@@ -16,10 +16,11 @@ jobs:
           php-version: ${{ matrix.php }}
       - name: PHP syntax
         run: find modules/addons/cloudhost247_* modules/servers/cloudhost247_ovh tests -name '*.php' -print0 | xargs -0 -n1 php -l
-      - name: PHP behavior and mock tests
-        run: |
-          php tests/foundation/run.php
-          php tests/currency/run.php
-          php tests/ovh/run.php
+      - name: Foundation PHP behavior tests
+        run: php tests/foundation/run.php
+      - name: Currency PHP behavior tests
+        run: php tests/currency/run.php
+      - name: OVH PHP mock and behavior tests
+        run: php -d display_errors=1 tests/ovh/run.php
       - name: Static and security tests
         run: python3 -m unittest -v tests/foundation/test_static.py tests/currency/test_static.py tests/ovh/test_static.py tests/security/test_security.py
