@@ -119,3 +119,21 @@ Before a staging phase, supply through the deployment environment (not Git/chat)
 6. **Migration/cutover:** metadata backup, dry runs, sampled reconciliation, dual-read comparison where safe, rollback rehearsal, then disable—not delete—vendor modules.
 
 Each matrix row moves to **Complete** only with source, automated tests and staging evidence. Installation alone is insufficient.
+
+## Phase 1 implementation update — 2026-09-27
+
+| Foundation capability | Implementation | Test status | Remaining/blocker |
+|---|---|---|---|
+| Independent namespaces/modules | `cloudhost247_core`, `cloudhost247_theme`, `cloudhost247_currency`, `cloudhost247_ovh` | Static structure test passed | Runtime activation needs WHMCS staging |
+| Versioned migrations | Shared ordered/transactional migration runner and module `1.0.0` migrations | Namespaced-table and non-destructive tests passed | MySQL/MariaDB execution needs staging |
+| Data preservation | Deactivation retains data; no replacement migration drops or alters WHMCS/vendor tables | Static test passed | Backup/restore rehearsal needs staging database |
+| Logging | Correlation IDs, structured JSON context, recursive secret redaction, WHMCS module-log fallback for errors | PHP unit test defined; CI pending | Database insertion needs staging |
+| Secrets | Redaction policy; OVH module design requires WHMCS encrypted server credential storage | Static prohibited-dependency test passed | Credential validation belongs to Phase 4 |
+| Admin security | Authenticated-admin guard, POST-only CSRF guard, role capability repository | Source/static review complete | WHMCS role/token integration needs staging |
+| Capability/health checks | PHP, WHMCS, Capsule, cURL, JSON, OpenSSL and entropy checks in admin dashboard | PHP unit test defined; CI pending | Live result needs staging |
+| Error reporting | Safe activation errors, retained-data deactivation responses and structured error logger | Source review complete | WHMCS UI behavior needs staging |
+| Automated tests | Standalone PHP tests, Python static safety tests, GitHub Actions PHP 7.4 lint/test workflow | Python: 4/4 passed locally; PHP unavailable locally | GitHub Actions will provide PHP lint/unit result |
+| Vendor-key independence | Replacement modules expose no vendor-key field/call and do not load original modules | Static scan passed | End-to-end proof needs staging activation |
+| WHMCS/OVH auth boundary | No WHMCS core changes; OVH credentials remain required and delegated to encrypted WHMCS server configuration | Design/static review complete | OVH API implementation is Phase 4 |
+
+Phase 1 deliberately implements operational foundations and real activation migrations, not business-feature parity. Theme workflows remain Phase 2, currency update workflows Phase 3, and OVH API/provisioning workflows Phase 4. Those corresponding matrix rows remain **Planned**.

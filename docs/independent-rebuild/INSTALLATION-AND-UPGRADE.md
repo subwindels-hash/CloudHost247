@@ -29,3 +29,27 @@ No replacement step will ask for the three vendor keys. Detailed commands and mi
 ## Required staging test record
 
 Record exact WHMCS/PHP/database versions, module commit, tests and timestamps for: activation/upgrade/rollback; admin permissions and CSRF; theme routes and responsive rendering; cart checkout; manual/cron currency runs and provider failure; price preview; invoices unchanged; OVH credential failure; catalog import idempotency; existing-service reconciliation; lifecycle actions; IP/status sync; concurrent cron lock; log secret redaction; and full restore.
+
+## Phase 1 foundation installation
+
+The Phase 1 modules now exist and can be activated on staging in this order:
+
+1. Copy `modules/addons/cloudhost247_core` and the three `cloudhost247_*` feature addon directories into the matching WHMCS path.
+2. In **System Settings → Addon Modules**, activate **CloudHost247 Foundation** first.
+3. Grant only the intended administrator roles access to the addon.
+4. Activate **CloudHost247 Theme Manager**, **CloudHost247 Currency**, and **CloudHost247 OVH**.
+5. Open the Foundation dashboard and confirm required health checks. cURL is expected before currency/OVH network features are enabled.
+6. Confirm that the `mod_cloudhost247_*` tables were created and the legacy tables are unchanged. Keep a before/after schema report.
+
+Activation is idempotent: migration versions are recorded in `mod_cloudhost247_migrations`. Deactivation intentionally retains all replacement data for rollback and never removes WHMCS or legacy vendor data. There is no uninstall/drop operation in Phase 1.
+
+The replacement module forms do not contain fields for HostX, Xtreme Currency Rates, or WGS-OVH licence keys. Do not enter OVH secrets until Phase 4 credential configuration is available; they must ultimately be stored through WHMCS encrypted server configuration, never in source or logs.
+
+Run the foundation checks with:
+
+```bash
+php tests/foundation/run.php
+python3 -m unittest -v tests/foundation/test_static.py
+```
+
+GitHub Actions additionally lints every new PHP file on PHP 7.4. Runtime activation and database assertions must be performed against the supported WHMCS staging environment before Phase 1 is marked staging-verified.

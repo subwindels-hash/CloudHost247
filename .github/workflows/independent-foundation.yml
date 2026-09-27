@@ -1,0 +1,19 @@
+name: Independent foundation
+on:
+  push:
+    branches: [arena/01a0e4c2-cloudhost247]
+  pull_request:
+jobs:
+  foundation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+      - name: PHP syntax
+        run: find modules/addons/cloudhost247_* tests/foundation -name '*.php' -print0 | xargs -0 -n1 php -l
+      - name: Foundation unit tests
+        run: php tests/foundation/run.php
+      - name: Static safety tests
+        run: python3 -m unittest -v tests/foundation/test_static.py
