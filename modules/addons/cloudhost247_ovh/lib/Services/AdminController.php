@@ -18,7 +18,9 @@ final class AdminController
         AdminGuard::requireAdmin(); $notice=''; $error=''; $search=array(); $preview=null;
         try {
             if (($_SERVER['REQUEST_METHOD']??'GET')==='POST') {
-                AdminGuard::requirePostToken(); $op=$_POST['operation']??''; $resolver=new ConnectionResolver();
+                AdminGuard::requirePostToken(); $op=$_POST['operation']??'';
+                $capability = in_array($op,array('price_apply','link_confirm','option_confirm'),true) ? 'changes.apply' : (in_array($op,array('endpoint','mapping'),true) ? 'settings.manage' : 'operations.run');
+                AdminGuard::requireCapability('cloudhost247_ovh',$capability); $resolver=new ConnectionResolver();
                 if ($op==='endpoint') { $this->saveEndpoint($_POST); $notice='Endpoint configuration saved.'; }
                 elseif ($op==='mapping') { (new MappingRepository())->save($_POST); $notice='Product mapping saved.'; }
                 elseif ($op==='test') { $resolver->endpoint((int)$_POST['endpoint_id'])->get('/me'); $notice='OVH authentication and /me permission succeeded.'; }
@@ -28,6 +30,8 @@ final class AdminController
                 elseif ($op==='search') { $search=(new ExistingServiceLinker($resolver))->search((int)$_POST['endpoint_id'],trim((string)$_POST['query'])); $notice='Search returned '.count($search).' services; no links were changed.'; }
                 elseif ($op==='link_preview') { $preview=(new ExistingServiceLinker($resolver))->preview((int)$_POST['endpoint_id'],$_POST['remote_service_name'],$_POST['family'],(int)$_POST['whmcs_service_id']); }
                 elseif ($op==='link_confirm') { (new ExistingServiceLinker($resolver))->link((int)$_POST['endpoint_id'],$_POST['remote_service_name'],$_POST['family'],(int)$_POST['whmcs_service_id'],!empty($_POST['confirm']),$_SESSION['adminid']); $notice='Existing service linked after explicit confirmation.'; }
+                elseif ($op==='option_suggest') { $preview=(new \CloudHost247\Ovh\Catalog\ConfigurableOptionMapper())->suggestions((int)$_POST['mapping_id']); }
+                elseif ($op==='option_confirm') { (new \CloudHost247\Ovh\Catalog\ConfigurableOptionMapper())->confirm((int)$_POST['mapping_id'],(int)$_POST['ovh_option_id'],(int)$_POST['whmcs_option_id'],(int)($_POST['whmcs_suboption_id']??0),$_SESSION['adminid'],!empty($_POST['confirm'])); $notice='Exact configurable-option mapping confirmed.'; }
                 elseif ($op==='price_preview') { $preview=(new PricingService(new PriceCalculator()))->preview((int)$_POST['mapping_id'],(int)$_POST['currency_id'],$_POST['billing_cycle'],(float)$_POST['source_price'],$_POST['source_currency'],$_POST['rounding_mode'],(int)$_POST['precision']); }
                 elseif ($op==='price_apply') { $notice='Applied final product price '.$this->pricing()->apply((int)$_POST['preview_id'],!empty($_POST['confirm'])).'. Historical invoices were not changed.'; }
                 else throw new InvalidArgumentException('Unknown operation.');

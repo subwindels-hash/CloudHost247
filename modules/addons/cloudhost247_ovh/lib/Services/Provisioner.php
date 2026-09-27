@@ -2,6 +2,7 @@
 namespace CloudHost247\Ovh\Services;
 
 use CloudHost247\Ovh\Api\ApiException;
+use CloudHost247\Ovh\Reconciliation\ProvisioningDecision;
 use WHMCS\Database\Capsule;
 use RuntimeException;
 
@@ -16,9 +17,9 @@ final class Provisioner
         if (!$mapping) throw new RuntimeException('No active OVH mapping for this product.');
         $key = hash('sha256', 'provision:' . (int) $serviceId . ':' . $mapping->id);
         $operation = Capsule::table('mod_cloudhost247_ovh_operations')->where('idempotency_key', $key)->first();
-        if ($operation && in_array($operation->status, array('running', 'remote_mutation', 'reconciliation_required', 'success', 'completed'), true)) {
-            return array('status' => $operation->status, 'remote_id' => $operation->remote_id, 'idempotent' => true);
-        }
+        $decision = (new ProvisioningDecision())->actionForStatus($operation ? $operation->status : null);
+        if ($operation && $decision === 'stop') return array('status'=>$operation->status,'remote_id'=>$operation->remote_id,'idempotent'=>true);
+        if ($decision === 'intervention') throw new RuntimeException('Provisioning state requires administrator intervention.');
         if ($operation) {
             Capsule::table('mod_cloudhost247_ovh_operations')->where('id', $operation->id)->update(array('status'=>'running','attempts'=>$operation->attempts+1,'error_message'=>null,'updated_at'=>date('Y-m-d H:i:s')));
         } else {
@@ -59,8 +60,9 @@ final class Provisioner
             Capsule::table('mod_cloudhost247_ovh_operations')->where('idempotency_key',$key)->update(array('status'=>'success','remote_id'=>$orderId,'response_json'=>json_encode($checkout),'updated_at'=>date('Y-m-d H:i:s')));
             return array('status'=>'pending','order_id'=>$orderId,'idempotent'=>false);
         } catch (\Throwable $e) {
-            $uncertain = $e instanceof ApiException && $e->status() === 0;
-            Capsule::table('mod_cloudhost247_ovh_operations')->where('idempotency_key',$key)->update(array('status'=>$uncertain?'reconciliation_required':'failed','error_message'=>substr($e->getMessage(),0,1000),'updated_at'=>date('Y-m-d H:i:s')));
+            $failureStatus = (new ProvisioningDecision())->failureStatus($e instanceof ApiException ? $e->status() : 500);
+            $uncertain = $failureStatus === 'reconciliation_required';
+            Capsule::table('mod_cloudhost247_ovh_operations')->where('idempotency_key',$key)->update(array('status'=>$failureStatus,'error_message'=>substr($e->getMessage(),0,1000),'updated_at'=>date('Y-m-d H:i:s')));
             Capsule::table('mod_cloudhost247_ovh_services')->where('whmcs_service_id',$serviceId)->update(array('status'=>$uncertain?'reconciliation_required':'failed','updated_at'=>date('Y-m-d H:i:s')));
             throw $e;
         }
