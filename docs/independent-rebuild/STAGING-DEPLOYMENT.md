@@ -69,3 +69,19 @@ Run them under the staging account, use absolute paths, protect logs, and do not
 3. Restore files and database from the proven pre-deployment backups. Do not attempt ad-hoc reverse migrations on financial/customer tables.
 4. Clear only staging compiled templates, re-run health checks, compare protected row counts and record rollback evidence.
 5. Preserve failed-run logs with secrets redacted for diagnosis.
+
+## Release-candidate freeze procedure (2026-09-27)
+
+Status: **SOURCE FOUNDATION COMPLETE → RELEASE CANDIDATE → STAGING PENDING**.
+
+The mandatory staging comparison sequence is:
+
+1. Deploy frozen baseline `3a9fbb9` to a positively identified non-production environment.
+2. Prove backup restoration and record exact WHMCS, PHP, database, web-server, and extension versions.
+3. Clear caches and execute the complete baseline matrix before configuring disposable OVH access.
+4. Capture database, browser, cron, financial, client-area, and operation evidence.
+5. Upgrade to the final release-candidate commit reported with this batch; do not substitute an unreviewed branch tip.
+6. Execute ordered CloudHost247 migrations, repeat affected tests, and compare evidence to baseline.
+7. Use only disposable least-privilege OVH resources. Never submit credentials through chat or commit them.
+
+The CI-level `scripts/release-candidate-check.sh` verifies syntax, behavior tests, static/security tests, migration ordering/additive policy, preserved proprietary checksums, embedded-secret patterns, core-schema policy, and diff cleanliness on PHP 7.4 and 8.2. This is source evidence only. Real migrations, WHMCS integration, browser behavior, cron, provider updates, and OVH lifecycle operations remain **BLOCKED — STAGING REQUIRED**.

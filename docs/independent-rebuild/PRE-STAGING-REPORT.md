@@ -70,3 +70,19 @@ Status vocabulary is strict: **IMPLEMENTED** means owned source plus applicable 
 - **NOT IMPLEMENTED — API/PRODUCT DEPENDENCY:** provider capabilities not exposed by an authenticated OVH product/API are not guessed; unsafe mutation retry is intentionally unavailable.
 
 Migration ordering is core `1.1.0`, currency `1.0.0 → 1.1.0`, theme `1.0.0 → 1.1.0`, and OVH `1.0.0 → 1.1.0 → 1.2.0 → 1.3.0 → 1.4.0 → 1.5.0`. All migrations are additive/idempotent and retain data on module deactivation. No WHMCS core schema is altered. Before upgrade, back up the database; rollback means restoring that backup and the prior source commit because additive tables/columns are deliberately retained.
+
+## Release-candidate freeze procedure (2026-09-27)
+
+Status: **SOURCE FOUNDATION COMPLETE → RELEASE CANDIDATE → STAGING PENDING**.
+
+The mandatory staging comparison sequence is:
+
+1. Deploy frozen baseline `3a9fbb9` to a positively identified non-production environment.
+2. Prove backup restoration and record exact WHMCS, PHP, database, web-server, and extension versions.
+3. Clear caches and execute the complete baseline matrix before configuring disposable OVH access.
+4. Capture database, browser, cron, financial, client-area, and operation evidence.
+5. Upgrade to the final release-candidate commit reported with this batch; do not substitute an unreviewed branch tip.
+6. Execute ordered CloudHost247 migrations, repeat affected tests, and compare evidence to baseline.
+7. Use only disposable least-privilege OVH resources. Never submit credentials through chat or commit them.
+
+The CI-level `scripts/release-candidate-check.sh` verifies syntax, behavior tests, static/security tests, migration ordering/additive policy, preserved proprietary checksums, embedded-secret patterns, core-schema policy, and diff cleanliness on PHP 7.4 and 8.2. This is source evidence only. Real migrations, WHMCS integration, browser behavior, cron, provider updates, and OVH lifecycle operations remain **BLOCKED — STAGING REQUIRED**.
