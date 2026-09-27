@@ -3,7 +3,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 echo '== CloudHost247 release-candidate source verification =='
 git diff --check
-find modules/addons/cloudhost247_* modules/servers/cloudhost247_ovh tests scripts -name '*.php' -print0 | xargs -0 -n1 php -l >/dev/null
+find modules/addons/cloudhost247_* modules/servers/cloudhost247_ovh tests scripts -name '*.php' -print0 | xargs -0 -n1 php -l
 php tests/foundation/run.php
 php tests/currency/run.php
 php -d display_errors=1 tests/ovh/run.php
