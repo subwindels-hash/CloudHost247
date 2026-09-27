@@ -40,11 +40,12 @@ final class ThemeRepository
         }
     }
 
-    public function published($type = null)
+    public function published($type = null, $locale = null)
     {
         $query = Capsule::table(self::CONTENT)->where('published', 1)->orderBy('sort_order')->orderBy('id');
         if ($type) $query->where('content_type', $type);
-        return array_map(array($this, 'hydrate'), $query->get()->all());
+        $items = array_map(array($this, 'hydrate'), $query->get()->all());
+        return $this->localize($items, $locale);
     }
 
     public function all($type = null)
@@ -54,10 +55,12 @@ final class ThemeRepository
         return array_map(array($this, 'hydrate'), $query->get()->all());
     }
 
-    public function findPublishedPage($slug)
+    public function findPublishedPage($slug, $locale = null)
     {
         $row = Capsule::table(self::CONTENT)->whereIn('content_type', array('page', 'landing'))->where('slug', $this->slug($slug))->where('published', 1)->first();
-        return $row ? $this->hydrate($row) : null;
+        if (!$row) return null;
+        $items = $this->localize(array($this->hydrate($row)), $locale);
+        return $items[0];
     }
 
     public function saveContent(array $input)
@@ -88,11 +91,54 @@ final class ThemeRepository
         return Capsule::table(self::CONTENT)->insertGetId($record);
     }
 
-    public function deleteContent($id) { return Capsule::table(self::CONTENT)->where('id', (int) $id)->delete(); }
-
-    public function clientContext()
+    public function saveTranslation(array $input)
     {
-        return array('settings' => $this->settings(), 'navigation' => $this->published('navigation'), 'banners' => $this->published('banner'), 'testimonials' => $this->published('testimonial'), 'sections' => $this->published('section'), 'footer' => $this->published('footer'), 'landing_pages' => $this->published('landing'));
+        $contentId = (int) (isset($input['content_id']) ? $input['content_id'] : 0);
+        $locale = $this->locale(isset($input['locale']) ? $input['locale'] : '');
+        if (!$contentId || !Capsule::table(self::CONTENT)->where('id', $contentId)->exists()) throw new InvalidArgumentException('Content item does not exist.');
+        $title = trim(strip_tags(isset($input['title']) ? $input['title'] : ''));
+        if ($title === '') throw new InvalidArgumentException('Translated title is required.');
+        $payload = array(
+            'body' => $this->sanitizeHtml(isset($input['body']) ? $input['body'] : ''),
+            'summary' => trim(strip_tags(isset($input['summary']) ? $input['summary'] : '')),
+            'seo_title' => trim(strip_tags(isset($input['seo_title']) ? $input['seo_title'] : '')),
+            'seo_description' => trim(strip_tags(isset($input['seo_description']) ? $input['seo_description'] : '')),
+        );
+        Capsule::table('mod_cloudhost247_theme_translations')->updateOrInsert(array('content_id'=>$contentId,'locale'=>$locale), array('title'=>$title,'payload_json'=>json_encode($payload),'updated_at'=>date('Y-m-d H:i:s')));
+    }
+
+    public function preview(array $input)
+    {
+        $copy = $input; $copy['content_type'] = isset($copy['content_type']) ? $copy['content_type'] : 'page';
+        return array('title'=>trim(strip_tags(isset($copy['title'])?$copy['title']:'')), 'summary'=>trim(strip_tags(isset($copy['summary'])?$copy['summary']:'')), 'body'=>$this->sanitizeHtml(isset($copy['body'])?$copy['body']:''));
+    }
+
+    public function deleteContent($id) { Capsule::table('mod_cloudhost247_theme_translations')->where('content_id',(int)$id)->delete(); return Capsule::table(self::CONTENT)->where('id', (int) $id)->delete(); }
+
+    public function clientContext($locale = null)
+    {
+        return array('settings' => $this->settings(), 'navigation' => $this->published('navigation',$locale), 'banners' => $this->published('banner',$locale), 'testimonials' => $this->published('testimonial',$locale), 'sections' => $this->published('section',$locale), 'footer' => $this->published('footer',$locale), 'landing_pages' => $this->published('landing',$locale));
+    }
+
+    private function localize(array $items, $locale)
+    {
+        $locale = $this->locale($locale ?: (isset($_SESSION['Language']) ? $_SESSION['Language'] : 'english'));
+        if ($locale === 'english' || !$items || !Capsule::schema()->hasTable('mod_cloudhost247_theme_translations')) return $items;
+        $ids = array_map(function ($item) { return $item['id']; }, $items);
+        $rows = Capsule::table('mod_cloudhost247_theme_translations')->whereIn('content_id',$ids)->where('locale',$locale)->get();
+        $translations = array(); foreach ($rows as $row) $translations[$row->content_id] = $row;
+        foreach ($items as &$item) if (isset($translations[$item['id']])) {
+            $row = $translations[$item['id']]; $payload = json_decode($row->payload_json,true); if (!is_array($payload)) $payload=array();
+            $item = array_merge($item, array_filter($payload,function($value){return $value!=='';})); $item['title']=$row->title; $item['locale']=$locale;
+        }
+        return $items;
+    }
+
+    private function locale($value)
+    {
+        $value = strtolower(str_replace('_','-',trim((string)$value)));
+        if (!preg_match('/^[a-z]{2,12}(?:-[a-z]{2,8})?$/',$value)) throw new InvalidArgumentException('Invalid locale.');
+        return $value;
     }
 
     private function hydrate($row)

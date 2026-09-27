@@ -7,7 +7,7 @@ use CloudHost247\Theme\ThemeRepository;
 use CloudHost247\Foundation\Support\Logger;
 
 add_hook('ClientAreaPage', 1, function ($vars) {
-    try { return array('cloudhost247' => (new ThemeRepository())->clientContext()); }
+    try { return array('cloudhost247' => (new ThemeRepository())->clientContext(isset($vars['language']) ? $vars['language'] : null)); }
     catch (\Throwable $e) { Logger::write('cloudhost247_theme', 'error', 'client.context', array('message' => $e->getMessage())); return array('cloudhost247' => array()); }
 });
 

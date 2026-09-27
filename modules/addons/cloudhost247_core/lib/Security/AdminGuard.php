@@ -26,6 +26,17 @@ final class AdminGuard
         if ($valid === false) { throw new RuntimeException('Invalid or expired CSRF token.'); }
     }
 
+    public static function requireCapability($module, $capability)
+    {
+        self::requireAdmin();
+        if (!class_exists('WHMCS\\Database\\Capsule') || !\WHMCS\Database\Capsule::schema()->hasTable('mod_cloudhost247_capabilities')) return true;
+        $row = \WHMCS\Database\Capsule::table('mod_cloudhost247_capabilities')->where('module',$module)->where('capability',$capability)->first();
+        if (!$row) return true; // WHMCS addon-role access remains the default authorization policy.
+        $roles = array_filter(array_map('intval', explode(',', $row->role_ids)));
+        if (!in_array((int) (isset($_SESSION['adminroleid']) ? $_SESSION['adminroleid'] : 0), $roles, true)) throw new RuntimeException('Your WHMCS administrator role lacks the required CloudHost247 capability.');
+        return true;
+    }
+
     public static function capability($module, $capability)
     {
         self::requireAdmin();
