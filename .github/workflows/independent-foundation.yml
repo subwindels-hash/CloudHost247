@@ -16,5 +16,6 @@ jobs:
       - name: Foundation unit tests
         run: php tests/foundation/run.php
           php tests/currency/run.php
+          php tests/ovh/run.php
       - name: Static safety tests
-        run: python3 -m unittest -v tests/foundation/test_static.py tests/currency/test_static.py
+        run: python3 -m unittest -v tests/foundation/test_static.py tests/currency/test_static.py tests/ovh/test_static.py
