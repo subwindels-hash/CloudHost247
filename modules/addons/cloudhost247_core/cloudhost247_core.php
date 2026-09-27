@@ -21,6 +21,7 @@ function cloudhost247_core_activate()
         if (!Capsule::schema()->hasTable('mod_cloudhost247_capabilities')) Capsule::schema()->create('mod_cloudhost247_capabilities', function ($t) {
             $t->bigIncrements('id'); $t->string('module', 64); $t->string('capability', 64); $t->string('role_ids', 255)->default(''); $t->unique(array('module', 'capability'), 'ch247_capability_unique');
         });
+        (new MigrationRunner())->run('cloudhost247_core', array(new \CloudHost247\Foundation\Database\CoreAuditMigration()));
         return array('status' => 'success', 'description' => 'Foundation tables installed non-destructively.');
     } catch (\Throwable $e) { return array('status' => 'error', 'description' => $e->getMessage()); }
 }

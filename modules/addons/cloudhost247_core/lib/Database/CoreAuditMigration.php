@@ -1,0 +1,4 @@
+<?php
+namespace CloudHost247\Foundation\Database;
+use CloudHost247\Foundation\Contracts\Migration;use WHMCS\Database\Capsule;
+final class CoreAuditMigration implements Migration{public function version(){return'1.1.0';}public function description(){return'Create shared secret-safe audit event repository';}public function up(){if(!Capsule::schema()->hasTable('mod_cloudhost247_audit_events'))Capsule::schema()->create('mod_cloudhost247_audit_events',function($t){$t->bigIncrements('id');$t->string('module',64)->index();$t->unsignedInteger('admin_id')->nullable()->index();$t->string('action',96)->index();$t->string('resource_type',48);$t->string('resource_id',191);$t->text('before_json')->nullable();$t->text('after_json')->nullable();$t->string('result',16)->index();$t->text('failure_reason')->nullable();$t->string('correlation_id',64)->index();$t->dateTime('created_at')->index();});}}
