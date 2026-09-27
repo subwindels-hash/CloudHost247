@@ -1,0 +1,3 @@
+<?php
+namespace CloudHost247\Ovh\Services;use WHMCS\Database\Capsule;
+final class ExecutionLock{private $n,$o;function __construct($n){$this->n=$n;$this->o=bin2hex(random_bytes(16));}function acquire($ttl=600){$now=date('Y-m-d H:i:s');$until=date('Y-m-d H:i:s',time()+$ttl);try{Capsule::table('mod_cloudhost247_ovh_locks')->insert(array('lock_name'=>$this->n,'owner'=>$this->o,'locked_until'=>$until,'updated_at'=>$now));return true;}catch(\Throwable $e){}return Capsule::table('mod_cloudhost247_ovh_locks')->where('lock_name',$this->n)->where('locked_until','<',$now)->update(array('owner'=>$this->o,'locked_until'=>$until,'updated_at'=>$now))===1;}function release(){Capsule::table('mod_cloudhost247_ovh_locks')->where('lock_name',$this->n)->where('owner',$this->o)->delete();}}
