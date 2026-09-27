@@ -1,0 +1,25 @@
+<?php
+namespace CloudHost247\Ovh\Products;
+
+use CloudHost247\Foundation\Support\AuditLogger;
+use WHMCS\Database\Capsule;
+use InvalidArgumentException;
+
+final class HostingProductManager
+{
+    public function listProducts(array $filters=array())
+    {
+        $query=Capsule::table('tblproducts as p')->leftJoin('tblproductgroups as g','g.id','=','p.gid')->leftJoin('mod_cloudhost247_hosting_products as m','m.whmcs_product_id','=','p.id')->select('p.id','p.name','p.description','p.gid','p.hidden','p.order','p.paytype','g.name as category_name','m.product_kind','m.featured','m.availability_status','m.display_order','m.specifications_json');
+        if(!empty($filters['kind']))$query->where('m.product_kind',$filters['kind']);if(isset($filters['active']))$query->where('p.hidden',$filters['active']?0:1);return$query->orderBy('m.display_order')->orderBy('p.order')->get()->all();
+    }
+    public function details($productId)
+    {
+        $product=Capsule::table('tblproducts')->where('id',(int)$productId)->first();if(!$product)throw new InvalidArgumentException('WHMCS product does not exist.');$metadata=Capsule::table('mod_cloudhost247_hosting_products')->where('whmcs_product_id',$product->id)->first();$prices=Capsule::table('tblpricing as p')->join('tblcurrencies as c','c.id','=','p.currency')->where('p.type','product')->where('p.relid',$product->id)->select('p.*','c.code')->get()->all();$mapping=Capsule::table('mod_cloudhost247_ovh_product_mappings')->where('whmcs_product_id',$product->id)->first();$options=Capsule::table('tblproductconfigoptions as o')->join('tblproductconfiglinks as l','l.gid','=','o.gid')->where('l.pid',$product->id)->select('o.id','o.optionname','o.optiontype')->get()->all();return array('product'=>$product,'metadata'=>$metadata,'prices'=>$prices,'mapping'=>$mapping,'options'=>$options);
+    }
+    public function save(array $input,$confirmed,$adminId)
+    {
+        if(!$confirmed)throw new InvalidArgumentException('Explicit product-change confirmation is required.');$id=(int)$input['whmcs_product_id'];$before=$this->details($id);$kind=(string)$input['product_kind'];if(!in_array($kind,array('hosting','vps','dedicated'),true))throw new InvalidArgumentException('Invalid hosting product kind.');$name=trim(strip_tags((string)$input['name']));if($name==='')throw new InvalidArgumentException('Product name is required.');$gid=(int)$input['gid'];if(!Capsule::table('tblproductgroups')->where('id',$gid)->exists())throw new InvalidArgumentException('Product category does not exist.');$spec=array();foreach(array('cpu','ram','storage','network','ipv4','ipv6','datacenter','operating_system')as$key)$spec[$key]=trim(strip_tags((string)($input[$key]??'')));Capsule::connection()->transaction(function()use($id,$input,$name,$gid,$kind,$spec){Capsule::table('tblproducts')->where('id',$id)->update(array('name'=>$name,'description'=>(string)$input['description'],'gid'=>$gid,'hidden'=>empty($input['active'])?1:0,'order'=>(int)$input['display_order']));Capsule::table('mod_cloudhost247_hosting_products')->updateOrInsert(array('whmcs_product_id'=>$id),array('product_kind'=>$kind,'featured'=>!empty($input['featured']),'availability_status'=>in_array($input['availability_status'],array('available','limited','unavailable','unknown'),true)?$input['availability_status']:'unknown','display_order'=>(int)$input['display_order'],'specifications_json'=>json_encode($spec),'updated_at'=>date('Y-m-d H:i:s')));});$after=$this->details($id);AuditLogger::record('cloudhost247_ovh','product.update','product',$id,$this->auditShape($before),$this->auditShape($after),'success',null,$adminId);
+    }
+    public function linkAddon($productId,$addonId,$ovhKey,$adminId,$confirmed){if(!$confirmed)throw new InvalidArgumentException('Explicit addon-link confirmation is required.');if(!Capsule::table('tblproducts')->where('id',(int)$productId)->exists()||!Capsule::table('tbladdons')->where('id',(int)$addonId)->exists())throw new InvalidArgumentException('Product or addon does not exist.');Capsule::table('mod_cloudhost247_product_addons')->updateOrInsert(array('whmcs_product_id'=>(int)$productId,'whmcs_addon_id'=>(int)$addonId),array('ovh_option_key'=>substr(trim((string)$ovhKey),0,191),'enabled'=>1,'updated_at'=>date('Y-m-d H:i:s')));AuditLogger::record('cloudhost247_ovh','product.addon-link','product',$productId,array(),array('addon_id'=>(int)$addonId,'ovh_option_key'=>$ovhKey),'success',null,$adminId);}
+    private function auditShape(array$data){$p=$data['product'];$m=$data['metadata'];return array('name'=>$p->name,'gid'=>$p->gid,'hidden'=>$p->hidden,'order'=>$p->order,'product_kind'=>$m?$m->product_kind:null,'featured'=>$m?$m->featured:null,'availability'=>$m?$m->availability_status:null);}
+}
