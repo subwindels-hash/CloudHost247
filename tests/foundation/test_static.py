@@ -47,4 +47,8 @@ class FoundationStaticTests(unittest.TestCase):
         self.assertIn('new ClientArea()', route)
         self.assertNotIn('session_start', route)
 
+    def test_sitemap_uses_published_cms_pages(self):
+        route=(ROOT/'cloudhost247-sitemap.php').read_text()
+        self.assertIn("published('page')",route);self.assertIn('ENT_XML1',route)
+
 if __name__ == '__main__': unittest.main()

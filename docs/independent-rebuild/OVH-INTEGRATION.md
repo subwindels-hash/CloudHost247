@@ -92,3 +92,11 @@ Admin changes require WHMCS administrator context and CSRF tokens. Regions, path
 Mock tests cover deterministic signatures, endpoint/path validation, authenticated headers, malformed JSON, rate-limit retries and secret exclusion. Static tests cover licensing independence, TLS, response limits, idempotency, non-destructive synchronization, admin/CSRF, financial-table protection and CLI-only cron.
 
 Mocks do not prove OVH behavior. Required staging evidence includes exact WHMCS/PHP/database versions, API region and access rules, `/me`, catalog responses, mapping validation, cart/order behavior with a disposable product, ambiguous-failure reconciliation, order polling, service binding, status/IP/reboot/power, read-only sync, lock concurrency, audit redaction and rollback. Production readiness is not claimed.
+
+## Parity completion update — 2026-09-27
+
+Version 1.2.0 adds conservative normalization of hardware/CPU/RAM/storage/network/region/OS fields that actually exist in catalog payloads, persisted discovered options, normalized IP output, currency-rate-backed price previews, explicitly confirmed and audited product-price application, existing-service search/preview/confirm linking, pending-order polling, conservative service-name binding, reverse-DNS operations, and ambiguity checkpoints.
+
+A transport failure during a remote mutation now enters `reconciliation_required`; repeated CreateAccount calls do not repeat that mutation. Cart and item IDs are checkpointed immediately. Where OVH returns a known order ID, polling queries status/details and binds only a returned `domain`, `serviceName`, or `serviceId`. Missing identities become `intervention_required`. If checkout may have succeeded but no order ID was received, automatic mutation remains stopped because safely discovering the order is region/account dependent; an administrator must reconcile rather than risk a duplicate.
+
+Pricing keeps source price/currency, conversion rate, margin, rounding and final value separately. Applying a preview requires explicit confirmation, updates one allowlisted product billing-cycle column, and writes an audit record. It never changes generated invoices or transactions. Automatic source-price extraction is still PARTIAL because OVH catalog price shapes vary and must be verified per region/product.
