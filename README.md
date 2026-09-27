@@ -32,8 +32,8 @@ of this repository **into** an existing WHMCS installation root (cPanel
 │   ├── addons/                     ← Addon modules (WHMCS → System Settings → Addon Modules)
 │   │   ├── hostx/                     HostX theme helper module (ionCube) — REQUIRED by the theme
 │   │   ├── cloudhost247_tools/        CloudHost247 Tools Platform v2.2.6 (60+ online tools)
-│   │   ├── hostx_domain_lookup/       HostX Domain Lookup (4-tool WHOIS/IP/DNS/availability build,
-│   │   │                              renamed from an older "hostx_tools" build — see module README)
+│   │   ├── cloudhost247_domain_lookup/  CloudHost247 Domain Lookup (4-tool WHOIS/IP/DNS/availability
+│   │   │                              build, renamed from an older "hostx_tools" build — see module README)
 │   │   ├── tools_center/              WHMCS Tools Center (UI addon + external-api backend —
 │   │   │                              deploy external-api/ separately per its INSTALL.md)
 │   │   ├── dnschecker/                DNS Checker client-area tool
@@ -52,7 +52,7 @@ of this repository **into** an existing WHMCS installation root (cPanel
 │       ├── Smtphosting/               SMTP hosting provisioning (ModulesGarden v3)
 │       ├── soyoustart/                SoYouStart dedicated server provisioning
 │       ├── soyoustart_vps/            SoYouStart VPS provisioning
-│       ├── hostx_email/               Email hosting provisioning (M365/GWorkspace/Pro)
+│       ├── cloudhost247_email/        Email hosting provisioning (M365/GWorkspace/Pro)
 │       └── smmprovisioning/           SMM panel order automation
 ├── templates/
 │   ├── hostx/                      ← HostX theme (WHMCS Global Services)
@@ -79,9 +79,9 @@ of this repository **into** an existing WHMCS installation root (cPanel
 
 | Module | Type | Location |
 |---|---|---|
-| HostX (theme helper) | addon | `modules/addons/hostx/` |
+| HostX (theme helper — ionCube, name fixed by vendor) | addon | `modules/addons/hostx/` |
 | CloudHost247 Tools Platform v2.2.6 | addon | `modules/addons/cloudhost247_tools/` |
-| HostX Domain Lookup | addon | `modules/addons/hostx_domain_lookup/` |
+| CloudHost247 Domain Lookup | addon | `modules/addons/cloudhost247_domain_lookup/` |
 | Tools Center (+ external API) | addon | `modules/addons/tools_center/` |
 | DNS Checker | addon | `modules/addons/dnschecker/` |
 | Custom Affiliate | addon | `modules/addons/customaffiliate/` |
@@ -95,7 +95,7 @@ of this repository **into** an existing WHMCS installation root (cPanel
 | Smtphosting v3 | server | `modules/servers/Smtphosting/` |
 | SoYouStart (dedicated) | server | `modules/servers/soyoustart/` |
 | SoYouStart VPS | server | `modules/servers/soyoustart_vps/` |
-| HostX Email Hosting | server | `modules/servers/hostx_email/` |
+| CloudHost247 Email Hosting | server | `modules/servers/cloudhost247_email/` |
 | SMM Provisioning | server | `modules/servers/smmprovisioning/` |
 
 **Notes**
@@ -109,9 +109,17 @@ of this repository **into** an existing WHMCS installation root (cPanel
   instead; its tables are `mod_cloudhost247_tools_*` (the old
   `mod_hostx_tools_*` / `mod_CloudHost247_tools_*` tables only hold cache, logs,
   rate limits and per-tool enable flags and can be dropped).
-- `cloudhost247_tools` and `hostx_domain_lookup` are **different** modules
+- `cloudhost247_tools` and `cloudhost247_domain_lookup` are **different** modules
   (60+ tool platform vs. 4-tool WHOIS/IP/DNS/availability build) and can both be
   active at the same time.
+- **Rebrand:** every module, page and string CloudHost247 owns is named
+  `cloudhost247*`. The two exceptions are the ionCube-encrypted vendor addon
+  `modules/addons/hostx/` (its function names live in encrypted bytecode and it
+  supplies 456 Smarty bindings the theme depends on) and the vendor theme
+  folders `templates/hostx/`, `templates/orderforms/hostx/`. Neither is visible
+  to customers. Renames that touch the WHMCS database (the provisioning module,
+  the addon, the renamed pages) need the steps in
+  [`docs/rebrand-migration.md`](docs/rebrand-migration.md) — **including SQL**.
 - `tools_center/external-api/` is a standalone PHP API backend. For security it
   must be deployed **outside** the WHMCS webroot (its own subdomain/server) —
   follow `modules/addons/tools_center/INSTALL.md`.

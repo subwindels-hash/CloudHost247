@@ -1,0 +1,134 @@
+Build a WHMCS provisioning module (NOT addon) for selling email hosting services via API.
+
+Module name: cloudhost247_email
+
+GOAL:
+Allow me to sell:
+- Professional Email Hosting (custom IMAP/SMTP service)
+- Microsoft 365 subscriptions
+- Google Workspace accounts
+
+The module must integrate with external APIs and automate account provisioning inside WHMCS.
+
+REQUIREMENTS:
+
+1. MODULE TYPE
+- WHMCS Server/Provisioning Module
+- Location:
+  /modules/servers/cloudhost247_email/
+
+FILES:
+- cloudhost247_email.php
+- functions.php
+- api.php
+- webhook.php
+- templates/
+
+2. CORE FEATURES
+
+A. PRODUCT SETUP
+- Create 3 product types in WHMCS:
+  1. Professional Email
+  2. Microsoft 365
+  3. Google Workspace
+
+- Each product must support:
+  - Domain input
+  - Username/email creation
+  - Plan selection (Basic, Standard, Premium)
+
+B. API INTEGRATION
+
+1. MICROSOFT 365
+- Use Microsoft Graph API
+- Functions:
+  - Create tenant user
+  - Assign license
+  - Suspend/unsuspend user
+  - Delete user
+
+2. GOOGLE WORKSPACE
+- Use Google Admin SDK API
+- Functions:
+  - Create user
+  - Assign license
+  - Suspend user
+  - Delete user
+
+3. PROFESSIONAL EMAIL
+- Use generic API (IMAP/SMTP hosting API)
+- Functions:
+  - Create mailbox
+  - Set password
+  - Delete mailbox
+
+- All API calls via cURL
+- Store API keys securely in module settings
+
+C. WHMCS FUNCTIONS (MANDATORY)
+
+Implement:
+- CreateAccount → creates email account via API
+- SuspendAccount → suspend user
+- UnsuspendAccount → reactivate user
+- TerminateAccount → delete user
+- ChangePassword → update password
+- ClientArea → show email details
+
+D. CLIENT AREA UI
+
+- Show:
+  - Email address
+  - Login links (Outlook / Gmail / Webmail)
+  - Reset password button
+  - Status (Active/Suspended)
+
+E. ADMIN SETTINGS
+
+- API credentials fields:
+  - Microsoft API (tenant ID, client ID, secret)
+  - Google API (service account JSON)
+  - Email hosting API URL + key
+
+- Enable/disable each provider
+
+F. AUTOMATION
+
+- Auto create account after payment
+- Sync status with WHMCS cron
+- Handle API errors gracefully
+
+G. SECURITY
+
+- Encrypt API keys
+- Validate all inputs
+- Prevent API abuse
+- No exposed credentials
+
+H. ERROR HANDLING
+
+- Log all API requests/responses
+- Never break WHMCS page loading
+- Return clean error messages
+
+I. COMPATIBILITY
+
+- WHMCS 8.9
+- PHP 7.4+
+- Works with CloudHost247 theme
+- No blank pages or fatal errors
+
+J. EXTRA FEATURES
+
+- Allow custom domain connection
+- Show DNS records required (MX, SPF, DKIM)
+- One-click copy DNS records
+
+OUTPUT:
+- Full working WHMCS provisioning module
+- No placeholders
+- Clean, production-ready code
+- Ready to upload and activate
+
+IMPORTANT:
+Ensure the module loads without errors and works smoothly inside WHMCS client area.

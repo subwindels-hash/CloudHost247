@@ -1,0 +1,553 @@
+/**
+ * CloudHost247 Domain Lookup - Client Styles
+ * Compatible with CloudHost247 v2.2.6 theme
+ */
+
+/* ===== Container & Layout ===== */
+.cloudhost247-domain-lookup-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 15px;
+}
+
+.cloudhost247-domain-lookup-hero {
+    text-align: center;
+    padding: 40px 20px;
+    margin-bottom: 30px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 8px;
+    color: #fff;
+}
+
+.cloudhost247-domain-lookup-hero h1 {
+    margin: 0 0 15px;
+    font-size: 2.5em;
+    font-weight: 300;
+}
+
+.cloudhost247-domain-lookup-hero h1 i {
+    margin-right: 15px;
+}
+
+.cloudhost247-domain-lookup-subtitle {
+    font-size: 1.1em;
+    opacity: 0.9;
+    margin: 0;
+}
+
+/* ===== Tools Grid ===== */
+.cloudhost247-domain-lookup-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.cloudhost247-tool-card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 30px 25px;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.cloudhost247-tool-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    border-color: #667eea;
+}
+
+.cloudhost247-tool-card-icon {
+    width: 70px;
+    height: 70px;
+    margin: 0 auto 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cloudhost247-tool-card-icon i {
+    font-size: 28px;
+    color: #fff;
+}
+
+.cloudhost247-tool-card-content h3 {
+    margin: 0 0 12px;
+    font-size: 1.3em;
+    color: #333;
+}
+
+.cloudhost247-tool-card-content p {
+    color: #666;
+    font-size: 0.95em;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+/* ===== Tool Section ===== */
+.cloudhost247-tool-section {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 30px;
+    margin-bottom: 20px;
+}
+
+.cloudhost247-domain-lookup-header {
+    margin-bottom: 20px;
+}
+
+.cloudhost247-domain-lookup-back {
+    color: #667eea;
+    text-decoration: none;
+    font-size: 0.95em;
+}
+
+.cloudhost247-domain-lookup-back:hover {
+    color: #764ba2;
+}
+
+.cloudhost247-tool-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.cloudhost247-tool-header h2 {
+    margin: 0 0 10px;
+    color: #333;
+    font-size: 1.8em;
+}
+
+.cloudhost247-tool-header h2 i {
+    color: #667eea;
+    margin-right: 10px;
+}
+
+.cloudhost247-tool-header p {
+    color: #666;
+    margin: 0;
+}
+
+/* ===== Forms ===== */
+.cloudhost247-tool-form {
+    max-width: 700px;
+    margin: 0 auto 25px;
+}
+
+.cloudhost247-tool-form .input-group-lg .form-control {
+    height: 50px;
+    font-size: 16px;
+}
+
+.cloudhost247-tool-form .btn-lg {
+    height: 50px;
+}
+
+.cloudhost247-tool-form .help-block {
+    color: #888;
+    font-size: 0.85em;
+}
+
+/* ===== Loading ===== */
+.cloudhost247-tool-loading {
+    text-align: center;
+    padding: 40px;
+}
+
+.cloudhost247-spinner {
+    width: 50px;
+    height: 50px;
+    margin: 0 auto 15px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #667eea;
+    border-radius: 50%;
+    animation: cloudhost247-spin 1s linear infinite;
+}
+
+@keyframes cloudhost247-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ===== Error ===== */
+.cloudhost247-tool-error {
+    max-width: 700px;
+    margin: 0 auto 20px;
+}
+
+/* ===== Results ===== */
+.cloudhost247-tool-results {
+    margin-top: 25px;
+}
+
+.cloudhost247-results-header {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #667eea;
+}
+
+.cloudhost247-results-header h4 {
+    margin: 0;
+    flex: 1;
+    color: #333;
+}
+
+.cloudhost247-source-badge {
+    background: #667eea;
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    font-weight: 500;
+}
+
+.cloudhost247-cache-badge {
+    background: #5cb85c;
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8em;
+}
+
+.cloudhost247-count-badge {
+    background: #f0ad4e;
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8em;
+}
+
+/* ===== Result Items ===== */
+.cloudhost247-result-item {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.cloudhost247-result-item label {
+    display: block;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 5px;
+    font-size: 0.9em;
+}
+
+.cloudhost247-result-item label i {
+    color: #667eea;
+    margin-right: 5px;
+}
+
+.cloudhost247-result-value {
+    color: #333;
+    word-break: break-word;
+}
+
+.cloudhost247-result-value .cloudhost247-badge {
+    display: inline-block;
+    background: #e9ecef;
+    padding: 2px 10px;
+    border-radius: 12px;
+    margin: 2px;
+    font-size: 0.9em;
+}
+
+.cloudhost247-result-value .cloudhost247-badge-success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.cloudhost247-result-value .cloudhost247-badge-danger {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* ===== Raw WHOIS ===== */
+.cloudhost247-raw-whois pre {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    padding: 15px;
+    max-height: 400px;
+    overflow-y: auto;
+    font-size: 0.85em;
+    line-height: 1.6;
+    color: #333;
+}
+
+/* ===== DNS Table ===== */
+.cloudhost247-dns-table {
+    margin-bottom: 0;
+}
+
+.cloudhost247-dns-table thead th {
+    background: #667eea;
+    color: #fff;
+    border: none;
+    font-weight: 500;
+}
+
+.cloudhost247-dns-table tbody tr:hover {
+    background: #f8f9ff;
+}
+
+.cloudhost247-dns-type-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    font-weight: 600;
+}
+
+.cloudhost247-dns-type-a { background: #d4edda; color: #155724; }
+.cloudhost247-dns-type-aaaa { background: #d1ecf1; color: #0c5460; }
+.cloudhost247-dns-type-mx { background: #fff3cd; color: #856404; }
+.cloudhost247-dns-type-ns { background: #e2e3f3; color: #383d7d; }
+.cloudhost247-dns-type-txt { background: #f8d7da; color: #721c24; }
+.cloudhost247-dns-type-cname { background: #d1ecf1; color: #0c5460; }
+.cloudhost247-dns-type-soa { background: #ffe0b2; color: #e65100; }
+.cloudhost247-dns-type-ptr { background: #e8f5e9; color: #2e7d32; }
+.cloudhost247-dns-type-srv { background: #f3e5f5; color: #7b1fa2; }
+.cloudhost247-dns-type-caa { background: #fce4ec; color: #c2185b; }
+
+/* ===== Availability Grid ===== */
+.cloudhost247-tld-selection {
+    margin-top: 20px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.cloudhost247-tld-selection label {
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.cloudhost247-tld-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
+}
+
+.cloudhost247-tld-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 0;
+    font-weight: normal;
+    transition: all 0.2s;
+}
+
+.cloudhost247-tld-checkbox:hover {
+    border-color: #667eea;
+}
+
+.cloudhost247-tld-checkbox input[type="checkbox"] {
+    margin: 0;
+}
+
+.cloudhost247-avail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.cloudhost247-avail-item {
+    padding: 20px;
+    border-radius: 6px;
+    text-align: center;
+    border: 2px solid;
+}
+
+.cloudhost247-avail-item.available {
+    background: #d4edda;
+    border-color: #28a745;
+}
+
+.cloudhost247-avail-item.taken {
+    background: #f8d7da;
+    border-color: #dc3545;
+}
+
+.cloudhost247-avail-item.error {
+    background: #fff3cd;
+    border-color: #ffc107;
+}
+
+.cloudhost247-avail-item .domain-name {
+    font-size: 1.1em;
+    font-weight: 600;
+    margin-bottom: 8px;
+    word-break: break-all;
+}
+
+.cloudhost247-avail-item .domain-status {
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+.cloudhost247-avail-item.available .domain-status {
+    color: #155724;
+}
+
+.cloudhost247-avail-item.available .domain-status::before {
+    content: "\f00c";
+    font-family: "FontAwesome";
+    margin-right: 5px;
+}
+
+.cloudhost247-avail-item.taken .domain-status {
+    color: #721c24;
+}
+
+.cloudhost247-avail-item.taken .domain-status::before {
+    content: "\f00d";
+    font-family: "FontAwesome";
+    margin-right: 5px;
+}
+
+/* ===== Empty State ===== */
+.cloudhost247-domain-lookup-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: #888;
+}
+
+.cloudhost247-domain-lookup-empty i {
+    font-size: 3em;
+    margin-bottom: 15px;
+    color: #ccc;
+}
+
+/* ===== Footer ===== */
+.cloudhost247-domain-lookup-footer {
+    text-align: center;
+    padding: 20px;
+    color: #888;
+    border-top: 1px solid #eee;
+    margin-top: 30px;
+}
+
+/* ===== Utility Classes ===== */
+.hidden {
+    display: none !important;
+}
+
+/* ===== Admin Styles ===== */
+.cloudhost247-admin-dashboard {
+    padding: 20px;
+}
+
+.cloudhost247-admin-header {
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.cloudhost247-admin-header h2 {
+    margin: 0 0 5px;
+}
+
+.cloudhost247-stats-row {
+    margin-bottom: 25px;
+}
+
+.cloudhost247-stat-card {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 15px;
+}
+
+.cloudhost247-stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    color: #fff;
+    font-size: 20px;
+}
+
+.cloudhost247-stat-blue { background: #667eea; }
+.cloudhost247-stat-green { background: #28a745; }
+.cloudhost247-stat-orange { background: #f0ad4e; }
+.cloudhost247-stat-red { background: #dc3545; }
+
+.cloudhost247-stat-info h3 {
+    margin: 0;
+    font-size: 1.6em;
+    color: #333;
+}
+
+.cloudhost247-stat-info p {
+    margin: 0;
+    color: #888;
+    font-size: 0.9em;
+}
+
+.cloudhost247-admin-panel {
+    margin-bottom: 25px;
+}
+
+.cloudhost247-quick-links .list-group-item {
+    display: flex;
+    align-items: center;
+}
+
+.cloudhost247-quick-links .list-group-item i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+    .cloudhost247-domain-lookup-hero h1 {
+        font-size: 1.8em;
+    }
+    
+    .cloudhost247-domain-lookup-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .cloudhost247-tool-section {
+        padding: 20px 15px;
+    }
+    
+    .cloudhost247-tld-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .cloudhost247-avail-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .cloudhost247-results-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

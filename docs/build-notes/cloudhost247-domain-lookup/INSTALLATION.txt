@@ -1,0 +1,11 @@
+Tools Provided
+Domain WHOIS - Registrar, Creation/Expiry dates, Name Servers, Status, Raw WHOIS
+IP Lookup - IP Address, ISP/Organization, Country/City, ASN, Coordinates, Timezone
+DNS Lookup - A, AAAA, MX, NS, TXT, CNAME, SOA, PTR, SRV, CAA records
+Domain Availability - Check across 19 TLDs with visual available/taken indicators
+
+Installation
+Upload cloudhost247_domain_lookup/ folder to /modules/addons/
+Activate "CloudHost247 Domain Lookup" in System Settings > Addon Modules
+Enter API keys for WhatIsMyIP and IPinfo
+Configure tool settings and save

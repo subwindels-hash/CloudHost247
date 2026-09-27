@@ -3,14 +3,15 @@
 | Path | Contents |
 |---|---|
 | `RESTRUCTURING.md` | Complete old→new mapping, removals, fixes, and verification record of the repository restructuring |
+| `rebrand-migration.md` | HostX → CloudHost247 rename: what changed, the SQL to run against the WHMCS database, webhook/URL updates, and what stays named `hostx` (and why) |
 | `pre-restructuring-audit.md` | Package-by-package audit inventory taken before any changes |
 | `policies/` | Source PDFs of the 19 CloudHost247 legal policies + original installation notes |
 | `announcement-bar/` | Announcement Bar build brief, usage examples, and the (not installed) CloudHost247-branded template variant |
-| `build-notes/` | Build/install provenance notes per module (cloudhost247-tools-platform, hostx-domain-lookup, dnschecker, customaffiliate, digitalproducts, hostx-email, phoneservices, smm) — each build prompt is kept at the module name the build actually ships under |
+| `build-notes/` | Build/install provenance notes per module (cloudhost247-tools-platform, cloudhost247-domain-lookup, dnschecker, customaffiliate, digitalproducts, cloudhost247-email, phoneservices, smm) — each build prompt is kept at the module name the build actually ships under |
 
 Module-specific README/INSTALL files live with their modules:
 - `modules/addons/tools_center/` (README.md, INSTALL.md, API.md)
-- `modules/addons/hostx_domain_lookup/README.md` (includes the rename provenance note)
+- `modules/addons/cloudhost247_domain_lookup/README.md` (includes the rename provenance note)
 - `modules/addons/digitalproducts/README.md`
 - `modules/addons/smmaddon/README.md`
 - `modules/addons/dnschecker/README.txt`

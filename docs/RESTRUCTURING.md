@@ -241,3 +241,55 @@ change, then activate **CloudHost247 Tools Platform**. The old
 `mod_hostx_tools_*` / `mod_CloudHost247_tools_*` tables hold only cache, logs,
 rate-limit counters and per-tool enable flags; they are safe to drop once the
 new module has been activated and its tools re-enabled.
+
+---
+
+## 7. Rebrand pass — `hostx` → `cloudhost247`
+
+Everything CloudHost247 owns was renamed off the HostX vendor brand. Database-
+affecting steps and the SQL to run are in
+[`docs/rebrand-migration.md`](rebrand-migration.md).
+
+### 7.1 Renamed
+
+| Kind | Before | After |
+|---|---|---|
+| Addon module | `modules/addons/hostx_domain_lookup/` | `modules/addons/cloudhost247_domain_lookup/` |
+| Provisioning module | `modules/servers/hostx_email/` | `modules/servers/cloudhost247_email/` |
+| Client pages | `hostx-sample.php`, `hostx-vps-sample.php`, `all-element-hostx.php` | `cloudhost247-sample.php`, `cloudhost247-vps-sample.php`, `all-element-cloudhost247.php` |
+| Page template | `templates/hostx/all-element-hostx.tpl` | `templates/hostx/all-element-cloudhost247.tpl` |
+| Build notes | `docs/build-notes/hostx-{domain-lookup,email}/` | `docs/build-notes/cloudhost247-{domain-lookup,email}/` |
+
+Inside the two renamed modules every identifier moved with the name: function
+prefixes, constants (`CLOUDHOST247_DOMAIN_LOOKUP_*`), namespace
+(`WHMCS\Module\Addon\CloudHost247DomainLookup`), autoloader prefix, PHP classes
+(`CloudHost247EmailAPI`), DB tables (`mod_cloudhost247_email_*`,
+`cloudhost247_domain_lookup_*`), client-area URLs, asset filenames, CSS class
+prefixes, JS variables, display names and author fields. Zero `hostx` tokens of
+any casing remain in either module.
+
+### 7.2 Deliberately not renamed
+
+| Kept | Why |
+|---|---|
+| `modules/addons/hostx/` | 63 ionCube-**encrypted** PHP files. WHMCS calls `hostx_config()` / `hostx_activate()` / `hostx_output()` from inside encrypted bytecode — folder, file and function prefix cannot change. Licensed vendor product. |
+| `templates/hostx/`, `templates/orderforms/hostx/` | Vendor theme + order form driven by that encrypted addon; renaming needs a WHMCS admin Template/Order Form switch and the addon may reference the path internally (unverifiable without source). |
+| `hostx_includes/`, `hostx.tpl`, `sslhostx.tpl`, `.hostx-*` / `.hx-*` CSS classes, `$hostx_*` Smarty vars, `homehostxwebhost*` lang keys | Contract with the encrypted addon's generated markup. |
+
+The theme consumes **456 Smarty bindings assigned by that encrypted addon** —
+`$hostx_theme_settings` (313 uses / 28 files), `$hostx_blocks` (143 / 46),
+`$hxselectedcurrency` (48 / 10), `$sidebarHostxRemove` (13 / 8),
+`$hxlanguagesflags` (7 / 4) — including in `header.tpl` and `footer.tpl`.
+Removing the addon would leave the header, footer, menus and every marketing
+page without content, so it stays. None of these names are customer-visible.
+
+### 7.3 Verification
+
+1. **Transformation replayed** against the original files from git for both
+   renamed modules — only the intended tokens changed.
+2. **PHP parse check** across the repository — no new errors (only the known
+   pre-existing `clone(…)` false positive in untouched ModulesGarden vendor code).
+3. **Zero `hostx` tokens** (any casing) inside the two renamed modules, their
+   build notes and the renamed pages.
+4. **Cross-reference check** — no file anywhere still points at the old module
+   folders, page filenames or template name.
