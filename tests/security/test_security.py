@@ -29,4 +29,19 @@ class RebuildSecurityReview(unittest.TestCase):
  def test_versioned_gap_migrations_are_namespaced(self):
   for p in [ROOT/'modules/addons/cloudhost247_theme/migrations/V110.php',ROOT/'modules/addons/cloudhost247_ovh/migrations/V130.php']:
    text=p.read_text();self.assertNotIn('drop',text.lower());self.assertRegex(text,r"create\('mod_cloudhost247_")
+ def test_management_migrations_are_ordered_additive_and_namespaced(self):
+  files=[ROOT/'modules/addons/cloudhost247_ovh/migrations'/f'V{v}.php' for v in (100,110,120,130,140,150)]
+  self.assertTrue(all(p.exists() for p in files))
+  for p in files:
+   s=p.read_text().lower();self.assertNotIn('drop',s);self.assertNotIn("schema()->table('tbl",s)
+ def test_consequential_management_writes_are_confirmed_and_audited(self):
+  pricing=(ROOT/'modules/addons/cloudhost247_ovh/lib/Pricing/PricingService.php').read_text()
+  products=(ROOT/'modules/addons/cloudhost247_ovh/lib/Products/HostingProductManager.php').read_text()
+  currency=(ROOT/'modules/addons/cloudhost247_currency/lib/Services/AdminController.php').read_text()
+  for s in (pricing,products,currency):self.assertIn('confirm',s.lower());self.assertIn('AuditLogger',s)
+ def test_audit_search_is_bounded_and_secret_redaction_is_central(self):
+  repo=(ROOT/'modules/addons/cloudhost247_core/lib/Support/AuditRepository.php').read_text();logger=(ROOT/'modules/addons/cloudhost247_core/lib/Support/AuditLogger.php').read_text()
+  self.assertIn('min(100',repo);self.assertIn('SecretPolicy::redact',logger)
+ def test_reconciliation_never_blindly_retries(self):
+  s=(ROOT/'modules/addons/cloudhost247_ovh/lib/Operations/OperationsDashboard.php').read_text();self.assertIn('never repeat the mutation',s);self.assertNotIn("->post(",s)
 if __name__=='__main__':unittest.main()

@@ -10,7 +10,7 @@ final class HostingProductManager
     public function listProducts(array $filters=array())
     {
         $query=Capsule::table('tblproducts as p')->leftJoin('tblproductgroups as g','g.id','=','p.gid')->leftJoin('mod_cloudhost247_hosting_products as m','m.whmcs_product_id','=','p.id')->select('p.id','p.name','p.description','p.gid','p.hidden','p.order','p.paytype','g.name as category_name','m.product_kind','m.featured','m.availability_status','m.display_order','m.specifications_json');
-        if(!empty($filters['kind']))$query->where('m.product_kind',$filters['kind']);if(isset($filters['active']))$query->where('p.hidden',$filters['active']?0:1);return$query->orderBy('m.display_order')->orderBy('p.order')->get()->all();
+        if(!empty($filters['kind']))$query->where('m.product_kind',$filters['kind']);if(isset($filters['active']))$query->where('p.hidden',$filters['active']?0:1);$rows=$query->orderBy('m.display_order')->orderBy('p.order')->get()->all();foreach($rows as$row){$spec=json_decode($row->specifications_json?:'{}',true);foreach(array('cpu','ram','storage','network','ipv4','ipv6','datacenter','operating_system')as$key)$row->{$key}=is_array($spec)&&isset($spec[$key])?$spec[$key]:'';}return$rows;
     }
     public function details($productId)
     {
