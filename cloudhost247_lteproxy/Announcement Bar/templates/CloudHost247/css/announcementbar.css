@@ -1,0 +1,132 @@
+/* ════════════════════════════════════════════════════════════════ */
+/*  Announcement Bar Standalone Stylesheet                          */
+/*  Path: /templates/hostx/css/announcementbar.css                  */
+/*  Optional: Link in header.tpl if you prefer external CSS          */
+/* ════════════════════════════════════════════════════════════════ */
+
+/* ─── Container ─── */
+.announcement-bar {
+    position: relative;
+    width: 100%;
+    background: linear-gradient(90deg, #1e3a8a 0%, #3b82f6 50%, #1e3a8a 100%);
+    color: #ffffff;
+    font-size: 0.875rem;   /* 14px */
+    font-weight: 500;
+    line-height: 1.5;
+    overflow: hidden;
+    z-index: 1040;         /* Above navbar (1030 in Bootstrap) */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .announcement-bar {
+        background: linear-gradient(90deg, #0f172a 0%, #1e40af 50%, #0f172a 100%);
+    }
+}
+
+/* ─── Scrolling Track ─── */
+.announcement-bar__track {
+    display: flex;
+    align-items: center;
+    width: fit-content;
+    min-width: 100%;
+    animation: announcement-scroll 30s linear infinite;
+    will-change: transform;
+}
+
+/* Pause animation on hover */
+.announcement-bar:hover .announcement-bar__track {
+    animation-play-state: paused;
+}
+
+/* ─── Individual Items ─── */
+.announcement-bar__item {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    padding: 0.625rem 2.5rem;   /* 10px 40px */
+    white-space: nowrap;
+    cursor: default;
+}
+
+.announcement-bar__item a,
+.announcement-bar__item--link {
+    color: #ffffff;
+    text-decoration: none;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.announcement-bar__item a:hover,
+.announcement-bar__item--link:hover {
+    opacity: 0.85;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+/* ─── Dot Separator ─── */
+.announcement-bar__dot {
+    display: inline-block;
+    width: 4px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+    margin: 0 2.5rem;
+    flex-shrink: 0;
+}
+
+/* ─── Keyframes ─── */
+/* Translate from 0 to -50% because content is duplicated exactly */
+@keyframes announcement-scroll {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+/* ─── Responsive Breakpoints ─── */
+@media (max-width: 767.98px) {
+    .announcement-bar {
+        font-size: 0.8125rem;   /* 13px */
+    }
+    .announcement-bar__item {
+        padding: 0.5rem 1.5rem;
+    }
+    .announcement-bar__dot {
+        margin: 0 1.5rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .announcement-bar {
+        font-size: 0.75rem;     /* 12px */
+    }
+    .announcement-bar__item {
+        padding: 0.5rem 1rem;
+    }
+    .announcement-bar__dot {
+        margin: 0 1rem;
+    }
+}
+
+/* ─── Accessibility: Reduced Motion ─── */
+@media (prefers-reduced-motion: reduce) {
+    .announcement-bar__track {
+        animation: none;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0;
+    }
+    .announcement-bar__item {
+        white-space: normal;
+        text-align: center;
+        padding: 0.25rem 0.75rem;
+    }
+    .announcement-bar__dot {
+        display: none;
+    }
+}

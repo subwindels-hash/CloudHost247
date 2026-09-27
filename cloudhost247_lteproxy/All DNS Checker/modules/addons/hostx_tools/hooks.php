@@ -1,0 +1,44 @@
+<?php
+/**
+ * HostX Tools - WHMCS Hooks
+ */
+
+use Illuminate\Database\Capsule\Manager as Capsule;
+
+add_hook('ClientAreaPage', 1, function ($vars) {
+    // Add custom page variables for hostx_tools module
+    if ($vars['filename'] === 'index' && isset($_GET['m']) && $_GET['m'] === 'hostx_tools') {
+        // Inject assets
+    }
+    return $vars;
+});
+
+add_hook('ClientAreaHeadOutput', 1, function ($vars) {
+    if (isset($_GET['m']) && $_GET['m'] === 'hostx_tools') {
+        $assetsUrl = 'modules/addons/hostx_tools/assets/';
+        $cssUrl = $assetsUrl . 'css/hostx-tools.css?v=226';
+        $jsUrl = $assetsUrl . 'js/hostx-tools.js?v=226';
+
+        return '<link rel="stylesheet" href="' . $cssUrl . '" type="text/css" />
+                <script src="' . $jsUrl . '"></script>';
+    }
+    return '';
+});
+
+add_hook('ClientAreaPrimaryNavbar', 1, function ($menu) {
+    if (!is_null($menu->getChild('Services'))) {
+        $menu->getChild('Services')->addChild(
+            'Online Tools',
+            [
+                'label' => Lang::trans('Online Tools'),
+                'uri' => 'index.php?m=hostx_tools',
+                'icon' => 'fa-tools',
+                'order' => 99,
+            ]
+        );
+    }
+});
+
+add_hook('AdminAreaPage', 1, function ($vars) {
+    return $vars;
+});

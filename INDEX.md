@@ -2,22 +2,23 @@
 
 Location: repository root `/home/user/CloudHost247/`
 
-- **Total extracted files:** 4,584
-- **Total size (extracted):** ~106.6 MB
+- **Total extracted files:** 4,632
+- **Total size (extracted):** ~119 MB
+- **ZIP archives remaining:** 0 (all 26 archives extracted, verified and removed)
 
 ## Packages
 
 | Package | Files | Size |
 |---|---|---|
-| `Refund Policy/` | 95 | 6.6 MB |
-| `Try-this/` | 325 | 23.9 MB |
-| `WGS-OVH-v8.0.8-Sourcecode/` | 433 | 7.7 MB |
-| `blockonomics/` | 25 | 884.1 KB |
-| `cloudhost247_lteproxy/` | 233 | 3.7 MB |
-| `hostx/` | 1,170 | 18.7 MB |
-| `orderforms/` | 643 | 23.5 MB |
-| `smtphosting-whmcs-v3/` | 1,680 | 22.0 MB |
-| `xtreme_currency_rates_6.0/` | 19 | 414.3 KB |
+| `Refund Policy/` | 95 | 6.9 MB |
+| `Try-this/` | 325 | 25 MB |
+| `WGS-OVH-v8.0.8-Sourcecode/` | 433 | 8.8 MB |
+| `blockonomics/` | 25 | 952 KB |
+| `cloudhost247_lteproxy/` | 240 | 3.9 MB |
+| `hostx/` | 1,170 | 22 MB |
+| `orderforms/` | 643 | 25 MB |
+| `smtphosting-whmcs-v3/` | 1,680 | 27 MB |
+| `xtreme_currency_rates_6.0/` | 19 | 460 KB |
 
 ## Top-level entries per package
 
@@ -115,7 +116,6 @@ WHMCS SMM Integration Module/
 ajax/
 assets/
 cloudhost247_lteproxy.php
-cloudhost247_lteproxy_whmcs_module.zip
 hooks/
 install.php
 lang/
@@ -312,3 +312,32 @@ Duplicate top-level archive wrappers were removed:
 - `blockonomics/` -> kept `blockonomics.php`, `callback/`, `blockonomics/`
 - `xtreme_currency_rates_6.0/` -> now module contents directly
 - `cloudhost247_lteproxy/` -> inner module lifted up; extra WHMCS tools preserved
+
+## Nested archives (final pass)
+
+The 17 archives nested inside `cloudhost247_lteproxy/` were extracted in place, next to
+their own archive, so each WHMCS add-on keeps its documented install layout:
+
+| Archive | Extracted to |
+|---|---|
+| `All CloudHost247 DNS Checker.zip`, `All DNS Checker.zip` | `All DNS Checker/modules/addons/{CloudHost247_tools,hostx_tools}/` |
+| `DNS Checker.zip`, `WHMCS DNS Checker Addon.zip`, `dnschecker-whmcs-module.zip` | `All DNS Checker/DNS Checker/modules/addons/dnschecker/` |
+| `Announcement Bar.zip`, `Announcement Bar CloudHost247.zip` | `Announcement Bar/templates/{hostx,CloudHost247}/` |
+| `WHMCS.zip` | `Use this All DNS Checker/whmcs-tools-center/` |
+| `WHMCS Affiliate Commission Logic.zip`, `customaffiliate.zip` | `WHMCS Affiliate Commission Logic/customaffiliate/` |
+| `WHMCS Digital Product Module*.zip`, `whmcs-digitalproducts-module.zip` | `WHMCS Digital Product Module/modules/addons/digitalproducts/` |
+| `WHMCS Domain Lookup.zip` | `WHMCS Domain Lookup/hostx_tools/` |
+| `WHMCS Email Hosting Module.zip` | `WHMCS Email Hosting Module/hostx_email/` |
+| `WHMCS Phone Number Platform.zip` | `WHMCS Phone Number Platform/phoneservices/` |
+| `smm_whmcs_module.zip` | `WHMCS SMM Integration Module/smm_whmcs_module/` |
+| `cloudhost247_lteproxy_whmcs_module.zip` | `cloudhost247_lteproxy/` (module root, already present) |
+
+### Merge rules applied
+
+- Extraction never overwrote an existing file; every collision was byte-compared first.
+- All colliding files were byte-identical, so no configuration, schema or template was changed.
+- 116 byte-identical duplicate copies created by redundant archive wrapper directories
+  (e.g. `WHMCS Phone Number Platform/WHMCS Phone Number Platform/...`) were collapsed to the
+  shallower canonical path. No unique content was removed.
+- Windows junk (`desktop.ini`) was dropped.
+- Every entry of all 26 archives was verified present on disk before the archives were deleted.
