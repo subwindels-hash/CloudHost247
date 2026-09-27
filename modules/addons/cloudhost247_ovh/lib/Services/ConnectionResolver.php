@@ -1,0 +1,5 @@
+<?php
+namespace CloudHost247\Ovh\Services;use CloudHost247\Ovh\Api\Credentials;use CloudHost247\Ovh\Api\Client;use CloudHost247\Ovh\Api\CurlTransport;use WHMCS\Database\Capsule;use RuntimeException;
+final class ConnectionResolver
+{public function fromModuleParams(array $p){$region=$p['configoption1']??'eu';return new Client($region,new Credentials($p['serverusername']??'',$p['serverpassword']??'',$p['serveraccesshash']??''),new CurlTransport());}
+ public function endpoint($id){$ep=Capsule::table('mod_cloudhost247_ovh_endpoints')->where('id',(int)$id)->where('enabled',1)->first();if(!$ep)throw new RuntimeException('OVH endpoint is disabled or missing.');$s=Capsule::table('tblservers')->where('id',$ep->server_id)->first();if(!$s)throw new RuntimeException('Mapped WHMCS server is missing.');if(!function_exists('decrypt'))throw new RuntimeException('WHMCS credential decryption is unavailable.');return new Client($ep->region,new Credentials($s->username,decrypt($s->password),decrypt($s->accesshash)),new CurlTransport());}}
