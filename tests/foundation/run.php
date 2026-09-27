@@ -7,6 +7,7 @@ require_once $root . '/modules/addons/cloudhost247_core/lib/Support/HealthCheck.
 class MockAuditTable { public static $inserted; public function insert($row){self::$inserted=$row;return true;} }
 if (!class_exists('WHMCS\\Database\\Capsule')) eval('namespace WHMCS\\Database; class Capsule { public static function table($name){ return new \\MockAuditTable(); } }');
 require_once $root . '/modules/addons/cloudhost247_core/lib/Support/AuditLogger.php';
+require_once $root . '/modules/addons/cloudhost247_core/lib/Support/SafeError.php';
 require_once $root . '/modules/addons/cloudhost247_theme/lib/ThemeRepository.php';
 
 use CloudHost247\Foundation\Security\SecretPolicy;
@@ -21,6 +22,10 @@ $tests['recursive secret redaction'] = function () {
 $tests['audit persistence redacts credentials'] = function () {
     \CloudHost247\Foundation\Support\AuditLogger::record('test','update','product',7,array('password'=>'before-secret'),array('api_token'=>'after-secret'));
     $row=MockAuditTable::$inserted; return $row['resource_id']==='7' && strpos($row['before_json'],'before-secret')===false && strpos($row['after_json'],'after-secret')===false && strpos($row['after_json'],'[REDACTED]')!==false;
+};
+$tests['safe errors expose correlation not exception'] = function () {
+    $safe=\CloudHost247\Foundation\Support\SafeError::from(new RuntimeException('secret database path /private/db'),'test','failure','Safe failure.');
+    return strpos($safe['display'],'Safe failure. Reference: ')===0 && strpos($safe['display'],'secret')===false && preg_match('/^[a-f0-9]{32}$/',$safe['correlation_id']);
 };
 $tests['correlation IDs are random hex'] = function () {
     $a = Logger::correlationId(); $b = Logger::correlationId();

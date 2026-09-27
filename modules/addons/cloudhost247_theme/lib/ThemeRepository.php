@@ -117,6 +117,11 @@ final class ThemeRepository
         return array('title'=>trim(strip_tags(isset($copy['title'])?$copy['title']:'')), 'summary'=>trim(strip_tags(isset($copy['summary'])?$copy['summary']:'')), 'body'=>$this->sanitizeHtml(isset($copy['body'])?$copy['body']:''));
     }
 
+    public function previewTranslation(array $input)
+    {
+        $locale=$this->locale(isset($input['locale'])?$input['locale']:'');$baseId=(int)(isset($input['content_id'])?$input['content_id']:0);$base=$baseId?Capsule::table(self::CONTENT)->where('id',$baseId)->first():null;if(!$base)throw new InvalidArgumentException('Base content item does not exist.');$baseItem=$this->hydrate($base);$preview=$this->preview($input);return array_merge($baseItem,array_filter($preview,function($v){return$v!=='';}),array('locale'=>$locale,'preview_only'=>true,'published'=>false));
+    }
+
     public function deleteContent($id) { Capsule::table('mod_cloudhost247_theme_translations')->where('content_id',(int)$id)->delete(); return Capsule::table(self::CONTENT)->where('id', (int) $id)->delete(); }
 
     public function clientContext($locale = null)

@@ -62,4 +62,8 @@ class RebuildSecurityReview(unittest.TestCase):
   repo=(ROOT/'modules/addons/cloudhost247_theme/lib/ThemeRepository.php').read_text();hooks=(ROOT/'modules/addons/cloudhost247_theme/hooks.php').read_text();site=(ROOT/'cloudhost247-sitemap.php').read_text()
   for marker in ('og_title','og_description','canonical_url','sitemap'):self.assertIn(marker,repo)
   self.assertIn('rel="canonical"',hooks);self.assertIn("published('landing')",site)
+ def test_safe_errors_use_correlation_without_raw_customer_exception(self):
+  s=(ROOT/'modules/addons/cloudhost247_core/lib/Support/SafeError.php').read_text();self.assertIn('correlation_id',s);self.assertNotIn('getMessage()',s);self.assertNotIn('getTrace',s)
+ def test_localized_preview_is_non_persistent(self):
+  repo=(ROOT/'modules/addons/cloudhost247_theme/lib/ThemeRepository.php').read_text();body=repo.split('public function previewTranslation',1)[1].split('public function deleteContent',1)[0];self.assertNotIn('insert',body.lower());self.assertNotIn('update',body.lower());self.assertIn("'preview_only'=>true",body)
 if __name__=='__main__':unittest.main()

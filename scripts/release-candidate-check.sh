@@ -7,7 +7,7 @@ find modules/addons/cloudhost247_* modules/servers/cloudhost247_ovh tests script
 php tests/foundation/run.php
 php tests/currency/run.php
 php -d display_errors=1 tests/ovh/run.php
-python3 -m unittest -v tests/foundation/test_static.py tests/currency/test_static.py tests/ovh/test_static.py tests/ovh/test_product_services_static.py tests/security/test_security.py
+python3 -m unittest -v tests/foundation/test_static.py tests/currency/test_static.py tests/ovh/test_static.py tests/ovh/test_product_services_static.py tests/ovh/test_public_catalog_static.py tests/security/test_security.py
 python3 -m unittest -v tests/staging/test_staging_tools.py
 python3 -m py_compile scripts/validate-migrations.py scripts/compare-financial-evidence.py scripts/generate-staging-report.py
 python3 scripts/validate-migrations.py

@@ -59,7 +59,7 @@ class FoundationStaticTests(unittest.TestCase):
 
     def test_preview_sanitizes_without_persisting(self):
         repo=(ROOT/'modules/addons/cloudhost247_theme/lib/ThemeRepository.php').read_text()
-        preview=repo[repo.index('public function preview'):repo.index('public function deleteContent')]
+        preview=repo[repo.index('public function preview(array'):repo.index('public function previewTranslation')]
         self.assertIn('sanitizeHtml',preview);self.assertNotIn('Capsule::table',preview)
 
     def test_open_graph_is_escaped(self):
