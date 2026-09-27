@@ -145,3 +145,9 @@ The detailed HostX comparison is maintained in `PHASE-2-HOSTX-PARITY.md`. The in
 **Implemented in source:** independent client/cart themes, responsive visual system, real settings-to-client CSS/output path, authenticated/CSRF-protected CMS administration, publish/draft content, ordered sections, banners, testimonials, nested navigation, footer blocks, per-page SEO title/description, custom WHMCS ClientArea page route, native account/cart inheritance, output escaping and HTML allowlisting.
 
 **Partial:** localized CMS, dedicated product-query landing components, sitemap, OG metadata, visual preview and drag/drop ordering. Numeric section ordering is the practical builder currently delivered. **Staging-blocked:** every browser/runtime assertion, WHMCS menu/head/footer hook behavior, auth/account/cart workflows and screenshots. These are not marked runtime-verified.
+
+## Independent currency implementation update — 2026-09-27
+
+The source implementation is documented in `CURRENCY-SYSTEM.md`. It provides two independent providers, fallback/retry, validated base/enabled currencies, manual/WHMCS-cron/CLI updates, lease locking, transactional current-rate writes, immutable history, comparison, margins, rounding, conversion, status/error reporting and an authenticated CSRF-protected admin dashboard. Static safeguards prohibit historical invoice, transaction and product-pricing writes.
+
+All source/unit-testable currency capabilities are implemented. Every WHMCS database, hook, provider-network, cron and admin-browser assertion remains **BLOCKED** pending secure staging; no runtime compatibility or production-readiness claim is made. The proprietary Xtreme module remains untouched and is not loaded by this implementation.
