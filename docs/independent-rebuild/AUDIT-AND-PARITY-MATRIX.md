@@ -1,0 +1,121 @@
+# Independent parity rebuild: audit and parity matrix
+
+**Audit date:** 2026-09-27  
+**Baseline:** `432989b8e20f65b1db3c2eeadc15cc4b5b736e82`  
+**Scope:** HostX, Xtreme Currency Rates 6.0, and WGS OVH/SoYouStart 8.0.8
+
+## Rules and status vocabulary
+
+This is a clean-room replacement project, not a licence-check patch. Vendor code remains in Git for inventory/migration only and must not be activated or redistributed unless the operator has the relevant rights. Replacement modules will use new names and independently written source. They will not call vendor licensing services or read vendor licence keys. WHMCS licensing and OVH API authentication are explicitly out of scope and remain mandatory.
+
+Status values: **Existing/vendor** (present but not an independent implementation), **Reusable integration** (ordinary WHMCS-facing template/route structure, subject to rights review), **Planned**, **Blocked from verification**, and **Complete**. “Present” never means “parity complete.”
+
+## Repository findings
+
+| Component | Active paths found | Size/shape | Encoding/source visibility | Vendor-key coupling | Independent status |
+|---|---|---:|---|---|---|
+| HostX helper | `modules/addons/hostx/` | 266 files; 63 PHP | All 63 PHP files are ionCube encoded | Licence/activation behavior cannot be safely inspected statically; `includes/license.php` and `includes/errolicense.php` exist | **Not implemented** |
+| HostX client theme | `templates/hostx/` | 1,711 files; 279 Smarty templates | Templates/assets readable; 49 directory guard PHP files are not encoded | Runtime data supplied by encoded addon/hooks | **Existing/vendor; rights review required** |
+| HostX order form | `templates/orderforms/hostx/` | 108 files; 27 templates | Readable | Theme/addon compatibility dependency | **Existing/vendor; rights review required** |
+| Xtreme Currency Rates | `modules/addons/xtreme_currency_rates/` | 19 files; 18 PHP | All 18 PHP files ionCube encoded | Explicit `license_verify.php`, security callback and encoded entry point | **Not implemented** |
+| WGS OVH admin | `modules/addons/soyoustart/` | 254 files; 32 PHP, 14 templates | Readable source | Explicit `licenseNumtoactivate`, `CheckLicense`, dashboard/status gates | **Existing/vendor only** |
+| WGS dedicated server | `modules/servers/soyoustart/` | 49 files | Readable source | Create/client operations query vendor licence and gate execution | **Existing/vendor only** |
+| WGS VPS server | `modules/servers/soyoustart_vps/` | 46 files | Readable source | Provisioning/client operations query vendor licence and gate execution | **Existing/vendor only** |
+| OVH order form | `templates/orderforms/ovh_cart/` | 78 files; 2 local templates | Readable; inherits WHMCS `standard_cart` | WGS addon exposes order-form entitlement checks | **Existing/vendor; replacement needed** |
+| OVH automation | `crons/{getServer,getIpStatus,priceSync,emailSend}.php` | 4 scripts | Readable | Coupled to WGS classes/tables | **Existing/vendor only** |
+
+A SHA-256 inventory of every in-scope original file is in `original-file-manifest.sha256`. No original file was deleted, moved, decoded, or modified during this audit.
+
+## Installation and configuration dependency inventory
+
+### HostX
+
+* WHMCS document-root pages call `init.php`, select a HostX template, and preserve public routes.
+* The WHMCS system theme is `templates/hostx`; cart theme is `templates/orderforms/hostx`.
+* The helper addon is activated as `hostx`; its encoded entry point, hooks, classes, admin pages, sitemap generators, menu defaults and block defaults are runtime dependencies.
+* Observed feature/admin entry points: settings, homepage selection, language management, top/side menus, page groups, page blocks, banners, reviews/testimonials, SEO manager/tags/content, TLD settings, category icons, dedicated settings, live chat and sitemap generation.
+* Observable compatibility names include `hostx_theme_settings`, `hostx_blocks`, `HostxPage`, `HostxBlock`, `HostxBanner`, and the partials under `hostx_includes/`.
+* ionCube is currently required only to run the vendor helper, not by the proposed replacement.
+* Exact schema and licence protocol cannot be derived lawfully/reliably from encoded files. Schema discovery must be performed on an authorised staging database using metadata-only exports.
+
+### Xtreme Currency Rates
+
+* Activated as addon `xtreme_currency_rates`.
+* Every PHP file is encoded, including hooks for `AfterCronJob`, `FetchCurrencyExchangeRates`, and `AdminDashboardWidget`.
+* Visible admin pages indicate dashboard, module settings, rate history, documentation, update and licence verification.
+* Current dependencies include ionCube and a vendor activation flow. Provider names, schemas, rounding/margin semantics and invoice behavior require an authorised black-box staging observation or database metadata export.
+
+### WGS OVH / SoYouStart
+
+* Addon activation name is `soyoustart`; dedicated and VPS server modules are separate.
+* Vendor licence setting: `tbladdonmodules(module='soyoustart', setting='licenseNumtoactivate')`; the source calls `Helper::CheckLicense()` and gates addon, cart and provisioning paths.
+* OVH authentication is independent from that vendor key and must be retained. The source has API/consumer configuration classes; replacement secrets must remain in WHMCS-encrypted server/addon configuration and never be logged.
+* Tables referenced: `mod_soyoustart`, `_configurable`, `_email_log`, `_exchange_rates`, `_imap`, `_ips_orders`, `_license`, `_log`, `_operatingsys`, `_pricesetting`, `_product_settings`, `_products`, `_seenMessage`, `_servers_ips`, `_setting`, plus `tbl_soyoustart` and normal WHMCS product/pricing/service tables.
+* Provisioning exports observed: create, renew, terminate and reboot for dedicated; create, renew, suspend, unsuspend, terminate, power on/off, reboot, rescue reboot and console for VPS; both expose admin/client service panels.
+* Admin classes cover API calls, configuration, consumers, email templates, existing servers, orders, products and server status. Cron names indicate inventory, IP status, price and email processing.
+* OVH API credentials and consumer tokens are legitimate authentication and are **not** to be removed or bypassed.
+
+## Original-versus-replacement parity matrix
+
+| Area | Original capability evidenced | Independent replacement acceptance criterion | Status |
+|---|---|---|---|
+| Theme shell | WHMCS client/header/footer/account pages, responsive assets | New CloudHost247 theme supports current target WHMCS pages, accessibility and mobile layouts | Planned |
+| Routes | Root PHP marketing/legal/product routes | Existing URLs return equivalent CloudHost247 pages without HostX runtime | Reusable structure; replacement planned |
+| Branding/settings | Colors, typography, logo, layouts, custom CSS/JS | Admin settings with validation, safe output encoding and defaults | Planned |
+| Navigation | Top menu, side menu, category icons, mega-menu partials | Ordered nested menus, visibility, translations and WHMCS links | Planned |
+| CMS/pages | Page groups, homepage selection, editable blocks | Draft/publish pages and ordered reusable sections; safe HTML policy | Planned |
+| Page builder | Drag/drop block library and defaults | Practical section reorder/configure/preview; no vendor JS dependency | Planned |
+| Banners | Banner admin and theme assets | CRUD, scheduling, links, alt text and responsive rendering | Planned |
+| Testimonials | Reviews/testimonial CRUD and images | Moderated CRUD, ordering and accessible rendering | Planned |
+| SEO | Per-page tags/content, OG images, sitemap classes | Title/description/canonical/robots/OG and sitemap generation | Planned |
+| Domains/TLDs | TLD settings and domain pages | WHMCS domain pricing/search integration without copied business logic | Planned |
+| Legal pages | Existing branded legal routes/templates | Preserve routes/content subject to content-rights review | Existing files; runtime test pending |
+| Cart | HostX order flow | Current-WHMCS cart/configure/checkout/complete flow, CSRF-safe | Planned |
+| Currency providers | Encoded provider configuration/API | Provider interface; at least ECB-compatible and configurable HTTP provider; timeouts/retries | Planned |
+| Auto/manual rates | Cron and manual update hooks | Idempotent manual/cron jobs, base normalization and transactional write | Planned |
+| Conversion | WHMCS currency integration | Decimal-safe conversion; base rate invariant; no silent partial updates | Planned |
+| Margins/rounding | Requested parity; encoded implementation | Per-currency/provider margin and explicit precision/rounding rules | Planned; semantics need staging observation |
+| Rate history | Admin history page | Immutable run/rate history with source, timestamps and actor | Planned |
+| Currency logs/errors | Dashboard widget and cron hooks | Redacted structured logs, status widget, retry-safe errors | Planned |
+| Prices/invoices | Requested safe synchronization | Preview/dry run; backups; never rewrite historical paid invoices; documented invoice policy | Planned |
+| OVH API auth | API/consumer configuration | Official OVH API signing/token auth, regional endpoint, TLS verification, encrypted secrets | Planned; authentication remains required |
+| Catalog import | Product/order/product-setting classes | Preview/import OVH catalog into mapped WHMCS groups/products, idempotently | Planned |
+| Pricing sync | Price settings, exchange rates, `priceSync.php` | Dry-run diff, margin/rounding, selected billing cycles/currencies, audit trail | Planned |
+| Config options | Product configurable mappings incl. OS/licences/network/storage | Stable OVH-to-WHMCS option mapping without destructive recreation | Planned |
+| Existing services | ExistingServer and service tables | Link/reconcile by immutable OVH service ID; no duplicate provisioning | Planned |
+| Dedicated provision | create/renew/terminate/reboot | Idempotent state machine, confirmation for destructive calls, WHMCS module results | Planned |
+| VPS provision | create/renew/suspend/unsuspend/terminate/power/rescue/console | Equivalent supported lifecycle with scoped client/admin controls | Planned |
+| Status | ServerStatus, `getServer.php` | Reconciled state, last successful poll, stale/error indicators | Planned |
+| IP management | IP order/status tables and `getIpStatus.php` | List/reverse/failover actions supported by OVH API/product; validation and audit | Planned |
+| Client area | Dedicated/VPS client templates | Service details, status, IPs and allowed lifecycle actions; CSRF and ownership checks | Planned |
+| Automation | Four cron scripts | WHMCS cron hooks and optional CLI, locks, batching, retries, run logs | Planned |
+| Admin controls | Dashboard/import/settings/logs | Role-checked pages, CSRF, pagination, redaction and actionable errors | Planned |
+| Compatibility/data | Existing WGS tables and service config | Read-only discovery + explicit migration, backups and rollback; no destructive activation | Planned |
+| Vendor keys | Three vendor activation dependencies | Replacement install/config/runtime has no fields/calls for those keys | Planned |
+| WHMCS licence | WHMCS core | Unchanged and mandatory | Preserved by design |
+
+## Data-safety and migration contract
+
+1. Replacement modules use new module names (`cloudhost247_theme`, `cloudhost247_currency`, `cloudhost247_ovh`) while migration is validated; vendor modules remain inactive but untouched.
+2. Activation only creates namespaced tables. It must not drop/rename vendor or WHMCS tables and must not alter services, invoices, products or prices.
+3. Migration starts with backup and dry-run reports, reads legacy records, maps stable IDs, and records checkpoints. Writes are transactional where supported and resumable where APIs are involved.
+4. Invoice policy defaults to prospective rates only. Historical invoices and transactions are immutable unless an administrator performs a separate explicit WHMCS-supported operation.
+5. OVH destructive lifecycle actions require permission checks, CSRF protection, ownership checks, idempotency keys/state checks and redacted audit logs.
+6. Vendor licence values may remain in legacy tables for rollback, but replacement code will neither request nor consume them.
+
+## Verification gaps / staging prerequisites
+
+The repository does not include WHMCS core, a database dump, target-version declaration beyond “WHMCS 8.x,” staging URL, or test OVH credentials. Consequently no honest end-to-end activation, cart, invoice, provisioning, existing-service or cron result can yet be reported. Static audit is complete; runtime parity is not.
+
+Before a staging phase, supply through the deployment environment (not Git/chat): exact WHMCS version and PHP version, a sanitised clone of the database, a staging WHMCS licence, OVH sandbox/test credentials where available, regional API endpoint, and a non-production test product/service. Production credentials must never be committed.
+
+## Phased implementation plan
+
+1. **Foundation:** independent namespaces, schema migrations, capability checks, secret handling, logging, uninstall policy and CI/static tests.
+2. **Theme/CMS:** CloudHost247 shell and cart compatibility first; settings, menus, pages/blocks, banners/testimonials, SEO/sitemap; then route-by-route regression.
+3. **Currency:** provider abstraction, history/log tables, manual/cron update, margins/rounding, dashboard; dry-run pricing sync and invoice safeguards.
+4. **OVH read-only:** signed client, endpoint/credential validation, catalog/status/IP discovery, mapping UI and existing-service reconciliation.
+5. **OVH mutations:** dedicated then VPS lifecycle actions, client UI, cron workers, retries/idempotency and audited error handling.
+6. **Migration/cutover:** metadata backup, dry runs, sampled reconciliation, dual-read comparison where safe, rollback rehearsal, then disable—not delete—vendor modules.
+
+Each matrix row moves to **Complete** only with source, automated tests and staging evidence. Installation alone is insufficient.
