@@ -3,7 +3,7 @@ namespace CloudHost247\Rdp\Api;
 use CloudHost247\Rdp\Contracts\Provider;
 final class ProviderClient implements Provider
 {
- private$base;$token;$transport;
+ private $base,$token,$transport;
  public function __construct($endpoint,$token,callable$transport=null){$parts=parse_url(trim((string)$endpoint));$host=strtolower(isset($parts['host'])?$parts['host']:'');$allowed=array_filter(array_map('trim',explode(',',strtolower((string)getenv('CH247_RDP_ALLOWED_HOSTS')))));if(($parts['scheme']??'')!=='https'||!$host||!in_array($host,$allowed,true)||isset($parts['user'])||isset($parts['pass'])||isset($parts['query'])||isset($parts['fragment']))throw new \InvalidArgumentException('RDP provider endpoint must be an allowlisted HTTPS origin.');if(!is_string($token)||strlen($token)<16||strlen($token)>4096)throw new \InvalidArgumentException('RDP provider authentication is unavailable.');$port=isset($parts['port'])?':'.(int)$parts['port']:'';$this->base='https://'.$host.$port.rtrim(isset($parts['path'])?$parts['path']:'','/');$this->token=$token;$this->transport=$transport?:array($this,'curl');}
  public function test(){return$this->request('GET','/me',null,null,true);}
  public function create(array$r,$key){return$this->request('POST','/services',array('product_id'=>(string)$r['product_id'],'client_reference'=>(string)$r['client_reference']),$key,false);}

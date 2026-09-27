@@ -2,7 +2,7 @@
 namespace CloudHost247\Rdp\Operations;use CloudHost247\Rdp\Contracts\Provider;use CloudHost247\Rdp\Contracts\Ledger;use CloudHost247\Rdp\Api\ProviderException;
 final class LifecycleService
 {
- private$p;$l;public function __construct(Provider$p,Ledger$l){$this->p=$p;$this->l=$l;}
+ private $p,$l;public function __construct(Provider$p,Ledger$l){$this->p=$p;$this->l=$l;}
  public function create($serviceId,$clientId,$productId){$existing=$this->l->binding($serviceId);if($existing)return array('status'=>$existing->status==='active'?'completed':'reconciliation_required','provider_service_id'=>$existing->provider_service_id);return$this->mutate('create',$serviceId,$clientId,function($key)use($serviceId,$productId){return$this->p->create(array('product_id'=>$productId,'client_reference'=>'whmcs-service-'.$serviceId),$key);},'active');}
  public function suspend($serviceId,$clientId){return$this->boundMutation('suspend',$serviceId,$clientId,'suspended');}public function unsuspend($serviceId,$clientId){return$this->boundMutation('unsuspend',$serviceId,$clientId,'active');}public function terminate($serviceId,$clientId){return$this->boundMutation('terminate',$serviceId,$clientId,'terminated');}
  private function boundMutation($op,$sid,$cid,$expected){$b=$this->ownedBinding($sid,$cid);return$this->mutate($op,$sid,$cid,function($key)use($op,$b){return$this->p->{$op}($b->provider_service_id,$key);},$expected,$b,(string)$b->updated_at);}
