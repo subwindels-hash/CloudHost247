@@ -1,4 +1,4 @@
-# Never commit re-created archives or secrets
+# Never commit archives or secrets
 *.zip
 .env
 .env.*
@@ -7,3 +7,11 @@
 .DS_Store
 desktop.ini
 Thumbs.db
+
+# WHMCS production configuration (contains DB credentials & license key)
+configuration.php
+
+# WHMCS runtime directories (created at runtime, must not be committed)
+/templates_c/
+/attachments/
+/downloads/
