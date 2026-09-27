@@ -1,6 +1,6 @@
 <?php
 /**
- * HostX Tools - WHMCS Addon Module
+ * HostX Domain Lookup - WHMCS Addon Module
  *
  * A comprehensive toolkit for domain WHOIS, IP lookup, DNS lookup,
  * and domain availability checks. Built for HostX v2.2.6 theme.
@@ -17,18 +17,18 @@ if (!defined("WHMCS")) {
     die("This file cannot be accessed directly");
 }
 
-define('HOSTX_TOOLS_VERSION', '1.0.0');
-define('HOSTX_TOOLS_MODULE', 'hostx_domain_lookup');
-define('HOSTX_TOOLS_ROOT', __DIR__);
-define('HOSTX_TOOLS_CACHE_DIR', __DIR__ . '/cache');
-define('HOSTX_TOOLS_TEMPLATE_DIR', __DIR__ . '/templates');
-define('HOSTX_TOOLS_INCLUDES_DIR', __DIR__ . '/includes');
-define('HOSTX_TOOLS_API_DIR', __DIR__ . '/api');
+define('HOSTX_DOMAIN_LOOKUP_VERSION', '1.0.0');
+define('HOSTX_DOMAIN_LOOKUP_MODULE', 'hostx_domain_lookup');
+define('HOSTX_DOMAIN_LOOKUP_ROOT', __DIR__);
+define('HOSTX_DOMAIN_LOOKUP_CACHE_DIR', __DIR__ . '/cache');
+define('HOSTX_DOMAIN_LOOKUP_TEMPLATE_DIR', __DIR__ . '/templates');
+define('HOSTX_DOMAIN_LOOKUP_INCLUDES_DIR', __DIR__ . '/includes');
+define('HOSTX_DOMAIN_LOOKUP_API_DIR', __DIR__ . '/api');
 
-require_once HOSTX_TOOLS_INCLUDES_DIR . '/Autoloader.php';
+require_once HOSTX_DOMAIN_LOOKUP_INCLUDES_DIR . '/Autoloader.php';
 
-use WHMCS\Module\Addon\HostXTools\CacheManager;
-use WHMCS\Module\Addon\HostXTools\SecurityManager;
+use WHMCS\Module\Addon\HostXDomainLookup\CacheManager;
+use WHMCS\Module\Addon\HostXDomainLookup\SecurityManager;
 
 /**
  * Module configuration
@@ -38,11 +38,11 @@ use WHMCS\Module\Addon\HostXTools\SecurityManager;
 function hostx_domain_lookup_config()
 {
     return [
-        'name'        => 'HostX Tools',
+        'name'        => 'HostX Domain Lookup',
         'description' => 'Professional domain WHOIS, IP lookup, DNS lookup, and domain availability toolkit for HostX theme.',
         'author'      => 'HostX Tools Team',
         'language'    => 'english',
-        'version'     => HOSTX_TOOLS_VERSION,
+        'version'     => HOSTX_DOMAIN_LOOKUP_VERSION,
         'fields'      => [
             'whatismyip_api_key' => [
                 'FriendlyName' => 'WhatIsMyIP API Key',
@@ -195,24 +195,24 @@ function hostx_domain_lookup_activate()
         }
 
         // Ensure cache directory exists
-        if (!is_dir(HOSTX_TOOLS_CACHE_DIR)) {
-            mkdir(HOSTX_TOOLS_CACHE_DIR, 0755, true);
+        if (!is_dir(HOSTX_DOMAIN_LOOKUP_CACHE_DIR)) {
+            mkdir(HOSTX_DOMAIN_LOOKUP_CACHE_DIR, 0755, true);
         }
 
         // Create .htaccess to protect cache directory
-        $htaccess = HOSTX_TOOLS_CACHE_DIR . '/.htaccess';
+        $htaccess = HOSTX_DOMAIN_LOOKUP_CACHE_DIR . '/.htaccess';
         if (!file_exists($htaccess)) {
             file_put_contents($htaccess, "Order deny,allow\nDeny from all\n");
         }
 
         return [
             'status'  => 'success',
-            'description' => 'HostX Tools module activated successfully. Cache and rate limit tables created.',
+            'description' => 'HostX Domain Lookup module activated successfully. Cache and rate limit tables created.',
         ];
     } catch (Exception $e) {
         return [
             'status'  => 'error',
-            'description' => 'Failed to activate HostX Tools: ' . $e->getMessage(),
+            'description' => 'Failed to activate HostX Domain Lookup: ' . $e->getMessage(),
         ];
     }
 }
@@ -227,7 +227,7 @@ function hostx_domain_lookup_deactivate()
     // Keep tables for data preservation, just disable the module
     return [
         'status'  => 'success',
-        'description' => 'HostX Tools module deactivated. All data has been preserved.',
+        'description' => 'HostX Domain Lookup module deactivated. All data has been preserved.',
     ];
 }
 
@@ -261,9 +261,9 @@ function hostx_domain_lookup_output($vars)
     $action = isset($_GET['action']) ? $_GET['action'] : 'dashboard';
     
     $smarty = new Smarty();
-    $smarty->setTemplateDir(HOSTX_TOOLS_TEMPLATE_DIR . '/admin');
-    $smarty->setCompileDir(HOSTX_TOOLS_CACHE_DIR . '/templates_c');
-    $smarty->setCacheDir(HOSTX_TOOLS_CACHE_DIR . '/cache');
+    $smarty->setTemplateDir(HOSTX_DOMAIN_LOOKUP_TEMPLATE_DIR . '/admin');
+    $smarty->setCompileDir(HOSTX_DOMAIN_LOOKUP_CACHE_DIR . '/templates_c');
+    $smarty->setCacheDir(HOSTX_DOMAIN_LOOKUP_CACHE_DIR . '/cache');
     
     $smarty->assign('moduleLink', $moduleLink);
     $smarty->assign('version', $version);
@@ -302,7 +302,7 @@ function hostx_domain_lookup_sidebar($vars)
     $moduleLink = $vars['modulelink'];
     $version = $vars['version'];
     
-    $sidebar = '<div class="sidebar-header">HostX Tools v' . $version . '</div>';
+    $sidebar = '<div class="sidebar-header">HostX Domain Lookup v' . $version . '</div>';
     $sidebar .= '<ul class="menu">';
     $sidebar .= '<li><a href="' . $moduleLink . '&action=dashboard">Dashboard</a></li>';
     $sidebar .= '<li><a href="' . $moduleLink . '&action=logs">Request Logs</a></li>';
@@ -387,7 +387,7 @@ function hostx_domain_lookup_clientarea($vars)
     }
     
     return [
-        'pagetitle'    => 'HostX Tools',
+        'pagetitle'    => 'HostX Domain Lookup',
         'breadcrumb'   => $breadcrumb,
         'templatefile' => 'client/' . ($page === 'tool' ? 'tool' : 'tools'),
         'requirelogin' => false,

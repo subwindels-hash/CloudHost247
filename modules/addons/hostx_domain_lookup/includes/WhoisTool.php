@@ -1,6 +1,6 @@
 <?php
 /**
- * HostX Tools - WHOIS Tool
+ * HostX Domain Lookup - WHOIS Tool
  *
  * Handles domain WHOIS lookups with API priority and native fallback.
  *
@@ -10,7 +10,7 @@
  * @license    MIT License
  */
 
-namespace WHMCS\Module\Addon\HostXTools;
+namespace WHMCS\Module\Addon\HostXDomainLookup;
 
 use Exception;
 

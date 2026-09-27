@@ -1,6 +1,6 @@
 <?php
 /**
- * HostX Tools - DNS Tool
+ * HostX Domain Lookup - DNS Tool
  *
  * Handles DNS lookups using native PHP dns_get_record().
  * No external API needed - uses PHP's built-in DNS functions.
@@ -11,7 +11,7 @@
  * @license    MIT License
  */
 
-namespace WHMCS\Module\Addon\HostXTools;
+namespace WHMCS\Module\Addon\HostXDomainLookup;
 
 use Exception;
 

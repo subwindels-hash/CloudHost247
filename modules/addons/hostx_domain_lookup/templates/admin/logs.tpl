@@ -1,4 +1,4 @@
-{* HostX Tools - Admin Logs *}
+{* HostX Domain Lookup - Admin Logs *}
 
 <div class="hostx-admin-logs">
     <div class="hostx-admin-header">

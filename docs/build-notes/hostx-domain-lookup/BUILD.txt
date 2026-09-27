@@ -1,4 +1,10 @@
-Build a complete WHMCS addon module (WHMCS 8.9, PHP 7.4, IonCube 10/11) named "hostx_tools" for HostX v2.2.6.
+NOTE: this is the original build prompt, corrected to the module name this build
+actually ships under. It was first written against the name "hostx_tools", which
+collided with the tools platform build (now modules/addons/cloudhost247_tools/).
+WHMCS requires folder name == file name == function prefix, so the shipped module
+is "hostx_domain_lookup" everywhere. Do not rebuild it as "hostx_tools".
+
+Build a complete WHMCS addon module (WHMCS 8.9, PHP 7.4, IonCube 10/11) named "hostx_domain_lookup" for HostX v2.2.6.
 
 CORE REQUIREMENTS:
 
@@ -86,8 +92,8 @@ Domain Availability:
 
 9. STRUCTURE
 
-/modules/addons/hostx_tools/
-- hostx_tools.php
+/modules/addons/hostx_domain_lookup/
+- hostx_domain_lookup.php
 - hooks.php
 - /templates/
 - /includes/

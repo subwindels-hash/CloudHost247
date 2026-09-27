@@ -1,6 +1,6 @@
 <?php
 /**
- * HostX Tools - Security Manager
+ * HostX Domain Lookup - Security Manager
  *
  * Handles CSRF protection, input sanitization, output escaping,
  * and rate limiting for all tools.
@@ -11,7 +11,7 @@
  * @license    MIT License
  */
 
-namespace WHMCS\Module\Addon\HostXTools;
+namespace WHMCS\Module\Addon\HostXDomainLookup;
 
 use Capsule;
 use Exception;

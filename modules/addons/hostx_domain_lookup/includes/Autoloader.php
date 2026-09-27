@@ -1,6 +1,6 @@
 <?php
 /**
- * HostX Tools - Class Autoloader
+ * HostX Domain Lookup - Class Autoloader
  *
  * @package    WHMCS
  * @author     HostX Tools Team
@@ -13,10 +13,10 @@ if (!defined("WHMCS")) {
 }
 
 /**
- * Autoloader for HostX Tools classes
+ * Autoloader for HostX Domain Lookup classes
  */
 spl_autoload_register(function ($class) {
-    $prefix = 'WHMCS\\Module\\Addon\\HostXTools\\';
+    $prefix = 'WHMCS\\Module\\Addon\\HostXDomainLookup\\';
     
     // Check if the class uses our namespace
     if (strpos($class, $prefix) !== 0) {
@@ -28,17 +28,17 @@ spl_autoload_register(function ($class) {
     
     // Map class names to files
     $classMap = [
-        'CacheManager'       => HOSTX_TOOLS_INCLUDES_DIR . '/CacheManager.php',
-        'SecurityManager'    => HOSTX_TOOLS_INCLUDES_DIR . '/SecurityManager.php',
-        'WhoisTool'          => HOSTX_TOOLS_INCLUDES_DIR . '/WhoisTool.php',
-        'IpTool'             => HOSTX_TOOLS_INCLUDES_DIR . '/IpTool.php',
-        'DnsTool'            => HOSTX_TOOLS_INCLUDES_DIR . '/DnsTool.php',
-        'DomainAvailability' => HOSTX_TOOLS_INCLUDES_DIR . '/DomainAvailability.php',
-        'AjaxHandler'        => HOSTX_TOOLS_INCLUDES_DIR . '/AjaxHandler.php',
-        'WhatIsMyIPApi'      => HOSTX_TOOLS_API_DIR . '/WhatIsMyIPApi.php',
-        'IPinfoApi'          => HOSTX_TOOLS_API_DIR . '/IPinfoApi.php',
-        'IPWhoApi'           => HOSTX_TOOLS_API_DIR . '/IPWhoApi.php',
-        'NativeWhois'        => HOSTX_TOOLS_API_DIR . '/NativeWhois.php',
+        'CacheManager'       => HOSTX_DOMAIN_LOOKUP_INCLUDES_DIR . '/CacheManager.php',
+        'SecurityManager'    => HOSTX_DOMAIN_LOOKUP_INCLUDES_DIR . '/SecurityManager.php',
+        'WhoisTool'          => HOSTX_DOMAIN_LOOKUP_INCLUDES_DIR . '/WhoisTool.php',
+        'IpTool'             => HOSTX_DOMAIN_LOOKUP_INCLUDES_DIR . '/IpTool.php',
+        'DnsTool'            => HOSTX_DOMAIN_LOOKUP_INCLUDES_DIR . '/DnsTool.php',
+        'DomainAvailability' => HOSTX_DOMAIN_LOOKUP_INCLUDES_DIR . '/DomainAvailability.php',
+        'AjaxHandler'        => HOSTX_DOMAIN_LOOKUP_INCLUDES_DIR . '/AjaxHandler.php',
+        'WhatIsMyIPApi'      => HOSTX_DOMAIN_LOOKUP_API_DIR . '/WhatIsMyIPApi.php',
+        'IPinfoApi'          => HOSTX_DOMAIN_LOOKUP_API_DIR . '/IPinfoApi.php',
+        'IPWhoApi'           => HOSTX_DOMAIN_LOOKUP_API_DIR . '/IPWhoApi.php',
+        'NativeWhois'        => HOSTX_DOMAIN_LOOKUP_API_DIR . '/NativeWhois.php',
     ];
     
     if (isset($classMap[$relativeClass]) && file_exists($classMap[$relativeClass])) {

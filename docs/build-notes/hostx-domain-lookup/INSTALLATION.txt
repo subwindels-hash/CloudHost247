@@ -5,7 +5,7 @@ DNS Lookup - A, AAAA, MX, NS, TXT, CNAME, SOA, PTR, SRV, CAA records
 Domain Availability - Check across 19 TLDs with visual available/taken indicators
 
 Installation
-Upload hostx_tools/ folder to /modules/addons/
-Activate in System Settings > Addon Modules
+Upload hostx_domain_lookup/ folder to /modules/addons/
+Activate "HostX Domain Lookup" in System Settings > Addon Modules
 Enter API keys for WhatIsMyIP and IPinfo
 Configure tool settings and save

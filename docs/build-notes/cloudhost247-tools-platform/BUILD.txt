@@ -1,0 +1,175 @@
+NOTE: this is the original build prompt, corrected to the module name this build
+actually ships under. It was first written against the name "hostx_tools"; the
+HostX-branded duplicate of this platform has been removed and the CloudHost247
+build is the one kept, at modules/addons/cloudhost247_tools/. WHMCS addon module
+names must be lowercase and folder == file == function prefix, so the shipped
+module is "cloudhost247_tools" everywhere (it was "CloudHost247_tools" before).
+
+Build a complete WHMCS addon module (WHMCS 8.9 compatible, PHP 7.4, IonCube 10/11) for my project (CloudHost247 on HostX v2.2.6).
+
+The module name: "cloudhost247_tools"
+
+GOAL:
+Create a full-featured online tools platform like DNSChecker.org integrated into WHMCS client area, with all tools grouped by category.
+
+REQUIREMENTS:
+
+1. STRUCTURE
+- Follow WHMCS addon module structure:
+  /modules/addons/cloudhost247_tools/
+    cloudhost247_tools.php
+    hooks.php
+    /templates/
+    /includes/
+    /api/
+    /assets/
+
+- No fatal errors on load
+- Use WHMCS Capsule (DB) properly
+- Secure all inputs (sanitize/validate)
+- Use MVC-like separation
+
+2. FRONTEND (CLIENT AREA)
+- Add page in WHMCS client area: index.php?m=cloudhost247_tools
+- Clean UI (Bootstrap 4/5)
+- Categories page + individual tool pages
+- AJAX-based results (no page reload)
+
+3. ADMIN AREA
+- Enable/disable tools
+- API key settings (WHOIS, GeoIP, etc.)
+- Logs + error handling
+
+4. TOOL CATEGORIES (IMPLEMENT ALL)
+
+A. DNS TOOLS
+- SPF Record Checker
+- Domain DNS Validation
+- Reverse IP Lookup
+- DNS Lookup (A, AAAA, MX, TXT, NS)
+- CNAME Lookup
+- NS Lookup
+- MX Lookup
+- DNS Propagation Checker (WhatsMyDNS clone)
+- DMARC Lookup & Validator
+- DNS Health Checker
+- DMARC Generator
+- DNSKEY Lookup
+- DS Record Lookup
+- DKIM Checker
+
+B. IP TOOLS
+- Ping IPv4
+- Ping IPv6
+- What is My IP
+- Traceroute
+- IP Location Lookup (GeoIP API)
+- Email Header Analyzer
+- IP Blacklist Checker (multi RBL check)
+- IP to Decimal
+- IP to Hostname
+- IP WHOIS
+- IPv6 WHOIS
+- IPv4 ↔ IPv6 Converter
+- IPv6 Generator
+- IPv6 CIDR tools
+- IPv6 Compress/Expand
+- Subnet Calculator
+- ISP Checker
+- Domain to IP
+
+C. DEVELOPER TOOLS
+- HTTP Headers Checker
+- Server OS Detector
+- MD5/Base64 Generator
+- Multi URL Opener
+- SMTP Test
+- .htaccess Redirect Generator
+- URL Rewrite Generator
+- Broken Link Checker
+- Open Graph Generator
+- RAID Calculator
+- Binary/Text Converter
+- JSON Viewer/Formatter
+
+D. DESIGNER TOOLS
+- RGB → Pantone
+- HEX → Pantone
+- CMYK → Pantone
+- HSV → Pantone
+
+E. WEBMASTER TOOLS
+- Link Analyzer
+- User Agent Checker
+- Google PageRank (mock if deprecated)
+- Punycode Converter
+- SERP Preview Tool
+- Robots.txt Generator
+
+F. NETWORK TOOLS
+- Port Checker (TCP)
+- MAC Address Lookup
+- MAC Generator
+- ASN Lookup
+
+G. CYBER SECURITY TOOLS
+- SSL Checker
+- Password Encryptor
+- Password Generator
+- Password Strength Checker
+
+H. PRODUCTIVITY TOOLS
+- QR Generator
+- QR Scanner (JS)
+- Lorem Ipsum Generator
+- Time Calculator
+- BIN Checker
+- Credit Card Validator (Luhn only)
+- Reverse Image Search (link-based)
+- Username Checker
+- Online Notepad
+- Small Text Generator
+- Word Counter
+- Domain Availability Checker (WHOIS API)
+- ROT13 Tool
+- Morse Code Tool
+- BIMI Checker
+- Image to Text (OCR API placeholder)
+
+I. GAMING TOOLS
+- Minecraft Color Codes Generator
+
+5. BACKEND LOGIC
+- Use:
+  - PHP built-in DNS functions (dns_get_record)
+  - cURL for APIs
+  - sockets for ping/traceroute (fallback safe mode)
+- Timeout handling
+- Error-safe outputs (no crashes)
+
+6. PERFORMANCE
+- Lazy load tools
+- Cache DNS/IP results (5–15 min)
+- Optimize queries
+
+7. SECURITY
+- Escape all output
+- CSRF protection
+- Rate limit tools
+- Disable dangerous shell_exec unless safe fallback exists
+
+8. EXTRA
+- Add homepage dashboard listing all tools
+- Search bar for tools
+- SEO-friendly URLs via WHMCS routing
+
+OUTPUT:
+- Full working WHMCS module code
+- No placeholders
+- No missing files
+- Ready to upload into /modules/addons/
+- Must load without errors
+
+IMPORTANT:
+Ensure compatibility with my HostX theme and WHMCS 8.9.
+Avoid breaking layout or causing blank pages.

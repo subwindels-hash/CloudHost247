@@ -1,6 +1,6 @@
 <?php
 /**
- * HostX Tools - WhatIsMyIP API Client
+ * HostX Domain Lookup - WhatIsMyIP API Client
  *
  * Handles domain WHOIS lookups via WhatIsMyIP API.
  * Primary API for domain WHOIS queries.
@@ -11,7 +11,7 @@
  * @license    MIT License
  */
 
-namespace WHMCS\Module\Addon\HostXTools;
+namespace WHMCS\Module\Addon\HostXDomainLookup;
 
 use Exception;
 
@@ -329,7 +329,7 @@ class WhatIsMyIPApi
             CURLOPT_SSL_VERIFYHOST => 2,
             CURLOPT_TIMEOUT        => $this->timeout,
             CURLOPT_CONNECTTIMEOUT => min(5, $this->timeout),
-            CURLOPT_USERAGENT      => 'HostXTools/' . HOSTX_TOOLS_VERSION . ' (WHMCS Addon)',
+            CURLOPT_USERAGENT      => 'HostXDomainLookup/' . HOSTX_DOMAIN_LOOKUP_VERSION . ' (WHMCS Addon)',
             CURLOPT_HTTPHEADER     => [
                 'Accept: application/json',
             ],

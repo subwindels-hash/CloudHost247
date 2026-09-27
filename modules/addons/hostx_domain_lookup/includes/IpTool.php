@@ -1,6 +1,6 @@
 <?php
 /**
- * HostX Tools - IP Tool
+ * HostX Domain Lookup - IP Tool
  *
  * Handles IP lookups with API priority and fallback.
  *
@@ -10,7 +10,7 @@
  * @license    MIT License
  */
 
-namespace WHMCS\Module\Addon\HostXTools;
+namespace WHMCS\Module\Addon\HostXDomainLookup;
 
 use Exception;
 

@@ -31,10 +31,9 @@ of this repository **into** an existing WHMCS installation root (cPanel
 ├── modules/
 │   ├── addons/                     ← Addon modules (WHMCS → System Settings → Addon Modules)
 │   │   ├── hostx/                     HostX theme helper module (ionCube) — REQUIRED by the theme
-│   │   ├── hostx_tools/               HostX Tools Platform v2.2.6 (60+ online tools)
-│   │   ├── CloudHost247_tools/        Same platform, CloudHost247-branded build (activate only ONE of the two)
+│   │   ├── cloudhost247_tools/        CloudHost247 Tools Platform v2.2.6 (60+ online tools)
 │   │   ├── hostx_domain_lookup/       HostX Domain Lookup (4-tool WHOIS/IP/DNS/availability build,
-│   │   │                              renamed from a second "hostx_tools" build — see module README)
+│   │   │                              renamed from an older "hostx_tools" build — see module README)
 │   │   ├── tools_center/              WHMCS Tools Center (UI addon + external-api backend —
 │   │   │                              deploy external-api/ separately per its INSTALL.md)
 │   │   ├── dnschecker/                DNS Checker client-area tool
@@ -81,8 +80,7 @@ of this repository **into** an existing WHMCS installation root (cPanel
 | Module | Type | Location |
 |---|---|---|
 | HostX (theme helper) | addon | `modules/addons/hostx/` |
-| HostX Tools Platform v2.2.6 | addon | `modules/addons/hostx_tools/` |
-| CloudHost247 Tools Platform (rebrand) | addon | `modules/addons/CloudHost247_tools/` |
+| CloudHost247 Tools Platform v2.2.6 | addon | `modules/addons/cloudhost247_tools/` |
 | HostX Domain Lookup | addon | `modules/addons/hostx_domain_lookup/` |
 | Tools Center (+ external API) | addon | `modules/addons/tools_center/` |
 | DNS Checker | addon | `modules/addons/dnschecker/` |
@@ -101,8 +99,19 @@ of this repository **into** an existing WHMCS installation root (cPanel
 | SMM Provisioning | server | `modules/servers/smmprovisioning/` |
 
 **Notes**
-- `hostx_tools` and `CloudHost247_tools` are two brandings of the same platform —
-  activate only one in WHMCS.
+- The tools platform shipped twice — once HostX-branded (`hostx_tools`) and once
+  CloudHost247-branded — byte-identical apart from the brand token. Only the
+  CloudHost247 build is kept, and it is named `cloudhost247_tools` (WHMCS addon
+  module names must be lowercase, and folder == file == function prefix). The
+  duplicate `hostx_tools` build has been removed. If `hostx_tools` or
+  `CloudHost247_tools` was previously activated on the live site, deactivate it
+  in WHMCS admin before deploying and activate **CloudHost247 Tools Platform**
+  instead; its tables are `mod_cloudhost247_tools_*` (the old
+  `mod_hostx_tools_*` / `mod_CloudHost247_tools_*` tables only hold cache, logs,
+  rate limits and per-tool enable flags and can be dropped).
+- `cloudhost247_tools` and `hostx_domain_lookup` are **different** modules
+  (60+ tool platform vs. 4-tool WHOIS/IP/DNS/availability build) and can both be
+  active at the same time.
 - `tools_center/external-api/` is a standalone PHP API backend. For security it
   must be deployed **outside** the WHMCS webroot (its own subdomain/server) —
   follow `modules/addons/tools_center/INSTALL.md`.

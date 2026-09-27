@@ -9,6 +9,11 @@ path/reference repair, and verified cleanup of duplicates and junk.
 The pre-restructuring inventory is preserved in
 [`docs/pre-restructuring-audit.md`](pre-restructuring-audit.md).
 
+> **§1–§5 record the restructuring pass as it happened.** The tools-platform
+> decision in §3 item 13 was revisited afterwards — see
+> [§6 Follow-up correction pass](#6-follow-up-correction-pass--module-naming)
+> for the current, authoritative state of the three tools modules.
+
 ---
 
 ## 1. Old → new directory mapping
@@ -146,3 +151,93 @@ extracted and removed all 26). Verified: zero archives in the final tree.
   byte-identical to the vendor package as delivered; left untouched.
 - The `hostx` addon and `xtreme_currency_rates` are ionCube-encoded and require
   the ionCube Loader; their license status must be valid on the production host.
+
+---
+
+## 6. Follow-up correction pass — module naming
+
+**Scope:** the three "tools" modules carried names that did not match the code
+they actually contain. Corrected as follows (this section supersedes §3 item 13).
+
+### 6.1 The duplicate platform build was resolved, not just coexisted
+
+`modules/addons/hostx_tools/` (HostX-branded) and
+`modules/addons/CloudHost247_tools/` (CloudHost247-branded) were verified to be
+the **same build twice**: after normalising the brand token, every file in one
+is byte-identical to its counterpart in the other (19/19 files, zero diff).
+Keeping both meant shipping the same 60+ tool platform under two module names
+that write two different sets of `mod_*` tables, with the standing footgun of
+activating the wrong one.
+
+- **Kept:** the CloudHost247-branded build — correct branding for this site.
+- **Removed:** `modules/addons/hostx_tools/` (nothing unique was lost).
+
+### 6.2 The kept build was renamed to a WHMCS-legal module name
+
+WHMCS requires an addon module name to be **all lowercase**, letters/numbers/
+underscore only, starting with a letter, with folder == file == function prefix
+(<https://developers.whmcs.com/addon-modules/getting-started>).
+`CloudHost247_tools` violated the lowercase rule.
+
+| | Before | After |
+|---|---|---|
+| Folder | `modules/addons/CloudHost247_tools/` | `modules/addons/cloudhost247_tools/` |
+| Module file | `CloudHost247_tools.php` | `cloudhost247_tools.php` |
+| Function prefix | `CloudHost247_tools_*`, `CloudHost247_tool_*` | `cloudhost247_tools_*`, `cloudhost247_tool_*` |
+| DB tables | `mod_CloudHost247_tools_*` | `mod_cloudhost247_tools_*` |
+| Client-area URL | `index.php?m=CloudHost247_tools` | `index.php?m=cloudhost247_tools` |
+| Assets | `assets/{css,js}/CloudHost247-tools.{css,js}` | `assets/{css,js}/cloudhost247-tools.{css,js}` |
+| CSS classes | `.CloudHost247-*` | `.cloudhost247-*` |
+
+Display strings (`CloudHost247 Tools Platform`, the `CloudHost247-Tools/2.2.6`
+user agent), PHP class names (`CloudHost247ToolsAdmin`, `CloudHost247ToolsClient`)
+and JS function names were left as-is — they are branding/code identifiers, not
+WHMCS module names.
+
+### 6.3 `hostx_domain_lookup` no longer carries the other module's name
+
+The rename in §3 item 13 changed the WHMCS-facing identifiers but left the
+internals named after `hostx_tools`. Everything now matches the module:
+
+| | Before | After |
+|---|---|---|
+| Constants | `HOSTX_TOOLS_VERSION`, `HOSTX_TOOLS_ROOT`, `HOSTX_TOOLS_CACHE_DIR`, `HOSTX_TOOLS_TEMPLATE_DIR`, `HOSTX_TOOLS_INCLUDES_DIR`, `HOSTX_TOOLS_API_DIR`, `HOSTX_TOOLS_MODULE` | `HOSTX_DOMAIN_LOOKUP_*` |
+| Namespace | `WHMCS\Module\Addon\HostXTools` | `WHMCS\Module\Addon\HostXDomainLookup` |
+| Autoloader prefix | `…\HostXTools\` | `…\HostXDomainLookup\` |
+| Assets | `assets/css/hostx-tools.css`, `assets/js/hostx-tools.js` | `assets/{css,js}/hostx-domain-lookup.{css,js}` |
+| CSS classes | `.hostx-tools-*` | `.hostx-domain-lookup-*` |
+| JS globals | `HostXTools`, `hostxToolsPath`, `hostxToolsCsrf` | `HostXDomainLookup`, `hostxDomainLookupPath`, `hostxDomainLookupCsrf` |
+| Admin/client display name | `HostX Tools` (the *other* module's name) | `HostX Domain Lookup` |
+
+`@author HostX Tools Team` attribution lines were deliberately left untouched.
+
+### 6.4 Build notes corrected
+
+The build prompts in `docs/build-notes/` still instructed a rebuild under the
+old, colliding names — following them would have recreated the exact defect
+fixed here. Both are corrected and carry a header note:
+
+- `docs/build-notes/hostx-domain-lookup/{BUILD,INSTALLATION}.txt` — `hostx_tools` → `hostx_domain_lookup`
+- `docs/build-notes/hostx-tools-platform/` → **renamed** `docs/build-notes/cloudhost247-tools-platform/`, `hostx_tools` → `cloudhost247_tools`
+
+### 6.5 Verification
+
+1. **Brand-normalised byte comparison** of the two platform builds before
+   deletion — 19/19 files identical, so removing `hostx_tools` lost no code.
+2. **PHP parse check** — all PHP files in both modules parsed (php-parser AST,
+   no PHP runtime in this environment); zero syntax errors.
+3. **Zero stale references** — no `hostx_tools`, `CloudHost247_tools`,
+   `HOSTX_TOOLS_`, `HostXTools` or `hostx-tools` token remains anywhere in code,
+   templates, assets or docs, except deliberate historical/provenance prose.
+4. **WHMCS contract re-checked** per module: folder == file == function prefix,
+   hook `m=` values, asset URLs, `mod_*` table names, namespace == autoloader
+   prefix.
+
+### 6.6 Deployment note
+
+If the live site already has `hostx_tools` (or `CloudHost247_tools`) activated:
+deactivate it in **System Settings → Addon Modules** *before* deploying this
+change, then activate **CloudHost247 Tools Platform**. The old
+`mod_hostx_tools_*` / `mod_CloudHost247_tools_*` tables hold only cache, logs,
+rate-limit counters and per-tool enable flags; they are safe to drop once the
+new module has been activated and its tools re-enabled.

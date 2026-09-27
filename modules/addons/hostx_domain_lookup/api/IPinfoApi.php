@@ -1,6 +1,6 @@
 <?php
 /**
- * HostX Tools - IPinfo API Client
+ * HostX Domain Lookup - IPinfo API Client
  *
  * Handles IP geolocation and WHOIS lookups via IPinfo API.
  * Primary API for IP-related queries.
@@ -11,7 +11,7 @@
  * @license    MIT License
  */
 
-namespace WHMCS\Module\Addon\HostXTools;
+namespace WHMCS\Module\Addon\HostXDomainLookup;
 
 use Exception;
 
@@ -222,7 +222,7 @@ class IPinfoApi
             CURLOPT_SSL_VERIFYHOST => 2,
             CURLOPT_TIMEOUT        => $this->timeout,
             CURLOPT_CONNECTTIMEOUT => min(5, $this->timeout),
-            CURLOPT_USERAGENT      => 'HostXTools/' . HOSTX_TOOLS_VERSION . ' (WHMCS Addon)',
+            CURLOPT_USERAGENT      => 'HostXDomainLookup/' . HOSTX_DOMAIN_LOOKUP_VERSION . ' (WHMCS Addon)',
         ]);
         
         $response = curl_exec($ch);

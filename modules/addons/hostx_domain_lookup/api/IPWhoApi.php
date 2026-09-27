@@ -1,6 +1,6 @@
 <?php
 /**
- * HostX Tools - IPWho API Client
+ * HostX Domain Lookup - IPWho API Client
  *
  * Handles IP geolocation via IPWho API.
  * Fallback API for IP-related queries.
@@ -11,7 +11,7 @@
  * @license    MIT License
  */
 
-namespace WHMCS\Module\Addon\HostXTools;
+namespace WHMCS\Module\Addon\HostXDomainLookup;
 
 use Exception;
 
@@ -157,7 +157,7 @@ class IPWhoApi
             CURLOPT_SSL_VERIFYHOST => 2,
             CURLOPT_TIMEOUT        => $this->timeout,
             CURLOPT_CONNECTTIMEOUT => min(5, $this->timeout),
-            CURLOPT_USERAGENT      => 'HostXTools/' . HOSTX_TOOLS_VERSION . ' (WHMCS Addon)',
+            CURLOPT_USERAGENT      => 'HostXDomainLookup/' . HOSTX_DOMAIN_LOOKUP_VERSION . ' (WHMCS Addon)',
             CURLOPT_HTTPHEADER     => [
                 'Accept: application/json',
             ],

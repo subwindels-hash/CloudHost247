@@ -1,6 +1,6 @@
 <?php
 /**
- * HostX Tools - Cache Manager
+ * HostX Domain Lookup - Cache Manager
  *
  * Handles caching of lookup results using either WHMCS database (Capsule)
  * or file-based caching with configurable duration.
@@ -11,7 +11,7 @@
  * @license    MIT License
  */
 
-namespace WHMCS\Module\Addon\HostXTools;
+namespace WHMCS\Module\Addon\HostXDomainLookup;
 
 use Capsule;
 use Exception;
@@ -47,7 +47,7 @@ class CacheManager
         $this->method = !empty($config['cache_method']) ? $config['cache_method'] : 'database';
         $durationMinutes = !empty($config['cache_duration']) ? (int)$config['cache_duration'] : 10;
         $this->duration = $durationMinutes * 60;
-        $this->cacheDir = HOSTX_TOOLS_CACHE_DIR;
+        $this->cacheDir = HOSTX_DOMAIN_LOOKUP_CACHE_DIR;
         
         // Ensure cache directory exists for file method
         if ($this->method === 'file' && !is_dir($this->cacheDir)) {

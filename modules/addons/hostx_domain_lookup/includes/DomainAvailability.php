@@ -1,6 +1,6 @@
 <?php
 /**
- * HostX Tools - Domain Availability Checker
+ * HostX Domain Lookup - Domain Availability Checker
  *
  * Checks domain availability using API priority and native WHOIS fallback.
  *
@@ -10,7 +10,7 @@
  * @license    MIT License
  */
 
-namespace WHMCS\Module\Addon\HostXTools;
+namespace WHMCS\Module\Addon\HostXDomainLookup;
 
 use Exception;
 

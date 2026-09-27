@@ -6,7 +6,7 @@
 | `pre-restructuring-audit.md` | Package-by-package audit inventory taken before any changes |
 | `policies/` | Source PDFs of the 19 CloudHost247 legal policies + original installation notes |
 | `announcement-bar/` | Announcement Bar build brief, usage examples, and the (not installed) CloudHost247-branded template variant |
-| `build-notes/` | Build/install provenance notes per module (hostx-tools-platform, hostx-domain-lookup, dnschecker, customaffiliate, digitalproducts, hostx-email, phoneservices, smm) |
+| `build-notes/` | Build/install provenance notes per module (cloudhost247-tools-platform, hostx-domain-lookup, dnschecker, customaffiliate, digitalproducts, hostx-email, phoneservices, smm) — each build prompt is kept at the module name the build actually ships under |
 
 Module-specific README/INSTALL files live with their modules:
 - `modules/addons/tools_center/` (README.md, INSTALL.md, API.md)

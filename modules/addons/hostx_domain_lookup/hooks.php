@@ -1,6 +1,6 @@
 <?php
 /**
- * HostX Tools - Hooks
+ * HostX Domain Lookup - Hooks
  *
  * Integrates with HostX theme v2.2.6 via WHMCS hooks.
  * Adds tools navigation and handles template modifications.
@@ -11,15 +11,15 @@
  * @license    MIT License
  */
 
-use WHMCS\Module\Addon\HostXTools\AjaxHandler;
-use WHMCS\Module\Addon\HostXTools\SecurityManager;
+use WHMCS\Module\Addon\HostXDomainLookup\AjaxHandler;
+use WHMCS\Module\Addon\HostXDomainLookup\SecurityManager;
 
 if (!defined("WHMCS")) {
     die("This file cannot be accessed directly");
 }
 
 /**
- * Add HostX Tools to client area navigation
+ * Add HostX Domain Lookup to client area navigation
  */
 add_hook('ClientAreaPrimaryNavbar', 1, function ($menu) {
     $config = hostx_domain_lookup_hook_get_config();
@@ -39,7 +39,7 @@ add_hook('ClientAreaPrimaryNavbar', 1, function ($menu) {
     
     // Add to primary navbar
     if (is_object($menu) && method_exists($menu, 'getChild')) {
-        $toolsItem = $menu->addChild('HostX Tools', [
+        $toolsItem = $menu->addChild('HostX Domain Lookup', [
             'uri' => 'index.php?m=hostx_domain_lookup',
             'icon' => 'fa fa-wrench',
             'order' => 99,
@@ -94,20 +94,20 @@ add_hook('ClientAreaPage', 1, function ($vars) {
 });
 
 /**
- * Add HostX Tools page to template vars
+ * Add HostX Domain Lookup page to template vars
  */
 add_hook('ClientAreaPage', 1, function ($vars) {
     if (isset($vars['m']) && $vars['m'] === 'hostx_domain_lookup') {
         // Ensure CSRF token is available
-        $vars['hostxToolsCsrf'] = SecurityManager::generateCsrfToken();
-        $vars['hostxToolsPath'] = 'modules/addons/hostx_domain_lookup';
+        $vars['hostxDomainLookupCsrf'] = SecurityManager::generateCsrfToken();
+        $vars['hostxDomainLookupPath'] = 'modules/addons/hostx_domain_lookup';
         
         return $vars;
     }
 });
 
 /**
- * Add styles and scripts for HostX Tools
+ * Add styles and scripts for HostX Domain Lookup
  */
 add_hook('ClientAreaHeadOutput', 1, function ($vars) {
     // Only add assets on our module pages
@@ -122,10 +122,10 @@ add_hook('ClientAreaHeadOutput', 1, function ($vars) {
     $output = '';
     
     // CSS
-    $output .= '<link rel="stylesheet" href="' . $modulePath . '/assets/css/hostx-tools.css?v=' . HOSTX_TOOLS_VERSION . '">' . PHP_EOL;
+    $output .= '<link rel="stylesheet" href="' . $modulePath . '/assets/css/hostx-domain-lookup.css?v=' . HOSTX_DOMAIN_LOOKUP_VERSION . '">' . PHP_EOL;
     
     // JavaScript
-    $output .= '<script src="' . $modulePath . '/assets/js/hostx-tools.js?v=' . HOSTX_TOOLS_VERSION . '"></script>' . PHP_EOL;
+    $output .= '<script src="' . $modulePath . '/assets/js/hostx-domain-lookup.js?v=' . HOSTX_DOMAIN_LOOKUP_VERSION . '"></script>' . PHP_EOL;
     
     return $output;
 });

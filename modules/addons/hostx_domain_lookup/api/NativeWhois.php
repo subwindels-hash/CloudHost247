@@ -1,6 +1,6 @@
 <?php
 /**
- * HostX Tools - Native PHP WHOIS Client
+ * HostX Domain Lookup - Native PHP WHOIS Client
  *
  * Performs WHOIS lookups directly via port 43.
  * Fallback method when APIs are unavailable.
@@ -11,7 +11,7 @@
  * @license    MIT License
  */
 
-namespace WHMCS\Module\Addon\HostXTools;
+namespace WHMCS\Module\Addon\HostXDomainLookup;
 
 use Exception;
 

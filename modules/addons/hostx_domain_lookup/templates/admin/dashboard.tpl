@@ -1,8 +1,8 @@
-{* HostX Tools - Admin Dashboard *}
+{* HostX Domain Lookup - Admin Dashboard *}
 
 <div class="hostx-admin-dashboard">
     <div class="hostx-admin-header">
-        <h2><i class="fa fa-wrench"></i> HostX Tools Dashboard</h2>
+        <h2><i class="fa fa-wrench"></i> HostX Domain Lookup Dashboard</h2>
         <p class="text-muted">Overview of tool usage and system status</p>
     </div>
     

@@ -1,6 +1,6 @@
 <?php
 /**
- * HostX Tools - AJAX Handler
+ * HostX Domain Lookup - AJAX Handler
  *
  * Handles all AJAX requests from the client area.
  * Processes tool requests with CSRF validation and rate limiting.
@@ -11,7 +11,7 @@
  * @license    MIT License
  */
 
-namespace WHMCS\Module\Addon\HostXTools;
+namespace WHMCS\Module\Addon\HostXDomainLookup;
 
 use Exception;
 

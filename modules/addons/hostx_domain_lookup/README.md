@@ -1,13 +1,21 @@
 # HostX Domain Lookup (formerly "HostX Tools" — Domain Lookup build)
 
 > **Provenance note:** this module was originally built as `hostx_tools` v1.0.0
-> (4-tool Domain WHOIS / IP / DNS / Availability toolkit). Because the repository
-> also ships the larger "HostX Tools Platform" v2.2.6 under the same `hostx_tools`
+> (4-tool Domain WHOIS / IP / DNS / Availability toolkit). That name collided with
+> the larger tools platform build, which shipped under the same `hostx_tools`
 > module name, and WHMCS requires folder name, file name and function prefix to
-> match the module name, this build was renamed to `hostx_domain_lookup` so both
-> can be installed side by side. All functions, tables (`hostx_domain_lookup_*`),
-> client-area URLs (`index.php?m=hostx_domain_lookup`) and asset paths were
-> updated accordingly.
+> match the module name — so this build was renamed to `hostx_domain_lookup`.
+> Everything internal now carries the correct name: functions
+> (`hostx_domain_lookup_*`), constants (`HOSTX_DOMAIN_LOOKUP_*`), namespace
+> (`WHMCS\Module\Addon\HostXDomainLookup`), tables, client-area URLs
+> (`index.php?m=hostx_domain_lookup`), assets
+> (`assets/css/hostx-domain-lookup.css`, `assets/js/hostx-domain-lookup.js`),
+> CSS class prefix (`hostx-domain-lookup-*`) and the admin display name
+> ("HostX Domain Lookup").
+>
+> The tools platform it used to collide with now lives at
+> [`modules/addons/cloudhost247_tools/`](../cloudhost247_tools/) — the two are
+> different modules and can be activated side by side.
 
 A comprehensive WHMCS addon module providing professional networking tools for domain analysis, IP intelligence, and DNS diagnostics. Built specifically for HostX v2.2.6 theme compatibility.
 
@@ -53,12 +61,12 @@ The final path should be:
 
 1. Login to WHMCS Admin Panel
 2. Go to **System Settings** > **Addon Modules**
-3. Find **HostX Tools** in the list
+3. Find **HostX Domain Lookup** in the list
 4. Click **Activate**
 
 ### Step 3: Configure Module
 
-1. Click **Configure** next to HostX Tools
+1. Click **Configure** next to HostX Domain Lookup
 2. Enter your API keys:
    - **WhatIsMyIP API Key** - Get from https://www.whatismyip.com/
    - **IPinfo Access Token** - Get from https://ipinfo.io/
@@ -109,9 +117,9 @@ Grant access to the desired admin roles in the module configuration.
 │
 ├── assets/                  # Static assets
 │   ├── css/
-│   │   └── hostx-tools.css # Module styles
+│   │   └── hostx-domain-lookup.css # Module styles
 │   └── js/
-│       └── hostx-tools.js  # Module JavaScript
+│       └── hostx-domain-lookup.js  # Module JavaScript
 │
 └── cache/                   # File cache directory (auto-created)
 ```
@@ -172,7 +180,7 @@ Individual tools:
 ## Admin Area
 
 Access the admin dashboard at:
-**Addons** > **HostX Tools**
+**Addons** > **HostX Domain Lookup**
 
 Features:
 - Dashboard with usage statistics

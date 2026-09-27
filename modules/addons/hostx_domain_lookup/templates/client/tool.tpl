@@ -1,9 +1,9 @@
-{* HostX Tools - Individual Tool Page *}
+{* HostX Domain Lookup - Individual Tool Page *}
 {* Displays the active tool interface *}
 
-<div class="hostx-tools-container">
-    <div class="hostx-tools-header">
-        <a href="index.php?m=hostx_domain_lookup" class="hostx-tools-back">
+<div class="hostx-domain-lookup-container">
+    <div class="hostx-domain-lookup-header">
+        <a href="index.php?m=hostx_domain_lookup" class="hostx-domain-lookup-back">
             <i class="fa fa-arrow-left"></i> Back to Tools
         </a>
     </div>
