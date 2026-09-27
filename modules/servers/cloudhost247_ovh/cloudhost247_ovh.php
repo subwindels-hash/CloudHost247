@@ -1,0 +1,14 @@
+<?php
+if(!defined('WHMCS'))die('Direct access denied');require_once __DIR__.'/../../addons/cloudhost247_ovh/bootstrap.php';
+use CloudHost247\Ovh\Services\Provisioner;use CloudHost247\Ovh\Services\ConnectionResolver;use CloudHost247\Ovh\Services\ServiceManager;
+function cloudhost247_ovh_MetaData(){return array('DisplayName'=>'CloudHost247 OVH','APIVersion'=>'1.1','RequiresServer'=>true);}
+function cloudhost247_ovh_ConfigOptions(){return array('OVH Region'=>array('Type'=>'dropdown','Options'=>array('eu'=>'Europe','ca'=>'Canada/APAC','us'=>'United States')));}
+function cloudhost247_ovh_CreateAccount(array$p){try{$r=(new Provisioner(new ConnectionResolver()))->provision((int)$p['serviceid'],(int)$p['pid'],$p);return isset($r['order_id'])?'success':'Provisioning request is already '.$r['status'];}catch(\Throwable$e){return'OVH provisioning failed: '.$e->getMessage();}}
+function cloudhost247_ovh_SuspendAccount(array$p){try{(new ServiceManager(new ConnectionResolver()))->power((int)$p['serviceid'],false);return'success';}catch(\Throwable$e){return$e->getMessage();}}
+function cloudhost247_ovh_UnsuspendAccount(array$p){try{(new ServiceManager(new ConnectionResolver()))->power((int)$p['serviceid'],true);return'success';}catch(\Throwable$e){return$e->getMessage();}}
+function cloudhost247_ovh_TerminateAccount(array$p){try{(new ServiceManager(new ConnectionResolver()))->terminate((int)$p['serviceid'],true);return'success';}catch(\Throwable$e){return$e->getMessage();}}
+function cloudhost247_ovh_AdminCustomButtonArray(){return array('Reboot'=>'reboot','Refresh Status'=>'refresh');}
+function cloudhost247_ovh_ClientAreaCustomButtonArray(){return array('Reboot Server'=>'reboot');}
+function cloudhost247_ovh_reboot(array$p){try{(new ServiceManager(new ConnectionResolver()))->reboot((int)$p['serviceid']);return'success';}catch(\Throwable$e){return$e->getMessage();}}
+function cloudhost247_ovh_refresh(array$p){try{(new ServiceManager(new ConnectionResolver()))->details((int)$p['serviceid']);return'success';}catch(\Throwable$e){return$e->getMessage();}}
+function cloudhost247_ovh_AdminServicesTabFields(array$p){try{$m=new ServiceManager(new ConnectionResolver());return array('OVH Status'=>json_encode($m->status((int)$p['serviceid'])),'OVH IPs'=>json_encode($m->ips((int)$p['serviceid'])));}catch(\Throwable$e){return array('OVH Integration Status'=>$e->getMessage());}}
