@@ -21,4 +21,12 @@ class RebuildSecurityReview(unittest.TestCase):
   for p in self.sources():self.assertIsNone(bad.search(p.read_text()),str(p))
  def test_api_ssrf_boundary(self):
   endpoint=(ROOT/'modules/addons/cloudhost247_ovh/lib/Api/Endpoint.php').read_text();self.assertIn('private static $regions',endpoint);self.assertNotIn('api_endpoint)',(ROOT/'modules/addons/cloudhost247_ovh/lib/Api/Client.php').read_text())
+ def test_staging_scripts_are_cli_and_confirmation_gated(self):
+  for name in ('staging-preflight.php','staging-financial-snapshot.php'):
+   s=(ROOT/'scripts'/name).read_text();self.assertIn("PHP_SAPI !== 'cli'",s);self.assertIn('CH247_STAGING_CONFIRM',s);self.assertNotIn('configuration.php',s)
+ def test_financial_snapshot_outputs_hashes_not_rows(self):
+  s=(ROOT/'scripts/staging-financial-snapshot.php').read_text();self.assertIn("hash_init('sha256')",s);self.assertIn("'sha256'=>hash_final",s);self.assertNotIn("'records'=>",s)
+ def test_versioned_gap_migrations_are_namespaced(self):
+  for p in [ROOT/'modules/addons/cloudhost247_theme/migrations/V110.php',ROOT/'modules/addons/cloudhost247_ovh/migrations/V130.php']:
+   text=p.read_text();self.assertNotIn('drop',text.lower());self.assertRegex(text,r"create\('mod_cloudhost247_")
 if __name__=='__main__':unittest.main()

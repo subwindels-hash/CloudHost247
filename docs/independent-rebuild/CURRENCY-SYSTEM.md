@@ -62,3 +62,7 @@ Use either the normal WHMCS schedule or the optional CLI at the desired cadence.
 ## Security and limitations
 
 All admin mutations require authenticated WHMCS admin context and CSRF validation. Values and provider identifiers are allowlisted/validated. This module does not replace WHMCS authentication, licensing, currencies UI, invoice accounting, or permissions to access the addon. Currency APIs can be unavailable or change behavior; a failed provider set never partially updates rates. PHP decimal floats are used because WHMCS currency rates are stored numerically; validated precision is capped at 12. Production readiness is not claimed before WHMCS 8.x/PHP 8.2 staging verification.
+
+## Pre-staging status clarification
+
+**IMPLEMENTED / automated:** provider parsing, conversion, margins, rounding, validation, lock/transaction structure, history and current-rate-only write boundary. **BLOCKED — STAGING REQUIRED:** real providers, WHMCS hooks/database, cron concurrency, admin permissions and financial before/after hashes. OVH pricing previews consume current CloudHost247/WHMCS currency rates while preserving source price, source currency, conversion, margin, rounding and final value separately. Applying OVH product pricing is a distinct explicitly confirmed operation and is never performed by currency updates.

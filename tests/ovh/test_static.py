@@ -35,4 +35,13 @@ class OvhSafetyTests(unittest.TestCase):
   self.assertIn('Explicit pricing confirmation',p);self.assertIn("table('tblpricing')",p);self.assertNotIn("table('tblinvoices')",p)
  def test_reverse_dns_requires_confirmation(self):
   p=(ADDON/'lib/Services/ReverseDnsManager.php').read_text();self.assertIn('Explicit reverse-DNS confirmation',p);self.assertIn('FILTER_VALIDATE_DOMAIN',p)
+ def test_safe_order_discovery_requires_unique_cart_match(self):
+  p=(ADDON/'lib/Reconciliation/OrderDiscovery.php').read_text()
+  self.assertIn('count($matches)!==1',p);self.assertIn('hash_equals',p);self.assertIn("'reconciliation_required'",p)
+ def test_option_mapping_is_exact_and_confirmed(self):
+  p=(ADDON/'lib/Catalog/ConfigurableOptionMapper.php').read_text()
+  self.assertIn('Explicit configurable-option mapping confirmation',p);self.assertIn('$allowed=false',p);self.assertIn('exact discovered match',p)
+ def test_capability_guards_cover_admin_mutations(self):
+  for p in [ROOT/'modules/addons/cloudhost247_theme/lib/AdminController.php',ROOT/'modules/addons/cloudhost247_currency/lib/Services/AdminController.php',ADDON/'lib/Services/AdminController.php']:
+   self.assertIn('requireCapability(',p.read_text(),str(p))
 if __name__=='__main__':unittest.main()

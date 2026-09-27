@@ -66,3 +66,14 @@ Requirements: WHMCS 8.1 or later with stock `twenty-one` and `standard_cart` the
 6. For rollback, select `twenty-one` and `standard_cart` again and disable Theme Manager. Data and original themes remain intact; no database rollback is required.
 
 Do not select or activate HostX. No HostX key is requested by this installation.
+
+## Secure staging package (source update)
+
+Follow `STAGING-DEPLOYMENT.md` and execute `STAGING-TEST-MATRIX.md`. Before tests, run the read-only preflight and protected-financial snapshot from outside the public webroot:
+
+```bash
+CH247_STAGING_CONFIRM=YES CH247_BUILD_COMMIT=<exact-hash> php scripts/staging-preflight.php /path/to/staging
+CH247_STAGING_CONFIRM=YES CH247_BUILD_COMMIT=<exact-hash> php scripts/staging-financial-snapshot.php /path/to/staging > /secure/evidence/financial-before.json
+```
+
+Repeat the financial snapshot after currency/OVH tests and compare hashes. These scripts output versions, aggregate row metadata and hashes—not credentials or customer row contents. The required extensions, database baseline, permissions, backup/restore, migration, cache clearing, cron, health checks and rollback are specified in `STAGING-DEPLOYMENT.md`.

@@ -33,3 +33,9 @@ Date: 2026-09-27. Scope: CloudHost247 Foundation, Theme/CMS, Currency, OVH addon
 * Real least-privilege consumer-key rules, rate limits, timeout ambiguity and log redaction need staging inspection.
 
 No production-readiness claim is made.
+
+## Authorization and staging-evidence update
+
+CloudHost247 now layers optional per-operation role capabilities over WHMCS addon-role access. No policy means normal WHMCS addon authorization; a configured policy restricts the capability to explicit WHMCS role IDs. Theme content/settings, currency settings/rate execution, and OVH settings/operations/confirmed changes call this guard. Runtime role/session behavior remains **BLOCKED — STAGING REQUIRED**.
+
+Read-only staging scripts require an explicit `CH247_STAGING_CONFIRM=YES`, reject web execution, output no row data or secrets, and provide environment metadata plus deterministic hashes for protected financial tables. Source/static findings remain IMPLEMENTED; browser/database/network assertions remain BLOCKED.

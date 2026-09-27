@@ -51,4 +51,19 @@ class FoundationStaticTests(unittest.TestCase):
         route=(ROOT/'cloudhost247-sitemap.php').read_text()
         self.assertIn("published('page')",route);self.assertIn('ENT_XML1',route)
 
+    def test_publication_and_localization_rules(self):
+        repo=(ROOT/'modules/addons/cloudhost247_theme/lib/ThemeRepository.php').read_text()
+        self.assertIn("where('published', 1)",repo)
+        self.assertIn('mod_cloudhost247_theme_translations',repo)
+        self.assertIn('base-content fallback', (ROOT/'modules/addons/cloudhost247_theme/lib/AdminController.php').read_text())
+
+    def test_preview_sanitizes_without_persisting(self):
+        repo=(ROOT/'modules/addons/cloudhost247_theme/lib/ThemeRepository.php').read_text()
+        preview=repo[repo.index('public function preview'):repo.index('public function deleteContent')]
+        self.assertIn('sanitizeHtml',preview);self.assertNotIn('Capsule::table',preview)
+
+    def test_open_graph_is_escaped(self):
+        hooks=(ROOT/'modules/addons/cloudhost247_theme/hooks.php').read_text()
+        self.assertIn('property="og:title"',hooks);self.assertIn("htmlspecialchars($vars['cloudhost247Page']",hooks)
+
 if __name__ == '__main__': unittest.main()

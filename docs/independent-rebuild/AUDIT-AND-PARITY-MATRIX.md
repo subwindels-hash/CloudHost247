@@ -161,3 +161,18 @@ The detailed evidence-based WGS comparison and replacement status are in `OVH-IN
 ## Final pre-staging parity update — 2026-09-27
 
 OVH partials were reduced with catalog normalization, discovered options, explicit pricing preview/application through CloudHost247 currency rates, existing-service search/preview/confirmed linking, ambiguous-mutation reconciliation states, order polling/binding, normalized IPs and reverse DNS. API/product-dependent advanced operations remain explicitly NOT IMPLEMENTED. Theme now includes Open Graph page metadata and an independent CMS sitemap. See `PRE-STAGING-REPORT.md`, `OVH-INTEGRATION.md`, and `SECURITY-REVIEW.md` for exact IMPLEMENTED/PARTIAL/BLOCKED boundaries.
+
+## Source gap and staging-package update
+
+| Area | Source status | Runtime status |
+|---|---|---|
+| Localized CMS and safe preview | IMPLEMENTED with base fallback and sanitizer | BLOCKED — STAGING REQUIRED |
+| Admin capability restrictions | IMPLEMENTED over WHMCS addon-role access | BLOCKED — STAGING REQUIRED |
+| OVH regional/product normalization | IMPLEMENTED conservatively for returned fields | BLOCKED — STAGING REQUIRED |
+| Source-price extraction | IMPLEMENTED only for exactly one numeric/currency candidate | BLOCKED — STAGING REQUIRED |
+| Configurable-option mapping | IMPLEMENTED for exact discovered matches with confirmation | BLOCKED — STAGING REQUIRED |
+| Missing-order discovery | PARTIAL: unique cart match only; ambiguity stops | BLOCKED — STAGING REQUIRED |
+| Existing-service matching | PARTIAL: ranked suggestions; explicit preview/confirmation remains mandatory | BLOCKED — STAGING REQUIRED |
+| Staging deployment/evidence package | IMPLEMENTED in documentation/read-only scripts | BLOCKED — STAGING REQUIRED |
+
+No functionality is marked STAGING VERIFIED. The complete test IDs and evidence fields are in `STAGING-TEST-MATRIX.md`.

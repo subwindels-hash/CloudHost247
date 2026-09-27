@@ -53,3 +53,9 @@ Source review covers authentication, authorization boundary, CSRF, query safety,
 12. Reconcile database/file backups and perform rollback.
 
 After these steps, issue a PASS/FAIL/PARTIAL/BLOCKED runtime matrix. Until then, no component is production-ready.
+
+## Source-completion addendum
+
+Additional source work implements localized CMS translations with base fallback, safe unsaved CMS preview, optional WHMCS-role capability restrictions, broader conservative OVH normalization, unique source-price resolution, exact configurable-option mapping, safe cart-order discovery and improved service matching. The executable deployment and evidence package is in `STAGING-DEPLOYMENT.md`, `STAGING-TEST-MATRIX.md`, and `scripts/staging-*.php`.
+
+Status vocabulary is strict: **IMPLEMENTED** means owned source plus applicable automated/mock evidence; **STAGING VERIFIED** has no entries; **PARTIAL** identifies intentionally bounded workflows; **BLOCKED — STAGING REQUIRED** covers all WHMCS/browser/database/network claims; **NOT IMPLEMENTED — API/PRODUCT DEPENDENCY** covers advanced OVH operations not safely generalized.
