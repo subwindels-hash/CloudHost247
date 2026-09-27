@@ -80,10 +80,14 @@ final class ThemeRepository
             'url' => $url, 'image_url' => trim((string) (isset($input['image_url']) ? $input['image_url'] : '')),
             'seo_title' => trim(strip_tags(isset($input['seo_title']) ? $input['seo_title'] : '')),
             'seo_description' => trim(strip_tags(isset($input['seo_description']) ? $input['seo_description'] : '')),
+            'og_title' => trim(strip_tags(isset($input['og_title']) ? $input['og_title'] : '')),
+            'og_description' => trim(strip_tags(isset($input['og_description']) ? $input['og_description'] : '')),
+            'canonical_url' => trim((string)(isset($input['canonical_url']) ? $input['canonical_url'] : '')),
+            'sitemap' => !isset($input['sitemap']) || !empty($input['sitemap']),
             'parent_slug' => $this->slug(isset($input['parent_slug']) ? $input['parent_slug'] : ''),
             'open_new' => !empty($input['open_new']),
         );
-        if (!$this->safeRelativeOrHttpsUrl($payload['image_url'])) throw new InvalidArgumentException('Unsafe image URL.');
+        if (!$this->safeRelativeOrHttpsUrl($payload['image_url']) || !$this->safeRelativeOrHttpsUrl($payload['canonical_url'])) throw new InvalidArgumentException('Unsafe image or canonical URL.');
         foreach ($payload as $value) if (is_string($value) && strlen($value) > 50000) throw new InvalidArgumentException('Content field is too long.');
         $record = array('content_type' => $type, 'slug' => $slug, 'title' => $title, 'payload_json' => json_encode($payload), 'published' => !empty($input['published']) ? 1 : 0, 'sort_order' => (int) (isset($input['sort_order']) ? $input['sort_order'] : 0), 'updated_at' => date('Y-m-d H:i:s'));
         if ($id) { Capsule::table(self::CONTENT)->where('id', $id)->update($record); return $id; }

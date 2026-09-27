@@ -19,8 +19,8 @@ add_hook('ClientAreaHeadOutput', 1, function ($vars) {
         $font = htmlspecialchars($settings['font_family'], ENT_QUOTES, 'UTF-8');
         $width = (int) $settings['layout_width'];
         $meta = '';
-        if (!empty($vars['cloudhost247Page']['seo_description'])) $meta .= '<meta name="description" content="' . htmlspecialchars($vars['cloudhost247Page']['seo_description'], ENT_QUOTES, 'UTF-8') . '"><meta property="og:description" content="' . htmlspecialchars($vars['cloudhost247Page']['seo_description'], ENT_QUOTES, 'UTF-8') . '">';
-        if (!empty($vars['cloudhost247Page']['title'])) $meta .= '<meta property="og:title" content="' . htmlspecialchars($vars['cloudhost247Page']['seo_title'] ?: $vars['cloudhost247Page']['title'], ENT_QUOTES, 'UTF-8') . '"><meta property="og:type" content="website">';
+        if (!empty($vars['cloudhost247Page']['seo_description'])) $meta .= '<meta name="description" content="' . htmlspecialchars($vars['cloudhost247Page']['seo_description'], ENT_QUOTES, 'UTF-8') . '">';
+        if (!empty($vars['cloudhost247Page']['title'])) { $ogTitle=$vars['cloudhost247Page']['og_title'] ?: ($vars['cloudhost247Page']['seo_title'] ?: $vars['cloudhost247Page']['title']); $ogDescription=$vars['cloudhost247Page']['og_description'] ?: $vars['cloudhost247Page']['seo_description']; $meta .= '<meta property="og:title" content="' . htmlspecialchars($ogTitle, ENT_QUOTES, 'UTF-8') . '"><meta property="og:description" content="'.htmlspecialchars($ogDescription,ENT_QUOTES,'UTF-8').'"><meta property="og:type" content="website">'; if(!empty($vars['cloudhost247Page']['canonical_url']))$meta.='<link rel="canonical" href="'.htmlspecialchars($vars['cloudhost247Page']['canonical_url'],ENT_QUOTES,'UTF-8').'">'; }
         return $meta . '<style>:root{--ch247-primary:' . $primary . ';--ch247-accent:' . $accent . ';--ch247-font:' . $font . ';--ch247-width:' . $width . 'px}</style>';
     } catch (\Throwable $e) { return ''; }
 });

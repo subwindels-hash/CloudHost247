@@ -1,12 +1,14 @@
-name: Independent rebuild tests
+name: Independent foundation
 on:
   push:
     branches: [arena/01a0e4c2-cloudhost247]
   pull_request:
 jobs:
-  source-tests:
+  release-candidate:
+    name: Release candidate (PHP ${{ matrix.php }})
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         php: ['7.4', '8.2']
     steps:
@@ -14,15 +16,5 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-      - name: PHP syntax
-        run: find modules/addons/cloudhost247_* modules/servers/cloudhost247_ovh tests -name '*.php' -print0 | xargs -0 -n1 php -l
-      - name: Foundation PHP behavior tests
-        run: php tests/foundation/run.php
-      - name: Currency PHP behavior tests
-        run: php tests/currency/run.php
-      - name: OVH PHP mock and behavior tests
-        run: php -d display_errors=1 tests/ovh/run.php
-      - name: Static and security tests
-        run: python3 -m unittest -v tests/foundation/test_static.py tests/currency/test_static.py tests/ovh/test_static.py tests/ovh/test_product_services_static.py tests/security/test_security.py
-      - name: Preserved proprietary-file integrity
-        run: grep -v '^#' docs/independent-rebuild/original-file-manifest.sha256 | sha256sum --check --strict
+      - name: Complete release-candidate verification
+        run: bash scripts/release-candidate-check.sh

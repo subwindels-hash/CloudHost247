@@ -44,4 +44,21 @@ class RebuildSecurityReview(unittest.TestCase):
   self.assertIn('min(100',repo);self.assertIn('SecretPolicy::redact',logger)
  def test_reconciliation_never_blindly_retries(self):
   s=(ROOT/'modules/addons/cloudhost247_ovh/lib/Operations/OperationsDashboard.php').read_text();self.assertIn('never repeat the mutation',s);self.assertNotIn("->post(",s)
+ def test_release_candidate_check_is_complete(self):
+  s=(ROOT/'scripts/release-candidate-check.sh').read_text()
+  for marker in ('php -l','tests/foundation/run.php','unittest','validate-migrations.py','sha256sum --check','git diff --check'):self.assertIn(marker,s)
+ def test_audit_filters_and_pagination_are_bounded(self):
+  s=(ROOT/'modules/addons/cloudhost247_core/lib/Support/AuditRepository.php').read_text()
+  for name in ('module','action','resource_type','resource','result','correlation_id','admin_id','from','to','q'):self.assertIn("'"+name+"'",s)
+  self.assertIn('min(100',s);self.assertIn('offset(',s);self.assertIn('limit(',s)
+ def test_operations_are_filtered_paginated_and_not_fabricated(self):
+  s=(ROOT/'modules/addons/cloudhost247_ovh/lib/Operations/OperationsDashboard.php').read_text()
+  for marker in ('ops_page','offset(','limit(','reconciliation_required'):self.assertIn(marker,s)
+ def test_native_theme_has_focus_mobile_and_reduced_motion(self):
+  for p in (ROOT/'templates/cloudhost247/css/custom.css',ROOT/'templates/orderforms/cloudhost247/css/custom.css'):
+   s=p.read_text();self.assertIn('focus-visible',s);self.assertIn('@media(max-width:767px)',s);self.assertIn('prefers-reduced-motion',s)
+ def test_cms_open_graph_canonical_and_sitemap_controls(self):
+  repo=(ROOT/'modules/addons/cloudhost247_theme/lib/ThemeRepository.php').read_text();hooks=(ROOT/'modules/addons/cloudhost247_theme/hooks.php').read_text();site=(ROOT/'cloudhost247-sitemap.php').read_text()
+  for marker in ('og_title','og_description','canonical_url','sitemap'):self.assertIn(marker,repo)
+  self.assertIn('rel="canonical"',hooks);self.assertIn("published('landing')",site)
 if __name__=='__main__':unittest.main()
