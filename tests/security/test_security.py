@@ -22,8 +22,9 @@ class RebuildSecurityReview(unittest.TestCase):
  def test_api_ssrf_boundary(self):
   endpoint=(ROOT/'modules/addons/cloudhost247_ovh/lib/Api/Endpoint.php').read_text();self.assertIn('private static $regions',endpoint);self.assertNotIn('api_endpoint)',(ROOT/'modules/addons/cloudhost247_ovh/lib/Api/Client.php').read_text())
  def test_staging_scripts_are_cli_and_confirmation_gated(self):
-  for name in ('staging-preflight.php','staging-financial-snapshot.php'):
-   s=(ROOT/'scripts'/name).read_text();self.assertIn("PHP_SAPI !== 'cli'",s);self.assertIn('CH247_STAGING_CONFIRM',s);self.assertNotIn('configuration.php',s)
+  common=(ROOT/'scripts/lib/staging-common.php').read_text();self.assertIn("PHP_SAPI!=='cli'",common);self.assertIn('CH247_STAGING_CONFIRM',common);self.assertIn('CH247_STAGING_HOST_ALLOWLIST',common)
+  for name in ('staging-preflight.php','staging-financial-snapshot.php','staging-baseline-evidence.php','staging-backup-verify.php'):
+   s=(ROOT/'scripts'/name).read_text();self.assertIn('staging-common.php',s);self.assertNotIn("require $root . '/configuration.php'",s)
  def test_financial_snapshot_outputs_hashes_not_rows(self):
   s=(ROOT/'scripts/staging-financial-snapshot.php').read_text();self.assertIn("hash_init('sha256')",s);self.assertIn("'sha256'=>hash_final",s);self.assertNotIn("'records'=>",s)
  def test_versioned_gap_migrations_are_namespaced(self):

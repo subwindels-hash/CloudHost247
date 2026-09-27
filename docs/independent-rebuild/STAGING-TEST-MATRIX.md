@@ -127,3 +127,9 @@ The mandatory staging comparison sequence is:
 7. Use only disposable least-privilege OVH resources. Never submit credentials through chat or commit them.
 
 The CI-level `scripts/release-candidate-check.sh` verifies syntax, behavior tests, static/security tests, migration ordering/additive policy, preserved proprietary checksums, embedded-secret patterns, core-schema policy, and diff cleanliness on PHP 7.4 and 8.2. This is source evidence only. Real migrations, WHMCS integration, browser behavior, cron, provider updates, and OVH lifecycle operations remain **BLOCKED — STAGING REQUIRED**.
+
+## Machine-readable evidence gates
+
+Every test row must reference an artifact, UTC timestamp, exact commit, operator, and result. The acceptance generator requires real evidence sections for browser, accessibility, security, currency, OVH, provisioning/lifecycle, reconciliation, and CMS/theme. `NOT RUN`, absent evidence, a failed restore proof, or any unexplained financial/customer-table mutation produces `FAIL`. Static/mock CI is recorded separately and never satisfies a runtime row.
+
+Capture financial snapshots immediately before and after every financial-impacting test. Changes require an explicit allowlist entry and non-empty reason in `approved-changes.json`; invoice, invoice-item, transaction, client-credit, service, and domain changes are unexpected unless the individual disposable test explicitly predicted them. Re-run the comparison after rollback as well.

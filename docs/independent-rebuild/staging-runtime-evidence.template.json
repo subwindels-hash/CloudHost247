@@ -1,0 +1,12 @@
+{
+  "status": "NOT RUN — STAGING REQUIRED",
+  "browser": {"status": "NOT RUN", "evidence": []},
+  "accessibility": {"status": "NOT RUN", "evidence": [], "limitations": []},
+  "security": {"status": "NOT RUN", "evidence": []},
+  "currency": {"status": "NOT RUN", "evidence": []},
+  "ovh": {"status": "NOT RUN", "evidence": []},
+  "provisioning_lifecycle": {"status": "NOT RUN", "evidence": []},
+  "reconciliation": {"status": "NOT RUN", "evidence": []},
+  "cms_theme": {"status": "NOT RUN", "evidence": []},
+  "known_limitations": []
+}

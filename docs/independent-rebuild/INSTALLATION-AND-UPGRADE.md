@@ -104,3 +104,7 @@ The mandatory staging comparison sequence is:
 7. Use only disposable least-privilege OVH resources. Never submit credentials through chat or commit them.
 
 The CI-level `scripts/release-candidate-check.sh` verifies syntax, behavior tests, static/security tests, migration ordering/additive policy, preserved proprietary checksums, embedded-secret patterns, core-schema policy, and diff cleanliness on PHP 7.4 and 8.2. This is source evidence only. Real migrations, WHMCS integration, browser behavior, cron, provider updates, and OVH lifecycle operations remain **BLOCKED — STAGING REQUIRED**.
+
+## Mandatory staging evidence gate
+
+Installation or upgrade is prohibited unless `staging-preflight.php` positively verifies the allowlisted URL, identity, database marker, runtime, document root, directories, extensions, database, modules/templates/migrations, addon state, and presentation state. Baseline `3a9fbb9` must be captured before upgrade to frozen RC `83de4e15d513c56128889d429350da83d46ad1fc`. A readable backup is insufficient: `staging-backup-verify.php` must run through the isolated restored WHMCS runtime and verify required tables. Rollback always restores the proven staging backup and prior files; modules do not destructively remove data.

@@ -85,3 +85,64 @@ The mandatory staging comparison sequence is:
 7. Use only disposable least-privilege OVH resources. Never submit credentials through chat or commit them.
 
 The CI-level `scripts/release-candidate-check.sh` verifies syntax, behavior tests, static/security tests, migration ordering/additive policy, preserved proprietary checksums, embedded-secret patterns, core-schema policy, and diff cleanliness on PHP 7.4 and 8.2. This is source evidence only. Real migrations, WHMCS integration, browser behavior, cron, provider updates, and OVH lifecycle operations remain **BLOCKED — STAGING REQUIRED**.
+
+## Hardened staging tooling (post-RC preparation)
+
+Run tooling from a protected checkout outside the public document root. Evidence and backups must be mode `0600` in a non-web-accessible directory. Required operator-supplied values are: exact allowlisted staging URL/host, a non-production identity, a database-name staging marker, WHMCS document root, deployment user, secure database defaults file, backup directory, and isolated restore document root/database. Credentials are never command arguments or evidence fields.
+
+Fail-closed environment variables:
+
+```bash
+export CH247_STAGING_CONFIRM=YES
+export CH247_STAGING_ID='approved-staging-ticket-or-name'
+export CH247_EXPECTED_STAGING_URL='https://exact-staging-host.example'
+export CH247_STAGING_HOST_ALLOWLIST='exact-staging-host.example'
+export CH247_STAGING_DB_MARKER='staging'
+export CH247_BUILD_COMMIT='3a9fbb9' # change only after verified upgrade
+```
+
+A hostname containing `www`, `prod`, or `production`, a URL mismatch, a host absent from the explicit allowlist, a database without the required marker, or missing identity causes immediate failure. The tooling never infers staging from a checkbox alone.
+
+### Exact execution sequence
+
+```bash
+# 1. From the tooling checkout, validate source-only controls.
+bash scripts/release-candidate-check.sh
+
+# 2. Deploy baseline 3a9fbb9 to staging by the approved non-destructive process.
+export CH247_PREFLIGHT_MODE=baseline
+php scripts/staging-preflight.php /srv/whmcs-staging /secure/evidence/baseline-preflight.json
+php scripts/staging-baseline-evidence.php /srv/whmcs-staging /secure/evidence/baseline.json
+php scripts/staging-financial-snapshot.php /srv/whmcs-staging /secure/evidence/financial-before.json
+
+# 3. Create backups using an approved defaults file (never a CLI password), archive files,
+# restore into a separate staging database/root, then verify the restored runtime.
+mysqldump --defaults-extra-file=/secure/staging-my.cnf --single-transaction --routines --triggers STAGING_DB | gzip > /secure/backups/database.sql.gz
+tar --exclude=templates_c --exclude=configuration.php -czf /secure/backups/application.tgz -C /srv/whmcs-staging .
+export CH247_SOURCE_DATABASE_HASH="$(jq -r .environment.database_name_hash /secure/evidence/baseline-preflight.json)"
+# Approved operators now restore both artifacts to /srv/whmcs-restore and an isolated DB.
+php scripts/staging-backup-verify.php /srv/whmcs-restore /secure/backups/database.sql.gz /secure/backups/application.tgz /secure/evidence/backup-restore.json
+
+# 4. Complete baseline matrix and preserve evidence. Only then upgrade to the exact RC.
+export CH247_BUILD_COMMIT=83de4e15d513c56128889d429350da83d46ad1fc
+export CH247_PREFLIGHT_MODE=release-candidate
+php scripts/staging-preflight.php /srv/whmcs-staging /secure/evidence/rc-preflight.json
+# Activate/upgrade modules in documented order and execute the full runtime matrix.
+php scripts/staging-financial-snapshot.php /srv/whmcs-staging /secure/evidence/financial-after.json
+python3 scripts/compare-financial-evidence.py /secure/evidence/financial-before.json /secure/evidence/financial-after.json --expected /secure/evidence/approved-changes.json --output /secure/evidence/financial-comparison.json
+python3 scripts/validate-migrations.py --json-output /secure/evidence/migrations.json
+
+# 5. Generate acceptance only after real runtime evidence is recorded.
+python3 scripts/generate-staging-report.py \
+ --preflight /secure/evidence/rc-preflight.json --backup /secure/evidence/backup-restore.json \
+ --baseline /secure/evidence/baseline.json --financial /secure/evidence/financial-comparison.json \
+ --migration /secure/evidence/migrations.json --automated /secure/evidence/automated-tests.json \
+ --runtime /secure/evidence/runtime-results.json --commit "$CH247_BUILD_COMMIT" \
+ --json-output /secure/evidence/acceptance.json --markdown-output /secure/evidence/acceptance.md
+```
+
+`staging-runtime-evidence.template.json` intentionally starts at `NOT RUN — STAGING REQUIRED`; it cannot yield acceptance until every mandatory real-runtime section has evidence.
+
+## Failure and rollback decision tree
+
+Any environment-identification, backup/restore, migration, unexplained financial, authentication, browser, security, currency, OVH, reconciliation, or lifecycle failure stops acceptance. Pause cron and test ordering; preserve redacted evidence; switch to stock themes; disable only CloudHost247 staging modules; restore application files and the proven database backup into staging; clear only the verified staging template cache; rerun preflight and financial comparison. Never delete or reverse-edit WHMCS customer, invoice, transaction, domain, service, or product data. A migration failure is handled by full proven database restoration, not improvised reverse SQL. Currency/OVH failures also require disabling their staging schedules and credentials before restoration.

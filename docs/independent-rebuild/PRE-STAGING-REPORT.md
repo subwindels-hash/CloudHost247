@@ -86,3 +86,7 @@ The mandatory staging comparison sequence is:
 7. Use only disposable least-privilege OVH resources. Never submit credentials through chat or commit them.
 
 The CI-level `scripts/release-candidate-check.sh` verifies syntax, behavior tests, static/security tests, migration ordering/additive policy, preserved proprietary checksums, embedded-secret patterns, core-schema policy, and diff cleanliness on PHP 7.4 and 8.2. This is source evidence only. Real migrations, WHMCS integration, browser behavior, cron, provider updates, and OVH lifecycle operations remain **BLOCKED — STAGING REQUIRED**.
+
+## Staging-readiness hardening
+
+Source tooling now provides fail-closed environment identification, runtime preflight, privacy-preserving baseline capture, backup/isolated-restore verification, expanded financial snapshots, explicit expected/unexpected comparison, per-migration validation, and acceptance report generation. These capabilities are **IMPLEMENTED (SOURCE/MOCK TESTED)**. No generated runtime PASS artifact is committed. Secure WHMCS/OVH access, real backup restoration, migrations, browser testing, provider updates, and lifecycle operations remain **BLOCKED — STAGING REQUIRED**.
