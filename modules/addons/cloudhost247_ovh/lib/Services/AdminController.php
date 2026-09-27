@@ -1,5 +1,40 @@
 <?php
-namespace CloudHost247\Ovh\Services;use CloudHost247\Foundation\Security\AdminGuard;use CloudHost247\Ovh\Catalog\CatalogService;use WHMCS\Database\Capsule;use InvalidArgumentException;
+namespace CloudHost247\Ovh\Services;
+
+use CloudHost247\Foundation\Security\AdminGuard;
+use CloudHost247\Ovh\Api\Endpoint;
+use CloudHost247\Ovh\Catalog\CatalogService;
+use CloudHost247\Ovh\Pricing\PriceCalculator;
+use CloudHost247\Ovh\Pricing\PricingService;
+use CloudHost247\Ovh\Reconciliation\ExistingServiceLinker;
+use CloudHost247\Ovh\Reconciliation\OrderPoller;
+use WHMCS\Database\Capsule;
+use InvalidArgumentException;
+
 final class AdminController
-{function handle(){AdminGuard::requireAdmin();$notice='';$error='';try{if(($_SERVER['REQUEST_METHOD']??'GET')==='POST'){AdminGuard::requirePostToken();$op=$_POST['operation']??'';if($op==='endpoint'){$this->saveEndpoint($_POST);$notice='Endpoint configuration saved.';}elseif($op==='mapping'){(new MappingRepository())->save($_POST);$notice='Product mapping saved.';}elseif($op==='test'){$c=(new ConnectionResolver())->endpoint((int)$_POST['endpoint_id']);$c->get('/me');$notice='OVH authentication and /me permission succeeded.';}elseif($op==='catalog'){$n=(new CatalogService(new ConnectionResolver()))->sync((int)$_POST['endpoint_id'],$_POST['subsidiary'],$_POST['family']);$notice='Catalog synchronized: '.$n.' plans.';}elseif($op==='services'){$n=(new Synchronizer(new ConnectionResolver()))->services((int)$_POST['endpoint_id']);$notice='Service synchronization finished: '.json_encode($n);}else throw new InvalidArgumentException('Unknown operation.');}}catch(\Throwable$e){$error=$e->getMessage();}$token=function_exists('generate_token')?generate_token('plain'):'';return array('notice'=>$notice,'error'=>$error,'token'=>$token,'endpoints'=>Capsule::table('mod_cloudhost247_ovh_endpoints')->get()->all(),'servers'=>Capsule::table('tblservers')->select('id','name','type')->get()->all(),'products'=>Capsule::table('tblproducts')->select('id','name')->orderBy('name')->get()->all(),'mappings'=>Capsule::table('mod_cloudhost247_ovh_product_mappings')->get()->all(),'operations'=>Capsule::table('mod_cloudhost247_ovh_operations')->orderBy('id','desc')->limit(50)->get()->all(),'syncs'=>Capsule::table('mod_cloudhost247_ovh_sync_runs')->orderBy('id','desc')->limit(30)->get()->all());}
- private function saveEndpoint($i){$region=strtolower($i['region']??'');if(!in_array($region,array('eu','ca','us'),true))throw new InvalidArgumentException('Invalid region.');$sid=(int)$i['server_id'];if(!Capsule::table('tblservers')->where('id',$sid)->exists())throw new InvalidArgumentException('WHMCS server does not exist.');Capsule::table('mod_cloudhost247_ovh_endpoints')->updateOrInsert(array('name'=>trim($i['name'])),array('region'=>$region,'api_endpoint'=>\CloudHost247\Ovh\Api\Endpoint::forRegion($region),'server_id'=>$sid,'enabled'=>!empty($i['enabled']),'updated_at'=>date('Y-m-d H:i:s')));}}
+{
+    public function handle()
+    {
+        AdminGuard::requireAdmin(); $notice=''; $error=''; $search=array(); $preview=null;
+        try {
+            if (($_SERVER['REQUEST_METHOD']??'GET')==='POST') {
+                AdminGuard::requirePostToken(); $op=$_POST['operation']??''; $resolver=new ConnectionResolver();
+                if ($op==='endpoint') { $this->saveEndpoint($_POST); $notice='Endpoint configuration saved.'; }
+                elseif ($op==='mapping') { (new MappingRepository())->save($_POST); $notice='Product mapping saved.'; }
+                elseif ($op==='test') { $resolver->endpoint((int)$_POST['endpoint_id'])->get('/me'); $notice='OVH authentication and /me permission succeeded.'; }
+                elseif ($op==='catalog') { $notice='Catalog synchronized: '.(new CatalogService($resolver))->sync((int)$_POST['endpoint_id'],$_POST['subsidiary'],$_POST['family']).' plans.'; }
+                elseif ($op==='services') { $notice='Service synchronization: '.json_encode((new Synchronizer($resolver))->services((int)$_POST['endpoint_id'])); }
+                elseif ($op==='poll') { $notice='Order polling: '.json_encode((new OrderPoller($resolver))->pollPending()); }
+                elseif ($op==='search') { $search=(new ExistingServiceLinker($resolver))->search((int)$_POST['endpoint_id'],trim((string)$_POST['query'])); $notice='Search returned '.count($search).' services; no links were changed.'; }
+                elseif ($op==='link_preview') { $preview=(new ExistingServiceLinker($resolver))->preview((int)$_POST['endpoint_id'],$_POST['remote_service_name'],$_POST['family'],(int)$_POST['whmcs_service_id']); }
+                elseif ($op==='link_confirm') { (new ExistingServiceLinker($resolver))->link((int)$_POST['endpoint_id'],$_POST['remote_service_name'],$_POST['family'],(int)$_POST['whmcs_service_id'],!empty($_POST['confirm']),$_SESSION['adminid']); $notice='Existing service linked after explicit confirmation.'; }
+                elseif ($op==='price_preview') { $preview=(new PricingService(new PriceCalculator()))->preview((int)$_POST['mapping_id'],(int)$_POST['currency_id'],$_POST['billing_cycle'],(float)$_POST['source_price'],$_POST['source_currency'],$_POST['rounding_mode'],(int)$_POST['precision']); }
+                elseif ($op==='price_apply') { $notice='Applied final product price '.$this->pricing()->apply((int)$_POST['preview_id'],!empty($_POST['confirm'])).'. Historical invoices were not changed.'; }
+                else throw new InvalidArgumentException('Unknown operation.');
+            }
+        } catch (\Throwable $e) { $error=$e->getMessage(); }
+        return array('notice'=>$notice,'error'=>$error,'search'=>$search,'preview'=>$preview,'token'=>function_exists('generate_token')?generate_token('plain'):'','endpoints'=>Capsule::table('mod_cloudhost247_ovh_endpoints')->get()->all(),'servers'=>Capsule::table('tblservers')->select('id','name','type')->get()->all(),'products'=>Capsule::table('tblproducts')->select('id','name')->orderBy('name')->get()->all(),'hosting'=>Capsule::table('tblhosting')->select('id','userid','packageid','domain','domainstatus')->orderBy('id','desc')->limit(500)->get()->all(),'currencies'=>Capsule::table('tblcurrencies')->get()->all(),'mappings'=>Capsule::table('mod_cloudhost247_ovh_product_mappings')->get()->all(),'operations'=>Capsule::table('mod_cloudhost247_ovh_operations')->orderBy('id','desc')->limit(50)->get()->all(),'syncs'=>Capsule::table('mod_cloudhost247_ovh_sync_runs')->orderBy('id','desc')->limit(30)->get()->all(),'price_previews'=>Capsule::table('mod_cloudhost247_ovh_price_previews')->orderBy('id','desc')->limit(30)->get()->all());
+    }
+    private function pricing() { return new PricingService(new PriceCalculator()); }
+    private function saveEndpoint($i) { $region=strtolower($i['region']??''); if(!in_array($region,array('eu','ca','us'),true))throw new InvalidArgumentException('Invalid region.');$sid=(int)$i['server_id'];if(!Capsule::table('tblservers')->where('id',$sid)->exists())throw new InvalidArgumentException('WHMCS server does not exist.');Capsule::table('mod_cloudhost247_ovh_endpoints')->updateOrInsert(array('name'=>trim($i['name'])),array('region'=>$region,'api_endpoint'=>Endpoint::forRegion($region),'server_id'=>$sid,'enabled'=>!empty($i['enabled']),'updated_at'=>date('Y-m-d H:i:s'))); }
+}
