@@ -2,9 +2,13 @@
 if (!defined('WHMCS')) { die('This file cannot be accessed directly'); }
 require_once __DIR__ . '/../cloudhost247_core/bootstrap.php';
 require_once __DIR__ . '/migrations/V100.php';
+require_once __DIR__ . '/lib/ThemeRepository.php';
+require_once __DIR__ . '/lib/AdminController.php';
 use CloudHost247\Foundation\Database\MigrationRunner;
 use CloudHost247\Foundation\Security\AdminGuard;
 use WHMCS\Database\Capsule;
+use CloudHost247\Theme\ThemeRepository;
+use CloudHost247\Theme\AdminController;
 
 function cloudhost247_theme_config()
 {
@@ -22,7 +26,20 @@ function cloudhost247_theme_activate()
 function cloudhost247_theme_deactivate() { return array('status' => 'success', 'description' => 'Data retained. No WHMCS or legacy vendor tables were changed.'); }
 function cloudhost247_theme_output($vars)
 {
-    AdminGuard::requireAdmin();
-    echo '<h2>CloudHost247 Theme Manager</h2><div class="alert alert-info">Independent module version 1.0.0. Vendor licence keys are neither requested nor consumed.</div>';
-    echo '<p>Theme settings and content repositories are ready.</p><p>Phase 1 provides the secure, non-destructive foundation; feature workflows are tracked in the parity matrix.</p>';
+    $view = (new AdminController(new ThemeRepository()))->handle();
+    $e = function ($v) { return htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8'); };
+    echo '<div class="ch247-admin"><h2>CloudHost247 Theme Manager</h2><p class="alert alert-info">Independent theme manager. Every published item is supplied to the CloudHost247 client theme; no HostX runtime or licence is used.</p>';
+    if ($view['notice']) echo '<div class="alert alert-success">' . $e($view['notice']) . '</div>';
+    if ($view['error']) echo '<div class="alert alert-danger">' . $e($view['error']) . '</div>';
+    echo '<ul class="nav nav-tabs"><li class="active"><a data-toggle="tab" href="#brand">Brand & layout</a></li><li><a data-toggle="tab" href="#content">Content manager</a></li><li><a data-toggle="tab" href="#inventory">Published inventory</a></li></ul><div class="tab-content" style="padding-top:20px">';
+    echo '<div id="brand" class="tab-pane active"><form method="post"><input type="hidden" name="token" value="'.$e($view['token']).'"><input type="hidden" name="operation" value="settings"><div class="row">';
+    $fields = array('brand_name'=>'Brand name','logo_url'=>'Logo URL (local or HTTPS)','primary_color'=>'Primary color','accent_color'=>'Accent color','font_family'=>'Font family','layout_width'=>'Maximum layout width','support_email'=>'Support email','hero_title'=>'Homepage heading','hero_text'=>'Homepage introduction','hero_cta_label'=>'Homepage button label','hero_cta_url'=>'Homepage button URL','footer_text'=>'Footer description','announcement_text'=>'Announcement text');
+    foreach ($fields as $key => $label) echo '<div class="col-md-6 form-group"><label>'.$e($label).'</label><input class="form-control" name="'.$e($key).'" value="'.$e($view['settings'][$key]).'"></div>';
+    echo '<div class="col-md-12 checkbox"><label><input type="hidden" name="show_announcement" value="0"><input type="checkbox" name="show_announcement" value="1"'.($view['settings']['show_announcement']==='1'?' checked':'').'> Display announcement bar</label></div></div><button class="btn btn-primary">Save theme settings</button></form></div>';
+    echo '<div id="content" class="tab-pane"><form method="post"><input type="hidden" name="token" value="'.$e($view['token']).'"><input type="hidden" name="operation" value="content"><div class="row"><div class="col-md-3 form-group"><label>Type</label><select class="form-control" name="content_type">';
+    foreach (array('page','landing','section','navigation','banner','testimonial','footer') as $type) echo '<option value="'.$type.'">'.ucfirst($type).'</option>';
+    echo '</select></div><div class="col-md-3 form-group"><label>Title</label><input required class="form-control" name="title"></div><div class="col-md-3 form-group"><label>Slug</label><input required pattern="[a-zA-Z0-9-]+" class="form-control" name="slug"></div><div class="col-md-3 form-group"><label>Order</label><input type="number" class="form-control" name="sort_order" value="0"></div><div class="col-md-6 form-group"><label>Summary</label><input class="form-control" name="summary"></div><div class="col-md-6 form-group"><label>Link URL</label><input class="form-control" name="url"></div><div class="col-md-6 form-group"><label>Image URL</label><input class="form-control" name="image_url"></div><div class="col-md-6 form-group"><label>Parent menu slug</label><input class="form-control" name="parent_slug"></div><div class="col-md-12 form-group"><label>Body (safe formatting tags allowed)</label><textarea rows="6" class="form-control" name="body"></textarea></div><div class="col-md-6 form-group"><label>SEO title</label><input class="form-control" name="seo_title"></div><div class="col-md-6 form-group"><label>SEO description</label><input class="form-control" name="seo_description"></div><div class="col-md-12 checkbox"><label><input type="checkbox" name="published" value="1"> Published</label> &nbsp; <label><input type="checkbox" name="open_new" value="1"> Open link in new tab</label></div></div><button class="btn btn-primary">Create content</button></form></div>';
+    echo '<div id="inventory" class="tab-pane"><table class="table table-striped"><thead><tr><th>Type</th><th>Title</th><th>Slug</th><th>Order</th><th>Status</th><th></th></tr></thead><tbody>';
+    foreach ($view['content'] as $item) { echo '<tr><td>'.$e($item['content_type']).'</td><td>'.$e($item['title']).'</td><td>'.$e($item['slug']).'</td><td>'.$e($item['sort_order']).'</td><td>'.($item['published']?'Published':'Draft').'</td><td><form method="post"><input type="hidden" name="token" value="'.$e($view['token']).'"><input type="hidden" name="operation" value="delete"><input type="hidden" name="id" value="'.$e($item['id']).'"><button class="btn btn-xs btn-danger">Delete</button></form></td></tr>'; }
+    echo '</tbody></table></div></div></div>';
 }

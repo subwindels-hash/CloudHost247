@@ -28,4 +28,23 @@ class FoundationStaticTests(unittest.TestCase):
                 for table in re.findall(r"schema\(\)->create\('([^']+)'", path.read_text()):
                     self.assertTrue(table.startswith('mod_cloudhost247_'), (path, table))
 
+    def test_theme_is_supported_child_and_cart(self):
+        theme = (ROOT/'templates/cloudhost247/theme.yaml').read_text()
+        cart = (ROOT/'templates/orderforms/cloudhost247/theme.yaml').read_text()
+        self.assertIn('parent: twenty-one', theme)
+        self.assertIn('parent: standard_cart', cart)
+
+    def test_templates_escape_dynamic_plain_text(self):
+        homepage = (ROOT/'templates/cloudhost247/homepage.tpl').read_text()
+        page = (ROOT/'templates/cloudhost247/cloudhost247-page.tpl').read_text()
+        self.assertIn('hero_title|escape', homepage)
+        self.assertIn('title|escape', page)
+        self.assertNotIn('$cloudhost247Page.title nofilter', page)
+
+    def test_custom_route_uses_whmcs_client_area(self):
+        route = (ROOT/'cloudhost247-page.php').read_text()
+        self.assertIn("require __DIR__ . '/init.php'", route)
+        self.assertIn('new ClientArea()', route)
+        self.assertNotIn('session_start', route)
+
 if __name__ == '__main__': unittest.main()

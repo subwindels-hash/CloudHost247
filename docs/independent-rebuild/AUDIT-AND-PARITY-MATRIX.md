@@ -137,3 +137,11 @@ Each matrix row moves to **Complete** only with source, automated tests and stag
 | WHMCS/OVH auth boundary | No WHMCS core changes; OVH credentials remain required and delegated to encrypted WHMCS server configuration | Design/static review complete | OVH API implementation is Phase 4 |
 
 Phase 1 deliberately implements operational foundations and real activation migrations, not business-feature parity. Theme workflows remain Phase 2, currency update workflows Phase 3, and OVH API/provisioning workflows Phase 4. Those corresponding matrix rows remain **Planned**.
+
+## Phase 2 implementation update — 2026-09-27
+
+The detailed HostX comparison is maintained in `PHASE-2-HOSTX-PARITY.md`. The independent deliverable uses WHMCS-supported child-theme inheritance rather than copying 279 vendor templates: native customer/session/billing pages inherit from the stock `twenty-one` parent, while CloudHost247 owns presentation, homepage/CMS output, settings, navigation and cart styling.
+
+**Implemented in source:** independent client/cart themes, responsive visual system, real settings-to-client CSS/output path, authenticated/CSRF-protected CMS administration, publish/draft content, ordered sections, banners, testimonials, nested navigation, footer blocks, per-page SEO title/description, custom WHMCS ClientArea page route, native account/cart inheritance, output escaping and HTML allowlisting.
+
+**Partial:** localized CMS, dedicated product-query landing components, sitemap, OG metadata, visual preview and drag/drop ordering. Numeric section ordering is the practical builder currently delivered. **Staging-blocked:** every browser/runtime assertion, WHMCS menu/head/footer hook behavior, auth/account/cart workflows and screenshots. These are not marked runtime-verified.

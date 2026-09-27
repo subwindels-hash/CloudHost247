@@ -53,3 +53,16 @@ python3 -m unittest -v tests/foundation/test_static.py
 ```
 
 GitHub Actions additionally lints every new PHP file on PHP 7.4. Runtime activation and database assertions must be performed against the supported WHMCS staging environment before Phase 1 is marked staging-verified.
+
+## Phase 2 theme installation and rollback
+
+Requirements: WHMCS 8.1 or later with stock `twenty-one` and `standard_cart` themes, plus an activated Phase 1 foundation.
+
+1. Back up files/database and deploy `cloudhost247-page.php`, `templates/cloudhost247`, `templates/orderforms/cloudhost247`, and the updated `modules/addons/cloudhost247_theme`.
+2. Deactivate/reactivate Theme Manager only if its initial migration has never run; otherwise opening it uses the existing schema. No legacy table is read or changed.
+3. Configure branding and create content in **Addons → CloudHost247 Theme Manager**. Keep items as drafts until reviewed.
+4. In WHMCS general settings select **CloudHost247** as the client theme. Select **CloudHost247 Cart** for the relevant product groups/general ordering settings.
+5. Clear WHMCS template cache. Test anonymous/authenticated pages, cart and every role on staging before cutover.
+6. For rollback, select `twenty-one` and `standard_cart` again and disable Theme Manager. Data and original themes remain intact; no database rollback is required.
+
+Do not select or activate HostX. No HostX key is requested by this installation.

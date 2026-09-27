@@ -4,6 +4,7 @@ require_once $root . '/modules/addons/cloudhost247_core/lib/Contracts/Migration.
 require_once $root . '/modules/addons/cloudhost247_core/lib/Security/SecretPolicy.php';
 require_once $root . '/modules/addons/cloudhost247_core/lib/Support/Logger.php';
 require_once $root . '/modules/addons/cloudhost247_core/lib/Support/HealthCheck.php';
+require_once $root . '/modules/addons/cloudhost247_theme/lib/ThemeRepository.php';
 
 use CloudHost247\Foundation\Security\SecretPolicy;
 use CloudHost247\Foundation\Support\Logger;
@@ -26,6 +27,14 @@ $tests['replacement module entry points exist'] = function () use ($root) {
     foreach (array('theme', 'currency', 'ovh') as $name) if (!is_file($root . '/modules/addons/cloudhost247_' . $name . '/cloudhost247_' . $name . '.php')) return false;
     return true;
 };
+
+$tests['theme sanitizer removes executable attributes'] = function () {
+    $repository = new \CloudHost247\Theme\ThemeRepository();
+    $method = new ReflectionMethod($repository, 'sanitizeHtml'); $method->setAccessible(true);
+    $safe = $method->invoke($repository, '<p onclick="alert(1)">Safe</p><script>alert(2)</script><a href="javascript:bad">bad</a>');
+    return strpos($safe, 'onclick') === false && strpos($safe, '<script') === false && strpos($safe, 'javascript:') === false && strpos($safe, 'Safe') !== false;
+};
+
 $failed = 0;
 foreach ($tests as $name => $test) {
     try { $ok = $test(); } catch (Throwable $e) { $ok = false; echo "not ok - $name: {$e->getMessage()}\n"; $failed++; continue; }
