@@ -23,4 +23,6 @@ jobs:
       - name: OVH PHP mock and behavior tests
         run: php -d display_errors=1 tests/ovh/run.php
       - name: Static and security tests
-        run: python3 -m unittest -v tests/foundation/test_static.py tests/currency/test_static.py tests/ovh/test_static.py tests/security/test_security.py
+        run: python3 -m unittest -v tests/foundation/test_static.py tests/currency/test_static.py tests/ovh/test_static.py tests/ovh/test_product_services_static.py tests/security/test_security.py
+      - name: Preserved proprietary-file integrity
+        run: grep -v '^#' docs/independent-rebuild/original-file-manifest.sha256 | sha256sum --check --strict
