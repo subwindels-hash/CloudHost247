@@ -1,28 +1,22 @@
 <?php
-if (!defined('WHMCS')) { die('This file cannot be accessed directly'); }
-require_once __DIR__ . '/../cloudhost247_core/bootstrap.php';
-require_once __DIR__ . '/migrations/V100.php';
-use CloudHost247\Foundation\Database\MigrationRunner;
-use CloudHost247\Foundation\Security\AdminGuard;
-use WHMCS\Database\Capsule;
-
-function cloudhost247_ovh_config()
-{
-    return array('name' => 'CloudHost247 OVH', 'description' => 'Independent OVH catalog, service mapping and job foundation.', 'version' => '1.0.0', 'author' => 'CloudHost247', 'language' => 'english', 'fields' => array());
-}
-function cloudhost247_ovh_activate()
-{
-    try {
-        if (!class_exists('CloudHost247\Foundation\Database\MigrationRunner')) throw new RuntimeException('Install the CloudHost247 Foundation files first.');
-        $migration = new \CloudHost247\Ovh\Migrations\OvhInitialMigration();
-        $applied = (new MigrationRunner())->run('cloudhost247_ovh', array($migration));
-        return array('status' => 'success', 'description' => 'Endpoint metadata, mappings and idempotent job repositories are ready. OVH credentials remain in encrypted WHMCS server configuration. Applied: ' . (count($applied) ? implode(', ', $applied) : 'already current'));
-    } catch (\Throwable $e) { return array('status' => 'error', 'description' => $e->getMessage()); }
-}
-function cloudhost247_ovh_deactivate() { return array('status' => 'success', 'description' => 'Data retained. No WHMCS or legacy vendor tables were changed.'); }
+if(!defined('WHMCS'))die('Direct access denied');require_once __DIR__.'/bootstrap.php';require_once __DIR__.'/migrations/V100.php';require_once __DIR__.'/migrations/V110.php';
+use CloudHost247\Foundation\Database\MigrationRunner;use CloudHost247\Ovh\Migrations\OvhInitialMigration;use CloudHost247\Ovh\Migrations\OvhOperationalMigration;use CloudHost247\Ovh\Services\AdminController;
+function cloudhost247_ovh_config(){return array('name'=>'CloudHost247 OVH','description'=>'Independent authenticated OVH catalog, mapping, provisioning and synchronization.','version'=>'1.1.0','author'=>'CloudHost247','language'=>'english','fields'=>array());}
+function cloudhost247_ovh_activate(){try{$a=(new MigrationRunner())->run('cloudhost247_ovh',array(new OvhInitialMigration(),new OvhOperationalMigration()));return array('status'=>'success','description'=>'OVH integration installed: '.($a?implode(', ',$a):'already current'));}catch(\Throwable$e){return array('status'=>'error','description'=>$e->getMessage());}}
+function cloudhost247_ovh_deactivate(){return array('status'=>'success','description'=>'Data retained. OVH and WHMCS services were not modified or removed.');}
 function cloudhost247_ovh_output($vars)
 {
-    AdminGuard::requireAdmin();
-    echo '<h2>CloudHost247 OVH</h2><div class="alert alert-info">Independent module version 1.0.0. Vendor licence keys are neither requested nor consumed.</div>';
-    echo '<p>Endpoint metadata, mappings and idempotent job repositories are ready. OVH credentials remain in encrypted WHMCS server configuration.</p><p>Phase 1 provides the secure, non-destructive foundation; feature workflows are tracked in the parity matrix.</p>';
+ $v=(new AdminController())->handle();$e=function($x){return htmlspecialchars((string)$x,ENT_QUOTES,'UTF-8');};
+ echo '<h2>CloudHost247 OVH</h2><p class="alert alert-info">Credentials remain in WHMCS encrypted server fields: Username = application key, Password = application secret, Access Hash = consumer key.</p>';
+ if($v['notice'])echo '<div class="alert alert-success">'.$e($v['notice']).'</div>';if($v['error'])echo '<div class="alert alert-danger">'.$e($v['error']).'</div>';
+ echo '<h3>Endpoint configuration</h3><form method="post" class="form-inline"><input type="hidden" name="token" value="'.$e($v['token']).'"><input type="hidden" name="operation" value="endpoint"><input required class="form-control" name="name" placeholder="Account label"><select name="region" class="form-control"><option>eu</option><option>ca</option><option>us</option></select><select name="server_id" class="form-control">';
+ foreach($v['servers'] as $server)echo '<option value="'.$e($server->id).'">'.$e($server->name).' ('.$e($server->type).')</option>';
+ echo '</select><label><input type="checkbox" name="enabled" value="1"> Enabled</label> <button class="btn btn-primary">Save</button></form><h3>Connections and synchronization</h3><table class="table"><tr><th>Name</th><th>Region</th><th>Server</th><th>Actions</th></tr>';
+ foreach($v['endpoints'] as $endpoint){echo '<tr><td>'.$e($endpoint->name).'</td><td>'.$e($endpoint->region).'</td><td>'.$e($endpoint->server_id).'</td><td><form method="post" class="form-inline"><input type="hidden" name="token" value="'.$e($v['token']).'"><input type="hidden" name="endpoint_id" value="'.$e($endpoint->id).'"><button name="operation" value="test" class="btn btn-xs btn-default">Test API</button> <input name="subsidiary" value="US" size="3" class="form-control"><select name="family" class="form-control"><option>eco</option><option>vps</option></select><button name="operation" value="catalog" class="btn btn-xs btn-default">Sync Catalog</button> <button name="operation" value="services" class="btn btn-xs btn-default">Sync Services</button></form></td></tr>';}
+ echo '</table><h3>Product mapping</h3><form method="post" class="form-inline"><input type="hidden" name="token" value="'.$e($v['token']).'"><input type="hidden" name="operation" value="mapping"><select name="whmcs_product_id" class="form-control">';
+ foreach($v['products'] as $product)echo '<option value="'.$e($product->id).'">'.$e($product->name).'</option>';
+ echo '</select><select name="endpoint_id" class="form-control">';foreach($v['endpoints'] as $endpoint)echo '<option value="'.$e($endpoint->id).'">'.$e($endpoint->name).'</option>';
+ echo '</select><select name="family" class="form-control"><option>eco</option><option>vps</option><option>dedicated</option></select><input required name="plan_code" class="form-control" placeholder="OVH plan code"><input required name="subsidiary" value="US" size="3" class="form-control"><input name="configuration_json" value="{}" class="form-control"><label><input type="checkbox" name="active" value="1"> Active</label> <button class="btn btn-primary">Save mapping</button></form><h3>Recent provisioning operations</h3><table class="table"><tr><th>ID</th><th>Service</th><th>Operation</th><th>Status</th><th>Remote ID</th><th>Error</th></tr>';
+ foreach($v['operations'] as $operation)echo '<tr><td>'.$e($operation->id).'</td><td>'.$e($operation->whmcs_service_id).'</td><td>'.$e($operation->operation).'</td><td>'.$e($operation->status).'</td><td>'.$e($operation->remote_id).'</td><td>'.$e($operation->error_message).'</td></tr>';
+ echo '</table>';
 }
