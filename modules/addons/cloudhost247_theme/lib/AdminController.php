@@ -3,6 +3,7 @@ namespace CloudHost247\Theme;
 
 use CloudHost247\Foundation\Security\AdminGuard;
 use CloudHost247\Foundation\Support\Logger;
+use CloudHost247\Foundation\Support\AuditLogger;
 
 final class AdminController
 {
@@ -18,6 +19,8 @@ final class AdminController
                 $operation = isset($_POST['operation']) ? $_POST['operation'] : '';
                 $capability = in_array($operation,array('delete','content','translation'),true) ? 'content.manage' : 'settings.manage';
                 AdminGuard::requireCapability('cloudhost247_theme',$capability);
+                if (($operation === 'delete' || ($operation === 'content' && !empty($_POST['published']))) && empty($_POST['confirm'])) throw new \InvalidArgumentException('Explicit publication or deletion confirmation is required.');
+                $before = $operation === 'settings' ? $this->repository->settings() : $this->repository->all();
                 if ($operation === 'settings') { $this->repository->saveSettings($_POST); $notice = 'Theme settings saved.'; }
                 elseif ($operation === 'content') { $this->repository->saveContent($_POST); $notice = 'Content saved and is reflected in the client theme according to its publication state.'; }
                 elseif ($operation === 'translation') { $this->repository->saveTranslation($_POST); $notice = 'Localized content saved with base-content fallback.'; }
@@ -25,6 +28,7 @@ final class AdminController
                 elseif ($operation === 'delete') { $this->repository->deleteContent((int) $_POST['id']); $notice = 'Content deleted.'; }
                 else throw new \InvalidArgumentException('Unknown operation.');
                 Logger::write('cloudhost247_theme', 'info', 'admin.' . $operation, array('admin_id' => $_SESSION['adminid']));
+                if ($operation !== 'preview') AuditLogger::record('cloudhost247_theme','content.'.$operation,'cms',$operation,$before,$operation==='settings'?$this->repository->settings():$this->repository->all(),'success',null,$_SESSION['adminid']);
             }
         } catch (\Throwable $e) { $error = $e->getMessage(); Logger::write('cloudhost247_theme', 'error', 'admin.error', array('message' => $error)); }
         $token = function_exists('generate_token') ? generate_token('plain') : '';

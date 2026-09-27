@@ -59,3 +59,14 @@ After these steps, issue a PASS/FAIL/PARTIAL/BLOCKED runtime matrix. Until then,
 Additional source work implements localized CMS translations with base fallback, safe unsaved CMS preview, optional WHMCS-role capability restrictions, broader conservative OVH normalization, unique source-price resolution, exact configurable-option mapping, safe cart-order discovery and improved service matching. The executable deployment and evidence package is in `STAGING-DEPLOYMENT.md`, `STAGING-TEST-MATRIX.md`, and `scripts/staging-*.php`.
 
 Status vocabulary is strict: **IMPLEMENTED** means owned source plus applicable automated/mock evidence; **STAGING VERIFIED** has no entries; **PARTIAL** identifies intentionally bounded workflows; **BLOCKED — STAGING REQUIRED** covers all WHMCS/browser/database/network claims; **NOT IMPLEMENTED — API/PRODUCT DEPENDENCY** covers advanced OVH operations not safely generalized.
+
+## Source management layer update (2026-09-27)
+
+**Project state: SOURCE DEVELOPMENT → STAGING PENDING.** CloudHost247 now includes additive source foundations for confirmed hosting-product metadata, pricing comparison evidence, redacted searchable audit events, currency policy administration, OVH operational filtering/reconciliation evidence, safe customer service states, and audited CMS mutations. WHMCS remains authoritative for products, pricing, billing, ownership, and authentication.
+
+- **IMPLEMENTED (source):** CSRF/role checks, explicit confirmation for consequential writes, namespaced metadata, current-versus-proposed pricing evidence, one-use price previews with stale-price rejection, audit filtering/pagination, bounded operational queries, reconciliation guidance that does not automatically repeat uncertain mutations, localization/preview fallback, output escaping, and secret redaction.
+- **PARTIAL:** Product specifications require runtime UI validation; operational next-sync/rate-limit visibility depends on persisted provider evidence; customer lifecycle buttons remain limited to operations already authorized by the server module; visual presentation needs browser evidence.
+- **BLOCKED — STAGING REQUIRED:** real migrations/database transactions, WHMCS hooks and client area, browser/accessibility rendering, cron, currency HTTP providers, OVH authentication/API calls, provisioning and lifecycle operations.
+- **NOT IMPLEMENTED — API/PRODUCT DEPENDENCY:** provider capabilities not exposed by an authenticated OVH product/API are not guessed; unsafe mutation retry is intentionally unavailable.
+
+Migration ordering is core `1.1.0`, currency `1.0.0 → 1.1.0`, theme `1.0.0 → 1.1.0`, and OVH `1.0.0 → 1.1.0 → 1.2.0 → 1.3.0 → 1.4.0 → 1.5.0`. All migrations are additive/idempotent and retain data on module deactivation. No WHMCS core schema is altered. Before upgrade, back up the database; rollback means restoring that backup and the prior source commit because additive tables/columns are deliberately retained.
