@@ -4,6 +4,9 @@ require_once $root . '/modules/addons/cloudhost247_core/lib/Contracts/Migration.
 require_once $root . '/modules/addons/cloudhost247_core/lib/Security/SecretPolicy.php';
 require_once $root . '/modules/addons/cloudhost247_core/lib/Support/Logger.php';
 require_once $root . '/modules/addons/cloudhost247_core/lib/Support/HealthCheck.php';
+class MockAuditTable { public static $inserted; public function insert($row){self::$inserted=$row;return true;} }
+if (!class_exists('WHMCS\\Database\\Capsule')) eval('namespace WHMCS\\Database; class Capsule { public static function table($name){ return new \\MockAuditTable(); } }');
+require_once $root . '/modules/addons/cloudhost247_core/lib/Support/AuditLogger.php';
 require_once $root . '/modules/addons/cloudhost247_theme/lib/ThemeRepository.php';
 
 use CloudHost247\Foundation\Security\SecretPolicy;
@@ -14,6 +17,10 @@ $tests = array();
 $tests['recursive secret redaction'] = function () {
     $safe = SecretPolicy::redact(array('user' => 'alice', 'api_key' => 'secret', 'nested' => array('consumerKey' => 'abc', 'ok' => 7)));
     return $safe['user'] === 'alice' && $safe['api_key'] === '[REDACTED]' && $safe['nested']['consumerKey'] === '[REDACTED]' && $safe['nested']['ok'] === 7;
+};
+$tests['audit persistence redacts credentials'] = function () {
+    \CloudHost247\Foundation\Support\AuditLogger::record('test','update','product',7,array('password'=>'before-secret'),array('api_token'=>'after-secret'));
+    $row=MockAuditTable::$inserted; return $row['resource_id']==='7' && strpos($row['before_json'],'before-secret')===false && strpos($row['after_json'],'after-secret')===false && strpos($row['after_json'],'[REDACTED]')!==false;
 };
 $tests['correlation IDs are random hex'] = function () {
     $a = Logger::correlationId(); $b = Logger::correlationId();
