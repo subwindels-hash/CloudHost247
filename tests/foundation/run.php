@@ -17,7 +17,7 @@ $tests['recursive secret redaction'] = function () {
 };
 $tests['correlation IDs are random hex'] = function () {
     $a = Logger::correlationId(); $b = Logger::correlationId();
-    return $a !== $b && preg_match('/^[a-f0-9]{64}$/', $a) === 1;
+    return $a !== $b && preg_match('/^[a-f0-9]{32}$/', $a) === 1;
 };
 $tests['health check shape'] = function () {
     $result = HealthCheck::run();
