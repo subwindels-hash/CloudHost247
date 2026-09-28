@@ -97,7 +97,7 @@ if (!defined("WHMCS")) die("This file cannot be accessed directly");
   "homewordpresshostingtext": "De fleste Dedibox-servere understøtter RAID, hvilket giver pålidelighed og ydeevne",
   "homecloudhosting": "Cloud Hosting",
   "homecloudhostingtext": "Vores tekniske assistance er tilgængelig 24 timer i døgnet, 7 dage om ugen med billet og telefon på fransk, engelsk og tysk",
-  "homehostxwebhost": "HostX Web Hosting",
+  "homehostxwebhost": "CloudHost247 Web Hosting",
   "homehostxwebhosttext": "Vi har den perfekte hosting plan for din næste server, websted, app, platform eller blog - alt understøttet af din prisbelønnede 24/7 support.",
   "homestartup": "linux hosting",
   "homesplan2": "vps hosting",

@@ -98,7 +98,7 @@ if (!defined("WHMCS")) die("This file cannot be accessed directly");
   "homewordpresshostingtext": "A Dedibox szerverek többsége támogatja a RAID szolgáltatást, amely megbízhatóságot és teljesítményt nyújt",
   "homecloudhosting": "Cloud Hosting",
   "homecloudhostingtext": "Technikai segítségnyújtásunk a nap 24 órájában, heti 7 napon, jegy és telefon, francia, angol és német nyelven áll rendelkezésre",
-  "homehostxwebhost": "HostX Webtárhely",
+  "homehostxwebhost": "CloudHost247 Webtárhely",
   "homehostxwebhosttext": "Megvan a tökéletes kiszolgálási terv a következő kiszolgálón, webhelyen, alkalmazásnál, platformon vagy blogon - mindezt a díjnyertes 24/7 támogatás.",
   "homestartup": "linux tárhely",
   "homesplan2": "vps hosting",

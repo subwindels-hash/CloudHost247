@@ -549,7 +549,7 @@ Microsoft Graph with an application registration, used for Microsoft 365 mailbox
 - **Authentication:** OAuth 2.0 client-credentials grant, exchanged server-side for a short-lived bearer token
 - **Endpoint:** Fixed provider URL, not administrator editable — `https://graph.microsoft.com/v1.0`
 - **Connection test:** `GET /organization` — response must be JSON; must contain `value`
-- **Platform usage:** modules/servers/hostx_email
+- **Platform usage:** modules/servers/cloudhost247_email
 
 | Field | Type | Required | Stored | Purpose |
 |---|---|---|---|---|

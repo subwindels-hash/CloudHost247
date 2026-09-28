@@ -95,7 +95,7 @@ if (!defined("WHMCS")) die("This file cannot be accessed directly");
   "homewordpresshostingtext": "Die meisten Dedibox-Server unterstützen RAID und bieten Zuverlässigkeit und Leistung",
   "homecloudhosting": "Cloud-Hosting",
   "homecloudhostingtext": "Unsere technische Unterstützung steht Ihnen rund um die Uhr an sieben Tagen in der Woche per Ticket und Telefon in Französisch, Englisch und Deutsch zur Verfügung",
-  "homehostxwebhost": "HostX Web Hosting",
+  "homehostxwebhost": "CloudHost247 Web Hosting",
   "homehostxwebhosttext": "Wir haben das perfekte Hosting-Paket für Ihren nächsten Server, Ihre nächste Website, App, Plattform oder Ihr Blog.",
   "homestartup": "Linux-Hosting",
   "homesplan2": "VPS-Hosting",

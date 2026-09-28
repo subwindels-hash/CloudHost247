@@ -1,0 +1,5 @@
+Installation
+Upload the cloudhost247_tools folder from the zip to /modules/addons/
+Go to WHMCS Admin → System Settings → Addon Modules
+Click Activate next to "HostX Tools Platform"
+Click Configure to set your API keys (WHOIS, GeoIP, OCR), rate limits, and cache duration

@@ -54,14 +54,14 @@ configuration for the same provider, which is the supported path forward.
 | API observed | Vendor module(s) | Registry provider |
 |---|---|---|
 | OVHcloud / SoYouStart (`eu`/`ca`/`us` API hosts) | `modules/addons/soyoustart`, `modules/servers/soyoustart`, `modules/servers/soyoustart_vps`, `crons/getServer.php`, `crons/getIpStatus.php`, `crons/priceSync.php` | `ovh`, `soyoustart` |
-| Microsoft Graph / Office 365 (`graph.microsoft.com`, `login.microsoftonline.com`, `outlook.office365.com`) | `modules/servers/hostx_email` | `microsoft_graph` |
-| Google Workspace / Gmail (`oauth2.googleapis.com`, `gmail.googleapis.com`, `admin.googleapis.com`) | `crons/emailSend.php`, `modules/servers/hostx_email` | not yet registered — see §6 |
+| Microsoft Graph / Office 365 (`graph.microsoft.com`, `login.microsoftonline.com`, `outlook.office365.com`) | `modules/servers/cloudhost247_email` | `microsoft_graph` |
+| Google Workspace / Gmail (`oauth2.googleapis.com`, `gmail.googleapis.com`, `admin.googleapis.com`) | `crons/emailSend.php`, `modules/servers/cloudhost247_email` | not yet registered — see §6 |
 | Blockonomics (`www.blockonomics.co`, `bch.blockonomics.co`) | `modules/gateways/blockonomics.php`, `modules/gateways/callback/blockonomics.php` | `blockonomics` |
 | CryptoCompare (`min-api.cryptocompare.com`) | `modules/gateways/blockonomics` | not registered — read-only public price feed, no credential |
 | SMTP Hosting reseller API (`my.smtphosting.com`) | `modules/servers/Smtphosting` | not registered — see §6 |
 | SMM panel v2 API | `modules/addons/smmaddon`, `modules/servers/smmprovisioning` | `smm_panel` |
 | eSIM / telephony APIs (`api.airalo.com`, `api.truphone.com`) | `modules/addons/phoneservices` | not registered — see §6 |
-| Public lookup services (`ip-api.com`, `api.bgpview.io`, `ipinfo.io`, `ipwho.is`, `api.whatismyip.com`, `lookup.binlist.net`, `api.qrserver.com`, `chart.googleapis.com`) | `modules/addons/CloudHost247_tools`, `hostx_tools`, `hostx_domain_lookup`, `tools_center` | not registered — unauthenticated public utilities, no credential to protect |
+| Public lookup services (`ip-api.com`, `api.bgpview.io`, `ipinfo.io`, `ipwho.is`, `api.whatismyip.com`, `lookup.binlist.net`, `api.qrserver.com`, `chart.googleapis.com`) | `modules/addons/CloudHost247_tools`, `cloudhost247_tools`, `cloudhost247_domain_lookup`, `tools_center` | not registered — unauthenticated public utilities, no credential to protect |
 | ionCube licence loader (`get-loader.ioncube.com`) | `modules/addons/hostx`, `modules/addons/xtreme_currency_rates` | not applicable — vendor licensing |
 
 ---
@@ -176,7 +176,7 @@ integrations with nothing to configure.
 
 | Item | Recommendation |
 |---|---|
-| Google Workspace / Gmail OAuth in `crons/emailSend.php` and `modules/servers/hostx_email` | Both are manifest-protected. When those modules are rebuilt, register a `google_workspace` provider (OAuth 2.0 service account or client credentials) rather than re-introducing per-module configuration. |
+| Google Workspace / Gmail OAuth in `crons/emailSend.php` and `modules/servers/cloudhost247_email` | Both are manifest-protected. When those modules are rebuilt, register a `google_workspace` provider (OAuth 2.0 service account or client credentials) rather than re-introducing per-module configuration. |
 | `my.smtphosting.com` reseller API (`modules/servers/Smtphosting`) | Vendor module. Register a provider when the module is rebuilt or replaced; the generic `smtp` provider already covers plain mail submission. |
 | eSIM / telephony APIs (`modules/addons/phoneservices`) | Vendor module using Airalo and Truphone. Register providers when that module is brought in-house. |
 | `modules/addons/soyoustart` | Decommission — see §4.1. |

@@ -31,10 +31,10 @@ of this repository **into** an existing WHMCS installation root (cPanel
 ├── modules/
 │   ├── addons/                     ← Addon modules (WHMCS → System Settings → Addon Modules)
 │   │   ├── hostx/                     HostX theme helper module (ionCube) — REQUIRED by the theme
-│   │   ├── hostx_tools/               HostX Tools Platform v2.2.6 (60+ online tools)
+│   │   ├── cloudhost247_tools/               HostX Tools Platform v2.2.6 (60+ online tools)
 │   │   ├── CloudHost247_tools/        Same platform, CloudHost247-branded build (activate only ONE of the two)
-│   │   ├── hostx_domain_lookup/       HostX Domain Lookup (4-tool WHOIS/IP/DNS/availability build,
-│   │   │                              renamed from a second "hostx_tools" build — see module README)
+│   │   ├── cloudhost247_domain_lookup/       HostX Domain Lookup (4-tool WHOIS/IP/DNS/availability build,
+│   │   │                              renamed from a second "cloudhost247_tools" build — see module README)
 │   │   ├── tools_center/              WHMCS Tools Center (UI addon + external-api backend —
 │   │   │                              deploy external-api/ separately per its INSTALL.md)
 │   │   ├── dnschecker/                DNS Checker client-area tool
@@ -53,7 +53,7 @@ of this repository **into** an existing WHMCS installation root (cPanel
 │       ├── Smtphosting/               SMTP hosting provisioning (ModulesGarden v3)
 │       ├── soyoustart/                SoYouStart dedicated server provisioning
 │       ├── soyoustart_vps/            SoYouStart VPS provisioning
-│       ├── hostx_email/               Email hosting provisioning (M365/GWorkspace/Pro)
+│       ├── cloudhost247_email/               Email hosting provisioning (M365/GWorkspace/Pro)
 │       └── smmprovisioning/           SMM panel order automation
 ├── templates/
 │   ├── hostx/                      ← HostX theme (WHMCS Global Services)
@@ -81,9 +81,9 @@ of this repository **into** an existing WHMCS installation root (cPanel
 | Module | Type | Location |
 |---|---|---|
 | HostX (theme helper) | addon | `modules/addons/hostx/` |
-| HostX Tools Platform v2.2.6 | addon | `modules/addons/hostx_tools/` |
+| HostX Tools Platform v2.2.6 | addon | `modules/addons/cloudhost247_tools/` |
 | CloudHost247 Tools Platform (rebrand) | addon | `modules/addons/CloudHost247_tools/` |
-| HostX Domain Lookup | addon | `modules/addons/hostx_domain_lookup/` |
+| HostX Domain Lookup | addon | `modules/addons/cloudhost247_domain_lookup/` |
 | Tools Center (+ external API) | addon | `modules/addons/tools_center/` |
 | DNS Checker | addon | `modules/addons/dnschecker/` |
 | Custom Affiliate | addon | `modules/addons/customaffiliate/` |
@@ -97,11 +97,11 @@ of this repository **into** an existing WHMCS installation root (cPanel
 | Smtphosting v3 | server | `modules/servers/Smtphosting/` |
 | SoYouStart (dedicated) | server | `modules/servers/soyoustart/` |
 | SoYouStart VPS | server | `modules/servers/soyoustart_vps/` |
-| HostX Email Hosting | server | `modules/servers/hostx_email/` |
+| HostX Email Hosting | server | `modules/servers/cloudhost247_email/` |
 | SMM Provisioning | server | `modules/servers/smmprovisioning/` |
 
 **Notes**
-- `hostx_tools` and `CloudHost247_tools` are two brandings of the same platform —
+- `cloudhost247_tools` and `CloudHost247_tools` are two brandings of the same platform —
   activate only one in WHMCS.
 - `tools_center/external-api/` is a standalone PHP API backend. For security it
   must be deployed **outside** the WHMCS webroot (its own subdomain/server) —

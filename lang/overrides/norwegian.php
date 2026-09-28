@@ -96,7 +96,7 @@ $_LANG = json_decode('{
   "homewordpresshostingtext": "De fleste Dedibox-servere støtter RAID, som gir pålitelighet og ytelse",
   "homecloudhosting": "Cloud Hosting",
   "homecloudhostingtext": "Vår teknisk assistanse er tilgjengelig 24 timer i døgnet, 7 dager i uken med billett og telefon, på fransk, engelsk og tysk",
-  "homehostxwebhost": "HostX Web Hosting",
+  "homehostxwebhost": "CloudHost247 Web Hosting",
   "homehostxwebhosttext": "Vi har den perfekte hosting planen for din neste server, nettsted, app, plattform eller blogg - alt støttet av din prisbelønte 24/7 support.",
   "homestartup": "linux hosting",
   "homesplan2": "vps hosting",

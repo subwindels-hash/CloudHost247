@@ -260,7 +260,7 @@ $_LANG['homecloudhosting'] = 'Cloud Hosting';
 
 $_LANG['homecloudhostingtext'] = 'Texniki yardımımız həftədə 7 gün 24 saat, bilet və telefon, Fransız, ingilis və alman dilində mövcuddur';
 
-$_LANG['homehostxwebhost'] = 'HostX Web Hosting';
+$_LANG['homehostxwebhost'] = 'CloudHost247 Web Hosting';
 
 $_LANG['homehostxwebhosttext'] = "Növbəti server, sayt, app, platform və ya blogunuz üçün mükəmməl bir hosting planı var - hamısı mükafat qazanan 24/7 dəstəyiniz tərəfindən dəstəklənir.";
 
