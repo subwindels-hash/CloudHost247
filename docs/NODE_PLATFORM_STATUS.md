@@ -272,3 +272,110 @@ says the corresponding cPanel gate is CLOSED with evidence.
 - **Intentionally not implemented in this phase (deferred, per the authorized scope):** no
   cart/checkout/payment/invoice/order/service-activation flow of any kind; domain
   registrar/availability integration remains unconnected by design.
+
+## Phase 4 — Customer App
+
+- **Scope (explicitly authorized):** self-service customer account management (full-name edit,
+  password change with real session invalidation), passive/staff-entered `customer_services` and
+  `customer_domains` records, a threaded customer support-ticket system, a staff customer
+  directory (admin + super_admin), staff service/domain/ticket management, and super_admin-only
+  account status/role changes. Explicitly **not** cart/checkout/orders/payments/billing ledger/
+  invoices/automated provisioning/registrar integration (deferred to Phase 5/6). Started from
+  accepted Phase 3 commit `66bfb76deb7a57ebdcf55f474c81b08fdf99e30c`.
+- **Session/git constraint:** same as Phase 3 — delivered as new, clearly-labeled commits on
+  `arena/01a0e82a-cloudhost247` (PR #11), with the PR description updated with a dedicated Phase 4
+  section. Nothing from Phase 1–3 was amended, rebased, or force-pushed.
+- **Schema (`database/migrations/0008`–`0013`):**
+  - `0008` — `customer_services` (user FK `ON DELETE CASCADE`, optional catalog product/plan soft
+    links `ON DELETE SET NULL`, status `CHECK`, staff-only `notes`/`created_by`).
+  - `0009` — `customer_domains` (same pattern; `domain_name` deliberately **not** globally unique —
+    a staff record, not a live registry).
+  - `0010`/`0011` — `support_tickets` / `support_ticket_messages` (status lifecycle `open` →
+    `pending_staff`/`pending_customer` → `closed`, reopens on any further reply; message body
+    non-blank `CHECK`; `author_role` captured as an immutable snapshot at post time).
+  - `0012` — `users.password_changed_at`, backfilled to **epoch** (`1970-01-01T00:00:00Z`, never
+    `now()`) so existing sessions are not disrupted by the deploy itself — only a real, subsequent
+    password change invalidates prior tokens. Full rationale in the migration file's comments.
+  - `0013` — widens the `auth_audit_log` event-type `CHECK` (not a new table) to accept
+    `profile_update`, `password_change`, `admin_status_change`, `admin_role_change`.
+  - All six are additive-only, no destructive change to any Phase 1–3 table.
+- **Repository/DTO/route layer:** `src/db/customer-services.ts`, `customer-domains.ts`,
+  `support-tickets.ts` (repository) → `src/dto/account.ts` (never leaks `notes`/`created_by`/
+  `password_hash`/another user's raw id to a customer-facing response) → `src/routes/account.ts`
+  (self-service, `/api/v1/account/*`) and `src/routes/admin-customers.ts` (staff,
+  `/api/v1/admin/customers/*`, `/api/v1/admin/tickets/*`).
+- **Authorization model (enforced server-side on every request, never trusting the JWT claim
+  alone):** `src/lib/require-role.ts` re-reads the caller's current role from `users` on every
+  call. Customer routes are self-scoped only (`authenticate()`); most staff routes accept
+  `admin`/`super_admin`; account-status and role-change routes accept `super_admin` only. A
+  super_admin cannot change their own role (self-demotion lockout, `400`). Frontend hiding
+  (`RequireRole.tsx`) is UX only and documented as such in its own source comment.
+- **Ownership isolation:** every self-service query is scoped to the caller's own `userId`. A
+  record that exists but belongs to someone else is **never** distinguishable from one that
+  doesn't exist — both return `404`, never `403` (proved adversarially in
+  `tests/integration/account-api.test.ts` with two real accounts, including a DB-level check that
+  a cross-customer write attempt was never persisted).
+- **Password/session security:** `authenticate()` (`src/lib/require-auth.ts`) rejects a JWT whose
+  `iat` predates the account's current `password_changed_at` (both floored to whole-second
+  precision — a deliberate, documented fix for the `iat`/`timestamptz` granularity mismatch,
+  proven by a test that forces real >1s delays around the password-change call). Independent of
+  the existing `jti`/`revoked_tokens` logout mechanism. A suspended/disabled account's still-valid
+  JWT is rejected on its very next request. Wrong-current-password returns `400
+  VALIDATION_ERROR`, not `401` — using `401` here was a real bug (caught via frontend TDD) that
+  collided with the frontend's "401 while holding a token ⇒ clear session" heuristic and silently
+  logged customers out for a typo; fixed and regression-tested.
+- **Passive-record boundary (no provisioning):** creating/editing a `customer_services` or
+  `customer_domains` row never calls cPanel/WHM/a registrar API and never provisions/activates/
+  verifies anything — proved by a test that stubs `globalThis.fetch` to throw if called at all,
+  then performs both mutations and asserts zero calls were made.
+- **Every customer-facing page explicitly handles:** loading, success (real data), empty ("no
+  services/domains/tickets yet"), API failure (visible banner, not a blank page), signed-out
+  (redirect to `/login`), and role-restricted (`RequireRole`'s "not available" message for a
+  customer reaching `/admin`) — no hardcoded records, balances, invoices, or fake success states
+  anywhere in this phase. Billing/Invoices remain the unchanged, honest Phase 1 placeholder.
+- **Testing:**
+  - `tests/integration/customer-app-schema.test.ts` (11 tests) — DB-level: FK
+    cascade/SET NULL behavior, status `CHECK` enforcement, partial-update semantics, ticket
+    lifecycle including reopen-on-reply, blank-message rejection, per-user vs. all-tickets scoping.
+  - `tests/integration/account-api.test.ts` (8 tests) — self-service API end-to-end: unauthenticated
+    rejection, profile update persistence, wrong-password `400` (hash untouched), real
+    password-invalidation of prior tokens with a freshly-issued token still working, ownership
+    isolation (services/domains/tickets), no self-service create/edit route exists for
+    services/domains, 404-not-403 for another customer's ticket (with non-persistence proof),
+    malformed-UUID vs. nonexistent-id distinction.
+  - `tests/integration/admin-customers-api.test.ts` (11 tests) — full RBAC matrix (unauthenticated/
+    customer/admin/super_admin), super_admin-only status/role routes, self-demotion lockout, a
+    forged-JWT-claiming-super_admin attack correctly rejected via DB re-verification, cross-customer
+    URL-id attachment rejected (`404`), and the `fetch`-stubbing no-side-effect boundary test.
+  - `tests/integration/migrate.test.ts` — extended to cover all 13 migrations.
+  - Frontend: `dashboard-protected.test.tsx`, `services-domains-pages.test.tsx`,
+    `support-pages.test.tsx`, `account-page.test.tsx`, `admin-rbac.test.tsx` — loading/empty/
+    success/error/signed-out/role-restricted states, the 404-not-403 ownership check, and a
+    dedicated regression assertion for the wrong-current-password bug (session/token still intact,
+    no Login screen shown).
+  - **Full suite: 165/165 tests passing across 27 test files**, via a clean backend typecheck,
+    frontend typecheck, production build (`npm run build`), and `npx vitest run`. All integration
+    tests run against a real embedded Postgres engine (pglite), migrated with the actual committed
+    SQL files — not mocks.
+  - `git diff` against the Phase 3 base commit, restricted to non-`cloudhost247-node`/non-docs
+    paths, confirms zero WHMCS/PHP files modified. **`package.json`/`package-lock.json` are
+    byte-identical to the Phase 3 baseline — zero new npm dependencies added.**
+- **API contract documentation:** `docs/API_CUSTOMER_APP.md` — full RBAC matrix, ownership/
+  404-not-403 rationale, the complete password-invalidation contract (including the epoch-backfill
+  rationale and the same-second precision trade-off), and every endpoint's request/response shape,
+  written directly against the actual route/DTO code (cross-checked line-by-line in an independent
+  review pass — see PR #11's Phase 4 verification section).
+- **Independent verification pass:** a separate review (not the implementation session) re-derived
+  every result above from a genuinely fresh `git clone` of `origin` — resolving the true branch tip
+  via `git ls-remote`, confirming `66bfb76` as a genuine unmodified ancestor, and re-running the
+  full clean-clone build/typecheck/test suite independently. No discrepancy found. Full detail
+  recorded in PR #11's description.
+- **cPanel staging verification: still BLOCKED / UNVERIFIED** — unchanged reason as every prior
+  phase. This phase adds no cPanel-incompatible dependency and no new dependency at all.
+- **Known limitation carried over, unchanged:** no automated headless-browser (Playwright/
+  Chromium) visual/responsive verification is possible in this sandbox. Frontend correctness is
+  verified via jsdom + Testing Library unit tests only, not a rendered browser.
+- **Intentionally not implemented in this phase (deferred, per the authorized scope):** cart,
+  checkout, orders, payments, payment gateways, a billing ledger, real invoices, automated
+  provisioning, cPanel/WHM API calls, domain registrar API calls, automatic service activation,
+  automatic domain registration/renewal, email verification/change, 2FA, SSO, file uploads.
