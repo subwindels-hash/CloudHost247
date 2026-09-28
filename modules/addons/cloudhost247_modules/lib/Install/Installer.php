@@ -78,6 +78,7 @@ final class Installer
         $dependencies = $resolver->check($manifest);
 
         $files = $this->fileImpact($manifest, $inspection);
+        $configurationChanges = $this->configurationChanges($manifest, $existing ? $this->repository->manifest($manifest->id()) : null);
 
         $warnings = array_merge($compatibility['warnings'], $dependencies['warnings']);
         $blockers = array_merge($compatibility['problems'], $dependencies['problems']);
@@ -95,6 +96,10 @@ final class Installer
         }
         if ($manifest->hasMigrations()) {
             $warnings[] = 'This module declares database changes. Its own migration runs when the module is activated, not during file installation.';
+        }
+        if ($configurationChanges['removed']) {
+            $warnings[] = count($configurationChanges['removed']) . ' configuration setting(s) declared by the installed version are gone from this package: '
+                . implode(', ', $configurationChanges['removed']) . '. Their stored values are retained but no longer used.';
         }
         if (!$inspection->has($manifest->entryPoint())) {
             $blockers[] = 'The package does not contain its declared entry point "' . $manifest->entryPoint() . '".';
@@ -117,6 +122,7 @@ final class Installer
             'warnings' => $warnings,
             'blockers' => $blockers,
             'integrations' => $manifest->integrationProviders(),
+            'configuration_changes' => $configurationChanges,
         ));
     }
 
@@ -148,6 +154,9 @@ final class Installer
             'install_path' => $manifest->relativeDirectory(),
             'declared_tables' => $manifest->declaredTables(),
             'requires_configuration' => $manifest->requiresConfiguration(),
+            // Configuration state before the change: stored setting keys only, never values.
+            'configuration_keys_before' => array_keys($this->repository->settings($manifest->id())),
+            'configuration_changes' => $plan->configurationChanges(),
             'integrations' => $manifest->integrationProviders(),
             'admin_id' => (int) $adminId,
         ));
@@ -191,6 +200,43 @@ final class Installer
                 . ($plan->existingRow() ? ($restored ? ' and the previous version was restored.' : ', but the previous version could not be fully restored. Restore it from the backup directory before using this module.') : ' and no files were left behind.');
             throw new ModuleException($message, ModuleException::REASON_ROLLBACK);
         }
+    }
+
+    /**
+     * What this package changes about the module's declared configuration.
+     *
+     * Recorded in the installation snapshot and shown in the update preview so
+     * an administrator sees settings appearing, disappearing or changing shape
+     * before confirming. Only field declarations are compared; stored values
+     * are never read here.
+     *
+     * @return array array('added','removed','changed','requires_configuration')
+     */
+    private function configurationChanges(Manifest $manifest, Manifest $installed = null)
+    {
+        $describe = function (Manifest $source) {
+            $fields = array();
+            foreach ($source->configuration()['fields'] as $field) {
+                $fields[$field['key']] = $field['type'] . '|' . ($field['required'] ? 'required' : 'optional')
+                    . '|' . implode(',', $field['options']) . '|' . $field['min'] . '-' . $field['max'];
+            }
+            return $fields;
+        };
+
+        $new = $describe($manifest);
+        $old = $installed ? $describe($installed) : array();
+
+        $changed = array();
+        foreach ($new as $key => $shape) {
+            if (isset($old[$key]) && $old[$key] !== $shape) { $changed[] = $key; }
+        }
+
+        return array(
+            'added' => array_values(array_diff(array_keys($new), array_keys($old))),
+            'removed' => array_values(array_diff(array_keys($old), array_keys($new))),
+            'changed' => $changed,
+            'requires_configuration' => $manifest->requiresConfiguration(),
+        );
     }
 
     /* --------------------------------------------------------- uninstall -- */

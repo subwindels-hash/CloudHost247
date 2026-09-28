@@ -899,6 +899,69 @@ $check('the uninstall is audited with the version that was removed', (function (
     return false;
 })());
 
+/* ----------------------------------------- update of an enabled module */
+
+// Reinstall the module, enable it, then update it: the update must keep the
+// enabled state and the message must say what is actually true.
+$request(array('operation' => 'install', 'checksum' => $checksum, 'confirm_install' => '1'));
+$controller->handle();
+$request(array('operation' => 'toggle', 'module_id' => 'demo_module', 'enabled' => '1'));
+$controller->handle();
+
+$updateManifest = $manifestFor(array('version' => '1.1.0', 'configuration' => array('required' => true, 'fields' => array(
+    array('key' => 'timeout', 'label' => 'Request timeout', 'type' => 'number', 'required' => true, 'min' => 5, 'max' => 90),
+    array('key' => 'default_region', 'label' => 'Default region', 'type' => 'select', 'options' => array('eu', 'us')),
+))));
+$updateZip = $makeZip('demo-1.1.0.zip', $packageFiles($updateManifest));
+$updateChecksum = Checksum::ofFile($updateZip);
+$updateUpload = $archives . '/upload-1.1.0.zip';
+copy($updateZip, $updateUpload);
+$request(array('operation' => 'upload'), array('package' => array('name' => 'demo-1.1.0.zip', 'tmp_name' => $updateUpload, 'error' => UPLOAD_ERR_OK, 'size' => filesize($updateZip))));
+$updatePreview = $controller->handle();
+$updatePreviewHtml = $view->render($updatePreview);
+$check('the update preview compares both versions and offers Update Module', strpos($updatePreviewHtml, '1.1.0') !== false
+    && strpos($updatePreviewHtml, 'installed: 1.0.0') !== false
+    && strpos($updatePreviewHtml, 'Update Module') !== false);
+$check('the update preview lists the configuration changes it brings', strpos($updatePreviewHtml, 'Configuration changes') !== false
+    && strpos($updatePreviewHtml, 'default_region') !== false
+    && strpos($updatePreviewHtml, 'Changed setting(s)') !== false);
+
+$request(array('operation' => 'install', 'checksum' => $updateChecksum, 'confirm_install' => '1'));
+$updated = $controller->handle();
+$check('an update of an enabled module keeps it enabled and says so honestly', $updated['error'] === ''
+    && (int) $controllerRegistry->find('demo_module')->enabled === 1
+    && strpos($updated['notice'], 'remains enabled') !== false
+    && strpos($updated['notice'], 'installed but disabled') === false);
+$check('the update is logged as an update carrying both versions', (function () use ($controllerRegistry) {
+    foreach ($controllerRegistry->eventRows as $event) {
+        if ($event->event_type === 'update' && $event->result === 'success') {
+            return $event->version_from === '1.0.0' && $event->version_to === '1.1.0';
+        }
+    }
+    return false;
+})());
+$check('the update is audited as an update, not as a fresh install', (function () {
+    foreach (AuditLogger::$records as $record) {
+        if ($record['action'] === 'module.update') {
+            return $record['before']['version'] === '1.0.0' && $record['after']['version'] === '1.1.0';
+        }
+    }
+    return false;
+})());
+$check('the installation snapshot records the configuration state and change', (function () use ($controllerStorage) {
+    foreach (glob($controllerStorage->root() . '/backups/*/installation.json') as $snapshotFile) {
+        $snapshot = json_decode(file_get_contents($snapshotFile), true);
+        if (!isset($snapshot['configuration_changes'], $snapshot['configuration_keys_before'])) { continue; }
+        if ($snapshot['version_to'] !== '1.1.0') { continue; }
+        return $snapshot['configuration_changes']['changed'] === array('timeout')
+            && $snapshot['configuration_changes']['added'] === array('default_region')
+            && $snapshot['admin_id'] === 7
+            && $snapshot['version_from'] === '1.0.0'
+            && isset($snapshot['started_at'], $snapshot['completed_at'], $snapshot['package_checksum'], $snapshot['declared_tables']);
+    }
+    return false;
+})());
+
 $request(array('operation' => 'not_a_real_operation'));
 $unknown = $controller->handle();
 $check('unknown operations are rejected', $unknown['error'] !== '');

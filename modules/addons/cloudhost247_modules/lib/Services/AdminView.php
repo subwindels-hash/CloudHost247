@@ -231,6 +231,7 @@ final class AdminView
             . '<span class="label label-danger">' . count($files['orphaned']) . ' removed</span></p>';
         $html .= $this->fileList('Files that will be replaced', $files['replaced']);
         $html .= $this->fileList('Files that will be removed', $files['orphaned']);
+        $html .= $this->configurationChanges($plan);
 
         foreach ($plan->warnings() as $warning) {
             $html .= '<div class="alert alert-warning">' . $this->e($warning) . '</div>';
@@ -270,6 +271,28 @@ final class AdminView
 
         $html .= '<p class="text-muted" style="margin-top:10px">The existing module directory is backed up before any file is written. '
             . 'If any step fails, the previous version is restored and the failure is recorded in the module log.</p>';
+        return $html;
+    }
+
+    /** Settings this package adds, drops or reshapes compared with the installed version. */
+    private function configurationChanges($plan)
+    {
+        if ($plan->isFreshInstall()) { return ''; }
+        $changes = $plan->configurationChanges();
+        if (!$changes['added'] && !$changes['removed'] && !$changes['changed']) {
+            return '<h4>Configuration changes</h4><p class="text-muted">This package declares the same settings as the installed version.</p>';
+        }
+        $html = '<h4>Configuration changes</h4><ul>';
+        foreach (array('added' => 'New setting(s)', 'changed' => 'Changed setting(s)', 'removed' => 'Removed setting(s)') as $key => $label) {
+            if (!$changes[$key]) { continue; }
+            $escaped = array();
+            foreach ($changes[$key] as $setting) { $escaped[] = '<code>' . $this->e($setting) . '</code>'; }
+            $html .= '<li><strong>' . $this->e($label) . ':</strong> ' . implode(', ', $escaped) . '</li>';
+        }
+        $html .= '</ul>';
+        if ($changes['removed']) {
+            $html .= '<p class="text-muted">Values stored for removed settings are retained, not deleted.</p>';
+        }
         return $html;
     }
 

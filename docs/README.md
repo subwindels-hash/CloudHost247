@@ -9,6 +9,7 @@
 | `independent-rebuild/` | Independent rebuild programme: security review, installation/upgrade, staging matrices, per-system documentation, and the proprietary-file integrity manifest |
 | `independent-rebuild/API-INTEGRATIONS.md` | **Central API & Integrations centre** — every supported provider, required credentials, where to obtain them, scopes, endpoint requirements, test vs production, rotation, connection testing, failure handling and the security model |
 | `independent-rebuild/MODULE-MANAGER.md` | **Super Admin Module Manager** — the upload/validate/inspect/install/rollback pipeline, the `module.json` specification, archive-security controls, permissions, audit logging and packaging rules |
+| `independent-rebuild/MODULE-MANAGER-COMPLIANCE.md` | **Module Manager traceability matrix** — every specification clause mapped to the code that implements it and the named test assertion that proves it |
 | `independent-rebuild/API-INVENTORY-AUDIT.md` | Repository-wide audit of every outbound API, hard-coded credential findings and their remediation status |
 | `build-notes/` | Build/install provenance notes per module (hostx-tools-platform, hostx-domain-lookup, dnschecker, customaffiliate, digitalproducts, hostx-email, phoneservices, smm) |
 

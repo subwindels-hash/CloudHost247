@@ -291,6 +291,32 @@ class ModuleManagerStaticTests(unittest.TestCase):
         self.assertIn("empty($_POST['confirm_usage'])", uninstall)
         self.assertIn("$usage['live'] === null", uninstall)
 
+    # ----------------------------------------------------------- compliance
+    def test_compliance_matrix_references_real_assertions(self):
+        """The traceability matrix may only cite checks that actually exist."""
+        doc = (DOCS / 'MODULE-MANAGER-COMPLIANCE.md').read_text()
+        suite = (ROOT / 'tests/modules/run.php').read_text()
+        static = (ROOT / 'tests/modules/test_static.py').read_text()
+        names = set(re.findall(r"`([a-z][a-z0-9 ,\'\-/()]{15,})`", doc))
+        self.assertGreater(len(names), 100, 'the matrix lost its evidence column')
+        for name in sorted(names):
+            if name.startswith('test_'):
+                self.assertIn(f'def {name}', static, name)
+            else:
+                self.assertIn(name, suite, name)
+
+    def test_compliance_matrix_covers_every_specification_section(self):
+        doc = (DOCS / 'MODULE-MANAGER-COMPLIANCE.md').read_text()
+        for heading in (
+            '## 1. The page', '## 2. Upload pipeline', '## 3. Secure archive extraction',
+            '## 4. Module manifest', '## 5. Installation preview', '## 6. Installation transaction',
+            '## 7. Existing module protection', '## 8. Enable / disable', '## 9. Uninstall',
+            '## 10. Module permissions', '## 11. Security / trust', '## 12. Module configuration',
+            '## 13. Module updates', '## 14. Module audit log', '## 15. Not a fake UI',
+            '## 16. Reusable platform service',
+        ):
+            self.assertIn(heading, doc)
+
     # ----------------------------------------------------------- deployment
     def test_storage_is_configurable_and_hardened(self):
         storage = self.source('lib/Package/PackageStorage.php')

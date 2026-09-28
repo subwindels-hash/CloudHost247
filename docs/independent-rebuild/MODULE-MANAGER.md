@@ -12,7 +12,7 @@ transactionally, and can prove afterwards that what is on disk is exactly what
 was installed.
 
 Nothing in this document describes intent only: every control below is
-implemented, exercised by `tests/modules/run.php` (231 assertions) and enforced
+implemented, exercised by `tests/modules/run.php` (237 assertions) and enforced
 at source level by `tests/modules/test_static.py`.
 
 ---

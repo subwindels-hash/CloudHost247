@@ -288,9 +288,16 @@ final class AdminController
         $health = ModuleManager::verify($manifest->id(), $this->installer);
         $this->log($adminId, 'health_check', $manifest->id(), $health['status'] === 'healthy' ? 'success' : 'failed', $health['detail'], $checksum);
 
+        // The state sentence is read back from the registry, so it always describes
+        // what is actually true now: a fresh install stays disabled, an update keeps
+        // whatever the administrator had already enabled.
+        $installedRow = $this->repository->find($manifest->id());
+        $state = $installedRow && (int) $installedRow->enabled === 1
+            ? 'The module was already enabled and remains enabled.'
+            : 'The module is installed but disabled — enable it once you have reviewed its configuration.';
         $notice = $manifest->name() . ' ' . $manifest->version() . ' ' . ($plan->isFreshInstall() ? 'installed' : 'updated')
             . ': ' . $result['files'] . ' file(s) written to ' . $manifest->relativeDirectory() . '. '
-            . 'Post-install verification: ' . $health['detail'] . ' The module is installed but disabled — enable it once you have reviewed its configuration.';
+            . 'Post-install verification: ' . $health['detail'] . ' ' . $state;
         return array('notice' => $notice);
     }
 

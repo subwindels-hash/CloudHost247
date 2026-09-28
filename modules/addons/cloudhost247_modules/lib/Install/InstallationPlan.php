@@ -37,6 +37,7 @@ final class InstallationPlan
     public function warnings() { return $this->data['warnings']; }
     public function blockers() { return $this->data['blockers']; }
     public function integrations() { return $this->data['integrations']; }
+    public function configurationChanges() { return isset($this->data['configuration_changes']) ? $this->data['configuration_changes'] : array('added' => array(), 'removed' => array(), 'changed' => array(), 'requires_configuration' => false); }
     public function requiresDowngradeConfirmation() { return $this->action() === self::ACTION_DOWNGRADE; }
 
     public function actionLabel()

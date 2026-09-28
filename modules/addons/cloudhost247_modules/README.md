@@ -92,11 +92,13 @@ deletes customer or service data.
 ## Writing a module
 
 See `docs/independent-rebuild/MODULE-MANAGER.md` for the full `module.json`
-specification, the packaging rules and the integration contract.
+specification, the packaging rules and the integration contract, and
+`docs/independent-rebuild/MODULE-MANAGER-COMPLIANCE.md` for the clause-by-clause
+traceability matrix (requirement → code → test).
 
 ## Tests
 
 ```bash
-php tests/modules/run.php                      # 231 behavioural assertions
+php tests/modules/run.php                      # 237 behavioural assertions
 python3 -m unittest tests.modules.test_static  # source-level security policy
 ```

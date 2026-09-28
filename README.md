@@ -169,7 +169,9 @@ not by unzipping over SSH or cPanel.
   tables are never dropped and customer/service data is never deleted.
 - Set `CH247_MODULE_STORAGE` to a writable directory outside the document root.
 
-Read `docs/independent-rebuild/MODULE-MANAGER.md` for the pipeline, the
+Read `docs/independent-rebuild/MODULE-MANAGER-COMPLIANCE.md` for the
+clause-by-clause traceability matrix (requirement → code → test), and
+`docs/independent-rebuild/MODULE-MANAGER.md` for the pipeline, the
 `module.json` specification and the packaging rules.
 
 ## Runtime requirements (deployment target)
