@@ -378,6 +378,18 @@ class TestBehaviorSuite(unittest.TestCase):
         self.assertIn("idempotent", src)
         self.assertIn("exit($fail ? 1 : 0)", src)
 
+    def test_fakes_load_after_the_interfaces_they_implement(self):
+        """The fakes implement module interfaces; PHP resolves 'implements'
+        at declaration time, so every contract file must be required before
+        fakes.php (this exact ordering bug broke the first CI run)."""
+        src = read(os.path.join(TESTS, "run.php"))
+        fakes_pos = src.index("require_once __DIR__ . '/fakes.php'")
+        for contract in ("Support/HttpTransport.php", "Contracts/ProviderFinder.php",
+                         "Contracts/OrderStore.php", "Contracts/ApiRecorder.php",
+                         "Support/UrlPolicy.php"):
+            self.assertLess(src.index("require_once $lib . '" + contract + "'"), fakes_pos,
+                            "%s must load before fakes.php" % contract)
+
     def test_fakes_are_test_only(self):
         src = read(os.path.join(TESTS, "fakes.php"))
         self.assertIn("namespace CloudHost247\\Smm\\Test", src)

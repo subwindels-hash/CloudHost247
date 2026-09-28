@@ -10,8 +10,9 @@
  * Usage: php tests/smm/run.php   (exits non-zero on any failure)
  */
 
-require_once __DIR__ . '/fakes.php';
-
+// Real module classes load FIRST: the fakes implement these interfaces
+// (HttpTransport, ProviderFinder, OrderStore, ApiRecorder), and PHP resolves
+// "implements" when the declaration executes — interfaces must exist by then.
 $root = dirname(__DIR__, 2);
 $lib = $root . '/modules/addons/cloudhost247_smm/lib/';
 require_once $lib . 'Support/ModuleException.php';
@@ -36,6 +37,8 @@ require_once $lib . 'Services/ReconciliationService.php';
 require_once $lib . 'Services/CatalogSync.php';
 require_once $lib . 'Services/Automation.php';
 require_once $lib . 'Services/ClientAreaService.php';
+
+require_once __DIR__ . '/fakes.php';
 
 use CloudHost247\Smm\Adapters\AdapterFactory;
 use CloudHost247\Smm\Adapters\GenericSmmAdapter;
