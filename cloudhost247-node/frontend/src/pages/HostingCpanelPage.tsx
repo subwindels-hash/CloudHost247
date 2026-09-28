@@ -1,12 +1,16 @@
 import { NavLink } from 'react-router-dom';
 import { usePageMeta } from '../lib/usePageMeta';
+import { ProductPlansSection } from '../components/ProductPlansSection';
 
 /**
- * Deliberately does not show plan tiers or prices: the real product catalog and pricing live in
- * WHMCS (queried dynamically from tblproducts/tblpricing in cpanel-hosting.php) and this Node app
- * has no live connection to that catalog yet. Inventing specific numbers here would present
- * fabricated pricing as real, which this project explicitly avoids. This page describes what's
- * included in general terms; a later phase will integrate the real, live catalog.
+ * The "what's included" copy below is general, static marketing content (unchanged from Phase 2)
+ * — it doesn't depend on the catalog and stays visible even if the live plans/pricing fetch below
+ * fails, since it's true regardless of catalog state.
+ *
+ * Phase 3 adds the "Plans & pricing" section beneath it, which is now real, live data from
+ * GET /api/v1/catalog/products/cpanel-hosting/plans (see src/routes/catalog-public.ts) rather than
+ * a "sign in to see pricing" placeholder — with an honest, distinct message for every possible
+ * state of that data (see ProductPlansSection).
  */
 const included = [
   { title: 'cPanel control panel', body: 'Manage files, databases, email, and domains from one familiar dashboard.' },
@@ -41,12 +45,16 @@ export default function HostingCpanelPage() {
       </section>
 
       <section className="ch247-section ch247-section--muted">
+        <div className="ch247-page ch247-page--wide">
+          <h2>Plans &amp; pricing</h2>
+          <ProductPlansSection slug="cpanel-hosting" />
+        </div>
+      </section>
+
+      <section className="ch247-section">
         <div className="ch247-page ch247-page--cta">
-          <h2>See current plans and pricing</h2>
-          <p>
-            Plan tiers and current pricing are shown when you create an account or sign in — create
-            an account to view them.
-          </p>
+          <h2>Ready to get started?</h2>
+          <p>Create an account and we&apos;ll help you pick the right plan.</p>
           <NavLink className="ch247-button" to="/register">
             Create your account
           </NavLink>

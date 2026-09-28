@@ -11,6 +11,25 @@ export interface ApiError {
   message: string;
 }
 
+/**
+ * Thrown by apiFetch for any non-2xx response. Carries the real HTTP status code alongside the
+ * message so callers that need to tell apart e.g. "not found" (404 — nothing configured yet) from
+ * a generic failure (network/500) can do so honestly, without guessing from message text. Existing
+ * callers that only did `error instanceof Error` / `error.message` keep working unchanged, since
+ * this extends Error.
+ */
+export class ApiRequestError extends Error {
+  readonly status: number;
+  readonly code: string;
+
+  constructor(status: number, code: string, message: string) {
+    super(message);
+    this.name = 'ApiRequestError';
+    this.status = status;
+    this.code = code;
+  }
+}
+
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const token = localStorage.getItem('ch247_token');
   const res = await fetch(path, {
@@ -33,7 +52,7 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
     if (res.status === 401 && token) {
       clearSession();
     }
-    throw new Error(body.message || 'Request failed');
+    throw new ApiRequestError(res.status, body.error || 'UNKNOWN', body.message || 'Request failed');
   }
 
   if (res.status === 204) {

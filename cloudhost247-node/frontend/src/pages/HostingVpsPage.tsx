@@ -1,15 +1,18 @@
 import { NavLink } from 'react-router-dom';
 import { usePageMeta } from '../lib/usePageMeta';
+import { ProductPlansSection } from '../components/ProductPlansSection';
 
 /**
  * Feature copy is adapted from the real, currently-published VPS hosting page content
  * (lang/overrides/english.php: vpsfullaccess*, vpsintegratedcpanel*, vpsinstantprovision* keys,
  * rendered by templates/cloudhost247_legacy/includes/blocks/why_choose_vps_hosting.tpl and served
- * today at vps-hosting.php) — lightly reworded for this app's brand voice, not invented. As with
- * the cPanel hosting page, this deliberately does not show plan tiers, specs (CPU/RAM/storage), or
- * prices: those are queried live from WHMCS (tblproducts/tblpricing) by vps-hosting.php and this
- * Node app has no live connection to that catalog yet. Inventing numbers here would present
- * fabricated pricing/specs as real.
+ * today at vps-hosting.php) — lightly reworded for this app's brand voice, not invented. It stays
+ * static because it's true regardless of catalog state.
+ *
+ * The "Plans & pricing" section below is now real, live data from
+ * GET /api/v1/catalog/products/vps-hosting/plans (see src/routes/catalog-public.ts), with an
+ * honest, distinct message for every possible state of that data (see ProductPlansSection) — no
+ * fabricated specs (CPU/RAM/storage) or prices are ever shown.
  */
 const included = [
   {
@@ -50,12 +53,16 @@ export default function HostingVpsPage() {
       </section>
 
       <section className="ch247-section ch247-section--muted">
+        <div className="ch247-page ch247-page--wide">
+          <h2>Plans &amp; pricing</h2>
+          <ProductPlansSection slug="vps-hosting" />
+        </div>
+      </section>
+
+      <section className="ch247-section">
         <div className="ch247-page ch247-page--cta">
-          <h2>See current plans and pricing</h2>
-          <p>
-            VPS plan tiers, resource allocations, and current pricing are shown when you create an
-            account or sign in.
-          </p>
+          <h2>Ready to get started?</h2>
+          <p>Create an account and we&apos;ll help you pick the right plan.</p>
           <NavLink className="ch247-button" to="/register">
             Create your account
           </NavLink>
