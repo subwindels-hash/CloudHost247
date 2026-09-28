@@ -43,6 +43,9 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0015_create_cart_items.sql',
     '0016_create_orders.sql',
     '0017_create_order_items.sql',
+    '0018_create_invoices.sql',
+    '0019_create_billing_ledger.sql',
+    '0020_create_payments.sql',
   ];
 
   it('finds the committed migration files in order', () => {

@@ -66,6 +66,11 @@ export interface OrderSummaryDTO {
   taxAmount: string;
   totalAmount: string;
   createdAt: string;
+  /** Set from Phase 5B onward — every order now gets exactly one invoice, issued atomically at
+   * checkout (see src/services/billing-service.ts#issueInvoiceForOrder). `null` only for orders
+   * that could theoretically predate that guarantee; no such orders exist once 0018+ are applied. */
+  invoiceId: string | null;
+  invoiceNumber: string | null;
 }
 
 export interface OrderItemDTO {
@@ -83,7 +88,7 @@ export interface OrderDetailDTO extends OrderSummaryDTO {
   items: OrderItemDTO[];
 }
 
-export function toOrderSummaryDTO(row: OrderRow): OrderSummaryDTO {
+export function toOrderSummaryDTO(row: OrderRow, invoice?: { id: string; invoice_number: string } | null): OrderSummaryDTO {
   return {
     id: row.id,
     orderNumber: row.order_number,
@@ -95,6 +100,8 @@ export function toOrderSummaryDTO(row: OrderRow): OrderSummaryDTO {
     taxAmount: row.tax_amount,
     totalAmount: row.total_amount,
     createdAt: row.created_at,
+    invoiceId: invoice?.id ?? null,
+    invoiceNumber: invoice?.invoice_number ?? null,
   };
 }
 

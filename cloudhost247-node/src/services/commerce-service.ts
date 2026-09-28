@@ -13,6 +13,7 @@ import { findPlanById } from '../db/catalog-plans';
 import { findProductById } from '../db/catalog-products';
 import { listPublishedPricingForPlan, type BillingPeriod } from '../db/catalog-pricing';
 import { withTransaction } from '../db/transaction';
+import { issueInvoiceForOrder } from './billing-service';
 import { fromCents, multiplyCents, sumCents, toCents } from '../lib/money';
 import { NotFoundError, ValidationError } from '../lib/errors';
 import { DEFAULT_CURRENCY } from '../config/billing';
@@ -125,11 +126,16 @@ export async function removeItemFromCart(pool: Queryable, userId: string, itemId
  *
  * Phase 5A creates the order in `status: 'pending'` / `payment_status: 'unpaid'` only — there is no
  * payment gateway yet (Phase 5C), so no route anywhere can mark an order paid at this stage.
+ *
+ * Phase 5B extends this same transaction to also issue the order's invoice and its opening
+ * `charge` ledger entry (src/services/billing-service.ts#issueInvoiceForOrder) — the order, its
+ * items, its invoice, and that invoice's ledger entry are one atomic unit; a checkout can never
+ * produce any strict subset of the four.
  */
 export async function checkoutCart(pool: Queryable, userId: string, genId: () => string): Promise<OrderDetailDTO> {
   const orderId = genId();
 
-  const { order, items } = await withTransaction(pool, async (tx) => {
+  const { order, items, invoice } = await withTransaction(pool, async (tx) => {
     const cart = await getOrCreateCartForUser(tx, userId, genId());
     const lines = await listCartItemsWithDetails(tx, cart.id, DEFAULT_CURRENCY);
 
@@ -181,17 +187,19 @@ export async function checkoutCart(pool: Queryable, userId: string, genId: () =>
       items: orderItems,
     });
 
+    const issuedInvoice = await issueInvoiceForOrder(tx, result.order, genId);
+
     await clearCart(tx, cart.id);
 
-    return result;
+    return { ...result, invoice: issuedInvoice };
   });
 
-  return { ...toOrderSummaryDTO(order), items: items.map(toOrderItemDTO) };
+  return { ...toOrderSummaryDTO(order, invoice), items: items.map(toOrderItemDTO) };
 }
 
 export async function listMyOrders(pool: Queryable, userId: string): Promise<OrderSummaryDTO[]> {
   const orders = await listOrdersForUser(pool, userId);
-  return orders.map(toOrderSummaryDTO);
+  return orders.map((row) => toOrderSummaryDTO(row, row.invoice_id ? { id: row.invoice_id, invoice_number: row.invoice_number as string } : null));
 }
 
 export async function getMyOrderDetail(pool: Queryable, userId: string, orderId: string): Promise<OrderDetailDTO> {
@@ -200,5 +208,6 @@ export async function getMyOrderDetail(pool: Queryable, userId: string, orderId:
     throw new NotFoundError('No order was found with that id');
   }
   const items = await listOrderItemsForOrder(pool, order.id);
-  return { ...toOrderSummaryDTO(order), items: items.map(toOrderItemDTO) };
+  const invoice = order.invoice_id ? { id: order.invoice_id, invoice_number: order.invoice_number as string } : null;
+  return { ...toOrderSummaryDTO(order, invoice), items: items.map(toOrderItemDTO) };
 }

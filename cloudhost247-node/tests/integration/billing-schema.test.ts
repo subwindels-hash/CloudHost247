@@ -1,0 +1,438 @@
+import { randomUUID } from 'node:crypto';
+import { PGlite } from '@electric-sql/pglite';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { PgliteClient } from '../../database/db-client';
+import { migrateUp } from '../../database/migrate';
+import { createUser } from '../../src/db/users';
+import { createOrder } from '../../src/db/orders';
+import { createInvoice, findInvoiceById, findInvoiceByOrderId, listInvoicesForUser, setInvoiceStatus } from '../../src/db/invoices';
+import { listLedgerEntriesForInvoice, listLedgerEntriesForUser, recordLedgerEntry } from '../../src/db/billing-ledger';
+import { createPayment, findPaymentByProviderReference, findPaymentById, listPaymentsForInvoice, updatePaymentStatus } from '../../src/db/payments';
+import { withTransaction } from '../../src/db/transaction';
+
+/**
+ * Exercises the real Phase 5B schema (invoices, billing_ledger, payments) and its repository
+ * functions against a real embedded Postgres engine (pglite) migrated with the actual committed
+ * migration files — not mocks. Mirrors tests/integration/commerce-schema.test.ts's approach for
+ * Phase 5A.
+ */
+describe('Phase 5B billing database schema and repositories', () => {
+  let db: PGlite;
+
+  beforeEach(async () => {
+    db = new PGlite();
+    await migrateUp(new PgliteClient(db), { isProduction: false });
+  });
+
+  afterEach(async () => {
+    await db.close();
+  });
+
+  async function makeUser(email: string) {
+    return createUser(db, { id: randomUUID(), email, passwordHash: 'hash', fullName: 'Test User' });
+  }
+
+  async function makeOrder(userId: string, totalAmount = '49.99') {
+    const { order } = await createOrder(db, {
+      id: randomUUID(),
+      userId,
+      currency: 'USD',
+      subtotalAmount: totalAmount,
+      discountAmount: '0.00',
+      taxAmount: '0.00',
+      totalAmount,
+      items: [],
+    });
+    return order;
+  }
+
+  it('generates unique, sequential, zero-padded invoice numbers via invoice_number_seq', async () => {
+    const user = await makeUser('inv1@example.com');
+    const order1 = await makeOrder(user.id);
+    const order2 = await makeOrder(user.id);
+
+    const invoice1 = await createInvoice(db, {
+      id: randomUUID(),
+      orderId: order1.id,
+      userId: user.id,
+      currency: 'USD',
+      subtotalAmount: '49.99',
+      discountAmount: '0.00',
+      taxAmount: '0.00',
+      totalAmount: '49.99',
+    });
+    const invoice2 = await createInvoice(db, {
+      id: randomUUID(),
+      orderId: order2.id,
+      userId: user.id,
+      currency: 'USD',
+      subtotalAmount: '49.99',
+      discountAmount: '0.00',
+      taxAmount: '0.00',
+      totalAmount: '49.99',
+    });
+
+    expect(invoice1.invoice_number).toMatch(/^INV-\d{8}$/);
+    expect(invoice2.invoice_number).toMatch(/^INV-\d{8}$/);
+    expect(invoice1.invoice_number).not.toBe(invoice2.invoice_number);
+    expect(invoice1.status).toBe('unpaid');
+    expect(invoice1.due_date).toBeTruthy();
+  });
+
+  it('enforces one invoice per order (unique order_id)', async () => {
+    const user = await makeUser('inv2@example.com');
+    const order = await makeOrder(user.id);
+    await createInvoice(db, {
+      id: randomUUID(),
+      orderId: order.id,
+      userId: user.id,
+      currency: 'USD',
+      subtotalAmount: '10.00',
+      discountAmount: '0.00',
+      taxAmount: '0.00',
+      totalAmount: '10.00',
+    });
+
+    await expect(
+      createInvoice(db, {
+        id: randomUUID(),
+        orderId: order.id,
+        userId: user.id,
+        currency: 'USD',
+        subtotalAmount: '10.00',
+        discountAmount: '0.00',
+        taxAmount: '0.00',
+        totalAmount: '10.00',
+      })
+    ).rejects.toThrow();
+  });
+
+  it('rejects an invalid invoice status and a negative amount', async () => {
+    const user = await makeUser('inv3@example.com');
+    const order = await makeOrder(user.id);
+
+    await expect(
+      db.query(
+        `INSERT INTO invoices (id, order_id, user_id, subtotal_amount, total_amount, status) VALUES ($1, $2, $3, 10, 10, 'overdue')`,
+        [randomUUID(), order.id, user.id]
+      )
+    ).rejects.toThrow();
+
+    await expect(
+      db.query(`INSERT INTO invoices (id, order_id, user_id, subtotal_amount, total_amount) VALUES ($1, $2, $3, -5, -5)`, [
+        randomUUID(),
+        order.id,
+        user.id,
+      ])
+    ).rejects.toThrow();
+  });
+
+  it('RESTRICTs deleting an order or user that has an invoice', async () => {
+    const user = await makeUser('inv4@example.com');
+    const order = await makeOrder(user.id);
+    await createInvoice(db, {
+      id: randomUUID(),
+      orderId: order.id,
+      userId: user.id,
+      currency: 'USD',
+      subtotalAmount: '10.00',
+      discountAmount: '0.00',
+      taxAmount: '0.00',
+      totalAmount: '10.00',
+    });
+
+    await expect(db.query('DELETE FROM orders WHERE id = $1', [order.id])).rejects.toThrow();
+    await expect(db.query('DELETE FROM users WHERE id = $1', [user.id])).rejects.toThrow();
+  });
+
+  it('finds an invoice by id and by order id, joined with the order number, and lists a user\'s invoices', async () => {
+    const user = await makeUser('inv5@example.com');
+    const order = await makeOrder(user.id);
+    const invoice = await createInvoice(db, {
+      id: randomUUID(),
+      orderId: order.id,
+      userId: user.id,
+      currency: 'USD',
+      subtotalAmount: '10.00',
+      discountAmount: '0.00',
+      taxAmount: '0.00',
+      totalAmount: '10.00',
+    });
+
+    const byId = await findInvoiceById(db, invoice.id);
+    expect(byId?.order_number).toBe(order.order_number);
+
+    const byOrder = await findInvoiceByOrderId(db, order.id);
+    expect(byOrder?.id).toBe(invoice.id);
+
+    const forUser = await listInvoicesForUser(db, user.id);
+    expect(forUser.map((i) => i.id)).toEqual([invoice.id]);
+  });
+
+  it('setInvoiceStatus updates status and updated_at (reserved for future phases, not called by 5B code)', async () => {
+    const user = await makeUser('inv6@example.com');
+    const order = await makeOrder(user.id);
+    const invoice = await createInvoice(db, {
+      id: randomUUID(),
+      orderId: order.id,
+      userId: user.id,
+      currency: 'USD',
+      subtotalAmount: '10.00',
+      discountAmount: '0.00',
+      taxAmount: '0.00',
+      totalAmount: '10.00',
+    });
+
+    const updated = await setInvoiceStatus(db, invoice.id, 'paid');
+    expect(updated?.status).toBe('paid');
+  });
+
+  describe('billing_ledger (append-only)', () => {
+    it('records a charge entry and lists it for both the invoice and the user', async () => {
+      const user = await makeUser('ledger1@example.com');
+      const order = await makeOrder(user.id);
+      const invoice = await createInvoice(db, {
+        id: randomUUID(),
+        orderId: order.id,
+        userId: user.id,
+        currency: 'USD',
+        subtotalAmount: '10.00',
+        discountAmount: '0.00',
+        taxAmount: '0.00',
+        totalAmount: '10.00',
+      });
+
+      const entry = await recordLedgerEntry(db, {
+        id: randomUUID(),
+        userId: user.id,
+        invoiceId: invoice.id,
+        entryType: 'charge',
+        amount: '10.00',
+        currency: 'USD',
+        description: `Invoice ${invoice.invoice_number}`,
+      });
+      expect(entry.entry_type).toBe('charge');
+
+      const forInvoice = await listLedgerEntriesForInvoice(db, invoice.id);
+      expect(forInvoice.map((e) => e.id)).toEqual([entry.id]);
+      const forUser = await listLedgerEntriesForUser(db, user.id);
+      expect(forUser.map((e) => e.id)).toEqual([entry.id]);
+    });
+
+    it('rejects a zero/negative amount and an invalid entry_type', async () => {
+      const user = await makeUser('ledger2@example.com');
+      await expect(
+        recordLedgerEntry(db, { id: randomUUID(), userId: user.id, invoiceId: null, entryType: 'credit', amount: '0.00', currency: 'USD', description: 'x' })
+      ).rejects.toThrow();
+
+      await expect(
+        db.query(`INSERT INTO billing_ledger (id, user_id, entry_type, amount, currency, description) VALUES ($1, $2, 'chargeback', 10, 'USD', 'x')`, [
+          randomUUID(),
+          user.id,
+        ])
+      ).rejects.toThrow();
+    });
+
+    it('is enforced insert-only at the database level: UPDATE and DELETE both fail, even outside the repository layer', async () => {
+      const user = await makeUser('ledger3@example.com');
+      const entry = await recordLedgerEntry(db, {
+        id: randomUUID(),
+        userId: user.id,
+        invoiceId: null,
+        entryType: 'credit',
+        amount: '5.00',
+        currency: 'USD',
+        description: 'Goodwill credit',
+      });
+
+      await expect(db.query('UPDATE billing_ledger SET amount = 999 WHERE id = $1', [entry.id])).rejects.toThrow(/append-only/);
+      await expect(db.query('DELETE FROM billing_ledger WHERE id = $1', [entry.id])).rejects.toThrow(/append-only/);
+
+      const { rows } = await db.query('SELECT amount FROM billing_ledger WHERE id = $1', [entry.id]);
+      expect((rows[0] as { amount: string }).amount).toBe('5.00');
+    });
+
+    it('a mutation attempt inside a transaction rolls back cleanly instead of corrupting other writes in the same transaction', async () => {
+      const user = await makeUser('ledger4@example.com');
+      const entry = await recordLedgerEntry(db, {
+        id: randomUUID(),
+        userId: user.id,
+        invoiceId: null,
+        entryType: 'credit',
+        amount: '5.00',
+        currency: 'USD',
+        description: 'Goodwill credit',
+      });
+
+      await expect(
+        withTransaction(db, async (tx) => {
+          await tx.query('UPDATE billing_ledger SET amount = 999 WHERE id = $1', [entry.id]);
+        })
+      ).rejects.toThrow(/append-only/);
+
+      const { rows } = await db.query('SELECT amount FROM billing_ledger WHERE id = $1', [entry.id]);
+      expect((rows[0] as { amount: string }).amount).toBe('5.00');
+    });
+
+    it('RESTRICTs deleting an invoice that has ledger entries', async () => {
+      const user = await makeUser('ledger5@example.com');
+      const order = await makeOrder(user.id);
+      const invoice = await createInvoice(db, {
+        id: randomUUID(),
+        orderId: order.id,
+        userId: user.id,
+        currency: 'USD',
+        subtotalAmount: '10.00',
+        discountAmount: '0.00',
+        taxAmount: '0.00',
+        totalAmount: '10.00',
+      });
+      await recordLedgerEntry(db, {
+        id: randomUUID(),
+        userId: user.id,
+        invoiceId: invoice.id,
+        entryType: 'charge',
+        amount: '10.00',
+        currency: 'USD',
+        description: 'x',
+      });
+
+      await expect(db.query('DELETE FROM invoices WHERE id = $1', [invoice.id])).rejects.toThrow();
+    });
+  });
+
+  describe('payments (schema-only in Phase 5B — no route creates these yet)', () => {
+    it('creates a payment row in "pending" status by default and enforces its status/amount checks', async () => {
+      const user = await makeUser('pay1@example.com');
+      const order = await makeOrder(user.id);
+      const invoice = await createInvoice(db, {
+        id: randomUUID(),
+        orderId: order.id,
+        userId: user.id,
+        currency: 'USD',
+        subtotalAmount: '10.00',
+        discountAmount: '0.00',
+        taxAmount: '0.00',
+        totalAmount: '10.00',
+      });
+
+      const payment = await createPayment(db, { id: randomUUID(), invoiceId: invoice.id, userId: user.id, amount: '10.00', currency: 'USD' });
+      expect(payment.status).toBe('pending');
+
+      await expect(
+        db.query(`INSERT INTO payments (id, invoice_id, user_id, amount, currency, status) VALUES ($1, $2, $3, 10, 'USD', 'approved')`, [
+          randomUUID(),
+          invoice.id,
+          user.id,
+        ])
+      ).rejects.toThrow();
+
+      await expect(
+        db.query(`INSERT INTO payments (id, invoice_id, user_id, amount, currency) VALUES ($1, $2, $3, 0, 'USD')`, [randomUUID(), invoice.id, user.id])
+      ).rejects.toThrow();
+    });
+
+    it('enforces idempotency: the same (provider, provider_reference) can never be recorded twice', async () => {
+      const user = await makeUser('pay2@example.com');
+      const order = await makeOrder(user.id);
+      const invoice = await createInvoice(db, {
+        id: randomUUID(),
+        orderId: order.id,
+        userId: user.id,
+        currency: 'USD',
+        subtotalAmount: '10.00',
+        discountAmount: '0.00',
+        taxAmount: '0.00',
+        totalAmount: '10.00',
+      });
+
+      await createPayment(db, {
+        id: randomUUID(),
+        invoiceId: invoice.id,
+        userId: user.id,
+        amount: '10.00',
+        currency: 'USD',
+        provider: 'sandbox',
+        providerReference: 'txn_123',
+      });
+
+      await expect(
+        createPayment(db, {
+          id: randomUUID(),
+          invoiceId: invoice.id,
+          userId: user.id,
+          amount: '10.00',
+          currency: 'USD',
+          provider: 'sandbox',
+          providerReference: 'txn_123',
+        })
+      ).rejects.toThrow();
+
+      // A different provider_reference (or no reference at all — e.g. a manual gateway payment)
+      // must still be allowed.
+      const second = await createPayment(db, { id: randomUUID(), invoiceId: invoice.id, userId: user.id, amount: '10.00', currency: 'USD' });
+      expect(second.provider_reference).toBeNull();
+
+      const found = await findPaymentByProviderReference(db, 'sandbox', 'txn_123');
+      expect(found?.invoice_id).toBe(invoice.id);
+    });
+
+    it('updatePaymentStatus transitions status and records a failure reason / completion time', async () => {
+      const user = await makeUser('pay3@example.com');
+      const order = await makeOrder(user.id);
+      const invoice = await createInvoice(db, {
+        id: randomUUID(),
+        orderId: order.id,
+        userId: user.id,
+        currency: 'USD',
+        subtotalAmount: '10.00',
+        discountAmount: '0.00',
+        taxAmount: '0.00',
+        totalAmount: '10.00',
+      });
+      const payment = await createPayment(db, { id: randomUUID(), invoiceId: invoice.id, userId: user.id, amount: '10.00', currency: 'USD' });
+
+      const failed = await updatePaymentStatus(db, payment.id, 'failed', { failureReason: 'card_declined' });
+      expect(failed?.status).toBe('failed');
+      expect(failed?.failure_reason).toBe('card_declined');
+
+      const found = await findPaymentById(db, payment.id);
+      expect(found?.status).toBe('failed');
+
+      const forInvoice = await listPaymentsForInvoice(db, invoice.id);
+      expect(forInvoice.map((p) => p.id)).toEqual([payment.id]);
+    });
+
+    it('RESTRICTs deleting an invoice that has a payment', async () => {
+      const user = await makeUser('pay4@example.com');
+      const order = await makeOrder(user.id);
+      const invoice = await createInvoice(db, {
+        id: randomUUID(),
+        orderId: order.id,
+        userId: user.id,
+        currency: 'USD',
+        subtotalAmount: '10.00',
+        discountAmount: '0.00',
+        taxAmount: '0.00',
+        totalAmount: '10.00',
+      });
+      await createPayment(db, { id: randomUUID(), invoiceId: invoice.id, userId: user.id, amount: '10.00', currency: 'USD' });
+
+      await expect(db.query('DELETE FROM invoices WHERE id = $1', [invoice.id])).rejects.toThrow();
+    });
+
+    it('confirms no code path in this codebase currently creates a payment row (Phase 5B has no gateway yet)', async () => {
+      // This is a structural assertion, not a DB assertion: src/routes/*.ts must not reference
+      // src/db/payments.ts's createPayment as of Phase 5B. Grepping the actual route sources is
+      // the most direct way to prove this without relying on prose alone.
+      const fs = await import('node:fs');
+      const path = await import('node:path');
+      const routesDir = path.join(__dirname, '..', '..', 'src', 'routes');
+      const files = fs.readdirSync(routesDir);
+      for (const file of files) {
+        const content = fs.readFileSync(path.join(routesDir, file), 'utf-8');
+        expect(content.includes('createPayment')).toBe(false);
+      }
+    });
+  });
+});

@@ -100,14 +100,34 @@ export async function createOrder(tx: Queryable, input: CreateOrderInput): Promi
   return { order, items };
 }
 
-export async function findOrderById(pool: Queryable, id: string): Promise<OrderRow | null> {
-  const { rows } = await pool.query<OrderRow>('SELECT * FROM orders WHERE id = $1 LIMIT 1', [id]);
+/** An order joined with its (Phase 5B+) invoice's id/number, if one has been issued for it — every
+ * order created since migration 0018 has exactly one (see
+ * src/services/billing-service.ts#issueInvoiceForOrder), but the join is a `LEFT JOIN` rather than
+ * an assumed inner join so this never breaks if that invariant is ever relaxed. */
+export interface OrderWithInvoiceRow extends OrderRow {
+  invoice_id: string | null;
+  invoice_number: string | null;
+}
+
+export async function findOrderById(pool: Queryable, id: string): Promise<OrderWithInvoiceRow | null> {
+  const { rows } = await pool.query<OrderWithInvoiceRow>(
+    `SELECT o.*, i.id AS invoice_id, i.invoice_number AS invoice_number
+     FROM orders o
+     LEFT JOIN invoices i ON i.order_id = o.id
+     WHERE o.id = $1
+     LIMIT 1`,
+    [id]
+  );
   return rows[0] ?? null;
 }
 
-export async function listOrdersForUser(pool: Queryable, userId: string): Promise<OrderRow[]> {
-  const { rows } = await pool.query<OrderRow>(
-    'SELECT * FROM orders WHERE user_id = $1 ORDER BY created_at DESC',
+export async function listOrdersForUser(pool: Queryable, userId: string): Promise<OrderWithInvoiceRow[]> {
+  const { rows } = await pool.query<OrderWithInvoiceRow>(
+    `SELECT o.*, i.id AS invoice_id, i.invoice_number AS invoice_number
+     FROM orders o
+     LEFT JOIN invoices i ON i.order_id = o.id
+     WHERE o.user_id = $1
+     ORDER BY o.created_at DESC`,
     [userId]
   );
   return rows;
