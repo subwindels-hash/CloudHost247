@@ -9,9 +9,19 @@ DOCS = ROOT / 'docs/independent-rebuild'
 PHP_SOURCES = sorted(p for p in MODULE.rglob('*.php') if p.is_file())
 
 
+def strip_comments(text):
+    """PHP source with block and line comments removed, so policy assertions
+    match real code rather than the prose that documents it."""
+    text = re.sub(r'/\*.*?\*/', '', text, flags=re.S)
+    return re.sub(r'(?m)^\s*//.*$', '', text)
+
+
 class ModuleManagerStaticTests(unittest.TestCase):
     def source(self, relative):
         return (MODULE / relative).read_text()
+
+    def code(self, relative):
+        return strip_comments(self.source(relative))
 
     # ------------------------------------------------------------- structure
     def test_module_layout(self):
@@ -206,14 +216,80 @@ class ModuleManagerStaticTests(unittest.TestCase):
         ])
         self.assertEqual(migration.count('hasTable('), len(tables))
 
+    def test_settings_migration_is_additive_and_holds_no_secrets(self):
+        migration = self.source('migrations/V110.php')
+        self.assertIn("return '1.1.0'", migration)
+        tables = re.findall(r"->create\('([^']+)'", migration)
+        self.assertEqual(tables, ['mod_cloudhost247_module_settings'])
+        self.assertEqual(migration.count('hasTable('), 1)
+        # V100 is immutable once released: the settings table arrives additively.
+        self.assertNotIn('mod_cloudhost247_module_settings', self.source('migrations/V100.php'))
+
     def test_migration_registered_with_the_release_gate(self):
         validator = (ROOT / 'scripts/validate-migrations.py').read_text()
-        self.assertIn("'cloudhost247_modules':['1.0.0']", validator)
+        self.assertIn("'cloudhost247_modules':['1.0.0','1.1.0']", validator)
         gate = (ROOT / 'scripts/release-candidate-check.sh').read_text()
         self.assertIn('tests/modules/run.php', gate)
         self.assertIn('tests/modules/test_static.py', gate)
         workflow = (ROOT / '.github/workflows/independent-foundation.yml').read_text()
         self.assertIn('tests/modules/run.php', workflow)
+
+    # ------------------------------------------------- configuration safety
+    def test_module_settings_can_never_hold_credentials(self):
+        manifest = self.source('lib/Manifest/Manifest.php')
+        # Secret by flag and secret by name are both refused before storage exists.
+        self.assertIn('CREDENTIAL_KEY_PATTERN', manifest)
+        for word in ('password', 'secret', 'token', 'key', 'credential', 'passphrase'):
+            self.assertIn(word, manifest.split('CREDENTIAL_KEY_PATTERN')[1].split(';')[0])
+        self.assertIn('looksLikeCredential', manifest)
+        # The settings path has no notion of a secret: it cannot store, encrypt or mask one.
+        settings = self.code('lib/Registry/ModuleSettings.php').lower()
+        for forbidden in ('secret', 'encrypt', 'decrypt', 'vault', 'password'):
+            self.assertNotIn(forbidden, settings)
+        repository = self.code('lib/Registry/ModuleRepository.php')
+        save = repository.split('public function saveSettings(')[1].split('public function')[0]
+        self.assertIn('updateOrInsert', save)
+        self.assertNotIn('manifest_json', save)
+
+    def test_configuration_is_validated_against_the_manifest_only(self):
+        controller = self.code('lib/Services/AdminController.php')
+        configure = controller.split('private function configure(')[1].split('private function')[0]
+        self.assertIn("requireCapability(self::MODULE, 'modules.configure')", configure)
+        self.assertIn('ModuleSettings::validate($manifest', configure)
+        # Only key names reach the log and the audit trail, never values.
+        self.assertIn("implode(', ', $changed)", configure)
+        logged = configure.split('$this->log(')[1].split(';')[0]
+        self.assertNotIn('$validated', logged)
+        audited = configure.split('$this->audit(')[1].split(';')[0]
+        self.assertIn('array_keys($before)', audited)
+        self.assertNotIn("$validated['values']", audited)
+
+    def test_connection_testing_is_delegated_to_the_integrations_centre(self):
+        service = self.code('lib/Services/ModuleManager.php')
+        tester = service.split('public static function testIntegration(')[1].split('private static function')[0]
+        self.assertIn('IntegrationManager::test(', tester)
+        # The Module Manager never reads, holds or forwards credentials itself.
+        for forbidden in ('secrets(', 'decrypt', 'password', 'api_key', 'MasterKey'):
+            self.assertNotIn(forbidden, tester)
+
+    # ------------------------------------------------------------ uninstall
+    def test_uninstall_shows_and_enforces_real_customer_impact(self):
+        census = self.code('lib/Registry/UsageCensus.php')
+        for table in ('tblservers', 'tblproducts', 'tblhosting', 'tbldomains', 'tblpaymentgateways'):
+            self.assertIn(table, census)
+        # Counts only: no customer row or column is ever selected or read.
+        for forbidden in ('->select(', '->get()', '->pluck(', 'firstname', 'lastname', 'email'):
+            self.assertNotIn(forbidden, census)
+        for destructive in ('->delete(', '->update(', '->insert(', 'Capsule::raw', 'DB::statement'):
+            self.assertNotIn(destructive, census)
+        # Unmeasurable means unknown, never a reassuring zero.
+        self.assertIn('return null', census)
+        self.assertIn("'Could not be measured: '", census)
+
+        controller = self.code('lib/Services/AdminController.php')
+        uninstall = controller.split('private function uninstall(')[1].split('private function')[0]
+        self.assertIn("empty($_POST['confirm_usage'])", uninstall)
+        self.assertIn("$usage['live'] === null", uninstall)
 
     # ----------------------------------------------------------- deployment
     def test_storage_is_configurable_and_hardened(self):

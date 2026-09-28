@@ -18,6 +18,13 @@ final class Manifest
 {
     const FILENAME = 'module.json';
     const MAX_BYTES = 262144;
+    const MAX_SETTING_LENGTH = 512;
+
+    /**
+     * Setting keys that are credentials by name. Module settings are stored in
+     * clear operational storage, so these are pushed to the encrypted vault.
+     */
+    const CREDENTIAL_KEY_PATTERN = '/(^|_)(password|passwd|pwd|secret|token|key|apikey|credential|credentials|passphrase|auth|signature|certificate|privatekey)($|_)/';
 
     /** Manifest keys the platform understands. Unknown keys are reported, not silently accepted. */
     private static $known = array(
@@ -217,12 +224,54 @@ final class Manifest
                     ModuleException::REASON_MANIFEST
                 );
             }
+            if (self::looksLikeCredential($key)) {
+                // A field can also be a credential by name only. Module settings are stored
+                // in clear operational storage, so credential-shaped keys are refused here
+                // whatever the module author called the "secret" flag.
+                throw new ModuleException(
+                    'Configuration field "' . self::printable($key) . '" looks like a credential. Declare it under "integrations" so it is stored in the encrypted API & Integrations vault instead of module settings.',
+                    ModuleException::REASON_MANIFEST
+                );
+            }
+            $type = in_array(isset($field['type']) ? $field['type'] : 'text', array('text', 'number', 'boolean', 'select'), true) ? (string) $field['type'] : 'text';
+            $options = array();
+            foreach (isset($field['options']) ? (array) $field['options'] : array() as $option) {
+                if (!is_scalar($option)) { continue; }
+                $option = self::text(array('v' => $option), 'v', 64);
+                if ($option !== '') { $options[] = $option; }
+            }
+            $options = array_values(array_unique($options));
+            if ($type === 'select' && !$options) {
+                throw new ModuleException(
+                    'Configuration field "' . self::printable($key) . '" is a select but declares no options.',
+                    ModuleException::REASON_MANIFEST
+                );
+            }
+            $default = self::text($field, 'default', self::MAX_SETTING_LENGTH);
+            if ($type === 'select' && $default !== '' && !in_array($default, $options, true)) {
+                throw new ModuleException(
+                    'Configuration field "' . self::printable($key) . '" declares a default that is not one of its options.',
+                    ModuleException::REASON_MANIFEST
+                );
+            }
+            $minimum = isset($field['min']) && is_numeric($field['min']) ? (string) $field['min'] : '';
+            $maximum = isset($field['max']) && is_numeric($field['max']) ? (string) $field['max'] : '';
+            if ($minimum !== '' && $maximum !== '' && $maximum + 0 < $minimum + 0) {
+                throw new ModuleException(
+                    'Configuration field "' . self::printable($key) . '" declares a maximum below its minimum.',
+                    ModuleException::REASON_MANIFEST
+                );
+            }
             $fields[] = array(
                 'key' => $key,
                 'label' => self::text($field, 'label', 128) ?: $key,
-                'type' => in_array(isset($field['type']) ? $field['type'] : 'text', array('text', 'number', 'boolean', 'select'), true) ? (string) $field['type'] : 'text',
+                'type' => $type,
                 'required' => !empty($field['required']),
                 'help' => self::text($field, 'help', 240),
+                'options' => $options,
+                'default' => $default,
+                'min' => $type === 'number' ? $minimum : '',
+                'max' => $type === 'number' ? $maximum : '',
             );
         }
         return array('required' => !empty($section['required']) || $fields !== array(), 'fields' => $fields);
@@ -267,6 +316,12 @@ final class Manifest
     }
 
     /* ------------------------------------------------------------------ helpers */
+
+    /** True when a configuration key names a credential rather than an operational setting. */
+    private static function looksLikeCredential($key)
+    {
+        return (bool) preg_match(self::CREDENTIAL_KEY_PATTERN, (string) $key);
+    }
 
     private static function text(array $raw, $key, $maximum)
     {

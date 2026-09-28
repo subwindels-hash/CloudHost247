@@ -19,6 +19,7 @@ final class ModuleRepository implements ModuleRegistry
     const PACKAGES = 'mod_cloudhost247_module_packages';
     const FILES = 'mod_cloudhost247_module_files';
     const EVENTS = 'mod_cloudhost247_module_events';
+    const SETTINGS = 'mod_cloudhost247_module_settings';
 
     const EVENT_TYPES = array(
         'upload' => 'Package uploaded',
@@ -31,6 +32,7 @@ final class ModuleRepository implements ModuleRegistry
         'uninstall' => 'Module uninstalled',
         'rollback' => 'Installation rolled back',
         'health_check' => 'Health check',
+        'configure' => 'Configuration changed',
     );
 
     /* ------------------------------------------------------------- modules */
@@ -219,6 +221,52 @@ final class ModuleRepository implements ModuleRegistry
     public function files($moduleId)
     {
         return Capsule::table(self::FILES)->where('module_id', (string) $moduleId)->orderBy('relative_path')->get();
+    }
+
+    /* ------------------------------------------------------------ settings */
+
+    /**
+     * Stored non-secret settings for a module.
+     *
+     * Returns an empty set rather than failing when the settings table has not
+     * been created yet, so an older deployment keeps working until it upgrades.
+     *
+     * @return array setting_key => string value
+     */
+    public function settings($moduleId)
+    {
+        try {
+            if (!Capsule::schema()->hasTable(self::SETTINGS)) { return array(); }
+        } catch (\Throwable $unavailable) {
+            return array();
+        }
+        $values = array();
+        foreach (Capsule::table(self::SETTINGS)->where('module_id', (string) $moduleId)->get() as $row) {
+            $values[(string) $row->setting_key] = (string) $row->setting_value;
+        }
+        return $values;
+    }
+
+    /**
+     * Persist validated settings. Values arrive already checked against the
+     * module manifest, and credential-shaped keys can never reach this table.
+     */
+    public function saveSettings($moduleId, array $values, $adminId)
+    {
+        if (!Capsule::schema()->hasTable(self::SETTINGS)) {
+            throw new ModuleException(
+                'The module settings table is missing. Deactivate and reactivate the Module Manager to run its migrations.',
+                ModuleException::REASON_STATE
+            );
+        }
+        $now = date('Y-m-d H:i:s');
+        foreach ($values as $key => $value) {
+            Capsule::table(self::SETTINGS)->updateOrInsert(
+                array('module_id' => (string) $moduleId, 'setting_key' => (string) $key),
+                array('setting_value' => (string) $value, 'updated_by' => $adminId, 'updated_at' => $now)
+            );
+        }
+        return count($values);
     }
 
     /* -------------------------------------------------------------- events */

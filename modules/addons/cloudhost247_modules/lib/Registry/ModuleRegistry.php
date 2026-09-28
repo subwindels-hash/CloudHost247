@@ -36,6 +36,10 @@ interface ModuleRegistry
     public function replaceFileManifest($moduleId, array $files);
     public function files($moduleId);
 
+    /* manifest-declared, non-secret module settings */
+    public function settings($moduleId);
+    public function saveSettings($moduleId, array $values, $adminId);
+
     /* events */
     public function recordEvent(array $event);
     public function events(array $filters = array(), $page = 1, $perPage = 25);

@@ -7,6 +7,7 @@ use CloudHost247\Integrations\Services\IntegrationManager;
 use CloudHost247\ModuleManager\Install\Installer;
 use CloudHost247\ModuleManager\Registry\ModuleRegistry;
 use CloudHost247\ModuleManager\Registry\ModuleRepository;
+use CloudHost247\ModuleManager\Registry\ModuleSettings;
 use CloudHost247\ModuleManager\Support\ModuleException;
 use CloudHost247\ModuleManager\Support\Paths;
 
@@ -133,35 +134,120 @@ final class ModuleManager
     /**
      * Real configuration state of the API integrations a module requires.
      *
-     * @return array list of array('provider','label','configured','status','status_label','known')
+     * The state is read from the integrations centre's own overview, which is
+     * the same data the health dashboard renders, so a module can never show a
+     * connection status the integrations centre does not actually hold.
+     *
+     * @return array list of array('provider','label','known','configured','enabled',
+     *               'status','status_label','last_checked_at','integration_id')
      */
     public static function integrationStatus($moduleId, $environment = null)
     {
         $manifest = self::manifest($moduleId);
         if (!$manifest) { return array(); }
+
+        $overview = self::integrationOverview($environment);
         $rows = array();
-        $haveIntegrations = class_exists('CloudHost247\\Integrations\\Services\\IntegrationManager');
         foreach ($manifest->integrationProviders() as $provider) {
-            $known = $haveIntegrations && ProviderRegistry::has($provider);
+            $known = isset($overview[$provider]);
             $row = array(
                 'provider' => $provider,
-                'label' => $known ? ProviderRegistry::get($provider)->label() : $provider,
+                'label' => $provider,
                 'known' => $known,
                 'configured' => false,
+                'enabled' => false,
                 'status' => 'not_configured',
                 'status_label' => 'Not configured',
+                'last_checked_at' => '',
+                'integration_id' => 0,
             );
             if ($known) {
-                $configuration = IntegrationManager::configuration($provider, $environment);
-                if ($configuration) {
-                    $row['configured'] = true;
-                    $row['status'] = (string) $configuration['status'];
-                    $row['status_label'] = \CloudHost247\Integrations\Support\ResultCode::label($configuration['status']);
-                }
+                $entry = $overview[$provider];
+                $row['label'] = (string) $entry['display_name'];
+                $row['configured'] = (bool) $entry['configured'];
+                $row['enabled'] = (bool) $entry['enabled'];
+                $row['status'] = (string) $entry['status'];
+                $row['status_label'] = (string) $entry['status_label'];
+                $row['last_checked_at'] = (string) $entry['last_checked_at'];
+                $row['integration_id'] = (int) $entry['integration_id'];
             }
             $rows[] = $row;
         }
         return $rows;
+    }
+
+    /**
+     * Run the central connection test for an integration a module declares.
+     *
+     * The test itself belongs to the API & Integrations centre: it holds the
+     * encrypted credentials and returns a sanitized classification. The Module
+     * Manager only asks for it and reports the classification back.
+     *
+     * @return array array('ran' => bool, 'code' => string, 'label' => string, 'detail' => string)
+     */
+    public static function testIntegration($moduleId, $provider, $adminId = null, $environment = null)
+    {
+        $manifest = self::manifest($moduleId);
+        if (!$manifest || !in_array((string) $provider, $manifest->integrationProviders(), true)) {
+            throw new ModuleException('That module does not declare this integration.', ModuleException::REASON_STATE);
+        }
+        if (!class_exists('CloudHost247\\Integrations\\Services\\IntegrationManager')) {
+            return array('ran' => false, 'code' => 'unavailable', 'label' => 'Unavailable',
+                'detail' => 'The API & Integrations centre is not installed on this deployment.');
+        }
+        $overview = self::integrationOverview($environment);
+        if (!isset($overview[$provider]) || !$overview[$provider]['configured']) {
+            return array('ran' => false, 'code' => 'not_configured', 'label' => 'Not configured',
+                'detail' => 'Store credentials for this provider in the API & Integrations centre before testing.');
+        }
+
+        $result = IntegrationManager::test((int) $overview[$provider]['integration_id'], $adminId);
+        $code = isset($result['code']) ? (string) $result['code'] : 'unknown';
+        return array(
+            'ran' => true,
+            'code' => $code,
+            'label' => \CloudHost247\Integrations\Support\ResultCode::label($code),
+            // IntegrationManager already returns a sanitized detail: no payload, no credential.
+            'detail' => isset($result['detail']) ? (string) $result['detail'] : '',
+        );
+    }
+
+    /** provider_key => overview row, or an empty set when the centre is absent. */
+    private static function integrationOverview($environment = null)
+    {
+        if (!class_exists('CloudHost247\\Integrations\\Services\\IntegrationManager')) { return array(); }
+        try {
+            $environment = $environment === null ? \CloudHost247\Integrations\Support\Environment::active() : $environment;
+            $overview = array();
+            foreach (IntegrationManager::overview($environment) as $row) {
+                $overview[(string) $row['provider_key']] = $row;
+            }
+            return $overview;
+        } catch (\Throwable $unavailable) {
+            return array();
+        }
+    }
+
+    /* ------------------------------------------------------------ settings */
+
+    /**
+     * Non-secret settings an installed module declared in its manifest,
+     * merged over the manifest defaults. Credentials are never stored here.
+     *
+     * @return array setting key => string value
+     */
+    public static function settings($moduleId)
+    {
+        $manifest = self::manifest($moduleId);
+        if (!$manifest) { return array(); }
+        return ModuleSettings::effective($manifest, self::repository()->settings($moduleId));
+    }
+
+    /** One setting value, or $default when the module never declared or saved it. */
+    public static function setting($moduleId, $key, $default = null)
+    {
+        $settings = self::settings($moduleId);
+        return array_key_exists($key, $settings) && $settings[$key] !== '' ? $settings[$key] : $default;
     }
 
     /** Deep link into the API & Integrations centre for a provider. */

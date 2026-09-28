@@ -362,8 +362,18 @@ final class AdminView
             );
         }
 
+        if ($data['reinstall_checksum'] !== '' && ($this->may($data, 'modules.install') || $this->may($data, 'modules.update'))) {
+            $html .= $this->miniForm(
+                $data['token'], 'preview',
+                array('checksum' => $data['reinstall_checksum']),
+                'Reinstall from stored package',
+                'btn-default'
+            );
+        }
+
         $html .= $this->configurationPanel($data, $manifest);
-        $html .= $this->dependencyPanel($manifest);
+        $html .= $this->compatibilityPanel($data);
+        $html .= $this->dependencyPanel($manifest, isset($data['dependency_check']) ? $data['dependency_check'] : null);
         $html .= $this->filesPanel($data['files']);
         $html .= $this->moduleEvents($data['module_events']);
         $html .= $this->uninstallPanel($data);
@@ -395,7 +405,16 @@ final class AdminView
                     . '<td>' . ($integration['configured'] ? 'Yes' : 'No') . '</td>'
                     . '<td>' . $this->e($integration['status_label']) . '</td><td>';
                 if ($integration['known']) {
-                    $html .= '<a class="btn btn-xs btn-primary" href="' . $this->e(ModuleManager::integrationLink($integration['provider'])) . '">Configure</a>';
+                    $html .= '<a class="btn btn-xs btn-primary" href="' . $this->e(ModuleManager::integrationLink($integration['provider'])) . '">Configure</a> ';
+                    if ($integration['configured'] && $this->may($data, 'modules.configure')) {
+                        $html .= $this->miniForm(
+                            $data['token'],
+                            'test_integration',
+                            array('module_id' => $row->module_id, 'provider' => $integration['provider']),
+                            'Test connection',
+                            'btn-default'
+                        );
+                    }
                 } else {
                     $html .= '<span class="text-muted">Provider not registered</span>';
                 }
@@ -404,21 +423,108 @@ final class AdminView
             $html .= '</tbody></table>';
         }
         if ($manifest->requiresConfiguration()) {
-            $html .= '<p>Module settings declared by the manifest:</p><table class="table"><thead><tr><th>Setting</th><th>Type</th><th>Required</th><th>Notes</th></tr></thead><tbody>';
-            foreach ($manifest->configuration()['fields'] as $field) {
-                $html .= '<tr><td>' . $this->e($field['label']) . ' <span class="text-muted">(' . $this->e($field['key']) . ')</span></td>'
-                    . '<td>' . $this->e($field['type']) . '</td><td>' . ($field['required'] ? 'Yes' : 'No') . '</td>'
-                    . '<td>' . $this->e($field['help']) . '</td></tr>';
-            }
-            $html .= '</tbody></table><p class="text-muted">Non-credential settings are configured in the module\'s own administration page. '
-                . 'A manifest may not declare secret settings: credentials must go through the API &amp; Integrations vault.</p>';
+            $html .= $this->settingsForm($data, $manifest);
         }
         return $html;
     }
 
-    private function dependencyPanel($manifest)
+    /**
+     * Editable form for the non-secret settings the manifest declares.
+     * Values are stored by the Module Manager; credentials never appear here.
+     */
+    private function settingsForm(array $data, $manifest)
+    {
+        $row = $data['module'];
+        $values = isset($data['settings']) ? $data['settings'] : array();
+        $editable = $this->may($data, 'modules.configure');
+
+        $html = '<h5>Module settings</h5>';
+        $html .= '<form method="post">'
+            . '<input type="hidden" name="token" value="' . $this->e($data['token']) . '">'
+            . '<input type="hidden" name="operation" value="configure">'
+            . '<input type="hidden" name="module_id" value="' . $this->e($row->module_id) . '">';
+
+        foreach ($manifest->configuration()['fields'] as $field) {
+            $key = $field['key'];
+            $value = isset($values[$key]) ? (string) $values[$key] : '';
+            $id = 'ch247-setting-' . preg_replace('/[^a-z0-9_]/', '', $key);
+            $html .= '<div class="form-group"><label for="' . $this->e($id) . '">' . $this->e($field['label'])
+                . ($field['required'] ? ' <span class="text-danger">*</span>' : '') . '</label>';
+
+            if ($field['type'] === 'boolean') {
+                $html .= '<div class="checkbox"><label><input type="checkbox" id="' . $this->e($id) . '" name="' . $this->e($key) . '" value="1"'
+                    . ($value === '1' ? ' checked' : '') . ($editable ? '' : ' disabled') . '> Enabled</label></div>';
+            } elseif ($field['type'] === 'select') {
+                $html .= '<select class="form-control" id="' . $this->e($id) . '" name="' . $this->e($key) . '"' . ($editable ? '' : ' disabled') . '>';
+                foreach ($field['options'] as $option) {
+                    $html .= '<option value="' . $this->e($option) . '"' . ($option === $value ? ' selected' : '') . '>' . $this->e($option) . '</option>';
+                }
+                $html .= '</select>';
+            } else {
+                $bounds = '';
+                if ($field['type'] === 'number') {
+                    $bounds = ($field['min'] !== '' ? ' min="' . $this->e($field['min']) . '"' : '')
+                        . ($field['max'] !== '' ? ' max="' . $this->e($field['max']) . '"' : '');
+                }
+                $html .= '<input class="form-control" id="' . $this->e($id) . '" type="' . ($field['type'] === 'number' ? 'number' : 'text') . '"'
+                    . ' name="' . $this->e($key) . '" value="' . $this->e($value) . '"' . $bounds
+                    . ($field['required'] ? ' required' : '') . ($editable ? '' : ' disabled') . ' autocomplete="off">';
+            }
+
+            $notes = $field['help'];
+            if ($field['type'] === 'number' && ($field['min'] !== '' || $field['max'] !== '')) {
+                $notes = trim($notes . ' Allowed range: ' . ($field['min'] !== '' ? $field['min'] : '−∞') . ' to ' . ($field['max'] !== '' ? $field['max'] : '∞') . '.');
+            }
+            if ($notes !== '') { $html .= '<span class="help-block">' . $this->e($notes) . '</span>'; }
+            $html .= '</div>';
+        }
+
+        if ($editable) {
+            $html .= '<button class="btn btn-primary">Save settings</button>';
+        } else {
+            $html .= '<div class="alert alert-warning">Your administrator role is not permitted to configure modules.</div>';
+        }
+        $html .= '</form>'
+            . '<p class="text-muted" style="margin-top:8px">These are operational settings only. A manifest may not declare secret fields and '
+            . 'credential-shaped keys are rejected at validation, so API keys, passwords and tokens are always stored in the encrypted '
+            . 'API &amp; Integrations vault instead.</p>';
+        return $html;
+    }
+
+    /** Live compatibility of an installed module with the runtime it is on today. */
+    private function compatibilityPanel(array $data)
+    {
+        if (empty($data['compatibility_check'])) { return ''; }
+        $check = $data['compatibility_check'];
+        $html = '<hr><p class="text-muted">Compatibility is re-checked against this server right now, not against the values recorded at install time.</p>'
+            . $this->checkTable('Compatibility check', $check['checks']);
+        foreach ($check['problems'] as $problem) {
+            $html .= '<div class="alert alert-danger">' . $this->e($problem) . '</div>';
+        }
+        foreach ($check['warnings'] as $warning) {
+            $html .= '<div class="alert alert-warning">' . $this->e($warning) . '</div>';
+        }
+        return $html;
+    }
+
+    /**
+     * Declared dependencies. When a live resolution is available the real
+     * current state of each dependency is shown next to the requirement.
+     */
+    private function dependencyPanel($manifest, array $check = null)
     {
         if (!$manifest || (!$manifest->dependencies() && !$manifest->conflicts())) { return ''; }
+        if ($check) {
+            $html = '<hr>' . $this->dependencyTable($check['rows']);
+            foreach ($check['problems'] as $problem) {
+                $html .= '<div class="alert alert-danger">' . $this->e($problem) . '</div>';
+            }
+            foreach ($check['warnings'] as $warning) {
+                $html .= '<div class="alert alert-warning">' . $this->e($warning) . '</div>';
+            }
+            return $html;
+        }
+
         $html = '<hr><h4>Dependencies</h4><table class="table"><thead><tr><th>Module</th><th>Requirement</th><th>Optional</th></tr></thead><tbody>';
         foreach ($manifest->dependencies() as $dependency) {
             $range = $dependency['min_version'] !== '' ? $dependency['min_version'] . ' and above' : 'any version';
@@ -462,9 +568,12 @@ final class AdminView
             . '<li><strong>API integrations:</strong> ' . $this->e($impact['integrations'] ? implode(', ', $impact['integrations']) : 'none declared')
             . '. Stored credentials remain in the API &amp; Integrations vault and can be removed there.</li>'
             . '<li><strong>Dependent modules:</strong> ' . $this->e($impact['dependents'] ? $this->dependentNames($impact['dependents']) : 'none') . '.</li>'
+            . '<li><strong>Stored settings:</strong> ' . (int) $impact['settings_retained'] . ' saved value(s) are retained, not deleted.</li>'
             . '<li><strong>Currently ' . ($impact['enabled'] ? 'enabled' : 'disabled') . '.</strong> '
-            . ($impact['enabled'] ? 'Active services provisioned through this module will stop working once its files are removed. Check WHMCS products and services that reference it first.' : '') . '</li>'
+            . ($impact['enabled'] ? 'Services provisioned through this module stop working once its files are removed.' : '') . '</li>'
             . '</ul>';
+
+        $html .= $this->usagePanel($impact['usage']);
 
         if (!$this->may($data, 'modules.uninstall')) {
             return $html . '<div class="alert alert-warning">Your administrator role is not permitted to uninstall modules.</div>';
@@ -474,15 +583,54 @@ final class AdminView
                 . $this->e($this->dependentNames($impact['dependents'])) . ' depend(s) on it.</div>';
         }
 
-        return $html . '<form method="post">'
+        $html .= '<form method="post">'
             . '<input type="hidden" name="token" value="' . $this->e($data['token']) . '">'
             . '<input type="hidden" name="operation" value="uninstall">'
             . '<input type="hidden" name="module_id" value="' . $this->e($row->module_id) . '">'
             . '<div class="form-group"><label for="ch247-confirm-id">Type <code>' . $this->e($row->module_id) . '</code> to confirm</label>'
-            . '<input class="form-control" id="ch247-confirm-id" name="confirm_module_id" autocomplete="off" required></div>'
-            . '<div class="checkbox"><label><input type="checkbox" name="confirm_uninstall" value="1" required> '
+            . '<input class="form-control" id="ch247-confirm-id" name="confirm_module_id" autocomplete="off" required></div>';
+
+        $usage = $impact['usage'];
+        if ($usage['live'] === null || $usage['live'] > 0) {
+            $html .= '<div class="checkbox"><label><input type="checkbox" name="confirm_usage" value="1" required> '
+                . $this->e($usage['live'] === null
+                    ? 'I understand that the live usage of this module could not be measured on this deployment.'
+                    : 'I understand that ' . $usage['live'] . ' live record(s) still reference this module and will stop working.')
+                . '</label></div>';
+        }
+
+        return $html . '<div class="checkbox"><label><input type="checkbox" name="confirm_uninstall" value="1" required> '
             . 'I have reviewed the impact above and authorise removal of this module\'s files.</label></div>'
             . '<button class="btn btn-danger">Uninstall module</button></form>';
+    }
+
+    /** Real WHMCS usage of the module, counted at render time. */
+    private function usagePanel(array $usage)
+    {
+        $html = '<h5>Customers and services using this module</h5>'
+            . '<table class="table table-condensed"><thead><tr><th>What</th><th>Count</th><th>Detail</th></tr></thead><tbody>';
+        foreach ($usage['rows'] as $row) {
+            $count = $row['known'] ? (string) (int) $row['count'] : 'unknown';
+            $class = '';
+            if ($row['known'] && $row['blocking'] && (int) $row['count'] > 0) { $class = ' class="warning"'; }
+            if (!$row['known']) { $class = ' class="danger"'; }
+            $html .= '<tr' . $class . '><td>' . $this->e($row['label']) . '</td>'
+                . '<td><strong>' . $this->e($count) . '</strong></td>'
+                . '<td>' . $this->e($row['detail']) . '</td></tr>';
+        }
+        $html .= '</tbody></table>';
+
+        if (!$usage['measured']) {
+            $html .= '<div class="alert alert-danger">Live usage could not be measured for: ' . $this->e(implode(', ', $usage['unmeasured']))
+                . '. Confirm manually in WHMCS before uninstalling — no assumption is made here.</div>';
+        } elseif ($usage['live'] > 0) {
+            $html .= '<div class="alert alert-warning">' . (int) $usage['live'] . ' live record(s) still use this module. '
+                . 'Uninstalling removes the module files only: customer accounts, services, invoices and domains are left exactly as they are, '
+                . 'but they will no longer be manageable through this module.</div>';
+        } else {
+            $html .= '<div class="alert alert-success">No live customer service, domain or payment currently references this module.</div>';
+        }
+        return $html;
     }
 
     private function dependentNames(array $dependents)

@@ -16,6 +16,7 @@ foreach (array(
     'Package/PackageInspection', 'Package/ArchiveInspector', 'Package/SecureExtractor',
     'Package/PackageStorage', 'Package/UploadReceiver',
     'Registry/ModuleRegistry', 'Registry/CompatibilityChecker', 'Registry/DependencyResolver',
+    'Registry/UsageCensus', 'Registry/ModuleSettings',
     'Install/InstallationPlan', 'Install/InstallationTransaction', 'Install/Installer',
 ) as $file) {
     require_once $base . $file . '.php';
@@ -40,6 +41,8 @@ use CloudHost247\ModuleManager\Package\UploadReceiver;
 use CloudHost247\ModuleManager\Registry\CompatibilityChecker;
 use CloudHost247\ModuleManager\Registry\DependencyResolver;
 use CloudHost247\ModuleManager\Registry\ModuleRepository;
+use CloudHost247\ModuleManager\Registry\ModuleSettings;
+use CloudHost247\ModuleManager\Registry\UsageCensus;
 use CloudHost247\ModuleManager\Security\CapabilityPolicy;
 use CloudHost247\ModuleManager\Services\AdminController;
 use CloudHost247\ModuleManager\Services\AdminView;
@@ -214,6 +217,112 @@ $check('manifest accepts a plain list of dependency ids', (function () use ($man
     return isset($parsed['cloudhost247_core'])
         && $parsed['cloudhost247_core']['min_version'] === ''
         && $parsed['cloudhost247_core']['optional'] === false;
+})());
+
+/* ------------------------------------------- configuration declarations */
+
+$configFields = function (array $fields) use ($manifestFor) {
+    return $manifestFor(array('configuration' => array('fields' => $fields)));
+};
+$check('manifest rejects a configuration field named like a credential', $rejects(function () use ($configFields) {
+    Manifest::fromArray($configFields(array(array('key' => 'api_key', 'label' => 'API key', 'type' => 'text'))));
+}, ModuleException::REASON_MANIFEST));
+$check('manifest rejects every credential-shaped setting key', (function () use ($configFields) {
+    foreach (array('password', 'provider_token', 'client_secret', 'auth_passphrase', 'private_key') as $key) {
+        try {
+            Manifest::fromArray($configFields(array(array('key' => $key, 'label' => 'x', 'type' => 'text'))));
+            return false;
+        } catch (ModuleException $expected) {
+            if ($expected->reason() !== ModuleException::REASON_MANIFEST) { return false; }
+        }
+    }
+    return true;
+})());
+$check('manifest still accepts operational settings', (function () use ($configFields) {
+    $fields = Manifest::fromArray($configFields(array(
+        array('key' => 'api_endpoint', 'label' => 'Endpoint', 'type' => 'text'),
+        array('key' => 'timeout', 'label' => 'Timeout', 'type' => 'number', 'min' => 5, 'max' => 60, 'default' => '30'),
+        array('key' => 'region', 'label' => 'Region', 'type' => 'select', 'options' => array('eu', 'us'), 'default' => 'eu'),
+        array('key' => 'debug', 'label' => 'Debug', 'type' => 'boolean'),
+    )))->configuration()['fields'];
+    return count($fields) === 4 && $fields[1]['min'] === '5' && $fields[1]['max'] === '60'
+        && $fields[2]['options'] === array('eu', 'us') && $fields[2]['default'] === 'eu';
+})());
+$check('manifest rejects a select without options', $rejects(function () use ($configFields) {
+    Manifest::fromArray($configFields(array(array('key' => 'region', 'label' => 'Region', 'type' => 'select'))));
+}, ModuleException::REASON_MANIFEST));
+$check('manifest rejects a default outside the declared options', $rejects(function () use ($configFields) {
+    Manifest::fromArray($configFields(array(array('key' => 'region', 'label' => 'Region', 'type' => 'select', 'options' => array('eu'), 'default' => 'us'))));
+}, ModuleException::REASON_MANIFEST));
+$check('manifest rejects a numeric range that is inverted', $rejects(function () use ($configFields) {
+    Manifest::fromArray($configFields(array(array('key' => 'timeout', 'label' => 'Timeout', 'type' => 'number', 'min' => 60, 'max' => 5))));
+}, ModuleException::REASON_MANIFEST));
+
+/* -------------------------------------------------- settings validation */
+
+$settingsManifest = Manifest::fromArray($configFields(array(
+    array('key' => 'api_endpoint', 'label' => 'Endpoint', 'type' => 'text', 'required' => true),
+    array('key' => 'timeout', 'label' => 'Timeout', 'type' => 'number', 'min' => 5, 'max' => 60, 'default' => '30'),
+    array('key' => 'region', 'label' => 'Region', 'type' => 'select', 'options' => array('eu', 'us'), 'default' => 'eu'),
+    array('key' => 'debug', 'label' => 'Debug', 'type' => 'boolean'),
+)));
+$check('settings validation accepts declared values', (function () use ($settingsManifest) {
+    $result = ModuleSettings::validate($settingsManifest, array(
+        'api_endpoint' => ' https://api.example.test/v1 ', 'timeout' => '45', 'region' => 'us', 'debug' => 'on',
+    ));
+    return $result['values'] === array('api_endpoint' => 'https://api.example.test/v1', 'timeout' => '45', 'region' => 'us', 'debug' => '1');
+})());
+$check('settings validation stores nothing that the manifest did not declare', (function () use ($settingsManifest) {
+    $result = ModuleSettings::validate($settingsManifest, array(
+        'api_endpoint' => 'https://api.example.test', 'timeout' => '30', 'region' => 'eu', 'api_key' => 'sk-live-should-never-be-stored',
+    ));
+    return !array_key_exists('api_key', $result['values']) && $result['ignored'] === array('api_key');
+})());
+$check('settings validation enforces the declared numeric range', $rejects(function () use ($settingsManifest) {
+    ModuleSettings::validate($settingsManifest, array('api_endpoint' => 'https://a.test', 'timeout' => '900', 'region' => 'eu'));
+}, ModuleException::REASON_CONFIGURATION));
+$check('settings validation rejects a non-numeric number', $rejects(function () use ($settingsManifest) {
+    ModuleSettings::validate($settingsManifest, array('api_endpoint' => 'https://a.test', 'timeout' => 'soon', 'region' => 'eu'));
+}, ModuleException::REASON_CONFIGURATION));
+$check('settings validation rejects a value outside the declared options', $rejects(function () use ($settingsManifest) {
+    ModuleSettings::validate($settingsManifest, array('api_endpoint' => 'https://a.test', 'timeout' => '30', 'region' => 'moon'));
+}, ModuleException::REASON_CONFIGURATION));
+$check('settings validation enforces required fields', $rejects(function () use ($settingsManifest) {
+    ModuleSettings::validate($settingsManifest, array('timeout' => '30', 'region' => 'eu'));
+}, ModuleException::REASON_CONFIGURATION));
+$check('settings validation strips control characters', (function () use ($settingsManifest) {
+    $result = ModuleSettings::validate($settingsManifest, array('api_endpoint' => "https://a.test\r\n<script>", 'timeout' => '30', 'region' => 'eu'));
+    return $result['values']['api_endpoint'] === 'https://a.test<script>';
+})());
+$check('stored settings are layered over the manifest defaults', (function () use ($settingsManifest) {
+    $effective = ModuleSettings::effective($settingsManifest, array('timeout' => '12'));
+    return $effective['timeout'] === '12' && $effective['region'] === 'eu' && $effective['api_endpoint'] === '';
+})());
+
+/* ------------------------------------------------------------ usage census */
+
+$census = new UsageCensus();
+$check('usage census reports unknown rather than zero when whmcs is unreachable', (function () use ($census) {
+    $usage = $census->forModule('demo_module', 'server');
+    if ($usage['measured'] !== false || $usage['live'] !== null || !$usage['unmeasured']) { return false; }
+    foreach ($usage['rows'] as $row) {
+        if ($row['known'] !== false || $row['count'] !== null) { return false; }
+        if (strpos($row['detail'], 'Could not be measured') !== 0) { return false; }
+    }
+    return true;
+})());
+$check('usage census counts nothing for module types without customer data', (function () use ($census) {
+    $usage = $census->forModule('demo_report', 'report');
+    return $usage['measured'] === true && $usage['live'] === 0;
+})());
+$check('usage census asks about servers, products, services and customers', (function () use ($census) {
+    $labels = array();
+    foreach ($census->forModule('demo_module', 'server')['rows'] as $row) { $labels[] = $row['label']; }
+    return $labels === array('Server entries', 'Products using this module', 'Live customer services', 'Customers with those services');
+})());
+$check('usage census covers gateways and registrars too', (function () use ($census) {
+    return count($census->forModule('demo_gateway', 'gateway')['rows']) === 3
+        && count($census->forModule('demo_registrar', 'registrar')['rows']) === 2;
 })());
 
 /* ------------------------------------------------------------ upload guard */
@@ -698,10 +807,87 @@ $request(array('operation' => 'toggle', 'module_id' => 'demo_module', 'enabled' 
 $disabled = $controller->handle();
 $check('disabling states plainly that nothing was deleted', strpos($disabled['notice'], 'No files were deleted') !== false && count(Paths::listFiles($appRoot . '/modules/addons/demo_module')) === 5);
 
+/* ------------------------------------------ configure an installed module */
+
+AdminGuard::$denied = array('modules.configure');
+$request(array('operation' => 'configure', 'module_id' => 'demo_module', 'timeout' => '15'));
+$configDenied = $controller->handle();
+$check('configuring is refused without the configure capability', $configDenied['error'] !== '' && $controllerRegistry->settings('demo_module') === array());
+AdminGuard::$denied = array();
+
+$request(array('operation' => 'configure', 'module_id' => 'demo_module', 'timeout' => 'not-a-number'));
+$configInvalid = $controller->handle();
+$check('an invalid setting is refused and nothing is stored', $configInvalid['error'] !== '' && $controllerRegistry->settings('demo_module') === array());
+
+$request(array('operation' => 'configure', 'module_id' => 'demo_module', 'timeout' => '45', 'api_key' => 'sk-live-never-store-me'));
+$configured = $controller->handle();
+$check('a valid configuration is really stored', $configured['error'] === '' && $controllerRegistry->settings('demo_module') === array('timeout' => '45'));
+$check('undeclared fields posted to the configure form are discarded', (function () use ($controllerRegistry) {
+    $stored = $controllerRegistry->settings('demo_module');
+    return !array_key_exists('api_key', $stored) && json_encode($stored) === '{"timeout":"45"}';
+})());
+$check('the configuration change is logged without any value', (function () use ($controllerRegistry) {
+    foreach ($controllerRegistry->eventRows as $event) {
+        if ($event->event_type !== 'configure') { continue; }
+        return $event->result === 'success'
+            && strpos($event->detail, 'timeout') !== false
+            && strpos($event->detail, '45') === false
+            && strpos($event->detail, 'sk-live') === false;
+    }
+    return false;
+})());
+$check('the configuration change is audited by key, never by value', (function () {
+    foreach (AuditLogger::$records as $record) {
+        if ($record['action'] !== 'module.configure') { continue; }
+        return $record['after'] === array('changed_keys' => array('timeout'))
+            && strpos(json_encode($record), 'sk-live') === false;
+    }
+    return false;
+})());
+$check('installed modules expose their settings through the platform facade', ModuleManager::setting('demo_module', 'timeout') === '45'
+    && ModuleManager::setting('demo_module', 'missing_setting', 'fallback') === 'fallback');
+
+$request(array(), array(), array('view' => 'details', 'module' => 'demo_module'));
+$detailsData = $controller->handle();
+$check('the details screen re-checks dependencies and compatibility live', isset($detailsData['dependency_check'], $detailsData['compatibility_check'])
+    && $detailsData['compatibility_check']['compatible'] === true);
+$check('the details screen offers a reinstall from the stored package', $detailsData['reinstall_checksum'] === $checksum);
+$detailsHtml = $view->render($detailsData);
+$check('the configure form renders the stored value and no secret field', strpos($detailsHtml, 'value="45"') !== false
+    && strpos($detailsHtml, 'name="operation" value="configure"') !== false
+    && stripos($detailsHtml, 'type="password"') === false
+    && strpos($detailsHtml, 'sk-live') === false);
+$check('the details screen shows real usage before offering an uninstall', strpos($detailsHtml, 'Customers and services using this module') !== false
+    && strpos($detailsHtml, 'Reinstall from stored package') !== false);
+
+$request(array('operation' => 'test_integration', 'module_id' => 'demo_module', 'provider' => 'demo_api'));
+$tested = $controller->handle();
+$check('a connection test reports honestly when the integrations centre is absent', $tested['error'] === ''
+    && strpos($tested['notice'], 'Unavailable') !== false);
+$check('the connection test is recorded as a failed health check, not a success', (function () use ($controllerRegistry) {
+    foreach (array_reverse($controllerRegistry->eventRows) as $event) {
+        if ($event->event_type === 'health_check' && strpos($event->detail, 'Connection test') === 0) {
+            return $event->result === 'failed';
+        }
+    }
+    return false;
+})());
+$check('a module cannot test an integration it never declared', (function () use ($controller, $request) {
+    $request(array('operation' => 'test_integration', 'module_id' => 'demo_module', 'provider' => 'someone_elses_api'));
+    $outcome = $controller->handle();
+    return $outcome['error'] !== '';
+})());
+
 $request(array('operation' => 'uninstall', 'module_id' => 'demo_module', 'confirm_uninstall' => '1', 'confirm_module_id' => 'wrong'));
 $wrongConfirmation = $controller->handle();
 $check('uninstall requires the module id to be typed exactly', $wrongConfirmation['error'] !== '' && is_file($appRoot . '/modules/addons/demo_module/demo_module.php'));
 $request(array('operation' => 'uninstall', 'module_id' => 'demo_module', 'confirm_uninstall' => '1', 'confirm_module_id' => 'demo_module'));
+$unacknowledged = $controller->handle();
+$check('uninstall stops when live customer usage was not acknowledged', $unacknowledged['error'] !== ''
+    && strpos($unacknowledged['error'], 'could not be measured') !== false
+    && is_file($appRoot . '/modules/addons/demo_module/demo_module.php'));
+
+$request(array('operation' => 'uninstall', 'module_id' => 'demo_module', 'confirm_uninstall' => '1', 'confirm_module_id' => 'demo_module', 'confirm_usage' => '1'));
 $removed = $controller->handle();
 $check('a confirmed uninstall removes the files and says what was kept', strpos($removed['notice'], 'Database tables retained') !== false
     && strpos($removed['notice'], 'Customer and service data were not deleted') !== false
@@ -776,10 +962,10 @@ $check('integration status is reported as not configured when unknown', (functio
 })());
 $check('integration deep links target the central credential vault', strpos(ModuleManager::integrationLink('demo_api'), 'view=configure&integration=demo_api') !== false);
 $check('module event types are a closed vocabulary', (function () {
-    foreach (array('upload', 'reject', 'install', 'update', 'reinstall', 'enable', 'disable', 'uninstall', 'rollback', 'health_check') as $type) {
+    foreach (array('upload', 'reject', 'install', 'update', 'reinstall', 'enable', 'disable', 'uninstall', 'rollback', 'health_check', 'configure') as $type) {
         if (!isset(ModuleRepository::EVENT_TYPES[$type])) { return false; }
     }
-    return count(ModuleRepository::EVENT_TYPES) === 10;
+    return count(ModuleRepository::EVENT_TYPES) === 11;
 })());
 $check('the repository writes to module-namespaced tables only', (function () {
     foreach (array(ModuleRepository::MODULES, ModuleRepository::PACKAGES, ModuleRepository::FILES, ModuleRepository::EVENTS) as $table) {

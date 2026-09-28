@@ -16,9 +16,11 @@ if (!defined('WHMCS')) { die('Direct access denied'); }
 
 require_once __DIR__ . '/bootstrap.php';
 require_once __DIR__ . '/migrations/V100.php';
+require_once __DIR__ . '/migrations/V110.php';
 
 use CloudHost247\Foundation\Database\MigrationRunner;
 use CloudHost247\ModuleManager\Migrations\ModuleManagerInitialMigration;
+use CloudHost247\ModuleManager\Migrations\ModuleSettingsMigration;
 use CloudHost247\ModuleManager\Package\PackageStorage;
 use CloudHost247\ModuleManager\Security\CapabilityPolicy;
 use CloudHost247\ModuleManager\Services\AdminController;
@@ -40,7 +42,7 @@ function cloudhost247_modules_config()
 function cloudhost247_modules_activate()
 {
     try {
-        $applied = (new MigrationRunner())->run('cloudhost247_modules', array(new ModuleManagerInitialMigration()));
+        $applied = (new MigrationRunner())->run('cloudhost247_modules', array(new ModuleManagerInitialMigration(), new ModuleSettingsMigration()));
         $description = 'Module Manager installed. Applied: ' . ($applied ? implode(', ', $applied) : 'already current') . '.';
 
         $storage = new PackageStorage();

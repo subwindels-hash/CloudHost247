@@ -12,7 +12,7 @@ transactionally, and can prove afterwards that what is on disk is exactly what
 was installed.
 
 Nothing in this document describes intent only: every control below is
-implemented, exercised by `tests/modules/run.php` (198 assertions) and enforced
+implemented, exercised by `tests/modules/run.php` (231 assertions) and enforced
 at source level by `tests/modules/test_static.py`.
 
 ---
@@ -114,7 +114,11 @@ at the resulting root.
   "configuration": {
     "required": true,
     "fields": [
-      { "key": "timeout", "label": "API timeout", "type": "number", "required": true, "help": "Seconds" }
+      { "key": "timeout", "label": "API timeout", "type": "number", "required": true,
+        "min": 5, "max": 60, "default": "30", "help": "Seconds" },
+      { "key": "default_region", "label": "Default region", "type": "select",
+        "options": ["eu", "us"], "default": "eu" },
+      { "key": "auto_provision", "label": "Provision automatically", "type": "boolean" }
     ]
   },
   "integrations": {
@@ -140,7 +144,10 @@ Hard rejections: missing/invalid `id`, `name`, `version`, `author`, `license`,
 `type`, `min_php_version`; an `entry_point` that is absolute, traverses, or is
 not `.php`; a maximum version below the minimum; a dependency id or version that
 does not parse; a migration table not matching `^mod_[a-z0-9_]{1,56}$`;
-**any configuration field marked `"secret": true`**.
+**any configuration field marked `"secret": true`**, **any configuration key
+that names a credential** (`password`, `api_key`, `client_secret`, `*_token`,
+`*_passphrase`, `private_key`, …), a `select` with no `options`, a `default`
+outside those options, and a numeric `max` below its `min`.
 
 Unknown keys are not an error — they are recorded and displayed in the preview
 as "keys this platform does not understand and will ignore", so a package can
@@ -223,14 +230,68 @@ directory is left behind and no registry row is created.
 - Health: `healthy | modified | missing_files | not_installed`, computed by
   re-hashing the installed files.
 
+**Modules → Installed → Configure** is generated from the manifest. The details
+screen renders a real form for every declared field and writes the values to
+`mod_cloudhost247_module_settings`:
+
+| Declared type | Rendered as | Server-side rule |
+| --- | --- | --- |
+| `text` | text input | control characters stripped, ≤ 512 chars |
+| `number` | number input with `min`/`max` | must be numeric and inside the declared range |
+| `select` | `<select>` of the declared `options` | value must be one of them |
+| `boolean` | checkbox | stored as `'1'` / `'0'` |
+
+Rules that make the form safe to expose:
+
+- **Only manifest-declared keys are stored.** Anything else posted to the
+  endpoint is discarded and counted, never written.
+- `modules.configure` capability + CSRF token on every save.
+- The **module log and audit trail record changed key names only** — never a
+  value — so a mis-declared field cannot leak into the log.
+- A manifest may not declare a secret field *and* may not declare a
+  credential-shaped key, so an API key, password or token can never reach this
+  table. Those belong to the API & Integrations vault, which the same screen
+  links to per provider.
+- Each declared integration row shows the real state held by the integrations
+  centre (configured / enabled / last result / last checked) and offers
+  **Test connection**, which calls `IntegrationManager::test()` — the central,
+  server-side tester. The Module Manager never reads or forwards the
+  credential; it only displays the sanitized classification it gets back.
+- Installed modules read their own settings at runtime through
+  `ModuleManager::setting($moduleId, $key, $default)`.
+
+The details screen also re-runs the **compatibility and dependency checks live**
+against the current runtime — not the values recorded on installation day — and
+offers **Reinstall from stored package** when the originally installed archive
+is still in package storage.
+
 ### 2.9 Uninstall
 
 The impact screen lists the exact file count and directory, the declared
 database tables (**retained**), declared API integrations (credentials stay in
-the vault), dependent modules (which block the uninstall) and whether the module
-is currently enabled — with an explicit warning that active services provisioned
-through it will stop working. The administrator must tick the confirmation and
-type the module id.
+the vault), stored module settings (**retained**), dependent modules (which
+block the uninstall) and whether the module is currently enabled.
+
+It also runs a **live usage census** against WHMCS itself (`UsageCensus`), so
+the administrator sees who is actually relying on the module before deciding:
+
+| Module type | Counted from |
+| --- | --- |
+| Server / provisioning | `tblservers.type`, `tblproducts.servertype`, live services in `tblhosting` (Active/Suspended/Pending) and the distinct clients owning them |
+| Addon | `tbladdonmodules.module` (activated in WHMCS) |
+| Gateway | `tblpaymentgateways.gateway`, services billed through it, unpaid invoices referencing it |
+| Registrar | `tblregistrars.registrar`, live domains in `tbldomains` |
+| Report / widget / notification | Not attached to customer data |
+
+Only counts are read — never a name, e-mail, address or credential. When a
+table cannot be reached the row reads **unknown**, never zero: the Module
+Manager refuses to imply "nothing is affected" from a measurement it could not
+take. If the census finds live records, or could not measure them, the
+administrator must tick an extra acknowledgement; the check is enforced in the
+controller, not only in the form. The number of live references at removal time
+is written to the module log and the audit trail.
+
+The administrator must also tick the impact confirmation and type the module id.
 
 Only files recorded in the installation manifest are deleted; anything an
 operator added afterwards is left in place. Tables are never dropped; customer

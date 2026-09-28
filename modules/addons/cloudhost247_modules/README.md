@@ -83,8 +83,9 @@ CH247_MODULE_MAX_UPLOAD_BYTES=33554432              # optional, 64 KiB – 256 M
 ## Tables
 
 `mod_cloudhost247_modules`, `mod_cloudhost247_module_packages`,
-`mod_cloudhost247_module_files`, `mod_cloudhost247_module_events` — all
-additive, all `hasTable`-guarded. Deactivating the addon retains every row;
+`mod_cloudhost247_module_files`, `mod_cloudhost247_module_events`
+(migration 1.0.0) and `mod_cloudhost247_module_settings` (migration 1.1.0) —
+all additive, all `hasTable`-guarded. Deactivating the addon retains every row;
 uninstalling a module removes its files but never drops a table and never
 deletes customer or service data.
 
@@ -96,6 +97,6 @@ specification, the packaging rules and the integration contract.
 ## Tests
 
 ```bash
-php tests/modules/run.php                      # 198 behavioural assertions
+php tests/modules/run.php                      # 231 behavioural assertions
 python3 -m unittest tests.modules.test_static  # source-level security policy
 ```

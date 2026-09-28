@@ -10,6 +10,8 @@ use CloudHost247\ModuleManager\Package\ArchiveInspector;
 use CloudHost247\ModuleManager\Package\PackageStorage;
 use CloudHost247\ModuleManager\Package\UploadReceiver;
 use CloudHost247\ModuleManager\Registry\CompatibilityChecker;
+use CloudHost247\ModuleManager\Registry\DependencyResolver;
+use CloudHost247\ModuleManager\Registry\ModuleSettings;
 use CloudHost247\ModuleManager\Security\CapabilityPolicy;
 use CloudHost247\ModuleManager\Registry\ModuleRegistry;
 use CloudHost247\ModuleManager\Registry\ModuleRepository;
@@ -119,6 +121,20 @@ final class AdminController
                 $data['health'] = $this->installer->health($moduleId);
                 $data['integration_status'] = ModuleManager::integrationStatus($moduleId);
                 $data['module_events'] = $this->repository->events(array('module_id' => $moduleId), 1, 15);
+                if ($data['manifest']) {
+                    // Live dependency and compatibility check for what is installed now,
+                    // not what was true on the day the package was installed.
+                    $resolver = new DependencyResolver($this->repository->installedIndex(), ModuleManager::platformComponents());
+                    $data['dependency_check'] = $resolver->check($data['manifest']);
+                    $data['compatibility_check'] = $this->installer->compatibilityChecker()->check($data['manifest']);
+                    $data['settings'] = ModuleSettings::effective($data['manifest'], $this->repository->settings($moduleId));
+                }
+                // A stored package with the installed checksum can be reinstalled as-is.
+                $data['reinstall_checksum'] = '';
+                $package = $this->repository->package((string) $row->package_checksum);
+                if ($package && $this->storage->packagePath((string) $row->package_checksum) !== '') {
+                    $data['reinstall_checksum'] = (string) $row->package_checksum;
+                }
                 try {
                     $data['uninstall_impact'] = $this->installer->uninstallImpact($moduleId);
                 } catch (ModuleException $ignored) {
@@ -150,6 +166,10 @@ final class AdminController
                 return $this->verify($adminId);
             case 'discard':
                 return $this->discard($adminId);
+            case 'configure':
+                return $this->configure($adminId);
+            case 'test_integration':
+                return $this->testIntegration($adminId);
             default:
                 throw new \InvalidArgumentException('Unknown module operation.');
         }
@@ -309,6 +329,17 @@ final class AdminController
         if (empty($_POST['confirm_uninstall'])) {
             throw new ModuleException('Uninstalling requires explicit confirmation.', ModuleException::REASON_PERMISSION);
         }
+        // When live customers, services or domains still reference the module — or when
+        // that could not be measured — the administrator must acknowledge it explicitly.
+        $usage = $impact['usage'];
+        if (($usage['live'] === null || $usage['live'] > 0) && empty($_POST['confirm_usage'])) {
+            throw new ModuleException(
+                $usage['live'] === null
+                    ? 'Live usage of this module could not be measured. Acknowledge that before uninstalling.'
+                    : 'This module is still referenced by ' . $usage['live'] . ' live record(s). Acknowledge the impact before uninstalling.',
+                ModuleException::REASON_PERMISSION
+            );
+        }
 
         try {
             $result = $this->installer->uninstall($moduleId, $adminId);
@@ -321,11 +352,83 @@ final class AdminController
         $retained = $result['retained_tables']
             ? ' Database tables retained: ' . implode(', ', $result['retained_tables']) . '.'
             : ' This module declared no database tables.';
-        $this->log($adminId, 'uninstall', $moduleId, 'success', $result['removed'] . ' file(s) removed.' . $retained, (string) $impact['row']->package_checksum, $result['version'], '');
-        $this->audit($adminId, 'module.uninstall', $moduleId, array('version' => $result['version'], 'files' => $impact['file_count']), array('removed' => $result['removed'], 'retained_tables' => $result['retained_tables']));
+        $liveAtRemoval = $usage['live'] === null ? 'unmeasured' : (string) $usage['live'];
+        $this->log($adminId, 'uninstall', $moduleId, 'success', $result['removed'] . ' file(s) removed.' . $retained . ' Live references at removal: ' . $liveAtRemoval . '.', (string) $impact['row']->package_checksum, $result['version'], '');
+        $this->audit($adminId, 'module.uninstall', $moduleId, array('version' => $result['version'], 'files' => $impact['file_count']), array('removed' => $result['removed'], 'retained_tables' => $result['retained_tables'], 'live_references' => $liveAtRemoval));
 
         return array('notice' => $impact['row']->name . ' was uninstalled: ' . $result['removed'] . ' file(s) removed.' . $retained
             . ' Customer and service data were not deleted.');
+    }
+
+    /**
+     * Save the non-secret settings an installed module declares.
+     *
+     * Only manifest-declared keys are accepted, every value is validated
+     * against its declared type, and credential-shaped keys cannot exist here
+     * at all because the manifest parser refuses them.
+     */
+    private function configure($adminId)
+    {
+        AdminGuard::requireCapability(self::MODULE, 'modules.configure');
+        $moduleId = $this->postModuleId();
+        $row = $this->repository->find($moduleId);
+        if (!$row) { throw new ModuleException('That module is not installed.', ModuleException::REASON_STATE); }
+        $manifest = $this->repository->manifest($moduleId);
+        if (!$manifest || !$manifest->requiresConfiguration()) {
+            throw new ModuleException('That module does not declare any configurable settings.', ModuleException::REASON_CONFIGURATION);
+        }
+
+        $input = array();
+        foreach ($_POST as $key => $value) {
+            if (in_array($key, array('token', 'operation', 'module_id'), true)) { continue; }
+            $input[(string) $key] = $value;
+        }
+        $validated = ModuleSettings::validate($manifest, $input);
+        $before = $this->repository->settings($moduleId);
+        $this->repository->saveSettings($moduleId, $validated['values'], $adminId);
+
+        $changed = array();
+        foreach ($validated['values'] as $key => $value) {
+            if (!array_key_exists($key, $before) || (string) $before[$key] !== (string) $value) { $changed[] = $key; }
+        }
+        // Setting keys are recorded; values are not, so a mis-declared field can never leak.
+        $detail = $changed
+            ? 'Settings updated: ' . implode(', ', $changed) . '.'
+            : 'Settings saved with no change.';
+        $this->log($adminId, 'configure', $moduleId, 'success', $detail, (string) $row->package_checksum);
+        $this->audit($adminId, 'module.configure', $moduleId, array('keys' => array_keys($before)), array('changed_keys' => $changed));
+
+        $ignored = $validated['ignored']
+            ? ' ' . count($validated['ignored']) . ' undeclared field(s) in the request were ignored.'
+            : '';
+        return array('notice' => $row->name . ' configuration saved. ' . $detail . $ignored);
+    }
+
+    /**
+     * Ask the API & Integrations centre to test a provider this module needs.
+     * The credentials never pass through the Module Manager.
+     */
+    private function testIntegration($adminId)
+    {
+        AdminGuard::requireCapability(self::MODULE, 'modules.configure');
+        $moduleId = $this->postModuleId();
+        $provider = isset($_POST['provider']) ? (string) $_POST['provider'] : '';
+        if (!preg_match('/^[a-z][a-z0-9_]{1,63}$/', $provider)) {
+            throw new \InvalidArgumentException('A valid integration reference is required.');
+        }
+
+        $result = ModuleManager::testIntegration($moduleId, $provider, $adminId);
+        $this->log(
+            $adminId,
+            'health_check',
+            $moduleId,
+            $result['ran'] && $result['code'] === 'ok' ? 'success' : 'failed',
+            'Connection test for integration "' . $provider . '": ' . $result['label'] . '.'
+        );
+        $this->audit($adminId, 'module.integration.test', $moduleId, array('provider' => $provider), array('result' => $result['code']), $result['ran'] ? 'success' : 'failed');
+
+        return array('notice' => 'Connection test for ' . $provider . ': ' . $result['label']
+            . ($result['detail'] !== '' ? ' — ' . $result['detail'] : ''));
     }
 
     private function verify($adminId)

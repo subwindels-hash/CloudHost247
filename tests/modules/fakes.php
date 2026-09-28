@@ -105,6 +105,7 @@ namespace CloudHost247\ModuleManager\Tests {
         public $packages = array();
         public $fileRows = array();
         public $eventRows = array();
+        public $settingRows = array();
         private $sequence = 0;
 
         public function all()
@@ -265,6 +266,20 @@ namespace CloudHost247\ModuleManager\Tests {
         public function files($moduleId)
         {
             return isset($this->fileRows[$moduleId]) ? $this->fileRows[$moduleId] : array();
+        }
+
+        public function settings($moduleId)
+        {
+            return isset($this->settingRows[$moduleId]) ? $this->settingRows[$moduleId] : array();
+        }
+
+        public function saveSettings($moduleId, array $values, $adminId)
+        {
+            if (!isset($this->settingRows[$moduleId])) { $this->settingRows[$moduleId] = array(); }
+            foreach ($values as $key => $value) {
+                $this->settingRows[$moduleId][(string) $key] = (string) $value;
+            }
+            return count($values);
         }
 
         public function recordEvent(array $event)

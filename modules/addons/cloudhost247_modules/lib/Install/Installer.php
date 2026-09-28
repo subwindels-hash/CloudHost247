@@ -9,6 +9,7 @@ use CloudHost247\ModuleManager\Registry\CompatibilityChecker;
 use CloudHost247\ModuleManager\Registry\DependencyResolver;
 use CloudHost247\ModuleManager\Registry\ModuleRegistry;
 use CloudHost247\ModuleManager\Registry\ModuleRepository;
+use CloudHost247\ModuleManager\Registry\UsageCensus;
 use CloudHost247\ModuleManager\Support\Checksum;
 use CloudHost247\ModuleManager\Support\ModuleException;
 use CloudHost247\ModuleManager\Support\Paths;
@@ -30,20 +31,24 @@ final class Installer
     private $storage;
     private $extractor;
     private $compatibility;
+    private $census;
 
     public function __construct(
         ModuleRegistry $repository = null,
         PackageStorage $storage = null,
         SecureExtractor $extractor = null,
-        CompatibilityChecker $compatibility = null
+        CompatibilityChecker $compatibility = null,
+        UsageCensus $census = null
     ) {
         $this->repository = $repository ? $repository : new ModuleRepository();
         $this->storage = $storage ? $storage : new PackageStorage();
         $this->extractor = $extractor ? $extractor : new SecureExtractor();
         $this->compatibility = $compatibility ? $compatibility : new CompatibilityChecker();
+        $this->census = $census ? $census : new UsageCensus();
     }
 
     public function repository() { return $this->repository; }
+    public function compatibilityChecker() { return $this->compatibility; }
     public function storage() { return $this->storage; }
 
     /* ----------------------------------------------------------- preview -- */
@@ -217,6 +222,9 @@ final class Installer
             'integrations' => $manifest ? $manifest->integrationProviders() : array(),
             'dependents' => $resolver->dependents($moduleId, true),
             'enabled' => (bool) $row->enabled,
+            // Real WHMCS usage: servers, products, live customer services, domains.
+            'usage' => $this->census->forModule($moduleId, (string) $row->module_type),
+            'settings_retained' => count($this->repository->settings($moduleId)),
         );
     }
 

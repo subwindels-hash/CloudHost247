@@ -23,6 +23,7 @@ class ModuleException extends RuntimeException
     const REASON_INSTALL = 'installation_failed';
     const REASON_ROLLBACK = 'rollback_performed';
     const REASON_STATE = 'invalid_state';
+    const REASON_CONFIGURATION = 'configuration_invalid';
 
     private $reason;
     private $correlationId;
