@@ -3,7 +3,7 @@
  * Legal Notice Page
  *
  * @package    WHMCS
- * @subpackage HostX Theme
+ * @subpackage CloudHost247 Theme
  * @copyright  CloudHost247 Isc
  * @license    Private
  */
@@ -34,7 +34,7 @@ $ca->addToBreadCrumb('legal-notice.php', 'Legal Notice');
 /**
  * Template Assignment
  *
- * Template file: templates/hostx/legalnotice.tpl
+ * Template file: templates/cloudhost247_legacy/legalnotice.tpl
  */
 $ca->setTemplate('legalnotice');
 

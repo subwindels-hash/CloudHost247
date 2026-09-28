@@ -1,0 +1,409 @@
+
+
+.container {
+  max-width: 1170px;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  margin: 0;
+}
+
+a:hover,
+a:focus {
+  text-decoration: none;
+}
+
+ul,
+li {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/*css start herre*/
+
+.bil-title {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+.bil-title h3 {
+    font-size: 18px;
+    color: #000000;
+    font-weight:800;
+    text-transform: uppercase;
+    font-family: 'Raleway', sans-serif;
+}
+
+.billingcycle-sec {
+    margin: 20px 0 30px;
+    width: 100%;
+    clear: both;
+    display: inherit;
+}
+.billingcycle-box{
+  border: 1px solid #dadee0;
+  padding: 10px 10px 25px;
+  margin-bottom: 20px;
+}
+.billingcycle-box p {
+    display: block;
+    color: #686e81;
+    font-size: 12px;
+    line-height: normal;
+    margin: 0px;
+    padding: 0px;
+    text-align: center;
+    font-weight: 500;
+    font-family: 'Raleway', sans-serif;
+    line-height: 18px;
+
+}
+.billingcycle-box p strong {
+    display: block;
+    width: 100%;
+    color: #333640;
+    font-size: 18px;
+    margin: 0px;
+    padding: 15px 0px;
+    font-family: 'Open Sans', sans-serif;
+    letter-spacing: -0.3px;
+}
+.billingcycle-box:hover{
+  background: #f1f4f8;
+  border-color: #8cbbfd;
+}
+.billingcycle-box:hover p strong{
+  color: #2d84fb;
+}
+.custom-radios {
+    text-align: right;
+    margin: 4px 12px 0;
+    padding: 0;
+}
+.custom-radios .checkbox-custom, .custom-radios .radio-custom {
+    opacity: 0;
+    position: absolute;   
+}
+
+.custom-radios .checkbox-custom, .custom-radios .checkbox-custom-label, .custom-radios .radio-custom, .custom-radios .radio-custom-label {
+    display: inline-block;
+    vertical-align: middle;
+    margin: 5px 0;
+    cursor: pointer;
+}
+
+.custom-radios .checkbox-custom-label, .custom-radios .radio-custom-label {
+    position: relative;
+    outline: none !important;
+    color: #000;
+}
+
+.custom-radios .checkbox-custom + .checkbox-custom-label:before, .custom-radios .radio-custom + .radio-custom-label:before {
+    content: '';
+    background: #f9f9f9;
+    border: 1px solid #c2c5ca;
+    display: inline-block;
+    vertical-align: middle;
+    width: 16px;
+    height:16px;
+    padding: 2px;
+    margin-right: 0px;
+    text-align: center;
+}
+
+.custom-radios .checkbox-custom:checked + .checkbox-custom-label:before {
+    content: "\f00c";
+    font-family: 'FontAwesome';
+    background: rebeccapurple;
+    color: #fff;
+    line-height: normal;
+    font-size: 12px;
+    font-weight: normal;
+}
+
+.custom-radios .radio-custom + .radio-custom-label:before {
+    border-radius: 2px;
+}
+
+.custom-radios .radio-custom:checked + .radio-custom-label:before {
+    content: "\f00c";
+    font-family: 'FontAwesome';
+    color: #fff;
+    background: #2d84fb;
+    border-color: #2d84fb;
+    font-size: 10px;
+}
+
+.custom-radios .checkbox-custom:focus + .checkbox-custom-label, .custom-radios .radio-custom:focus + .radio-custom-label {
+  outline: 1px solid #ddd; /* focus style */
+}
+
+.bil-title h4 {
+    margin: 17px 0 0px;
+    padding: 0px;
+    color: #333640;
+    font-size: 18px;
+    font-weight: 700;
+    font-family: 'Raleway', sans-serif;
+}
+.bil-title h4 img {
+    margin-right: 6px;
+    vertical-align: sub;
+}
+
+.bil-title p {
+    margin: 15px 0 0px;
+    padding: 0px;
+    font-size: 12px;
+    color: #8e8f93;
+    font-weight: 500;
+    font-family: 'Raleway', sans-serif;
+    line-height: 16px;
+    min-height: 33px;
+}
+.config-box p strong{
+  font-size: 16px;
+  color: #333640;
+}
+.lg-icons{text-align: center;}
+.os-icons img {
+    width: 26px;
+    height: 26px;
+    margin-right: 12px;
+    margin-top: 4px;
+}
+.operating-box {
+    padding: 5px 0 0;
+}
+.operating-box h4 {
+    width: 100%;
+    color: #333640;
+    font-size: 16px;
+    margin: 0px;
+    padding: 15px 0px;
+    font-family: 'Open Sans', sans-serif;
+    text-align: center;
+    font-weight: 700;
+}
+.operating-box:hover{background: inherit;}
+.op-select {
+    border: none;
+    width: 100%;
+    padding: 8px 30px 10px 8px !important;
+    appearance: none;
+    -webkit-appearance: none;
+    color: #474c5a;
+    font-size: 11px;
+    outline: none;
+    background: #f1f4f8 url(../images/d-arow.png);
+    background-repeat: no-repeat;
+    background-position: 93% center;
+    line-height: 18px;
+}
+
+#orderfrm .col-md-8 h3 {
+    font-size: 18px;
+    color: #000000;
+    font-weight: 800;
+    text-transform: uppercase;
+    font-family: 'Raleway', sans-serif;
+}
+#order-modern .col-md-8 .configoptions {
+    border: none;
+}
+.soyoustartHtml .col-sm-12.col-md-12.col-lg-12 {
+    padding-left: 0;
+    padding-right: 0;
+}
+.opreatingHTML {
+    clear: both;
+    display: inline-block;
+    width: 100%;
+    margin-top: 15px;
+}
+#order-modern select.op-select {
+    border:none;
+    border-top: 1px solid #ccc;
+}
+.Diskconfig {
+    background-color: #f1f4f8;
+}
+.Diskconfig p {
+    font-size: 15px;
+    color: #222222;
+    font-weight: 600;
+}
+#orderfrm .list-section .list-radio-btn [type="radio"]:checked + label {
+    background-color: #ffffff;
+}
+#orderfrm .list-section .list-radio-btn p label:nth-child(even) {
+    background-color: #ffffff;
+}
+#orderfrm .list-section .list-radio-btn p label {
+    border-bottom: none;
+}
+
+.C-panel .logo_section{
+    background-color: #f5f7fa;
+    border: 2px solid rgba(45,132,251,0.55);
+    border: 1px solid #dcdcdc;
+    border-radius: 0;
+    height: 60px;
+    position: relative;
+}
+.form-control:focus{
+    box-shadow: none;
+    outline: none;
+}
+.C-panel .soyoustartRadio{
+    margin-top: 0;
+    position: relative;
+    z-index: 1;
+}
+.C-panel .logo_section:hover, .billingcycle-box:hover{
+    border: 1px solid rgba(45,132,251,0.55);
+}
+.opreatingHTML{
+    margin-top: 0;
+}
+.custom-radios .radio-custom{
+    z-index: 1;
+}
+.billingcycle-box{
+    position: relative;
+}
+.radioname {
+    height: auto; 
+    font-size: 12px;
+    margin: 0;
+    font-size: 15px;
+    line-height: 17px;
+}
+.C-panel .logo-part {
+    align-items: center;
+    height: 100%;
+}
+.C-panel .logo_section img {
+    margin-left: -5px;
+}
+
+.operating-box h4{
+    font-size: 12px;
+    font-family: 'Raleway', sans-serif;
+    line-height: 16px;
+}
+.VPSOpreating{
+    height: 128px;
+}
+.VPSOpreatingapp p {
+    margin:0px;
+}
+.dedicatedOpreating{
+    height:160px;    
+}
+.opreatingHTML .row{
+    display:flow-root !important;
+}
+
+/*===============29-sept-2020==========*/
+
+.iradio_square-blue {
+    padding-right: 20px;
+}
+.list-section .list-radio-btn p label {
+    padding-left: 26px;
+}
+.billingcycle-box .iradio_square-blue {
+    background-position: -72px 0;
+    border-radius: 3px;
+    width: 16px;
+    height: 16px;
+    padding: 1px;
+    border: 1px solid #ddd;
+}
+.list-section .iradio_square-blue.checked::after {
+    content: "";
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: #096bef;
+    left: 2px;
+    top: 2px;
+    border-radius: 50%;
+}
+.list-section .iradio_square-blue {
+    width: 16px;
+    height: 16px;
+    padding: 1px;
+    border: 1px solid #ddd;
+    border-radius: 50%;
+    background: unset;
+}
+.billingcycle-box .iradio_square-blue.checked {
+    /*background-position: -51px -3px;*/
+    background: unset;
+    border: 0;
+}
+.list-section .list-radio-btn .iradio_square-blue {
+    position: relative;
+    top: 17px;
+}
+.pricing_section .price_group #productList .price_sect li {
+    margin-bottom: 10px;
+}
+.list-section .list-radio-btn p label {
+    padding-bottom: 0;
+    border-bottom: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+}
+.list-section .list-radio-btn p label:nth-child(even) {
+    background-color: unset;
+}
+.list-section .iradio_square-blue.checked {
+    background-position: unset;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    padding: 1px;
+    left: 0px;
+    border: 1px solid #ddd;
+    border-radius: 50%;
+}
+
+.billingcycle-box .iradio_square-blue.checked::after {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    background-color: #096bef;
+    left: 0;
+    /* font-family: "Font Awesome 5 Free"; */
+    content: "";
+    color: #fff;
+    font-size: 9px;
+    text-align: center;
+    border-radius: 2px;
+    font-weight: 600;
+    padding: 2px 1px 0px 0px;
+    background-image: url(/templates/orderforms/cloudhost247_legacy/images/tick.png);
+    background-repeat: no-repeat;
+    background-position: 45% 40%;
+    background-size: 8px;
+}
+.networkHeading, .memoryHeading, .ipHeading {
+    margin-top: 4rem;
+}
+
+/*===============29-sept-2020-end==========*/

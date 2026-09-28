@@ -16,8 +16,8 @@ var _localLang = {
             <link rel="stylesheet" href="templates/orderforms/{$carttpl}/css/clientx-child.css" type="text/css">
         {else if $template eq "cloudx"}    
             <link rel="stylesheet" href="templates/orderforms/{$carttpl}/css/cloudx.css" type="text/css">
-        {else if $template eq "hostx"}    
-            <link rel="stylesheet" href="templates/orderforms/{$carttpl}/css/hostx.css" type="text/css">
+        {else if $template eq "cloudhost247_legacy"}    
+            <link rel="stylesheet" href="templates/orderforms/{$carttpl}/css/cloudhost247.css" type="text/css">
         {else if $template eq "lagom2"}    
             <link rel="stylesheet" href="templates/orderforms/{$carttpl}/css/lagom2.css" type="text/css">
         {else if $template eq "six"}    

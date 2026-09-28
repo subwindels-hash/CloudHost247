@@ -8,6 +8,6 @@ $ca->setPageTitle('Comingsoon');
 $ca->addToBreadCrumb('index.php', Lang::trans('globalsystemname'));
 $ca->addToBreadCrumb('comingsoon.php', 'Comingsoon');
 $ca->initPage();
-$ca->assign('sidebarHostxRemove', 'true');
+$ca->assign('sidebarCloudHost247Remove', 'true');
 $ca->setTemplate('comingsoon');
 $ca->output();

@@ -94,8 +94,8 @@ $_LANG = json_decode('{
   "homewordpresshostingtext": "Většina serverů Dedibox podporuje RAID a poskytuje spolehlivost a výkon",
   "homecloudhosting": "Cloud hosting",
   "homecloudhostingtext": "Naše technická pomoc je k dispozici 24 hodin denně, 7 dní v týdnu lístkem a telefonem, ve francouzštině, angličtině a němčině",
-  "homehostxwebhost": "CloudHost247 Web Hosting",
-  "homehostxwebhosttext": "Máme perfektní hostingový plán pro váš další server, web, aplikaci, platformu nebo blog - vše podporované vaší oceněnou podporou 24/7.",
+  "homecloudhost247webhost": "CloudHost247 Web Hosting",
+  "homecloudhost247webhosttext": "Máme perfektní hostingový plán pro váš další server, web, aplikaci, platformu nebo blog - vše podporované vaší oceněnou podporou 24/7.",
   "homestartup": "linux hosting",
   "homesplan2": "vps hosting",
   "homesplan3": "vyhrazený server",
@@ -555,7 +555,7 @@ $_LANG['antiddosprotection'] = "Keep your dedicated infrastructures protected ag
  /* for v2.2.0 */
 $_LANG['contactuspagemainhead'] = "Kontaktujte nás";
 $_LANG['contactuspagemainsubhead'] = "Pro více informací";
-$_LANG['contactuscompanyname'] = "Hostx Pvt Ltd.";
+$_LANG['contactuscompanyname'] = "CloudHost247 Pvt Ltd.";
 $_LANG['contactusaddress'] = "abcdd, Phase 123, IND Area<br>Near Hotel Abcd,<br>XYZ, XYZ, XYZ 123456";
 $_LANG['contactushotlinesale'] = "<b>Hotline:</b> +91 8360944358";
 $_LANG['contactusbusinesshoursale'] = "<b>Service</b> Hours: 9:00 – 18:00 (Mon – Sat)";

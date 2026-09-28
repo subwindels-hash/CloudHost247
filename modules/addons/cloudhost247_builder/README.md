@@ -3,7 +3,7 @@
 Visual, drag-and-drop page builder for the public CloudHost247 website, built
 into the WHMCS admin as **Addons → CloudHost247 Website Builder**.
 
-It is an addition to the site, not a replacement for it. No HostX template file
+It is an addition to the site, not a replacement for it. No CloudHost247 template file
 is read, written or overridden; builder pages render inside the active client
 area theme, so the existing branding, navigation, cart, checkout, login and
 registration keep working exactly as before. The module ships **inactive**.

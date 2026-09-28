@@ -26,8 +26,8 @@
 <link href="{$assets}/css/compatible_clientx_child.css?v={$unique_id}" rel="stylesheet">
 {elseif $clientareatemplate eq "cloudx"}
 <link href="{$assets}/css/compatible_cloudx.css?v={$unique_id}" rel="stylesheet">
-{elseif $clientareatemplate eq "hostx"}
-<link href="{$assets}/css/compatible_hostx.css?v={$unique_id}" rel="stylesheet">
+{elseif $clientareatemplate eq "cloudhost247_legacy"}
+<link href="{$assets}/css/compatible_cloudhost247.css?v={$unique_id}" rel="stylesheet">
 {/if}
 
 

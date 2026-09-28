@@ -26,7 +26,7 @@ function get_currency(){
     }
     return $currency;
 }
-function wgs_fetch_product_detail_according_to_language_hostx($language,$relid,$for){
+function wgs_fetch_product_detail_according_to_language_cloudhost247($language,$relid,$for){
 	if($for == 'pname'){
 		$dataReturn = Capsule::table('tbldynamic_translations')->where('related_type','product.{id}.name')->where('related_id',$relid)->where('language',$language)->first();
 	}else if($for == 'pdescp'){
@@ -85,8 +85,8 @@ if(!empty($gid)){
             $pDesc = Capsule::table('mod_hostx_page_products')->select('pHeadSortDesc','pDescription','pFootCaption','pFootSortDesc')->where('productId', $pData['pid'])->where('pageId', $pageData->id)->first();
 			if($checkForTranslationGroup->value == 1){
 				if(isset($_SESSION['Language'])){
-					$getPname = wgs_fetch_product_detail_according_to_language_hostx($_SESSION['Language'],$pData['pid'],'pname');
-					$getPdescp = wgs_fetch_product_detail_according_to_language_hostx($_SESSION['Language'],$pData['pid'],'pdescp');
+					$getPname = wgs_fetch_product_detail_according_to_language_cloudhost247($_SESSION['Language'],$pData['pid'],'pname');
+					$getPdescp = wgs_fetch_product_detail_according_to_language_cloudhost247($_SESSION['Language'],$pData['pid'],'pdescp');
 					$productName = ($getPname->translation != '' ? $getPname->translation : $pData['name']);
 					if($getLocalLang->value != $_SESSION['Language']){
 						$productDescp = ($getPdescp->translation != '' ? $getPdescp->translation : $pData['description']);
@@ -159,6 +159,6 @@ if(!empty($gid)){
 $ca->assign('productsDataCycles', $arrayCycles);
 $ca->assign('productsData', $productsData);
 $ca->assign('productsDataCount', count((array)$productsData));
-$ca->assign('sidebarHostxRemove', 'true');
-$ca->setTemplate('hostx');
+$ca->assign('sidebarCloudHost247Remove', 'true');
+$ca->setTemplate('cloudhost247_legacy');
 $ca->output();

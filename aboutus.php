@@ -8,6 +8,6 @@ $ca->setPageTitle('About Us');
 $ca->addToBreadCrumb('index.php', Lang::trans('globalsystemname'));
 $ca->addToBreadCrumb('aboutus.php', 'About Us');
 $ca->initPage();
-$ca->assign('sidebarHostxRemove', 'true');
+$ca->assign('sidebarCloudHost247Remove', 'true');
 $ca->setTemplate('aboutus');
 $ca->output();

@@ -25,7 +25,7 @@ $ca->initPage();
  * REFUND POLICY DATA
  * ================================================================
  * Professional, legally appropriate refund policy content
- * structured for display within the HostX theme.
+ * structured for display within the CloudHost247 theme.
  * ================================================================
  */
 

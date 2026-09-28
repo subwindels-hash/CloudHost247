@@ -109,7 +109,7 @@ source cannot be read. That "unknown" travels to the renderer, which then:
 | domain pricing | `tbldomainpricing` + `tblpricing`, WHMCS year columns (`msetupfee` = 1 year), client-group override rows excluded |
 | cart, checkout link | the visitor's real WHMCS cart session; links to `cart.php?a=view` / `cart.php?a=checkout` |
 | account links | real session state: a signed-in visitor is offered the client area, not a login link |
-| customer reviews | published testimonials in the CloudHost247 theme content store |
+| customer reviews | published testimonials in the legacy theme content store |
 | service status | `IntegrationManager::installed()` — measured health only |
 
 The builder never re-implements a cart, a checkout or an authentication form.
@@ -174,7 +174,7 @@ Each has draft and published copies, a priority and display conditions
 (`all`, `front page`, a specific page, a slug prefix, a page type) with
 exclusions that always win.
 
-No HostX or WHMCS template file is read or modified. A site with no published
+No CloudHost247 or WHMCS template file is read or modified. A site with no published
 parts behaves exactly as it did before the module was installed, and login and
 registration remain WHMCS's own pages — the builder can only decorate around
 them, never replace the authentication flow.

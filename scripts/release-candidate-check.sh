@@ -3,7 +3,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 echo '== CloudHost247 release-candidate source verification =='
 git diff --check
-find modules/addons/cloudhost247_* modules/servers/cloudhost247_ovh modules/servers/RDP tests scripts crons/cloudhost247_*.php builder-page.php cloudhost247-page.php -name '*.php' -print0 | xargs -0 -n1 php -l
+find modules/addons/cloudhost247_* modules/servers/cloudhost247_ovh modules/servers/RDP tests scripts crons/cloudhost247_*.php builder-page.php cloudhost247-page.php aboutus.php all-element-cloudhost247.php blog.php cloudhost247-sample.php cloudhost247-vps-sample.php comingsoon.php cpanel-hosting.php data-protection-standards.php dedeicated-server.php dedicated-server.php developer-friendly.php domain.php enterprise-servers.php future-element.php game-servers.php help-center.php legal-notice.php notfound.php offers.php plesk-hosting.php refund-and-cancellation-policy.php refund-policy.php ssl-certificate.php tables.php terms-of-service.php vps-hosting.php vps-privatecloud.php vps-publiccloud.php web-hosting.php website-design.php windows-hosting.php wordpress-hosting.php -name '*.php' -print0 | xargs -0 -n1 php -l
 php tests/foundation/run.php
 php tests/currency/run.php
 php -d display_errors=1 tests/ovh/run.php

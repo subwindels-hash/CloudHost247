@@ -3,7 +3,7 @@
  * Data Protection Standards Page
  *
  * @package    WHMCS
- * @subpackage HostX Theme
+ * @subpackage CloudHost247 Theme
  * @copyright  CloudHost247 Isc
  * @license    Private
  */
@@ -26,7 +26,7 @@ $ca->initPage();
 /**
  * Template Assignment
  *
- * Template file: templates/hostx/dataprotectionstandards.tpl
+ * Template file: templates/cloudhost247_legacy/dataprotectionstandards.tpl
  */
 $ca->setTemplate('dataprotectionstandards');
 

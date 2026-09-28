@@ -1,7 +1,7 @@
 name: Independent foundation
 on:
   push:
-    branches: [arena/01a0e4c2-cloudhost247]
+    branches: [arena/01a0e4c2-cloudhost247, arena/01a0e748-cloudhost247]
   pull_request:
 jobs:
   release-candidate:
@@ -17,7 +17,7 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
       - name: PHP syntax diagnostics
-        run: find modules/addons/cloudhost247_* modules/servers/cloudhost247_ovh modules/servers/RDP tests scripts crons/cloudhost247_*.php builder-page.php cloudhost247-page.php -name '*.php' -print0 | xargs -0 -n1 php -l
+        run: find modules/addons/cloudhost247_* modules/servers/cloudhost247_ovh modules/servers/RDP tests scripts crons/cloudhost247_*.php builder-page.php cloudhost247-page.php aboutus.php all-element-cloudhost247.php blog.php cloudhost247-sample.php cloudhost247-vps-sample.php comingsoon.php cpanel-hosting.php data-protection-standards.php dedeicated-server.php dedicated-server.php developer-friendly.php domain.php enterprise-servers.php future-element.php game-servers.php help-center.php legal-notice.php notfound.php offers.php plesk-hosting.php refund-and-cancellation-policy.php refund-policy.php ssl-certificate.php tables.php terms-of-service.php vps-hosting.php vps-privatecloud.php vps-publiccloud.php web-hosting.php website-design.php windows-hosting.php wordpress-hosting.php -name '*.php' -print0 | xargs -0 -n1 php -l
       - name: PHP behavior diagnostics
         run: php tests/foundation/run.php && php tests/currency/run.php && php -d display_errors=1 tests/ovh/run.php && php -d display_errors=1 tests/rdp/run.php && php -d display_errors=1 tests/integrations/run.php && php -d display_errors=1 tests/modules/run.php && php -d display_errors=1 tests/builder/run.php
       - name: Complete release-candidate verification

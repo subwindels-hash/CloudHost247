@@ -1,4 +1,4 @@
-/public_html/templates/hostx/privacypolicy.tpl
+/public_html/templates/cloudhost247_legacy/privacypolicy.tpl
 
 
 /public_html/

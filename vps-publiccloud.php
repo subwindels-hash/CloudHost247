@@ -4,11 +4,11 @@ use WHMCS\Database\Capsule;
 define('CLIENTAREA', true);
 require __DIR__ . '/init.php';
 $ca = new ClientArea();
-$ca->setPageTitle('WHMCS HostX Page Title');
+$ca->setPageTitle('WHMCS CloudHost247 Page Title');
 $ca->addToBreadCrumb('index.php', Lang::trans('globalsystemname'));
-$ca->addToBreadCrumb('vps-publiccloud.php', 'WHMCS HostX Page Title');
+$ca->addToBreadCrumb('vps-publiccloud.php', 'WHMCS CloudHost247 Page Title');
 $ca->initPage();
 
-$ca->assign('sidebarHostxRemove', 'true');
-$ca->setTemplate('hostx');
+$ca->assign('sidebarCloudHost247Remove', 'true');
+$ca->setTemplate('cloudhost247_legacy');
 $ca->output();

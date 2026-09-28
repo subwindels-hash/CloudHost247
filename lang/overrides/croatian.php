@@ -94,8 +94,8 @@ $_LANG = json_decode('{
   "homewordpresshostingtext": "Većina Dedibox poslužitelja podržava RAID, osiguravajući pouzdanost i performanse",
   "homecloudhosting": "Hosting u oblaku",
   "homecloudhostingtext": "Naša tehnička pomoć dostupna je 24 sata dnevno, 7 dana u tjednu, putem ulaznice i telefona, na francuskom, engleskom i njemačkom jeziku",
-  "homehostxwebhost": "CloudHost247 web hosting",
-  "homehostxwebhosttext": "Imamo savršen hosting plan za vaš sljedeći poslužitelj, web-lokaciju, aplikaciju, platformu ili blog - a sve to podupire vaša nagrađivana 24/7 podrška.",
+  "homecloudhost247webhost": "CloudHost247 web hosting",
+  "homecloudhost247webhosttext": "Imamo savršen hosting plan za vaš sljedeći poslužitelj, web-lokaciju, aplikaciju, platformu ili blog - a sve to podupire vaša nagrađivana 24/7 podrška.",
   "homestartup": "Linux hosting",
   "homesplan2": "VPS hosting",
   "homesplan3": "namjenski poslužitelj",
@@ -555,7 +555,7 @@ types of DDoS attack, without any limitations in terms of volume or duration.";
 /* for v2.2.0 */
 $_LANG['contactuspagemainhead'] = "Kontaktirajte nas";
 $_LANG['contactuspagemainsubhead'] = "za više informacija";
-$_LANG['contactuscompanyname'] = "Hostx Pvt Ltd.";
+$_LANG['contactuscompanyname'] = "CloudHost247 Pvt Ltd.";
 $_LANG['contactusaddress'] = "abcdd, Phase 123, IND područje u blizini hotela Abcd, <br> XYZ, XYZ, XYZ 123456";
 $_LANG['contactushotlinesale'] = "<b> Telefonska linija: </b> +91 8360944358";
 $_LANG['contactusbusinesshoursale'] = "<b> Usluga </b> Sati: 9:00 - 18:00 (pon - sub)";

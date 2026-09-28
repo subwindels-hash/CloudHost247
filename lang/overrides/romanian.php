@@ -188,8 +188,8 @@ $_LANG['homewordpresshosting'] = 'Wordpress Hosting';
 $_LANG['homewordpresshostingtext'] = 'Majoritatea serverelor Dedibox suportă RAID, oferind fiabilitate și performanță';
 $_LANG['homecloudhosting'] = 'Cloud Hosting';
 $_LANG['homecloudhostingtext'] = 'Asistența noastră tehnică este disponibilă 24 de ore pe zi, 7 zile pe săptămână cu bilet și telefon, în franceză, engleză și germană';
-$_LANG['homehostxwebhost'] = 'CloudHost247 Web Hosting';
-$_LANG['homehostxwebhosttext'] = "Avem planul perfect de găzduire pentru următorul server, site, aplicație, platformă sau blog - toate susținute de suportul dvs. câștigat 24 de ore din 24,";
+$_LANG['homecloudhost247webhost'] = 'CloudHost247 Web Hosting';
+$_LANG['homecloudhost247webhosttext'] = "Avem planul perfect de găzduire pentru următorul server, site, aplicație, platformă sau blog - toate susținute de suportul dvs. câștigat 24 de ore din 24,";
 $_LANG['homestartup'] = "linux hosting";
 $_LANG['homesplan2'] = "vps hosting";
 $_LANG['homesplan3'] = "server dedicat";
@@ -571,7 +571,7 @@ the market<br>It provides your services with round-the-clock protection against 
  /* for v2.2.0 */
 $_LANG['contactuspagemainhead'] = "Contactează-ne";
 $_LANG['contactuspagemainsubhead'] = "pentru mai multe informatii";
-$_LANG['contactuscompanyname'] = "Hostx Pvt Ltd.";
+$_LANG['contactuscompanyname'] = "CloudHost247 Pvt Ltd.";
 $_LANG['contactusaddress'] = "abcdd, Phase 123, Zona IND - Hotel Aproape Hotel Abcd, <br> XYZ, XYZ, XYZ 123456";
 $_LANG['contactushotlinesale'] = "<b>Hotline:</b> +91 8360944358";
 $_LANG['contactusbusinesshoursale'] = "<b>Serviciu </b> Ore: 9:00 - 18:00 (Luni - Sat)";

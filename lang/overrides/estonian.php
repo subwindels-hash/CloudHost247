@@ -96,8 +96,8 @@ if (!defined("WHMCS")) die("This file cannot be accessed directly");
   "homewordpresshostingtext": "Enamik Dediboxi servereid toetab RAID-i, mis tagab usaldusväärsuse ja jõudluse",
   "homecloudhosting": "Cloud Hosting",
   "homecloudhostingtext": "Meie tehniline abi on saadaval 24 tundi ööpäevas, 7 päeva nädalas pileti ja telefoni teel, prantsuse, inglise ja saksa keeles",
-  "homehostxwebhost": "CloudHost247i veebimajutus",
-  "homehostxwebhosttext": "Meil on teie järgmise serveri, saidi, rakenduse, platvormi või blogi jaoks täiuslik hosting kava, mida toetavad auhinnatud 24/7 tugi.",
+  "homecloudhost247webhost": "CloudHost247i veebimajutus",
+  "homecloudhost247webhosttext": "Meil on teie järgmise serveri, saidi, rakenduse, platvormi või blogi jaoks täiuslik hosting kava, mida toetavad auhinnatud 24/7 tugi.",
   "homestartup": "linux hosting",
   "homesplan2": "VPS hosting",
   "homesplan3": "spetsiaalne server",
@@ -556,7 +556,7 @@ duration.";
 /* for v2.2.0 */
 $_LANG['contactuspagemainhead'] = "Võta meiega ühendust";
 $_LANG['contactuspagemainsubhead'] = "rohkem informatsiooni";
-$_LANG['contactuscompanyname'] = "Hostx Pvt Ltd.";
+$_LANG['contactuscompanyname'] = "CloudHost247 Pvt Ltd.";
 $_LANG['contactusaddress'] = "abcdd, Phase 123, IND Piirkond - Hotelli Abcd lähedal, <br> XYZ, XYZ, XYZ 123456";
 $_LANG['contactushotlinesale'] = "<b> Vihjeliin: </b> +91 8360944358";
 $_LANG['contactusbusinesshoursale'] = "<b> Teenindus </b> Tööaeg: 9:00 - 18:00 (E – L)";

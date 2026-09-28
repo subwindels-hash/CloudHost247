@@ -94,8 +94,8 @@ $_LANG = json_decode('{
   "homewordpresshostingtext": "تدعم غالبية خوادم Dedibox RAID ، مما يوفر الموثوقية والأداء",
   "homecloudhosting": "سحابة استضافة",
   "homecloudhostingtext": "مساعدتنا الفنية متوفرة 24 ساعة في اليوم ، 7 أيام في الأسبوع عن طريق التذاكر والهاتف ، باللغات الفرنسية والإنجليزية والألمانية",
-  "homehostxwebhost": "استضافة CloudHost247",
-  "homehostxwebhosttext": "لدينا خطة استضافة مثالية لخادمك التالي ، أو موقعك ، أو تطبيقك ، أو نظامك الأساسي ، أو مدونتك - وكل ذلك مدعومًا بدعمك الحائز على الجوائز على مدار 24 ساعة طوال أيام الأسبوع.",
+  "homecloudhost247webhost": "استضافة CloudHost247",
+  "homecloudhost247webhosttext": "لدينا خطة استضافة مثالية لخادمك التالي ، أو موقعك ، أو تطبيقك ، أو نظامك الأساسي ، أو مدونتك - وكل ذلك مدعومًا بدعمك الحائز على الجوائز على مدار 24 ساعة طوال أيام الأسبوع.",
   "homestartup": "استضافة لينكس",
   "homesplan2": "استضافة vps",
   "homesplan3": "خادم مخصص",
@@ -553,7 +553,7 @@ $_LANG['antiddosprotection'] = "Keep your dedicated infrastructures protected ag
 
 $_LANG['contactuspagemainhead'] = "اتصل بنا";
 $_LANG['contactuspagemainsubhead'] = "للمزيد من المعلومات";
-$_LANG['contactuscompanyname'] = "Hostx Pvt Ltd.";
+$_LANG['contactuscompanyname'] = "CloudHost247 Pvt Ltd.";
 $_LANG['contactusaddress'] = "أبكد ، المرحلة 123 ، المنطقة الصناعية <br> بالقرب من فندق أبكد ، <br> XYZ، XYZ، XYZ 123456";
 $_LANG['contactushotlinesale'] = "<b> الخط الساخن: </ b> +91 8360944358";
 $_LANG['contactusbusinesshoursale'] = "<b> الخدمة </ b> ساعات العمل: 9:00 - 18:00 (الإثنين - السبت)";

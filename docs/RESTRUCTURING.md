@@ -15,21 +15,21 @@ The pre-restructuring inventory is preserved in
 
 | Old location | New location | Notes |
 |---|---|---|
-| `Try-this/*.php` (28 pages) | `/` (docroot) | HostX theme client-area pages; `refund-and-vancellation-policy.php` (typo duplicate) dropped, `terms-of-service.php` superseded by policy-package version |
+| `Try-this/*.php` (28 pages) | `/` (docroot) | legacy theme client-area pages; `refund-and-vancellation-policy.php` (typo duplicate) dropped, `terms-of-service.php` superseded by policy-package version |
 | `Refund Policy/All Pages/PHP/*.php` (18 pages) | `/` | CloudHost247 legal pages (acceptable-use, backup, cookie, cybercrime, data-deletion, data-privacy-notice, data-protection, domain-agreement, domain-renewal, domainregistrationaddendum, fair-usage, faqs, help-center, legal, legal-notice, privacy, refund, trademark, terms-of-service) |
-| `Refund Policy/All Pages/TPL/*.tpl` (19 templates) | `templates/hostx/` | `termsofservice.tpl` supersedes the stock theme copy |
+| `Refund Policy/All Pages/TPL/*.tpl` (19 templates) | `templates/cloudhost247_legacy/` | `termsofservice.tpl` supersedes the stock theme copy |
 | `Refund Policy/<Policy>/*.pdf` (19 PDFs) | `docs/policies/` | Source legal documents |
 | `Refund Policy/All Pages/Installation.txt` | `docs/policies/INSTALLATION.txt` | |
 | `Refund Policy/<Policy>/{*.php,*.tpl}` (38 copies) | *(removed)* | Byte-identical duplicates of the All Pages set (verified; see §4) |
 | `Try-this/modules/addons/hostx/` | `modules/addons/hostx/` | ionCube-encoded theme helper addon |
 | `Try-this/lang/overrides/*` (27 files) | `lang/overrides/` | `english.php` merged with the OVH override file |
 | `Try-this/sitemap.html`, `sitemap.xml`, `README.md` | *(removed)* | 0-byte / content-free junk |
-| `orderforms/*.tpl`, `includes/`, `css/`, `js/`, `banners/`, `caticons/`, `og_images/`, `testimonial_images/`, `webfonts/`, `store/`, `oauth/`, `payment/`, `marketconnect/`, `index.php` | `templates/hostx/` | The **HostX theme** (was mixed into a folder misleadingly named `orderforms/`) |
-| `orderforms/hostx/` | `templates/orderforms/hostx/` | The **HostX order form** |
-| `orderforms/{viewcart,checkout,common,complete,fraudcheck,ordersummary,products,error,linkedaccounts,sidebar-categories,sidebar-categories-collapsed,sidebar-categories-selector,marketconnect-promo}.tpl`, `orderforms/theme.yaml` | *(removed)* | Superseded old copies of the order form (pre-WHMCS-8 variables: `$renewals`, `$smarty.server.PHP_SELF`); every file has a newer counterpart in `templates/orderforms/hostx/` (verified) |
-| `orderforms/thumbnail.gif` | *(removed)* | Byte-identical to `templates/orderforms/hostx/thumbnail.gif` |
+| `orderforms/*.tpl`, `includes/`, `css/`, `js/`, `banners/`, `caticons/`, `og_images/`, `testimonial_images/`, `webfonts/`, `store/`, `oauth/`, `payment/`, `marketconnect/`, `index.php` | `templates/cloudhost247_legacy/` | The **CloudHost247 legacy theme** (was mixed into a folder misleadingly named `orderforms/`) |
+| `orderforms/cloudhost247_legacy/` | `templates/orderforms/cloudhost247_legacy/` | The **CloudHost247 legacy order form** |
+| `orderforms/{viewcart,checkout,common,complete,fraudcheck,ordersummary,products,error,linkedaccounts,sidebar-categories,sidebar-categories-collapsed,sidebar-categories-selector,marketconnect-promo}.tpl`, `orderforms/theme.yaml` | *(removed)* | Superseded old copies of the order form (pre-WHMCS-8 variables: `$renewals`, `$smarty.server.PHP_SELF`); every file has a newer counterpart in `templates/orderforms/cloudhost247_legacy/` (verified) |
+| `orderforms/thumbnail.gif` | *(removed)* | Byte-identical to `templates/orderforms/cloudhost247_legacy/thumbnail.gif` |
 | `orderforms/all-elements.tpl` | *(removed)* | 0-byte, unreferenced |
-| `hostx/{domain_icons,error,flags,fonts,hostx_includes,images,img}` | `templates/hostx/…` | Theme asset folders (all referenced by theme TPLs/CSS) |
+| `cloudhost247/{domain_icons,error,flags,fonts,cloudhost247_legacy_includes,images,img}` | `templates/cloudhost247_legacy/…` | Theme asset folders (all referenced by theme TPLs/CSS) |
 | `WGS-OVH-v8.0.8-Sourcecode/whmcs/modules/addons/soyoustart/` | `modules/addons/soyoustart/` | OVH admin addon |
 | `WGS-OVH-v8.0.8-Sourcecode/whmcs/modules/servers/soyoustart/` | `modules/servers/soyoustart/` | Dedicated-server provisioning |
 | `WGS-OVH-v8.0.8-Sourcecode/whmcs/modules/servers/soyoustart_vps/` | `modules/servers/soyoustart_vps/` | VPS provisioning |
@@ -40,7 +40,7 @@ The pre-restructuring inventory is preserved in
 | `blockonomics/callback/blockonomics.php` | `modules/gateways/callback/blockonomics.php` | Callback endpoint |
 | `blockonomics/blockonomics/*` | `modules/gateways/blockonomics/*` | Blockonomics lib v1.9.8 (official plugin layout) |
 | `cloudhost247_lteproxy/{*.php,lib,hooks,ajax,templates,assets,lang,README.md}` | `modules/servers/cloudhost247_lteproxy/` | LTE Proxy provisioning module (per its own README) |
-| `cloudhost247_lteproxy/All DNS Checker/modules/addons/cloudhost247_tools/` | `modules/addons/cloudhost247_tools/` | HostX Tools Platform v2.2.6 |
+| `cloudhost247_lteproxy/All DNS Checker/modules/addons/cloudhost247_tools/` | `modules/addons/cloudhost247_tools/` | CloudHost247 Tools Platform v2.2.6 |
 | `cloudhost247_lteproxy/All DNS Checker/modules/addons/CloudHost247_tools/` | `modules/addons/CloudHost247_tools/` | CloudHost247-branded platform build |
 | `cloudhost247_lteproxy/WHMCS Domain Lookup/cloudhost247_tools/` | `modules/addons/cloudhost247_domain_lookup/` | **Renamed module** (see §3) |
 | `cloudhost247_lteproxy/All DNS Checker/DNS Checker/modules/addons/dnschecker/` | `modules/addons/dnschecker/` | |
@@ -53,8 +53,8 @@ The pre-restructuring inventory is preserved in
 | `cloudhost247_lteproxy/WHMCS SMM Integration Module/smm_whmcs_module/modules/servers/smmprovisioning/` | `modules/servers/smmprovisioning/` | |
 | `cloudhost247_lteproxy/Use this All DNS Checker/whmcs-tools-center/whmcs-addon/` + `install.sql` + docs | `modules/addons/tools_center/` | Addon + its DB schema + docs |
 | `cloudhost247_lteproxy/Use this All DNS Checker/whmcs-tools-center/external-api/` | `modules/addons/tools_center/external-api/` | Kept with the addon as shipped; its INSTALL.md requires deployment **outside** the WHMCS webroot |
-| `cloudhost247_lteproxy/Announcement Bar/templates/hostx/includes/announcementbar.tpl` | `templates/hostx/includes/announcementbar.tpl` | Integrated into `header.tpl` (renders nothing until announcements are assigned) |
-| `cloudhost247_lteproxy/Announcement Bar/templates/hostx/css/announcementbar.css` | `templates/hostx/css/announcementbar.css` | Optional external-CSS variant of the TPL's inline styles |
+| `cloudhost247_lteproxy/Announcement Bar/templates/cloudhost247_legacy/includes/announcementbar.tpl` | `templates/cloudhost247_legacy/includes/announcementbar.tpl` | Integrated into `header.tpl` (renders nothing until announcements are assigned) |
+| `cloudhost247_lteproxy/Announcement Bar/templates/cloudhost247_legacy/css/announcementbar.css` | `templates/cloudhost247_legacy/css/announcementbar.css` | Optional external-CSS variant of the TPL's inline styles |
 | `cloudhost247_lteproxy/Announcement Bar/…` (docs, examples, CloudHost247 variant, stale nested duplicate) | `docs/announcement-bar/` | The `Announcement Bar/Announcement Bar/` nested copy was a byte-identical partial duplicate (verified, removed) |
 | `cloudhost247_lteproxy/**/Build.txt, Installation.txt, INSTALL.txt, *.pdf` | `docs/build-notes/<module>/` | Provenance/build documentation |
 | `smtphosting-whmcs-v3/modules/servers/Smtphosting/` | `modules/servers/Smtphosting/` | ModulesGarden module incl. vendor/ |
@@ -66,7 +66,7 @@ The pre-restructuring inventory is preserved in
    verified byte-identical to the `All Pages` set (modulo the bug fixes in §3,
    verified file-by-file with automated comparison).
 2. **13 old order-form templates + `theme.yaml`** at `orderforms/` root — every
-   one superseded by a newer version in `templates/orderforms/hostx/` (older
+   one superseded by a newer version in `templates/orderforms/cloudhost247_legacy/` (older
    WHMCS variable usage; counterparts confirmed present, several byte-identical).
 3. **`dnschecker-whmcs-module/`** — byte-identical second copy of `dnschecker`.
 4. **`Announcement Bar/Announcement Bar/`** — byte-identical partial duplicate.
@@ -92,19 +92,19 @@ extracted and removed all 26). Verified: zero archives in the final tree.
 |---|---|---|
 | 1 | 4 policy PHP files (`refund-policy`, `backup-policy`, `cybercrime-policy`, `trademark-policy`) contained `require 'configadminioncontroller.php';` — **the file exists nowhere**, so those pages fatally errored | Bogus `require` removed |
 | 2 | 20 policy PHP files used `require $_SERVER['DOCUMENT_ROOT'] . '/init.php';` (breaks under CLI / non-standard docroots) | Normalized to the WHMCS-standard `require __DIR__ . '/init.php';` |
-| 3 | 4 policy TPLs were full HTML pages referencing `$template/includes/common/{head,navbar,footer}.tpl` — paths that don't exist in the HostX theme, and full-page markup conflicts with WHMCS's theme header/footer wrapper | Converted to body fragments (wrapper stripped), consistent with the 15 working policy templates |
+| 3 | 4 policy TPLs were full HTML pages referencing `$template/includes/common/{head,navbar,footer}.tpl` — paths that don't exist in the legacy theme, and full-page markup conflicts with WHMCS's theme header/footer wrapper | Converted to body fragments (wrapper stripped), consistent with the 15 working policy templates |
 | 4 | `datadeletion.tpl`, `dataprivacynoticeandconsentform.tpl` — same full-page-wrapper defect, referencing non-existent `$template/head.tpl`, `$template/includes/header.tpl`, `$template/includes/footer.tpl` | Wrapper stripped to body fragments |
-| 5 | `domainrenewalpolicy.tpl` referenced six-theme-only `pageheader.tpl` / `pagefooter.tpl` (absent from HostX) | Removed (the HostX wrapper provides header/footer) |
+| 5 | `domainrenewalpolicy.tpl` referenced six-theme-only `pageheader.tpl` / `pagefooter.tpl` (absent from the legacy theme) | Removed (the legacy theme wrapper provides header/footer) |
 | 6 | `data-privacy-notice-and-consent-form.php` called `setTemplate('privacypolicy')` — would render the **Privacy Policy** content instead of the Data Privacy Notice (two different templates shared one name in the source package) | Retargeted to its own template `dataprivacynoticeandconsentform` |
 | 7 | `datadeletion.tpl` referenced non-existent `assets/images/banner-bg.jpg` | Repointed to the theme's `images/term_bg_1.jpg` (same banner used by sibling policy pages) |
 | 8 | `cookiepolicy.tpl` referenced non-existent `assets/img/inner-bg.png` | Repointed to `images/term_bg_1.jpg` |
 | 9 | `blog.tpl` no-image fallback pointed at missing `images/blog-3.jpg` | Repointed to the theme's own `og_images/default-image.png` |
-| 10 | `css/overrides/override.css` / `js/overrides/override.js` referenced by `includes/head.tpl` but only the `.new` starter files shipped | Created from the shipped `.new` starters (0-byte, no behavior change; the HostX addon manages their content) |
+| 10 | `css/overrides/override.css` / `js/overrides/override.js` referenced by `includes/head.tpl` but only the `.new` starter files shipped | Created from the shipped `.new` starters (0-byte, no behavior change; the CloudHost247 addon manages their content) |
 | 11 | `templates/orderforms/index.php` redirected to `../../../../index.php` (wrong depth — one level above docroot) | Corrected to `../../index.php` |
 | 12 | `dedeicated-server.php` breadcrumb linked to non-existent `dedeicatedserver.php` | Corrected to its own filename |
-| 13 | **`cloudhost247_tools` module-name collision** — two different builds (HostX Tools Platform v2.2.6 and HostX Tools v1.0.0) both install to `modules/addons/cloudhost247_tools/`; WHMCS requires folder name == file name == function prefix | Per decision: the 4-tool Domain Lookup build was **renamed to `cloudhost247_domain_lookup`** (functions, table names, client-area URLs, asset paths — 83 references across 15 files) so both builds coexist. `cloudhost247_tools` (platform) and `CloudHost247_tools` (rebrand) also coexist; activate only one of those two |
+| 13 | **`cloudhost247_tools` module-name collision** — two different builds (CloudHost247 Tools Platform v2.2.6 and CloudHost247 Tools v1.0.0) both install to `modules/addons/cloudhost247_tools/`; WHMCS requires folder name == file name == function prefix | Per decision: the 4-tool Domain Lookup build was **renamed to `cloudhost247_domain_lookup`** (functions, table names, client-area URLs, asset paths — 83 references across 15 files) so both builds coexist. `cloudhost247_tools` (platform) and `CloudHost247_tools` (rebrand) also coexist; activate only one of those two |
 | 14 | Announcement Bar existed as loose files | `announcementbar.tpl` installed into the theme and included from `header.tpl` directly after `<body>` (renders nothing unless an `$announcements` array is assigned; usage examples in `docs/announcement-bar/`) |
-| 15 | OVH `lang/overrides/english.php` would have been lost (same filename as the HostX override) | Merged into a single `lang/overrides/english.php` (639 keys, no collisions — verified by key intersection) |
+| 15 | OVH `lang/overrides/english.php` would have been lost (same filename as the CloudHost247 override) | Merged into a single `lang/overrides/english.php` (639 keys, no collisions — verified by key intersection) |
 | 16 | Production WHMCS `configuration.php` (DB credentials) was committable | Added to `.gitignore` together with WHMCS runtime dirs (`templates_c/`, `attachments/`, `downloads/`) |
 
 ## 4. Verification performed
@@ -120,14 +120,14 @@ extracted and removed all 26). Verified: zero archives in the final tree.
    `orderforms/standard_cart/…` references intentionally fall back to WHMCS
    core files present in any installation).
 4. **Page→template bindings** — every `setTemplate()` in the 46 root pages
-   resolves to an existing `templates/hostx/*.tpl`.
+   resolves to an existing `templates/cloudhost247_legacy/*.tpl`.
 5. **Asset references** — all 250 `templates/{$template}/…` references from
    theme TPLs and all 65 order-form asset references resolve to existing files.
 6. **Module self-consistency** — Blockonomics gateway/loader/callback relative
    requires verified against the official plugin layout; LTE Proxy `lib/`
    requires verified; `cloudhost247_domain_lookup` contains zero stale `cloudhost247_tools`
    references; no stale references to any old path anywhere in code.
-7. **ionCube-encoded files** (hostx addon, xtreme_currency_rates) moved
+7. **ionCube-encoded files** (cloudhost247 addon, xtreme_currency_rates) moved
    unmodified (blob-identical).
 8. **No ZIP archives, no `desktop.ini`/`Thumbs.db`/`.DS_Store`, no empty
    directories remain.**
@@ -144,5 +144,6 @@ extracted and removed all 26). Verified: zero archives in the final tree.
 - `modules/servers/Smtphosting/` ships with a few 0-byte placeholder files
   (`App/Config/di/services.yml`, `Core/Database/data.sql`, two `home.tpl`) —
   byte-identical to the vendor package as delivered; left untouched.
-- The `hostx` addon and `xtreme_currency_rates` are ionCube-encoded and require
+- The legacy `modules/addons/hostx` addon (name retained — its entry point is ionCube-encoded
+  and defines the `hostx_*()` functions WHMCS calls) and `xtreme_currency_rates` are ionCube-encoded and require
   the ionCube Loader; their license status must be valid on the production host.

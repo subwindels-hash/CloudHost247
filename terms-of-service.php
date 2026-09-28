@@ -3,7 +3,7 @@
  * Terms & Conditions Page
  *
  * WHMCS ClientArea page for displaying CloudHost247 Isc Terms & Conditions.
- * Template: templates/hostx/termsofservice.tpl
+ * Template: templates/cloudhost247_legacy/termsofservice.tpl
  *
  * @package    WHMCS
  * @author     CloudHost247 Isc
@@ -39,7 +39,7 @@ if ($isLoggedIn) {
 
 // Assign Smarty variables for template use
 $ca->assign('WEB_ROOT', $CONFIG['SystemURL'] ?? '');
-$ca->assign('template', $ca->getClientAreaTemplate() ?? 'hostx');
+$ca->assign('template', $ca->getClientAreaTemplate() ?? 'cloudhost247_legacy');
 $ca->assign('pageTitle', 'Terms & Conditions');
 $ca->assign('isLoggedIn', $isLoggedIn);
 $ca->assign('clientName', $clientName);

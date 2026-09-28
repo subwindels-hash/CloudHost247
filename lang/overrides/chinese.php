@@ -95,8 +95,8 @@ $_LANG = json_decode('{
   "homewordpresshostingtext": "大多數Dedibox服務器都支持RAID，提供可靠性和性能",
   "homecloudhosting": "雲託管",
   "homecloudhostingtext": "我們的技術支持每週7天，每天24小時提供票務和電話服務，法語，英語和德語",
-  "homehostxwebhost": "CloudHost247虛擬主機",
-  "homehostxwebhosttext": "我們為您的下一個服務器，網站，應用程序，平台或博客提供了完美的託管計劃 - 所有這些都由您屢獲殊榮的全天候支持提供支持。",
+  "homecloudhost247webhost": "CloudHost247虛擬主機",
+  "homecloudhost247webhosttext": "我們為您的下一個服務器，網站，應用程序，平台或博客提供了完美的託管計劃 - 所有這些都由您屢獲殊榮的全天候支持提供支持。",
   "homestartup": "linux主機",
   "homesplan2": "vps主機",
   "homesplan3": "專用服務器",
@@ -556,7 +556,7 @@ $_LANG['antiddosprotection'] = "Keep your dedicated infrastructures protected ag
 
 $_LANG['contactuspagemainhead'] = "联系我们";
 $_LANG['contactuspagemainsubhead'] = "想要查询更多的信息";
-$_LANG['contactuscompanyname'] = "Hostx Pvt Ltd.";
+$_LANG['contactuscompanyname'] = "CloudHost247 Pvt Ltd.";
 $_LANG['contactusaddress'] = "abcdd，第123阶段，IND区<br>在酒店Abcd附近，<br> XYZ，XYZ，XYZ 123456";
 $_LANG['contactushotlinesale'] = "<b>咨询热线：</ b> +91 8360944358";
 $_LANG['contactusbusinesshoursale'] = "<b>服务</ b>时间：9:00 – 18:00（周一至周六）";

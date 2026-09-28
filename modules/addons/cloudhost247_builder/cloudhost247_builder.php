@@ -8,7 +8,7 @@
  *
  * Three properties define this module.
  *
- * 1. It is additive. No HostX or WHMCS template file is read, written or
+ * 1. It is additive. No CloudHost247 or WHMCS template file is read, written or
  *    replaced; builder pages are served by their own front controller and
  *    rendered inside the active client-area theme, so existing pages, the
  *    cart, checkout, login and registration keep working untouched.

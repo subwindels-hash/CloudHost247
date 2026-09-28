@@ -3,7 +3,7 @@
  * Help Center Page
  *
  * @package    WHMCS
- * @subpackage HostX Theme
+ * @subpackage CloudHost247 Theme
  * @copyright  CloudHost247 Isc
  * @license    Private
  */
@@ -34,7 +34,7 @@ $ca->addToBreadCrumb('help-center.php', 'Help Center');
 /**
  * Template Assignment
  *
- * Template file: templates/hostx/helpcenter.tpl
+ * Template file: templates/cloudhost247_legacy/helpcenter.tpl
  */
 $ca->setTemplate('helpcenter');
 

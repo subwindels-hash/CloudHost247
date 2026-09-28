@@ -2,7 +2,7 @@
 
 **Audit date:** 2026-09-27  
 **Baseline:** `432989b8e20f65b1db3c2eeadc15cc4b5b736e82`  
-**Scope:** HostX, Xtreme Currency Rates 6.0, and WGS OVH/SoYouStart 8.0.8
+**Scope:** the legacy vendor stack (theme, order form, page-builder helper), Xtreme Currency Rates 6.0, and WGS OVH/SoYouStart 8.0.8
 
 ## Rules and status vocabulary
 
@@ -14,9 +14,9 @@ Status values: **Existing/vendor** (present but not an independent implementatio
 
 | Component | Active paths found | Size/shape | Encoding/source visibility | Vendor-key coupling | Independent status |
 |---|---|---:|---|---|---|
-| HostX helper | `modules/addons/hostx/` | 266 files; 63 PHP | All 63 PHP files are ionCube encoded | Licence/activation behavior cannot be safely inspected statically; `includes/license.php` and `includes/errolicense.php` exist | **Not implemented** |
-| HostX client theme | `templates/hostx/` | 1,711 files; 279 Smarty templates | Templates/assets readable; 49 directory guard PHP files are not encoded | Runtime data supplied by encoded addon/hooks | **Existing/vendor; rights review required** |
-| HostX order form | `templates/orderforms/hostx/` | 108 files; 27 templates | Readable | Theme/addon compatibility dependency | **Existing/vendor; rights review required** |
+| Legacy page-builder helper | `modules/addons/hostx/` | 266 files; 63 PHP | All 63 PHP files are ionCube encoded | Licence/activation behavior cannot be safely inspected statically; `includes/license.php` and `includes/errolicense.php` exist | **Not implemented** |
+| Legacy client theme | `templates/cloudhost247_legacy/` | 1,711 files; 279 Smarty templates | Templates/assets readable; 49 directory guard PHP files are not encoded | Runtime data supplied by encoded addon/hooks | **Existing/vendor; rights review required** |
+| Legacy order form | `templates/orderforms/cloudhost247_legacy/` | 108 files; 27 templates | Readable | Theme/addon compatibility dependency | **Existing/vendor; rights review required** |
 | Xtreme Currency Rates | `modules/addons/xtreme_currency_rates/` | 19 files; 18 PHP | All 18 PHP files ionCube encoded | Explicit `license_verify.php`, security callback and encoded entry point | **Not implemented** |
 | WGS OVH admin | `modules/addons/soyoustart/` | 254 files; 32 PHP, 14 templates | Readable source | Explicit `licenseNumtoactivate`, `CheckLicense`, dashboard/status gates | **Existing/vendor only** |
 | WGS dedicated server | `modules/servers/soyoustart/` | 49 files | Readable source | Create/client operations query vendor licence and gate execution | **Existing/vendor only** |
@@ -28,13 +28,13 @@ A SHA-256 inventory of every in-scope original file is in `original-file-manifes
 
 ## Installation and configuration dependency inventory
 
-### HostX
+### Legacy vendor stack
 
-* WHMCS document-root pages call `init.php`, select a HostX template, and preserve public routes.
-* The WHMCS system theme is `templates/hostx`; cart theme is `templates/orderforms/hostx`.
-* The helper addon is activated as `hostx`; its encoded entry point, hooks, classes, admin pages, sitemap generators, menu defaults and block defaults are runtime dependencies.
+* WHMCS document-root pages call `init.php`, select a legacy-theme template, and preserve public routes.
+* The WHMCS system theme is `templates/cloudhost247_legacy`; cart theme is `templates/orderforms/cloudhost247_legacy`.
+* The helper addon is activated as `hostx` — the directory and registration keep the vendor name because the ionCube-encoded entry point defines the `hostx_*()` functions WHMCS calls (see `BRAND-RENAME.md`). Its encoded entry point, hooks, classes, admin pages, sitemap generators, menu defaults and block defaults are runtime dependencies.
 * Observed feature/admin entry points: settings, homepage selection, language management, top/side menus, page groups, page blocks, banners, reviews/testimonials, SEO manager/tags/content, TLD settings, category icons, dedicated settings, live chat and sitemap generation.
-* Observable compatibility names include `hostx_theme_settings`, `hostx_blocks`, `HostxPage`, `HostxBlock`, `HostxBanner`, and the partials under `hostx_includes/`.
+* Observable compatibility names include the Smarty variables `$hostx_theme_settings` and `$hostx_blocks`, the classes `HostxPage`, `HostxBlock` and `HostxBanner`, and the partials under `cloudhost247_legacy_includes/`. The variable and class names are retained unchanged — the encoded helper assigns/calls them.
 * ionCube is currently required only to run the vendor helper, not by the proposed replacement.
 * Exact schema and licence protocol cannot be derived lawfully/reliably from encoded files. Schema discovery must be performed on an authorised staging database using metadata-only exports.
 
@@ -60,7 +60,7 @@ A SHA-256 inventory of every in-scope original file is in `original-file-manifes
 | Area | Original capability evidenced | Independent replacement acceptance criterion | Status |
 |---|---|---|---|
 | Theme shell | WHMCS client/header/footer/account pages, responsive assets | New CloudHost247 theme supports current target WHMCS pages, accessibility and mobile layouts | Planned |
-| Routes | Root PHP marketing/legal/product routes | Existing URLs return equivalent CloudHost247 pages without HostX runtime | Reusable structure; replacement planned |
+| Routes | Root PHP marketing/legal/product routes | Existing URLs return equivalent CloudHost247 pages without CloudHost247 runtime | Reusable structure; replacement planned |
 | Branding/settings | Colors, typography, logo, layouts, custom CSS/JS | Admin settings with validation, safe output encoding and defaults | Planned |
 | Navigation | Top menu, side menu, category icons, mega-menu partials | Ordered nested menus, visibility, translations and WHMCS links | Planned |
 | CMS/pages | Page groups, homepage selection, editable blocks | Draft/publish pages and ordered reusable sections; safe HTML policy | Planned |
@@ -70,7 +70,7 @@ A SHA-256 inventory of every in-scope original file is in `original-file-manifes
 | SEO | Per-page tags/content, OG images, sitemap classes | Title/description/canonical/robots/OG and sitemap generation | Planned |
 | Domains/TLDs | TLD settings and domain pages | WHMCS domain pricing/search integration without copied business logic | Planned |
 | Legal pages | Existing branded legal routes/templates | Preserve routes/content subject to content-rights review | Existing files; runtime test pending |
-| Cart | HostX order flow | Current-WHMCS cart/configure/checkout/complete flow, CSRF-safe | Planned |
+| Cart | CloudHost247 order flow | Current-WHMCS cart/configure/checkout/complete flow, CSRF-safe | Planned |
 | Currency providers | Encoded provider configuration/API | Provider interface; at least ECB-compatible and configurable HTTP provider; timeouts/retries | Planned |
 | Auto/manual rates | Cron and manual update hooks | Idempotent manual/cron jobs, base normalization and transactional write | Planned |
 | Conversion | WHMCS currency integration | Decimal-safe conversion; base rate invariant; no silent partial updates | Planned |
@@ -140,7 +140,7 @@ Phase 1 deliberately implements operational foundations and real activation migr
 
 ## Phase 2 implementation update — 2026-09-27
 
-The detailed HostX comparison is maintained in `PHASE-2-HOSTX-PARITY.md`. The independent deliverable uses WHMCS-supported child-theme inheritance rather than copying 279 vendor templates: native customer/session/billing pages inherit from the stock `twenty-one` parent, while CloudHost247 owns presentation, homepage/CMS output, settings, navigation and cart styling.
+The detailed legacy-theme comparison is maintained in `PHASE-2-LEGACY-PARITY.md`. The independent deliverable uses WHMCS-supported child-theme inheritance rather than copying 279 vendor templates: native customer/session/billing pages inherit from the stock `twenty-one` parent, while CloudHost247 owns presentation, homepage/CMS output, settings, navigation and cart styling.
 
 **Implemented in source:** independent client/cart themes, responsive visual system, real settings-to-client CSS/output path, authenticated/CSRF-protected CMS administration, publish/draft content, ordered sections, banners, testimonials, nested navigation, footer blocks, per-page SEO title/description, custom WHMCS ClientArea page route, native account/cart inheritance, output escaping and HTML allowlisting.
 
