@@ -1,0 +1,48 @@
+name: Tools behavior diagnostics report
+
+on:
+  push:
+    branches: ['arena/01a0e748-cloudhost247']
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  tools-debug:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+      - name: Run tools behavior suite and report output
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set +e
+          php -d display_errors=1 -d error_reporting=E_ALL tests/tools/run.php > /tmp/tools.out 2>&1
+          RC=$?
+          set -e
+          echo "exit_code=$RC" >> /tmp/tools.out
+          cat /tmp/tools.out
+          if [ "$RC" -ne 0 ]; then
+            export TOOLS_RC="$RC"
+            python3 - <<'PYEOF'
+          import json, os, urllib.request
+          body = "Tools behavior suite failed (exit %s). Output:\n```\n%s\n```" % (
+              os.environ.get("TOOLS_RC", "?"), open("/tmp/tools.out").read())
+          req = urllib.request.Request(
+              "https://api.github.com/repos/%s/issues/9/comments" % os.environ["GITHUB_REPOSITORY"],
+              data=json.dumps({"body": body}).encode(),
+              headers={"Authorization": "token " + os.environ["GH_TOKEN"],
+                       "Accept": "application/vnd.github+json"})
+          try:
+              urllib.request.urlopen(req)
+              print("debug comment posted")
+          except Exception as e:
+              print("comment failed:", e)
+          PYEOF
+          fi
+          exit $RC
