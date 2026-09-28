@@ -156,7 +156,21 @@ final class ThemeRepository
         return array_merge(array('id' => (int) $row->id, 'content_type' => $row->content_type, 'slug' => $row->slug, 'title' => $row->title, 'published' => (bool) $row->published, 'sort_order' => (int) $row->sort_order), $payload);
     }
     private function slug($value) { $value = strtolower(trim((string) $value)); return trim(preg_replace('/[^a-z0-9]+/', '-', $value), '-'); }
-    private function safeRelativeOrHttpsUrl($url) { if ($url === '') return true; if (preg_match('#^(?:/|[a-zA-Z0-9][a-zA-Z0-9._-]*\.php(?:[?#]|$))#', $url)) return true; return filter_var($url, FILTER_VALIDATE_URL) && strtolower(parse_url($url, PHP_URL_SCHEME)) === 'https'; }
+    /**
+     * Accept site-relative links and absolute https URLs; reject everything else.
+     *
+     * The '#' inside the character class must stay escaped: '#' is the pattern
+     * delimiter, and an unescaped one truncates the pattern so preg_match()
+     * returns false with a warning and every internal link degrades to "#".
+     * The negative lookahead keeps "//host" and "/\host" out, because browsers
+     * fold backslashes to slashes and would treat both as off-site jumps.
+     */
+    private function safeRelativeOrHttpsUrl($url)
+    {
+        if ($url === '') return true;
+        if (preg_match('#^(?:/(?![/\\\\])|[a-zA-Z0-9][a-zA-Z0-9._-]*\.php(?:[?\#]|$))#', $url)) return true;
+        return filter_var($url, FILTER_VALIDATE_URL) && strtolower(parse_url($url, PHP_URL_SCHEME)) === 'https';
+    }
     private function sanitizeHtml($html)
     {
         $html = strip_tags((string) $html, '<p><br><strong><em><ul><ol><li><h2><h3><h4><blockquote><a>');

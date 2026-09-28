@@ -158,7 +158,37 @@ Neither defect is introduced by the Website Builder work and neither is fixed he
 
 | Ref | Location | Finding | Impact | Recommendation |
 |---|---|---|---|---|
-| PRE-1 | `modules/addons/cloudhost247_theme/lib/ThemeRepository.php:159` | `safeRelativeOrHttpsUrl()` uses `#` as the delimiter but leaves `#` unescaped inside the `[?#]` character class, so the pattern terminates early. PHP raises `preg_match(): Unknown modifier ']'` and the call returns `false` for **every** input | **Not a security hole — it fails closed.** The broken branch was the one that *allowed* a URL, so control falls through to the stricter absolute-HTTPS test. The functional effect is that legitimate relative links (`/about`, `contact.php`) in theme CMS content are rewritten to `href="#"`, plus a PHP warning on every call | One-character fix: `[?\#]`. Add a regression test asserting `/about` and `contact.php` are accepted while `javascript:` is not. Deferred so this change set stays confined to the Website Builder |
+| PRE-1 | `modules/addons/cloudhost247_theme/lib/ThemeRepository.php:159` | `safeRelativeOrHttpsUrl()` uses `#` as the delimiter but leaves `#` unescaped inside the `[?#]` character class, so the pattern terminates early. PHP raises `preg_match(): Unknown modifier ']'` and the call returns `false` for **every** input | **Not a security hole — it fails closed.** The broken branch was the one that *allowed* a URL, so control falls through to the stricter absolute-HTTPS test. The functional effect is that legitimate relative links (`/about`, `contact.php`) in theme CMS content are rewritten to `href="#"`, plus a PHP warning on every call | **Fixed.** The `#` is now escaped as `[?\#]`, and the relative branch gained a `(?![/\\])` lookahead — see the note below. Covered by five regression tests in `tests/foundation/run.php` |
 | PRE-2 | `tests/ovh/run.php` (`MockTransport::send`) | The double returns `array_shift($this->responses)`, which yields `null` once the queued responses are exhausted. `Client::request()` then reads `$r['status']` / `$r['body']` off `null`, producing `Warning: Trying to access array offset on value of type null` and a `json_decode(): Passing null` deprecation | Test-only noise. A real `Transport` always returns an array, so there is no production defect. The OVH suite's own assertions all pass | Have `MockTransport` return a documented default (or fail loudly) when its queue is drained, so the warnings stop masking real ones |
+
+### PRE-1 remediation: fixing the pattern re-opened a branch that had never run
+
+Repairing the delimiter is a one-character change, but it is not a one-character
+review. Because the pattern had *always* returned `false`, the `return true`
+branch behind it was dead code that had never executed against real input in
+production. Restoring it therefore had to be treated as introducing new
+acceptance logic rather than as restoring known-good behaviour.
+
+That mattered, because the branch begins `^/`. A literal repair would have
+started accepting `//evil.example/x` — a protocol-relative URL that sends the
+visitor off-site — along with `/\evil.example`, since browsers fold backslashes
+to forward slashes when parsing URLs. Neither had ever been reachable while the
+pattern was broken, so neither was covered by a test. The fix adds a negative
+lookahead, `/(?![/\\])`, to keep both out.
+
+Verified behaviour after the change (`tests/foundation/run.php`):
+
+| Input | Result |
+| --- | --- |
+| `/`, `/cart.php`, `/clientarea.php?action=details`, `index.php`, `order.php?a=1`, `page.php#top` | accepted |
+| `https://good.example/x` | accepted (absolute-HTTPS branch) |
+| `http://bad.example/x`, `javascript:alert(1)`, `data:text/html;base64,…` | rejected |
+| `//evil.example/x`, `/\/evil.example`, `/\evil.example` | rejected |
+
+`preg_match()` now raises no warnings, and the practical effect is that internal
+links in theme CMS content resolve instead of degrading to `href="#"`. One of
+the five new tests — the protocol-relative one — passed *vacuously* before the
+fix, since the broken pattern rejected everything; it only became meaningful
+once the branch started running.
 
 **Verification note:** `@php-wasm/cli`, the runtime used for local PHP in this environment, does not propagate PHP's exit code — `exit(1)`, fatal errors and a failing `php -l` all return shell status `0`. `scripts/release-candidate-check.sh` relies on `set -e` and is therefore only meaningful under a real PHP binary, which is what GitHub Actions uses. Local runs in a php-wasm environment must assert on command **output**, not exit status, or they will report success unconditionally.
