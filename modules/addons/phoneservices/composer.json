@@ -1,25 +1,33 @@
 {
-    "name": "telecom/phoneservices",
-    "description": "Phone Number Services Platform for WHMCS - Virtual numbers, VoIP, SMS, eSIM and analytics",
+    "name": "cloudhost247/phoneservices",
+    "description": "Phone Number Services Platform for WHMCS - virtual numbers, VoIP, SMS, eSIM and analytics",
     "type": "whmcs-module",
     "license": "proprietary",
     "require": {
         "php": ">=7.4",
-        "twilio/sdk": "^7.0",
-        "vonage/client": "^4.0",
-        "sendgrid/sendgrid": "^8.0",
-        "endroid/qr-code": "^4.0",
-        "firebase/php-jwt": "^6.0",
-        "guzzlehttp/guzzle": "^7.0"
+        "ext-curl": "*",
+        "ext-json": "*",
+        "ext-openssl": "*",
+        "ext-mbstring": "*"
+    },
+    "require-dev": {
+        "squizlabs/php_codesniffer": "^3.7"
+    },
+    "suggest": {
+        "endroid/qr-code": "Renders eSIM activation QR codes as PNG locally; without it the module falls back to the provider-hosted QR image and the manual LPA activation string."
     },
     "autoload": {
         "psr-4": {
-            "PhoneServices\\\\": "lib/"
+            "PhoneServices\\": "lib/"
         }
     },
     "config": {
         "platform": {
             "php": "7.4"
-        }
+        },
+        "optimize-autoloader": true
+    },
+    "scripts": {
+        "lint": "find lib api -name '*.php' -print0 | xargs -0 -n1 php -l"
     }
 }

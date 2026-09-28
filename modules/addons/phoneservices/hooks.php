@@ -1,144 +1,229 @@
 <?php
 /**
- * Phone Services - WHMCS Hooks
- * Integrates with WHMCS core events
+ * Phone Services - WHMCS hook integrations.
+ *
+ * Covers the scheduled lifecycle work (renewals, expiries, retention), billing
+ * reconciliation, client-area asset injection and service teardown.
+ *
+ * @package PhoneServices
  */
-
-use PhoneServices\Core\Logger;
-use PhoneServices\Services\NumberService;
-use PhoneServices\Services\EsimService;
-use PhoneServices\Services\UsageService;
 
 if (!defined('WHMCS')) {
     die('This file cannot be accessed directly');
 }
 
-require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/bootstrap.php';
+
+use PhoneServices\Core\Config;
+use PhoneServices\Core\Database;
+use PhoneServices\Core\Logger;
+use PhoneServices\Providers\ProviderRegistry;
+use PhoneServices\Services\Cron;
 
 /**
- * Daily Cron Job Hook
- * Handles renewals, expirations, cleanup
+ * Daily lifecycle run: renewals, expiries, usage sync and retention pruning.
  */
-add_hook('DailyCronJob', 1, function($vars) {
+add_hook('DailyCronJob', 1, static function ($vars) {
     try {
-        // Number renewals
-        $numberService = new NumberService();
-        $renewalDue = $numberService->getRenewalDueNumbers(3);
-        foreach ($renewalDue as $number) {
-            // Send renewal reminder or auto-renew logic here
-            Logger::info('Number renewal due', ['id' => $number['id'], 'user' => $number['user_id']]);
-        }
-        
-        // eSIM expirations
-        $esimService = new EsimService();
-        $expiringEsims = $esimService->getExpiringEsims(3);
-        foreach ($expiringEsims as $esim) {
-            Logger::info('eSIM expiring soon', ['id' => $esim['id'], 'user' => $esim['user_id']]);
-        }
-        
-        // Cleanup old logs
-        $usageService = new UsageService();
-        $usageService->cleanupOldUsage(365);
-        Logger::cleanOldLogs();
-        
-        // Generate daily report
-        $usageService->generateDailyReport();
-        
-    } catch (\Exception $e) {
-        Logger::error('Cron hook error: ' . $e->getMessage());
+        $cron = new Cron();
+        $summary = $cron->runDaily();
+
+        Logger::info('Daily cron completed', $summary);
+    } catch (\Throwable $e) {
+        Logger::exception($e, 'DailyCronJob');
     }
 });
 
 /**
- * Invoice Paid Hook
- * Process service provisioning on invoice payment
+ * Frequent run (every 5 minutes on WHMCS 8): poll provider state for calls and
+ * messages that are still in flight.
  */
-add_hook('InvoicePaid', 1, function($vars) {
+add_hook('AfterCronJob', 1, static function ($vars) {
     try {
-        $invoiceId = $vars['invoiceid'];
-        
-        // Check if this invoice is related to phone services
-        $items = select_query('tblinvoiceitems', '*', ['invoiceid' => $invoiceId]);
-        while ($item = mysql_fetch_assoc($items)) {
-            if (strpos($item['description'], 'Phone Number') !== false 
-                || strpos($item['description'], 'eSIM') !== false
-                || strpos($item['description'], 'VoIP') !== false) {
-                
-                Logger::info('Phone service invoice paid', ['invoice' => $invoiceId, 'item' => $item['id']]);
-                
-                // Update transaction status
-                $usageService = new UsageService();
-                $usageService->updateTransactionStatus(0, 'completed', [
-                    'invoice_id' => $invoiceId,
-                    'gateway' => 'whmcs',
-                ]);
+        $cron = new Cron();
+        $cron->runFrequent();
+    } catch (\Throwable $e) {
+        Logger::exception($e, 'AfterCronJob');
+    }
+});
+
+/**
+ * Mark platform transactions as paid when their WHMCS invoice settles.
+ */
+add_hook('InvoicePaid', 1, static function ($vars) {
+    try {
+        $invoiceId = (int) ($vars['invoiceid'] ?? 0);
+        if ($invoiceId <= 0) {
+            return;
+        }
+
+        $usageService = new \PhoneServices\Services\UsageService();
+        $updated = $usageService->markInvoicePaid($invoiceId);
+
+        if ($updated > 0) {
+            Logger::info('Phone service transactions settled', [
+                'invoice'      => $invoiceId,
+                'transactions' => $updated,
+            ]);
+        }
+    } catch (\Throwable $e) {
+        Logger::exception($e, 'InvoicePaid');
+    }
+});
+
+/**
+ * Suspend numbers and eSIMs when a client service is suspended.
+ */
+add_hook('AfterModuleSuspend', 1, static function ($vars) {
+    try {
+        $serviceId = (int) ($vars['params']['serviceid'] ?? 0);
+        if ($serviceId <= 0) {
+            return;
+        }
+
+        $numberService = new \PhoneServices\Services\NumberService();
+
+        foreach (Database::select('mod_phoneservices_numbers', '*', ['assigned_service_id' => $serviceId, 'status' => 'active']) as $number) {
+            $numberService->suspendNumber((int) $number['id'], 'WHMCS service suspended');
+        }
+    } catch (\Throwable $e) {
+        Logger::exception($e, 'AfterModuleSuspend');
+    }
+});
+
+/**
+ * Re-activate numbers when the service is unsuspended.
+ */
+add_hook('AfterModuleUnsuspend', 1, static function ($vars) {
+    try {
+        $serviceId = (int) ($vars['params']['serviceid'] ?? 0);
+        if ($serviceId <= 0) {
+            return;
+        }
+
+        $numberService = new \PhoneServices\Services\NumberService();
+
+        foreach (Database::select('mod_phoneservices_numbers', '*', ['assigned_service_id' => $serviceId, 'status' => 'suspended']) as $number) {
+            $numberService->activateNumber((int) $number['id']);
+        }
+    } catch (\Throwable $e) {
+        Logger::exception($e, 'AfterModuleUnsuspend');
+    }
+});
+
+/**
+ * Release provider resources when a service is terminated or deleted.
+ */
+add_hook('ServiceDelete', 1, static function ($vars) {
+    try {
+        $serviceId = (int) ($vars['serviceid'] ?? 0);
+        if ($serviceId <= 0) {
+            return;
+        }
+
+        $numberService = new \PhoneServices\Services\NumberService();
+        $released = 0;
+
+        foreach (Database::select('mod_phoneservices_numbers', '*', ['assigned_service_id' => $serviceId]) as $number) {
+            if (in_array((string) $number['status'], ['released', 'expired'], true)) {
+                continue;
             }
+            $numberService->releaseNumber((int) $number['id']);
+            $released++;
         }
-    } catch (\Exception $e) {
-        Logger::error('InvoicePaid hook error: ' . $e->getMessage());
+
+        Database::update('mod_phoneservices_subscriptions', [
+            'status'       => 'cancelled',
+            'cancelled_at' => date('Y-m-d H:i:s'),
+        ], ['service_id' => $serviceId]);
+
+        Logger::info('Service teardown completed', ['service' => $serviceId, 'numbers_released' => $released]);
+    } catch (\Throwable $e) {
+        Logger::exception($e, 'ServiceDelete');
     }
 });
 
 /**
- * Client Area Page Output Hook
- * Inject client area assets
+ * Inject client-area assets only on the module's own pages.
  */
-add_hook('ClientAreaPageOutput', 1, function($vars) {
-    if (isset($_GET['m']) && $_GET['m'] === 'phoneservices') {
-        $assets = '<link rel="stylesheet" href="/modules/addons/phoneservices/assets/css/client.css">';
-        $assets .= '<script src="/modules/addons/phoneservices/assets/js/client/app.js"></script>';
-        return $assets;
+add_hook('ClientAreaHeadOutput', 1, static function ($vars) {
+    if (($_GET['m'] ?? '') !== 'phoneservices') {
+        return '';
     }
+
+    $base = '/modules/addons/phoneservices/assets';
+
+    return '<link rel="stylesheet" href="' . $base . '/css/client.css?v=' . PHONESERVICES_VERSION . '">';
 });
 
-/**
- * Admin Area Page Output Hook
- * Inject admin assets
- */
-add_hook('AdminAreaPageOutput', 1, function($vars) {
-    if (isset($_GET['module']) && $_GET['module'] === 'phoneservices') {
-        $assets = '<link rel="stylesheet" href="/modules/addons/phoneservices/assets/css/admin.css">';
-        $assets .= '<script src="/modules/addons/phoneservices/assets/js/admin/app.js"></script>';
-        return $assets;
+add_hook('ClientAreaFooterOutput', 1, static function ($vars) {
+    if (($_GET['m'] ?? '') !== 'phoneservices') {
+        return '';
     }
-});
 
-/**
- * After Module Upgrade Hook
- */
-add_hook('AfterModuleUpgrade', 1, function($vars) {
-    if ($vars['module'] === 'phoneservices') {
-        Logger::info('Module upgraded', ['version' => $vars['version']]);
+    $base = '/modules/addons/phoneservices/assets';
+    $output = '';
+
+    // The Twilio Voice SDK is only loaded on the VoIP page and only when the
+    // configured voice provider actually supports browser calling.
+    if (($_GET['action'] ?? '') === 'voip' && Config::isServiceEnabled('voip')) {
+        $voiceProvider = Config::getProviderForCapability('voice');
+        if (in_array('webrtc', ProviderRegistry::capabilities($voiceProvider), true)) {
+            $output .= '<script src="https://sdk.twilio.com/js/voice/releases/2.11.1/twilio.min.js" crossorigin="anonymous"></script>';
+        }
     }
+
+    return $output . '<script src="' . $base . '/js/client/app.js?v=' . PHONESERVICES_VERSION . '"></script>';
 });
 
 /**
- * Client Edit Hook
- * Track client profile changes
+ * Admin assets for the Super Admin panel.
  */
-add_hook('ClientEdit', 1, function($vars) {
-    // Update phone numbers if client phone changed
-    Logger::debug('Client edited', ['client' => $vars['userid']]);
+add_hook('AdminAreaHeadOutput', 1, static function ($vars) {
+    if (($_GET['module'] ?? '') !== 'phoneservices') {
+        return '';
+    }
+
+    return '<link rel="stylesheet" href="../modules/addons/phoneservices/assets/css/admin.css?v=' . PHONESERVICES_VERSION . '">';
+});
+
+add_hook('AdminAreaFooterOutput', 1, static function ($vars) {
+    if (($_GET['module'] ?? '') !== 'phoneservices') {
+        return '';
+    }
+
+    return '<script src="../modules/addons/phoneservices/assets/js/admin/app.js?v=' . PHONESERVICES_VERSION . '"></script>';
 });
 
 /**
- * Pre-termination hook for services
- * Clean up numbers and eSIMs when service is terminated
+ * Surface phone services on the client-area home page.
  */
-add_hook('ServiceDelete', 1, function($vars) {
+add_hook('ClientAreaPrimaryNavbar', 1, static function ($primaryNavbar) {
     try {
-        $serviceId = $vars['serviceid'];
-        $userId = $vars['userid'];
-        
-        // Release associated numbers
-        $numberService = new NumberService();
-        $numbers = Database::select('mod_phoneservices_numbers', '*', ['assigned_service_id' => $serviceId]);
-        foreach ($numbers as $number) {
-            $numberService->releaseNumber($number['id']);
+        if (!Config::getBool('show_navbar_link', true)) {
+            return;
         }
-        
-        Logger::info('Service cleanup completed', ['service' => $serviceId, 'user' => $userId]);
-    } catch (\Exception $e) {
-        Logger::error('ServiceDelete hook error: ' . $e->getMessage());
+
+        $services = $primaryNavbar->getChild('Services');
+        if ($services === null) {
+            return;
+        }
+
+        $services->addChild('Phone Services', [
+            'label' => 'Phone Services',
+            'uri'   => 'index.php?m=phoneservices',
+            'order' => 90,
+        ]);
+    } catch (\Throwable $e) {
+        // Navigation is cosmetic - never break the client area over it.
+    }
+});
+
+/**
+ * Record module upgrades.
+ */
+add_hook('AfterModuleUpgrade', 1, static function ($vars) {
+    if (($vars['module'] ?? '') === 'phoneservices') {
+        Logger::info('Module upgraded', ['version' => $vars['version'] ?? '']);
     }
 });

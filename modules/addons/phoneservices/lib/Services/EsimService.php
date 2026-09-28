@@ -11,8 +11,6 @@ use PhoneServices\Core\Logger;
 use PhoneServices\Core\Config;
 use PhoneServices\Providers\ProviderFactory;
 use PhoneServices\Interfaces\EsimProviderInterface;
-use Endroid\QrCode\QrCode;
-use Endroid\QrCode\Writer\PngWriter;
 
 class EsimService
 {
@@ -118,44 +116,102 @@ class EsimService
             return ['error' => 'eSIM not found'];
         }
         
-        $qrData = $esim['qr_code_data'];
-        
-        if (empty($qrData)) {
+        $qrData = (string) ($esim['qr_code_data'] ?? '');
+        $qrUrl  = (string) ($esim['qr_code_url'] ?? '');
+
+        if ($qrData === '' || $qrUrl === '') {
             $provider = ProviderFactory::getProvider($esim['provider']);
-            if ($provider && $provider instanceof EsimProviderInterface) {
-                $qrData = $provider->getQrCodeData($esim['provider_esim_id']);
+
+            if ($provider instanceof EsimProviderInterface) {
+                $remote = $provider->getQrCodeData((string) $esim['provider_esim_id']);
+
+                if (is_array($remote)) {
+                    $qrData = $qrData !== '' ? $qrData : (string) ($remote['qr_code_data'] ?? ($remote['lpa_code'] ?? ''));
+                    $qrUrl  = $qrUrl !== '' ? $qrUrl : (string) ($remote['qr_code_url'] ?? '');
+                } elseif (is_string($remote)) {
+                    $qrData = $qrData !== '' ? $qrData : $remote;
+                }
             }
         }
-        
-        if (empty($qrData) && !empty($esim['lpa_code'])) {
-            $qrData = $esim['lpa_code'];
+
+        if ($qrData === '' && !empty($esim['lpa_code'])) {
+            $qrData = (string) $esim['lpa_code'];
         }
-        
-        if (empty($qrData)) {
-            return ['error' => 'No provisioning data available'];
+
+        if ($qrData === '' && $qrUrl === '') {
+            return ['success' => false, 'error' => 'No provisioning data available'];
         }
-        
-        try {
-            $writer = new PngWriter();
-            $qrCode = QrCode::create($qrData)
-                ->setSize(400)
-                ->setMargin(10);
-            
-            $result = $writer->write($qrCode);
-            $base64 = base64_encode($result->getString());
-            
-            return [
-                'success' => true,
-                'qr_data' => $qrData,
-                'qr_base64' => 'data:image/png;base64,' . $base64,
-                'lpa_code' => $esim['lpa_code'],
-            ];
-        } catch (\Exception $e) {
-            Logger::error('QR generation failed', ['error' => $e->getMessage()]);
-            return ['error' => $e->getMessage(), 'qr_data' => $qrData];
+
+        // Persist whatever we resolved so later calls are cheap.
+        $persist = [];
+        if ($qrData !== '' && (string) ($esim['qr_code_data'] ?? '') === '') {
+            $persist['qr_code_data'] = $qrData;
         }
+        if ($qrUrl !== '' && (string) ($esim['qr_code_url'] ?? '') === '') {
+            $persist['qr_code_url'] = $qrUrl;
+        }
+        if ($persist) {
+            Database::update('mod_phoneservices_esims', $persist, ['id' => $esimId]);
+        }
+
+        $response = [
+            'success'      => true,
+            'qr_data'      => $qrData,
+            'qr_code_url'  => $qrUrl !== '' ? $qrUrl : null,
+            'lpa_code'     => $esim['lpa_code'] ?? null,
+            'manual_entry' => $this->parseLpaCode($qrData !== '' ? $qrData : (string) $esim['lpa_code']),
+        ];
+
+        // Render a local PNG only when a QR library happens to be installed.
+        // The endroid/qr-code package is an optional convenience, never a
+        // hard requirement: clients can always use the provider URL or the
+        // manual SM-DP+ / activation-code entry returned above.
+        if ($qrData !== '' && class_exists('\\Endroid\\QrCode\\QrCode') && class_exists('\\Endroid\\QrCode\\Writer\\PngWriter')) {
+            try {
+                $writerClass = '\\Endroid\\QrCode\\Writer\\PngWriter';
+                $qrClass     = '\\Endroid\\QrCode\\QrCode';
+
+                $writer = new $writerClass();
+                $qrCode = new $qrClass($qrData);
+
+                if (method_exists($qrCode, 'setSize')) {
+                    $qrCode->setSize(400);
+                }
+                if (method_exists($qrCode, 'setMargin')) {
+                    $qrCode->setMargin(10);
+                }
+
+                $response['qr_base64'] = 'data:image/png;base64,' . base64_encode($writer->write($qrCode)->getString());
+            } catch (\Throwable $e) {
+                Logger::warning('Local QR rendering failed, falling back to provider data', [
+                    'esim_id' => $esimId,
+                    'error'   => $e->getMessage(),
+                ]);
+            }
+        }
+
+        return $response;
     }
-    
+
+    /**
+     * Split an LPA activation string into its manual-entry components.
+     *
+     * Format: LPA:1$<SM-DP+ address>$<activation code>[$<optional>]
+     *
+     * @return array<string,string>
+     */
+    private function parseLpaCode(string $lpa): array
+    {
+        $parts = explode('$', trim($lpa));
+
+        return [
+            'smdp_address'    => $parts[1] ?? '',
+            'activation_code' => $parts[2] ?? '',
+            'confirmation'    => $parts[3] ?? '',
+            'raw'             => trim($lpa),
+        ];
+    }
+
     /**
      * Check data usage
      */
@@ -301,14 +357,13 @@ class EsimService
      */
     public function getExpiringEsims(int $days = 7): array
     {
-        $sql = "SELECT * FROM mod_phoneservices_esims 
-                WHERE status = 'active' 
-                AND expires_at <= DATE_ADD(NOW(), INTERVAL " . (int)$days . " DAY)";
-        $result = full_query($sql);
-        $esims = [];
-        while ($row = mysql_fetch_assoc($result)) {
-            $esims[] = $row;
-        }
-        return $esims;
+        return Database::raw(
+            'SELECT * FROM mod_phoneservices_esims
+              WHERE status = ?
+                AND expires_at IS NOT NULL
+                AND expires_at <= DATE_ADD(NOW(), INTERVAL ? DAY)
+              ORDER BY expires_at ASC',
+            ['active', max(0, $days)]
+        );
     }
 }

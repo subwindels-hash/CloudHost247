@@ -1,168 +1,215 @@
 <?php
 /**
- * REST API Router
- * Handles internal REST API routing for module services
+ * REST API router.
+ *
+ * Maps HTTP verb + path to a controller action, applies middleware (with the
+ * scope the route requires) and normalises every response envelope.
+ *
+ * @package PhoneServices
  */
 
 namespace PhoneServices\Core;
 
-use PhoneServices\API\Controllers\NumbersController;
-use PhoneServices\API\Controllers\VoipController;
-use PhoneServices\API\Controllers\SmsController;
 use PhoneServices\API\Controllers\EsimController;
+use PhoneServices\API\Controllers\NumbersController;
+use PhoneServices\API\Controllers\SmsController;
 use PhoneServices\API\Controllers\UsageController;
-use PhoneServices\API\Middleware\AuthMiddleware;
+use PhoneServices\API\Controllers\VoipController;
 
 class Router
 {
+    /** @var array<int,array<string,mixed>> */
     private $routes = [];
+
+    /** @var array<int,string> */
     private $middleware = [];
-    
+
     public function __construct()
     {
         $this->registerDefaultRoutes();
     }
-    
-    /**
-     * Register default REST API routes
-     */
-    private function registerDefaultRoutes()
+
+    private function registerDefaultRoutes(): void
     {
-        // Numbers API
-        $this->addRoute('GET', '/api/numbers', [NumbersController::class, 'index']);
-        $this->addRoute('POST', '/api/numbers/purchase', [NumbersController::class, 'purchase']);
-        $this->addRoute('POST', '/api/numbers/:id/renew', [NumbersController::class, 'renew']);
-        $this->addRoute('POST', '/api/numbers/:id/suspend', [NumbersController::class, 'suspend']);
-        $this->addRoute('POST', '/api/numbers/:id/release', [NumbersController::class, 'release']);
-        
-        // VoIP API
-        $this->addRoute('GET', '/api/voip/calls', [VoipController::class, 'calls']);
-        $this->addRoute('POST', '/api/voip/call', [VoipController::class, 'initiateCall']);
-        $this->addRoute('POST', '/api/voip/call/:id/end', [VoipController::class, 'endCall']);
-        $this->addRoute('GET', '/api/voip/token', [VoipController::class, 'getToken']);
-        
-        // SMS API
-        $this->addRoute('GET', '/api/sms/messages', [SmsController::class, 'messages']);
-        $this->addRoute('POST', '/api/sms/send', [SmsController::class, 'send']);
-        $this->addRoute('POST', '/api/sms/otp', [SmsController::class, 'sendOtp']);
-        $this->addRoute('POST', '/api/sms/whatsapp', [SmsController::class, 'sendWhatsapp']);
-        $this->addRoute('POST', '/api/sms/email', [SmsController::class, 'sendEmail']);
-        
-        // eSIM API
-        $this->addRoute('GET', '/api/esim/profiles', [EsimController::class, 'profiles']);
-        $this->addRoute('POST', '/api/esim/purchase', [EsimController::class, 'purchase']);
-        $this->addRoute('GET', '/api/esim/:id/qrcode', [EsimController::class, 'qrCode']);
-        $this->addRoute('GET', '/api/esim/plans', [EsimController::class, 'plans']);
-        
-        // Usage API
-        $this->addRoute('GET', '/api/usage', [UsageController::class, 'index']);
-        $this->addRoute('GET', '/api/usage/transactions', [UsageController::class, 'transactions']);
-        $this->addRoute('GET', '/api/usage/report', [UsageController::class, 'report']);
+        // Service discovery / health
+        $this->addRoute('GET', '/api/health', [UsageController::class, 'health'], '');
+
+        // Numbers
+        $this->addRoute('GET', '/api/numbers', [NumbersController::class, 'index'], 'numbers');
+        $this->addRoute('GET', '/api/numbers/search', [NumbersController::class, 'search'], 'numbers');
+        $this->addRoute('GET', '/api/numbers/countries', [NumbersController::class, 'countries'], 'numbers');
+        $this->addRoute('POST', '/api/numbers/purchase', [NumbersController::class, 'purchase'], 'numbers');
+        $this->addRoute('POST', '/api/numbers/:id/renew', [NumbersController::class, 'renew'], 'numbers');
+        $this->addRoute('POST', '/api/numbers/:id/suspend', [NumbersController::class, 'suspend'], 'numbers');
+        $this->addRoute('POST', '/api/numbers/:id/release', [NumbersController::class, 'release'], 'numbers');
+        $this->addRoute('POST', '/api/numbers/:id/assign', [NumbersController::class, 'assign'], 'numbers');
+
+        // VoIP
+        $this->addRoute('GET', '/api/voip/calls', [VoipController::class, 'calls'], 'voip');
+        $this->addRoute('POST', '/api/voip/call', [VoipController::class, 'initiateCall'], 'voip');
+        $this->addRoute('POST', '/api/voip/call/:id/end', [VoipController::class, 'endCall'], 'voip');
+        $this->addRoute('GET', '/api/voip/token', [VoipController::class, 'getToken'], 'voip');
+
+        // Messaging
+        $this->addRoute('GET', '/api/sms/messages', [SmsController::class, 'messages'], 'sms');
+        $this->addRoute('POST', '/api/sms/send', [SmsController::class, 'send'], 'sms');
+        $this->addRoute('POST', '/api/sms/otp', [SmsController::class, 'sendOtp'], 'sms');
+        $this->addRoute('POST', '/api/sms/otp/verify', [SmsController::class, 'verifyOtp'], 'sms');
+        $this->addRoute('POST', '/api/sms/whatsapp', [SmsController::class, 'sendWhatsapp'], 'sms');
+        $this->addRoute('POST', '/api/sms/email', [SmsController::class, 'sendEmail'], 'sms');
+
+        // eSIM
+        $this->addRoute('GET', '/api/esim/plans', [EsimController::class, 'plans'], 'esim');
+        $this->addRoute('GET', '/api/esim/profiles', [EsimController::class, 'profiles'], 'esim');
+        $this->addRoute('POST', '/api/esim/purchase', [EsimController::class, 'purchase'], 'esim');
+        $this->addRoute('GET', '/api/esim/:id/qrcode', [EsimController::class, 'qrCode'], 'esim');
+        $this->addRoute('GET', '/api/esim/:id/usage', [EsimController::class, 'usage'], 'esim');
+        $this->addRoute('POST', '/api/esim/:id/topup', [EsimController::class, 'topUp'], 'esim');
+
+        // Usage & billing
+        $this->addRoute('GET', '/api/usage', [UsageController::class, 'index'], 'usage');
+        $this->addRoute('GET', '/api/usage/transactions', [UsageController::class, 'transactions'], 'usage');
+        $this->addRoute('GET', '/api/usage/report', [UsageController::class, 'report'], 'usage');
     }
-    
+
     /**
-     * Add a route
+     * @param callable|array{0:string,1:string} $handler
      */
-    public function addRoute($method, $path, $handler)
+    public function addRoute(string $method, string $path, $handler, string $scope = ''): void
     {
         $this->routes[] = [
-            'method' => strtoupper($method),
-            'path' => $path,
+            'method'  => strtoupper($method),
+            'path'    => $path,
             'handler' => $handler,
+            'scope'   => $scope,
         ];
     }
-    
-    /**
-     * Add middleware
-     */
-    public function addMiddleware($middleware)
+
+    public function addMiddleware(string $middleware): void
     {
         $this->middleware[] = $middleware;
     }
-    
+
     /**
-     * Dispatch the current request
+     * Resolve and execute the current request.
      */
-    public function dispatch()
+    public function dispatch(): void
     {
-        $method = $_SERVER['REQUEST_METHOD'];
-        $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-        $path = str_replace('/modules/addons/phoneservices/', '/', $path);
-        
-        // Run middleware
-        foreach ($this->middleware as $mw) {
-            if (is_string($mw) && class_exists($mw)) {
-                $instance = new $mw();
-                if (method_exists($instance, 'handle')) {
-                    $instance->handle();
-                }
-            }
-        }
-        
+        $method = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
+        $path = $this->requestPath();
+
         $route = $this->matchRoute($method, $path);
-        
+
         if (!$route) {
-            $this->jsonResponse(['error' => 'Route not found'], 404);
+            $this->jsonResponse(['success' => false, 'error' => 'Route not found', 'path' => $path], 404);
             return;
         }
-        
-        try {
-            $handler = $route['handler'];
-            $params = $route['params'];
-            
-            $class = $handler[0];
-            $method = $handler[1];
-            $controller = new $class();
-            
-            $response = call_user_func_array([$controller, $method], [$params]);
-            
-            if (is_array($response) || is_object($response)) {
-                $this->jsonResponse($response);
-            } else {
-                echo $response;
-            }
-        } catch (\Exception $e) {
-            Logger::error('API Error: ' . $e->getMessage(), ['route' => $path]);
-            $this->jsonResponse(['error' => 'Internal server error', 'message' => $e->getMessage()], 500);
-        }
-    }
-    
-    /**
-     * Match route against registered routes
-     */
-    private function matchRoute($method, $path)
-    {
-        foreach ($this->routes as $route) {
-            if ($route['method'] !== strtoupper($method)) {
+
+        foreach ($this->middleware as $middleware) {
+            if (!class_exists($middleware)) {
                 continue;
             }
-            
-            $pattern = preg_replace('/:([a-zA-Z0-9_]+)/', '([^/]+)', $route['path']);
-            $pattern = '#^' . $pattern . '$#';
-            
-            if (preg_match($pattern, $path, $matches)) {
-                $params = [];
-                preg_match_all('/:([a-zA-Z0-9_]+)/', $route['path'], $keys);
-                
-                for ($i = 0; $i < count($keys[1]); $i++) {
-                    $params[$keys[1][$i]] = $matches[$i + 1];
-                }
-                
-                return ['handler' => $route['handler'], 'params' => $params];
+
+            $instance = new $middleware();
+            if (method_exists($instance, 'handle')) {
+                $instance->handle((string) $route['scope']);
             }
         }
-        
+
+        try {
+            [$class, $action] = $route['handler'];
+            $controller = new $class();
+            $response = $controller->{$action}($route['params']);
+
+            if (is_array($response)) {
+                $status = isset($response['success']) && $response['success'] === false ? 400 : 200;
+                $this->jsonResponse($response, (int) ($response['status_code'] ?? $status));
+                return;
+            }
+
+            echo $response;
+        } catch (\Throwable $e) {
+            Logger::exception($e, 'API ' . $method . ' ' . $path);
+            $this->jsonResponse([
+                'success' => false,
+                'error'   => Config::isSandbox() ? $e->getMessage() : 'Internal server error',
+            ], 500);
+        }
+    }
+
+    /**
+     * Normalise the request path so the API works with or without URL
+     * rewriting (PATH_INFO, direct script access, or a rewritten route).
+     */
+    public function requestPath(): string
+    {
+        $path = (string) ($_SERVER['PATH_INFO'] ?? '');
+
+        if ($path === '') {
+            $path = (string) parse_url((string) ($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH);
+            $path = preg_replace('#^.*/modules/addons/phoneservices(?:/api/rest\.php)?#', '', $path);
+        }
+
+        $path = '/' . trim((string) $path, '/');
+
+        return $path === '/' ? '/api/health' : $path;
+    }
+
+    /**
+     * @return array{handler:mixed,params:array<string,string>,scope:string}|null
+     */
+    private function matchRoute(string $method, string $path): ?array
+    {
+        foreach ($this->routes as $route) {
+            if ($route['method'] !== $method) {
+                continue;
+            }
+
+            $pattern = '#^' . preg_replace('/:([a-zA-Z0-9_]+)/', '([^/]+)', str_replace('#', '\#', $route['path'])) . '$#';
+
+            if (!preg_match($pattern, $path, $matches)) {
+                continue;
+            }
+
+            preg_match_all('/:([a-zA-Z0-9_]+)/', $route['path'], $keys);
+
+            $params = [];
+            foreach ($keys[1] as $index => $key) {
+                $params[$key] = $matches[$index + 1] ?? '';
+            }
+
+            return ['handler' => $route['handler'], 'params' => $params, 'scope' => (string) $route['scope']];
+        }
+
         return null;
     }
-    
+
     /**
-     * Send JSON response
+     * @param array<string,mixed> $data
      */
-    public function jsonResponse($data, $status = 200)
+    public function jsonResponse(array $data, int $status = 200): void
     {
+        unset($data['status_code']);
+
         http_response_code($status);
         header('Content-Type: application/json');
         echo json_encode($data);
         exit;
+    }
+
+    /**
+     * Exposed for documentation/tests.
+     *
+     * @return array<int,array<string,string>>
+     */
+    public function listRoutes(): array
+    {
+        return array_map(static function (array $route) {
+            return [
+                'method' => $route['method'],
+                'path'   => $route['path'],
+                'scope'  => (string) $route['scope'],
+            ];
+        }, $this->routes);
     }
 }

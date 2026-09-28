@@ -1,82 +1,115 @@
 <?php
 /**
- * Twilio Webhook Handler
- * Handles inbound SMS and voice callbacks from Twilio
+ * Twilio webhook endpoint.
+ *
+ * Handles inbound SMS, inbound/outbound voice events and delivery receipts.
+ * Every request is authenticated with the X-Twilio-Signature HMAC before any
+ * state is changed.
+ *
+ * Configure in Twilio (or let the module do it via "Set webhooks"):
+ *   .../api/webhooks/twilio.php?event=sms
+ *   .../api/webhooks/twilio.php?event=voice
+ *   .../api/webhooks/twilio.php?event=sms-status
+ *   .../api/webhooks/twilio.php?event=call-status
+ *
+ * @package PhoneServices
  */
 
+require_once __DIR__ . '/../bootstrap.php';
+
+use PhoneServices\Core\Config;
+use PhoneServices\Core\Logger;
+use PhoneServices\Providers\ProviderFactory;
+use PhoneServices\Providers\TwilioProvider;
 use PhoneServices\Services\SmsService;
 use PhoneServices\Services\VoipService;
-use PhoneServices\Core\Logger;
 
-require_once __DIR__ . '/../../vendor/autoload.php';
+$event = (string) ($_GET['event'] ?? ($_GET['type'] ?? 'sms'));
+$headers = phoneservices_api_headers();
+$signature = (string) ($headers['x-twilio-signature'] ?? '');
 
-$type = $_GET['type'] ?? 'sms';
+/** @var TwilioProvider|null $provider */
+$provider = ProviderFactory::getProvider('twilio');
 
-if ($type === 'sms') {
-    $smsService = new SmsService();
-    
-    $data = [
-        'provider' => 'twilio',
-        'message_id' => $_POST['MessageSid'] ?? '',
-        'from' => $_POST['From'] ?? '',
-        'to' => $_POST['To'] ?? '',
-        'body' => $_POST['Body'] ?? '',
-        'channel' => 'sms',
-    ];
-    
-    $result = $smsService->receiveInboundMessage($data);
-    
-    Logger::info('Twilio SMS webhook received', $data);
-    
-    // Return empty TwiML
-    header('Content-Type: text/xml');
-    echo '<?xml version="1.0" encoding="UTF-8"?>';
-    echo '<Response></Response>';
-    exit;
+if (!$provider instanceof TwilioProvider) {
+    Logger::error('Twilio webhook received but the provider is unavailable');
+    phoneservices_api_json(['success' => false, 'error' => 'Provider unavailable'], 503);
 }
 
-if ($type === 'voice') {
-    $voipService = new VoipService();
-    
-    $callId = $_POST['CallSid'] ?? '';
-    $status = $_POST['CallStatus'] ?? '';
-    $from = $_POST['From'] ?? '';
-    $to = $_POST['To'] ?? '';
-    $duration = $_POST['CallDuration'] ?? 0;
-    $price = $_POST['Price'] ?? 0;
-    
-    if ($callId) {
-        $voipService->updateCallStatus($callId, $status, [
-            'duration' => $duration,
-            'price' => $price,
-            'from' => $from,
-            'to' => $to,
-        ]);
-        
-        Logger::info('Twilio voice webhook received', ['call_id' => $callId, 'status' => $status]);
-    }
-    
-    // Return TwiML response
-    header('Content-Type: text/xml');
-    echo '<?xml version="1.0" encoding="UTF-8"?>';
-    echo '<Response>';
-    echo '<Say>Thank you for calling.</Say>';
-    echo '</Response>';
-    exit;
+if (!$provider->validateWebhookSignature(phoneservices_api_current_url(), $_POST, $signature)) {
+    Logger::warning('Rejected Twilio webhook: invalid signature', ['event' => $event]);
+    phoneservices_api_json(['success' => false, 'error' => 'Invalid signature'], 403);
 }
 
-// Status callback
-if ($type === 'status') {
-    $smsService = new SmsService();
-    
-    $messageId = $_POST['MessageSid'] ?? '';
-    $status = $_POST['MessageStatus'] ?? '';
-    
-    if ($messageId) {
-        Logger::info('Twilio status callback', ['message_id' => $messageId, 'status' => $status]);
-    }
-    
-    http_response_code(200);
-    echo 'OK';
-    exit;
+phoneservices_api_record_event('twilio', $event, $_POST, (string) ($_POST['MessageSid'] ?? ($_POST['CallSid'] ?? '')));
+
+switch ($event) {
+    case 'sms':
+        if (Config::isServiceEnabled('sms')) {
+            (new SmsService())->receiveInboundMessage([
+                'provider'   => 'twilio',
+                'message_id' => (string) ($_POST['MessageSid'] ?? ''),
+                'from'       => (string) ($_POST['From'] ?? ''),
+                'to'         => (string) ($_POST['To'] ?? ''),
+                'body'       => (string) ($_POST['Body'] ?? ''),
+                'channel'    => 'sms',
+            ]);
+        }
+
+        header('Content-Type: text/xml');
+        echo '<?xml version="1.0" encoding="UTF-8"?><Response></Response>';
+        exit;
+
+    case 'sms-status':
+    case 'status':
+        $messageId = (string) ($_POST['MessageSid'] ?? '');
+        if ($messageId !== '') {
+            \PhoneServices\Core\Database::update('mod_phoneservices_messages', [
+                'status'        => TwilioProvider::mapMessageStatus((string) ($_POST['MessageStatus'] ?? '')),
+                'error_message' => $_POST['ErrorMessage'] ?? null,
+                'delivered_at'  => ($_POST['MessageStatus'] ?? '') === 'delivered' ? date('Y-m-d H:i:s') : null,
+            ], ['message_id' => $messageId]);
+        }
+
+        phoneservices_api_json(['success' => true]);
+        break;
+
+    case 'call-status':
+        $callId = (string) ($_POST['CallSid'] ?? '');
+        if ($callId !== '') {
+            (new VoipService())->updateCallStatus(
+                $callId,
+                TwilioProvider::mapCallStatus((string) ($_POST['CallStatus'] ?? '')),
+                [
+                    'duration' => (int) ($_POST['CallDuration'] ?? 0),
+                    'cost'     => abs((float) ($_POST['Price'] ?? 0)),
+                    'from'     => (string) ($_POST['From'] ?? ''),
+                    'to'       => (string) ($_POST['To'] ?? ''),
+                ]
+            );
+        }
+
+        phoneservices_api_json(['success' => true]);
+        break;
+
+    case 'voice':
+    default:
+        $callId = (string) ($_POST['CallSid'] ?? '');
+        $voip = new VoipService();
+
+        if ($callId !== '') {
+            $voip->registerInboundCall([
+                'provider'  => 'twilio',
+                'call_id'   => $callId,
+                'from'      => (string) ($_POST['From'] ?? ''),
+                'to'        => (string) ($_POST['To'] ?? ''),
+                'status'    => TwilioProvider::mapCallStatus((string) ($_POST['CallStatus'] ?? 'ringing')),
+                'direction' => (string) ($_POST['Direction'] ?? 'inbound'),
+            ]);
+        }
+
+        // Bridge the inbound call to the browser client that owns the number.
+        header('Content-Type: text/xml');
+        echo $voip->buildInboundTwiml((string) ($_POST['To'] ?? ''), (string) ($_POST['From'] ?? ''));
+        exit;
 }

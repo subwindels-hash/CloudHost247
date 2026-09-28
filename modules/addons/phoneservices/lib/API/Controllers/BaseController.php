@@ -6,7 +6,9 @@
 
 namespace PhoneServices\API\Controllers;
 
+use PhoneServices\API\Middleware\AuthMiddleware;
 use PhoneServices\Core\Logger;
+use PhoneServices\Core\Security;
 
 class BaseController
 {
@@ -25,13 +27,64 @@ class BaseController
      */
     protected function getUserId(): int
     {
-        if (isset($_SESSION['uid'])) {
-            return (int) $_SESSION['uid'];
-        }
-        if (isset($_SESSION['api_user_id'])) {
-            return (int) $_SESSION['api_user_id'];
-        }
-        return 0;
+        $contextUser = AuthMiddleware::userId();
+
+        return $contextUser > 0 ? $contextUser : Security::currentClientId();
+    }
+
+    /**
+     * Is the caller an internal/system principal (no specific client)?
+     */
+    protected function isSystemContext(): bool
+    {
+        $context = AuthMiddleware::getContext();
+
+        return ($context['method'] ?? null) === 'webhook' || $this->getUserId() === 0;
+    }
+
+    /**
+     * Reject the request unless the record belongs to the caller.
+     */
+    protected function ownsOrFail(string $table, int $recordId): bool
+    {
+        $userId = $this->getUserId();
+
+        return $userId > 0 && Security::assertOwnership($table, $recordId, $userId);
+    }
+
+    /**
+     * Uniform error envelope.
+     *
+     * @return array<string,mixed>
+     */
+    protected function error(string $message, int $status = 400): array
+    {
+        return ['success' => false, 'error' => $message, 'status_code' => $status];
+    }
+
+    /**
+     * Uniform success envelope.
+     *
+     * @param mixed $data
+     * @return array<string,mixed>
+     */
+    protected function ok($data = null, array $extra = []): array
+    {
+        return array_merge(['success' => true, 'data' => $data], $extra);
+    }
+
+    /**
+     * Pagination helper: returns [limit, offset].
+     *
+     * @return array{0:int,1:int}
+     */
+    protected function pagination(int $defaultLimit = 50, int $maxLimit = 200): array
+    {
+        $limit = (int) ($_GET['limit'] ?? $defaultLimit);
+        $limit = max(1, min($limit, $maxLimit));
+        $page = max(1, (int) ($_GET['page'] ?? 1));
+
+        return [$limit, ($page - 1) * $limit];
     }
     
     /**

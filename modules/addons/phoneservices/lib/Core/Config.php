@@ -1,122 +1,271 @@
 <?php
 /**
  * Configuration Manager
- * Handles all module settings with caching
+ *
+ * Single source of truth for module settings. Reads from the module settings
+ * table first (runtime, editable in the Super Admin panel) and falls back to
+ * the WHMCS addon configuration (tbladdonmodules) so the activation defaults
+ * still apply. Secret values are transparently encrypted at rest.
+ *
+ * @package PhoneServices
  */
 
 namespace PhoneServices\Core;
 
 class Config
 {
+    const TABLE = 'mod_phoneservices_settings';
+
+    /** Settings treated as secrets: encrypted at rest, masked in the UI. */
+    const SECRET_SUFFIXES = ['_key', '_token', '_secret', '_sid', '_password', '_signature'];
+
+    /** @var array<string,mixed> */
     private static $cache = [];
-    
+
+    /** @var bool */
+    private static $loaded = false;
+
     /**
-     * Get a configuration value
+     * Get a configuration value (decrypted when it is a secret).
+     *
+     * @param  mixed $default
+     * @return mixed
      */
-    public static function get($key, $default = null)
+    public static function get(string $key, $default = null)
     {
-        if (isset(self::$cache[$key])) {
-            return self::$cache[$key];
+        self::loadAll();
+
+        if (array_key_exists($key, self::$cache)) {
+            $value = self::$cache[$key];
+            return ($value === null || $value === '') && $default !== null ? $default : $value;
         }
-        
-        $result = select_query('tbladdonmodules', 'value', ['module' => 'phoneservices', 'setting' => $key]);
-        if ($row = mysql_fetch_assoc($result)) {
-            self::$cache[$key] = $row['value'];
-            return $row['value'];
+
+        // Fallback: WHMCS addon module configuration fields.
+        $value = Database::value('tbladdonmodules', 'value', [
+            'module'  => 'phoneservices',
+            'setting' => $key,
+        ]);
+
+        if ($value === null) {
+            self::$cache[$key] = $default;
+            return $default;
         }
-        
-        // Fallback to mod_phoneservices_settings
-        $result = select_query('mod_phoneservices_settings', 'setting_value', ['setting_name' => $key]);
-        if ($row = mysql_fetch_assoc($result)) {
-            self::$cache[$key] = $row['setting_value'];
-            return $row['setting_value'];
-        }
-        
-        return $default;
-    }
-    
-    /**
-     * Set a configuration value
-     */
-    public static function set($key, $value)
-    {
+
+        $value = self::isSecret($key) ? Crypto::decrypt((string) $value) : $value;
         self::$cache[$key] = $value;
-        
-        $exists = select_query('mod_phoneservices_settings', 'id', ['setting_name' => $key]);
-        if (mysql_num_rows($exists)) {
-            update_query('mod_phoneservices_settings', ['setting_value' => $value], ['setting_name' => $key]);
+
+        return $value === '' && $default !== null ? $default : $value;
+    }
+
+    public static function getInt(string $key, int $default = 0): int
+    {
+        $value = self::get($key, $default);
+
+        return is_numeric($value) ? (int) $value : $default;
+    }
+
+    public static function getFloat(string $key, float $default = 0.0): float
+    {
+        $value = self::get($key, $default);
+
+        return is_numeric($value) ? (float) $value : $default;
+    }
+
+    public static function getBool(string $key, bool $default = false): bool
+    {
+        $value = self::get($key, $default ? '1' : '0');
+
+        return in_array(strtolower((string) $value), ['1', 'on', 'yes', 'true'], true);
+    }
+
+    /**
+     * Persist a configuration value (encrypting secrets).
+     *
+     * @param mixed $value
+     */
+    public static function set(string $key, $value): bool
+    {
+        $stored = self::isSecret($key) ? Crypto::encrypt((string) $value) : (string) $value;
+
+        $exists = Database::value(self::TABLE, 'id', ['setting_name' => $key]);
+
+        if ($exists !== null) {
+            Database::update(self::TABLE, [
+                'setting_value' => $stored,
+                'updated_at'    => date('Y-m-d H:i:s'),
+            ], ['setting_name' => $key]);
         } else {
-            insert_query('mod_phoneservices_settings', ['setting_name' => $key, 'setting_value' => $value]);
+            Database::insert(self::TABLE, [
+                'setting_name'  => $key,
+                'setting_value' => $stored,
+                'created_at'    => date('Y-m-d H:i:s'),
+                'updated_at'    => date('Y-m-d H:i:s'),
+            ]);
+        }
+
+        self::$cache[$key] = self::isSecret($key) ? (string) $value : (string) $value;
+
+        return true;
+    }
+
+    /**
+     * Bulk set (used by the admin settings forms).
+     *
+     * @param array<string,mixed> $values
+     */
+    public static function setMany(array $values): void
+    {
+        foreach ($values as $key => $value) {
+            self::set((string) $key, $value);
         }
     }
-    
+
     /**
-     * Get all feature toggles
+     * Is this setting a secret (encrypted at rest, masked in the UI)?
      */
-    public static function getFeatureToggles()
+    public static function isSecret(string $key): bool
+    {
+        foreach (self::SECRET_SUFFIXES as $suffix) {
+            if (substr($key, -strlen($suffix)) === $suffix) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Masked value for safe display in the admin panel.
+     */
+    public static function masked(string $key): string
+    {
+        return Crypto::mask((string) self::get($key, ''));
+    }
+
+    /**
+     * Service feature toggles - services can be enabled/disabled dynamically.
+     *
+     * @return array<string,bool>
+     */
+    public static function getFeatureToggles(): array
     {
         return [
-            'numbers' => self::get('enable_numbers', '1') === '1',
-            'voip'    => self::get('enable_voip', '1') === '1',
-            'sms'     => self::get('enable_sms', '1') === '1',
-            'esim'    => self::get('enable_esim', '1') === '1',
+            'numbers'   => self::getBool('enable_numbers', true),
+            'voip'      => self::getBool('enable_voip', true),
+            'sms'       => self::getBool('enable_sms', true),
+            'esim'      => self::getBool('enable_esim', true),
+            'analytics' => self::getBool('enable_analytics', true),
         ];
     }
-    
-    /**
-     * Check if a service is enabled
-     */
-    public static function isServiceEnabled($service)
+
+    public static function isServiceEnabled(string $service): bool
     {
         $toggles = self::getFeatureToggles();
-        return isset($toggles[$service]) ? $toggles[$service] : false;
+
+        return $toggles[$service] ?? false;
     }
-    
+
     /**
-     * Get provider credentials
+     * Credential bag for a provider.
+     *
+     * The key map is provider-declared (see ProviderRegistry) so adding a new
+     * provider never requires editing this class.
+     *
+     * @return array<string,string>
      */
-    public static function getProviderCredentials($provider)
+    public static function getProviderCredentials(string $provider): array
     {
-        $map = [
-            'twilio' => ['account_sid' => 'twilio_account_sid', 'auth_token' => 'twilio_auth_token'],
-            'vonage' => ['api_key' => 'vonage_api_key', 'api_secret' => 'vonage_api_secret'],
-            'airalo' => ['api_token' => 'airalo_api_token'],
-            'truphone' => ['api_key' => 'truphone_api_key'],
-        ];
-        
-        if (!isset($map[$provider])) {
-            return [];
-        }
-        
         $credentials = [];
-        foreach ($map[$provider] as $key => $configKey) {
-            $credentials[$key] = self::get($configKey, '');
+
+        foreach (\PhoneServices\Providers\ProviderRegistry::credentialFields($provider) as $field) {
+            $credentials[$field] = (string) self::get($provider . '_' . $field, '');
         }
-        
+
+        $credentials['mode'] = self::get('api_mode', 'sandbox');
+        $credentials['provider'] = $provider;
+
         return $credentials;
     }
-    
+
     /**
-     * Get SendGrid credentials
+     * Which provider handles a given capability (sms, voice, numbers, esim,
+     * whatsapp, email). Falls back to the platform default provider.
      */
-    public static function getSendgridCredentials()
+    public static function getProviderForCapability(string $capability): string
     {
-        return ['api_key' => self::get('sendgrid_api_key', '')];
+        $configured = (string) self::get('provider_' . $capability, '');
+
+        if ($configured !== '') {
+            return $configured;
+        }
+
+        return (string) self::get('default_provider', 'twilio');
     }
-    
-    /**
-     * Get WhatsApp credentials
-     */
-    public static function getWhatsappCredentials()
+
+    public static function isSandbox(): bool
     {
-        return ['token' => self::get('whatsapp_business_token', '')];
+        return self::get('api_mode', 'sandbox') !== 'live';
     }
-    
+
     /**
-     * Clear cache
+     * Base URL used to build webhook callbacks handed to providers.
      */
-    public static function clearCache()
+    public static function webhookBaseUrl(): string
+    {
+        $configured = rtrim((string) self::get('webhook_base_url', ''), '/');
+        if ($configured !== '') {
+            return $configured;
+        }
+
+        $systemUrl = '';
+
+        try {
+            if (class_exists('\\WHMCS\\Config\\Setting')) {
+                $systemUrl = (string) \WHMCS\Config\Setting::getValue('SystemURL');
+            }
+        } catch (\Exception $e) {
+            $systemUrl = '';
+        }
+
+        return rtrim($systemUrl, '/') . '/modules/addons/phoneservices/api/webhooks';
+    }
+
+    /**
+     * Load every runtime setting once per request.
+     */
+    private static function loadAll(): void
+    {
+        if (self::$loaded) {
+            return;
+        }
+
+        self::$loaded = true;
+
+        foreach (Database::select(self::TABLE, '*', [], 'id', 'ASC') as $row) {
+            $name = $row['setting_name'] ?? '';
+            if ($name === '') {
+                continue;
+            }
+
+            $value = (string) ($row['setting_value'] ?? '');
+            self::$cache[$name] = self::isSecret($name) ? Crypto::decrypt($value) : $value;
+        }
+    }
+
+    public static function clearCache(): void
     {
         self::$cache = [];
+        self::$loaded = false;
+    }
+
+    /**
+     * Test seam: preload settings without touching the database.
+     *
+     * @param array<string,mixed> $values
+     */
+    public static function seed(array $values): void
+    {
+        self::$cache = $values;
+        self::$loaded = true;
     }
 }
