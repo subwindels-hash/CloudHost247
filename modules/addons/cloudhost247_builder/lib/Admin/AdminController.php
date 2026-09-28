@@ -47,8 +47,10 @@ class AdminController
         'page' => 'builder.pages',
         'editor' => 'builder.pages',
         'revisions' => 'builder.pages',
+        'backups' => 'builder.pages',
         'templates' => 'builder.templates',
         'theme' => 'builder.theme',
+        'headers' => 'builder.theme',
         'part' => 'builder.theme',
         'menus' => 'builder.theme',
         'styles' => 'builder.settings',
@@ -553,7 +555,13 @@ class AdminController
 
     private function editorState($pageId, $partId)
     {
-        $data = $this->catalog->toArray();
+        $data = array(
+            'widgets' => $this->catalog->toArray(),
+            'categories' => $this->catalog->categories(),
+            'style_properties' => array_keys(\CloudHost247\Builder\Schema\StyleSchema::properties()),
+            'devices' => \CloudHost247\Builder\Schema\StyleSchema::DEVICES,
+            'breakpoints' => \CloudHost247\Builder\Schema\StyleSchema::BREAKPOINTS,
+        );
         $target = array();
         if ($partId > 0) {
             $part = $this->theme->find($partId);
@@ -664,8 +672,43 @@ class AdminController
                 if (!$page) { return array('error' => 'That page no longer exists.'); }
                 return array('page' => $page, 'revisions' => $this->pages->revisions($page['id'], 60));
 
+            case 'backups':
+                // Revision index: every page with how much history it carries.
+                $listing = $this->pages->repository()->all(array(), 1, 100);
+                $rows = array();
+                foreach ($listing['rows'] as $page) {
+                    $history = $this->pages->revisions($page['id'], 200);
+                    $snapshots = 0;
+                    foreach ($history as $revision) {
+                        if ($revision['is_published_snapshot']) { $snapshots++; }
+                    }
+                    $rows[] = array(
+                        'page' => $page,
+                        'revisions' => count($history),
+                        'snapshots' => $snapshots,
+                        'latest' => $history ? $history[0] : null,
+                    );
+                }
+                return array('backups' => $rows, 'revision_limit' => $this->settings->integer('revision_limit'));
+
             case 'templates':
                 return array('templates' => $this->templates->all(), 'categories' => LibraryRepository::TEMPLATE_CATEGORIES);
+
+            case 'headers':
+                // The same parts, narrowed to the two that wrap every page.
+                $siteParts = array();
+                foreach ($this->theme->all() as $part) {
+                    if ($part['part_type'] !== 'header' && $part['part_type'] !== 'footer') { continue; }
+                    $part['conditions_summary'] = DisplayConditions::describe($part['conditions']);
+                    $siteParts[] = $part;
+                }
+                return array(
+                    'parts' => $siteParts,
+                    'part_types' => array('header' => LibraryRepository::PART_TYPES['header'],
+                        'footer' => LibraryRepository::PART_TYPES['footer']),
+                    'pages' => $this->pages->repository()->all(array(), 1, 100),
+                    'menus' => $this->menus->all(),
+                );
 
             case 'theme':
                 $parts = $this->theme->all();

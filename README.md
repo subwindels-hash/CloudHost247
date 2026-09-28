@@ -120,6 +120,7 @@ under `docs/independent-rebuild/` and covered by the release gate
 | CloudHost247 Foundation (audit log, capability policy, migrations) | addon | `modules/addons/cloudhost247_core/` |
 | **CloudHost247 API & Integrations** | addon | `modules/addons/cloudhost247_integrations/` |
 | **CloudHost247 Module Manager** | addon | `modules/addons/cloudhost247_modules/` |
+| **CloudHost247 Website Builder** | addon | `modules/addons/cloudhost247_builder/` |
 | CloudHost247 Currency | addon | `modules/addons/cloudhost247_currency/` |
 | CloudHost247 OVH | addon / server | `modules/addons/cloudhost247_ovh/`, `modules/servers/cloudhost247_ovh/` |
 | CloudHost247 Theme | addon | `modules/addons/cloudhost247_theme/` |
@@ -173,6 +174,34 @@ Read `docs/independent-rebuild/MODULE-MANAGER-COMPLIANCE.md` for the
 clause-by-clause traceability matrix (requirement → code → test), and
 `docs/independent-rebuild/MODULE-MANAGER.md` for the pipeline, the
 `module.json` specification and the packaging rules.
+
+### Website Builder
+
+The public website is designed in **Admin → Addons → CloudHost247 Website
+Builder**: pages, templates, theme parts, navigation menus, global styles, a
+media library, forms, SEO settings, custom CSS and revision history, all driven
+by one versioned page schema.
+
+- It is additive. No HostX template file is read, written or replaced; builder
+  pages render inside the active client area theme, and the existing branding,
+  navigation, cart, checkout, login and registration are untouched.
+- Hosting plans, product cards, order buttons, domain search and pricing, the
+  cart, checkout links and service status read WHMCS and the API & Integrations
+  centre **live**. When a source cannot be read the editor says exactly what is
+  missing and the published page omits the block — there is no demo price
+  anywhere in the module.
+- Draft and published content are separate columns. Saving never changes the
+  live page, unpublishing removes the live copy, a scheduled page is not served
+  early, and a draft preview needs a hashed, expiring token.
+- Content cannot become code: rich text, URLs, styles, custom CSS, uploads and
+  imported templates each pass a dedicated validator, and a template import
+  executes nothing and writes no file.
+- Publishing, deletion, settings and custom CSS default to Super Admin only.
+- Served by `builder-page.php?slug=...`; the module ships inactive.
+
+Read `docs/independent-rebuild/WEBSITE-BUILDER.md` for the page schema, the
+widget library, the publishing model, the security controls and the test
+inventory.
 
 ## Runtime requirements (deployment target)
 

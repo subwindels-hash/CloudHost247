@@ -65,7 +65,10 @@ final class HtmlSanitizer
     public function text($value, $maxLength = 500, $allowNewlines = false)
     {
         $value = (string) $value;
-        $value = strip_tags($value);
+        // Drop scripted elements with their contents before flattening, so the
+        // words inside a <script> block never survive as "text".
+        $value = preg_replace('#<(' . implode('|', self::STRIPPED) . ')\b[^>]*>.*?</\1\s*>#is', ' ', $value);
+        $value = strip_tags((string) $value);
         $value = str_replace("\0", '', $value);
         $value = $allowNewlines
             ? preg_replace('/[^\P{C}\n]+/u', '', $value)
@@ -83,16 +86,18 @@ final class HtmlSanitizer
 
     private function withDom($html)
     {
-        $previous = libxml_use_internal_errors(true);
         $document = new DOMDocument('1.0', 'UTF-8');
         $wrapped = '<?xml encoding="UTF-8"?><div id="ch247-root">' . $html . '</div>';
         $flags = 0;
         if (defined('LIBXML_HTML_NOIMPLIED')) { $flags |= LIBXML_HTML_NOIMPLIED; }
         if (defined('LIBXML_HTML_NODEFDTD')) { $flags |= LIBXML_HTML_NODEFDTD; }
         if (defined('LIBXML_NONET')) { $flags |= LIBXML_NONET; }
-        $loaded = $document->loadHTML($wrapped, $flags);
-        libxml_clear_errors();
-        libxml_use_internal_errors($previous);
+        // Malformed markup is the normal case here, so libxml will complain.
+        // The warnings are suppressed locally rather than by switching libxml
+        // into internal-error mode: that setting and the error buffer behind it
+        // are global, and clearing them would discard diagnostics belonging to
+        // whatever else is running in this request.
+        $loaded = @$document->loadHTML($wrapped, $flags);
         if (!$loaded) { return null; }
 
         $root = $document->getElementById('ch247-root');

@@ -1,7 +1,7 @@
 from pathlib import Path
 import re,unittest
 ROOT=Path(__file__).resolve().parents[2]
-OWNED=[ROOT/'modules/addons/cloudhost247_core',ROOT/'modules/addons/cloudhost247_theme',ROOT/'modules/addons/cloudhost247_currency',ROOT/'modules/addons/cloudhost247_integrations',ROOT/'modules/addons/cloudhost247_modules',ROOT/'modules/addons/cloudhost247_ovh',ROOT/'modules/servers/cloudhost247_ovh']
+OWNED=[ROOT/'modules/addons/cloudhost247_core',ROOT/'modules/addons/cloudhost247_theme',ROOT/'modules/addons/cloudhost247_currency',ROOT/'modules/addons/cloudhost247_integrations',ROOT/'modules/addons/cloudhost247_modules',ROOT/'modules/addons/cloudhost247_builder',ROOT/'modules/addons/cloudhost247_ovh',ROOT/'modules/servers/cloudhost247_ovh']
 class RebuildSecurityReview(unittest.TestCase):
  def sources(self):
   return [p for d in OWNED for p in d.rglob('*') if p.suffix in ('.php','.tpl')]

@@ -22,9 +22,11 @@ class AdminView
         'pages' => 'Pages',
         'templates' => 'Templates',
         'theme' => 'Theme Builder',
+        'headers' => 'Header &amp; Footer',
         'menus' => 'Navigation Menus',
         'styles' => 'Global Styles',
         'media' => 'Media Library',
+        'backups' => 'Revisions &amp; Backups',
         'forms' => 'Forms',
         'seo' => 'SEO Settings',
         'css' => 'Custom CSS',
@@ -50,6 +52,8 @@ class AdminView
             case 'pages': $body = $this->pages($data); break;
             case 'page': $body = $this->pageSettings($data); break;
             case 'revisions': $body = $this->revisions($data); break;
+            case 'backups': $body = $this->backups($data); break;
+            case 'headers': $body = $this->headers($data); break;
             case 'templates': $body = $this->templates($data); break;
             case 'theme': $body = $this->theme($data); break;
             case 'part': $body = $this->part($data); break;
@@ -78,7 +82,8 @@ class AdminView
             $required = isset(AdminController::VIEW_CAPABILITIES[$key]) ? AdminController::VIEW_CAPABILITIES[$key] : 'builder.view';
             if (isset($capabilities[$required]) && !$capabilities[$required]) { continue; }
             $active = ($view === $key
-                || ($key === 'pages' && in_array($view, array('page', 'revisions'), true))
+                || ($key === 'pages' && $view === 'page')
+                || ($key === 'backups' && $view === 'revisions')
                 || ($key === 'theme' && $view === 'part')
                 || ($key === 'forms' && $view === 'submissions')) ? ' class="is-active"' : '';
             $navigation .= '<li' . $active . '><a href="' . $this->url(array('view' => $key)) . '">' . $this->e($label) . '</a></li>';
@@ -408,6 +413,70 @@ class AdminView
             . '<p>Every saved change is kept. Restoring loads that version into the draft; the live page only changes when you publish.</p>'
             . ($rows === '' ? '<p class="ch247b-empty">No revisions yet.</p>'
                 : '<table class="ch247b-table"><thead><tr><th>#</th><th>Note</th><th>Saved</th><th>By</th><th></th></tr></thead><tbody>' . $rows . '</tbody></table>')
+            . '</section>';
+    }
+
+    private function backups(array $data)
+    {
+        $rows = '';
+        foreach ($data['backups'] as $entry) {
+            $page = $entry['page'];
+            $latest = $entry['latest'];
+            $rows .= '<tr><td><strong>' . $this->e($page['title']) . '</strong><br />'
+                . '<span class="ch247b-dim">/' . $this->e($page['slug']) . '</span></td>'
+                . '<td>' . $this->statusBadge($page) . '</td>'
+                . '<td>' . (int) $entry['revisions'] . '</td>'
+                . '<td>' . (int) $entry['snapshots'] . '</td>'
+                . '<td class="ch247b-dim">' . $this->e($latest ? $latest['created_at'] . ' - ' . $latest['note'] : 'none yet') . '</td>'
+                . '<td><a class="ch247b-btn ch247b-btn--sm" href="' . $this->url(array('view' => 'revisions', 'id' => $page['id']))
+                . '">Open history</a></td></tr>';
+        }
+        return '<section class="ch247b-panel"><h2>Revisions &amp; backups</h2>'
+            . '<p>Every saved change is kept as a revision. Restoring loads a version into the draft; the live page only '
+            . 'changes when you publish. The newest ' . (int) $data['revision_limit'] . ' revisions per page are retained, '
+            . 'and published snapshots are kept regardless of that limit.</p>'
+            . ($rows === '' ? '<p class="ch247b-empty">No pages yet.</p>'
+                : '<table class="ch247b-table"><thead><tr><th>Page</th><th>Status</th><th>Revisions</th>'
+                . '<th>Published snapshots</th><th>Most recent</th><th></th></tr></thead><tbody>' . $rows . '</tbody></table>')
+            . '</section>';
+    }
+
+    private function headers(array $data)
+    {
+        $rows = '';
+        foreach ($data['parts'] as $part) {
+            $rows .= '<tr><td><strong>' . $this->e($part['name']) . '</strong><br /><span class="ch247b-dim">'
+                . $this->e($part['part_key']) . '</span></td>'
+                . '<td>' . $this->e($part['part_type']) . '</td>'
+                . '<td>' . $this->e($part['status'])
+                . ($part['has_unpublished_changes'] ? ' <span class="ch247b-tag">unpublished changes</span>' : '') . '</td>'
+                . '<td class="ch247b-dim">' . $this->e($part['conditions_summary']) . '</td>'
+                . '<td class="ch247b-actions">'
+                . '<a class="ch247b-btn ch247b-btn--sm ch247b-btn--primary" href="'
+                . $this->url(array('view' => 'editor', 'part' => $part['id'])) . '">Edit</a> '
+                . '<a class="ch247b-btn ch247b-btn--sm" href="' . $this->url(array('view' => 'part', 'id' => $part['id']))
+                . '">Conditions</a> '
+                . $this->inlineForm($data, 'part.publish', array('part_id' => $part['id']), 'Publish', 'ch247b-btn--sm ch247b-btn--go')
+                . '</td></tr>';
+        }
+        $menus = '';
+        foreach ($data['menus'] as $menu) {
+            $menus .= '<li>' . $this->e($menu['name']) . ' <span class="ch247b-dim">('
+                . count($menu['items']) . ' item(s), key ' . $this->e($menu['menu_key']) . ')</span></li>';
+        }
+        return '<section class="ch247b-panel"><h2>Header &amp; Footer</h2>'
+            . '<p>The header and footer that wrap builder pages. They are ordinary builder documents, so the same widgets, '
+            . 'styling and responsive controls apply. A page can use the part that matches its display conditions, name a '
+            . 'specific one, or have none at all - set that per page under Pages &rarr; Settings.</p>'
+            . ($rows === '' ? '<p class="ch247b-empty">No header or footer parts yet. Create one in Theme Builder, or start '
+                . 'from the built-in "Site header" and "Site footer" templates.</p>'
+                : '<table class="ch247b-table"><thead><tr><th>Part</th><th>Type</th><th>Status</th><th>Shown on</th>'
+                . '<th>Actions</th></tr></thead><tbody>' . $rows . '</tbody></table>')
+            . '<h3>Menus available to these parts</h3>'
+            . ($menus === '' ? '<p class="ch247b-empty">No menus yet. Create one under Navigation Menus.</p>'
+                : '<ul class="ch247b-log">' . $menus . '</ul>')
+            . '<p class="ch247b-dim">Your HostX theme files are never modified. With no published header or footer part, '
+            . 'pages render inside the existing site chrome exactly as before.</p>'
             . '</section>';
     }
 
@@ -920,8 +989,8 @@ class AdminView
             'pageId' => $page ? (int) $page['id'] : 0,
             'partId' => $part ? (int) $part['id'] : 0,
             'title' => $page ? $page['title'] : ($part ? $part['name'] : ''),
-            'backUrl' => $this->url(array('view' => $part ? 'theme' : 'pages')),
-            'settingsUrl' => $page ? $this->url(array('view' => 'page', 'id' => $page['id'])) : '',
+            'backUrl' => $this->rawUrl(array('view' => $part ? 'theme' : 'pages')),
+            'settingsUrl' => $page ? $this->rawUrl(array('view' => 'page', 'id' => $page['id'])) : '',
             'kind' => $part ? 'part' : 'page',
         );
         $json = json_encode($config, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
@@ -992,11 +1061,27 @@ class AdminView
         return !isset($data['capabilities'][$capability]) || $data['capabilities'][$capability];
     }
 
+    /** URL for an HTML attribute: ampersands are entity-escaped. */
     private function url(array $params)
     {
         $url = $this->link;
         foreach ($params as $key => $value) {
             $url .= '&amp;' . rawurlencode($key) . '=' . rawurlencode((string) $value);
+        }
+        return $url;
+    }
+
+    /**
+     * URL for a JSON or JavaScript value.
+     *
+     * The entity form belongs in markup only; putting it inside JSON would hand
+     * the browser a literal "&amp;" in the query string.
+     */
+    private function rawUrl(array $params)
+    {
+        $url = $this->link;
+        foreach ($params as $key => $value) {
+            $url .= '&' . rawurlencode($key) . '=' . rawurlencode((string) $value);
         }
         return $url;
     }

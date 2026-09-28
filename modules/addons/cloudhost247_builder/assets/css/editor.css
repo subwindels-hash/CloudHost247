@@ -1,0 +1,152 @@
+/*
+ * CloudHost247 Website Builder - editor shell.
+ *
+ * The editor takes over the viewport so the canvas has room to show the real
+ * page. It is a fixed overlay rather than a separate application: the WHMCS
+ * admin session, routing and permissions are unchanged underneath it.
+ */
+
+body.ch247-editor-open { overflow: hidden; }
+
+.ch247-editor {
+    position: fixed; inset: 0; z-index: 9000; display: flex; flex-direction: column;
+    background: #f1f5f9; color: #1f2937;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.ch247-editor * { box-sizing: border-box; }
+.ch247-editor__boot, .ch247-editor__error { padding: 40px; text-align: center; color: #64748b; }
+.ch247-editor__error h2 { color: #8f2b2b; }
+
+.ch247-editor__toolbar {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 10px 14px; background: #0f172a; color: #e2e8f0; flex: none; flex-wrap: wrap;
+}
+.ch247-editor__group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ch247-editor__title { font-weight: 600; max-width: 34ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ch247-editor__badge {
+    font-size: .72rem; text-transform: uppercase; letter-spacing: .06em;
+    background: rgba(226, 232, 240, .16); padding: 3px 8px; border-radius: 999px;
+}
+
+.ch247-ebtn {
+    display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px; border-radius: 8px;
+    border: 1px solid rgba(226, 232, 240, .28); background: rgba(226, 232, 240, .08); color: inherit;
+    font: inherit; font-weight: 600; font-size: .88rem; cursor: pointer; text-decoration: none;
+}
+.ch247-ebtn:hover { background: rgba(226, 232, 240, .18); }
+.ch247-ebtn--primary { background: #0756d8; border-color: #0756d8; color: #fff; }
+.ch247-ebtn--go { background: #12b886; border-color: #12b886; color: #062b21; }
+.ch247-ebtn--danger { border-color: #e03131; color: #ffdada; }
+.ch247-ebtn--sm { padding: 4px 9px; font-size: .8rem; }
+.ch247-ebtn--device.is-active { background: #0756d8; border-color: #0756d8; color: #fff; }
+
+.ch247-editor__body { flex: 1 1 auto; display: flex; min-height: 0; }
+.ch247-editor__sidebar, .ch247-editor__inspector {
+    width: 300px; flex: none; background: #fff; border-right: 1px solid #e2e8f0;
+    display: flex; flex-direction: column; min-height: 0;
+}
+.ch247-editor__inspector { border-right: 0; border-left: 1px solid #e2e8f0; width: 330px; }
+.ch247-editor__panel { overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 12px; }
+
+.ch247-editor__tabs { display: flex; border-bottom: 1px solid #e2e8f0; flex: none; }
+.ch247-editor__tabs--sub { margin: 0 -12px 4px; padding: 0 12px; }
+.ch247-etab {
+    flex: 1 1 auto; padding: 10px 6px; border: 0; background: none; font: inherit; font-weight: 600;
+    font-size: .86rem; color: #64748b; cursor: pointer; border-bottom: 2px solid transparent;
+}
+.ch247-etab.is-active { color: #0756d8; border-bottom-color: #0756d8; }
+
+.ch247-editor__canvas { flex: 1 1 auto; overflow-y: auto; padding: 18px; min-width: 0; }
+.ch247-editor__frame {
+    margin: 0 auto; background: #fff; border-radius: 10px; overflow: hidden;
+    box-shadow: 0 20px 50px -34px rgba(15, 23, 42, .6); transition: max-width .2s ease; max-width: 100%;
+}
+.ch247-editor__iframe { width: 100%; border: 0; display: block; min-height: 600px; }
+.ch247-editor__notices {
+    margin: 16px auto 0; max-width: 900px; background: #fff8e6; border: 1px solid #f3d38a;
+    border-radius: 10px; padding: 12px 16px; color: #92400e; font-size: .88rem;
+}
+.ch247-editor__notices:empty { display: none; }
+.ch247-editor__notices h4 { margin: 0 0 6px; }
+.ch247-editor__notices ul { margin: 0; padding-left: 18px; }
+
+.ch247-editor__status {
+    flex: none; padding: 7px 14px; background: #0f172a; color: #94a3b8; font-size: .82rem;
+}
+.ch247-editor__status.is-error { background: #7f1d1d; color: #fee2e2; }
+
+.ch247-widgetlist__head { margin: 10px 0 4px; font-size: .76rem; text-transform: uppercase; letter-spacing: .06em; color: #64748b; }
+.ch247-widgetlist__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.ch247-widget-tile {
+    display: flex; flex-direction: column; gap: 3px; padding: 9px; border: 1px solid #e2e8f0;
+    border-radius: 8px; background: #fff; font: inherit; text-align: left; cursor: grab;
+}
+.ch247-widget-tile:hover { border-color: #0756d8; background: #f8faff; }
+.ch247-widget-tile__label { font-weight: 600; font-size: .84rem; }
+.ch247-widget-tile__live { font-size: .68rem; color: #0b6b4f; background: #e7f8f1; border-radius: 999px; padding: 1px 6px; width: fit-content; }
+
+.ch247-tree, .ch247-tree__children { list-style: none; margin: 0; padding: 0; }
+.ch247-tree__row {
+    width: 100%; text-align: left; border: 0; background: none; font: inherit; font-size: .85rem;
+    padding: 5px 8px; border-radius: 6px; cursor: pointer;
+}
+.ch247-tree__row:hover { background: #f1f5f9; }
+.ch247-tree__item.is-selected > .ch247-tree__row { background: #0756d8; color: #fff; }
+
+.ch247-template-card, .ch247-template-save {
+    border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 6px;
+}
+
+.ch247-inspector__head { display: flex; flex-direction: column; gap: 8px; }
+.ch247-inspector__head h3 { margin: 0; font-size: 1rem; }
+.ch247-inspector__actions { display: flex; flex-wrap: wrap; gap: 4px; }
+.ch247-inspector__actions .ch247-ebtn { border-color: #e2e8f0; background: #f8fafc; color: #1f2937; }
+.ch247-inspector__pane { display: flex; flex-direction: column; gap: 10px; }
+
+.ch247-efield { display: flex; flex-direction: column; gap: 4px; }
+.ch247-efield--inline { display: grid; grid-template-columns: 120px 1fr; align-items: center; gap: 8px; }
+.ch247-efield__label { font-size: .8rem; font-weight: 600; color: #475569; text-transform: capitalize; }
+.ch247-einput {
+    width: 100%; padding: 7px 10px; border: 1px solid #e2e8f0; border-radius: 7px; font: inherit; font-size: .86rem; background: #fff;
+}
+.ch247-einput:focus { outline: 2px solid #0756d8; outline-offset: 1px; }
+.ch247-echeck { display: flex; align-items: center; gap: 8px; font-size: .86rem; }
+.ch247-erow { display: flex; gap: 6px; flex-wrap: wrap; }
+.ch247-edim { color: #64748b; font-size: .82rem; }
+.ch247-ewarn {
+    background: #fff8e6; border: 1px solid #f3d38a; color: #92400e;
+    border-radius: 7px; padding: 8px 10px; font-size: .82rem;
+}
+.ch247-media-preview { width: 100%; max-height: 130px; object-fit: contain; background: #f1f5f9; border-radius: 7px; }
+
+.ch247-repeater__item { border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px; display: flex; flex-direction: column; gap: 8px; }
+.ch247-repeater__head { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.ch247-repeater__head strong { margin-right: auto; font-size: .8rem; color: #64748b; }
+.ch247-stylegroup { border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 10px; }
+.ch247-stylegroup summary { cursor: pointer; font-weight: 600; font-size: .86rem; }
+.ch247-stylegroup h4 { margin: 0 0 6px; font-size: .86rem; }
+
+.ch247-modal {
+    position: fixed; inset: 0; z-index: 9500; background: rgba(15, 23, 42, .55);
+    display: flex; align-items: center; justify-content: center; padding: 24px;
+}
+.ch247-modal__panel {
+    background: #fff; border-radius: 12px; padding: 18px; width: min(880px, 100%); max-height: 84vh;
+    overflow-y: auto; display: flex; flex-direction: column; gap: 12px;
+}
+.ch247-modal__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.ch247-modal__tile {
+    border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px; background: #fff; cursor: pointer;
+    display: flex; flex-direction: column; gap: 6px; font: inherit; font-size: .78rem; text-align: center;
+}
+.ch247-modal__tile img { width: 100%; height: 90px; object-fit: cover; border-radius: 6px; }
+
+@media (max-width: 1100px) {
+    .ch247-editor__sidebar { width: 240px; }
+    .ch247-editor__inspector { width: 280px; }
+}
+@media (max-width: 860px) {
+    .ch247-editor__body { flex-direction: column; overflow-y: auto; }
+    .ch247-editor__sidebar, .ch247-editor__inspector { width: 100%; border: 0; border-bottom: 1px solid #e2e8f0; }
+    .ch247-editor__panel { max-height: 280px; }
+}

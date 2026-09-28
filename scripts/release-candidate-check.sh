@@ -3,14 +3,15 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 echo '== CloudHost247 release-candidate source verification =='
 git diff --check
-find modules/addons/cloudhost247_* modules/servers/cloudhost247_ovh modules/servers/RDP tests scripts -name '*.php' -print0 | xargs -0 -n1 php -l
+find modules/addons/cloudhost247_* modules/servers/cloudhost247_ovh modules/servers/RDP tests scripts crons/cloudhost247_*.php builder-page.php cloudhost247-page.php -name '*.php' -print0 | xargs -0 -n1 php -l
 php tests/foundation/run.php
 php tests/currency/run.php
 php -d display_errors=1 tests/ovh/run.php
 php -d display_errors=1 tests/rdp/run.php
 php -d display_errors=1 tests/integrations/run.php
 php -d display_errors=1 tests/modules/run.php
-python3 -m unittest -v tests/foundation/test_static.py tests/currency/test_static.py tests/ovh/test_static.py tests/ovh/test_product_services_static.py tests/ovh/test_public_catalog_static.py tests/rdp/test_static.py tests/integrations/test_static.py tests/modules/test_static.py tests/security/test_security.py tests/security/test_archive_integration.py
+php -d display_errors=1 tests/builder/run.php
+python3 -m unittest -v tests/foundation/test_static.py tests/currency/test_static.py tests/ovh/test_static.py tests/ovh/test_product_services_static.py tests/ovh/test_public_catalog_static.py tests/rdp/test_static.py tests/integrations/test_static.py tests/modules/test_static.py tests/builder/test_static.py tests/security/test_security.py tests/security/test_archive_integration.py
 python3 -m unittest -v tests/staging/test_staging_tools.py
 python3 -m py_compile scripts/validate-migrations.py scripts/compare-financial-evidence.py scripts/generate-staging-report.py
 python3 scripts/validate-migrations.py

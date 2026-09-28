@@ -84,25 +84,35 @@ final class WidgetRenderer
             . $this->e($color) . ';width:' . $width . '%" />';
     }
 
+    /**
+     * Tabs.
+     *
+     * Without JavaScript every panel is visible with its title as a heading,
+     * so the content is always readable; runtime.js upgrades it to real tabs
+     * when it loads. Nothing is hidden behind script that a visitor needs.
+     */
     private function tabs(array $props, RenderContext $context, array $node)
     {
         $items = $this->items($props, 'items');
         if (!$items) { return $this->unavailable($context, 'Add at least one tab.'); }
         $group = 'ch247-tabs-' . preg_replace('/[^a-z0-9]/', '', Node::id($node));
-        $labels = '';
+        $buttons = '';
         $panels = '';
         $index = 0;
         foreach ($items as $item) {
-            $id = $group . '-' . $index;
-            $checked = $index === 0 ? ' checked="checked"' : '';
-            $labels .= '<input class="ch247-tabs__radio" type="radio" name="' . $this->e($group) . '" id="' . $this->e($id) . '"' . $checked . ' />'
-                . '<label class="ch247-tabs__label" for="' . $this->e($id) . '">' . $this->e($this->str($item, 'title')) . '</label>';
-            $panels .= '<div class="ch247-tabs__panel" data-ch247-tab="' . $index . '">'
-                . $this->rich($item, 'content') . '</div>';
+            $title = $this->str($item, 'title');
+            $panelId = $group . '-panel-' . $index;
+            $buttons .= '<button type="button" class="ch247-tabs__label" role="tab"'
+                . ' data-ch247-tab-button="' . $index . '" aria-controls="' . $this->e($panelId) . '"'
+                . ' aria-selected="' . ($index === 0 ? 'true' : 'false') . '">' . $this->e($title) . '</button>';
+            $panels .= '<section class="ch247-tabs__panel' . ($index === 0 ? ' is-active' : '') . '" role="tabpanel"'
+                . ' id="' . $this->e($panelId) . '" data-ch247-tab="' . $index . '">'
+                . '<h3 class="ch247-tabs__fallback">' . $this->e($title) . '</h3>'
+                . $this->rich($item, 'content') . '</section>';
             $index++;
         }
         return '<div class="ch247-tabs" data-ch247-tabs="' . (int) count($items) . '">'
-            . '<div class="ch247-tabs__bar">' . $labels . '</div>'
+            . '<div class="ch247-tabs__bar" role="tablist">' . $buttons . '</div>'
             . '<div class="ch247-tabs__panels">' . $panels . '</div></div>';
     }
 
