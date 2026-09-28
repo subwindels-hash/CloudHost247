@@ -206,9 +206,10 @@ class Router
     {
         return array_map(static function (array $route) {
             return [
-                'method' => $route['method'],
-                'path'   => $route['path'],
-                'scope'  => (string) $route['scope'],
+                'method'  => $route['method'],
+                'path'    => $route['path'],
+                'scope'   => (string) $route['scope'],
+                'handler' => $route['handler'],
             ];
         }, $this->routes);
     }

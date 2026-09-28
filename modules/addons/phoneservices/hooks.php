@@ -173,6 +173,11 @@ add_hook('ClientAreaFooterOutput', 1, static function ($vars) {
         }
     }
 
+    // Chart.js powers the analytics graph on the usage page only.
+    if (($_GET['action'] ?? '') === 'usage' && Config::isServiceEnabled('analytics')) {
+        $output .= '<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" crossorigin="anonymous"></script>';
+    }
+
     return $output . '<script src="' . $base . '/js/client/app.js?v=' . PHONESERVICES_VERSION . '"></script>';
 });
 
