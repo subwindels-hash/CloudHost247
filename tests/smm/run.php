@@ -485,6 +485,8 @@ check($tests, 'reconciliation: no provider id -> flagged for manual attention', 
 $fetched = array(
     array('provider_service_id' => '12', 'name' => 'Instagram Followers - Real', 'category' => 'Instagram', 'description' => '', 'type' => 'Default', 'min_quantity' => 100, 'max_quantity' => 10000, 'rate' => '0.90', 'currency' => 'USD', 'refill' => true, 'cancel' => true, 'provider_status' => 'active'),
     array('provider_service_id' => '99', 'name' => 'New Service', 'category' => 'New', 'description' => '', 'type' => 'Default', 'min_quantity' => 1, 'max_quantity' => 100, 'rate' => '0.50', 'currency' => 'USD', 'refill' => false, 'cancel' => false, 'provider_status' => 'active'),
+    // service 31 disappeared in an earlier sync (existing id 7, available=0) and now returns
+    array('provider_service_id' => '31', 'name' => 'YouTube Views', 'category' => 'YouTube', 'description' => '', 'type' => 'Default', 'min_quantity' => 1000, 'max_quantity' => 1000000, 'rate' => '1.20', 'currency' => 'USD', 'refill' => true, 'cancel' => false, 'provider_status' => 'active'),
 );
 $existing = array(
     (object) array('id' => 5, 'provider_service_id' => '12', 'name' => 'Instagram Followers - Real', 'category' => 'Instagram', 'description' => '', 'type' => 'Default', 'min_quantity' => 100, 'max_quantity' => 10000, 'rate' => '0.90', 'currency' => 'USD', 'refill' => 1, 'cancel' => 1, 'provider_status' => 'active', 'available' => 1),
