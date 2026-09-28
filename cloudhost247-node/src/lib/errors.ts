@@ -22,3 +22,15 @@ export class ConflictError extends HttpError {
     super(409, message, 'CONFLICT');
   }
 }
+
+export class ForbiddenError extends HttpError {
+  constructor(message = 'You do not have permission to perform this action') {
+    super(403, message, 'FORBIDDEN');
+  }
+}
+
+export class NotFoundError extends HttpError {
+  constructor(message = 'Resource not found') {
+    super(404, message, 'NOT_FOUND');
+  }
+}
