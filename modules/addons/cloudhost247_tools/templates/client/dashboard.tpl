@@ -14,9 +14,9 @@
     <div class="container cloudhost247-tools-container">
         <div class="row" id="cloudhost247-categories-grid">
             {foreach from=$categories key=catKey item=catTools}
-            <div class="col-md-4 col-sm-6 cloudhost247-category-card" data-category="{$catKey}">
+            <div class="col-md-4 col-sm-6 cloudhost247-category-card" data-category="{$catKey|escape}">
                 <div class="cloudhost247-card">
-                    <div class="cloudhost247-card-header cloudhost247-cat-{$catKey}">
+                    <div class="cloudhost247-card-header cloudhost247-cat-{$catKey|escape}">
                         <h3>
                             {if $catKey == 'dns'}<i class="fas fa-server"></i>{/if}
                             {if $catKey == 'ip'}<i class="fas fa-network-wired"></i>{/if}
@@ -27,22 +27,22 @@
                             {if $catKey == 'security'}<i class="fas fa-shield-alt"></i>{/if}
                             {if $catKey == 'productivity'}<i class="fas fa-magic"></i>{/if}
                             {if $catKey == 'gaming'}<i class="fas fa-gamepad"></i>{/if}
-                            {ucfirst($catKey)} Tools
+                            {ucfirst($catKey)|escape} Tools
                         </h3>
                         <span class="cloudhost247-tool-count">{count($catTools)} tools</span>
                     </div>
                     <div class="cloudhost247-card-body">
                         <ul class="cloudhost247-tool-list">
                             {foreach from=$catTools key=toolId item=tool}
-                            <li class="cloudhost247-tool-item" data-tool="{$toolId}" data-name="{strtolower($tool.name)}">
-                                <a href="{$base_url}&action=tool&tool={$toolId}">
-                                    <i class="fas {$tool.icon}"></i> {$tool.name}
+                            <li class="cloudhost247-tool-item" data-tool="{$toolId|escape}" data-name="{strtolower($tool.name)|escape}">
+                                <a href="{$base_url|escape}&action=tool&tool={$toolId|escape}">
+                                    <i class="fas {$tool.icon|escape}"></i> {$tool.name|escape}
                                 </a>
-                                <small class="cloudhost247-tool-desc">{$tool.desc}</small>
+                                <small class="cloudhost247-tool-desc">{$tool.desc|escape}</small>
                             </li>
                             {/foreach}
                         </ul>
-                        <a href="{$base_url}&action=category&cat={$catKey}" class="btn btn-sm btn-outline-primary cloudhost247-view-all">
+                        <a href="{$base_url|escape}&action=category&cat={$catKey|escape}" class="btn btn-sm btn-outline-primary cloudhost247-view-all">
                             View All <i class="fas fa-arrow-right"></i>
                         </a>
                     </div>

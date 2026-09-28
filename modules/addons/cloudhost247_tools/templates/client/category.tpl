@@ -4,8 +4,8 @@
         <div class="container">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{$base_url}">Tools Platform</a></li>
-                    <li class="breadcrumb-item active">{$category_label} Tools</li>
+                    <li class="breadcrumb-item"><a href="{$base_url|escape}">Tools Platform</a></li>
+                    <li class="breadcrumb-item active">{$category_label|escape} Tools</li>
                 </ol>
             </nav>
             <h1><i class="fas 
@@ -18,7 +18,7 @@
                 {if $category == 'security'}fa-shield-alt{/if}
                 {if $category == 'productivity'}fa-magic{/if}
                 {if $category == 'gaming'}fa-gamepad{/if}
-            "></i> {$category_label} Tools</h1>
+            "></i> {$category_label|escape} Tools</h1>
             <p class="lead">{count($tools)} tools available in this category</p>
         </div>
     </div>
@@ -29,11 +29,11 @@
             <div class="col-md-4 col-sm-6">
                 <div class="cloudhost247-tool-card">
                     <div class="cloudhost247-tool-icon">
-                        <i class="fas {$tool.icon}"></i>
+                        <i class="fas {$tool.icon|escape}"></i>
                     </div>
-                    <h4>{$tool.name}</h4>
-                    <p>{$tool.desc}</p>
-                    <a href="{$base_url}&action=tool&tool={$toolId}" class="btn btn-primary btn-block">
+                    <h4>{$tool.name|escape}</h4>
+                    <p>{$tool.desc|escape}</p>
+                    <a href="{$base_url|escape}&action=tool&tool={$toolId|escape}" class="btn btn-primary btn-block">
                         <i class="fas fa-play"></i> Use Tool
                     </a>
                 </div>

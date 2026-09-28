@@ -1,7 +1,7 @@
 <?php
 /**
  * CloudHost247 Tools Platform - WHMCS Addon Module
- * Version: 2.2.6
+ * Version: 2.2.7
  * Compatible: WHMCS 8.9+, PHP 7.4+
  */
 
@@ -9,7 +9,12 @@ if (!defined("WHMCS")) {
     die("This file cannot be accessed directly");
 }
 
+require_once __DIR__ . '/bootstrap.php';
+require_once __DIR__ . '/migrations/V227.php';
+
 use Illuminate\Database\Capsule\Manager as Capsule;
+use CloudHost247\Foundation\Database\MigrationRunner;
+use CloudHost247\Tools\Migrations\InitialMigration;
 
 /**
  * Module configuration
@@ -20,7 +25,7 @@ function cloudhost247_tools_config()
         'name' => 'CloudHost247 Tools Platform',
         'description' => 'All-in-one online tools platform for DNS, IP, Developer, Security and Productivity tools.',
         'author' => 'CloudHost247',
-        'version' => '2.2.6',
+        'version' => '2.2.7',
         'language' => 'english',
         'fields' => [
             'whois_api_key' => [
@@ -43,6 +48,19 @@ function cloudhost247_tools_config()
                 'Size' => '50',
                 'Default' => '',
                 'Description' => 'API key for Image to Text OCR (optional)',
+            ],
+            'api_token' => [
+                'FriendlyName' => 'REST API Token',
+                'Type' => 'text',
+                'Size' => '64',
+                'Default' => '',
+                'Description' => 'Token for modules/addons/cloudhost247_tools/api/index.php. Leave empty to keep the REST API disabled. Use a long random string.',
+            ],
+            'trust_proxy_headers' => [
+                'FriendlyName' => 'Trust proxy headers (X-Forwarded-For / CF-Connecting-IP)',
+                'Type' => 'yesno',
+                'Default' => '',
+                'Description' => 'Enable ONLY when the site is behind a trusted proxy (e.g. Cloudflare). When off, rate limiting uses the direct remote address and cannot be spoofed.',
             ],
             'rate_limit_requests' => [
                 'FriendlyName' => 'Rate Limit (requests/minute)',
@@ -74,78 +92,24 @@ function cloudhost247_tools_config()
 }
 
 /**
- * Module activation
+ * Module activation — runs the versioned initial migration through the shared
+ * foundation MigrationRunner. The migration is fully guarded (hasTable), so
+ * upgrading an existing 2.2.6 install preserves all data and simply records
+ * 2.2.7 as applied.
  */
 function cloudhost247_tools_activate()
 {
     try {
-        // Create tools settings table
-        if (!Capsule::schema()->hasTable('mod_cloudhost247_tools_settings')) {
-            Capsule::schema()->create('mod_cloudhost247_tools_settings', function ($table) {
-                $table->increments('id');
-                $table->string('setting_name', 100)->unique();
-                $table->text('setting_value')->nullable();
-                $table->timestamps();
-            });
-        }
+        $applied = (new MigrationRunner())->run('cloudhost247_tools', array(new InitialMigration()));
 
-        // Create tools status table
-        if (!Capsule::schema()->hasTable('mod_cloudhost247_tools_status')) {
-            Capsule::schema()->create('mod_cloudhost247_tools_status', function ($table) {
-                $table->increments('id');
-                $table->string('tool_id', 100)->unique();
-                $table->string('tool_name', 255);
-                $table->string('category', 100);
-                $table->tinyInteger('enabled')->default(1);
-                $table->integer('usage_count')->default(0);
-                $table->timestamps();
-            });
-        }
-
-        // Create tools logs table
-        if (!Capsule::schema()->hasTable('mod_cloudhost247_tools_logs')) {
-            Capsule::schema()->create('mod_cloudhost247_tools_logs', function ($table) {
-                $table->increments('id');
-                $table->string('tool_id', 100);
-                $table->string('input', 500)->nullable();
-                $table->string('ip_address', 50);
-                $table->integer('user_id')->default(0);
-                $table->text('result')->nullable();
-                $table->string('status', 20)->default('success');
-                $table->text('error_message')->nullable();
-                $table->timestamp('created_at')->useCurrent();
-            });
-        }
-
-        // Create cache table
-        if (!Capsule::schema()->hasTable('mod_cloudhost247_tools_cache')) {
-            Capsule::schema()->create('mod_cloudhost247_tools_cache', function ($table) {
-                $table->increments('id');
-                $table->string('cache_key', 255)->unique();
-                $table->longText('cache_value');
-                $table->timestamp('expires_at');
-                $table->timestamp('created_at')->useCurrent();
-            });
-        }
-
-        // Create rate limit table
-        if (!Capsule::schema()->hasTable('mod_cloudhost247_tools_rate_limit')) {
-            Capsule::schema()->create('mod_cloudhost247_tools_rate_limit', function ($table) {
-                $table->increments('id');
-                $table->string('ip_address', 50);
-                $table->integer('request_count')->default(0);
-                $table->timestamp('window_start')->useCurrent();
-            });
-        }
-
-        // Seed default tool statuses
+        // Seed default tool statuses (idempotent).
         cloudhost247_tools_seed_tools();
 
         return [
             'status' => 'success',
-            'description' => 'CloudHost247 Tools Platform activated successfully.',
+            'description' => 'CloudHost247 Tools Platform activated. ' . ($applied ? 'Applied: ' . implode(', ', $applied) : 'Schema already current.'),
         ];
-    } catch (\Exception $e) {
+    } catch (\Throwable $e) {
         return [
             'status' => 'error',
             'description' => 'Failed to activate: ' . $e->getMessage(),
