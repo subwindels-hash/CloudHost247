@@ -5,6 +5,7 @@ import type { Env } from './config/env';
 import { registerSecurityPlugins } from './plugins/security';
 import { registerHealthRoutes } from './routes/health';
 import { registerAuthRoutes } from './routes/auth';
+import { registerPublicCatalogRoutes } from './routes/catalog-public';
 import { HttpError } from './lib/errors';
 import { createLogger } from './lib/logger';
 import type { Queryable } from './db/types';
@@ -67,6 +68,7 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     await registerSecurityPlugins(instance, env);
     await registerHealthRoutes(instance, env);
     await registerAuthRoutes(instance, env, pool);
+    await registerPublicCatalogRoutes(instance, env, pool);
   });
 
   if (serveFrontend) {
