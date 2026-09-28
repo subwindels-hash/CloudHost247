@@ -64,28 +64,31 @@ function cloudhost247_tool_ip_location($post)
         return array_merge($cached, ['cached' => true]);
     }
 
-    // Try free ip-api.com first
-    $result = cloudhost247_tools_curl("http://ip-api.com/json/{$ip}?fields=status,message,country,countryCode,region,regionName,city,zip,lat,lon,timezone,isp,org,as,mobile,proxy,hosting", null, [], 10);
+    // HTTPS endpoint (ipwho.is) — free, no key required, TLS-verified.
+    // ip-api.com's free tier is HTTP-only and would leak the queried IP to
+    // network observers, so it is not used.
+    $result = cloudhost247_tools_curl("https://ipwho.is/{$ip}", null, [], 10);
 
     if ($result['code'] === 200) {
         $data = json_decode($result['body'], true);
-        if ($data && $data['status'] === 'success') {
+        if ($data && !empty($data['success'])) {
+            $connection = isset($data['connection']) && is_array($data['connection']) ? $data['connection'] : array();
             $output = [
                 'ip' => $ip,
                 'country' => $data['country'] ?? '',
-                'country_code' => $data['countryCode'] ?? '',
-                'region' => $data['regionName'] ?? '',
+                'country_code' => $data['country_code'] ?? '',
+                'region' => $data['region'] ?? '',
                 'city' => $data['city'] ?? '',
-                'zip' => $data['zip'] ?? '',
-                'latitude' => $data['lat'] ?? 0,
-                'longitude' => $data['lon'] ?? 0,
-                'timezone' => $data['timezone'] ?? '',
-                'isp' => $data['isp'] ?? '',
-                'organization' => $data['org'] ?? '',
-                'asn' => $data['as'] ?? '',
-                'mobile' => $data['mobile'] ?? false,
-                'proxy' => $data['proxy'] ?? false,
-                'hosting' => $data['hosting'] ?? false,
+                'zip' => $data['postal'] ?? '',
+                'latitude' => $data['latitude'] ?? 0,
+                'longitude' => $data['longitude'] ?? 0,
+                'timezone' => isset($data['timezone']) && is_array($data['timezone']) ? (string) ($data['timezone']['id'] ?? '') : '',
+                'isp' => $connection['isp'] ?? '',
+                'organization' => $connection['org'] ?? '',
+                'asn' => isset($connection['asn']) ? 'AS' . $connection['asn'] : '',
+                'mobile' => !empty($data['is_mobile']) && $data['is_mobile'] !== 'unknown',
+                'proxy' => !empty($data['is_proxy']) && $data['is_proxy'] !== 'unknown',
+                'hosting' => false,
             ];
             cloudhost247_tools_cache_set($cacheKey, $output, 15);
             return $output;

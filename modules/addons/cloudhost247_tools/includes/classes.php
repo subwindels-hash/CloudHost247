@@ -9,6 +9,11 @@ if (!defined("WHMCS")) {
 
 use Illuminate\Database\Capsule\Manager as Capsule;
 
+require_once __DIR__ . '/functions.php';
+require_once __DIR__ . '/api.php';
+
+use CloudHost247\Foundation\Security\AdminGuard;
+
 /**
  * Admin Area Controller
  */
@@ -21,6 +26,22 @@ class CloudHost247ToolsAdmin
     {
         $this->vars = $vars;
         $this->moduleLink = $vars['modulelink'];
+    }
+
+    /**
+     * All admin mutations are POST + CSRF-token protected (AdminGuard uses
+     * WHMCS's own token infrastructure). Returns an error message on failure,
+     * null on success.
+     */
+    protected function guardAdminPost()
+    {
+        try {
+            AdminGuard::requireAdmin();
+            AdminGuard::requirePostToken();
+        } catch (\Throwable $e) {
+            return 'Security check failed: ' . $e->getMessage();
+        }
+        return null;
     }
 
     public function renderNavigation($active)
@@ -132,7 +153,12 @@ class CloudHost247ToolsAdmin
     public function renderToolsManager()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['tool_action'])) {
-            $this->handleToolAction();
+            $guardError = $this->guardAdminPost();
+            if ($guardError !== null) {
+                echo '<div class="alert alert-danger">' . htmlspecialchars($guardError, ENT_QUOTES, 'UTF-8') . '</div>';
+            } else {
+                $this->handleToolAction();
+            }
         }
 
         $categories = cloudhost247_tools_get_all_tools();
@@ -142,7 +168,8 @@ class CloudHost247ToolsAdmin
 
         $html = '<div class="cloudhost247-admin-content">
             <h2>Tools Manager</h2>
-            <form method="post" action="' . $this->moduleLink . '&action=tools">';
+            <form method="post" action="' . $this->moduleLink . '&action=tools">'
+            . '<input type="hidden" name="token" value="' . htmlspecialchars(function_exists('generate_token') ? generate_token('plain') : '', ENT_QUOTES, 'UTF-8') . '">';
 
         foreach ($categories as $category => $tools) {
             $catLabel = ucfirst($category);
@@ -283,8 +310,20 @@ class CloudHost247ToolsAdmin
 
     public function renderSettings()
     {
+        $clearCacheNotice = '';
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['clear_cache'])) {
+            $guardError = $this->guardAdminPost();
+            if ($guardError !== null) {
+                $clearCacheNotice = '<div class="alert alert-danger">' . htmlspecialchars($guardError, ENT_QUOTES, 'UTF-8') . '</div>';
+            } else {
+                Capsule::table('mod_cloudhost247_tools_cache')->truncate();
+                $clearCacheNotice = '<div class="alert alert-success">Cache cleared.</div>';
+            }
+        }
+
         return '<div class="cloudhost247-admin-content">
             <h2>Settings</h2>
+            ' . $clearCacheNotice . '
             <div class="alert alert-info">
                 <i class="fa fa-info-circle"></i> Module settings are configured through the <strong>Addon Modules</strong> list. Click "Configure" next to CloudHost247 Tools Platform to manage API keys and global settings.
             </div>
@@ -292,9 +331,10 @@ class CloudHost247ToolsAdmin
                 <div class="panel-heading">Cache Management</div>
                 <div class="panel-body">
                     <p>Cached tool results will expire automatically based on the configured duration.</p>
-                    <a href="' . $this->moduleLink . '&action=settings&clear_cache=1" class="btn btn-warning" onclick="return confirm(\'Clear all cached results?\');">
-                        <i class="fa fa-trash"></i> Clear Cache Now
-                    </a>
+                    <form method="post" action="' . $this->moduleLink . '&action=settings">'
+                    . '<input type="hidden" name="token" value="' . htmlspecialchars(function_exists('generate_token') ? generate_token('plain') : '', ENT_QUOTES, 'UTF-8') . '">'
+                    . '<button type="submit" name="clear_cache" value="1" class="btn btn-warning" onclick="return confirm(\'Clear all cached results?\');">'
+                    . '<i class="fa fa-trash"></i> Clear Cache Now</button></form>
                 </div>
             </div>
         </div>';
@@ -445,33 +485,17 @@ class CloudHost247ToolsClient
             exit;
         }
 
-        // Include tool implementations
-        $category = cloudhost247_tools_get_tool_info($toolId)['category'] ?? '';
-        $toolFile = __DIR__ . '/includes/tools/' . $category . '_tools.php';
+        // Shared executor: validates the tool, loads its implementation,
+        // applies dispatcher-level response caching for cacheable lookups and
+        // logs both successes and failures.
+        $result = cloudhost247_tools_execute_tool($toolId, $_POST, true);
 
-        if (!file_exists($toolFile)) {
-            echo json_encode(['success' => false, 'message' => 'Tool implementation not found.']);
+        if (!$result['ok']) {
+            echo json_encode(['success' => false, 'message' => $result['error']]);
             exit;
         }
 
-        require_once $toolFile;
-
-        $handler = 'cloudhost247_tool_' . str_replace(['-', '.'], '_', $toolId);
-
-        if (!function_exists($handler)) {
-            echo json_encode(['success' => false, 'message' => 'Tool handler not implemented yet: ' . $handler]);
-            exit;
-        }
-
-        try {
-            $result = call_user_func($handler, $_POST);
-            cloudhost247_tools_log($toolId, $_POST, $result, 'success');
-            echo json_encode(['success' => true, 'data' => $result]);
-        } catch (\Exception $e) {
-            cloudhost247_tools_log($toolId, $_POST, '', 'error', $e->getMessage());
-            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
-        }
-
+        echo json_encode(['success' => true, 'data' => $result['data'], 'cached' => $result['cached']]);
         exit;
     }
 }

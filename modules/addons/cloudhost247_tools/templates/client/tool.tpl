@@ -4,13 +4,13 @@
         <div class="container">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{$base_url}">Tools Platform</a></li>
-                    <li class="breadcrumb-item"><a href="{$base_url}&action=category&cat={$tool.category}">{ucfirst($tool.category)} Tools</a></li>
-                    <li class="breadcrumb-item active">{$tool.name}</li>
+                    <li class="breadcrumb-item"><a href="{$base_url|escape}">Tools Platform</a></li>
+                    <li class="breadcrumb-item"><a href="{$base_url|escape}&action=category&cat={$tool.category|escape}">{ucfirst($tool.category)|escape} Tools</a></li>
+                    <li class="breadcrumb-item active">{$tool.name|escape}</li>
                 </ol>
             </nav>
-            <h1><i class="fas {$tool.icon}"></i> {$tool.name}</h1>
-            <p class="lead">{$tool.desc}</p>
+            <h1><i class="fas {$tool.icon|escape}"></i> {$tool.name|escape}</h1>
+            <p class="lead">{$tool.desc|escape}</p>
         </div>
     </div>
 
@@ -18,9 +18,9 @@
         <div class="row">
             <div class="col-md-8">
                 <div class="cloudhost247-tool-workspace">
-                    <form id="cloudhost247-tool-form" class="cloudhost247-tool-form" data-tool="{$tool.id}">
-                        <input type="hidden" name="csrf_token" value="{$csrf_token}">
-                        <input type="hidden" name="tool" value="{$tool.id}">
+                    <form id="cloudhost247-tool-form" class="cloudhost247-tool-form" data-tool="{$tool.id|escape}">
+                        <input type="hidden" name="csrf_token" value="{$csrf_token|escape}">
+                        <input type="hidden" name="tool" value="{$tool.id|escape}">
                         <input type="hidden" name="action" value="ajax">
 
                         {* Tool-specific form fields rendered by JavaScript based on tool ID *}
@@ -64,8 +64,8 @@
                             <i class="fas fa-info-circle"></i> About This Tool
                         </div>
                         <div class="card-body">
-                            <p>{$tool.desc}</p>
-                            <p class="text-muted small">Category: {ucfirst($tool.category)}</p>
+                            <p>{$tool.desc|escape}</p>
+                            <p class="text-muted small">Category: {ucfirst($tool.category)|escape}</p>
                         </div>
                     </div>
 
@@ -79,7 +79,7 @@
                                 {assign var="relatedCount" value=0}
                                 {foreach from=$categories[$tool.category] key=rId item=rTool}
                                     {if $rId != $tool.id && $relatedCount < 5}
-                                        <li><a href="{$base_url}&action=tool&tool={$rId}"><i class="fas {$rTool.icon}"></i> {$rTool.name}</a></li>
+                                        <li><a href="{$base_url|escape}&action=tool&tool={$rId|escape}"><i class="fas {$rTool.icon|escape}"></i> {$rTool.name|escape}</a></li>
                                         {assign var="relatedCount" value=$relatedCount+1}
                                     {/if}
                                 {/foreach}
@@ -94,6 +94,6 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    cloudhost247RenderToolForm('{$tool.id}', '{$tool.category}');
+    cloudhost247RenderToolForm('{$tool.id|escape}', '{$tool.category|escape}');
 });
 </script>

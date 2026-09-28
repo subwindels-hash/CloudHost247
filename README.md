@@ -32,8 +32,8 @@ of this repository **into** an existing WHMCS installation root (cPanel
 │   ├── addons/                     ← Addon modules (WHMCS → System Settings → Addon Modules)
 │   │   ├── hostx/                     Legacy theme helper module (ionCube; name retained by its
 │   │   │                                encoded entry point) — REQUIRED by the legacy theme
-│   │   ├── cloudhost247_tools/               CloudHost247 Tools Platform v2.2.6 (60+ online tools)
-│   │   ├── CloudHost247_tools/        Same platform, CloudHost247-branded build (activate only ONE of the two)
+│   │   ├── cloudhost247_tools/               CloudHost247 Tools Platform v2.2.7 (66 online tools, hardened:
+│   │   │                              TLS-verified APIs, no shell execution, REST API + tests)
 │   │   ├── cloudhost247_domain_lookup/       CloudHost247 Domain Lookup (4-tool WHOIS/IP/DNS/availability build,
 │   │   │                              renamed from a second "cloudhost247_tools" build — see module README)
 │   │   ├── tools_center/              WHMCS Tools Center (UI addon + external-api backend —
@@ -86,8 +86,7 @@ of this repository **into** an existing WHMCS installation root (cPanel
 | Module | Type | Location |
 |---|---|---|
 | CloudHost247 (theme helper) | addon | `modules/addons/hostx/` |
-| CloudHost247 Tools Platform v2.2.6 | addon | `modules/addons/cloudhost247_tools/` |
-| CloudHost247 Tools Platform (rebrand) | addon | `modules/addons/CloudHost247_tools/` |
+| CloudHost247 Tools Platform v2.2.7 (hardened) | addon | `modules/addons/cloudhost247_tools/` |
 | CloudHost247 Domain Lookup | addon | `modules/addons/cloudhost247_domain_lookup/` |
 | Tools Center (+ external API) | addon | `modules/addons/tools_center/` |
 | DNS Checker | addon | `modules/addons/dnschecker/` |
@@ -107,8 +106,10 @@ of this repository **into** an existing WHMCS installation root (cPanel
 | SMM Provisioning (prototype) | server | `modules/servers/smmprovisioning/` |
 
 **Notes**
-- `cloudhost247_tools` and `CloudHost247_tools` are two brandings of the same platform —
-  activate only one in WHMCS.
+- The duplicate `CloudHost247_tools` (capital C) module was removed in the v2.2.7
+  hardening pass — `cloudhost247_tools` is the single tools platform; its REST API
+  (`modules/addons/cloudhost247_tools/api/index.php`) is disabled until an admin
+  sets an API token in the module configuration.
 - `tools_center/external-api/` is a standalone PHP API backend. For security it
   must be deployed **outside** the WHMCS webroot (its own subdomain/server) —
   follow `modules/addons/tools_center/INSTALL.md`.

@@ -18,8 +18,9 @@ function cloudhost247_tool_qr_generator($post)
         return ['error' => 'Please enter text or URL for QR code'];
     }
 
-    // Use Google Chart API for QR generation
-    $apiUrl = 'https://chart.googleapis.com/chart?cht=qr&chs=' . $size . 'x' . $size . '&chl=' . urlencode($text) . '&chld=H|0';
+    // QuickChart QR endpoint: free, HTTPS, no key required. (The Google Chart
+    // Infographics API used originally was retired in 2019.)
+    $apiUrl = 'https://quickchart.io/qr?margin=1&size=' . $size . '&text=' . urlencode($text);
 
     return [
         'text' => $text,
@@ -265,7 +266,11 @@ function cloudhost247_tool_online_notepad($post)
     $action = cloudhost247_tools_sanitize($post['notepad_action'] ?? 'save', 'string');
 
     if ($action === 'save') {
-        // Store in session for temporary persistence
+        // Cap stored content so an oversized paste cannot bloat the session
+        // store (and the request body stays bounded for the log layer).
+        if (strlen($content) > 262144) {
+            return ['error' => 'Note exceeds the 256 KB limit'];
+        }
         $_SESSION['cloudhost247_notepad'] = $content;
         return ['saved' => true, 'length' => strlen($content), 'words' => str_word_count($content)];
     } else {
