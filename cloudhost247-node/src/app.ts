@@ -9,6 +9,7 @@ import { registerPublicCatalogRoutes } from './routes/catalog-public';
 import { registerCatalogAdminRoutes } from './routes/catalog-admin';
 import { registerAccountRoutes } from './routes/account';
 import { registerAdminCustomerRoutes } from './routes/admin-customers';
+import { registerCommerceRoutes } from './routes/commerce';
 import { HttpError } from './lib/errors';
 import { createLogger } from './lib/logger';
 import type { Queryable } from './db/types';
@@ -75,6 +76,7 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     await registerCatalogAdminRoutes(instance, env, pool);
     await registerAccountRoutes(instance, env, pool);
     await registerAdminCustomerRoutes(instance, env, pool);
+    await registerCommerceRoutes(instance, env, pool);
   });
 
   if (serveFrontend) {

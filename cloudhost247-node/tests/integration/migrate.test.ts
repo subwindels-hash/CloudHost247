@@ -39,6 +39,10 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0011_create_support_ticket_messages.sql',
     '0012_add_password_changed_at_to_users.sql',
     '0013_extend_auth_audit_log_event_types.sql',
+    '0014_create_carts.sql',
+    '0015_create_cart_items.sql',
+    '0016_create_orders.sql',
+    '0017_create_order_items.sql',
   ];
 
   it('finds the committed migration files in order', () => {

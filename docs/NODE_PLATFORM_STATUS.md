@@ -379,3 +379,120 @@ says the corresponding cPanel gate is CLOSED with evidence.
   checkout, orders, payments, payment gateways, a billing ledger, real invoices, automated
   provisioning, cPanel/WHM API calls, domain registrar API calls, automatic service activation,
   automatic domain registration/renewal, email verification/change, 2FA, SSO, file uploads.
+
+## Phase 5A — Commerce foundation (cart → orders → order items → price snapshots)
+
+- **Scope (explicitly authorized, first sub-phase of Phase 5 "Commerce & Billing"):** a real cart
+  (one per customer), server-priced add/update/remove-item operations, and checkout into a real,
+  immutable `orders`/`order_items` record with a permanent price snapshot. Explicitly **not**
+  payments, payment gateways, webhooks, invoices, a billing ledger, billing emails, or admin/staff
+  order-viewing (all deferred to 5B–5G, per the user-approved sub-phase sequence and the
+  per-sub-phase checkpoint cadence). Started from accepted Phase 4 commit `d84b620`.
+- **Locked architecture decisions carried into this and every later Phase 5 sub-phase:** (1) the
+  payment gateway layer (5C) will be an abstraction plus a fully-featured manual/offline gateway
+  plus a self-contained sandbox gateway with simulated *signed* webhooks — never a stub-only
+  interface, never invented/faked real provider credentials; (2) every sub-phase (5A, 5B, …) is
+  checkpointed individually with the user before the next one starts; (3) single default currency
+  (`USD`, `src/config/billing.ts`) only, tax/fee support is optional and off unless a future phase
+  adds real configuration — never a fabricated rate.
+- **Schema (`database/migrations/0014`–`0017`, all additive, no change to any Phase 1–4 table):**
+  - `0014` — `carts` (`user_id` FK `ON DELETE CASCADE`; unique index on `user_id` — exactly one
+    cart per customer, enabling an atomic get-or-create upsert).
+  - `0015` — `cart_items` (`plan_id` only — no redundant `product_id`, so it can never drift out of
+    sync with the plan's real product; `billing_period` `CHECK`; `quantity` `CHECK` `1..20`; unique
+    on `(cart_id, plan_id, billing_period)` so re-adding increases quantity instead of duplicating
+    a line). No price column at all — cart pricing is always resolved live, never cached.
+  - `0016` — `orders`, the first genuinely financial table in the platform: `order_number` is
+    generated **by the database itself** from a new `order_number_seq` sequence
+    (`'CH-' || lpad(nextval(...)::text, 8, '0')`) — atomic and race-free under concurrent
+    checkouts, never client- or app-generated; `user_id` is `ON DELETE RESTRICT` (not `CASCADE`) so
+    an account with order history can never be deleted; `status`/`payment_status` are separate
+    columns with their own `CHECK` enums; every amount column has a non-negative `CHECK`.
+  - `0017` — `order_items`, an immutable price **snapshot** per line
+    (`product_name_snapshot`/`plan_name_snapshot`/`unit_price_amount`/`currency`/
+    `line_total_amount`, copied once at checkout and never recalculated); `product_id`/`plan_id`
+    are optional soft links `ON DELETE SET NULL` so a later catalog rename/price-change/deletion
+    can never alter a historical order (proved by tests — see below).
+- **Transactional integrity (new, foundational for the rest of Phase 5):** discovered that the
+  existing `Queryable` interface had no real transaction support, and that naively calling
+  `pool.query('BEGIN')` followed by more `pool.query()` calls against a real `pg.Pool` would
+  **not** be a genuine transaction (each call can be handed a different pooled connection — a
+  well-known node-postgres pitfall). Added `src/db/transaction.ts`'s `withTransaction(pool, fn)`,
+  which checks out one dedicated client via `pool.connect()` in production (real
+  `BEGIN`/`COMMIT`/`ROLLBACK` on that single client, always released in `finally`) or uses
+  `@electric-sql/pglite`'s native `.transaction()` API in tests. `checkoutCart` runs the price
+  re-read, the `orders`/`order_items` insert, and clearing the cart **inside one call to this
+  helper** — closing a check-then-act (TOCTOU) gap between reading a price and writing the order,
+  and guaranteeing a rejected checkout (empty cart, unavailable line) leaves the cart completely
+  untouched. This helper is designed to be reused for 5D's webhook-idempotency + payment +
+  order-status atomicity.
+- **Exact-money arithmetic (new):** `src/lib/money.ts` (`toCents`/`fromCents`/`multiplyCents`/
+  `sumCents`) is the only place any monetary string from the database is ever turned into a number
+  — always as a whole integer number of cents, never a native float — consistent with the existing
+  "numeric columns come back as strings" convention (`src/db/catalog-pricing.ts`). No commerce code
+  does `+`/`-`/`*` on a decimal money string directly.
+- **Repository/service/DTO/route layering (same shape as Phase 3's catalog layer and Phase 4's
+  account layer):** `src/db/carts.ts`, `src/db/orders.ts` (raw CRUD) → `src/services/
+  commerce-service.ts` (the *only* code allowed to decide what a cart line or order costs; reuses
+  Phase 3's `findPlanById`/`findProductById`/`listPublishedPricingForPlan` for add-to-cart and
+  checkout validation) → `src/dto/commerce.ts` (response shaping, never leaks an internal field or
+  a client-supplied price) → `src/routes/commerce.ts` (`/api/v1/cart*`, `/api/v1/orders*`, wired
+  into `src/app.ts`'s existing single shared route-registration context).
+- **Price-integrity rules enforced server-side, never trusting the client:** no request body field
+  for price/subtotal/tax/discount/total/currency is ever read or validated against — a client can
+  only say *what* it wants (`planId` + `billingPeriod` + `quantity`); adding to cart requires the
+  plan `active`, its product `active`+`public`, and a currently-`published` price for that exact
+  cadence in the platform's one currency; checkout re-validates all of this fresh, inside the
+  transaction, immediately before writing the order — never from cart-add-time data. An
+  unavailable/inactive line is surfaced honestly (`priceUnavailable`/`hasUnavailableItems` in the
+  cart response, excluded from the subtotal) rather than silently dropped or approximated, and
+  blocks checkout outright (`400`, listing the affected plan names, no partial order created).
+- **Ownership isolation:** identical pattern to Phase 4 — every cart-item/order query is scoped to
+  the caller's own `userId`; a record that exists but belongs to someone else is never
+  distinguishable from one that doesn't exist — both `404`, never `403` (proved adversarially with
+  two real accounts, including a persisted-state check that a cross-customer mutation attempt never
+  took effect).
+- **No route anywhere can mark an order paid in this phase** — `payment_status` starts at
+  `'unpaid'` and there is no code path that changes it yet (payments/webhooks are 5C/5D). No admin/
+  staff order-viewing route exists yet (5F).
+- **Testing:**
+  - `tests/integration/commerce-schema.test.ts` (16 tests) — DB-level: one-cart-per-user upsert,
+    `cart_items` quantity `CHECK` (0 and 21 both rejected), upsert-increases-quantity-not-rows,
+    live-price join returning `null` honestly when no published price exists for a currency/period,
+    remove/clear operations, ownership-join helper, sequential/unique/zero-padded order numbers via
+    the DB sequence, negative-amount and invalid-enum rejection on `orders`, a full
+    `createOrder`+snapshot test that changes the catalog name/price *after* the order exists and
+    asserts the order is untouched, `ON DELETE SET NULL` behavior when the underlying catalog rows
+    are deleted, `ON DELETE RESTRICT` proving a user with an order can't be deleted, and
+    `withTransaction`'s commit-on-success/rollback-on-throw/unsupported-handle-error paths, plus
+    the money-helper round-trip and non-finite-input rejection.
+  - `tests/integration/commerce-api.test.ts` (12 tests) — full API end-to-end: unauthenticated
+    rejection on every route, empty-cart shape, server-computed subtotal from the live price,
+    a direct price/currency/subtotal-manipulation attempt in the request body proven to have zero
+    effect, rejection of a plan with no published price for the requested cadence, rejection of an
+    inactive-plan/private-product add (both `404`, no existence leak), 404-not-403 ownership
+    isolation on both cart items and orders (with a persisted-state check), empty-cart checkout
+    rejection, a full checkout proving the order/cart-clearing/price-permanence chain (including a
+    post-checkout catalog price change that the placed order is proven immune to), a
+    race-condition test where a line is disabled between add-to-cart and checkout (checkout
+    rejected, **zero** orders created, cart left intact), and out-of-range quantity rejection on
+    both add and update.
+  - `tests/integration/migrate.test.ts` — extended to cover all 17 migrations.
+  - **Full suite: 193/193 tests passing across 29 test files**, via a clean backend typecheck
+    (`tsc --noEmit`) and `npx vitest run` (backend + frontend). All integration tests run against a
+    real embedded Postgres engine (pglite), migrated with the actual committed SQL files — not
+    mocks. No frontend changes were needed this sub-phase (backend-only, per the locked cadence).
+- **API contract documentation:** `docs/API_COMMERCE.md` — architecture diagram, full data-model
+  summary, the money-handling and transactional-integrity rationale, the authorization/ownership
+  matrix, every price-integrity rule, and every endpoint's exact request/response shape, written
+  directly against the actual route/service/DTO code.
+- **cPanel staging verification: still BLOCKED / UNVERIFIED** — unchanged reason as every prior
+  phase. This sub-phase adds no new npm dependency (transaction/money helpers are hand-written,
+  no library added) and no cPanel-incompatible dependency.
+- **Explicit checkpoint:** per the locked "checkpoint after every sub-phase" cadence, this is the
+  end of Phase 5A. Phase 5B (billing foundation: invoices → ledger → payment records) has not been
+  started and will not begin until the user reviews and approves this sub-phase.
+- **Intentionally not implemented in this sub-phase (deferred to later Phase 5 sub-phases, per the
+  authorized scope):** payments, payment gateways (manual/offline and sandbox), webhooks, invoices,
+  a billing ledger, refunds, billing emails, admin/staff order or payment management, an audit
+  trail beyond what Phase 1–4 already provide, tax/discount configuration, multi-currency support.
