@@ -306,6 +306,41 @@ describe('commerce API (/api/v1/cart, /api/v1/orders)', () => {
     await app.close();
   });
 
+  it('rejects a cumulative add that would push a line past the per-line quantity cap (400, not 500)', async () => {
+    const { token } = await createCustomer('cumulativeqty@example.com');
+    const { plan } = await makeActivePlanWithPrice(19.99);
+    const app = buildTestApp();
+
+    // Fill the line right up to the cap — this must succeed.
+    const atCap = await app.inject({
+      method: 'POST',
+      url: '/api/v1/cart/items',
+      headers: { authorization: `Bearer ${token}` },
+      payload: { planId: plan.id, billingPeriod: 'monthly', quantity: 20 },
+    });
+    expect(atCap.statusCode).toBe(201);
+    expect(atCap.json().cart.items[0].quantity).toBe(20);
+
+    // Adding *any* more must be refused honestly. `addCartItem` upserts additively
+    // (quantity = existing + requested), so 20 + 1 would violate
+    // cart_items_quantity_positive_check at the database level — that must surface as a clean
+    // client error, never as an unhandled 500.
+    const overflow = await app.inject({
+      method: 'POST',
+      url: '/api/v1/cart/items',
+      headers: { authorization: `Bearer ${token}` },
+      payload: { planId: plan.id, billingPeriod: 'monthly', quantity: 1 },
+    });
+    expect(overflow.statusCode).toBe(400);
+    expect(overflow.json().message).toMatch(/20/);
+
+    // The existing line must be completely unchanged by the rejected attempt.
+    const cartRes = await app.inject({ method: 'GET', url: '/api/v1/cart', headers: { authorization: `Bearer ${token}` } });
+    expect(cartRes.json().cart.items).toHaveLength(1);
+    expect(cartRes.json().cart.items[0].quantity).toBe(20);
+    await app.close();
+  });
+
   it('rejects an out-of-range quantity on both add-to-cart and quantity-update', async () => {
     const { token } = await createCustomer('badqty@example.com');
     const { plan } = await makeActivePlanWithPrice();

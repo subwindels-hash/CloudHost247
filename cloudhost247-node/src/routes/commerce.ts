@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
+import { MAX_CART_ITEM_QUANTITY } from '../config/billing';
 import type { Env } from '../config/env';
 import { getPool } from '../db/pool';
 import type { Queryable } from '../db/types';
@@ -21,11 +22,11 @@ const billingPeriodEnum = z.enum(['one_time', 'monthly', 'quarterly', 'semi_annu
 const addCartItemSchema = z.object({
   planId: z.string().uuid('planId must be a valid UUID'),
   billingPeriod: billingPeriodEnum,
-  quantity: z.number().int().min(1).max(20).optional(),
+  quantity: z.number().int().min(1).max(MAX_CART_ITEM_QUANTITY).optional(),
 });
 
 const updateCartItemSchema = z.object({
-  quantity: z.number().int().min(1).max(20),
+  quantity: z.number().int().min(1).max(MAX_CART_ITEM_QUANTITY),
 });
 
 const idParamSchema = z.object({ id: z.string().uuid('id must be a valid UUID') });
