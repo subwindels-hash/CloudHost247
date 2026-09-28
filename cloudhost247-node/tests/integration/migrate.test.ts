@@ -33,6 +33,12 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0005_create_catalog_product_plans.sql',
     '0006_create_catalog_plan_pricing.sql',
     '0007_create_catalog_plan_features.sql',
+    '0008_create_customer_services.sql',
+    '0009_create_customer_domains.sql',
+    '0010_create_support_tickets.sql',
+    '0011_create_support_ticket_messages.sql',
+    '0012_add_password_changed_at_to_users.sql',
+    '0013_extend_auth_audit_log_event_types.sql',
   ];
 
   it('finds the committed migration files in order', () => {
