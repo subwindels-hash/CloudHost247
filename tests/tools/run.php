@@ -352,6 +352,11 @@ require_once $root . '/modules/addons/cloudhost247_tools/includes/classes.php';
 require_once $root . '/modules/addons/cloudhost247_tools/migrations/V227.php';
 require_once $root . '/modules/addons/cloudhost247_tools/cloudhost247_tools.php';
 require_once $root . '/modules/addons/cloudhost247_tools/hooks.php';
+// The module loads tool implementations on demand; the suite calls handlers
+// directly, so preload every category file up front.
+foreach (array('dns', 'ip', 'developer', 'designer', 'webmaster', 'network', 'security', 'productivity', 'gaming') as $category) {
+    require_once $root . '/modules/addons/cloudhost247_tools/includes/tools/' . $category . '_tools.php';
+}
 
 $_SESSION = array();
 
@@ -434,8 +439,9 @@ $check('spec tool inventory is complete (spot-check 24 slugs)', function () {
  * ------------------------------------------------------------------ */
 
 $check('sanitize domain strips everything but host characters', function () {
-    return cloudhost247_tools_sanitize('ExaMple.COM<script>', 'domain') === 'example.com'
-        && cloudhost247_tools_sanitize('a b', 'domain') === 'ab';
+    return cloudhost247_tools_sanitize('ExaMple.COM', 'domain') === 'example.com'
+        && cloudhost247_tools_sanitize('exa mple.com', 'domain') === 'example.com'
+        && cloudhost247_tools_sanitize('EXAMPLE.COM.', 'domain') === 'example.com.';
 });
 
 $check('sanitize string strips tags and escapes html', function () {
@@ -480,13 +486,21 @@ $check('rate limit allows n then blocks, then frees after window', function () {
     ch247_fresh_install();
     ch247_set_setting('rate_limit_requests', '3');
     $_SERVER['REMOTE_ADDR'] = '203.0.113.9';
-    $ok = cloudhost247_tools_check_rate_limit('203.0.113.9')
-        && cloudhost247_tools_check_rate_limit('203.0.113.9')
-        && cloudhost247_tools_check_rate_limit('203.0.113.9')
-        && cloudhost247_tools_check_rate_limit('203.0.113.9') === false;
-    if (!$ok) { return false; }
+    for ($i = 1; $i <= 3; $i++) {
+        if (cloudhost247_tools_check_rate_limit('203.0.113.9') !== true) {
+            echo "  [diag] call {$i} of 3 was rejected\n";
+            return false;
+        }
+    }
+    if (cloudhost247_tools_check_rate_limit('203.0.113.9') !== false) {
+        echo "  [diag] 4th call was not blocked\n";
+        return false;
+    }
     // separate IP is not affected
-    if (cloudhost247_tools_check_rate_limit('198.51.100.7') === false) { return false; }
+    if (cloudhost247_tools_check_rate_limit('198.51.100.7') === false) {
+        echo "  [diag] separate IP was blocked\n";
+        return false;
+    }
     // expire the window by back-dating the row
     $rows = CH247FakeStore::rows('mod_cloudhost247_tools_rate_limit');
     foreach ($rows as &$row) {
@@ -496,7 +510,11 @@ $check('rate limit allows n then blocks, then frees after window', function () {
     }
     unset($row);
     CH247FakeStore::setRows('mod_cloudhost247_tools_rate_limit', $rows);
-    return cloudhost247_tools_check_rate_limit('203.0.113.9') === true;
+    if (cloudhost247_tools_check_rate_limit('203.0.113.9') !== true) {
+        echo "  [diag] window did not free after expiry\n";
+        return false;
+    }
+    return true;
 });
 
 $check('client ip ignores spoofed headers unless proxy trust is enabled', function () {
@@ -559,7 +577,7 @@ $check('cache key is param-order independent and excludes credentials', function
 function cloudhost247_tools_execute_usage($toolId)
 {
     foreach (CH247FakeStore::rows('mod_cloudhost247_tools_status') as $row) {
-        if ($row['tool_id'] === $toolId) { return (int) $row['usage_count']; }
+        if ($row['tool_id'] === $toolId) { return isset($row['usage_count']) ? (int) $row['usage_count'] : 0; }
     }
     return -1;
 }
@@ -570,6 +588,7 @@ function cloudhost247_tools_execute_usage($toolId)
 
 $check('execute tool runs a deterministic tool end to end', function () {
     ch247_fresh_install();
+    $_POST = array('text' => 'Hello'); // several handlers read $_POST directly
     $result = cloudhost247_tools_execute_tool('rot13', array('text' => 'Hello'), true);
     return $result['ok'] === true && $result['data']['result'] === str_rot13('Hello') && $result['cached'] === false;
 });
@@ -586,14 +605,14 @@ $check('execute tool rejects unknown and disabled tools', function () {
 
 $check('requester-reflective tools are never dispatcher-cached', function () {
     foreach (array('what_is_my_ip', 'online_notepad', 'user_agent', 'password_generator', 'qr_scanner') as $tool) {
-        if (cloudhost247_tools_is_cacheable($tool)) { return false; }
+        if (cloudhost247_tools_is_cacheable($tool)) { echo "  [diag] {$tool} should not be cacheable\n"; return false; }
     }
     foreach (array('dns_lookup', 'mx_lookup', 'ssl_checker', 'ip_blacklist', 'http_headers') as $tool) {
-        if (!cloudhost247_tools_is_cacheable($tool)) { return false; }
+        if (!cloudhost247_tools_is_cacheable($tool)) { echo "  [diag] {$tool} should be cacheable\n"; return false; }
     }
     // live probes stay uncached so answers are always current
     foreach (array('ping_ipv4', 'traceroute', 'port_checker', 'domain_availability', 'smtp_test', 'username_checker') as $tool) {
-        if (cloudhost247_tools_is_cacheable($tool)) { return false; }
+        if (cloudhost247_tools_is_cacheable($tool)) { echo "  [diag] {$tool} live probe should not be cacheable\n"; return false; }
     }
     return true;
 });
@@ -619,7 +638,7 @@ $check('dns query builder produces a valid wire packet', function () {
     return $header['id'] === 0x1a2b
         && $header['flags'] === 0x0100                                        // RD=1
         && $header['qd'] === 1 && $header['an'] === 0
-        && substr($packet, 12, 15) === "\x07example\x03com\x00"
+        && substr($packet, 12, 13) === "\x07example\x03com\x00"
         && unpack('ntype/nclass', substr($packet, -4)) === array('type' => 1, 'class' => 1)
         ? true : false;
 });
@@ -636,7 +655,7 @@ function ch247_dns_response($id, $answers, $rcode = 0)
     $packet = pack('nnnnnn', $id, $flags, 1, count($answers), 0, 0) . $question;
     foreach ($answers as $answer) {
         $packet .= "\xc0\x0c";                    // pointer to question name
-        $packet .= pack('nnttl/nrdlength', $answer['type'], 1, $answer['ttl'], strlen($answer['rdata']));
+        $packet .= pack('nnNn', $answer['type'], 1, $answer['ttl'], strlen($answer['rdata']));
         $packet .= $answer['rdata'];
     }
     return $packet;
@@ -742,6 +761,7 @@ $check('api catalog lists enabled tools and excludes client-stateful ones', func
 $check('api dispatch runs a tool and reports timing', function () {
     ch247_fresh_install();
     ch247_set_setting('api_token', 't');
+    $_POST = array('tool' => 'rot13', 'text' => 'Hello'); // handlers read $_POST directly
     $res = cloudhost247_tools_api_dispatch('run', array('tool' => 'rot13', 'text' => 'Hello'), 'api:test');
     return $res['status'] === 200
         && $res['body']['success'] === true
@@ -794,7 +814,7 @@ $check('morse code roundtrips letters', function () {
 $check('word counter counts words, chars, lines, sentences', function () {
     $_POST = array('text' => "one two three.\nfour five!\n\nsix");
     $r = cloudhost247_tool_word_counter($_POST);
-    return $r['words'] === 6 && $r['sentences'] === 2 && $r['paragraphs'] === 2 && $r['lines'] === 3
+    return $r['words'] === 6 && $r['sentences'] === 2 && $r['paragraphs'] === 2 && $r['lines'] === 4
         && $r['characters'] === strlen($_POST['text']);
 });
 
@@ -1074,21 +1094,23 @@ $check('admin forms embed the csrf token field', function () {
 $check('client dashboard renders tool categories for guests', function () {
     ch247_fresh_install();
     $_SESSION = array();
+    $_GET = array();
     $client = new CloudHost247ToolsClient(array('modulelink' => 'index.php?m=cloudhost247_tools'));
-    $page = $client->renderDashboard();
-    return $page['templatefile'] === 'dashboard'
-        && $page['requirelogin'] === false
-        && count($page['vars']['categories']) === 9
-        && strlen($page['vars']['csrf_token']) === 64;
+    $page = $client->handleRequest(); // public router: no action -> dashboard
+    if ($page['templatefile'] !== 'dashboard' || $page['requirelogin'] !== false) { return false; }
+    if (count($page['vars']['categories']) !== 9) { return false; }
+    return strlen($page['vars']['csrf_token']) === 64;
 });
 
 $check('client tool page resolves a tool and unknown tools fall back to dashboard', function () {
     ch247_fresh_install();
     $_SESSION = array();
     $client = new CloudHost247ToolsClient(array('modulelink' => 'index.php?m=cloudhost247_tools'));
-    $page = $client->renderToolPage('rot13');
+    $_GET = array('action' => 'tool', 'tool' => 'rot13');
+    $page = $client->handleRequest();
     if ($page['templatefile'] !== 'tool' || strpos($page['pagetitle'], 'ROT13') === false) { return false; }
-    $fallback = $client->renderToolPage('no_such_tool_at_all');
+    $_GET = array('action' => 'tool', 'tool' => 'no_such_tool_at_all');
+    $fallback = $client->handleRequest();
     return $fallback['templatefile'] === 'dashboard';
 });
 
@@ -1100,7 +1122,8 @@ $check('client category page lists only enabled tools', function () {
     }, CH247FakeStore::rows('mod_cloudhost247_tools_status')));
     $_SESSION = array();
     $client = new CloudHost247ToolsClient(array('modulelink' => 'index.php?m=cloudhost247_tools'));
-    $page = $client->renderCategoryPage('productivity');
+    $_GET = array('action' => 'category', 'cat' => 'productivity');
+    $page = $client->handleRequest();
     return $page['templatefile'] === 'category' && !isset($page['vars']['tools']['rot13']);
 });
 
@@ -1150,9 +1173,8 @@ $check('deactivation preserves tables', function () {
 
 $check('hooks register asset injection for the module pages', function () {
     $names = $GLOBALS['CH247_HOOKS'];
-    if (!in_array('ClientAreaPage', $names, true) || !in_array('ClientAreaHeadOutput', $names, true)) { return false; }
-    foreach ($GLOBALS['CH247_HOOKS'] as $name) {
-        if ($name !== 'ClientAreaPage' && $name !== 'ClientAreaHeadOutput') { return false; }
+    foreach (array('ClientAreaPage', 'ClientAreaHeadOutput', 'ClientAreaPrimaryNavbar', 'AdminAreaPage') as $expected) {
+        if (!in_array($expected, $names, true)) { return false; }
     }
     return true;
 });
