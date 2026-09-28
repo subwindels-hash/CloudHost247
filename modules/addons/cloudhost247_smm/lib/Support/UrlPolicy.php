@@ -6,6 +6,9 @@ use RuntimeException;
 /**
  * SSRF boundary for provider endpoints.
  *
+ * Not final: resolveHost() is the documented override point that lets the
+ * behavior suite substitute deterministic DNS answers (no live lookups).
+ *
  * Provider API URLs are administrator-supplied, so every request is gated
  * here: only HTTPS, no URL credentials, no private/reserved/loopback target,
  * no credentials ever sent to a redirect target (cURL never follows).
@@ -14,7 +17,7 @@ use RuntimeException;
  * validation time; a provider whose DNS later flips to a private address is
  * still blocked because the check runs again immediately before each request.
  */
-final class UrlPolicy
+class UrlPolicy
 {
     private static $privateCidrs = array(
         '10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16', '127.0.0.0/8',

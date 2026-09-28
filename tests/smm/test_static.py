@@ -115,6 +115,13 @@ class TestStructure(unittest.TestCase):
         for path in php_files(os.path.join(ADDON, "lib")):
             self.assertIn("namespace CloudHost247\\Smm", read(path), path)
 
+    def test_url_policy_is_extensible_for_deterministic_dns(self):
+        """The behavior suite subclasses UrlPolicy to override resolveHost();
+        the class must therefore not be final (this exact fatal broke CI)."""
+        src = read(os.path.join(ADDON, "lib", "Support", "UrlPolicy.php"))
+        self.assertNotRegex(src, r"final\s+class\s+UrlPolicy")
+        self.assertRegex(src, r"protected static function resolveHost")
+
     def test_bootstrap_autoload_prefix_matches(self):
         src = read(os.path.join(ADDON, "bootstrap.php"))
         self.assertIn("spl_autoload_register", src)
