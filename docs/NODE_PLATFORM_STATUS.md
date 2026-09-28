@@ -150,3 +150,125 @@ says the corresponding cPanel gate is CLOSED with evidence.
     paths, confirms zero WHMCS/PHP files modified.
 - **cPanel staging verification: still BLOCKED** — unchanged from above; no cPanel
   environment/credentials have become available during this continuation.
+
+## Phase 3 — Node Façade & Catalog
+
+- **Scope (explicitly authorized):** first real catalog/application-façade layer — Catalog →
+  Product → Plan → Pricing → Public API → Admin config — independent of WHMCS, while WHMCS stays
+  the authoritative order/billing system. Explicitly **not** order/payment/provisioning/invoice/
+  service-activation (checkout flow deferred to a future phase). Started from accepted Phase 2
+  commit `d1baf2e510a58a96a1b3657e5bbbcc76ce29693c`.
+- **Session/git constraint:** this session cannot create a separate `phase3` branch or a genuinely
+  separate pull request. Phase 3 is delivered as new, clearly-labeled commits on
+  `arena/01a0e82a-cloudhost247` (the same branch as PR #11), with the PR description updated to
+  delineate "Phase 2 (accepted)" from "Phase 3 (new, pending review)". Nothing from Phase 1/2 was
+  amended, rebased, or force-pushed — Phase 2's accepted commit remains intact and reachable.
+- **Schema (`database/migrations/0004`–`0007`):**
+  - `0004` — `products` (slug, name, description, product_type, status, visibility,
+    display_order, timestamps).
+  - `0005` — `product_plans` (product FK, slug unique per product, name, description, status,
+    billing_model, display_order, timestamps).
+  - `0006` — `plan_pricing` (plan FK, billing_period, currency, amount **nullable**, setup_fee,
+    effective_status, timestamps) with a `CHECK` constraint
+    (`plan_pricing_published_requires_amount_check`) making "published with no amount"
+    structurally impossible at the database level — the schema itself enforces "never invent a
+    price."
+  - `0007` — `plan_features` (plan FK, name, value, display_order, visibility).
+  - All four are additive-only (new tables), no destructive change to any Phase 1/2 table.
+- **Repository/service/DTO layer (never a WHMCS-table passthrough):**
+  `src/db/catalog-products.ts`, `catalog-plans.ts`, `catalog-pricing.ts`, `catalog-features.ts`
+  (repository) → `src/services/catalog-service.ts` (public read model, enforces "public/active
+  only" and "published pricing only" centrally) → `src/dto/catalog.ts` (explicit response DTOs,
+  never raw DB rows) → `src/routes/catalog-public.ts` / `src/routes/catalog-admin.ts`. Full
+  contract: `docs/API_CATALOG.md`.
+- **Public API added:** `GET /api/v1/catalog`, `GET /api/v1/catalog/products[?type=]`,
+  `GET /api/v1/catalog/products/:slug`, `GET /api/v1/catalog/products/:slug/plans`. Unauthenticated,
+  public-data-only, validated params, consistent JSON error shape, correct status codes (400/404
+  distinguished, e.g. malformed slug vs. missing/private slug).
+- **Admin API added:** full product/plan/pricing/feature CRUD plus enable/disable, all under
+  `/api/v1/admin/catalog/*`, gated by the existing JWT/`jti`-revocation auth model plus
+  `requireRole('super_admin')` (server-side only — the client-supplied role is never trusted).
+  Every mutation is a real Postgres write, proven in tests by reading the row back afterward, not
+  just asserting a `200`.
+- **Frontend wiring (Phase 2 visual system unchanged — no redesign):**
+  - `/hosting` is now a real catalog landing page: primary content is fetched live from
+    `GET /api/v1/catalog` (`frontend/src/lib/useApiResource.ts`), with a distinct "coming soon" vs.
+    "available here" state per real product `available` flag. The known-real-but-not-yet-catalogued
+    service lines from Phase 2 (Shared Hosting, Dedicated Hosting, etc.) are still shown honestly
+    below the live catalog section so the page never looks emptier than the real current service
+    lineup, and an explicit empty-catalog hint appears if the live catalog itself has zero rows.
+  - `/hosting/cpanel` and `/hosting/vps` keep their existing static "what's included" marketing
+    copy (true regardless of catalog state) and add a new, live "Plans & pricing" section
+    (`frontend/src/components/ProductPlansSection.tsx`) backed by
+    `GET /api/v1/catalog/products/:slug/plans`, with an honest, distinct message for every real
+    state: loading, network/server error, product not yet in the catalog (404), product present but
+    still draft ("being finalized"), product active with zero published plans, and — per plan — no
+    published pricing yet. No fabricated plan names, specs, or prices at any point.
+  - `/domains` keeps the Phase 2 "domain search/registration isn't connected yet" notice
+    unconditionally (registrar/WHMCS domain-lookup integration is still absent), and separately,
+    honestly queries `GET /api/v1/catalog/products?type=domain` to show whatever domain-type
+    catalog entries actually exist (or "none configured yet") — catalog capability and real
+    registrar availability are kept visibly distinct, exactly as required.
+  - `frontend/src/lib/api.ts`'s `apiFetch` now throws an `ApiRequestError` carrying the real HTTP
+    status code (previously just a message), used to distinguish a 404 ("not in the catalog") from
+    a generic failure; fully backward compatible with every existing `instanceof Error` catch site.
+- **Every catalog-driven page/section explicitly handles:** loading, success, empty (zero
+  products/plans), unavailable product (draft), API failure (network/5xx), and malformed response
+  (a `res.json()` parse failure surfaces as the same visible error banner, via the same rejected
+  promise path) — no blank screens, no silent fallback to fake data anywhere in this phase.
+- **Testing:**
+  - `tests/integration/catalog-schema.test.ts` (8 tests) — DB-level: constraints, per-product plan
+    slug uniqueness, active-only plan listing, publish-requires-amount `CHECK`, negative-price
+    rejection, feature replace + public-only visibility, enable/disable persistence,
+    partial-update semantics.
+  - `tests/integration/catalog-public-api.test.ts` (10 tests) — list/retrieve/plans endpoints:
+    hidden/private exclusion, draft-but-public "coming soon" (not hidden, not 404), invalid `type`
+    query rejected, invalid vs. missing-vs-private slug (400 vs. 404, indistinguishable for
+    private), empty catalog returns a real empty `200`, disabled plan excluded from public plans.
+  - `tests/integration/catalog-admin-api.test.ts` (15 tests) — unauthenticated rejected, non-admin
+    (`customer`) rejected, wrong-role (`admin`, not `super_admin`) rejected, revoked/logged-out
+    token rejected, full create/update/enable/disable persistence (verified by reading the row
+    back and by re-querying the public API), invalid payload → 400 + confirmed non-persistence,
+    invalid UUID param → 400, nonexistent id → 404, full plan+pricing+features creation flow
+    verified end-to-end through the public API, publish-without-amount rejected with a clean 400
+    (both on create and on `PATCH`), admin detail endpoint exposes draft/unpublished/private data
+    that the public API correctly withholds.
+  - `tests/integration/migrate.test.ts` — extended to 10 tests covering all 7 migrations
+    (unchanged pattern from Phase 2, now including the 4 new catalog migrations).
+  - Frontend: `frontend/tests/unit/hosting-catalog-page.test.tsx` (4), `hosting-cpanel-page.test.tsx`
+    (5), `hosting-vps-page.test.tsx` (2), `domains-marketing-page.test.tsx` (3) — loading, success
+    (real data rendering, correct links/prices/features), empty, error, draft/unavailable-product,
+    and 404-not-yet-catalogued states, each asserted against the real rendered DOM via
+    `@testing-library/react` with a stubbed `fetch`, exercised through the real `App` router (not
+    the component in isolation).
+  - **Full suite: 118/118 tests passing across 20 test files** (up from 70 at the last Phase 2
+    report), via a clean `npm run typecheck` (server), `npx tsc -p frontend/tsconfig.json --noEmit`
+    (frontend), `npm run build` (server + frontend, Vite production build succeeds), and
+    `npx vitest run`. All integration tests run against a real embedded Postgres engine (pglite),
+    migrated with the actual committed SQL files — not mocks.
+  - `git diff` against the Phase 2 base commit, restricted to non-`cloudhost247-node`/non-docs
+    paths, confirms zero WHMCS/PHP files modified, consistent with every prior phase.
+- **API contract documentation:** `docs/API_CATALOG.md` — endpoints, methods, auth/authz
+  requirements, request/response DTOs, and the full error-code table, written directly against the
+  actual route/schema code in this phase (not aspirational).
+- **cPanel staging verification: still BLOCKED / UNVERIFIED** — unchanged reason as every prior
+  phase (no cPanel environment/credentials have been available at any point in this project). This
+  phase does not add or remove any cPanel-incompatible dependency (still Fastify + `pg` +
+  `process.env.PORT`, no Docker/K8s/systemd/mandatory-Redis/PM2/custom-Nginx/daemons/root). Must
+  not be described as cPanel-ready/production-ready until Appendix C of
+  `docs/CPANEL_DEPLOYMENT.md` is closed with real evidence from an actual cPanel account.
+- **Known limitation carried over, unchanged:** no automated headless-browser (Playwright/
+  Chromium) visual/responsive verification is possible in this sandbox (browser binary download
+  fails — registry-only network access). The new `.ch247-plan-grid`/`.ch247-state-banner` CSS
+  reuses the same responsive breakpoint pattern as the existing `.ch247-index-grid`/`.ch247-grid`
+  (single-column below 767px), verified by manual CSS review only, not a real browser.
+- **Dev-only seed data:** `database/seed/dev-catalog-seed.sql` — an optional, explicitly-labeled
+  fixture (two obviously-fake `[DEV FIXTURE]`-prefixed products, one published example price of
+  `$1.23/mo`, one left in `draft`) for manually exercising the full UI end to end without first
+  driving the admin API by hand. Lives outside `database/migrations/` on purpose and is **never**
+  run automatically by `npm run migrate` or app boot — run by hand only
+  (`psql "$DATABASE_URL" -f database/seed/dev-catalog-seed.sql`), idempotent (fixed ids,
+  `ON CONFLICT (id) DO NOTHING`), verified in `tests/integration/dev-catalog-seed.test.ts`.
+- **Intentionally not implemented in this phase (deferred, per the authorized scope):** no
+  cart/checkout/payment/invoice/order/service-activation flow of any kind; domain
+  registrar/availability integration remains unconnected by design.
