@@ -161,7 +161,9 @@ function cloudhost247_tools_get_setting($key, $default = '')
 }
 
 /**
- * Log tool usage
+ * Log tool usage. Input payloads are truncated before persistence so huge
+ * pastes (JSON viewer, email headers) cannot bloat the log table, and only
+ * an admin ever sees them.
  */
 function cloudhost247_tools_log($toolId, $input, $result, $status = 'success', $error = '')
 {
@@ -171,14 +173,21 @@ function cloudhost247_tools_log($toolId, $input, $result, $status = 'success', $
     $userId = isset($_SESSION['uid']) ? (int) $_SESSION['uid'] : 0;
     $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 
+    if (is_array($input)) {
+        unset($input['csrf_token'], $input['token']); // never persist credentials
+        $input = substr((string) json_encode($input), 0, 500);
+    } else {
+        $input = substr((string) $input, 0, 500);
+    }
+
     Capsule::table('mod_cloudhost247_tools_logs')->insert([
         'tool_id' => $toolId,
-        'input' => is_array($input) ? json_encode($input) : substr($input, 0, 500),
+        'input' => $input,
         'ip_address' => $ip,
         'user_id' => $userId,
-        'result' => is_array($result) ? json_encode($result) : substr($result, 0, 10000),
+        'result' => is_array($result) ? substr((string) json_encode($result), 0, 10000) : substr((string) $result, 0, 10000),
         'status' => $status,
-        'error_message' => $error,
+        'error_message' => substr((string) $error, 0, 1000),
         'created_at' => date('Y-m-d H:i:s'),
     ]);
 
@@ -203,30 +212,29 @@ function cloudhost247_tools_json_response($data, $success = true, $message = '')
 }
 
 /**
- * Safe shell_exec fallback
- */
-function cloudhost247_tools_safe_exec($command, $timeout = 10)
-{
-    if (function_exists('shell_exec') && !ini_get('safe_mode')) {
-        $output = shell_exec($command . ' 2>&1');
-        return $output;
-    }
-    return null;
-}
-
-/**
  * cURL helper
+ *
+ * TLS certificate verification is always enforced: the tools platform talks
+ * to third-party APIs over HTTPS and a disabled verifier would allow a
+ * man-in-the-middle to tamper with lookup results or harvest API keys.
  */
 function cloudhost247_tools_curl($url, $postData = null, $headers = [], $timeout = 30)
 {
+    // Refuse non-HTTP(S) schemes so crafted URLs cannot reach file:// or php:// wrappers.
+    if (!preg_match('~^https?://~i', $url)) {
+        return ['error' => 'Unsupported URL scheme', 'code' => 0, 'body' => ''];
+    }
+
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_MAXREDIRS, 4);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
     curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout / 2);
-    curl_setopt($ch, CURLOPT_USERAGENT, 'CloudHost247-Tools/2.2.6');
+    curl_setopt($ch, CURLOPT_USERAGENT, 'CloudHost247-Tools/2.2.7');
 
     if (!empty($headers)) {
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
@@ -289,13 +297,21 @@ function cloudhost247_tools_cache_set($key, $value, $minutes = null)
 
 /**
  * Get client IP
+ *
+ * By default only the direct remote address is trusted — forwarded headers
+ * (X-Forwarded-For, CF-Connecting-IP) are client-controlled and would let
+ * anyone bypass rate limiting by spoofing them. Sites behind a trusted
+ * proxy can opt in via the `trust_proxy_headers` module setting.
  */
 function cloudhost247_tools_get_client_ip()
 {
-    $keys = ['HTTP_CF_CONNECTING_IP', 'HTTP_X_FORWARDED_FOR', 'REMOTE_ADDR'];
+    $keys = ['REMOTE_ADDR'];
+    if (cloudhost247_tools_get_setting('trust_proxy_headers', '') === 'on') {
+        $keys = ['HTTP_CF_CONNECTING_IP', 'HTTP_X_FORWARDED_FOR', 'REMOTE_ADDR'];
+    }
     foreach ($keys as $key) {
         if (!empty($_SERVER[$key])) {
-            $ips = explode(',', $_SERVER[$key]);
+            $ips = explode(',', (string) $_SERVER[$key]);
             $ip = trim($ips[0]);
             if (filter_var($ip, FILTER_VALIDATE_IP)) {
                 return $ip;

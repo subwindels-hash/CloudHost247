@@ -1,5 +1,15 @@
 Installation
-Upload the cloudhost247_tools folder from the zip to /modules/addons/
-Go to WHMCS Admin → System Settings → Addon Modules
-Click Activate next to "CloudHost247 Tools Platform"
-Click Configure to set your API keys (WHOIS, GeoIP, OCR), rate limits, and cache duration
+1. Upload the cloudhost247_tools folder to /modules/addons/
+2. WHMCS Admin -> System Settings -> Addon Modules -> Activate "CloudHost247 Tools Platform"
+   (activation creates the mod_cloudhost247_tools_* tables via the guarded V227
+   migration; upgrading over 2.2.6 preserves all existing data)
+3. Click Configure to set:
+   - WHOIS / GeoIP / OCR API keys (optional, third-party lookups)
+   - REST API Token: leave EMPTY to keep the REST API disabled; set a long
+     random string to enable modules/addons/cloudhost247_tools/api/index.php
+   - Trust proxy headers: enable ONLY behind a trusted proxy (Cloudflare etc.)
+   - Rate limit (default 60 requests/minute), cache duration (5-30 min), logs
+4. Client area page: index.php?m=cloudhost247_tools (guests allowed)
+5. Admin pages: Addon Modules -> CloudHost247 Tools Platform (Dashboard,
+   Tools Manager, Activity Logs, Settings)
+6. Verify after install: php tests/tools/run.php (behavior suite)

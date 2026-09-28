@@ -8,6 +8,7 @@ if (!defined("WHMCS")) {
 }
 
 require_once __DIR__ . '/../functions.php';
+require_once __DIR__ . '/../dns_client.php';
 
 function cloudhost247_tool_spf_checker($post)
 {
@@ -228,19 +229,30 @@ function cloudhost247_tool_dns_propagation($post)
 
     $results = [];
     foreach ($servers as $server) {
-        $cmd = 'dig @' . escapeshellarg($server['ip']) . ' ' . escapeshellarg($domain) . ' ' . $type . ' +short';
-        $output = cloudhost247_tools_safe_exec($cmd, 5);
-        $lines = array_filter(explode("\n", trim($output ?: '')));
+        // Pure-PHP RFC 1035 query over UDP — no shell execution involved.
+        $answer = CloudHost247ToolsDnsClient::query($server['ip'], $domain, $type);
 
         $results[] = [
             'server_name' => $server['name'],
             'server_ip' => $server['ip'],
-            'resolved' => !empty($lines),
-            'records' => array_values($lines),
+            'resolved' => $answer['ok'] && !empty($answer['records']),
+            'records' => $answer['ok'] ? $answer['records'] : [],
+            'error' => $answer['ok'] ? '' : $answer['error'],
         ];
     }
 
-    return ['domain' => $domain, 'type' => $type, 'results' => $results];
+    $resolvedCount = count(array_filter($results, function ($r) {
+        return $r['resolved'];
+    }));
+
+    return [
+        'domain' => $domain,
+        'type' => $type,
+        'results' => $results,
+        'resolved_count' => $resolvedCount,
+        'total_count' => count($results),
+        'fully_propagated' => $resolvedCount === count($results),
+    ];
 }
 
 function cloudhost247_tool_dmarc_lookup($post)

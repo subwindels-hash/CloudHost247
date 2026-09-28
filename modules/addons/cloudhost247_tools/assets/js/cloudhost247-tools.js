@@ -402,7 +402,7 @@
         'dns_propagation': function(data) {
             var html = '<table class="cloudhost247-dns-table"><thead><tr><th>DNS Server</th><th>IP</th><th>Resolved</th><th>Records</th></tr></thead><tbody>';
             (data.results || []).forEach(function(r) {
-                html += '<tr><td>' + escapeHtml(r.server_name) + '</td><td>' + escapeHtml(r.server_ip) + '</td><td>' + (r.resolved ? '<span class="cloudhost247-status-pass">Yes</span>' : '<span class="cloudhost247-status-fail">No</span>') + '</td><td>' + (r.records || []).join(', ') + '</td></tr>';
+                html += '<tr><td>' + escapeHtml(r.server_name) + '</td><td>' + escapeHtml(r.server_ip) + '</td><td>' + (r.resolved ? '<span class="cloudhost247-status-pass">Yes</span>' : '<span class="cloudhost247-status-fail">No</span>') + '</td><td>' + (r.records || []).map(escapeHtml).join(', ') + '</td></tr>';
             });
             html += '</tbody></table>';
             return html;
