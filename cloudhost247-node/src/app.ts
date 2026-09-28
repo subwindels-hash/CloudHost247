@@ -7,11 +7,14 @@ import { registerHealthRoutes } from './routes/health';
 import { registerAuthRoutes } from './routes/auth';
 import { HttpError } from './lib/errors';
 import { createLogger } from './lib/logger';
+import type { Queryable } from './db/types';
 
 export interface BuildAppOptions {
   /** Serve the built frontend (public/) and SPA-fallback unmatched GET routes to it. */
   serveFrontend?: boolean;
   publicDir?: string;
+  /** Test-only: substitute a real embedded Postgres engine instead of the live pg Pool. */
+  pool?: Queryable;
 }
 
 /**
@@ -19,7 +22,7 @@ export interface BuildAppOptions {
  * use `app.inject()` without binding a real TCP port.
  */
 export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstance {
-  const { serveFrontend = true, publicDir = path.join(__dirname, '..', '..', 'public') } = options;
+  const { serveFrontend = true, publicDir = path.join(__dirname, '..', '..', 'public'), pool } = options;
 
   const app = Fastify({
     // Cast: pino's Logger type is a structural superset of Fastify's FastifyBaseLogger but TS's
@@ -63,7 +66,7 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
   app.register(async (instance) => {
     await registerSecurityPlugins(instance, env);
     await registerHealthRoutes(instance, env);
-    await registerAuthRoutes(instance, env);
+    await registerAuthRoutes(instance, env, pool);
   });
 
   if (serveFrontend) {

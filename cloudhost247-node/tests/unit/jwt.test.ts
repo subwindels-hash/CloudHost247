@@ -16,6 +16,16 @@ describe('jwt helpers', () => {
     expect(decoded.sub).toBe('user-1');
     expect(decoded.role).toBe('customer');
     expect(decoded.email).toBe('a@example.com');
+    // jti is used by src/lib/require-auth.ts + src/db/revoked-tokens.ts to invalidate one
+    // specific token on logout (see database/migrations/0003_create_revoked_tokens.sql).
+    expect(decoded.jti).toEqual(expect.any(String));
+    expect(decoded.exp).toEqual(expect.any(Number));
+  });
+
+  it('gives two tokens for the same user different jti values', () => {
+    const a = signAuthToken(env, { sub: 'user-1', role: 'customer', email: 'a@example.com' });
+    const b = signAuthToken(env, { sub: 'user-1', role: 'customer', email: 'a@example.com' });
+    expect(verifyAuthToken(env, a).jti).not.toBe(verifyAuthToken(env, b).jti);
   });
 
   it('rejects a token signed with a different secret', () => {

@@ -27,23 +27,32 @@ describe('migration runner against the real database/migrations SQL files', () =
 
   it('finds the committed migration files in order', () => {
     const files = listMigrationFiles();
-    expect(files.length).toBeGreaterThanOrEqual(2);
+    expect(files.length).toBeGreaterThanOrEqual(3);
     expect(files[0]?.name).toBe('0001_create_users.sql');
     expect(files[1]?.name).toBe('0002_create_auth_audit_log.sql');
+    expect(files[2]?.name).toBe('0003_create_revoked_tokens.sql');
   });
 
   it('applies all pending migrations and records them in schema_migrations', async () => {
     const result = await migrateUp(client, { isProduction: false });
-    expect(result.applied).toEqual(['0001_create_users.sql', '0002_create_auth_audit_log.sql']);
+    expect(result.applied).toEqual([
+      '0001_create_users.sql',
+      '0002_create_auth_audit_log.sql',
+      '0003_create_revoked_tokens.sql',
+    ]);
 
     const applied = await getAppliedMigrations(client);
-    expect(applied.map((a) => a.name)).toEqual(['0001_create_users.sql', '0002_create_auth_audit_log.sql']);
+    expect(applied.map((a) => a.name)).toEqual([
+      '0001_create_users.sql',
+      '0002_create_auth_audit_log.sql',
+      '0003_create_revoked_tokens.sql',
+    ]);
 
     const tables = await client.query<{ table_name: string }>(
       "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name"
     );
     expect(tables.rows.map((r) => r.table_name)).toEqual(
-      expect.arrayContaining(['users', 'auth_audit_log', 'schema_migrations'])
+      expect.arrayContaining(['users', 'auth_audit_log', 'revoked_tokens', 'schema_migrations'])
     );
   });
 
@@ -85,7 +94,7 @@ describe('migration runner against the real database/migrations SQL files', () =
 
   it('applies in production once explicitly confirmed', async () => {
     const result = await migrateUp(client, { isProduction: true, confirmedForProduction: true });
-    expect(result.applied.length).toBe(2);
+    expect(result.applied.length).toBe(3);
   });
 
   it('status reports pending migrations before running and applied after', async () => {

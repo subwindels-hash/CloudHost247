@@ -1,4 +1,4 @@
-import type { Pool } from 'pg';
+import type { Queryable } from './types';
 
 export interface UserRecord {
   id: string;
@@ -11,18 +11,18 @@ export interface UserRecord {
   updated_at: string;
 }
 
-export async function findUserByEmail(pool: Pool, email: string): Promise<UserRecord | null> {
+export async function findUserByEmail(pool: Queryable, email: string): Promise<UserRecord | null> {
   const { rows } = await pool.query<UserRecord>('SELECT * FROM users WHERE lower(email) = lower($1) LIMIT 1', [email]);
   return rows[0] ?? null;
 }
 
-export async function findUserById(pool: Pool, id: string): Promise<UserRecord | null> {
+export async function findUserById(pool: Queryable, id: string): Promise<UserRecord | null> {
   const { rows } = await pool.query<UserRecord>('SELECT * FROM users WHERE id = $1 LIMIT 1', [id]);
   return rows[0] ?? null;
 }
 
 export async function createUser(
-  pool: Pool,
+  pool: Queryable,
   input: { id: string; email: string; passwordHash: string; fullName: string }
 ): Promise<UserRecord> {
   const { rows } = await pool.query<UserRecord>(
@@ -39,7 +39,7 @@ export async function createUser(
 }
 
 export async function recordAuthEvent(
-  pool: Pool,
+  pool: Queryable,
   event: {
     id: string;
     userId: string | null;

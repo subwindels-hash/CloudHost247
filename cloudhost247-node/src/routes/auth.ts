@@ -3,9 +3,12 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import type { Env } from '../config/env';
 import { getPool } from '../db/pool';
+import type { Queryable } from '../db/types';
 import { createUser, findUserByEmail, findUserById, recordAuthEvent } from '../db/users';
+import { revokeToken } from '../db/revoked-tokens';
 import { hashPassword, verifyPassword } from '../lib/password';
-import { signAuthToken, verifyAuthToken } from '../lib/jwt';
+import { signAuthToken } from '../lib/jwt';
+import { authenticate } from '../lib/require-auth';
 import { ConflictError, UnauthorizedError, ValidationError } from '../lib/errors';
 
 const registerSchema = z.object({
@@ -28,8 +31,11 @@ function publicUser(user: { id: string; email: string; full_name: string; role: 
  * Deeper flows (password reset, email verification, 2FA, SSO) are explicitly out of scope for
  * Phase 1 and will be added once the independent billing/customer platform needs them.
  */
-export async function registerAuthRoutes(app: FastifyInstance, env: Env) {
-  const pool = getPool(env);
+export async function registerAuthRoutes(app: FastifyInstance, env: Env, overridePool?: Queryable) {
+  // `overridePool` lets tests substitute a real embedded Postgres engine (pglite) instead of a
+  // live TCP connection — see tests/integration/auth-flow.test.ts. Production always uses the
+  // real singleton pg Pool.
+  const pool = overridePool ?? getPool(env);
 
   app.post(
     '/api/auth/register',
@@ -103,23 +109,43 @@ export async function registerAuthRoutes(app: FastifyInstance, env: Env) {
   });
 
   app.get('/api/auth/me', async (request) => {
-    const header = request.headers.authorization;
-    if (!header?.startsWith('Bearer ')) {
-      throw new UnauthorizedError('Missing bearer token');
-    }
-    const token = header.slice('Bearer '.length);
+    const auth = await authenticate(request, env, pool);
 
-    let payload;
-    try {
-      payload = verifyAuthToken(env, token);
-    } catch {
-      throw new UnauthorizedError('Invalid or expired token');
-    }
-
-    const user = await findUserById(pool, payload.sub);
+    const user = await findUserById(pool, auth.userId);
     if (!user) {
       throw new UnauthorizedError('Account no longer exists');
     }
     return { user: publicUser(user) };
   });
+
+  /**
+   * Actually invalidates the token that was used to call this endpoint (not just "the client
+   * forgets it locally"): the token's jti is recorded in revoked_tokens, so any subsequent
+   * request — from this browser tab, another tab, or anywhere else the token might have been
+   * copied — is rejected by authenticate() even though the JWT signature/expiry are still valid.
+   * See database/migrations/0003_create_revoked_tokens.sql for the full rationale.
+   */
+  app.post(
+    '/api/auth/logout',
+    { config: { rateLimit: { max: 30, timeWindow: '1 minute' } } },
+    async (request, reply) => {
+      const auth = await authenticate(request, env, pool);
+
+      await revokeToken(pool, {
+        jti: auth.jti,
+        userId: auth.userId,
+        expiresAt: new Date(auth.exp * 1000),
+      });
+
+      await recordAuthEvent(pool, {
+        id: randomUUID(),
+        userId: auth.userId,
+        eventType: 'logout',
+        ipAddress: request.ip,
+        userAgent: request.headers['user-agent'] ?? null,
+      });
+
+      reply.code(204).send();
+    }
+  );
 }
