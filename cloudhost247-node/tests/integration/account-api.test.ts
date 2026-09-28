@@ -98,7 +98,12 @@ describe('self-service account API (/api/v1/account)', () => {
       headers: { authorization: `Bearer ${token}` },
       payload: { currentPassword: 'totally-wrong', newPassword: 'brand-new-password-1' },
     });
-    expect(res.statusCode).toBe(401);
+    // 400 (ValidationError), not 401: the caller's bearer token is fine, only the submitted
+    // currentPassword field is wrong. Using 401 here was a real bug — the frontend's global
+    // "401 while holding a token means the token itself is bad" handling (frontend/src/lib/api.ts)
+    // would otherwise silently log a customer out of the whole app for simply mistyping their
+    // current password. See src/routes/account.ts and frontend/tests/unit/account-page.test.tsx.
+    expect(res.statusCode).toBe(400);
 
     const after = await db.query<{ password_hash: string }>('SELECT password_hash FROM users WHERE email = $1', ['bob@example.com']);
     expect(after.rows[0]?.password_hash).toBe(before.rows[0]?.password_hash);

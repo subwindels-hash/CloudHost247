@@ -154,10 +154,15 @@ exists). Records a `profile_update` audit event. Returns `{ user: PublicUserDTO 
 ### `POST /api/v1/account/password`
 
 Body: `{ "currentPassword": string, "newPassword": string (min 10 chars) }`. Rate-limited to 10
-requests/minute. Returns `401` if `currentPassword` is wrong (and makes no change at all — the
-hash is only ever touched after successful verification). On success: `204 No Content`, and
-invalidates every other outstanding session per the contract above. Records a `password_change`
-audit event.
+requests/minute. Returns `400 VALIDATION_ERROR` if `currentPassword` is wrong (and makes no change
+at all — the hash is only ever touched after successful verification) — **deliberately not
+`401`**: the caller's bearer token is fine, only the submitted `currentPassword` field failed to
+validate, and the frontend treats any `401` received while holding a token as proof the token
+itself is dead (see `frontend/src/lib/api.ts`), which would otherwise silently log a customer out
+of the whole app for simply mistyping their current password. This was caught as a real bug via a
+frontend test (`frontend/tests/unit/account-page.test.tsx`) during Phase 4 development. On
+success: `204 No Content`, and invalidates every other outstanding session per the contract above.
+Records a `password_change` audit event.
 
 ### `GET /api/v1/account/services`
 

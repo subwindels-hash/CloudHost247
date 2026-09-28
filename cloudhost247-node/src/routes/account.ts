@@ -16,7 +16,7 @@ import {
 } from '../db/support-tickets';
 import { hashPassword, verifyPassword } from '../lib/password';
 import { authenticate } from '../lib/require-auth';
-import { NotFoundError, UnauthorizedError, ValidationError } from '../lib/errors';
+import { NotFoundError, ValidationError } from '../lib/errors';
 import {
   toCustomerDomainDTO,
   toCustomerServiceDTO,
@@ -102,7 +102,16 @@ export async function registerAccountRoutes(app: FastifyInstance, env: Env, over
 
       const currentOk = await verifyPassword(currentPassword, user.password_hash);
       if (!currentOk) {
-        throw new UnauthorizedError('Current password is incorrect');
+        // Deliberately 400 (ValidationError), not 401: this account's *bearer token* is fine
+        // (authenticate() already succeeded above) — only the submitted currentPassword field
+        // failed to validate. The frontend's apiFetch (frontend/src/lib/api.ts) treats *any* 401
+        // received while a token is present as proof that token itself is no longer good, and
+        // immediately clears the whole local session — appropriate for a genuinely invalid/
+        // revoked token, but not for a customer who simply mistyped their current password. Using
+        // 401 here was caught as a real bug via a frontend test (a mistyped current password was
+        // silently logging the user out of the app entirely) — see
+        // frontend/tests/unit/account-page.test.tsx.
+        throw new ValidationError('Current password is incorrect');
       }
 
       const newHash = await hashPassword(newPassword);
