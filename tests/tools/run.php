@@ -486,18 +486,21 @@ $check('rate limit allows n then blocks, then frees after window', function () {
     ch247_fresh_install();
     ch247_set_setting('rate_limit_requests', '3');
     $_SERVER['REMOTE_ADDR'] = '203.0.113.9';
+    // Mirror the module's callers: they read the setting and pass it in.
+    $maxRequests = (int) cloudhost247_tools_get_setting('rate_limit_requests', '60');
+    if ($maxRequests !== 3) { echo "  [diag] setting not applied: {$maxRequests}\n"; return false; }
     for ($i = 1; $i <= 3; $i++) {
-        if (cloudhost247_tools_check_rate_limit('203.0.113.9') !== true) {
+        if (cloudhost247_tools_check_rate_limit('203.0.113.9', $maxRequests) !== true) {
             echo "  [diag] call {$i} of 3 was rejected\n";
             return false;
         }
     }
-    if (cloudhost247_tools_check_rate_limit('203.0.113.9') !== false) {
+    if (cloudhost247_tools_check_rate_limit('203.0.113.9', $maxRequests) !== false) {
         echo "  [diag] 4th call was not blocked\n";
         return false;
     }
     // separate IP is not affected
-    if (cloudhost247_tools_check_rate_limit('198.51.100.7') === false) {
+    if (cloudhost247_tools_check_rate_limit('198.51.100.7', $maxRequests) === false) {
         echo "  [diag] separate IP was blocked\n";
         return false;
     }
@@ -510,7 +513,7 @@ $check('rate limit allows n then blocks, then frees after window', function () {
     }
     unset($row);
     CH247FakeStore::setRows('mod_cloudhost247_tools_rate_limit', $rows);
-    if (cloudhost247_tools_check_rate_limit('203.0.113.9') !== true) {
+    if (cloudhost247_tools_check_rate_limit('203.0.113.9', $maxRequests) !== true) {
         echo "  [diag] window did not free after expiry\n";
         return false;
     }
@@ -664,7 +667,8 @@ function ch247_dns_response($id, $answers, $rcode = 0)
 $check('dns parser extracts A records', function () {
     $raw = ch247_dns_response(0x1a2b, array(array('type' => 1, 'ttl' => 300, 'rdata' => "\x5d\xb8\xd8\x22")));
     $out = CloudHost247ToolsDnsClient::parseResponse($raw, 0x1a2b, 'example.com', 'A');
-    return $out['ok'] === true && $out['records'] === array('93.184.216.34') && $out['rcode'] === 0;
+    if ($out['ok'] !== true) { echo "  [diag] A parse failed: " . $out['error'] . " hex=" . bin2hex($raw) . "\n"; return false; }
+    return $out['records'] === array('93.184.216.34') && $out['rcode'] === 0;
 });
 
 $check('dns parser extracts AAAA records', function () {
@@ -682,7 +686,7 @@ $check('dns parser extracts MX with priority and compressed host', function () {
 });
 
 $check('dns parser joins TXT character-strings', function () {
-    $rdata = "\x06v=spf1" . "\x04 -all";
+    $rdata = "\x06v=spf1" . "\x05 -all";
     $raw = ch247_dns_response(0x55, array(array('type' => 16, 'ttl' => 300, 'rdata' => $rdata)));
     $out = CloudHost247ToolsDnsClient::parseResponse($raw, 0x55, 'example.com', 'TXT');
     return $out['ok'] === true && $out['records'] === array('v=spf1 -all');
@@ -934,6 +938,7 @@ $check('qr generator returns a working https image url', function () {
 
 $check('email header analyzer extracts routing fields', function () {
     $header = "Received: by mail.example.com for user@example.com\nFrom: Alice <alice@example.org>\nTo: bob@example.com\nSubject: Test\nDate: Mon, 1 Jan 2026 00:00:00 +0000";
+    $_POST = array('header' => $header); // handler reads $_POST directly
     $r = cloudhost247_tool_email_header_analyzer(array('header' => $header));
     return isset($r['received'][0]) && strpos($r['from'], 'alice@example.org') !== false
         && strpos($r['to'], 'bob@example.com') !== false;
@@ -959,13 +964,14 @@ $check('punycode converter encodes idn or degrades cleanly', function () {
 
 $check('htaccess and url rewrite generators output redirect rules', function () {
     $r = cloudhost247_tool_htaccess_generator(array('redirect_type' => '301', 'from' => '/old', 'to' => 'https://example.com/new'));
-    if (strpos($r['rewrite_rule'], '301') === false || strpos($r['rewrite_rule'], '/old') === false) { return false; }
+    if (strpos($r['rewrite_rule'], 'R=301') === false || strpos($r['rewrite_rule'], '^old$') === false) { return false; }
     $alias = cloudhost247_tool_url_rewrite(array('redirect_type' => '301', 'from' => '/old', 'to' => 'https://example.com/new'));
     return $alias === $r;
 });
 
 $check('robots generator produces disallow rules', function () {
-    $r = cloudhost247_tool_robots_generator(array('user_agent' => '*', 'disallow' => '/admin'));
+    $_POST = array('disallow' => '/admin'); // handler reads $_POST directly
+    $r = cloudhost247_tool_robots_generator(array('user_agent' => '*'));
     $out = $r['robots_txt'];
     return strpos($out, 'User-agent: *') !== false && strpos($out, 'Disallow: /admin') !== false;
 });
@@ -1000,7 +1006,7 @@ $check('mac generator emits valid addresses and lookup validates', function () {
 $check('user agent reflects the requesting agent', function () {
     $_SERVER['HTTP_USER_AGENT'] = 'TestAgent/1.0 (compatible)';
     $r = cloudhost247_tool_user_agent(array());
-    return strpos(json_encode($r), 'TestAgent/1.0') !== false;
+    return $r['user_agent'] === 'TestAgent/1.0 (compatible)' && $r['is_mobile'] === false;
 });
 
 $check('reverse image search builds engine links', function () {
@@ -1039,11 +1045,13 @@ $check('ip tools validate address first', function () {
 
 $check('online notepad enforces the size cap', function () {
     $_SESSION = array();
-    $ok = cloudhost247_tool_online_notepad(array('content' => 'short note', 'notepad_action' => 'save'));
+    $_POST = array('content' => 'short note'); // handler reads $_POST directly
+    $ok = cloudhost247_tool_online_notepad(array('notepad_action' => 'save'));
     if (!isset($ok['saved']) || $ok['saved'] !== true) { return false; }
     $load = cloudhost247_tool_online_notepad(array('notepad_action' => 'load'));
     if ($load['content'] !== 'short note') { return false; }
-    $tooBig = cloudhost247_tool_online_notepad(array('content' => str_repeat('x', 262145), 'notepad_action' => 'save'));
+    $_POST = array('content' => str_repeat('x', 262145));
+    $tooBig = cloudhost247_tool_online_notepad(array('notepad_action' => 'save'));
     return isset($tooBig['error']);
 });
 

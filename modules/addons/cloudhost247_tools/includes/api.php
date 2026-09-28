@@ -40,21 +40,23 @@ function cloudhost247_tools_cache_exempt_tools()
  */
 function cloudhost247_tools_is_cacheable($toolId)
 {
-    static $cacheable = null;
-    if ($cacheable === null) {
-        $cacheable = array(
-            // DNS lookups
-            'spf_checker', 'domain_dns_validation', 'dns_lookup', 'cname_lookup',
-            'ns_lookup', 'mx_lookup', 'dns_propagation', 'dmarc_lookup', 'dns_health',
-            'dnskey_lookup', 'ds_record_lookup', 'dkim_checker', 'reverse_ip_lookup',
-            // IP / network identity lookups
-            'domain_to_ip', 'ip_to_hostname', 'ip_location', 'isp_checker',
-            'ip_whois', 'ipv6_whois', 'ip_blacklist', 'asn_lookup', 'mac_lookup',
-            // TLS / HTTP metadata
-            'ssl_checker', 'http_headers', 'server_os_detector', 'pagerank',
-        );
-    }
-    return isset($cacheable[$toolId]) && !in_array($toolId, cloudhost247_tools_cache_exempt_tools(), true);
+        static $cacheable = null;
+        if ($cacheable === null) {
+            // Keyed map so membership is an isset() lookup (a plain value list
+            // made isset() always false — the cache silently never worked).
+            $cacheable = array_fill_keys(array(
+                // DNS lookups
+                'spf_checker', 'domain_dns_validation', 'dns_lookup', 'cname_lookup',
+                'ns_lookup', 'mx_lookup', 'dns_propagation', 'dmarc_lookup', 'dns_health',
+                'dnskey_lookup', 'ds_record_lookup', 'dkim_checker', 'reverse_ip_lookup',
+                // IP / network identity lookups
+                'domain_to_ip', 'ip_to_hostname', 'ip_location', 'isp_checker',
+                'ip_whois', 'ipv6_whois', 'ip_blacklist', 'asn_lookup', 'mac_lookup',
+                // TLS / HTTP metadata
+                'ssl_checker', 'http_headers', 'server_os_detector', 'pagerank',
+            ), true);
+        }
+        return isset($cacheable[$toolId]) && !in_array($toolId, cloudhost247_tools_cache_exempt_tools(), true);
 }
 
 /**

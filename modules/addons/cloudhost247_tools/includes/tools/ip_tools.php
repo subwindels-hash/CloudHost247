@@ -340,14 +340,18 @@ function cloudhost247_tool_ipv6_compress($post)
         $compressed = inet_ntop(inet_pton($ipv6));
         return ['original' => $ipv6, 'compressed' => $compressed];
     } else {
-        $expanded = inet_ntop(inet_pton($ipv6));
-        // Re-expand to full form
-        $parts = explode(':', $expanded);
-        $fullParts = [];
-        foreach ($parts as $part) {
-            $fullParts[] = str_pad($part, 4, '0', STR_PAD_LEFT);
+        // Expand to the full 32-hex-digit form. The compressed "::" group must
+        // be filled with the right number of zero groups first - padding each
+        // part alone leaves "::" in place and produces a wrong expansion.
+        $bin = @inet_pton($ipv6);
+        if ($bin === false || strlen($bin) !== 16) {
+            return ['error' => 'Invalid IPv6 address'];
         }
-        return ['original' => $ipv6, 'expanded' => implode(':', $fullParts)];
+        $groups = array();
+        for ($i = 0; $i < 16; $i += 2) {
+            $groups[] = sprintf('%04x', (ord($bin[$i]) << 8) | ord($bin[$i + 1]));
+        }
+        return ['original' => $ipv6, 'expanded' => implode(':', $groups)];
     }
 }
 
