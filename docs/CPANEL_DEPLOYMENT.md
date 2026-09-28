@@ -352,7 +352,7 @@ reinstall" for routine updates.
 
 ---
 
-## 8. Endpoints and frontend routes shipped in Phase 1
+## 8. Endpoints and frontend routes
 
 - `GET /health` — liveness probe. Always returns `200` with a minimal JSON body
   (`{ "status": "ok" }`-shaped) as long as the Node process is running; it does **not** check the
@@ -366,21 +366,37 @@ reinstall" for routine updates.
   login/registration events). Login and other sensitive routes are rate-limited (see below);
   repeated failed attempts return `429 Too Many Requests`, not a generic error.
 - All other GET routes are handled by the React SPA (`frontend/`), built into `public/` and
-  served by the Node app with a **server-side SPA fallback** — the shipped routes are `/`,
-  `/login`, `/register`, `/dashboard`, `/services`, `/domains`, `/billing`, `/invoices`,
-  `/support`, `/admin`. Because the fallback is implemented in the Node app itself
-  (`src/app.ts`'s `setNotFoundHandler`, using `@fastify/static`'s `reply.sendFile('index.html')`),
-  **directly navigating to, or refreshing the browser on, any of those URLs works correctly** —
-  the server always returns the SPA shell for unmatched `GET` requests that aren't `/api/*`,
-  `/health`, or `/ready`, and React Router takes over client-side from there. This requires no
-  `.htaccess` rewrite rules of its own; do not add conflicting Apache rewrite rules for these
-  paths on top of what cPanel's Application Manager already wrote when you mounted the app.
+  served by the Node app with a **server-side SPA fallback**. Shipped routes:
+  - Phase 1 (auth foundation + authenticated-app placeholders): `/`, `/login`, `/register`,
+    `/dashboard`, `/services`, `/domains`, `/billing`, `/invoices`, `/support`, `/admin`.
+  - Phase 2 (public website + shared application shell): `/about`, `/hosting/cpanel`,
+    `/legal/privacy-policy` — same shared `Header`/`Footer` shell as the rest of the app
+    (`frontend/src/layout/`), and the same generic SPA-fallback mechanism, so **no server or
+    Apache configuration changes are ever needed to add a new client-side route** — this was
+    verified by adding these three routes without touching `src/app.ts`.
+
+  Because the fallback is implemented in the Node app itself (`src/app.ts`'s
+  `setNotFoundHandler`, using `@fastify/static`'s `reply.sendFile('index.html')`), **directly
+  navigating to, or refreshing the browser on, any of those URLs works correctly** — the server
+  always returns the SPA shell for unmatched `GET` requests that aren't `/api/*`, `/health`, or
+  `/ready`, and React Router takes over client-side from there. This requires no `.htaccess`
+  rewrite rules of its own; do not add conflicting Apache rewrite rules for these paths on top of
+  what cPanel's Application Manager already wrote when you mounted the app.
 - Security headers/CORS (`@fastify/helmet`, `@fastify/cors`) and rate limiting
   (`@fastify/rate-limit`) are applied globally to every route registered on the app (verified via
   `tests/unit/rate-limit.test.ts` and `tests/unit/spa-routing.test.ts`, and against a real
   Postgres-backed run — see section 10).
+- **Content honesty notes for the Phase 2 public pages** (see `frontend/src/pages/`): the
+  homepage hero copy and footer tagline reuse the real CloudHost247 brand defaults from
+  `modules/addons/cloudhost247_theme/lib/ThemeRepository.php`; the About page and cPanel Hosting
+  page contain newly-written, clearly-generic copy (no fabricated team bios, no invented
+  pricing — the real product catalog and pricing remain in WHMCS until a later phase integrates
+  them here); the Privacy Policy route uses a generic, explicitly-labeled placeholder component
+  (`frontend/src/pages/LegalPage.tsx`) rather than fabricated legal text — the existing WHMCS
+  `privacy-policy.php` remains the authoritative version until a reviewed replacement ships.
 
 ---
+
 
 ## 9. No long-running workers — HTTP job endpoints + cPanel Cron only (future phases)
 

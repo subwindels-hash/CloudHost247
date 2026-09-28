@@ -28,7 +28,24 @@ describe('SPA fallback routing (Apache/cPanel refresh safety)', () => {
     rmSync(publicDir, { recursive: true, force: true });
   });
 
-  const routes = ['/', '/login', '/register', '/dashboard', '/services', '/domains', '/billing', '/invoices', '/support', '/admin'];
+  const routes = [
+    '/',
+    '/login',
+    '/register',
+    '/dashboard',
+    '/services',
+    '/domains',
+    '/billing',
+    '/invoices',
+    '/support',
+    '/admin',
+    // Phase 2 public marketing/legal routes — same generic fallback mechanism, no server changes
+    // required to add them, which is the point of testing the fallback itself rather than a
+    // hardcoded route list.
+    '/about',
+    '/hosting/cpanel',
+    '/legal/privacy-policy',
+  ];
 
   it.each(routes)('GET %s resolves to the SPA shell (not a 404)', async (route) => {
     const app = buildApp(env, { serveFrontend: true, publicDir });
