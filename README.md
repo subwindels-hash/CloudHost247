@@ -42,7 +42,8 @@ of this repository **into** an existing WHMCS installation root (cPanel
 │   │   ├── customaffiliate/           Custom affiliate commission engine
 │   │   ├── digitalproducts/           Digital products marketplace / secure downloads
 │   │   ├── phoneservices/             Phone number platform (Twilio/Telnyx style)
-│   │   ├── smmaddon/                  SMM panel integration (admin part)
+│   │   ├── smmaddon/                  SMM panel integration, basic prototype (superseded)
+│   │   ├── cloudhost247_smm/          CloudHost247 SMM marketplace (multi-provider; supersedes smmaddon)
 │   │   ├── soyoustart/                OVH/SoYouStart admin suite (WGS-OVH v8.0.8)
 │   │   └── xtreme_currency_rates/     Xtreme Currency Rates (ionCube)
 │   ├── gateways/                   ← Payment gateway modules
@@ -55,7 +56,8 @@ of this repository **into** an existing WHMCS installation root (cPanel
 │       ├── soyoustart/                SoYouStart dedicated server provisioning
 │       ├── soyoustart_vps/            SoYouStart VPS provisioning
 │       ├── cloudhost247_email/               Email hosting provisioning (M365/GWorkspace/Pro)
-│       └── smmprovisioning/           SMM panel order automation
+│       ├── smmprovisioning/           SMM panel order automation (superseded by cloudhost247_smm)
+│       └── cloudhost247_smm/          CloudHost247 SMM marketplace provisioning (payment-gated, idempotent)
 ├── templates/
 │   ├── cloudhost247/                ← CloudHost247 independent theme (child of twenty-one)
 │   ├── cloudhost247_legacy/         ← CloudHost247 legacy theme (WHMCS Global Services)
@@ -92,7 +94,8 @@ of this repository **into** an existing WHMCS installation root (cPanel
 | Custom Affiliate | addon | `modules/addons/customaffiliate/` |
 | Digital Products Marketplace | addon | `modules/addons/digitalproducts/` |
 | Phone Number Platform | addon | `modules/addons/phoneservices/` |
-| SMM Addon | addon | `modules/addons/smmaddon/` |
+| SMM Addon (prototype) | addon | `modules/addons/smmaddon/` |
+| CloudHost247 SMM Marketplace | addon + server | `modules/addons/cloudhost247_smm/` + `modules/servers/cloudhost247_smm/` (multi-provider, cron `crons/cloudhost247_smm.php`) |
 | SoYouStart admin suite | addon | `modules/addons/soyoustart/` |
 | Xtreme Currency Rates 6.0 | addon | `modules/addons/xtreme_currency_rates/` |
 | Blockonomics | gateway | `modules/gateways/blockonomics.php` (+ `blockonomics/`, `callback/`) |
@@ -101,7 +104,7 @@ of this repository **into** an existing WHMCS installation root (cPanel
 | SoYouStart (dedicated) | server | `modules/servers/soyoustart/` |
 | SoYouStart VPS | server | `modules/servers/soyoustart_vps/` |
 | CloudHost247 Email Hosting | server | `modules/servers/cloudhost247_email/` |
-| SMM Provisioning | server | `modules/servers/smmprovisioning/` |
+| SMM Provisioning (prototype) | server | `modules/servers/smmprovisioning/` |
 
 **Notes**
 - `cloudhost247_tools` and `CloudHost247_tools` are two brandings of the same platform —

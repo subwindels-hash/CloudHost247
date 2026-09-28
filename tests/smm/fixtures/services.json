@@ -1,0 +1,7 @@
+[
+  {"service": "12", "name": "Instagram Followers - Real", "type": "Default", "category": "Instagram Followers", "description": "High quality followers", "rate": "0.90", "min": "100", "max": "10000", "refill": true, "cancel": true, "currency": "USD"},
+  {"service": "27", "name": "TikTok Likes - Fast", "type": "Default", "category": "TikTok Likes", "description": "", "rate": "0.10", "min": "50", "max": "5000", "refill": false, "cancel": false, "currency": "USD"},
+  {"service": "31", "name": "YouTube Views", "type": "Default", "category": "YouTube", "rate": "1.20", "min": "1000", "max": "1000000", "refill": true, "cancel": false, "currency": "USD"},
+  {"service": "999", "name": "", "rate": "0.01"},
+  {"service": "44", "name": "Twitter Retweets", "type": "Default", "category": "Twitter", "rate": "0.30", "min": "20", "max": "2000", "refill": false, "cancel": true, "currency": "USD"}
+]

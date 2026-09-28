@@ -1,0 +1,111 @@
+CLOUDHOST247 SMM MARKETPLACE - CAPABILITIES, LIMITATIONS AND VERIFICATION STATUS
+================================================================================
+
+STATUS (do not skip this section)
+---------------------------------
+IMPLEMENTED AND UNIT/STATIC TESTED. NOT PRODUCTION-VERIFIED.
+The automated test suite (tests/smm/run.php + test_static.py) runs against a
+MOCKED provider transport with scripted JSON fixtures. That is explicitly a
+developer-level verification of logic, NOT a staging verification. No claim of
+production readiness may be made until the staging checklist below is
+completed and recorded.
+
+IMPLEMENTED CAPABILITIES
+------------------------
+- Multi-provider management: generic SMM Panel API v2 adapter (POST key+action
+  dialect: services/add/status/balance/refill/refill_status/cancel), per-
+  provider enable/disable, priority, timeout, connection test with balance.
+- API keys encrypted at rest via WHMCS encrypt(); plaintext never stored,
+  never redisplayed (masked hint only), never logged (Redactor strips key
+  material from requests and response echoes before insert).
+- Catalog sync: adds/updates/deactivates (never deletes) provider services
+  with all documented fields (service id, name, category, description,
+  min/max, rate, currency, type, refill, cancel, status). Values absent from
+  the panel are stored as NULL, never invented.
+- Product mapping: existing WHMCS products only; the module never creates or
+  modifies products or pricing. Duplicate product mappings are refused (UI
+  pre-check + unique index). Min/max/cost/sell/margin captured per mapping.
+- Order automation: submission ONLY from WHMCS CreateAccount (payment +
+  approval); validated target link + quantity; idempotent via unique service
+  index + optimistic claim; provider order id stored; full event history and
+  redacted API log with correlation ids.
+- Failure semantics: provider refusals -> stored, surfaced, admin-retryable;
+  lost/unknown outcomes -> "uncertain" + reconciliation (verify-only, never
+  a blind resubmit); crashed workers (in-flight > 15 min) -> swept to
+  uncertain. Retry is blocked whenever a provider order id exists.
+- Status sync: bounded batches, per-provider failure isolation (one bad panel
+  cannot stall the queue), normalization from provider spellings, verified
+  terminal statuses never overwritten (conflicts flagged for review).
+- Client area: "My SMM Orders" page (ownership-scoped, no provider internals)
+  and per-service panel with refill/cancel buttons offered only when the
+  provider supports the operation and the status allows it. Duplicate refill
+  requests are blocked while one is in progress.
+- Admin dashboard with real counts (no fabricated statistics), filterable
+  paginated tables, order detail with events and API log, provider/service/
+  mapping management, settings, log purge.
+- Cron: status sync, pending-submission drive, reconciliation, catalog sync,
+  cleanup - all bounded, interval-gated and overlap-locked; CLI-only
+  standalone entry + AfterCronJob hook sharing the same lock.
+- Schema: 9 additive mod_cloudhost247_smm_* tables via guarded, re-runnable
+  versioned migration (V100) registered in the repo migration gate. No WHMCS
+  core table is modified. No foreign keys (history cannot be cascade-deleted).
+- Security: AdminGuard session+CSRF+capability checks on every admin action;
+  HTTPS-only provider endpoints with TLS verification, no redirect following
+  with credentials, bounded timeouts and response size, private/reserved IP
+  rejection (SSRF); no eval/exec/shell functions; no unserialize; no dynamic
+  SQL fragments; templates escape every variable; page rendering performs
+  zero provider API calls.
+
+HONEST LIMITATIONS (known and accepted)
+---------------------------------------
+- Generic adapter scope: only the "Generic SMM Panel API v2" dialect is
+  implemented. Panels with different wire formats need a new adapter class
+  registered in AdapterFactory (by design a small, isolated class).
+- Some panels do not implement cancel/refill or return inconsistent shapes;
+  capability flags are per-provider/per-service and buttons stay hidden when
+  unsupported. Panels that misreport "refill": true will produce a provider
+  refusal, which is surfaced and logged, not faked.
+- DNS TOCTOU: provider URLs are validated at save time and again immediately
+  before each request, but between validation and the cURL call a malicious
+  DNS answer could theoretically redirect to a private address. Standard
+  curl (not a custom resolver) is used for WHMCS compatibility. Documented
+  accepted risk; mitigation is restricting provider configuration to admins.
+- IPv6 checking is coarser than IPv4 (loopback/ULA/link-local blocked;
+  full CIDR table not implemented). Provider panels are public v4/v6 hosts.
+- Reconciliation cannot verify an uncertain submission that produced no
+  provider order id (nothing to query); those orders need a human to check
+  the panel and attach the id on the order page. This is by design (safer
+  than resubmitting).
+- Status sync cadence is minute-granularity (interval floor of 60 s).
+- No dripfeed / subscriptions / multi-link orders: the generic dialect's
+  extras field is not modeled. Not invented per project policy.
+- The client "My SMM Orders" list is capped at the most recent 200 orders.
+
+STAGING VERIFICATION CHECKLIST (required before any production claim)
+---------------------------------------------------------------------
+Perform on an isolated WHMCS 8.9.x + PHP 7.4 staging install with a REAL
+provider panel (or a panel you control):
+ 1. Activate addon: migration V100 applies; re-activating is a no-op.
+ 2. Add provider with a real key: Test shows balance; key not visible
+    anywhere afterwards; api_log rows show [REDACTED] for the key.
+ 3. Sync services against the real panel; spot-check min/max/rate.
+ 4. Map a product; place a paid test order; verify exactly ONE submission
+    appears at the panel (check panel order list); repeat provisioning run
+    (admin "run module create") -> still one order.
+ 5. Simulate provider refusal (bad service id) -> rejection stored, retry
+    works after fixing.
+ 6. Simulate lost response (block the panel host) -> order becomes
+    uncertain; no resubmission after multiple cron runs; attach the panel
+    order id -> reconciliation resolves it.
+ 7. Status sync: watch a live order progress to completion; then verify a
+    contradictory provider answer cannot flip a completed order (flag only).
+ 8. Cron: run crons/cloudhost247_smm.php via CLI; confirm overlap lock when
+    launched twice concurrently; confirm web access returns 403.
+ 9. Client area: second client cannot see the first client's orders; refill
+    button only on completed/partial for refill-capable services.
+10. Rollback: deactivate + re-activate; terminate a service; delete a
+    provider with history (must be blocked); delete a mapping (orders keep
+    snapshots).
+Record results in docs/build-notes/cloudhost247-smm/STAGING-RESULTS.txt
+(template to be created on first run). Only after all ten pass may the
+module be described as production-ready.

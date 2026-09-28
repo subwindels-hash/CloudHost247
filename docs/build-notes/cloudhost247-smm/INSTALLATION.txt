@@ -1,0 +1,140 @@
+CLOUDHOST247 SMM MARKETPLACE - INSTALLATION & OPERATIONS GUIDE
+==============================================================
+
+Scope: modules/addons/cloudhost247_smm (addon) + modules/servers/cloudhost247_smm
+(provisioning) + crons/cloudhost247_smm.php. Targets WHMCS 8.9.x on PHP 7.4+
+(IonCube-encoded WHMCS is unaffected: this module is plain PHP, independent of
+WHMCS core files, and does not decode or bypass anything).
+
+This module SUPERSEDES the earlier prototype modules/addons/smmaddon +
+modules/servers/smmprovisioning. Those are not removed by this installation;
+disable them in WHMCS when switching over (see "Migrating from the prototype"
+below).
+
+--------------------------------------------------------------------------
+1. PREREQUISITES
+--------------------------------------------------------------------------
+- WHMCS 8.9.x, PHP 7.4 or newer, MySQL 5.7+/MariaDB 10.3+.
+- PHP extensions: curl, openssl, mbstring (all standard in WHMCS installs).
+- The CloudHost247 core addon (modules/addons/cloudhost247_core) present.
+- Outbound HTTPS to your provider panel(s).
+- A provider API key per panel (the "Generic SMM Panel API v2" dialect:
+  POST form with "key" and "action" parameters).
+
+--------------------------------------------------------------------------
+2. INSTALL
+--------------------------------------------------------------------------
+a) Deploy files (already in the repository):
+     modules/addons/cloudhost247_smm/
+     modules/servers/cloudhost247_smm/
+     crons/cloudhost247_smm.php
+
+b) WHMCS admin -> System Settings -> Addon Modules:
+   - Activate "CloudHost247 SMM Marketplace".
+   - Activation runs migration V100 (creates 9 mod_cloudhost247_smm_* tables,
+     guarded and re-runnable). Nothing is dropped or renamed; no WHMCS core
+     table is modified.
+   - Grant admin role access.
+
+c) WHMCS admin -> System Settings -> Products/Services:
+   - For each SMM service you sell, create a product using the
+     "CloudHost247 SMM Marketplace" module (or switch an existing product to
+     it). The product itself (name, price, group, etc.) stays a normal WHMCS
+     product - the module NEVER creates or edits products or pricing.
+   - The product's configurable options "Target Link" and "Quantity" are
+     created automatically by the module's ConfigOptions.
+
+d) Configure the addon (Addon Modules -> CloudHost247 SMM):
+   1. Providers tab -> Add provider: name, adapter "generic", the panel's
+      HTTPS API URL, and the API key. The key is encrypted immediately
+      (WHMCS encrypt()) and never displayed again - only a masked hint.
+      Press "Test" to verify connectivity + balance; then "Enable".
+   2. Providers tab -> "Sync services" imports the panel's catalog into
+      Services (min/max/rate/type/category/refill/cancel are stored as
+      reported; nothing is invented).
+   3. Mappings tab -> Add mapping: pick an existing WHMCS product, pick a
+      provider service, set display name, min/max (override or blank to use
+      the provider's), cost/selling price/currency. One product maps to
+      exactly one provider service (duplicate mappings are refused).
+      Enable the mapping.
+   4. Settings tab: intervals and batch sizes. Defaults are sane
+      (status sync 15 min, catalog 24 h, reconciliation 60 min, log
+      retention 90 days).
+
+e) Cron (choose one):
+   - Recommended: */5 * * * * php -q /path/to/whmcs/crons/cloudhost247_smm.php
+     (every five minutes; adjust to taste - the script is CLI-only and exits
+     403 over the web).
+   - Or rely on the AfterCronJob hook: no extra setup, runs on every WHMCS
+     cron execution.
+   Both paths share the same overlap lock (mod_cloudhost247_smm_locks), so
+   running both is safe - the second run simply skips.
+
+--------------------------------------------------------------------------
+3. HOW ORDERS FLOW
+--------------------------------------------------------------------------
+1. Customer orders the product, pays (or admin accepts the order).
+2. WHMCS runs provisioning -> CreateAccount -> the order is validated
+   (target link format, quantity vs mapping/provider min-max) and submitted
+   to the panel exactly once. Repeated provisioning attempts return the
+   recorded outcome (idempotent - unique index on the WHMCS service id plus
+   an optimistic state claim).
+   - Provider refuses (bad service id, insufficient balance...): the refusal
+     text is stored and shown; an admin can correct and "Retry submission"
+     (retry is blocked if a provider order id was already recorded).
+   - Connection lost mid-submission: the order becomes "uncertain" and is
+     NEVER auto-resubmitted. Reconciliation polls the panel; if an order id
+     was found in the panel it is attached on the order detail page.
+3. Status sync updates the order (pending -> processing -> in progress ->
+   partial/completed/canceled/failed/refunded, normalized from the panel's
+   raw spelling). Verified terminal statuses are never overwritten; a
+   contradictory provider answer flags the order for review.
+4. Customer sees status on the product page and in "My SMM Orders"
+   (index.php?m=cloudhost247_smm). Refill/Cancellation buttons appear only
+   when the provider genuinely supports them and the status allows it.
+5. Admin dashboard: real counts, reconciliation queue, review flags, full
+   order detail with every event and redacted API call (correlation ids
+   included).
+
+--------------------------------------------------------------------------
+4. MIGRATING FROM THE PROTOTYPE (smmaddon / smmprovisioning)
+--------------------------------------------------------------------------
+- The prototype uses its own tables (smm_addon_*); this module does not read
+  or write them. Finish or cancel any open prototype orders manually in the
+  panel, then deactivate the prototype addon in WHMCS and switch products to
+  the new module.
+- No data migration is performed (the prototype stored little state). If you
+  must keep prototype orders for reference, leave the prototype addon
+  installed but disabled.
+
+--------------------------------------------------------------------------
+5. ROLLBACK
+--------------------------------------------------------------------------
+- Deactivate the addon: NON-destructive (all tables and data are retained).
+  Products using the provisioning module will show the generic error page
+  until re-activated.
+- To fully remove after decommissioning: deactivate the addon, switch
+  products to another module (or delete them), then drop the
+  mod_cloudhost247_smm_* tables manually. Order history lives only there -
+  export it first if you need an audit trail. Nothing else in WHMCS is
+  touched by this module.
+- Downgrades: the module has a single migration version (1.0.0); rolling
+  back the code while leaving the tables is safe (newer code re-activates
+  against the same schema).
+
+--------------------------------------------------------------------------
+6. OPERATIONS NOTES
+--------------------------------------------------------------------------
+- Provider deletion is BLOCKED while any order references the provider.
+  Disable the provider instead (order history keeps its snapshots). A
+  provider with zero history can be deleted (its catalog + mappings go with
+  it; orders never do).
+- Deleting a mapping never touches existing orders (snapshots are kept on
+  the order row) and never cancels anything at the panel.
+- Local catalog rows missing from a panel response are marked unavailable,
+  never deleted.
+- Terminating a WHMCS service ends the local lifecycle only; cancelling at
+  the panel is an explicit action.
+- All provider API calls are logged with redacted request/response excerpts
+  (key material is stripped before insert) and purged per the retention
+  setting.
