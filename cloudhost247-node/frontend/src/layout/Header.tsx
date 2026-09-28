@@ -1,19 +1,24 @@
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
+import { apiFetch } from '../lib/api';
 import { clearSession } from '../lib/auth';
 import { useAuthState } from './useAuthState';
 
 const marketingLinks = [
   { to: '/', label: 'Home', end: true },
-  { to: '/hosting/cpanel', label: 'Hosting' },
+  { to: '/hosting', label: 'Hosting' },
+  { to: '/domains', label: 'Domains' },
   { to: '/about', label: 'About' },
-  { to: '/support', label: 'Support' },
+  { to: '/contact', label: 'Contact' },
+  { to: '/faq', label: 'FAQ' },
 ];
 
+// Secondary, in-app navigation shown only once signed in (account/feature areas). Kept separate
+// from the primary Dashboard/Account/Log out controls in ch247-auth-links so that "how do I sign
+// out" is never buried inside a long feature list.
 const appLinks = [
-  { to: '/dashboard', label: 'Dashboard' },
   { to: '/services', label: 'Services' },
-  { to: '/domains', label: 'Domains' },
+  { to: '/account/domains', label: 'My Domains' },
   { to: '/billing', label: 'Billing' },
   { to: '/invoices', label: 'Invoices' },
   { to: '/admin', label: 'Admin' },
@@ -24,8 +29,18 @@ export default function Header() {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  function handleLogout() {
+  async function handleLogout() {
     setMenuOpen(false);
+    // Best-effort: actually invalidate the token server-side (see /api/auth/logout +
+    // database/migrations/0003_create_revoked_tokens.sql) so it can't keep being used elsewhere
+    // even after this tab clears its own copy. If the network call fails (offline, server
+    // unreachable), still clear the local session immediately — a user clicking "Log out" must
+    // never be left looking signed in on the device in front of them.
+    try {
+      await apiFetch('/api/auth/logout', { method: 'POST' });
+    } catch {
+      // Already logged out / offline / network error — fall through to local cleanup regardless.
+    }
     clearSession();
     navigate('/');
   }
@@ -65,7 +80,12 @@ export default function Header() {
           <div className="ch247-auth-links">
             {token ? (
               <>
-                {user && <span className="ch247-auth-greeting">{user.fullName}</span>}
+                <NavLink to="/dashboard" onClick={closeMenu}>
+                  Dashboard
+                </NavLink>
+                <NavLink to="/account" onClick={closeMenu}>
+                  {user ? user.fullName.split(' ')[0] : 'Account'}
+                </NavLink>
                 <button type="button" className="ch247-button ch247-button--ghost" onClick={handleLogout}>
                   Log out
                 </button>
@@ -73,10 +93,10 @@ export default function Header() {
             ) : (
               <>
                 <NavLink to="/login" className="ch247-button ch247-button--ghost" onClick={closeMenu}>
-                  Log in
+                  Sign In
                 </NavLink>
                 <NavLink to="/register" className="ch247-button" onClick={closeMenu}>
-                  Get started
+                  Create Account
                 </NavLink>
               </>
             )}

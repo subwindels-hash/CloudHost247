@@ -195,6 +195,14 @@ a {
   border: 1px solid rgba(255, 255, 255, 0.35);
 }
 
+/* Secondary button variant for use on light/card backgrounds (ch247-button--ghost is designed for
+   the dark header and is unreadable outside it). */
+.ch247-button--outline {
+  background: transparent;
+  color: var(--ch247-primary) !important;
+  border: 1px solid var(--ch247-border);
+}
+
 .ch247-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
@@ -276,6 +284,15 @@ a {
   padding: 0;
 }
 
+.ch247-page--wide {
+  max-width: 980px;
+}
+
+.ch247-page__hint {
+  font-size: 0.85rem;
+  margin: 0;
+}
+
 .ch247-placeholder-notice {
   background: #fff7e6;
   border: 1px solid #f5d98b;
@@ -283,13 +300,119 @@ a {
   padding: 0.9rem 1.1rem;
 }
 
+.ch247-definition-list {
+  display: grid;
+  grid-template-columns: minmax(0, 140px) 1fr;
+  row-gap: 0.6rem;
+  column-gap: 1rem;
+  margin: 1.25rem 0;
+}
+
+.ch247-definition-list dt {
+  font-weight: 600;
+  color: #40506b;
+}
+
+.ch247-definition-list dd {
+  margin: 0;
+  word-break: break-word;
+}
+
+/* --- Legal / FAQ / contact / index-style content pages --------------------------------------- */
+
+.ch247-index-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.1rem;
+  margin: 1.5rem 0;
+}
+
+.ch247-index-card {
+  border: 1px solid var(--ch247-border);
+  border-radius: 0.6rem;
+  padding: 1.1rem 1.25rem;
+  background: #fff;
+}
+
+.ch247-index-card h3 {
+  margin: 0 0 0.4rem;
+  font-size: 1.02rem;
+}
+
+.ch247-index-card p {
+  margin: 0 0 0.6rem;
+  color: #40506b;
+  font-size: 0.92rem;
+}
+
+.ch247-index-card__status {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+}
+
+.ch247-index-card__status--available {
+  background: #e6f8f0;
+  color: #067647;
+}
+
+.ch247-index-card__status--pending {
+  background: #eef2fa;
+  color: #40506b;
+}
+
+.ch247-faq-item {
+  border-bottom: 1px solid var(--ch247-border);
+  padding: 1.1rem 0;
+}
+
+.ch247-faq-item:last-child {
+  border-bottom: none;
+}
+
+.ch247-faq-item h3 {
+  margin: 0 0 0.45rem;
+  font-size: 1.02rem;
+}
+
+.ch247-faq-item p,
+.ch247-faq-item ul {
+  margin: 0;
+  color: #40506b;
+}
+
+.ch247-faq-item ul {
+  padding-left: 1.2rem;
+}
+
+.ch247-contact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1.1rem;
+  margin: 1.5rem 0;
+}
+
 @media (max-width: 767px) {
   .ch247-hero {
     padding: 3rem 1.25rem;
   }
 
-  .ch247-grid {
+  .ch247-grid,
+  .ch247-index-grid,
+  .ch247-contact-grid {
     grid-template-columns: 1fr;
+  }
+
+  .ch247-definition-list {
+    grid-template-columns: 1fr;
+  }
+
+  .ch247-definition-list dd {
+    margin-bottom: 0.35rem;
   }
 
   .ch247-menu-toggle {

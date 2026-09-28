@@ -1,5 +1,5 @@
 import { FormEvent, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { apiFetch } from '../lib/api';
 import { setSession, type StoredUser } from '../lib/auth';
 import { usePageMeta } from '../lib/usePageMeta';
@@ -9,6 +9,10 @@ interface AuthResponse {
   token: string;
 }
 
+interface LocationState {
+  from?: string;
+}
+
 export default function LoginPage() {
   usePageMeta('Log in', 'Log in to your CloudHost247 account.');
   const [email, setEmail] = useState('');
@@ -16,6 +20,8 @@ export default function LoginPage() {
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const redirectTo = (location.state as LocationState | null)?.from || '/dashboard';
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -28,7 +34,7 @@ export default function LoginPage() {
       });
       setSession(res.token, res.user);
       setMessage({ kind: 'ok', text: `Welcome back, ${res.user.fullName}.` });
-      navigate('/dashboard');
+      navigate(redirectTo, { replace: true });
     } catch (err) {
       setMessage({ kind: 'error', text: err instanceof Error ? err.message : 'Login failed' });
     } finally {

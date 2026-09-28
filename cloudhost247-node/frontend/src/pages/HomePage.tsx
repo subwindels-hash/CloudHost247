@@ -36,7 +36,7 @@ export default function HomePage() {
         <div className="ch247-hero__inner">
           <h1>Cloud infrastructure built for your next idea</h1>
           <p>Fast hosting, straightforward billing, and support whenever you need it.</p>
-          <NavLink className="ch247-button" to="/hosting/cpanel">
+          <NavLink className="ch247-button" to="/hosting">
             Explore hosting
           </NavLink>
         </div>

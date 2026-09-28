@@ -37,8 +37,9 @@ describe('SPA fallback routing (Apache/cPanel refresh safety)', () => {
     '/login',
     '/register',
     '/dashboard',
+    '/account',
+    '/account/domains',
     '/services',
-    '/domains',
     '/billing',
     '/invoices',
     '/support',
@@ -47,7 +48,13 @@ describe('SPA fallback routing (Apache/cPanel refresh safety)', () => {
     // required to add them, which is the point of testing the fallback itself rather than a
     // hardcoded route list.
     '/about',
+    '/hosting',
     '/hosting/cpanel',
+    '/hosting/vps',
+    '/domains',
+    '/contact',
+    '/faq',
+    '/legal',
     '/legal/privacy-policy',
   ];
 

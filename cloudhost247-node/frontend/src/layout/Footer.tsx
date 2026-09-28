@@ -11,10 +11,13 @@ export default function Footer() {
           <p>Reliable cloud services, available around the clock.</p>
         </div>
         <nav aria-label="Footer">
-          <NavLink to="/hosting/cpanel">Hosting</NavLink>
+          <NavLink to="/hosting">Hosting</NavLink>
+          <NavLink to="/domains">Domains</NavLink>
           <NavLink to="/about">About</NavLink>
+          <NavLink to="/contact">Contact</NavLink>
+          <NavLink to="/faq">FAQ</NavLink>
           <NavLink to="/support">Support</NavLink>
-          <NavLink to="/legal/privacy-policy">Privacy policy</NavLink>
+          <NavLink to="/legal">Legal</NavLink>
         </nav>
       </div>
       <div className="ch247-footer__legal">&copy; {year} CloudHost247. All rights reserved.</div>
