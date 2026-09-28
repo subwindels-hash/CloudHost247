@@ -178,7 +178,10 @@ final class CloudHost247ToolsDnsClient
             if ($nameEnd === null || $nameEnd + 10 > $len) {
                 break; // malformed answer — return what we have so far
             }
-            $fixed = unpack('ntype/nclass/nttl/nrdlength', substr($raw, $nameEnd, 10));
+            // Wire layout: TYPE(16) CLASS(16) TTL(32!) RDLENGTH(16) - the TTL
+            // must be 'N' (32-bit); using 'n' here desynchronised every answer
+            // and made all records parse as out-of-bounds.
+            $fixed = unpack('ntype/nclass/Nttl/nrdlength', substr($raw, $nameEnd, 10));
             if ($fixed === false) {
                 break;
             }
