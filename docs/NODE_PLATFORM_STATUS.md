@@ -595,3 +595,125 @@ says the corresponding cPanel gate is CLOSED with evidence.
   authorized scope):** a working payment gateway (manual/offline and sandbox), payment initiation,
   webhooks, refunds, credits actually being issued, billing emails, admin/staff invoice or payment
   management, customer-facing billing UI, tax/discount configuration, multi-currency support.
+
+## Phase 5C — Payment integration (gateway abstraction → manual + sandbox gateways → payment initiation)
+
+- **Scope (explicitly authorized, third of the seven user-approved Phase 5 sub-phases; user
+  approved proceeding via "CONTINUE" after reviewing the 5B checkpoint):** a payment gateway
+  abstraction; a manual/offline gateway (staff record bank-transfer/cash payments) with its own
+  staff-confirmation resolution path; a self-contained sandbox gateway with simulated signed
+  webhook groundwork. Deliberately stops at **payment initiation** — actually receiving and
+  verifying a webhook is Phase 5D's job, not this one's. Started from accepted Phase 5B commit
+  `9361062`.
+- **Schema (`database/migrations/0021`–`0022`, additive, no change to any Phase 1–5B table):**
+  - `0021` — adds `payments.confirmed_by_user_id` (`uuid NULL REFERENCES users(id) ON DELETE SET
+    NULL`). Records which staff member confirmed/rejected a manual payment — the manual gateway's
+    equivalent of a webhook's provider signature: what makes a state transition attributable and
+    auditable rather than an unexplained status flip. `ON DELETE SET NULL` so deleting the staff
+    account later never blocks the delete or corrupts the payment record.
+  - `0022` — widens `auth_audit_log.event_type`'s `CHECK` (same drop/re-add pattern as `0013`) to
+    add `payment_initiated`, `manual_payment_confirmed`, `manual_payment_rejected` — continuing the
+    "one shared audit trail across phases" pattern rather than a new table per phase.
+- **Gateway abstraction (`src/payments/*`), new this phase:**
+  - `types.ts` — the `PaymentGateway` interface. `initiatePayment` only ever returns "here are the
+    details of a now-pending attempt," never "whether it succeeded" — every real gateway confirms
+    asynchronously (redirect/webhook/human), so the interface is honest about that instead of
+    baking synchronous success into its shape.
+  - `manual-gateway.ts` (`id='manual'`) — `providerReference` always `null` (no external system),
+    `method='bank_transfer'`, instructions from the new `MANUAL_PAYMENT_INSTRUCTIONS` env var or an
+    honest generic fallback if unset — **never a fabricated bank account number**.
+  - `sandbox-gateway.ts` (`id='sandbox'`) — generates a unique `sandbox_<hex>` provider reference
+    per call, `method='sandbox_demo'`, plus `buildSignedWebhookPayload()` — Phase 5D groundwork
+    only, not wired to any route.
+  - `webhook-signing.ts` — generic HMAC-SHA256 `signPayload`/`verifySignature` (timing-safe via
+    `crypto.timingSafeEqual`), pure crypto with zero DB/route knowledge, reusable by Phase 5D's
+    webhook receiver.
+  - `gateway-registry.ts` — `getGateway(id, env)` resolves `'manual'`/`'sandbox'` or throws a `400`;
+    `AVAILABLE_GATEWAY_IDS` kept in the same module as the registry so the two can never drift.
+- **New environment variables (both optional, both validated with no fabricated fallback secret):**
+  `MANUAL_PAYMENT_INSTRUCTIONS` (free-text; generic honest fallback if unset) and
+  `SANDBOX_GATEWAY_WEBHOOK_SECRET` (`min(16)`; only ever required at the point the sandbox gateway's
+  signing capability is actually invoked, not at process startup, so a deployment that never
+  exercises the sandbox gateway is never forced to configure it).
+- **Service layer (`src/services/payment-service.ts`, new this phase):**
+  `initiatePaymentForInvoice` — 404 if the invoice isn't owned/found, 400 if it isn't `unpaid`,
+  transactionally cancels any other still-`pending` attempt for that invoice then creates the new
+  `payments` row via the chosen gateway, logs `payment_initiated`.
+  `confirmManualPayment`/`rejectManualPayment` — both refuse (400) anything but a
+  `provider==='manual'`, `status==='pending'` payment (404 if the payment doesn't exist at all).
+  Confirming atomically: marks the payment `successful` + `confirmed_by_user_id`, records a
+  `payment` ledger entry, marks the invoice `paid`, marks the order's `payment_status` `paid`
+  (**the order's own fulfillment `status` is deliberately left untouched** — preserving the
+  Phase 5A/5B separation between order lifecycle and payment status) — logs
+  `manual_payment_confirmed`. Rejecting: marks the payment `failed` with a reason, records **no**
+  ledger entry (nothing was actually charged), leaves the invoice `unpaid` — logs
+  `manual_payment_rejected`. `getMyPaymentDetail` — same ownership-scoped 404 pattern as every other
+  read in this codebase.
+- **Routes (new this phase, wired into `src/app.ts`'s existing shared route context):**
+  `src/routes/payments.ts` — `POST /api/v1/invoices/:id/payments` (customer, body
+  `{gateway:'manual'|'sandbox'}`), `GET /api/v1/payments/:id` (customer, ownership-checked).
+  `src/routes/admin-billing.ts` — `POST /api/v1/admin/payments/:id/confirm-manual` and
+  `POST /api/v1/admin/payments/:id/reject-manual` (body `{reason}`), both gated to `admin` **and**
+  `super_admin` (not `super_admin`-only) — confirming/rejecting a manual payment is routine billing
+  support work, the staff equivalent of a webhook arriving, not an account-integrity action;
+  mirrors the same `admin`+`super_admin` split already used for routine customer support in
+  `src/routes/admin-customers.ts`. **This is deliberately narrow** — two single-purpose endpoints
+  for resolving a `manual` payment only, **not** the broader Phase 5F admin billing dashboard
+  (search/filter/view-all-invoices, refunds), which remains fully out of scope for 5C. Flagging this
+  boundary explicitly per the checkpoint cadence, in case the user intended something broader.
+- **Invoice detail extended, no breaking change:** `getMyInvoiceDetail`
+  (`src/services/billing-service.ts`) now also returns `payments` (every attempt for that invoice,
+  oldest first, including cancelled/failed ones) — `src/dto/billing.ts`'s `InvoiceDetailDTO` gained
+  one new field; every existing field is unchanged.
+- **The specific "5C stops at initiation" guarantee, proved, not just asserted:** `updatePaymentStatus`
+  (the only function in the codebase capable of changing a payment's status) is defined in
+  `src/db/payments.ts` and has **exactly one caller anywhere** —
+  `src/services/payment-service.ts` — and every call site there is preceded by a guard requiring
+  `provider === 'manual'`. `tests/integration/payments-api.test.ts` includes a static/grep-based
+  test asserting both of these facts directly against the committed source files (not just
+  behaviorally), specifically so a future edit "helpfully" auto-completing sandbox payments (e.g.
+  to make a demo look nicer) would be caught immediately.
+- **Testing:**
+  - `tests/integration/payments-schema.test.ts` (19 tests) — DB-level: `confirmed_by_user_id`
+    default-null/set/`COALESCE`-preserved-on-later-update/`ON DELETE SET NULL` behavior, the widened
+    `auth_audit_log` `CHECK` accepting the three new event types (and still rejecting an unknown
+    one), `setOrderPaymentStatus` touching only `payment_status`, `cancelOtherPendingPayments`
+    scoping correctly to one invoice, the gateway registry resolving both ids and rejecting unknown
+    ones, the manual gateway's fallback vs. configured-instructions behavior, the sandbox gateway's
+    unique-reference generation and `buildSignedWebhookPayload`'s guards (missing secret,
+    non-sandbox payment) and correct signature, and the webhook-signing module's sign/verify
+    round-trip, tamper rejection, wrong-secret rejection, and malformed-signature fail-closed
+    behavior.
+  - `tests/integration/payments-api.test.ts` (17 tests) — full API end-to-end: unauthenticated
+    rejection, unknown-gateway rejection, 404-not-403 ownership isolation on initiation and on
+    `GET /api/v1/payments/:id`, both gateways' initiation response shapes, the not-unpaid-invoice
+    guard, prior-pending-attempt cancellation on re-initiation, admin-route RBAC (401 unauth, 403
+    customer, 200 both `admin` and `super_admin`), confirm-manual's full atomic proof (payment +
+    ledger + invoice + order + `confirmed_by_user_id` + audit log, all checked against raw rows),
+    reject-manual's proof (failed status, no ledger entry, invoice stays unpaid, audit log),
+    empty-reason rejection, the manual-only guard rejecting a `sandbox` payment on both admin
+    routes, double-confirm/reject-after-confirm rejection, 404 for a nonexistent payment id, and
+    the static grep-based "sandbox never leaves pending" proof described above.
+  - `tests/integration/migrate.test.ts` — extended to cover all 22 migrations.
+  - **Full suite: 251/251 tests passing across 33 test files**, via a clean backend typecheck
+    (`tsc --noEmit`) and a clean production build (`npm run build`). All integration tests run
+    against a real embedded Postgres engine (pglite), migrated with the actual committed SQL files
+    — not mocks. No frontend changes were needed this sub-phase (backend-only, per the locked
+    cadence).
+- **API contract documentation:** new `docs/API_PAYMENTS.md` — architecture diagram, full
+  gateway-abstraction/data-model summary, the new env vars, the authorization matrix, and every
+  endpoint's exact request/response shape, written directly against the actual route/service/DTO
+  code. `docs/API_BILLING.md` updated in place to point at it and to document the invoice detail
+  response's new `payments` field, without altering its own historical Phase 5B record.
+- **cPanel staging verification: still BLOCKED / UNVERIFIED** — unchanged reason as every prior
+  phase. This sub-phase adds no new npm dependency and no cPanel-incompatible dependency; both new
+  migrations use only standard SQL/PL-pgSQL already exercised successfully against pglite's real
+  embedded Postgres engine.
+- **Explicit checkpoint:** per the locked "checkpoint after every sub-phase" cadence, this is the
+  end of Phase 5C. Phase 5D (webhook signature verification → idempotency → reconciliation) has not
+  been started and will not begin until the user reviews and approves this sub-phase.
+- **Intentionally not implemented in this sub-phase (deferred to later Phase 5 sub-phases, per the
+  authorized scope):** any inbound webhook route, automated payment confirmation of any kind (a
+  `sandbox` payment cannot resolve itself), refunds/credits, billing emails, the broader admin
+  billing dashboard (search/filter/view-all-invoices), customer-facing "Pay now" UI, real external
+  payment provider integration, tax/discount configuration, multi-currency support.

@@ -11,6 +11,8 @@ import { registerAccountRoutes } from './routes/account';
 import { registerAdminCustomerRoutes } from './routes/admin-customers';
 import { registerCommerceRoutes } from './routes/commerce';
 import { registerBillingRoutes } from './routes/billing';
+import { registerPaymentRoutes } from './routes/payments';
+import { registerAdminBillingRoutes } from './routes/admin-billing';
 import { HttpError } from './lib/errors';
 import { createLogger } from './lib/logger';
 import type { Queryable } from './db/types';
@@ -79,6 +81,8 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     await registerAdminCustomerRoutes(instance, env, pool);
     await registerCommerceRoutes(instance, env, pool);
     await registerBillingRoutes(instance, env, pool);
+    await registerPaymentRoutes(instance, env, pool);
+    await registerAdminBillingRoutes(instance, env, pool);
   });
 
   if (serveFrontend) {

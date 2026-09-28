@@ -46,6 +46,8 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0018_create_invoices.sql',
     '0019_create_billing_ledger.sql',
     '0020_create_payments.sql',
+    '0021_add_payment_confirmation_fields.sql',
+    '0022_extend_auth_audit_log_event_types_for_payments.sql',
   ];
 
   it('finds the committed migration files in order', () => {

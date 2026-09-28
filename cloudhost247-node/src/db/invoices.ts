@@ -80,10 +80,11 @@ export async function listInvoicesForUser(pool: Queryable, userId: string): Prom
 
 
 /**
- * Reserved for Phase 5D's verified-webhook processing (moving `unpaid` -> `paid`/`refunded`/
- * `partially_refunded`) and for a possible future staff `void` action (Phase 5F). Not called by
- * any code as of Phase 5B — no payment gateway exists yet, so nothing can legitimately change an
- * invoice's status.
+ * As of Phase 5C, called from exactly one place — `src/services/payment-service.ts#confirmManualPayment`
+ * moving `unpaid` -> `paid` when a staff member confirms a manual/offline payment. Phase 5D's
+ * verified-webhook processing will call this too (for gateway-confirmed payments, and eventually
+ * `refunded`/`partially_refunded`), and a possible future staff `void` action (Phase 5F) may as
+ * well. Never called with a client-supplied status value.
  */
 export async function setInvoiceStatus(tx: Queryable, id: string, status: string): Promise<InvoiceRow | null> {
   const { rows } = await tx.query<InvoiceRow>(

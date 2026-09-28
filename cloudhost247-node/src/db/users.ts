@@ -144,7 +144,10 @@ export async function recordAuthEvent(
       | 'profile_update'
       | 'password_change'
       | 'admin_status_change'
-      | 'admin_role_change';
+      | 'admin_role_change'
+      | 'payment_initiated'
+      | 'manual_payment_confirmed'
+      | 'manual_payment_rejected';
     ipAddress?: string | null;
     userAgent?: string | null;
     metadata?: Record<string, unknown>;

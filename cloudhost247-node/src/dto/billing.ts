@@ -2,6 +2,8 @@ import type { InvoiceWithOrderRow } from '../db/invoices';
 import type { LedgerEntryRow } from '../db/billing-ledger';
 import { toOrderItemDTO, type OrderItemDTO } from './commerce';
 import type { OrderItemRow } from '../db/orders';
+import { toPaymentDTO, type PaymentDTO } from './payments';
+import type { PaymentRow } from '../db/payments';
 
 /**
  * Phase 5B billing DTOs — same "never leak an internal field, never fabricate a value" mapping
@@ -36,6 +38,10 @@ export interface LedgerEntryDTO {
 export interface InvoiceDetailDTO extends InvoiceSummaryDTO {
   items: OrderItemDTO[];
   ledger: LedgerEntryDTO[];
+  /** Every payment *attempt* (Phase 5C) recorded against this invoice, oldest first — including
+   * cancelled/failed ones, so a customer can see their own payment history, not just the one that
+   * eventually succeeded. */
+  payments: PaymentDTO[];
 }
 
 export function toInvoiceSummaryDTO(row: InvoiceWithOrderRow): InvoiceSummaryDTO {
@@ -66,10 +72,16 @@ export function toLedgerEntryDTO(row: LedgerEntryRow): LedgerEntryDTO {
   };
 }
 
-export function toInvoiceDetailDTO(invoice: InvoiceWithOrderRow, orderItems: OrderItemRow[], ledger: LedgerEntryRow[]): InvoiceDetailDTO {
+export function toInvoiceDetailDTO(
+  invoice: InvoiceWithOrderRow,
+  orderItems: OrderItemRow[],
+  ledger: LedgerEntryRow[],
+  payments: PaymentRow[]
+): InvoiceDetailDTO {
   return {
     ...toInvoiceSummaryDTO(invoice),
     items: orderItems.map(toOrderItemDTO),
     ledger: ledger.map(toLedgerEntryDTO),
+    payments: payments.map(toPaymentDTO),
   };
 }

@@ -133,6 +133,20 @@ export async function listOrdersForUser(pool: Queryable, userId: string): Promis
   return rows;
 }
 
+/**
+ * Reserved for the payment layer (Phase 5C's manual-payment confirmation, and Phase 5D's verified
+ * webhook processing) — the only two legitimate ways an order's `payment_status` can ever change.
+ * Never called with a client-supplied value; always called from inside the same transaction as the
+ * corresponding payment/invoice update.
+ */
+export async function setOrderPaymentStatus(tx: Queryable, orderId: string, paymentStatus: string): Promise<OrderRow | null> {
+  const { rows } = await tx.query<OrderRow>(
+    `UPDATE orders SET payment_status = $1, updated_at = now() WHERE id = $2 RETURNING *`,
+    [paymentStatus, orderId]
+  );
+  return rows[0] ?? null;
+}
+
 export async function listOrderItemsForOrder(pool: Queryable, orderId: string): Promise<OrderItemRow[]> {
   const { rows } = await pool.query<OrderItemRow>(
     'SELECT * FROM order_items WHERE order_id = $1 ORDER BY created_at ASC',

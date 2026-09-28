@@ -59,6 +59,22 @@ const envSchema = z.object({
   CRON_JOB_TOKEN: z.string().min(16).optional(),
 
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
+
+  // --- Phase 5C: payment gateways (src/payments/*) -------------------------------------------
+  // Free-text bank-transfer/cash payment instructions shown to a customer who chooses the manual/
+  // offline gateway (src/payments/manual-gateway.ts). Deliberately optional with no fabricated
+  // default bank details — if unset, the gateway returns an honest "not configured yet, contact
+  // support" message instead of inventing a fake account number.
+  MANUAL_PAYMENT_INSTRUCTIONS: z.string().max(2000).optional(),
+
+  // HMAC secret the self-contained sandbox gateway (src/payments/sandbox-gateway.ts) uses to sign
+  // the webhook payloads it produces, and that Phase 5D's webhook receiver will use to verify them
+  // (src/payments/webhook-signing.ts). This is not a "real" secret shared with any external
+  // party — the sandbox gateway is this same application simulating both sides of a provider
+  // integration purely for testing — but it still isn't given a hardcoded fallback, consistent
+  // with this file's no-fabricated-secrets rule; a deployment that never exercises the sandbox
+  // gateway never needs to set it.
+  SANDBOX_GATEWAY_WEBHOOK_SECRET: z.string().min(16).optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

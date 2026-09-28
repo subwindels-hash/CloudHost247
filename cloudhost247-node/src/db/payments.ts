@@ -11,6 +11,7 @@ export interface PaymentRow {
   currency: string;
   status: string;
   failure_reason: string | null;
+  confirmed_by_user_id: string | null;
   initiated_at: string;
   completed_at: string | null;
   created_at: string;
@@ -31,11 +32,11 @@ export interface CreatePaymentInput {
 }
 
 /**
- * Schema/repository foundation laid down in Phase 5B for Phase 5C's payment gateway abstraction —
- * **no route or service anywhere calls this yet**. There is no payment gateway wired up as of
- * Phase 5B, so nothing in the codebase has a legitimate reason to create a payment record; doing so
- * here without a real gateway behind it would be exactly the "simulated payment success" the
- * project's standing security rules forbid.
+ * Creates a payment *attempt* in `pending` status. As of Phase 5C this is called from exactly one
+ * place — `src/services/payment-service.ts#initiatePaymentForInvoice`, itself only reachable via a
+ * gateway from `src/payments/*` (never with a status other than `pending`, and never client-
+ * supplied) — so "a payment row exists" always means "a real gateway (manual or sandbox) was asked
+ * to initiate one," never a fabricated success.
  */
 export async function createPayment(tx: Queryable, input: CreatePaymentInput): Promise<PaymentRow> {
   const { rows } = await tx.query<PaymentRow>(
@@ -81,18 +82,32 @@ export async function listPaymentsForInvoice(pool: Queryable, invoiceId: string)
   return rows;
 }
 
+/**
+ * Marks every still-`pending` payment attempt for an invoice as `cancelled`, other than
+ * `keepPaymentId` (the attempt just created). Called when a customer initiates a *new* attempt for
+ * an invoice that already has an older, abandoned one sitting in `pending` — a courtesy cleanup so
+ * stale attempts don't pile up, never a statement that anything was actually paid or failed.
+ */
+export async function cancelOtherPendingPayments(tx: Queryable, invoiceId: string, keepPaymentId: string): Promise<void> {
+  await tx.query(
+    `UPDATE payments SET status = 'cancelled', updated_at = now()
+     WHERE invoice_id = $1 AND id <> $2 AND status = 'pending'`,
+    [invoiceId, keepPaymentId]
+  );
+}
+
 export async function updatePaymentStatus(
   tx: Queryable,
   id: string,
   status: PaymentStatus,
-  extra: { failureReason?: string | null; completedAt?: string | null } = {}
+  extra: { failureReason?: string | null; completedAt?: string | null; confirmedByUserId?: string | null } = {}
 ): Promise<PaymentRow | null> {
   const { rows } = await tx.query<PaymentRow>(
     `UPDATE payments
-     SET status = $1, failure_reason = $2, completed_at = $3, updated_at = now()
-     WHERE id = $4
+     SET status = $1, failure_reason = $2, completed_at = $3, confirmed_by_user_id = COALESCE($4, confirmed_by_user_id), updated_at = now()
+     WHERE id = $5
      RETURNING *`,
-    [status, extra.failureReason ?? null, extra.completedAt ?? null, id]
+    [status, extra.failureReason ?? null, extra.completedAt ?? null, extra.confirmedByUserId ?? null, id]
   );
   return rows[0] ?? null;
 }

@@ -11,14 +11,20 @@ See `docs/API_COMMERCE.md` for the cart/order layer this builds directly on top 
 
 ## Explicit non-goals (this phase)
 
+> **Update (Phase 5C):** Payments are no longer schema-only — see `docs/API_PAYMENTS.md` for the
+> full payment gateway/initiation/manual-confirmation contract now built on top of this phase's
+> `payments` table. The invoice detail response below now also includes a `payments` array. The
+> non-goals below describe Phase 5B's own scope at the time it shipped and are left as written for
+> history; nothing below is contradicted by 5C, which only *adds* to this table, never edits it.
+
 - **No payment gateway, no way to create or mutate a payment, and no way for any invoice to become
-  `paid`.** `database/migrations/0020_create_payments.sql` adds the `payments` table schema and
-  `src/db/payments.ts` adds its repository functions, but **no route or service anywhere calls
-  them** — grepping every route file for `createPayment` is one of the tests in
-  `tests/integration/billing-schema.test.ts`. This is deliberate groundwork for Phase 5C (the
-  gateway abstraction, a manual/offline gateway, and a self-contained sandbox gateway with
-  simulated signed webhooks), not a working payment flow. Every invoice this phase creates starts
-  and stays `status: 'unpaid'`.
+  `paid`, as of Phase 5B itself.** `database/migrations/0020_create_payments.sql` adds the
+  `payments` table schema and `src/db/payments.ts` adds its repository functions, but at the time
+  Phase 5B shipped, no route or service anywhere called them. Phase 5C (see `docs/API_PAYMENTS.md`)
+  is what now calls them, through a gateway abstraction, a manual/offline gateway, and a
+  self-contained sandbox gateway. Every invoice still starts at `status: 'unpaid'`, and Phase 5C's
+  sandbox gateway still cannot move a payment to any terminal state — only Phase 5D's webhook
+  receiver, or a staff member confirming a manual payment, can.
 - **No tax or discount configuration system yet.** Exactly like `orders` (Phase 5A), an invoice's
   `discount_amount`/`tax_amount` are always `"0.00"` — a genuine zero, copied verbatim from the
   order, never fabricated.
@@ -80,7 +86,7 @@ never fabricate a value" mapping-layer pattern used throughout this codebase.
   against the table, and the same attempted inside a transaction, both rejected with the row
   unchanged). Correcting a mistake always means inserting a new, reversing entry — never editing or
   removing the original.
-- `payments` (`0020`) — schema only as of this phase (see "Explicit non-goals" above). Models the
+- `payments` (`0020`, extended by `0021` in Phase 5C — see `docs/API_PAYMENTS.md`). Models the
   real payment lifecycle the Phase 5 spec calls for (`pending` / `successful` / `failed` /
   `cancelled` / `expired` / `refunded` / `partially_refunded`). A partial unique index on
   `(provider, provider_reference)` (enforced only when both are present) is already in place —
@@ -138,8 +144,10 @@ Lists the caller's own invoices (summaries), newest first.
 ### `GET /api/v1/invoices/:id`
 
 Full invoice detail: the invoice fields above, plus `items` (the underlying order's line-item
-snapshots — see `docs/API_COMMERCE.md`) and `ledger` (every `billing_ledger` entry recorded against
-this invoice, oldest first). Ownership-checked (`404`, not `403`, for another customer's invoice).
+snapshots — see `docs/API_COMMERCE.md`), `ledger` (every `billing_ledger` entry recorded against
+this invoice, oldest first), and — as of Phase 5C — `payments` (every payment *attempt* recorded
+against this invoice, oldest first, including cancelled/failed ones; see `docs/API_PAYMENTS.md`).
+Ownership-checked (`404`, not `403`, for another customer's invoice).
 
 ```json
 {
@@ -155,6 +163,11 @@ this invoice, oldest first). Ownership-checked (`404`, not `403`, for another cu
     "ledger": [
       { "id": "…", "entryType": "charge", "amount": "24.50", "currency": "USD",
         "description": "Invoice INV-00000001 for order CH-00000001", "createdAt": "2026-09-28T…" }
+    ],
+    "payments": [
+      { "id": "…", "invoiceId": "…", "provider": "manual", "providerReference": null,
+        "method": "bank_transfer", "amount": "24.50", "currency": "USD", "status": "pending",
+        "failureReason": null, "initiatedAt": "2026-09-28T…", "completedAt": null }
     ]
   }
 }
@@ -162,11 +175,14 @@ this invoice, oldest first). Ownership-checked (`404`, not `403`, for another cu
 
 ## What's next (later Phase 5 sub-phases)
 
-- **5C** — the payment gateway abstraction, a fully-featured manual/offline gateway, and a
-  self-contained sandbox gateway with simulated signed webhooks; checkout initiation actually
-  starts populating the `payments` table this phase left ready but unused.
-- **5D** — signature-verified, idempotent, replay-protected webhooks — the *only* way an invoice's
-  `status` or an order's `payment_status` can ever become `paid`.
-- **5E/5F** — customer-facing billing UI (`/billing`, `/invoices`) and admin/staff billing
-  management + audit trail.
+- **5C — done, see `docs/API_PAYMENTS.md`.** The payment gateway abstraction, a manual/offline
+  gateway, and a self-contained sandbox gateway; checkout initiation now populates the `payments`
+  table this phase left ready but unused. Deliberately stops at *initiation* — resolving a payment
+  is either a staff member confirming a manual one, or Phase 5D's webhook receiver.
+- **5D** — signature-verified, idempotent, replay-protected webhooks — the *only automated* way an
+  invoice's `status` or an order's `payment_status` can become `paid` (alongside 5C's manual-gateway
+  staff-confirmation path, which is a direct human assertion, not an automated one).
+- **5E/5F** — customer-facing billing UI (`/billing`, `/invoices`) and the broader admin/staff
+  billing dashboard (search/filter/view-all-invoices, refunds) + audit trail. (5C added two narrow
+  admin endpoints for manual-payment confirm/reject only — see `docs/API_PAYMENTS.md`.)
 - **5G** — SMTP notifications (order confirmation, invoice, payment) and reconciliation jobs.

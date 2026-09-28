@@ -2,6 +2,7 @@ import type { Queryable } from '../db/types';
 import { createInvoice, findInvoiceById, listInvoicesForUser, type InvoiceRow } from '../db/invoices';
 import { listLedgerEntriesForInvoice, recordLedgerEntry } from '../db/billing-ledger';
 import { listOrderItemsForOrder, type OrderRow } from '../db/orders';
+import { listPaymentsForInvoice } from '../db/payments';
 import { NotFoundError } from '../lib/errors';
 import { toInvoiceDetailDTO, toInvoiceSummaryDTO, type InvoiceDetailDTO, type InvoiceSummaryDTO } from '../dto/billing';
 
@@ -57,10 +58,11 @@ export async function getMyInvoiceDetail(pool: Queryable, userId: string, invoic
     throw new NotFoundError('No invoice was found with that id');
   }
 
-  const [items, ledger] = await Promise.all([
+  const [items, ledger, payments] = await Promise.all([
     listOrderItemsForOrder(pool, invoice.order_id),
     listLedgerEntriesForInvoice(pool, invoice.id),
+    listPaymentsForInvoice(pool, invoice.id),
   ]);
 
-  return toInvoiceDetailDTO(invoice, items, ledger);
+  return toInvoiceDetailDTO(invoice, items, ledger, payments);
 }
