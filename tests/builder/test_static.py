@@ -327,6 +327,115 @@ class WebsiteBuilderStaticTests(unittest.TestCase):
         self.assertIn("body.append('token', config.token)", editor)
         self.assertIn("form.append('token', config.token)", editor)
 
+    # ------------------------------------------------- editor interactions
+    #
+    # The brief was explicit that this must not be "a collection of buttons
+    # that do nothing". These assertions pin the interaction contract so a
+    # refactor cannot quietly reduce the editor to a mockup. They deliberately
+    # check wiring rather than appearance: a control that loses its handler,
+    # or a drag path that stops mutating the document, fails here.
+
+    def test_editor_wires_drag_and_drop(self):
+        editor = self.source('assets/js/editor.js')
+        # Canvas nodes are draggable and carry a move payload.
+        self.assertIn("node.setAttribute('draggable', 'true')", editor)
+        for event_name in ("'dragstart'", "'dragover'", "'drop'"):
+            self.assertIn("addEventListener(%s" % event_name, editor)
+        self.assertRegex(editor, r"dataTransfer\.setData\('text/plain',\s*JSON\.stringify\(\{\s*move:")
+        # Palette tiles are draggable and carry an add payload.
+        self.assertIn("tile.setAttribute('draggable', 'true')", editor)
+        self.assertRegex(editor, r"effectAllowed\s*=\s*'copy'")
+        # Empty containers expose drop zones, including the document root.
+        self.assertIn('data-ch247-dropzone', editor)
+        self.assertIn("handleDrop(event.dataTransfer.getData('text/plain')", editor)
+        self.assertIn("target === 'root' ? null : target)", editor)
+        # handleDrop services both gestures and mutates the document.
+        self.assertRegex(editor, r'function handleDrop\(')
+        self.assertRegex(editor, r'if \(data\.add\)')
+        self.assertRegex(editor, r'if \(data\.move\)')
+        for call in ('insertNode(', 'removeNode(', 'repaint('):
+            self.assertIn(call, editor)
+
+    def test_editor_refuses_impossible_drops(self):
+        editor = self.source('assets/js/editor.js')
+        # A node may not be dropped into its own subtree.
+        self.assertIn('isDescendant(moving.node, targetId)', editor)
+        self.assertIn('An element cannot be dropped inside itself.', editor)
+        # A placement the schema forbids is rolled back rather than forced.
+        self.assertIn('That element cannot go there.', editor)
+        self.assertIn('state.history.pop()', editor)
+        # Containment is decided by a rule table, not hard-coded per widget.
+        self.assertRegex(editor, r'function accepts\(')
+
+    def test_editor_supports_inline_text_editing(self):
+        editor = self.source('assets/js/editor.js')
+        self.assertIn("field.setAttribute('contenteditable', 'true')", editor)
+        self.assertIn('data-ch247-inline', editor)
+        # The edit is committed back into the document on blur, against the
+        # owning node, rather than left in the DOM.
+        self.assertIn("addEventListener('blur'", editor)
+        self.assertIn("field.closest('[data-ch247-id]')", editor)
+
+    def test_editor_has_a_real_undo_history(self):
+        editor = self.source('assets/js/editor.js')
+        for name in ('function pushHistory(', 'function undo(', 'function redo('):
+            self.assertIn(name, editor)
+        self.assertIn("toolButton('Undo', undo)", editor)
+        self.assertIn("toolButton('Redo', redo)", editor)
+        # Keyboard shortcuts are wired to the same functions.
+        self.assertRegex(editor, r"key === 'z' && !event\.shiftKey.*undo\(\)")
+        self.assertRegex(editor, r"key === 's'.*saveDraft\(false\)")
+
+    def test_editor_supports_copy_paste_duplicate_and_delete(self):
+        editor = self.source('assets/js/editor.js')
+        self.assertIn("smallButton('Duplicate'", editor)
+        self.assertIn("smallButton('Copy'", editor)
+        self.assertIn("smallButton('Paste into'", editor)
+        self.assertIn("smallButton('Delete'", editor)
+        self.assertIn('state.clipboard', editor)
+        # Pasted and duplicated nodes get fresh ids so the document stays valid.
+        self.assertIn('function freshIds(', editor)
+        self.assertRegex(editor, r'freshIds\(clone\(state\.clipboard\)\)')
+        self.assertRegex(editor, r'freshIds\(clone\(found\.node\)\)')
+
+    def test_no_editor_button_is_inert(self):
+        """Every button the editor builds is created through a factory that
+        attaches a click handler, and every call site supplies one."""
+        editor = self.source('assets/js/editor.js')
+        for factory in ('toolButton', 'smallButton'):
+            definition = re.search(
+                r'function %s\(label, handler[^)]*\)\s*\{(.*?)\n    \}' % factory, editor, re.S)
+            self.assertIsNotNone(definition, factory)
+            self.assertIn("addEventListener('click', handler)", definition.group(1), factory)
+
+        call_sites = re.findall(r"\b(?:tool|small)Button\(\s*'([^']*)'\s*(.?)", editor)
+        self.assertGreaterEqual(len(call_sites), 10)
+        for label, following in call_sites:
+            # A comma means a handler argument follows the label.
+            self.assertEqual(',', following, 'button %r has no handler' % label)
+
+    def test_editor_offers_per_device_styling(self):
+        editor = self.source('assets/js/editor.js')
+        self.assertIn('function setDevice(', editor)
+        self.assertIn("button.setAttribute('data-device', device.key)", editor)
+        self.assertIn("addEventListener('click', function () { setDevice(device.key); })", editor)
+        # Style reads and writes are scoped to the device being edited, so a
+        # tablet or mobile value cannot overwrite the desktop one.
+        self.assertIn('node.style[state.device]', editor)
+        self.assertRegex(editor, r'delete node\.style\[state\.device\]\[property\]')
+        # The inheritance rule is stated to the administrator, not implied.
+        self.assertIn('Tablet and mobile inherit desktop until you set them.', editor)
+
+    def test_editor_canvas_is_rendered_by_the_server(self):
+        """The canvas must be the real renderer's output, not a lookalike the
+        browser draws, otherwise preview/published parity is unverifiable."""
+        editor = self.source('assets/js/editor.js')
+        self.assertRegex(editor, r"api\('render'")
+        self.assertIn('function repaint(', editor)
+        self.assertIn('function paintCanvas(', editor)
+        # Links and forms inside the canvas are neutralised while editing.
+        self.assertIn("querySelectorAll('a, form, button')", editor)
+
     # ------------------------------------------------------------ front page
     def test_front_controller_checks_module_state_and_session(self):
         controller = (ROOT / 'builder-page.php').read_text()
