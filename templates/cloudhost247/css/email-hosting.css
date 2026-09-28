@@ -1,0 +1,445 @@
+/**
+ * CloudHost247 - Email Hosting page.
+ *
+ * Namespaced under .ch247-email* so nothing here can affect the rest of the
+ * child theme. Mobile-first, no external fonts or assets, respects
+ * prefers-reduced-motion and keyboard focus.
+ */
+
+.ch247-email {
+    --ch247-email-ink: #16202f;
+    --ch247-email-muted: #66748a;
+    --ch247-email-line: #e3e8ef;
+    --ch247-email-accent: #1c64f2;
+    --ch247-email-accent-dark: #1749b8;
+    --ch247-email-surface: #ffffff;
+    --ch247-email-surface-alt: #f6f8fb;
+    color: var(--ch247-email-ink);
+}
+
+.ch247-email h1,
+.ch247-email h2,
+.ch247-email h3,
+.ch247-email h4 {
+    color: var(--ch247-email-ink);
+    font-weight: 700;
+}
+
+.ch247-muted { color: var(--ch247-email-muted); }
+
+/* ------------------------------------------------------------------ hero */
+
+.ch247-email-hero {
+    background: linear-gradient(160deg, #f4f7fd 0%, #ffffff 65%);
+    border-bottom: 1px solid var(--ch247-email-line);
+    padding: 48px 0 40px;
+}
+
+.ch247-email-hero__inner { align-items: center; }
+
+.ch247-email-eyebrow {
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ch247-email-accent);
+    margin-bottom: 10px;
+}
+
+.ch247-email-hero h1 {
+    font-size: 34px;
+    line-height: 1.2;
+    margin: 0 0 16px;
+}
+
+.ch247-email-hero__lead {
+    font-size: 17px;
+    line-height: 1.65;
+    color: var(--ch247-email-muted);
+    max-width: 44em;
+}
+
+.ch247-email-hero__actions {
+    margin: 24px 0 18px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.ch247-email-hero__note {
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--ch247-email-muted);
+    max-width: 48em;
+    margin: 0;
+}
+
+/* buttons */
+
+.ch247-btn {
+    display: inline-block;
+    padding: 12px 22px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 15px;
+    text-decoration: none;
+    border: 1px solid transparent;
+    transition: background-color .18s ease, color .18s ease, border-color .18s ease;
+}
+
+.ch247-btn:focus-visible,
+.ch247-btn:focus {
+    outline: 3px solid rgba(28, 100, 242, .35);
+    outline-offset: 2px;
+    text-decoration: none;
+}
+
+.ch247-btn--primary {
+    background: var(--ch247-email-accent);
+    color: #fff;
+}
+
+.ch247-btn--primary:hover,
+.ch247-btn--primary:focus {
+    background: var(--ch247-email-accent-dark);
+    color: #fff;
+}
+
+.ch247-btn--ghost {
+    background: transparent;
+    border-color: #c8d3e4;
+    color: var(--ch247-email-ink);
+}
+
+.ch247-btn--ghost:hover,
+.ch247-btn--ghost:focus {
+    border-color: var(--ch247-email-accent);
+    color: var(--ch247-email-accent);
+}
+
+.ch247-btn--block { display: block; text-align: center; width: 100%; }
+
+/* hero illustration */
+
+.ch247-mailcard {
+    position: relative;
+    background: var(--ch247-email-surface);
+    border: 1px solid var(--ch247-email-line);
+    border-radius: 14px;
+    box-shadow: 0 18px 40px rgba(22, 32, 47, .10);
+    padding: 16px 16px 26px;
+    max-width: 380px;
+    margin: 28px auto 0;
+}
+
+.ch247-mailcard__bar { display: flex; gap: 6px; margin-bottom: 16px; }
+.ch247-mailcard__bar span {
+    width: 10px; height: 10px; border-radius: 50%; background: #dbe2ec;
+}
+
+.ch247-mailcard__row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+
+.ch247-mailcard__row--head { padding-bottom: 12px; border-bottom: 1px solid var(--ch247-email-line); }
+
+.ch247-mailcard__avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: var(--ch247-email-accent); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+}
+
+.ch247-mailcard__lines { flex: 1; }
+
+.ch247-mailcard i {
+    display: block; height: 8px; border-radius: 4px;
+    background: #e8edf5; margin-bottom: 7px;
+}
+
+.ch247-mailcard i.w40 { width: 40%; }
+.ch247-mailcard i.w60 { width: 60%; }
+.ch247-mailcard i.w70 { width: 70%; }
+.ch247-mailcard i.w80 { width: 80%; }
+.ch247-mailcard i.w90 { width: 90%; }
+
+.ch247-mailcard__badge {
+    position: absolute;
+    right: 14px;
+    bottom: -14px;
+    background: #0f2744;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 7px 14px;
+    border-radius: 999px;
+    box-shadow: 0 8px 18px rgba(15, 39, 68, .25);
+}
+
+/* --------------------------------------------------------------- sections */
+
+.ch247-email-section { padding: 46px 0; }
+.ch247-email-section--muted { background: var(--ch247-email-surface-alt); }
+
+.ch247-email-section__head { text-align: center; max-width: 46em; margin: 0 auto 30px; }
+.ch247-email-section__head--left { text-align: left; margin-left: 0; }
+.ch247-email-section__head h2 { font-size: 26px; margin: 0 0 10px; }
+.ch247-email-section__head p { color: var(--ch247-email-muted); margin: 0; }
+
+/* -------------------------------------------------------- provider cards */
+
+.ch247-provider-card {
+    background: var(--ch247-email-surface);
+    border: 1px solid var(--ch247-email-line);
+    border-radius: 12px;
+    padding: 24px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+}
+
+.ch247-provider-card h3 { font-size: 19px; margin: 0 0 6px; }
+
+.ch247-provider-card__summary { color: var(--ch247-email-muted); font-size: 14px; }
+
+.ch247-provider-card__features {
+    list-style: none;
+    padding: 0;
+    margin: 16px 0;
+    flex: 1;
+}
+
+.ch247-provider-card__features li {
+    position: relative;
+    padding-left: 24px;
+    margin-bottom: 9px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.ch247-provider-card__features li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 6px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--ch247-email-accent);
+}
+
+.ch247-provider-card__count { font-size: 13px; font-weight: 600; margin-bottom: 10px; }
+
+.ch247-provider-card--microsoft365 .ch247-provider-card__features li::before { background: #1f7ae0; }
+.ch247-provider-card--google .ch247-provider-card__features li::before { background: #1aa260; }
+
+/* ------------------------------------------------------------ plan cards */
+
+.ch247-plan-group { margin-bottom: 34px; }
+
+.ch247-plan-group__title {
+    font-size: 18px;
+    margin: 0 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--ch247-email-line);
+}
+
+.ch247-plan-card {
+    position: relative;
+    background: var(--ch247-email-surface);
+    border: 1px solid var(--ch247-email-line);
+    border-radius: 12px;
+    padding: 22px;
+    margin-bottom: 22px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.ch247-plan-card--featured {
+    border-color: var(--ch247-email-accent);
+    box-shadow: 0 12px 28px rgba(28, 100, 242, .12);
+}
+
+.ch247-plan-card__flag {
+    position: absolute;
+    top: -11px;
+    left: 22px;
+    background: var(--ch247-email-accent);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 999px;
+}
+
+.ch247-plan-card__tier {
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ch247-email-muted);
+    margin: 0 0 4px;
+}
+
+.ch247-plan-card h4 { font-size: 18px; margin: 0 0 12px; }
+
+.ch247-plan-card__price { margin: 0 0 12px; }
+.ch247-plan-card__price strong { font-size: 26px; }
+.ch247-plan-card__cycle { color: var(--ch247-email-muted); font-size: 13px; margin-left: 4px; }
+.ch247-plan-card__setup { display: block; font-size: 12px; color: var(--ch247-email-muted); }
+
+.ch247-plan-card__desc { font-size: 13px; color: var(--ch247-email-muted); }
+
+.ch247-plan-card__specs { margin: 14px 0 18px; flex: 1; }
+
+.ch247-plan-card__specs > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 7px 0;
+    border-bottom: 1px dashed var(--ch247-email-line);
+    font-size: 13px;
+}
+
+.ch247-plan-card__specs dt { font-weight: 600; margin: 0; }
+.ch247-plan-card__specs dd { margin: 0; text-align: right; color: var(--ch247-email-muted); }
+
+.ch247-pill {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 999px;
+}
+
+.ch247-pill--ok { background: #e6f6ed; color: #1a7f45; }
+.ch247-pill--off { background: #fdecec; color: #b42318; }
+
+.ch247-email-empty {
+    background: var(--ch247-email-surface);
+    border: 1px dashed #c8d3e4;
+    border-radius: 12px;
+    padding: 28px;
+    text-align: center;
+}
+
+/* ------------------------------------------------------------ comparison */
+
+.ch247-compare table { background: var(--ch247-email-surface); margin-bottom: 0; }
+.ch247-compare th, .ch247-compare td { vertical-align: middle !important; font-size: 14px; }
+.ch247-compare thead th { border-bottom: 2px solid var(--ch247-email-line); }
+.ch247-compare tbody th { font-weight: 600; width: 26%; }
+.ch247-compare tbody tr:nth-child(odd) { background: #fbfcfe; }
+
+/* ------------------------------------------------------------------- DNS */
+
+.ch247-dns-steps { padding-left: 20px; margin: 18px 0; }
+.ch247-dns-steps li { margin-bottom: 10px; line-height: 1.6; }
+
+.ch247-dns-panel {
+    background: var(--ch247-email-surface);
+    border: 1px solid var(--ch247-email-line);
+    border-radius: 12px;
+    padding: 24px;
+}
+
+.ch247-dns-panel h3 { font-size: 17px; margin: 0 0 10px; }
+
+.ch247-dns-kinds { list-style: none; padding: 0; margin: 18px 0; }
+
+.ch247-dns-kinds li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--ch247-email-line);
+    font-size: 14px;
+}
+
+.ch247-dns-kinds li:last-child { border-bottom: 0; }
+
+.ch247-tag {
+    display: inline-block;
+    min-width: 84px;
+    text-align: center;
+    background: #eef3fd;
+    color: var(--ch247-email-accent-dark);
+    font-family: SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+/* ------------------------------------------------------------------ FAQs */
+
+.ch247-faq { max-width: 52em; margin: 0 auto; }
+
+.ch247-faq__item {
+    background: var(--ch247-email-surface);
+    border: 1px solid var(--ch247-email-line);
+    border-radius: 10px;
+    margin-bottom: 12px;
+    padding: 0 18px;
+}
+
+.ch247-faq__item summary {
+    cursor: pointer;
+    list-style: none;
+    padding: 16px 30px 16px 0;
+    font-weight: 600;
+    position: relative;
+}
+
+.ch247-faq__item summary::-webkit-details-marker { display: none; }
+
+.ch247-faq__item summary::after {
+    content: "+";
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    font-weight: 400;
+    color: var(--ch247-email-accent);
+}
+
+.ch247-faq__item[open] summary::after { content: "\2212"; }
+
+.ch247-faq__item summary:focus-visible {
+    outline: 3px solid rgba(28, 100, 242, .35);
+    outline-offset: 2px;
+}
+
+.ch247-faq__answer { padding: 0 0 16px; color: var(--ch247-email-muted); line-height: 1.7; }
+
+.ch247-email-cta { text-align: center; margin-top: 30px; }
+.ch247-email-cta p { font-weight: 600; margin-bottom: 12px; }
+
+/* --------------------------------------------------------------- responsive */
+
+@media (min-width: 992px) {
+    .ch247-email-hero { padding: 72px 0 64px; }
+    .ch247-email-hero h1 { font-size: 44px; }
+    .ch247-email-section { padding: 64px 0; }
+    .ch247-mailcard { margin-top: 0; }
+}
+
+@media (max-width: 767px) {
+    .ch247-email-hero h1 { font-size: 27px; }
+    .ch247-email-hero__lead { font-size: 15px; }
+    .ch247-btn { width: 100%; text-align: center; }
+    .ch247-email-hero__actions { flex-direction: column; }
+    .ch247-compare tbody th { width: auto; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ch247-btn { transition: none; }
+}
+
+@media print {
+    .ch247-email-hero__actions,
+    .ch247-email-cta { display: none; }
+}

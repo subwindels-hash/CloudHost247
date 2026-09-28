@@ -92,4 +92,59 @@ class EsimController extends BaseController
         
         return ['success' => true, 'data' => $plans];
     }
+
+    /**
+     * GET /api/esim/:id/usage
+     *
+     * @return array<string,mixed>
+     */
+    public function usage(array $params = []): array
+    {
+        $id = (int) ($params['id'] ?? 0);
+
+        if ($id <= 0) {
+            return $this->error('An eSIM id is required');
+        }
+
+        if (!$this->isSystemContext() && !$this->ownsOrFail('mod_phoneservices_esims', $id)) {
+            return $this->error('eSIM not found', 404);
+        }
+
+        $usage = $this->service->checkUsage($id);
+
+        if (!empty($usage['error'])) {
+            return $this->error((string) $usage['error']);
+        }
+
+        return $this->ok($usage);
+    }
+
+    /**
+     * POST /api/esim/:id/topup  { "plan_id": "..." }
+     *
+     * @return array<string,mixed>
+     */
+    public function topUp(array $params = []): array
+    {
+        $id = (int) ($params['id'] ?? 0);
+        $input = array_merge($_POST, $this->getInput());
+        $planId = (string) ($input['plan_id'] ?? '');
+
+        if ($id <= 0 || $planId === '') {
+            return $this->error('An eSIM id and plan_id are required');
+        }
+
+        if (!$this->isSystemContext() && !$this->ownsOrFail('mod_phoneservices_esims', $id)) {
+            return $this->error('eSIM not found', 404);
+        }
+
+        $result = $this->service->topUp($id, $planId);
+
+        if (!empty($result['error'])) {
+            return $this->error((string) $result['error']);
+        }
+
+        return $this->ok($result);
+    }
+
 }

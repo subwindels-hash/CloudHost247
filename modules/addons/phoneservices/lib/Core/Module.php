@@ -1,344 +1,594 @@
 <?php
 /**
- * Core Module Class
- * Handles activation, database management, rendering, and lifecycle
+ * Core Module - lifecycle and admin/client controllers.
+ *
+ * Thin controller layer: it validates input, delegates to the service layer
+ * and renders a template. No provider or SQL logic lives here.
+ *
+ * @package PhoneServices
  */
 
 namespace PhoneServices\Core;
 
 use PhoneServices\Providers\ProviderFactory;
-use PhoneServices\Services\NumberService;
-use PhoneServices\Services\VoipService;
-use PhoneServices\Services\SmsService;
+use PhoneServices\Providers\ProviderRegistry;
 use PhoneServices\Services\EsimService;
-use PhoneServices\Services\UsageService;
+use PhoneServices\Services\NumberService;
 use PhoneServices\Services\PricingService;
+use PhoneServices\Services\SmsService;
+use PhoneServices\Services\UsageService;
+use PhoneServices\Services\VoipService;
 
 class Module
 {
-    private $config;
-    private $db;
-    
-    public function __construct()
-    {
-        $this->config = new Config();
-        $this->db = new Database();
-    }
-    
+    /** Admin pages and the capability/toggle they belong to. */
+    const ADMIN_PAGES = [
+        'dashboard'    => null,
+        'api_config'   => null,
+        'providers'    => null,
+        'pricing'      => null,
+        'numbers'      => 'numbers',
+        'voip'         => 'voip',
+        'sms'          => 'sms',
+        'esim'         => 'esim',
+        'usage'        => 'analytics',
+        'transactions' => null,
+        'users'        => null,
+        'logs'         => null,
+    ];
+
+    const CLIENT_PAGES = ['dashboard', 'numbers', 'voip', 'sms', 'esim', 'usage'];
+
+    /* ==================================================================
+     | Lifecycle
+     * ================================================================= */
+
     /**
-     * Activate module - create database tables
+     * @return array{tables:int,migrations:int}
      */
-    public function activate()
+    public function activate(): array
     {
-        $schemaFile = __DIR__ . '/../../install/schema.sql';
-        if (file_exists($schemaFile)) {
-            $sql = file_get_contents($schemaFile);
-            $statements = array_filter(array_map('trim', explode(';', $sql)));
-            foreach ($statements as $statement) {
-                if (!empty($statement)) {
-                    full_query($statement);
-                }
-            }
-        }
-        
-        // Insert default settings
-        $this->insertDefaultSettings();
+        $installer = new Installer();
+        $result = $installer->install();
+
+        Config::clearCache();
+
+        return $result;
     }
-    
+
     /**
-     * Deactivate module
+     * Data is intentionally preserved on deactivation - telecom records are
+     * billing evidence and must survive a module toggle.
      */
-    public function deactivate()
+    public function deactivate(): void
     {
-        // Do not drop tables to preserve data
-        // Just disable scheduled tasks if any
+        Logger::info('PhoneServices deactivated (data retained)');
     }
-    
-    /**
-     * Upgrade module
-     */
-    public function upgrade($currentVersion)
+
+    public function upgrade(string $currentVersion): int
     {
-        $migrationsDir = __DIR__ . '/../../install/migrations/';
-        if (is_dir($migrationsDir)) {
-            $migrations = glob($migrationsDir . '*.sql');
-            sort($migrations);
-            foreach ($migrations as $migration) {
-                $version = basename($migration, '.sql');
-                if (version_compare($version, $currentVersion, '>')) {
-                    $sql = file_get_contents($migration);
-                    $statements = array_filter(array_map('trim', explode(';', $sql)));
-                    foreach ($statements as $statement) {
-                        if (!empty($statement)) {
-                            full_query($statement);
-                        }
-                    }
-                }
-            }
-        }
+        $installer = new Installer();
+
+        return $installer->upgrade($currentVersion);
     }
-    
-    /**
-     * Insert default settings on activation
-     */
-    private function insertDefaultSettings()
-    {
-        $defaults = [
-            ['setting_name' => 'default_provider', 'setting_value' => 'twilio'],
-            ['setting_name' => 'api_mode', 'setting_value' => 'sandbox'],
-            ['setting_name' => 'enable_numbers', 'setting_value' => '1'],
-            ['setting_name' => 'enable_voip', 'setting_value' => '1'],
-            ['setting_name' => 'enable_sms', 'setting_value' => '1'],
-            ['setting_name' => 'enable_esim', 'setting_value' => '1'],
-            ['setting_name' => 'log_retention_days', 'setting_value' => '90'],
-        ];
-        
-        foreach ($defaults as $setting) {
-            $exists = select_query('mod_phoneservices_settings', 'id', ['setting_name' => $setting['setting_name']]);
-            if (!mysql_num_rows($exists)) {
-                insert_query('mod_phoneservices_settings', $setting);
-            }
-        }
-    }
-    
-    // ==================== ADMIN RENDERERS ====================
-    
-    public function renderAdminDashboard($vars)
+
+    /* ==================================================================
+     | Admin
+     * ================================================================= */
+
+    public function renderAdminDashboard(array $vars): void
     {
         $usageService = new UsageService();
-        $stats = $usageService->getSystemStats();
-        
-        $template = __DIR__ . '/../../templates/admin/dashboard.tpl';
-        if (file_exists($template)) {
-            extract(['vars' => $vars, 'stats' => $stats]);
-            include $template;
-        }
+
+        $this->renderAdmin('dashboard', [
+            'vars'      => $vars,
+            'stats'     => $usageService->getSystemStats(),
+            'providers' => ProviderFactory::healthCheck(),
+            'toggles'   => Config::getFeatureToggles(),
+            'tables'    => Installer::tableStatus(),
+            'recent'    => Logger::getRecentLogs(10, Logger::LEVEL_ERROR),
+        ]);
     }
-    
-    public function renderApiConfig($vars)
+
+    /**
+     * API configuration: credentials, mode, provider routing, feature flags.
+     */
+    public function renderApiConfig(array $vars): void
     {
-        $config = new Config();
-        $providers = ProviderFactory::getAvailableProviders();
-        
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $this->handleApiConfigPost($vars, $_POST);
+        $notice = null;
+
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+            $notice = $this->handleApiConfigPost($_POST);
         }
-        
-        $template = __DIR__ . '/../../templates/admin/api_config.tpl';
-        if (file_exists($template)) {
-            extract(['vars' => $vars, 'providers' => $providers, 'config' => $config]);
-            include $template;
-        }
-    }
-    
-    private function handleApiConfigPost($vars, $post)
-    {
-        $allowedFields = [
-            'api_mode', 'default_provider', 'twilio_account_sid', 'twilio_auth_token',
-            'vonage_api_key', 'vonage_api_secret', 'airalo_api_token',
-            'truphone_api_key', 'sendgrid_api_key', 'whatsapp_business_token'
-        ];
-        
-        foreach ($allowedFields as $field) {
-            if (isset($post[$field])) {
-                update_query('tbladdonmodules', ['value' => $post[$field]], ['module' => 'phoneservices', 'setting' => $field]);
+
+        $providerFields = [];
+        foreach (ProviderRegistry::all() as $id => $definition) {
+            foreach (ProviderRegistry::credentialLabels($id) as $field => $label) {
+                $providerFields[$id][] = [
+                    'name'     => $id . '_' . $field,
+                    'label'    => $label,
+                    'value'    => Config::masked($id . '_' . $field),
+                    'required' => in_array($field, ProviderRegistry::requiredCredentials($id), true),
+                    'is_set'   => (string) Config::get($id . '_' . $field, '') !== '',
+                ];
             }
         }
-        
-        // Update feature toggles
-        $toggles = ['enable_numbers', 'enable_voip', 'enable_sms', 'enable_esim'];
-        foreach ($toggles as $toggle) {
-            $value = isset($post[$toggle]) ? '1' : '0';
-            update_query('mod_phoneservices_settings', ['setting_value' => $value], ['setting_name' => $toggle]);
+
+        $routing = [];
+        foreach (ProviderRegistry::CAPABILITIES as $capability) {
+            $candidates = ProviderRegistry::forCapability($capability);
+            if (!$candidates) {
+                continue;
+            }
+            $routing[$capability] = [
+                'selected'   => Config::getProviderForCapability($capability),
+                'candidates' => $candidates,
+            ];
         }
-        
-        header('Location: ' . $vars['modulelink'] . '&action=api_config&success=1');
-        exit;
+
+        $this->renderAdmin('api_config', [
+            'vars'           => $vars,
+            'notice'         => $notice,
+            'apiMode'        => Config::get('api_mode', 'sandbox'),
+            'providers'      => ProviderRegistry::labels(),
+            'providerFields' => $providerFields,
+            'routing'        => $routing,
+            'toggles'        => Config::getFeatureToggles(),
+            'defaultProvider' => Config::get('default_provider', 'twilio'),
+            'webhookBase'    => Config::webhookBaseUrl(),
+            'allowedOrigins' => (string) Config::get('api_allowed_origins', ''),
+            'apiRateLimit'   => Config::getInt('api_rate_limit', 120),
+            'debugLogging'   => Config::getBool('debug_logging', false),
+            'csrf'           => Security::csrfField(),
+        ]);
     }
-    
-    public function renderPricing($vars)
+
+    /**
+     * @param array<string,mixed> $post
+     * @return array{type:string,message:string}
+     */
+    private function handleApiConfigPost(array $post): array
+    {
+        if (!Security::verifyCsrf($post)) {
+            return ['type' => 'danger', 'message' => 'Security token mismatch - changes were not saved.'];
+        }
+
+        $saved = 0;
+
+        // Provider credentials (blank input = keep the stored value).
+        foreach (ProviderRegistry::all() as $id => $definition) {
+            foreach (ProviderRegistry::credentialFields($id) as $field) {
+                $key = $id . '_' . $field;
+                if (!array_key_exists($key, $post)) {
+                    continue;
+                }
+
+                $value = Security::text($post[$key], 500);
+                if ($value === '' || strpos($value, '****') === 0) {
+                    continue; // masked placeholder resubmitted
+                }
+
+                Config::set($key, $value);
+                $saved++;
+            }
+        }
+
+        // Mode + provider routing.
+        Config::set('api_mode', Security::oneOf($post['api_mode'] ?? '', ['sandbox', 'live'], 'sandbox'));
+
+        if (!empty($post['default_provider']) && ProviderRegistry::exists((string) $post['default_provider'])) {
+            Config::set('default_provider', strtolower((string) $post['default_provider']));
+        }
+
+        foreach (ProviderRegistry::CAPABILITIES as $capability) {
+            $key = 'provider_' . $capability;
+            if (isset($post[$key]) && ProviderRegistry::exists((string) $post[$key])) {
+                Config::set($key, strtolower((string) $post[$key]));
+            }
+        }
+
+        // Feature toggles - unchecked checkboxes are absent from the POST.
+        foreach (array_keys(Config::getFeatureToggles()) as $service) {
+            Config::set('enable_' . $service, isset($post['enable_' . $service]) ? '1' : '0');
+        }
+
+        if (isset($post['webhook_base_url'])) {
+            $url = filter_var(trim((string) $post['webhook_base_url']), FILTER_VALIDATE_URL);
+            Config::set('webhook_base_url', $url ?: '');
+        }
+
+        // REST API access control.
+        if (isset($post['api_allowed_origins'])) {
+            $origins = [];
+
+            foreach (preg_split('/[\s,]+/', (string) $post['api_allowed_origins']) as $origin) {
+                $origin = rtrim(trim((string) $origin), '/');
+
+                if ($origin !== '' && filter_var($origin, FILTER_VALIDATE_URL)) {
+                    $origins[] = $origin;
+                }
+            }
+
+            Config::set('api_allowed_origins', implode(',', array_unique($origins)));
+        }
+
+        if (isset($post['api_rate_limit'])) {
+            Config::set('api_rate_limit', (string) max(0, min(10000, (int) $post['api_rate_limit'])));
+        }
+
+        Config::set('debug_logging', isset($post['debug_logging']) ? '1' : '0');
+
+        ProviderFactory::clearCache();
+        Logger::info('API configuration updated', ['credentials_changed' => $saved]);
+
+        return ['type' => 'success', 'message' => 'Configuration saved.' . ($saved ? " {$saved} credential(s) updated." : '')];
+    }
+
+    /**
+     * Provider health / connectivity page.
+     */
+    public function renderProviders(array $vars): void
+    {
+        $notice = null;
+
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && Security::verifyCsrf($_POST)) {
+            $providerId = strtolower(Security::text($_POST['provider'] ?? '', 50));
+            $provider = ProviderFactory::getProvider($providerId);
+
+            if ($provider === null) {
+                $notice = ['type' => 'danger', 'message' => 'Unknown provider: ' . Security::escape($providerId)];
+            } else {
+                $ok = $provider->testConnection();
+                $notice = [
+                    'type'    => $ok ? 'success' : 'danger',
+                    'message' => $ok
+                        ? ProviderRegistry::labels()[$providerId] . ' connection succeeded.'
+                        : 'Connection failed: ' . Security::escape((string) $provider->getLastError()),
+                ];
+            }
+        }
+
+        $this->renderAdmin('providers', [
+            'vars'      => $vars,
+            'notice'    => $notice,
+            'providers' => ProviderFactory::healthCheck(),
+            'csrf'      => Security::csrfField(),
+        ]);
+    }
+
+    public function renderPricing(array $vars): void
     {
         $pricingService = new PricingService();
-        
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $pricingService->updatePricing($_POST);
-            header('Location: ' . $vars['modulelink'] . '&action=pricing&success=1');
-            exit;
+        $notice = null;
+
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+            if (Security::verifyCsrf($_POST)) {
+                $pricingService->updatePricing($_POST);
+                $notice = ['type' => 'success', 'message' => 'Pricing updated.'];
+            } else {
+                $notice = ['type' => 'danger', 'message' => 'Security token mismatch - pricing was not saved.'];
+            }
         }
-        
-        $pricing = $pricingService->getAllPricing();
-        $template = __DIR__ . '/../../templates/admin/pricing.tpl';
-        if (file_exists($template)) {
-            extract(['vars' => $vars, 'pricing' => $pricing]);
-            include $template;
-        }
+
+        $this->renderAdmin('pricing', [
+            'vars'    => $vars,
+            'notice'  => $notice,
+            'pricing' => $pricingService->getAllPricing(),
+            'csrf'    => Security::csrfField(),
+        ]);
     }
-    
-    public function renderNumbersAdmin($vars)
+
+    public function renderNumbersAdmin(array $vars): void
     {
         $numberService = new NumberService();
-        $numbers = $numberService->getAllNumbers();
-        $template = __DIR__ . '/../../templates/admin/numbers.tpl';
-        if (file_exists($template)) {
-            extract(['vars' => $vars, 'numbers' => $numbers]);
-            include $template;
-        }
+        $notice = $this->handleNumberAction($numberService);
+
+        $filters = [
+            'status'  => Security::text($_GET['status'] ?? '', 20),
+            'country' => Security::text($_GET['country'] ?? '', 2),
+            'search'  => Security::text($_GET['q'] ?? '', 50),
+        ];
+
+        $this->renderAdmin('numbers', [
+            'vars'    => $vars,
+            'notice'  => $notice,
+            'numbers' => $numberService->getAllNumbers($filters),
+            'filters' => $filters,
+            'csrf'    => Security::csrfField(),
+        ]);
     }
-    
-    public function renderVoipAdmin($vars)
+
+    /**
+     * @return array{type:string,message:string}|null
+     */
+    private function handleNumberAction(NumberService $numberService): ?array
+    {
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
+            return null;
+        }
+
+        if (!Security::verifyCsrf($_POST)) {
+            return ['type' => 'danger', 'message' => 'Security token mismatch.'];
+        }
+
+        $numberId = (int) ($_POST['number_id'] ?? 0);
+        $operation = Security::oneOf($_POST['operation'] ?? '', ['activate', 'suspend', 'release', 'renew'], '');
+
+        if ($numberId <= 0 || $operation === '') {
+            return ['type' => 'danger', 'message' => 'Invalid request.'];
+        }
+
+        switch ($operation) {
+            case 'activate':
+                $ok = $numberService->activateNumber($numberId);
+                break;
+            case 'suspend':
+                $ok = $numberService->suspendNumber($numberId, Security::text($_POST['reason'] ?? 'Admin action', 255));
+                break;
+            case 'release':
+                $ok = $numberService->releaseNumber($numberId);
+                break;
+            case 'renew':
+            default:
+                $result = $numberService->renewNumber($numberId);
+                $ok = !empty($result['success']);
+                break;
+        }
+
+        return [
+            'type'    => $ok ? 'success' : 'danger',
+            'message' => $ok
+                ? 'Number ' . $operation . 'd successfully.'
+                : 'Could not ' . $operation . ' the number - check the system log.',
+        ];
+    }
+
+    public function renderVoipAdmin(array $vars): void
     {
         $voipService = new VoipService();
-        $calls = $voipService->getAllCallLogs();
-        $template = __DIR__ . '/../../templates/admin/voip.tpl';
-        if (file_exists($template)) {
-            extract(['vars' => $vars, 'calls' => $calls]);
-            include $template;
-        }
+
+        $this->renderAdmin('voip', [
+            'vars'  => $vars,
+            'calls' => $voipService->getAllCallLogs(['limit' => 200]),
+            'stats' => $voipService->getCallStatistics(),
+            'csrf'  => Security::csrfField(),
+        ]);
     }
-    
-    public function renderSmsAdmin($vars)
+
+    public function renderSmsAdmin(array $vars): void
     {
         $smsService = new SmsService();
-        $messages = $smsService->getAllMessages();
-        $template = __DIR__ . '/../../templates/admin/sms.tpl';
-        if (file_exists($template)) {
-            extract(['vars' => $vars, 'messages' => $messages]);
-            include $template;
-        }
+
+        $this->renderAdmin('sms', [
+            'vars'     => $vars,
+            'messages' => $smsService->getAllMessages(['limit' => 200]),
+            'stats'    => $smsService->getMessageStatistics(),
+            'csrf'     => Security::csrfField(),
+        ]);
     }
-    
-    public function renderEsimAdmin($vars)
+
+    public function renderEsimAdmin(array $vars): void
     {
         $esimService = new EsimService();
-        $esims = $esimService->getAllProfiles();
-        $template = __DIR__ . '/../../templates/admin/esim.tpl';
-        if (file_exists($template)) {
-            extract(['vars' => $vars, 'esims' => $esims]);
-            include $template;
-        }
+
+        $this->renderAdmin('esim', [
+            'vars'  => $vars,
+            'esims' => $esimService->getAllProfiles(),
+            'csrf'  => Security::csrfField(),
+        ]);
     }
-    
-    public function renderUsageAdmin($vars)
+
+    public function renderUsageAdmin(array $vars): void
     {
         $usageService = new UsageService();
-        $reports = $usageService->getSystemUsageReport();
-        $template = __DIR__ . '/../../templates/admin/usage.tpl';
-        if (file_exists($template)) {
-            extract(['vars' => $vars, 'reports' => $reports]);
-            include $template;
-        }
+
+        $this->renderAdmin('usage', [
+            'vars'    => $vars,
+            'reports' => $usageService->getSystemUsageReport(),
+            'stats'   => $usageService->getSystemStats(),
+        ]);
     }
-    
-    public function renderTransactionsAdmin($vars)
+
+    public function renderTransactionsAdmin(array $vars): void
     {
         $usageService = new UsageService();
-        $transactions = $usageService->getAllTransactions();
-        $template = __DIR__ . '/../../templates/admin/transactions.tpl';
-        if (file_exists($template)) {
-            extract(['vars' => $vars, 'transactions' => $transactions]);
-            include $template;
-        }
+
+        $filters = [
+            'user_id'      => (int) ($_GET['user_id'] ?? 0),
+            'status'       => Security::text($_GET['status'] ?? '', 20),
+            'service_type' => Security::text($_GET['service_type'] ?? '', 20),
+            'from'         => Security::text($_GET['from'] ?? '', 20),
+            'to'           => Security::text($_GET['to'] ?? '', 20),
+        ];
+
+        $this->renderAdmin('transactions', [
+            'vars'         => $vars,
+            'filters'      => $filters,
+            'transactions' => $usageService->getAllTransactions($filters),
+            'totals'       => $usageService->getTransactionTotals($filters),
+        ]);
     }
-    
-    public function renderUsersAdmin($vars)
+
+    /**
+     * User & subscription management.
+     */
+    public function renderUsersAdmin(array $vars): void
     {
-        $result = select_query('tblclients', 'id, firstname, lastname, email, status', '', 'id', 'DESC');
-        $users = [];
-        while ($row = mysql_fetch_assoc($result)) {
-            $users[] = $row;
-        }
-        $template = __DIR__ . '/../../templates/admin/users.tpl';
-        if (file_exists($template)) {
-            extract(['vars' => $vars, 'users' => $users]);
-            include $template;
-        }
+        $search = Security::text($_GET['q'] ?? '', 60);
+
+        $sql = 'SELECT c.id, c.firstname, c.lastname, c.email, c.status,
+                       (SELECT COUNT(*) FROM mod_phoneservices_numbers n WHERE n.user_id = c.id AND n.status <> "released") AS numbers,
+                       (SELECT COUNT(*) FROM mod_phoneservices_esims e WHERE e.user_id = c.id) AS esims,
+                       (SELECT COUNT(*) FROM mod_phoneservices_calls k WHERE k.user_id = c.id) AS calls,
+                       (SELECT COUNT(*) FROM mod_phoneservices_messages m WHERE m.user_id = c.id) AS messages,
+                       (SELECT COALESCE(SUM(t.amount),0) FROM mod_phoneservices_transactions t WHERE t.user_id = c.id AND t.status = "completed") AS spend
+                  FROM tblclients c
+                 WHERE (? = "" OR c.email LIKE ? OR c.firstname LIKE ? OR c.lastname LIKE ?)
+                 ORDER BY numbers DESC, c.id DESC
+                 LIMIT 200';
+
+        $like = '%' . $search . '%';
+        $users = Database::raw($sql, [$search, $like, $like, $like]);
+
+        $this->renderAdmin('users', [
+            'vars'   => $vars,
+            'users'  => $users,
+            'search' => $search,
+            'subscriptions' => Database::select('mod_phoneservices_subscriptions', '*', [], 'id', 'DESC', 100),
+        ]);
     }
-    
-    public function renderLogsAdmin($vars)
+
+    public function renderLogsAdmin(array $vars): void
     {
-        $logs = Logger::getRecentLogs(100);
-        $template = __DIR__ . '/../../templates/admin/logs.tpl';
-        if (file_exists($template)) {
-            extract(['vars' => $vars, 'logs' => $logs]);
-            include $template;
-        }
+        $level = Security::oneOf($_GET['level'] ?? '', ['debug', 'info', 'warning', 'error'], '');
+
+        $this->renderAdmin('logs', [
+            'vars'  => $vars,
+            'logs'  => Logger::getRecentLogs(200, $level ?: null),
+            'level' => $level,
+        ]);
     }
-    
-    // ==================== CLIENT AREA ====================
-    
-    public function renderClientArea($vars, $action)
+
+    /**
+     * Include an admin template with the given data in scope.
+     *
+     * @param array<string,mixed> $data
+     */
+    private function renderAdmin(string $page, array $data): void
     {
-        $userId = isset($_SESSION['uid']) ? $_SESSION['uid'] : 0;
-        if (!$userId && $action !== 'dashboard') {
+        $template = PHONESERVICES_ROOT . '/templates/admin/' . $page . '.tpl';
+
+        if (!is_file($template)) {
+            echo '<div class="alert alert-danger">Admin template missing: ' . Security::escape($page) . '</div>';
+            return;
+        }
+
+        extract($data, EXTR_SKIP);
+        include $template;
+    }
+
+    /* ==================================================================
+     | Client area
+     * ================================================================= */
+
+    /**
+     * @param array<string,mixed> $vars
+     * @return array<string,mixed>
+     */
+    public function renderClientArea(array $vars, string $action): array
+    {
+        $userId = Security::currentClientId();
+
+        if (!in_array($action, self::CLIENT_PAGES, true)) {
             $action = 'dashboard';
         }
-        
-        $data = [];
-        $data['vars'] = $vars;
-        $data['action'] = $action;
-        
+
+        // Respect the dynamic service switches.
+        $requiredToggle = ['numbers' => 'numbers', 'voip' => 'voip', 'sms' => 'sms', 'esim' => 'esim', 'usage' => 'analytics'];
+        if (isset($requiredToggle[$action]) && !Config::isServiceEnabled($requiredToggle[$action])) {
+            $action = 'dashboard';
+        }
+
+        $data = [
+            'vars'     => $vars,
+            'action'   => $action,
+            'userId'   => $userId,
+            'toggles'  => Config::getFeatureToggles(),
+            'currency' => Config::get('currency', 'USD'),
+            'csrf'     => Security::csrfToken(),
+        ];
+
+        try {
+            $data += $this->clientPageData($action, $userId);
+        } catch (\Throwable $e) {
+            Logger::exception($e, 'Client area render');
+            $data['error'] = 'This service is temporarily unavailable. Please try again shortly.';
+        }
+
+        $template = PHONESERVICES_ROOT . '/templates/client/' . $action . '.tpl';
+        $output = '';
+
+        if (is_file($template)) {
+            extract($data, EXTR_SKIP);
+            ob_start();
+            include $template;
+            $output = (string) ob_get_clean();
+        } else {
+            $output = '<div class="alert alert-danger">Template not found: ' . Security::escape($action) . '</div>';
+        }
+
+        return [
+            'pagetitle'    => 'Phone Services',
+            'breadcrumb'   => ['index.php?m=phoneservices' => 'Phone Services'],
+            'templatefile' => 'clientarea',
+            'requirelogin' => true,
+            'forcessl'     => true,
+            'vars'         => [
+                'content'    => $output,
+                'action'     => $action,
+                'toggles'    => Config::getFeatureToggles(),
+                'modulelink' => $vars['modulelink'] ?? 'index.php?m=phoneservices',
+            ],
+        ];
+    }
+
+    /**
+     * @return array<string,mixed>
+     */
+    private function clientPageData(string $action, int $userId): array
+    {
         switch ($action) {
             case 'numbers':
                 $service = new NumberService();
-                $data['numbers'] = $service->getUserNumbers($userId);
-                $data['availableCountries'] = $service->getAvailableCountries();
-                break;
+                return [
+                    'numbers'            => $service->getUserNumbers($userId),
+                    'availableCountries' => $service->getAvailableCountries(),
+                ];
+
             case 'voip':
                 $service = new VoipService();
-                $data['calls'] = $service->getUserCallLogs($userId);
-                $data['webRtcConfig'] = $service->getWebRtcConfig($userId);
-                break;
+                return [
+                    'calls'       => $service->getUserCallLogs($userId),
+                    'webRtcConfig' => $service->getWebRtcConfig($userId),
+                ];
+
             case 'sms':
                 $service = new SmsService();
-                $data['messages'] = $service->getUserMessages($userId);
-                break;
+                $numberService = new NumberService();
+                return [
+                    'messages' => $service->getUserMessages($userId),
+                    'numbers'  => $numberService->getUserNumbers($userId),
+                ];
+
             case 'esim':
                 $service = new EsimService();
-                $data['esims'] = $service->getUserProfiles($userId);
-                $data['plans'] = $service->getAvailablePlans();
-                break;
+                return [
+                    'esims' => $service->getUserProfiles($userId),
+                    'plans' => $service->getAvailablePlans(),
+                ];
+
             case 'usage':
                 $service = new UsageService();
-                $data['usage'] = $service->getUserUsage($userId);
-                $data['transactions'] = $service->getUserTransactions($userId);
-                break;
+                return [
+                    'usage'        => $service->getUserUsage($userId),
+                    'transactions' => $service->getUserTransactions($userId),
+                    'daily'        => $service->getUserDailyUsage($userId, 30),
+                ];
+
             case 'dashboard':
             default:
                 $usageService = new UsageService();
                 $numberService = new NumberService();
-                $data['stats'] = [
-                    'numbers' => $numberService->countUserNumbers($userId),
-                    'calls' => $usageService->countUserCalls($userId),
-                    'sms' => $usageService->countUserSms($userId),
-                    'esims' => $usageService->countUserEsims($userId),
+                return [
+                    'stats' => [
+                        'numbers' => $numberService->countUserNumbers($userId),
+                        'calls'   => $usageService->countUserCalls($userId),
+                        'sms'     => $usageService->countUserSms($userId),
+                        'esims'   => $usageService->countUserEsims($userId),
+                        'spend'   => $usageService->getUserSpend($userId),
+                    ],
+                    'usage' => $usageService->getUserUsage($userId),
                 ];
-                break;
         }
-        
-        $template = __DIR__ . '/../../templates/client/' . $action . '.tpl';
-        $output = '';
-        if (file_exists($template)) {
-            extract($data);
-            ob_start();
-            include $template;
-            $output = ob_get_clean();
-        } else {
-            $output = '<div class="alert alert-danger">Template not found: ' . htmlspecialchars($action) . '</div>';
-        }
-        
-        return [
-            'pagetitle' => 'Phone Services',
-            'breadcrumb' => [
-                'index.php?m=phoneservices' => 'Phone Services',
-            ],
-            'templatefile' => 'clientarea',
-            'requirelogin' => true,
-            'forcessl' => false,
-            'vars' => [
-                'content' => $output,
-                'action' => $action,
-                'modulelink' => $vars['modulelink'],
-            ],
-        ];
     }
 }

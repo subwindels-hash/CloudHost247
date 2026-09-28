@@ -1,210 +1,254 @@
 <?php
-
 /**
- * Custom Affiliate Commission Hooks
+ * Custom Affiliate Commission - WHMCS hooks.
  *
- * Integrates with WHMCS core via hooks:
- * - InvoicePaid: Triggers commission calculation after invoice is paid
- * - AffiliateCommission: Overrides default commission calculation
- * - InvoiceRefunded: Reverses commissions on refund
- * - AfterModuleUpgrade/Downgrade: Handles service changes
+ * Hook points used
+ * ----------------
+ *  AffiliateCommission          suppress the WHMCS default commission so this
+ *                               module is the only thing that pays out
+ *  InvoicePaid                  calculate + credit commission (50% / 20%)
+ *  InvoiceRefunded              reverse commission
+ *  InvoiceCancelled             reverse commission
+ *  InvoiceUnpaid                reverse commission (payment undone)
+ *  AfterProductUpgrade          keep commission state across package changes
+ *  AfterConfigOptionsUpgrade
+ *  AfterModuleChangePackage
+ *  ServiceEdit
+ *  DailyCronJob                 audit-log housekeeping
+ *
+ * Every handler is wrapped so that a failure inside the commission engine can
+ * never interrupt a payment, an invoice action or the cron.
+ *
+ * @package    WHMCS
+ * @subpackage CustomAffiliate
  */
 
-if (!defined("WHMCS")) {
-    die("This file cannot be accessed directly");
+if (!defined('WHMCS')) {
+    die('This file cannot be accessed directly');
 }
 
-use WHMCS\Database\Capsule;
+require_once __DIR__ . '/bootstrap.php';
 
-// Autoloader for our class
-require_once __DIR__ . '/lib/CommissionManager.php';
+use CustomAffiliate\CommissionEngine;
+use CustomAffiliate\Logger;
+use CustomAffiliate\Rules;
+use CustomAffiliate\ServiceChange;
+use CustomAffiliate\Settings;
 
 /**
- * Hook: InvoicePaid
- * Triggered after an invoice is marked as paid
+ * Run a hook body with a safety net.
+ *
+ * @param  mixed $default Returned if the callback throws.
+ * @return mixed
  */
-add_hook('InvoicePaid', 1, function($vars) {
-    $invoiceId = $vars['invoiceId'];
-
-    $manager = new \CustomAffiliate\CommissionManager();
-    $manager->logDebug('InvoicePaid hook fired', ['invoice_id' => $invoiceId]);
-
+function customaffiliate_guard(string $hook, callable $callback, $default = null)
+{
     try {
-        $commissions = $manager->processInvoicePaid($invoiceId);
+        return $callback();
+    } catch (\Throwable $e) {
+        Logger::error('Unhandled error in ' . $hook, [
+            'action' => 'hook_error',
+            'hook'   => $hook,
+            'error'  => $e->getMessage(),
+            'file'   => basename($e->getFile()) . ':' . $e->getLine(),
+        ]);
 
-        if ($commissions && is_array($commissions)) {
-            foreach ($commissions as $commission) {
-                // Prevent duplicate commissions
-                if ($manager->isDuplicateCommission(
-                    $commission['invoice_id'],
-                    $commission['service_id'],
-                    $commission['affiliate_id']
-                )) {
-                    $manager->logDebug('Duplicate commission detected - skipping', [
-                        'invoice_id' => $commission['invoice_id'],
-                        'service_id' => $commission['service_id'],
-                    ]);
-                    continue;
-                }
+        return $default;
+    }
+}
 
-                // Record the commission in our tracking system
-                $manager->recordCommission($commission);
+/**
+ * Suppress the WHMCS default commission.
+ *
+ * WHMCS's AffiliateCommission hook cannot change the commission AMOUNT - it
+ * only accepts boolean `skipCommission` / `payout` overrides. So the strategy
+ * is: stop WHMCS paying anything here, and let InvoicePaid pay the correct
+ * 50%/20% ourselves. That single decision is what implements both
+ * "custom percentage" and "exclude every non-hosting product".
+ *
+ * @param array<string,mixed> $vars
+ * @return array<string,bool>
+ */
+add_hook('AffiliateCommission', 1, function ($vars) {
+    return customaffiliate_guard('AffiliateCommission', function () use ($vars) {
+        if (!Settings::isEnabled() || !Settings::isExclusive()) {
+            return [];
+        }
 
-                $manager->logDebug('Commission recorded successfully', [
-                    'type' => $commission['commission_type'],
-                    'amount' => $commission['commission_amount'],
-                ]);
+        Logger::debug('Suppressed WHMCS default affiliate commission', [
+            'affiliate_id'      => (int) ($vars['affiliateId'] ?? 0),
+            'service_id'        => (int) ($vars['serviceId'] ?? 0),
+            'referral_id'       => (int) ($vars['referralId'] ?? 0),
+            'default_amount'    => (float) ($vars['commissionAmount'] ?? 0),
+        ]);
+
+        // Custom rates are applied from InvoicePaid instead.
+        return ['skipCommission' => true, 'payout' => false];
+    }, []);
+});
+
+/**
+ * Commission is only ever earned once an invoice is actually PAID.
+ *
+ * @param array<string,mixed> $vars
+ */
+add_hook('InvoicePaid', 1, function ($vars) {
+    customaffiliate_guard('InvoicePaid', function () use ($vars) {
+        $invoiceId = (int) ($vars['invoiceid'] ?? 0);
+
+        if ($invoiceId <= 0) {
+            return;
+        }
+
+        $engine = new CommissionEngine();
+        $summary = $engine->processInvoice($invoiceId);
+
+        Logger::debug('InvoicePaid processed', [
+            'invoice_id' => $invoiceId,
+            'processed'  => $summary['processed'],
+            'skipped'    => $summary['skipped'],
+            'amount'     => $summary['amount'],
+        ]);
+    });
+});
+
+/**
+ * Refund: claw the commission back.
+ *
+ * @param array<string,mixed> $vars
+ */
+add_hook('InvoiceRefunded', 1, function ($vars) {
+    customaffiliate_guard('InvoiceRefunded', function () use ($vars) {
+        if (!Settings::isEnabled() || !Settings::reversesOnRefund()) {
+            return;
+        }
+
+        $invoiceId = (int) ($vars['invoiceid'] ?? 0);
+
+        if ($invoiceId > 0) {
+            (new CommissionEngine())->reverseInvoice($invoiceId, 'invoice refunded');
+        }
+    });
+});
+
+/**
+ * Cancelled invoice: same treatment as a refund.
+ *
+ * @param array<string,mixed> $vars
+ */
+add_hook('InvoiceCancelled', 1, function ($vars) {
+    customaffiliate_guard('InvoiceCancelled', function () use ($vars) {
+        if (!Settings::isEnabled() || !Settings::reversesOnCancel()) {
+            return;
+        }
+
+        $invoiceId = (int) ($vars['invoiceid'] ?? 0);
+
+        if ($invoiceId > 0) {
+            (new CommissionEngine())->reverseInvoice($invoiceId, 'invoice cancelled');
+        }
+    });
+});
+
+/**
+ * An invoice flipped back to Unpaid (chargeback, mistaken payment, gateway
+ * reversal): the commission it produced is no longer earned.
+ *
+ * @param array<string,mixed> $vars
+ */
+add_hook('InvoiceUnpaid', 1, function ($vars) {
+    customaffiliate_guard('InvoiceUnpaid', function () use ($vars) {
+        if (!Settings::isEnabled() || !Settings::reversesOnRefund()) {
+            return;
+        }
+
+        $invoiceId = (int) ($vars['invoiceid'] ?? 0);
+
+        if ($invoiceId > 0) {
+            (new CommissionEngine())->reverseInvoice($invoiceId, 'invoice marked unpaid');
+        }
+    });
+});
+
+/**
+ * Package changes: upgrades, downgrades and admin product swaps.
+ *
+ * The service keeps its ledger row, so the next payment is correctly treated
+ * as a renewal rather than a brand new first payment.
+ */
+foreach (['AfterProductUpgrade', 'AfterConfigOptionsUpgrade', 'AfterModuleChangePackage', 'ServiceEdit'] as $packageHook) {
+    add_hook($packageHook, 1, function ($vars) use ($packageHook) {
+        customaffiliate_guard($packageHook, function () use ($vars, $packageHook) {
+            $serviceId = ServiceChange::resolveServiceId((array) $vars);
+
+            if ($serviceId > 0) {
+                ServiceChange::handle($serviceId, strtolower(str_replace('After', '', $packageHook)));
+            }
+        });
+    });
+}
+
+/**
+ * Daily housekeeping. The commission work itself is event driven (InvoicePaid
+ * fires for cron-generated renewal payments too), so the cron only prunes the
+ * audit log.
+ */
+add_hook('DailyCronJob', 1, function ($vars) {
+    customaffiliate_guard('DailyCronJob', function () {
+        $retention = Settings::getInt('log_retention_days', 180);
+        $pruned = Logger::prune($retention);
+
+        if ($pruned > 0) {
+            Logger::debug('Pruned audit log', ['rows' => $pruned, 'retention_days' => $retention]);
+        }
+    });
+});
+
+/**
+ * Expose a short commission summary in the client's admin sidebar.
+ *
+ * @param array<string,mixed> $vars
+ * @return array<string,string>
+ */
+add_hook('AdminAreaClientSummaryPage', 1, function ($vars) {
+    return customaffiliate_guard('AdminAreaClientSummaryPage', function () use ($vars) {
+        if (!Settings::isEnabled()) {
+            return '';
+        }
+
+        $clientId = (int) ($vars['userid'] ?? 0);
+
+        if ($clientId <= 0) {
+            return '';
+        }
+
+        $payouts = CommissionEngine::payouts(['client_id' => $clientId], 100);
+
+        if (!$payouts) {
+            return '';
+        }
+
+        $first = 0.0;
+        $recurring = 0.0;
+
+        foreach ($payouts as $payout) {
+            if ($payout->status === 'reversed') {
+                continue;
+            }
+
+            if ($payout->commission_type === Rules::TYPE_FIRST) {
+                $first += (float) $payout->amount;
+            } else {
+                $recurring += (float) $payout->amount;
             }
         }
-    } catch (Exception $e) {
-        $manager->logDebug('Exception in InvoicePaid hook', [
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString(),
-        ]);
-    }
-});
 
-/**
- * Hook: AffiliateCommission
- * Overrides the default affiliate commission calculation
- *
- * This hook allows us to modify or replace WHMCS's default commission amount.
- * Return a numeric value to set the commission, or false to use default WHMCS calculation.
- * Return 0 to give no commission.
- */
-add_hook('AffiliateCommission', 1, function($vars) {
-    $manager = new \CustomAffiliate\CommissionManager();
-    $manager->logDebug('AffiliateCommission hook fired', $vars);
-
-    try {
-        $result = $manager->handleAffiliateCommissionHook($vars);
-
-        if ($result === false) {
-            // Use default WHMCS calculation
-            $manager->logDebug('Using default WHMCS commission calculation');
-            return false;
-        }
-
-        if ($result === 0 || $result === 0.00) {
-            // Explicitly zero commission for non-hosting products
-            $manager->logDebug('Commission zeroed for non-web-hosting product');
-            return 0;
-        }
-
-        $manager->logDebug('Custom commission override applied', ['amount' => $result]);
-        return $result;
-
-    } catch (Exception $e) {
-        $manager->logDebug('Exception in AffiliateCommission hook', [
-            'error' => $e->getMessage(),
-        ]);
-        return false; // Fallback to default on error
-    }
-});
-
-/**
- * Hook: InvoiceRefunded
- * Reverses affiliate commission when invoice is refunded
- */
-add_hook('InvoiceRefunded', 1, function($vars) {
-    $invoiceId = $vars['invoiceId'];
-    $refundType = $vars['type'] ?? 'unknown'; // 'Partial' or 'Full'
-    $refundAmount = $vars['refundAmount'] ?? 0;
-
-    $manager = new \CustomAffiliate\CommissionManager();
-    $manager->logDebug('InvoiceRefunded hook fired', [
-        'invoice_id' => $invoiceId,
-        'refund_type' => $refundType,
-        'refund_amount' => $refundAmount,
-    ]);
-
-    try {
-        $manager->handleInvoiceRefund($invoiceId);
-    } catch (Exception $e) {
-        $manager->logDebug('Exception in InvoiceRefunded hook', [
-            'error' => $e->getMessage(),
-        ]);
-    }
-});
-
-/**
- * Hook: AfterModuleUpgrade
- * Handles commission logic when a hosting service is upgraded
- */
-add_hook('AfterModuleUpgrade', 1, function($vars) {
-    $serviceId = $vars['params']['serviceid'] ?? 0;
-    if (!$serviceId) {
-        return;
-    }
-
-    $manager = new \CustomAffiliate\CommissionManager();
-    $manager->logDebug('AfterModuleUpgrade hook fired', ['service_id' => $serviceId]);
-
-    try {
-        $manager->handleServiceChange($serviceId, 'upgrade');
-    } catch (Exception $e) {
-        $manager->logDebug('Exception in AfterModuleUpgrade hook', [
-            'error' => $e->getMessage(),
-        ]);
-    }
-});
-
-/**
- * Hook: AfterModuleDowngrade
- * Handles commission logic when a hosting service is downgraded
- */
-add_hook('AfterModuleDowngrade', 1, function($vars) {
-    $serviceId = $vars['params']['serviceid'] ?? 0;
-    if (!$serviceId) {
-        return;
-    }
-
-    $manager = new \CustomAffiliate\CommissionManager();
-    $manager->logDebug('AfterModuleDowngrade hook fired', ['service_id' => $serviceId]);
-
-    try {
-        $manager->handleServiceChange($serviceId, 'downgrade');
-    } catch (Exception $e) {
-        $manager->logDebug('Exception in AfterModuleDowngrade hook', [
-            'error' => $e->getMessage(),
-        ]);
-    }
-});
-
-/**
- * Hook: PreCronJob
- * Daily cron compatibility - log that module is active during cron
- */
-add_hook('PreCronJob', 1, function($vars) {
-    // This hook ensures our module is loaded during cron execution
-    // The actual cron-related logic is handled by InvoicePaid which fires
-    // when the cron marks renewal invoices as paid
-});
-
-/**
- * Hook: ClientAreaPage
- * Handle affiliate cookie tracking for new client registrations
- */
-add_hook('ClientAreaPage', 1, function($vars) {
-    // This is a lightweight hook to ensure affiliate tracking is active
-    // WHMCS handles affiliate cookie tracking natively via tblclients.affiliateid
-    return [];
-});
-
-/**
- * Hook: OrderPaid
- * Additional hook for order-level commission processing
- */
-add_hook('OrderPaid', 1, function($vars) {
-    $orderId = $vars['orderId'];
-    $invoiceId = $vars['invoiceId'] ?? 0;
-
-    $manager = new \CustomAffiliate\CommissionManager();
-    $manager->logDebug('OrderPaid hook fired', [
-        'order_id' => $orderId,
-        'invoice_id' => $invoiceId,
-    ]);
-
-    // The InvoicePaid hook handles the actual commission calculation
-    // This hook is for additional logging or future extensions
+        return '<div class="panel panel-default">'
+            . '<div class="panel-heading"><strong>Affiliate commission</strong></div>'
+            . '<div class="panel-body">'
+            . 'First payment: <strong>' . number_format($first, 2) . '</strong><br>'
+            . 'Renewals: <strong>' . number_format($recurring, 2) . '</strong><br>'
+            . '<span class="text-muted">' . count($payouts) . ' payout record(s)</span>'
+            . '</div></div>';
+    }, '');
 });
