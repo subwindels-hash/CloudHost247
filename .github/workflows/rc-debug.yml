@@ -1,0 +1,27 @@
+name: RC debug (temporary)
+on:
+  push:
+    branches: [arena/01a0e7b6-cloudhost247]
+jobs:
+  rc-debug:
+    name: RC debug (PHP 7.4)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+      - name: Run release-candidate script and capture output
+        run: |
+          set +e
+          bash scripts/release-candidate-check.sh > /tmp/rc.log 2>&1
+          code=$?
+          echo "exit_code=$code"
+          {
+            echo '### release-candidate-check.sh exit code: '"$code"
+            echo ''
+            echo '```'
+            tail -n 120 /tmp/rc.log
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit 0
