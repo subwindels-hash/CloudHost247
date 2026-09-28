@@ -119,6 +119,7 @@ under `docs/independent-rebuild/` and covered by the release gate
 |---|---|---|
 | CloudHost247 Foundation (audit log, capability policy, migrations) | addon | `modules/addons/cloudhost247_core/` |
 | **CloudHost247 API & Integrations** | addon | `modules/addons/cloudhost247_integrations/` |
+| **CloudHost247 Module Manager** | addon | `modules/addons/cloudhost247_modules/` |
 | CloudHost247 Currency | addon | `modules/addons/cloudhost247_currency/` |
 | CloudHost247 OVH | addon / server | `modules/addons/cloudhost247_ovh/`, `modules/servers/cloudhost247_ovh/` |
 | CloudHost247 Theme | addon | `modules/addons/cloudhost247_theme/` |
@@ -147,6 +148,29 @@ Read `docs/independent-rebuild/API-INTEGRATIONS.md` for the per-provider
 credential, scope, endpoint, rotation and failure-handling reference, and
 `docs/independent-rebuild/API-INVENTORY-AUDIT.md` for the repository-wide
 credential audit.
+
+### Module Manager
+
+New modules are installed from **Admin → Addons → CloudHost247 Module Manager**,
+not by unzipping over SSH or cPanel.
+
+- A `.zip` package is validated (type, size, signature, MIME, SHA-256) and its
+  archive is inspected **before** anything is written: path traversal, absolute
+  paths, symlinks, executable/setuid modes, decompression bombs, forbidden file
+  types and control files are rejected.
+- `module.json` is validated as data. No PHP from the package is executed at
+  install time.
+- An installation preview shows module, version, author, type, PHP range,
+  dependencies, files, database changes, configuration, permissions and
+  checksum, and must be confirmed. Downgrades need a second confirmation.
+- Installation is transactional: the previous version is backed up and restored
+  automatically if any step fails. Modules install **disabled**.
+- Uninstall lists exactly which files are removed and which tables are kept;
+  tables are never dropped and customer/service data is never deleted.
+- Set `CH247_MODULE_STORAGE` to a writable directory outside the document root.
+
+Read `docs/independent-rebuild/MODULE-MANAGER.md` for the pipeline, the
+`module.json` specification and the packaging rules.
 
 ## Runtime requirements (deployment target)
 

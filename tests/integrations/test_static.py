@@ -11,6 +11,7 @@ OWNED = [
     ROOT / 'modules/addons/cloudhost247_core',
     ROOT / 'modules/addons/cloudhost247_currency',
     ROOT / 'modules/addons/cloudhost247_integrations',
+    ROOT / 'modules/addons/cloudhost247_modules',
     ROOT / 'modules/addons/cloudhost247_ovh',
     ROOT / 'modules/addons/cloudhost247_theme',
     ROOT / 'modules/servers/RDP',

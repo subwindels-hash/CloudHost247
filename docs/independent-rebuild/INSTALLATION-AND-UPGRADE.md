@@ -148,3 +148,29 @@ Reference: [API-INTEGRATIONS.md](API-INTEGRATIONS.md) (per-provider credentials,
 **Rollback.** Deactivate the addon. Dependent modules fall back to their legacy credential sources (WHMCS server record for RDP and OVH, product configuration options for the LTE proxy, documented public endpoints for the currency providers). No table is dropped.
 
 **BLOCKED — STAGING REQUIRED:** migration execution on MySQL/MariaDB, WHMCS activation, role-capability behaviour, live provider connection tests, cron scheduling and the per-module credential cut-over.
+
+## Super Admin Module Manager
+
+Reference: [MODULE-MANAGER.md](MODULE-MANAGER.md) (pipeline, `module.json` specification, archive security controls, packaging rules).
+
+**Prerequisites.** PHP `zip`, `fileinfo`, `hash` and `json` extensions. A writable package directory **outside** the document root:
+
+| Variable | Required | Value |
+|---|---|---|
+| `CH247_MODULE_STORAGE` | recommended | Absolute path outside the web root for uploaded packages and pre-installation backups, writable by the web user (e.g. `/var/cloudhost247/modules`). May instead be `$ch247_module_storage` in `configuration.php`. Falls back to `$attachments_dir/cloudhost247-modules`. |
+| `CH247_MODULE_MAX_UPLOAD_BYTES` | no | Maximum package size in bytes (default 33554432; accepted range 65536–268435456). Keep PHP `upload_max_filesize` and `post_max_size` at or above this value. |
+
+**Install sequence.**
+
+1. Activate **CloudHost247 Foundation** (`cloudhost247_core`) first — it supplies the audit log and the capability policy this module seeds into.
+2. Activate **CloudHost247 API & Integrations** if installed modules will need API credentials.
+3. Activate **CloudHost247 Module Manager** — runs migration `1.0.0`, creating `mod_cloudhost247_modules`, `mod_cloudhost247_module_packages`, `mod_cloudhost247_module_files`, `mod_cloudhost247_module_events`, and seeds a Super-Admin-only policy for `modules.view/upload/install/update/toggle/uninstall/configure`.
+4. Read the activation message: it reports the resolved storage path, whether that path is inside the web root, whether the `zip` extension is loaded, and which capabilities were restricted. Fix anything it flags before uploading a package.
+5. Review the policy under **CloudHost247 Foundation → Administrator role capabilities** and restrict the `modules.*` capabilities to the role IDs that should hold them.
+6. Upload a package, read the installation preview in full, then confirm. The module installs **disabled**; enable it only after its configuration and health check have been reviewed.
+
+**Upgrade safety.** The migration is additive and `hasTable`-guarded. Deactivating the addon retains every row — installed modules, the package ledger, the file manifest and the module log — and uninstalls nothing. Updating a module backs up the previous directory before writing, and restores it if any step fails. Uninstalling a module removes only the files recorded at install time and never drops a table.
+
+**Rollback.** Deactivate the addon; installed modules keep working because their files and WHMCS registrations are untouched. To revert one module, reinstall the previous package (the preview will show it as a downgrade) or restore its directory from `<storage>/backups/<module>-<timestamp>-<checksum>/previous/`.
+
+**BLOCKED — STAGING REQUIRED:** migration execution on MySQL/MariaDB, WHMCS activation, administrator role-capability behaviour, filesystem ownership/permissions on the target host, and an end-to-end install of a real third-party package.

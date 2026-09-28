@@ -9,7 +9,8 @@ php tests/currency/run.php
 php -d display_errors=1 tests/ovh/run.php
 php -d display_errors=1 tests/rdp/run.php
 php -d display_errors=1 tests/integrations/run.php
-python3 -m unittest -v tests/foundation/test_static.py tests/currency/test_static.py tests/ovh/test_static.py tests/ovh/test_product_services_static.py tests/ovh/test_public_catalog_static.py tests/rdp/test_static.py tests/integrations/test_static.py tests/security/test_security.py tests/security/test_archive_integration.py
+php -d display_errors=1 tests/modules/run.php
+python3 -m unittest -v tests/foundation/test_static.py tests/currency/test_static.py tests/ovh/test_static.py tests/ovh/test_product_services_static.py tests/ovh/test_public_catalog_static.py tests/rdp/test_static.py tests/integrations/test_static.py tests/modules/test_static.py tests/security/test_security.py tests/security/test_archive_integration.py
 python3 -m unittest -v tests/staging/test_staging_tools.py
 python3 -m py_compile scripts/validate-migrations.py scripts/compare-financial-evidence.py scripts/generate-staging-report.py
 python3 scripts/validate-migrations.py

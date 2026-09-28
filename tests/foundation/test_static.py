@@ -1,7 +1,7 @@
 from pathlib import Path
 import re, unittest
 ROOT = Path(__file__).resolve().parents[2]
-MODULES = ['cloudhost247_core', 'cloudhost247_theme', 'cloudhost247_currency', 'cloudhost247_integrations', 'cloudhost247_ovh']
+MODULES = ['cloudhost247_core', 'cloudhost247_theme', 'cloudhost247_currency', 'cloudhost247_integrations', 'cloudhost247_modules', 'cloudhost247_ovh']
 
 class FoundationStaticTests(unittest.TestCase):
     def test_entrypoints_and_migrations_exist(self):
