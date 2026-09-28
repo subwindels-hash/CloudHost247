@@ -12,13 +12,32 @@ replaced feature has passed acceptance testing on staging (see `docs/independent
 the PHP-side rebuild notes, which are a separate, earlier effort and are not reused by this Node
 app).
 
-> **Status of this document:** written and technically reviewed alongside Phase 1 of the Node
-> platform. The install/build/test/migration steps below have been verified against a real
-> Postgres-wire-protocol database in a local sandbox. **The actual cPanel terminal commands,
-> Application Manager screen layout, and Node.js Selector version list have not yet been
-> exercised against a real cPanel account** — do that before calling this "cPanel-ready" per the
-> project's acceptance checklist (Appendix C). Update this note once a real staging run has been
-> completed, and record the exact cPanel version / Node Selector version encountered.
+> **Status of this document — cPanel staging verification: BLOCKED, not performed.**
+>
+> Phase 1 (commit `3523035c5817b857eb2917c188db2452bebab35a` on
+> `arena/01a0e82a-cloudhost247`) built, typechecked, and passed its full automated test suite
+> (40/40) in a clean `git clone` + `npm ci`, and was exercised end-to-end against a **local
+> Postgres-wire-protocol test database** (PGlite) in the development sandbox. **None of that is
+> cPanel verification.** No real cPanel account, WHM access, or hosting credentials have been
+> available to this work at any point, so the following have **not** been performed and must not
+> be assumed or fabricated:
+>
+> - Deployment through a real cPanel "Setup Node.js App" / Passenger instance
+> - Confirmation of actual cPanel version, Apache version, Node.js Selector versions, or npm
+>   version on any real host
+> - Real Apache reverse-proxy behavior for direct navigation/refresh on the SPA routes
+> - Real PostgreSQL availability/configuration on an actual cPanel account or its approved
+>   external alternative
+> - Review of real Passenger/cPanel error logs for credential leakage
+> - Any item in the Appendix C checklist below — **all 18 items remain unchecked**
+>
+> **This gate is explicitly known and was not silently skipped:** the project owner was informed
+> of this exact blocker and made an informed decision to let Phase 2 (public website / shared
+> application shell) proceed in parallel while this gate stays open, on the explicit condition
+> that **no part of this platform is described as "cPanel-ready" or "production-ready" until a
+> real cPanel staging run closes every item below.** If you are picking this up later: do the
+> real cPanel run before relying on this in production, regardless of how much Phase 2/3 work has
+> since been layered on top.
 
 ---
 
