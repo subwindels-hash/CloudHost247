@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import { usePageMeta } from '../lib/usePageMeta';
 
 /**
  * Hero copy and tagline below are the real CloudHost247 brand defaults defined in
@@ -24,6 +25,11 @@ const features = [
 ];
 
 export default function HomePage() {
+  usePageMeta(
+    'CloudHost247',
+    'Fast hosting, straightforward billing, and support whenever you need it.'
+  );
+
   return (
     <div>
       <section className="ch247-hero">

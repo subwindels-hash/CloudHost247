@@ -331,7 +331,16 @@ reinstall" for routine updates.
 3. Run `npm test` if you have a way to point it at a disposable/staging database (see section 10
    about not running the full suite against production data).
 4. If the change includes new migrations, follow section 6's full procedure.
-5. Restart the app from *Setup Node.js App*.
+5. Restart the app from *Setup Node.js App* — **this step is not optional, even for a
+   frontend-only change.** `@fastify/static` (which serves `public/`) is configured with
+   `wildcard: false` (`src/app.ts`) so that unmatched paths correctly fall through to the SPA
+   fallback instead of the static plugin swallowing them; the tradeoff is that `@fastify/static`
+   builds its list of servable files **once, from the filesystem, when the plugin registers at
+   process startup** — it does not notice files added, removed, or changed in `public/` while the
+   process keeps running. If you rebuild the frontend without restarting the Node process, newly
+   added or renamed files (e.g. a new hashed JS/CSS bundle filename from a fresh Vite build) will
+   silently fall through to the SPA-shell fallback (still `200`, but the wrong body) instead of
+   `404`ing obviously — always restart after `npm run build`, not just after a backend change.
 6. Do **not** run `npm ci`/`npm install` and do **not** delete `node_modules` for this kind of
    update — `node_modules` only needs to change when the lockfile changes.
 

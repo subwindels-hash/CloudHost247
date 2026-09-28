@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { apiFetch } from '../lib/api';
+import { usePageMeta } from '../lib/usePageMeta';
 
 interface MeResponse {
   user: { id: string; email: string; fullName: string; role: string };
 }
 
 export default function DashboardPage() {
+  usePageMeta('Dashboard', 'Your CloudHost247 account overview.');
   const [me, setMe] = useState<MeResponse['user'] | null>(null);
   const [error, setError] = useState<string | null>(null);
 

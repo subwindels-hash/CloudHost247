@@ -8,6 +8,8 @@
  *
  * Usage: add one entry per policy page and route to <LegalPage {...entry} />.
  */
+import { usePageMeta } from '../lib/usePageMeta';
+
 export interface LegalPageProps {
   title: string;
   /** Where the current, legally-reviewed version of this policy lives today. */
@@ -15,6 +17,8 @@ export interface LegalPageProps {
 }
 
 export default function LegalPage({ title, currentVersionNote }: LegalPageProps) {
+  usePageMeta(title, `${title} placeholder — see the currently-in-effect version linked on this page.`);
+
   return (
     <div className="ch247-page">
       <h1>{title}</h1>

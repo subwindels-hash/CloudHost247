@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import { usePageMeta } from '../lib/usePageMeta';
 
 /**
  * Deliberately does not show plan tiers or prices: the real product catalog and pricing live in
@@ -17,6 +18,8 @@ const included = [
 ];
 
 export default function HostingCpanelPage() {
+  usePageMeta('cPanel Hosting', "Everyday web hosting with the control panel administrators already know.");
+
   return (
     <div>
       <section className="ch247-hero ch247-hero--compact">

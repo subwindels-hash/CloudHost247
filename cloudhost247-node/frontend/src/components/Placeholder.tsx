@@ -1,9 +1,13 @@
+import { usePageMeta } from '../lib/usePageMeta';
+
 interface PlaceholderProps {
   title: string;
   description: string;
 }
 
 export default function Placeholder({ title, description }: PlaceholderProps) {
+  usePageMeta(title, description);
+
   return (
     <div className="ch247-card">
       <h1>{title}</h1>

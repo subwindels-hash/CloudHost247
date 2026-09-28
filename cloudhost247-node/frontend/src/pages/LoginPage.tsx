@@ -2,6 +2,7 @@ import { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../lib/api';
 import { setSession, type StoredUser } from '../lib/auth';
+import { usePageMeta } from '../lib/usePageMeta';
 
 interface AuthResponse {
   user: StoredUser;
@@ -9,6 +10,7 @@ interface AuthResponse {
 }
 
 export default function LoginPage() {
+  usePageMeta('Log in', 'Log in to your CloudHost247 account.');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);

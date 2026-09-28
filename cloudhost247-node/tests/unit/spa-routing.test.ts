@@ -22,6 +22,10 @@ describe('SPA fallback routing (Apache/cPanel refresh safety)', () => {
     publicDir = mkdtempSync(path.join(tmpdir(), 'ch247-public-'));
     writeFileSync(path.join(publicDir, 'index.html'), '<html><body>SPA shell</body></html>');
     writeFileSync(path.join(publicDir, 'app.js'), 'console.log("built asset");');
+    // Mirrors the real build output (see frontend/public/) — favicon.svg and robots.txt are
+    // top-level static files (not under /assets/), copied as-is by Vite's publicDir passthrough.
+    writeFileSync(path.join(publicDir, 'favicon.svg'), '<svg>fake favicon</svg>');
+    writeFileSync(path.join(publicDir, 'robots.txt'), 'User-agent: *\nAllow: /\n');
   });
 
   afterEach(() => {
@@ -60,6 +64,20 @@ describe('SPA fallback routing (Apache/cPanel refresh safety)', () => {
     const res = await app.inject({ method: 'GET', url: '/app.js' });
     expect(res.statusCode).toBe(200);
     expect(res.body).toContain('built asset');
+    await app.close();
+  });
+
+  it('serves top-level static files (favicon.svg, robots.txt) rather than the SPA shell', async () => {
+    const app = buildApp(env, { serveFrontend: true, publicDir });
+
+    const favicon = await app.inject({ method: 'GET', url: '/favicon.svg' });
+    expect(favicon.statusCode).toBe(200);
+    expect(favicon.body).toContain('fake favicon');
+
+    const robots = await app.inject({ method: 'GET', url: '/robots.txt' });
+    expect(robots.statusCode).toBe(200);
+    expect(robots.body).toContain('User-agent');
+
     await app.close();
   });
 

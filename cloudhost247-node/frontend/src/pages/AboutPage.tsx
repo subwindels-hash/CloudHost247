@@ -1,3 +1,5 @@
+import { usePageMeta } from '../lib/usePageMeta';
+
 /**
  * The only "About us" content that existed anywhere in this repository before this page was
  * Lorem Ipsum filler and fabricated fake team bios (e.g. "John Packet, CEO & Co Founder") shipped
@@ -8,6 +10,8 @@
  * content is supplied.
  */
 export default function AboutPage() {
+  usePageMeta('About', 'What CloudHost247 provides and what we value.');
+
   return (
     <div className="ch247-page">
       <h1>About CloudHost247</h1>
