@@ -96,6 +96,6 @@ specification, the packaging rules and the integration contract.
 ## Tests
 
 ```bash
-php tests/modules/run.php                      # 196 behavioural assertions
+php tests/modules/run.php                      # 198 behavioural assertions
 python3 -m unittest tests.modules.test_static  # source-level security policy
 ```

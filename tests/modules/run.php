@@ -193,6 +193,28 @@ $check('manifest parses dependency shorthand', (function () use ($manifestFor) {
     $parsed = Manifest::fromArray($manifestFor(array('dependencies' => array('cloudhost247_core' => '>=1.1.0'))))->dependencies();
     return isset($parsed['cloudhost247_core']) && $parsed['cloudhost247_core']['min_version'] === '1.1.0';
 })());
+$check('manifest survives a registry round trip without losing constraints', (function () use ($manifestFor) {
+    $original = Manifest::fromArray($manifestFor(array(
+        'dependencies' => array('cloudhost247_core' => '>=1.1.0', 'optional_helper' => array('min_version' => '2.0.0', 'max_version' => '3.0.0', 'optional' => true)),
+        'configuration' => array('fields' => array(array('key' => 'timeout', 'type' => 'number', 'required' => true))),
+        'integrations' => array('providers' => array('demo_provider')),
+    )));
+    // ModuleRepository::manifest() rebuilds stored manifests through fromArray(toArray()).
+    $restored = Manifest::fromArray($original->toArray());
+    $dependencies = $restored->dependencies();
+    return $dependencies == $original->dependencies()
+        && $dependencies['cloudhost247_core']['min_version'] === '1.1.0'
+        && $dependencies['optional_helper']['max_version'] === '3.0.0'
+        && $dependencies['optional_helper']['optional'] === true
+        && $restored->unknownKeys() === array()
+        && $restored->toArray() == $original->toArray();
+})());
+$check('manifest accepts a plain list of dependency ids', (function () use ($manifestFor) {
+    $parsed = Manifest::fromArray($manifestFor(array('dependencies' => array('cloudhost247_core'))))->dependencies();
+    return isset($parsed['cloudhost247_core'])
+        && $parsed['cloudhost247_core']['min_version'] === ''
+        && $parsed['cloudhost247_core']['optional'] === false;
+})());
 
 /* ------------------------------------------------------------ upload guard */
 

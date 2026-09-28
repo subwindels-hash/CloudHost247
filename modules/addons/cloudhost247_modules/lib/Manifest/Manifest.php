@@ -51,7 +51,9 @@ final class Manifest
 
     public static function fromArray(array $raw)
     {
-        $unknown = array_diff(array_keys($raw), self::$known);
+        // "unknown_keys" is emitted by toArray(); re-reading a stored manifest must not
+        // report the platform's own bookkeeping key as an unknown manifest key.
+        $unknown = array_diff(array_keys($raw), self::$known, array('unknown_keys'));
 
         $id = isset($raw['id']) ? (string) $raw['id'] : '';
         if (!Paths::isValidModuleId($id)) {
@@ -140,12 +142,20 @@ final class Manifest
         $dependencies = array();
         if (!isset($raw['dependencies']) || !is_array($raw['dependencies'])) { return $dependencies; }
         foreach ($raw['dependencies'] as $key => $value) {
-            // Accept both {"id": ">=1.0.0"} shorthand and the explicit object form.
-            if (is_int($key) && is_array($value)) {
-                $id = isset($value['id']) ? (string) $value['id'] : '';
+            // Accept the {"id": ">=1.0.0"} shorthand and the explicit object form. The object
+            // form is also what toArray() emits, so a manifest re-read from the registry keeps
+            // its version constraints instead of degrading to "any version".
+            if (is_array($value)) {
+                $id = isset($value['id']) ? (string) $value['id'] : (is_int($key) ? '' : (string) $key);
                 $minimum = isset($value['min_version']) ? (string) $value['min_version'] : '';
                 $maximum = isset($value['max_version']) ? (string) $value['max_version'] : '';
                 $optional = !empty($value['optional']);
+            } elseif (is_int($key)) {
+                // A plain list of module ids: ["cloudhost247_core"] — no version constraint.
+                $id = is_scalar($value) ? (string) $value : '';
+                $minimum = '';
+                $maximum = '';
+                $optional = false;
             } else {
                 $id = (string) $key;
                 $minimum = is_scalar($value) ? ltrim((string) $value, '>=v ') : '';
