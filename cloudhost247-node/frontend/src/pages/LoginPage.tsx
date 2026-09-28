@@ -1,8 +1,10 @@
 import { FormEvent, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../lib/api';
+import { setSession, type StoredUser } from '../lib/auth';
 
 interface AuthResponse {
-  user: { id: string; email: string; fullName: string; role: string };
+  user: StoredUser;
   token: string;
 }
 
@@ -11,6 +13,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null);
+  const navigate = useNavigate();
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -21,8 +24,9 @@ export default function LoginPage() {
         method: 'POST',
         body: JSON.stringify({ email, password }),
       });
-      localStorage.setItem('ch247_token', res.token);
+      setSession(res.token, res.user);
       setMessage({ kind: 'ok', text: `Welcome back, ${res.user.fullName}.` });
+      navigate('/dashboard');
     } catch (err) {
       setMessage({ kind: 'error', text: err instanceof Error ? err.message : 'Login failed' });
     } finally {

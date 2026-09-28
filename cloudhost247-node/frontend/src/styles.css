@@ -1,6 +1,20 @@
+/*
+ * Design tokens below match the real CloudHost247 brand tokens defined in
+ * modules/addons/cloudhost247_theme/lib/ThemeRepository.php (the independent-rebuild PHP theme's
+ * settings defaults) so this new app and the existing WHMCS site present a consistent brand while
+ * both stacks run side by side. Font is referenced by name only (no external/CDN font load) —
+ * this keeps the app fully self-contained for cPanel shared hosting, with no dependency on
+ * reaching an external font host at runtime.
+ */
 :root {
   color-scheme: light;
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --ch247-primary: #0756d8;
+  --ch247-accent: #12b886;
+  --ch247-ink: #16233a;
+  --ch247-bg: #f7f9fc;
+  --ch247-border: #e3e9f2;
+  --ch247-width: 1180px;
+  --ch247-font: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 
 * {
@@ -9,8 +23,13 @@
 
 body {
   margin: 0;
-  background: #f6f8fb;
-  color: #101828;
+  font-family: var(--ch247-font);
+  background: var(--ch247-bg);
+  color: var(--ch247-ink);
+}
+
+a {
+  color: var(--ch247-primary);
 }
 
 .ch247-shell {
@@ -19,47 +38,295 @@ body {
   flex-direction: column;
 }
 
-.ch247-nav {
+.ch247-skip {
+  position: absolute;
+  left: -9999px;
+}
+
+.ch247-skip:focus {
+  left: 1rem;
+  top: 1rem;
+  z-index: 9999;
+  background: #fff;
+  padding: 1rem;
+  border-radius: 0.4rem;
+}
+
+/* --- Header / shared app shell nav ------------------------------------------------------- */
+
+.ch247-header {
+  background: #071b3d;
+  color: #fff;
+}
+
+.ch247-header__inner {
+  max-width: var(--ch247-width);
+  margin: 0 auto;
   display: flex;
   align-items: center;
-  gap: 1.25rem;
+  gap: 1.5rem;
   padding: 0.9rem 1.5rem;
-  background: #0b1d3a;
-  color: #fff;
   flex-wrap: wrap;
 }
 
-.ch247-nav a {
+.ch247-brand {
+  font-weight: 800;
+  font-size: 1.15rem;
+  color: #fff !important;
+  text-decoration: none;
+}
+
+.ch247-brand--footer {
+  color: #fff;
+  font-size: 1.05rem;
+  margin-bottom: 0.35rem;
+}
+
+.ch247-nav-links {
+  display: flex;
+  gap: 1.1rem;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.ch247-nav-links a,
+.ch247-subnav a {
   color: #dce6f7;
   text-decoration: none;
   font-size: 0.92rem;
 }
 
-.ch247-nav a.brand {
-  font-weight: 700;
-  font-size: 1.05rem;
+.ch247-nav-links a:hover,
+.ch247-nav-links a.active,
+.ch247-subnav a:hover,
+.ch247-subnav a.active {
   color: #fff;
-  margin-right: 0.5rem;
 }
 
-.ch247-nav a:hover {
+.ch247-auth-links {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ch247-auth-greeting {
+  color: #dce6f7;
+  font-size: 0.9rem;
+}
+
+.ch247-subnav {
+  background: #0b2450;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ch247-subnav nav {
+  max-width: var(--ch247-width);
+  margin: 0 auto;
+  padding: 0.55rem 1.5rem;
+  display: flex;
+  gap: 1.1rem;
+  flex-wrap: wrap;
+}
+
+/* --- Buttons ------------------------------------------------------------------------------ */
+
+.ch247-button {
+  display: inline-block;
+  background: var(--ch247-accent);
+  color: #071b3d !important;
+  padding: 0.7rem 1.2rem;
+  border: none;
+  border-radius: 0.55rem;
+  font-weight: 700;
+  text-decoration: none !important;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.ch247-button--ghost {
+  background: transparent;
+  color: #fff !important;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.ch247-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* --- Hero / marketing sections --------------------------------------------------------- */
+
+.ch247-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 5.5rem 1.5rem 4.5rem;
+  background: linear-gradient(130deg, #061a3a 0%, var(--ch247-primary) 70%, #1573ef 100%);
   color: #fff;
 }
+
+.ch247-hero--compact {
+  padding: 3.5rem 1.5rem;
+}
+
+.ch247-hero__inner {
+  position: relative;
+  z-index: 1;
+  max-width: var(--ch247-width);
+  margin: 0 auto;
+}
+
+.ch247-hero h1 {
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  line-height: 1.08;
+  max-width: 760px;
+  margin: 0 0 1.1rem;
+  font-weight: 800;
+}
+
+.ch247-hero p {
+  font-size: 1.15rem;
+  max-width: 620px;
+  opacity: 0.92;
+  margin: 0 0 1.5rem;
+}
+
+.ch247-section {
+  padding: 3.5rem 1.5rem;
+}
+
+.ch247-section--muted {
+  background: #eef2fa;
+}
+
+.ch247-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+  max-width: var(--ch247-width);
+  margin: 0 auto;
+}
+
+.ch247-feature-card h2 {
+  font-size: 1.1rem;
+  margin: 0 0 0.5rem;
+}
+
+.ch247-feature-card p {
+  margin: 0;
+  color: #40506b;
+}
+
+.ch247-page {
+  max-width: 760px;
+  margin: 2.5rem auto;
+  background: #fff;
+  padding: clamp(1.25rem, 4vw, 2.75rem);
+  border-radius: 0.8rem;
+}
+
+.ch247-page--cta {
+  text-align: center;
+  background: transparent;
+  padding: 0;
+}
+
+.ch247-placeholder-notice {
+  background: #fff7e6;
+  border: 1px solid #f5d98b;
+  border-radius: 0.5rem;
+  padding: 0.9rem 1.1rem;
+}
+
+@media (max-width: 767px) {
+  .ch247-hero {
+    padding: 3rem 1.25rem;
+  }
+
+  .ch247-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ch247-header__inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ch247-auth-links {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+/* --- Footer -------------------------------------------------------------------------------- */
+
+.ch247-footer {
+  background: #071b3d;
+  color: #dce7fa;
+  margin-top: auto;
+}
+
+.ch247-footer__inner {
+  max-width: var(--ch247-width);
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 2rem;
+  padding: 2.25rem 1.5rem 1.25rem;
+}
+
+.ch247-footer__inner p {
+  margin: 0;
+  max-width: 320px;
+  opacity: 0.85;
+}
+
+.ch247-footer__inner nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ch247-footer__inner nav a {
+  color: #dce7fa;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.ch247-footer__inner nav a:hover {
+  color: #fff;
+}
+
+.ch247-footer__legal {
+  max-width: var(--ch247-width);
+  margin: 0 auto;
+  padding: 0.75rem 1.5rem 1.5rem;
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+/* --- Existing app/dashboard components (unchanged from Phase 1) ------------------------- */
 
 .ch247-main {
   flex: 1;
-  padding: 2rem 1.5rem;
-  max-width: 960px;
-  margin: 0 auto;
   width: 100%;
 }
 
 .ch247-card {
   background: #fff;
-  border: 1px solid #e4e9f2;
+  border: 1px solid var(--ch247-border);
   border-radius: 10px;
   padding: 1.5rem;
   margin-bottom: 1rem;
+}
+
+/* Non-marketing app pages (dashboard, billing, etc.) keep a narrower, form-friendly column. */
+.ch247-main > .ch247-card,
+.ch247-main > form {
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 2rem;
 }
 
 .ch247-status-ok {
@@ -90,7 +357,7 @@ form.ch247-form button {
   padding: 0.6rem 0.9rem;
   border: none;
   border-radius: 6px;
-  background: #1858c7;
+  background: var(--ch247-primary);
   color: #fff;
   font-weight: 600;
   cursor: pointer;
