@@ -139,7 +139,9 @@ namespace CloudHost247\Smm\Test {
                 'name' => 'Test Provider ' . $id,
                 'adapter' => 'generic',
                 'api_url' => TEST_PROVIDER_URL,
-                'api_key_encrypted' => 'test-envelope',
+                // Valid Crypto envelope (the global encrypt()/decrypt() fakes
+                // defined at the bottom of this file make it reversible).
+                'api_key_encrypted' => \CloudHost247\Smm\Support\Crypto::encrypt('test-key'),
                 'enabled' => 1,
                 'refill_supported' => 1,
                 'cancel_supported' => 1,
@@ -322,13 +324,18 @@ namespace CloudHost247\Smm\Test {
             return true;
         }
 
-        public function eligibleForStatusSync($limit)
+        public function eligibleForStatusSync($limit, $terminalRecheckWindow = 86400)
         {
             $terminal = \CloudHost247\Smm\Support\StatusMap::terminalStatuses();
+            $cutoffTs = time() - max(3600, (int) $terminalRecheckWindow);
             $out = array();
             foreach ($this->rows as $row) {
                 if ((string) $row->submission_state !== 'accepted' || (int) $row->suspended === 1) { continue; }
-                if ($row->order_status !== null && in_array((string) $row->order_status, $terminal, true)) { continue; }
+                if ($row->order_status !== null && in_array((string) $row->order_status, $terminal, true)) {
+                    // terminal: re-verify only inside the window
+                    $fresh = $row->last_status_at !== null && strtotime((string) $row->last_status_at) >= $cutoffTs;
+                    if (!$fresh) { continue; }
+                }
                 $out[] = $row;
                 if (count($out) >= (int) $limit) { break; }
             }

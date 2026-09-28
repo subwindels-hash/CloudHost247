@@ -23,6 +23,9 @@ use CloudHost247\Smm\Support\TransportException;
  */
 final class StatusSyncService
 {
+    /** Terminal orders are re-verified for this long, then left alone. */
+    const TERMINAL_RECHECK_SECONDS = 86400;
+
     private $finder;
     private $orders;
     private $recorder;

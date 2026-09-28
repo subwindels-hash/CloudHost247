@@ -36,10 +36,15 @@ interface OrderStore
 
     /**
      * Bounded list of orders eligible for status synchronization:
-     * accepted, not suspended, provider enabled, status not verified-terminal.
-     * @return array rows joined with their provider row (provider_api data)
+     * accepted, not suspended, provider enabled, status not verified-terminal —
+     * PLUS orders that turned terminal within the re-verification window so a
+     * provider contradicting a verified terminal status is caught and flagged
+     * (never overwritten). After the window the terminal order is left alone.
+     * @param int $limit
+     * @param int $terminalRecheckWindow seconds since terminal status was set
+     * @return array rows
      */
-    public function eligibleForStatusSync($limit);
+    public function eligibleForStatusSync($limit, $terminalRecheckWindow = 86400);
 
     /** Orders in a given submission state (bounded). */
     public function findByState($state, $limit);

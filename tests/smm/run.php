@@ -385,7 +385,7 @@ function orderRow($id, $serviceId, $providerId, $status)
         'refill_supported' => 0, 'cancel_supported' => 0,
         'last_refill_id' => '', 'last_refill_status' => '',
         'error_message' => '', 'correlation_id' => 'corr' . $id,
-        'submitted_at' => date('Y-m-d H:i:s'), 'last_status_at' => null,
+        'submitted_at' => date('Y-m-d H:i:s'), 'last_status_at' => date('Y-m-d H:i:s'),
         'last_sync_at' => null, 'created_at' => date('Y-m-d H:i:s'),
         'updated_at' => date('Y-m-d H:i:s'),
     );
@@ -395,7 +395,8 @@ $finder->addProvider(1);
 $finder->addProvider(2);
 $orders = new FakeOrderStore();
 $orders->rows[1] = orderRow(1, 101, 1, 'pending');
-$orders->rows[2] = orderRow(2, 102, 1, 'completed'); // terminal: must NOT be polled
+$orders->rows[2] = orderRow(2, 102, 1, 'completed'); // stale terminal: outside the recheck window
+$orders->rows[2]->last_status_at = date('Y-m-d H:i:s', time() - 172800);
 $orders->rows[3] = orderRow(3, 103, 2, 'pending');   // other provider
 $recorder = new FakeApiRecorder();
 $transport = new FakeTransport(array(
@@ -404,11 +405,12 @@ $transport = new FakeTransport(array(
 ));
 $sync = new StatusSyncService($finder, $orders, $recorder, new AdapterFactory($transport));
 $summary = $sync->syncBatch(50);
-check($tests, 'status sync polls only eligible orders', $transport->calls() === 2 && $summary['checked'] === 2);
+check($tests, 'status sync polls eligible orders only (stale terminal skipped)', $transport->calls() === 2 && $summary['checked'] === 2);
 check($tests, 'status sync applies normalized transition', $orders->rows[1]->order_status === 'in_progress' && $orders->rows[1]->remains === 250 && $orders->rows[1]->start_count === 3572);
 check($tests, 'status sync records event with correlation id', count($orders->events) === 2 && $orders->events[0]->event === 'status_change');
 
-// Terminal conflict: provider flips a completed order back to pending.
+// Terminal conflict: a FRESHLY terminal order is re-verified inside the
+// window; the provider contradicting it must not overwrite the stored status.
 $finder = new FakeProviderFinder();
 $finder->addProvider(1);
 $orders = new FakeOrderStore();

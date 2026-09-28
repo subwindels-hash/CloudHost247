@@ -102,16 +102,25 @@ final class OrderRepository implements OrderStore
         )) === 1;
     }
 
-    public function eligibleForStatusSync($limit)
+    public function eligibleForStatusSync($limit, $terminalRecheckWindow = 86400)
     {
         $terminal = StatusMap::terminalStatuses();
+        $terminalCutoff = date('Y-m-d H:i:s', time() - max(3600, (int) $terminalRecheckWindow));
         return Capsule::table(self::ORDERS . ' AS o')
             ->join('mod_cloudhost247_smm_providers AS p', 'p.id', '=', 'o.provider_id')
             ->where('o.submission_state', 'accepted')
             ->where('o.suspended', 0)
             ->where('p.enabled', 1)
-            ->where(function ($q) use ($terminal) {
-                $q->whereNull('o.order_status')->orWhereNotIn('o.order_status', $terminal);
+            ->where(function ($q) use ($terminal, $terminalCutoff) {
+                // non-terminal (or unverified) orders always sync;
+                // terminal orders are re-verified only inside the window
+                $q->whereNull('o.order_status')
+                    ->orWhereNotIn('o.order_status', $terminal)
+                    ->orWhere(function ($q2) use ($terminal, $terminalCutoff) {
+                        $q2->whereIn('o.order_status', $terminal)
+                            ->whereNotNull('o.last_status_at')
+                            ->where('o.last_status_at', '>', $terminalCutoff);
+                    });
             })
             ->select('o.*', 'p.name AS provider_name_snapshot', 'p.adapter AS provider_adapter',
                 'p.api_url AS provider_api_url', 'p.api_key_encrypted AS provider_api_key_encrypted',
