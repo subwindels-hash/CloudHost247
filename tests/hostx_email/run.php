@@ -1136,8 +1136,18 @@ $tests['default page content makes no false partnership claim'] = static functio
 
     $blob = strtolower((string) json_encode($content));
 
-    foreach (['official partner', 'microsoft partner', 'google partner', 'certified partner'] as $claim) {
-        if (strpos($blob, $claim) !== false && strpos($blob, 'not ' . $claim) === false) {
+    // Affirmative partnership claims only: "not affiliated with, or an official
+    // partner of" is exactly the wording we require, so a bare substring match
+    // would flag the disclaimer itself.
+    $affirmative = '/(we are|cloudhost247 is|as an?)\s+(an?\s+)?(official|certified|authorised|authorized|accredited)\s+'
+        . '(microsoft|google|reseller|partner)/';
+
+    if (preg_match($affirmative, $blob)) {
+        return 'content makes an affirmative partnership claim';
+    }
+
+    foreach (['microsoft partner', 'google partner', 'gold partner'] as $claim) {
+        if (strpos($blob, $claim) !== false) {
             return 'content claims: ' . $claim;
         }
     }
