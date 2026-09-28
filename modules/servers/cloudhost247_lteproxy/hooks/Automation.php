@@ -89,7 +89,7 @@ add_hook('InvoicePaid', 1, function ($vars) {
                 'password' => $service->password ?? '',
                 'configoption1' => $product->configoption1 ?? '',
                 'configoption2' => $product->configoption2 ?? '',
-                'configoption3' => $product->configoption3 ?? 'https://api.cloudhost247.com',
+                'configoption3' => $product->configoption3 ?? '',
                 'configoption4' => $product->configoption4 ?? 30,
                 'configoption5' => $product->configoption5 ?? 'SOCKS5',
                 'configoption6' => $product->configoption6 ?? 'WIFI_AND_CELLULAR',
@@ -171,7 +171,7 @@ add_hook('ServiceSuspend', 1, function ($vars) {
             'password' => $service->password ?? '',
             'configoption1' => $product->configoption1 ?? '',
             'configoption2' => $product->configoption2 ?? '',
-            'configoption3' => $product->configoption3 ?? 'https://api.cloudhost247.com',
+            'configoption3' => $product->configoption3 ?? '',
             'configoption4' => $product->configoption4 ?? 30,
             'configoption5' => $product->configoption5 ?? 'SOCKS5',
             'configoption6' => $product->configoption6 ?? 'WIFI_AND_CELLULAR',
@@ -236,7 +236,7 @@ add_hook('ServiceUnsuspend', 1, function ($vars) {
             'password' => $service->password ?? '',
             'configoption1' => $product->configoption1 ?? '',
             'configoption2' => $product->configoption2 ?? '',
-            'configoption3' => $product->configoption3 ?? 'https://api.cloudhost247.com',
+            'configoption3' => $product->configoption3 ?? '',
             'configoption4' => $product->configoption4 ?? 30,
             'configoption5' => $product->configoption5 ?? 'SOCKS5',
             'configoption6' => $product->configoption6 ?? 'WIFI_AND_CELLULAR',
@@ -306,7 +306,7 @@ add_hook('DailyCronJob', 1, function () {
                         'username' => $service->username,
                         'configoption1' => $product->configoption1 ?? '',
                         'configoption2' => $product->configoption2 ?? '',
-                        'configoption3' => $product->configoption3 ?? 'https://api.cloudhost247.com',
+                        'configoption3' => $product->configoption3 ?? '',
                     ];
 
                     cloudhost247_lteproxy_TerminateAccount($params);

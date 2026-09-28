@@ -109,6 +109,45 @@ of this repository **into** an existing WHMCS installation root (cPanel
 - The SoYouStart cron scripts in `crons/` need a `crons/config.php` defining
   `$whmcspath` if WHMCS is not reachable via `../init.php`.
 
+## CloudHost247 independent rebuild modules
+
+These are the first-party modules built for this repository. They are documented
+under `docs/independent-rebuild/` and covered by the release gate
+(`scripts/release-candidate-check.sh`).
+
+| Module | Type | Location |
+|---|---|---|
+| CloudHost247 Foundation (audit log, capability policy, migrations) | addon | `modules/addons/cloudhost247_core/` |
+| **CloudHost247 API & Integrations** | addon | `modules/addons/cloudhost247_integrations/` |
+| CloudHost247 Currency | addon | `modules/addons/cloudhost247_currency/` |
+| CloudHost247 OVH | addon / server | `modules/addons/cloudhost247_ovh/`, `modules/servers/cloudhost247_ovh/` |
+| CloudHost247 Theme | addon | `modules/addons/cloudhost247_theme/` |
+| Secure RDP provisioning | server | `modules/servers/RDP/` |
+
+### API & Integrations centre
+
+Every external API the platform calls is configured in one place —
+**Admin → Addons → CloudHost247 API & Integrations** — covering RDP,
+hosting/provisioning, WHM/cPanel, domain registrars, DNS, Cloudflare, payments,
+email/SMTP, SMS, WhatsApp, Telegram, notifications, AI/LLM, exchange rates,
+object storage, monitoring, KYC, network and SMM providers.
+
+- Credentials are stored AES-256-GCM encrypted, decrypted only server-side, and
+  never rendered into HTML, a URL, a log or an API response.
+- **Test Connection** runs server-side and returns only a sanitized
+  classification (connected / auth failed / invalid endpoint / timeout /
+  provider unavailable / invalid configuration / permission denied).
+- Each provider is configured separately per environment
+  (development / staging / production) and production changes require an
+  explicit confirmation.
+- Required before activation:
+  `CH247_INTEGRATIONS_KEY` (32+ random bytes) and `CH247_PLATFORM_ENVIRONMENT`.
+
+Read `docs/independent-rebuild/API-INTEGRATIONS.md` for the per-provider
+credential, scope, endpoint, rotation and failure-handling reference, and
+`docs/independent-rebuild/API-INVENTORY-AUDIT.md` for the repository-wide
+credential audit.
+
 ## Runtime requirements (deployment target)
 
 - WHMCS 8.x (order form `templates/orderforms/hostx` requires WHMCS 8.1+,

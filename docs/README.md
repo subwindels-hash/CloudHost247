@@ -6,6 +6,9 @@
 | `pre-restructuring-audit.md` | Package-by-package audit inventory taken before any changes |
 | `policies/` | Source PDFs of the 19 CloudHost247 legal policies + original installation notes |
 | `announcement-bar/` | Announcement Bar build brief, usage examples, and the (not installed) CloudHost247-branded template variant |
+| `independent-rebuild/` | Independent rebuild programme: security review, installation/upgrade, staging matrices, per-system documentation, and the proprietary-file integrity manifest |
+| `independent-rebuild/API-INTEGRATIONS.md` | **Central API & Integrations centre** — every supported provider, required credentials, where to obtain them, scopes, endpoint requirements, test vs production, rotation, connection testing, failure handling and the security model |
+| `independent-rebuild/API-INVENTORY-AUDIT.md` | Repository-wide audit of every outbound API, hard-coded credential findings and their remediation status |
 | `build-notes/` | Build/install provenance notes per module (hostx-tools-platform, hostx-domain-lookup, dnschecker, customaffiliate, digitalproducts, hostx-email, phoneservices, smm) |
 
 Module-specific README/INSTALL files live with their modules:
@@ -16,3 +19,4 @@ Module-specific README/INSTALL files live with their modules:
 - `modules/addons/dnschecker/README.txt`
 - `modules/servers/cloudhost247_lteproxy/README.md`
 - `templates/hostx/README.md` (original theme note)
+- `modules/addons/cloudhost247_integrations/` (central API & Integrations centre — see `docs/independent-rebuild/API-INTEGRATIONS.md`)

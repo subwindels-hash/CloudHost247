@@ -68,9 +68,22 @@ class ApiClient
      */
     public function __construct(array $config, Logger $logger)
     {
-        $this->apiBaseUrl = rtrim($config['api_base_url'] ?? 'https://api.cloudhost247.com', '/');
-        $this->apiKey = $config['api_key'] ?? '';
-        $this->apiSecret = $config['api_secret'] ?? '';
+        $baseUrl = rtrim(trim((string) ($config['api_base_url'] ?? '')), '/');
+        if ($baseUrl === '' || stripos($baseUrl, 'https://') !== 0) {
+            throw new ApiException(
+                'The LTE Proxy API endpoint is not configured. Configure the "CloudHost247 LTE Proxy API" integration under Addons, API & Integrations; no endpoint is assumed by this module.',
+                500
+            );
+        }
+        if (trim((string) ($config['api_key'] ?? '')) === '') {
+            throw new ApiException(
+                'The LTE Proxy API key is not configured. Store it in the central API & Integrations vault before using this module.',
+                500
+            );
+        }
+        $this->apiBaseUrl = $baseUrl;
+        $this->apiKey = (string) $config['api_key'];
+        $this->apiSecret = '';
         $this->timeout = (int) ($config['api_timeout'] ?? 30);
         $this->sslVerify = (bool) ($config['api_ssl_verify'] ?? true);
         $this->logger = $logger;
