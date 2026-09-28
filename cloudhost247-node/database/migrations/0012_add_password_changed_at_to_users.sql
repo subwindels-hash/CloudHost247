@@ -1,0 +1,30 @@
+-- Migration: 0012_add_password_changed_at_to_users.sql
+-- Purpose: Phase 4 self-service password change needs a way to invalidate any JWT that was issued
+-- before the *most recent* password change, even though that token's own signature/expiry are
+-- still perfectly valid — the same class of problem `revoked_tokens`/`jti` already solves for an
+-- explicit logout (see 0003_create_revoked_tokens.sql), applied here to "the password changed
+-- since this token was issued" instead.
+--
+-- Backfill choice: epoch ('1970-01-01T00:00:00Z'), deliberately NOT now(). This is an explicit
+-- product decision, not an oversight:
+--   * Backfilling to now() would mean every session that exists anywhere at the moment this
+--     migration runs is immediately treated as "issued before the last password change" and
+--     rejected on its very next request — silently forcing every currently-logged-in customer to
+--     re-login the instant Phase 4 ships, even though no password actually changed. That is a
+--     surprising, disruptive side effect of an unrelated deploy and is explicitly rejected here.
+--   * Backfilling to epoch means: every session that already exists before this migration keeps
+--     working exactly as it did before (its `iat` is always after 1970). The new check only ever
+--     takes effect the first time a customer *actually* changes their password
+--     (POST /api/v1/account/password — see src/routes/account.ts), at which point
+--     `password_changed_at` is set to a real `now()` and every token issued before that real
+--     change is correctly rejected on its next use, from then on.
+--
+-- This column is entirely independent of `revoked_tokens`: logging out one specific
+-- browser/device/token continues to be handled only by the existing jti-based revocation list.
+-- This column only ever matters for "did the password change after this specific token was
+-- issued" — enforced in src/lib/require-auth.ts's authenticate(), which rejects (401) a token
+-- whose `iat` claim (seconds since epoch) predates the user's current `password_changed_at`
+-- (both truncated to whole-second precision — see the comment in require-auth.ts for the
+-- documented, accepted trade-off this involves).
+
+ALTER TABLE users ADD COLUMN IF NOT EXISTS password_changed_at timestamptz NOT NULL DEFAULT '1970-01-01T00:00:00Z';

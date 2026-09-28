@@ -1,0 +1,20 @@
+# Dependencies (installed on the server from the committed lockfile — never committed)
+node_modules/
+
+# Compiled server output (produced by `npm run build:server`)
+dist/
+
+# Built frontend static assets (produced by `npm run build:frontend`) — generated, not source.
+public/*
+!public/.gitkeep
+
+# Secrets / local environment
+.env
+.env.*
+!.env.example
+
+# Editor/OS noise
+.DS_Store
+
+# Test/coverage output
+coverage/

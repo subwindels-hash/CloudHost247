@@ -1,0 +1,786 @@
+/*
+ * Design tokens below match the real CloudHost247 brand tokens defined in
+ * modules/addons/cloudhost247_theme/lib/ThemeRepository.php (the independent-rebuild PHP theme's
+ * settings defaults) so this new app and the existing WHMCS site present a consistent brand while
+ * both stacks run side by side. Font is referenced by name only (no external/CDN font load) —
+ * this keeps the app fully self-contained for cPanel shared hosting, with no dependency on
+ * reaching an external font host at runtime.
+ */
+:root {
+  color-scheme: light;
+  --ch247-primary: #0756d8;
+  --ch247-accent: #12b886;
+  --ch247-ink: #16233a;
+  --ch247-bg: #f7f9fc;
+  --ch247-border: #e3e9f2;
+  --ch247-width: 1180px;
+  --ch247-font: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--ch247-font);
+  background: var(--ch247-bg);
+  color: var(--ch247-ink);
+}
+
+a {
+  color: var(--ch247-primary);
+}
+
+.ch247-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.ch247-skip {
+  position: absolute;
+  left: -9999px;
+}
+
+.ch247-skip:focus {
+  left: 1rem;
+  top: 1rem;
+  z-index: 9999;
+  background: #fff;
+  padding: 1rem;
+  border-radius: 0.4rem;
+}
+
+/* --- Header / shared app shell nav ------------------------------------------------------- */
+
+.ch247-header {
+  background: #071b3d;
+  color: #fff;
+}
+
+.ch247-header__inner {
+  max-width: var(--ch247-width);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.9rem 1.5rem;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Hidden on desktop; shown as a hamburger toggle below the mobile breakpoint. */
+.ch247-menu-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 0.4rem;
+  background: transparent;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.ch247-menu-toggle__bar {
+  display: block;
+  height: 2px;
+  margin: 0 auto;
+  width: 22px;
+  background: #fff;
+  border-radius: 2px;
+}
+
+.ch247-header__collapsible {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.ch247-brand {
+  font-weight: 800;
+  font-size: 1.15rem;
+  color: #fff !important;
+  text-decoration: none;
+}
+
+.ch247-brand--footer {
+  color: #fff;
+  font-size: 1.05rem;
+  margin-bottom: 0.35rem;
+}
+
+.ch247-nav-links {
+  display: flex;
+  gap: 1.1rem;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.ch247-nav-links a,
+.ch247-subnav a {
+  color: #dce6f7;
+  text-decoration: none;
+  font-size: 0.92rem;
+}
+
+.ch247-nav-links a:hover,
+.ch247-nav-links a.active,
+.ch247-subnav a:hover,
+.ch247-subnav a.active {
+  color: #fff;
+}
+
+.ch247-auth-links {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ch247-auth-greeting {
+  color: #dce6f7;
+  font-size: 0.9rem;
+}
+
+.ch247-subnav {
+  background: #0b2450;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ch247-subnav nav {
+  max-width: var(--ch247-width);
+  margin: 0 auto;
+  padding: 0.55rem 1.5rem;
+  display: flex;
+  gap: 1.1rem;
+  flex-wrap: wrap;
+}
+
+/* --- Buttons ------------------------------------------------------------------------------ */
+
+.ch247-button {
+  display: inline-block;
+  background: var(--ch247-accent);
+  color: #071b3d !important;
+  padding: 0.7rem 1.2rem;
+  border: none;
+  border-radius: 0.55rem;
+  font-weight: 700;
+  text-decoration: none !important;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.ch247-button--ghost {
+  background: transparent;
+  color: #fff !important;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+/* Secondary button variant for use on light/card backgrounds (ch247-button--ghost is designed for
+   the dark header and is unreadable outside it). */
+.ch247-button--outline {
+  background: transparent;
+  color: var(--ch247-primary) !important;
+  border: 1px solid var(--ch247-border);
+}
+
+.ch247-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* --- Hero / marketing sections --------------------------------------------------------- */
+
+.ch247-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 5.5rem 1.5rem 4.5rem;
+  background: linear-gradient(130deg, #061a3a 0%, var(--ch247-primary) 70%, #1573ef 100%);
+  color: #fff;
+}
+
+.ch247-hero--compact {
+  padding: 3.5rem 1.5rem;
+}
+
+.ch247-hero__inner {
+  position: relative;
+  z-index: 1;
+  max-width: var(--ch247-width);
+  margin: 0 auto;
+}
+
+.ch247-hero h1 {
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  line-height: 1.08;
+  max-width: 760px;
+  margin: 0 0 1.1rem;
+  font-weight: 800;
+}
+
+.ch247-hero p {
+  font-size: 1.15rem;
+  max-width: 620px;
+  opacity: 0.92;
+  margin: 0 0 1.5rem;
+}
+
+.ch247-section {
+  padding: 3.5rem 1.5rem;
+}
+
+.ch247-section--muted {
+  background: #eef2fa;
+}
+
+.ch247-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+  max-width: var(--ch247-width);
+  margin: 0 auto;
+}
+
+.ch247-feature-card h2 {
+  font-size: 1.1rem;
+  margin: 0 0 0.5rem;
+}
+
+.ch247-feature-card p {
+  margin: 0;
+  color: #40506b;
+}
+
+.ch247-page {
+  max-width: 760px;
+  margin: 2.5rem auto;
+  background: #fff;
+  padding: clamp(1.25rem, 4vw, 2.75rem);
+  border-radius: 0.8rem;
+}
+
+.ch247-page--cta {
+  text-align: center;
+  background: transparent;
+  padding: 0;
+}
+
+.ch247-page--wide {
+  max-width: 980px;
+}
+
+.ch247-page__hint {
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.ch247-placeholder-notice {
+  background: #fff7e6;
+  border: 1px solid #f5d98b;
+  border-radius: 0.5rem;
+  padding: 0.9rem 1.1rem;
+}
+
+.ch247-definition-list {
+  display: grid;
+  grid-template-columns: minmax(0, 140px) 1fr;
+  row-gap: 0.6rem;
+  column-gap: 1rem;
+  margin: 1.25rem 0;
+}
+
+.ch247-definition-list dt {
+  font-weight: 600;
+  color: #40506b;
+}
+
+.ch247-definition-list dd {
+  margin: 0;
+  word-break: break-word;
+}
+
+/* --- Legal / FAQ / contact / index-style content pages --------------------------------------- */
+
+.ch247-index-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.1rem;
+  margin: 1.5rem 0;
+}
+
+.ch247-index-card {
+  border: 1px solid var(--ch247-border);
+  border-radius: 0.6rem;
+  padding: 1.1rem 1.25rem;
+  background: #fff;
+}
+
+.ch247-index-card h3 {
+  margin: 0 0 0.4rem;
+  font-size: 1.02rem;
+}
+
+.ch247-index-card p {
+  margin: 0 0 0.6rem;
+  color: #40506b;
+  font-size: 0.92rem;
+}
+
+.ch247-index-card__status {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+}
+
+.ch247-index-card__status--available {
+  background: #e6f8f0;
+  color: #067647;
+}
+
+.ch247-index-card__status--pending {
+  background: #eef2fa;
+  color: #40506b;
+}
+
+.ch247-faq-item {
+  border-bottom: 1px solid var(--ch247-border);
+  padding: 1.1rem 0;
+}
+
+.ch247-faq-item:last-child {
+  border-bottom: none;
+}
+
+.ch247-faq-item h3 {
+  margin: 0 0 0.45rem;
+  font-size: 1.02rem;
+}
+
+.ch247-faq-item p,
+.ch247-faq-item ul {
+  margin: 0;
+  color: #40506b;
+}
+
+.ch247-faq-item ul {
+  padding-left: 1.2rem;
+}
+
+.ch247-contact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1.1rem;
+  margin: 1.5rem 0;
+}
+
+/* --- Catalog (Phase 3): loading/error states and plan/price cards ---------------------------- */
+
+.ch247-state-banner {
+  max-width: var(--ch247-width);
+  margin: 0 auto 1.5rem;
+  padding: 1rem 1.25rem;
+  border-radius: 0.6rem;
+  background: #eef2fa;
+  color: #40506b;
+}
+
+.ch247-state-banner--error {
+  background: #fdecec;
+  border: 1px solid #f3b4b4;
+  color: #7a2020;
+}
+
+.ch247-state-banner--error p {
+  margin: 0 0 0.35rem;
+}
+
+.ch247-state-banner--error p:last-child {
+  margin-bottom: 0;
+}
+
+.ch247-plan-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.25rem;
+  max-width: var(--ch247-width);
+  margin: 1.5rem auto;
+}
+
+.ch247-plan-card {
+  border: 1px solid var(--ch247-border);
+  border-radius: 0.7rem;
+  padding: 1.5rem;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ch247-plan-card h3 {
+  margin: 0;
+}
+
+.ch247-plan-card__price {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--ch247-primary);
+}
+
+.ch247-plan-card__price-unpublished {
+  font-size: 0.92rem;
+  font-style: italic;
+  color: #40506b;
+}
+
+.ch247-plan-card__features {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.ch247-plan-card__features li {
+  color: #40506b;
+  font-size: 0.92rem;
+}
+
+@media (max-width: 767px) {
+  .ch247-hero {
+    padding: 3rem 1.25rem;
+  }
+
+  .ch247-grid,
+  .ch247-index-grid,
+  .ch247-contact-grid,
+  .ch247-plan-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ch247-definition-list {
+    grid-template-columns: 1fr;
+  }
+
+  .ch247-definition-list dd {
+    margin-bottom: 0.35rem;
+  }
+
+  .ch247-menu-toggle {
+    display: flex;
+  }
+
+  .ch247-header__collapsible {
+    display: none;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    gap: 1rem;
+    padding-top: 0.75rem;
+  }
+
+  .ch247-header__collapsible.is-open {
+    display: flex;
+  }
+
+  .ch247-nav-links {
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+  }
+
+  .ch247-auth-links {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+}
+
+/* --- Footer -------------------------------------------------------------------------------- */
+
+.ch247-footer {
+  background: #071b3d;
+  color: #dce7fa;
+  margin-top: auto;
+}
+
+.ch247-footer__inner {
+  max-width: var(--ch247-width);
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 2rem;
+  padding: 2.25rem 1.5rem 1.25rem;
+}
+
+.ch247-footer__inner p {
+  margin: 0;
+  max-width: 320px;
+  opacity: 0.85;
+}
+
+.ch247-footer__inner nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ch247-footer__inner nav a {
+  color: #dce7fa;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.ch247-footer__inner nav a:hover {
+  color: #fff;
+}
+
+.ch247-footer__legal {
+  max-width: var(--ch247-width);
+  margin: 0 auto;
+  padding: 0.75rem 1.5rem 1.5rem;
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+/* --- Existing app/dashboard components (unchanged from Phase 1) ------------------------- */
+
+.ch247-main {
+  flex: 1;
+  width: 100%;
+}
+
+.ch247-card {
+  background: #fff;
+  border: 1px solid var(--ch247-border);
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Non-marketing app pages (dashboard, billing, etc.) keep a narrower, form-friendly column. */
+.ch247-main > .ch247-card,
+.ch247-main > form {
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 2rem;
+}
+
+.ch247-status-ok {
+  color: #067647;
+  font-weight: 600;
+}
+
+.ch247-status-error {
+  color: #b42318;
+  font-weight: 600;
+}
+
+form.ch247-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 360px;
+}
+
+form.ch247-form input {
+  padding: 0.55rem 0.7rem;
+  border: 1px solid #cfd8e6;
+  border-radius: 6px;
+  font-size: 0.95rem;
+}
+
+form.ch247-form button {
+  padding: 0.6rem 0.9rem;
+  border: none;
+  border-radius: 6px;
+  background: var(--ch247-primary);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+form.ch247-form button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* --- Phase 4: customer app (account/services/domains/support/admin) ------------------------- */
+
+/* Wider, multi-card column for authenticated app pages that render more than one section (the
+   direct-child `.ch247-main > .ch247-card` rule above only targets a single top-level card). */
+.ch247-stack {
+  max-width: 900px;
+  margin: 2rem auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ch247-card h2 {
+  margin-top: 0;
+}
+
+.ch247-table-wrap {
+  overflow-x: auto;
+}
+
+.ch247-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.ch247-table th,
+.ch247-table td {
+  text-align: left;
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid var(--ch247-border);
+  vertical-align: middle;
+}
+
+.ch247-table th {
+  color: #40506b;
+  font-weight: 600;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.ch247-table tr:last-child td {
+  border-bottom: none;
+}
+
+.ch247-badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: #eef2fa;
+  color: #40506b;
+}
+
+.ch247-badge--active {
+  background: #e3f9ef;
+  color: #067647;
+}
+
+.ch247-badge--warning {
+  background: #fff7e6;
+  color: #8a5a00;
+}
+
+.ch247-badge--danger {
+  background: #fdecec;
+  color: #b42318;
+}
+
+.ch247-button--small {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.85rem;
+}
+
+.ch247-button--danger {
+  background: #fdecec;
+  color: #b42318 !important;
+  border: 1px solid #f3b4b4;
+}
+
+.ch247-inline-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.ch247-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 1.25rem 0;
+}
+
+.ch247-thread__message {
+  border: 1px solid var(--ch247-border);
+  border-radius: 0.6rem;
+  padding: 0.75rem 1rem;
+  background: #f7f9fc;
+}
+
+.ch247-thread__message--self {
+  background: #eef6ff;
+  border-color: #bcd6f7;
+  align-self: flex-end;
+  max-width: 85%;
+}
+
+.ch247-thread__meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.78rem;
+  color: #40506b;
+  margin-bottom: 0.35rem;
+}
+
+.ch247-thread__body {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+form.ch247-form--wide {
+  max-width: 480px;
+}
+
+form.ch247-form textarea {
+  padding: 0.55rem 0.7rem;
+  border: 1px solid #cfd8e6;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  resize: vertical;
+}
+
+form.ch247-form select {
+  padding: 0.55rem 0.7rem;
+  border: 1px solid #cfd8e6;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  background: #fff;
+}
+
+.ch247-field-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #40506b;
+  display: block;
+  margin-bottom: 0.3rem;
+}

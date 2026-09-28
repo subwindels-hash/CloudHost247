@@ -1,0 +1,71 @@
+name: CloudHost247 Node platform
+
+# Independent from the WHMCS/PHP "Independent foundation" workflow — this only builds/tests the
+# new cloudhost247-node/ application and never touches the existing PHP/WHMCS tree.
+on:
+  push:
+    branches: [arena/01a0e82a-cloudhost247]
+    paths:
+      - 'cloudhost247-node/**'
+      - '.github/workflows/node-platform.yml'
+  pull_request:
+    paths:
+      - 'cloudhost247-node/**'
+      - '.github/workflows/node-platform.yml'
+
+jobs:
+  build-and-test:
+    name: Build, typecheck, test (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Keep in sync with cloudhost247-node/package.json "engines.node" and with whatever LTS
+        # versions the target cPanel host's Node.js Selector actually offers — see
+        # docs/CPANEL_DEPLOYMENT.md, section "Node.js version". As of this workflow's authoring
+        # (Sept 2026): Node 22 is Maintenance LTS (EOL Apr 2027) and Node 24 is Active LTS
+        # (EOL Apr 2028); Node 20 already reached EOL (Apr 2026) and Fastify v5 requires Node
+        # >=20 at minimum, while the vitest 5 devDependency requires Node >=22.12 to run at all —
+        # so 22.x is the practical floor for this repo today. Re-verify both numbers against
+        # https://nodejs.org/en/about/previous-releases and the real hosting account before
+        # relying on either; never assume a version without checking.
+        node: ['22.12.0', '24.8.0']
+    defaults:
+      run:
+        working-directory: cloudhost247-node
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: 'npm'
+          cache-dependency-path: cloudhost247-node/package-lock.json
+
+      - name: Install dependencies from lockfile
+        run: npm ci
+
+      - name: Audit production dependency tree
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Typecheck server
+        run: npm run typecheck
+
+      - name: Typecheck frontend
+        run: npx tsc -p frontend/tsconfig.json --noEmit
+
+      - name: Unit + integration tests (includes real migrations run against an embedded Postgres engine)
+        run: npm test
+
+      - name: Build server + frontend (production artifacts)
+        run: npm run build
+
+      - name: Verify server.js can boot the compiled app (env validation only, no network)
+        run: |
+          node -e "
+            process.env.NODE_ENV='production';
+            process.env.DATABASE_URL='postgresql://user:pass@localhost:5432/cloudhost247';
+            process.env.JWT_SECRET='0'.repeat(32);
+            require('./dist/src/app.js');
+            console.log('dist/src/app.js loads cleanly');
+          "
