@@ -26,8 +26,16 @@ class AuthMiddleware
             return;
         }
         
-        // Check WHMCS session auth for browser requests
-        if (isset($_SESSION['uid']) && $_SESSION['uid'] > 0) {
+        // Session requests are same-origin and state-changing calls require WHMCS CSRF.
+        if (isset($_SESSION['uid']) && (int) $_SESSION['uid'] > 0) {
+            if (in_array($_SERVER['REQUEST_METHOD'] ?? 'GET', ['POST', 'PUT', 'PATCH', 'DELETE'], true)) {
+                $csrf = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? ($_POST['token'] ?? '');
+                $sessionToken = $_SESSION['token'] ?? '';
+                if (!$csrf || !$sessionToken || !hash_equals((string) $sessionToken, (string) $csrf)) {
+                    $this->deny(403, 'Invalid CSRF token');
+                }
+            }
+            $_SESSION['phoneservices_auth_type'] = 'session';
             return;
         }
         
@@ -48,10 +56,7 @@ class AuthMiddleware
             }
         }
         
-        http_response_code(401);
-        header('Content-Type: application/json');
-        echo json_encode(['error' => 'Unauthorized']);
-        exit;
+        $this->deny(401, 'Unauthorized');
     }
     
     /**
@@ -66,8 +71,9 @@ class AuthMiddleware
             }
             
             $decoded = JWT::decode($token, new Key($secret, 'HS256'));
-            if (isset($decoded->sub)) {
-                $_SESSION['api_user_id'] = $decoded->sub;
+            if (isset($decoded->sub) && (int) $decoded->sub > 0 && isset($decoded->exp) && (int) $decoded->exp >= time()) {
+                $_SESSION['api_user_id'] = (int) $decoded->sub;
+                $_SESSION['phoneservices_auth_type'] = 'jwt';
                 return true;
             }
         } catch (\Exception $e) {
@@ -83,6 +89,20 @@ class AuthMiddleware
     {
         // In production, validate against stored API keys
         $validKey = \PhoneServices\Core\Config::get('api_key', '');
-        return !empty($validKey) && hash_equals($validKey, $apiKey);
+        $userId = (int) \PhoneServices\Core\Config::get('api_user_id', 0);
+        if (!empty($validKey) && $userId > 0 && hash_equals((string) $validKey, $apiKey)) {
+            $_SESSION['api_user_id'] = $userId;
+            $_SESSION['phoneservices_auth_type'] = 'api_key';
+            return true;
+        }
+        return false;
+    }
+
+    private function deny(int $status, string $message): void
+    {
+        http_response_code($status);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['success' => false, 'error' => $message]);
+        exit;
     }
 }

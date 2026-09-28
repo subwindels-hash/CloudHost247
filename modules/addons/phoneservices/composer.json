@@ -14,7 +14,7 @@
     },
     "autoload": {
         "psr-4": {
-            "PhoneServices\\\\": "lib/"
+            "PhoneServices\\": "lib/"
         }
     },
     "config": {

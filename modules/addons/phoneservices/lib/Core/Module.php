@@ -94,9 +94,9 @@ class Module
         ];
         
         foreach ($defaults as $setting) {
-            $exists = select_query('mod_phoneservices_settings', 'id', ['setting_name' => $setting['setting_name']]);
-            if (!mysql_num_rows($exists)) {
-                insert_query('mod_phoneservices_settings', $setting);
+            $exists = Database::row('mod_phoneservices_settings', 'id', ['setting_name' => $setting['setting_name']]);
+            if (!$exists) {
+                Database::insert('mod_phoneservices_settings', $setting);
             }
         }
     }
@@ -242,11 +242,7 @@ class Module
     
     public function renderUsersAdmin($vars)
     {
-        $result = select_query('tblclients', 'id, firstname, lastname, email, status', '', 'id', 'DESC');
-        $users = [];
-        while ($row = mysql_fetch_assoc($result)) {
-            $users[] = $row;
-        }
+        $users = Database::select('tblclients', 'id, firstname, lastname, email, status', [], 'id', 'DESC', 250);
         $template = __DIR__ . '/../../templates/admin/users.tpl';
         if (file_exists($template)) {
             extract(['vars' => $vars, 'users' => $users]);

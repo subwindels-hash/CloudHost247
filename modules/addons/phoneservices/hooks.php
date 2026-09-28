@@ -5,6 +5,7 @@
  */
 
 use PhoneServices\Core\Logger;
+use PhoneServices\Core\Database;
 use PhoneServices\Services\NumberService;
 use PhoneServices\Services\EsimService;
 use PhoneServices\Services\UsageService;
@@ -13,7 +14,7 @@ if (!defined('WHMCS')) {
     die('This file cannot be accessed directly');
 }
 
-require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/bootstrap.php';
 
 /**
  * Daily Cron Job Hook
@@ -58,20 +59,19 @@ add_hook('InvoicePaid', 1, function($vars) {
         $invoiceId = $vars['invoiceid'];
         
         // Check if this invoice is related to phone services
-        $items = select_query('tblinvoiceitems', '*', ['invoiceid' => $invoiceId]);
-        while ($item = mysql_fetch_assoc($items)) {
-            if (strpos($item['description'], 'Phone Number') !== false 
+        $items = Database::select('tblinvoiceitems', '*', ['invoiceid' => $invoiceId]);
+        foreach ($items as $item) {
+            if (strpos($item['description'], 'Phone Number') !== false
                 || strpos($item['description'], 'eSIM') !== false
                 || strpos($item['description'], 'VoIP') !== false) {
-                
                 Logger::info('Phone service invoice paid', ['invoice' => $invoiceId, 'item' => $item['id']]);
-                
-                // Update transaction status
-                $usageService = new UsageService();
-                $usageService->updateTransactionStatus(0, 'completed', [
-                    'invoice_id' => $invoiceId,
-                    'gateway' => 'whmcs',
-                ]);
+                // Transactions are matched by invoice, never by a placeholder id.
+                foreach (Database::select('mod_phoneservices_transactions', 'id', ['invoice_id' => $invoiceId]) as $transaction) {
+                    (new UsageService())->updateTransactionStatus((int) $transaction['id'], 'completed', [
+                        'invoice_id' => $invoiceId,
+                        'gateway' => 'whmcs',
+                    ]);
+                }
             }
         }
     } catch (\Exception $e) {

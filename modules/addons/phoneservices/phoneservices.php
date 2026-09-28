@@ -17,7 +17,7 @@ use PhoneServices\Core\Module;
 use PhoneServices\Core\Config;
 use PhoneServices\Core\Logger;
 
-require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/bootstrap.php';
 
 /**
  * Module Configuration
@@ -29,7 +29,7 @@ function phoneservices_config()
         'description' => 'Virtual telecom services including phone numbers, VoIP, SMS, eSIM, and usage tracking.',
         'author'      => 'Telecom Team',
         'language'    => 'english',
-        'version'     => '1.0.0',
+        'version'     => '1.1.0',
         'link'        => 'https://example.com/phoneservices',
         'fields'      => [
             'api_mode' => [

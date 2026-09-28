@@ -30,7 +30,11 @@ class Logger
             'created_at' => date('Y-m-d H:i:s'),
         ];
         
-        insert_query('mod_phoneservices_logs', $data);
+        // Never let observability take down a customer request during install/upgrade.
+        try {
+            Database::insert('mod_phoneservices_logs', $data);
+        } catch (\Exception $ignored) {
+        }
         
         // Also log to WHMCS activity log for errors
         if ($level === self::LEVEL_ERROR) {
@@ -70,12 +74,7 @@ class Logger
             $where['level'] = $level;
         }
         
-        $result = select_query('mod_phoneservices_logs', '*', $where, 'id', 'DESC', (int)$limit);
-        $logs = [];
-        while ($row = mysql_fetch_assoc($result)) {
-            $logs[] = $row;
-        }
-        return $logs;
+        return Database::select('mod_phoneservices_logs', '*', $where, 'id', 'DESC', max(1, (int) $limit));
     }
     
     /**
@@ -86,9 +85,7 @@ class Logger
         $retentionDays = (int) Config::get('log_retention_days', 90);
         $cutoffDate = date('Y-m-d H:i:s', strtotime("-{$retentionDays} days"));
         
-        full_query("DELETE FROM mod_phoneservices_logs WHERE created_at < '" . db_escape_string($cutoffDate) . "'");
-        
-        $affected = mysql_affected_rows();
+        $affected = Database::table('mod_phoneservices_logs')->where('created_at', '<', $cutoffDate)->delete();
         self::info("Cleaned {$affected} old log records");
         
         return $affected;

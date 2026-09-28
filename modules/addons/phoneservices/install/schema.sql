@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS `mod_phoneservices_numbers` (
     `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
     `user_id` INT(10) UNSIGNED NOT NULL DEFAULT 0,
     `assigned_service_id` INT(10) UNSIGNED NULL DEFAULT 0,
+    `assigned_at` DATETIME NULL,
     `provider` VARCHAR(50) NOT NULL,
     `provider_id` VARCHAR(100) NOT NULL,
     `number` VARCHAR(30) NOT NULL,

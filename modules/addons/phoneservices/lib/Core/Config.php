@@ -19,17 +19,20 @@ class Config
             return self::$cache[$key];
         }
         
-        $result = select_query('tbladdonmodules', 'value', ['module' => 'phoneservices', 'setting' => $key]);
-        if ($row = mysql_fetch_assoc($result)) {
+        $row = Database::row('tbladdonmodules', 'value', ['module' => 'phoneservices', 'setting' => $key]);
+        if ($row) {
             self::$cache[$key] = $row['value'];
             return $row['value'];
         }
-        
-        // Fallback to mod_phoneservices_settings
-        $result = select_query('mod_phoneservices_settings', 'setting_value', ['setting_name' => $key]);
-        if ($row = mysql_fetch_assoc($result)) {
-            self::$cache[$key] = $row['setting_value'];
-            return $row['setting_value'];
+
+        // Fallback to runtime settings. Missing table is expected during activation.
+        try {
+            $row = Database::row('mod_phoneservices_settings', 'setting_value', ['setting_name' => $key]);
+            if ($row) {
+                self::$cache[$key] = $row['setting_value'];
+                return $row['setting_value'];
+            }
+        } catch (\Exception $ignored) {
         }
         
         return $default;
@@ -42,11 +45,11 @@ class Config
     {
         self::$cache[$key] = $value;
         
-        $exists = select_query('mod_phoneservices_settings', 'id', ['setting_name' => $key]);
-        if (mysql_num_rows($exists)) {
-            update_query('mod_phoneservices_settings', ['setting_value' => $value], ['setting_name' => $key]);
+        $existing = Database::row('mod_phoneservices_settings', 'id', ['setting_name' => $key]);
+        if ($existing) {
+            Database::update('mod_phoneservices_settings', ['setting_value' => $value], ['id' => $existing['id']]);
         } else {
-            insert_query('mod_phoneservices_settings', ['setting_name' => $key, 'setting_value' => $value]);
+            Database::insert('mod_phoneservices_settings', ['setting_name' => $key, 'setting_value' => $value]);
         }
     }
     

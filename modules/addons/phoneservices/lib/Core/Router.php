@@ -57,7 +57,7 @@ class Router
         // Usage API
         $this->addRoute('GET', '/api/usage', [UsageController::class, 'index']);
         $this->addRoute('GET', '/api/usage/transactions', [UsageController::class, 'transactions']);
-        $this->addRoute('GET', '/api/usage/report', [UsageController::class, 'report']);
+        // System-wide reports are intentionally available only in the WHMCS admin UI.
     }
     
     /**

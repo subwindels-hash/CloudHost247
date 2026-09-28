@@ -8,7 +8,21 @@ use PhoneServices\Services\SmsService;
 use PhoneServices\Services\VoipService;
 use PhoneServices\Core\Logger;
 
-require_once __DIR__ . '/../../vendor/autoload.php';
+require_once dirname(__DIR__, 2) . '/bootstrap.php';
+
+// Reject forged callbacks before any state change. Twilio signs the exact public URL.
+$signature = $_SERVER['HTTP_X_TWILIO_SIGNATURE'] ?? '';
+$authToken = (string) \PhoneServices\Core\Config::get('twilio_auth_token', '');
+$publicBase = rtrim((string) \PhoneServices\Core\Config::get('webhook_base_url', ''), '/');
+$requestUrl = $publicBase
+    ? $publicBase . ($_SERVER['REQUEST_URI'] ?? '')
+    : ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? '') . ($_SERVER['REQUEST_URI'] ?? ''));
+if (!$signature || !$authToken || !class_exists('Twilio\\Security\\RequestValidator')
+    || !(new \Twilio\Security\RequestValidator($authToken))->validate($signature, $requestUrl, $_POST)) {
+    http_response_code(403);
+    echo 'Invalid signature';
+    exit;
+}
 
 $type = $_GET['type'] ?? 'sms';
 

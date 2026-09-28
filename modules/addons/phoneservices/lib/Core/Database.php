@@ -1,109 +1,75 @@
 <?php
-/**
- * Database Helper
- * Provides safe database operations with escaping
- */
-
 namespace PhoneServices\Core;
 
+use WHMCS\Database\Capsule;
+
+/** Small Capsule gateway; all persistence uses WHMCS' configured PDO connection. */
 class Database
 {
-    /**
-     * Execute a safe query with parameters
-     */
-    public static function query($sql, $params = [])
+    public static function table($table)
     {
-        foreach ($params as $key => $value) {
-            $sql = str_replace(':' . $key, "'" . db_escape_string($value) . "'", $sql);
-        }
-        
-        $result = full_query($sql);
-        
-        if (!$result) {
-            Logger::error('Database query failed: ' . $sql . ' | Error: ' . mysql_error());
-        }
-        
-        return $result;
+        return Capsule::table($table);
     }
-    
-    /**
-     * Insert and return ID
-     */
+
+    public static function query($sql, $params = array())
+    {
+        return Capsule::connection()->select($sql, array_values($params));
+    }
+
+    public static function statement($sql, $params = array())
+    {
+        return Capsule::connection()->statement($sql, array_values($params));
+    }
+
     public static function insert($table, $data)
     {
-        $id = insert_query($table, $data);
-        return $id;
+        return (int) self::table($table)->insertGetId($data);
     }
-    
-    /**
-     * Update records
-     */
+
     public static function update($table, $data, $where)
     {
-        update_query($table, $data, $where);
+        return self::applyWhere(self::table($table), $where)->update($data);
     }
-    
-    /**
-     * Select records
-     */
-    public static function select($table, $fields = '*', $where = [], $orderBy = 'id', $orderDir = 'ASC', $limit = null)
+
+    public static function select($table, $fields = '*', $where = array(), $orderBy = 'id', $orderDir = 'ASC', $limit = null)
     {
-        $result = select_query($table, $fields, $where, $orderBy, $orderDir, $limit);
-        $rows = [];
-        while ($row = mysql_fetch_assoc($result)) {
-            $rows[] = $row;
+        $query = self::applyWhere(self::table($table), $where);
+        $fields = $fields === '*' ? array('*') : array_map('trim', explode(',', $fields));
+        $query->select($fields)->orderBy($orderBy, strtolower($orderDir) === 'desc' ? 'desc' : 'asc');
+        if ($limit !== null) {
+            $query->limit(max(1, (int) $limit));
         }
-        return $rows;
+        return array_map(function ($row) { return (array) $row; }, $query->get()->all());
     }
-    
-    /**
-     * Get single row
-     */
-    public static function row($table, $fields = '*', $where = [])
+
+    public static function row($table, $fields = '*', $where = array())
     {
         $rows = self::select($table, $fields, $where, 'id', 'ASC', 1);
-        return $rows ? $rows[0] : null;
+        return isset($rows[0]) ? $rows[0] : null;
     }
-    
-    /**
-     * Count records
-     */
-    public static function count($table, $where = [])
+
+    public static function count($table, $where = array())
     {
-        $result = select_query($table, 'COUNT(*) as total', $where);
-        $row = mysql_fetch_assoc($result);
-        return (int) $row['total'];
+        return (int) self::applyWhere(self::table($table), $where)->count();
     }
-    
-    /**
-     * Delete records
-     */
+
     public static function delete($table, $where)
     {
-        delete_query($table, $where);
+        if (!$where) {
+            throw new \InvalidArgumentException('Refusing an unscoped delete');
+        }
+        return self::applyWhere(self::table($table), $where)->delete();
     }
-    
-    /**
-     * Begin transaction (if supported)
-     */
-    public static function beginTransaction()
+
+    public static function beginTransaction() { Capsule::connection()->beginTransaction(); }
+    public static function commit() { Capsule::connection()->commit(); }
+    public static function rollback() { Capsule::connection()->rollBack(); }
+
+    private static function applyWhere($query, array $where)
     {
-        full_query('START TRANSACTION');
-    }
-    
-    /**
-     * Commit transaction
-     */
-    public static function commit()
-    {
-        full_query('COMMIT');
-    }
-    
-    /**
-     * Rollback transaction
-     */
-    public static function rollback()
-    {
-        full_query('ROLLBACK');
+        foreach ($where as $column => $value) {
+            $query->where($column, '=', $value);
+        }
+        return $query;
     }
 }
