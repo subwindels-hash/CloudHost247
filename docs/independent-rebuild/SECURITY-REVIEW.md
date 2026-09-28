@@ -222,3 +222,26 @@ warnings were masking. The suite goes from 20 assertions with 12 diagnostics to
 22 with none.
 
 **Verification note:** `@php-wasm/cli`, the runtime used for local PHP in this environment, does not propagate PHP's exit code — `exit(1)`, fatal errors and a failing `php -l` all return shell status `0`. `scripts/release-candidate-check.sh` relies on `set -e` and is therefore only meaningful under a real PHP binary, which is what GitHub Actions uses. Local runs in a php-wasm environment must assert on command **output**, not exit status, or they will report success unconditionally.
+
+## hostx_email (email hosting module and public page)
+
+Date: 2026-09-28. Scope: `modules/servers/hostx_email`, `email-hosting.php`, `templates/cloudhost247/cloudhost247-email-hosting.tpl`. Source/mock verified only; every runtime row is **BLOCKED — STAGING REQUIRED**.
+
+| Risk | Control / finding | Status |
+|---|---|---|
+| Authentication bypass | Page and client area bootstrap native WHMCS; no custom session handling | Static verified |
+| Authorization / IDOR | `ClientAreaPresenter` checks `AccountRepository::isOwnedBy()` on render and again on every POST; client id comes from `$_SESSION`, never the request | Static verified; runtime blocked |
+| CSRF | All client-area actions are POST with a WHMCS `generate_token()` value compared via `hash_equals` | Static verified |
+| XSS | Both templates escape every emitted value (asserted by the test suite); provider strings pass through `Validator::text`/`Redactor::scrub` | Static verified; browser blocked |
+| SSRF / transport | `CurlClient` refuses non-HTTPS, disables redirects, forces `SSL_VERIFYPEER`+`VERIFYHOST`, bounded connect/total timeouts; Microsoft and Google hosts are constants | Static verified |
+| Secret leakage | Credentials only in WHMCS-encrypted `tblservers` fields; `Redactor` masks by key, by pattern (Bearer, PEM, JWT, `client_secret=`) and via `logModuleCall` replacement values; no credential-shaped column exists in the module schema | Unit/static verified; live logs blocked |
+| Credential display | No template renders a credential, service-account JSON or raw provider body; customer errors are curated plus a correlation id | Static verified |
+| Duplicate provisioning / races | Unique idempotency keys, persistent per-service locks, `remote_id` short-circuit, provider `409` adoption, stale-operation sweep | Mock/static verified; concurrency blocked |
+| Unsafe retries | A timeout after the request was sent is classified `uncertain` and never retried; only reconciliation reads the provider | Mock verified |
+| Webhook forgery / replay | HMAC over `timestamp.body` with ±5 min window, `hash_equals`, persisted event ids with a UNIQUE key; Graph `clientState`; unsupported providers refused with 501; webhooks can only schedule a re-read | Unit/static verified |
+| Privilege assumptions | Google delegation and Microsoft admin consent are treated as external prerequisites; missing permissions produce explicit configuration/permission errors, never silent success | Static verified |
+| Financial writes | None. The module reads `tblproducts`/`tblpricing`; it never creates or re-prices products or touches invoices | Static verified |
+| Destructive DNS | The module never writes to a customer DNS zone; records are display-only and sourced from the provider or an administrator | Static verified |
+| Core integrity | No WHMCS core file, existing module or unrelated template modified; ionCube/licensing untouched | Static verified |
+| Unsafe deserialization / file ops | JSON only; no `unserialize`, uploads, archive extraction, dynamic includes or writes | Static verified |
+| Rendering-time external calls | Public page and client-area render perform no provider API calls (asserted by the test suite) | Static verified |

@@ -1,460 +1,452 @@
 # Phone Number Services Platform for WHMCS
 
-A production-ready, scalable WHMCS module providing virtual telecom services including phone numbers, VoIP, SMS, eSIM, and usage tracking with API-first architecture and clean modular design.
+An API-first, provider-agnostic telecom platform for WHMCS: virtual numbers, VoIP
+(WebRTC + PSTN), SMS / WhatsApp / email messaging, eSIM data plans, and full usage,
+billing and analytics — with a Super Admin panel that lets you swap providers,
+re-price, and enable or disable entire services without touching code.
+
+- **Version:** 1.1.0
+- **Requires:** WHMCS 8.0+, PHP 7.4+ (tested on 7.4 and 8.2), MySQL 5.7+ / MariaDB 10.2+
+- **Composer:** optional (the module ships a PSR-4 fallback autoloader and uses no vendor SDKs)
 
 ---
 
-## Table of Contents
+## Table of contents
 
-1. [Features](#features)
-2. [System Requirements](#system-requirements)
-3. [Installation](#installation)
-4. [Configuration](#configuration)
-5. [Provider Setup](#provider-setup)
-6. [API Reference](#api-reference)
-7. [Webhooks](#webhooks)
-8. [Database Schema](#database-schema)
-9. [Troubleshooting](#troubleshooting)
-10. [License](#license)
-
----
-
-## Features
-
-### Virtual Phone Numbers
-- Purchase virtual numbers (multi-country support: US, GB, CA, AU, DE, FR, NL, ES, IT, JP)
-- Local numbers, second phone numbers, toll-free numbers
-- Full lifecycle: Activate, Assign, Renew, Suspend, Release
-- Country selection during purchase
-
-### VoIP Calling System
-- WebRTC browser-based calling
-- Incoming & outgoing calls with international support
-- Real-time call status: ringing, connected, ended, failed
-- Call logs with duration, caller ID, receiver ID, cost, timestamps
-
-### SMS & Messaging
-- Send/receive SMS globally
-- OTP / 2FA SMS support
-- WhatsApp Business API integration
-- Email sending via SendGrid
-- Message logs and delivery status tracking
-
-### eSIM & Data Services
-- Purchase and activate eSIM profiles
-- QR code generation for eSIM provisioning
-- Global/local data plans
-- Real-time data usage tracking
-- Plan lifecycle: activate, expire, renew
-
-### Usage & Monitoring
-- Track usage for Calls, SMS, Data
-- Real-time analytics dashboard for users
-- Admin reporting: usage logs, billing reports, transaction history
-
-### Super Admin Panel
-- API configuration management
-- Pricing control per country/service type
-- Enable/disable services dynamically
-- User & subscription management
-- System-wide logs & analytics
-- Transaction monitoring
+1. [Feature overview](#1-feature-overview)
+2. [Architecture](#2-architecture)
+3. [Module structure](#3-module-structure)
+4. [Installation](#4-installation)
+5. [Cron jobs](#5-cron-jobs)
+6. [Configuration](#6-configuration)
+7. [Providers](#7-providers)
+8. [Webhooks](#8-webhooks)
+9. [Provisioning (server) modules](#9-provisioning-server-modules)
+10. [REST API](#10-rest-api)
+11. [Database schema](#11-database-schema)
+12. [Security model](#12-security-model)
+13. [Extending the platform](#13-extending-the-platform)
+14. [Testing](#14-testing)
+15. [Troubleshooting](#15-troubleshooting)
 
 ---
 
-## System Requirements
+## 1. Feature overview
 
-- WHMCS 8.0+ (Compatible with 7.10+ with minor adjustments)
-- PHP 7.4+ (PHP 8.0+ recommended)
-- MySQL 5.7+ / MariaDB 10.2+
-- Composer 2.0+
-- SSL certificate (required for WebRTC and webhooks)
+### A. Virtual numbers
+Multi-country search and purchase, local / second / toll-free / mobile / national
+number types, and a complete lifecycle: **activate → assign to a service → renew →
+suspend → release back to the pool**. Renewals and expiry reminders are driven by
+the daily cron.
 
-### PHP Extensions Required
-- `pdo_mysql`
-- `curl`
-- `json`
-- `mbstring`
-- `openssl`
-- `gd` (for QR code generation)
+### B. VoIP
+Browser calling over WebRTC (Twilio Voice SDK loaded only when the active voice
+provider advertises the `webrtc` capability), inbound and outbound PSTN, international
+dialling, real-time status (`ringing` / `connected` / `ended` / `failed`) and call
+detail records with duration, caller ID, receiver ID, cost and timestamps. Inbound
+calls are bridged to the browser client that owns the number, or to the number's
+`forward_to` handset.
+
+### C. SMS & messaging
+Global send/receive, OTP generation + verification (length, TTL and attempt limits
+configurable), WhatsApp Business Cloud API, SendGrid transactional email, message
+logs with normalised delivery state (`queued`, `sent`, `delivered`, `received`,
+`failed`).
+
+### D. eSIM & data
+Plan catalogue from the active eSIM provider, purchase and activation, QR code /
+LPA activation details (no hard dependency on a QR library — see
+[QR codes](#qr-codes)), global and local plans, real-time data usage sync and
+lifecycle activate / top-up / renew / expire.
+
+### E. Usage, billing & monitoring
+Every call, message and megabyte is metered into `mod_phoneservices_usage` and
+priced into `mod_phoneservices_transactions`. Clients get a live analytics
+dashboard; admins get usage reports, transaction monitoring and system-wide logs.
+
+### Super Admin panel
+API configuration, provider routing and health checks, per-country/per-service
+pricing, dynamic service toggles, user & subscription management, transaction
+monitoring and searchable logs.
 
 ---
 
-## Installation
-
-### Step 1: Upload Module
-
-Upload the `phoneservices` directory to your WHMCS installation:
+## 2. Architecture
 
 ```
-/modules/addons/phoneservices/
+          ┌──────────────── WHMCS ─────────────────┐
+          │  addon module │ hooks │ server modules │
+          └───────┬───────────┬──────────┬─────────┘
+                  │           │          │
+            ┌─────▼─────┐ ┌───▼────┐ ┌───▼──────────┐
+            │  Module   │ │  Cron  │ │ Provisioning │   (lib/Core)
+            └─────┬─────┘ └───┬────┘ └───┬──────────┘
+                  │           │          │
+          ┌───────▼───────────▼──────────▼────────┐
+          │            Service layer               │   (lib/Services)
+          │  Number · Voip · Sms · Esim · Usage    │
+          │              · Pricing · Cron          │
+          └───────────────────┬────────────────────┘
+                              │  TelecomProviderInterface (+ capability interfaces)
+          ┌───────────────────▼────────────────────┐
+          │           Integration layer            │   (lib/Providers)
+          │ Twilio · Vonage · Airalo · Truphone     │
+          │ WhatsApp · SendGrid                     │
+          └───────────────────┬────────────────────┘
+                              │ HttpClient (cURL, no vendor SDKs)
+                        provider REST APIs
 ```
 
-### Step 2: Install Dependencies
+Three hard rules keep the platform modular:
+
+1. **Nothing is hardcoded to a provider.** Services resolve a provider through
+   `ProviderFactory::forCapability($capability)`, which honours the admin's routing
+   choice (`provider_{capability}` setting), then `default_provider`, then the first
+   registered provider advertising that capability.
+2. **Templates never talk to providers.** Admin/client templates receive plain PHP
+   variables from `Module`, which calls the service layer.
+3. **The REST API is the only write path for the browser.** The client area
+   JavaScript performs every mutation through `api/rest.php`, so the same behaviour
+   is available to third-party integrations.
+
+---
+
+## 3. Module structure
+
+```
+modules/addons/phoneservices/
+├── phoneservices.php                 # WHMCS addon entry points
+├── bootstrap.php                     # PHONESERVICES_ROOT/VERSION + PSR-4 autoloader
+├── hooks.php                         # cron, billing, suspend/terminate, asset injection
+├── composer.json                     # optional dev tooling only
+├── cron/run.php                      # CLI runner: `php run.php daily|frequent`
+├── api/
+│   ├── bootstrap.php                 # WHMCS init + request helpers for HTTP endpoints
+│   ├── rest.php                      # REST entry point (CORS allowlist, auth, routing)
+│   └── webhooks/{twilio,vonage,whatsapp,sendgrid}.php
+├── install/
+│   ├── schema.sql                    # full schema (fresh installs)
+│   └── migrations/*.sql              # incremental DDL (tracked in a migrations table)
+├── lib/
+│   ├── Core/        Module, Installer, Config, Crypto, Security, Database,
+│   │                Logger, HttpClient, Router, Provisioning
+│   ├── Interfaces/  TelecomProviderInterface + Number/Voice/Sms/Esim interfaces
+│   ├── Providers/   AbstractProvider, ProviderRegistry, ProviderFactory,
+│   │                Twilio, Vonage, Airalo, Truphone, WhatsApp, Sendgrid
+│   ├── Services/    Number, Voip, Sms, Esim, Usage, Pricing, Cron
+│   └── API/         Controllers/ + Middleware/AuthMiddleware
+├── templates/
+│   ├── clientarea.tpl                # Smarty shell for the client area
+│   ├── admin/*.tpl                   # PHP templates (dashboard, api_config, providers,
+│   │                                   pricing, numbers, voip, sms, esim, usage,
+│   │                                   transactions, users, logs)
+│   └── client/*.tpl                  # PHP templates + _helpers.php
+├── assets/{css,js}/...
+└── lang/english.php
+
+modules/servers/phoneservices_{numbers,voip,sms,esim}/   # provisioning modules
+tests/phoneservices/run.php                              # behaviour diagnostics
+```
+
+---
+
+## 4. Installation
+
+### Step 1 — upload
+
+Copy `modules/addons/phoneservices/` into your WHMCS installation. If you want the
+per-service products, also copy the four `modules/servers/phoneservices_*`
+directories.
+
+### Step 2 — (optional) Composer
 
 ```bash
 cd /path/to/whmcs/modules/addons/phoneservices
 composer install --no-dev --optimize-autoloader
 ```
 
-If you don't have Composer access on the server, you can:
-1. Run `composer install` locally
-2. Upload the entire directory including the `vendor/` folder
+Composer is **not required**: `bootstrap.php` registers a PSR-4 autoloader when
+`vendor/` is absent, and the module talks to every provider over plain REST with
+cURL. A missing `composer install` can never fatal your WHMCS installation.
 
-### Step 3: Activate Module
+### Step 3 — activate
 
-1. Log in to WHMCS Admin
-2. Navigate to **System Settings > Addon Modules**
-3. Find **Phone Number Services Platform**
-4. Click **Activate**
-5. The module will automatically create all required database tables
+**System Settings → Addon Modules → Phone Number Services Platform → Activate.**
 
-### Step 4: Configure Access Control
+Activation runs `install/schema.sql`, then applies any pending files in
+`install/migrations/` (recorded in `mod_phoneservices_migrations`), then seeds the
+default settings. Upgrading the module re-runs only the pending migrations, so
+activation and upgrade are both idempotent.
 
-1. In the Addon Modules list, click **Configure** next to Phone Services
-2. Select which admin roles can access the module
-3. Save changes
+### Step 4 — permissions
 
----
+Click **Configure** on the addon and grant access to the admin roles that should
+see the platform. The addon's own settings are intentionally minimal — operating
+mode, webhook base URL, and whether to show the client-area navbar link. **Provider
+credentials are entered in the module's own API Configuration page**, where they are
+encrypted at rest.
 
-## Configuration
+### Step 5 — cron
 
-### API Credentials
+See the next section. Without the cron jobs, renewals, expiry reminders, usage sync
+and stuck-call reconciliation will not run.
 
-Navigate to **Addons > Phone Number Services Platform > API Configuration**
+### Step 6 — products (optional)
 
-Configure the following providers:
-
-#### Twilio (SMS, Voice, Numbers)
-- Account SID
-- Auth Token
-
-#### Vonage (SMS, Voice)
-- API Key
-- API Secret
-
-#### Airalo (eSIM)
-- API Token
-
-#### Truphone (eSIM)
-- API Key
-
-#### SendGrid (Email)
-- API Key
-
-#### WhatsApp Business
-- Business Token
-- Phone Number ID (set in settings table)
-
-### Feature Toggles
-
-Enable or disable services dynamically from the API Configuration page:
-- Virtual Numbers
-- VoIP Calling
-- SMS Messaging
-- eSIM Services
-
-### Pricing Control
-
-Navigate to **Addons > Phone Number Services Platform > Pricing Control**
-
-Set rates per:
-- Service type (voice, sms, number)
-- Country (ISO 2-letter code)
-- Rate per minute / per unit / monthly cost / setup cost
+Create WHMCS products using the `phoneservices_numbers`, `phoneservices_voip`,
+`phoneservices_sms` or `phoneservices_esim` server modules to sell the services as
+recurring products. See [section 9](#9-provisioning-server-modules).
 
 ---
 
-## Provider Setup
+## 5. Cron jobs
 
-### Provider Abstraction Architecture
+The module hooks into WHMCS's own cron (`DailyCronJob` and `AfterCronJob`), so on a
+standard installation **no extra crontab entry is needed**. For installations that
+prefer dedicated scheduling — or want the frequent job to run more often than the
+WHMCS cron — use the CLI runner:
 
-The module uses a provider abstraction layer (`TelecomProviderInterface`) allowing seamless provider switching without code changes.
+```cron
+# Lifecycle: renewals, expiry reminders, eSIM usage sync, log/usage pruning, daily report
+5 2 * * *    php /path/to/whmcs/modules/addons/phoneservices/cron/run.php daily
+
+# Reconciliation: stuck calls and queued messages
+*/10 * * * * php /path/to/whmcs/modules/addons/phoneservices/cron/run.php frequent
+```
+
+The runner is CLI-only (it refuses to execute over HTTP), exits non-zero on failure
+and prints a summary of everything it touched.
+
+---
+
+## 6. Configuration
+
+**Addons → Phone Number Services Platform → API Configuration.**
+
+| Setting | Meaning |
+|---|---|
+| `api_mode` | `sandbox` exposes verbose API errors and marks traffic as test; `live` is production. |
+| `default_provider` | Fallback provider when a capability has no explicit routing. |
+| `provider_{capability}` | Explicit routing for `numbers`, `voice`, `sms`, `esim`, `whatsapp`, `email`, `webrtc`. |
+| `enable_{numbers,voip,sms,esim,analytics}` | Dynamic service toggles. Disabled services vanish from the client area and are rejected by the API. |
+| `webhook_base_url` | Defaults to `{SystemURL}/modules/addons/phoneservices/api/webhooks`. |
+| `api_allowed_origins` | Comma-separated origins allowed to call the REST API cross-origin. Empty = same-origin only. |
+| `api_rate_limit` | Requests per minute per API key (0 disables). |
+| `currency`, `default_markup_percent` | Pricing defaults. |
+| `otp_length`, `otp_ttl_seconds`, `otp_max_attempts` | OTP policy. |
+| `usage_retention_days`, `log_retention_days` | Pruning windows for the daily cron. |
+| `debug_logging` | Verbose (redacted) request/response logging. |
+
+Pricing per country and per service type lives under **Pricing Control**; rates can
+be set per minute, per unit, per month and per setup.
+
+---
+
+## 7. Providers
+
+| Provider | numbers | voice | sms | webrtc | whatsapp | email | esim |
+|---|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| Twilio   | ✔ | ✔ | ✔ | ✔ |   |   |   |
+| Vonage   | ✔ | ✔ | ✔ |   |   |   |   |
+| WhatsApp (Meta Cloud API) |   |   |   |   | ✔ |   |   |
+| SendGrid |   |   |   |   |   | ✔ |   |
+| Airalo   |   |   |   |   |   |   | ✔ |
+| Truphone |   |   |   |   |   |   | ✔ |
+
+Every provider implements `TelecomProviderInterface` plus the capability interfaces
+it supports, so switching provider is a dropdown change:
 
 ```php
-// Get default provider
-$provider = ProviderFactory::getDefaultProvider();
+use PhoneServices\Providers\ProviderFactory;
 
-// Get provider for specific service
-$smsProvider = ProviderFactory::getProviderForService('sms', 'twilio');
-
-// Switch provider dynamically
-$provider = ProviderFactory::getProvider('vonage');
+$sms   = ProviderFactory::forCapability('sms');            // admin-configured provider
+$voice = ProviderFactory::forCapability('voice', 'vonage'); // explicit override
+$twilio = ProviderFactory::getProvider('twilio');           // by id
 ```
 
-### Supported Providers
+Provider methods return a uniform array: `['success' => bool, 'error' => ?string, ...]`.
+**Providers → Test connection** performs a live credential check per provider.
 
-| Provider | SMS | Voice | Numbers | WebRTC | eSIM |
-|----------|-----|-------|---------|--------|------|
-| Twilio   | Yes | Yes   | Yes     | Yes    | No   |
-| Vonage   | Yes | Yes   | Yes     | Yes    | No   |
-| Airalo   | No  | No    | No      | No     | Yes  |
-| Truphone | No  | No    | No      | No     | Yes  |
+### QR codes
+
+`EsimService::getQrCode()` prefers the provider's own QR image URL and the raw LPA
+activation string, and always returns `manual_entry` (`smdp_address`,
+`activation_code`) so a client can install a profile by hand. If `endroid/qr-code`
+happens to be installed, a local PNG is added as `qr_base64` — but it is never
+required.
 
 ---
 
-## API Reference
+## 8. Webhooks
 
-### REST API Base URL
+All endpoints verify authenticity before touching any data and record the raw event
+in `mod_phoneservices_provider_events`.
 
-```
-https://yourdomain.com/modules/addons/phoneservices/api/rest.php
-```
+| Provider | URL | Verification |
+|---|---|---|
+| Twilio | `.../api/webhooks/twilio.php?event=sms\|voice\|sms-status\|call-status` | `X-Twilio-Signature` HMAC over the full URL + POST body |
+| Vonage | `.../api/webhooks/vonage.php?event=sms\|voice\|sms-status\|call-status` | Signed-JWT `Authorization` header (enforced when `vonage_signature_secret` is set) |
+| WhatsApp | `.../api/webhooks/whatsapp.php` | `hub.verify_token` handshake on GET, `X-Hub-Signature-256` on POST |
+| SendGrid | `.../api/webhooks/sendgrid.php` | Shared secret in `Authorization` (when `sendgrid_webhook_secret` is set) |
+
+Webhook endpoints boot WHMCS through `api/bootstrap.php`, so they participate in the
+same configuration, logging and database layer as the rest of the module.
+
+---
+
+## 9. Provisioning (server) modules
+
+Four thin modules let you sell each service as a WHMCS product. They delegate
+everything to `PhoneServices\Core\Provisioning`, which records a row in
+`mod_phoneservices_subscriptions` and mirrors WHMCS lifecycle events onto the
+underlying resources:
+
+| Module | Create | Suspend | Unsuspend | Terminate |
+|---|---|---|---|---|
+| `phoneservices_numbers` | optionally buys + assigns a number in the configured country | suspends the service's numbers | reactivates them | releases them |
+| `phoneservices_voip` | activates the calling subscription | suspends it | reactivates it | cancels it |
+| `phoneservices_sms` | activates messaging | suspends it | reactivates it | cancels it |
+| `phoneservices_esim` | optionally provisions the configured plan | suspends the subscription | reactivates it | expires the profiles |
+
+Config options are positional: **1** country/region, **2** type, **3** plan code,
+**4** quota. Each module also contributes a client-area overview tab and an admin
+Services-tab summary.
+
+---
+
+## 10. REST API
+
+Base URL: `https://your-whmcs/modules/addons/phoneservices/api/rest.php`
 
 ### Authentication
 
-API requests support two authentication methods:
+- **Session** — client-area requests are authenticated by the WHMCS client session.
+- **API key** — `Authorization: Bearer ps_live_...` (issue via `AuthMiddleware::issueApiKey()`).
+- **JWT** — short-lived HS256 bearer tokens for machine-to-machine calls.
 
-1. **WHMCS Session**: For browser-based requests (client area)
-2. **API Key / JWT**: For programmatic access
+Each route declares a scope (`numbers`, `voip`, `sms`, `esim`, `usage`); API keys are
+granted a subset. Only `GET /api/health` is unauthenticated.
 
-```bash
-curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-     https://yourdomain.com/modules/addons/phoneservices/api/rest.php/api/numbers
+### Envelope
+
+```json
+{ "success": true, "data": { "...": "..." } }
+{ "success": false, "error": "Human readable message" }
 ```
+
+`success: false` maps to HTTP 400 unless the controller returns an explicit
+`status_code`.
 
 ### Endpoints
 
-#### Numbers
-- `GET /api/numbers` - List numbers
-- `POST /api/numbers/purchase` - Purchase number
-- `POST /api/numbers/:id/renew` - Renew number
-- `POST /api/numbers/:id/suspend` - Suspend number
-- `POST /api/numbers/:id/release` - Release number
-
-#### VoIP
-- `GET /api/voip/calls` - List call logs
-- `POST /api/voip/call` - Initiate call
-- `POST /api/voip/call/:id/end` - End call
-- `GET /api/voip/token` - Get WebRTC token
-
-#### SMS
-- `GET /api/sms/messages` - List messages
-- `POST /api/sms/send` - Send SMS
-- `POST /api/sms/otp` - Send OTP
-- `POST /api/sms/whatsapp` - Send WhatsApp
-- `POST /api/sms/email` - Send Email
-
-#### eSIM
-- `GET /api/esim/profiles` - List eSIMs
-- `POST /api/esim/purchase` - Purchase plan
-- `GET /api/esim/:id/qrcode` - Get QR code
-- `GET /api/esim/plans` - List available plans
-
-#### Usage
-- `GET /api/usage` - Usage summary
-- `GET /api/usage/transactions` - Transaction history
-- `GET /api/usage/report` - System report
-
----
-
-## Webhooks
-
-### Twilio Webhooks
-
-Configure the following URLs in your Twilio console:
-
-- **Voice URL**: `https://yourdomain.com/modules/addons/phoneservices/api/webhooks/twilio.php?type=voice`
-- **SMS URL**: `https://yourdomain.com/modules/addons/phoneservices/api/webhooks/twilio.php?type=sms`
-- **Status Callback**: `https://yourdomain.com/modules/addons/phoneservices/api/webhooks/twilio.php?type=status`
-
-### Vonage Webhooks
-
-Configure in your Vonage dashboard:
-
-- **Inbound SMS**: `https://yourdomain.com/modules/addons/phoneservices/api/webhooks/vonage.php?type=sms`
-- **Voice Answer**: `https://yourdomain.com/modules/addons/phoneservices/api/webhooks/vonage.php?type=voice`
-- **Voice Event**: `https://yourdomain.com/modules/addons/phoneservices/api/webhooks/vonage.php?type=voice`
-- **DLR**: `https://yourdomain.com/modules/addons/phoneservices/api/webhooks/vonage.php?type=dlr`
-
----
-
-## Database Schema
-
-The module creates the following tables on activation:
-
-- `mod_phoneservices_settings` - Module configuration
-- `mod_phoneservices_numbers` - Virtual phone numbers
-- `mod_phoneservices_calls` - Call logs
-- `mod_phoneservices_messages` - SMS/WhatsApp/Email logs
-- `mod_phoneservices_otp` - OTP codes
-- `mod_phoneservices_esims` - eSIM profiles
-- `mod_phoneservices_usage` - Usage records
-- `mod_phoneservices_transactions` - Billing transactions
-- `mod_phoneservices_pricing` - Pricing rules
-- `mod_phoneservices_logs` - System logs
-- `mod_phoneservices_webrtc_tokens` - WebRTC tokens
-
----
-
-## Troubleshooting
-
-### Provider Not Available
-- Check API credentials in **API Configuration**
-- Verify provider test connection
-- Check `mod_phoneservices_logs` table for errors
-
-### WebRTC Not Working
-- Ensure site uses HTTPS
-- Check Twilio credentials and TwiML app configuration
-- Verify browser permissions for microphone
-
-### Webhooks Not Receiving
-- Ensure URLs are publicly accessible (not behind auth)
-- Check firewall / CDN rules
-- Verify SSL certificate is valid
-- Check logs for webhook payloads
-
-### Database Errors
-- Ensure MySQL user has CREATE TABLE privileges
-- Check collation compatibility (utf8mb4)
-- Review `mod_phoneservices_logs` for SQL errors
-
-### Composer Autoload Issues
-- Run `composer dump-autoload`
-- Ensure `vendor/autoload.php` exists
-- Check PHP version compatibility
-
----
-
-## File Structure
-
-```
-modules/addons/phoneservices/
-├── phoneservices.php          # Main module file
-├── composer.json              # Dependencies
-├── hooks.php                  # WHMCS hooks
-├── README.md                  # This file
-├── lib/
-│   ├── Core/
-│   │   ├── Module.php         # Core module logic
-│   │   ├── Config.php         # Configuration manager
-│   │   ├── Logger.php         # Logging system
-│   │   ├── Database.php       # Database helper
-│   │   └── Router.php         # REST API router
-│   ├── Interfaces/
-│   │   ├── TelecomProviderInterface.php
-│   │   ├── NumberProviderInterface.php
-│   │   ├── VoiceProviderInterface.php
-│   │   ├── SmsProviderInterface.php
-│   │   └── EsimProviderInterface.php
-│   ├── Providers/
-│   │   ├── AbstractProvider.php
-│   │   ├── ProviderFactory.php
-│   │   ├── TwilioProvider.php
-│   │   ├── VonageProvider.php
-│   │   ├── AiraloProvider.php
-│   │   └── TruphoneProvider.php
-│   ├── Services/
-│   │   ├── NumberService.php
-│   │   ├── VoipService.php
-│   │   ├── SmsService.php
-│   │   ├── EsimService.php
-│   │   ├── UsageService.php
-│   │   └── PricingService.php
-│   ├── Models/
-│   │   └── (Model classes for ORM extensions)
-│   └── API/
-│       ├── Middleware/
-│       │   └── AuthMiddleware.php
-│       └── Controllers/
-│           ├── BaseController.php
-│           ├── NumbersController.php
-│           ├── VoipController.php
-│           ├── SmsController.php
-│           ├── EsimController.php
-│           └── UsageController.php
-├── templates/
-│   ├── admin/
-│   │   ├── dashboard.tpl
-│   │   ├── api_config.tpl
-│   │   ├── pricing.tpl
-│   │   ├── numbers.tpl
-│   │   ├── voip.tpl
-│   │   ├── sms.tpl
-│   │   ├── esim.tpl
-│   │   ├── usage.tpl
-│   │   ├── transactions.tpl
-│   │   ├── users.tpl
-│   │   └── logs.tpl
-│   └── client/
-│       ├── dashboard.tpl
-│       ├── numbers.tpl
-│       ├── voip.tpl
-│       ├── sms.tpl
-│       ├── esim.tpl
-│       └── usage.tpl
-├── assets/
-│   ├── css/
-│   │   ├── admin.css
-│   │   └── client.css
-│   └── js/
-│       ├── admin/
-│       │   └── app.js
-│       └── client/
-│           └── app.js
-├── api/
-│   ├── rest.php               # REST API entry
-│   └── webhooks/
-│       ├── twilio.php
-│       └── vonage.php
-├── install/
-│   ├── schema.sql             # Database schema
-│   └── migrations/            # Future migrations
-└── lang/
-    └── english.php            # Language strings
-```
-
----
-
-## Security Considerations
-
-1. **API Keys**: Never commit credentials to version control
-2. **Webhooks**: Validate webhook signatures where supported
-3. **HTTPS**: Always use HTTPS in production
-4. **Rate Limiting**: Implement rate limiting on API endpoints for production use
-5. **Input Validation**: All inputs are escaped using WHMCS database helpers
-6. **JWT**: Store `jwt_secret` securely in module settings
-
----
-
-## Development
-
-### Running Tests
+| Scope | Method & path |
+|---|---|
+| — | `GET /api/health` |
+| numbers | `GET /api/numbers` · `GET /api/numbers/search` · `GET /api/numbers/countries` · `POST /api/numbers/purchase` · `POST /api/numbers/:id/{renew,suspend,release,assign}` |
+| voip | `GET /api/voip/calls` · `GET /api/voip/token` · `POST /api/voip/call` · `POST /api/voip/call/:id/end` |
+| sms | `GET /api/sms/messages` · `POST /api/sms/send` · `POST /api/sms/otp` · `POST /api/sms/otp/verify` · `POST /api/sms/whatsapp` · `POST /api/sms/email` |
+| esim | `GET /api/esim/plans` · `GET /api/esim/profiles` · `GET /api/esim/:id/qrcode` · `GET /api/esim/:id/usage` · `POST /api/esim/purchase` · `POST /api/esim/:id/topup` |
+| usage | `GET /api/usage` · `GET /api/usage/transactions` · `GET /api/usage/report` |
 
 ```bash
-composer install
-vendor/bin/phpunit tests/
+curl -H "Authorization: Bearer $TOKEN" \
+     "https://your-whmcs/modules/addons/phoneservices/api/rest.php/api/numbers/search?country=GB&type=local"
 ```
 
-### Adding a New Provider
+---
 
-1. Create a new class in `lib/Providers/` implementing the relevant interfaces
-2. Register it in `ProviderFactory::getProvider()`
-3. Add configuration fields in `phoneservices_config()`
-4. Update provider capabilities documentation
+## 11. Database schema
 
-### Extending Services
+| Table | Contents |
+|---|---|
+| `mod_phoneservices_settings` | Configuration (secrets encrypted) |
+| `mod_phoneservices_numbers` | Virtual numbers + lifecycle timestamps |
+| `mod_phoneservices_calls` | Call detail records |
+| `mod_phoneservices_messages` | SMS / WhatsApp / email logs |
+| `mod_phoneservices_otp` | One-time codes (hashed, TTL + attempts) |
+| `mod_phoneservices_esims` | eSIM profiles, data counters, QR data |
+| `mod_phoneservices_usage` | Metered usage events |
+| `mod_phoneservices_transactions` | Billable events, optional WHMCS invoice link |
+| `mod_phoneservices_subscriptions` | Recurring number/eSIM/service subscriptions |
+| `mod_phoneservices_pricing` | Rate card per service type and country |
+| `mod_phoneservices_api_keys` | API keys with scopes and expiry |
+| `mod_phoneservices_provider_events` | Raw provider webhook payloads |
+| `mod_phoneservices_webrtc_tokens` | Issued WebRTC tokens |
+| `mod_phoneservices_logs` | Structured application log |
+| `mod_phoneservices_migrations` | Applied migration filenames |
 
-1. Create service class in `lib/Services/`
-2. Add API controller in `lib/API/Controllers/`
-3. Register routes in `Core/Router.php`
-4. Add admin/client templates
+New DDL must be added to **both** `install/schema.sql` (fresh installs) and a file in
+`install/migrations/` (existing installs); the test suite asserts this.
 
 ---
 
-## License
+## 12. Security model
 
-This module is proprietary software. All rights reserved.
+- **Credentials at rest** — AES-256-GCM via `Crypto`, keyed with HKDF from the WHMCS
+  `cc_encryption_hash`. Settings whose names end in `_key`, `_token`, `_secret`,
+  `_sid`, `_password` or `_signature` are encrypted automatically and shown masked in
+  the admin UI; resubmitting a mask is ignored.
+- **No credentials in `tbladdonmodules`** — the addon config form deliberately holds
+  no API keys.
+- **CSRF** — every admin POST is protected with `Security::csrfToken()` / `verifyCsrf()`.
+- **Ownership** — API controllers call `ownsOrFail()`, so a client can only read or
+  mutate their own numbers, calls, messages and eSIMs.
+- **CORS** — off by default; opt in per origin with `api_allowed_origins`.
+- **Webhook authenticity** — HMAC / JWT verification on every endpoint (see §8).
+- **Logging** — `Logger::redact()` strips secrets before anything is written, and log
+  writes can never recurse or fatal a request.
+- **Database** — Capsule/PDO with bound parameters only; the legacy WHMCS helpers
+  (`select_query`, `full_query`, …) removed in WHMCS 8 are not used anywhere (asserted
+  by the test suite).
 
 ---
 
-## Support
+## 13. Extending the platform
 
-For support, documentation updates, or feature requests, contact the development team.
+**Add a provider**
+
+1. Create `lib/Providers/AcmeProvider.php` extending `AbstractProvider` and
+   implementing the capability interfaces it supports.
+2. Register it in `ProviderRegistry::builtIn()` with its label, capabilities and
+   credential fields — the admin UI, routing dropdowns and health checks pick it up
+   automatically.
+3. Add `api/webhooks/acme.php` if the provider posts callbacks.
+
+**Add an endpoint**
+
+1. Add the action to the relevant controller in `lib/API/Controllers/`.
+2. Register the route (with its scope) in `Router::registerDefaultRoutes()`.
+3. Extend `tests/phoneservices/run.php` — it asserts every route maps to a real
+   controller method.
 
 ---
 
-**Version**: 1.0.0  
-**Last Updated**: 2024  
-**Compatible With**: WHMCS 8.0+, PHP 7.4+
+## 14. Testing
+
+```bash
+php tests/phoneservices/run.php
+```
+
+The harness needs no database, no WHMCS runtime and no PHPUnit. It checks module
+structure, template coverage, schema/migration parity, credential encryption
+round-trips and tamper rejection, input validation, provider registry integrity,
+absence of vendor SDKs and legacy DB helpers, status normalisation, and the complete
+REST surface. CI (`.github/workflows/independent-foundation.yml`) runs it on PHP 7.4
+and 8.2 alongside `php -l` over every module file and PHP template.
+
+---
+
+## 15. Troubleshooting
+
+| Symptom | Where to look |
+|---|---|
+| "Provider unavailable" | **Providers** page → Test connection; credentials are set on **API Configuration**. |
+| Browser calling never becomes ready | Site must be HTTPS; the voice provider must advertise `webrtc`; check the browser microphone permission and the console. |
+| Webhooks rejected with 403 | The signature check failed: confirm the provider's signing secret and that `webhook_base_url` matches the URL the provider actually calls (proxies rewriting the host break HMACs). |
+| Renewals/reminders never fire | Confirm the WHMCS cron runs, or add the `cron/run.php` entries from §5. |
+| Client area page is blank | Check `mod_phoneservices_logs`; render errors are caught and logged rather than fataling WHMCS. |
+| Activation fails | The MySQL user needs `CREATE TABLE`/`ALTER`; check `mod_phoneservices_migrations` for the last applied file. |
+
+---
+
+**Version 1.1.0** · WHMCS 8.0+ · PHP 7.4+

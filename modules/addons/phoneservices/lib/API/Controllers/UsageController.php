@@ -69,4 +69,33 @@ class UsageController extends BaseController
             ]
         ];
     }
+
+    /**
+     * GET /api/health - service discovery and provider readiness.
+     *
+     * @return array<string,mixed>
+     */
+    public function health(array $params = []): array
+    {
+        $toggles = \PhoneServices\Core\Config::getFeatureToggles();
+
+        $providers = [];
+        foreach (\PhoneServices\Providers\ProviderRegistry::CAPABILITIES as $capability) {
+            $candidates = \PhoneServices\Providers\ProviderRegistry::forCapability($capability);
+            if (!$candidates) {
+                continue;
+            }
+            $providers[$capability] = \PhoneServices\Core\Config::getProviderForCapability($capability);
+        }
+
+        return $this->ok([
+            'module'    => 'phoneservices',
+            'version'   => defined('PHONESERVICES_VERSION') ? PHONESERVICES_VERSION : 'unknown',
+            'mode'      => \PhoneServices\Core\Config::isSandbox() ? 'sandbox' : 'live',
+            'services'  => $toggles,
+            'providers' => $providers,
+            'time'      => gmdate('c'),
+        ]);
+    }
+
 }

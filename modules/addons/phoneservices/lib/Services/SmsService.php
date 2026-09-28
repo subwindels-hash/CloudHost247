@@ -10,9 +10,10 @@ use PhoneServices\Core\Database;
 use PhoneServices\Core\Logger;
 use PhoneServices\Core\Config;
 use PhoneServices\Providers\ProviderFactory;
+use PhoneServices\Interfaces\ChatProviderInterface;
+use PhoneServices\Interfaces\EmailProviderInterface;
 use PhoneServices\Interfaces\SmsProviderInterface;
-use SendGrid\Mail\Mail as SendGridMail;
-use SendGrid;
+use PhoneServices\Core\Security;
 
 class SmsService
 {
@@ -21,7 +22,7 @@ class SmsService
     
     public function __construct(string $providerName = null)
     {
-        $this->provider = ProviderFactory::getProviderForService('sms', $providerName);
+        $this->provider = ProviderFactory::forCapability('sms', $providerName);
     }
     
     /**
@@ -91,6 +92,13 @@ class SmsService
      */
     public function sendOtp(int $userId, string $to, string $type = 'sms', int $length = 6, int $ttl = 300): array
     {
+        if (!Security::rateLimit('otp:' . $userId . ':' . preg_replace('/[^0-9a-z@.+]/i', '', $to), Config::getInt('otp_max_attempts', 5), 900)) {
+            return ['success' => false, 'error' => 'Too many verification codes requested. Please wait before retrying.'];
+        }
+
+        $length = $length ?: Config::getInt('otp_length', 6);
+        $ttl = $ttl ?: Config::getInt('otp_ttl_seconds', 300);
+
         $code = $this->generateOtp($length);
         $hash = password_hash($code, PASSWORD_DEFAULT);
         
@@ -107,13 +115,32 @@ class SmsService
         
         $message = "Your verification code is: {$code}. Valid for " . ($ttl / 60) . " minutes. Do not share this code.";
         
-        if ($type === 'sms') {
-            $fromNumber = Config::get('default_sms_number', '');
-            $result = $this->sendSms($userId, $fromNumber, $to, $message);
-        } elseif ($type === 'whatsapp') {
-            $result = $this->sendWhatsapp($userId, $to, $message);
-        } else {
-            $result = ['error' => 'Invalid OTP type'];
+        switch ($type) {
+            case 'sms':
+                $result = $this->sendSms($userId, (string) Config::get('default_sms_number', ''), $to, $message);
+                break;
+            case 'whatsapp':
+                $template = (string) Config::get('whatsapp_otp_template', '');
+                $result = $template !== ''
+                    ? $this->sendWhatsapp($userId, $to, $message, [
+                        'template'   => $template,
+                        'language'   => (string) Config::get('whatsapp_otp_language', 'en_US'),
+                        'parameters' => [$code],
+                        'otp_code'   => $code,
+                    ])
+                    : $this->sendWhatsapp($userId, $to, $message);
+                break;
+            case 'email':
+                $result = $this->sendEmail(
+                    $userId,
+                    $to,
+                    'Your verification code',
+                    '<p>' . htmlspecialchars($message, ENT_QUOTES, 'UTF-8') . '</p>',
+                    ['categories' => ['otp']]
+                );
+                break;
+            default:
+                $result = ['success' => false, 'error' => 'Unsupported OTP channel: ' . $type];
         }
         
         Logger::info('OTP sent', ['user' => $userId, 'type' => $type]);
@@ -156,110 +183,90 @@ class SmsService
      */
     public function sendWhatsapp(int $userId, string $to, string $message, array $options = []): array
     {
-        $token = Config::getWhatsappCredentials()['token'] ?? '';
-        if (empty($token)) {
-            return ['error' => 'WhatsApp Business not configured'];
+        $provider = ProviderFactory::forCapability('whatsapp', $options['provider'] ?? null);
+
+        if (!$provider instanceof ChatProviderInterface) {
+            return ['success' => false, 'error' => 'No WhatsApp provider is configured'];
         }
-        
-        $phoneId = Config::get('whatsapp_phone_id', '');
-        if (empty($phoneId)) {
-            return ['error' => 'WhatsApp Phone ID not configured'];
+
+        if (!empty($options['template'])) {
+            $result = $provider->sendTemplate(
+                $to,
+                (string) $options['template'],
+                (string) ($options['language'] ?? 'en_US'),
+                (array) ($options['parameters'] ?? []),
+                $options
+            );
+        } else {
+            $result = $provider->sendChatMessage($to, $message, $options);
         }
-        
-        try {
-            $client = new \GuzzleHttp\Client();
-            $url = "https://graph.facebook.com/v18.0/{$phoneId}/messages";
-            
-            $payload = [
-                'messaging_product' => 'whatsapp',
-                'recipient_type' => 'individual',
-                'to' => $to,
-                'type' => 'text',
-                'text' => ['body' => $message],
-            ];
-            
-            $response = $client->post($url, [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . $token,
-                    'Content-Type' => 'application/json',
-                ],
-                'json' => $payload,
-            ]);
-            
-            $data = json_decode($response->getBody()->getContents(), true);
-            
-            $record = [
-                'user_id' => $userId,
-                'provider' => 'whatsapp',
-                'message_id' => $data['messages'][0]['id'] ?? '',
-                'to_number' => $to,
-                'body' => $message,
-                'direction' => 'outbound',
-                'status' => 'sent',
-                'channel' => 'whatsapp',
-                'created_at' => date('Y-m-d H:i:s'),
-            ];
-            
-            $id = Database::insert('mod_phoneservices_messages', $record);
-            
-            Logger::info('WhatsApp sent', ['id' => $id, 'to' => $to]);
-            return ['success' => true, 'message_id' => $record['message_id'], 'id' => $id];
-            
-        } catch (\Exception $e) {
-            Logger::error('WhatsApp send failed', ['error' => $e->getMessage()]);
-            return ['error' => $e->getMessage()];
+
+        $id = Database::insert('mod_phoneservices_messages', [
+            'user_id'    => $userId,
+            'provider'   => $provider->getName(),
+            'message_id' => (string) ($result['message_id'] ?? ''),
+            'to_number'  => $to,
+            'body'       => mb_substr($message, 0, 2000),
+            'direction'  => 'outbound',
+            'status'     => !empty($result['success']) ? 'sent' : 'failed',
+            'channel'    => 'whatsapp',
+            'error_message' => $result['error'] ?? null,
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        if (empty($result['success'])) {
+            Logger::error('WhatsApp send failed', ['to' => $to, 'error' => $result['error'] ?? 'unknown']);
+
+            return ['success' => false, 'error' => $result['error'] ?? 'WhatsApp send failed', 'id' => $id];
         }
+
+        Logger::info('WhatsApp message sent', ['id' => $id, 'user' => $userId]);
+
+        return ['success' => true, 'id' => $id, 'message_id' => $result['message_id'] ?? '', 'provider' => $provider->getName()];
     }
-    
+
     /**
-     * Send email via SendGrid
+     * Send a transactional email through the configured email provider
+     * (SendGrid by default).
+     *
+     * @param array<string,mixed> $options
+     * @return array<string,mixed>
      */
     public function sendEmail(int $userId, string $to, string $subject, string $body, array $options = []): array
     {
-        $apiKey = Config::getSendgridCredentials()['api_key'] ?? '';
-        if (empty($apiKey)) {
-            return ['error' => 'SendGrid not configured'];
+        $provider = ProviderFactory::forCapability('email', $options['provider'] ?? null);
+
+        if (!$provider instanceof EmailProviderInterface) {
+            return ['success' => false, 'error' => 'No email provider is configured'];
         }
-        
-        try {
-            $sg = new SendGrid($apiKey);
-            $mail = new SendGridMail();
-            $mail->setFrom($options['from'] ?? Config::get('sendgrid_from', 'noreply@example.com'), $options['from_name'] ?? 'Phone Services');
-            $mail->addTo($to);
-            $mail->setSubject($subject);
-            $mail->addContent('text/plain', strip_tags($body));
-            $mail->addContent('text/html', $body);
-            
-            if (!empty($options['attachments'])) {
-                foreach ($options['attachments'] as $attachment) {
-                    $mail->addAttachment($attachment['content'], $attachment['type'], $attachment['name']);
-                }
-            }
-            
-            $response = $sg->send($mail);
-            
-            $success = $response->statusCode() >= 200 && $response->statusCode() < 300;
-            
-            Database::insert('mod_phoneservices_messages', [
-                'user_id' => $userId,
-                'provider' => 'sendgrid',
-                'to_number' => $to,
-                'body' => $subject,
-                'direction' => 'outbound',
-                'status' => $success ? 'sent' : 'failed',
-                'channel' => 'email',
-                'created_at' => date('Y-m-d H:i:s'),
-            ]);
-            
-            Logger::info('Email sent', ['to' => $to, 'status' => $response->statusCode()]);
-            return ['success' => $success, 'status_code' => $response->statusCode()];
-            
-        } catch (\Exception $e) {
-            Logger::error('Email send failed', ['error' => $e->getMessage()]);
-            return ['error' => $e->getMessage()];
+
+        $options['text'] = $options['text'] ?? strip_tags($body);
+        $result = $provider->sendEmail($to, $subject, $body, $options);
+
+        $id = Database::insert('mod_phoneservices_messages', [
+            'user_id'    => $userId,
+            'provider'   => $provider->getName(),
+            'message_id' => (string) ($result['message_id'] ?? ''),
+            'to_number'  => $to,
+            'body'       => mb_substr($subject, 0, 255),
+            'direction'  => 'outbound',
+            'status'     => !empty($result['success']) ? 'sent' : 'failed',
+            'channel'    => 'email',
+            'error_message' => $result['error'] ?? null,
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        if (empty($result['success'])) {
+            Logger::error('Email send failed', ['to' => $to, 'error' => $result['error'] ?? 'unknown']);
+
+            return ['success' => false, 'error' => $result['error'] ?? 'Email send failed', 'id' => $id];
         }
+
+        Logger::info('Email sent', ['id' => $id, 'user' => $userId]);
+
+        return ['success' => true, 'id' => $id, 'message_id' => $result['message_id'] ?? ''];
     }
-    
+
     /**
      * Get message status
      */
@@ -307,7 +314,50 @@ class SmsService
             $where['status'] = $filters['status'];
         }
         
-        return Database::select('mod_phoneservices_messages', '*', $where, 'id', 'DESC', $filters['limit'] ?? 100);
+        return Database::select('mod_phoneservices_messages', '*', $where, 'id', 'DESC', (int) ($filters['limit'] ?? 100));
+    }
+
+    /**
+     * Aggregate messaging metrics for the admin SMS screen.
+     *
+     * @return array<string,mixed>
+     */
+    public function getMessageStatistics(array $filters = []): array
+    {
+        $sql = 'SELECT COUNT(*) AS total,
+                       COALESCE(SUM(cost),0) AS total_cost,
+                       SUM(CASE WHEN status = "delivered" THEN 1 ELSE 0 END) AS delivered,
+                       SUM(CASE WHEN status = "failed" THEN 1 ELSE 0 END) AS failed,
+                       SUM(CASE WHEN direction = "inbound" THEN 1 ELSE 0 END) AS inbound,
+                       SUM(CASE WHEN channel = "whatsapp" THEN 1 ELSE 0 END) AS whatsapp,
+                       SUM(CASE WHEN channel = "email" THEN 1 ELSE 0 END) AS email
+                  FROM mod_phoneservices_messages
+                 WHERE 1 = 1';
+        $bindings = [];
+
+        if (!empty($filters['user_id'])) {
+            $sql .= ' AND user_id = ?';
+            $bindings[] = (int) $filters['user_id'];
+        }
+        if (!empty($filters['from'])) {
+            $sql .= ' AND created_at >= ?';
+            $bindings[] = date('Y-m-d 00:00:00', strtotime((string) $filters['from']));
+        }
+
+        $row = Database::raw($sql, $bindings)[0] ?? [];
+        $total = (int) ($row['total'] ?? 0);
+        $delivered = (int) ($row['delivered'] ?? 0);
+
+        return [
+            'total'         => $total,
+            'delivered'     => $delivered,
+            'failed'        => (int) ($row['failed'] ?? 0),
+            'inbound'       => (int) ($row['inbound'] ?? 0),
+            'whatsapp'      => (int) ($row['whatsapp'] ?? 0),
+            'email'         => (int) ($row['email'] ?? 0),
+            'total_cost'    => round((float) ($row['total_cost'] ?? 0), 4),
+            'delivery_rate' => $total > 0 ? round(($delivered / $total) * 100, 1) : 0.0,
+        ];
     }
     
     /**

@@ -134,4 +134,32 @@ class SmsController extends BaseController
         
         return ['success' => true, 'data' => $result];
     }
+
+    /**
+     * POST /api/sms/otp/verify  { "to": "+1...", "code": "123456" }
+     *
+     * @return array<string,mixed>
+     */
+    public function verifyOtp(array $params = []): array
+    {
+        $input = array_merge($_POST, $this->getInput());
+        $error = $this->validate($input, ['to', 'code']);
+
+        if ($error) {
+            return $this->error($error);
+        }
+
+        $userId = $this->getUserId();
+
+        if ($userId <= 0) {
+            return $this->error('Authentication required', 401);
+        }
+
+        $verified = $this->service->verifyOtp($userId, (string) $input['to'], (string) $input['code']);
+
+        return $verified
+            ? $this->ok(['verified' => true])
+            : $this->error('The verification code is invalid or has expired', 422);
+    }
+
 }

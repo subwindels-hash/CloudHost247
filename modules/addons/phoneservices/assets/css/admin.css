@@ -63,3 +63,65 @@
 .phoneservices-api-config input[type="password"] {
     font-family: monospace;
 }
+
+/* ------------------------------------------------------------------
+   Admin pages
+   ------------------------------------------------------------------ */
+.phoneservices-admin .ps-page-head {
+    margin-bottom: 15px;
+}
+
+.phoneservices-admin .ps-muted {
+    color: #888;
+}
+
+.phoneservices-admin .ps-stats {
+    margin-bottom: 15px;
+}
+
+.phoneservices-admin .stat-card {
+    background: #fff;
+    border: 1px solid #e3e6ea;
+    border-radius: 4px;
+    padding: 12px;
+    text-align: center;
+}
+
+.phoneservices-admin .stat-value {
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.phoneservices-admin .stat-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #8a8a8a;
+}
+
+.phoneservices-admin .ps-filter-bar {
+    margin-bottom: 15px;
+}
+
+.phoneservices-admin .ps-inline-form {
+    display: inline-block;
+    margin: 0 4px 0 0;
+}
+
+.phoneservices-admin .ps-form-actions {
+    margin-bottom: 25px;
+}
+
+.phoneservices-admin .ps-error-cell {
+    max-width: 320px;
+    word-break: break-word;
+}
+
+.phoneservices-admin .ps-toggle {
+    margin-right: 18px;
+}
+
+.phoneservices-admin .ps-progress {
+    height: 8px;
+    margin-bottom: 4px;
+}

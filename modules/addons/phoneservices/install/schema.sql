@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS `mod_phoneservices_numbers` (
     `setup_cost` DECIMAL(10,4) NOT NULL DEFAULT 0.0000,
     `voice_url` VARCHAR(500) NULL,
     `sms_url` VARCHAR(500) NULL,
+    `forward_to` VARCHAR(30) NULL,
     `purchased_at` DATETIME NULL,
     `activated_at` DATETIME NULL,
     `renewed_at` DATETIME NULL,
@@ -130,6 +131,7 @@ CREATE TABLE IF NOT EXISTS `mod_phoneservices_esims` (
     `iccid` VARCHAR(30) NULL,
     `lpa_code` VARCHAR(255) NULL,
     `qr_code_data` TEXT NULL,
+    `qr_code_url` VARCHAR(500) NULL,
     `status` ENUM('pending','active','suspended','expired','cancelled') NOT NULL DEFAULT 'pending',
     `friendly_name` VARCHAR(255) NULL,
     `data_total_mb` INT(10) UNSIGNED NULL,
@@ -241,3 +243,69 @@ VALUES
 ('number', 'GB', 0.000000, 0.000000, 1.5000, 2.0000, 'USD'),
 ('number', 'CA', 0.000000, 0.000000, 1.0000, 2.0000, 'USD')
 ON DUPLICATE KEY UPDATE updated_at = CURRENT_TIMESTAMP;
+
+-- ============================================================
+-- 1.1.0 additions (kept here so fresh installs get them too;
+-- install/migrations/1.1.0_platform_hardening.sql applies them
+-- to existing installations).
+-- ============================================================
+-- Per-client REST API credentials (hashed at rest)
+CREATE TABLE IF NOT EXISTS `mod_phoneservices_api_keys` (
+    `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `user_id` INT(10) UNSIGNED NOT NULL DEFAULT 0,
+    `label` VARCHAR(100) NOT NULL DEFAULT 'default',
+    `key_id` VARCHAR(32) NOT NULL,
+    `key_hash` CHAR(64) NOT NULL,
+    `scopes` VARCHAR(255) NOT NULL DEFAULT 'numbers,voip,sms,esim,usage',
+    `status` ENUM('active','revoked') NOT NULL DEFAULT 'active',
+    `last_used_at` DATETIME NULL,
+    `last_used_ip` VARCHAR(45) NULL,
+    `expires_at` DATETIME NULL,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `key_id` (`key_id`),
+    KEY `user_id` (`user_id`),
+    KEY `status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Raw provider webhook/event audit trail (also used for idempotency)
+CREATE TABLE IF NOT EXISTS `mod_phoneservices_provider_events` (
+    `id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `provider` VARCHAR(50) NOT NULL,
+    `event_type` VARCHAR(80) NOT NULL,
+    `external_id` VARCHAR(190) NULL,
+    `payload` MEDIUMTEXT NULL,
+    `processed` TINYINT(1) NOT NULL DEFAULT 0,
+    `processed_at` DATETIME NULL,
+    `error` VARCHAR(500) NULL,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `provider_event` (`provider`,`event_type`),
+    KEY `external_id` (`external_id`),
+    KEY `created_at` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Recurring subscriptions for numbers and eSIM data plans
+CREATE TABLE IF NOT EXISTS `mod_phoneservices_subscriptions` (
+    `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `user_id` INT(10) UNSIGNED NOT NULL,
+    `service_id` INT(10) UNSIGNED NULL DEFAULT 0,
+    `service_type` ENUM('number','voip','sms','esim','bundle') NOT NULL,
+    `resource_id` INT(10) UNSIGNED NULL DEFAULT 0,
+    `plan_code` VARCHAR(100) NULL,
+    `billing_cycle` ENUM('monthly','quarterly','annually','onetime') NOT NULL DEFAULT 'monthly',
+    `amount` DECIMAL(10,4) NOT NULL DEFAULT 0.0000,
+    `currency` CHAR(3) NOT NULL DEFAULT 'USD',
+    `status` ENUM('pending','active','suspended','cancelled','expired') NOT NULL DEFAULT 'pending',
+    `auto_renew` TINYINT(1) NOT NULL DEFAULT 1,
+    `started_at` DATETIME NULL,
+    `next_due_date` DATE NULL,
+    `cancelled_at` DATETIME NULL,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `user_id` (`user_id`),
+    KEY `service_type` (`service_type`),
+    KEY `status_due` (`status`,`next_due_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

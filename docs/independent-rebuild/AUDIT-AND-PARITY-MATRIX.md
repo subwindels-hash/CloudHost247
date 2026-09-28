@@ -215,3 +215,17 @@ The CI-level `scripts/release-candidate-check.sh` verifies syntax, behavior test
 **IMPLEMENTED — SOURCE/MOCK VERIFIED:** independent `modules/servers/RDP` implementation with allowlisted HTTPS provider client, encrypted WHMCS server-field token input, strict response schemas, 5/20-second network bounds, disabled redirects, 1 MiB response cap, namespaced `cloudhost247_rdp:1.0.0` migration, operation ledger, generation-aware idempotency, ownership checks, read-only reconciliation, redacted audit/error handling and secret-free responsive templates. No code from `RDP.zip` was copied; the archive remains unchanged and inactive.
 
 **BLOCKED — STAGING/API AUTHORIZATION REQUIRED:** provider ownership/licensing, endpoint contract, bearer-token authorization, product IDs, permissions, real create/suspend/unsuspend/terminate semantics, WHMCS module activation, migration execution, UI, concurrency and disposable lifecycle tests. The module must not be activated until these pass. Required migration ordering adds RDP `1.0.0` after the existing Core, Currency, Theme and OVH sequences.
+
+## Email hosting (hostx_email) — added 2026-09-28
+
+| Component | Path | Independent status |
+|---|---|---|
+| Email provisioning server module | `modules/servers/hostx_email/` | **Complete (source/mock verified)** — new independent implementation; no vendor code reused |
+| Public email hosting page | `email-hosting.php`, `templates/cloudhost247/cloudhost247-email-hosting.tpl`, `templates/cloudhost247/css/email-hosting.css` | **Complete (source verified)** — live WHMCS products/pricing only |
+| Client-area email management | `modules/servers/hostx_email/templates/overview.tpl` | **Complete (source verified)** — ownership + CSRF enforced |
+| Provider adapters | `lib/Providers/{ProfessionalEmail,Microsoft365,GoogleWorkspace}Provider.php` | **Complete (mock verified)** — real Graph/Admin SDK/REST contracts, no SDKs |
+| Schema and migrations | `install/schema.sql`, `install/migrations/1.0.0_baseline.sql` | **Complete (source verified)** — `mod_hostx_email_*` only |
+| Automated diagnostics | `tests/hostx_email/run.php` | **Complete** — 44 mock checks in the PHP 7.4/8.2 CI matrix |
+| Live tenant behaviour | Microsoft 365 / Google Workspace / mail platform | **Blocked from verification** — see `STAGING-TEST-MATRIX.md` rows HXE-01..HXE-27 |
+
+The pre-existing `modules/servers/cloudhost247_email` is left untouched and inactive; `hostx_email` is a separate module with its own tables, page and tests, so neither interferes with the other. Nothing in the hosting, OVH, currency, authentication, checkout or dashboard paths was modified.

@@ -1,294 +1,265 @@
 <?php
 /**
- * Phone Number Services Platform - Main Module File
+ * Phone Number Services Platform - WHMCS addon module entry point.
+ *
+ * The addon is the platform core: it owns the schema, the Super Admin panel
+ * and the client area. Per-service provisioning is handled by the companion
+ * server modules (modules/servers/phoneservices_*), which delegate to the same
+ * service layer.
+ *
+ * Provider credentials are NOT stored as addon settings: they are managed in
+ * the module's API Configuration screen and encrypted at rest (AES-256-GCM).
  *
  * @package    PhoneServices
- * @author     Telecom Team
- * @copyright  Copyright (c) 2024
+ * @author     CloudHost247
  * @license    Proprietary
- * @version    1.0.0
+ * @version    1.1.0
  */
 
 if (!defined('WHMCS')) {
     die('This file cannot be accessed directly');
 }
 
-use PhoneServices\Core\Module;
+require_once __DIR__ . '/bootstrap.php';
+
 use PhoneServices\Core\Config;
 use PhoneServices\Core\Logger;
-
-require_once __DIR__ . '/vendor/autoload.php';
+use PhoneServices\Core\Module;
+use PhoneServices\Core\Security;
 
 /**
- * Module Configuration
+ * Addon metadata and configuration fields.
+ *
+ * @return array<string,mixed>
  */
 function phoneservices_config()
 {
     return [
         'name'        => 'Phone Number Services Platform',
-        'description' => 'Virtual telecom services including phone numbers, VoIP, SMS, eSIM, and usage tracking.',
-        'author'      => 'Telecom Team',
+        'description' => 'Virtual phone numbers, WebRTC VoIP, SMS/WhatsApp/email messaging, eSIM data plans and usage analytics with a provider-agnostic API layer.',
+        'author'      => 'CloudHost247',
         'language'    => 'english',
-        'version'     => '1.0.0',
-        'link'        => 'https://example.com/phoneservices',
+        'version'     => PHONESERVICES_VERSION,
         'fields'      => [
             'api_mode' => [
                 'FriendlyName' => 'API Mode',
                 'Type'         => 'dropdown',
                 'Options'      => 'sandbox,live',
                 'Default'      => 'sandbox',
-                'Description'  => 'Select API operating mode.',
+                'Description'  => 'Sandbox uses provider test endpoints and enables verbose logging.',
             ],
-            'default_provider' => [
-                'FriendlyName' => 'Default Provider',
-                'Type'         => 'dropdown',
-                'Options'      => 'twilio,vonage,airalo,truphone',
-                'Default'      => 'twilio',
-                'Description'  => 'Default telecom provider for all services.',
-            ],
-            'twilio_account_sid' => [
-                'FriendlyName' => 'Twilio Account SID',
-                'Type'         => 'password',
-                'Size'         => '50',
-                'Default'      => '',
-                'Description'  => 'Your Twilio Account SID.',
-            ],
-            'twilio_auth_token' => [
-                'FriendlyName' => 'Twilio Auth Token',
-                'Type'         => 'password',
-                'Size'         => '50',
-                'Default'      => '',
-                'Description'  => 'Your Twilio Auth Token.',
-            ],
-            'vonage_api_key' => [
-                'FriendlyName' => 'Vonage API Key',
-                'Type'         => 'password',
-                'Size'         => '50',
-                'Default'      => '',
-                'Description'  => 'Your Vonage API Key.',
-            ],
-            'vonage_api_secret' => [
-                'FriendlyName' => 'Vonage API Secret',
-                'Type'         => 'password',
-                'Size'         => '50',
-                'Default'      => '',
-                'Description'  => 'Your Vonage API Secret.',
-            ],
-            'airalo_api_token' => [
-                'FriendlyName' => 'Airalo API Token',
-                'Type'         => 'password',
-                'Size'         => '50',
-                'Default'      => '',
-                'Description'  => 'Your Airalo API Token.',
-            ],
-            'truphone_api_key' => [
-                'FriendlyName' => 'Truphone API Key',
-                'Type'         => 'password',
-                'Size'         => '50',
-                'Default'      => '',
-                'Description'  => 'Your Truphone API Key.',
-            ],
-            'sendgrid_api_key' => [
-                'FriendlyName' => 'SendGrid API Key',
-                'Type'         => 'password',
-                'Size'         => '50',
-                'Default'      => '',
-                'Description'  => 'SendGrid API Key for email services.',
-            ],
-            'whatsapp_business_token' => [
-                'FriendlyName' => 'WhatsApp Business Token',
-                'Type'         => 'password',
-                'Size'         => '50',
-                'Default'      => '',
-                'Description'  => 'WhatsApp Business API token.',
-            ],
-            'enable_numbers' => [
-                'FriendlyName' => 'Enable Virtual Numbers',
-                'Type'         => 'yesno',
-                'Default'      => 'on',
-                'Description'  => 'Enable virtual phone number services.',
-            ],
-            'enable_voip' => [
-                'FriendlyName' => 'Enable VoIP',
-                'Type'         => 'yesno',
-                'Default'      => 'on',
-                'Description'  => 'Enable VoIP calling services.',
-            ],
-            'enable_sms' => [
-                'FriendlyName' => 'Enable SMS',
-                'Type'         => 'yesno',
-                'Default'      => 'on',
-                'Description'  => 'Enable SMS messaging services.',
-            ],
-            'enable_esim' => [
-                'FriendlyName' => 'Enable eSIM',
-                'Type'         => 'yesno',
-                'Default'      => 'on',
-                'Description'  => 'Enable eSIM data services.',
-            ],
-            'log_retention_days' => [
-                'FriendlyName' => 'Log Retention (Days)',
+            'webhook_base_url' => [
+                'FriendlyName' => 'Webhook Base URL',
                 'Type'         => 'text',
-                'Size'         => '10',
-                'Default'      => '90',
-                'Description'  => 'Number of days to retain system logs.',
+                'Size'         => '60',
+                'Default'      => '',
+                'Description'  => 'Optional override, e.g. https://billing.example.com/modules/addons/phoneservices/api/webhooks. Defaults to the WHMCS system URL.',
+            ],
+            'show_navbar_link' => [
+                'FriendlyName' => 'Client Navigation Link',
+                'Type'         => 'yesno',
+                'Default'      => 'on',
+                'Description'  => 'Show "Phone Services" under the client area Services menu.',
+            ],
+            'credentials_notice' => [
+                'FriendlyName' => 'Provider Credentials',
+                'Type'         => 'textarea',
+                'Rows'         => '2',
+                'Default'      => '',
+                'Description'  => 'Configure Twilio / Vonage / Airalo / Truphone / WhatsApp / SendGrid credentials inside the module (Addons > Phone Number Services Platform > API Configuration). They are encrypted at rest and never stored here.',
             ],
         ],
     ];
 }
 
 /**
- * Module Activation
+ * Create the schema, apply migrations and seed defaults.
+ *
+ * @return array<string,string>
  */
 function phoneservices_activate()
 {
     try {
         $module = new Module();
-        $module->activate();
+        $result = $module->activate();
 
         return [
-            'status'  => 'success',
-            'description' => 'Phone Number Services Platform activated successfully. Database tables created.',
+            'status'      => 'success',
+            'description' => sprintf(
+                'Phone Number Services Platform activated. %d schema statements executed, %d migration(s) applied.',
+                $result['tables'],
+                $result['migrations']
+            ),
         ];
-    } catch (\Exception $e) {
+    } catch (\Throwable $e) {
         return [
-            'status'  => 'error',
+            'status'      => 'error',
             'description' => 'Activation failed: ' . $e->getMessage(),
         ];
     }
 }
 
 /**
- * Module Deactivation
+ * @return array<string,string>
  */
 function phoneservices_deactivate()
 {
     try {
-        $module = new Module();
-        $module->deactivate();
+        (new Module())->deactivate();
 
         return [
-            'status'  => 'success',
-            'description' => 'Phone Number Services Platform deactivated.',
+            'status'      => 'success',
+            'description' => 'Phone Number Services Platform deactivated. Telecom records were retained for billing evidence.',
         ];
-    } catch (\Exception $e) {
+    } catch (\Throwable $e) {
         return [
-            'status'  => 'error',
+            'status'      => 'error',
             'description' => 'Deactivation failed: ' . $e->getMessage(),
         ];
     }
 }
 
 /**
- * Module Upgrade
+ * @param array<string,mixed> $vars
  */
 function phoneservices_upgrade($vars)
 {
     try {
-        $module = new Module();
-        $module->upgrade($vars['version']);
-    } catch (\Exception $e) {
-        Logger::error('Upgrade failed: ' . $e->getMessage());
+        (new Module())->upgrade((string) ($vars['version'] ?? ''));
+    } catch (\Throwable $e) {
+        Logger::exception($e, 'Module upgrade');
     }
 }
 
 /**
- * Admin Area Output
+ * Super Admin panel.
+ *
+ * @param array<string,mixed> $vars
  */
 function phoneservices_output($vars)
 {
-    $action = isset($_GET['action']) ? $_GET['action'] : 'dashboard';
-    $module = new Module();
-    
-    echo '<div class="phoneservices-admin-wrapper">';
-    
-    switch ($action) {
-        case 'dashboard':
-            $module->renderAdminDashboard($vars);
-            break;
-        case 'api_config':
-            $module->renderApiConfig($vars);
-            break;
-        case 'pricing':
-            $module->renderPricing($vars);
-            break;
-        case 'numbers':
-            $module->renderNumbersAdmin($vars);
-            break;
-        case 'voip':
-            $module->renderVoipAdmin($vars);
-            break;
-        case 'sms':
-            $module->renderSmsAdmin($vars);
-            break;
-        case 'esim':
-            $module->renderEsimAdmin($vars);
-            break;
-        case 'usage':
-            $module->renderUsageAdmin($vars);
-            break;
-        case 'transactions':
-            $module->renderTransactionsAdmin($vars);
-            break;
-        case 'users':
-            $module->renderUsersAdmin($vars);
-            break;
-        case 'logs':
-            $module->renderLogsAdmin($vars);
-            break;
-        default:
-            $module->renderAdminDashboard($vars);
+    $action = isset($_GET['action']) ? (string) $_GET['action'] : 'dashboard';
+
+    if (!array_key_exists($action, Module::ADMIN_PAGES)) {
+        $action = 'dashboard';
     }
-    
+
+    $module = new Module();
+
+    echo '<div class="phoneservices-admin-wrapper">';
+
+    try {
+        switch ($action) {
+            case 'api_config':
+                $module->renderApiConfig($vars);
+                break;
+            case 'providers':
+                $module->renderProviders($vars);
+                break;
+            case 'pricing':
+                $module->renderPricing($vars);
+                break;
+            case 'numbers':
+                $module->renderNumbersAdmin($vars);
+                break;
+            case 'voip':
+                $module->renderVoipAdmin($vars);
+                break;
+            case 'sms':
+                $module->renderSmsAdmin($vars);
+                break;
+            case 'esim':
+                $module->renderEsimAdmin($vars);
+                break;
+            case 'usage':
+                $module->renderUsageAdmin($vars);
+                break;
+            case 'transactions':
+                $module->renderTransactionsAdmin($vars);
+                break;
+            case 'users':
+                $module->renderUsersAdmin($vars);
+                break;
+            case 'logs':
+                $module->renderLogsAdmin($vars);
+                break;
+            case 'dashboard':
+            default:
+                $module->renderAdminDashboard($vars);
+        }
+    } catch (\Throwable $e) {
+        Logger::exception($e, 'Admin page ' . $action);
+        echo '<div class="alert alert-danger">The page could not be rendered: '
+            . Security::escape($e->getMessage())
+            . '. See Phone Services > System Logs for details.</div>';
+    }
+
     echo '</div>';
 }
 
 /**
- * Admin Area Sidebar
+ * Admin sidebar navigation.
+ *
+ * @param array<string,mixed> $vars
  */
 function phoneservices_sidebar($vars)
 {
-    $sidebar = '
-    <div class="sidebar-header">Phone Services</div>
-    <ul class="menu">
-        <li><a href="' . $vars['modulelink'] . '&action=dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-        <li><a href="' . $vars['modulelink'] . '&action=api_config"><i class="fas fa-cogs"></i> API Configuration</a></li>
-        <li><a href="' . $vars['modulelink'] . '&action=pricing"><i class="fas fa-dollar-sign"></i> Pricing Control</a></li>
-        <li class="divider"></li>
-        <li><a href="' . $vars['modulelink'] . '&action=numbers"><i class="fas fa-phone"></i> Numbers</a></li>
-        <li><a href="' . $vars['modulelink'] . '&action=voip"><i class="fas fa-microphone"></i> VoIP</a></li>
-        <li><a href="' . $vars['modulelink'] . '&action=sms"><i class="fas fa-envelope"></i> SMS</a></li>
-        <li><a href="' . $vars['modulelink'] . '&action=esim"><i class="fas fa-sim-card"></i> eSIM</a></li>
-        <li class="divider"></li>
-        <li><a href="' . $vars['modulelink'] . '&action=usage"><i class="fas fa-chart-line"></i> Usage & Analytics</a></li>
-        <li><a href="' . $vars['modulelink'] . '&action=transactions"><i class="fas fa-receipt"></i> Transactions</a></li>
-        <li><a href="' . $vars['modulelink'] . '&action=users"><i class="fas fa-users"></i> Users</a></li>
-        <li><a href="' . $vars['modulelink'] . '&action=logs"><i class="fas fa-file-alt"></i> System Logs</a></li>
-    </ul>
-    <style>
-        .phoneservices-admin-wrapper { padding: 20px; }
-        .sidebar-header { font-weight: bold; padding: 10px; background: #2d3a4a; color: #fff; }
-        .menu { list-style: none; padding: 0; margin: 0; }
-        .menu li a { display: block; padding: 10px 15px; color: #333; text-decoration: none; border-bottom: 1px solid #eee; }
-        .menu li a:hover { background: #f5f5f5; }
-        .menu li.divider { border-top: 1px solid #ddd; margin: 5px 0; }
-    </style>';
-    
-    return $sidebar;
+    $link = $vars['modulelink'] ?? '';
+    $current = (string) ($_GET['action'] ?? 'dashboard');
+    $toggles = Config::getFeatureToggles();
+
+    $groups = [
+        'Platform' => [
+            'dashboard'  => ['Dashboard', 'fa-tachometer-alt', true],
+            'api_config' => ['API Configuration', 'fa-cogs', true],
+            'providers'  => ['Provider Health', 'fa-plug', true],
+            'pricing'    => ['Pricing Control', 'fa-dollar-sign', true],
+        ],
+        'Services' => [
+            'numbers' => ['Numbers', 'fa-phone', $toggles['numbers']],
+            'voip'    => ['VoIP & Calls', 'fa-microphone', $toggles['voip']],
+            'sms'     => ['Messaging', 'fa-comment-dots', $toggles['sms']],
+            'esim'    => ['eSIM & Data', 'fa-sim-card', $toggles['esim']],
+        ],
+        'Operations' => [
+            'usage'        => ['Usage & Analytics', 'fa-chart-line', $toggles['analytics']],
+            'transactions' => ['Transactions', 'fa-receipt', true],
+            'users'        => ['Users & Subscriptions', 'fa-users', true],
+            'logs'         => ['System Logs', 'fa-file-alt', true],
+        ],
+    ];
+
+    $html = '<div class="phoneservices-sidebar">';
+
+    foreach ($groups as $groupLabel => $items) {
+        $html .= '<div class="ps-sidebar-header">' . htmlspecialchars($groupLabel, ENT_QUOTES, 'UTF-8') . '</div><ul class="ps-menu">';
+
+        foreach ($items as $action => [$label, $icon, $enabled]) {
+            $classes = 'ps-menu-item' . ($current === $action ? ' active' : '') . ($enabled ? '' : ' disabled');
+            $html .= '<li class="' . $classes . '"><a href="' . htmlspecialchars($link . '&action=' . $action, ENT_QUOTES, 'UTF-8') . '">'
+                . '<i class="fas ' . $icon . '"></i> ' . htmlspecialchars($label, ENT_QUOTES, 'UTF-8')
+                . ($enabled ? '' : ' <span class="ps-pill">off</span>')
+                . '</a></li>';
+        }
+
+        $html .= '</ul>';
+    }
+
+    $html .= '<div class="ps-sidebar-footer">v' . htmlspecialchars(PHONESERVICES_VERSION, ENT_QUOTES, 'UTF-8')
+        . ' &middot; ' . (Config::isSandbox() ? 'sandbox' : 'live') . ' mode</div></div>';
+
+    return $html;
 }
 
 /**
- * Client Area Output
+ * Client area controller.
+ *
+ * @param array<string,mixed> $vars
+ * @return array<string,mixed>
  */
 function phoneservices_clientarea($vars)
 {
-    $action = isset($_GET['action']) ? $_GET['action'] : 'dashboard';
-    $module = new Module();
-    
-    $allowedActions = ['dashboard', 'numbers', 'voip', 'sms', 'esim', 'usage', 'calls', 'messages'];
-    if (!in_array($action, $allowedActions)) {
-        $action = 'dashboard';
-    }
-    
-    return $module->renderClientArea($vars, $action);
+    $action = isset($_GET['action']) ? (string) $_GET['action'] : 'dashboard';
+
+    return (new Module())->renderClientArea($vars, $action);
 }

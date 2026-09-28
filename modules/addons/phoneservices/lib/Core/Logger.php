@@ -1,6 +1,13 @@
 <?php
 /**
- * Logger - Centralized logging with retention policy
+ * Logger - centralised, structured logging with retention.
+ *
+ * Writes to mod_phoneservices_logs, mirrors errors into the WHMCS activity log
+ * and degrades to the PHP error log if the database is unavailable. Re-entrancy
+ * is guarded so a failing write can never recurse (the data layer logs through
+ * this class).
+ *
+ * @package PhoneServices
  */
 
 namespace PhoneServices\Core;
@@ -11,94 +18,159 @@ class Logger
     const LEVEL_INFO = 'info';
     const LEVEL_WARNING = 'warning';
     const LEVEL_ERROR = 'error';
-    
+
+    /** Keys scrubbed from context before persistence. */
+    const REDACT_KEYS = ['password', 'auth_token', 'api_key', 'api_secret', 'access_token', 'secret', 'token', 'authorization'];
+
+    /** @var bool Re-entrancy guard */
+    private static $writing = false;
+
     /**
-     * Log a message
+     * @param array<string,mixed> $context
      */
-    public static function log($level, $message, $context = [])
+    public static function log(string $level, string $message, array $context = []): void
     {
-        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
-        $caller = isset($trace[1]) ? $trace[1] : $trace[0];
-        $source = (isset($caller['class']) ? $caller['class'] : '') . '::' . (isset($caller['function']) ? $caller['function'] : 'unknown');
-        
-        $data = [
-            'level' => $level,
-            'message' => $message,
-            'context' => json_encode($context),
-            'source' => $source,
-            'ip_address' => $_SERVER['REMOTE_ADDR'] ?? 'cli',
-            'created_at' => date('Y-m-d H:i:s'),
-        ];
-        
-        insert_query('mod_phoneservices_logs', $data);
-        
-        // Also log to WHMCS activity log for errors
-        if ($level === self::LEVEL_ERROR) {
-            logActivity('PhoneServices Error: ' . $message);
+        if (self::$writing) {
+            // A log write is already in flight (e.g. the DB layer failed):
+            // fall back to the PHP error log to avoid infinite recursion.
+            error_log('[phoneservices][' . $level . '] ' . $message);
+            return;
+        }
+
+        self::$writing = true;
+
+        try {
+            $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3);
+            $caller = $trace[2] ?? ($trace[1] ?? ($trace[0] ?? []));
+            $source = ($caller['class'] ?? '') . ($caller['type'] ?? '') . ($caller['function'] ?? 'unknown');
+
+            $data = [
+                'level'      => $level,
+                'message'    => mb_substr($message, 0, 2000),
+                'context'    => json_encode(self::redact($context)),
+                'source'     => mb_substr($source, 0, 190),
+                'ip_address' => self::clientIp(),
+                'created_at' => date('Y-m-d H:i:s'),
+            ];
+
+            try {
+                \WHMCS\Database\Capsule::table('mod_phoneservices_logs')->insert($data);
+            } catch (\Throwable $e) {
+                error_log('[phoneservices][' . $level . '] ' . $message . ' (log write failed: ' . $e->getMessage() . ')');
+            }
+
+            if ($level === self::LEVEL_ERROR && function_exists('logActivity')) {
+                logActivity('PhoneServices Error: ' . mb_substr($message, 0, 500));
+            }
+        } finally {
+            self::$writing = false;
         }
     }
-    
-    public static function debug($message, $context = [])
+
+    public static function debug(string $message, array $context = []): void
     {
         if (self::isDebugMode()) {
             self::log(self::LEVEL_DEBUG, $message, $context);
         }
     }
-    
-    public static function info($message, $context = [])
+
+    public static function info(string $message, array $context = []): void
     {
         self::log(self::LEVEL_INFO, $message, $context);
     }
-    
-    public static function warning($message, $context = [])
+
+    public static function warning(string $message, array $context = []): void
     {
         self::log(self::LEVEL_WARNING, $message, $context);
     }
-    
-    public static function error($message, $context = [])
+
+    public static function error(string $message, array $context = []): void
     {
         self::log(self::LEVEL_ERROR, $message, $context);
     }
-    
+
     /**
-     * Get recent logs
+     * Log an exception with its origin.
      */
-    public static function getRecentLogs($limit = 100, $level = null)
+    public static function exception(\Throwable $e, string $context = ''): void
     {
-        $where = [];
+        self::error(($context !== '' ? $context . ': ' : '') . $e->getMessage(), [
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+        ]);
+    }
+
+    /**
+     * @return array<int,array<string,mixed>>
+     */
+    public static function getRecentLogs(int $limit = 100, ?string $level = null, array $extraFilters = []): array
+    {
+        $where = $extraFilters;
         if ($level) {
             $where['level'] = $level;
         }
-        
-        $result = select_query('mod_phoneservices_logs', '*', $where, 'id', 'DESC', (int)$limit);
-        $logs = [];
-        while ($row = mysql_fetch_assoc($result)) {
-            $logs[] = $row;
-        }
-        return $logs;
+
+        return Database::select('mod_phoneservices_logs', '*', $where, 'id', 'DESC', max(1, min($limit, 1000)));
     }
-    
+
     /**
-     * Clean old logs based on retention policy
+     * Delete logs older than the configured retention window.
      */
-    public static function cleanOldLogs()
+    public static function cleanOldLogs(): int
     {
-        $retentionDays = (int) Config::get('log_retention_days', 90);
+        $retentionDays = max(1, Config::getInt('log_retention_days', 90));
         $cutoffDate = date('Y-m-d H:i:s', strtotime("-{$retentionDays} days"));
-        
-        full_query("DELETE FROM mod_phoneservices_logs WHERE created_at < '" . db_escape_string($cutoffDate) . "'");
-        
-        $affected = mysql_affected_rows();
-        self::info("Cleaned {$affected} old log records");
-        
+
+        $affected = Database::statement(
+            'DELETE FROM mod_phoneservices_logs WHERE created_at < ?',
+            [$cutoffDate]
+        );
+
+        if ($affected > 0) {
+            self::info("Pruned {$affected} log records older than {$retentionDays} days");
+        }
+
         return $affected;
     }
-    
-    /**
-     * Check if debug mode is enabled
-     */
-    public static function isDebugMode()
+
+    public static function isDebugMode(): bool
     {
-        return Config::get('api_mode', 'sandbox') === 'sandbox';
+        return Config::getBool('debug_logging', false) || Config::isSandbox();
+    }
+
+    /**
+     * Remove secrets from log context.
+     *
+     * @param array<string,mixed> $context
+     * @return array<string,mixed>
+     */
+    private static function redact(array $context): array
+    {
+        foreach ($context as $key => $value) {
+            if (is_array($value)) {
+                $context[$key] = self::redact($value);
+                continue;
+            }
+
+            foreach (self::REDACT_KEYS as $needle) {
+                if (stripos((string) $key, $needle) !== false) {
+                    $context[$key] = '***redacted***';
+                    break;
+                }
+            }
+        }
+
+        return $context;
+    }
+
+    private static function clientIp(): string
+    {
+        if (php_sapi_name() === 'cli') {
+            return 'cli';
+        }
+
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+
+        return is_string($ip) ? substr($ip, 0, 45) : '';
     }
 }

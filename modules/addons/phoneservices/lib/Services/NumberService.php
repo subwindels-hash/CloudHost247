@@ -280,6 +280,9 @@ class NumberService
             'friendly_name' => $config['friendly_name'] ?? $number['friendly_name'],
             'voice_url' => $config['voice_url'] ?? $number['voice_url'],
             'sms_url' => $config['sms_url'] ?? $number['sms_url'],
+            'forward_to' => array_key_exists('forward_to', $config)
+                ? ($config['forward_to'] !== '' ? $config['forward_to'] : null)
+                : ($number['forward_to'] ?? null),
         ], ['id' => $numberId]);
         
         return true;
@@ -290,14 +293,13 @@ class NumberService
      */
     public function getRenewalDueNumbers(int $days = 7): array
     {
-        $sql = "SELECT * FROM mod_phoneservices_numbers 
-                WHERE status = 'active' 
-                AND next_renewal <= DATE_ADD(NOW(), INTERVAL " . (int)$days . " DAY)";
-        $result = full_query($sql);
-        $numbers = [];
-        while ($row = mysql_fetch_assoc($result)) {
-            $numbers[] = $row;
-        }
-        return $numbers;
+        return Database::raw(
+            'SELECT * FROM mod_phoneservices_numbers
+              WHERE status = ?
+                AND next_renewal IS NOT NULL
+                AND next_renewal <= DATE_ADD(NOW(), INTERVAL ? DAY)
+              ORDER BY next_renewal ASC',
+            ['active', max(0, $days)]
+        );
     }
 }
