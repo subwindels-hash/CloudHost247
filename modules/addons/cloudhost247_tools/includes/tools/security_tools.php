@@ -107,23 +107,45 @@ function cloudhost247_tool_password_generator($post)
     $symbols = isset($post['symbols']);
     $count = min((int) ($post['count'] ?? 5), 20);
 
-    $charset = '';
-    if ($upper) $charset .= 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    if ($lower) $charset .= 'abcdefghijklmnopqrstuvwxyz';
-    if ($numbers) $charset .= '0123456789';
-    if ($symbols) $charset .= '!@#$%^&*()_+-=[]{}|;:,.<>?';
+    $classes = [];
+    if ($upper) $classes[] = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    if ($lower) $classes[] = 'abcdefghijklmnopqrstuvwxyz';
+    if ($numbers) $classes[] = '0123456789';
+    if ($symbols) $classes[] = '!@#$%^&*()_+-=[]{}|;:,.<>?';
 
-    if (empty($charset)) {
-        $charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    if (empty($classes)) {
+        $classes = ['abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', '0123456789'];
     }
+
+    $charset = implode('', $classes);
 
     $passwords = [];
     for ($i = 0; $i < $count; $i++) {
-        $password = '';
-        for ($j = 0; $j < $length; $j++) {
-            $password .= $charset[random_int(0, strlen($charset) - 1)];
+        // Seed one character from every selected class so the charset flags are
+        // actually honored. Drawing every character uniformly from the merged
+        // charset only satisfies them probabilistically: a 24 character
+        // password omits digits roughly 5% of the time.
+        $characters = [];
+        foreach ($classes as $class) {
+            if (count($characters) < $length) {
+                $characters[] = $class[random_int(0, strlen($class) - 1)];
+            }
         }
-        $passwords[] = $password;
+
+        while (count($characters) < $length) {
+            $characters[] = $charset[random_int(0, strlen($charset) - 1)];
+        }
+
+        // Fisher-Yates with a CSPRNG, so the guaranteed characters are not
+        // predictable by position.
+        for ($j = count($characters) - 1; $j > 0; $j--) {
+            $k = random_int(0, $j);
+            $swap = $characters[$j];
+            $characters[$j] = $characters[$k];
+            $characters[$k] = $swap;
+        }
+
+        $passwords[] = implode('', $characters);
     }
 
     return ['length' => $length, 'count' => $count, 'passwords' => $passwords];
