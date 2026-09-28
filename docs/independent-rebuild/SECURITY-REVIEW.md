@@ -159,7 +159,7 @@ Neither defect is introduced by the Website Builder work and neither is fixed he
 | Ref | Location | Finding | Impact | Recommendation |
 |---|---|---|---|---|
 | PRE-1 | `modules/addons/cloudhost247_theme/lib/ThemeRepository.php:159` | `safeRelativeOrHttpsUrl()` uses `#` as the delimiter but leaves `#` unescaped inside the `[?#]` character class, so the pattern terminates early. PHP raises `preg_match(): Unknown modifier ']'` and the call returns `false` for **every** input | **Not a security hole — it fails closed.** The broken branch was the one that *allowed* a URL, so control falls through to the stricter absolute-HTTPS test. The functional effect is that legitimate relative links (`/about`, `contact.php`) in theme CMS content are rewritten to `href="#"`, plus a PHP warning on every call | **Fixed.** The `#` is now escaped as `[?\#]`, and the relative branch gained a `(?![/\\])` lookahead — see the note below. Covered by five regression tests in `tests/foundation/run.php` |
-| PRE-2 | `tests/ovh/run.php` (`MockTransport::send`) | The double returns `array_shift($this->responses)`, which yields `null` once the queued responses are exhausted. `Client::request()` then reads `$r['status']` / `$r['body']` off `null`, producing `Warning: Trying to access array offset on value of type null` and a `json_decode(): Passing null` deprecation | Test-only noise. A real `Transport` always returns an array, so there is no production defect. The OVH suite's own assertions all pass | Have `MockTransport` return a documented default (or fail loudly) when its queue is drained, so the warnings stop masking real ones |
+| PRE-2 | `tests/ovh/run.php` (`MockTransport::send`) | The double returns `array_shift($this->responses)`, which yields `null` once the queued responses are exhausted. `Client::request()` then reads `$r['status']` / `$r['body']` off `null`, producing `Warning: Trying to access array offset on value of type null` and a `json_decode(): Passing null` deprecation | Test-only noise. A real `Transport` always returns an array, so there is no production defect. The OVH suite's own assertions all pass | **Fixed.** `MockTransport` now throws on a drained queue, the malformed-response test is provisioned for all three retry attempts and asserts the specific exception, and the suite fails if any PHP diagnostic is raised — see the note below |
 
 ### PRE-1 remediation: fixing the pattern re-opened a branch that had never run
 
@@ -190,5 +190,35 @@ links in theme CMS content resolve instead of degrading to `href="#"`. One of
 the five new tests — the protocol-relative one — passed *vacuously* before the
 fix, since the broken pattern rejected everything; it only became meaningful
 once the branch started running.
+
+### PRE-2 remediation: the warnings were hiding a test that could not fail
+
+The ten warnings came from one place: the `malformed response` test queued two
+transport responses, but a `GET` is retried three times and `timeDelta()`
+consumes one call before the first attempt. The queue drained on the retry,
+`array_shift()` returned `null`, and `Client` read `$r['status']` and
+`$r['body']` off it.
+
+The consequence was worse than noise. The malformed-JSON exception raised on
+the first attempt was swallowed by the retry loop, and what finally escaped was
+the generic `OVH API request failed` built from the null response. Because the
+test only asserted that *something* was thrown, it passed — while exercising a
+path that had nothing to do with malformed JSON.
+
+Three changes:
+
+- `MockTransport::send()` throws when its queue is drained, so an unanticipated
+  call is reported as itself instead of as a downstream null dereference.
+- The test queues a response for every attempt and asserts the exception is an
+  `ApiException` whose message names malformed JSON, after exactly four calls.
+- The suite installs an error handler, collects diagnostics, and fails if any
+  were raised — so the next warning cannot quietly accumulate.
+
+Mutation-checked. Reverting the double to `null`, under-provisioning the queue,
+and removing the malformed-JSON check in `Client` each fail the suite. The
+decisive case: changing that exception's message to a generic one is caught by
+the repaired assertion and **passed** by the original — the blind spot the
+warnings were masking. The suite goes from 20 assertions with 12 diagnostics to
+22 with none.
 
 **Verification note:** `@php-wasm/cli`, the runtime used for local PHP in this environment, does not propagate PHP's exit code — `exit(1)`, fatal errors and a failing `php -l` all return shell status `0`. `scripts/release-candidate-check.sh` relies on `set -e` and is therefore only meaningful under a real PHP binary, which is what GitHub Actions uses. Local runs in a php-wasm environment must assert on command **output**, not exit status, or they will report success unconditionally.
