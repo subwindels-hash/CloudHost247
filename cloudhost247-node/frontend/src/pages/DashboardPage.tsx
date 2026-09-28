@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { apiFetch } from '../lib/api';
+import { listMyDomains, listMyServices, listMyTickets } from '../lib/account-api';
+import type { CustomerDomain, CustomerService, TicketSummary } from '../lib/account-types';
 import { usePageMeta } from '../lib/usePageMeta';
+import StatusBadge from '../components/StatusBadge';
 
 interface MeResponse {
   user: { id: string; email: string; fullName: string; role: string };
@@ -10,14 +13,19 @@ interface MeResponse {
 /**
  * The authenticated application shell's landing page. This route is wrapped in <RequireAuth />
  * (see App.tsx), so a signed-out visitor never reaches this component at all — they're redirected
- * to /login first. What's rendered here is real, server-verified account identity (via
- * /api/auth/me) plus honest "not built yet" notices for every feature area that doesn't have real
- * data behind it yet. Nothing on this page is fabricated: no invoices, balances, hosting services,
- * orders, or provisioning records exist in this system yet, so none are shown.
+ * to /login first.
+ *
+ * Phase 4: services, domains, and support tickets are now real, API-backed summaries (see
+ * docs/API_CUSTOMER_APP.md) rather than placeholders. Billing/invoices remain an honest "not
+ * available yet" notice — this platform has no payment/billing system, and Phase 4 explicitly
+ * does not add one (see the non-goals list in docs/API_CUSTOMER_APP.md).
  */
 export default function DashboardPage() {
   usePageMeta('Dashboard', 'Your CloudHost247 account overview.');
   const [me, setMe] = useState<MeResponse['user'] | null>(null);
+  const [services, setServices] = useState<CustomerService[] | 'loading' | 'error'>('loading');
+  const [domains, setDomains] = useState<CustomerDomain[] | 'loading' | 'error'>('loading');
+  const [tickets, setTickets] = useState<TicketSummary[] | 'loading' | 'error'>('loading');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -37,6 +45,22 @@ export default function DashboardPage() {
     };
   }, [navigate]);
 
+  useEffect(() => {
+    let cancelled = false;
+    listMyServices()
+      .then((res) => !cancelled && setServices(res.services))
+      .catch(() => !cancelled && setServices('error'));
+    listMyDomains()
+      .then((res) => !cancelled && setDomains(res.domains))
+      .catch(() => !cancelled && setDomains('error'));
+    listMyTickets()
+      .then((res) => !cancelled && setTickets(res.tickets))
+      .catch(() => !cancelled && setTickets('error'));
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   if (!me) {
     return (
       <div className="ch247-card">
@@ -45,40 +69,84 @@ export default function DashboardPage() {
     );
   }
 
+  const openTicketCount = Array.isArray(tickets) ? tickets.filter((t) => t.status !== 'closed').length : null;
+
   return (
-    <div>
-      <section className="ch247-card">
+    <div className="ch247-stack">
+      <div className="ch247-card">
         <h1>Welcome back, {me.fullName}</h1>
         <p>
           Signed in as <strong>{me.email}</strong> — role: {me.role}
         </p>
-      </section>
+      </div>
 
-      <section className="ch247-card">
+      <div className="ch247-card">
         <h2>Hosting services</h2>
-        <p className="ch247-placeholder-notice">
-          Service provisioning hasn't been migrated to this platform yet, so no services are listed
-          here. Your existing hosting continues to run unaffected, managed through the current
-          client area, until this feature ships on this platform.
+        {services === 'loading' && <p className="ch247-page__hint">Loading…</p>}
+        {services === 'error' && <p className="ch247-status-error">Couldn&apos;t load your services right now.</p>}
+        {Array.isArray(services) && services.length === 0 && (
+          <p className="ch247-page__hint">No services have been added to your account yet.</p>
+        )}
+        {Array.isArray(services) && services.length > 0 && (
+          <ul className="ch247-thread" style={{ margin: 0 }}>
+            {services.slice(0, 3).map((service) => (
+              <li key={service.id} className="ch247-inline-actions">
+                <span>{service.label}</span>
+                <StatusBadge status={service.status} />
+              </li>
+            ))}
+          </ul>
+        )}
+        <p className="ch247-page__hint">
+          <Link to="/services">View all services →</Link>
         </p>
-      </section>
+      </div>
 
-      <section className="ch247-card">
+      <div className="ch247-card">
         <h2>Billing &amp; invoices</h2>
         <p className="ch247-placeholder-notice">
-          Billing and invoicing haven't been migrated to this platform yet — this app has no
+          Billing and invoicing haven&apos;t been migrated to this platform yet — this app has no
           connection to real billing data, so no balance, invoice, or payment history is shown
           here rather than an invented one. Use the current client area for billing.
         </p>
-      </section>
+      </div>
 
-      <section className="ch247-card">
+      <div className="ch247-card">
         <h2>Domains</h2>
-        <p className="ch247-placeholder-notice">
-          Domain management hasn't been migrated to this platform yet. See{' '}
-          <Link to="/account/domains">My Domains</Link> for the current status of this feature.
+        {domains === 'loading' && <p className="ch247-page__hint">Loading…</p>}
+        {domains === 'error' && <p className="ch247-status-error">Couldn&apos;t load your domains right now.</p>}
+        {Array.isArray(domains) && domains.length === 0 && (
+          <p className="ch247-page__hint">No domains have been added to your account yet.</p>
+        )}
+        {Array.isArray(domains) && domains.length > 0 && (
+          <ul className="ch247-thread" style={{ margin: 0 }}>
+            {domains.slice(0, 3).map((domain) => (
+              <li key={domain.id} className="ch247-inline-actions">
+                <span>{domain.domainName}</span>
+                <StatusBadge status={domain.status} />
+              </li>
+            ))}
+          </ul>
+        )}
+        <p className="ch247-page__hint">
+          <Link to="/account/domains">View all domains →</Link>
         </p>
-      </section>
+      </div>
+
+      <div className="ch247-card">
+        <h2>Support</h2>
+        {tickets === 'error' && <p className="ch247-status-error">Couldn&apos;t load your tickets right now.</p>}
+        {typeof openTicketCount === 'number' && (
+          <p>
+            {openTicketCount === 0
+              ? 'You have no open support tickets.'
+              : `You have ${openTicketCount} open support ${openTicketCount === 1 ? 'ticket' : 'tickets'}.`}
+          </p>
+        )}
+        <p className="ch247-page__hint">
+          <Link to="/support">Go to Support →</Link>
+        </p>
+      </div>
     </div>
   );
 }

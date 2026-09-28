@@ -21,8 +21,14 @@ const appLinks = [
   { to: '/account/domains', label: 'My Domains' },
   { to: '/billing', label: 'Billing' },
   { to: '/invoices', label: 'Invoices' },
-  { to: '/admin', label: 'Admin' },
+  { to: '/support', label: 'Support' },
 ];
+
+// "Admin" is only ever shown to an account whose *locally cached* role is admin/super_admin —
+// purely so a customer never sees a nav link to a page that would just show "not available" (see
+// components/RequireRole.tsx). This is a UX nicety only; the real authorization check happens
+// server-side on every admin API call regardless of what this header renders.
+const STAFF_ROLES = ['admin', 'super_admin'];
 
 export default function Header() {
   const { token, user } = useAuthState();
@@ -111,6 +117,11 @@ export default function Header() {
                 {link.label}
               </NavLink>
             ))}
+            {user && STAFF_ROLES.includes(user.role) && (
+              <NavLink to="/admin" onClick={closeMenu}>
+                Admin
+              </NavLink>
+            )}
           </nav>
         </div>
       )}

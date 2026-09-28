@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom';
 import Layout from './layout/Layout';
 import RequireAuth from './components/RequireAuth';
+import RequireRole from './components/RequireRole';
 import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
 import HostingPage from './pages/HostingPage';
@@ -20,7 +21,11 @@ import DomainsPage from './pages/DomainsPage';
 import BillingPage from './pages/BillingPage';
 import InvoicesPage from './pages/InvoicesPage';
 import SupportPage from './pages/SupportPage';
+import SupportTicketPage from './pages/SupportTicketPage';
 import AdminPage from './pages/AdminPage';
+import AdminCustomerDetailPage from './pages/AdminCustomerDetailPage';
+import AdminTicketsPage from './pages/AdminTicketsPage';
+import AdminTicketDetailPage from './pages/AdminTicketDetailPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 export default function App() {
@@ -36,7 +41,6 @@ export default function App() {
         <Route path="/domains" element={<DomainsMarketingPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/faq" element={<FaqPage />} />
-        <Route path="/support" element={<SupportPage />} />
         <Route path="/legal" element={<LegalIndexPage />} />
         <Route path="/legal/privacy-policy" element={<PrivacyPolicyPage />} />
 
@@ -53,7 +57,18 @@ export default function App() {
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/billing" element={<BillingPage />} />
           <Route path="/invoices" element={<InvoicesPage />} />
-          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/support" element={<SupportPage />} />
+          <Route path="/support/:id" element={<SupportTicketPage />} />
+
+          {/* Staff-only (admin + super_admin) customer/ticket management. RequireRole is a
+              frontend convenience only — every route it guards independently re-verifies the
+              caller's role server-side (see components/RequireRole.tsx). */}
+          <Route element={<RequireRole roles={['admin', 'super_admin']} />}>
+            <Route path="/admin" element={<AdminPage />} />
+            <Route path="/admin/customers/:id" element={<AdminCustomerDetailPage />} />
+            <Route path="/admin/tickets" element={<AdminTicketsPage />} />
+            <Route path="/admin/tickets/:id" element={<AdminTicketDetailPage />} />
+          </Route>
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />
