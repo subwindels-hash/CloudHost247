@@ -115,7 +115,7 @@ I. COMPATIBILITY
 
 - WHMCS 8.9
 - PHP 7.4+
-- Works with HostX theme
+- Works with the legacy CloudHost247 theme
 - No blank pages or fatal errors
 
 J. EXTRA FEATURES

@@ -2,7 +2,7 @@ Create a reusable Announcement Bar that displays scrolling messages at the top o
 
 Requirements:
 
-Create a file: /templates/hostx/includes/announcementbar.tpl
+Create a file: /templates/cloudhost247_legacy/includes/announcementbar.tpl
 Use only Smarty + HTML + CSS (optional minimal JS if needed)
 Integrate it into the main layout (header.tpl) so it appears ABOVE the navbar
 Display multiple announcement messages from a Smarty variable (array of messages with text + optional link)
@@ -13,7 +13,7 @@ On hover, pause the scrolling animation (animation-play-state: paused)
 Each message should be clickable if it has a URL
 Fully responsive for mobile, tablet, and desktop
 Prevent text overflow and layout breaking
-Keep design clean, modern, and consistent with WHMCS Hostx theme
+Keep design clean, modern, and consistent with the WHMCS legacy CloudHost247 theme
 
 Output:
 

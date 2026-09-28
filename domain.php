@@ -8,6 +8,6 @@ $ca->setPageTitle('Domain');
 $ca->addToBreadCrumb('index.php', Lang::trans('globalsystemname'));
 $ca->addToBreadCrumb('domain.php', 'Domain');
 $ca->initPage();
-$ca->assign('sidebarHostxRemove', 'true');
-$ca->setTemplate('hostx');
+$ca->assign('sidebarCloudHost247Remove', 'true');
+$ca->setTemplate('cloudhost247_legacy');
 $ca->output();

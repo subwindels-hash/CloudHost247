@@ -56,7 +56,7 @@ Run them under the staging account, use absolute paths, protect logs, and do not
 * Foundation checks report WHMCS, Capsule, cURL, JSON, OpenSSL and randomness.
 * All migration versions are present once; activation repeated is a no-op.
 * Original checksum manifest verifies and legacy modules remain inactive.
-* CloudHost247 theme/cart resolve with no HostX include or licence request.
+* CloudHost247 theme/cart resolve with no legacy-vendor include or licence request.
 * Currency manual dry observation succeeds/fails atomically and protected tables are unchanged.
 * OVH `/me` succeeds with redacted logs; catalog reads work before any order mutation.
 * Test mail/payment callbacks cannot reach production.

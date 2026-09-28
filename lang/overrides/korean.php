@@ -94,8 +94,8 @@ $_LANG = json_decode('{
   "homewordpresshostingtext": "대부분의 Dedibox 서버는 RAID를 지원하여 안정성과 성능을 제공합니다.",
   "homecloudhosting": "클라우드 호스팅",
   "homecloudhostingtext": "우리의 기술 지원은 티켓과 전화로 24 시간 연중 무휴로 프랑스어, 영어, 독일어로 제공됩니다.",
-  "homehostxwebhost": "CloudHost247 웹 호스팅",
-  "homehostxwebhosttext": "수상 경력에 빛나는 연중 무휴 24 시간 지원을 통해 다음 서버, 사이트, 앱, 플랫폼 또는 블로그를위한 완벽한 호스팅 계획을 수립했습니다.",
+  "homecloudhost247webhost": "CloudHost247 웹 호스팅",
+  "homecloudhost247webhosttext": "수상 경력에 빛나는 연중 무휴 24 시간 지원을 통해 다음 서버, 사이트, 앱, 플랫폼 또는 블로그를위한 완벽한 호스팅 계획을 수립했습니다.",
   "homestartup": "리눅스 호스팅",
   "homesplan2": "vps 호스팅",
   "homesplan3": "전용 서버",
@@ -570,7 +570,7 @@ $_LANG['antiddosprotection'] = "Keep your dedicated infrastructures protected ag
 /* for v2.2.0 */
 $_LANG['contactuspagemainhead'] = "문의하기";
 $_LANG['contactuspagemainsubhead'] = "자세한 내용은";
-$_LANG['contactuscompanyname'] = "Hostx Pvt Ltd.";
+$_LANG['contactuscompanyname'] = "CloudHost247 Pvt Ltd.";
 $_LANG['contactusaddress'] = "abcdd, Phase 123, IND Area <br> 호텔 Abcd 근처, <br> XYZ, XYZ, XYZ 123456";
 $_LANG['contactushotlinesale'] = "<b> 핫라인 : </ b> +91 8360944358";
 $_LANG['contactusbusinesshoursale'] = "<b> 서비스 </ b> 시간 : 9:00 – 18:00 (월 – 토요일)";

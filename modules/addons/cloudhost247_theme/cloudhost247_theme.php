@@ -29,7 +29,7 @@ function cloudhost247_theme_output($vars)
 {
     $view = (new AdminController(new ThemeRepository()))->handle();
     $e = function ($v) { return htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8'); };
-    echo '<div class="ch247-admin"><h2>CloudHost247 Theme Manager</h2><p class="alert alert-info">Independent theme manager. Every published item is supplied to the CloudHost247 client theme; no HostX runtime or licence is used.</p>';
+    echo '<div class="ch247-admin"><h2>CloudHost247 Theme Manager</h2><p class="alert alert-info">Independent theme manager. Every published item is supplied to the CloudHost247 client theme; no CloudHost247 runtime or licence is used.</p>';
     if ($view['notice']) echo '<div class="alert alert-success">' . $e($view['notice']) . '</div>';
     if ($view['error']) echo '<div class="alert alert-danger">' . $e($view['error']) . '</div>';
     echo '<ul class="nav nav-tabs"><li class="active"><a data-toggle="tab" href="#brand">Brand & layout</a></li><li><a data-toggle="tab" href="#content">Content manager</a></li><li><a data-toggle="tab" href="#inventory">Published inventory</a></li><li><a data-toggle="tab" href="#cms-audit">Audit history</a></li></ul><div class="tab-content" style="padding-top:20px">';

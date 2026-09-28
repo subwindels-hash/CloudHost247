@@ -98,8 +98,8 @@ if (!defined("WHMCS")) die("This file cannot be accessed directly");
   "homewordpresshostingtext": "A Dedibox szerverek többsége támogatja a RAID szolgáltatást, amely megbízhatóságot és teljesítményt nyújt",
   "homecloudhosting": "Cloud Hosting",
   "homecloudhostingtext": "Technikai segítségnyújtásunk a nap 24 órájában, heti 7 napon, jegy és telefon, francia, angol és német nyelven áll rendelkezésre",
-  "homehostxwebhost": "CloudHost247 Webtárhely",
-  "homehostxwebhosttext": "Megvan a tökéletes kiszolgálási terv a következő kiszolgálón, webhelyen, alkalmazásnál, platformon vagy blogon - mindezt a díjnyertes 24/7 támogatás.",
+  "homecloudhost247webhost": "CloudHost247 Webtárhely",
+  "homecloudhost247webhosttext": "Megvan a tökéletes kiszolgálási terv a következő kiszolgálón, webhelyen, alkalmazásnál, platformon vagy blogon - mindezt a díjnyertes 24/7 támogatás.",
   "homestartup": "linux tárhely",
   "homesplan2": "vps hosting",
   "homesplan3": "dedikált szerver",
@@ -557,7 +557,7 @@ $_LANG['antiddosprotection'] = "Keep your dedicated infrastructures protected ag
 /* for v2.2.0 */
 $_LANG['contactuspagemainhead'] = "Lépjen kapcsolatba velünk";
 $_LANG['contactuspagemainsubhead'] = "további információért";
-$_LANG['contactuscompanyname'] = "Hostx Pvt Ltd.";
+$_LANG['contactuscompanyname'] = "CloudHost247 Pvt Ltd.";
 $_LANG['contactusaddress'] = "abcdd, Phase 123, IND körzet - Hotel Abcd közelében, <br> XYZ, XYZ, XYZ 123456";
 $_LANG['contactushotlinesale'] = "<b> Forródrót: </b> +91 8360944358";
 $_LANG['contactusbusinesshoursale'] = "<b> Szolgáltatás </b> Órák: 9:00 - 18:00 (hétfőtől szombatig)";

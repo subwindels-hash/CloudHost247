@@ -95,8 +95,8 @@ $_LANG = json_decode('{
   "homewordpresshostingtext": "רוב שרתי Dedibox תומכים ב- RAID, ומספקים אמינות וביצועים",
   "homecloudhosting": "אירוח ענן",
   "homecloudhostingtext": "סיוע טכני שלנו זמין 24 שעות ביממה, 7 ימים בשבוע על ידי כרטיס טלפון, בצרפתית, אנגלית וגרמנית",
-  "homehostxwebhost": "אירוח אתרים",
-  "homehostxwebhosttext": "יש לנו תוכנית אירוח מושלמת לשרת הבא שלך, האתר, האפליקציה, הפלטפורמה או הבלוג - כולם מגובים בתמיכתך הזוכה 24 שעות ביממה.",
+  "homecloudhost247webhost": "אירוח אתרים",
+  "homecloudhost247webhosttext": "יש לנו תוכנית אירוח מושלמת לשרת הבא שלך, האתר, האפליקציה, הפלטפורמה או הבלוג - כולם מגובים בתמיכתך הזוכה 24 שעות ביממה.",
   "homestartup": "אירוח",
   "homesplan2": "אירוח",
   "homesplan3": "שרת ייעודי",
@@ -616,7 +616,7 @@ $_LANG['antiddosprotection'] = "Keep your dedicated infrastructures protected ag
 /* for v2.2.0 */
 $_LANG['contactuspagemainhead'] = "צור קשר";
 $_LANG['contactuspagemainsubhead'] = "למידע נוסף";
-$_LANG['contactuscompanyname'] = "Hostx Pvt בעמ";
+$_LANG['contactuscompanyname'] = "CloudHost247 Pvt בעמ";
 $_LANG['contactusaddress'] = "abcdd, שלב 123, אזור IND - מלונות ליד בית Abcd, XYZ, XYZ, XYZ 123456";
 $_LANG['contactushotlinesale'] = "<b> קו חם: </b> +91 8360944358";
 $_LANG['contactusbusinesshoursale'] = "<b> שירות </ b> שעות: 9:00 - 18:00 (שני - שבת)";

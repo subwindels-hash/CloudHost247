@@ -11,7 +11,7 @@ use CloudHost247\Builder\Support\BuilderException;
  * Theme parts: global headers, footers and layout templates.
  *
  * Parts are additive. They are rendered by the builder's own page renderer and
- * by an optional client-area hook; no HostX template file is read, written or
+ * by an optional client-area hook; no CloudHost247 template file is read, written or
  * replaced by this service, and a site with no published parts behaves exactly
  * as it did before the module was installed.
  *

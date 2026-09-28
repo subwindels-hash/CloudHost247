@@ -1,6 +1,6 @@
 {* ════════════════════════════════════════════════════════════ *}
-{*   HostX Theme — Header Integration Snippet                     *}
-{*   Add this to: /templates/hostx/header.tpl                    *}
+{*   CloudHost247 Legacy Theme — Header Integration Snippet               *}
+{*   Add this to: /templates/cloudhost247_legacy/header.tpl                    *}
 {*   Place it directly after the <body> tag and BEFORE navbar   *}
 {* ════════════════════════════════════════════════════════════ *}
 

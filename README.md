@@ -16,7 +16,7 @@ of this repository **into** an existing WHMCS installation root (cPanel
 ```
 /                                   ← WHMCS document root (cPanel public_html)
 ├── *.php                           ← 46 client-area pages
-│   │                                  (28 HostX theme pages: aboutus, vps-hosting,
+│   │                                  (28 legacy theme pages: aboutus, vps-hosting,
 │   │                                   cpanel-hosting, blog, ssl-certificate, …
 │   │                                   + 18 CloudHost247 legal/policy pages:
 │   │                                   refund-policy, privacy-policy, terms-of-service,
@@ -27,13 +27,14 @@ of this repository **into** an existing WHMCS installation root (cPanel
 │   ├── getServer.php
 │   └── priceSync.php
 ├── lang/overrides/                 ← 27 language override files
-│   └── english.php                    (HostX theme strings + OVH order-form strings)
+│   └── english.php                    (legacy theme strings + OVH order-form strings)
 ├── modules/
 │   ├── addons/                     ← Addon modules (WHMCS → System Settings → Addon Modules)
-│   │   ├── hostx/                     HostX theme helper module (ionCube) — REQUIRED by the theme
-│   │   ├── cloudhost247_tools/               HostX Tools Platform v2.2.6 (60+ online tools)
+│   │   ├── hostx/                     Legacy theme helper module (ionCube; name retained by its
+│   │   │                                encoded entry point) — REQUIRED by the legacy theme
+│   │   ├── cloudhost247_tools/               CloudHost247 Tools Platform v2.2.6 (60+ online tools)
 │   │   ├── CloudHost247_tools/        Same platform, CloudHost247-branded build (activate only ONE of the two)
-│   │   ├── cloudhost247_domain_lookup/       HostX Domain Lookup (4-tool WHOIS/IP/DNS/availability build,
+│   │   ├── cloudhost247_domain_lookup/       CloudHost247 Domain Lookup (4-tool WHOIS/IP/DNS/availability build,
 │   │   │                              renamed from a second "cloudhost247_tools" build — see module README)
 │   │   ├── tools_center/              WHMCS Tools Center (UI addon + external-api backend —
 │   │   │                              deploy external-api/ separately per its INSTALL.md)
@@ -41,7 +42,8 @@ of this repository **into** an existing WHMCS installation root (cPanel
 │   │   ├── customaffiliate/           Custom affiliate commission engine
 │   │   ├── digitalproducts/           Digital products marketplace / secure downloads
 │   │   ├── phoneservices/             Phone number platform (Twilio/Telnyx style)
-│   │   ├── smmaddon/                  SMM panel integration (admin part)
+│   │   ├── smmaddon/                  SMM panel integration, basic prototype (superseded)
+│   │   ├── cloudhost247_smm/          CloudHost247 SMM marketplace (multi-provider; supersedes smmaddon)
 │   │   ├── soyoustart/                OVH/SoYouStart admin suite (WGS-OVH v8.0.8)
 │   │   └── xtreme_currency_rates/     Xtreme Currency Rates (ionCube)
 │   ├── gateways/                   ← Payment gateway modules
@@ -54,12 +56,14 @@ of this repository **into** an existing WHMCS installation root (cPanel
 │       ├── soyoustart/                SoYouStart dedicated server provisioning
 │       ├── soyoustart_vps/            SoYouStart VPS provisioning
 │       ├── cloudhost247_email/               Email hosting provisioning (M365/GWorkspace/Pro)
-│       └── smmprovisioning/           SMM panel order automation
+│       ├── smmprovisioning/           SMM panel order automation (superseded by cloudhost247_smm)
+│       └── cloudhost247_smm/          CloudHost247 SMM marketplace provisioning (payment-gated, idempotent)
 ├── templates/
-│   ├── hostx/                      ← HostX theme (WHMCS Global Services)
+│   ├── cloudhost247/                ← CloudHost247 independent theme (child of twenty-one)
+│   ├── cloudhost247_legacy/         ← CloudHost247 legacy theme (WHMCS Global Services)
 │   │   ├── *.tpl                      ~130 theme pages (incl. 18 policy pages)
 │   │   ├── includes/                  shared partials + blocks (70+ layout blocks)
-│   │   ├── hostx_includes/            mega-menu, side-menu, SEO, live-chat partials
+│   │   ├── cloudhost247_legacy_includes/            mega-menu, side-menu, SEO, live-chat partials
 │   │   ├── css/ js/ fonts/ webfonts/  theme assets
 │   │   ├── images/ img/ flags/        theme graphics, sprites, country flags
 │   │   ├── domain_icons/ banners/ caticons/ og_images/ testimonial_images/
@@ -67,7 +71,8 @@ of this repository **into** an existing WHMCS installation root (cPanel
 │   │   ├── store/ oauth/ payment/     MarketConnect store, OAuth, payment partials
 │   │   └── marketconnect/             MarketConnect product artwork
 │   └── orderforms/                 ← Order form templates (WHMCS → Setup → Order Forms)
-│       ├── hostx/                     HostX order form (primary)
+│       ├── cloudhost247/              CloudHost247 order form (new build)
+│       ├── cloudhost247_legacy/       CloudHost247 legacy order form (primary today)
 │       └── ovh_cart/                  OVH order form (standard_cart child, for SoYouStart)
 └── docs/                           ← All documentation
     ├── RESTRUCTURING.md               full old→new mapping of this cleanup
@@ -80,16 +85,17 @@ of this repository **into** an existing WHMCS installation root (cPanel
 
 | Module | Type | Location |
 |---|---|---|
-| HostX (theme helper) | addon | `modules/addons/hostx/` |
-| HostX Tools Platform v2.2.6 | addon | `modules/addons/cloudhost247_tools/` |
+| CloudHost247 (theme helper) | addon | `modules/addons/hostx/` |
+| CloudHost247 Tools Platform v2.2.6 | addon | `modules/addons/cloudhost247_tools/` |
 | CloudHost247 Tools Platform (rebrand) | addon | `modules/addons/CloudHost247_tools/` |
-| HostX Domain Lookup | addon | `modules/addons/cloudhost247_domain_lookup/` |
+| CloudHost247 Domain Lookup | addon | `modules/addons/cloudhost247_domain_lookup/` |
 | Tools Center (+ external API) | addon | `modules/addons/tools_center/` |
 | DNS Checker | addon | `modules/addons/dnschecker/` |
 | Custom Affiliate | addon | `modules/addons/customaffiliate/` |
 | Digital Products Marketplace | addon | `modules/addons/digitalproducts/` |
 | Phone Number Platform | addon | `modules/addons/phoneservices/` |
-| SMM Addon | addon | `modules/addons/smmaddon/` |
+| SMM Addon (prototype) | addon | `modules/addons/smmaddon/` |
+| CloudHost247 SMM Marketplace | addon + server | `modules/addons/cloudhost247_smm/` + `modules/servers/cloudhost247_smm/` (multi-provider, cron `crons/cloudhost247_smm.php`) |
 | SoYouStart admin suite | addon | `modules/addons/soyoustart/` |
 | Xtreme Currency Rates 6.0 | addon | `modules/addons/xtreme_currency_rates/` |
 | Blockonomics | gateway | `modules/gateways/blockonomics.php` (+ `blockonomics/`, `callback/`) |
@@ -97,8 +103,8 @@ of this repository **into** an existing WHMCS installation root (cPanel
 | Smtphosting v3 | server | `modules/servers/Smtphosting/` |
 | SoYouStart (dedicated) | server | `modules/servers/soyoustart/` |
 | SoYouStart VPS | server | `modules/servers/soyoustart_vps/` |
-| HostX Email Hosting | server | `modules/servers/cloudhost247_email/` |
-| SMM Provisioning | server | `modules/servers/smmprovisioning/` |
+| CloudHost247 Email Hosting | server | `modules/servers/cloudhost247_email/` |
+| SMM Provisioning (prototype) | server | `modules/servers/smmprovisioning/` |
 
 **Notes**
 - `cloudhost247_tools` and `CloudHost247_tools` are two brandings of the same platform —
@@ -182,7 +188,7 @@ Builder**: pages, templates, theme parts, navigation menus, global styles, a
 media library, forms, SEO settings, custom CSS and revision history, all driven
 by one versioned page schema.
 
-- It is additive. No HostX template file is read, written or replaced; builder
+- It is additive. No CloudHost247 template file is read, written or replaced; builder
   pages render inside the active client area theme, and the existing branding,
   navigation, cart, checkout, login and registration are untouched.
 - Hosting plans, product cards, order buttons, domain search and pricing, the
@@ -205,9 +211,9 @@ inventory.
 
 ## Runtime requirements (deployment target)
 
-- WHMCS 8.x (order form `templates/orderforms/hostx` requires WHMCS 8.1+,
-  error pages `templates/hostx/error/` require WHMCS 8.8+)
-- PHP 7.4–8.2 with **ionCube Loader** (the `hostx` addon and
+- WHMCS 8.x (order form `templates/orderforms/cloudhost247_legacy` requires WHMCS 8.1+,
+  error pages `templates/cloudhost247_legacy/error/` require WHMCS 8.8+)
+- PHP 7.4–8.2 with **ionCube Loader** (the legacy `hostx` addon and
   `xtreme_currency_rates` are encoded), cURL, JSON, PDO, OpenSSL
 - `templates/orderforms/ovh_cart/` falls back to WHMCS core `standard_cart`
   templates — a stock WHMCS installation provides them.

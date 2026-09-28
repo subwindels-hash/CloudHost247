@@ -1,6 +1,6 @@
 # `pages.zip` safe integration review
 
-The archive was inspected and extracted to an isolated temporary directory before comparison. No archive file was blindly copied. All 38 files already have an established destination in the repository. Current hardened controllers were retained where archive copies were weaker; protected HostX templates were not modified. The archive is not referenced at runtime and can be removed after verification.
+The archive was inspected and extracted to an isolated temporary directory before comparison. No archive file was blindly copied. All 38 files already have an established destination in the repository. Current hardened controllers were retained where archive copies were weaker; protected CloudHost247 templates were not modified. The archive is not referenced at runtime and can be removed after verification.
 
 ## PHP controllers
 
@@ -37,33 +37,33 @@ Destination for each `PHP/*` entry is the same filename at the WHMCS document ro
 
 The comparison found no safe missing controller behavior requiring a merge.
 
-## Protected HostX templates
+## Protected CloudHost247 templates
 
-Each `TPL/*` archive entry maps to the existing `templates/hostx/<filename>` path. These files are protected by the proprietary checksum manifest and were left unchanged.
+Each `TPL/*` archive entry maps to the existing `templates/cloudhost247_legacy/<filename>` path. These files are protected by the proprietary checksum manifest and were left unchanged.
 
 ### Already identical — no write required
 
-- `TPL/acceptableusepolicy.tpl` → `templates/hostx/acceptableusepolicy.tpl`
-- `TPL/dataprotectionstandards.tpl` → `templates/hostx/dataprotectionstandards.tpl`
-- `TPL/domainagreement.tpl` → `templates/hostx/domainagreement.tpl`
-- `TPL/domainregistrationaddendum.tpl` → `templates/hostx/domainregistrationaddendum.tpl`
-- `TPL/fairusagepolicy.tpl` → `templates/hostx/fairusagepolicy.tpl`
-- `TPL/faqs.tpl` → `templates/hostx/faqs.tpl`
-- `TPL/helpcenter.tpl` → `templates/hostx/helpcenter.tpl`
-- `TPL/legal.tpl` → `templates/hostx/legal.tpl`
-- `TPL/legalnotice.tpl` → `templates/hostx/legalnotice.tpl`
-- `TPL/privacypolicy.tpl` → `templates/hostx/privacypolicy.tpl`
-- `TPL/termsofservice.tpl` → `templates/hostx/termsofservice.tpl`
+- `TPL/acceptableusepolicy.tpl` → `templates/cloudhost247_legacy/acceptableusepolicy.tpl`
+- `TPL/dataprotectionstandards.tpl` → `templates/cloudhost247_legacy/dataprotectionstandards.tpl`
+- `TPL/domainagreement.tpl` → `templates/cloudhost247_legacy/domainagreement.tpl`
+- `TPL/domainregistrationaddendum.tpl` → `templates/cloudhost247_legacy/domainregistrationaddendum.tpl`
+- `TPL/fairusagepolicy.tpl` → `templates/cloudhost247_legacy/fairusagepolicy.tpl`
+- `TPL/faqs.tpl` → `templates/cloudhost247_legacy/faqs.tpl`
+- `TPL/helpcenter.tpl` → `templates/cloudhost247_legacy/helpcenter.tpl`
+- `TPL/legal.tpl` → `templates/cloudhost247_legacy/legal.tpl`
+- `TPL/legalnotice.tpl` → `templates/cloudhost247_legacy/legalnotice.tpl`
+- `TPL/privacypolicy.tpl` → `templates/cloudhost247_legacy/privacypolicy.tpl`
+- `TPL/termsofservice.tpl` → `templates/cloudhost247_legacy/termsofservice.tpl`
 
 ### Differing protected files — existing version retained
 
-- `TPL/backuppolicy.tpl` → `templates/hostx/backuppolicy.tpl`
-- `TPL/cookiepolicy.tpl` → `templates/hostx/cookiepolicy.tpl`
-- `TPL/cybercrimepolicy.tpl` → `templates/hostx/cybercrimepolicy.tpl`
-- `TPL/datadeletion.tpl` → `templates/hostx/datadeletion.tpl`
-- `TPL/dataprivacynoticeandconsentform.tpl` → `templates/hostx/dataprivacynoticeandconsentform.tpl`
-- `TPL/domainrenewalpolicy.tpl` → `templates/hostx/domainrenewalpolicy.tpl`
-- `TPL/refundpolicy.tpl` → `templates/hostx/refundpolicy.tpl`
-- `TPL/trademarkpolicy.tpl` → `templates/hostx/trademarkpolicy.tpl`
+- `TPL/backuppolicy.tpl` → `templates/cloudhost247_legacy/backuppolicy.tpl`
+- `TPL/cookiepolicy.tpl` → `templates/cloudhost247_legacy/cookiepolicy.tpl`
+- `TPL/cybercrimepolicy.tpl` → `templates/cloudhost247_legacy/cybercrimepolicy.tpl`
+- `TPL/datadeletion.tpl` → `templates/cloudhost247_legacy/datadeletion.tpl`
+- `TPL/dataprivacynoticeandconsentform.tpl` → `templates/cloudhost247_legacy/dataprivacynoticeandconsentform.tpl`
+- `TPL/domainrenewalpolicy.tpl` → `templates/cloudhost247_legacy/domainrenewalpolicy.tpl`
+- `TPL/refundpolicy.tpl` → `templates/cloudhost247_legacy/refundpolicy.tpl`
+- `TPL/trademarkpolicy.tpl` → `templates/cloudhost247_legacy/trademarkpolicy.tpl`
 
 No protected template was overwritten, merged, reformatted, or activated differently. This review does not grant redistribution or activation rights.

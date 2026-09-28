@@ -8,6 +8,6 @@ $ca->setPageTitle('Future-Element');
 $ca->addToBreadCrumb('index.php', Lang::trans('globalsystemname'));
 $ca->addToBreadCrumb('future-element.php', 'Future-Element');
 $ca->initPage();
-$ca->assign('sidebarHostxRemove', 'true');
+$ca->assign('sidebarCloudHost247Remove', 'true');
 $ca->setTemplate('future-element');
 $ca->output();

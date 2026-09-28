@@ -8,6 +8,6 @@ $ca->setPageTitle('Enterprise Servers');
 $ca->addToBreadCrumb('index.php', Lang::trans('globalsystemname'));
 $ca->addToBreadCrumb('enterpriseservers.php', 'Enterprise Servers');
 $ca->initPage();
-$ca->assign('sidebarHostxRemove', 'true');
-$ca->setTemplate('hostx');
+$ca->assign('sidebarCloudHost247Remove', 'true');
+$ca->setTemplate('cloudhost247_legacy');
 $ca->output();

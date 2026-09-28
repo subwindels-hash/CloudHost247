@@ -4,7 +4,7 @@
  *
  * These only ever add to the page. They write the meta tags and stylesheet for
  * a builder page into the theme head, and the runtime script into the footer.
- * No HostX template file is read or modified, and on every page that is not a
+ * No CloudHost247 template file is read or modified, and on every page that is not a
  * builder page the hooks return an empty string, so the rest of the site --
  * the cart, checkout, login, registration and the client area -- renders
  * exactly as it did before the module existed.

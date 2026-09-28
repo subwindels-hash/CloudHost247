@@ -1,4 +1,4 @@
-Build a complete WHMCS addon module (WHMCS 8.9, PHP 7.4, IonCube 10/11) named "cloudhost247_tools" for HostX v2.2.6.
+Build a complete WHMCS addon module (WHMCS 8.9, PHP 7.4, IonCube 10/11) named "cloudhost247_tools" for the legacy CloudHost247 theme (v2.2.6).
 
 CORE REQUIREMENTS:
 
@@ -80,7 +80,7 @@ Domain Availability:
 8. COMPATIBILITY
 
 - Fully compatible with WHMCS 8.9
-- Must work with HostX theme
+- Must work with the legacy CloudHost247 theme
 - No layout breaking
 - No fatal errors on module activation
 

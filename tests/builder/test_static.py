@@ -455,7 +455,7 @@ class WebsiteBuilderStaticTests(unittest.TestCase):
     def test_no_protected_theme_file_is_referenced_for_writing(self):
         for path in PHP_SOURCES + [ROOT / 'builder-page.php']:
             code = strip_comments(path.read_text())
-            self.assertNotIn('templates/hostx', code, str(path))
+            self.assertNotIn('templates/cloudhost247_legacy', code, str(path))
             self.assertNotIn('templates/orderforms', code, str(path))
 
     # ------------------------------------------------------------------ gates

@@ -8,7 +8,7 @@ $ca->setPageTitle('Dedeicated Server');
 $ca->addToBreadCrumb('index.php', Lang::trans('globalsystemname'));
 $ca->addToBreadCrumb('dedicated-server.php', 'Dedeicated Server');
 $ca->initPage();
-$ca->assign('sidebarHostxRemove', 'true');
-$ca->setTemplate('hostx');
+$ca->assign('sidebarCloudHost247Remove', 'true');
+$ca->setTemplate('cloudhost247_legacy');
 $ca->output();
 

@@ -95,8 +95,8 @@ $_LANG = json_decode('{
   "homewordpresshostingtext": "A maioria dos servidores da Dedibox suportam RAID, fornecendo confiabilidade e desempenho",
   "homecloudhosting": "Cloud Hosting",
   "homecloudhostingtext": "Nossa assistência técnica está disponível 24 horas por dia, 7 dias por semana, por bilhete e telefone, em francês, inglês e alemão.",
-  "homehostxwebhost": "Host da Web do CloudHost247",
-  "homehostxwebhosttext": "Temos o plano de hospedagem perfeito para o seu próximo servidor, site, aplicativo, plataforma ou blog - tudo com o apoio de seu premiado suporte 24/7.",
+  "homecloudhost247webhost": "Host da Web do CloudHost247",
+  "homecloudhost247webhosttext": "Temos o plano de hospedagem perfeito para o seu próximo servidor, site, aplicativo, plataforma ou blog - tudo com o apoio de seu premiado suporte 24/7.",
   "homestartup": "hospedagem linux",
   "homesplan2": "hospedagem vps",
   "homesplan3": "servidor dedicado",
@@ -558,7 +558,7 @@ $_LANG['msisdnCodeErrorNotValid'] = "não é válido Vodacom MSISDN.";
 /* for v2.2.0 */
 $_LANG['contactuspagemainhead'] = "Contate-Nos";
 $_LANG['contactuspagemainsubhead'] = "Para maiores informações";
-$_LANG['contactuscompanyname'] = "Hostx Pvt Ltd.";
+$_LANG['contactuscompanyname'] = "CloudHost247 Pvt Ltd.";
 $_LANG['contactusaddress'] = "abcdd, Fase 123, Área IND <br> Perto do Hotel Abcd, <br> XYZ, XYZ, XYZ 123456";
 $_LANG['contactushotlinesale'] = "<b> Linha direta: </b> +91 8360944358";
 $_LANG['contactusbusinesshoursale'] = "<b> Serviço </b> Horário: 9:00 - 18:00 (Seg - Sáb)";

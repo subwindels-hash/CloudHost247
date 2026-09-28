@@ -96,8 +96,8 @@ if (!defined("WHMCS")) die("This file cannot be accessed directly");
   "homewordpresshostingtext": "De meeste Dedibox-servers ondersteunen RAID en bieden betrouwbaarheid en prestaties",
   "homecloudhosting": "Cloud Hosting",
   "homecloudhostingtext": "Onze technische assistentie is 24 uur per dag, 7 dagen per week beschikbaar per ticket en telefoon, in het Frans, Engels en Duits",
-  "homehostxwebhost": "CloudHost247 Web Hosting",
-  "homehostxwebhosttext": "We hebben het perfecte hostingplan voor uw volgende server, site, app, platform of blog. Dit alles ondersteund door uw bekroonde 24/7 ondersteuning.",
+  "homecloudhost247webhost": "CloudHost247 Web Hosting",
+  "homecloudhost247webhosttext": "We hebben het perfecte hostingplan voor uw volgende server, site, app, platform of blog. Dit alles ondersteund door uw bekroonde 24/7 ondersteuning.",
   "homestartup": "Linux hosting",
   "homesplan2": "vps hosting",
   "homesplan3": "dedicated server",
@@ -556,7 +556,7 @@ protection against all types of DDoS attack, without any limitations in terms of
 /* for v2.2.0 */
 $_LANG['contactuspagemainhead'] = "Neem contact op";
 $_LANG['contactuspagemainsubhead'] = "voor meer informatie";
-$_LANG['contactuscompanyname'] = "Hostx Pvt Ltd.";
+$_LANG['contactuscompanyname'] = "CloudHost247 Pvt Ltd.";
 $_LANG['contactusaddress'] = "abcdd, fase 123, IND-gebied <br> bij hotel Abcd, <br> XYZ, XYZ, XYZ 123456";
 $_LANG['contactushotlinesale'] = "<b> Hotline: </b> +91 8360944358";
 $_LANG['contactusbusinesshoursale'] = "<b> Service </b> Openingstijden: 9:00 - 18:00 (ma - za)";

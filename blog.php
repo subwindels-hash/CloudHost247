@@ -45,7 +45,7 @@ foreach($result as $value)
 	$blogs[] = array("id" => $id, "date" => $date, "timestamp" => $timestamp, "image" => $arrayOfSources[0], "title" => $title, "text" => $announcement, "link"=>"index.php/announcements/$id/$link.html");
 }
 $ca->assign('blogs', $blogs);
-$ca->assign('sidebarHostxRemove', 'true');
+$ca->assign('sidebarCloudHost247Remove', 'true');
 $ca->setTemplate('blog');
 
 $ca->output();

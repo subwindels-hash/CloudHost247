@@ -16,7 +16,7 @@ Quick login links (Outlook/Gmail/Webmail)
 Password reset with confirmation and visibility toggle
 DNS records table (MX, SPF, DKIM, DMARC) with one-click copy
 Individual and bulk copy buttons for DNS records
-Responsive design compatible with HostX theme
+Responsive design compatible with the legacy CloudHost247 theme
 Automation
 Auto-provisioning after invoice payment via InvoicePaid hook
 Daily status synchronization via DailyCronJob hook

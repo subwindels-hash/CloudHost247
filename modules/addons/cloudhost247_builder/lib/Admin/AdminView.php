@@ -475,7 +475,7 @@ class AdminView
             . '<h3>Menus available to these parts</h3>'
             . ($menus === '' ? '<p class="ch247b-empty">No menus yet. Create one under Navigation Menus.</p>'
                 : '<ul class="ch247b-log">' . $menus . '</ul>')
-            . '<p class="ch247b-dim">Your HostX theme files are never modified. With no published header or footer part, '
+            . '<p class="ch247b-dim">Your CloudHost247 theme files are never modified. With no published header or footer part, '
             . 'pages render inside the existing site chrome exactly as before.</p>'
             . '</section>';
     }
@@ -550,7 +550,7 @@ class AdminView
             $typeOptions .= '<option value="' . $this->e($key) . '">' . $this->e($label) . '</option>';
         }
         return '<section class="ch247b-panel"><h2>Theme Builder</h2>'
-            . '<p>Theme parts are additive layers rendered around builder pages. Your HostX theme files are never modified, '
+            . '<p>Theme parts are additive layers rendered around builder pages. Your CloudHost247 theme files are never modified, '
             . 'and a part only appears where its display conditions match.</p>'
             . ($rows === '' ? '<p class="ch247b-empty">No theme parts yet.</p>'
                 : '<table class="ch247b-table"><thead><tr><th>Part</th><th>Type</th><th>Status</th><th>Shown on</th><th>Actions</th></tr></thead><tbody>' . $rows . '</tbody></table>')

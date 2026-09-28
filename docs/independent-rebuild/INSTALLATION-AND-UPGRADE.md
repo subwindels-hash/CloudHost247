@@ -4,15 +4,15 @@
 
 ## Licence and authentication boundary
 
-The replacement installation will never request HostX, Xtreme Currency Rates, or WGS-OVH vendor licence keys. It will continue to require a valid WHMCS installation/licence and valid OVH API credentials for OVH operations.
+The replacement installation will never request CloudHost247, Xtreme Currency Rates, or WGS-OVH vendor licence keys. It will continue to require a valid WHMCS installation/licence and valid OVH API credentials for OVH operations.
 
 ## Safe preparation
 
 1. Clone production to an isolated staging installation supported by the exact WHMCS/PHP versions.
 2. Back up database and files; verify restore before activation.
-3. Keep the current `hostx`, `xtreme_currency_rates`, `soyoustart`, and `soyoustart_vps` paths unchanged for audit/rollback, but do not activate unlicensed code.
+3. Keep the current `modules/addons/hostx` (legacy page-builder helper), `xtreme_currency_rates`, `soyoustart`, and `soyoustart_vps` paths unchanged for audit/rollback, but do not activate unlicensed code.
 4. Never commit `configuration.php`, database dumps, OVH application secret/consumer key, WHMCS licence data, or API responses containing customer data.
-5. Capture metadata-only schemas and row counts for legacy `hostx*`, `mod_soyoustart*`, and `tbl_soyoustart` tables.
+5. Capture metadata-only schemas and row counts for legacy `mod_hostx_*`, `mod_soyoustart*`, and `tbl_soyoustart` tables.
 
 ## Intended install sequence
 
@@ -43,7 +43,7 @@ The Phase 1 modules now exist and can be activated on staging in this order:
 
 Activation is idempotent: migration versions are recorded in `mod_cloudhost247_migrations`. Deactivation intentionally retains all replacement data for rollback and never removes WHMCS or legacy vendor data. There is no uninstall/drop operation in Phase 1.
 
-The replacement module forms do not contain fields for HostX, Xtreme Currency Rates, or WGS-OVH licence keys. Do not enter OVH secrets until Phase 4 credential configuration is available; they must ultimately be stored through WHMCS encrypted server configuration, never in source or logs.
+The replacement module forms do not contain fields for CloudHost247, Xtreme Currency Rates, or WGS-OVH licence keys. Do not enter OVH secrets until Phase 4 credential configuration is available; they must ultimately be stored through WHMCS encrypted server configuration, never in source or logs.
 
 Run the foundation checks with:
 
@@ -61,11 +61,11 @@ Requirements: WHMCS 8.1 or later with stock `twenty-one` and `standard_cart` the
 1. Back up files/database and deploy `cloudhost247-page.php`, `templates/cloudhost247`, `templates/orderforms/cloudhost247`, and the updated `modules/addons/cloudhost247_theme`.
 2. Deactivate/reactivate Theme Manager only if its initial migration has never run; otherwise opening it uses the existing schema. No legacy table is read or changed.
 3. Configure branding and create content in **Addons → CloudHost247 Theme Manager**. Keep items as drafts until reviewed.
-4. In WHMCS general settings select **CloudHost247** as the client theme. Select **CloudHost247 Cart** for the relevant product groups/general ordering settings.
+4. In WHMCS general settings select **cloudhost247_legacy** as the client theme. Select the **cloudhost247_legacy** order form for the relevant product groups/general ordering settings.
 5. Clear WHMCS template cache. Test anonymous/authenticated pages, cart and every role on staging before cutover.
 6. For rollback, select `twenty-one` and `standard_cart` again and disable Theme Manager. Data and original themes remain intact; no database rollback is required.
 
-Do not select or activate HostX. No HostX key is requested by this installation.
+Do not select or activate the legacy page-builder helper. No vendor key is requested by this installation.
 
 ## Secure staging package (source update)
 

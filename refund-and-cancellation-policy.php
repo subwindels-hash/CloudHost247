@@ -8,6 +8,6 @@ $ca->setPageTitle('Refund and Cancellation Policy');
 $ca->addToBreadCrumb('index.php', Lang::trans('globalsystemname'));
 $ca->addToBreadCrumb('refund-and-cancellation-policy.php', 'Refund and Cancellation Policy');
 $ca->initPage();
-$ca->assign('sidebarHostxRemove', 'true');
+$ca->assign('sidebarCloudHost247Remove', 'true');
 $ca->setTemplate('refund-and-vancellation-policy');
 $ca->output();

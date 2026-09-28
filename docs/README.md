@@ -20,6 +20,6 @@ Module-specific README/INSTALL files live with their modules:
 - `modules/addons/smmaddon/README.md`
 - `modules/addons/dnschecker/README.txt`
 - `modules/servers/cloudhost247_lteproxy/README.md`
-- `templates/hostx/README.md` (original theme note)
+- `templates/cloudhost247_legacy/README.md` (original theme note)
 - `modules/addons/cloudhost247_integrations/` (central API & Integrations centre — see `docs/independent-rebuild/API-INTEGRATIONS.md`)
 - `modules/addons/cloudhost247_modules/` (Super Admin Module Manager — see `docs/independent-rebuild/MODULE-MANAGER.md`)
