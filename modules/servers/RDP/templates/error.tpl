@@ -1,0 +1,1 @@
+<div class="alert alert-warning ch247-rdp-error" role="alert" aria-live="polite"><h2>RDP service information unavailable</h2><p>{$rdpError|escape}</p><p><a class="btn btn-default" href="submitticket.php">Contact support</a></p></div><link rel="stylesheet" href="modules/servers/RDP/assets/css/client.css">

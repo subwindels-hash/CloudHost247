@@ -1,0 +1,10 @@
+name: "CloudHost247"
+description: "Independent CloudHost247 client-area child theme"
+author: "CloudHost247"
+config:
+  parent: twenty-one
+dependencies:
+  bootstrap: 4.5.2
+provides:
+  jquery: 1.12
+  fontawesome: 5

@@ -1,0 +1,9 @@
+name: "CloudHost247 Cart"
+description: "CloudHost247 checkout styling with WHMCS standard cart inheritance"
+author: "CloudHost247"
+config:
+  parent: standard_cart
+dependencies:
+  bootstrap: 4
+  jquery: 1.12
+  fontawesome: 5

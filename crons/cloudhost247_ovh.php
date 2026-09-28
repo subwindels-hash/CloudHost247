@@ -1,0 +1,3 @@
+<?php
+if(PHP_SAPI!=='cli'){http_response_code(403);exit('CLI only');}$root=dirname(__DIR__);require $root.'/init.php';require_once $root.'/modules/addons/cloudhost247_ovh/bootstrap.php';
+try{$resolver=new \CloudHost247\Ovh\Services\ConnectionResolver();$ids=\WHMCS\Database\Capsule::table('mod_cloudhost247_ovh_endpoints')->where('enabled',1)->pluck('id');$all=array('orders'=>(new \CloudHost247\Ovh\Reconciliation\OrderPoller($resolver))->pollPending(),'services'=>array());foreach($ids as$id)$all['services'][$id]=(new \CloudHost247\Ovh\Services\Synchronizer($resolver))->services($id);fwrite(STDOUT,json_encode($all).PHP_EOL);exit(0);}catch(\Throwable$e){fwrite(STDERR,'OVH synchronization failed: '.$e->getMessage().PHP_EOL);exit(1);}

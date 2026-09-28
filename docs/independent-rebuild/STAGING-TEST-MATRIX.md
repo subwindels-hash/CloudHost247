@@ -1,0 +1,147 @@
+# Executable staging test and evidence matrix
+
+Every row starts **BLOCKED — STAGING REQUIRED**. Replace status only after execution on the recorded environment. Evidence must contain: test ID, UTC time, exact commit, WHMCS/PHP/database versions, administrator/test-client identity (non-sensitive ID only), action, expected result, actual result, PASS/FAIL/PARTIAL/BLOCKED, redacted logs/API evidence, screenshot path where applicable, before/after database impact, and cleanup/rollback result.
+
+## Environment record
+
+| Field | Value |
+|---|---|
+| Commit | |
+| Staging hostname/System URL | |
+| WHMCS exact version | |
+| PHP/FPM and CLI versions | |
+| Database/version/sql_mode | |
+| Browser/device matrix | |
+| OVH region/test-account label | |
+| Backup IDs and restore proof | |
+| Tester and UTC window | |
+
+## WHMCS and client area
+
+| ID | Test | Expected | Status |
+|---|---|---|---|
+| W-001 | Login/logout, valid and invalid credentials | Native WHMCS authentication/session behavior; no bypass | BLOCKED — STAGING REQUIRED |
+| W-002 | Registration and email validation | Native validation/CSRF and expected account state | BLOCKED — STAGING REQUIRED |
+| W-003 | Password reset request/token/change | Native expiry, one-use token and no account disclosure | BLOCKED — STAGING REQUIRED |
+| W-004 | Client dashboard | Correct native counts/data and authorization | BLOCKED — STAGING REQUIRED |
+| W-005 | Services and service details | Only owned services visible | BLOCKED — STAGING REQUIRED |
+| W-006 | Domains and domain details | Only owned domains/actions visible | BLOCKED — STAGING REQUIRED |
+| W-007 | Invoices, transactions and payment view | Values/status unchanged by theme | BLOCKED — STAGING REQUIRED |
+| W-008 | Quotes | Supported quote list/view/accept behavior | BLOCKED — STAGING REQUIRED |
+| W-009 | Tickets and knowledgebase | Ownership, submission CSRF, search/view | BLOCKED — STAGING REQUIRED |
+| W-010 | Profile, contacts and payment methods | Native authorization/validation | BLOCKED — STAGING REQUIRED |
+| W-011 | Product configuration | Options, cycles, totals and validation | BLOCKED — STAGING REQUIRED |
+| W-012 | Checkout/test gateway/3DS path | Test-only order completes; no production gateway | BLOCKED — STAGING REQUIRED |
+
+## Theme and CMS
+
+| ID | Test | Expected | Status |
+|---|---|---|---|
+| T-001 | Homepage/settings | Branding, hero, announcement and CSS settings visibly apply | BLOCKED — STAGING REQUIRED |
+| T-002 | Navigation/mobile navigation | Ordered/nested links, keyboard/touch behavior | BLOCKED — STAGING REQUIRED |
+| T-003 | Pages/landing pages/publication | Published visible; drafts/unpublished return 404 | BLOCKED — STAGING REQUIRED |
+| T-004 | Localized content and fallback | Selected locale overrides fields; missing translation uses base | BLOCKED — STAGING REQUIRED |
+| T-005 | Safe preview | Sanitized preview renders without saving/publishing | BLOCKED — STAGING REQUIRED |
+| T-006 | Banners/testimonials/sections/footer | Correct order/content and escaped plain fields | BLOCKED — STAGING REQUIRED |
+| T-007 | SEO/Open Graph | Correct title/description/OG with escaped content | BLOCKED — STAGING REQUIRED |
+| T-008 | Sitemap | XML-valid; only published CMS pages; correct staging URL | BLOCKED — STAGING REQUIRED |
+| T-009 | 404 behavior | Unknown/unpublished slug gives HTTP 404 | BLOCKED — STAGING REQUIRED |
+| T-010 | Responsive/a11y | 320/768/1024/1440 widths, no overflow; keyboard/focus/labels | BLOCKED — STAGING REQUIRED |
+
+## Currency
+
+| ID | Test | Expected | Status |
+|---|---|---|---|
+| C-001 | Provider connectivity and TLS | Valid rates or bounded redacted error | BLOCKED — STAGING REQUIRED |
+| C-002 | Primary failure/fallback | Secondary used; warning and successful atomic run | BLOCKED — STAGING REQUIRED |
+| C-003 | Manual update | Enabled current rates/history update transactionally | BLOCKED — STAGING REQUIRED |
+| C-004 | Scheduled/CLI update and frequency | Due execution only; timestamps/logs correct | BLOCKED — STAGING REQUIRED |
+| C-005 | Margin/precision/rounding/conversion | Matches independently calculated examples | BLOCKED — STAGING REQUIRED |
+| C-006 | Malformed/missing provider symbol | Whole run fails; no partial rates | BLOCKED — STAGING REQUIRED |
+| C-007 | Concurrent invocations/stale lock | One owner; second exits; stale lease recovers | BLOCKED — STAGING REQUIRED |
+| C-008 | Financial-table invariant | Invoices/items/transactions/tblpricing checksums unchanged | BLOCKED — STAGING REQUIRED |
+
+## OVH
+
+| ID | Test | Expected | Status |
+|---|---|---|---|
+| O-001 | Credential validation and `/me` | Least-privilege auth succeeds; secrets absent from logs | BLOCKED — STAGING REQUIRED |
+| O-002 | Catalog/normalization/source price | Raw retained; only returned fields normalized; ambiguous price not used | BLOCKED — STAGING REQUIRED |
+| O-003 | Product/configurable-option mapping | Exact suggestions; explicit mapping; duplicates rejected | BLOCKED — STAGING REQUIRED |
+| O-004 | Pricing preview/apply | Source/conversion/margin/rounding shown; explicit one-cycle update/audit | BLOCKED — STAGING REQUIRED |
+| O-005 | Provision disposable service | Checkpointed cart/item/order; pending binding state | BLOCKED — STAGING REQUIRED |
+| O-006 | Duplicate CreateAccount | No second cart/item/order | BLOCKED — STAGING REQUIRED |
+| O-007 | Fail after cart/item and retry | Checkpoint resume or reconciliation stop; no duplicate | BLOCKED — STAGING REQUIRED |
+| O-008 | Lost checkout response | `reconciliation_required`; unique cart match only; no blind checkout | BLOCKED — STAGING REQUIRED |
+| O-009 | Order polling/service binding | Pending→completed, unique service ID bound once | BLOCKED — STAGING REQUIRED |
+| O-010 | Existing-service search/preview/link | Read-only search; explicit confirmation/audit; duplicate rejected | BLOCKED — STAGING REQUIRED |
+| O-011 | Status/details/IP and IPv6 | Correct normalized values and ownership | BLOCKED — STAGING REQUIRED |
+| O-012 | Reboot and VPS start/stop | Supported test resource transitions; audited errors | BLOCKED — STAGING REQUIRED |
+| O-013 | Suspend/unsuspend semantics | VPS stop/start only as documented; unsupported type rejected | BLOCKED — STAGING REQUIRED |
+| O-014 | Reverse DNS set/delete | Supported block only; validation and explicit confirmation | BLOCKED — STAGING REQUIRED |
+| O-015 | Read-only service sync/cron concurrency | Known bindings updated; unknown skipped; no destructive action | BLOCKED — STAGING REQUIRED |
+| O-016 | Termination disposable resource | Explicit WHMCS action only; no sync termination | BLOCKED — STAGING REQUIRED |
+
+## Security and rollback
+
+| ID | Test | Expected | Status |
+|---|---|---|---|
+| S-001 | Addon roles and CloudHost247 capabilities | Unauthorized roles denied; allowed roles work | BLOCKED — STAGING REQUIRED |
+| S-002 | CSRF/replayed/missing token | Every admin mutation rejected | BLOCKED — STAGING REQUIRED |
+| S-003 | XSS/SQLi/SSRF/path payload corpus | Encoded/rejected; fixed endpoints; no query alteration | BLOCKED — STAGING REQUIRED |
+| S-004 | Secret/log inspection | No app secret, consumer key, signature, DB/WHMCS credentials | BLOCKED — STAGING REQUIRED |
+| S-005 | Migration idempotency and protected row counts | Second activation no-op; no protected deletion/corruption | BLOCKED — STAGING REQUIRED |
+| S-006 | Full rollback rehearsal | Proven backup restores files/DB and stock theme operation | BLOCKED — STAGING REQUIRED |
+
+## Per-test evidence template
+
+```text
+Test ID:
+Status: PASS | FAIL | PARTIAL | BLOCKED
+UTC timestamp:
+Commit / environment versions:
+Preconditions and sanitized record IDs:
+Action performed:
+Expected:
+Actual:
+Redacted logs/API evidence path:
+Screenshot/video path:
+Database before/after query and result:
+Cleanup/rollback performed:
+Defect/next step:
+Tester:
+```
+
+## Release-candidate freeze procedure (2026-09-27)
+
+Status: **SOURCE FOUNDATION COMPLETE → RELEASE CANDIDATE → STAGING PENDING**.
+
+The mandatory staging comparison sequence is:
+
+1. Deploy frozen baseline `3a9fbb9` to a positively identified non-production environment.
+2. Prove backup restoration and record exact WHMCS, PHP, database, web-server, and extension versions.
+3. Clear caches and execute the complete baseline matrix before configuring disposable OVH access.
+4. Capture database, browser, cron, financial, client-area, and operation evidence.
+5. Upgrade to the final release-candidate commit reported with this batch; do not substitute an unreviewed branch tip.
+6. Execute ordered CloudHost247 migrations, repeat affected tests, and compare evidence to baseline.
+7. Use only disposable least-privilege OVH resources. Never submit credentials through chat or commit them.
+
+The CI-level `scripts/release-candidate-check.sh` verifies syntax, behavior tests, static/security tests, migration ordering/additive policy, preserved proprietary checksums, embedded-secret patterns, core-schema policy, and diff cleanliness on PHP 7.4 and 8.2. This is source evidence only. Real migrations, WHMCS integration, browser behavior, cron, provider updates, and OVH lifecycle operations remain **BLOCKED — STAGING REQUIRED**.
+
+## Machine-readable evidence gates
+
+Every test row must reference an artifact, UTC timestamp, exact commit, operator, and result. The acceptance generator requires real evidence sections for browser, accessibility, security, currency, OVH, provisioning/lifecycle, reconciliation, and CMS/theme. `NOT RUN`, absent evidence, a failed restore proof, or any unexplained financial/customer-table mutation produces `FAIL`. Static/mock CI is recorded separately and never satisfies a runtime row.
+
+Capture financial snapshots immediately before and after every financial-impacting test. Changes require an explicit allowlist entry and non-empty reason in `approved-changes.json`; invoice, invoice-item, transaction, client-credit, service, and domain changes are unexpected unless the individual disposable test explicitly predicted them. Re-run the comparison after rollback as well.
+
+## Post-freeze source completion batch
+
+**IMPLEMENTED — SOURCE VERIFIED:** a WHMCS-native public hosting/VPS/dedicated catalog now reads only visible WHMCS products with CloudHost247 metadata marked `available` or `limited`, uses current WHMCS currency/pricing rows, presents verified specifications, and links into native WHMCS cart configuration. Missing prices and unknown service kinds fail safely as `NOT VERIFIED`. Client service presentation now includes the validated product kind. CMS localization has non-persistent draft preview with base fallback, and CMS administration includes bounded redacted audit history. Pricing preview evidence now displays current/proposed difference, conversion, margin, precision, rounding, component, cycle, correlation ID, and audit context. Shared safe errors expose only a correlation reference to customers and record bounded structured metadata without exception messages or traces.
+
+**BLOCKED — STAGING REQUIRED:** WHMCS route/template resolution, real catalog prices, browser rendering, cart behavior, CMS runtime, translated preview rendering, administrator workflow, accessibility acceptance, migrations, currency/OVH calls, provisioning, lifecycle and reconciliation remain unverified. No visual drag-and-drop editor was added. No runtime PASS is claimed.
+
+## Secure RDP source module
+
+**IMPLEMENTED — SOURCE/MOCK VERIFIED:** independent `modules/servers/RDP` implementation with allowlisted HTTPS provider client, encrypted WHMCS server-field token input, strict response schemas, 5/20-second network bounds, disabled redirects, 1 MiB response cap, namespaced `cloudhost247_rdp:1.0.0` migration, operation ledger, generation-aware idempotency, ownership checks, read-only reconciliation, redacted audit/error handling and secret-free responsive templates. No code from `RDP.zip` was copied; the archive remains unchanged and inactive.
+
+**BLOCKED — STAGING/API AUTHORIZATION REQUIRED:** provider ownership/licensing, endpoint contract, bearer-token authorization, product IDs, permissions, real create/suspend/unsuspend/terminate semantics, WHMCS module activation, migration execution, UI, concurrency and disposable lifecycle tests. The module must not be activated until these pass. Required migration ordering adds RDP `1.0.0` after the existing Core, Currency, Theme and OVH sequences.

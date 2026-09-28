@@ -1,0 +1,24 @@
+name: Independent foundation
+on:
+  push:
+    branches: [arena/01a0e4c2-cloudhost247]
+  pull_request:
+jobs:
+  release-candidate:
+    name: Release candidate (PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['7.4', '8.2']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+      - name: PHP syntax diagnostics
+        run: find modules/addons/cloudhost247_* modules/servers/cloudhost247_ovh modules/servers/RDP tests scripts -name '*.php' -print0 | xargs -0 -n1 php -l
+      - name: PHP behavior diagnostics
+        run: php tests/foundation/run.php && php tests/currency/run.php && php -d display_errors=1 tests/ovh/run.php && php -d display_errors=1 tests/rdp/run.php
+      - name: Complete release-candidate verification
+        run: bash scripts/release-candidate-check.sh
