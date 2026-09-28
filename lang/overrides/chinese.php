@@ -95,7 +95,7 @@ $_LANG = json_decode('{
   "homewordpresshostingtext": "大多數Dedibox服務器都支持RAID，提供可靠性和性能",
   "homecloudhosting": "雲託管",
   "homecloudhostingtext": "我們的技術支持每週7天，每天24小時提供票務和電話服務，法語，英語和德語",
-  "homehostxwebhost": "HostX虛擬主機",
+  "homehostxwebhost": "CloudHost247虛擬主機",
   "homehostxwebhosttext": "我們為您的下一個服務器，網站，應用程序，平台或博客提供了完美的託管計劃 - 所有這些都由您屢獲殊榮的全天候支持提供支持。",
   "homestartup": "linux主機",
   "homesplan2": "vps主機",

@@ -13,7 +13,7 @@
             <div class="ch247-form-row">
                 <div class="ch247-form-group">
                     <label>API Base URL</label>
-                    <input type="url" name="api_base_url" class="ch247-input" value="{$settings.api_base_url}" placeholder="https://api.cloudhost247.com">
+                    <input type="url" name="api_base_url" class="ch247-input" value="{$settings.api_base_url}" placeholder="Configured under Addons &raquo; API &amp; Integrations">
                 </div>
                 <div class="ch247-form-group">
                     <label>API Key</label>

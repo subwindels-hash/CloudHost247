@@ -1,0 +1,19 @@
+<?php
+/** CloudHost247 Module Manager autoloader. */
+if (!defined('WHMCS')) { die('This file cannot be accessed directly'); }
+
+require_once __DIR__ . '/../cloudhost247_core/bootstrap.php';
+
+// Optional: the API & Integrations centre supplies the credential vault used by
+// installed modules. Absent on deployments that have not enabled it.
+if (is_file(__DIR__ . '/../cloudhost247_integrations/bootstrap.php')) {
+    require_once __DIR__ . '/../cloudhost247_integrations/bootstrap.php';
+}
+
+spl_autoload_register(function ($class) {
+    $prefix = 'CloudHost247\\ModuleManager\\';
+    if (strncmp($class, $prefix, strlen($prefix)) !== 0) { return; }
+    $relative = str_replace('\\', '/', substr($class, strlen($prefix)));
+    $file = __DIR__ . '/lib/' . $relative . '.php';
+    if (is_file($file)) { require_once $file; }
+});

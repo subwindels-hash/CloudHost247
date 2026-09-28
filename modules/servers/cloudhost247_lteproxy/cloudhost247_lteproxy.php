@@ -23,9 +23,11 @@ require_once __DIR__ . '/lib/Logger.php';
 require_once __DIR__ . '/lib/RateLimiter.php';
 require_once __DIR__ . '/lib/Cache.php';
 require_once __DIR__ . '/lib/Helpers.php';
+require_once __DIR__ . '/lib/Configuration.php';
 require_once __DIR__ . '/lib/ApiClient.php';
 
 use CloudHost247\LTEProxy\ApiClient;
+use CloudHost247\LTEProxy\Configuration;
 use CloudHost247\LTEProxy\ApiException;
 use CloudHost247\LTEProxy\Logger;
 use CloudHost247\LTEProxy\Cache;
@@ -44,25 +46,24 @@ function cloudhost247_lteproxy_ConfigOptions(): array
 {
     return [
         'api_key' => [
-            'FriendlyName' => 'API Key',
+            'FriendlyName' => 'API Key (deprecated)',
             'Type' => 'text',
             'Size' => '64',
-            'Description' => 'Your CloudHost247 API Key',
-            'Required' => true,
+            'Description' => 'DEPRECATED. Configure the LTE Proxy API under Addons, API &amp; Integrations; credentials are stored encrypted there. This field is only read when no central integration is configured and should be cleared after migrating.',
+            'Required' => false,
         ],
         'api_secret' => [
-            'FriendlyName' => 'API Secret',
-            'Type' => 'password',
-            'Size' => '64',
-            'Description' => 'Your CloudHost247 API Secret',
-            'Required' => true,
-        ],
-        'api_base_url' => [
-            'FriendlyName' => 'API Base URL',
+            'FriendlyName' => 'API Secret (unused)',
             'Type' => 'text',
             'Size' => '64',
-            'Default' => 'https://api.cloudhost247.com',
-            'Description' => 'The base URL for the CloudHost247 API',
+            'Description' => 'UNUSED. The LTE Proxy API authenticates with a bearer API key only. Leave this empty.',
+            'Required' => false,
+        ],
+        'api_base_url' => [
+            'FriendlyName' => 'API Base URL (deprecated)',
+            'Type' => 'text',
+            'Size' => '64',
+            'Description' => 'DEPRECATED. The endpoint is supplied by the central API &amp; Integrations configuration. This field is only read when no central integration is configured.',
         ],
         'api_timeout' => [
             'FriendlyName' => 'API Timeout (seconds)',
@@ -872,29 +873,9 @@ function cloudhost247_lteproxy_adminRevealIPs(array $params): string
  */
 function getCh247Config(array $params): array
 {
-    return [
-        'api_key' => $params['configoption1'] ?? '',
-        'api_secret' => $params['configoption2'] ?? '',
-        'api_base_url' => $params['configoption3'] ?? 'https://api.cloudhost247.com',
-        'api_timeout' => (int) ($params['configoption4'] ?? 30),
-        'proxy_type' => $params['configoption5'] ?? 'SOCKS5',
-        'connection_type' => $params['configoption6'] ?? 'WIFI_AND_CELLULAR',
-        'rotation_type' => $params['configoption7'] ?? 'manual',
-        'rotation_interval' => (int) ($params['configoption8'] ?? 60),
-        'region' => $params['configoption9'] ?? 'us',
-        'carrier' => $params['configoption10'] ?? 'verizon',
-        'auth_type' => $params['configoption11'] ?? 'username_password',
-        'trial_enabled' => (bool) ($params['configoption12'] ?? false),
-        'trial_duration' => (int) ($params['configoption13'] ?? 24),
-        'auto_provision' => (bool) ($params['configoption14'] ?? true),
-        'logging_enabled' => (bool) ($params['configoption15'] ?? true),
-        'log_level' => $params['configoption16'] ?? 'INFO',
-        'cache_enabled' => (bool) ($params['configoption17'] ?? true),
-        'rate_limit_requests' => (int) ($params['configoption18'] ?? 60),
-        'log_directory' => __DIR__ . '/logs',
-        'cache_directory' => __DIR__ . '/cache',
-    ];
+    return Configuration::resolve($params, __DIR__);
 }
+
 
 /**
  * Get API client instance

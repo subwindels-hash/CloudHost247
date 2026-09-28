@@ -1,6 +1,6 @@
 <?php
 if(!defined('WHMCS'))die('Direct access denied');require_once __DIR__.'/bootstrap.php';
-use CloudHost247\Rdp\Api\ProviderClient;use CloudHost247\Rdp\Operations\DatabaseLedger;use CloudHost247\Rdp\Operations\LifecycleService;use CloudHost247\Foundation\Support\AuditLogger;use CloudHost247\Foundation\Support\SafeError;
+use CloudHost247\Rdp\Api\ConfigResolver;use CloudHost247\Rdp\Api\ProviderClient;use CloudHost247\Rdp\Operations\DatabaseLedger;use CloudHost247\Rdp\Operations\LifecycleService;use CloudHost247\Foundation\Support\AuditLogger;use CloudHost247\Foundation\Support\SafeError;
 function RDP_MetaData(){return array('DisplayName'=>'CloudHost247 Secure RDP','APIVersion'=>'1.1','RequiresServer'=>true);}
 function RDP_ConfigOptions(){return array('Provider Product ID'=>array('Type'=>'text','Size'=>'40','Description'=>'Exact provider product identifier from the authorized provider catalog.'),'Customer Reboot Allowed'=>array('Type'=>'yesno','Description'=>'Reserved for a verified provider capability; no client mutation is exposed by default.'));}
 function RDP_TestConnection(array$p){try{$c=rdp_client($p);$c->test();return array('success'=>true,'error'=>'');}catch(\Throwable$e){$safe=SafeError::from($e,'cloudhost247_rdp','connection.test','Provider connection could not be verified.');return array('success'=>false,'error'=>$safe['display']);}}
@@ -16,4 +16,4 @@ function RDP_ClientArea(array$p){try{$uid=(int)($_SESSION['uid']??0);if(!$uid||$
 function RDP_AdminServicesTabFields(array$p){try{$ledger=rdp_ledger();$b=$ledger->binding((int)$p['serviceid']);if(!$b)return array('RDP Provider State'=>'NOT VERIFIED');$details=json_decode($b->safe_details_json?:'{}',true);return array('RDP Provider State'=>htmlspecialchars($b->status,ENT_QUOTES,'UTF-8'),'Provider Service Reference'=>htmlspecialchars($b->provider_service_id,ENT_QUOTES,'UTF-8'),'Last Verified'=>htmlspecialchars($b->last_verified_at?:'NOT VERIFIED',ENT_QUOTES,'UTF-8'),'Safe Details'=>htmlspecialchars(json_encode($details),ENT_QUOTES,'UTF-8'));}catch(\Throwable$e){return array('RDP Provider State'=>'NOT VERIFIED');}}
 function RDP_AdminServicesTabFieldsSave(array$p){return;}
 function rdp_ledger(){$l=new DatabaseLedger();$l->ensureSchema();return$l;}
-function rdp_client(array$p){$host=trim((string)($p['serverhostname']??''));$port=(int)($p['serverport']??0);$endpoint='https://'.$host.($port?':'.$port:'');return new ProviderClient($endpoint,(string)($p['serveraccesshash']??''));}
+function rdp_client(array$p){$resolved=ConfigResolver::resolve($p);return new ProviderClient($resolved['endpoint'],$resolved['token']);}

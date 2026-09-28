@@ -1,0 +1,25 @@
+Three Full Provider Integrations
+Microsoft 365 — Microsoft Graph API with OAuth 2.0 client credentials flow, license assignment (Business Basic/Standard/Premium), full CRUD operations
+Google Workspace — Google Admin SDK with service account JWT authentication, licensing API integration, user lifecycle management
+Professional Email — Generic REST API interface for IMAP/SMTP hosting platforms with standard CRUD endpoints
+Security Features
+AES-256 encrypted API credentials
+SHA-256 webhook signature verification
+Rate limiting (60 requests/hour per identifier)
+Input validation and sanitization on all fields
+Credential redaction in API logs
+cURL with SSL verification enforced
+Client Area Features
+Email address display with copy button
+Status badge (Active/Suspended with color coding)
+Quick login links (Outlook/Gmail/Webmail)
+Password reset with confirmation and visibility toggle
+DNS records table (MX, SPF, DKIM, DMARC) with one-click copy
+Individual and bulk copy buttons for DNS records
+Responsive design compatible with HostX theme
+Automation
+Auto-provisioning after invoice payment via InvoicePaid hook
+Daily status synchronization via DailyCronJob hook
+Real-time webhook processing for all three providers
+Graceful error handling that never breaks WHMCS pages
+To install, upload the cloudhost247_email/ folder to /modules/servers/ in your WHMCS installation, then configure a server and products in the admin area. Full instructions are in the README.

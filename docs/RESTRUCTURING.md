@@ -40,14 +40,14 @@ The pre-restructuring inventory is preserved in
 | `blockonomics/callback/blockonomics.php` | `modules/gateways/callback/blockonomics.php` | Callback endpoint |
 | `blockonomics/blockonomics/*` | `modules/gateways/blockonomics/*` | Blockonomics lib v1.9.8 (official plugin layout) |
 | `cloudhost247_lteproxy/{*.php,lib,hooks,ajax,templates,assets,lang,README.md}` | `modules/servers/cloudhost247_lteproxy/` | LTE Proxy provisioning module (per its own README) |
-| `cloudhost247_lteproxy/All DNS Checker/modules/addons/hostx_tools/` | `modules/addons/hostx_tools/` | HostX Tools Platform v2.2.6 |
+| `cloudhost247_lteproxy/All DNS Checker/modules/addons/cloudhost247_tools/` | `modules/addons/cloudhost247_tools/` | HostX Tools Platform v2.2.6 |
 | `cloudhost247_lteproxy/All DNS Checker/modules/addons/CloudHost247_tools/` | `modules/addons/CloudHost247_tools/` | CloudHost247-branded platform build |
-| `cloudhost247_lteproxy/WHMCS Domain Lookup/hostx_tools/` | `modules/addons/hostx_domain_lookup/` | **Renamed module** (see §3) |
+| `cloudhost247_lteproxy/WHMCS Domain Lookup/cloudhost247_tools/` | `modules/addons/cloudhost247_domain_lookup/` | **Renamed module** (see §3) |
 | `cloudhost247_lteproxy/All DNS Checker/DNS Checker/modules/addons/dnschecker/` | `modules/addons/dnschecker/` | |
 | `cloudhost247_lteproxy/All DNS Checker/DNS Checker/dnschecker-whmcs-module/` | *(removed)* | Byte-identical duplicate of the above |
 | `cloudhost247_lteproxy/WHMCS Affiliate Commission Logic/customaffiliate/` | `modules/addons/customaffiliate/` | |
 | `cloudhost247_lteproxy/WHMCS Digital Product Module/modules/addons/digitalproducts/` | `modules/addons/digitalproducts/` | + package `README.md` moved into the module |
-| `cloudhost247_lteproxy/WHMCS Email Hosting Module/hostx_email/` | `modules/servers/hostx_email/` | Has `MetaData`/`ConfigOptions`/`CreateAccount` → provisioning module |
+| `cloudhost247_lteproxy/WHMCS Email Hosting Module/cloudhost247_email/` | `modules/servers/cloudhost247_email/` | Has `MetaData`/`ConfigOptions`/`CreateAccount` → provisioning module |
 | `cloudhost247_lteproxy/WHMCS Phone Number Platform/phoneservices/` | `modules/addons/phoneservices/` | |
 | `cloudhost247_lteproxy/WHMCS SMM Integration Module/smm_whmcs_module/modules/addons/smmaddon/` | `modules/addons/smmaddon/` | + `README.md`, `schema.sql`, `example_api.php` |
 | `cloudhost247_lteproxy/WHMCS SMM Integration Module/smm_whmcs_module/modules/servers/smmprovisioning/` | `modules/servers/smmprovisioning/` | |
@@ -102,7 +102,7 @@ extracted and removed all 26). Verified: zero archives in the final tree.
 | 10 | `css/overrides/override.css` / `js/overrides/override.js` referenced by `includes/head.tpl` but only the `.new` starter files shipped | Created from the shipped `.new` starters (0-byte, no behavior change; the HostX addon manages their content) |
 | 11 | `templates/orderforms/index.php` redirected to `../../../../index.php` (wrong depth — one level above docroot) | Corrected to `../../index.php` |
 | 12 | `dedeicated-server.php` breadcrumb linked to non-existent `dedeicatedserver.php` | Corrected to its own filename |
-| 13 | **`hostx_tools` module-name collision** — two different builds (HostX Tools Platform v2.2.6 and HostX Tools v1.0.0) both install to `modules/addons/hostx_tools/`; WHMCS requires folder name == file name == function prefix | Per decision: the 4-tool Domain Lookup build was **renamed to `hostx_domain_lookup`** (functions, table names, client-area URLs, asset paths — 83 references across 15 files) so both builds coexist. `hostx_tools` (platform) and `CloudHost247_tools` (rebrand) also coexist; activate only one of those two |
+| 13 | **`cloudhost247_tools` module-name collision** — two different builds (HostX Tools Platform v2.2.6 and HostX Tools v1.0.0) both install to `modules/addons/cloudhost247_tools/`; WHMCS requires folder name == file name == function prefix | Per decision: the 4-tool Domain Lookup build was **renamed to `cloudhost247_domain_lookup`** (functions, table names, client-area URLs, asset paths — 83 references across 15 files) so both builds coexist. `cloudhost247_tools` (platform) and `CloudHost247_tools` (rebrand) also coexist; activate only one of those two |
 | 14 | Announcement Bar existed as loose files | `announcementbar.tpl` installed into the theme and included from `header.tpl` directly after `<body>` (renders nothing unless an `$announcements` array is assigned; usage examples in `docs/announcement-bar/`) |
 | 15 | OVH `lang/overrides/english.php` would have been lost (same filename as the HostX override) | Merged into a single `lang/overrides/english.php` (639 keys, no collisions — verified by key intersection) |
 | 16 | Production WHMCS `configuration.php` (DB credentials) was committable | Added to `.gitignore` together with WHMCS runtime dirs (`templates_c/`, `attachments/`, `downloads/`) |
@@ -125,7 +125,7 @@ extracted and removed all 26). Verified: zero archives in the final tree.
    theme TPLs and all 65 order-form asset references resolve to existing files.
 6. **Module self-consistency** — Blockonomics gateway/loader/callback relative
    requires verified against the official plugin layout; LTE Proxy `lib/`
-   requires verified; `hostx_domain_lookup` contains zero stale `hostx_tools`
+   requires verified; `cloudhost247_domain_lookup` contains zero stale `cloudhost247_tools`
    references; no stale references to any old path anywhere in code.
 7. **ionCube-encoded files** (hostx addon, xtreme_currency_rates) moved
    unmodified (blob-identical).

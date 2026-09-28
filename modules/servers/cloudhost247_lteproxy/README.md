@@ -143,11 +143,17 @@ php install.php
 
 ### API Settings
 
+> **Credentials are managed centrally.** Configure the *CloudHost247 LTE Proxy API*
+> integration under **Addons -> API & Integrations**. The API key is stored
+> encrypted there and decrypted server-side at call time. The product
+> configuration fields below are a deprecated fallback for installations that
+> have not migrated yet; clear them once the central integration is in place.
+
 | Setting | Description | Default |
 |---------|-------------|---------|
-| API Key | Your CloudHost247 API key | (required) |
-| API Secret | Your CloudHost247 API secret | (required) |
-| API Base URL | API endpoint URL | `https://api.cloudhost247.com` |
+| API Key (deprecated) | Legacy fallback only; use the central integration | (empty) |
+| API Secret (unused) | Not used; the API authenticates with a bearer key | (empty) |
+| API Base URL (deprecated) | Legacy fallback only; supplied by the central integration | (empty, no endpoint is assumed) |
 | API Timeout | Request timeout in seconds | 30 |
 
 ### Proxy Defaults

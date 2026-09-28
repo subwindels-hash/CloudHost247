@@ -17,9 +17,11 @@ require_once __DIR__ . '/../lib/Logger.php';
 require_once __DIR__ . '/../lib/Cache.php';
 require_once __DIR__ . '/../lib/Helpers.php';
 require_once __DIR__ . '/../lib/RateLimiter.php';
+require_once __DIR__ . '/../lib/Configuration.php';
 require_once __DIR__ . '/../lib/ApiClient.php';
 
 use CloudHost247\LTEProxy\ApiClient;
+use CloudHost247\LTEProxy\Configuration;
 use CloudHost247\LTEProxy\ApiException;
 use CloudHost247\LTEProxy\Helpers;
 use CloudHost247\LTEProxy\Logger;
@@ -538,7 +540,7 @@ function buildModuleParams($service, $product): array
         'password' => $service->password ?? '',
         'configoption1' => $product->configoption1 ?? '',
         'configoption2' => $product->configoption2 ?? '',
-        'configoption3' => $product->configoption3 ?? 'https://api.cloudhost247.com',
+        'configoption3' => $product->configoption3 ?? '',
         'configoption4' => $product->configoption4 ?? 30,
         'configoption5' => $product->configoption5 ?? 'SOCKS5',
         'configoption6' => $product->configoption6 ?? 'WIFI_AND_CELLULAR',
@@ -562,16 +564,5 @@ function buildModuleParams($service, $product): array
  */
 function getCh247Config(array $params): array
 {
-    return [
-        'api_key' => $params['configoption1'] ?? '',
-        'api_secret' => $params['configoption2'] ?? '',
-        'api_base_url' => $params['configoption3'] ?? 'https://api.cloudhost247.com',
-        'api_timeout' => (int) ($params['configoption4'] ?? 30),
-        'logging_enabled' => (bool) ($params['configoption15'] ?? true),
-        'log_level' => $params['configoption16'] ?? 'INFO',
-        'cache_enabled' => (bool) ($params['configoption17'] ?? true),
-        'rate_limit_requests' => (int) ($params['configoption18'] ?? 60),
-        'log_directory' => __DIR__ . '/../logs',
-        'cache_directory' => __DIR__ . '/../cache',
-    ];
+    return Configuration::resolve($params, dirname(__DIR__));
 }

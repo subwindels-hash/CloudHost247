@@ -47,6 +47,59 @@ $tests['theme sanitizer removes executable attributes'] = function () {
     return strpos($safe, 'onclick') === false && strpos($safe, '<script') === false && strpos($safe, 'javascript:') === false && strpos($safe, 'Safe') !== false;
 };
 
+// Regression cover for the link sanitizer. Its pattern is delimited with '#',
+// so an unescaped '#' inside a character class silently truncated it: every
+// call returned false with a warning and every internal link became href="#".
+// Fixing that reactivates a branch which had never really run, so the
+// protocol-relative cases below are guards on the fix, not just on the bug.
+$themeUrlCheck = function () {
+    $repository = new \CloudHost247\Theme\ThemeRepository();
+    $method = new ReflectionMethod($repository, 'safeRelativeOrHttpsUrl');
+    $method->setAccessible(true);
+    return function ($url) use ($repository, $method) { return (bool) $method->invoke($repository, $url); };
+};
+
+$tests['theme sanitizer allows internal links'] = function () use ($themeUrlCheck) {
+    $allows = $themeUrlCheck();
+    foreach (array('/', '/cart.php', '/clientarea.php?action=details', 'index.php', 'order.php?a=1', 'page.php#top') as $url) {
+        if (!$allows($url)) return false;
+    }
+    return true;
+};
+$tests['theme sanitizer allows https and rejects other schemes'] = function () use ($themeUrlCheck) {
+    $allows = $themeUrlCheck();
+    if (!$allows('https://good.example/x')) return false;
+    foreach (array('http://bad.example/x', 'javascript:alert(1)', 'data:text/html;base64,AAA') as $url) {
+        if ($allows($url)) return false;
+    }
+    return true;
+};
+$tests['theme sanitizer rejects protocol-relative links'] = function () use ($themeUrlCheck) {
+    $allows = $themeUrlCheck();
+    // Browsers fold backslashes to slashes, so these are all off-site jumps.
+    foreach (array('//evil.example/x', '/\\/evil.example', '/\\evil.example') as $url) {
+        if ($allows($url)) return false;
+    }
+    return true;
+};
+$tests['theme sanitizer link check raises no php warnings'] = function () use ($themeUrlCheck) {
+    $allows = $themeUrlCheck();
+    $warnings = 0;
+    set_error_handler(function () use (&$warnings) { $warnings++; return true; });
+    foreach (array('/cart.php', 'index.php', 'https://good.example/x', 'javascript:alert(1)') as $url) { $allows($url); }
+    restore_error_handler();
+    return $warnings === 0;
+};
+$tests['theme sanitizer preserves internal hrefs in html'] = function () {
+    $repository = new \CloudHost247\Theme\ThemeRepository();
+    $method = new ReflectionMethod($repository, 'sanitizeHtml');
+    $method->setAccessible(true);
+    $html = $method->invoke($repository, '<p><a href="/cart.php">Order</a> <a href="//evil.example/x">Bad</a></p>');
+    return strpos($html, 'href="/cart.php"') !== false
+        && strpos($html, 'evil.example') === false
+        && substr_count($html, 'href="#"') === 1;
+};
+
 $failed = 0;
 foreach ($tests as $name => $test) {
     try { $ok = $test(); } catch (Throwable $e) { $ok = false; echo "not ok - $name: {$e->getMessage()}\n"; $failed++; continue; }

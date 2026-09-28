@@ -31,10 +31,10 @@ of this repository **into** an existing WHMCS installation root (cPanel
 ├── modules/
 │   ├── addons/                     ← Addon modules (WHMCS → System Settings → Addon Modules)
 │   │   ├── hostx/                     HostX theme helper module (ionCube) — REQUIRED by the theme
-│   │   ├── hostx_tools/               HostX Tools Platform v2.2.6 (60+ online tools)
+│   │   ├── cloudhost247_tools/               HostX Tools Platform v2.2.6 (60+ online tools)
 │   │   ├── CloudHost247_tools/        Same platform, CloudHost247-branded build (activate only ONE of the two)
-│   │   ├── hostx_domain_lookup/       HostX Domain Lookup (4-tool WHOIS/IP/DNS/availability build,
-│   │   │                              renamed from a second "hostx_tools" build — see module README)
+│   │   ├── cloudhost247_domain_lookup/       HostX Domain Lookup (4-tool WHOIS/IP/DNS/availability build,
+│   │   │                              renamed from a second "cloudhost247_tools" build — see module README)
 │   │   ├── tools_center/              WHMCS Tools Center (UI addon + external-api backend —
 │   │   │                              deploy external-api/ separately per its INSTALL.md)
 │   │   ├── dnschecker/                DNS Checker client-area tool
@@ -53,7 +53,7 @@ of this repository **into** an existing WHMCS installation root (cPanel
 │       ├── Smtphosting/               SMTP hosting provisioning (ModulesGarden v3)
 │       ├── soyoustart/                SoYouStart dedicated server provisioning
 │       ├── soyoustart_vps/            SoYouStart VPS provisioning
-│       ├── hostx_email/               Email hosting provisioning (M365/GWorkspace/Pro)
+│       ├── cloudhost247_email/               Email hosting provisioning (M365/GWorkspace/Pro)
 │       └── smmprovisioning/           SMM panel order automation
 ├── templates/
 │   ├── hostx/                      ← HostX theme (WHMCS Global Services)
@@ -81,9 +81,9 @@ of this repository **into** an existing WHMCS installation root (cPanel
 | Module | Type | Location |
 |---|---|---|
 | HostX (theme helper) | addon | `modules/addons/hostx/` |
-| HostX Tools Platform v2.2.6 | addon | `modules/addons/hostx_tools/` |
+| HostX Tools Platform v2.2.6 | addon | `modules/addons/cloudhost247_tools/` |
 | CloudHost247 Tools Platform (rebrand) | addon | `modules/addons/CloudHost247_tools/` |
-| HostX Domain Lookup | addon | `modules/addons/hostx_domain_lookup/` |
+| HostX Domain Lookup | addon | `modules/addons/cloudhost247_domain_lookup/` |
 | Tools Center (+ external API) | addon | `modules/addons/tools_center/` |
 | DNS Checker | addon | `modules/addons/dnschecker/` |
 | Custom Affiliate | addon | `modules/addons/customaffiliate/` |
@@ -97,17 +97,111 @@ of this repository **into** an existing WHMCS installation root (cPanel
 | Smtphosting v3 | server | `modules/servers/Smtphosting/` |
 | SoYouStart (dedicated) | server | `modules/servers/soyoustart/` |
 | SoYouStart VPS | server | `modules/servers/soyoustart_vps/` |
-| HostX Email Hosting | server | `modules/servers/hostx_email/` |
+| HostX Email Hosting | server | `modules/servers/cloudhost247_email/` |
 | SMM Provisioning | server | `modules/servers/smmprovisioning/` |
 
 **Notes**
-- `hostx_tools` and `CloudHost247_tools` are two brandings of the same platform —
+- `cloudhost247_tools` and `CloudHost247_tools` are two brandings of the same platform —
   activate only one in WHMCS.
 - `tools_center/external-api/` is a standalone PHP API backend. For security it
   must be deployed **outside** the WHMCS webroot (its own subdomain/server) —
   follow `modules/addons/tools_center/INSTALL.md`.
 - The SoYouStart cron scripts in `crons/` need a `crons/config.php` defining
   `$whmcspath` if WHMCS is not reachable via `../init.php`.
+
+## CloudHost247 independent rebuild modules
+
+These are the first-party modules built for this repository. They are documented
+under `docs/independent-rebuild/` and covered by the release gate
+(`scripts/release-candidate-check.sh`).
+
+| Module | Type | Location |
+|---|---|---|
+| CloudHost247 Foundation (audit log, capability policy, migrations) | addon | `modules/addons/cloudhost247_core/` |
+| **CloudHost247 API & Integrations** | addon | `modules/addons/cloudhost247_integrations/` |
+| **CloudHost247 Module Manager** | addon | `modules/addons/cloudhost247_modules/` |
+| **CloudHost247 Website Builder** | addon | `modules/addons/cloudhost247_builder/` |
+| CloudHost247 Currency | addon | `modules/addons/cloudhost247_currency/` |
+| CloudHost247 OVH | addon / server | `modules/addons/cloudhost247_ovh/`, `modules/servers/cloudhost247_ovh/` |
+| CloudHost247 Theme | addon | `modules/addons/cloudhost247_theme/` |
+| Secure RDP provisioning | server | `modules/servers/RDP/` |
+
+### API & Integrations centre
+
+Every external API the platform calls is configured in one place —
+**Admin → Addons → CloudHost247 API & Integrations** — covering RDP,
+hosting/provisioning, WHM/cPanel, domain registrars, DNS, Cloudflare, payments,
+email/SMTP, SMS, WhatsApp, Telegram, notifications, AI/LLM, exchange rates,
+object storage, monitoring, KYC, network and SMM providers.
+
+- Credentials are stored AES-256-GCM encrypted, decrypted only server-side, and
+  never rendered into HTML, a URL, a log or an API response.
+- **Test Connection** runs server-side and returns only a sanitized
+  classification (connected / auth failed / invalid endpoint / timeout /
+  provider unavailable / invalid configuration / permission denied).
+- Each provider is configured separately per environment
+  (development / staging / production) and production changes require an
+  explicit confirmation.
+- Required before activation:
+  `CH247_INTEGRATIONS_KEY` (32+ random bytes) and `CH247_PLATFORM_ENVIRONMENT`.
+
+Read `docs/independent-rebuild/API-INTEGRATIONS.md` for the per-provider
+credential, scope, endpoint, rotation and failure-handling reference, and
+`docs/independent-rebuild/API-INVENTORY-AUDIT.md` for the repository-wide
+credential audit.
+
+### Module Manager
+
+New modules are installed from **Admin → Addons → CloudHost247 Module Manager**,
+not by unzipping over SSH or cPanel.
+
+- A `.zip` package is validated (type, size, signature, MIME, SHA-256) and its
+  archive is inspected **before** anything is written: path traversal, absolute
+  paths, symlinks, executable/setuid modes, decompression bombs, forbidden file
+  types and control files are rejected.
+- `module.json` is validated as data. No PHP from the package is executed at
+  install time.
+- An installation preview shows module, version, author, type, PHP range,
+  dependencies, files, database changes, configuration, permissions and
+  checksum, and must be confirmed. Downgrades need a second confirmation.
+- Installation is transactional: the previous version is backed up and restored
+  automatically if any step fails. Modules install **disabled**.
+- Uninstall lists exactly which files are removed and which tables are kept;
+  tables are never dropped and customer/service data is never deleted.
+- Set `CH247_MODULE_STORAGE` to a writable directory outside the document root.
+
+Read `docs/independent-rebuild/MODULE-MANAGER-COMPLIANCE.md` for the
+clause-by-clause traceability matrix (requirement → code → test), and
+`docs/independent-rebuild/MODULE-MANAGER.md` for the pipeline, the
+`module.json` specification and the packaging rules.
+
+### Website Builder
+
+The public website is designed in **Admin → Addons → CloudHost247 Website
+Builder**: pages, templates, theme parts, navigation menus, global styles, a
+media library, forms, SEO settings, custom CSS and revision history, all driven
+by one versioned page schema.
+
+- It is additive. No HostX template file is read, written or replaced; builder
+  pages render inside the active client area theme, and the existing branding,
+  navigation, cart, checkout, login and registration are untouched.
+- Hosting plans, product cards, order buttons, domain search and pricing, the
+  cart, checkout links and service status read WHMCS and the API & Integrations
+  centre **live**. When a source cannot be read the editor says exactly what is
+  missing and the published page omits the block — there is no demo price
+  anywhere in the module.
+- Draft and published content are separate columns. Saving never changes the
+  live page, unpublishing removes the live copy, a scheduled page is not served
+  early, and a draft preview needs a hashed, expiring token.
+- Content cannot become code: rich text, URLs, styles, custom CSS, uploads and
+  imported templates each pass a dedicated validator, and a template import
+  executes nothing and writes no file.
+- Publishing, deletion, settings and custom CSS default to Super Admin only.
+- Served by `builder-page.php?slug=...`; the module ships inactive.
+
+Read `docs/independent-rebuild/WEBSITE-BUILDER.md` for the page schema, the
+widget library, the publishing model, the security controls and the test
+inventory.
 
 ## Runtime requirements (deployment target)
 

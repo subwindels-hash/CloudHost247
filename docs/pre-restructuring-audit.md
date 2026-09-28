@@ -63,15 +63,15 @@ theme, order form, root pages, addon/server/gateway modules, language overrides,
 
 ### 7. `cloudhost247_lteproxy/` — LTE Proxy provisioning module + 9 bundled tool packages (240 files)
 - Core module (`cloudhost247_lteproxy.php` + lib/ hooks/ ajax/ templates/ assets/ lang/ install.php; README: "Upload the module folder to /modules/servers/cloudhost247_lteproxy/") → **modules/servers/cloudhost247_lteproxy/**
-- `All DNS Checker/modules/addons/hostx_tools/` — "HostX Tools Platform" v2.2.6, 60+ tools → **modules/addons/hostx_tools/** (CONFLICT — see Q1)
+- `All DNS Checker/modules/addons/cloudhost247_tools/` — "HostX Tools Platform" v2.2.6, 60+ tools → **modules/addons/cloudhost247_tools/** (CONFLICT — see Q1)
 - `All DNS Checker/modules/addons/CloudHost247_tools/` — same platform rebranded for CloudHost247 (846-line diff = pure rebrand) (see Q2)
 - `All DNS Checker/DNS Checker/` — `dnschecker` addon; two nested copies byte-identical → keep one → **modules/addons/dnschecker/**
 - `Announcement Bar/` — Smarty/CSS announcement bar for the theme (Build.txt: install to templates/hostx/includes/announcementbar.tpl + header integration); contains `hostx` and `CloudHost247` template variants + a stale nested partial duplicate
 - `Use this All DNS Checker/whmcs-tools-center/` — "WHMCS Tools Center" addon (`whmcs-addon/` → modules/addons/tools_center/) + `external-api/` (designed to be deployed OUTSIDE the WHMCS webroot) (see Q3)
 - `WHMCS Affiliate Commission Logic/customaffiliate/` → **modules/addons/customaffiliate/** (INSTALL.txt confirmed)
 - `WHMCS Digital Product Module/modules/addons/digitalproducts/` → **modules/addons/digitalproducts/** (README confirmed)
-- `WHMCS Domain Lookup/hostx_tools/` — "HostX Tools" v1.0.0, 4 tools (WHOIS/IP/DNS/availability), OOP w/ API fallbacks — SAME module name as the platform above (see Q1)
-- `WHMCS Email Hosting Module/hostx_email/` — has MetaData/ConfigOptions/CreateAccount → SERVER module → **modules/servers/hostx_email/**
+- `WHMCS Domain Lookup/cloudhost247_tools/` — "HostX Tools" v1.0.0, 4 tools (WHOIS/IP/DNS/availability), OOP w/ API fallbacks — SAME module name as the platform above (see Q1)
+- `WHMCS Email Hosting Module/cloudhost247_email/` — has MetaData/ConfigOptions/CreateAccount → SERVER module → **modules/servers/cloudhost247_email/**
 - `WHMCS Phone Number Platform/phoneservices/` — addon (config/activate/output/sidebar) → **modules/addons/phoneservices/**
 - `WHMCS SMM Integration Module/smm_whmcs_module/` — `modules/addons/smmaddon/` + `modules/servers/smmprovisioning/` → **modules/addons/smmaddon/** + **modules/servers/smmprovisioning/**
 
@@ -100,11 +100,11 @@ theme, order form, root pages, addon/server/gateway modules, language overrides,
 ├── crons/soyoustart/             ← OVH cron scripts
 ├── lang/overrides/               ← 27 languages (english.php = hostx + OVH merged)
 ├── modules/
-│   ├── addons/  hostx, soyoustart, xtreme_currency_rates, hostx_tools,
+│   ├── addons/  hostx, soyoustart, xtreme_currency_rates, cloudhost247_tools,
 │   │            CloudHost247_tools, dnschecker, customaffiliate, digitalproducts,
 │   │            phoneservices, smmaddon, tools_center
 │   ├── gateways/ blockonomics.php, blockonomics/, callback/
-│   └── servers/  cloudhost247_lteproxy, Smtphosting, soyoustart, hostx_email, smmprovisioning
+│   └── servers/  cloudhost247_lteproxy, Smtphosting, soyoustart, cloudhost247_email, smmprovisioning
 ├── templates/
 │   ├── hostx/                    ← full theme (tpls, includes, hostx_includes, css, js,
 │   │                               fonts, webfonts, images, img, flags, domain_icons,
