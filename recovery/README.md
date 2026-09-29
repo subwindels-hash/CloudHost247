@@ -83,6 +83,38 @@ better-targeted change.
 
 ---
 
+---
+
+## 3. `check-production-state.sql` (+ `.sh` wrapper) — answer the one open question
+
+The audit could not determine whether **your** production database has had Phase 5 migrations
+applied or holds real financial data — that host is not reachable from the development sandbox.
+This answers it.
+
+**Read-only and safe against live production:** every statement is a `SELECT` inside a
+`BEGIN TRANSACTION READ ONLY`. Nothing is created, altered or deleted.
+
+```bash
+export DATABASE_URL='postgresql://user:pass@host:5432/dbname'
+bash recovery/check-production-state.sh
+# or, if psql isn't on PATH:
+psql "$DATABASE_URL" -X -f recovery/check-production-state.sql
+```
+
+**Verified:** all 8 statements executed cleanly against real PostgreSQL 18.4, and the
+`READ ONLY` transaction was confirmed to genuinely reject an attempted `INSERT`.
+
+Sections 5 and 6 detect whether the §3.1 double-credit has **already fired in production**. Those
+queries are not theoretical — run against the audit database they correctly returned 25 affected
+invoices, the exact double-credits the stress test had produced.
+
+It reports six things: which Phase 5 tables exist · which migrations ≥ `0014` ran · counts of
+orders/invoices/ledger/payments · any non-`pending` payment · any double-credited invoice · any
+over-paid invoice. Interpretation notes are at the bottom of the `.sql` file and map directly onto
+Recovery Options A, B and C.
+
+---
+
 ## Recommendation
 
 Apply **patch 1 alone**. It removes the only exploitable defect found in the whole audit, is
