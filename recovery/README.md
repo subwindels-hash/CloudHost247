@@ -22,11 +22,19 @@ git checkout -- cloudhost247-node/src/
 
 ---
 
-## 1. `5c-fix-concurrent-manual-confirm.patch` — fixes the critical defect
+## 1. `5c-fix-concurrent-manual-confirm.patch` — **OBSOLETE, DO NOT APPLY**
 
-**Fixes:** `PHASE_5_CHECKPOINT_REPORT.md` §3.1 — concurrent staff confirmations of the same manual
-payment each append a `payment` entry to the append-only `billing_ledger`, recording one invoice as
-paid several times over.
+> **Superseded by commit `7a46ebd`, which contains this fix and more.** The defect it addressed is
+> already fixed on this branch. The patch **no longer applies** — `git apply --check` fails on both
+> `src/db/payments.ts` and `src/services/payment-service.ts`, because the committed fix changed the
+> same lines. Re-verified against `81c515c` on 2026-09-29.
+>
+> It is kept, unmodified, as a record of what was proposed before the fix was authorized. If you
+> are looking for the live fix, read the commit, not this file.
+
+**Originally fixed:** `PHASE_5_CHECKPOINT_REPORT.md` §3.1 — concurrent staff confirmations of the
+same manual payment each append a `payment` entry to the append-only `billing_ledger`, recording
+one invoice as paid several times over.
 
 **Touches:** `src/db/payments.ts`, `src/services/payment-service.ts`. **Code only — no migration,
 no schema change, no data change.**
@@ -65,7 +73,38 @@ instruction to "prepare only, await approval."
 **What it deliberately does NOT do:** no table is dropped, no migration reverted, no row deleted, no
 commit reverted. It is an off switch, not a rollback.
 
-**Verified — 14/14 against real PostgreSQL:**
+**Re-verified against the current branch tip `81c515c` on 2026-09-29 — 12/12.** The earlier 14/14
+run was against `50a1c47`; the application has changed a great deal since (the 5C concurrency fix,
+findings B1–B5), so the patch was re-checked rather than assumed. `git apply --check` passes, the
+patched tree typechecks, and:
+
+- **5A intact:** add-to-cart and checkout still succeed.
+- **5B intact:** checkout still issues its invoice and opening `charge` ledger entry; both invoice
+  read endpoints still 200.
+- **5C surface gone:** all four payment endpoints return 404.
+- **Nothing destroyed:** `invoices`, `payments` and `billing_ledger` all still exist, and
+  migrations `0018`–`0022` remain applied. No schema rollback.
+
+### ⚠ One consequence you must know before applying
+
+**Applying this patch makes 19 tests fail.** They are all in
+`cloudhost247-node/tests/integration/payments-api.test.ts`, and they fail *because they are
+testing the endpoints the patch deliberately switches off* — this is the patch working, not
+breaking. Measured on the patched tree:
+
+```
+Test Files  1 failed | 33 passed (34)
+     Tests  19 failed | 279 passed (298)
+```
+
+**No test outside that one file fails.** Phase 4, Phase 5A and Phase 5B suites all stay green, which
+is the property that matters: the off switch does not disturb anything you are keeping.
+
+If you apply Option B, skip that file in the same change
+(`describe.skip`, or exclude it in `vitest.config.ts`) so the suite stays honest — a red CI that
+everyone learns to ignore is worse than no CI. Re-enable it when 5C is re-enabled.
+
+**Original verification — 14/14 against real PostgreSQL (at `50a1c47`):**
 
 - **Phase 4 intact:** `/health`, public catalog, account services all 200.
 - **Phase 5A intact:** add-to-cart 201, checkout 201, order history readable.

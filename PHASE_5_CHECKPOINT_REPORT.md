@@ -1017,3 +1017,82 @@ Phase 5C's authorization boundary is the strongest-looking part of this work: it
 adversarial combination tried, including the database-state check that caught defects elsewhere.
 **That is not the same as accepting it.** The webhook pipeline remains frozen and unverified end
 to end, no real provider is activated, and **Phase 5B and 5C remain NOT ACCEPTED.**
+
+---
+
+# ADDENDUM 7 — Re-verifying the recovery plan itself
+
+The recovery artifacts in `recovery/` are the safety net for this whole situation, and they had
+not been re-checked since the code moved underneath them. A rollback plan that silently stopped
+working is worse than no plan, because it is trusted. Both were re-tested against the current tip
+`81c515c`.
+
+## `5c-fix-concurrent-manual-confirm.patch` — obsolete, and now says so
+
+It no longer applies. `git apply --check` fails on both `src/db/payments.ts` and
+`src/services/payment-service.ts`: the authorized fix in `7a46ebd` changed the same lines. This is
+expected — the patch was superseded by the real fix — but nothing in `recovery/` said so, and a
+reader reaching for it in an incident would have hit a confusing error.
+
+It is now marked **OBSOLETE, DO NOT APPLY** at the top of `recovery/README.md`, kept unmodified as
+a record of what was proposed before the fix was authorized.
+
+## `option-b-disable-payment-routes.patch` — still valid, re-verified 12/12
+
+The original 14/14 verification was against `50a1c47`. A great deal has changed since (the 5C
+concurrency fix, findings B1–B5), so it was re-run rather than assumed. Applied to a throwaway
+clone of `81c515c`:
+
+```
+git apply --check   : passes
+tsc --noEmit        : exit 0
+
+PASS  5A: add-to-cart still works
+PASS  5A: checkout still creates an order
+PASS  5B: checkout still issues an invoice
+PASS  5B: the opening charge ledger entry is still written
+PASS  5B: the customer can still read their invoices
+PASS  5B: the customer can still read one invoice
+PASS  5C: POST /api/v1/invoices/:id/payments is switched off
+PASS  5C: GET /api/v1/payments/:id is switched off
+PASS  5C: POST /api/v1/admin/payments/:id/confirm-manual is switched off
+PASS  5C: POST /api/v1/admin/payments/:id/reject-manual is switched off
+PASS  no financial table was dropped
+PASS  migrations 0018-0022 remain applied (no schema rollback)
+```
+
+Option B still does exactly what it claims: Phase 5A and 5B keep working, the four Phase 5C
+endpoints return 404, and nothing is dropped, reverted or deleted.
+
+## A consequence that had never been recorded
+
+**Applying Option B makes 19 tests fail.** Measured on the patched tree:
+
+```
+Test Files  1 failed | 33 passed (34)
+     Tests  19 failed | 279 passed (298)
+```
+
+Every one is in `tests/integration/payments-api.test.ts`, and they fail *because they test the
+endpoints the patch deliberately switches off*. **No test outside that file fails** — Phase 4, 5A
+and 5B suites all stay green, which is the property that actually matters.
+
+This is the patch working, not breaking. But had you applied Option B during an incident and
+watched CI go red with 19 failures, that is a genuinely alarming thing to discover with no
+warning. `recovery/README.md` now states it up front and recommends skipping that one file in the
+same change, so the suite stays honest rather than red-and-ignored.
+
+## Evidence
+
+| Check | Result |
+| --- | --- |
+| Option B applies to `81c515c` | yes, `git apply --check` clean |
+| Option B patched tree typechecks | exit 0 |
+| Option B functional verification | **12/12** |
+| Option B effect on the suite | 279/298, failures confined to `payments-api.test.ts` |
+| Obsolete 5C patch | confirmed non-applying, now labelled |
+| Unpatched branch state | untouched — the patch was applied only in a throwaway clone, never here |
+| Migrations added | **none** — still 22 |
+
+Nothing in `recovery/` has been applied to this branch. Option B remains **prepared and awaiting
+your approval**, exactly as instructed.
