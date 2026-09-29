@@ -20,6 +20,7 @@ import ServicesPage from './pages/ServicesPage';
 import DomainsPage from './pages/DomainsPage';
 import BillingPage from './pages/BillingPage';
 import InvoicesPage from './pages/InvoicesPage';
+import InvoiceDetailPage from './pages/InvoiceDetailPage';
 import SupportPage from './pages/SupportPage';
 import SupportTicketPage from './pages/SupportTicketPage';
 import AdminPage from './pages/AdminPage';
@@ -57,6 +58,7 @@ export default function App() {
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/billing" element={<BillingPage />} />
           <Route path="/invoices" element={<InvoicesPage />} />
+          <Route path="/invoices/:id" element={<InvoiceDetailPage />} />
           <Route path="/support" element={<SupportPage />} />
           <Route path="/support/:id" element={<SupportTicketPage />} />
 

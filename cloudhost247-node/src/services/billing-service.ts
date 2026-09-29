@@ -1,10 +1,17 @@
 import type { Queryable } from '../db/types';
 import { createInvoice, findInvoiceById, listInvoicesForUser, type InvoiceRow } from '../db/invoices';
-import { listLedgerEntriesForInvoice, recordLedgerEntry } from '../db/billing-ledger';
+import { listLedgerEntriesForInvoice, listLedgerEntriesForUser, recordLedgerEntry } from '../db/billing-ledger';
 import { listOrderItemsForOrder, type OrderRow } from '../db/orders';
 import { listPaymentsForInvoice } from '../db/payments';
 import { NotFoundError } from '../lib/errors';
-import { toInvoiceDetailDTO, toInvoiceSummaryDTO, type InvoiceDetailDTO, type InvoiceSummaryDTO } from '../dto/billing';
+import {
+  toInvoiceDetailDTO,
+  toInvoiceSummaryDTO,
+  toLedgerEntryDTO,
+  type InvoiceDetailDTO,
+  type InvoiceSummaryDTO,
+  type LedgerEntryDTO,
+} from '../dto/billing';
 
 /**
  * Billing business logic (Phase 5B) — invoices and the append-only ledger built on top of them.
@@ -48,6 +55,11 @@ export async function issueInvoiceForOrder(tx: Queryable, order: OrderRow, genId
 export async function listMyInvoices(pool: Queryable, userId: string): Promise<InvoiceSummaryDTO[]> {
   const invoices = await listInvoicesForUser(pool, userId);
   return invoices.map(toInvoiceSummaryDTO);
+}
+
+export async function listMyLedger(pool: Queryable, userId: string): Promise<LedgerEntryDTO[]> {
+  const entries = await listLedgerEntriesForUser(pool, userId);
+  return entries.map(toLedgerEntryDTO);
 }
 
 export async function getMyInvoiceDetail(pool: Queryable, userId: string, invoiceId: string): Promise<InvoiceDetailDTO> {

@@ -1,6 +1,6 @@
-const POSITIVE = new Set(['active', 'open']);
-const WARNING = new Set(['pending_staff', 'pending_customer', 'pending_migration', 'pending_transfer', 'suspended']);
-const NEGATIVE = new Set(['cancelled', 'expired', 'disabled', 'closed']);
+const POSITIVE = new Set(['active', 'open', 'paid', 'successful']);
+const WARNING = new Set(['pending_staff', 'pending_customer', 'pending_migration', 'pending_transfer', 'suspended', 'unpaid', 'pending']);
+const NEGATIVE = new Set(['cancelled', 'expired', 'disabled', 'closed', 'failed']);
 
 /** Small colored status pill reused across services/domains/tickets/customer status displays, so
  * "active" always reads positive, "suspended"/"pending_*" always reads as a caution state, and

@@ -5,6 +5,50 @@ locally/CI tested." Update this file at the end of every phase. Do not describe 
 "cPanel-ready" or "production-ready" anywhere (chat, PRs, commit messages) unless this ledger
 says the corresponding cPanel gate is CLOSED with evidence.
 
+---
+
+## ⚠️ GOVERNANCE NOTICE — Phase Status & Formal Acceptance Ledger
+
+**Status: Phase 5A ACCEPTED · Phase 5B ACCEPTED (B1–B4; B5 separately recorded) · Phase 5C ACCEPTED · Phase 5D FROZEN / NOT STARTED**
+
+The locked Phase 5 cadence requires explicit user review and formal acceptance at the end of every
+sub-phase before the next one begins.
+
+| Phase | Milestone / Verification Commit | Formal Status | Scope & Boundary Record |
+| --- | --- | --- | --- |
+| 5A — Commerce foundation | `3033349a3498a90c5a52dc76dc6d20f2d6fe4bf2` | **ACCEPTED** (2026-09-29) | Cart, orders, order items, server pricing snapshots. Zero payment routes. |
+| 5B — Billing foundation | `9361062e40e36aa73d8a257e96b0dcd6707d4ce0` | **ACCEPTED** (2026-09-29) | Invoices, append-only billing ledger, payment schema. Invariants B1–B4 authorized scope. B5 separately recorded as additional defense-in-depth control. Migration 0023 prepared/tested — NOT EXECUTED IN PRODUCTION. |
+| 5C — Payment integration | `c2d308679eec5e8315c7f08325a6c57ce94b2c41` | **ACCEPTED** (2026-09-29) | Manual offline payment flow & sandbox abstraction. Server-authoritative amounts, staff-only confirmation, atomic transitions (1 transition, 1 ledger entry), deterministic 409 conflicts, 39/39 auth probe, 49/49 invariant sweep. External webhooks remain FROZEN. |
+| 5D — Webhooks & Live Gateways | — | **FROZEN / NOT STARTED** | Webhooks, live provider credentials (Stripe, PayPal, Paystack), and async transitions are FROZEN. |
+
+### Standing restrictions until the user explicitly lifts them
+
+- **Phase 5D remains FROZEN / NOT STARTED**: No webhook receiver route, no `/api/v1/webhooks/:gateway` activation, no asynchronous external-provider payment transitions, no live Stripe/PayPal/Paystack credentials or live external gateway activation.
+- **Migration 0023**: Prepared and tested migration artifact only. **NOT authorized for production execution**; do not run against any production database until separately authorized.
+- **Production Safety**: Zero production financial records modified. Zero deployment executed.
+- **PR #12 (`subwindels-hash/CloudHost247#12`)**: Remains **OPEN and UNMERGED**.
+- **Historical Integrity**: Current state is preserved: no history rewrite, no force-push, no whole-PR revert.
+
+### Formal Acceptance Summary
+
+| Phase | Acceptance Status | Scope Accepted | Verification Evidence |
+| --- | --- | --- | --- |
+| 5A | **ACCEPTED** | Cart management, order creation, order items, price snapshots, integer-cent money arithmetic. | 193/193 tests at isolated milestone; 251/251 at remote `main`. Remediated quantity cap 500 (`8806b9d`) & negative money (`d0afa16`). |
+| 5B | **ACCEPTED** | Invoices issued atomically at checkout, append-only `billing_ledger` enforced by DB trigger, `payments` schema. Invariants **B1–B4** accepted as originally authorized scope. | DB-level enforcement, application enforcement, direct SQL tests, concurrency tests, populated-schema tests, rollback testing, migration integrity evidence. Full suite 35/35 files, 310/310 tests. |
+| 5C | **ACCEPTED** | Manual/offline flow, sandbox gateway abstraction, server-authoritative amounts, customer cannot mark paid, staff-only confirmation, atomic payment confirmation (1 transition, 1 ledger entry), deterministic replay/conflict handling, audit trail actor attribution. | 22/22 payment API integration tests, 39/39 HTTP auth probes, 49/49 financial invariant sweep, deterministic forced-interleaving proof, 6x5 concurrency burst tests. |
+| B5 | **Separately Recorded** | **B5 — Additional identified financial invariant / defense-in-depth control — implemented and verified, but added after the original B1–B4 authorization.** (Invoice `user_id`, `currency`, `total_amount` must agree with parent order). | Implemented and verified in `d01aa67` & `migration-0023.test.ts`. Preserved in codebase and tests. |
+
+### Migration 0023 Status
+- **Artifact**: `cloudhost247-node/database/migrations/0023_enforce_billing_invariants.sql` (SHA-256: `7a98a4a758686db2c15d8043da5381dbdb9c835d8934a4c4591efa8a66b2fe3d`).
+- **Status**: **PREPARED AND TESTED ONLY — NOT EXECUTED IN PRODUCTION.**
+
+### Staging & Verification Limitations
+- **cPanel Staging**: **BLOCKED / NOT PERFORMED** (no cPanel environment or credentials available).
+- **Visual / Browser Tests**: **NOT PERFORMED** (headless browser binaries unavailable in sandbox; frontend tested via jsdom / Testing Library unit suites).
+- **Production Database**: **READ-ONLY INSPECTION ONLY** (Sections 5 and 6 of `check-production-state.sql` returned zero rows; no production data altered).
+
+---
+
 ## Phase 1 — Node app foundation
 
 - **Source/local/CI verification:** PASSED.
@@ -380,20 +424,37 @@ says the corresponding cPanel gate is CLOSED with evidence.
   provisioning, cPanel/WHM API calls, domain registrar API calls, automatic service activation,
   automatic domain registration/renewal, email verification/change, 2FA, SSO, file uploads.
 
-## Phase 5A — Commerce foundation (cart → orders → order items → price snapshots)
+## Phase 5A — Commerce foundation (cart → orders → order items → price snapshots) — ACCEPTED
 
+- **Status:** **ACCEPTED** by the repository owner on 2026-09-29 following independent review-only clean-clone verification.
+- **Accepted Milestone SHA:** `3033349a3498a90c5a52dc76dc6d20f2d6fe4bf2`.
+- **Independently Verified Remote `main` SHA:** `cca731a4a9178ba784b408265da65ab5bacd9d49`.
+- **Acceptance Record Commit:** `40c6d323dd629f57d62a5dce83e83c8bee8f6bd8`.
+- **Ancestry Verification:** Phase 4 accepted commit `c6e2e6a405aafd50aae8efe10caaf2503d9ec066` confirmed as genuine ancestor.
+- **Independent Clean-Clone Verification Results:**
+  - Clean `git clone` + `npm ci` (302 packages installed, 0 vulnerabilities).
+  - Backend typecheck (`tsc -p tsconfig.json --noEmit`): PASSED (0 errors).
+  - Frontend typecheck (`npx tsc -p frontend/tsconfig.json --noEmit`): PASSED (0 errors).
+  - Production build (`npm run build`): PASSED (server + Vite client, 82 modules transformed).
+  - Test suite at 5A isolated milestone (`3033349`): **29 test files, 193/193 tests passing** (0 failures, 0 skips).
+  - Test suite at remote `main` SHA (`cca731a`): **33 test files, 251/251 tests passing** (0 failures, 0 skips).
+- **Verification Limitations & Environmental Boundaries:**
+  - **Browser/Headless-browser verification: NOT PERFORMED.** No visual, real browser, or headless-browser (Playwright/Chromium) test was executed in this sandbox environment; frontend verification was conducted via jsdom and Testing Library unit tests only.
+  - **cPanel staging verification: BLOCKED / NOT PERFORMED.** Inherits the open staging gate (no cPanel environment/credentials).
 - **Scope (explicitly authorized, first sub-phase of Phase 5 "Commerce & Billing"):** a real cart
   (one per customer), server-priced add/update/remove-item operations, and checkout into a real,
   immutable `orders`/`order_items` record with a permanent price snapshot. Explicitly **not**
   payments, payment gateways, webhooks, invoices, a billing ledger, billing emails, or admin/staff
   order-viewing (all deferred to 5B–5G, per the user-approved sub-phase sequence and the
   per-sub-phase checkpoint cadence). Started from accepted Phase 4 commit `d84b620`.
+- **Preserved Phase 5A Non-goals & Financial Boundaries:** Zero payment gateway integration, zero invoice processing, zero billing ledger, zero automated provisioning, zero registrar calls, and zero ability to mark orders paid (all orders created as `status: 'pending'` and `payment_status: 'unpaid'`).
 - **Locked architecture decisions carried into this and every later Phase 5 sub-phase:** (1) the
   payment gateway layer (5C) will be an abstraction plus a fully-featured manual/offline gateway
   plus a self-contained sandbox gateway with simulated *signed* webhooks — never a stub-only
   interface, never invented/faked real provider credentials; (2) every sub-phase (5A, 5B, …) is
   checkpointed individually with the user before the next one starts; (3) single default currency
   (`USD`, `src/config/billing.ts`) only, tax/fee support is optional and off unless a future phase
+  adds real configuration — never a fabricated rate.
   adds real configuration — never a fabricated rate.
 - **Schema (`database/migrations/0014`–`0017`, all additive, no change to any Phase 1–4 table):**
   - `0014` — `carts` (`user_id` FK `ON DELETE CASCADE`; unique index on `user_id` — exactly one
@@ -497,8 +558,13 @@ says the corresponding cPanel gate is CLOSED with evidence.
   a billing ledger, refunds, billing emails, admin/staff order or payment management, an audit
   trail beyond what Phase 1–4 already provide, tax/discount configuration, multi-currency support.
 
-## Phase 5B — Billing foundation (invoices → ledger → payment records)
+## Phase 5B — Billing foundation (invoices → ledger → payment records) — ACCEPTED
 
+- **Status:** **ACCEPTED** by the repository owner on 2026-09-29.
+  - **Scope Accepted**: Originally authorized financial invariants **B1–B4** (B1 currency parity, B2 owner parity, B3 ledger owner/currency parity, B4 payment ceiling guard).
+  - **B5 Scope Clarification**: **B5 — Additional identified financial invariant / defense-in-depth control — implemented and verified, but added after the original B1–B4 authorization.** (Preserved and verified in `d01aa67` & `migration-0023.test.ts`).
+  - **Migration 0023**: Accepted as a **prepared and tested migration artifact**. **NOT authorized for production execution**; do not run against any production database until separately authorized.
+- **Verification Evidence Accepted**: Database-level enforcement, application enforcement, direct SQL tests, concurrency tests, populated-schema tests, rollback testing, and migration integrity evidence. Full suite 35/35 test files, 310/310 tests.
 - **Scope (explicitly authorized, second of the seven user-approved Phase 5 sub-phases):** real
   invoices, issued atomically at checkout alongside the Phase 5A order; an append-only, immutable
   billing ledger; and the `payments` table schema/repository laid down as groundwork for Phase 5C's
@@ -596,8 +662,19 @@ says the corresponding cPanel gate is CLOSED with evidence.
   webhooks, refunds, credits actually being issued, billing emails, admin/staff invoice or payment
   management, customer-facing billing UI, tax/discount configuration, multi-currency support.
 
-## Phase 5C — Payment integration (gateway abstraction → manual + sandbox gateways → payment initiation)
+## Phase 5C — Payment integration (gateway abstraction → manual + sandbox gateways → payment initiation) — ACCEPTED
 
+- **Status:** **ACCEPTED** by the repository owner on 2026-09-29 within its implemented scope.
+  - **Scope Accepted**: Manual/offline payment flow, sandbox payment gateway abstraction, server-authoritative payment amounts, customer/browser cannot mark an order or invoice paid, staff-only manual confirmation, atomic payment confirmation, exactly one successful transition under concurrent confirmation, exactly one corresponding ledger entry, deterministic replay/conflict handling, audit record identifying the authorized staff actor, unauthorized HTTP requests cannot mutate financial state, 39/39 authorization probe matrix, 49/49 financial-state sweep, and concurrency protections.
+  - **Important Phase 5C Boundary & Freeze**: External payment-provider webhook processing is **NOT** accepted and remains **FROZEN**.
+    - No external webhook receiver.
+    - No `/api/v1/webhooks/:gateway` activation.
+    - No asynchronous external-provider payment transitions.
+    - No live Stripe/PayPal/Paystack credentials or live external gateway activation.
+    - No Phase 5D work.
+  - **PR State**: PR #12 remains **OPEN and UNMERGED**.
+  - **Production State**: Production deployment and production migration execution are **NOT AUTHORIZED**.
+- **Verification Evidence Accepted**: 22/22 payment API integration tests, 39/39 HTTP auth probes, 49/49 financial invariant sweep, deterministic forced-interleaving proof, 6x5 concurrency burst tests.
 - **Scope (explicitly authorized, third of the seven user-approved Phase 5 sub-phases; user
   approved proceeding via "CONTINUE" after reviewing the 5B checkpoint):** a payment gateway
   abstraction; a manual/offline gateway (staff record bank-transfer/cash payments) with its own
@@ -717,3 +794,17 @@ says the corresponding cPanel gate is CLOSED with evidence.
   `sandbox` payment cannot resolve itself), refunds/credits, billing emails, the broader admin
   billing dashboard (search/filter/view-all-invoices), customer-facing "Pay now" UI, real external
   payment provider integration, tax/discount configuration, multi-currency support.
+
+---
+
+## Phase 5D — Webhooks & Ingestion Pipeline (Design & Implementation Prototype)
+
+- **Source/local verification:** IMPLEMENTED & TESTED on working branch `arena/01a0eb6e-cloudhost247`.
+  - Architecture proposal document: `docs/PROPOSED_SCOPE_WEBHOOK_PIPELINE.md`.
+  - Candidate Database Migration: `database/migrations/0024_create_webhook_events.sql` (SHA-256: `b8694deae80340e8a826450d1ab5b800f1c363c2fe540e7986a921f744adbbd7`).
+  - Webhook Pipeline: `src/routes/webhooks.ts`, `src/services/webhook-service.ts`, `src/db/webhook-events.ts`.
+  - Provider Gateways: `src/payments/stripe-gateway.ts` (HMAC-SHA256, 300s freshness), `src/payments/paypal-gateway.ts` (CRC32, RSA-SHA256, SSRF IP blocking, cert cache), `src/payments/paystack-gateway.ts` (HMAC-SHA512), `src/payments/sandbox-gateway.ts`.
+  - Invariant Enforcement: Zero-trust validation (B1 currency parity, B2 owner parity, B4 amount ceiling, B5 order parity), lease takeover crash recovery (60s lease), row-level locks `FOR UPDATE`, append-only billing ledger.
+  - Test Suite: `tests/integration/webhooks-api.test.ts` (20/20 integration tests covering all providers, concurrency bursts, replay protection, SSRF rejection, and invariant checks).
+- **Production Status:** NOT EXECUTED IN PRODUCTION. PR #12 remains OPEN and UNMERGED. Remote `main` untouched. Zero live credentials configured.
+
