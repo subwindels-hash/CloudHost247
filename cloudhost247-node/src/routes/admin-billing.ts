@@ -7,16 +7,45 @@ import type { Queryable } from '../db/types';
 import { requireRole } from '../lib/require-role';
 import { ValidationError } from '../lib/errors';
 import { confirmManualPayment, rejectManualPayment } from '../services/payment-service';
+import {
+  adminCancelInvoice,
+  adminGetInvoiceDetail,
+  adminIssueRefund,
+  adminListInvoices,
+  adminListLedger,
+} from '../services/billing-service';
+import { runFinancialReconciliation } from '../services/reconciliation-service';
 
-// Confirming/rejecting a manual bank-transfer payment is routine billing support work — the staff
-// equivalent of an automated webhook arriving — not an account-integrity action (it can't lock
-// anyone out of their account or escalate anyone's privilege), so it is available to both
-// privileged roles, mirroring the `admin`+`super_admin` split already used for routine customer
-// support work in src/routes/admin-customers.ts (`CUSTOMER_MANAGEMENT_ROLES`).
+// Confirming/rejecting a manual bank-transfer payment, viewing invoices/ledger, issuing refunds,
+// and cancelling invoices are billing operations available to admin and super_admin roles.
 const BILLING_STAFF_ROLES = ['admin', 'super_admin'] as const;
 
 const idParamSchema = z.object({ id: z.string().uuid('id must be a valid UUID') });
 const rejectPaymentSchema = z.object({ reason: z.string().min(1).max(2000) });
+
+const listInvoicesQuerySchema = z.object({
+  page: z.coerce.number().int().positive().optional(),
+  limit: z.coerce.number().int().positive().max(100).optional(),
+  status: z.enum(['paid', 'unpaid', 'void', 'refunded', 'partially_refunded']).optional(),
+  search: z.string().max(100).optional(),
+});
+
+const listLedgerQuerySchema = z.object({
+  page: z.coerce.number().int().positive().optional(),
+  limit: z.coerce.number().int().positive().max(100).optional(),
+  userId: z.string().uuid().optional(),
+  invoiceId: z.string().uuid().optional(),
+  entryType: z.enum(['charge', 'payment', 'refund', 'credit']).optional(),
+});
+
+const refundInvoiceSchema = z.object({
+  amountCents: z.number().int().positive('Refund amount must be a positive integer in cents'),
+  reason: z.string().min(1, 'Reason is required').max(2000),
+});
+
+const cancelInvoiceSchema = z.object({
+  reason: z.string().min(1, 'Reason is required').max(2000),
+});
 
 function parseOrThrow<T>(schema: z.ZodType<T>, value: unknown): T {
   const parsed = schema.safeParse(value);
@@ -27,16 +56,65 @@ function parseOrThrow<T>(schema: z.ZodType<T>, value: unknown): T {
 }
 
 /**
- * Phase 5C staff-side billing API — the manual/offline gateway's confirmation mechanism only.
- * See docs/API_PAYMENTS.md for the full contract.
- *
- * This is deliberately narrow: two single-purpose endpoints for resolving a `manual`-provider
- * payment that's still `pending`. It is NOT the broader Phase 5F admin billing dashboard
- * (search/filter/view-all-invoices, refunds, etc.) — that remains out of scope for this phase.
+ * Phase 5C & 5F staff-side billing API routes.
  */
 export async function registerAdminBillingRoutes(app: FastifyInstance, env: Env, overridePool?: Queryable) {
   const pool = overridePool ?? getPool(env);
 
+  // --- Phase 5F: Invoices Management ---
+  app.get('/api/v1/admin/invoices', async (request) => {
+    await requireRole(request, env, pool, BILLING_STAFF_ROLES);
+    const query = parseOrThrow(listInvoicesQuerySchema, request.query);
+    return adminListInvoices(pool, query);
+  });
+
+  app.get<{ Params: { id: string } }>('/api/v1/admin/invoices/:id', async (request) => {
+    await requireRole(request, env, pool, BILLING_STAFF_ROLES);
+    const { id } = parseOrThrow(idParamSchema, request.params);
+    const invoice = await adminGetInvoiceDetail(pool, id);
+    return { invoice };
+  });
+
+  app.post<{ Params: { id: string } }>('/api/v1/admin/invoices/:id/refund', async (request) => {
+    const auth = await requireRole(request, env, pool, BILLING_STAFF_ROLES);
+    const { id } = parseOrThrow(idParamSchema, request.params);
+    const { amountCents, reason } = parseOrThrow(refundInvoiceSchema, request.body);
+
+    const invoice = await adminIssueRefund(pool, auth.userId, id, amountCents, reason, randomUUID, {
+      ipAddress: request.ip,
+      userAgent: request.headers['user-agent'] ?? null,
+    });
+
+    return { invoice };
+  });
+
+  app.post<{ Params: { id: string } }>('/api/v1/admin/invoices/:id/cancel', async (request) => {
+    const auth = await requireRole(request, env, pool, BILLING_STAFF_ROLES);
+    const { id } = parseOrThrow(idParamSchema, request.params);
+    const { reason } = parseOrThrow(cancelInvoiceSchema, request.body);
+
+    const invoice = await adminCancelInvoice(pool, auth.userId, id, reason, randomUUID, {
+      ipAddress: request.ip,
+      userAgent: request.headers['user-agent'] ?? null,
+    });
+
+    return { invoice };
+  });
+
+  // --- Phase 5F: Global Financial Ledger ---
+  app.get('/api/v1/admin/billing/ledger', async (request) => {
+    await requireRole(request, env, pool, BILLING_STAFF_ROLES);
+    const query = parseOrThrow(listLedgerQuerySchema, request.query);
+    return adminListLedger(pool, query);
+  });
+
+  // --- Phase 5G: Automated Financial Reconciliation ---
+  app.get('/api/v1/admin/billing/reconciliation', async (request) => {
+    await requireRole(request, env, pool, BILLING_STAFF_ROLES);
+    const report = await runFinancialReconciliation(pool);
+    return { report };
+  });
+  // --- Phase 5C: Manual Payment Confirmation / Rejection ---
   app.post<{ Params: { id: string } }>('/api/v1/admin/payments/:id/confirm-manual', async (request) => {
     const auth = await requireRole(request, env, pool, BILLING_STAFF_ROLES);
     const { id } = parseOrThrow(idParamSchema, request.params);
@@ -62,3 +140,4 @@ export async function registerAdminBillingRoutes(app: FastifyInstance, env: Env,
     return { payment };
   });
 }
+

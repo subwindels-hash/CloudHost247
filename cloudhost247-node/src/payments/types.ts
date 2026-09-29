@@ -1,13 +1,8 @@
 import type { Env } from '../config/env';
 
 /**
- * Phase 5C payment gateway abstraction. A "gateway" is anything capable of *initiating* a payment
- * attempt for an invoice — it is deliberately not asked to (and cannot) report success or failure
- * synchronously. Every real gateway confirms a payment asynchronously (a redirect callback, a
- * webhook, a human) — modelling `initiatePayment` as "return the details of a now-pending attempt"
- * rather than "return whether it succeeded" is what keeps this interface honest about that, and
- * keeps Phase 5D's job (receiving and verifying those asynchronous confirmations) a separate,
- * additive layer instead of something baked into this interface's shape.
+ * Phase 5C & 5D payment gateway abstraction. A "gateway" is anything capable of *initiating* a payment
+ * attempt for an invoice and *handling* incoming verified webhooks asynchronously.
  */
 export interface InitiatePaymentInput {
   paymentId: string;
@@ -34,4 +29,34 @@ export interface PaymentGateway {
    * both recognize. */
   readonly id: string;
   initiatePayment(input: InitiatePaymentInput, env: Env): Promise<GatewayInitiationResult>;
+}
+
+export interface WebhookEventDTO {
+  gateway: string;
+  providerEventId: string;
+  providerTransmissionId?: string;
+  providerPaymentReference: string;
+  cloudhostPaymentId?: string;
+  canonicalEventType: 'payment.success' | 'payment.failed' | 'payment.cancelled' | 'unhandled';
+  eventOccurredAt: Date;
+  receivedAt: Date;
+  amountCents: number;
+  currency: string;
+  outcome: 'succeeded' | 'failed' | 'pending' | 'unhandled';
+  failureReason?: string;
+  rawPayloadHash: string;
+}
+
+export interface WebhookHandler {
+  readonly gatewayId: string;
+  verifySignature(
+    rawBody: Buffer,
+    headers: Record<string, string | string[] | undefined>,
+    env: Env
+  ): Promise<boolean> | boolean;
+  parseEvent(
+    rawBody: Buffer,
+    headers: Record<string, string | string[] | undefined>,
+    rawPayloadHash: string
+  ): WebhookEventDTO;
 }

@@ -2,6 +2,7 @@ import type { Queryable } from '../db/types';
 import {
   addCartItem,
   clearCart,
+  findCartItemForPlanPeriod,
   findCartItemWithOwner,
   getOrCreateCartForUser,
   listCartItemsWithDetails,
@@ -16,7 +17,7 @@ import { withTransaction } from '../db/transaction';
 import { issueInvoiceForOrder } from './billing-service';
 import { fromCents, multiplyCents, sumCents, toCents } from '../lib/money';
 import { NotFoundError, ValidationError } from '../lib/errors';
-import { DEFAULT_CURRENCY } from '../config/billing';
+import { DEFAULT_CURRENCY, MAX_CART_ITEM_QUANTITY } from '../config/billing';
 import {
   toCartLineDTO,
   toOrderItemDTO,
@@ -84,13 +85,29 @@ export async function addItemToCart(pool: Queryable, userId: string, input: AddC
   }
 
   const cart = await getOrCreateCartForUser(pool, userId, genId());
-  await addCartItem(pool, {
+  const added = await addCartItem(pool, {
     id: genId(),
     cartId: cart.id,
     planId: plan.id,
     billingPeriod: input.billingPeriod,
     quantity: input.quantity,
   });
+
+  if (!added) {
+    // The line already exists and adding `input.quantity` more would push it past the per-line
+    // cap (src/db/carts.ts#addCartItem enforces this atomically). Report it honestly with the
+    // numbers the customer needs to act on, rather than letting the database CHECK constraint
+    // escape as an unhandled 500. Re-reading the current quantity here is safe: this is the
+    // already-rejected path, nothing was written, and a concurrent change would at worst make
+    // the number in the message slightly stale — never the decision itself, which the database
+    // already made.
+    const existing = await findCartItemForPlanPeriod(pool, cart.id, plan.id, input.billingPeriod);
+    const current = existing?.quantity ?? MAX_CART_ITEM_QUANTITY;
+    throw new ValidationError(
+      `You already have ${current} of this item in your cart and the maximum per line is ${MAX_CART_ITEM_QUANTITY}. ` +
+        `Adding ${input.quantity} more would exceed it — update the existing line's quantity instead.`
+    );
+  }
 
   return computeCartSummary(pool, cart.id, DEFAULT_CURRENCY);
 }

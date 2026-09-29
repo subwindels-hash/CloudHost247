@@ -1,0 +1,37 @@
+diff --git a/cloudhost247-node/src/app.ts b/cloudhost247-node/src/app.ts
+index 049b933..d58aa7b 100644
+--- a/cloudhost247-node/src/app.ts
++++ b/cloudhost247-node/src/app.ts
+@@ -81,8 +81,30 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
+     await registerAdminCustomerRoutes(instance, env, pool);
+     await registerCommerceRoutes(instance, env, pool);
+     await registerBillingRoutes(instance, env, pool);
+-    await registerPaymentRoutes(instance, env, pool);
+-    await registerAdminBillingRoutes(instance, env, pool);
++
++    // ---------------------------------------------------------------------------------------
++    // RECOVERY OPTION B — Phase 5C payment endpoints are DISABLED pending review.
++    //
++    // Phase 5C was merged (c2d3086, via cca731a) without the approval the locked Phase 5 cadence
++    // requires, and an independent audit found a confirmed double-credit defect: concurrent staff
++    // confirmations of the same manual payment each append a `payment` entry to `billing_ledger`,
++    // which is append-only and therefore cannot be corrected by deletion. See
++    // PHASE_5_CHECKPOINT_REPORT.md section 3.1.
++    //
++    // Commenting out these two registrations removes every payment endpoint
++    // (POST /api/v1/invoices/:id/payments, GET /api/v1/payments/:id,
++    //  POST /api/v1/admin/payments/:id/confirm-manual, .../reject-manual) while leaving the
++    // Phase 5A commerce flow, the Phase 5B invoice/ledger schema, and all existing financial
++    // history completely intact. Nothing is dropped, reverted, or deleted — this is a reversible
++    // off switch, not a rollback.
++    //
++    // To re-enable once the defect is fixed and 5C is approved, delete this block's comment
++    // markers. Do NOT revert merge commit cca731a to achieve the same effect: Phase 5A checkout
++    // issues its invoice inside the same transaction (src/services/commerce-service.ts), so a
++    // whole-PR revert would take working Phase 5A commerce with it.
++    // ---------------------------------------------------------------------------------------
++    // await registerPaymentRoutes(instance, env, pool);
++    // await registerAdminBillingRoutes(instance, env, pool);
+   });
+ 
+   if (serveFrontend) {

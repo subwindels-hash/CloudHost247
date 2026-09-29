@@ -18,3 +18,7 @@ configuration.php
 
 __pycache__/
 *.py[cod]
+
+# Convenience symlink to cloudhost247-node/node_modules so tooling run from the repository
+# root (e.g. recovery/verify-financial-invariants.ts) can resolve dependencies.
+/node_modules

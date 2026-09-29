@@ -39,23 +39,70 @@ export interface CreatePaymentInput {
  * to initiate one," never a fabricated success.
  */
 export async function createPayment(tx: Queryable, input: CreatePaymentInput): Promise<PaymentRow> {
+  // `user_id` and `currency` are deliberately NOT taken from the caller's input — they are read
+  // out of the `invoices` row by this same statement, and the amount is checked against that same
+  // row. This makes three cross-row invariants structurally impossible to violate rather than
+  // merely unlikely (independent audit findings B1, B2, B4):
+  //
+  //   B1  a payment can never carry a different currency from its invoice
+  //   B2  a payment can never be attributed to a different user than its invoice
+  //   B4  a payment can never exceed the invoice total
+  //
+  // Doing it as `INSERT ... SELECT ... FROM invoices` means the invoice is read inside the
+  // caller's transaction, under the same snapshot and row locks as the rest of the write, so
+  // there is no read-then-write window for the values to change underneath us. A separate
+  // `SELECT` followed by an `INSERT` would reintroduce exactly the class of race that the
+  // Phase 5C manual-confirmation defect was made of.
+  //
+  // `input.userId`/`input.currency` are still accepted so every caller keeps documenting what it
+  // believes to be true; the assertion below fails loudly if that belief is ever wrong.
   const { rows } = await tx.query<PaymentRow>(
     `INSERT INTO payments (id, invoice_id, user_id, provider, provider_reference, method, amount, currency)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+     SELECT $1, i.id, i.user_id, $3, $4, $5, $6::numeric(12,2), i.currency
+     FROM invoices i
+     WHERE i.id = $2
+       AND $6::numeric(12,2) <= i.total_amount
+       AND i.user_id = $7
+       AND i.currency = $8
      RETURNING *`,
     [
       input.id,
       input.invoiceId,
-      input.userId,
       input.provider ?? null,
       input.providerReference ?? null,
       input.method ?? null,
       input.amount,
+      input.userId,
       input.currency,
     ]
   );
   const row = rows[0];
-  if (!row) throw new Error('Failed to create payment');
+  if (!row) {
+    // Every one of these conditions is an integrity violation rather than ordinary validation —
+    // the service layer has already established that the invoice exists and is unpaid. The
+    // owner/currency assertions live in the WHERE clause rather than after the INSERT for the
+    // reason documented at length in src/db/billing-ledger.ts#recordLedgerEntry: checking after
+    // the write means a mismatched call still writes its row, and under a plain `Pool` (which
+    // satisfies `Queryable`) that row is committed before the throw.
+    const { rows: diag } = await tx.query<{ user_id: string; currency: string; total_amount: string }>(
+      `SELECT user_id, currency, total_amount FROM invoices WHERE id = $1`,
+      [input.invoiceId]
+    );
+    const invoice = diag[0];
+    if (!invoice) {
+      throw new Error(`Failed to create payment: no invoice ${input.invoiceId} exists`);
+    }
+    if (invoice.user_id !== input.userId || invoice.currency !== input.currency) {
+      throw new Error(
+        `Payment/invoice mismatch for invoice ${input.invoiceId}: ` +
+          `caller expected user=${input.userId} currency=${input.currency}, ` +
+          `invoice has user=${invoice.user_id} currency=${invoice.currency}`
+      );
+    }
+    throw new Error(
+      `Failed to create payment: no invoice ${input.invoiceId} accepts an amount of ${input.amount}`
+    );
+  }
   return row;
 }
 
@@ -96,18 +143,56 @@ export async function cancelOtherPendingPayments(tx: Queryable, invoiceId: strin
   );
 }
 
+export async function cancelAllPendingPaymentsForInvoice(tx: Queryable, invoiceId: string): Promise<void> {
+  await tx.query(
+    `UPDATE payments SET status = 'cancelled', updated_at = now()
+     WHERE invoice_id = $1 AND status = 'pending'`,
+    [invoiceId]
+  );
+}
+
+
 export async function updatePaymentStatus(
   tx: Queryable,
   id: string,
   status: PaymentStatus,
-  extra: { failureReason?: string | null; completedAt?: string | null; confirmedByUserId?: string | null } = {}
+  extra: {
+    failureReason?: string | null;
+    completedAt?: string | null;
+    confirmedByUserId?: string | null;
+    /**
+     * The status the caller believes the payment is currently in. When supplied it becomes part
+     * of the `UPDATE`'s own `WHERE` clause, so the check and the write are a single atomic
+     * statement rather than a read followed by a write.
+     *
+     * This closes a real double-credit race: `confirmManualPayment` reads the payment and checks
+     * `status === 'pending'` *outside* its transaction, so two staff requests (or one
+     * double-clicked button, or a retried request) could both pass that check before either
+     * committed, and each would then append its own `payment` entry to `billing_ledger` — an
+     * append-only table whose rows cannot be deleted, only offset by compensating entries. A
+     * 25-round stress test reproduced six confirmations, and six ledger entries, for a single
+     * invoice.
+     *
+     * With this guard the loser of the race updates zero rows and gets `null` back, which the
+     * caller must treat as "someone else already resolved this payment".
+     */
+    expectedCurrentStatus?: PaymentStatus;
+  } = {}
 ): Promise<PaymentRow | null> {
   const { rows } = await tx.query<PaymentRow>(
     `UPDATE payments
      SET status = $1, failure_reason = $2, completed_at = $3, confirmed_by_user_id = COALESCE($4, confirmed_by_user_id), updated_at = now()
      WHERE id = $5
+       AND ($6::text IS NULL OR status = $6)
      RETURNING *`,
-    [status, extra.failureReason ?? null, extra.completedAt ?? null, extra.confirmedByUserId ?? null, id]
+    [
+      status,
+      extra.failureReason ?? null,
+      extra.completedAt ?? null,
+      extra.confirmedByUserId ?? null,
+      id,
+      extra.expectedCurrentStatus ?? null,
+    ]
   );
   return rows[0] ?? null;
 }

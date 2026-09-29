@@ -5,7 +5,7 @@ import { getPool } from '../db/pool';
 import type { Queryable } from '../db/types';
 import { authenticate } from '../lib/require-auth';
 import { ValidationError } from '../lib/errors';
-import { getMyInvoiceDetail, listMyInvoices } from '../services/billing-service';
+import { getMyInvoiceDetail, listMyInvoices, listMyLedger } from '../services/billing-service';
 
 const idParamSchema = z.object({ id: z.string().uuid('id must be a valid UUID') });
 
@@ -39,6 +39,12 @@ export async function registerBillingRoutes(app: FastifyInstance, env: Env, over
     const auth = await authenticate(request, env, pool);
     const invoices = await listMyInvoices(pool, auth.userId);
     return { invoices };
+  });
+
+  app.get('/api/v1/billing/ledger', async (request) => {
+    const auth = await authenticate(request, env, pool);
+    const ledger = await listMyLedger(pool, auth.userId);
+    return { ledger };
   });
 
   app.get<{ Params: { id: string } }>('/api/v1/invoices/:id', async (request) => {

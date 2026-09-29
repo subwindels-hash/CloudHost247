@@ -75,6 +75,13 @@ const envSchema = z.object({
   // with this file's no-fabricated-secrets rule; a deployment that never exercises the sandbox
   // gateway never needs to set it.
   SANDBOX_GATEWAY_WEBHOOK_SECRET: z.string().min(16).optional(),
+
+  // --- Phase 5D: External payment provider webhook secrets ----------------------------------
+  // Secrets for verifying incoming asynchronous webhook signatures. Optional with no hardcoded
+  // fallbacks. Required only when handling live webhooks for that specific provider.
+  STRIPE_WEBHOOK_SECRET: z.string().min(16).optional(),
+  PAYPAL_WEBHOOK_ID: z.string().min(10).optional(),
+  PAYSTACK_SECRET_KEY: z.string().min(16).optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

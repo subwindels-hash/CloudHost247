@@ -147,7 +147,11 @@ export async function recordAuthEvent(
       | 'admin_role_change'
       | 'payment_initiated'
       | 'manual_payment_confirmed'
-      | 'manual_payment_rejected';
+      | 'manual_payment_rejected'
+      | 'webhook_payment_succeeded'
+      | 'webhook_payment_failed'
+      | 'admin_invoice_refunded'
+      | 'admin_invoice_cancelled';
     ipAddress?: string | null;
     userAgent?: string | null;
     metadata?: Record<string, unknown>;

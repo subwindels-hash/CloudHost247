@@ -10,3 +10,15 @@
  * Multi-currency support is out of scope until a future phase explicitly adds it.
  */
 export const DEFAULT_CURRENCY = 'USD';
+
+/**
+ * Maximum quantity a single cart line (and therefore a single order line) may carry.
+ *
+ * This is the one source of truth for that number: the request-validation schema
+ * (src/routes/commerce.ts), the additive add-to-cart upsert guard (src/db/carts.ts), and the
+ * database CHECK constraints (`cart_items_quantity_positive_check` in
+ * database/migrations/0015_create_cart_items.sql and `order_items_quantity_positive_check` in
+ * 0017) must all agree. Changing it here requires a matching migration — the database constraint
+ * is the real backstop and is deliberately not derived from this constant at runtime.
+ */
+export const MAX_CART_ITEM_QUANTITY = 20;
