@@ -13,7 +13,8 @@ import { registerCommerceRoutes } from './routes/commerce';
 import { registerBillingRoutes } from './routes/billing';
 import { registerPaymentRoutes } from './routes/payments';
 import { registerAdminBillingRoutes } from './routes/admin-billing';
-import { HttpError } from './lib/errors';
+import { registerWebhookRoutes } from './routes/webhooks';
+import { HttpError, ValidationError } from './lib/errors';
 import { createLogger } from './lib/logger';
 import type { Queryable } from './db/types';
 
@@ -40,6 +41,26 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     trustProxy: true, // cPanel/Apache sits in front of this process via Passenger's reverse proxy
   });
 
+  // Capture raw request body bytes for cryptographic webhook signature verification
+  // while still parsing JSON for route handlers.
+  app.addContentTypeParser('application/json', { parseAs: 'buffer' }, (req, body, done) => {
+    (req as unknown as { rawBody?: Buffer }).rawBody = Buffer.isBuffer(body)
+      ? body
+      : typeof body === 'string'
+        ? Buffer.from(body)
+        : Buffer.alloc(0);
+    if (!body || body.length === 0) {
+      done(null, {});
+      return;
+    }
+    try {
+      const json = JSON.parse(body.toString('utf8'));
+      done(null, json);
+    } catch {
+      done(new ValidationError('Invalid JSON body'), undefined);
+    }
+  });
+
   app.setErrorHandler((rawError, request, reply) => {
     const error = rawError as Error & { validation?: unknown; statusCode?: number; code?: string };
     if (error instanceof HttpError) {
@@ -64,13 +85,7 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
   });
 
   // Security plugins + API routes are registered inside a *single* avvio plugin/context, in
-  // strict sequence. This matters: @fastify/rate-limit (and helmet/cors) are themselves wrapped
-  // with `fastify-plugin`, which makes them attach their hooks/decorators to their immediate
-  // parent context. If security plugins and routes were registered as separate sibling
-  // `app.register()` calls, the hooks would attach to one sibling context and never reach routes
-  // declared in a different sibling — routes would silently end up with no rate limiting applied.
-  // Registering everything as descendants of one shared context, in order, guarantees security
-  // plugins are fully mounted (hooks attached to this exact context) before any route is added.
+  // strict sequence.
   app.register(async (instance) => {
     await registerSecurityPlugins(instance, env);
     await registerHealthRoutes(instance, env);
@@ -83,27 +98,24 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     await registerBillingRoutes(instance, env, pool);
     await registerPaymentRoutes(instance, env, pool);
     await registerAdminBillingRoutes(instance, env, pool);
+    await registerWebhookRoutes(instance, env, pool);
   });
 
   if (serveFrontend) {
-    // Registered directly on the root `app` (not nested inside the block above) so that the
-    // `reply.sendFile` decorator it adds is visible to the root-level notFoundHandler below —
-    // decorators only flow down to child contexts, never sideways between separate sibling ones.
     app.register(fastifyStatic, {
       root: publicDir,
-      index: false, // handled explicitly by the notFoundHandler below so client routes work too
+      index: false,
       wildcard: false,
     });
   }
 
   app.setNotFoundHandler((request, reply) => {
-    const isApiRoute = request.raw.url?.startsWith('/api') || request.raw.url === '/health' || request.raw.url === '/ready';
+    const isApiRoute =
+      request.raw.url?.startsWith('/api') || request.raw.url === '/health' || request.raw.url === '/ready';
     if (!serveFrontend || isApiRoute || request.method !== 'GET') {
       reply.code(404).send({ error: 'NOT_FOUND', message: 'Resource not found' });
       return;
     }
-    // React Router (client-side) routes: always resolve to the SPA shell so direct navigation
-    // and browser refreshes work when this app is reached through cPanel/Apache/Passenger.
     reply.type('text/html').sendFile('index.html');
   });
 

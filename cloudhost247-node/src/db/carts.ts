@@ -1,3 +1,4 @@
+import { MAX_CART_ITEM_QUANTITY } from '../config/billing';
 import type { Queryable } from './types';
 
 export interface CartRow {
@@ -84,6 +85,24 @@ export async function findCartItemById(pool: Queryable, id: string): Promise<Car
   return rows[0] ?? null;
 }
 
+/** Looks up the single cart line for an exact (cart, plan, billing period) — the same tuple the
+ * unique index in 0015_create_cart_items.sql covers, so this returns at most one row. Used only to
+ * build an accurate error message on the already-rejected over-cap add path
+ * (src/services/commerce-service.ts#addItemToCart); it is never part of a decision, which the
+ * database makes atomically in `addCartItem`. */
+export async function findCartItemForPlanPeriod(
+  pool: Queryable,
+  cartId: string,
+  planId: string,
+  billingPeriod: string
+): Promise<CartItemRow | null> {
+  const { rows } = await pool.query<CartItemRow>(
+    'SELECT * FROM cart_items WHERE cart_id = $1 AND plan_id = $2 AND billing_period = $3 LIMIT 1',
+    [cartId, planId, billingPeriod]
+  );
+  return rows[0] ?? null;
+}
+
 export interface CartItemWithOwnerRow extends CartItemRow {
   cart_user_id: string;
 }
@@ -106,22 +125,34 @@ export async function findCartItemWithOwner(pool: Queryable, id: string): Promis
 
 /** Adds `quantity` more of (planId, billingPeriod) to the cart — upserts against the unique
  * (cart_id, plan_id, billing_period) index, so adding an item already in the cart increases its
- * quantity rather than creating a duplicate line. */
+ * quantity rather than creating a duplicate line.
+ *
+ * Returns `null` — rather than throwing — when the *cumulative* quantity would exceed
+ * `MAX_CART_ITEM_QUANTITY`. The `WHERE` guard on the `DO UPDATE` is what enforces that, and it is
+ * deliberately part of the same single statement as the upsert: evaluating "how many are already
+ * in the cart?" in a separate `SELECT` first would leave a TOCTOU gap where two concurrent
+ * add-to-cart requests for the same line could each pass the check and then jointly exceed the
+ * cap. When the guard blocks the update, Postgres simply updates no row and `RETURNING` yields
+ * nothing, which the service layer (src/services/commerce-service.ts#addItemToCart) turns into an
+ * honest 400. Without the guard the additive `quantity` would violate
+ * `cart_items_quantity_positive_check` and surface as an unhandled 500.
+ *
+ * The database CHECK constraint remains the real backstop — this guard exists so a legitimate
+ * customer action produces a clear, actionable error instead of an internal-server-error. */
 export async function addCartItem(
   pool: Queryable,
   input: { id: string; cartId: string; planId: string; billingPeriod: string; quantity: number }
-): Promise<CartItemRow> {
+): Promise<CartItemRow | null> {
   const { rows } = await pool.query<CartItemRow>(
     `INSERT INTO cart_items (id, cart_id, plan_id, billing_period, quantity)
      VALUES ($1, $2, $3, $4, $5)
      ON CONFLICT (cart_id, plan_id, billing_period)
      DO UPDATE SET quantity = cart_items.quantity + EXCLUDED.quantity, updated_at = now()
+     WHERE cart_items.quantity + EXCLUDED.quantity <= $6
      RETURNING *`,
-    [input.id, input.cartId, input.planId, input.billingPeriod, input.quantity]
+    [input.id, input.cartId, input.planId, input.billingPeriod, input.quantity, MAX_CART_ITEM_QUANTITY]
   );
-  const row = rows[0];
-  if (!row) throw new Error('Failed to add cart item');
-  return row;
+  return rows[0] ?? null;
 }
 
 /** Sets a line's quantity to an absolute value (not additive — see addCartItem for "add more"). */
