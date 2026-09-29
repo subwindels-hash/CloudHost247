@@ -323,6 +323,91 @@ final class WhmcsDataSource implements LiveDataSource
         return $this->currency;
     }
 
+    public function brokerageAvailability()
+    {
+        if (!class_exists('CloudHost247\\Broker\\Repositories\\SettingsRepository')) {
+            $this->reason = 'The Domain Brokerage module is not installed.';
+            return null;
+        }
+        try {
+            $settings = new \CloudHost247\Broker\Repositories\SettingsRepository();
+            $enabled = $settings->isBrokerageEnabled();
+        } catch (\Throwable $unavailable) {
+            $this->reason = 'Domain Brokerage settings could not be read.';
+            return null;
+        }
+        return array(
+            'enabled' => (bool) $enabled,
+            'new_case_url' => CartLinks::brokerNewCase(),
+            'list_url' => CartLinks::brokerCaseList(),
+        );
+    }
+
+    public function brokerageFees()
+    {
+        if (!class_exists('CloudHost247\\Broker\\Repositories\\FeeRepository')) {
+            $this->reason = 'The Domain Brokerage module is not installed.';
+            return null;
+        }
+        try {
+            $rows = (new \CloudHost247\Broker\Repositories\FeeRepository())->enabled();
+        } catch (\Throwable $unavailable) {
+            $this->reason = 'Brokerage fee rules could not be read.';
+            return null;
+        }
+        $fees = array();
+        foreach ($rows as $row) {
+            $fees[] = array(
+                'name' => $this->sanitizer->text(isset($row->name) ? $row->name : '', 120),
+                'fee_type' => $this->sanitizer->text(isset($row->fee_type) ? $row->fee_type : '', 16),
+                'applies_to' => $this->sanitizer->text(isset($row->applies_to) ? $row->applies_to : '', 24),
+                'amount' => (float) (isset($row->amount) ? $row->amount : 0),
+                'currency' => $this->sanitizer->text(isset($row->currency) ? $row->currency : '', 8),
+            );
+        }
+        return $fees;
+    }
+
+    public function brokerageCases($clientId, $limit = 5)
+    {
+        if (!class_exists('CloudHost247\\Broker\\Repositories\\CaseRepository')) {
+            $this->reason = 'The Domain Brokerage module is not installed.';
+            return null;
+        }
+        $clientId = (int) $clientId;
+        $limit = max(1, min(25, (int) $limit));
+        $base = array(
+            'rows' => array(),
+            'total' => 0,
+            'list_url' => CartLinks::brokerCaseList(),
+            'new_case_url' => CartLinks::brokerNewCase(),
+        );
+        if ($clientId <= 0) { return $base; }
+        try {
+            $result = (new \CloudHost247\Broker\Repositories\CaseRepository())->forClient($clientId, 1, $limit);
+        } catch (\Throwable $unavailable) {
+            $this->reason = 'Brokerage cases could not be read.';
+            return null;
+        }
+        if (!is_array($result) || !isset($result['rows'])) { return $base; }
+        foreach ($result['rows'] as $row) {
+            $status = isset($row->status) ? (string) $row->status : '';
+            $label = class_exists('CloudHost247\\Broker\\Domain\\CaseStatus')
+                ? \CloudHost247\Broker\Domain\CaseStatus::label($status)
+                : $status;
+            $base['rows'][] = array(
+                'case_number' => $this->sanitizer->text(isset($row->case_number) ? $row->case_number : '', 40),
+                'domain' => $this->sanitizer->text(isset($row->domain) ? $row->domain : '', 255),
+                'status' => $this->sanitizer->text($status, 40),
+                'status_label' => $this->sanitizer->text($label, 60),
+                'updated_at' => $this->sanitizer->text(isset($row->updated_at) ? $row->updated_at : '', 40),
+                'detail_url' => CartLinks::brokerCaseDetail(isset($row->id) ? $row->id : 0),
+            );
+        }
+        $base['total'] = (int) $result['total'];
+        return $base;
+    }
+
     private function hydrateProduct($row, array $groups, $cycle)
     {
         $id = (int) $row->id;

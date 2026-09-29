@@ -400,6 +400,103 @@ Gandi v5 REST API for domain registration, renewal and contact management.
 | Personal access token (`access_token`) | secret | yes | **encrypted vault** | Sent as an Authorization bearer header. |
 | Organisation ID (`account_id`) | text | no | configuration row | Optional sharing-id used when the token can see several organisations. |
 
+#### GoDaddy Domains API — `godaddy`
+
+GoDaddy Domains v1 API for availability lookup, registration, DNS, contacts
+and transfer. GoDaddy's aftermarket/brokerage purchase of a domain already
+owned by a third party is a separate GoDaddy product that this API does not
+expose, and CloudHost247 never assumes that access exists.
+
+- **Vendor:** GoDaddy.com, LLC
+- **Provider documentation:** https://developer.godaddy.com/doc/endpoint/domains
+- **Where to obtain credentials:** GoDaddy Developer Portal -> API Keys. Production keys require an approved GoDaddy account in good standing; OTE (test) keys are self-serve.
+- **Required scopes / permissions:** `GET /v1/domains/available`, `GET /v1/domains/{domain}`, `PATCH /v1/domains/{domain}/records`, `POST /v1/domains/{domain}/transferOut`
+- **Authentication:** `Authorization: sso-key {key}:{secret}` request header
+- **Endpoint:** Environment-mapped — production `https://api.godaddy.com`, staging/development (OTE) `https://api.ote-godaddy.com`
+- **Connection test:** `GET /v1/domains/available?domain=cloudhost247-health-check.com&checkType=FAST`
+- **Platform usage:** `modules/addons/cloudhost247_broker` (domain search state resolution; `domain_availability` capability only — never brokerage)
+
+| Field | Type | Required | Stored | Purpose |
+|---|---|---|---|---|
+| GoDaddy API key (`username`) | text | yes | configuration row | Created at the GoDaddy Developer Portal. |
+| GoDaddy API secret (`api_secret`) | secret | yes | **encrypted vault** | Sent only in the Authorization header, never in a URL. |
+
+#### Sedo Marketplace Partner API — `sedo`
+
+Sedo Marketplace Partner Program (MPP) API for domain search, for-sale lookup
+and aftermarket brokerage requests. Requires an approved Sedo partner/API
+agreement — CloudHost247 does not assume this access exists, and no
+brokerage capability is exposed to a customer until the connection is both
+configured and tested successfully.
+
+- **Vendor:** Sedo GmbH
+- **Provider documentation:** https://api.sedo.com/ (issued to approved Marketplace Partner Program members)
+- **Where to obtain credentials:** Issued by the Sedo Marketplace Partner Program team after commercial approval.
+- **Required scopes / permissions:** domain search, partner for-sale lookup, partner brokerage request
+- **Authentication:** HTTP Basic (partner ID + sign key)
+- **Endpoint:** Fixed provider URL — `https://api.sedo.com`
+- **Connection test:** `GET /partner/status`
+- **Platform usage:** `modules/addons/cloudhost247_broker` (Route A/B acquisition routing, once a partner agreement is confirmed)
+
+| Field | Type | Required | Stored | Purpose |
+|---|---|---|---|---|
+| Sedo partner ID (`account_id`) | text | yes | configuration row | Basic-auth username. |
+| Sedo sign key (`api_secret`) | secret | yes | **encrypted vault** | Used to authenticate partner API requests server-side. Never sent in a query string. |
+
+A commercial Sedo Marketplace Partner Program agreement is required before
+this integration can be enabled. Until the connection tests as Connected, the
+broker engine treats Sedo as unavailable and routes affected cases to the
+manual CloudHost247 broker instead.
+
+#### Afternic Aftermarket API — `afternic`
+
+Afternic aftermarket listing / Fast Transfer API for domains listed through
+the Afternic marketplace network. Requires an approved Afternic reseller or
+API partner agreement. CloudHost247 never displays "Afternic Connected"
+unless this integration is both configured and tested successfully.
+
+- **Vendor:** Afternic (a GoDaddy company)
+- **Provider documentation:** Provided directly by Afternic to approved API partners; there is no public self-serve specification.
+- **Where to obtain credentials:** Issued by the Afternic partner integrations team upon approval.
+- **Required scopes / permissions:** for-sale lookup, Fast Transfer acquisition request
+- **Authentication:** `Authorization: Bearer <secret>` request header
+- **Endpoint:** Supplied by the administrator (validated HTTPS endpoint, issued at partner onboarding)
+- **Connection test:** `GET /status`
+- **Platform usage:** `modules/addons/cloudhost247_broker` (Route A/B acquisition routing, once a partner agreement is confirmed)
+
+| Field | Type | Required | Stored | Purpose |
+|---|---|---|---|---|
+| Afternic API key (`api_key`) | secret | yes | **encrypted vault** | Sent as an Authorization bearer header. |
+
+#### DomainAgents Brokerage API — `domainagents`
+
+DomainAgents domain acquisition/brokerage service: owner outreach,
+negotiation, offer/counteroffer and transfer support. Requires an approved
+DomainAgents partner/API agreement. CloudHost247 does not assume this access
+exists.
+
+- **Vendor:** DomainAgents, LLC
+- **Provider documentation:** Provided directly by DomainAgents to approved API partners.
+- **Where to obtain credentials:** Issued by DomainAgents upon partner approval.
+- **Required scopes / permissions:** acquisition request, negotiation status, offer submission, transfer status
+- **Authentication:** `Authorization: Bearer <secret>` request header
+- **Endpoint:** Supplied by the administrator (validated HTTPS endpoint, issued at partner onboarding)
+- **Connection test:** `GET /status`
+- **Platform usage:** `modules/addons/cloudhost247_broker` (Route B acquisition routing, once a partner agreement is confirmed)
+
+| Field | Type | Required | Stored | Purpose |
+|---|---|---|---|---|
+| API base URL (`base_url`) | url | yes | configuration row | Supplied by DomainAgents at partner onboarding. |
+| API key (`api_key`) | secret | yes | **encrypted vault** | Sent as an Authorization bearer header. |
+
+Brokerage capability for Sedo, Afternic and DomainAgents is reported to the
+platform, and to the Domain Broker Service's routing engine, only after each
+respective integration tests as Connected **and** an administrator has
+confirmed the partner/commercial agreement in **Super Admin -> Domain
+Brokerage -> Providers**. Until then, `modules/addons/cloudhost247_broker`
+routes affected cases to the manual CloudHost247 broker (the guaranteed
+fallback), which requires no external API access at all.
+
 ### DNS
 
 #### PowerDNS authoritative API — `powerdns`

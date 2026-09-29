@@ -577,6 +577,61 @@ final class WidgetCatalog
                     call_user_func($f, 'show_checked_at', 'Show last checked time', 'toggle', true),
                 ),
             ),
+            'broker_this_domain' => array(
+                'label' => 'Broker This Domain', 'category' => 'business', 'icon' => 'globe', 'live_data' => true,
+                'description' => 'Lets a visitor ask CloudHost247 to try to acquire a specific domain. Submits to the real Domain Brokerage service; shown as unavailable if brokerage is not enabled.',
+                'fields' => array(
+                    call_user_func($f, 'heading', 'Heading', 'text', 'Want this domain?'),
+                    call_user_func($f, 'text', 'Supporting text', 'textarea', 'We can reach out on your behalf through legitimate channels. Buying registered domains is never guaranteed.'),
+                    call_user_func($f, 'placeholder', 'Domain field placeholder', 'text', 'example.com'),
+                    call_user_func($f, 'button_label', 'Button label', 'text', 'Broker This Domain'),
+                ),
+            ),
+            'domain_brokerage_cta' => array(
+                'label' => 'Domain Brokerage CTA', 'category' => 'business', 'icon' => 'bolt', 'live_data' => true,
+                'description' => 'A general call-to-action that links into the real Domain Brokerage request form. Shown as unavailable if brokerage is not enabled.',
+                'fields' => array(
+                    call_user_func($f, 'heading', 'Heading', 'text', 'Can\'t get the domain you want?'),
+                    call_user_func($f, 'text', 'Supporting text', 'textarea', 'Our domain brokers can contact the owner and negotiate on your behalf.'),
+                    call_user_func($f, 'button_label', 'Button label', 'text', 'Start a Brokerage Request'),
+                    call_user_func($f, 'variant', 'Style', 'select', 'primary', array('options' => array('primary' => 'Primary', 'secondary' => 'Secondary', 'outline' => 'Outline'))),
+                ),
+            ),
+            'brokerage_status' => array(
+                'label' => 'Brokerage Status', 'category' => 'business', 'icon' => 'status', 'live_data' => true,
+                'description' => 'The signed-in customer\'s most recent Domain Brokerage case and its real status. Shown only to a signed-in visitor with at least one case.',
+                'fields' => array(
+                    call_user_func($f, 'heading', 'Heading', 'text', 'Your brokerage request'),
+                ),
+            ),
+            'customer_brokerage_cases' => array(
+                'label' => 'Customer Brokerage Cases', 'category' => 'business', 'icon' => 'menu', 'live_data' => true,
+                'description' => 'A signed-in customer\'s real Domain Brokerage case list with a link to the full dashboard. Never shows another customer\'s cases.',
+                'fields' => array(
+                    call_user_func($f, 'heading', 'Heading', 'text', 'Your domain brokerage cases'),
+                    call_user_func($f, 'limit', 'Maximum cases', 'number', 5, array('min' => 1, 'max' => 20)),
+                    call_user_func($f, 'empty_text', 'Message when there are none', 'text', 'You have no domain brokerage cases yet.'),
+                ),
+            ),
+            'brokerage_pricing' => array(
+                'label' => 'Brokerage Pricing', 'category' => 'business', 'icon' => 'card', 'live_data' => true,
+                'description' => 'The admin-configured Domain Brokerage fee rules (Super Admin -> Domain Brokerage -> Fees). Never a sample price list.',
+                'fields' => array(
+                    call_user_func($f, 'heading', 'Heading', 'text', 'Brokerage pricing'),
+                    call_user_func($f, 'text', 'Supporting text', 'textarea', 'The acquisition price, brokerage fee, transfer fee and any service fee are always itemised separately.'),
+                ),
+            ),
+            'brokerage_faq' => array(
+                'label' => 'Brokerage FAQ', 'category' => 'business', 'icon' => 'faq',
+                'description' => 'Frequently asked questions about the Domain Brokerage service. Same editor as the general FAQ widget.',
+                'fields' => array(
+                    call_user_func($f, 'items', 'Questions', 'items', array(), array('max_items' => 24, 'fields' => array(
+                        call_user_func($f, 'question', 'Question', 'text', 'Can you guarantee you will get the domain?'),
+                        call_user_func($f, 'answer', 'Answer', 'richtext', '<p>No. A registered domain may not be for sale, and an owner may decline or not respond. We only use legitimate contact channels and will always tell you the real status of your request.</p>'),
+                    ))),
+                    call_user_func($f, 'schema_markup', 'Add FAQ structured data', 'toggle', true),
+                ),
+            ),
 
             /* ----------------------------------------------------------- site */
             'site_logo' => array(

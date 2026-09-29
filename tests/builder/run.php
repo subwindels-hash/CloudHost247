@@ -127,6 +127,10 @@ class ArrayDataSource implements LiveDataSource
     public $statusRows = array();
     public $reviewRows = array();
     public $cartItems = 0;
+    public $brokerInstalled = true;
+    public $brokerEnabled = false;
+    public $brokerFeeRows = array();
+    public $brokerCaseRows = array();
 
     public function available() { return $this->catalogueAvailable; }
     public function unavailableReason() { return 'The WHMCS catalogue is not readable in this test.'; }
@@ -163,6 +167,37 @@ class ArrayDataSource implements LiveDataSource
     public function reviews($limit = 3) { return $this->reviewRows; }
     public function serviceStatus($limit = 6) { return $this->statusRows; }
     public function currency() { return array('id' => 1, 'code' => 'USD', 'prefix' => '$', 'suffix' => ''); }
+
+    public function brokerageAvailability()
+    {
+        if (!$this->brokerInstalled) { return null; }
+        return array('enabled' => $this->brokerEnabled, 'new_case_url' => 'index.php?m=cloudhost247_broker&a=new', 'list_url' => 'index.php?m=cloudhost247_broker&a=list');
+    }
+
+    public function brokerageFees()
+    {
+        return $this->brokerInstalled ? $this->brokerFeeRows : null;
+    }
+
+    public function brokerageCases($clientId, $limit = 5)
+    {
+        if (!$this->brokerInstalled) { return null; }
+        $labels = array('negotiation' => 'Negotiation', 'completed' => 'Completed', 'request_submitted' => 'Request Submitted');
+        $rows = array();
+        if ((int) $clientId > 0) {
+            foreach (array_slice($this->brokerCaseRows, 0, (int) $limit) as $raw) {
+                $rows[] = array(
+                    'case_number' => $raw->case_number,
+                    'domain' => $raw->domain,
+                    'status' => $raw->status,
+                    'status_label' => isset($labels[$raw->status]) ? $labels[$raw->status] : $raw->status,
+                    'updated_at' => $raw->updated_at,
+                    'detail_url' => 'index.php?m=cloudhost247_broker&a=detail&id=' . $raw->id,
+                );
+            }
+        }
+        return array('rows' => $rows, 'total' => count($rows), 'list_url' => 'index.php?m=cloudhost247_broker&a=list', 'new_case_url' => 'index.php?m=cloudhost247_broker&a=new');
+    }
 }
 
 $data = new ArrayDataSource();
@@ -281,7 +316,7 @@ $check('breakpoints are tablet 1024 and mobile 767',
 /* ------------------------------------------------------- 5. widget catalog */
 
 $catalog = new WidgetCatalog();
-$check('catalogue exposes 34 widgets plus 3 layout containers', count($catalog->keys()) === 37);
+$check('catalogue exposes 40 widgets plus 3 layout containers', count($catalog->keys()) === 43);
 $check('layout containers are marked structural',
     $catalog->get('section')->isStructural() && $catalog->get('heading')->isStructural() === false);
 $check('catalogue has the hosting widgets', $catalog->has('hosting_plans') && $catalog->has('domain_search')
@@ -444,6 +479,109 @@ $statusHtml = $renderer->render(Document::fromArray(array('children' => array(bu
 )))), $validator, false), RenderContext::publish($data))['html'];
 $check('service status reports measured state', strpos($statusHtml, 'OVH API') !== false
     && strpos($statusHtml, 'is-ok') !== false && strpos($statusHtml, 'is-warn') !== false);
+
+/* --------------------------------------------------- 7b. domain brokerage widgets */
+
+$brokerWidgets = array('broker_this_domain', 'domain_brokerage_cta', 'brokerage_status', 'customer_brokerage_cases', 'brokerage_pricing', 'brokerage_faq');
+foreach ($brokerWidgets as $brokerWidgetKey) {
+    $check('the widget catalogue declares "' . $brokerWidgetKey . '"', $catalog->has($brokerWidgetKey));
+}
+
+$data->brokerInstalled = false;
+$notInstalledHtml = $renderer->render(Document::fromArray(array('children' => array(buildSection(array(
+    array('widget' => 'broker_this_domain', 'props' => array()),
+    array('widget' => 'domain_brokerage_cta', 'props' => array()),
+    array('widget' => 'brokerage_pricing', 'props' => array()),
+)))), $validator, false), RenderContext::editor($data))['html'];
+$check('brokerage widgets say so when the module is not installed',
+    substr_count($notInstalledHtml, 'Domain Brokerage is not installed') === 3);
+
+$data->brokerInstalled = true;
+$data->brokerEnabled = false;
+$disabledHtml = $renderer->render(Document::fromArray(array('children' => array(buildSection(array(
+    array('widget' => 'broker_this_domain', 'props' => array('heading' => 'Want this domain?')),
+    array('widget' => 'domain_brokerage_cta', 'props' => array('button_label' => 'Ask a broker')),
+)))), $validator, false), RenderContext::editor($data))['html'];
+$check('the CTA widgets never invite a request the platform is not accepting',
+    strpos($disabledHtml, 'not currently being accepted') !== false
+    && strpos($disabledHtml, 'Want this domain?') === false
+    && strpos($disabledHtml, 'Ask a broker') === false);
+
+$data->brokerEnabled = true;
+$ctaHtml = $renderer->render(Document::fromArray(array('children' => array(buildSection(array(
+    array('widget' => 'broker_this_domain', 'props' => array('heading' => 'Want this domain?', 'button_label' => 'Broker This Domain')),
+    array('widget' => 'domain_brokerage_cta', 'props' => array('button_label' => 'Ask a broker')),
+)))), $validator, false), RenderContext::publish($data))['html'];
+$check('Broker This Domain renders a real form to the brokerage module', strpos($ctaHtml, 'action="index.php?m=cloudhost247_broker"') !== false
+    && strpos($ctaHtml, 'name="domain"') !== false && strpos($ctaHtml, 'Broker This Domain') !== false);
+$check('the Domain Brokerage CTA links to the real new-case form', strpos($ctaHtml, 'href="index.php?m=cloudhost247_broker&amp;a=new"') !== false
+    && strpos($ctaHtml, 'Ask a broker') !== false);
+
+$previousUid = isset($_SESSION['uid']) ? $_SESSION['uid'] : null;
+unset($_SESSION['uid']);
+$signedOutHtml = $renderer->render(Document::fromArray(array('children' => array(buildSection(array(
+    array('widget' => 'brokerage_status', 'props' => array()),
+    array('widget' => 'customer_brokerage_cases', 'props' => array()),
+)))), $validator, false), RenderContext::editor($data))['html'];
+$check('a signed-out visitor is asked to sign in rather than shown case data',
+    substr_count($signedOutHtml, 'Sign in') === 2);
+
+$_SESSION['uid'] = 501;
+$data->brokerCaseRows = array();
+$emptyCasesHtml = $renderer->render(Document::fromArray(array('children' => array(buildSection(array(
+    array('widget' => 'brokerage_status', 'props' => array()),
+    array('widget' => 'customer_brokerage_cases', 'props' => array('empty_text' => 'No brokerage cases on this account.')),
+)))), $validator, false), RenderContext::publish($data))['html'];
+$check('an account with no cases is told so honestly, not shown a sample case',
+    strpos($emptyCasesHtml, 'You have no domain brokerage cases yet.') !== false
+    && strpos($emptyCasesHtml, 'No brokerage cases on this account.') !== false);
+
+$data->brokerCaseRows = array(
+    (object) array('id' => 9, 'case_number' => 'BRK-2026-000184', 'domain' => 'example.com', 'status' => 'negotiation', 'updated_at' => '2026-09-20 10:00:00'),
+    (object) array('id' => 10, 'case_number' => 'BRK-2026-000201', 'domain' => 'another.com', 'status' => 'completed', 'updated_at' => '2026-09-21 10:00:00'),
+);
+$casesHtml = $renderer->render(Document::fromArray(array('children' => array(buildSection(array(
+    array('widget' => 'brokerage_status', 'props' => array()),
+    array('widget' => 'customer_brokerage_cases', 'props' => array('limit' => 5)),
+)))), $validator, false), RenderContext::publish($data))['html'];
+$check('brokerage status shows the real most recent case and its real status label',
+    strpos($casesHtml, 'BRK-2026-000184') !== false && strpos($casesHtml, 'Negotiation') !== false);
+$check('customer brokerage cases lists every real case with a link to its detail page',
+    strpos($casesHtml, 'BRK-2026-000201') !== false && strpos($casesHtml, 'Completed') !== false
+    && strpos($casesHtml, 'index.php?m=cloudhost247_broker&amp;a=detail&amp;id=9') !== false);
+if ($previousUid === null) { unset($_SESSION['uid']); } else { $_SESSION['uid'] = $previousUid; }
+$data->brokerCaseRows = array();
+
+$data->brokerFeeRows = array();
+$noFeesHtml = $renderer->render(Document::fromArray(array('children' => array(buildSection(array(
+    array('widget' => 'brokerage_pricing', 'props' => array()),
+)))), $validator, false), RenderContext::editor($data))['html'];
+$check('brokerage pricing admits when no fee rules are configured, rather than inventing one',
+    strpos($noFeesHtml, 'No brokerage fee rules are configured yet.') !== false);
+
+$data->brokerFeeRows = array(
+    array('name' => 'Standard brokerage fee', 'fee_type' => 'percentage', 'applies_to' => 'brokerage_fee', 'amount' => 10.0, 'currency' => 'USD'),
+    array('name' => 'Transfer fee', 'fee_type' => 'fixed', 'applies_to' => 'transfer_fee', 'amount' => 25.0, 'currency' => 'USD'),
+);
+$feesHtml = $renderer->render(Document::fromArray(array('children' => array(buildSection(array(
+    array('widget' => 'brokerage_pricing', 'props' => array('heading' => 'Brokerage pricing')),
+)))), $validator, false), RenderContext::publish($data))['html'];
+$check('brokerage pricing shows the real, separately configured fee rules',
+    strpos($feesHtml, 'Standard brokerage fee') !== false && strpos($feesHtml, '10%') !== false
+    && strpos($feesHtml, 'Transfer fee') !== false && strpos($feesHtml, 'USD 25.00') !== false);
+$check('the acquisition price is always described as separate from these fees',
+    strpos($feesHtml, 'always shown separately') !== false);
+
+$faqHtml = $renderer->render(Document::fromArray(array('children' => array(buildSection(array(
+    array('widget' => 'brokerage_faq', 'props' => array('items' => array(
+        array('question' => 'Can you guarantee the acquisition?', 'answer' => '<p>No, never.</p>'),
+    ))),
+)))), $validator, false), RenderContext::publish($data))['html'];
+$check('the Brokerage FAQ widget reuses the real FAQ renderer', strpos($faqHtml, 'Can you guarantee the acquisition?') !== false
+    && strpos($faqHtml, 'ch247-faq__item') !== false);
+
+$data->brokerInstalled = true;
+$data->brokerEnabled = false;
 
 $check('icons are drawn from the built-in set', Icons::has('check') && Icons::svg('check') !== '');
 $check('unknown icons render nothing', Icons::svg('<script>') === '');

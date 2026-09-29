@@ -79,14 +79,30 @@ rather than rendering it incorrectly.
 
 ## 3. Widget library
 
-37 catalogue entries: 3 layout containers plus 34 widgets.
+43 catalogue entries: 3 layout containers plus 40 widgets.
 
 | Group | Widgets |
 |---|---|
 | Layout | section, container, column, spacer, divider, tabs, accordion, carousel |
 | Content | heading, text editor, image, gallery, video, icon, button, list, testimonial, pricing table, counter, progress bar, call to action |
-| Business | hosting plans, product card, order button, server specifications, domain search, domain pricing, cart, checkout link, customer reviews, form, FAQ, service status |
+| Business | hosting plans, product card, order button, server specifications, domain search, domain pricing, cart, checkout link, customer reviews, form, FAQ, service status, **Broker This Domain, Domain Brokerage CTA, Brokerage Status, Customer Brokerage Cases, Brokerage Pricing, Brokerage FAQ** |
 | Site | logo, navigation menu, account links, copyright |
+
+The six Domain Brokerage widgets read live data from the `cloudhost247_broker`
+module through the same `LiveDataSource` contract as every other business
+widget: `brokerageAvailability()`, `brokerageFees()` and `brokerageCases()`.
+If that module is not installed, or the Super Admin has not turned brokerage
+on, each widget says so plainly ("Domain Brokerage is not installed" /
+"Domain brokerage requests are not currently being accepted") instead of
+rendering a form nobody can submit. "Brokerage Status" and "Customer
+Brokerage Cases" only ever show the signed-in visitor's own cases — an
+anonymous visitor is asked to sign in, never shown a sample case — and both
+link into the real, fully-featured brokerage client area
+(`index.php?m=cloudhost247_broker`) for full case detail, negotiation history
+and payment status rather than re-implementing that UI inside a page. "Broker
+This Domain" submits straight to the brokerage module's own request form,
+exactly as the existing "domain search" widget posts to the WHMCS domain
+checker rather than re-implementing availability checking.
 
 There is deliberately **no raw HTML, shortcode or custom-script widget**. The
 only executable code on a published builder page is the module's own
@@ -111,8 +127,12 @@ source cannot be read. That "unknown" travels to the renderer, which then:
 | account links | real session state: a signed-in visitor is offered the client area, not a login link |
 | customer reviews | published testimonials in the legacy theme content store |
 | service status | `IntegrationManager::installed()` — measured health only |
+| Broker This Domain, Domain Brokerage CTA | `cloudhost247_broker`'s `SettingsRepository::isBrokerageEnabled()`; the CTA is hidden unless brokerage is actually turned on, and the form posts to the module's real new-case endpoint |
+| Brokerage Status, Customer Brokerage Cases | the signed-in visitor's own rows from `cloudhost247_broker`'s `CaseRepository::forClient()`, never another customer's cases and never a sample case |
+| Brokerage Pricing | `cloudhost247_broker`'s `FeeRepository::enabled()` — the admin-configured fee rules, or an honest "not configured" notice |
 
-The builder never re-implements a cart, a checkout or an authentication form.
+The builder never re-implements a cart, a checkout, an authentication form, or
+the brokerage negotiation/payment/transfer workflow itself.
 
 ---
 

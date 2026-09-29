@@ -62,4 +62,32 @@ interface LiveDataSource
 
     /** @return array|null array('code','prefix','suffix') */
     public function currency();
+
+    /**
+     * Whether the CloudHost247 Domain Brokerage service is installed and
+     * accepting new requests right now, and the real URLs into it.
+     *
+     * @return array|null null when the brokerage module is not installed;
+     *                     otherwise array('enabled', 'new_case_url', 'list_url')
+     */
+    public function brokerageAvailability();
+
+    /**
+     * The brokerage service's real, admin-configured fee rules
+     * (Super Admin -> Domain Brokerage -> Fees). Never a sample price list.
+     *
+     * @return array|null null when the brokerage module is not installed;
+     *                     otherwise a list of array('name','fee_type','applies_to','amount','currency')
+     */
+    public function brokerageFees();
+
+    /**
+     * One signed-in customer's real brokerage cases, most recent first.
+     *
+     * @param int $clientId 0 when no visitor is signed in
+     * @return array|null null when the brokerage module is not installed;
+     *                     otherwise array('rows' => [...], 'total' => int, 'list_url', 'new_case_url')
+     *                     where each row is array('case_number','domain','status','status_label','updated_at','detail_url')
+     */
+    public function brokerageCases($clientId, $limit = 5);
 }
