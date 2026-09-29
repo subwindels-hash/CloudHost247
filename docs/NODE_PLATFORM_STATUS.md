@@ -849,5 +849,3 @@ sub-phase before the next one begins.
   - Multi-Gateway E2E Lifecycle Suite: `tests/integration/billing-lifecycle-e2e.test.ts` (Order $\to$ Invoice $\to$ Payment $\to$ Settlement $\to$ Customer Ledger $\to$ Admin Review $\to$ Partial & Full Refund Lifecycle $\to$ Invariant Audit).
   - Full Platform Verification: **48 / 48 test files passing (371 / 371 total tests passing)** with 0 vulnerabilities.
 - **Production Status:** PREPARED AND TESTED ONLY. PR #12 remains OPEN and UNMERGED. Remote `main` untouched (zero drift).
-
-

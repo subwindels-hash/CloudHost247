@@ -114,7 +114,6 @@ export async function registerAdminBillingRoutes(app: FastifyInstance, env: Env,
     const report = await runFinancialReconciliation(pool);
     return { report };
   });
-
   // --- Phase 5C: Manual Payment Confirmation / Rejection ---
   app.post<{ Params: { id: string } }>('/api/v1/admin/payments/:id/confirm-manual', async (request) => {
     const auth = await requireRole(request, env, pool, BILLING_STAFF_ROLES);
