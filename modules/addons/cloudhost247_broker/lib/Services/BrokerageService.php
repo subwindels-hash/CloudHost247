@@ -136,7 +136,8 @@ final class BrokerageService
         if (in_array($case->status, array(CaseStatus::REQUEST_SUBMITTED, CaseStatus::MANUAL_BROKER_REQUIRED), true)) {
             $this->transitionStatus($caseId, CaseStatus::BROKER_ASSIGNED, 'admin', $assignedByAdminId, 'A broker has been assigned to this case.', 'customer');
         }
-        AuditLogger::record('cloudhost247_broker', 'case.assign_broker', 'broker_case', $caseId, array('assigned_admin_id' => (int) $case->assigned_admin_id), array('assigned_admin_id' => (int) $adminId), 'success', null, $assignedByAdminId);
+        $previousAdminId = isset($case->assigned_admin_id) ? (int) $case->assigned_admin_id : null;
+        AuditLogger::record('cloudhost247_broker', 'case.assign_broker', 'broker_case', $caseId, array('assigned_admin_id' => $previousAdminId), array('assigned_admin_id' => (int) $adminId), 'success', null, $assignedByAdminId);
         $this->notifier->brokerAssigned($case->client_id, $case->case_number, $case->domain);
         return $this->cases->find($caseId);
     }

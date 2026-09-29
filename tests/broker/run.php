@@ -18,8 +18,13 @@ ini_set('display_errors', '1');
 define('WHMCS', true);
 
 $root = dirname(__DIR__, 2);
-require_once __DIR__ . '/fakes.php';
+// bootstrap.php must load first: it only registers PSR-4 autoloaders (no
+// eager class references), while fakes.php declares
+// CH247BrokerTestLookupBridge implementing
+// CloudHost247\Broker\Domain\LookupBridgeInterface at require-time, which
+// needs the CloudHost247\Broker\ autoloader already registered to resolve.
 require_once $root . '/modules/addons/cloudhost247_broker/bootstrap.php';
+require_once __DIR__ . '/fakes.php';
 
 use CloudHost247\Broker\Domain\CaseStatus;
 use CloudHost247\Broker\Domain\DomainState;

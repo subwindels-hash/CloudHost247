@@ -146,7 +146,7 @@ final class TransferService
     {
         $case = $this->cases->find($caseId);
         if (!$case) { throw new RuntimeException('Brokerage case not found.'); }
-        if ((int) $case->disputed === 1) { throw new RuntimeException('This case is disputed; resolve the dispute before continuing the transfer.'); }
+        if (isset($case->disputed) && (int) $case->disputed === 1) { throw new RuntimeException('This case is disputed; resolve the dispute before continuing the transfer.'); }
         return $case;
     }
 }
