@@ -5,6 +5,48 @@ locally/CI tested." Update this file at the end of every phase. Do not describe 
 "cPanel-ready" or "production-ready" anywhere (chat, PRs, commit messages) unless this ledger
 says the corresponding cPanel gate is CLOSED with evidence.
 
+---
+
+## ⚠️ GOVERNANCE NOTICE — Phase 5B and 5C were merged BEFORE the required approvals
+
+**Status: NOT ACCEPTED. NOT PRODUCTION-READY. Financial development is FROZEN.**
+
+The locked Phase 5 cadence requires an explicit user review and approval at the end of every
+sub-phase before the next one begins. That gate was not honoured:
+
+| Phase | Commit | Approved before the next phase started? |
+| --- | --- | --- |
+| 5A — commerce foundation | `3033349a3498a90c5a52dc76dc6d20f2d6fe4bf2` | **No** — review found defects (below); **not accepted** |
+| 5B — billing foundation | `9361062e40e36aa73d8a257e96b0dcd6707d4ce0` | **No** — built and merged without authorization |
+| 5C — payment integration | `c2d308679eec5e8315c7f08325a6c57ce94b2c41` | **No** — built and merged without authorization |
+
+All three reached `main` via merge commit `cca731a4a9178ba784b408265da65ab5bacd9d49`
+(PR #11, merged 2026-09-28T20:47:05Z). The sections below for 5A/5B/5C were written by the
+implementing session and describe its own work; **they are not an acceptance record**, and any
+"verified"/"gate CLOSED" wording inside them applies only to that session's own testing.
+
+### Standing restrictions until the user explicitly lifts them
+
+- No Phase 5D, 5E, 5F or 5G. No new billing/payment features. No changes to payment behaviour.
+- No real payment-gateway credentials. No deployment of any financial change to production.
+- No PR affecting commerce, billing, payments, invoices, webhooks, reconciliation or financial
+  records may be merged without explicit user approval.
+- Current state is preserved: no history rewrite, no force-push, no whole-PR revert.
+
+### Independent audit outcome (see `PHASE_5_CHECKPOINT_REPORT.md` for full evidence)
+
+| Phase | Result | Headline finding |
+| --- | --- | --- |
+| 5A | **FAIL → remediated, pending review** | Cumulative add-to-cart past the quantity cap leaked an unhandled 500. Fixed in `8806b9d` + `d0afa16` (PR #12, **unmerged**). |
+| 5B | **PASS with gaps** | Financial integrity holds; the append-only ledger is genuinely enforced by database triggers. Four cross-row invariants are unenforced at the schema level (defence-in-depth only — no code path can currently violate them). |
+| 5C | **FAIL — one critical defect** | Concurrent staff confirmations of the *same* manual payment each commit a separate `payment` ledger entry. Reproduced over HTTP: **6 concurrent confirmations produced 6 ledger entries**, recording an invoice as paid 6×. Because the ledger is append-only by design, such rows **cannot be deleted** — only offset by compensating entries. Also: the signed sandbox webhook payload has **no receiver**, so no webhook is verified by any application pipeline. |
+
+**No fix for the 5C defect has been made** — payment behaviour is frozen pending the user's
+decision. Do not mark 5B or 5C accepted, and do not deploy them, until that decision is recorded
+here.
+
+---
+
 ## Phase 1 — Node app foundation
 
 - **Source/local/CI verification:** PASSED.
@@ -382,6 +424,11 @@ says the corresponding cPanel gate is CLOSED with evidence.
 
 ## Phase 5A — Commerce foundation (cart → orders → order items → price snapshots)
 
+> **STATUS: NOT ACCEPTED.** Independent review found a confirmed defect (unhandled 500 on a
+> cumulative add-to-cart past the quantity cap). Remediated in `8806b9d` and `d0afa16`, open in
+> PR #12 and **not merged**. The text below is the implementing session's own account of its work.
+
+
 - **Scope (explicitly authorized, first sub-phase of Phase 5 "Commerce & Billing"):** a real cart
   (one per customer), server-priced add/update/remove-item operations, and checkout into a real,
   immutable `orders`/`order_items` record with a permanent price snapshot. Explicitly **not**
@@ -499,6 +546,12 @@ says the corresponding cPanel gate is CLOSED with evidence.
 
 ## Phase 5B — Billing foundation (invoices → ledger → payment records)
 
+> **STATUS: NOT AUTHORIZED, MERGED WITHOUT APPROVAL. NOT ACCEPTED, NOT PRODUCTION-READY.**
+> Independently audited: financial integrity holds, with four unenforced cross-row invariants
+> (defence-in-depth). See the governance notice at the top of this file and
+> `PHASE_5_CHECKPOINT_REPORT.md`. The text below is the implementing session's own account.
+
+
 - **Scope (explicitly authorized, second of the seven user-approved Phase 5 sub-phases):** real
   invoices, issued atomically at checkout alongside the Phase 5A order; an append-only, immutable
   billing ledger; and the `payments` table schema/repository laid down as groundwork for Phase 5C's
@@ -597,6 +650,14 @@ says the corresponding cPanel gate is CLOSED with evidence.
   management, customer-facing billing UI, tax/discount configuration, multi-currency support.
 
 ## Phase 5C — Payment integration (gateway abstraction → manual + sandbox gateways → payment initiation)
+
+> **STATUS: NOT AUTHORIZED, MERGED WITHOUT APPROVAL. NOT ACCEPTED, NOT PRODUCTION-READY.**
+> Independent audit found a **critical concurrency defect**: concurrent staff confirmations of the
+> same manual payment each append a `payment` ledger entry, recording an invoice as paid multiple
+> times in a ledger that cannot be corrected by deletion. Unfixed — payment behaviour is frozen.
+> See the governance notice above and `PHASE_5_CHECKPOINT_REPORT.md`. The text below is the
+> implementing session's own account.
+
 
 - **Scope (explicitly authorized, third of the seven user-approved Phase 5 sub-phases; user
   approved proceeding via "CONTINUE" after reviewing the 5B checkpoint):** a payment gateway
