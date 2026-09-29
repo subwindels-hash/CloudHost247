@@ -60,8 +60,10 @@ export default function AdminPage() {
     <div className="ch247-stack">
       <div className="ch247-card">
         <h1>Admin — Customers</h1>
-        <p className="ch247-page__hint">
+        <p className="ch247-page__hint" style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
           <Link to="/admin/tickets">Manage support tickets →</Link>
+          <Link to="/admin/invoices">Manage invoices & refunds →</Link>
+          <Link to="/admin/ledger">Financial audit ledger →</Link>
         </p>
 
         <form className="ch247-inline-actions" onSubmit={onSubmitSearch} style={{ marginTop: '1rem' }}>

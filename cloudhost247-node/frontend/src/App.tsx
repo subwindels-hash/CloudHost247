@@ -20,12 +20,16 @@ import ServicesPage from './pages/ServicesPage';
 import DomainsPage from './pages/DomainsPage';
 import BillingPage from './pages/BillingPage';
 import InvoicesPage from './pages/InvoicesPage';
+import InvoiceDetailPage from './pages/InvoiceDetailPage';
 import SupportPage from './pages/SupportPage';
 import SupportTicketPage from './pages/SupportTicketPage';
 import AdminPage from './pages/AdminPage';
 import AdminCustomerDetailPage from './pages/AdminCustomerDetailPage';
 import AdminTicketsPage from './pages/AdminTicketsPage';
 import AdminTicketDetailPage from './pages/AdminTicketDetailPage';
+import { AdminInvoicesPage } from './pages/AdminInvoicesPage';
+import { AdminInvoiceDetailPage } from './pages/AdminInvoiceDetailPage';
+import { AdminLedgerPage } from './pages/AdminLedgerPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 export default function App() {
@@ -57,10 +61,11 @@ export default function App() {
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/billing" element={<BillingPage />} />
           <Route path="/invoices" element={<InvoicesPage />} />
+          <Route path="/invoices/:id" element={<InvoiceDetailPage />} />
           <Route path="/support" element={<SupportPage />} />
           <Route path="/support/:id" element={<SupportTicketPage />} />
 
-          {/* Staff-only (admin + super_admin) customer/ticket management. RequireRole is a
+          {/* Staff-only (admin + super_admin) customer/ticket/billing management. RequireRole is a
               frontend convenience only — every route it guards independently re-verifies the
               caller's role server-side (see components/RequireRole.tsx). */}
           <Route element={<RequireRole roles={['admin', 'super_admin']} />}>
@@ -68,6 +73,9 @@ export default function App() {
             <Route path="/admin/customers/:id" element={<AdminCustomerDetailPage />} />
             <Route path="/admin/tickets" element={<AdminTicketsPage />} />
             <Route path="/admin/tickets/:id" element={<AdminTicketDetailPage />} />
+            <Route path="/admin/invoices" element={<AdminInvoicesPage />} />
+            <Route path="/admin/invoices/:id" element={<AdminInvoiceDetailPage />} />
+            <Route path="/admin/ledger" element={<AdminLedgerPage />} />
           </Route>
         </Route>
 

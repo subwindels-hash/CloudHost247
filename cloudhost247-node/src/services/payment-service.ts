@@ -12,7 +12,7 @@ import {
   type PaymentRow,
 } from '../db/payments';
 import { getGateway } from '../payments/gateway-registry';
-import { NotFoundError, ValidationError } from '../lib/errors';
+import { ConflictError, NotFoundError, ValidationError } from '../lib/errors';
 import { toPaymentDTO, type PaymentDTO } from '../dto/payments';
 import { recordAuthEvent } from '../db/users';
 
@@ -117,7 +117,12 @@ async function loadManualPendingPaymentOrThrow(pool: Queryable, paymentId: strin
     throw new ValidationError('Only payments made through the manual/offline gateway can be confirmed or rejected here');
   }
   if (payment.status !== 'pending') {
-    throw new ValidationError(`Cannot act on a payment with status "${payment.status}"`);
+    // Already resolved. This is a state conflict, not a malformed request, so it is a 409 — the
+    // SAME status the in-transaction guard returns when a concurrent request wins the race (see
+    // updatePaymentStatus's `expectedCurrentStatus`). Staff tooling therefore sees one
+    // deterministic "already processed" response whether the duplicate arrives a millisecond or
+    // a day late, instead of a 400/409 coin flip decided by timing.
+    throw new ConflictError(`This payment has already been resolved (status "${payment.status}")`);
   }
   return payment;
 }
@@ -142,8 +147,18 @@ export async function confirmManualPayment(
     const confirmed = await updatePaymentStatus(tx, payment.id, 'successful', {
       completedAt: new Date().toISOString(),
       confirmedByUserId: actingAdminId,
+      // Re-assert inside the transaction what was checked outside it. Without this, two
+      // concurrent confirmations of the same payment would both proceed and both append a
+      // `payment` ledger entry — recording the invoice as paid twice in an append-only ledger.
+      expectedCurrentStatus: 'pending',
     });
-    if (!confirmed) throw new NotFoundError('No payment was found with that id');
+    if (!confirmed) {
+      // Zero rows updated means a concurrent request won the race and already moved this payment
+      // out of `pending`. Respond with a deterministic 409 Conflict — never a success, never a
+      // second financial credit, and never a 500. The transaction is abandoned here, so no
+      // ledger entry, invoice update or order update from this attempt is ever committed.
+      throw new ConflictError('This payment has already been resolved by another request');
+    }
 
     const invoice = await findInvoiceById(tx, payment.invoice_id);
     if (!invoice) throw new NotFoundError('No invoice was found for this payment');
@@ -196,8 +211,11 @@ export async function rejectManualPayment(
     const rejected = await updatePaymentStatus(tx, payment.id, 'failed', {
       failureReason: reason,
       confirmedByUserId: actingAdminId,
+      expectedCurrentStatus: 'pending',
     });
-    if (!rejected) throw new NotFoundError('No payment was found with that id');
+    if (!rejected) {
+      throw new ConflictError('This payment has already been resolved by another request');
+    }
 
     await recordAuthEvent(tx, {
       id: genId(),

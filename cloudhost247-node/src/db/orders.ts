@@ -147,6 +147,15 @@ export async function setOrderPaymentStatus(tx: Queryable, orderId: string, paym
   return rows[0] ?? null;
 }
 
+export async function setOrderStatus(tx: Queryable, orderId: string, status: string): Promise<OrderRow | null> {
+  const { rows } = await tx.query<OrderRow>(
+    `UPDATE orders SET status = $1, updated_at = now() WHERE id = $2 RETURNING *`,
+    [status, orderId]
+  );
+  return rows[0] ?? null;
+}
+
+
 export async function listOrderItemsForOrder(pool: Queryable, orderId: string): Promise<OrderItemRow[]> {
   const { rows } = await pool.query<OrderItemRow>(
     'SELECT * FROM order_items WHERE order_id = $1 ORDER BY created_at ASC',
