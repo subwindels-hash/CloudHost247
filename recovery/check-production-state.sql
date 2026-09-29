@@ -27,12 +27,35 @@ ORDER BY table_name;
 \echo '    (7 rows = full Phase 5 schema present; 0 rows = Phase 5 never reached this database)'
 
 \echo ''
-\echo '--- 2. Which Phase 5 migrations have been applied? (>= 0014) ---'
+\echo '--- 2a. Have the Phase 5B/5C migrations 0018-0022 specifically been applied? ---'
+-- Lists all five by name and shows APPLIED / not applied for each, so the answer does not depend
+-- on reading a possibly-empty result set correctly.
+-- NOTE: schema_migrations.version stores the four-digit prefix only ('0018'), not the full
+-- filename. Matching on the filename silently reports "not applied" for every row even on a
+-- database where the migrations ARE applied, which is the exact opposite of the truth and the
+-- wrong answer to base a rollback decision on.
+SELECT m.version,
+       m.description,
+       CASE WHEN s.version IS NULL THEN 'not applied' ELSE 'APPLIED' END AS status,
+       s.applied_at
+FROM (VALUES
+        ('0018', 'create_invoices'),
+        ('0019', 'create_billing_ledger'),
+        ('0020', 'create_payments'),
+        ('0021', 'add_payment_confirmation_fields'),
+        ('0022', 'extend_auth_audit_log_event_types_for_payments')
+     ) AS m(version, description)
+LEFT JOIN schema_migrations s ON s.version = m.version
+ORDER BY m.version;
+\echo '    (all five "not applied" = no Phase 5B/5C schema has ever reached this database)'
+
+\echo ''
+\echo '--- 2b. Every Phase 5 migration applied here (>= 0014, includes 5A commerce) ---'
 SELECT version, applied_at
 FROM schema_migrations
 WHERE version >= '0014'
 ORDER BY version;
-\echo '    (no rows = NO Phase 5 migration has ever run here)'
+\echo '    (no rows = NO Phase 5 migration of any kind has ever run here)'
 
 \echo ''
 \echo '--- 3. Does any financial data exist? ---'

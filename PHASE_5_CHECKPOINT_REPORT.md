@@ -652,3 +652,64 @@ last commit before the fix, which cannot silently no-op.
 
 Everything else in Addendum 1 stands: webhook work untouched and frozen, no phase marked accepted,
 PR #12 open and unmerged, nothing deployed.
+
+---
+
+# ADDENDUM 3 — Production-check correctness fix (commit pending)
+
+## A latent bug in the production check, found and fixed
+
+Section D of your directive asks specifically whether **migrations 0018–0022** have been applied.
+The check script answered that only indirectly (`WHERE version >= '0014'`), so an explicit
+per-migration check was added. On verification it reported **"not applied" for all five against a
+database where all five WERE applied.**
+
+Cause: `schema_migrations.version` stores the four-digit prefix (`'0018'`), not the full filename
+(`'0018_create_invoices'`). Matching on filenames never matches.
+
+This mattered more than a normal bug: it fails in the **dangerous direction**. It would have told
+you Phase 5 never reached production when it had — and per the script's own interpretation notes,
+that answer routes you to "Option B is available at essentially zero data risk."
+
+Fixed, and verified in **both** directions, which is what the original check lacked:
+
+```
+--- against a database where they ARE applied (must all say APPLIED) ---
+  APPLIED      0018_create_invoices
+  APPLIED      0019_create_billing_ledger
+  APPLIED      0020_create_payments
+  APPLIED      0021_add_payment_confirmation_fields
+  APPLIED      0022_extend_auth_audit_log_event_types_for_payments
+--- against a database where they are NOT applied (must all say not applied) ---
+  not applied  0018 / 0019 / 0020 / 0021 / 0022
+```
+
+All 9 statements in the file execute cleanly; the `READ ONLY` transaction still rejects writes.
+
+## Sandbox snapshot restore — recovered without reset or force-push
+
+The environment was restored from a snapshot mid-session: `HEAD` reverted to `cca731a` and all nine
+session commits were absent locally, though present on `origin`. The working tree was verified
+**byte-identical** to the pushed tip `bb083e3` (`git diff --cached bb083e3` empty) before anything
+was touched, then recovered with `fetch --unshallow` + `stash -u` + `merge --ff-only bb083e3`.
+
+**No `git reset --hard`, no force-push, no branch deletion, no history rewrite.** Local now matches
+`origin/arena/01a0e9c8-cloudhost247` exactly at `bb083e3`, all nine commits intact, tree clean.
+`node_modules`, `/tmp` probes and the PostgreSQL instance were also wiped and have been rebuilt;
+the full suite was re-run on the recovered checkout: **288/288 across 34 files.**
+
+## On the remaining migration-dependent gap (item B, "document any gap that cannot safely be fixed without a migration")
+
+B1–B4 are fixed by transaction-safe enforcement in the write path, with **no migration**. Two
+things remain that *would* require one, and I am **requesting approval rather than writing them**:
+
+1. **Promoting B1–B4 to database constraints** (additive migration `0023`). The current enforcement
+   binds every write that goes through `createPayment`/`recordLedgerEntry` — which is every write
+   the application makes — but not direct SQL access.
+2. **A database-level guarantee of at most one `payment` ledger entry per invoice** (a partial
+   unique index). Today that is guaranteed by the fixed conditional transition, not by the schema.
+   **Caveat worth your attention:** such an index would permanently forbid legitimate partial
+   payments, which the schema currently allows. I do not recommend it without a product decision on
+   whether partial payments are ever in scope.
+
+Neither has been written. Both are additive-only if approved; `0018`–`0022` would not be edited.
