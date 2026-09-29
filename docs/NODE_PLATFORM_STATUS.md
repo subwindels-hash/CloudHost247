@@ -35,15 +35,33 @@ implementing session and describe its own work; **they are not an acceptance rec
 
 ### Independent audit outcome (see `PHASE_5_CHECKPOINT_REPORT.md` for full evidence)
 
-| Phase | Result | Headline finding |
-| --- | --- | --- |
-| 5A | **FAIL → remediated, pending review** | Cumulative add-to-cart past the quantity cap leaked an unhandled 500. Fixed in `8806b9d` + `d0afa16` (PR #12, **unmerged**). |
-| 5B | **PASS with gaps** | Financial integrity holds; the append-only ledger is genuinely enforced by database triggers. Four cross-row invariants are unenforced at the schema level (defence-in-depth only — no code path can currently violate them). |
-| 5C | **FAIL — one critical defect** | Concurrent staff confirmations of the *same* manual payment each commit a separate `payment` ledger entry. Reproduced over HTTP: **6 concurrent confirmations produced 6 ledger entries**, recording an invoice as paid 6×. Because the ledger is append-only by design, such rows **cannot be deleted** — only offset by compensating entries. Also: the signed sandbox webhook payload has **no receiver**, so no webhook is verified by any application pipeline. |
+| Phase | Audit result | Headline finding | Remediation |
+| --- | --- | --- | --- |
+| 5A | **FAIL → remediated** | Cumulative add-to-cart past the quantity cap leaked an unhandled 500. | Fixed in `8806b9d` + `d0afa16`. PR #12 **open and unmerged — not approved for merge.** |
+| 5B | **PASS with 4 gaps → all four fixed** | Financial integrity holds; the append-only ledger is genuinely enforced by database triggers. Four cross-row invariants (payment/ledger currency, owner and amount vs. the parent invoice) were unenforced. | Fixed in `7a46ebd`, code-only, **no migration**. |
+| 5C | **FAIL — one critical defect → fixed** | Concurrent staff confirmations of the *same* manual payment each committed a separate `payment` ledger entry. Reproduced over HTTP: **8 concurrent confirmations produced 8 successes and 5 ledger entries** on one invoice, in a ledger that is append-only and cannot be corrected by deletion. | Fixed in `7a46ebd`, code-only, **no migration**. |
 
-**No fix for the 5C defect has been made** — payment behaviour is frozen pending the user's
-decision. Do not mark 5B or 5C accepted, and do not deploy them, until that decision is recorded
-here.
+### Authorized remediation completed (commit `7a46ebd`)
+
+- **5C concurrency:** the `pending → resolved` transition is now a single database-enforced atomic
+  statement (`expectedCurrentStatus` folded into the `UPDATE`'s own `WHERE`). Losers of a race get
+  a deterministic **409 Conflict** and commit nothing.
+- **5B B1–B4:** `createPayment` and `recordLedgerEntry` derive `user_id` and `currency` from the
+  parent invoice inside the caller's transaction and check the amount against the invoice total in
+  the same statement, making mismatched rows structurally impossible.
+- **Evidence:** 285/285 tests across 34 files (was 274), reproduced from a **clean clone** with a
+  fresh `npm ci`; 21/21 adversarial assertions against **real PostgreSQL 18.4**; each of the 11 new
+  tests independently verified to **fail against the pre-fix code**.
+- **No migration was added. No historical financial record was modified or deleted.**
+
+### Still outstanding
+
+- **Webhook pipeline is a confirmed implementation gap and remains FROZEN.** No webhook receiver
+  route exists; `verifySignature` is called by no route; the signed sandbox payload has no
+  production consumer. **The sandbox payment pipeline is NOT end-to-end functional.** A proposed
+  scope is in `docs/PROPOSED_SCOPE_WEBHOOK_PIPELINE.md` — not authorized, not started.
+- **No phase is accepted.** 5A, 5B and 5C all remain unaccepted and not production-ready pending
+  explicit user acceptance. Nothing has been deployed.
 
 ---
 
@@ -547,9 +565,11 @@ here.
 ## Phase 5B — Billing foundation (invoices → ledger → payment records)
 
 > **STATUS: NOT AUTHORIZED, MERGED WITHOUT APPROVAL. NOT ACCEPTED, NOT PRODUCTION-READY.**
-> Independently audited: financial integrity holds, with four unenforced cross-row invariants
-> (defence-in-depth). See the governance notice at the top of this file and
-> `PHASE_5_CHECKPOINT_REPORT.md`. The text below is the implementing session's own account.
+> Independently audited: financial integrity holds. All four cross-row invariant gaps (B1-B4) were
+> found and have since been **fixed and independently verified** in `7a46ebd` (code-only, no
+> migration) — but fixing the findings is not acceptance. See the governance notice at the top of
+> this file and `PHASE_5_CHECKPOINT_REPORT.md`. The text below is the implementing session's own
+> account.
 
 
 - **Scope (explicitly authorized, second of the seven user-approved Phase 5 sub-phases):** real
@@ -653,10 +673,13 @@ here.
 
 > **STATUS: NOT AUTHORIZED, MERGED WITHOUT APPROVAL. NOT ACCEPTED, NOT PRODUCTION-READY.**
 > Independent audit found a **critical concurrency defect**: concurrent staff confirmations of the
-> same manual payment each append a `payment` ledger entry, recording an invoice as paid multiple
-> times in a ledger that cannot be corrected by deletion. Unfixed — payment behaviour is frozen.
-> See the governance notice above and `PHASE_5_CHECKPOINT_REPORT.md`. The text below is the
-> implementing session's own account.
+> same manual payment each appended a `payment` ledger entry, recording an invoice as paid multiple
+> times in a ledger that cannot be corrected by deletion. **Fixed and independently verified** in
+> `7a46ebd` (code-only, no migration) under narrowly scoped authorization — fixing it is not
+> acceptance. The **webhook pipeline remains a confirmed gap and is frozen**: no receiver route
+> exists, so the sandbox payment pipeline is NOT end-to-end functional. See the governance notice
+> above and `PHASE_5_CHECKPOINT_REPORT.md`. The text below is the implementing session's own
+> account.
 
 
 - **Scope (explicitly authorized, third of the seven user-approved Phase 5 sub-phases; user

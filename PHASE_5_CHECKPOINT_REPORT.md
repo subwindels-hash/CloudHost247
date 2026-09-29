@@ -440,3 +440,140 @@ own write-ups cannot be mistaken for an acceptance record.
 4. **The 5B gaps (B1–B4)** — service-layer assertions now, a new additive migration later, or defer?
 
 I am stopping here and taking no further action until you decide.
+
+---
+
+# ADDENDUM — Authorized remediation (commit `7a46ebd`)
+
+Added after your decisions of 2026-09-29. Scope was limited to exactly what you authorized: the 5C
+concurrency defect and the four 5B cross-row gaps. **Webhook work was not touched. No migration was
+added. No historical financial record was modified or deleted. Nothing was deployed. PR #12 remains
+open and unmerged.**
+
+## A. 5C double-credit defect — FIXED and independently verified
+
+**Root cause:** `confirmManualPayment` checked `status === 'pending'` outside its transaction, then
+updated with `WHERE id = $1` and no status guard. Two requests that both completed the read before
+either committed would both proceed, each appending a `payment` ledger entry.
+
+**Fix** (`src/db/payments.ts`, `src/services/payment-service.ts` — code only):
+
+- `updatePaymentStatus` takes `expectedCurrentStatus`, folded into the `UPDATE`'s own `WHERE`
+  clause (`AND ($6::text IS NULL OR status = $6)`). Check and write are now one atomic
+  database-enforced statement. Under `READ COMMITTED` the loser re-evaluates the predicate against
+  the committed row, matches nothing, and updates zero rows.
+- The loser receives a deterministic **409 Conflict** and its entire transaction is abandoned — no
+  ledger entry, no invoice update, no order update.
+- The pre-transaction guard now also raises **409** instead of 400, so "already processed" is one
+  answer regardless of whether the duplicate arrives a millisecond or a day late. *(This changes two
+  existing assertions in `payments-api.test.ts` from 400 to 409 — a deliberate, behaviour-visible
+  change, made because you required a deterministic conflict response.)*
+
+**Verification against real PostgreSQL 18.4:**
+
+| Check | Before | After |
+| --- | --- | --- |
+| Forced interleave (both reads before either write) | 2/2 succeeded, ledger 39.98 vs invoice 19.99 | **1/2 succeeded, 1 × 409, ledger 19.99 = invoice** |
+| Stress 40 rounds × 8 concurrent | up to **8 × 200, 6 ledger entries** | **max 1 × 200, max 1 ledger entry, 0 non-409 losers** |
+| Invoices over-credited afterwards | present | **0** |
+| Invoices with duplicate payment entries | present | **0** |
+| Successful payments whose invoice isn't `paid` | — | **0** |
+| Ledger-write failure mid-transaction | — | payment stays `pending`, invoice `unpaid`, retry succeeds |
+
+**Four permanent regression tests** added to `tests/integration/payments-api.test.ts`: simultaneous
+confirmations, repeated bursts with a global over-credit invariant, a confirm-vs-reject race, and
+atomic rollback on ledger failure. **Three of the four fail against the pre-fix code** (the fourth
+covers transaction rollback, which was already correct — stated plainly rather than overclaimed):
+
+```
+× commits exactly one confirmation when several arrive simultaneously
+    AssertionError: expected [200,200,200,200,200,200,…(2)] to have a length of 1 but got 8
+× keeps the ledger total equal to the invoice total under repeated concurrent bursts
+    AssertionError: expected [ …(5) ] to have a length of 1 but got 5
+× lets a confirmation and a rejection race without producing both outcomes
+    AssertionError: expected [ 200, 400 ] to deeply equal [ 200, 409 ]
+```
+
+## B. 5B gaps B1–B4 — ALL FOUR FIXED, no migration required
+
+| # | Invariant | File · function | Enforcement |
+| --- | --- | --- | --- |
+| B1 | payment currency == invoice currency | `src/db/payments.ts` · `createPayment` | derived from the invoice row |
+| B2 | payment `user_id` == invoice `user_id` | `src/db/payments.ts` · `createPayment` | derived from the invoice row |
+| B3 | ledger `user_id`/currency == invoice's | `src/db/billing-ledger.ts` · `recordLedgerEntry` | derived from the invoice row |
+| B4 | payment amount <= invoice total | `src/db/payments.ts` · `createPayment` | `AND $6 <= i.total_amount` in the same statement |
+
+Both writers now use `INSERT ... SELECT ... FROM invoices` so the invoice is read **inside the
+caller's transaction**, under the same snapshot and locks as the write. A separate `SELECT`
+followed by an `INSERT` would have reintroduced exactly the race that caused the 5C defect. A
+defensive post-insert assertion catches any caller whose assumptions have drifted.
+
+**No migration was needed** — the enforcement lives in the write path and is transaction-safe.
+Promoting these to database CHECK/trigger constraints would additionally protect against direct SQL
+access, but that requires a **new additive** migration `0023`; per your instruction I have **not**
+written it and will request approval separately if you want it.
+
+**Seven regression tests** in `tests/integration/billing-schema.test.ts` cover each invariant, a
+positive control (exact-total, partial, invoice-less entries all still work), rollback of a valid
+write beside a rejected one, and a payment against a non-existent invoice. **Six of the seven fail
+against the pre-fix code**; the positive control passes both before and after, confirming the fix
+blocks only what it should.
+
+## C. Webhook pipeline — UNCHANGED and FROZEN
+
+No receiver route was added. `verifySignature` is still called by no route. **The sandbox payment
+pipeline is not end-to-end functional and is not claimed to be.** No provider was activated, no
+credential added. Proposed scope: `docs/PROPOSED_SCOPE_WEBHOOK_PIPELINE.md` — not authorized, not
+started.
+
+## D. Have duplicate entries already been written anywhere persistent?
+
+**Not in anything I can reach — and I did not connect to production.** The only database in this
+sandbox is an ephemeral PostgreSQL 18.4 instance created for the audit; the duplicates it briefly
+contained were produced by my own pre-fix reproduction and the tables were cleared afterwards.
+Current state: **0 invoices with duplicate payment ledger entries, 0 over-credited invoices.**
+
+Your production database cannot be reached from here, so only you can answer this. Run
+`recovery/check-production-state.sql` (read-only, verified: all 8 statements execute cleanly and
+the `READ ONLY` transaction genuinely rejects writes). **Sections 5 and 6 detect exactly this
+condition** — run against the audit database those queries correctly identified 25 affected
+invoices, so the detection is demonstrated rather than assumed.
+
+**If either section returns a row, stop and send me the output.** I will not insert reversal
+entries or modify any financial record without an approved reconciliation plan.
+
+## E. Verification summary
+
+| Item | Result |
+| --- | --- |
+| Full suite (working copy) | **285/285 across 34 files** (was 274/274 across 34) |
+| Full suite (**clean clone**, fresh `npm ci`) | **285/285 across 34 files** |
+| Typecheck (backend + frontend) | clean, both copies |
+| Production build | clean, both copies |
+| Adversarial probe vs real PostgreSQL 18.4 | **21/21** |
+| New tests verified to fail pre-fix | 9 of 11 (the other 2 are positive/rollback controls) |
+| Migrations added | **none** — still 22, unchanged |
+| Historical financial records modified | **none** |
+
+**Commits this session:** `8806b9d` (5A cart fix) · `d0afa16` (5A money.ts) · `8120af1` (checkpoint
+report + governance) · `50a1c47` (prepared recovery patches) · `3b12c49` (production check script) ·
+**`7a46ebd`** (authorized 5C + 5B fixes).
+
+`recovery/5c-fix-concurrent-manual-confirm.patch` is now **superseded** by `7a46ebd`, which
+implements the same fix plus the 409 determinism and the regression tests.
+`recovery/option-b-disable-payment-routes.patch` remains prepared and **unapplied**.
+
+## F. Remaining limitations — stated, not hidden
+
+1. **No phase is accepted.** 5A, 5B and 5C remain unaccepted and not production-ready.
+2. **The webhook pipeline does not exist.** Signature verification, replay rejection and webhook
+   idempotency remain **UNVERIFIED end-to-end** because there is nothing to verify against.
+3. **No browser/visual verification** was performed at any point — no browser was run.
+4. **Production state is unknown to me.** Every "nothing deployed" statement covers this repository
+   and its CI only.
+5. **B1–B4 are enforced in the write path, not by database constraints.** Direct SQL access bypasses
+   them; that would need additive migration `0023`, which I have not written.
+6. **Ledger immutability is privilege-dependent** — a table owner can disable the triggers. The
+   application's runtime role should not own these tables in production.
+
+**Stopping here and awaiting your explicit acceptance.**
