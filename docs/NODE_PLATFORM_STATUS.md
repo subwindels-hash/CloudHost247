@@ -49,9 +49,11 @@ implementing session and describe its own work; **they are not an acceptance rec
 - **5B B1–B4:** `createPayment` and `recordLedgerEntry` derive `user_id` and `currency` from the
   parent invoice inside the caller's transaction and check the amount against the invoice total in
   the same statement, making mismatched rows structurally impossible.
-- **Evidence:** 285/285 tests across 34 files (was 274), reproduced from a **clean clone** with a
-  fresh `npm ci`; 21/21 adversarial assertions against **real PostgreSQL 18.4**; each of the 11 new
-  tests independently verified to **fail against the pre-fix code**.
+- **Evidence:** **288/288 tests across 34 files** (was 274), reproduced from a **clean clone** with
+  a fresh `npm ci`; 21/21 adversarial assertions against **real PostgreSQL 18.4**; 14 new tests, each
+  independently verified to **fail against the pre-fix code** by restoring the pre-fix file versions
+  from `3b12c49`. Includes a **deterministic forced-interleave** test (both callers provably observe
+  `pending` before either writes) and concurrent cross-row invariant tests.
 - **No migration was added. No historical financial record was modified or deleted.**
 
 ### Still outstanding

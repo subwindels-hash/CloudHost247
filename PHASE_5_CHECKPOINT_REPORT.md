@@ -577,3 +577,78 @@ implements the same fix plus the 409 determinism and the regression tests.
    application's runtime role should not own these tables in production.
 
 **Stopping here and awaiting your explicit acceptance.**
+
+---
+
+# ADDENDUM 2 — Gap closure after re-reading the directive (commit `3fc4a9d`)
+
+Re-reading your requirements line by line against what commit `7a46ebd` actually contained found
+two items only partially met. Both are now closed.
+
+## 1. "Deterministic concurrency tests with forced interleaving"
+
+`7a46ebd`'s concurrency tests raced with `Promise.all`. That is realistic but **nondeterministic** —
+the interleaving that triggers the defect may or may not occur on any given run. The barrier-based
+forced interleave existed only in a throwaway probe, not in the repository.
+
+Now committed as `DETERMINISTIC forced interleave: both callers read 'pending' before either
+writes` in `tests/integration/payments-api.test.ts`. A `Queryable` proxy holds every caller at the
+point just past the pre-transaction status read until **all** callers have passed it, so the test
+asserts `arrived === 2` — proving both genuinely observed `pending` — before either transaction
+writes. One must commit; the other must receive **409** and write nothing.
+
+Verified against the pre-fix code (files restored from `3b12c49`):
+
+```
+× DETERMINISTIC forced interleave: both callers read `pending` before either writes
+    AssertionError: expected [ { status: 'fulfilled', …(1) }, …(1) ] to have a length of 1 but got 2
+```
+
+## 2. "Test … concurrent operations" for the 5B gaps
+
+The B1–B4 tests in `7a46ebd` were all sequential. Two concurrency tests are now added to
+`tests/integration/billing-schema.test.ts`:
+
+- **`holds every invariant under concurrent writes against the same invoice`** — issues two
+  legitimate and three invariant-violating payments simultaneously; each must resolve according to
+  its own validity, and only the two legitimate rows may persist.
+- **`never lets concurrent ledger writes attribute an entry to the wrong owner`** — a legitimate
+  and a misattributed ledger write race; only the legitimate one may survive, which matters
+  especially here because the ledger is append-only and a wrong row would be permanent.
+
+Both fail against the pre-fix code:
+
+```
+× holds every invariant under concurrent writes against the same invoice
+    AssertionError: wrong-currency should have failed: expected 'fulfilled' to be 'rejected'
+× never lets concurrent ledger writes attribute an entry to the wrong owner
+    AssertionError: expected 'fulfilled' to be 'rejected'
+```
+
+## Correction to Addendum 1's evidence
+
+While re-verifying, I found that one pre-fix check in the previous round used
+`git stash push <paths>` on files that had **no uncommitted changes** (the fix was already
+committed). That stashed nothing, so the "pre-fix" run still had the fix in place and proved
+nothing. The earlier checks in that round were valid — the changes were genuinely uncommitted at
+the time — but this one was not, and the run that produced it should be disregarded.
+
+All pre-fix verification is now done by explicitly restoring the file versions from `3b12c49`, the
+last commit before the fix, which cannot silently no-op.
+
+## Updated totals
+
+| Item | Result |
+| --- | --- |
+| Full suite (working copy) | **288/288 across 34 files** (was 285) |
+| Full suite (**clean clone**, fresh `npm ci`) | **288/288 across 34 files** |
+| Typecheck + production build | clean, both copies |
+| New tests this round | 3, **all three verified to fail pre-fix** |
+| Cumulative new tests since the audit began | 14 |
+| Migrations | **22, unchanged — none added** |
+| Historical financial records modified | **none** |
+
+**Commits:** `8806b9d` · `d0afa16` · `8120af1` · `50a1c47` · `3b12c49` · `7a46ebd` · **`3fc4a9d`**
+
+Everything else in Addendum 1 stands: webhook work untouched and frozen, no phase marked accepted,
+PR #12 open and unmerged, nothing deployed.
