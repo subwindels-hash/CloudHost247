@@ -1,0 +1,59 @@
+id: ollama
+name: Ollama
+category: ai
+description: Run large language models like Llama, Mistral, and Gemma locally on your own GPU.
+website: https://ollama.com
+repository: https://github.com/ollama/ollama
+documentation: https://github.com/ollama/ollama/blob/main/docs/api.md
+license: MIT
+featured: false
+popularity: 870
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 4
+  memory: 8192
+  storage: 102400
+  recommended:
+    cpu: 8
+    memory: 32768
+    storage: 204800
+  gpu: true
+services:
+  app:
+    image: ollama/ollama
+    internal: false
+    port: 11434
+    volumes:
+    - /root/.ollama
+environment:
+  required: []
+  optional:
+  - key: OLLAMA_KEEP_ALIVE
+    default: 5m
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /api/version
+  port: 11434
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+update:
+  strategy: pull-and-recreate
+versions:
+- version: 0.5.7
+  image: ollama/ollama:0.5.7
+  stable: true
+longDescription: Ollama bundles model weights, inference runtime, and a clean REST API into one service. Pull models
+  with `ollama pull llama3`, then talk to them over OpenAI-compatible HTTP from any application. Model files are
+  stored in a named volume so they survive redeploys.

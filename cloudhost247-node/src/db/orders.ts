@@ -27,6 +27,7 @@ export interface OrderItemRow {
   unit_price_amount: string;
   currency: string;
   line_total_amount: string;
+  metadata: Record<string, unknown> | null;
   created_at: string;
 }
 
@@ -41,6 +42,8 @@ export interface CreateOrderItemInput {
   unitPriceAmount: string;
   currency: string;
   lineTotalAmount: string;
+  /** Phase 6: server-side provisioning metadata (installationId / hosting target). Never client-set. */
+  metadata?: Record<string, unknown>;
 }
 
 export interface CreateOrderInput {
@@ -75,8 +78,8 @@ export async function createOrder(tx: Queryable, input: CreateOrderInput): Promi
     const { rows } = await tx.query<OrderItemRow>(
       `INSERT INTO order_items
          (id, order_id, product_id, plan_id, product_name_snapshot, plan_name_snapshot,
-          billing_period, quantity, unit_price_amount, currency, line_total_amount)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+          billing_period, quantity, unit_price_amount, currency, line_total_amount, metadata)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
        RETURNING *`,
       [
         item.id,
@@ -90,6 +93,7 @@ export async function createOrder(tx: Queryable, input: CreateOrderInput): Promi
         item.unitPriceAmount,
         item.currency,
         item.lineTotalAmount,
+        item.metadata ? JSON.stringify(item.metadata) : null,
       ]
     );
     const row = rows[0];

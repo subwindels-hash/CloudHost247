@@ -1,0 +1,62 @@
+id: prestashop
+name: PrestaShop
+category: e-commerce
+description: Open-source e-commerce platform with 300+ features and a thriving module ecosystem.
+website: https://prestashop.com
+repository: https://github.com/PrestaShop/PrestaShop
+documentation: https://devdocs.prestashop-project.org
+license: OSL-3.0
+featured: false
+popularity: 560
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 2
+  memory: 2048
+  storage: 30720
+  recommended:
+    cpu: 2
+    memory: 4096
+    storage: 81920
+services:
+  app:
+    image: prestashop/prestashop
+    internal: false
+    port: 80
+    volumes:
+    - /var/www/html
+    dependsOn:
+    - db
+  db:
+    image: mysql:8
+    internal: true
+    volumes:
+    - /var/lib/mysql
+    database: mysql
+environment:
+  required: []
+  optional: []
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /
+  port: 80
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+  - database
+update:
+  strategy: pull-and-recreate
+versions:
+- version: '9.0'
+  image: prestashop/prestashop:9.0-apache
+  stable: true

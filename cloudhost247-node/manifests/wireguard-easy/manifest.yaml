@@ -1,0 +1,57 @@
+id: wireguard-easy
+name: WireGuard Easy
+category: networking
+description: The easiest way to install and manage WireGuard VPN on your server.
+website: https://wg-easy.github.io
+repository: https://github.com/wg-easy/wg-easy
+documentation: https://github.com/wg-easy/wg-easy
+license: CC-BY-NC-SA-4.0
+featured: false
+popularity: 810
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 1
+  memory: 512
+  storage: 5120
+  recommended:
+    cpu: 1
+    memory: 1024
+    storage: 10240
+services:
+  app:
+    image: ghcr.io/wg-easy/wg-easy
+    internal: false
+    port: 51821
+    capabilities:
+    - NET_ADMIN
+    volumes:
+    - /etc/wireguard
+environment:
+  required: []
+  optional:
+  - key: WG_HOST
+    defaultFromDomain: true
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /
+  port: 51821
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+update:
+  strategy: pull-and-recreate
+versions:
+- version: '14'
+  image: ghcr.io/wg-easy/wg-easy:14
+  stable: true

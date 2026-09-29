@@ -1,0 +1,62 @@
+id: ghost
+name: Ghost
+category: cms
+description: Modern publishing platform for professional blogs and newsletters with built-in memberships.
+website: https://ghost.org
+repository: https://github.com/TryGhost/Ghost
+documentation: https://ghost.org/docs
+license: MIT
+featured: false
+popularity: 620
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 1
+  memory: 1024
+  storage: 10240
+  recommended:
+    cpu: 2
+    memory: 2048
+    storage: 20480
+services:
+  app:
+    image: ghost
+    internal: false
+    port: 2368
+    volumes:
+    - /var/lib/ghost/content
+    dependsOn:
+    - db
+  db:
+    image: mysql:8
+    internal: true
+    volumes:
+    - /var/lib/mysql
+    database: mysql
+environment:
+  required: []
+  optional: []
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /
+  port: 2368
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+  - database
+update:
+  strategy: pull-and-recreate
+versions:
+- version: '5.104'
+  image: ghost:5.104-alpine
+  stable: true

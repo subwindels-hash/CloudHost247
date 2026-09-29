@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { apiFetch } from '../lib/api';
 import { listMyDomains, listMyServices, listMyTickets } from '../lib/account-api';
 import type { CustomerDomain, CustomerService, TicketSummary } from '../lib/account-types';
+import { fetchMyInstallations, type MyInstallation } from '../lib/marketplace-api';
 import { usePageMeta } from '../lib/usePageMeta';
 import StatusBadge from '../components/StatusBadge';
 
@@ -26,6 +27,7 @@ export default function DashboardPage() {
   const [services, setServices] = useState<CustomerService[] | 'loading' | 'error'>('loading');
   const [domains, setDomains] = useState<CustomerDomain[] | 'loading' | 'error'>('loading');
   const [tickets, setTickets] = useState<TicketSummary[] | 'loading' | 'error'>('loading');
+  const [installations, setInstallations] = useState<MyInstallation[] | 'loading' | 'error'>('loading');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -56,6 +58,9 @@ export default function DashboardPage() {
     listMyTickets()
       .then((res) => !cancelled && setTickets(res.tickets))
       .catch(() => !cancelled && setTickets('error'));
+    fetchMyInstallations()
+      .then((res) => !cancelled && setInstallations(res.installations))
+      .catch(() => !cancelled && setInstallations('error'));
     return () => {
       cancelled = true;
     };
@@ -103,11 +108,39 @@ export default function DashboardPage() {
       </div>
 
       <div className="ch247-card">
+        <h2>My applications</h2>
+        {installations === 'loading' && <p className="ch247-page__hint">Loading…</p>}
+        {installations === 'error' && <p className="ch247-status-error">Couldn&apos;t load your applications right now.</p>}
+        {Array.isArray(installations) && installations.length === 0 && (
+          <p className="ch247-page__hint">
+            No applications installed yet — browse the <Link to="/apps">App Marketplace</Link> to deploy your first one.
+          </p>
+        )}
+        {Array.isArray(installations) && installations.length > 0 && (
+          <ul className="ch247-thread" style={{ margin: 0 }}>
+            {installations.slice(0, 4).map((installation) => (
+              <li key={installation.id} className="ch247-inline-actions">
+                <span>
+                  {installation.application?.name ?? 'Application'} —{' '}
+                  <Link to={`/dashboard/apps/${installation.id}`}>{installation.name}</Link>
+                </span>
+                <StatusBadge status={installation.status} />
+              </li>
+            ))}
+          </ul>
+        )}
+        <p className="ch247-page__hint">
+          <Link to="/dashboard/apps">View all applications →</Link>
+        </p>
+      </div>
+
+      <div className="ch247-card">
         <h2>Billing &amp; invoices</h2>
-        <p className="ch247-placeholder-notice">
-          Billing and invoicing haven&apos;t been migrated to this platform yet — this app has no
-          connection to real billing data, so no balance, invoice, or payment history is shown
-          here rather than an invented one. Use the current client area for billing.
+        <p className="ch247-page__hint">
+          Orders, invoices, and payment history live under Billing.
+        </p>
+        <p className="ch247-page__hint">
+          <Link to="/billing">Go to Billing →</Link>
         </p>
       </div>
 

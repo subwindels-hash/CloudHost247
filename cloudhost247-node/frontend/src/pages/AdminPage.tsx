@@ -61,6 +61,11 @@ export default function AdminPage() {
       <div className="ch247-card">
         <h1>Admin — Customers</h1>
         <p className="ch247-page__hint" style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+          <Link to="/admin/apps">Applications &amp; marketplace →</Link>
+          <Link to="/admin/deployments">Deployments →</Link>
+          <Link to="/admin/servers">Servers →</Link>
+          <Link to="/admin/settings">Platform settings →</Link>
+          <Link to="/admin/audit">Audit log →</Link>
           <Link to="/admin/tickets">Manage support tickets →</Link>
           <Link to="/admin/invoices">Manage invoices & refunds →</Link>
           <Link to="/admin/ledger">Financial audit ledger →</Link>

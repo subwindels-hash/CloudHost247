@@ -5,7 +5,7 @@ export interface InvoiceSummary {
   invoiceNumber: string;
   orderId: string;
   orderNumber: string;
-  status: 'unpaid' | 'paid' | 'cancelled';
+  status: 'unpaid' | 'paid' | 'cancelled' | 'partially_refunded' | 'refunded';
   currency: string;
   subtotalAmount: string;
   discountAmount: string;

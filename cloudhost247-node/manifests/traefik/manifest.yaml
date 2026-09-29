@@ -1,0 +1,58 @@
+id: traefik
+name: Traefik
+category: infrastructure
+description: Cloud-native reverse proxy and load balancer — the platform’s routing layer.
+website: https://traefik.io
+repository: https://github.com/traefik/traefik
+documentation: https://doc.traefik.io/traefik
+license: MIT
+featured: false
+popularity: 850
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+- kubernetes
+requirements:
+  cpu: 1
+  memory: 512
+  storage: 5120
+  recommended:
+    cpu: 1
+    memory: 1024
+    storage: 10240
+services:
+  app:
+    image: traefik
+    internal: false
+    port: 8080
+    command: --providers.docker --entrypoints.web.address=:80 --entrypoints.websecure.address=:443 --api.dashboard=true
+    volumes:
+    - /etc/traefik
+environment:
+  required: []
+  optional: []
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /ping
+  port: 8080
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+update:
+  strategy: pull-and-recreate
+versions:
+- version: '3.3'
+  image: traefik:v3.3
+  stable: true
+longDescription: 'Traefik is the reverse proxy CloudHost247 itself places in front of Docker-hosted applications:
+  automatic service discovery via Docker labels, Let’s Encrypt certificate issuance and renewal, and HTTP→HTTPS
+  redirection. Deploying your own instance gives you an independent proxy for custom stacks.'

@@ -12,6 +12,7 @@ export default function Footer() {
         </div>
         <nav aria-label="Footer">
           <NavLink to="/hosting">Hosting</NavLink>
+          <NavLink to="/apps">App Marketplace</NavLink>
           <NavLink to="/domains">Domains</NavLink>
           <NavLink to="/about">About</NavLink>
           <NavLink to="/contact">Contact</NavLink>

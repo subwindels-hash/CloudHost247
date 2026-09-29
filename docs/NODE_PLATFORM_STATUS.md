@@ -849,3 +849,24 @@ sub-phase before the next one begins.
   - Multi-Gateway E2E Lifecycle Suite: `tests/integration/billing-lifecycle-e2e.test.ts` (Order $\to$ Invoice $\to$ Payment $\to$ Settlement $\to$ Customer Ledger $\to$ Admin Review $\to$ Partial & Full Refund Lifecycle $\to$ Invariant Audit).
   - Full Platform Verification: **48 / 48 test files passing (371 / 371 total tests passing)** with 0 vulnerabilities.
 - **Production Status:** PREPARED AND TESTED ONLY. PR #12 remains OPEN and UNMERGED. Remote `main` untouched (zero drift).
+
+---
+
+## Phase 6 — App Marketplace, Manifest Catalog & the Deployment Pipeline
+
+- **Source/local/CI verification:** PASSED on working branch `arena/01a0eeb2-cloudhost247`.
+  - **Full platform verification: 53 / 53 test files passing (399 / 399 total tests), `tsc` clean, `vite build` clean.**
+  - Overview document: `docs/PHASE_6_MARKETPLACE_DEPLOYMENTS.md`; agent operations guide: `docs/SERVER_AGENT.md`.
+  - **Manifest catalog (52 applications, 23 categories):** `manifests/<slug>/manifest.yaml`, authored by `tools/build-manifests.py`, validated by zod (`src/marketplace/manifest-schema.ts`). Runtime is 100% DB-driven — no per-app deployment code exists.
+  - **Migrations 0026–0040:** applications/versions/categories, installations, deployment queue + steps + events, servers + encrypted credentials + metrics, domain verification, backups, subscriptions, audit logs, platform settings.
+  - **Importer:** `src/marketplace/import-service.ts` (+ `scripts/import-catalog.ts`, `npm run catalog:import`); admin validate/import routes; imported apps start `draft` and publish only through the approval workflow (spec §47).
+  - **Deployment engine:** `src/deployments/engine.ts` — per-action step pipelines, manifest re-validation, one-retry steps, rollback of completed infra steps, capacity checks, env/secret generation; adapters: docker (via Server Agent), cPanel (WHM/UAPI only), Kubernetes (optional, off by default).
+  - **Compose generator:** `src/deployments/compose-generator.ts` — per-customer projects, resource limits, 0600 `.env`, Traefik labels from manifest+domain; `cap_add` support.
+  - **Worker:** `src/worker/` — registry of handlers, `FOR UPDATE SKIP LOCKED` claiming, lease expiry recovery, retries with backoff (`npm run worker`).
+  - **Provisioning gate:** `src/services/provisioning-service.ts` — money→infrastructure only via verified webhooks; zero-total installs queue the same way; engine re-checks `orders.payment_status`.
+  - **Server Agent:** `server-agent/` — zero-dependency Node service; fixed HMAC-signed operation set; the Docker socket never leaves the server; installer with hardened systemd unit.
+  - **Platform infrastructure:** `infrastructure/docker/` (compose for API+worker+Postgres+Redis+Traefik, dev overlay, hardened image), `infrastructure/traefik/`, `infrastructure/backups/`.
+  - **API:** public marketplace; customer installations/deployments (incl. SSE live console)/domains (real DNS TXT verification)/servers; admin apps workflow + versions, servers registry + rotation, deployments oversight, settings whitelist, audit log; inbound agent API.
+  - **Frontend:** marketplace + app detail install wizard, My Apps, instance management (logs/backups/domains/config/deployments), live deployment console, dashboard integration, admin apps/deployments/servers/settings/audit pages.
+  - **Tests added:** `tests/unit/manifest-catalog.test.ts`, `tests/integration/marketplace-installations.test.ts`, `tests/integration/worker-deployments.test.ts`, `tests/integration/agent-deployments-api.test.ts`, `tests/integration/domains-servers-admin.test.ts`. These found and fixed two real queue bugs (PG parameter typing in `recordHealthResult`/`failDeployment` that left deployments stuck `running`, and step-row duplication on retry).
+- **Production Status:** PREPARED AND TESTED ONLY. `DEPLOYMENT_SIMULATION_MODE=false` is the default; deployments require registered servers with reachable agents.

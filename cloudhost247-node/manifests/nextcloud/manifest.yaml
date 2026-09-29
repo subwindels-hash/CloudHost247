@@ -1,0 +1,74 @@
+id: nextcloud
+name: Nextcloud
+category: storage
+description: Self-hosted file sync and share platform with calendars, contacts, and collaboration.
+website: https://nextcloud.com
+repository: https://github.com/nextcloud/server
+documentation: https://docs.nextcloud.com
+license: AGPL-3.0
+featured: true
+popularity: 960
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 2
+  memory: 2048
+  storage: 102400
+  recommended:
+    cpu: 2
+    memory: 4096
+    storage: 512000
+services:
+  app:
+    image: nextcloud
+    internal: false
+    port: 80
+    volumes:
+    - /var/www/html
+    dependsOn:
+    - db
+    - redis
+  db:
+    image: mariadb:11
+    internal: true
+    volumes:
+    - /var/lib/mysql
+    database: mariadb
+  redis:
+    image: redis:7-alpine
+    internal: true
+    database: redis
+environment:
+  required: []
+  optional:
+  - key: NEXTCLOUD_TRUSTED_DOMAINS
+    defaultFromDomain: true
+  - key: REDIS_HOST
+    default: redis
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /status.php
+  port: 80
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+  - database
+update:
+  strategy: pull-and-recreate
+versions:
+- version: '31.0'
+  image: nextcloud:31.0-apache
+  stable: true
+longDescription: 'Nextcloud is a fully open-source content collaboration platform: files, calendars, contacts, mail,
+  chat, and office editing in one place, on your own servers. Access from web, desktop clients, and mobile apps.
+  This deployment includes Redis for file locking and a dedicated MariaDB database.'

@@ -1,0 +1,55 @@
+id: redis
+name: Redis
+category: database
+description: In-memory data store for caching, queues, session storage, and pub/sub.
+website: https://redis.io
+repository: https://github.com/redis/redis
+documentation: https://redis.io/docs/latest
+license: RSALv2/SSPL-1.0
+featured: false
+popularity: 850
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 1
+  memory: 1024
+  storage: 10240
+  recommended:
+    cpu: 1
+    memory: 2048
+    storage: 20480
+services:
+  app:
+    image: redis
+    internal: false
+    port: 6379
+    command: redis-server --appendonly yes
+    volumes:
+    - /data
+environment:
+  required: []
+  optional: []
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: command
+  command:
+  - redis-cli
+  - ping
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+update:
+  strategy: pull-and-recreate
+versions:
+- version: '7.4'
+  image: redis:7.4-alpine
+  stable: true

@@ -82,6 +82,50 @@ const envSchema = z.object({
   STRIPE_WEBHOOK_SECRET: z.string().min(16).optional(),
   PAYPAL_WEBHOOK_ID: z.string().min(10).optional(),
   PAYSTACK_SECRET_KEY: z.string().min(16).optional(),
+
+  // --- Phase 6: Marketplace / deployments ----------------------------------------------------
+  // Key ring for encrypting server credentials and application secrets at rest
+  // (src/lib/crypto.ts). Optional at boot — but every code path that stores or reads a secret
+  // fails loudly until it is configured (MissingEncryptionKeyError), so a production deployment
+  // cannot silently run without it.
+  //   CREDENTIAL_ENCRYPTION_KEY=<hex64 or base64 of 32 bytes>              → single key, version 1
+  //   CREDENTIAL_ENCRYPTION_KEYS=1:<hex64>,2:<hex64>                       → versioned ring
+  CREDENTIAL_ENCRYPTION_KEY: z.string().optional(),
+  CREDENTIAL_ENCRYPTION_KEYS: z.string().optional(),
+
+  // Directory containing the application manifest catalog (manifests/<slug>/manifest.yaml).
+  MARKETPLACE_MANIFESTS_DIR: z.string().default('manifests'),
+
+  // When 'true', the Docker deployment adapter executes against a simulated in-process agent
+  // that records every step but never touches a real server or Docker. This exists so the full
+  // order → payment → deployment pipeline can be exercised in CI, staging, and demos WITHOUT
+  // pretending a real deployment happened: installation rows are visibly marked
+  // `simulated: true` in the API. Must never be enabled in production.
+  DEPLOYMENT_SIMULATION_MODE: boolFromString.optional().default('false'),
+
+  // --- Phase 6: Deployment worker -------------------------------------------------------------
+  WORKER_ID: z.string().min(1).max(64).default(() => `worker-${process.pid}`),
+  WORKER_POLL_INTERVAL_MS: z.coerce.number().int().min(250).max(60_000).default(2000),
+  WORKER_CONCURRENCY: z.coerce.number().int().min(1).max(32).default(4),
+  // How long a claimed-but-unrenewed deployment lease stays valid before another worker may
+  // take the job over (crash recovery). Jobs renew the lease while running.
+  WORKER_LEASE_MS: z.coerce.number().int().min(10_000).max(600_000).default(120_000),
+
+  // --- Phase 6: Backups (off-server storage) --------------------------------------------------
+  // Optional S3-compatible target (AWS S3, Cloudflare R2, Wasabi, MinIO…). When unset, backups
+  // can only use storage_provider='local' on the app's own server, and the admin UI reports
+  // that no off-server target is configured (never silently pretending one exists).
+  BACKUP_S3_ENDPOINT: z.string().url().optional(),
+  BACKUP_S3_REGION: z.string().optional(),
+  BACKUP_S3_BUCKET: z.string().min(1).optional(),
+  BACKUP_S3_ACCESS_KEY_ID: z.string().min(1).optional(),
+  BACKUP_S3_SECRET_ACCESS_KEY: z.string().min(1).optional(),
+
+  // --- Phase 6: Kubernetes adapter ------------------------------------------------------------
+  // The Kubernetes adapter is optional and OFF by default (spec §39: not mandatory for the
+  // first release). Cluster access configuration lives per-server in server_credentials
+  // (kubernetes_kubeconfig); this flag only enables the adapter at all.
+  KUBERNETES_ADAPTER_ENABLED: boolFromString.optional().default('false'),
 });
 
 export type Env = z.infer<typeof envSchema>;

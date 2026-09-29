@@ -1,0 +1,70 @@
+id: n8n
+name: n8n
+category: automation
+description: Fair-code workflow automation with 400+ integrations and native AI capabilities.
+website: https://n8n.io
+repository: https://github.com/n8n-io/n8n
+documentation: https://docs.n8n.io
+license: Sustainable Use License
+featured: true
+popularity: 980
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+- kubernetes
+requirements:
+  cpu: 2
+  memory: 4096
+  storage: 20480
+  recommended:
+    cpu: 2
+    memory: 4096
+    storage: 40960
+services:
+  app:
+    image: n8nio/n8n
+    internal: false
+    port: 5678
+    volumes:
+    - /home/node/.n8n
+environment:
+  required:
+  - key: N8N_ENCRYPTION_KEY
+    description: Key that encrypts saved credentials
+    secret: true
+    generate: random_32
+  optional:
+  - key: N8N_HOST
+    defaultFromDomain: true
+  - key: N8N_EDITOR_BASE_URL
+    defaultFromUrl: true
+  - key: TZ
+    default: UTC
+  - key: N8N_DIAGNOSTICS_ENABLED
+    default: 'false'
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /
+  port: 5678
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+update:
+  strategy: pull-and-recreate
+versions:
+- version: 1.98.0
+  image: n8nio/n8n:1.98.0
+  stable: true
+longDescription: n8n is a source-available workflow automation tool that lets you connect anything to everything.
+  Build complex automations visually with branching, merging, loops, and custom JavaScript or Python code nodes.
+  Includes 400+ pre-built integrations, AI agent workflows, and a REST API for pipeline-as-code. Your workflows,
+  credentials, and execution history live on your own server.

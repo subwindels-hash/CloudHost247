@@ -1,0 +1,65 @@
+id: moodle
+name: Moodle
+category: education
+description: The world’s most popular learning management system for online courses.
+website: https://moodle.org
+repository: https://github.com/moodle/moodle
+documentation: https://docs.moodle.org
+license: GPL-3.0
+featured: false
+popularity: 590
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 2
+  memory: 2048
+  storage: 40960
+  recommended:
+    cpu: 2
+    memory: 4096
+    storage: 81920
+services:
+  app:
+    image: bitnami/moodle
+    internal: false
+    port: 8080
+    volumes:
+    - /bitnami/moodle
+    - /bitnami/apache
+    dependsOn:
+    - db
+  db:
+    image: mariadb:11
+    internal: true
+    volumes:
+    - /var/lib/mysql
+    database: mariadb
+environment:
+  required: []
+  optional:
+  - key: MOODLE_SITE_URL
+    defaultFromUrl: true
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /login/index.php
+  port: 8080
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+  - database
+update:
+  strategy: pull-and-recreate
+versions:
+- version: '4.5'
+  image: bitnami/moodle:4.5.2
+  stable: true

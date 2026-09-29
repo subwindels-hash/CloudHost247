@@ -15,6 +15,14 @@ import { registerPaymentRoutes } from './routes/payments';
 import { registerAdminBillingRoutes } from './routes/admin-billing';
 import { registerWebhookRoutes } from './routes/webhooks';
 import { registerDomainBrokerageRoutes } from './routes/domain-brokerage';
+import { registerMarketplaceRoutes } from './routes/marketplace';
+import { registerMarketplaceAdminRoutes } from './routes/marketplace-admin';
+import { registerAppInstallationRoutes } from './routes/app-installations';
+import { registerDeploymentRoutes } from './routes/deployments';
+import { registerServerRoutes } from './routes/servers';
+import { registerDomainRoutes } from './routes/domains';
+import { registerAgentRoutes } from './routes/agent';
+import { registerAdminPlatformRoutes } from './routes/admin-platform';
 import { HttpError, ValidationError } from './lib/errors';
 import { createLogger } from './lib/logger';
 import type { Queryable } from './db/types';
@@ -101,6 +109,16 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     await registerAdminBillingRoutes(instance, env, pool);
     await registerWebhookRoutes(instance, env, pool);
     await registerDomainBrokerageRoutes(instance, env, pool);
+
+    // Phase 6 — marketplace, deployments, servers, domains, agent API, subscriptions, audit.
+    await registerMarketplaceRoutes(instance, env, pool);
+    await registerMarketplaceAdminRoutes(instance, env, pool);
+    await registerAppInstallationRoutes(instance, env, pool);
+    await registerDeploymentRoutes(instance, env, pool);
+    await registerServerRoutes(instance, env, pool);
+    await registerDomainRoutes(instance, env, pool);
+    await registerAgentRoutes(instance, env, pool);
+    await registerAdminPlatformRoutes(instance, env, pool);
   });
 
   if (serveFrontend) {

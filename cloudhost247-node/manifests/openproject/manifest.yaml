@@ -1,0 +1,58 @@
+id: openproject
+name: OpenProject
+category: project-management
+description: Leading open-source project management software with agile and classic teams in mind.
+website: https://openproject.org
+repository: https://github.com/opf/openproject
+documentation: https://www.openproject.org/docs
+license: GPL-3.0
+featured: false
+popularity: 650
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 2
+  memory: 4096
+  storage: 30720
+  recommended:
+    cpu: 2
+    memory: 8192
+    storage: 61440
+services:
+  app:
+    image: openproject/openproject
+    internal: false
+    port: 80
+    volumes:
+    - /var/openproject/assets
+environment:
+  required:
+  - key: SECRET_KEY_BASE
+    secret: true
+    generate: random_32
+  optional:
+  - key: OPENPROJECT_HOST__NAME
+    defaultFromDomain: true
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /health_checks/default
+  port: 80
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+update:
+  strategy: pull-and-recreate
+versions:
+- version: '15.0'
+  image: openproject/openproject:15.0
+  stable: true

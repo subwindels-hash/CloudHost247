@@ -31,7 +31,7 @@ describe('/dashboard end-to-end route protection', () => {
     expect(screen.getByRole('heading', { name: 'Log in' })).toBeTruthy();
   });
 
-  it('shows real account data for a signed-in visitor, including real (empty) services/domains/tickets and an honest billing placeholder', async () => {
+  it('shows real account data for a signed-in visitor, including real (empty) services/domains/tickets/installations', async () => {
     setSession('a-token', { id: 'u1', email: 'ada@example.com', fullName: 'Ada Lovelace', role: 'customer' });
 
     // Phase 4: the dashboard now also calls the real /api/v1/account/* endpoints, so the mock
@@ -56,6 +56,10 @@ describe('/dashboard end-to-end route protection', () => {
         if (url.includes('/api/v1/account/tickets')) {
           return { ok: true, status: 200, json: async () => ({ tickets: [] }) };
         }
+        // Phase 6: the dashboard also loads the customer's application installations.
+        if (url.includes('/api/v1/app-installations')) {
+          return { ok: true, status: 200, json: async () => ({ installations: [] }) };
+        }
         throw new Error(`Unexpected fetch in test: ${url}`);
       })
     );
@@ -67,14 +71,14 @@ describe('/dashboard end-to-end route protection', () => {
     );
 
     await waitFor(() => expect(screen.getByText(/Welcome back, Ada Lovelace/)).toBeTruthy());
-    // Billing/invoices are still explicitly out of scope for Phase 4 — the honest "not migrated
-    // yet" notice must still be shown for that section specifically.
-    await waitFor(() => expect(screen.getByText(/Billing and invoicing haven't been migrated to this platform yet/i)).toBeTruthy());
-    // Services/domains/tickets are now real, API-backed (Phase 4) — an empty result renders an
+    // Billing is real since Phase 5 — the dashboard links to it instead of a placeholder.
+    await waitFor(() => expect(screen.getByText(/Orders, invoices, and payment history live under Billing./i)).toBeTruthy());
+    // Services/domains/tickets/installations are real, API-backed — an empty result renders an
     // honest "nothing added yet" state, never a "not migrated" placeholder and never fabricated data.
     await waitFor(() => expect(screen.getByText(/No services have been added to your account yet/i)).toBeTruthy());
     await waitFor(() => expect(screen.getByText(/No domains have been added to your account yet/i)).toBeTruthy());
     await waitFor(() => expect(screen.getByText(/You have no open support tickets/i)).toBeTruthy());
+    await waitFor(() => expect(screen.getByText(/No applications installed yet/i)).toBeTruthy());
 
     clearSession();
   });

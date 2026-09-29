@@ -1,0 +1,71 @@
+id: vikunja
+name: Vikunja
+category: project-management
+description: The to-do app to organize your life — lists, kanban, gantt, and teams.
+website: https://vikunja.io
+repository: https://code.vikunja.io/vikunja
+documentation: https://vikunja.io/docs
+license: AGPL-3.0
+featured: false
+popularity: 510
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 1
+  memory: 512
+  storage: 10240
+  recommended:
+    cpu: 1
+    memory: 1024
+    storage: 20480
+services:
+  app:
+    image: vikunja/frontend
+    internal: false
+    port: 80
+    dependsOn:
+    - api
+  api:
+    image: vikunja/api
+    internal: false
+    port: 3456
+    volumes:
+    - /app/vikunja/files
+    dependsOn:
+    - db
+  db:
+    image: postgres:17-alpine
+    internal: true
+    volumes:
+    - /var/lib/postgresql/data
+    database: postgres
+environment:
+  required: []
+  optional:
+  - key: VIKUNJA_SERVICE_PUBLICURL
+    defaultFromUrl: true
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /api/v1/info
+  port: 3456
+  service: api
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+  - database
+update:
+  strategy: pull-and-recreate
+versions:
+- version: 0.24.0
+  image: vikunja/api:0.24.0
+  stable: true

@@ -209,6 +209,14 @@ export async function processIncomingWebhook(
       // 4. Mark order payment_status paid
       await setOrderPaymentStatus(tx, invoice.order_id, 'paid');
 
+      // 4b. Phase 6 provisioning hook (spec §20): the ONLY path from verified money to
+      // infrastructure. Creates subscriptions and queues INSTALL/provision deployment jobs for
+      // the items this order contains. Idempotent on (order, item), so duplicate webhook
+      // deliveries cannot double-provision.
+      await import('./provisioning-service').then(({ provisionPaidOrder }) =>
+        provisionPaidOrder(tx, order, idGenerator)
+      );
+
       // 5. Audit log
       const auditSql = `
         INSERT INTO auth_audit_log (id, user_id, event_type, metadata, created_at)

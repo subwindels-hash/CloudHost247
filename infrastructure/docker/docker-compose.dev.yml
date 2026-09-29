@@ -1,0 +1,40 @@
+# CloudHost247 platform — development stack (docker-compose.dev.yml).
+#
+# Same topology as production but with hot-reload dev servers, published ports, and a
+# simulation-friendly configuration. Run from infrastructure/docker/:
+#   docker compose -f docker-compose.dev.yml up
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: cloudhost247
+      POSTGRES_USER: cloudhost247
+      POSTGRES_PASSWORD: devpassword
+    ports: ['5432:5432']
+    volumes: [pgdev:/var/lib/postgresql/data]
+
+  redis:
+    image: redis:7-alpine
+    ports: ['6379:6379']
+
+  # The app and worker normally run via `npm run dev` / `npm run worker` on the host against
+  # these services (DATABASE_URL=postgresql://cloudhost247:devpassword@localhost:5432/cloudhost247).
+  # A Traefik instance matching the production network topology is included so generated
+  # routing labels can be exercised locally.
+  traefik:
+    image: traefik:v3.3
+    command:
+      - '--providers.docker=true'
+      - '--providers.docker.exposedbydefault=false'
+      - '--entrypoints.web.address=:80'
+      - '--entrypoints.websecure.address=:443'
+      - '--api.insecure=true'
+    ports:
+      - '80:80'
+      - '443:443'
+      - '8080:8080'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+volumes:
+  pgdev: {}

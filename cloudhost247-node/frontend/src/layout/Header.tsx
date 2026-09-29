@@ -7,6 +7,7 @@ import { useAuthState } from './useAuthState';
 const marketingLinks = [
   { to: '/', label: 'Home', end: true },
   { to: '/hosting', label: 'Hosting' },
+  { to: '/apps', label: 'App Marketplace' },
   { to: '/domains', label: 'Domains' },
   { to: '/about', label: 'About' },
   { to: '/contact', label: 'Contact' },
@@ -18,7 +19,9 @@ const marketingLinks = [
 // out" is never buried inside a long feature list.
 const appLinks = [
   { to: '/services', label: 'Services' },
-  { to: '/account/domains', label: 'My Domains' },
+  { to: '/dashboard/apps', label: 'My Apps' },
+  { to: '/dashboard/servers', label: 'Servers' },
+  { to: '/dashboard/domains', label: 'My Domains' },
   { to: '/billing', label: 'Billing' },
   { to: '/invoices', label: 'Invoices' },
   { to: '/support', label: 'Support' },

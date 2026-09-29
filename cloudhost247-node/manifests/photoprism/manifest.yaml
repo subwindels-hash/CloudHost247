@@ -1,0 +1,60 @@
+id: photoprism
+name: PhotoPrism
+category: media
+description: AI-powered photos app for the decentralized web — browse, organize, and share.
+website: https://photoprism.app
+repository: https://github.com/photoprism/photoprism
+documentation: https://docs.photoprism.app
+license: AGPL-3.0
+featured: false
+popularity: 700
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 2
+  memory: 4096
+  storage: 102400
+  recommended:
+    cpu: 4
+    memory: 8192
+    storage: 512000
+services:
+  app:
+    image: photoprism/photoprism
+    internal: false
+    port: 2342
+    volumes:
+    - /photoprism/originals
+    - /photoprism/storage
+environment:
+  required:
+  - key: PHOTOPRISM_ADMIN_PASSWORD
+    description: Initial admin password
+    secret: true
+    generate: random_32
+  optional:
+  - key: PHOTOPRISM_SITE_URL
+    defaultFromUrl: true
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /api/v1/status
+  port: 2342
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+update:
+  strategy: pull-and-recreate
+versions:
+- version: '241128'
+  image: photoprism/photoprism:241128
+  stable: true

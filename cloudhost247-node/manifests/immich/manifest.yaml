@@ -1,0 +1,78 @@
+id: immich
+name: Immich
+category: media
+description: High-performance self-hosted photo and video backup solution with mobile apps.
+website: https://immich.app
+repository: https://github.com/immich-app/immich
+documentation: https://immich.app/docs/overview/introduction
+license: AGPL-3.0
+featured: true
+popularity: 950
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 2
+  memory: 4096
+  storage: 102400
+  recommended:
+    cpu: 4
+    memory: 8192
+    storage: 512000
+services:
+  app:
+    image: ghcr.io/immich-app/immich-server
+    internal: false
+    port: 2283
+    volumes:
+    - /usr/src/app/upload
+    dependsOn:
+    - db
+    - redis
+    - ml
+  db:
+    image: postgres:17-alpine
+    internal: true
+    volumes:
+    - /var/lib/postgresql/data
+    database: postgres
+  redis:
+    image: redis:7-alpine
+    internal: true
+    database: redis
+  ml:
+    image: ghcr.io/immich-app/immich-machine-learning
+    internal: true
+    volumes:
+    - /cache
+environment:
+  required:
+  - key: IMMICH_MACHINE_LEARNING_URL
+    default: http://ml:3003
+  optional: []
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /api/server-info/ping
+  port: 2283
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+  - database
+update:
+  strategy: pull-and-recreate
+versions:
+- version: 1.124.0
+  image: ghcr.io/immich-app/immich-server:v1.124.0
+  stable: true
+longDescription: Immich is a self-hosted backup solution for your photos and videos from mobile devices, with facial
+  recognition, object detection, albums, shared links, and a timeline UI that feels like the commercial services
+  you are leaving. Includes the machine-learning service for on-device-style search.

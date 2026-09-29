@@ -1,0 +1,117 @@
+# CloudHost247 platform infrastructure — self-hosted stack (staging/production).
+#
+# Runs the control plane (API + portal), the deployment worker, PostgreSQL, Redis, and Traefik
+# on one or more Docker hosts. The PHP marketing site and cPanel deployment story are separate
+# (docs/CPANEL_DEPLOYMENT.md); this compose is for the Docker/VPS deployment of the platform
+# itself.
+#
+# Usage:
+#   cp .env.example .env   # fill in secrets
+#   docker compose up -d
+#   docker compose exec app npm run migrate up     # explicit, controlled migrations
+#   docker compose exec app node dist/src/scripts-import-manifests.js   # or POST /api/v1/admin/manifests/import
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-cloudhost247}
+      POSTGRES_USER: ${POSTGRES_USER:-cloudhost247}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-cloudhost247}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [internal]
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ['redis-server', '--appendonly', 'yes']
+    volumes:
+      - redis-data:/data
+    networks: [internal]
+
+  app:
+    build:
+      context: ../cloudhost247-node
+      dockerfile: ../infrastructure/docker/Dockerfile.app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      APP_URL: ${APP_URL:?set APP_URL}
+      DATABASE_URL: postgres://${POSTGRES_USER:-cloudhost247}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-cloudhost247}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET}
+      CREDENTIAL_ENCRYPTION_KEY: ${CREDENTIAL_ENCRYPTION_KEY:?set CREDENTIAL_ENCRYPTION_KEY}
+      DEPLOYMENT_SIMULATION_MODE: 'false'
+      KUBERNETES_ADAPTER_ENABLED: 'false'
+      LOG_LEVEL: info
+    volumes:
+      - manifests:/app/manifests:ro
+    networks: [internal, traefik]
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.ch247-app.rule=Host(`${APP_HOST:?set APP_HOST}`)'
+      - 'traefik.http.routers.ch247-app.entrypoints=websecure'
+      - 'traefik.http.routers.ch247-app.tls=true'
+      - 'traefik.http.routers.ch247-app.tls.certresolver=letsencrypt'
+      - 'traefik.http.services.ch247-app.loadbalancer.server.port=3000'
+
+  worker:
+    build:
+      context: ../cloudhost247-node
+      dockerfile: ../infrastructure/docker/Dockerfile.app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ['node', 'dist/src/worker/main.js']
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://${POSTGRES_USER:-cloudhost247}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-cloudhost247}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET}
+      CREDENTIAL_ENCRYPTION_KEY: ${CREDENTIAL_ENCRYPTION_KEY:?set CREDENTIAL_ENCRYPTION_KEY}
+      WORKER_ID: worker-1
+      WORKER_CONCURRENCY: '4'
+    volumes:
+      - manifests:/app/manifests:ro
+    networks: [internal]
+
+  traefik:
+    image: traefik:v3.3
+    restart: unless-stopped
+    command:
+      - '--providers.docker=true'
+      - '--providers.docker.exposedbydefault=false'
+      - '--providers.docker.network=cloudhost247_traefik'
+      - '--entrypoints.web.address=:80'
+      - '--entrypoints.websecure.address=:443'
+      - '--entrypoints.web.http.redirections.entrypoint.to=websecure'
+      - '--entrypoints.web.http.redirections.entrypoint.scheme=https'
+      - '--certificatesresolvers.letsencrypt.acme.tlschallenge=true'
+      - '--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL:?set ACME_EMAIL}'
+      - '--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json'
+      - '--metrics.prometheus=true'
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - letsencrypt:/letsencrypt
+    networks: [traefik]
+
+volumes:
+  postgres-data:
+  redis-data:
+  letsencrypt:
+  manifests:
+
+networks:
+  internal: {}
+  traefik: {}

@@ -1,0 +1,57 @@
+id: code-server
+name: code-server
+category: developer-tools
+description: VS Code in the browser, running on your own server with your own hardware.
+website: https://coder.com
+repository: https://github.com/coder/code-server
+documentation: https://coder.com/docs/code-server/latest
+license: MIT
+featured: false
+popularity: 610
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 2
+  memory: 2048
+  storage: 20480
+  recommended:
+    cpu: 4
+    memory: 8192
+    storage: 81920
+services:
+  app:
+    image: codercom/code-server
+    internal: false
+    port: 8080
+    volumes:
+    - /home/coder
+environment:
+  required:
+  - key: PASSWORD
+    description: Login password for the web editor
+    secret: true
+    generate: random_32
+  optional: []
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /healthz
+  port: 8080
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+update:
+  strategy: pull-and-recreate
+versions:
+- version: 4.95.0
+  image: codercom/code-server:4.95.0
+  stable: true

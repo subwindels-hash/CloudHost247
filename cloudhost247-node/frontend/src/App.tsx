@@ -31,6 +31,19 @@ import AdminTicketDetailPage from './pages/AdminTicketDetailPage';
 import { AdminInvoicesPage } from './pages/AdminInvoicesPage';
 import { AdminInvoiceDetailPage } from './pages/AdminInvoiceDetailPage';
 import { AdminLedgerPage } from './pages/AdminLedgerPage';
+import MarketplacePage from './pages/MarketplacePage';
+import AppDetailPage from './pages/AppDetailPage';
+import MyAppsPage from './pages/MyAppsPage';
+import AppInstancePage from './pages/AppInstancePage';
+import DeploymentDetailPage from './pages/DeploymentDetailPage';
+import DashboardServersPage from './pages/DashboardServersPage';
+import DashboardDomainsPage from './pages/DashboardDomainsPage';
+import AdminAppsPage from './pages/AdminAppsPage';
+import AdminAppDetailPage from './pages/AdminAppDetailPage';
+import AdminDeploymentsPage from './pages/AdminDeploymentsPage';
+import AdminServersPage from './pages/AdminServersPage';
+import AdminSettingsPage from './pages/AdminSettingsPage';
+import AdminAuditPage from './pages/AdminAuditPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 export default function App() {
@@ -57,6 +70,11 @@ export default function App() {
             signed-out visitor is redirected to /login instead of ever rendering these. */}
         <Route element={<RequireAuth />}>
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/dashboard/apps" element={<MyAppsPage />} />
+          <Route path="/dashboard/apps/:id" element={<AppInstancePage />} />
+          <Route path="/dashboard/deployments/:id" element={<DeploymentDetailPage />} />
+          <Route path="/dashboard/servers" element={<DashboardServersPage />} />
+          <Route path="/dashboard/domains" element={<DashboardDomainsPage />} />
           <Route path="/account" element={<AccountPage />} />
           <Route path="/account/domains" element={<DomainsPage />} />
           <Route path="/account/domain-brokerage" element={<DomainBrokeragePage />} />
@@ -78,6 +96,15 @@ export default function App() {
             <Route path="/admin/invoices" element={<AdminInvoicesPage />} />
             <Route path="/admin/invoices/:id" element={<AdminInvoiceDetailPage />} />
             <Route path="/admin/ledger" element={<AdminLedgerPage />} />
+            <Route path="/admin/apps" element={<AdminAppsPage />} />
+            <Route path="/admin/applications/:id" element={<AdminAppDetailPage />} />
+            <Route path="/admin/apps/:id" element={<AdminAppDetailPage />} />
+            <Route path="/admin/deployments" element={<AdminDeploymentsPage />} />
+            <Route path="/admin/deployments/:id" element={<AdminDeploymentsPage />} />
+            <Route path="/admin/servers" element={<AdminServersPage />} />
+            <Route path="/admin/servers/:id" element={<AdminServersPage />} />
+            <Route path="/admin/settings" element={<AdminSettingsPage />} />
+            <Route path="/admin/audit" element={<AdminAuditPage />} />
           </Route>
         </Route>
 

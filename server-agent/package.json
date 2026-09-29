@@ -1,0 +1,16 @@
+{
+  "name": "cloudhost247-agent",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CloudHost247 Server Agent — controlled, authenticated operations bridge between the CloudHost247 control plane and a customer VPS/dedicated server. Runs Docker Compose deployments in isolated per-application projects; never exposes the Docker socket to the network.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "start:dev": "node --watch src/server.js"
+  }
+}

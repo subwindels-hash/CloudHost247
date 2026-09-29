@@ -1,0 +1,56 @@
+id: navidrome
+name: Navidrome
+category: media
+description: Modern music collection server and streamer with Subsonic API compatibility.
+website: https://navidrome.org
+repository: https://github.com/navidrome/navidrome
+documentation: https://www.navidrome.org/docs
+license: GPL-3.0
+featured: false
+popularity: 640
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 1
+  memory: 512
+  storage: 51200
+  recommended:
+    cpu: 1
+    memory: 1024
+    storage: 256000
+services:
+  app:
+    image: deluan/navidrome
+    internal: false
+    port: 4533
+    volumes:
+    - /data
+    - /music
+environment:
+  required: []
+  optional:
+  - key: ND_BASEURL
+    default: ''
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /ping
+  port: 4533
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+update:
+  strategy: pull-and-recreate
+versions:
+- version: 0.54.0
+  image: deluan/navidrome:0.54.0
+  stable: true
