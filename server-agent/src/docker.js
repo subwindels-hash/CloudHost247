@@ -29,10 +29,29 @@ export function projectDir(appsDir, project) {
   return path.join(appsDir, assertProjectName(project));
 }
 
+const ENV_KEY_RE = /^[A-Z][A-Z0-9_]*$/;
+
+function dotenvValue(value) {
+  const text = String(value);
+  // Keep simple values readable. Quote everything else so spaces, $, #, quotes, and newlines
+  // cannot change how Compose parses a secret or turn one value into multiple variables.
+  if (/^[A-Za-z0-9_./:@+\-]+$/.test(text)) return text;
+  return `"${text
+    .replace(/\\/g, '\\\\')
+    .replace(/"/g, '\\"')
+    .replace(/\r/g, '\\r')
+    .replace(/\n/g, '\\n')}`;
+}
+
 function envFileContent(environment) {
-  // .env format: KEY=value with single-quote escaping; values never contain newlines by contract.
   return Object.entries(environment)
-    .map(([key, value]) => `${key}=${String(value).replace(/'/g, "'\\''")}`)
+    .map(([key, value]) => {
+      if (!ENV_KEY_RE.test(key)) throw new Error(`Invalid environment variable name "${key}"`);
+      if (typeof value !== 'string' && typeof value !== 'number' && typeof value !== 'boolean') {
+        throw new Error(`Invalid environment variable value for "${key}"`);
+      }
+      return `${key}=${dotenvValue(value)}`;
+    })
     .join('\n') + '\n';
 }
 

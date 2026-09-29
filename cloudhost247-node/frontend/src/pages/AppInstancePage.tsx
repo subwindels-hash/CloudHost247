@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import { usePageMeta } from '../lib/usePageMeta';
 import {
   deleteInstallation,
@@ -58,10 +58,17 @@ interface DomainRow {
  */
 export default function AppInstancePage() {
   const { id } = useParams<{ id: string }>();
+  const location = useLocation();
   usePageMeta('Application', 'Manage your application installation');
   const [summary, setSummary] = useState<MyInstallation | null>(null);
   const [detail, setDetail] = useState<InstallationDetailRow | null>(null);
-  const [tab, setTab] = useState<'overview' | 'logs' | 'backups' | 'domains' | 'config' | 'deployments'>('overview');
+  const [tab, setTab] = useState<'overview' | 'logs' | 'backups' | 'domains' | 'config' | 'deployments'>(() => {
+    if (location.pathname.endsWith('/logs')) return 'logs';
+    if (location.pathname.endsWith('/backups')) return 'backups';
+    if (location.pathname.endsWith('/settings')) return 'config';
+    if (location.pathname.endsWith('/domains')) return 'domains';
+    return 'overview';
+  });
   const [error, setError] = useState('');
   const [actionMessage, setActionMessage] = useState('');
   const [busy, setBusy] = useState('');

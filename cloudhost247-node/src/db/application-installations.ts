@@ -247,7 +247,7 @@ export async function markDeleted(db: Queryable, id: string): Promise<Installati
 export async function recordHealthResult(
   db: Queryable,
   id: string,
-  healthy: boolean,
+  healthy: boolean | null,
   options: { restartCountDelta?: number; circuitOpenUntil?: string | null; resetRestarts?: boolean } = {}
 ): Promise<InstallationRow | null> {
   const existingResult = await db.query<InstallationRow>(
@@ -258,20 +258,24 @@ export async function recordHealthResult(
   if (!existing) return null;
   const { rows } = await db.query<InstallationRow>(
     `UPDATE application_installations SET
-       health_status = $2::varchar,
+       health_status = CASE
+         WHEN $2::boolean IS NULL THEN 'unknown'
+         WHEN $2::boolean THEN 'healthy'
+         ELSE 'unhealthy'
+       END,
        last_health_check_at = now(),
        restart_count = CASE WHEN $4::boolean THEN 0 ELSE restart_count + $3::int END,
        circuit_open_until = $5,
        status = CASE
-         WHEN $2::varchar = 'healthy' AND status IN ('starting', 'unhealthy', 'updating') THEN 'healthy'
-         WHEN $2::varchar = 'unhealthy' AND status IN ('starting', 'healthy', 'updating') THEN 'unhealthy'
+         WHEN $2::boolean IS TRUE AND status IN ('starting', 'unhealthy', 'updating') THEN 'healthy'
+         WHEN $2::boolean IS FALSE AND status IN ('starting', 'healthy', 'updating') THEN 'unhealthy'
          ELSE status
        END,
        updated_at = now()
      WHERE id = $1 RETURNING *`,
     [
       id,
-      healthy ? 'healthy' : 'unhealthy',
+      healthy,
       options.restartCountDelta ?? 0,
       options.resetRestarts ?? false,
       options.circuitOpenUntil ?? null,

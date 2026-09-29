@@ -178,8 +178,21 @@ export function createCpanelAdapter(options: CpanelAdapterOptions): DeploymentAd
     async applicationLogs(): Promise<LogsResult> {
       throw new UnsupportedOperationError('cpanel', 'applicationLogs');
     },
-    async runHealthcheck(): Promise<ApplicationStatusResult> {
-      throw new UnsupportedOperationError('cpanel', 'runHealthcheck');
+    async runHealthcheck(ctx): Promise<ApplicationStatusResult> {
+      // cPanel account provisioning does not expose a container health signal. Keep the
+      // installation UNKNOWN until a domain-level HTTP monitor is configured; returning UNKNOWN
+      // is intentional and prevents the control plane from claiming the site is online merely
+      // because WHM accepted the account.
+      if (options.simulationMode) {
+        await ctx.log('warn', 'SIMULATION MODE: cPanel health could not be verified');
+      }
+      return {
+        ok: true,
+        code: 'HEALTHCHECK_UNAVAILABLE',
+        message: 'cPanel account was provisioned, but application health is not yet verifiable',
+        running: false,
+        health: 'unknown',
+      };
     },
     async runBackup(): Promise<BackupResult> {
       throw new UnsupportedOperationError('cpanel', 'runBackup');

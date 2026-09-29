@@ -126,16 +126,21 @@ export function createDockerAdapter(options: DockerAdapterOptions): DeploymentAd
 
     async applicationStatus(ctx, project): Promise<ApplicationStatusResult> {
       if (await isSimulated(ctx)) {
-        return { ok: true, code: 'OK', message: 'Simulated status', running: true, health: 'unknown' };
+        return { ok: true, code: 'SIMULATION', message: 'Simulated status; live health is unavailable', running: false, health: 'unknown' };
       }
       try {
         const status = await agentAppStatus(ctx.db, agentRef(ctx.server), project);
+        const allRunning = status.containers.length > 0 && status.containers.every((c) => c.state === 'running');
+        const hasUnhealthyContainer = status.containers.some((c) => c.health === 'unhealthy');
+        const allContainersHealthy = allRunning && status.containers.every((c) => c.health === 'healthy');
         return {
           ok: true,
           code: 'OK',
           message: `${status.containers.length} container(s)`,
           running: status.running,
-          health: status.containers.every((c) => c.state === 'running') ? 'healthy' : 'unhealthy',
+          // Running is not the same as healthy. Docker only reports a definitive health state
+          // when the container has a healthcheck; otherwise the control plane must show UNKNOWN.
+          health: hasUnhealthyContainer ? 'unhealthy' : allContainersHealthy ? 'healthy' : 'unknown',
         };
       } catch (err) {
         return { ok: false, code: 'STATUS_FAILED', message: (err as Error).message, running: false, health: 'unknown' };
@@ -156,11 +161,11 @@ export function createDockerAdapter(options: DockerAdapterOptions): DeploymentAd
 
     async runHealthcheck(ctx, project, manifest): Promise<ApplicationStatusResult> {
       if (await isSimulated(ctx)) {
-        return { ok: true, code: 'OK', message: 'Simulated health check', running: true, health: 'healthy' };
+        return { ok: true, code: 'SIMULATION', message: 'Simulated health check; live health is unavailable', running: false, health: 'unknown' };
       }
       const check = manifest.healthcheck;
       if (!check) {
-        return { ok: true, code: 'NO_HEALTHCHECK', message: 'Manifest defines no healthcheck', running: true, health: 'unknown' };
+        return { ok: true, code: 'NO_HEALTHCHECK', message: 'Manifest defines no healthcheck', running: false, health: 'unknown' };
       }
       try {
         const report = await agentRunHealthcheck(ctx.db, agentRef(ctx.server), project, check.service ?? 'app', {

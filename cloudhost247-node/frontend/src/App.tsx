@@ -59,6 +59,12 @@ export default function App() {
         <Route path="/domains" element={<DomainsMarketingPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/faq" element={<FaqPage />} />
+
+        {/* Public, database-driven application marketplace. These routes intentionally sit
+            outside RequireAuth so visitors can browse the catalog before signing in. */}
+        <Route path="/apps" element={<MarketplacePage />} />
+        <Route path="/apps/:slug" element={<AppDetailPage />} />
+
         <Route path="/legal" element={<LegalIndexPage />} />
         <Route path="/legal/privacy-policy" element={<PrivacyPolicyPage />} />
 
@@ -72,6 +78,13 @@ export default function App() {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/dashboard/apps" element={<MyAppsPage />} />
           <Route path="/dashboard/apps/:id" element={<AppInstancePage />} />
+          {/* Deep links mirror the dashboard information architecture from the platform
+              specification. AppInstancePage owns the shared data/actions and selects the
+              requested tab from the URL. */}
+          <Route path="/dashboard/apps/:id/logs" element={<AppInstancePage />} />
+          <Route path="/dashboard/apps/:id/backups" element={<AppInstancePage />} />
+          <Route path="/dashboard/apps/:id/settings" element={<AppInstancePage />} />
+          <Route path="/dashboard/apps/:id/domains" element={<AppInstancePage />} />
           <Route path="/dashboard/deployments/:id" element={<DeploymentDetailPage />} />
           <Route path="/dashboard/servers" element={<DashboardServersPage />} />
           <Route path="/dashboard/domains" element={<DashboardDomainsPage />} />
