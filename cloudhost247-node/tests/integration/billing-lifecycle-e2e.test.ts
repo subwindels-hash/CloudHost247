@@ -11,13 +11,16 @@ import { createProduct } from '../../src/db/catalog-products';
 import { createPlan } from '../../src/db/catalog-plans';
 import { createPricing } from '../../src/db/catalog-pricing';
 import { runFinancialReconciliation } from '../../src/services/reconciliation-service';
+import { signPayload } from '../../src/payments/webhook-signing';
 
 describe('Phase 5G: End-to-End Billing Lifecycle & Automated Reconciliation', () => {
   let db: PGlite;
+  const SANDBOX_SECRET = 'sb_secret_test_12345';
   const env = loadEnv({
     NODE_ENV: 'test',
     DATABASE_URL: 'postgresql://user:pass@localhost:5432/cloudhost247',
     JWT_SECRET: 'g'.repeat(32),
+    SANDBOX_GATEWAY_WEBHOOK_SECRET: SANDBOX_SECRET,
   } as NodeJS.ProcessEnv);
 
   beforeEach(async () => {
@@ -160,6 +163,140 @@ describe('Phase 5G: End-to-End Billing Lifecycle & Automated Reconciliation', ()
     expect(reconReport.invariantChecks.B4_paymentTotalCap).toBe(true);
     expect(reconReport.invariantChecks.B5_orderInvoiceParity).toBe(true);
     expect(reconReport.invariantChecks.R1_refundTotalCap).toBe(true);
+
+    await app.close();
+  });
+
+  it('completes multi-item checkout and handles unpaid invoice cancellation with clean reconciliation', async () => {
+    const app = buildTestApp();
+    const customer = await createUser('customer-multi@example.com', 'customer', 'Multi Item Customer');
+    const admin = await createUser('admin-multi@example.com', 'admin', 'Billing Staff');
+    const { plan: planA } = await makeActivePlanWithPrice(30);
+    const { plan: planB } = await makeActivePlanWithPrice(70);
+
+    // 1. Add 2 distinct items to cart
+    await app.inject({
+      method: 'POST',
+      url: '/api/v1/cart/items',
+      headers: { authorization: `Bearer ${customer.token}` },
+      payload: { planId: planA.id, billingPeriod: 'monthly' },
+    });
+    await app.inject({
+      method: 'POST',
+      url: '/api/v1/cart/items',
+      headers: { authorization: `Bearer ${customer.token}` },
+      payload: { planId: planB.id, billingPeriod: 'monthly' },
+    });
+
+    // 2. Checkout order
+    const checkoutRes = await app.inject({
+      method: 'POST',
+      url: '/api/v1/orders',
+      headers: { authorization: `Bearer ${customer.token}` },
+    });
+    expect(checkoutRes.statusCode).toBe(201);
+    const order = checkoutRes.json().order;
+    expect(order.items).toHaveLength(2);
+    expect(order.totalAmount).toBe('100.00');
+    const invoiceId = order.invoiceId;
+
+    // 3. Admin cancels the unpaid invoice
+    const cancelRes = await app.inject({
+      method: 'POST',
+      url: `/api/v1/admin/invoices/${invoiceId}/cancel`,
+      headers: { authorization: `Bearer ${admin.token}` },
+      payload: { reason: 'Customer changed requirements before payment' },
+    });
+    expect(cancelRes.statusCode).toBe(200);
+    expect(cancelRes.json().invoice.status).toBe('void');
+
+    // 4. Verify order status is cancelled
+    const orderRes = await app.inject({
+      method: 'GET',
+      url: `/api/v1/orders/${order.id}`,
+      headers: { authorization: `Bearer ${customer.token}` },
+    });
+    expect(orderRes.json().order.status).toBe('cancelled');
+    expect(orderRes.json().order.paymentStatus).toBe('unpaid');
+
+    // 5. Invariant audit should report 0 violations
+    const reconReport = await runFinancialReconciliation(db);
+    expect(reconReport.status).toBe('healthy');
+    expect(reconReport.summary.totalViolations).toBe(0);
+
+    await app.close();
+  });
+
+  it('completes sandbox gateway lifecycle and verifies all double-entry ledger invariant checks', async () => {
+    const app = buildTestApp();
+    const customer = await createUser('customer-sandbox@example.com', 'customer', 'Sandbox Customer');
+    const { plan } = await makeActivePlanWithPrice(45);
+
+    // 1. Add item & checkout
+    await app.inject({
+      method: 'POST',
+      url: '/api/v1/cart/items',
+      headers: { authorization: `Bearer ${customer.token}` },
+      payload: { planId: plan.id, billingPeriod: 'monthly' },
+    });
+    const checkoutRes = await app.inject({
+      method: 'POST',
+      url: '/api/v1/orders',
+      headers: { authorization: `Bearer ${customer.token}` },
+    });
+    const order = checkoutRes.json().order;
+    const invoiceId = order.invoiceId;
+
+    // 2. Initiate sandbox payment
+    const payRes = await app.inject({
+      method: 'POST',
+      url: `/api/v1/invoices/${invoiceId}/payments`,
+      headers: { authorization: `Bearer ${customer.token}` },
+      payload: { gateway: 'sandbox' },
+    });
+    expect(payRes.statusCode).toBe(201);
+    const payment = payRes.json().payment;
+    expect(payment.provider).toBe('sandbox');
+    expect(payment.status).toBe('pending');
+
+    // 3. Simulated sandbox webhook delivers successful payment notification
+    const webhookPayload = JSON.stringify({
+      provider: 'sandbox',
+      providerReference: payment.providerReference,
+      paymentId: payment.id,
+      outcome: 'successful',
+      amount: '45.00',
+      currency: 'USD',
+      eventId: `sb_evt_${payment.id}`,
+      occurredAt: new Date().toISOString(),
+    });
+    const sig = signPayload(SANDBOX_SECRET, webhookPayload);
+
+    const hookRes = await app.inject({
+      method: 'POST',
+      url: '/api/v1/webhooks/sandbox',
+      headers: {
+        'content-type': 'application/json',
+        'x-sandbox-signature': sig,
+      },
+      payload: webhookPayload,
+    });
+    expect(hookRes.statusCode).toBe(200);
+
+    // 4. Verify invoice is paid and order payment status is paid
+    const invRes = await app.inject({
+      method: 'GET',
+      url: `/api/v1/invoices/${invoiceId}`,
+      headers: { authorization: `Bearer ${customer.token}` },
+    });
+    expect(invRes.json().invoice.status).toBe('paid');
+    expect(invRes.json().invoice.totalAmount).toBe('45.00');
+    expect(invRes.json().invoice.ledger).toHaveLength(2); // Charge + Payment credit
+
+    // 5. Invariant audit verifies B1-B5, R1, L1
+    const reconReport = await runFinancialReconciliation(db);
+    expect(reconReport.status).toBe('healthy');
+    expect(reconReport.summary.totalViolations).toBe(0);
 
     await app.close();
   });
