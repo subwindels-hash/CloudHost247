@@ -48,7 +48,7 @@ import {
 } from '../db/application-config';
 import { databaseCredentialKeys, substituteTemplateValue } from './compose-generator';
 import { validateManifest, type ApplicationManifest, parseDuration } from '../marketplace/manifest-schema';
-import type { DeploymentAdapter } from './adapters/types';
+import type { ApplicationStatusResult, DeploymentAdapter } from './adapters/types';
 import { createDockerAdapter } from './adapters/docker-adapter';
 import { createCpanelAdapter } from './adapters/cpanel-adapter';
 import { createKubernetesAdapter } from './adapters/kubernetes-adapter';
@@ -243,6 +243,14 @@ interface PipelineContext {
 
 function fail(code: string, message: string, rollbackNeeded = false): never {
   throw new DeploymentExecutionError(code, message, rollbackNeeded);
+}
+
+/** Preserve UNKNOWN when infrastructure cannot verify application health. A missing probe,
+ * simulation, or an adapter that has no health API is not evidence of a healthy application. */
+function healthValue(health: ApplicationStatusResult['health']): boolean | null {
+  if (health === 'healthy') return true;
+  if (health === 'unhealthy') return false;
+  return null;
 }
 
 function requireInstallation(ctx: PipelineContext): { installation: InstallationRow; application: ApplicationRow; version: ApplicationVersionRow; manifest: ApplicationManifest } {
@@ -536,21 +544,32 @@ function installPipeline(ctx: PipelineContext): StepDefinitionInternal[] {
       if (report.health === 'unhealthy') {
         fail('HEALTHCHECK_FAILED', `Application did not become healthy: ${report.message}`);
       }
-      await recordHealthResult(db, installation.id, report.health === 'healthy', { resetRestarts: true });
+      await recordHealthResult(db, installation.id, healthValue(report.health), { resetRestarts: true });
     },
   };
 
   const markOnline: StepDefinitionInternal = {
-    name: 'Mark application online',
+    name: 'Record deployment result',
     run: async () => {
       const { installation } = requireInstallation(ctx);
-      await setInstallationStatus(db, installation.id, 'healthy');
-      await updateInstallation(db, installation.id, { deploymentId: ctx.deployment.id });
-      // Bump popularity honestly: only successful installs count.
-      await db.query(
-        `UPDATE applications SET popularity = popularity + 1 WHERE id = $1`,
-        [installation.application_id]
+      const health = await db.query<{ health_status: 'healthy' | 'unhealthy' | 'unknown' }>(
+        `SELECT health_status FROM application_installations WHERE id = $1`,
+        [installation.id]
       );
+      const healthStatus = health.rows[0]?.health_status ?? 'unknown';
+
+      // A deployment can finish while health is still unknown (for example a cPanel adapter
+      // without a probe, or a simulation). Never turn "we could not verify it" into ONLINE.
+      if (healthStatus === 'healthy') {
+        await setInstallationStatus(db, installation.id, 'healthy');
+        await db.query(
+          `UPDATE applications SET popularity = popularity + 1 WHERE id = $1`,
+          [installation.application_id]
+        );
+      } else {
+        await ctx.log('warn', `Deployment completed but application health is ${healthStatus.toUpperCase()}; leaving status as starting`);
+      }
+      await updateInstallation(db, installation.id, { deploymentId: ctx.deployment.id });
     },
   };
 
@@ -600,7 +619,7 @@ function lifecyclePipeline(
           await setInstallationStatus(db, installation.id, 'stopped', { force: true }).catch(() => undefined);
         } else {
           const report = await adapter.runHealthcheck({ db, server, log: ctx.log }, project, manifest);
-          await recordHealthResult(db, installation.id, report.health === 'healthy', {});
+          await recordHealthResult(db, installation.id, healthValue(report.health), {});
         }
       },
     },
@@ -777,7 +796,7 @@ function updatePipeline(ctx: PipelineContext): StepDefinitionInternal[] {
           fail(result.code, result.message, true);
         }
         const report = await adapter.runHealthcheck({ db, server, log: ctx.log }, installation.container_project ?? installation.id, manifest);
-        await recordHealthResult(db, installation.id, report.health === 'healthy', { resetRestarts: true });
+        await recordHealthResult(db, installation.id, healthValue(report.health), { resetRestarts: true });
       },
     },
   ];
@@ -915,7 +934,7 @@ function healthcheckPipeline(ctx: PipelineContext): StepDefinitionInternal[] {
           manifest
         );
         const previous = installation.health_status;
-        await recordHealthResult(db, installation.id, report.health === 'healthy', {});
+        await recordHealthResult(db, installation.id, healthValue(report.health), {});
 
         // Automatic recovery (spec §53): unhealthy → restart, with a circuit breaker after
         // repeated failures so a broken application is not restarted forever.

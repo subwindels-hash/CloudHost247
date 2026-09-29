@@ -45,7 +45,7 @@ const nestedIdParamSchema = z.object({ id: z.string().uuid('id must be a valid U
 
 const listCustomersQuerySchema = z.object({
   search: z.string().max(255).optional(),
-  role: z.enum(['customer', 'admin', 'super_admin']).optional(),
+  role: z.enum(['customer', 'staff', 'admin', 'super_admin']).optional(),
   limit: z.coerce.number().int().min(1).max(100).optional(),
   offset: z.coerce.number().int().min(0).optional(),
 });
@@ -91,7 +91,7 @@ const updateDomainSchema = z
   .refine((v) => Object.keys(v).length > 0, { message: 'At least one field must be provided' });
 
 const statusSchema = z.object({ status: z.enum(['active', 'suspended', 'disabled']) });
-const roleSchema = z.object({ role: z.enum(['customer', 'admin', 'super_admin']) });
+const roleSchema = z.object({ role: z.enum(['customer', 'staff', 'admin', 'super_admin']) });
 const ticketStatusSchema = z.object({ status: z.enum(['open', 'pending_customer', 'pending_staff', 'closed']) });
 const replyMessageSchema = z.object({ message: z.string().min(1).max(10000) });
 const listTicketsQuerySchema = z.object({

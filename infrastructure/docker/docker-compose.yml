@@ -37,8 +37,10 @@ services:
 
   app:
     build:
-      context: ../cloudhost247-node
-      dockerfile: ../infrastructure/docker/Dockerfile.app
+      # The Dockerfile copies both the Node control plane and the infrastructure files, so the
+      # repository root (not cloudhost247-node/) must be the build context.
+      context: ../..
+      dockerfile: infrastructure/docker/Dockerfile.app
     restart: unless-stopped
     depends_on:
       postgres:
@@ -65,8 +67,8 @@ services:
 
   worker:
     build:
-      context: ../cloudhost247-node
-      dockerfile: ../infrastructure/docker/Dockerfile.app
+      context: ../..
+      dockerfile: infrastructure/docker/Dockerfile.app
     restart: unless-stopped
     depends_on:
       postgres:
@@ -89,7 +91,7 @@ services:
     command:
       - '--providers.docker=true'
       - '--providers.docker.exposedbydefault=false'
-      - '--providers.docker.network=cloudhost247_traefik'
+      - '--providers.docker.network=cloudhost247-traefik'
       - '--entrypoints.web.address=:80'
       - '--entrypoints.websecure.address=:443'
       - '--entrypoints.web.http.redirections.entrypoint.to=websecure'
@@ -114,4 +116,8 @@ volumes:
 
 networks:
   internal: {}
-  traefik: {}
+  # Customer deployment manifests use this stable external name for Traefik labels. Without an
+  # explicit name Compose would create cloudhost247_traefik, which would not match the generated
+  # cloudhost247-traefik network and routes would silently fail.
+  traefik:
+    name: cloudhost247-traefik
