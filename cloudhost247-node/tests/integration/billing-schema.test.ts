@@ -435,4 +435,239 @@ describe('Phase 5B billing database schema and repositories', () => {
       }
     });
   });
+  // --- Cross-row financial invariants (independent audit findings B1-B4) -----------------------
+  //
+  // The audit found that `payments` and `billing_ledger` rows could be written with a currency,
+  // an owner, or an amount that disagreed with the invoice they belong to. Nothing in the
+  // application produced such a row — each of these tables has exactly one writer, and all of
+  // them derive their values from the invoice — but the invariant was enforced only by that
+  // convention, not by the write path itself. A future second writer (Phase 5D's webhook
+  // receiver is the obvious one) would have had nothing stopping it.
+  //
+  // `createPayment` and `recordLedgerEntry` now read the invoice inside the caller's transaction
+  // and derive `user_id`/`currency` from it, with the amount checked against the invoice total in
+  // the same statement, so these are no longer "shouldn't happen" cases but "can't happen" ones.
+  describe('cross-row invariants against the parent invoice', () => {
+    async function invoiceFor(email: string, total = '49.99') {
+      const user = await makeUser(email);
+      const order = await makeOrder(user.id, total);
+      const invoice = await createInvoice(db, {
+        id: randomUUID(),
+        orderId: order.id,
+        userId: user.id,
+        currency: 'USD',
+        subtotalAmount: total,
+        discountAmount: '0.00',
+        taxAmount: '0.00',
+        totalAmount: total,
+      });
+      return { user, order, invoice };
+    }
+
+    it('B1: refuses a payment denominated in a different currency from its invoice', async () => {
+      const { user, invoice } = await invoiceFor('b1@example.com');
+      await expect(
+        withTransaction(db, (tx) =>
+          createPayment(tx, {
+            id: randomUUID(),
+            invoiceId: invoice.id,
+            userId: user.id,
+            amount: invoice.total_amount,
+            currency: 'EUR',
+            provider: 'manual',
+          })
+        )
+      ).rejects.toThrow(/mismatch/i);
+      expect(await listPaymentsForInvoice(db, invoice.id)).toHaveLength(0);
+    });
+
+    it('B2: refuses a payment attributed to a different user than its invoice', async () => {
+      const { invoice } = await invoiceFor('b2@example.com');
+      const stranger = await makeUser('b2-stranger@example.com');
+      await expect(
+        withTransaction(db, (tx) =>
+          createPayment(tx, {
+            id: randomUUID(),
+            invoiceId: invoice.id,
+            userId: stranger.id,
+            amount: invoice.total_amount,
+            currency: 'USD',
+            provider: 'manual',
+          })
+        )
+      ).rejects.toThrow(/mismatch/i);
+      expect(await listPaymentsForInvoice(db, invoice.id)).toHaveLength(0);
+    });
+
+    it('B3: refuses a ledger entry attributed to a different user or currency than its invoice', async () => {
+      const { user, invoice } = await invoiceFor('b3@example.com');
+      const stranger = await makeUser('b3-stranger@example.com');
+
+      await expect(
+        withTransaction(db, (tx) =>
+          recordLedgerEntry(tx, {
+            id: randomUUID(),
+            userId: stranger.id,
+            invoiceId: invoice.id,
+            entryType: 'credit',
+            amount: '5.00',
+            currency: 'USD',
+            description: 'misattributed credit',
+          })
+        )
+      ).rejects.toThrow(/mismatch/i);
+
+      await expect(
+        withTransaction(db, (tx) =>
+          recordLedgerEntry(tx, {
+            id: randomUUID(),
+            userId: user.id,
+            invoiceId: invoice.id,
+            entryType: 'credit',
+            amount: '5.00',
+            currency: 'GBP',
+            description: 'wrong-currency credit',
+          })
+        )
+      ).rejects.toThrow(/mismatch/i);
+
+      expect(await listLedgerEntriesForInvoice(db, invoice.id)).toHaveLength(0);
+    });
+
+    it('B4: refuses a payment larger than the invoice total', async () => {
+      const { user, invoice } = await invoiceFor('b4@example.com', '49.99');
+      await expect(
+        withTransaction(db, (tx) =>
+          createPayment(tx, {
+            id: randomUUID(),
+            invoiceId: invoice.id,
+            userId: user.id,
+            amount: '999999.00',
+            currency: 'USD',
+            provider: 'manual',
+          })
+        )
+      ).rejects.toThrow(/no invoice .* accepts an amount/i);
+      expect(await listPaymentsForInvoice(db, invoice.id)).toHaveLength(0);
+
+      // One cent over is still over — the boundary must not be fuzzy.
+      await expect(
+        withTransaction(db, (tx) =>
+          createPayment(tx, {
+            id: randomUUID(),
+            invoiceId: invoice.id,
+            userId: user.id,
+            amount: '50.00',
+            currency: 'USD',
+            provider: 'manual',
+          })
+        )
+      ).rejects.toThrow(/accepts an amount/i);
+    });
+
+    it('still accepts every legitimate write, including exact-total and partial payments', async () => {
+      const { user, invoice } = await invoiceFor('bok@example.com', '49.99');
+
+      const exact = await withTransaction(db, (tx) =>
+        createPayment(tx, {
+          id: randomUUID(),
+          invoiceId: invoice.id,
+          userId: user.id,
+          amount: '49.99',
+          currency: 'USD',
+          provider: 'manual',
+        })
+      );
+      expect(exact.amount).toBe('49.99');
+      expect(exact.user_id).toBe(user.id);
+      expect(exact.currency).toBe('USD');
+
+      const partial = await withTransaction(db, (tx) =>
+        createPayment(tx, {
+          id: randomUUID(),
+          invoiceId: invoice.id,
+          userId: user.id,
+          amount: '10.00',
+          currency: 'USD',
+          provider: 'sandbox',
+          providerReference: `ref-${randomUUID()}`,
+        })
+      );
+      expect(partial.amount).toBe('10.00');
+
+      const entry = await withTransaction(db, (tx) =>
+        recordLedgerEntry(tx, {
+          id: randomUUID(),
+          userId: user.id,
+          invoiceId: invoice.id,
+          entryType: 'payment',
+          amount: '49.99',
+          currency: 'USD',
+          description: 'legitimate payment',
+        })
+      );
+      expect(entry.user_id).toBe(user.id);
+      expect(entry.currency).toBe('USD');
+
+      // A standalone, invoice-less ledger entry has no invoice to derive from and must still work.
+      const standalone = await withTransaction(db, (tx) =>
+        recordLedgerEntry(tx, {
+          id: randomUUID(),
+          userId: user.id,
+          invoiceId: null,
+          entryType: 'credit',
+          amount: '3.00',
+          currency: 'USD',
+          description: 'account-level credit',
+        })
+      );
+      expect(standalone.invoice_id).toBeNull();
+      expect(standalone.user_id).toBe(user.id);
+    });
+
+    it('rolls back a valid write sitting beside a rejected one', async () => {
+      const { user, invoice } = await invoiceFor('brollback@example.com');
+      const stranger = await makeUser('brollback-stranger@example.com');
+
+      await expect(
+        withTransaction(db, async (tx) => {
+          await createPayment(tx, {
+            id: randomUUID(),
+            invoiceId: invoice.id,
+            userId: user.id,
+            amount: '1.50',
+            currency: 'USD',
+            provider: 'manual',
+          });
+          // ...and then a cross-row violation in the same transaction.
+          await createPayment(tx, {
+            id: randomUUID(),
+            invoiceId: invoice.id,
+            userId: stranger.id,
+            amount: '1.00',
+            currency: 'USD',
+            provider: 'manual',
+          });
+        })
+      ).rejects.toThrow(/mismatch/i);
+
+      // Neither write may survive.
+      expect(await listPaymentsForInvoice(db, invoice.id)).toHaveLength(0);
+    });
+
+    it('refuses a payment against an invoice that does not exist', async () => {
+      await expect(
+        withTransaction(db, (tx) =>
+          createPayment(tx, {
+            id: randomUUID(),
+            invoiceId: randomUUID(),
+            userId: randomUUID(),
+            amount: '1.00',
+            currency: 'USD',
+            provider: 'manual',
+          })
+        )
+      ).rejects.toThrow(/no invoice/i);
+    });
+  });
 });
