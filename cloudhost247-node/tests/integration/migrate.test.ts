@@ -52,6 +52,21 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0024_create_webhook_events.sql',
     '0025_extend_auth_audit_log_for_admin_billing.sql',
     '0026_create_domain_brokerage.sql',
+    // Phase 6 — marketplace, deployments, servers, domains, billing lifecycle, audit.
+    '0027_create_roles_user_roles.sql',
+    '0028_create_servers_server_credentials.sql',
+    '0029_create_application_categories.sql',
+    '0030_create_applications.sql',
+    '0031_create_application_versions.sql',
+    '0032_create_application_installations.sql',
+    '0033_create_deployments.sql',
+    '0034_extend_domains.sql',
+    '0035_create_application_environment_volumes.sql',
+    '0036_create_backups.sql',
+    '0037_create_subscriptions.sql',
+    '0038_create_audit_logs.sql',
+    '0039_create_server_metrics.sql',
+    '0040_create_platform_settings.sql',
   ];
 
   it('finds the committed migration files in order', () => {
@@ -80,6 +95,25 @@ describe('migration runner against the real database/migrations SQL files', () =
         'plan_pricing',
         'plan_features',
         'schema_migrations',
+        // Phase 6
+        'roles',
+        'servers',
+        'server_credentials',
+        'application_categories',
+        'applications',
+        'application_versions',
+        'application_installations',
+        'deployments',
+        'deployment_steps',
+        'deployment_events',
+        'application_domains',
+        'application_environment',
+        'application_volumes',
+        'backups',
+        'subscriptions',
+        'audit_logs',
+        'server_metrics',
+        'platform_settings',
       ])
     );
   });

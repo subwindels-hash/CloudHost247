@@ -1,0 +1,61 @@
+id: postgresql
+name: PostgreSQL
+category: database
+description: The world’s most advanced open-source relational database, as a dedicated instance.
+website: https://postgresql.org
+repository: https://github.com/postgres/postgres
+documentation: https://www.postgresql.org/docs
+license: PostgreSQL
+featured: true
+popularity: 920
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 1
+  memory: 1024
+  storage: 20480
+  recommended:
+    cpu: 2
+    memory: 4096
+    storage: 102400
+services:
+  app:
+    image: postgres
+    internal: false
+    port: 5432
+    volumes:
+    - /var/lib/postgresql/data
+environment:
+  required: []
+  optional: []
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: command
+  command:
+  - pg_isready
+  - -U
+  - postgres
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+update:
+  strategy: pull-and-recreate
+versions:
+- version: '17'
+  image: postgres:17-alpine
+  stable: true
+- version: '16'
+  image: postgres:16-alpine
+longDescription: A dedicated PostgreSQL 17 instance with generated credentials, an isolated named volume for the
+  data directory, and automated backups. Reachable by your other installations on the same private network, or exposed
+  with a domain of its own through the platform proxy. pgAdmin and Adminer are both in the marketplace to manage
+  it.

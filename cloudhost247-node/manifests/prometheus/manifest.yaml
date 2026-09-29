@@ -1,0 +1,54 @@
+id: prometheus
+name: Prometheus
+category: monitoring
+description: Open-source systems monitoring and alerting toolkit with a powerful query language.
+website: https://prometheus.io
+repository: https://github.com/prometheus/prometheus
+documentation: https://prometheus.io/docs
+license: Apache-2.0
+featured: false
+popularity: 800
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+- kubernetes
+requirements:
+  cpu: 1
+  memory: 2048
+  storage: 51200
+  recommended:
+    cpu: 2
+    memory: 4096
+    storage: 102400
+services:
+  app:
+    image: prom/prometheus
+    internal: false
+    port: 9090
+    volumes:
+    - /prometheus
+environment:
+  required: []
+  optional: []
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /-/healthy
+  port: 9090
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+update:
+  strategy: pull-and-recreate
+versions:
+- version: 3.1.0
+  image: prom/prometheus:v3.1.0
+  stable: true

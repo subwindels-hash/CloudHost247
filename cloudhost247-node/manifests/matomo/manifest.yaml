@@ -1,0 +1,65 @@
+id: matomo
+name: Matomo
+category: analytics
+description: Google Analytics alternative that gives you full data ownership and privacy compliance.
+website: https://matomo.org
+repository: https://github.com/matomo-org/matomo
+documentation: https://matomo.org/docs
+license: GPL-3.0
+featured: false
+popularity: 700
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 1
+  memory: 1024
+  storage: 10240
+  recommended:
+    cpu: 2
+    memory: 2048
+    storage: 20480
+services:
+  app:
+    image: matomo
+    internal: false
+    port: 80
+    volumes:
+    - /var/www/html
+    dependsOn:
+    - db
+  db:
+    image: mariadb:11
+    internal: true
+    volumes:
+    - /var/lib/mysql
+    database: mariadb
+environment:
+  required:
+  - key: MATOMO_DATABASE_PASSWORD
+    secret: true
+    generate: random_32
+  optional: []
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /index.php
+  port: 80
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+  - database
+update:
+  strategy: pull-and-recreate
+versions:
+- version: 5.2.0
+  image: matomo:5.2.0-apache
+  stable: true

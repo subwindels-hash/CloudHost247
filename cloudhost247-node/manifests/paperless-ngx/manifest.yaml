@@ -1,0 +1,74 @@
+id: paperless-ngx
+name: Paperless-ngx
+category: documents
+description: Scan, OCR, index, and archive all your physical documents, fully searchable.
+website: https://docs.paperless-ngx.com
+repository: https://github.com/paperless-ngx/paperless-ngx
+documentation: https://docs.paperless-ngx.com
+license: GPL-3.0
+featured: false
+popularity: 710
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 2
+  memory: 2048
+  storage: 51200
+  recommended:
+    cpu: 2
+    memory: 4096
+    storage: 102400
+services:
+  app:
+    image: paperlessngx/paperless-ngx
+    internal: false
+    port: 8000
+    volumes:
+    - /usr/src/paperless/data
+    - /usr/src/paperless/media
+    - /usr/src/paperless/export
+    dependsOn:
+    - db
+    - broker
+  db:
+    image: postgres:17-alpine
+    internal: true
+    volumes:
+    - /var/lib/postgresql/data
+    database: postgres
+  broker:
+    image: redis:7-alpine
+    internal: true
+    volumes:
+    - /data
+    database: redis
+environment:
+  required:
+  - key: PAPERLESS_SECRET_KEY
+    secret: true
+    generate: random_32
+  optional: []
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /accounts/login/
+  port: 8000
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+  - database
+update:
+  strategy: pull-and-recreate
+versions:
+- version: 2.14.0
+  image: paperlessngx/paperless-ngx:2.14.0
+  stable: true

@@ -1,0 +1,62 @@
+id: umami
+name: Umami
+category: analytics
+description: Simple, fast, privacy-focused web analytics without cookies or personal data collection.
+website: https://umami.is
+repository: https://github.com/umami-software/umami
+documentation: https://umami.is/docs
+license: MIT
+featured: false
+popularity: 580
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 1
+  memory: 1024
+  storage: 10240
+  recommended:
+    cpu: 1
+    memory: 2048
+    storage: 20480
+services:
+  app:
+    image: ghcr.io/umami-software/umami
+    internal: false
+    port: 3000
+    dependsOn:
+    - db
+    environment:
+      DATABASE_URL: postgres://__DB_USER__:__DB_PASSWORD__@db:5432/__DB_NAME__
+  db:
+    image: postgres:17-alpine
+    internal: true
+    volumes:
+    - /var/lib/postgresql/data
+    database: postgres
+environment:
+  required: []
+  optional: []
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /api/heartbeat
+  port: 3000
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+  - database
+update:
+  strategy: pull-and-recreate
+versions:
+- version: 2.15.1
+  image: ghcr.io/umami-software/umami:postgresql-v2.15.1
+  stable: true

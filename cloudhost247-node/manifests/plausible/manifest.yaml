@@ -1,0 +1,75 @@
+id: plausible
+name: Plausible Analytics
+category: analytics
+description: Lightweight and open-source web analytics, cookie-free and GDPR compliant.
+website: https://plausible.io
+repository: https://github.com/plausible/analytics
+documentation: https://plausible.io/docs/self-hosting
+license: AGPL-3.0
+featured: false
+popularity: 540
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 2
+  memory: 2048
+  storage: 20480
+  recommended:
+    cpu: 2
+    memory: 4096
+    storage: 40960
+services:
+  app:
+    image: plausible/analytics
+    internal: false
+    port: 8000
+    dependsOn:
+    - db
+    - clickhouse
+    environment:
+      BASE_URL: __URL__
+      DATABASE_URL: postgres://__DB_USER__:__DB_PASSWORD__@db:5432/__DB_NAME__
+      CLICKHOUSE_DATABASE: plausible_events_db
+      CLICKHOUSE_USER: plausible_events_user
+      DISABLE_REGISTRATION: 'true'
+  db:
+    image: postgres:17-alpine
+    internal: true
+    volumes:
+    - /var/lib/postgresql/data
+    database: postgres
+  clickhouse:
+    image: clickhouse/clickhouse-server:24-alpine
+    internal: true
+    volumes:
+    - /var/lib/clickhouse
+environment:
+  required:
+  - key: SECRET_KEY_BASE
+    secret: true
+    generate: random_32
+  optional: []
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /api/health
+  port: 8000
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+  - database
+update:
+  strategy: pull-and-recreate
+versions:
+- version: 2.1.5
+  image: plausible/analytics:v2.1.5
+  stable: true

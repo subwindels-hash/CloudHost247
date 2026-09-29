@@ -784,3 +784,430 @@ form.ch247-form select {
   display: block;
   margin-bottom: 0.3rem;
 }
+
+/* =============================================================================================
+   Phase 6 — Marketplace, applications, deployments, admin operations
+   ============================================================================================= */
+
+/* Marketplace grid + cards */
+.ch247-market-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.ch247-market-section {
+  margin-top: 8px;
+}
+
+.ch247-market-section h2 {
+  margin: 12px 0;
+}
+
+.ch247-market-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 10px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.ch247-market-card__head {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.ch247-market-card__head h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.ch247-market-card__cat {
+  margin: 0;
+  color: #475569;
+  font-size: 0.85rem;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.ch247-market-card__desc {
+  margin: 0;
+  font-size: 0.9rem;
+  flex-grow: 1;
+}
+
+.ch247-market-card__req,
+.ch247-market-card__meta {
+  margin: 0;
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.ch247-market-controls {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 14px 0 6px;
+}
+
+.ch247-market-controls input[type='search'] {
+  flex: 1;
+  min-width: 220px;
+}
+
+.ch247-market-cats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.ch247-market-cats button {
+  border: 1px solid rgba(15, 23, 42, 0.15);
+  background: transparent;
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.ch247-market-cats button.is-active {
+  background: #0756d8;
+  border-color: #0756d8;
+  color: #fff;
+}
+
+/* Letter-tile logos (no external image fetches) */
+.ch247-app-tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  color: #fff;
+  font-weight: 700;
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
+}
+
+/* App detail page */
+.ch247-appdetail__head {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.ch247-appdetail__desc {
+  margin-top: 12px;
+  line-height: 1.6;
+}
+
+.ch247-appdetail__links {
+  display: flex;
+  gap: 14px;
+  font-size: 0.85rem;
+  flex-wrap: wrap;
+}
+
+/* Install wizard (spec §44) */
+.ch247-wizard__steps {
+  display: flex;
+  gap: 4px;
+  list-style: none;
+  padding: 0;
+  margin: 16px 0;
+  font-size: 0.85rem;
+}
+
+.ch247-wizard__steps li {
+  padding: 8px 14px;
+  border-radius: 8px 8px 0 0;
+  border-bottom: 3px solid rgba(15, 23, 42, 0.12);
+  color: #64748b;
+}
+
+.ch247-wizard__steps li.is-active {
+  color: #0756d8;
+  border-bottom-color: #0756d8;
+  font-weight: 600;
+}
+
+.ch247-wizard__steps li.is-done {
+  color: #166534;
+  border-bottom-color: #166534;
+}
+
+.ch247-wizard__panel {
+  margin-top: 8px;
+}
+
+.ch247-wizard__nav {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 18px;
+}
+
+.ch247-serverlist {
+  display: grid;
+  gap: 8px;
+}
+
+.ch247-serverlist__item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+.ch247-serverlist__item.is-selected {
+  border-color: #0756d8;
+  background: rgba(7, 86, 216, 0.06);
+}
+
+.ch247-fieldset {
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin: 14px 0;
+  display: grid;
+  gap: 10px;
+}
+
+.ch247-fieldset h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.ch247-field {
+  display: grid;
+  gap: 4px;
+  font-size: 0.88rem;
+}
+
+.ch247-field small {
+  color: #64748b;
+}
+
+/* Instance rows, tabs, actions */
+.ch247-instrow {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.ch247-instrow.is-focus {
+  outline: 2px solid #0756d8;
+}
+
+.ch247-instrow__main h2 {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+}
+
+.ch247-instrow__side {
+  display: grid;
+  gap: 8px;
+  justify-items: end;
+  align-content: start;
+}
+
+.ch247-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ch247-tabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.12);
+  margin-top: 16px;
+}
+
+.ch247-tabs button {
+  border: none;
+  background: transparent;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  border-bottom: 3px solid transparent;
+  color: #475569;
+}
+
+.ch247-tabs button.is-active {
+  color: #0756d8;
+  border-bottom-color: #0756d8;
+  font-weight: 600;
+}
+
+.ch247-btn--danger {
+  border-color: #b91c1c;
+  color: #b91c1c;
+}
+
+.ch247-btn--danger:hover:not(:disabled) {
+  background: #b91c1c;
+  color: #fff;
+}
+
+/* Key/value lists */
+.ch247-kv {
+  display: grid;
+  grid-template-columns: minmax(120px, max-content) 1fr;
+  gap: 6px 18px;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.ch247-kv dt {
+  color: #64748b;
+}
+
+.ch247-kv dd {
+  margin: 0;
+}
+
+/* Deployment pipeline + console (spec §24) */
+.ch247-pipeline {
+  list-style: none;
+  padding: 0;
+  margin: 14px 0;
+  display: grid;
+  gap: 8px;
+}
+
+.ch247-pipeline li {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 0.92rem;
+}
+
+.ch247-pipeline li small {
+  display: block;
+  color: #b91c1c;
+}
+
+.ch247-pipeline__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.2);
+  flex-shrink: 0;
+}
+
+.ch247-pipeline li.is-running .ch247-pipeline__dot {
+  background: #d97706;
+  animation: ch247-pulse 1.2s ease-in-out infinite;
+}
+
+.ch247-pipeline li.is-succeeded .ch247-pipeline__dot {
+  background: #16a34a;
+}
+
+.ch247-pipeline li.is-failed .ch247-pipeline__dot {
+  background: #dc2626;
+}
+
+.ch247-pipeline li.is-skipped {
+  color: #94a3b8;
+  text-decoration: line-through;
+}
+
+@keyframes ch247-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.ch247-console {
+  background: #0b1120;
+  color: #e2e8f0;
+  border-radius: 8px;
+  padding: 12px 14px;
+  max-height: 420px;
+  overflow: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.ch247-console__line {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.ch247-console__line.is-error,
+.ch247-console__line.is-warn {
+  color: #f87171;
+}
+
+.ch247-console__line.is-info {
+  color: #93c5fd;
+}
+
+.ch247-console__time {
+  color: #64748b;
+  margin-right: 10px;
+}
+
+/* Banners */
+.ch247-banner {
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.88rem;
+  margin: 10px 0;
+}
+
+.ch247-banner--info {
+  background: rgba(7, 86, 216, 0.08);
+  color: #1e40af;
+}
+
+.ch247-banner--warning {
+  background: rgba(217, 119, 6, 0.12);
+  color: #92400e;
+}
+
+.ch247-banner--error {
+  background: rgba(185, 28, 28, 0.1);
+  color: #b91c1c;
+}
+
+/* Plain lists + inline forms */
+.ch247-plainlist {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.ch247-inlineform {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.ch247-secret {
+  user-select: all;
+  word-break: break-all;
+  background: #0b1120;
+  color: #e2e8f0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  display: inline-block;
+}
+
+.ch247-audit-meta {
+  font-size: 0.72rem;
+  color: #64748b;
+}

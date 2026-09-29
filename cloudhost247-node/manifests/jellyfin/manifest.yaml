@@ -1,0 +1,54 @@
+id: jellyfin
+name: Jellyfin
+category: media
+description: Free software media system that puts you in control of your media library.
+website: https://jellyfin.org
+repository: https://github.com/jellyfin/jellyfin
+documentation: https://jellyfin.org/docs
+license: GPL-2.0
+featured: false
+popularity: 880
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 2
+  memory: 2048
+  storage: 102400
+  recommended:
+    cpu: 4
+    memory: 8192
+    storage: 512000
+services:
+  app:
+    image: jellyfin/jellyfin
+    internal: false
+    port: 8096
+    volumes:
+    - /config
+    - /media
+environment:
+  required: []
+  optional: []
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /health
+  port: 8096
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+update:
+  strategy: pull-and-recreate
+versions:
+- version: 10.10.0
+  image: jellyfin/jellyfin:10.10.0
+  stable: true

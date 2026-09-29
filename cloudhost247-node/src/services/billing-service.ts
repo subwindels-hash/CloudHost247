@@ -66,15 +66,21 @@ export async function issueInvoiceForOrder(tx: Queryable, order: OrderRow, genId
     totalAmount: order.total_amount,
   });
 
-  await recordLedgerEntry(tx, {
-    id: genId(),
-    userId: order.user_id,
-    invoiceId: invoice.id,
-    entryType: 'charge',
-    amount: invoice.total_amount,
-    currency: invoice.currency,
-    description: `Invoice ${invoice.invoice_number} for order ${order.order_number}`,
-  });
+  // A zero-total invoice (e.g. an app installation covered by an existing subscription) has
+  // nothing to charge: billing_ledger's positive-amount check applies to real charges, and a
+  // synthetic 0.00 "charge" row would be noise in an append-only table. Zero invoices stay
+  // unbalanced at exactly zero by construction.
+  if (Number.parseFloat(invoice.total_amount) > 0) {
+    await recordLedgerEntry(tx, {
+      id: genId(),
+      userId: order.user_id,
+      invoiceId: invoice.id,
+      entryType: 'charge',
+      amount: invoice.total_amount,
+      currency: invoice.currency,
+      description: `Invoice ${invoice.invoice_number} for order ${order.order_number}`,
+    });
+  }
 
   return invoice;
 }

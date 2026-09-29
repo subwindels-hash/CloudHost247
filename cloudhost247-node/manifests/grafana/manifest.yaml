@@ -1,0 +1,62 @@
+id: grafana
+name: Grafana
+category: monitoring
+description: The open observability platform for dashboards, alerting, and analytics.
+website: https://grafana.com
+repository: https://github.com/grafana/grafana
+documentation: https://grafana.com/docs/grafana/latest
+license: AGPL-3.0
+featured: true
+popularity: 890
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+- kubernetes
+requirements:
+  cpu: 1
+  memory: 1024
+  storage: 10240
+  recommended:
+    cpu: 2
+    memory: 2048
+    storage: 20480
+services:
+  app:
+    image: grafana/grafana
+    internal: false
+    port: 3000
+    volumes:
+    - /var/lib/grafana
+environment:
+  required:
+  - key: GF_SECURITY_ADMIN_PASSWORD
+    description: Admin login password
+    secret: true
+    generate: random_32
+  optional:
+  - key: GF_SERVER_ROOT_URL
+    defaultFromUrl: true
+  - key: GF_USERS_ALLOW_SIGN_UP
+    default: 'false'
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /api/health
+  port: 3000
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+update:
+  strategy: pull-and-recreate
+versions:
+- version: 11.5.0
+  image: grafana/grafana:11.5.0
+  stable: true

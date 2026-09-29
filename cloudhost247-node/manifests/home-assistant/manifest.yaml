@@ -1,0 +1,56 @@
+id: home-assistant
+name: Home Assistant
+category: home-automation
+description: Open-source home automation hub that puts local control and privacy first.
+website: https://home-assistant.io
+repository: https://github.com/home-assistant/core
+documentation: https://www.home-assistant.io/docs
+license: Apache-2.0
+featured: true
+popularity: 900
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 2
+  memory: 2048
+  storage: 20480
+  recommended:
+    cpu: 2
+    memory: 4096
+    storage: 40960
+services:
+  app:
+    image: homeassistant/home-assistant
+    internal: false
+    port: 8123
+    volumes:
+    - /config
+environment:
+  required: []
+  optional: []
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /api/
+  port: 8123
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+update:
+  strategy: pull-and-recreate
+versions:
+- version: '2025.1'
+  image: homeassistant/home-assistant:2025.1
+  stable: true
+longDescription: Home Assistant connects thousands of smart home devices — Zigbee, Z-Wave, Matter, MQTT, and everything
+  in between — into one local, private hub with powerful automations, dashboards, and voice control. Works fully
+  offline; no cloud dependency.

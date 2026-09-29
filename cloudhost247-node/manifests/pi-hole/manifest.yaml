@@ -1,0 +1,59 @@
+id: pi-hole
+name: Pi-hole
+category: networking
+description: Network-level ad and tracker blocking DNS server for your whole network.
+website: https://pi-hole.net
+repository: https://github.com/pi-hole/pi-hole
+documentation: https://docs.pi-hole.net
+license: EUPL-1.2
+featured: false
+popularity: 860
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 1
+  memory: 512
+  storage: 5120
+  recommended:
+    cpu: 1
+    memory: 1024
+    storage: 10240
+services:
+  app:
+    image: pihole/pihole
+    internal: false
+    port: 80
+    volumes:
+    - /etc/pihole
+environment:
+  required:
+  - key: WEBPASSWORD
+    description: Admin web UI password
+    secret: true
+    generate: random_32
+  optional:
+  - key: TZ
+    default: UTC
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /admin/login.php
+  port: 80
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+update:
+  strategy: pull-and-recreate
+versions:
+- version: '2024.07'
+  image: pihole/pihole:2024.07.0
+  stable: true

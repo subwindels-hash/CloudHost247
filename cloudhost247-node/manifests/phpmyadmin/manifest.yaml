@@ -1,0 +1,54 @@
+id: phpmyadmin
+name: phpMyAdmin
+category: database
+description: Classic web interface for MySQL and MariaDB administration.
+website: https://phpmyadmin.net
+repository: https://github.com/phpmyadmin/phpmyadmin
+documentation: https://docs.phpmyadmin.net
+license: GPL-2.0
+featured: false
+popularity: 740
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 1
+  memory: 256
+  storage: 2560
+  recommended:
+    cpu: 1
+    memory: 512
+    storage: 5120
+services:
+  app:
+    image: phpmyadmin
+    internal: false
+    port: 80
+environment:
+  required:
+  - key: PMA_HOST
+    description: Hostname of your MySQL/MariaDB installation
+    default: db
+  optional: []
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /
+  port: 80
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+update:
+  strategy: pull-and-recreate
+versions:
+- version: 5.2.1
+  image: phpmyadmin:5.2.1-apache
+  stable: true

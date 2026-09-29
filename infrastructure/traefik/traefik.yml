@@ -1,0 +1,42 @@
+# Stand-alone Traefik static config for a CloudHost247 application server.
+#
+# This file is for servers where Traefik runs natively (not in the platform compose). The
+# platform never hardcodes customer domains here — routing is generated per-deployment from
+# Docker labels (spec §33) by src/deployments/compose-generator.ts.
+entryPoints:
+  web:
+    address: ':80'
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+  websecure:
+    address: ':443'
+    http:
+      tls:
+        certResolver: letsencrypt
+
+providers:
+  docker:
+    endpoint: 'unix:///var/run/docker.sock'
+    exposedByDefault: false
+    network: cloudhost247-traefik
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      # Switch to tlsChallenge/httpsChallenge in production; the HTTP challenge needs no ports.
+      httpChallenge:
+        entryPoint: web
+      email: ops@cloudhost247.com
+      storage: /letsencrypt/acme.json
+
+api:
+  dashboard: true
+
+metrics:
+  prometheus: true
+
+log:
+  level: INFO

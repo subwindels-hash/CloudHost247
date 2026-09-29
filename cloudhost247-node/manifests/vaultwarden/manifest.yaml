@@ -1,0 +1,64 @@
+id: vaultwarden
+name: Vaultwarden
+category: security
+description: Unofficial Bitwarden-compatible server — password manager for your whole team.
+website: https://github.com/dani-garcia/vaultwarden
+repository: https://github.com/dani-garcia/vaultwarden
+documentation: https://github.com/dani-garcia/vaultwarden/wiki
+license: AGPL-3.0
+featured: true
+popularity: 910
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 1
+  memory: 256
+  storage: 2560
+  recommended:
+    cpu: 1
+    memory: 512
+    storage: 10240
+services:
+  app:
+    image: vaultwarden/server
+    internal: false
+    port: 80
+    volumes:
+    - /data
+environment:
+  required:
+  - key: ADMIN_TOKEN
+    description: Token for the admin panel (argon2 hash recommended in production)
+    secret: true
+    generate: random_32
+  optional:
+  - key: DOMAIN
+    defaultFromUrl: true
+  - key: SIGNUPS_ALLOWED
+    default: 'true'
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /alive
+  port: 80
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+update:
+  strategy: pull-and-recreate
+versions:
+- version: 1.33.0
+  image: vaultwarden/server:1.33.0
+  stable: true
+longDescription: Vaultwarden is a lightweight, self-hosted Bitwarden-compatible password server. Works with all
+  official Bitwarden apps and browser extensions. End-to-end encrypted vaults, secure sharing, TOTP codes, and attachments
+  — your passwords never leave infrastructure you control.
