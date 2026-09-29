@@ -809,3 +809,101 @@ a consistent state.** I have not re-derived every other conclusion in this repor
 stricter standard, and I am not claiming it here.
 
 Phase 5B remains **NOT ACCEPTED**, and nothing here changes that.
+
+---
+
+# ADDENDUM 5 — Finding B5: an invoice could be attributed to the wrong customer
+
+Addendum 4 closed with an admission: I had not re-derived the rest of the audit under the stricter
+"sweep the database, not just the call" standard. Doing that produced a second finding.
+
+## The anti-pattern hunt
+
+First I searched every repository module for the shape that caused the Addendum 4 defect — a write
+whose invariant is asserted *after* it. The two I had already fixed were the only instances; no
+other module writes first and validates second. That part of the codebase is clean.
+
+## Finding B5
+
+`createInvoice` inserted the caller's values with **no reference to the parent order at all**:
+
+```sql
+INSERT INTO invoices (id, order_id, user_id, currency, subtotal_amount, ...)
+VALUES ($1, $2, $3, $4, $5, ...)
+```
+
+Nothing tied `user_id`, `currency` or any amount to the order being invoiced. The whole-database
+sweep caught it immediately: an invoice persisted against an order owned by a different user.
+
+**Why this one matters more than Addendum 4's.** `listInvoicesForUser` scopes by
+`invoices.user_id`, and both the ledger entry and the payment row derive their owner *from the
+invoice*. A single wrong `user_id` at invoice creation would therefore carry an entire financial
+chain — invoice, opening charge, payment, payment ledger entry — to the wrong customer, and the
+ledger half of that chain is append-only and undeletable.
+
+**Reachability, stated precisely.** The only caller, `issueInvoiceForOrder`
+(`src/services/billing-service.ts:23`), copies the order's own fields verbatim, so **the invariant
+held in practice and no misattributed invoice could have been produced by the application.** As in
+Addendum 4, the gap was that it was never *enforced*.
+
+## Two false passes in my own probe
+
+The first run of the rewritten probe reported that the currency and total cases were correctly
+rejected. They were not. All three cases reused the same order, and
+`invoices_order_id_unique_idx` allows one invoice per order — so after the first case inserted its
+row, the next two were rejected by the **unique index**, for a reason unrelated to the invariant
+under test. Only the owner case was genuinely exercised. Each case now uses its own order, in both
+the probe and the committed tests.
+
+This is the same failure mode as the `git stash` no-op disclosed in Addendum 2: a check that
+appears to pass while testing nothing. It is worth stating plainly that two of the three have now
+been caught only because something else forced a closer look.
+
+## Fix (code-only, no migration)
+
+`createInvoice` now derives `user_id` and `currency` from the order and requires every amount to
+equal the order's, all in the `WHERE` clause, so a disagreement matches no row and nothing is
+written:
+
+```sql
+SELECT $1, o.id, o.user_id, o.currency, $4, $5, $6, $7
+FROM orders o
+WHERE o.id = $2 AND o.user_id = $3 AND o.currency = $8
+  AND o.subtotal_amount = $4 AND o.discount_amount = $5
+  AND o.tax_amount = $6 AND o.total_amount = $7
+```
+
+Ten existing tests failed against this, all for the same reason: they paired a fixture order of
+49.99 with a fixture invoice of 10.00, amounts that were never related because nothing required
+them to be. No assertion depended on the mismatch — it was incidental fixture data — so the
+fixtures were aligned rather than the constraint weakened.
+
+## Evidence
+
+| Check | Result |
+| --- | --- |
+| Full suite | **298/298 across 34 files** (293 + 5) |
+| Invariant probe vs real PostgreSQL 18.4 | **49/49**, including a 16-query whole-DB sweep |
+| Pre-fix proof | all 4 adversarial B5 tests fail against `104cd6f`; the legitimate case passes both before and after |
+| Typecheck | clean |
+| Migrations added | **none** — still 22 |
+| Historical financial records modified | **none** |
+
+## The probe is now committed
+
+`recovery/verify-financial-invariants.ts` is in the repository so this is reproducible by you
+rather than a claim about a sandbox you cannot inspect:
+
+```
+cd cloudhost247-node && LOG_LEVEL=silent npx tsx ../recovery/verify-financial-invariants.ts
+```
+
+It creates and drops its own throwaway database and never contacts production.
+
+## Standing assessment
+
+Two latent integrity gaps in two rounds of deeper review, both in code I had already reported as
+verified. Neither was reachable through the application, and I have no evidence of any incorrect
+financial record — but the rate at which this standard keeps finding things is itself the most
+useful result here. **Phase 5B remains NOT ACCEPTED**, and I would not treat the billing foundation
+as settled on the strength of the current evidence.
