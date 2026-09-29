@@ -285,4 +285,3 @@ export async function adminCancelInvoice(
 
   return adminGetInvoiceDetail(pool, invoiceId);
 }
-
