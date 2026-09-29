@@ -172,4 +172,36 @@ describe('billing API (/api/v1/invoices)', () => {
     expect(res.statusCode).toBe(400);
     await app.close();
   });
+
+  it('lists customer billing ledger entries and isolates customer data', async () => {
+    const alice = await createCustomer('alice-ledger@example.com');
+    const bob = await createCustomer('bob-ledger@example.com');
+    const { plan } = await makeActivePlanWithPrice(15);
+    const app = buildTestApp();
+
+    await checkout(app, alice.token, plan);
+
+    // Alice has 1 charge entry
+    const aliceRes = await app.inject({
+      method: 'GET',
+      url: '/api/v1/billing/ledger',
+      headers: { authorization: `Bearer ${alice.token}` },
+    });
+    expect(aliceRes.statusCode).toBe(200);
+    const aliceLedger = aliceRes.json().ledger;
+    expect(aliceLedger).toHaveLength(1);
+    expect(aliceLedger[0].entryType).toBe('charge');
+    expect(aliceLedger[0].amount).toBe('15.00');
+
+    // Bob has 0 ledger entries
+    const bobRes = await app.inject({
+      method: 'GET',
+      url: '/api/v1/billing/ledger',
+      headers: { authorization: `Bearer ${bob.token}` },
+    });
+    expect(bobRes.statusCode).toBe(200);
+    expect(bobRes.json().ledger).toEqual([]);
+
+    await app.close();
+  });
 });

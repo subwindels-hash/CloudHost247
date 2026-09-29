@@ -1,0 +1,86 @@
+diff --git a/cloudhost247-node/src/db/payments.ts b/cloudhost247-node/src/db/payments.ts
+index 83d9158..2b2ebc2 100644
+--- a/cloudhost247-node/src/db/payments.ts
++++ b/cloudhost247-node/src/db/payments.ts
+@@ -100,14 +100,43 @@ export async function updatePaymentStatus(
+   tx: Queryable,
+   id: string,
+   status: PaymentStatus,
+-  extra: { failureReason?: string | null; completedAt?: string | null; confirmedByUserId?: string | null } = {}
++  extra: {
++    failureReason?: string | null;
++    completedAt?: string | null;
++    confirmedByUserId?: string | null;
++    /**
++     * The status the caller believes the payment is currently in. When supplied it becomes part
++     * of the `UPDATE`'s own `WHERE` clause, so the check and the write are a single atomic
++     * statement rather than a read followed by a write.
++     *
++     * This closes a real double-credit race: `confirmManualPayment` reads the payment and checks
++     * `status === 'pending'` *outside* its transaction, so two staff requests (or one
++     * double-clicked button, or a retried request) could both pass that check before either
++     * committed, and each would then append its own `payment` entry to `billing_ledger` — an
++     * append-only table whose rows cannot be deleted, only offset by compensating entries. A
++     * 25-round stress test reproduced six confirmations, and six ledger entries, for a single
++     * invoice.
++     *
++     * With this guard the loser of the race updates zero rows and gets `null` back, which the
++     * caller must treat as "someone else already resolved this payment".
++     */
++    expectedCurrentStatus?: PaymentStatus;
++  } = {}
+ ): Promise<PaymentRow | null> {
+   const { rows } = await tx.query<PaymentRow>(
+     `UPDATE payments
+      SET status = $1, failure_reason = $2, completed_at = $3, confirmed_by_user_id = COALESCE($4, confirmed_by_user_id), updated_at = now()
+      WHERE id = $5
++       AND ($6::text IS NULL OR status = $6)
+      RETURNING *`,
+-    [status, extra.failureReason ?? null, extra.completedAt ?? null, extra.confirmedByUserId ?? null, id]
++    [
++      status,
++      extra.failureReason ?? null,
++      extra.completedAt ?? null,
++      extra.confirmedByUserId ?? null,
++      id,
++      extra.expectedCurrentStatus ?? null,
++    ]
+   );
+   return rows[0] ?? null;
+ }
+diff --git a/cloudhost247-node/src/services/payment-service.ts b/cloudhost247-node/src/services/payment-service.ts
+index d4cf64a..736b61b 100644
+--- a/cloudhost247-node/src/services/payment-service.ts
++++ b/cloudhost247-node/src/services/payment-service.ts
+@@ -142,8 +142,17 @@ export async function confirmManualPayment(
+     const confirmed = await updatePaymentStatus(tx, payment.id, 'successful', {
+       completedAt: new Date().toISOString(),
+       confirmedByUserId: actingAdminId,
++      // Re-assert inside the transaction what was checked outside it. Without this, two
++      // concurrent confirmations of the same payment would both proceed and both append a
++      // `payment` ledger entry — recording the invoice as paid twice in an append-only ledger.
++      expectedCurrentStatus: 'pending',
+     });
+-    if (!confirmed) throw new NotFoundError('No payment was found with that id');
++    if (!confirmed) {
++      // Zero rows updated means another request resolved this payment first. Fail as a plain
++      // validation error, exactly as the pre-transaction check would have, so a lost race is
++      // never reported as a success and never leaks a 500.
++      throw new ValidationError('This payment has already been resolved by another request');
++    }
+ 
+     const invoice = await findInvoiceById(tx, payment.invoice_id);
+     if (!invoice) throw new NotFoundError('No invoice was found for this payment');
+@@ -196,8 +205,11 @@ export async function rejectManualPayment(
+     const rejected = await updatePaymentStatus(tx, payment.id, 'failed', {
+       failureReason: reason,
+       confirmedByUserId: actingAdminId,
++      expectedCurrentStatus: 'pending',
+     });
+-    if (!rejected) throw new NotFoundError('No payment was found with that id');
++    if (!rejected) {
++      throw new ValidationError('This payment has already been resolved by another request');
++    }
+ 
+     await recordAuthEvent(tx, {
+       id: genId(),
