@@ -3,11 +3,13 @@ if (!defined('WHMCS')) { die('Direct access denied'); }
 
 require_once __DIR__ . '/bootstrap.php';
 require_once __DIR__ . '/migrations/V100.php';
+require_once __DIR__ . '/migrations/V110.php';
 
 use CloudHost247\Broker\Http\AdminController;
 use CloudHost247\Broker\Http\AdminView;
 use CloudHost247\Broker\Http\ClientAreaController;
 use CloudHost247\Broker\Migrations\InitialMigration;
+use CloudHost247\Broker\Migrations\DeliveryMigration;
 use CloudHost247\Foundation\Database\MigrationRunner;
 use CloudHost247\Foundation\Support\Logger;
 
@@ -26,7 +28,7 @@ function cloudhost247_broker_config()
 function cloudhost247_broker_activate()
 {
     try {
-        $applied = (new MigrationRunner())->run('cloudhost247_broker', array(new InitialMigration()));
+        $applied = (new MigrationRunner())->run('cloudhost247_broker', array(new InitialMigration(), new DeliveryMigration()));
         return array(
             'status' => 'success',
             'description' => 'Domain Brokerage installed. Applied migrations: ' . ($applied ? implode(', ', $applied) : 'already current')

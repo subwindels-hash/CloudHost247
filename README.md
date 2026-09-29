@@ -128,6 +128,7 @@ under `docs/independent-rebuild/` and covered by the release gate
 | **CloudHost247 API & Integrations** | addon | `modules/addons/cloudhost247_integrations/` |
 | **CloudHost247 Module Manager** | addon | `modules/addons/cloudhost247_modules/` |
 | **CloudHost247 Website Builder** | addon | `modules/addons/cloudhost247_builder/` |
+| **CloudHost247 Domain Brokerage** | addon | `modules/addons/cloudhost247_broker/` (provider-agnostic acquisition brokerage; domain-search “Broker This Domain” CTA via `cloudhost247_domain_lookup`; Page Builder widgets in `cloudhost247_builder`; docs: `docs/independent-rebuild/DOMAIN-BROKER.md`) |
 | CloudHost247 Currency | addon | `modules/addons/cloudhost247_currency/` |
 | CloudHost247 OVH | addon / server | `modules/addons/cloudhost247_ovh/`, `modules/servers/cloudhost247_ovh/` |
 | CloudHost247 Theme | addon | `modules/addons/cloudhost247_theme/` |

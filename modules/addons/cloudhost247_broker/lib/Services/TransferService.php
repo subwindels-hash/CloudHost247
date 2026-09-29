@@ -21,13 +21,15 @@ final class TransferService
     private $transfers;
     private $brokerage;
     private $notifier;
+    private $delivery;
 
-    public function __construct(CaseRepository $cases = null, TransferRepository $transfers = null, BrokerageService $brokerage = null, NotificationService $notifier = null)
+    public function __construct(CaseRepository $cases = null, TransferRepository $transfers = null, BrokerageService $brokerage = null, NotificationService $notifier = null, DomainDeliveryService $delivery = null)
     {
         $this->cases = $cases ?: new CaseRepository();
         $this->transfers = $transfers ?: new TransferRepository();
         $this->brokerage = $brokerage ?: new BrokerageService();
         $this->notifier = $notifier ?: new NotificationService();
+        $this->delivery = $delivery ?: new DomainDeliveryService();
     }
 
     public function authorize($caseId, $adminId, $registrar = '')
@@ -100,6 +102,12 @@ final class TransferService
     public function complete($caseId, $adminId, $destinationAccount = '')
     {
         $transfer = $this->requireTransfer($caseId);
+        if ($transfer->status === TransferStatus::COMPLETED) {
+            // Idempotent (requirement #29): re-completing an already completed
+            // transfer returns the current record instead of duplicating the
+            // completion events, audit rows or the domain delivery attempt.
+            return $transfer;
+        }
         if ($transfer->status !== TransferStatus::VERIFIED) {
             throw new RuntimeException('The transfer must be verified before the case can be completed.');
         }
@@ -109,9 +117,20 @@ final class TransferService
         ));
         $case = $this->cases->find($caseId);
         $this->cases->update($caseId, array('transfer_status' => TransferStatus::COMPLETED));
-        $this->brokerage->transitionStatus($caseId, CaseStatus::COMPLETED, 'admin', $adminId, 'Transfer verified and completed. The domain is now associated with the customer\'s CloudHost247 account.', 'customer');
+        $this->brokerage->transitionStatus($caseId, CaseStatus::COMPLETED, 'admin', $adminId, 'Transfer verified and completed. Domain delivery to the customer account is being finalized.', 'customer');
         AuditLogger::record('cloudhost247_broker', 'transfer.complete', 'broker_case', $caseId, array(), array(), 'success', null, $adminId);
         $this->notifier->transferCompleted($case->client_id, $case->case_number, $case->domain);
+
+        // Requirement #25: associate the verified domain with the customer's
+        // CloudHost247 account through WHMCS's own API. Delivery records its
+        // own explicit status (associated / pending_manual / failed) on the
+        // transfer — completion never claims an account association that did
+        // not actually happen.
+        try {
+            $this->delivery->associate($caseId, $adminId);
+        } catch (\Throwable $error) {
+            \CloudHost247\Foundation\Support\Logger::write('cloudhost247_broker', 'error', 'delivery.attempt_failed', array('case_id' => (int) $caseId, 'message' => $error->getMessage()));
+        }
         return $this->transfers->currentForCase($caseId);
     }
 

@@ -68,6 +68,7 @@ EXPECTED_FILES = [
     os.path.join(LIB, "Services", "NegotiationService.php"),
     os.path.join(LIB, "Services", "PaymentService.php"),
     os.path.join(LIB, "Services", "TransferService.php"),
+    os.path.join(LIB, "Services", "DomainDeliveryService.php"),
     os.path.join(LIB, "Services", "FeeCalculator.php"),
     os.path.join(LIB, "Services", "CaseNumberGenerator.php"),
     os.path.join(LIB, "Services", "NotificationService.php"),
@@ -77,6 +78,9 @@ EXPECTED_FILES = [
     os.path.join(MODULE, "templates", "list.tpl"),
     os.path.join(MODULE, "templates", "new.tpl"),
     os.path.join(MODULE, "templates", "detail.tpl"),
+    os.path.join(MODULE, "migrations", "V110.php"),
+    os.path.join(ROOT, "templates", "cloudhost247_legacy", "domainbrokerageterms.tpl"),
+    os.path.join(ROOT, "templates", "cloudhost247", "domainbrokerageterms.tpl"),
     os.path.join(ROOT, "tests", "broker", "run.php"),
     os.path.join(ROOT, "tests", "broker", "fakes.php"),
     DOC,
@@ -335,6 +339,92 @@ class BrokerStaticTests(unittest.TestCase):
         self.assertIn("Domain Brokerage is not installed", renderer)
         self.assertIn("not currently being accepted", renderer)
         self.assertIn("Sign in to view", renderer)
+
+    # ------------------------------------------------- delivery (item 25/29)
+    def test_delivery_uses_the_whmcs_api_and_never_writes_core_domain_tables(self):
+        service = read(os.path.join(LIB, "Services", "DomainDeliveryService.php"))
+        self.assertIn("localAPI('GetClientsDomains'", service)
+        self.assertIn("localAPI('AddClientDomain'", service)
+        self.assertNotIn("tbldomains", service)
+        # Delivery is confirmed, never assumed:
+        self.assertIn("pending_manual", service)
+        self.assertIn("associated", service)
+        self.assertIn("findClientDomain", service)
+
+    def test_transfer_completion_and_delivery_are_idempotent(self):
+        transfer = read(os.path.join(LIB, "Services", "TransferService.php"))
+        complete_fn = transfer[transfer.index("function complete("):]
+        self.assertIn("TransferStatus::COMPLETED) {", complete_fn)
+        self.assertIn("already completed", complete_fn.lower())
+        # Completion triggers the real delivery attempt:
+        self.assertIn("->associate(", complete_fn)
+
+    def test_delivery_migration_is_additive_and_column_guarded(self):
+        migration = read(os.path.join(MODULE, "migrations", "V110.php"))
+        self.assertIn("'1.1.0'", migration)
+        self.assertIn("hasColumn", migration)
+        self.assertIn("mod_cloudhost247_broker_transfers", migration)
+        for forbidden in ("dropIfExists", "DROP TABLE", "->rename(", "tbldomains"):
+            self.assertNotIn(forbidden, migration)
+        # The migration validator expects this version registered:
+        validator = read(os.path.join(ROOT, "scripts", "validate-migrations.py"))
+        self.assertIn("'cloudhost247_broker':['1.0.0','1.1.0']", validator)
+
+    def test_completion_notification_does_not_claim_delivery_before_it_happens(self):
+        notifications = read(os.path.join(LIB, "Services", "NotificationService.php"))
+        completed_idx = notifications.index("function transferCompleted")
+        delivered_idx = notifications.index("function domainDelivered")
+        completed_body = notifications[completed_idx:delivered_idx]
+        self.assertNotIn("is now associated", completed_body)
+        self.assertIn("customer_notifications_enabled", notifications)
+
+    # ------------------------------------------------- provider calls (item 38)
+    def test_provider_calls_are_recorded_in_the_idempotent_ledger(self):
+        adapter = read(os.path.join(LIB, "Providers", "GoDaddyAdapter.php"))
+        self.assertIn("ProviderCallRepository", adapter)
+        self.assertIn("->record(", adapter)
+        self.assertIn("domain_availability", adapter)
+        self.assertIn("correlation", adapter)
+        self.assertIn("latencyMs", adapter)
+        ledger = read(os.path.join(LIB, "Repositories", "ProviderCallRepository.php"))
+        self.assertIn("alreadyPerformed", ledger)
+        self.assertIn("latency_ms", ledger)
+
+    # ------------------------------------------------- customer dashboard
+    def test_customer_dashboard_shows_next_action_agreement_and_delivery(self):
+        controller = read(os.path.join(LIB, "Http", "ClientAreaController.php"))
+        self.assertIn("next_action", controller)
+        self.assertIn("accepted_offer", controller)
+        self.assertIn("delivery_label", controller)
+        detail = read(os.path.join(MODULE, "templates", "detail.tpl"))
+        self.assertIn("Next action", detail)
+        self.assertIn("Agreement reached", detail)
+        self.assertIn("delivery_label", detail)
+        listing = read(os.path.join(MODULE, "templates", "list.tpl"))
+        self.assertIn("next_action", listing)
+
+    # ------------------------------------------------- legal terms (item 36)
+    def test_terms_page_uses_real_theme_templates_and_covers_the_required_points(self):
+        page = read(os.path.join(ROOT, "domain-brokerage-terms.php"))
+        self.assertNotIn("templates/5.7", page)
+        self.assertIn("WHMCS\\ClientArea", page)
+        self.assertIn("setTemplate('domainbrokerageterms')", page)
+        for point in (
+            "Acquisition is not guaranteed",
+            "registered by someone else only means it is unavailable",
+            "brokerage fee",
+            "transfer fee",
+            "Refund",
+            "expire",
+            "Cancellation",
+            "Disputes",
+            "privacy",
+            "provider",
+        ):
+            self.assertIn(point.lower(), page.lower())
+        for theme in ("cloudhost247_legacy", "cloudhost247"):
+            tpl = read(os.path.join(ROOT, "templates", theme, "domainbrokerageterms.tpl"))
+            self.assertIn("brokerageTerms", tpl)
 
     # --------------------------------------------------------------- docs
     def test_documentation_exists_and_covers_every_provider(self):

@@ -336,9 +336,15 @@ class CH247BrokerTestLookupBridge implements \CloudHost247\Broker\Domain\LookupB
 if (!function_exists('localAPI')) {
     $GLOBALS['CH247_BROKER_INVOICES'] = array();
     $GLOBALS['CH247_BROKER_EMAILS'] = array();
+    // Fake WHMCS client-domain registry (the store DomainDeliveryService
+    // re-reads through localAPI('GetClientsDomains')). Set
+    // $GLOBALS['CH247_BROKER_ADD_DOMAIN_OK'] = false to simulate a WHMCS
+    // version where AddClientDomain is unavailable/rejected.
+    $GLOBALS['CH247_BROKER_DOMAINS'] = array();
+    $GLOBALS['CH247_BROKER_ADD_DOMAIN_OK'] = true;
     function localAPI($action, $params = array())
     {
-        global $CH247_BROKER_INVOICES, $CH247_BROKER_EMAILS;
+        global $CH247_BROKER_INVOICES, $CH247_BROKER_EMAILS, $CH247_BROKER_DOMAINS, $CH247_BROKER_ADD_DOMAIN_OK;
         if ($action === 'CreateInvoice') {
             $id = count($CH247_BROKER_INVOICES) + 1001;
             $CH247_BROKER_INVOICES[$id] = array('status' => 'Unpaid');
@@ -353,6 +359,33 @@ if (!function_exists('localAPI')) {
             $CH247_BROKER_EMAILS[] = $params;
             return array('result' => 'success');
         }
+        if ($action === 'GetClientsDomains') {
+            $needle = strtolower(isset($params['domain']) ? (string) $params['domain'] : '');
+            $items = array();
+            foreach ($CH247_BROKER_DOMAINS as $row) {
+                if (strtolower($row['domainname']) === $needle) { $items[] = $row; }
+            }
+            if (!$items) { return array('result' => 'success', 'totalresults' => 0, 'domains' => array()); }
+            $out = array();
+            foreach ($items as $i => $row) { $out[$i] = $row; }
+            return array('result' => 'success', 'totalresults' => count($items), 'domains' => array('item' => count($out) === 1 ? $items[0] : $out));
+        }
+        if ($action === 'AddClientDomain') {
+            if (!$CH247_BROKER_ADD_DOMAIN_OK) { return array('result' => 'error', 'feature_disabled' => 'The action is not supported in this version of WHMCS'); }
+            $domain = strtolower(isset($params['domainname']) ? (string) $params['domainname'] : '');
+            foreach ($CH247_BROKER_DOMAINS as $row) {
+                if (strtolower($row['domainname']) === $domain) { return array('result' => 'error', 'message' => 'Domain already exists'); }
+            }
+            $id = 5000 + count($CH247_BROKER_DOMAINS) + 1;
+            $CH247_BROKER_DOMAINS[$id] = array(
+                'id' => $id,
+                'domainid' => $id,
+                'clientid' => (int) (isset($params['clientid']) ? $params['clientid'] : 0),
+                'domainname' => $domain,
+                'status' => isset($params['status']) ? (string) $params['status'] : 'Active',
+            );
+            return array('result' => 'success', 'domainid' => $id);
+        }
         return array('result' => 'error', 'message' => 'Unhandled localAPI action in test fake: ' . $action);
     }
 }
@@ -360,4 +393,13 @@ if (!function_exists('localAPI')) {
 function ch247_broker_set_invoice_status($invoiceId, $status)
 {
     $GLOBALS['CH247_BROKER_INVOICES'][(int) $invoiceId]['status'] = $status;
+}
+
+/** Seed the fake WHMCS client-domain registry directly (test support only). */
+function ch247_broker_seed_client_domain($domainId, $clientId, $domain)
+{
+    $GLOBALS['CH247_BROKER_DOMAINS'][(int) $domainId] = array(
+        'id' => (int) $domainId, 'domainid' => (int) $domainId,
+        'clientid' => (int) $clientId, 'domainname' => strtolower($domain), 'status' => 'Active',
+    );
 }

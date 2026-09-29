@@ -80,6 +80,23 @@ abstract class AbstractIntegrationAdapter implements ProviderAdapter
         return ResultCode::label((string) $row->status) . ($row->last_failure_reason ? ' — ' . (string) $row->last_failure_reason : '');
     }
 
+    /**
+     * Non-secret facts for the admin Providers table (requirement #17): which
+     * environment the connection record belongs to and when its last real
+     * health check ran. Never contains credentials or provider payloads.
+     */
+    public function integrationSummary()
+    {
+        $environment = 'development';
+        try { $environment = Environment::active(); } catch (\Throwable $error) { /* default */ }
+        $row = $this->integrationRow();
+        return array(
+            'environment' => $environment,
+            'last_checked_at' => $row && isset($row->last_checked_at) ? (string) $row->last_checked_at : '',
+            'configured' => (bool) $row,
+        );
+    }
+
     public function accessRequirements()
     {
         return 'Configure and test this provider from Super Admin -> API & Integrations, then confirm the commercial/partner agreement from Super Admin -> Domain Brokerage -> Providers.';

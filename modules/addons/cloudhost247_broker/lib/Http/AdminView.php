@@ -5,6 +5,7 @@ use CloudHost247\Broker\Domain\CaseStatus;
 use CloudHost247\Broker\Domain\PaymentStatus;
 use CloudHost247\Broker\Domain\TransferStatus;
 use CloudHost247\Broker\Providers\ConnectionState;
+use CloudHost247\Broker\Services\DomainDeliveryService;
 
 /**
  * Super Admin dashboard renderer (requirement #5). Plain PHP output (matches
@@ -177,12 +178,17 @@ final class AdminView
         if (!$data['payments']) { echo '<tr><td colspan="7"><em>No invoice created yet.</em></td></tr>'; }
         echo '</table>';
 
-        echo '<h4>Transfers</h4><table class="table table-condensed"><tr><th>Status</th><th>Registrar</th><th>Provider ref.</th><th>Initiated</th><th>Verified</th><th>Completed</th></tr>';
+        echo '<h4>Transfers &amp; delivery</h4><table class="table table-condensed"><tr><th>Status</th><th>Registrar</th><th>Provider ref.</th><th>Initiated</th><th>Verified</th><th>Completed</th><th>Delivery</th></tr>';
         foreach ($data['transfers'] as $transfer) {
+            $deliveryStatus = DomainDeliveryService::statusOf($transfer);
             echo '<tr><td>' . $this->e(TransferStatus::label($transfer->status)) . '</td><td>' . $this->e($transfer->registrar) . '</td><td>' . $this->e($transfer->provider_reference) . '</td>'
-                . '<td>' . $this->e($transfer->initiated_at) . '</td><td>' . $this->e($transfer->verified_at) . '</td><td>' . $this->e($transfer->completed_at) . '</td></tr>';
+                . '<td>' . $this->e($transfer->initiated_at) . '</td><td>' . $this->e($transfer->verified_at) . '</td><td>' . $this->e($transfer->completed_at) . '</td>'
+                . '<td>' . $this->e(DomainDeliveryService::label($deliveryStatus))
+                . (!empty($transfer->whmcs_domain_id) ? ' <small>(WHMCS domain #' . (int) $transfer->whmcs_domain_id . ')</small>' : '')
+                . (!empty($transfer->delivery_note) && $deliveryStatus !== DomainDeliveryService::STATUS_ASSOCIATED ? '<br><small>' . $this->e($transfer->delivery_note) . '</small>' : '')
+                . '</td></tr>';
         }
-        if (!$data['transfers']) { echo '<tr><td colspan="6"><em>No transfer authorized yet.</em></td></tr>'; }
+        if (!$data['transfers']) { echo '<tr><td colspan="7"><em>No transfer authorized yet.</em></td></tr>'; }
         echo '</table>';
 
         echo '<h4>Assignment history</h4><table class="table table-condensed"><tr><th>When</th><th>Admin</th><th>Action</th><th>By</th></tr>';
@@ -234,6 +240,9 @@ final class AdminView
         if ($case->transfer_status === TransferStatus::VERIFIED) {
             echo $this->form($id, $token, 'transfer_complete', 'case_detail', '<input class="form-control" style="display:inline-block;width:220px;" name="destination_account" placeholder="Destination account"> <button class="btn btn-sm btn-success" type="submit">Complete case</button>');
         }
+        if (($case->transfer_status === TransferStatus::VERIFIED || $case->transfer_status === TransferStatus::COMPLETED) && !$case->disputed) {
+            echo $this->form($id, $token, 'deliver_domain', 'case_detail', '<button class="btn btn-sm btn-primary" type="submit" title="Associates the domain with the customer account through WHMCS; a retry never creates a duplicate domain record">Deliver / re-check domain delivery</button>');
+        }
         if (!CaseStatus::isTerminal($case->status)) {
             echo $this->form($id, $token, 'transfer_fail', 'case_detail', '<input class="form-control" style="display:inline-block;width:280px;" name="reason" placeholder="Failure reason"> <button class="btn btn-sm btn-danger" type="submit">Mark transfer failed</button>');
             echo $this->form($id, $token, 'cancel_case', 'case_detail', '<input class="form-control" style="display:inline-block;width:280px;" name="reason" placeholder="Cancellation reason"> <button class="btn btn-sm btn-danger" type="submit">Cancel case</button>');
@@ -262,21 +271,24 @@ final class AdminView
     private function renderProviders(array $data)
     {
         echo '<p>Every provider here draws its real connection state from Super Admin -&gt; API &amp; Integrations. A "Connected" status is only ever shown after that provider\'s own credentials have been saved and its Test Connection has recently succeeded — nothing here fabricates a working integration.</p>';
-        echo '<table class="table table-striped"><tr><th>Provider</th><th>Type</th><th>Status</th><th>Declared capabilities</th><th>Active capabilities</th><th>Priority</th><th>Enabled for routing</th><th>Agreement confirmed</th><th></th></tr>';
+        echo '<table class="table table-striped"><tr><th>Provider</th><th>Type</th><th>Status</th><th>Capabilities (declared / active)</th><th>Environment</th><th>Last check</th><th>Routing policy</th><th>Actions</th></tr>';
         foreach ($data['provider_rows'] as $row) {
             $adapter = $row['adapter'];
             $config = $row['config'];
             $state = $adapter->connectionState();
+            $summary = $adapter->integrationSummary();
             $badge = $state === ConnectionState::CONNECTED ? 'success' : ($state === ConnectionState::MANUAL ? 'default' : 'warning');
-            echo '<tr><td>' . $this->e($adapter->label()) . '<div><small>' . $this->e($adapter->connectionDetail()) . '</small></div></td>'
+            echo '<tr><td>' . $this->e($adapter->label()) . '<div><small>' . $this->e($adapter->connectionDetail()) . '</small></div>'
+                . '<div><small><em>' . $this->e($adapter->accessRequirements()) . '</em></small></div></td>'
                 . '<td>' . ($adapter->isManual() ? 'Manual' : 'API integration') . '</td>'
                 . '<td><span class="label label-' . $badge . '">' . $this->e(ConnectionState::label($state)) . '</span></td>'
-                . '<td><small>' . $this->e(implode(', ', $adapter->declaredCapabilities())) . '</small></td>'
-                . '<td><small>' . $this->e(implode(', ', $adapter->activeCapabilities()) ?: 'None') . '</small></td>'
-                . '<td>' . (int) $config->priority . '</td><td>' . ($config->enabled ? 'Yes' : 'No') . '</td><td>' . ($config->partner_agreement_confirmed ? 'Yes' : 'No') . '</td>'
-                . '<td><small>' . $this->e($adapter->accessRequirements()) . '</small></td></tr>';
+                . '<td><small><strong>Declared:</strong> ' . $this->e(implode(', ', $adapter->declaredCapabilities())) . '<br><strong>Active:</strong> ' . $this->e(implode(', ', $adapter->activeCapabilities()) ?: 'None') . '</small></td>'
+                . '<td>' . $this->e($summary['environment']) . '</td>'
+                . '<td>' . ($summary['last_checked_at'] !== '' ? $this->e($summary['last_checked_at']) : '<em>Never tested</em>') . '</td>'
+                . '<td><small>Priority ' . (int) $config->priority . ' · Routing ' . ($config->enabled ? 'enabled' : 'disabled') . ' · Agreement ' . ($config->partner_agreement_confirmed ? 'confirmed' : 'not confirmed') . '</small></td>'
+                . '<td>' . $this->providerActions($adapter) . '</td></tr>';
             if (!$adapter->isManual()) {
-                echo '<tr><td colspan="9"><form method="post" class="form-inline">' . $this->hidden(0, $data['token'], 'provider_save', 'providers')
+                echo '<tr><td colspan="8"><form method="post" class="form-inline">' . $this->hidden(0, $data['token'], 'provider_save', 'providers')
                     . '<input type="hidden" name="provider_key" value="' . $this->e($adapter->key()) . '">'
                     . 'Priority <input class="form-control" style="width:80px;display:inline-block;" name="priority" value="' . (int) $config->priority . '"> '
                     . '<label><input type="checkbox" name="enabled" value="1"' . ($config->enabled ? ' checked' : '') . '> Enabled for routing</label> '
@@ -286,7 +298,22 @@ final class AdminView
             }
         }
         echo '</table>';
-        echo '<p><em>To connect or test a provider\'s credentials, use Super Admin -&gt; API &amp; Integrations. This screen only controls whether the brokerage engine is allowed to route cases to an already-configured provider.</em></p>';
+        echo '<p><em>Credentials are managed exclusively in Super Admin -&gt; API &amp; Integrations (Configure / Test Connection / View logs / Rotate credentials). This screen only controls whether the brokerage engine may route cases to an already-configured provider, and records the commercial agreement a provider\'s aftermarket capabilities require.</em></p>';
+    }
+
+    /** Deep links into the central API & Integrations screen — the single place credentials are ever managed (requirement #17/#18). */
+    private function providerActions($adapter)
+    {
+        if ($adapter->isManual()) { return '<span class="text-muted">Always available</span>'; }
+        $key = urlencode($adapter->key());
+        $base = 'addonmodules.php?module=cloudhost247_integrations';
+        $links = array(
+            '<a class="btn btn-xs btn-default" href="' . $base . '&amp;view=configure&amp;integration=' . $key . '">Configure</a>',
+            '<a class="btn btn-xs btn-default" href="' . $base . '&amp;view=configure&amp;integration=' . $key . '" title="Runs server-side from API & Integrations">Test Connection</a>',
+            '<a class="btn btn-xs btn-default" href="' . $base . '&amp;view=events&amp;provider_key=' . $key . '">View logs</a>',
+            '<a class="btn btn-xs btn-default" href="' . $base . '&amp;view=configure&amp;integration=' . $key . '" title="Credential rotation is performed in API & Integrations">Rotate credentials</a>',
+        );
+        return implode(' ', $links);
     }
 
     // ----------------------------------------------------------- brokers
