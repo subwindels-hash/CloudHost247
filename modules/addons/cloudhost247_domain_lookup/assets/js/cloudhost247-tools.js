@@ -12,12 +12,19 @@
         ajaxUrl: 'index.php?m=cloudhost247_domain_lookup&ajax=1',
         csrfToken: null,
         defaultTimeout: 30000, // 30 seconds max wait
+        brokerEnabled: false,
+        brokerUrl: '',
     };
 
     // ===== Initialization =====
     $(document).ready(function() {
         // Get CSRF token
         config.csrfToken = $('#cloudhost247-csrf-token').val() || '';
+
+        // Domain Brokerage is a separate, optional add-on: the CTA is only
+        // ever shown when it is actually installed and turned on server-side.
+        config.brokerEnabled = $('#cloudhost247-broker-enabled').val() === '1';
+        config.brokerUrl = $('#cloudhost247-broker-url').val() || '';
 
         // Initialize tools based on current page
         initDomainWhois();
@@ -159,6 +166,15 @@
 
         // Raw WHOIS
         $('#whois-result-raw').text(data.raw_whois || 'Not available');
+
+        // A successful WHOIS lookup means the domain is already registered;
+        // offer the real Domain Brokerage CTA only when that service is on.
+        var whoisBrokerHtml = brokerCtaHtml(data.domain);
+        if (whoisBrokerHtml) {
+            $('#whois-broker-cta').html(whoisBrokerHtml).removeClass('hidden');
+        } else {
+            $('#whois-broker-cta').addClass('hidden').empty();
+        }
 
         showResult('whois-results');
     }
@@ -549,6 +565,16 @@
                     html += '<small class="text-muted">' + escapeHtml(result.registrar) + '</small>';
                 }
 
+                // Registered (taken) domains, and only those, get a real
+                // "Broker This Domain" link -- never shown for an available
+                // domain, and never shown at all unless brokerage is enabled.
+                if (itemClass === 'taken') {
+                    var itemBrokerHtml = brokerCtaHtml(result.domain);
+                    if (itemBrokerHtml) {
+                        html += itemBrokerHtml;
+                    }
+                }
+
                 html += '</div>';
                 $grid.append(html);
             });
@@ -559,6 +585,26 @@
         $('#avail-source').text(sourceText);
 
         showResult('avail-results');
+    }
+
+    // ===== Domain Brokerage CTA =====
+
+    /**
+     * A registered domain is never presented as "for sale". This only ever
+     * offers to ask CloudHost247's Domain Brokerage service to try to reach
+     * the owner through legitimate channels -- it never claims the domain
+     * can be bought, and it is only rendered at all when the brokerage
+     * add-on is actually installed and enabled.
+     */
+    function brokerCtaHtml(domain) {
+        if (!config.brokerEnabled || !config.brokerUrl || !domain) {
+            return '';
+        }
+        var url = config.brokerUrl + '&domain=' + encodeURIComponent(domain);
+        return '<div class="cloudhost247-broker-cta-inner">' +
+            '<p><i class="fa fa-info-circle"></i> This domain is already registered. CloudHost247 can try to reach the owner through legitimate channels on your behalf &mdash; acquisition is never guaranteed.</p>' +
+            '<a class="btn btn-primary" href="' + escapeHtml(url) + '"><i class="fa fa-handshake-o"></i> Broker This Domain</a>' +
+            '</div>';
     }
 
     // ===== Utility Functions =====

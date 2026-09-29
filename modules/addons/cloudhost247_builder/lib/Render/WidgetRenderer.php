@@ -45,6 +45,9 @@ final class WidgetRenderer
             'server_specs' => 'serverSpecs', 'domain_search' => 'domainSearch', 'domain_pricing' => 'domainPricing',
             'cart_summary' => 'cartSummary', 'checkout_link' => 'checkoutLink', 'reviews' => 'reviews',
             'contact_form' => 'contactForm', 'faq' => 'faq', 'service_status' => 'serviceStatus',
+            'broker_this_domain' => 'brokerThisDomain', 'domain_brokerage_cta' => 'domainBrokerageCta',
+            'brokerage_status' => 'brokerageStatus', 'customer_brokerage_cases' => 'customerBrokerageCases',
+            'brokerage_pricing' => 'brokerageFeesWidget', 'brokerage_faq' => 'faq',
             'site_logo' => 'siteLogo', 'nav_menu' => 'navMenu', 'account_links' => 'accountLinks',
             'copyright' => 'copyright',
         );
@@ -724,6 +727,159 @@ final class WidgetRenderer
             . ($heading !== '' ? '<h3 class="ch247-status__heading">' . $this->e($heading) . '</h3>' : '')
             . '<ul class="ch247-status__list">' . $list . '</ul>'
             . '<p class="ch247-status__note">Measured by the CloudHost247 API &amp; Integrations centre.</p></div>';
+    }
+
+    /* ------------------------------------------------------- domain brokerage */
+
+    private function brokerThisDomain(array $props, RenderContext $context)
+    {
+        $data = $context->data();
+        $availability = $data === null ? null : $data->brokerageAvailability();
+        if ($availability === null) {
+            return $this->unavailable($context, 'Domain Brokerage is not installed, so this widget cannot be shown.');
+        }
+        if (empty($availability['enabled'])) {
+            return $this->unavailable($context, 'Domain brokerage requests are not currently being accepted.');
+        }
+        $heading = $this->prop($props, 'heading');
+        $text = $this->prop($props, 'text');
+        $placeholder = $this->prop($props, 'placeholder', 'example.com');
+        $buttonLabel = $this->prop($props, 'button_label', 'Broker This Domain');
+        $actionParts = explode('&', $availability['new_case_url'], 2);
+        $action = $this->e($actionParts[0]);
+        return '<form class="ch247-broker-cta" method="get" action="' . $action . '">'
+            . $this->hiddenFieldsFromQuery($availability['new_case_url'])
+            . ($heading !== '' ? '<h3 class="ch247-broker-cta__heading">' . $this->e($heading) . '</h3>' : '')
+            . ($text !== '' ? '<p class="ch247-broker-cta__text">' . $this->e($text) . '</p>' : '')
+            . '<div class="ch247-broker-cta__row">'
+            . '<input type="text" name="domain" class="ch247-broker-cta__input" placeholder="' . $this->e($placeholder) . '" required>'
+            . '<button type="submit" class="ch247-btn ch247-btn--primary">' . $this->e($buttonLabel) . '</button>'
+            . '</div></form>';
+    }
+
+    private function domainBrokerageCta(array $props, RenderContext $context)
+    {
+        $data = $context->data();
+        $availability = $data === null ? null : $data->brokerageAvailability();
+        if ($availability === null) {
+            return $this->unavailable($context, 'Domain Brokerage is not installed, so this widget cannot be shown.');
+        }
+        if (empty($availability['enabled'])) {
+            return $this->unavailable($context, 'Domain brokerage requests are not currently being accepted.');
+        }
+        $heading = $this->prop($props, 'heading');
+        $text = $this->prop($props, 'text');
+        $classes = 'ch247-btn ch247-btn--' . $this->variant($this->prop($props, 'variant', 'primary'));
+        return '<div class="ch247-cta ch247-cta--brokerage">'
+            . ($heading !== '' ? '<h3 class="ch247-cta__heading">' . $this->e($heading) . '</h3>' : '')
+            . ($text !== '' ? '<p class="ch247-cta__text">' . $this->e($text) . '</p>' : '')
+            . $this->anchor($availability['new_case_url'], $this->prop($props, 'button_label', 'Start a Brokerage Request'), $classes)
+            . '</div>';
+    }
+
+    private function brokerageStatus(array $props, RenderContext $context)
+    {
+        $data = $context->data();
+        $clientId = !empty($_SESSION['uid']) ? (int) $_SESSION['uid'] : 0;
+        $result = $data === null ? null : $data->brokerageCases($clientId, 1);
+        if ($result === null) {
+            return $this->unavailable($context, 'Domain Brokerage is not installed, so this widget cannot be shown.');
+        }
+        if ($clientId <= 0) {
+            return $this->unavailable($context, 'Sign in to view the status of your domain brokerage request.');
+        }
+        $heading = $this->prop($props, 'heading', 'Your brokerage request');
+        if (empty($result['rows'])) {
+            return '<div class="ch247-broker-status">'
+                . ($heading !== '' ? '<h3 class="ch247-broker-status__heading">' . $this->e($heading) . '</h3>' : '')
+                . '<p class="ch247-broker-status__empty">You have no domain brokerage cases yet.</p>'
+                . $this->anchor($result['new_case_url'], 'Request a domain broker', 'ch247-btn ch247-btn--primary ch247-btn--sm')
+                . '</div>';
+        }
+        $row = $result['rows'][0];
+        return '<div class="ch247-broker-status">'
+            . ($heading !== '' ? '<h3 class="ch247-broker-status__heading">' . $this->e($heading) . '</h3>' : '')
+            . '<p class="ch247-broker-status__case">' . $this->e($row['case_number']) . ' &mdash; ' . $this->e($row['domain']) . '</p>'
+            . '<p class="ch247-broker-status__state">' . $this->e($row['status_label']) . '</p>'
+            . $this->anchor($row['detail_url'], 'View details', 'ch247-btn ch247-btn--outline ch247-btn--sm')
+            . '</div>';
+    }
+
+    private function customerBrokerageCases(array $props, RenderContext $context)
+    {
+        $data = $context->data();
+        $clientId = !empty($_SESSION['uid']) ? (int) $_SESSION['uid'] : 0;
+        $limit = max(1, min(20, (int) $this->prop($props, 'limit', 5)));
+        $result = $data === null ? null : $data->brokerageCases($clientId, $limit);
+        if ($result === null) {
+            return $this->unavailable($context, 'Domain Brokerage is not installed, so this widget cannot be shown.');
+        }
+        if ($clientId <= 0) {
+            return $this->unavailable($context, 'Sign in to view your domain brokerage cases.');
+        }
+        $heading = $this->prop($props, 'heading', 'Your domain brokerage cases');
+        if (empty($result['rows'])) {
+            return '<div class="ch247-broker-cases">'
+                . ($heading !== '' ? '<h3 class="ch247-broker-cases__heading">' . $this->e($heading) . '</h3>' : '')
+                . '<p class="ch247-broker-cases__empty">' . $this->e($this->prop($props, 'empty_text', 'You have no domain brokerage cases yet.')) . '</p>'
+                . '</div>';
+        }
+        $rows = '';
+        foreach ($result['rows'] as $row) {
+            $rows .= '<li class="ch247-broker-cases__row">'
+                . '<span class="ch247-broker-cases__number">' . $this->e($row['case_number']) . '</span>'
+                . '<span class="ch247-broker-cases__domain">' . $this->e($row['domain']) . '</span>'
+                . '<span class="ch247-broker-cases__state">' . $this->e($row['status_label']) . '</span>'
+                . $this->anchor($row['detail_url'], 'View', 'ch247-btn ch247-btn--outline ch247-btn--sm')
+                . '</li>';
+        }
+        return '<div class="ch247-broker-cases">'
+            . ($heading !== '' ? '<h3 class="ch247-broker-cases__heading">' . $this->e($heading) . '</h3>' : '')
+            . '<ul class="ch247-broker-cases__list">' . $rows . '</ul>'
+            . $this->anchor($result['list_url'], 'View all cases', 'ch247-btn ch247-btn--ghost ch247-btn--sm')
+            . '</div>';
+    }
+
+    private function brokerageFeesWidget(array $props, RenderContext $context)
+    {
+        $data = $context->data();
+        $fees = $data === null ? null : $data->brokerageFees();
+        if ($fees === null) {
+            return $this->unavailable($context, 'Domain Brokerage is not installed, so this widget cannot be shown.');
+        }
+        if (!$fees) {
+            return $this->unavailable($context, 'No brokerage fee rules are configured yet.');
+        }
+        $heading = $this->prop($props, 'heading');
+        $text = $this->prop($props, 'text');
+        $labels = array('brokerage_fee' => 'Brokerage fee', 'transfer_fee' => 'Transfer fee', 'service_fee' => 'Service fee');
+        $rows = '';
+        foreach ($fees as $fee) {
+            $label = isset($labels[$fee['applies_to']]) ? $labels[$fee['applies_to']] : $this->e($fee['applies_to']);
+            $amount = $fee['fee_type'] === 'percentage' ? $this->e(rtrim(rtrim(number_format($fee['amount'], 2), '0'), '.') . '%') : $this->e($fee['currency'] . ' ' . number_format($fee['amount'], 2));
+            $rows .= '<li class="ch247-broker-pricing__row"><span class="ch247-broker-pricing__name">' . $this->e($fee['name'] !== '' ? $fee['name'] : $label) . '</span>'
+                . '<span class="ch247-broker-pricing__amount">' . $amount . '</span></li>';
+        }
+        return '<div class="ch247-broker-pricing">'
+            . ($heading !== '' ? '<h3 class="ch247-broker-pricing__heading">' . $this->e($heading) . '</h3>' : '')
+            . ($text !== '' ? '<p class="ch247-broker-pricing__text">' . $this->e($text) . '</p>' : '')
+            . '<ul class="ch247-broker-pricing__list">' . $rows . '</ul>'
+            . '<p class="ch247-broker-pricing__note">The domain\'s acquisition price is agreed with the seller and is always shown separately from these fees.</p>'
+            . '</div>';
+    }
+
+    private function hiddenFieldsFromQuery($url)
+    {
+        $query = parse_url($url, PHP_URL_QUERY);
+        if (!is_string($query) || $query === '') { return ''; }
+        parse_str($query, $params);
+        unset($params['domain']);
+        $html = '';
+        foreach ($params as $name => $value) {
+            if (!is_scalar($value)) { continue; }
+            $html .= '<input type="hidden" name="' . $this->e($name) . '" value="' . $this->e($value) . '">';
+        }
+        return $html;
     }
 
     /* ------------------------------------------------------------------ site */

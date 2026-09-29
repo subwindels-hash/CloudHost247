@@ -370,6 +370,12 @@ function cloudhost247_domain_lookup_clientarea($vars)
     
     // Generate CSRF token for forms
     $csrfToken = SecurityManager::generateCsrfToken();
+
+    // Real, honest brokerage availability (requirement: never guarantee an
+    // acquisition; the "Broker This Domain" CTA is only ever shown when the
+    // CloudHost247 Domain Brokerage module is actually installed and an
+    // administrator has actually turned it on).
+    list($brokerAvailable, $brokerNewCaseUrl) = cloudhost247_domain_lookup_broker_availability();
     
     // Build breadcrumb
     $breadcrumb = [
@@ -392,14 +398,39 @@ function cloudhost247_domain_lookup_clientarea($vars)
         'templatefile' => 'client/' . ($page === 'tool' ? 'tool' : 'tools'),
         'requirelogin' => false,
         'vars'         => [
-            'tools'       => $tools,
-            'page'        => $page,
-            'tool'        => $tool,
-            'csrfToken'   => $csrfToken,
-            'modulePath'  => 'modules/addons/cloudhost247_domain_lookup',
-            'config'      => $config,
+            'tools'             => $tools,
+            'page'              => $page,
+            'tool'              => $tool,
+            'csrfToken'         => $csrfToken,
+            'modulePath'        => 'modules/addons/cloudhost247_domain_lookup',
+            'config'            => $config,
+            'brokerAvailable'   => $brokerAvailable,
+            'brokerNewCaseUrl'  => $brokerNewCaseUrl,
         ],
     ];
+}
+
+/**
+ * Whether the CloudHost247 Domain Brokerage add-on module is installed and
+ * has been turned on by an administrator, and the real URL into its request
+ * form. Never assumes the module is present; falls back to disabled/'' so
+ * the "Broker This Domain" CTA is simply omitted rather than pointing
+ * somewhere that cannot handle it.
+ *
+ * @return array [bool $available, string $newCaseUrl]
+ */
+function cloudhost247_domain_lookup_broker_availability()
+{
+    if (!class_exists('CloudHost247\\Broker\\Repositories\\SettingsRepository')) {
+        return [false, ''];
+    }
+    try {
+        $settings = new \CloudHost247\Broker\Repositories\SettingsRepository();
+        $enabled = $settings->isBrokerageEnabled();
+    } catch (\Throwable $unavailable) {
+        return [false, ''];
+    }
+    return [(bool) $enabled, 'index.php?m=cloudhost247_broker&a=new'];
 }
 
 /**

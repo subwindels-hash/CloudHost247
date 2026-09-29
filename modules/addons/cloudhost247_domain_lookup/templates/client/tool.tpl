@@ -93,6 +93,8 @@
                     </label>
                     <pre class="cloudhost247-raw-data hidden" id="whois-result-raw"></pre>
                 </div>
+
+                <div class="cloudhost247-broker-cta hidden" id="whois-broker-cta"></div>
             </div>
         </div>
     </div>
@@ -359,4 +361,6 @@
     {/if}
     
     <input type="hidden" id="cloudhost247-csrf-token" value="{$csrfToken}">
+    <input type="hidden" id="cloudhost247-broker-enabled" value="{if $brokerAvailable}1{else}0{/if}">
+    <input type="hidden" id="cloudhost247-broker-url" value="{$brokerNewCaseUrl|escape:'html':'UTF-8'}">
 </div>
