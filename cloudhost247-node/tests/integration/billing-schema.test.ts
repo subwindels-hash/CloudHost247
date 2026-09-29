@@ -655,6 +655,93 @@ describe('Phase 5B billing database schema and repositories', () => {
       expect(await listPaymentsForInvoice(db, invoice.id)).toHaveLength(0);
     });
 
+    it('holds every invariant under concurrent writes against the same invoice', async () => {
+      const { user, invoice } = await invoiceFor('bconcurrent@example.com', '49.99');
+      const stranger = await makeUser('bconcurrent-stranger@example.com');
+
+      // A mix of legitimate and invariant-violating writes, all issued at once against the same
+      // invoice. The violations must fail regardless of interleaving — enforcement that only
+      // holds when requests arrive one at a time is not enforcement.
+      const attempts = [
+        { label: 'valid-1', userId: user.id, amount: '10.00', currency: 'USD', valid: true },
+        { label: 'wrong-currency', userId: user.id, amount: '10.00', currency: 'EUR', valid: false },
+        { label: 'wrong-user', userId: stranger.id, amount: '10.00', currency: 'USD', valid: false },
+        { label: 'over-total', userId: user.id, amount: '999999.00', currency: 'USD', valid: false },
+        { label: 'valid-2', userId: user.id, amount: '5.00', currency: 'USD', valid: true },
+      ];
+
+      const results = await Promise.allSettled(
+        attempts.map((a) =>
+          withTransaction(db, (tx) =>
+            createPayment(tx, {
+              id: randomUUID(),
+              invoiceId: invoice.id,
+              userId: a.userId,
+              amount: a.amount,
+              currency: a.currency,
+              provider: 'sandbox',
+              providerReference: `conc-${a.label}-${randomUUID()}`,
+            })
+          )
+        )
+      );
+
+      attempts.forEach((a, i) => {
+        expect(results[i].status, `${a.label} should have ${a.valid ? 'succeeded' : 'failed'}`).toBe(
+          a.valid ? 'fulfilled' : 'rejected'
+        );
+      });
+
+      // Only the two legitimate rows may exist, and both must match the invoice exactly.
+      const stored = await listPaymentsForInvoice(db, invoice.id);
+      expect(stored).toHaveLength(2);
+      for (const row of stored) {
+        expect(row.user_id).toBe(user.id);
+        expect(row.currency).toBe('USD');
+        expect(Number(row.amount)).toBeLessThanOrEqual(Number(invoice.total_amount));
+      }
+    });
+
+    it('never lets concurrent ledger writes attribute an entry to the wrong owner', async () => {
+      const { user, invoice } = await invoiceFor('bledgerconc@example.com');
+      const stranger = await makeUser('bledgerconc-stranger@example.com');
+
+      const results = await Promise.allSettled([
+        withTransaction(db, (tx) =>
+          recordLedgerEntry(tx, {
+            id: randomUUID(),
+            userId: user.id,
+            invoiceId: invoice.id,
+            entryType: 'credit',
+            amount: '1.00',
+            currency: 'USD',
+            description: 'legitimate',
+          })
+        ),
+        withTransaction(db, (tx) =>
+          recordLedgerEntry(tx, {
+            id: randomUUID(),
+            userId: stranger.id,
+            invoiceId: invoice.id,
+            entryType: 'credit',
+            amount: '1.00',
+            currency: 'USD',
+            description: 'misattributed',
+          })
+        ),
+      ]);
+
+      expect(results[0].status).toBe('fulfilled');
+      expect(results[1].status).toBe('rejected');
+
+      const entries = await listLedgerEntriesForInvoice(db, invoice.id);
+      expect(entries).toHaveLength(1);
+      expect(entries[0].user_id).toBe(user.id);
+      // The append-only ledger cannot be corrected after the fact, so a wrong row surviving here
+      // would be permanent.
+      expect(await listLedgerEntriesForUser(db, stranger.id)).toHaveLength(0);
+    });
+
     it('refuses a payment against an invoice that does not exist', async () => {
       await expect(
         withTransaction(db, (tx) =>

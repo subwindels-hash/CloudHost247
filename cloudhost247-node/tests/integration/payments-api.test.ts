@@ -8,6 +8,7 @@ import { buildApp } from '../../src/app';
 import { PgliteClient } from '../../database/db-client';
 import { migrateUp } from '../../database/migrate';
 import { signAuthToken } from '../../src/lib/jwt';
+import { confirmManualPayment } from '../../src/services/payment-service';
 import { hashPassword } from '../../src/lib/password';
 import { createProduct } from '../../src/db/catalog-products';
 import { createPlan } from '../../src/db/catalog-plans';
@@ -596,7 +597,8 @@ describe('payment API (/api/v1/invoices/:id/payments, /api/v1/payments/:id, /api
     }
 
     const paymentLedgerRows = async (invoiceId: string) =>
-      (await db.query(`SELECT * FROM billing_ledger WHERE invoice_id = $1 AND entry_type = 'payment'`, [invoiceId])).rows;
+      (await db.query(`SELECT * FROM billing_ledger WHERE invoice_id = $1 AND entry_type = 'payment'`, [invoiceId]))
+        .rows as Array<{ amount: string }>;
 
     it('commits exactly one confirmation when several arrive simultaneously', async () => {
       const app = buildTestApp();
@@ -708,6 +710,73 @@ describe('payment API (/api/v1/invoices/:id/payments, /api/v1/payments/:id, /api
         expect(invoice.status).toBe('unpaid');
         expect(ledger).toHaveLength(0);
       }
+      await app.close();
+    });
+
+    it('DETERMINISTIC forced interleave: both callers read `pending` before either writes', async () => {
+      // The bursts above race with Promise.all, which is realistic but NOT deterministic — the
+      // interleaving that actually triggers the defect may or may not occur on a given run. This
+      // test forces the exact ordering instead, so it can never pass by luck:
+      //
+      //   caller A: reads the payment, sees `pending`  ---.
+      //   caller B: reads the payment, sees `pending`  ---'  (both reads now done)
+      //   release both -> A commits its transaction -> B attempts its UPDATE
+      //
+      // That was precisely the defect: B's UPDATE used `WHERE id = $1` with no status guard, so
+      // it succeeded against an already-confirmed payment and appended a SECOND `payment` entry
+      // to the append-only ledger. With the guard folded into the UPDATE's own WHERE clause, B
+      // matches zero rows and its whole transaction is abandoned.
+      const app = buildTestApp();
+      const admin = await createUserWithRole('admin');
+      const { invoiceId, paymentId } = await pendingManualPayment(app, 'forced-interleave@example.com');
+
+      const CALLERS = 2;
+      let arrived = 0;
+      let releaseAll: () => void = () => {};
+      const allArrived = new Promise<void>((resolve) => {
+        releaseAll = resolve;
+      });
+
+      // A Queryable proxy that holds every caller at the same point — just after the
+      // pre-transaction status read — until all of them have got past it.
+      const barrierDb = {
+        query: async (text: string, params?: unknown[]) => {
+          const result = await db.query(text, params as unknown[]);
+          if (/SELECT \* FROM payments WHERE id/.test(text)) {
+            arrived += 1;
+            if (arrived >= CALLERS) releaseAll();
+            await allArrived;
+          }
+          return result;
+        },
+        transaction: (cb: (tx: unknown) => Promise<unknown>) => db.transaction(cb as never),
+      };
+
+      const outcomes = await Promise.allSettled(
+        Array.from({ length: CALLERS }, () =>
+          confirmManualPayment(barrierDb as never, admin.userId, paymentId, randomUUID)
+        )
+      );
+
+      // Both callers genuinely observed `pending` before either wrote.
+      expect(arrived).toBe(CALLERS);
+
+      const succeeded = outcomes.filter((o) => o.status === 'fulfilled');
+      const failed = outcomes.filter((o) => o.status === 'rejected');
+      expect(succeeded).toHaveLength(1);
+      expect(failed).toHaveLength(1);
+      // The loser must fail with the deterministic 409, not a 400, a 404 or a 500.
+      expect((failed[0] as PromiseRejectedResult).reason).toMatchObject({ statusCode: 409 });
+
+      // And the financial record — the thing that actually matters — must show a single credit.
+      const ledger = await paymentLedgerRows(invoiceId);
+      expect(ledger).toHaveLength(1);
+      const invoice = (await db.query('SELECT total_amount, status FROM invoices WHERE id = $1', [invoiceId])).rows[0] as {
+        total_amount: string;
+        status: string;
+      };
+      expect(ledger[0].amount).toBe(invoice.total_amount);
+      expect(invoice.status).toBe('paid');
       await app.close();
     });
 
