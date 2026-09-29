@@ -380,14 +380,29 @@ says the corresponding cPanel gate is CLOSED with evidence.
   provisioning, cPanel/WHM API calls, domain registrar API calls, automatic service activation,
   automatic domain registration/renewal, email verification/change, 2FA, SSO, file uploads.
 
-## Phase 5A — Commerce foundation (cart → orders → order items → price snapshots)
+## Phase 5A — Commerce foundation (cart → orders → order items → price snapshots) — ACCEPTED
 
+- **Status:** **ACCEPTED** by the repository owner on 2026-09-29 following independent review-only clean-clone verification.
+- **Accepted Milestone SHA:** `3033349a3498a90c5a52dc76dc6d20f2d6fe4bf2`.
+- **Independently Verified Remote `main` SHA:** `cca731a4a9178ba784b408265da65ab5bacd9d49`.
+- **Ancestry Verification:** Phase 4 accepted commit `c6e2e6a405aafd50aae8efe10caaf2503d9ec066` confirmed as genuine ancestor.
+- **Independent Clean-Clone Verification Results:**
+  - Clean `git clone` + `npm ci` (302 packages installed, 0 vulnerabilities).
+  - Backend typecheck (`tsc -p tsconfig.json --noEmit`): PASSED (0 errors).
+  - Frontend typecheck (`npx tsc -p frontend/tsconfig.json --noEmit`): PASSED (0 errors).
+  - Production build (`npm run build`): PASSED (server + Vite client, 82 modules transformed).
+  - Test suite at 5A isolated milestone (`3033349`): **29 test files, 193/193 tests passing** (0 failures, 0 skips).
+  - Test suite at remote `main` SHA (`cca731a`): **33 test files, 251/251 tests passing** (0 failures, 0 skips).
+- **Verification Limitations & Environmental Boundaries:**
+  - **Browser/Headless-browser verification: NOT PERFORMED.** No visual, real browser, or headless-browser (Playwright/Chromium) test was executed in this sandbox environment; frontend verification was conducted via jsdom and Testing Library unit tests only.
+  - **cPanel staging verification: BLOCKED / NOT PERFORMED.** Inherits the open staging gate (no cPanel environment/credentials).
 - **Scope (explicitly authorized, first sub-phase of Phase 5 "Commerce & Billing"):** a real cart
   (one per customer), server-priced add/update/remove-item operations, and checkout into a real,
   immutable `orders`/`order_items` record with a permanent price snapshot. Explicitly **not**
   payments, payment gateways, webhooks, invoices, a billing ledger, billing emails, or admin/staff
   order-viewing (all deferred to 5B–5G, per the user-approved sub-phase sequence and the
   per-sub-phase checkpoint cadence). Started from accepted Phase 4 commit `d84b620`.
+- **Preserved Phase 5A Non-goals & Financial Boundaries:** Zero payment gateway integration, zero invoice processing, zero billing ledger, zero automated provisioning, zero registrar calls, and zero ability to mark orders paid (all orders created as `status: 'pending'` and `payment_status: 'unpaid'`).
 - **Locked architecture decisions carried into this and every later Phase 5 sub-phase:** (1) the
   payment gateway layer (5C) will be an abstraction plus a fully-featured manual/offline gateway
   plus a self-contained sandbox gateway with simulated *signed* webhooks — never a stub-only
@@ -497,7 +512,9 @@ says the corresponding cPanel gate is CLOSED with evidence.
   a billing ledger, refunds, billing emails, admin/staff order or payment management, an audit
   trail beyond what Phase 1–4 already provide, tax/discount configuration, multi-currency support.
 
-## Phase 5B — Billing foundation (invoices → ledger → payment records)
+## Phase 5B — Billing foundation (invoices → ledger → payment records) — NOT ACCEPTED
+
+> **Status: NOT ACCEPTED.** Acceptance depends on its own independent review, authorized migration 0023 work, and outstanding decision resolutions.
 
 - **Scope (explicitly authorized, second of the seven user-approved Phase 5 sub-phases):** real
   invoices, issued atomically at checkout alongside the Phase 5A order; an append-only, immutable
@@ -596,7 +613,9 @@ says the corresponding cPanel gate is CLOSED with evidence.
   webhooks, refunds, credits actually being issued, billing emails, admin/staff invoice or payment
   management, customer-facing billing UI, tax/discount configuration, multi-currency support.
 
-## Phase 5C — Payment integration (gateway abstraction → manual + sandbox gateways → payment initiation)
+## Phase 5C — Payment integration (gateway abstraction → manual + sandbox gateways → payment initiation) — NOT ACCEPTED
+
+> **Status: NOT ACCEPTED.** Acceptance depends on its own independent review, authorized migration 0023 work, and outstanding decision resolutions. PR #12 remains open and unmerged. Phase 5D has not been started.
 
 - **Scope (explicitly authorized, third of the seven user-approved Phase 5 sub-phases; user
   approved proceeding via "CONTINUE" after reviewing the 5B checkpoint):** a payment gateway
