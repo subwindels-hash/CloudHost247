@@ -713,3 +713,99 @@ things remain that *would* require one, and I am **requesting approval rather th
    whether partial payments are ever in scope.
 
 Neither has been written. Both are additive-only if approved; `0018`–`0022` would not be edited.
+
+---
+
+# ADDENDUM 4 — A defect in my own B1–B4 fix, found by re-verification
+
+## What happened
+
+The 21-check adversarial probe cited earlier in this report was evidence from a sandbox the
+platform later destroyed. Rather than keep citing a run that no longer existed, I rebuilt it as a
+28-check probe against real PostgreSQL 18.4 and added one thing the original lacked: a
+**whole-database consistency sweep** at the end, rather than per-test assertions only.
+
+The sweep failed. One invoice carried **two** `payment` ledger entries totalling **99.98 against a
+49.99 total**. Both rows came from probe checks that had just reported **PASS — correctly
+rejected**.
+
+## Cause — my own code, commit `7a46ebd`
+
+The B1–B4 remediation enforced the cross-row invariants as an assertion **after** the INSERT:
+
+```ts
+const { rows } = await tx.query(`INSERT INTO billing_ledger ... SELECT ... FROM invoices WHERE i.id = $2`);
+const row = rows[0];
+if (input.invoiceId && (row.user_id !== input.userId || row.currency !== input.currency)) {
+  throw new Error(`Ledger/invoice mismatch ...`);   // the row is ALREADY WRITTEN
+}
+```
+
+The INSERT derives `user_id`/`currency` from the invoice, so it always succeeds; the mismatch is
+then detected and thrown. Inside a transaction the rollback erases the row and the behaviour looks
+correct — which is why every existing test passed. But `tx` is typed `Queryable`, and a plain
+`pg.Pool` satisfies it. Called that way, under autocommit, **the row is committed and then the
+function throws**: the caller is told the write was rejected while an immutable, undeletable entry
+sits in the ledger, over-crediting the invoice.
+
+`createPayment` in `src/db/payments.ts` had the identical shape.
+
+In an append-only table this is the worst available failure mode: the safety net was writing
+exactly the row it existed to prevent, and nothing can delete it afterwards.
+
+**Reachability — stated precisely.** All three current callers (`billing-service.ts:35`,
+`payment-service.ts:166`, `payment-service.ts:76`) pass `tx` from inside `withTransaction`, so
+**this was not reachable through the application as it stands today, and no production path could
+have produced a phantom credit.** It was a latent trap for the next caller, and the code comment
+claiming the invariant was "structurally impossible to violate" was simply false.
+
+## Fix (code-only, no migration)
+
+The invariant moved into the `WHERE` clause, so a mismatch matches no row and nothing is written:
+
+```sql
+FROM invoices i
+WHERE i.id = $2
+  AND i.user_id = $6
+  AND i.currency = $7
+```
+
+On zero rows both functions now read the invoice back to distinguish "does not exist" from
+"mismatch" and throw accordingly. The guarantee no longer depends on the caller being inside a
+transaction.
+
+## Evidence
+
+Five regression tests added to `tests/integration/billing-schema.test.ts`, each calling with the
+connection directly rather than a transaction. Proven to fail against `7a46ebd`:
+
+```
+× writes no ledger row when the caller misattributes the entry to a non-owner
+× writes no ledger row when the caller asserts the wrong currency
+× never lets a sequence of rejected ledger writes over-credit an invoice
+× writes no payment row when the caller misattributes the payment to a non-owner
+× writes no payment row when the caller asserts the wrong currency
+  AssertionError: expected '249.95' to be null
+```
+
+That last line is five consecutive rejected writes crediting **249.95** to a 49.99 invoice.
+
+| Check | Result |
+| --- | --- |
+| Full suite | **293/293 across 34 files** (288 + 5) |
+| Adversarial probe vs real PostgreSQL 18.4 | **28/28**, including the whole-DB sweep |
+| Typecheck | clean |
+| Migrations added | **none** — still 22 |
+| Historical financial records modified | **none** |
+
+## What this says about the earlier verdict
+
+My previous report stated B1–B4 were closed and independently verified. That was **overstated**.
+The invariants held for every caller that existed, but the enforcement was not structural in the
+way the code and the report both claimed. It took a whole-database sweep — not per-test assertions
+— to expose it, which is worth remembering when judging the rest of this audit: **passing
+adversarial tests demonstrated that each call behaved correctly, not that the database was left in
+a consistent state.** I have not re-derived every other conclusion in this report under that
+stricter standard, and I am not claiming it here.
+
+Phase 5B remains **NOT ACCEPTED**, and nothing here changes that.

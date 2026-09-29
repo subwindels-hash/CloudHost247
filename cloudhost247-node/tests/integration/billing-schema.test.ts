@@ -757,4 +757,115 @@ describe('Phase 5B billing database schema and repositories', () => {
       ).rejects.toThrow(/no invoice/i);
     });
   });
+
+  /**
+   * The cross-row invariants above are enforced by the WHERE clause of the INSERT, not by a
+   * comparison performed after it. That distinction is invisible when the caller is inside a
+   * transaction — a post-INSERT throw rolls the row back either way — so it needs its own tests
+   * that call with the connection directly, exactly as a future caller outside a transaction
+   * would. An earlier revision committed the offending row and then threw, leaving a permanent,
+   * undeletable entry in an append-only ledger while reporting failure to its caller.
+   */
+  describe('a rejected write must leave nothing behind, even outside a transaction', () => {
+    it('writes no ledger row when the caller misattributes the entry to a non-owner', async () => {
+      const owner = await makeUser('leftover-owner@example.com');
+      const stranger = await makeUser('leftover-stranger@example.com');
+      const order = await makeOrder(owner.id);
+      const invoice = await createInvoice(db, {
+        id: randomUUID(), orderId: order.id, userId: owner.id, currency: 'USD',
+        subtotalAmount: '49.99', discountAmount: '0.00', taxAmount: '0.00', totalAmount: '49.99',
+      });
+
+      await expect(
+        recordLedgerEntry(db, {
+          id: randomUUID(), userId: stranger.id, invoiceId: invoice.id, entryType: 'payment',
+          amount: '49.99', currency: 'USD', description: 'misattributed',
+        })
+      ).rejects.toThrow(/mismatch/i);
+
+      const entries = await listLedgerEntriesForInvoice(db, invoice.id);
+      expect(entries).toHaveLength(0);
+    });
+
+    it('writes no ledger row when the caller asserts the wrong currency', async () => {
+      const user = await makeUser('leftover-currency@example.com');
+      const order = await makeOrder(user.id);
+      const invoice = await createInvoice(db, {
+        id: randomUUID(), orderId: order.id, userId: user.id, currency: 'USD',
+        subtotalAmount: '49.99', discountAmount: '0.00', taxAmount: '0.00', totalAmount: '49.99',
+      });
+
+      await expect(
+        recordLedgerEntry(db, {
+          id: randomUUID(), userId: user.id, invoiceId: invoice.id, entryType: 'payment',
+          amount: '49.99', currency: 'GBP', description: 'wrong currency',
+        })
+      ).rejects.toThrow(/mismatch/i);
+
+      expect(await listLedgerEntriesForInvoice(db, invoice.id)).toHaveLength(0);
+    });
+
+    it('never lets a sequence of rejected ledger writes over-credit an invoice', async () => {
+      const owner = await makeUser('leftover-sweep-owner@example.com');
+      const stranger = await makeUser('leftover-sweep-stranger@example.com');
+      const order = await makeOrder(owner.id);
+      const invoice = await createInvoice(db, {
+        id: randomUUID(), orderId: order.id, userId: owner.id, currency: 'USD',
+        subtotalAmount: '49.99', discountAmount: '0.00', taxAmount: '0.00', totalAmount: '49.99',
+      });
+
+      for (let i = 0; i < 5; i++) {
+        await expect(
+          recordLedgerEntry(db, {
+            id: randomUUID(), userId: stranger.id, invoiceId: invoice.id, entryType: 'payment',
+            amount: '49.99', currency: 'USD', description: `rejected ${i}`,
+          })
+        ).rejects.toThrow(/mismatch/i);
+      }
+
+      const credited = await db.query<{ total: string | null }>(
+        `SELECT sum(amount)::text AS total FROM billing_ledger WHERE invoice_id = $1 AND entry_type = 'payment'`,
+        [invoice.id]
+      );
+      expect(credited.rows[0]?.total).toBeNull();
+      expect(await listLedgerEntriesForInvoice(db, invoice.id)).toHaveLength(0);
+    });
+
+    it('writes no payment row when the caller misattributes the payment to a non-owner', async () => {
+      const owner = await makeUser('leftover-pay-owner@example.com');
+      const stranger = await makeUser('leftover-pay-stranger@example.com');
+      const order = await makeOrder(owner.id);
+      const invoice = await createInvoice(db, {
+        id: randomUUID(), orderId: order.id, userId: owner.id, currency: 'USD',
+        subtotalAmount: '49.99', discountAmount: '0.00', taxAmount: '0.00', totalAmount: '49.99',
+      });
+
+      await expect(
+        createPayment(db, {
+          id: randomUUID(), invoiceId: invoice.id, userId: stranger.id,
+          amount: '49.99', currency: 'USD', provider: 'manual', providerReference: randomUUID(),
+        })
+      ).rejects.toThrow(/mismatch/i);
+
+      expect(await listPaymentsForInvoice(db, invoice.id)).toHaveLength(0);
+    });
+
+    it('writes no payment row when the caller asserts the wrong currency', async () => {
+      const user = await makeUser('leftover-pay-currency@example.com');
+      const order = await makeOrder(user.id);
+      const invoice = await createInvoice(db, {
+        id: randomUUID(), orderId: order.id, userId: user.id, currency: 'USD',
+        subtotalAmount: '49.99', discountAmount: '0.00', taxAmount: '0.00', totalAmount: '49.99',
+      });
+
+      await expect(
+        createPayment(db, {
+          id: randomUUID(), invoiceId: invoice.id, userId: user.id,
+          amount: '49.99', currency: 'EUR', provider: 'manual', providerReference: randomUUID(),
+        })
+      ).rejects.toThrow(/mismatch/i);
+
+      expect(await listPaymentsForInvoice(db, invoice.id)).toHaveLength(0);
+    });
+  });
 });

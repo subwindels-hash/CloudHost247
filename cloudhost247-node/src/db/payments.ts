@@ -62,6 +62,8 @@ export async function createPayment(tx: Queryable, input: CreatePaymentInput): P
      FROM invoices i
      WHERE i.id = $2
        AND $6::numeric(12,2) <= i.total_amount
+       AND i.user_id = $7
+       AND i.currency = $8
      RETURNING *`,
     [
       input.id,
@@ -70,24 +72,35 @@ export async function createPayment(tx: Queryable, input: CreatePaymentInput): P
       input.providerReference ?? null,
       input.method ?? null,
       input.amount,
+      input.userId,
+      input.currency,
     ]
   );
   const row = rows[0];
   if (!row) {
-    // Zero rows means either the invoice does not exist or the amount exceeded its total. Both
-    // are integrity violations rather than ordinary validation failures — the service layer has
-    // already established that the invoice exists and is unpaid before calling this.
+    // Every one of these conditions is an integrity violation rather than ordinary validation —
+    // the service layer has already established that the invoice exists and is unpaid. The
+    // owner/currency assertions live in the WHERE clause rather than after the INSERT for the
+    // reason documented at length in src/db/billing-ledger.ts#recordLedgerEntry: checking after
+    // the write means a mismatched call still writes its row, and under a plain `Pool` (which
+    // satisfies `Queryable`) that row is committed before the throw.
+    const { rows: diag } = await tx.query<{ user_id: string; currency: string; total_amount: string }>(
+      `SELECT user_id, currency, total_amount FROM invoices WHERE id = $1`,
+      [input.invoiceId]
+    );
+    const invoice = diag[0];
+    if (!invoice) {
+      throw new Error(`Failed to create payment: no invoice ${input.invoiceId} exists`);
+    }
+    if (invoice.user_id !== input.userId || invoice.currency !== input.currency) {
+      throw new Error(
+        `Payment/invoice mismatch for invoice ${input.invoiceId}: ` +
+          `caller expected user=${input.userId} currency=${input.currency}, ` +
+          `invoice has user=${invoice.user_id} currency=${invoice.currency}`
+      );
+    }
     throw new Error(
       `Failed to create payment: no invoice ${input.invoiceId} accepts an amount of ${input.amount}`
-    );
-  }
-  if (row.user_id !== input.userId || row.currency !== input.currency) {
-    // Unreachable unless a caller's assumptions have drifted from the invoice. Surface it rather
-    // than silently recording a payment against the wrong customer or in the wrong currency.
-    throw new Error(
-      `Payment/invoice mismatch for invoice ${input.invoiceId}: ` +
-        `caller expected user=${input.userId} currency=${input.currency}, ` +
-        `invoice has user=${row.user_id} currency=${row.currency}`
     );
   }
   return row;
