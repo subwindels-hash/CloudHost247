@@ -43,6 +43,12 @@ final class ManualBrokerAdapter implements ProviderAdapter
 
     public function connectionDetail() { return 'CloudHost247 broker team. No external API dependency; outreach and negotiation are recorded manually inside this case.'; }
 
+    /** The manual route has no external integration row; its state is always "available, no check needed". */
+    public function integrationSummary()
+    {
+        return array('environment' => 'n/a', 'last_checked_at' => '', 'configured' => true);
+    }
+
     public function accessRequirements()
     {
         return 'No third-party access is required. A CloudHost247 broker must use only legitimate contact channels (public RDAP/WHOIS contact where available, registrar forwarding, public business contact information, the domain\'s own public website, or an approved marketplace channel) and must never scrape, purchase, or bypass privacy-protected registrant data.';

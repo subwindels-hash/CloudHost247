@@ -8,6 +8,7 @@ use CloudHost247\Broker\Repositories\FeeRepository;
 use CloudHost247\Broker\Repositories\ProviderConfigRepository;
 use CloudHost247\Broker\Repositories\SettingsRepository;
 use CloudHost247\Broker\Services\BrokerageService;
+use CloudHost247\Broker\Services\DomainDeliveryService;
 use CloudHost247\Broker\Services\NegotiationService;
 use CloudHost247\Broker\Services\PaymentService;
 use CloudHost247\Broker\Services\TransferService;
@@ -52,6 +53,7 @@ final class AdminController
     private $negotiation;
     private $payment;
     private $transfer;
+    private $delivery;
     private $adapters;
 
     public function __construct()
@@ -64,6 +66,7 @@ final class AdminController
         $this->negotiation = new NegotiationService();
         $this->payment = new PaymentService();
         $this->transfer = new TransferService();
+        $this->delivery = new DomainDeliveryService();
         $this->adapters = new AdapterRegistry();
     }
 
@@ -198,6 +201,11 @@ final class AdminController
                 AdminGuard::requireCapability('cloudhost247_broker', 'transfers.manage');
                 $this->transfer->complete($caseId, $adminId, isset($_POST['destination_account']) ? $_POST['destination_account'] : '');
                 $data['notice'] = 'Case completed.';
+                break;
+            case 'deliver_domain':
+                AdminGuard::requireCapability('cloudhost247_broker', 'transfers.manage');
+                $delivered = $this->delivery->associate($caseId, $adminId);
+                $data['notice'] = 'Domain delivery: ' . DomainDeliveryService::label(DomainDeliveryService::statusOf($delivered)) . '.';
                 break;
             case 'transfer_fail':
                 AdminGuard::requireCapability('cloudhost247_broker', 'transfers.manage');

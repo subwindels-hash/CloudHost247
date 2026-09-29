@@ -1,7 +1,14 @@
 # CloudHost247 Domain Broker Service
 
-Version 1.0.0 — provider-agnostic domain acquisition brokerage for domains that
+Version 1.1.0 — provider-agnostic domain acquisition brokerage for domains that
 are already registered elsewhere. Module: `modules/addons/cloudhost247_broker`.
+
+Changelog: 1.0.0 core engine and dashboards; 1.1.0 adds verified domain
+delivery into the customer account (`DomainDeliveryService` + transfer
+delivery columns), the outbound provider-call ledger (`GoDaddyAdapter` →
+`mod_cloudhost247_broker_provider_calls`), the documented customer "next
+action"/agreement/delivery views, and the full Domain Brokerage Terms page on
+both shipped themes.
 
 ## What this is (and is not)
 
@@ -53,7 +60,9 @@ Customer → Search/Lookup → Broker This Domain → BrokerageService::createCa
     → owner contact → NegotiationService (offers/counteroffers, immutable)
     → customer approval (never auto-accepted) → PaymentService (WHMCS invoice)
     → TransferService (authorize → initiate → provider confirmed → processing
-       → verified → completed) → Customer Account
+       → verified → completed)
+    → DomainDeliveryService (associate the domain with the customer's
+       CloudHost247 account through WHMCS's own API, verified by re-read)
 ```
 
 One consistent "CloudHost247 Domain Brokerage" experience is shown to the
@@ -88,6 +97,34 @@ Offers and events are insert-only (no status/updated_at column): a negotiation
 never be silently rewritten. `NegotiationService::status()` always *derives*
 pending/accepted/rejected/expired/superseded from that history.
 
+Migration `V110` (1.1.0) additively extends the transfers table with the
+delivery ledger columns (`delivery_status`, `whmcs_domain_id`, `delivered_at`,
+`delivery_note`) behind `hasColumn` guards — nothing is dropped or renamed.
+
+## Domain delivery (verified transfer → customer account)
+
+`TransferService::complete()` is the only path to `CaseStatus::COMPLETED`, and
+it only runs after a transfer reached `VERIFIED`. Completion immediately
+attempts account delivery through `DomainDeliveryService::associate()`:
+
+1. `localAPI('GetClientsDomains')` — if the domain already has a record owned
+   by this customer, it is adopted (idempotent; never duplicated). If the
+   record is owned by a **different** account, delivery is recorded `failed`
+   and never overridden.
+2. Otherwise `localAPI('AddClientDomain')` creates the record through WHMCS's
+   own administrative API, and the service **re-reads the client domain list
+   to confirm ownership** before reporting `associated`. A create call that
+   cannot be confirmed is never claimed as delivered.
+3. When WHMCS cannot complete the association in this environment (API
+   unavailable or action unsupported), the transfer carries an explicit
+   `pending_manual` state plus the exact manual step an operator must take in
+   WHMCS Admin → Clients → Domains. A Super Admin can then retry from the case
+   screen ("Deliver / re-check domain delivery") — the retry is idempotent.
+
+Only `associated` produces the customer-facing `delivery.associated` event and
+the "Domain delivered" email; the transfer-completed notification deliberately
+does not claim account association before it has been confirmed.
+
 ## Security controls
 
 * `Security\AdminGuard::requireAdmin()` / `requirePostToken()` gate every
@@ -113,9 +150,15 @@ pending/accepted/rejected/expired/superseded from that history.
 `BrokerageService::createCase()`, `NegotiationService::submit()`,
 `PaymentService::createInvoice()` and `TransferService::authorize()` all
 short-circuit to the original row on a retried key — never a duplicate case,
-offer, invoice, or transfer. `ProviderCallRepository` additionally records
-every outbound provider call with a correlation id for idempotent retries at
-the provider boundary.
+offer, invoice, or transfer. `TransferService::complete()` itself is
+idempotent: re-completing a case returns the existing record without
+duplicating events, audit rows, or the delivery attempt.
+
+`ProviderCallRepository` additionally gives an idempotency ledger at the
+provider boundary (unique on provider + operation + idempotency key).
+`GoDaddyAdapter` records every real availability call there with the
+correlation id, the sanitized `ResultCode`, the HTTP status and the latency —
+raw provider payloads, credentials and headers are never written.
 
 ## Settings
 
@@ -144,16 +187,37 @@ deployment never silently exposes the feature.
 ## Testing
 
 `tests/broker/run.php` is a self-contained behavior suite (fake in-memory
-Capsule query builder + a stubbed "not configured" Integrations manager,
-mirroring the pattern already used by `tests/foundation/run.php` and
-`tests/tools/run.php`) that exercises the real domain enums, provider
-adapters, routing, repositories, fee math, and the full brokerage →
-negotiation → payment → transfer → completion lifecycle against the actual
-module classes. `tests/broker/test_static.py` asserts structure, security,
-and "no fabricated data" invariants. Neither test requires network access or
-a real WHMCS/MySQL runtime; a real PHP interpreter is required to execute
-`tests/broker/run.php` and was not available in this development sandbox —
-it is intended to run in CI (see the independent-foundation workflow).
+Capsule query builder + a stubbed Integrations manager/localAPI mirroring the
+pattern already used by `tests/foundation/run.php` and `tests/tools/run.php`)
+that exercises the real domain enums, provider adapters, routing,
+repositories, fee math, and the full brokerage → negotiation → payment →
+transfer → delivery → completion lifecycle against the actual module classes,
+including: delivery association/adoption/conflict/manual-fallback honesty,
+completion idempotency, the provider-call ledger (success, auth failure and
+transport failure), and the customer notification toggle.
+`tests/broker/test_static.py` asserts structure, security, and "no fabricated
+data" invariants. Neither test requires network access or a real WHMCS/MySQL
+runtime. CI runs both suites plus `scripts/release-candidate-check.sh` on
+PHP 7.4 and PHP 8.2 (`.github/workflows/independent-foundation.yml`).
+
+## Module Manager compatibility (requirement #43)
+
+This service is a first-party repository module, shipped in this repository
+and activated through WHMCS's own **System Settings → Addon Modules** flow —
+the same trust path as `cloudhost247_core`, `cloudhost247_integrations`,
+`cloudhost247_builder`, `cloudhost247_currency`, `cloudhost247_ovh`,
+`cloudhost247_theme` and the `RDP` server module. It is therefore **not** an
+untrusted upload and it does not enter the Package Installer pipeline
+(`cloudhost247_modules`), which exists precisely for *third-party* ZIP
+uploads: validated `module.json` manifest, dependency/compatibility checks,
+migrations through the Foundation `MigrationRunner`, capability-declared
+permissions, byte-verified installs and safe rollback, with no blind
+execution of packaged code. The broker module plays by the same rules its
+peers do: namespaced additive migrations, activation non-destructive,
+deactivation retains data, and zero credentials stored outside the central
+vault. Should this module ever be repackaged as an uploadable distribution,
+its `module.json` must declare the `cloudhost247_core` and
+`cloudhost247_integrations` runtime dependencies it has.
 
 ## Feature status
 
@@ -170,5 +234,7 @@ it is intended to run in CI (see the independent-foundation workflow).
 | Idempotency (cases/offers/payments/transfers) | IMPLEMENTED (source) | `idempotency_key` columns + short-circuit lookups |
 | Audit logging | IMPLEMENTED (source) | `AuditLogger::record()` on every state-changing action |
 | Server-side rate limiting | IMPLEMENTED (source) | `BrokerageService::assertWithinRateLimit()`, real DB count |
-| Page Builder widgets (Broker CTA, status, pricing, FAQ) | NOT YET INTEGRATED | Tracked follow-up; core engine does not depend on it |
-| Runtime/staging verification with live provider credentials | BLOCKED | No real GoDaddy/Sedo/Afternic/DomainAgents credentials or WHMCS/MySQL runtime is available in this environment |
+| Page Builder widgets (Broker CTA, status, cases, pricing, FAQ) | IMPLEMENTED (source) | `cloudhost247_builder` `WidgetCatalog` (`broker_this_domain`, `domain_brokerage_cta`, `brokerage_status`, `customer_brokerage_cases`, `brokerage_pricing`, `brokerage_faq`) via `LiveDataSource` → real broker repositories (asserted by `tests/broker/test_static.py` + `tests/builder/`) |
+| Domain delivery to customer account | IMPLEMENTED (source), runtime BLOCKED | `DomainDeliveryService` through `localAPI('GetClientsDomains'/'AddClientDomain')` with confirm-by-re-read; needs a staging WHMCS runtime for live verification |
+| Outbound provider-call ledger | IMPLEMENTED (source) | `GoDaddyAdapter` → `ProviderCallRepository::record()` (correlation id, sanitized result code, HTTP status, latency) |
+| Runtime/staging verification with live provider credentials | BLOCKED | No real GoDaddy/Sedo/Afternic/DomainAgents partner credentials or WHMCS/MySQL runtime is available in this environment; provider access must be legitimately obtained and tested before enabling (see \"Provider adapters and real capabilities\") |

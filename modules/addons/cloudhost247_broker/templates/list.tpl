@@ -12,13 +12,14 @@
 {if $results.rows}
 <div class="table-responsive">
 <table class="table table-striped">
-<thead><tr><th>Case #</th><th>Domain</th><th>Status</th><th>Budget</th><th>Payment</th><th>Transfer</th><th>Submitted</th><th></th></tr></thead>
+<thead><tr><th>Case #</th><th>Domain</th><th>Status</th><th>Next action</th><th>Budget</th><th>Payment</th><th>Transfer</th><th>Submitted</th><th></th></tr></thead>
 <tbody>
 {foreach from=$results.rows item=c}
 <tr>
 <td>{$c->case_number|escape:'html':'UTF-8'}</td>
 <td>{$c->domain|escape:'html':'UTF-8'}</td>
 <td>{$c->status_label|escape:'html':'UTF-8'}</td>
+<td>{$c->next_action|escape:'html':'UTF-8'}</td>
 <td>{$c->currency|escape:'html':'UTF-8'} {$c->max_budget|string_format:"%.2f"}</td>
 <td>{$c->payment_status_label|escape:'html':'UTF-8'}</td>
 <td>{$c->transfer_status_label|escape:'html':'UTF-8'}</td>

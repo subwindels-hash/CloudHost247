@@ -1,6 +1,7 @@
 <?php
 namespace CloudHost247\Broker\Services;
 
+use CloudHost247\Broker\Repositories\SettingsRepository;
 use CloudHost247\Foundation\Support\Logger;
 
 /**
@@ -8,14 +9,23 @@ use CloudHost247\Foundation\Support\Logger;
  * notification/email infrastructure (localAPI SendEmail with the built-in
  * "general" custom template) — not a separate messaging system. Never places
  * a provider credential, internal note, or unnecessary private detail in the
- * message body.
+ * message body. Honours the customer_notifications_enabled setting from
+ * Super Admin -> Domain Brokerage -> Settings (requirement #35).
  */
 final class NotificationService
 {
+    private $settings;
+
+    public function __construct(SettingsRepository $settings = null)
+    {
+        $this->settings = $settings ?: new SettingsRepository();
+    }
+
     public function notify($clientId, $subject, $message)
     {
         $clientId = (int) $clientId;
         if ($clientId <= 0 || !function_exists('localAPI')) { return false; }
+        if ($this->settings->get('customer_notifications_enabled', '1') !== '1') { return false; }
         try {
             $result = localAPI('SendEmail', array(
                 'id' => $clientId,
@@ -106,7 +116,13 @@ final class NotificationService
     public function transferCompleted($clientId, $caseNumber, $domain)
     {
         return $this->notify($clientId, 'Transfer completed: ' . $caseNumber,
-            "The transfer for {$domain} (case {$caseNumber}) has been verified and completed. The domain is now associated with your CloudHost247 account.");
+            "The transfer for {$domain} (case {$caseNumber}) has been verified and completed. CloudHost247 is finalizing delivery of the domain to your account; we will confirm as soon as it is linked. Your brokerage case is now marked Completed.");
+    }
+
+    public function domainDelivered($clientId, $caseNumber, $domain)
+    {
+        return $this->notify($clientId, 'Domain delivered: ' . $caseNumber,
+            "{$domain} (case {$caseNumber}) is now associated with your CloudHost247 account. You can manage the functions your registrar supports (DNS, nameservers, renewal, transfer lock, contacts) from your Client Area.");
     }
 
     public function transferFailed($clientId, $caseNumber, $domain, $reason)

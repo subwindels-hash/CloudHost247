@@ -17,6 +17,7 @@ use CloudHost247\Broker\Security\CaseGuard;
 use CloudHost247\Broker\Security\ClientGuard;
 use CloudHost247\Broker\Security\InputValidator;
 use CloudHost247\Broker\Services\BrokerageService;
+use CloudHost247\Broker\Services\DomainDeliveryService;
 use CloudHost247\Broker\Services\NegotiationService;
 use RuntimeException;
 
@@ -165,8 +166,11 @@ final class ClientAreaController
             $data['events'] = $this->events->customerTimeline($caseId);
             $data['messages'] = $this->messages->customerThread($caseId);
             $data['offers'] = $this->negotiation->timelineFor($caseId);
+            $data['accepted_offer'] = $this->negotiation->acceptedOffer($caseId);
             $data['payments'] = $this->payments->forCase($caseId);
             $data['transfer'] = $this->transfers->currentForCase($caseId);
+            $data['delivery_status'] = DomainDeliveryService::statusOf($data['transfer']);
+            $data['delivery_label'] = DomainDeliveryService::label($data['delivery_status']);
             $data['documents'] = $this->documents->customerVisible($caseId);
             return;
         }
@@ -183,7 +187,35 @@ final class ClientAreaController
         $case->payment_status_label = PaymentStatus::label($case->payment_status);
         $case->transfer_status_label = TransferStatus::label($case->transfer_status);
         $case->domain_status_label = DomainState::label($case->domain_status);
+        $case->next_action = $this->nextAction($case);
+        $case->broker_label = !empty($case->assigned_admin_id) ? 'A CloudHost247 broker is assigned to this case' : 'Awaiting broker assignment';
         return $case;
+    }
+
+    /**
+     * The single most useful next step for this customer, derived from the
+     * real stored case status (requirement #4) — never a hard-coded guess.
+     */
+    private function nextAction($case)
+    {
+        switch ((string) $case->status) {
+            case CaseStatus::REQUEST_SUBMITTED: return 'Awaiting broker assignment';
+            case CaseStatus::MANUAL_BROKER_REQUIRED: return 'Awaiting manual broker assignment';
+            case CaseStatus::BROKER_ASSIGNED: return 'Your broker is reviewing the acquisition route';
+            case CaseStatus::CONTACTING_OWNER: return 'Your broker is attempting to contact the owner or registrar channel';
+            case CaseStatus::NEGOTIATION: return 'Negotiation in progress — no action needed right now';
+            case CaseStatus::AWAITING_CUSTOMER: return 'Review the latest offer and accept, reject or counter';
+            case CaseStatus::AWAITING_SELLER: return 'Waiting for the owner or provider to respond';
+            case CaseStatus::OFFER_ACCEPTED: return 'Agreement reached — invoice is being prepared';
+            case CaseStatus::PAYMENT_PENDING: return 'Pay the brokerage invoice from your Invoices page';
+            case CaseStatus::TRANSFER_PENDING: return 'Payment received — transfer is being authorized';
+            case CaseStatus::TRANSFER_PROCESSING: return 'Transfer in progress — no action needed right now';
+            case CaseStatus::COMPLETED: return 'Completed — the domain is being delivered to your account';
+            case CaseStatus::CANCELLED: return 'Case cancelled — no further action';
+            case CaseStatus::FAILED: return 'This case failed — contact support for options';
+            case CaseStatus::DISPUTED: return 'Under dispute review — our team will contact you';
+            default: return 'No action required';
+        }
     }
 
     private function requireOfferOwnedByClient($offerId, $clientId)

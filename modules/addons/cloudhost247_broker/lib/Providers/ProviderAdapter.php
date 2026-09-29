@@ -51,6 +51,13 @@ interface ProviderAdapter
     /** Human-safe detail for the current connection state (no payloads, no secrets). */
     public function connectionDetail();
 
+    /**
+     * Non-secret connection facts for the admin Providers table:
+     * array(environment, last_checked_at, configured). Never contains
+     * credentials or provider payloads.
+     */
+    public function integrationSummary();
+
     /** Documentation string describing partner/commercial requirements, for the admin UI. */
     public function accessRequirements();
 }

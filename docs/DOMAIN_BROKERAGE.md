@@ -2,6 +2,8 @@
 
 The Node platform's Domain Brokerage Engine is provider-neutral. `src/domain-brokerage/provider.ts` defines the adapter contract and capability registry; database provider rows are not considered connected until a real health check succeeds. No GoDaddy, Sedo, Afternic, or DomainAgents adapter is enabled in this checkout because credentials/partner access are not configured.
 
+> The customer-facing WHMCS implementation of this service lives in `modules/addons/cloudhost247_broker/` (CloudHost247 Domain Broker Service) and is documented in `docs/independent-rebuild/DOMAIN-BROKER.md`. Both implementations share the same honesty rules: no fabricated connections, offers, payments, escrow, owners, transfers, or deliveries.
+
 ## Legitimate workflow
 
 Customers can submit a confidential-budget case at `/api/v1/account/domain-brokerage/cases`. The maximum budget is never returned to provider/owner-facing DTOs. The default acquisition route is `manual_broker_required`; a registered domain is not represented as available for sale. Customer records are owner-scoped, and admin case access is role-gated.

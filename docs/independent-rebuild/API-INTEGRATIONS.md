@@ -618,6 +618,31 @@ Authenticated SMTP submission used for transactional mail.
 | SMTP password (`password`) | secret | yes | **encrypted vault** | Required by the SMTP AUTH protocol; stored encrypted and used server-side only. |
 | Default from address (`from_address`) | text | no | configuration row (JSON options) |  |
 
+#### cPanel SMTP (marketing) — `cpanel_smtp`
+
+Authenticated SMTP submission through a cPanel-hosted mailbox, the primary delivery provider for CloudHost247 Marketing campaigns.
+
+- **Vendor:** cPanel mail server
+- **Provider documentation:** https://datatracker.ietf.org/doc/html/rfc4954
+- **Where to obtain credentials:** cPanel -> Email Accounts (mailbox + password issued by the hosting account).
+- **Required scopes / permissions:** `SMTP AUTH submission`
+- **Authentication:** SMTP AUTH LOGIN over TLS
+- **Endpoint:** Fixed provider URL, not administrator editable — `smtp://configured-host`
+- **Connection test:** live SMTP submission handshake (greeting, EHLO, STARTTLS where configured, AUTH LOGIN, QUIT — no message is sent)
+- **Platform usage:** modules/addons/cloudhost247_marketing
+- **Notes:** The connection test performs a real SMTP handshake, STARTTLS upgrade and AUTH exchange, then QUIT. No message is sent. Marketing campaigns are subject to the module's queue batching and configurable rate limits. This is a separate integration row from the shared transactional `smtp` relay so marketing identity, rotation and throttle tuning never disturb transactional mail — the vault, probe, tester, and admin screens are shared, not duplicated.
+
+| Field | Type | Required | Stored | Purpose |
+|---|---|---|---|---|
+| SMTP host (`host`) | text | yes | configuration row (JSON options) | For example mail.example.com — usually the cPanel server hostname. |
+| Port (`port`) | number | yes | configuration row (JSON options) | Default `465`. 465 = implicit TLS (SSL); 587 = STARTTLS. |
+| Encryption (`encryption`) | select (`ssl`, `tls`) | yes | configuration row (JSON options) | Default `ssl`. |
+| Mailbox (username) (`username`) | text | yes | configuration row | The full mailbox address, for example marketing@example.com. |
+| Mailbox password (`password`) | secret | yes | **encrypted vault** | Stored encrypted and only ever written to the authenticated SMTP socket, server-side. |
+| Default from name (`from_name`) | text | no | configuration row (JSON options) |  |
+| Default from address (`from_address`) | text | no | configuration row (JSON options) | Should be the mailbox itself or an address on its domain (no unrelated-domain spoofing). |
+| Default reply-to address (`reply_to`) | text | no | configuration row (JSON options) |  |
+
 #### SendGrid — `sendgrid`
 
 SendGrid v3 API for transactional email.

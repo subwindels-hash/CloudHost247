@@ -17,6 +17,17 @@
 <div class="col-sm-4"><strong>Domain status:</strong> {$case->domain_status_label|escape:'html':'UTF-8'}</div>
 <div class="col-sm-4"><strong>Submitted:</strong> {$case->created_at|escape:'html':'UTF-8'}</div>
 </div>
+<div class="row" style="margin-top:8px;">
+<div class="col-sm-4"><strong>Broker:</strong> {$case->broker_label|escape:'html':'UTF-8'}</div>
+<div class="col-sm-8"><strong>Next action:</strong> {$case->next_action|escape:'html':'UTF-8'}</div>
+</div>
+
+{if $accepted_offer}
+<div class="alert alert-success" style="margin-top:12px;">
+<strong>Agreement reached:</strong> {$accepted_offer->currency|escape:'html':'UTF-8'} {$accepted_offer->amount|string_format:"%.2f"} accepted on {$accepted_offer->created_at|escape:'html':'UTF-8'}.
+This agreement is recorded on the immutable offer ledger below.
+</div>
+{/if}
 
 <h3 style="margin-top:20px;">Offers &amp; Counteroffers</h3>
 {if $offers}
@@ -94,8 +105,12 @@
 {/if}
 
 {if $transfer}
-<h3>Transfer</h3>
+<h3>Transfer &amp; delivery</h3>
 <p>Status: {$transfer->status|escape:'html':'UTF-8'}{if $transfer->completed_at} &mdash; completed {$transfer->completed_at|escape:'html':'UTF-8'}{/if}</p>
+<p>Delivery: {$delivery_label|escape:'html':'UTF-8'}
+{if $delivery_status eq 'associated'} &mdash; manage DNS, nameservers, renewal, transfer lock and contacts from your <a href="clientarea.php?action=domains">Client Area &raquo; Domains</a>.
+{elseif $delivery_status eq 'pending_manual'} &mdash; CloudHost247 is manually linking the domain to your account; we will confirm when done.
+{elseif $delivery_status eq 'failed'} &mdash; our team is resolving an issue linking the domain to your account and will contact you.{/if}</p>
 {/if}
 
 {if $documents}

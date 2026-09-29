@@ -41,15 +41,19 @@ use CloudHost247\Broker\Providers\ManualBrokerAdapter;
 use CloudHost247\Broker\Providers\SedoAdapter;
 use CloudHost247\Broker\Repositories\CaseRepository;
 use CloudHost247\Broker\Repositories\FeeRepository;
+use CloudHost247\Broker\Repositories\ProviderCallRepository;
 use CloudHost247\Broker\Repositories\ProviderConfigRepository;
 use CloudHost247\Broker\Repositories\SettingsRepository;
 use CloudHost247\Broker\Routing\AcquisitionRouter;
 use CloudHost247\Broker\Security\CaseGuard;
 use CloudHost247\Broker\Security\InputValidator;
+use CloudHost247\Broker\Repositories\EventRepository;
 use CloudHost247\Broker\Services\BrokerageService;
 use CloudHost247\Broker\Services\CaseNumberGenerator;
+use CloudHost247\Broker\Services\DomainDeliveryService;
 use CloudHost247\Broker\Services\FeeCalculator;
 use CloudHost247\Broker\Services\NegotiationService;
+use CloudHost247\Broker\Services\NotificationService;
 use CloudHost247\Broker\Services\PaymentService;
 use CloudHost247\Broker\Services\TransferService;
 
@@ -61,6 +65,8 @@ function ch247_broker_fresh()
     CH247BrokerFakeDB::reset();
     $GLOBALS['CH247_BROKER_INVOICES'] = array();
     $GLOBALS['CH247_BROKER_EMAILS'] = array();
+    $GLOBALS['CH247_BROKER_DOMAINS'] = array();
+    $GLOBALS['CH247_BROKER_ADD_DOMAIN_OK'] = true;
 }
 
 function ch247_broker_seed_case($overrides = array())
@@ -83,6 +89,59 @@ function ch247_broker_seed_negotiating_case($overrides = array())
     $service->assignBroker($case->id, 7, 1);
     $service->recordContactAttempt($case->id, 7, 'Reached out via registrar forwarding.');
     return $service->recordOwnerResponse($case->id, 7, 'Owner is open to an offer.');
+}
+
+/** Walks a case through negotiation -> agreement -> paid invoice -> verified transfer, using only the real services. */
+function ch247_broker_walk_to_verified($overrides = array())
+{
+    $case = ch247_broker_seed_negotiating_case($overrides);
+    $negotiation = new NegotiationService();
+    $offer = $negotiation->submit($case->id, array('amount' => 3000, 'currency' => 'USD', 'from_party' => 'seller', 'to_party' => 'customer'));
+    $negotiation->accept($offer->id, 'customer', 501);
+    $payments = new PaymentService();
+    $payment = $payments->createInvoice($case->id, 3000, 1);
+    ch247_broker_set_invoice_status($payment->whmcs_invoice_id, 'Paid');
+    $payments->syncStatus($case->id);
+    $transfers = new TransferService();
+    $transfers->authorize($case->id, 1);
+    $transfers->initiate($case->id, 1, 'REF-WALK');
+    $transfers->providerConfirmed($case->id, 1);
+    $transfers->processing($case->id, 1);
+    $transfers->verify($case->id, 1);
+    return $case;
+}
+
+/**
+ * Seed a central-integrations row that looks genuinely connected: enabled,
+ * recently health-checked, status 'connected'. The environment defaults to
+ * the runtime default ('production' when no override is configured).
+ */
+function ch247_broker_seed_connected_integration($key, $environment = 'production')
+{
+    $rows = &CH247BrokerFakeDB::rowsRef('mod_cloudhost247_integrations');
+    $row = array(
+        'provider_key' => (string) $key,
+        'environment' => (string) $environment,
+        'label' => (string) $key,
+        'endpoint' => 'https://integration-test.example/',
+        'options_json' => '{}',
+        'status' => 'connected',
+        'last_failure_reason' => null,
+        'last_checked_at' => date('Y-m-d H:i:s'),
+        'enabled' => 1,
+    );
+    $rows[] = $row;
+}
+
+/**
+ * Build the real GoDaddyAdapter against a genuinely "connected" seeded
+ * integration row, with the raw availability request replaced by the
+ * injected callable — the class stays final and no network call can happen.
+ */
+function ch247_broker_test_godaddy($requester)
+{
+    ch247_broker_seed_connected_integration('godaddy');
+    return new GoDaddyAdapter(new ProviderConfigRepository(), new ProviderCallRepository(), $requester);
 }
 
 // -------------------------------------------------------------- domain enums
@@ -448,6 +507,138 @@ $tests['DomainStatusResolver never guesses when every source fails'] = function 
     $resolver = new DomainStatusResolver(new GoDaddyAdapter(new ProviderConfigRepository()), $bridge);
     $result = $resolver->resolve('unreachable-domain.com');
     return $result['state'] === DomainState::PROVIDER_UNAVAILABLE && $result['source'] === 'unavailable';
+};
+
+// ------------------------------------------------------------- delivery flow
+
+$tests['DomainDeliveryService associates a verified domain with the customer account and is idempotent'] = function () {
+    ch247_broker_fresh();
+    $case = ch247_broker_walk_to_verified();
+    $transfers = new TransferService();
+    $completed = $transfers->complete($case->id, 1, 'client-account-501');
+    if ($completed->status !== TransferStatus::COMPLETED || $completed->delivery_status !== DomainDeliveryService::STATUS_ASSOCIATED) { return false; }
+    if (empty($completed->whmcs_domain_id)) { return false; }
+    $domains = $GLOBALS['CH247_BROKER_DOMAINS'];
+    if (count($domains) !== 1) { return false; }
+    $row = reset($domains);
+    if ((int) $row['clientid'] !== 501) { return false; }
+    $events = (new EventRepository())->customerTimeline($case->id);
+    $hasAssociatedEvent = false;
+    foreach ($events as $event) { if ($event->event_type === 'delivery.associated') { $hasAssociatedEvent = true; } }
+    if (!$hasAssociatedEvent) { return false; }
+    $deliveredMail = false;
+    foreach ($GLOBALS['CH247_BROKER_EMAILS'] as $mail) {
+        if (isset($mail['customsubject']) && strpos($mail['customsubject'], 'Domain delivered') !== false) { $deliveredMail = true; }
+    }
+    if (!$deliveredMail) { return false; }
+    // Re-completing an already completed case must not duplicate the delivery,
+    // the domain record, or any timeline events (requirement #29).
+    $again = $transfers->complete($case->id, 1);
+    $eventsAfter = (new EventRepository())->customerTimeline($case->id);
+    return $again->id === $completed->id && count($GLOBALS['CH247_BROKER_DOMAINS']) === 1 && count($eventsAfter) === count($events);
+};
+
+$tests['DomainDeliveryService adopts an existing WHMCS domain record owned by this customer'] = function () {
+    ch247_broker_fresh();
+    $case = ch247_broker_walk_to_verified();
+    ch247_broker_seed_client_domain(4242, 501, 'example-broker-test.com');
+    $completed = (new TransferService())->complete($case->id, 1);
+    return $completed->delivery_status === DomainDeliveryService::STATUS_ASSOCIATED
+        && (int) $completed->whmcs_domain_id === 4242
+        && count($GLOBALS['CH247_BROKER_DOMAINS']) === 1; // no duplicate record created
+};
+
+$tests['DomainDeliveryService refuses to override a domain record owned by a different account'] = function () {
+    ch247_broker_fresh();
+    $case = ch247_broker_walk_to_verified();
+    ch247_broker_seed_client_domain(4300, 999, 'example-broker-test.com');
+    $completed = (new TransferService())->complete($case->id, 1);
+    return $completed->status === TransferStatus::COMPLETED
+        && $completed->delivery_status === DomainDeliveryService::STATUS_FAILED
+        && empty($completed->whmcs_domain_id); // the conflict was recorded, never overridden
+};
+
+$tests['DomainDeliveryService falls back to pending_manual — then a retry delivers once the API works'] = function () {
+    ch247_broker_fresh();
+    $case = ch247_broker_walk_to_verified();
+    $GLOBALS['CH247_BROKER_ADD_DOMAIN_OK'] = false; // simulate a WHMCS build without AddClientDomain
+    $completed = (new TransferService())->complete($case->id, 1);
+    if ($completed->delivery_status !== DomainDeliveryService::STATUS_PENDING_MANUAL || !empty($completed->whmcs_domain_id)) { return false; }
+    // It must never claim the delivery to the customer: no associated event, no "Domain delivered" email.
+    $events = (new EventRepository())->customerTimeline($case->id);
+    foreach ($events as $event) { if ($event->event_type === 'delivery.associated') { return false; } }
+    foreach ($GLOBALS['CH247_BROKER_EMAILS'] as $mail) {
+        if (isset($mail['customsubject']) && strpos($mail['customsubject'], 'Domain delivered') !== false) { return false; }
+    }
+    // An operator retry (or a later supported WHMCS) completes the delivery idempotently.
+    $GLOBALS['CH247_BROKER_ADD_DOMAIN_OK'] = true;
+    $retried = (new DomainDeliveryService())->associate($case->id, 1);
+    return $retried->delivery_status === DomainDeliveryService::STATUS_ASSOCIATED && !empty($retried->whmcs_domain_id);
+};
+
+// -------------------------------------------------- provider call ledger (#38)
+
+$tests['GoDaddyAdapter records every real provider call in the idempotent ledger'] = function () {
+    ch247_broker_fresh();
+    $adapter = ch247_broker_test_godaddy(function ($domain) {
+        return array('status' => 200, 'json' => array('available' => false, 'definitive' => true));
+    });
+    $result = $adapter->checkAvailability('ledger-test.com');
+    $rows = CH247BrokerFakeDB::rowsRef('mod_cloudhost247_broker_provider_calls');
+    if ($result === null || $result['available'] !== false || count($rows) !== 1) { return false; }
+    $call = $rows[0];
+    return $call['provider_key'] === 'godaddy' && $call['operation'] === 'domain_availability'
+        && $call['result_code'] === 'connected' && $call['http_status'] === 200
+        && $call['latency_ms'] >= 0 && $call['correlation_id'] !== '';
+};
+
+$tests['GoDaddyAdapter records failures with sanitized codes and never guesses a result'] = function () {
+    ch247_broker_fresh();
+    $adapter = ch247_broker_test_godaddy(function ($domain) {
+        return array('status' => 401, 'json' => null);
+    });
+    if ($adapter->checkAvailability('auth-fail-test.com') !== null) { return false; }
+    $adapter = ch247_broker_test_godaddy(function ($domain) {
+        throw new RuntimeException('boom'); // transport-level failure
+    });
+    if ($adapter->checkAvailability('boom-test.com') !== null) { return false; }
+    $rows = CH247BrokerFakeDB::rowsRef('mod_cloudhost247_broker_provider_calls');
+    return count($rows) === 2
+        && $rows[0]['result_code'] === 'authentication_failed' && $rows[0]['http_status'] === 401
+        && $rows[1]['result_code'] === 'provider_unavailable';
+};
+
+$tests['GoDaddyAdapter refuses availability without a connected integration and records nothing'] = function () {
+    ch247_broker_fresh();
+    $adapter = new GoDaddyAdapter(new ProviderConfigRepository()); // no seeded integration row
+    if ($adapter->checkAvailability('never-configured-test.com') !== null) { return false; }
+    $rows = CH247BrokerFakeDB::rowsRef('mod_cloudhost247_broker_provider_calls');
+    return count($rows) === 0; // real calls only: the ledger never fakes an attempt
+};
+
+// ----------------------------------------------------------------- notifications
+
+$tests['NotificationService honours the customer_notifications_enabled setting'] = function () {
+    ch247_broker_fresh();
+    $settings = new SettingsRepository();
+    $settings->set('customer_notifications_enabled', '0');
+    $notifier = new NotificationService($settings);
+    $blocked = $notifier->notify(501, 'Test subject', 'Test body');
+    $settings->set('customer_notifications_enabled', '1');
+    $sent = $notifier->notify(501, 'Test subject', 'Test body');
+    return $blocked === false && $sent === true && count($GLOBALS['CH247_BROKER_EMAILS']) === 1;
+};
+
+$tests['transferCompleted notification never claims account delivery before it happens'] = function () {
+    $service = new NotificationService();
+    $reflection = new ReflectionMethod(NotificationService::class, 'transferCompleted');
+    $source = file_get_contents($reflection->getFileName());
+    $start = strpos($source, 'function transferCompleted');
+    $end = strpos($source, 'function domainDelivered', $start);
+    $body = substr($source, $start, $end - $start);
+    // The completion message must not state the domain "is now associated" —
+    // that claim belongs exclusively to domainDelivered().
+    return strpos($body, 'is now associated') === false;
 };
 
 // ------------------------------------------------------------------------- run
