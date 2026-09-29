@@ -1096,3 +1096,71 @@ same change, so the suite stays honest rather than red-and-ignored.
 
 Nothing in `recovery/` has been applied to this branch. Option B remains **prepared and awaiting
 your approval**, exactly as instructed.
+
+---
+
+# ADDENDUM 8 — The 5C signing primitive, audited adversarially
+
+The remaining 5C requirement not re-derived under this standard was the directive's: *sandbox
+signing must use real cryptographic signatures; the sandbox must be unmistakable for a real
+provider; report what is implemented vs tested vs unverified.*
+
+**Scope note:** webhook work is frozen. This audit builds, wires and enables **nothing**. It tests
+the signing primitive in isolation and asserts the **absence** of a receiver.
+
+## Result — 47/47, no defect
+
+`recovery/verify-webhook-signing.ts` (committed, runnable by you).
+
+**The signature is real cryptography, not a placeholder.** It matches an independently computed
+`createHmac('sha256', ...)` digest byte for byte, is a 64-character hex digest, changes when the
+secret changes, and changes when one byte of the body changes. It is demonstrably not a hash of
+the body alone.
+
+**Verification fails closed under every attack tried** — tampered body, amount raised to 9999.99,
+currency swapped, wrong secret, empty signature, truncated signature, single flipped byte,
+over-long signature, non-hex garbage, odd-length hex, empty body. None throws; all return `false`.
+`timingSafeEqual` is used rather than `===`, guarded by the length check that would otherwise make
+it throw.
+
+**The sandbox cannot be mistaken for a real provider:** id `sandbox`, reference prefixed
+`sandbox_`, method `sandbox_demo`, and customer-facing text that says both "simulated" and "no
+real money". No `stripe`/`paypal`/`adyen`/`braintree`/`square`/`flutterwave`/`paystack` gateway
+resolves. `buildSignedWebhookPayload` refuses to sign for a non-sandbox payment and refuses to
+sign at all when no secret is configured.
+
+**The receiver does not exist, and the probe asserts that it does not** — no webhook route file,
+no route path containing "webhook", `verifySignature` called by no route or service, and nothing
+that moves a `sandbox` payment out of `pending`. If a future change quietly adds a receiver, that
+group starts failing. That is deliberate.
+
+## One real finding — in the proposal, not the code
+
+The proposed 5D scope said replay protection would *"reject an event id already processed"*.
+**There is no event id.** `SandboxWebhookPayload` carries `provider`, `providerReference`,
+`paymentId`, `outcome`, `amount`, `currency`, `occurredAt` — nothing unique per event.
+
+This matters because Phase 5C committed to that payload as "a known-correct shape for 5D to start
+from". Discovering the omission mid-build would mean changing the one thing that was supposed to
+be settled. `docs/PROPOSED_SCOPE_WEBHOOK_PIPELINE.md` now carries the correction and three honest
+options; my recommendation is to dedupe on a hash of the exact raw body, which needs no change to
+anything already written and no payload redesign. **No code was changed — the work remains
+frozen.**
+
+## Implemented vs tested vs unverified — the accurate statement
+
+| | Status |
+| --- | --- |
+| HMAC-SHA256 signing (`signPayload`) | implemented, **tested** (47/47 adversarial) |
+| Signature verification (`verifySignature`) | implemented, **tested**; called by nothing |
+| Sandbox gateway initiation | implemented, **tested**; cannot reach a terminal state |
+| Signed example payload | implemented, **tested** |
+| Webhook receiver / route | **does not exist** |
+| Signed webhook through the real verification + payment pipeline | **UNVERIFIED — no pipeline exists** |
+| Replay / duplicate-event rejection | **UNVERIFIED — nothing to replay against**; design gap above |
+| Real provider | **none activated**, none registered, no credentials |
+
+The honest claim about Phase 5C is: **the signing groundwork is sound and well tested; the payment
+pipeline it is groundwork for does not exist and is therefore unverified end to end.** That is
+unchanged from my earlier reports, and nothing here should be read as moving 5C closer to
+acceptance. **Phase 5B and 5C remain NOT ACCEPTED.**

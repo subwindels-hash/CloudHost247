@@ -37,7 +37,15 @@ Deliberately small, and deliberately sandbox-only.
    interpreted, or logged. Using the existing `verifySignature`, which already uses
    `timingSafeEqual` and fails closed on length mismatch.
 3. **Replay protection** — reject events whose `occurredAt` is outside a short window, and reject
-   an event id already processed.
+   an event already processed.
+
+   > **Correction (2026-09-29).** An earlier draft of this document said "reject an event id
+   > already processed". **There is no event id.** `SandboxWebhookPayload`
+   > (`src/payments/sandbox-gateway.ts`) carries exactly `provider`, `providerReference`,
+   > `paymentId`, `outcome`, `amount`, `currency`, `occurredAt` — no unique per-event identifier.
+   > This matters because Phase 5C committed to that payload as "a known-correct shape for 5D to
+   > start from", so discovering the omission mid-build would mean changing the very thing that
+   > was supposed to be settled. See open question 1 below for the two honest options.
 4. **Idempotency** — a duplicate delivery of the same event must be a no-op returning the same
    response, never a second ledger entry. The existing partial unique index on
    `(provider, provider_reference)` is the right foundation.
@@ -65,8 +73,24 @@ Deliberately small, and deliberately sandbox-only.
 
 ### Open questions for you
 
-1. Should replay protection use a dedicated `processed_webhook_events` table (needs an additive
-   migration) or reuse `payments.provider_reference` (no migration, slightly weaker)?
+1. **How should a replayed event be recognised, given there is no event id?** Three options, in
+   my order of preference:
+
+   a. **Dedupe on a hash of the exact raw body** (no payload change, no migration if the hash is
+      stored against the payment; an additive `processed_webhook_events` table if you want a
+      proper audit trail). A genuine replay is a byte-identical re-delivery, so its hash matches;
+      two legitimately different events differ in `occurredAt` and so hash differently. This works
+      with the payload exactly as Phase 5C already built and signed it.
+
+   b. **Add an `eventId` field** to `SandboxWebhookPayload`. Cleanest long term and closest to how
+      real providers do it — but it changes the signed payload shape that 5C committed to, so the
+      "known-correct groundwork" claim would need restating.
+
+   c. **Key on `(paymentId, outcome)`** — no migration, but it cannot distinguish a replay from a
+      legitimate second event for the same payment (a `failed` retried to `successful` is fine;
+      two `successful` events are not). Weakest of the three.
+
+   Option (a) needs no change to anything already written. I recommend it, but this is your call.
 2. Should the receiver be enabled by configuration (`SANDBOX_GATEWAY_WEBHOOK_SECRET` present) so it
    is inert in any environment that has not deliberately switched it on?
 3. Should it be rate-limited separately from the global 300/min?
