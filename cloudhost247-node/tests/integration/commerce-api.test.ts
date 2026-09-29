@@ -371,4 +371,169 @@ describe('commerce API (/api/v1/cart, /api/v1/orders)', () => {
     expect(patchRes.statusCode).toBe(400);
     await app.close();
   });
+
+  /**
+   * Regression suite for cart quantity semantics.
+   *
+   * Context: an independent review reported "an existing quantity of 20 updated to 5 produces a
+   * 500 and a quantity of 25". Investigation showed that conflates two deliberately different
+   * endpoints, and only one of them was defective:
+   *
+   *   POST   /api/v1/cart/items        ADDITIVE  — "add to cart"; 20 then +5 means 25.
+   *                                    This was the real defect: exceeding the cap violated
+   *                                    cart_items_quantity_positive_check and leaked an
+   *                                    unhandled 500. It now returns a 400.
+   *   PATCH  /api/v1/cart/items/:id    ABSOLUTE  — "set quantity to N"; 20 then set 5 means 5.
+   *
+   * The tests below pin BOTH semantics permanently so the two can never silently converge, and
+   * cover the four cases the review asked for: setting, increasing, decreasing, and concurrent
+   * updates.
+   */
+  describe('cart quantity semantics (set / increase / decrease / concurrent)', () => {
+    async function seedCartLine(email: string, quantity: number) {
+      const { token } = await createCustomer(email);
+      const { plan } = await makeActivePlanWithPrice();
+      const app = buildTestApp();
+      const addRes = await app.inject({
+        method: 'POST',
+        url: '/api/v1/cart/items',
+        headers: { authorization: `Bearer ${token}` },
+        payload: { planId: plan.id, billingPeriod: 'monthly', quantity },
+      });
+      expect(addRes.statusCode).toBe(201);
+      return { app, token, plan, itemId: addRes.json().cart.items[0].id as string };
+    }
+
+    const setQuantity = (app: ReturnType<typeof buildTestApp>, token: string, itemId: string, quantity: unknown) =>
+      app.inject({
+        method: 'PATCH',
+        url: `/api/v1/cart/items/${itemId}`,
+        headers: { authorization: `Bearer ${token}` },
+        payload: { quantity },
+      });
+
+    const readCart = async (app: ReturnType<typeof buildTestApp>, token: string) =>
+      (await app.inject({ method: 'GET', url: '/api/v1/cart', headers: { authorization: `Bearer ${token}` } })).json().cart;
+
+    it('SETTING: updating an existing quantity of 20 to 5 yields exactly 5, never 25', async () => {
+      const { app, token, itemId } = await seedCartLine('setqty@example.com', 20);
+
+      const res = await setQuantity(app, token, itemId, 5);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.json().cart.items[0].quantity).toBe(5);
+      // Re-read from the database rather than trusting the write response, so an "absolute set"
+      // that actually performed an additive upsert (5 + 20 = 25) cannot pass this test.
+      const cart = await readCart(app, token);
+      expect(cart.items).toHaveLength(1);
+      expect(cart.items[0].quantity).toBe(5);
+      // The subtotal must be recomputed from the new quantity, not left at the old one.
+      // 5 x 9.99 = 49.95 exactly (see src/lib/money.ts — never 49.949999999999996).
+      expect(cart.subtotalAmount).toBe('49.95');
+      await app.close();
+    });
+
+    it('DECREASING: stepping a quantity down repeatedly always lands on the requested value', async () => {
+      const { app, token, itemId } = await seedCartLine('decqty@example.com', 20);
+
+      for (const [requested, expectedSubtotal] of [[12, '119.88'], [7, '69.93'], [1, '9.99']] as const) {
+        const res = await setQuantity(app, token, itemId, requested);
+        expect(res.statusCode).toBe(200);
+        const cart = await readCart(app, token);
+        expect(cart.items[0].quantity).toBe(requested);
+        expect(cart.subtotalAmount).toBe(expectedSubtotal);
+      }
+      await app.close();
+    });
+
+    it('INCREASING: stepping a quantity up lands on the requested value, and the cap is the limit', async () => {
+      const { app, token, itemId } = await seedCartLine('incqty@example.com', 1);
+
+      for (const [requested, expectedSubtotal] of [[4, '39.96'], [13, '129.87'], [20, '199.80']] as const) {
+        const res = await setQuantity(app, token, itemId, requested);
+        expect(res.statusCode).toBe(200);
+        const cart = await readCart(app, token);
+        expect(cart.items[0].quantity).toBe(requested);
+        expect(cart.subtotalAmount).toBe(expectedSubtotal);
+      }
+
+      // One past the cap is a clean validation failure, and must leave the stored value intact
+      // rather than partially applying or surfacing the database CHECK constraint as a 500.
+      const overCap = await setQuantity(app, token, itemId, 21);
+      expect(overCap.statusCode).toBe(400);
+      expect(overCap.json().error).toBe('VALIDATION_ERROR');
+      expect((await readCart(app, token)).items[0].quantity).toBe(20);
+      await app.close();
+    });
+
+    it('SETTING: every invalid quantity is a 4xx, and a database CHECK is never allowed to surface as a 500', async () => {
+      const { app, token, itemId } = await seedCartLine('invalidqty@example.com', 10);
+
+      // cart_items_quantity_positive_check (0015_create_cart_items.sql) rejects <= 0 and the
+      // per-line cap rejects > 20. Neither may ever reach the client as an unhandled 500.
+      for (const invalid of [0, -1, -20, 21, 1000, 1.5, '5', null, true, [], {}]) {
+        const res = await setQuantity(app, token, itemId, invalid);
+        expect(
+          res.statusCode,
+          `quantity=${JSON.stringify(invalid)} returned ${res.statusCode}; expected a 4xx`
+        ).toBeGreaterThanOrEqual(400);
+        expect(
+          res.statusCode,
+          `quantity=${JSON.stringify(invalid)} leaked a server error instead of a validation error`
+        ).toBeLessThan(500);
+        // The stored quantity must be untouched by every rejected attempt.
+        expect((await readCart(app, token)).items[0].quantity).toBe(10);
+      }
+      await app.close();
+    });
+
+    it('CONCURRENT: simultaneous absolute sets settle on one requested value, never a summed one', async () => {
+      const { app, token, itemId } = await seedCartLine('concurrentset@example.com', 10);
+
+      const requested = [3, 9, 15, 2, 11];
+      const results = await Promise.all(requested.map((n) => setQuantity(app, token, itemId, n)));
+
+      for (const res of results) expect(res.statusCode).toBe(200);
+
+      const cart = await readCart(app, token);
+      // Concurrent absolute sets are last-writer-wins, which is the correct semantic for "set
+      // quantity to N" — but the final value must be one a client actually asked for. A summed
+      // value (40) or any other arithmetic artefact means the update is not really absolute.
+      expect(requested).toContain(cart.items[0].quantity);
+      expect(cart.items[0].quantity).not.toBe(requested.reduce((a, b) => a + b, 0));
+      // And the races must not have duplicated the line.
+      expect(cart.items).toHaveLength(1);
+      await app.close();
+    });
+
+    it('CONCURRENT: simultaneous additive adds can never push a line past the cap', async () => {
+      const { token } = await createCustomer('concurrentadd@example.com');
+      const { plan } = await makeActivePlanWithPrice();
+      const app = buildTestApp();
+
+      // Two 15s racing against a cap of 20: exactly one may win. The cap is enforced inside the
+      // single ON CONFLICT DO UPDATE ... WHERE statement, so there is no check-then-write window
+      // for the loser to slip through.
+      const results = await Promise.all(
+        [15, 15].map(() =>
+          app.inject({
+            method: 'POST',
+            url: '/api/v1/cart/items',
+            headers: { authorization: `Bearer ${token}` },
+            payload: { planId: plan.id, billingPeriod: 'monthly', quantity: 15 },
+          })
+        )
+      );
+
+      const statuses = results.map((r) => r.statusCode).sort();
+      expect(statuses).toEqual([201, 400]);
+      expect(results.every((r) => r.statusCode !== 500)).toBe(true);
+
+      const cart = await readCart(app, token);
+      expect(cart.items).toHaveLength(1);
+      expect(cart.items[0].quantity).toBe(15);
+      expect(cart.items[0].quantity).toBeLessThanOrEqual(20);
+      await app.close();
+    });
+  });
 });
