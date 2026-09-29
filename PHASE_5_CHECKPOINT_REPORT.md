@@ -907,3 +907,113 @@ verified. Neither was reachable through the application, and I have no evidence 
 financial record — but the rate at which this standard keeps finding things is itself the most
 useful result here. **Phase 5B remains NOT ACCEPTED**, and I would not treat the billing foundation
 as settled on the strength of the current evidence.
+
+---
+
+# ADDENDUM 6 — Phase 5C authorization and secret exposure, under the sweep standard
+
+The one substantial area not yet re-derived under the "sweep the database, not just the call"
+standard was the directive's hardest security requirement: **no customer or browser request may
+mark an order paid without verified authorization.** This addendum closes that.
+
+**No new defect was found here.** After two rounds that each found one, that is worth stating
+plainly rather than padding.
+
+## Authorization matrix — 39/39
+
+`recovery/verify-payment-authorization.ts` (committed) drives the real Fastify app from
+`src/app.ts` against real PostgreSQL 18.4, through the real auth middleware, with nothing mocked.
+It attacks all six financial routes:
+
+```
+GET  /api/v1/invoices                                GET  /api/v1/payments/:id
+GET  /api/v1/invoices/:id                            POST /api/v1/admin/payments/:id/confirm-manual
+POST /api/v1/invoices/:id/payments                   POST /api/v1/admin/payments/:id/reject-manual
+```
+
+with five unauthorized callers: no credentials; a garbage bearer token; **a token signed with the
+wrong secret**; another logged-in customer; and the invoice owner's own valid token against the
+staff routes. Every combination is rejected with 401/403/404.
+
+Critically — and this is the part a normal route test omits — the probe snapshots invoice,
+payment, ledger, paid-invoice, paid-order, successful-payment counts and the ledger sum before the
+matrix and re-compares afterwards:
+
+```
+PASS  financial state is byte-for-byte unchanged after every rejected request
+PASS  no customer-side request moved the invoice to paid
+PASS  no customer-side request produced a successful payment
+PASS  no customer-side request produced a payment ledger entry
+PASS  the payment amount came from the invoice, not the request body
+```
+
+Client-supplied `status: 'successful'` and `amount: '0.01'` in the initiation body are both
+ignored — the amount is taken from the invoice.
+
+The control cases confirm this is not simply a broken endpoint: an admin **can** confirm, it
+**does** mark the invoice paid, it writes **exactly one** ledger entry, and it leaves an
+`auth_audit_log` record naming the acting staff member. A replayed confirmation is refused with a
+4xx and adds no ledger entry.
+
+## Two more false passes in my own probe, caught before reporting
+
+1. The first run's checkout used a non-existent endpoint, so `invoiceId` was `undefined` and six
+   routes were being called as literally `/undefined`. They "passed" — a rejection that proves
+   nothing about authorization. The probe now **aborts** on bad fixtures rather than reporting
+   meaningless passes.
+2. Five control checks failed because the probe's own later initiations had cancelled the payment
+   it was about to confirm — `initiatePaymentForInvoice` cancels other pending attempts so a
+   customer can abandon a stale one. Correct product behaviour, misread as a defect; the control
+   now uses a fresh attempt.
+
+That is four self-inflicted false results across this audit (the `git stash` no-op, the reused
+order, and these two). Each was caught only by looking again at something that already said PASS.
+
+## Secret exposure — clean, verified rather than asserted
+
+Three secrets exist: `JWT_SECRET`, `CRON_JOB_TOKEN`, `SANDBOX_GATEWAY_WEBHOOK_SECRET`.
+
+| Check | Result |
+| --- | --- |
+| Referenced anywhere in `frontend/src` | no |
+| Present in the built browser bundle (`public/assets/*.js`, 249,591 bytes) | **no** — all three identifiers absent, as are `createHmac`, `signPayload`, `DATABASE_URL`, `postgresql://` |
+| `confirm-manual` route referenced in the bundle | **no** — the frontend has no notion of the staff route |
+| Committed to the repository (`.env`, `*.pem`) | none tracked |
+| Passed to any log call | none |
+| **Empirically** logged on a request carrying a bearer token | **0 occurrences** — the logger records only method, url, host, remoteAddress; headers are never serialized |
+
+The last row was measured, not inferred: a request with a known sentinel token was injected and the
+captured log output searched for it.
+
+**One observation, not fixed.** There is no `redact` configuration on the logger
+(`src/lib/logger.ts`). Nothing currently logs a secret, so the requirement is met in fact — but it
+is met by every call site happening to be careful, not by a structural guarantee. That is the same
+"held in practice, never enforced" shape as findings B5 and Addendum 4. I have **not** changed it:
+it is outside the financial scope this remediation was authorized for, and the logger affects the
+whole application. **Recommended as a small separate change, awaiting your approval.**
+
+## Evidence
+
+| Check | Result |
+| --- | --- |
+| Authorization matrix vs real PostgreSQL | **39/39** |
+| Financial invariant probe | **49/49** |
+| Full suite | **298/298 across 34 files** |
+| Typecheck + production build | clean |
+| Migrations added | **none** — still 22 |
+| Production contacted | never |
+
+Both probes are committed and reproducible by you:
+
+```
+cd cloudhost247-node
+LOG_LEVEL=silent npx tsx ../recovery/verify-financial-invariants.ts
+LOG_LEVEL=silent npx tsx ../recovery/verify-payment-authorization.ts
+```
+
+## Standing assessment
+
+Phase 5C's authorization boundary is the strongest-looking part of this work: it held under every
+adversarial combination tried, including the database-state check that caught defects elsewhere.
+**That is not the same as accepting it.** The webhook pipeline remains frozen and unverified end
+to end, no real provider is activated, and **Phase 5B and 5C remain NOT ACCEPTED.**
