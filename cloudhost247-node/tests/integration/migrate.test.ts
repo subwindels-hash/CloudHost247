@@ -51,6 +51,7 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0023_enforce_billing_invariants.sql',
     '0024_create_webhook_events.sql',
     '0025_extend_auth_audit_log_for_admin_billing.sql',
+    '0026_create_domain_brokerage.sql',
   ];
 
   it('finds the committed migration files in order', () => {
