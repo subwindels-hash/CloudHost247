@@ -18,6 +18,7 @@ import DashboardPage from './pages/DashboardPage';
 import AccountPage from './pages/AccountPage';
 import ServicesPage from './pages/ServicesPage';
 import DomainsPage from './pages/DomainsPage';
+import DomainBrokeragePage from './pages/DomainBrokeragePage';
 import BillingPage from './pages/BillingPage';
 import InvoicesPage from './pages/InvoicesPage';
 import InvoiceDetailPage from './pages/InvoiceDetailPage';
@@ -58,6 +59,7 @@ export default function App() {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/account" element={<AccountPage />} />
           <Route path="/account/domains" element={<DomainsPage />} />
+          <Route path="/account/domain-brokerage" element={<DomainBrokeragePage />} />
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/billing" element={<BillingPage />} />
           <Route path="/invoices" element={<InvoicesPage />} />

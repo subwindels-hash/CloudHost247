@@ -14,6 +14,7 @@ import { registerBillingRoutes } from './routes/billing';
 import { registerPaymentRoutes } from './routes/payments';
 import { registerAdminBillingRoutes } from './routes/admin-billing';
 import { registerWebhookRoutes } from './routes/webhooks';
+import { registerDomainBrokerageRoutes } from './routes/domain-brokerage';
 import { HttpError, ValidationError } from './lib/errors';
 import { createLogger } from './lib/logger';
 import type { Queryable } from './db/types';
@@ -99,6 +100,7 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     await registerPaymentRoutes(instance, env, pool);
     await registerAdminBillingRoutes(instance, env, pool);
     await registerWebhookRoutes(instance, env, pool);
+    await registerDomainBrokerageRoutes(instance, env, pool);
   });
 
   if (serveFrontend) {
