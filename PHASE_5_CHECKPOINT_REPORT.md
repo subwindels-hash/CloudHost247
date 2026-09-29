@@ -364,6 +364,14 @@ Sequence, each step reviewed and approved by you before the next:
 5. **Only then** consider authorizing 5D, with the webhook receiver built against the now-verified
    signing primitives.
 
+> **Update:** both the 5C fix and Option B are now **prepared as verified, unapplied patches** in
+> `recovery/` (see `recovery/README.md`). Each was applied temporarily, tested against real
+> PostgreSQL 18.4, and reverted; the revert was itself verified by re-reproducing the §3.1 defect.
+> The 5C fix takes the double-credit from **6 ledger entries down to 1** under the same 25-round
+> stress that exposed it, with 58/58 payment+billing tests still passing. Option B verified 14/14:
+> payment endpoints gone, Phase 4 / 5A / 5B intact, all financial history and tables preserved.
+> **Neither is applied.** No Phase 5B or 5C source file is modified on this branch.
+
 ### Option B — Narrowly scoped disablement *(prepared only, awaiting approval)*
 
 If you judge 5B/5C unacceptable regardless of correctness, the **minimum** intervention is to
