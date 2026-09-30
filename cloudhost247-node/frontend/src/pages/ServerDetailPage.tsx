@@ -12,7 +12,9 @@ import {
   cancelServer,
   revokeServerCancellation,
   readServerCancellation,
+  fetchServerHealth,
   type ConsoleSession,
+  type ServerHealthSnapshot,
   type AvailableOperatingSystem,
   type CustomerServer,
   type ServerConfiguration,
@@ -92,20 +94,23 @@ export default function ServerDetailPage() {
   const [targetVersion, setTargetVersion] = useState('');
   const [targetArchitecture, setTargetArchitecture] = useState<'x86_64' | 'arm64'>('x86_64');
   const [confirm, setConfirm] = useState('');
+  const [health, setHealth] = useState<ServerHealthSnapshot | null>(null);
   const [firewallRules, setFirewallRules] = useState<FirewallRule[]>([]);
   const [newRulePort, setNewRulePort] = useState('');
   const [newRuleProtocol, setNewRuleProtocol] = useState<'tcp' | 'udp'>('tcp');
   const [newRuleDesc, setNewRuleDesc] = useState('');
 
   const load = useCallback(async () => {
-    const [{ server: loaded }, state, fw] = await Promise.all([
+    const [{ server: loaded }, state, fw, monitoring] = await Promise.all([
       fetchCustomerServer(id),
       apiFetch<ProvisioningState>(`/api/v1/servers/${id}/provisioning-status`),
       fetchServerFirewall(id).catch(() => ({ rules: [] })),
+      fetchServerHealth(id).catch(() => null),
     ]);
     setServer(loaded);
     setProvisioning(state);
     setFirewallRules(fw.rules);
+    setHealth(monitoring);
   }, [id]);
 
   useEffect(() => {
@@ -542,6 +547,58 @@ export default function ServerDetailPage() {
             Only operations supported by this provider and product are shown. Every operation runs through the queue worker and is audit logged.
           </p>
         </article>
+      </section>
+
+      {/* Monitoring — agent-reported, never inferred. */}
+      <section className="ch247-card">
+        <div className="ch247-section-heading">
+          <div>
+            <span className="ch247-eyebrow">Monitoring</span>
+            <h2>Resource usage</h2>
+          </div>
+          <span>
+            {health?.agent.reachable
+              ? `Agent ${health.agent.version ?? ''} reporting`
+              : health?.agent.lastSeenAt
+                ? `Agent last seen ${new Date(health.agent.lastSeenAt).toLocaleString()}`
+                : 'Agent has not reported yet'}
+          </span>
+        </div>
+        {health?.latest ? (
+          <>
+            <dl className="ch247-kv">
+              <dt>CPU</dt>
+              <dd>{health.latest.cpu_percent === null ? '—' : `${Number(health.latest.cpu_percent).toFixed(1)} %`}</dd>
+              <dt>Load (1m)</dt>
+              <dd>{health.latest.load_1 === null ? '—' : Number(health.latest.load_1).toFixed(2)}</dd>
+              <dt>Memory</dt>
+              <dd>
+                {health.latest.memory_used_mb !== null && health.latest.memory_total_mb
+                  ? `${Math.round(health.latest.memory_used_mb / 1024 * 10) / 10} / ${Math.round(health.latest.memory_total_mb / 1024 * 10) / 10} GB`
+                  : '—'}
+              </dd>
+              <dt>Disk</dt>
+              <dd>
+                {health.latest.disk_used_mb !== null && health.latest.disk_total_mb
+                  ? `${Math.round(health.latest.disk_used_mb / 1024)} / ${Math.round(health.latest.disk_total_mb / 1024)} GB`
+                  : '—'}
+              </dd>
+              <dt>Uptime</dt>
+              <dd>{health.latest.uptime_seconds ? `${Math.floor(health.latest.uptime_seconds / 86400)}d ${Math.floor((health.latest.uptime_seconds % 86400) / 3600)}h` : '—'}</dd>
+              <dt>Measured</dt>
+              <dd>{new Date(health.latest.captured_at).toLocaleString()}</dd>
+            </dl>
+            {!health.agent.reachable && (
+              <p className="ch247-banner ch247-banner--warning">
+                These figures are the last report received, not the current state — the monitoring agent has not checked in for over five minutes.
+              </p>
+            )}
+          </>
+        ) : (
+          <p className="ch247-page__hint">
+            No measurements have been received from this server yet. Figures appear once the monitoring agent reports; nothing here is estimated from the plan.
+          </p>
+        )}
       </section>
 
       {/* Firewall & Security Group Rules */}

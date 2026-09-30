@@ -156,6 +156,26 @@ export function openServerConsole(id: string) {
  * Requests cancellation. `AT_PERIOD_END` keeps the server until the paid term ends and stays
  * revocable; `IMMEDIATE` destroys it now and requires the typed confirmation.
  */
+/** Agent-reported health. Every field is optional: an agent that has not reported yet reports nothing. */
+export interface ServerHealthSnapshot {
+  status: string;
+  agent: { version: string | null; lastSeenAt: string | null; reachable: boolean };
+  latest?: {
+    captured_at: string;
+    cpu_percent: string | number | null;
+    load_1: string | number | null;
+    memory_used_mb: number | null;
+    memory_total_mb: number | null;
+    disk_used_mb: number | null;
+    disk_total_mb: number | null;
+    uptime_seconds: number | null;
+  } | null;
+}
+
+export function fetchServerHealth(id: string) {
+  return apiFetch<ServerHealthSnapshot>(`/api/v1/servers/${id}/health`);
+}
+
 export function cancelServer(id: string,input: { mode: 'AT_PERIOD_END'|'IMMEDIATE'; confirmation?: 'DELETE'; reason?: string }) {
   return apiFetch<{ mode: string; effectiveAt: string | null; jobId: string | null; queued: boolean; cancelledSubscriptions: number; retiredWithoutProviderCall: boolean }>(
     `/api/v1/servers/${id}/cancel`,{ method: 'POST',headers: { 'Idempotency-Key': crypto.randomUUID() },body: JSON.stringify(input) }

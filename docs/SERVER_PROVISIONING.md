@@ -314,6 +314,15 @@ in both places: configuration-class errors (`PROVIDER_NOT_CONFIGURED`, `CONFIGUR
 while transient errors (`RATE_LIMITED`, `PROVIDER_TIMEOUT`, `NETWORK_TEMPORARY_FAILURE`,
 `INSUFFICIENT_CAPACITY`) are retried by the durable queue with backoff.
 
+### What the customer sees
+
+The server page carries a **Monitoring** panel fed by `GET /api/v1/servers/:id/health`: CPU, one
+minute load, memory, disk, uptime and the moment the figures were measured. Every number comes
+from an HMAC-authenticated agent report — nothing is inferred from the plan the customer bought.
+A server that has never reported says so instead of rendering zeroes, and figures older than five
+minutes are labelled as the last report received rather than the current state, because a silent
+agent and an idle server look identical in a gauge.
+
 ## Image verification freshness
 
 An image mapping used to be proven exactly once, when an operator pressed **Test** before
