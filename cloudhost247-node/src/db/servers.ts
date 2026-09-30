@@ -14,6 +14,21 @@ export type ServerType = 'VPS' | 'DEDICATED' | 'CPANEL' | 'KUBERNETES' | 'SHARED
 
 export interface ServerRow {
   id: string;
+  customer_id: string | null;
+  order_id: string | null;
+  plan_id: string | null;
+  provider_id: string | null;
+  region_id: string | null;
+  datacenter_id: string | null;
+  operating_system_version_id: string | null;
+  os_image_id: string | null;
+  architecture: 'x86_64' | 'arm64' | null;
+  provider_server_id: string | null;
+  provisioning_status: string | null;
+  renewal_date: string | null;
+  bandwidth_gb: number | null;
+  capabilities: Record<string, boolean>;
+  control_panel_id: string | null;
   name: string;
   hostname: string;
   ip_address: string | null;

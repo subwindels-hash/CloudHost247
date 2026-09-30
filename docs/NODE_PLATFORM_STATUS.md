@@ -26,7 +26,7 @@ sub-phase before the next one begins.
 
 ### Standing restrictions until the user explicitly lifts them
 
-- **Migrations 0023, 0024, 0025**: Prepared and tested migration artifacts only. **NOT authorized for production execution**; do not run against any production database until separately authorized.
+- **Migrations 0023, 0024, 0025, and 0041**: Prepared and tested migration artifacts only. **NOT authorized for production execution**; do not run against any production database until separately authorized.
 - **Production Safety**: Zero production financial records modified. Zero deployment executed.
 - **PR #12 (`subwindels-hash/CloudHost247#12`)**: Remains **OPEN and UNMERGED**.
 - **Historical Integrity**: Current state is preserved: no history rewrite, no force-push, no whole-PR revert.
@@ -870,3 +870,84 @@ sub-phase before the next one begins.
   - **Frontend:** marketplace + app detail install wizard, My Apps, instance management (logs/backups/domains/config/deployments), live deployment console, dashboard integration, admin apps/deployments/servers/settings/audit pages.
   - **Tests added:** `tests/unit/manifest-catalog.test.ts`, `tests/integration/marketplace-installations.test.ts`, `tests/integration/worker-deployments.test.ts`, `tests/integration/agent-deployments-api.test.ts`, `tests/integration/domains-servers-admin.test.ts`. These found and fixed two real queue bugs (PG parameter typing in `recordHealthResult`/`failDeployment` that left deployments stuck `running`, and step-row duplication on retry).
 - **Production Status:** PREPARED AND TESTED ONLY. `DEPLOYMENT_SIMULATION_MODE=false` is the default; deployments require registered servers with reachable agents.
+
+---
+
+## Phase 7 — Server OS Catalog & Provider Provisioning
+
+- **Source/local verification:** PASSED on branch `arena/01a0ef49-cloudhost247`.
+  - **Full platform verification: 56 / 56 test files passing (412 / 412 tests), backend/frontend TypeScript clean, production server + Vite build clean, and migration 0041 applies/idempotently verifies in the embedded PostgreSQL test engine.**
+  - Migration artifact: `cloudhost247-node/database/migrations/0041_create_os_catalog_and_server_provisioning.sql` — normalized OS families/versions/lifecycle/architectures, providers/regions/datacenters, private image mappings, exact product availability, control-panel compatibility, provisioning jobs, SSH keys, notifications, and UNKNOWN backfill for existing servers.
+  - Real compute path: verified payment → existing PostgreSQL deployment queue → dedicated compute provisioner → explicit adapter → provider/image/network/SSH/authenticated-agent health → READY/ACTIVE. Create and reinstall use persisted idempotency state; long jobs renew their queue leases.
+  - Native provider integration: Hetzner Cloud. Other declared provider types fail closed unless an operator configures a real `generic_http` bridge implementing `docs/SERVER_PROVISIONING.md`; no compute mock is selected by production code.
+  - Customer UI/API: dynamic plan/location/OS/version/architecture/SSH key/control-panel order flow, owned server inventory/detail/status/logs/actions, and confirmation-gated queued reinstall.
+  - Admin UI/API: OS/version lifecycle, provider/location, image testing/activation, exact availability, jobs/logs/retry/cancel, metrics, and audit events.
+  - Tests added: `tests/integration/server-infrastructure.test.ts`, `tests/unit/infrastructure-provider-registry.test.ts`, and `frontend/tests/unit/operating-system-selector.test.tsx`.
+- **Production Status:** PREPARED AND LOCALLY TESTED ONLY. Migration 0041 has **NOT** been run against staging or production. No provider credential was configured, no live provider API was called, and no real Ubuntu 24.04 → Debian 13 acceptance run was performed. Live acceptance remains blocked on operator-supplied credentials, real image/location/product mappings, and a published self-contained server-agent installer.
+
+---
+
+## Phase 2 (Control Plane) — Core Infrastructure Abstraction & Provider Adapters
+
+- **Source/local verification:** PASSED on branch `arena/01a0ef49-cloudhost247`.
+  - **Full platform verification: 56 / 56 test files passing (418 / 418 tests), backend/frontend TypeScript clean, production server + Vite build clean.**
+  - Migration artifact: `cloudhost247-node/database/migrations/0042_expand_infrastructure_providers_and_server_operations.sql` — expands provider types and adapter kinds to include `AWS`, `DIGITALOCEAN`, `VULTR`, `CONTABO`, `OVH`, `HETZNER`, `PROXMOX`, `VIRTUALIZOR`, `SOLUSVM`, `OPENSTACK`, and `GENERIC_HTTP`. Expands deployment actions and provisioning jobs to include `server_resize`, `server_snapshot_create`, `server_snapshot_restore`, and `server_snapshot_delete`.
+  - Provider Adapter Architecture: Concrete adapters implemented for Hetzner, DigitalOcean, Vultr, AWS, OVH, Contabo, and Generic HTTP with fail-closed configuration validation (`validateConfiguration()`).
+  - Server Operations API: Added customer endpoints `POST /api/v1/servers/:id/resize`, `POST /api/v1/servers/:id/snapshots`, `DELETE /api/v1/servers/:id/snapshots/:snapshotId`, and `POST /api/v1/servers/:id/snapshots/:snapshotId/restore` with SHA-256 bounded idempotency keys.
+  - Worker Execution: Asynchronous execution of server resize and snapshot operations via the PostgreSQL-backed deployments queue.
+
+---
+
+## Phase 3 & 4 (Control Plane) — Control Panel Catalog, Commercial Plans, Adapters & Auto-Installer
+
+- **Source/local verification:** PASSED on branch `arena/01a0ef49-cloudhost247`.
+  - **Full platform verification: 58 / 58 test files passing (431 / 431 tests), backend/frontend TypeScript clean, production server + Vite build clean.**
+  - **Migration artifact:** `cloudhost247-node/database/migrations/0043_create_control_panels_and_plans.sql` — extended `control_panels` with category (`SERVER_PANEL`, `APPLICATION_DEPLOYMENT_PLATFORM`, `SERVER_MANAGEMENT`), hardware requirements (min CPU, RAM, disk), compatible operating systems array, and native capability flags. Created `control_panel_plans` table for commercial licensing tiers, billing cycles, and domain/account quotas. Seeded all 18 requested control panel platforms and their starter plans.
+  - **Control Panel Adapter Architecture:** Implemented unified `ControlPanelAdapter` interface and concrete adapters for all 18 platforms: Dokploy, Coolify, CloudPanel, cPanel, Plesk, DirectAdmin, CyberPanel, HestiaCP, FASTPANEL, aaPanel, Easypanel, Cosmos, Cloudron, Webuzo, Webmin, TinyCP, Kusanagi, and AdminBolt.
+  - **Auto-Installer Engine:** Implemented `buildServerCloudInitWithControlPanel` in the central adapter registry to synthesize comprehensive Cloud-Init user-data scripts installing both the CloudHost247 monitoring agent and the automated platform setup routine.
+  - **REST API:** Implemented Fastify endpoints `/api/v1/control-panels`, `/api/v1/control-panels/:slug`, `/api/v1/control-panel-plans`, and audit-logged administrative endpoints `/api/v1/admin/control-panels` and `/api/v1/admin/control-panel-plans`.
+  - **Marketplace & Customer UI:**
+    - `/hosting/control-panels` — Filterable marketplace with category tabs (`SERVER_PANEL`, `APPLICATION_DEPLOYMENT_PLATFORM`, `SERVER_MANAGEMENT`), keyword search, license filters (Free vs. Commercial), and pricing cards.
+    - `/hosting/control-panels/:slug` — Deep-dive platform specification with system requirements, compatible OS chips, native capabilities checklist, and commercial license plans.
+    - `/admin/control-panels` — Staff administration console for platform metadata, system requirements, and commercial license tier builders.
+    - `/dashboard/servers/:id` — Enhanced server management dashboard displaying installed control panel cards, direct access links ("Open Panel Dashboard ↗"), default login instructions, snapshot creation, and destructive OS reinstall.
+  - **Tests added:** `tests/integration/control-panels-api.test.ts` (7 tests) and `tests/unit/control-panel-adapters.test.ts` (6 tests).
+
+---
+
+## Phase 5 (Control Plane) — Authoritative DNS Management Engine
+
+- **Source/local verification:** PASSED on branch `arena/01a0ef49-cloudhost247`.
+  - **Full platform verification: 59 / 59 test files passing (435 / 435 tests), backend/frontend TypeScript clean, production server + Vite build clean.**
+  - **Migration artifact:** `cloudhost247-node/database/migrations/0044_create_dns_zones_and_records.sql` — created `dns_zones` and `dns_records` tables with support for authoritative record types (`A`, `AAAA`, `CNAME`, `TXT`, `MX`, `NS`, `SRV`, `CAA`), priority fields, TTL limits, and default CloudHost247 nameservers (`ns1.cloudhost247.com`, `ns2.cloudhost247.com`).
+  - **DNS Provider Architecture:** Created `DNSProvider` abstraction (`src/dns/types.ts`) and concrete drivers (`src/dns/providers.ts`) supporting Local Database, Cloudflare API, and AWS Route53 with fail-closed configuration checks.
+  - **REST API:** Implemented Fastify routes `/api/v1/dns/zones`, `/api/v1/dns/zones/:zoneId`, and record lifecycle operations `/api/v1/dns/zones/:zoneId/records` with RBAC tenant ownership validation.
+  - **Customer Portal UI:** Built DNS Management interface at `/dashboard/dns` and `/account/dns` (`frontend/src/pages/DnsManagementPage.tsx`) allowing zone creation, record additions, inline edits, and deletions.
+  - **Tests added:** `tests/integration/dns-api.test.ts` (4 tests).
+
+---
+
+## Phase 6 (Control Plane) — SSL / TLS Certificate Lifecycle & Baseline Network Firewall
+
+- **Source/local verification:** PASSED on branch `arena/01a0ef49-cloudhost247`.
+  - **Full platform verification: 60 / 60 test files passing (438 / 438 tests), backend/frontend TypeScript clean, production server + Vite build clean.**
+  - **Migration artifacts:**
+    - `0045_create_ssl_certificates.sql` — `ssl_certificates` schema with automated state machine (`PENDING`, `VALIDATING`, `ISSUED`, `EXPIRED`, `FAILED`, `REVOKED`), challenge types (`HTTP_01`, `DNS_01`, `MANUAL`), renewal tracking, and certificate/private key storage.
+    - `0046_create_firewall_rules.sql` — `firewall_rules` schema for protocol (`TCP`, `UDP`, `ICMP`, `ALL`), port ranges, CIDR source blocks, rule actions (`ALLOW`, `DENY`), and panel profiles.
+  - **Persistence & API Layer:**
+    - `src/db/ssl.ts` & `src/routes/ssl.ts` — Certificate ordering, ACME issuance, CSR handling, certificate revocation, and automated renewal triggers.
+    - `src/db/firewall.ts` & `src/routes/firewall.ts` — Server firewall rule listing, creation, deletion, and dynamic baseline application. Baseline rules derive from the installed control panel's required ports (e.g., cPanel opens 2083/2087, Dokploy opens 3000, Plesk opens 8443) alongside standard SSH (22), HTTP (80), and HTTPS (443).
+  - **Customer Portal UI:**
+    - `/dashboard/ssl` (`frontend/src/pages/SslManagementPage.tsx`) — SSL certificate overview, new certificate ordering wizard, validation challenge tracker, and auto-renew toggle.
+    - `/dashboard/servers/:id` (`frontend/src/pages/ServerDetailPage.tsx`) — Interactive firewall manager tab allowing one-click baseline security application and custom ingress rule configuration.
+  - **Tests added:** `tests/integration/ssl-firewall-api.test.ts` (3 tests).
+  - **Migration artifact:** `cloudhost247-node/database/migrations/0043_create_control_panels_and_plans.sql` — extended `control_panels` with category (`SERVER_PANEL`, `APPLICATION_DEPLOYMENT_PLATFORM`, `SERVER_MANAGEMENT`), hardware requirements (min CPU, RAM, disk), compatible operating systems array, and native capability flags. Created `control_panel_plans` table for commercial licensing tiers, billing cycles, and domain/account quotas. Seeded all 18 requested control panel platforms and their starter plans.
+  - **Control Panel Adapter Architecture:** Implemented unified `ControlPanelAdapter` interface and concrete adapters for all 18 platforms: Dokploy, Coolify, CloudPanel, cPanel, Plesk, DirectAdmin, CyberPanel, HestiaCP, FASTPANEL, aaPanel, Easypanel, Cosmos, Cloudron, Webuzo, Webmin, TinyCP, Kusanagi, and AdminBolt.
+  - **Auto-Installer Engine:** Implemented `buildServerCloudInitWithControlPanel` in the central adapter registry to synthesize comprehensive Cloud-Init user-data scripts installing both the CloudHost247 monitoring agent and the automated platform setup routine.
+  - **REST API:** Implemented Fastify endpoints `/api/v1/control-panels`, `/api/v1/control-panels/:slug`, `/api/v1/control-panel-plans`, and audit-logged administrative endpoints `/api/v1/admin/control-panels` and `/api/v1/admin/control-panel-plans`.
+  - **Marketplace & Customer UI:**
+    - `/hosting/control-panels` — Filterable marketplace with category tabs (`SERVER_PANEL`, `APPLICATION_DEPLOYMENT_PLATFORM`, `SERVER_MANAGEMENT`), keyword search, license filters (Free vs. Commercial), and pricing cards.
+    - `/hosting/control-panels/:slug` — Deep-dive platform specification with system requirements, compatible OS chips, native capabilities checklist, and commercial license plans.
+    - `/admin/control-panels` — Staff administration console for platform metadata, system requirements, and commercial license tier builders.
+    - `/dashboard/servers/:id` — Enhanced server management dashboard displaying installed control panel cards, direct access links ("Open Panel Dashboard ↗"), default login instructions, snapshot creation, and destructive OS reinstall.
+  - **Tests added:** `tests/integration/control-panels-api.test.ts` (7 tests) and `tests/unit/control-panel-adapters.test.ts` (6 tests).

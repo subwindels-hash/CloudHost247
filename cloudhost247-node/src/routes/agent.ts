@@ -36,6 +36,14 @@ const reportSchema = z.object({
   uptimeSeconds: z.coerce.number().int().min(0).nullable().optional(),
   dockerContainers: z.coerce.number().int().min(0).nullable().optional(),
   dockerContainersHealthy: z.coerce.number().int().min(0).nullable().optional(),
+  // Provisioning attestation. New server agents report these from the running machine; older
+  // agents may omit them and remain valid for legacy application hosting, but a newly provisioned
+  // server is not marked READY until all are present and verified by the worker.
+  osId: z.string().max(64).optional(),
+  osVersion: z.string().max(128).optional(),
+  hostname: z.string().max(255).optional(),
+  securityConfigured: z.boolean().optional(),
+  monitoringRunning: z.boolean().optional(),
 });
 
 export async function registerAgentRoutes(app: FastifyInstance, env: Env, overridePool?: Queryable) {
@@ -92,9 +100,22 @@ export async function registerAgentRoutes(app: FastifyInstance, env: Env, overri
       docker_containers: report.dockerContainers ?? null,
       docker_containers_healthy: report.dockerContainersHealthy ?? null,
     });
+    const provisioningHealth = report.osId && report.osVersion && report.hostname
+      ? {
+          osId: report.osId,
+          osVersion: report.osVersion,
+          hostname: report.hostname,
+          securityConfigured: report.securityConfigured === true,
+          monitoringRunning: report.monitoringRunning === true,
+          reportedAt: new Date().toISOString(),
+        }
+      : undefined;
     await updateServer(pool, server.id, {
       agentVersion: report.agentVersion,
       agentLastSeenAt: new Date().toISOString(),
+      metadata: provisioningHealth
+        ? { ...(server.metadata ?? {}), provisioningHealth }
+        : server.metadata,
     });
     return { ok: true };
   });

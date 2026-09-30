@@ -26,7 +26,19 @@ export type DeploymentAction =
   | 'provision'
   | 'suspend'
   | 'terminate'
-  | 'healthcheck';
+  | 'healthcheck'
+  | 'server_provision'
+  | 'server_reinstall'
+  | 'server_start'
+  | 'server_stop'
+  | 'server_reboot'
+  | 'server_shutdown'
+  | 'server_rescue'
+  | 'server_delete'
+  | 'server_resize'
+  | 'server_snapshot_create'
+  | 'server_snapshot_restore'
+  | 'server_snapshot_delete';
 
 export interface DeploymentRow {
   id: string;
@@ -217,6 +229,8 @@ export async function completeDeployment(db: Queryable, id: string): Promise<Dep
 export interface FailOptions {
   errorCode?: string;
   errorMessage?: string;
+  /** Permanent validation/authentication failures must never be retried blindly. */
+  retryable?: boolean;
   /** Exponential backoff base for an automatic retry (spec §28 reliability). */
   retryDelayMs?: number;
 }
@@ -230,7 +244,7 @@ export async function failDeployment(
   deployment: DeploymentRow,
   options: FailOptions = {}
 ): Promise<DeploymentRow | null> {
-  const canRetry = deployment.attempts < deployment.max_attempts;
+  const canRetry = options.retryable !== false && deployment.attempts < deployment.max_attempts;
   const delay = options.retryDelayMs ?? Math.min(60_000, 2 ** deployment.attempts * 5_000);
   const { rows } = await db.query<DeploymentRow>(
     `UPDATE deployments

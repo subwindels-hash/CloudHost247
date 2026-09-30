@@ -64,6 +64,9 @@ export default function AdminPage() {
           <Link to="/admin/apps">Applications &amp; marketplace →</Link>
           <Link to="/admin/deployments">Deployments →</Link>
           <Link to="/admin/servers">Servers →</Link>
+          <Link to="/admin/control-panels">Control panels &amp; software →</Link>
+          <Link to="/admin/infrastructure/operating-systems">Infrastructure &amp; operating systems →</Link>
+          <Link to="/admin/infrastructure/provisioning">Server provisioning →</Link>
           <Link to="/admin/settings">Platform settings →</Link>
           <Link to="/admin/audit">Audit log →</Link>
           <Link to="/admin/tickets">Manage support tickets →</Link>

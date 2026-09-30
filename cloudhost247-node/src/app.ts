@@ -23,6 +23,11 @@ import { registerServerRoutes } from './routes/servers';
 import { registerDomainRoutes } from './routes/domains';
 import { registerAgentRoutes } from './routes/agent';
 import { registerAdminPlatformRoutes } from './routes/admin-platform';
+import { registerInfrastructureRoutes } from './routes/infrastructure';
+import { registerControlPanelsRoutes } from './routes/control-panels';
+import { registerDnsRoutes } from './routes/dns';
+import { registerSslRoutes } from './routes/ssl';
+import { registerFirewallRoutes } from './routes/firewall';
 import { HttpError, ValidationError } from './lib/errors';
 import { createLogger } from './lib/logger';
 import type { Queryable } from './db/types';
@@ -119,6 +124,11 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     await registerDomainRoutes(instance, env, pool);
     await registerAgentRoutes(instance, env, pool);
     await registerAdminPlatformRoutes(instance, env, pool);
+    await registerInfrastructureRoutes(instance, env, pool);
+    await registerControlPanelsRoutes(instance, env, pool);
+    await registerDnsRoutes(instance, env, pool);
+    await registerSslRoutes(instance, env, pool);
+    await registerFirewallRoutes(instance, env, pool);
   });
 
   if (serveFrontend) {

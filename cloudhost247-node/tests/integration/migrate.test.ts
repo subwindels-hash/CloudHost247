@@ -67,6 +67,12 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0038_create_audit_logs.sql',
     '0039_create_server_metrics.sql',
     '0040_create_platform_settings.sql',
+    '0041_create_os_catalog_and_server_provisioning.sql',
+    '0042_expand_infrastructure_providers_and_server_operations.sql',
+    '0043_create_control_panels_and_plans.sql',
+    '0044_create_dns_zones_and_records.sql',
+    '0045_create_ssl_certificates.sql',
+    '0046_create_firewall_rules.sql',
   ];
 
   it('finds the committed migration files in order', () => {
@@ -114,6 +120,16 @@ describe('migration runner against the real database/migrations SQL files', () =
         'audit_logs',
         'server_metrics',
         'platform_settings',
+        'operating_systems',
+        'operating_system_versions',
+        'infrastructure_providers',
+        'infrastructure_regions',
+        'infrastructure_datacenters',
+        'server_os_images',
+        'server_product_configurations',
+        'provisioning_jobs',
+        'customer_ssh_keys',
+        'user_notifications',
       ])
     );
   });

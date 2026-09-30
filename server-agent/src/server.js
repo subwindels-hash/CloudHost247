@@ -22,6 +22,8 @@
  * exposes the Docker socket. Adding one is a security review event, not a pull request.
  */
 import http from 'node:http';
+import { existsSync, readFileSync } from 'node:fs';
+import { hostname } from 'node:os';
 import { AGENT_VERSION, loadConfig } from './config.js';
 import { NonceCache, verifyRequest, signOutbound } from './auth.js';
 import {
@@ -39,6 +41,30 @@ import { runBackup, restoreBackup, systemReport } from './backups.js';
 
 const config = loadConfig();
 const nonceCache = new NonceCache(config.maxSkewSeconds);
+
+function provisioningAttestation() {
+  let fields = {};
+  try {
+    fields = Object.fromEntries(
+      readFileSync('/etc/os-release', 'utf8')
+        .split('\n')
+        .filter((line) => line.includes('='))
+        .map((line) => {
+          const at = line.indexOf('=');
+          return [line.slice(0, at), line.slice(at + 1).replace(/^"|"$/g, '')];
+        })
+    );
+  } catch {
+    // The control plane treats missing OS fields as an incomplete health check; never invent them.
+  }
+  return {
+    osId: fields.ID,
+    osVersion: fields.VERSION_ID ?? fields.BUILD_ID,
+    hostname: hostname(),
+    securityConfigured: existsSync('/var/lib/cloudhost247/security-configured'),
+    monitoringRunning: true,
+  };
+}
 
 function send(res, status, payload) {
   const body = JSON.stringify(payload);
@@ -77,7 +103,7 @@ const server = http.createServer(async (req, res) => {
       return;
     }
     if (req.method === 'GET' && url.pathname === '/v1/system/report') {
-      send(res, 200, { ...(await systemReport()), agentVersion: AGENT_VERSION });
+      send(res, 200, { ...(await systemReport()), agentVersion: AGENT_VERSION, ...provisioningAttestation() });
       return;
     }
 
@@ -162,7 +188,7 @@ server.listen(config.port, config.bind, () => {
 if (config.reportSeconds > 0) {
   const report = async () => {
     try {
-      const payload = JSON.stringify({ ...(await systemReport()), agentVersion: AGENT_VERSION });
+      const payload = JSON.stringify({ ...(await systemReport()), agentVersion: AGENT_VERSION, ...provisioningAttestation() });
       const headers = signOutbound(config, 'POST', '/api/v1/agent/report', payload);
       const response = await fetch(`${config.controlUrl}/api/v1/agent/report`, {
         method: 'POST',

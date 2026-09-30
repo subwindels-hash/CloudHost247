@@ -16,15 +16,18 @@ import {
   failDeployment,
   findDeploymentById,
   reclaimExpiredDeployments,
+  renewDeploymentLease,
   setInstallationStatusIfCurrent,
   type DeploymentRow,
 } from './worker-db';
 import { executeDeployment, type EngineOptions } from '../deployments/engine';
+import { executeServerProvisioning } from '../infrastructure/services/server-provisioner';
 
 export interface JobContext {
   db: Queryable;
   options: EngineOptions;
   workerId: string;
+  leaseMs?: number;
 }
 
 export type JobHandler = (ctx: JobContext, deployment: DeploymentRow) => Promise<void>;
@@ -47,6 +50,14 @@ const engineBackedHandler: JobHandler = async (ctx, deployment) => {
   );
 };
 
+const serverProvisioningHandler: JobHandler = async (ctx,deployment) => {
+  const result = await executeServerProvisioning(ctx.db,deployment);
+  await appendDeploymentEvent(
+    ctx.db,deployment.id,result.outcome === 'succeeded' ? 'info' : 'error',
+    `Infrastructure job finished with outcome: ${result.outcome}`
+  );
+};
+
 export const jobHandlers: Record<string, JobHandler> = {
   install: engineBackedHandler,
   reinstall: engineBackedHandler,
@@ -63,6 +74,18 @@ export const jobHandlers: Record<string, JobHandler> = {
   provision: engineBackedHandler,
   suspend: engineBackedHandler,
   terminate: engineBackedHandler,
+  server_provision: serverProvisioningHandler,
+  server_reinstall: serverProvisioningHandler,
+  server_start: serverProvisioningHandler,
+  server_stop: serverProvisioningHandler,
+  server_reboot: serverProvisioningHandler,
+  server_shutdown: serverProvisioningHandler,
+  server_rescue: serverProvisioningHandler,
+  server_delete: serverProvisioningHandler,
+  server_resize: serverProvisioningHandler,
+  server_snapshot_create: serverProvisioningHandler,
+  server_snapshot_restore: serverProvisioningHandler,
+  server_snapshot_delete: serverProvisioningHandler,
 };
 
 export function hasHandler(action: string): boolean {
@@ -71,7 +94,8 @@ export function hasHandler(action: string): boolean {
 
 /** Claims and runs one job. Returns the claimed deployment (or null when the queue is empty). */
 export async function processNextJob(ctx: JobContext): Promise<DeploymentRow | null> {
-  const claimed = await claimNextDeployment(ctx.db, ctx.workerId, 120_000);
+  const leaseMs=ctx.leaseMs??120_000;
+  const claimed = await claimNextDeployment(ctx.db, ctx.workerId, leaseMs);
   if (!claimed) return null;
 
   const handler = jobHandlers[claimed.action];
@@ -83,6 +107,11 @@ export async function processNextJob(ctx: JobContext): Promise<DeploymentRow | n
     return claimed;
   }
 
+  // Compute provisioning health waits can be much longer than the queue lease. Renew while any
+  // handler runs so a second worker cannot reclaim and execute the same provider operation.
+  const renewEveryMs=Math.max(1_000,Math.floor(leaseMs/3));
+  const renewal=setInterval(()=>{void renewDeploymentLease(ctx.db,claimed.id,ctx.workerId,leaseMs).catch(()=>undefined);},renewEveryMs);
+  renewal.unref?.();
   try {
     await handler(ctx, claimed);
   } catch (err) {
@@ -92,13 +121,15 @@ export async function processNextJob(ctx: JobContext): Promise<DeploymentRow | n
       errorCode: 'HANDLER_ERROR',
       errorMessage: (err as Error).message,
     }).catch(() => undefined);
+  } finally {
+    clearInterval(renewal);
   }
   return claimed;
 }
 
 /** Reclaims jobs whose worker died (expired lease) — crash recovery, spec §28. */
 export async function recoverOrphanedJobs(ctx: JobContext): Promise<number> {
-  const reclaimed = await reclaimExpiredDeployments(ctx.db, ctx.workerId, 120_000);
+  const reclaimed = await reclaimExpiredDeployments(ctx.db, ctx.workerId, ctx.leaseMs??120_000);
   for (const deployment of reclaimed) {
     await appendDeploymentEvent(
       ctx.db,

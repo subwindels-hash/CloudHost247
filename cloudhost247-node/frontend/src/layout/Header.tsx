@@ -7,6 +7,7 @@ import { useAuthState } from './useAuthState';
 const marketingLinks = [
   { to: '/', label: 'Home', end: true },
   { to: '/hosting', label: 'Hosting' },
+  { to: '/hosting/control-panels', label: 'Control Panels' },
   { to: '/apps', label: 'App Marketplace' },
   { to: '/domains', label: 'Domains' },
   { to: '/about', label: 'About' },
@@ -22,6 +23,8 @@ const appLinks = [
   { to: '/dashboard/apps', label: 'My Apps' },
   { to: '/dashboard/servers', label: 'Servers' },
   { to: '/dashboard/domains', label: 'My Domains' },
+  { to: '/dashboard/dns', label: 'DNS Zones' },
+  { to: '/dashboard/ssl', label: 'SSL Certificates' },
   { to: '/billing', label: 'Billing' },
   { to: '/invoices', label: 'Invoices' },
   { to: '/support', label: 'Support' },

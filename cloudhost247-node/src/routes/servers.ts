@@ -31,6 +31,16 @@ import { listServerMetrics, trimServerMetrics } from '../db/ops-tables';
 import { listInstallationsForServer } from '../db/application-installations';
 import { getKeyRing } from '../lib/keyring';
 import { generateSecret } from '../lib/crypto';
+import { createHash, randomUUID } from 'node:crypto';
+import { createServerOrder } from '../services/server-order-service';
+import {
+  enqueueServerProvisioningJob,
+  findOwnedCustomerServer,
+  findCustomerServerById,
+  findProvisioningJobById,
+  listCustomerServers,
+} from '../db/server-provisioning';
+import { resolveAvailableConfiguration } from '../db/operating-systems';
 
 const idSchema = z.string().uuid('id must be a valid UUID');
 
@@ -56,6 +66,40 @@ const createServerSchema = z.object({
 
 const patchServerSchema = createServerSchema.partial().extend({
   status: z.enum(['active', 'provisioning', 'maintenance', 'offline', 'retired']).optional(),
+});
+
+const orderServerSchema = z.object({
+  planId: z.string().uuid(),
+  billingPeriod: z.enum(['one_time','monthly','quarterly','semi_annually','annually']),
+  providerId: z.string().uuid(),
+  regionId: z.string().uuid(),
+  datacenterId: z.string().uuid().nullable().optional(),
+  operatingSystemVersionId: z.string().uuid(),
+  architecture: z.enum(['x86_64','arm64']),
+  serverType: z.enum(['VPS','DEDICATED','CLOUD']),
+  sshKeyIds: z.array(z.string().uuid()).min(1).max(20),
+  hostname: z.string().min(1).max(253),
+  controlPanelId: z.string().uuid().nullable().optional(),
+});
+
+const reinstallServerSchema = z.object({
+  operatingSystemVersionId: z.string().uuid(),
+  architecture: z.enum(['x86_64','arm64']),
+  confirmation: z.literal('REINSTALL'),
+});
+
+const resizeServerSchema = z.object({
+  targetPlanId: z.string().uuid().optional(),
+  planMetadata: z.record(z.unknown()).optional(),
+});
+
+const createSnapshotSchema = z.object({
+  description: z.string().min(1).max(255).optional(),
+});
+
+const sshKeySchema = z.object({
+  name: z.string().min(1).max(160),
+  publicKey: z.string().min(40).max(16_384).regex(/^(ssh-(rsa|ed25519)|ecdsa-sha2-nistp(256|384|521))\s+[A-Za-z0-9+/=]+(?:\s+.*)?$/, 'Enter a valid OpenSSH public key'),
 });
 
 function parseOrThrow<T>(schema: z.ZodType<T>, value: unknown): T {
@@ -269,26 +313,264 @@ export async function registerServerRoutes(app: FastifyInstance, env: Env, overr
     return { credentials: await listCredentialMetadata(pool, id) };
   });
 
+  // --- Customer server ordering -----------------------------------------------------------------
+  app.get('/api/v1/ssh-keys', async (request) => {
+    const auth = await authenticate(request,env,pool);
+    const { rows } = await pool.query(
+      `SELECT id,name,fingerprint,created_at FROM customer_ssh_keys WHERE user_id=$1 ORDER BY created_at DESC`,
+      [auth.userId]
+    );
+    return { sshKeys: rows };
+  });
+
+  app.post('/api/v1/ssh-keys', async (request,reply) => {
+    const auth = await authenticate(request,env,pool);
+    const input = parseOrThrow(sshKeySchema,request.body);
+    const normalized = input.publicKey.trim().replace(/\s+/g,' ');
+    const fingerprint = `SHA256:${createHash('sha256').update(normalized).digest('base64url')}`;
+    const keyId = randomUUID();
+    await pool.query(
+      `INSERT INTO customer_ssh_keys (id,user_id,name,fingerprint,public_key) VALUES ($1,$2,$3,$4,$5)`,
+      [keyId,auth.userId,input.name,fingerprint,normalized]
+    );
+    await auditRequest(pool,request,auth.userId,{ action: 'SSH_KEY_ADDED',resourceType: 'ssh_key',resourceId: keyId });
+    reply.code(201);
+    return { sshKey: { id: keyId,name: input.name,fingerprint } };
+  });
+
+  app.delete<{ Params: { id: string } }>('/api/v1/ssh-keys/:id', async (request,reply) => {
+    const auth = await authenticate(request,env,pool);
+    const keyId = parseOrThrow(idSchema,request.params.id);
+    const { rows } = await pool.query(`DELETE FROM customer_ssh_keys WHERE id=$1 AND user_id=$2 RETURNING id`,[keyId,auth.userId]);
+    if (!rows[0]) throw new NotFoundError('No SSH key was found with that id');
+    await auditRequest(pool,request,auth.userId,{ action: 'SSH_KEY_DELETED',resourceType: 'ssh_key',resourceId: keyId });
+    reply.code(204); return null;
+  });
+
+  app.post('/api/v1/servers', async (request,reply) => {
+    const auth = await authenticate(request,env,pool);
+    const input = parseOrThrow(orderServerSchema,request.body);
+    const result = await createServerOrder(pool,auth.userId,input);
+    await auditRequest(pool,request,auth.userId,{
+      action: 'SERVER_ORDER_CREATED',resourceType: 'server',resourceId: result.serverId,
+      metadata: { orderId: result.orderId,provisioningStatus: result.provisioningStatus },
+    });
+    reply.code(201);
+    return result;
+  });
+
   app.get('/api/v1/servers', async (request) => {
-    await authenticate(request, env, pool);
-    const servers = await listServers(pool, { status: 'active' });
-    return { servers: servers.map(publicServerDto).filter(Boolean) };
+    // Platform deployment targets were public before customer compute was added and remain public
+    // scheduling metadata. Customer inventory is returned only after full authentication.
+    const auth = request.headers.authorization?.startsWith('Bearer ')
+      ? await authenticate(request,env,pool)
+      : null;
+    const [owned,targets] = await Promise.all([
+      auth ? listCustomerServers(pool,auth.userId) : Promise.resolve([]),
+      listServers(pool,{ status: 'active' }),
+    ]);
+    return {
+      servers: owned,
+      deploymentTargets: targets.filter((server) => !server.customer_id).map(publicServerDto).filter(Boolean),
+    };
   });
 
   app.get<{ Params: { id: string } }>('/api/v1/servers/:id', async (request) => {
     const auth = await authenticate(request, env, pool);
-    const id = parseOrThrow(idSchema, request.params.id);
-    const server = await findServerById(pool, id);
-    if (!server || server.status !== 'active') throw new NotFoundError('No server was found with that id');
-    const hasInstallationThere = (await listInstallationsForServer(pool, id)).some(
+    const serverId = parseOrThrow(idSchema, request.params.id);
+    const owned = await findOwnedCustomerServer(pool,serverId,auth.userId);
+    if (owned) return { server: owned };
+
+    const server = await findServerById(pool, serverId);
+    if (!server || server.customer_id || server.status !== 'active') throw new NotFoundError('No server was found with that id');
+    const hasInstallationThere = (await listInstallationsForServer(pool, serverId)).some(
       (i) => i.customer_id === auth.userId
     );
-    if (!hasInstallationThere) {
-      // Customers get public metadata for active servers (needed by the wizard), full detail
-      // only for servers hosting their own installations.
-      return { server: publicServerDto(server) };
-    }
-    return { server: publicServerDto(server), allocation: await getServerAllocation(pool, id) };
+    // Non-owned platform targets expose only the same public scheduling metadata the app wizard
+    // needs. Hostname, provider resource id, IP and credentials stay hidden.
+    return hasInstallationThere
+      ? { server: publicServerDto(server),allocation: await getServerAllocation(pool,serverId) }
+      : { server: publicServerDto(server) };
+  });
+
+  function requestIdempotencyKey(request: { headers: Record<string,string | string[] | undefined> },serverId: string,action: string): string {
+    const raw = request.headers['idempotency-key'];
+    const supplied = Array.isArray(raw) ? raw[0] : raw;
+    if (supplied && !/^[A-Za-z0-9._:-]{8,120}$/.test(supplied)) throw new ValidationError('Idempotency-Key must be 8-120 safe characters');
+    const digest = createHash('sha256').update(`${serverId}:${action}:${supplied ?? randomUUID()}`).digest('hex');
+    return `srv-act:${serverId.slice(0, 8)}:${action.slice(0, 16)}:${digest}`;
+  }
+
+  async function queueOwnedAction(
+    request: Parameters<typeof authenticate>[0],
+    serverId: string,
+    operation: 'START'|'STOP'|'REBOOT'|'SHUTDOWN'|'RESCUE'|'DELETE'
+  ) {
+    const auth = await authenticate(request,env,pool);
+    const server = await findOwnedCustomerServer(pool,serverId,auth.userId);
+    if (!server || !server.provider_id) throw new NotFoundError('No server was found with that id');
+    const capability = operation.toLowerCase();
+    if (server.capabilities?.[capability] !== true) throw new ValidationError(`${operation} is not supported for this server`);
+    if (!server.provider_server_id) throw new ConflictError('The server has not been created at the provider yet');
+    const result = await enqueueServerProvisioningJob(pool,{
+      serverId: server.id,providerId: server.provider_id,osImageId: server.os_image_id,
+      operation,requestedBy: auth.userId,idempotencyKey: requestIdempotencyKey(request,server.id,operation),
+    });
+    await auditRequest(pool,request,auth.userId,{ action: `SERVER_${operation}_QUEUED`,resourceType: 'server',resourceId: server.id,metadata: { jobId: result.job.id } });
+    return { jobId: result.job.id,status: result.job.status,queued: result.created };
+  }
+
+  for (const [path,operation] of Object.entries({
+    start: 'START',
+    'power-on': 'START',
+    stop: 'STOP',
+    'power-off': 'SHUTDOWN',
+    reboot: 'REBOOT',
+    shutdown: 'SHUTDOWN',
+    rescue: 'RESCUE',
+  }) as Array<[string,'START'|'STOP'|'REBOOT'|'SHUTDOWN'|'RESCUE']>) {
+    app.post<{ Params: { id: string } }>(`/api/v1/servers/:id/${path}`,async (request) =>
+      queueOwnedAction(request,parseOrThrow(idSchema,request.params.id),operation)
+    );
+  }
+
+  app.post<{ Params: { id: string } }>('/api/v1/servers/:id/resize', async (request) => {
+    const auth = await authenticate(request, env, pool);
+    const serverId = parseOrThrow(idSchema, request.params.id);
+    const input = parseOrThrow(resizeServerSchema, request.body ?? {});
+    const server = await findOwnedCustomerServer(pool, serverId, auth.userId);
+    if (!server || !server.provider_id) throw new NotFoundError('No server was found with that id');
+    if (!server.provider_server_id) throw new ConflictError('The server has not been created at the provider yet');
+    const result = await enqueueServerProvisioningJob(pool, {
+      serverId: server.id,
+      providerId: server.provider_id,
+      osImageId: server.os_image_id,
+      operation: 'RESIZE',
+      requestedBy: auth.userId,
+      idempotencyKey: requestIdempotencyKey(request, server.id, 'RESIZE'),
+      payload: { planMetadata: input.planMetadata ?? {}, targetPlanId: input.targetPlanId },
+    });
+    await auditRequest(pool, request, auth.userId, { action: 'SERVER_RESIZE_QUEUED', resourceType: 'server', resourceId: server.id, metadata: { jobId: result.job.id } });
+    return { jobId: result.job.id, status: result.job.status, queued: result.created };
+  });
+
+  app.post<{ Params: { id: string } }>('/api/v1/servers/:id/snapshots', async (request, reply) => {
+    const auth = await authenticate(request, env, pool);
+    const serverId = parseOrThrow(idSchema, request.params.id);
+    const input = parseOrThrow(createSnapshotSchema, request.body ?? {});
+    const server = await findOwnedCustomerServer(pool, serverId, auth.userId);
+    if (!server || !server.provider_id) throw new NotFoundError('No server was found with that id');
+    if (!server.provider_server_id) throw new ConflictError('The server has not been created at the provider yet');
+    const result = await enqueueServerProvisioningJob(pool, {
+      serverId: server.id,
+      providerId: server.provider_id,
+      osImageId: server.os_image_id,
+      operation: 'SNAPSHOT_CREATE',
+      requestedBy: auth.userId,
+      idempotencyKey: requestIdempotencyKey(request, server.id, 'SNAPSHOT_CREATE'),
+      payload: { description: input.description },
+    });
+    await auditRequest(pool, request, auth.userId, { action: 'SERVER_SNAPSHOT_CREATE_QUEUED', resourceType: 'server', resourceId: server.id, metadata: { jobId: result.job.id } });
+    reply.code(202);
+    return { jobId: result.job.id, status: result.job.status, queued: result.created };
+  });
+
+  app.delete<{ Params: { id: string; snapshotId: string } }>('/api/v1/servers/:id/snapshots/:snapshotId', async (request, reply) => {
+    const auth = await authenticate(request, env, pool);
+    const serverId = parseOrThrow(idSchema, request.params.id);
+    const snapshotId = parseOrThrow(z.string().min(1).max(255), request.params.snapshotId);
+    const server = await findOwnedCustomerServer(pool, serverId, auth.userId);
+    if (!server || !server.provider_id) throw new NotFoundError('No server was found with that id');
+    if (!server.provider_server_id) throw new ConflictError('The server has not been created at the provider yet');
+    const result = await enqueueServerProvisioningJob(pool, {
+      serverId: server.id,
+      providerId: server.provider_id,
+      osImageId: server.os_image_id,
+      operation: 'SNAPSHOT_DELETE',
+      requestedBy: auth.userId,
+      idempotencyKey: requestIdempotencyKey(request, server.id, `SNAPSHOT_DELETE:${snapshotId}`),
+      payload: { snapshotId },
+    });
+    await auditRequest(pool, request, auth.userId, { action: 'SERVER_SNAPSHOT_DELETE_QUEUED', resourceType: 'server', resourceId: server.id, metadata: { jobId: result.job.id, snapshotId } });
+    reply.code(202);
+    return { jobId: result.job.id, status: result.job.status, queued: result.created };
+  });
+
+  app.post<{ Params: { id: string; snapshotId: string } }>('/api/v1/servers/:id/snapshots/:snapshotId/restore', async (request) => {
+    const auth = await authenticate(request, env, pool);
+    const serverId = parseOrThrow(idSchema, request.params.id);
+    const snapshotId = parseOrThrow(z.string().min(1).max(255), request.params.snapshotId);
+    const server = await findOwnedCustomerServer(pool, serverId, auth.userId);
+    if (!server || !server.provider_id) throw new NotFoundError('No server was found with that id');
+    if (!server.provider_server_id) throw new ConflictError('The server has not been created at the provider yet');
+    const result = await enqueueServerProvisioningJob(pool, {
+      serverId: server.id,
+      providerId: server.provider_id,
+      osImageId: server.os_image_id,
+      operation: 'SNAPSHOT_RESTORE',
+      requestedBy: auth.userId,
+      idempotencyKey: requestIdempotencyKey(request, server.id, `SNAPSHOT_RESTORE:${snapshotId}`),
+      payload: { snapshotId },
+    });
+    await auditRequest(pool, request, auth.userId, { action: 'SERVER_SNAPSHOT_RESTORE_QUEUED', resourceType: 'server', resourceId: server.id, metadata: { jobId: result.job.id, snapshotId } });
+    return { jobId: result.job.id, status: result.job.status, queued: result.created };
+  });
+
+  app.post<{ Params: { id: string } }>('/api/v1/servers/:id/reinstall',async (request) => {
+    const auth = await authenticate(request,env,pool);
+    const serverId = parseOrThrow(idSchema,request.params.id);
+    const input = parseOrThrow(reinstallServerSchema,request.body);
+    const server = await findOwnedCustomerServer(pool,serverId,auth.userId);
+    if (!server || !server.plan_id || !server.provider_id || !server.region_id) throw new NotFoundError('No server was found with that id');
+    if (server.capabilities?.reinstall !== true) throw new ValidationError('OS reinstall is not supported for this server');
+    if (!server.provider_server_id || !['active','stopped','error'].includes(server.status)) throw new ConflictError('This server cannot be reinstalled in its current state');
+    const configuration = await resolveAvailableConfiguration(pool,{
+      planId: server.plan_id,providerId: server.provider_id,regionId: server.region_id,
+      datacenterId: server.datacenter_id,operatingSystemVersionId: input.operatingSystemVersionId,
+      architecture: input.architecture,serverType: server.server_type,
+    });
+    if (!configuration) throw new ValidationError('The selected operating system is unavailable for this server');
+    const allowed = await pool.query(
+      `SELECT 1 FROM operating_system_versions v JOIN operating_systems os ON os.id=v.operating_system_id
+       WHERE v.id=$1 AND os.is_reinstall_supported=true`,[input.operatingSystemVersionId]
+    );
+    if (!allowed.rows[0]) throw new ValidationError('The selected operating system is not enabled for reinstall');
+    const result = await enqueueServerProvisioningJob(pool,{
+      serverId: server.id,providerId: server.provider_id,osImageId: configuration.image_id,
+      operation: 'REINSTALL',requestedBy: auth.userId,
+      idempotencyKey: requestIdempotencyKey(request,server.id,'REINSTALL'),
+      payload: { targetOperatingSystemVersionId: input.operatingSystemVersionId,targetArchitecture: input.architecture },
+    });
+    await auditRequest(pool,request,auth.userId,{ action: 'SERVER_REINSTALL_STARTED',resourceType: 'server',resourceId: server.id,metadata: { jobId: result.job.id,targetVersionId: input.operatingSystemVersionId } });
+    return { jobId: result.job.id,status: result.job.status,queued: result.created };
+  });
+
+  app.delete<{ Params: { id: string } }>('/api/v1/servers/:id',async (request) => {
+    return queueOwnedAction(request,parseOrThrow(idSchema,request.params.id),'DELETE');
+  });
+
+  app.get<{ Params: { id: string } }>('/api/v1/servers/:id/status',async (request) => {
+    const auth = await authenticate(request,env,pool);
+    const server = await findOwnedCustomerServer(pool,parseOrThrow(idSchema,request.params.id),auth.userId);
+    if (!server) throw new NotFoundError('No server was found with that id');
+    return { id: server.id,status: server.status,provisioningStatus: server.provisioning_status,ipAddress: server.ip_address };
+  });
+
+  app.get<{ Params: { id: string } }>('/api/v1/servers/:id/provisioning-status',async (request) => {
+    const auth = await authenticate(request,env,pool);
+    const serverId = parseOrThrow(idSchema,request.params.id);
+    const server = await findOwnedCustomerServer(pool,serverId,auth.userId);
+    if (!server) throw new NotFoundError('No server was found with that id');
+    const { rows } = await pool.query(`SELECT id,status,attempts,max_attempts,error_code,error_message,started_at,completed_at,created_at FROM provisioning_jobs WHERE server_id=$1 ORDER BY created_at DESC LIMIT 1`,[serverId]);
+    return { server: { status: server.status,provisioningStatus: server.provisioning_status },job: rows[0] ?? null };
+  });
+
+  app.get<{ Params: { id: string } }>('/api/v1/servers/:id/logs',async (request) => {
+    const auth = await authenticate(request,env,pool);
+    const serverId = parseOrThrow(idSchema,request.params.id);
+    if (!await findOwnedCustomerServer(pool,serverId,auth.userId)) throw new NotFoundError('No server was found with that id');
+    const { rows } = await pool.query(`SELECT id,status,operation,logs,error_code,error_message,created_at FROM provisioning_jobs WHERE server_id=$1 ORDER BY created_at DESC LIMIT 20`,[serverId]);
+    return { jobs: rows };
   });
 
   app.get<{ Params: { id: string } }>('/api/v1/servers/:id/metrics', async (request) => {
@@ -296,7 +578,7 @@ export async function registerServerRoutes(app: FastifyInstance, env: Env, overr
     const id = parseOrThrow(idSchema, request.params.id);
     const server = await findServerById(pool, id);
     if (!server) throw new NotFoundError('No server was found with that id');
-    const mine = (await listInstallationsForServer(pool, id)).some((i) => i.customer_id === auth.userId);
+    const mine = server.customer_id === auth.userId || (await listInstallationsForServer(pool, id)).some((i) => i.customer_id === auth.userId);
     const user = (await pool.query<{ role: string }>(`SELECT role FROM users WHERE id = $1`, [auth.userId])).rows[0];
     if (!mine && user?.role !== 'admin' && user?.role !== 'super_admin' && user?.role !== 'staff') {
       throw new NotFoundError('No server was found with that id');
@@ -309,6 +591,9 @@ export async function registerServerRoutes(app: FastifyInstance, env: Env, overr
     const id = parseOrThrow(idSchema, request.params.id);
     const server = await findServerById(pool, id);
     if (!server) throw new NotFoundError('No server was found with that id');
+    const mine = server.customer_id === auth.userId || (await listInstallationsForServer(pool,id)).some((item) => item.customer_id === auth.userId);
+    const user = (await pool.query<{ role: string }>(`SELECT role FROM users WHERE id=$1`,[auth.userId])).rows[0];
+    if (!mine && !['admin','super_admin','staff'].includes(user?.role ?? '')) throw new NotFoundError('No server was found with that id');
     const latest = (await listServerMetrics(pool, id, 1))[0];
     return {
       status: server.status,

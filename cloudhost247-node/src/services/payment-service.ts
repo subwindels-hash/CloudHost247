@@ -2,7 +2,7 @@ import type { Env } from '../config/env';
 import type { Queryable } from '../db/types';
 import { withTransaction } from '../db/transaction';
 import { findInvoiceById, setInvoiceStatus } from '../db/invoices';
-import { setOrderPaymentStatus } from '../db/orders';
+import { findOrderById, setOrderPaymentStatus } from '../db/orders';
 import { recordLedgerEntry } from '../db/billing-ledger';
 import {
   cancelOtherPendingPayments,
@@ -175,6 +175,15 @@ export async function confirmManualPayment(
 
     await setInvoiceStatus(tx, invoice.id, 'paid');
     await setOrderPaymentStatus(tx, invoice.order_id, 'paid');
+
+    // Manual/offline settlement is just as authoritative as a verified automated webhook. It
+    // must pass through the same paid-order hook; order creation alone never provisions.
+    const paidOrder = await findOrderById(tx,invoice.order_id);
+    if (paidOrder) {
+      await import('./provisioning-service').then(({ provisionPaidOrder }) =>
+        provisionPaidOrder(tx,paidOrder,genId)
+      );
+    }
 
     await recordAuthEvent(tx, {
       id: genId(),
