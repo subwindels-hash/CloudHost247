@@ -80,6 +80,7 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0051_operating_system_logo_assets.sql',
     '0052_serialize_server_infrastructure_operations.sql',
     '0053_customer_identity_and_support_sessions.sql',
+    '0054_create_revenue_guardian.sql',
   ];
 
   it('finds the committed migration files in order', () => {

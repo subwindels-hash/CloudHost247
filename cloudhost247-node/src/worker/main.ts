@@ -14,6 +14,7 @@ import { sweepScheduledTerminations } from '../services/server-termination-servi
 import { deliverNotificationOutbox } from '../services/notification-outbox-service';
 import { reconcileServerState } from '../services/infrastructure-reconciliation-service';
 import { revalidateProviderImages } from '../services/os-image-revalidation-service';
+import { runRevenueGuardianCycle } from '../revenue-guardian/jobs/scheduler';
 import type { EngineOptions } from '../deployments/engine';
 
 const HEALTHCHECK_INTERVAL_MS = 60_000;
@@ -31,6 +32,11 @@ const RECONCILIATION_INTERVAL_MS = 10 * 60_000;
 // Image catalogs change on the scale of provider releases, so a six-hourly pass over the stalest
 // mappings is enough to catch a withdrawn image long before a customer orders it.
 const IMAGE_REVALIDATION_INTERVAL_MS = 6 * 60 * 60_000;
+// Revenue Guardian automation cycle: the sweep runs every 5 minutes, but each job only actually
+// executes once per admin-configured schedule bucket (run_key lock) — see
+// src/revenue-guardian/jobs/scheduler.ts. Frequent sweeping just means a due bucket is picked up
+// promptly; it never causes double execution.
+const REVENUE_GUARDIAN_SWEEP_INTERVAL_MS = 5 * 60_000;
 
 function engineOptions(simulationMode: boolean, kubernetesEnabled: boolean): EngineOptions {
   return { simulationMode, kubernetesEnabled };
@@ -59,6 +65,7 @@ async function main() {
   let lastReconciliation = 0;
   let lastImageRevalidation = 0;
   let lastSecurityNumberSweep = 0;
+  let lastRevenueGuardianSweep = 0;
 
   const shutdown = (signal: string) => {
     logger.log(`[worker:${workerId}] ${signal} received — draining`);
@@ -125,6 +132,14 @@ async function main() {
           if (check.outcome !== 'VERIFIED') {
             logger.log(`[worker:${workerId}] image ${check.providerImageId ?? check.imageId}: ${check.outcome}${check.error ? ` — ${check.error}` : ''}`);
           }
+        }
+      }
+
+      if (now - lastRevenueGuardianSweep >= REVENUE_GUARDIAN_SWEEP_INTERVAL_MS) {
+        lastRevenueGuardianSweep = now;
+        const rg = await runRevenueGuardianCycle(pool);
+        if (rg.ran.length > 0 || rg.failed.length > 0) {
+          logger.log(`[worker:${workerId}] revenue guardian: ran [${rg.ran.join(', ')}]${rg.failed.length ? `; failed [${rg.failed.join(', ')}]` : ''}`);
         }
       }
 

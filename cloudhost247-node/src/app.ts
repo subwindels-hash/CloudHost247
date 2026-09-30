@@ -30,6 +30,7 @@ import { registerControlPanelsRoutes } from './routes/control-panels';
 import { registerDnsRoutes } from './routes/dns';
 import { registerSslRoutes } from './routes/ssl';
 import { registerFirewallRoutes } from './routes/firewall';
+import { registerRevenueGuardianRoutes } from './revenue-guardian/controllers/routes';
 import { HttpError, ValidationError } from './lib/errors';
 import { createLogger } from './lib/logger';
 import type { Queryable } from './db/types';
@@ -133,6 +134,9 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     await registerDnsRoutes(instance, env, pool);
     await registerSslRoutes(instance, env, pool);
     await registerFirewallRoutes(instance, env, pool);
+
+    // Revenue Guardian — revenue recovery management layer over the existing billing engine.
+    await registerRevenueGuardianRoutes(instance, env, pool);
   });
 
   if (serveFrontend) {
