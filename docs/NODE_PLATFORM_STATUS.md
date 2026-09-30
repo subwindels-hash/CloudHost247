@@ -989,3 +989,16 @@ sub-phase before the next one begins.
   - **`src/services/infrastructure-reconciliation-service.ts`:** asks each provider what it actually has (worker every 10 minutes, bounded batch). Power state and IP are adopted; an image mismatch is reported but never rewritten (the catalog, not a provider string, decides which OS was sold); a missing resource is flagged without deleting the record, and only confirms `retired` when the platform was already deleting it; an unreachable or unconfigured provider changes nothing about the server, while `last_reconciled_at` still advances so one broken integration cannot starve the fleet.
   - **Operator surface:** `GET /api/v1/admin/server-drift`, `POST /api/v1/admin/server-reconciliation/sweep`, and a "Provider state drift" panel on `/admin/infrastructure/logs`. Every finding is audited as `SERVER_DRIFT_<kind>`.
   - **Tests added:** `tests/integration/server-reconciliation.test.ts` (7).
+
+---
+
+## Phase 7 (continued) — Provider image re-verification
+
+- **Source/local verification:** PASSED on branch `arena/01a0f219-cloudhost247`.
+  - **Full platform verification: 73 / 73 test files passing (535 / 535 tests), backend and frontend TypeScript clean.**
+  - **No migration required:** the freshness signal is `server_os_images.verified_at` plus a `metadata.revalidationAttemptedAt` stamp, both already available on the existing table.
+  - **Closed gap:** a provider image mapping was proven exactly once, when an operator pressed "Test" before enabling it. If the provider later withdrew, renamed or re-architected that image, the catalog kept selling it and the failure only surfaced after the customer had paid.
+  - **`src/services/os-image-revalidation-service.ts`:** re-asks providers about the stalest enabled mappings (worker every 6 hours, bounded batch, oldest-checked first). An image the provider still offers has its `verified_at` refreshed; one that is gone or reports a different architecture is set to `INVALID` with the provider's reason and audited as `OS_IMAGE_INVALIDATED`; an unreachable, unconfigured or rate-limited provider changes nothing, because an outage is not evidence that an image was withdrawn. Every attempt stamps `metadata.revalidationAttemptedAt` first, so one dead provider cannot hold the head of the queue.
+  - **Blast radius:** ordering and reinstall join through `ACTIVE` images with a non-null `verified_at`, so an invalidated mapping leaves the customer flow immediately, while servers already running that image keep their `os_image_id` and are untouched. `DRAFT`, `DISABLED` and `INVALID` rows are never re-checked, and the sweep never promotes a mapping to `ACTIVE` on its own — enabling stays an operator decision.
+  - **Operator surface:** `GET /api/v1/admin/os-image-verifications` (stale/invalidated mappings with reasons), `POST /api/v1/admin/os-images/revalidate`, and a "Re-check enabled mappings" button on `/admin/infrastructure/os-images` reporting how many were checked, withdrawn and unreachable.
+  - **Tests added:** `tests/integration/os-image-revalidation.test.ts` (6).

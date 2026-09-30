@@ -298,6 +298,8 @@ Reinstall requires server ownership, provider/product capability, the literal co
 | `POST /api/v1/admin/provisioning-jobs/:id/{retry,cancel}` | Operator recovery for failed or queued jobs. |
 | `GET /api/v1/admin/provisioning-metrics` | Totals, success rate, average duration, retries, queue depth, jobs stalled over 30 minutes, failures grouped by error code, and per-provider job health. |
 | `POST /api/v1/admin/os-lifecycle/sweep` | Applies a freshly entered end-of-life date immediately; the worker runs the same sweep hourly. |
+| `GET /api/v1/admin/os-image-verifications` | Enabled or invalidated image mappings whose verification is stale, with the provider's reason. |
+| `POST /api/v1/admin/os-images/revalidate` | Re-checks enabled mappings against their providers now; the worker runs the same sweep every 6 hours. |
 | `GET /api/v1/admin/server-drift` | Servers whose recorded state disagreed with their provider, with what was adopted and what was only reported. |
 | `POST /api/v1/admin/server-reconciliation/sweep` | Re-checks a batch of servers against their providers now; the worker runs the same sweep every 10 minutes. |
 | `GET /api/v1/admin/notification-outbox` | Email delivery health: queued/delivered/failed counts plus the rows that are failing and why. |
@@ -311,6 +313,29 @@ in both places: configuration-class errors (`PROVIDER_NOT_CONFIGURED`, `CONFIGUR
 `INVALID_CONFIGURATION`, `IMAGE_UNAVAILABLE`) are terminal and never retried automatically,
 while transient errors (`RATE_LIMITED`, `PROVIDER_TIMEOUT`, `NETWORK_TEMPORARY_FAILURE`,
 `INSUFFICIENT_CAPACITY`) are retried by the durable queue with backoff.
+
+## Image verification freshness
+
+An image mapping used to be proven exactly once, when an operator pressed **Test** before
+enabling it. The catalog then claimed it was deployable forever — including after the provider
+deleted the snapshot, renamed the template or withdrew it from a region. The lie surfaced at the
+worst possible moment: after a customer had paid, as a failed provisioning job.
+
+`revalidateProviderImages` (worker every 6 hours; also `POST /api/v1/admin/os-images/revalidate`
+and a **Re-check enabled mappings** button on the OS images page) re-asks the provider about the
+stalest enabled mappings, oldest first.
+
+| Finding | Action |
+| --- | --- |
+| Provider still offers the image | `verified_at` refreshed, mapping stays `ACTIVE` |
+| Provider no longer offers it, or reports a different architecture | mapping set to `INVALID` with the reason, audited as `OS_IMAGE_INVALIDATED` |
+| Provider unreachable, unconfigured, rate limited or timing out | **nothing changes** — an outage is not evidence that an image is gone, and emptying the catalog over it would be worse than the outage |
+
+Because ordering and reinstall join through `ACTIVE` images with a non-null `verified_at`, an
+invalidated mapping disappears from the customer flow immediately. Servers already running that
+image are never touched — only the ability to sell it again is withdrawn. Only mappings an
+operator enabled are re-checked: `DRAFT`, `DISABLED` and `INVALID` rows are left alone, and the
+sweep never promotes anything to `ACTIVE` by itself.
 
 ## Provider state reconciliation
 

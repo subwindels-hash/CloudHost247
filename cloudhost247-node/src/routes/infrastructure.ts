@@ -50,6 +50,7 @@ import { ADAPTER_PROFILES, describeProviderConfiguration } from '../infrastructu
 import { ProviderError } from '../infrastructure/providers/types';
 import { sweepScheduledTerminations } from '../services/server-termination-service';
 import { listServerDrift, reconcileServerState } from '../services/infrastructure-reconciliation-service';
+import { listStaleImageVerifications, revalidateProviderImages } from '../services/os-image-revalidation-service';
 import {
   deliverNotificationOutbox,
   listFailedNotificationDeliveries,
@@ -525,6 +526,26 @@ export async function registerInfrastructureRoutes(app: FastifyInstance,env: Env
     const terminated=await sweepScheduledTerminations(db);
     await auditRequest(db,request,auth.userId,{action:'SERVER_TERMINATIONS_SWEPT',resourceType:'server',metadata:{servers:terminated.length}});
     return {terminated};
+  });
+  /**
+   * Image verification freshness. An image is only deployable while the provider still offers
+   * it, so enabled mappings are re-checked on a schedule and a withdrawn image is removed from
+   * ordering before a customer can pay for it.
+   */
+  app.get('/api/v1/admin/os-image-verifications',async(request)=>{
+    await admin(request);
+    const query=parse(z.object({staleAfterDays:z.coerce.number().int().min(1).max(365).optional()}),request.query??{});
+    return {images:await listStaleImageVerifications(db,(query.staleAfterDays??7)*86_400_000)};
+  });
+  app.post('/api/v1/admin/os-images/revalidate',async(request)=>{
+    const auth=await admin(request);
+    const body=parse(z.object({limit:z.number().int().min(1).max(200).optional(),staleAfterDays:z.number().int().min(0).max(365).optional()}),request.body??{});
+    const results=await revalidateProviderImages(db,{
+      limit:body.limit??20,
+      ...(body.staleAfterDays===undefined?{}:{staleAfterMs:body.staleAfterDays*86_400_000}),
+    });
+    await auditRequest(db,request,auth.userId,{action:'OS_IMAGES_REVALIDATED',resourceType:'os_image',metadata:{checked:results.length,invalidated:results.filter((item)=>item.outcome==='INVALIDATED').length}});
+    return {results};
   });
   /**
    * Server state drift. The worker asks each provider what it actually has every ten minutes;

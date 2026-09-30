@@ -7,6 +7,7 @@ import { sweepOperatingSystemLifecycle } from '../services/os-lifecycle-service'
 import { sweepScheduledTerminations } from '../services/server-termination-service';
 import { deliverNotificationOutbox } from '../services/notification-outbox-service';
 import { reconcileServerState } from '../services/infrastructure-reconciliation-service';
+import { revalidateProviderImages } from '../services/os-image-revalidation-service';
 import type { EngineOptions } from '../deployments/engine';
 
 const HEALTHCHECK_INTERVAL_MS = 60_000;
@@ -21,6 +22,9 @@ const NOTIFICATION_OUTBOX_INTERVAL_MS = 60_000;
 // Provider state drifts slowly and each check is a provider API call, so the sweep walks a
 // bounded batch of the oldest-checked servers every ten minutes rather than polling everything.
 const RECONCILIATION_INTERVAL_MS = 10 * 60_000;
+// Image catalogs change on the scale of provider releases, so a six-hourly pass over the stalest
+// mappings is enough to catch a withdrawn image long before a customer orders it.
+const IMAGE_REVALIDATION_INTERVAL_MS = 6 * 60 * 60_000;
 
 function engineOptions(simulationMode: boolean, kubernetesEnabled: boolean): EngineOptions {
   return { simulationMode, kubernetesEnabled };
@@ -47,6 +51,7 @@ async function main() {
   let lastTerminationSweep = 0;
   let lastNotificationDrain = 0;
   let lastReconciliation = 0;
+  let lastImageRevalidation = 0;
 
   const shutdown = (signal: string) => {
     logger.log(`[worker:${workerId}] ${signal} received — draining`);
@@ -104,6 +109,15 @@ async function main() {
         lastReconciliation = now;
         for (const drift of await reconcileServerState(pool)) {
           logger.log(`[worker:${workerId}] drift on ${drift.name}: ${drift.kind} ${drift.from} → ${drift.to}${drift.applied ? ' (applied)' : ' (reported only)'}`);
+        }
+      }
+
+      if (now - lastImageRevalidation >= IMAGE_REVALIDATION_INTERVAL_MS) {
+        lastImageRevalidation = now;
+        for (const check of await revalidateProviderImages(pool)) {
+          if (check.outcome !== 'VERIFIED') {
+            logger.log(`[worker:${workerId}] image ${check.providerImageId ?? check.imageId}: ${check.outcome}${check.error ? ` — ${check.error}` : ''}`);
+          }
         }
       }
 
