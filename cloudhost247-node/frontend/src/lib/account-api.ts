@@ -5,6 +5,9 @@
  */
 import { apiFetch } from './api';
 import type {
+  AccountProfile,
+  AdminSupportSession,
+  SecurityNumberStatus,
   AdminCustomerDetail,
   AdminCustomerDomain,
   AdminCustomerService,
@@ -160,4 +163,125 @@ export function setTicketStatus(id: string, status: TicketStatus) {
     method: 'PATCH',
     body: JSON.stringify({ status }),
   });
+}
+
+// --- Customer identity, Security Number and profile (spec §18–§31) -----------------------------
+
+export function getMyAccount() {
+  return apiFetch<{ user: AccountProfile }>('/api/v1/account');
+}
+
+export interface AccountProfileUpdate {
+  fullName?: string;
+  phone?: string | null;
+  addressLine1?: string | null;
+  city?: string | null;
+  state?: string | null;
+  postalCode?: string | null;
+  country?: string | null;
+}
+
+export function updateMyAccount(input: AccountProfileUpdate) {
+  return apiFetch<{ user: AccountProfile }>('/api/v1/account', {
+    method: 'PATCH',
+    body: JSON.stringify(input),
+  });
+}
+
+export function getMySecurityNumberStatus() {
+  return apiFetch<{ securityNumber: SecurityNumberStatus; rotated: boolean }>(
+    '/api/v1/account/security-number/status'
+  );
+}
+
+/** Step-up authenticated. The returned plaintext is shown temporarily and never persisted. */
+export function revealMySecurityNumber(password: string) {
+  return apiFetch<{ securityNumber: { value: string; version: number; expiresAt: string; displayTtlSeconds: number } }>(
+    '/api/v1/account/security-number/reveal',
+    { method: 'POST', body: JSON.stringify({ password }) }
+  );
+}
+
+export function changeMySecurityNumber(currentSecurityNumber: string, newSecurityNumber: string) {
+  return apiFetch<{ securityNumber: { version: number; expiresAt: string; createdAt: string } }>(
+    '/api/v1/account/security-number/change',
+    { method: 'POST', body: JSON.stringify({ currentSecurityNumber, newSecurityNumber }) }
+  );
+}
+
+export function uploadMyProfileImage(input: { data: string; contentType: string; fileName: string }) {
+  return apiFetch<{ profileImage: { contentType: string; byteSize: number; updatedAt: string } }>(
+    '/api/v1/account/profile-image',
+    { method: 'PUT', body: JSON.stringify(input) }
+  );
+}
+
+export function removeMyProfileImage() {
+  return apiFetch<void>('/api/v1/account/profile-image', { method: 'DELETE' });
+}
+
+// --- Admin: security number oversight and support mode ------------------------------------------
+
+export function getCustomerSecurityNumberStatus(userId: string) {
+  return apiFetch<{ securityNumber: SecurityNumberStatus }>(`/api/v1/admin/users/${userId}/security-number`);
+}
+
+export function forceRotateCustomerSecurityNumber(userId: string) {
+  return apiFetch<{ securityNumber: SecurityNumberStatus }>(`/api/v1/admin/users/${userId}/security-number/rotate`, {
+    method: 'POST',
+  });
+}
+
+export function requireSecurityNumberReinitialization(userId: string) {
+  return apiFetch<{ securityNumber: SecurityNumberStatus }>(
+    `/api/v1/admin/users/${userId}/security-number/require-reinitialization`,
+    { method: 'POST' }
+  );
+}
+
+export interface SwitchResponse {
+  token: string;
+  supportSession: {
+    id: string;
+    originalAdminId: string;
+    targetUserId: string;
+    targetCustomerId: string | null;
+    targetEmail: string;
+    targetFullName: string;
+    reason: string | null;
+    startedAt: string;
+    expiresAt: string;
+  };
+}
+
+export function switchToCustomerAccount(userId: string, reason: string) {
+  return apiFetch<SwitchResponse>(`/api/v1/admin/customers/${userId}/switch`, {
+    method: 'POST',
+    body: JSON.stringify({ reason }),
+  });
+}
+
+export function endSupportSession(sessionId: string) {
+  return apiFetch<void>(`/api/v1/admin/support-sessions/${sessionId}/end`, { method: 'POST' });
+}
+
+export function listSupportSessions() {
+  return apiFetch<{ sessions: AdminSupportSession[] }>('/api/v1/admin/support-sessions');
+}
+
+export function createAdminUser(input: {
+  email: string;
+  fullName: string;
+  password: string;
+  role?: 'customer' | 'staff' | 'admin' | 'super_admin';
+  phone?: string | null;
+}) {
+  return apiFetch<{ user: AdminCustomerSummary }>('/api/v1/admin/users', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export function deleteAdminUser(userId: string) {
+  return apiFetch<void>(`/api/v1/admin/users/${userId}`, { method: 'DELETE' });
 }

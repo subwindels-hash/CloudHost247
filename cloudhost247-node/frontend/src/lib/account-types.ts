@@ -9,7 +9,54 @@ export interface PublicUser {
   email: string;
   fullName: string;
   role: 'customer' | 'admin' | 'super_admin';
-  status: 'active' | 'suspended' | 'disabled';
+  status: 'active' | 'suspended' | 'disabled' | 'deleted';
+  /** Permanent six-digit account number. Display-safe identifier — never a credential. */
+  customerId: string | null;
+}
+
+/** The signed-in customer's own editable profile (GET/PATCH /api/v1/account). */
+export interface AccountProfile extends PublicUser {
+  phone: string | null;
+  addressLine1: string | null;
+  city: string | null;
+  state: string | null;
+  postalCode: string | null;
+  country: string | null;
+  hasProfileImage: boolean;
+  createdAt: string;
+}
+
+/**
+ * Security Number *status* — deliberately contains no value and no hash. The plaintext only ever
+ * appears in the one-off response to a reveal/change request and is never stored client-side
+ * (not in localStorage, not in the auth store, not in a cached user object).
+ */
+export interface SecurityNumberStatus {
+  initialized: boolean;
+  version: number;
+  createdAt: string | null;
+  expiresAt: string | null;
+  expired: boolean;
+  secondsUntilExpiry: number;
+  rotationHours: number;
+}
+
+export interface SupportSessionContext {
+  id: string;
+  originalAdminId: string | null;
+  expiresAt: string;
+}
+
+export interface AdminSupportSession {
+  id: string;
+  originalAdminId: string;
+  targetUserId: string;
+  targetCustomerId: string | null;
+  reason: string | null;
+  startedAt: string;
+  expiresAt: string;
+  endedAt: string | null;
+  endedReason: string | null;
 }
 
 export interface CustomerService {
@@ -77,8 +124,11 @@ export interface AdminCustomerSummary {
   email: string;
   fullName: string;
   role: 'customer' | 'admin' | 'super_admin';
-  status: 'active' | 'suspended' | 'disabled';
+  status: 'active' | 'suspended' | 'disabled' | 'deleted';
   createdAt: string;
+  customerId: string | null;
+  phone: string | null;
+  deletedAt: string | null;
 }
 
 export interface AdminCustomerDetail {

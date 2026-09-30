@@ -79,6 +79,7 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0050_server_state_reconciliation.sql',
     '0051_operating_system_logo_assets.sql',
     '0052_serialize_server_infrastructure_operations.sql',
+    '0053_customer_identity_and_support_sessions.sql',
   ];
 
   it('finds the committed migration files in order', () => {
@@ -100,6 +101,9 @@ describe('migration runner against the real database/migrations SQL files', () =
     expect(tables.rows.map((r) => r.table_name)).toEqual(
       expect.arrayContaining([
         'users',
+        'user_profile_images',
+        'admin_support_sessions',
+        'security_number_attempts',
         'auth_audit_log',
         'revoked_tokens',
         'products',

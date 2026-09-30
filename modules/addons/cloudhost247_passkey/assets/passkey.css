@@ -1,0 +1,110 @@
+/*
+ * CloudHost247 Passkey — client-area styling.
+ *
+ * Small and additive: it styles only elements this addon introduces and
+ * inherits colours from the active CloudHost247 theme wherever possible, so
+ * it cannot restyle or break existing pages.
+ */
+
+.passkey-panel {
+    border: 1px solid rgba(0, 0, 0, .08);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 24px;
+    background: #fff;
+}
+
+.passkey-panel__title {
+    margin: 0 0 6px;
+    font-size: 1.05rem;
+    font-weight: 600;
+}
+
+.passkey-panel__hint {
+    margin: 0 0 16px;
+    color: #6b7280;
+    font-size: .9rem;
+}
+
+.passkey-list {
+    list-style: none;
+    margin: 0 0 16px;
+    padding: 0;
+}
+
+.passkey-list__item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, .06);
+}
+
+.passkey-list__item:last-child {
+    border-bottom: 0;
+}
+
+.passkey-list__name {
+    font-weight: 600;
+}
+
+.passkey-list__meta {
+    display: block;
+    color: #6b7280;
+    font-size: .82rem;
+}
+
+.passkey-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: .72rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+.passkey-badge--active { background: #e7f6ec; color: #1b7a3e; }
+.passkey-badge--disabled { background: #fdf3e0; color: #9a6a12; }
+.passkey-badge--revoked { background: #fdeaea; color: #a32020; }
+
+.passkey-feedback {
+    margin: 12px 0 0;
+    font-size: .9rem;
+    min-height: 1.2em;
+}
+
+.passkey-feedback--ok { color: #1b7a3e; }
+.passkey-feedback--error { color: #a32020; }
+
+.passkey-login {
+    margin: 16px 0;
+    text-align: center;
+}
+
+.passkey-login__divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 16px 0;
+    color: #9ca3af;
+    font-size: .8rem;
+    text-transform: uppercase;
+}
+
+.passkey-login__divider::before,
+.passkey-login__divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: rgba(0, 0, 0, .1);
+}
+
+/* Hidden until the script determines WebAuthn is unavailable. */
+[data-passkey-unsupported] { display: none; }
+
+@media (prefers-color-scheme: dark) {
+    .passkey-panel { background: #161a22; border-color: rgba(255, 255, 255, .08); }
+    .passkey-panel__hint, .passkey-list__meta { color: #9aa4b2; }
+}

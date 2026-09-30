@@ -15,6 +15,7 @@ import { useAuthState } from '../layout/useAuthState';
 import type { AdminCustomerDetail, AdminCustomerDomain, AdminCustomerService } from '../lib/account-types';
 import { CatalogErrorBanner, CatalogLoadingBanner } from '../components/CatalogStateBanner';
 import StatusBadge from '../components/StatusBadge';
+import AdminCustomerIdentityPanel from '../components/AdminCustomerIdentityPanel';
 
 type LoadState = { status: 'loading' } | { status: 'error'; message: string } | { status: 'success'; detail: AdminCustomerDetail };
 
@@ -94,6 +95,8 @@ export default function AdminCustomerDetailPage() {
           <>
             <h1>{state.detail.customer.fullName}</h1>
             <dl className="ch247-definition-list">
+              <dt>Customer ID</dt>
+              <dd>{state.detail.customer.customerId ?? '—'}</dd>
               <dt>Email</dt>
               <dd>{state.detail.customer.email}</dd>
               <dt>Role</dt>
@@ -157,6 +160,10 @@ export default function AdminCustomerDetailPage() {
           </>
         )}
       </div>
+
+      {state.status === 'success' && (
+        <AdminCustomerIdentityPanel customer={state.detail.customer} isSuperAdmin={isSuperAdmin} />
+      )}
 
       {state.status === 'success' && (
         <>

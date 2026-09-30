@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import Header from './Header';
 import Footer from './Footer';
+import SupportModeBanner from '../components/SupportModeBanner';
 
 /**
  * Shared application shell — a single Header/Footer wrapping every route (public marketing pages
@@ -13,6 +14,7 @@ export default function Layout() {
       <a className="ch247-skip" href="#main-content">
         Skip to main content
       </a>
+      <SupportModeBanner />
       <Header />
       <main id="main-content" className="ch247-main">
         <Outlet />
