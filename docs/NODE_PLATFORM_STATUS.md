@@ -854,8 +854,8 @@ sub-phase before the next one begins.
 
 ## Phase 6 — App Marketplace, Manifest Catalog & the Deployment Pipeline
 
-- **Source/local/CI verification:** PASSED on working branch `arena/01a0eeb2-cloudhost247`.
-  - **Full platform verification: 53 / 53 test files passing (399 / 399 total tests), `tsc` clean, `vite build` clean.**
+- **Source/local/CI verification:** PASSED on working branch `arena/01a0eeb2-cloudhost247` (PR #17, all CI checks green).
+  - **Full platform verification: 54 / 54 test files passing (402 / 402 total tests), `tsc` clean, `vite build` clean.**
   - Overview document: `docs/PHASE_6_MARKETPLACE_DEPLOYMENTS.md`; agent operations guide: `docs/SERVER_AGENT.md`.
   - **Manifest catalog (52 applications, 23 categories):** `manifests/<slug>/manifest.yaml`, authored by `tools/build-manifests.py`, validated by zod (`src/marketplace/manifest-schema.ts`). Runtime is 100% DB-driven — no per-app deployment code exists.
   - **Migrations 0026–0040:** applications/versions/categories, installations, deployment queue + steps + events, servers + encrypted credentials + metrics, domain verification, backups, subscriptions, audit logs, platform settings.
@@ -869,4 +869,5 @@ sub-phase before the next one begins.
   - **API:** public marketplace; customer installations/deployments (incl. SSE live console)/domains (real DNS TXT verification)/servers; admin apps workflow + versions, servers registry + rotation, deployments oversight, settings whitelist, audit log; inbound agent API.
   - **Frontend:** marketplace + app detail install wizard, My Apps, instance management (logs/backups/domains/config/deployments), live deployment console, dashboard integration, admin apps/deployments/servers/settings/audit pages.
   - **Tests added:** `tests/unit/manifest-catalog.test.ts`, `tests/integration/marketplace-installations.test.ts`, `tests/integration/worker-deployments.test.ts`, `tests/integration/agent-deployments-api.test.ts`, `tests/integration/domains-servers-admin.test.ts`. These found and fixed two real queue bugs (PG parameter typing in `recordHealthResult`/`failDeployment` that left deployments stuck `running`, and step-row duplication on retry).
+  - **Lifecycle coverage:** `tests/integration/provisioning-lifecycle.test.ts` — end-to-end PAID path (checkout → invoice → sandbox webhook (HMAC-verified) → subscription + exactly one install deployment via the idempotent queue, duplicate webhook ignored), subscription dunning sweep (`active → past_due → grace_period → suspended` with a queued STOP deployment, idempotency-keyed `subscription-suspend:<id>:<ts>`), and health-check scheduling (one job per installation per 5-minute bucket, recent-check and circuit-breaker installations skipped, `max_attempts=1`). Schedulers extracted to `src/worker/sweeps.ts` (`scheduleHealthChecks`, `sweepSubscriptions`; settings `subscription.grace_period_days` / `subscription.suspend_after_days`, defaults 7 + 7).
 - **Production Status:** PREPARED AND TESTED ONLY. `DEPLOYMENT_SIMULATION_MODE=false` is the default; deployments require registered servers with reachable agents.
