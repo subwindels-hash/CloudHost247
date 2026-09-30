@@ -126,6 +126,45 @@ const envSchema = z.object({
   // first release). Cluster access configuration lives per-server in server_credentials
   // (kubernetes_kubeconfig); this flag only enables the adapter at all.
   KUBERNETES_ADAPTER_ENABLED: boolFromString.optional().default('false'),
+
+  // --- Infrastructure providers / OS provisioning ------------------------------------------
+  // Provider secrets are optional at process boot because each CloudHost247 deployment chooses
+  // its own providers. The adapter fails closed with PROVIDER_NOT_CONFIGURED when its credentials
+  // are absent; no route or seed silently selects a mock provider.
+  HETZNER_API_URL: z.string().url().optional(),
+  HETZNER_API_TOKEN: z.string().min(1).optional(),
+  DIGITALOCEAN_API_URL: z.string().url().optional(),
+  DIGITALOCEAN_API_TOKEN: z.string().min(1).optional(),
+  VULTR_API_URL: z.string().url().optional(),
+  VULTR_API_KEY: z.string().min(1).optional(),
+  AWS_ACCESS_KEY_ID: z.string().min(1).optional(),
+  AWS_SECRET_ACCESS_KEY: z.string().min(1).optional(),
+  AWS_REGION: z.string().min(1).optional(),
+  CONTABO_API_URL: z.string().url().optional(),
+  CONTABO_CLIENT_ID: z.string().min(1).optional(),
+  CONTABO_CLIENT_SECRET: z.string().min(1).optional(),
+  CONTABO_API_USER: z.string().min(1).optional(),
+  CONTABO_API_PASSWORD: z.string().min(1).optional(),
+  OVH_API_ENDPOINT: z.string().url().optional(),
+  OVH_APPLICATION_KEY: z.string().min(1).optional(),
+  OVH_APPLICATION_SECRET: z.string().min(1).optional(),
+  OVH_CONSUMER_KEY: z.string().min(1).optional(),
+  PROXMOX_API_URL: z.string().url().optional(),
+  PROXMOX_API_TOKEN: z.string().min(1).optional(),
+  VIRTUALIZOR_API_URL: z.string().url().optional(),
+  VIRTUALIZOR_API_KEY: z.string().min(1).optional(),
+  VIRTUALIZOR_API_SECRET: z.string().min(1).optional(),
+  SOLUSVM_API_URL: z.string().url().optional(),
+  SOLUSVM_API_TOKEN: z.string().min(1).optional(),
+  OPENSTACK_API_URL: z.string().url().optional(),
+  OPENSTACK_API_TOKEN: z.string().min(1).optional(),
+  // URL of an operator-built, self-contained server-agent installer. Required before a real
+  // provision/reinstall job can become READY; the worker refuses to skip monitoring attestation.
+  SERVER_AGENT_INSTALL_URL: z.string().url().optional(),
+  PROVISIONING_HEALTH_TIMEOUT_MS: z.coerce.number().int().min(10_000).max(3_600_000).default(600_000),
+  // Existing mail systems can expose a server-side webhook. Neither value is sent to browsers.
+  NOTIFICATION_EMAIL_WEBHOOK_URL: z.string().url().optional(),
+  NOTIFICATION_EMAIL_WEBHOOK_TOKEN: z.string().min(16).optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

@@ -45,6 +45,20 @@ import AdminServersPage from './pages/AdminServersPage';
 import AdminSettingsPage from './pages/AdminSettingsPage';
 import AdminAuditPage from './pages/AdminAuditPage';
 import NotFoundPage from './pages/NotFoundPage';
+import NewServerPage from './pages/NewServerPage';
+import ServerDetailPage from './pages/ServerDetailPage';
+import ServerLogsPage from './pages/ServerLogsPage';
+import AdminOperatingSystemsPage from './pages/AdminOperatingSystemsPage';
+import AdminOsVersionsPage from './pages/AdminOsVersionsPage';
+import AdminOsImagesPage from './pages/AdminOsImagesPage';
+import AdminProvidersPage from './pages/AdminProvidersPage';
+import AdminAvailabilityPage from './pages/AdminAvailabilityPage';
+import AdminProvisioningPage from './pages/AdminProvisioningPage';
+import ControlPanelsPage from './pages/ControlPanelsPage';
+import ControlPanelDetailPage from './pages/ControlPanelDetailPage';
+import AdminControlPanelsPage from './pages/AdminControlPanelsPage';
+import DnsManagementPage from './pages/DnsManagementPage';
+import SslManagementPage from './pages/SslManagementPage';
 
 export default function App() {
   return (
@@ -56,6 +70,8 @@ export default function App() {
         <Route path="/hosting" element={<HostingPage />} />
         <Route path="/hosting/cpanel" element={<HostingCpanelPage />} />
         <Route path="/hosting/vps" element={<HostingVpsPage />} />
+        <Route path="/hosting/control-panels" element={<ControlPanelsPage />} />
+        <Route path="/hosting/control-panels/:slug" element={<ControlPanelDetailPage />} />
         <Route path="/domains" element={<DomainsMarketingPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/faq" element={<FaqPage />} />
@@ -87,11 +103,19 @@ export default function App() {
           <Route path="/dashboard/apps/:id/domains" element={<AppInstancePage />} />
           <Route path="/dashboard/deployments/:id" element={<DeploymentDetailPage />} />
           <Route path="/dashboard/servers" element={<DashboardServersPage />} />
+          <Route path="/dashboard/servers/:id" element={<ServerDetailPage />} />
+          <Route path="/dashboard/servers/:id/logs" element={<ServerLogsPage />} />
+          <Route path="/servers/new" element={<NewServerPage />} />
           <Route path="/dashboard/domains" element={<DashboardDomainsPage />} />
+          <Route path="/dashboard/dns" element={<DnsManagementPage />} />
+          <Route path="/dashboard/ssl" element={<SslManagementPage />} />
           <Route path="/account" element={<AccountPage />} />
           <Route path="/account/domains" element={<DomainsPage />} />
+          <Route path="/account/dns" element={<DnsManagementPage />} />
+          <Route path="/account/ssl" element={<SslManagementPage />} />
           <Route path="/account/domain-brokerage" element={<DomainBrokeragePage />} />
           <Route path="/services" element={<ServicesPage />} />
+          <Route path="/account/services" element={<ServicesPage />} />
           <Route path="/billing" element={<BillingPage />} />
           <Route path="/invoices" element={<InvoicesPage />} />
           <Route path="/invoices/:id" element={<InvoiceDetailPage />} />
@@ -118,6 +142,16 @@ export default function App() {
             <Route path="/admin/servers/:id" element={<AdminServersPage />} />
             <Route path="/admin/settings" element={<AdminSettingsPage />} />
             <Route path="/admin/audit" element={<AdminAuditPage />} />
+            <Route path="/admin/infrastructure" element={<AdminProvidersPage />} />
+            <Route path="/admin/infrastructure/operating-systems" element={<AdminOperatingSystemsPage />} />
+            <Route path="/admin/infrastructure/operating-systems/:slug/versions" element={<AdminOsVersionsPage />} />
+            <Route path="/admin/infrastructure/images" element={<AdminOsImagesPage />} />
+            <Route path="/admin/infrastructure/providers" element={<AdminProvidersPage />} />
+            <Route path="/admin/infrastructure/availability" element={<AdminAvailabilityPage />} />
+            <Route path="/admin/infrastructure/provisioning" element={<AdminProvisioningPage />} />
+            <Route path="/admin/infrastructure/provisioning/:id" element={<AdminProvisioningPage />} />
+            <Route path="/admin/control-panels" element={<AdminControlPanelsPage />} />
+            <Route path="/admin/infrastructure/control-panels" element={<AdminControlPanelsPage />} />
           </Route>
         </Route>
 

@@ -22,6 +22,11 @@ import { listPublishedPricingForPlan } from '../db/catalog-pricing';
 import { findInstallationById, updateInstallation } from '../db/application-installations';
 import { createSubscription, findSubscriptionById } from '../db/ops-tables';
 import { enqueueDeployment } from '../db/deployments';
+import {
+  enqueueServerProvisioningJob,
+  findCustomerServerById,
+  updateCustomerServerProvisioning,
+} from '../db/server-provisioning';
 
 const PERIOD_DAYS: Record<string, number> = {
   one_time: 3650,
@@ -34,6 +39,9 @@ const PERIOD_DAYS: Record<string, number> = {
 interface OrderItemMetadata {
   installationId?: string;
   kind?: string;
+  serverProvision?: {
+    serverId: string;
+  };
   hosting?: {
     serverId: string;
     domain: string;
@@ -53,6 +61,7 @@ export interface ProvisioningReport {
   installationsQueued: string[];
   subscriptionsCreated: string[];
   hostingJobsQueued: string[];
+  serverJobsQueued: string[];
 }
 
 /**
@@ -60,11 +69,68 @@ export interface ProvisioningReport {
  * and queues the INSTALL deployment for each application installation the paid order contains.
  */
 export async function provisionPaidOrder(tx: Queryable, order: OrderRow, genId: () => string = randomUUID): Promise<ProvisioningReport> {
-  const report: ProvisioningReport = { installationsQueued: [], subscriptionsCreated: [], hostingJobsQueued: [] };
+  // Re-read inside the settlement transaction. Webhook callers hold the order snapshot loaded
+  // before setOrderPaymentStatus(), so its in-memory payment_status is intentionally stale even
+  // though the authoritative row in this same transaction is already paid.
+  const paymentState = await tx.query<{ payment_status: string }>(
+    `SELECT payment_status FROM orders WHERE id=$1`,[order.id]
+  );
+  if (paymentState.rows[0]?.payment_status !== 'paid') {
+    throw new Error(`Refusing provisioning for unpaid order ${order.id}`);
+  }
+  const report: ProvisioningReport = {
+    installationsQueued: [],
+    subscriptionsCreated: [],
+    hostingJobsQueued: [],
+    serverJobsQueued: [],
+  };
   const items = await listOrderItemsForOrder(tx, order.id);
 
   for (const item of items) {
     const metadata = parseMetadata(item);
+
+    // --- VPS/cloud/dedicated server: verified payment → durable provisioning queue -------------
+    if (metadata.serverProvision?.serverId) {
+      const server = await findCustomerServerById(tx, metadata.serverProvision.serverId);
+      if (!server || server.customer_id !== order.user_id) continue;
+      if (server.order_id && server.order_id !== order.id) continue;
+      if (!server.provider_id || !server.os_image_id) continue;
+
+      // One subscription per order/plan. Duplicate verified events reuse it rather than extending
+      // or creating another billable service.
+      if (item.plan_id) {
+        const existing = await tx.query<{ id: string }>(
+          `SELECT id FROM subscriptions WHERE order_id=$1 AND plan_id=$2 LIMIT 1`,
+          [order.id,item.plan_id]
+        );
+        if (!existing.rows[0]) {
+          const subscription = await createSubscription(tx, {
+            customerId: order.user_id,
+            planId: item.plan_id,
+            orderId: order.id,
+            provider: 'cloudhost247',
+            periodEnd: new Date(Date.now() + (PERIOD_DAYS[item.billing_period] ?? 30) * 86_400_000),
+          });
+          report.subscriptionsCreated.push(subscription.id);
+        }
+      }
+
+      const result = await enqueueServerProvisioningJob(tx, {
+        serverId: server.id,
+        orderId: order.id,
+        providerId: server.provider_id,
+        osImageId: server.os_image_id,
+        operation: 'PROVISION',
+        requestedBy: order.user_id,
+        idempotencyKey: `server-provision:${server.id}:${order.id}`,
+        payload: { serverId: server.id },
+      });
+      if (result.created) {
+        report.serverJobsQueued.push(result.job.id);
+        await updateCustomerServerProvisioning(tx,server.id,{ status: 'queued',provisioningStatus: 'QUEUED' });
+      }
+      continue;
+    }
 
     // --- Application installation: subscription + INSTALL deployment --------------------------
     if (metadata.installationId) {

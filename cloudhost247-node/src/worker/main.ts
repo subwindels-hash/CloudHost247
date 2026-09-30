@@ -20,6 +20,7 @@ async function main() {
     db: pool,
     options: engineOptions(env.DEPLOYMENT_SIMULATION_MODE, env.KUBERNETES_ADAPTER_ENABLED),
     workerId,
+    leaseMs:env.WORKER_LEASE_MS,
   };
 
   const logger = console; // worker logs to stdout; pino JSON in a later ops phase

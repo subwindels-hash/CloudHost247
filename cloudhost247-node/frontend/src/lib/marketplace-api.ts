@@ -214,7 +214,8 @@ export interface PublicServer {
 }
 
 export async function fetchPublicServers() {
-  return apiFetch<{ servers: PublicServer[] }>('/api/v1/servers');
+  const result = await apiFetch<{ deploymentTargets: PublicServer[] }>('/api/v1/servers');
+  return { servers: result.deploymentTargets };
 }
 
 export async function payInvoice(invoiceId: string, gateway = 'sandbox') {
