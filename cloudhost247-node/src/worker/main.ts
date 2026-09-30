@@ -2,7 +2,13 @@ import 'dotenv/config';
 import { loadEnv } from '../config/env';
 import { getPool, closePool } from '../db/pool';
 import { processNextJob, recoverOrphanedJobs } from './handlers';
-import { scheduleHealthChecks, sweepSubscriptions } from './sweeps';
+import {
+  SECURITY_NUMBER_SWEEP_INTERVAL_MS,
+  scheduleHealthChecks,
+  sweepExpiredSupportSessions,
+  sweepSecurityNumbers,
+  sweepSubscriptions,
+} from './sweeps';
 import { sweepOperatingSystemLifecycle } from '../services/os-lifecycle-service';
 import { sweepScheduledTerminations } from '../services/server-termination-service';
 import { deliverNotificationOutbox } from '../services/notification-outbox-service';
@@ -52,6 +58,7 @@ async function main() {
   let lastNotificationDrain = 0;
   let lastReconciliation = 0;
   let lastImageRevalidation = 0;
+  let lastSecurityNumberSweep = 0;
 
   const shutdown = (signal: string) => {
     logger.log(`[worker:${workerId}] ${signal} received — draining`);
@@ -118,6 +125,15 @@ async function main() {
           if (check.outcome !== 'VERIFIED') {
             logger.log(`[worker:${workerId}] image ${check.providerImageId ?? check.imageId}: ${check.outcome}${check.error ? ` — ${check.error}` : ''}`);
           }
+        }
+      }
+
+      if (now - lastSecurityNumberSweep >= SECURITY_NUMBER_SWEEP_INTERVAL_MS) {
+        lastSecurityNumberSweep = now;
+        const rotated = await sweepSecurityNumbers(pool);
+        const closed = await sweepExpiredSupportSessions(pool);
+        if (rotated > 0 || closed > 0) {
+          logger.log(`[worker:${workerId}] security numbers rotated: ${rotated}; support sessions expired: ${closed}`);
         }
       }
 

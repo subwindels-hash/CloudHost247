@@ -8,10 +8,15 @@ import type { Queryable } from '../db/types';
 import { getSetting, listSubscriptionsByStatus, updateSubscription } from '../db/ops-tables';
 import { enqueueDeployment } from '../db/deployments';
 import { listInstallationsForHealthChecks } from './worker-db';
+import { expireStaleSupportSessions } from '../db/support-sessions';
+import { listAccountsNeedingRotation, rotateSecurityNumber } from '../services/security-number-service';
+import { recordAuditBestEffort } from '../lib/audit';
 
 export const HEALTHCHECK_PERIOD_MINUTES = 5;
 export const SUBSCRIPTION_GRACE_DEFAULT_DAYS = 7;
 export const SUSPEND_AFTER_GRACE_DEFAULT_DAYS = 7;
+/** Rotation windows are hours long, so a five-minute sweep is timely without being chatty. */
+export const SECURITY_NUMBER_SWEEP_INTERVAL_MS = 5 * 60_000;
 
 /**
  * Enqueues health-check jobs for active installations (spec §52). One job per installation per
@@ -88,4 +93,50 @@ export async function sweepSubscriptions(db: Queryable): Promise<void> {
       }
     }
   }
+}
+
+/**
+ * Proactive Security Number rotation (spec §14–§17).
+ *
+ * Walks accounts whose number has expired (or was never issued) and reissues one, incrementing
+ * the version and destroying the previous hash. This is the *proactive* half of the guarantee;
+ * the reactive half lives on the customer's status endpoint, so a stopped worker can never leave
+ * anybody locked out — it only means their new number is minted on next access instead of ahead
+ * of time. Every rotation is audited (without the value, which is never logged).
+ */
+export async function sweepSecurityNumbers(db: Queryable, batchSize = 500): Promise<number> {
+  const due = await listAccountsNeedingRotation(db, batchSize);
+  let rotated = 0;
+  for (const user of due) {
+    const result = await rotateSecurityNumber(db, user.id);
+    if (!result) continue;
+    rotated += 1;
+    await recordAuditBestEffort(db, {
+      actorId: null,
+      action: 'security_number_rotated',
+      resourceType: 'user',
+      resourceId: user.id,
+      metadata: { customerId: user.customer_id, trigger: 'scheduled_rotation', version: result.version },
+    });
+  }
+  return rotated;
+}
+
+/**
+ * Closes out delegated admin support sessions that have run past their expiry, so the audit
+ * record shows a definite end ("expired") instead of an open-looking row. Authentication already
+ * refuses an expired session on every request — this sweep is about the trail, not the gate.
+ */
+export async function sweepExpiredSupportSessions(db: Queryable): Promise<number> {
+  const expired = await expireStaleSupportSessions(db);
+  for (const session of expired) {
+    await recordAuditBestEffort(db, {
+      actorId: session.admin_id,
+      action: 'admin_customer_account_switch_ended',
+      resourceType: 'user',
+      resourceId: session.customer_uuid,
+      metadata: { customerId: session.customer_id, switchSessionId: session.id, endedReason: 'expired' },
+    });
+  }
+  return expired.length;
 }

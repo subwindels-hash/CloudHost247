@@ -9,6 +9,8 @@ import { registerPublicCatalogRoutes } from './routes/catalog-public';
 import { registerCatalogAdminRoutes } from './routes/catalog-admin';
 import { registerAccountRoutes } from './routes/account';
 import { registerAdminCustomerRoutes } from './routes/admin-customers';
+import { registerAccountIdentityRoutes } from './routes/account-identity';
+import { registerAdminUserRoutes } from './routes/admin-users';
 import { registerCommerceRoutes } from './routes/commerce';
 import { registerBillingRoutes } from './routes/billing';
 import { registerPaymentRoutes } from './routes/payments';
@@ -107,7 +109,9 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     await registerPublicCatalogRoutes(instance, env, pool);
     await registerCatalogAdminRoutes(instance, env, pool);
     await registerAccountRoutes(instance, env, pool);
+    await registerAccountIdentityRoutes(instance, env, pool);
     await registerAdminCustomerRoutes(instance, env, pool);
+    await registerAdminUserRoutes(instance, env, pool);
     await registerCommerceRoutes(instance, env, pool);
     await registerBillingRoutes(instance, env, pool);
     await registerPaymentRoutes(instance, env, pool);

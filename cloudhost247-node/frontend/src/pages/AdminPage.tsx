@@ -76,7 +76,7 @@ export default function AdminPage() {
 
         <form className="ch247-inline-actions" onSubmit={onSubmitSearch} style={{ marginTop: '1rem' }}>
           <input
-            placeholder="Search by name or email"
+            placeholder="Search by name, email, phone or Customer ID"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{ flex: '1 1 240px', padding: '0.55rem 0.7rem', border: '1px solid #cfd8e6', borderRadius: 6 }}
@@ -105,6 +105,7 @@ export default function AdminPage() {
             <table className="ch247-table">
               <thead>
                 <tr>
+                  <th>Customer ID</th>
                   <th>Name</th>
                   <th>Email</th>
                   <th>Role</th>
@@ -115,6 +116,7 @@ export default function AdminPage() {
               <tbody>
                 {state.customers.map((customer) => (
                   <tr key={customer.id}>
+                    <td>{customer.customerId ?? '—'}</td>
                     <td>{customer.fullName}</td>
                     <td>{customer.email}</td>
                     <td>{customer.role}</td>

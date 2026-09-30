@@ -3,11 +3,18 @@ import type { Env } from '../config/env';
 import type { Queryable } from '../db/types';
 import { isTokenRevoked } from '../db/revoked-tokens';
 import { findUserById } from '../db/users';
+import { findSupportSessionById, isSupportSessionActive } from '../db/support-sessions';
 import { UnauthorizedError } from './errors';
 import { verifyAuthToken, type AuthTokenClaims } from './jwt';
 
 export interface AuthenticatedRequestContext extends AuthTokenClaims {
   userId: string;
+  /** The caller's permanent six-digit Customer ID (null only for rows predating assignment). */
+  customerId: string | null;
+  /** Set only inside a delegated admin support session (see src/lib/support-mode.ts). */
+  supportSessionId: string | null;
+  /** The administrator acting on the customer's behalf, when supportSessionId is set. */
+  actingAdminId: string | null;
   /** DB-reverified role/status at request time — see requireRole() below. Populated here so
    * every protected route gets a single, consistent, DB-fresh view of the caller without a
    * second query per route. */
@@ -88,5 +95,37 @@ export async function authenticate(request: FastifyRequest, env: Env, pool: Quer
     throw new UnauthorizedError('Session invalidated by a password change — please log in again');
   }
 
-  return { ...claims, userId: claims.sub, status: user.status };
+  // --- Delegated support session -------------------------------------------------------------
+  // A token carrying `sup` only works while its support session row is still open and unexpired.
+  // Ending the session (or letting it expire) therefore revokes the token immediately, without
+  // needing to touch the revocation list, and an admin can never fabricate delegated access by
+  // hand-crafting a claim: the row must exist, must name that same admin, and must point at this
+  // exact customer.
+  let supportSessionId: string | null = null;
+  let actingAdminId: string | null = null;
+  if (claims.sup) {
+    const session = await findSupportSessionById(pool, claims.sup);
+    if (!session || !isSupportSessionActive(session)) {
+      throw new UnauthorizedError('This support session has ended');
+    }
+    if (session.customer_uuid !== claims.sub || (claims.act && session.admin_id !== claims.act)) {
+      throw new UnauthorizedError('This support session is not valid for this account');
+    }
+    const admin = await findUserById(pool, session.admin_id);
+    if (!admin || admin.status !== 'active' || !['admin', 'super_admin'].includes(admin.role)) {
+      // The acting administrator lost their privileges (or their account) mid-session.
+      throw new UnauthorizedError('This support session is no longer authorized');
+    }
+    supportSessionId = session.id;
+    actingAdminId = session.admin_id;
+  }
+
+  return {
+    ...claims,
+    userId: claims.sub,
+    status: user.status,
+    customerId: user.customer_id ?? null,
+    supportSessionId,
+    actingAdminId,
+  };
 }

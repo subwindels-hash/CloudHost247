@@ -16,6 +16,7 @@ import {
 } from '../db/support-tickets';
 import { hashPassword, verifyPassword } from '../lib/password';
 import { authenticate } from '../lib/require-auth';
+import { guardSupportMode } from '../lib/support-mode';
 import { NotFoundError, ValidationError } from '../lib/errors';
 import {
   toCustomerDomainDTO,
@@ -95,6 +96,9 @@ export async function registerAccountRoutes(app: FastifyInstance, env: Env, over
     { config: { rateLimit: { max: 10, timeWindow: '1 minute' } } },
     async (request, reply) => {
       const auth = await authenticate(request, env, pool);
+      // An administrator inside this account in support mode must never be able to take it over
+      // by setting a new password (spec §38). Refused and audited, not silently ignored.
+      await guardSupportMode(pool, request, auth, 'password.change');
       const { currentPassword, newPassword } = parseOrThrow(changePasswordSchema, request.body);
 
       const user = await findUserById(pool, auth.userId);

@@ -1211,3 +1211,51 @@ form.ch247-form select {
   font-size: 0.72rem;
   color: #64748b;
 }
+
+/* --- Support mode banner (admin acting inside a customer account) -------------------------- */
+.ch247-support-banner {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 1rem;
+  background: #7a2e00;
+  color: #fff7ed;
+  font-size: 0.92rem;
+  line-height: 1.4;
+  border-bottom: 3px solid #ffb066;
+}
+
+.ch247-support-banner strong {
+  color: #ffe4c7;
+}
+
+.ch247-support-banner .ch247-button {
+  margin-left: auto;
+  border-color: #ffd9b3;
+  color: #fff7ed;
+}
+
+/* --- Security Number panel ------------------------------------------------------------------ */
+.ch247-security-number {
+  display: inline-block;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 2rem;
+  letter-spacing: 0.4rem;
+  padding: 0.4rem 0.9rem;
+  border: 1px dashed #cfd8e6;
+  border-radius: 8px;
+  background: #f7f9fc;
+}
+
+.ch247-avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #cfd8e6;
+  background: #f7f9fc;
+}

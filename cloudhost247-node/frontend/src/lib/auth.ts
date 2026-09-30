@@ -17,6 +17,12 @@ export interface StoredUser {
 const TOKEN_KEY = 'ch247_token';
 const USER_KEY = 'ch247_user';
 const AUTH_EVENT = 'ch247-auth-changed';
+/**
+ * While an administrator is switched into a customer account, their *own* session is parked here
+ * so "Exit support mode" can restore it in one click. It holds the admin's normal token — the
+ * delegated customer token lives in the usual slot — and is cleared as soon as support mode ends.
+ */
+const SUPPORT_ORIGIN_KEY = 'ch247_support_origin';
 
 export function getToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);
@@ -52,4 +58,33 @@ export function subscribeToAuthChanges(callback: () => void): () => void {
     window.removeEventListener(AUTH_EVENT, callback);
     window.removeEventListener('storage', callback);
   };
+}
+
+export interface SupportOrigin {
+  token: string;
+  user: StoredUser;
+  sessionId: string;
+  targetName: string;
+  targetCustomerId: string | null;
+  expiresAt: string;
+}
+
+export function setSupportOrigin(origin: SupportOrigin): void {
+  localStorage.setItem(SUPPORT_ORIGIN_KEY, JSON.stringify(origin));
+  window.dispatchEvent(new Event(AUTH_EVENT));
+}
+
+export function getSupportOrigin(): SupportOrigin | null {
+  const raw = localStorage.getItem(SUPPORT_ORIGIN_KEY);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as SupportOrigin;
+  } catch {
+    return null;
+  }
+}
+
+export function clearSupportOrigin(): void {
+  localStorage.removeItem(SUPPORT_ORIGIN_KEY);
+  window.dispatchEvent(new Event(AUTH_EVENT));
 }

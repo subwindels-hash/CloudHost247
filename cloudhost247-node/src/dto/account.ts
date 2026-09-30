@@ -19,10 +19,48 @@ export interface PublicUserDTO {
   fullName: string;
   role: string;
   status: string;
+  /** Permanent six-digit account number. Safe to display: it is an identifier, not a secret.
+   * Note what is NOT here and never will be — `security_number_hash` and every other
+   * security_number_* column. The Security Number has its own dedicated status endpoint and is
+   * never folded into a generic user payload (spec §11/§46). */
+  customerId: string | null;
 }
 
 export function toPublicUser(user: UserRecord): PublicUserDTO {
-  return { id: user.id, email: user.email, fullName: user.full_name, role: user.role, status: user.status };
+  return {
+    id: user.id,
+    email: user.email,
+    fullName: user.full_name,
+    role: user.role,
+    status: user.status,
+    customerId: user.customer_id ?? null,
+  };
+}
+
+/** The caller's own account, including the self-editable profile fields (spec §26). */
+export interface AccountProfileDTO extends PublicUserDTO {
+  phone: string | null;
+  addressLine1: string | null;
+  city: string | null;
+  state: string | null;
+  postalCode: string | null;
+  country: string | null;
+  hasProfileImage: boolean;
+  createdAt: string;
+}
+
+export function toAccountProfileDTO(user: UserRecord, hasProfileImage: boolean): AccountProfileDTO {
+  return {
+    ...toPublicUser(user),
+    phone: user.phone ?? null,
+    addressLine1: user.address_line1 ?? null,
+    city: user.city ?? null,
+    state: user.state ?? null,
+    postalCode: user.postal_code ?? null,
+    country: user.country ?? null,
+    hasProfileImage,
+    createdAt: user.created_at,
+  };
 }
 
 // --- Customer services -----------------------------------------------------------------------
@@ -167,6 +205,10 @@ export interface AdminCustomerSummaryDTO {
   role: string;
   status: string;
   createdAt: string;
+  /** Shown in the staff directory so support can match the number a caller reads out. */
+  customerId: string | null;
+  phone: string | null;
+  deletedAt: string | null;
 }
 
 export function toAdminCustomerSummaryDTO(user: UserRecord): AdminCustomerSummaryDTO {
@@ -177,5 +219,37 @@ export function toAdminCustomerSummaryDTO(user: UserRecord): AdminCustomerSummar
     role: user.role,
     status: user.status,
     createdAt: user.created_at,
+    customerId: user.customer_id ?? null,
+    phone: user.phone ?? null,
+    deletedAt: user.deleted_at ?? null,
+  };
+}
+
+/**
+ * Staff-facing view of one account. Contains the customer's *identity*, never their secrets:
+ * no password hash, and no Security Number hash, plaintext, or any value derived from it —
+ * administrators only ever see its lifecycle metadata, exposed separately by the
+ * /security-number/status endpoint (spec §20/§46).
+ */
+export interface AdminUserDetailDTO extends AdminCustomerSummaryDTO {
+  addressLine1: string | null;
+  city: string | null;
+  state: string | null;
+  postalCode: string | null;
+  country: string | null;
+  updatedAt: string;
+  hasProfileImage: boolean;
+}
+
+export function toAdminUserDetailDTO(user: UserRecord, hasProfileImage = false): AdminUserDetailDTO {
+  return {
+    ...toAdminCustomerSummaryDTO(user),
+    addressLine1: user.address_line1 ?? null,
+    city: user.city ?? null,
+    state: user.state ?? null,
+    postalCode: user.postal_code ?? null,
+    country: user.country ?? null,
+    updatedAt: user.updated_at,
+    hasProfileImage,
   };
 }

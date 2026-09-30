@@ -6,6 +6,19 @@ export interface AuthTokenPayload {
   sub: string; // user id
   role: string;
   email: string;
+  /**
+   * Delegated "support mode" claims (spec §32). Present only on tokens minted by
+   * POST /api/v1/admin/customers/:id/switch. `sup` is the admin_support_sessions row id and
+   * `act` ("actor") is the administrator who is acting — the customer the token authenticates as
+   * stays in `sub`, so ownership scoping in every existing route keeps working unchanged, while
+   * the real human behind the request is never lost.
+   *
+   * These claims are advisory only: src/lib/require-auth.ts re-reads the support session row
+   * from the database on every request, so a token cannot outlive a session that was ended or
+   * has expired, and it can never be *self*-granted — the claim is worthless without the row.
+   */
+  sup?: string;
+  act?: string;
 }
 
 /**
@@ -20,9 +33,10 @@ export interface AuthTokenClaims extends AuthTokenPayload {
   exp: number;
 }
 
-export function signAuthToken(env: Env, payload: AuthTokenPayload): string {
+export function signAuthToken(env: Env, payload: AuthTokenPayload, overrides: { expiresIn?: SignOptions['expiresIn'] } = {}): string {
   const options: SignOptions = {
-    expiresIn: env.JWT_EXPIRES_IN as SignOptions['expiresIn'],
+    // Support-mode tokens deliberately pass a shorter lifetime than the platform default.
+    expiresIn: overrides.expiresIn ?? (env.JWT_EXPIRES_IN as SignOptions['expiresIn']),
     jwtid: randomUUID(),
   };
   return jwt.sign(payload, env.JWT_SECRET, options);
