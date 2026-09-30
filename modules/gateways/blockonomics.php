@@ -423,6 +423,14 @@ function blockonomics_link($params)
         exit('[ERROR] In modules/gateways/blockonomics.php::Blockonomics_link() function: Missing or invalid $params data.');
     }
 
+    // CloudHost247 server-side availability gate (spec §6, §15–§16): the master switch and the
+    // effective per-currency state decide whether a Pay Now form is rendered at all. Historical
+    // transactions and records are untouched — only NEW payment creation is refused.
+    if (!\Blockonomics\GatewaySettings::gatewayEnabled()
+        || count(\Blockonomics\GatewaySettings::effectiveCurrencies()) === 0) {
+        return '<div class="alert alert-warning" role="alert">Cryptocurrency payments are currently unavailable.</div>';
+    }
+
     $blockonomics = new Blockonomics();
     $order_params = $blockonomics->get_order_checkout_params($params);
     

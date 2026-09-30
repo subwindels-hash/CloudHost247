@@ -59,6 +59,37 @@ import AdminInfrastructureLogsPage from './pages/AdminInfrastructureLogsPage';
 import ControlPanelsPage from './pages/ControlPanelsPage';
 import ControlPanelDetailPage from './pages/ControlPanelDetailPage';
 import AdminControlPanelsPage from './pages/AdminControlPanelsPage';
+import RGDashboardPage from './pages/revenue-guardian/DashboardPage';
+import RecoveryQueuePage from './pages/revenue-guardian/RecoveryQueuePage';
+import RGCaseDetailPage from './pages/revenue-guardian/CaseDetailPage';
+import RGKanbanPage from './pages/revenue-guardian/KanbanPage';
+import RGFollowUpsPage from './pages/revenue-guardian/FollowUpsPage';
+import RGPromisesPage from './pages/revenue-guardian/PromisesPage';
+import RGAssignmentsPage from './pages/revenue-guardian/AssignmentsPage';
+import RGCustomerProfilePage from './pages/revenue-guardian/CustomerProfilePage';
+import RGReportsPage from './pages/revenue-guardian/ReportsPage';
+import {
+  OrdersPage as RGOrdersPage,
+  RenewalsPage as RGRenewalsPage,
+  RenewalRescuePage,
+  ExpiringServicesPage,
+  PreSuspensionPage,
+  PreTerminationPage,
+} from './pages/revenue-guardian/MonitorPages';
+import {
+  RevenueAtRiskPage,
+  CustomerHealthPage,
+  HighValuePage,
+  RiskAnalysisPage,
+  ForecastPage,
+} from './pages/revenue-guardian/InsightPages';
+import { MyWorkPage, StaffPerformancePage } from './pages/revenue-guardian/WorkPages';
+import { AutomationPage as RGAutomationPage, AutomationRunsPage } from './pages/revenue-guardian/AutomationPages';
+import { ActivityLogPage as RGActivityLogPage, EmailLogsPage as RGEmailLogsPage } from './pages/revenue-guardian/LogsPages';
+import { RGSettingsPage, ModuleHealthPage as RGModuleHealthPage } from './pages/revenue-guardian/SettingsPages';
+import CloudflareServicesPage from './pages/cloudflare/CloudflareServicesPage';
+import CloudflareServicePage from './pages/cloudflare/CloudflareServicePage';
+import AdminCloudflarePage from './pages/AdminCloudflarePage';
 import DnsManagementPage from './pages/DnsManagementPage';
 import SslManagementPage from './pages/SslManagementPage';
 
@@ -118,6 +149,9 @@ export default function App() {
           <Route path="/account/ssl" element={<SslManagementPage />} />
           <Route path="/account/domain-brokerage" element={<DomainBrokeragePage />} />
           <Route path="/services" element={<ServicesPage />} />
+          <Route path="/services/cloudflare" element={<CloudflareServicesPage />} />
+          <Route path="/services/cloudflare/:id" element={<CloudflareServicePage />} />
+          <Route path="/services/cloudflare/:id/:tab" element={<CloudflareServicePage />} />
           <Route path="/account/services" element={<ServicesPage />} />
           <Route path="/billing" element={<BillingPage />} />
           <Route path="/invoices" element={<InvoicesPage />} />
@@ -156,6 +190,42 @@ export default function App() {
             <Route path="/admin/infrastructure/logs" element={<AdminInfrastructureLogsPage />} />
             <Route path="/admin/control-panels" element={<AdminControlPanelsPage />} />
             <Route path="/admin/infrastructure/control-panels" element={<AdminControlPanelsPage />} />
+            <Route path="/admin/cloudflare" element={<AdminCloudflarePage />} />
+            <Route path="/admin/cloudflare/:tab" element={<AdminCloudflarePage />} />
+            <Route path="/admin/integrations/cloudflare" element={<AdminCloudflarePage />} />
+          </Route>
+
+          {/* Revenue Guardian — staff accounts also participate (with a server-enforced,
+              portfolio-scoped permission subset; see src/revenue-guardian/permissions.ts). */}
+          <Route element={<RequireRole roles={['staff', 'admin', 'super_admin']} />}>
+            <Route path="/admin/revenue-guardian" element={<RGDashboardPage />} />
+            <Route path="/admin/revenue-guardian/my-work" element={<MyWorkPage />} />
+            <Route path="/admin/revenue-guardian/revenue-at-risk" element={<RevenueAtRiskPage />} />
+            <Route path="/admin/revenue-guardian/customer-health" element={<CustomerHealthPage />} />
+            <Route path="/admin/revenue-guardian/high-value" element={<HighValuePage />} />
+            <Route path="/admin/revenue-guardian/recovery" element={<RecoveryQueuePage />} />
+            <Route path="/admin/revenue-guardian/recovery/:id" element={<RGCaseDetailPage />} />
+            <Route path="/admin/revenue-guardian/kanban" element={<RGKanbanPage />} />
+            <Route path="/admin/revenue-guardian/follow-ups" element={<RGFollowUpsPage />} />
+            <Route path="/admin/revenue-guardian/promises" element={<RGPromisesPage />} />
+            <Route path="/admin/revenue-guardian/assignments" element={<RGAssignmentsPage />} />
+            <Route path="/admin/revenue-guardian/orders" element={<RGOrdersPage />} />
+            <Route path="/admin/revenue-guardian/renewals" element={<RGRenewalsPage />} />
+            <Route path="/admin/revenue-guardian/renewal-rescue" element={<RenewalRescuePage />} />
+            <Route path="/admin/revenue-guardian/expiring-services" element={<ExpiringServicesPage />} />
+            <Route path="/admin/revenue-guardian/pre-suspension" element={<PreSuspensionPage />} />
+            <Route path="/admin/revenue-guardian/pre-termination" element={<PreTerminationPage />} />
+            <Route path="/admin/revenue-guardian/customers/:id" element={<RGCustomerProfilePage />} />
+            <Route path="/admin/revenue-guardian/risk-analysis" element={<RiskAnalysisPage />} />
+            <Route path="/admin/revenue-guardian/forecast" element={<ForecastPage />} />
+            <Route path="/admin/revenue-guardian/reports" element={<RGReportsPage />} />
+            <Route path="/admin/revenue-guardian/staff-performance" element={<StaffPerformancePage />} />
+            <Route path="/admin/revenue-guardian/automation" element={<RGAutomationPage />} />
+            <Route path="/admin/revenue-guardian/automation/runs" element={<AutomationRunsPage />} />
+            <Route path="/admin/revenue-guardian/activity" element={<RGActivityLogPage />} />
+            <Route path="/admin/revenue-guardian/email-logs" element={<RGEmailLogsPage />} />
+            <Route path="/admin/revenue-guardian/module-health" element={<RGModuleHealthPage />} />
+            <Route path="/admin/revenue-guardian/settings" element={<RGSettingsPage />} />
           </Route>
         </Route>
 

@@ -39,6 +39,7 @@ const PERIOD_DAYS: Record<string, number> = {
 interface OrderItemMetadata {
   installationId?: string;
   kind?: string;
+  cloudflare?: Record<string, unknown>;
   serverProvision?: {
     serverId: string;
   };
@@ -62,6 +63,7 @@ export interface ProvisioningReport {
   subscriptionsCreated: string[];
   hostingJobsQueued: string[];
   serverJobsQueued: string[];
+  cloudflareServicesQueued: string[];
 }
 
 /**
@@ -83,11 +85,20 @@ export async function provisionPaidOrder(tx: Queryable, order: OrderRow, genId: 
     subscriptionsCreated: [],
     hostingJobsQueued: [],
     serverJobsQueued: [],
+    cloudflareServicesQueued: [],
   };
   const items = await listOrderItemsForOrder(tx, order.id);
 
   for (const item of items) {
     const metadata = parseMetadata(item);
+
+    // --- Cloudflare service / plan change: verified payment -> pending service + durable job ---
+    if (metadata.kind === 'cloudflare' || metadata.cloudflare) {
+      const { provisionCloudflareOrderItem } = await import('./cloudflare-service');
+      const result = await provisionCloudflareOrderItem(tx, order, item, genId);
+      if (result.cloudflareServiceId) report.cloudflareServicesQueued.push(result.cloudflareServiceId);
+      continue;
+    }
 
     // --- VPS/cloud/dedicated server: verified payment → durable provisioning queue -------------
     if (metadata.serverProvision?.serverId) {
