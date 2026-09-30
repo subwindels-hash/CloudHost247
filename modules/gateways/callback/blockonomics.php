@@ -25,28 +25,66 @@ if (!$gatewayParams['type']) {
 require_once $blockonomics->getLangFilePath();
 
 // Retrieve data returned in payment gateway callback
-$secret = htmlspecialchars($_GET['secret']);
-$status = htmlspecialchars($_GET['status']);
-$addr = htmlspecialchars($_GET['addr']);
-$value = htmlspecialchars($_GET['value']);
-$txid = htmlspecialchars($_GET['txid']);
+$secret = isset($_GET['secret']) ? htmlspecialchars($_GET['secret']) : '';
+$status = isset($_GET['status']) ? htmlspecialchars($_GET['status']) : '';
+$addr = isset($_GET['addr']) ? htmlspecialchars($_GET['addr']) : '';
+$value = isset($_GET['value']) ? htmlspecialchars($_GET['value']) : '';
+$txid = isset($_GET['txid']) ? htmlspecialchars($_GET['txid']) : '';
 
 /**
- * Validate callback authenticity.
+ * CloudHost247 hardening (spec §21–§23): a callback is untrusted input. Authenticate it with a
+ * timing-safe secret comparison, then validate the SHAPE of every field before any database
+ * read or write. Anything malformed is rejected with a generic response — no information leak,
+ * no partial state change. All checks fail closed.
  */
 $secret_value = $blockonomics->getCallbackSecret();
 
-if ($secret_value != $secret) {
-    $transactionStatus = $_BLOCKLANG['error']['secret'];
-    $success = false;
-
-    echo $transactionStatus;
+if (!is_string($secret_value) || $secret_value === ''
+    || $secret === '' || !hash_equals((string) $secret_value, (string) $secret)) {
+    http_response_code(403);
+    echo isset($_BLOCKLANG['error']['secret']) ? $_BLOCKLANG['error']['secret'] : 'Invalid callback.';
     exit();
 }
 
+// status: small signed integer (Blockonomics uses 0..2). value: satoshi/base units, digits only.
+if (!preg_match('/^-?\d{1,2}$/', $status) || !preg_match('/^\d{1,20}$/', $value)) {
+    http_response_code(400);
+    exit('Invalid callback.');
+}
+// addr: BTC/BCH address or the gateway's USDT composite reference. txid: hex / provider id.
+if ($addr === '' || strlen($addr) > 128 || !preg_match('/^[a-zA-Z0-9:_-]+$/', $addr)) {
+    http_response_code(400);
+    exit('Invalid callback.');
+}
+if ($txid === '' || strlen($txid) > 128 || !preg_match('/^[a-zA-Z0-9]+$/', $txid)) {
+    http_response_code(400);
+    exit('Invalid callback.');
+}
+$status = (int) $status;
+$value = (float) $value;
+
 $order = $blockonomics->getOrderByAddress($addr);
+
+// Address we never issued → reject. The payment identity must be OURS (spec §21).
+if ($order === null || empty($order['order_id'])) {
+    http_response_code(404);
+    exit('Invalid callback.');
+}
+
 $invoiceId = $order['order_id'];
 $bits = $order['bits'];
+
+// Currency recorded on OUR order row is authoritative; it must be one the gateway supports.
+if (!array_key_exists($order['blockonomics_currency'], $blockonomics->getSupportedCurrencies())) {
+    http_response_code(400);
+    exit('Invalid callback.');
+}
+
+// A zero/unset expected amount can never be credited from a percentage calculation.
+if (!is_numeric($bits) || (float) $bits <= 0) {
+    http_response_code(400);
+    exit('Invalid callback.');
+}
 
 $confirmations = $blockonomics->getConfirmations();
 
@@ -143,7 +181,11 @@ if ($blockonomics->checkIfTransactionExists($blockonomics_currency_code . ' - ' 
  * @param string|array $debugData    Data to log
  * @param string $transactionStatus  Status
  */
-logTransaction($gatewayParams['name'], $_GET, 'Successful');
+$loggedCallback = $_GET;
+if (isset($loggedCallback['secret'])) {
+    $loggedCallback['secret'] = '[REDACTED]';
+}
+logTransaction($gatewayParams['name'], $loggedCallback, 'Successful');
 
 $paymentFee = 0;
 

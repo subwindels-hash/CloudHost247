@@ -16,6 +16,15 @@
         
         <!-- Blockonomics Checkout Panel -->    
         <div class="bnomics-order-panel">
+            <!-- CloudHost247: the network is explicit and inseparable from the payment details -->
+            <div class="alert alert-info" style="margin:10px;">
+                <strong>{$crypto.name} &mdash; {$usdt_network_label}</strong>
+            </div>
+            <div class="alert alert-warning" style="margin:10px;">
+                <strong>Important:</strong><br>
+                Only send {$crypto.name} using the network shown above ({$usdt_network_label}).<br>
+                Sending {$crypto.name} through a different network may result in permanent loss of funds.
+            </div>
             <table>
                 <tr>
                     <th class="bnomics-header">

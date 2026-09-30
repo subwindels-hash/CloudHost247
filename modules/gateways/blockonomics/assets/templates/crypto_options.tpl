@@ -8,7 +8,7 @@
           <button class="bnomics-select-options button btn btn-lg">
             <span class="bnomics-icon-{$code} bnomics-rotate-{$code}"></span>
             <span class="vertical-line">
-              {$_BLOCKLANG.payWith} {$crypto['name']}
+              {$_BLOCKLANG.payWith} {$crypto['name']}{if $code == 'usdt' && $usdt_network_label} &mdash; {$usdt_network_label}{/if}
             </span>
           </button>
         </a>

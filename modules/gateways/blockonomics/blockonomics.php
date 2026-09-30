@@ -10,6 +10,7 @@ use DateInterval;
 
 require_once __DIR__ . '/../../../includes/gatewayfunctions.php';
 require_once __DIR__ . '/../../../includes/invoicefunctions.php';
+require_once __DIR__ . '/lib/GatewaySettings.php';
 
 class Blockonomics
 {
@@ -90,8 +91,10 @@ class Blockonomics
      */
     public function getApiKey()
     {
-        $gatewayParams = getGatewayVariables('blockonomics');
-        return $gatewayParams['ApiKey'];
+        // CloudHost247: resolve through the central API & Integrations vault first (encrypted
+        // at rest); the legacy WHMCS gateway ApiKey field remains the fallback so existing
+        // installations keep working unchanged (spec §11, §30–§31).
+        return GatewaySettings::resolveApiKey();
     }
 
     /*
@@ -146,12 +149,16 @@ class Blockonomics
      */
     public function getActiveCurrencies()
     {
+        // CloudHost247: availability is the EFFECTIVE state resolved by GatewaySettings —
+        // master switch AND per-currency flag AND valid configuration (API credential for
+        // BTC/BCH, receiving address + supported network for USDT). Every caller (Pay Now
+        // link, payment page, checkout templates, USDT poller) therefore enforces the same
+        // server-side rule; nothing is decided by hidden buttons (spec §6–§9, §15–§16, §32–§33).
         $active_currencies = [];
         $blockonomics_currencies = $this->getSupportedCurrencies();
+        $effective = GatewaySettings::effectiveCurrencies();
         foreach ($blockonomics_currencies as $code => $currency) {
-            $gatewayParams = getGatewayVariables('blockonomics');
-            $enabled = $gatewayParams[$code . 'Enabled'];
-            if ($enabled) {
+            if (in_array($code, $effective, true)) {
                 $active_currencies[$code] = $currency;
             }
         }
@@ -648,6 +655,12 @@ class Blockonomics
             exit("Unable to select order from blockonomics_orders: {$e->getMessage()}");
         }
 
+        // CloudHost247 hardening: a callback for an address we never issued is rejected
+        // instead of fataling on a null row (spec §21).
+        if ($existing_order === null) {
+            return null;
+        }
+
         return [
             'order_id' => $existing_order->id_order,
             'timestamp' => $existing_order->timestamp,
@@ -1045,6 +1058,9 @@ class Blockonomics
             $context["chain_id"] = $selectedTokenNetworks["chainId"];
             $context["contract_address"] = $selectedTokenNetworks["tokens"][$crypto['code']];
             $context["usdt_address"] = $this->getUSDTAddress();
+            // CloudHost247: the configured network is displayed explicitly and travels with
+            // the receiving details — never a bare "USDT" (spec §9–§10).
+            $context["usdt_network_label"] = GatewaySettings::usdtNetworkLabel();
             $this->load_blockonomics_template($ca, 'web3_checkout', $context);
         } else {
             $time_period_from_db = $this->getTimePeriod();
