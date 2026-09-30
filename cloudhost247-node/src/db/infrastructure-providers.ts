@@ -195,7 +195,7 @@ export async function createRegion(
   const { rows } = await db.query<InfrastructureRegionRow>(
     `INSERT INTO infrastructure_regions (id, provider_id, code, name, country_code, status, metadata)
      VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
-    [randomUUID(), input.providerId, input.code, input.name, input.countryCode ?? null, input.status ?? 'ACTIVE', JSON.stringify(input.metadata ?? {})]
+    [randomUUID(), input.providerId, input.code, input.name, input.countryCode ?? null, input.status ?? 'DISABLED', JSON.stringify(input.metadata ?? {})]
   );
   const row = rows[0];
   if (!row) throw new Error('createRegion: insert returned no row');
@@ -250,7 +250,7 @@ export async function createDatacenter(
   const { rows } = await db.query<InfrastructureDatacenterRow>(
     `INSERT INTO infrastructure_datacenters (id, region_id, code, name, status, metadata)
      VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
-    [randomUUID(), input.regionId, input.code, input.name, input.status ?? 'ACTIVE', JSON.stringify(input.metadata ?? {})]
+    [randomUUID(), input.regionId, input.code, input.name, input.status ?? 'DISABLED', JSON.stringify(input.metadata ?? {})]
   );
   const row = rows[0];
   if (!row) throw new Error('createDatacenter: insert returned no row');
@@ -264,13 +264,14 @@ export async function findOsImageById(db: Queryable, id: string): Promise<Server
 
 export async function listOsImages(
   db: Queryable,
-  filters: { providerId?: string; versionId?: string; status?: string } = {}
+  filters: { providerId?: string; versionId?: string; operatingSystemId?: string; status?: string } = {}
 ): Promise<Array<ServerOsImageRow & { provider_name: string; os_display_name: string; region_name: string | null; datacenter_name: string | null }>> {
   const conditions: string[] = [];
   const params: unknown[] = [];
   const add = (sql: string, value: unknown) => { params.push(value); conditions.push(sql.replace('?', `$${params.length}`)); };
   if (filters.providerId) add('i.provider_id=?', filters.providerId);
   if (filters.versionId) add('i.operating_system_version_id=?', filters.versionId);
+  if (filters.operatingSystemId) add('v.operating_system_id=?', filters.operatingSystemId);
   if (filters.status) add('i.status=?', filters.status);
   const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
   const { rows } = await db.query<ServerOsImageRow & { provider_name: string; os_display_name: string; region_name: string | null; datacenter_name: string | null }>(
@@ -337,6 +338,13 @@ export async function updateOsImage(
 }
 
 export async function deleteOsImage(db: Queryable, id: string): Promise<boolean> {
-  const result = await db.query(`DELETE FROM server_os_images WHERE id=$1 AND status <> 'ACTIVE' RETURNING id`, [id]);
+  const result = await db.query(
+    `DELETE FROM server_os_images i
+     WHERE i.id=$1 AND i.status <> 'ACTIVE'
+       AND NOT EXISTS (SELECT 1 FROM servers s WHERE s.os_image_id=i.id)
+       AND NOT EXISTS (SELECT 1 FROM provisioning_jobs j WHERE j.os_image_id=i.id)
+     RETURNING id`,
+    [id]
+  );
   return result.rows.length > 0;
 }

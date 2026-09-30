@@ -190,15 +190,46 @@ describe('admin infrastructure operations', () => {
     expect(promised.statusCode).toBe(400);
     expect(promised.json().message).toContain('does not support reinstall');
 
-    // Power actions every adapter implements are still accepted.
+    // Only power actions implemented by every adapter are accepted; the disabled native AWS
+    // adapter must not advertise snapshots, metrics, resize or other unimplemented operations.
     const honest = await app.inject({
       method: 'POST', url: '/api/v1/admin/server-product-configurations', headers,
-      payload: body({ start: true, stop: true, reboot: true, shutdown: true, snapshot: true }),
+      payload: body({ start: true, stop: true, reboot: true, shutdown: true }),
     });
     expect(honest.statusCode).toBe(201);
     expect((await db.query<{ count: number }>(
       `SELECT count(*)::int count FROM server_product_configurations WHERE provider_id=$1`, [providerId]
     )).rows[0]?.count).toBe(1);
+    await app.close();
+  });
+
+  it('stores, serves, replaces and deletes validated database-backed OS logos', async () => {
+    const app = buildApp(env, { serveFrontend: false, pool: db });
+    const osId='10000000-0000-0000-0000-000000000001';
+    // A complete 1x1 transparent PNG. Upload validation checks both the declared MIME and bytes.
+    const contentBase64='iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M/wHwAEAQH/69f2WQAAAABJRU5ErkJggg==';
+    const upload=await app.inject({
+      method:'POST',url:`/api/v1/admin/operating-systems/${osId}/logo`,headers:auth(adminToken),
+      payload:{fileName:'ubuntu.png',contentType:'image/png',contentBase64},
+    });
+    expect(upload.statusCode).toBe(201);
+    expect(upload.json().logo.url).toBe(`/api/v1/operating-systems/${osId}/logo`);
+
+    const served=await app.inject({method:'GET',url:`/api/v1/operating-systems/${osId}/logo`});
+    expect(served.statusCode).toBe(200);
+    expect(served.headers['content-type']).toBe('image/png');
+    expect(served.rawPayload.equals(Buffer.from(contentBase64,'base64'))).toBe(true);
+    expect(served.headers.etag).toMatch(/^\"[0-9a-f]{64}\"$/);
+    expect((await app.inject({method:'GET',url:`/api/v1/operating-systems/${osId}/logo`,headers:{'if-none-match':String(served.headers.etag)}})).statusCode).toBe(304);
+
+    const invalid=await app.inject({
+      method:'POST',url:`/api/v1/admin/operating-systems/${osId}/logo`,headers:auth(adminToken),
+      payload:{fileName:'fake.png',contentType:'image/png',contentBase64:Buffer.from('not an image').toString('base64')},
+    });
+    expect(invalid.statusCode).toBe(400);
+
+    expect((await app.inject({method:'DELETE',url:`/api/v1/admin/operating-systems/${osId}/logo`,headers:auth(adminToken)})).statusCode).toBe(204);
+    expect((await app.inject({method:'GET',url:`/api/v1/operating-systems/${osId}/logo`})).statusCode).toBe(404);
     await app.close();
   });
 

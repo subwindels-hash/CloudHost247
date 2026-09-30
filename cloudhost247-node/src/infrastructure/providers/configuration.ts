@@ -101,8 +101,8 @@ export const ADAPTER_PROFILES: Record<AdapterKind, AdapterProfile> = {
       { suffix: '_REGION', description: 'Default EC2 region', required: true, fallback: 'AWS_REGION' },
     ],
     planMetadata: [{ key: 'providerServerType', description: 'EC2 instance type', required: true }, ...RESOURCE_METADATA],
-    capabilities: { reinstall: false, snapshot: true, resize: true, console: false, metrics: true, rescue: false },
-    notes: 'SigV4 EC2 API.',
+    capabilities: { reinstall: false, snapshot: false, resize: false, console: false, metrics: false, rescue: false },
+    notes: 'Native EC2 is intentionally disabled until a complete SigV4 client is implemented. Use the generic_http bridge adapter for a tested AWS integration.',
   },
   contabo: {
     kind: 'contabo',
@@ -117,8 +117,8 @@ export const ADAPTER_PROFILES: Record<AdapterKind, AdapterProfile> = {
       { suffix: '_API_PASSWORD', description: 'API password', required: true, fallback: 'CONTABO_API_PASSWORD' },
     ],
     planMetadata: [{ key: 'providerServerType', description: 'Contabo product id', required: true }, ...RESOURCE_METADATA],
-    capabilities: { reinstall: true, snapshot: true, resize: false, console: false, metrics: false, rescue: false },
-    notes: 'OAuth2 client-credentials API.',
+    capabilities: { reinstall: false, snapshot: false, resize: false, console: false, metrics: false, rescue: false },
+    notes: 'Native Contabo is intentionally disabled until the OAuth2 lifecycle and VPS API are complete. Use the generic_http bridge adapter for a tested integration.',
   },
   ovh: {
     kind: 'ovh',
@@ -321,6 +321,9 @@ export function describeProviderConfiguration(
     missing.length = 0;
     if (source.NODE_ENV === 'production') missing.push('mock provider is disabled in production');
     else if (source.ALLOW_MOCK_PROVIDER !== 'true') missing.push('ALLOW_MOCK_PROVIDER=true');
+  }
+  if (profile.kind === 'aws' || profile.kind === 'contabo') {
+    missing.push('native adapter implementation is disabled; configure a generic_http provider bridge');
   }
   return {
     adapter: profile.kind,

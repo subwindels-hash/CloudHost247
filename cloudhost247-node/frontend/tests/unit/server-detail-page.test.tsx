@@ -121,6 +121,17 @@ describe('ServerDetailPage — monitoring', () => {
   });
 });
 
+describe('ServerDetailPage — honest access and security controls',()=>{
+  it('never fabricates root/admin credentials or exposes the database-only firewall editor',async()=>{
+    stubApi({server:{...server,capabilities:{...server.capabilities,firewall:true}}});
+    renderPage();
+    await waitFor(()=>expect(screen.getByText('Server details')).toBeTruthy());
+    expect(screen.queryByText('root / admin')).toBeNull();
+    expect(screen.queryByText('Firewall & Port Rules')).toBeNull();
+    expect(screen.queryByText(/Apply Baseline Rules/)).toBeNull();
+  });
+});
+
 describe('ServerDetailPage — reinstall confirmation', () => {
   it('states the destructive consequence and keeps the action disabled until it is typed exactly', async () => {
     stubApi();
