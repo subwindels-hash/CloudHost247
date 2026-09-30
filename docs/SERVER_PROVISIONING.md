@@ -9,7 +9,7 @@ Logos are browser assets only. They are never used as installation images. Publi
 ## Safe rollout
 
 1. Back up PostgreSQL and run `npm run migrate:status`.
-2. Apply migrations `0041_create_os_catalog_and_server_provisioning.sql` through `0048_operating_system_logo_assets.sql` using the normal migration command. It is additive. Existing `servers` records are retained and point to the archived **Unknown operating system** version when their OS cannot be proven.
+2. Apply migrations `0041_create_os_catalog_and_server_provisioning.sql` through `0052_serialize_server_infrastructure_operations.sql` using the normal migration command. They preserve existing server and billing records. Existing `servers` records point to the archived **Unknown operating system** version when their OS cannot be proven; if legacy data contains overlapping active operations for one server, migration 0052 keeps the oldest and safely cancels the newer queue records before enforcing serialization.
 3. Set `APP_URL`, `CREDENTIAL_ENCRYPTION_KEY` (or a key ring), `SERVER_AGENT_INSTALL_URL`, provider credentials, and worker settings in the server-side secret store. Restart the API and worker.
 4. In **Admin → Infrastructure**, add the provider and location records. Keep the provider disabled until its credentials validate.
 5. Add an OS image mapping as `DRAFT`, use **Test**, and enable it only after the provider confirms the image and architecture.
@@ -41,6 +41,12 @@ A server reaches READY only after all of these are true:
 - the report confirms the security marker and running monitoring agent.
 
 Failure to configure any required service produces an explicit terminal or retryable error. There is no production fallback to a mock provider, fake address, or synthetic health result.
+
+The supplied `infrastructure/docker/docker-compose.yml` forwards common provisioning and default
+provider variables to **both** `app` and `worker`. If a provider row uses a custom
+`credential_env_prefix`, add that prefix's variables to both service environments (or to an
+operator-managed Compose override/secret injection); configuring only the API is insufficient
+because the worker makes the provisioning calls.
 
 ## Provider adapters
 
@@ -106,40 +112,27 @@ Capabilities: reinstall, snapshot, resize, console.
 
 Native instance API.
 
-### Amazon EC2 (`aws`)
+### Amazon EC2 (`aws`) — native adapter disabled
 
-- Default credential prefix: `AWS`
-- API base URL: not required
+The native AWS adapter is **not production-ready in this release**. It does not contain a complete
+AWS Signature Version 4 client, so provider validation and every provider operation deliberately
+fail closed with `SERVICE_UNAVAILABLE`; it never creates a resource or reports synthetic health.
+`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and `AWS_REGION` remain recognised only for
+configuration diagnostics and a future implementation.
 
-| Variable | Purpose | Required |
-| --- | --- | --- |
-| `AWS_ACCESS_KEY_ID` | IAM access key id | yes |
-| `AWS_SECRET_ACCESS_KEY` | IAM secret access key | yes |
-| `AWS_REGION` | Default EC2 region | yes |
+To deploy on AWS today, expose the required EC2 operations through an operator-owned HTTPS bridge
+that implements the `generic_http` contract below. Register that provider as `generic_http`, not
+`aws`, and restrict its IAM role to the required actions and CloudHost247 resource tags.
 
-Plan/availability metadata: `providerServerType`, `cpuCores`, `memoryMb`, `storageMb`.
+### Contabo (`contabo`) — native adapter disabled
 
-Capabilities: snapshot, resize, metrics.
+The native Contabo adapter is **not production-ready in this release**. The OAuth token lifecycle
+and VPS operations are incomplete, so activation and all calls deliberately fail closed with
+`SERVICE_UNAVAILABLE`. The `CONTABO_CLIENT_ID`, `CONTABO_CLIENT_SECRET`, `CONTABO_API_USER`, and
+`CONTABO_API_PASSWORD` names remain documented only for diagnostics/future support.
 
-SigV4 EC2 API.
-
-### Contabo (`contabo`)
-
-- Default credential prefix: `CONTABO`
-- API base URL: `https://api.contabo.com/v1` (default)
-
-| Variable | Purpose | Required |
-| --- | --- | --- |
-| `CONTABO_CLIENT_ID` | OAuth client id | yes |
-| `CONTABO_CLIENT_SECRET` | OAuth client secret | yes |
-| `CONTABO_API_USER` | API user | yes |
-| `CONTABO_API_PASSWORD` | API password | yes |
-
-Plan/availability metadata: `providerServerType`, `cpuCores`, `memoryMb`, `storageMb`.
-
-Capabilities: reinstall, snapshot.
-
-OAuth2 client-credentials API.
+Use an operator-owned `generic_http` bridge for Contabo until the native adapter is completed and
+integration-tested. Do not activate a provider row with adapter `contabo`.
 
 ### OVHcloud Public Cloud (`ovh`)
 
@@ -284,9 +277,15 @@ working implementation is never substituted.
 
 ## Payment and queue guarantees
 
-Server order creation atomically creates an `AWAITING_PAYMENT` server, order, and invoice; it does not call a provider. The verified settlement transaction re-reads the authoritative paid order, creates/reuses the subscription, and enqueues one PostgreSQL deployment using a unique idempotency key. The worker re-checks payment and ownership before creation. Provider resource IDs are persisted immediately; after a crash the worker checks both that ID and provider-side idempotency before creating anything.
+Server order creation atomically creates an `AWAITING_PAYMENT` server, order, and invoice; it does not call a provider. The verified settlement transaction re-reads the authoritative paid order, creates/reuses the subscription, and enqueues one PostgreSQL deployment using a unique idempotency key. The worker re-checks payment and ownership before creation. It also re-resolves the complete active/public product → plan → provider → region/datacenter → OS/version/architecture → verified image chain at claim time, so disabling or corrupting any compatibility row after payment fails closed before provider allocation. Provider resource IDs are persisted immediately; after a crash the worker checks both that ID and provider-side idempotency before creating anything.
 
-Reinstall requires server ownership, provider/product capability, the literal confirmation `REINSTALL`, and a newly resolved active image for the server's provider and location. It is always queued. Existing resources may display EOL or archived OS versions, but those versions cannot be selected for a new deployment.
+Reinstall requires server ownership, provider/product capability, the literal confirmation `REINSTALL`, and a newly resolved active image for the server's provider and location. It is always queued and cannot change the existing server's hardware architecture. Existing resources may display EOL or archived OS versions, but those versions cannot be selected for a new deployment.
+
+Enqueueing locks the server row and permits only one non-terminal infrastructure job per server.
+The same `Idempotency-Key` returns the existing job; a different concurrent power, snapshot,
+reinstall, resize, or delete request returns `409`. Migration 0052 also enforces this invariant
+with a partial unique index, while cancel/retry transitions update the queue and provisioning rows
+atomically.
 
 ## Observability, audit and infrastructure logs
 
@@ -305,7 +304,7 @@ Reinstall requires server ownership, provider/product capability, the literal co
 | `GET /api/v1/admin/notification-outbox` | Email delivery health: queued/delivered/failed counts plus the rows that are failing and why. |
 | `POST /api/v1/admin/notification-outbox/drain` | Sends queued notification emails now; the worker runs the same drain every minute. |
 | `POST /api/v1/admin/server-terminations/sweep` | Destroys servers whose scheduled cancellation is due; the worker runs the same sweep every 15 minutes. |
-| `GET /api/v1/admin/infrastructure-logs` | Append-only audit trail filtered to infrastructure resources (`provider`, `region`, `datacenter`, `os_image`, `operating_system`, `operating_system_version`, `provisioning_job`, `server`), with `action`, `resourceId`, `limit` and `offset` filters. |
+| `GET /api/v1/admin/infrastructure-logs` | Append-only audit trail filtered to infrastructure resources (`provider`, `region`, `datacenter`, `os_image`, `operating_system`, `operating_system_version`, `server_product_configuration`, `provisioning_job`, `server`), with `action`, `resourceId`, `limit` and `offset` filters. |
 
 Infrastructure logs are a read-only projection of the existing `audit_logs` table — there is no
 second logging system and no UI can edit or delete an entry. Failure classification is visible
@@ -408,9 +407,13 @@ Guarantees the sweep must keep, all covered by `tests/integration/os-lifecycle.t
 per-distribution conditionals. Assets live in `cloudhost247-node/frontend/public/os-logos/` and
 migration `0048_operating_system_logo_assets.sql` points the five previously unillustrated
 families (Alpine, Arch, Kali, NixOS, openSUSE) at their SVGs, updating only rows whose
-`logo_url` is still `NULL` so operator branding is preserved. A family without a logo renders a
-text badge instead. A logo is never an installation image: installable artifacts exist only in
-`server_os_images.provider_image_id` / `provider_template_id`.
+`logo_url` is still `NULL` so operator branding is preserved. Admins may alternatively upload a
+PNG, JPEG or WebP logo of at most 512 KiB. Migration 0051 stores it in PostgreSQL for multi-instance
+and cPanel-safe delivery; the upload endpoint verifies magic bytes and records size/SHA-256/uploader,
+then atomically points `logo_url` at the public cache/ETag-enabled logo route. Delete removes only
+the uploaded asset and URL, while existing static URLs remain supported. A family without a logo
+renders a text badge instead. A logo is never an installation image: installable artifacts exist
+only in `server_os_images.provider_image_id` / `provider_template_id`.
 
 ## Customer notifications
 
@@ -428,7 +431,7 @@ email is an optional bridge that never blocks that flow and never fakes the in-a
 ### Email delivery
 
 Email is **queued, never sent inline**. `createNotification` writes the in-app row and a
-`notification_outbox` row in the same flow; the worker drains the outbox every minute
+`notification_outbox` row atomically in one data-modifying SQL statement; the worker drains the outbox every minute
 (`deliverNotificationOutbox`). Two things that used to be broken are now guaranteed: a slow or
 dead mail webhook cannot stall the worker that is finishing a customer's server, and a delivery
 that fails is retried instead of being lost after one attempt.
@@ -467,8 +470,9 @@ Each row carries, in `metadata`:
 - the adapter's own plan identifier (`providerServerType`, `providerFlavorId`, `providerVirtType`,
   … — see the per-adapter tables above) — without it, provisioning fails closed;
 - the resources the customer is sold (`cpuCores`, `memoryMb`, `storageMb`, `bandwidthGb`);
-- `capabilities`, the exact set of actions the server detail page offers and the API accepts
-  (`start`, `stop`, `reboot`, `shutdown`, `reinstall`, `snapshot`, `resize`, `rescue`, `console`).
+- `capabilities`, the provider-supported action set used to gate the server detail page and API
+  (`start`, `stop`, `reboot`, `shutdown`, `reinstall`, `snapshot`, `resize`, `rescue`, `console`),
+  subject to additional billing gates such as the resize restriction below.
 
 `capabilities` is checked against the provider's adapter profile before the row is saved: a
 template cannot offer `reinstall`, `snapshot`, `resize`, `console` or `rescue` unless that adapter
@@ -476,6 +480,16 @@ actually implements it. Otherwise the customer would be shown a button whose onl
 outcome is a failed job, discovered after they clicked it. Power actions (`start`, `stop`,
 `reboot`, `shutdown`) are implemented by every adapter and are always available. The admin form
 hides or disables whatever the selected provider cannot do and lists what it can.
+
+Two surfaces deliberately remain unavailable rather than pretending that database state changes
+infrastructure:
+
+- `firewall` cannot be advertised on a template and all customer firewall endpoints fail closed
+  until a provider adapter or authenticated server-agent firewall operation actually applies and
+  verifies rules. Existing `firewall_rules` rows are compatibility/audit data, not proof of an
+  active network policy.
+- self-service `resize` refuses customer-supplied provider sizing metadata. A provider resize must
+  be reached through a priced, paid upgrade-order flow; that billing flow is not implemented yet.
 
 Rows are created `DISABLED` on purpose. Enable one only after a verified provider image exists
 for that provider, OS version, architecture and region; the ordering and reinstall queries join

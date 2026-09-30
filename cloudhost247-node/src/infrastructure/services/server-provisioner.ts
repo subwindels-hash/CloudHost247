@@ -18,6 +18,7 @@ import {
   type ProvisioningJobRow,
 } from '../../db/server-provisioning';
 import { findProviderById, type ServerOsImageRow } from '../../db/infrastructure-providers';
+import { resolveAvailableConfiguration } from '../../db/operating-systems';
 import { recordAuditBestEffort } from '../../lib/audit';
 import { notifyServerReady, notifyServerTerminated } from '../../services/notification-service';
 import { createInfrastructureProviderAdapter } from '../providers/registry';
@@ -123,6 +124,7 @@ async function executeLifecycleAction(
   await startStep(db,step.id);
   try {
     const payload = deployment.payload && typeof deployment.payload === 'object' ? deployment.payload as Record<string, unknown> : {};
+    let providerResponse: Record<string,unknown>|null=null;
     if (job.operation === 'START') await adapter.startServer(server.provider_server_id);
     else if (job.operation === 'STOP' || job.operation === 'SHUTDOWN') await adapter.shutdownServer(server.provider_server_id);
     else if (job.operation === 'REBOOT') await adapter.rebootServer(server.provider_server_id);
@@ -131,10 +133,11 @@ async function executeLifecycleAction(
       const planMetadata = payload.planMetadata && typeof payload.planMetadata === 'object'
         ? payload.planMetadata as Record<string, unknown>
         : (server.metadata.providerPlan && typeof server.metadata.providerPlan === 'object' ? server.metadata.providerPlan as Record<string, unknown> : {});
-      await adapter.resizeServer(server.provider_server_id, planMetadata);
+      const resized=await adapter.resizeServer(server.provider_server_id, planMetadata);
+      providerResponse={id:resized.id,status:resized.status,ipAddress:resized.ipAddress};
     } else if (job.operation === 'SNAPSHOT_CREATE') {
       const desc = typeof payload.description === 'string' ? payload.description : `Snapshot-${new Date().toISOString().slice(0, 10)}`;
-      await adapter.createSnapshot(server.provider_server_id, desc);
+      providerResponse=await adapter.createSnapshot(server.provider_server_id, desc);
     } else if (job.operation === 'SNAPSHOT_DELETE') {
       const snapshotId = typeof payload.snapshotId === 'string' ? payload.snapshotId : '';
       if (!snapshotId) throw new ProviderError('INVALID_CONFIGURATION', 'Snapshot ID is required for deletion', false);
@@ -146,17 +149,25 @@ async function executeLifecycleAction(
     } else throw new ProviderError('UNSUPPORTED_OPERATION',`${job.operation} is not supported by this adapter`,false);
 
     await finishStep(db,step.id,'succeeded');
-    await completeDeployment(db,deployment.id);
-    const status = job.operation === 'DELETE' ? 'retired' : job.operation === 'START' || job.operation === 'REBOOT' || job.operation === 'RESIZE' ? 'active' : 'stopped';
+    const status = job.operation === 'DELETE' ? 'retired'
+      : job.operation === 'START' || job.operation === 'REBOOT' ? 'active'
+        : job.operation === 'STOP' || job.operation === 'SHUTDOWN' ? 'stopped'
+          : server.status;
     await updateCustomerServerProvisioning(db,server.id,{ status,provisioningStatus: 'READY' });
-    await updateProvisioningJob(db,job.id,{ status: 'READY',attempts: deployment.attempts,completedAt: new Date().toISOString(),errorCode: null,errorMessage: null });
     // A destroyed server is the one lifecycle action the customer must hear about even though
     // they asked for it: it confirms the resource is gone and that billing has stopped.
     if (job.operation === 'DELETE') {
       const terminated = await findCustomerServerById(db,server.id);
       if (terminated) await notifyServerTerminated(db,terminated);
     }
+    await updateProvisioningJob(db,job.id,{
+      status: 'READY',attempts: deployment.attempts,completedAt: new Date().toISOString(),
+      errorCode: null,errorMessage: null,providerResponse,
+    });
     await recordAuditBestEffort(db,{ action: `SERVER_${job.operation}`,resourceType: 'server',resourceId: server.id,actorId: deployment.requested_by });
+    // Complete the broker row last. If the worker crashes after the durable job reaches READY,
+    // redelivery takes the terminal fast path above instead of repeating the provider action.
+    await completeDeployment(db,deployment.id);
     return 'succeeded';
   } catch (error) {
     return fail(db,deployment,job,error,step.id);
@@ -189,9 +200,45 @@ export async function executeServerProvisioning(
     if (!['PROVISION','REINSTALL'].includes(job.operation)) {
       return { outcome: await executeLifecycleAction(db,deployment,job,adapter,server) };
     }
+    if (!server.plan_id || !server.region_id || !server.architecture) {
+      throw new ProviderError('INVALID_CONFIGURATION','Server plan, region, or architecture is missing',false);
+    }
+    const payload = deployment.payload && typeof deployment.payload === 'object'
+      ? deployment.payload as Record<string, unknown>
+      : {};
+    if (job.operation === 'REINSTALL') {
+      if (typeof payload.targetOperatingSystemVersionId !== 'string') {
+        throw new ProviderError('INVALID_CONFIGURATION','Reinstall target operating-system version is missing',false);
+      }
+      if (payload.targetArchitecture !== server.architecture) {
+        throw new ProviderError('INVALID_CONFIGURATION','A reinstall cannot change the server architecture',false);
+      }
+    }
+    const targetVersionId = job.operation === 'REINSTALL'
+      ? payload.targetOperatingSystemVersionId as string
+      : server.operating_system_version_id;
     const image: ServerOsImageRow = await resolveVerifiedProviderImage(db,{
-      osImageId: job.os_image_id,provider,architecture: server.architecture,
+      osImageId: job.os_image_id,
+      provider,
+      architecture: server.architecture,
+      operatingSystemVersionId: targetVersionId,
+      regionId: server.region_id,
+      datacenterId: server.datacenter_id,
     });
+    // Re-check the complete purchasable chain at execution time. A provider, product, region,
+    // location, OS, image, or template may have been disabled between payment and worker claim.
+    const availableConfiguration = await resolveAvailableConfiguration(db,{
+      planId: server.plan_id,
+      providerId: provider.id,
+      regionId: server.region_id,
+      datacenterId: server.datacenter_id,
+      operatingSystemVersionId: image.operating_system_version_id,
+      architecture: server.architecture,
+      serverType: server.server_type,
+    });
+    if (!availableConfiguration) {
+      throw new ProviderError('INVALID_CONFIGURATION','The paid server configuration is no longer deployable',false);
+    }
     const steps = await createDeploymentSteps(db,deployment.id,job.operation === 'REINSTALL' ? REINSTALL_STEPS : PROVISION_STEPS);
     const run = async (index: number,fn: () => Promise<void>) => {
       const step = steps[index];
@@ -216,6 +263,12 @@ export async function executeServerProvisioning(
         const identity = await ensureAgentIdentity(db,server,options);
         agentUserData = identity.userData;
       }
+      await recordAuditBestEffort(db,{
+        actorId:deployment.requested_by,
+        action:job.operation==='REINSTALL'?'SERVER_REINSTALL_STARTED':'SERVER_PROVISIONING_STARTED',
+        resourceType:'server',resourceId:server.id,
+        metadata:{jobId:job.id,attempt:deployment.attempts,providerId:provider.id},
+      });
     });
 
     await run(1,async () => {
@@ -225,6 +278,10 @@ export async function executeServerProvisioning(
       if (availableImage.architecture && availableImage.architecture !== server.architecture) {
         throw new ProviderError('INVALID_CONFIGURATION','Provider image architecture does not match the server architecture',false);
       }
+      await recordAuditBestEffort(db,{
+        actorId:deployment.requested_by,action:'OS_IMAGE_SELECTED',resourceType:'server',resourceId:server.id,
+        metadata:{jobId:job.id,providerId:provider.id,osImageId:image.id,architecture:image.architecture},
+      });
     });
 
     const location = await db.query<{ region_code: string; datacenter_code: string | null }>(
@@ -257,13 +314,23 @@ export async function executeServerProvisioning(
         await updateCustomerServerProvisioning(db,server.id,{ status: 'provisioning',provisioningStatus: 'CREATING',providerServerId: remote.id,ipAddress: remote.ipAddress });
         server.provider_server_id = remote.id;
         healthEvidenceAfterMs = Date.now();
+        await recordAuditBestEffort(db,{
+          actorId:deployment.requested_by,action:'SERVER_CREATED_AT_PROVIDER',resourceType:'server',resourceId:server.id,
+          metadata:{jobId:job.id,providerId:provider.id,providerServerId:remote.id},
+        });
       });
-      await run(3,async () => stage(db,job,deployment.id,'INSTALLING_OS','Provider accepted the selected operating-system image'));
+      await run(3,async () => {
+        await stage(db,job,deployment.id,'INSTALLING_OS','Provider accepted the selected operating-system image');
+        await recordAuditBestEffort(db,{actorId:deployment.requested_by,action:'OS_INSTALL_STARTED',resourceType:'server',resourceId:server.id,metadata:{jobId:job.id,osImageId:image.id}});
+        await stage(db,job,deployment.id,'CONFIGURING','Cloud-init configuration for hostname, SSH access and monitoring was attached to the provider build');
+      });
     } else {
       await run(2,async () => {
         if (!server.provider_server_id) throw new ProviderError('INVALID_CONFIGURATION','Cannot reinstall a server without a provider resource id',false);
         await stage(db,job,deployment.id,'INSTALLING_OS','Starting destructive operating-system reinstall');
+        await recordAuditBestEffort(db,{actorId:deployment.requested_by,action:'OS_INSTALL_STARTED',resourceType:'server',resourceId:server.id,metadata:{jobId:job.id,osImageId:image.id}});
         await adapter.reinstallServer({ providerServerId: server.provider_server_id,idempotencyKey:job.idempotency_key,isRetry:deployment.attempts>1,image,architecture: createInput.architecture,hostname: server.hostname,sshPublicKeys: sshKeys,userData: createInput.userData });
+        await stage(db,job,deployment.id,'CONFIGURING','Cloud-init configuration for hostname, SSH access and monitoring was attached to the provider rebuild');
         healthEvidenceAfterMs = Date.now();
       });
     }
@@ -272,9 +339,12 @@ export async function executeServerProvisioning(
     let healthIp = '';
     await run(waitStepIndex,async () => {
       await stage(db,job,deployment.id,'NETWORK_CONFIGURING','Waiting for provider power and network state');
+      await recordAuditBestEffort(db,{actorId:deployment.requested_by,action:'SERVER_HEALTH_CHECK_STARTED',resourceType:'server',resourceId:server.id,metadata:{jobId:job.id}});
       // First health pass also verifies SSH and the authenticated agent where required.
       const result = await waitForServerHealth(db,server,adapter,image,options,healthEvidenceAfterMs);
       healthIp = result.ipAddress;
+      await stage(db,job,deployment.id,'SECURITY_CONFIGURING','Authenticated agent confirmed hostname, SSH reachability, security baseline and monitoring');
+      await recordAuditBestEffort(db,{actorId:deployment.requested_by,action:'OS_INSTALL_COMPLETED',resourceType:'server',resourceId:server.id,metadata:{jobId:job.id,osImageId:image.id}});
     });
     await run(waitStepIndex + 1,async () => {
       await stage(db,job,deployment.id,'HEALTH_CHECK','All provider, network, SSH, OS, hostname, security and monitoring checks passed');

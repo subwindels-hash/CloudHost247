@@ -35,7 +35,14 @@ export class ImageResolutionError extends Error {
  */
 export async function resolveVerifiedProviderImage(
   db: Queryable,
-  input: { osImageId: string | null; provider: InfrastructureProviderRow; architecture: string | null }
+  input: {
+    osImageId: string | null;
+    provider: InfrastructureProviderRow;
+    architecture: string | null;
+    operatingSystemVersionId?: string | null;
+    regionId?: string | null;
+    datacenterId?: string | null;
+  }
 ): Promise<ServerOsImageRow> {
   const image = input.osImageId ? await findOsImageById(db, input.osImageId) : null;
   if (!image || image.status !== 'ACTIVE' || !image.verified_at) {
@@ -47,6 +54,21 @@ export async function resolveVerifiedProviderImage(
       'Provider image does not match the selected provider/architecture',
       false
     );
+  }
+  if (input.operatingSystemVersionId !== undefined && image.operating_system_version_id !== input.operatingSystemVersionId) {
+    throw new ProviderError('INVALID_CONFIGURATION', 'Provider image does not match the selected operating-system version', false);
+  }
+  if (input.regionId !== undefined && image.region_id !== null && image.region_id !== input.regionId) {
+    throw new ProviderError('INVALID_CONFIGURATION', 'Provider image does not support the selected region', false);
+  }
+  if (input.datacenterId !== undefined && image.datacenter_id !== null && image.datacenter_id !== input.datacenterId) {
+    throw new ProviderError('INVALID_CONFIGURATION', 'Provider image does not support the selected datacenter', false);
+  }
+  // A datacenter-scoped mapping without its parent region is malformed legacy data. The admin API
+  // prevents creating this combination, but execution still rejects it rather than trusting a row
+  // written directly or by an older release.
+  if (image.datacenter_id !== null && (image.region_id === null || image.region_id !== input.regionId)) {
+    throw new ProviderError('INVALID_CONFIGURATION', 'Provider image datacenter scope does not match its region', false);
   }
   return image;
 }

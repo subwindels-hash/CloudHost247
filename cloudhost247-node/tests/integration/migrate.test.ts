@@ -77,6 +77,8 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0048_operating_system_logo_assets.sql',
     '0049_notification_outbox_delivery_scheduling.sql',
     '0050_server_state_reconciliation.sql',
+    '0051_operating_system_logo_assets.sql',
+    '0052_serialize_server_infrastructure_operations.sql',
   ];
 
   it('finds the committed migration files in order', () => {

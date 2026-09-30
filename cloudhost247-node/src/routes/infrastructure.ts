@@ -3,6 +3,7 @@ import { z } from 'zod';
 import type { Env } from '../config/env';
 import { getPool } from '../db/pool';
 import type { Queryable } from '../db/types';
+import { withTransaction } from '../db/transaction';
 import { authenticate } from '../lib/require-auth';
 import { requireRole } from '../lib/require-role';
 import { auditRequest } from '../lib/audit';
@@ -57,6 +58,14 @@ import {
   summarizeNotificationOutbox,
 } from '../services/notification-outbox-service';
 import { sweepOperatingSystemLifecycle } from '../services/os-lifecycle-service';
+import {
+  deleteOperatingSystemLogo,
+  findOperatingSystemLogo,
+  MAX_OS_LOGO_BYTES,
+  upsertOperatingSystemLogo,
+  validateOsLogoBytes,
+  type OsLogoContentType,
+} from '../db/operating-system-logos';
 import {
   cancelProvisioningJob,
   findProvisioningJobById,
@@ -169,6 +178,13 @@ const patchImageSchema = z.object({
   providerImageId: z.string().max(512).nullable().optional(),providerTemplateId: z.string().max(512).nullable().optional(),architecture: architecture.optional(),
   regionId: id.nullable().optional(),datacenterId: id.nullable().optional(),status: imageStatus.optional(),metadata: z.record(z.unknown()).optional(),
 });
+const logoUploadSchema = z.object({
+  fileName: z.string().trim().min(1).max(255),
+  contentType: z.enum(['image/png','image/jpeg','image/webp']),
+  // Base64 is larger than the decoded payload. The byte-level helper still enforces the exact
+  // 512 KiB ceiling and verifies the image magic bytes.
+  contentBase64: z.string().min(4).max(Math.ceil(MAX_OS_LOGO_BYTES / 3) * 4 + 8),
+});
 
 /**
  * Power and lifecycle verbs every adapter in the registry implements directly. Everything else is
@@ -178,7 +194,8 @@ const ALWAYS_AVAILABLE_CAPABILITIES = new Set(['start','stop','reboot','shutdown
 
 async function validateProductConfigurationReferences(
   db: Queryable,
-  input: { planId:string;providerId:string;regionId:string;datacenterId?:string|null;operatingSystemVersionId:string;architecture:'x86_64'|'arm64';serverType:'VPS'|'DEDICATED'|'CLOUD';metadata?:Record<string,unknown> }
+  input: { planId:string;providerId:string;regionId:string;datacenterId?:string|null;operatingSystemVersionId:string;architecture:'x86_64'|'arm64';serverType:'VPS'|'DEDICATED'|'CLOUD';metadata?:Record<string,unknown> },
+  requireActive = false
 ) {
   const [plan,provider,region,datacenter,version]=await Promise.all([
     findPlanById(db,input.planId),findProviderById(db,input.providerId),findRegionById(db,input.regionId),
@@ -193,6 +210,14 @@ async function validateProductConfigurationReferences(
   const os=await findOperatingSystem(db,version.operating_system_id);
   const supported=input.serverType==='VPS'?os?.is_vps_supported:input.serverType==='DEDICATED'?os?.is_dedicated_supported:os?.is_cloud_supported;
   if(!supported)throw new ValidationError('Operating system does not support the selected server type');
+  if(requireActive){
+    if(plan.status!=='active')throw new ValidationError('Product plan must be active before this template can be enabled');
+    if(provider.status!=='ACTIVE')throw new ValidationError('Provider must be active before this template can be enabled');
+    if(region.status!=='ACTIVE')throw new ValidationError('Region must be active before this template can be enabled');
+    if(datacenter&&datacenter.status!=='ACTIVE')throw new ValidationError('Datacenter must be active before this template can be enabled');
+    if(!os||os.status!=='ACTIVE')throw new ValidationError('Operating system must be active before this template can be enabled');
+    if(!['ACTIVE','MAINTENANCE','EOL_WARNING'].includes(version.status))throw new ValidationError('OS version is not available for new deployments');
+  }
   if(input.metadata){
     for(const [key,min] of [['cpuCores',1],['memoryMb',256],['storageMb',1024]] as const){
       const value=input.metadata[key];
@@ -217,21 +242,37 @@ async function validateProductConfigurationReferences(
   }
 }
 
+async function validateImageMappingReferences(
+  db: Queryable,
+  input: {
+    providerId:string;operatingSystemVersionId:string;architecture:'x86_64'|'arm64';
+    regionId?:string|null;datacenterId?:string|null;
+  },
+  requireActiveLocation = false
+) {
+  const [provider,version,region,datacenter]=await Promise.all([
+    findProviderById(db,input.providerId),findOperatingSystemVersion(db,input.operatingSystemVersionId),
+    input.regionId?findRegionById(db,input.regionId):null,input.datacenterId?findDatacenterById(db,input.datacenterId):null,
+  ]);
+  if(!provider)throw new ValidationError('Provider does not exist');
+  if(!version||!version.architecture_support.includes(input.architecture))throw new ValidationError('OS version does not support the selected architecture');
+  if(input.regionId&&(!region||region.provider_id!==provider.id))throw new ValidationError('Region does not belong to the selected provider');
+  if(input.datacenterId&&(!datacenter||!region||datacenter.region_id!==region.id))throw new ValidationError('Datacenter does not belong to the selected region');
+  if(requireActiveLocation){
+    if(region&&region.status!=='ACTIVE')throw new ValidationError('Region must be active before an image can be enabled');
+    if(datacenter&&datacenter.status!=='ACTIVE')throw new ValidationError('Datacenter must be active before an image can be enabled');
+  }
+  return {provider,version,region,datacenter};
+}
+
 async function validateImage(db: Queryable,imageId: string,actorId: string) {
   const image = await findOsImageById(db,imageId);
   if (!image) throw new NotFoundError('No OS image mapping was found with that id');
-  const [provider,version,region,datacenter] = await Promise.all([
-    findProviderById(db,image.provider_id),
-    findOperatingSystemVersion(db,image.operating_system_version_id),
-    image.region_id ? findRegionById(db,image.region_id) : null,
-    image.datacenter_id ? findDatacenterById(db,image.datacenter_id) : null,
-  ]);
-  if (!provider) throw new ValidationError('Provider does not exist');
+  const {provider} = await validateImageMappingReferences(db,{
+    providerId:image.provider_id,operatingSystemVersionId:image.operating_system_version_id,
+    architecture:image.architecture,regionId:image.region_id,datacenterId:image.datacenter_id,
+  },true);
   if (provider.status !== 'ACTIVE') throw new ValidationError('Provider must be active before an image can be verified');
-  if (!version) throw new ValidationError('Operating-system version does not exist');
-  if (!version.architecture_support.includes(image.architecture)) throw new ValidationError('Architecture is not supported by the OS version');
-  if (region && region.provider_id !== provider.id) throw new ValidationError('Region does not belong to the selected provider');
-  if (datacenter && (!region || datacenter.region_id !== region.id)) throw new ValidationError('Datacenter does not belong to the selected region');
   const adapter = createInfrastructureProviderAdapter(provider);
   try {
     await adapter.validateConfiguration();
@@ -260,11 +301,32 @@ export async function registerInfrastructureRoutes(app: FastifyInstance,env: Env
        JOIN server_product_configurations c ON c.operating_system_version_id=v.id AND c.provider_id=p.id
          AND c.architecture=img.architecture AND c.status='ACTIVE'
          AND (img.region_id IS NULL OR img.region_id=c.region_id)
-         AND (img.datacenter_id IS NULL OR img.datacenter_id=c.datacenter_id)
+         AND (img.datacenter_id IS NULL OR (img.datacenter_id=c.datacenter_id AND img.region_id=c.region_id))
+       JOIN infrastructure_regions r ON r.id=c.region_id AND r.provider_id=p.id AND r.status='ACTIVE'
+       JOIN product_plans plan ON plan.id=c.plan_id AND plan.status='active'
+       JOIN products product ON product.id=plan.product_id AND product.status='active' AND product.visibility='public'
+       LEFT JOIN infrastructure_datacenters dc ON dc.id=c.datacenter_id
        WHERE os.status='ACTIVE' AND v.status IN ('ACTIVE','MAINTENANCE','EOL_WARNING')
+         AND ((c.server_type='VPS' AND os.is_vps_supported=true)
+           OR (c.server_type='DEDICATED' AND os.is_dedicated_supported=true)
+           OR (c.server_type='CLOUD' AND os.is_cloud_supported=true))
+         AND (c.datacenter_id IS NULL OR (dc.status='ACTIVE' AND dc.region_id=c.region_id))
        ORDER BY os.sort_order,os.name`
     );
     return { operatingSystems: rows.rows };
+  });
+  app.get<{ Params: { id: string } }>('/api/v1/operating-systems/:id/logo',async (request,reply) => {
+    const osId=parse(id,request.params.id);
+    const asset=await findOperatingSystemLogo(db,osId);
+    if(!asset)throw new NotFoundError('No uploaded logo was found for that operating system');
+    const etag=`\"${asset.sha256}\"`;
+    if(request.headers['if-none-match']===etag){reply.code(304);return null;}
+    reply.header('Content-Type',asset.content_type);
+    reply.header('Content-Length',String(asset.byte_size));
+    reply.header('Cache-Control','public, max-age=3600, must-revalidate');
+    reply.header('ETag',etag);
+    reply.header('X-Content-Type-Options','nosniff');
+    return Buffer.from(asset.content);
   });
   app.get<{ Params: { id: string } }>('/api/v1/operating-systems/:id',async (request) => {
     const operatingSystem = await findOperatingSystem(db,request.params.id);
@@ -277,13 +339,22 @@ export async function registerInfrastructureRoutes(app: FastifyInstance,env: Env
     const result = await db.query(
       `SELECT DISTINCT v.id,v.version,v.display_name,v.release_name,v.architecture_support,v.status,v.is_default,v.is_recommended,v.is_lts,v.release_date,v.end_of_life_date
        FROM operating_system_versions v
+       JOIN operating_systems os_support ON os_support.id=v.operating_system_id AND os_support.status='ACTIVE'
        JOIN server_os_images img ON img.operating_system_version_id=v.id AND img.status='ACTIVE' AND img.verified_at IS NOT NULL
        JOIN infrastructure_providers p ON p.id=img.provider_id AND p.status='ACTIVE'
        JOIN server_product_configurations c ON c.operating_system_version_id=v.id AND c.provider_id=p.id
          AND c.architecture=img.architecture AND c.status='ACTIVE'
          AND (img.region_id IS NULL OR img.region_id=c.region_id)
-         AND (img.datacenter_id IS NULL OR img.datacenter_id=c.datacenter_id)
+         AND (img.datacenter_id IS NULL OR (img.datacenter_id=c.datacenter_id AND img.region_id=c.region_id))
+       JOIN infrastructure_regions r ON r.id=c.region_id AND r.provider_id=p.id AND r.status='ACTIVE'
+       JOIN product_plans plan ON plan.id=c.plan_id AND plan.status='active'
+       JOIN products product ON product.id=plan.product_id AND product.status='active' AND product.visibility='public'
+       LEFT JOIN infrastructure_datacenters dc ON dc.id=c.datacenter_id
        WHERE v.operating_system_id=$1 AND v.status IN ('ACTIVE','MAINTENANCE','EOL_WARNING')
+         AND ((c.server_type='VPS' AND os_support.is_vps_supported=true)
+           OR (c.server_type='DEDICATED' AND os_support.is_dedicated_supported=true)
+           OR (c.server_type='CLOUD' AND os_support.is_cloud_supported=true))
+         AND (c.datacenter_id IS NULL OR (dc.status='ACTIVE' AND dc.region_id=c.region_id))
        ORDER BY v.is_default DESC,v.is_recommended DESC,v.display_name DESC`,[operatingSystem.id]
     );
     return { operatingSystem,versions: result.rows };
@@ -309,6 +380,8 @@ export async function registerInfrastructureRoutes(app: FastifyInstance,env: Env
     const query = parse(z.object({ serverType: serverType.optional(),providerId: id.optional(),regionId: id.optional(),architecture: architecture.optional() }),request.query ?? {});
     const plan = await findPlanById(db,parse(id,request.params.id));
     if (!plan || plan.status !== 'active') throw new NotFoundError('No server plan was found with that id');
+    const publicProduct=await db.query(`SELECT 1 FROM products WHERE id=$1 AND status='active' AND visibility='public'`,[plan.product_id]);
+    if(!publicProduct.rows[0])throw new NotFoundError('No server plan was found with that id');
     const rows = await listAvailableConfigurations(db,{ planId: plan.id,...query });
     return {
       plan: { id: plan.id,name: plan.name,description: plan.description },
@@ -318,6 +391,10 @@ export async function registerInfrastructureRoutes(app: FastifyInstance,env: Env
   });
   app.get<{ Params: { id: string } }>('/api/v1/server-products/:id/operating-systems',async (request) => {
     const planId = parse(id,request.params.id);
+    const plan=await findPlanById(db,planId);
+    if(!plan||plan.status!=='active')throw new NotFoundError('No server plan was found with that id');
+    const publicProduct=await db.query(`SELECT 1 FROM products WHERE id=$1 AND status='active' AND visibility='public'`,[plan.product_id]);
+    if(!publicProduct.rows[0])throw new NotFoundError('No server plan was found with that id');
     const rows = await listAvailableConfigurations(db,{ planId });
     return { operatingSystems: groupConfiguration(rows).operatingSystems };
   });
@@ -357,15 +434,79 @@ export async function registerInfrastructureRoutes(app: FastifyInstance,env: Env
     await auditRequest(db,request,auth.userId,{ action: 'OS_UPDATED',resourceType: 'operating_system',resourceId: osId,metadata: { status: operatingSystem.status } });
     return { operatingSystem };
   });
+  app.post<{ Params: { id: string } }>('/api/v1/admin/operating-systems/:id/logo',async (request,reply) => {
+    const auth=await admin(request);const osId=parse(id,request.params.id);
+    if(!await findOperatingSystem(db,osId))throw new NotFoundError('No operating system was found with that id');
+    const input=parse(logoUploadSchema,request.body);
+    if(!/^[A-Za-z0-9+/]+={0,2}$/.test(input.contentBase64)||input.contentBase64.length%4!==0){
+      throw new ValidationError('Logo content must be canonical base64');
+    }
+    const content=Buffer.from(input.contentBase64,'base64');
+    try{validateOsLogoBytes(input.contentType as OsLogoContentType,content);}
+    catch(error){throw new ValidationError(error instanceof Error?error.message:'Invalid logo image');}
+    const logoUrl=`/api/v1/operating-systems/${osId}/logo`;
+    const asset=await withTransaction(db,async(tx)=>{
+      const saved=await upsertOperatingSystemLogo(tx,{
+        operatingSystemId:osId,contentType:input.contentType as OsLogoContentType,content,
+        originalFilename:input.fileName,uploadedBy:auth.userId,
+      });
+      await updateOperatingSystem(tx,osId,{logoUrl});
+      return saved;
+    });
+    await auditRequest(db,request,auth.userId,{
+      action:'OS_LOGO_UPLOADED',resourceType:'operating_system',resourceId:osId,
+      metadata:{contentType:asset.content_type,byteSize:asset.byte_size,sha256:asset.sha256},
+    });
+    reply.code(201);return{logo:{url:logoUrl,contentType:asset.content_type,byteSize:asset.byte_size,sha256:asset.sha256}};
+  });
+  app.delete<{ Params: { id: string } }>('/api/v1/admin/operating-systems/:id/logo',async (request,reply) => {
+    const auth=await admin(request);const osId=parse(id,request.params.id);
+    const operatingSystem=await findOperatingSystem(db,osId);if(!operatingSystem)throw new NotFoundError();
+    const deleted=await withTransaction(db,async(tx)=>{
+      const removed=await deleteOperatingSystemLogo(tx,osId);
+      if(removed&&operatingSystem.logo_url===`/api/v1/operating-systems/${osId}/logo`)await updateOperatingSystem(tx,osId,{logoUrl:null});
+      return removed;
+    });
+    if(!deleted)throw new NotFoundError('No uploaded logo was found for that operating system');
+    await auditRequest(db,request,auth.userId,{action:'OS_LOGO_DELETED',resourceType:'operating_system',resourceId:osId});
+    reply.code(204);return null;
+  });
   app.delete<{ Params: { id: string } }>('/api/v1/admin/operating-systems/:id',async (request,reply) => {
     const auth = await admin(request); const osId = parse(id,request.params.id);
     const existing = await findOperatingSystem(db,osId); if (!existing) throw new NotFoundError();
-    if (!await deleteOperatingSystemIfSafe(db,osId)) throw new ConflictError('This OS has version or server history and must be archived instead');
+    if(existing.status!=='ARCHIVED')throw new ConflictError('Archive the operating system before deleting it');
+    if (!await deleteOperatingSystemIfSafe(db,osId)) throw new ConflictError('This OS has version or server history and must remain archived');
     await auditRequest(db,request,auth.userId,{ action: 'OS_DELETED',resourceType: 'operating_system',resourceId: osId }); reply.code(204); return null;
   });
   app.get<{ Params: { id: string } }>('/api/v1/admin/operating-systems/:id/versions',async (request) => {
     await admin(request); const operatingSystem = await findOperatingSystem(db,request.params.id); if (!operatingSystem) throw new NotFoundError();
-    return { operatingSystem,versions: await listOperatingSystemVersions(db,operatingSystem.id,{ includeArchived: true }) };
+    const versions=await listOperatingSystemVersions(db,operatingSystem.id,{ includeArchived: true });
+    const stats=await db.query<{id:string;provider_image_count:number;active_image_count:number;available_region_count:number}>(`
+      SELECT v.id,
+             count(DISTINCT i.id)::int provider_image_count,
+             count(DISTINCT i.id) FILTER(WHERE i.status='ACTIVE' AND i.verified_at IS NOT NULL)::int active_image_count,
+             count(DISTINCT c.region_id) FILTER(WHERE c.status='ACTIVE' AND i.status='ACTIVE' AND i.verified_at IS NOT NULL
+               AND p.status='ACTIVE' AND r.status='ACTIVE' AND plan.status='active'
+               AND product.status='active' AND product.visibility='public'
+               AND (c.datacenter_id IS NULL OR dc.status='ACTIVE'))::int available_region_count
+      FROM operating_system_versions v
+      LEFT JOIN server_os_images i ON i.operating_system_version_id=v.id
+      LEFT JOIN server_product_configurations c ON c.operating_system_version_id=v.id
+        AND c.provider_id=i.provider_id AND c.architecture=i.architecture
+        AND (i.region_id IS NULL OR i.region_id=c.region_id)
+        AND (i.datacenter_id IS NULL OR i.datacenter_id=c.datacenter_id)
+      LEFT JOIN infrastructure_providers p ON p.id=c.provider_id
+      LEFT JOIN infrastructure_regions r ON r.id=c.region_id AND r.provider_id=p.id
+      LEFT JOIN infrastructure_datacenters dc ON dc.id=c.datacenter_id AND dc.region_id=r.id
+      LEFT JOIN product_plans plan ON plan.id=c.plan_id
+      LEFT JOIN products product ON product.id=plan.product_id
+      WHERE v.operating_system_id=$1 GROUP BY v.id`,[operatingSystem.id]);
+    const byId=new Map(stats.rows.map((row)=>[row.id,row]));
+    return { operatingSystem,versions: versions.map((version)=>({
+      ...version,provider_image_count:byId.get(version.id)?.provider_image_count??0,
+      active_image_count:byId.get(version.id)?.active_image_count??0,
+      available_region_count:byId.get(version.id)?.available_region_count??0,
+    })) };
   });
   app.post<{ Params: { id: string } }>('/api/v1/admin/operating-systems/:id/versions',async (request,reply) => {
     const auth = await admin(request); const osId = parse(id,request.params.id); if (!await findOperatingSystem(db,osId)) throw new NotFoundError();
@@ -373,8 +514,14 @@ export async function registerInfrastructureRoutes(app: FastifyInstance,env: Env
     await auditRequest(db,request,auth.userId,{ action: 'OS_VERSION_CREATED',resourceType: 'operating_system_version',resourceId: version.id }); reply.code(201); return { version };
   });
   app.patch<{ Params: { id: string } }>('/api/v1/admin/operating-system-versions/:id',async (request) => {
-    const auth = await admin(request); const versionId = parse(id,request.params.id); const version = await updateOperatingSystemVersion(db,versionId,parse(patchVersionSchema,request.body));
-    if (!version) throw new NotFoundError(); await auditRequest(db,request,auth.userId,{ action: 'OS_VERSION_UPDATED',resourceType: 'operating_system_version',resourceId: versionId,metadata: { status: version.status } }); return { version };
+    const auth=await admin(request);const versionId=parse(id,request.params.id);const patch=parse(patchVersionSchema,request.body);
+    if(patch.status==='ACTIVE'){
+      const existing=await findOperatingSystemVersion(db,versionId);if(!existing)throw new NotFoundError();
+      const operatingSystem=await findOperatingSystem(db,existing.operating_system_id);
+      if(!operatingSystem||operatingSystem.status!=='ACTIVE')throw new ValidationError('Operating system must be active before a version can be activated');
+    }
+    const version=await updateOperatingSystemVersion(db,versionId,patch);
+    if(!version)throw new NotFoundError();await auditRequest(db,request,auth.userId,{action:'OS_VERSION_UPDATED',resourceType:'operating_system_version',resourceId:versionId,metadata:{status:version.status}});return{version};
   });
 
   // Providers / regions / datacenters. Secret values are never accepted by these schemas.
@@ -438,26 +585,59 @@ export async function registerInfrastructureRoutes(app: FastifyInstance,env: Env
     }
     const provider=await updateProvider(db,providerId,patch);await auditRequest(db,request,auth.userId,{action:'PROVIDER_UPDATED',resourceType:'provider',resourceId:providerId,metadata:{status:provider?.status}});return {provider};
   });
-  app.post('/api/v1/admin/regions',async (request,reply) => {const auth=await admin(request);const input=parse(regionSchema,request.body);if(!await findProviderById(db,input.providerId))throw new ValidationError('Provider does not exist');const region=await createRegion(db,input);await auditRequest(db,request,auth.userId,{action:'REGION_CREATED',resourceType:'region',resourceId:region.id});reply.code(201);return {region};});
-  app.patch<{ Params: { id: string } }>('/api/v1/admin/regions/:id',async(request)=>{const auth=await admin(request);const regionId=parse(id,request.params.id);const patch=parse(regionSchema.omit({providerId:true,code:true}).partial(),request.body);const region=await updateRegion(db,regionId,patch);if(!region)throw new NotFoundError();await auditRequest(db,request,auth.userId,{action:'REGION_UPDATED',resourceType:'region',resourceId:regionId});return{region};});
-  app.post('/api/v1/admin/datacenters',async(request,reply)=>{const auth=await admin(request);const input=parse(datacenterSchema,request.body);const region=await findRegionById(db,input.regionId);if(!region)throw new ValidationError('Region does not exist');const datacenter=await createDatacenter(db,input);await auditRequest(db,request,auth.userId,{action:'DATACENTER_CREATED',resourceType:'datacenter',resourceId:datacenter.id});reply.code(201);return{datacenter};});
-  app.patch<{Params:{id:string}}>('/api/v1/admin/datacenters/:id',async(request)=>{const auth=await admin(request);const datacenterId=parse(id,request.params.id);const patch=parse(datacenterSchema.omit({regionId:true,code:true}).partial(),request.body);const datacenter=await updateDatacenter(db,datacenterId,patch);if(!datacenter)throw new NotFoundError();await auditRequest(db,request,auth.userId,{action:'DATACENTER_UPDATED',resourceType:'datacenter',resourceId:datacenterId});return{datacenter};});
+  app.post('/api/v1/admin/regions',async (request,reply) => {
+    const auth=await admin(request);const input=parse(regionSchema,request.body);const provider=await findProviderById(db,input.providerId);
+    if(!provider)throw new ValidationError('Provider does not exist');
+    if(input.status==='ACTIVE'&&provider.status!=='ACTIVE')throw new ValidationError('Provider must be active before its region can be activated');
+    const region=await createRegion(db,input);await auditRequest(db,request,auth.userId,{action:'REGION_CREATED',resourceType:'region',resourceId:region.id});reply.code(201);return {region};
+  });
+  app.patch<{ Params: { id: string } }>('/api/v1/admin/regions/:id',async(request)=>{
+    const auth=await admin(request);const regionId=parse(id,request.params.id);const patch=parse(regionSchema.omit({providerId:true,code:true}).partial(),request.body);
+    const existing=await findRegionById(db,regionId);if(!existing)throw new NotFoundError();
+    if(patch.status==='ACTIVE'){
+      const provider=await findProviderById(db,existing.provider_id);
+      if(!provider||provider.status!=='ACTIVE')throw new ValidationError('Provider must be active before its region can be activated');
+    }
+    const region=await updateRegion(db,regionId,patch);await auditRequest(db,request,auth.userId,{action:'REGION_UPDATED',resourceType:'region',resourceId:regionId});return{region};
+  });
+  app.post('/api/v1/admin/datacenters',async(request,reply)=>{
+    const auth=await admin(request);const input=parse(datacenterSchema,request.body);const region=await findRegionById(db,input.regionId);
+    if(!region)throw new ValidationError('Region does not exist');
+    if(input.status==='ACTIVE'){
+      const provider=await findProviderById(db,region.provider_id);
+      if(region.status!=='ACTIVE'||provider?.status!=='ACTIVE')throw new ValidationError('Provider and region must be active before a datacenter can be activated');
+    }
+    const datacenter=await createDatacenter(db,input);await auditRequest(db,request,auth.userId,{action:'DATACENTER_CREATED',resourceType:'datacenter',resourceId:datacenter.id});reply.code(201);return{datacenter};
+  });
+  app.patch<{Params:{id:string}}>('/api/v1/admin/datacenters/:id',async(request)=>{
+    const auth=await admin(request);const datacenterId=parse(id,request.params.id);const patch=parse(datacenterSchema.omit({regionId:true,code:true}).partial(),request.body);
+    const existing=await findDatacenterById(db,datacenterId);if(!existing)throw new NotFoundError();
+    if(patch.status==='ACTIVE'){
+      const region=await findRegionById(db,existing.region_id);const provider=region?await findProviderById(db,region.provider_id):null;
+      if(!region||region.status!=='ACTIVE'||provider?.status!=='ACTIVE')throw new ValidationError('Provider and region must be active before a datacenter can be activated');
+    }
+    const datacenter=await updateDatacenter(db,datacenterId,patch);await auditRequest(db,request,auth.userId,{action:'DATACENTER_UPDATED',resourceType:'datacenter',resourceId:datacenterId});return{datacenter};
+  });
 
   // Provider image mappings: enabling always performs a live provider validation first.
-  app.get('/api/v1/admin/os-images',async(request)=>{await admin(request);const query=parse(z.object({providerId:id.optional(),versionId:id.optional(),status:imageStatus.optional()}),request.query??{});return{images:await listOsImages(db,query)};});
+  app.get('/api/v1/admin/os-images',async(request)=>{await admin(request);const query=parse(z.object({providerId:id.optional(),versionId:id.optional(),operatingSystemId:id.optional(),status:imageStatus.optional()}),request.query??{});return{images:await listOsImages(db,query)};});
   app.post('/api/v1/admin/os-images',async(request,reply)=>{
     const auth=await admin(request);const input=parse(imageSchema,request.body);
-    const [provider,version,region,datacenter]=await Promise.all([findProviderById(db,input.providerId),findOperatingSystemVersion(db,input.operatingSystemVersionId),input.regionId?findRegionById(db,input.regionId):null,input.datacenterId?findDatacenterById(db,input.datacenterId):null]);
-    if(!provider)throw new ValidationError('Provider does not exist');
-    if(!version||!version.architecture_support.includes(input.architecture))throw new ValidationError('OS version does not support the selected architecture');
-    if(input.regionId&&(!region||region.provider_id!==provider.id))throw new ValidationError('Region does not belong to the selected provider');
-    if(input.datacenterId&&(!datacenter||!region||datacenter.region_id!==region.id))throw new ValidationError('Datacenter does not belong to the selected region');
+    await validateImageMappingReferences(db,input);
     const image=await createOsImage(db,input);await auditRequest(db,request,auth.userId,{action:'OS_IMAGE_CREATED',resourceType:'os_image',resourceId:image.id});reply.code(201);return{image};
   });
   app.patch<{Params:{id:string}}>('/api/v1/admin/os-images/:id',async(request)=>{
     const auth=await admin(request);const imageId=parse(id,request.params.id);const patch=parse(patchImageSchema,request.body);const existing=await findOsImageById(db,imageId);if(!existing)throw new NotFoundError();
     const candidateImageId=patch.providerImageId!==undefined?patch.providerImageId:existing.provider_image_id;const candidateTemplateId=patch.providerTemplateId!==undefined?patch.providerTemplateId:existing.provider_template_id;if(!candidateImageId&&!candidateTemplateId)throw new ValidationError('providerImageId or providerTemplateId is required');
     const mappingChanged=patch.providerImageId!==undefined||patch.providerTemplateId!==undefined||patch.architecture!==undefined||patch.regionId!==undefined||patch.datacenterId!==undefined;
+    if(mappingChanged){
+      await validateImageMappingReferences(db,{
+        providerId:existing.provider_id,operatingSystemVersionId:existing.operating_system_version_id,
+        architecture:patch.architecture??existing.architecture,
+        regionId:patch.regionId!==undefined?patch.regionId:existing.region_id,
+        datacenterId:patch.datacenterId!==undefined?patch.datacenterId:existing.datacenter_id,
+      });
+    }
     if(mappingChanged&&patch.status==='ACTIVE')throw new ValidationError('Save mapping changes as draft, test them, then enable the image');
     if(patch.status==='ACTIVE')await validateImage(db,imageId,auth.userId);
     const image=await updateOsImage(db,imageId,mappingChanged?{...patch,status:'DRAFT',verifiedAt:null,verifiedBy:null,verificationError:null}:patch);
@@ -487,7 +667,7 @@ export async function registerInfrastructureRoutes(app: FastifyInstance,env: Env
     if(status==='ACTIVE'){
       const current=await db.query<{plan_id:string;provider_id:string;region_id:string;datacenter_id:string|null;operating_system_version_id:string;architecture:'x86_64'|'arm64';server_type:'VPS'|'DEDICATED'|'CLOUD';metadata:Record<string,unknown>}>(`SELECT * FROM server_product_configurations WHERE id=$1`,[configurationId]);
       const row=current.rows[0];if(!row)throw new NotFoundError();
-      await validateProductConfigurationReferences(db,{planId:row.plan_id,providerId:row.provider_id,regionId:row.region_id,datacenterId:row.datacenter_id,operatingSystemVersionId:row.operating_system_version_id,architecture:row.architecture,serverType:row.server_type,metadata:row.metadata});
+      await validateProductConfigurationReferences(db,{planId:row.plan_id,providerId:row.provider_id,regionId:row.region_id,datacenterId:row.datacenter_id,operatingSystemVersionId:row.operating_system_version_id,architecture:row.architecture,serverType:row.server_type,metadata:row.metadata},true);
       const images=await db.query(`SELECT 1 FROM server_os_images i WHERE i.provider_id=$1 AND i.operating_system_version_id=$2 AND i.architecture=$3 AND (i.region_id IS NULL OR i.region_id=$4) AND (i.datacenter_id IS NULL OR i.datacenter_id=$5) AND i.status='ACTIVE' AND i.verified_at IS NOT NULL`,[row.provider_id,row.operating_system_version_id,row.architecture,row.region_id,row.datacenter_id]);
       if(!images.rows[0])throw new ValidationError('No verified active provider image supports this exact configuration');
     }
@@ -610,13 +790,13 @@ export async function registerInfrastructureRoutes(app: FastifyInstance,env: Env
   app.get('/api/v1/admin/infrastructure-logs',async(request)=>{
     await admin(request);
     const query=parse(z.object({
-      resourceType:z.enum(['provider','region','datacenter','os_image','operating_system','operating_system_version','provisioning_job','server']).optional(),
+      resourceType:z.enum(['provider','region','datacenter','os_image','operating_system','operating_system_version','server_product_configuration','provisioning_job','server']).optional(),
       resourceId:id.optional(),
       action:z.string().trim().min(1).max(120).optional(),
       limit:z.coerce.number().int().min(1).max(200).optional(),
       offset:z.coerce.number().int().min(0).optional(),
     }),request.query??{});
-    const types=query.resourceType?[query.resourceType]:['provider','region','datacenter','os_image','operating_system','operating_system_version','provisioning_job','server'];
+    const types=query.resourceType?[query.resourceType]:['provider','region','datacenter','os_image','operating_system','operating_system_version','server_product_configuration','provisioning_job','server'];
     const {rows}=await db.query(`
       SELECT a.id,a.actor_id,u.email actor_email,a.action,a.resource_type,a.resource_id,a.metadata,a.ip_address,a.created_at
       FROM audit_logs a LEFT JOIN users u ON u.id=a.actor_id

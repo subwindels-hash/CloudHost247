@@ -1,10 +1,7 @@
 import type { InfrastructureProviderRow, ServerOsImageRow } from '../../db/infrastructure-providers';
 import { unsupportedRescue } from './common';
-import { providerRequest } from './http';
 import {
   ProviderError,
-  asRecord,
-  asString,
   type CreateProviderServerInput,
   type InfrastructureProviderAdapter,
   type ProviderHealthResult,
@@ -19,7 +16,6 @@ export class ContaboProviderAdapter implements InfrastructureProviderAdapter {
   private readonly clientSecret: string | undefined;
   private readonly apiUser: string | undefined;
   private readonly apiPassword: string | undefined;
-  private readonly endpoint: string;
 
   constructor(readonly provider: InfrastructureProviderRow, source: NodeJS.ProcessEnv = process.env) {
     const prefix = provider.credential_env_prefix || 'CONTABO';
@@ -27,7 +23,6 @@ export class ContaboProviderAdapter implements InfrastructureProviderAdapter {
     this.clientSecret = source[`${prefix}_CLIENT_SECRET`] ?? source.CONTABO_CLIENT_SECRET;
     this.apiUser = source[`${prefix}_API_USER`] ?? source.CONTABO_API_USER;
     this.apiPassword = source[`${prefix}_API_PASSWORD`] ?? source.CONTABO_API_PASSWORD;
-    this.endpoint = provider.api_base_url ?? source.CONTABO_API_URL ?? 'https://api.contabo.com/v1';
   }
 
   private ensureConfigured(): void {
@@ -90,9 +85,9 @@ export class ContaboProviderAdapter implements InfrastructureProviderAdapter {
     throw new ProviderError('SERVICE_UNAVAILABLE', 'Contabo snapshot restore requires active provider bridge', false);
   }
 
-  async getServerStatus(providerServerId: string): Promise<ProviderServer> {
+  async getServerStatus(_providerServerId: string): Promise<ProviderServer> {
     this.ensureConfigured();
-    return { id: providerServerId, status: 'unknown', name: null, ipAddress: null, imageId: null, metadata: {} };
+    throw new ProviderError('SERVICE_UNAVAILABLE', 'Contabo status lookup requires an enabled provider bridge', false);
   }
 
   async getServerIP(providerServerId: string): Promise<string | null> {
@@ -101,12 +96,12 @@ export class ContaboProviderAdapter implements InfrastructureProviderAdapter {
 
   async getAvailableImages(): Promise<ProviderImage[]> {
     this.ensureConfigured();
-    return [];
+    throw new ProviderError('SERVICE_UNAVAILABLE', 'Contabo image discovery requires an enabled provider bridge', false);
   }
 
   async getImage(_image: ServerOsImageRow): Promise<ProviderImage | null> {
     this.ensureConfigured();
-    return null;
+    throw new ProviderError('SERVICE_UNAVAILABLE', 'Contabo image lookup requires an enabled provider bridge', false);
   }
 
   async reinstallServer(_input: ReinstallProviderServerInput): Promise<ProviderServer> {
@@ -119,16 +114,16 @@ export class ContaboProviderAdapter implements InfrastructureProviderAdapter {
 
   async getConsole(_providerServerId: string): Promise<Record<string, unknown>> {
     this.ensureConfigured();
-    return {};
+    throw new ProviderError('SERVICE_UNAVAILABLE', 'Contabo console access requires an enabled provider bridge', false);
   }
 
   async getServerMetrics(_providerServerId: string): Promise<Record<string, unknown>> {
     this.ensureConfigured();
-    return {};
+    throw new ProviderError('SERVICE_UNAVAILABLE', 'Contabo metrics require an enabled provider bridge', false);
   }
 
-  async healthCheck(providerServerId: string, _expectedImage: ServerOsImageRow): Promise<ProviderHealthResult> {
+  async healthCheck(_providerServerId: string, _expectedImage: ServerOsImageRow): Promise<ProviderHealthResult> {
     this.ensureConfigured();
-    return { exists: false, poweredOn: false, ipAddress: null, imageMatches: false, providerStatus: 'unknown' };
+    throw new ProviderError('SERVICE_UNAVAILABLE', 'Contabo health checks require an enabled provider bridge', false);
   }
 }

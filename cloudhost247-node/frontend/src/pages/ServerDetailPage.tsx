@@ -22,13 +22,6 @@ import {
   type CustomerServer,
   type ServerConfiguration,
 } from '../lib/infrastructure-api';
-import {
-  fetchServerFirewall,
-  addServerFirewallRule,
-  deleteServerFirewallRule,
-  applyBaselineFirewall,
-  type FirewallRule,
-} from '../lib/ssl-firewall-api';
 import { usePageMeta } from '../lib/usePageMeta';
 
 interface ProvisioningState {
@@ -99,21 +92,15 @@ export default function ServerDetailPage() {
   const [confirm, setConfirm] = useState('');
   const [health, setHealth] = useState<ServerHealthSnapshot | null>(null);
   const [rescueSession, setRescueSession] = useState<RescueSession | null>(null);
-  const [firewallRules, setFirewallRules] = useState<FirewallRule[]>([]);
-  const [newRulePort, setNewRulePort] = useState('');
-  const [newRuleProtocol, setNewRuleProtocol] = useState<'tcp' | 'udp'>('tcp');
-  const [newRuleDesc, setNewRuleDesc] = useState('');
 
   const load = useCallback(async () => {
-    const [{ server: loaded }, state, fw, monitoring] = await Promise.all([
+    const [{ server: loaded }, state, monitoring] = await Promise.all([
       fetchCustomerServer(id),
       apiFetch<ProvisioningState>(`/api/v1/servers/${id}/provisioning-status`),
-      fetchServerFirewall(id).catch(() => ({ rules: [] })),
       fetchServerHealth(id).catch(() => null),
     ]);
     setServer(loaded);
     setProvisioning(state);
-    setFirewallRules(fw.rules);
     setHealth(monitoring);
   }, [id]);
 
@@ -144,7 +131,8 @@ export default function ServerDetailPage() {
             (available) =>
               available.providerId === server.provider_id &&
               available.regionId === server.region_id &&
-              available.datacenterId === server.datacenter_id
+              available.datacenterId === server.datacenter_id &&
+              available.architecture === server.architecture
           )
         ),
       }))
@@ -158,11 +146,10 @@ export default function ServerDetailPage() {
     const version = os.versions.find((item) => item.id === targetVersion) ?? os.versions[0];
     if (version) {
       if (version.id !== targetVersion) setTargetVersion(version.id);
-      if (!version.architectures.includes(targetArchitecture)) {
-        setTargetArchitecture(version.architectures[0] ?? 'x86_64');
-      }
+      const currentArchitecture = server?.architecture === 'arm64' ? 'arm64' : 'x86_64';
+      if (targetArchitecture !== currentArchitecture) setTargetArchitecture(currentArchitecture);
     }
-  }, [reinstallSystems, targetOs, targetVersion, targetArchitecture]);
+  }, [reinstallSystems, server?.architecture, targetOs, targetVersion, targetArchitecture]);
 
   async function scheduleCancellation() {
     setBusy('cancel');
@@ -287,53 +274,6 @@ export default function ServerDetailPage() {
     setSnapshotDesc('');
   }
 
-  async function handleAddFirewallRule(e: React.FormEvent) {
-    e.preventDefault();
-    if (!newRulePort) return;
-    setBusy('firewall');
-    try {
-      await addServerFirewallRule(id, {
-        portRangeStart: Number(newRulePort),
-        protocol: newRuleProtocol,
-        description: newRuleDesc || 'Custom rule',
-      });
-      setMessage(`Firewall rule for port ${newRulePort}/${newRuleProtocol} added.`);
-      setNewRulePort('');
-      setNewRuleDesc('');
-      await load();
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Could not add firewall rule');
-    } finally {
-      setBusy('');
-    }
-  }
-
-  async function handleDeleteFirewallRule(ruleId: string) {
-    setBusy('firewall');
-    try {
-      await deleteServerFirewallRule(id, ruleId);
-      setMessage('Firewall rule deleted.');
-      await load();
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Could not delete firewall rule');
-    } finally {
-      setBusy('');
-    }
-  }
-
-  async function handleApplyBaselineFirewall() {
-    setBusy('firewall');
-    try {
-      await applyBaselineFirewall(id);
-      setMessage('Baseline firewall rules applied.');
-      await load();
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Could not apply baseline firewall');
-    } finally {
-      setBusy('');
-    }
-  }
-
   async function reinstall() {
     if (confirm !== 'REINSTALL') {
       setError('Type REINSTALL to confirm the destructive operation.');
@@ -453,8 +393,8 @@ export default function ServerDetailPage() {
               <strong>{panelUrl ?? 'Available after IP assignment'}</strong>
             </div>
             <div>
-              <span style={{ color: '#64748b' }}>Initial Admin Login: </span>
-              <strong>root / admin</strong>
+              <span style={{ color: '#64748b' }}>Initial access: </span>
+              <strong>Use your selected SSH key</strong>
             </div>
             <div>
               <span style={{ color: '#64748b' }}>Installation Method: </span>
@@ -646,106 +586,6 @@ export default function ServerDetailPage() {
             No measurements have been received from this server yet. Figures appear once the monitoring agent reports; nothing here is estimated from the plan.
           </p>
         )}
-      </section>
-
-      {/* Firewall & Security Group Rules */}
-      <section className="ch247-card">
-        <div className="ch247-section-heading">
-          <div>
-            <span className="ch247-eyebrow">Network Security</span>
-            <h2>Firewall & Port Rules</h2>
-          </div>
-          <button
-            type="button"
-            className="ch247-btn ch247-btn--secondary"
-            disabled={busy !== ''}
-            onClick={handleApplyBaselineFirewall}
-          >
-            Apply Baseline Rules for {server.control_panel_name ?? 'Server'}
-          </button>
-        </div>
-
-        <form className="ch247-card ch247-form" style={{ marginTop: '1rem' }} onSubmit={handleAddFirewallRule}>
-          <h3>+ Add Firewall Inbound Port</h3>
-          <div className="ch247-form-grid">
-            <label className="ch247-field">
-              <span>Port</span>
-              <input
-                type="number"
-                required
-                placeholder="e.g. 443 or 8080"
-                value={newRulePort}
-                onChange={(e) => setNewRulePort(e.target.value)}
-              />
-            </label>
-            <label className="ch247-field">
-              <span>Protocol</span>
-              <select
-                value={newRuleProtocol}
-                onChange={(e) => setNewRuleProtocol(e.target.value as 'tcp' | 'udp')}
-              >
-                <option value="tcp">TCP</option>
-                <option value="udp">UDP</option>
-              </select>
-            </label>
-            <label className="ch247-field">
-              <span>Description / Purpose</span>
-              <input
-                placeholder="e.g. Custom Web App"
-                value={newRuleDesc}
-                onChange={(e) => setNewRuleDesc(e.target.value)}
-              />
-            </label>
-          </div>
-          <div className="ch247-actions">
-            <button type="submit" className="ch247-btn ch247-btn--primary" disabled={busy !== ''}>
-              Add Inbound Port
-            </button>
-          </div>
-        </form>
-
-        <div className="ch247-table-wrap" style={{ marginTop: '1rem' }}>
-          <table className="ch247-table">
-            <thead>
-              <tr>
-                <th>Protocol</th>
-                <th>Port</th>
-                <th>Direction</th>
-                <th>Source</th>
-                <th>Description</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {firewallRules.map((rule) => (
-                <tr key={rule.id}>
-                  <td><span className="ch247-badge">{rule.protocol.toUpperCase()}</span></td>
-                  <td><strong>{rule.port_range_start}</strong></td>
-                  <td>{rule.direction}</td>
-                  <td><code>{rule.source_cidr}</code></td>
-                  <td>{rule.description ?? '—'}</td>
-                  <td>
-                    <button
-                      type="button"
-                      className="ch247-btn ch247-btn--sm ch247-btn--danger"
-                      disabled={busy !== ''}
-                      onClick={() => handleDeleteFirewallRule(rule.id)}
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {firewallRules.length === 0 && (
-                <tr>
-                  <td colSpan={6} style={{ textAlign: 'center', color: '#64748b' }}>
-                    No custom firewall rules configured. Click "Apply Baseline Rules" above to setup default security.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
       </section>
 
       {(inRescue || rescueSession) && (
@@ -980,21 +820,8 @@ export default function ServerDetailPage() {
               </label>
               <label className="ch247-field">
                 Architecture
-                <select
-                  value={targetArchitecture}
-                  onChange={(event) =>
-                    setTargetArchitecture(event.target.value as 'x86_64' | 'arm64')
-                  }
-                >
-                  {reinstallSystems
-                    .find((os) => os.id === targetOs)
-                    ?.versions.find((version) => version.id === targetVersion)
-                    ?.architectures.map((item) => (
-                      <option key={item} value={item}>
-                        {item}
-                      </option>
-                    ))}
-                </select>
+                <output aria-describedby="reinstall-architecture-note"><strong>{targetArchitecture}</strong></output>
+                <small id="reinstall-architecture-note">Reinstall keeps the server&apos;s existing hardware architecture.</small>
               </label>
             </div>
           )}

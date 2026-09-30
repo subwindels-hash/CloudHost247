@@ -1,5 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { Queryable } from './types';
+import { withTransaction } from './transaction';
+import { ConflictError } from '../lib/errors';
 import { enqueueDeployment, type DeploymentAction } from './deployments';
 
 export interface ProvisioningJobRow {
@@ -193,31 +195,61 @@ export async function enqueueServerProvisioningJob(
     serverId: string; orderId?: string | null; providerId: string; osImageId?: string | null;
     operation: ProvisioningJobRow['operation']; requestedBy?: string | null; idempotencyKey: string;
     payload?: Record<string, unknown>; maxAttempts?: number;
-  }
+  },
+  options: { alreadyInTransaction?: boolean } = {}
 ): Promise<{ job: ProvisioningJobRow; created: boolean }> {
-  const deploymentResult = await enqueueDeployment(db, {
-    serverId: input.serverId,
-    orderId: input.orderId ?? null,
-    action: ACTION_BY_OPERATION[input.operation],
-    requestedBy: input.requestedBy ?? null,
-    idempotencyKey: input.idempotencyKey,
-    payload: input.payload,
-    maxAttempts: input.maxAttempts ?? 3,
-  });
-  if (deploymentResult.created) {
-    const { rows } = await db.query<ProvisioningJobRow>(
+  const enqueue = async (tx: Queryable): Promise<{ job: ProvisioningJobRow; created: boolean }> => {
+    // Serialize *all* infrastructure work for one server. This prevents contradictory operations
+    // (for example, reinstall + delete) from being queued by concurrent browser requests. The
+    // idempotency lookup is repeated after the row lock so simultaneous retries still receive the
+    // first job rather than a conflict.
+    await tx.query(`SELECT id FROM servers WHERE id=$1 FOR UPDATE`, [input.serverId]);
+    const duplicate = await tx.query<ProvisioningJobRow>(
+      `SELECT * FROM provisioning_jobs WHERE idempotency_key=$1`, [input.idempotencyKey]
+    );
+    if (duplicate.rows[0]) return { job: duplicate.rows[0], created: false };
+
+    const active = await tx.query<Pick<ProvisioningJobRow, 'id' | 'operation' | 'status'>>(
+      `SELECT id,operation,status FROM provisioning_jobs
+       WHERE server_id=$1 AND status NOT IN('READY','FAILED','CANCELLED')
+       ORDER BY created_at ASC LIMIT 1`, [input.serverId]
+    );
+    if (active.rows[0]) {
+      throw new ConflictError(
+        `Server operation ${active.rows[0].operation} is already ${active.rows[0].status.toLowerCase()}`
+      );
+    }
+
+    const deploymentResult = await enqueueDeployment(tx, {
+      serverId: input.serverId,
+      orderId: input.orderId ?? null,
+      action: ACTION_BY_OPERATION[input.operation],
+      requestedBy: input.requestedBy ?? null,
+      idempotencyKey: input.idempotencyKey,
+      payload: input.payload,
+      maxAttempts: input.maxAttempts ?? 3,
+    });
+    if (!deploymentResult.created) {
+      const existing = await findProvisioningJobByDeployment(tx, deploymentResult.deployment.id);
+      if (!existing) throw new Error('Provisioning deployment exists without a provisioning job');
+      return { job: existing, created: false };
+    }
+
+    const { rows } = await tx.query<ProvisioningJobRow>(
       `INSERT INTO provisioning_jobs
          (id,deployment_id,server_id,order_id,provider_id,os_image_id,operation,status,max_attempts,idempotency_key)
        VALUES ($1,$2,$3,$4,$5,$6,$7,'QUEUED',$8,$9) RETURNING *`,
-      [randomUUID(),deploymentResult.deployment.id,input.serverId,input.orderId ?? null,input.providerId,input.osImageId ?? null,input.operation,input.maxAttempts ?? 3,input.idempotencyKey]
+      [
+        randomUUID(), deploymentResult.deployment.id, input.serverId, input.orderId ?? null,
+        input.providerId, input.osImageId ?? null, input.operation, input.maxAttempts ?? 3,
+        input.idempotencyKey,
+      ]
     );
     const job = rows[0];
     if (!job) throw new Error('enqueueServerProvisioningJob: insert returned no row');
     return { job, created: true };
-  }
-  const existing = await findProvisioningJobByDeployment(db, deploymentResult.deployment.id);
-  if (!existing) throw new Error('Provisioning deployment exists without a provisioning job');
-  return { job: existing, created: false };
+  };
+  return options.alreadyInTransaction ? enqueue(db) : withTransaction(db, enqueue);
 }
 
 export async function findProvisioningJobById(db: Queryable, id: string): Promise<ProvisioningJobRow | null> {
@@ -288,27 +320,55 @@ export async function appendProvisioningLog(
 }
 
 export async function cancelProvisioningJob(db: Queryable, jobId: string): Promise<boolean> {
-  const { rows } = await db.query<{ deployment_id: string }>(
-    `UPDATE provisioning_jobs SET status='CANCELLED',completed_at=now(),updated_at=now()
-     WHERE id=$1 AND status='QUEUED' RETURNING deployment_id`, [jobId]
+  const { rows } = await db.query(
+    `WITH target AS (
+       SELECT id,deployment_id FROM provisioning_jobs WHERE id=$1 AND status='QUEUED' FOR UPDATE
+     ), cancelled_deployment AS (
+       UPDATE deployments d
+       SET status='cancelled',completed_at=now(),lease_expires_at=NULL,worker_id=NULL,updated_at=now()
+       FROM target t
+       WHERE d.id=t.deployment_id AND d.status='queued'
+       RETURNING d.id
+     )
+     UPDATE provisioning_jobs j
+     SET status='CANCELLED',completed_at=now(),updated_at=now()
+     FROM target t,cancelled_deployment d
+     WHERE j.id=t.id AND d.id=t.deployment_id
+     RETURNING j.id`,
+    [jobId]
   );
-  const row = rows[0];
-  if (!row) return false;
-  await db.query(`UPDATE deployments SET status='cancelled',completed_at=now(),updated_at=now() WHERE id=$1 AND status='queued'`, [row.deployment_id]);
-  return true;
+  return rows.length > 0;
 }
 
 export async function retryProvisioningJob(db: Queryable, jobId: string): Promise<boolean> {
-  const job = await findProvisioningJobById(db,jobId);
-  if (!job || job.status !== 'FAILED' || job.retryable === false) return false;
+  // Queue row and observability row move together. If another active operation appeared after the
+  // failure, the one-active-operation index rolls this whole statement back rather than leaving
+  // an orphaned retry in deployments.
   const { rows } = await db.query(
-    `UPDATE deployments SET status='queued',run_after=now(),completed_at=NULL,lease_expires_at=NULL,
-       error_code=NULL,error_message=NULL,updated_at=now()
-     WHERE id=$1 AND status IN ('failed','rolled_back') RETURNING id`, [job.deployment_id]
+     `WITH target AS (
+       SELECT failed.id,failed.deployment_id
+       FROM provisioning_jobs failed
+       WHERE failed.id=$1 AND failed.status='FAILED' AND failed.retryable IS DISTINCT FROM false
+         AND NOT EXISTS (
+           SELECT 1 FROM provisioning_jobs active
+           WHERE active.server_id=failed.server_id AND active.id<>failed.id
+             AND active.status NOT IN('READY','FAILED','CANCELLED')
+         )
+       FOR UPDATE
+     ), queued_deployment AS (
+       UPDATE deployments d
+       SET status='queued',run_after=now(),completed_at=NULL,lease_expires_at=NULL,
+           worker_id=NULL,error_code=NULL,error_message=NULL,updated_at=now()
+       FROM target t
+       WHERE d.id=t.deployment_id AND d.status IN('failed','rolled_back')
+       RETURNING d.id
+     )
+     UPDATE provisioning_jobs j
+     SET status='QUEUED',failed_at=NULL,error_code=NULL,error_message=NULL,updated_at=now()
+     FROM target t,queued_deployment d
+     WHERE j.id=t.id AND d.id=t.deployment_id
+     RETURNING j.id`,
+    [jobId]
   );
-  if (!rows[0]) return false;
-  await db.query(
-    `UPDATE provisioning_jobs SET status='QUEUED',failed_at=NULL,error_code=NULL,error_message=NULL,updated_at=now() WHERE id=$1`, [jobId]
-  );
-  return true;
+  return rows.length > 0;
 }

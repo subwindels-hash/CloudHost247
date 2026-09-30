@@ -7,7 +7,7 @@ import { buildApp } from '../../src/app';
 import { loadEnv } from '../../src/config/env';
 import { createUser } from '../../src/db/users';
 import { signAuthToken } from '../../src/lib/jwt';
-import { enqueueServerProvisioningJob } from '../../src/db/server-provisioning';
+import { cancelProvisioningJob, enqueueServerProvisioningJob, retryProvisioningJob } from '../../src/db/server-provisioning';
 import { executeServerProvisioning } from '../../src/infrastructure/services/server-provisioner';
 import type { DeploymentRow } from '../../src/db/deployments';
 import type { InfrastructureProviderAdapter } from '../../src/infrastructure/providers/types';
@@ -75,6 +75,15 @@ describe('server OS catalog and infrastructure boundaries', () => {
     await db.query(`UPDATE orders SET payment_status='paid' WHERE id=$1`,[body.orderId]);const paid=await findOrderById(db,body.orderId);expect(paid).not.toBeNull();
     await provisionPaidOrder(db,paid!);await provisionPaidOrder(db,paid!);
     expect((await db.query<{count:number}>(`SELECT count(*)::int count FROM provisioning_jobs WHERE server_id=$1`,[body.serverId])).rows[0]?.count).toBe(1);
+
+    // Payment does not freeze a stale compatibility claim. If an operator disables the location
+    // before the worker claims the job, execution fails before any provider resource is created.
+    await db.query(`UPDATE infrastructure_regions SET status='DISABLED' WHERE id=$1`,[regionId]);
+    const queued=(await db.query<{id:string;deployment_id:string}>(`SELECT id,deployment_id FROM provisioning_jobs WHERE server_id=$1`,[body.serverId])).rows[0]!;
+    const deployment=(await db.query<DeploymentRow>(`SELECT * FROM deployments WHERE id=$1`,[queued.deployment_id])).rows[0]!;
+    expect((await executeServerProvisioning(db,deployment,{source:{} as NodeJS.ProcessEnv})).outcome).toBe('failed');
+    expect((await db.query<{error_code:string}>(`SELECT error_code FROM provisioning_jobs WHERE id=$1`,[queued.id])).rows[0]?.error_code).toBe('INVALID_CONFIGURATION');
+    expect((await db.query<{provider_server_id:string|null}>(`SELECT provider_server_id FROM servers WHERE id=$1`,[body.serverId])).rows[0]?.provider_server_id).toBeNull();
     await app.close();
   });
 
@@ -97,13 +106,16 @@ describe('server OS catalog and infrastructure boundaries', () => {
 
   it('persists real adapter evidence and marks READY only after provider, IP, SSH, and health checks pass',async()=>{
     const user=await createUser(db,{id:randomUUID(),email:`healthy-${randomUUID()}@example.com`,passwordHash:'hash',fullName:'Healthy Customer'});
-    const providerId=randomUUID(),regionId=randomUUID(),imageId=randomUUID(),serverId=randomUUID(),orderId=randomUUID(),sshKeyId=randomUUID();
+    const product=await createProduct(db,{id:randomUUID(),slug:`healthy-product-${randomUUID()}`,name:'Healthy Compute',productType:'hosting',status:'active',visibility:'public'});
+    const plan=await createPlan(db,{id:randomUUID(),productId:product.id,slug:`healthy-plan-${randomUUID()}`,name:'Healthy VPS',status:'active'});
+    const providerId=randomUUID(),regionId=randomUUID(),imageId=randomUUID(),configurationId=randomUUID(),serverId=randomUUID(),orderId=randomUUID(),sshKeyId=randomUUID();
     await db.query(`INSERT INTO infrastructure_providers(id,name,slug,provider_type,adapter,status) VALUES($1,'Healthy provider',$2,'OTHER','generic_http','ACTIVE')`,[providerId,`healthy-${providerId}`]);
     await db.query(`INSERT INTO infrastructure_regions(id,provider_id,code,name,status) VALUES($1,$2,'test-1','Test Region','ACTIVE')`,[regionId,providerId]);
     await db.query(`INSERT INTO server_os_images(id,provider_id,operating_system_version_id,provider_image_id,architecture,region_id,status,verified_at) VALUES($1,$2,'20000000-0000-0000-0000-000000000006','ubuntu-24.04','x86_64',$3,'ACTIVE',now())`,[imageId,providerId,regionId]);
+    await db.query(`INSERT INTO server_product_configurations(id,plan_id,provider_id,region_id,operating_system_version_id,architecture,server_type,status,metadata) VALUES($1,$2,$3,$4,'20000000-0000-0000-0000-000000000006','x86_64','VPS','ACTIVE',$5)`,[configurationId,plan.id,providerId,regionId,JSON.stringify({cpuCores:2,memoryMb:2048,storageMb:20000,providerServerType:'test-small'})]);
     await db.query(`INSERT INTO customer_ssh_keys(id,user_id,name,public_key,fingerprint) VALUES($1,$2,'Test key','ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAITestKey tests@example.test',$3)`,[sshKeyId,user.id,`SHA256:${randomUUID()}`]);
     await db.query(`INSERT INTO orders(id,user_id,status,payment_status,currency,subtotal_amount,discount_amount,tax_amount,total_amount) VALUES($1,$2,'pending','paid','USD',10,0,0,10)`,[orderId,user.id]);
-    await db.query(`INSERT INTO servers(id,name,hostname,server_type,status,customer_id,order_id,provider_id,region_id,operating_system_version_id,os_image_id,architecture,provisioning_status,metadata) VALUES($1,'healthy-vps','healthy.example.test','VPS','queued',$2,$3,$4,$5,'20000000-0000-0000-0000-000000000006',$6,'x86_64','QUEUED',$7)`,[serverId,user.id,orderId,providerId,regionId,imageId,JSON.stringify({sshKeyIds:[sshKeyId],providerPlan:{providerServerType:'test-small'}})]);
+    await db.query(`INSERT INTO servers(id,name,hostname,server_type,status,customer_id,order_id,plan_id,provider_id,region_id,operating_system_version_id,os_image_id,architecture,provisioning_status,metadata) VALUES($1,'healthy-vps','healthy.example.test','VPS','queued',$2,$3,$4,$5,$6,'20000000-0000-0000-0000-000000000006',$7,'x86_64','QUEUED',$8)`,[serverId,user.id,orderId,plan.id,providerId,regionId,imageId,JSON.stringify({sshKeyIds:[sshKeyId],providerPlan:{providerServerType:'test-small'}})]);
     const queued=await enqueueServerProvisioningJob(db,{serverId,orderId,providerId,osImageId:imageId,operation:'PROVISION',requestedBy:user.id,idempotencyKey:`healthy:${serverId}`});
     const deployment=(await db.query<DeploymentRow>(`SELECT * FROM deployments WHERE id=$1`,[queued.job.deployment_id])).rows[0]!;
     let creates=0;const remote={id:'provider-123',status:'running',name:'healthy-vps',ipAddress:'203.0.113.10',imageId:'ubuntu-24.04',metadata:{}};
@@ -124,6 +136,30 @@ describe('server OS catalog and infrastructure boundaries', () => {
     expect((await db.query<{status:string}>(`SELECT status FROM provisioning_jobs WHERE id=$1`,[queued.job.id])).rows[0]?.status).toBe('READY');
   });
 
+  it('moves deployment and provisioning rows atomically when cancelling and retrying',async()=>{
+    const user=await createUser(db,{id:randomUUID(),email:`queue-${randomUUID()}@example.com`,passwordHash:'hash',fullName:'Queue User'});
+    const providerId=randomUUID(),serverId=randomUUID();
+    await db.query(`INSERT INTO infrastructure_providers(id,name,slug,provider_type,adapter,status) VALUES($1,'Queue provider',$2,'OTHER','generic_http','ACTIVE')`,[providerId,`queue-${providerId}`]);
+    await db.query(`INSERT INTO servers(id,name,hostname,server_type,status,customer_id,provider_id,provider_server_id,operating_system_version_id,architecture,provisioning_status) VALUES($1,'queue-vps','queue.example.test','VPS','active',$2,$3,'remote-queue','20000000-0000-0000-0000-000000000006','x86_64','READY')`,[serverId,user.id,providerId]);
+    const first=await enqueueServerProvisioningJob(db,{serverId,providerId,operation:'REBOOT',requestedBy:user.id,idempotencyKey:`queue-cancel:${serverId}`});
+    expect(await cancelProvisioningJob(db,first.job.id)).toBe(true);
+    expect((await db.query<{job_status:string;deployment_status:string}>(`SELECT j.status job_status,d.status deployment_status FROM provisioning_jobs j JOIN deployments d ON d.id=j.deployment_id WHERE j.id=$1`,[first.job.id])).rows[0]).toEqual({job_status:'CANCELLED',deployment_status:'cancelled'});
+
+    const second=await enqueueServerProvisioningJob(db,{serverId,providerId,operation:'REBOOT',requestedBy:user.id,idempotencyKey:`queue-retry:${serverId}`});
+    await db.query(`UPDATE provisioning_jobs SET status='FAILED',retryable=true WHERE id=$1`,[second.job.id]);
+    await db.query(`UPDATE deployments SET status='failed' WHERE id=$1`,[second.job.deployment_id]);
+    expect(await retryProvisioningJob(db,second.job.id)).toBe(true);
+    expect((await db.query<{job_status:string;deployment_status:string}>(`SELECT j.status job_status,d.status deployment_status FROM provisioning_jobs j JOIN deployments d ON d.id=j.deployment_id WHERE j.id=$1`,[second.job.id])).rows[0]).toEqual({job_status:'QUEUED',deployment_status:'queued'});
+
+    // A failed job cannot be revived beside newer active work for the same server.
+    await db.query(`UPDATE provisioning_jobs SET status='FAILED',retryable=true WHERE id=$1`,[second.job.id]);
+    await db.query(`UPDATE deployments SET status='failed' WHERE id=$1`,[second.job.deployment_id]);
+    const active=await enqueueServerProvisioningJob(db,{serverId,providerId,operation:'REBOOT',requestedBy:user.id,idempotencyKey:`queue-active:${serverId}`});
+    expect(await retryProvisioningJob(db,second.job.id)).toBe(false);
+    expect((await db.query<{status:string}>(`SELECT status FROM provisioning_jobs WHERE id=$1`,[active.job.id])).rows[0]?.status).toBe('QUEUED');
+    expect((await db.query<{status:string}>(`SELECT status FROM provisioning_jobs WHERE id=$1`,[second.job.id])).rows[0]?.status).toBe('FAILED');
+  });
+
   it('does not reveal or act on a server owned by another customer',async()=>{
     const owner=await createUser(db,{id:randomUUID(),email:`owner-${randomUUID()}@example.com`,passwordHash:'hash',fullName:'Owner'});
     const other=await createUser(db,{id:randomUUID(),email:`other-${randomUUID()}@example.com`,passwordHash:'hash',fullName:'Other'});
@@ -140,27 +176,38 @@ describe('server OS catalog and infrastructure boundaries', () => {
     await app.close();
   });
 
-  it('queues and executes resize and snapshot operations for owned servers', async () => {
+  it('refuses unbilled resize metadata and queues capability-backed snapshot operations for owned servers', async () => {
     const user = await createUser(db, { id: randomUUID(), email: `ops-${randomUUID()}@example.com`, passwordHash: 'hash', fullName: 'Ops User' });
     const providerId = randomUUID();
     const serverId = randomUUID();
     await db.query(`INSERT INTO infrastructure_providers(id,name,slug,provider_type,adapter,status) VALUES($1,'Ops provider',$2,'OTHER','generic_http','ACTIVE')`, [providerId, `ops-${providerId}`]);
-    await db.query(`INSERT INTO servers(id,name,hostname,server_type,status,customer_id,provider_id,provider_server_id,operating_system_version_id,architecture,provisioning_status,capabilities) VALUES($1,'ops-vps','ops.example.test','VPS','active',$2,$3,'remote-ops-1','20000000-0000-0000-0000-000000000006','x86_64','READY',$4)`, [serverId, user.id, providerId, JSON.stringify({ start: true, stop: true, reboot: true, resize: true })]);
+    await db.query(`INSERT INTO servers(id,name,hostname,server_type,status,customer_id,provider_id,provider_server_id,operating_system_version_id,architecture,provisioning_status,capabilities) VALUES($1,'ops-vps','ops.example.test','VPS','active',$2,$3,'remote-ops-1','20000000-0000-0000-0000-000000000006','x86_64','READY',$4)`, [serverId, user.id, providerId, JSON.stringify({ start: true, stop: true, reboot: true, resize: true, snapshot: true })]);
 
     const app = buildApp(env, { serveFrontend: false, pool: db });
     const token = signAuthToken(env, { sub: user.id, role: 'customer', email: user.email });
     const headers = { authorization: `Bearer ${token}` };
 
     const resizeRes = await app.inject({ method: 'POST', url: `/api/v1/servers/${serverId}/resize`, headers, payload: { planMetadata: { cpuCores: 4 } } });
-    expect(resizeRes.statusCode).toBe(200);
-    expect(resizeRes.json().queued).toBe(true);
+    expect(resizeRes.statusCode).toBe(409);
+    expect(resizeRes.json().message).toContain('paid upgrade order');
 
-    const snapRes = await app.inject({ method: 'POST', url: `/api/v1/servers/${serverId}/snapshots`, headers, payload: { description: 'Weekly Backup' } });
+    const snapshotHeaders={...headers,'idempotency-key':'weekly-snapshot-001'};
+    const snapRes = await app.inject({ method: 'POST', url: `/api/v1/servers/${serverId}/snapshots`, headers:snapshotHeaders, payload: { description: 'Weekly Backup' } });
     expect(snapRes.statusCode).toBe(202);
     expect(snapRes.json().queued).toBe(true);
+    const duplicateSnap=await app.inject({method:'POST',url:`/api/v1/servers/${serverId}/snapshots`,headers:snapshotHeaders,payload:{description:'Weekly Backup'}});
+    expect(duplicateSnap.statusCode).toBe(202);expect(duplicateSnap.json()).toMatchObject({jobId:snapRes.json().jobId,queued:false});
+
+    // A different operation cannot race the active snapshot job.
+    const conflict=await app.inject({method:'DELETE',url:`/api/v1/servers/${serverId}/snapshots/snap-99`,headers});
+    expect(conflict.statusCode).toBe(409);
+    await db.query(`UPDATE provisioning_jobs SET status='READY',completed_at=now() WHERE id=$1`,[snapRes.json().jobId]);
+    await db.query(`UPDATE deployments SET status='succeeded',completed_at=now() WHERE id=(SELECT deployment_id FROM provisioning_jobs WHERE id=$1)`,[snapRes.json().jobId]);
 
     const deleteSnapRes = await app.inject({ method: 'DELETE', url: `/api/v1/servers/${serverId}/snapshots/snap-99`, headers });
     expect(deleteSnapRes.statusCode).toBe(202);
+    await db.query(`UPDATE provisioning_jobs SET status='READY',completed_at=now() WHERE id=$1`,[deleteSnapRes.json().jobId]);
+    await db.query(`UPDATE deployments SET status='succeeded',completed_at=now() WHERE id=(SELECT deployment_id FROM provisioning_jobs WHERE id=$1)`,[deleteSnapRes.json().jobId]);
 
     const restoreSnapRes = await app.inject({ method: 'POST', url: `/api/v1/servers/${serverId}/snapshots/snap-99/restore`, headers });
     expect(restoreSnapRes.statusCode).toBe(200);
