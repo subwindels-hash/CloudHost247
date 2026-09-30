@@ -140,3 +140,12 @@
   margin: 0;
   flex: 0 0 auto;
 }
+
+/* Pending-cancellation hint on the server list: visible without shouting, so a customer sees at a
+   glance which services are winding down. */
+.ch247-server-card__cancelling {
+  margin: 0.35rem 0 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #b45309;
+}

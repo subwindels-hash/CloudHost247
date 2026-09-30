@@ -20,6 +20,7 @@ const TONE: Record<string, string> = {
   SERVER_REINSTALLED: 'is-success',
   OS_EOL_WARNING: 'is-warning',
   OS_EOL: 'is-danger',
+  SERVER_TERMINATED: 'is-danger',
 };
 
 /**

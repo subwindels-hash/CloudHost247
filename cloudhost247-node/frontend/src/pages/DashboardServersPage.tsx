@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import OsLifecycleNotice from '../components/OsLifecycleNotice';
 import { CatalogErrorBanner, CatalogLoadingBanner } from '../components/CatalogStateBanner';
 import StatusBadge from '../components/StatusBadge';
-import { fetchCustomerServers, type CustomerServer } from '../lib/infrastructure-api';
+import { fetchCustomerServers, readServerCancellation, type CustomerServer } from '../lib/infrastructure-api';
 import { usePageMeta } from '../lib/usePageMeta';
 
 /** Customer-owned VPS/cloud/dedicated resources. Platform deployment targets are intentionally
@@ -34,6 +34,7 @@ export default function DashboardServersPage() {
       </p>
       <div className="ch247-server-card__ip"><small>PUBLIC IP</small><strong>{server.ip_address??(server.provisioning_status?.replace(/_/g,' ')??'Pending')}</strong></div>
       <dl className="ch247-server-card__specs"><div><dt>CPU</dt><dd>{server.cpu_cores} vCPU</dd></div><div><dt>RAM</dt><dd>{Math.round(server.memory_mb/1024)} GB</dd></div><div><dt>Storage</dt><dd>{Math.round(server.storage_mb/1024)} GB</dd></div></dl>
+      {readServerCancellation(server)?.mode==='AT_PERIOD_END'&&<p className="ch247-server-card__cancelling">Cancels on {readServerCancellation(server)?.effectiveAt?new Date(readServerCancellation(server)!.effectiveAt!).toLocaleDateString():'the end of the paid term'}</p>}
       <div className="ch247-server-card__footer"><span>{server.region_name??'Region pending'}</span><span>View server →</span></div>
     </Link>)}</div>}
   </div>;

@@ -952,3 +952,16 @@ sub-phase before the next one begins.
     - `/admin/control-panels` — Staff administration console for platform metadata, system requirements, and commercial license tier builders.
     - `/dashboard/servers/:id` — Enhanced server management dashboard displaying installed control panel cards, direct access links ("Open Panel Dashboard ↗"), default login instructions, snapshot creation, and destructive OS reinstall.
   - **Tests added:** `tests/integration/control-panels-api.test.ts` (7 tests) and `tests/unit/control-panel-adapters.test.ts` (6 tests).
+
+---
+
+## Phase 7 (continued) — Console access, server templates, and the cancellation lifecycle
+
+- **Source/local verification:** PASSED on branch `arena/01a0f219-cloudhost247`.
+  - **Full platform verification: 70 / 70 test files passing (515 / 515 tests), backend and frontend TypeScript clean.**
+  - **No migration required:** `provisioning_jobs.operation` already allowed `DELETE` and `deployments.action` already mapped `server_delete`; the gap was that nothing ever requested one.
+  - **Serial console:** `POST /api/v1/servers/:id/console` issues a provider console session to the owner only — the single server action answered in request scope, since the credential is only useful in the requesting browser. Ownership 404, capability 400, pre-provision 409, and an unconfigured provider 503 through the new `src/infrastructure/providers/error-mapping.ts`. The session URL/password are never logged, audited or stored; the audit record `SERVER_CONSOLE_OPENED` holds only the server and provider ids.
+  - **Server templates:** `server_product_configurations` is named for what it is in the admin UI (`/admin/infrastructure/availability` → "Server templates"), rather than adding a duplicate registry that could disagree with the ordering and reinstall queries. The create form can now grant the `console` capability.
+  - **Cancellation and termination:** `POST /api/v1/servers/:id/cancel` with `AT_PERIOD_END` (revocable via `DELETE /api/v1/servers/:id/cancel`, honours the paid term, flags `cancel_at_period_end`) or `IMMEDIATE` (typed `"DELETE"` confirmation, cancels subscriptions, enqueues the `DELETE` job). `sweepScheduledTerminations` runs in the worker every 15 minutes and on demand via `POST /api/v1/admin/server-terminations/sweep`. Destruction always runs through the queue and adapter; the `servers` row is kept as `retired` so orders, invoices and audit history survive; a server that never reached the provider is retired directly rather than faking a provider call. Completion raises a once-only `SERVER_TERMINATED` notification.
+  - **Customer UI:** "Open console" action and session panel, plus a danger zone on `/dashboard/servers/:id` offering cancel-at-term or destroy-now with the typed confirmation, a revoke path, and a "Cancels on …" hint on the server list.
+  - **Tests added:** `tests/integration/server-console.test.ts` (5), `tests/unit/provider-error-mapping.test.ts` (4), `tests/integration/server-termination.test.ts` (7).

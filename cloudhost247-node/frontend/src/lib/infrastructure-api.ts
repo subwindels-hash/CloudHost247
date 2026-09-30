@@ -83,7 +83,27 @@ export interface CustomerServer {
   bandwidth_gb: number | null;
   renewal_date: string | null;
   capabilities: Record<string,boolean>;
+  metadata?: Record<string,unknown> | null;
   created_at: string;
+}
+
+/** Pending cancellation recorded on `servers.metadata.cancellation`. */
+export interface ServerCancellation {
+  mode: 'AT_PERIOD_END' | 'IMMEDIATE';
+  requestedAt: string;
+  effectiveAt: string | null;
+  reason: string | null;
+}
+
+export function readServerCancellation(server: CustomerServer): ServerCancellation | null {
+  const raw = server.metadata?.cancellation as Partial<ServerCancellation> | undefined;
+  if (!raw || (raw.mode !== 'AT_PERIOD_END' && raw.mode !== 'IMMEDIATE')) return null;
+  return {
+    mode: raw.mode,
+    requestedAt: typeof raw.requestedAt === 'string' ? raw.requestedAt : '',
+    effectiveAt: typeof raw.effectiveAt === 'string' ? raw.effectiveAt : null,
+    reason: typeof raw.reason === 'string' ? raw.reason : null,
+  };
 }
 
 export interface SshKey {
@@ -130,4 +150,18 @@ export interface ConsoleSession { url?: string; password?: string; type?: string
  */
 export function openServerConsole(id: string) {
   return apiFetch<{ console: ConsoleSession }>(`/api/v1/servers/${id}/console`,{ method: 'POST' });
+}
+
+/**
+ * Requests cancellation. `AT_PERIOD_END` keeps the server until the paid term ends and stays
+ * revocable; `IMMEDIATE` destroys it now and requires the typed confirmation.
+ */
+export function cancelServer(id: string,input: { mode: 'AT_PERIOD_END'|'IMMEDIATE'; confirmation?: 'DELETE'; reason?: string }) {
+  return apiFetch<{ mode: string; effectiveAt: string | null; jobId: string | null; queued: boolean; cancelledSubscriptions: number; retiredWithoutProviderCall: boolean }>(
+    `/api/v1/servers/${id}/cancel`,{ method: 'POST',headers: { 'Idempotency-Key': crypto.randomUUID() },body: JSON.stringify(input) }
+  );
+}
+
+export function revokeServerCancellation(id: string) {
+  return apiFetch<{ revoked: boolean; restoredSubscriptions: number }>(`/api/v1/servers/${id}/cancel`,{ method: 'DELETE' });
 }

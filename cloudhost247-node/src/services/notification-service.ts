@@ -70,6 +70,27 @@ export async function notifyServerReady(
   }
 }
 
+/**
+ * Confirms a completed termination. In-app only and idempotent through the notification unique
+ * index, so a redelivered DELETE job cannot notify the customer twice. The message never claims
+ * data can be recovered — by this point the provider resource is gone.
+ */
+export async function notifyServerTerminated(db: Queryable, server: CustomerServerDetailRow): Promise<void> {
+  if (!server.customer_id) return;
+  const message = [
+    `Server: ${server.name}`,
+    `Hostname: ${server.hostname}`,
+    'The server has been destroyed at the infrastructure provider and billing for it has stopped.',
+    'Its data cannot be recovered. Your invoices and account history are unchanged.',
+  ].join('\n');
+  await db.query(
+    `INSERT INTO user_notifications (id,user_id,type,title,message,resource_type,resource_id)
+     VALUES ($1,$2,'SERVER_TERMINATED',$3,$4,'server',$5)
+     ON CONFLICT (user_id,type,resource_type,resource_id) WHERE resource_id IS NOT NULL DO NOTHING`,
+    [randomUUID(),server.customer_id,'Your CloudHost247 server has been terminated',message,server.id]
+  );
+}
+
 export async function listNotifications(db: Queryable, userId: string) {
   const { rows } = await db.query(
     `SELECT * FROM user_notifications WHERE user_id=$1 ORDER BY created_at DESC LIMIT 100`, [userId]

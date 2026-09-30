@@ -19,7 +19,7 @@ import {
 } from '../../db/server-provisioning';
 import { findProviderById, type ServerOsImageRow } from '../../db/infrastructure-providers';
 import { recordAuditBestEffort } from '../../lib/audit';
-import { notifyServerReady } from '../../services/notification-service';
+import { notifyServerReady, notifyServerTerminated } from '../../services/notification-service';
 import { createInfrastructureProviderAdapter } from '../providers/registry';
 import {
   ProviderError,
@@ -150,6 +150,12 @@ async function executeLifecycleAction(
     const status = job.operation === 'DELETE' ? 'retired' : job.operation === 'START' || job.operation === 'REBOOT' || job.operation === 'RESIZE' ? 'active' : 'stopped';
     await updateCustomerServerProvisioning(db,server.id,{ status,provisioningStatus: 'READY' });
     await updateProvisioningJob(db,job.id,{ status: 'READY',attempts: deployment.attempts,completedAt: new Date().toISOString(),errorCode: null,errorMessage: null });
+    // A destroyed server is the one lifecycle action the customer must hear about even though
+    // they asked for it: it confirms the resource is gone and that billing has stopped.
+    if (job.operation === 'DELETE') {
+      const terminated = await findCustomerServerById(db,server.id);
+      if (terminated) await notifyServerTerminated(db,terminated);
+    }
     await recordAuditBestEffort(db,{ action: `SERVER_${job.operation}`,resourceType: 'server',resourceId: server.id,actorId: deployment.requested_by });
     return 'succeeded';
   } catch (error) {

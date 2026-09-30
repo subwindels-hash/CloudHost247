@@ -9,6 +9,9 @@ import {
   fetchServerConfiguration,
   serverAction,
   openServerConsole,
+  cancelServer,
+  revokeServerCancellation,
+  readServerCancellation,
   type ConsoleSession,
   type AvailableOperatingSystem,
   type CustomerServer,
@@ -81,6 +84,9 @@ export default function ServerDetailPage() {
   const [showReinstall, setShowReinstall] = useState(false);
   const [showSnapshotModal, setShowSnapshotModal] = useState(false);
   const [consoleSession, setConsoleSession] = useState<ConsoleSession | null>(null);
+  const [showCancel, setShowCancel] = useState(false);
+  const [cancelConfirm, setCancelConfirm] = useState('');
+  const [cancelReason, setCancelReason] = useState('');
   const [snapshotDesc, setSnapshotDesc] = useState('');
   const [targetOs, setTargetOs] = useState('');
   const [targetVersion, setTargetVersion] = useState('');
@@ -148,6 +154,62 @@ export default function ServerDetailPage() {
       }
     }
   }, [reinstallSystems, targetOs, targetVersion, targetArchitecture]);
+
+  async function scheduleCancellation() {
+    setBusy('cancel');
+    setError('');
+    setMessage('');
+    try {
+      const result = await cancelServer(id, { mode: 'AT_PERIOD_END', reason: cancelReason || undefined });
+      setMessage(result.effectiveAt
+        ? `Cancellation scheduled. This server stays online until ${new Date(result.effectiveAt).toLocaleDateString()} and will not renew.`
+        : 'Cancellation scheduled. This server will not renew.');
+      setShowCancel(false);
+      setCancelReason('');
+      await load();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Could not schedule the cancellation');
+    } finally {
+      setBusy('');
+    }
+  }
+
+  async function destroyNow() {
+    if (cancelConfirm !== 'DELETE') {
+      setError('Type DELETE to confirm the destructive operation.');
+      return;
+    }
+    setBusy('cancel');
+    setError('');
+    try {
+      const result = await cancelServer(id, { mode: 'IMMEDIATE', confirmation: 'DELETE', reason: cancelReason || undefined });
+      setMessage(result.jobId
+        ? `Termination queued as job ${result.jobId}. The server is being destroyed at the provider.`
+        : 'The server was retired — it had never been created at the provider.');
+      setShowCancel(false);
+      setCancelConfirm('');
+      setCancelReason('');
+      await load();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Could not terminate the server');
+    } finally {
+      setBusy('');
+    }
+  }
+
+  async function keepServer() {
+    setBusy('cancel');
+    setError('');
+    try {
+      await revokeServerCancellation(id);
+      setMessage('Cancellation revoked — this server will renew as usual.');
+      await load();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Could not revoke the cancellation');
+    } finally {
+      setBusy('');
+    }
+  }
 
   async function requestConsole() {
     setBusy('console');
@@ -259,6 +321,8 @@ export default function ServerDetailPage() {
   if (!server && !error) return <CatalogLoadingBanner label="Loading server…" />;
   if (!server) return <CatalogErrorBanner message={error || 'Server not found'} />;
   const runningJob = provisioning?.job && ACTIVE_JOB.has(provisioning.job.status);
+  const cancellation = readServerCancellation(server);
+  const terminating = server.status === 'deleting' || server.status === 'retired';
 
   const panelSlug = server.control_panel_slug;
   const panelPortInfo = panelSlug ? PANEL_PORTS[panelSlug] : null;
@@ -649,6 +713,80 @@ export default function ServerDetailPage() {
           </div>
         </section>
       )}
+
+      <section className="ch247-card ch247-destructive-panel">
+        <span className="ch247-eyebrow">Danger zone</span>
+        <h2>Cancel this server</h2>
+        {terminating ? (
+          <p className="ch247-page__hint">
+            {server.status === 'retired'
+              ? 'This server has been terminated. Its invoices and history remain in your account.'
+              : 'This server is being destroyed at the provider. The dashboard updates when the job finishes.'}
+          </p>
+        ) : cancellation ? (
+          <>
+            <div className="ch247-banner ch247-banner--warning">
+              <strong>Cancellation scheduled</strong>
+              <br />
+              This server stays online until{' '}
+              {cancellation.effectiveAt ? new Date(cancellation.effectiveAt).toLocaleDateString() : 'the end of the paid term'}
+              , then it is destroyed and billing stops. All data is erased at that point.
+            </div>
+            <div className="ch247-actions">
+              <button type="button" className="ch247-btn" disabled={busy !== ''} onClick={() => void keepServer()}>
+                {busy === 'cancel' ? 'Working…' : 'Keep my server'}
+              </button>
+            </div>
+          </>
+        ) : !showCancel ? (
+          <>
+            <p className="ch247-page__hint">
+              Cancelling stops future billing. You can keep the server until the end of the term you have already paid
+              for, or destroy it now. Destroying erases all data and cannot be undone.
+            </p>
+            <div className="ch247-actions">
+              <button type="button" className="ch247-btn ch247-btn--danger" disabled={busy !== ''} onClick={() => setShowCancel(true)}>
+                Cancel server
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <label className="ch247-field">
+              Why are you cancelling? (optional)
+              <input value={cancelReason} onChange={(event) => setCancelReason(event.target.value)} maxLength={500} />
+            </label>
+            <div className="ch247-actions">
+              <button type="button" className="ch247-btn" disabled={busy !== ''} onClick={() => void scheduleCancellation()}>
+                {busy === 'cancel' ? 'Working…' : 'Cancel at end of term'}
+              </button>
+              <button type="button" className="ch247-btn" onClick={() => { setShowCancel(false); setCancelConfirm(''); }}>
+                Keep my server
+              </button>
+            </div>
+            <div className="ch247-banner ch247-banner--error">
+              <strong>WARNING</strong>
+              <br />
+              Destroying the server now erases every disk at the provider immediately. Snapshots and data cannot be
+              recovered, and any running services stop at once.
+            </div>
+            <label className="ch247-field">
+              Type <strong>DELETE</strong> to destroy this server now
+              <input value={cancelConfirm} onChange={(event) => setCancelConfirm(event.target.value)} />
+            </label>
+            <div className="ch247-actions">
+              <button
+                type="button"
+                className="ch247-btn ch247-btn--danger"
+                disabled={cancelConfirm !== 'DELETE' || busy !== ''}
+                onClick={() => void destroyNow()}
+              >
+                {busy === 'cancel' ? 'Working…' : 'Destroy server now'}
+              </button>
+            </div>
+          </>
+        )}
+      </section>
 
       {showReinstall && (
         <section className="ch247-card ch247-destructive-panel">

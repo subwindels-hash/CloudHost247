@@ -42,6 +42,12 @@ import {
 } from '../db/server-provisioning';
 import { ImageResolutionError, resolveReinstallTarget } from '../infrastructure/services/image-resolver';
 import { findProviderById } from '../db/infrastructure-providers';
+import {
+  readCancellation,
+  requestServerTermination,
+  resolveTermEnd,
+  revokeScheduledTermination,
+} from '../services/server-termination-service';
 import { createInfrastructureProviderAdapter } from '../infrastructure/providers/registry';
 import { providerErrorToHttpError } from '../infrastructure/providers/error-mapping';
 
@@ -89,6 +95,13 @@ const reinstallServerSchema = z.object({
   operatingSystemVersionId: z.string().uuid(),
   architecture: z.enum(['x86_64','arm64']),
   confirmation: z.literal('REINSTALL'),
+});
+
+const cancelServerSchema = z.object({
+  mode: z.enum(['AT_PERIOD_END','IMMEDIATE']).default('AT_PERIOD_END'),
+  // Immediate destruction is irreversible, so it carries the same typed confirmation as reinstall.
+  confirmation: z.literal('DELETE').optional(),
+  reason: z.string().max(500).optional(),
 });
 
 const resizeServerSchema = z.object({
@@ -587,6 +600,58 @@ export async function registerServerRoutes(app: FastifyInstance, env: Env, overr
    * explicit 503 rather than a fabricated console URL. The session payload is returned to the
    * owner only and never written to a log or an audit record.
    */
+  /**
+   * Customer cancellation (spec §19, §30). Two modes: keep the server until the term the customer
+   * already paid for ends, or destroy it now.
+   *
+   * Deliberately not gated on a `capabilities.delete` flag the way the power actions are: a
+   * customer must always be able to stop paying for a service, whatever the product template
+   * says. What the capability set cannot grant, it also cannot take away here.
+   */
+  app.post<{ Params: { id: string } }>('/api/v1/servers/:id/cancel', async (request, reply) => {
+    const auth = await authenticate(request, env, pool);
+    const serverId = parseOrThrow(idSchema, request.params.id);
+    const input = parseOrThrow(cancelServerSchema, request.body ?? {});
+    const mode = input.mode ?? 'AT_PERIOD_END';
+    const server = await findOwnedCustomerServer(pool, serverId, auth.userId);
+    if (!server) throw new NotFoundError('No server was found with that id');
+    if (server.status === 'retired') throw new ConflictError('This server has already been terminated');
+    if (server.status === 'deleting') throw new ConflictError('This server is already being terminated');
+    if (mode === 'IMMEDIATE' && input.confirmation !== 'DELETE') {
+      throw new ValidationError('Immediate termination destroys all data on the server — send confirmation "DELETE" to proceed');
+    }
+    if (mode === 'AT_PERIOD_END' && !(await resolveTermEnd(pool, server))) {
+      throw new ConflictError('This server has no scheduled renewal to cancel — request immediate termination instead');
+    }
+    const result = await requestServerTermination(pool, {
+      server, actorId: auth.userId, mode, reason: input.reason ?? null,
+      idempotencyKey: requestIdempotencyKey(request, server.id, 'DELETE'),
+    });
+    reply.code(result.mode === 'IMMEDIATE' ? 202 : 200);
+    return {
+      mode: result.mode, effectiveAt: result.effectiveAt, jobId: result.jobId, queued: result.queued,
+      cancelledSubscriptions: result.cancelledSubscriptions.length,
+      retiredWithoutProviderCall: result.retiredWithoutProviderCall,
+    };
+  });
+
+  /** Undoes a scheduled cancellation while the server is still running. */
+  app.delete<{ Params: { id: string } }>('/api/v1/servers/:id/cancel', async (request) => {
+    const auth = await authenticate(request, env, pool);
+    const serverId = parseOrThrow(idSchema, request.params.id);
+    const server = await findOwnedCustomerServer(pool, serverId, auth.userId);
+    if (!server) throw new NotFoundError('No server was found with that id');
+    const cancellation = readCancellation(server);
+    if (!cancellation || cancellation.mode !== 'AT_PERIOD_END') {
+      throw new ConflictError('This server has no scheduled cancellation');
+    }
+    if (server.status === 'deleting' || server.status === 'retired') {
+      throw new ConflictError('This server is already being terminated and cannot be restored');
+    }
+    const restored = await revokeScheduledTermination(pool, server, auth.userId);
+    return { revoked: true, restoredSubscriptions: restored.length };
+  });
+
   app.post<{ Params: { id: string } }>('/api/v1/servers/:id/console', async (request) => {
     const auth = await authenticate(request, env, pool);
     const serverId = parseOrThrow(idSchema, request.params.id);

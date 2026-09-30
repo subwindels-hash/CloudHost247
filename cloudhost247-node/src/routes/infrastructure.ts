@@ -48,6 +48,7 @@ import { listAllProducts } from '../db/catalog-products';
 import { createInfrastructureProviderAdapter } from '../infrastructure/providers/registry';
 import { ADAPTER_PROFILES, describeProviderConfiguration } from '../infrastructure/providers/configuration';
 import { ProviderError } from '../infrastructure/providers/types';
+import { sweepScheduledTerminations } from '../services/server-termination-service';
 import { sweepOperatingSystemLifecycle } from '../services/os-lifecycle-service';
 import {
   cancelProvisioningJob,
@@ -507,6 +508,17 @@ export async function registerInfrastructureRoutes(app: FastifyInstance,env: Env
     const transitions=await sweepOperatingSystemLifecycle(db,body);
     await auditRequest(db,request,auth.userId,{action:'OS_LIFECYCLE_SWEPT',resourceType:'operating_system_version',metadata:{transitions:transitions.length}});
     return {transitions};
+  });
+  /**
+   * Runs the scheduled-termination sweep on demand. The worker runs the same function every
+   * fifteen minutes; this endpoint lets an operator reclaim a due server immediately. It only
+   * enqueues DELETE jobs for servers whose customer already asked to cancel.
+   */
+  app.post('/api/v1/admin/server-terminations/sweep',async(request)=>{
+    const auth=await admin(request);
+    const terminated=await sweepScheduledTerminations(db);
+    await auditRequest(db,request,auth.userId,{action:'SERVER_TERMINATIONS_SWEPT',resourceType:'server',metadata:{servers:terminated.length}});
+    return {terminated};
   });
   /**
    * Infrastructure logs (spec §27). A read-only projection of the existing append-only

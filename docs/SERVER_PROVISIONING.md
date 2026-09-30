@@ -298,6 +298,7 @@ Reinstall requires server ownership, provider/product capability, the literal co
 | `POST /api/v1/admin/provisioning-jobs/:id/{retry,cancel}` | Operator recovery for failed or queued jobs. |
 | `GET /api/v1/admin/provisioning-metrics` | Totals, success rate, average duration, retries, queue depth, jobs stalled over 30 minutes, failures grouped by error code, and per-provider job health. |
 | `POST /api/v1/admin/os-lifecycle/sweep` | Applies a freshly entered end-of-life date immediately; the worker runs the same sweep hourly. |
+| `POST /api/v1/admin/server-terminations/sweep` | Destroys servers whose scheduled cancellation is due; the worker runs the same sweep every 15 minutes. |
 | `GET /api/v1/admin/infrastructure-logs` | Append-only audit trail filtered to infrastructure resources (`provider`, `region`, `datacenter`, `os_image`, `operating_system`, `operating_system_version`, `provisioning_job`, `server`), with `action`, `resourceId`, `limit` and `offset` filters. |
 
 Infrastructure logs are a read-only projection of the existing `audit_logs` table — there is no
@@ -359,6 +360,7 @@ caused them; email is an optional bridge that never blocks or fakes the in-app r
 | `SERVER_REINSTALLED` | a reinstall job completes and the new OS is attested | success notice |
 | `OS_EOL_WARNING` | the lifecycle sweep moves a version the customer runs to EOL_WARNING | warning notice, one per server |
 | `OS_EOL` | the lifecycle sweep moves that version to EOL | end-of-life notice, one per server |
+| `SERVER_TERMINATED` | a DELETE job finishes and the provider resource is gone | termination notice confirming billing has stopped |
 
 Customers read them at **Dashboard → Notifications** (`/dashboard/notifications`):
 `GET /api/v1/notifications` returns the list plus the unread count, and
@@ -387,6 +389,35 @@ Rows are created `DISABLED` on purpose. Enable one only after a verified provide
 for that provider, OS version, architecture and region; the ordering and reinstall queries join
 through `ACTIVE` images with a non-null `verified_at`, so a template enabled too early simply
 never appears rather than producing a broken order.
+
+## Cancellation and termination
+
+Provisioning has a counterpart: `POST /api/v1/servers/:id/cancel`. It is deliberately **not**
+gated on a `capabilities.delete` flag — a customer must always be able to stop paying for a
+service, whatever the product template allows.
+
+| Mode | Effect | Reversible |
+| --- | --- | --- |
+| `AT_PERIOD_END` (default) | Subscriptions on the server's order are flagged `cancel_at_period_end`; the server keeps running until the term the customer already paid for ends. | Yes — `DELETE /api/v1/servers/:id/cancel` until the sweep fires |
+| `IMMEDIATE` | Requires the typed confirmation `"DELETE"`. Subscriptions are cancelled and a `DELETE` provisioning job is enqueued at once. | No |
+
+Both modes record the request under `servers.metadata.cancellation`
+(`mode`, `requestedAt`, `requestedBy`, `effectiveAt`, `reason`) and audit it
+(`SERVER_TERMINATION_SCHEDULED`, `SERVER_TERMINATION_REQUESTED`, `SERVER_TERMINATION_REVOKED`).
+
+The destruction itself never happens in the request:
+
+- `sweepScheduledTerminations` (worker, every 15 minutes; also
+  `POST /api/v1/admin/server-terminations/sweep`) enqueues the `DELETE` job once `effectiveAt`
+  passes, skipping servers already `deleting` or `retired` and deriving the idempotency key from
+  the effective date so a re-run reuses the existing job;
+- the worker calls the provider adapter's `deleteServer`, sets the server to `retired`, and
+  raises a `SERVER_TERMINATED` notification — once, even if the queue redelivers the job;
+- a server that never reached the provider (an abandoned unpaid order) is retired directly with
+  the audit action `SERVER_RETIRED_WITHOUT_PROVIDER_RESOURCE`. No provider call is faked.
+
+The `servers` row is **kept** with status `retired`. Nothing deletes customer records: orders,
+invoices, payments and the audit trail are untouched, so billing history stays intact.
 
 ## Serial console access
 
