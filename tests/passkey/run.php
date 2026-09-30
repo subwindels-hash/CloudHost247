@@ -58,21 +58,9 @@ final class FakeAuthenticator
     {
         $this->credentialId = $credentialId === null ? random_bytes(32) : $credentialId;
 
-        // Prefer live key generation; fall back to the committed throwaway
-        // test key when the runtime cannot generate one (see fixtures/README).
-        $pem = null;
-        if (function_exists('openssl_pkey_new')) {
-            $resource = @openssl_pkey_new(array('curve_name' => 'prime256v1', 'private_key_type' => OPENSSL_KEYTYPE_EC));
-            if ($resource) {
-                @openssl_pkey_export($resource, $pem);
-            }
-        }
-        if (!$pem) {
-            $pem = file_get_contents(__DIR__ . '/fixtures/es256-private.test.pem');
-        }
-        $this->privateKey = $pem;
+        $this->privateKey = ch247_pk_test_key();
 
-        $details = openssl_pkey_get_details(openssl_pkey_get_private($pem));
+        $details = openssl_pkey_get_details(openssl_pkey_get_private($this->privateKey));
         $this->cose = array(
             1 => Cose::KTY_EC2,
             3 => Cose::ALG_ES256,
@@ -156,6 +144,61 @@ final class FakeAuthenticator
             ),
         );
     }
+}
+
+/**
+ * Returns a throwaway P-256 private key for the test authenticator.
+ *
+ * Preference order:
+ *   1. generate one with OpenSSL (what CI does — a fresh key every run);
+ *   2. reuse a previously cached key from fixtures/.
+ *
+ * The cache exists only for runtimes that cannot call openssl_pkey_new()
+ * (php-wasm, for example, has no openssl.cnf). It is deliberately *not*
+ * committed: the repository's .gitignore excludes *.pem, and a private key
+ * has no business in version control even when it protects nothing.
+ */
+function ch247_pk_test_key()
+{
+    static $pem = null;
+    if ($pem !== null) {
+        return $pem;
+    }
+    $cache = __DIR__ . '/fixtures/es256-private.test.pem';
+
+    if (function_exists('openssl_pkey_new')) {
+        $resource = @openssl_pkey_new(array(
+            'curve_name' => 'prime256v1',
+            'private_key_type' => OPENSSL_KEYTYPE_EC,
+        ));
+        if ($resource) {
+            $generated = null;
+            @openssl_pkey_export($resource, $generated);
+            if ($generated) {
+                // Cache it so a runtime that cannot generate keys can still
+                // run the suite after one successful run on this machine.
+                @file_put_contents($cache, $generated);
+                $pem = $generated;
+                return $pem;
+            }
+        }
+    }
+
+    if (is_file($cache)) {
+        $cached = file_get_contents($cache);
+        if ($cached && strpos($cached, 'PRIVATE KEY') !== false) {
+            $pem = $cached;
+            return $pem;
+        }
+    }
+
+    throw new \RuntimeException(
+        'Cannot obtain a test key: openssl_pkey_new() is unavailable in this PHP runtime and '
+        . 'no cached key exists at tests/passkey/fixtures/es256-private.test.pem. '
+        . "Generate one with:\n"
+        . "  openssl genpkey -algorithm EC -pkeyopt ec_paramgen_curve:P-256 "
+        . "-out tests/passkey/fixtures/es256-private.test.pem"
+    );
 }
 
 /** Registers a passkey for a client and returns [authenticator, credential]. */
