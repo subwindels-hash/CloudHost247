@@ -1,18 +1,102 @@
 <?php
-if (!defined('WHMCS')) { die('Direct access denied'); }
-require_once __DIR__.'/bootstrap.php';
-use WHMCS\Database\Capsule; use CloudHost247\CartRecovery\Migrations\V100; use CloudHost247\CartRecovery\SettingsRepository; use CloudHost247\CartRecovery\EmailService; use CloudHost247\CartRecovery\ReminderService;
-function cloudhost247_cart_recovery_config(){return array('name'=>'CloudHost247 Cart Recovery','description'=>'Native WHMCS abandoned-cart recovery, reminders and conversion analytics.','version'=>'1.0.0','author'=>'CloudHost247','language'=>'english','fields'=>array());}
-function cloudhost247_cart_recovery_activate(){try{V100::run();SettingsRepository::seed();EmailService::ensureTemplates();return array('status'=>'success','description'=>'Cart Recovery installed non-destructively. Schedule the documented cron and review the WHMCS email templates.');}catch(\Throwable $e){return array('status'=>'error','description'=>'Installation failed: '.htmlspecialchars($e->getMessage(),ENT_QUOTES,'UTF-8'));}}
-function cloudhost247_cart_recovery_deactivate(){return array('status'=>'success','description'=>'Cart Recovery disabled. Historical recovery and reminder data was retained.');}
-function cloudhost247_cart_recovery_output($vars){
-    if(function_exists('checkPermission')&&!checkPermission('Manage Addon Modules')){echo '<div class="alert alert-danger">You are not authorized to manage Cart Recovery.</div>';return;}
-    $e=function($v){return htmlspecialchars((string)$v,ENT_QUOTES,'UTF-8');}; $notice='';
-    if(strtoupper($_SERVER['REQUEST_METHOD']??'GET')==='POST'){ if(function_exists('check_token')) check_token('WHMCS.admin.default'); if(isset($_POST['save_settings'])){foreach(array('enabled','enable_reminder_1','enable_reminder_2','enable_reminder_3','guest_recovery','unsubscribe') as $ck) $_POST[$ck]=isset($_POST[$ck])?'1':'0'; SettingsRepository::save($_POST);$notice='Settings saved.';} if(isset($_POST['process_due'])){$r=ReminderService::process((int)SettingsRepository::get('batch_size'));$notice='Due reminders processed: '.$r['sent'].' sent, '.$r['failed'].' failed.';} }
-    $s=SettingsRepository::all(); $q=Capsule::table('mod_cloudhost247_cart_recovery_recoveries'); $counts=array(); foreach(array('abandoned','active','recovered','converted','expired','unsubscribed') as $st)$counts[$st]=(int)$q->where('status',$st)->count(); $sent=(int)Capsule::table('mod_cloudhost247_cart_recovery_reminder_logs')->where('status','sent')->count(); $failed=(int)Capsule::table('mod_cloudhost247_cart_recovery_reminder_logs')->where('status','failed')->count(); $eligible=$counts['abandoned']+$counts['recovered']+$counts['converted']; $rate=$eligible?number_format(($counts['recovered']+$counts['converted'])/$eligible*100,2):'0.00'; $revenue=(float)$q->where('status','converted')->sum('recovered_revenue');
-    $filter=isset($_GET['status'])?(string)$_GET['status']:''; $list=$q->when(in_array($filter,array('active','abandoned','recovered','converted','expired','unsubscribed'),true),function($x)use($filter){return $x->where('status',$filter);})->orderBy('id','desc')->limit(100)->get();
-    echo '<h2>CloudHost247 Cart Recovery</h2>'; if($notice)echo '<div class="alert alert-success">'.$e($notice).'</div>'; echo '<div class="row">'; foreach(array('abandoned'=>'Abandoned Carts','active'=>'Active Recovery Carts','sent'=>'Reminders Sent','recovered'=>'Recovered Carts','converted'=>'Converted Carts','expired'=>'Expired Carts','unsubscribed'=>'Unsubscribed Customers','rate'=>'Recovery Rate','revenue'=>'Recovered Revenue') as $key=>$label){$v=isset($counts[$key])?$counts[$key]:($key==='sent'?$sent:($key==='rate'?$rate.'%':($key==='revenue'?number_format($revenue,2):0)));echo '<div class="col-sm-4 col-md-2"><div class="panel panel-default"><div class="panel-heading">'.$e($label).'</div><div class="panel-body"><strong>'.$e($v).'</strong></div></div></div>'; } echo '</div>';
-    $token=function_exists('generate_token')?generate_token('plain'):''; echo '<h3>Settings</h3><form method="post" class="form-horizontal"><input type="hidden" name="token" value="'.$e($token).'">'; foreach(array('enabled'=>'Enable Cart Recovery','enable_reminder_1'=>'Enable Reminder 1','enable_reminder_2'=>'Enable Reminder 2','enable_reminder_3'=>'Enable Reminder 3','guest_recovery'=>'Enable Guest Recovery','unsubscribe'=>'Enable Unsubscribe') as $k=>$label)echo '<label class="checkbox-inline"><input type="checkbox" name="'.$e($k).'" value="1"'.($s[$k]==='1'?' checked':'').'> '.$e($label).'</label> '; echo '<br><br>'; foreach(array('abandonment_threshold'=>'Abandonment Threshold (seconds)','reminder_1_delay'=>'Reminder 1 Delay (seconds)','reminder_2_delay'=>'Reminder 2 Delay (seconds)','reminder_3_delay'=>'Reminder 3 Delay (seconds)','maximum_reminders'=>'Maximum Reminders','token_lifetime'=>'Token Lifetime (seconds)','batch_size'=>'Cron Batch Size') as $k=>$label)echo '<div class="form-group"><label class="col-sm-3 control-label">'.$e($label).'</label><div class="col-sm-3"><input class="form-control" type="number" min="1" name="'.$e($k).'" value="'.$e($s[$k]).'"></div></div>'; echo '<button class="btn btn-primary" name="save_settings">Save Settings</button> <button class="btn btn-default" name="process_due">Process Due Reminders</button></form><hr><h3>Recovery Records</h3><p>Recovery rate is recovered or converted carts divided by abandoned/recovered/converted carts; revenue is copied only from authoritative WHMCS orders when conversion is observed.</p><form method="get"><select name="status" class="form-control" style="max-width:240px;display:inline"><option value="">All statuses</option>';foreach(array('active','abandoned','recovered','converted','expired','unsubscribed') as $x)echo '<option value="'.$x.'"'.($filter===$x?' selected':'').'>'.$x.'</option>';echo '</select> <button class="btn btn-default">Filter</button></form><div class="table-responsive"><table class="table table-striped"><thead><tr><th>Customer</th><th>Email</th><th>Cart</th><th>Total</th><th>Status</th><th>Created</th><th>Last activity</th><th>Reminder</th><th>Order</th></tr></thead><tbody>';
-    foreach($list as $r){echo '<tr><td>'.$e(trim($r->first_name.' '.$r->last_name)).'</td><td>'.$e($r->email).'</td><td>'.$e(\CloudHost247\CartRecovery\CartSnapshot::label($r->cart_snapshot)).'</td><td>'.$e($r->currency.' '.$r->cart_total).'</td><td>'.$e($r->status).'</td><td>'.$e($r->created_at).'</td><td>'.$e($r->last_activity_at).'</td><td>'.$e($r->last_reminder_number).' / '.$e($r->next_reminder_at).'</td><td>'.$e($r->order_id).'</td></tr>';}
-    echo '</tbody></table></div><p>Reminder failures: '.$e($failed).'. Records are retained when the addon is disabled.</p>';
+/**
+ * CloudHost247 Cart Recovery — WHMCS addon entry point.
+ *
+ * Abandoned-cart capture, secure recovery links, reminder scheduling through
+ * the existing WHMCS email system, and conversion analytics. WHMCS remains
+ * the source of truth for the shopping cart, orders and invoices.
+ */
+
+if (!defined('WHMCS')) {
+    die('Direct access denied');
+}
+
+require_once __DIR__ . '/bootstrap.php';
+
+use CloudHost247\CartRecovery\AdminController;
+use CloudHost247\CartRecovery\EmailService;
+use CloudHost247\CartRecovery\Log;
+use CloudHost247\CartRecovery\MigrationRunner;
+use CloudHost247\CartRecovery\SettingsRepository;
+
+function cloudhost247_cart_recovery_config()
+{
+    return array(
+        'name' => 'CloudHost247 Cart Recovery',
+        'description' => 'Abandoned cart capture, secure recovery links, reminder emails through the WHMCS mail system, and recovery/conversion analytics.',
+        'version' => '1.0.0',
+        'author' => 'CloudHost247',
+        'language' => 'english',
+        // Runtime configuration lives on the addon dashboard so it can be
+        // validated and documented; no duplicated settings here.
+        'fields' => array(),
+    );
+}
+
+function cloudhost247_cart_recovery_activate()
+{
+    try {
+        MigrationRunner::migrate();
+        SettingsRepository::seed();
+        $created = EmailService::ensureTemplates();
+        Log::info('addon.activated', array('templates_created' => $created));
+        return array(
+            'status' => 'success',
+            'description' => 'Cart Recovery installed. Schedule the cron job documented in the addon README and review the three '
+                . '"CloudHost247 Abandoned Cart Reminder" templates under Setup → Email Templates.',
+        );
+    } catch (\Throwable $e) {
+        Log::error('addon.activation_failed', array('error' => Log::safeError($e)));
+        return array(
+            'status' => 'error',
+            'description' => 'Installation failed: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8'),
+        );
+    }
+}
+
+/**
+ * Deactivation stops tracking, reminders and recovery links (every entry
+ * point checks that the addon is active) but deliberately keeps historical
+ * data. Deleting recovery history requires an explicit, destructive action.
+ */
+function cloudhost247_cart_recovery_deactivate()
+{
+    Log::info('addon.deactivated', array());
+    return array(
+        'status' => 'success',
+        'description' => 'Cart Recovery disabled. Tracking, reminders and recovery links are now inactive; '
+            . 'historical recovery, reminder and suppression data has been retained.',
+    );
+}
+
+function cloudhost247_cart_recovery_upgrade($vars)
+{
+    try {
+        MigrationRunner::migrate();
+        SettingsRepository::seed();
+        EmailService::ensureTemplates();
+    } catch (\Throwable $e) {
+        Log::error('addon.upgrade_failed', array('error' => Log::safeError($e)));
+    }
+}
+
+function cloudhost247_cart_recovery_output($vars)
+{
+    try {
+        $view = AdminController::handle(is_array($vars) ? $vars : array());
+        require __DIR__ . '/templates/admin/index.tpl';
+    } catch (\Throwable $e) {
+        Log::error('admin.render_failed', array('error' => Log::safeError($e)));
+        echo '<div class="alert alert-danger">The Cart Recovery dashboard could not be displayed. '
+            . 'Check the module log for details.</div>';
+    }
+}
+
+/**
+ * Client-area sidebar entry is intentionally not registered: cart recovery is
+ * an administrative feature plus two public endpoints (recover / unsubscribe).
+ */
+function cloudhost247_cart_recovery_sidebar($vars)
+{
+    return '';
 }
