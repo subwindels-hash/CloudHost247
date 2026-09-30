@@ -46,7 +46,7 @@ import { findPlanById, listActivePlansForProduct } from '../db/catalog-plans';
 import { listPublishedPricingForPlan } from '../db/catalog-pricing';
 import { listAllProducts } from '../db/catalog-products';
 import { createInfrastructureProviderAdapter } from '../infrastructure/providers/registry';
-import { ADAPTER_PROFILES, describeProviderConfiguration } from '../infrastructure/providers/configuration';
+import { ADAPTER_PROFILES, describeProviderConfiguration, getAdapterProfile } from '../infrastructure/providers/configuration';
 import { ProviderError } from '../infrastructure/providers/types';
 import { sweepScheduledTerminations } from '../services/server-termination-service';
 import { listServerDrift, reconcileServerState } from '../services/infrastructure-reconciliation-service';
@@ -170,6 +170,12 @@ const patchImageSchema = z.object({
   regionId: id.nullable().optional(),datacenterId: id.nullable().optional(),status: imageStatus.optional(),metadata: z.record(z.unknown()).optional(),
 });
 
+/**
+ * Power and lifecycle verbs every adapter in the registry implements directly. Everything else is
+ * declared per adapter in ADAPTER_PROFILES and must be proven before a template may offer it.
+ */
+const ALWAYS_AVAILABLE_CAPABILITIES = new Set(['start','stop','reboot','shutdown','delete']);
+
 async function validateProductConfigurationReferences(
   db: Queryable,
   input: { planId:string;providerId:string;regionId:string;datacenterId?:string|null;operatingSystemVersionId:string;architecture:'x86_64'|'arm64';serverType:'VPS'|'DEDICATED'|'CLOUD';metadata?:Record<string,unknown> }
@@ -191,6 +197,22 @@ async function validateProductConfigurationReferences(
     for(const [key,min] of [['cpuCores',1],['memoryMb',256],['storageMb',1024]] as const){
       const value=input.metadata[key];
       if(typeof value!=='number'||!Number.isInteger(value)||value<min)throw new ValidationError(`Configuration metadata requires ${key} >= ${min}`);
+    }
+    // A template's capability flags decide which buttons the customer is shown. Promising an
+    // operation the provider's adapter cannot perform would queue a job that can only fail after
+    // the customer has already clicked, so the promise is refused here instead.
+    const declared=input.metadata.capabilities;
+    if(declared!==undefined){
+      if(typeof declared!=='object'||declared===null||Array.isArray(declared))throw new ValidationError('Configuration metadata capabilities must be an object of booleans');
+      const profile=getAdapterProfile(provider.adapter);
+      if(!profile)throw new ValidationError('Provider adapter is unknown, so its capabilities cannot be verified');
+      for(const [capability,enabled] of Object.entries(declared as Record<string,unknown>)){
+        if(typeof enabled!=='boolean')throw new ValidationError(`Capability ${capability} must be true or false`);
+        if(!enabled)continue;
+        if(!ALWAYS_AVAILABLE_CAPABILITIES.has(capability)&&profile.capabilities[capability as keyof typeof profile.capabilities]!==true){
+          throw new ValidationError(`The ${provider.name} adapter does not support ${capability}, so it cannot be offered on this template`);
+        }
+      }
     }
   }
 }

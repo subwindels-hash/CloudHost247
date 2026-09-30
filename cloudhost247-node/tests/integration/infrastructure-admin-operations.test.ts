@@ -153,6 +153,55 @@ describe('admin infrastructure operations', () => {
     await app.close();
   });
 
+  it('refuses a server template that promises an action the provider adapter cannot perform', async () => {
+    const app = buildApp(env, { serveFrontend: false, pool: db });
+    const headers = { authorization: `Bearer ${adminToken}` };
+    const product = await db.query<{ id: string }>(
+      `INSERT INTO products(id,slug,name,product_type,status,visibility) VALUES($1,$2,'Capability product','hosting','active','public') RETURNING id`,
+      [randomUUID(), `cap-${randomUUID()}`]
+    );
+    const plan = await db.query<{ id: string }>(
+      `INSERT INTO product_plans(id,product_id,slug,name,status) VALUES($1,$2,$3,'Capability plan','active') RETURNING id`,
+      [randomUUID(), product.rows[0]!.id, `cap-plan-${randomUUID()}`]
+    );
+    const providerId = randomUUID();
+    const regionId = randomUUID();
+    // AWS is a real adapter whose profile declares no in-place reinstall and no serial console.
+    await db.query(
+      `INSERT INTO infrastructure_providers(id,name,slug,provider_type,adapter,status) VALUES($1,'Capability provider',$2,'AWS','aws','DISABLED')`,
+      [providerId, `cap-${providerId}`]
+    );
+    await db.query(
+      `INSERT INTO infrastructure_regions(id,provider_id,code,name,status) VALUES($1,$2,'cap-1','Capability Region','ACTIVE')`,
+      [regionId, providerId]
+    );
+    await db.query(`UPDATE operating_system_versions SET status='ACTIVE' WHERE id='20000000-0000-0000-0000-000000000006'`);
+    const body = (capabilities: Record<string, boolean>) => ({
+      planId: plan.rows[0]!.id, providerId, regionId, datacenterId: null,
+      operatingSystemVersionId: '20000000-0000-0000-0000-000000000006',
+      architecture: 'x86_64', serverType: 'VPS', status: 'DISABLED',
+      metadata: { cpuCores: 2, memoryMb: 4096, storageMb: 80000, providerServerType: 't3.small', capabilities },
+    });
+
+    const promised = await app.inject({
+      method: 'POST', url: '/api/v1/admin/server-product-configurations', headers,
+      payload: body({ start: true, stop: true, reboot: true, reinstall: true }),
+    });
+    expect(promised.statusCode).toBe(400);
+    expect(promised.json().message).toContain('does not support reinstall');
+
+    // Power actions every adapter implements are still accepted.
+    const honest = await app.inject({
+      method: 'POST', url: '/api/v1/admin/server-product-configurations', headers,
+      payload: body({ start: true, stop: true, reboot: true, shutdown: true, snapshot: true }),
+    });
+    expect(honest.statusCode).toBe(201);
+    expect((await db.query<{ count: number }>(
+      `SELECT count(*)::int count FROM server_product_configurations WHERE provider_id=$1`, [providerId]
+    )).rows[0]?.count).toBe(1);
+    await app.close();
+  });
+
   it('exposes an append-only infrastructure audit trail, admin only', async () => {
     const app = buildApp(env, { serveFrontend: false, pool: db });
     expect((await app.inject({ method: 'GET', url: '/api/v1/admin/infrastructure-logs' })).statusCode).toBe(401);

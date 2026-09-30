@@ -461,6 +461,13 @@ Each row carries, in `metadata`:
 - `capabilities`, the exact set of actions the server detail page offers and the API accepts
   (`start`, `stop`, `reboot`, `shutdown`, `reinstall`, `snapshot`, `resize`, `rescue`, `console`).
 
+`capabilities` is checked against the provider's adapter profile before the row is saved: a
+template cannot offer `reinstall`, `snapshot`, `resize`, `console` or `rescue` unless that adapter
+actually implements it. Otherwise the customer would be shown a button whose only possible
+outcome is a failed job, discovered after they clicked it. Power actions (`start`, `stop`,
+`reboot`, `shutdown`) are implemented by every adapter and are always available. The admin form
+hides or disables whatever the selected provider cannot do and lists what it can.
+
 Rows are created `DISABLED` on purpose. Enable one only after a verified provider image exists
 for that provider, OS version, architecture and region; the ordering and reinstall queries join
 through `ACTIVE` images with a non-null `verified_at`, so a template enabled too early simply
@@ -527,7 +534,17 @@ The required acceptance run cannot be simulated:
 5. Configure and verify a Debian 13 x86_64 image in the same provider/location.
 6. Queue reinstall with confirmation `REINSTALL`; confirm Debian 13 agent attestation before the catalog fields change and the server returns to READY.
 
-Record provider request IDs and job/audit IDs outside customer-visible logs. Real credentials and this live acceptance are intentionally not part of repository tests.
+Record provider request IDs and job/audit IDs outside customer-visible logs. Real credentials and
+this live acceptance are intentionally not part of repository tests.
+
+The same sequence — order, payment, queued job, provider create, health gates, `READY`,
+notification, then a confirmed reinstall onto Debian 13 that moves the catalog OS recorded against
+the server — runs against a stub adapter on every test run in
+`tests/integration/server-reinstall-acceptance.test.ts`. It also asserts the two ways the flow must
+refuse: an unconfirmed or non-owner reinstall never creates a job, and a reinstall that fails at
+the provider leaves the previously installed OS recorded rather than advertising one the server is
+not running. What that test cannot prove is that a real provider behaves as the stub does — which
+is what the live run above is for.
 
 ## Control Panel & Application Platform Catalog (Phase 3)
 
