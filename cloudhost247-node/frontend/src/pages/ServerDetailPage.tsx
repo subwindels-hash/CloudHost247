@@ -2,11 +2,22 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { CatalogErrorBanner, CatalogLoadingBanner } from '../components/CatalogStateBanner';
 import StatusBadge from '../components/StatusBadge';
+import OsLifecycleNotice from '../components/OsLifecycleNotice';
 import { apiFetch } from '../lib/api';
 import {
   fetchCustomerServer,
   fetchServerConfiguration,
   serverAction,
+  openServerConsole,
+  cancelServer,
+  revokeServerCancellation,
+  readServerCancellation,
+  fetchServerHealth,
+  enterRescueMode,
+  exitRescueMode,
+  type ConsoleSession,
+  type RescueSession,
+  type ServerHealthSnapshot,
   type AvailableOperatingSystem,
   type CustomerServer,
   type ServerConfiguration,
@@ -77,25 +88,33 @@ export default function ServerDetailPage() {
   const [busy, setBusy] = useState('');
   const [showReinstall, setShowReinstall] = useState(false);
   const [showSnapshotModal, setShowSnapshotModal] = useState(false);
+  const [consoleSession, setConsoleSession] = useState<ConsoleSession | null>(null);
+  const [showCancel, setShowCancel] = useState(false);
+  const [cancelConfirm, setCancelConfirm] = useState('');
+  const [cancelReason, setCancelReason] = useState('');
   const [snapshotDesc, setSnapshotDesc] = useState('');
   const [targetOs, setTargetOs] = useState('');
   const [targetVersion, setTargetVersion] = useState('');
   const [targetArchitecture, setTargetArchitecture] = useState<'x86_64' | 'arm64'>('x86_64');
   const [confirm, setConfirm] = useState('');
+  const [health, setHealth] = useState<ServerHealthSnapshot | null>(null);
+  const [rescueSession, setRescueSession] = useState<RescueSession | null>(null);
   const [firewallRules, setFirewallRules] = useState<FirewallRule[]>([]);
   const [newRulePort, setNewRulePort] = useState('');
   const [newRuleProtocol, setNewRuleProtocol] = useState<'tcp' | 'udp'>('tcp');
   const [newRuleDesc, setNewRuleDesc] = useState('');
 
   const load = useCallback(async () => {
-    const [{ server: loaded }, state, fw] = await Promise.all([
+    const [{ server: loaded }, state, fw, monitoring] = await Promise.all([
       fetchCustomerServer(id),
       apiFetch<ProvisioningState>(`/api/v1/servers/${id}/provisioning-status`),
       fetchServerFirewall(id).catch(() => ({ rules: [] })),
+      fetchServerHealth(id).catch(() => null),
     ]);
     setServer(loaded);
     setProvisioning(state);
     setFirewallRules(fw.rules);
+    setHealth(monitoring);
   }, [id]);
 
   useEffect(() => {
@@ -144,6 +163,108 @@ export default function ServerDetailPage() {
       }
     }
   }, [reinstallSystems, targetOs, targetVersion, targetArchitecture]);
+
+  async function scheduleCancellation() {
+    setBusy('cancel');
+    setError('');
+    setMessage('');
+    try {
+      const result = await cancelServer(id, { mode: 'AT_PERIOD_END', reason: cancelReason || undefined });
+      setMessage(result.effectiveAt
+        ? `Cancellation scheduled. This server stays online until ${new Date(result.effectiveAt).toLocaleDateString()} and will not renew.`
+        : 'Cancellation scheduled. This server will not renew.');
+      setShowCancel(false);
+      setCancelReason('');
+      await load();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Could not schedule the cancellation');
+    } finally {
+      setBusy('');
+    }
+  }
+
+  async function destroyNow() {
+    if (cancelConfirm !== 'DELETE') {
+      setError('Type DELETE to confirm the destructive operation.');
+      return;
+    }
+    setBusy('cancel');
+    setError('');
+    try {
+      const result = await cancelServer(id, { mode: 'IMMEDIATE', confirmation: 'DELETE', reason: cancelReason || undefined });
+      setMessage(result.jobId
+        ? `Termination queued as job ${result.jobId}. The server is being destroyed at the provider.`
+        : 'The server was retired — it had never been created at the provider.');
+      setShowCancel(false);
+      setCancelConfirm('');
+      setCancelReason('');
+      await load();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Could not terminate the server');
+    } finally {
+      setBusy('');
+    }
+  }
+
+  async function keepServer() {
+    setBusy('cancel');
+    setError('');
+    try {
+      await revokeServerCancellation(id);
+      setMessage('Cancellation revoked — this server will renew as usual.');
+      await load();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Could not revoke the cancellation');
+    } finally {
+      setBusy('');
+    }
+  }
+
+  async function requestConsole() {
+    setBusy('console');
+    setError('');
+    setMessage('');
+    setConsoleSession(null);
+    try {
+      const result = await openServerConsole(id);
+      setConsoleSession(result.console);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Could not open a console session');
+    } finally {
+      setBusy('');
+    }
+  }
+
+  async function enterRescue() {
+    setBusy('rescue');
+    setError('');
+    setMessage('');
+    try {
+      const result = await enterRescueMode(id);
+      setRescueSession(result.rescue);
+      setMessage('The server is rebooting into the provider rescue system.');
+      await load();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Could not enter rescue mode');
+    } finally {
+      setBusy('');
+    }
+  }
+
+  async function leaveRescue() {
+    setBusy('rescue');
+    setError('');
+    try {
+      await exitRescueMode(id);
+      setRescueSession(null);
+      setMessage('The server is rebooting back into its installed operating system.');
+      await load();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Could not leave rescue mode');
+    } finally {
+      setBusy('');
+    }
+  }
 
   async function action(name: string, payload: unknown = {}) {
     setBusy(name);
@@ -240,6 +361,10 @@ export default function ServerDetailPage() {
   if (!server && !error) return <CatalogLoadingBanner label="Loading server…" />;
   if (!server) return <CatalogErrorBanner message={error || 'Server not found'} />;
   const runningJob = provisioning?.job && ACTIVE_JOB.has(provisioning.job.status);
+  const cancellation = readServerCancellation(server);
+  // Rescue state lives on the server row, so a reload or a second browser still shows it.
+  const inRescue = Boolean((server.metadata as { rescue?: unknown } | null | undefined)?.rescue);
+  const terminating = server.status === 'deleting' || server.status === 'retired';
 
   const panelSlug = server.control_panel_slug;
   const panelPortInfo = panelSlug ? PANEL_PORTS[panelSlug] : null;
@@ -279,6 +404,12 @@ export default function ServerDetailPage() {
           <strong>{server.ip_address ?? 'IP pending'}</strong>
         </div>
       </section>
+
+      <OsLifecycleNotice
+        status={server.os_version_status}
+        displayName={server.os_display_name}
+        endOfLifeDate={server.os_end_of_life_date}
+      />
 
       {error && <CatalogErrorBanner message={error} />}
       {message && <p className="ch247-banner ch247-banner--info">{message}</p>}
@@ -428,6 +559,26 @@ export default function ServerDetailPage() {
                 Create Snapshot
               </button>
             )}
+            {server.capabilities?.console === true && (
+              <button
+                type="button"
+                className="ch247-btn"
+                disabled={busy !== '' || !!runningJob}
+                onClick={() => void requestConsole()}
+              >
+                {busy === 'console' ? 'Opening console…' : 'Open console'}
+              </button>
+            )}
+            {server.capabilities?.rescue === true && (
+              <button
+                type="button"
+                className="ch247-btn"
+                disabled={busy !== '' || !!runningJob}
+                onClick={() => void (inRescue ? leaveRescue() : enterRescue())}
+              >
+                {busy === 'rescue' ? 'Working…' : inRescue ? 'Leave rescue mode' : 'Boot into rescue'}
+              </button>
+            )}
             {server.capabilities?.reinstall === true && (
               <button
                 type="button"
@@ -443,6 +594,58 @@ export default function ServerDetailPage() {
             Only operations supported by this provider and product are shown. Every operation runs through the queue worker and is audit logged.
           </p>
         </article>
+      </section>
+
+      {/* Monitoring — agent-reported, never inferred. */}
+      <section className="ch247-card">
+        <div className="ch247-section-heading">
+          <div>
+            <span className="ch247-eyebrow">Monitoring</span>
+            <h2>Resource usage</h2>
+          </div>
+          <span>
+            {health?.agent.reachable
+              ? `Agent ${health.agent.version ?? ''} reporting`
+              : health?.agent.lastSeenAt
+                ? `Agent last seen ${new Date(health.agent.lastSeenAt).toLocaleString()}`
+                : 'Agent has not reported yet'}
+          </span>
+        </div>
+        {health?.latest ? (
+          <>
+            <dl className="ch247-kv">
+              <dt>CPU</dt>
+              <dd>{health.latest.cpu_percent === null ? '—' : `${Number(health.latest.cpu_percent).toFixed(1)} %`}</dd>
+              <dt>Load (1m)</dt>
+              <dd>{health.latest.load_1 === null ? '—' : Number(health.latest.load_1).toFixed(2)}</dd>
+              <dt>Memory</dt>
+              <dd>
+                {health.latest.memory_used_mb !== null && health.latest.memory_total_mb
+                  ? `${Math.round(health.latest.memory_used_mb / 1024 * 10) / 10} / ${Math.round(health.latest.memory_total_mb / 1024 * 10) / 10} GB`
+                  : '—'}
+              </dd>
+              <dt>Disk</dt>
+              <dd>
+                {health.latest.disk_used_mb !== null && health.latest.disk_total_mb
+                  ? `${Math.round(health.latest.disk_used_mb / 1024)} / ${Math.round(health.latest.disk_total_mb / 1024)} GB`
+                  : '—'}
+              </dd>
+              <dt>Uptime</dt>
+              <dd>{health.latest.uptime_seconds ? `${Math.floor(health.latest.uptime_seconds / 86400)}d ${Math.floor((health.latest.uptime_seconds % 86400) / 3600)}h` : '—'}</dd>
+              <dt>Measured</dt>
+              <dd>{new Date(health.latest.captured_at).toLocaleString()}</dd>
+            </dl>
+            {!health.agent.reachable && (
+              <p className="ch247-banner ch247-banner--warning">
+                These figures are the last report received, not the current state — the monitoring agent has not checked in for over five minutes.
+              </p>
+            )}
+          </>
+        ) : (
+          <p className="ch247-page__hint">
+            No measurements have been received from this server yet. Figures appear once the monitoring agent reports; nothing here is estimated from the plan.
+          </p>
+        )}
       </section>
 
       {/* Firewall & Security Group Rules */}
@@ -545,6 +748,88 @@ export default function ServerDetailPage() {
         </div>
       </section>
 
+      {(inRescue || rescueSession) && (
+        <section className="ch247-card">
+          <h2>Rescue mode</h2>
+          <p className="ch247-page__hint">
+            This server is booted from the provider rescue system, not from your installed operating system. Your
+            disks are attached but not mounted as the running system, so you can repair a machine that no longer
+            boots. Leave rescue mode to boot your operating system again.
+          </p>
+          {rescueSession ? (
+            <>
+              <dl className="ch247-kv">
+                <dt>Rescue system</dt>
+                <dd>{rescueSession.type}</dd>
+                <dt>Username</dt>
+                <dd><code>{rescueSession.username}</code></dd>
+                {rescueSession.password && (
+                  <>
+                    <dt>One-time password</dt>
+                    <dd><code>{rescueSession.password}</code></dd>
+                  </>
+                )}
+              </dl>
+              <p className="ch247-banner ch247-banner--warning">
+                {rescueSession.password
+                  ? 'This password was generated by the provider for this session only. CloudHost247 does not store it — copy it now, because reloading this page will not show it again.'
+                  : 'This provider grants rescue access through the SSH keys attached to the server rather than a password.'}
+              </p>
+            </>
+          ) : (
+            <p className="ch247-banner ch247-banner--info">
+              The rescue credentials were shown once when rescue mode was entered and were never stored. Leave and
+              re-enter rescue mode to have the provider issue new ones.
+            </p>
+          )}
+          <div className="ch247-actions">
+            <button type="button" className="ch247-btn" disabled={busy !== ''} onClick={() => void leaveRescue()}>
+              {busy === 'rescue' ? 'Working…' : 'Leave rescue mode'}
+            </button>
+          </div>
+        </section>
+      )}
+
+      {consoleSession && (
+        <section className="ch247-card">
+          <h2>Serial console session</h2>
+          <p className="ch247-page__hint">
+            This session was issued by the provider for your account only. It is short lived, is never stored by
+            CloudHost247, and disappears from this page when you reload it. Do not share the link.
+          </p>
+          <dl className="ch247-kv">
+            {typeof consoleSession.type === 'string' && (
+              <>
+                <dt>Console type</dt>
+                <dd>{consoleSession.type}</dd>
+              </>
+            )}
+            {typeof consoleSession.expiresAt === 'string' && (
+              <>
+                <dt>Expires</dt>
+                <dd>{new Date(consoleSession.expiresAt).toLocaleString()}</dd>
+              </>
+            )}
+            {typeof consoleSession.password === 'string' && (
+              <>
+                <dt>One-time password</dt>
+                <dd><code>{consoleSession.password}</code></dd>
+              </>
+            )}
+          </dl>
+          <div className="ch247-actions">
+            {typeof consoleSession.url === 'string' && (
+              <a className="ch247-btn ch247-btn--primary" href={consoleSession.url} target="_blank" rel="noreferrer noopener">
+                Launch console
+              </a>
+            )}
+            <button type="button" className="ch247-btn" onClick={() => setConsoleSession(null)}>
+              Close
+            </button>
+          </div>
+        </section>
+      )}
+
       {showSnapshotModal && (
         <section className="ch247-card">
           <h2>Create Server Snapshot</h2>
@@ -574,6 +859,80 @@ export default function ServerDetailPage() {
           </div>
         </section>
       )}
+
+      <section className="ch247-card ch247-destructive-panel">
+        <span className="ch247-eyebrow">Danger zone</span>
+        <h2>Cancel this server</h2>
+        {terminating ? (
+          <p className="ch247-page__hint">
+            {server.status === 'retired'
+              ? 'This server has been terminated. Its invoices and history remain in your account.'
+              : 'This server is being destroyed at the provider. The dashboard updates when the job finishes.'}
+          </p>
+        ) : cancellation ? (
+          <>
+            <div className="ch247-banner ch247-banner--warning">
+              <strong>Cancellation scheduled</strong>
+              <br />
+              This server stays online until{' '}
+              {cancellation.effectiveAt ? new Date(cancellation.effectiveAt).toLocaleDateString() : 'the end of the paid term'}
+              , then it is destroyed and billing stops. All data is erased at that point.
+            </div>
+            <div className="ch247-actions">
+              <button type="button" className="ch247-btn" disabled={busy !== ''} onClick={() => void keepServer()}>
+                {busy === 'cancel' ? 'Working…' : 'Keep my server'}
+              </button>
+            </div>
+          </>
+        ) : !showCancel ? (
+          <>
+            <p className="ch247-page__hint">
+              Cancelling stops future billing. You can keep the server until the end of the term you have already paid
+              for, or destroy it now. Destroying erases all data and cannot be undone.
+            </p>
+            <div className="ch247-actions">
+              <button type="button" className="ch247-btn ch247-btn--danger" disabled={busy !== ''} onClick={() => setShowCancel(true)}>
+                Cancel server
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <label className="ch247-field">
+              Why are you cancelling? (optional)
+              <input value={cancelReason} onChange={(event) => setCancelReason(event.target.value)} maxLength={500} />
+            </label>
+            <div className="ch247-actions">
+              <button type="button" className="ch247-btn" disabled={busy !== ''} onClick={() => void scheduleCancellation()}>
+                {busy === 'cancel' ? 'Working…' : 'Cancel at end of term'}
+              </button>
+              <button type="button" className="ch247-btn" onClick={() => { setShowCancel(false); setCancelConfirm(''); }}>
+                Keep my server
+              </button>
+            </div>
+            <div className="ch247-banner ch247-banner--error">
+              <strong>WARNING</strong>
+              <br />
+              Destroying the server now erases every disk at the provider immediately. Snapshots and data cannot be
+              recovered, and any running services stop at once.
+            </div>
+            <label className="ch247-field">
+              Type <strong>DELETE</strong> to destroy this server now
+              <input value={cancelConfirm} onChange={(event) => setCancelConfirm(event.target.value)} />
+            </label>
+            <div className="ch247-actions">
+              <button
+                type="button"
+                className="ch247-btn ch247-btn--danger"
+                disabled={cancelConfirm !== 'DELETE' || busy !== ''}
+                onClick={() => void destroyNow()}
+              >
+                {busy === 'cancel' ? 'Working…' : 'Destroy server now'}
+              </button>
+            </div>
+          </>
+        )}
+      </section>
 
       {showReinstall && (
         <section className="ch247-card ch247-destructive-panel">

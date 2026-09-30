@@ -13,6 +13,9 @@ export type ProviderType =
   | 'SOLUSVM'
   | 'OPENSTACK'
   | 'GENERIC_HTTP'
+  // Development-only provider (src/infrastructure/providers/mock-adapter.ts). Disabled in
+  // production and never selected automatically.
+  | 'MOCK'
   | 'OTHER';
 
 export type ProviderAdapterKind =
@@ -26,7 +29,8 @@ export type ProviderAdapterKind =
   | 'virtualizor'
   | 'solusvm'
   | 'openstack'
-  | 'generic_http';
+  | 'generic_http'
+  | 'mock';
 
 export interface InfrastructureProviderRow {
   id: string;

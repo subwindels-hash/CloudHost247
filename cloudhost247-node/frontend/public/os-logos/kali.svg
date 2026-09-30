@@ -1,0 +1,5 @@
+<svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Kali Linux">
+  <rect x="6" y="6" width="60" height="60" rx="14" fill="#0E1116"/>
+  <path d="M20 16h7.6v17.2L42.8 16h9.4L37 33.2 52.6 53.4h-9.6L31.6 38.2l-4 4.6v10.6H20V16Z" fill="#FFFFFF"/>
+  <path d="M36 57.5c5.6-3.6 11.4-4.4 17.4-2.4-4.9-.2-9.3.9-13.2 3.3-4.3 2.6-9 3-14 1.2 3.6 0 6.9-.7 9.8-2.1Z" fill="#00B0D8"/>
+</svg>

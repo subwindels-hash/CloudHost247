@@ -1,5 +1,3 @@
-import { randomUUID } from 'node:crypto';
-import net from 'node:net';
 import type { Queryable } from '../../db/types';
 import type { DeploymentRow } from '../../db/deployments';
 import {
@@ -19,19 +17,20 @@ import {
   type CustomerServerDetailRow,
   type ProvisioningJobRow,
 } from '../../db/server-provisioning';
-import { findProviderById, findOsImageById } from '../../db/infrastructure-providers';
-import { getCredential, storeCredential } from '../../db/servers';
-import { getKeyRing } from '../../lib/keyring';
-import { generateSecret } from '../../lib/crypto';
+import { findProviderById, type ServerOsImageRow } from '../../db/infrastructure-providers';
 import { recordAuditBestEffort } from '../../lib/audit';
-import { notifyServerReady } from '../../services/notification-service';
+import { notifyServerReady, notifyServerTerminated } from '../../services/notification-service';
 import { createInfrastructureProviderAdapter } from '../providers/registry';
-import { buildServerCloudInitWithControlPanel } from '../../control-panels/registry';
 import {
   ProviderError,
   type CreateProviderServerInput,
   type InfrastructureProviderAdapter,
 } from '../providers/types';
+// Provisioning is composed from focused services (spec §8): image resolution, server
+// configuration inputs, and health verification each live in their own module.
+import { resolveVerifiedProviderImage } from './image-resolver';
+import { ensureAgentIdentity, getServerSshKeys } from './server-configurator';
+import { waitForServerHealth, type HealthCheckOptions } from './health-checker';
 
 const PROVISION_STEPS = [
   'Validate paid order and server configuration',
@@ -52,49 +51,8 @@ const REINSTALL_STEPS = [
   'Save new operating system and notify customer',
 ];
 
-export interface ServerProvisionerOptions {
+export interface ServerProvisionerOptions extends HealthCheckOptions {
   adapterOverride?: InfrastructureProviderAdapter;
-  source?: NodeJS.ProcessEnv;
-  pollIntervalMs?: number;
-  healthTimeoutMs?: number;
-  requireAgentHealth?: boolean;
-  tcpCheck?: (host: string, port: number) => Promise<boolean>;
-}
-
-function shellQuote(value: string): string {
-  return `'${value.replace(/'/g, `'"'"'`)}'`;
-}
-
-function buildCloudInit(input: {
-  hostname: string;
-  sshKeys: string[];
-  agentId: string;
-  agentSecret: string;
-  controlUrl: string;
-  installerUrl: string;
-}): string {
-  const keys = input.sshKeys.map((key) => `      - ${JSON.stringify(key)}`).join('\n');
-  const install = [
-    `curl -fsSL ${shellQuote(input.installerUrl)} -o /tmp/cloudhost247-agent-install`,
-    'chmod 0700 /tmp/cloudhost247-agent-install',
-    `CH247_AGENT_ID=${shellQuote(input.agentId)} CH247_AGENT_SECRET=${shellQuote(input.agentSecret)} CH247_CONTROL_URL=${shellQuote(input.controlUrl)} /tmp/cloudhost247-agent-install`,
-    'install -d -m 700 /var/lib/cloudhost247 && install -m 600 /dev/null /var/lib/cloudhost247/security-configured',
-  ].join(' && ');
-  return `#cloud-config\nhostname: ${input.hostname}\nmanage_etc_hosts: true\nssh_pwauth: false\ndisable_root: false\nusers:\n  - default\n  - name: root\n    ssh_authorized_keys:\n${keys}\npackage_update: true\npackages:\n  - curl\n  - ca-certificates\nruncmd:\n  - [ sh, -lc, ${JSON.stringify(install)} ]\n`;
-}
-
-async function checkTcp(host: string, port: number): Promise<boolean> {
-  return new Promise((resolve) => {
-    const socket = net.createConnection({ host,port,timeout: 3_000 });
-    const done = (value: boolean) => { socket.destroy(); resolve(value); };
-    socket.once('connect',() => done(true));
-    socket.once('timeout',() => done(false));
-    socket.once('error',() => done(false));
-  });
-}
-
-async function sleep(ms: number): Promise<void> {
-  await new Promise((resolve) => setTimeout(resolve,ms));
 }
 
 async function stage(
@@ -114,114 +72,6 @@ async function stage(
   });
   await appendProvisioningLog(db,job.id,{ stage: status,message });
   await appendDeploymentEvent(db,deploymentId,'info',message);
-}
-
-async function getSshKeys(db: Queryable, server: CustomerServerDetailRow): Promise<string[]> {
-  const raw = server.metadata.sshKeyIds;
-  const ids = Array.isArray(raw) ? raw.filter((id): id is string => typeof id === 'string') : [];
-  if (ids.length === 0) throw new ProviderError('INVALID_CONFIGURATION','Server has no SSH key selection',false);
-  const { rows } = await db.query<{ public_key: string }>(
-    `SELECT public_key FROM customer_ssh_keys WHERE user_id=$1 AND id=ANY($2::uuid[])`,
-    [server.customer_id,ids]
-  );
-  if (rows.length !== ids.length) throw new ProviderError('INVALID_CONFIGURATION','A selected SSH key is no longer available',false);
-  return rows.map((row) => row.public_key);
-}
-
-async function ensureAgentIdentity(
-  db: Queryable,
-  server: CustomerServerDetailRow,
-  options: ServerProvisionerOptions
-): Promise<{ id: string; secret: string; userData: string }> {
-  const source = options.source ?? process.env;
-  const controlUrl = source.APP_URL;
-  const installerUrl = source.SERVER_AGENT_INSTALL_URL;
-  if (!controlUrl || !installerUrl) {
-    throw new ProviderError(
-      'CONFIGURATION_REQUIRED',
-      'APP_URL and SERVER_AGENT_INSTALL_URL are required for monitored server provisioning',
-      false
-    );
-  }
-  const id = server.agent_id ?? `agent-${generateSecret(12).toLowerCase()}`;
-  let secret = server.agent_id ? await getCredential(db,getKeyRing(),server.id,'agent_secret') : null;
-  if (!secret) {
-    secret = generateSecret(32);
-    await storeCredential(db,getKeyRing(),server.id,'agent_secret',secret);
-  }
-  if (!server.agent_id) await db.query(`UPDATE servers SET agent_id=$2,updated_at=now() WHERE id=$1`,[server.id,id]);
-  const sshKeys = await getSshKeys(db,server);
-  
-  let controlPanelSlug: string | null = null;
-  if (server.control_panel_id) {
-    const cp = await db.query<{ slug: string }>(`SELECT slug FROM control_panels WHERE id=$1`, [server.control_panel_id]);
-    controlPanelSlug = cp.rows[0]?.slug ?? null;
-  }
-
-  return {
-    id,
-    secret,
-    userData: buildServerCloudInitWithControlPanel({
-      hostname: server.hostname,
-      sshKeys,
-      agentId: id,
-      agentSecret: secret,
-      controlUrl,
-      installerUrl,
-      controlPanelSlug,
-      architecture: server.architecture as 'x86_64' | 'arm64',
-    }),
-  };
-}
-
-async function waitForHealth(
-  db: Queryable,
-  server: CustomerServerDetailRow,
-  adapter: InfrastructureProviderAdapter,
-  image: NonNullable<Awaited<ReturnType<typeof findOsImageById>>>,
-  options: ServerProvisionerOptions,
-  evidenceAfterMs: number
-): Promise<{ ipAddress: string }> {
-  const timeoutMs = options.healthTimeoutMs ?? Number((options.source ?? process.env).PROVISIONING_HEALTH_TIMEOUT_MS ?? 600_000);
-  const pollMs = options.pollIntervalMs ?? 10_000;
-  const deadline = Date.now() + timeoutMs;
-  let last = 'Provider server has not reached the expected health state';
-  while (Date.now() <= deadline) {
-    const providerHealth = await adapter.healthCheck(server.provider_server_id as string,image);
-    if (!providerHealth.exists) throw new ProviderError('RESOURCE_NOT_FOUND','Provider server disappeared during health check',false);
-    if (!providerHealth.poweredOn) { last = `Provider status is ${providerHealth.providerStatus}`; await sleep(pollMs); continue; }
-    if (!providerHealth.ipAddress) { last = 'Provider has not assigned an IP address'; await sleep(pollMs); continue; }
-    if (!providerHealth.imageMatches) throw new ProviderError('IMAGE_UNAVAILABLE','Provider reports an unexpected operating-system image',false);
-    const ssh = await (options.tcpCheck ?? checkTcp)(providerHealth.ipAddress,22);
-    if (!ssh) { last = 'SSH is not reachable yet'; await sleep(pollMs); continue; }
-
-    if (options.requireAgentHealth !== false) {
-      const fresh = await findCustomerServerById(db,server.id);
-      const report = fresh?.metadata.provisioningHealth;
-      const reportData = report && typeof report === 'object' ? report as Record<string,unknown> : {};
-      const reportTime = typeof reportData.reportedAt === 'string' ? new Date(reportData.reportedAt).getTime() : 0;
-      const seen = fresh?.agent_last_seen_at && Date.now() - new Date(fresh.agent_last_seen_at).getTime() < 5 * 60_000 && reportTime >= evidenceAfterMs;
-      const expected = await db.query<{ slug: string; os_release_ids: string[]; version: string }>(
-        `SELECT os.slug,os.os_release_ids,v.version FROM operating_system_versions v
-         JOIN operating_systems os ON os.id=v.operating_system_id WHERE v.id=$1`,
-        [image.operating_system_version_id]
-      );
-      const expectedOs = expected.rows[0];
-      const expectedVersion = expectedOs?.version;
-      const acceptedOsIds = expectedOs?.os_release_ids.length ? expectedOs.os_release_ids : expectedOs ? [expectedOs.slug] : [];
-      const reportedVersion = String(reportData.osVersion ?? '');
-      const versionMatches = expectedVersion === 'rolling' ? reportedVersion.length > 0 : reportedVersion.startsWith(expectedVersion ?? '__missing__');
-      const osMatches = acceptedOsIds.includes(String(reportData.osId ?? '')) && versionMatches;
-      const hostnameMatches = reportData.hostname === fresh?.hostname;
-      if (!seen || !osMatches || !hostnameMatches || reportData.securityConfigured !== true || reportData.monitoringRunning !== true) {
-        last = 'Waiting for authenticated agent OS, hostname, security and monitoring report';
-        await sleep(pollMs);
-        continue;
-      }
-    }
-    return { ipAddress: providerHealth.ipAddress };
-  }
-  throw new ProviderError('NETWORK_TEMPORARY_FAILURE',last,true);
 }
 
 async function fail(
@@ -300,6 +150,12 @@ async function executeLifecycleAction(
     const status = job.operation === 'DELETE' ? 'retired' : job.operation === 'START' || job.operation === 'REBOOT' || job.operation === 'RESIZE' ? 'active' : 'stopped';
     await updateCustomerServerProvisioning(db,server.id,{ status,provisioningStatus: 'READY' });
     await updateProvisioningJob(db,job.id,{ status: 'READY',attempts: deployment.attempts,completedAt: new Date().toISOString(),errorCode: null,errorMessage: null });
+    // A destroyed server is the one lifecycle action the customer must hear about even though
+    // they asked for it: it confirms the resource is gone and that billing has stopped.
+    if (job.operation === 'DELETE') {
+      const terminated = await findCustomerServerById(db,server.id);
+      if (terminated) await notifyServerTerminated(db,terminated);
+    }
     await recordAuditBestEffort(db,{ action: `SERVER_${job.operation}`,resourceType: 'server',resourceId: server.id,actorId: deployment.requested_by });
     return 'succeeded';
   } catch (error) {
@@ -333,11 +189,9 @@ export async function executeServerProvisioning(
     if (!['PROVISION','REINSTALL'].includes(job.operation)) {
       return { outcome: await executeLifecycleAction(db,deployment,job,adapter,server) };
     }
-    const image = job.os_image_id ? await findOsImageById(db,job.os_image_id) : null;
-    if (!image || image.status !== 'ACTIVE' || !image.verified_at) throw new ProviderError('IMAGE_UNAVAILABLE','Provider OS image is not verified and active',false);
-    if (image.provider_id !== provider.id || image.architecture !== server.architecture) {
-      throw new ProviderError('INVALID_CONFIGURATION','Provider image does not match the selected provider/architecture',false);
-    }
+    const image: ServerOsImageRow = await resolveVerifiedProviderImage(db,{
+      osImageId: job.os_image_id,provider,architecture: server.architecture,
+    });
     const steps = await createDeploymentSteps(db,deployment.id,job.operation === 'REINSTALL' ? REINSTALL_STEPS : PROVISION_STEPS);
     const run = async (index: number,fn: () => Promise<void>) => {
       const step = steps[index];
@@ -379,7 +233,7 @@ export async function executeServerProvisioning(
     );
     const place = location.rows[0];
     if (!place) throw new ProviderError('INVALID_CONFIGURATION','Server region no longer exists',false);
-    const sshKeys = await getSshKeys(db,server);
+    const sshKeys = await getServerSshKeys(db,server);
     const createInput: CreateProviderServerInput = {
       idempotencyKey: job.idempotency_key,name: server.name,hostname: server.hostname,
       architecture: server.architecture as 'x86_64' | 'arm64',image,
@@ -419,7 +273,7 @@ export async function executeServerProvisioning(
     await run(waitStepIndex,async () => {
       await stage(db,job,deployment.id,'NETWORK_CONFIGURING','Waiting for provider power and network state');
       // First health pass also verifies SSH and the authenticated agent where required.
-      const result = await waitForHealth(db,server,adapter,image,options,healthEvidenceAfterMs);
+      const result = await waitForServerHealth(db,server,adapter,image,options,healthEvidenceAfterMs);
       healthIp = result.ipAddress;
     });
     await run(waitStepIndex + 1,async () => {
@@ -432,7 +286,7 @@ export async function executeServerProvisioning(
       });
       if (job.order_id && job.operation === 'PROVISION') await db.query(`UPDATE orders SET status='completed',updated_at=now() WHERE id=$1 AND payment_status='paid'`,[job.order_id]);
       const ready = await findCustomerServerById(db,server.id);
-      if (ready) await notifyServerReady(db,ready,options.source,job.operation==='REINSTALL'?'SERVER_REINSTALLED':'SERVER_READY');
+      if (ready) await notifyServerReady(db,ready,job.operation==='REINSTALL'?'SERVER_REINSTALLED':'SERVER_READY');
       await updateProvisioningJob(db,job.id,{ status: 'READY',attempts: deployment.attempts,completedAt: new Date().toISOString(),errorCode: null,errorMessage: null,retryable: null });
       await recordAuditBestEffort(db,{ actorId: deployment.requested_by,action: job.operation === 'REINSTALL' ? 'SERVER_REINSTALL_COMPLETED' : 'SERVER_READY',resourceType: 'server',resourceId: server.id,metadata: { jobId: job.id,providerId: provider.id,osImageId: image.id } });
     });

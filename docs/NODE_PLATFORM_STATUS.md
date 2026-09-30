@@ -952,3 +952,88 @@ sub-phase before the next one begins.
     - `/admin/control-panels` — Staff administration console for platform metadata, system requirements, and commercial license tier builders.
     - `/dashboard/servers/:id` — Enhanced server management dashboard displaying installed control panel cards, direct access links ("Open Panel Dashboard ↗"), default login instructions, snapshot creation, and destructive OS reinstall.
   - **Tests added:** `tests/integration/control-panels-api.test.ts` (7 tests) and `tests/unit/control-panel-adapters.test.ts` (6 tests).
+
+---
+
+## Phase 7 (continued) — Console access, server templates, and the cancellation lifecycle
+
+- **Source/local verification:** PASSED on branch `arena/01a0f219-cloudhost247`.
+  - **Full platform verification: 70 / 70 test files passing (515 / 515 tests), backend and frontend TypeScript clean.**
+  - **No migration required:** `provisioning_jobs.operation` already allowed `DELETE` and `deployments.action` already mapped `server_delete`; the gap was that nothing ever requested one.
+  - **Serial console:** `POST /api/v1/servers/:id/console` issues a provider console session to the owner only — the single server action answered in request scope, since the credential is only useful in the requesting browser. Ownership 404, capability 400, pre-provision 409, and an unconfigured provider 503 through the new `src/infrastructure/providers/error-mapping.ts`. The session URL/password are never logged, audited or stored; the audit record `SERVER_CONSOLE_OPENED` holds only the server and provider ids.
+  - **Server templates:** `server_product_configurations` is named for what it is in the admin UI (`/admin/infrastructure/availability` → "Server templates"), rather than adding a duplicate registry that could disagree with the ordering and reinstall queries. The create form can now grant the `console` capability.
+  - **Cancellation and termination:** `POST /api/v1/servers/:id/cancel` with `AT_PERIOD_END` (revocable via `DELETE /api/v1/servers/:id/cancel`, honours the paid term, flags `cancel_at_period_end`) or `IMMEDIATE` (typed `"DELETE"` confirmation, cancels subscriptions, enqueues the `DELETE` job). `sweepScheduledTerminations` runs in the worker every 15 minutes and on demand via `POST /api/v1/admin/server-terminations/sweep`. Destruction always runs through the queue and adapter; the `servers` row is kept as `retired` so orders, invoices and audit history survive; a server that never reached the provider is retired directly rather than faking a provider call. Completion raises a once-only `SERVER_TERMINATED` notification.
+  - **Customer UI:** "Open console" action and session panel, plus a danger zone on `/dashboard/servers/:id` offering cancel-at-term or destroy-now with the typed confirmation, a revoke path, and a "Cancels on …" hint on the server list.
+  - **Tests added:** `tests/integration/server-console.test.ts` (5), `tests/unit/provider-error-mapping.test.ts` (4), `tests/integration/server-termination.test.ts` (7).
+
+---
+
+## Phase 7 (continued) — Notification email delivery that actually retries
+
+- **Source/local verification:** PASSED on branch `arena/01a0f219-cloudhost247`.
+  - **Full platform verification: 71 / 71 test files passing (522 / 522 tests), backend and frontend TypeScript clean.**
+  - **Migration artifact:** `cloudhost247-node/database/migrations/0049_notification_outbox_delivery_scheduling.sql` — adds `next_attempt_at` and `max_attempts` to `notification_outbox`, a partial due-row index, and re-arms rows previously parked only because nothing was configured. Additive; existing rows become due immediately.
+  - **Decoupled delivery:** `createNotification` in `src/services/notification-service.ts` writes the durable in-app row and queues its email copy; no HTTP happens on the path that is finishing a customer's server. `src/services/notification-outbox-service.ts` drains the queue in the worker every minute, claiming rows by pushing `next_attempt_at` forward so concurrent workers never send the same email twice.
+  - **Failure classification:** unconfigured webhook and `401`/`403` park as `CONFIGURATION_REQUIRED` and are retried every 15 minutes without consuming the attempt budget; `408`/`429`/`5xx`/network errors back off 1 → 5 → 15 → 60 → 240 minutes up to `max_attempts`; other `4xx` fail permanently; `2xx` is never re-sent.
+  - **Operator visibility:** `GET /api/v1/admin/notification-outbox` and `POST /api/v1/admin/notification-outbox/drain`, surfaced as a "Notification delivery" panel on `/admin/infrastructure/logs` listing every stuck or failed delivery with its reason.
+  - **Tests added:** `tests/integration/notification-outbox.test.ts` (7).
+
+---
+
+## Phase 7 (continued) — Provider state reconciliation
+
+- **Source/local verification:** PASSED on branch `arena/01a0f219-cloudhost247`.
+  - **Full platform verification: 72 / 72 test files passing (529 / 529 tests), backend and frontend TypeScript clean.**
+  - **Migration artifact:** `cloudhost247-node/database/migrations/0050_server_state_reconciliation.sql` — adds `servers.last_reconciled_at` and a partial index so the sweep can round-robin oldest-checked first. Additive and nullable.
+  - **Closed gap:** health checks only ran once, during provisioning. A server powered off from the provider's own console, re-addressed, or destroyed outside CloudHost247 kept showing its old state on the dashboard forever.
+  - **`src/services/infrastructure-reconciliation-service.ts`:** asks each provider what it actually has (worker every 10 minutes, bounded batch). Power state and IP are adopted; an image mismatch is reported but never rewritten (the catalog, not a provider string, decides which OS was sold); a missing resource is flagged without deleting the record, and only confirms `retired` when the platform was already deleting it; an unreachable or unconfigured provider changes nothing about the server, while `last_reconciled_at` still advances so one broken integration cannot starve the fleet.
+  - **Operator surface:** `GET /api/v1/admin/server-drift`, `POST /api/v1/admin/server-reconciliation/sweep`, and a "Provider state drift" panel on `/admin/infrastructure/logs`. Every finding is audited as `SERVER_DRIFT_<kind>`.
+  - **Tests added:** `tests/integration/server-reconciliation.test.ts` (7).
+
+---
+
+## Phase 7 (continued) — Provider image re-verification
+
+- **Source/local verification:** PASSED on branch `arena/01a0f219-cloudhost247`.
+  - **Full platform verification: 73 / 73 test files passing (535 / 535 tests), backend and frontend TypeScript clean.**
+  - **No migration required:** the freshness signal is `server_os_images.verified_at` plus a `metadata.revalidationAttemptedAt` stamp, both already available on the existing table.
+  - **Closed gap:** a provider image mapping was proven exactly once, when an operator pressed "Test" before enabling it. If the provider later withdrew, renamed or re-architected that image, the catalog kept selling it and the failure only surfaced after the customer had paid.
+  - **`src/services/os-image-revalidation-service.ts`:** re-asks providers about the stalest enabled mappings (worker every 6 hours, bounded batch, oldest-checked first). An image the provider still offers has its `verified_at` refreshed; one that is gone or reports a different architecture is set to `INVALID` with the provider's reason and audited as `OS_IMAGE_INVALIDATED`; an unreachable, unconfigured or rate-limited provider changes nothing, because an outage is not evidence that an image was withdrawn. Every attempt stamps `metadata.revalidationAttemptedAt` first, so one dead provider cannot hold the head of the queue.
+  - **Blast radius:** ordering and reinstall join through `ACTIVE` images with a non-null `verified_at`, so an invalidated mapping leaves the customer flow immediately, while servers already running that image keep their `os_image_id` and are untouched. `DRAFT`, `DISABLED` and `INVALID` rows are never re-checked, and the sweep never promotes a mapping to `ACTIVE` on its own — enabling stays an operator decision.
+  - **Operator surface:** `GET /api/v1/admin/os-image-verifications` (stale/invalidated mappings with reasons), `POST /api/v1/admin/os-images/revalidate`, and a "Re-check enabled mappings" button on `/admin/infrastructure/os-images` reporting how many were checked, withdrawn and unreachable.
+  - **Tests added:** `tests/integration/os-image-revalidation.test.ts` (6).
+
+---
+
+## Phase 7 (continued) — Acceptance flow under test, and honest template capabilities
+
+- **Source/local verification:** PASSED on branch `arena/01a0f219-cloudhost247`.
+  - **Full platform verification: 74 / 74 test files passing (540 / 540 tests), backend and frontend TypeScript clean.**
+  - **No migration required.**
+  - **Closed gap 1 — the acceptance flow was only half covered.** Ordering, payment gating and provisioning to `READY` were tested, and reinstall was tested at its edges (ownership, confirmation, image resolution), but nothing executed a `REINSTALL` job through the worker. `tests/integration/server-reinstall-acceptance.test.ts` now runs the whole of spec §50 against a stub adapter: order → pay → one queued job → provider create → health gates → `READY` → `SERVER_READY` notification, then a confirmed reinstall onto Debian 13 that resolves the Debian mapping server-side, installs it, flips `operating_system_version_id`/`os_image_id`, notifies `SERVER_REINSTALLED` and audits `SERVER_REINSTALL_COMPLETED`. It also pins the two refusals: an unconfirmed or non-owner reinstall creates no job, and a reinstall that fails at the provider leaves the previously installed OS recorded rather than advertising one the server is not running.
+  - **Closed gap 2 — a server template could promise what its provider cannot do.** `metadata.capabilities` drove the customer's action buttons and the API's accept list, but nothing checked it against the adapter. An operator could enable `rescue` on an AWS template; the customer would click it and get a job that fails with `UNSUPPORTED_OPERATION` after the fact. Template creation and enablement now validate every requested capability against `ADAPTER_PROFILES`, rejecting the row with a specific message; `start`/`stop`/`reboot`/`shutdown` are implemented by every adapter and stay always-available. The admin form disables what the selected provider cannot do and lists what it can, instead of hard-coding `reinstall: true`.
+  - **Tests added:** `tests/integration/server-reinstall-acceptance.test.ts` (4), plus one case in `tests/integration/infrastructure-admin-operations.test.ts`.
+
+---
+
+## Phase 7 (continued) — Monitoring the customer can actually see
+
+- **Source/local verification:** PASSED on branch `arena/01a0f219-cloudhost247`.
+  - **Full platform verification: 75 / 75 test files passing (545 / 545 tests), backend and frontend TypeScript clean.**
+  - **No migration required:** `server_metrics` and `GET /api/v1/servers/:id/health` already existed; nothing in the customer UI ever called them.
+  - **Closed gap:** spec §21 lists Monitoring as a server action, and the agent has been reporting CPU, load, memory, disk and uptime since `0039_create_server_metrics.sql` — but the only consumer was the admin provisioning page. A customer could not see a single measurement from their own server.
+  - **`Monitoring` panel on `/dashboard/servers/:id`:** CPU, one-minute load, memory, disk, uptime and the capture timestamp, read from the authenticated agent's last report. A server that has never reported says so rather than rendering zeroes, and a report older than five minutes is labelled as the last one received rather than the current state — a silent agent and an idle server look identical in a gauge, and only one of them is fine. The panel degrades to the "not reported yet" state if the health endpoint fails, so monitoring can never take the server page down.
+  - **Tests added:** `frontend/tests/unit/server-detail-page.test.tsx` (5) — provisioning-job status with its failure reason and attempt count, the empty and stale monitoring states, and the reinstall confirmation: the destructive warning is present, the action stays disabled until `REINSTALL` is typed exactly (`reinstall` does not arm it and sends nothing), and the submitted payload carries only catalog ids plus the confirmation, never a provider image reference.
+
+---
+
+## Phase 7 (continued) — Rescue mode, implemented where it really exists
+
+- **Source/local verification:** PASSED on branch `arena/01a0f219-cloudhost247`.
+  - **Full platform verification: 76 / 76 test files passing (551 / 551 tests), backend and frontend TypeScript clean.**
+  - **No migration required:** rescue state rides on `servers.status` and `servers.metadata.rescue`; no credential is persisted, so there is nothing to store.
+  - **Closed gap:** spec §21 lists Rescue Mode, and the `RESCUE` job operation existed since `0041`, but no adapter implemented it — every profile declared `rescue: false`, so the endpoint could only ever return 400, and a template that forced the flag on produced a job that failed with `UNSUPPORTED_OPERATION` after the customer clicked.
+  - **Real implementations only:** Hetzner (`enable_rescue` + `reset`, `disable_rescue` + `reset`) and OpenStack (Nova `rescue` / `unrescue`) now implement it and declare `rescue: true`. Every other adapter refuses through a shared `unsupportedRescue()` with a non-retryable `UNSUPPORTED_OPERATION`, and keeps the capability `false` so the template validation added in the previous round stops the button being offered at all.
+  - **Request-scoped, like the console, and for the same reason:** the provider's one-time root password is only useful in the browser that asked for it. `POST /api/v1/servers/:id/rescue` returns it directly and writes it nowhere — not a job payload, not a log line, not an audit row, not a column. `DELETE` on the same path leaves rescue and reboots into the installed OS. While rescue is active the server is `maintenance`, which is honest: it is up, but it is not running the customer's operating system.
+  - **Customer UI:** a capability-gated "Boot into rescue" action plus a rescue panel that shows the credentials once, says plainly that CloudHost247 did not store them, and offers "Leave rescue mode". After a reload the panel states the credentials were shown once and are gone rather than pretending to still have them.
+  - **Tests added:** `tests/integration/server-rescue.test.ts` (6) — capability refusal, ownership 404, a provider with no rescue API refusing without changing the server, the full Hetzner enter/leave request sequence, and an assertion that the generated password appears in neither `servers.metadata` nor `audit_logs`.

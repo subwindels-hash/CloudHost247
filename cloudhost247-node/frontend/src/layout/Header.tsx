@@ -22,6 +22,7 @@ const appLinks = [
   { to: '/services', label: 'Services' },
   { to: '/dashboard/apps', label: 'My Apps' },
   { to: '/dashboard/servers', label: 'Servers' },
+  { to: '/dashboard/notifications', label: 'Notifications' },
   { to: '/dashboard/domains', label: 'My Domains' },
   { to: '/dashboard/dns', label: 'DNS Zones' },
   { to: '/dashboard/ssl', label: 'SSL Certificates' },

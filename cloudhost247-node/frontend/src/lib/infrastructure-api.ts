@@ -68,6 +68,8 @@ export interface CustomerServer {
   os_name: string | null;
   os_logo_url: string | null;
   os_display_name: string | null;
+  os_version_status?: string | null;
+  os_end_of_life_date?: string | null;
   control_panel_id?: string | null;
   control_panel_name?: string | null;
   control_panel_slug?: string | null;
@@ -81,7 +83,27 @@ export interface CustomerServer {
   bandwidth_gb: number | null;
   renewal_date: string | null;
   capabilities: Record<string,boolean>;
+  metadata?: Record<string,unknown> | null;
   created_at: string;
+}
+
+/** Pending cancellation recorded on `servers.metadata.cancellation`. */
+export interface ServerCancellation {
+  mode: 'AT_PERIOD_END' | 'IMMEDIATE';
+  requestedAt: string;
+  effectiveAt: string | null;
+  reason: string | null;
+}
+
+export function readServerCancellation(server: CustomerServer): ServerCancellation | null {
+  const raw = server.metadata?.cancellation as Partial<ServerCancellation> | undefined;
+  if (!raw || (raw.mode !== 'AT_PERIOD_END' && raw.mode !== 'IMMEDIATE')) return null;
+  return {
+    mode: raw.mode,
+    requestedAt: typeof raw.requestedAt === 'string' ? raw.requestedAt : '',
+    effectiveAt: typeof raw.effectiveAt === 'string' ? raw.effectiveAt : null,
+    reason: typeof raw.reason === 'string' ? raw.reason : null,
+  };
 }
 
 export interface SshKey {
@@ -118,4 +140,68 @@ export function fetchCustomerServers() { return apiFetch<{ servers: CustomerServ
 export function fetchCustomerServer(id: string) { return apiFetch<{ server: CustomerServer }>(`/api/v1/servers/${id}`); }
 export function serverAction(id: string,action: string,body: unknown = {}) {
   return apiFetch<{ jobId: string; status: string; queued: boolean }>(`/api/v1/servers/${id}/${action}`,{ method: 'POST',headers: { 'Idempotency-Key': crypto.randomUUID() },body: JSON.stringify(body) });
+}
+
+export interface ConsoleSession { url?: string; password?: string; type?: string; expiresAt?: string; [key: string]: unknown }
+
+/**
+ * Requests a short-lived provider console session. The credential is returned to the owner's
+ * browser only and is never persisted client-side.
+ */
+export function openServerConsole(id: string) {
+  return apiFetch<{ console: ConsoleSession }>(`/api/v1/servers/${id}/console`,{ method: 'POST' });
+}
+
+/**
+ * Requests cancellation. `AT_PERIOD_END` keeps the server until the paid term ends and stays
+ * revocable; `IMMEDIATE` destroys it now and requires the typed confirmation.
+ */
+/** Agent-reported health. Every field is optional: an agent that has not reported yet reports nothing. */
+export interface ServerHealthSnapshot {
+  status: string;
+  agent: { version: string | null; lastSeenAt: string | null; reachable: boolean };
+  latest?: {
+    captured_at: string;
+    cpu_percent: string | number | null;
+    load_1: string | number | null;
+    memory_used_mb: number | null;
+    memory_total_mb: number | null;
+    disk_used_mb: number | null;
+    disk_total_mb: number | null;
+    uptime_seconds: number | null;
+  } | null;
+}
+
+export function fetchServerHealth(id: string) {
+  return apiFetch<ServerHealthSnapshot>(`/api/v1/servers/${id}/health`);
+}
+
+/** One-time rescue credentials. Held in component state only — never written anywhere. */
+export interface RescueSession {
+  type: string;
+  username: string;
+  password?: string;
+  rebooted: boolean;
+  notes?: string;
+}
+
+export function enterRescueMode(id: string) {
+  return apiFetch<{ rescue: RescueSession }>(`/api/v1/servers/${id}/rescue`, {
+    method: 'POST',
+    body: JSON.stringify({ confirmation: 'RESCUE' }),
+  });
+}
+
+export function exitRescueMode(id: string) {
+  return apiFetch<{ rescue: null }>(`/api/v1/servers/${id}/rescue`, { method: 'DELETE' });
+}
+
+export function cancelServer(id: string,input: { mode: 'AT_PERIOD_END'|'IMMEDIATE'; confirmation?: 'DELETE'; reason?: string }) {
+  return apiFetch<{ mode: string; effectiveAt: string | null; jobId: string | null; queued: boolean; cancelledSubscriptions: number; retiredWithoutProviderCall: boolean }>(
+    `/api/v1/servers/${id}/cancel`,{ method: 'POST',headers: { 'Idempotency-Key': crypto.randomUUID() },body: JSON.stringify(input) }
+  );
+}
+
+export function revokeServerCancellation(id: string) {
+  return apiFetch<{ revoked: boolean; restoredSubscriptions: number }>(`/api/v1/servers/${id}/cancel`,{ method: 'DELETE' });
 }

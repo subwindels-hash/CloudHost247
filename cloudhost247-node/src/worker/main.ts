@@ -3,10 +3,28 @@ import { loadEnv } from '../config/env';
 import { getPool, closePool } from '../db/pool';
 import { processNextJob, recoverOrphanedJobs } from './handlers';
 import { scheduleHealthChecks, sweepSubscriptions } from './sweeps';
+import { sweepOperatingSystemLifecycle } from '../services/os-lifecycle-service';
+import { sweepScheduledTerminations } from '../services/server-termination-service';
+import { deliverNotificationOutbox } from '../services/notification-outbox-service';
+import { reconcileServerState } from '../services/infrastructure-reconciliation-service';
+import { revalidateProviderImages } from '../services/os-image-revalidation-service';
 import type { EngineOptions } from '../deployments/engine';
 
 const HEALTHCHECK_INTERVAL_MS = 60_000;
 const SUBSCRIPTION_SWEEP_INTERVAL_MS = 5 * 60_000;
+// OS end-of-life dates move at most once a day; hourly is frequent enough and cheap.
+const OS_LIFECYCLE_SWEEP_INTERVAL_MS = 60 * 60_000;
+// Scheduled cancellations are day-granular in practice; a 15-minute sweep destroys them promptly
+// after the paid term ends without polling the database hard.
+const TERMINATION_SWEEP_INTERVAL_MS = 15 * 60_000;
+// Notification emails are queued, not sent inline, so this drain is what actually delivers them.
+const NOTIFICATION_OUTBOX_INTERVAL_MS = 60_000;
+// Provider state drifts slowly and each check is a provider API call, so the sweep walks a
+// bounded batch of the oldest-checked servers every ten minutes rather than polling everything.
+const RECONCILIATION_INTERVAL_MS = 10 * 60_000;
+// Image catalogs change on the scale of provider releases, so a six-hourly pass over the stalest
+// mappings is enough to catch a withdrawn image long before a customer orders it.
+const IMAGE_REVALIDATION_INTERVAL_MS = 6 * 60 * 60_000;
 
 function engineOptions(simulationMode: boolean, kubernetesEnabled: boolean): EngineOptions {
   return { simulationMode, kubernetesEnabled };
@@ -29,6 +47,11 @@ async function main() {
   let running = true;
   let lastHealthSweep = 0;
   let lastSubscriptionSweep = 0;
+  let lastOsLifecycleSweep = 0;
+  let lastTerminationSweep = 0;
+  let lastNotificationDrain = 0;
+  let lastReconciliation = 0;
+  let lastImageRevalidation = 0;
 
   const shutdown = (signal: string) => {
     logger.log(`[worker:${workerId}] ${signal} received — draining`);
@@ -58,6 +81,44 @@ async function main() {
       if (now - lastSubscriptionSweep >= SUBSCRIPTION_SWEEP_INTERVAL_MS) {
         lastSubscriptionSweep = now;
         await sweepSubscriptions(pool);
+      }
+      if (now - lastOsLifecycleSweep >= OS_LIFECYCLE_SWEEP_INTERVAL_MS) {
+        lastOsLifecycleSweep = now;
+        const transitions = await sweepOperatingSystemLifecycle(pool);
+        for (const change of transitions) {
+          logger.log(`[worker:${workerId}] OS version ${change.displayName}: ${change.from} → ${change.to} (${change.notifiedServers} customer notice(s))`);
+        }
+      }
+
+      if (now - lastTerminationSweep >= TERMINATION_SWEEP_INTERVAL_MS) {
+        lastTerminationSweep = now;
+        for (const terminated of await sweepScheduledTerminations(pool)) {
+          logger.log(`[worker:${workerId}] scheduled termination due for ${terminated.name}: ${terminated.jobId ? `job ${terminated.jobId}` : 'retired without a provider resource'}`);
+        }
+      }
+
+      if (now - lastNotificationDrain >= NOTIFICATION_OUTBOX_INTERVAL_MS) {
+        lastNotificationDrain = now;
+        const delivery = await deliverNotificationOutbox(pool);
+        if (delivery.claimed > 0) {
+          logger.log(`[worker:${workerId}] notification outbox: ${delivery.delivered} delivered, ${delivery.retrying} retrying, ${delivery.failed} failed, ${delivery.configurationRequired} awaiting configuration`);
+        }
+      }
+
+      if (now - lastReconciliation >= RECONCILIATION_INTERVAL_MS) {
+        lastReconciliation = now;
+        for (const drift of await reconcileServerState(pool)) {
+          logger.log(`[worker:${workerId}] drift on ${drift.name}: ${drift.kind} ${drift.from} → ${drift.to}${drift.applied ? ' (applied)' : ' (reported only)'}`);
+        }
+      }
+
+      if (now - lastImageRevalidation >= IMAGE_REVALIDATION_INTERVAL_MS) {
+        lastImageRevalidation = now;
+        for (const check of await revalidateProviderImages(pool)) {
+          if (check.outcome !== 'VERIFIED') {
+            logger.log(`[worker:${workerId}] image ${check.providerImageId ?? check.imageId}: ${check.outcome}${check.error ? ` — ${check.error}` : ''}`);
+          }
+        }
       }
 
       if (!didWork) {

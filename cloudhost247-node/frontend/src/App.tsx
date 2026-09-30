@@ -37,6 +37,7 @@ import MyAppsPage from './pages/MyAppsPage';
 import AppInstancePage from './pages/AppInstancePage';
 import DeploymentDetailPage from './pages/DeploymentDetailPage';
 import DashboardServersPage from './pages/DashboardServersPage';
+import NotificationsPage from './pages/NotificationsPage';
 import DashboardDomainsPage from './pages/DashboardDomainsPage';
 import AdminAppsPage from './pages/AdminAppsPage';
 import AdminAppDetailPage from './pages/AdminAppDetailPage';
@@ -54,6 +55,7 @@ import AdminOsImagesPage from './pages/AdminOsImagesPage';
 import AdminProvidersPage from './pages/AdminProvidersPage';
 import AdminAvailabilityPage from './pages/AdminAvailabilityPage';
 import AdminProvisioningPage from './pages/AdminProvisioningPage';
+import AdminInfrastructureLogsPage from './pages/AdminInfrastructureLogsPage';
 import ControlPanelsPage from './pages/ControlPanelsPage';
 import ControlPanelDetailPage from './pages/ControlPanelDetailPage';
 import AdminControlPanelsPage from './pages/AdminControlPanelsPage';
@@ -103,6 +105,7 @@ export default function App() {
           <Route path="/dashboard/apps/:id/domains" element={<AppInstancePage />} />
           <Route path="/dashboard/deployments/:id" element={<DeploymentDetailPage />} />
           <Route path="/dashboard/servers" element={<DashboardServersPage />} />
+          <Route path="/dashboard/notifications" element={<NotificationsPage />} />
           <Route path="/dashboard/servers/:id" element={<ServerDetailPage />} />
           <Route path="/dashboard/servers/:id/logs" element={<ServerLogsPage />} />
           <Route path="/servers/new" element={<NewServerPage />} />
@@ -150,6 +153,7 @@ export default function App() {
             <Route path="/admin/infrastructure/availability" element={<AdminAvailabilityPage />} />
             <Route path="/admin/infrastructure/provisioning" element={<AdminProvisioningPage />} />
             <Route path="/admin/infrastructure/provisioning/:id" element={<AdminProvisioningPage />} />
+            <Route path="/admin/infrastructure/logs" element={<AdminInfrastructureLogsPage />} />
             <Route path="/admin/control-panels" element={<AdminControlPanelsPage />} />
             <Route path="/admin/infrastructure/control-panels" element={<AdminControlPanelsPage />} />
           </Route>

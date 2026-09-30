@@ -40,7 +40,17 @@ import {
   findProvisioningJobById,
   listCustomerServers,
 } from '../db/server-provisioning';
-import { resolveAvailableConfiguration } from '../db/operating-systems';
+import { ImageResolutionError, resolveReinstallTarget } from '../infrastructure/services/image-resolver';
+import { findProviderById } from '../db/infrastructure-providers';
+import {
+  readCancellation,
+  requestServerTermination,
+  resolveTermEnd,
+  revokeScheduledTermination,
+} from '../services/server-termination-service';
+import { createInfrastructureProviderAdapter } from '../infrastructure/providers/registry';
+import { providerErrorToHttpError } from '../infrastructure/providers/error-mapping';
+import type { RescueSession } from '../infrastructure/providers/types';
 
 const idSchema = z.string().uuid('id must be a valid UUID');
 
@@ -86,6 +96,13 @@ const reinstallServerSchema = z.object({
   operatingSystemVersionId: z.string().uuid(),
   architecture: z.enum(['x86_64','arm64']),
   confirmation: z.literal('REINSTALL'),
+});
+
+const cancelServerSchema = z.object({
+  mode: z.enum(['AT_PERIOD_END','IMMEDIATE']).default('AT_PERIOD_END'),
+  // Immediate destruction is irreversible, so it carries the same typed confirmation as reinstall.
+  confirmation: z.literal('DELETE').optional(),
+  reason: z.string().max(500).optional(),
 });
 
 const resizeServerSchema = z.object({
@@ -404,7 +421,7 @@ export async function registerServerRoutes(app: FastifyInstance, env: Env, overr
   async function queueOwnedAction(
     request: Parameters<typeof authenticate>[0],
     serverId: string,
-    operation: 'START'|'STOP'|'REBOOT'|'SHUTDOWN'|'RESCUE'|'DELETE'
+    operation: 'START'|'STOP'|'REBOOT'|'SHUTDOWN'|'DELETE'
   ) {
     const auth = await authenticate(request,env,pool);
     const server = await findOwnedCustomerServer(pool,serverId,auth.userId);
@@ -427,8 +444,7 @@ export async function registerServerRoutes(app: FastifyInstance, env: Env, overr
     'power-off': 'SHUTDOWN',
     reboot: 'REBOOT',
     shutdown: 'SHUTDOWN',
-    rescue: 'RESCUE',
-  }) as Array<[string,'START'|'STOP'|'REBOOT'|'SHUTDOWN'|'RESCUE']>) {
+  }) as Array<[string,'START'|'STOP'|'REBOOT'|'SHUTDOWN']>) {
     app.post<{ Params: { id: string } }>(`/api/v1/servers/:id/${path}`,async (request) =>
       queueOwnedAction(request,parseOrThrow(idSchema,request.params.id),operation)
     );
@@ -524,17 +540,19 @@ export async function registerServerRoutes(app: FastifyInstance, env: Env, overr
     if (!server || !server.plan_id || !server.provider_id || !server.region_id) throw new NotFoundError('No server was found with that id');
     if (server.capabilities?.reinstall !== true) throw new ValidationError('OS reinstall is not supported for this server');
     if (!server.provider_server_id || !['active','stopped','error'].includes(server.status)) throw new ConflictError('This server cannot be reinstalled in its current state');
-    const configuration = await resolveAvailableConfiguration(pool,{
-      planId: server.plan_id,providerId: server.provider_id,regionId: server.region_id,
-      datacenterId: server.datacenter_id,operatingSystemVersionId: input.operatingSystemVersionId,
-      architecture: input.architecture,serverType: server.server_type,
-    });
-    if (!configuration) throw new ValidationError('The selected operating system is unavailable for this server');
-    const allowed = await pool.query(
-      `SELECT 1 FROM operating_system_versions v JOIN operating_systems os ON os.id=v.operating_system_id
-       WHERE v.id=$1 AND os.is_reinstall_supported=true`,[input.operatingSystemVersionId]
-    );
-    if (!allowed.rows[0]) throw new ValidationError('The selected operating system is not enabled for reinstall');
+    // The target OS is re-resolved server-side through the shared image resolver: the client's
+    // selection is only a pair of catalog ids, never a provider image reference.
+    let configuration;
+    try {
+      configuration = await resolveReinstallTarget(pool,{
+        planId: server.plan_id,providerId: server.provider_id,regionId: server.region_id,
+        datacenterId: server.datacenter_id,operatingSystemVersionId: input.operatingSystemVersionId,
+        architecture: input.architecture,serverType: server.server_type,
+      });
+    } catch (error) {
+      if (error instanceof ImageResolutionError) throw new ValidationError(error.message);
+      throw error;
+    }
     const result = await enqueueServerProvisioningJob(pool,{
       serverId: server.id,providerId: server.provider_id,osImageId: configuration.image_id,
       operation: 'REINSTALL',requestedBy: auth.userId,
@@ -571,6 +589,162 @@ export async function registerServerRoutes(app: FastifyInstance, env: Env, overr
     if (!await findOwnedCustomerServer(pool,serverId,auth.userId)) throw new NotFoundError('No server was found with that id');
     const { rows } = await pool.query(`SELECT id,status,operation,logs,error_code,error_message,created_at FROM provisioning_jobs WHERE server_id=$1 ORDER BY created_at DESC LIMIT 20`,[serverId]);
     return { jobs: rows };
+  });
+
+  /**
+   * Issues a provider console session for the owner of the server (spec §24).
+   *
+   * This is the one server action that cannot be queued: a console session is a short-lived
+   * credential that is only useful in the browser that asked for it. It is still ownership- and
+   * capability-checked, audited, and fails closed — a provider that is not configured returns an
+   * explicit 503 rather than a fabricated console URL. The session payload is returned to the
+   * owner only and never written to a log or an audit record.
+   */
+  /**
+   * Customer cancellation (spec §19, §30). Two modes: keep the server until the term the customer
+   * already paid for ends, or destroy it now.
+   *
+   * Deliberately not gated on a `capabilities.delete` flag the way the power actions are: a
+   * customer must always be able to stop paying for a service, whatever the product template
+   * says. What the capability set cannot grant, it also cannot take away here.
+   */
+  app.post<{ Params: { id: string } }>('/api/v1/servers/:id/cancel', async (request, reply) => {
+    const auth = await authenticate(request, env, pool);
+    const serverId = parseOrThrow(idSchema, request.params.id);
+    const input = parseOrThrow(cancelServerSchema, request.body ?? {});
+    const mode = input.mode ?? 'AT_PERIOD_END';
+    const server = await findOwnedCustomerServer(pool, serverId, auth.userId);
+    if (!server) throw new NotFoundError('No server was found with that id');
+    if (server.status === 'retired') throw new ConflictError('This server has already been terminated');
+    if (server.status === 'deleting') throw new ConflictError('This server is already being terminated');
+    if (mode === 'IMMEDIATE' && input.confirmation !== 'DELETE') {
+      throw new ValidationError('Immediate termination destroys all data on the server — send confirmation "DELETE" to proceed');
+    }
+    if (mode === 'AT_PERIOD_END' && !(await resolveTermEnd(pool, server))) {
+      throw new ConflictError('This server has no scheduled renewal to cancel — request immediate termination instead');
+    }
+    const result = await requestServerTermination(pool, {
+      server, actorId: auth.userId, mode, reason: input.reason ?? null,
+      idempotencyKey: requestIdempotencyKey(request, server.id, 'DELETE'),
+    });
+    reply.code(result.mode === 'IMMEDIATE' ? 202 : 200);
+    return {
+      mode: result.mode, effectiveAt: result.effectiveAt, jobId: result.jobId, queued: result.queued,
+      cancelledSubscriptions: result.cancelledSubscriptions.length,
+      retiredWithoutProviderCall: result.retiredWithoutProviderCall,
+    };
+  });
+
+  /** Undoes a scheduled cancellation while the server is still running. */
+  app.delete<{ Params: { id: string } }>('/api/v1/servers/:id/cancel', async (request) => {
+    const auth = await authenticate(request, env, pool);
+    const serverId = parseOrThrow(idSchema, request.params.id);
+    const server = await findOwnedCustomerServer(pool, serverId, auth.userId);
+    if (!server) throw new NotFoundError('No server was found with that id');
+    const cancellation = readCancellation(server);
+    if (!cancellation || cancellation.mode !== 'AT_PERIOD_END') {
+      throw new ConflictError('This server has no scheduled cancellation');
+    }
+    if (server.status === 'deleting' || server.status === 'retired') {
+      throw new ConflictError('This server is already being terminated and cannot be restored');
+    }
+    const restored = await revokeScheduledTermination(pool, server, auth.userId);
+    return { revoked: true, restoredSubscriptions: restored.length };
+  });
+
+  app.post<{ Params: { id: string } }>('/api/v1/servers/:id/console', async (request) => {
+    const auth = await authenticate(request, env, pool);
+    const serverId = parseOrThrow(idSchema, request.params.id);
+    const server = await findOwnedCustomerServer(pool, serverId, auth.userId);
+    if (!server || !server.provider_id) throw new NotFoundError('No server was found with that id');
+    if (server.capabilities?.console !== true) throw new ValidationError('Console access is not supported for this server');
+    if (!server.provider_server_id) throw new ConflictError('The server has not been created at the provider yet');
+    const provider = await findProviderById(pool, server.provider_id);
+    if (!provider || provider.status !== 'ACTIVE') {
+      throw new ValidationError('The infrastructure provider for this server is not active');
+    }
+    let session: Record<string, unknown>;
+    try {
+      const adapter = createInfrastructureProviderAdapter(provider);
+      session = await adapter.getConsole(server.provider_server_id);
+    } catch (error) {
+      // The provider message can name internal endpoints, so it stays in the server log.
+      request.log.warn({ serverId: server.id, providerId: provider.id, err: error }, 'console session failed');
+      throw providerErrorToHttpError(error);
+    }
+    await auditRequest(pool, request, auth.userId, {
+      action: 'SERVER_CONSOLE_OPENED', resourceType: 'server', resourceId: server.id,
+      // Deliberately no session payload: the audit trail records that access happened, not the credential.
+      metadata: { providerId: provider.id },
+    });
+    return { console: session };
+  });
+
+  /**
+   * Rescue mode boots the server from the provider's rescue system so the customer can repair a
+   * machine that no longer boots. It runs in request scope for the same reason the console does:
+   * the one-time root password the provider generates is only useful in the browser that asked
+   * for it, and writing it to a job payload, a log line or an audit row would turn a repair tool
+   * into a stored credential. The audit trail records that rescue was entered, never how.
+   */
+  async function rescueContext(request: Parameters<typeof authenticate>[0], rawId: string) {
+    const auth = await authenticate(request, env, pool);
+    const serverId = parseOrThrow(idSchema, rawId);
+    const server = await findOwnedCustomerServer(pool, serverId, auth.userId);
+    if (!server || !server.provider_id) throw new NotFoundError('No server was found with that id');
+    if (server.capabilities?.rescue !== true) throw new ValidationError('Rescue mode is not supported for this server');
+    if (!server.provider_server_id) throw new ConflictError('The server has not been created at the provider yet');
+    const provider = await findProviderById(pool, server.provider_id);
+    if (!provider || provider.status !== 'ACTIVE') throw new ValidationError('The infrastructure provider for this server is not active');
+    return { auth, server, provider, adapter: createInfrastructureProviderAdapter(provider) };
+  }
+
+  app.post<{ Params: { id: string } }>('/api/v1/servers/:id/rescue', async (request) => {
+    const { auth, server, provider, adapter } = await rescueContext(request, request.params.id);
+    const input = parseOrThrow(z.object({ confirmation: z.literal('RESCUE') }), request.body ?? {});
+    void input;
+    let session: RescueSession;
+    try {
+      const planMetadata = server.metadata.providerPlan && typeof server.metadata.providerPlan === 'object'
+        ? server.metadata.providerPlan as Record<string, unknown> : {};
+      session = await adapter.enableRescue(server.provider_server_id as string, {
+        architecture: (server.architecture === 'arm64' ? 'arm64' : 'x86_64'),
+        providerSshKeyIds: Array.isArray(planMetadata.providerSshKeyIds)
+          ? planMetadata.providerSshKeyIds as Array<string | number> : undefined,
+      });
+    } catch (error) {
+      request.log.warn({ serverId: server.id, providerId: provider.id, err: error }, 'rescue mode failed');
+      throw providerErrorToHttpError(error);
+    }
+    // `maintenance` is the honest state: the server is up, but it is not running the customer's OS.
+    await pool.query(
+      `UPDATE servers SET status='maintenance', metadata = coalesce(metadata,'{}'::jsonb) || $2::jsonb, updated_at=now() WHERE id=$1`,
+      [server.id, JSON.stringify({ rescue: { enteredAt: new Date().toISOString(), type: session.type } })]
+    );
+    await auditRequest(pool, request, auth.userId, {
+      action: 'SERVER_RESCUE_ENTERED', resourceType: 'server', resourceId: server.id,
+      // No credential, ever — only that rescue was entered and on which provider.
+      metadata: { providerId: provider.id, rescueType: session.type },
+    });
+    return { rescue: { type: session.type, username: session.username, password: session.password, rebooted: session.rebooted, notes: session.notes } };
+  });
+
+  app.delete<{ Params: { id: string } }>('/api/v1/servers/:id/rescue', async (request) => {
+    const { auth, server, provider, adapter } = await rescueContext(request, request.params.id);
+    try {
+      await adapter.disableRescue(server.provider_server_id as string);
+    } catch (error) {
+      request.log.warn({ serverId: server.id, providerId: provider.id, err: error }, 'leaving rescue mode failed');
+      throw providerErrorToHttpError(error);
+    }
+    await pool.query(
+      `UPDATE servers SET status='active', metadata = coalesce(metadata,'{}'::jsonb) - 'rescue', updated_at=now() WHERE id=$1`,
+      [server.id]
+    );
+    await auditRequest(pool, request, auth.userId, {
+      action: 'SERVER_RESCUE_EXITED', resourceType: 'server', resourceId: server.id, metadata: { providerId: provider.id },
+    });
+    return { rescue: null };
   });
 
   app.get<{ Params: { id: string } }>('/api/v1/servers/:id/metrics', async (request) => {

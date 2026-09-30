@@ -1,0 +1,33 @@
+<svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="NixOS">
+  <polygon points="36,27.5 43.4,31.75 43.4,40.25 36,44.5 28.6,40.25 28.6,31.75" fill="#5277C3"/>
+  <g transform="translate(36,36) rotate(0)" stroke="#5277C3" stroke-width="5" stroke-linecap="round" fill="none">
+    <path d="M 0,-9 L 0,-30"/>
+    <path d="M 0,-17 L -7,-24"/>
+    <path d="M 0,-17 L 7,-24"/>
+  </g>
+  <g transform="translate(36,36) rotate(60)" stroke="#7EBAE4" stroke-width="5" stroke-linecap="round" fill="none">
+    <path d="M 0,-9 L 0,-30"/>
+    <path d="M 0,-17 L -7,-24"/>
+    <path d="M 0,-17 L 7,-24"/>
+  </g>
+  <g transform="translate(36,36) rotate(120)" stroke="#5277C3" stroke-width="5" stroke-linecap="round" fill="none">
+    <path d="M 0,-9 L 0,-30"/>
+    <path d="M 0,-17 L -7,-24"/>
+    <path d="M 0,-17 L 7,-24"/>
+  </g>
+  <g transform="translate(36,36) rotate(180)" stroke="#7EBAE4" stroke-width="5" stroke-linecap="round" fill="none">
+    <path d="M 0,-9 L 0,-30"/>
+    <path d="M 0,-17 L -7,-24"/>
+    <path d="M 0,-17 L 7,-24"/>
+  </g>
+  <g transform="translate(36,36) rotate(240)" stroke="#5277C3" stroke-width="5" stroke-linecap="round" fill="none">
+    <path d="M 0,-9 L 0,-30"/>
+    <path d="M 0,-17 L -7,-24"/>
+    <path d="M 0,-17 L 7,-24"/>
+  </g>
+  <g transform="translate(36,36) rotate(300)" stroke="#7EBAE4" stroke-width="5" stroke-linecap="round" fill="none">
+    <path d="M 0,-9 L 0,-30"/>
+    <path d="M 0,-17 L -7,-24"/>
+    <path d="M 0,-17 L 7,-24"/>
+  </g>
+</svg>

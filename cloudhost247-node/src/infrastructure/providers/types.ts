@@ -83,6 +83,29 @@ export interface ProviderHealthResult {
  * findServerByIdempotencyKey so a crash between provider creation and local persistence cannot
  * allocate a second billable resource.
  */
+/** What the platform knows when asking a provider to boot a server into its rescue system. */
+export interface RescueRequest {
+  /** Rescue images are per-architecture on every provider that offers them. */
+  architecture: 'x86_64' | 'arm64';
+  /** Provider-side SSH key ids from the server template, where the provider injects them. */
+  providerSshKeyIds?: Array<string | number>;
+}
+
+/**
+ * The result of entering rescue mode. `password` is a one-time credential that must be handed to
+ * the requesting customer and never stored, logged or audited — the same rule the console session
+ * follows. Providers that key rescue access off an injected SSH key return no password at all.
+ */
+export interface RescueSession {
+  /** Provider's name for the rescue system booted, e.g. `linux64`. */
+  type: string;
+  username: string;
+  password?: string;
+  /** True when the server was rebooted into rescue as part of this call. */
+  rebooted: boolean;
+  notes?: string;
+}
+
 export interface InfrastructureProviderAdapter {
   readonly kind: string;
   readonly provider: InfrastructureProviderRow;
@@ -109,6 +132,8 @@ export interface InfrastructureProviderAdapter {
   deleteSnapshot(providerServerId: string, snapshotId: string): Promise<void>;
   restoreSnapshot(providerServerId: string, snapshotId: string): Promise<void>;
   getConsole(providerServerId: string): Promise<Record<string, unknown>>;
+  enableRescue(providerServerId: string, input: RescueRequest): Promise<RescueSession>;
+  disableRescue(providerServerId: string): Promise<void>;
   getServerMetrics(providerServerId: string): Promise<Record<string, unknown>>;
   healthCheck(providerServerId: string, expectedImage: ServerOsImageRow): Promise<ProviderHealthResult>;
 }

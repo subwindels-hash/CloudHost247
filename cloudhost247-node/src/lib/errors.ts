@@ -34,3 +34,15 @@ export class NotFoundError extends HttpError {
     super(404, message, 'NOT_FOUND');
   }
 }
+
+export class ServiceUnavailableError extends HttpError {
+  constructor(message = 'This service is temporarily unavailable') {
+    super(503, message, 'SERVICE_UNAVAILABLE');
+  }
+}
+
+export class UpstreamError extends HttpError {
+  constructor(message = 'The upstream provider returned an unexpected response') {
+    super(502, message, 'UPSTREAM_ERROR');
+  }
+}

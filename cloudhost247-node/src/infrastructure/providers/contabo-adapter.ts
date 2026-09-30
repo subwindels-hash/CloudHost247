@@ -1,4 +1,5 @@
 import type { InfrastructureProviderRow, ServerOsImageRow } from '../../db/infrastructure-providers';
+import { unsupportedRescue } from './common';
 import { providerRequest } from './http';
 import {
   ProviderError,
@@ -112,6 +113,9 @@ export class ContaboProviderAdapter implements InfrastructureProviderAdapter {
     this.ensureConfigured();
     throw new ProviderError('SERVICE_UNAVAILABLE', 'Contabo VPS reinstall requires active provider bridge', false);
   }
+
+  async enableRescue(): Promise<never> { return unsupportedRescue('contabo'); }
+  async disableRescue(): Promise<never> { return unsupportedRescue('contabo'); }
 
   async getConsole(_providerServerId: string): Promise<Record<string, unknown>> {
     this.ensureConfigured();

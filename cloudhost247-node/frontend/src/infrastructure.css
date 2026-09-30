@@ -81,3 +81,71 @@
   .ch247-capability-list{grid-template-columns:1fr}
 }
 
+
+/* Provider configuration readiness panel and infrastructure logs */
+.ch247-provider-config{margin-top:1rem;padding-top:1rem;border-top:1px solid #e2e8f0;display:grid;gap:1rem}
+.ch247-provider-config__state{margin:0;padding:.75rem 1rem;border-radius:8px;font-size:.88rem;font-weight:600}
+.ch247-provider-config__state.is-ready{background:#dcfce7;color:#15803d}
+.ch247-provider-config__state.is-incomplete{background:#fef3c7;color:#b45309}
+.ch247-provider-config__facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:.75rem;margin:0}
+.ch247-provider-config__facts div{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:.7rem .85rem}
+.ch247-provider-config__facts dt{font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:#64748b}
+.ch247-provider-config__facts dd{margin:.25rem 0 0;font-weight:700;color:#0f172a;word-break:break-all}
+.ch247-provider-config__meta h4{margin:0 0 .4rem;font-size:.92rem}
+.ch247-provider-config__meta ul,.ch247-provider-config__notes{margin:0;padding-left:1.1rem;color:#475569;font-size:.85rem;display:grid;gap:.3rem}
+.ch247-provider-config__notes{color:#64748b;font-style:italic}
+.ch247-ok-text{color:#15803d;font-weight:600}
+.ch247-log-meta{display:block;max-width:420px;white-space:pre-wrap;word-break:break-word;color:#475569}
+@media(max-width:767px){.ch247-provider-config__facts{grid-template-columns:1fr}.ch247-log-meta{max-width:none}}
+
+/* Operating-system lifecycle notices (EOL warning / end of life) */
+.ch247-os-lifecycle{display:grid;gap:.3rem;padding:1rem 1.15rem;border-radius:10px;border:1px solid transparent}
+.ch247-os-lifecycle strong{font-size:.95rem}
+.ch247-os-lifecycle span{font-size:.88rem;line-height:1.45}
+.ch247-os-lifecycle small{font-size:.78rem;opacity:.85}
+.ch247-os-lifecycle.is-maintenance{background:#eff6ff;border-color:#bfdbfe;color:#1e40af}
+.ch247-os-lifecycle.is-warning{background:#fef3c7;border-color:#fcd34d;color:#92400e}
+.ch247-os-lifecycle.is-eol{background:#fee2e2;border-color:#fecaca;color:#991b1b}
+.ch247-os-lifecycle__tag{display:inline-block;margin-left:.35rem;padding:.1rem .45rem;border-radius:999px;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;vertical-align:middle}
+.ch247-os-lifecycle__tag.is-maintenance{background:#dbeafe;color:#1e40af}
+.ch247-os-lifecycle__tag.is-warning{background:#fef3c7;color:#92400e}
+.ch247-os-lifecycle__tag.is-eol{background:#fee2e2;color:#991b1b}
+
+/* Customer notification centre */
+.ch247-notification-list{list-style:none;margin:0;padding:0;display:grid;gap:.85rem}
+.ch247-notification{border-left:4px solid #cbd5e1}
+.ch247-notification.is-unread{border-left-color:#0756d8;background:#f8fbff}
+.ch247-notification.is-success.is-unread{border-left-color:#16a34a}
+.ch247-notification.is-warning.is-unread{border-left-color:#d97706}
+.ch247-notification.is-danger.is-unread{border-left-color:#dc2626}
+.ch247-notification__head{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;flex-wrap:wrap}
+.ch247-notification__head h2{margin:0;font-size:1.05rem}
+.ch247-notification__head time{color:#64748b;font-size:.8rem}
+.ch247-notification__body{white-space:pre-line;color:#475569;margin:.5rem 0 .85rem;font-size:.9rem;line-height:1.5}
+
+/* Inline checkbox field used by the server-template form; keeps the label on one line and the
+   control aligned with the surrounding text inputs on every breakpoint. */
+.ch247-field--check {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  align-self: end;
+  padding-bottom: 0.55rem;
+}
+
+.ch247-field--check input[type='checkbox'] {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  flex: 0 0 auto;
+}
+
+/* Pending-cancellation hint on the server list: visible without shouting, so a customer sees at a
+   glance which services are winding down. */
+.ch247-server-card__cancelling {
+  margin: 0.35rem 0 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #b45309;
+}

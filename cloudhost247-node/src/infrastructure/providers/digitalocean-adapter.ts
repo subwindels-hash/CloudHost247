@@ -1,4 +1,5 @@
 import type { InfrastructureProviderRow, ServerOsImageRow } from '../../db/infrastructure-providers';
+import { unsupportedRescue } from './common';
 import { providerRequest } from './http';
 import {
   ProviderError,
@@ -186,6 +187,9 @@ export class DigitalOceanProviderAdapter implements InfrastructureProviderAdapte
     await this.action(input.providerServerId, 'rebuild', { image });
     return this.getServerStatus(input.providerServerId);
   }
+
+  async enableRescue(): Promise<never> { return unsupportedRescue('digitalocean'); }
+  async disableRescue(): Promise<never> { return unsupportedRescue('digitalocean'); }
 
   async getConsole(providerServerId: string): Promise<Record<string, unknown>> {
     return asRecord(await this.request(`/droplets/${encodeURIComponent(providerServerId)}/actions`));
