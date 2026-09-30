@@ -12,7 +12,7 @@ const LINKS: Array<{ key: InfrastructureNavKey; to: string; label: string }> = [
   { key: 'operating-systems', to: '/admin/infrastructure/operating-systems', label: 'Operating systems' },
   { key: 'images', to: '/admin/infrastructure/images', label: 'OS images' },
   { key: 'providers', to: '/admin/infrastructure/providers', label: 'Providers & regions' },
-  { key: 'availability', to: '/admin/infrastructure/availability', label: 'Availability' },
+  { key: 'availability', to: '/admin/infrastructure/availability', label: 'Server templates' },
   { key: 'provisioning', to: '/admin/infrastructure/provisioning', label: 'Provisioning' },
   { key: 'logs', to: '/admin/infrastructure/logs', label: 'Infrastructure logs' },
 ];

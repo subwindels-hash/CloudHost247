@@ -121,3 +121,13 @@ export function fetchCustomerServer(id: string) { return apiFetch<{ server: Cust
 export function serverAction(id: string,action: string,body: unknown = {}) {
   return apiFetch<{ jobId: string; status: string; queued: boolean }>(`/api/v1/servers/${id}/${action}`,{ method: 'POST',headers: { 'Idempotency-Key': crypto.randomUUID() },body: JSON.stringify(body) });
 }
+
+export interface ConsoleSession { url?: string; password?: string; type?: string; expiresAt?: string; [key: string]: unknown }
+
+/**
+ * Requests a short-lived provider console session. The credential is returned to the owner's
+ * browser only and is never persisted client-side.
+ */
+export function openServerConsole(id: string) {
+  return apiFetch<{ console: ConsoleSession }>(`/api/v1/servers/${id}/console`,{ method: 'POST' });
+}

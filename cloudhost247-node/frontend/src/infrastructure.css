@@ -122,3 +122,21 @@
 .ch247-notification__head h2{margin:0;font-size:1.05rem}
 .ch247-notification__head time{color:#64748b;font-size:.8rem}
 .ch247-notification__body{white-space:pre-line;color:#475569;margin:.5rem 0 .85rem;font-size:.9rem;line-height:1.5}
+
+/* Inline checkbox field used by the server-template form; keeps the label on one line and the
+   control aligned with the surrounding text inputs on every breakpoint. */
+.ch247-field--check {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  align-self: end;
+  padding-bottom: 0.55rem;
+}
+
+.ch247-field--check input[type='checkbox'] {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  flex: 0 0 auto;
+}

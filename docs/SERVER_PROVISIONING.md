@@ -13,7 +13,7 @@ Logos are browser assets only. They are never used as installation images. Publi
 3. Set `APP_URL`, `CREDENTIAL_ENCRYPTION_KEY` (or a key ring), `SERVER_AGENT_INSTALL_URL`, provider credentials, and worker settings in the server-side secret store. Restart the API and worker.
 4. In **Admin → Infrastructure**, add the provider and location records. Keep the provider disabled until its credentials validate.
 5. Add an OS image mapping as `DRAFT`, use **Test**, and enable it only after the provider confirms the image and architecture.
-6. Activate the OS version, then create and enable an exact product availability rule. The rule metadata must include resource values and the adapter's provider plan/type identifier.
+6. Activate the OS version, then create and enable an exact server template (product availability rule). The rule metadata must include resource values and the adapter's provider plan/type identifier.
 7. Place a low-cost test order. Confirm that no provider request occurs before verified payment. Observe the queued job and all health stages.
 8. Do not enable production sales until provisioning, agent attestation, delete/lifecycle actions, and reinstall have all passed in the intended region.
 
@@ -366,6 +366,48 @@ Customers read them at **Dashboard → Notifications** (`/dashboard/notification
 All three are scoped to the authenticated user id, so a notification belonging to another
 account returns `404` rather than confirming it exists. Notification text never contains
 credentials, tokens or provider responses.
+
+## Server templates (admin)
+
+`server_product_configurations` **is** the server-template registry: one row per
+plan × provider × region × datacenter × OS version × architecture × server type. There is no
+second template table — a duplicate registry would let ordering and reinstall disagree about
+what is deployable. Operators manage the rows at
+**Admin → Infrastructure → Server templates** (`/admin/infrastructure/availability`).
+
+Each row carries, in `metadata`:
+
+- the adapter's own plan identifier (`providerServerType`, `providerFlavorId`, `providerVirtType`,
+  … — see the per-adapter tables above) — without it, provisioning fails closed;
+- the resources the customer is sold (`cpuCores`, `memoryMb`, `storageMb`, `bandwidthGb`);
+- `capabilities`, the exact set of actions the server detail page offers and the API accepts
+  (`start`, `stop`, `reboot`, `shutdown`, `reinstall`, `snapshot`, `resize`, `rescue`, `console`).
+
+Rows are created `DISABLED` on purpose. Enable one only after a verified provider image exists
+for that provider, OS version, architecture and region; the ordering and reinstall queries join
+through `ACTIVE` images with a non-null `verified_at`, so a template enabled too early simply
+never appears rather than producing a broken order.
+
+## Serial console access
+
+`POST /api/v1/servers/:id/console` issues a provider console session for the owner of the
+server. It is the single server action that is answered synchronously, because a console
+session is a short-lived credential that is only useful in the browser that requested it;
+everything that changes server state still goes through the durable queue.
+
+Guarantees:
+
+- ownership is checked first, and a server belonging to another account returns `404` rather
+  than `403`, so the endpoint cannot be used to probe for server ids;
+- the template must declare `capabilities.console` (`400` otherwise) and the server must already
+  exist at the provider (`409` while it is still queued);
+- an unconfigured, unauthenticated or unreachable provider returns `503`
+  (`SERVICE_UNAVAILABLE`) with a neutral message — never a fabricated console URL. The mapping
+  lives in `src/infrastructure/providers/error-mapping.ts`; the provider's own wording is logged
+  server-side only, because it can name internal endpoints;
+- the session URL, password and token are returned to the owner's browser and are never written
+  to logs, the audit trail or the database. The audit record is `SERVER_CONSOLE_OPENED` with the
+  server and provider ids only.
 
 ## Live acceptance run
 

@@ -8,6 +8,8 @@ import {
   fetchCustomerServer,
   fetchServerConfiguration,
   serverAction,
+  openServerConsole,
+  type ConsoleSession,
   type AvailableOperatingSystem,
   type CustomerServer,
   type ServerConfiguration,
@@ -78,6 +80,7 @@ export default function ServerDetailPage() {
   const [busy, setBusy] = useState('');
   const [showReinstall, setShowReinstall] = useState(false);
   const [showSnapshotModal, setShowSnapshotModal] = useState(false);
+  const [consoleSession, setConsoleSession] = useState<ConsoleSession | null>(null);
   const [snapshotDesc, setSnapshotDesc] = useState('');
   const [targetOs, setTargetOs] = useState('');
   const [targetVersion, setTargetVersion] = useState('');
@@ -145,6 +148,21 @@ export default function ServerDetailPage() {
       }
     }
   }, [reinstallSystems, targetOs, targetVersion, targetArchitecture]);
+
+  async function requestConsole() {
+    setBusy('console');
+    setError('');
+    setMessage('');
+    setConsoleSession(null);
+    try {
+      const result = await openServerConsole(id);
+      setConsoleSession(result.console);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Could not open a console session');
+    } finally {
+      setBusy('');
+    }
+  }
 
   async function action(name: string, payload: unknown = {}) {
     setBusy(name);
@@ -435,6 +453,16 @@ export default function ServerDetailPage() {
                 Create Snapshot
               </button>
             )}
+            {server.capabilities?.console === true && (
+              <button
+                type="button"
+                className="ch247-btn"
+                disabled={busy !== '' || !!runningJob}
+                onClick={() => void requestConsole()}
+              >
+                {busy === 'console' ? 'Opening console…' : 'Open console'}
+              </button>
+            )}
             {server.capabilities?.reinstall === true && (
               <button
                 type="button"
@@ -551,6 +579,46 @@ export default function ServerDetailPage() {
           </table>
         </div>
       </section>
+
+      {consoleSession && (
+        <section className="ch247-card">
+          <h2>Serial console session</h2>
+          <p className="ch247-page__hint">
+            This session was issued by the provider for your account only. It is short lived, is never stored by
+            CloudHost247, and disappears from this page when you reload it. Do not share the link.
+          </p>
+          <dl className="ch247-kv">
+            {typeof consoleSession.type === 'string' && (
+              <>
+                <dt>Console type</dt>
+                <dd>{consoleSession.type}</dd>
+              </>
+            )}
+            {typeof consoleSession.expiresAt === 'string' && (
+              <>
+                <dt>Expires</dt>
+                <dd>{new Date(consoleSession.expiresAt).toLocaleString()}</dd>
+              </>
+            )}
+            {typeof consoleSession.password === 'string' && (
+              <>
+                <dt>One-time password</dt>
+                <dd><code>{consoleSession.password}</code></dd>
+              </>
+            )}
+          </dl>
+          <div className="ch247-actions">
+            {typeof consoleSession.url === 'string' && (
+              <a className="ch247-btn ch247-btn--primary" href={consoleSession.url} target="_blank" rel="noreferrer noopener">
+                Launch console
+              </a>
+            )}
+            <button type="button" className="ch247-btn" onClick={() => setConsoleSession(null)}>
+              Close
+            </button>
+          </div>
+        </section>
+      )}
 
       {showSnapshotModal && (
         <section className="ch247-card">

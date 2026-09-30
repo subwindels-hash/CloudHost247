@@ -41,6 +41,9 @@ import {
   listCustomerServers,
 } from '../db/server-provisioning';
 import { ImageResolutionError, resolveReinstallTarget } from '../infrastructure/services/image-resolver';
+import { findProviderById } from '../db/infrastructure-providers';
+import { createInfrastructureProviderAdapter } from '../infrastructure/providers/registry';
+import { providerErrorToHttpError } from '../infrastructure/providers/error-mapping';
 
 const idSchema = z.string().uuid('id must be a valid UUID');
 
@@ -573,6 +576,43 @@ export async function registerServerRoutes(app: FastifyInstance, env: Env, overr
     if (!await findOwnedCustomerServer(pool,serverId,auth.userId)) throw new NotFoundError('No server was found with that id');
     const { rows } = await pool.query(`SELECT id,status,operation,logs,error_code,error_message,created_at FROM provisioning_jobs WHERE server_id=$1 ORDER BY created_at DESC LIMIT 20`,[serverId]);
     return { jobs: rows };
+  });
+
+  /**
+   * Issues a provider console session for the owner of the server (spec §24).
+   *
+   * This is the one server action that cannot be queued: a console session is a short-lived
+   * credential that is only useful in the browser that asked for it. It is still ownership- and
+   * capability-checked, audited, and fails closed — a provider that is not configured returns an
+   * explicit 503 rather than a fabricated console URL. The session payload is returned to the
+   * owner only and never written to a log or an audit record.
+   */
+  app.post<{ Params: { id: string } }>('/api/v1/servers/:id/console', async (request) => {
+    const auth = await authenticate(request, env, pool);
+    const serverId = parseOrThrow(idSchema, request.params.id);
+    const server = await findOwnedCustomerServer(pool, serverId, auth.userId);
+    if (!server || !server.provider_id) throw new NotFoundError('No server was found with that id');
+    if (server.capabilities?.console !== true) throw new ValidationError('Console access is not supported for this server');
+    if (!server.provider_server_id) throw new ConflictError('The server has not been created at the provider yet');
+    const provider = await findProviderById(pool, server.provider_id);
+    if (!provider || provider.status !== 'ACTIVE') {
+      throw new ValidationError('The infrastructure provider for this server is not active');
+    }
+    let session: Record<string, unknown>;
+    try {
+      const adapter = createInfrastructureProviderAdapter(provider);
+      session = await adapter.getConsole(server.provider_server_id);
+    } catch (error) {
+      // The provider message can name internal endpoints, so it stays in the server log.
+      request.log.warn({ serverId: server.id, providerId: provider.id, err: error }, 'console session failed');
+      throw providerErrorToHttpError(error);
+    }
+    await auditRequest(pool, request, auth.userId, {
+      action: 'SERVER_CONSOLE_OPENED', resourceType: 'server', resourceId: server.id,
+      // Deliberately no session payload: the audit trail records that access happened, not the credential.
+      metadata: { providerId: provider.id },
+    });
+    return { console: session };
   });
 
   app.get<{ Params: { id: string } }>('/api/v1/servers/:id/metrics', async (request) => {
