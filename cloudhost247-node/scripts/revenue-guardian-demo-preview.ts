@@ -26,6 +26,14 @@ import { runRevenueGuardianCycle } from '../src/revenue-guardian/jobs/scheduler'
 import { createPaymentPromise } from '../src/revenue-guardian/services/promise-service';
 import { assignCustomer } from '../src/revenue-guardian/services/assignment-service';
 import { reconcileRecoveryState, processPaymentPromises } from '../src/revenue-guardian/jobs/definitions';
+import { buildKeyRing } from '../src/lib/crypto';
+import { setKeyRingForTesting } from '../src/lib/keyring';
+import { setCloudflareTestOverrides, encryptApiToken } from '../src/integrations/cloudflare/config';
+import { createCloudflareOrder } from '../src/services/cloudflare-service';
+import { provisionPaidOrder } from '../src/services/provisioning-service';
+import { withTransaction } from '../src/db/transaction';
+import { sweepCloudflareJobs } from '../src/worker/cloudflare-sweep';
+import { MockCloudflare } from '../tests/helpers/mock-cloudflare';
 
 const PASSWORD = 'demo-password-123';
 
@@ -33,13 +41,20 @@ async function main() {
   const db = new PGlite();
   await migrateUp(new PgliteClient(db), { isProduction: false });
 
+  process.env.DATABASE_URL = 'postgresql://embedded:embedded@localhost:5432/embedded';
+  process.env.JWT_SECRET = 'demo-preview-secret-demo-preview-secret';
+  process.env.CREDENTIAL_ENCRYPTION_KEY = 'a'.repeat(64);
   const env = loadEnv({
     ...process.env,
     NODE_ENV: 'development',
-    DATABASE_URL: 'postgresql://embedded:embedded@localhost:5432/embedded',
-    JWT_SECRET: 'demo-preview-secret-demo-preview-secret',
     PORT: '3000',
   } as NodeJS.ProcessEnv);
+  setKeyRingForTesting(buildKeyRing('a'.repeat(64), undefined));
+
+  // DEV PREVIEW ONLY: a simulated Cloudflare API endpoint (tests/helpers/mock-cloudflare.ts) so
+  // the module is explorable without real credentials. Production always talks to the real API.
+  const mockCf = new MockCloudflare();
+  setCloudflareTestOverrides({ fetchImpl: mockCf.fetch, sleep: () => Promise.resolve() });
 
   // ------------------------------------------------------------------------------- seed ---
   const hash = await hashPassword(PASSWORD);
@@ -207,6 +222,60 @@ async function main() {
   );
   await processPaymentPromises(db);
 
+  // ----------------------------------------------------------------------- Cloudflare demo ---
+  await db.query(
+    `INSERT INTO cloudflare_accounts (id, account_name, cloudflare_account_id, api_base_url, encrypted_api_token, created_by)
+     VALUES ($1,'Demo Reseller Account',$2,'https://api.cloudflare.test/client/v4',$3,$4)`,
+    [randomUUID(), mockCf.accountId, encryptApiToken(mockCf.validToken), adminId]
+  );
+  const cfPlans: Array<[string, string, number, Record<string, boolean>]> = [
+    ['Cloudflare Free', 'free', 0, { firewall: false, speed: false }],
+    ['Cloudflare Pro', 'pro', 20, {}],
+    ['Cloudflare Business', 'business', 200, {}],
+  ];
+  const cfPlanIds: string[] = [];
+  for (const [name, tier, price, entitlements] of cfPlans) {
+    const prodId = randomUUID();
+    const cfPlanId = randomUUID();
+    await db.query(`INSERT INTO products (id, slug, name, product_type, status, visibility) VALUES ($1,$2,$3,'service','active','public')`,
+      [prodId, `cf-${tier}`, name]);
+    await db.query(`INSERT INTO product_plans (id, product_id, slug, name, status) VALUES ($1,$2,$3,$4,'active')`,
+      [cfPlanId, prodId, `cf-${tier}-plan`, name]);
+    await db.query(`INSERT INTO plan_pricing (id, plan_id, billing_period, currency, amount, effective_status) VALUES ($1,$2,'monthly','USD',$3,'published')`,
+      [randomUUID(), cfPlanId, price]);
+    await db.query(
+      `INSERT INTO cloudflare_plan_mappings (id, plan_id, cloudflare_plan, entitlements, created_by) VALUES ($1,$2,$3,$4::jsonb,$5)`,
+      [randomUUID(), cfPlanId, tier, JSON.stringify(entitlements), adminId]
+    );
+    cfPlanIds.push(cfPlanId);
+  }
+  // Emeka buys Cloudflare Pro for a domain; the order settles and the worker provisions it.
+  const cfOrder = await createCloudflareOrder(db, custIds[4]!, { planId: cfPlanIds[1]!, billingPeriod: 'monthly', domainName: 'emeka-demo.example' });
+  await withTransaction(db, async (tx) => {
+    await tx.query(`UPDATE orders SET payment_status='paid', status='completed' WHERE id=$1`, [cfOrder.order.id]);
+    await tx.query(`UPDATE invoices SET status='paid' WHERE order_id=$1`, [cfOrder.order.id]);
+    await tx.query(
+      `INSERT INTO billing_ledger (id, user_id, invoice_id, entry_type, amount, currency, description)
+       SELECT $1, $2, i.id, 'payment', i.total_amount, i.currency, 'Payment received (demo seed)' FROM invoices i WHERE i.order_id = $3`,
+      [randomUUID(), custIds[4]!, cfOrder.order.id]
+    );
+    const { rows } = await tx.query<import('../src/db/orders').OrderRow>(`SELECT * FROM orders WHERE id=$1`, [cfOrder.order.id]);
+    await provisionPaidOrder(tx, rows[0]!);
+  });
+  mockCf.records.set('r-demo-txt', { id: 'r-demo-txt', zoneId: '', type: 'TXT', name: 'emeka-demo.example', content: 'v=spf1 -all', ttl: 1, proxied: false } as never);
+  await sweepCloudflareJobs(db, 'preview-worker');
+  // Attach the pre-seeded TXT record to the created zone and sync once so DNS shows data.
+  const zoneEntry = [...mockCf.zones.values()][0];
+  if (zoneEntry) {
+    mockCf.records.set('r-demo-txt', { id: 'r-demo-txt', zoneId: zoneEntry.id, type: 'TXT', name: 'emeka-demo.example', content: 'v=spf1 -all', ttl: 1, proxied: false } as never);
+    zoneEntry.status = 'active';
+    const { rows: cfsvc } = await db.query<{ id: string }>(`SELECT id FROM cloudflare_services LIMIT 1`);
+    if (cfsvc[0]) {
+      await db.query(`INSERT INTO cloudflare_jobs (id, cloudflare_service_id, job_type) VALUES ($1,$2,'sync_zone')`, [randomUUID(), cfsvc[0].id]);
+      await sweepCloudflareJobs(db, 'preview-worker');
+    }
+  }
+
   // ------------------------------------------------------------------------------ serve ---
   const app = buildApp(env, {
     serveFrontend: true,
@@ -215,12 +284,15 @@ async function main() {
   });
   await app.listen({ port: 3000, host: '0.0.0.0' });
 
-  // Keep automation honest in the preview too: re-run the cycle periodically.
+  // Keep automation honest in the preview too: re-run the cycles periodically.
   setInterval(() => void runRevenueGuardianCycle(db).catch(() => undefined), 5 * 60_000);
+  setInterval(() => void sweepCloudflareJobs(db, 'preview-worker').catch(() => undefined), 30_000);
 
   // eslint-disable-next-line no-console
   console.log('\nRevenue Guardian demo preview ready on http://0.0.0.0:3000');
   // eslint-disable-next-line no-console
+  console.log('Cloudflare module: /admin/cloudflare (admin) and /services/cloudflare (as emeka@demo-customer.test).');
+  console.log('NOTE: this preview talks to a SIMULATED Cloudflare endpoint (dev-only); production uses the real API.');
   console.log(`Logins (password "${PASSWORD}"):
   root@demo.cloudhost247.test   (super_admin — includes write-off)
   admin@demo.cloudhost247.test  (admin)

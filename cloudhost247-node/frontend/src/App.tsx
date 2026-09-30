@@ -87,6 +87,9 @@ import { MyWorkPage, StaffPerformancePage } from './pages/revenue-guardian/WorkP
 import { AutomationPage as RGAutomationPage, AutomationRunsPage } from './pages/revenue-guardian/AutomationPages';
 import { ActivityLogPage as RGActivityLogPage, EmailLogsPage as RGEmailLogsPage } from './pages/revenue-guardian/LogsPages';
 import { RGSettingsPage, ModuleHealthPage as RGModuleHealthPage } from './pages/revenue-guardian/SettingsPages';
+import CloudflareServicesPage from './pages/cloudflare/CloudflareServicesPage';
+import CloudflareServicePage from './pages/cloudflare/CloudflareServicePage';
+import AdminCloudflarePage from './pages/AdminCloudflarePage';
 import DnsManagementPage from './pages/DnsManagementPage';
 import SslManagementPage from './pages/SslManagementPage';
 
@@ -146,6 +149,9 @@ export default function App() {
           <Route path="/account/ssl" element={<SslManagementPage />} />
           <Route path="/account/domain-brokerage" element={<DomainBrokeragePage />} />
           <Route path="/services" element={<ServicesPage />} />
+          <Route path="/services/cloudflare" element={<CloudflareServicesPage />} />
+          <Route path="/services/cloudflare/:id" element={<CloudflareServicePage />} />
+          <Route path="/services/cloudflare/:id/:tab" element={<CloudflareServicePage />} />
           <Route path="/account/services" element={<ServicesPage />} />
           <Route path="/billing" element={<BillingPage />} />
           <Route path="/invoices" element={<InvoicesPage />} />
@@ -184,6 +190,9 @@ export default function App() {
             <Route path="/admin/infrastructure/logs" element={<AdminInfrastructureLogsPage />} />
             <Route path="/admin/control-panels" element={<AdminControlPanelsPage />} />
             <Route path="/admin/infrastructure/control-panels" element={<AdminControlPanelsPage />} />
+            <Route path="/admin/cloudflare" element={<AdminCloudflarePage />} />
+            <Route path="/admin/cloudflare/:tab" element={<AdminCloudflarePage />} />
+            <Route path="/admin/integrations/cloudflare" element={<AdminCloudflarePage />} />
           </Route>
 
           {/* Revenue Guardian — staff accounts also participate (with a server-enforced,

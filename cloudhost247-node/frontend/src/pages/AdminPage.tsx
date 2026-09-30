@@ -72,6 +72,7 @@ export default function AdminPage() {
           <Link to="/admin/tickets">Manage support tickets →</Link>
           <Link to="/admin/invoices">Manage invoices & refunds →</Link>
           <Link to="/admin/revenue-guardian">Revenue Guardian — revenue recovery →</Link>
+          <Link to="/admin/cloudflare">Cloudflare — reseller & zones →</Link>
           <Link to="/admin/ledger">Financial audit ledger →</Link>
         </p>
 

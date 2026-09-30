@@ -15,6 +15,7 @@ import { deliverNotificationOutbox } from '../services/notification-outbox-servi
 import { reconcileServerState } from '../services/infrastructure-reconciliation-service';
 import { revalidateProviderImages } from '../services/os-image-revalidation-service';
 import { runRevenueGuardianCycle } from '../revenue-guardian/jobs/scheduler';
+import { sweepCloudflareJobs } from './cloudflare-sweep';
 import type { EngineOptions } from '../deployments/engine';
 
 const HEALTHCHECK_INTERVAL_MS = 60_000;
@@ -37,6 +38,8 @@ const IMAGE_REVALIDATION_INTERVAL_MS = 6 * 60 * 60_000;
 // src/revenue-guardian/jobs/scheduler.ts. Frequent sweeping just means a due bucket is picked up
 // promptly; it never causes double execution.
 const REVENUE_GUARDIAN_SWEEP_INTERVAL_MS = 5 * 60_000;
+// Cloudflare durable job queue: claim-lease with per-job backoff, so sweeping often is cheap.
+const CLOUDFLARE_SWEEP_INTERVAL_MS = 60_000;
 
 function engineOptions(simulationMode: boolean, kubernetesEnabled: boolean): EngineOptions {
   return { simulationMode, kubernetesEnabled };
@@ -66,6 +69,7 @@ async function main() {
   let lastImageRevalidation = 0;
   let lastSecurityNumberSweep = 0;
   let lastRevenueGuardianSweep = 0;
+  let lastCloudflareSweep = 0;
 
   const shutdown = (signal: string) => {
     logger.log(`[worker:${workerId}] ${signal} received — draining`);
@@ -132,6 +136,14 @@ async function main() {
           if (check.outcome !== 'VERIFIED') {
             logger.log(`[worker:${workerId}] image ${check.providerImageId ?? check.imageId}: ${check.outcome}${check.error ? ` — ${check.error}` : ''}`);
           }
+        }
+      }
+
+      if (now - lastCloudflareSweep >= CLOUDFLARE_SWEEP_INTERVAL_MS) {
+        lastCloudflareSweep = now;
+        const cf = await sweepCloudflareJobs(pool, workerId);
+        if (cf.claimed > 0 || cf.syncsScheduled > 0) {
+          logger.log(`[worker:${workerId}] cloudflare jobs: ${cf.succeeded} succeeded, ${cf.retrying} retrying, ${cf.failed} failed, ${cf.syncsScheduled} sync(s) scheduled`);
         }
       }
 
