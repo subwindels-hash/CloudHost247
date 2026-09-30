@@ -965,3 +965,15 @@ sub-phase before the next one begins.
   - **Cancellation and termination:** `POST /api/v1/servers/:id/cancel` with `AT_PERIOD_END` (revocable via `DELETE /api/v1/servers/:id/cancel`, honours the paid term, flags `cancel_at_period_end`) or `IMMEDIATE` (typed `"DELETE"` confirmation, cancels subscriptions, enqueues the `DELETE` job). `sweepScheduledTerminations` runs in the worker every 15 minutes and on demand via `POST /api/v1/admin/server-terminations/sweep`. Destruction always runs through the queue and adapter; the `servers` row is kept as `retired` so orders, invoices and audit history survive; a server that never reached the provider is retired directly rather than faking a provider call. Completion raises a once-only `SERVER_TERMINATED` notification.
   - **Customer UI:** "Open console" action and session panel, plus a danger zone on `/dashboard/servers/:id` offering cancel-at-term or destroy-now with the typed confirmation, a revoke path, and a "Cancels on …" hint on the server list.
   - **Tests added:** `tests/integration/server-console.test.ts` (5), `tests/unit/provider-error-mapping.test.ts` (4), `tests/integration/server-termination.test.ts` (7).
+
+---
+
+## Phase 7 (continued) — Notification email delivery that actually retries
+
+- **Source/local verification:** PASSED on branch `arena/01a0f219-cloudhost247`.
+  - **Full platform verification: 71 / 71 test files passing (522 / 522 tests), backend and frontend TypeScript clean.**
+  - **Migration artifact:** `cloudhost247-node/database/migrations/0049_notification_outbox_delivery_scheduling.sql` — adds `next_attempt_at` and `max_attempts` to `notification_outbox`, a partial due-row index, and re-arms rows previously parked only because nothing was configured. Additive; existing rows become due immediately.
+  - **Decoupled delivery:** `createNotification` in `src/services/notification-service.ts` writes the durable in-app row and queues its email copy; no HTTP happens on the path that is finishing a customer's server. `src/services/notification-outbox-service.ts` drains the queue in the worker every minute, claiming rows by pushing `next_attempt_at` forward so concurrent workers never send the same email twice.
+  - **Failure classification:** unconfigured webhook and `401`/`403` park as `CONFIGURATION_REQUIRED` and are retried every 15 minutes without consuming the attempt budget; `408`/`429`/`5xx`/network errors back off 1 → 5 → 15 → 60 → 240 minutes up to `max_attempts`; other `4xx` fail permanently; `2xx` is never re-sent.
+  - **Operator visibility:** `GET /api/v1/admin/notification-outbox` and `POST /api/v1/admin/notification-outbox/drain`, surfaced as a "Notification delivery" panel on `/admin/infrastructure/logs` listing every stuck or failed delivery with its reason.
+  - **Tests added:** `tests/integration/notification-outbox.test.ts` (7).

@@ -286,7 +286,7 @@ export async function executeServerProvisioning(
       });
       if (job.order_id && job.operation === 'PROVISION') await db.query(`UPDATE orders SET status='completed',updated_at=now() WHERE id=$1 AND payment_status='paid'`,[job.order_id]);
       const ready = await findCustomerServerById(db,server.id);
-      if (ready) await notifyServerReady(db,ready,options.source,job.operation==='REINSTALL'?'SERVER_REINSTALLED':'SERVER_READY');
+      if (ready) await notifyServerReady(db,ready,job.operation==='REINSTALL'?'SERVER_REINSTALLED':'SERVER_READY');
       await updateProvisioningJob(db,job.id,{ status: 'READY',attempts: deployment.attempts,completedAt: new Date().toISOString(),errorCode: null,errorMessage: null,retryable: null });
       await recordAuditBestEffort(db,{ actorId: deployment.requested_by,action: job.operation === 'REINSTALL' ? 'SERVER_REINSTALL_COMPLETED' : 'SERVER_READY',resourceType: 'server',resourceId: server.id,metadata: { jobId: job.id,providerId: provider.id,osImageId: image.id } });
     });

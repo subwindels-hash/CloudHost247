@@ -16,8 +16,8 @@
  *
  * Nothing here deletes data, and MAINTENANCE remains a manual operator decision.
  */
-import { randomUUID } from 'node:crypto';
 import type { Queryable } from '../db/types';
+import { createNotification } from './notification-service';
 import { recordAuditBestEffort } from '../lib/audit';
 
 /** Statuses of servers that no longer exist for the customer and need no EOL warning. */
@@ -71,14 +71,15 @@ async function notifyAffectedCustomers(
         : `End of life: ${deadline}. Your server keeps running, but this version no longer receives vendor security updates.`,
       'Reinstall the server with a supported version from your dashboard when you are ready. Reinstalling erases all data on the server.',
     ].join('\n');
-    const inserted = await db.query<{ id: string }>(
-      `INSERT INTO user_notifications (id,user_id,type,title,message,resource_type,resource_id)
-       VALUES ($1,$2,$3,$4,$5,'server',$6)
-       ON CONFLICT (user_id,type,resource_type,resource_id) WHERE resource_id IS NOT NULL DO NOTHING
-       RETURNING id`,
-      [randomUUID(), server.customer_id, `OS_${to}`, title, message, server.id]
-    );
-    if (inserted.rows[0]) notified += 1;
+    const created = await createNotification(db, {
+      userId: server.customer_id,
+      type: `OS_${to}`,
+      title,
+      message,
+      resourceType: 'server',
+      resourceId: server.id,
+    });
+    if (created) notified += 1;
   }
   return notified;
 }

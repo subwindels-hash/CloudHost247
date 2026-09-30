@@ -298,6 +298,8 @@ Reinstall requires server ownership, provider/product capability, the literal co
 | `POST /api/v1/admin/provisioning-jobs/:id/{retry,cancel}` | Operator recovery for failed or queued jobs. |
 | `GET /api/v1/admin/provisioning-metrics` | Totals, success rate, average duration, retries, queue depth, jobs stalled over 30 minutes, failures grouped by error code, and per-provider job health. |
 | `POST /api/v1/admin/os-lifecycle/sweep` | Applies a freshly entered end-of-life date immediately; the worker runs the same sweep hourly. |
+| `GET /api/v1/admin/notification-outbox` | Email delivery health: queued/delivered/failed counts plus the rows that are failing and why. |
+| `POST /api/v1/admin/notification-outbox/drain` | Sends queued notification emails now; the worker runs the same drain every minute. |
 | `POST /api/v1/admin/server-terminations/sweep` | Destroys servers whose scheduled cancellation is due; the worker runs the same sweep every 15 minutes. |
 | `GET /api/v1/admin/infrastructure-logs` | Append-only audit trail filtered to infrastructure resources (`provider`, `region`, `datacenter`, `os_image`, `operating_system`, `operating_system_version`, `provisioning_job`, `server`), with `action`, `resourceId`, `limit` and `offset` filters. |
 
@@ -351,8 +353,8 @@ text badge instead. A logo is never an installation image: installable artifacts
 
 ## Customer notifications
 
-In-app notifications are durable and written inside the same transaction flow as the event that
-caused them; email is an optional bridge that never blocks or fakes the in-app record.
+In-app notifications are durable and written in the same flow as the event that caused them;
+email is an optional bridge that never blocks that flow and never fakes the in-app record.
 
 | Type | Raised when | Shown as |
 | --- | --- | --- |
@@ -361,6 +363,28 @@ caused them; email is an optional bridge that never blocks or fakes the in-app r
 | `OS_EOL_WARNING` | the lifecycle sweep moves a version the customer runs to EOL_WARNING | warning notice, one per server |
 | `OS_EOL` | the lifecycle sweep moves that version to EOL | end-of-life notice, one per server |
 | `SERVER_TERMINATED` | a DELETE job finishes and the provider resource is gone | termination notice confirming billing has stopped |
+
+### Email delivery
+
+Email is **queued, never sent inline**. `createNotification` writes the in-app row and a
+`notification_outbox` row in the same flow; the worker drains the outbox every minute
+(`deliverNotificationOutbox`). Two things that used to be broken are now guaranteed: a slow or
+dead mail webhook cannot stall the worker that is finishing a customer's server, and a delivery
+that fails is retried instead of being lost after one attempt.
+
+| Outcome | State | Retried? |
+| --- | --- | --- |
+| Webhook not configured | `CONFIGURATION_REQUIRED` | Yes, every 15 minutes, and **without** consuming the attempt budget — configuring the variables later delivers the backlog |
+| `401`/`403` from the webhook | `CONFIGURATION_REQUIRED` | Yes, on the same free schedule — a rejected credential is the operator's to fix |
+| `408`, `429`, `5xx`, network error | `PENDING` | Yes, backoff 1 → 5 → 15 → 60 → 240 minutes, up to `max_attempts` (default 6), then `FAILED` |
+| Any other `4xx` | `FAILED` | No — a rejected payload will not become valid by repeating it |
+| `2xx` | `DELIVERED` | Never re-sent |
+
+Claiming pushes a row's `next_attempt_at` forward before the HTTP call, so two workers never send
+the same email. Operators see the backlog and every failure reason under
+**Admin → Infrastructure → Infrastructure logs**; nothing is silently dropped. Migration
+`0049_notification_outbox_delivery_scheduling.sql` adds the scheduling columns and re-arms rows
+that had been parked only because nothing was configured.
 
 Customers read them at **Dashboard → Notifications** (`/dashboard/notifications`):
 `GET /api/v1/notifications` returns the list plus the unread count, and

@@ -49,6 +49,11 @@ import { createInfrastructureProviderAdapter } from '../infrastructure/providers
 import { ADAPTER_PROFILES, describeProviderConfiguration } from '../infrastructure/providers/configuration';
 import { ProviderError } from '../infrastructure/providers/types';
 import { sweepScheduledTerminations } from '../services/server-termination-service';
+import {
+  deliverNotificationOutbox,
+  listFailedNotificationDeliveries,
+  summarizeNotificationOutbox,
+} from '../services/notification-outbox-service';
 import { sweepOperatingSystemLifecycle } from '../services/os-lifecycle-service';
 import {
   cancelProvisioningJob,
@@ -519,6 +524,23 @@ export async function registerInfrastructureRoutes(app: FastifyInstance,env: Env
     const terminated=await sweepScheduledTerminations(db);
     await auditRequest(db,request,auth.userId,{action:'SERVER_TERMINATIONS_SWEPT',resourceType:'server',metadata:{servers:terminated.length}});
     return {terminated};
+  });
+  /**
+   * Notification delivery health. Email is queued in `notification_outbox` and delivered by the
+   * worker; this is where an operator sees the backlog and, crucially, what is failing — a
+   * notification that could not be emailed is visible rather than silently dropped.
+   */
+  app.get('/api/v1/admin/notification-outbox',async(request)=>{
+    await admin(request);
+    const query=parse(z.object({limit:z.coerce.number().int().min(1).max(200).optional()}),request.query??{});
+    return {summary:await summarizeNotificationOutbox(db),problems:await listFailedNotificationDeliveries(db,query.limit??50)};
+  });
+  /** Runs the email drain on demand; the worker runs the same function every minute. */
+  app.post('/api/v1/admin/notification-outbox/drain',async(request)=>{
+    const auth=await admin(request);
+    const report=await deliverNotificationOutbox(db);
+    await auditRequest(db,request,auth.userId,{action:'NOTIFICATION_OUTBOX_DRAINED',resourceType:'notification',metadata:{...report}});
+    return report;
   });
   /**
    * Infrastructure logs (spec §27). A read-only projection of the existing append-only

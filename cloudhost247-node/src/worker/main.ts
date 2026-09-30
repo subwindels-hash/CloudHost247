@@ -5,6 +5,7 @@ import { processNextJob, recoverOrphanedJobs } from './handlers';
 import { scheduleHealthChecks, sweepSubscriptions } from './sweeps';
 import { sweepOperatingSystemLifecycle } from '../services/os-lifecycle-service';
 import { sweepScheduledTerminations } from '../services/server-termination-service';
+import { deliverNotificationOutbox } from '../services/notification-outbox-service';
 import type { EngineOptions } from '../deployments/engine';
 
 const HEALTHCHECK_INTERVAL_MS = 60_000;
@@ -14,6 +15,8 @@ const OS_LIFECYCLE_SWEEP_INTERVAL_MS = 60 * 60_000;
 // Scheduled cancellations are day-granular in practice; a 15-minute sweep destroys them promptly
 // after the paid term ends without polling the database hard.
 const TERMINATION_SWEEP_INTERVAL_MS = 15 * 60_000;
+// Notification emails are queued, not sent inline, so this drain is what actually delivers them.
+const NOTIFICATION_OUTBOX_INTERVAL_MS = 60_000;
 
 function engineOptions(simulationMode: boolean, kubernetesEnabled: boolean): EngineOptions {
   return { simulationMode, kubernetesEnabled };
@@ -38,6 +41,7 @@ async function main() {
   let lastSubscriptionSweep = 0;
   let lastOsLifecycleSweep = 0;
   let lastTerminationSweep = 0;
+  let lastNotificationDrain = 0;
 
   const shutdown = (signal: string) => {
     logger.log(`[worker:${workerId}] ${signal} received — draining`);
@@ -80,6 +84,14 @@ async function main() {
         lastTerminationSweep = now;
         for (const terminated of await sweepScheduledTerminations(pool)) {
           logger.log(`[worker:${workerId}] scheduled termination due for ${terminated.name}: ${terminated.jobId ? `job ${terminated.jobId}` : 'retired without a provider resource'}`);
+        }
+      }
+
+      if (now - lastNotificationDrain >= NOTIFICATION_OUTBOX_INTERVAL_MS) {
+        lastNotificationDrain = now;
+        const delivery = await deliverNotificationOutbox(pool);
+        if (delivery.claimed > 0) {
+          logger.log(`[worker:${workerId}] notification outbox: ${delivery.delivered} delivered, ${delivery.retrying} retrying, ${delivery.failed} failed, ${delivery.configurationRequired} awaiting configuration`);
         }
       }
 

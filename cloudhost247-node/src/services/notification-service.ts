@@ -1,73 +1,63 @@
 import { randomUUID } from 'node:crypto';
 import type { Queryable } from '../db/types';
 import type { CustomerServerDetailRow } from '../db/server-provisioning';
+import { enqueueNotificationEmail } from './notification-outbox-service';
+
+export interface NotificationInput {
+  userId: string;
+  type: string;
+  title: string;
+  message: string;
+  resourceType?: string | null;
+  resourceId?: string | null;
+}
 
 /**
- * Creates the in-app notification first (durable), then optionally delivers the same non-secret
- * message to an operator-configured email webhook. Missing email configuration is explicit in the
- * outbox; it never rolls back an already-ready server or pretends an email was sent.
+ * Writes the durable in-app notification and queues its email copy.
+ *
+ * The insert is idempotent through the partial unique index on
+ * (user_id, type, resource_type, resource_id), so a redelivered job re-notifies nobody — and
+ * because the outbox row is only queued when the insert actually created a notification, it
+ * cannot send a duplicate email either. Delivery itself happens in the outbox sweep: no HTTP
+ * call is made on the path that is finishing a customer's server.
  */
+export async function createNotification(db: Queryable, input: NotificationInput): Promise<string | null> {
+  const { rows } = await db.query<{ id: string }>(
+    `INSERT INTO user_notifications (id,user_id,type,title,message,resource_type,resource_id)
+     VALUES ($1,$2,$3,$4,$5,$6,$7)
+     ON CONFLICT (user_id,type,resource_type,resource_id) WHERE resource_id IS NOT NULL DO NOTHING
+     RETURNING id`,
+    [randomUUID(),input.userId,input.type,input.title,input.message,input.resourceType ?? null,input.resourceId ?? null]
+  );
+  const id = rows[0]?.id;
+  if (!id) return null;
+  await enqueueNotificationEmail(db, id);
+  return id;
+}
+
+/** Announces a server that has passed every health gate, or a completed reinstall. */
 export async function notifyServerReady(
   db: Queryable,
   server: CustomerServerDetailRow,
-  source: NodeJS.ProcessEnv = process.env,
   type: 'SERVER_READY'|'SERVER_REINSTALLED' = 'SERVER_READY'
 ): Promise<void> {
-  const notificationId = randomUUID();
-  const title = type==='SERVER_REINSTALLED'?'Your CloudHost247 server reinstall is complete':'Your CloudHost247 server is ready';
-  const message = [
-    `Server: ${server.name}`,
-    `Operating system: ${server.os_display_name ?? 'Unknown'}`,
-    `IP address: ${server.ip_address ?? 'Available in the dashboard'}`,
-    `Region: ${server.region_name ?? '—'}`,
-    'Your server is now available from your CloudHost247 dashboard.',
-  ].join('\n');
-  const inserted=await db.query<{id:string}>(
-    `INSERT INTO user_notifications (id,user_id,type,title,message,resource_type,resource_id)
-     VALUES ($1,$2,$6,$3,$4,'server',$5)
-     ON CONFLICT (user_id,type,resource_type,resource_id) WHERE resource_id IS NOT NULL DO NOTHING
-     RETURNING id`,
-    [notificationId,server.customer_id,title,message,server.id,type]
-  );
-  if(!inserted.rows[0])return;
-
-  const outboxId = randomUUID();
-  const url = source.NOTIFICATION_EMAIL_WEBHOOK_URL;
-  const token = source.NOTIFICATION_EMAIL_WEBHOOK_TOKEN;
-  if (!url || !token) {
-    await db.query(
-      `INSERT INTO notification_outbox (id,notification_id,channel,status,last_error)
-       VALUES ($1,$2,'EMAIL','CONFIGURATION_REQUIRED','Email delivery webhook is not configured')`,
-      [outboxId,notificationId]
-    );
-    return;
-  }
-
-  await db.query(
-    `INSERT INTO notification_outbox (id,notification_id,channel,status,attempts)
-     VALUES ($1,$2,'EMAIL','PENDING',1)`, [outboxId,notificationId]
-  );
-  try {
-    const user = await db.query<{ email: string; full_name: string }>(
-      `SELECT email,full_name FROM users WHERE id=$1`, [server.customer_id]
-    );
-    const recipient = user.rows[0];
-    if (!recipient) throw new Error('Notification recipient no longer exists');
-    const response = await fetch(url,{
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json',Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ to: recipient.email,name: recipient.full_name,template: type==='SERVER_REINSTALLED'?'server_reinstalled':'server_ready',subject: title,text: message }),
-    });
-    if (!response.ok) throw new Error(`Email webhook returned HTTP ${response.status}`);
-    await db.query(
-      `UPDATE notification_outbox SET status='DELIVERED',delivered_at=now(),updated_at=now() WHERE id=$1`, [outboxId]
-    );
-  } catch (error) {
-    await db.query(
-      `UPDATE notification_outbox SET status='FAILED',last_error=$2,updated_at=now() WHERE id=$1`,
-      [outboxId,(error as Error).message.slice(0,500)]
-    );
-  }
+  if (!server.customer_id) return;
+  await createNotification(db, {
+    userId: server.customer_id,
+    type,
+    title: type === 'SERVER_REINSTALLED'
+      ? 'Your CloudHost247 server reinstall is complete'
+      : 'Your CloudHost247 server is ready',
+    message: [
+      `Server: ${server.name}`,
+      `Operating system: ${server.os_display_name ?? 'Unknown'}`,
+      `IP address: ${server.ip_address ?? 'Available in the dashboard'}`,
+      `Region: ${server.region_name ?? '—'}`,
+      'Your server is now available from your CloudHost247 dashboard.',
+    ].join('\n'),
+    resourceType: 'server',
+    resourceId: server.id,
+  });
 }
 
 /**
@@ -77,18 +67,19 @@ export async function notifyServerReady(
  */
 export async function notifyServerTerminated(db: Queryable, server: CustomerServerDetailRow): Promise<void> {
   if (!server.customer_id) return;
-  const message = [
-    `Server: ${server.name}`,
-    `Hostname: ${server.hostname}`,
-    'The server has been destroyed at the infrastructure provider and billing for it has stopped.',
-    'Its data cannot be recovered. Your invoices and account history are unchanged.',
-  ].join('\n');
-  await db.query(
-    `INSERT INTO user_notifications (id,user_id,type,title,message,resource_type,resource_id)
-     VALUES ($1,$2,'SERVER_TERMINATED',$3,$4,'server',$5)
-     ON CONFLICT (user_id,type,resource_type,resource_id) WHERE resource_id IS NOT NULL DO NOTHING`,
-    [randomUUID(),server.customer_id,'Your CloudHost247 server has been terminated',message,server.id]
-  );
+  await createNotification(db, {
+    userId: server.customer_id,
+    type: 'SERVER_TERMINATED',
+    title: 'Your CloudHost247 server has been terminated',
+    message: [
+      `Server: ${server.name}`,
+      `Hostname: ${server.hostname}`,
+      'The server has been destroyed at the infrastructure provider and billing for it has stopped.',
+      'Its data cannot be recovered. Your invoices and account history are unchanged.',
+    ].join('\n'),
+    resourceType: 'server',
+    resourceId: server.id,
+  });
 }
 
 export async function listNotifications(db: Queryable, userId: string) {
