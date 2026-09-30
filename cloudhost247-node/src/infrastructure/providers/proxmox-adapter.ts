@@ -27,6 +27,7 @@ import {
   planMetadataString,
   requirePlanMetadataString,
   requireSecureBaseUrl,
+  unsupportedRescue,
 } from './common';
 import { ProxmoxClient, type ProxmoxClusterResource, type ProxmoxGuestType } from './proxmox-client';
 import {
@@ -436,6 +437,9 @@ export class ProxmoxProviderAdapter implements InfrastructureProviderAdapter {
     await client.waitForTask(ref.node, startUpid);
     return this.toServer(ref, { status: 'running', name }, await this.resolveIp(ref), template);
   }
+
+  async enableRescue(): Promise<never> { return unsupportedRescue('proxmox'); }
+  async disableRescue(): Promise<never> { return unsupportedRescue('proxmox'); }
 
   async getConsole(providerServerId: string): Promise<Record<string, unknown>> {
     const ref = parseGuestRef(providerServerId);

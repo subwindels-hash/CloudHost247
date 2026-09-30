@@ -27,6 +27,7 @@ import {
   planMetadataString,
   requirePlanMetadataString,
   requireSecureBaseUrl,
+  unsupportedRescue,
 } from './common';
 import { providerRequest } from './http';
 import {
@@ -291,6 +292,9 @@ export class VirtualizorProviderAdapter implements InfrastructureProviderAdapter
     });
     return this.getServerStatus(input.providerServerId);
   }
+
+  async enableRescue(): Promise<never> { return unsupportedRescue('virtualizor'); }
+  async disableRescue(): Promise<never> { return unsupportedRescue('virtualizor'); }
 
   async getConsole(providerServerId: string): Promise<Record<string, unknown>> {
     return asRecord(await this.call('vnc', { novnc: providerServerId }));

@@ -50,6 +50,7 @@ import {
 } from '../services/server-termination-service';
 import { createInfrastructureProviderAdapter } from '../infrastructure/providers/registry';
 import { providerErrorToHttpError } from '../infrastructure/providers/error-mapping';
+import type { RescueSession } from '../infrastructure/providers/types';
 
 const idSchema = z.string().uuid('id must be a valid UUID');
 
@@ -420,7 +421,7 @@ export async function registerServerRoutes(app: FastifyInstance, env: Env, overr
   async function queueOwnedAction(
     request: Parameters<typeof authenticate>[0],
     serverId: string,
-    operation: 'START'|'STOP'|'REBOOT'|'SHUTDOWN'|'RESCUE'|'DELETE'
+    operation: 'START'|'STOP'|'REBOOT'|'SHUTDOWN'|'DELETE'
   ) {
     const auth = await authenticate(request,env,pool);
     const server = await findOwnedCustomerServer(pool,serverId,auth.userId);
@@ -443,8 +444,7 @@ export async function registerServerRoutes(app: FastifyInstance, env: Env, overr
     'power-off': 'SHUTDOWN',
     reboot: 'REBOOT',
     shutdown: 'SHUTDOWN',
-    rescue: 'RESCUE',
-  }) as Array<[string,'START'|'STOP'|'REBOOT'|'SHUTDOWN'|'RESCUE']>) {
+  }) as Array<[string,'START'|'STOP'|'REBOOT'|'SHUTDOWN']>) {
     app.post<{ Params: { id: string } }>(`/api/v1/servers/:id/${path}`,async (request) =>
       queueOwnedAction(request,parseOrThrow(idSchema,request.params.id),operation)
     );
@@ -678,6 +678,73 @@ export async function registerServerRoutes(app: FastifyInstance, env: Env, overr
       metadata: { providerId: provider.id },
     });
     return { console: session };
+  });
+
+  /**
+   * Rescue mode boots the server from the provider's rescue system so the customer can repair a
+   * machine that no longer boots. It runs in request scope for the same reason the console does:
+   * the one-time root password the provider generates is only useful in the browser that asked
+   * for it, and writing it to a job payload, a log line or an audit row would turn a repair tool
+   * into a stored credential. The audit trail records that rescue was entered, never how.
+   */
+  async function rescueContext(request: Parameters<typeof authenticate>[0], rawId: string) {
+    const auth = await authenticate(request, env, pool);
+    const serverId = parseOrThrow(idSchema, rawId);
+    const server = await findOwnedCustomerServer(pool, serverId, auth.userId);
+    if (!server || !server.provider_id) throw new NotFoundError('No server was found with that id');
+    if (server.capabilities?.rescue !== true) throw new ValidationError('Rescue mode is not supported for this server');
+    if (!server.provider_server_id) throw new ConflictError('The server has not been created at the provider yet');
+    const provider = await findProviderById(pool, server.provider_id);
+    if (!provider || provider.status !== 'ACTIVE') throw new ValidationError('The infrastructure provider for this server is not active');
+    return { auth, server, provider, adapter: createInfrastructureProviderAdapter(provider) };
+  }
+
+  app.post<{ Params: { id: string } }>('/api/v1/servers/:id/rescue', async (request) => {
+    const { auth, server, provider, adapter } = await rescueContext(request, request.params.id);
+    const input = parseOrThrow(z.object({ confirmation: z.literal('RESCUE') }), request.body ?? {});
+    void input;
+    let session: RescueSession;
+    try {
+      const planMetadata = server.metadata.providerPlan && typeof server.metadata.providerPlan === 'object'
+        ? server.metadata.providerPlan as Record<string, unknown> : {};
+      session = await adapter.enableRescue(server.provider_server_id as string, {
+        architecture: (server.architecture === 'arm64' ? 'arm64' : 'x86_64'),
+        providerSshKeyIds: Array.isArray(planMetadata.providerSshKeyIds)
+          ? planMetadata.providerSshKeyIds as Array<string | number> : undefined,
+      });
+    } catch (error) {
+      request.log.warn({ serverId: server.id, providerId: provider.id, err: error }, 'rescue mode failed');
+      throw providerErrorToHttpError(error);
+    }
+    // `maintenance` is the honest state: the server is up, but it is not running the customer's OS.
+    await pool.query(
+      `UPDATE servers SET status='maintenance', metadata = coalesce(metadata,'{}'::jsonb) || $2::jsonb, updated_at=now() WHERE id=$1`,
+      [server.id, JSON.stringify({ rescue: { enteredAt: new Date().toISOString(), type: session.type } })]
+    );
+    await auditRequest(pool, request, auth.userId, {
+      action: 'SERVER_RESCUE_ENTERED', resourceType: 'server', resourceId: server.id,
+      // No credential, ever — only that rescue was entered and on which provider.
+      metadata: { providerId: provider.id, rescueType: session.type },
+    });
+    return { rescue: { type: session.type, username: session.username, password: session.password, rebooted: session.rebooted, notes: session.notes } };
+  });
+
+  app.delete<{ Params: { id: string } }>('/api/v1/servers/:id/rescue', async (request) => {
+    const { auth, server, provider, adapter } = await rescueContext(request, request.params.id);
+    try {
+      await adapter.disableRescue(server.provider_server_id as string);
+    } catch (error) {
+      request.log.warn({ serverId: server.id, providerId: provider.id, err: error }, 'leaving rescue mode failed');
+      throw providerErrorToHttpError(error);
+    }
+    await pool.query(
+      `UPDATE servers SET status='active', metadata = coalesce(metadata,'{}'::jsonb) - 'rescue', updated_at=now() WHERE id=$1`,
+      [server.id]
+    );
+    await auditRequest(pool, request, auth.userId, {
+      action: 'SERVER_RESCUE_EXITED', resourceType: 'server', resourceId: server.id, metadata: { providerId: provider.id },
+    });
+    return { rescue: null };
   });
 
   app.get<{ Params: { id: string } }>('/api/v1/servers/:id/metrics', async (request) => {

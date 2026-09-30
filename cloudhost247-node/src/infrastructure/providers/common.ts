@@ -113,3 +113,12 @@ export function firstPublicIpv4(candidates: Array<string | null | undefined>): s
 export function encodeUserData(userData: string): string {
   return Buffer.from(userData, 'utf8').toString('base64');
 }
+
+/**
+ * Rescue mode is only implemented for providers whose API genuinely offers a rescue system.
+ * Everywhere else the adapter refuses instead of pretending: a rescue that silently did nothing
+ * would strand a customer who believes they are about to repair a broken disk.
+ */
+export function unsupportedRescue(kind: string): never {
+  throw new ProviderError('UNSUPPORTED_OPERATION', `${kind} does not offer a rescue system through its API`, false);
+}

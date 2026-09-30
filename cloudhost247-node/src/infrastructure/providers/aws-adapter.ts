@@ -1,4 +1,5 @@
 import type { InfrastructureProviderRow, ServerOsImageRow } from '../../db/infrastructure-providers';
+import { unsupportedRescue } from './common';
 import { providerRequest } from './http';
 import {
   ProviderError,
@@ -117,6 +118,9 @@ export class AwsProviderAdapter implements InfrastructureProviderAdapter {
     this.ensureConfigured();
     throw new ProviderError('SERVICE_UNAVAILABLE', 'AWS EC2 reinstall requires active provider bridge', false);
   }
+
+  async enableRescue(): Promise<never> { return unsupportedRescue('aws'); }
+  async disableRescue(): Promise<never> { return unsupportedRescue('aws'); }
 
   async getConsole(_providerServerId: string): Promise<Record<string, unknown>> {
     this.ensureConfigured();

@@ -176,6 +176,26 @@ export function fetchServerHealth(id: string) {
   return apiFetch<ServerHealthSnapshot>(`/api/v1/servers/${id}/health`);
 }
 
+/** One-time rescue credentials. Held in component state only — never written anywhere. */
+export interface RescueSession {
+  type: string;
+  username: string;
+  password?: string;
+  rebooted: boolean;
+  notes?: string;
+}
+
+export function enterRescueMode(id: string) {
+  return apiFetch<{ rescue: RescueSession }>(`/api/v1/servers/${id}/rescue`, {
+    method: 'POST',
+    body: JSON.stringify({ confirmation: 'RESCUE' }),
+  });
+}
+
+export function exitRescueMode(id: string) {
+  return apiFetch<{ rescue: null }>(`/api/v1/servers/${id}/rescue`, { method: 'DELETE' });
+}
+
 export function cancelServer(id: string,input: { mode: 'AT_PERIOD_END'|'IMMEDIATE'; confirmation?: 'DELETE'; reason?: string }) {
   return apiFetch<{ mode: string; effectiveAt: string | null; jobId: string | null; queued: boolean; cancelledSubscriptions: number; retiredWithoutProviderCall: boolean }>(
     `/api/v1/servers/${id}/cancel`,{ method: 'POST',headers: { 'Idempotency-Key': crypto.randomUUID() },body: JSON.stringify(input) }

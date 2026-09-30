@@ -64,8 +64,8 @@ export const ADAPTER_PROFILES: Record<AdapterKind, AdapterProfile> = {
       { key: 'providerServerType', description: 'Hetzner server type, e.g. cx22', required: true },
       ...RESOURCE_METADATA,
     ],
-    capabilities: { reinstall: true, snapshot: true, resize: true, console: true, metrics: true, rescue: false },
-    notes: 'Native API. Idempotency uses the cloudhost247_idempotency label plus lookup-before-create.',
+    capabilities: { reinstall: true, snapshot: true, resize: true, console: true, metrics: true, rescue: true },
+    notes: 'Native API. Idempotency uses the cloudhost247_idempotency label plus lookup-before-create. Rescue boots Hetzner\'s linux64 rescue system and returns a one-time root password.',
   },
   digitalocean: {
     kind: 'digitalocean',
@@ -223,8 +223,8 @@ export const ADAPTER_PROFILES: Record<AdapterKind, AdapterProfile> = {
       { key: 'providerKeypairName', description: 'Optional Nova keypair injected in addition to customer keys', required: false },
       ...RESOURCE_METADATA,
     ],
-    capabilities: { reinstall: true, snapshot: true, resize: true, console: true, metrics: false, rescue: false },
-    notes: 'Keystone v3 + Nova + Glance. Either password login or a pre-issued token is required.',
+    capabilities: { reinstall: true, snapshot: true, resize: true, console: true, metrics: false, rescue: true },
+    notes: 'Keystone v3 + Nova + Glance. Either password login or a pre-issued token is required. Rescue uses the native Nova rescue/unrescue actions.',
   },
   generic_http: {
     kind: 'generic_http',

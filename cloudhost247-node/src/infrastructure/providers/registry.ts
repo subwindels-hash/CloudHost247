@@ -17,6 +17,8 @@ import {
   type ProviderImage,
   type ProviderServer,
   type ReinstallProviderServerInput,
+  type RescueRequest,
+  type RescueSession,
 } from './types';
 import { VirtualizorProviderAdapter } from './virtualizor-adapter';
 import { VultrProviderAdapter } from './vultr-adapter';
@@ -57,6 +59,8 @@ class UnavailableNativeProviderAdapter implements InfrastructureProviderAdapter 
   deleteSnapshot(_id: string, _snapId: string): Promise<void> { return Promise.reject(this.unavailable()); }
   restoreSnapshot(_id: string, _snapId: string): Promise<void> { return Promise.reject(this.unavailable()); }
   getConsole(_id: string): Promise<Record<string, unknown>> { return Promise.reject(this.unavailable()); }
+  enableRescue(_id: string, _input: RescueRequest): Promise<RescueSession> { return Promise.reject(this.unavailable()); }
+  disableRescue(_id: string): Promise<void> { return Promise.reject(this.unavailable()); }
   getServerMetrics(_id: string): Promise<Record<string, unknown>> { return Promise.reject(this.unavailable()); }
   healthCheck(_id: string, _image: ServerOsImageRow): Promise<ProviderHealthResult> { return Promise.reject(this.unavailable()); }
 }

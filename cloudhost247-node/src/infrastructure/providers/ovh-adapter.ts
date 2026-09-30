@@ -25,6 +25,7 @@ import {
   planMetadataString,
   requirePlanMetadataString,
   requireSecureBaseUrl,
+  unsupportedRescue,
 } from './common';
 import { OvhClient, type OvhImage, type OvhInstance } from './ovh-client';
 import {
@@ -263,6 +264,9 @@ export class OvhProviderAdapter implements InfrastructureProviderAdapter {
     await this.action(input.providerServerId, 'reinstall', { imageId });
     return this.getServerStatus(input.providerServerId);
   }
+
+  async enableRescue(): Promise<never> { return unsupportedRescue('ovh'); }
+  async disableRescue(): Promise<never> { return unsupportedRescue('ovh'); }
 
   async getConsole(providerServerId: string): Promise<Record<string, unknown>> {
     return asRecord(await this.action(providerServerId, 'vnc'));

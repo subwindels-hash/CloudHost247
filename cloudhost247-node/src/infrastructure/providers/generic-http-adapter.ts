@@ -1,4 +1,5 @@
 import type { InfrastructureProviderRow, ServerOsImageRow } from '../../db/infrastructure-providers';
+import { unsupportedRescue } from './common';
 import { providerRequest } from './http';
 import {
   ProviderError,
@@ -119,6 +120,9 @@ export class GenericHttpProviderAdapter implements InfrastructureProviderAdapter
     });
     return this.getServerStatus(input.providerServerId);
   }
+  async enableRescue(): Promise<never> { return unsupportedRescue('This provider'); }
+  async disableRescue(): Promise<never> { return unsupportedRescue('This provider'); }
+
   async getConsole(id: string): Promise<Record<string, unknown>> { return asRecord(await this.request(`/v1/servers/${encodeURIComponent(id)}/console`)); }
   async getServerMetrics(id: string): Promise<Record<string, unknown>> { return asRecord(await this.request(`/v1/servers/${encodeURIComponent(id)}/metrics`)); }
   healthCheck(id: string, image: ServerOsImageRow): Promise<ProviderHealthResult> {

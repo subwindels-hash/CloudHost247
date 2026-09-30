@@ -26,6 +26,7 @@ import {
   planMetadataString,
   requirePlanMetadataString,
   requireSecureBaseUrl,
+  unsupportedRescue,
 } from './common';
 import { providerRequest } from './http';
 import {
@@ -260,6 +261,9 @@ export class SolusvmProviderAdapter implements InfrastructureProviderAdapter {
     await this.call('vserver-rebuild', { vserverid: input.providerServerId, template });
     return this.getServerStatus(input.providerServerId);
   }
+
+  async enableRescue(): Promise<never> { return unsupportedRescue('solusvm'); }
+  async disableRescue(): Promise<never> { return unsupportedRescue('solusvm'); }
 
   async getConsole(providerServerId: string): Promise<Record<string, unknown>> {
     return asRecord(await this.call('vserver-console', { vserverid: providerServerId, access: 'enable', time: 2 }));

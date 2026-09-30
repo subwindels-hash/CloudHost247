@@ -511,6 +511,32 @@ The destruction itself never happens in the request:
 The `servers` row is **kept** with status `retired`. Nothing deletes customer records: orders,
 invoices, payments and the audit trail are untouched, so billing history stays intact.
 
+## Rescue mode
+
+A server that no longer boots cannot be repaired from inside itself. Rescue mode boots it from
+the provider's own rescue system with the disks attached but not running, so the customer can
+repair a broken filesystem, bootloader or configuration.
+
+`POST /api/v1/servers/:id/rescue` (confirmation `RESCUE`) enters it; `DELETE` on the same path
+leaves it and reboots back into the installed operating system. Both are owner-only, capability
+gated, and audited as `SERVER_RESCUE_ENTERED` / `SERVER_RESCUE_EXITED`. While rescue is active the
+server is `maintenance`, which is the honest state — it is up, but it is not running the
+customer's OS — and `servers.metadata.rescue` records when it was entered and which rescue system
+was booted.
+
+Two deliberate constraints:
+
+- **Only adapters with a real rescue API may offer it.** Hetzner (`enable_rescue` + `reset`) and
+  OpenStack (Nova `rescue` / `unrescue`) implement it; every other adapter refuses with a
+  non-retryable `UNSUPPORTED_OPERATION`, and their profile capability stays `false` so a template
+  cannot offer the button in the first place. A rescue that silently did nothing would strand a
+  customer who believes they are about to repair a disk.
+- **The one-time root password is never stored.** Like the console session, it runs in request
+  scope and is returned only to the browser that asked for it — never a job payload, a log line,
+  an audit row or a database column. Reloading the page does not show it again; leaving and
+  re-entering rescue asks the provider for a new one. This is asserted by
+  `tests/integration/server-rescue.test.ts`, which greps our own storage for the credential.
+
 ## Serial console access
 
 `POST /api/v1/servers/:id/console` issues a provider console session for the owner of the

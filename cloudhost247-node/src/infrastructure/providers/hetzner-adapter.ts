@@ -10,6 +10,8 @@ import {
   type ProviderImage,
   type ProviderServer,
   type ReinstallProviderServerInput,
+  type RescueRequest,
+  type RescueSession,
 } from './types';
 
 interface HetznerServerPayload {
@@ -209,6 +211,35 @@ export class HetznerProviderAdapter implements InfrastructureProviderAdapter {
       // in-progress and let the attested health gate decide the terminal outcome.
     }
     return this.getServerStatus(input.providerServerId);
+  }
+
+  /**
+   * Hetzner boots a separate rescue image that replaces the running system until the next reset.
+   * The API returns a root password exactly once; it is handed straight back to the caller and
+   * never persisted here. Project SSH keys from the template are injected as well, so an operator
+   * who configured them does not depend on the password at all.
+   */
+  async enableRescue(providerServerId: string, input: RescueRequest): Promise<RescueSession> {
+    // Hetzner serves one 64-bit rescue system for both x86 and Arm servers.
+    const body: Record<string, unknown> = { type: 'linux64' };
+    if (input.providerSshKeyIds?.length) body.ssh_keys = input.providerSshKeyIds;
+    const result = await this.request<{ root_password?: string | null; action?: Record<string, unknown> }>(
+      `/servers/${encodeURIComponent(providerServerId)}/actions/enable_rescue`,
+      { method: 'POST', body: JSON.stringify(body) }
+    );
+    // Rescue only takes effect on the next boot, so the reset is part of entering it.
+    await this.action(providerServerId, 'reset');
+    return {
+      type: 'linux64',
+      username: 'root',
+      password: typeof result.root_password === 'string' && result.root_password.length > 0 ? result.root_password : undefined,
+      rebooted: true,
+    };
+  }
+
+  async disableRescue(providerServerId: string): Promise<void> {
+    await this.action(providerServerId, 'disable_rescue');
+    await this.action(providerServerId, 'reset');
   }
 
   async getConsole(providerServerId: string): Promise<Record<string, unknown>> {

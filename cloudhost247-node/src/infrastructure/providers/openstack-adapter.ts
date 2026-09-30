@@ -34,6 +34,8 @@ import {
   type ProviderImage,
   type ProviderServer,
   type ReinstallProviderServerInput,
+  type RescueRequest,
+  type RescueSession,
 } from './types';
 
 interface NovaServer {
@@ -274,6 +276,20 @@ export class OpenStackProviderAdapter implements InfrastructureProviderAdapter {
       rebuild: { imageRef, user_data: encodeUserData(input.userData), metadata: { [IDEMPOTENCY_METADATA_KEY]: input.idempotencyKey } },
     });
     return this.getServerStatus(input.providerServerId);
+  }
+
+  /**
+   * Nova rescue reboots the instance from a rescue image with the original disk attached as a
+   * secondary volume. The generated admin password is returned once and is never stored here.
+   */
+  async enableRescue(providerServerId: string, _input: RescueRequest): Promise<RescueSession> {
+    const result = asRecord(await this.action(providerServerId, { rescue: {} }));
+    const password = typeof result.adminPass === 'string' && result.adminPass.length > 0 ? result.adminPass : undefined;
+    return { type: 'nova-rescue', username: 'root', password, rebooted: true };
+  }
+
+  async disableRescue(providerServerId: string): Promise<void> {
+    await this.action(providerServerId, { unrescue: null });
   }
 
   async getConsole(providerServerId: string): Promise<Record<string, unknown>> {

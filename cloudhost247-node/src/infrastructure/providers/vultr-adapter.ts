@@ -1,4 +1,5 @@
 import type { InfrastructureProviderRow, ServerOsImageRow } from '../../db/infrastructure-providers';
+import { unsupportedRescue } from './common';
 import { providerRequest } from './http';
 import {
   ProviderError,
@@ -184,6 +185,9 @@ export class VultrProviderAdapter implements InfrastructureProviderAdapter {
     });
     return this.getServerStatus(input.providerServerId);
   }
+
+  async enableRescue(): Promise<never> { return unsupportedRescue('vultr'); }
+  async disableRescue(): Promise<never> { return unsupportedRescue('vultr'); }
 
   async getConsole(providerServerId: string): Promise<Record<string, unknown>> {
     return asRecord(await this.request(`/instances/${encodeURIComponent(providerServerId)}/actions`));

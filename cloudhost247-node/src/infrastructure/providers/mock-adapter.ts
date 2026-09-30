@@ -14,7 +14,7 @@
  */
 import { randomUUID } from 'node:crypto';
 import type { InfrastructureProviderRow, ServerOsImageRow } from '../../db/infrastructure-providers';
-import { idempotentResourceName } from './common';
+import { idempotentResourceName, unsupportedRescue } from './common';
 import {
   ProviderError,
   type CreateProviderServerInput,
@@ -166,6 +166,9 @@ export class MockProviderAdapter implements InfrastructureProviderAdapter {
     state.status = 'running';
     return this.toServer(state);
   }
+
+  async enableRescue(): Promise<never> { return unsupportedRescue('mock'); }
+  async disableRescue(): Promise<never> { return unsupportedRescue('mock'); }
 
   async getConsole(providerServerId: string): Promise<Record<string, unknown>> {
     this.state(providerServerId);
