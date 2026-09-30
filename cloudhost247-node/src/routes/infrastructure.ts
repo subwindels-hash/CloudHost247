@@ -46,6 +46,7 @@ import { findPlanById, listActivePlansForProduct } from '../db/catalog-plans';
 import { listPublishedPricingForPlan } from '../db/catalog-pricing';
 import { listAllProducts } from '../db/catalog-products';
 import { createInfrastructureProviderAdapter } from '../infrastructure/providers/registry';
+import { ADAPTER_PROFILES, describeProviderConfiguration } from '../infrastructure/providers/configuration';
 import { ProviderError } from '../infrastructure/providers/types';
 import {
   cancelProvisioningJob,
@@ -138,8 +139,8 @@ const versionSchema = z.object({
 const patchVersionSchema = versionSchema.omit({ version: true }).partial();
 const providerSchema = z.object({
   name: z.string().min(1).max(160),slug,
-  providerType: z.enum(['OVH','HETZNER','AWS','DIGITALOCEAN','VULTR','CONTABO','PROXMOX','VIRTUALIZOR','SOLUSVM','OPENSTACK','GENERIC_HTTP','OTHER']),
-  adapter: z.enum(['hetzner','ovh','aws','digitalocean','vultr','contabo','proxmox','virtualizor','solusvm','openstack','generic_http']),
+  providerType: z.enum(['OVH','HETZNER','AWS','DIGITALOCEAN','VULTR','CONTABO','PROXMOX','VIRTUALIZOR','SOLUSVM','OPENSTACK','GENERIC_HTTP','MOCK','OTHER']),
+  adapter: z.enum(['hetzner','ovh','aws','digitalocean','vultr','contabo','proxmox','virtualizor','solusvm','openstack','generic_http','mock']),
   status: providerStatus.optional(),apiBaseUrl: z.string().url().nullable().optional(),credentialEnvPrefix: z.string().max(64).regex(/^[A-Z][A-Z0-9_]*$/).nullable().optional(),
   capabilities: z.record(z.unknown()).optional(),metadata: z.record(z.unknown()).optional(),
 });
@@ -327,10 +328,54 @@ export async function registerInfrastructureRoutes(app: FastifyInstance,env: Env
 
   // Providers / regions / datacenters. Secret values are never accepted by these schemas.
   app.get('/api/v1/admin/providers',async (request) => { await admin(request); return { providers: await listProviders(db),regions: await listRegions(db),datacenters: await listDatacenters(db) }; });
-  app.post('/api/v1/admin/providers',async (request,reply) => { const auth=await admin(request);const input=parse(providerSchema,request.body);if(input.status==='ACTIVE')throw new ValidationError('Create the provider disabled, then validate and activate it');const provider=await createProvider(db,input);await auditRequest(db,request,auth.userId,{action:'PROVIDER_CREATED',resourceType:'provider',resourceId:provider.id});reply.code(201);return {provider}; });
+  app.post('/api/v1/admin/providers',async (request,reply) => {
+    const auth=await admin(request);const input=parse(providerSchema,request.body);
+    if(input.status==='ACTIVE')throw new ValidationError('Create the provider disabled, then validate and activate it');
+    if((input.adapter==='mock')!==(input.providerType==='MOCK'))throw new ValidationError('The mock adapter must be paired with the MOCK provider type');
+    // The development mock provider can never be registered on a production deployment, and
+    // even in development it requires the explicit ALLOW_MOCK_PROVIDER opt-in (spec §34, §35).
+    if(input.adapter==='mock'&&(env.NODE_ENV==='production'||!env.ALLOW_MOCK_PROVIDER)){
+      throw new ValidationError('The mock provider is only available in development with ALLOW_MOCK_PROVIDER=true');
+    }
+    const provider=await createProvider(db,input);
+    await auditRequest(db,request,auth.userId,{action:'PROVIDER_CREATED',resourceType:'provider',resourceId:provider.id,metadata:{adapter:input.adapter}});
+    reply.code(201);return {provider};
+  });
+  /**
+   * Reports which server-side variables an adapter needs and whether they are present.
+   * Only names and booleans are returned — no secret value is ever read into the response.
+   */
+  app.get('/api/v1/admin/provider-adapters',async (request)=>{
+    await admin(request);
+    return {adapters:Object.values(ADAPTER_PROFILES).map((profile)=>({
+      adapter:profile.kind,label:profile.label,defaultEnvPrefix:profile.defaultEnvPrefix,
+      defaultApiBaseUrl:profile.defaultApiBaseUrl,apiBaseUrlRequired:profile.requiresApiBaseUrl,
+      credentials:profile.credentials.map((credential)=>({name:`${profile.defaultEnvPrefix}${credential.suffix}`,description:credential.description,required:credential.required})),
+      planMetadata:profile.planMetadata,capabilities:profile.capabilities,notes:profile.notes,
+      developmentOnly:profile.kind==='mock',
+    }))};
+  });
+  app.get<{Params:{id:string}}>('/api/v1/admin/providers/:id/configuration',async (request)=>{
+    await admin(request);
+    const provider=await findProviderById(db,parse(id,request.params.id));
+    if(!provider)throw new NotFoundError('No provider was found with that id');
+    const configuration=describeProviderConfiguration(provider);
+    const images=await db.query<{total:string;active:string}>(
+      `SELECT count(*)::text total,count(*) FILTER (WHERE status='ACTIVE' AND verified_at IS NOT NULL)::text active
+       FROM server_os_images WHERE provider_id=$1`,[provider.id]
+    );
+    return {
+      provider:{id:provider.id,name:provider.name,slug:provider.slug,providerType:provider.provider_type,adapter:provider.adapter,status:provider.status},
+      configuration,
+      images:{total:Number(images.rows[0]?.total??'0'),verifiedActive:Number(images.rows[0]?.active??'0')},
+    };
+  });
   app.patch<{ Params: { id: string } }>('/api/v1/admin/providers/:id',async (request) => {
     const auth=await admin(request);const providerId=parse(id,request.params.id);const patch=parse(patchProviderSchema,request.body);const existing=await findProviderById(db,providerId);if(!existing)throw new NotFoundError();
     if(patch.status==='ACTIVE'){
+      if(existing.adapter==='mock'&&(env.NODE_ENV==='production'||!env.ALLOW_MOCK_PROVIDER)){
+        throw new ValidationError('The mock provider cannot be activated on this deployment');
+      }
       const candidate={
         ...existing,
         name:patch.name??existing.name,
@@ -404,5 +449,55 @@ export async function registerInfrastructureRoutes(app: FastifyInstance,env: Env
   app.get<{Params:{id:string}}>('/api/v1/admin/provisioning-jobs/:id',async(request)=>{await admin(request);const job=await findProvisioningJobById(db,parse(id,request.params.id));if(!job)throw new NotFoundError();return{job,steps:await listDeploymentSteps(db,job.deployment_id),events:await listDeploymentEvents(db,job.deployment_id)};});
   app.post<{Params:{id:string}}>('/api/v1/admin/provisioning-jobs/:id/retry',async(request)=>{const auth=await admin(request);const jobId=parse(id,request.params.id);if(!await retryProvisioningJob(db,jobId))throw new ConflictError('Only retryable failed jobs can be retried');await auditRequest(db,request,auth.userId,{action:'PROVISIONING_JOB_RETRIED',resourceType:'provisioning_job',resourceId:jobId});return{queued:true};});
   app.post<{Params:{id:string}}>('/api/v1/admin/provisioning-jobs/:id/cancel',async(request)=>{const auth=await admin(request);const jobId=parse(id,request.params.id);if(!await cancelProvisioningJob(db,jobId))throw new ConflictError('Only queued jobs can be cancelled');await auditRequest(db,request,auth.userId,{action:'PROVISIONING_JOB_CANCELLED',resourceType:'provisioning_job',resourceId:jobId});return{cancelled:true};});
-  app.get('/api/v1/admin/provisioning-metrics',async(request)=>{await admin(request);const summary=await db.query(`SELECT count(*)::int total,count(*) FILTER(WHERE status='READY')::int ready,count(*) FILTER(WHERE status='FAILED')::int failed,COALESCE(avg(EXTRACT(EPOCH FROM(completed_at-started_at))) FILTER(WHERE completed_at IS NOT NULL),0)::float average_duration_seconds,COALESCE(sum(attempts-1),0)::int retries FROM provisioning_jobs`);const queue=await db.query(`SELECT count(*)::int depth FROM deployments WHERE action LIKE 'server_%' AND status='queued'`);return{...summary.rows[0],queueDepth:queue.rows[0]?.depth??0};});
+  /**
+   * Observability (spec §30): success/failure counts, duration, queue depth, plus the failure
+   * breakdown and per-provider health an operator needs to see *which* integration is broken.
+   */
+  app.get('/api/v1/admin/provisioning-metrics',async(request)=>{
+    await admin(request);
+    const summary=await db.query(`SELECT count(*)::int total,count(*) FILTER(WHERE status='READY')::int ready,count(*) FILTER(WHERE status='FAILED')::int failed,COALESCE(avg(EXTRACT(EPOCH FROM(completed_at-started_at))) FILTER(WHERE completed_at IS NOT NULL),0)::float average_duration_seconds,COALESCE(sum(attempts-1),0)::int retries FROM provisioning_jobs`);
+    const queue=await db.query(`SELECT count(*)::int depth FROM deployments WHERE action LIKE 'server_%' AND status='queued'`);
+    const errors=await db.query(`SELECT error_code code,count(*)::int count FROM provisioning_jobs WHERE error_code IS NOT NULL GROUP BY error_code ORDER BY count DESC,code ASC LIMIT 20`);
+    const providers=await db.query(`
+      SELECT p.id provider_id,p.name provider_name,p.adapter,p.status,
+             count(j.id)::int total,
+             count(j.id) FILTER(WHERE j.status='READY')::int ready,
+             count(j.id) FILTER(WHERE j.status='FAILED')::int failed,
+             count(j.id) FILTER(WHERE j.status NOT IN('READY','FAILED','CANCELLED'))::int in_progress
+      FROM infrastructure_providers p LEFT JOIN provisioning_jobs j ON j.provider_id=p.id
+      GROUP BY p.id,p.name,p.adapter,p.status ORDER BY p.name ASC`);
+    const stale=await db.query(`SELECT count(*)::int count FROM provisioning_jobs WHERE status NOT IN('READY','FAILED','CANCELLED') AND started_at IS NOT NULL AND started_at < now() - interval '30 minutes'`);
+    return{
+      ...summary.rows[0],
+      queueDepth:queue.rows[0]?.depth??0,
+      stalledJobs:stale.rows[0]?.count??0,
+      failuresByCode:errors.rows,
+      providers:providers.rows,
+    };
+  });
+  /**
+   * Infrastructure logs (spec §27). A read-only projection of the existing append-only
+   * audit_logs table restricted to infrastructure resource types, so provider, image, region,
+   * provisioning and server-action history is auditable without a second logging system.
+   */
+  app.get('/api/v1/admin/infrastructure-logs',async(request)=>{
+    await admin(request);
+    const query=parse(z.object({
+      resourceType:z.enum(['provider','region','datacenter','os_image','operating_system','operating_system_version','provisioning_job','server']).optional(),
+      resourceId:id.optional(),
+      action:z.string().trim().min(1).max(120).optional(),
+      limit:z.coerce.number().int().min(1).max(200).optional(),
+      offset:z.coerce.number().int().min(0).optional(),
+    }),request.query??{});
+    const types=query.resourceType?[query.resourceType]:['provider','region','datacenter','os_image','operating_system','operating_system_version','provisioning_job','server'];
+    const {rows}=await db.query(`
+      SELECT a.id,a.actor_id,u.email actor_email,a.action,a.resource_type,a.resource_id,a.metadata,a.ip_address,a.created_at
+      FROM audit_logs a LEFT JOIN users u ON u.id=a.actor_id
+      WHERE a.resource_type = ANY($1::text[])
+        AND ($2::text IS NULL OR a.resource_id=$2)
+        AND ($3::text IS NULL OR a.action=$3)
+      ORDER BY a.created_at DESC LIMIT $4 OFFSET $5`,
+      [types,query.resourceId??null,query.action??null,query.limit??50,query.offset??0]);
+    return{logs:rows};
+  });
 }

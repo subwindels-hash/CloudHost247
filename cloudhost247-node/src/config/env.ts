@@ -149,15 +149,34 @@ const envSchema = z.object({
   OVH_APPLICATION_KEY: z.string().min(1).optional(),
   OVH_APPLICATION_SECRET: z.string().min(1).optional(),
   OVH_CONSUMER_KEY: z.string().min(1).optional(),
+  // OVH Public Cloud project ("service name") that owns the provisioned instances.
+  OVH_CLOUD_PROJECT_ID: z.string().min(1).optional(),
   PROXMOX_API_URL: z.string().url().optional(),
   PROXMOX_API_TOKEN: z.string().min(1).optional(),
   VIRTUALIZOR_API_URL: z.string().url().optional(),
   VIRTUALIZOR_API_KEY: z.string().min(1).optional(),
   VIRTUALIZOR_API_SECRET: z.string().min(1).optional(),
   SOLUSVM_API_URL: z.string().url().optional(),
+  SOLUSVM_API_ID: z.string().min(1).optional(),
+  SOLUSVM_API_KEY: z.string().min(1).optional(),
   SOLUSVM_API_TOKEN: z.string().min(1).optional(),
+  // OpenStack accepts either a Keystone v3 password login or a pre-issued token plus the Nova
+  // endpoint. The adapter fails closed with PROVIDER_NOT_CONFIGURED unless one set is complete.
+  OPENSTACK_AUTH_URL: z.string().url().optional(),
+  OPENSTACK_USERNAME: z.string().min(1).optional(),
+  OPENSTACK_PASSWORD: z.string().min(1).optional(),
+  OPENSTACK_PROJECT_ID: z.string().min(1).optional(),
+  OPENSTACK_PROJECT_NAME: z.string().min(1).optional(),
+  OPENSTACK_USER_DOMAIN_NAME: z.string().min(1).optional(),
+  OPENSTACK_PROJECT_DOMAIN_NAME: z.string().min(1).optional(),
+  OPENSTACK_REGION: z.string().min(1).optional(),
+  OPENSTACK_IMAGE_URL: z.string().url().optional(),
   OPENSTACK_API_URL: z.string().url().optional(),
   OPENSTACK_API_TOKEN: z.string().min(1).optional(),
+  // Development-only opt-in for the mock infrastructure provider (spec §35). It is ignored in
+  // production: the mock adapter refuses to run when NODE_ENV=production, and an administrator
+  // must still register a provider whose adapter is literally `mock` for it to be reachable.
+  ALLOW_MOCK_PROVIDER: boolFromString.optional().default('false'),
   // URL of an operator-built, self-contained server-agent installer. Required before a real
   // provision/reinstall job can become READY; the worker refuses to skip monitoring attestation.
   SERVER_AGENT_INSTALL_URL: z.string().url().optional(),

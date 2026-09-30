@@ -81,3 +81,19 @@
   .ch247-capability-list{grid-template-columns:1fr}
 }
 
+
+/* Provider configuration readiness panel and infrastructure logs */
+.ch247-provider-config{margin-top:1rem;padding-top:1rem;border-top:1px solid #e2e8f0;display:grid;gap:1rem}
+.ch247-provider-config__state{margin:0;padding:.75rem 1rem;border-radius:8px;font-size:.88rem;font-weight:600}
+.ch247-provider-config__state.is-ready{background:#dcfce7;color:#15803d}
+.ch247-provider-config__state.is-incomplete{background:#fef3c7;color:#b45309}
+.ch247-provider-config__facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:.75rem;margin:0}
+.ch247-provider-config__facts div{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:.7rem .85rem}
+.ch247-provider-config__facts dt{font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:#64748b}
+.ch247-provider-config__facts dd{margin:.25rem 0 0;font-weight:700;color:#0f172a;word-break:break-all}
+.ch247-provider-config__meta h4{margin:0 0 .4rem;font-size:.92rem}
+.ch247-provider-config__meta ul,.ch247-provider-config__notes{margin:0;padding-left:1.1rem;color:#475569;font-size:.85rem;display:grid;gap:.3rem}
+.ch247-provider-config__notes{color:#64748b;font-style:italic}
+.ch247-ok-text{color:#15803d;font-weight:600}
+.ch247-log-meta{display:block;max-width:420px;white-space:pre-wrap;word-break:break-word;color:#475569}
+@media(max-width:767px){.ch247-provider-config__facts{grid-template-columns:1fr}.ch247-log-meta{max-width:none}}

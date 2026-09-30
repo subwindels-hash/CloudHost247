@@ -73,6 +73,8 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0044_create_dns_zones_and_records.sql',
     '0045_create_ssl_certificates.sql',
     '0046_create_firewall_rules.sql',
+    '0047_infrastructure_adapter_coverage.sql',
+    '0048_operating_system_logo_assets.sql',
   ];
 
   it('finds the committed migration files in order', () => {

@@ -40,7 +40,7 @@ import {
   findProvisioningJobById,
   listCustomerServers,
 } from '../db/server-provisioning';
-import { resolveAvailableConfiguration } from '../db/operating-systems';
+import { ImageResolutionError, resolveReinstallTarget } from '../infrastructure/services/image-resolver';
 
 const idSchema = z.string().uuid('id must be a valid UUID');
 
@@ -524,17 +524,19 @@ export async function registerServerRoutes(app: FastifyInstance, env: Env, overr
     if (!server || !server.plan_id || !server.provider_id || !server.region_id) throw new NotFoundError('No server was found with that id');
     if (server.capabilities?.reinstall !== true) throw new ValidationError('OS reinstall is not supported for this server');
     if (!server.provider_server_id || !['active','stopped','error'].includes(server.status)) throw new ConflictError('This server cannot be reinstalled in its current state');
-    const configuration = await resolveAvailableConfiguration(pool,{
-      planId: server.plan_id,providerId: server.provider_id,regionId: server.region_id,
-      datacenterId: server.datacenter_id,operatingSystemVersionId: input.operatingSystemVersionId,
-      architecture: input.architecture,serverType: server.server_type,
-    });
-    if (!configuration) throw new ValidationError('The selected operating system is unavailable for this server');
-    const allowed = await pool.query(
-      `SELECT 1 FROM operating_system_versions v JOIN operating_systems os ON os.id=v.operating_system_id
-       WHERE v.id=$1 AND os.is_reinstall_supported=true`,[input.operatingSystemVersionId]
-    );
-    if (!allowed.rows[0]) throw new ValidationError('The selected operating system is not enabled for reinstall');
+    // The target OS is re-resolved server-side through the shared image resolver: the client's
+    // selection is only a pair of catalog ids, never a provider image reference.
+    let configuration;
+    try {
+      configuration = await resolveReinstallTarget(pool,{
+        planId: server.plan_id,providerId: server.provider_id,regionId: server.region_id,
+        datacenterId: server.datacenter_id,operatingSystemVersionId: input.operatingSystemVersionId,
+        architecture: input.architecture,serverType: server.server_type,
+      });
+    } catch (error) {
+      if (error instanceof ImageResolutionError) throw new ValidationError(error.message);
+      throw error;
+    }
     const result = await enqueueServerProvisioningJob(pool,{
       serverId: server.id,providerId: server.provider_id,osImageId: configuration.image_id,
       operation: 'REINSTALL',requestedBy: auth.userId,

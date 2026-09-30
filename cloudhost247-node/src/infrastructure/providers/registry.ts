@@ -4,8 +4,11 @@ import { ContaboProviderAdapter } from './contabo-adapter';
 import { DigitalOceanProviderAdapter } from './digitalocean-adapter';
 import { GenericHttpProviderAdapter } from './generic-http-adapter';
 import { HetznerProviderAdapter } from './hetzner-adapter';
+import { MockProviderAdapter } from './mock-adapter';
+import { OpenStackProviderAdapter } from './openstack-adapter';
 import { OvhProviderAdapter } from './ovh-adapter';
 import { ProxmoxProviderAdapter } from './proxmox-adapter';
+import { SolusvmProviderAdapter } from './solusvm-adapter';
 import {
   ProviderError,
   type CreateProviderServerInput,
@@ -15,10 +18,12 @@ import {
   type ProviderServer,
   type ReinstallProviderServerInput,
 } from './types';
+import { VirtualizorProviderAdapter } from './virtualizor-adapter';
 import { VultrProviderAdapter } from './vultr-adapter';
 
 /**
- * Fallback adapter for uninstalled provider kinds. Always fails closed.
+ * Fallback adapter for unknown provider kinds. Always fails closed: an unrecognised adapter is
+ * never quietly substituted with another provider's implementation or with the mock provider.
  */
 class UnavailableNativeProviderAdapter implements InfrastructureProviderAdapter {
   readonly kind: string;
@@ -56,6 +61,14 @@ class UnavailableNativeProviderAdapter implements InfrastructureProviderAdapter 
   healthCheck(_id: string, _image: ServerOsImageRow): Promise<ProviderHealthResult> { return Promise.reject(this.unavailable()); }
 }
 
+/**
+ * Resolves the adapter for one provider row.
+ *
+ * Every provider kind maps to its own implementation: one provider's client is never reused for
+ * a different platform, and the development mock is only ever returned for a provider that an
+ * administrator explicitly registered with the `mock` adapter (it additionally refuses to run
+ * in production — see mock-adapter.ts).
+ */
 export function createInfrastructureProviderAdapter(
   provider: InfrastructureProviderRow,
   source: NodeJS.ProcessEnv = process.env
@@ -74,12 +87,17 @@ export function createInfrastructureProviderAdapter(
     case 'contabo':
       return new ContaboProviderAdapter(provider, source);
     case 'proxmox':
-    case 'virtualizor':
-    case 'solusvm':
-    case 'openstack':
       return new ProxmoxProviderAdapter(provider, source);
+    case 'virtualizor':
+      return new VirtualizorProviderAdapter(provider, source);
+    case 'solusvm':
+      return new SolusvmProviderAdapter(provider, source);
+    case 'openstack':
+      return new OpenStackProviderAdapter(provider, source);
     case 'generic_http':
       return new GenericHttpProviderAdapter(provider, source);
+    case 'mock':
+      return new MockProviderAdapter(provider, source);
     default:
       return new UnavailableNativeProviderAdapter(provider);
   }

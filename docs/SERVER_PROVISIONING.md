@@ -9,7 +9,7 @@ Logos are browser assets only. They are never used as installation images. Publi
 ## Safe rollout
 
 1. Back up PostgreSQL and run `npm run migrate:status`.
-2. Apply migration `0041_create_os_catalog_and_server_provisioning.sql` using the normal migration command. It is additive. Existing `servers` records are retained and point to the archived **Unknown operating system** version when their OS cannot be proven.
+2. Apply migrations `0041_create_os_catalog_and_server_provisioning.sql` through `0048_operating_system_logo_assets.sql` using the normal migration command. It is additive. Existing `servers` records are retained and point to the archived **Unknown operating system** version when their OS cannot be proven.
 3. Set `APP_URL`, `CREDENTIAL_ENCRYPTION_KEY` (or a key ring), `SERVER_AGENT_INSTALL_URL`, provider credentials, and worker settings in the server-side secret store. Restart the API and worker.
 4. In **Admin → Infrastructure**, add the provider and location records. Keep the provider disabled until its credentials validate.
 5. Add an OS image mapping as `DRAFT`, use **Test**, and enable it only after the provider confirms the image and architecture.
@@ -28,6 +28,7 @@ Production migrations and provider enablement are operator actions; application 
 | `SERVER_AGENT_INSTALL_URL` | HTTPS URL for an operator-owned, self-contained executable installer. |
 | `PROVISIONING_HEALTH_TIMEOUT_MS` | Maximum provider/network/agent health wait (default 600000). |
 | `WORKER_*` | Durable deployment worker identity, polling, concurrency, and lease settings. |
+| `ALLOW_MOCK_PROVIDER` | Development-only opt-in for the isolated mock adapter. Ignored (and refused) when `NODE_ENV=production`. Default `false`. |
 | `NOTIFICATION_EMAIL_WEBHOOK_URL`, `NOTIFICATION_EMAIL_WEBHOOK_TOKEN` | Optional server-side email bridge. In-app notification remains durable if absent; email is marked `CONFIGURATION_REQUIRED`. |
 
 `SERVER_AGENT_INSTALL_URL` must serve one shell executable that can run on the selected clean image. It must install Node.js 20+, Docker, the complete `server-agent/src` tree, its systemd unit, and start the service. The repository's `server-agent/install.sh` installs from a local checkout and is therefore a packaging source, not by itself a remote artifact. Publish a versioned, integrity-controlled installer from operator infrastructure; test it on every image. Never place agent or provider secrets in the installer URL or artifact.
@@ -43,74 +44,204 @@ Failure to configure any required service produces an explicit terminal or retry
 
 ## Provider adapters
 
-### Hetzner Cloud (native)
+Every adapter reads its credentials **only** from server-side environment variables. Nothing is
+stored in the database, returned by an API, written to a log, or shipped to the browser. A
+provider whose variables are absent fails closed with `PROVIDER_NOT_CONFIGURED` or
+`CONFIGURATION_REQUIRED` *before* any network call, and it cannot be activated in the admin UI.
 
-Admin provider values:
+Each provider row carries an optional `credential_env_prefix`. When set, the adapter reads
+`<PREFIX>_<SUFFIX>` (for example `HETZNER_EU_API_TOKEN`), which lets one deployment hold several
+accounts of the same provider. When it is not set, the default prefix in the tables below is
+used. Self-hosted platforms (Proxmox, Virtualizor, SolusVM, OpenStack, and bridges) additionally
+require an HTTPS `api_base_url` on the provider row; plain HTTP is rejected except for localhost
+in development.
 
-- type: `HETZNER`
-- adapter: `hetzner`
-- API base URL: normally `https://api.hetzner.cloud/v1`
-- credential prefix: normally `HETZNER`
+**Admin → Infrastructure → Providers & regions → Configuration** renders exactly these
+requirements per provider and shows which variables are set — names and booleans only, never a
+value — via `GET /api/v1/admin/providers/:id/configuration`. The catalogue of all adapters is
+available at `GET /api/v1/admin/provider-adapters`. Both endpoints are admin-only.
 
-Secrets:
+### Hetzner Cloud (`hetzner`)
 
-```text
-HETZNER_API_TOKEN=...
-HETZNER_API_URL=https://api.hetzner.cloud/v1
-```
+- Default credential prefix: `HETZNER`
+- API base URL: `https://api.hetzner.cloud/v1` (default)
 
-The token needs the server/image operations represented by the configured capabilities. Product availability metadata needs `providerServerType` (for example, an operator-verified Hetzner server type). Region/datacenter codes and image identifiers must be real Hetzner values. Adapter idempotency uses the `cloudhost247_idempotency` label and lookup-before-create.
+| Variable | Purpose | Required |
+| --- | --- | --- |
+| `HETZNER_API_TOKEN` | Hetzner Cloud project API token | yes |
 
-### DigitalOcean, Vultr, AWS, and Contabo
+Plan/availability metadata: `providerServerType`, `cpuCores`, `memoryMb`, `storageMb`.
 
-The provider types and secure environment variables are:
+Capabilities: reinstall, snapshot, resize, console, metrics.
 
-```text
-DIGITALOCEAN_API_URL=https://api.digitalocean.com/v2
-DIGITALOCEAN_API_TOKEN=...
-VULTR_API_URL=https://api.vultr.com/v2
-VULTR_API_KEY=...
-AWS_ACCESS_KEY_ID=...
-AWS_SECRET_ACCESS_KEY=...
-AWS_REGION=us-east-1
-CONTABO_API_URL=https://api.contabo.com/v1
-CONTABO_CLIENT_ID=...
-CONTABO_CLIENT_SECRET=...
-CONTABO_API_USER=...
-CONTABO_API_PASSWORD=...
-```
+Native API. Idempotency uses the cloudhost247_idempotency label plus lookup-before-create.
 
-Adapters fail closed with `PROVIDER_NOT_CONFIGURED` if tokens or API credentials are not set. DigitalOcean and Vultr support native droplet/instance creation with user-data, power control, rebuild/reinstall, resize, and snapshot actions.
+### DigitalOcean (`digitalocean`)
 
-### OVH, Proxmox, Virtualizor, SolusVM, and OpenStack
+- Default credential prefix: `DIGITALOCEAN`
+- API base URL: `https://api.digitalocean.com/v2` (default)
 
-The provider types and secure environment names are reserved:
+| Variable | Purpose | Required |
+| --- | --- | --- |
+| `DIGITALOCEAN_API_TOKEN` | DigitalOcean personal access token | yes |
 
-```text
-OVH_API_ENDPOINT=...
-OVH_APPLICATION_KEY=...
-OVH_APPLICATION_SECRET=...
-OVH_CONSUMER_KEY=...
-PROXMOX_API_URL=...
-PROXMOX_API_TOKEN=...
-VIRTUALIZOR_API_URL=...
-VIRTUALIZOR_API_KEY=...
-VIRTUALIZOR_API_SECRET=...
-SOLUSVM_API_URL=...
-SOLUSVM_API_TOKEN=...
-OPENSTACK_API_URL=...
-OPENSTACK_API_TOKEN=...
-```
+Plan/availability metadata: `providerServerType`, `cpuCores`, `memoryMb`, `storageMb`.
 
-Native adapters for these providers are **not implemented in this release**. Selecting their native adapter fails closed with `SERVICE_UNAVAILABLE`; the existence of environment variable names is not a claim of integration support.
+Capabilities: reinstall, snapshot, resize, console.
 
-Operators may instead deploy a separately secured provider bridge and select `generic_http`. Set the provider's HTTPS `api_base_url`, choose a unique `credential_env_prefix` (for example `MY_OVH_BRIDGE`), and configure only on the API/worker host:
+Native droplet API with user-data, rebuild, resize and snapshots.
 
-```text
-MY_OVH_BRIDGE_API_TOKEN=...
-```
+### Vultr (`vultr`)
 
-The bridge is a real provider integration, not a simulator. It must implement:
+- Default credential prefix: `VULTR`
+- API base URL: `https://api.vultr.com/v2` (default)
+
+| Variable | Purpose | Required |
+| --- | --- | --- |
+| `VULTR_API_KEY` | Vultr API key | yes |
+
+Plan/availability metadata: `providerServerType`, `cpuCores`, `memoryMb`, `storageMb`.
+
+Capabilities: reinstall, snapshot, resize, console.
+
+Native instance API.
+
+### Amazon EC2 (`aws`)
+
+- Default credential prefix: `AWS`
+- API base URL: not required
+
+| Variable | Purpose | Required |
+| --- | --- | --- |
+| `AWS_ACCESS_KEY_ID` | IAM access key id | yes |
+| `AWS_SECRET_ACCESS_KEY` | IAM secret access key | yes |
+| `AWS_REGION` | Default EC2 region | yes |
+
+Plan/availability metadata: `providerServerType`, `cpuCores`, `memoryMb`, `storageMb`.
+
+Capabilities: snapshot, resize, metrics.
+
+SigV4 EC2 API.
+
+### Contabo (`contabo`)
+
+- Default credential prefix: `CONTABO`
+- API base URL: `https://api.contabo.com/v1` (default)
+
+| Variable | Purpose | Required |
+| --- | --- | --- |
+| `CONTABO_CLIENT_ID` | OAuth client id | yes |
+| `CONTABO_CLIENT_SECRET` | OAuth client secret | yes |
+| `CONTABO_API_USER` | API user | yes |
+| `CONTABO_API_PASSWORD` | API password | yes |
+
+Plan/availability metadata: `providerServerType`, `cpuCores`, `memoryMb`, `storageMb`.
+
+Capabilities: reinstall, snapshot.
+
+OAuth2 client-credentials API.
+
+### OVHcloud Public Cloud (`ovh`)
+
+- Default credential prefix: `OVH`
+- API base URL: `https://eu.api.ovh.com/1.0` (default)
+
+| Variable | Purpose | Required |
+| --- | --- | --- |
+| `OVH_APPLICATION_KEY` | OVH application key | yes |
+| `OVH_APPLICATION_SECRET` | OVH application secret | yes |
+| `OVH_CONSUMER_KEY` | OVH consumer key with /cloud access | yes |
+| `OVH_CLOUD_PROJECT_ID` | Public Cloud project (service name) that owns the instances | yes |
+| `OVH_API_ENDPOINT` | Regional API endpoint when it is not set on the provider row | optional |
+
+Plan/availability metadata: `providerFlavorId`, `providerSshKeyId` (optional), `cpuCores`, `memoryMb`, `storageMb`.
+
+Capabilities: reinstall, snapshot, resize, console, metrics.
+
+Signed OVH v1 API against /cloud/project/{id}/instance. Instances are named from the job idempotency key and looked up before creation.
+
+### Proxmox VE (`proxmox`)
+
+- Default credential prefix: `PROXMOX`
+- API base URL: **required on the provider row** (self-hosted endpoint)
+
+| Variable | Purpose | Required |
+| --- | --- | --- |
+| `PROXMOX_API_TOKEN` | API token in the form user@realm!tokenid=uuid | yes |
+| `PROXMOX_API_URL` | https URL of the PVE API when it is not set on the provider row | optional |
+
+Plan/availability metadata: `providerNode`, `providerStorage` (optional), `providerBridge` (optional), `providerSnippetStorage` (optional), `cpuCores`, `memoryMb`, `storageMb`.
+
+Capabilities: reinstall, snapshot, resize, console, metrics.
+
+QEMU full clone from a template VMID, or LXC from a vztmpl volume. Provider server ids are node/type/vmid.
+
+### Virtualizor (`virtualizor`)
+
+- Default credential prefix: `VIRTUALIZOR`
+- API base URL: **required on the provider row** (self-hosted endpoint)
+
+| Variable | Purpose | Required |
+| --- | --- | --- |
+| `VIRTUALIZOR_API_KEY` | Virtualizor admin API key | yes |
+| `VIRTUALIZOR_API_SECRET` | Virtualizor admin API password | yes |
+| `VIRTUALIZOR_API_URL` | https URL of the admin panel when it is not set on the provider row | optional |
+
+Plan/availability metadata: `providerVirtType`, `providerNode` (optional), `providerUserId` (optional), `providerPlanId` (optional), `cpuCores`, `memoryMb`, `storageMb`.
+
+Capabilities: reinstall, snapshot, resize, console, metrics.
+
+Admin API. The selected OS template must have cloud-init enabled so the agent, SSH keys and hostname are applied.
+
+### SolusVM 1 (`solusvm`)
+
+- Default credential prefix: `SOLUSVM`
+- API base URL: **required on the provider row** (self-hosted endpoint)
+
+| Variable | Purpose | Required |
+| --- | --- | --- |
+| `SOLUSVM_API_ID` | SolusVM admin API id | yes |
+| `SOLUSVM_API_KEY` | SolusVM admin API key | yes |
+| `SOLUSVM_API_URL` | https URL of the SolusVM master when it is not set on the provider row | optional |
+
+Plan/availability metadata: `providerVirtType`, `providerClientId`, `providerPlanId`, `providerNode` (optional), `cpuCores`, `memoryMb`, `storageMb`.
+
+Capabilities: reinstall, resize, console, metrics.
+
+Admin API v1 (api/admin/command.php). Snapshots are not exposed by SolusVM 1.
+
+### OpenStack (`openstack`)
+
+- Default credential prefix: `OPENSTACK`
+- API base URL: not required
+
+| Variable | Purpose | Required |
+| --- | --- | --- |
+| `OPENSTACK_AUTH_URL` | Keystone v3 URL (password login) | optional |
+| `OPENSTACK_USERNAME` | Keystone user (password login) | optional |
+| `OPENSTACK_PASSWORD` | Keystone password (password login) | optional |
+| `OPENSTACK_PROJECT_ID` | Project id (or _PROJECT_NAME) | optional |
+| `OPENSTACK_API_URL` | Nova compute endpoint (token login) | optional |
+| `OPENSTACK_API_TOKEN` | Pre-issued Keystone token (token login) | optional |
+
+Plan/availability metadata: `providerFlavorId`, `providerNetworkId` (optional), `providerKeypairName` (optional), `cpuCores`, `memoryMb`, `storageMb`.
+
+Capabilities: reinstall, snapshot, resize, console.
+
+Keystone v3 + Nova + Glance. Either password login or a pre-issued token is required.
+
+### Operator provider bridge (`generic_http`)
+
+- Default credential prefix: `PROVIDER_BRIDGE`
+- API base URL: **required on the provider row**
+- Variable: `<PREFIX>_API_TOKEN` (bearer token for the operator-owned bridge, required)
+- Plan metadata: `providerServerType` (optional), `cpuCores`, `memoryMb`, `storageMb`
+- Capabilities: reinstall, console, metrics
+
+When a provider has no native adapter, deploy a separately secured HTTPS bridge and select the
+`generic_http` adapter. Set the provider's `api_base_url`, choose a unique
+`credential_env_prefix` (for example `MY_OVH_BRIDGE`), and set `MY_OVH_BRIDGE_API_TOKEN` on the
+API/worker host only. The bridge is a real integration, not a simulator, and must implement:
 
 - `GET /v1/health`
 - `GET /v1/images` and `GET /v1/images/:id`
@@ -120,13 +251,70 @@ The bridge is a real provider integration, not a simulator. It must implement:
 - `POST /v1/servers/:id/{start,shutdown,reboot,reinstall}`
 - `GET /v1/servers/:id/{health,console,metrics}`
 
-It must preserve idempotency keys and return explicit HTTP failures. Only activate a bridge-backed provider after API reachability, image lookup, create/retry/delete, health, and reinstall have been tested.
+It must preserve idempotency keys and return explicit HTTP failures. Only activate a
+bridge-backed provider after API reachability, image lookup, create/retry/delete, health, and
+reinstall have been tested.
+
+### Development mock provider (`mock`)
+
+- Default credential prefix: `MOCK` (no credentials are read)
+- Plan metadata: `cpuCores`, `memoryMb`, `storageMb`
+- Capabilities: reinstall, snapshot, resize
+
+The `mock` adapter exists so the provisioning pipeline can be exercised without a provider
+account. It is deliberately isolated:
+
+- it requires `NODE_ENV` other than `production` **and** `ALLOW_MOCK_PROVIDER=true`; otherwise
+  every call — including `validateConfiguration` — fails with `SERVICE_UNAVAILABLE` or
+  `CONFIGURATION_REQUIRED`;
+- the admin API refuses to create or activate a mock provider unless both conditions hold, and
+  the database enforces that `adapter='mock'` is paired with `provider_type='MOCK'`
+  (`infrastructure_providers_mock_pairing_check`, migration `0047`);
+- it never returns a routable address: mock servers report `192.0.2.10` from the RFC 5737
+  documentation range and carry `metadata.mock = true`, so mock and real inventory can always be
+  told apart;
+- it is never selected automatically. Provider choice always comes from an explicit, enabled
+  product availability rule.
+
+### Unsupported adapters
+
+If a provider row names an adapter that has no implementation, the registry returns a
+fail-closed adapter that rejects every operation with `SERVICE_UNAVAILABLE`. A mock or partially
+working implementation is never substituted.
 
 ## Payment and queue guarantees
 
 Server order creation atomically creates an `AWAITING_PAYMENT` server, order, and invoice; it does not call a provider. The verified settlement transaction re-reads the authoritative paid order, creates/reuses the subscription, and enqueues one PostgreSQL deployment using a unique idempotency key. The worker re-checks payment and ownership before creation. Provider resource IDs are persisted immediately; after a crash the worker checks both that ID and provider-side idempotency before creating anything.
 
 Reinstall requires server ownership, provider/product capability, the literal confirmation `REINSTALL`, and a newly resolved active image for the server's provider and location. It is always queued. Existing resources may display EOL or archived OS versions, but those versions cannot be selected for a new deployment.
+
+## Observability, audit and infrastructure logs
+
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /api/v1/admin/provider-adapters` | Every adapter with the variables, plan metadata and capabilities it needs. |
+| `GET /api/v1/admin/providers/:id/configuration` | Per-provider readiness: which variables are set, what is missing, how many verified images exist. Names and booleans only. |
+| `GET /api/v1/admin/provisioning-jobs`, `/:id` | Job list and per-job steps, events and stage logs. |
+| `POST /api/v1/admin/provisioning-jobs/:id/{retry,cancel}` | Operator recovery for failed or queued jobs. |
+| `GET /api/v1/admin/provisioning-metrics` | Totals, success rate, average duration, retries, queue depth, jobs stalled over 30 minutes, failures grouped by error code, and per-provider job health. |
+| `GET /api/v1/admin/infrastructure-logs` | Append-only audit trail filtered to infrastructure resources (`provider`, `region`, `datacenter`, `os_image`, `operating_system`, `operating_system_version`, `provisioning_job`, `server`), with `action`, `resourceId`, `limit` and `offset` filters. |
+
+Infrastructure logs are a read-only projection of the existing `audit_logs` table — there is no
+second logging system and no UI can edit or delete an entry. Failure classification is visible
+in both places: configuration-class errors (`PROVIDER_NOT_CONFIGURED`, `CONFIGURATION_REQUIRED`,
+`INVALID_CONFIGURATION`, `IMAGE_UNAVAILABLE`) are terminal and never retried automatically,
+while transient errors (`RATE_LIMITED`, `PROVIDER_TIMEOUT`, `NETWORK_TEMPORARY_FAILURE`,
+`INSUFFICIENT_CAPACITY`) are retried by the durable queue with backoff.
+
+## Operating-system logos
+
+`operating_systems.logo_url` is the only source of OS branding; no component contains
+per-distribution conditionals. Assets live in `cloudhost247-node/frontend/public/os-logos/` and
+migration `0048_operating_system_logo_assets.sql` points the five previously unillustrated
+families (Alpine, Arch, Kali, NixOS, openSUSE) at their SVGs, updating only rows whose
+`logo_url` is still `NULL` so operator branding is preserved. A family without a logo renders a
+text badge instead. A logo is never an installation image: installable artifacts exist only in
+`server_os_images.provider_image_id` / `provider_template_id`.
 
 ## Live acceptance run
 

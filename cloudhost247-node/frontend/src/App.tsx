@@ -54,6 +54,7 @@ import AdminOsImagesPage from './pages/AdminOsImagesPage';
 import AdminProvidersPage from './pages/AdminProvidersPage';
 import AdminAvailabilityPage from './pages/AdminAvailabilityPage';
 import AdminProvisioningPage from './pages/AdminProvisioningPage';
+import AdminInfrastructureLogsPage from './pages/AdminInfrastructureLogsPage';
 import ControlPanelsPage from './pages/ControlPanelsPage';
 import ControlPanelDetailPage from './pages/ControlPanelDetailPage';
 import AdminControlPanelsPage from './pages/AdminControlPanelsPage';
@@ -150,6 +151,7 @@ export default function App() {
             <Route path="/admin/infrastructure/availability" element={<AdminAvailabilityPage />} />
             <Route path="/admin/infrastructure/provisioning" element={<AdminProvisioningPage />} />
             <Route path="/admin/infrastructure/provisioning/:id" element={<AdminProvisioningPage />} />
+            <Route path="/admin/infrastructure/logs" element={<AdminInfrastructureLogsPage />} />
             <Route path="/admin/control-panels" element={<AdminControlPanelsPage />} />
             <Route path="/admin/infrastructure/control-panels" element={<AdminControlPanelsPage />} />
           </Route>
