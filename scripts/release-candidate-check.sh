@@ -16,7 +16,8 @@ php -d display_errors=1 tests/builder/run.php
 php -d display_errors=1 tests/broker/run.php
 php -d display_errors=1 tests/marketing/run.php
 php -d display_errors=1 tests/cart_recovery/run.php
-python3 -m unittest -v tests/foundation/test_static.py tests/currency/test_static.py tests/ovh/test_static.py tests/ovh/test_product_services_static.py tests/ovh/test_public_catalog_static.py tests/rdp/test_static.py tests/integrations/test_static.py tests/modules/test_static.py tests/builder/test_static.py tests/smm/test_static.py tests/tools/test_static.py tests/broker/test_static.py tests/cart_recovery/test_static.py tests/security/test_security.py tests/security/test_archive_integration.py
+php -d display_errors=1 tests/passkey/run.php
+python3 -m unittest -v tests/foundation/test_static.py tests/currency/test_static.py tests/ovh/test_static.py tests/ovh/test_product_services_static.py tests/ovh/test_public_catalog_static.py tests/rdp/test_static.py tests/integrations/test_static.py tests/modules/test_static.py tests/builder/test_static.py tests/smm/test_static.py tests/tools/test_static.py tests/broker/test_static.py tests/cart_recovery/test_static.py tests/passkey/test_static.py tests/security/test_security.py tests/security/test_archive_integration.py
 python3 -m unittest -v tests/staging/test_staging_tools.py
 python3 -m py_compile scripts/validate-migrations.py scripts/compare-financial-evidence.py scripts/generate-staging-report.py
 python3 scripts/validate-migrations.py

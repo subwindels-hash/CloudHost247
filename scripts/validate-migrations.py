@@ -2,7 +2,7 @@
 from pathlib import Path
 import argparse,json,re,sys
 p=argparse.ArgumentParser();p.add_argument('--json-output');a=p.parse_args();root=Path(__file__).resolve().parents[1]
-expected={'cloudhost247_core':['1.1.0'],'cloudhost247_currency':['1.0.0','1.1.0'],'cloudhost247_theme':['1.0.0','1.1.0'],'cloudhost247_integrations':['1.0.0'],'cloudhost247_modules':['1.0.0','1.1.0'],'cloudhost247_builder':['1.0.0'],'cloudhost247_ovh':['1.0.0','1.1.0','1.2.0','1.3.0','1.4.0','1.5.0','1.6.0'],'cloudhost247_rdp':['1.0.0'],'cloudhost247_smm':['1.0.0'],'cloudhost247_tools':['2.2.7'],'cloudhost247_broker':['1.0.0','1.1.0'],'cloudhost247_marketing':['1.0.0'],'cloudhost247_cart_recovery':['1.0.0','1.0.1']};checks=[];failures=[]
+expected={'cloudhost247_core':['1.1.0'],'cloudhost247_currency':['1.0.0','1.1.0'],'cloudhost247_theme':['1.0.0','1.1.0'],'cloudhost247_integrations':['1.0.0'],'cloudhost247_modules':['1.0.0','1.1.0'],'cloudhost247_builder':['1.0.0'],'cloudhost247_ovh':['1.0.0','1.1.0','1.2.0','1.3.0','1.4.0','1.5.0','1.6.0'],'cloudhost247_rdp':['1.0.0'],'cloudhost247_smm':['1.0.0'],'cloudhost247_tools':['2.2.7'],'cloudhost247_broker':['1.0.0','1.1.0'],'cloudhost247_marketing':['1.0.0'],'cloudhost247_cart_recovery':['1.0.0','1.0.1'],'cloudhost247_passkey':['1.0.0']};checks=[];failures=[]
 for module,versions in expected.items():
  base=(root/'modules/servers/RDP') if module=='cloudhost247_rdp' else (root/'modules/addons'/module);paths=sorted((base/'migrations').glob('V*.php')) if (base/'migrations').exists() else sorted((base/'lib/Database').glob('*Migration.php'));found=[]
  for path in paths:
