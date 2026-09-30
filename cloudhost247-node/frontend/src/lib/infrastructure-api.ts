@@ -68,6 +68,8 @@ export interface CustomerServer {
   os_name: string | null;
   os_logo_url: string | null;
   os_display_name: string | null;
+  os_version_status?: string | null;
+  os_end_of_life_date?: string | null;
   control_panel_id?: string | null;
   control_panel_name?: string | null;
   control_panel_slug?: string | null;

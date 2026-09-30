@@ -297,6 +297,7 @@ Reinstall requires server ownership, provider/product capability, the literal co
 | `GET /api/v1/admin/provisioning-jobs`, `/:id` | Job list and per-job steps, events and stage logs. |
 | `POST /api/v1/admin/provisioning-jobs/:id/{retry,cancel}` | Operator recovery for failed or queued jobs. |
 | `GET /api/v1/admin/provisioning-metrics` | Totals, success rate, average duration, retries, queue depth, jobs stalled over 30 minutes, failures grouped by error code, and per-provider job health. |
+| `POST /api/v1/admin/os-lifecycle/sweep` | Applies a freshly entered end-of-life date immediately; the worker runs the same sweep hourly. |
 | `GET /api/v1/admin/infrastructure-logs` | Append-only audit trail filtered to infrastructure resources (`provider`, `region`, `datacenter`, `os_image`, `operating_system`, `operating_system_version`, `provisioning_job`, `server`), with `action`, `resourceId`, `limit` and `offset` filters. |
 
 Infrastructure logs are a read-only projection of the existing `audit_logs` table — there is no
@@ -305,6 +306,37 @@ in both places: configuration-class errors (`PROVIDER_NOT_CONFIGURED`, `CONFIGUR
 `INVALID_CONFIGURATION`, `IMAGE_UNAVAILABLE`) are terminal and never retried automatically,
 while transient errors (`RATE_LIMITED`, `PROVIDER_TIMEOUT`, `NETWORK_TEMPORARY_FAILURE`,
 `INSUFFICIENT_CAPACITY`) are retried by the durable queue with backoff.
+
+## Operating-system lifecycle (EOL)
+
+Every version carries an operator-entered `end_of_life_date`. The worker runs
+`sweepOperatingSystemLifecycle` hourly (and an admin can trigger it with
+`POST /api/v1/admin/os-lifecycle/sweep`) to advance the catalog:
+
+| Transition | Condition | Effect |
+| --- | --- | --- |
+| `ACTIVE`/`MAINTENANCE` → `EOL_WARNING` | end of life within 90 days (`warningDays`) | still orderable and reinstallable; every affected customer gets one in-app notice per server |
+| `ACTIVE`/`MAINTENANCE`/`EOL_WARNING` → `EOL` | end-of-life date has passed | removed from ordering and reinstall; customers are notified once per server |
+| `EOL` → `ARCHIVED` | 180 days past end of life (`archiveAfterDays`) **and** no server references the version | catalog cleanup only |
+
+`MAINTENANCE` remains a manual operator decision; the sweep never sets it.
+
+Guarantees the sweep must keep, all covered by `tests/integration/os-lifecycle.test.ts`:
+
+- **Running servers are never modified.** Status, IP, image, and recorded OS version stay exactly
+  as they were; only catalog rows change. A server keeps showing the version it actually runs,
+  annotated with its lifecycle state, instead of being silently re-pointed at another OS.
+- **Nothing is deleted.** A version is only archived once no server references it, so historical
+  records never dangle.
+- **New deployments stop immediately.** Public catalog, ordering, and reinstall queries only
+  accept `ACTIVE`, `MAINTENANCE` and `EOL_WARNING`, so an EOL version cannot be selected even
+  though existing servers still display it.
+- **Customers are told once.** The notification unique index makes repeated sweeps idempotent;
+  `GET /api/v1/servers/:id` returns `os_version_status` and `os_end_of_life_date`, and the
+  dashboard and server detail pages render a notice that states plainly that the server keeps
+  running and that reinstalling erases the disk.
+- **Everything is audited.** Each transition writes `OS_VERSION_EOL_WARNING`, `OS_VERSION_EOL`,
+  or `OS_VERSION_ARCHIVED` to `audit_logs`, visible in Admin → Infrastructure logs.
 
 ## Operating-system logos
 
@@ -315,6 +347,25 @@ families (Alpine, Arch, Kali, NixOS, openSUSE) at their SVGs, updating only rows
 `logo_url` is still `NULL` so operator branding is preserved. A family without a logo renders a
 text badge instead. A logo is never an installation image: installable artifacts exist only in
 `server_os_images.provider_image_id` / `provider_template_id`.
+
+## Customer notifications
+
+In-app notifications are durable and written inside the same transaction flow as the event that
+caused them; email is an optional bridge that never blocks or fakes the in-app record.
+
+| Type | Raised when | Shown as |
+| --- | --- | --- |
+| `SERVER_READY` | a provisioning job reaches READY after every health gate | success notice with the server link |
+| `SERVER_REINSTALLED` | a reinstall job completes and the new OS is attested | success notice |
+| `OS_EOL_WARNING` | the lifecycle sweep moves a version the customer runs to EOL_WARNING | warning notice, one per server |
+| `OS_EOL` | the lifecycle sweep moves that version to EOL | end-of-life notice, one per server |
+
+Customers read them at **Dashboard → Notifications** (`/dashboard/notifications`):
+`GET /api/v1/notifications` returns the list plus the unread count, and
+`POST /api/v1/notifications/:id/read` / `POST /api/v1/notifications/read-all` mark them read.
+All three are scoped to the authenticated user id, so a notification belonging to another
+account returns `404` rather than confirming it exists. Notification text never contains
+credentials, tokens or provider responses.
 
 ## Live acceptance run
 

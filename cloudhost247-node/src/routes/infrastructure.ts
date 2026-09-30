@@ -48,6 +48,7 @@ import { listAllProducts } from '../db/catalog-products';
 import { createInfrastructureProviderAdapter } from '../infrastructure/providers/registry';
 import { ADAPTER_PROFILES, describeProviderConfiguration } from '../infrastructure/providers/configuration';
 import { ProviderError } from '../infrastructure/providers/types';
+import { sweepOperatingSystemLifecycle } from '../services/os-lifecycle-service';
 import {
   cancelProvisioningJob,
   findProvisioningJobById,
@@ -55,7 +56,12 @@ import {
   retryProvisioningJob,
 } from '../db/server-provisioning';
 import { listDeploymentEvents, listDeploymentSteps } from '../db/deployments';
-import { listNotifications } from '../services/notification-service';
+import {
+  countUnreadNotifications,
+  listNotifications,
+  markAllNotificationsRead,
+  markNotificationRead,
+} from '../services/notification-service';
 
 const id = z.string().uuid();
 const slug = z.string().min(1).max(120).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
@@ -286,9 +292,24 @@ export async function registerInfrastructureRoutes(app: FastifyInstance,env: Env
     return { operatingSystems: groupConfiguration(rows).operatingSystems };
   });
 
+  // Customer notification centre. Every query is scoped to the authenticated user id.
   app.get('/api/v1/notifications',async (request) => {
     const auth = await authenticate(request,env,db);
-    return { notifications: await listNotifications(db,auth.userId) };
+    const [notifications,unread] = await Promise.all([
+      listNotifications(db,auth.userId),
+      countUnreadNotifications(db,auth.userId),
+    ]);
+    return { notifications,unread };
+  });
+  app.post<{ Params: { id: string } }>('/api/v1/notifications/:id/read',async (request) => {
+    const auth = await authenticate(request,env,db);
+    const updated = await markNotificationRead(db,auth.userId,parse(id,request.params.id));
+    if (!updated) throw new NotFoundError('No notification was found with that id');
+    return { read: true };
+  });
+  app.post('/api/v1/notifications/read-all',async (request) => {
+    const auth = await authenticate(request,env,db);
+    return { read: await markAllNotificationsRead(db,auth.userId) };
   });
 
   // Admin operating systems and versions.
@@ -474,6 +495,18 @@ export async function registerInfrastructureRoutes(app: FastifyInstance,env: Env
       failuresByCode:errors.rows,
       providers:providers.rows,
     };
+  });
+  /**
+   * Runs the end-of-life lifecycle sweep on demand. The worker runs the same function hourly;
+   * this endpoint lets an operator apply a freshly entered end-of-life date immediately.
+   * It only advances catalog statuses — running servers are never modified.
+   */
+  app.post('/api/v1/admin/os-lifecycle/sweep',async(request)=>{
+    const auth=await admin(request);
+    const body=parse(z.object({warningDays:z.number().int().min(1).max(730).optional(),archiveAfterDays:z.number().int().min(1).max(3650).optional()}).optional().default({}),request.body??{});
+    const transitions=await sweepOperatingSystemLifecycle(db,body);
+    await auditRequest(db,request,auth.userId,{action:'OS_LIFECYCLE_SWEPT',resourceType:'operating_system_version',metadata:{transitions:transitions.length}});
+    return {transitions};
   });
   /**
    * Infrastructure logs (spec §27). A read-only projection of the existing append-only

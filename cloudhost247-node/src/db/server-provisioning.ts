@@ -68,6 +68,7 @@ export interface CustomerServerDetailRow {
   os_version: string | null;
   os_display_name: string | null;
   os_version_status: string | null;
+  os_end_of_life_date: string | null;
   os_image_id: string | null;
   control_panel_id?: string | null;
   control_panel_name?: string | null;
@@ -94,6 +95,7 @@ const CUSTOMER_SERVER_SELECT = `
     dc.name datacenter_name,
     os.name os_name, os.slug os_slug, os.logo_url os_logo_url,
     osv.version os_version, osv.display_name os_display_name, osv.status os_version_status,
+    osv.end_of_life_date os_end_of_life_date,
     cp.name control_panel_name, cp.slug control_panel_slug, cp.logo_url control_panel_logo_url,
     cp.category control_panel_category, cp.installation_method control_panel_installation_method,
     cp.capabilities control_panel_capabilities

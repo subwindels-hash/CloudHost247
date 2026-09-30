@@ -97,3 +97,28 @@
 .ch247-ok-text{color:#15803d;font-weight:600}
 .ch247-log-meta{display:block;max-width:420px;white-space:pre-wrap;word-break:break-word;color:#475569}
 @media(max-width:767px){.ch247-provider-config__facts{grid-template-columns:1fr}.ch247-log-meta{max-width:none}}
+
+/* Operating-system lifecycle notices (EOL warning / end of life) */
+.ch247-os-lifecycle{display:grid;gap:.3rem;padding:1rem 1.15rem;border-radius:10px;border:1px solid transparent}
+.ch247-os-lifecycle strong{font-size:.95rem}
+.ch247-os-lifecycle span{font-size:.88rem;line-height:1.45}
+.ch247-os-lifecycle small{font-size:.78rem;opacity:.85}
+.ch247-os-lifecycle.is-maintenance{background:#eff6ff;border-color:#bfdbfe;color:#1e40af}
+.ch247-os-lifecycle.is-warning{background:#fef3c7;border-color:#fcd34d;color:#92400e}
+.ch247-os-lifecycle.is-eol{background:#fee2e2;border-color:#fecaca;color:#991b1b}
+.ch247-os-lifecycle__tag{display:inline-block;margin-left:.35rem;padding:.1rem .45rem;border-radius:999px;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;vertical-align:middle}
+.ch247-os-lifecycle__tag.is-maintenance{background:#dbeafe;color:#1e40af}
+.ch247-os-lifecycle__tag.is-warning{background:#fef3c7;color:#92400e}
+.ch247-os-lifecycle__tag.is-eol{background:#fee2e2;color:#991b1b}
+
+/* Customer notification centre */
+.ch247-notification-list{list-style:none;margin:0;padding:0;display:grid;gap:.85rem}
+.ch247-notification{border-left:4px solid #cbd5e1}
+.ch247-notification.is-unread{border-left-color:#0756d8;background:#f8fbff}
+.ch247-notification.is-success.is-unread{border-left-color:#16a34a}
+.ch247-notification.is-warning.is-unread{border-left-color:#d97706}
+.ch247-notification.is-danger.is-unread{border-left-color:#dc2626}
+.ch247-notification__head{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;flex-wrap:wrap}
+.ch247-notification__head h2{margin:0;font-size:1.05rem}
+.ch247-notification__head time{color:#64748b;font-size:.8rem}
+.ch247-notification__body{white-space:pre-line;color:#475569;margin:.5rem 0 .85rem;font-size:.9rem;line-height:1.5}

@@ -76,3 +76,29 @@ export async function listNotifications(db: Queryable, userId: string) {
   );
   return rows;
 }
+
+export async function countUnreadNotifications(db: Queryable, userId: string): Promise<number> {
+  const { rows } = await db.query<{ count: string }>(
+    `SELECT count(*)::text count FROM user_notifications WHERE user_id=$1 AND read_at IS NULL`, [userId]
+  );
+  return Number(rows[0]?.count ?? '0');
+}
+
+/**
+ * Marks one notification read. Scoped by user id so a customer can never touch — or discover the
+ * existence of — another customer's notification.
+ */
+export async function markNotificationRead(db: Queryable, userId: string, notificationId: string): Promise<boolean> {
+  const { rows } = await db.query<{ id: string }>(
+    `UPDATE user_notifications SET read_at=COALESCE(read_at,now()) WHERE id=$1 AND user_id=$2 RETURNING id`,
+    [notificationId, userId]
+  );
+  return Boolean(rows[0]);
+}
+
+export async function markAllNotificationsRead(db: Queryable, userId: string): Promise<number> {
+  const { rows } = await db.query<{ id: string }>(
+    `UPDATE user_notifications SET read_at=now() WHERE user_id=$1 AND read_at IS NULL RETURNING id`, [userId]
+  );
+  return rows.length;
+}

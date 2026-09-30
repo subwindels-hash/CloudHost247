@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { CatalogErrorBanner, CatalogLoadingBanner } from '../components/CatalogStateBanner';
 import StatusBadge from '../components/StatusBadge';
+import OsLifecycleNotice from '../components/OsLifecycleNotice';
 import { apiFetch } from '../lib/api';
 import {
   fetchCustomerServer,
@@ -279,6 +280,12 @@ export default function ServerDetailPage() {
           <strong>{server.ip_address ?? 'IP pending'}</strong>
         </div>
       </section>
+
+      <OsLifecycleNotice
+        status={server.os_version_status}
+        displayName={server.os_display_name}
+        endOfLifeDate={server.os_end_of_life_date}
+      />
 
       {error && <CatalogErrorBanner message={error} />}
       {message && <p className="ch247-banner ch247-banner--info">{message}</p>}

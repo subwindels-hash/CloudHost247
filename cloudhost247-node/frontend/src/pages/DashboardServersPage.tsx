@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import OsLifecycleNotice from '../components/OsLifecycleNotice';
 import { CatalogErrorBanner, CatalogLoadingBanner } from '../components/CatalogStateBanner';
 import StatusBadge from '../components/StatusBadge';
 import { fetchCustomerServers, type CustomerServer } from '../lib/infrastructure-api';
@@ -29,7 +30,7 @@ export default function DashboardServersPage() {
       <h2>{server.name}</h2>
       <p className="ch247-server-card__os">
         {server.control_panel_name ? <strong style={{ color: '#0756d8' }}>{server.control_panel_name} · </strong> : null}
-        {server.os_display_name??'Unknown operating system'} · {server.architecture??'—'}
+        {server.os_display_name??'Unknown operating system'} · {server.architecture??'—'} <OsLifecycleNotice compact status={server.os_version_status} displayName={server.os_display_name} endOfLifeDate={server.os_end_of_life_date}/>
       </p>
       <div className="ch247-server-card__ip"><small>PUBLIC IP</small><strong>{server.ip_address??(server.provisioning_status?.replace(/_/g,' ')??'Pending')}</strong></div>
       <dl className="ch247-server-card__specs"><div><dt>CPU</dt><dd>{server.cpu_cores} vCPU</dd></div><div><dt>RAM</dt><dd>{Math.round(server.memory_mb/1024)} GB</dd></div><div><dt>Storage</dt><dd>{Math.round(server.storage_mb/1024)} GB</dd></div></dl>

@@ -37,6 +37,7 @@ import MyAppsPage from './pages/MyAppsPage';
 import AppInstancePage from './pages/AppInstancePage';
 import DeploymentDetailPage from './pages/DeploymentDetailPage';
 import DashboardServersPage from './pages/DashboardServersPage';
+import NotificationsPage from './pages/NotificationsPage';
 import DashboardDomainsPage from './pages/DashboardDomainsPage';
 import AdminAppsPage from './pages/AdminAppsPage';
 import AdminAppDetailPage from './pages/AdminAppDetailPage';
@@ -104,6 +105,7 @@ export default function App() {
           <Route path="/dashboard/apps/:id/domains" element={<AppInstancePage />} />
           <Route path="/dashboard/deployments/:id" element={<DeploymentDetailPage />} />
           <Route path="/dashboard/servers" element={<DashboardServersPage />} />
+          <Route path="/dashboard/notifications" element={<NotificationsPage />} />
           <Route path="/dashboard/servers/:id" element={<ServerDetailPage />} />
           <Route path="/dashboard/servers/:id/logs" element={<ServerLogsPage />} />
           <Route path="/servers/new" element={<NewServerPage />} />

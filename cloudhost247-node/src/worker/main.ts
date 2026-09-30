@@ -3,10 +3,13 @@ import { loadEnv } from '../config/env';
 import { getPool, closePool } from '../db/pool';
 import { processNextJob, recoverOrphanedJobs } from './handlers';
 import { scheduleHealthChecks, sweepSubscriptions } from './sweeps';
+import { sweepOperatingSystemLifecycle } from '../services/os-lifecycle-service';
 import type { EngineOptions } from '../deployments/engine';
 
 const HEALTHCHECK_INTERVAL_MS = 60_000;
 const SUBSCRIPTION_SWEEP_INTERVAL_MS = 5 * 60_000;
+// OS end-of-life dates move at most once a day; hourly is frequent enough and cheap.
+const OS_LIFECYCLE_SWEEP_INTERVAL_MS = 60 * 60_000;
 
 function engineOptions(simulationMode: boolean, kubernetesEnabled: boolean): EngineOptions {
   return { simulationMode, kubernetesEnabled };
@@ -29,6 +32,7 @@ async function main() {
   let running = true;
   let lastHealthSweep = 0;
   let lastSubscriptionSweep = 0;
+  let lastOsLifecycleSweep = 0;
 
   const shutdown = (signal: string) => {
     logger.log(`[worker:${workerId}] ${signal} received — draining`);
@@ -58,6 +62,13 @@ async function main() {
       if (now - lastSubscriptionSweep >= SUBSCRIPTION_SWEEP_INTERVAL_MS) {
         lastSubscriptionSweep = now;
         await sweepSubscriptions(pool);
+      }
+      if (now - lastOsLifecycleSweep >= OS_LIFECYCLE_SWEEP_INTERVAL_MS) {
+        lastOsLifecycleSweep = now;
+        const transitions = await sweepOperatingSystemLifecycle(pool);
+        for (const change of transitions) {
+          logger.log(`[worker:${workerId}] OS version ${change.displayName}: ${change.from} → ${change.to} (${change.notifiedServers} customer notice(s))`);
+        }
       }
 
       if (!didWork) {
