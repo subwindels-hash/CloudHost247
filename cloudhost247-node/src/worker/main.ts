@@ -6,6 +6,7 @@ import { scheduleHealthChecks, sweepSubscriptions } from './sweeps';
 import { sweepOperatingSystemLifecycle } from '../services/os-lifecycle-service';
 import { sweepScheduledTerminations } from '../services/server-termination-service';
 import { deliverNotificationOutbox } from '../services/notification-outbox-service';
+import { reconcileServerState } from '../services/infrastructure-reconciliation-service';
 import type { EngineOptions } from '../deployments/engine';
 
 const HEALTHCHECK_INTERVAL_MS = 60_000;
@@ -17,6 +18,9 @@ const OS_LIFECYCLE_SWEEP_INTERVAL_MS = 60 * 60_000;
 const TERMINATION_SWEEP_INTERVAL_MS = 15 * 60_000;
 // Notification emails are queued, not sent inline, so this drain is what actually delivers them.
 const NOTIFICATION_OUTBOX_INTERVAL_MS = 60_000;
+// Provider state drifts slowly and each check is a provider API call, so the sweep walks a
+// bounded batch of the oldest-checked servers every ten minutes rather than polling everything.
+const RECONCILIATION_INTERVAL_MS = 10 * 60_000;
 
 function engineOptions(simulationMode: boolean, kubernetesEnabled: boolean): EngineOptions {
   return { simulationMode, kubernetesEnabled };
@@ -42,6 +46,7 @@ async function main() {
   let lastOsLifecycleSweep = 0;
   let lastTerminationSweep = 0;
   let lastNotificationDrain = 0;
+  let lastReconciliation = 0;
 
   const shutdown = (signal: string) => {
     logger.log(`[worker:${workerId}] ${signal} received — draining`);
@@ -92,6 +97,13 @@ async function main() {
         const delivery = await deliverNotificationOutbox(pool);
         if (delivery.claimed > 0) {
           logger.log(`[worker:${workerId}] notification outbox: ${delivery.delivered} delivered, ${delivery.retrying} retrying, ${delivery.failed} failed, ${delivery.configurationRequired} awaiting configuration`);
+        }
+      }
+
+      if (now - lastReconciliation >= RECONCILIATION_INTERVAL_MS) {
+        lastReconciliation = now;
+        for (const drift of await reconcileServerState(pool)) {
+          logger.log(`[worker:${workerId}] drift on ${drift.name}: ${drift.kind} ${drift.from} → ${drift.to}${drift.applied ? ' (applied)' : ' (reported only)'}`);
         }
       }
 

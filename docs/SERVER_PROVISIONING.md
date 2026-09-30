@@ -298,6 +298,8 @@ Reinstall requires server ownership, provider/product capability, the literal co
 | `POST /api/v1/admin/provisioning-jobs/:id/{retry,cancel}` | Operator recovery for failed or queued jobs. |
 | `GET /api/v1/admin/provisioning-metrics` | Totals, success rate, average duration, retries, queue depth, jobs stalled over 30 minutes, failures grouped by error code, and per-provider job health. |
 | `POST /api/v1/admin/os-lifecycle/sweep` | Applies a freshly entered end-of-life date immediately; the worker runs the same sweep hourly. |
+| `GET /api/v1/admin/server-drift` | Servers whose recorded state disagreed with their provider, with what was adopted and what was only reported. |
+| `POST /api/v1/admin/server-reconciliation/sweep` | Re-checks a batch of servers against their providers now; the worker runs the same sweep every 10 minutes. |
 | `GET /api/v1/admin/notification-outbox` | Email delivery health: queued/delivered/failed counts plus the rows that are failing and why. |
 | `POST /api/v1/admin/notification-outbox/drain` | Sends queued notification emails now; the worker runs the same drain every minute. |
 | `POST /api/v1/admin/server-terminations/sweep` | Destroys servers whose scheduled cancellation is due; the worker runs the same sweep every 15 minutes. |
@@ -309,6 +311,31 @@ in both places: configuration-class errors (`PROVIDER_NOT_CONFIGURED`, `CONFIGUR
 `INVALID_CONFIGURATION`, `IMAGE_UNAVAILABLE`) are terminal and never retried automatically,
 while transient errors (`RATE_LIMITED`, `PROVIDER_TIMEOUT`, `NETWORK_TEMPORARY_FAILURE`,
 `INSUFFICIENT_CAPACITY`) are retried by the durable queue with backoff.
+
+## Provider state reconciliation
+
+Health checks used to run exactly once, at provisioning time. After that the platform only
+learned about a server's state when it changed that state itself — so a machine powered off from
+the provider's own console, given a new IP, or destroyed outside CloudHost247 kept showing the
+old state on the customer's dashboard indefinitely.
+
+`reconcileServerState` (worker, every 10 minutes; also
+`POST /api/v1/admin/server-reconciliation/sweep`) walks a bounded batch of servers oldest-checked
+first — `servers.last_reconciled_at`, added by migration `0050_server_state_reconciliation.sql` —
+and asks the provider what it actually has.
+
+| Finding | Action | Applied? |
+| --- | --- | --- |
+| Provider reports a different power state | server set to `active`/`stopped` (`maintenance` is an operator decision and is never overwritten) | Yes |
+| Provider reports a different IP | `servers.ip_address` updated | Yes |
+| Provider reports a different image | recorded and audited only | **No** — rewriting the OS from a provider string would be guesswork, and the catalog is what we sold |
+| Provider has no such resource | flagged `MISSING_AT_PROVIDER`; the row is **kept** for investigation | No |
+| …and the platform was already `deleting` it | `TERMINATION_CONFIRMED`, server set to `retired` | Yes |
+| Provider unreachable or unconfigured | `PROVIDER_UNREACHABLE`; the server record is untouched | No |
+
+Every finding is written to `servers.metadata.reconciliation`, audited as `SERVER_DRIFT_<kind>`,
+and listed under **Admin → Infrastructure → Infrastructure logs**. `last_reconciled_at` advances
+even when a provider call fails, so one broken integration cannot starve the rest of the fleet.
 
 ## Operating-system lifecycle (EOL)
 

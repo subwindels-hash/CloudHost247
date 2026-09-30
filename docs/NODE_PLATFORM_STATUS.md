@@ -977,3 +977,15 @@ sub-phase before the next one begins.
   - **Failure classification:** unconfigured webhook and `401`/`403` park as `CONFIGURATION_REQUIRED` and are retried every 15 minutes without consuming the attempt budget; `408`/`429`/`5xx`/network errors back off 1 → 5 → 15 → 60 → 240 minutes up to `max_attempts`; other `4xx` fail permanently; `2xx` is never re-sent.
   - **Operator visibility:** `GET /api/v1/admin/notification-outbox` and `POST /api/v1/admin/notification-outbox/drain`, surfaced as a "Notification delivery" panel on `/admin/infrastructure/logs` listing every stuck or failed delivery with its reason.
   - **Tests added:** `tests/integration/notification-outbox.test.ts` (7).
+
+---
+
+## Phase 7 (continued) — Provider state reconciliation
+
+- **Source/local verification:** PASSED on branch `arena/01a0f219-cloudhost247`.
+  - **Full platform verification: 72 / 72 test files passing (529 / 529 tests), backend and frontend TypeScript clean.**
+  - **Migration artifact:** `cloudhost247-node/database/migrations/0050_server_state_reconciliation.sql` — adds `servers.last_reconciled_at` and a partial index so the sweep can round-robin oldest-checked first. Additive and nullable.
+  - **Closed gap:** health checks only ran once, during provisioning. A server powered off from the provider's own console, re-addressed, or destroyed outside CloudHost247 kept showing its old state on the dashboard forever.
+  - **`src/services/infrastructure-reconciliation-service.ts`:** asks each provider what it actually has (worker every 10 minutes, bounded batch). Power state and IP are adopted; an image mismatch is reported but never rewritten (the catalog, not a provider string, decides which OS was sold); a missing resource is flagged without deleting the record, and only confirms `retired` when the platform was already deleting it; an unreachable or unconfigured provider changes nothing about the server, while `last_reconciled_at` still advances so one broken integration cannot starve the fleet.
+  - **Operator surface:** `GET /api/v1/admin/server-drift`, `POST /api/v1/admin/server-reconciliation/sweep`, and a "Provider state drift" panel on `/admin/infrastructure/logs`. Every finding is audited as `SERVER_DRIFT_<kind>`.
+  - **Tests added:** `tests/integration/server-reconciliation.test.ts` (7).

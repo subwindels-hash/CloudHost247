@@ -16,6 +16,15 @@ interface InfrastructureLog {
   created_at: string;
 }
 
+interface DriftRecord {
+  id: string;
+  name: string;
+  hostname: string;
+  status: string;
+  last_reconciled_at: string | null;
+  reconciliation: { kind: string; from: string | null; to: string | null; detail: string | null; applied: boolean; observedAt: string } | null;
+}
+
 interface OutboxSummary { status: string; channel: string; count: number; oldest_created_at: string | null }
 interface OutboxProblem {
   id: string;
@@ -53,6 +62,8 @@ export default function AdminInfrastructureLogsPage() {
   const [page, setPage] = useState(0);
   const [outbox, setOutbox] = useState<{ summary: OutboxSummary[]; problems: OutboxProblem[] } | null>(null);
   const [draining, setDraining] = useState(false);
+  const [drift, setDrift] = useState<DriftRecord[] | null>(null);
+  const [reconciling, setReconciling] = useState(false);
   const [notice, setNotice] = useState('');
   const pageSize = 50;
 
@@ -93,8 +104,31 @@ export default function AdminInfrastructureLogsPage() {
     }
   }
 
+  const loadDrift = useCallback(async () => {
+    try {
+      setDrift((await apiFetch<{ servers: DriftRecord[] }>('/api/v1/admin/server-drift')).servers);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Could not load server drift');
+    }
+  }, []);
+
+  async function reconcile() {
+    setReconciling(true);
+    setNotice('');
+    try {
+      const result = await apiFetch<{ drifts: unknown[] }>('/api/v1/admin/server-reconciliation/sweep', { method: 'POST' });
+      setNotice(`Reconciliation finished: ${result.drifts.length} server(s) disagreed with their provider.`);
+      await loadDrift();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Could not reconcile server state');
+    } finally {
+      setReconciling(false);
+    }
+  }
+
   useEffect(() => { void load(); }, [load]);
   useEffect(() => { void loadOutbox(); }, [loadOutbox]);
+  useEffect(() => { void loadDrift(); }, [loadDrift]);
 
   return (
     <div className="ch247-stack">
@@ -127,6 +161,46 @@ export default function AdminInfrastructureLogsPage() {
             />
           </label>
         </div>
+      </section>
+      <section className="ch247-card">
+        <div className="ch247-section-heading">
+          <div>
+            <h2>Provider state drift</h2>
+            <p className="ch247-page__hint">
+              The worker asks each provider what it actually has every ten minutes. Power state and IP address are
+              adopted from the provider; a mismatched image is reported only, because the catalog — not a provider
+              string — decides which operating system we sold.
+            </p>
+          </div>
+          <button className="ch247-btn" disabled={reconciling} onClick={() => void reconcile()}>
+            {reconciling ? 'Checking…' : 'Re-check now'}
+          </button>
+        </div>
+        {drift && drift.length === 0 && <p className="ch247-page__hint">Every checked server matches its provider.</p>}
+        {drift && drift.length > 0 && (
+          <div className="ch247-table-wrap">
+            <table className="ch247-table">
+              <thead>
+                <tr><th>Server</th><th>Recorded state</th><th>Drift</th><th>Observed</th><th>Detail</th></tr>
+              </thead>
+              <tbody>
+                {drift.map((row) => (
+                  <tr key={row.id}>
+                    <td>{row.name}<br /><small>{row.hostname}</small></td>
+                    <td>{row.status}</td>
+                    <td>
+                      <strong>{row.reconciliation?.kind}</strong>
+                      <br />
+                      <small>{row.reconciliation?.from ?? '—'} → {row.reconciliation?.to ?? '—'} {row.reconciliation?.applied ? '(applied)' : '(reported)'}</small>
+                    </td>
+                    <td>{row.reconciliation?.observedAt ? new Date(row.reconciliation.observedAt).toLocaleString() : '—'}</td>
+                    <td><small>{row.reconciliation?.detail ?? '—'}</small></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
       <section className="ch247-card">
         <div className="ch247-section-heading">

@@ -49,6 +49,7 @@ import { createInfrastructureProviderAdapter } from '../infrastructure/providers
 import { ADAPTER_PROFILES, describeProviderConfiguration } from '../infrastructure/providers/configuration';
 import { ProviderError } from '../infrastructure/providers/types';
 import { sweepScheduledTerminations } from '../services/server-termination-service';
+import { listServerDrift, reconcileServerState } from '../services/infrastructure-reconciliation-service';
 import {
   deliverNotificationOutbox,
   listFailedNotificationDeliveries,
@@ -524,6 +525,22 @@ export async function registerInfrastructureRoutes(app: FastifyInstance,env: Env
     const terminated=await sweepScheduledTerminations(db);
     await auditRequest(db,request,auth.userId,{action:'SERVER_TERMINATIONS_SWEPT',resourceType:'server',metadata:{servers:terminated.length}});
     return {terminated};
+  });
+  /**
+   * Server state drift. The worker asks each provider what it actually has every ten minutes;
+   * this lists what disagreed with our records, and lets an operator re-check immediately.
+   */
+  app.get('/api/v1/admin/server-drift',async(request)=>{
+    await admin(request);
+    const query=parse(z.object({limit:z.coerce.number().int().min(1).max(200).optional()}),request.query??{});
+    return {servers:await listServerDrift(db,query.limit??100)};
+  });
+  app.post('/api/v1/admin/server-reconciliation/sweep',async(request)=>{
+    const auth=await admin(request);
+    const body=parse(z.object({limit:z.number().int().min(1).max(200).optional()}),request.body??{});
+    const drifts=await reconcileServerState(db,{limit:body.limit??25});
+    await auditRequest(db,request,auth.userId,{action:'SERVER_RECONCILIATION_SWEPT',resourceType:'server',metadata:{drifts:drifts.length}});
+    return {drifts};
   });
   /**
    * Notification delivery health. Email is queued in `notification_outbox` and delivered by the
