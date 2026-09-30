@@ -94,44 +94,25 @@ describe('SSL Certificates & Firewall Security APIs Integration', () => {
   });
 
   describe('Server Firewall Rules & Baseline Security', () => {
-    it('applies baseline security rules matching the server control panel', async () => {
-      // Apply baseline firewall (cPanel has WHM 2087, cPanel 2083, webmail, HTTP/HTTPS, SSH 22)
+    it('fails closed when no provider or authenticated-agent firewall integration exists', async () => {
       const baseRes = await app.inject({
         method: 'POST',
         url: `/api/v1/servers/${serverId}/firewall/baseline`,
         headers: { authorization: `Bearer ${userToken}` },
       });
+      expect(baseRes.statusCode).toBe(400);
+      expect(JSON.parse(baseRes.payload).message).toContain('unavailable');
 
-      expect(baseRes.statusCode).toBe(201);
-      const rules = JSON.parse(baseRes.payload).rules;
-      expect(rules.length).toBeGreaterThanOrEqual(5);
-
-      const ports = rules.map((r: any) => r.port_range_start);
-      expect(ports).toContain(22); // SSH
-      expect(ports).toContain(2087); // WHM
-      expect(ports).toContain(2083); // cPanel
-
-      // Add a custom rule
       const customRes = await app.inject({
         method: 'POST',
         url: `/api/v1/servers/${serverId}/firewall`,
         headers: { authorization: `Bearer ${userToken}` },
-        payload: {
-          protocol: 'tcp',
-          portRangeStart: 8088,
-          description: 'Custom staging proxy',
-        },
+        payload: { protocol: 'tcp', portRangeStart: 8088, description: 'Custom staging proxy' },
       });
-      expect(customRes.statusCode).toBe(201);
-      const customRule = JSON.parse(customRes.payload).rule;
-
-      // Delete the custom rule
-      const delRes = await app.inject({
-        method: 'DELETE',
-        url: `/api/v1/servers/${serverId}/firewall/${customRule.id}`,
-        headers: { authorization: `Bearer ${userToken}` },
-      });
-      expect(delRes.statusCode).toBe(204);
+      expect(customRes.statusCode).toBe(400);
+      expect((await db.query<{count:number}>(
+        `SELECT count(*)::int count FROM firewall_rules WHERE server_id=$1`,[serverId]
+      )).rows[0]?.count).toBe(0);
     });
 
     it('rejects unauthorized access from other users', async () => {

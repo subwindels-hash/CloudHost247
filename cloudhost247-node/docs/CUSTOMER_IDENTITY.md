@@ -1,7 +1,7 @@
 # Customer identity, Security Number, user management and support mode
 
 This document is the contract for the identity layer added in migration
-`0051_customer_identity_and_support_sessions.sql`. It covers four related features:
+`0053_customer_identity_and_support_sessions.sql`. It covers four related features:
 
 1. the permanent six-digit **Customer ID**,
 2. the rotating four-digit **Security Number**,

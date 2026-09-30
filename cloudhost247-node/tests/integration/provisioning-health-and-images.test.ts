@@ -84,8 +84,20 @@ describe('image resolution and health verification', () => {
   it('accepts only the verified, matching mapping', async () => {
     const image = await resolveVerifiedProviderImage(db, {
       osImageId: verifiedImageId, provider: provider(), architecture: 'x86_64',
+      operatingSystemVersionId: UBUNTU_2404, regionId, datacenterId: null,
     });
     expect(image.provider_image_id).toBe('ubuntu-24.04');
+  });
+
+  it('rechecks version and location scope when a queued job is executed', async () => {
+    await expect(resolveVerifiedProviderImage(db, {
+      osImageId: verifiedImageId, provider: provider(), architecture: 'x86_64',
+      operatingSystemVersionId: DEBIAN_13, regionId, datacenterId: null,
+    })).rejects.toMatchObject({ code: 'INVALID_CONFIGURATION' });
+    await expect(resolveVerifiedProviderImage(db, {
+      osImageId: verifiedImageId, provider: provider(), architecture: 'x86_64',
+      operatingSystemVersionId: UBUNTU_2404, regionId: randomUUID(), datacenterId: null,
+    })).rejects.toMatchObject({ code: 'INVALID_CONFIGURATION' });
   });
 
   it('refuses a reinstall target that is not an enabled configuration for the server', async () => {

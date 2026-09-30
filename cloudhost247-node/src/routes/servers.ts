@@ -456,18 +456,13 @@ export async function registerServerRoutes(app: FastifyInstance, env: Env, overr
     const input = parseOrThrow(resizeServerSchema, request.body ?? {});
     const server = await findOwnedCustomerServer(pool, serverId, auth.userId);
     if (!server || !server.provider_id) throw new NotFoundError('No server was found with that id');
+    if (server.capabilities?.resize !== true) throw new ValidationError('Resize is not supported for this server');
     if (!server.provider_server_id) throw new ConflictError('The server has not been created at the provider yet');
-    const result = await enqueueServerProvisioningJob(pool, {
-      serverId: server.id,
-      providerId: server.provider_id,
-      osImageId: server.os_image_id,
-      operation: 'RESIZE',
-      requestedBy: auth.userId,
-      idempotencyKey: requestIdempotencyKey(request, server.id, 'RESIZE'),
-      payload: { planMetadata: input.planMetadata ?? {}, targetPlanId: input.targetPlanId },
-    });
-    await auditRequest(pool, request, auth.userId, { action: 'SERVER_RESIZE_QUEUED', resourceType: 'server', resourceId: server.id, metadata: { jobId: result.job.id } });
-    return { jobId: result.job.id, status: result.job.status, queued: result.created };
+    // Provider sizing metadata is price-sensitive and must never come directly from a customer.
+    // A paid upgrade-order flow is not implemented yet, so fail closed instead of granting an
+    // unbilled provider resize through a crafted API request.
+    void input;
+    throw new ConflictError('Self-service resize requires a paid upgrade order and is not available yet');
   });
 
   app.post<{ Params: { id: string } }>('/api/v1/servers/:id/snapshots', async (request, reply) => {
@@ -476,6 +471,7 @@ export async function registerServerRoutes(app: FastifyInstance, env: Env, overr
     const input = parseOrThrow(createSnapshotSchema, request.body ?? {});
     const server = await findOwnedCustomerServer(pool, serverId, auth.userId);
     if (!server || !server.provider_id) throw new NotFoundError('No server was found with that id');
+    if (server.capabilities?.snapshot !== true) throw new ValidationError('Snapshots are not supported for this server');
     if (!server.provider_server_id) throw new ConflictError('The server has not been created at the provider yet');
     const result = await enqueueServerProvisioningJob(pool, {
       serverId: server.id,
@@ -497,6 +493,7 @@ export async function registerServerRoutes(app: FastifyInstance, env: Env, overr
     const snapshotId = parseOrThrow(z.string().min(1).max(255), request.params.snapshotId);
     const server = await findOwnedCustomerServer(pool, serverId, auth.userId);
     if (!server || !server.provider_id) throw new NotFoundError('No server was found with that id');
+    if (server.capabilities?.snapshot !== true) throw new ValidationError('Snapshots are not supported for this server');
     if (!server.provider_server_id) throw new ConflictError('The server has not been created at the provider yet');
     const result = await enqueueServerProvisioningJob(pool, {
       serverId: server.id,
@@ -518,6 +515,7 @@ export async function registerServerRoutes(app: FastifyInstance, env: Env, overr
     const snapshotId = parseOrThrow(z.string().min(1).max(255), request.params.snapshotId);
     const server = await findOwnedCustomerServer(pool, serverId, auth.userId);
     if (!server || !server.provider_id) throw new NotFoundError('No server was found with that id');
+    if (server.capabilities?.snapshot !== true) throw new ValidationError('Snapshots are not supported for this server');
     if (!server.provider_server_id) throw new ConflictError('The server has not been created at the provider yet');
     const result = await enqueueServerProvisioningJob(pool, {
       serverId: server.id,
@@ -539,6 +537,9 @@ export async function registerServerRoutes(app: FastifyInstance, env: Env, overr
     const server = await findOwnedCustomerServer(pool,serverId,auth.userId);
     if (!server || !server.plan_id || !server.provider_id || !server.region_id) throw new NotFoundError('No server was found with that id');
     if (server.capabilities?.reinstall !== true) throw new ValidationError('OS reinstall is not supported for this server');
+    if (!server.architecture || input.architecture !== server.architecture) {
+      throw new ValidationError('A reinstall cannot change the server architecture');
+    }
     if (!server.provider_server_id || !['active','stopped','error'].includes(server.status)) throw new ConflictError('This server cannot be reinstalled in its current state');
     // The target OS is re-resolved server-side through the shared image resolver: the client's
     // selection is only a pair of catalog ids, never a provider image reference.

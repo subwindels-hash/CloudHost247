@@ -124,7 +124,7 @@ export async function provisionPaidOrder(tx: Queryable, order: OrderRow, genId: 
         requestedBy: order.user_id,
         idempotencyKey: `server-provision:${server.id}:${order.id}`,
         payload: { serverId: server.id },
-      });
+      },{alreadyInTransaction:true});
       if (result.created) {
         report.serverJobsQueued.push(result.job.id);
         await updateCustomerServerProvisioning(tx,server.id,{ status: 'queued',provisioningStatus: 'QUEUED' });

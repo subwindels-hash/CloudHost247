@@ -243,14 +243,19 @@ export async function listAvailableConfigurations(
 ): Promise<AvailableConfigurationRow[]> {
   const params: unknown[] = [input.planId];
   const conditions = [
-    `c.plan_id=$1`, `c.status='ACTIVE'`, `p.status='ACTIVE'`, `r.status='ACTIVE'`,
+    `c.plan_id=$1`, `c.status='ACTIVE'`, `plan.status='active'`,
+    `product.status='active'`, `product.visibility='public'`,
+    `p.status='ACTIVE'`, `r.status='ACTIVE'`,
     `os.status='ACTIVE'`, `v.status IN ('ACTIVE','MAINTENANCE','EOL_WARNING')`,
     `((c.server_type='VPS' AND os.is_vps_supported=true) OR (c.server_type='DEDICATED' AND os.is_dedicated_supported=true) OR (c.server_type='CLOUD' AND os.is_cloud_supported=true))`,
+    `(c.datacenter_id IS NULL OR (dc.status='ACTIVE' AND dc.region_id=c.region_id))`,
+  ];
+  const imageConditions = [
     `img.status='ACTIVE'`, `img.verified_at IS NOT NULL`,
     `img.provider_id=c.provider_id`, `img.operating_system_version_id=c.operating_system_version_id`,
     `img.architecture=c.architecture`,
     `(img.region_id IS NULL OR img.region_id=c.region_id)`,
-    `(img.datacenter_id IS NULL OR img.datacenter_id=c.datacenter_id)`,
+    `(img.datacenter_id IS NULL OR (img.datacenter_id=c.datacenter_id AND img.region_id=c.region_id))`,
   ];
   const add = (fragment: string, value: unknown) => { params.push(value); conditions.push(fragment.replace('?', `$${params.length}`)); };
   if (input.serverType) add(`c.server_type=?`, input.serverType);
@@ -269,13 +274,15 @@ export async function listAvailableConfigurations(
        v.is_default,v.is_recommended,v.is_lts,v.end_of_life_date,
        img.id image_id,c.metadata configuration_metadata
      FROM server_product_configurations c
+     JOIN product_plans plan ON plan.id=c.plan_id
+     JOIN products product ON product.id=plan.product_id
      JOIN infrastructure_providers p ON p.id=c.provider_id
-     JOIN infrastructure_regions r ON r.id=c.region_id
+     JOIN infrastructure_regions r ON r.id=c.region_id AND r.provider_id=p.id
      LEFT JOIN infrastructure_datacenters dc ON dc.id=c.datacenter_id
      JOIN operating_system_versions v ON v.id=c.operating_system_version_id
      JOIN operating_systems os ON os.id=v.operating_system_id
-     JOIN server_os_images img ON ${conditions.slice(7, 13).join(' AND ')}
-     WHERE ${conditions.slice(0, 7).concat(conditions.slice(13)).join(' AND ')}
+     JOIN server_os_images img ON ${imageConditions.join(' AND ')}
+     WHERE ${conditions.join(' AND ')}
      ORDER BY c.id,
        CASE WHEN img.datacenter_id=c.datacenter_id THEN 1 ELSE 0 END DESC,
        CASE WHEN img.region_id=c.region_id THEN 1 ELSE 0 END DESC`, params

@@ -1,4 +1,4 @@
--- Migration: 0051_customer_identity_and_support_sessions.sql
+-- Migration: 0053_customer_identity_and_support_sessions.sql
 -- Purpose: Customer identity (permanent six-digit Customer ID), the rotating four-digit Security
 -- Number credential, self-service profile fields, profile images, and delegated admin "support
 -- mode" sessions.

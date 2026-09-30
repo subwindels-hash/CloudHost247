@@ -10,6 +10,58 @@
 #   docker compose up -d
 #   docker compose exec app npm run migrate up     # explicit, controlled migrations
 #   docker compose exec app node dist/src/scripts-import-manifests.js   # or POST /api/v1/admin/manifests/import
+#
+# Keep this shared map on both app and worker. The app validates providers and resolves customer
+# choices; the worker performs the provider calls. Blank optional values fail closed in the adapter.
+x-provider-environment: &provider-environment
+  ALLOW_MOCK_PROVIDER: 'false'
+  APP_URL: ${APP_URL:?set APP_URL}
+  PROVISIONING_HEALTH_TIMEOUT_MS: '${PROVISIONING_HEALTH_TIMEOUT_MS:-600000}'
+  SERVER_AGENT_INSTALL_URL: ${SERVER_AGENT_INSTALL_URL:-}
+  NOTIFICATION_EMAIL_WEBHOOK_URL: ${NOTIFICATION_EMAIL_WEBHOOK_URL:-}
+  NOTIFICATION_EMAIL_WEBHOOK_TOKEN: ${NOTIFICATION_EMAIL_WEBHOOK_TOKEN:-}
+  HETZNER_API_URL: ${HETZNER_API_URL:-https://api.hetzner.cloud/v1}
+  HETZNER_API_TOKEN: ${HETZNER_API_TOKEN:-}
+  DIGITALOCEAN_API_URL: ${DIGITALOCEAN_API_URL:-https://api.digitalocean.com/v2}
+  DIGITALOCEAN_API_TOKEN: ${DIGITALOCEAN_API_TOKEN:-}
+  VULTR_API_URL: ${VULTR_API_URL:-https://api.vultr.com/v2}
+  VULTR_API_KEY: ${VULTR_API_KEY:-}
+  # Native AWS/Contabo adapters remain fail-closed; these are forwarded for configuration
+  # diagnostics and future upgrades, not as a claim that the adapters are production-ready.
+  AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+  AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+  AWS_REGION: ${AWS_REGION:-us-east-1}
+  CONTABO_API_URL: ${CONTABO_API_URL:-https://api.contabo.com/v1}
+  CONTABO_CLIENT_ID: ${CONTABO_CLIENT_ID:-}
+  CONTABO_CLIENT_SECRET: ${CONTABO_CLIENT_SECRET:-}
+  CONTABO_API_USER: ${CONTABO_API_USER:-}
+  CONTABO_API_PASSWORD: ${CONTABO_API_PASSWORD:-}
+  OVH_APPLICATION_KEY: ${OVH_APPLICATION_KEY:-}
+  OVH_APPLICATION_SECRET: ${OVH_APPLICATION_SECRET:-}
+  OVH_CONSUMER_KEY: ${OVH_CONSUMER_KEY:-}
+  OVH_CLOUD_PROJECT_ID: ${OVH_CLOUD_PROJECT_ID:-}
+  OVH_API_ENDPOINT: ${OVH_API_ENDPOINT:-}
+  PROXMOX_API_TOKEN: ${PROXMOX_API_TOKEN:-}
+  PROXMOX_API_URL: ${PROXMOX_API_URL:-}
+  VIRTUALIZOR_API_KEY: ${VIRTUALIZOR_API_KEY:-}
+  VIRTUALIZOR_API_SECRET: ${VIRTUALIZOR_API_SECRET:-}
+  VIRTUALIZOR_API_URL: ${VIRTUALIZOR_API_URL:-}
+  SOLUSVM_API_ID: ${SOLUSVM_API_ID:-}
+  SOLUSVM_API_KEY: ${SOLUSVM_API_KEY:-}
+  SOLUSVM_API_URL: ${SOLUSVM_API_URL:-}
+  OPENSTACK_AUTH_URL: ${OPENSTACK_AUTH_URL:-}
+  OPENSTACK_USERNAME: ${OPENSTACK_USERNAME:-}
+  OPENSTACK_PASSWORD: ${OPENSTACK_PASSWORD:-}
+  OPENSTACK_PROJECT_ID: ${OPENSTACK_PROJECT_ID:-}
+  OPENSTACK_PROJECT_NAME: ${OPENSTACK_PROJECT_NAME:-}
+  OPENSTACK_USER_DOMAIN_NAME: ${OPENSTACK_USER_DOMAIN_NAME:-Default}
+  OPENSTACK_PROJECT_DOMAIN_NAME: ${OPENSTACK_PROJECT_DOMAIN_NAME:-Default}
+  OPENSTACK_REGION: ${OPENSTACK_REGION:-}
+  OPENSTACK_API_URL: ${OPENSTACK_API_URL:-}
+  OPENSTACK_IMAGE_URL: ${OPENSTACK_IMAGE_URL:-}
+  OPENSTACK_API_TOKEN: ${OPENSTACK_API_TOKEN:-}
+  PROVIDER_BRIDGE_API_TOKEN: ${PROVIDER_BRIDGE_API_TOKEN:-}
+
 services:
   postgres:
     image: postgres:17-alpine
@@ -46,6 +98,7 @@ services:
       postgres:
         condition: service_healthy
     environment:
+      <<: *provider-environment
       NODE_ENV: production
       APP_URL: ${APP_URL:?set APP_URL}
       DATABASE_URL: postgres://${POSTGRES_USER:-cloudhost247}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-cloudhost247}
@@ -75,12 +128,15 @@ services:
         condition: service_healthy
     command: ['node', 'dist/src/worker/main.js']
     environment:
+      <<: *provider-environment
       NODE_ENV: production
       DATABASE_URL: postgres://${POSTGRES_USER:-cloudhost247}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-cloudhost247}
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET}
       CREDENTIAL_ENCRYPTION_KEY: ${CREDENTIAL_ENCRYPTION_KEY:?set CREDENTIAL_ENCRYPTION_KEY}
-      WORKER_ID: worker-1
-      WORKER_CONCURRENCY: '4'
+      WORKER_ID: ${WORKER_ID:-worker-1}
+      WORKER_POLL_INTERVAL_MS: '${WORKER_POLL_INTERVAL_MS:-2000}'
+      WORKER_CONCURRENCY: '${WORKER_CONCURRENCY:-4}'
+      WORKER_LEASE_MS: '${WORKER_LEASE_MS:-120000}'
     volumes:
       - manifests:/app/manifests:ro
     networks: [internal]

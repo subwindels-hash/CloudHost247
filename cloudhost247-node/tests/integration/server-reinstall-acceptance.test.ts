@@ -229,6 +229,13 @@ describe('acceptance: order, provision, then reinstall onto another operating sy
     });
     expect(unconfirmed.statusCode).toBe(400);
 
+    const architectureChange = await app.inject({
+      method: 'POST', url: `/api/v1/servers/${serverId}/reinstall`, headers: { authorization: `Bearer ${token}` },
+      payload: { operatingSystemVersionId: DEBIAN_13, architecture: 'arm64', confirmation: 'REINSTALL' },
+    });
+    expect(architectureChange.statusCode).toBe(400);
+    expect(architectureChange.json().message).toContain('cannot change the server architecture');
+
     const intruder = await createUser(db, { id: randomUUID(), email: `intruder-${randomUUID()}@example.com`, passwordHash: 'hash', fullName: 'Intruder' });
     const stolen = await app.inject({
       method: 'POST', url: `/api/v1/servers/${serverId}/reinstall`,

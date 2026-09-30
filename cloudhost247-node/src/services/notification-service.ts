@@ -1,7 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import type { Queryable } from '../db/types';
 import type { CustomerServerDetailRow } from '../db/server-provisioning';
-import { enqueueNotificationEmail } from './notification-outbox-service';
 
 export interface NotificationInput {
   userId: string;
@@ -22,17 +21,35 @@ export interface NotificationInput {
  * call is made on the path that is finishing a customer's server.
  */
 export async function createNotification(db: Queryable, input: NotificationInput): Promise<string | null> {
+  const notificationId = randomUUID();
+  const outboxId = randomUUID();
+  // The in-app record and email outbox row are one statement, so a process/database failure cannot
+  // commit the notification while silently losing its delivery request. A duplicate resource
+  // notification inserts neither row.
   const { rows } = await db.query<{ id: string }>(
-    `INSERT INTO user_notifications (id,user_id,type,title,message,resource_type,resource_id)
-     VALUES ($1,$2,$3,$4,$5,$6,$7)
-     ON CONFLICT (user_id,type,resource_type,resource_id) WHERE resource_id IS NOT NULL DO NOTHING
-     RETURNING id`,
-    [randomUUID(),input.userId,input.type,input.title,input.message,input.resourceType ?? null,input.resourceId ?? null]
+    `WITH inserted AS (
+       INSERT INTO user_notifications (id,user_id,type,title,message,resource_type,resource_id)
+       VALUES ($1,$2,$3,$4,$5,$6,$7)
+       ON CONFLICT (user_id,type,resource_type,resource_id) WHERE resource_id IS NOT NULL DO NOTHING
+       RETURNING id
+     ), queued AS (
+       INSERT INTO notification_outbox (id,notification_id,channel,status,attempts,next_attempt_at)
+       SELECT $8,id,'EMAIL','PENDING',0,now() FROM inserted
+       RETURNING notification_id
+     )
+     SELECT inserted.id FROM inserted JOIN queued ON queued.notification_id=inserted.id`,
+    [
+      notificationId,
+      input.userId,
+      input.type,
+      input.title,
+      input.message,
+      input.resourceType ?? null,
+      input.resourceId ?? null,
+      outboxId,
+    ]
   );
-  const id = rows[0]?.id;
-  if (!id) return null;
-  await enqueueNotificationEmail(db, id);
-  return id;
+  return rows[0]?.id ?? null;
 }
 
 /** Announces a server that has passed every health gate, or a completed reinstall. */

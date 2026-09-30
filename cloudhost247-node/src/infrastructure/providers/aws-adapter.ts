@@ -1,10 +1,7 @@
 import type { InfrastructureProviderRow, ServerOsImageRow } from '../../db/infrastructure-providers';
 import { unsupportedRescue } from './common';
-import { providerRequest } from './http';
 import {
   ProviderError,
-  asRecord,
-  asString,
   type CreateProviderServerInput,
   type InfrastructureProviderAdapter,
   type ProviderHealthResult,
@@ -17,15 +14,11 @@ export class AwsProviderAdapter implements InfrastructureProviderAdapter {
   readonly kind = 'aws';
   private readonly accessKeyId: string | undefined;
   private readonly secretAccessKey: string | undefined;
-  private readonly region: string;
-  private readonly endpoint: string;
 
   constructor(readonly provider: InfrastructureProviderRow, source: NodeJS.ProcessEnv = process.env) {
     const prefix = provider.credential_env_prefix || 'AWS';
     this.accessKeyId = source[`${prefix}_ACCESS_KEY_ID`] ?? source.AWS_ACCESS_KEY_ID;
     this.secretAccessKey = source[`${prefix}_SECRET_ACCESS_KEY`] ?? source.AWS_SECRET_ACCESS_KEY;
-    this.region = source[`${prefix}_REGION`] ?? source.AWS_REGION ?? 'us-east-1';
-    this.endpoint = provider.api_base_url ?? `https://ec2.${this.region}.amazonaws.com`;
   }
 
   private ensureConfigured(): void {
@@ -36,14 +29,14 @@ export class AwsProviderAdapter implements InfrastructureProviderAdapter {
 
   async validateConfiguration(): Promise<void> {
     this.ensureConfigured();
-    // Signature v4 request or bridge proxy request
-    await providerRequest(`${this.endpoint}/`, { method: 'POST', body: 'Action=DescribeRegions&Version=2016-11-15' }, {
-      headers: { Authorization: `AWS4-HMAC-SHA256 Credential=${this.accessKeyId}` },
-    }).catch((err) => {
-      if (err instanceof ProviderError && (err.code === 'PROVIDER_NOT_CONFIGURED' || err.code === 'AUTHENTICATION_FAILED')) throw err;
-      // In dev or without mock AWS gateway, standard fail-closed
-      throw new ProviderError('AUTHENTICATION_FAILED', 'AWS API authentication validation failed', false);
-    });
+    // A credential id is not an AWS Signature Version 4 authorization header. Until a complete
+    // signer/native EC2 client is present, activation must fail rather than claiming a malformed
+    // request validated the account. Operators can use the real generic_http bridge adapter.
+    throw new ProviderError(
+      'SERVICE_UNAVAILABLE',
+      'The native AWS EC2 adapter is not enabled in this build; configure a generic_http provider bridge',
+      false
+    );
   }
 
   async createServer(input: CreateProviderServerInput): Promise<ProviderServer> {
@@ -95,9 +88,9 @@ export class AwsProviderAdapter implements InfrastructureProviderAdapter {
     throw new ProviderError('SERVICE_UNAVAILABLE', 'AWS snapshot restore requires active provider bridge', false);
   }
 
-  async getServerStatus(providerServerId: string): Promise<ProviderServer> {
+  async getServerStatus(_providerServerId: string): Promise<ProviderServer> {
     this.ensureConfigured();
-    return { id: providerServerId, status: 'unknown', name: null, ipAddress: null, imageId: null, metadata: {} };
+    throw new ProviderError('SERVICE_UNAVAILABLE', 'AWS status lookup requires an enabled native adapter or provider bridge', false);
   }
 
   async getServerIP(providerServerId: string): Promise<string | null> {
@@ -106,12 +99,12 @@ export class AwsProviderAdapter implements InfrastructureProviderAdapter {
 
   async getAvailableImages(): Promise<ProviderImage[]> {
     this.ensureConfigured();
-    return [];
+    throw new ProviderError('SERVICE_UNAVAILABLE', 'AWS image discovery requires an enabled native adapter or provider bridge', false);
   }
 
   async getImage(_image: ServerOsImageRow): Promise<ProviderImage | null> {
     this.ensureConfigured();
-    return null;
+    throw new ProviderError('SERVICE_UNAVAILABLE', 'AWS image lookup requires an enabled native adapter or provider bridge', false);
   }
 
   async reinstallServer(_input: ReinstallProviderServerInput): Promise<ProviderServer> {
@@ -124,16 +117,16 @@ export class AwsProviderAdapter implements InfrastructureProviderAdapter {
 
   async getConsole(_providerServerId: string): Promise<Record<string, unknown>> {
     this.ensureConfigured();
-    return {};
+    throw new ProviderError('SERVICE_UNAVAILABLE', 'AWS console access requires an enabled native adapter or provider bridge', false);
   }
 
   async getServerMetrics(_providerServerId: string): Promise<Record<string, unknown>> {
     this.ensureConfigured();
-    return {};
+    throw new ProviderError('SERVICE_UNAVAILABLE', 'AWS metrics require an enabled native adapter or provider bridge', false);
   }
 
-  async healthCheck(providerServerId: string, _expectedImage: ServerOsImageRow): Promise<ProviderHealthResult> {
+  async healthCheck(_providerServerId: string, _expectedImage: ServerOsImageRow): Promise<ProviderHealthResult> {
     this.ensureConfigured();
-    return { exists: false, poweredOn: false, ipAddress: null, imageMatches: false, providerStatus: 'unknown' };
+    throw new ProviderError('SERVICE_UNAVAILABLE', 'AWS health checks require an enabled native adapter or provider bridge', false);
   }
 }
