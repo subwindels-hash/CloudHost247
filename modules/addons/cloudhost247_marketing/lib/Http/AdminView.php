@@ -2,8 +2,11 @@
 namespace CloudHost247\Marketing\Http;
 
 use CloudHost247\Marketing\Domain\CampaignStatus;
+use CloudHost247\Marketing\Domain\ConsentStatus;
 use CloudHost247\Marketing\Domain\QueueStatus;
+use CloudHost247\Marketing\Domain\SubscriberSource;
 use CloudHost247\Marketing\Domain\SubscriberStatus;
+use CloudHost247\Marketing\Domain\SuppressionReason;
 
 /** WHMCS-admin-markup renderer (same conventions as the other first-party modules). */
 final class AdminView
@@ -15,16 +18,44 @@ final class AdminView
         return function_exists('generate_token') ? generate_token('plain') : '';
     }
 
+    private function base($view = '', array $query = array())
+    {
+        $url = 'addonmodules.php?module=cloudhost247_marketing';
+        if ($view !== '') { $url .= '&amp;view=' . urlencode($view); }
+        foreach ($query as $key => $value) {
+            if ($value === '' || $value === null) { continue; }
+            $url .= '&amp;' . urlencode((string) $key) . '=' . urlencode((string) $value);
+        }
+        return $url;
+    }
+
     public function render(array $data)
     {
-        echo '<h2>CloudHost247 Marketing <small style="font-size:12px;">v1.0.0 — queue-based campaigns via cPanel SMTP</small></h2>';
+        echo '<h2>CloudHost247 Marketing <small style="font-size:12px;">v1.1.0 — queue-based campaigns via cPanel SMTP</small></h2>';
         if ($data['error'] !== '') { echo '<div class="alert alert-danger">' . $this->e($data['error']) . '</div>'; }
         if ($data['notice'] !== '') { echo '<div class="alert alert-success">' . $this->e($data['notice']) . '</div>'; }
-        echo '<ul class="nav nav-tabs" role="tablist">'
-            . '<li role="presentation" class="' . ($data['view'] === 'dashboard' ? 'active' : '') . '"><a href="addonmodules.php?module=cloudhost247_marketing">Dashboard</a></li>'
-            . '<li role="presentation" class="' . ($data['view'] === 'settings' ? 'active' : '') . '"><a href="addonmodules.php?module=cloudhost247_marketing&amp;view=settings">Delivery Settings</a></li>'
-            . '</ul><div style="margin-top:14px;">';
+
+        $tabs = array(
+            'dashboard' => array('Dashboard', ''),
+            'subscribers' => array('Subscribers', 'subscribers'),
+            'lists' => array('Lists', 'lists'),
+            'import' => array('Import', 'import'),
+            'suppressions' => array('Suppression List', 'suppressions'),
+            'settings' => array('Delivery Settings', 'settings'),
+        );
+        $active = $data['view'] === 'subscriber' ? 'subscribers' : $data['view'];
+        echo '<ul class="nav nav-tabs" role="tablist">';
+        foreach ($tabs as $key => $tab) {
+            echo '<li role="presentation" class="' . ($active === $key ? 'active' : '') . '"><a href="' . $this->base($tab[1]) . '">' . $this->e($tab[0]) . '</a></li>';
+        }
+        echo '</ul><div style="margin-top:14px;">';
+
         if ($data['view'] === 'settings') { $this->renderSettings($data); }
+        elseif ($data['view'] === 'subscribers') { $this->renderSubscribers($data); }
+        elseif ($data['view'] === 'subscriber') { $this->renderSubscriberDetail($data); }
+        elseif ($data['view'] === 'lists') { $this->renderLists($data); }
+        elseif ($data['view'] === 'import') { $this->renderImport($data); }
+        elseif ($data['view'] === 'suppressions') { $this->renderSuppressions($data); }
         else { $this->renderDashboard($data); }
         echo '</div>';
     }
@@ -88,6 +119,332 @@ final class AdminView
         echo '<p class="text-muted">Capabilities: the Foundation capability registry can restrict operations to WHMCS roles '
             . '(<code>marketing.settings.manage</code>, <code>marketing.campaigns.manage</code>, <code>marketing.subscribers.manage</code>, '
             . '<code>marketing.sending.manage</code>, <code>marketing.analytics.view</code>).</p>';
+    }
+
+    // ------------------------------------------------------------ subscribers
+
+    private function renderSubscribers(array $data)
+    {
+        $s = $data['subscribers'];
+        $canManage = !empty($data['capabilities']['subscribers.manage']);
+        $filters = $s['filters'];
+
+        echo '<h4>Subscribers <span class="text-muted" style="font-size:12px;">' . (int) $s['total'] . ' matching</span></h4>';
+        echo '<form method="get" action="addonmodules.php" class="form-inline" style="margin-bottom:10px;">'
+            . '<input type="hidden" name="module" value="cloudhost247_marketing" /><input type="hidden" name="view" value="subscribers" />'
+            . '<input class="form-control" name="q" value="' . $this->e($filters['search']) . '" placeholder="Search email, name, company" /> '
+            . '<select class="form-control" name="status"><option value="">Any status</option>';
+        foreach ($s['statuses'] as $status) {
+            echo '<option value="' . $this->e($status) . '"' . ($filters['status'] === $status ? ' selected' : '') . '>' . $this->e(SubscriberStatus::label($status)) . '</option>';
+        }
+        echo '</select> <select class="form-control" name="consent"><option value="">Any consent</option>';
+        foreach ($s['consents'] as $consent) {
+            echo '<option value="' . $this->e($consent) . '"' . ($filters['consent_status'] === $consent ? ' selected' : '') . '>' . $this->e(ConsentStatus::label($consent)) . '</option>';
+        }
+        echo '</select> <select class="form-control" name="list"><option value="0">Any list</option>';
+        foreach ($s['lists'] as $list) {
+            echo '<option value="' . (int) $list->id . '"' . ((int) $filters['list_id'] === (int) $list->id ? ' selected' : '') . '>' . $this->e($list->name) . '</option>';
+        }
+        echo '</select> <select class="form-control" name="tag"><option value="0">Any tag</option>';
+        foreach ($s['tags'] as $tag) {
+            echo '<option value="' . (int) $tag->id . '"' . ((int) $filters['tag_id'] === (int) $tag->id ? ' selected' : '') . '>' . $this->e($tag->name) . '</option>';
+        }
+        echo '</select> <button class="btn btn-default">Filter</button></form>';
+
+        echo '<form method="post" action="' . $this->base('subscribers') . '" style="margin-bottom:14px;">'
+            . '<input type="hidden" name="token" value="' . $this->e($this->token()) . '" />'
+            . '<input type="hidden" name="action" value="subscribers.export" />'
+            . '<input type="hidden" name="filters[status]" value="' . $this->e($filters['status']) . '" />'
+            . '<input type="hidden" name="filters[consent_status]" value="' . $this->e($filters['consent_status']) . '" />'
+            . '<input type="hidden" name="filters[search]" value="' . $this->e($filters['search']) . '" />'
+            . '<input type="hidden" name="filters[list_id]" value="' . (int) $filters['list_id'] . '" />'
+            . '<input type="hidden" name="filters[tag_id]" value="' . (int) $filters['tag_id'] . '" />'
+            . '<button class="btn btn-default btn-sm" type="submit">Export this view (CSV)</button>'
+            . '<span class="text-muted" style="margin-left:8px;font-size:12px;">Exports are audited; spreadsheet formulas are neutralised.</span></form>';
+
+        if (!empty($data['download'])) {
+            echo '<div class="panel panel-default"><div class="panel-heading">CSV export — headers were already sent, so copy the content below</div>'
+                . '<div class="panel-body"><textarea class="form-control" rows="10" readonly>' . $this->e($data['download']['content']) . '</textarea></div></div>';
+        }
+
+        echo '<table class="table table-striped"><tr><th>Email</th><th>Name</th><th>Status</th><th>Consent</th><th>Source</th><th>Last activity</th><th></th></tr>';
+        foreach ($s['rows'] as $row) {
+            $name = trim((string) $row->first_name . ' ' . (string) $row->last_name);
+            echo '<tr><td><a href="' . $this->base('subscriber', array('id' => (int) $row->id)) . '">' . $this->e($row->email) . '</a></td>'
+                . '<td>' . $this->e($name !== '' ? $name : '—') . '</td>'
+                . '<td>' . $this->e(SubscriberStatus::label((string) $row->status)) . '</td>'
+                . '<td>' . $this->e(ConsentStatus::label((string) $row->consent_status)) . '</td>'
+                . '<td>' . $this->e(SubscriberSource::label((string) $row->source)) . '</td>'
+                . '<td>' . $this->e(isset($row->last_activity_at) && $row->last_activity_at ? $row->last_activity_at : '—') . '</td>'
+                . '<td><a class="btn btn-xs btn-default" href="' . $this->base('subscriber', array('id' => (int) $row->id)) . '">Open</a></td></tr>';
+        }
+        if (!$s['rows']) { echo '<tr><td colspan="7" class="text-muted">No subscribers match this filter yet.</td></tr>'; }
+        echo '</table>';
+        $this->pagination('subscribers', $s['page'], $s['pages'], array('q' => $filters['search'], 'status' => $filters['status'], 'consent' => $filters['consent_status'], 'list' => $filters['list_id'], 'tag' => $filters['tag_id']));
+
+        echo '<h4>Add a subscriber</h4>';
+        if (!$canManage) { echo '<div class="alert alert-warning">Your WHMCS role lacks marketing.subscribers.manage; this form is read-only for you.</div>'; }
+        echo '<form method="post" action="' . $this->base('subscribers') . '" class="form-inline">'
+            . '<input type="hidden" name="token" value="' . $this->e($this->token()) . '" /><input type="hidden" name="action" value="subscriber.save" />'
+            . '<input class="form-control" name="email" placeholder="email@example.com" required /> '
+            . '<input class="form-control" name="first_name" placeholder="First name" /> '
+            . '<input class="form-control" name="last_name" placeholder="Last name" /> '
+            . '<select class="form-control" name="consent_status">';
+        foreach ($s['consents'] as $consent) {
+            echo '<option value="' . $this->e($consent) . '">' . $this->e(ConsentStatus::label($consent)) . '</option>';
+        }
+        echo '</select> <input class="form-control" name="consent_source" placeholder="consent source (e.g. signup form)" /> '
+            . '<button class="btn btn-primary"' . ($canManage ? '' : ' disabled') . '>Add / update</button></form>';
+        echo '<p class="text-muted">A suppressed address cannot be added here — that is the point of the suppression list. Release the suppression first if it is genuinely intended.</p>';
+    }
+
+    private function renderSubscriberDetail(array $data)
+    {
+        $detail = $data['subscriberDetail'];
+        if (!$detail) { echo '<div class="alert alert-warning">That subscriber does not exist.</div>'; return; }
+        $row = $detail['subscriber'];
+        $canManage = !empty($data['capabilities']['subscribers.manage']);
+
+        echo '<h4>' . $this->e($row->email) . '</h4>';
+        echo '<p><a href="' . $this->base('subscribers') . '">&larr; All subscribers</a></p>';
+        echo '<table class="table table-condensed" style="max-width:760px;">'
+            . '<tr><th style="width:220px;">Status</th><td>' . $this->e(SubscriberStatus::label((string) $row->status)) . '</td></tr>'
+            . '<tr><th>Consent</th><td>' . $this->e(ConsentStatus::label((string) $row->consent_status))
+            . ($row->consent_source ? ' <span class="text-muted">(' . $this->e($row->consent_source) . ')</span>' : '') . '</td></tr>'
+            . '<tr><th>Sendable right now</th><td>' . ($detail['sendable']['sendable']
+                ? '<span class="label label-success">Yes</span>'
+                : '<span class="label label-danger">No</span> <span class="text-muted">' . $this->e($detail['sendable']['reason']) . '</span>') . '</td></tr>'
+            . '<tr><th>Bounces</th><td>' . (int) $row->bounce_count . ($row->bounce_type ? ' (' . $this->e($row->bounce_type) . ')' : '') . '</td></tr>'
+            . '<tr><th>Lists</th><td>';
+        foreach ($detail['lists'] as $list) { echo '<span class="label label-info">' . $this->e($list->name) . '</span> '; }
+        if (!$detail['lists']) { echo '<span class="text-muted">None</span>'; }
+        echo '</td></tr><tr><th>Tags</th><td>';
+        foreach ($detail['tags'] as $tag) { echo '<span class="label label-default">' . $this->e($tag->name) . '</span> '; }
+        if (!$detail['tags']) { echo '<span class="text-muted">None</span>'; }
+        echo '</td></tr>';
+        if ($detail['suppression']) {
+            echo '<tr><th>Suppression</th><td><span class="label label-danger">' . $this->e(SuppressionReason::label((string) $detail['suppression']->reason)) . '</span>'
+                . ' <span class="text-muted">' . $this->e($detail['suppression']->detail) . '</span> '
+                . ' <a href="' . $this->base('suppressions', array('q' => (string) $row->email)) . '">manage</a></td></tr>';
+        }
+        echo '</table>';
+
+        echo '<div class="row"><div class="col-sm-6">';
+        echo '<h4>Memberships</h4><form method="post" action="' . $this->base('subscriber', array('id' => (int) $row->id)) . '">'
+            . '<input type="hidden" name="token" value="' . $this->e($this->token()) . '" /><input type="hidden" name="action" value="subscriber.lists" />'
+            . '<input type="hidden" name="subscriber_id" value="' . (int) $row->id . '" />';
+        $memberIds = array();
+        foreach ($detail['lists'] as $list) { $memberIds[] = (int) $list->id; }
+        foreach ($detail['all_lists'] as $list) {
+            echo '<label class="checkbox-inline"><input type="checkbox" name="list_ids[]" value="' . (int) $list->id . '"'
+                . (in_array((int) $list->id, $memberIds, true) ? ' checked' : '') . ' /> ' . $this->e($list->name) . '</label><br />';
+        }
+        if (!$detail['all_lists']) { echo '<p class="text-muted">No active lists yet — create one first.</p>'; }
+        echo '<button class="btn btn-sm btn-primary"' . ($canManage ? '' : ' disabled') . ' style="margin-top:8px;">Save memberships</button></form>';
+
+        echo '<h4>Tags</h4><form method="post" action="' . $this->base('subscriber', array('id' => (int) $row->id)) . '" class="form-inline">'
+            . '<input type="hidden" name="token" value="' . $this->e($this->token()) . '" /><input type="hidden" name="action" value="subscriber.tag.add" />'
+            . '<input type="hidden" name="subscriber_id" value="' . (int) $row->id . '" />'
+            . '<input class="form-control" name="tag" placeholder="new-or-existing-tag" /> <button class="btn btn-sm btn-primary"' . ($canManage ? '' : ' disabled') . '>Add tag</button></form>';
+        foreach ($detail['tags'] as $tag) {
+            echo '<form method="post" action="' . $this->base('subscriber', array('id' => (int) $row->id)) . '" class="form-inline" style="margin-bottom:4px;">'
+                . '<input type="hidden" name="token" value="' . $this->e($this->token()) . '" /><input type="hidden" name="action" value="subscriber.tag.remove" />'
+                . '<input type="hidden" name="subscriber_id" value="' . (int) $row->id . '" />'
+                . '<input type="hidden" name="tag" value="' . $this->e($tag->tag_key) . '" />'
+                . '<span class="label label-default">' . $this->e($tag->name) . '</span> <button class="btn btn-xs btn-default"' . ($canManage ? '' : ' disabled') . '>remove</button></form>';
+        }
+        echo '</div><div class="col-sm-6">';
+
+        echo '<h4>Lifecycle</h4>';
+        echo '<form method="post" action="' . $this->base('subscriber', array('id' => (int) $row->id)) . '" style="margin-bottom:8px;">'
+            . '<input type="hidden" name="token" value="' . $this->e($this->token()) . '" /><input type="hidden" name="action" value="subscriber.unsubscribe" />'
+            . '<input type="hidden" name="email" value="' . $this->e($row->email) . '" />'
+            . '<button class="btn btn-sm btn-warning"' . ($canManage ? '' : ' disabled') . '>Unsubscribe and suppress</button>'
+            . '<span class="text-muted" style="margin-left:8px;font-size:12px;">Records revocation and blocks every future send.</span></form>';
+        echo '<form method="post" action="' . $this->base('subscriber', array('id' => (int) $row->id)) . '">'
+            . '<input type="hidden" name="token" value="' . $this->e($this->token()) . '" /><input type="hidden" name="action" value="subscriber.resubscribe" />'
+            . '<input type="hidden" name="email" value="' . $this->e($row->email) . '" />'
+            . '<input class="form-control" name="consent_source" placeholder="consent source (required by your policy)" style="max-width:280px;display:inline-block;" /> '
+            . '<button class="btn btn-sm btn-default"' . ($canManage ? '' : ' disabled') . '>Restore to subscribed</button></form>';
+        echo '<p class="text-muted">Restoring refuses while a suppression row exists — release it from the Suppression List first, so both decisions stay visible in the audit trail.</p>';
+        echo '</div></div>';
+    }
+
+    // ------------------------------------------------------------------ lists
+
+    private function renderLists(array $data)
+    {
+        $view = $data['listsView'];
+        $canManage = !empty($data['capabilities']['subscribers.manage']);
+        echo '<h4>Lists</h4>';
+        echo '<table class="table table-striped"><tr><th>Name</th><th>Key</th><th>Status</th><th>Members</th><th>Description</th><th></th></tr>';
+        foreach ($view['rows'] as $entry) {
+            $list = $entry['list'];
+            echo '<tr><td><strong>' . $this->e($list->name) . '</strong></td><td><code>' . $this->e($list->list_key) . '</code></td>'
+                . '<td>' . $this->e($list->status) . '</td><td>' . (int) $entry['members'] . '</td>'
+                . '<td>' . $this->e($list->description) . '</td><td>';
+            if ($list->status === 'active') {
+                echo '<form method="post" action="' . $this->base('lists') . '" style="display:inline;">'
+                    . '<input type="hidden" name="token" value="' . $this->e($this->token()) . '" /><input type="hidden" name="action" value="list.archive" />'
+                    . '<input type="hidden" name="list_id" value="' . (int) $list->id . '" />'
+                    . '<button class="btn btn-xs btn-default"' . ($canManage ? '' : ' disabled') . '>Archive</button></form>';
+            }
+            echo '</td></tr>';
+        }
+        if (!$view['rows']) { echo '<tr><td colspan="6" class="text-muted">No lists yet.</td></tr>'; }
+        echo '</table>';
+
+        echo '<h4>Create a list</h4><form method="post" action="' . $this->base('lists') . '" class="form-inline">'
+            . '<input type="hidden" name="token" value="' . $this->e($this->token()) . '" /><input type="hidden" name="action" value="list.save" />'
+            . '<input class="form-control" name="name" placeholder="Newsletter" required /> '
+            . '<input class="form-control" name="list_key" placeholder="newsletter (optional)" /> '
+            . '<input class="form-control" name="description" placeholder="What this list is for" /> '
+            . '<button class="btn btn-primary"' . ($canManage ? '' : ' disabled') . '>Create</button></form>';
+
+        echo '<h4>Add addresses to a list</h4><form method="post" action="' . $this->base('lists') . '">'
+            . '<input type="hidden" name="token" value="' . $this->e($this->token()) . '" /><input type="hidden" name="action" value="list.members.add" />'
+            . '<select class="form-control" name="list_id" style="max-width:280px;">';
+        foreach ($view['rows'] as $entry) {
+            if ($entry['list']->status !== 'active') { continue; }
+            echo '<option value="' . (int) $entry['list']->id . '">' . $this->e($entry['list']->name) . '</option>';
+        }
+        echo '</select><textarea class="form-control" name="emails" rows="3" placeholder="one address per line, or comma separated" style="margin-top:6px;"></textarea>'
+            . '<button class="btn btn-primary"' . ($canManage ? '' : ' disabled') . ' style="margin-top:6px;">Add addresses</button></form>'
+            . '<p class="text-muted">Addresses that are suppressed are reported back as skipped — adding a list membership never overrides a suppression.</p>';
+    }
+
+    // ---------------------------------------------------------------- imports
+
+    private function renderImport(array $data)
+    {
+        $view = $data['importView'];
+        $canManage = !empty($data['capabilities']['subscribers.manage']);
+        $preview = isset($data['importPreview']) ? $data['importPreview'] : null;
+
+        echo '<h4>Import subscribers</h4>';
+        echo '<p class="text-muted">CSV, TSV or one address per line. Preview first: the preview writes nothing, and the import refuses to run if the content or mapping changed afterwards. Limit: '
+            . (int) $view['max_rows'] . ' rows per import.</p>';
+        echo '<form method="post" action="' . $this->base('import') . '" enctype="multipart/form-data">'
+            . '<input type="hidden" name="token" value="' . $this->e($this->token()) . '" />';
+        echo '<table class="table" style="max-width:900px;"><tr><th style="width:220px;">Source file</th><td><input type="file" name="import_file" accept=".csv,.txt,.tsv,text/csv,text/plain" /></td></tr>'
+            . '<tr><th>…or paste content</th><td><textarea class="form-control" name="content" rows="6" placeholder="email,first_name,last_name&#10;alice@example.com,Alice,Example">' . $this->e(isset($_POST['content']) ? (string) $_POST['content'] : '') . '</textarea></td></tr>'
+            . '<tr><th>Source label</th><td><input class="form-control" name="source_label" value="' . $this->e(isset($_POST['source_label']) ? (string) $_POST['source_label'] : 'Pasted content') . '" /></td></tr>'
+            . '<tr><th>Add to lists</th><td>';
+        foreach ($view['lists'] as $list) {
+            echo '<label class="checkbox-inline"><input type="checkbox" name="list_ids[]" value="' . (int) $list->id . '" /> ' . $this->e($list->name) . '</label> ';
+        }
+        echo '</td></tr><tr><th>Apply tags</th><td><input class="form-control" name="default_tags" placeholder="imported;2026-q4" /></td></tr>'
+            . '<tr><th>Consent statement</th><td><select class="form-control" name="consent_status" style="max-width:320px;">';
+        foreach ($view['consents'] as $consent) {
+            echo '<option value="' . $this->e($consent) . '"' . ($consent === ConsentStatus::UNKNOWN ? ' selected' : '') . '>' . $this->e(ConsentStatus::label($consent)) . '</option>';
+        }
+        echo '</select><br /><input class="form-control" name="consent_source" placeholder="where this list came from (e.g. 2026 trade-show signup sheet)" style="margin-top:6px;" />'
+            . '<br /><small class="text-muted">Importing addresses does not create consent. Record the real basis, or leave it as “no consent evidence”.</small></td></tr>';
+
+        if ($preview) {
+            echo '<tr><th>Column mapping</th><td>';
+            foreach ($preview['mapping'] as $index => $field) {
+                $label = $preview['has_header'] && isset($preview['header'][$index]) ? $preview['header'][$index] : 'Column ' . ((int) $index + 1);
+                echo '<label class="form-inline" style="margin-right:10px;">' . $this->e($label) . ' <select class="form-control" name="mapping[' . (int) $index . ']">';
+                foreach ($view['fields'] as $option) {
+                    echo '<option value="' . $this->e($option) . '"' . ($field === $option ? ' selected' : '') . '>' . $this->e($option) . '</option>';
+                }
+                echo '</select></label>';
+            }
+            echo '</td></tr>';
+        }
+        echo '</table>';
+        echo '<button class="btn btn-default" name="action" value="import.preview"' . ($canManage ? '' : ' disabled') . '>Preview import</button> ';
+        if ($preview) {
+            echo '<button class="btn btn-primary" name="action" value="import.apply"' . ($canManage ? '' : ' disabled') . '>Import now</button>'
+                . '<input type="hidden" name="preview_hash" value="' . $this->e($preview['hash']) . '" />';
+        }
+        echo '</form>';
+
+        if ($preview) {
+            $c = $preview['counts'];
+            echo '<h4>Preview — nothing has been written yet</h4>';
+            echo '<table class="table table-condensed" style="max-width:620px;">'
+                . '<tr><th>Rows read</th><td>' . (int) $c['total'] . '</td></tr>'
+                . '<tr><th>Would be created</th><td>' . (int) $c['created'] . '</td></tr>'
+                . '<tr><th>Would be updated</th><td>' . (int) $c['updated'] . '</td></tr>'
+                . '<tr><th>Skipped — suppressed</th><td>' . (int) $c['skipped_suppressed'] . '</td></tr>'
+                . '<tr><th>Skipped — invalid address</th><td>' . (int) $c['skipped_invalid'] . '</td></tr>'
+                . '<tr><th>Skipped — duplicate in file</th><td>' . (int) $c['skipped_duplicate'] . '</td></tr>'
+                . '<tr><th>Skipped — no address in the mapped column</th><td>' . (int) $c['skipped_empty'] . '</td></tr></table>';
+            echo '<p class="text-muted">Press “Import now” to apply exactly this preview. If you change the content or the mapping, the hash changes and the import will ask you to preview again.</p>';
+        }
+
+        echo '<h4>Import history</h4><table class="table table-striped"><tr><th>#</th><th>Source</th><th>Status</th><th>Totals</th><th>Finished</th></tr>';
+        foreach ($view['history'] as $row) {
+            echo '<tr><td>' . (int) $row->id . '</td><td>' . $this->e($row->source_label) . '</td><td>' . $this->e($row->status) . '</td>'
+                . '<td><code style="font-size:11px;">' . $this->e(isset($row->totals_json) ? (string) $row->totals_json : '') . '</code></td>'
+                . '<td>' . $this->e(isset($row->finished_at) && $row->finished_at ? $row->finished_at : '—') . '</td></tr>';
+        }
+        if (!$view['history']) { echo '<tr><td colspan="5" class="text-muted">No imports yet.</td></tr>'; }
+        echo '</table>';
+    }
+
+    // ----------------------------------------------------------- suppressions
+
+    private function renderSuppressions(array $data)
+    {
+        $view = $data['suppressionsView'];
+        $canManage = !empty($data['capabilities']['subscribers.manage']);
+        echo '<h4>Suppression list <span class="text-muted" style="font-size:12px;">' . (int) $view['total'] . ' address(es) — nothing here can ever be mailed</span></h4>';
+        echo '<div class="row" style="max-width:980px;">';
+        foreach (SuppressionReason::all() as $reason) {
+            echo '<div class="col-sm-2"><div class="panel panel-default"><div class="panel-body text-center">'
+                . '<div style="font-size:20px;font-weight:600;">' . (int) $view['counts'][$reason] . '</div>'
+                . '<div class="text-muted" style="font-size:11px;">' . $this->e(SuppressionReason::label($reason)) . '</div></div></div></div>';
+        }
+        echo '</div>';
+
+        echo '<form method="get" action="addonmodules.php" class="form-inline" style="margin-bottom:10px;">'
+            . '<input type="hidden" name="module" value="cloudhost247_marketing" /><input type="hidden" name="view" value="suppressions" />'
+            . '<input class="form-control" name="q" value="' . $this->e($view['filters']['search']) . '" placeholder="Search address" /> '
+            . '<select class="form-control" name="reason"><option value="">Any reason</option>';
+        foreach ($view['reasons'] as $reason) {
+            echo '<option value="' . $this->e($reason) . '"' . ($view['filters']['reason'] === $reason ? ' selected' : '') . '>' . $this->e(SuppressionReason::label($reason)) . '</option>';
+        }
+        echo '</select> <button class="btn btn-default">Filter</button></form>';
+
+        echo '<table class="table table-striped"><tr><th>Email</th><th>Reason</th><th>Source</th><th>Detail</th><th>Added</th><th></th></tr>';
+        foreach ($view['rows'] as $row) {
+            echo '<tr><td>' . $this->e($row->email) . '</td><td>' . $this->e(SuppressionReason::label((string) $row->reason)) . '</td>'
+                . '<td>' . $this->e($row->source) . '</td><td>' . $this->e($row->detail) . '</td><td>' . $this->e($row->created_at) . '</td><td>'
+                . '<form method="post" action="' . $this->base('suppressions') . '" class="form-inline">'
+                . '<input type="hidden" name="token" value="' . $this->e($this->token()) . '" /><input type="hidden" name="action" value="suppression.release" />'
+                . '<input type="hidden" name="email" value="' . $this->e($row->email) . '" />';
+            $protected = in_array((string) $row->reason, array(SuppressionReason::SPAM_COMPLAINT, SuppressionReason::HARD_BOUNCE), true);
+            if ($protected) {
+                echo '<label class="checkbox-inline" style="font-size:11px;"><input type="checkbox" name="force" value="1" /> confirm</label> ';
+            }
+            echo '<button class="btn btn-xs btn-default"' . ($canManage ? '' : ' disabled') . '>Release</button></form></td></tr>';
+        }
+        if (!$view['rows']) { echo '<tr><td colspan="6" class="text-muted">Nothing suppressed.</td></tr>'; }
+        echo '</table>';
+        $this->pagination('suppressions', $view['page'], $view['pages'], array('q' => $view['filters']['search'], 'reason' => $view['filters']['reason']));
+
+        echo '<h4>Suppress an address</h4><form method="post" action="' . $this->base('suppressions') . '" class="form-inline">'
+            . '<input type="hidden" name="token" value="' . $this->e($this->token()) . '" /><input type="hidden" name="action" value="suppression.add" />'
+            . '<input class="form-control" name="email" placeholder="email@example.com" required /> '
+            . '<select class="form-control" name="reason">';
+        foreach ($view['reasons'] as $reason) {
+            echo '<option value="' . $this->e($reason) . '">' . $this->e(SuppressionReason::label($reason)) . '</option>';
+        }
+        echo '</select> <input class="form-control" name="detail" placeholder="detail (optional)" /> '
+            . '<button class="btn btn-primary"' . ($canManage ? '' : ' disabled') . '>Suppress</button></form>';
+    }
+
+    private function pagination($view, $page, $pages, array $query = array())
+    {
+        if ($pages <= 1) { return; }
+        echo '<ul class="pagination">';
+        for ($i = 1; $i <= min($pages, 25); $i++) {
+            echo '<li class="' . ($i === (int) $page ? 'active' : '') . '"><a href="' . $this->base($view, array_merge($query, array('page' => $i))) . '">' . $i . '</a></li>';
+        }
+        echo '</ul>';
     }
 
     private function renderSettings(array $data)

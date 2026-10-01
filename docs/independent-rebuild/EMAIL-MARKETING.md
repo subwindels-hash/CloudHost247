@@ -1,6 +1,6 @@
 # CloudHost247 Email Marketing Platform
 
-Module: `modules/addons/cloudhost247_marketing` (version 1.0.0, in build).
+Module: `modules/addons/cloudhost247_marketing` (version 1.1.0, in build — SESSION 2 of 12 complete).
 Native WHMCS addon — no separate application, no separate frontend, no
 duplicate SMTP/credential infrastructure. Delivery credentials live
 exclusively in the central CloudHost247 API & Integrations vault under the
@@ -22,12 +22,17 @@ modules/addons/cloudhost247_marketing
  ├─ cloudhost247_marketing.php   registration / activation (MigrationRunner) / admin dispatch
  ├─ bootstrap.php                PSR-4 autoloader + defensive core/integrations requires
  ├─ hooks.php                    Admin → Marketing menu; (automation triggers land in SESSION 10)
- ├─ lib/Domain                   closed state enums (Campaign/Subscriber/Queue/Result/Event/Suppression)
- ├─ lib/Repositories             SettingsRepository (+ domain repositories in later sessions)
- ├─ lib/Services                 (sessions 2–10)
- ├─ lib/Http                     AdminController / AdminView (dashboard + Delivery Settings today)
+ ├─ lib/Domain                   closed state enums (Campaign/Subscriber/Queue/Result/Event/Suppression,
+ │                               + ConsentStatus and SubscriberSource since SESSION 2)
+ ├─ lib/Repositories             SettingsRepository, SubscriberRepository, ListRepository,
+ │                               TagRepository, SuppressionRepository
+ ├─ lib/Services                 SubscriptionService (subscribe/unsubscribe/bounce/suppression),
+ │                               ImportService, ExportService; campaign/queue/automation services land in later sessions
+ ├─ lib/Http                     AdminController / AdminView (dashboard, Delivery Settings,
+ │                               Subscribers, Lists, Import, Suppression List)
  ├─ lib/Security                 InputValidator
  ├─ migrations/V100.php          16 mod_cloudhost247_marketing_* tables (additive, hasTable-guarded)
+ ├─ migrations/V110.php          tags + subscriber_tags (SESSION 2, additive, hasTable-guarded)
  └─ docs → this file
 
 Delivery chain (built in SESSION 6/7):
@@ -91,7 +96,7 @@ Delivery chain (built in SESSION 6/7):
 |---|---|---|
 | 0 — Repository audit | **DONE** | `EMAIL-MARKETING-AUDIT.md` — no code modified |
 | 1 — Foundation | **DONE** | addon registration, `AdminAreaMainMenu` menu (10 sections), 16-table guarded migration, capability policy support, settings repository + Delivery Settings UI, dashboard with real counters, `cpanel_smtp` catalog provider, docs, CI wiring. Tests: 12 behavior (PHP 7.4 + 8.2) + 11 static invariants — all green |
-| 2 — Subscribers/lists/import | planned | subscriber/list CRUD, tags, CSV/TXT/paste import + audit, export, unsubscribe/suppression engine |
+| 2 — Subscribers/lists/import | **DONE** | `SubscriberRepository`/`ListRepository`/`TagRepository`/`SuppressionRepository`; `SubscriptionService` (consent recorded as given, suppression always wins, idempotent unsubscribe, hard/soft bounce rules, two-step release + resubscribe); `ImportService` (CSV/TSV/semicolon/one-per-line, header detection + mapping suggestion, dry-run preview bound to the apply by a payload hash, import audit record, suppressed rows reported as skipped); `ExportService` (audited CSV, spreadsheet-formula neutralisation); admin screens for Subscribers (+detail), Lists, Import and Suppression List; migration `1.1.0` adds the two tag tables. Tests: 17 new behavior cases in `tests/marketing/session2.php` (29 total in the suite) + static invariants green |
 | 3 — Segments | planned | rule DSL over whitelisted read-only WHMCS columns, dynamic evaluation |
 | 4 — Templates + builder | planned | block catalog → email-safe table HTML, sanitizer, previews, template library |
 | 5 — Campaigns | planned | CRUD → validation checklist → test email → schedule/pause/resume/cancel |
@@ -105,9 +110,19 @@ Delivery chain (built in SESSION 6/7):
 
 ## Testing
 
-* `tests/marketing/run.php` — behavior suite (activation idempotency, seeding,
-  settings persistence/audit/capability denial, dashboard honesty, catalog
-  registration, enum closures, validator) — runs under PHP 7.4 and 8.2 in CI.
+* `tests/marketing/run.php` — SESSION 1 behavior suite (activation idempotency,
+  seeding, settings persistence/audit/capability denial, dashboard honesty,
+  catalog registration, enum closures, validator) plus the SESSION 2 file below;
+  runs under PHP 7.4 and 8.2 in CI.
+* `tests/marketing/session2.php` — SESSION 2 behavior suite (17 cases): tag-table
+  migration idempotency, consent recorded exactly as given, suppressed addresses
+  refused and audited, idempotent unsubscribe + suppression, soft/hard bounce
+  rules, two-step suppression release and resubscribe, list keying/idempotent
+  membership/archiving, tag normalisation, filtered pagination (status, search,
+  list, tag), import parsing (quoted CSV, semicolons, one-per-line, row limit),
+  preview-writes-nothing, apply + audit record + suppressed skip, export
+  formula-injection neutralisation + export audit, capability-gated screens,
+  CSRF on every mutation, and the preview→apply hash binding.
 * `tests/marketing/test_static.py` — structure/migration/security/no-duplicate-
   infrastructure/no-placeholder invariants.
 * CI: appended to the PHP suite chain in

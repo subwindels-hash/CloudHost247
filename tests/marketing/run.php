@@ -1,6 +1,6 @@
 <?php
 /**
- * CloudHost247 Marketing — SESSION 1 behavior suite.
+ * CloudHost247 Marketing — behavior suite (SESSION 1 + SESSION 2).
  *
  * Pure PHP, no network, fake in-memory storage (see fakes.php); mirrors
  * tests/broker/run.php conventions. Run: php tests/marketing/run.php
@@ -130,7 +130,7 @@ $tests['Activation installs all module tables idempotently and seeds settings wi
 $tests['Module registration exposes the required WHMCS hooks'] = function () {
     $config = cloudhost247_marketing_config();
     return $config['name'] === 'CloudHost247 Marketing'
-        && $config['version'] === '1.0.0'
+        && $config['version'] === '1.1.0'
         && function_exists('cloudhost247_marketing_activate')
         && function_exists('cloudhost247_marketing_deactivate')
         && function_exists('cloudhost247_marketing_output');
@@ -226,6 +226,15 @@ $tests['The central catalog defines cpanel_smtp as the marketing delivery provid
     return $hasSecretPassword && $hasHost && $hasEncryption
         && is_array($health) && strtoupper(isset($health['method']) ? $health['method'] : '') === 'SMTP';
 };
+
+// ---------------------------------------------------- SESSION 2 - subscribers
+// Subscribers, lists, tags, import/export and the suppression engine live in
+// session2.php so each session keeps its own test file.
+
+foreach (require __DIR__ . '/session2.php' as $name => $test) {
+    if (isset($tests[$name])) { throw new RuntimeException('Duplicate marketing test name: ' . $name); }
+    $tests[$name] = $test;
+}
 
 // ------------------------------------------------------------------------- run
 

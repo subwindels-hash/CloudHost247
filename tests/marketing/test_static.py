@@ -66,9 +66,11 @@ class MarketingStaticTests(unittest.TestCase):
         # no credentials of any kind are persisted by the module
         self.assertNotIn("password", migration)
 
-    def test_migration_validator_is_pinned_to_marketing_100(self):
+    def test_migration_validator_is_pinned_to_marketing_versions(self):
+        # The validator must know every migration this module ships; a new
+        # migration that is not registered there fails the release candidate.
         validator = read(os.path.join(ROOT, "scripts", "validate-migrations.py"))
-        self.assertIn("'cloudhost247_marketing':['1.0.0']", validator)
+        self.assertIn("'cloudhost247_marketing':['1.0.0','1.1.0']", validator)
 
     # ---------------------------------------------------------- security
     def test_no_dangerous_calls_and_no_core_table_writes_anywhere(self):
@@ -136,9 +138,12 @@ class MarketingStaticTests(unittest.TestCase):
         self.assertIn("Accepted by relay", queue)  # never claims "delivered" for SMTP-accepted
 
     def test_no_placeholder_language(self):
+        # "placeholder" is banned as *copy* (an unfinished-content marker), not as
+        # the HTML input attribute: input[placeholder] is the standard way to hint
+        # a field, so that one form is normalised away before the scan.
         banned = ("coming soon", "todo:", "fixme", "lorem ipsum", "placeholder")
         for path in iter_php(MODULE):
-            body = read(path).lower()
+            body = re.sub(r'placeholder\s*=\s*"', 'input-hint="', read(path).lower())
             for phrase in banned:
                 self.assertNotIn(phrase, body, "'%s' in %s" % (phrase, path))
 
