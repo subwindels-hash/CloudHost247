@@ -48,6 +48,9 @@ class MarketingStaticTests(unittest.TestCase):
             os.path.join(LIB, "Domain", "SegmentOperator.php"),
             os.path.join(LIB, "Domain", "TemplateBlock.php"),
             os.path.join(LIB, "Repositories", "CampaignRepository.php"),
+            os.path.join(LIB, "Repositories", "QueueRepository.php"),
+            os.path.join(LIB, "Repositories", "RecipientRepository.php"),
+            os.path.join(LIB, "Services", "QueueService.php"),
             os.path.join(LIB, "Repositories", "SegmentRepository.php"),
             os.path.join(LIB, "Repositories", "TemplateRepository.php"),
             os.path.join(LIB, "Services", "CampaignService.php"),
@@ -128,6 +131,16 @@ class MarketingStaticTests(unittest.TestCase):
             combined += read(path)
         for forbidden in ("fsockopen", "stream_socket_client", "swiftmailer", "PHPMailer"):
             self.assertNotIn(forbidden, combined)
+
+    def test_the_delivery_worker_cron_is_cli_only_and_bounded(self):
+        # The worker must never be reachable from the web, must load the module's
+        # own bootstrap, and must expose the flags the runbook documents.
+        cron = read(os.path.join(MODULE, "..", "..", "..", "crons", "cloudhost247_marketing.php"))
+        self.assertIn("PHP_SAPI !== 'cli'", cron)
+        self.assertIn("cloudhost247_marketing/bootstrap.php", cron)
+        self.assertIn("--dry-run", cron)
+        self.assertIn("--campaign=", cron)
+        self.assertIn("QueueService", cron)
 
     def test_smtp_delivery_is_resolved_through_the_integrations_vault(self):
         # The transport asks the integrations addon for a ready client; it never

@@ -289,6 +289,15 @@ foreach (require __DIR__ . '/session5.php' as $name => $test) {
     $tests[$name] = $test;
 }
 
+// --------------------------------------------------- SESSION 7 - queue and worker
+// Freezing audiences, queueing once, claiming safely, throttling, retries and
+// the render smoke test live in session7.php.
+
+foreach (require __DIR__ . '/session7.php' as $name => $test) {
+    if (isset($tests[$name])) { throw new RuntimeException('Duplicate marketing test name: ' . $name); }
+    $tests[$name] = $test;
+}
+
 // -------------------------------------------------------- SESSION 6 - cPanel SMTP
 // The delivery provider, sender-domain policy and failure reporting live in
 // session6.php; the SMTP wire protocol is covered by tests/integrations.

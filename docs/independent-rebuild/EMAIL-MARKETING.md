@@ -1,6 +1,6 @@
 # CloudHost247 Email Marketing Platform
 
-Module: `modules/addons/cloudhost247_marketing` (version 1.2.0, in build — SESSIONS 1–6 of 12 complete).
+Module: `modules/addons/cloudhost247_marketing` (version 1.2.0, in build — SESSIONS 1–7 of 12 complete).
 Native WHMCS addon — no separate application, no separate frontend, no
 duplicate SMTP/credential infrastructure. Delivery credentials live
 exclusively in the central CloudHost247 API & Integrations vault under the
@@ -35,7 +35,8 @@ modules/addons/cloudhost247_marketing
  │                               TemplateService (block rendering + builtin library, SESSION 4),
  │                               CampaignService + MessageTransport / UnavailableTransport (SESSION 5),
  │                               SmtpTransport + SenderPolicy (SESSION 6);
- │                               queue and automation services land in later sessions
+ │                               QueueService + recipient/queue repositories (SESSION 7);
+ │                               analytics and automation services land in later sessions
  ├─ lib/Http                     AdminController / AdminView (dashboard, Delivery Settings,
  │                               Campaigns, Subscribers, Segments, Templates, Lists, Import,
  │                               Suppression List)
@@ -47,7 +48,8 @@ modules/addons/cloudhost247_marketing
 
 Delivery chain (built in SESSION 6/7):
    Campaign → Recipients (suppression-filtered, deduplicated) → mod_cloudhost247_marketing_email_queue
-            → crons/cloudhost247_marketing.php (batched worker, rate limits, backoff, idempotent claims)
+            → crons/cloudhost247_marketing.php (batched worker: freeze audience, queue once,
+              claim with locks, rate limits, backoff, suppression re-check, campaign settle)
             → cpanel_smtp (IntegrationManager credentials + integrations SmtpClient) → relay
              events → mod_cloudhost247_marketing_email_events → analytics
 ```
@@ -111,7 +113,7 @@ Delivery chain (built in SESSION 6/7):
 | 4 — Templates + builder | **DONE** | `TemplateBlock` closed catalog (heading, paragraph, bullets, button, image, divider, spacer, legal — typed fields with bounds); `HtmlSanitizer` restricted rich-text subset (`b/strong/i/em/u/a/br` only, script/style/iframe stripped, balanced output) and absolute-URL rules (http(s)/mailto only; `javascript:`, `data:`, protocol-relative and userinfo forms refused); `TemplateService` renders each design to table-based inline-styled HTML plus a plain-text twin, skips unsafe or empty blocks with named warnings instead of approximating them, stores design + rendered output together, and seeds three builtin templates idempotently from activation; `TemplateRepository` + migration `1.2.0` add the `status` column so templates archive rather than disappear (builtins can never be deleted). Admin: Templates tab (library, create, block editor, add/remove block, preview as source + plain text, archive/activate/delete) behind `marketing.campaigns.manage`. Tests: 13 new behavior cases in `tests/marketing/session4.php` (56 total in the suite) + static invariants green |
 | 5 — Campaigns | **DONE** | `CampaignAudience` (list / segment / all subscribed addresses, resolved live — never frozen); `CampaignRepository` with path-independent idempotency keys, status-owned timestamps (pause keeps `scheduled_at`, cancel keeps `started_at`) and a `due()` lookup for the worker; `CampaignService` with the pre-send checklist (name, single-line subject ≤150 chars, sender, reply-to, HTML **and** text content, non-empty audience; provider reported as advisory), an explicit transition map (draft→ready→scheduled→queued→sending→completed, with pause/resume/cancel/archive and per-state editability), local-time scheduling converted to UTC, audience previews that count subscribed members only and surface segment truncation/unverified rows, and a test send that goes through the same checklist and transport and audits refusals (`campaign.test_refused` / `failed` / `sent`) instead of pretending. Delivery itself is behind the new `MessageTransport` contract (`UnavailableTransport` until SESSION 6), which is what keeps sockets and credentials out of this module. Admin: Campaigns tab with status/search filters, counts, campaign detail (checklist, audience preview, lifecycle buttons, test send, content preview), edits returning an approved campaign to draft. Tests: 12 new behavior cases in `tests/marketing/session5.php` (68 total in the suite) + 13 static invariants |
 | 6 — cPanel SMTP | **DONE** | Shared `SmtpClient` added to `cloudhost247_integrations` (`lib/Api/SmtpClient.php`): implicit-TLS/STARTTLS only, AUTH LOGIN, MAIL/RCPT/DATA with base64 MIME and a generated boundary, CR/LF header-injection guards, address validation, 250/4xx/5xx classification through `ResultCode`, relay queue-id capture, and a dialer seam for tests; `IntegrationManager::smtp()` builds it from the vault and `smtpIdentity()` returns the non-secret mailbox/from-address. Marketing's `SmtpTransport` (implements `MessageTransport` + `SenderPolicy`) resolves that client lazily, answers availability with a specific reason (addon missing / not configured / unreadable), forwards messages verbatim, reports relay failures to the integrations event history, and enforces the sender-domain rule ("mailbox domain or configured from-address domain") both in the checklist and again at send time. The campaign detail screen now shows the sending identity and a real test-send panel. Tests: 6 new SMTP-protocol cases in `tests/integrations/run.php` (106 total) and 10 new marketing cases in `tests/marketing/session6.php` (78 total) |
-| 7 — Queue + delivery | planned | recipient materialization, claim locking, throttling, backoff, cron worker |
+| 7 — Queue + delivery | **DONE** | `RecipientRepository` freezes the audience (`unique(campaign_id,email)`, whitelisted personalisation, pending/sent/failed/skipped); `QueueRepository` owns one row per message with a unique idempotency key, two-step claim locking, `releaseStaleLocks()` for workers that die mid-send, `release()` for paused campaigns (no retry spent), retry/permanent failure/skip transitions and the event ledger; `QueueService` runs one pass: release stale locks → `materialize()` (segment/list resolved once, suppression and consent applied) → `enqueue()` (idempotent) → `dispatch()` (claims, re-checks suppression, sends through `MessageTransport`, hard refusal ⇒ suppress, transient ⇒ backoff from settings, provider-session refusal ⇒ stop the run and hand unattempted messages back) → `settle()` (completed, or failed when nothing got out). Throttling is an allowance per pass (`batch_size`, `messages_per_minute`, rolling `hourly_limit`); the worker never sleeps in-request. `CampaignService::sendNow()` gives an approved campaign a deliberate "queue immediately" action — drafts still never send. Admin: delivery-queue panel with per-status counts, settings summary and a bounded "Run a worker pass now" button. `crons/cloudhost247_marketing.php` (CLI-only, `--campaign=N`, `--dry-run`, JSON summary, exit codes). Tests: 13 new cases in `tests/marketing/session7.php` (91 total) including a render smoke test over all 13 admin screens, which uncovered and fixed a latent fatal on the dashboard (missing `QueueStatus` import) |
 | 8 — Tracking | planned | pixel/click endpoints, suppression/unsubscribe flows, bounce ingestion |
 | 9 — Analytics | planned | rates from the event ledger only, click map, recipient activity |
 | 10 — Automation | planned | triggers via WHMCS hooks, wait/email steps, idempotent runs |
@@ -124,6 +126,14 @@ Delivery chain (built in SESSION 6/7):
   seeding, settings persistence/audit/capability denial, dashboard honesty,
   catalog registration, enum closures, validator) plus the SESSION 2 file below;
   runs under PHP 7.4 and 8.2 in CI.
+* `tests/marketing/session7.php` — SESSION 7 behavior suite (13 cases): audience
+  freezing with suppression/consent skips, idempotent queueing, delivery and
+  honest completion counters, stale-lock recovery after a worker dies mid-send,
+  no double delivery across repeated passes, hard-bounce suppression, transient
+  retries with backoff and exhaustion, provider-session refusal that stops the run
+  and hands unattempted messages back, batch/per-minute/hourly throttle ceilings,
+  no-provider behaviour, pause/resume and cancel, and a smoke test that renders
+  every admin screen (`AdminView::render`) inside a fatal-catching harness.
 * `tests/marketing/session6.php` — SESSION 6 behavior suite (10 cases): transport
   availability with reasons, verbatim forwarding and queue-id propagation,
   relay-failure reporting to the integrations event history, the sender-domain

@@ -22,6 +22,16 @@ final class AdminView
         return function_exists('generate_token') ? generate_token('plain') : '';
     }
 
+    /** The module's own version, so the header can never drift from the file. */
+    private function version()
+    {
+        if (function_exists('cloudhost247_marketing_config')) {
+            $config = cloudhost247_marketing_config();
+            if (isset($config['version'])) { return (string) $config['version']; }
+        }
+        return '1.2.0';
+    }
+
     private function base($view = '', array $query = array())
     {
         $url = 'addonmodules.php?module=cloudhost247_marketing';
@@ -35,7 +45,7 @@ final class AdminView
 
     public function render(array $data)
     {
-        echo '<h2>CloudHost247 Marketing <small style="font-size:12px;">v1.1.0 — queue-based campaigns via cPanel SMTP</small></h2>';
+        echo '<h2>CloudHost247 Marketing <small style="font-size:12px;">v' . $this->e($this->version()) . ' — queue-based campaigns via cPanel SMTP</small></h2>';
         if ($data['error'] !== '') { echo '<div class="alert alert-danger">' . $this->e($data['error']) . '</div>'; }
         if ($data['notice'] !== '') { echo '<div class="alert alert-success">' . $this->e($data['notice']) . '</div>'; }
 
@@ -481,6 +491,9 @@ final class AdminView
         };
         if ($status === CampaignStatus::DRAFT) { echo $button('campaign.ready', 'Mark ready', 'btn-primary'); }
         if ($status === CampaignStatus::READY) {
+            echo $button('campaign.send_now', 'Send now', 'btn-success');
+        }
+        if ($status === CampaignStatus::READY) {
             echo '<form method="post" action="' . $this->base('campaign', array('id' => (int) $row->id)) . '" style="margin-bottom:8px;">'
                 . '<input type="hidden" name="token" value="' . $this->e($this->token()) . '" /><input type="hidden" name="action" value="campaign.schedule" />'
                 . '<input type="hidden" name="campaign_id" value="' . (int) $row->id . '" />'
@@ -504,6 +517,29 @@ final class AdminView
         if (!CampaignStatus::isTerminal($status)) { echo $button('campaign.cancel', 'Cancel campaign', 'btn-warning'); }
         if (in_array($status, array(CampaignStatus::COMPLETED, CampaignStatus::CANCELLED, CampaignStatus::FAILED), true)) {
             echo $button('campaign.archive', 'Archive');
+        }
+
+        echo '<h4>Delivery queue</h4>';
+        echo '<p class="text-muted">The worker (<code>crons/cloudhost247_marketing.php</code>) freezes the audience, queues one message per recipient and delivers within '
+            . (int) $detail['queue']['settings']['batch_size'] . ' messages per pass, ' . (int) $detail['queue']['settings']['messages_per_minute'] . '/minute, '
+            . (int) $detail['queue']['settings']['hourly_limit'] . '/hour. Nothing is dropped when a pass is cut short — the next pass continues.</p>';
+        echo '<table class="table table-condensed" style="max-width:420px;">';
+        foreach (QueueStatus::all() as $queueStatus) {
+            $count = isset($detail['queue'][$queueStatus]) ? (int) $detail['queue'][$queueStatus] : 0;
+            if ($count === 0 && !in_array($queueStatus, array(QueueStatus::QUEUED, QueueStatus::SENT), true)) { continue; }
+            echo '<tr><td>' . $this->e(QueueStatus::label($queueStatus)) . '</td><td style="text-align:right;">' . number_format($count) . '</td></tr>';
+        }
+        echo '</table>';
+        if ($detail['queue']['total'] === 0) {
+            echo '<p class="text-muted">Nothing is queued yet. A queued campaign is frozen and filled by the worker, then reported back here.</p>';
+        }
+        if (in_array($status, array(CampaignStatus::QUEUED, CampaignStatus::SENDING), true) && $detail['canManage']) {
+            echo '<form method="post" action="' . $this->base('campaign', array('id' => (int) $row->id)) . '" style="margin-bottom:8px;">'
+                . '<input type="hidden" name="token" value="' . $this->e($this->token()) . '" />'
+                . '<input type="hidden" name="action" value="campaign.work" />'
+                . '<input type="hidden" name="campaign_id" value="' . (int) $row->id . '" />'
+                . '<button class="btn btn-sm btn-primary">Run a worker pass now</button> '
+                . '<span class="text-muted" style="font-size:12px;">bounded by the same settings the cron uses</span></form>';
         }
 
         echo '<h4>Test message</h4>';

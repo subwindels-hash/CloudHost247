@@ -25,6 +25,8 @@ use CloudHost247\Marketing\Services\ImportService;
 use CloudHost247\Marketing\Services\SegmentService;
 use CloudHost247\Marketing\Services\CampaignService;
 use CloudHost247\Marketing\Services\TemplateService;
+use CloudHost247\Marketing\Repositories\QueueRepository;
+use CloudHost247\Marketing\Services\QueueService;
 use CloudHost247\Marketing\Services\SmtpTransport;
 use CloudHost247\Marketing\Services\SubscriptionService;
 use WHMCS\Database\Capsule;
@@ -74,6 +76,7 @@ final class AdminController
     private $segments;
     private $templates;
     private $campaigns;
+    private $queue;
 
     public function __construct(
         SettingsRepository $settings = null,
@@ -86,7 +89,8 @@ final class AdminController
         ExportService $exporter = null,
         SegmentService $segments = null,
         TemplateService $templates = null,
-        CampaignService $campaigns = null
+        CampaignService $campaigns = null,
+        QueueService $queue = null
     ) {
         $this->settings = $settings ?: new SettingsRepository();
         $this->subscribers = $subscribers ?: new SubscriberRepository();
@@ -99,6 +103,7 @@ final class AdminController
         $this->segments = $segments ?: new SegmentService();
         $this->templates = $templates ?: new TemplateService();
         $this->campaigns = $campaigns ?: new CampaignService(null, null, null, null, null, $this->campaignTransport());
+        $this->queue = $queue ?: new QueueService(null, $this->campaigns);
     }
 
     public function handle()
@@ -501,6 +506,7 @@ final class AdminController
         $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
         $campaign = $id > 0 ? $this->campaigns->repository()->find($id) : null;
         if (!$campaign) { return array('campaignDetail' => null); }
+        $queueCounts = (new QueueRepository())->countsForCampaign((int) $campaign->id);
 
         return array('campaignDetail' => array(
             'row' => $campaign,
@@ -512,6 +518,14 @@ final class AdminController
             'segments' => $this->segments->repository()->all('active'),
             'templates' => $this->templates->repository()->all('active'),
             'canManage' => $this->capAllowed(self::CAMPAIGN_CAPABILITY),
+            'queue' => array_merge($queueCounts, array(
+                'total' => array_sum($queueCounts),
+                'settings' => array(
+                    'batch_size' => (int) $this->settings->get('batch_size'),
+                    'messages_per_minute' => (int) $this->settings->get('messages_per_minute'),
+                    'hourly_limit' => (int) $this->settings->get('hourly_limit'),
+                ),
+            )),
         ));
     }
 
@@ -559,6 +573,11 @@ final class AdminController
             return array('notice' => $result['message'], 'error' => '');
         }
 
+        if ($action === 'campaign.send_now') {
+            $result = $this->campaigns->sendNow($id);
+            return array('notice' => $result['message'], 'error' => '');
+        }
+
         if ($action === 'campaign.pause') {
             $result = $this->campaigns->pause($id);
             return array('notice' => $result['message'], 'error' => '');
@@ -572,6 +591,19 @@ final class AdminController
         if ($action === 'campaign.archive') {
             $result = $this->campaigns->archive($id);
             return array('notice' => $result['message'], 'error' => '');
+        }
+
+        if ($action === 'campaign.work') {
+            if (!$this->campaigns->transport()->isAvailable()) {
+                return array('notice' => '', 'error' => 'Nothing was queued or sent: ' . $this->campaigns->transport()->reason());
+            }
+            $summary = $this->queue->run(array('campaign_id' => $id, 'worker' => 'admin-' . (isset($_SESSION['adminid']) ? (int) $_SESSION['adminid'] : 0)));
+            $message = 'Worker pass finished: ' . $summary['sent'] . ' accepted by the relay, '
+                . $summary['retried'] . ' to retry, ' . $summary['failed'] . ' failed'
+                . ($summary['rate_limited'] !== '' ? ' — ' . $summary['rate_limited'] : '') . '.';
+            AuditLogger::record('cloudhost247_marketing', 'campaign.worked', 'marketing_campaign', $id,
+                array(), $summary, 'success');
+            return array('notice' => $message, 'error' => '');
         }
 
         if ($action === 'campaign.test') {

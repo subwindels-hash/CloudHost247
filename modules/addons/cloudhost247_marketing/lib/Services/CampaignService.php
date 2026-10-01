@@ -351,6 +351,19 @@ final class CampaignService
         );
     }
 
+    /**
+     * Resolves a campaign's segment audience to subscriber ids for the worker.
+     * It refuses when the evaluation is not trustworthy — a truncated scan or
+     * unverifiable customer conditions — because sending to a partial audience
+     * is worse than not sending at all.
+     *
+     * @return int[]
+     */
+    public function segmentIds($segmentId, $limit = 20000)
+    {
+        return $this->segments->subscriberIds((int) $segmentId, (int) $limit);
+    }
+
     // -------------------------------------------------------------- transitions
 
     public function markReady($id)
@@ -373,6 +386,26 @@ final class CampaignService
             'scheduled_timezone' => $when['timezone'],
             'failure_reason' => '',
         ), 'campaign.scheduled', 'Campaign scheduled for ' . $when['utc'] . ' UTC (' . $when['local'] . ' ' . $when['timezone'] . ').');
+    }
+
+    /**
+     * Queues an approved campaign for the next worker pass, without picking a
+     * calendar moment. It is a deliberate, audited action: the same blocking
+     * checks apply, so "send now" cannot be used to skip the checklist.
+     */
+    public function sendNow($id)
+    {
+        $campaign = $this->requireCampaign($id);
+        $issues = $this->blockingIssues($campaign);
+        if ($issues) {
+            throw new \RuntimeException('The campaign is not ready: ' . implode(' ', $issues));
+        }
+        $now = date('Y-m-d H:i:s');
+        return $this->transition($campaign, CampaignStatus::SCHEDULED, array(
+            'scheduled_at' => $now,
+            'scheduled_timezone' => 'UTC',
+            'failure_reason' => '',
+        ), 'campaign.queued_now', 'Campaign approved for immediate delivery; the worker will queue it on its next pass.');
     }
 
     public function pause($id)
