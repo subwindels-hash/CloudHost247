@@ -3,8 +3,8 @@ name: CloudHost247 Node platform
 # Independent from the WHMCS/PHP "Independent foundation" workflow — this only builds/tests the
 # new cloudhost247-node/ application and never touches the existing PHP/WHMCS tree.
 on:
+  # No branch allow-list: pushes to main and to every review branch must build the platform.
   push:
-    branches: [arena/01a0e82a-cloudhost247]
     paths:
       - 'cloudhost247-node/**'
       - '.github/workflows/node-platform.yml'

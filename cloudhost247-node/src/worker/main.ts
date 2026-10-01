@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { loadEnv } from '../config/env';
 import { getPool, closePool } from '../db/pool';
-import { processNextJob, recoverOrphanedJobs } from './handlers';
+import { processNextJob, recoverOrphanedJobs, type JobContext } from './handlers';
 import {
   SECURITY_NUMBER_SWEEP_INTERVAL_MS,
   scheduleHealthChecks,
@@ -17,6 +17,11 @@ import { revalidateProviderImages } from '../services/os-image-revalidation-serv
 import { runRevenueGuardianCycle } from '../revenue-guardian/jobs/scheduler';
 import { sweepCloudflareJobs } from './cloudflare-sweep';
 import type { EngineOptions } from '../deployments/engine';
+import {
+  DEFAULT_WORKER_CYCLE_LEASE_NAME,
+  withWorkerCycleLease,
+} from './worker-lease';
+import { parseWorkerOnceMode, runWorkerLoop, type WorkerCycleOutcome } from './runtime';
 
 const HEALTHCHECK_INTERVAL_MS = 60_000;
 const SUBSCRIPTION_SWEEP_INTERVAL_MS = 5 * 60_000;
@@ -41,35 +46,176 @@ const REVENUE_GUARDIAN_SWEEP_INTERVAL_MS = 5 * 60_000;
 // Cloudflare durable job queue: claim-lease with per-job backoff, so sweeping often is cheap.
 const CLOUDFLARE_SWEEP_INTERVAL_MS = 60_000;
 
+interface WorkerLogger {
+  log(message: string): void;
+  error(message: string): void;
+}
+
+interface WorkerSchedule {
+  lastHealthSweep: number;
+  lastSubscriptionSweep: number;
+  lastOsLifecycleSweep: number;
+  lastTerminationSweep: number;
+  lastNotificationDrain: number;
+  lastReconciliation: number;
+  lastImageRevalidation: number;
+  lastSecurityNumberSweep: number;
+  lastRevenueGuardianSweep: number;
+  lastCloudflareSweep: number;
+}
+
+function createWorkerSchedule(): WorkerSchedule {
+  return {
+    lastHealthSweep: 0,
+    lastSubscriptionSweep: 0,
+    lastOsLifecycleSweep: 0,
+    lastTerminationSweep: 0,
+    lastNotificationDrain: 0,
+    lastReconciliation: 0,
+    lastImageRevalidation: 0,
+    lastSecurityNumberSweep: 0,
+    lastRevenueGuardianSweep: 0,
+    lastCloudflareSweep: 0,
+  };
+}
+
 function engineOptions(simulationMode: boolean, kubernetesEnabled: boolean): EngineOptions {
   return { simulationMode, kubernetesEnabled };
 }
 
-async function main() {
+/**
+ * Executes one bounded worker cycle. This same cycle is used by a supervised long-running
+ * process and by cPanel's `worker:once` cron command; `schedule` keeps interval-gated tasks from
+ * running on every tight persistent-loop iteration. A fresh one-shot process has a fresh
+ * schedule, which intentionally makes all periodic checks due once per Cron invocation.
+ */
+async function runWorkerCycle(
+  ctx: JobContext,
+  schedule: WorkerSchedule,
+  logger: WorkerLogger,
+  concurrency: number
+): Promise<WorkerCycleOutcome> {
+  let didWork = false;
+  const recovered = await recoverOrphanedJobs(ctx);
+  didWork ||= recovered > 0;
+
+  // Drain at most the configured number of deployment jobs in one cycle. Each individual claim
+  // is protected by its own row lease; this is safe even when a failed old Cron process is later
+  // recovered after the cycle lease expires.
+  const claimed: Array<Promise<unknown>> = [];
+  for (let slot = 0; slot < concurrency; slot += 1) {
+    claimed.push(processNextJob(ctx));
+  }
+  const processed = await Promise.all(claimed);
+  didWork ||= processed.some((job) => job !== null);
+
+  const now = Date.now();
+  if (now - schedule.lastHealthSweep >= HEALTHCHECK_INTERVAL_MS) {
+    schedule.lastHealthSweep = now;
+    const scheduled = await scheduleHealthChecks(ctx.db);
+    didWork ||= scheduled > 0;
+    if (scheduled > 0) logger.log(`[worker:${ctx.workerId}] scheduled ${scheduled} health check job(s)`);
+  }
+  if (now - schedule.lastSubscriptionSweep >= SUBSCRIPTION_SWEEP_INTERVAL_MS) {
+    schedule.lastSubscriptionSweep = now;
+    await sweepSubscriptions(ctx.db);
+  }
+  if (now - schedule.lastOsLifecycleSweep >= OS_LIFECYCLE_SWEEP_INTERVAL_MS) {
+    schedule.lastOsLifecycleSweep = now;
+    for (const change of await sweepOperatingSystemLifecycle(ctx.db)) {
+      didWork ||= true;
+      logger.log(
+        `[worker:${ctx.workerId}] OS version ${change.displayName}: ${change.from} → ${change.to} (${change.notifiedServers} customer notice(s))`
+      );
+    }
+  }
+  if (now - schedule.lastTerminationSweep >= TERMINATION_SWEEP_INTERVAL_MS) {
+    schedule.lastTerminationSweep = now;
+    for (const terminated of await sweepScheduledTerminations(ctx.db)) {
+      didWork ||= true;
+      logger.log(
+        `[worker:${ctx.workerId}] scheduled termination due for ${terminated.name}: ${terminated.jobId ? `job ${terminated.jobId}` : 'retired without a provider resource'}`
+      );
+    }
+  }
+  if (now - schedule.lastNotificationDrain >= NOTIFICATION_OUTBOX_INTERVAL_MS) {
+    schedule.lastNotificationDrain = now;
+    const delivery = await deliverNotificationOutbox(ctx.db);
+    didWork ||= delivery.claimed > 0;
+    if (delivery.claimed > 0) {
+      logger.log(
+        `[worker:${ctx.workerId}] notification outbox: ${delivery.delivered} delivered, ${delivery.retrying} retrying, ${delivery.failed} failed, ${delivery.configurationRequired} awaiting configuration`
+      );
+    }
+  }
+  if (now - schedule.lastReconciliation >= RECONCILIATION_INTERVAL_MS) {
+    schedule.lastReconciliation = now;
+    for (const drift of await reconcileServerState(ctx.db)) {
+      didWork ||= true;
+      logger.log(
+        `[worker:${ctx.workerId}] drift on ${drift.name}: ${drift.kind} ${drift.from} → ${drift.to}${drift.applied ? ' (applied)' : ' (reported only)'}`
+      );
+    }
+  }
+  if (now - schedule.lastImageRevalidation >= IMAGE_REVALIDATION_INTERVAL_MS) {
+    schedule.lastImageRevalidation = now;
+    for (const check of await revalidateProviderImages(ctx.db)) {
+      if (check.outcome !== 'VERIFIED') {
+        didWork ||= true;
+        logger.log(
+          `[worker:${ctx.workerId}] image ${check.providerImageId ?? check.imageId}: ${check.outcome}${check.error ? ` — ${check.error}` : ''}`
+        );
+      }
+    }
+  }
+  if (now - schedule.lastCloudflareSweep >= CLOUDFLARE_SWEEP_INTERVAL_MS) {
+    schedule.lastCloudflareSweep = now;
+    const cloudflare = await sweepCloudflareJobs(ctx.db, ctx.workerId);
+    didWork ||= cloudflare.claimed > 0 || cloudflare.syncsScheduled > 0;
+    if (cloudflare.claimed > 0 || cloudflare.syncsScheduled > 0) {
+      logger.log(
+        `[worker:${ctx.workerId}] cloudflare jobs: ${cloudflare.succeeded} succeeded, ${cloudflare.retrying} retrying, ${cloudflare.failed} failed, ${cloudflare.syncsScheduled} sync(s) scheduled`
+      );
+    }
+  }
+  if (now - schedule.lastRevenueGuardianSweep >= REVENUE_GUARDIAN_SWEEP_INTERVAL_MS) {
+    schedule.lastRevenueGuardianSweep = now;
+    const revenueGuardian = await runRevenueGuardianCycle(ctx.db);
+    didWork ||= revenueGuardian.ran.length > 0 || revenueGuardian.failed.length > 0;
+    if (revenueGuardian.ran.length > 0 || revenueGuardian.failed.length > 0) {
+      logger.log(
+        `[worker:${ctx.workerId}] revenue guardian: ran [${revenueGuardian.ran.join(', ')}]${revenueGuardian.failed.length ? `; failed [${revenueGuardian.failed.join(', ')}]` : ''}`
+      );
+    }
+  }
+  if (now - schedule.lastSecurityNumberSweep >= SECURITY_NUMBER_SWEEP_INTERVAL_MS) {
+    schedule.lastSecurityNumberSweep = now;
+    const rotated = await sweepSecurityNumbers(ctx.db);
+    const closed = await sweepExpiredSupportSessions(ctx.db);
+    didWork ||= rotated > 0 || closed > 0;
+    if (rotated > 0 || closed > 0) {
+      logger.log(`[worker:${ctx.workerId}] security numbers rotated: ${rotated}; support sessions expired: ${closed}`);
+    }
+  }
+
+  return { didWork };
+}
+
+/** Worker CLI entry point. `--once` is for cPanel Cron; no flag is for a supervised worker host. */
+export async function main(argv: readonly string[] = process.argv): Promise<void> {
   const env = loadEnv();
+  const once = parseWorkerOnceMode(argv, env.WORKER_ONCE);
   const pool = getPool(env);
   const workerId = env.WORKER_ID;
-  const ctx = {
+  const ctx: JobContext = {
     db: pool,
     options: engineOptions(env.DEPLOYMENT_SIMULATION_MODE, env.KUBERNETES_ADAPTER_ENABLED),
     workerId,
-    leaseMs:env.WORKER_LEASE_MS,
+    leaseMs: env.WORKER_LEASE_MS,
   };
-
-  const logger = console; // worker logs to stdout; pino JSON in a later ops phase
-  logger.log(`[worker:${workerId}] starting (poll=${env.WORKER_POLL_INTERVAL_MS}ms, concurrency=${env.WORKER_CONCURRENCY}, simulation=${env.DEPLOYMENT_SIMULATION_MODE})`);
-
+  const logger: WorkerLogger = console;
+  const schedule = createWorkerSchedule();
   let running = true;
-  let lastHealthSweep = 0;
-  let lastSubscriptionSweep = 0;
-  let lastOsLifecycleSweep = 0;
-  let lastTerminationSweep = 0;
-  let lastNotificationDrain = 0;
-  let lastReconciliation = 0;
-  let lastImageRevalidation = 0;
-  let lastSecurityNumberSweep = 0;
-  let lastRevenueGuardianSweep = 0;
-  let lastCloudflareSweep = 0;
 
   const shutdown = (signal: string) => {
     logger.log(`[worker:${workerId}] ${signal} received — draining`);
@@ -78,109 +224,49 @@ async function main() {
   process.on('SIGTERM', () => shutdown('SIGTERM'));
   process.on('SIGINT', () => shutdown('SIGINT'));
 
-  while (running) {
-    try {
-      await recoverOrphanedJobs(ctx);
+  logger.log(
+    `[worker:${workerId}] starting (${once ? 'one-shot Cron cycle' : 'persistent worker'}, poll=${env.WORKER_POLL_INTERVAL_MS}ms, concurrency=${env.WORKER_CONCURRENCY}, simulation=${env.DEPLOYMENT_SIMULATION_MODE})`
+  );
 
-      // Run up to WORKER_CONCURRENCY jobs concurrently; each poll drains at most that many.
-      const claimed: Array<Promise<unknown>> = [];
-      for (let slot = 0; slot < env.WORKER_CONCURRENCY; slot += 1) {
-        claimed.push(processNextJob(ctx));
-      }
-      const processed = await Promise.all(claimed);
-      const didWork = processed.some((p) => p !== null);
+  try {
+    await runWorkerLoop(
+      async () => {
+        if (!once) return runWorkerCycle(ctx, schedule, logger, env.WORKER_CONCURRENCY);
 
-      const now = Date.now();
-      if (now - lastHealthSweep >= HEALTHCHECK_INTERVAL_MS) {
-        lastHealthSweep = now;
-        const scheduled = await scheduleHealthChecks(pool);
-        if (scheduled > 0) logger.log(`[worker:${workerId}] scheduled ${scheduled} health check job(s)`);
-      }
-      if (now - lastSubscriptionSweep >= SUBSCRIPTION_SWEEP_INTERVAL_MS) {
-        lastSubscriptionSweep = now;
-        await sweepSubscriptions(pool);
-      }
-      if (now - lastOsLifecycleSweep >= OS_LIFECYCLE_SWEEP_INTERVAL_MS) {
-        lastOsLifecycleSweep = now;
-        const transitions = await sweepOperatingSystemLifecycle(pool);
-        for (const change of transitions) {
-          logger.log(`[worker:${workerId}] OS version ${change.displayName}: ${change.from} → ${change.to} (${change.notifiedServers} customer notice(s))`);
+        const lease = await withWorkerCycleLease(
+          pool,
+          {
+            name: DEFAULT_WORKER_CYCLE_LEASE_NAME,
+            holder: workerId,
+            leaseMs: env.WORKER_ONCE_LEASE_MS,
+          },
+          () => runWorkerCycle(ctx, schedule, logger, env.WORKER_CONCURRENCY),
+          (error) => logger.error(`[worker:${workerId}] cycle-lease issue: ${error.message}`)
+        );
+        if (!lease.acquired) {
+          logger.log(`[worker:${workerId}] skipped one-shot cycle: another Cron worker holds the active lease`);
+          return { didWork: false };
         }
+        return lease.value ?? { didWork: false };
+      },
+      {
+        once,
+        pollIntervalMs: env.WORKER_POLL_INTERVAL_MS,
+        isRunning: () => running,
+        onError: (error) => logger.error(`[worker:${workerId}] loop error: ${error.message}`),
       }
-
-      if (now - lastTerminationSweep >= TERMINATION_SWEEP_INTERVAL_MS) {
-        lastTerminationSweep = now;
-        for (const terminated of await sweepScheduledTerminations(pool)) {
-          logger.log(`[worker:${workerId}] scheduled termination due for ${terminated.name}: ${terminated.jobId ? `job ${terminated.jobId}` : 'retired without a provider resource'}`);
-        }
-      }
-
-      if (now - lastNotificationDrain >= NOTIFICATION_OUTBOX_INTERVAL_MS) {
-        lastNotificationDrain = now;
-        const delivery = await deliverNotificationOutbox(pool);
-        if (delivery.claimed > 0) {
-          logger.log(`[worker:${workerId}] notification outbox: ${delivery.delivered} delivered, ${delivery.retrying} retrying, ${delivery.failed} failed, ${delivery.configurationRequired} awaiting configuration`);
-        }
-      }
-
-      if (now - lastReconciliation >= RECONCILIATION_INTERVAL_MS) {
-        lastReconciliation = now;
-        for (const drift of await reconcileServerState(pool)) {
-          logger.log(`[worker:${workerId}] drift on ${drift.name}: ${drift.kind} ${drift.from} → ${drift.to}${drift.applied ? ' (applied)' : ' (reported only)'}`);
-        }
-      }
-
-      if (now - lastImageRevalidation >= IMAGE_REVALIDATION_INTERVAL_MS) {
-        lastImageRevalidation = now;
-        for (const check of await revalidateProviderImages(pool)) {
-          if (check.outcome !== 'VERIFIED') {
-            logger.log(`[worker:${workerId}] image ${check.providerImageId ?? check.imageId}: ${check.outcome}${check.error ? ` — ${check.error}` : ''}`);
-          }
-        }
-      }
-
-      if (now - lastCloudflareSweep >= CLOUDFLARE_SWEEP_INTERVAL_MS) {
-        lastCloudflareSweep = now;
-        const cf = await sweepCloudflareJobs(pool, workerId);
-        if (cf.claimed > 0 || cf.syncsScheduled > 0) {
-          logger.log(`[worker:${workerId}] cloudflare jobs: ${cf.succeeded} succeeded, ${cf.retrying} retrying, ${cf.failed} failed, ${cf.syncsScheduled} sync(s) scheduled`);
-        }
-      }
-
-      if (now - lastRevenueGuardianSweep >= REVENUE_GUARDIAN_SWEEP_INTERVAL_MS) {
-        lastRevenueGuardianSweep = now;
-        const rg = await runRevenueGuardianCycle(pool);
-        if (rg.ran.length > 0 || rg.failed.length > 0) {
-          logger.log(`[worker:${workerId}] revenue guardian: ran [${rg.ran.join(', ')}]${rg.failed.length ? `; failed [${rg.failed.join(', ')}]` : ''}`);
-        }
-      }
-
-      if (now - lastSecurityNumberSweep >= SECURITY_NUMBER_SWEEP_INTERVAL_MS) {
-        lastSecurityNumberSweep = now;
-        const rotated = await sweepSecurityNumbers(pool);
-        const closed = await sweepExpiredSupportSessions(pool);
-        if (rotated > 0 || closed > 0) {
-          logger.log(`[worker:${workerId}] security numbers rotated: ${rotated}; support sessions expired: ${closed}`);
-        }
-      }
-
-      if (!didWork) {
-        await new Promise((resolve) => setTimeout(resolve, env.WORKER_POLL_INTERVAL_MS));
-      }
-    } catch (err) {
-      logger.error(`[worker:${workerId}] loop error: ${(err as Error).message}`);
-      await new Promise((resolve) => setTimeout(resolve, Math.max(env.WORKER_POLL_INTERVAL_MS, 5000)));
-    }
+    );
+  } finally {
+    await closePool();
+    logger.log(`[worker:${workerId}] stopped cleanly`);
   }
-
-  await closePool();
-  logger.log(`[worker:${workerId}] stopped cleanly`);
 }
 
 // Only auto-start when run directly (node dist/src/worker/main.js), not when imported by tests.
 if (require.main === module) {
   main().catch((err) => {
+    // eslint-disable-next-line no-console
     console.error('[worker] fatal startup error:', err instanceof Error ? err.message : err);
-    process.exit(1);
+    process.exitCode = 1;
   });
 }

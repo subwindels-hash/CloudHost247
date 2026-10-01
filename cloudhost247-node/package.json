@@ -19,6 +19,7 @@
     "build:frontend": "vite build --config frontend/vite.config.ts",
     "start": "node server.js",
     "worker": "node dist/src/worker/main.js",
+    "worker:once": "node dist/src/worker/main.js --once",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",

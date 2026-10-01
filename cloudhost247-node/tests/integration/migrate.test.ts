@@ -84,6 +84,7 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0055_create_cloudflare.sql',
     '0056_extend_platform_services_licenses_backups.sql',
     '0057_create_ai_support_operator.sql',
+    '0058_create_worker_cycle_leases.sql',
   ];
 
   it('finds the committed migration files in order', () => {
@@ -148,6 +149,7 @@ describe('migration runner against the real database/migrations SQL files', () =
         'ai_support_messages',
         'newsletter_subscriptions',
         'support_agent_presence',
+        'worker_cycle_leases',
       ])
     );
   });

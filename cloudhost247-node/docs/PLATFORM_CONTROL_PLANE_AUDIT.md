@@ -43,9 +43,29 @@ The marketplace API and installer UI now distinguish **customer-provided require
 - Blank browser inputs are stripped before submit.
 - The backend also treats blank values for generated/defaulted manifest fields as absent, preventing an empty encrypted override from replacing a generated secret during deployment.
 
+## Worker-runtime completion — 2026-10-01
+
+The original cPanel guide prohibited an unmanaged permanent Node worker, while this platform now
+uses the worker for deployments, notifications, reconciliation, Cloudflare jobs and Revenue
+Guardian. That gap is closed in source with a cPanel-safe execution mode:
+
+- `npm run worker:once` runs one bounded cycle and exits; cPanel Cron invokes the compiled command
+  once per minute rather than relying on an SSH-launched daemon.
+- Migration `0058_create_worker_cycle_leases.sql` adds the durable `worker_cycle_leases` table.
+  One-shot cycles acquire and renew this database-backed lease, so overlapping Cron runs skip while
+  a healthy cycle is active and a later run recovers automatically after a crash.
+- Per-deployment leases remain unchanged. The cycle lease only serializes periodic sweeps; it never
+  weakens the row-level claim/recovery controls around provider actions.
+- `tests/unit/worker-runtime.test.ts` covers one-shot mode, persistent idle polling and Cron-visible
+  failures; `tests/integration/worker-lease.test.ts` proves exclusivity, renewal and expiry takeover
+  against migrated PostgreSQL-compatible SQL.
+
+This is source/test evidence only. A real cPanel staging run must still prove the host's exact Cron
+node path, environment inheritance, log rotation and failure alerting before production use.
+
 ## Next controlled phases
 
 1. Add optional Redis-backed caching/rate-limit/session primitives only if the deployment environment requires Redis; keep PostgreSQL as the current durable queue source of truth unless changed deliberately.
 2. Extend end-to-end tests for paid webhook → install job → worker execution with generated secrets, using the existing adapter override seam.
-3. Add operational documentation for worker/agent deployment, credential rotation, backup retention, and incident rollback runbooks.
+3. Add operational runbooks for server-agent deployment, credential rotation, backup retention, restore verification, and incident rollback; the cPanel worker command is now documented separately.
 4. Continue improving frontend install ergonomics: plan selection/pricing display, verified-domain picker, and compatibility explanations based on server capacity.

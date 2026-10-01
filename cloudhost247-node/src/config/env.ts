@@ -110,6 +110,13 @@ const envSchema = z.object({
   // How long a claimed-but-unrenewed deployment lease stays valid before another worker may
   // take the job over (crash recovery). Jobs renew the lease while running.
   WORKER_LEASE_MS: z.coerce.number().int().min(10_000).max(600_000).default(120_000),
+  // cPanel must invoke a bounded one-shot cycle from Cron rather than leave an SSH-launched
+  // daemon running. `npm run worker:once` sets this through the CLI; this environment flag is
+  // available for hosts whose scheduler cannot pass arguments.
+  WORKER_ONCE: boolFromString.optional().default('false'),
+  // Cycle-wide Cron lease. It serialises periodic sweeps while per-deployment leases continue to
+  // protect individual provider operations. It is renewed while a one-shot cycle is running.
+  WORKER_ONCE_LEASE_MS: z.coerce.number().int().min(10_000).max(3_600_000).default(900_000),
 
   // --- Phase 6: Backups (off-server storage) --------------------------------------------------
   // Optional S3-compatible target (AWS S3, Cloudflare R2, Wasabi, MinIO…). When unset, backups
