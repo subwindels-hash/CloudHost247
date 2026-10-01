@@ -66,6 +66,7 @@ namespace {
         private $orderBy = array();
         private $paging = array('limit' => null, 'offset' => 0);
         private $selectCount = false;
+        private $columns = null;
 
         public function __construct($table) { $this->table = $table; }
 
@@ -106,6 +107,15 @@ namespace {
         public function when($value, $callback)
         {
             if ($value) { $callback($this); }
+            return $this;
+        }
+
+        /** Column projection: select('id', 'email') / select(array('id', 'email')). */
+        public function select()
+        {
+            $args = func_get_args();
+            if (count($args) === 1 && is_array($args[0])) { $args = $args[0]; }
+            $this->columns = array_map('strval', $args);
             return $this;
         }
 
@@ -178,6 +188,15 @@ namespace {
             }
             if ($this->paging['offset'] > 0 || $this->paging['limit'] !== null) {
                 $out = array_slice($out, $this->paging['offset'], $this->paging['limit'] === null ? null : $this->paging['limit']);
+            }
+            if ($this->columns !== null) {
+                $out = array_map(function ($row) {
+                    $keep = array();
+                    foreach ($this->columns as $column) {
+                        if (array_key_exists($column, $row)) { $keep[$column] = $row[$column]; }
+                    }
+                    return $keep;
+                }, $out);
             }
             return $out;
         }

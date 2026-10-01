@@ -4,6 +4,8 @@ namespace CloudHost247\Marketing\Http;
 use CloudHost247\Marketing\Domain\CampaignStatus;
 use CloudHost247\Marketing\Domain\ConsentStatus;
 use CloudHost247\Marketing\Domain\QueueStatus;
+use CloudHost247\Marketing\Domain\SegmentField;
+use CloudHost247\Marketing\Domain\SegmentOperator;
 use CloudHost247\Marketing\Domain\SubscriberSource;
 use CloudHost247\Marketing\Domain\SubscriberStatus;
 use CloudHost247\Marketing\Domain\SuppressionReason;
@@ -38,12 +40,13 @@ final class AdminView
         $tabs = array(
             'dashboard' => array('Dashboard', ''),
             'subscribers' => array('Subscribers', 'subscribers'),
+            'segments' => array('Segments', 'segments'),
             'lists' => array('Lists', 'lists'),
             'import' => array('Import', 'import'),
             'suppressions' => array('Suppression List', 'suppressions'),
             'settings' => array('Delivery Settings', 'settings'),
         );
-        $active = $data['view'] === 'subscriber' ? 'subscribers' : $data['view'];
+        $active = $data['view'] === 'subscriber' ? 'subscribers' : ($data['view'] === 'segment' ? 'segments' : $data['view']);
         echo '<ul class="nav nav-tabs" role="tablist">';
         foreach ($tabs as $key => $tab) {
             echo '<li role="presentation" class="' . ($active === $key ? 'active' : '') . '"><a href="' . $this->base($tab[1]) . '">' . $this->e($tab[0]) . '</a></li>';
@@ -56,6 +59,8 @@ final class AdminView
         elseif ($data['view'] === 'lists') { $this->renderLists($data); }
         elseif ($data['view'] === 'import') { $this->renderImport($data); }
         elseif ($data['view'] === 'suppressions') { $this->renderSuppressions($data); }
+        elseif ($data['view'] === 'segments') { $this->renderSegments($data); }
+        elseif ($data['view'] === 'segment') { $this->renderSegmentDetail($data); }
         elseif (!empty($data['plannedSession'])) { $this->renderPlanned($data); }
         else { $this->renderDashboard($data); }
         echo '</div>';
@@ -292,6 +297,169 @@ final class AdminView
             . '<button class="btn btn-sm btn-default"' . ($canManage ? '' : ' disabled') . '>Restore to subscribed</button></form>';
         echo '<p class="text-muted">Restoring refuses while a suppression row exists — release it from the Suppression List first, so both decisions stay visible in the audit trail.</p>';
         echo '</div></div>';
+    }
+
+    // --------------------------------------------------------------- segments
+
+    private function fieldSelect($name, $selected)
+    {
+        $groups = array('Subscriber' => array(), 'Membership' => array(), 'Customer (read-only)' => array());
+        foreach (SegmentField::all() as $key => $field) {
+            if ($key === 'list' || $key === 'tag') { $groups['Membership'][$key] = $field['label']; }
+            elseif (!empty($field['client'])) { $groups['Customer (read-only)'][$key] = $field['label']; }
+            else { $groups['Subscriber'][$key] = $field['label']; }
+        }
+        echo '<select name="' . $this->e($name) . '" class="form-control" style="width:220px;display:inline-block;">';
+        echo '<option value="">— field —</option>';
+        foreach ($groups as $label => $fields) {
+            echo '<optgroup label="' . $this->e($label) . '">';
+            foreach ($fields as $key => $text) {
+                echo '<option value="' . $this->e($key) . '"' . ($selected === $key ? ' selected' : '') . '>' . $this->e($text) . '</option>';
+            }
+            echo '</optgroup>';
+        }
+        echo '</select>';
+    }
+
+    private function operatorSelect($name, $selected)
+    {
+        echo '<select name="' . $this->e($name) . '" class="form-control" style="width:180px;display:inline-block;">';
+        echo '<option value="">— operator —</option>';
+        foreach (SegmentOperator::all() as $operator) {
+            echo '<option value="' . $this->e($operator) . '"' . ($selected === $operator ? ' selected' : '') . '>' . $this->e(SegmentOperator::label($operator)) . '</option>';
+        }
+        echo '</select>';
+    }
+
+    /** One editable rule row; $rule may be null for the blank rows. */
+    private function ruleRow($index, $rule)
+    {
+        $field = $rule && isset($rule['field']) ? (string) $rule['field'] : '';
+        $operator = $rule && isset($rule['operator']) ? (string) $rule['operator'] : '';
+        $value = '';
+        if ($rule && isset($rule['value']) && $rule['value'] !== null) {
+            $value = is_array($rule['value'])
+                ? implode(', ', array_map(function ($item) { return is_bool($item) ? ($item ? 'yes' : 'no') : (string) $item; }, $rule['value']))
+                : (is_bool($rule['value']) ? ($rule['value'] ? 'yes' : 'no') : (string) $rule['value']);
+        }
+        echo '<div style="margin-bottom:6px;">';
+        $this->fieldSelect('rule_field[]', $field);
+        echo ' ';
+        $this->operatorSelect('rule_operator[]', $operator);
+        echo ' <input name="rule_value[]" class="form-control" style="width:280px;display:inline-block;" value="' . $this->e($value) . '" />';
+        echo '</div>';
+    }
+
+    private function ruleBuilder(array $definition)
+    {
+        $rules = isset($definition['rules']) ? $definition['rules'] : array();
+        $match = isset($definition['match']) ? (string) $definition['match'] : 'all';
+        echo '<label>Match</label> <select name="match" class="form-control" style="width:220px;display:inline-block;">'
+            . '<option value="all"' . ($match === 'all' ? ' selected' : '') . '>every rule must match</option>'
+            . '<option value="any"' . ($match === 'any' ? ' selected' : '') . '>at least one rule must match</option></select>';
+        echo '<div style="margin:8px 0;">';
+        $index = 0;
+        foreach ($rules as $rule) { $this->ruleRow($index++, $rule); }
+        for ($blank = 0; $blank < 3; $blank++) { $this->ruleRow($index++, null); }
+        echo '</div>';
+        echo '<details><summary class="text-muted">Fields and operators this build accepts</summary>';
+        echo '<table class="table table-condensed" style="max-width:900px;"><tr><th>Field</th><th>Type</th><th>Operators</th><th>Value</th><th>Notes</th></tr>';
+        foreach (SegmentField::all() as $key => $field) {
+            $operators = array();
+            foreach (SegmentOperator::forType($field['type']) as $operator) { $operators[] = SegmentOperator::label($operator); }
+            $values = '';
+            if ($field['type'] === SegmentField::TYPE_ENUM) { $values = implode(', ', SegmentField::values($key)); }
+            elseif ($field['type'] === SegmentField::TYPE_BOOL) { $values = 'yes / no'; }
+            elseif ($field['type'] === SegmentField::TYPE_DATE) { $values = 'YYYY-MM-DD, or whole days for the relative operators'; }
+            elseif ($field['type'] === SegmentField::TYPE_REFERENCE) { $values = 'comma-separated keys'; }
+            else { $values = 'text, comma-separated for is one of / is none of'; }
+            echo '<tr><td><code>' . $this->e($key) . '</code><br /><span class="text-muted">' . $this->e($field['label']) . '</span></td>'
+                . '<td>' . $this->e($field['type']) . '</td><td>' . $this->e(implode(', ', $operators)) . '</td>'
+                . '<td>' . $this->e($values) . '</td><td class="text-muted">' . $this->e($field['hint']) . '</td></tr>';
+        }
+        echo '</table></details>';
+    }
+
+    private function renderSegments(array $data)
+    {
+        $view = $data['segmentsView'];
+        $canManage = !empty($view['canManage']);
+        echo '<h4>Segments</h4>';
+        echo '<p class="text-muted">A segment is a saved question, not a list of people. Membership is evaluated live from the subscriber tables, list and tag memberships and read-only customer facts — nothing is copied, so nobody is mailed because of a stale sync.</p>';
+        echo '<table class="table table-striped"><tr><th>Name</th><th>Key</th><th>Rules</th><th>Matching subscribers</th><th>Status</th><th></th></tr>';
+        foreach ($view['rows'] as $row) {
+            $meta = isset($view['definitions'][(int) $row->id]) ? $view['definitions'][(int) $row->id] : array('summary' => '', 'sentences' => array());
+            echo '<tr><td><strong>' . $this->e($row->name) . '</strong>';
+            if ((string) $row->description !== '') { echo '<br /><span class="text-muted">' . $this->e($row->description) . '</span>'; }
+            echo '</td><td><code>' . $this->e($row->segment_key) . '</code></td>';
+            echo '<td>' . $this->e($meta['summary']);
+            if ($meta['sentences']) {
+                echo '<br /><span class="text-muted" style="font-size:12px;">' . $this->e(implode('; ', $meta['sentences'])) . '</span>';
+            }
+            echo '</td>';
+            echo '<td>';
+            if ($row->cached_count === null) { echo '<span class="text-muted">not evaluated yet</span>'; }
+            else { echo number_format((int) $row->cached_count) . ' <span class="text-muted" style="font-size:12px;">as at ' . $this->e($row->cached_at) . '</span>'; }
+            echo '</td>';
+            echo '<td>' . $this->e($row->status) . '</td><td>';
+            echo '<a class="btn btn-xs btn-default" href="' . $this->base('segment', array('id' => (int) $row->id)) . '">Edit</a> ';
+            echo '<form method="post" action="' . $this->base('segments') . '" style="display:inline;">'
+                . '<input type="hidden" name="token" value="' . $this->e($this->token()) . '" /><input type="hidden" name="action" value="segment.count" />'
+                . '<input type="hidden" name="segment_id" value="' . (int) $row->id . '" />'
+                . '<button class="btn btn-xs btn-default"' . ($canManage ? '' : ' disabled') . '>Refresh count</button></form> ';
+            $toggle = $row->status === 'active' ? 'segment.archive' : 'segment.activate';
+            echo '<form method="post" action="' . $this->base('segments') . '" style="display:inline;">'
+                . '<input type="hidden" name="token" value="' . $this->e($this->token()) . '" /><input type="hidden" name="action" value="' . $toggle . '" />'
+                . '<input type="hidden" name="segment_id" value="' . (int) $row->id . '" />'
+                . '<button class="btn btn-xs btn-default"' . ($canManage ? '' : ' disabled') . '>' . ($row->status === 'active' ? 'Archive' : 'Reactivate') . '</button></form>';
+            echo '</td></tr>';
+        }
+        if (!$view['rows']) { echo '<tr><td colspan="6" class="text-muted">No segments yet.</td></tr>'; }
+        echo '</table>';
+
+        echo '<h4>New segment</h4>';
+        echo '<form method="post" action="' . $this->base('segments') . '" style="max-width:980px;">'
+            . '<input type="hidden" name="token" value="' . $this->e($this->token()) . '" /><input type="hidden" name="action" value="segment.save" />';
+        echo '<table class="table"><tr><th style="width:160px;">Name</th><td><input name="name" class="form-control" /></td></tr>'
+            . '<tr><th>Key</th><td><input name="segment_key" class="form-control" style="max-width:320px;" /> <span class="text-muted">short identifier used by campaigns; left blank it is derived from the name</span></td></tr>'
+            . '<tr><th>Description</th><td><input name="description" class="form-control" /></td></tr>'
+            . '<tr><th>Rules</th><td>';
+        $this->ruleBuilder(array('match' => 'all', 'rules' => array()));
+        echo '</td></tr></table>';
+        echo '<button class="btn btn-primary"' . ($canManage ? '' : ' disabled') . '>Create segment</button>';
+        echo '</form>';
+    }
+
+    private function renderSegmentDetail(array $data)
+    {
+        $detail = $data['segmentDetail'];
+        $row = $detail['row'];
+        $canManage = !empty($data['capabilities']['campaigns.manage']);
+        echo '<a href="' . $this->base('segments') . '">&larr; All segments</a>';
+        echo '<h4>Edit segment: ' . $this->e($row->name) . ' <small>' . $this->e($row->status) . '</small></h4>';
+        echo '<p class="text-muted">' . $this->e($detail['summary']) . '</p>';
+        if ($detail['sentences']) {
+            echo '<ul class="text-muted">';
+            foreach ($detail['sentences'] as $sentence) { echo '<li>' . $this->e($sentence) . '</li>'; }
+            echo '</ul>';
+        }
+        if ($row->cached_count === null) {
+            echo '<div class="alert alert-warning">This segment has never been evaluated. The count shown in the list stays blank until a refresh runs; sending resolves the audience live.</div>';
+        } else {
+            echo '<p>Last evaluation: <strong>' . number_format((int) $row->cached_count) . '</strong> matching subscriber(s) as at ' . $this->e($row->cached_at) . '.</p>';
+        }
+
+        echo '<form method="post" action="' . $this->base('segment', array('id' => (int) $row->id)) . '" style="max-width:980px;">'
+            . '<input type="hidden" name="token" value="' . $this->e($this->token()) . '" /><input type="hidden" name="action" value="segment.save" />'
+            . '<input type="hidden" name="segment_id" value="' . (int) $row->id . '" />';
+        echo '<table class="table"><tr><th style="width:160px;">Name</th><td><input name="name" class="form-control" value="' . $this->e($row->name) . '" /></td></tr>'
+            . '<tr><th>Key</th><td><code>' . $this->e($row->segment_key) . '</code> <span class="text-muted">keys are permanent once campaigns reference them</span></td></tr>'
+            . '<tr><th>Description</th><td><input name="description" class="form-control" value="' . $this->e($row->description) . '" /></td></tr>'
+            . '<tr><th>Rules</th><td>';
+        $this->ruleBuilder($detail['definition']);
+        echo '</td></tr></table>';
+        echo '<button class="btn btn-primary"' . ($canManage ? '' : ' disabled') . '>Save changes</button>';
+        echo '</form>';
     }
 
     // ------------------------------------------------------------------ lists

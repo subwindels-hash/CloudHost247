@@ -1,6 +1,6 @@
 # CloudHost247 Email Marketing Platform
 
-Module: `modules/addons/cloudhost247_marketing` (version 1.1.0, in build — SESSION 2 of 12 complete).
+Module: `modules/addons/cloudhost247_marketing` (version 1.1.0, in build — SESSIONS 1–3 of 12 complete).
 Native WHMCS addon — no separate application, no separate frontend, no
 duplicate SMTP/credential infrastructure. Delivery credentials live
 exclusively in the central CloudHost247 API & Integrations vault under the
@@ -23,13 +23,16 @@ modules/addons/cloudhost247_marketing
  ├─ bootstrap.php                PSR-4 autoloader + defensive core/integrations requires
  ├─ hooks.php                    Admin → Marketing menu; (automation triggers land in SESSION 10)
  ├─ lib/Domain                   closed state enums (Campaign/Subscriber/Queue/Result/Event/Suppression,
- │                               + ConsentStatus and SubscriberSource since SESSION 2)
+ │                               ConsentStatus, SubscriberSource) + SegmentField / SegmentOperator
+ │                               closed catalogs (SESSION 3)
  ├─ lib/Repositories             SettingsRepository, SubscriberRepository, ListRepository,
- │                               TagRepository, SuppressionRepository
+ │                               TagRepository, SuppressionRepository, SegmentRepository,
+ │                               ClientDirectoryRepository (read-only WHMCS facts, SESSION 3)
  ├─ lib/Services                 SubscriptionService (subscribe/unsubscribe/bounce/suppression),
- │                               ImportService, ExportService; campaign/queue/automation services land in later sessions
+ │                               ImportService, ExportService, SegmentService (live evaluation, fail-closed);
+ │                               campaign/queue/automation services land in later sessions
  ├─ lib/Http                     AdminController / AdminView (dashboard, Delivery Settings,
- │                               Subscribers, Lists, Import, Suppression List)
+ │                               Subscribers, Segments, Lists, Import, Suppression List)
  ├─ lib/Security                 InputValidator
  ├─ migrations/V100.php          16 mod_cloudhost247_marketing_* tables (additive, hasTable-guarded)
  ├─ migrations/V110.php          tags + subscriber_tags (SESSION 2, additive, hasTable-guarded)
@@ -95,9 +98,9 @@ Delivery chain (built in SESSION 6/7):
 | Session | Status | Notes |
 |---|---|---|
 | 0 — Repository audit | **DONE** | `EMAIL-MARKETING-AUDIT.md` — no code modified |
-| 1 — Foundation | **DONE** | addon registration, `AdminAreaMainMenu` menu (10 sections), 16-table guarded migration, capability policy support, settings repository + Delivery Settings UI, dashboard with real counters, `cpanel_smtp` catalog provider, docs, CI wiring. Tests: 11 behavior (PHP 7.4 + 8.2) + 11 static invariants — all green |
-| 2 — Subscribers/lists/import | **DONE** | `SubscriberRepository`/`ListRepository`/`TagRepository`/`SuppressionRepository`; `SubscriptionService` (consent recorded as given, suppression always wins, idempotent unsubscribe, hard/soft bounce rules, two-step release + resubscribe); `ImportService` (CSV/TSV/semicolon/one-per-line, header detection + mapping suggestion, dry-run preview bound to the apply by a payload hash, import audit record, suppressed rows reported as skipped); `ExportService` (audited CSV, spreadsheet-formula neutralisation); admin screens for Subscribers (+detail), Lists, Import and Suppression List; migration `1.1.0` adds the two tag tables. Tests: 17 new behavior cases in `tests/marketing/session2.php` (28 total in the suite) + static invariants green |
-| 3 — Segments | planned | rule DSL over whitelisted read-only WHMCS columns, dynamic evaluation |
+| 1 — Foundation | **DONE** | addon registration, `AdminAreaMainMenu` menu (10 sections), 16-table guarded migration, capability policy support, settings repository + Delivery Settings UI, dashboard with real counters, `cpanel_smtp` catalog provider, docs, CI wiring. Tests: 12 behavior (PHP 7.4 + 8.2) + 11 static invariants — all green |
+| 2 — Subscribers/lists/import | **DONE** | `SubscriberRepository`/`ListRepository`/`TagRepository`/`SuppressionRepository`; `SubscriptionService` (consent recorded as given, suppression always wins, idempotent unsubscribe, hard/soft bounce rules, two-step release + resubscribe); `ImportService` (CSV/TSV/semicolon/one-per-line, header detection + mapping suggestion, dry-run preview bound to the apply by a payload hash, import audit record, suppressed rows reported as skipped); `ExportService` (audited CSV, spreadsheet-formula neutralisation); admin screens for Subscribers (+detail), Lists, Import and Suppression List; migration `1.1.0` adds the two tag tables. Tests: 17 new behavior cases in `tests/marketing/session2.php` (29 in the suite after this session) + static invariants green |
+| 3 — Segments | **DONE** | `SegmentField`/`SegmentOperator` closed catalogs (subscriber columns, list/tag membership, six read-only `client.*` facts); `SegmentService` validates and canonicalises definitions on save and on evaluation, evaluates live in 500-row batches with no membership copy, indexes memberships per referenced key, and fails closed when a customer fact cannot be verified (reported as `unverified`, never invented); `subscriberIds()` refuses archived, truncated or unverifiable segments so the send path can never overshoot; `SegmentRepository` stores the canonical JSON and a timestamped display count only, clearing it whenever rules change; `ClientDirectoryRepository` reads only the whitelisted `tblclients`/`tblhosting`/`tbldomains` columns in batches keyed by e-mail. Admin: Segments tab with list/create/edit, rule builder, refresh-count and archive actions behind `marketing.campaigns.manage`. Tests: 14 new behavior cases in `tests/marketing/session3.php` (43 total in the suite) + static invariants green |
 | 4 — Templates + builder | planned | block catalog → email-safe table HTML, sanitizer, previews, template library |
 | 5 — Campaigns | planned | CRUD → validation checklist → test email → schedule/pause/resume/cancel |
 | 6 — cPanel SMTP | planned | shared `SmtpClient` (integrations), provider class, sender-domain validation, test panel |
@@ -114,6 +117,18 @@ Delivery chain (built in SESSION 6/7):
   seeding, settings persistence/audit/capability denial, dashboard honesty,
   catalog registration, enum closures, validator) plus the SESSION 2 file below;
   runs under PHP 7.4 and 8.2 in CI.
+* `tests/marketing/session3.php` — SESSION 3 behavior suite (14 cases): the closed
+  DSL refuses unknown fields, mismatched operators, bad enum/date/day values and
+  21-rule definitions; canonicalisation of JSON input, lower-cased enums,
+  deduplicated lists, `is_set` value-less rules, bare rule lists; reference keys
+  must exist at save time but stored definitions stay readable; save/update/
+  archive/reactivate audits and cache invalidation; live re-evaluation with no
+  membership copy (members appear and disappear without touching the segment);
+  all/any precedence; `is one of` / `is none of` / `is present` / `is missing`
+  membership semantics; relative date rules; read-only customer facts batched by
+  e-mail with `unverified` accounting; fail-closed refusals from `subscriberIds()`
+  ('cannot be resolved', 'could not be verified', archived); and the admin POST
+  flow for create / count / archive with CSRF and capability guards.
 * `tests/marketing/session2.php` — SESSION 2 behavior suite (17 cases): tag-table
   migration idempotency, consent recorded exactly as given, suppressed addresses
   refused and audited, idempotent unsubscribe + suppression, soft/hard bounce

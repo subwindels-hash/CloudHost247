@@ -162,12 +162,17 @@ $tests['Every advertised menu section is routable and unbuilt ones say so instea
     // The menu advertises more sections than the build has landed; each of them
     // must keep its own address and explain itself rather than silently render
     // the dashboard under a different URL.
-    $planned = array('segments' => 3, 'templates' => 4, 'campaigns' => 5, 'analytics' => 9, 'automations' => 10);
+    $planned = array('templates' => 4, 'campaigns' => 5, 'analytics' => 9, 'automations' => 10);
     foreach ($planned as $view => $session) {
         $_GET = array('view' => $view);
         $data = (new AdminController())->handle();
         if ($data['view'] !== $view || (int) $data['plannedSession'] !== $session) { return false; }
     }
+    // SESSION 3 landed: segments is a real view, not a planned one.
+    $_GET = array('view' => 'segments');
+    $data = (new AdminController())->handle();
+    if ($data['view'] !== 'segments' || (int) $data['plannedSession'] !== 0) { return false; }
+
     // A genuinely unknown view still resolves to the dashboard.
     $_GET = array('view' => 'does-not-exist');
     $data = (new AdminController())->handle();
@@ -253,6 +258,15 @@ $tests['The central catalog defines cpanel_smtp as the marketing delivery provid
 // session2.php so each session keeps its own test file.
 
 foreach (require __DIR__ . '/session2.php' as $name => $test) {
+    if (isset($tests[$name])) { throw new RuntimeException('Duplicate marketing test name: ' . $name); }
+    $tests[$name] = $test;
+}
+
+// ------------------------------------------------------------- SESSION 3 - segments
+// The segment DSL, live evaluation and the fail-closed send path live in
+// session3.php for the same reason.
+
+foreach (require __DIR__ . '/session3.php' as $name => $test) {
     if (isset($tests[$name])) { throw new RuntimeException('Duplicate marketing test name: ' . $name); }
     $tests[$name] = $test;
 }

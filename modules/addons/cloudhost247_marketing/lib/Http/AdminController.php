@@ -19,6 +19,7 @@ use CloudHost247\Marketing\Repositories\TagRepository;
 use CloudHost247\Marketing\Security\InputValidator;
 use CloudHost247\Marketing\Services\ExportService;
 use CloudHost247\Marketing\Services\ImportService;
+use CloudHost247\Marketing\Services\SegmentService;
 use CloudHost247\Marketing\Services\SubscriptionService;
 use WHMCS\Database\Capsule;
 
@@ -32,7 +33,7 @@ final class AdminController
     const PROVIDER_KEY = 'cpanel_smtp';
 
     /** Every view the module currently serves. */
-    const VIEWS = array('dashboard', 'settings', 'subscribers', 'subscriber', 'lists', 'import', 'suppressions');
+    const VIEWS = array('dashboard', 'settings', 'subscribers', 'subscriber', 'lists', 'import', 'suppressions', 'segments', 'segment');
 
     /**
      * Sections the admin menu already advertises but whose build session has not
@@ -42,7 +43,6 @@ final class AdminController
      * @var array<string,int>
      */
     const PLANNED_VIEWS = array(
-        'segments' => 3,
         'templates' => 4,
         'campaigns' => 5,
         'analytics' => 9,
@@ -51,6 +51,8 @@ final class AdminController
 
     /** Capability required for each mutating view (SESSION 2 scope). */
     const SUBSCRIBER_CAPABILITY = 'marketing.subscribers.manage';
+    /** Segments are audience definitions, so they sit behind the campaign capability. */
+    const SEGMENT_CAPABILITY = 'marketing.campaigns.manage';
 
     private $settings;
     private $subscribers;
@@ -60,6 +62,7 @@ final class AdminController
     private $subscriptions;
     private $imports;
     private $exporter;
+    private $segments;
 
     public function __construct(
         SettingsRepository $settings = null,
@@ -69,7 +72,8 @@ final class AdminController
         TagRepository $tags = null,
         SubscriptionService $subscriptions = null,
         ImportService $imports = null,
-        ExportService $exporter = null
+        ExportService $exporter = null,
+        SegmentService $segments = null
     ) {
         $this->settings = $settings ?: new SettingsRepository();
         $this->subscribers = $subscribers ?: new SubscriberRepository();
@@ -79,6 +83,7 @@ final class AdminController
         $this->subscriptions = $subscriptions ?: new SubscriptionService($this->subscribers, $this->suppressions, $this->lists, $this->tags);
         $this->imports = $imports ?: new ImportService($this->subscribers, $this->tags, $this->subscriptions);
         $this->exporter = $exporter ?: new ExportService($this->subscribers, $this->lists, $this->tags);
+        $this->segments = $segments ?: new SegmentService();
     }
 
     public function handle()
@@ -96,6 +101,17 @@ final class AdminController
                 // reports validation failures as an Error notice (unchanged).
                 $notice = $this->saveSettings();
                 if (substr($notice, 0, 6) === 'Error:') { $error = $notice; $notice = ''; }
+            } elseif ($view === 'segments' || $view === 'segment') {
+                $this->requireMutation(self::SEGMENT_CAPABILITY);
+                try {
+                    $result = $this->handleSegmentAction();
+                    $notice = isset($result['notice']) ? $result['notice'] : '';
+                    $error = isset($result['error']) ? $result['error'] : '';
+                } catch (\InvalidArgumentException $e) {
+                    $error = 'Error: ' . $e->getMessage();
+                } catch (\RuntimeException $e) {
+                    $error = 'Error: ' . $e->getMessage();
+                }
             } elseif (in_array($view, array('subscribers', 'subscriber', 'lists', 'suppressions', 'import'), true)) {
                 // The guard runs outside the try block on purpose: a missing
                 // capability or CSRF token must refuse the request outright, never
@@ -147,6 +163,12 @@ final class AdminController
         } elseif ($view === 'lists') { $data = array_merge($data, $this->listView()); }
         elseif ($view === 'import') { $data = array_merge($data, $this->importView()); }
         elseif ($view === 'suppressions') { $data = array_merge($data, $this->suppressionView()); }
+        elseif ($view === 'segments') { $data = array_merge($data, $this->segmentListView()); }
+        elseif ($view === 'segment') {
+            $detail = $this->segmentDetailView();
+            $data = array_merge($data, $detail);
+            if (empty($detail['segmentDetail'])) { $viewError = 'That segment does not exist.'; }
+        }
 
         foreach ($extra as $key => $value) { $data[$key] = $value; }
         if ($error === '' && $viewError !== '') { $data['error'] = $viewError; }
@@ -375,6 +397,104 @@ final class AdminController
         }
 
         return array('notice' => '', 'error' => 'Unknown list action.');
+    }
+
+    // -------------------------------------------------------------- segments
+
+    private function segmentListView()
+    {
+        $rows = $this->segments->repository()->all();
+        $definitions = array();
+        foreach ($rows as $row) {
+            $definitions[(int) $row->id] = array(
+                'summary' => $this->segments->describeDefinition($row->definition_json),
+                'sentences' => $this->segments->ruleSentences($row->definition_json),
+            );
+        }
+        return array('segmentsView' => array(
+            'rows' => $rows,
+            'definitions' => $definitions,
+            'canManage' => $this->capAllowed(self::SEGMENT_CAPABILITY),
+        ));
+    }
+
+    private function segmentDetailView()
+    {
+        $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
+        $segment = $id > 0 ? $this->segments->repository()->find($id) : null;
+        $definition = array('match' => 'all', 'rules' => array());
+        if ($segment) {
+            $definition = $this->segments->normaliseDefinition($segment->definition_json, false);
+        }
+        return array('segmentDetail' => $segment ? array(
+            'row' => $segment,
+            'definition' => $definition,
+            'sentences' => $this->segments->ruleSentences($definition),
+            'summary' => $this->segments->describeDefinition($definition),
+        ) : null);
+    }
+
+    private function handleSegmentAction()
+    {
+        $action = isset($_POST['action']) ? (string) $_POST['action'] : '';
+
+        if ($action === 'segment.save') {
+            $id = isset($_POST['segment_id']) ? (int) $_POST['segment_id'] : 0;
+            $definition = array(
+                'match' => isset($_POST['match']) ? (string) $_POST['match'] : 'all',
+                'rules' => $this->rulesFromPost(),
+            );
+            if (!$definition['rules']) { return array('notice' => '', 'error' => 'Add at least one rule — an empty segment would mean "everyone".'); }
+            $name = isset($_POST['name']) ? (string) $_POST['name'] : '';
+            $key = isset($_POST['segment_key']) ? (string) $_POST['segment_key'] : '';
+            if (trim($key) === '') { $key = strtolower(preg_replace('/[^a-z0-9_-]/i', '-', $name)); }
+            $segment = $this->segments->save(array(
+                'segment_key' => $key,
+                'name' => $name,
+                'description' => isset($_POST['description']) ? (string) $_POST['description'] : '',
+                'definition' => $definition,
+            ), $id);
+            return array('notice' => $id > 0 ? 'Segment updated.' : 'Segment created.', 'error' => '', 'segment_id' => (int) $segment->id);
+        }
+
+        if ($action === 'segment.archive' || $action === 'segment.activate') {
+            $id = isset($_POST['segment_id']) ? (int) $_POST['segment_id'] : 0;
+            if ($action === 'segment.archive') { $this->segments->archive($id); } else { $this->segments->activate($id); }
+            return array('notice' => 'Segment ' . ($action === 'segment.archive' ? 'archived' : 'reactivated') . '.', 'error' => '');
+        }
+
+        if ($action === 'segment.count') {
+            $id = isset($_POST['segment_id']) ? (int) $_POST['segment_id'] : 0;
+            $refresh = $this->segments->refreshCount($id);
+            $result = $refresh['result'];
+            $notice = number_format($result['count']) . ' subscriber(s) match right now';
+            if ($result['truncated']) { $notice .= ' (evaluation stopped at the scan limit — refine the rules)'; }
+            $notice .= '.';
+            $error = $result['error'];
+            if ($result['unverified'] > 0) {
+                $error = trim($error . ' ' . number_format($result['unverified']) . ' subscriber(s) were not matched because a customer-side condition could not be verified.');
+            }
+            return array('notice' => $notice, 'error' => $error);
+        }
+
+        return array('notice' => '', 'error' => 'Unknown segment action.');
+    }
+
+    /** @return array canonical rule rows, blank form rows dropped */
+    private function rulesFromPost()
+    {
+        $fields = isset($_POST['rule_field']) && is_array($_POST['rule_field']) ? $_POST['rule_field'] : array();
+        $operators = isset($_POST['rule_operator']) && is_array($_POST['rule_operator']) ? $_POST['rule_operator'] : array();
+        $values = isset($_POST['rule_value']) && is_array($_POST['rule_value']) ? $_POST['rule_value'] : array();
+        $rules = array();
+        foreach ($fields as $index => $field) {
+            $field = trim((string) $field);
+            $operator = isset($operators[$index]) ? strtolower(trim((string) $operators[$index])) : '';
+            $value = isset($values[$index]) ? (string) $values[$index] : '';
+            if ($field === '' && $operator === '' && trim($value) === '') { continue; }
+            $rules[] = array('field' => $field, 'operator' => $operator, 'value' => $value);
+        }
+        return $rules;
     }
 
     // ----------------------------------------------------------- suppressions
