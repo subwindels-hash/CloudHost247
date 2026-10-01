@@ -36,8 +36,9 @@ The audit inspected readable addon/server PHP, hooks, templates and four cron sc
 | Reboot | Dedicated/VPS reboot | IMPLEMENTED source | BLOCKED |
 | VPS power/suspend semantics | VPS start/stop mapped to WHMCS suspend/unsuspend | IMPLEMENTED source | Stop is power state, not OVH billing suspension |
 | Termination | Explicit WHMCS terminate action invokes supported endpoint | IMPLEMENTED source | Destructive runtime test requires disposable service |
-| Reverse DNS | Legacy endpoints audited | PARTIAL/not exposed | Requires validated IP block/address workflow |
-| Reinstall/rescue/snapshot/backup/firewall/IPMI/monitoring | Legacy API capability audited | NOT IMPLEMENTED | Product/permission dependent; must not be guessed |
+| Reverse DNS | Admin set/delete with IP-block/address/hostname validation, confirmation and audit | IMPLEMENTED source, BLOCKED runtime | Needs an IP block the OVH account owns |
+| Snapshot / automated-backup status / task history / reinstall / rescue boot / IPMI access / monitoring | Admin-only `AdvancedOperations` (see below) | IMPLEMENTED source, BLOCKED runtime | Endpoint shapes follow OVH's public API reference; never exercised against a live account; consumer key needs matching rules |
+| Firewall, network-boot beyond boot-id selection, intervention history, backup restore | Legacy API capability audited | NOT IMPLEMENTED | Product/permission dependent; must not be guessed |
 | Service synchronization | Lists dedicated/VPS, updates only known bindings, counts unchanged/updated/failed/skipped | IMPLEMENTED source | BLOCKED runtime |
 | Catalog synchronization | Idempotent upsert and unavailable marking | IMPLEMENTED source | BLOCKED runtime |
 | Locked cron | CLI-only worker, endpoint leases, stale recovery and structured run counts | IMPLEMENTED source | Scheduling/runtime BLOCKED |
@@ -117,3 +118,23 @@ Version 1.3.0 adds recursive-but-conservative region/product normalization, an u
 - **NOT IMPLEMENTED — API/PRODUCT DEPENDENCY:** provider capabilities not exposed by an authenticated OVH product/API are not guessed; unsafe mutation retry is intentionally unavailable.
 
 Migration ordering is core `1.1.0`, currency `1.0.0 → 1.1.0`, theme `1.0.0 → 1.1.0`, and OVH `1.0.0 → 1.1.0 → 1.2.0 → 1.3.0 → 1.4.0 → 1.5.0`. All migrations are additive/idempotent and retain data on module deactivation. No WHMCS core schema is altered. Before upgrade, back up the database; rollback means restoring that backup and the prior source commit because additive tables/columns are deliberately retained.
+
+## Advanced service operations (admin-only)
+
+`lib/Services/AdvancedOperations.php`, surfaced in **Admin → Addons → CloudHost247 OVH → Advanced service operations**. It operates on a WHMCS service that is already linked to an OVH service name, and the action must match the linked family. There is no customer-facing entry point.
+
+| Action | Family | OVH call (beneath the service base path) | Kind |
+|---|---|---|---|
+| Snapshot status / backup status / task history / templates | VPS | `GET /snapshot`, `/automatedBackup`, `/tasks`, `/templates` | read |
+| Create snapshot | VPS | `POST /createSnapshot {description}` | write |
+| Revert / delete snapshot | VPS | `POST /snapshot/revert`, `DELETE /snapshot` | **destructive** |
+| Reinstall | VPS | `POST /reinstall {templateId}` | **destructive** |
+| Task history / rescue boot options / IPMI status / compatible templates | Dedicated | `GET /task`, `/boot?bootType=rescue`, `/features/ipmi`, `/install/compatibleTemplates` | read |
+| Monitoring on/off | Dedicated | `PUT <base> {monitoring}` | write |
+| Select next boot | Dedicated | `PUT <base> {bootId}` (use the existing Reboot action afterwards) | write |
+| IPMI access | Dedicated | `POST /features/ipmi/access {ipToAllow, ttl, type}` | write |
+| Reinstall | Dedicated | `POST /install/start {templateName, details.customHostname}` | **destructive** |
+
+Controls: CSRF token; `operations.run` capability for reads and `changes.apply` for writes; an explicit confirmation checkbox on every write; typing the exact OVH service name for destructive actions; strict validation of every field (numeric IDs, template-name pattern, IP address, hostname, closed IPMI ttl/type lists); the same ledgered, idempotent, never-auto-retried mutation path used for reboot and terminate (an uncertain outcome becomes `reconciliation_required`); and an audit event. Reverse-DNS set/delete in the same page are confirmed and audited too.
+
+Staging evidence still required: each call against a disposable OVH VPS and dedicated server, with a consumer key limited to the paths used.
