@@ -62,20 +62,42 @@ export interface AdminSupportSession {
 export interface CustomerService {
   id: string;
   label: string;
-  status: 'active' | 'suspended' | 'cancelled' | 'pending_migration';
+  status: string;
   productSlug: string | null;
   productName: string | null;
   planSlug: string | null;
   planName: string | null;
+  serverId?: string | null;
+  serverName?: string | null;
+  serverIp?: string | null;
+  serverStatus?: string | null;
+  controlPanelId?: string | null;
+  panelName?: string | null;
+  panelSlug?: string | null;
+  licenseId?: string | null;
+  licenseStatus?: string | null;
+  domain?: string | null;
+  hostname?: string | null;
+  username?: string | null;
+  billingCycle?: string;
+  amount?: number | string;
+  currency?: string;
+  nextDueDate?: string | null;
+  suspensionDate?: string | null;
+  terminationDate?: string | null;
   externalReference: string | null;
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface AdminCustomerService extends CustomerService {
   userId: string;
+  customerId?: string;
   notes: string | null;
   createdBy: string | null;
   updatedAt: string;
+  customerEmail?: string;
+  customerName?: string;
 }
 
 export interface CustomerDomain {

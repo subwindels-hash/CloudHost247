@@ -82,6 +82,7 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0053_customer_identity_and_support_sessions.sql',
     '0054_create_revenue_guardian.sql',
     '0055_create_cloudflare.sql',
+    '0056_extend_platform_services_licenses_backups.sql',
   ];
 
   it('finds the committed migration files in order', () => {

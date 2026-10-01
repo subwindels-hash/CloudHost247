@@ -73,8 +73,27 @@ export interface CustomerServiceDTO {
   productName: string | null;
   planSlug: string | null;
   planName: string | null;
+  serverId?: string | null;
+  serverName?: string | null;
+  serverIp?: string | null;
+  serverStatus?: string | null;
+  controlPanelId?: string | null;
+  panelName?: string | null;
+  panelSlug?: string | null;
+  licenseId?: string | null;
+  licenseStatus?: string | null;
+  domain?: string | null;
+  hostname?: string | null;
+  username?: string | null;
+  billingCycle?: string;
+  amount?: number | string;
+  currency?: string;
+  nextDueDate?: string | null;
+  suspensionDate?: string | null;
+  terminationDate?: string | null;
   externalReference: string | null;
   createdAt: string;
+  updatedAt?: string;
 }
 
 export function toCustomerServiceDTO(row: CustomerServiceRow): CustomerServiceDTO {
@@ -86,25 +105,50 @@ export function toCustomerServiceDTO(row: CustomerServiceRow): CustomerServiceDT
     productName: row.product_name,
     planSlug: row.plan_slug,
     planName: row.plan_name,
+    serverId: row.server_id ?? null,
+    serverName: row.server_name ?? null,
+    serverIp: row.server_ip ?? null,
+    serverStatus: row.server_status ?? null,
+    controlPanelId: row.control_panel_id ?? null,
+    panelName: row.panel_name ?? null,
+    panelSlug: row.panel_slug ?? null,
+    licenseId: row.license_id ?? null,
+    licenseStatus: row.license_status ?? null,
+    domain: row.domain ?? null,
+    hostname: row.hostname ?? null,
+    username: row.username ?? null,
+    billingCycle: row.billing_cycle ?? 'monthly',
+    amount: row.amount ?? 0.0,
+    currency: row.currency ?? 'USD',
+    nextDueDate: row.next_due_date ?? null,
+    suspensionDate: row.suspension_date ?? null,
+    terminationDate: row.termination_date ?? null,
     externalReference: row.external_reference,
     createdAt: row.created_at,
+    updatedAt: row.updated_at,
   };
 }
 
 export interface AdminCustomerServiceDTO extends CustomerServiceDTO {
   userId: string;
+  customerId: string;
   notes: string | null;
   createdBy: string | null;
   updatedAt: string;
+  customerEmail?: string;
+  customerName?: string;
 }
 
 export function toAdminCustomerServiceDTO(row: CustomerServiceRow): AdminCustomerServiceDTO {
   return {
     ...toCustomerServiceDTO(row),
     userId: row.user_id,
+    customerId: row.customer_id ?? row.user_id,
     notes: row.notes,
     createdBy: row.created_by,
     updatedAt: row.updated_at,
+    customerEmail: row.customer_email,
+    customerName: row.customer_name,
   };
 }
 

@@ -87,6 +87,12 @@ export interface CompatibilityCheckResult {
   reasons: string[];
 }
 
+export interface ControlPanelOperationResult {
+  success: boolean;
+  message?: string;
+  data?: Record<string, unknown>;
+}
+
 export interface ControlPanelAdapter {
   readonly slug: string;
   readonly name: string;
@@ -123,4 +129,31 @@ export interface ControlPanelAdapter {
     cpuCores: number,
     diskGb: number
   ): CompatibilityCheckResult;
+
+  /**
+   * Standard control panel management operations (Section 7 & 8).
+   * Capability-aware and fails closed if API/agent integration is unavailable.
+   */
+  install?(options: ControlPanelInstallOptions): Promise<ControlPanelOperationResult>;
+  uninstall?(options: { serverIp: string }): Promise<ControlPanelOperationResult>;
+  configure?(options: Record<string, unknown>): Promise<ControlPanelOperationResult>;
+  getStatus?(target: { serverIp: string }): Promise<{ status: string; version?: string }>;
+  healthCheck?(target: { serverIp: string }): Promise<{ healthy: boolean; details?: string }>;
+  createAccount?(options: Record<string, unknown>): Promise<ControlPanelOperationResult>;
+  suspendAccount?(options: Record<string, unknown>): Promise<ControlPanelOperationResult>;
+  unsuspendAccount?(options: Record<string, unknown>): Promise<ControlPanelOperationResult>;
+  terminateAccount?(options: Record<string, unknown>): Promise<ControlPanelOperationResult>;
+  createDomain?(options: { domain: string; serverIp?: string }): Promise<ControlPanelOperationResult>;
+  deleteDomain?(options: { domain: string }): Promise<ControlPanelOperationResult>;
+  createSubdomain?(options: { domain: string; subdomain: string }): Promise<ControlPanelOperationResult>;
+  createDatabase?(options: { databaseName: string; user?: string }): Promise<ControlPanelOperationResult>;
+  deleteDatabase?(options: { databaseName: string }): Promise<ControlPanelOperationResult>;
+  createEmailAccount?(options: { email: string; quotaMb?: number }): Promise<ControlPanelOperationResult>;
+  deleteEmailAccount?(options: { email: string }): Promise<ControlPanelOperationResult>;
+  createDNSRecord?(options: Record<string, unknown>): Promise<ControlPanelOperationResult>;
+  deleteDNSRecord?(options: Record<string, unknown>): Promise<ControlPanelOperationResult>;
+  issueSSL?(options: { domain: string }): Promise<ControlPanelOperationResult>;
+  renewSSL?(options: { domain: string }): Promise<ControlPanelOperationResult>;
+  getUsage?(target: { serverIp: string }): Promise<Record<string, unknown>>;
+  restartService?(serviceName: string): Promise<ControlPanelOperationResult>;
 }
