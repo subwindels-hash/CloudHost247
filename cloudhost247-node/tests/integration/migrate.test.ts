@@ -83,6 +83,7 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0054_create_revenue_guardian.sql',
     '0055_create_cloudflare.sql',
     '0056_extend_platform_services_licenses_backups.sql',
+    '0057_create_ai_support_operator.sql',
   ];
 
   it('finds the committed migration files in order', () => {
@@ -143,6 +144,10 @@ describe('migration runner against the real database/migrations SQL files', () =
         'provisioning_jobs',
         'customer_ssh_keys',
         'user_notifications',
+        'ai_support_conversations',
+        'ai_support_messages',
+        'newsletter_subscriptions',
+        'support_agent_presence',
       ])
     );
   });
