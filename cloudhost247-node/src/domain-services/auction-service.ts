@@ -204,6 +204,12 @@ export async function placeBid(db: Queryable, input: PlaceBidInput, genId: () =>
       }
     }
 
+    // A bidder re-submitting their own winning amount is told exactly that — before the
+    // increment rule implies someone else outbid them.
+    if (auction.current_highest_bidder_id === input.userId && toCents(auction.current_highest_bid ?? '0') === amountCents) {
+      throw new ConflictError('You already hold the highest bid at that amount');
+    }
+
     // Server-computed minimum acceptable bid.
     const floorCents = Math.max(toCents(auction.current_highest_bid ?? auction.minimum_bid), toCents(auction.minimum_bid));
     const requiredCents = floorCents + toCents(auction.bid_increment);
@@ -213,11 +219,6 @@ export async function placeBid(db: Queryable, input: PlaceBidInput, genId: () =>
           `(current ${(auction.current_highest_bid ?? auction.minimum_bid)} ${auction.currency} plus ` +
           `an increment of ${auction.bid_increment} ${auction.currency}).`
       );
-    }
-
-    // A bidder cannot outbid themselves with the same amount (no-op duplicate bid).
-    if (auction.current_highest_bidder_id === input.userId && toCents(auction.current_highest_bid ?? '0') === amountCents) {
-      throw new ConflictError('You already hold the highest bid at that amount');
     }
 
     const nextSequence = (auction.bid_count ?? 0) + 1;
@@ -578,14 +579,16 @@ export async function adminUpdateAuctionStatus(
     if (!rule.from.includes(auction.status)) {
       throw new ConflictError(`Cannot ${action} an auction with status "${auction.status}"`);
     }
+    // Booleans are computed in JS: reusing the status parameter in both a varchar column and a
+    // text comparison makes Postgres fail parameter type inference (SQLSTATE 42P08).
     const { rows: updated } = await tx.query<AuctionRow>(
       `UPDATE domain_auctions
           SET status=$2,
-              cancelled_at = CASE WHEN $2='cancelled' THEN now() ELSE cancelled_at END,
-              completed_at = CASE WHEN $2='completed' THEN now() ELSE completed_at END,
+              cancelled_at = CASE WHEN $3 THEN now() ELSE cancelled_at END,
+              completed_at = CASE WHEN $4 THEN now() ELSE completed_at END,
               updated_at=now()
         WHERE id=$1 RETURNING *`,
-      [auctionId, rule.to]
+      [auctionId, rule.to, action === 'cancel', action === 'complete']
     );
 
     if (action === 'cancel' && auction.current_highest_bidder_id) {

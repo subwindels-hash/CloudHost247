@@ -98,6 +98,17 @@ import { RGSettingsPage, ModuleHealthPage as RGModuleHealthPage } from './pages/
 import CloudflareServicesPage from './pages/cloudflare/CloudflareServicesPage';
 import CloudflareServicePage from './pages/cloudflare/CloudflareServicePage';
 import AdminCloudflarePage from './pages/AdminCloudflarePage';
+import AdminDomainServicesPage from './pages/AdminDomainServicesPage';
+import DomainSearchPage from './pages/domains/SearchPage';
+import DomainTransferPage from './pages/domains/TransferPage';
+import DomainExtensionsPage from './pages/domains/ExtensionsPage';
+import DomainAuctionsPage from './pages/domains/AuctionsPage';
+import DomainAuctionDetailPage from './pages/domains/AuctionDetailPage';
+import DomainAppraisalPage from './pages/domains/AppraisalPage';
+import DomainClubPage from './pages/domains/ClubPage';
+import DomainWhoisPage from './pages/domains/WhoisPage';
+import DomainBulkSearchPage from './pages/domains/BulkSearchPage';
+import DomainBrokerPage from './pages/domains/BrokerPage';
 import DnsManagementPage from './pages/DnsManagementPage';
 import SslManagementPage from './pages/SslManagementPage';
 
@@ -116,6 +127,19 @@ export default function App() {
         <Route path="/hosting/control-panels" element={<ControlPanelsPage />} />
         <Route path="/hosting/control-panels/:slug" element={<ControlPanelDetailPage />} />
         <Route path="/domains" element={<DomainsMarketingPage />} />
+        {/* Domain Services hub pages. Browsing is public; actions that need an account
+            (registering, transferring, bidding, appraising, bulk search, brokering) show an
+            honest sign-in prompt, and the backend re-verifies auth + rate limits on every call. */}
+        <Route path="/domains/search" element={<DomainSearchPage />} />
+        <Route path="/domains/transfer" element={<DomainTransferPage />} />
+        <Route path="/domains/extensions" element={<DomainExtensionsPage />} />
+        <Route path="/domains/auctions" element={<DomainAuctionsPage />} />
+        <Route path="/domains/auctions/:id" element={<DomainAuctionDetailPage />} />
+        <Route path="/domains/appraisal" element={<DomainAppraisalPage />} />
+        <Route path="/domains/club" element={<DomainClubPage />} />
+        <Route path="/domains/whois" element={<DomainWhoisPage />} />
+        <Route path="/domains/bulk-search" element={<DomainBulkSearchPage />} />
+        <Route path="/domains/broker" element={<DomainBrokerPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/faq" element={<FaqPage />} />
 
@@ -226,6 +250,9 @@ export default function App() {
             <Route path="/admin/cloudflare" element={<AdminCloudflarePage />} />
             <Route path="/admin/cloudflare/:tab" element={<AdminCloudflarePage />} />
             <Route path="/admin/integrations/cloudflare" element={<AdminCloudflarePage />} />
+            {/* Domain Services control room: providers + credentials + real Test Connection,
+                extension catalogue + trending, auctions, transfers, Domain Club plans. */}
+            <Route path="/admin/domain-services" element={<AdminDomainServicesPage />} />
           </Route>
 
           {/* Revenue Guardian — staff accounts also participate (with a server-enforced,

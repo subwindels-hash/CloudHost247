@@ -25,6 +25,10 @@ import { registerServerRoutes } from './routes/servers';
 import { registerDomainRoutes } from './routes/domains';
 import { registerDomainServiceRoutes } from './routes/domain-services';
 import { registerAdminDomainServiceRoutes } from './routes/admin-domain-services';
+import {
+  DomainProviderError,
+  safeDomainProviderMessage,
+} from './domain-services/providers/types';
 import { registerAgentRoutes } from './routes/agent';
 import { registerAdminPlatformRoutes } from './routes/admin-platform';
 import { registerInfrastructureRoutes } from './routes/infrastructure';
@@ -92,6 +96,16 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     const error = rawError as Error & { validation?: unknown; statusCode?: number; code?: string };
     if (error instanceof HttpError) {
       reply.code(error.statusCode).send({ error: error.code, message: error.message });
+      return;
+    }
+    // Domain provider failures are expected operational states (provider down, rate limited, or
+    // not yet configured by an admin) — they must surface as a safe, specific message, never as
+    // an opaque 500 and never leaking provider detail (see safeDomainProviderMessage).
+    if (error instanceof DomainProviderError) {
+      const status = error.code === 'RATE_LIMITED' ? 429 : 503;
+      reply
+        .code(status)
+        .send({ error: `DOMAIN_${error.code}`, message: safeDomainProviderMessage(error) });
       return;
     }
     // Validation errors thrown by fastify's own schema layer, if used later.

@@ -591,11 +591,18 @@ export async function adminUpdateTransferStatus(
     `UPDATE domain_transfers
         SET status=$2,
             provider_metadata = provider_metadata || $3::jsonb,
-            completed_at = CASE WHEN $2='completed' THEN now() ELSE completed_at END,
+            completed_at = CASE WHEN $4 THEN now() ELSE completed_at END,
             updated_at=now()
       WHERE id=$1
       RETURNING id`,
-    [transferId, status, JSON.stringify({ adminNote: note ?? null, adminUpdatedAt: new Date().toISOString() })]
+    [
+      transferId,
+      status,
+      JSON.stringify({ adminNote: note ?? null, adminUpdatedAt: new Date().toISOString() }),
+      // Boolean computed in JS: reusing $2 (varchar column + text comparison) breaks Postgres
+      // parameter type inference (SQLSTATE 42P08).
+      status === 'completed',
+    ]
   );
   if (updated.length === 0) throw new NotFoundError('No transfer was found with that id');
 }

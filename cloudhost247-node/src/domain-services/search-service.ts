@@ -127,7 +127,7 @@ async function persistSearch(
   await db.query(
     `INSERT INTO domain_searches
        (id, user_id, provider_id, search_type, query_label, status, error_code, error_message, request_metadata, completed_at)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9, CASE WHEN $6 = 'completed' THEN now() ELSE NULL END)`,
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
     [
       searchId,
       input.userId,
@@ -138,6 +138,10 @@ async function persistSearch(
       input.errorCode,
       input.errorMessage,
       JSON.stringify(input.providerMetadata ?? {}),
+      // Computed in JS rather than reusing the status parameter in SQL — reusing $6 in both a
+      // varchar column and a text comparison makes Postgres fail with "inconsistent types
+      // deduced for parameter" (SQLSTATE 42P08).
+      input.status === 'completed' ? new Date() : null,
     ]
   );
 

@@ -391,8 +391,9 @@ export async function processPaidRegistrations(
 ): Promise<RegistrationProcessingReport> {
   const { rows: candidates } = await pool.query<{
     id: string; user_id: string; domain_name: string; registration_years: number; provider_id: string | null;
+    contact_id: string | null;
   }>(
-    `SELECT r.id, r.user_id, r.domain_name, r.registration_years, r.provider_id
+    `SELECT r.id, r.user_id, r.domain_name, r.registration_years, r.provider_id, r.contact_id
        FROM domain_registrations r
       WHERE r.status = 'payment_verified'
       ORDER BY r.updated_at ASC
@@ -422,7 +423,7 @@ export async function processPaidRegistrations(
     }
 
     try {
-      const contact = await loadDecryptedContact(pool, ring, candidate.user_id);
+      const contact = await loadDecryptedContact(pool, ring, candidate.user_id, candidate.contact_id);
       const result = await provider.adapter.registerDomain({
         domainName: candidate.domain_name,
         years: candidate.registration_years,
@@ -440,7 +441,7 @@ export async function processPaidRegistrations(
         await tx.query(
           `UPDATE domain_registrations
               SET status = $2, provider_reference = $3, provider_status = $4, provider_metadata = $5,
-                  confirmed_at = CASE WHEN $2 = 'registered' THEN now() ELSE confirmed_at END,
+                  confirmed_at = CASE WHEN $6 THEN now() ELSE confirmed_at END,
                   updated_at = now()
             WHERE id = $1`,
           [
@@ -449,6 +450,7 @@ export async function processPaidRegistrations(
             result.providerReference,
             result.providerStatus,
             JSON.stringify(result.metadata),
+            confirmed,
           ]
         );
         if (confirmed) {
@@ -512,10 +514,22 @@ export async function confirmPendingRegistrations(pool: Queryable, batchSize = 1
   return confirmedCount;
 }
 
-async function loadDecryptedContact(pool: Queryable, ring: EncryptionKeyRing, userId: string) {
+async function loadDecryptedContact(
+  pool: Queryable,
+  ring: EncryptionKeyRing,
+  userId: string,
+  contactId: string | null
+) {
+  // The registration's own contact row is authoritative. Only when the FK is missing (legacy row)
+  // do we fall back to the user's most recent contact.
   const { rows } = await pool.query<{ encrypted_contact_data: string }>(
-    `SELECT encrypted_contact_data FROM domain_contacts WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1`,
-    [userId]
+    `SELECT encrypted_contact_data FROM domain_contacts
+      WHERE ($1::uuid IS NOT NULL AND id = $1::uuid)
+         OR ($1::uuid IS NULL AND user_id = $2 AND id = (
+              SELECT id FROM domain_contacts WHERE user_id = $2 ORDER BY created_at DESC LIMIT 1
+            ))
+      LIMIT 1`,
+    [contactId, userId]
   );
   const stored = rows[0];
   if (!stored) throw new DomainProviderError('PROVIDER_ERROR', 'No domain contact on file for this registration', false, {});

@@ -1259,3 +1259,275 @@ form.ch247-form select {
   border: 1px solid #cfd8e6;
   background: #f7f9fc;
 }
+
+/* --- Domain Services platform ----------------------------------------------------------------
+ * Cards follow the reference layout: a titled group heading, a responsive grid of cards, each
+ * card with a large service title, a rounded icon container, a short description and an
+ * accessible action link. No horizontal scrolling at any width — the grid collapses to a single
+ * column below the mobile breakpoint. */
+
+.ch247-dsvc-group {
+  margin-top: 2.5rem;
+}
+
+.ch247-dsvc-group > h2 {
+  font-size: 1.15rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #4a5b76;
+  margin: 0 0 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--ch247-border);
+}
+
+.ch247-dsvc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.ch247-dsvc-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  background: #fff;
+  border: 1px solid var(--ch247-border);
+  border-radius: 10px;
+  padding: 1.15rem 1.15rem 1rem;
+  min-width: 0;
+  transition: border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+}
+
+.ch247-dsvc-card:hover,
+.ch247-dsvc-card:focus-within {
+  border-color: var(--ch247-primary);
+  box-shadow: 0 6px 18px rgba(7, 86, 216, 0.08);
+  transform: translateY(-1px);
+}
+
+.ch247-dsvc-card__icon {
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+  border-radius: 12px;
+  background: rgba(7, 86, 216, 0.08);
+  color: var(--ch247-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.ch247-dsvc-card__icon--accent {
+  background: rgba(18, 184, 134, 0.12);
+  color: #0b8c66;
+}
+
+.ch247-dsvc-card__title {
+  font-size: 1.08rem;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.ch247-dsvc-card__text {
+  font-size: 0.92rem;
+  color: #4a5b76;
+  margin: 0;
+  line-height: 1.45;
+}
+
+.ch247-dsvc-card__link {
+  margin-top: auto;
+  align-self: flex-start;
+  font-weight: 600;
+  font-size: 0.92rem;
+  padding: 0.3rem 0;
+  border-radius: 4px;
+}
+
+.ch247-dsvc-card__link:focus-visible {
+  outline: 2px solid var(--ch247-primary);
+  outline-offset: 2px;
+}
+
+.ch247-dsvc-search {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-top: 1.25rem;
+}
+
+.ch247-dsvc-search input[type='text'],
+.ch247-dsvc-search input[type='search'] {
+  flex: 1 1 260px;
+  min-width: 0;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--ch247-border);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.ch247-dsvc-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+  margin: 1rem 0;
+}
+
+.ch247-dsvc-toolbar input[type='text'],
+.ch247-dsvc-toolbar input[type='search'],
+.ch247-dsvc-toolbar select,
+.ch247-dsvc-toolbar textarea {
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--ch247-border);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  min-width: 0;
+  flex: 1 1 200px;
+  background: #fff;
+  color: var(--ch247-ink);
+}
+
+.ch247-dsvc-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.18rem 0.6rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.ch247-dsvc-status--available { background: rgba(18, 184, 134, 0.14); color: #0b7a58; }
+.ch247-dsvc-status--premium { background: rgba(214, 158, 46, 0.16); color: #8a5a00; }
+.ch247-dsvc-status--registered,
+.ch247-dsvc-status--unavailable { background: rgba(100, 116, 139, 0.14); color: #475569; }
+.ch247-dsvc-status--unsupported { background: rgba(100, 116, 139, 0.10); color: #64748b; }
+.ch247-dsvc-status--provider_error { background: rgba(220, 38, 38, 0.12); color: #b91c1c; }
+.ch247-dsvc-status--pending,
+.ch247-dsvc-status--processing { background: rgba(7, 86, 216, 0.10); color: var(--ch247-primary); }
+.ch247-dsvc-status--failed,
+.ch247-dsvc-status--cancelled { background: rgba(220, 38, 38, 0.12); color: #b91c1c; }
+.ch247-dsvc-status--completed,
+.ch247-dsvc-status--registered-ok { background: rgba(18, 184, 134, 0.14); color: #0b7a58; }
+
+.ch247-dsvc-trending {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 0.22rem 0.55rem;
+  border-radius: 6px;
+  background: #16233a;
+  color: #6ee7b7;
+  text-transform: uppercase;
+}
+
+.ch247-dsvc-provider-missing {
+  border: 1px solid #f3c78e;
+  background: #fff7ea;
+  color: #7a4a00;
+  border-radius: 10px;
+  padding: 1rem 1.1rem;
+  line-height: 1.5;
+}
+
+.ch247-dsvc-result-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.ch247-dsvc-result {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.9rem;
+  justify-content: space-between;
+  background: #fff;
+  border: 1px solid var(--ch247-border);
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  min-width: 0;
+}
+
+.ch247-dsvc-result__domain {
+  font-weight: 700;
+  word-break: break-all;
+  min-width: 0;
+}
+
+.ch247-dsvc-result__prices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  font-size: 0.85rem;
+  color: #4a5b76;
+}
+
+.ch247-dsvc-result__prices strong { color: var(--ch247-ink); }
+
+.ch247-dsvc-countdown {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.ch247-dsvc-kv {
+  display: grid;
+  grid-template-columns: minmax(140px, max-content) 1fr;
+  gap: 0.45rem 1.25rem;
+  margin: 0;
+}
+
+.ch247-dsvc-kv dt { font-weight: 700; color: #4a5b76; }
+.ch247-dsvc-kv dd { margin: 0; min-width: 0; word-break: break-word; }
+
+.ch247-dsvc-appraisal-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--ch247-ink);
+}
+
+.ch247-dsvc-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.ch247-dsvc-fact {
+  background: #fff;
+  border: 1px solid var(--ch247-border);
+  border-radius: 10px;
+  padding: 0.7rem 0.9rem;
+  min-width: 0;
+}
+
+.ch247-dsvc-fact dt { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; color: #4a5b76; }
+.ch247-dsvc-fact dd { margin: 0.2rem 0 0; font-weight: 700; word-break: break-word; }
+
+@media (max-width: 720px) {
+  .ch247-dsvc-grid,
+  .ch247-dsvc-result-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ch247-dsvc-kv {
+    grid-template-columns: 1fr;
+    gap: 0.15rem;
+  }
+
+  .ch247-dsvc-kv dt {
+    margin-top: 0.55rem;
+  }
+}

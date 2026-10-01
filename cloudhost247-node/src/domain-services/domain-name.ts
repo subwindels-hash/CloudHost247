@@ -10,12 +10,15 @@
 const MAX_DOMAIN_LENGTH = 253;
 
 /** A single DNS label: 1–63 chars, alnum, hyphens only in the middle, no leading/trailing hyphen. */
-const LABEL_PATTERN = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/;
+const LABEL_SOURCE = '[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?';
+const LABEL_PATTERN = new RegExp(`^${LABEL_SOURCE}$`);
 
-/** A syntactically valid registrable domain: at least two labels (name + TLD). */
-const DOMAIN_PATTERN = new RegExp(
-  `^(?=.{1,${MAX_DOMAIN_LENGTH}}$)(?:${LABEL_PATTERN.source})(?:\\.${LABEL_PATTERN.source})+$`
-);
+/**
+ * A syntactically valid registrable domain: at least two labels (name + TLD). Built from the
+ * UNANCHORED label source — embedding the anchored pattern here would bake the `^`/`$` anchors
+ * into the middle of the expression and make multi-label domains like `example.com` unmatchable.
+ */
+const DOMAIN_PATTERN = new RegExp(`^(?=.{1,${MAX_DOMAIN_LENGTH}}$)${LABEL_SOURCE}(?:\\.${LABEL_SOURCE})+$`);
 
 /** A bare search term: a single label with no dot (e.g. `mybrand`). */
 const TERM_PATTERN = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/;
