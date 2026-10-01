@@ -25,22 +25,11 @@ python3 -m unittest -v tests/foundation/test_static.py tests/currency/test_stati
 python3 -m unittest -v tests/staging/test_staging_tools.py
 python3 -m py_compile scripts/validate-migrations.py scripts/compare-financial-evidence.py scripts/generate-staging-report.py scripts/branding-audit.py
 python3 scripts/validate-migrations.py
-# Repository-wide retired-brand search; every surviving reference must be listed in
-# docs/independent-rebuild/branding-exceptions.list with a reason code.
+# Repository-wide retired-brand search. The vendor theme-helper addon has been
+# retired, so the tolerated count is zero: any new occurrence of the retired
+# brand fails the release candidate outright.
 python3 scripts/branding-audit.py --quiet
-override_list='docs/independent-rebuild/rebrand-overrides.list'
-override_hashes='docs/independent-rebuild/rebrand-overrides.sha256'
 original_manifest='docs/independent-rebuild/original-file-manifest.sha256'
-filtered_manifest=$(mktemp)
-list_paths=$(mktemp)
-hash_paths=$(mktemp)
-trap 'rm -f "$filtered_manifest" "$list_paths" "$hash_paths"' EXIT
-awk 'NF && $0 !~ /^#/ { print }' "$override_list" | sort > "$list_paths"
-awk 'NF && $0 !~ /^#/ { print $2 }' "$override_hashes" | sort > "$hash_paths"
-diff -u "$list_paths" "$hash_paths"
-awk 'FNR==NR { if (NF && $0 !~ /^#/) excluded[$0]=1; next } NF && $0 !~ /^#/ && !($2 in excluded) { print }' \
-    "$override_list" "$original_manifest" > "$filtered_manifest"
-sha256sum --check --strict "$filtered_manifest" >/dev/null
-grep -v '^#' "$override_hashes" | sha256sum --check --strict >/dev/null
+sha256sum --check --strict "$original_manifest" >/dev/null
 # Embedded-secret and core-schema policies are enforced by test_security.py and validate-migrations.py.
 echo 'Release-candidate source verification passed.'

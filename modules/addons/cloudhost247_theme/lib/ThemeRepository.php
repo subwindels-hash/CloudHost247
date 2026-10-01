@@ -16,6 +16,85 @@ final class ThemeRepository
         'hero_text' => 'Fast hosting, straightforward billing, and support whenever you need it.',
         'hero_cta_label' => 'Explore hosting', 'hero_cta_url' => 'cart.php',
         'layout_width' => '1180', 'show_announcement' => '0', 'announcement_text' => '',
+        // Public-site contract absorbed from the retired vendor theme helper.
+        // Every key below is read by templates/cloudhost247_legacy; the list is
+        // the complete set of keys that theme consumes, so the first-party
+        // settings store is a drop-in source for it. Values are overridable
+        // from mod_cloudhost247_theme_settings and editable in the admin UI.
+        'baidu_pixel_code' => '',
+        'banner_background_color' => '#0756d8',
+        'banner_button_background_color' => '#12b886',
+        'banner_button_text_color' => '#ffffff',
+        'banner_text_color' => '#ffffff',
+        'bing_verification_code' => '',
+        'chat_option_selected' => 'none',
+        'cookies_message_text' => 'We use cookies to improve your experience on our site.',
+        'cookies_position' => 'bottom',
+        'country_calling_code_phone' => '',
+        'disable_footer_inner_page' => '',
+        'disable_multi_crrency' => '0',
+        'dismiss_button_text' => 'Accept',
+        'domain_suggestion_display_hmpg' => '1',
+        'dropdown_event' => 'hover',
+        'enable_browser_cookies_cloudhost247' => '1',
+        'enable_header_target' => '1',
+        'enable_live_chat_cloudhost247' => '',
+        'enable_offer_setting_cloudhost247' => '',
+        'enable_primary_sidebar_left' => '',
+        'enable_secondary_sidebar_right' => '',
+        'enable_sticky_header' => '',
+        'facebook_handle_code' => '',
+        'facebook_pixel_code' => '',
+        'favicon' => '',
+        'footer_layout' => 'default',
+        'google_analytics_code' => '',
+        'google_tag_manager_code' => '',
+        'google_verification_code' => '',
+        'header_button_link' => '',
+        'header_button_txt' => '',
+        'header_logo' => '',
+        'header_logo_height' => '',
+        'header_logo_link' => 'index.php',
+        'header_logo_width' => '',
+        'instagram_handle_code' => '',
+        'invoice_logo' => '',
+        'invoice_logo_height' => '',
+        'invoice_logo_width' => '',
+        'lg_pw_logo' => '',
+        'lg_pw_logo_height' => '',
+        'lg_pw_logo_width' => '',
+        'linkedin_handle_code' => '',
+        'live_chat_id' => '',
+        'menu_layout' => 'default',
+        'offer_background_style_one_color' => '#f5f8ff',
+        'offer_hthree_style_one_background_color' => '#f5f8ff',
+        'offer_hthree_style_one_off_color' => '#12b886',
+        'offer_hthree_style_one_text' => '',
+        'offer_hthree_style_one_text_color' => '#111827',
+        'offer_logo_style_one' => '',
+        'offer_logo_style_one_height' => '',
+        'offer_logo_style_one_width' => '',
+        'offer_price_style_one_text' => '',
+        'offer_style_one_close_button_background_color' => '#0756d8',
+        'offer_style_one_close_button_color' => '#ffffff',
+        'offer_style_one_coupon_border_color' => '#0756d8',
+        'offer_style_one_coupon_code' => '',
+        'offer_style_one_coupon_code_color' => '#0756d8',
+        'offer_style_one_off' => '',
+        'offer_style_one_plan' => '',
+        'offer_style_one_plan_color' => '#111827',
+        'offer_style_one_use_coupon' => '',
+        'offer_style_one_use_coupon_color' => '#0756d8',
+        'offer_timer' => '0',
+        'phone' => '',
+        'phone_display' => '1',
+        'pinrest_handle_code' => '',
+        'policy_link' => '',
+        'policy_link_text' => '',
+        'social_site_share' => '1',
+        'template_name_custom' => 'cloudhost247_legacy',
+        'twitter_handle_code' => '',
+        'yandex_verification_code' => '',
     );
 
     public function settings()
@@ -35,7 +114,8 @@ final class ThemeRepository
             if ($key === 'layout_width' && ((int) $value < 960 || (int) $value > 1600)) throw new InvalidArgumentException('Layout width must be between 960 and 1600 pixels.');
             if (substr($key, -4) === '_url' && !$this->safeRelativeOrHttpsUrl($value)) throw new InvalidArgumentException('Unsafe URL supplied for ' . $key);
             if ($key === 'support_email' && $value !== '' && !filter_var($value, FILTER_VALIDATE_EMAIL)) throw new InvalidArgumentException('Support email is invalid.');
-            if (strlen($value) > 2000) throw new InvalidArgumentException('Setting is too long: ' . $key);
+            $limit = (substr($key, -5) === '_code' || substr($key, -5) === '_text') ? 20000 : 2000;
+            if (strlen($value) > $limit) throw new InvalidArgumentException('Setting is too long: ' . $key);
             Capsule::table(self::SETTINGS)->updateOrInsert(array('setting_key' => $key), array('setting_value' => $value, 'value_type' => 'string', 'updated_at' => date('Y-m-d H:i:s')));
         }
     }
@@ -126,7 +206,66 @@ final class ThemeRepository
 
     public function clientContext($locale = null)
     {
-        return array('settings' => $this->settings(), 'navigation' => $this->published('navigation',$locale), 'banners' => $this->published('banner',$locale), 'testimonials' => $this->published('testimonial',$locale), 'sections' => $this->published('section',$locale), 'footer' => $this->published('footer',$locale), 'landing_pages' => $this->published('landing',$locale));
+        return array('settings' => $this->settings(), 'navigation' => $this->published('navigation',$locale), 'banners' => $this->published('banner',$locale), 'testimonials' => $this->published('testimonial',$locale), 'sections' => $this->published('section',$locale), 'footer' => $this->published('footer',$locale), 'landing_pages' => $this->published('landing',$locale), 'blocks' => $this->blocks($locale), 'current_page_link' => $this->currentPageLink());
+    }
+
+    /**
+     * Named HTML blocks (copyright, footer_block, footer_block_latest) keyed by
+     * slug, sanitised the same way as every other rich-text value.
+     */
+    public function blocks($locale = null)
+    {
+        $blocks = array();
+        foreach ($this->published('block', $locale) as $item) {
+            $widgets = isset($item['widgets']) && is_array($item['widgets']) ? $item['widgets'] : array();
+            $blocks[$item['slug']] = (object) array(
+                'title' => isset($item['title']) ? (string) $item['title'] : '',
+                'sub_title' => isset($item['sub_title']) ? (string) $item['sub_title'] : '',
+                'description' => isset($item['description']) ? (string) $item['description'] : '',
+                'widgets' => array_values(array_map(function ($widget) { return (object) (is_array($widget) ? $widget : array('widget_description' => (string) $widget)); }, $widgets)),
+            );
+        }
+        return $blocks;
+    }
+
+    /**
+     * Absolute URL of the page being rendered, for the social share links.
+     */
+    public function currentPageLink()
+    {
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        $host = isset($_SERVER['HTTP_HOST']) ? preg_replace('/[^A-Za-z0-9\.\-:\[\]]/', '', $_SERVER['HTTP_HOST']) : '';
+        $path = isset($_SERVER['REQUEST_URI']) ? parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) : '';
+        $query = isset($_SERVER['QUERY_STRING']) && $_SERVER['QUERY_STRING'] !== '' ? '?' . $_SERVER['QUERY_STRING'] : '';
+        return $host === '' ? '' : $scheme . '://' . $host . (is_string($path) ? $path : '') . $query;
+    }
+
+    /**
+     * Block layout for one public landing page: the ordered list of assigned
+     * block slugs plus the slug to template-filename map the theme iterates.
+     */
+    public function pageLayout($pageTitle)
+    {
+        $slug = $this->slug((string) $pageTitle);
+        $slugs = array();
+        $layouts = array();
+        foreach ($this->published('block') as $item) {
+            $pages = isset($item['pages']) && is_array($item['pages']) ? $item['pages'] : array();
+            $layout = isset($item['layout']) ? preg_replace('/[^A-Za-z0-9_\-]/', '', (string) $item['layout']) : '';
+            if ($layout === '') $layout = $item['slug'];
+            $layouts[$item['slug']] = $layout;
+            if (!$pages || in_array($slug, array_map(array($this, 'slug'), $pages), true)) $slugs[] = $item['slug'];
+        }
+        return array('page_blocks' => $slugs, 'block_layouts' => $layouts, 'has_no_block' => $slugs === array());
+    }
+
+    /**
+     * Fallback product copy used by the public landing pages when a product has
+     * no page-specific description row.
+     */
+    public function defaultProductCopy()
+    {
+        return array('pHeadSortDesc' => '', 'pDescription' => '', 'pFootCaption' => '', 'pFootSortDesc' => '');
     }
 
     private function localize(array $items, $locale)

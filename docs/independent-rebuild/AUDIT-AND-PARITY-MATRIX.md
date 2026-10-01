@@ -14,7 +14,7 @@ Status values: **Existing/vendor** (present but not an independent implementatio
 
 | Component | Active paths found | Size/shape | Encoding/source visibility | Vendor-key coupling | Independent status |
 |---|---|---:|---|---|---|
-| Legacy page-builder helper | `modules/addons/hostx/` | 266 files; 63 PHP | All 63 PHP files are ionCube encoded | Licence/activation behavior cannot be safely inspected statically; `includes/license.php` and `includes/errolicense.php` exist | **Not implemented** |
+| Legacy page-builder helper | `modules/addons/[retired-addon]/` | 266 files; 63 PHP | All 63 PHP files are ionCube encoded | Licence/activation behavior cannot be safely inspected statically; `includes/license.php` and `includes/errolicense.php` exist | **Not implemented** |
 | Legacy client theme | `templates/cloudhost247_legacy/` | 1,711 files; 279 Smarty templates | Templates/assets readable; 49 directory guard PHP files are not encoded | Runtime data supplied by encoded addon/hooks | **Existing/vendor; rights review required** |
 | Legacy order form | `templates/orderforms/cloudhost247_legacy/` | 108 files; 27 templates | Readable | Theme/addon compatibility dependency | **Existing/vendor; rights review required** |
 | Xtreme Currency Rates | `modules/addons/xtreme_currency_rates/` | 19 files; 18 PHP | All 18 PHP files ionCube encoded | Explicit `license_verify.php`, security callback and encoded entry point | **Not implemented** |
@@ -32,9 +32,9 @@ A SHA-256 inventory of every in-scope original file is in `original-file-manifes
 
 * WHMCS document-root pages call `init.php`, select a legacy-theme template, and preserve public routes.
 * The WHMCS system theme is `templates/cloudhost247_legacy`; cart theme is `templates/orderforms/cloudhost247_legacy`.
-* The helper addon is activated as `hostx` — the directory and registration keep the vendor name because the ionCube-encoded entry point defines the `hostx_*()` functions WHMCS calls (see `BRAND-RENAME.md`). Its encoded entry point, hooks, classes, admin pages, sitemap generators, menu defaults and block defaults are runtime dependencies.
+* The helper addon is activated as `the-retired-brand` — the directory and registration keep the vendor name because the ionCube-encoded entry point defines the `the-retired-brand_*()` functions WHMCS calls (see `BRAND-RENAME.md`). Its encoded entry point, hooks, classes, admin pages, sitemap generators, menu defaults and block defaults are runtime dependencies.
 * Observed feature/admin entry points: settings, homepage selection, language management, top/side menus, page groups, page blocks, banners, reviews/testimonials, SEO manager/tags/content, TLD settings, category icons, dedicated settings, live chat and sitemap generation.
-* Observable compatibility names include the Smarty variables `$hostx_theme_settings` and `$hostx_blocks`, the classes `HostxPage`, `HostxBlock` and `HostxBanner`, and the partials under `cloudhost247_legacy_includes/`. The variable and class names are retained unchanged — the encoded helper assigns/calls them.
+* Observable compatibility names include the Smarty variables `$[retired]_theme_settings` and `$[retired]_blocks`, the classes `[RetiredPage]`, `[RetiredBlock]` and `[RetiredBanner]`, and the partials under `cloudhost247_legacy_includes/`. The variable and class names are retained unchanged — the encoded helper assigns/calls them.
 * ionCube is currently required only to run the vendor helper, not by the proposed replacement.
 * Exact schema and licence protocol cannot be derived lawfully/reliably from encoded files. Schema discovery must be performed on an authorised staging database using metadata-only exports.
 

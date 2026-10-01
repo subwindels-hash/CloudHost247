@@ -188,5 +188,5 @@
 	var orderHostingBtn = "{$LANG.orderhosting}";
 	var preferTldError = "{$LANG.domainTldPreffer}";
 	var domainisavailable = "{$LANG.domainavailable2}";
-	var domainSuggestionSeting = "{$hostx_theme_settings.domain_suggestion_display_hmpg}";
+	var domainSuggestionSeting = "{$cloudhost247.settings.domain_suggestion_display_hmpg}";
 </script>

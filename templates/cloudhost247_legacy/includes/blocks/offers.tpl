@@ -1,12 +1,12 @@
-{if $hostx_blocks[$block_slug]}
+{if $cloudhost247.blocks[$block_slug]}
 <div class="offers-banner">
    <div class="container">
       <div class="row">
          <div class="col-sm-12">
             <div class="offers-banner-inner">
-               <h2>{eval var=$hostx_blocks[$block_slug]->title}</h2>
-               <h5>{eval var=$hostx_blocks[$block_slug]->sub_title}</h5>
-                   {eval var=$hostx_blocks[$block_slug]->description}
+               <h2>{eval var=$cloudhost247.blocks[$block_slug]->title}</h2>
+               <h5>{eval var=$cloudhost247.blocks[$block_slug]->sub_title}</h5>
+                   {eval var=$cloudhost247.blocks[$block_slug]->description}
             </div>
          </div>
       </div>
@@ -15,7 +15,7 @@
 
 <script>
    var x = setInterval( function(){ t(); } , 1000);
-   var date_ = "{$hostx_theme_settings.offer_timer}";
+   var date_ = "{$cloudhost247.settings.offer_timer}";
    function t() {
      var now = new Date().getTime();
      var countDownDate = new Date(date_).getTime();

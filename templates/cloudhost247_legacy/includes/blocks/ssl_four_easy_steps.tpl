@@ -1,14 +1,14 @@
-{if $hostx_blocks[$block_slug]}
+{if $cloudhost247.blocks[$block_slug]}
 <div class="about-why-choose-us ssl-certification">
         <div class="container">
           <div class="row choose-us-row">
             <div class="col-sm-12">
-              <h2>{eval var=$hostx_blocks[$block_slug]->title}</h2>
-              <p>{eval var=$hostx_blocks[$block_slug]->sub_title}</p>
+              <h2>{eval var=$cloudhost247.blocks[$block_slug]->title}</h2>
+              <p>{eval var=$cloudhost247.blocks[$block_slug]->sub_title}</p>
             </div>
           </div>
           <div class="row choose-us-row-two">
-          {foreach $hostx_blocks[$block_slug]->widgets as $widget}
+          {foreach $cloudhost247.blocks[$block_slug]->widgets as $widget}
              {eval var=$widget->widget_description|html_entity_decode}
           {/foreach}
           </div>

@@ -1,11 +1,11 @@
 <div class="testimonials-1">
   <div class="container">
-	{if $hostx_blocks[$block_slug]}
-		<h2>{eval var=$hostx_blocks[$block_slug]->title}</h2>
-		<h6>{eval var=$hostx_blocks[$block_slug]->sub_title}</h2>
+	{if $cloudhost247.blocks[$block_slug]}
+		<h2>{eval var=$cloudhost247.blocks[$block_slug]->title}</h2>
+		<h6>{eval var=$cloudhost247.blocks[$block_slug]->sub_title}</h2>
 		<div class="carousel slide" data-ride="carousel">
 			<div class="wgsTestimonial carousel-inner">
-			  {foreach $hostx_blocks[$block_slug]->widgets as $widget}
+			  {foreach $cloudhost247.blocks[$block_slug]->widgets as $widget}
 				{eval var=$widget->widget_description|html_entity_decode}
 			  {/foreach}
 			</div>

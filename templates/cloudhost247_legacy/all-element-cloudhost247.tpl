@@ -2403,7 +2403,7 @@ height: 32px;
 		</div>
 		<script>
 		   var x = setInterval( function(){ t(); } , 1000);
-		   var date_ = "{$hostx_theme_settings.offer_timer}";
+		   var date_ = "{$cloudhost247.settings.offer_timer}";
 		   function t() {
 			 var now = new Date().getTime();
 			 var countDownDate = new Date(date_).getTime();
@@ -2632,7 +2632,7 @@ var domainAlreadyInCart = "{$LANG.domainAlreadyExist}";
 var orderHostingBtn = "{$LANG.orderhosting}";
 var preferTldError = "{$LANG.domainTldPreffer}";
 var domainisavailable = "{$LANG.domainavailable2}";
-var domainSuggestionSeting = "{$hostx_theme_settings.domain_suggestion_display_hmpg}";
+var domainSuggestionSeting = "{$cloudhost247.settings.domain_suggestion_display_hmpg}";
 function wgsBlockManaged(obj,id){
 	jQuery(".allElement").addClass('hidden');
 	jQuery(".common-li-cls").removeClass('active');

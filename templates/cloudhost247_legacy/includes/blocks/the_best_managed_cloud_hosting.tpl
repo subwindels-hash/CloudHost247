@@ -1,7 +1,7 @@
-{if $hostx_blocks[$block_slug]}
+{if $cloudhost247.blocks[$block_slug]}
 <div class="get_started">
     <div class="container">
-        {eval var=$hostx_blocks[$block_slug]->description}
+        {eval var=$cloudhost247.blocks[$block_slug]->description}
     </div>
 </div>
 {else}

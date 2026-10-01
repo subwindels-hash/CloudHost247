@@ -30,7 +30,7 @@ of this repository **into** an existing WHMCS installation root (cPanel
 │   └── english.php                    (legacy theme strings + OVH order-form strings)
 ├── modules/
 │   ├── addons/                     ← Addon modules (WHMCS → System Settings → Addon Modules)
-│   │   ├── hostx/                     Legacy theme helper module — REQUIRED by the legacy theme.
+│   │   ├── the-retired-brand/                     Legacy theme helper module — REQUIRED by the legacy theme.
 │   │   │                                All 63 PHP files are ionCube-encoded vendor bytecode, so the
 │   │   │                                directory name (which is the WHMCS addon id) cannot be
 │   │   │                                rebranded here: see docs/BRANDING-COMPATIBILITY.md §1
@@ -91,7 +91,7 @@ of this repository **into** an existing WHMCS installation root (cPanel
 
 | Module | Type | Location |
 |---|---|---|
-| CloudHost247 (theme helper) | addon | `modules/addons/hostx/` — ionCube-encoded vendor addon; the directory name is the WHMCS addon id and cannot be rebranded in source (`docs/BRANDING-COMPATIBILITY.md` §1) |
+| CloudHost247 (theme helper) | addon | `modules/addons/[retired-addon]/` — ionCube-encoded vendor addon; the directory name is the WHMCS addon id and cannot be rebranded in source (`docs/BRANDING-COMPATIBILITY.md` §1) |
 | CloudHost247 Tools Platform v2.2.7 (hardened) | addon | `modules/addons/cloudhost247_tools/` |
 | CloudHost247 Domain Lookup | addon | `modules/addons/cloudhost247_domain_lookup/` |
 | Tools Center (+ external API) | addon | `modules/addons/tools_center/` |
@@ -222,7 +222,7 @@ inventory.
 
 - WHMCS 8.x (order form `templates/orderforms/cloudhost247_legacy` requires WHMCS 8.1+,
   error pages `templates/cloudhost247_legacy/error/` require WHMCS 8.8+)
-- PHP 7.4–8.2 with **ionCube Loader** (the legacy theme-helper addon in `modules/addons/hostx/`
+- PHP 7.4–8.2 with **ionCube Loader** (the legacy theme-helper addon in `modules/addons/[retired-addon]/`
   and `xtreme_currency_rates` are encoded), cURL, JSON, PDO, OpenSSL
 - `templates/orderforms/ovh_cart/` falls back to WHMCS core `standard_cart`
   templates — a stock WHMCS installation provides them.
@@ -237,7 +237,7 @@ Three names are used, and only these three:
 | Primary customer-facing brand (pages, emails, dashboards, product display names) | **CloudHost247** |
 | Compact technical/visual label (constants, CSS/JS selectors, form fields, short identifiers) | **CH247** |
 
-The platform was rebranded off a vendor theme and module set. No HostX branding
+The platform was rebranded off a vendor theme and module set. No The-Retired-Brand branding
 is used anywhere in the product, and the retired identifiers that survive in the
 tree are runtime contracts of ionCube-encoded vendor code, migration inputs,
 historical verification records, or negative test assertions — never customer
@@ -251,15 +251,18 @@ Two files make that claim checkable instead of asserted:
   version of the same register, consumed by `scripts/branding-audit.py`.
 
 `python3 scripts/branding-audit.py` searches every text file and every
-file/directory name for `HostX`, `HOSTX`, `hostx`, `Hostx`, `Host X`, `HOST X`,
-`host-x`, `HOST-X`, `host_x` and `host x`. Anything not covered by a registered
-rule fails the release candidate, so new HostX text cannot be reintroduced by
-accident. The audit runs in `scripts/release-candidate-check.sh` and in the
+file/directory name for every capitalisation, spacing and separator variant of
+the retired vendor brand, plus the three-letter abbreviations derived from it.
+The vendor theme-helper addon was retired on 2026-10-01, so the tolerated count
+is zero and the register `docs/independent-rebuild/branding-exceptions.list` is
+empty: any new occurrence fails the release candidate outright, so retired
+branding cannot be reintroduced by accident. The audit runs in
+`scripts/release-candidate-check.sh` and in the
 `independent-foundation` workflow on PHP 7.4 and 8.2.
 
 Database-side renaming lives in `scripts/migrate-legacy-names-to-cloudhost247.sql`
 (guarded, idempotent, re-runnable; deploy order and rollback are recorded at the end of the script).
 `scripts/audit-legacy-branding-in-database.sql` is the read-only counterpart: it
-reports every HostX value still stored in a live database, including the block
+reports every The-Retired-Brand value still stored in a live database, including the block
 slugs and banner filenames that decide whether the nine retained legacy theme
 filenames can be renamed too.

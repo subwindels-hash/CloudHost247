@@ -1,11 +1,11 @@
-{if $hostx_blocks[$block_slug]}
+{if $cloudhost247.blocks[$block_slug]}
 <div id="feature" class="hosting_feature">
   <div class="container">
-    <h2>{eval var=$hostx_blocks[$block_slug]->title} </h2>
-    <p>{eval var=$hostx_blocks[$block_slug]->sub_title}</p>
+    <h2>{eval var=$cloudhost247.blocks[$block_slug]->title} </h2>
+    <p>{eval var=$cloudhost247.blocks[$block_slug]->sub_title}</p>
     <div class="hosting_sections">
       <div class="row">
-        {foreach $hostx_blocks[$block_slug]->widgets as $widget}
+        {foreach $cloudhost247.blocks[$block_slug]->widgets as $widget}
           {eval var=$widget->widget_description|html_entity_decode}
         {/foreach}      
       </div>

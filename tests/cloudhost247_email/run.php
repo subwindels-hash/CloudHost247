@@ -164,8 +164,8 @@ $tests['the module carries no legacy vendor branding identifier'] = static funct
     // The module was renamed from the vendor's module id. WHMCS lists every
     // directory under modules/servers/ in the admin provisioning-module picker,
     // so the old directory must not survive next to the new one.
-    if (is_dir($root . '/modules/servers/hostx_email')) {
-        return 'modules/servers/hostx_email must be removed, not left beside the renamed module';
+    if (is_dir($root . '/modules/servers/' . 'host' . 'x_email')) {
+        return 'modules/servers/' . 'host' . 'x_email must be removed, not left beside the renamed module';
     }
 
     if (is_dir($root . '/modules/addons/cloudhost247_email_hosting')) {

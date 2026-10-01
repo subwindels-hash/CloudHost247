@@ -1,8 +1,8 @@
-{if $hostx_blocks[$block_slug]}
+{if $cloudhost247.blocks[$block_slug]}
 <div class="perfect-domain">
-    <h2>{eval var=$hostx_blocks[$block_slug]->title}</h2>
-    <p>{eval var=$hostx_blocks[$block_slug]->sub_title}.</p>
-       {eval var=$hostx_blocks[$block_slug]->description}
+    <h2>{eval var=$cloudhost247.blocks[$block_slug]->title}</h2>
+    <p>{eval var=$cloudhost247.blocks[$block_slug]->sub_title}.</p>
+       {eval var=$cloudhost247.blocks[$block_slug]->description}
 </div>
 {else}
 <div class="perfect-domain">

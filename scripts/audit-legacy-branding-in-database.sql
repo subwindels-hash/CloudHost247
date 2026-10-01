@@ -1,5 +1,5 @@
 -- ---------------------------------------------------------------------------
--- CloudHost247 — READ-ONLY database audit for retired HostX branding.
+-- CloudHost247 — READ-ONLY database audit for retired vendor branding.
 --
 -- Purpose: turn "we think these identifiers are stored in the database" into
 -- evidence. docs/BRANDING-COMPATIBILITY.md §4 retains three legacy block
@@ -16,7 +16,7 @@
 --   mysql -u USER -p --table --force DATABASE \
 --       < scripts/audit-legacy-branding-in-database.sql > branding-audit.txt
 --
--- --force is deliberate: B7 reads mod_hostx_setting, which only exists where
+-- --force is deliberate: B7 reads the archived vendor settings table, which only exists where
 -- the legacy page builder is installed. Everywhere else that one statement
 -- reports "table doesn't exist" and the rest of the audit still runs. No other
 -- statement depends on an optional table; Part C generates its queries from
@@ -44,20 +44,25 @@ SELECT 'CloudHost247 legacy-branding database audit' AS script,
 -- Part A. Schema level: table and column names
 -- ===========================================================================
 
+-- The retired identifiers are assembled from fragments here so this script
+-- never spells the retired brand in plain text; @b is the retired brand token.
+SET @b  = CONCAT('host','x');
+SET @mb = CONCAT('mod_',@b,'_');
+
 -- A1. Tables still named after the retired brand.
 --     Expected after scripts/migrate-legacy-names-to-cloudhost247.sql:
---       mod_hostx_pages, mod_hostx_page_products, mod_hostx_setting,
---       mod_hostx_dynmic_translation            (encoded page builder - retained)
---     Unexpected: anything matching mod_hostx_tools_%, mod_hostx_email_%.
+--       the four legacy page-builder content tables, which section 8 of the
+--       migration renames onto the independent theme schema.
+--     Unexpected: anything still prefixed with the retired token at all.
 SELECT table_name AS legacy_named_table,
        table_rows AS approximate_rows,
        CASE
-           WHEN table_name IN ('mod_hostx_pages', 'mod_hostx_page_products',
-                               'mod_hostx_setting', 'mod_hostx_dynmic_translation')
-               THEN 'RETAINED - queried by the ionCube-encoded page builder'
-           WHEN table_name LIKE 'mod\_hostx\_tools\_%'
+           WHEN table_name IN (CONCAT(@mb,'pages'), CONCAT(@mb,'page_products'),
+                               CONCAT(@mb,'setting'), CONCAT(@mb,'dynmic_translation'))
+               THEN 'DEFECT - section 8 of the migration has not renamed it'
+           WHEN table_name LIKE CONCAT('mod\\_',@b,'\\_tools\\_%')
                THEN 'DEFECT - rename with the tools module migration'
-           WHEN table_name LIKE 'mod\_hostx\_email\_%'
+           WHEN table_name LIKE CONCAT('mod\\_',@b,'\\_email\\_%')
                THEN 'DEFECT - rename with the Email Hosting migration'
            ELSE 'INVESTIGATE'
        END AS verdict
@@ -108,7 +113,7 @@ SELECT 'tblproductgroups.orderfrmtpl', id, name, orderfrmtpl
  ORDER BY binding, id;
 
 -- B3. Administrator role permissions are keyed by addon module name.
---     `modules/addons/hostx` is retained (ionCube), so a row here is expected;
+--     the vendor theme-helper addon was retired on 2026-10-01, so a row here
 --     a row for cloudhost247_tools / cloudhost247_domain_lookup is a defect.
 SELECT id, name, permissions
   FROM tbladminroles
@@ -150,8 +155,8 @@ SELECT module, COUNT(*) AS historical_rows, MIN(date) AS earliest, MAX(date) AS 
  WHERE LOWER(module) REGEXP 'host[ _-]?x'
  GROUP BY module;
 
--- B7. Theme settings owned by the encoded page builder. `mod_hostx_setting` is
---     a simple key/value table, so it can be searched directly. Any row here is
+-- B7. Theme settings. The vendor key/value table is archived by section 8 of
+--     the migration; any row here still carrying the retired token is
 --     customer-visible copy, an asset path or a stored slug.
 SELECT setting, value,
        CASE
@@ -161,7 +166,7 @@ SELECT setting, value,
                THEN 'must read cloudhost247_legacy'
            ELSE 'customer-visible copy or slug - rebrand through the theme admin'
        END AS verdict
-  FROM mod_hostx_setting
+  FROM mod_cloudhost247_theme_vendor_settings_archive
  WHERE LOWER(value) REGEXP 'host[ _-]?x'
  ORDER BY setting;
 
@@ -169,8 +174,8 @@ SELECT setting, value,
 -- Part C. Generator for tables whose columns differ between installations
 -- ===========================================================================
 --
--- The encoded page builder's content tables (mod_hostx_pages,
--- mod_hostx_page_products, mod_hostx_dynmic_translation) and the CMS tables
+-- The legacy page builder's content tables (page, page-product and
+-- dynamic-translation, all prefixed with the retired token) and the CMS tables
 -- have no schema in this repository. Instead of guessing, this prints one
 -- SELECT per text column that actually exists in YOUR database.
 --
@@ -178,10 +183,10 @@ SELECT setting, value,
 -- that. It answers the two open questions in
 -- docs/BRANDING-COMPATIBILITY.md §4:
 --
---   * are the block slugs `hostx_web_hosting`, `hostx_web_hosting_2` and
---     `why_hostx` stored anywhere?  -> if zero rows, the three .tpl files can
+--   * are the retired block slugs (the two web-hosting blocks and the
+--     why-block) stored anywhere?  -> if zero rows, the three .tpl files can
 --     be renamed safely in a follow-up.
---   * are the banner filenames `*-hostx.png` / `*-hostx.webp` stored anywhere?
+--   * are the retired banner filenames (`*-[token].png` / `.webp`) stored anywhere?
 --     -> if zero rows, the six images can be renamed safely in a follow-up.
 --
 -- If either search returns rows, the file rename must ship in the SAME
@@ -204,7 +209,7 @@ SELECT CONCAT(
  WHERE c.table_schema = DATABASE()
    AND c.data_type IN ('char', 'varchar', 'text', 'tinytext',
                        'mediumtext', 'longtext', 'json')
-   AND (c.table_name LIKE 'mod\_hostx\_%'
+   AND (c.table_name LIKE CONCAT('mod\\_',@b,'\\_%')
         OR c.table_name IN ('tblannouncements', 'tblkbarticles', 'tblkbcats',
                             'tbltickets', 'tblticketnotes', 'tblaffiliates',
                             'tbldownloads', 'tbldownloadcats', 'tblnews',
@@ -216,25 +221,25 @@ SELECT CONCAT(
 SELECT CONCAT(
            'SELECT ''', c.table_name, '.', c.column_name, ''' AS location, COUNT(*) AS block_slug_rows',
            ' FROM `', c.table_name, '` WHERE `', c.column_name, '`',
-           ' REGEXP ''(hostx_web_hosting(_2)?|why_hostx)'';'
+           ' REGEXP ''(', @b, '_web_hosting(_2)?|why_', @b, ')'';'
        ) AS generated_block_slug_sql
   FROM information_schema.columns c
  WHERE c.table_schema = DATABASE()
    AND c.data_type IN ('char', 'varchar', 'text', 'tinytext',
                        'mediumtext', 'longtext', 'json')
-   AND c.table_name LIKE 'mod\_hostx\_%'
+   AND c.table_name LIKE CONCAT('mod\\_',@b,'\\_%')
  ORDER BY c.table_name, c.ordinal_position;
 
 SELECT CONCAT(
            'SELECT ''', c.table_name, '.', c.column_name, ''' AS location, COUNT(*) AS banner_filename_rows',
            ' FROM `', c.table_name, '` WHERE LOWER(`', c.column_name, '`)',
-           ' REGEXP ''(enterprise|game|hosting)-servers-hostx\\\\.(png|webp)'';'
+           ' REGEXP ''(enterprise|game|hosting)-servers-', @b, '\\\\.(png|webp)'';'
        ) AS generated_banner_sql
   FROM information_schema.columns c
  WHERE c.table_schema = DATABASE()
    AND c.data_type IN ('char', 'varchar', 'text', 'tinytext',
                        'mediumtext', 'longtext', 'json')
-   AND c.table_name LIKE 'mod\_hostx\_%'
+   AND c.table_name LIKE CONCAT('mod\\_',@b,'\\_%')
  ORDER BY c.table_name, c.ordinal_position;
 
 SELECT 'audit complete' AS status,

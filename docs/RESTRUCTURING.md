@@ -21,7 +21,7 @@ The pre-restructuring inventory is preserved in
 | `Refund Policy/<Policy>/*.pdf` (19 PDFs) | `docs/policies/` | Source legal documents |
 | `Refund Policy/All Pages/Installation.txt` | `docs/policies/INSTALLATION.txt` | |
 | `Refund Policy/<Policy>/{*.php,*.tpl}` (38 copies) | *(removed)* | Byte-identical duplicates of the All Pages set (verified; see §4) |
-| `Try-this/modules/addons/hostx/` | `modules/addons/hostx/` | ionCube-encoded theme helper addon; directory name is the WHMCS addon id and is retained — `docs/BRANDING-COMPATIBILITY.md` §1 |
+| `Try-this/modules/addons/[retired-addon]/` | `modules/addons/[retired-addon]/` | ionCube-encoded theme helper addon; directory name is the WHMCS addon id and is retained — `docs/BRANDING-COMPATIBILITY.md` §1 |
 | `Try-this/lang/overrides/*` (27 files) | `lang/overrides/` | `english.php` merged with the OVH override file |
 | `Try-this/sitemap.html`, `sitemap.xml`, `README.md` | *(removed)* | 0-byte / content-free junk |
 | `orderforms/*.tpl`, `includes/`, `css/`, `js/`, `banners/`, `caticons/`, `og_images/`, `testimonial_images/`, `webfonts/`, `store/`, `oauth/`, `payment/`, `marketconnect/`, `index.php` | `templates/cloudhost247_legacy/` | The **CloudHost247 legacy theme** (was mixed into a folder misleadingly named `orderforms/`) |
@@ -144,6 +144,6 @@ extracted and removed all 26). Verified: zero archives in the final tree.
 - `modules/servers/Smtphosting/` ships with a few 0-byte placeholder files
   (`App/Config/di/services.yml`, `Core/Database/data.sql`, two `home.tpl`) —
   byte-identical to the vendor package as delivered; left untouched.
-- The legacy `modules/addons/hostx` addon (name retained — its entry point is ionCube-encoded
-  and defines the `hostx_*()` functions WHMCS calls) and `xtreme_currency_rates` are ionCube-encoded and require
+- The legacy `modules/addons/[retired-addon]` addon (name retained — its entry point is ionCube-encoded
+  and defines the `the-retired-brand_*()` functions WHMCS calls) and `xtreme_currency_rates` are ionCube-encoded and require
   the ionCube Loader; their license status must be valid on the production host.

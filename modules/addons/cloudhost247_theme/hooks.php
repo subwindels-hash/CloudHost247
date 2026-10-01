@@ -7,8 +7,19 @@ use CloudHost247\Theme\ThemeRepository;
 use CloudHost247\Foundation\Support\Logger;
 
 add_hook('ClientAreaPage', 1, function ($vars) {
-    try { return array('cloudhost247' => (new ThemeRepository())->clientContext(isset($vars['language']) ? $vars['language'] : null)); }
-    catch (\Throwable $e) { Logger::write('cloudhost247_theme', 'error', 'client.context', array('message' => $e->getMessage())); return array('cloudhost247' => array()); }
+    try {
+        $repository = new ThemeRepository();
+        $context = array('cloudhost247' => $repository->clientContext(isset($vars['language']) ? $vars['language'] : null));
+        // Public landing pages iterate their assigned blocks through the
+        // block-loop template; the layout is resolved from the theme content
+        // table for the script being rendered.
+        $layout = $repository->pageLayout(basename(isset($_SERVER['PHP_SELF']) ? $_SERVER['PHP_SELF'] : ''));
+        $context['seodata'] = (object) $layout;
+        $context['block_layouts'] = $layout['block_layouts'];
+        $context['has_no_block'] = $layout['has_no_block'];
+        return $context;
+    }
+    catch (\Throwable $e) { Logger::write('cloudhost247_theme', 'error', 'client.context', array('message' => $e->getMessage())); return array('cloudhost247' => array(), 'seodata' => (object) array('page_blocks' => array()), 'block_layouts' => array(), 'has_no_block' => true); }
 });
 
 add_hook('ClientAreaHeadOutput', 1, function ($vars) {

@@ -4,20 +4,20 @@
 			{if $templatefile == 'clientregister'}
 				 <div class="register-side-image">
 					<div class="left-logo-image">
-					  {if !empty($hostx_theme_settings.lg_pw_logo)}
-						<img src="{$hostx_theme_settings.lg_pw_logo}" alt="logo" height="{$hostx_theme_settings.lg_pw_logo_height}" width="{$hostx_theme_settings.lg_pw_logo_width}">
+					  {if !empty($cloudhost247.settings.lg_pw_logo)}
+						<img src="{$cloudhost247.settings.lg_pw_logo}" alt="logo" height="{$cloudhost247.settings.lg_pw_logo_height}" width="{$cloudhost247.settings.lg_pw_logo_width}">
 					  {else}
-						<img src="{$hostx_theme_settings.header_logo}" alt="logo" height="{$hostx_theme_settings.lg_pw_logo_height}" width="{$hostx_theme_settings.lg_pw_logo_width}">
+						<img src="{$cloudhost247.settings.header_logo}" alt="logo" height="{$cloudhost247.settings.lg_pw_logo_height}" width="{$cloudhost247.settings.lg_pw_logo_width}">
 					  {/if}
 					</div>
 				 </div>							 
 			{else}
 				<div class="login-side-image">
 					<div class="left-logo-image">
-						{if !empty($hostx_theme_settings.lg_pw_logo)}
-							<img src="{$hostx_theme_settings.lg_pw_logo}" alt="logo" height="{$hostx_theme_settings.lg_pw_logo_height}" width="{$hostx_theme_settings.lg_pw_logo_width}">
+						{if !empty($cloudhost247.settings.lg_pw_logo)}
+							<img src="{$cloudhost247.settings.lg_pw_logo}" alt="logo" height="{$cloudhost247.settings.lg_pw_logo_height}" width="{$cloudhost247.settings.lg_pw_logo_width}">
 						{else}
-							<img src="{$hostx_theme_settings.header_logo}" alt="logo" height="{$hostx_theme_settings.lg_pw_logo_height}" width="{$hostx_theme_settings.lg_pw_logo_width}">
+							<img src="{$cloudhost247.settings.header_logo}" alt="logo" height="{$cloudhost247.settings.lg_pw_logo_height}" width="{$cloudhost247.settings.lg_pw_logo_width}">
 						{/if}
 					</div>
 				</div>

@@ -1,18 +1,18 @@
-{if $hostx_blocks[$block_slug]}
+{if $cloudhost247.blocks[$block_slug]}
 <div class="dedicated-server">
   <div class="container">
     <div id="owl-demo1">  
       <div class="item">
         <img src="{$WEB_ROOT}/templates/{$template}/images/server-img.png" alt="vps panel">
-        <h2>{eval var=$hostx_blocks[$block_slug]->title}</h2>
-         <p>{eval var=$hostx_blocks[$block_slug]->sub_title}</p>
+        <h2>{eval var=$cloudhost247.blocks[$block_slug]->title}</h2>
+         <p>{eval var=$cloudhost247.blocks[$block_slug]->sub_title}</p>
         <div class="clearfix"></div>
-        {foreach $hostx_blocks[$block_slug]->widgets as $widget}
+        {foreach $cloudhost247.blocks[$block_slug]->widgets as $widget}
           <div class="dedicated_box">
             {eval var=$widget->widget_description|html_entity_decode}
           </div>
         {/foreach}
-        <div class="packages">{eval var=$hostx_blocks[$block_slug]->description}</div>
+        <div class="packages">{eval var=$cloudhost247.blocks[$block_slug]->description}</div>
       </div>
     </div>
   </div>

@@ -4,11 +4,11 @@
          <div class="main-sec">
             <div class="left-sec">
                <div class="logo-sec">
-                  {if !empty($hostx_theme_settings.header_logo)}
-                     <a href="{if $hostx_theme_settings.header_logo_link neq ''}{$hostx_theme_settings.header_logo_link}{else}{$WEB_ROOT}/index.php{/if}" {if $hostx_theme_settings.enable_header_target eq 'on'}target="_blank"{/if}  class="logo {if $filename == 'clientarea' || $filename == 'submitticket' || $filename == 'affiliates' || $filename == 'supporttickets' || $filename == 'serverstatus' || $filename == 'viewticket' || $templatefile == 'account-user-management' || $templatefile == 'account-contacts-manage' || $templatefile == 'account-paymentmethods' || $templatefile == 'account-paymentmethods-manage' || $templatefile == 'announcements' || $templatefile == 'knowledgebase' || $templatefile == 'downloads' || $templatefile == 'viewannouncement' || $templatefile == 'knowledgebasecat' || $templatefile == 'knowledgebasearticle' || $templatefile == 'user-password' || $templatefile == 'user-profile' || $templatefile == 'user-switch-account' || $templatefile == 'user-security' || $templatefile == 'account-contacts-manage' || $templatefile == 'account-contacts-new' || $templatefile == 'store/ox/manage'}mega-latest-menu{/if}"><img src="{$hostx_theme_settings.header_logo}" alt="{$companyname}" {if $hostx_theme_settings.header_logo_height neq ''}height="{$hostx_theme_settings.header_logo_height}"{/if} {if $hostx_theme_settings.header_logo_width neq ''}width="{$hostx_theme_settings.header_logo_width}" {/if}>
+                  {if !empty($cloudhost247.settings.header_logo)}
+                     <a href="{if $cloudhost247.settings.header_logo_link neq ''}{$cloudhost247.settings.header_logo_link}{else}{$WEB_ROOT}/index.php{/if}" {if $cloudhost247.settings.enable_header_target eq 'on'}target="_blank"{/if}  class="logo {if $filename == 'clientarea' || $filename == 'submitticket' || $filename == 'affiliates' || $filename == 'supporttickets' || $filename == 'serverstatus' || $filename == 'viewticket' || $templatefile == 'account-user-management' || $templatefile == 'account-contacts-manage' || $templatefile == 'account-paymentmethods' || $templatefile == 'account-paymentmethods-manage' || $templatefile == 'announcements' || $templatefile == 'knowledgebase' || $templatefile == 'downloads' || $templatefile == 'viewannouncement' || $templatefile == 'knowledgebasecat' || $templatefile == 'knowledgebasearticle' || $templatefile == 'user-password' || $templatefile == 'user-profile' || $templatefile == 'user-switch-account' || $templatefile == 'user-security' || $templatefile == 'account-contacts-manage' || $templatefile == 'account-contacts-new' || $templatefile == 'store/ox/manage'}mega-latest-menu{/if}"><img src="{$cloudhost247.settings.header_logo}" alt="{$companyname}" {if $cloudhost247.settings.header_logo_height neq ''}height="{$cloudhost247.settings.header_logo_height}"{/if} {if $cloudhost247.settings.header_logo_width neq ''}width="{$cloudhost247.settings.header_logo_width}" {/if}>
                      </a>
                   {else}
-                     <a href="{if $hostx_theme_settings.header_logo_link neq ''}{$hostx_theme_settings.header_logo_link}{else}{$WEB_ROOT}/index.php{/if}" class="logo logo-text {if $filename == 'clientarea' || $filename == 'submitticket' || $filename == 'affiliates' || $filename == 'supporttickets' || $filename == 'serverstatus' || $filename == 'viewticket' || $templatefile == 'account-user-management' || $templatefile == 'account-contacts-manage' || $templatefile == 'account-paymentmethods' || $templatefile == 'account-paymentmethods-manage' || $templatefile == 'announcements' || $templatefile == 'knowledgebase' || $templatefile == 'downloads' || $templatefile == 'viewannouncement' || $templatefile == 'knowledgebasecat' || $templatefile == 'knowledgebasearticle' || $templatefile == 'user-password' || $templatefile == 'user-profile' || $templatefile == 'user-switch-account' || $templatefile == 'user-security' || $templatefile == 'account-contacts-manage' || $templatefile == 'account-contacts-new' || $templatefile == 'store/ox/manage'}mega-latest-menu{/if}" {if $hostx_theme_settings.enable_header_target eq 'on'}target="_blank"{/if}>{$companyname}
+                     <a href="{if $cloudhost247.settings.header_logo_link neq ''}{$cloudhost247.settings.header_logo_link}{else}{$WEB_ROOT}/index.php{/if}" class="logo logo-text {if $filename == 'clientarea' || $filename == 'submitticket' || $filename == 'affiliates' || $filename == 'supporttickets' || $filename == 'serverstatus' || $filename == 'viewticket' || $templatefile == 'account-user-management' || $templatefile == 'account-contacts-manage' || $templatefile == 'account-paymentmethods' || $templatefile == 'account-paymentmethods-manage' || $templatefile == 'announcements' || $templatefile == 'knowledgebase' || $templatefile == 'downloads' || $templatefile == 'viewannouncement' || $templatefile == 'knowledgebasecat' || $templatefile == 'knowledgebasearticle' || $templatefile == 'user-password' || $templatefile == 'user-profile' || $templatefile == 'user-switch-account' || $templatefile == 'user-security' || $templatefile == 'account-contacts-manage' || $templatefile == 'account-contacts-new' || $templatefile == 'store/ox/manage'}mega-latest-menu{/if}" {if $cloudhost247.settings.enable_header_target eq 'on'}target="_blank"{/if}>{$companyname}
                      </a>
                   {/if}
                </div>
@@ -135,7 +135,7 @@
                {else}
                   <div class="wgs-menu-in-clientarea">
                      {if $filename == 'clientarea' || $filename == 'submitticket' || $filename == 'affiliates' || $filename == 'supporttickets' || $filename == 'serverstatus' || $filename == 'viewticket' || $templatefile == 'account-user-management' || $templatefile == 'account-contacts-manage' || $templatefile == 'account-paymentmethods' || $templatefile == 'account-paymentmethods-manage' || $templatefile == 'announcements' || $templatefile == 'knowledgebase' || $templatefile == 'downloads' || $templatefile == 'viewannouncement' || $templatefile == 'knowledgebasecat' || $templatefile == 'knowledgebasearticle' || $templatefile == 'user-password' || $templatefile == 'user-profile' || $templatefile == 'user-switch-account' || $templatefile == 'user-security' || $templatefile == 'account-contacts-manage' || $templatefile == 'account-contacts-new' || $templatefile == 'store/ox/manage'}
-                        {if $hostx_theme_settings.enable_primary_sidebar_left neq 'on'}
+                        {if $cloudhost247.settings.enable_primary_sidebar_left neq 'on'}
                            <div class="primary-side-open-close-side-new trynowone">
                                  <div class="primary-menu-toggle {if $primarySideBarStatus eq '' || $primarySideBarStatus eq 'open'}change-primary{/if}" onclick="wgsChangeSideBarNavigationsButtons(this,'primary');">
                                     <div class="bar1"></div>
@@ -147,11 +147,11 @@
                         <a href="{$WEB_ROOT}/index.php" class="home-logo-mega-menu"><i class="fa fa-home"></i></a>
                      {/if}
                      <ul class="nav right_navi new-mega-menu-right-bar"> 
-                           {if $hostx_theme_settings.phone_display eq 'yes'}
-                                 {if empty($hostx_theme_settings.phone)}
+                           {if $cloudhost247.settings.phone_display eq 'yes'}
+                                 {if empty($cloudhost247.settings.phone)}
                                     <li><a href="tel:{$LANG.headerphone}" class="telephoneanchor"><i class="fa fa-phone"></i><span>{$LANG.headerphone}</span></a></li>
                                  {else}
-                                    <li><a href="tel:+{$hostx_theme_settings.country_calling_code_phone}{$hostx_theme_settings.phone}" class="telephoneanchor"><i class="fa fa-phone"></i><span> (+{$hostx_theme_settings.country_calling_code_phone}) {$hostx_theme_settings.phone}</span></a></li>
+                                    <li><a href="tel:+{$cloudhost247.settings.country_calling_code_phone}{$cloudhost247.settings.phone}" class="telephoneanchor"><i class="fa fa-phone"></i><span> (+{$cloudhost247.settings.country_calling_code_phone}) {$cloudhost247.settings.phone}</span></a></li>
                                  {/if}
                            {/if}
                            {if $languagechangeenabled && count($locales) > 1}
@@ -163,7 +163,7 @@
                                     </div>
                                  </li> 
                            {/if}
-                           {if !$loggedin && $currencies && ($hostx_theme_settings.disable_multi_crrency) == 'on' }
+                           {if !$loggedin && $currencies && ($cloudhost247.settings.disable_multi_crrency) == 'on' }
                                  <li class="currencyDiv"><a href="#" data-toggle="dropdown"><span id="sCurrency">{$hxselectedcurrency.prefix} {$hxselectedcurrency.code}</span> <i class="fa fa-sort-desc"></i></a>
                                     <div class="dropdown-menu" id="currencyList"> 
                                        {foreach from=$currencies item=listcurr}
@@ -191,7 +191,7 @@
                         {/if}					 
                      </ul>
                      {if $filename == 'clientarea' || $filename == 'submitticket' || $filename == 'affiliates' || $filename == 'supporttickets' || $filename == 'serverstatus' || $filename == 'viewticket' || $templatefile == 'account-user-management' || $templatefile == 'account-contacts-manage' || $templatefile == 'account-paymentmethods' || $templatefile == 'account-paymentmethods-manage' || $templatefile == 'announcements' || $templatefile == 'knowledgebase' || $templatefile == 'downloads' || $templatefile == 'viewannouncement' || $templatefile == 'knowledgebasecat' || $templatefile == 'knowledgebasearticle' || $templatefile == 'user-password' || $templatefile == 'user-profile' || $templatefile == 'user-switch-account' || $templatefile == 'user-security' || $templatefile == 'account-contacts-manage' || $templatefile == 'account-contacts-new' || $templatefile == 'store/ox/manage'}
-                        {if $hostx_theme_settings.enable_secondary_sidebar_right neq 'on'}
+                        {if $cloudhost247.settings.enable_secondary_sidebar_right neq 'on'}
                            {if !$inShoppingCart && ($secondarySidebar->hasChildren() || $primarySidebar->hasChildren())}
                                  <div class="secondary-side-open-close-side-new">
                                     <div class="secondary-menu-toggle {if $secondarySideBarStatus eq '' ||  $secondarySideBarStatus eq 'open'}change-secondary{/if}" onclick="wgsChangeSideBarNavigationsButtons(this,'secondary');">

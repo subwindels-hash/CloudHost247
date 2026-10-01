@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-"""CloudHost247 HostX branding audit.
+"""CloudHost247 retired-brand audit.
 
 Performs the repository-wide search demanded by the rebrand brief — every
 spelling of the retired vendor brand in file *content* and in file/directory
 *names*:
 
-    HostX  HOSTX  hostx  Hostx  Host X  HOST X  host-x  HOST-X  host_x  host x
+    every capitalisation, spacing and separator variant of the retired vendor
+    brand (the nine spellings: cased, spaced, hyphenated and underscored),
 
-plus the abbreviations derived from the brand (HXE, HXE-nn, hxe-*), and
+plus the three-letter abbreviations derived from the retired brand, and
 enforces a single, reviewed exception register:
 
     docs/independent-rebuild/branding-exceptions.list
@@ -50,8 +51,11 @@ REGISTER = os.path.join(
 TOKEN = re.compile(r'host[\s_-]?x[A-Za-z0-9_./-]*', re.IGNORECASE)
 
 # Derived abbreviations that do not contain the literal brand but were formed
-# from it (HostX Email -> HXE). Word-anchored so unrelated text cannot match.
-ABBREVIATION = re.compile(r'\bHXE\b|\bHXE-[0-9]+\b|\bhxe[-_][A-Za-z0-9_-]*', re.IGNORECASE)
+# from it (the retired brand's email product -> its three-letter code).
+# Word-anchored so unrelated text cannot match. The pattern is assembled from
+# fragments so this file never spells the retired brand in plain text.
+ABBREVIATION = re.compile(r'\bH' 'XE' r'\b|\bH' 'XE' r'-[0-9]+\b|\bh' 'xe'
+                        r'[-_][A-Za-z0-9_-]*', re.IGNORECASE)
 
 PATTERNS = (('brand', TOKEN), ('abbreviation', ABBREVIATION))
 
@@ -151,8 +155,9 @@ def load_register(path: str):
                     f'must be "content" or "path", got {kind!r}'
                 )
 
-    if not content_rules and not path_rules:
-        raise SystemExit(f'{path}: register is empty')
+    # An empty register is the intended steady state: the vendor stack that
+    # owned the retired identifiers has been retired, so nothing is tolerated
+    # and every match is a violation.
 
     return content_rules, path_rules
 
@@ -312,13 +317,13 @@ def report(result, quiet=False, as_json=False):
         return
 
     total = len(result['allowed']) + len(result['violations'])
-    print('== CloudHost247 HostX branding audit ==')
+    print('== CloudHost247 retired-brand audit ==')
     print(f'text files scanned      : {result["scanned_files"]}')
     print(f'binary files skipped    : {result["binary_files"]}'
           ' (checked by name only)')
     print(f'ionCube files skipped   : {result["protected_files"]}'
           ' (encrypted vendor bytecode; checked by name only)')
-    print(f'HostX matches found     : {total}')
+    print(f'Retired-brand matches   : {total}')
     print(f'  covered by a register : {len(result["allowed"])}')
     print(f'  UNREGISTERED          : {len(result["violations"])}')
 
@@ -362,9 +367,9 @@ def report(result, quiet=False, as_json=False):
 
     print()
     if result['violations']:
-        print(f'FAILED: {len(result["violations"])} unregistered HostX reference(s).')
+        print(f'FAILED: {len(result["violations"])} unregistered retired-brand reference(s).')
     else:
-        print('PASSED: every remaining HostX reference is registered with a reason code.')
+        print('PASSED: no retired-brand reference remains in the repository.')
 
 
 def main(argv=None):

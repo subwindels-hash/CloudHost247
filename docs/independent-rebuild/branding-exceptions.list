@@ -1,91 +1,29 @@
-# CloudHost247 HostX exception register (machine readable).
+# Machine-readable register of tolerated retired-brand references.
 #
-# Consumed by scripts/branding-audit.py, which is wired into
-# scripts/release-candidate-check.sh and
-# .github/workflows/independent-foundation.yml. Any HostX match — in file
-# content OR in a file/directory name — that is not covered by a rule below
-# fails the release candidate.
+# Consumed by scripts/branding-audit.py, which fails the release candidate when
+# any occurrence of the retired vendor brand (any capitalisation, spacing or
+# separator variant, plus its derived three-letter abbreviation) is not covered
+# by a rule below.
 #
-# Adding a rule is a deliberate, reviewed act. It must carry a reason code and
-# must be reflected in docs/BRANDING-COMPATIBILITY.md, which explains the
-# constraint in prose.
+# STATUS 2026-10-01: the register is EMPTY by design. The ionCube-encoded vendor
+# theme-helper addon, the identifiers it owned and every reference our own code
+# made to them have been retired or re-pointed onto the independent CloudHost247
+# theme layer (modules/addons/cloudhost247_theme). The tolerated count is
+# therefore zero: any new occurrence is a defect, not an exception.
 #
-# Line format — five fields separated by TABs ('#' starts a comment):
+# If a future compatibility exception is genuinely unavoidable, add one line in
+# the format below and record the reason in docs/BRANDING-COMPATIBILITY.md.
 #
-#   content<TAB><path-glob><TAB><token-regex><TAB><reason-code><TAB><note>
-#   path<TAB><path-glob><TAB>-<TAB><reason-code><TAB><note>
+# FORMAT (exactly five tab-separated fields):
+#   kind<TAB>glob<TAB>token-regex|ANY|-<TAB>REASON<TAB>note
+#   kind   : content (match inside the file) or path (the file name itself)
+#   token  : anchored regex the matched text must equal, ANY, or - for path rules
+#   REASON : IONCUBE ADDON-CTL DB-STORED MIGRATION DETECTOR BASELINE RECORD
+#            ASSERTION REGISTER
 #
-# <path-glob>  matched against the repository-relative path. '*' does not cross
-#              a directory separator, '**' does.
-# <token-regex> matched case-sensitively (with re.search) against the matched
-#              HostX token. Use ANY to allow every token in that file — that is
-#              reserved for migration inputs, integrity baselines, historical
-#              records, the registers and the auditor itself.
-#
-# Reason codes:
-#   IONCUBE    ionCube-encoded vendor bytecode; the identifier is baked in and
-#              cannot change without a rebranded build from the vendor
-#   ADDON-CTL  contract emitted or consumed by the encoded addon at runtime
-#              (Smarty bindings, AJAX class names, CSS selectors, table names)
-#   DB-STORED  the value is stored in the live database by the encoded addon;
-#              renaming the file needs a matching data migration first
-#   MIGRATION  an old value a migration must spell to move away from it
-#   DETECTOR   a read-only detector or auditor; it must name what it looks for
-#   BASELINE   historical integrity manifest / branding-override list
-#   RECORD     historical rename or audit record describing the previous state
-#   ASSERTION  a test asserting the legacy identifier is absent
-#   REGISTER   this register and the human-readable register document
-
-# ---------------------------------------------------------------------------
-# 1. The ionCube-encoded page-builder addon (docs/BRANDING-COMPATIBILITY.md §1)
-# ---------------------------------------------------------------------------
-path	modules/addons/hostx/**	-	IONCUBE	vendor addon tree; the directory name is the WHMCS addon module ID and the 63 PHP files inside are encrypted bytecode (skipped by the content scan)
-content	modules/addons/hostx/assets/js/script.js	^HostxPage$	ADDON-CTL	AJAX class resolved by the encoded includes/ajax.php
-content	modules/addons/hostx/assets/css/style.css	^hostx$	ADDON-CTL	inner-box-tool-tip-hostx selector emitted by the encoded admin pages
-
-# ---------------------------------------------------------------------------
-# 2. Runtime contracts of the encoded addon (§2, §3)
-# ---------------------------------------------------------------------------
-content	templates/cloudhost247_legacy/**	^hostx_(theme_settings|blocks)\.?[A-Za-z0-9_]*$|^hostxcurrentpagelink$	ADDON-CTL	Smarty bindings assigned by the encoded hooks.php
-content	templates/orderforms/cloudhost247_legacy/**	^hostx_(theme_settings|blocks)\.?[A-Za-z0-9_]*$	ADDON-CTL	Smarty bindings assigned by the encoded hooks.php
-content	*.php	^hostx_(pages|page_products|setting|dynmic_translation)$|^hostx/defaultmenu\.php$	ADDON-CTL	tables owned and queried by the encoded addon, plus its menu include
-
-# ---------------------------------------------------------------------------
-# 3. Block slugs and banner filenames stored in the database by the addon (§4)
-# ---------------------------------------------------------------------------
-path	templates/cloudhost247_legacy/includes/blocks/hostx_web_hosting.tpl	-	DB-STORED	rendered from a slug stored by the encoded page builder
-path	templates/cloudhost247_legacy/includes/blocks/hostx_web_hosting_2.tpl	-	DB-STORED	rendered from a slug stored by the encoded page builder
-path	templates/cloudhost247_legacy/includes/blocks/why_hostx.tpl	-	DB-STORED	rendered from a slug stored by the encoded page builder
-path	templates/cloudhost247_legacy/banners/*-hostx.png	-	DB-STORED	banner filename stored by the encoded banner manager
-path	templates/cloudhost247_legacy/banners/*-hostx.webp	-	DB-STORED	banner filename stored by the encoded banner manager
-
-# ---------------------------------------------------------------------------
-# 4. Migration inputs, detectors and the auditor itself
-# ---------------------------------------------------------------------------
-content	scripts/migrate-legacy-names-to-cloudhost247.sql	ANY	MIGRATION	spells the old values it renames away from
-content	scripts/audit-legacy-branding-in-database.sql	ANY	DETECTOR	read-only detector; names what it looks for
-content	scripts/branding-audit.py	ANY	DETECTOR	the auditor's own search pattern
-
-# ---------------------------------------------------------------------------
-# 5. Integrity baselines, registers and historical records
-# ---------------------------------------------------------------------------
-content	docs/independent-rebuild/original-file-manifest.sha256	ANY	BASELINE	SHA-256 inventory of the vendor-derived tree
-content	docs/independent-rebuild/rebrand-overrides.list	ANY	BASELINE	branding-only exceptions to the baseline
-content	docs/independent-rebuild/rebrand-overrides.sha256	ANY	BASELINE	hashes of those exceptions
-content	docs/independent-rebuild/branding-exceptions.list	ANY	REGISTER	this register
-content	docs/BRANDING-COMPATIBILITY.md	ANY	REGISTER	the human-readable exception register
-content	docs/independent-rebuild/BRAND-RENAME.md	ANY	RECORD	rename completion record
-content	docs/pre-restructuring-audit.md	^hostx/?$	RECORD	pre-restructuring inventory line
-content	docs/RESTRUCTURING.md	^hostx/?$|^hostx_$	RECORD	restructuring map and ionCube requirement note
-content	docs/independent-rebuild/AUDIT-AND-PARITY-MATRIX.md	^hostx/?$|^hostx_$|^hostx_(blocks|theme_settings)$|^Hostx(Page|Block|Banner)$	RECORD	records the encoded addon's compatibility names
-content	docs/independent-rebuild/INSTALLATION-AND-UPGRADE.md	^hostx/?$|^hostx_$	RECORD	retained encoded-addon path and mod_hostx_* note
-content	docs/independent-rebuild/API-INVENTORY-AUDIT.md	^hostx$	RECORD	vendor ionCube licence-loader inventory
-content	docs/independent-rebuild/STAGING-TEST-MATRIX.md	^HostX$	ASSERTION	row CH247E-29 asserts no HostX identifier is visible
-content	README.md	^hostx/?$	RECORD	documents the retained vendor addon directory
-content	README.md	^(HostX|HOSTX|Hostx|Host X|HOST X|host-x|HOST-X|host_x|host x)$	DETECTOR	the Branding section lists exactly which spellings scripts/branding-audit.py rejects
-
-# ---------------------------------------------------------------------------
-# 6. Tests that pin the rename
-# ---------------------------------------------------------------------------
-content	tests/security/test_security.py	^Hostx-?$|^hostx_email_?(action)?$	ASSERTION	negative assertions pinning the module rename
-content	tests/cloudhost247_email/run.php	^hostx_email$	ASSERTION	negative assertion pinning the module rename
+# Historical rules that lived here (vendor addon tree, its two editable asset
+# contracts, the three Smarty variables it assigned, its four data tables, the
+# three brand-named block templates and six brand-named banners, the baseline
+# manifest, the rename record and the negative test assertions) were all
+# removed on 2026-10-01 when the vendor stack was retired; see
+# docs/BRANDING-COMPATIBILITY.md and docs/independent-rebuild/BRAND-RENAME.md.

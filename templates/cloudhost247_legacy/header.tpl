@@ -25,7 +25,7 @@
 				<div class="container{if $skipMainBodyContainer}-fluid without-padding{/if} container-cloudhost247-body">
 					<div class="row">
 					{if !$cartpage && $templatefile neq 'domain-renewals' && $loggedin}
-						{if $hostx_theme_settings.enable_primary_sidebar_left neq 'on'}
+						{if $cloudhost247.settings.enable_primary_sidebar_left neq 'on'}
 						<div class="custom-primary-side-bar-icn">
 								<nav id="menu-sidebar-cloudhost247" class="sidebar-cloudhost247 sidebar-left-cloudhost247 {if $primarySideBarStatus eq '' ||  $primarySideBarStatus eq 'open'}left-open-cloudhost247{/if}">
 									<div class="inner-outer-div">
@@ -36,7 +36,7 @@
 								</nav>
 						</div>
 						{/if}
-						{if $hostx_theme_settings.enable_secondary_sidebar_right neq 'on'}
+						{if $cloudhost247.settings.enable_secondary_sidebar_right neq 'on'}
 							{if !$inShoppingCart && ($secondarySidebar->hasChildren() || $primarySidebar->hasChildren())}
 								<div class="custom-side-side-bar-icn">
 									<nav id="menu-sidebar-cloudhost247-sec" class="sidebar-cloudhost247-sec sidebar-left-cloudhost247-sec {if $secondarySideBarStatus eq '' ||  $secondarySideBarStatus eq 'open'}left-open-cloudhost247-sec{/if}">

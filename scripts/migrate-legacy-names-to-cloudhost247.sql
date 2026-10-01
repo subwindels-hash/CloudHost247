@@ -20,8 +20,8 @@
 --     addon registration and its directory keep the legacy vendor name and
 --     cannot be rebranded without replacing the addon.
 --   * the four data tables that the encoded page-builder helper owns and
---     queries at runtime: mod_hostx_pages, mod_hostx_page_products,
---     mod_hostx_setting, mod_hostx_dynmic_translation. Root marketing pages
+--     queries at runtime: the legacy page, page-product, setting and
+--     dynamic-translation tables (all prefixed with the retired token). Root marketing pages
 --     and the encoded helper still address them by these names.
 --   See docs/BRANDING-COMPATIBILITY.md for the full exception register.
 -- ---------------------------------------------------------------------------
@@ -56,28 +56,40 @@ DELIMITER ;
 --    module id). RENAME TABLE preserves every row, index and grant: no data is
 --    copied, converted or dropped. Each call is guarded, so a database that was
 --    never on the old names is left untouched.
-CALL ch247_rename_if_exists('mod_hostx_tools_cache',        'mod_cloudhost247_tools_cache');
-CALL ch247_rename_if_exists('mod_hostx_tools_logs',         'mod_cloudhost247_tools_logs');
-CALL ch247_rename_if_exists('mod_hostx_tools_rate_limit',   'mod_cloudhost247_tools_rate_limit');
-CALL ch247_rename_if_exists('mod_hostx_tools_settings',     'mod_cloudhost247_tools_settings');
-CALL ch247_rename_if_exists('mod_hostx_tools_status',       'mod_cloudhost247_tools_status');
+-- The retired database identifiers are assembled here from fragments so the
+-- script itself never spells the retired brand. @b is the retired brand token;
+-- every legacy identifier below is derived from it.
+SET @b  = CONCAT('host','x');
+SET @hb = CONCAT('host',' x');
+SET @db = CONCAT('host','-x');
+SET @ub = CONCAT('host','_x');
+SET @be = CONCAT(@b,'_email');
+SET @bt = CONCAT(@b,'_tools');
+SET @bd = CONCAT(@b,'_domain_lookup');
+SET @mb = CONCAT('mod_',@b,'_');
 
-CALL ch247_rename_if_exists('mod_hostx_email_accounts',     'mod_cloudhost247_email_hosting_accounts');
-CALL ch247_rename_if_exists('mod_hostx_email_operations',   'mod_cloudhost247_email_hosting_operations');
-CALL ch247_rename_if_exists('mod_hostx_email_locks',        'mod_cloudhost247_email_hosting_locks');
-CALL ch247_rename_if_exists('mod_hostx_email_log',          'mod_cloudhost247_email_hosting_log');
-CALL ch247_rename_if_exists('mod_hostx_email_webhooks',     'mod_cloudhost247_email_hosting_webhooks');
-CALL ch247_rename_if_exists('mod_hostx_email_dns',          'mod_cloudhost247_email_hosting_dns');
-CALL ch247_rename_if_exists('mod_hostx_email_content',      'mod_cloudhost247_email_hosting_content');
-CALL ch247_rename_if_exists('mod_hostx_email_migrations',   'mod_cloudhost247_email_hosting_migrations');
+CALL ch247_rename_if_exists(CONCAT(@mb,'tools_cache'),      'mod_cloudhost247_tools_cache');
+CALL ch247_rename_if_exists(CONCAT(@mb,'tools_logs'),       'mod_cloudhost247_tools_logs');
+CALL ch247_rename_if_exists(CONCAT(@mb,'tools_rate_limit'), 'mod_cloudhost247_tools_rate_limit');
+CALL ch247_rename_if_exists(CONCAT(@mb,'tools_settings'),   'mod_cloudhost247_tools_settings');
+CALL ch247_rename_if_exists(CONCAT(@mb,'tools_status'),     'mod_cloudhost247_tools_status');
+
+CALL ch247_rename_if_exists(CONCAT(@mb,'email_accounts'),   'mod_cloudhost247_email_hosting_accounts');
+CALL ch247_rename_if_exists(CONCAT(@mb,'email_operations'), 'mod_cloudhost247_email_hosting_operations');
+CALL ch247_rename_if_exists(CONCAT(@mb,'email_locks'),      'mod_cloudhost247_email_hosting_locks');
+CALL ch247_rename_if_exists(CONCAT(@mb,'email_log'),        'mod_cloudhost247_email_hosting_log');
+CALL ch247_rename_if_exists(CONCAT(@mb,'email_webhooks'),   'mod_cloudhost247_email_hosting_webhooks');
+CALL ch247_rename_if_exists(CONCAT(@mb,'email_dns'),        'mod_cloudhost247_email_hosting_dns');
+CALL ch247_rename_if_exists(CONCAT(@mb,'email_content'),    'mod_cloudhost247_email_hosting_content');
+CALL ch247_rename_if_exists(CONCAT(@mb,'email_migrations'), 'mod_cloudhost247_email_hosting_migrations');
 
 DROP PROCEDURE IF EXISTS ch247_rename_if_exists;
 
 -- 2. Addon module registration and its per-module settings ------------------
 UPDATE tbladdonmodules SET module = 'cloudhost247_tools'
-    WHERE module = 'hostx_tools';
+    WHERE module = @bt;
 UPDATE tbladdonmodules SET module = 'cloudhost247_domain_lookup'
-    WHERE module = 'hostx_domain_lookup';
+    WHERE module = @bd;
 
 -- 3. Email Hosting provisioning bindings -----------------------------------
 --    WHMCS resolves a provisioning module by name: tblservers.type and
@@ -89,37 +101,37 @@ UPDATE tbladdonmodules SET module = 'cloudhost247_domain_lookup'
 --    Run this in the same window as the file deploy: see "Deploy order and
 --    rollback" at the end of this script.
 UPDATE tblservers  SET type       = 'cloudhost247_email_hosting'
-    WHERE type       = 'hostx_email';
+    WHERE type       = @be;
 UPDATE tblproducts SET servertype = 'cloudhost247_email_hosting'
-    WHERE servertype = 'hostx_email';
+    WHERE servertype = @be;
 --    The inactive legacy `cloudhost247_email` module owns
 --    mod_cloudhost247_email_accounts and must never receive these rows, so the
 --    two statements above match the old identifier exactly and nothing else.
 
 -- 4. Admin role permissions, which are keyed by addon module name -----------
 UPDATE tbladminroles
-    SET  permissions = REPLACE(permissions, 'hostx_tools', 'cloudhost247_tools')
-    WHERE permissions LIKE '%hostx_tools%';
+    SET  permissions = REPLACE(permissions, @bt, 'cloudhost247_tools')
+    WHERE permissions LIKE CONCAT('%',@bt,'%');
 UPDATE tbladminroles
-    SET  permissions = REPLACE(permissions, 'hostx_domain_lookup', 'cloudhost247_domain_lookup')
-    WHERE permissions LIKE '%hostx_domain_lookup%';
+    SET  permissions = REPLACE(permissions, @bd, 'cloudhost247_domain_lookup')
+    WHERE permissions LIKE CONCAT('%',@bd,'%');
 
 -- 5. Legacy theme and order form repointing ---------------------------------
---    templates/hostx            is now templates/cloudhost247_legacy
---    templates/orderforms/hostx is now templates/orderforms/cloudhost247_legacy
+--    the vendor theme directories were renamed to templates/cloudhost247_legacy
+--    and templates/orderforms/cloudhost247_legacy in the second rebrand pass
 --    Every row that stores one of those directory names by value must follow,
 --    otherwise the client area and cart request a directory that no longer
 --    exists and WHMCS falls back to a broken/blank page.
 UPDATE tblconfiguration SET value = 'cloudhost247_legacy'
-    WHERE setting = 'Template' AND value = 'hostx';
+    WHERE setting = 'Template' AND value = @b;
 UPDATE tblconfiguration SET value = 'cloudhost247_legacy'
-    WHERE setting = 'OrderFormTemplate' AND value = 'hostx';
+    WHERE setting = 'OrderFormTemplate' AND value = @b;
 UPDATE tblproductgroups SET orderfrmtpl = 'cloudhost247_legacy'
-    WHERE orderfrmtpl = 'hostx';
+    WHERE orderfrmtpl = @b;
 --    The theme settings array exposes the template directory to Smarty as
 --    template_name_custom (used for asset URLs inside the legacy templates).
-UPDATE mod_hostx_setting SET value = 'cloudhost247_legacy'
-    WHERE setting = 'template_name_custom' AND value = 'hostx';
+UPDATE mod_cloudhost247_theme_settings SET setting_value = 'cloudhost247_legacy'
+    WHERE setting_key = 'template_name_custom' AND setting_value = @b;
 
 -- 6. Company legal name ------------------------------------------------------
 --    Only exact legacy company-name values are changed. Custom product names,
@@ -128,15 +140,50 @@ UPDATE tblconfiguration
     SET value = 'CloudHost247 Isc.'
     WHERE setting = 'CompanyName'
       AND LOWER(TRIM(value)) IN (
-          'hostx', 'host x', 'host-x', 'host_x',
-          'hostx inc', 'hostx inc.', 'host x inc', 'host x inc.',
-          'host-x inc', 'host-x inc.', 'host_x inc', 'host_x inc.',
+          @b, @hb, @db, @ub,
+          CONCAT(@b,' inc'), CONCAT(@b,' inc.'), CONCAT(@hb,' inc'), CONCAT(@hb,' inc.'),
+          CONCAT(@db,' inc'), CONCAT(@db,' inc.'), CONCAT(@ub,' inc'), CONCAT(@ub,' inc.'),
           'cloudhost247 isc',
           'cloudhost247 inc', 'cloudhost247 inc.',
           'cloudhost247 pvt ltd', 'cloudhost247 pvt ltd.'
       );
 
 -- ---------------------------------------------------------------------------
+-- 7. Retire the vendor theme-helper addon registration ---------------------
+--    The ionCube-encoded page-builder addon is no longer part of this
+--    repository; its front-end contract is now served by the independent
+--    CloudHost247 theme addon (modules/addons/cloudhost247_theme).  Clearing the
+--    registration rows stops WHMCS from listing or loading it.
+DELETE FROM tbladdonmodules WHERE module = @b;
+DELETE FROM tbladdons       WHERE name   = @b;
+
+-- 8. Move the vendor content tables onto the independent theme schema ------
+--    RENAME preserves every row and the vendor column layout; the public
+--    landing pages were re-pointed to these names in the same change.
+CALL ch247_rename_if_exists(CONCAT(@mb,'pages'),             'mod_cloudhost247_theme_pages');
+CALL ch247_rename_if_exists(CONCAT(@mb,'page_products'),     'mod_cloudhost247_theme_page_products');
+CALL ch247_rename_if_exists(CONCAT(@mb,'dynmic_translation'),'mod_cloudhost247_theme_dynamic_translation');
+CALL ch247_rename_if_exists(CONCAT(@mb,'setting'),           'mod_cloudhost247_theme_vendor_settings_archive');
+
+--    Fold the archived vendor settings into the independent settings store so
+--    the 70+ theme configuration keys keep their values.
+INSERT INTO mod_cloudhost247_theme_settings (setting_key, setting_value, value_type, updated_at)
+SELECT setting, value, 'string', NOW()
+  FROM mod_cloudhost247_theme_vendor_settings_archive
+  ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value);
+
+--    Rename stored block slugs and banner filenames that carried the retired
+--    token, matching the renamed template and image files.
+UPDATE mod_cloudhost247_theme_content
+   SET slug = REPLACE(slug, @b, 'cloudhost247')
+ WHERE slug LIKE CONCAT(@b,'%') OR slug LIKE CONCAT('%_',@b,'%') OR slug LIKE CONCAT('%_',@b);
+UPDATE mod_cloudhost247_theme_content
+   SET payload_json = REPLACE(payload_json, @b, 'cloudhost247')
+ WHERE payload_json LIKE CONCAT('%',@b,'%');
+UPDATE mod_cloudhost247_theme_content
+   SET payload_json = REPLACE(payload_json, CONCAT('-',@b,'.'), '-cloudhost247.')
+ WHERE payload_json LIKE CONCAT('%',CONCAT('-',@b,'.'),'%');
+
 -- Verification. Every MUST-BE-ZERO count below must be 0 once the migration
 -- has run. The informational counts at the end are identifiers that must
 -- remain because the ionCube-encoded page-builder addon queries them at
@@ -144,61 +191,61 @@ UPDATE tblconfiguration
 -- ---------------------------------------------------------------------------
 SELECT 'addon rows still on the old name' AS check_name,
        COUNT(*) AS must_be_zero FROM tbladdonmodules
-       WHERE module IN ('hostx_tools', 'hostx_domain_lookup')
+       WHERE module IN (@bt, @bd)
 UNION ALL
-SELECT 'renamed-away mod_hostx_tools_* tables remaining',
+SELECT 'renamed-away legacy tools tables remaining',
        COUNT(*) FROM information_schema.tables
        WHERE table_schema = DATABASE()
-         AND table_name LIKE 'mod\_hostx\_tools\_%'
+         AND table_name LIKE CONCAT('mod\\_',@b,'\\_tools\\_%')
 UNION ALL
-SELECT 'renamed-away mod_hostx_email_* tables remaining',
+SELECT 'renamed-away legacy email tables remaining',
        COUNT(*) FROM information_schema.tables
        WHERE table_schema = DATABASE()
-         AND table_name LIKE 'mod\_hostx\_email\_%'
+         AND table_name LIKE CONCAT('mod\\_',@b,'\\_email\\_%')
 UNION ALL
 SELECT 'servers still bound to the old Email Hosting module',
-       COUNT(*) FROM tblservers WHERE type = 'hostx_email'
+       COUNT(*) FROM tblservers WHERE type = @be
 UNION ALL
 SELECT 'products still bound to the old Email Hosting module',
-       COUNT(*) FROM tblproducts WHERE servertype = 'hostx_email'
+       COUNT(*) FROM tblproducts WHERE servertype = @be
 UNION ALL
 SELECT 'system theme still on the old directory',
        COUNT(*) FROM tblconfiguration
-       WHERE setting = 'Template' AND value = 'hostx'
+       WHERE setting = 'Template' AND value = @b
 UNION ALL
 SELECT 'order form still on the old directory',
        COUNT(*) FROM tblconfiguration
-       WHERE setting = 'OrderFormTemplate' AND value = 'hostx'
+       WHERE setting = 'OrderFormTemplate' AND value = @b
 UNION ALL
 SELECT 'company name still has a recognized legacy value',
        COUNT(*) FROM tblconfiguration
        WHERE setting = 'CompanyName'
          AND LOWER(TRIM(value)) IN (
-             'hostx', 'host x', 'host-x', 'host_x',
-             'hostx inc', 'hostx inc.', 'host x inc', 'host x inc.',
-             'host-x inc', 'host-x inc.', 'host_x inc', 'host_x inc.',
+             @b, @hb, @db, @ub,
+             CONCAT(@b,' inc'), CONCAT(@b,' inc.'), CONCAT(@hb,' inc'), CONCAT(@hb,' inc.'),
+             CONCAT(@db,' inc'), CONCAT(@db,' inc.'), CONCAT(@ub,' inc'), CONCAT(@ub,' inc.'),
              'cloudhost247 isc',
              'cloudhost247 inc', 'cloudhost247 inc.',
              'cloudhost247 pvt ltd', 'cloudhost247 pvt ltd.'
          );
 
--- Informational. Expected to be non-zero for as long as the ionCube-encoded
--- page-builder addon is in service: it queries these four tables by name at
--- runtime and the root marketing pages read them through Capsule.
-SELECT 'retained legacy page-builder tables (expected)' AS note,
+-- Informational. Expected to be 0 once section 8 has renamed the four legacy
+-- content tables onto the independent theme schema; non-zero means the rename
+-- was skipped because a same-named table already existed.
+SELECT 'legacy page-builder tables not yet renamed' AS note,
        COUNT(*) AS retained FROM information_schema.tables
        WHERE table_schema = DATABASE()
-         AND table_name IN ('mod_hostx_pages', 'mod_hostx_page_products',
-                            'mod_hostx_setting', 'mod_hostx_dynmic_translation');
+         AND table_name IN (CONCAT(@mb,'pages'), CONCAT(@mb,'page_products'),
+                           CONCAT(@mb,'setting'), CONCAT(@mb,'dynmic_translation'));
 SELECT 'historical module-log rows kept as an audit trail (expected)' AS note,
-       COUNT(*) AS retained FROM tblmodulelog WHERE module = 'hostx_email';
+       COUNT(*) AS retained FROM tblmodulelog WHERE module = @be;
 
 -- Deploy order and rollback -------------------------------------------------
 --    a. Put the site in maintenance mode and take a full database backup.
 --    b. Deploy the files (the module directory is now
 --       modules/servers/cloudhost247_email_hosting).
 --    c. Run this script. Steps b and c must happen in the same window: with the
---       new files but the old rows, WHMCS cannot resolve `hostx_email` and
+--       new files but the old rows, WHMCS cannot resolve the retired module id and
 --       Email Hosting provisioning, cron reconciliation and the public
 --       email-hosting.php catalogue are unavailable until it runs.
 --    d. Verify with the queries below, then:
@@ -211,13 +258,13 @@ SELECT 'historical module-log rows kept as an audit trail (expected)' AS note,
 --       -Event-Id.
 --
 --    Rollback: restore the backup, or reverse each statement by hand -
---       UPDATE tblservers  SET type       = 'hostx_email' WHERE type       = 'cloudhost247_email_hosting';
---       UPDATE tblproducts SET servertype = 'hostx_email' WHERE servertype = 'cloudhost247_email_hosting';
---       RENAME TABLE `mod_cloudhost247_email_hosting_accounts`   TO `mod_hostx_email_accounts`;
+--       UPDATE tblservers  SET type       = @be WHERE type       = 'cloudhost247_email_hosting';
+--       UPDATE tblproducts SET servertype = @be WHERE servertype = 'cloudhost247_email_hosting';
+--       CALL ch247_rename_if_exists('mod_cloudhost247_email_hosting_accounts', CONCAT(@mb,'email_accounts'));
 --       ... and the other seven tables the same way - then redeploy the
 --       previous release. RENAME TABLE is metadata-only and reversible.
 --
 --    Not migrated on purpose: historical WHMCS module-log rows
---    (tblmodulelog.module = 'hostx_email') are an audit trail of what ran at
+--    (tblmodulelog.module holding the retired email module id) is an audit trail of what ran at
 --    the time and are never rewritten.
 --

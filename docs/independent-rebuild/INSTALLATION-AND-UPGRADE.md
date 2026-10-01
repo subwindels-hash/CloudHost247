@@ -10,9 +10,9 @@ The replacement installation will never request CloudHost247, Xtreme Currency Ra
 
 1. Clone production to an isolated staging installation supported by the exact WHMCS/PHP versions.
 2. Back up database and files; verify restore before activation.
-3. Keep the current `modules/addons/hostx` (legacy page-builder helper), `xtreme_currency_rates`, `soyoustart`, and `soyoustart_vps` paths unchanged for audit/rollback, but do not activate unlicensed code.
+3. Keep the current `modules/addons/[retired-addon]` (legacy page-builder helper), `xtreme_currency_rates`, `soyoustart`, and `soyoustart_vps` paths unchanged for audit/rollback, but do not activate unlicensed code.
 4. Never commit `configuration.php`, database dumps, OVH application secret/consumer key, WHMCS licence data, or API responses containing customer data.
-5. Capture metadata-only schemas and row counts for legacy `mod_hostx_*`, `mod_soyoustart*`, and `tbl_soyoustart` tables.
+5. Capture metadata-only schemas and row counts for legacy `mod_[retired]_*`, `mod_soyoustart*`, and `tbl_soyoustart` tables.
 
 ## Intended install sequence
 

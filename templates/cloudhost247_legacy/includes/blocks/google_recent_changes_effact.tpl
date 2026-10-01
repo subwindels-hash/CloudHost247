@@ -1,12 +1,12 @@
-{if $hostx_blocks[$block_slug]}
+{if $cloudhost247.blocks[$block_slug]}
 <div class="ssl-effect-site recent-changes-effact">
 	<div class="container">
 	  <div class="row ssl-effect-site-row">
 		<div class="col-sm-7">
-		  <h4>{eval var=$hostx_blocks[$block_slug]->title}</h4>
-		      {eval var=$hostx_blocks[$block_slug]->description}
+		  <h4>{eval var=$cloudhost247.blocks[$block_slug]->title}</h4>
+		      {eval var=$cloudhost247.blocks[$block_slug]->description}
 		</div>
-		{foreach $hostx_blocks[$block_slug]->widgets as $widget}
+		{foreach $cloudhost247.blocks[$block_slug]->widgets as $widget}
           {eval var=$widget->widget_description|html_entity_decode}
         {/foreach}
 	  </div>

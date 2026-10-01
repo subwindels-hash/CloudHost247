@@ -133,7 +133,7 @@
                <div class="line-1sh"></div>
                 <div class="line-2sh"></div>
                <div class="ratinginner">
-				<img src="{$hostx_theme_settings.header_logo}" alt="{$companyname}">
+				<img src="{$cloudhost247.settings.header_logo}" alt="{$companyname}">
                 <h4>{$LANG.aboutPageWebsiteRateHead}</h4>
                 <h2>{$LANG.aboutPageWebsiteRateNumber}</h2>
                 <img class="star-im" src="{$WEB_ROOT}/templates/{$template}/images/star-img-rat.png" alt="review icon">

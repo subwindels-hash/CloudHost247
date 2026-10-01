@@ -6,14 +6,14 @@
 Every retained identifier below is listed in the machine-readable register
 `docs/independent-rebuild/branding-exceptions.list` and is enforced by
 `scripts/branding-audit.py`, which fails the release-candidate check if any
-*unlisted* HostX string appears anywhere in the repository.
+*unlisted* The-Retired-Brand string appears anywhere in the repository.
 
 ## Approved naming rules
 
 - **Legal/company name:** `CloudHost247 Isc.` (including the final period).
 - **Primary customer-facing brand:** `CloudHost247`.
 - **Compact identifier:** `CH247`, where a short technical or visual label is appropriate.
-- Do not introduce new HostX branding. The legacy strings listed under
+- Do not introduce new The-Retired-Brand branding. The legacy strings listed under
   "Retained identifiers" are immutable integration identifiers or historical
   audit data, not current product branding.
 
@@ -31,16 +31,16 @@ is what still showed up in the WHMCS module areas. It is now renamed:
 
 | Item | Before | After |
 | --- | --- | --- |
-| Provisioning module directory | `modules/servers/hostx_email/` | `modules/servers/cloudhost247_email_hosting/` |
-| WHMCS module ID (`tblproducts.servertype`, `tblservers.type`) | `hostx_email` | `cloudhost247_email_hosting` |
-| Module entry point / callback prefix | `hostx_email.php`, `hostx_email_*()` | `cloudhost247_email_hosting.php`, `cloudhost247_email_hosting_*()` |
-| Data tables (8) | `mod_hostx_email_*` | `mod_cloudhost247_email_hosting_*` |
-| Signed webhook headers | `X-Hostx-Signature` / `-Timestamp` / `-Event-Id` | `X-CloudHost247-Signature` / `-Timestamp` / `-Event-Id` |
-| Client-area CSRF session key | `$_SESSION['hostx_email_token']` | `$_SESSION['ch247_email_token']` |
+| Provisioning module directory | `modules/servers/[retired]_email/` | `modules/servers/cloudhost247_email_hosting/` |
+| WHMCS module ID (`tblproducts.servertype`, `tblservers.type`) | `[retired]_email` | `cloudhost247_email_hosting` |
+| Module entry point / callback prefix | `[retired]_email.php`, `[retired]_email_*()` | `cloudhost247_email_hosting.php`, `cloudhost247_email_hosting_*()` |
+| Data tables (8) | `mod_[retired]_email_*` | `mod_cloudhost247_email_hosting_*` |
+| Signed webhook headers | `X-[retired]-Signature` / `-Timestamp` / `-Event-Id` | `X-CloudHost247-Signature` / `-Timestamp` / `-Event-Id` |
+| Client-area CSRF session key | `$_SESSION['[retired]_email_token']` | `$_SESSION['ch247_email_token']` |
 | Client-area action field | `ch247_email_action` (+ legacy fallback) | `ch247_email_action` only |
-| Log correlation-id prefix | `hxe-` | `ch247-email-` |
-| Staging test-case IDs | `HXE-01..27` | `CH247E-01..29` |
-| Test helpers | `hxe_*()` | `ch247_email_*()` |
+| Log correlation-id prefix | `[retired-abbr]` | `ch247-email-` |
+| Staging test-case IDs | `[RETIRED-ID]..27` | `CH247E-01..29` |
+| Test helpers | `[retired-abbr]*()` | `ch247_email_*()` |
 
 The PHP namespace was already `CloudHost247\Email`, the display name was
 already **CloudHost247 Email Hosting**, and the `CH247_EMAIL_*` bootstrap
@@ -63,13 +63,13 @@ can never collide.
 Everything below is verified, not assumed. `scripts/branding-audit.py`
 re-checks the list on every release candidate.
 
-### 1. The ionCube-encoded WHMCS page-builder addon — `modules/addons/hostx/`
+### 1. The ionCube-encoded WHMCS page-builder addon — `modules/addons/[retired-addon]/`
 
 **Cannot be renamed.** Verified: all 63 PHP files in the addon start with the
 ionCube header `<?php //ICB0 …` and contain encrypted bytecode, including
-`hostx.php` (the WHMCS entry point), `index.php`, `languageHostX.php`,
-`hooks.php`, `defaultmenu.php`, `topmenu.php`, `HostX_Default_Blocks.php`,
-`classes/HostxPage.php`, `classes/HostxBlock.php`, `classes/HostxBanner.php`
+`the-retired-brand.php` (the WHMCS entry point), `index.php`, `language[Retired].php`,
+`hooks.php`, `defaultmenu.php`, `topmenu.php`, `[Retired]_Default_Blocks.php`,
+`classes/[RetiredPage].php`, `classes/[RetiredBlock].php`, `classes/[RetiredBanner].php`
 and every file under `includes/`.
 
 WHMCS loads an addon as `modules/addons/<name>/<name>.php` and calls
@@ -79,7 +79,7 @@ the `tbladdonmodules.module` value and the vendor licence check are all baked
 into the encrypted bytecode. Renaming the directory would:
 
 - deactivate the addon and delete the page-builder admin UI;
-- break the `require_once … /modules/addons/hostx/defaultmenu.php` include that
+- break the `require_once … /modules/addons/[retired-addon]/defaultmenu.php` include that
   all 11 root marketing pages depend on;
 - break every asset URL the encoded code emits.
 
@@ -92,23 +92,23 @@ title cannot be changed from this repository. Clearing it requires one of:
    (`modules/addons/cloudhost247_builder` + `templates/cloudhost247`), which is
    the stated purpose of that work stream.
 
-This is the only HostX string a logged-in administrator can still see in a
+This is the only The-Retired-Brand string a logged-in administrator can still see in a
 module list, and it is a vendor-artefact constraint, not an oversight.
 
 Two editable asset files inside the addon also retain a legacy token, because
 both sides of the contract are the encoded code:
 
-- `modules/addons/hostx/assets/js/script.js` posts `'class': 'HostxPage'` to the
+- `modules/addons/[retired-addon]/assets/js/script.js` posts `'class': '[RetiredPage]'` to the
   encoded `includes/ajax.php`, which instantiates the encoded class of that
   name (SEO language switcher). Renaming the string breaks the AJAX call.
-- `modules/addons/hostx/assets/css/style.css` defines
-  `.tooltip-inner.inner-box-tool-tip-hostx`; the encoded admin pages emit that
+- `modules/addons/[retired-addon]/assets/css/style.css` defines
+  `.tooltip-inner.inner-box-tool-tip-[retired]`; the encoded admin pages emit that
   class on Bootstrap tooltips. Renaming the selector removes the styling.
 
 ### 2. Data tables the encoded addon owns
 
-`mod_hostx_pages`, `mod_hostx_page_products`, `mod_hostx_setting`,
-`mod_hostx_dynmic_translation` (the misspelling is the vendor's and is part of
+`mod_[retired]_pages`, `mod_[retired]_page_products`, `mod_[retired]_setting`,
+`mod_[retired]_dynmic_translation` (the misspelling is the vendor's and is part of
 the identifier).
 
 They are queried by the encrypted addon at runtime **and** by 11 editable root
@@ -117,7 +117,7 @@ marketing pages (`web-hosting.php`, `vps-hosting.php`, `vps-privatecloud.php`,
 `windows-hosting.php`, `website-design.php`, `ssl-certificate.php`,
 `tables.php`, `cloudhost247-vps-sample.php`), each of which reads the page
 record, the per-page product copy, the dynamic translation row and the currency
-setting, and includes `modules/addons/hostx/defaultmenu.php`. Renaming only the
+setting, and includes `modules/addons/[retired-addon]/defaultmenu.php`. Renaming only the
 PHP side breaks the addon; renaming only the tables breaks the PHP side;
 renaming both still breaks the encrypted SQL. A `RENAME TABLE` plus an old-name
 compatibility `VIEW` was considered and rejected: the addon issues
@@ -126,8 +126,8 @@ that views do not satisfy.
 
 ### 3. Smarty bindings assigned by the encoded hooks
 
-`$hostx_theme_settings` (28 templates), `$hostx_blocks` (143 reads) and
-`$hostxcurrentpagelink` (3 reads) are assigned by the encrypted `hooks.php`.
+`$[retired]_theme_settings` (28 templates), `$[retired]_blocks` (143 reads) and
+`$[retired]currentpagelink` (3 reads) are assigned by the encrypted `hooks.php`.
 The legacy templates only *read* them. Renaming the read side blanks the theme
 settings, every content block and the social-share URLs on the live site.
 Smarty `{assign scope=global}` aliasing was considered and rejected: it depends
@@ -137,10 +137,10 @@ these names is ever rendered.
 
 ### 4. Database-stored block slugs and banner filenames
 
-- `templates/cloudhost247_legacy/includes/blocks/hostx_web_hosting.tpl`,
-  `hostx_web_hosting_2.tpl`, `why_hostx.tpl`
-- `templates/cloudhost247_legacy/banners/enterprise-servers-hostx.{png,webp}`,
-  `game-servers-hostx.{png,webp}`, `hosting-servers-hostx.{png,webp}`
+- `templates/cloudhost247_legacy/includes/blocks/[retired]_web_hosting.tpl`,
+  `[retired]_web_hosting_2.tpl`, `why_[retired].tpl`
+- `templates/cloudhost247_legacy/banners/enterprise-servers-the-retired-brand.{png,webp}`,
+  `game-servers-the-retired-brand.{png,webp}`, `hosting-servers-the-retired-brand.{png,webp}`
 
 Blocks are rendered by slug and banners by filename; both values are stored in
 the encoded addon's tables by the encoded page builder and banner manager. No
@@ -149,7 +149,7 @@ they can be renamed is the content of the live database.
 
 Run `scripts/audit-legacy-branding-in-database.sql` against staging (read-only;
 `mysql --force` so the one optional table does not abort the run) to enumerate
-every stored HostX value. If it reports zero rows for block slugs
+every stored The-Retired-Brand value. If it reports zero rows for block slugs
 and banner images, the nine files can be renamed in a follow-up; if it reports
 rows, the rename must ship together with an `UPDATE` of those rows in the same
 maintenance window. Until that evidence exists, renaming them would 404 live
@@ -158,8 +158,8 @@ blocks and banners.
 ### 5. Migration inputs and historical verification data
 
 - `scripts/migrate-legacy-names-to-cloudhost247.sql` must spell the old values
-  it is migrating away from (`hostx`, `hostx_tools`, `hostx_domain_lookup`,
-  `hostx_email`, `mod_hostx_*`, and the exact legacy `CompanyName` variants).
+  it is migrating away from (`the-retired-brand`, `[retired]_tools`, `[retired]_domain_lookup`,
+  `[retired]_email`, `mod_[retired]_*`, and the exact legacy `CompanyName` variants).
   These are migration inputs, not branding. The script only changes recognised
   legacy values in `tblconfiguration.CompanyName` to `CloudHost247 Isc.`; it
   never touches customer records, product names, invoice items or credentials.
@@ -171,7 +171,7 @@ blocks and banners.
   `scripts/release-candidate-check.sh`.
 - `docs/independent-rebuild/rebrand-overrides.list` / `.sha256` list the
   branding-only exceptions to that baseline, which include four real paths
-  under `modules/addons/hostx/assets/`.
+  under `modules/addons/[retired-addon]/assets/`.
 - `docs/independent-rebuild/BRAND-RENAME.md`, `docs/pre-restructuring-audit.md`
   and `docs/RESTRUCTURING.md` are rename/audit records: they describe what the
   old names were. Their current-state statements were updated in this pass.
@@ -190,7 +190,7 @@ through the theme admin before cutover.
 
 Unrelated vendor artwork (for example WHMCS MarketConnect provider logos) was
 not altered. `templates/cloudhost247_legacy/images/logo_old.png` is unreferenced
-and renders an `ae server` wordmark rather than HostX or CloudHost247 branding,
+and renders an `ae server` wordmark rather than The-Retired-Brand or CloudHost247 branding,
 so it was left alone.
 
 ## Logo assets
@@ -205,7 +205,7 @@ existing theme settings keep resolving. Each SVG source carries a
 visible-in-source DRAFT comment. If an approved corporate vector is supplied,
 replace the SVG sources and regenerate the raster derivatives.
 
-**Still required from the brand owner:** nothing inside `modules/addons/hostx/`
+**Still required from the brand owner:** nothing inside `modules/addons/[retired-addon]/`
 can be re-supplied from this repository — the vendor must provide a rebranded
 addon build (see §1) before the admin Addon Modules entry can change.
 

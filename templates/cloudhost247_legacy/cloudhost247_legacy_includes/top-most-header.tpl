@@ -1,21 +1,21 @@
-{if $hostx_theme_settings.menu_layout eq 'mega_menu'}
+{if $cloudhost247.settings.menu_layout eq 'mega_menu'}
 {if $sidebarCloudHost247Remove eq 'true' || $templatefile eq 'homepage' || !$loggedin || $filename == 'cart' || $templatefile == 'products' ||  $templatefile == 'configureproductdomain'  || $templatefile == 'domain-renewals' || $templatefile == 'store/weebly/index' || $templatefile == 'store/ssl/index' || $templatefile == 'store/codeguard/index' || $templatefile == 'store/sitelock/index' || $templatefile == 'store/spamexperts/index' || $templatefile == 'store/sitelockvpn/index' || $templatefile == 'store/marketgoo/index' || $templatefile == 'store/ox/index' || $templatefile == 'store/sitebuilder/index' || $templatefile == 'store/order' || $templatefile == 'store/cpanelseo/index' || $templatefile == 'store/nordvpn/index' || $templatefile == 'store/threesixtymonitoring/index' || $templatefile == 'store/xovinow/index'}
 	<header class="header wgs-new-header-top">
 	<div class="container">
-		{if !empty($hostx_theme_settings.header_logo)}
-			 <a href="{if $hostx_theme_settings.header_logo_link neq ''}{$hostx_theme_settings.header_logo_link}{else}{$WEB_ROOT}/index.php{/if}" {if $hostx_theme_settings.enable_header_target eq 'on'}target="_blank"{/if}  class="logo wgs-new-head-logo">
-				 <img src="{$hostx_theme_settings.header_logo}" alt="{$companyname}" {if $hostx_theme_settings.header_logo_height neq ''}height="{$hostx_theme_settings.header_logo_height}"{/if} {if $hostx_theme_settings.header_logo_width neq ''}width="{$hostx_theme_settings.header_logo_width}" {/if}>
+		{if !empty($cloudhost247.settings.header_logo)}
+			 <a href="{if $cloudhost247.settings.header_logo_link neq ''}{$cloudhost247.settings.header_logo_link}{else}{$WEB_ROOT}/index.php{/if}" {if $cloudhost247.settings.enable_header_target eq 'on'}target="_blank"{/if}  class="logo wgs-new-head-logo">
+				 <img src="{$cloudhost247.settings.header_logo}" alt="{$companyname}" {if $cloudhost247.settings.header_logo_height neq ''}height="{$cloudhost247.settings.header_logo_height}"{/if} {if $cloudhost247.settings.header_logo_width neq ''}width="{$cloudhost247.settings.header_logo_width}" {/if}>
 			 </a>
 		{else}
-			 <a href="{if $hostx_theme_settings.header_logo_link neq ''}{$hostx_theme_settings.header_logo_link}{else}{$WEB_ROOT}/index.php{/if}" class="logo logo-text wgs-new-head-logo" {if $hostx_theme_settings.enable_header_target eq 'on'}target="_blank"{/if}>{$companyname}</a>
+			 <a href="{if $cloudhost247.settings.header_logo_link neq ''}{$cloudhost247.settings.header_logo_link}{else}{$WEB_ROOT}/index.php{/if}" class="logo logo-text wgs-new-head-logo" {if $cloudhost247.settings.enable_header_target eq 'on'}target="_blank"{/if}>{$companyname}</a>
 		{/if}	
 		<div class="right float-right">
 			<ul class="nav right_navi"> 
-				 {if $hostx_theme_settings.phone_display eq 'yes'}
-					 {if empty($hostx_theme_settings.phone)}
+				 {if $cloudhost247.settings.phone_display eq 'yes'}
+					 {if empty($cloudhost247.settings.phone)}
 						 <li><a href="tel:+{$LANG.headerphone}" class="telephoneanchor"><i class="fa fa-phone"></i><span>{$LANG.headerphone}</span></a></li>
 					 {else}
-						 <li><a href="tel:+{$hostx_theme_settings.country_calling_code_phone}{$hostx_theme_settings.phone}" class="telephoneanchor"><i class="fa fa-phone"></i> <span>(+{$hostx_theme_settings.country_calling_code_phone}) {$hostx_theme_settings.phone}</span></a></li>
+						 <li><a href="tel:+{$cloudhost247.settings.country_calling_code_phone}{$cloudhost247.settings.phone}" class="telephoneanchor"><i class="fa fa-phone"></i> <span>(+{$cloudhost247.settings.country_calling_code_phone}) {$cloudhost247.settings.phone}</span></a></li>
 					 {/if}
 				 {/if}
 				 {if $languagechangeenabled && count($locales) > 1}
@@ -27,7 +27,7 @@
 						 </div>
 					 </li> 
 				 {/if}
-				 {if !$loggedin && $currencies && ($hostx_theme_settings.disable_multi_crrency) == 'on' }
+				 {if !$loggedin && $currencies && ($cloudhost247.settings.disable_multi_crrency) == 'on' }
 					 <li class="currencyDiv"><a href="#" data-toggle="dropdown"><span id="sCurrency">{$hxselectedcurrency.prefix} {$hxselectedcurrency.code}</span> <i class="fa fa-sort-desc"></i></a>
 						 <div class="dropdown-menu" id="currencyList"> 
 							 {foreach from=$currencies item=listcurr}
@@ -59,24 +59,24 @@
 	</div>
 	</header>
 	{/if}
-{elseif $hostx_theme_settings.menu_layout eq 'mega_menu_latest'}
+{elseif $cloudhost247.settings.menu_layout eq 'mega_menu_latest'}
 	{if $sidebarCloudHost247Remove eq 'true' || $templatefile eq 'homepage' || !$loggedin || $filename == 'cart' || $templatefile == 'products' || $templatefile == 'configureproductdomain' || $templatefile == 'domain-renewals' || $templatefile == 'store/weebly/index' || $templatefile == 'store/ssl/index' || $templatefile == 'store/codeguard/index' || $templatefile == 'store/sitelock/index' || $templatefile == 'store/spamexperts/index' || $templatefile == 'store/sitelockvpn/index' || $templatefile == 'store/marketgoo/index' || $templatefile == 'store/ox/index' || $templatefile == 'store/sitebuilder/index' || $templatefile == 'store/order' || $templatefile == 'store/cpanelseo/index' || $templatefile == 'store/nordvpn/index' || $templatefile == 'store/threesixtymonitoring/index' || $templatefile == 'store/xovinow/index'}
 	<header class="header wgs-new-header-top-latest">
 		<div class="container">
-			{if !empty($hostx_theme_settings.header_logo)}
-				<a href="{if $hostx_theme_settings.header_logo_link neq ''}{$hostx_theme_settings.header_logo_link}{else}{$WEB_ROOT}/index.php{/if}" {if $hostx_theme_settings.enable_header_target eq 'on'}target="_blank"{/if}  class="logo wgs-new-head-logo">
-					<img src="{$hostx_theme_settings.header_logo}" alt="{$companyname}" {if $hostx_theme_settings.header_logo_height neq ''}height="{$hostx_theme_settings.header_logo_height}"{/if} {if $hostx_theme_settings.header_logo_width neq ''}width="{$hostx_theme_settings.header_logo_width}" {/if}>
+			{if !empty($cloudhost247.settings.header_logo)}
+				<a href="{if $cloudhost247.settings.header_logo_link neq ''}{$cloudhost247.settings.header_logo_link}{else}{$WEB_ROOT}/index.php{/if}" {if $cloudhost247.settings.enable_header_target eq 'on'}target="_blank"{/if}  class="logo wgs-new-head-logo">
+					<img src="{$cloudhost247.settings.header_logo}" alt="{$companyname}" {if $cloudhost247.settings.header_logo_height neq ''}height="{$cloudhost247.settings.header_logo_height}"{/if} {if $cloudhost247.settings.header_logo_width neq ''}width="{$cloudhost247.settings.header_logo_width}" {/if}>
 				</a>
 			{else}
-				<a href="{if $hostx_theme_settings.header_logo_link neq ''}{$hostx_theme_settings.header_logo_link}{else}{$WEB_ROOT}/index.php{/if}" class="logo logo-text wgs-new-head-logo" {if $hostx_theme_settings.enable_header_target eq 'on'}target="_blank"{/if}>{$companyname}</a>
+				<a href="{if $cloudhost247.settings.header_logo_link neq ''}{$cloudhost247.settings.header_logo_link}{else}{$WEB_ROOT}/index.php{/if}" class="logo logo-text wgs-new-head-logo" {if $cloudhost247.settings.enable_header_target eq 'on'}target="_blank"{/if}>{$companyname}</a>
 			{/if}	
 			<div class="right float-right">
 				<ul class="nav right_navi"> 
-					{if $hostx_theme_settings.phone_display eq 'yes'}
-						{if empty($hostx_theme_settings.phone)}
+					{if $cloudhost247.settings.phone_display eq 'yes'}
+						{if empty($cloudhost247.settings.phone)}
 							<li><a href="tel:+{$LANG.headerphone}" class="telephoneanchor"><i class="fa fa-phone"></i><span>{$LANG.headerphone}</span></a></li>
 						{else}
-							<li><a href="tel:+{$hostx_theme_settings.country_calling_code_phone}{$hostx_theme_settings.phone}" class="telephoneanchor"><i class="fa fa-phone"></i> <span>(+{$hostx_theme_settings.country_calling_code_phone}) {$hostx_theme_settings.phone}</span></a></li>
+							<li><a href="tel:+{$cloudhost247.settings.country_calling_code_phone}{$cloudhost247.settings.phone}" class="telephoneanchor"><i class="fa fa-phone"></i> <span>(+{$cloudhost247.settings.country_calling_code_phone}) {$cloudhost247.settings.phone}</span></a></li>
 						{/if}
 					{/if}
 					{if $languagechangeenabled && count($locales) > 1}
@@ -88,7 +88,7 @@
 							</div>
 						</li> 
 					{/if}
-					{if !$loggedin && $currencies && ($hostx_theme_settings.disable_multi_crrency) == 'on' }
+					{if !$loggedin && $currencies && ($cloudhost247.settings.disable_multi_crrency) == 'on' }
 						<li class="currencyDiv"><a href="#" data-toggle="dropdown"><span id="sCurrency">{$hxselectedcurrency.prefix} {$hxselectedcurrency.code}</span> <i class="fa fa-sort-desc"></i></a>
 							<div class="dropdown-menu" id="currencyList"> 
 								{foreach from=$currencies item=listcurr}
@@ -120,36 +120,36 @@
 		</div>
 	</header>
 	{/if}
-{elseif $hostx_theme_settings.menu_layout eq 'dropdown_menu'}
+{elseif $cloudhost247.settings.menu_layout eq 'dropdown_menu'}
 	{if $sidebarCloudHost247Remove eq 'true' || $templatefile eq 'homepage' || !$loggedin || $filename == 'cart' || $templatefile == 'products' ||  $templatefile == 'configureproductdomain' || $templatefile == 'domain-renewals' || $templatefile == 'store/weebly/index' || $templatefile == 'store/ssl/index' || $templatefile == 'store/codeguard/index' || $templatefile == 'store/sitelock/index' || $templatefile == 'store/spamexperts/index' || $templatefile == 'store/sitelockvpn/index' || $templatefile == 'store/marketgoo/index' || $templatefile == 'store/ox/index' || $templatefile == 'store/sitebuilder/index' || $templatefile == 'store/order' || $templatefile == 'store/cpanelseo/index' || $templatefile == 'store/nordvpn/index' || $templatefile == 'store/threesixtymonitoring/index' || $templatefile == 'store/xovinow/index'}
 	<header class="header">
 	{if !$cartpage && $templatefile neq 'domain-renewals' && $loggedin && $filename == 'clientarea'}
-		{if $hostx_theme_settings.enable_primary_sidebar_left neq 'on'}
+		{if $cloudhost247.settings.enable_primary_sidebar_left neq 'on'}
 			<div class="left-side-arrow-primary-header-top">
 				<i class="fa fa-align-left" onclick="wgsChangeSideBarsClaas(this,'primary');" id="leftPrimaryBarIclass"></i>
 			</div>
 		{/if}
-		{if $hostx_theme_settings.enable_secondary_sidebar_right neq 'on'}
+		{if $cloudhost247.settings.enable_secondary_sidebar_right neq 'on'}
 			<div class="right-side-arrow-secondary-header-top">
 				<i class="fa fa-align-right" onclick="wgsChangeSideBarsClaas(this,'secondary');" id="rightSideBarIclass"></i>	
 			</div>
 		{/if}
 	{/if}
 	<div class="container">
-		{if !empty($hostx_theme_settings.header_logo)}
-			 <a href="{if $hostx_theme_settings.header_logo_link neq ''}{$hostx_theme_settings.header_logo_link}{else}{$WEB_ROOT}/index.php{/if}" {if $hostx_theme_settings.enable_header_target eq 'on'}target="_blank"{/if}  class="logo wgs-new-head-logo-dropdown">
-				 <img src="{$hostx_theme_settings.header_logo}" alt="{$companyname}" {if $hostx_theme_settings.header_logo_height neq ''}height="{$hostx_theme_settings.header_logo_height}"{/if} {if $hostx_theme_settings.header_logo_width neq ''}width="{$hostx_theme_settings.header_logo_width}" {/if}>
+		{if !empty($cloudhost247.settings.header_logo)}
+			 <a href="{if $cloudhost247.settings.header_logo_link neq ''}{$cloudhost247.settings.header_logo_link}{else}{$WEB_ROOT}/index.php{/if}" {if $cloudhost247.settings.enable_header_target eq 'on'}target="_blank"{/if}  class="logo wgs-new-head-logo-dropdown">
+				 <img src="{$cloudhost247.settings.header_logo}" alt="{$companyname}" {if $cloudhost247.settings.header_logo_height neq ''}height="{$cloudhost247.settings.header_logo_height}"{/if} {if $cloudhost247.settings.header_logo_width neq ''}width="{$cloudhost247.settings.header_logo_width}" {/if}>
 			 </a>
 		{else}
-			 <a href="{if $hostx_theme_settings.header_logo_link neq ''}{$hostx_theme_settings.header_logo_link}{else}{$WEB_ROOT}/index.php{/if}" class="logo logo-text wgs-new-head-logo-dropdown" {if $hostx_theme_settings.enable_header_target eq 'on'}target="_blank"{/if}>{$companyname}</a>
+			 <a href="{if $cloudhost247.settings.header_logo_link neq ''}{$cloudhost247.settings.header_logo_link}{else}{$WEB_ROOT}/index.php{/if}" class="logo logo-text wgs-new-head-logo-dropdown" {if $cloudhost247.settings.enable_header_target eq 'on'}target="_blank"{/if}>{$companyname}</a>
 		{/if}	
 		<div class="right float-right">
 			<ul class="nav right_navi"> 
-				 {if $hostx_theme_settings.phone_display eq 'yes'}
-					 {if empty($hostx_theme_settings.phone)}
+				 {if $cloudhost247.settings.phone_display eq 'yes'}
+					 {if empty($cloudhost247.settings.phone)}
 						 <li><a href="tel:+{$LANG.headerphone}" class="telephoneanchor"><i class="fa fa-phone"></i><span>{$LANG.headerphone}</span></a></li>
 					 {else}
-						 <li><a href="tel:+{$hostx_theme_settings.country_calling_code_phone}{$hostx_theme_settings.phone}" class="telephoneanchor"><i class="fa fa-phone"></i> <span>(+{$hostx_theme_settings.country_calling_code_phone}) {$hostx_theme_settings.phone}</span></a></li>
+						 <li><a href="tel:+{$cloudhost247.settings.country_calling_code_phone}{$cloudhost247.settings.phone}" class="telephoneanchor"><i class="fa fa-phone"></i> <span>(+{$cloudhost247.settings.country_calling_code_phone}) {$cloudhost247.settings.phone}</span></a></li>
 					 {/if}
 				 {/if}
 				 {if $languagechangeenabled && count($locales) > 1}
@@ -161,7 +161,7 @@
 						 </div>
 					 </li> 
 				 {/if}
-				 {if !$loggedin && $currencies && ($hostx_theme_settings.disable_multi_crrency) == 'on' }
+				 {if !$loggedin && $currencies && ($cloudhost247.settings.disable_multi_crrency) == 'on' }
 					 <li class="currencyDiv"><a href="#" data-toggle="dropdown"><span id="sCurrency">{$hxselectedcurrency.prefix} {$hxselectedcurrency.code}</span> <i class="fa fa-sort-desc"></i></a>
 						 <div class="dropdown-menu" id="currencyList"> 
 							 {foreach from=$currencies item=listcurr}

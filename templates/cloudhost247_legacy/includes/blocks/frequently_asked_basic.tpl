@@ -1,11 +1,11 @@
-{if $hostx_blocks[$block_slug]}
+{if $cloudhost247.blocks[$block_slug]}
   <div class="frequbntly_asked frequbntly_asked1">
     <div class="container">
       <div class="top">
-        <h2>{eval var=$hostx_blocks[$block_slug]->title}</h2> 
+        <h2>{eval var=$cloudhost247.blocks[$block_slug]->title}</h2>
       </div>
       <div class="clearfix"></div>
-       {foreach $hostx_blocks[$block_slug]->widgets as $k =>  $widget}
+       {foreach $cloudhost247.blocks[$block_slug]->widgets as $k =>  $widget}
           <div class="question_answers">
             <a class="question" href="javascript:;" data="#collapseExample_{$k}" role="button" aria-expanded="false" aria-controls="collapseExample_{$k}">{eval var=$widget->widget_title}
                 <span><img src="{$WEB_ROOT}/templates/{$template}/images/bottom-arro.svg" class="svg" alt="tick icon"></span>  

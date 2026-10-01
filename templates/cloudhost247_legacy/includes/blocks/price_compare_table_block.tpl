@@ -1,16 +1,16 @@
-{if $hostx_blocks[$block_slug]}
-   <div class="tabs-sec {if $hostx_theme_settings.enable_sticky_header eq 'on'}tabs-sticky{/if}">
-      {eval var=$hostx_blocks[$block_slug]->description}
+{if $cloudhost247.blocks[$block_slug]}
+   <div class="tabs-sec {if $cloudhost247.settings.enable_sticky_header eq 'on'}tabs-sticky{/if}">
+      {eval var=$cloudhost247.blocks[$block_slug]->description}
       <div class="container">
          <div class="tab-content">
-            {foreach $hostx_blocks[$block_slug]->widgets as $widget}
+            {foreach $cloudhost247.blocks[$block_slug]->widgets as $widget}
                {eval var=$widget->widget_description|html_entity_decode}
             {/foreach}
          </div>
       </div>
    </div>
 {else}
-<div class="tabs-sec {if $hostx_theme_settings.enable_sticky_header eq 'on'}tabs-sticky{/if}">
+<div class="tabs-sec {if $cloudhost247.settings.enable_sticky_header eq 'on'}tabs-sticky{/if}">
    <ul class="nav nav-tabs" role="tablist">
       <li class="nav-item active">
          <a class="nav-link" data-toggle="tab" href="#featureTabBlock">Features</a>

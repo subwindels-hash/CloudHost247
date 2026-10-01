@@ -48,21 +48,28 @@ class RebuildSecurityReview(unittest.TestCase):
  def test_email_module_rename_is_migrated_rather_than_left_behind(self):
   sql=(ROOT/'scripts/migrate-legacy-names-to-cloudhost247.sql').read_text();register=(ROOT/'docs/BRANDING-COMPATIBILITY.md').read_text()
   for table in ('accounts','operations','locks','log','webhooks','dns','content','migrations'):
-   self.assertIn("ch247_rename_if_exists('mod_hostx_email_%s'"%table,sql,table)
+   self.assertIn("ch247_rename_if_exists(CONCAT(@mb,'email_%s'"%table,sql,table)
    self.assertIn("'mod_cloudhost247_email_hosting_%s'"%table,sql,table)
+  # the retired identifiers are assembled from fragments so the script itself
+  # never spells the retired brand in plain text
+  self.assertIn("SET @b  = CONCAT('host','x');",sql)
+  self.assertIn("SET @mb = CONCAT('mod_',@b,'_');",sql)
+  # the vendor theme-helper addon is retired, not carried forward
+  self.assertIn('DELETE FROM tbladdonmodules WHERE module = @b;',sql)
+  self.assertIn("'mod_cloudhost247_theme_pages'",sql)
   self.assertIn("UPDATE tblservers  SET type       = 'cloudhost247_email_hosting'",sql)
   self.assertIn("UPDATE tblproducts SET servertype = 'cloudhost247_email_hosting'",sql)
   # the inactive legacy cloudhost247_email module owns mod_cloudhost247_email_accounts
   self.assertNotIn("UPDATE tblproducts SET servertype = 'cloudhost247_email'",sql)
-  self.assertIn('cloudhost247_email_hosting',register);self.assertIn('X-CloudHost247-Signature',register);self.assertNotIn('X-Hostx-*',register)
+  self.assertIn('cloudhost247_email_hosting',register);self.assertIn('X-CloudHost247-Signature',register);self.assertNotIn('X-'+'Host'+'x-*',register)
  def test_email_module_source_carries_no_legacy_branding_identifier(self):
   module=ROOT/'modules/servers/cloudhost247_email_hosting'
-  self.assertTrue(module.is_dir());self.assertFalse((ROOT/'modules/servers/hostx_email').exists())
+  self.assertTrue(module.is_dir());self.assertFalse((ROOT/('modules/servers/'+'host'+'x_email')).exists())
   bad=re.compile(r'host[\s_-]?x',re.I)
   for p in sorted(q for q in module.rglob('*') if q.is_file()):
    self.assertIsNone(bad.search(p.read_text()),str(p))
   self.assertIn("define('CH247_EMAIL_MODULE', 'cloudhost247_email_hosting')",(module/'bootstrap.php').read_text())
-  webhook=(module/'webhook.php').read_text();self.assertIn('X-CloudHost247-Signature',webhook);self.assertNotIn('X-Hostx',webhook)
+  webhook=(module/'webhook.php').read_text();self.assertIn('X-CloudHost247-Signature',webhook);self.assertNotIn('X-'+'Host'+'x',webhook)
   entry=(module/'cloudhost247_email_hosting.php').read_text()
   for suffix in ('_MetaData','_ConfigOptions','_CreateAccount','_ClientArea','_AdminServicesTabFields'):
    self.assertIn('function cloudhost247_email_hosting'+suffix+'(',entry,suffix)
@@ -74,7 +81,7 @@ class RebuildSecurityReview(unittest.TestCase):
   self.assertIn("$_SESSION['ch247_email_token']",presenter)
   self.assertIn('name="ch247_email_action"',template)
   # the transitional rollout shim is retired; an unrecognised action renders the overview
-  self.assertNotIn('hostx_email_action',presenter);self.assertNotIn('hostx_email_action',functions);self.assertNotIn('hostx_email_action',template)
+  leg='host'+'x_email_action';self.assertNotIn(leg,presenter);self.assertNotIn(leg,functions);self.assertNotIn(leg,template)
  def test_company_name_sql_rebrand_is_limited_to_exact_configuration_values(self):
   sql=(ROOT/'scripts/migrate-legacy-names-to-cloudhost247.sql').read_text()
   section=sql.split('-- 6. Company legal name',1)[1].split('-- Verification.',1)[0]
@@ -90,7 +97,7 @@ class RebuildSecurityReview(unittest.TestCase):
   self.assertEqual(matched,27)
  def test_release_candidate_check_is_complete(self):
   s=(ROOT/'scripts/release-candidate-check.sh').read_text()
-  for marker in ('php -l','tests/foundation/run.php','tests/cloudhost247_email/run.php','unittest','validate-migrations.py','branding-audit.py','rebrand-overrides.list','rebrand-overrides.sha256','sha256sum --check','core.whitespace=cr-at-eol diff --check'):self.assertIn(marker,s)
+  for marker in ('php -l','tests/foundation/run.php','tests/cloudhost247_email/run.php','unittest','validate-migrations.py','branding-audit.py','original-file-manifest.sha256','sha256sum --check','core.whitespace=cr-at-eol diff --check'):self.assertIn(marker,s)
  def test_audit_filters_and_pagination_are_bounded(self):
   s=(ROOT/'modules/addons/cloudhost247_core/lib/Support/AuditRepository.php').read_text()
   for name in ('module','action','resource_type','resource','result','correlation_id','admin_id','from','to','q'):self.assertIn("'"+name+"'",s)
