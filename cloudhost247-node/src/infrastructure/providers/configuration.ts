@@ -115,10 +115,19 @@ export const ADAPTER_PROFILES: Record<AdapterKind, AdapterProfile> = {
       { suffix: '_CLIENT_SECRET', description: 'OAuth client secret', required: true, fallback: 'CONTABO_CLIENT_SECRET' },
       { suffix: '_API_USER', description: 'API user', required: true, fallback: 'CONTABO_API_USER' },
       { suffix: '_API_PASSWORD', description: 'API password', required: true, fallback: 'CONTABO_API_PASSWORD' },
+      { suffix: '_API_URL', description: 'Compute API base URL override', required: false, fallback: 'CONTABO_API_URL' },
+      { suffix: '_TOKEN_URL', description: 'OAuth2 token URL override', required: false, fallback: 'CONTABO_TOKEN_URL' },
     ],
-    planMetadata: [{ key: 'providerServerType', description: 'Contabo product id', required: true }, ...RESOURCE_METADATA],
-    capabilities: { reinstall: false, snapshot: false, resize: false, console: false, metrics: false, rescue: false },
-    notes: 'Native Contabo is intentionally disabled until the OAuth2 lifecycle and VPS API are complete. Use the generic_http bridge adapter for a tested integration.',
+    planMetadata: [
+      { key: 'providerServerType', description: 'Contabo VPS/VDS product id, e.g. V153', required: true },
+      { key: 'providerSshKeyIds', description: 'Optional Contabo Secret ids for provider-side SSH-key injection', required: false },
+      { key: 'contaboPeriodMonths', description: 'Initial contract period: 1, 12, or 24 months (default 1)', required: false },
+      { key: 'contaboDefaultUser', description: 'root, admin, or administrator (default admin)', required: false },
+      { key: 'contaboLicense', description: 'Optional Contabo license code', required: false },
+      ...RESOURCE_METADATA,
+    ],
+    capabilities: { reinstall: true, snapshot: true, resize: false, console: false, metrics: false, rescue: false },
+    notes: 'Native Compute API with cached in-memory OAuth2 tokens, lifecycle actions, image validation, in-place reinstall and snapshots. The platform refuses scheduled Contabo cancellation as DELETE, because it is not immediate resource destruction.',
   },
   ovh: {
     kind: 'ovh',
@@ -321,9 +330,6 @@ export function describeProviderConfiguration(
     missing.length = 0;
     if (source.NODE_ENV === 'production') missing.push('mock provider is disabled in production');
     else if (source.ALLOW_MOCK_PROVIDER !== 'true') missing.push('ALLOW_MOCK_PROVIDER=true');
-  }
-  if (profile.kind === 'contabo') {
-    missing.push('native adapter implementation is disabled; configure a generic_http provider bridge');
   }
   return {
     adapter: profile.kind,

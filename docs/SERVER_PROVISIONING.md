@@ -112,27 +112,54 @@ Capabilities: reinstall, snapshot, resize, console.
 
 Native instance API.
 
-### Amazon EC2 (`aws`) — native adapter disabled
+### Amazon EC2 (`aws`)
 
-The native AWS adapter is **not production-ready in this release**. It does not contain a complete
-AWS Signature Version 4 client, so provider validation and every provider operation deliberately
-fail closed with `SERVICE_UNAVAILABLE`; it never creates a resource or reports synthetic health.
-`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and `AWS_REGION` remain recognised only for
-configuration diagnostics and a future implementation.
+- Default credential prefix: `AWS`
+- Required variables: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`
 
-To deploy on AWS today, expose the required EC2 operations through an operator-owned HTTPS bridge
-that implements the `generic_http` contract below. Register that provider as `generic_http`, not
-`aws`, and restrict its IAM role to the required actions and CloudHost247 resource tags.
+Native EC2 uses the AWS SDK's Signature Version 4 client. Plan metadata must set
+`providerServerType` to an EC2 instance type; the mapped OS image must hold an AMI id. It supports
+create/retry lookup through a CloudHost247 idempotency tag, status, start/stop/reboot, terminate,
+resize, snapshots, image lookup and console output. In-place reinstall and root-volume restore are
+intentionally unavailable because they need an explicit replacement-instance workflow. CloudWatch
+metrics require separately scoped permissions and are not supplied by this adapter.
 
-### Contabo (`contabo`) — native adapter disabled
+### Contabo (`contabo`)
 
-The native Contabo adapter is **not production-ready in this release**. The OAuth token lifecycle
-and VPS operations are incomplete, so activation and all calls deliberately fail closed with
-`SERVICE_UNAVAILABLE`. The `CONTABO_CLIENT_ID`, `CONTABO_CLIENT_SECRET`, `CONTABO_API_USER`, and
-`CONTABO_API_PASSWORD` names remain documented only for diagnostics/future support.
+- Default credential prefix: `CONTABO`
+- API base URL: `https://api.contabo.com/v1` (default)
+- OAuth token URL: `https://auth.contabo.com/auth/realms/contabo/protocol/openid-connect/token` (default)
 
-Use an operator-owned `generic_http` bridge for Contabo until the native adapter is completed and
-integration-tested. Do not activate a provider row with adapter `contabo`.
+| Variable | Purpose | Required |
+| --- | --- | --- |
+| `CONTABO_CLIENT_ID` | OAuth client id | yes |
+| `CONTABO_CLIENT_SECRET` | OAuth client secret | yes |
+| `CONTABO_API_USER` | Contabo API user | yes |
+| `CONTABO_API_PASSWORD` | Contabo API password | yes |
+| `CONTABO_API_URL` | Compute API base URL override | no |
+| `CONTABO_TOKEN_URL` | OAuth token URL override | no |
+
+Plan/availability metadata: `providerServerType` (Contabo VPS/VDS product id), optional
+`providerSshKeyIds` (Contabo Secret ids), `contaboPeriodMonths` (`1`, `12`, or `24`),
+`contaboDefaultUser` (`root`, `admin`, or `administrator`), optional `contaboLicense`, and the
+common CPU/memory/storage values.
+
+The native adapter exchanges the password-grant OAuth token only at runtime and keeps it in process
+memory with a refresh margin. Tokens and the four credential values are never written to database
+rows, audit events, deployment logs, or API responses. It passes a unique Contabo `x-request-id` on
+each request and uses a deterministic, visible idempotency marker in the instance display name for
+lookup-before-create. It supports configuration validation, create/status, start/stop/shutdown/
+restart, OS image lookup, in-place reinstall, and snapshots. Contabo's API expects SSH **Secret
+ids** rather than raw public key strings; platform cloud-init still receives its customer SSH keys,
+and provider-side injection is optional through trusted `providerSshKeyIds` metadata.
+
+Contabo's documented cancellation endpoint schedules cancellation rather than immediately removing
+an instance. CloudHost247 therefore refuses the platform's destructive `DELETE` operation for this
+adapter rather than claiming a resource is gone or billing has stopped. Resize/product upgrades,
+console URLs, metrics, and rescue mode are also explicitly unsupported until each has a safe,
+operator-confirmed workflow. Do not enable production sales until the intended account's full
+create/retry/reinstall/snapshot/lifecycle/health matrix has been exercised with a low-cost test
+instance.
 
 ### OVHcloud Public Cloud (`ovh`)
 

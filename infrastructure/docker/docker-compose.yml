@@ -26,12 +26,13 @@ x-provider-environment: &provider-environment
   DIGITALOCEAN_API_TOKEN: ${DIGITALOCEAN_API_TOKEN:-}
   VULTR_API_URL: ${VULTR_API_URL:-https://api.vultr.com/v2}
   VULTR_API_KEY: ${VULTR_API_KEY:-}
-  # Native AWS/Contabo adapters remain fail-closed; these are forwarded for configuration
-  # diagnostics and future upgrades, not as a claim that the adapters are production-ready.
+  # Native AWS EC2 and Contabo Compute credentials. Keep them in the deployment secret store;
+  # the same values must reach both app and worker because the worker calls providers.
   AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
   AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
   AWS_REGION: ${AWS_REGION:-us-east-1}
   CONTABO_API_URL: ${CONTABO_API_URL:-https://api.contabo.com/v1}
+  CONTABO_TOKEN_URL: ${CONTABO_TOKEN_URL:-https://auth.contabo.com/auth/realms/contabo/protocol/openid-connect/token}
   CONTABO_CLIENT_ID: ${CONTABO_CLIENT_ID:-}
   CONTABO_CLIENT_SECRET: ${CONTABO_CLIENT_SECRET:-}
   CONTABO_API_USER: ${CONTABO_API_USER:-}
