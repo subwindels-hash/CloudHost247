@@ -204,6 +204,31 @@ export function quoteRegistration(domainName: string, years: number): Promise<{ 
   });
 }
 
+export interface AvailabilityWatchDto {
+  id: string;
+  domainName: string;
+  status: 'watching' | 'available' | 'cancelled';
+  lastCheckedAt: string | null;
+  lastAvailability: string | null;
+  availableAt: string | null;
+  createdAt: string;
+}
+
+export function watchDomain(domainName: string): Promise<{ watch: AvailabilityWatchDto }> {
+  return apiFetch<{ watch: AvailabilityWatchDto }>('/api/v1/domain-services/watches', {
+    method: 'POST',
+    body: JSON.stringify({ domainName }),
+  });
+}
+
+export function listMyWatches(): Promise<{ watches: AvailabilityWatchDto[] }> {
+  return apiFetch<{ watches: AvailabilityWatchDto[] }>('/api/v1/domain-services/watches');
+}
+
+export function cancelWatch(id: string): Promise<void> {
+  return apiFetch<void>(`/api/v1/domain-services/watches/${id}`, { method: 'DELETE' });
+}
+
 export function whoisLookup(domainName: string): Promise<WhoisResponse> {
   return apiFetch<WhoisResponse>('/api/v1/domain-services/whois', {
     method: 'POST',

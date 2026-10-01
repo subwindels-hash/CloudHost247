@@ -4,6 +4,7 @@ import { usePageMeta } from '../lib/usePageMeta';
 import { apiFetch } from '../lib/api';
 import { SectionCard, StatusChip, formatDateTime, formatPrice } from '../components/domain-services/ui';
 import AdminBrokerageSection from '../components/AdminBrokerageSection';
+import AdminDomainActivitySection from '../components/AdminDomainActivitySection';
 import type { AuctionDto, ClubPlanDto, ExtensionEntry, ReadinessResponse } from '../lib/domain-services-api';
 
 /**
@@ -94,7 +95,7 @@ const ADAPTER_LABELS: Record<string, string> = {
   'godaddy-govalue': 'GoDaddy GoValue (domain appraisal)',
 };
 
-type TabId = 'overview' | 'providers' | 'extensions' | 'auctions' | 'transfers' | 'club' | 'broker';
+type TabId = 'overview' | 'providers' | 'extensions' | 'auctions' | 'transfers' | 'club' | 'broker' | 'activity';
 
 const TABS: Array<{ id: TabId; label: string }> = [
   { id: 'overview', label: 'Overview' },
@@ -104,6 +105,7 @@ const TABS: Array<{ id: TabId; label: string }> = [
   { id: 'transfers', label: 'Transfers' },
   { id: 'club', label: 'Domain Club' },
   { id: 'broker', label: 'Broker' },
+  { id: 'activity', label: 'Activity' },
 ];
 
 function toIsoUtc(localValue: string): string | null {
@@ -861,6 +863,8 @@ export default function AdminDomainServicesPage() {
       )}
 
       {tab === 'broker' && <AdminBrokerageSection />}
+
+      {tab === 'activity' && <AdminDomainActivitySection />}
 
       <p style={{ marginTop: '1.5rem' }} className="ch247-page__hint">
         All provider, extension, auction, transfer, club and broker actions on this page are audit-logged. See{' '}

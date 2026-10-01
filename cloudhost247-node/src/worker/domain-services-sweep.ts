@@ -17,6 +17,7 @@ import { processDomainTransfers } from '../domain-services/transfer-service';
 import { processPaidAppraisals } from '../domain-services/appraisal-service';
 import { sweepAuctionStates } from '../domain-services/auction-service';
 import { expireLapsedMemberships, sendMembershipRenewalReminders } from '../domain-services/club-service';
+import { sweepAvailabilityWatches } from '../domain-services/availability-watch-service';
 
 export interface DomainServicesSweepReport {
   registrations: { claimed: number; registered: number; pending: number; failed: number };
@@ -26,6 +27,7 @@ export interface DomainServicesSweepReport {
   auctions: { started: number; endingSoon: number; ended: number };
   membershipsExpired: number;
   membershipRenewalReminders: number;
+  availabilityWatches: { checked: number; becameAvailable: number; failures: number };
 }
 
 /** Short interval: auction states and fulfilment are latency-sensitive for customers. */
@@ -41,6 +43,7 @@ export async function sweepDomainServices(db: Queryable): Promise<DomainServices
   const auctions = await sweepAuctionStates(db);
   const membershipsExpired = await expireLapsedMemberships(db);
   const membershipRenewalReminders = await sendMembershipRenewalReminders(db);
+  const availabilityWatches = await sweepAvailabilityWatches(db);
 
   return {
     registrations,
@@ -50,5 +53,6 @@ export async function sweepDomainServices(db: Queryable): Promise<DomainServices
     auctions,
     membershipsExpired,
     membershipRenewalReminders,
+    availabilityWatches,
   };
 }

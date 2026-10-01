@@ -418,6 +418,172 @@ describe('Domain Services notifications (auctions, club, broker)', () => {
   });
 });
 
+describe('Domain availability watches', () => {
+  let db: PGlite;
+  let mockNamecheap: MockNamecheap;
+
+  beforeEach(async () => {
+    db = new PGlite();
+    await migrateUp(new PgliteClient(db), { isProduction: false });
+    mockNamecheap = new MockNamecheap();
+    await mockNamecheap.start();
+  });
+
+  afterEach(async () => {
+    await mockNamecheap.stop();
+    await db.close();
+  });
+
+  function buildTestApp() {
+    return buildApp(env, { serveFrontend: false, pool: db });
+  }
+
+  async function connectRegistrar(app: ReturnType<typeof buildTestApp>, adminToken: string) {
+    const created = await app.inject({
+      method: 'POST',
+      url: '/api/v1/admin/domain-services/providers',
+      headers: { authorization: `Bearer ${adminToken}` },
+      payload: {
+        providerKey: 'watch-registrar',
+        name: 'Watch Registrar',
+        adapterKey: 'namecheap',
+        providerType: 'registrar',
+        apiBaseUrl: mockNamecheap.url(),
+        environment: 'sandbox',
+      },
+    });
+    const providerId = created.json().provider.id as string;
+    await app.inject({
+      method: 'PUT',
+      url: `/api/v1/admin/domain-services/providers/${providerId}/credentials`,
+      headers: { authorization: `Bearer ${adminToken}` },
+      payload: { credentials: { apiUser: 'u', apiKey: 'k', userName: 'u', clientIp: '127.0.0.1' } },
+    });
+    await app.inject({
+      method: 'POST',
+      url: `/api/v1/admin/domain-services/providers/${providerId}/test`,
+      headers: { authorization: `Bearer ${adminToken}` },
+    });
+  }
+
+  it('refuses to create watches when no registrar is connected (honest not-configured state)', async () => {
+    const app = buildTestApp();
+    const user = await createUser(db, 'watch-noprovider@example.com');
+    const created = await app.inject({
+      method: 'POST',
+      url: '/api/v1/domain-services/watches',
+      headers: { authorization: `Bearer ${user.token}` },
+      payload: { domainName: 'taken-something.com' },
+    });
+    expect(created.statusCode).toBe(400);
+    expect(created.json().message).toContain('Service Provider Not Configured');
+
+    const unauthenticated = await app.inject({
+      method: 'POST',
+      url: '/api/v1/domain-services/watches',
+      payload: { domainName: 'taken-something.com' },
+    });
+    expect(unauthenticated.statusCode).toBe(401);
+  });
+
+  it('fulfils a watch only from a fresh provider answer, notifying exactly once', async () => {
+    const app = buildTestApp();
+    const admin = await createUser(db, 'watch-admin@example.com', 'super_admin');
+    await connectRegistrar(app, admin.token);
+    const user = await createUser(db, 'watcher@example.com');
+    const other = await createUser(db, 'other-watcher@example.com');
+
+    // Watch a registered domain (mock: "taken" labels are registered) and an available one.
+    const taken = await app.inject({
+      method: 'POST',
+      url: '/api/v1/domain-services/watches',
+      headers: { authorization: `Bearer ${user.token}` },
+      payload: { domainName: 'taken-watch.com' },
+    });
+    expect(taken.statusCode).toBe(201);
+    const takenWatchId = taken.json().watch.id as string;
+    expect(taken.json().watch.status).toBe('watching');
+
+    // Re-watching is idempotent — the same active watch comes back, never a second row.
+    const duplicate = await app.inject({
+      method: 'POST',
+      url: '/api/v1/domain-services/watches',
+      headers: { authorization: `Bearer ${user.token}` },
+      payload: { domainName: 'TAKEN-watch.com' },
+    });
+    expect(duplicate.statusCode).toBe(201);
+    expect(duplicate.json().watch.id).toBe(takenWatchId);
+    const watchRows = await db.query(`SELECT count(*)::int AS count FROM domain_availability_watches`);
+    expect(watchRows.rows[0].count).toBe(1);
+
+    const fresh = await app.inject({
+      method: 'POST',
+      url: '/api/v1/domain-services/watches',
+      headers: { authorization: `Bearer ${user.token}` },
+      payload: { domainName: 'freshbrand.com' },
+    });
+    expect(fresh.statusCode).toBe(201);
+
+    // First sweep: taken stays watching silently; the available one flips + notifies.
+    const report = await sweepDomainServices(db as never);
+    expect(report.availabilityWatches.checked).toBe(2);
+    expect(report.availabilityWatches.becameAvailable).toBe(1);
+
+    let types = await notificationTypes(db, user.id);
+    expect(types).toContain('DOMAIN_AVAILABILITY_ALERT');
+    expect(types.filter((type) => type === 'DOMAIN_AVAILABILITY_ALERT')).toHaveLength(1);
+
+    const states = await db.query<{ domain_name: string; status: string; last_availability: string | null }>(
+      `SELECT domain_name, status, last_availability FROM domain_availability_watches ORDER BY domain_name`
+    );
+    expect(states.rows).toEqual([
+      { domain_name: 'freshbrand.com', status: 'available', last_availability: 'available' },
+      { domain_name: 'taken-watch.com', status: 'watching', last_availability: 'registered' },
+    ]);
+
+    // Repeated sweeps never re-notify and never re-flip.
+    await sweepDomainServices(db as never);
+    types = await notificationTypes(db, user.id);
+    expect(types.filter((type) => type === 'DOMAIN_AVAILABILITY_ALERT')).toHaveLength(1);
+
+    // Ownership: someone else's watch is indistinguishable from missing.
+    const foreign = await app.inject({
+      method: 'DELETE',
+      url: `/api/v1/domain-services/watches/${takenWatchId}`,
+      headers: { authorization: `Bearer ${other.token}` },
+    });
+    expect(foreign.statusCode).toBe(404);
+
+    const cancelled = await app.inject({
+      method: 'DELETE',
+      url: `/api/v1/domain-services/watches/${takenWatchId}`,
+      headers: { authorization: `Bearer ${user.token}` },
+    });
+    expect(cancelled.statusCode).toBe(204);
+    const again = await app.inject({
+      method: 'DELETE',
+      url: `/api/v1/domain-services/watches/${takenWatchId}`,
+      headers: { authorization: `Bearer ${user.token}` },
+    });
+    expect(again.statusCode).toBe(404);
+
+    // The list endpoint reflects the final state for the owner only.
+    const mine = await app.inject({
+      method: 'GET',
+      url: '/api/v1/domain-services/watches',
+      headers: { authorization: `Bearer ${user.token}` },
+    });
+    const mineWatches = mine.json().watches as Array<{ domainName: string; status: string }>;
+    expect(mineWatches).toHaveLength(2);
+    const theirs = await app.inject({
+      method: 'GET',
+      url: '/api/v1/domain-services/watches',
+      headers: { authorization: `Bearer ${other.token}` },
+    });
+    expect(theirs.json().watches).toHaveLength(0);
+  });
+});
+
 describe('Domain Services notifications with a connected (simulated) registrar', () => {
   let db: PGlite;
   let mockNamecheap: MockNamecheap;

@@ -32,6 +32,7 @@ minimal admin surface; audit logging on every mutating route. Baseline: typechec
 | Broker customer-message posted | none | `DOMAIN_BROKER_MESSAGE` per message |
 | Broker payment / transfer status changes | none | `DOMAIN_BROKER_PAYMENT_<STATUS>` / `DOMAIN_BROKER_TRANSFER_<STATUS>` on transition only |
 | Club **membership renewal** reminder | none | `DOMAIN_CLUB_RENEWAL_REMINDER` once per membership when renewal is ≤ 7 days away |
+| **Domain availability** (watchlist) | none | `DOMAIN_AVAILABILITY_ALERT` when the sweep's fresh provider check finds a watched domain available/premium — see G5 |
 
 All sends go through `createNotification`, whose partial unique index on
 `(user_id, type, resource_type, resource_id)` makes every one of the above once-only by
@@ -76,7 +77,26 @@ event + audit written, MCAS where state changes):
 
 Admin UI: new **Broker** tab on `/admin/domain-services` (`AdminBrokerageSection`) — case
 search/filter, case detail, status workflow, offer recording, notes/messages, fees & payment,
-transfer tracking, timeline.
+transfer tracking, timeline. New **Activity** tab (`AdminDomainActivitySection`) — the
+registrations, appraisals, WHOIS/RDAP lookups and domain-transactions oversight endpoints that
+previously had no UI.
+
+### G5 — Domain availability watchlist (spec §17 "Domain availability", added 2026-10-01 later pass)
+
+The only §17 event with no backing feature. Implemented end to end:
+
+- Migration `0065_create_domain_availability_watches.sql` — one ACTIVE watch per user per domain
+  (partial unique index), history rows kept, sweep intake index (stalest-first).
+- `availability-watch-service.ts` — create (honest refusal when no registrar is connected;
+  idempotent re-watch; 100-watch cap per user), list (owner-only), cancel (owner-only, 404 for
+  anything else), and the worker sweep step: the stalest 50 active watches re-checked in ONE
+  batched provider call. Only a fresh `available`/`premium` answer flips a watch (compare-and-
+  swap) and sends `DOMAIN_AVAILABILITY_ALERT` — provider failures back off without ever marking
+  a domain available or killing the watch.
+- Routes: `POST/GET/DELETE /api/v1/domain-services/watches[/…]` (authenticated, audit-logged).
+- UI: **Watch** button on taken results in `/domains/search` (signed-in users; "Watching ✓"
+  state), and a **Domain availability watches** section in the dashboard Searches & Lookups tab
+  with cancel and a deep link back to search when a watch fires.
 
 ## 3. Verification
 

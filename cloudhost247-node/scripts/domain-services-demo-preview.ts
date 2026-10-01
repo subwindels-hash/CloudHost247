@@ -287,6 +287,15 @@ async function main() {
     payload: { body: 'The seller countered at 12,500 USD. It is inside your budget — open the case to accept or reject.', visibility: 'customer' },
   });
 
+  // Availability watch: Amaka watches a registered domain; the 30s sweep re-checks it honestly
+  // (stays "watching" — the simulated registrar keeps it registered, no fake flips).
+  await app.inject({
+    method: 'POST',
+    url: '/api/v1/domain-services/watches',
+    headers: { authorization: `Bearer ${amakaToken}` },
+    payload: { domainName: 'taken-private.net' },
+  });
+
   // ------------------------------------------------------------------------------- serve ---
   const port = Number(env.PORT) || 3000;
   await app.listen({ port, host: '0.0.0.0' });

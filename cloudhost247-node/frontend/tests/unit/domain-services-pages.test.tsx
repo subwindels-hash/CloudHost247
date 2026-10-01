@@ -320,6 +320,11 @@ describe('/dashboard/domains Domain Services tabs', () => {
       } },
       { match: (path) => path.startsWith('/api/v1/domain-services/searches'), body: { searches: [] } },
       { match: (path) => path.startsWith('/api/v1/domain-services/whois/history'), body: { lookups: [] } },
+      { match: (path) => path === '/api/v1/domain-services/watches', body: {
+        watches: [
+          { id: 'watch-1', domainName: 'dreambrand.example', status: 'watching', lastCheckedAt: '2026-09-30T12:00:00Z', lastAvailability: 'registered', availableAt: null, createdAt: '2026-09-29T00:00:00Z' },
+        ],
+      } },
       {
         match: (path) => path.startsWith('/api/v1/domain-services/club/membership'),
         body: {
@@ -370,9 +375,11 @@ describe('/dashboard/domains Domain Services tabs', () => {
     // Lost auctions are listed from the real endpoint.
     expect(screen.getByText('lostbid.example')).toBeTruthy();
 
-    // Searches & Lookups tab includes bulk search history.
+    // Searches & Lookups tab includes bulk search history and availability watches.
     fireEvent.click(screen.getByRole('button', { name: 'Searches & Lookups' }));
     await waitFor(() => expect(screen.getByText('portfolio list')).toBeTruthy());
+    expect(screen.getByText('dreambrand.example')).toBeTruthy();
+    expect(screen.getByText('Watching')).toBeTruthy();
 
     // Domain Club tab shows the live membership.
     fireEvent.click(screen.getByRole('button', { name: 'Domain Club' }));

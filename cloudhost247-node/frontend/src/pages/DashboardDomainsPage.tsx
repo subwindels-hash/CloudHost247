@@ -4,7 +4,7 @@ import { usePageMeta } from '../lib/usePageMeta';
 import { apiFetch } from '../lib/api';
 import { CatalogErrorBanner, CatalogLoadingBanner } from '../components/CatalogStateBanner';
 import { formatDateTime, formatPrice, SectionCard, StatusChip } from '../components/domain-services/ui';
-import type { MembershipDto } from '../lib/domain-services-api';
+import { listMyWatches, cancelWatch, type AvailabilityWatchDto, type MembershipDto } from '../lib/domain-services-api';
 
 interface DomainRow {
   id: string;
@@ -184,6 +184,7 @@ export default function DashboardDomainsPage() {
   const [searches, setSearches] = useState<SearchRow[] | null>(null);
   const [bulkSearches, setBulkSearches] = useState<BulkSearchRow[] | null>(null);
   const [whoisLookups, setWhoisLookups] = useState<WhoisRow[] | null>(null);
+  const [watches, setWatches] = useState<AvailabilityWatchDto[] | null>(null);
   const [transactions, setTransactions] = useState<TransactionRow[] | null>(null);
   const [lost, setLost] = useState<LostAuctionRow[] | null>(null);
   const [membership, setMembership] = useState<MembershipDto | null | undefined>(undefined);
@@ -238,6 +239,9 @@ export default function DashboardDomainsPage() {
       apiFetch<{ lookups: WhoisRow[] }>('/api/v1/domain-services/whois/history')
         .then((r) => setWhoisLookups(r.lookups))
         .catch(() => setWhoisLookups([]));
+      listMyWatches()
+        .then((r) => setWatches(r.watches ?? []))
+        .catch(() => setWatches([]));
     }
     if (tab === 'club' && membership === undefined) {
       apiFetch<{ membership: MembershipDto | null }>('/api/v1/domain-services/club/membership')
@@ -272,6 +276,22 @@ export default function DashboardDomainsPage() {
       loadDomains();
     } catch (err) {
       setMessage(err instanceof Error ? err.message : 'Could not add the domain');
+    } finally {
+      setBusy('');
+    }
+  }
+
+  async function onCancelWatch(id: string) {
+    setBusy(`watch:${id}`);
+    setMessage('');
+    try {
+      await cancelWatch(id);
+      setMessage('Availability watch cancelled.');
+      listMyWatches()
+        .then((r) => setWatches(r.watches ?? []))
+        .catch(() => undefined);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'The watch could not be cancelled right now.');
     } finally {
       setBusy('');
     }
@@ -596,6 +616,58 @@ export default function DashboardDomainsPage() {
                         <td>{bulk.accepted_count}</td>
                         <td>{bulk.rejected_count}</td>
                         <td>{formatDateTime(bulk.created_at)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </SectionCard>
+
+          <SectionCard title="Domain availability watches" style={{ marginTop: "1rem" }} actions={<Link className="ch247-button ch247-button--outline" to="/domains/search">Watch a domain</Link>}>
+            {watches === null ? (
+              <CatalogLoadingBanner label="Loading availability watches…" />
+            ) : watches.length === 0 ? (
+              <p className="ch247-page__hint">
+                No availability watches. When a domain you want is taken, use the <em>Watch</em> button in{' '}
+                <Link to="/domains/search">Domain Search</Link> and we will notify you if it becomes available.
+              </p>
+            ) : (
+              <div className="ch247-table-wrap">
+                <table className="ch247-table">
+                  <thead><tr><th>Domain</th><th>Status</th><th>Last check</th><th>Availability</th><th>Watching since</th><th></th></tr></thead>
+                  <tbody>
+                    {watches.map((watch) => (
+                      <tr key={watch.id}>
+                        <td style={{ wordBreak: 'break-all' }}>
+                          {watch.status === 'available' ? (
+                            <Link to={`/domains/search?domain=${encodeURIComponent(watch.domainName)}`}>{watch.domainName}</Link>
+                          ) : (
+                            watch.domainName
+                          )}
+                        </td>
+                        <td>
+                          {watch.status === 'watching' ? 'Watching' : watch.status === 'available' ? (
+                            <span className="ch247-dsvc-status ch247-dsvc-status--available">Available now</span>
+                          ) : (
+                            'Cancelled'
+                          )}
+                        </td>
+                        <td>{watch.lastCheckedAt ? formatDateTime(watch.lastCheckedAt) : 'Pending'}</td>
+                        <td>{watch.lastAvailability ? watch.lastAvailability.replace(/_/g, ' ') : '—'}</td>
+                        <td>{formatDateTime(watch.createdAt)}</td>
+                        <td>
+                          {watch.status === 'watching' && (
+                            <button
+                              className="ch247-button ch247-button--small ch247-button--outline"
+                              type="button"
+                              onClick={() => void onCancelWatch(watch.id)}
+                              disabled={busy === `watch:${watch.id}`}
+                            >
+                              Stop watching
+                            </button>
+                          )}
+                        </td>
                       </tr>
                     ))}
                   </tbody>

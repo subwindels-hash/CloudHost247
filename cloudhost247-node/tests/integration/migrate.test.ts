@@ -91,6 +91,7 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0062_create_webauthn_authentication_challenges.sql',
     '0063_create_domain_services_foundation.sql',
     '0064_relax_domain_extensions_shape.sql',
+    '0065_create_domain_availability_watches.sql',
   ];
 
   it('finds the committed migration files in order', () => {
@@ -181,6 +182,7 @@ describe('migration runner against the real database/migrations SQL files', () =
         'domain_club_plans',
         'domain_club_memberships',
         'domain_transactions',
+        'domain_availability_watches',
       ])
     );
   });
