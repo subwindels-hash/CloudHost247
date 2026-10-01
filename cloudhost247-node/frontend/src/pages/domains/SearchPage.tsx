@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { usePageMeta } from '../../lib/usePageMeta';
 import { getToken } from '../../lib/auth';
 import { apiFetch } from '../../lib/api';
@@ -51,8 +51,9 @@ const EMPTY_CONTACT: ContactForm = {
 export default function SearchPage() {
   usePageMeta('Domain Search', 'Search domain availability and register domains.');
   const token = getToken();
+  const [searchParams] = useSearchParams();
 
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(searchParams.get('domain') ?? '');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [search, setSearch] = useState<SearchResponse | null>(null);
@@ -84,6 +85,28 @@ export default function SearchPage() {
       setBusy(false);
     }
   }
+
+  // Deep links (e.g. /domains/search?domain=example.com from bulk search) run once on arrival.
+  useEffect(() => {
+    const prefill = (searchParams.get('domain') ?? '').trim();
+    if (!prefill) return;
+    let cancelled = false;
+    setBusy(true);
+    searchDomains(prefill)
+      .then((response) => {
+        if (!cancelled) setSearch(response);
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) setError(err instanceof Error ? err.message : 'The search could not be completed right now.');
+      })
+      .finally(() => {
+        if (!cancelled) setBusy(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function selectDomain(result: SearchResultRow) {
     setSelected(result);

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { usePageMeta } from '../../lib/usePageMeta';
 import { getToken } from '../../lib/auth';
 import { whoisLookup, type WhoisResponse } from '../../lib/domain-services-api';
@@ -117,7 +118,7 @@ export default function WhoisPage() {
               )}
               {token && (
                 <p className="ch247-page__hint">
-                  Your lookups are saved to <a href="/dashboard/domains">your dashboard</a>.
+                  Your lookups are saved to <Link to="/dashboard/domains">your dashboard</Link>.
                 </p>
               )}
             </section>
