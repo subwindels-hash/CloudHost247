@@ -23,6 +23,8 @@ import { registerAppInstallationRoutes } from './routes/app-installations';
 import { registerDeploymentRoutes } from './routes/deployments';
 import { registerServerRoutes } from './routes/servers';
 import { registerDomainRoutes } from './routes/domains';
+import { registerDomainServiceRoutes } from './routes/domain-services';
+import { registerAdminDomainServiceRoutes } from './routes/admin-domain-services';
 import { registerAgentRoutes } from './routes/agent';
 import { registerAdminPlatformRoutes } from './routes/admin-platform';
 import { registerInfrastructureRoutes } from './routes/infrastructure';
@@ -147,6 +149,11 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     await registerDnsRoutes(instance, env, pool);
     await registerSslRoutes(instance, env, pool);
     await registerFirewallRoutes(instance, env, pool);
+
+    // Domain Services platform (search, registration, transfer, extensions, auctions, appraisal,
+    // club, WHOIS/RDAP, bulk search) + its Super Admin controls.
+    await registerDomainServiceRoutes(instance, env, pool);
+    await registerAdminDomainServiceRoutes(instance, env, pool);
 
     // Revenue Guardian — revenue recovery management layer over the existing billing engine.
     await registerRevenueGuardianRoutes(instance, env, pool);

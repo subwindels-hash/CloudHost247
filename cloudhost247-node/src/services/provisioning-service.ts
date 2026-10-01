@@ -41,6 +41,13 @@ interface OrderItemMetadata {
   installationId?: string;
   kind?: string;
   cloudflare?: Record<string, unknown>;
+  // --- Domain Services link ids (see src/domain-services/*): set server-side at order creation. ---
+  registrationId?: string;
+  transferId?: string;
+  appraisalId?: string;
+  membershipId?: string;
+  auctionId?: string;
+  domainName?: string;
   serverProvision?: {
     serverId: string;
   };
@@ -99,6 +106,35 @@ export async function provisionPaidOrder(tx: Queryable, order: OrderRow, genId: 
 
   for (const item of items) {
     const metadata = parseMetadata(item);
+
+    // --- Domain Services: verified payment unlocks the provider workflow; the registrar call
+    // itself is performed by the worker sweep (never inside the settlement transaction). Each
+    // hook is idempotent on its status transition, so webhook redelivery is a no-op. ---
+    if (metadata.kind === 'domain_registration' && typeof metadata.registrationId === 'string') {
+      const { markRegistrationPaymentVerified } = await import('../domain-services/registration-service');
+      await markRegistrationPaymentVerified(tx, metadata.registrationId);
+      continue;
+    }
+    if (metadata.kind === 'domain_transfer' && typeof metadata.transferId === 'string') {
+      const { markTransferPaymentVerified } = await import('../domain-services/transfer-service');
+      await markTransferPaymentVerified(tx, metadata.transferId);
+      continue;
+    }
+    if (metadata.kind === 'domain_appraisal' && typeof metadata.appraisalId === 'string') {
+      const { markAppraisalPaymentVerified } = await import('../domain-services/appraisal-service');
+      await markAppraisalPaymentVerified(tx, metadata.appraisalId);
+      continue;
+    }
+    if (metadata.kind === 'domain_club_membership' && typeof metadata.membershipId === 'string') {
+      const { markMembershipPaymentVerified } = await import('../domain-services/club-service');
+      await markMembershipPaymentVerified(tx, metadata.membershipId);
+      continue;
+    }
+    if (metadata.kind === 'domain_auction_payment' && typeof metadata.auctionId === 'string') {
+      const { markAuctionPaymentVerified } = await import('../domain-services/auction-service');
+      await markAuctionPaymentVerified(tx, metadata.auctionId);
+      continue;
+    }
 
     // --- Cloudflare service / plan change: verified payment -> pending service + durable job ---
     if (metadata.kind === 'cloudflare' || metadata.cloudflare) {
