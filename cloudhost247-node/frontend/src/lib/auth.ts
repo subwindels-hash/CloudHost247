@@ -12,6 +12,7 @@ export interface StoredUser {
   email: string;
   fullName: string;
   role: string;
+  emailVerified?: boolean;
 }
 
 const TOKEN_KEY = 'ch247_token';

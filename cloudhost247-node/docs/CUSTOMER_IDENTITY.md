@@ -1,12 +1,15 @@
 # Customer identity, Security Number, user management and support mode
 
-This document is the contract for the identity layer added in migration
-`0053_customer_identity_and_support_sessions.sql`. It covers four related features:
+This document is the contract for the identity layer introduced by migrations
+`0053_customer_identity_and_support_sessions.sql`, `0059_create_auth_recovery.sql`, and
+`0060_create_totp_mfa.sql`. It covers:
 
 1. the permanent six-digit **Customer ID**,
 2. the rotating four-digit **Security Number**,
-3. **admin user management** (including soft deletion), and
-4. **support mode** — an administrator temporarily working inside a customer's account.
+3. **admin user management** (including soft deletion),
+4. **support mode** — an administrator temporarily working inside a customer's account,
+5. email verification and password recovery, and
+6. TOTP multi-factor authentication and recovery codes.
 
 Everything here is additive: `users.id` (uuid) is still the primary key, every existing foreign
 key still points at it, and existing authentication, billing and RBAC behaviour is unchanged.
@@ -109,8 +112,8 @@ short-lived JWT with two extra claims: `sup` (the session id) and `act` (the act
   the admin losing their role) invalidates the token immediately.
 * The customer's password, sessions and Security Number are never read or modified. Their own
   session keeps working throughout.
-* Restricted actions — password change, Security Number reveal/change, payment-method change,
-  account deletion, email change, role change — are refused with 403 and audited
+* Restricted actions — password change, Security Number reveal/change, MFA enrollment/disable,
+  payment-method change, account deletion, email change, role change — are refused with 403 and audited
   (`src/lib/support-mode.ts` owns the list).
 * The UI shows a persistent banner for the whole session (`SupportModeBanner`), driven by what
   the server reports on `/api/auth/me`, with a one-click "Exit support mode" that ends the
@@ -145,3 +148,74 @@ secret:
 `account_profile_image_removed`, `admin_user_created`, `admin_user_updated`, `admin_user_deleted`,
 `admin_customer_account_switch_started`, `admin_customer_account_switch_ended`,
 `admin_customer_account_switch_action_blocked`.
+
+## 7. Email verification and password recovery
+
+Migration `0059_create_auth_recovery.sql` adds durable, independent recovery primitives without
+putting a bearer link into an ordinary notification or storing it in plaintext.
+
+| Method | Path | Contract |
+| --- | --- | --- |
+| POST | `/api/auth/email-verification/confirm` | Redeems a single-use 24-hour verification link. |
+| POST | `/api/auth/email-verification/resend` | Authenticated resend; Fastify + per-account throttled. |
+| POST | `/api/auth/password-reset/request` | Anonymous, non-enumerating request; always returns 202 for a syntactically valid email. |
+| POST | `/api/auth/password-reset/confirm` | Redeems a single-use 30-minute link and replaces the password. |
+
+### Token and delivery properties
+
+* `auth_action_tokens` contains a SHA-256 digest only, never a raw email-verification or password
+  reset token. A raw link is domain-separated HMAC output derived only in worker memory from the
+  action UUID, purpose and `JWT_SECRET`; it is not persisted in `auth_email_outbox`, logs, audit
+  metadata or API responses.
+* Issuing a replacement marks any older unused token of the same purpose unusable. Redemption is
+  one `UPDATE … RETURNING` under a transaction, so concurrent clicks cannot consume it twice.
+  Expired, superseded, consumed and signing-key-invalidated queue entries become visible
+  `CANCELLED` rows instead of being sent as misleading links.
+* `auth_email_outbox` uses the same explicitly configured operator email webhook as notifications,
+  but is a separate table because a reset request must not create an in-app notification. The
+  worker delivers it in the normal one-shot Cron cycle with lease, bounded retries and
+  `CONFIGURATION_REQUIRED` handling. Until `NOTIFICATION_EMAIL_WEBHOOK_URL` and
+  `NOTIFICATION_EMAIL_WEBHOOK_TOKEN` are configured, no email is claimed as delivered.
+* Reset requests have a route limit (5 per 15 minutes) and a database-backed per-account limit
+  (3 per hour). Known, unknown and inactive email addresses get the same accepted response.
+* A completed reset increments `users.auth_session_version` in the same SQL write as the new
+  password hash. Every earlier JWT—including one issued in the same second—is rejected, while a
+  fresh login receives the new version immediately. `password_changed_at` remains stamped for
+  audit/backward compatibility.
+
+Email verification currently confirms contactability and is surfaced in `/api/auth/me` and the
+Account page. It does not yet gate all customer actions; enforcing verification as a policy gate
+should be a separately reviewed product decision so existing customers and administrator-created
+accounts are migrated deliberately.
+
+## 8. TOTP multi-factor authentication
+
+Migration `0060_create_totp_mfa.sql` adds optional RFC 6238 TOTP MFA and single-use recovery
+codes. It is deliberately a full login boundary—not merely an account-page preference.
+
+| Method | Path | Contract |
+| --- | --- | --- |
+| POST | `/api/auth/mfa/totp/enroll` | Authenticated password step-up; returns a pending setup secret/standard `otpauth://` URI once. |
+| POST | `/api/auth/mfa/totp/confirm` | Proves the pending authenticator and returns ten one-time recovery codes once. |
+| GET | `/api/auth/mfa/status` | Authenticated MFA state and remaining recovery-code count. |
+| POST | `/api/auth/mfa/disable` | Requires current password and a current TOTP or unused recovery code. |
+| POST | `/api/auth/mfa/login/verify` | Anonymous continuation of a password-authenticated, 5-minute MFA login challenge. |
+
+* TOTP seeds in `user_mfa_totp` are encrypted with the existing versioned AES-256-GCM credential
+  key ring (`CREDENTIAL_ENCRYPTION_KEY` or `CREDENTIAL_ENCRYPTION_KEYS`). Enrollment fails closed
+  with 503 until that key ring is configured; MFA is never quietly enabled with a plaintext or
+  unrecoverable seed.
+* Recovery codes have 80 random bits each and only SHA-256 digests are stored. They are shown once
+  at confirmation, are accepted at login or disable as a fallback, and atomically become unusable
+  after redemption.
+* Password login returns `202 { mfaRequired, mfaToken }` for an MFA-enrolled user instead of a
+  JWT. The short-lived continuation token is stored only as a hash, is bound to the current
+  password-session version, permits five attempts, is single-use, and is kept only in frontend
+  component memory. A JWT is minted only after a TOTP or recovery factor succeeds. A password
+  reset/change invalidates outstanding MFA challenges as well as ordinary sessions.
+* Accepted TOTP timesteps are recorded, preventing replay of the same authenticator code within
+  its validity period. A one-period clock-skew allowance is supported.
+* Enrollment and disable are blocked in delegated support mode and audit all enrollment,
+  challenge, failure, enable, disable, and recovery-code events. Passkeys/WebAuthn remain a
+  separate future module because they require a reviewed relying-party and origin-registration
+  policy.

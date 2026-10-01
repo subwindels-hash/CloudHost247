@@ -23,6 +23,10 @@ export const SUPPORT_MODE_RESTRICTED_ACTIONS = [
   'payment_method.change',
   'account.delete',
   'account.email_change',
+  'mfa.enroll',
+  'mfa.disable',
+  'passkey.enroll',
+  'passkey.manage',
   'role.change',
 ] as const;
 

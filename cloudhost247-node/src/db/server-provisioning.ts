@@ -174,6 +174,56 @@ export async function updateCustomerServerProvisioning(
   );
 }
 
+/**
+ * Applies a resize only after the provider action succeeded. The caller obtains all values from a
+ * freshly re-resolved, active server template; browser-supplied sizing is never accepted here.
+ * `subscriptionId` is optional for legacy servers that predate subscriptions, but when present is
+ * ownership-scoped so a malformed deployment payload cannot move another customer's billing plan.
+ */
+export async function applyCustomerServerResize(
+  db: Queryable,
+  input: {
+    serverId: string;
+    customerId: string;
+    targetPlanId: string;
+    targetConfigurationId: string;
+    providerPlan: Record<string, unknown>;
+    cpuCores: number;
+    memoryMb: number;
+    storageMb: number;
+    bandwidthGb: number | null;
+    capabilities: Record<string, boolean>;
+    subscriptionId?: string | null;
+  },
+): Promise<void> {
+  const current = await findCustomerServerById(db, input.serverId);
+  if (!current || current.customer_id !== input.customerId) {
+    throw new Error('Resize target server is missing or does not belong to the paid order customer');
+  }
+  const metadata = {
+    ...current.metadata,
+    productConfigurationId: input.targetConfigurationId,
+    providerPlan: input.providerPlan,
+  };
+  await db.query(
+    `UPDATE servers
+     SET plan_id=$2,cpu_cores=$3,memory_mb=$4,storage_mb=$5,bandwidth_gb=$6,
+         capabilities=$7,metadata=$8,updated_at=now()
+     WHERE id=$1 AND customer_id=$9`,
+    [
+      input.serverId,input.targetPlanId,input.cpuCores,input.memoryMb,input.storageMb,input.bandwidthGb,
+      JSON.stringify(input.capabilities),JSON.stringify(metadata),input.customerId,
+    ],
+  );
+  if (input.subscriptionId) {
+    await db.query(
+      `UPDATE subscriptions SET plan_id=$2,updated_at=now()
+       WHERE id=$1 AND customer_id=$3 AND status IN ('active','past_due','grace_period')`,
+      [input.subscriptionId,input.targetPlanId,input.customerId],
+    );
+  }
+}
+
 const ACTION_BY_OPERATION: Record<ProvisioningJobRow['operation'], DeploymentAction> = {
   PROVISION: 'server_provision',
   REINSTALL: 'server_reinstall',

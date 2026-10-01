@@ -15,6 +15,10 @@ export interface UserRecord {
    * change. Backfilled to epoch for pre-Phase-4 accounts, never to `now()`, so existing sessions
    * are never invalidated by the migration itself. */
   password_changed_at: string;
+  /** Set only after the customer redeems a single-use email verification action (0059 migration). */
+  email_verified_at: string | null;
+  /** Monotonic JWT session generation; increments with every password change (0059 migration). */
+  auth_session_version: number;
   /** Permanent, human-readable six-digit account number (0051 migration). Never a relational
    * key — `id` (uuid) remains the primary key and every foreign key still points at it. */
   customer_id: string | null;
@@ -114,13 +118,18 @@ export async function updateFullName(pool: Queryable, id: string, fullName: stri
   return rows[0] ?? null;
 }
 
-/** Phase 4 self-service password change. Always stamps `password_changed_at = now()` alongside
- * the new hash — this is the one and only place that column is ever set to a real, non-epoch
- * value, and it is what makes every token issued before this exact moment stop working on its
- * next use (see src/lib/require-auth.ts and 0012_add_password_changed_at_to_users.sql). */
+/** Password change/reset. It stamps `password_changed_at` and increments the database-backed
+ * session version. The version is the exact invalidation mechanism (including same-second JWTs);
+ * the timestamp remains useful for audit/history and compatibility with older sessions. */
 export async function updatePasswordHash(pool: Queryable, id: string, passwordHash: string): Promise<UserRecord | null> {
   const { rows } = await pool.query<UserRecord>(
-    `UPDATE users SET password_hash = $1, password_changed_at = now(), updated_at = now() WHERE id = $2 RETURNING *`,
+    `UPDATE users
+        SET password_hash = $1,
+            password_changed_at = now(),
+            auth_session_version = auth_session_version + 1,
+            updated_at = now()
+      WHERE id = $2
+      RETURNING *`,
     [passwordHash, id]
   );
   return rows[0] ?? null;
@@ -243,7 +252,21 @@ export async function recordAuthEvent(
       | 'webhook_payment_succeeded'
       | 'webhook_payment_failed'
       | 'admin_invoice_refunded'
-      | 'admin_invoice_cancelled';
+      | 'admin_invoice_cancelled'
+      | 'email_verification_requested'
+      | 'email_verified'
+      | 'password_reset_requested'
+      | 'password_reset_completed'
+      | 'mfa_enrollment_started'
+      | 'mfa_enabled'
+      | 'mfa_disabled'
+      | 'mfa_login_challenge'
+      | 'mfa_login_failure'
+      | 'mfa_recovery_code_used'
+      | 'passkey_enrollment_started'
+      | 'passkey_added'
+      | 'passkey_removed'
+      | 'passkey_renamed';
     ipAddress?: string | null;
     userAgent?: string | null;
     metadata?: Record<string, unknown>;

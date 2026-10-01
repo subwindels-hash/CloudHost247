@@ -16,6 +16,9 @@ import LegalIndexPage from './pages/LegalIndexPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
+import VerifyEmailPage from './pages/VerifyEmailPage';
 import DashboardPage from './pages/DashboardPage';
 import AccountPage from './pages/AccountPage';
 import ServicesPage from './pages/ServicesPage';
@@ -127,6 +130,9 @@ export default function App() {
         {/* Auth */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
 
         {/* Authenticated app shell — real protected routes (see components/RequireAuth.tsx). A
             signed-out visitor is redirected to /login instead of ever rendering these. */}

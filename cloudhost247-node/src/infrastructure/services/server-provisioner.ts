@@ -1,4 +1,6 @@
 import type { Queryable } from '../../db/types';
+import { withTransaction } from '../../db/transaction';
+import { setOrderStatus } from '../../db/orders';
 import type { DeploymentRow } from '../../db/deployments';
 import {
   appendDeploymentEvent,
@@ -10,6 +12,7 @@ import {
 } from '../../db/deployments';
 import {
   appendProvisioningLog,
+  applyCustomerServerResize,
   findCustomerServerById,
   findProvisioningJobByDeployment,
   updateCustomerServerProvisioning,
@@ -130,10 +133,70 @@ async function executeLifecycleAction(
     else if (job.operation === 'REBOOT') await adapter.rebootServer(server.provider_server_id);
     else if (job.operation === 'DELETE') await adapter.deleteServer(server.provider_server_id);
     else if (job.operation === 'RESIZE') {
-      const planMetadata = payload.planMetadata && typeof payload.planMetadata === 'object'
-        ? payload.planMetadata as Record<string, unknown>
-        : (server.metadata.providerPlan && typeof server.metadata.providerPlan === 'object' ? server.metadata.providerPlan as Record<string, unknown> : {});
-      const resized=await adapter.resizeServer(server.provider_server_id, planMetadata);
+      const targetPlanId = typeof payload.targetPlanId === 'string' ? payload.targetPlanId : null;
+      if (!targetPlanId || !server.provider_id || !server.region_id || !server.operating_system_version_id || !server.architecture) {
+        throw new ProviderError('INVALID_CONFIGURATION', 'Paid resize job has no complete target server configuration', false);
+      }
+      // Resolve immediately before the mutation. Payment proves the quote was accepted, not that a
+      // later-disabled image/template is still eligible for a provider-side resource change.
+      const configuration = await resolveAvailableConfiguration(db, {
+        planId: targetPlanId,
+        providerId: server.provider_id,
+        regionId: server.region_id,
+        datacenterId: server.datacenter_id,
+        operatingSystemVersionId: server.operating_system_version_id,
+        architecture: server.architecture,
+        serverType: server.server_type,
+      });
+      if (!configuration) {
+        throw new ProviderError('INVALID_CONFIGURATION', 'Target resize configuration is no longer active', false);
+      }
+      const targetMetadata = configuration.configuration_metadata ?? {};
+      const capabilities = typeof targetMetadata.capabilities === 'object' && targetMetadata.capabilities !== null
+        ? targetMetadata.capabilities as Record<string, unknown>
+        : {};
+      const integer = (key: string, minimum: number): number => {
+        const value = targetMetadata[key];
+        if (typeof value !== 'number' || !Number.isInteger(value) || value < minimum) {
+          throw new ProviderError('INVALID_CONFIGURATION', `Target resize configuration is incomplete (${key})`, false);
+        }
+        return value;
+      };
+      if (capabilities.resize !== true) {
+        throw new ProviderError('INVALID_CONFIGURATION', 'Target resize configuration is not resize-capable', false);
+      }
+      const cpuCores = integer('cpuCores', 1);
+      const memoryMb = integer('memoryMb', 256);
+      const storageMb = integer('storageMb', 1024);
+      const bandwidthGb = typeof targetMetadata.bandwidthGb === 'number' && Number.isInteger(targetMetadata.bandwidthGb)
+        ? targetMetadata.bandwidthGb : null;
+      const targetCapabilities = Object.fromEntries(
+        Object.entries(capabilities).filter(([, value]) => typeof value === 'boolean'),
+      ) as Record<string, boolean>;
+      const grows = cpuCores >= server.cpu_cores && memoryMb >= server.memory_mb && storageMb >= server.storage_mb
+        && (cpuCores > server.cpu_cores || memoryMb > server.memory_mb || storageMb > server.storage_mb);
+      if (!grows) throw new ProviderError('INVALID_CONFIGURATION', 'Target resize configuration is not a non-destructive resource increase', false);
+
+      const resized = await adapter.resizeServer(server.provider_server_id, targetMetadata);
+      const subscriptionId = typeof payload.subscriptionId === 'string' ? payload.subscriptionId : null;
+      await withTransaction(db, async (tx) => {
+        await applyCustomerServerResize(tx, {
+          serverId: server.id,
+          customerId: server.customer_id,
+          targetPlanId,
+          targetConfigurationId: configuration.configuration_id,
+          providerPlan: targetMetadata,
+          cpuCores,
+          memoryMb,
+          storageMb,
+          bandwidthGb,
+          capabilities: targetCapabilities,
+          subscriptionId,
+        });
+        // The paid upgrade order is completed only after local billing/server state matches the
+        // provider mutation; a provider failure leaves it paid-but-pending for support/refund.
+        if (job.order_id) await setOrderStatus(tx, job.order_id, 'completed');
+      });
       providerResponse={id:resized.id,status:resized.status,ipAddress:resized.ipAddress};
     } else if (job.operation === 'SNAPSHOT_CREATE') {
       const desc = typeof payload.description === 'string' ? payload.description : `Snapshot-${new Date().toISOString().slice(0, 10)}`;

@@ -19,6 +19,7 @@
     "build:frontend": "vite build --config frontend/vite.config.ts",
     "start": "node server.js",
     "worker": "node dist/src/worker/main.js",
+    "worker:once": "node dist/src/worker/main.js --once",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
@@ -32,10 +33,13 @@
     "catalog:import": "tsx scripts/import-catalog.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-ec2": "3.1144.0",
     "@fastify/cors": "^11.3.0",
     "@fastify/helmet": "^13.1.1",
     "@fastify/rate-limit": "^11.2.0",
     "@fastify/static": "^10.1.5",
+    "@simplewebauthn/browser": "14.0.0",
+    "@simplewebauthn/server": "14.0.3",
     "bcryptjs": "^2.4.3",
     "dotenv": "^16.4.5",
     "fastify": "^5.12.5",

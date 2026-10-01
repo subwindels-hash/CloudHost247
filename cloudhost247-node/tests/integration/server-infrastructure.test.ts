@@ -176,7 +176,7 @@ describe('server OS catalog and infrastructure boundaries', () => {
     await app.close();
   });
 
-  it('refuses unbilled resize metadata and queues capability-backed snapshot operations for owned servers', async () => {
+  it('queues capability-backed snapshot operations for owned servers', async () => {
     const user = await createUser(db, { id: randomUUID(), email: `ops-${randomUUID()}@example.com`, passwordHash: 'hash', fullName: 'Ops User' });
     const providerId = randomUUID();
     const serverId = randomUUID();
@@ -186,10 +186,6 @@ describe('server OS catalog and infrastructure boundaries', () => {
     const app = buildApp(env, { serveFrontend: false, pool: db });
     const token = signAuthToken(env, { sub: user.id, role: 'customer', email: user.email });
     const headers = { authorization: `Bearer ${token}` };
-
-    const resizeRes = await app.inject({ method: 'POST', url: `/api/v1/servers/${serverId}/resize`, headers, payload: { planMetadata: { cpuCores: 4 } } });
-    expect(resizeRes.statusCode).toBe(409);
-    expect(resizeRes.json().message).toContain('paid upgrade order');
 
     const snapshotHeaders={...headers,'idempotency-key':'weekly-snapshot-001'};
     const snapRes = await app.inject({ method: 'POST', url: `/api/v1/servers/${serverId}/snapshots`, headers:snapshotHeaders, payload: { description: 'Weekly Backup' } });

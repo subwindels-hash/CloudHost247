@@ -251,7 +251,7 @@ local development reference only. Never commit a real `.env` file.
 | `DATABASE_POOL_MAX` | no | Defaults to a small pool (`5`) suitable for shared hosting's connection limits. Raise only after confirming the account's Postgres connection limit. |
 | `JWT_SECRET` | yes | Long random secret used to sign auth tokens. Generate with `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"` and store only in cPanel's environment variable editor. |
 | `JWT_EXPIRES_IN` | no | Defaults to `12h`. |
-| `CRON_JOB_TOKEN` | reserved | Not used by Phase 1 (no job endpoints exist yet). Reserved for Phase 2's authenticated HTTP job endpoints invoked by cPanel Cron Jobs (see section 9). |
+| `CRON_JOB_TOKEN` | reserved | Reserved for future authenticated HTTP job endpoints. The current queue/notification/reconciliation worker is invoked as a lease-protected CLI one-shot from cPanel Cron; see section 9. |
 | `LOG_LEVEL` | no | Defaults to `info`. Structured JSON logs (`pino`) are written to stdout, which cPanel/Passenger captures to the app's log file. |
 
 **After changing any environment variable, you must restart the application** (*Setup Node.js
@@ -407,28 +407,47 @@ reinstall" for routine updates.
 ---
 
 
-## 9. No long-running workers — HTTP job endpoints + cPanel Cron only (future phases)
+## 9. Scheduled worker — cPanel Cron one-shot only
 
-Per this project's hard constraint, **no scheduled task in this platform runs as a
-permanently-running Node process/daemon** — cPanel shared hosting cannot manage that reliably and
-this project explicitly forbids relying on PM2/systemd for it. Phase 1 ships no scheduled jobs
-yet; when invoicing/reminders/renewals/suspension/retry/reporting jobs are added in a later phase,
-each one will be:
+The platform now has asynchronous deployments, notification delivery, subscription/dunning,
+provider reconciliation, Cloudflare jobs, OS checks and Revenue Guardian automation. On cPanel
+shared hosting these **must not** be run as an SSH-launched permanent `npm run worker` process:
+cPanel cannot reliably supervise or restart such a daemon.
 
-- An **authenticated** HTTP endpoint (checked against `CRON_JOB_TOKEN` or an equivalent secret —
-  never an unauthenticated `/cron` URL reachable by anyone who finds it) or a **CLI script**
-  invoked directly by cPanel Cron, and
-- **Idempotent** (safe to run twice for the same period without double-charging/double-emailing),
-  **logged**, and **concurrency-safe** (safe if cPanel's cron fires it while a previous run is
-  still finishing, e.g. via a DB-backed lock/lease rather than an in-memory flag that a new
-  process wouldn't see), and
-- Scheduled via cPanel's *Cron Jobs* tool (e.g.
-  `curl -fsS -H "Authorization: Bearer $CRON_JOB_TOKEN" https://<app-url>/api/jobs/<job-name>`,
-  or `node dist/scripts/<job-name>.js` if implemented as a CLI script instead of an HTTP endpoint).
+Instead, after a successful build and controlled migration, schedule the bounded CLI command below
+once per minute in cPanel's **Cron Jobs** interface. Use the exact virtual-environment `node` path
+shown by *Setup Node.js App*; do not guess it.
 
-This section will be expanded with the actual job list and cron expressions once those jobs are
-implemented in a later phase — it's documented here now so the constraint is visible from Phase 1
-onward.
+```cron
+* * * * * cd <APP_ROOT> && /path/from/cpanel/node dist/src/worker/main.js --once >> /path/outside/webroot/cloudhost247-worker.log 2>&1
+```
+
+`npm run worker:once` is an equivalent local/operator shorthand. It performs one bounded cycle,
+then exits. It does not start a daemon.
+
+### Why overlapping Cron invocations are safe
+
+- A one-shot cycle obtains the durable PostgreSQL lease in `worker_cycle_leases` before it runs.
+  If a preceding cycle is still healthy, the new invocation logs a skip and exits successfully.
+- The cycle lease is renewed while the cycle is running and expires automatically if its process
+  dies, so a later Cron invocation can recover without an operator clearing an in-memory lock.
+- Every deployment also retains its existing row-level lease and idempotency key. The cycle lease
+  serializes periodic sweeps; it never replaces the per-job crash-recovery protection.
+- A one-shot cycle exits non-zero on an unexpected error. Configure cPanel's Cron email or your
+  log monitor to alert on that failure. Do **not** expose an unauthenticated HTTP `/cron` route.
+
+Environment variables:
+
+| Variable | Default | Purpose |
+|---|---:|---|
+| `WORKER_CONCURRENCY` | `4` | Maximum jobs drained in one worker cycle. Keep this low on shared hosting. |
+| `WORKER_LEASE_MS` | `120000` | Per-deployment lease, renewed while a provider action runs. |
+| `WORKER_ONCE_LEASE_MS` | `900000` | Cycle-wide Cron lease; renewed during the one-shot run. Must exceed the expected longest worker cycle. |
+| `WORKER_ONCE` | `false` | Alternative to `--once` only for schedulers that cannot pass CLI arguments. Never set it for a supervised persistent worker. |
+
+For a VM/container deployment with process supervision, `npm run worker` remains supported and
+runs the same cycle continuously. Do not run both the persistent worker and cPanel's one-shot cron
+against the same database unless you have deliberately designed that deployment topology.
 
 ---
 

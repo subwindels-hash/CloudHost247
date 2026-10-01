@@ -1,0 +1,102 @@
+import { describe, expect, it, vi } from 'vitest';
+import { AwsProviderAdapter } from '../../src/infrastructure/providers/aws-adapter';
+import { ProviderError, type CreateProviderServerInput } from '../../src/infrastructure/providers/types';
+import type { InfrastructureProviderRow, ServerOsImageRow } from '../../src/db/infrastructure-providers';
+
+function provider(): InfrastructureProviderRow {
+  return {
+    id: 'provider-1', name: 'AWS', slug: 'aws', provider_type: 'AWS', adapter: 'aws', status: 'ACTIVE',
+    api_base_url: null, credential_env_prefix: 'AWS', capabilities: {}, metadata: {},
+    last_health_check_at: null, last_health_status: null, created_at: '', updated_at: '',
+  };
+}
+
+const image = { provider_image_id: 'ami-123', provider_template_id: null } as ServerOsImageRow;
+
+function createInput(overrides: Partial<CreateProviderServerInput> = {}): CreateProviderServerInput {
+  return {
+    idempotencyKey: 'operation-123', name: 'host-one', hostname: 'host-one', architecture: 'x86_64',
+    image, regionCode: 'us-east-1', datacenterCode: null,
+    planMetadata: { providerServerType: 't3.micro', awsKeyName: 'provisioning-key' },
+    sshPublicKeys: ['ssh-ed25519 AAAA customer@example'], userData: '#cloud-config\nusers: []',
+    ...overrides,
+  };
+}
+
+function adapter(responses: unknown[]) {
+  const send = vi.fn(async () => responses.shift());
+  const instance = new AwsProviderAdapter(provider(), {
+    AWS_ACCESS_KEY_ID: 'access', AWS_SECRET_ACCESS_KEY: 'secret', AWS_REGION: 'us-east-1',
+  }, { send });
+  return { instance, send };
+}
+
+function commandInput(command: unknown): Record<string, unknown> {
+  return (command as { input: Record<string, unknown> }).input;
+}
+
+describe('AwsProviderAdapter', () => {
+  it('uses an idempotency lookup before constructing a RunInstances request', async () => {
+    const { instance, send } = adapter([
+      { Reservations: [] },
+      { Instances: [{ InstanceId: 'i-123', ImageId: 'ami-123', State: { Name: 'pending' } }] },
+    ]);
+
+    const created = await instance.createServer(createInput());
+
+    expect(created).toMatchObject({ id: 'i-123', status: 'pending', imageId: 'ami-123' });
+    expect(send).toHaveBeenCalledTimes(2);
+    expect(send.mock.calls[0]?.[0]?.constructor.name).toBe('DescribeInstancesCommand');
+    expect(send.mock.calls[1]?.[0]?.constructor.name).toBe('RunInstancesCommand');
+    expect(commandInput(send.mock.calls[1]?.[0])).toMatchObject({
+      ImageId: 'ami-123', InstanceType: 't3.micro', MinCount: 1, MaxCount: 1,
+      ClientToken: 'operation-123', KeyName: 'provisioning-key',
+    });
+    expect(commandInput(send.mock.calls[1]?.[0]).TagSpecifications).toEqual([{
+      ResourceType: 'instance',
+      Tags: [
+        { Key: 'Name', Value: 'host-one' },
+        { Key: 'cloudhost247:idempotency', Value: 'operation-123' },
+      ],
+    }]);
+    expect(commandInput(send.mock.calls[1]?.[0]).UserData).toBe(Buffer.from('#cloud-config\nusers: []').toString('base64'));
+  });
+
+  it('does not silently discard supplied public keys when no EC2 key pair is configured', async () => {
+    const { instance, send } = adapter([{ Reservations: [] }]);
+
+    await expect(instance.createServer(createInput({ planMetadata: { providerServerType: 't3.micro' } })))
+      .rejects.toMatchObject({ code: 'INVALID_CONFIGURATION' });
+    expect(send).toHaveBeenCalledTimes(1); // idempotency lookup; no billable create request
+  });
+
+  it('discovers the root EBS volume before creating a snapshot', async () => {
+    const { instance, send } = adapter([
+      { Reservations: [{ Instances: [{
+        InstanceId: 'i-123', ImageId: 'ami-123', State: { Name: 'running' }, RootDeviceName: '/dev/xvda',
+        BlockDeviceMappings: [{ DeviceName: '/dev/xvda', Ebs: { VolumeId: 'vol-root' } }],
+      }] }] },
+      { SnapshotId: 'snap-123', State: 'pending', Description: 'before maintenance' },
+    ]);
+
+    await expect(instance.createSnapshot('i-123', 'before maintenance')).resolves.toEqual({
+      id: 'snap-123', state: 'pending', volumeId: 'vol-root', description: 'before maintenance',
+    });
+    expect(send.mock.calls.map(([command]) => command.constructor.name)).toEqual([
+      'DescribeInstancesCommand', 'CreateSnapshotCommand',
+    ]);
+    expect(commandInput(send.mock.calls[1]?.[0])).toMatchObject({ VolumeId: 'vol-root', Description: 'before maintenance' });
+  });
+
+  it('maps AWS authentication failures to the platform provider error contract', async () => {
+    const { instance } = adapter([]);
+    const failingAdapter = new AwsProviderAdapter(provider(), {
+      AWS_ACCESS_KEY_ID: 'access', AWS_SECRET_ACCESS_KEY: 'secret', AWS_REGION: 'us-east-1',
+    }, { send: vi.fn(async () => { throw { name: 'AuthFailure', $metadata: { httpStatusCode: 403 } }; }) });
+
+    await expect(failingAdapter.validateConfiguration()).rejects.toMatchObject({
+      code: 'AUTHENTICATION_FAILED', retryable: false,
+    } satisfies Partial<ProviderError>);
+    await expect(instance.getServerMetrics('i-123')).rejects.toMatchObject({ code: 'UNSUPPORTED_OPERATION' });
+  });
+});

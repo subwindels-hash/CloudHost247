@@ -409,7 +409,7 @@ export async function registerAdminUserRoutes(app: FastifyInstance, env: Env, ov
 
     const token = signAuthToken(
       env,
-      { sub: target.id, role: target.role, email: target.email, sup: session.id, act: actor.userId },
+      { sub: target.id, role: target.role, email: target.email, sv: target.auth_session_version, sup: session.id, act: actor.userId },
       { expiresIn: `${durationMinutes}m` }
     );
 

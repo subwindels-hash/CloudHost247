@@ -13,6 +13,8 @@ describe('env validation', () => {
     expect(env.PORT).toBe(3000);
     expect(env.DATABASE_SSL).toBe(false);
     expect(env.LOG_LEVEL).toBe('info');
+    expect(env.WORKER_ONCE).toBe(false);
+    expect(env.WORKER_ONCE_LEASE_MS).toBe(900_000);
   });
 
   it('rejects a missing DATABASE_URL', () => {

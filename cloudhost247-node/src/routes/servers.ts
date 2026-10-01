@@ -33,6 +33,7 @@ import { getKeyRing } from '../lib/keyring';
 import { generateSecret } from '../lib/crypto';
 import { createHash, randomUUID } from 'node:crypto';
 import { createServerOrder } from '../services/server-order-service';
+import { createServerResizeOrder, listServerResizeOptions } from '../services/server-resize-order-service';
 import {
   enqueueServerProvisioningJob,
   findOwnedCustomerServer,
@@ -106,8 +107,9 @@ const cancelServerSchema = z.object({
 });
 
 const resizeServerSchema = z.object({
-  targetPlanId: z.string().uuid().optional(),
-  planMetadata: z.record(z.unknown()).optional(),
+  // A plan id is only a catalogue choice. Price, provider size metadata and eligibility are all
+  // resolved server-side before an invoice is issued.
+  targetPlanId: z.string().uuid(),
 });
 
 const createSnapshotSchema = z.object({
@@ -474,6 +476,12 @@ export async function registerServerRoutes(app: FastifyInstance, env: Env, overr
     );
   }
 
+  app.get<{ Params: { id: string } }>('/api/v1/servers/:id/resize-options', async (request) => {
+    const auth = await authenticate(request, env, pool);
+    const serverId = parseOrThrow(idSchema, request.params.id);
+    return { options: await listServerResizeOptions(pool, auth.userId, serverId) };
+  });
+
   const handleResize = async (request: FastifyRequest<{ Params: { id: string } }>) => {
     const auth = await authenticate(request, env, pool);
     const serverId = parseOrThrow(idSchema, request.params.id);
@@ -482,11 +490,16 @@ export async function registerServerRoutes(app: FastifyInstance, env: Env, overr
     if (!server || !server.provider_id) throw new NotFoundError('No server was found with that id');
     if (server.capabilities?.resize !== true) throw new ValidationError('Resize is not supported for this server');
     if (!server.provider_server_id) throw new ConflictError('The server has not been created at the provider yet');
-    // Provider sizing metadata is price-sensitive and must never come directly from a customer.
-    // A paid upgrade-order flow is not implemented yet, so fail closed instead of granting an
-    // unbilled provider resize through a crafted API request.
-    void input;
-    throw new ConflictError('Self-service resize requires a paid upgrade order and is not available yet');
+    const result = await createServerResizeOrder(pool, auth.userId, {
+      serverId: server.id,
+      targetPlanId: input.targetPlanId,
+    });
+    await auditRequest(pool, request, auth.userId, {
+      action: result.created ? 'SERVER_RESIZE_ORDER_CREATED' : 'SERVER_RESIZE_ORDER_REUSED',
+      resourceType: 'server', resourceId: server.id,
+      metadata: { orderId: result.orderId, invoiceId: result.invoiceId, targetPlanId: result.targetPlanId },
+    });
+    return result;
   };
 
   app.post<{ Params: { id: string } }>('/api/v1/servers/:id/resize', handleResize);

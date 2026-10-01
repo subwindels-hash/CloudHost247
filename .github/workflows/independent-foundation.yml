@@ -1,7 +1,8 @@
 name: Independent foundation
+# Run on every push and pull request. Do not pin this to short-lived Arena branches: a merge to
+# main must receive the same PHP/module verification as its pull request.
 on:
   push:
-    branches: [arena/01a0e4c2-cloudhost247, arena/01a0e748-cloudhost247, arena/01a0e7b6-cloudhost247, arena/01a0ed11-cloudhost247, arena/01a0ee05-cloudhost247, arena/01a0f37a-cloudhost247]
   pull_request:
 jobs:
   release-candidate:
