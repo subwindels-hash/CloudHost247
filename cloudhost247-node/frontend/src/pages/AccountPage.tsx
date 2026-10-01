@@ -137,7 +137,7 @@ export default function AccountPage() {
       .then((res) => { if (!cancelled) setMfaStatus(res.mfa); })
       .catch(() => { /* Non-fatal — MFA controls report their unavailable state below. */ });
     apiFetch<{ passkeys: Array<{ id: string; name: string; device_type: string; backed_up: boolean; created_at: string }> }>('/api/auth/passkeys')
-      .then((res) => { if (!cancelled) setPasskeys(res.passkeys); })
+      .then((res) => { if (!cancelled) setPasskeys(res.passkeys ?? []); })
       .catch(() => { /* Non-fatal — passkey controls report their unavailable state below. */ });
 
     return () => {
