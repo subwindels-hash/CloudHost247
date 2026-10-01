@@ -44,64 +44,115 @@ export async function registerSslRoutes(
 ) {
   const pool = overridePool ?? getPool(env);
 
-  app.get('/api/v1/ssl/certificates', async (request) => {
-    const auth = await authenticate(request, env, pool);
-    const certificates = await listSslCertificatesForUser(pool, auth.userId);
-    return { certificates };
-  });
-
-  app.post('/api/v1/ssl/certificates', async (request, reply) => {
-    const auth = await authenticate(request, env, pool);
-    const input = parseOrThrow(createSslSchema, request.body);
-
-    const certificate = await createSslCertificate(pool, {
-      userId: auth.userId,
-      domainName: input.domainName,
-      sans: input.sans,
-      issuer: input.issuer ?? 'LETS_ENCRYPT',
-      challengeType: input.challengeType ?? 'HTTP_01',
-      certificatePem: input.certificatePem,
-      status: input.certificatePem ? 'ISSUED' : 'PENDING',
-      expiresAt: input.certificatePem ? new Date(Date.now() + 90 * 86400 * 1000).toISOString() : null,
-      autoRenew: input.autoRenew ?? true,
-      serverId: input.serverId,
-      domainId: input.domainId,
+  const registerHandlers = (prefix: string) => {
+    app.get(`${prefix}/ssl/certificates`, async (request) => {
+      const auth = await authenticate(request, env, pool);
+      const certificates = await listSslCertificatesForUser(pool, auth.userId);
+      return { certificates };
     });
 
-    await auditRequest(pool, request, auth.userId, {
-      action: 'SSL_CERTIFICATE_REQUESTED',
-      resourceType: 'ssl_certificate',
-      resourceId: certificate.id,
-      metadata: { domain: certificate.domain_name, issuer: certificate.issuer },
+    app.post(`${prefix}/ssl/certificates`, async (request, reply) => {
+      const auth = await authenticate(request, env, pool);
+      const input = parseOrThrow(createSslSchema, request.body);
+
+      const certificate = await createSslCertificate(pool, {
+        userId: auth.userId,
+        domainName: input.domainName,
+        sans: input.sans,
+        issuer: input.issuer ?? 'LETS_ENCRYPT',
+        challengeType: input.challengeType ?? 'HTTP_01',
+        certificatePem: input.certificatePem,
+        status: input.certificatePem ? 'ISSUED' : 'PENDING',
+        expiresAt: input.certificatePem ? new Date(Date.now() + 90 * 86400 * 1000).toISOString() : null,
+        autoRenew: input.autoRenew ?? true,
+        serverId: input.serverId,
+        domainId: input.domainId,
+      });
+
+      await auditRequest(pool, request, auth.userId, {
+        action: 'SSL_CERTIFICATE_REQUESTED',
+        resourceType: 'ssl_certificate',
+        resourceId: certificate.id,
+        metadata: { domain: certificate.domain_name, issuer: certificate.issuer },
+      });
+
+      reply.code(201);
+      return { certificate };
     });
 
-    reply.code(201);
-    return { certificate };
-  });
-
-  app.get<{ Params: { id: string } }>('/api/v1/ssl/certificates/:id', async (request) => {
-    const auth = await authenticate(request, env, pool);
-    const id = parseOrThrow(idSchema, request.params.id);
-    const cert = await findSslCertificateById(pool, id);
-    if (!cert || cert.user_id !== auth.userId) throw new NotFoundError('Certificate not found');
-    return { certificate: cert };
-  });
-
-  app.delete<{ Params: { id: string } }>('/api/v1/ssl/certificates/:id', async (request, reply) => {
-    const auth = await authenticate(request, env, pool);
-    const id = parseOrThrow(idSchema, request.params.id);
-    const cert = await findSslCertificateById(pool, id);
-    if (!cert || cert.user_id !== auth.userId) throw new NotFoundError('Certificate not found');
-
-    await deleteSslCertificate(pool, id);
-    await auditRequest(pool, request, auth.userId, {
-      action: 'SSL_CERTIFICATE_DELETED',
-      resourceType: 'ssl_certificate',
-      resourceId: id,
-      metadata: { domain: cert.domain_name },
+    app.get<{ Params: { id: string } }>(`${prefix}/ssl/certificates/:id`, async (request) => {
+      const auth = await authenticate(request, env, pool);
+      const id = parseOrThrow(idSchema, request.params.id);
+      const cert = await findSslCertificateById(pool, id);
+      if (!cert || cert.user_id !== auth.userId) throw new NotFoundError('Certificate not found');
+      return { certificate: cert };
     });
 
-    reply.code(204);
-    return null;
-  });
+    app.post<{ Params: { id: string } }>(`${prefix}/ssl/certificates/:id/renew`, async (request) => {
+      const auth = await authenticate(request, env, pool);
+      const id = parseOrThrow(idSchema, request.params.id);
+      const cert = await findSslCertificateById(pool, id);
+      if (!cert || cert.user_id !== auth.userId) throw new NotFoundError('Certificate not found');
+
+      // Update expiry and mark valid
+      const newExpiry = new Date(Date.now() + 90 * 86400 * 1000).toISOString();
+      await pool.query(
+        `UPDATE ssl_certificates SET status = 'ISSUED', expires_at = $1, updated_at = now() WHERE id = $2`,
+        [newExpiry, id]
+      );
+      const updated = await findSslCertificateById(pool, id);
+
+      await auditRequest(pool, request, auth.userId, {
+        action: 'SSL_CERTIFICATE_RENEWED',
+        resourceType: 'ssl_certificate',
+        resourceId: id,
+        metadata: { domain: cert.domain_name, newExpiry },
+      });
+
+      return { certificate: updated };
+    });
+
+    app.post<{ Params: { id: string } }>(`${prefix}/ssl/certificates/:id/revoke`, async (request) => {
+      const auth = await authenticate(request, env, pool);
+      const id = parseOrThrow(idSchema, request.params.id);
+      const cert = await findSslCertificateById(pool, id);
+      if (!cert || cert.user_id !== auth.userId) throw new NotFoundError('Certificate not found');
+
+      await pool.query(
+        `UPDATE ssl_certificates SET status = 'REVOKED', updated_at = now() WHERE id = $1`,
+        [id]
+      );
+      const updated = await findSslCertificateById(pool, id);
+
+      await auditRequest(pool, request, auth.userId, {
+        action: 'SSL_CERTIFICATE_REVOKED',
+        resourceType: 'ssl_certificate',
+        resourceId: id,
+        metadata: { domain: cert.domain_name },
+      });
+
+      return { certificate: updated };
+    });
+
+    app.delete<{ Params: { id: string } }>(`${prefix}/ssl/certificates/:id`, async (request, reply) => {
+      const auth = await authenticate(request, env, pool);
+      const id = parseOrThrow(idSchema, request.params.id);
+      const cert = await findSslCertificateById(pool, id);
+      if (!cert || cert.user_id !== auth.userId) throw new NotFoundError('Certificate not found');
+
+      await deleteSslCertificate(pool, id);
+      await auditRequest(pool, request, auth.userId, {
+        action: 'SSL_CERTIFICATE_DELETED',
+        resourceType: 'ssl_certificate',
+        resourceId: id,
+        metadata: { domain: cert.domain_name },
+      });
+
+      reply.code(204);
+      return null;
+    });
+  };
+
+  registerHandlers('/api/v1');
+  registerHandlers('/api');
 }

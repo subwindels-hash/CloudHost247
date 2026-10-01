@@ -6,7 +6,7 @@
  * Customer routes expose only the public metadata needed to choose hosting in the wizard; the
  * metrics/health endpoints are open to the customer whose installations run on that server.
  */
-import type { FastifyInstance } from 'fastify';
+import type { FastifyInstance, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import type { Env } from '../config/env';
 import { getPool } from '../db/pool';
@@ -331,16 +331,19 @@ export async function registerServerRoutes(app: FastifyInstance, env: Env, overr
   });
 
   // --- Customer server ordering -----------------------------------------------------------------
-  app.get('/api/v1/ssh-keys', async (request) => {
+  const handleGetSshKeys = async (request: FastifyRequest) => {
     const auth = await authenticate(request,env,pool);
     const { rows } = await pool.query(
       `SELECT id,name,fingerprint,created_at FROM customer_ssh_keys WHERE user_id=$1 ORDER BY created_at DESC`,
       [auth.userId]
     );
     return { sshKeys: rows };
-  });
+  };
 
-  app.post('/api/v1/ssh-keys', async (request,reply) => {
+  app.get('/api/v1/ssh-keys', handleGetSshKeys);
+  app.get('/api/ssh-keys', handleGetSshKeys);
+
+  const handlePostSshKey = async (request: FastifyRequest, reply: any) => {
     const auth = await authenticate(request,env,pool);
     const input = parseOrThrow(sshKeySchema,request.body);
     const normalized = input.publicKey.trim().replace(/\s+/g,' ');
@@ -353,18 +356,24 @@ export async function registerServerRoutes(app: FastifyInstance, env: Env, overr
     await auditRequest(pool,request,auth.userId,{ action: 'SSH_KEY_ADDED',resourceType: 'ssh_key',resourceId: keyId });
     reply.code(201);
     return { sshKey: { id: keyId,name: input.name,fingerprint } };
-  });
+  };
 
-  app.delete<{ Params: { id: string } }>('/api/v1/ssh-keys/:id', async (request,reply) => {
+  app.post('/api/v1/ssh-keys', handlePostSshKey);
+  app.post('/api/ssh-keys', handlePostSshKey);
+
+  const handleDeleteSshKey = async (request: FastifyRequest<{ Params: { id: string } }>, reply: any) => {
     const auth = await authenticate(request,env,pool);
     const keyId = parseOrThrow(idSchema,request.params.id);
     const { rows } = await pool.query(`DELETE FROM customer_ssh_keys WHERE id=$1 AND user_id=$2 RETURNING id`,[keyId,auth.userId]);
     if (!rows[0]) throw new NotFoundError('No SSH key was found with that id');
     await auditRequest(pool,request,auth.userId,{ action: 'SSH_KEY_DELETED',resourceType: 'ssh_key',resourceId: keyId });
     reply.code(204); return null;
-  });
+  };
 
-  app.post('/api/v1/servers', async (request,reply) => {
+  app.delete<{ Params: { id: string } }>('/api/v1/ssh-keys/:id', handleDeleteSshKey);
+  app.delete<{ Params: { id: string } }>('/api/ssh-keys/:id', handleDeleteSshKey);
+
+  const handleOrderServer = async (request: FastifyRequest, reply: any) => {
     const auth = await authenticate(request,env,pool);
     const input = parseOrThrow(orderServerSchema,request.body);
     const result = await createServerOrder(pool,auth.userId,input);
@@ -374,9 +383,12 @@ export async function registerServerRoutes(app: FastifyInstance, env: Env, overr
     });
     reply.code(201);
     return result;
-  });
+  };
 
-  app.get('/api/v1/servers', async (request) => {
+  app.post('/api/v1/servers', handleOrderServer);
+  app.post('/api/servers', handleOrderServer);
+
+  const handleListServers = async (request: FastifyRequest) => {
     // Platform deployment targets were public before customer compute was added and remain public
     // scheduling metadata. Customer inventory is returned only after full authentication.
     const auth = request.headers.authorization?.startsWith('Bearer ')
@@ -390,9 +402,12 @@ export async function registerServerRoutes(app: FastifyInstance, env: Env, overr
       servers: owned,
       deploymentTargets: targets.filter((server) => !server.customer_id).map(publicServerDto).filter(Boolean),
     };
-  });
+  };
 
-  app.get<{ Params: { id: string } }>('/api/v1/servers/:id', async (request) => {
+  app.get('/api/v1/servers', handleListServers);
+  app.get('/api/servers', handleListServers);
+
+  const handleGetServer = async (request: FastifyRequest<{ Params: { id: string } }>) => {
     const auth = await authenticate(request, env, pool);
     const serverId = parseOrThrow(idSchema, request.params.id);
     const owned = await findOwnedCustomerServer(pool,serverId,auth.userId);
@@ -403,12 +418,18 @@ export async function registerServerRoutes(app: FastifyInstance, env: Env, overr
     const hasInstallationThere = (await listInstallationsForServer(pool, serverId)).some(
       (i) => i.customer_id === auth.userId
     );
+    if (!hasInstallationThere && auth.role !== 'admin' && auth.role !== 'super_admin') {
+      throw new NotFoundError('No server was found with that id');
+    }
     // Non-owned platform targets expose only the same public scheduling metadata the app wizard
     // needs. Hostname, provider resource id, IP and credentials stay hidden.
     return hasInstallationThere
       ? { server: publicServerDto(server),allocation: await getServerAllocation(pool,serverId) }
       : { server: publicServerDto(server) };
-  });
+  };
+
+  app.get<{ Params: { id: string } }>('/api/v1/servers/:id', handleGetServer);
+  app.get<{ Params: { id: string } }>('/api/servers/:id', handleGetServer);
 
   function requestIdempotencyKey(request: { headers: Record<string,string | string[] | undefined> },serverId: string,action: string): string {
     const raw = request.headers['idempotency-key'];
@@ -448,9 +469,12 @@ export async function registerServerRoutes(app: FastifyInstance, env: Env, overr
     app.post<{ Params: { id: string } }>(`/api/v1/servers/:id/${path}`,async (request) =>
       queueOwnedAction(request,parseOrThrow(idSchema,request.params.id),operation)
     );
+    app.post<{ Params: { id: string } }>(`/api/servers/:id/${path}`,async (request) =>
+      queueOwnedAction(request,parseOrThrow(idSchema,request.params.id),operation)
+    );
   }
 
-  app.post<{ Params: { id: string } }>('/api/v1/servers/:id/resize', async (request) => {
+  const handleResize = async (request: FastifyRequest<{ Params: { id: string } }>) => {
     const auth = await authenticate(request, env, pool);
     const serverId = parseOrThrow(idSchema, request.params.id);
     const input = parseOrThrow(resizeServerSchema, request.body ?? {});
@@ -463,7 +487,10 @@ export async function registerServerRoutes(app: FastifyInstance, env: Env, overr
     // unbilled provider resize through a crafted API request.
     void input;
     throw new ConflictError('Self-service resize requires a paid upgrade order and is not available yet');
-  });
+  };
+
+  app.post<{ Params: { id: string } }>('/api/v1/servers/:id/resize', handleResize);
+  app.post<{ Params: { id: string } }>('/api/servers/:id/resize', handleResize);
 
   app.post<{ Params: { id: string } }>('/api/v1/servers/:id/snapshots', async (request, reply) => {
     const auth = await authenticate(request, env, pool);
@@ -530,7 +557,7 @@ export async function registerServerRoutes(app: FastifyInstance, env: Env, overr
     return { jobId: result.job.id, status: result.job.status, queued: result.created };
   });
 
-  app.post<{ Params: { id: string } }>('/api/v1/servers/:id/reinstall',async (request) => {
+  const handleReinstallOrRebuild = async (request: FastifyRequest<{ Params: { id: string } }>) => {
     const auth = await authenticate(request,env,pool);
     const serverId = parseOrThrow(idSchema,request.params.id);
     const input = parseOrThrow(reinstallServerSchema,request.body);
@@ -562,9 +589,17 @@ export async function registerServerRoutes(app: FastifyInstance, env: Env, overr
     });
     await auditRequest(pool,request,auth.userId,{ action: 'SERVER_REINSTALL_STARTED',resourceType: 'server',resourceId: server.id,metadata: { jobId: result.job.id,targetVersionId: input.operatingSystemVersionId } });
     return { jobId: result.job.id,status: result.job.status,queued: result.created };
-  });
+  };
+
+  app.post<{ Params: { id: string } }>('/api/v1/servers/:id/reinstall', handleReinstallOrRebuild);
+  app.post<{ Params: { id: string } }>('/api/v1/servers/:id/rebuild', handleReinstallOrRebuild);
+  app.post<{ Params: { id: string } }>('/api/servers/:id/reinstall', handleReinstallOrRebuild);
+  app.post<{ Params: { id: string } }>('/api/servers/:id/rebuild', handleReinstallOrRebuild);
 
   app.delete<{ Params: { id: string } }>('/api/v1/servers/:id',async (request) => {
+    return queueOwnedAction(request,parseOrThrow(idSchema,request.params.id),'DELETE');
+  });
+  app.delete<{ Params: { id: string } }>('/api/servers/:id',async (request) => {
     return queueOwnedAction(request,parseOrThrow(idSchema,request.params.id),'DELETE');
   });
 

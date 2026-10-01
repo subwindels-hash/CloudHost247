@@ -7,6 +7,8 @@ import AboutPage from './pages/AboutPage';
 import HostingPage from './pages/HostingPage';
 import HostingCpanelPage from './pages/HostingCpanelPage';
 import HostingVpsPage from './pages/HostingVpsPage';
+import HostingDedicatedPage from './pages/HostingDedicatedPage';
+import HostingApplicationHostingPage from './pages/HostingApplicationHostingPage';
 import DomainsMarketingPage from './pages/DomainsMarketingPage';
 import ContactPage from './pages/ContactPage';
 import FaqPage from './pages/FaqPage';
@@ -59,6 +61,8 @@ import AdminInfrastructureLogsPage from './pages/AdminInfrastructureLogsPage';
 import ControlPanelsPage from './pages/ControlPanelsPage';
 import ControlPanelDetailPage from './pages/ControlPanelDetailPage';
 import AdminControlPanelsPage from './pages/AdminControlPanelsPage';
+import AdminLicensesPage from './pages/AdminLicensesPage';
+import AdminMonitoringPage from './pages/AdminMonitoringPage';
 import RGDashboardPage from './pages/revenue-guardian/DashboardPage';
 import RecoveryQueuePage from './pages/revenue-guardian/RecoveryQueuePage';
 import RGCaseDetailPage from './pages/revenue-guardian/CaseDetailPage';
@@ -103,6 +107,8 @@ export default function App() {
         <Route path="/hosting" element={<HostingPage />} />
         <Route path="/hosting/cpanel" element={<HostingCpanelPage />} />
         <Route path="/hosting/vps" element={<HostingVpsPage />} />
+        <Route path="/hosting/dedicated" element={<HostingDedicatedPage />} />
+        <Route path="/hosting/application-hosting" element={<HostingApplicationHostingPage />} />
         <Route path="/hosting/control-panels" element={<ControlPanelsPage />} />
         <Route path="/hosting/control-panels/:slug" element={<ControlPanelDetailPage />} />
         <Route path="/domains" element={<DomainsMarketingPage />} />
@@ -153,6 +159,14 @@ export default function App() {
           <Route path="/services/cloudflare/:id" element={<CloudflareServicePage />} />
           <Route path="/services/cloudflare/:id/:tab" element={<CloudflareServicePage />} />
           <Route path="/account/services" element={<ServicesPage />} />
+          <Route path="/account/services/:id" element={<ServerDetailPage />} />
+          <Route path="/account/services/:id/overview" element={<ServerDetailPage />} />
+          <Route path="/account/services/:id/monitoring" element={<ServerDetailPage />} />
+          <Route path="/account/services/:id/dns" element={<ServerDetailPage />} />
+          <Route path="/account/services/:id/ssl" element={<ServerDetailPage />} />
+          <Route path="/account/services/:id/backups" element={<ServerDetailPage />} />
+          <Route path="/account/services/:id/firewall" element={<ServerDetailPage />} />
+          <Route path="/account/services/:id/billing" element={<ServerDetailPage />} />
           <Route path="/billing" element={<BillingPage />} />
           <Route path="/invoices" element={<InvoicesPage />} />
           <Route path="/invoices/:id" element={<InvoiceDetailPage />} />
@@ -189,7 +203,13 @@ export default function App() {
             <Route path="/admin/infrastructure/provisioning/:id" element={<AdminProvisioningPage />} />
             <Route path="/admin/infrastructure/logs" element={<AdminInfrastructureLogsPage />} />
             <Route path="/admin/control-panels" element={<AdminControlPanelsPage />} />
+            <Route path="/admin/control-panels/:id" element={<AdminControlPanelsPage />} />
             <Route path="/admin/infrastructure/control-panels" element={<AdminControlPanelsPage />} />
+            <Route path="/admin/licenses" element={<AdminLicensesPage />} />
+            <Route path="/admin/monitoring" element={<AdminMonitoringPage />} />
+            <Route path="/admin/dns" element={<DnsManagementPage />} />
+            <Route path="/admin/ssl" element={<SslManagementPage />} />
+            <Route path="/admin/audit-logs" element={<AdminAuditPage />} />
             <Route path="/admin/cloudflare" element={<AdminCloudflarePage />} />
             <Route path="/admin/cloudflare/:tab" element={<AdminCloudflarePage />} />
             <Route path="/admin/integrations/cloudflare" element={<AdminCloudflarePage />} />
