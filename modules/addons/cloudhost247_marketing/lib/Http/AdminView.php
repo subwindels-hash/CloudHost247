@@ -5,6 +5,7 @@ use CloudHost247\Marketing\Domain\CampaignStatus;
 use CloudHost247\Marketing\Domain\ConsentStatus;
 use CloudHost247\Marketing\Domain\QueueStatus;
 use CloudHost247\Marketing\Domain\SegmentField;
+use CloudHost247\Marketing\Domain\TemplateBlock;
 use CloudHost247\Marketing\Domain\SegmentOperator;
 use CloudHost247\Marketing\Domain\SubscriberSource;
 use CloudHost247\Marketing\Domain\SubscriberStatus;
@@ -41,12 +42,15 @@ final class AdminView
             'dashboard' => array('Dashboard', ''),
             'subscribers' => array('Subscribers', 'subscribers'),
             'segments' => array('Segments', 'segments'),
+            'templates' => array('Templates', 'templates'),
             'lists' => array('Lists', 'lists'),
             'import' => array('Import', 'import'),
             'suppressions' => array('Suppression List', 'suppressions'),
             'settings' => array('Delivery Settings', 'settings'),
         );
-        $active = $data['view'] === 'subscriber' ? 'subscribers' : ($data['view'] === 'segment' ? 'segments' : $data['view']);
+        $active = $data['view'] === 'subscriber' ? 'subscribers'
+            : ($data['view'] === 'segment' ? 'segments'
+            : ($data['view'] === 'template' ? 'templates' : $data['view']));
         echo '<ul class="nav nav-tabs" role="tablist">';
         foreach ($tabs as $key => $tab) {
             echo '<li role="presentation" class="' . ($active === $key ? 'active' : '') . '"><a href="' . $this->base($tab[1]) . '">' . $this->e($tab[0]) . '</a></li>';
@@ -61,6 +65,8 @@ final class AdminView
         elseif ($data['view'] === 'suppressions') { $this->renderSuppressions($data); }
         elseif ($data['view'] === 'segments') { $this->renderSegments($data); }
         elseif ($data['view'] === 'segment') { $this->renderSegmentDetail($data); }
+        elseif ($data['view'] === 'templates') { $this->renderTemplates($data); }
+        elseif ($data['view'] === 'template') { $this->renderTemplateDetail($data); }
         elseif (!empty($data['plannedSession'])) { $this->renderPlanned($data); }
         else { $this->renderDashboard($data); }
         echo '</div>';
@@ -297,6 +303,138 @@ final class AdminView
             . '<button class="btn btn-sm btn-default"' . ($canManage ? '' : ' disabled') . '>Restore to subscribed</button></form>';
         echo '<p class="text-muted">Restoring refuses while a suppression row exists — release it from the Suppression List first, so both decisions stay visible in the audit trail.</p>';
         echo '</div></div>';
+    }
+
+    // -------------------------------------------------------------- templates
+
+    /** One editable block row: only the fields that block type declares. */
+    private function blockRow($index, array $block)
+    {
+        $type = (string) $block['type'];
+        $definition = TemplateBlock::definition($type);
+        echo '<fieldset style="border:1px solid #e3e8ee;padding:10px;margin-bottom:10px;">';
+        echo '<legend style="font-size:13px;font-weight:bold;margin-bottom:0;">Block ' . ($index + 1) . ': ' . $this->e($definition['label']) . '</legend>';
+        echo '<input type="hidden" name="block[' . $index . '][type]" value="' . $this->e($type) . '" />';
+        foreach ($definition['fields'] as $name => $field) {
+            $value = isset($block[$name]) && $block[$name] !== null ? $block[$name] : (isset($field['default']) ? $field['default'] : '');
+            echo '<div style="margin-bottom:6px;"><label style="min-width:150px;display:inline-block;font-weight:normal;">' . $this->e($field['label']) . '</label>';
+            if ($field['type'] === TemplateBlock::TYPE_ENUM) {
+                echo '<select name="block[' . $index . '][' . $this->e($name) . ']" class="form-control" style="width:180px;display:inline-block;">';
+                foreach ($field['values'] as $option) {
+                    echo '<option value="' . $this->e($option) . '"' . ((string) $value === (string) $option ? ' selected' : '') . '>' . $this->e($option) . '</option>';
+                }
+                echo '</select>';
+            } elseif ($field['type'] === TemplateBlock::TYPE_TEXTAREA) {
+                echo '<textarea name="block[' . $index . '][' . $this->e($name) . ']" class="form-control" rows="4" style="max-width:560px;">' . $this->e($value) . '</textarea>';
+            } else {
+                echo '<input name="block[' . $index . '][' . $this->e($name) . ']" class="form-control" style="width:420px;display:inline-block;" value="' . $this->e($value) . '" />';
+            }
+            echo '<span class="text-muted" style="margin-left:6px;font-size:12px;">' . $this->e(isset($field['required']) && $field['required'] ? 'required' : 'optional') . '</span></div>';
+        }
+        echo '<label style="font-weight:normal;"><input type="checkbox" name="block[' . $index . '][remove]" value="1" /> remove this block</label>';
+        echo '</fieldset>';
+    }
+
+    private function blockHelp(array $catalog)
+    {
+        echo '<details><summary class="text-muted">Blocks this build can render</summary><table class="table table-condensed" style="max-width:900px;">'
+            . '<tr><th>Block</th><th>Fields</th><th>Notes</th></tr>';
+        foreach ($catalog as $type => $block) {
+            $fields = array();
+            foreach ($block['fields'] as $name => $field) {
+                $fields[] = $name . ' (' . $field['type'] . (empty($field['required']) ? '' : ', required') . ')';
+            }
+            echo '<tr><td><code>' . $this->e($type) . '</code><br /><span class="text-muted">' . $this->e($block['label']) . '</span></td>'
+                . '<td>' . $this->e($fields ? implode(', ', $fields) : 'none') . '</td>'
+                . '<td class="text-muted">' . $this->e($block['summary']) . '</td></tr>';
+        }
+        echo '</table></details>';
+    }
+
+    private function renderTemplates(array $data)
+    {
+        $view = $data['templatesView'];
+        $canManage = !empty($view['canManage']);
+        echo '<h4>Templates</h4>';
+        echo '<p class="text-muted">A template is a list of catalog blocks. It renders once, when it is saved, into table-based HTML with inline styles plus a plain-text alternative — the preview, the stored copy and what a campaign sends are the same bytes.</p>';
+        echo '<table class="table table-striped"><tr><th>Name</th><th>Key</th><th>Category</th><th>Design</th><th>Source</th><th>Status</th><th></th></tr>';
+        foreach ($view['rows'] as $row) {
+            echo '<tr><td><strong>' . $this->e($row->name) . '</strong></td><td><code>' . $this->e($row->template_key) . '</code></td>'
+                . '<td>' . $this->e($row->category) . '</td><td>' . $this->e(isset($view['descriptions'][(int) $row->id]) ? $view['descriptions'][(int) $row->id] : '') . '</td>'
+                . '<td>' . $this->e($row->source) . '</td><td>' . $this->e($row->status) . '</td><td>';
+            echo '<a class="btn btn-xs btn-default" href="' . $this->base('template', array('id' => (int) $row->id)) . '">Edit</a> ';
+            $toggle = $row->status === 'active' ? 'template.archive' : 'template.activate';
+            echo '<form method="post" action="' . $this->base('templates') . '" style="display:inline;">'
+                . '<input type="hidden" name="token" value="' . $this->e($this->token()) . '" /><input type="hidden" name="action" value="' . $toggle . '" />'
+                . '<input type="hidden" name="template_id" value="' . (int) $row->id . '" />'
+                . '<button class="btn btn-xs btn-default"' . ($canManage ? '' : ' disabled') . '>' . ($row->status === 'active' ? 'Archive' : 'Reactivate') . '</button></form>';
+            if ((string) $row->source !== 'builtin') {
+                echo ' <form method="post" action="' . $this->base('templates') . '" style="display:inline;">'
+                    . '<input type="hidden" name="token" value="' . $this->e($this->token()) . '" /><input type="hidden" name="action" value="template.delete" />'
+                    . '<input type="hidden" name="template_id" value="' . (int) $row->id . '" />'
+                    . '<button class="btn btn-xs btn-link"' . ($canManage ? '' : ' disabled') . '>Delete</button></form>';
+            }
+            echo '</td></tr>';
+        }
+        if (!$view['rows']) { echo '<tr><td colspan="7" class="text-muted">No templates yet.</td></tr>'; }
+        echo '</table>';
+
+        echo '<h4>New template</h4>';
+        echo '<form method="post" action="' . $this->base('templates') . '" style="max-width:980px;">'
+            . '<input type="hidden" name="token" value="' . $this->e($this->token()) . '" /><input type="hidden" name="action" value="template.save" />';
+        echo '<table class="table"><tr><th style="width:160px;">Name</th><td><input name="name" class="form-control" /></td></tr>'
+            . '<tr><th>Key</th><td><input name="template_key" class="form-control" style="max-width:320px;" /> <span class="text-muted">left blank it is derived from the name</span></td></tr>'
+            . '<tr><th>Category</th><td><input name="category" class="form-control" style="max-width:220px;" value="general" /></td></tr>'
+            . '<tr><th>Starts with</th><td><select name="add_block" class="form-control" style="width:220px;">';
+        foreach ($view['catalog'] as $type => $block) { echo '<option value="' . $this->e($type) . '">' . $this->e($block['label']) . '</option>'; }
+        echo '</select> <span class="text-muted">one catalog block; the rest are added in the editor</span></td></tr></table>';
+        echo '<button class="btn btn-primary"' . ($canManage ? '' : ' disabled') . '>Create template</button></form>';
+        $this->blockHelp($view['catalog']);
+    }
+
+    private function templatePreviewPanel(array $preview)
+    {
+        echo '<div class="panel panel-default"><div class="panel-heading"><strong>Preview</strong> <span class="text-muted">— exactly what will be stored and sent</span></div><div class="panel-body">';
+        foreach ($preview['warnings'] as $warning) { echo '<div class="alert alert-warning">' . $this->e($warning) . '</div>'; }
+        echo '<h5>Plain text</h5><pre style="white-space:pre-wrap;background:#f7f9fb;border:1px solid #e3e8ee;padding:10px;">' . $this->e($preview['text']) . '</pre>';
+        echo '<h5>HTML source</h5><textarea readonly class="form-control" rows="12" style="font-family:monospace;font-size:12px;">' . $this->e($preview['html']) . '</textarea>';
+        echo '<p class="text-muted" style="margin-top:8px;">The rendered HTML is shown as source on purpose: it is generated markup, and rendering it back into the admin page would be a needless second execution path.</p>';
+        echo '</div></div>';
+    }
+
+    private function renderTemplateDetail(array $data)
+    {
+        $detail = $data['templateDetail'];
+        $row = $detail['row'];
+        $canManage = !empty($data['capabilities']['campaigns.manage']);
+        echo '<a href="' . $this->base('templates') . '">&larr; All templates</a>';
+        echo '<h4>Edit template: ' . $this->e($row->name) . ' <small>' . $this->e($row->source) . ' · ' . $this->e($row->status) . '</small></h4>';
+        if ($detail['warnings']) {
+            echo '<div class="alert alert-warning">This stored design has warnings — fix them before a campaign uses it.<ul style="margin:6px 0 0 18px;">';
+            foreach ($detail['warnings'] as $warning) { echo '<li>' . $this->e($warning) . '</li>'; }
+            echo '</ul></div>';
+        }
+
+        echo '<form method="post" action="' . $this->base('template', array('id' => (int) $row->id)) . '" style="max-width:980px;">'
+            . '<input type="hidden" name="token" value="' . $this->e($this->token()) . '" />'
+            . '<input type="hidden" name="template_id" value="' . (int) $row->id . '" />';
+        echo '<table class="table"><tr><th style="width:160px;">Name</th><td><input name="name" class="form-control" value="' . $this->e($row->name) . '" /></td></tr>'
+            . '<tr><th>Key</th><td><code>' . $this->e($row->template_key) . '</code> <span class="text-muted">campaigns reference the key, so it is permanent</span></td></tr>'
+            . '<tr><th>Category</th><td><input name="category" class="form-control" style="max-width:220px;" value="' . $this->e($row->category) . '" /></td></tr></table>';
+
+        foreach ($detail['design']['blocks'] as $index => $block) { $this->blockRow($index, $block); }
+        if (!$detail['design']['blocks']) { echo '<p class="text-muted">This design has no blocks yet — add one below.</p>'; }
+
+        echo '<div style="margin-bottom:12px;"><label style="font-weight:normal;">Add block: </label><select name="add_block" class="form-control" style="width:220px;display:inline-block;"><option value="">— choose —</option>';
+        foreach ($detail['catalog'] as $type => $block) { echo '<option value="' . $this->e($type) . '">' . $this->e($block['label']) . '</option>'; }
+        echo '</select> <span class="text-muted">added with catalog defaults when you save</span></div>';
+
+        echo '<button class="btn btn-primary" name="action" value="template.save"' . ($canManage ? '' : ' disabled') . '>Save template</button> ';
+        echo '<button class="btn btn-default" name="action" value="template.preview"' . ($canManage ? '' : ' disabled') . '>Preview</button>';
+        echo '</form>';
+
+        if (!empty($data['templatePreview'])) { $this->templatePreviewPanel($data['templatePreview']); }
+        $this->blockHelp($detail['catalog']);
     }
 
     // --------------------------------------------------------------- segments

@@ -9,6 +9,8 @@ use CloudHost247\Marketing\Domain\CampaignStatus;
 use CloudHost247\Marketing\Domain\ConsentStatus;
 use CloudHost247\Marketing\Domain\QueueStatus;
 use CloudHost247\Marketing\Domain\SubscriberSource;
+use CloudHost247\Marketing\Domain\TemplateBlock;
+use CloudHost247\Marketing\Repositories\TemplateRepository;
 use CloudHost247\Marketing\Domain\SubscriberStatus;
 use CloudHost247\Marketing\Domain\SuppressionReason;
 use CloudHost247\Marketing\Repositories\ListRepository;
@@ -20,6 +22,7 @@ use CloudHost247\Marketing\Security\InputValidator;
 use CloudHost247\Marketing\Services\ExportService;
 use CloudHost247\Marketing\Services\ImportService;
 use CloudHost247\Marketing\Services\SegmentService;
+use CloudHost247\Marketing\Services\TemplateService;
 use CloudHost247\Marketing\Services\SubscriptionService;
 use WHMCS\Database\Capsule;
 
@@ -33,7 +36,8 @@ final class AdminController
     const PROVIDER_KEY = 'cpanel_smtp';
 
     /** Every view the module currently serves. */
-    const VIEWS = array('dashboard', 'settings', 'subscribers', 'subscriber', 'lists', 'import', 'suppressions', 'segments', 'segment');
+    const VIEWS = array('dashboard', 'settings', 'subscribers', 'subscriber', 'lists', 'import', 'suppressions',
+        'segments', 'segment', 'templates', 'template');
 
     /**
      * Sections the admin menu already advertises but whose build session has not
@@ -43,7 +47,6 @@ final class AdminController
      * @var array<string,int>
      */
     const PLANNED_VIEWS = array(
-        'templates' => 4,
         'campaigns' => 5,
         'analytics' => 9,
         'automations' => 10,
@@ -53,6 +56,8 @@ final class AdminController
     const SUBSCRIBER_CAPABILITY = 'marketing.subscribers.manage';
     /** Segments are audience definitions, so they sit behind the campaign capability. */
     const SEGMENT_CAPABILITY = 'marketing.campaigns.manage';
+    /** Templates are content, same capability boundary as campaigns. */
+    const TEMPLATE_CAPABILITY = 'marketing.campaigns.manage';
 
     private $settings;
     private $subscribers;
@@ -63,6 +68,7 @@ final class AdminController
     private $imports;
     private $exporter;
     private $segments;
+    private $templates;
 
     public function __construct(
         SettingsRepository $settings = null,
@@ -73,7 +79,8 @@ final class AdminController
         SubscriptionService $subscriptions = null,
         ImportService $imports = null,
         ExportService $exporter = null,
-        SegmentService $segments = null
+        SegmentService $segments = null,
+        TemplateService $templates = null
     ) {
         $this->settings = $settings ?: new SettingsRepository();
         $this->subscribers = $subscribers ?: new SubscriberRepository();
@@ -84,13 +91,15 @@ final class AdminController
         $this->imports = $imports ?: new ImportService($this->subscribers, $this->tags, $this->subscriptions);
         $this->exporter = $exporter ?: new ExportService($this->subscribers, $this->lists, $this->tags);
         $this->segments = $segments ?: new SegmentService();
+        $this->templates = $templates ?: new TemplateService();
     }
 
     public function handle()
     {
         AdminGuard::requireAdmin();
         $view = isset($_GET['view']) ? (string) $_GET['view'] : 'dashboard';
-        if (!in_array($view, self::VIEWS, true) && !isset(self::PLANNED_VIEWS[$view])) { $view = 'dashboard'; }
+        $plannedSessions = self::PLANNED_VIEWS;
+        if (!in_array($view, self::VIEWS, true) && !isset($plannedSessions[$view])) { $view = 'dashboard'; }
 
         $notice = '';
         $error = '';
@@ -101,6 +110,18 @@ final class AdminController
                 // reports validation failures as an Error notice (unchanged).
                 $notice = $this->saveSettings();
                 if (substr($notice, 0, 6) === 'Error:') { $error = $notice; $notice = ''; }
+            } elseif ($view === 'templates' || $view === 'template') {
+                $this->requireMutation(self::TEMPLATE_CAPABILITY);
+                try {
+                    $result = $this->handleTemplateAction();
+                    $notice = isset($result['notice']) ? $result['notice'] : '';
+                    $error = isset($result['error']) ? $result['error'] : '';
+                    if (isset($result['templatePreview'])) { $extra['templatePreview'] = $result['templatePreview']; }
+                } catch (\InvalidArgumentException $e) {
+                    $error = 'Error: ' . $e->getMessage();
+                } catch (\RuntimeException $e) {
+                    $error = 'Error: ' . $e->getMessage();
+                }
             } elseif ($view === 'segments' || $view === 'segment') {
                 $this->requireMutation(self::SEGMENT_CAPABILITY);
                 try {
@@ -144,7 +165,7 @@ final class AdminController
             'settings' => $this->settings->all(),
             'integration' => $this->integrationStatus(),
             'tables' => $this->tableHealth(),
-            'plannedSession' => isset(self::PLANNED_VIEWS[$view]) ? self::PLANNED_VIEWS[$view] : 0,
+            'plannedSession' => isset($plannedSessions[$view]) ? $plannedSessions[$view] : 0,
             'capabilities' => array(
                 'settings.manage' => $this->capAllowed('marketing.settings.manage'),
                 'campaigns.manage' => $this->capAllowed('marketing.campaigns.manage'),
@@ -168,6 +189,11 @@ final class AdminController
             $detail = $this->segmentDetailView();
             $data = array_merge($data, $detail);
             if (empty($detail['segmentDetail'])) { $viewError = 'That segment does not exist.'; }
+        } elseif ($view === 'templates') { $data = array_merge($data, $this->templateListView()); }
+        elseif ($view === 'template') {
+            $detail = $this->templateDetailView();
+            $data = array_merge($data, $detail);
+            if (empty($detail['templateDetail'])) { $viewError = 'That template does not exist.'; }
         }
 
         foreach ($extra as $key => $value) { $data[$key] = $value; }
@@ -397,6 +423,111 @@ final class AdminController
         }
 
         return array('notice' => '', 'error' => 'Unknown list action.');
+    }
+
+    // ------------------------------------------------------------- templates
+
+    private function templateListView()
+    {
+        $rows = $this->templates->repository()->all();
+        $descriptions = array();
+        foreach ($rows as $row) {
+            $design = TemplateRepository::designOf($row);
+            $descriptions[(int) $row->id] = count($design['blocks']) . ' block(s)';
+        }
+        return array('templatesView' => array(
+            'rows' => $rows,
+            'descriptions' => $descriptions,
+            'catalog' => $this->templates->catalog(),
+            'canManage' => $this->capAllowed(self::TEMPLATE_CAPABILITY),
+        ));
+    }
+
+    private function templateDetailView()
+    {
+        $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
+        $template = $id > 0 ? $this->templates->repository()->find($id) : null;
+        $design = array('blocks' => array());
+        $warnings = array();
+        if ($template) {
+            $design = $this->templates->normaliseDesign($template->design_json, false);
+            $warnings = $this->templates->preview($design)['warnings'];
+        }
+        return array('templateDetail' => $template ? array(
+            'row' => $template,
+            'design' => $design,
+            'warnings' => $warnings,
+            'catalog' => $this->templates->catalog(),
+        ) : null);
+    }
+
+    private function handleTemplateAction()
+    {
+        $action = isset($_POST['action']) ? (string) $_POST['action'] : '';
+
+        if ($action === 'template.preview') {
+            $rendered = $this->templates->preview($this->designFromPost());
+            return array(
+                'notice' => $rendered['warnings'] ? 'Preview rendered with warnings — see below.' : 'Preview rendered.',
+                'error' => '',
+                'templatePreview' => array('html' => $rendered['html'], 'text' => $rendered['text'], 'warnings' => $rendered['warnings']),
+            );
+        }
+
+        if ($action === 'template.save' || $action === 'template.add_block') {
+            $id = isset($_POST['template_id']) ? (int) $_POST['template_id'] : 0;
+            $design = $this->designFromPost();
+            $name = isset($_POST['name']) ? (string) $_POST['name'] : '';
+            $category = isset($_POST['category']) ? (string) $_POST['category'] : 'general';
+            $key = isset($_POST['template_key']) ? (string) $_POST['template_key'] : '';
+            if (trim($key) === '') { $key = strtolower(preg_replace('/[^a-z0-9_-]/i', '-', $name)); }
+            // A brand-new template and a block just added both carry catalog
+            // defaults, so they save with warnings that the editor displays; the
+            // explicit Save button on an existing template is strict and refuses
+            // missing required values.
+            $result = $this->templates->save(array(
+                'template_key' => $key,
+                'name' => $name,
+                'category' => $category,
+                'design' => $design,
+            ), $id, $id > 0 && $action === 'template.save');
+            $template = $result['template'];
+            $notice = ($id > 0 ? 'Template updated.' : 'Template created.') . ' ' . count($design['blocks']) . ' block(s).';
+            $error = '';
+            if ($result['warnings']) { $error = 'Warnings — ' . implode(' ', $result['warnings']); }
+            return array('notice' => $notice, 'error' => $error, 'template_id' => (int) $template->id);
+        }
+
+        if ($action === 'template.archive' || $action === 'template.activate' || $action === 'template.delete') {
+            $id = isset($_POST['template_id']) ? (int) $_POST['template_id'] : 0;
+            if ($action === 'template.archive') { $this->templates->archive($id); return array('notice' => 'Template archived.', 'error' => ''); }
+            if ($action === 'template.activate') { $this->templates->activate($id); return array('notice' => 'Template reactivated.', 'error' => ''); }
+            $this->templates->delete($id);
+            return array('notice' => 'Template deleted.', 'error' => '');
+        }
+
+        return array('notice' => '', 'error' => 'Unknown template action.');
+    }
+
+    /** @return array{blocks:array} the design as posted (block rows plus an optional add) */
+    private function designFromPost()
+    {
+        $rows = isset($_POST['block']) && is_array($_POST['block']) ? $_POST['block'] : array();
+        $blocks = array();
+        foreach ($rows as $row) {
+            if (!is_array($row)) { continue; }
+            if (!empty($row['remove'])) { continue; }
+            $type = isset($row['type']) ? (string) $row['type'] : '';
+            if (!TemplateBlock::isValid($type)) { continue; }
+            $block = array('type' => $type);
+            foreach (TemplateBlock::definition($type)['fields'] as $name => $field) {
+                if (array_key_exists($name, $row)) { $block[$name] = $row[$name]; }
+            }
+            $blocks[] = $block;
+        }
+        $add = isset($_POST['add_block']) ? (string) $_POST['add_block'] : '';
+        if (TemplateBlock::isValid($add)) { $blocks[] = array_merge(array('type' => $add), TemplateBlock::defaults($add)); }
+        return array('blocks' => $blocks);
     }
 
     // -------------------------------------------------------------- segments

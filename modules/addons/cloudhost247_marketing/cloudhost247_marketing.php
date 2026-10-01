@@ -13,6 +13,7 @@ if (!defined('WHMCS')) { die('This file cannot be accessed directly'); }
 require_once __DIR__ . '/bootstrap.php';
 require_once __DIR__ . '/migrations/V100.php';
 require_once __DIR__ . '/migrations/V110.php';
+require_once __DIR__ . '/migrations/V120.php';
 
 use CloudHost247\Foundation\Database\MigrationRunner;
 use CloudHost247\Foundation\Support\Logger;
@@ -20,14 +21,16 @@ use CloudHost247\Marketing\Http\AdminController;
 use CloudHost247\Marketing\Http\AdminView;
 use CloudHost247\Marketing\Migrations\InitialMigration;
 use CloudHost247\Marketing\Migrations\TagMigration;
+use CloudHost247\Marketing\Migrations\TemplateMigration;
 use CloudHost247\Marketing\Repositories\SettingsRepository;
+use CloudHost247\Marketing\Services\TemplateService;
 
 function cloudhost247_marketing_config()
 {
     return array(
         'name' => 'CloudHost247 Marketing',
         'description' => 'Native email marketing: campaigns, subscribers, lists, segments, templates, visual builder, queue-based cPanel SMTP delivery, tracking, suppression and automation.',
-        'version' => '1.1.0',
+        'version' => '1.2.0',
         'author' => 'CloudHost247',
         'language' => 'english',
         'fields' => array(),
@@ -37,8 +40,9 @@ function cloudhost247_marketing_config()
 function cloudhost247_marketing_activate()
 {
     try {
-        (new MigrationRunner())->run('cloudhost247_marketing', array(new InitialMigration(), new TagMigration()));
+        (new MigrationRunner())->run('cloudhost247_marketing', array(new InitialMigration(), new TagMigration(), new TemplateMigration()));
         (new SettingsRepository())->seedDefaults();
+        (new TemplateService())->ensureBuiltins();
         return array(
             'status' => 'success',
             'description' => 'Marketing platform tables installed non-destructively. Configure cPanel SMTP from Super Admin -> API & Integrations (integration key: cpanel_smtp), then schedule crons/cloudhost247_marketing.php from the system crontab.',

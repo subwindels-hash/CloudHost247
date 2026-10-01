@@ -130,7 +130,7 @@ $tests['Activation installs all module tables idempotently and seeds settings wi
 $tests['Module registration exposes the required WHMCS hooks'] = function () {
     $config = cloudhost247_marketing_config();
     return $config['name'] === 'CloudHost247 Marketing'
-        && $config['version'] === '1.1.0'
+        && $config['version'] === '1.2.0'
         && function_exists('cloudhost247_marketing_activate')
         && function_exists('cloudhost247_marketing_deactivate')
         && function_exists('cloudhost247_marketing_output');
@@ -162,16 +162,18 @@ $tests['Every advertised menu section is routable and unbuilt ones say so instea
     // The menu advertises more sections than the build has landed; each of them
     // must keep its own address and explain itself rather than silently render
     // the dashboard under a different URL.
-    $planned = array('templates' => 4, 'campaigns' => 5, 'analytics' => 9, 'automations' => 10);
+    $planned = array('campaigns' => 5, 'analytics' => 9, 'automations' => 10);
     foreach ($planned as $view => $session) {
         $_GET = array('view' => $view);
         $data = (new AdminController())->handle();
         if ($data['view'] !== $view || (int) $data['plannedSession'] !== $session) { return false; }
     }
-    // SESSION 3 landed: segments is a real view, not a planned one.
-    $_GET = array('view' => 'segments');
-    $data = (new AdminController())->handle();
-    if ($data['view'] !== 'segments' || (int) $data['plannedSession'] !== 0) { return false; }
+    // SESSIONS 3 and 4 landed: segments and templates are real views now.
+    foreach (array('segments', 'templates') as $realView) {
+        $_GET = array('view' => $realView);
+        $data = (new AdminController())->handle();
+        if ($data['view'] !== $realView || (int) $data['plannedSession'] !== 0) { return false; }
+    }
 
     // A genuinely unknown view still resolves to the dashboard.
     $_GET = array('view' => 'does-not-exist');
@@ -267,6 +269,14 @@ foreach (require __DIR__ . '/session2.php' as $name => $test) {
 // session3.php for the same reason.
 
 foreach (require __DIR__ . '/session3.php' as $name => $test) {
+    if (isset($tests[$name])) { throw new RuntimeException('Duplicate marketing test name: ' . $name); }
+    $tests[$name] = $test;
+}
+
+// ------------------------------------------------------------ SESSION 4 - templates
+// The block builder, sanitizer and rendered-output fidelity live in session4.php.
+
+foreach (require __DIR__ . '/session4.php' as $name => $test) {
     if (isset($tests[$name])) { throw new RuntimeException('Duplicate marketing test name: ' . $name); }
     $tests[$name] = $test;
 }

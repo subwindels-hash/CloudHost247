@@ -66,11 +66,24 @@ class MarketingStaticTests(unittest.TestCase):
         # no credentials of any kind are persisted by the module
         self.assertNotIn("password", migration)
 
+    def test_every_later_migration_is_additive_namespaced_and_guarded(self):
+        # Additive is a property of the whole migration set, not just the first
+        # one: a later migration that drops, renames or reaches into a WHMCS
+        # core table would break an existing install.
+        for name in ("V110.php", "V120.php"):
+            migration = read(os.path.join(MODULE, "migrations", name))
+            for forbidden in ("dropIfExists", "DROP TABLE", "->dropColumn", "->rename("):
+                self.assertNotIn(forbidden, migration, "%s contains %s" % (name, forbidden))
+            self.assertNotRegex(migration, r"->(?:create|table)\(\s*'(?!mod_cloudhost247_marketing_)", name)
+            self.assertNotIn("password", migration)
+            self.assertNotRegex(migration, r"(?:tblclients|tblhosting|tbldomains)", name)
+            self.assertTrue("hasTable" in migration or "hasColumn" in migration, "%s is unguarded" % name)
+
     def test_migration_validator_is_pinned_to_marketing_versions(self):
         # The validator must know every migration this module ships; a new
         # migration that is not registered there fails the release candidate.
         validator = read(os.path.join(ROOT, "scripts", "validate-migrations.py"))
-        self.assertIn("'cloudhost247_marketing':['1.0.0','1.1.0']", validator)
+        self.assertIn("'cloudhost247_marketing':['1.0.0','1.1.0','1.2.0']", validator)
 
     # ---------------------------------------------------------- security
     def test_no_dangerous_calls_and_no_core_table_writes_anywhere(self):

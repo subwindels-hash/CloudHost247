@@ -21,7 +21,7 @@ php -d display_errors=1 tests/passkey/run.php
 php -d display_errors=1 tests/phoneservices/run.php
 php -d display_errors=1 tests/customaffiliate/run.php
 php -d display_errors=1 tests/cloudhost247_email/run.php
-python3 -m unittest -v tests/foundation/test_static.py tests/currency/test_static.py tests/ovh/test_static.py tests/ovh/test_product_services_static.py tests/ovh/test_public_catalog_static.py tests/rdp/test_static.py tests/integrations/test_static.py tests/modules/test_static.py tests/builder/test_static.py tests/smm/test_static.py tests/tools/test_static.py tests/broker/test_static.py tests/cart_recovery/test_static.py tests/passkey/test_static.py tests/security/test_security.py tests/security/test_archive_integration.py
+python3 -m unittest -v tests/foundation/test_static.py tests/currency/test_static.py tests/marketing/test_static.py tests/ovh/test_static.py tests/ovh/test_product_services_static.py tests/ovh/test_public_catalog_static.py tests/rdp/test_static.py tests/integrations/test_static.py tests/modules/test_static.py tests/builder/test_static.py tests/smm/test_static.py tests/tools/test_static.py tests/broker/test_static.py tests/cart_recovery/test_static.py tests/passkey/test_static.py tests/security/test_security.py tests/security/test_archive_integration.py
 python3 -m unittest -v tests/staging/test_staging_tools.py
 python3 -m py_compile scripts/validate-migrations.py scripts/compare-financial-evidence.py scripts/generate-staging-report.py scripts/branding-audit.py
 python3 scripts/validate-migrations.py
