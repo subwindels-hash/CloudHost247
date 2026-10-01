@@ -260,6 +260,7 @@ final class CampaignService
                 trim((string) $campaign->html) !== '' && trim((string) $campaign->text) !== '',
                 'Choose a template so the campaign carries both an HTML and a plain-text body.', true),
             $this->check('audience', 'Audience', $audience['count'] > 0, $audience['detail'], true),
+            $this->senderDomainCheck($campaign),
             $this->check('transport', 'Delivery provider',
                 $this->transport->isAvailable(),
                 $this->transport->isAvailable() ? 'Provider: ' . $this->transport->key() . '.' : $this->transport->reason(),
@@ -275,6 +276,22 @@ final class CampaignService
             if ($check['blocking'] && !$check['ok']) { $issues[] = $check['label'] . ': ' . $check['detail']; }
         }
         return $issues;
+    }
+
+    /**
+     * The provider's sender-domain rule, reported by the provider itself. A
+     * transport that states no policy is shown as not enforced instead of
+     * silently passing, and a stated failure blocks a schedule like any other.
+     */
+    private function senderDomainCheck($campaign)
+    {
+        if (!($this->transport instanceof SenderPolicy)) {
+            return $this->check('sender_domain', 'Sender domain', true,
+                'The delivery provider does not state a sender-domain policy.', false);
+        }
+        $policy = $this->transport->senderPolicy((string) $campaign->from_email);
+        return $this->check('sender_domain', 'Sender domain', !empty($policy['ok']),
+            (string) $policy['detail'], !empty($policy['enforced']));
     }
 
     private function check($key, $label, $ok, $detail, $blocking)

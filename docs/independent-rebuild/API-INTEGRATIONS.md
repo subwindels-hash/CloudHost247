@@ -28,6 +28,7 @@ Integration  ->  Provider    ->  Credentials       ->  Configuration  ->  Health
 | Runtime resolution | `lib/Services/IntegrationManager.php` | Resolves the active configuration for the current environment at call time. |
 | Health check | `lib/Services/ConnectionTester.php`, `lib/Api/SmtpProbe.php` | Executes the documented provider test server-side and reduces it to one safe classification. |
 | API client | `lib/Api/IntegrationClient.php`, `lib/Api/Signers/*` | Applies the provider's authentication protocol, timeouts and retry policy. |
+| SMTP submission | `lib/Api/SmtpClient.php` | Delivers a MIME message over the configured relay (implicit TLS or STARTTLS, 250/4xx/5xx classification, header-injection guards, queue-id capture). `IntegrationManager::smtp()` builds it from the vault; `smtpIdentity()` returns the non-secret mailbox/from-address so a module can enforce a sender-domain policy without touching a credential. Used by `cloudhost247_marketing`'s `SmtpTransport`. |
 | Administration | `lib/Services/AdminController.php`, `AdminView.php` | Super Admin screens, CSRF, capabilities, confirmations and audit records. |
 
 **Adding a provider** means adding one `ProviderDefinition` to the catalogue (or

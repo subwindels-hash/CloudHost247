@@ -411,7 +411,7 @@ return array(
     $_POST = array(); $_REQUEST = array();
     $detail = (new CloudHost247\Marketing\Http\AdminController())->handle();
     if (empty($detail['campaignDetail']['row'])) { return false; }
-    if (count($detail['campaignDetail']['checklist']) !== 8) { return false; }
+    if (count($detail['campaignDetail']['checklist']) !== 9) { return false; }
     if ($detail['campaignDetail']['audience']['count'] !== 1) { return false; }
 
     $ready = ch247_marketing_post('campaign', array('action' => 'campaign.ready', 'campaign_id' => (int) $campaign->id), array('id' => (int) $campaign->id));

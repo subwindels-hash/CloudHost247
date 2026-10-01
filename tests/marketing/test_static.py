@@ -52,6 +52,8 @@ class MarketingStaticTests(unittest.TestCase):
             os.path.join(LIB, "Repositories", "TemplateRepository.php"),
             os.path.join(LIB, "Services", "CampaignService.php"),
             os.path.join(LIB, "Services", "MessageTransport.php"),
+            os.path.join(LIB, "Services", "SenderPolicy.php"),
+            os.path.join(LIB, "Services", "SmtpTransport.php"),
             os.path.join(LIB, "Services", "UnavailableTransport.php"),
             os.path.join(LIB, "Services", "SegmentService.php"),
             os.path.join(LIB, "Services", "TemplateService.php"),
@@ -126,6 +128,17 @@ class MarketingStaticTests(unittest.TestCase):
             combined += read(path)
         for forbidden in ("fsockopen", "stream_socket_client", "swiftmailer", "PHPMailer"):
             self.assertNotIn(forbidden, combined)
+
+    def test_smtp_delivery_is_resolved_through_the_integrations_vault(self):
+        # The transport asks the integrations addon for a ready client; it never
+        # reads a configuration table, decrypts a secret or names a credential.
+        transport = read(os.path.join(LIB, "Services", "SmtpTransport.php"))
+        self.assertIn("IntegrationManager", transport)
+        self.assertIn("'smtp'", transport)
+        self.assertIn("smtpIdentity", transport)
+        for forbidden in ("SecretVault", "options_json", "value_fingerprint", "password", "smtp_pass"):
+            self.assertNotIn(forbidden, transport, "%s must not appear in the marketing transport" % forbidden)
+        self.assertIn("SenderPolicy", transport)
 
     def test_module_never_touches_smtp_secrets_directly(self):
         combined = ""

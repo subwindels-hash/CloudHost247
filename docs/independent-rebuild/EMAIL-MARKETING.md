@@ -1,6 +1,6 @@
 # CloudHost247 Email Marketing Platform
 
-Module: `modules/addons/cloudhost247_marketing` (version 1.2.0, in build — SESSIONS 1–5 of 12 complete).
+Module: `modules/addons/cloudhost247_marketing` (version 1.2.0, in build — SESSIONS 1–6 of 12 complete).
 Native WHMCS addon — no separate application, no separate frontend, no
 duplicate SMTP/credential infrastructure. Delivery credentials live
 exclusively in the central CloudHost247 API & Integrations vault under the
@@ -33,7 +33,8 @@ modules/addons/cloudhost247_marketing
  ├─ lib/Services                 SubscriptionService (subscribe/unsubscribe/bounce/suppression),
  │                               ImportService, ExportService, SegmentService (live evaluation, fail-closed),
  │                               TemplateService (block rendering + builtin library, SESSION 4),
- │                               CampaignService + MessageTransport / UnavailableTransport (SESSION 5);
+ │                               CampaignService + MessageTransport / UnavailableTransport (SESSION 5),
+ │                               SmtpTransport + SenderPolicy (SESSION 6);
  │                               queue and automation services land in later sessions
  ├─ lib/Http                     AdminController / AdminView (dashboard, Delivery Settings,
  │                               Campaigns, Subscribers, Segments, Templates, Lists, Import,
@@ -109,7 +110,7 @@ Delivery chain (built in SESSION 6/7):
 | 3 — Segments | **DONE** | `SegmentField`/`SegmentOperator` closed catalogs (subscriber columns, list/tag membership, six read-only `client.*` facts); `SegmentService` validates and canonicalises definitions on save and on evaluation, evaluates live in 500-row batches with no membership copy, indexes memberships per referenced key, and fails closed when a customer fact cannot be verified (reported as `unverified`, never invented); `subscriberIds()` refuses archived, truncated or unverifiable segments so the send path can never overshoot; `SegmentRepository` stores the canonical JSON and a timestamped display count only, clearing it whenever rules change; `ClientDirectoryRepository` reads only the whitelisted `tblclients`/`tblhosting`/`tbldomains` columns in batches keyed by e-mail. Admin: Segments tab with list/create/edit, rule builder, refresh-count and archive actions behind `marketing.campaigns.manage`. Tests: 14 new behavior cases in `tests/marketing/session3.php` (43 total in the suite) + static invariants green |
 | 4 — Templates + builder | **DONE** | `TemplateBlock` closed catalog (heading, paragraph, bullets, button, image, divider, spacer, legal — typed fields with bounds); `HtmlSanitizer` restricted rich-text subset (`b/strong/i/em/u/a/br` only, script/style/iframe stripped, balanced output) and absolute-URL rules (http(s)/mailto only; `javascript:`, `data:`, protocol-relative and userinfo forms refused); `TemplateService` renders each design to table-based inline-styled HTML plus a plain-text twin, skips unsafe or empty blocks with named warnings instead of approximating them, stores design + rendered output together, and seeds three builtin templates idempotently from activation; `TemplateRepository` + migration `1.2.0` add the `status` column so templates archive rather than disappear (builtins can never be deleted). Admin: Templates tab (library, create, block editor, add/remove block, preview as source + plain text, archive/activate/delete) behind `marketing.campaigns.manage`. Tests: 13 new behavior cases in `tests/marketing/session4.php` (56 total in the suite) + static invariants green |
 | 5 — Campaigns | **DONE** | `CampaignAudience` (list / segment / all subscribed addresses, resolved live — never frozen); `CampaignRepository` with path-independent idempotency keys, status-owned timestamps (pause keeps `scheduled_at`, cancel keeps `started_at`) and a `due()` lookup for the worker; `CampaignService` with the pre-send checklist (name, single-line subject ≤150 chars, sender, reply-to, HTML **and** text content, non-empty audience; provider reported as advisory), an explicit transition map (draft→ready→scheduled→queued→sending→completed, with pause/resume/cancel/archive and per-state editability), local-time scheduling converted to UTC, audience previews that count subscribed members only and surface segment truncation/unverified rows, and a test send that goes through the same checklist and transport and audits refusals (`campaign.test_refused` / `failed` / `sent`) instead of pretending. Delivery itself is behind the new `MessageTransport` contract (`UnavailableTransport` until SESSION 6), which is what keeps sockets and credentials out of this module. Admin: Campaigns tab with status/search filters, counts, campaign detail (checklist, audience preview, lifecycle buttons, test send, content preview), edits returning an approved campaign to draft. Tests: 12 new behavior cases in `tests/marketing/session5.php` (68 total in the suite) + 13 static invariants |
-| 6 — cPanel SMTP | planned | shared `SmtpClient` (integrations), provider class, sender-domain validation, test panel |
+| 6 — cPanel SMTP | **DONE** | Shared `SmtpClient` added to `cloudhost247_integrations` (`lib/Api/SmtpClient.php`): implicit-TLS/STARTTLS only, AUTH LOGIN, MAIL/RCPT/DATA with base64 MIME and a generated boundary, CR/LF header-injection guards, address validation, 250/4xx/5xx classification through `ResultCode`, relay queue-id capture, and a dialer seam for tests; `IntegrationManager::smtp()` builds it from the vault and `smtpIdentity()` returns the non-secret mailbox/from-address. Marketing's `SmtpTransport` (implements `MessageTransport` + `SenderPolicy`) resolves that client lazily, answers availability with a specific reason (addon missing / not configured / unreadable), forwards messages verbatim, reports relay failures to the integrations event history, and enforces the sender-domain rule ("mailbox domain or configured from-address domain") both in the checklist and again at send time. The campaign detail screen now shows the sending identity and a real test-send panel. Tests: 6 new SMTP-protocol cases in `tests/integrations/run.php` (106 total) and 10 new marketing cases in `tests/marketing/session6.php` (78 total) |
 | 7 — Queue + delivery | planned | recipient materialization, claim locking, throttling, backoff, cron worker |
 | 8 — Tracking | planned | pixel/click endpoints, suppression/unsubscribe flows, bounce ingestion |
 | 9 — Analytics | planned | rates from the event ledger only, click map, recipient activity |
@@ -123,6 +124,14 @@ Delivery chain (built in SESSION 6/7):
   seeding, settings persistence/audit/capability denial, dashboard honesty,
   catalog registration, enum closures, validator) plus the SESSION 2 file below;
   runs under PHP 7.4 and 8.2 in CI.
+* `tests/marketing/session6.php` — SESSION 6 behavior suite (10 cases): transport
+  availability with reasons, verbatim forwarding and queue-id propagation,
+  relay-failure reporting to the integrations event history, the sender-domain
+  policy (mailbox domain, configured from-address domain, refused unrelated
+  domain, malformed address), policy enforcement at send time as well as in the
+  checklist, a blocked schedule naming the sender-domain failure, a real test
+  send through the transport, and the module's refusal to hold credentials when
+  the integrations addon is absent.
 * `tests/marketing/session5.php` — SESSION 5 behavior suite (12 cases): campaign
   creation validation and idempotency, content copied (not referenced) from its
   template, the checklist and its blocking semantics, audience counting for lists

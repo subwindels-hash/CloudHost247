@@ -25,7 +25,7 @@ use CloudHost247\Marketing\Services\ImportService;
 use CloudHost247\Marketing\Services\SegmentService;
 use CloudHost247\Marketing\Services\CampaignService;
 use CloudHost247\Marketing\Services\TemplateService;
-use CloudHost247\Marketing\Services\UnavailableTransport;
+use CloudHost247\Marketing\Services\SmtpTransport;
 use CloudHost247\Marketing\Services\SubscriptionService;
 use WHMCS\Database\Capsule;
 
@@ -452,17 +452,27 @@ final class AdminController
     // ------------------------------------------------------------- campaigns
 
     /**
-     * The campaign screens use a refusal transport until SESSION 6 wires the
-     * real sender. The reason shown is the provider state, so the operator is
-     * told what to fix instead of being offered a button that does nothing.
+     * The cPanel SMTP transport, wired to the central vault. It reports whether
+     * the provider is usable and why not, so the operator is told what to fix
+     * instead of being offered a button that does nothing.
      */
     private function campaignTransport()
     {
-        $status = $this->integrationStatus();
-        if (empty($status['configured'])) {
-            return new UnavailableTransport('Configure the cPanel SMTP provider in API & Integrations before sending.');
-        }
-        return new UnavailableTransport('The cPanel SMTP sender arrives in SESSION 6 of this build; test messages are refused rather than silently dropped.');
+        return new SmtpTransport();
+    }
+
+    /** Availability, reason and non-secret identity of the delivery provider. */
+    private function transportSummary()
+    {
+        $transport = $this->campaigns->transport();
+        $summary = array(
+            'available' => $transport->isAvailable(),
+            'key' => $transport->key(),
+            'reason' => $transport->reason(),
+            'identity' => null,
+        );
+        if ($transport instanceof SmtpTransport) { $summary['identity'] = $transport->identity(); }
+        return $summary;
     }
 
     private function campaignListView()
@@ -478,11 +488,7 @@ final class AdminController
             'counts' => $this->campaigns->repository()->countsByStatus(),
             'statuses' => CampaignStatus::all(),
             'canManage' => $this->capAllowed(self::CAMPAIGN_CAPABILITY),
-            'transport' => array(
-                'available' => $this->campaigns->transport()->isAvailable(),
-                'key' => $this->campaigns->transport()->key(),
-                'reason' => $this->campaigns->transport()->reason(),
-            ),
+            'transport' => $this->transportSummary(),
             'lists' => $this->lists->all('active'),
             'segments' => $this->segments->repository()->all('active'),
             'templates' => $this->templates->repository()->all('active'),
@@ -501,11 +507,7 @@ final class AdminController
             'checklist' => $this->campaigns->checklist($campaign),
             'audience' => $this->campaigns->audiencePreview($campaign),
             'editable' => in_array((string) $campaign->status, CampaignService::EDITABLE_STATUSES, true),
-            'transport' => array(
-                'available' => $this->campaigns->transport()->isAvailable(),
-                'key' => $this->campaigns->transport()->key(),
-                'reason' => $this->campaigns->transport()->reason(),
-            ),
+            'transport' => $this->transportSummary(),
             'lists' => $this->lists->all('active'),
             'segments' => $this->segments->repository()->all('active'),
             'templates' => $this->templates->repository()->all('active'),
