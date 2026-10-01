@@ -40,8 +40,26 @@ export interface MarketplaceAppDetail extends MarketplaceApp {
   deploymentType: string;
   versions: Array<{ id: string; version: string; releaseNotes: string | null; stable: boolean; requirements: { minCpu: number; minMemoryMb: number; minStorageMb: number } }>;
   environment: {
-    required: Array<{ key: string; label: string | null; description: string | null; secret: boolean }>;
-    optional: Array<{ key: string; label: string | null; description: string | null; secret: boolean; default: string | null }>;
+    required: Array<{
+      key: string;
+      label: string | null;
+      description: string | null;
+      secret: boolean;
+      generated: boolean;
+      defaultFromDomain: boolean;
+      defaultFromUrl: boolean;
+      default: string | null;
+      customerProvided: boolean;
+    }>;
+    optional: Array<{
+      key: string;
+      label: string | null;
+      description: string | null;
+      secret: boolean;
+      default: string | null;
+      defaultFromDomain: boolean;
+      defaultFromUrl: boolean;
+    }>;
   };
   domainRequired: boolean;
   sslSupported: boolean;

@@ -19,9 +19,9 @@ import { getStoredUser } from '../lib/auth';
  * Application detail + installation wizard (spec §42, §44):
  *  1. Choose a server (from the customer's own installations/servers the platform can place)
  *  2. Configure: version, app name, primary domain, and the manifest's required env vars
- *  3. Review requirements and estimated recurring cost, then request the installation
- * The POST creates an order + invoice (prorated to the billing day) and queues a deployment —
- * provisioning starts only after payment, exactly like any hosting product.
+ *  3. Review requirements and estimated recurring cost, then request the installation.
+ * The POST creates an order + invoice; the paid-order webhook queues deployment, so provisioning
+ * still starts only after verified payment exactly like any hosting product.
  */
 export default function AppDetailPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -87,9 +87,27 @@ export default function AppDetailPage() {
     (selectedServer.cpuCores >= selectedVersion.requirements.minCpu &&
       selectedServer.memoryMb >= selectedVersion.requirements.minMemoryMb &&
       selectedServer.storageMb >= selectedVersion.requirements.minStorageMb);
-  const missingEnv = (app?.environment.required ?? []).filter((item) => !env[item.key]?.trim());
+  const requiredCustomerEnv = (app?.environment.required ?? []).filter((item) => item.customerProvided);
+  const missingEnv = requiredCustomerEnv.filter((item) => !env[item.key]?.trim());
 
   const canSubmit = Boolean(serverId && version && !missingEnv.length && requirementsMet && !submitting);
+
+  function environmentHint(item: {
+    generated?: boolean;
+    defaultFromDomain?: boolean;
+    defaultFromUrl?: boolean;
+    default?: string | null;
+    description?: string | null;
+    customerProvided?: boolean;
+  }) {
+    const notes = [item.description].filter(Boolean) as string[];
+    if (item.generated) notes.push('Leave blank to generate a strong secret server-side.');
+    else if (item.defaultFromDomain) notes.push('Leave blank to use the primary domain.');
+    else if (item.defaultFromUrl) notes.push('Leave blank to use the primary application URL.');
+    else if (item.default !== null && item.default !== undefined) notes.push(`Leave blank to use default: ${item.default}.`);
+    else if (item.customerProvided) notes.push('Required: enter a value before continuing.');
+    return notes.join(' ');
+  }
 
   async function submit() {
     if (!app || !slug) return;
@@ -102,7 +120,7 @@ export default function AppDetailPage() {
         serverId,
         name: name.trim() || undefined,
         domain: domain.trim() || null,
-        environment: env,
+        environment: Object.fromEntries(Object.entries(env).filter(([, value]) => value.trim() !== '')),
       });
       // Pay the invoice in the sandbox flow; provisioning (the deployment job) starts only
       // from the paid-order webhook, so route to the installation to watch it appear.
@@ -257,30 +275,45 @@ export default function AppDetailPage() {
                     <h3>Configuration</h3>
                     {app.environment.required.map((item) => (
                       <label key={item.key} className="ch247-field">
-                        {item.label ?? item.key} <span aria-hidden="true">*</span>
+                        {item.label ?? item.key}{' '}
+                        {item.customerProvided ? <span aria-hidden="true">*</span> : <small>(auto)</small>}
                         <input
                           value={env[item.key] ?? ''}
                           onChange={(event) => setEnv({ ...env, [item.key]: event.target.value })}
-                          placeholder={item.secret ? 'left blank = auto-generated' : ''}
+                          placeholder={
+                            item.generated
+                              ? 'auto-generated if left blank'
+                              : item.defaultFromDomain
+                                ? 'uses primary domain if left blank'
+                                : item.defaultFromUrl
+                                  ? 'uses application URL if left blank'
+                                  : item.default ?? ''
+                          }
                           autoComplete="off"
                         />
-                        {item.description && <small>{item.description}</small>}
+                        <small>{environmentHint(item)}</small>
                       </label>
                     ))}
                     {app.environment.optional.map((item) => (
                       <label key={item.key} className="ch247-field">
                         {item.label ?? item.key} <small>(optional)</small>
                         <input
-                          value={env[item.key] ?? item.default ?? ''}
+                          value={env[item.key] ?? ''}
                           onChange={(event) => setEnv({ ...env, [item.key]: event.target.value })}
+                          placeholder={
+                            item.defaultFromDomain
+                              ? 'uses primary domain if left blank'
+                              : item.defaultFromUrl
+                                ? 'uses application URL if left blank'
+                                : item.default ?? ''
+                          }
                           autoComplete="off"
                         />
-                        {item.description && <small>{item.description}</small>}
+                        <small>{environmentHint(item)}</small>
                       </label>
                     ))}
                     <p className="ch247-page__hint">
-                      Required values left blank are auto-generated by the platform and stored encrypted
-                      — you never need to invent a secret by hand.
+                      Fields marked <strong>(auto)</strong> are generated or derived by CloudHost247 when left blank and stored encrypted where appropriate.
                     </p>
                   </div>
                 )}

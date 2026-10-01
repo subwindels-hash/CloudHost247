@@ -51,10 +51,33 @@ export interface MarketplaceAppDetailDTO extends MarketplaceAppCardDTO {
     stable: boolean;
     requirements: { minCpu: number; minMemoryMb: number; minStorageMb: number };
   }>;
-  /** Keys the installer will ask for (values are NEVER included; secrets stay server-side). */
+  /**
+   * Keys the installer will ask for (values are NEVER included; secrets stay server-side).
+   * The flags tell the UI which blank inputs are valid because the worker will generate or derive
+   * them server-side; without them the browser cannot distinguish "customer must provide" from
+   * "leave blank to generate".
+   */
   environment: {
-    required: Array<{ key: string; label: string | null; description: string | null; secret: boolean }>;
-    optional: Array<{ key: string; label: string | null; description: string | null; secret: boolean; default: string | null }>;
+    required: Array<{
+      key: string;
+      label: string | null;
+      description: string | null;
+      secret: boolean;
+      generated: boolean;
+      defaultFromDomain: boolean;
+      defaultFromUrl: boolean;
+      default: string | null;
+      customerProvided: boolean;
+    }>;
+    optional: Array<{
+      key: string;
+      label: string | null;
+      description: string | null;
+      secret: boolean;
+      default: string | null;
+      defaultFromDomain: boolean;
+      defaultFromUrl: boolean;
+    }>;
   };
   domainRequired: boolean;
   sslSupported: boolean;
@@ -116,18 +139,29 @@ export function toAppDetailDTO(
       requirements: { minCpu: v.minimum_cpu, minMemoryMb: v.minimum_memory_mb, minStorageMb: v.minimum_storage_mb },
     })),
     environment: {
-      required: (manifest?.environment.required ?? []).map((e) => ({
-        key: e.key,
-        label: e.label ?? null,
-        description: e.description ?? null,
-        secret: e.secret,
-      })),
+      required: (manifest?.environment.required ?? []).map((e) => {
+        const generated = e.generate === 'random_32';
+        const hasServerDefault = generated || e.defaultFromDomain || e.defaultFromUrl || e.default !== undefined;
+        return {
+          key: e.key,
+          label: e.label ?? null,
+          description: e.description ?? null,
+          secret: e.secret,
+          generated,
+          defaultFromDomain: e.defaultFromDomain,
+          defaultFromUrl: e.defaultFromUrl,
+          default: e.default ?? null,
+          customerProvided: !hasServerDefault,
+        };
+      }),
       optional: (manifest?.environment.optional ?? []).map((e) => ({
         key: e.key,
         label: e.label ?? null,
         description: e.description ?? null,
         secret: e.secret,
         default: e.default ?? null,
+        defaultFromDomain: e.defaultFromDomain,
+        defaultFromUrl: e.defaultFromUrl,
       })),
     },
     domainRequired: manifest?.domain.primaryRequired ?? false,

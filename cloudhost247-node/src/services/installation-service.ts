@@ -37,7 +37,7 @@ import { setInvoiceStatus } from '../db/invoices';
 import { setOrderPaymentStatus } from '../db/orders';
 import { findPlanById } from '../db/catalog-plans';
 import { listPublishedPricingForPlan, type BillingPeriod } from '../db/catalog-pricing';
-import type { ApplicationManifest, HostingType } from '../marketplace/manifest-schema';
+import type { ApplicationManifest, HostingType, ManifestEnvironmentEntry } from '../marketplace/manifest-schema';
 
 export interface CreateInstallationInput {
   applicationIdOrSlug: string;
@@ -168,21 +168,38 @@ export async function createInstallationRequest(
   }
 
   // --- Environment validation (spec §23 request example) -----------------------------------------
-  const environment = input.environment ?? {};
-  const allowedKeys = new Set([
-    ...manifest.environment.required.map((e) => e.key),
-    ...manifest.environment.optional.map((e) => e.key),
-  ]);
-  for (const key of Object.keys(environment)) {
-    if (!allowedKeys.has(key)) {
+  const rawEnvironment = input.environment ?? {};
+  const requiredEntries = manifest.environment.required.map((entry) => ({ ...entry, required: true }));
+  const optionalEntries = manifest.environment.optional.map((entry) => ({ ...entry, required: false }));
+  const entriesByKey = new Map<string, ManifestEnvironmentEntry & { required: boolean }>(
+    [...requiredEntries, ...optionalEntries].map((entry) => [entry.key, entry])
+  );
+  for (const key of Object.keys(rawEnvironment)) {
+    if (!entriesByKey.has(key)) {
       throw new ValidationError(`Environment variable ${key} is not configurable for this application`);
     }
   }
+
+  // Blank browser inputs mean "use the manifest default / generate server-side" — never persist
+  // an empty string that would override a generated secret and make the worker fail later.
+  const environment: Record<string, string> = {};
+  for (const [key, value] of Object.entries(rawEnvironment)) {
+    const entry = entriesByKey.get(key);
+    if (!entry) continue;
+    const text = String(value);
+    const canBeDerivedServerSide =
+      entry.generate === 'random_32' || entry.defaultFromDomain || entry.defaultFromUrl || entry.default !== undefined;
+    if (text.trim() === '' && (!entry.required || canBeDerivedServerSide)) {
+      continue;
+    }
+    environment[key] = text;
+  }
+
   const customerMustProvide = manifest.environment.required.filter(
     (e) => !e.generate && !e.defaultFromDomain && !e.defaultFromUrl && e.default === undefined
   );
   for (const entry of customerMustProvide) {
-    if (!environment[entry.key]) {
+    if (!environment[entry.key]?.trim()) {
       throw new ValidationError(`Environment variable ${entry.key} is required for this application`);
     }
   }
