@@ -25,6 +25,8 @@ export const SUPPORT_MODE_RESTRICTED_ACTIONS = [
   'account.email_change',
   'mfa.enroll',
   'mfa.disable',
+  'passkey.enroll',
+  'passkey.manage',
   'role.change',
 ] as const;
 

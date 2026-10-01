@@ -1,4 +1,5 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
+import { startRegistration } from '@simplewebauthn/browser';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../lib/api';
 import {
@@ -70,6 +71,11 @@ export default function AccountPage() {
   const [recoveryCodes, setRecoveryCodes] = useState<string[] | null>(null);
   const [mfaDisablePassword, setMfaDisablePassword] = useState('');
   const [mfaDisableCode, setMfaDisableCode] = useState('');
+  const [passkeys, setPasskeys] = useState<Array<{ id: string; name: string; device_type: string; backed_up: boolean; created_at: string }>>([]);
+  const [passkeyPassword, setPasskeyPassword] = useState('');
+  const [passkeyName, setPasskeyName] = useState('This device');
+  const [passkeyBusy, setPasskeyBusy] = useState(false);
+  const [passkeyMessage, setPasskeyMessage] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null);
 
   const [securityStatus, setSecurityStatus] = useState<SecurityNumberStatus | null>(null);
   const [revealPassword, setRevealPassword] = useState('');
@@ -128,12 +134,11 @@ export default function AccountPage() {
       });
 
     apiFetch<MfaStatusResponse>('/api/auth/mfa/status')
-      .then((res) => {
-        if (!cancelled) setMfaStatus(res.mfa);
-      })
-      .catch(() => {
-        /* Non-fatal — MFA controls report their unavailable state below. */
-      });
+      .then((res) => { if (!cancelled) setMfaStatus(res.mfa); })
+      .catch(() => { /* Non-fatal — MFA controls report their unavailable state below. */ });
+    apiFetch<{ passkeys: Array<{ id: string; name: string; device_type: string; backed_up: boolean; created_at: string }> }>('/api/auth/passkeys')
+      .then((res) => { if (!cancelled) setPasskeys(res.passkeys); })
+      .catch(() => { /* Non-fatal — passkey controls report their unavailable state below. */ });
 
     return () => {
       cancelled = true;
@@ -173,6 +178,26 @@ export default function AccountPage() {
     const timer = setTimeout(() => setRevealedNumber(null), 120_000);
     return () => clearTimeout(timer);
   }, [revealedNumber]);
+
+  async function addPasskey(e: FormEvent) {
+    e.preventDefault(); setPasskeyBusy(true); setPasskeyMessage(null);
+    try {
+      const started = await apiFetch<{ challengeId: string; options: Parameters<typeof startRegistration>[0]['optionsJSON'] }>('/api/auth/passkeys/register/options', { method:'POST', body:JSON.stringify({ password:passkeyPassword }) });
+      const response = await startRegistration({ optionsJSON: started.options });
+      const finished = await apiFetch<{ passkey: { id:string; name:string; device_type:string; backed_up:boolean; created_at:string } }>('/api/auth/passkeys/register/verify', { method:'POST', body:JSON.stringify({ challengeId:started.challengeId, name:passkeyName, response }) });
+      setPasskeys((current) => [finished.passkey, ...current]); setPasskeyPassword(''); setPasskeyMessage({kind:'ok',text:'Passkey added.'});
+    } catch (err) { setPasskeyMessage({kind:'error',text:err instanceof Error ? err.message : 'Could not add passkey.'}); }
+    finally { setPasskeyBusy(false); }
+  }
+
+  async function removePasskey(id: string) {
+    const password = window.prompt('Enter your current password to remove this passkey.');
+    if (!password) return;
+    setPasskeyBusy(true); setPasskeyMessage(null);
+    try { await apiFetch(`/api/auth/passkeys/${id}`, { method:'DELETE', body:JSON.stringify({ password }) }); setPasskeys((current) => current.filter((item) => item.id !== id)); setPasskeyMessage({kind:'ok',text:'Passkey removed.'}); }
+    catch (err) { setPasskeyMessage({kind:'error',text:err instanceof Error ? err.message : 'Could not remove passkey.'}); }
+    finally { setPasskeyBusy(false); }
+  }
 
   async function beginMfaEnrollment(e: FormEvent) {
     e.preventDefault();
@@ -452,6 +477,20 @@ export default function AccountPage() {
         <button type="button" className="ch247-button ch247-button--outline" onClick={handleLogout} disabled={loggingOut}>
           {loggingOut ? 'Logging out…' : 'Log out of this device'}
         </button>
+      </div>
+
+      <div className="ch247-card">
+        <h2>Passkeys</h2>
+        <p className="ch247-page__hint">Register a device passkey now. Passkey sign-in is not activated yet, so your password and MFA remain the login path.</p>
+        {inSupportMode ? <p className="ch247-status-error">Passkey changes are blocked in support mode.</p> : (
+          <form className="ch247-form ch247-form--wide" onSubmit={addPasskey}>
+            <label><span className="ch247-field-label">Passkey name</span><input value={passkeyName} onChange={(e) => setPasskeyName(e.target.value)} maxLength={80} required /></label>
+            <label><span className="ch247-field-label">Confirm your password</span><input type="password" value={passkeyPassword} onChange={(e) => setPasskeyPassword(e.target.value)} autoComplete="current-password" required /></label>
+            <button type="submit" disabled={passkeyBusy}>{passkeyBusy ? 'Working…' : 'Add passkey'}</button>
+          </form>
+        )}
+        {passkeys.length > 0 && <ul>{passkeys.map((passkey) => <li key={passkey.id}><strong>{passkey.name}</strong> — {passkey.device_type === 'multiDevice' ? 'synced passkey' : 'device passkey'} <button type="button" className="ch247-button ch247-button--outline" onClick={() => removePasskey(passkey.id)} disabled={passkeyBusy || inSupportMode}>Remove</button></li>)}</ul>}
+        {passkeyMessage && <p className={passkeyMessage.kind === 'ok' ? 'ch247-status-ok' : 'ch247-status-error'}>{passkeyMessage.text}</p>}
       </div>
 
       <div className="ch247-card">

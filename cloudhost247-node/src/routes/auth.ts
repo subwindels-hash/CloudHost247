@@ -15,6 +15,7 @@ import {
   issueMfaLoginChallenge,
 } from '../services/totp-mfa-service';
 import { createUserWithIdentity } from '../services/customer-identity-service';
+import { beginPasskeyRegistration, finishPasskeyRegistration, listPasskeys, removePasskey, renamePasskey } from '../services/passkey-service';
 import {
   expiryFromNow,
   generateSecurityNumber,
@@ -67,6 +68,12 @@ const mfaLoginVerifySchema = mfaCodeSchema.extend({
 
 const mfaEnrollSchema = z.object({ password: z.string().min(1) });
 const mfaDisableSchema = mfaCodeSchema.extend({ password: z.string().min(1) });
+const passkeyStartSchema = z.object({ password: z.string().min(1) });
+const passkeyFinishSchema = z.object({
+  challengeId: z.string().uuid(), name: z.string().trim().min(1).max(80), response: z.record(z.unknown()),
+});
+const passkeyRenameSchema = z.object({ name: z.string().trim().min(1).max(80) });
+const passkeyRemoveSchema = z.object({ password: z.string().min(1) });
 
 function publicUser(user: {
   id: string;
@@ -347,6 +354,59 @@ export async function registerAuthRoutes(app: FastifyInstance, env: Env, overrid
   app.get('/api/auth/mfa/status', async (request) => {
     const auth = await authenticate(request, env, pool);
     return { mfa: await getMfaStatus(pool, auth.userId) };
+  });
+
+  app.get('/api/auth/passkeys', async (request) => {
+    const auth = await authenticate(request, env, pool);
+    return { passkeys: await listPasskeys(pool, auth.userId) };
+  });
+
+  app.post('/api/auth/passkeys/register/options', { config: { rateLimit: { max: 5, timeWindow: '15 minutes' } } }, async (request) => {
+    const auth = await authenticate(request, env, pool);
+    await guardSupportMode(pool, request, auth, 'passkey.enroll');
+    const parsed = passkeyStartSchema.safeParse(request.body);
+    if (!parsed.success) throw new ValidationError(parsed.error.issues.map((i) => i.message).join(', '));
+    const user = await findUserById(pool, auth.userId);
+    if (!user) throw new UnauthorizedError('Account no longer exists');
+    if (!(await verifyPassword(parsed.data.password, user.password_hash))) throw new ValidationError('Current password is incorrect');
+    const registration = await beginPasskeyRegistration(pool, env, { id:user.id,email:user.email,fullName:user.full_name,authSessionVersion:user.auth_session_version });
+    await recordAuthEvent(pool, { id: randomUUID(), userId:user.id, eventType:'passkey_enrollment_started', ipAddress:request.ip, userAgent:request.headers['user-agent'] ?? null });
+    return registration;
+  });
+
+  app.post('/api/auth/passkeys/register/verify', { config: { rateLimit: { max: 10, timeWindow: '15 minutes' } } }, async (request) => {
+    const auth = await authenticate(request, env, pool);
+    await guardSupportMode(pool, request, auth, 'passkey.enroll');
+    const parsed = passkeyFinishSchema.safeParse(request.body);
+    if (!parsed.success) throw new ValidationError(parsed.error.issues.map((i) => i.message).join(', '));
+    const passkey = await finishPasskeyRegistration(pool, env, { userId:auth.userId, sessionVersion:auth.sv ?? 0, challengeId:parsed.data.challengeId, response:parsed.data.response as never, name:parsed.data.name });
+    if (!passkey) throw new ValidationError('Passkey registration could not be verified. Start setup again.');
+    await recordAuthEvent(pool, { id:randomUUID(),userId:auth.userId,eventType:'passkey_added',ipAddress:request.ip,userAgent:request.headers['user-agent'] ?? null,metadata:{ passkeyId:passkey.id } });
+    return { passkey };
+  });
+
+  app.patch('/api/auth/passkeys/:id', async (request) => {
+    const auth = await authenticate(request, env, pool);
+    await guardSupportMode(pool, request, auth, 'passkey.manage');
+    const parsed = passkeyRenameSchema.safeParse(request.body);
+    if (!parsed.success) throw new ValidationError(parsed.error.issues.map((i) => i.message).join(', '));
+    const passkey = await renamePasskey(pool, auth.userId, String((request.params as { id?: string }).id ?? ''), parsed.data.name);
+    if (!passkey) throw new ValidationError('Passkey not found');
+    await recordAuthEvent(pool,{id:randomUUID(),userId:auth.userId,eventType:'passkey_renamed',ipAddress:request.ip,userAgent:request.headers['user-agent'] ?? null,metadata:{passkeyId:passkey.id}});
+    return { passkey };
+  });
+
+  app.delete('/api/auth/passkeys/:id', async (request) => {
+    const auth = await authenticate(request, env, pool);
+    await guardSupportMode(pool, request, auth, 'passkey.manage');
+    const parsed = passkeyRemoveSchema.safeParse(request.body);
+    if (!parsed.success) throw new ValidationError(parsed.error.issues.map((i) => i.message).join(', '));
+    const user = await findUserById(pool, auth.userId);
+    if (!user || !(await verifyPassword(parsed.data.password, user.password_hash))) throw new ValidationError('Current password is incorrect');
+    const removed = await removePasskey(pool, auth.userId, String((request.params as { id?: string }).id ?? ''));
+    if (!removed) throw new ValidationError('Passkey not found');
+    await recordAuthEvent(pool,{id:randomUUID(),userId:auth.userId,eventType:'passkey_removed',ipAddress:request.ip,userAgent:request.headers['user-agent'] ?? null});
+    return { message:'Passkey removed.' };
   });
 
   app.post('/api/auth/mfa/disable', { config: { rateLimit: { max: 5, timeWindow: '15 minutes' } } }, async (request) => {

@@ -87,6 +87,7 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0058_create_worker_cycle_leases.sql',
     '0059_create_auth_recovery.sql',
     '0060_create_totp_mfa.sql',
+    '0061_create_webauthn_passkeys.sql',
   ];
 
   it('finds the committed migration files in order', () => {
@@ -157,6 +158,8 @@ describe('migration runner against the real database/migrations SQL files', () =
         'user_mfa_totp',
         'user_mfa_recovery_codes',
         'auth_mfa_login_challenges',
+        'user_passkeys',
+        'webauthn_registration_challenges',
       ])
     );
   });

@@ -262,7 +262,11 @@ export async function recordAuthEvent(
       | 'mfa_disabled'
       | 'mfa_login_challenge'
       | 'mfa_login_failure'
-      | 'mfa_recovery_code_used';
+      | 'mfa_recovery_code_used'
+      | 'passkey_enrollment_started'
+      | 'passkey_added'
+      | 'passkey_removed'
+      | 'passkey_renamed';
     ipAddress?: string | null;
     userAgent?: string | null;
     metadata?: Record<string, unknown>;
