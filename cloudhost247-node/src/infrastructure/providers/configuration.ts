@@ -304,9 +304,20 @@ export function describeProviderConfiguration(
     const present = Boolean(source[name] ?? (fallbackName ? source[fallbackName] : undefined));
     return { name, fallbackName, description: credential.description, required: credential.required, present };
   });
-  const apiBaseUrlConfigured = Boolean(provider.api_base_url ?? profile.defaultApiBaseUrl);
+  const configuredBaseUrl = provider.api_base_url ?? profile.defaultApiBaseUrl;
+  let apiBaseUrlConfigured = Boolean(configuredBaseUrl);
+  if (configuredBaseUrl) {
+    try {
+      const parsed = new URL(configuredBaseUrl);
+      const loopback = parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1' || parsed.hostname === '::1';
+      apiBaseUrlConfigured = parsed.protocol === 'https:' || (parsed.protocol === 'http:' && loopback);
+    } catch {
+      apiBaseUrlConfigured = false;
+    }
+  }
   const missing = credentials.filter((credential) => credential.required && !credential.present).map((credential) => credential.name);
-  if (profile.requiresApiBaseUrl && !apiBaseUrlConfigured) missing.push('api_base_url');
+  if (configuredBaseUrl && !apiBaseUrlConfigured) missing.push('api_base_url must use https');
+  else if (profile.requiresApiBaseUrl && !apiBaseUrlConfigured) missing.push('api_base_url');
   // OpenStack accepts either of two credential sets, so completeness is evaluated per login mode.
   if (profile.kind === 'openstack') {
     const present = (suffix: string) => credentials.find((credential) => credential.name.endsWith(suffix))?.present === true;

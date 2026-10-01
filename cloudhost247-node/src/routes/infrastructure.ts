@@ -89,6 +89,27 @@ const versionStatus = z.enum(['ACTIVE','MAINTENANCE','EOL_WARNING','EOL','ARCHIV
 const providerStatus = z.enum(['ACTIVE','DISABLED','CONFIGURATION_REQUIRED','UNAVAILABLE']);
 const imageStatus = z.enum(['DRAFT','VALIDATING','ACTIVE','DISABLED','INVALID']);
 
+// Provider/image/template metadata is operator-controlled, but it is still returned in privileged
+// admin projections and passed into adapter requests. Keep credentials in environment variables,
+// not in JSON fields that can be copied into browser responses, audit records, or provider logs.
+const SENSITIVE_METADATA_TERMS = [
+  'authorization', 'apikey', 'accesskey', 'consumerkey', 'applicationkey', 'secret',
+  'token', 'password', 'passwd', 'credential', 'privatekey', 'userdata', 'cloudinit',
+];
+function containsSensitiveMetadata(value: unknown, depth = 0): boolean {
+  if (depth > 6 || value === null || typeof value !== 'object') return false;
+  if (Array.isArray(value)) return value.some((item) => containsSensitiveMetadata(item, depth + 1));
+  return Object.entries(value as Record<string, unknown>).some(([key, item]) => {
+    const normalized = key.toLowerCase().replace(/[^a-z0-9]/g, '');
+    return SENSITIVE_METADATA_TERMS.some((term) => normalized === term || normalized.includes(term))
+      || containsSensitiveMetadata(item, depth + 1);
+  });
+}
+const safeMetadata = z.record(z.unknown()).refine(
+  (value) => !containsSensitiveMetadata(value),
+  'Metadata cannot contain provider credentials or secret material; configure those in the server environment',
+);
+
 function parse<T>(schema: z.ZodType<T>, value: unknown): T {
   const result = schema.safeParse(value);
   if (!result.success) throw new ValidationError(result.error.issues.map((issue) => issue.message).join(', '));
@@ -165,18 +186,18 @@ const providerSchema = z.object({
   providerType: z.enum(['OVH','HETZNER','AWS','DIGITALOCEAN','VULTR','CONTABO','PROXMOX','VIRTUALIZOR','SOLUSVM','OPENSTACK','GENERIC_HTTP','MOCK','OTHER']),
   adapter: z.enum(['hetzner','ovh','aws','digitalocean','vultr','contabo','proxmox','virtualizor','solusvm','openstack','generic_http','mock']),
   status: providerStatus.optional(),apiBaseUrl: z.string().url().nullable().optional(),credentialEnvPrefix: z.string().max(64).regex(/^[A-Z][A-Z0-9_]*$/).nullable().optional(),
-  capabilities: z.record(z.unknown()).optional(),metadata: z.record(z.unknown()).optional(),
+  capabilities: z.record(z.unknown()).optional(),metadata: safeMetadata.optional(),
 });
 const patchProviderSchema = providerSchema.omit({ slug: true,providerType: true,adapter: true }).partial();
-const regionSchema = z.object({ providerId: id,code: z.string().min(1).max(96),name: z.string().min(1).max(160),countryCode: z.string().length(2).nullable().optional(),status: z.enum(['ACTIVE','DISABLED','ARCHIVED']).optional(),metadata: z.record(z.unknown()).optional() });
-const datacenterSchema = z.object({ regionId: id,code: z.string().min(1).max(96),name: z.string().min(1).max(160),status: z.enum(['ACTIVE','DISABLED','ARCHIVED']).optional(),metadata: z.record(z.unknown()).optional() });
+const regionSchema = z.object({ providerId: id,code: z.string().min(1).max(96),name: z.string().min(1).max(160),countryCode: z.string().length(2).nullable().optional(),status: z.enum(['ACTIVE','DISABLED','ARCHIVED']).optional(),metadata: safeMetadata.optional() });
+const datacenterSchema = z.object({ regionId: id,code: z.string().min(1).max(96),name: z.string().min(1).max(160),status: z.enum(['ACTIVE','DISABLED','ARCHIVED']).optional(),metadata: safeMetadata.optional() });
 const imageSchema = z.object({
   providerId: id,operatingSystemVersionId: id,providerImageId: z.string().max(512).nullable().optional(),providerTemplateId: z.string().max(512).nullable().optional(),
-  architecture,regionId: id.nullable().optional(),datacenterId: id.nullable().optional(),metadata: z.record(z.unknown()).optional(),
+  architecture,regionId: id.nullable().optional(),datacenterId: id.nullable().optional(),metadata: safeMetadata.optional(),
 }).refine((value) => !!value.providerImageId || !!value.providerTemplateId,{ message: 'providerImageId or providerTemplateId is required' });
 const patchImageSchema = z.object({
   providerImageId: z.string().max(512).nullable().optional(),providerTemplateId: z.string().max(512).nullable().optional(),architecture: architecture.optional(),
-  regionId: id.nullable().optional(),datacenterId: id.nullable().optional(),status: imageStatus.optional(),metadata: z.record(z.unknown()).optional(),
+  regionId: id.nullable().optional(),datacenterId: id.nullable().optional(),status: imageStatus.optional(),metadata: safeMetadata.optional(),
 });
 const logoUploadSchema = z.object({
   fileName: z.string().trim().min(1).max(255),
@@ -652,7 +673,7 @@ export async function registerInfrastructureRoutes(app: FastifyInstance,env: Env
     return{plans:result.rows};
   });
 
-  const productConfigSchema=z.object({planId:id,providerId:id,regionId:id,datacenterId:id.nullable().optional(),operatingSystemVersionId:id,architecture,serverType,status:z.enum(['ACTIVE','DISABLED','ARCHIVED']).optional(),metadata:z.record(z.unknown()).optional()});
+  const productConfigSchema=z.object({planId:id,providerId:id,regionId:id,datacenterId:id.nullable().optional(),operatingSystemVersionId:id,architecture,serverType,status:z.enum(['ACTIVE','DISABLED','ARCHIVED']).optional(),metadata:safeMetadata.optional()});
   app.get('/api/v1/admin/server-product-configurations',async(request)=>{await admin(request);const query=parse(z.object({planId:id.optional()}),request.query??{});return{configurations:await listProductConfigurations(db,query.planId)};});
   app.post('/api/v1/admin/server-product-configurations',async(request,reply)=>{
     const auth=await admin(request);const input=parse(productConfigSchema,request.body);

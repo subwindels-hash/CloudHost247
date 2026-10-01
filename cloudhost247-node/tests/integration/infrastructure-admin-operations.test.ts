@@ -110,6 +110,22 @@ describe('admin infrastructure operations', () => {
     await app.close();
   });
 
+  it('rejects credentials hidden inside operator metadata instead of returning them to admin clients', async () => {
+    const app = buildApp(env, { serveFrontend: false, pool: db });
+    const response = await app.inject({
+      method: 'POST', url: '/api/v1/admin/providers', headers: auth(adminToken),
+      payload: {
+        name: 'Metadata secret test', slug: `metadata-${randomUUID().slice(0, 8)}`,
+        providerType: 'GENERIC_HTTP', adapter: 'generic_http', status: 'CONFIGURATION_REQUIRED',
+        apiBaseUrl: 'https://bridge.example.test', credentialEnvPrefix: 'BRIDGE',
+        metadata: { providerPlan: { apiToken: 'should-not-be-stored' } },
+      },
+    });
+    expect(response.statusCode).toBe(400);
+    expect(response.json().message).toContain('Metadata cannot contain provider credentials');
+    await app.close();
+  });
+
   it('refuses to register the mock provider without the explicit development opt-in', async () => {
     const app = buildApp(env, { serveFrontend: false, pool: db });
     const rejected = await app.inject({

@@ -84,6 +84,24 @@ describe('every adapter kind fails closed without server-side credentials', () =
       retryable: false,
     });
   });
+
+  it('refuses to send a generic bridge bearer token over external plaintext HTTP', async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+    const instance = createInfrastructureProviderAdapter(
+      provider('generic_http', 'GENERIC_HTTP', {
+        api_base_url: 'http://bridge.example.test',
+        credential_env_prefix: 'BRIDGE',
+      }),
+      { BRIDGE_API_TOKEN: 'bridge-secret-token' } as NodeJS.ProcessEnv,
+    );
+    await expect(instance.validateConfiguration()).rejects.toMatchObject<Partial<ProviderError>>({
+      code: 'INVALID_CONFIGURATION',
+      retryable: false,
+    });
+    expect(fetchMock).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
+  });
 });
 
 describe('mock provider isolation', () => {
@@ -180,6 +198,16 @@ describe('provider configuration reporting never leaks secrets', () => {
     const report = describeProviderConfiguration(provider('proxmox', 'PROXMOX'), {} as NodeJS.ProcessEnv);
     expect(report.apiBaseUrlRequired).toBe(true);
     expect(report.missing).toContain('api_base_url');
+  });
+
+  it('does not report an external plaintext bridge as ready', () => {
+    const report = describeProviderConfiguration(
+      provider('generic_http', 'GENERIC_HTTP', { api_base_url: 'http://bridge.example.test', credential_env_prefix: 'BRIDGE' }),
+      { BRIDGE_API_TOKEN: 'bridge-secret-token' } as NodeJS.ProcessEnv,
+    );
+    expect(report.ready).toBe(false);
+    expect(report.missing).toContain('api_base_url must use https');
+    expect(JSON.stringify(report)).not.toContain('bridge-secret-token');
   });
 
   it('reports an unimplemented adapter as fail-closed rather than ready', () => {
