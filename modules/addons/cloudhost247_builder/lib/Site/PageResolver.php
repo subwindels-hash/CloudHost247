@@ -5,6 +5,7 @@ use CloudHost247\Builder\Catalog\WhmcsDataSource;
 use CloudHost247\Builder\Contracts\LiveDataSource;
 use CloudHost247\Builder\Render\RenderContext;
 use CloudHost247\Builder\Render\Renderer;
+use CloudHost247\Builder\Repositories\MediaRepository;
 use CloudHost247\Builder\Repositories\PageRepository;
 use CloudHost247\Builder\Services\FormService;
 use CloudHost247\Builder\Services\MenuService;
@@ -43,6 +44,7 @@ class PageResolver
     private $data;
     private $menus;
     private $forms;
+    private $media;
 
     public function __construct(
         PageService $pages = null,
@@ -51,8 +53,10 @@ class PageResolver
         Renderer $renderer = null,
         LiveDataSource $data = null,
         MenuService $menus = null,
-        FormService $forms = null
+        FormService $forms = null,
+        MediaRepository $media = null
     ) {
+        $this->media = $media ? $media : new MediaRepository();
         $this->settings = $settings ? $settings : new Settings();
         $this->pages = $pages ? $pages : new PageService();
         $this->theme = $theme ? $theme : new ThemeService();
@@ -201,6 +205,7 @@ class PageResolver
 
     private function meta(array $page, $isPreview)
     {
+        $image = $this->socialImage($page);
         $suffix = (string) $this->settings->get('seo_title_suffix', '');
         $title = $page['seo_title'] !== '' ? $page['seo_title'] : $page['title'];
         $description = $page['meta_description'] !== ''
@@ -212,8 +217,34 @@ class PageResolver
             // A preview is never indexable, whatever the page says.
             'robots' => $isPreview ? 'noindex,nofollow' : ($page['meta_robots'] !== '' ? $page['meta_robots'] : 'index,follow'),
             'canonical' => $isPreview ? '' : $page['canonical_url'],
-            'og_image' => (string) $this->settings->get('social_image_url', ''),
+            'og_image' => $image['url'],
+            'og_image_alt' => $image['alt'],
+            'site_name' => (string) $this->settings->get('site_title', ''),
         );
+    }
+
+    /**
+     * Social-sharing image for a page: its own social image, then its featured image, then
+     * the site-wide default. Only stored image media qualifies; anything else is skipped
+     * rather than emitted as a broken tag.
+     *
+     * @return array{url:string,alt:string}
+     */
+    private function socialImage(array $page)
+    {
+        foreach (array('og_media_id', 'featured_media_id') as $field) {
+            $id = isset($page[$field]) ? (int) $page[$field] : 0;
+            if ($id <= 0) { continue; }
+            try {
+                $media = $this->media->find($id);
+            } catch (\Throwable $unavailable) {
+                $media = null;
+            }
+            if ($media && !empty($media['is_image']) && $media['url_path'] !== '') {
+                return array('url' => (string) $media['url_path'], 'alt' => (string) $media['alt_text']);
+            }
+        }
+        return array('url' => (string) $this->settings->get('social_image_url', ''), 'alt' => '');
     }
 
     private function notFound($reason)

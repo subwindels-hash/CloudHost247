@@ -92,6 +92,37 @@ class PageRepository
         return $row ? $this->hydrate($row) : null;
     }
 
+    /**
+     * Rows that could appear in a sitemap: public pages with published content that are
+     * published or scheduled. Scheduling time, robots and canonical rules are applied by
+     * SitemapService, which keeps this query cheap (no document bodies are hydrated).
+     *
+     * @return array<int,array<string,string>> slug, status, publish_at, published_at, updated_at, meta_robots, canonical_url
+     */
+    public function sitemapCandidates($limit = 50000)
+    {
+        $rows = Capsule::table(self::PAGES)
+            ->where('visibility', 'public')
+            ->whereIn('status', array('published', 'scheduled'))
+            ->where('published_json', '!=', '')
+            ->orderBy('slug', 'asc')
+            ->limit(max(1, (int) $limit))
+            ->get();
+        $out = array();
+        foreach ($rows as $row) {
+            $out[] = array(
+                'slug' => (string) $row->slug,
+                'status' => (string) $row->status,
+                'publish_at' => $row->publish_at ? (string) $row->publish_at : '',
+                'published_at' => $row->published_at ? (string) $row->published_at : '',
+                'updated_at' => $row->updated_at ? (string) $row->updated_at : '',
+                'meta_robots' => (string) $row->meta_robots,
+                'canonical_url' => (string) $row->canonical_url,
+            );
+        }
+        return $out;
+    }
+
     public function slugExists($slug, $exceptId = 0)
     {
         $query = Capsule::table(self::PAGES)->where('slug', (string) $slug);
