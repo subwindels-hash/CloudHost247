@@ -283,11 +283,35 @@ export async function sweepAuctionStates(db: Queryable): Promise<{ started: numb
       RETURNING id`
   );
 
-  const endingSoon = await db.query(
+  const endingSoon = await db.query<{ id: string; domain_name: string; ends_at: string }>(
     `UPDATE domain_auctions SET status='ending_soon', updated_at=now()
       WHERE status='live' AND ends_at <= now() + interval '1 hour'
-      RETURNING id`
+      RETURNING id, domain_name, ends_at`
   );
+
+  // "Auction ending soon" — every customer with a live stake in the auction is told once.
+  // createNotification dedupes on (user, type, resource), so repeated sweeps cannot re-send.
+  if (endingSoon.rows.length > 0) {
+    const { createNotification } = await import('../services/notification-service');
+    for (const auction of endingSoon.rows) {
+      const { rows: bidders } = await db.query<{ user_id: string }>(
+        `SELECT DISTINCT user_id FROM domain_bids
+          WHERE auction_id=$1 AND status IN ('active','winning','outbid')`,
+        [auction.id]
+      );
+      const endsAt = new Date(auction.ends_at).toUTCString();
+      for (const bidder of bidders) {
+        await createNotification(db, {
+          userId: bidder.user_id,
+          type: 'DOMAIN_AUCTION_ENDING_SOON',
+          title: 'An auction you bid on is ending soon',
+          message: `Bidding on ${auction.domain_name} closes at ${endsAt}. Visit the auction page to check the current highest bid.`,
+          resourceType: 'domain_auction',
+          resourceId: auction.id,
+        }).catch(() => undefined);
+      }
+    }
+  }
 
   const { rows: toEnd } = await db.query<{ id: string; domain_name: string; current_highest_bidder_id: string | null; current_highest_bid: string | null; currency: string }>(
     `SELECT id, domain_name, current_highest_bidder_id, current_highest_bid, currency
@@ -326,6 +350,26 @@ export async function sweepAuctionStates(db: Queryable): Promise<{ started: numb
           resourceType: 'domain_auction',
           resourceId: auction.id,
         }).catch(() => undefined);
+
+        // "Auction lost" — every other participating bidder is told the auction closed without
+        // them winning. Distinct users only; dedupe makes repeat sweeps safe.
+        const { rows: losers } = await tx.query<{ user_id: string }>(
+          `SELECT DISTINCT user_id FROM domain_bids
+            WHERE auction_id=$1 AND status='lost' AND user_id <> $2`,
+          [auction.id, auction.current_highest_bidder_id]
+        );
+        for (const loser of losers) {
+          await createNotification(tx, {
+            userId: loser.user_id,
+            type: 'DOMAIN_AUCTION_LOST',
+            title: 'Auction ended — you did not win',
+            message: `The auction for ${auction.domain_name} has ended and your bid was not the winning bid. Browse current auctions to find similar domains.`,
+            resourceType: 'domain_auction',
+            resourceId: auction.id,
+          }).catch(() => undefined);
+        }
+      } else {
+        // No bids at all: nothing was won or lost, but participating state is unchanged.
       }
       endedCount += 1;
     });

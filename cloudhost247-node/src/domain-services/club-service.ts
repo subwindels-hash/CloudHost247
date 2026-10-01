@@ -207,16 +207,17 @@ export interface MembershipDto {
   invoiceId: string | null;
   billingPeriod: string;
   priceAmount: string;
+  currency: string;
 }
 
 export async function getMyMembership(db: Queryable, userId: string): Promise<MembershipDto | null> {
   const { rows } = await db.query<{
     id: string; plan_id: string; status: string; starts_at: string | null; renews_at: string | null;
     cancelled_at: string | null; created_at: string; order_id: string | null; plan_name: string;
-    billing_period: string; price_amount: string;
+    billing_period: string; price_amount: string; currency: string;
   }>(
     `SELECT m.id, m.plan_id, m.status, m.starts_at, m.renews_at, m.cancelled_at, m.created_at,
-            m.order_id, p.name AS plan_name, p.billing_period, p.price_amount
+            m.order_id, p.name AS plan_name, p.billing_period, p.price_amount, p.currency
        FROM domain_club_memberships m
        JOIN domain_club_plans p ON p.id = m.plan_id
       WHERE m.user_id = $1
@@ -243,6 +244,7 @@ export async function getMyMembership(db: Queryable, userId: string): Promise<Me
     invoiceId: invoice.rows[0]?.id ?? null,
     billingPeriod: row.billing_period,
     priceAmount: row.price_amount,
+    currency: row.currency,
   };
 }
 
@@ -437,18 +439,17 @@ export async function cancelMyMembership(db: Queryable, userId: string, membersh
 
 /** Worker sweep: expire active memberships past their renewal date (no auto-charge exists). */
 export async function expireLapsedMemberships(db: Queryable): Promise<number> {
-  const { rows: expiredNow } = await db.query(
+  // Capture the expiring rows themselves: the customer must be told about THEIR expiry as it
+  // happens, not some time later when an unrelated membership happens to lapse.
+  const { rows: expiredNow } = await db.query<{ id: string; user_id: string }>(
     `UPDATE domain_club_memberships
         SET status = 'expired', updated_at = now()
       WHERE status = 'active' AND renews_at < now()
-      RETURNING id`
+      RETURNING id, user_id`
   );
   if (expiredNow.length > 0) {
-    const { rows: expired } = await db.query<{ user_id: string; id: string }>(
-      `SELECT user_id, id FROM domain_club_memberships WHERE status = 'expired' AND renews_at < now() - interval '1 day'`
-    );
     const { createNotification } = await import('../services/notification-service');
-    for (const membership of expired) {
+    for (const membership of expiredNow) {
       await createNotification(db, {
         userId: membership.user_id,
         type: 'DOMAIN_CLUB_EXPIRED',
@@ -460,6 +461,41 @@ export async function expireLapsedMemberships(db: Queryable): Promise<number> {
     }
   }
   return expiredNow.length;
+}
+
+/**
+ * Worker sweep: "membership renewal" reminder, sent once per membership when the renewal date is
+ * 7 days away or less. createNotification dedupes on (user, type, membership), so the reminder
+ * can never repeat for the same term.
+ */
+export const MEMBERSHIP_RENEWAL_REMINDER_WINDOW_DAYS = 7;
+
+export async function sendMembershipRenewalReminders(db: Queryable): Promise<number> {
+  const { rows: due } = await db.query<{ id: string; user_id: string; renews_at: string }>(
+    `SELECT m.id, m.user_id, m.renews_at
+       FROM domain_club_memberships m
+      WHERE m.status = 'active'
+        AND m.renews_at > now()
+        AND m.renews_at <= now() + interval '7 days'
+      ORDER BY m.renews_at ASC
+      LIMIT 200`
+  );
+  if (due.length === 0) return 0;
+  const { createNotification } = await import('../services/notification-service');
+  let sent = 0;
+  for (const membership of due) {
+    const renewsAt = new Date(membership.renews_at).toUTCString();
+    const notificationId = await createNotification(db, {
+      userId: membership.user_id,
+      type: 'DOMAIN_CLUB_RENEWAL_REMINDER',
+      title: 'Your Discount Domain Club membership renews soon',
+      message: `Your membership is due for renewal on ${renewsAt}. Renew from the Domain Club page to keep your member pricing without interruption.`,
+      resourceType: 'domain_club_membership',
+      resourceId: membership.id,
+    }).catch(() => null);
+    if (notificationId) sent += 1;
+  }
+  return sent;
 }
 
 /**

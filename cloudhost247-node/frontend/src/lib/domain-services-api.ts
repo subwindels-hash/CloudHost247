@@ -171,6 +171,7 @@ export interface MembershipDto {
   invoiceId: string | null;
   billingPeriod: string;
   priceAmount: string;
+  currency: string;
 }
 
 export function fetchReadiness(): Promise<ReadinessResponse> {

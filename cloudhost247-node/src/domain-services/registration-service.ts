@@ -455,6 +455,7 @@ export async function processPaidRegistrations(
         );
         if (confirmed) {
           await linkRegisteredDomain(tx, candidate.user_id, candidate.domain_name, provider.provider.name, candidate.id);
+          await notifyRegistrationSucceeded(tx, candidate.id, candidate.user_id, candidate.domain_name);
         }
         await advanceRegistrationTransaction(tx, candidate.id, confirmed ? 'paid' : 'processing', result.providerReference);
       });
@@ -500,6 +501,7 @@ export async function confirmPendingRegistrations(pool: Queryable, batchSize = 1
           );
           if (updated[0]) {
             await linkRegisteredDomain(tx, candidate.user_id, candidate.domain_name, provider.provider.name, candidate.id);
+            await notifyRegistrationSucceeded(tx, candidate.id, candidate.user_id, candidate.domain_name);
             await advanceRegistrationTransaction(tx, candidate.id, 'paid', candidate.provider_reference);
             confirmedCount += 1;
           }
@@ -593,6 +595,28 @@ async function failRegistration(
     type: 'DOMAIN_REGISTRATION_FAILED',
     title: 'Domain registration could not be completed',
     message: `We could not complete the registration request for your domain. Our team will review the order and follow up. Reference: ${registrationId}`,
+    resourceType: 'domain_registration',
+    resourceId: registrationId,
+  }).catch(() => undefined);
+}
+
+/**
+ * "Domain registration succeeded" — sent only after the REGISTRAR confirmed the domain, never on
+ * payment alone. Deduped on (user, type, registration), so the settle path and the polling path
+ * cannot both notify for the same registration.
+ */
+async function notifyRegistrationSucceeded(
+  tx: Queryable,
+  registrationId: string,
+  userId: string,
+  domainName: string
+): Promise<void> {
+  const { createNotification } = await import('../services/notification-service');
+  await createNotification(tx, {
+    userId,
+    type: 'DOMAIN_REGISTRATION_COMPLETED',
+    title: 'Your domain registration is complete',
+    message: `${domainName} has been registered and is now live in your CloudHost247 account. Manage it from your dashboard.`,
     resourceType: 'domain_registration',
     resourceId: registrationId,
   }).catch(() => undefined);
