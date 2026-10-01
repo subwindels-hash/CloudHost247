@@ -74,6 +74,41 @@ describe('/domains/search', () => {
     await waitFor(() => expect(screen.getByText('Service Provider Not Configured')).toBeTruthy());
     expect(screen.queryByText('example.com')).toBeNull();
   });
+
+  it('lets a signed-in customer watch a taken result and reflects the "Watching" state', async () => {
+    localStorage.setItem('ch247_token', 'test-token');
+    vi.stubGlobal('fetch', routeMock([
+      {
+        match: (path) => path.startsWith('/api/v1/domain-services/search'),
+        body: {
+          searchId: 's3', queryLabel: 'taken-brand', status: 'completed', message: null,
+          results: [
+            { domainName: 'taken-brand.com', availabilityStatus: 'registered', isPremium: false, registrationPrice: null, renewalPrice: null, transferPrice: '11.48', currency: 'USD' },
+          ],
+        },
+      },
+      {
+        match: (path, init) => path === '/api/v1/domain-services/watches' && (init?.method ?? 'GET') === 'POST',
+        status: 201,
+        body: { watch: { id: 'watch-42', domainName: 'taken-brand.com', status: 'watching', lastCheckedAt: null, lastAvailability: null, availableAt: null, createdAt: '2026-10-01T00:00:00Z' } },
+      },
+      {
+        match: (path, init) => path === '/api/v1/domain-services/watches' && (init?.method ?? 'GET') === 'GET',
+        body: { watches: [] },
+      },
+    ]));
+
+    render(<MemoryRouter initialEntries={['/domains/search']}><App /></MemoryRouter>);
+
+    fireEvent.change(screen.getByLabelText('Domain name'), { target: { value: 'taken-brand' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Search' }));
+
+    const watchButton = await screen.findByRole('button', { name: 'Watch' });
+    fireEvent.click(watchButton);
+
+    await waitFor(() => expect(screen.getByText('Watching ✓')).toBeTruthy());
+    expect(screen.getByText(/you will be notified if it becomes available/i)).toBeTruthy();
+  });
 });
 
 describe('/domains/whois', () => {

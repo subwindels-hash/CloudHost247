@@ -100,15 +100,21 @@ The only §17 event with no backing feature. Implemented end to end:
 
 ## 3. Verification
 
-- **New integration tests** (`tests/integration/domain-services-notifications.test.ts`, 7 tests
+- **New integration tests** (`tests/integration/domain-services-notifications.test.ts`, 12 tests
   against embedded Postgres + the simulated registrar): ending-soon once-only; win/lose
   notifications once-only; club expiry same-sweep regression; renewal reminder window +
   once-only; full broker workflow (notifications, supersede, hidden internal notes,
   server-computed payment total, transfer tracking, RBAC 403s); registration completion
-  notification once-only across repeated sweeps.
-- **Frontend unit test strengthened** (`domain-services-pages.test.tsx`): now also asserts the
-  lost-auctions, bulk-searches, Domain Club and Broker Requests dashboard sections.
-- Gates: `npm run typecheck` ✅, full `vitest run` ✅, `npm run build:frontend` ✅.
+  notification once-only across repeated sweeps; and five watch tests — not-configured refusal,
+  fulfilment + notify-once + owner-scoped cancel, premium fulfilment with the premium message,
+  wholesale provider-failure backoff (stamps, never fulfils, never notifies), and the
+  100-watches-per-user cap.
+- **Frontend unit tests strengthened** (`domain-services-pages.test.tsx`, 14 tests): also asserts
+  the lost-auctions, bulk-searches, Domain Club, availability-watches and Broker Requests
+  dashboard sections, plus the Watch → "Watching ✓" flow on taken search results.
+- Gates: `npm run typecheck` ✅, full `vitest run` (101 files, 735 tests) ✅,
+  `npm run build:frontend` ✅; GitHub Actions `Build, typecheck, test` jobs green (Node 22.12
+  & 24.8) on PR #32.
 - **Live dev preview** (`scripts/domain-services-demo-preview.ts`, development-only harness
   extended with a club membership + broker case through the real APIs): notifications visible in
   the customer's notification centre include `DOMAIN_REGISTRATION_COMPLETED`,

@@ -8,6 +8,7 @@ import { migrateUp } from '../../database/migrate';
 import { signAuthToken } from '../../src/lib/jwt';
 import { hashPassword } from '../../src/lib/password';
 import { sweepDomainServices } from '../../src/worker/domain-services-sweep';
+import { sweepAvailabilityWatches } from '../../src/domain-services/availability-watch-service';
 import { expireLapsedMemberships, sendMembershipRenewalReminders } from '../../src/domain-services/club-service';
 import { MockNamecheap } from '../helpers/mock-registrar';
 
@@ -581,6 +582,102 @@ describe('Domain availability watches', () => {
       headers: { authorization: `Bearer ${other.token}` },
     });
     expect(theirs.json().watches).toHaveLength(0);
+  });
+
+  it('fulfils a premium domain with the premium-specific message and pricing context', async () => {
+    const app = buildTestApp();
+    const admin = await createUser(db, 'watch-premium-admin@example.com', 'super_admin');
+    await connectRegistrar(app, admin.token);
+    const user = await createUser(db, 'premium-watcher@example.com');
+
+    // The simulated registry sells .io domains as premium names.
+    const watch = await app.inject({
+      method: 'POST',
+      url: '/api/v1/domain-services/watches',
+      headers: { authorization: `Bearer ${user.token}` },
+      payload: { domainName: 'rarebrand.io' },
+    });
+    expect(watch.statusCode).toBe(201);
+
+    const report = await sweepAvailabilityWatches(db as never);
+    expect(report).toEqual({ checked: 1, becameAvailable: 1, failures: 0 });
+
+    const row = await db.query<{ status: string; last_availability: string | null; available_at: string | null }>(
+      `SELECT status, last_availability, available_at FROM domain_availability_watches`
+    );
+    expect(row.rows[0].status).toBe('available');
+    expect(row.rows[0].last_availability).toBe('premium');
+    expect(row.rows[0].available_at).not.toBeNull();
+
+    const notifications = await db.query<{ type: string; message: string }>(
+      `SELECT type, message FROM user_notifications WHERE user_id = $1`,
+      [user.id]
+    );
+    expect(notifications.rows).toHaveLength(1);
+    expect(notifications.rows[0].type).toBe('DOMAIN_AVAILABILITY_ALERT');
+    expect(notifications.rows[0].message).toContain('premium domain');
+  });
+
+  it('backs off without killing watches or notifying when the provider call fails wholesale', async () => {
+    const app = buildTestApp();
+    const admin = await createUser(db, 'watch-fail-admin@example.com', 'super_admin');
+    await connectRegistrar(app, admin.token);
+    const user = await createUser(db, 'unlucky-watcher@example.com');
+
+    for (const domain of ['taken-one.com', 'gonebrand.com']) {
+      const created = await app.inject({
+        method: 'POST',
+        url: '/api/v1/domain-services/watches',
+        headers: { authorization: `Bearer ${user.token}` },
+        payload: { domainName: domain },
+      });
+      expect(created.statusCode).toBe(201);
+    }
+
+    // Registrar endpoint goes away before the sweep runs: the whole availability call fails.
+    await mockNamecheap.stop();
+    const report = await sweepAvailabilityWatches(db as never);
+    expect(report.failures).toBe(2);
+    expect(report.becameAvailable).toBe(0);
+
+    // Watches stay watching, attempts are stamped (fresh last_checked_at moves them to the
+    // back of the queue), and the failure counter increments — nothing is marked available.
+    const rows = await db.query<{ status: string; check_failures: number; last_checked_at: string | null; available_at: string | null }>(
+      `SELECT status, check_failures, last_checked_at, available_at FROM domain_availability_watches ORDER BY domain_name`
+    );
+    for (const row of rows.rows) {
+      expect(row.status).toBe('watching');
+      expect(row.check_failures).toBe(1);
+      expect(row.last_checked_at).not.toBeNull();
+      expect(row.available_at).toBeNull();
+    }
+    const notifications = await db.query(`SELECT id FROM user_notifications WHERE user_id = $1`, [user.id]);
+    expect(notifications.rows).toHaveLength(0);
+  });
+
+  it('refuses watch number 101 per user with a clear validation error', async () => {
+    const app = buildTestApp();
+    const admin = await createUser(db, 'watch-cap-admin@example.com', 'super_admin');
+    await connectRegistrar(app, admin.token);
+    const user = await createUser(db, 'cap-watcher@example.com');
+
+    for (let index = 0; index < 100; index += 1) {
+      await db.query(
+        `INSERT INTO domain_availability_watches (id, user_id, domain_name) VALUES ($1::uuid, $2::uuid, $3)`,
+        [randomUUID(), user.id, `capwatch${index}.com`]
+      );
+    }
+
+    const refused = await app.inject({
+      method: 'POST',
+      url: '/api/v1/domain-services/watches',
+      headers: { authorization: `Bearer ${user.token}` },
+      payload: { domainName: 'capwatch100.com' },
+    });
+    expect(refused.statusCode).toBe(400);
+    expect(refused.json().message).toContain('at most 100');
+    const total = await db.query<{ count: number }>(`SELECT count(*)::int AS count FROM domain_availability_watches`);
+    expect(total.rows[0].count).toBe(100);
   });
 });
 
