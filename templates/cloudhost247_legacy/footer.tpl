@@ -8,15 +8,15 @@
 </section>
 {/if}
 <!-- footer -->
-{if $hostx_theme_settings.disable_footer_inner_page neq 'on'}
-    {if $hostx_theme_settings.footer_layout eq '1'}
+{if $cloudhost247.settings.disable_footer_inner_page neq 'on'}
+    {if $cloudhost247.settings.footer_layout eq '1'}
         {include file="$template/includes/blocks/footer_block_latest.tpl"}
     {else}
 	    {include file="$template/includes/blocks/footer_block.tpl"}
     {/if}
-{else if $hostx_theme_settings.disable_footer_inner_page eq 'on'}
+{else if $cloudhost247.settings.disable_footer_inner_page eq 'on'}
 	{if $filename != 'clientarea' && $filename != 'submitticket' && $filename != 'affiliates' && $filename != 'supporttickets' && $filename != 'serverstatus' && $filename != 'viewticket' && !$smarty.get.m && $templatefile != 'account-user-management' && $templatefile != 'account-contacts-manage' && $templatefile != 'account-paymentmethods' && $templatefile != 'account-paymentmethods-manage' && $templatefile != 'announcements' && $templatefile != 'knowledgebase' && $templatefile != 'downloads' && $templatefile != 'viewannouncement' && $templatefile != 'knowledgebasecat' && $templatefile != 'knowledgebasearticle' && $templatefile != 'user-password' && $templatefile != 'user-profile' && $templatefile != 'user-switch-account' && $templatefile != 'user-security' && $filename != 'upgrade'}
-        {if $hostx_theme_settings.footer_layout eq '1'}
+        {if $cloudhost247.settings.footer_layout eq '1'}
             {include file="$template/includes/blocks/footer_block_latest.tpl"}
         {else}
 		    {include file="$template/includes/blocks/footer_block.tpl"}

@@ -1,14 +1,14 @@
-{if $hostx_blocks[$block_slug]}
+{if $cloudhost247.blocks[$block_slug]}
   <div class="frequbntly_asked mt-5">
       <div class="container">
 
         <div class="top">
-          <h2>{eval var=$hostx_blocks[$block_slug]->title}</h2>
-          <h5>{eval var=$hostx_blocks[$block_slug]->sub_title}</h5>
+          <h2>{eval var=$cloudhost247.blocks[$block_slug]->title}</h2>
+          <h5>{eval var=$cloudhost247.blocks[$block_slug]->sub_title}</h5>
         </div>
         <div class="clearfix"></div>
 
-       {foreach $hostx_blocks[$block_slug]->widgets as $k =>  $widget}
+       {foreach $cloudhost247.blocks[$block_slug]->widgets as $k =>  $widget}
         <div class="question_answers">
             <span>{if $k < 10}0{/if}{($k+1)}</span>
             <a class="question" href="javascript:;" data="#collapse_{$k}" role="button" aria-expanded="false" aria-controls="collapse_{$k}">{eval var=$widget->widget_title}

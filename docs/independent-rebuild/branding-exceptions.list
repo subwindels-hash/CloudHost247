@@ -1,0 +1,29 @@
+# Machine-readable register of tolerated retired-brand references.
+#
+# Consumed by scripts/branding-audit.py, which fails the release candidate when
+# any occurrence of the retired vendor brand (any capitalisation, spacing or
+# separator variant, plus its derived three-letter abbreviation) is not covered
+# by a rule below.
+#
+# STATUS 2026-10-01: the register is EMPTY by design. The ionCube-encoded vendor
+# theme-helper addon, the identifiers it owned and every reference our own code
+# made to them have been retired or re-pointed onto the independent CloudHost247
+# theme layer (modules/addons/cloudhost247_theme). The tolerated count is
+# therefore zero: any new occurrence is a defect, not an exception.
+#
+# If a future compatibility exception is genuinely unavoidable, add one line in
+# the format below and record the reason in docs/BRANDING-COMPATIBILITY.md.
+#
+# FORMAT (exactly five tab-separated fields):
+#   kind<TAB>glob<TAB>token-regex|ANY|-<TAB>REASON<TAB>note
+#   kind   : content (match inside the file) or path (the file name itself)
+#   token  : anchored regex the matched text must equal, ANY, or - for path rules
+#   REASON : IONCUBE ADDON-CTL DB-STORED MIGRATION DETECTOR BASELINE RECORD
+#            ASSERTION REGISTER
+#
+# Historical rules that lived here (vendor addon tree, its two editable asset
+# contracts, the three Smarty variables it assigned, its four data tables, the
+# three brand-named block templates and six brand-named banners, the baseline
+# manifest, the rename record and the negative test assertions) were all
+# removed on 2026-10-01 when the vendor stack was retired; see
+# docs/BRANDING-COMPATIBILITY.md and docs/independent-rebuild/BRAND-RENAME.md.

@@ -25,8 +25,8 @@
 
             <div class="row invoice-header">
                 <div class="invoice-col">
-				{if !empty($hostx_theme_settings.invoice_logo)}
-                     <img src="{$hostx_theme_settings.invoice_logo}" alt="{$companyname}" height="{$hostx_theme_settings.invoice_logo_height}" width="$hostx_theme_settings.invoice_logo_width">
+				{if !empty($cloudhost247.settings.invoice_logo)}
+                     <img src="{$cloudhost247.settings.invoice_logo}" alt="{$companyname}" height="{$cloudhost247.settings.invoice_logo_height}" width="$cloudhost247.settings.invoice_logo_width">
                 {elseif $logo}
                     <p><img src="{$logo}" title="{$companyname}" /></p>
                {else}

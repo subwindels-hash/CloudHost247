@@ -18,7 +18,7 @@ theme, order form, root pages, addon/server/gateway modules, language overrides,
   - `refund-and-cancellation-policy.php` and `refund-and-vancellation-policy.php` are the SAME page
     (typo duplicate, both `setTemplate('refund-and-vancellation-policy')`)
 - `lang/overrides/` — 27 language files (cloudhost247 menu/block strings) → **lang/overrides/**
-- `modules/addons/hostx/` — legacy vendor theme helper addon (ionCube-encoded, complete: classes, includes, json, assets) → **modules/addons/hostx/**
+- `modules/addons/[retired-addon]/` — legacy vendor theme helper addon (ionCube-encoded, complete: classes, includes, json, assets) → **modules/addons/[retired-addon]/**
 - `sitemap.html`, `sitemap.xml` — 0-byte junk (the cloudhost247 addon generates sitemaps itself)
 
 ### 2. `orderforms/` — the actual cloudhost247 THEME + ORDER FORM mixed together (643 files)

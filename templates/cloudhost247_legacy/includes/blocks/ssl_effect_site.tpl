@@ -1,5 +1,5 @@
 <!--ssl-effect-site-->
-{if $hostx_blocks[$block_slug]}
+{if $cloudhost247.blocks[$block_slug]}
 <div class="ssl-effect-site">
       <div class="container">
         <div class="row ssl-effect-site-row">
@@ -7,10 +7,10 @@
            <img src="{$WEB_ROOT}/templates/{$template}/images/ssl-effect-img.png" alt="ssl certificate">  
           </div>
            <div class="col-sm-6">
-            <h4>{eval var=$hostx_blocks[$block_slug]->title}</h4>
-            <p>{eval var=$hostx_blocks[$block_slug]->sub_title}</p>
+            <h4>{eval var=$cloudhost247.blocks[$block_slug]->title}</h4>
+            <p>{eval var=$cloudhost247.blocks[$block_slug]->sub_title}</p>
             <ul>
-              {foreach $hostx_blocks[$block_slug]->widgets as $widget}
+              {foreach $cloudhost247.blocks[$block_slug]->widgets as $widget}
                   {eval var=$widget->widget_description|html_entity_decode}
               {/foreach}
             </ul>

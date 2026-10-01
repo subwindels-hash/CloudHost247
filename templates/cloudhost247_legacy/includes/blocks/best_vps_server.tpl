@@ -1,10 +1,10 @@
-{if $hostx_blocks[$block_slug]}
+{if $cloudhost247.blocks[$block_slug]}
 <!-- best VPS server -->
 <div class="best-vps-server">
-  <h2>{eval var=$hostx_blocks[$block_slug]->title|html_entity_decode}</h2>
+  <h2>{eval var=$cloudhost247.blocks[$block_slug]->title|html_entity_decode}</h2>
   <div class="container">
     <div class="row">
-      {foreach $hostx_blocks[$block_slug]->widgets as $widget}
+      {foreach $cloudhost247.blocks[$block_slug]->widgets as $widget}
         {eval var=$widget->widget_description|html_entity_decode}
       {/foreach}
     </div>

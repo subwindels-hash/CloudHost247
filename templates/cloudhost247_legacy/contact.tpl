@@ -34,7 +34,7 @@
 					  <li class="list-inline-item"><a href="submitticket.php" class="sales-btn">{$LANG.contactusemailssaleticket}</a></li>
 					  <li class="list-inline-item"><a href="#" class="live-chat-con">{$LANG.contactuslivechat}</a></li>
 					 </ul>
-					 <p>{$LANG.contactushotlinesale1} +{$hostx_theme_settings.country_calling_code_phone} {$hostx_theme_settings.phone}</p>
+					 <p>{$LANG.contactushotlinesale1} +{$cloudhost247.settings.country_calling_code_phone} {$cloudhost247.settings.phone}</p>
 					 <p>{$LANG.contactusbusinesshoursale}</p>
 					 <p>{$LANG.contactusemailssale}</p>
 					</div>
@@ -46,7 +46,7 @@
 						  <li class="list-inline-item"><a href="submitticket.php" class="sales-btn">{$LANG.contactusemailscustomerticket}</a></li>
 						  <li class="list-inline-item"><a href="#" class="live-chat-con">{$LANG.contactuslivechat}</a></li>
 						 </ul>
-						 <p>{$LANG.contactushotlinecustomer1} +{$hostx_theme_settings.country_calling_code_phone} {$hostx_theme_settings.phone}</p>
+						 <p>{$LANG.contactushotlinecustomer1} +{$cloudhost247.settings.country_calling_code_phone} {$cloudhost247.settings.phone}</p>
 						 <p>{$LANG.contactusbusinesshourcustomer}</p>
 						 <p>{$LANG.contactusemailscustomer}</p>
 					</div>
@@ -58,7 +58,7 @@
 						  <li class="list-inline-item"><a href="submitticket.php" class="sales-btn">{$LANG.contactusemailstechnicalticket}</a></li>
 						  <li class="list-inline-item"><a href="#" class="live-chat-con">{$LANG.contactuslivechat}</a></li>
 						 </ul>
-						 <p>{$LANG.contactushotlinetechnical1} +{$hostx_theme_settings.country_calling_code_phone} {$hostx_theme_settings.phone}</p>
+						 <p>{$LANG.contactushotlinetechnical1} +{$cloudhost247.settings.country_calling_code_phone} {$cloudhost247.settings.phone}</p>
 						 <p>{$LANG.contactusbusinesshourtechnical}</p>
 						 <p>{$LANG.contactusemailstechnical}</p>
 					</div>

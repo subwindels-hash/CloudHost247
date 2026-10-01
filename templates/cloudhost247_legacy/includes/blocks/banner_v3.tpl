@@ -1,5 +1,5 @@
-{if $hostx_blocks[$block_slug]}
-  {eval var=$hostx_blocks[$block_slug]->description}
+{if $cloudhost247.blocks[$block_slug]}
+  {eval var=$cloudhost247.blocks[$block_slug]->description}
 {else}
 <div class="hx-business-banner"><div class="container"><div class="row"><div class="col-12"><div class=" business-content text-center"><h1>Take <span>Your Business</span> Online With</h1><h5>Fast, Secure, Powerful Web Hosting!</h5><p>Focus on your business and avoid all the web hosting hassles. Our managed hosting guarantees unmatched performance & reliability.</p></div></div><div class="col-12"><div class=" business-block"><ul class="list-inline-item hx-business-list pl-0"><li class=" list-inline-item mb-3"><div class="hx-bnr-list"><div class="hx-box"><img src="{$WEB_ROOT}/templates/{$template}/images/hx-business-icon1.svg" alt="icon"></div><p>30 Day <br>Guarantee</p></div></li><li class="list-inline-item mb-3"><div class="hx-bnr-list"><div class="hx-box"><img src="{$WEB_ROOT}/templates/{$template}/images/hx-business-icon2.svg" alt="icon"></div><p>Trusted by 1.2 <br>Millions user</p></div></li><li class="list-inline-item mb-3 business-brdr-right"><div class="hx-bnr-list"><div class="hx-box"><img src="{$WEB_ROOT}/templates/{$template}/images/hx-business-icon3.svg" alt="icon"></div><p>Speed Like <br>No One Else</p></div></li></ul></div></div><div class="col-12"><div class="business-start-btn mb-4 mb-lg-0 text-center"><a href="{$WEB_ROOT}/cart.php" class="btn business-btn">Get Started Now</a></div></div></div></div></div>
 {/if}

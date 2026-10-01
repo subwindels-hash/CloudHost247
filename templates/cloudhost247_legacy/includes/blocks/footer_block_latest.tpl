@@ -1,8 +1,8 @@
-{if $hostx_blocks['footer_block_latest']}
+{if $cloudhost247.blocks['footer_block_latest']}
 <footer class="footer {if $filename == 'clientarea' || $filename == 'submitticket' || $filename == 'affiliates' || $filename == 'supporttickets' || $filename == 'serverstatus' || $filename == 'viewticket' || $templatefile == 'account-user-management' || $templatefile == 'account-contacts-manage' || $templatefile == 'account-paymentmethods' || $templatefile == 'account-paymentmethods-manage' || $templatefile == 'announcements' || $templatefile == 'knowledgebase' || $templatefile == 'downloads' || $templatefile == 'viewannouncement' || $templatefile == 'knowledgebasecat' || $templatefile == 'knowledgebasearticle' || $templatefile == 'user-password' || $templatefile == 'user-profile' || $templatefile == 'user-switch-account' || $templatefile == 'user-security' || $templatefile == 'account-contacts-manage' || $templatefile == 'account-contacts-new'}clientarea-footer-entered{/if}" id="mainfootercloudhost247">
    <div class="container">
       <div class="row">
-          {foreach $hostx_blocks['footer_block_latest']->widgets as $widget}
+          {foreach $cloudhost247.blocks['footer_block_latest']->widgets as $widget}
             {eval var=$widget->widget_description|html_entity_decode}
           {/foreach}
        </div>
@@ -94,11 +94,11 @@
                   </ul>
                   <div class="clearfix"></div>
                   <ul class="socil_icon">
-                     <li><a target="_blank" href="{$hostx_theme_settings.linkedin_handle_code}" rel="noopener"><i class="fab fa-linkedin"></i></a></li>
-                     <li><a target="_blank" href="{$hostx_theme_settings.twitter_handle_code}" rel="noopener"><i class="fab fa-twitter"></i></a></li>
-                     <li><a target="_blank" href="{$hostx_theme_settings.facebook_handle_code}" rel="noopener"><i class="fab fa-facebook"></i></a></li>
-                     <li><a target="_blank" href="{$hostx_theme_settings.instagram_handle_code}" rel="noopener"><i class="fab fa-instagram"></i></a></li>
-                     <li><a target="_blank" href="{$hostx_theme_settings.pinrest_handle_code}" rel="noopener"><i class="fab fa-pinterest"></i></a></li>
+                     <li><a target="_blank" href="{$cloudhost247.settings.linkedin_handle_code}" rel="noopener"><i class="fab fa-linkedin"></i></a></li>
+                     <li><a target="_blank" href="{$cloudhost247.settings.twitter_handle_code}" rel="noopener"><i class="fab fa-twitter"></i></a></li>
+                     <li><a target="_blank" href="{$cloudhost247.settings.facebook_handle_code}" rel="noopener"><i class="fab fa-facebook"></i></a></li>
+                     <li><a target="_blank" href="{$cloudhost247.settings.instagram_handle_code}" rel="noopener"><i class="fab fa-instagram"></i></a></li>
+                     <li><a target="_blank" href="{$cloudhost247.settings.pinrest_handle_code}" rel="noopener"><i class="fab fa-pinterest"></i></a></li>
                      <li><a target="_blank" href="#" rel="noopener"><i class="fab fa-skype"></i></a></li>
                   </ul>
                </div>

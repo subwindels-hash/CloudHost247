@@ -148,38 +148,40 @@ Capture financial snapshots immediately before and after every financial-impacti
 
 ## CloudHost247 Email Hosting — public page and provisioning module
 
-**IMPLEMENTED — SOURCE/MOCK VERIFIED:** CloudHost247 Email Hosting uses the independent WHMCS server module at `modules/servers/hostx_email`; the technical module ID `hostx_email` is retained for existing WHMCS product/server bindings. It provides Professional Email, Microsoft Graph, and Google Workspace adapters behind one contract, a public `email-hosting.php` page reading only live WHMCS products/pricing for `servertype = hostx_email`, a client-area overview with ownership + CSRF enforcement and DNS copy buttons, versioned schema with idempotency/reconciliation ledger, authenticated webhook endpoint, bounded cron, redacted structured logging, and 44 mock diagnostics in `tests/cloudhost247_email/run.php`.
+**IMPLEMENTED — SOURCE/MOCK VERIFIED:** CloudHost247 Email Hosting uses the independent WHMCS server module at `modules/servers/cloudhost247_email_hosting`; the WHMCS module ID is `cloudhost247_email_hosting` and no vendor identifier survives in the module source, schema, webhook headers, session keys or client-area form fields. It provides Professional Email, Microsoft Graph, and Google Workspace adapters behind one contract, a public `email-hosting.php` page reading only live WHMCS products/pricing for `servertype = cloudhost247_email_hosting`, a client-area overview with ownership + CSRF enforcement and DNS copy buttons, versioned schema with idempotency/reconciliation ledger, authenticated webhook endpoint, bounded cron, redacted structured logging, and 59 mock diagnostics in `tests/cloudhost247_email/run.php`.
 
 **BLOCKED — STAGING / TENANT AUTHORIZATION REQUIRED:** every row below. Mock transport results never satisfy a runtime row.
 
 | # | Test | Evidence required | Status |
 |---|---|---|---|
-| HXE-01 | Module appears in *Servers → type* and saves credentials encrypted | WHMCS server list screenshot; `tblservers.password`/`accesshash` are ciphertext | NOT RUN |
-| HXE-02 | **Test connection** against a real Microsoft 365 tenant | Graph `/organization` + `/subscribedSkus` success; admin screenshot | NOT RUN |
-| HXE-03 | **Test connection** against a real Google Workspace tenant with domain-wide delegation | Token exchange success; `isAdmin` true for the delegated admin | NOT RUN |
-| HXE-04 | **Test connection** against the Professional Email provisioning API | `/plans` response; correct auth style | NOT RUN |
-| HXE-05 | Product configuration: provider/tier/SKU/usage location saved and read back | Product screenshot + `tblproducts.configoption1..8` | NOT RUN |
-| HXE-06 | Order → payment → approval → `CreateAccount` provisions exactly one mailbox | WHMCS module log, provider admin console, `mod_hostx_email_accounts` row | NOT RUN |
-| HXE-07 | Licence availability refusal when the tenant has no free seat | No remote user created; WHMCS error text captured | NOT RUN |
-| HXE-08 | Licence assignment verified in the provider console | Microsoft `assignedLicenses` / Google licence assignment screenshot | NOT RUN |
-| HXE-09 | Duplicate/replayed `CreateAccount` creates no second account | `mod_hostx_email_operations` single `succeeded` row; provider user count unchanged | NOT RUN |
-| HXE-10 | Suspend → sign-in blocked; Unsuspend → restored | Provider console + failed/successful sign-in evidence | NOT RUN |
-| HXE-11 | Password change succeeds (cloud-only tenant) and is refused with guidance on a federated tenant | Both outcomes captured | NOT RUN |
-| HXE-12 | Terminate releases the licence *then* deletes the user | Ordered API log; seat count returned to the pool | NOT RUN |
-| HXE-13 | Ownership: client B cannot view or act on client A's service | HTTP 200 with access-denied view; `clientarea.ownership_denied` log entry | NOT RUN |
-| HXE-14 | CSRF: POST without/with a stale token is refused | Captured request/response pair | NOT RUN |
-| HXE-15 | DNS records rendered from Graph for a real domain; values match the Microsoft 365 portal exactly | Side-by-side screenshots | NOT RUN |
-| HXE-16 | DNS copy / copy-all buttons work in Chrome, Firefox and mobile Safari | Browser evidence | NOT RUN |
-| HXE-17 | DNS verification only reports "verified" after the records resolve publicly | `dig` output + UI state before/after | NOT RUN |
-| HXE-18 | Webhook: valid HMAC accepted; tampered, stale and replayed events rejected | 4 request/response captures + `mod_hostx_email_webhooks` rows | NOT RUN |
-| HXE-19 | Webhook: Google callback refused with 501 | Response capture | NOT RUN |
-| HXE-20 | Cron: `DailyCronJob`/`AfterCronJob` run bounded batches without overlapping | Two concurrent runs; lock row; log timings | NOT RUN |
-| HXE-21 | API failure/timeout after send marks `needs_reconcile` and the reconciler adopts or clears it | Injected timeout on staging; ledger + account transitions | NOT RUN |
-| HXE-22 | Secret redaction in live logs (WHMCS module log + `mod_hostx_email_log`) | Log export grepped for secret material | NOT RUN |
-| HXE-23 | `email-hosting.php` renders real prices/availability in two currencies | Page screenshots + `tblpricing` rows | NOT RUN |
-| HXE-24 | "Get Started" reaches the correct WHMCS cart configuration and completes checkout | Order flow capture | NOT RUN |
-| HXE-25 | Page accessibility (landmarks, headings, focus, contrast) and responsive layout at 360/768/1440 | axe report + screenshots | NOT RUN |
-| HXE-26 | Existing hosting, OVH, currency, authentication, checkout and dashboard flows unchanged | Baseline regression matrix re-run | NOT RUN |
-| HXE-27 | Migrations apply cleanly on MySQL and MariaDB; re-run is a no-op | `cron.php migrate` output twice; schema diff | NOT RUN |
+| CH247E-01 | Module appears in *Servers → type* and saves credentials encrypted | WHMCS server list screenshot; `tblservers.password`/`accesshash` are ciphertext | NOT RUN |
+| CH247E-02 | **Test connection** against a real Microsoft 365 tenant | Graph `/organization` + `/subscribedSkus` success; admin screenshot | NOT RUN |
+| CH247E-03 | **Test connection** against a real Google Workspace tenant with domain-wide delegation | Token exchange success; `isAdmin` true for the delegated admin | NOT RUN |
+| CH247E-04 | **Test connection** against the Professional Email provisioning API | `/plans` response; correct auth style | NOT RUN |
+| CH247E-05 | Product configuration: provider/tier/SKU/usage location saved and read back | Product screenshot + `tblproducts.configoption1..8` | NOT RUN |
+| CH247E-06 | Order → payment → approval → `CreateAccount` provisions exactly one mailbox | WHMCS module log, provider admin console, `mod_cloudhost247_email_hosting_accounts` row | NOT RUN |
+| CH247E-07 | Licence availability refusal when the tenant has no free seat | No remote user created; WHMCS error text captured | NOT RUN |
+| CH247E-08 | Licence assignment verified in the provider console | Microsoft `assignedLicenses` / Google licence assignment screenshot | NOT RUN |
+| CH247E-09 | Duplicate/replayed `CreateAccount` creates no second account | `mod_cloudhost247_email_hosting_operations` single `succeeded` row; provider user count unchanged | NOT RUN |
+| CH247E-10 | Suspend → sign-in blocked; Unsuspend → restored | Provider console + failed/successful sign-in evidence | NOT RUN |
+| CH247E-11 | Password change succeeds (cloud-only tenant) and is refused with guidance on a federated tenant | Both outcomes captured | NOT RUN |
+| CH247E-12 | Terminate releases the licence *then* deletes the user | Ordered API log; seat count returned to the pool | NOT RUN |
+| CH247E-13 | Ownership: client B cannot view or act on client A's service | HTTP 200 with access-denied view; `clientarea.ownership_denied` log entry | NOT RUN |
+| CH247E-14 | CSRF: POST without/with a stale token is refused | Captured request/response pair | NOT RUN |
+| CH247E-15 | DNS records rendered from Graph for a real domain; values match the Microsoft 365 portal exactly | Side-by-side screenshots | NOT RUN |
+| CH247E-16 | DNS copy / copy-all buttons work in Chrome, Firefox and mobile Safari | Browser evidence | NOT RUN |
+| CH247E-17 | DNS verification only reports "verified" after the records resolve publicly | `dig` output + UI state before/after | NOT RUN |
+| CH247E-18 | Webhook: valid HMAC accepted; tampered, stale and replayed events rejected | 4 request/response captures + `mod_cloudhost247_email_hosting_webhooks` rows | NOT RUN |
+| CH247E-19 | Webhook: Google callback refused with 501 | Response capture | NOT RUN |
+| CH247E-20 | Cron: `DailyCronJob`/`AfterCronJob` run bounded batches without overlapping | Two concurrent runs; lock row; log timings | NOT RUN |
+| CH247E-21 | API failure/timeout after send marks `needs_reconcile` and the reconciler adopts or clears it | Injected timeout on staging; ledger + account transitions | NOT RUN |
+| CH247E-22 | Secret redaction in live logs (WHMCS module log + `mod_cloudhost247_email_hosting_log`) | Log export grepped for secret material | NOT RUN |
+| CH247E-23 | `email-hosting.php` renders real prices/availability in two currencies | Page screenshots + `tblpricing` rows | NOT RUN |
+| CH247E-24 | "Get Started" reaches the correct WHMCS cart configuration and completes checkout | Order flow capture | NOT RUN |
+| CH247E-25 | Page accessibility (landmarks, headings, focus, contrast) and responsive layout at 360/768/1440 | axe report + screenshots | NOT RUN |
+| CH247E-26 | Existing hosting, OVH, currency, authentication, checkout and dashboard flows unchanged | Baseline regression matrix re-run | NOT RUN |
+| CH247E-27 | Migrations apply cleanly on MySQL and MariaDB; re-run is a no-op | `cron.php migrate` output twice; schema diff | NOT RUN |
+| CH247E-28 | Vendor-identifier rename migration: an installation still bound to the pre-rebrand module ID is moved to `cloudhost247_email_hosting` with every row preserved | `scripts/migrate-legacy-names-to-cloudhost247.sql` verification output (all MUST-BE-ZERO rows 0); before/after row counts for the eight renamed tables; `cron.php status` shows the same account totals; one provisioning action succeeds | NOT RUN |
+| CH247E-29 | No The-Retired-Brand identifier is visible in the admin provisioning-module picker, server list, product module dropdown, module log or client area | Admin screenshots of each surface; `scripts/branding-audit.py` output | NOT RUN |
 
-Required migration ordering: `hostx_email 1.0.0` after the existing Core, Currency, Theme, OVH and RDP sequences. The module creates only `mod_hostx_email_*` tables and never writes to WHMCS core tables other than the documented `tblhosting.password` update for a generated mailbox password.
+Required migration ordering: `cloudhost247_email_hosting 1.0.0` after the existing Core, Currency, Theme, OVH and RDP sequences, and after `scripts/migrate-legacy-names-to-cloudhost247.sql` has renamed any installation that was still bound to the vendor module ID (see CH247E-28). The module creates only `mod_cloudhost247_email_hosting_*` tables and never writes to WHMCS core tables other than the documented `tblhosting.password` update for a generated mailbox password.

@@ -18,7 +18,7 @@
 							{if $marketConnectPromosData.symantec eq '1'}
 							<div class="promo-cont-block hidden" id="ssl-promo-blk">
 								<div class="pcb-icon">
-									<img src="{$WEB_ROOT}/templates/{$hostx_theme_settings.template_name_custom}/marketconnect/ssl/ssl.png">
+									<img src="{$WEB_ROOT}/templates/{$cloudhost247.settings.template_name_custom}/marketconnect/ssl/ssl.png">
 								</div>
 								<div class="promo-cont-inner">
 									<a href="" id="rapidSslTitle"></a>
@@ -29,7 +29,7 @@
 							{if $marketConnectPromosData.weebly  eq '1'}
 							<div class="promo-cont-block hidden" id="weebly-promo-blk">
 								<div class="pcb-icon">
-									<img src="{$WEB_ROOT}/templates/{$hostx_theme_settings.template_name_custom}/marketconnect/weebly/weebly.png">
+									<img src="{$WEB_ROOT}/templates/{$cloudhost247.settings.template_name_custom}/marketconnect/weebly/weebly.png">
 								</div>
 								<div class="promo-cont-inner">
 									<a href="" id="weeblyTitle"></a>
@@ -40,7 +40,7 @@
 							{if $marketConnectPromosData.codeguard   eq '1'}
 							<div class="promo-cont-block hidden" id="codeguard-promo-blk">
 								<div class="pcb-icon">
-									<img src="{$WEB_ROOT}/templates/{$hostx_theme_settings.template_name_custom}/marketconnect/codeguard/codeguard.png">
+									<img src="{$WEB_ROOT}/templates/{$cloudhost247.settings.template_name_custom}/marketconnect/codeguard/codeguard.png">
 								</div>
 								<div class="promo-cont-inner">
 									<a href="" id="codeguardTitle"></a>
@@ -51,7 +51,7 @@
 							{if $marketConnectPromosData.marketgoo eq '1'}
 							<div class="promo-cont-block hidden" id="marketgo-promo-blk">
 								<div class="pcb-icon">
-									<img src="{$WEB_ROOT}/templates/{$hostx_theme_settings.template_name_custom}/marketconnect/marketgoo/marketgoo.png">
+									<img src="{$WEB_ROOT}/templates/{$cloudhost247.settings.template_name_custom}/marketconnect/marketgoo/marketgoo.png">
 								</div>
 								<div class="promo-cont-inner">
 									<a href="" id="marketgooTitle"></a>
@@ -66,7 +66,7 @@
 							{if $marketConnectPromosData.sitelock eq '1'}
 							<div class="promo-cont-block hidden" id="sitelock-promo-blk">
 								<div class="pcb-icon">
-									<img src="{$WEB_ROOT}/templates/{$hostx_theme_settings.template_name_custom}/marketconnect/sitelock/sitelock.png">
+									<img src="{$WEB_ROOT}/templates/{$cloudhost247.settings.template_name_custom}/marketconnect/sitelock/sitelock.png">
 								</div>
 								<div class="promo-cont-inner">
 									<a href="" id="sitelockTitle"></a>
@@ -77,7 +77,7 @@
 							{if $marketConnectPromosData.spamexperts eq '1'}
 							<div class="promo-cont-block hidden" id="spamexpert-promo-blk">
 								<div class="pcb-icon">
-									<img src="{$WEB_ROOT}/templates/{$hostx_theme_settings.template_name_custom}/marketconnect/spamexperts/spamexpert.png">
+									<img src="{$WEB_ROOT}/templates/{$cloudhost247.settings.template_name_custom}/marketconnect/spamexperts/spamexpert.png">
 								</div>
 								<div class="promo-cont-inner">
 									<a href="" id="spamexpertTitle"></a>
@@ -88,7 +88,7 @@
 							{if $marketConnectPromosData.sitelockvpn eq '1'}
 							<div class="promo-cont-block hidden" id="sitelockvpn-promo-blk">
 								<div class="pcb-icon">
-									<img src="{$WEB_ROOT}/templates/{$hostx_theme_settings.template_name_custom}/marketconnect/sitelockvpn/sitelockvpn.png">
+									<img src="{$WEB_ROOT}/templates/{$cloudhost247.settings.template_name_custom}/marketconnect/sitelockvpn/sitelockvpn.png">
 								</div>
 								<div class="promo-cont-inner">
 									<a href="" id="sitelockvpnTitle"></a>
@@ -99,7 +99,7 @@
 							{if $marketConnectPromosData.sitebuilder eq '1'}
 							<div class="promo-cont-block hidden" id="sitebuilder-promo-blk">
 								<div class="pcb-icon">
-									<img src="{$WEB_ROOT}/templates/{$hostx_theme_settings.template_name_custom}/marketconnect/sitebuilder/sitebuilder.png">
+									<img src="{$WEB_ROOT}/templates/{$cloudhost247.settings.template_name_custom}/marketconnect/sitebuilder/sitebuilder.png">
 								</div>
 								<div class="promo-cont-inner">
 									<a href="" id="sitebuilderTitle"></a>
@@ -110,7 +110,7 @@
 							{if $marketConnectPromosData.cpanelseo eq '1'}
 							<div class="promo-cont-block hidden" id="cpanelseo-promo-blk">
 								<div class="pcb-icon">
-									<img src="{$WEB_ROOT}/templates/{$hostx_theme_settings.template_name_custom}/marketconnect/cpanelseo/cpanel-seo-logo.svg">
+									<img src="{$WEB_ROOT}/templates/{$cloudhost247.settings.template_name_custom}/marketconnect/cpanelseo/cpanel-seo-logo.svg">
 								</div>
 								<div class="promo-cont-inner">
 									<a href="" id="cpanelseoTitle"></a>
@@ -135,7 +135,7 @@
 					</div>
 					<div class="body-promo-bnr-ord-right">
 						<div class="promo-cont-block-img">
-							<img src="{$WEB_ROOT}/templates/{$hostx_theme_settings.template_name_custom}/images/cart-order-home.png">
+							<img src="{$WEB_ROOT}/templates/{$cloudhost247.settings.template_name_custom}/images/cart-order-home.png">
 						</div>
 						<p>{$LANG.addnewproducttitle}</p>
 					</div>

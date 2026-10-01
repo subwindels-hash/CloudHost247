@@ -14,7 +14,7 @@ Status values: **Existing/vendor** (present but not an independent implementatio
 
 | Component | Active paths found | Size/shape | Encoding/source visibility | Vendor-key coupling | Independent status |
 |---|---|---:|---|---|---|
-| Legacy page-builder helper | `modules/addons/hostx/` | 266 files; 63 PHP | All 63 PHP files are ionCube encoded | Licence/activation behavior cannot be safely inspected statically; `includes/license.php` and `includes/errolicense.php` exist | **Not implemented** |
+| Legacy page-builder helper | `modules/addons/[retired-addon]/` | 266 files; 63 PHP | All 63 PHP files are ionCube encoded | Licence/activation behavior cannot be safely inspected statically; `includes/license.php` and `includes/errolicense.php` exist | **Not implemented** |
 | Legacy client theme | `templates/cloudhost247_legacy/` | 1,711 files; 279 Smarty templates | Templates/assets readable; 49 directory guard PHP files are not encoded | Runtime data supplied by encoded addon/hooks | **Existing/vendor; rights review required** |
 | Legacy order form | `templates/orderforms/cloudhost247_legacy/` | 108 files; 27 templates | Readable | Theme/addon compatibility dependency | **Existing/vendor; rights review required** |
 | Xtreme Currency Rates | `modules/addons/xtreme_currency_rates/` | 19 files; 18 PHP | All 18 PHP files ionCube encoded | Explicit `license_verify.php`, security callback and encoded entry point | **Not implemented** |
@@ -32,9 +32,9 @@ A SHA-256 inventory of every in-scope original file is in `original-file-manifes
 
 * WHMCS document-root pages call `init.php`, select a legacy-theme template, and preserve public routes.
 * The WHMCS system theme is `templates/cloudhost247_legacy`; cart theme is `templates/orderforms/cloudhost247_legacy`.
-* The helper addon is activated as `hostx` — the directory and registration keep the vendor name because the ionCube-encoded entry point defines the `hostx_*()` functions WHMCS calls (see `BRAND-RENAME.md`). Its encoded entry point, hooks, classes, admin pages, sitemap generators, menu defaults and block defaults are runtime dependencies.
+* The helper addon is activated as `the-retired-brand` — the directory and registration keep the vendor name because the ionCube-encoded entry point defines the `the-retired-brand_*()` functions WHMCS calls (see `BRAND-RENAME.md`). Its encoded entry point, hooks, classes, admin pages, sitemap generators, menu defaults and block defaults are runtime dependencies.
 * Observed feature/admin entry points: settings, homepage selection, language management, top/side menus, page groups, page blocks, banners, reviews/testimonials, SEO manager/tags/content, TLD settings, category icons, dedicated settings, live chat and sitemap generation.
-* Observable compatibility names include the Smarty variables `$hostx_theme_settings` and `$hostx_blocks`, the classes `HostxPage`, `HostxBlock` and `HostxBanner`, and the partials under `cloudhost247_legacy_includes/`. The variable and class names are retained unchanged — the encoded helper assigns/calls them.
+* Observable compatibility names include the Smarty variables `$[retired]_theme_settings` and `$[retired]_blocks`, the classes `[RetiredPage]`, `[RetiredBlock]` and `[RetiredBanner]`, and the partials under `cloudhost247_legacy_includes/`. The variable and class names are retained unchanged — the encoded helper assigns/calls them.
 * ionCube is currently required only to run the vendor helper, not by the proposed replacement.
 * Exact schema and licence protocol cannot be derived lawfully/reliably from encoded files. Schema discovery must be performed on an authorised staging database using metadata-only exports.
 
@@ -220,12 +220,12 @@ The CI-level `scripts/release-candidate-check.sh` verifies syntax, behavior test
 
 | Component | Path | Independent status |
 |---|---|---|
-| Email provisioning server module | `modules/servers/hostx_email/` | **Complete (source/mock verified)** — new independent implementation; no vendor code reused |
+| Email provisioning server module | `modules/servers/cloudhost247_email_hosting/` | **Complete (source/mock verified)** — new independent implementation; no vendor code reused |
 | Public email hosting page | `email-hosting.php`, `templates/cloudhost247/cloudhost247-email-hosting.tpl`, `templates/cloudhost247/css/email-hosting.css` | **Complete (source verified)** — live WHMCS products/pricing only |
-| Client-area email management | `modules/servers/hostx_email/templates/overview.tpl` | **Complete (source verified)** — ownership + CSRF enforced |
+| Client-area email management | `modules/servers/cloudhost247_email_hosting/templates/overview.tpl` | **Complete (source verified)** — ownership + CSRF enforced |
 | Provider adapters | `lib/Providers/{ProfessionalEmail,Microsoft365,GoogleWorkspace}Provider.php` | **Complete (mock verified)** — real Graph/Admin SDK/REST contracts, no SDKs |
-| Schema and migrations | `install/schema.sql`, `install/migrations/1.0.0_baseline.sql` | **Complete (source verified)** — `mod_hostx_email_*` only |
-| Automated diagnostics | `tests/cloudhost247_email/run.php` | **Complete** — 44 mock checks in the PHP 7.4/8.2 CI matrix |
-| Live tenant behaviour | Microsoft 365 / Google Workspace / mail platform | **Blocked from verification** — see `STAGING-TEST-MATRIX.md` rows HXE-01..HXE-27 |
+| Schema and migrations | `install/schema.sql`, `install/migrations/1.0.0_baseline.sql` | **Complete (source verified)** — `mod_cloudhost247_email_hosting_*` only |
+| Automated diagnostics | `tests/cloudhost247_email/run.php` | **Complete** — 59 mock checks in the PHP 7.4/8.2 CI matrix (`count($tests)` in the harness; 58 before the branding pass added the no-legacy-identifier check) |
+| Live tenant behaviour | Microsoft 365 / Google Workspace / mail platform | **Blocked from verification** — see `STAGING-TEST-MATRIX.md` rows CH247E-01..CH247E-27 |
 
-The pre-existing `modules/servers/cloudhost247_email` is left untouched and inactive. The separate CloudHost247 Email Hosting module uses the legacy WHMCS module ID `hostx_email` and its existing tables for compatibility; its customer-facing display name is CloudHost247 Email Hosting. Nothing in the hosting, OVH, currency, authentication, checkout or dashboard paths was modified.
+The pre-existing `modules/servers/cloudhost247_email` is left untouched and inactive; it owns `mod_cloudhost247_email_accounts` and must never be confused with the active module. The active CloudHost247 Email Hosting module is `modules/servers/cloudhost247_email_hosting` (WHMCS module ID and display name `CloudHost247 Email Hosting`, tables `mod_cloudhost247_email_hosting_*`). It was renamed away from the vendor module ID by the rebrand and `scripts/migrate-legacy-names-to-cloudhost247.sql` moves every existing product/server binding and table in the same maintenance window. Nothing in the hosting, OVH, currency, authentication, checkout or dashboard paths was modified.

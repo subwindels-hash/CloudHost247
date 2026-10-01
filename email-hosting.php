@@ -20,7 +20,7 @@ use WHMCS\ClientArea;
 define('CLIENTAREA', true);
 
 require __DIR__ . '/init.php';
-require_once __DIR__ . '/modules/servers/hostx_email/bootstrap.php';
+require_once __DIR__ . '/modules/servers/cloudhost247_email_hosting/bootstrap.php';
 
 $ca = new ClientArea();
 $ca->setPageTitle('CloudHost247 Email Hosting');

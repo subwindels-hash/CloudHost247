@@ -62,7 +62,7 @@ configuration for the same provider, which is the supported path forward.
 | SMM panel v2 API | `modules/addons/smmaddon`, `modules/servers/smmprovisioning` | `smm_panel` |
 | eSIM / telephony APIs (`api.airalo.com`, `api.truphone.com`) | `modules/addons/phoneservices` | not registered — see §6 |
 | Public lookup services (`ip-api.com`, `api.bgpview.io`, `ipinfo.io`, `ipwho.is`, `api.whatismyip.com`, `lookup.binlist.net`, `api.qrserver.com`, `chart.googleapis.com`) | `modules/addons/CloudHost247_tools`, `cloudhost247_tools`, `cloudhost247_domain_lookup`, `tools_center` | not registered — unauthenticated public utilities, no credential to protect |
-| ionCube licence loader (`get-loader.ioncube.com`) | `modules/addons/hostx`, `modules/addons/xtreme_currency_rates` | not applicable — vendor licensing |
+| ionCube licence loader (`get-loader.ioncube.com`) | `modules/addons/[retired-addon]`, `modules/addons/xtreme_currency_rates` | not applicable — vendor licensing |
 
 ---
 

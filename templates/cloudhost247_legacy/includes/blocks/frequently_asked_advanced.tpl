@@ -1,15 +1,15 @@
 <!--  frequently-questions-->
-{if $hostx_blocks[$block_slug]}
+{if $cloudhost247.blocks[$block_slug]}
 <div class="frequently-questions">
         <div class="container">
           <div class="row frequently-questions-row">
-            <h2>{eval var=$hostx_blocks[$block_slug]->title|html_entity_decode}</h2>
+            <h2>{eval var=$cloudhost247.blocks[$block_slug]->title|html_entity_decode}</h2>
               <div class="col-sm-12">
                <div class="accordion-container-main">
                    <!--Accordion wrapper-->
                       <div class="accordion md-accordion" id="accordionEx1" role="tablist" aria-multiselectable="true">
                           <!-- Accordion card -->
-                          {foreach $hostx_blocks[$block_slug]->widgets  as $key =>  $widget}
+                          {foreach $cloudhost247.blocks[$block_slug]->widgets  as $key =>  $widget}
                           <div class="card">
                             <!-- Card header -->
                             <div class="card-header" role="tab" id="headingTwo{$key}">

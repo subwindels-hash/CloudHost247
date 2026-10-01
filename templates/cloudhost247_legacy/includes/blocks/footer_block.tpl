@@ -1,8 +1,8 @@
-{if $hostx_blocks['footer_block']}
+{if $cloudhost247.blocks['footer_block']}
 <footer class="footer {if $filename == 'clientarea' || $filename == 'submitticket' || $filename == 'affiliates' || $filename == 'supporttickets' || $filename == 'serverstatus' || $filename == 'viewticket' || $templatefile == 'account-user-management' || $templatefile == 'account-contacts-manage' || $templatefile == 'account-paymentmethods' || $templatefile == 'account-paymentmethods-manage' || $templatefile == 'announcements' || $templatefile == 'knowledgebase' || $templatefile == 'downloads' || $templatefile == 'viewannouncement' || $templatefile == 'knowledgebasecat' || $templatefile == 'knowledgebasearticle' || $templatefile == 'user-password' || $templatefile == 'user-profile' || $templatefile == 'user-switch-account' || $templatefile == 'user-security' || $templatefile == 'account-contacts-manage' || $templatefile == 'account-contacts-new'}clientarea-footer-entered{/if}" id="mainfootercloudhost247">
     <div class="container">
     	<div class="row">
-	        {foreach $hostx_blocks['footer_block']->widgets as $widget}
+	        {foreach $cloudhost247.blocks['footer_block']->widgets as $widget}
 	          {eval var=$widget->widget_description|html_entity_decode}
 	        {/foreach}
         </div>
@@ -23,43 +23,43 @@
                 <div class="footer_col">
                     <h4>{$LANG.footercontactinfo}</h4>
                     <a href="#">{$LANG.footer24support}</a>
-                    <h4 class="mt-2">+{$hostx_theme_settings.country_calling_code_phone} {$hostx_theme_settings.phone}</h4>
+                    <h4 class="mt-2">+{$cloudhost247.settings.country_calling_code_phone} {$cloudhost247.settings.phone}</h4>
                     <p class="mt-3">{$LANG.footeremail}</p>
                     <a href="#" class="color_white">{$companyEmailAddress}</a>
                     <div class="clearfix"></div>
-					{if !empty($hostx_theme_settings.facebook_handle_code) || !empty($hostx_theme_settings.instagram_handle_code) || 
-					!empty($hostx_theme_settings.pinrest_handle_code) || 
-					!empty($hostx_theme_settings.linkedin_handle_code) || 
-					!empty($hostx_theme_settings.twitter_handle_code)}
+					{if !empty($cloudhost247.settings.facebook_handle_code) || !empty($cloudhost247.settings.instagram_handle_code) ||
+					!empty($cloudhost247.settings.pinrest_handle_code) ||
+					!empty($cloudhost247.settings.linkedin_handle_code) ||
+					!empty($cloudhost247.settings.twitter_handle_code)}
 					    <a href="#" class="mt-3 pull-left">{$LANG.footerfollowus}</a>
 						<ul class="socil_icon">
-						{if !empty($hostx_theme_settings.facebook_handle_code)}
+						{if !empty($cloudhost247.settings.facebook_handle_code)}
 							<li>
-								<a href="{$hostx_theme_settings.facebook_handle_code}" target="_blank"><i class="fab fa-facebook"></i></a>
+								<a href="{$cloudhost247.settings.facebook_handle_code}" target="_blank"><i class="fab fa-facebook"></i></a>
 							</li>
 						{/if}
-						{if !empty($hostx_theme_settings.instagram_handle_code)}
+						{if !empty($cloudhost247.settings.instagram_handle_code)}
 							<li>
-								<a href="{$hostx_theme_settings.instagram_handle_code}" target="_blank">
+								<a href="{$cloudhost247.settings.instagram_handle_code}" target="_blank">
 								<i class="fab fa-instagram"></i></a>
 							</li>
 						{/if}
-						{if !empty($hostx_theme_settings.pinrest_handle_code)}
+						{if !empty($cloudhost247.settings.pinrest_handle_code)}
 							<li>
-								<a href="{$hostx_theme_settings.pinrest_handle_code}" target="_blank">
+								<a href="{$cloudhost247.settings.pinrest_handle_code}" target="_blank">
 								<i class="fab fa-pinterest"></i></a>
 							</li>
 						{/if}
-						{if !empty($hostx_theme_settings.linkedin_handle_code)}
+						{if !empty($cloudhost247.settings.linkedin_handle_code)}
 							<li>
-								<a href="{$hostx_theme_settings.linkedin_handle_code}" target="_blank">
+								<a href="{$cloudhost247.settings.linkedin_handle_code}" target="_blank">
 								<i class="fab fa-linkedin"></i>
 								</a>
 							</li>
 						{/if}
-						{if !empty($hostx_theme_settings.twitter_handle_code)}
+						{if !empty($cloudhost247.settings.twitter_handle_code)}
 							<li>
-								<a href="{$hostx_theme_settings.twitter_handle_code}" target="_blank">
+								<a href="{$cloudhost247.settings.twitter_handle_code}" target="_blank">
 								<i class="fab fa-twitter"></i></a>
 							</li>
 						{/if}

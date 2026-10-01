@@ -23,8 +23,8 @@
             <div class="row firstrowVq">
                 <div class="col-sm-7">
                  
-                    {if !empty($hostx_theme_settings.invoice_logo)}
-                     <img src="{$hostx_theme_settings.invoice_logo}" alt="{$companyname}" height="{$hostx_theme_settings.invoice_logo_height}" width="$hostx_theme_settings.invoice_logo_width">
+                    {if !empty($cloudhost247.settings.invoice_logo)}
+                     <img src="{$cloudhost247.settings.invoice_logo}" alt="{$companyname}" height="{$cloudhost247.settings.invoice_logo_height}" width="$cloudhost247.settings.invoice_logo_width">
                     {else}
                         <a href="{$WEB_ROOT}/index.php" class="logo logo-text"><h1>{$companyname}</h1></a>
                     {/if}

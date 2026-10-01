@@ -3,6 +3,7 @@ if (!defined('WHMCS')) { die('This file cannot be accessed directly'); }
 require_once __DIR__ . '/../cloudhost247_core/bootstrap.php';
 require_once __DIR__ . '/migrations/V100.php';
 require_once __DIR__ . '/migrations/V110.php';
+require_once __DIR__ . '/migrations/V120.php';
 require_once __DIR__ . '/lib/ThemeRepository.php';
 require_once __DIR__ . '/lib/AdminController.php';
 use CloudHost247\Foundation\Database\MigrationRunner;
@@ -19,7 +20,7 @@ function cloudhost247_theme_activate()
 {
     try {
         if (!class_exists('CloudHost247\Foundation\Database\MigrationRunner')) throw new RuntimeException('Install the CloudHost247 Foundation files first.');
-        $migrations = array(new \CloudHost247\Theme\Migrations\ThemeInitialMigration(), new \CloudHost247\Theme\Migrations\ThemeLocalizationMigration());
+        $migrations = array(new \CloudHost247\Theme\Migrations\ThemeInitialMigration(), new \CloudHost247\Theme\Migrations\ThemeLocalizationMigration(), new \CloudHost247\Theme\Migrations\ThemeLandingContentMigration());
         $applied = (new MigrationRunner())->run('cloudhost247_theme', $migrations);
         return array('status' => 'success', 'description' => 'Theme settings and content repositories are ready. Applied: ' . (count($applied) ? implode(', ', $applied) : 'already current'));
     } catch (\Throwable $e) { return array('status' => 'error', 'description' => $e->getMessage()); }

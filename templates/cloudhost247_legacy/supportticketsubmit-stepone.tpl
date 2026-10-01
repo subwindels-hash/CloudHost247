@@ -7,8 +7,8 @@
                     <div class="col-sm-12 col-md-4 departdiv">
                       <a href="{$smarty.server.PHP_SELF}?step=2&amp;deptid={$department.id}">
                         <div class="more-product-col">
-                        {if !empty($hostx_theme_settings.{"dept_{$department.id}"})}
-							<img src='{$hostx_theme_settings.{"dept_{$department.id}"}}' alt="{$WEB_ROOT}/templates/{$template}/images/sharedhosting.png">
+                        {if !empty($cloudhost247.settings.{"dept_{$department.id}"})}
+							<img src='{$cloudhost247.settings.{"dept_{$department.id}"}}' alt="{$WEB_ROOT}/templates/{$template}/images/sharedhosting.png">
                         {else}
 							<img src="{$WEB_ROOT}/templates/{$template}/images/{if $num > 4}sharedhosting{else}ticketicon{$num}{/if}.png" alt="{$WEB_ROOT}/templates/{$template}/images/sharedhosting.png">
                         {/if}

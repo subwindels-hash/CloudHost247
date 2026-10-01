@@ -1,16 +1,16 @@
-{if $hostx_blocks[$block_slug]}
+{if $cloudhost247.blocks[$block_slug]}
 {assign var=imageArrays value=['1'=>'ddos-icon.svg','2'=>'rpn.svg','3'=>'icon05.svg','4'=>'kvm-over-ip.svg','5'=>'rpn1.svg','6'=>'support.svg','7'=>'certified-datacenter.svg','8'=>'premium-network.svg']}
 {assign var=altArrays value=['1'=>'ddos icon','2'=>'lock icon','3'=>'svg icons','4'=>'user settings','5'=>'raid icon','6'=>'24*7 Support','7'=>'datacenter','8'=>'network']}
 <div class="features-option2">
     <div class="container">
 	    <div class="top">
-	      <h2>{eval var=$hostx_blocks[$block_slug]->title}</h2>
-	          {eval var=$hostx_blocks[$block_slug]->description}
+	      <h2>{eval var=$cloudhost247.blocks[$block_slug]->title}</h2>
+	          {eval var=$cloudhost247.blocks[$block_slug]->description}
 	    </div>
 	    <div class="clearfix"></div>
 	    <div class="row">
 		 {$turnsImg = 1}
-	     {foreach $hostx_blocks[$block_slug]->widgets as $widget}
+	     {foreach $cloudhost247.blocks[$block_slug]->widgets as $widget}
 	      <div class="col-sm-3">
 	        <div class="features-col">
 	          <div class="img-box">

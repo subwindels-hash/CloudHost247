@@ -1,5 +1,5 @@
-{if $hostx_blocks[$block_slug]}
-  {eval var=$hostx_blocks[$block_slug]->description}
+{if $cloudhost247.blocks[$block_slug]}
+  {eval var=$cloudhost247.blocks[$block_slug]->description}
 {else}
 <div class="new_hx-banner"><div class="container"><div class="row"><div class="col-12"><div class="hx-banner-content"><h1>Take Your Business Online With</h1><h3>Fast, Secure, Powerful Web Hosting!</h3></div></div></div>
 <div class="row hx-list"><div class="col-md-3"><div class="hx-banner-list"><div class="hx-box"><img src="{$WEB_ROOT}/templates/{$template}/images/hx-img1.svg" alt="icon"></div><p>30 Day Guarantee</p></div></div><div class="col-md-3"><div class="hx-banner-list"><div class="hx-box"><img src="{$WEB_ROOT}/templates/{$template}/images/hx-img2.svg" alt="icon"></div><p>Trusted by 1.2 Millions user</p></div></div><div class="col-md-3"><div class="hx-banner-list"><div class="hx-box"><img src="{$WEB_ROOT}/templates/{$template}/images/hx-img3.svg" alt="icon"></div><p>Speed Like No One Else</p></div></div><div class="col-md-3"><div class="hx-banner-list"><div class="hx-box"><img src="{$WEB_ROOT}/templates/{$template}/images/hx-img4.png" alt="icon"></div><p>Full Root and Full Control</p></div></div></div><div class="row"><div class="col-12"><div class="text-center mt-5"><a href="#" class="btn hx-getstart-btn">GET STARTED NOW</a></div></div></div></div></div>

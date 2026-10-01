@@ -1,4 +1,4 @@
-{if $hostx_theme_settings.dropdown_event eq 'hover'}
+{if $cloudhost247.settings.dropdown_event eq 'hover'}
 <script type="text/javascript">
 	jQuery(document).ready(function () {
 	   jQuery('#myHeader ul li.cloudhost247-dropdown').mouseover(function() {

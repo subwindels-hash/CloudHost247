@@ -704,7 +704,7 @@
 						<div class="showMarketingEmail">
 							<div class="marketing-email-optin">
 								<div class="text-center p10">
-								<img src="templates/{$hostx_theme_settings.template_name_custom}/images/marketingemail.png"></div>
+								<img src="templates/{$cloudhost247.settings.template_name_custom}/images/marketingemail.png"></div>
 								<h4 class="font-size-18">{lang key='emailMarketing.joinOurMailingList'}</h4>
 								<p>{$marketingEmailOptInMessage}</p>
 								<div class="text-center">

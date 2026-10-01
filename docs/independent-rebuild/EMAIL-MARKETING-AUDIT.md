@@ -33,7 +33,7 @@ mandatory audit. Every claim below names the file that proves it.
 | Client-area module pages | broker `cloudhost247_broker_clientarea()` | `index.php?m=<module>` array return: `pagetitle`, `breadcrumb`, `templatefile`, `vars`, `requirelogin => true` |
 | Public (no-login) root pages | `domain-brokerage-terms.php`, `refund-policy.php`, … | `define('CLIENTAREA', true)` + `ClientArea->initPage()` + theme tpl; **the pattern for the public unsubscribe page**; each file is individually listed in the CI lint step |
 | Client data access (read) precedent | broker `DomainDeliveryService` (localAPI Read), builder `LiveDataSource`/`WhmcsDataSource` (Capsule reads) | Repository modules never write core tables; WHMCS reads happen via Capsule or localAPI |
-| Email PROVISIONING products | `modules/servers/cloudhost247_email/`, `modules/servers/Smtphosting/`, `modules/servers/hostx_email/` | Mailbox/account provisioning (IMAP/SMTP hosting, Microsoft 365, Google Workspace, ModulesGarden SMTP-hosting reseller) — **sell mailboxes; none send campaigns** |
+| Email PROVISIONING products | `modules/servers/cloudhost247_email/`, `modules/servers/Smtphosting/`, `modules/servers/cloudhost247_email_hosting/` | Mailbox/account provisioning (IMAP/SMTP hosting, Microsoft 365, Google Workspace, ModulesGarden SMTP-hosting reseller) — **sell mailboxes; none send campaigns** |
 | Transactional send example | `modules/addons/phoneservices/lib/Interfaces/EmailProviderInterface.php` + `Providers/SendgridProvider.php` | SendGrid transactional interface (`sendEmail`, `getEmailStatus`) — good shape reference for a provider contract; it is notification-scoped, not marketing |
 | Notification (customer) helper | broker `NotificationService` → `localAPI('SendEmail')` | Uses WHMCS transactional mailer — **marketing must NOT send campaigns through this path** (would conflate marketing with transactional and bypass rate-limit/bounce/marketing-suppression rules) |
 | Test infrastructure | `tests/broker/{fakes.php,run.php,test_static.py}` | Fake Capsule query builder, fake `localAPI`, seeded globals; static invariants in Python; reproduced per-module (`tests/marketing/*`) |
@@ -57,7 +57,7 @@ mandatory audit. Every claim below names the file that proves it.
 | Module | Interaction decision |
 |---|---|
 | `crons/emailSend.php` | Misnamed legacy OVH `seenMessage` maintenance script (whole body commented/`exit`) — **not an email sender**; ignore, do not delete (tracked separately) |
-| `modules/servers/cloudhost247_email`, `Smtphosting`, `hostx_email` | Provision mailboxes for customers; marketing consumes *no* code from them; cPanel SMTP credentials for campaigns come from the integrations vault, not these products |
+| `modules/servers/cloudhost247_email`, `Smtphosting`, `cloudhost247_email_hosting` | Provision mailboxes for customers; marketing consumes *no* code from them; cPanel SMTP credentials for campaigns come from the integrations vault, not these products |
 | `phoneservices/SendgridProvider` | Transactional notifications only; marketing does not reuse it (different concern), but its interface shape is a reference |
 | broker `NotificationService` / `localAPI('SendEmail')` | **Marketing campaigns never use WHMCS `SendEmail`** (transactional pipeline; spec #39 separation) |
 | Central `smtp` integration row | The shared transactional relay. Marketing gets its **own provider key** (below) so sender identity, rotation and failures never disturb transactional mail — while reusing 100% of the vault/probe/tester/UI code |

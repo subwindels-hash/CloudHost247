@@ -38,11 +38,11 @@
 {else}
 	<title>{if $kbarticle.title}{$kbarticle.title} - {/if}{$pagetitle} - {$companyname}</title>
 {/if}
-{if empty($hostx_theme_settings.favicon)}
+{if empty($cloudhost247.settings.favicon)}
   <link rel="shortcut icon" href="{$WEB_ROOT}/templates/{$template}/images/favicon.ico" type="image/x-icon">
   <link rel="icon" href="{$WEB_ROOT}/templates/{$template}/images/favicon.ico" type="image/x-icon">
 {else}
-  <link rel="shortcut icon" href="{$hostx_theme_settings.favicon}" type="image/x-icon">
-  <link rel="icon" href="{$hostx_theme_settings.favicon}" type="image/x-icon">
+  <link rel="shortcut icon" href="{$cloudhost247.settings.favicon}" type="image/x-icon">
+  <link rel="icon" href="{$cloudhost247.settings.favicon}" type="image/x-icon">
 {/if}
 <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">

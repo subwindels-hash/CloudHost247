@@ -1,9 +1,9 @@
-{if $hostx_blocks[$block_slug]}
+{if $cloudhost247.blocks[$block_slug]}
 <div class="bandwidth">
   <div class="container">
     <div class="bandwidth_in">
     <div class="row">
-     {foreach $hostx_blocks[$block_slug]->widgets as $widget}
+     {foreach $cloudhost247.blocks[$block_slug]->widgets as $widget}
           {eval var=$widget->widget_description|html_entity_decode}
      {/foreach}  
     </div>

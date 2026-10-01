@@ -9,7 +9,7 @@ $ca->addToBreadCrumb('index.php', Lang::trans('globalsystemname'));
 $ca->addToBreadCrumb('pleskhosting.php', 'Plesk Hosting');
 $ca->initPage();
 $pageName = basename($_SERVER['PHP_SELF']);
-$pageData = Capsule::table("mod_hostx_pages")->where('pageTitle',$pageName)->first();
+$pageData = Capsule::table("mod_cloudhost247_theme_pages")->where('pageTitle',$pageName)->first();
 $getLocalLang = Capsule::table('tblconfiguration')->where('setting','Language')->first();
 $gid = $pageData->productGroup;
 function get_currency(){
@@ -37,17 +37,17 @@ function wgs_fetch_product_detail_according_to_language_cloudhost247($language,$
 	return $dataReturn;
 }
 function wgs_get_dynmic_translation_page($related_type,$related_id,$language){
-	return Capsule::table('mod_hostx_dynmic_translation')->where('related_type',$related_type)->where('related_id',$related_id)->where('language',$language)->first();
+	return Capsule::table('mod_cloudhost247_theme_dynamic_translation')->where('related_type',$related_type)->where('related_id',$related_id)->where('language',$language)->first();
 }
 function wgs_pricing_format_data($priceProduct,$currencyId){
-	$currencySettingGet = Capsule::table('mod_hostx_setting')->where('setting','currency_setting')->first();
-	$currencySettingGetCount = Capsule::table('mod_hostx_setting')->where('setting','currency_setting')->count();
+	$currencySettingGet = Capsule::table('mod_cloudhost247_theme_settings')->where('setting_key','currency_setting')->first();
+	$currencySettingGetCount = Capsule::table('mod_cloudhost247_theme_settings')->where('setting_key','currency_setting')->count();
 	if($currencySettingGetCount > 0){
-		if($currencySettingGet->value == 'prefix'){
+		if($currencySettingGet->setting_value == 'prefix'){
 			return formatCurrency($priceProduct,$currencyId)->toPrefixed();
-		}elseif($currencySettingGet->value == 'suffix'){
+		}elseif($currencySettingGet->setting_value == 'suffix'){
 			return formatCurrency($priceProduct,$currencyId)->toSuffixed();
-		}elseif($currencySettingGet->value == 'both'){
+		}elseif($currencySettingGet->setting_value == 'both'){
 			return formatCurrency($priceProduct,$currencyId)->toFull();
 		}
 	}else{
@@ -83,7 +83,7 @@ if(!empty($gid)){
 				$pData['pricing']['biennially'] = wgs_pricing_format_data($pData['pricing']['biennially'],$currency->id);
 				$pData['pricing']['triennially'] = wgs_pricing_format_data($pData['pricing']['triennially'],$currency->id);
 			}
-            $pDesc = Capsule::table('mod_hostx_page_products')->select('pHeadSortDesc','pDescription','pFootCaption','pFootSortDesc')->where('productId', $pData['pid'])->where('pageId', $pageData->id)->first();
+            $pDesc = Capsule::table('mod_cloudhost247_theme_page_products')->select('pHeadSortDesc','pDescription','pFootCaption','pFootSortDesc')->where('productId', $pData['pid'])->where('pageId', $pageData->id)->first();
 			if($checkForTranslationGroup->value == 1){
 				if(isset($_SESSION['Language'])){
 					$getPname = wgs_fetch_product_detail_according_to_language_cloudhost247($_SESSION['Language'],$pData['pid'],'pname');
@@ -121,7 +121,7 @@ if(!empty($gid)){
             if(!empty($pDesc)){
                 $pDesc = (array) $pDesc;
             }else{            
-                require_once __DIR__ . '/modules/addons/hostx/defaultmenu.php';
+                require_once __DIR__ . '/modules/addons/cloudhost247_theme/landing-bootstrap.php';
                 $pDesc = $defaultPData;
             }
 			$pDesc['pHeadSortDesc'] = html_entity_decode($pDesc['pHeadSortDesc']);

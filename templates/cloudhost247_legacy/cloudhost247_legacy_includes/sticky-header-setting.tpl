@@ -1,4 +1,4 @@
-{if $hostx_theme_settings.enable_sticky_header eq 'on'}
+{if $cloudhost247.settings.enable_sticky_header eq 'on'}
     <script>
         window.onscroll = function () {
             make_header_sticky();
