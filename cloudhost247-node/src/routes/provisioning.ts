@@ -12,6 +12,7 @@ import {
   findProvisioningJobById,
   retryProvisioningJob,
   cancelProvisioningJob,
+  findCustomerServerById,
 } from '../db/server-provisioning';
 import { listDeploymentSteps, listDeploymentEvents } from '../db/deployments';
 
@@ -40,9 +41,14 @@ export async function registerProvisioningRoutes(app: FastifyInstance, env: Env,
       const limit = query.limit ? parseInt(query.limit, 10) : 50;
 
       if (!isStaff) {
-        // Customer can only query their own server's jobs
-        if (!query.serverId) {
-          throw new ValidationError('serverId is required');
+        // A server id is not an authorization boundary: resolve it and verify ownership before
+        // allowing a customer to inspect its infrastructure history.
+        if (!query.serverId) throw new ValidationError('serverId is required');
+        const serverId = parseOrThrow(idParamSchema, query.serverId);
+        const server = await findCustomerServerById(pool, serverId);
+        if (!server || server.customer_id !== auth.userId) {
+          // Deliberately avoid revealing whether another customer's server exists.
+          throw new NotFoundError('Server not found');
         }
       }
 
@@ -59,11 +65,18 @@ export async function registerProvisioningRoutes(app: FastifyInstance, env: Env,
      * Get single provisioning job details with step breakdown and progress events.
      */
     app.get<{ Params: { id: string } }>(`${prefix}/provisioning/jobs/:id`, async (request) => {
-      await authenticate(request, env, pool);
+      const auth = await authenticate(request, env, pool);
       const id = parseOrThrow(idParamSchema, request.params.id);
 
       const job = await findProvisioningJobById(pool, id);
       if (!job) throw new NotFoundError('Provisioning job not found');
+      const isStaff = auth.role === 'admin' || auth.role === 'super_admin' || auth.role === 'staff';
+      if (!isStaff) {
+        const server = await findCustomerServerById(pool, job.server_id);
+        if (!server || server.customer_id !== auth.userId) {
+          throw new NotFoundError('Provisioning job not found');
+        }
+      }
 
       const [steps, events] = await Promise.all([
         listDeploymentSteps(pool, job.deployment_id),
