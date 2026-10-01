@@ -2,6 +2,7 @@ import { Outlet } from 'react-router-dom';
 import Header from './Header';
 import Footer from './Footer';
 import SupportModeBanner from '../components/SupportModeBanner';
+import AiSupportWidget from '../components/AiSupportWidget';
 
 /**
  * Shared application shell — a single Header/Footer wrapping every route (public marketing pages
@@ -20,6 +21,7 @@ export default function Layout() {
         <Outlet />
       </main>
       <Footer />
+      <AiSupportWidget />
     </div>
   );
 }

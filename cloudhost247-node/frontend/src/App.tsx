@@ -63,6 +63,7 @@ import ControlPanelDetailPage from './pages/ControlPanelDetailPage';
 import AdminControlPanelsPage from './pages/AdminControlPanelsPage';
 import AdminLicensesPage from './pages/AdminLicensesPage';
 import AdminMonitoringPage from './pages/AdminMonitoringPage';
+import AdminAiSupportPage from './pages/AdminAiSupportPage';
 import RGDashboardPage from './pages/revenue-guardian/DashboardPage';
 import RecoveryQueuePage from './pages/revenue-guardian/RecoveryQueuePage';
 import RGCaseDetailPage from './pages/revenue-guardian/CaseDetailPage';
@@ -180,6 +181,7 @@ export default function App() {
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/admin/customers/:id" element={<AdminCustomerDetailPage />} />
             <Route path="/admin/tickets" element={<AdminTicketsPage />} />
+            <Route path="/admin/ai-support" element={<AdminAiSupportPage />} />
             <Route path="/admin/tickets/:id" element={<AdminTicketDetailPage />} />
             <Route path="/admin/invoices" element={<AdminInvoicesPage />} />
             <Route path="/admin/invoices/:id" element={<AdminInvoiceDetailPage />} />

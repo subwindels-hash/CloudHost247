@@ -38,6 +38,7 @@ import { registerFirewallRoutes } from './routes/firewall';
 import { registerRevenueGuardianRoutes } from './revenue-guardian/controllers/routes';
 import { registerCloudflareRoutes } from './routes/cloudflare';
 import { registerAdminCloudflareRoutes } from './routes/admin-cloudflare';
+import { registerAiSupportRoutes } from './routes/ai-support';
 import { HttpError, ValidationError } from './lib/errors';
 import { createLogger } from './lib/logger';
 import type { Queryable } from './db/types';
@@ -153,6 +154,7 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     // Cloudflare reseller & management subsystem.
     await registerCloudflareRoutes(instance, env, pool);
     await registerAdminCloudflareRoutes(instance, env, pool);
+    await registerAiSupportRoutes(instance, env, pool);
   });
 
   if (serveFrontend) {
