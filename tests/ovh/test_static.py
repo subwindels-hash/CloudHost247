@@ -44,4 +44,12 @@ class OvhSafetyTests(unittest.TestCase):
  def test_capability_guards_cover_admin_mutations(self):
   for p in [ROOT/'modules/addons/cloudhost247_theme/lib/AdminController.php',ROOT/'modules/addons/cloudhost247_currency/lib/Services/AdminController.php',ADDON/'lib/Services/AdminController.php']:
    self.assertIn('requireCapability(',p.read_text(),str(p))
+ def test_advanced_operations_are_guarded(self):
+  a=(ADDON/'lib/Services/AdvancedOperations.php').read_text();c=(ADDON/'lib/Services/AdminController.php').read_text()
+  self.assertIn('Explicit confirmation is required',a);self.assertIn('Type the exact OVH service name',a);self.assertIn('hash_equals',a)
+  self.assertIn("'advanced_run','rdns_set','rdns_delete'",c);self.assertRegex(c,r"\$capability = in_array\(\$op,array\([^)]*'advanced_run'")
+  self.assertNotIn('shell_exec',a);self.assertNotIn('exec(',a)
+  m=(ADDON/'lib/Services/ServiceManager.php').read_text();self.assertIn('function performSub',m);self.assertIn('reconciliation_required',m)
+ def test_advanced_operations_not_exposed_to_customers(self):
+  s=(SERVER/'cloudhost247_ovh.php').read_text();self.assertNotIn('AdvancedOperations',s)
 if __name__=='__main__':unittest.main()

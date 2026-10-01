@@ -37,7 +37,7 @@ foreach (array(
     'Services/Settings', 'Services/PageService', 'Services/TemplateService', 'Services/MediaService',
     'Services/FormService', 'Services/MenuService', 'Services/DisplayConditions', 'Services/ThemeService',
     'Services/Starters',
-    'Catalog/WhmcsDataSource', 'Site/PageResolver',
+    'Catalog/WhmcsDataSource', 'Site/PageResolver', 'Site/SocialMeta', 'Services/SitemapService',
     'Admin/EditorContext', 'Admin/AdminController', 'Admin/AdminView',
 ) as $file) {
     require_once $base . $file . '.php';
@@ -1206,6 +1206,102 @@ $editorParity = $renderer->render($parityDocument, RenderContext::editor($data))
 $strippedEditor = preg_replace('/ data-ch247-(id|type|widget|inline)="[^"]*"/', '', $editorParity['html']);
 $check('the editor canvas differs from the published page only by its editing hooks',
     strpos($strippedEditor, '<h1 class="ch247-heading">') !== false);
+
+/* ------------------------------------------- 13. social metadata and sitemap */
+
+$seoDoc = function ($headline) use ($validator) {
+    return Document::fromArray(array('children' => array(buildSection(array(
+        array('widget' => 'heading', 'props' => array('text' => $headline, 'level' => 'h1')),
+    )))), $validator, false);
+};
+$makePage = function ($title, array $meta = array()) use ($pages, $seoDoc) {
+    $page = $pages->create(array('title' => $title), 7);
+    $pages->saveDraft($page['id'], $seoDoc($title), 7);
+    $pages->publish($page['id'], 7);
+    if ($meta) { $pages->updateMeta($page['id'], $meta, 7); }
+    return $page;
+};
+
+$freshPng = function ($r, $g, $b) {
+    $chunk = function ($type, $data) { return pack('N', strlen($data)) . $type . $data . pack('N', crc32($type . $data)); };
+    return "\x89PNG\r\n\x1a\n" . $chunk('IHDR', pack('NNCCCCC', 1, 1, 8, 2, 0, 0, 0))
+        . $chunk('IDAT', gzcompress("\x00" . chr($r) . chr($g) . chr($b))) . $chunk('IEND', '');
+};
+$sharePath = $temp . '/share.png';
+$shareBytes = $freshPng(12, 200, 90);
+file_put_contents($sharePath, $shareBytes);
+$shared = $media->upload(array('name' => 'Share Card.png', 'tmp_name' => $sharePath, 'error' => UPLOAD_ERR_OK, 'size' => strlen($shareBytes)),
+    7, array('alt_text' => 'Share card'), false);
+$check('a social image can be uploaded for the tests', $shared['media']['id'] > 0 && $shared['media']['is_image']);
+
+$ogPage = $makePage('Social Card Page');
+$settings->save(array('social_image_url' => 'https://cdn.example.test/default-share.png'), 7);
+$check('without a page image the site default social image is used',
+    $resolver->resolve($ogPage['slug'])['meta']['og_image'] === 'https://cdn.example.test/default-share.png');
+$pages->updateMeta($ogPage['id'], array('featured_media_id' => $shared['media']['id']), 7);
+$check('a page falls back to its featured image',
+    $resolver->resolve($ogPage['slug'])['meta']['og_image'] === $shared['media']['url_path']);
+$pages->updateMeta($ogPage['id'], array('og_media_id' => $shared['media']['id']), 7);
+$ogMeta = $resolver->resolve($ogPage['slug'])['meta'];
+$check('a page uses its own social image', $ogMeta['og_image'] === $shared['media']['url_path']);
+$check('the social image carries its alt text', $ogMeta['og_image_alt'] === $shared['media']['alt_text']);
+$check('the site name is exposed for og:site_name', $ogMeta['site_name'] === $settings->get('site_title', ''));
+$pages->updateMeta($ogPage['id'], array('og_media_id' => 987654, 'featured_media_id' => 0), 7);
+$check('a missing media record falls back to the site default rather than a broken tag',
+    $resolver->resolve($ogPage['slug'])['meta']['og_image'] === 'https://cdn.example.test/default-share.png');
+
+$tags = \CloudHost247\Builder\Site\SocialMeta::tags(array(
+    'title' => 'Fast "VPS" <b>hosting</b>', 'description' => 'A & B', 'og_image' => '/media/hero.png',
+    'og_image_alt' => 'Hero', 'canonical' => '/builder-page.php?slug=vps', 'site_name' => 'CloudHost247',
+), 'https://example.test/');
+$check('relative social images are made absolute', strpos($tags, 'content="https://example.test/media/hero.png"') !== false);
+$check('og:url follows the canonical address', strpos($tags, 'property="og:url" content="https://example.test/builder-page.php?slug=vps"') !== false);
+$check('social tags escape markup and quotes', strpos($tags, '<b>') === false && strpos($tags, 'Fast &quot;VPS&quot; &lt;b&gt;') !== false);
+$check('a large twitter card is used when there is an image', strpos($tags, 'content="summary_large_image"') !== false);
+$check('a summary twitter card is used without an image',
+    strpos(\CloudHost247\Builder\Site\SocialMeta::tags(array('title' => 'T'), 'https://example.test'), 'content="summary"') !== false);
+$check('javascript and protocol-relative image URLs are never emitted',
+    \CloudHost247\Builder\Site\SocialMeta::absolute('javascript:alert(1)', 'https://example.test') === ''
+    && \CloudHost247\Builder\Site\SocialMeta::absolute('//evil.test/x.png', 'https://example.test') === ''
+    && \CloudHost247\Builder\Site\SocialMeta::absolute('/ok.png', '') === '');
+
+$sitemap = new \CloudHost247\Builder\Services\SitemapService(new PageRepository(), $settings);
+$sitePublic = $makePage('Sitemap Public Page');
+$siteNoindex = $makePage('Sitemap Noindex Page', array('meta_robots' => 'noindex,follow'));
+$siteForeign = $makePage('Sitemap Foreign Canonical', array('canonical_url' => 'https://elsewhere.example.test/original'));
+$siteSelf = $makePage('Sitemap Self Canonical');
+$pages->updateMeta($siteSelf['id'], array('canonical_url' => 'https://example.test/builder-page.php?slug=' . $siteSelf['slug']), 7);
+$siteClients = $makePage('Sitemap Clients Only', array('visibility' => 'clients'));
+$siteDraft = $pages->create(array('title' => 'Sitemap Draft Only'), 7);
+$siteFuture = $pages->create(array('title' => 'Sitemap Future Page'), 7);
+$pages->saveDraft($siteFuture['id'], $seoDoc('Future'), 7);
+$pages->schedule($siteFuture['id'], date('Y-m-d H:i:s', time() + 86400), 7);
+
+$locs = array_map(function ($entry) { return $entry['loc']; }, $sitemap->entries('https://example.test/'));
+$loc = function ($page) { return 'https://example.test/builder-page.php?slug=' . $page['slug']; };
+$check('the sitemap lists a published public page', in_array($loc($sitePublic), $locs, true));
+$check('the sitemap omits noindex pages', !in_array($loc($siteNoindex), $locs, true));
+$check('the sitemap omits pages canonicalised elsewhere', !in_array($loc($siteForeign), $locs, true));
+$check('the sitemap keeps pages that canonicalise to themselves', in_array($loc($siteSelf), $locs, true));
+$check('the sitemap omits client-only pages', !in_array($loc($siteClients), $locs, true));
+$check('the sitemap omits drafts', !in_array($loc($siteDraft), $locs, true));
+$check('the sitemap omits pages scheduled for the future', !in_array($loc($siteFuture), $locs, true));
+$locsLater = array_map(function ($entry) { return $entry['loc']; }, $sitemap->entries('https://example.test', time() + 2 * 86400));
+$check('a scheduled page is listed once its time has passed', in_array($loc($siteFuture), $locsLater, true));
+$check('every listed URL is unique', count($locs) === count(array_unique($locs)));
+$check('every listed URL is on the site origin', count(array_filter($locs, function ($u) { return strpos($u, 'https://example.test/') !== 0; })) === 0);
+
+$xml = $sitemap->xml('https://example.test');
+$check('the sitemap is a urlset document', strpos($xml, '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">') !== false);
+$check('the sitemap carries lastmod dates', preg_match('#<lastmod>\d{4}-\d{2}-\d{2}</lastmod>#', $xml) === 1);
+$check('ampersands in the sitemap would be escaped', strpos($sitemap->xml('https://example.test/a&b'), 'a&amp;b') !== false);
+if (function_exists('simplexml_load_string')) {
+    $check('the sitemap is well-formed XML', simplexml_load_string($xml) !== false);
+}
+$settings->save(array('pretty_urls' => '1'), 7);
+$prettyLocs = array_map(function ($entry) { return $entry['loc']; }, $sitemap->entries('https://example.test'));
+$check('pretty URLs are reflected in the sitemap', in_array('https://example.test/' . $sitePublic['slug'], $prettyLocs, true));
+$settings->save(array('pretty_urls' => '0'), 7);
 
 /* ---------------------------------------------------------------- report */
 

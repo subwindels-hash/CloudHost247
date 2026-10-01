@@ -7,7 +7,6 @@ $hookManager->register(
             {
                 return;
             }
-            //todo product/module chceck
             $configController = new  \ModulesGarden\ProductsReseller\Server\Smtphosting\Core\App\Controllers\Instances\Addon\ConfigOptions();
             $configController->runExecuteProcess($args);
         }

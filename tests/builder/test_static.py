@@ -491,6 +491,24 @@ class WebsiteBuilderStaticTests(unittest.TestCase):
         assertions = run.count('$check(') - 1
         self.assertGreater(assertions, 200)
 
+    def test_sitemap_endpoint_is_gated_and_never_lists_unindexable_pages(self):
+        endpoint = (ROOT / 'builder-sitemap.php').read_text()
+        self.assertIn("tbladdonmodules", endpoint)
+        self.assertIn('http_response_code(404)', endpoint)
+        service = (MODULE / 'lib/Services/SitemapService.php').read_text()
+        repo = (MODULE / 'lib/Repositories/PageRepository.php').read_text()
+        self.assertIn("->where('visibility', 'public')", repo)
+        self.assertIn("array('published', 'scheduled')", repo)
+        self.assertIn('noindex', service)
+        self.assertIn('canonical', service)
+
+    def test_social_tags_are_escaped_in_one_place(self):
+        hooks = (MODULE / 'hooks.php').read_text()
+        self.assertIn('SocialMeta::tags', hooks)
+        self.assertNotIn('og:image', hooks)
+        social = (MODULE / 'lib/Site/SocialMeta.php').read_text()
+        self.assertIn('htmlspecialchars', social)
+
     def test_readme_declares_the_module(self):
         readme = (ROOT / 'README.md').read_text()
         self.assertIn('cloudhost247_builder', readme)

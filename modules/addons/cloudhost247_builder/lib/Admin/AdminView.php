@@ -891,6 +891,7 @@ class AdminView
                 . $this->e($value) . '</option>';
         }
         return '<section class="ch247b-panel"><h2>SEO defaults</h2>'
+            . '<p>Sitemap of indexable builder pages: <code>builder-sitemap.php</code>. Noindex, client-only, draft, future-scheduled and canonicalised-elsewhere pages are left out automatically.</p>'
             . '<form method="post" action="' . $this->url(array('view' => 'seo')) . '">'
             . $this->tokenField($data)
             . '<input type="hidden" name="action" value="seo.save" />'

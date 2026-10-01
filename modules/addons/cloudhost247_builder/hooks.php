@@ -44,16 +44,8 @@ add_hook('ClientAreaHeadOutput', 1, function ($vars) {
     if (!empty($meta['canonical'])) {
         $out .= '<link rel="canonical" href="' . cloudhost247_builder_escape($meta['canonical']) . '" />';
     }
-    if (!empty($meta['title'])) {
-        $out .= '<meta property="og:title" content="' . cloudhost247_builder_escape($meta['title']) . '" />';
-        $out .= '<meta property="og:type" content="website" />';
-    }
-    if (!empty($meta['description'])) {
-        $out .= '<meta property="og:description" content="' . cloudhost247_builder_escape($meta['description']) . '" />';
-    }
-    if (!empty($meta['og_image'])) {
-        $out .= '<meta property="og:image" content="' . cloudhost247_builder_escape($meta['og_image']) . '" />';
-    }
+    // Open Graph / Twitter-card tags, escaped and absolutised by SocialMeta.
+    $out .= \CloudHost247\Builder\Site\SocialMeta::tags($meta, isset($vars['systemurl']) ? (string) $vars['systemurl'] : '');
 
     if (!empty($render['css'])) {
         // The compiler only emits values StyleSchema approved; this strips any

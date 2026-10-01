@@ -350,3 +350,31 @@ to it with a rewrite rule.
 
 **Environment:** `CH247_BUILDER_MEDIA_ROOT`, `CH247_BUILDER_MEDIA_URL`
 (optional). No credentials, endpoints or secrets are stored by this module.
+
+---
+
+## 14. Social metadata and sitemap (added 2026-10-02)
+
+**Social sharing tags.** `Site\SocialMeta` writes `og:title`, `og:type`, `og:site_name`,
+`og:description`, `og:url` (the canonical address when one is set), `og:image`, `og:image:alt`
+and the matching `twitter:*` tags. Every value is escaped; relative image and canonical paths
+are made absolute against WHMCS `SystemURL`; anything that is not `http(s)` or a site-relative
+path (for example `javascript:` or `//host/...`) is dropped. The image is chosen per page: its
+own **social image** (`og_media_id`), then its **featured image** (`featured_media_id`), then the
+site-wide default in SEO settings. Only stored image media qualifies; a missing or non-image
+record falls back instead of emitting a broken tag. Previews stay `noindex,nofollow` and carry no canonical.
+
+**Sitemap.** `builder-sitemap.php` (served only while the addon is active, otherwise 404) emits
+a standard `urlset` of pages a search engine may legitimately index. A page is listed only if
+it is public, published (or scheduled with its time reached), not `noindex`, and not
+canonicalised to a different address. Drafts, archived, client-only and admin-only pages are never
+listed. URLs are built exactly like `PageService::publicUrl()` (including the pretty-URL
+setting) with `lastmod` from the publish date. The Theme CMS sitemap, `cloudhost247-sitemap.php`,
+is unchanged; submit both.
+
+**Tests.** 28 new assertions in `tests/builder/run.php` cover image precedence and fallback, tag
+escaping and absolutisation, every sitemap inclusion/exclusion rule, scheduling, pretty URLs and
+well-formed XML. Runtime behaviour under WHMCS remains staging-blocked.
+
+**Still partial in the builder:** localized CMS, dedicated product-query landing components,
+and visual preview with drag/drop section ordering.
