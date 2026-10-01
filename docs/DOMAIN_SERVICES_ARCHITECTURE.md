@@ -177,7 +177,7 @@ Phases 1–12 are implemented and verified. Summary of what shipped, where:
 
 ### Verification
 
-- `tsc` clean (server + frontend strict), `vitest run`: **723 tests / 100 files pass**
+- `tsc` clean (server + frontend strict), `vitest run`: **726 tests / 100 files pass**
   (including the new `tests/integration/domain-services-api.test.ts` PGlite end-to-end suite and
   `frontend/tests/unit/domain-services-pages.test.tsx`), `vite build` succeeds.
 - The integration suite caught and fixed four real defects: an unmatchable domain-name regex
@@ -185,6 +185,34 @@ Phases 1–12 are implemented and verified. Summary of what shipped, where:
   persistence (SQLSTATE 42P08), the same conflict in auction/registration/transfer status
   updates, and registration sweeps using the wrong (latest) contact row instead of the
   registration's own `contact_id`.
+
+### Simulated providers for tests and preview
+
+`tests/helpers/mock-registrar.ts` runs local HTTP servers that speak the **real wire protocols** —
+MockNamecheap (Namecheap XML API: balance, check, TLD list, create, transfer, getInfo) and
+MockRdap (IANA-style bootstrap + RFC 9083 responses). These are external test doubles at the
+transport boundary only: the production adapters, services, payments and admin APIs run unchanged
+against them. The registry itself still contains no mock adapter — an unconfigured production
+system keeps returning `Service Provider Not Configured`.
+
+Three integration tests use them to prove the provider-backed flows end to end: catalogue sync +
+search with real provider prices (available/premium/registered), the full registration lifecycle
+(quote → order → verified payment → sweep → registrar confirmation → `customer_domains` link →
+duplicate rejection), and RDAP WHOIS privacy reporting (redacted vs public registrant, and a
+registry 404 mapped to a genuine `not_found` rather than an error).
+
+### Live demo preview
+
+`scripts/domain-services-demo-preview.ts` boots the real app (PGlite, built frontend on
+`0.0.0.0:3000`) with the simulated providers and seeds all demo state **through the production
+admin APIs** — provider creation, encrypted credential write, real Test Connection, and catalogue
+sync. Booting this preview exposed and led to fixes for two catalogue-sync defects:
+
+1. Sync stored dotted labels (`.com`) while `domain_extensions.shape_check` requires bare labels
+   (`com`), so every real registrar catalogue sync failed with a constraint violation. Sync,
+   price lookup and search now consistently use bare labels; display layers re-add the dot.
+2. **Migration `0064_relax_domain_extensions_shape.sql`** extends the shape check to multi-label
+   public suffixes (`com.ng`, `co.uk`, `co.za`) that real registrar TLD catalogues include.
 
 ### Operational activation checklist
 
