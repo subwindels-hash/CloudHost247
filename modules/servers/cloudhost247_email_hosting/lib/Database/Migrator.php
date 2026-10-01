@@ -5,7 +5,7 @@
  * install/schema.sql holds the canonical shape; install/migrations/*.sql hold
  * the incremental steps for existing installations. Both are applied
  * idempotently, and the applied filenames are tracked in
- * mod_hostx_email_migrations.
+ * mod_cloudhost247_email_hosting_migrations.
  *
  * ensureSchema() is cheap after the first call (one cached table check), so it
  * is safe to call from every module entry point - a provisioning module has no
@@ -26,14 +26,14 @@ final class Migrator
      * @var array<int,string>
      */
     const TABLES = [
-        'mod_hostx_email_accounts',
-        'mod_hostx_email_operations',
-        'mod_hostx_email_locks',
-        'mod_hostx_email_log',
-        'mod_hostx_email_webhooks',
-        'mod_hostx_email_dns',
-        'mod_hostx_email_content',
-        'mod_hostx_email_migrations',
+        'mod_cloudhost247_email_hosting_accounts',
+        'mod_cloudhost247_email_hosting_operations',
+        'mod_cloudhost247_email_hosting_locks',
+        'mod_cloudhost247_email_hosting_log',
+        'mod_cloudhost247_email_hosting_webhooks',
+        'mod_cloudhost247_email_hosting_dns',
+        'mod_cloudhost247_email_hosting_content',
+        'mod_cloudhost247_email_hosting_migrations',
     ];
 
     /** @var bool|null */
@@ -49,8 +49,8 @@ final class Migrator
         }
 
         try {
-            $installed = Capsule::schema()->hasTable('mod_hostx_email_accounts')
-                && Capsule::schema()->hasTable('mod_hostx_email_migrations');
+            $installed = Capsule::schema()->hasTable('mod_cloudhost247_email_hosting_accounts')
+                && Capsule::schema()->hasTable('mod_cloudhost247_email_hosting_migrations');
 
             if (!$installed || $force) {
                 self::runFile(CH247_EMAIL_ROOT . '/install/schema.sql');
@@ -88,13 +88,13 @@ final class Migrator
             $name = basename($file);
 
             try {
-                if (Capsule::table('mod_hostx_email_migrations')->where('filename', $name)->exists()) {
+                if (Capsule::table('mod_cloudhost247_email_hosting_migrations')->where('filename', $name)->exists()) {
                     continue;
                 }
 
                 self::runFile($file);
 
-                Capsule::table('mod_hostx_email_migrations')->insert([
+                Capsule::table('mod_cloudhost247_email_hosting_migrations')->insert([
                     'filename'   => $name,
                     'applied_at' => date('Y-m-d H:i:s'),
                 ]);

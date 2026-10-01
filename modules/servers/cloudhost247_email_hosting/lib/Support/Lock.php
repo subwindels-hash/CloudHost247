@@ -1,6 +1,6 @@
 <?php
 /**
- * Persistent cooperative locks (mod_hostx_email_locks).
+ * Persistent cooperative locks (mod_cloudhost247_email_hosting_locks).
  *
  * Prevents cron, webhook and admin-initiated work from touching the same
  * service - or the same provider tenant - concurrently. Locks always carry an
@@ -16,7 +16,7 @@ use WHMCS\Database\Capsule;
 
 final class Lock
 {
-    const TABLE = 'mod_hostx_email_locks';
+    const TABLE = 'mod_cloudhost247_email_hosting_locks';
 
     /** @var array<int,string> keys held by this process */
     private static $held = [];

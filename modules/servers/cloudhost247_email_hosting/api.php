@@ -32,7 +32,7 @@ use CloudHost247\Email\Support\Result;
  *
  * @param array<string,mixed> $params
  */
-function hostx_email_provider(array $params, ?HttpClient $http = null): ProviderInterface
+function cloudhost247_email_hosting_provider(array $params, ?HttpClient $http = null): ProviderInterface
 {
     return ProviderFactory::make(new Config($params), $http);
 }
@@ -45,7 +45,7 @@ function hostx_email_provider(array $params, ?HttpClient $http = null): Provider
  * @param  array<string,mixed> $params
  * @return array<string,mixed>
  */
-function hostx_email_test_connection(array $params, ?HttpClient $http = null)
+function cloudhost247_email_hosting_test_connection(array $params, ?HttpClient $http = null)
 {
     $config = new Config($params);
 
@@ -88,10 +88,10 @@ function hostx_email_test_connection(array $params, ?HttpClient $http = null)
  * @param  array<string,mixed> $params
  * @return array<string,mixed> Result envelope
  */
-function hostx_email_list_plans(array $params, ?HttpClient $http = null)
+function cloudhost247_email_hosting_list_plans(array $params, ?HttpClient $http = null)
 {
     try {
-        $provider = hostx_email_provider($params, $http);
+        $provider = cloudhost247_email_hosting_provider($params, $http);
 
         if (empty($provider->capabilities()['plans'])) {
             return Result::fail(
@@ -114,7 +114,7 @@ function hostx_email_list_plans(array $params, ?HttpClient $http = null)
  * @param  array<string,mixed> $params
  * @return array<string,mixed>
  */
-function hostx_email_check_availability(array $params, string $sku = '', ?HttpClient $http = null)
+function cloudhost247_email_hosting_check_availability(array $params, string $sku = '', ?HttpClient $http = null)
 {
     try {
         $config = new Config($params);
@@ -134,7 +134,7 @@ function hostx_email_check_availability(array $params, string $sku = '', ?HttpCl
  * @param  array<string,mixed> $params
  * @return array<string,mixed>
  */
-function hostx_email_dns_records(array $params, ?HttpClient $http = null)
+function cloudhost247_email_hosting_dns_records(array $params, ?HttpClient $http = null)
 {
     try {
         $config = new Config($params);
@@ -155,7 +155,7 @@ function hostx_email_dns_records(array $params, ?HttpClient $http = null)
  *
  * @return array<string,array<string,bool>>
  */
-function hostx_email_capability_matrix()
+function cloudhost247_email_hosting_capability_matrix()
 {
     $matrix = [];
 

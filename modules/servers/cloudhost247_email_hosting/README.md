@@ -60,29 +60,37 @@ Suspend, unsuspend, terminate, change password and package change follow the sam
 
 ## 2. Installation
 
-1. **Upload** the module to `modules/servers/hostx_email/` and the page files:
+1. **Upload** the module to `modules/servers/cloudhost247_email_hosting/` and the page files:
    - `email-hosting.php` (WHMCS root)
    - `templates/cloudhost247/cloudhost247-email-hosting.tpl`
    - `templates/cloudhost247/css/email-hosting.css`
 2. **Create the schema.** It is created automatically on first use; to do it up front:
    ```bash
-   php modules/servers/hostx_email/cron.php migrate
+   php modules/servers/cloudhost247_email_hosting/cron.php migrate
    ```
+   > **Upgrading an installation that used the pre-rebrand module?** WHMCS
+   > resolves a provisioning module by directory name, so run
+   > `scripts/migrate-legacy-names-to-cloudhost247.sql` in the same maintenance
+   > window, *before* this step. It renames the eight module tables and repoints
+   > `tblservers.type` / `tblproducts.servertype`; `RENAME TABLE` is
+   > metadata-only, so every row, index and grant is preserved. Without it WHMCS
+   > cannot resolve the old module id and step 2 would create empty tables
+   > beside your un-migrated data.
 3. **Add a server** at *Configuration → System Settings → Servers*, type
-   **CloudHost247 Email Hosting (WHMCS module ID: `hostx_email`)** — one server per provider tenant
+   **CloudHost247 Email Hosting (WHMCS module ID: `cloudhost247_email_hosting`)** — one server per provider tenant
    (see section 3). Use **Test connection**.
-4. **Create products** whose module is `hostx_email` and assign them to that server group
+4. **Create products** whose module is `cloudhost247_email_hosting` and assign them to that server group
    (section 5). The module never creates or re-prices WHMCS products itself.
 5. **Link the page** from your navigation: `email-hosting.php`.
 6. *(Optional)* add a cron entry for faster synchronisation:
    ```
-   0,15,30,45 * * * * php /path/to/whmcs/modules/servers/hostx_email/cron.php sync >/dev/null 2>&1
+   0,15,30,45 * * * * php /path/to/whmcs/modules/servers/cloudhost247_email_hosting/cron.php sync >/dev/null 2>&1
    ```
    The WHMCS cron already runs a bounded pass via `hooks.php`, so this is optional.
 
 Verify with:
 ```bash
-php modules/servers/hostx_email/cron.php status
+php modules/servers/cloudhost247_email_hosting/cron.php status
 ```
 
 ## 3. Server settings (credentials)
@@ -200,15 +208,15 @@ Pricing is ordinary WHMCS pricing. The module reads it; it never writes it.
 
 - hero, provider cards, plan grid, comparison table, DNS section and FAQs;
 - plans, prices, cycles, storage and availability read live from `tblproducts` /
-  `tblpricing` for products whose `servertype` is `hostx_email`, in the visitor's currency;
+  `tblpricing` for products whose `servertype` is `cloudhost247_email_hosting`, in the visitor's currency;
 - "Get Started" → `cart.php?a=add&pid=<real pid>`;
 - a product with no price in the active currency renders **"Pricing not published"** —
   never a fabricated number; a hidden/retired product is marked **Not available**;
-- copy is editable through `mod_hostx_email_content` (defaults in
+- copy is editable through `mod_cloudhost247_email_hosting_content` (defaults in
   `lib/Repository/ContentRepository.php`):
 
 ```sql
-UPDATE mod_hostx_email_content
+UPDATE mod_cloudhost247_email_hosting_content
    SET value_json = '{"heading":"…","subheading":"…","primary_cta":"…","secondary_cta":"…","disclaimer":"…"}'
  WHERE content_key = 'hero' AND locale = 'english';
 ```
@@ -264,19 +272,19 @@ The table on the public page is generated from these same flags.
   a small catch-up on `AfterCronJob` (10 / 5). `cron.php sync` does the same from a system
   cron. A persistent lock prevents overlap.
 - **Webhooks.** `webhook.php?provider=professional|microsoft365`.
-  Professional Email: `HMAC-SHA256(timestamp + "." + body)` in `X-Hostx-Signature`, with
-  `X-Hostx-Timestamp` (±5 min) and `X-Hostx-Event-Id`; verified event ids are stored so a
+  Professional Email: `HMAC-SHA256(timestamp + "." + body)` in `X-CloudHost247-Signature`, with
+  `X-CloudHost247-Timestamp` (±5 min) and `X-CloudHost247-Event-Id`; verified event ids are stored so a
   replay is a no-op. Microsoft Graph: `validationToken` handshake plus `clientState`
   comparison. Google is **refused with 501** — no signed directory webhook is documented.
   A webhook only ever schedules a re-read; it never provisions, deletes or bills.
-- **Logging.** `mod_hostx_email_log` (structured, correlation id) plus WHMCS `logModuleCall`,
+- **Logging.** `mod_cloudhost247_email_hosting_log` (structured, correlation id) plus WHMCS `logModuleCall`,
   both passed through `Support\Redactor` — by key name, by value pattern (Bearer tokens, PEM
   keys, JWTs, `client_secret=` pairs) and via WHMCS replacement values.
 
 ## 11. Idempotency and reconciliation
 
 Every mutation claims a deterministic key
-(`operation-serviceId-sha256(inputs)`) in `mod_hostx_email_operations`, which has a UNIQUE
+(`operation-serviceId-sha256(inputs)`) in `mod_cloudhost247_email_hosting_operations`, which has a UNIQUE
 index on it. Consequences:
 
 - a replayed WHMCS action returns the previous result instead of calling the provider again;
@@ -303,18 +311,18 @@ index on it. Consequences:
 ## 13. Database schema
 
 `install/schema.sql` (idempotent) + `install/migrations/*.sql` tracked in
-`mod_hostx_email_migrations`.
+`mod_cloudhost247_email_hosting_migrations`.
 
 | Table | Purpose |
 |---|---|
-| `mod_hostx_email_accounts` | one row per service: remote id, status, licence, storage, DNS state (UNIQUE `service_id`) |
-| `mod_hostx_email_operations` | idempotency + reconciliation ledger (UNIQUE `idempotency_key`) |
-| `mod_hostx_email_locks` | persistent cooperative locks with expiry |
-| `mod_hostx_email_log` | structured redacted log |
-| `mod_hostx_email_webhooks` | receipts + replay protection (UNIQUE `provider,event_id`) |
-| `mod_hostx_email_dns` | records shown to the customer, with source and verification state |
-| `mod_hostx_email_content` | editable page copy |
-| `mod_hostx_email_migrations` | applied migrations |
+| `mod_cloudhost247_email_hosting_accounts` | one row per service: remote id, status, licence, storage, DNS state (UNIQUE `service_id`) |
+| `mod_cloudhost247_email_hosting_operations` | idempotency + reconciliation ledger (UNIQUE `idempotency_key`) |
+| `mod_cloudhost247_email_hosting_locks` | persistent cooperative locks with expiry |
+| `mod_cloudhost247_email_hosting_log` | structured redacted log |
+| `mod_cloudhost247_email_hosting_webhooks` | receipts + replay protection (UNIQUE `provider,event_id`) |
+| `mod_cloudhost247_email_hosting_dns` | records shown to the customer, with source and verification state |
+| `mod_cloudhost247_email_hosting_content` | editable page copy |
+| `mod_cloudhost247_email_hosting_migrations` | applied migrations |
 
 ## 14. CLI
 

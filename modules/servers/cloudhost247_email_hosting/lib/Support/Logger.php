@@ -3,7 +3,7 @@
  * Structured, redacted logging.
  *
  * Two sinks:
- *   1. mod_hostx_email_log  - the module's own structured log (queryable from
+ *   1. mod_cloudhost247_email_hosting_log  - the module's own structured log (queryable from
  *      the client area's admin tab and the CLI tools)
  *   2. logModuleCall()      - WHMCS's native module log, so operators find the
  *      entries where they already look
@@ -21,7 +21,7 @@ use WHMCS\Database\Capsule;
 
 final class Logger
 {
-    const TABLE = 'mod_hostx_email_log';
+    const TABLE = 'mod_cloudhost247_email_hosting_log';
 
     const LEVEL_DEBUG   = 'debug';
     const LEVEL_INFO    = 'info';
@@ -41,9 +41,9 @@ final class Logger
     {
         if ($fresh || self::$correlationId === null) {
             try {
-                self::$correlationId = 'hxe-' . bin2hex(random_bytes(8));
+                self::$correlationId = 'ch247-email-' . bin2hex(random_bytes(8));
             } catch (\Throwable $e) {
-                self::$correlationId = 'hxe-' . substr(md5((string) microtime(true) . (string) mt_rand()), 0, 16);
+                self::$correlationId = 'ch247-email-' . substr(md5((string) microtime(true) . (string) mt_rand()), 0, 16);
             }
         }
 
@@ -52,7 +52,7 @@ final class Logger
 
     public static function setCorrelationId(string $id): void
     {
-        self::$correlationId = substr(preg_replace('/[^A-Za-z0-9\-]/', '', $id) ?: 'hxe', 0, 64);
+        self::$correlationId = substr(preg_replace('/[^A-Za-z0-9\-]/', '', $id) ?: 'ch247-email', 0, 64);
     }
 
     /**

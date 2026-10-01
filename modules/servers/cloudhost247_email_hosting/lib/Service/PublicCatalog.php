@@ -3,7 +3,7 @@
  * Public catalogue for the email-hosting landing page.
  *
  * Everything shown on the page comes from real WHMCS records:
- *   - products whose provisioning module is hostx_email (tblproducts.servertype)
+ *   - products whose provisioning module is cloudhost247_email_hosting (tblproducts.servertype)
  *   - pricing from tblpricing for the visitor's active currency
  *   - the provider/plan/storage facts configured on each product
  *
@@ -28,7 +28,7 @@ use WHMCS\Database\Capsule;
 
 final class PublicCatalog
 {
-    const MODULE = 'hostx_email';
+    const MODULE = 'cloudhost247_email_hosting';
 
     /**
      * Billing cycles in the order they are preferred for the headline price.

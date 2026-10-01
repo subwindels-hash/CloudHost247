@@ -30,7 +30,7 @@ use WHMCS\Database\Capsule;
 
 final class DnsService
 {
-    const TABLE = 'mod_hostx_email_dns';
+    const TABLE = 'mod_cloudhost247_email_hosting_dns';
 
     const STATE_UNKNOWN      = 'unknown';
     const STATE_PENDING      = 'pending';

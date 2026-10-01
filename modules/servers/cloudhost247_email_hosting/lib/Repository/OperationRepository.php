@@ -1,6 +1,6 @@
 <?php
 /**
- * Idempotency + reconciliation ledger (mod_hostx_email_operations).
+ * Idempotency + reconciliation ledger (mod_cloudhost247_email_hosting_operations).
  *
  * Every remote mutation is wrapped in begin()/finish(). The unique key on
  * idempotency_key means a replayed WHMCS action (double click, retried cron,
@@ -22,7 +22,7 @@ use WHMCS\Database\Capsule;
 
 final class OperationRepository
 {
-    const TABLE = 'mod_hostx_email_operations';
+    const TABLE = 'mod_cloudhost247_email_hosting_operations';
 
     const STATE_IN_PROGRESS = 'in_progress';
     const STATE_SUCCEEDED   = 'succeeded';

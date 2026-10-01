@@ -5,7 +5,7 @@
  * Supported today:
  *
  *   professional  HMAC-SHA256 over the raw body with a shared secret, sent in
- *                 X-Hostx-Signature, plus X-Hostx-Timestamp and X-Hostx-Event-Id.
+ *                 X-CloudHost247-Signature, plus X-CloudHost247-Timestamp and X-CloudHost247-Event-Id.
  *                 The secret lives in the server access-hash JSON
  *                 ({"webhook_secret": "..."}) - i.e. encrypted by WHMCS.
  *
@@ -31,7 +31,7 @@ use WHMCS\Database\Capsule;
 
 final class Verifier
 {
-    const TABLE = 'mod_hostx_email_webhooks';
+    const TABLE = 'mod_cloudhost247_email_hosting_webhooks';
 
     /** Maximum age of a signed request, in seconds. */
     const MAX_SKEW = 300;

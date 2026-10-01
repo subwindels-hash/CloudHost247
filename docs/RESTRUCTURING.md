@@ -21,7 +21,7 @@ The pre-restructuring inventory is preserved in
 | `Refund Policy/<Policy>/*.pdf` (19 PDFs) | `docs/policies/` | Source legal documents |
 | `Refund Policy/All Pages/Installation.txt` | `docs/policies/INSTALLATION.txt` | |
 | `Refund Policy/<Policy>/{*.php,*.tpl}` (38 copies) | *(removed)* | Byte-identical duplicates of the All Pages set (verified; see §4) |
-| `Try-this/modules/addons/hostx/` | `modules/addons/hostx/` | ionCube-encoded theme helper addon |
+| `Try-this/modules/addons/hostx/` | `modules/addons/hostx/` | ionCube-encoded theme helper addon; directory name is the WHMCS addon id and is retained — `docs/BRANDING-COMPATIBILITY.md` §1 |
 | `Try-this/lang/overrides/*` (27 files) | `lang/overrides/` | `english.php` merged with the OVH override file |
 | `Try-this/sitemap.html`, `sitemap.xml`, `README.md` | *(removed)* | 0-byte / content-free junk |
 | `orderforms/*.tpl`, `includes/`, `css/`, `js/`, `banners/`, `caticons/`, `og_images/`, `testimonial_images/`, `webfonts/`, `store/`, `oauth/`, `payment/`, `marketconnect/`, `index.php` | `templates/cloudhost247_legacy/` | The **CloudHost247 legacy theme** (was mixed into a folder misleadingly named `orderforms/`) |
@@ -47,7 +47,7 @@ The pre-restructuring inventory is preserved in
 | `cloudhost247_lteproxy/All DNS Checker/DNS Checker/dnschecker-whmcs-module/` | *(removed)* | Byte-identical duplicate of the above |
 | `cloudhost247_lteproxy/WHMCS Affiliate Commission Logic/customaffiliate/` | `modules/addons/customaffiliate/` | |
 | `cloudhost247_lteproxy/WHMCS Digital Product Module/modules/addons/digitalproducts/` | `modules/addons/digitalproducts/` | + package `README.md` moved into the module |
-| `cloudhost247_lteproxy/WHMCS Email Hosting Module/cloudhost247_email/` | `modules/servers/cloudhost247_email/` | Has `MetaData`/`ConfigOptions`/`CreateAccount` → provisioning module |
+| `cloudhost247_lteproxy/WHMCS Email Hosting Module/cloudhost247_email/` | `modules/servers/cloudhost247_email/` | Has `MetaData`/`ConfigOptions`/`CreateAccount` → provisioning module. Superseded and **inactive**: the live Email Hosting module is the first-party `modules/servers/cloudhost247_email_hosting/`, which is not part of this vendor-archive mapping |
 | `cloudhost247_lteproxy/WHMCS Phone Number Platform/phoneservices/` | `modules/addons/phoneservices/` | |
 | `cloudhost247_lteproxy/WHMCS SMM Integration Module/smm_whmcs_module/modules/addons/smmaddon/` | `modules/addons/smmaddon/` | + `README.md`, `schema.sql`, `example_api.php` |
 | `cloudhost247_lteproxy/WHMCS SMM Integration Module/smm_whmcs_module/modules/servers/smmprovisioning/` | `modules/servers/smmprovisioning/` | |

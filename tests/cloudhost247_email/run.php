@@ -14,7 +14,7 @@
  */
 
 $root = dirname(__DIR__, 2);
-$module = $root . '/modules/servers/hostx_email';
+$module = $root . '/modules/servers/cloudhost247_email_hosting';
 
 require_once $module . '/bootstrap.php';
 
@@ -35,7 +35,7 @@ use CloudHost247\Email\Webhook\Verifier;
 /**
  * @param array<string,mixed> $overrides
  */
-function hxe_params(array $overrides = []): array
+function ch247_email_params(array $overrides = []): array
 {
     return array_merge([
         'serviceid'        => 4242,
@@ -62,15 +62,15 @@ function hxe_params(array $overrides = []): array
 }
 
 /** A Microsoft adapter wired to a mock transport with a valid token response. */
-function hxe_microsoft(MockHttpClient $http, array $overrides = []): Microsoft365Provider
+function ch247_email_microsoft(MockHttpClient $http, array $overrides = []): Microsoft365Provider
 {
     $http->on('POST https://login.microsoftonline.com', 200, ['access_token' => 'mock-token', 'expires_in' => 3599]);
 
-    return new Microsoft365Provider(new Config(hxe_params($overrides)), $http);
+    return new Microsoft365Provider(new Config(ch247_email_params($overrides)), $http);
 }
 
 /** A Google adapter wired to a mock transport. Uses a throwaway RSA key. */
-function hxe_google(MockHttpClient $http, array $overrides = []): GoogleWorkspaceProvider
+function ch247_email_google(MockHttpClient $http, array $overrides = []): GoogleWorkspaceProvider
 {
     static $privateKey;
 
@@ -84,7 +84,7 @@ function hxe_google(MockHttpClient $http, array $overrides = []): GoogleWorkspac
         'private_key'  => $privateKey,
     ];
 
-    $params = hxe_params(array_merge([
+    $params = ch247_email_params(array_merge([
         'configoption1'    => Config::PROVIDER_GOOGLE,
         'configoption3'    => '1010020027',
         'serverusername'   => 'admin@example-business.com',
@@ -97,9 +97,9 @@ function hxe_google(MockHttpClient $http, array $overrides = []): GoogleWorkspac
 }
 
 /** A Professional Email adapter wired to a mock transport. */
-function hxe_professional(MockHttpClient $http, array $overrides = []): ProfessionalEmailProvider
+function ch247_email_professional(MockHttpClient $http, array $overrides = []): ProfessionalEmailProvider
 {
-    $params = hxe_params(array_merge([
+    $params = ch247_email_params(array_merge([
         'configoption1'    => Config::PROVIDER_PROFESSIONAL,
         'configoption3'    => 'pro-10gb',
         'serverhostname'   => 'https://mail-api.example.net',
@@ -116,7 +116,7 @@ $tests = [];
 
 $tests['module files required by the brief exist'] = static function () use ($module) {
     $required = [
-        'hostx_email.php', 'functions.php', 'api.php', 'webhook.php', 'cron.php', 'hooks.php',
+        'cloudhost247_email_hosting.php', 'functions.php', 'api.php', 'webhook.php', 'cron.php', 'hooks.php',
         'bootstrap.php', 'README.md',
         'install/schema.sql', 'install/migrations/1.0.0_baseline.sql',
         'templates/overview.tpl', 'templates/error.tpl', 'templates/assets/clientarea.css',
@@ -137,27 +137,78 @@ $tests['module files required by the brief exist'] = static function () use ($mo
 };
 
 $tests['it is a server module, not an addon'] = static function () use ($module, $root) {
-    if (is_dir($root . '/modules/addons/hostx_email')) {
-        return 'hostx_email must not exist as an addon module';
+    if (is_dir($root . '/modules/addons/cloudhost247_email_hosting')) {
+        return 'cloudhost247_email_hosting must not exist as an addon module';
     }
 
-    $source = (string) file_get_contents($module . '/hostx_email.php');
+    $source = (string) file_get_contents($module . '/cloudhost247_email_hosting.php');
 
     foreach (['_MetaData', '_ConfigOptions', '_CreateAccount', '_SuspendAccount', '_UnsuspendAccount',
               '_TerminateAccount', '_ChangePassword', '_ClientArea'] as $suffix) {
-        if (strpos($source, 'function hostx_email' . $suffix . '(') === false) {
-            return 'missing hostx_email' . $suffix . '()';
+        if (strpos($source, 'function cloudhost247_email_hosting' . $suffix . '(') === false) {
+            return 'missing cloudhost247_email_hosting' . $suffix . '()';
         }
     }
 
     // Addon-only entry points must NOT be present.
     foreach (['_activate(', '_deactivate(', '_output('] as $addonOnly) {
-        if (strpos($source, 'function hostx_email' . $addonOnly) !== false) {
-            return 'addon entry point hostx_email' . $addonOnly . ' found in a server module';
+        if (strpos($source, 'function cloudhost247_email_hosting' . $addonOnly) !== false) {
+            return 'addon entry point cloudhost247_email_hosting' . $addonOnly . ' found in a server module';
         }
     }
 
     return true;
+};
+
+$tests['the module carries no legacy vendor branding identifier'] = static function () use ($module, $root) {
+    // The module was renamed from the vendor's module id. WHMCS lists every
+    // directory under modules/servers/ in the admin provisioning-module picker,
+    // so the old directory must not survive next to the new one.
+    if (is_dir($root . '/modules/servers/hostx_email')) {
+        return 'modules/servers/hostx_email must be removed, not left beside the renamed module';
+    }
+
+    if (is_dir($root . '/modules/addons/cloudhost247_email_hosting')) {
+        return 'the module must not exist as an addon module';
+    }
+
+    // Nothing inside the module may still spell the old brand, in code,
+    // schema, templates or documentation. scripts/branding-audit.py enforces
+    // the same rule across the whole repository.
+    $legacy = '/host[\s_-]?x/i';
+    $files = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($module, FilesystemIterator::SKIP_DOTS)
+    );
+
+    foreach ($files as $file) {
+        if (!$file->isFile()) {
+            continue;
+        }
+
+        if (preg_match($legacy, (string) file_get_contents($file->getPathname())) === 1) {
+            return 'legacy branding identifier remains in ' . $file->getPathname();
+        }
+    }
+
+    // The database rename must be handled by the reviewed migration, and the
+    // module must not silently create empty tables over un-migrated data.
+    $sql = (string) file_get_contents($root . '/scripts/migrate-legacy-names-to-cloudhost247.sql');
+
+    foreach ([
+        "SET type       = 'cloudhost247_email_hosting'",
+        "SET servertype = 'cloudhost247_email_hosting'",
+        "'mod_cloudhost247_email_hosting_accounts'",
+        "'mod_cloudhost247_email_hosting_migrations'",
+    ] as $required) {
+        if (strpos($sql, $required) === false) {
+            return 'the migration no longer performs ' . $required;
+        }
+    }
+
+    $bootstrap = (string) file_get_contents($module . '/bootstrap.php');
+
+    return strpos($bootstrap, "define('CH247_EMAIL_MODULE', 'cloudhost247_email_hosting')") !== false
+        ?: 'bootstrap.php must publish the renamed module id';
 };
 
 $tests['the public page exists and renders from WHMCS data'] = static function () use ($root) {
@@ -202,7 +253,7 @@ $tests['config option numbering is stable'] = static function () {
 };
 
 $tests['product configuration is read correctly'] = static function () {
-    $config = new Config(hxe_params());
+    $config = new Config(ch247_email_params());
 
     return $config->provider() === Config::PROVIDER_MICROSOFT
         && $config->planTier() === 'standard'
@@ -215,7 +266,7 @@ $tests['product configuration is read correctly'] = static function () {
 };
 
 $tests['an unknown provider falls back safely'] = static function () {
-    $config = new Config(hxe_params(['configoption1' => 'not-a-provider']));
+    $config = new Config(ch247_email_params(['configoption1' => 'not-a-provider']));
 
     return $config->provider() === Config::PROVIDER_PROFESSIONAL ?: 'unknown provider not clamped';
 };
@@ -229,14 +280,14 @@ $tests['service validation rejects bad domains and mailboxes'] = static function
     ];
 
     foreach ($bad as $overrides) {
-        $result = (new Config(hxe_params($overrides)))->validateService();
+        $result = (new Config(ch247_email_params($overrides)))->validateService();
 
         if (Result::isOk($result)) {
             return 'accepted invalid input: ' . json_encode($overrides);
         }
     }
 
-    return Result::isOk((new Config(hxe_params()))->validateService()) ?: 'rejected a valid service';
+    return Result::isOk((new Config(ch247_email_params()))->validateService()) ?: 'rejected a valid service';
 };
 
 $tests['password policy is enforced'] = static function () {
@@ -278,7 +329,7 @@ $tests['domain and mailbox validation'] = static function () {
 
 $tests['MOCK: Microsoft authenticates with client credentials'] = static function () {
     $http = new MockHttpClient();
-    $provider = hxe_microsoft($http);
+    $provider = ch247_email_microsoft($http);
     $http->on('GET https://graph.microsoft.com/v1.0/organization', 200, ['value' => [['displayName' => 'Contoso']]]);
     $http->on('GET https://graph.microsoft.com/v1.0/subscribedSkus', 200, ['value' => []]);
 
@@ -303,7 +354,7 @@ $tests['MOCK: Microsoft surfaces a permission failure clearly'] = static functio
         'error_description' => 'AADSTS7000215: Invalid client secret provided.',
     ]);
 
-    $provider = new Microsoft365Provider(new Config(hxe_params()), $http);
+    $provider = new Microsoft365Provider(new Config(ch247_email_params()), $http);
     $result = $provider->testConnection();
 
     return !Result::isOk($result)
@@ -313,7 +364,7 @@ $tests['MOCK: Microsoft surfaces a permission failure clearly'] = static functio
 };
 
 $tests['Microsoft configuration errors are reported, not guessed'] = static function () {
-    $provider = new Microsoft365Provider(new Config(hxe_params(['serveraccesshash' => '', 'serverpassword' => ''])), new MockHttpClient());
+    $provider = new Microsoft365Provider(new Config(ch247_email_params(['serveraccesshash' => '', 'serverpassword' => ''])), new MockHttpClient());
     $result = $provider->validateConfiguration();
 
     return !Result::isOk($result)
@@ -365,7 +416,7 @@ $tests['MOCK: Google explains an unauthorised service account'] = static functio
     $resource = openssl_pkey_new(['private_key_bits' => 2048, 'private_key_type' => OPENSSL_KEYTYPE_RSA]);
     openssl_pkey_export($resource, $privateKey);
 
-    $provider = new GoogleWorkspaceProvider(new Config(hxe_params([
+    $provider = new GoogleWorkspaceProvider(new Config(ch247_email_params([
         'configoption1'    => Config::PROVIDER_GOOGLE,
         'serverusername'   => 'admin@example-business.com',
         'serveraccesshash' => json_encode(['service_account' => [
@@ -383,7 +434,7 @@ $tests['MOCK: Google explains an unauthorised service account'] = static functio
 };
 
 $tests['Professional Email refuses IMAP/SMTP-only configuration'] = static function () {
-    $provider = new ProfessionalEmailProvider(new Config(hxe_params([
+    $provider = new ProfessionalEmailProvider(new Config(ch247_email_params([
         'configoption1'  => Config::PROVIDER_PROFESSIONAL,
         'serverhostname' => '',
     ])), new MockHttpClient());
@@ -400,7 +451,7 @@ $tests['Professional Email refuses IMAP/SMTP-only configuration'] = static funct
 
 $tests['MOCK: Microsoft create validates seats, then creates and licenses'] = static function () {
     $http = new MockHttpClient();
-    $provider = hxe_microsoft($http);
+    $provider = ch247_email_microsoft($http);
 
     $http->on('GET https://graph.microsoft.com/v1.0/subscribedSkus', 200, ['value' => [[
         'skuId'         => 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
@@ -443,7 +494,7 @@ $tests['MOCK: Microsoft create validates seats, then creates and licenses'] = st
 
 $tests['MOCK: Microsoft refuses to provision with no free seat'] = static function () {
     $http = new MockHttpClient();
-    $provider = hxe_microsoft($http);
+    $provider = ch247_email_microsoft($http);
 
     $http->on('GET https://graph.microsoft.com/v1.0/subscribedSkus', 200, ['value' => [[
         'skuId'         => 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
@@ -468,7 +519,7 @@ $tests['MOCK: Microsoft refuses to provision with no free seat'] = static functi
 
 $tests['MOCK: Microsoft refuses an unmapped SKU'] = static function () {
     $http = new MockHttpClient();
-    $provider = hxe_microsoft($http);
+    $provider = ch247_email_microsoft($http);
 
     $http->on('GET https://graph.microsoft.com/v1.0/subscribedSkus', 200, ['value' => [[
         'skuId'         => 'other-guid',
@@ -485,7 +536,7 @@ $tests['MOCK: Microsoft refuses an unmapped SKU'] = static function () {
 
 $tests['MOCK: Google creates a user and assigns the licence'] = static function () {
     $http = new MockHttpClient();
-    $provider = hxe_google($http);
+    $provider = ch247_email_google($http);
 
     $http->on('POST https://admin.googleapis.com/admin/directory/v1/users', 200, [
         'id' => '1234567890', 'primaryEmail' => 'info@example-business.com',
@@ -516,7 +567,7 @@ $tests['MOCK: Google creates a user and assigns the licence'] = static function 
 
 $tests['MOCK: an existing remote user is adopted, never duplicated'] = static function () {
     $http = new MockHttpClient();
-    $provider = hxe_microsoft($http);
+    $provider = ch247_email_microsoft($http);
 
     $http->on('GET https://graph.microsoft.com/v1.0/subscribedSkus', 200, ['value' => [[
         'skuId' => 'sku-guid', 'skuPartNumber' => 'O365_BUSINESS_PREMIUM',
@@ -560,7 +611,7 @@ $tests['idempotency keys are deterministic and input-sensitive'] = static functi
 
 $tests['a timeout on a mutating call is uncertain, not failed'] = static function () {
     $http = new MockHttpClient();
-    $provider = hxe_microsoft($http);
+    $provider = ch247_email_microsoft($http);
 
     $http->on('GET https://graph.microsoft.com/v1.0/subscribedSkus', 200, ['value' => [[
         'skuId' => 'sku-guid', 'skuPartNumber' => 'O365_BUSINESS_PREMIUM',
@@ -584,7 +635,7 @@ $tests['a timeout on a mutating call is uncertain, not failed'] = static functio
 
 $tests['a refused connection is a plain failure, not uncertain'] = static function () {
     $http = new MockHttpClient();
-    $provider = hxe_professional($http);
+    $provider = ch247_email_professional($http);
 
     $http->on('PATCH https://mail-api.example.net/mailboxes/box-1', 0, '', [], false, 'Connection refused');
 
@@ -611,7 +662,7 @@ $tests['HTTP status mapping'] = static function () {
 
 $tests['MOCK: suspend blocks sign-in without deleting the mailbox'] = static function () {
     $http = new MockHttpClient();
-    $provider = hxe_microsoft($http);
+    $provider = ch247_email_microsoft($http);
 
     $http->on('PATCH https://graph.microsoft.com/v1.0/users/user-guid-1', 204, []);
 
@@ -627,7 +678,7 @@ $tests['MOCK: suspend blocks sign-in without deleting the mailbox'] = static fun
 
 $tests['MOCK: unsuspend restores sign-in'] = static function () {
     $http = new MockHttpClient();
-    $provider = hxe_google($http);
+    $provider = ch247_email_google($http);
 
     $http->on('PUT https://admin.googleapis.com/admin/directory/v1/users/1234567890', 200, ['suspended' => false]);
 
@@ -639,7 +690,7 @@ $tests['MOCK: unsuspend restores sign-in'] = static function () {
 
 $tests['MOCK: password change explains a federated-tenant refusal'] = static function () {
     $http = new MockHttpClient();
-    $provider = hxe_microsoft($http);
+    $provider = ch247_email_microsoft($http);
 
     $http->on('PATCH https://graph.microsoft.com/v1.0/users/user-guid-1', 403, [
         'error' => ['message' => 'Insufficient privileges to complete the operation.'],
@@ -658,7 +709,7 @@ $tests['MOCK: password change explains a federated-tenant refusal'] = static fun
 
 $tests['a weak password never reaches the provider'] = static function () {
     $http = new MockHttpClient();
-    $provider = hxe_google($http);
+    $provider = ch247_email_google($http);
 
     $result = $provider->changePassword(['remote_id' => '1', 'email' => 'a@b.com'], 'weak');
 
@@ -672,7 +723,7 @@ $tests['a weak password never reaches the provider'] = static function () {
 
 $tests['MOCK: terminate releases the licence then deletes the user'] = static function () {
     $http = new MockHttpClient();
-    $provider = hxe_google($http);
+    $provider = ch247_email_google($http);
 
     $http->on('DELETE https://licensing.googleapis.com/apps/licensing/v1/product/Google-Apps/sku/1010020027/user/info%40example-business.com', 200, []);
     $http->on('DELETE https://admin.googleapis.com/admin/directory/v1/users/1234567890', 204, []);
@@ -695,7 +746,7 @@ $tests['MOCK: terminate releases the licence then deletes the user'] = static fu
 
 $tests['MOCK: terminating an already-deleted account succeeds'] = static function () {
     $http = new MockHttpClient();
-    $provider = hxe_microsoft($http);
+    $provider = ch247_email_microsoft($http);
 
     $http->on('DELETE https://graph.microsoft.com/v1.0/users/user-guid-1', 404, [
         'error' => ['message' => 'Resource not found.'],
@@ -710,7 +761,7 @@ $tests['MOCK: terminating an already-deleted account succeeds'] = static functio
 
 $tests['MOCK: Microsoft DNS records come from Graph, unmodified'] = static function () {
     $http = new MockHttpClient();
-    $provider = hxe_microsoft($http);
+    $provider = ch247_email_microsoft($http);
 
     $http->on('GET https://graph.microsoft.com/v1.0/domains/example-business.com', 200, ['isVerified' => false]);
     $http->on('verificationDnsRecords', 200, ['value' => [[
@@ -762,7 +813,7 @@ $tests['MOCK: Microsoft DNS records come from Graph, unmodified'] = static funct
 
 $tests['Google DNS is not invented when nothing is configured'] = static function () {
     $http = new MockHttpClient();
-    $provider = hxe_google($http);
+    $provider = ch247_email_google($http);
 
     $result = $provider->dnsRecords('example-business.com');
 
@@ -774,7 +825,7 @@ $tests['Google DNS is not invented when nothing is configured'] = static functio
 
 $tests['administrator-configured DNS records are rendered'] = static function () {
     $http = new MockHttpClient();
-    $provider = hxe_google($http, [
+    $provider = ch247_email_google($http, [
         'serveraccesshash' => json_encode([
             'service_account' => ['client_email' => 'sa@p.iam.gserviceaccount.com', 'private_key' => 'x'],
             'dns'             => ['*' => [
@@ -865,7 +916,7 @@ $tests['only providers with documented authentication accept webhooks'] = static
 
     return in_array('professional', Verifier::SUPPORTED, true)
         && in_array('microsoft365', Verifier::SUPPORTED, true)
-        && strpos($source, 'hostx_email_webhook_respond(501') !== false
+        && strpos($source, 'cloudhost247_email_hosting_webhook_respond(501') !== false
         && strpos($source, 'validationToken') !== false
         ?: 'webhook endpoint contract wrong';
 };
@@ -953,7 +1004,7 @@ $tests['plain HTTP provider endpoints are refused'] = static function () {
 };
 
 $tests['the API base URL rejects an http:// host'] = static function () {
-    $config = new Config(hxe_params([
+    $config = new Config(ch247_email_params([
         'configoption1'  => Config::PROVIDER_PROFESSIONAL,
         'serverhostname' => 'http://mail-api.example.net',
     ]));
@@ -1060,7 +1111,7 @@ $tests['provider capability matrix is honest'] = static function () {
 };
 
 $tests['the provisioner refuses an unsupported capability'] = static function () {
-    $config = new Config(hxe_params(['configoption1' => Config::PROVIDER_PROFESSIONAL, 'serverhostname' => 'https://mail-api.example.net']));
+    $config = new Config(ch247_email_params(['configoption1' => Config::PROVIDER_PROFESSIONAL, 'serverhostname' => 'https://mail-api.example.net']));
     $provisioner = new \CloudHost247\Email\Service\Provisioner($config, new MockHttpClient());
 
     $result = $provisioner->preflight('assign_license');
@@ -1070,7 +1121,7 @@ $tests['the provisioner refuses an unsupported capability'] = static function ()
 };
 
 $tests['Microsoft licensing requires a usage location'] = static function () {
-    $config = new Config(hxe_params(['configoption6' => '']));
+    $config = new Config(ch247_email_params(['configoption6' => '']));
     $provisioner = new \CloudHost247\Email\Service\Provisioner($config, new MockHttpClient());
 
     $result = $provisioner->preflight('create');

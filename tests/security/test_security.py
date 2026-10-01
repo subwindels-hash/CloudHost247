@@ -45,16 +45,36 @@ class RebuildSecurityReview(unittest.TestCase):
   self.assertIn('min(100',repo);self.assertIn('SecretPolicy::redact',logger)
  def test_reconciliation_never_blindly_retries(self):
   s=(ROOT/'modules/addons/cloudhost247_ovh/lib/Operations/OperationsDashboard.php').read_text();self.assertIn('never repeat the mutation',s);self.assertNotIn("->post(",s)
- def test_email_module_compatibility_identifiers_are_not_migrated_blindly(self):
+ def test_email_module_rename_is_migrated_rather_than_left_behind(self):
   sql=(ROOT/'scripts/migrate-legacy-names-to-cloudhost247.sql').read_text();register=(ROOT/'docs/BRANDING-COMPATIBILITY.md').read_text()
-  self.assertIn('modules/servers/hostx_email',sql);self.assertIn('mod_hostx_email_*',sql)
-  self.assertIn('intentionally unchanged',sql.lower());self.assertNotIn("UPDATE tblproducts SET servertype = 'cloudhost247_email'",sql)
-  self.assertIn('X-Hostx-*',register);self.assertIn('technical WHMCS type `hostx_email`',register)
- def test_email_action_accepts_previous_form_field_during_rollout(self):
-  presenter=(ROOT/'modules/servers/hostx_email/lib/Service/ClientAreaPresenter.php').read_text();functions=(ROOT/'modules/servers/hostx_email/functions.php').read_text();template=(ROOT/'modules/servers/hostx_email/templates/overview.tpl').read_text()
-  self.assertIn("$post['ch247_email_action'] ?? $post['hostx_email_action'] ?? ''",presenter)
-  self.assertIn("$_POST['hostx_email_action']",functions)
-  self.assertIn('name="ch247_email_action"',template);self.assertNotIn('name="hostx_email_action"',template)
+  for table in ('accounts','operations','locks','log','webhooks','dns','content','migrations'):
+   self.assertIn("ch247_rename_if_exists('mod_hostx_email_%s'"%table,sql,table)
+   self.assertIn("'mod_cloudhost247_email_hosting_%s'"%table,sql,table)
+  self.assertIn("UPDATE tblservers  SET type       = 'cloudhost247_email_hosting'",sql)
+  self.assertIn("UPDATE tblproducts SET servertype = 'cloudhost247_email_hosting'",sql)
+  # the inactive legacy cloudhost247_email module owns mod_cloudhost247_email_accounts
+  self.assertNotIn("UPDATE tblproducts SET servertype = 'cloudhost247_email'",sql)
+  self.assertIn('cloudhost247_email_hosting',register);self.assertIn('X-CloudHost247-Signature',register);self.assertNotIn('X-Hostx-*',register)
+ def test_email_module_source_carries_no_legacy_branding_identifier(self):
+  module=ROOT/'modules/servers/cloudhost247_email_hosting'
+  self.assertTrue(module.is_dir());self.assertFalse((ROOT/'modules/servers/hostx_email').exists())
+  bad=re.compile(r'host[\s_-]?x',re.I)
+  for p in sorted(q for q in module.rglob('*') if q.is_file()):
+   self.assertIsNone(bad.search(p.read_text()),str(p))
+  self.assertIn("define('CH247_EMAIL_MODULE', 'cloudhost247_email_hosting')",(module/'bootstrap.php').read_text())
+  webhook=(module/'webhook.php').read_text();self.assertIn('X-CloudHost247-Signature',webhook);self.assertNotIn('X-Hostx',webhook)
+  entry=(module/'cloudhost247_email_hosting.php').read_text()
+  for suffix in ('_MetaData','_ConfigOptions','_CreateAccount','_ClientArea','_AdminServicesTabFields'):
+   self.assertIn('function cloudhost247_email_hosting'+suffix+'(',entry,suffix)
+ def test_email_client_area_action_and_csrf_use_current_identifiers_only(self):
+  module=ROOT/'modules/servers/cloudhost247_email_hosting'
+  presenter=(module/'lib/Service/ClientAreaPresenter.php').read_text();functions=(module/'functions.php').read_text();template=(module/'templates/overview.tpl').read_text()
+  self.assertIn("$post['ch247_email_action'] ?? ''",presenter)
+  self.assertIn("!empty($_POST['ch247_email_action'])",functions)
+  self.assertIn("$_SESSION['ch247_email_token']",presenter)
+  self.assertIn('name="ch247_email_action"',template)
+  # the transitional rollout shim is retired; an unrecognised action renders the overview
+  self.assertNotIn('hostx_email_action',presenter);self.assertNotIn('hostx_email_action',functions);self.assertNotIn('hostx_email_action',template)
  def test_company_name_sql_rebrand_is_limited_to_exact_configuration_values(self):
   sql=(ROOT/'scripts/migrate-legacy-names-to-cloudhost247.sql').read_text()
   section=sql.split('-- 6. Company legal name',1)[1].split('-- Verification.',1)[0]
@@ -70,7 +90,7 @@ class RebuildSecurityReview(unittest.TestCase):
   self.assertEqual(matched,27)
  def test_release_candidate_check_is_complete(self):
   s=(ROOT/'scripts/release-candidate-check.sh').read_text()
-  for marker in ('php -l','tests/foundation/run.php','tests/cloudhost247_email/run.php','unittest','validate-migrations.py','rebrand-overrides.list','rebrand-overrides.sha256','sha256sum --check','core.whitespace=cr-at-eol diff --check'):self.assertIn(marker,s)
+  for marker in ('php -l','tests/foundation/run.php','tests/cloudhost247_email/run.php','unittest','validate-migrations.py','branding-audit.py','rebrand-overrides.list','rebrand-overrides.sha256','sha256sum --check','core.whitespace=cr-at-eol diff --check'):self.assertIn(marker,s)
  def test_audit_filters_and_pagination_are_bounded(self):
   s=(ROOT/'modules/addons/cloudhost247_core/lib/Support/AuditRepository.php').read_text()
   for name in ('module','action','resource_type','resource','result','correlation_id','admin_id','from','to','q'):self.assertIn("'"+name+"'",s)

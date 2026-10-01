@@ -1,11 +1,10 @@
 -- ---------------------------------------------------------------------------
 -- Complete the CloudHost247 rebrand in the database.
 --
--- REQUIRED for deployments moving the renamed addon modules and legacy theme.
--- WHMCS resolves addon modules, templates and order forms by database value.
--- This script deliberately leaves the separate Email Hosting server module's
--- type (hostx_email) and mod_hostx_email_* tables unchanged: the source at
--- modules/servers/hostx_email still uses those identifiers for compatibility.
+-- REQUIRED for deployments moving the renamed addon modules, the renamed
+-- Email Hosting provisioning module and the legacy theme. WHMCS resolves addon
+-- modules, server modules, templates and order forms by database value, so the
+-- files and the rows must change in the SAME maintenance window.
 --
 -- Run it in the SAME maintenance window as the deploy, with the site in
 -- maintenance mode, AFTER a full database backup.
@@ -20,10 +19,6 @@
 --     those function names are baked into the encoded vendor files, so the
 --     addon registration and its directory keep the legacy vendor name and
 --     cannot be rebranded without replacing the addon.
---   * the Email Hosting server module's technical type `hostx_email` and its
---     mod_hostx_email_* data tables. WHMCS products/servers and the current
---     module source depend on those stable identifiers; renaming them would
---     require a separate staged module/data migration.
 --   * the four data tables that the encoded page-builder helper owns and
 --     queries at runtime: mod_hostx_pages, mod_hostx_page_products,
 --     mod_hostx_setting, mod_hostx_dynmic_translation. Root marketing pages
@@ -56,13 +51,25 @@ END //
 DELIMITER ;
 
 -- 1. Module data tables -----------------------------------------------------
---    Only the renamed tools-module tables move. Email Hosting tables retain
---    their original prefix because modules/servers/hostx_email reads them.
+--    CloudHost247 Tools (renamed addon) and CloudHost247 Email Hosting
+--    (modules/servers/cloudhost247_email_hosting, renamed from the vendor
+--    module id). RENAME TABLE preserves every row, index and grant: no data is
+--    copied, converted or dropped. Each call is guarded, so a database that was
+--    never on the old names is left untouched.
 CALL ch247_rename_if_exists('mod_hostx_tools_cache',        'mod_cloudhost247_tools_cache');
 CALL ch247_rename_if_exists('mod_hostx_tools_logs',         'mod_cloudhost247_tools_logs');
 CALL ch247_rename_if_exists('mod_hostx_tools_rate_limit',   'mod_cloudhost247_tools_rate_limit');
 CALL ch247_rename_if_exists('mod_hostx_tools_settings',     'mod_cloudhost247_tools_settings');
 CALL ch247_rename_if_exists('mod_hostx_tools_status',       'mod_cloudhost247_tools_status');
+
+CALL ch247_rename_if_exists('mod_hostx_email_accounts',     'mod_cloudhost247_email_hosting_accounts');
+CALL ch247_rename_if_exists('mod_hostx_email_operations',   'mod_cloudhost247_email_hosting_operations');
+CALL ch247_rename_if_exists('mod_hostx_email_locks',        'mod_cloudhost247_email_hosting_locks');
+CALL ch247_rename_if_exists('mod_hostx_email_log',          'mod_cloudhost247_email_hosting_log');
+CALL ch247_rename_if_exists('mod_hostx_email_webhooks',     'mod_cloudhost247_email_hosting_webhooks');
+CALL ch247_rename_if_exists('mod_hostx_email_dns',          'mod_cloudhost247_email_hosting_dns');
+CALL ch247_rename_if_exists('mod_hostx_email_content',      'mod_cloudhost247_email_hosting_content');
+CALL ch247_rename_if_exists('mod_hostx_email_migrations',   'mod_cloudhost247_email_hosting_migrations');
 
 DROP PROCEDURE IF EXISTS ch247_rename_if_exists;
 
@@ -73,9 +80,21 @@ UPDATE tbladdonmodules SET module = 'cloudhost247_domain_lookup'
     WHERE module = 'hostx_domain_lookup';
 
 -- 3. Email Hosting provisioning bindings -----------------------------------
---    Intentionally unchanged. Existing tblproducts.servertype and
---    tblservers.type values `hostx_email` resolve to
---    modules/servers/hostx_email and remain valid.
+--    WHMCS resolves a provisioning module by name: tblservers.type and
+--    tblproducts.servertype must equal the directory under modules/servers/.
+--    The module is now modules/servers/cloudhost247_email_hosting, so every
+--    binding must follow or WHMCS reports "module not found" and stops
+--    provisioning. Product ids, pricing, services and credentials are not
+--    touched - only the module identifier string.
+--    Run this in the same window as the file deploy: see "Deploy order and
+--    rollback" at the end of this script.
+UPDATE tblservers  SET type       = 'cloudhost247_email_hosting'
+    WHERE type       = 'hostx_email';
+UPDATE tblproducts SET servertype = 'cloudhost247_email_hosting'
+    WHERE servertype = 'hostx_email';
+--    The inactive legacy `cloudhost247_email` module owns
+--    mod_cloudhost247_email_accounts and must never receive these rows, so the
+--    two statements above match the old identifier exactly and nothing else.
 
 -- 4. Admin role permissions, which are keyed by addon module name -----------
 UPDATE tbladminroles
@@ -119,8 +138,9 @@ UPDATE tblconfiguration
 
 -- ---------------------------------------------------------------------------
 -- Verification. Every MUST-BE-ZERO count below must be 0 once the migration
--- has run. Informational counts at the end include identifiers intentionally
--- retained for the encoded page-builder and Email Hosting compatibility.
+-- has run. The informational counts at the end are identifiers that must
+-- remain because the ionCube-encoded page-builder addon queries them at
+-- runtime; see docs/BRANDING-COMPATIBILITY.md.
 -- ---------------------------------------------------------------------------
 SELECT 'addon rows still on the old name' AS check_name,
        COUNT(*) AS must_be_zero FROM tbladdonmodules
@@ -130,6 +150,17 @@ SELECT 'renamed-away mod_hostx_tools_* tables remaining',
        COUNT(*) FROM information_schema.tables
        WHERE table_schema = DATABASE()
          AND table_name LIKE 'mod\_hostx\_tools\_%'
+UNION ALL
+SELECT 'renamed-away mod_hostx_email_* tables remaining',
+       COUNT(*) FROM information_schema.tables
+       WHERE table_schema = DATABASE()
+         AND table_name LIKE 'mod\_hostx\_email\_%'
+UNION ALL
+SELECT 'servers still bound to the old Email Hosting module',
+       COUNT(*) FROM tblservers WHERE type = 'hostx_email'
+UNION ALL
+SELECT 'products still bound to the old Email Hosting module',
+       COUNT(*) FROM tblproducts WHERE servertype = 'hostx_email'
 UNION ALL
 SELECT 'system theme still on the old directory',
        COUNT(*) FROM tblconfiguration
@@ -151,18 +182,42 @@ SELECT 'company name still has a recognized legacy value',
              'cloudhost247 pvt ltd', 'cloudhost247 pvt ltd.'
          );
 
--- Informational, expected to be non-zero while the encoded helper and/or
--- compatibility-bound Email Hosting products remain in service.
+-- Informational. Expected to be non-zero for as long as the ionCube-encoded
+-- page-builder addon is in service: it queries these four tables by name at
+-- runtime and the root marketing pages read them through Capsule.
 SELECT 'retained legacy page-builder tables (expected)' AS note,
        COUNT(*) AS retained FROM information_schema.tables
        WHERE table_schema = DATABASE()
          AND table_name IN ('mod_hostx_pages', 'mod_hostx_page_products',
                             'mod_hostx_setting', 'mod_hostx_dynmic_translation');
-SELECT 'Email Hosting products retaining hostx_email (expected)' AS note,
-       COUNT(*) AS retained FROM tblproducts WHERE servertype = 'hostx_email';
-SELECT 'Email Hosting servers retaining hostx_email (expected)' AS note,
-       COUNT(*) AS retained FROM tblservers WHERE type = 'hostx_email';
-SELECT 'Email Hosting tables retaining mod_hostx_email_* (expected)' AS note,
-       COUNT(*) AS retained FROM information_schema.tables
-       WHERE table_schema = DATABASE()
-         AND table_name LIKE 'mod\_hostx\_email\_%';
+SELECT 'historical module-log rows kept as an audit trail (expected)' AS note,
+       COUNT(*) AS retained FROM tblmodulelog WHERE module = 'hostx_email';
+
+-- Deploy order and rollback -------------------------------------------------
+--    a. Put the site in maintenance mode and take a full database backup.
+--    b. Deploy the files (the module directory is now
+--       modules/servers/cloudhost247_email_hosting).
+--    c. Run this script. Steps b and c must happen in the same window: with the
+--       new files but the old rows, WHMCS cannot resolve `hostx_email` and
+--       Email Hosting provisioning, cron reconciliation and the public
+--       email-hosting.php catalogue are unavailable until it runs.
+--    d. Verify with the queries below, then:
+--         php modules/servers/cloudhost247_email_hosting/cron.php status
+--       and re-save one Email Hosting server profile (System Settings >
+--       Products/Services > Servers) to confirm the module still resolves.
+--    e. Re-point any provider webhook URL that referenced the old path to
+--       modules/servers/cloudhost247_email_hosting/webhook.php and update the
+--       signed header names to X-CloudHost247-Signature / -Timestamp /
+--       -Event-Id.
+--
+--    Rollback: restore the backup, or reverse each statement by hand -
+--       UPDATE tblservers  SET type       = 'hostx_email' WHERE type       = 'cloudhost247_email_hosting';
+--       UPDATE tblproducts SET servertype = 'hostx_email' WHERE servertype = 'cloudhost247_email_hosting';
+--       RENAME TABLE `mod_cloudhost247_email_hosting_accounts`   TO `mod_hostx_email_accounts`;
+--       ... and the other seven tables the same way - then redeploy the
+--       previous release. RENAME TABLE is metadata-only and reversible.
+--
+--    Not migrated on purpose: historical WHMCS module-log rows
+--    (tblmodulelog.module = 'hostx_email') are an audit trail of what ran at
+--    the time and are never rewritten.
+--

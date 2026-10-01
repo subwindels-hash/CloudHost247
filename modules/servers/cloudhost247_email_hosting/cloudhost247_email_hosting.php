@@ -39,7 +39,7 @@ use CloudHost247\Email\Support\Config;
  *
  * @return array<string,mixed>
  */
-function hostx_email_MetaData()
+function cloudhost247_email_hosting_MetaData()
 {
     return [
         'DisplayName'               => 'CloudHost247 Email Hosting',
@@ -61,7 +61,7 @@ function hostx_email_MetaData()
  *
  * @return array<string,array<string,mixed>>
  */
-function hostx_email_ConfigOptions()
+function cloudhost247_email_hosting_ConfigOptions()
 {
     return [
         'Email provider' => [
@@ -120,9 +120,9 @@ function hostx_email_ConfigOptions()
  * @param  array<string,mixed> $params
  * @return string 'success' or an error message
  */
-function hostx_email_CreateAccount(array $params)
+function cloudhost247_email_hosting_CreateAccount(array $params)
 {
-    return hostx_email_run('CreateAccount', $params, static function ($provisioner) {
+    return cloudhost247_email_hosting_run('CreateAccount', $params, static function ($provisioner) {
         return $provisioner->create();
     });
 }
@@ -131,9 +131,9 @@ function hostx_email_CreateAccount(array $params)
  * @param  array<string,mixed> $params
  * @return string
  */
-function hostx_email_SuspendAccount(array $params)
+function cloudhost247_email_hosting_SuspendAccount(array $params)
 {
-    return hostx_email_run('SuspendAccount', $params, static function ($provisioner) {
+    return cloudhost247_email_hosting_run('SuspendAccount', $params, static function ($provisioner) {
         return $provisioner->suspend();
     });
 }
@@ -142,9 +142,9 @@ function hostx_email_SuspendAccount(array $params)
  * @param  array<string,mixed> $params
  * @return string
  */
-function hostx_email_UnsuspendAccount(array $params)
+function cloudhost247_email_hosting_UnsuspendAccount(array $params)
 {
-    return hostx_email_run('UnsuspendAccount', $params, static function ($provisioner) {
+    return cloudhost247_email_hosting_run('UnsuspendAccount', $params, static function ($provisioner) {
         return $provisioner->unsuspend();
     });
 }
@@ -153,9 +153,9 @@ function hostx_email_UnsuspendAccount(array $params)
  * @param  array<string,mixed> $params
  * @return string
  */
-function hostx_email_TerminateAccount(array $params)
+function cloudhost247_email_hosting_TerminateAccount(array $params)
 {
-    return hostx_email_run('TerminateAccount', $params, static function ($provisioner) {
+    return cloudhost247_email_hosting_run('TerminateAccount', $params, static function ($provisioner) {
         return $provisioner->terminate();
     });
 }
@@ -164,9 +164,9 @@ function hostx_email_TerminateAccount(array $params)
  * @param  array<string,mixed> $params
  * @return string
  */
-function hostx_email_ChangePassword(array $params)
+function cloudhost247_email_hosting_ChangePassword(array $params)
 {
-    return hostx_email_run('ChangePassword', $params, static function ($provisioner) {
+    return cloudhost247_email_hosting_run('ChangePassword', $params, static function ($provisioner) {
         return $provisioner->changePassword();
     });
 }
@@ -178,9 +178,9 @@ function hostx_email_ChangePassword(array $params)
  * @param  array<string,mixed> $params
  * @return string
  */
-function hostx_email_Renew(array $params)
+function cloudhost247_email_hosting_Renew(array $params)
 {
-    return hostx_email_run('Renew', $params, static function ($provisioner, $config) {
+    return cloudhost247_email_hosting_run('Renew', $params, static function ($provisioner, $config) {
         return (new \CloudHost247\Email\Service\Reconciler())->syncService($config->serviceId());
     });
 }
@@ -192,10 +192,10 @@ function hostx_email_Renew(array $params)
  * @param  array<string,mixed> $params
  * @return string
  */
-function hostx_email_ChangePackage(array $params)
+function cloudhost247_email_hosting_ChangePackage(array $params)
 {
-    return hostx_email_run('ChangePackage', $params, static function ($provisioner, $config) {
-        return hostx_email_change_package($provisioner, $config);
+    return cloudhost247_email_hosting_run('ChangePackage', $params, static function ($provisioner, $config) {
+        return cloudhost247_email_hosting_change_package($provisioner, $config);
     });
 }
 
@@ -205,11 +205,11 @@ function hostx_email_ChangePackage(array $params)
  * @param  array<string,mixed> $params
  * @return array<string,mixed>
  */
-function hostx_email_TestConnection(array $params)
+function cloudhost247_email_hosting_TestConnection(array $params)
 {
     require_once __DIR__ . '/api.php';
 
-    return hostx_email_test_connection($params);
+    return cloudhost247_email_hosting_test_connection($params);
 }
 
 /**
@@ -218,9 +218,9 @@ function hostx_email_TestConnection(array $params)
  * @param  array<string,mixed> $params
  * @return array<string,mixed>
  */
-function hostx_email_ClientArea(array $params)
+function cloudhost247_email_hosting_ClientArea(array $params)
 {
-    return hostx_email_client_area($params);
+    return cloudhost247_email_hosting_client_area($params);
 }
 
 /**
@@ -228,7 +228,7 @@ function hostx_email_ClientArea(array $params)
  *
  * @return array<string,string>
  */
-function hostx_email_ClientAreaAllowedFunctions()
+function cloudhost247_email_hosting_ClientAreaAllowedFunctions()
 {
     return [];
 }
@@ -240,9 +240,9 @@ function hostx_email_ClientAreaAllowedFunctions()
  * @param  array<string,mixed> $params
  * @return array<string,string>
  */
-function hostx_email_AdminServicesTabFields(array $params)
+function cloudhost247_email_hosting_AdminServicesTabFields(array $params)
 {
-    return hostx_email_admin_tab_fields($params);
+    return cloudhost247_email_hosting_admin_tab_fields($params);
 }
 
 /**
@@ -253,7 +253,7 @@ function hostx_email_AdminServicesTabFields(array $params)
  * @param  array<string,mixed> $params
  * @return array<string,mixed>
  */
-function hostx_email_ServiceSingleSignOn(array $params)
+function cloudhost247_email_hosting_ServiceSingleSignOn(array $params)
 {
     $config = new Config($params);
     $provider = ProviderFactory::make($config);

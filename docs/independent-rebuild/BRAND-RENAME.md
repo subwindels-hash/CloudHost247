@@ -2,11 +2,14 @@
 
 # The CloudHost247 rebrand — completion record
 
-Two rename passes have now run. The first (2026-09-27) rebranded the
-in-house `hostx_tools`, `hostx_domain_lookup` and `hostx_email` modules.
-The second (2026-09-28, this document) completed the rebrand across the
-legacy theme, the order form, the page templates, the language packs, the
-root pages, the tests and the documentation.
+Three rename passes have now run. The first (2026-09-27) rebranded the
+in-house `hostx_tools`, `hostx_domain_lookup` and `hostx_email` addons.
+The second (2026-09-28) completed the rebrand across the legacy theme, the
+order form, the page templates, the language packs, the root pages, the
+tests and the documentation. The third (2026-10-01) renamed the Email
+Hosting provisioning module itself — directory, WHMCS module id, callbacks,
+tables, webhook headers, session key, form field, log prefix, test-case ids
+— and added the enforced exception register described below.
 
 The customer-facing brand is **CloudHost247**. A small set of exact WHMCS
 module, database, and encoded-addon identifiers remains only for compatibility;
@@ -46,6 +49,49 @@ are kept side by side.
                                   -> docs/independent-rebuild/BRAND-RENAME.md
     docs/independent-rebuild/PHASE-2-HOSTX-PARITY.md
                                   -> docs/independent-rebuild/PHASE-2-LEGACY-PARITY.md
+
+## What was renamed in the third pass (2026-10-01)
+
+    modules/servers/hostx_email/  -> modules/servers/cloudhost247_email_hosting/
+    modules/servers/hostx_email/hostx_email.php
+                                  -> .../cloudhost247_email_hosting.php
+    hostx_email_MetaData() and every other hostx_email_*() callback
+                                  -> cloudhost247_email_hosting_*()
+    mod_hostx_email_{accounts,operations,locks,log,webhooks,dns,content,migrations}
+                                  -> mod_cloudhost247_email_hosting_*
+    X-Hostx-Signature / X-Hostx-Timestamp / X-Hostx-Event-Id
+                                  -> X-CloudHost247-Signature / -Timestamp / -Event-Id
+    $_SESSION['hostx_email_token'] -> $_SESSION['ch247_email_token']
+    $post['hostx_email_action'] fallback
+                                  -> removed; ch247_email_action only
+    correlation-id prefix 'hxe-'  -> 'ch247-email-'
+    staging rows HXE-01..HXE-27   -> CH247E-01..CH247E-29
+    test helpers hxe_*()          -> ch247_email_*()
+
+The PHP namespace (`CloudHost247\Email`), the WHMCS display name
+(**CloudHost247 Email Hosting**) and the `CH247_EMAIL_*` bootstrap constants
+were already correct and did not move. `modules/servers/cloudhost247_email/`
+is a different, inactive module that owns `mod_cloudhost247_email_accounts`;
+the new `mod_cloudhost247_email_hosting_*` prefix was chosen so the two can
+never collide.
+
+WHMCS resolves a provisioning module by directory name, so this pass is not
+source-only: `scripts/migrate-legacy-names-to-cloudhost247.sql` renames the
+eight tables and repoints `tblservers.type` and `tblproducts.servertype` in
+the same maintenance window. Historical `tblmodulelog` rows keep the
+identifier they logged under — an audit trail is never rewritten.
+
+### Verification added in this pass
+
+    docs/independent-rebuild/branding-exceptions.list   machine-readable register
+    scripts/branding-audit.py                           repository-wide HostX search
+    scripts/audit-legacy-branding-in-database.sql       read-only database detector
+
+The auditor is wired into `scripts/release-candidate-check.sh` and into the
+`independent-foundation` workflow, so an unregistered HostX string — in file
+content *or* in a file/directory name — now fails CI instead of being found by
+eye. It also reports register rules that have gone stale, so the exception list
+cannot rot into a blanket exemption.
 
 ## What was rebranded inside the files
 
@@ -110,8 +156,8 @@ banner manager), so renaming the files would break live banners.
 
 **The migration SQL's `FROM` names.** `scripts/migrate-legacy-names-to-cloudhost247.sql`
 must reference the old identifiers to rename them. It also checks exact
-legacy company-name values. The Email Hosting module type and table names are
-retained as compatibility identifiers and are not rewritten by this script.
+legacy company-name values, and since the third pass it carries the Email
+Hosting module and table rename as well.
 
 Removing any of these requires replacing the encoded helper outright —
 which is exactly what the independent rebuild
@@ -125,11 +171,11 @@ migration together, inside one maintenance window, after a full backup:
 
     mysql -u USER -p DATABASE < scripts/migrate-legacy-names-to-cloudhost247.sql
 
-It renames the five owned `hostx_tools` data tables, repoints the renamed
-addon registrations, and updates the legacy theme, order-form, and exact
-legacy company-name values. It deliberately does **not** change the Email
-Hosting server type or `mod_hostx_email_*` tables because the current module
-continues to use them for WHMCS compatibility:
+It renames the five owned `hostx_tools` data tables **and** the eight Email
+Hosting tables, repoints the renamed addon registrations, moves
+`tblservers.type` / `tblproducts.servertype` to
+`cloudhost247_email_hosting`, and updates the legacy theme, order-form, and
+exact legacy company-name values:
 
 | Setting | Old | New |
 | --- | --- | --- |
@@ -139,15 +185,22 @@ continues to use them for WHMCS compatibility:
 | `mod_hostx_setting` row `template_name_custom` | `hostx` | `cloudhost247_legacy` |
 | `tblconfiguration.CompanyName` (exact known legacy values only) | `HostX`, the no-period `CloudHost247 Isc` spelling, `CloudHost247 Inc.`, and `CloudHost247 Pvt Ltd.` variants | `CloudHost247 Isc.` |
 
-Every statement is guarded and the script is safe to re-run. The
-verification block at the end must report all MUST-BE-ZERO counts as 0; the
-informational counts list page-builder tables and Email Hosting bindings
-that intentionally keep their technical names.
+| `tblservers.type` | `hostx_email` | `cloudhost247_email_hosting` |
+| `tblproducts.servertype` | `hostx_email` | `cloudhost247_email_hosting` |
+| `mod_hostx_email_*` (8 tables) | legacy prefix | `mod_cloudhost247_email_hosting_*` |
 
-Skipping it leaves the renamed addon registrations and legacy theme
-settings on their old values, so the addon menu or client-area theme may not
-resolve. Email Hosting products remain functional because their module type
-and tables are intentionally unchanged by this migration.
+Every statement is guarded and the script is safe to re-run. `RENAME TABLE`
+is metadata-only, so rows, indexes and grants are preserved rather than
+copied. The verification block at the end must report all MUST-BE-ZERO counts
+as 0; the only informational counts left are the four page-builder tables and
+the historical module-log rows.
+
+Skipping it leaves the renamed addon registrations, legacy theme settings and
+Email Hosting bindings on their old values, so the addon menu or client-area
+theme may not resolve **and** WHMCS reports "module not found" for every Email
+Hosting product while the module creates empty tables beside the un-migrated
+data. The *Deploy order and rollback* section at the end of the script records
+the exact sequence and the reverse statements.
 
 ## Licensing note
 

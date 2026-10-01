@@ -2,7 +2,7 @@
 /**
  * CloudHost247 Email Hosting - provider webhook endpoint.
  *
- * URL: https://<whmcs>/modules/servers/hostx_email/webhook.php?provider=<key>
+ * URL: https://<whmcs>/modules/servers/cloudhost247_email_hosting/webhook.php?provider=<key>
  *
  * Security model
  * --------------
@@ -59,14 +59,14 @@ header('Cache-Control: no-store');
 /**
  * @param array<string,mixed> $payload
  */
-function hostx_email_webhook_respond(int $status, array $payload): void
+function cloudhost247_email_hosting_webhook_respond(int $status, array $payload): void
 {
     http_response_code($status);
     echo json_encode($payload);
     exit;
 }
 
-function hostx_email_webhook_header(string $name): string
+function cloudhost247_email_hosting_webhook_header(string $name): string
 {
     $key = 'HTTP_' . strtoupper(str_replace('-', '_', $name));
 
@@ -79,7 +79,7 @@ Logger::correlationId(true);
 $provider = Validator::oneOf($_GET['provider'] ?? '', ['professional', 'microsoft365', 'google'], '');
 
 if ($provider === '') {
-    hostx_email_webhook_respond(400, ['error' => 'Unknown provider.']);
+    cloudhost247_email_hosting_webhook_respond(400, ['error' => 'Unknown provider.']);
 }
 
 // Microsoft Graph subscription handshake: echo the validation token verbatim.
@@ -95,20 +95,20 @@ if ($provider === 'microsoft365' && $validationToken !== '') {
 if (!in_array($provider, Verifier::SUPPORTED, true)) {
     Logger::warning('webhook.provider_unsupported', ['provider' => $provider]);
 
-    hostx_email_webhook_respond(501, [
+    cloudhost247_email_hosting_webhook_respond(501, [
         'error' => 'No authenticated webhook is documented for this provider; callbacks are refused. '
             . 'Status is kept current by the scheduled reconciler.',
     ]);
 }
 
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
-    hostx_email_webhook_respond(405, ['error' => 'Method not allowed.']);
+    cloudhost247_email_hosting_webhook_respond(405, ['error' => 'Method not allowed.']);
 }
 
 $rawBody = (string) file_get_contents('php://input');
 
 if (strlen($rawBody) > 262144) {
-    hostx_email_webhook_respond(413, ['error' => 'Payload too large.']);
+    cloudhost247_email_hosting_webhook_respond(413, ['error' => 'Payload too large.']);
 }
 
 $payload = json_decode($rawBody, true);
@@ -122,7 +122,7 @@ $payload = is_array($payload) ? $payload : [];
  */
 $serverSecrets = static function (string $provider): array {
     try {
-        $servers = Capsule::table('tblservers')->where('type', 'hostx_email')->where('disabled', 0)->get();
+        $servers = Capsule::table('tblservers')->where('type', 'cloudhost247_email_hosting')->where('disabled', 0)->get();
     } catch (\Throwable $e) {
         return [];
     }
@@ -161,9 +161,9 @@ $eventType = '';
 $affectedEmails = [];
 
 if ($provider === 'professional') {
-    $signature = hostx_email_webhook_header('X-Hostx-Signature');
-    $timestamp = hostx_email_webhook_header('X-Hostx-Timestamp');
-    $eventId = hostx_email_webhook_header('X-Hostx-Event-Id');
+    $signature = cloudhost247_email_hosting_webhook_header('X-CloudHost247-Signature');
+    $timestamp = cloudhost247_email_hosting_webhook_header('X-CloudHost247-Timestamp');
+    $eventId = cloudhost247_email_hosting_webhook_header('X-CloudHost247-Event-Id');
     $eventType = Validator::text($payload['event'] ?? '', 96);
 
     foreach ($serverSecrets($provider) as $secret) {
@@ -231,19 +231,19 @@ if (!$verified) {
         'event'    => Redactor::scrub($eventType),
     ]);
 
-    hostx_email_webhook_respond(401, ['error' => 'Signature verification failed.']);
+    cloudhost247_email_hosting_webhook_respond(401, ['error' => 'Signature verification failed.']);
 }
 
 // Replay protection: a verified event id is only ever processed once.
 if (!Verifier::remember($provider, $eventId, $eventType, $rawBody, true, 'accepted')) {
-    hostx_email_webhook_respond(200, ['status' => 'duplicate_ignored']);
+    cloudhost247_email_hosting_webhook_respond(200, ['status' => 'duplicate_ignored']);
 }
 
 $queued = 0;
 
 foreach ($affectedEmails as $email) {
     try {
-        $account = Capsule::table('mod_hostx_email_accounts')->where('email', $email)->first();
+        $account = Capsule::table('mod_cloudhost247_email_hosting_accounts')->where('email', $email)->first();
     } catch (\Throwable $e) {
         $account = null;
     }
@@ -268,4 +268,4 @@ Logger::info('webhook.accepted', [
     'queued'   => $queued,
 ]);
 
-hostx_email_webhook_respond(200, ['status' => 'accepted', 'queued' => $queued]);
+cloudhost247_email_hosting_webhook_respond(200, ['status' => 'accepted', 'queued' => $queued]);

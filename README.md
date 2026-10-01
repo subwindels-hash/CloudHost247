@@ -30,8 +30,10 @@ of this repository **into** an existing WHMCS installation root (cPanel
 │   └── english.php                    (legacy theme strings + OVH order-form strings)
 ├── modules/
 │   ├── addons/                     ← Addon modules (WHMCS → System Settings → Addon Modules)
-│   │   ├── hostx/                     Legacy theme helper module (ionCube; name retained by its
-│   │   │                                encoded entry point) — REQUIRED by the legacy theme
+│   │   ├── hostx/                     Legacy theme helper module — REQUIRED by the legacy theme.
+│   │   │                                All 63 PHP files are ionCube-encoded vendor bytecode, so the
+│   │   │                                directory name (which is the WHMCS addon id) cannot be
+│   │   │                                rebranded here: see docs/BRANDING-COMPATIBILITY.md §1
 │   │   ├── cloudhost247_tools/               CloudHost247 Tools Platform v2.2.7 (66 online tools, hardened:
 │   │   │                              TLS-verified APIs, no shell execution, REST API + tests)
 │   │   ├── cloudhost247_domain_lookup/       CloudHost247 Domain Lookup (4-tool WHOIS/IP/DNS/availability build,
@@ -55,7 +57,11 @@ of this repository **into** an existing WHMCS installation root (cPanel
 │       ├── Smtphosting/               SMTP hosting provisioning (ModulesGarden v3)
 │       ├── soyoustart/                SoYouStart dedicated server provisioning
 │       ├── soyoustart_vps/            SoYouStart VPS provisioning
-│       ├── cloudhost247_email/               Email hosting provisioning (M365/GWorkspace/Pro)
+│       ├── cloudhost247_email_hosting/  **CloudHost247 Email Hosting** (M365 / Google Workspace /
+│       │                                Professional Email; renamed off the vendor module id —
+│       │                                run scripts/migrate-legacy-names-to-cloudhost247.sql)
+│       ├── cloudhost247_email/        Earlier email provisioning build — INACTIVE, kept for
+│       │                                reference; owns mod_cloudhost247_email_accounts
 │       ├── smmprovisioning/           SMM panel order automation (superseded by cloudhost247_smm)
 │       └── cloudhost247_smm/          CloudHost247 SMM marketplace provisioning (payment-gated, idempotent)
 ├── templates/
@@ -85,7 +91,7 @@ of this repository **into** an existing WHMCS installation root (cPanel
 
 | Module | Type | Location |
 |---|---|---|
-| CloudHost247 (theme helper) | addon | `modules/addons/hostx/` |
+| CloudHost247 (theme helper) | addon | `modules/addons/hostx/` — ionCube-encoded vendor addon; the directory name is the WHMCS addon id and cannot be rebranded in source (`docs/BRANDING-COMPATIBILITY.md` §1) |
 | CloudHost247 Tools Platform v2.2.7 (hardened) | addon | `modules/addons/cloudhost247_tools/` |
 | CloudHost247 Domain Lookup | addon | `modules/addons/cloudhost247_domain_lookup/` |
 | Tools Center (+ external API) | addon | `modules/addons/tools_center/` |
@@ -102,7 +108,7 @@ of this repository **into** an existing WHMCS installation root (cPanel
 | Smtphosting v3 | server | `modules/servers/Smtphosting/` |
 | SoYouStart (dedicated) | server | `modules/servers/soyoustart/` |
 | SoYouStart VPS | server | `modules/servers/soyoustart_vps/` |
-| CloudHost247 Email Hosting | server | `modules/servers/cloudhost247_email/` |
+| **CloudHost247 Email Hosting** | server | `modules/servers/cloudhost247_email_hosting/` (module id `cloudhost247_email_hosting`; `modules/servers/cloudhost247_email/` is an earlier, inactive build) |
 | SMM Provisioning (prototype) | server | `modules/servers/smmprovisioning/` |
 
 **Notes**
@@ -216,7 +222,44 @@ inventory.
 
 - WHMCS 8.x (order form `templates/orderforms/cloudhost247_legacy` requires WHMCS 8.1+,
   error pages `templates/cloudhost247_legacy/error/` require WHMCS 8.8+)
-- PHP 7.4–8.2 with **ionCube Loader** (the legacy `hostx` addon and
-  `xtreme_currency_rates` are encoded), cURL, JSON, PDO, OpenSSL
+- PHP 7.4–8.2 with **ionCube Loader** (the legacy theme-helper addon in `modules/addons/hostx/`
+  and `xtreme_currency_rates` are encoded), cURL, JSON, PDO, OpenSSL
 - `templates/orderforms/ovh_cart/` falls back to WHMCS core `standard_cart`
   templates — a stock WHMCS installation provides them.
+
+## Branding
+
+Three names are used, and only these three:
+
+| Context | Name |
+|---|---|
+| Legal / company presentation (policies, notices, footer copyright, `tblconfiguration.CompanyName`, the 27 language overrides) | **CloudHost247 Isc.** |
+| Primary customer-facing brand (pages, emails, dashboards, product display names) | **CloudHost247** |
+| Compact technical/visual label (constants, CSS/JS selectors, form fields, short identifiers) | **CH247** |
+
+The platform was rebranded off a vendor theme and module set. No HostX branding
+is used anywhere in the product, and the retired identifiers that survive in the
+tree are runtime contracts of ionCube-encoded vendor code, migration inputs,
+historical verification records, or negative test assertions — never customer
+copy.
+
+Two files make that claim checkable instead of asserted:
+
+- `docs/BRANDING-COMPATIBILITY.md` — the human-readable register: what was
+  renamed, what remains, and the exact technical reason for each survivor.
+- `docs/independent-rebuild/branding-exceptions.list` — the machine-readable
+  version of the same register, consumed by `scripts/branding-audit.py`.
+
+`python3 scripts/branding-audit.py` searches every text file and every
+file/directory name for `HostX`, `HOSTX`, `hostx`, `Hostx`, `Host X`, `HOST X`,
+`host-x`, `HOST-X`, `host_x` and `host x`. Anything not covered by a registered
+rule fails the release candidate, so new HostX text cannot be reintroduced by
+accident. The audit runs in `scripts/release-candidate-check.sh` and in the
+`independent-foundation` workflow on PHP 7.4 and 8.2.
+
+Database-side renaming lives in `scripts/migrate-legacy-names-to-cloudhost247.sql`
+(guarded, idempotent, re-runnable; deploy order and rollback are recorded at the end of the script).
+`scripts/audit-legacy-branding-in-database.sql` is the read-only counterpart: it
+reports every HostX value still stored in a live database, including the block
+slugs and banner filenames that decide whether the nine retained legacy theme
+filenames can be renamed too.

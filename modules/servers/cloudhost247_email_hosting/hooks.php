@@ -31,7 +31,7 @@ use WHMCS\Database\Capsule;
 add_hook('DailyCronJob', 1, function () {
     try {
         // Only do work when the module is actually in use.
-        $servers = Capsule::table('tblservers')->where('type', 'hostx_email')->count();
+        $servers = Capsule::table('tblservers')->where('type', 'cloudhost247_email_hosting')->count();
 
         if ($servers === 0) {
             return;
@@ -54,7 +54,7 @@ add_hook('DailyCronJob', 1, function () {
  */
 add_hook('AfterCronJob', 1, function () {
     try {
-        $servers = Capsule::table('tblservers')->where('type', 'hostx_email')->count();
+        $servers = Capsule::table('tblservers')->where('type', 'cloudhost247_email_hosting')->count();
 
         if ($servers === 0) {
             return;
@@ -78,5 +78,5 @@ add_hook('ClientAreaHeadOutput', 1, function ($vars) {
         return '';
     }
 
-    return '<link rel="stylesheet" href="modules/servers/hostx_email/templates/assets/clientarea.css">';
+    return '<link rel="stylesheet" href="modules/servers/cloudhost247_email_hosting/templates/assets/clientarea.css">';
 });

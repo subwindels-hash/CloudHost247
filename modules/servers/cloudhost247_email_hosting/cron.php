@@ -14,7 +14,7 @@
  *
  * Suggested crontab (every 15 minutes is plenty):
  *   Every 15 minutes:
- *   0,15,30,45 * * * * php /path/to/whmcs/modules/servers/hostx_email/cron.php sync >/dev/null 2>&1
+ *   0,15,30,45 * * * * php /path/to/whmcs/modules/servers/cloudhost247_email_hosting/cron.php sync >/dev/null 2>&1
  *
  * The same work also runs from the WHMCS daily cron through hooks.php, so this
  * file is optional.
@@ -133,11 +133,11 @@ switch ($command) {
         }
 
         try {
-            $total = Capsule::table('mod_hostx_email_accounts')->count();
-            $active = Capsule::table('mod_hostx_email_accounts')->where('status', 'active')->count();
-            $reconcile = Capsule::table('mod_hostx_email_accounts')->where('needs_reconcile', 1)->count();
-            $servers = Capsule::table('tblservers')->where('type', 'hostx_email')->count();
-            $products = Capsule::table('tblproducts')->where('servertype', 'hostx_email')->count();
+            $total = Capsule::table('mod_cloudhost247_email_hosting_accounts')->count();
+            $active = Capsule::table('mod_cloudhost247_email_hosting_accounts')->where('status', 'active')->count();
+            $reconcile = Capsule::table('mod_cloudhost247_email_hosting_accounts')->where('needs_reconcile', 1)->count();
+            $servers = Capsule::table('tblservers')->where('type', 'cloudhost247_email_hosting')->count();
+            $products = Capsule::table('tblproducts')->where('servertype', 'cloudhost247_email_hosting')->count();
 
             echo "\n  servers configured : {$servers}\n";
             echo "  products mapped    : {$products}\n";

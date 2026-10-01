@@ -16,7 +16,7 @@ if (defined('CH247_EMAIL_ROOT')) {
 }
 
 define('CH247_EMAIL_ROOT', __DIR__);
-define('CH247_EMAIL_MODULE', 'hostx_email');
+define('CH247_EMAIL_MODULE', 'cloudhost247_email_hosting');
 define('CH247_EMAIL_VERSION', '1.0.0');
 
 spl_autoload_register(static function ($class) {

@@ -1,6 +1,6 @@
 <?php
 /**
- * Editable page content (mod_hostx_email_content).
+ * Editable page content (mod_cloudhost247_email_hosting_content).
  *
  * The landing page copy - hero text, provider card bullets, FAQs, DNS guidance
  * - ships with sensible defaults and can be overridden per key without touching
@@ -21,7 +21,7 @@ use WHMCS\Database\Capsule;
 
 final class ContentRepository
 {
-    const TABLE = 'mod_hostx_email_content';
+    const TABLE = 'mod_cloudhost247_email_hosting_content';
 
     /**
      * Built-in defaults. Deliberately factual: no provider claims that the

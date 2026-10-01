@@ -225,7 +225,7 @@ warnings were masking. The suite goes from 20 assertions with 12 diagnostics to
 
 ## CloudHost247 Email Hosting module and public page
 
-Date: 2026-09-28. Scope: `modules/servers/hostx_email`, `email-hosting.php`, `templates/cloudhost247/cloudhost247-email-hosting.tpl`. Source/mock verified only; every runtime row is **BLOCKED — STAGING REQUIRED**. The WHMCS server module ID remains `hostx_email` for compatibility.
+Date: 2026-09-28. Scope: `modules/servers/cloudhost247_email_hosting`, `email-hosting.php`, `templates/cloudhost247/cloudhost247-email-hosting.tpl`. Source/mock verified only; every runtime row is **BLOCKED — STAGING REQUIRED**. The WHMCS server module ID is `cloudhost247_email_hosting`; webhook authentication uses the `X-CloudHost247-Signature` / `-Timestamp` / `-Event-Id` headers and the client-area CSRF fallback token key is `ch247_email_token`.
 
 | Risk | Control / finding | Status |
 |---|---|---|

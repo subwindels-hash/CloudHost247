@@ -4,7 +4,7 @@ cd "$(dirname "$0")/.."
 echo '== CloudHost247 release-candidate source verification =='
 # Some language overrides are intentionally CRLF; ignore only the carriage return in a CRLF line ending.
 git -c core.whitespace=cr-at-eol diff --check
-find modules/addons/cloudhost247_* modules/servers/hostx_email modules/servers/cloudhost247_ovh modules/servers/cloudhost247_smm modules/servers/RDP tests scripts crons/cloudhost247_*.php builder-page.php cloudhost247-page.php aboutus.php all-element-cloudhost247.php blog.php cloudhost247-sample.php cloudhost247-vps-sample.php comingsoon.php cpanel-hosting.php data-protection-standards.php dedeicated-server.php dedicated-server.php developer-friendly.php domain.php enterprise-servers.php future-element.php game-servers.php help-center.php legal-notice.php notfound.php offers.php plesk-hosting.php refund-and-cancellation-policy.php refund-policy.php ssl-certificate.php tables.php terms-of-service.php vps-hosting.php vps-privatecloud.php vps-publiccloud.php web-hosting.php website-design.php windows-hosting.php wordpress-hosting.php -name '*.php' -print0 | xargs -0 -n1 php -l
+find modules/addons/cloudhost247_* modules/servers/cloudhost247_email_hosting modules/servers/cloudhost247_ovh modules/servers/cloudhost247_smm modules/servers/RDP tests scripts crons/cloudhost247_*.php builder-page.php cloudhost247-page.php aboutus.php all-element-cloudhost247.php blog.php cloudhost247-sample.php cloudhost247-vps-sample.php comingsoon.php cpanel-hosting.php data-protection-standards.php dedeicated-server.php dedicated-server.php developer-friendly.php domain.php enterprise-servers.php future-element.php game-servers.php help-center.php legal-notice.php notfound.php offers.php plesk-hosting.php refund-and-cancellation-policy.php refund-policy.php ssl-certificate.php tables.php terms-of-service.php vps-hosting.php vps-privatecloud.php vps-publiccloud.php web-hosting.php website-design.php windows-hosting.php wordpress-hosting.php -name '*.php' -print0 | xargs -0 -n1 php -l
 php tests/foundation/run.php
 php tests/currency/run.php
 php -d display_errors=1 tests/smm/run.php
@@ -23,8 +23,11 @@ php -d display_errors=1 tests/customaffiliate/run.php
 php -d display_errors=1 tests/cloudhost247_email/run.php
 python3 -m unittest -v tests/foundation/test_static.py tests/currency/test_static.py tests/ovh/test_static.py tests/ovh/test_product_services_static.py tests/ovh/test_public_catalog_static.py tests/rdp/test_static.py tests/integrations/test_static.py tests/modules/test_static.py tests/builder/test_static.py tests/smm/test_static.py tests/tools/test_static.py tests/broker/test_static.py tests/cart_recovery/test_static.py tests/passkey/test_static.py tests/security/test_security.py tests/security/test_archive_integration.py
 python3 -m unittest -v tests/staging/test_staging_tools.py
-python3 -m py_compile scripts/validate-migrations.py scripts/compare-financial-evidence.py scripts/generate-staging-report.py
+python3 -m py_compile scripts/validate-migrations.py scripts/compare-financial-evidence.py scripts/generate-staging-report.py scripts/branding-audit.py
 python3 scripts/validate-migrations.py
+# Repository-wide retired-brand search; every surviving reference must be listed in
+# docs/independent-rebuild/branding-exceptions.list with a reason code.
+python3 scripts/branding-audit.py --quiet
 override_list='docs/independent-rebuild/rebrand-overrides.list'
 override_hashes='docs/independent-rebuild/rebrand-overrides.sha256'
 original_manifest='docs/independent-rebuild/original-file-manifest.sha256'

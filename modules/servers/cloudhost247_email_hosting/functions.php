@@ -38,7 +38,7 @@ use CloudHost247\Email\Service\Provisioner;
  * @param  callable            $callback fn(Provisioner, Config): array
  * @return string
  */
-function hostx_email_run(string $action, array $params, callable $callback)
+function cloudhost247_email_hosting_run(string $action, array $params, callable $callback)
 {
     $config = new Config($params);
 
@@ -77,7 +77,7 @@ function hostx_email_run(string $action, array $params, callable $callback)
  *
  * @return array<string,mixed>
  */
-function hostx_email_change_package(Provisioner $provisioner, Config $config)
+function cloudhost247_email_hosting_change_package(Provisioner $provisioner, Config $config)
 {
     $provider = $provisioner->provider();
     $capabilities = $provider->capabilities();
@@ -137,7 +137,7 @@ function hostx_email_change_package(Provisioner $provisioner, Config $config)
  * @param  array<string,mixed> $params
  * @return array<string,mixed>
  */
-function hostx_email_client_area(array $params)
+function cloudhost247_email_hosting_client_area(array $params)
 {
     $config = new Config($params);
 
@@ -148,7 +148,7 @@ function hostx_email_client_area(array $params)
         $notice = null;
 
         if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST'
-            && (!empty($_POST['ch247_email_action']) || !empty($_POST['hostx_email_action']))) {
+            && !empty($_POST['ch247_email_action'])) {
             $notice = $presenter->handlePost($_POST);
         }
 
@@ -178,7 +178,7 @@ function hostx_email_client_area(array $params)
  * @param  array<string,mixed> $params
  * @return array<string,string>
  */
-function hostx_email_admin_tab_fields(array $params)
+function cloudhost247_email_hosting_admin_tab_fields(array $params)
 {
     $config = new Config($params);
 
@@ -242,7 +242,7 @@ function hostx_email_admin_tab_fields(array $params)
  * Generate a policy-compliant password (used by the admin "generate" helper and
  * by provisioning when WHMCS holds no password).
  */
-function hostx_email_generate_password(int $length = 18): string
+function cloudhost247_email_hosting_generate_password(int $length = 18): string
 {
     return \CloudHost247\Email\Support\Validator::generatePassword($length);
 }

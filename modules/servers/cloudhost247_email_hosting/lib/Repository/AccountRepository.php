@@ -1,6 +1,6 @@
 <?php
 /**
- * Provisioned account state (mod_hostx_email_accounts).
+ * Provisioned account state (mod_cloudhost247_email_hosting_accounts).
  *
  * The remote account id persisted here is what makes provisioning idempotent:
  * once it exists, CreateAccount will never create a second remote user for the
@@ -17,7 +17,7 @@ use WHMCS\Database\Capsule;
 
 final class AccountRepository
 {
-    const TABLE = 'mod_hostx_email_accounts';
+    const TABLE = 'mod_cloudhost247_email_hosting_accounts';
 
     const STATUS_PENDING     = 'pending';
     const STATUS_ACTIVE      = 'active';

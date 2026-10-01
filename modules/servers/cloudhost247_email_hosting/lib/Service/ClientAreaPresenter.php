@@ -116,8 +116,7 @@ final class ClientAreaPresenter
      */
     public function handlePost(array $post): ?array
     {
-        // Accept the former hidden field name for cached forms during the rebrand rollout.
-        $submittedAction = $post['ch247_email_action'] ?? $post['hostx_email_action'] ?? '';
+        $submittedAction = $post['ch247_email_action'] ?? '';
         $action = Validator::oneOf($submittedAction, ['change_password', 'refresh_dns', 'refresh_status'], '');
 
         if ($action === '') {
@@ -388,11 +387,11 @@ final class ClientAreaPresenter
             return (string) generate_token('plain');
         }
 
-        if (empty($_SESSION['hostx_email_token'])) {
-            $_SESSION['hostx_email_token'] = bin2hex(random_bytes(16));
+        if (empty($_SESSION['ch247_email_token'])) {
+            $_SESSION['ch247_email_token'] = bin2hex(random_bytes(16));
         }
 
-        return (string) $_SESSION['hostx_email_token'];
+        return (string) $_SESSION['ch247_email_token'];
     }
 
     private function verifyToken(string $presented): bool

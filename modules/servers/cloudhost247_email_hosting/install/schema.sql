@@ -10,7 +10,7 @@
 -- ---------------------------------------------------------------------------
 
 -- Provisioned mailboxes / subscriptions, one row per WHMCS service.
-CREATE TABLE IF NOT EXISTS `mod_hostx_email_accounts` (
+CREATE TABLE IF NOT EXISTS `mod_cloudhost247_email_hosting_accounts` (
     `id`                INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
     `service_id`        INT(10) UNSIGNED NOT NULL,
     `client_id`         INT(10) UNSIGNED NOT NULL DEFAULT 0,
@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS `mod_hostx_email_accounts` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Idempotency + reconciliation ledger: one row per attempted remote operation.
-CREATE TABLE IF NOT EXISTS `mod_hostx_email_operations` (
+CREATE TABLE IF NOT EXISTS `mod_cloudhost247_email_hosting_operations` (
     `id`              INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
     `service_id`      INT(10) UNSIGNED NOT NULL DEFAULT 0,
     `provider`        VARCHAR(32) NOT NULL DEFAULT '',
@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS `mod_hostx_email_operations` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Cooperative locks so cron, webhooks and admin actions cannot overlap.
-CREATE TABLE IF NOT EXISTS `mod_hostx_email_locks` (
+CREATE TABLE IF NOT EXISTS `mod_cloudhost247_email_hosting_locks` (
     `lock_key`    VARCHAR(191) NOT NULL,
     `owner`       VARCHAR(64) NOT NULL DEFAULT '',
     `acquired_at` DATETIME NOT NULL,
@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS `mod_hostx_email_locks` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Structured, redacted log.
-CREATE TABLE IF NOT EXISTS `mod_hostx_email_log` (
+CREATE TABLE IF NOT EXISTS `mod_cloudhost247_email_hosting_log` (
     `id`             INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
     `correlation_id` VARCHAR(64) NULL DEFAULT NULL,
     `level`          ENUM('debug','info','warning','error') NOT NULL DEFAULT 'info',
@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS `mod_hostx_email_log` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Webhook receipts, for signature auditing and replay protection.
-CREATE TABLE IF NOT EXISTS `mod_hostx_email_webhooks` (
+CREATE TABLE IF NOT EXISTS `mod_cloudhost247_email_hosting_webhooks` (
     `id`           INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
     `provider`     VARCHAR(32) NOT NULL DEFAULT '',
     `event_id`     VARCHAR(191) NOT NULL,
@@ -108,7 +108,7 @@ CREATE TABLE IF NOT EXISTS `mod_hostx_email_webhooks` (
 
 -- DNS records presented to the customer, as returned by the provider or as
 -- configured by an administrator. Never invented by the module.
-CREATE TABLE IF NOT EXISTS `mod_hostx_email_dns` (
+CREATE TABLE IF NOT EXISTS `mod_cloudhost247_email_hosting_dns` (
     `id`            INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
     `service_id`    INT(10) UNSIGNED NOT NULL,
     `domain`        VARCHAR(191) NOT NULL DEFAULT '',
@@ -127,7 +127,7 @@ CREATE TABLE IF NOT EXISTS `mod_hostx_email_dns` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Editable public-page content (hero copy, FAQs, comparison notes).
-CREATE TABLE IF NOT EXISTS `mod_hostx_email_content` (
+CREATE TABLE IF NOT EXISTS `mod_cloudhost247_email_hosting_content` (
     `content_key` VARCHAR(96) NOT NULL,
     `locale`      VARCHAR(12) NOT NULL DEFAULT 'english',
     `value_json`  MEDIUMTEXT NULL DEFAULT NULL,
@@ -136,7 +136,7 @@ CREATE TABLE IF NOT EXISTS `mod_hostx_email_content` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Applied migrations.
-CREATE TABLE IF NOT EXISTS `mod_hostx_email_migrations` (
+CREATE TABLE IF NOT EXISTS `mod_cloudhost247_email_hosting_migrations` (
     `id`         INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
     `filename`   VARCHAR(191) NOT NULL,
     `applied_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
