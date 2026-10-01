@@ -6,10 +6,10 @@
  * Everything that reaches a provider API or a template goes through here first.
  *
  * @package    WHMCS
- * @subpackage hostx_email
+ * @subpackage CloudHost247 Email Hosting
  */
 
-namespace HostxEmail\Support;
+namespace CloudHost247\Email\Support;
 
 final class Validator
 {

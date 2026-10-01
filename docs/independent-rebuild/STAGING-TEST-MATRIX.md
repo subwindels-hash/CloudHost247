@@ -146,9 +146,9 @@ Capture financial snapshots immediately before and after every financial-impacti
 
 **BLOCKED — STAGING/API AUTHORIZATION REQUIRED:** provider ownership/licensing, endpoint contract, bearer-token authorization, product IDs, permissions, real create/suspend/unsuspend/terminate semantics, WHMCS module activation, migration execution, UI, concurrency and disposable lifecycle tests. The module must not be activated until these pass. Required migration ordering adds RDP `1.0.0` after the existing Core, Currency, Theme and OVH sequences.
 
-## hostx_email — email hosting page and provisioning module
+## CloudHost247 Email Hosting — public page and provisioning module
 
-**IMPLEMENTED — SOURCE/MOCK VERIFIED:** independent WHMCS server module `modules/servers/hostx_email` (Professional Email, Microsoft Graph, Google Workspace Admin SDK adapters behind one contract), public `email-hosting.php` page reading only live WHMCS products/pricing for `servertype = hostx_email`, client-area overview template with ownership + CSRF enforcement and DNS copy buttons, versioned schema with idempotency/reconciliation ledger, authenticated webhook endpoint, bounded cron, redacted structured logging, and 44 mock diagnostics in `tests/hostx_email/run.php`.
+**IMPLEMENTED — SOURCE/MOCK VERIFIED:** CloudHost247 Email Hosting uses the independent WHMCS server module at `modules/servers/hostx_email`; the technical module ID `hostx_email` is retained for existing WHMCS product/server bindings. It provides Professional Email, Microsoft Graph, and Google Workspace adapters behind one contract, a public `email-hosting.php` page reading only live WHMCS products/pricing for `servertype = hostx_email`, a client-area overview with ownership + CSRF enforcement and DNS copy buttons, versioned schema with idempotency/reconciliation ledger, authenticated webhook endpoint, bounded cron, redacted structured logging, and 44 mock diagnostics in `tests/cloudhost247_email/run.php`.
 
 **BLOCKED — STAGING / TENANT AUTHORIZATION REQUIRED:** every row below. Mock transport results never satisfy a runtime row.
 

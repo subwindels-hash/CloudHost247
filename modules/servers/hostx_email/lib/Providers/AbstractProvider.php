@@ -10,18 +10,18 @@
  *   HTTP 4xx                                -> failed   (permanent, mapped to a code)
  *
  * @package    WHMCS
- * @subpackage hostx_email
+ * @subpackage CloudHost247 Email Hosting
  */
 
-namespace HostxEmail\Providers;
+namespace CloudHost247\Email\Providers;
 
-use HostxEmail\Dns\RecordSet;
-use HostxEmail\Support\Config;
-use HostxEmail\Support\CurlClient;
-use HostxEmail\Support\HttpClient;
-use HostxEmail\Support\Logger;
-use HostxEmail\Support\Redactor;
-use HostxEmail\Support\Result;
+use CloudHost247\Email\Dns\RecordSet;
+use CloudHost247\Email\Support\Config;
+use CloudHost247\Email\Support\CurlClient;
+use CloudHost247\Email\Support\HttpClient;
+use CloudHost247\Email\Support\Logger;
+use CloudHost247\Email\Support\Redactor;
+use CloudHost247\Email\Support\Result;
 
 abstract class AbstractProvider implements ProviderInterface
 {

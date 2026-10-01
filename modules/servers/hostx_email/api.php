@@ -1,6 +1,6 @@
 <?php
 /**
- * hostx_email - provider API surface.
+ * CloudHost247 Email Hosting - provider API surface.
  *
  * Thin, dependency-free helpers that expose the provider adapters to the rest
  * of the module (connection testing, plan discovery, DNS retrieval, capability
@@ -10,7 +10,7 @@
  * and by the CLI tools. The public HTTP surface is webhook.php only.
  *
  * @package    WHMCS
- * @subpackage hostx_email
+ * @subpackage CloudHost247 Email Hosting
  */
 
 if (!defined('WHMCS')) {
@@ -19,13 +19,13 @@ if (!defined('WHMCS')) {
 
 require_once __DIR__ . '/bootstrap.php';
 
-use HostxEmail\Providers\ProviderFactory;
-use HostxEmail\Providers\ProviderInterface;
-use HostxEmail\Service\DnsService;
-use HostxEmail\Support\Config;
-use HostxEmail\Support\HttpClient;
-use HostxEmail\Support\Logger;
-use HostxEmail\Support\Result;
+use CloudHost247\Email\Providers\ProviderFactory;
+use CloudHost247\Email\Providers\ProviderInterface;
+use CloudHost247\Email\Service\DnsService;
+use CloudHost247\Email\Support\Config;
+use CloudHost247\Email\Support\HttpClient;
+use CloudHost247\Email\Support\Logger;
+use CloudHost247\Email\Support\Result;
 
 /**
  * Build the provider adapter for a set of WHMCS params.

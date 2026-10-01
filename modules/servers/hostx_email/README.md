@@ -1,4 +1,4 @@
-# hostx_email — CloudHost247 Email Hosting provisioning module
+# CloudHost247 Email Hosting — WHMCS provisioning module
 
 A WHMCS **server (provisioning) module** — not an addon — that provisions business email
 across three independent provider adapters behind one contract, plus the public
@@ -69,7 +69,7 @@ Suspend, unsuspend, terminate, change password and package change follow the sam
    php modules/servers/hostx_email/cron.php migrate
    ```
 3. **Add a server** at *Configuration → System Settings → Servers*, type
-   **CloudHost247 Email Hosting (hostx_email)** — one server per provider tenant
+   **CloudHost247 Email Hosting (WHMCS module ID: `hostx_email`)** — one server per provider tenant
    (see section 3). Use **Test connection**.
 4. **Create products** whose module is `hostx_email` and assign them to that server group
    (section 5). The module never creates or re-prices WHMCS products itself.
@@ -330,7 +330,7 @@ php cron.php prune --days=90              # log + webhook housekeeping
 ## 15. Testing
 
 ```bash
-php tests/hostx_email/run.php
+php tests/cloudhost247_email/run.php
 ```
 
 **These are MOCK tests.** Provider calls are served by `lib/Testing/MockHttpClient.php`;
@@ -344,7 +344,7 @@ clipboard, webhook signature + replay + unsupported-provider refusal, cron bound
 failure and reconciliation classification, and secret redaction.
 
 Live-tenant verification is tracked in
-`docs/independent-rebuild/STAGING-TEST-MATRIX.md` (section "hostx_email").
+`docs/independent-rebuild/STAGING-TEST-MATRIX.md` (section "CloudHost247 Email Hosting").
 
 ## 16. Troubleshooting
 

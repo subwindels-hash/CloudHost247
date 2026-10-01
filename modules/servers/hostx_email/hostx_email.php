@@ -1,6 +1,6 @@
 <?php
 /**
- * hostx_email - CloudHost247 Email Hosting provisioning module for WHMCS.
+ * CloudHost247 Email Hosting provisioning module for WHMCS.
  *
  * A WHMCS SERVER (provisioning) module - not an addon - supporting three
  * independent provider adapters behind one contract:
@@ -16,7 +16,7 @@
  * the provider permission matrix.
  *
  * @package    WHMCS
- * @subpackage hostx_email
+ * @subpackage CloudHost247 Email Hosting
  * @author     CloudHost247
  * @version    1.0.0
  */
@@ -28,8 +28,8 @@ if (!defined('WHMCS')) {
 require_once __DIR__ . '/bootstrap.php';
 require_once __DIR__ . '/functions.php';
 
-use HostxEmail\Providers\ProviderFactory;
-use HostxEmail\Support\Config;
+use CloudHost247\Email\Providers\ProviderFactory;
+use CloudHost247\Email\Support\Config;
 
 /**
  * Module metadata.
@@ -42,7 +42,7 @@ use HostxEmail\Support\Config;
 function hostx_email_MetaData()
 {
     return [
-        'DisplayName'               => 'CloudHost247 Email Hosting (hostx_email)',
+        'DisplayName'               => 'CloudHost247 Email Hosting',
         'APIVersion'                => '1.1',
         'RequiresServer'            => true,
         'DefaultNonSSLPort'         => '443',
@@ -56,7 +56,7 @@ function hostx_email_MetaData()
 /**
  * Product configuration options.
  *
- * The numbering is fixed by HostxEmail\Support\Config::CONFIG_OPTIONS; do not
+ * The numbering is fixed by the module configuration options class. do not
  * reorder without migrating existing products.
  *
  * @return array<string,array<string,mixed>>
@@ -181,7 +181,7 @@ function hostx_email_ChangePassword(array $params)
 function hostx_email_Renew(array $params)
 {
     return hostx_email_run('Renew', $params, static function ($provisioner, $config) {
-        return (new \HostxEmail\Service\Reconciler())->syncService($config->serviceId());
+        return (new \CloudHost247\Email\Service\Reconciler())->syncService($config->serviceId());
     });
 }
 

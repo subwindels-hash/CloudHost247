@@ -10,10 +10,10 @@
  *     the Authorization header)
  *
  * @package    WHMCS
- * @subpackage hostx_email
+ * @subpackage CloudHost247 Email Hosting
  */
 
-namespace HostxEmail\Support;
+namespace CloudHost247\Email\Support;
 
 final class CurlClient implements HttpClient
 {
@@ -69,7 +69,7 @@ final class CurlClient implements HttpClient
             CURLOPT_CONNECTTIMEOUT    => $this->connectTimeout,
             CURLOPT_TIMEOUT           => max(1, $timeout),
             CURLOPT_HTTPHEADER        => $requestHeaders,
-            CURLOPT_USERAGENT         => 'CloudHost247-hostx_email/' . (defined('HOSTX_EMAIL_VERSION') ? HOSTX_EMAIL_VERSION : '1.0.0'),
+            CURLOPT_USERAGENT         => 'CloudHost247-EmailHosting/' . (defined('CH247_EMAIL_VERSION') ? CH247_EMAIL_VERSION : '1.0.0'),
             CURLOPT_HEADERFUNCTION    => static function ($curl, $line) use (&$responseHeaders) {
                 $parts = explode(':', $line, 2);
 

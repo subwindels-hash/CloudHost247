@@ -571,7 +571,7 @@ the market<br>It provides your services with round-the-clock protection against 
  /* for v2.2.0 */
 $_LANG['contactuspagemainhead'] = "Contactează-ne";
 $_LANG['contactuspagemainsubhead'] = "pentru mai multe informatii";
-$_LANG['contactuscompanyname'] = "CloudHost247 Pvt Ltd.";
+$_LANG['contactuscompanyname'] = "CloudHost247 Isc.";
 $_LANG['contactusaddress'] = "abcdd, Phase 123, Zona IND - Hotel Aproape Hotel Abcd, <br> XYZ, XYZ, XYZ 123456";
 $_LANG['contactushotlinesale'] = "<b>Hotline:</b> +91 8360944358";
 $_LANG['contactusbusinesshoursale'] = "<b>Serviciu </b> Ore: 9:00 - 18:00 (Luni - Sat)";

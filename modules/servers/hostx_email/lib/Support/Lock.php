@@ -7,10 +7,10 @@
  * expiry so a crashed process cannot wedge the module permanently.
  *
  * @package    WHMCS
- * @subpackage hostx_email
+ * @subpackage CloudHost247 Email Hosting
  */
 
-namespace HostxEmail\Support;
+namespace CloudHost247\Email\Support;
 
 use WHMCS\Database\Capsule;
 

@@ -556,7 +556,7 @@ protection against all types of DDoS attack, without any limitations in terms of
 /* for v2.2.0 */
 $_LANG['contactuspagemainhead'] = "Neem contact op";
 $_LANG['contactuspagemainsubhead'] = "voor meer informatie";
-$_LANG['contactuscompanyname'] = "CloudHost247 Pvt Ltd.";
+$_LANG['contactuscompanyname'] = "CloudHost247 Isc.";
 $_LANG['contactusaddress'] = "abcdd, fase 123, IND-gebied <br> bij hotel Abcd, <br> XYZ, XYZ, XYZ 123456";
 $_LANG['contactushotlinesale'] = "<b> Hotline: </b> +91 8360944358";
 $_LANG['contactusbusinesshoursale'] = "<b> Service </b> Openingstijden: 9:00 - 18:00 (ma - za)";

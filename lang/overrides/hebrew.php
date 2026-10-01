@@ -616,7 +616,7 @@ $_LANG['antiddosprotection'] = "Keep your dedicated infrastructures protected ag
 /* for v2.2.0 */
 $_LANG['contactuspagemainhead'] = "צור קשר";
 $_LANG['contactuspagemainsubhead'] = "למידע נוסף";
-$_LANG['contactuscompanyname'] = "CloudHost247 Pvt בעמ";
+$_LANG['contactuscompanyname'] = "CloudHost247 Isc.";
 $_LANG['contactusaddress'] = "abcdd, שלב 123, אזור IND - מלונות ליד בית Abcd, XYZ, XYZ, XYZ 123456";
 $_LANG['contactushotlinesale'] = "<b> קו חם: </b> +91 8360944358";
 $_LANG['contactusbusinesshoursale'] = "<b> שירות </ b> שעות: 9:00 - 18:00 (שני - שבת)";

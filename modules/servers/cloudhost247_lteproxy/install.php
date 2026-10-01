@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * CloudHost247 Isc LTE Proxy Module - Installation Script
+ * CloudHost247 LTE Proxy Module - Installation Script
  *
  * Run this script to install the module properly.
  *
@@ -16,7 +16,7 @@ if (php_sapi_name() !== 'cli') {
 }
 
 echo "========================================\n";
-echo "CloudHost247 Isc LTE Proxy Module\n";
+echo "CloudHost247 LTE Proxy Module\n";
 echo "Installation Script v1.0.0\n";
 echo "========================================\n\n";
 
@@ -170,7 +170,7 @@ if ($syntaxErrors === 0) {
 echo "\n========================================\n";
 echo "Installation Summary\n";
 echo "========================================\n";
-echo "Module:        CloudHost247 Isc LTE Proxy Module\n";
+echo "Module:        CloudHost247 LTE Proxy Module\n";
 echo "Version:       1.0.0\n";
 echo "Location:      $modulePath\n";
 echo "PHP Version:   " . PHP_VERSION . "\n";

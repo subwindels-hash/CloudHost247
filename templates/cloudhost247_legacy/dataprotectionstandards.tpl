@@ -21,7 +21,7 @@
 
             {* Introductory Statement *}
             <div class="legal-intro">
-                <p>At CloudHost247 Isc, safeguarding the personal data of our customers, partners, and employees is a top priority. These Data Protection Standards outline the principles, measures, and responsibilities we follow to ensure compliance with applicable data protection laws, including the General Data Protection Regulation (GDPR), the California Consumer Privacy Act (CCPA), and other relevant regulations.</p>
+                <p>At CloudHost247 Isc., safeguarding the personal data of our customers, partners, and employees is a top priority. These Data Protection Standards outline the principles, measures, and responsibilities we follow to ensure compliance with applicable data protection laws, including the General Data Protection Regulation (GDPR), the California Consumer Privacy Act (CCPA), and other relevant regulations.</p>
             </div>
 
             {* Section 1: Purpose *}
@@ -65,7 +65,7 @@
 
             {* Section 5: Data Security Measures *}
             <h3>5. Data Security Measures</h3>
-            <p>To protect data, CloudHost247 Isc implements:</p>
+            <p>To protect data, CloudHost247 Isc. implements:</p>
             <ul class="legal-list">
                 <li>Encryption of data in transit (TLS/SSL) and at rest.</li>
                 <li>Access controls to limit data access to authorized personnel only.</li>

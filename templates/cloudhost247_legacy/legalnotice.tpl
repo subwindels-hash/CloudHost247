@@ -21,27 +21,27 @@
 
             {* Introductory Statement *}
             <div class="legal-intro">
-                <p>This Legal Notice governs your access to and use of the CloudHost247 Isc website and services. By accessing this website, you acknowledge and agree to the terms set forth herein. Please read this notice carefully before continuing to use our services.</p>
+                <p>This Legal Notice governs your access to and use of the CloudHost247 Isc. website and services. By accessing this website, you acknowledge and agree to the terms set forth herein. Please read this notice carefully before continuing to use our services.</p>
             </div>
 
             {* Section 1: Company Information *}
             <h3>1. Company Information</h3>
-            <p><strong>Registered Business Name:</strong> CloudHost247 Isc</p>
+            <p><strong>Registered Business Name:</strong> CloudHost247 Isc.</p>
             <p><strong>Legal Form:</strong> International Service Company (Isc)</p>
             <p><strong>Registered Address:</strong> [Company Registered Address]</p>
             <p><strong>Registration Number:</strong> [Business Registration Number]</p>
             <p><strong>VAT/Tax ID:</strong> [VAT or Tax Identification Number, if applicable]</p>
             <p><strong>Data Protection Officer (DPO):</strong> <a href="mailto:privacy@cloudhost247.com">privacy@cloudhost247.com</a></p>
-            <p>CloudHost247 Isc is a legally registered entity operating in accordance with applicable international business and data protection regulations. All formal legal correspondence should be directed to the registered address or official contact channels provided on this page.</p>
+            <p>CloudHost247 Isc. is a legally registered entity operating in accordance with applicable international business and data protection regulations. All formal legal correspondence should be directed to the registered address or official contact channels provided on this page.</p>
 
             {* Section 2: Website Ownership *}
             <h3>2. Website Ownership</h3>
-            <p>The domain <strong>www.cloudhost247.com</strong> and all associated subdomains are the exclusive property of CloudHost247 Isc. The website, including all content, design elements, code, graphics, and underlying infrastructure, is owned and operated by CloudHost247 Isc unless otherwise stated.</p>
+            <p>The domain <strong>www.cloudhost247.com</strong> and all associated subdomains are the exclusive property of CloudHost247 Isc. The website, including all content, design elements, code, graphics, and underlying infrastructure, is owned and operated by CloudHost247 Isc. unless otherwise stated.</p>
             <p>All rights not expressly granted herein are reserved. No part of this website may be reproduced, distributed, or transmitted in any form without prior written authorization from CloudHost247 Isc.</p>
 
             {* Section 3: Hosting Provider Details *}
             <h3>3. Hosting Provider Details</h3>
-            <p>CloudHost247 Isc operates its own hosting infrastructure and partners with select data center providers to ensure high availability, security, and performance for client services. Our primary hosting facilities are located in:</p>
+            <p>CloudHost247 Isc. operates its own hosting infrastructure and partners with select data center providers to ensure high availability, security, and performance for client services. Our primary hosting facilities are located in:</p>
             <ul class="legal-list">
                 <li>United States (Primary data center)</li>
                 <li>European Union (GDPR-compliant facility)</li>
@@ -51,14 +51,14 @@
 
             {* Section 4: Intellectual Property Rights *}
             <h3>4. Intellectual Property Rights</h3>
-            <p>All content published on this website, including but not limited to text, graphics, logos, icons, images, audio clips, digital downloads, data compilations, and software, is the property of CloudHost247 Isc or its content suppliers and is protected by international copyright and intellectual property laws.</p>
+            <p>All content published on this website, including but not limited to text, graphics, logos, icons, images, audio clips, digital downloads, data compilations, and software, is the property of CloudHost247 Isc. or its content suppliers and is protected by international copyright and intellectual property laws.</p>
             <p>The compilation of all content on this site is the exclusive property of CloudHost247 Isc. Unauthorized use of any materials on this website may violate copyright, trademark, and other laws and may result in civil or criminal penalties.</p>
-            <p>Trademarks, service marks, and logos displayed on this website are registered and unregistered trademarks of CloudHost247 Isc or third-party owners. Nothing contained on this website should be construed as granting any license or right to use any trademark without prior written permission.</p>
+            <p>Trademarks, service marks, and logos displayed on this website are registered and unregistered trademarks of CloudHost247 Isc. or third-party owners. Nothing contained on this website should be construed as granting any license or right to use any trademark without prior written permission.</p>
 
             {* Section 5: Liability Disclaimer *}
             <h3>5. Liability Disclaimer</h3>
-            <p>CloudHost247 Isc makes every reasonable effort to ensure the accuracy and completeness of information provided on this website. However, we do not warrant that the content is error-free, up-to-date, or suitable for any particular purpose.</p>
-            <p>To the fullest extent permitted by applicable law, CloudHost247 Isc shall not be liable for:</p>
+            <p>CloudHost247 Isc. makes every reasonable effort to ensure the accuracy and completeness of information provided on this website. However, we do not warrant that the content is error-free, up-to-date, or suitable for any particular purpose.</p>
+            <p>To the fullest extent permitted by applicable law, CloudHost247 Isc. shall not be liable for:</p>
             <ul class="legal-list">
                 <li>Any direct, indirect, incidental, consequential, or punitive damages arising from the use or inability to use this website or our services.</li>
                 <li>Loss of data, revenue, or profits resulting from technical failures, downtime, or service interruptions.</li>
@@ -70,7 +70,7 @@
             {* Section 6: External Links Disclaimer *}
             <h3>6. External Links Disclaimer</h3>
             <p>This website may contain links to third-party websites or resources that are not owned or controlled by CloudHost247 Isc. These links are provided solely for convenience and informational purposes.</p>
-            <p>CloudHost247 Isc has no control over and assumes no responsibility for:</p>
+            <p>CloudHost247 Isc. has no control over and assumes no responsibility for:</p>
             <ul class="legal-list">
                 <li>The content, accuracy, or opinions expressed on external websites.</li>
                 <li>The privacy practices or security standards of third-party sites.</li>
@@ -92,7 +92,7 @@
 
             {* Closing Statement *}
             <div class="legal-closing">
-                <p>By continuing to access and use this website, you acknowledge that you have read, understood, and agree to be bound by this Legal Notice. CloudHost247 Isc reserves the right to amend this notice at any time without prior notification. Changes take effect immediately upon posting to this page.</p>
+                <p>By continuing to access and use this website, you acknowledge that you have read, understood, and agree to be bound by this Legal Notice. CloudHost247 Isc. reserves the right to amend this notice at any time without prior notification. Changes take effect immediately upon posting to this page.</p>
             </div>
 
         </div>

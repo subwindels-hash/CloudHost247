@@ -45,9 +45,32 @@ class RebuildSecurityReview(unittest.TestCase):
   self.assertIn('min(100',repo);self.assertIn('SecretPolicy::redact',logger)
  def test_reconciliation_never_blindly_retries(self):
   s=(ROOT/'modules/addons/cloudhost247_ovh/lib/Operations/OperationsDashboard.php').read_text();self.assertIn('never repeat the mutation',s);self.assertNotIn("->post(",s)
+ def test_email_module_compatibility_identifiers_are_not_migrated_blindly(self):
+  sql=(ROOT/'scripts/migrate-legacy-names-to-cloudhost247.sql').read_text();register=(ROOT/'docs/BRANDING-COMPATIBILITY.md').read_text()
+  self.assertIn('modules/servers/hostx_email',sql);self.assertIn('mod_hostx_email_*',sql)
+  self.assertIn('intentionally unchanged',sql.lower());self.assertNotIn("UPDATE tblproducts SET servertype = 'cloudhost247_email'",sql)
+  self.assertIn('X-Hostx-*',register);self.assertIn('technical WHMCS type `hostx_email`',register)
+ def test_email_action_accepts_previous_form_field_during_rollout(self):
+  presenter=(ROOT/'modules/servers/hostx_email/lib/Service/ClientAreaPresenter.php').read_text();functions=(ROOT/'modules/servers/hostx_email/functions.php').read_text();template=(ROOT/'modules/servers/hostx_email/templates/overview.tpl').read_text()
+  self.assertIn("$post['ch247_email_action'] ?? $post['hostx_email_action'] ?? ''",presenter)
+  self.assertIn("$_POST['hostx_email_action']",functions)
+  self.assertIn('name="ch247_email_action"',template);self.assertNotIn('name="hostx_email_action"',template)
+ def test_company_name_sql_rebrand_is_limited_to_exact_configuration_values(self):
+  sql=(ROOT/'scripts/migrate-legacy-names-to-cloudhost247.sql').read_text()
+  section=sql.split('-- 6. Company legal name',1)[1].split('-- Verification.',1)[0]
+  self.assertIn("setting = 'CompanyName'",section);self.assertIn('LOWER(TRIM(value)) IN (',section)
+  self.assertIn("SET value = 'CloudHost247 Isc.'",section);self.assertIn("'cloudhost247 isc'",section);self.assertIn("'cloudhost247 pvt ltd.'",section)
+  self.assertNotIn('tblclients',section);self.assertNotIn('tblproducts',section)
+ def test_contact_language_company_names_use_the_official_legal_entity(self):
+  files=list((ROOT/'lang/overrides').glob('*.php'));matched=0
+  for p in files:
+   for line in p.read_text().splitlines():
+    if "['contactuscompanyname']" in line:
+     matched+=1;self.assertIn('CloudHost247 Isc.',line,str(p));self.assertNotRegex(line,r'(?i)\b(pvt|inc)\b',str(p))
+  self.assertEqual(matched,27)
  def test_release_candidate_check_is_complete(self):
   s=(ROOT/'scripts/release-candidate-check.sh').read_text()
-  for marker in ('php -l','tests/foundation/run.php','unittest','validate-migrations.py','sha256sum --check','git diff --check'):self.assertIn(marker,s)
+  for marker in ('php -l','tests/foundation/run.php','tests/cloudhost247_email/run.php','unittest','validate-migrations.py','rebrand-overrides.list','rebrand-overrides.sha256','sha256sum --check','core.whitespace=cr-at-eol diff --check'):self.assertIn(marker,s)
  def test_audit_filters_and_pagination_are_bounded(self):
   s=(ROOT/'modules/addons/cloudhost247_core/lib/Support/AuditRepository.php').read_text()
   for name in ('module','action','resource_type','resource','result','correlation_id','admin_id','from','to','q'):self.assertIn("'"+name+"'",s)

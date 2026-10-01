@@ -12,12 +12,12 @@
  * activation hook of its own.
  *
  * @package    WHMCS
- * @subpackage hostx_email
+ * @subpackage CloudHost247 Email Hosting
  */
 
-namespace HostxEmail\Database;
+namespace CloudHost247\Email\Database;
 
-use HostxEmail\Support\Logger;
+use CloudHost247\Email\Support\Logger;
 use WHMCS\Database\Capsule;
 
 final class Migrator
@@ -53,7 +53,7 @@ final class Migrator
                 && Capsule::schema()->hasTable('mod_hostx_email_migrations');
 
             if (!$installed || $force) {
-                self::runFile(HOSTX_EMAIL_ROOT . '/install/schema.sql');
+                self::runFile(CH247_EMAIL_ROOT . '/install/schema.sql');
                 self::runMigrations();
             }
 
@@ -61,7 +61,7 @@ final class Migrator
         } catch (\Throwable $e) {
             self::$ready = false;
 
-            error_log('[hostx_email] schema check failed: ' . $e->getMessage());
+            error_log('[CH247_EMAIL] schema check failed: ' . $e->getMessage());
         }
 
         return (bool) self::$ready;
@@ -75,7 +75,7 @@ final class Migrator
     public static function runMigrations(): array
     {
         $applied = [];
-        $directory = HOSTX_EMAIL_ROOT . '/install/migrations';
+        $directory = CH247_EMAIL_ROOT . '/install/migrations';
 
         if (!is_dir($directory)) {
             return $applied;
@@ -122,7 +122,7 @@ final class Migrator
                 Capsule::connection()->statement($statement);
             } catch (\Throwable $e) {
                 // Re-applying an already-present object is expected and safe.
-                error_log('[hostx_email] schema statement skipped: ' . $e->getMessage());
+                error_log('[CH247_EMAIL] schema statement skipped: ' . $e->getMessage());
             }
         }
     }

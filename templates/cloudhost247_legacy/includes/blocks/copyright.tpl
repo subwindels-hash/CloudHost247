@@ -4,6 +4,6 @@
 </div>
 {else}
 <div class="copyright" id="copyRightCloudHost247">
-    &copy; {$date_year} {$companyname}. {$LANG.footerprivacypolicy}&nbsp;&nbsp;&nbsp;<a href="{$WEB_ROOT}/aboutus.php">{$LANG.aboutPageTitle}</a>
+    &copy; {$date_year} CloudHost247 Isc. {$LANG.footerprivacypolicy}&nbsp;&nbsp;&nbsp;<a href="{$WEB_ROOT}/aboutus.php">{$LANG.aboutPageTitle}</a>
 </div> 
 {/if}

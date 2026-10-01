@@ -133,7 +133,7 @@
                 </p>
 
                 <h3>9. Registry Authority Clause</h3>
-                <p>CloudHost247 Isc and its registry partners reserve the right to:</p>
+                <p>CloudHost247 Isc. and its registry partners reserve the right to:</p>
                 <p>
                     - Correct registration errors<br>
                     - Suspend or transfer domains in disputes<br>
@@ -142,7 +142,7 @@
                 </p>
 
                 <h3>10. Acceptance</h3>
-                <p>By registering a domain through CloudHost247 Isc, the Registrant:</p>
+                <p>By registering a domain through CloudHost247 Isc., the Registrant:</p>
                 <p>
                     - Confirms acceptance of all applicable registry rules<br>
                     - Agrees to dispute resolution processes<br>

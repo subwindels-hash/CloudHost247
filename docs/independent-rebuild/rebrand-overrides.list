@@ -1,0 +1,30 @@
+# Explicit, branding-only edits to paths covered by the original integrity manifest,
+# plus the draft SVG sources and their raster logo derivatives.
+modules/addons/hostx/assets/css/style.css
+modules/addons/hostx/assets/js/enjoyhint/homePageHint.js
+modules/addons/hostx/assets/js/enjoyhint/manageSeotag.js
+modules/addons/hostx/assets/js/enjoyhint/settingsPageHint.js
+templates/cloudhost247_legacy/backuppolicy.tpl
+templates/cloudhost247_legacy/cookiepolicy.tpl
+templates/cloudhost247_legacy/cybercrimepolicy.tpl
+templates/cloudhost247_legacy/dataprotectionstandards.tpl
+templates/cloudhost247_legacy/domainregistrationaddendum.tpl
+templates/cloudhost247_legacy/domainrenewalpolicy.tpl
+templates/cloudhost247_legacy/fairusagepolicy.tpl
+templates/cloudhost247_legacy/faqs.tpl
+templates/cloudhost247_legacy/helpcenter.tpl
+templates/cloudhost247_legacy/images/banner-logo.png
+templates/cloudhost247_legacy/images/cloudhost247-banner-wordmark.svg
+templates/cloudhost247_legacy/images/cloudhost247-wordmark-white.svg
+templates/cloudhost247_legacy/images/cloudhost247-wordmark.svg
+templates/cloudhost247_legacy/images/favicon.ico
+templates/cloudhost247_legacy/images/for-logo.png
+templates/cloudhost247_legacy/images/host-logo.png
+templates/cloudhost247_legacy/images/logo-register-page.png
+templates/cloudhost247_legacy/images/logo-white.png
+templates/cloudhost247_legacy/images/logo.png
+templates/cloudhost247_legacy/includes/blocks/copyright.tpl
+templates/cloudhost247_legacy/legalnotice.tpl
+templates/cloudhost247_legacy/privacypolicy.tpl
+templates/cloudhost247_legacy/refundpolicy.tpl
+templates/cloudhost247_legacy/trademarkpolicy.tpl

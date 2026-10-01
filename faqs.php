@@ -1,10 +1,10 @@
 <?php
 /**
- * CloudHost247 Isc - Frequently Asked Questions (FAQs)
+ * CloudHost247 - Frequently Asked Questions (FAQs)
  *
  * @package    WHMCS
- * @author     CloudHost247 Isc
- * @copyright  Copyright (c) CloudHost247 Isc
+ * @author     CloudHost247
+ * @copyright  Copyright (c) CloudHost247 Isc.
  * @license    https://www.cloudhost247.com/license
  */
 
@@ -29,8 +29,8 @@ $ca->initPage();
 $ca->assign('faqItems', [
     [
         'id' => 'faq-1',
-        'question' => 'What is CloudHost247 Isc?',
-        'answer' => 'CloudHost247 Isc is a professional web hosting and cloud solutions provider offering secure, reliable, and high-performance hosting, domain registration, and managed IT services for individuals, businesses, and organizations worldwide.'
+        'question' => 'What is CloudHost247?',
+        'answer' => 'CloudHost247 is a professional web hosting and cloud solutions provider offering secure, reliable, and high-performance hosting, domain registration, and managed IT services for individuals, businesses, and organizations worldwide.'
     ],
     [
         'id' => 'faq-2',
@@ -74,7 +74,7 @@ $ca->assign('faqItems', [
     ],
     [
         'id' => 'faq-10',
-        'question' => 'How do I transfer my website to CloudHost247 Isc?',
+        'question' => 'How do I transfer my website to CloudHost247?',
         'answer' => 'We offer free migration assistance for most hosting plans. Simply contact our support team with your current hosting details, and we\'ll handle the transfer for you.'
     ],
     [

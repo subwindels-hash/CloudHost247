@@ -554,7 +554,7 @@ $_LANG['antiddosprotection'] = "Keep your dedicated infrastructures protected ag
 /* for v2.2.0 */
 $_LANG['contactuspagemainhead'] = "ہم سے رابطہ کریں";
 $_LANG['contactuspagemainsubhead'] = "مزید معلومات کے لیے";
-$_LANG['contactuscompanyname'] = "میزبان پرائیوٹ لمیٹڈ";
+$_LANG['contactuscompanyname'] = "CloudHost247 Isc.";
 $_LANG['contactusaddress'] = "ای بی سی ڈی ڈی ، فیز 123 ، آئی این ڈی ایریا - ہوٹل ای بی سی ڈی کے قریب ، <br> ایکس وائیڈ ، XYZ ، XYZ 123456";
 $_LANG['contactushotlinesale'] = "<b> ہاٹ لائن: </ b> +91 8360944358";
 $_LANG['contactusbusinesshoursale'] = "<b> خدمت </ b> اوقات: 9:00 - 18:00 (سومر - ہفتہ)";

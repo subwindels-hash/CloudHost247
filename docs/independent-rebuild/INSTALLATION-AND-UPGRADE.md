@@ -175,15 +175,15 @@ Reference: [MODULE-MANAGER.md](MODULE-MANAGER.md) (pipeline, `module.json` speci
 
 **BLOCKED — STAGING REQUIRED:** migration execution on MySQL/MariaDB, WHMCS activation, administrator role-capability behaviour, filesystem ownership/permissions on the target host, and an end-to-end install of a real third-party package.
 
-## hostx_email (email hosting) install sequence
+## CloudHost247 Email Hosting install sequence
 
 1. Deploy `modules/servers/hostx_email/`, `email-hosting.php`, `templates/cloudhost247/cloudhost247-email-hosting.tpl` and `templates/cloudhost247/css/email-hosting.css`.
 2. Create the schema: `php modules/servers/hostx_email/cron.php migrate` (also created automatically on first use). It creates only `mod_hostx_email_*` tables.
-3. Add one WHMCS **server** per provider tenant, type *CloudHost247 Email Hosting (hostx_email)*. Credentials go in the WHMCS-encrypted Hostname/Username/Password/Access-hash fields — see the mapping table in `modules/servers/hostx_email/README.md` section 3. Use **Test connection** before going further.
+3. Add one WHMCS **server** per provider tenant, type *CloudHost247 Email Hosting* (technical WHMCS type: `hostx_email`). Credentials go in the WHMCS-encrypted Hostname/Username/Password/Access-hash fields — see the mapping table in `modules/servers/hostx_email/README.md` section 3. Use **Test connection** before going further.
 4. Grant the provider permissions listed in README section 4 (Microsoft application permissions with admin consent; Google domain-wide delegation authorised by the customer's super administrator; a genuine Professional Email provisioning API — IMAP/SMTP cannot provision mailboxes).
-5. Create or edit WHMCS products with module `hostx_email` and set the eight module options. The module never creates products or changes pricing.
+5. Create or edit WHMCS products with WHMCS module ID `hostx_email` and set the eight module options. The module never creates products or changes pricing.
 6. Publish `email-hosting.php` in the site navigation.
 7. Optional faster synchronisation: `0,15,30,45 * * * * php /path/to/whmcs/modules/servers/hostx_email/cron.php sync`. The WHMCS cron already performs a bounded pass.
-8. Verify with `php modules/servers/hostx_email/cron.php status` and by running `php tests/hostx_email/run.php` (mock diagnostics).
+8. Verify with `php modules/servers/hostx_email/cron.php status` and by running `php tests/cloudhost247_email/run.php` (mock diagnostics).
 
 Rollback: deactivate the products and remove the server profile; the `mod_hostx_email_*` tables are additive and can be left in place. No WHMCS core table is altered.

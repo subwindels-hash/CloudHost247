@@ -8,10 +8,10 @@
  * credentials in places a key-only filter would miss.
  *
  * @package    WHMCS
- * @subpackage hostx_email
+ * @subpackage CloudHost247 Email Hosting
  */
 
-namespace HostxEmail\Support;
+namespace CloudHost247\Email\Support;
 
 final class Redactor
 {

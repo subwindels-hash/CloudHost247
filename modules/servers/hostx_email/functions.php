@@ -1,13 +1,13 @@
 <?php
 /**
- * hostx_email - shared procedural helpers for the WHMCS entry points.
+ * CloudHost247 Email Hosting - shared procedural helpers for the WHMCS entry points.
  *
- * Keeps hostx_email.php declarative: each WHMCS function is one line, and the
+ * Keeps the WHMCS entry point declarative: each WHMCS function is one line, and the
  * cross-cutting concerns (schema readiness, exception safety, WHMCS result
  * shaping, admin tab rendering) live here.
  *
  * @package    WHMCS
- * @subpackage hostx_email
+ * @subpackage CloudHost247 Email Hosting
  */
 
 if (!defined('WHMCS')) {
@@ -16,16 +16,16 @@ if (!defined('WHMCS')) {
 
 require_once __DIR__ . '/bootstrap.php';
 
-use HostxEmail\Database\Migrator;
-use HostxEmail\Providers\ProviderFactory;
-use HostxEmail\Repository\AccountRepository;
-use HostxEmail\Repository\OperationRepository;
-use HostxEmail\Service\ClientAreaPresenter;
-use HostxEmail\Service\DnsService;
-use HostxEmail\Support\Config;
-use HostxEmail\Support\Logger;
-use HostxEmail\Support\Result;
-use HostxEmail\Service\Provisioner;
+use CloudHost247\Email\Database\Migrator;
+use CloudHost247\Email\Providers\ProviderFactory;
+use CloudHost247\Email\Repository\AccountRepository;
+use CloudHost247\Email\Repository\OperationRepository;
+use CloudHost247\Email\Service\ClientAreaPresenter;
+use CloudHost247\Email\Service\DnsService;
+use CloudHost247\Email\Support\Config;
+use CloudHost247\Email\Support\Logger;
+use CloudHost247\Email\Support\Result;
+use CloudHost247\Email\Service\Provisioner;
 
 /**
  * Run a provisioning action with the standard safety net.
@@ -147,7 +147,8 @@ function hostx_email_client_area(array $params)
         $presenter = new ClientAreaPresenter($config);
         $notice = null;
 
-        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && !empty($_POST['hostx_email_action'])) {
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST'
+            && (!empty($_POST['ch247_email_action']) || !empty($_POST['hostx_email_action']))) {
             $notice = $presenter->handlePost($_POST);
         }
 
@@ -243,5 +244,5 @@ function hostx_email_admin_tab_fields(array $params)
  */
 function hostx_email_generate_password(int $length = 18): string
 {
-    return \HostxEmail\Support\Validator::generatePassword($length);
+    return \CloudHost247\Email\Support\Validator::generatePassword($length);
 }

@@ -8,7 +8,7 @@
 {* ───────────────────────────────────────────────────────────────────── *}
 
 {assign var="announcements" value=[
-    ['text'=>'Welcome to CloudHost247 Isc — Your trusted hosting partner since 2010'],
+    ['text'=>'Welcome to CloudHost247 — Your trusted hosting partner since 2010'],
     ['text'=>'Free migration assistance with every plan'],
     ['text'=>'99.9% Uptime SLA guaranteed']
 ]}

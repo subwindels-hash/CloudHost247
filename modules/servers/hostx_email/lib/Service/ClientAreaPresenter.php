@@ -11,19 +11,19 @@
  *     account JSON, no raw provider responses, no stack traces.
  *
  * @package    WHMCS
- * @subpackage hostx_email
+ * @subpackage CloudHost247 Email Hosting
  */
 
-namespace HostxEmail\Service;
+namespace CloudHost247\Email\Service;
 
-use HostxEmail\Dns\RecordSet;
-use HostxEmail\Providers\ProviderFactory;
-use HostxEmail\Providers\ProviderInterface;
-use HostxEmail\Repository\AccountRepository;
-use HostxEmail\Support\Config;
-use HostxEmail\Support\Logger;
-use HostxEmail\Support\Result;
-use HostxEmail\Support\Validator;
+use CloudHost247\Email\Dns\RecordSet;
+use CloudHost247\Email\Providers\ProviderFactory;
+use CloudHost247\Email\Providers\ProviderInterface;
+use CloudHost247\Email\Repository\AccountRepository;
+use CloudHost247\Email\Support\Config;
+use CloudHost247\Email\Support\Logger;
+use CloudHost247\Email\Support\Result;
+use CloudHost247\Email\Support\Validator;
 
 final class ClientAreaPresenter
 {
@@ -104,7 +104,7 @@ final class ClientAreaPresenter
             'canRefreshStatus' => !empty($capabilities['status']),
             'passwordPolicy'   => 'At least 12 characters, combining three of: lower case, upper case, digits, symbols.',
             'token'            => $this->csrfToken(),
-            'moduleVersion'    => HOSTX_EMAIL_VERSION,
+            'moduleVersion'    => CH247_EMAIL_VERSION,
         ];
     }
 
@@ -116,7 +116,9 @@ final class ClientAreaPresenter
      */
     public function handlePost(array $post): ?array
     {
-        $action = Validator::oneOf($post['hostx_email_action'] ?? '', ['change_password', 'refresh_dns', 'refresh_status'], '');
+        // Accept the former hidden field name for cached forms during the rebrand rollout.
+        $submittedAction = $post['ch247_email_action'] ?? $post['hostx_email_action'] ?? '';
+        $action = Validator::oneOf($submittedAction, ['change_password', 'refresh_dns', 'refresh_status'], '');
 
         if ($action === '') {
             return null;

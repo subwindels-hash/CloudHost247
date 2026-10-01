@@ -11,12 +11,12 @@
  * Content is plain text; every value is escaped at render time.
  *
  * @package    WHMCS
- * @subpackage hostx_email
+ * @subpackage CloudHost247 Email Hosting
  */
 
-namespace HostxEmail\Repository;
+namespace CloudHost247\Email\Repository;
 
-use HostxEmail\Support\Logger;
+use CloudHost247\Email\Support\Logger;
 use WHMCS\Database\Capsule;
 
 final class ContentRepository

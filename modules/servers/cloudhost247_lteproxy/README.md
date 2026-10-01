@@ -1,4 +1,4 @@
-# CloudHost247 Isc LTE Proxy Reseller Module
+# CloudHost247 LTE Proxy Reseller Module
 
 A comprehensive, production-ready WHMCS provisioning module that integrates with the CloudHost247 LTE Proxy API. Provides full proxy reselling capabilities with modern UI, real-time management, and complete automation.
 
@@ -433,7 +433,7 @@ cloudhost247_lteproxy/
 ## Support
 
 For support and assistance:
-- **Company**: CloudHost247 Isc
+- **Company**: CloudHost247 Isc.
 - **Module Version**: 1.0.0
 - **License**: Proprietary
 

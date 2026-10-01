@@ -7,12 +7,12 @@
  * same WHMCS service.
  *
  * @package    WHMCS
- * @subpackage hostx_email
+ * @subpackage CloudHost247 Email Hosting
  */
 
-namespace HostxEmail\Repository;
+namespace CloudHost247\Email\Repository;
 
-use HostxEmail\Support\Logger;
+use CloudHost247\Email\Support\Logger;
 use WHMCS\Database\Capsule;
 
 final class AccountRepository
@@ -144,7 +144,7 @@ final class AccountRepository
         }
 
         $merged = array_merge($current, $metadata);
-        $encoded = json_encode(\HostxEmail\Support\Redactor::redact($merged));
+        $encoded = json_encode(\CloudHost247\Email\Support\Redactor::redact($merged));
 
         self::update($serviceId, ['metadata_json' => substr($encoded === false ? '{}' : $encoded, 0, 60000)]);
     }

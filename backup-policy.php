@@ -4,7 +4,7 @@
  *
  * @package    WHMCS
  * @author     CloudHost247
- * @copyright  Copyright (c) CloudHost247, All Rights Reserved
+ * @copyright  Copyright (c) CloudHost247 Isc., All Rights Reserved
  * @link       https://www.cloudhost247.com
  */
 
@@ -35,15 +35,15 @@ $backupSections = [
         'subtitle' => 'Last Updated: April 26, 2026',
     ],
     'introduction' => [
-        'content' => 'This Backup Policy outlines the backup practices and responsibilities for services provided by CloudHost247 Inc. Our goal is to safeguard customer data through systematic backup procedures while clearly defining the boundaries of provider responsibility and user obligations. Please review this policy carefully to understand how your data is protected and what steps you should take to maintain your own independent copies.'
+        'content' => 'This Backup Policy outlines the backup practices and responsibilities for services provided by CloudHost247 Isc. Our goal is to safeguard customer data through systematic backup procedures while clearly defining the boundaries of provider responsibility and user obligations. Please review this policy carefully to understand how your data is protected and what steps you should take to maintain your own independent copies.'
     ],
     'sections' => [
         [
             'id' => 'responsibility',
             'title' => '1. Backup Responsibility',
-            'content' => 'Backup responsibility is shared between CloudHost247 Inc. and our customers:',
+            'content' => 'Backup responsibility is shared between CloudHost247 Isc. and our customers:',
             'items' => [
-                '<strong>Provider Responsibility:</strong> CloudHost247 Inc. performs automated backups of hosting server environments as a courtesy and disaster-recovery measure. These backups are intended to restore service continuity in the event of hardware failure, system-level corruption, or catastrophic infrastructure events.',
+                '<strong>Provider Responsibility:</strong> CloudHost247 Isc. performs automated backups of hosting server environments as a courtesy and disaster-recovery measure. These backups are intended to restore service continuity in the event of hardware failure, system-level corruption, or catastrophic infrastructure events.',
                 '<strong>User Responsibility:</strong> Customers are ultimately responsible for maintaining their own independent backups of all website files, databases, emails, and application data hosted on our infrastructure. Our automated backups should not be relied upon as your sole or primary data protection strategy.',
                 '<strong>Scope:</strong> Provider-managed backups cover server-level restore points and do not extend to individual file recovery, email restoration for deleted mailboxes, or granular database table recovery unless explicitly stated in your service plan.',
             ]
@@ -86,7 +86,7 @@ $backupSections = [
         [
             'id' => 'limitations',
             'title' => '5. Limitations & Liability',
-            'content' => 'CloudHost247 Inc. provides backups on a best-effort basis. The following limitations apply:',
+            'content' => 'CloudHost247 Isc. provides backups on a best-effort basis. The following limitations apply:',
             'items' => [
                 'Our backup systems are designed for disaster recovery, not as a substitute for customer-owned data protection strategies.',
                 'We are not liable for any data loss, business interruption, revenue loss, or consequential damages arising from backup failure, incomplete backups, delayed restoration, or backup unavailability.',
@@ -110,7 +110,7 @@ $backupSections = [
         [
             'id' => 'updates',
             'title' => '7. Policy Updates',
-            'content' => 'CloudHost247 Inc. reserves the right to update or modify this Backup Policy at any time. Changes may include adjustments to backup frequency, retention periods, restoration procedures, or scope of coverage. Updates will be posted on this page with a revised effective date. Continued use of our services after policy changes constitutes acceptance of the updated terms. We encourage customers to review this policy periodically.'
+            'content' => 'CloudHost247 Isc. reserves the right to update or modify this Backup Policy at any time. Changes may include adjustments to backup frequency, retention periods, restoration procedures, or scope of coverage. Updates will be posted on this page with a revised effective date. Continued use of our services after policy changes constitutes acceptance of the updated terms. We encourage customers to review this policy periodically.'
         ],
     ],
     'contact' => [

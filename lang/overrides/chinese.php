@@ -556,7 +556,7 @@ $_LANG['antiddosprotection'] = "Keep your dedicated infrastructures protected ag
 
 $_LANG['contactuspagemainhead'] = "联系我们";
 $_LANG['contactuspagemainsubhead'] = "想要查询更多的信息";
-$_LANG['contactuscompanyname'] = "CloudHost247 Pvt Ltd.";
+$_LANG['contactuscompanyname'] = "CloudHost247 Isc.";
 $_LANG['contactusaddress'] = "abcdd，第123阶段，IND区<br>在酒店Abcd附近，<br> XYZ，XYZ，XYZ 123456";
 $_LANG['contactushotlinesale'] = "<b>咨询热线：</ b> +91 8360944358";
 $_LANG['contactusbusinesshoursale'] = "<b>服务</ b>时间：9:00 – 18:00（周一至周六）";

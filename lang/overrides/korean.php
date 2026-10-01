@@ -570,7 +570,7 @@ $_LANG['antiddosprotection'] = "Keep your dedicated infrastructures protected ag
 /* for v2.2.0 */
 $_LANG['contactuspagemainhead'] = "문의하기";
 $_LANG['contactuspagemainsubhead'] = "자세한 내용은";
-$_LANG['contactuscompanyname'] = "CloudHost247 Pvt Ltd.";
+$_LANG['contactuscompanyname'] = "CloudHost247 Isc.";
 $_LANG['contactusaddress'] = "abcdd, Phase 123, IND Area <br> 호텔 Abcd 근처, <br> XYZ, XYZ, XYZ 123456";
 $_LANG['contactushotlinesale'] = "<b> 핫라인 : </ b> +91 8360944358";
 $_LANG['contactusbusinesshoursale'] = "<b> 서비스 </ b> 시간 : 9:00 – 18:00 (월 – 토요일)";

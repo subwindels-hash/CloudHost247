@@ -554,7 +554,7 @@ $_LANG['antiddosprotection'] = "Keep your dedicated infrastructures protected ag
 /* for v2.2.0 */
 $_LANG['contactuspagemainhead'] = "Kontaktiere uns";
 $_LANG['contactuspagemainsubhead'] = "für mehr Informationen";
-$_LANG['contactuscompanyname'] = "CloudHost247 Pvt Ltd.";
+$_LANG['contactuscompanyname'] = "CloudHost247 Isc.";
 $_LANG['contactusaddress'] = "abcdd, Phase 123, IND Bereich <br> In der Nähe des Hotels Abcd, <br> XYZ, XYZ, XYZ 123456";
 $_LANG['contactushotlinesale'] = "<b> Hotline: </ b> +91 8360944358";
 $_LANG['contactusbusinesshoursale'] = "<b> Service </ b> Öffnungszeiten: 9:00 - 18:00 Uhr (Mo - Sa)";

@@ -20,13 +20,13 @@
  * Refusing is always safe: the cron reconciler keeps state fresh regardless.
  *
  * @package    WHMCS
- * @subpackage hostx_email
+ * @subpackage CloudHost247 Email Hosting
  */
 
-namespace HostxEmail\Webhook;
+namespace CloudHost247\Email\Webhook;
 
-use HostxEmail\Support\Logger;
-use HostxEmail\Support\Result;
+use CloudHost247\Email\Support\Logger;
+use CloudHost247\Email\Support\Result;
 use WHMCS\Database\Capsule;
 
 final class Verifier

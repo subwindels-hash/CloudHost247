@@ -1,5 +1,5 @@
 {*
- * CloudHost247 Isc - Frequently Asked Questions (FAQs) Template
+ * CloudHost247 - Frequently Asked Questions (FAQs) Template
  * Matches CloudHost247 theme styling with accordion functionality
  *}
 
@@ -29,7 +29,7 @@
         <div class="row justify-content-center">
             <div class="col-lg-10 col-xl-8">
                 <div class="faq-intro">
-                    <p class="text-muted text-center mb-5">Welcome to the CloudHost247 Isc FAQ section. We've compiled answers to help you get the most out of our services. Can't find what you're looking for? <a href="contact.php">Contact our support team</a>.</p>
+                    <p class="text-muted text-center mb-5">Welcome to the CloudHost247 FAQ section. We've compiled answers to help you get the most out of our services. Can't find what you're looking for? <a href="contact.php">Contact our support team</a>.</p>
                 </div>
 
                 <div class="faq-accordion" id="faqAccordion">

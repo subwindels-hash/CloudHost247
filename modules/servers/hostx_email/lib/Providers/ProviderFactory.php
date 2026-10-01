@@ -6,13 +6,13 @@
  * "default provider" that could silently provision on the wrong platform.
  *
  * @package    WHMCS
- * @subpackage hostx_email
+ * @subpackage CloudHost247 Email Hosting
  */
 
-namespace HostxEmail\Providers;
+namespace CloudHost247\Email\Providers;
 
-use HostxEmail\Support\Config;
-use HostxEmail\Support\HttpClient;
+use CloudHost247\Email\Support\Config;
+use CloudHost247\Email\Support\HttpClient;
 
 final class ProviderFactory
 {

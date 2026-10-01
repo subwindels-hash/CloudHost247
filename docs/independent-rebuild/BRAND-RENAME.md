@@ -1,3 +1,5 @@
+> Historical migration record. Legacy terms below quote immutable WHMCS identifiers, encoded-addon paths, and database names; they are not current customer-facing branding. See `docs/BRANDING-COMPATIBILITY.md` for the current exception register.
+
 # The CloudHost247 rebrand — completion record
 
 Two rename passes have now run. The first (2026-09-27) rebranded the
@@ -6,10 +8,12 @@ The second (2026-09-28, this document) completed the rebrand across the
 legacy theme, the order form, the page templates, the language packs, the
 root pages, the tests and the documentation.
 
-The brand is **CloudHost247** everywhere we own the name. The legacy vendor
-theme directories carry the suffix `_legacy` because the independent
-CloudHost247 theme already occupies `templates/cloudhost247` and
-`templates/orderforms/cloudhost247`; both themes are kept side by side.
+The customer-facing brand is **CloudHost247**. A small set of exact WHMCS
+module, database, and encoded-addon identifiers remains only for compatibility;
+see `docs/BRANDING-COMPATIBILITY.md`. The legacy theme directories carry the
+suffix `_legacy` because the independent CloudHost247 theme already occupies
+`templates/cloudhost247` and `templates/orderforms/cloudhost247`; both themes
+are kept side by side.
 
 ## What was renamed in this pass
 
@@ -45,12 +49,14 @@ CloudHost247 theme already occupies `templates/cloudhost247` and
 
 ## What was rebranded inside the files
 
-* **Legacy theme templates, CSS and JS (1,700+ files):** every CSS class
-  prefix (`hostx-*` → `cloudhost247-*`), every partial include path, the
-  cookie-library asset names, the `rtl` flag variable (`rtlHostx` →
-  `rtlCloudHost247`), the Smarty-facing sidebar flag
-  (`sidebarHostxRemove` → `sidebarCloudHost247Remove`) and the fallback
-  coupon code (`HOSTX40` → `CLOUDHOST247-40`).
+* **Legacy theme templates, CSS and JS (1,700+ files):** editable CSS class
+  prefixes (`hostx-*` → `cloudhost247-*`), partial include paths, and
+  cookie-library asset names were rebranded. The `rtl` flag variable
+  (`rtlHostx` → `rtlCloudHost247`), Smarty-facing sidebar flag
+  (`sidebarHostxRemove` → `sidebarCloudHost247Remove`) and fallback coupon
+  code (`HOSTX40` → `CLOUDHOST247-40`) were updated; the runtime-bound
+  `inner-box-tool-tip-hostx` selector remains documented in
+  `docs/BRANDING-COMPATIBILITY.md`.
 * **Root marketing pages (28 files):** `setTemplate('hostx')` →
   `setTemplate('cloudhost247_legacy')`, template-name comparisons in the
   SoYouStart/OVH client templates, the per-page helper function names
@@ -58,7 +64,7 @@ CloudHost247 theme already occupies `templates/cloudhost247` and
 * **Language packs (27 files):** the keys `homehostxwebhost` /
   `homehostxwebhosttext` became `homecloudhost247webhost` /
   `homecloudhost247webhosttext` on both sides (lang files and templates),
-  and the company strings now read `CloudHost247 Pvt Ltd.`
+  and the company name was synchronized across all 27 language overrides (the legal suffix has since been standardized as `CloudHost247 Isc.`).
 * **Order form:** the internal `orderforms/hostx/...` include paths and the
   ovh_cart stylesheet link now address `cloudhost247_legacy`.
 * **Tests and docs:** the two static tests that pin the protected theme
@@ -103,9 +109,9 @@ records store the image filename in the database (written by the encoded
 banner manager), so renaming the files would break live banners.
 
 **The migration SQL's `FROM` names.** `scripts/migrate-legacy-names-to-cloudhost247.sql`
-must reference the old identifiers to rename them; those occurrences are
-the only sanctioned `hostx` strings outside the encoded addon and the
-retained names above.
+must reference the old identifiers to rename them. It also checks exact
+legacy company-name values. The Email Hosting module type and table names are
+retained as compatibility identifiers and are not rewritten by this script.
 
 Removing any of these requires replacing the encoded helper outright —
 which is exactly what the independent rebuild
@@ -119,9 +125,11 @@ migration together, inside one maintenance window, after a full backup:
 
     mysql -u USER -p DATABASE < scripts/migrate-legacy-names-to-cloudhost247.sql
 
-It renames the eight owned module tables, repoints the addon/product/server
-registrations, and — new in this pass — repoints the legacy theme and order
-form values:
+It renames the five owned `hostx_tools` data tables, repoints the renamed
+addon registrations, and updates the legacy theme, order-form, and exact
+legacy company-name values. It deliberately does **not** change the Email
+Hosting server type or `mod_hostx_email_*` tables because the current module
+continues to use them for WHMCS compatibility:
 
 | Setting | Old | New |
 | --- | --- | --- |
@@ -129,15 +137,17 @@ form values:
 | `tblconfiguration.OrderFormTemplate` | `hostx` | `cloudhost247_legacy` |
 | `tblproductgroups.orderfrmtpl` | `hostx` | `cloudhost247_legacy` |
 | `mod_hostx_setting` row `template_name_custom` | `hostx` | `cloudhost247_legacy` |
+| `tblconfiguration.CompanyName` (exact known legacy values only) | `HostX`, the no-period `CloudHost247 Isc` spelling, `CloudHost247 Inc.`, and `CloudHost247 Pvt Ltd.` variants | `CloudHost247 Isc.` |
 
 Every statement is guarded and the script is safe to re-run. The
 verification block at the end must report all MUST-BE-ZERO counts as 0; the
-final count lists the four tables that intentionally keep their names.
+informational counts list page-builder tables and Email Hosting bindings
+that intentionally keep their technical names.
 
-Skipping it has specific consequences: the addons disappear from the admin
-menu, every email product loses its provisioning module, and the client
-area requests `templates/hostx` — a directory that no longer exists — so
-every page falls back to a broken template.
+Skipping it leaves the renamed addon registrations and legacy theme
+settings on their old values, so the addon menu or client-area theme may not
+resolve. Email Hosting products remain functional because their module type
+and tables are intentionally unchanged by this migration.
 
 ## Licensing note
 

@@ -9,12 +9,12 @@
  * Every method returns a Result envelope (see Support\Result).
  *
  * @package    WHMCS
- * @subpackage hostx_email
+ * @subpackage CloudHost247 Email Hosting
  */
 
-namespace HostxEmail\Providers;
+namespace CloudHost247\Email\Providers;
 
-use HostxEmail\Dns\RecordSet;
+use CloudHost247\Email\Dns\RecordSet;
 
 interface ProviderInterface
 {

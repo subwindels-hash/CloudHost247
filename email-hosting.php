@@ -3,18 +3,18 @@
  * CloudHost247 - public email hosting page.
  *
  * A real WHMCS client-area page: every plan, price and availability flag comes
- * from live WHMCS product records belonging to the hostx_email provisioning
- * module, in the visitor's active currency, and every "Get started" button
+ * from live WHMCS product records belonging to the CloudHost247 Email Hosting
+ * provisioning module, in the visitor's active currency, and every "Get started" button
  * links into the normal WHMCS configure/checkout flow.
  *
  * No provider API is called while this page renders.
  *
  * @package    WHMCS
- * @subpackage hostx_email
+ * @subpackage CloudHost247 Email Hosting
  */
 
-use HostxEmail\Repository\ContentRepository;
-use HostxEmail\Service\PublicCatalog;
+use CloudHost247\Email\Repository\ContentRepository;
+use CloudHost247\Email\Service\PublicCatalog;
 use WHMCS\ClientArea;
 
 define('CLIENTAREA', true);
@@ -23,7 +23,7 @@ require __DIR__ . '/init.php';
 require_once __DIR__ . '/modules/servers/hostx_email/bootstrap.php';
 
 $ca = new ClientArea();
-$ca->setPageTitle('Email Hosting');
+$ca->setPageTitle('CloudHost247 Email Hosting');
 $ca->addToBreadCrumb('index.php', Lang::trans('globalsystemname'));
 $ca->addToBreadCrumb('email-hosting.php', 'Email Hosting');
 $ca->initPage();
@@ -63,12 +63,12 @@ try {
     }
 } catch (\Throwable $e) {
     // Never leak an exception to a public page.
-    $reference = \HostxEmail\Support\Logger::correlationId();
+    $reference = \CloudHost247\Email\Support\Logger::correlationId();
 
     try {
-        \HostxEmail\Support\Logger::error('public_page.catalog_failed', ['error' => $e->getMessage()]);
+        \CloudHost247\Email\Support\Logger::error('public_page.catalog_failed', ['error' => $e->getMessage()]);
     } catch (\Throwable $logFailure) {
-        error_log('[hostx_email] public page catalog failure: ' . $e->getMessage());
+        error_log('[CloudHost247 Email Hosting] public page catalog failure: ' . $e->getMessage());
     }
 
     $catalogError = 'Plan information is temporarily unavailable. Reference: ' . $reference;

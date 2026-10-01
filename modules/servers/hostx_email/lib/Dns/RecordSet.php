@@ -8,12 +8,12 @@
  * available the record set is empty and the UI says so.
  *
  * @package    WHMCS
- * @subpackage hostx_email
+ * @subpackage CloudHost247 Email Hosting
  */
 
-namespace HostxEmail\Dns;
+namespace CloudHost247\Email\Dns;
 
-use HostxEmail\Support\Validator;
+use CloudHost247\Email\Support\Validator;
 
 final class RecordSet
 {

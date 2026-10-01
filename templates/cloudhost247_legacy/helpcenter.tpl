@@ -41,7 +41,7 @@
 
             {* Introductory Statement *}
             <div class="legal-intro">
-                <p>Welcome to the CloudHost247 Isc Help Center — your one-stop destination for support, troubleshooting, and guidance on all our services. Whether you're a new customer or an experienced user, you'll find the resources you need to get the most out of our hosting and cloud solutions.</p>
+                <p>Welcome to the CloudHost247 Help Center — your one-stop destination for support, troubleshooting, and guidance on all our services. Whether you're a new customer or an experienced user, you'll find the resources you need to get the most out of our hosting and cloud solutions.</p>
             </div>
 
             {* Section 1: Getting Started *}

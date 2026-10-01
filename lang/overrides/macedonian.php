@@ -555,7 +555,7 @@ $_LANG['antiddosprotection'] = "Keep your dedicated infrastructures protected ag
 /* for v2.2.0 */
 $_LANG['contactuspagemainhead'] = "Контактирајте не";
 $_LANG['contactuspagemainsubhead'] = "за повеќе информации";
-$_LANG['contactuscompanyname'] = "CloudHost247 Pvt Ltd.";
+$_LANG['contactuscompanyname'] = "CloudHost247 Isc.";
 $_LANG['contactusaddress'] = "abcdd, Фаза 123, Површина ИНД - Во близина на хотелот Абсд, <br> XYZ, XYZ, XYZ 123456";
 $_LANG['contactushotlinesale'] = "<b> телефонска линија: </b> +91 8360944358";
 $_LANG['contactusbusinesshoursale'] = "<b> Услуга </b> Часови: 9:00 - 18:00 часот (Пон - сабота)";

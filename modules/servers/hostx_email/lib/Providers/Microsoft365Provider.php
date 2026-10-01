@@ -22,15 +22,15 @@
  *     rejects them, and the resulting Graph error is surfaced verbatim.
  *
  * @package    WHMCS
- * @subpackage hostx_email
+ * @subpackage CloudHost247 Email Hosting
  */
 
-namespace HostxEmail\Providers;
+namespace CloudHost247\Email\Providers;
 
-use HostxEmail\Dns\RecordSet;
-use HostxEmail\Support\Logger;
-use HostxEmail\Support\Result;
-use HostxEmail\Support\Validator;
+use CloudHost247\Email\Dns\RecordSet;
+use CloudHost247\Email\Support\Logger;
+use CloudHost247\Email\Support\Result;
+use CloudHost247\Email\Support\Validator;
 
 final class Microsoft365Provider extends AbstractProvider
 {

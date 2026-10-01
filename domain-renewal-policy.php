@@ -3,8 +3,8 @@
  * WHMCS Domain Name Auto-Renewal and Deletion Policy Page
  *
  * @package WHMCS
- * @author CloudHost247 Isc
- * @copyright Copyright (c) CloudHost247 Isc, All Rights Reserved
+ * @author CloudHost247 Isc.
+ * @copyright Copyright (c) CloudHost247 Isc., All Rights Reserved
  * @license https://www.cloudhost247.com/license/
  */
 
