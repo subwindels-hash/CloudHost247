@@ -36,6 +36,7 @@ const appLinks = [
 // components/RequireRole.tsx). This is a UX nicety only; the real authorization check happens
 // server-side on every admin API call regardless of what this header renders.
 const STAFF_ROLES = ['admin', 'super_admin'];
+const SUPPORT_ROLES = ['staff', 'admin', 'super_admin'];
 
 export default function Header() {
   const { token, user } = useAuthState();
@@ -124,6 +125,11 @@ export default function Header() {
                 {link.label}
               </NavLink>
             ))}
+            {user && SUPPORT_ROLES.includes(user.role) && (
+              <NavLink to="/admin/ai-support" onClick={closeMenu}>
+                AI Support Desk
+              </NavLink>
+            )}
             {user && STAFF_ROLES.includes(user.role) && (
               <NavLink to="/admin" onClick={closeMenu}>
                 Admin

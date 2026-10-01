@@ -174,6 +174,12 @@ export default function App() {
           <Route path="/support" element={<SupportPage />} />
           <Route path="/support/:id" element={<SupportTicketPage />} />
 
+          {/* The AI support desk is available to staff, admin, and super_admin operators. The
+              backend independently re-verifies the role on every request. */}
+          <Route element={<RequireRole roles={['staff', 'admin', 'super_admin']} />}>
+            <Route path="/admin/ai-support" element={<AdminAiSupportPage />} />
+          </Route>
+
           {/* Staff-only (admin + super_admin) customer/ticket/billing management. RequireRole is a
               frontend convenience only — every route it guards independently re-verifies the
               caller's role server-side (see components/RequireRole.tsx). */}
@@ -181,7 +187,6 @@ export default function App() {
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/admin/customers/:id" element={<AdminCustomerDetailPage />} />
             <Route path="/admin/tickets" element={<AdminTicketsPage />} />
-            <Route path="/admin/ai-support" element={<AdminAiSupportPage />} />
             <Route path="/admin/tickets/:id" element={<AdminTicketDetailPage />} />
             <Route path="/admin/invoices" element={<AdminInvoicesPage />} />
             <Route path="/admin/invoices/:id" element={<AdminInvoiceDetailPage />} />
