@@ -118,12 +118,8 @@ describe('self-service account API (/api/v1/account)', () => {
     const before = await app.inject({ method: 'GET', url: '/api/v1/account/services', headers: { authorization: `Bearer ${oldToken}` } });
     expect(before.statusCode).toBe(200);
 
-    // JWT `iat` only has whole-second precision (see src/lib/require-auth.ts for the full
-    // rationale). Force the old token and the password change onto different wall-clock seconds
-    // so this test deterministically exercises the real "before vs. after" boundary instead of
-    // racing real execution speed within the same second.
-    await new Promise((resolve) => setTimeout(resolve, 1100));
-
+    // The monotonic auth session version changes inside the same password-update SQL statement,
+    // so even a change in the exact same JWT iat second invalidates the old session.
     const change = await app.inject({
       method: 'POST',
       url: '/api/v1/account/password',
@@ -133,8 +129,7 @@ describe('self-service account API (/api/v1/account)', () => {
     expect(change.statusCode).toBe(204);
 
     // The very same old token (still cryptographically valid, not expired, not logged out via
-    // /api/auth/logout) must now be rejected — this is the password_changed_at mechanism, not jti
-    // revocation.
+    // /api/auth/logout) must now be rejected by the changed session generation, not jti revocation.
     const afterWithOldToken = await app.inject({
       method: 'GET',
       url: '/api/v1/account/services',
@@ -142,10 +137,9 @@ describe('self-service account API (/api/v1/account)', () => {
     });
     expect(afterWithOldToken.statusCode).toBe(401);
 
-    // A freshly-issued token for the same account (simulating a real re-login with the new
-    // password), minted in a later wall-clock second than the change, must work.
-    await new Promise((resolve) => setTimeout(resolve, 1100));
-    const newToken = signAuthToken(env, { sub: userId, role: 'customer', email: 'carol@example.com' });
+    // A freshly-issued token for the new session generation (simulating a real re-login with the
+    // new password) must work immediately; there is no timestamp boundary to wait for.
+    const newToken = signAuthToken(env, { sub: userId, role: 'customer', email: 'carol@example.com', sv: 1 });
     const afterWithNewToken = await app.inject({
       method: 'GET',
       url: '/api/v1/account/services',

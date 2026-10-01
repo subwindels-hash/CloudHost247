@@ -62,10 +62,17 @@ export async function authenticate(request: FastifyRequest, env: Env, pool: Quer
     throw new UnauthorizedError('Account is not active');
   }
 
-  // Phase 4 password-change invalidation (see database/migrations/0012_add_password_changed_at_to_users.sql
-  // and src/db/users.ts#updatePasswordHash). A changed password must invalidate every JWT issued
-  // before the change, even though those tokens are still cryptographically valid and unexpired,
-  // and even though they were never explicitly logged out via /api/auth/logout.
+  // Password-change/reset invalidation. Every token carries the current monotonic session
+  // version; updatePasswordHash increments it in the same SQL statement as the new password
+  // hash. This immediately invalidates all prior sessions, including one minted in the exact same
+  // wall-clock second as the reset. Tokens issued before the 0059 migration lack `sv` and map to
+  // zero, matching the migration's default without invalidating every deployed user at migration.
+  if ((claims.sv ?? 0) !== user.auth_session_version) {
+    throw new UnauthorizedError('Session invalidated by a password change — please log in again');
+  }
+
+  // The legacy timestamp check remains a conservative compatibility safeguard for deployments
+  // that had password_changed_at before the session-version column existed.
   //
   // Comparison precision trade-off (deliberate, documented, accepted — not a bug):
   // JWT `iat` is whole-second precision (a standard `NumericDate`, per RFC 7519), while Postgres

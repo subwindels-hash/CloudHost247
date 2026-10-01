@@ -1,5 +1,5 @@
 import { FormEvent, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { apiFetch } from '../lib/api';
 import { setSession, type StoredUser } from '../lib/auth';
 import { usePageMeta } from '../lib/usePageMeta';
@@ -11,6 +11,7 @@ interface AuthResponse {
 
 interface LocationState {
   from?: string;
+  recoveryMessage?: string;
 }
 
 export default function LoginPage() {
@@ -18,10 +19,13 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [message, setMessage] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const redirectTo = (location.state as LocationState | null)?.from || '/dashboard';
+  const locationState = location.state as LocationState | null;
+  const [message, setMessage] = useState<{ kind: 'ok' | 'error'; text: string } | null>(
+    locationState?.recoveryMessage ? { kind: 'ok', text: locationState.recoveryMessage } : null
+  );
+  const redirectTo = locationState?.from || '/dashboard';
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -65,6 +69,7 @@ export default function LoginPage() {
         </button>
       </form>
       {message && <p className={message.kind === 'ok' ? 'ch247-status-ok' : 'ch247-status-error'}>{message.text}</p>}
+      <p><Link to="/forgot-password">Forgot your password?</Link></p>
     </div>
   );
 }

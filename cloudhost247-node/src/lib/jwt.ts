@@ -6,6 +6,8 @@ export interface AuthTokenPayload {
   sub: string; // user id
   role: string;
   email: string;
+  /** Monotonic per-user session generation, incremented on password change/reset. */
+  sv?: number;
   /**
    * Delegated "support mode" claims (spec §32). Present only on tokens minted by
    * POST /api/v1/admin/customers/:id/switch. `sup` is the admin_support_sessions row id and

@@ -5,6 +5,7 @@ import type { Env } from '../config/env';
 import { getPool } from '../db/pool';
 import type { Queryable } from '../db/types';
 import { findUserByEmail, findUserById, recordAuthEvent } from '../db/users';
+import { confirmEmailVerification, completePasswordReset, issueAuthAction } from '../services/auth-recovery-service';
 import { createUserWithIdentity } from '../services/customer-identity-service';
 import {
   expiryFromNow,
@@ -30,6 +31,20 @@ const loginSchema = z.object({
   password: z.string().min(1),
 });
 
+const passwordResetRequestSchema = z.object({
+  email: z.string().email(),
+});
+
+const actionTokenSchema = z.object({
+  // HMAC-SHA256 base64url output is 43 characters. Keeping a bounded format prevents oversized
+  // garbage from reaching the hashing/query path while not leaking anything about validity.
+  token: z.string().min(32).max(128).regex(/^[A-Za-z0-9_-]+$/, 'Invalid action token'),
+});
+
+const passwordResetConfirmSchema = actionTokenSchema.extend({
+  password: z.string().min(10, 'Password must be at least 10 characters'),
+});
+
 function publicUser(user: {
   id: string;
   email: string;
@@ -37,6 +52,7 @@ function publicUser(user: {
   role: string;
   status: string;
   customer_id?: string | null;
+  email_verified_at?: string | null;
 }) {
   // Deliberately identical in shape to src/dto/account.ts#toPublicUser: identity only. The
   // Security Number (hash, plaintext, expiry, version) is never part of this payload — not on
@@ -48,13 +64,14 @@ function publicUser(user: {
     role: user.role,
     status: user.status,
     customerId: user.customer_id ?? null,
+    emailVerified: Boolean(user.email_verified_at),
   };
 }
 
 /**
- * Authentication foundation: register, login, and "who am I" (token verification).
- * Deeper flows (password reset, email verification, 2FA, SSO) are explicitly out of scope for
- * Phase 1 and will be added once the independent billing/customer platform needs them.
+ * Authentication foundation: registration, login, email verification and password recovery.
+ * Every recovery action is a durable, single-use, expiring token; passkeys/MFA and SSO remain
+ * separate identity modules because they need a dedicated step-up/WebAuthn design.
  */
 export async function registerAuthRoutes(app: FastifyInstance, env: Env, overridePool?: Queryable) {
   // `overridePool` lets tests substitute a real embedded Postgres engine (pglite) instead of a
@@ -100,6 +117,13 @@ export async function registerAuthRoutes(app: FastifyInstance, env: Env, overrid
         userAgent: request.headers['user-agent'] ?? null,
       });
 
+      // The raw verification link is never stored in Postgres. This atomically writes only a
+      // token hash plus a dedicated mail-outbox item; the worker derives the link at send time.
+      const verification = await issueAuthAction(pool, env, user, 'email_verification', {
+        ipAddress: request.ip,
+        userAgent: request.headers['user-agent'] ?? null,
+      });
+
       // Audit records the *fact* of issuance and the Customer ID — never the Security Number.
       await recordAuditBestEffort(
         pool,
@@ -113,7 +137,7 @@ export async function registerAuthRoutes(app: FastifyInstance, env: Env, overrid
         requestAuditContext(request)
       );
 
-      const token = signAuthToken(env, { sub: user.id, role: user.role, email: user.email });
+      const token = signAuthToken(env, { sub: user.id, role: user.role, email: user.email, sv: user.auth_session_version });
       reply.code(201);
       // The plaintext Security Number is returned exactly once, here, to the person who just
       // created the account — it is never stored in plaintext and cannot be recovered later
@@ -123,6 +147,7 @@ export async function registerAuthRoutes(app: FastifyInstance, env: Env, overrid
         user: publicUser(user),
         token,
         securityNumber: { value: securityNumber, expiresAt: user.security_number_expires_at },
+        emailVerification: { queued: verification.issued },
       };
     }
   );
@@ -161,10 +186,101 @@ export async function registerAuthRoutes(app: FastifyInstance, env: Env, overrid
       userAgent: request.headers['user-agent'] ?? null,
     });
 
-    const token = signAuthToken(env, { sub: user.id, role: user.role, email: user.email });
+    const token = signAuthToken(env, { sub: user.id, role: user.role, email: user.email, sv: user.auth_session_version });
     reply.code(200);
     return { user: publicUser(user), token };
   });
+
+  /**
+   * Anonymous by design and deliberately non-enumerating: matching, non-active, and unknown
+   * addresses all receive the same 202 response. Per-IP Fastify rate limits plus the durable
+   * per-account issue limit in issueAuthAction protect both the endpoint and a known inbox.
+   */
+  app.post(
+    '/api/auth/password-reset/request',
+    { config: { rateLimit: { max: 5, timeWindow: '15 minutes' } } },
+    async (request, reply) => {
+      const parsed = passwordResetRequestSchema.safeParse(request.body);
+      if (!parsed.success) {
+        throw new ValidationError(parsed.error.issues.map((i) => i.message).join(', '));
+      }
+      const user = await findUserByEmail(pool, parsed.data.email);
+      if (user?.status === 'active') {
+        await issueAuthAction(pool, env, user, 'password_reset', {
+          ipAddress: request.ip,
+          userAgent: request.headers['user-agent'] ?? null,
+        });
+      }
+      reply.code(202);
+      return { message: 'If an active account matches that email address, a password reset link will be sent shortly.' };
+    }
+  );
+
+  app.post(
+    '/api/auth/password-reset/confirm',
+    { config: { rateLimit: { max: 10, timeWindow: '15 minutes' } } },
+    async (request) => {
+      const parsed = passwordResetConfirmSchema.safeParse(request.body);
+      if (!parsed.success) {
+        throw new ValidationError(parsed.error.issues.map((i) => i.message).join(', '));
+      }
+      const updated = await completePasswordReset(pool, parsed.data.token, await hashPassword(parsed.data.password), {
+        ipAddress: request.ip,
+        userAgent: request.headers['user-agent'] ?? null,
+      });
+      if (!updated) {
+        throw new ValidationError('This password reset link is invalid or has expired. Request a new link to continue.');
+      }
+      return { message: 'Your password has been reset. You can now log in with your new password.' };
+    }
+  );
+
+  app.post(
+    '/api/auth/email-verification/confirm',
+    { config: { rateLimit: { max: 10, timeWindow: '15 minutes' } } },
+    async (request) => {
+      const parsed = actionTokenSchema.safeParse(request.body);
+      if (!parsed.success) {
+        throw new ValidationError(parsed.error.issues.map((i) => i.message).join(', '));
+      }
+      const verified = await confirmEmailVerification(pool, parsed.data.token, {
+        ipAddress: request.ip,
+        userAgent: request.headers['user-agent'] ?? null,
+      });
+      if (!verified) {
+        throw new ValidationError('This verification link is invalid or has expired. Request a new link to continue.');
+      }
+      return { message: 'Your email address has been verified.' };
+    }
+  );
+
+  app.post(
+    '/api/auth/email-verification/resend',
+    { config: { rateLimit: { max: 5, timeWindow: '15 minutes' } } },
+    async (request, reply) => {
+      const auth = await authenticate(request, env, pool);
+      const user = await findUserById(pool, auth.userId);
+      if (!user) throw new UnauthorizedError('Account no longer exists');
+      if (user.email_verified_at) {
+        return { message: 'This email address is already verified.', alreadyVerified: true, queued: false };
+      }
+      const result = await issueAuthAction(pool, env, user, 'email_verification', {
+        ipAddress: request.ip,
+        userAgent: request.headers['user-agent'] ?? null,
+      });
+      // 202 is intentional for both a fresh queue and the per-account throttling case. The
+      // browser gets no token and an attacker who stole a session cannot turn this into a mail
+      // flood; the account page can simply tell the customer to wait before trying again.
+      reply.code(202);
+      return {
+        message: result.issued
+          ? 'A new verification link has been queued for delivery.'
+          : 'A verification link was requested recently. Please wait before requesting another.',
+        alreadyVerified: false,
+        queued: result.issued,
+      };
+    }
+  );
 
   app.get('/api/auth/me', async (request) => {
     const auth = await authenticate(request, env, pool);

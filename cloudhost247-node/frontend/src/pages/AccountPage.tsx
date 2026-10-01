@@ -16,7 +16,7 @@ import { clearSession, getSupportOrigin, setSession, type StoredUser } from '../
 import { usePageMeta } from '../lib/usePageMeta';
 
 interface MeResponse {
-  user: { id: string; email: string; fullName: string; role: string; status: string };
+  user: { id: string; email: string; fullName: string; role: string; status: string; emailVerified: boolean };
 }
 
 /**
@@ -54,6 +54,8 @@ export default function AccountPage() {
   const [newPassword, setNewPassword] = useState('');
   const [passwordSubmitting, setPasswordSubmitting] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null);
+  const [verificationSubmitting, setVerificationSubmitting] = useState(false);
+  const [verificationMessage, setVerificationMessage] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null);
 
   const [securityStatus, setSecurityStatus] = useState<SecurityNumberStatus | null>(null);
   const [revealPassword, setRevealPassword] = useState('');
@@ -150,6 +152,27 @@ export default function AccountPage() {
     return () => clearTimeout(timer);
   }, [revealedNumber]);
 
+  async function resendVerification() {
+    setVerificationSubmitting(true);
+    setVerificationMessage(null);
+    try {
+      const result = await apiFetch<{ message: string; queued: boolean; alreadyVerified: boolean }>('/api/auth/email-verification/resend', {
+        method: 'POST',
+      });
+      if (result.alreadyVerified) {
+        setMe((current) => (current ? { ...current, emailVerified: true } : current));
+        const stored = JSON.parse(localStorage.getItem('ch247_user') ?? 'null') as StoredUser | null;
+        const token = localStorage.getItem('ch247_token');
+        if (stored && token) setSession(token, { ...stored, emailVerified: true });
+      }
+      setVerificationMessage({ kind: 'ok', text: result.message });
+    } catch (err) {
+      setVerificationMessage({ kind: 'error', text: err instanceof Error ? err.message : 'Could not request a verification email.' });
+    } finally {
+      setVerificationSubmitting(false);
+    }
+  }
+
   async function handleLogout() {
     setLoggingOut(true);
     try {
@@ -203,7 +226,7 @@ export default function AccountPage() {
       setNewPassword('');
       setPasswordMessage({
         kind: 'ok',
-        text: 'Your password has been changed. Any other signed-in devices will need to log in again.',
+        text: 'Your password has been changed. For your security, sign in again before continuing.',
       });
     } catch (err) {
       setPasswordMessage({ kind: 'error', text: err instanceof Error ? err.message : 'Could not change your password.' });
@@ -313,6 +336,8 @@ export default function AccountPage() {
           <dd data-testid="customer-id">{profile?.customerId ?? '—'}</dd>
           <dt>Email</dt>
           <dd>{me.email}</dd>
+          <dt>Email verification</dt>
+          <dd>{me.emailVerified ? 'Verified' : 'Not verified'}</dd>
           <dt>Role</dt>
           <dd>{me.role}</dd>
           <dt>Status</dt>
@@ -322,6 +347,17 @@ export default function AccountPage() {
           Quote your Customer ID when you contact support or ask about an invoice. It never changes
           and it is not a password — never use it to prove who you are.
         </p>
+        {!me.emailVerified && (
+          <div className="ch247-placeholder-notice">
+            <p>Verify this email address to confirm that CloudHost247 can contact you about your account.</p>
+            <button type="button" className="ch247-button ch247-button--outline" onClick={resendVerification} disabled={verificationSubmitting}>
+              {verificationSubmitting ? 'Requesting…' : 'Send a verification link'}
+            </button>
+            {verificationMessage && (
+              <p className={verificationMessage.kind === 'ok' ? 'ch247-status-ok' : 'ch247-status-error'}>{verificationMessage.text}</p>
+            )}
+          </div>
+        )}
         <p className="ch247-placeholder-notice">
           Changing your email, two-factor authentication, and single sign-on aren&apos;t available
           on this platform yet.

@@ -7,6 +7,7 @@ import { usePageMeta } from '../lib/usePageMeta';
 interface AuthResponse {
   user: StoredUser;
   token: string;
+  emailVerification: { queued: boolean };
 }
 
 export default function RegisterPage() {
@@ -28,8 +29,14 @@ export default function RegisterPage() {
         body: JSON.stringify({ fullName, email, password }),
       });
       setSession(res.token, res.user);
-      setMessage({ kind: 'ok', text: `Account created for ${res.user.email}.` });
-      navigate('/dashboard');
+      setMessage({
+        kind: 'ok',
+        text: res.emailVerification.queued
+          ? `Account created for ${res.user.email}. A verification email request has been queued.`
+          : `Account created for ${res.user.email}.`,
+      });
+      // The account page makes the pending verification state and resend action immediately visible.
+      navigate('/account');
     } catch (err) {
       setMessage({ kind: 'error', text: err instanceof Error ? err.message : 'Registration failed' });
     } finally {

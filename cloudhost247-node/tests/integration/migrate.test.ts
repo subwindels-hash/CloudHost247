@@ -85,6 +85,7 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0056_extend_platform_services_licenses_backups.sql',
     '0057_create_ai_support_operator.sql',
     '0058_create_worker_cycle_leases.sql',
+    '0059_create_auth_recovery.sql',
   ];
 
   it('finds the committed migration files in order', () => {
@@ -150,6 +151,8 @@ describe('migration runner against the real database/migrations SQL files', () =
         'newsletter_subscriptions',
         'support_agent_presence',
         'worker_cycle_leases',
+        'auth_action_tokens',
+        'auth_email_outbox',
       ])
     );
   });

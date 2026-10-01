@@ -145,3 +145,42 @@ secret:
 `account_profile_image_removed`, `admin_user_created`, `admin_user_updated`, `admin_user_deleted`,
 `admin_customer_account_switch_started`, `admin_customer_account_switch_ended`,
 `admin_customer_account_switch_action_blocked`.
+
+## 7. Email verification and password recovery
+
+Migration `0059_create_auth_recovery.sql` adds durable, independent recovery primitives without
+putting a bearer link into an ordinary notification or storing it in plaintext.
+
+| Method | Path | Contract |
+| --- | --- | --- |
+| POST | `/api/auth/email-verification/confirm` | Redeems a single-use 24-hour verification link. |
+| POST | `/api/auth/email-verification/resend` | Authenticated resend; Fastify + per-account throttled. |
+| POST | `/api/auth/password-reset/request` | Anonymous, non-enumerating request; always returns 202 for a syntactically valid email. |
+| POST | `/api/auth/password-reset/confirm` | Redeems a single-use 30-minute link and replaces the password. |
+
+### Token and delivery properties
+
+* `auth_action_tokens` contains a SHA-256 digest only, never a raw email-verification or password
+  reset token. A raw link is domain-separated HMAC output derived only in worker memory from the
+  action UUID, purpose and `JWT_SECRET`; it is not persisted in `auth_email_outbox`, logs, audit
+  metadata or API responses.
+* Issuing a replacement marks any older unused token of the same purpose unusable. Redemption is
+  one `UPDATE … RETURNING` under a transaction, so concurrent clicks cannot consume it twice.
+  Expired, superseded, consumed and signing-key-invalidated queue entries become visible
+  `CANCELLED` rows instead of being sent as misleading links.
+* `auth_email_outbox` uses the same explicitly configured operator email webhook as notifications,
+  but is a separate table because a reset request must not create an in-app notification. The
+  worker delivers it in the normal one-shot Cron cycle with lease, bounded retries and
+  `CONFIGURATION_REQUIRED` handling. Until `NOTIFICATION_EMAIL_WEBHOOK_URL` and
+  `NOTIFICATION_EMAIL_WEBHOOK_TOKEN` are configured, no email is claimed as delivered.
+* Reset requests have a route limit (5 per 15 minutes) and a database-backed per-account limit
+  (3 per hour). Known, unknown and inactive email addresses get the same accepted response.
+* A completed reset increments `users.auth_session_version` in the same SQL write as the new
+  password hash. Every earlier JWT—including one issued in the same second—is rejected, while a
+  fresh login receives the new version immediately. `password_changed_at` remains stamped for
+  audit/backward compatibility.
+
+Email verification currently confirms contactability and is surfaced in `/api/auth/me` and the
+Account page. It does not yet gate all customer actions; enforcing verification as a policy gate
+should be a separately reviewed product decision so existing customers and administrator-created
+accounts are migrated deliberately.

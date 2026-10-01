@@ -12,6 +12,7 @@ import {
 import { sweepOperatingSystemLifecycle } from '../services/os-lifecycle-service';
 import { sweepScheduledTerminations } from '../services/server-termination-service';
 import { deliverNotificationOutbox } from '../services/notification-outbox-service';
+import { deliverAuthEmailOutbox } from '../services/auth-recovery-service';
 import { reconcileServerState } from '../services/infrastructure-reconciliation-service';
 import { revalidateProviderImages } from '../services/os-image-revalidation-service';
 import { runRevenueGuardianCycle } from '../revenue-guardian/jobs/scheduler';
@@ -93,7 +94,8 @@ async function runWorkerCycle(
   ctx: JobContext,
   schedule: WorkerSchedule,
   logger: WorkerLogger,
-  concurrency: number
+  concurrency: number,
+  authEmailEnv: Pick<ReturnType<typeof loadEnv>, 'APP_URL' | 'JWT_SECRET'>
 ): Promise<WorkerCycleOutcome> {
   let didWork = false;
   const recovered = await recoverOrphanedJobs(ctx);
@@ -145,6 +147,13 @@ async function runWorkerCycle(
     if (delivery.claimed > 0) {
       logger.log(
         `[worker:${ctx.workerId}] notification outbox: ${delivery.delivered} delivered, ${delivery.retrying} retrying, ${delivery.failed} failed, ${delivery.configurationRequired} awaiting configuration`
+      );
+    }
+    const authDelivery = await deliverAuthEmailOutbox(ctx.db, { env: authEmailEnv });
+    didWork ||= authDelivery.claimed > 0;
+    if (authDelivery.claimed > 0) {
+      logger.log(
+        `[worker:${ctx.workerId}] authentication email outbox: ${authDelivery.delivered} delivered, ${authDelivery.retrying} retrying, ${authDelivery.failed} failed, ${authDelivery.cancelled} cancelled, ${authDelivery.configurationRequired} awaiting configuration`
       );
     }
   }
@@ -231,7 +240,7 @@ export async function main(argv: readonly string[] = process.argv): Promise<void
   try {
     await runWorkerLoop(
       async () => {
-        if (!once) return runWorkerCycle(ctx, schedule, logger, env.WORKER_CONCURRENCY);
+        if (!once) return runWorkerCycle(ctx, schedule, logger, env.WORKER_CONCURRENCY, env);
 
         const lease = await withWorkerCycleLease(
           pool,
@@ -240,7 +249,7 @@ export async function main(argv: readonly string[] = process.argv): Promise<void
             holder: workerId,
             leaseMs: env.WORKER_ONCE_LEASE_MS,
           },
-          () => runWorkerCycle(ctx, schedule, logger, env.WORKER_CONCURRENCY),
+          () => runWorkerCycle(ctx, schedule, logger, env.WORKER_CONCURRENCY, env),
           (error) => logger.error(`[worker:${workerId}] cycle-lease issue: ${error.message}`)
         );
         if (!lease.acquired) {
