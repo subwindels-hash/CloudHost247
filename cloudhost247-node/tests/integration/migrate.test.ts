@@ -89,6 +89,7 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0060_create_totp_mfa.sql',
     '0061_create_webauthn_passkeys.sql',
     '0062_create_webauthn_authentication_challenges.sql',
+    '0063_create_domain_services_foundation.sql',
   ];
 
   it('finds the committed migration files in order', () => {
@@ -162,6 +163,23 @@ describe('migration runner against the real database/migrations SQL files', () =
         'user_passkeys',
         'webauthn_registration_challenges',
         'webauthn_authentication_challenges',
+        'domain_service_providers',
+        'domain_service_provider_credentials',
+        'domain_extensions',
+        'domain_provider_extension_offerings',
+        'domain_searches',
+        'domain_search_results',
+        'domain_bulk_searches',
+        'domain_contacts',
+        'domain_registrations',
+        'domain_transfers',
+        'domain_appraisals',
+        'domain_whois_lookups',
+        'domain_auctions',
+        'domain_bids',
+        'domain_club_plans',
+        'domain_club_memberships',
+        'domain_transactions',
       ])
     );
   });
