@@ -308,7 +308,8 @@ async function main() {
 Domain Services demo preview ready on http://0.0.0.0:${port}
 
   /domains                  — services hub (3 groups × 9 cards) + live search
-  /domains/search           — search + registration checkout (try "amaka-brand" or any name)
+  /domains/search           — search + registration checkout (try "amaka-brand" or any name);
+                              taken results get a Watch button (sign in as Amaka)
   /domains/extensions       — synced TLD catalogue with admin-curated trending badges
   /domains/auctions         — live auction (brandstack.com) + scheduled (cloudmetrics.io)
   /domains/whois            — RDAP lookup (try "taken-public.com" vs "taken-private.net")
@@ -316,9 +317,11 @@ Domain Services demo preview ready on http://0.0.0.0:${port}
   /domains/broker           — broker request form (Amaka has a live case with a seller offer)
   /domains/appraisal        — honest "Service Provider Not Configured" (no valuation provider)
   /dashboard/domains        — registrations, transfers, auctions (bids/won/lost), appraisals,
-                              searches & bulk lookups, Domain Club membership, Broker Requests
+                              searches & bulk lookups, availability watches (Amaka watches
+                              taken-private.net), Domain Club membership, Broker Requests
   /admin/domain-services    — providers, Test Connection, extensions, auctions, transfers, club,
-                              and the Broker tab (case workflow, offers, notes, fees, transfers)
+                              the Broker tab (case workflow, offers, notes, fees, transfers)
+                              and the Activity tab (registrations/appraisals/WHOIS/transactions)
 
   Registrar/RDAP endpoints are SIMULATED (tests/helpers/mock-registrar.ts); production uses the
   real Namecheap/GoDaddy/RDAP services. Appraisal is intentionally left unconfigured to show the
