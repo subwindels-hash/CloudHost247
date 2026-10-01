@@ -153,6 +153,27 @@ $tests['Admin dashboard is real data only: zero-filled until campaigns exist, ho
     return array_sum(array_map(function ($exists) { return $exists ? 1 : 0; }, $data['tables'])) === count($data['tables']);
 };
 
+$tests['Every advertised menu section is routable and unbuilt ones say so instead of falling back to the dashboard'] = function () {
+    ch247_marketing_fresh();
+    cloudhost247_marketing_activate();
+    $_SESSION['adminid'] = 1;
+    $_SESSION['adminroleid'] = 1;
+    $_SERVER['REQUEST_METHOD'] = 'GET';
+    // The menu advertises more sections than the build has landed; each of them
+    // must keep its own address and explain itself rather than silently render
+    // the dashboard under a different URL.
+    $planned = array('segments' => 3, 'templates' => 4, 'campaigns' => 5, 'analytics' => 9, 'automations' => 10);
+    foreach ($planned as $view => $session) {
+        $_GET = array('view' => $view);
+        $data = (new AdminController())->handle();
+        if ($data['view'] !== $view || (int) $data['plannedSession'] !== $session) { return false; }
+    }
+    // A genuinely unknown view still resolves to the dashboard.
+    $_GET = array('view' => 'does-not-exist');
+    $data = (new AdminController())->handle();
+    return $data['view'] === 'dashboard' && (int) $data['plannedSession'] === 0;
+};
+
 $tests['Settings save requires POST+CSRF and is sanitized, audited and capability-gated'] = function () {
     ch247_marketing_fresh();
     cloudhost247_marketing_activate();

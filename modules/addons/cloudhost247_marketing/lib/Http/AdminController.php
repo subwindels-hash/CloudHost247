@@ -34,6 +34,21 @@ final class AdminController
     /** Every view the module currently serves. */
     const VIEWS = array('dashboard', 'settings', 'subscribers', 'subscriber', 'lists', 'import', 'suppressions');
 
+    /**
+     * Sections the admin menu already advertises but whose build session has not
+     * landed yet. They stay routable so a click never silently lands somewhere
+     * else; each renders an explicit notice naming the session that delivers it.
+     *
+     * @var array<string,int>
+     */
+    const PLANNED_VIEWS = array(
+        'segments' => 3,
+        'templates' => 4,
+        'campaigns' => 5,
+        'analytics' => 9,
+        'automations' => 10,
+    );
+
     /** Capability required for each mutating view (SESSION 2 scope). */
     const SUBSCRIBER_CAPABILITY = 'marketing.subscribers.manage';
 
@@ -70,7 +85,7 @@ final class AdminController
     {
         AdminGuard::requireAdmin();
         $view = isset($_GET['view']) ? (string) $_GET['view'] : 'dashboard';
-        if (!in_array($view, self::VIEWS, true)) { $view = 'dashboard'; }
+        if (!in_array($view, self::VIEWS, true) && !isset(self::PLANNED_VIEWS[$view])) { $view = 'dashboard'; }
 
         $notice = '';
         $error = '';
@@ -113,6 +128,7 @@ final class AdminController
             'settings' => $this->settings->all(),
             'integration' => $this->integrationStatus(),
             'tables' => $this->tableHealth(),
+            'plannedSession' => isset(self::PLANNED_VIEWS[$view]) ? self::PLANNED_VIEWS[$view] : 0,
             'capabilities' => array(
                 'settings.manage' => $this->capAllowed('marketing.settings.manage'),
                 'campaigns.manage' => $this->capAllowed('marketing.campaigns.manage'),

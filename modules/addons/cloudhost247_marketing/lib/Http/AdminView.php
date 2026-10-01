@@ -56,8 +56,32 @@ final class AdminView
         elseif ($data['view'] === 'lists') { $this->renderLists($data); }
         elseif ($data['view'] === 'import') { $this->renderImport($data); }
         elseif ($data['view'] === 'suppressions') { $this->renderSuppressions($data); }
+        elseif (!empty($data['plannedSession'])) { $this->renderPlanned($data); }
         else { $this->renderDashboard($data); }
         echo '</div>';
+    }
+
+    /**
+     * Menu sections whose session has not landed yet. The page states plainly
+     * that nothing is wired up and which session brings it — no dead links and
+     * no pretend screens.
+     */
+    private function renderPlanned(array $data)
+    {
+        $notes = array(
+            3 => array('Segments', 'segment rule builder over whitelisted read-only WHMCS columns, evaluated dynamically'),
+            4 => array('Templates', 'block catalog rendered to email-safe table HTML, sanitizer, previews and the template library'),
+            5 => array('Campaigns', 'campaign CRUD, the pre-send validation checklist, test sends and schedule/pause/resume/cancel'),
+            9 => array('Analytics', 'open/click/bounce rates read from the event ledger, click map and per-recipient activity'),
+            10 => array('Automations', 'trigger, wait and email steps driven by WHMCS hooks with idempotent runs'),
+        );
+        $session = (int) $data['plannedSession'];
+        $info = isset($notes[$session]) ? $notes[$session] : array('This section', 'the module extension it belongs to');
+        echo '<div class="alert alert-info"><strong>' . $this->e($info[0]) . ' is not available yet.</strong> '
+            . 'This build session (' . $session . ') adds ' . $this->e($info[1]) . '. '
+            . 'Nothing on this page reads or writes data.</div>';
+        echo '<p class="text-muted">The session order is tracked in <code>docs/independent-rebuild/EMAIL-MARKETING.md</code>; '
+            . 'the menu entry exists so the planned sections stay visible while they are built.</p>';
     }
 
     private function renderDashboard(array $data)
