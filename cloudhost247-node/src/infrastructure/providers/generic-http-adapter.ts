@@ -1,5 +1,5 @@
 import type { InfrastructureProviderRow, ServerOsImageRow } from '../../db/infrastructure-providers';
-import { unsupportedRescue } from './common';
+import { requireSecureBaseUrl, unsupportedRescue } from './common';
 import { providerRequest } from './http';
 import {
   ProviderError,
@@ -30,10 +30,15 @@ export class GenericHttpProviderAdapter implements InfrastructureProviderAdapter
   }
 
   private async request<T>(path: string, init: RequestInit = {}): Promise<T> {
-    if (!this.baseUrl || !this.token) {
-      throw new ProviderError('PROVIDER_NOT_CONFIGURED', `${this.provider.name} endpoint or API token is not configured`, false);
+    if (!this.token) {
+      throw new ProviderError('PROVIDER_NOT_CONFIGURED', `${this.provider.name} API token is not configured`, false);
     }
-    return providerRequest<T>(`${this.baseUrl}${path}`, init, { headers: { Authorization: `Bearer ${this.token}` } });
+    // This adapter carries a bearer credential on every request. Enforce the same transport
+    // boundary as the native self-hosted adapters instead of allowing an operator typo to send
+    // the token over plaintext HTTP. Loopback HTTP remains available for a local development
+    // tunnel, as documented by requireSecureBaseUrl.
+    const baseUrl = requireSecureBaseUrl(this.provider.name, this.baseUrl);
+    return providerRequest<T>(`${baseUrl}${path}`, init, { headers: { Authorization: `Bearer ${this.token}` } });
   }
 
   validateConfiguration(): Promise<void> { return this.request('/v1/health'); }
