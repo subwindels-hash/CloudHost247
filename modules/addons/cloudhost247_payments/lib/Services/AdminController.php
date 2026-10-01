@@ -42,6 +42,11 @@ final class AdminController
 
     public function handle()
     {
+        // Explicit authenticated-admin gate first (same as every other CloudHost247 admin
+        // controller): requirePostToken()/requireCapability() also enforce it transitively,
+        // but the file-local guard is what the security review test scans for.
+        AdminGuard::requireAdmin();
+
         $notice = '';
         $error = '';
 
