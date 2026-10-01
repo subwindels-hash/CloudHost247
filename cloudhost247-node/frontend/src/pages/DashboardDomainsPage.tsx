@@ -4,6 +4,7 @@ import { usePageMeta } from '../lib/usePageMeta';
 import { apiFetch } from '../lib/api';
 import { CatalogErrorBanner, CatalogLoadingBanner } from '../components/CatalogStateBanner';
 import { formatDateTime, formatPrice, SectionCard, StatusChip } from '../components/domain-services/ui';
+import { listMyWatches, cancelWatch, type AvailabilityWatchDto, type MembershipDto } from '../lib/domain-services-api';
 
 interface DomainRow {
   id: string;
@@ -59,6 +60,28 @@ interface WonAuctionRow {
   payment_completed: boolean;
 }
 
+interface LostAuctionRow {
+  id: string;
+  domain_name: string;
+  status: string;
+  current_highest_bid: string | null;
+  currency: string;
+  ends_at: string;
+}
+
+interface BrokerCaseRow {
+  id: string;
+  brokerage_id: string;
+  domain: string;
+  status: string;
+  current_offer: string | null;
+  currency: string;
+  payment_status: string;
+  transfer_status: string;
+  created_at: string;
+  updated_at: string;
+}
+
 interface AppraisalRow {
   id: string;
   domain_name: string;
@@ -88,6 +111,17 @@ interface WhoisRow {
   created_at: string;
 }
 
+interface BulkSearchRow {
+  id: string;
+  query_label: string;
+  status: string;
+  source_type: string;
+  submitted_count: number;
+  accepted_count: number;
+  rejected_count: number;
+  created_at: string;
+}
+
 interface TransactionRow {
   id: string;
   transaction_type: string;
@@ -98,7 +132,7 @@ interface TransactionRow {
   invoice_number: string | null;
 }
 
-type TabId = 'domains' | 'registrations' | 'transfers' | 'auctions' | 'appraisals' | 'lookups' | 'transactions';
+type TabId = 'domains' | 'registrations' | 'transfers' | 'auctions' | 'appraisals' | 'lookups' | 'club' | 'broker' | 'transactions';
 
 const TABS: Array<{ id: TabId; label: string }> = [
   { id: 'domains', label: 'My Domains' },
@@ -107,8 +141,25 @@ const TABS: Array<{ id: TabId; label: string }> = [
   { id: 'auctions', label: 'Auctions' },
   { id: 'appraisals', label: 'Appraisals' },
   { id: 'lookups', label: 'Searches & Lookups' },
+  { id: 'club', label: 'Domain Club' },
+  { id: 'broker', label: 'Broker Requests' },
   { id: 'transactions', label: 'Transactions' },
 ];
+
+const BROKER_STATUS_LABELS: Record<string, string> = {
+  request_submitted: 'Submitted',
+  broker_assigned: 'Broker assigned',
+  under_review: 'Under review',
+  contacting_seller: 'Contacting seller',
+  negotiation: 'Negotiating',
+  offer_received: 'Offer received',
+  offer_accepted: 'Offer accepted',
+  payment_pending: 'Payment pending',
+  transfer_pending: 'Transfer pending',
+  completed: 'Completed',
+  rejected: 'Rejected',
+  cancelled: 'Cancelled',
+};
 
 /**
  * Domain Services dashboard. "My Domains" keeps the original Phase 6 behaviour (add a domain,
@@ -131,8 +182,13 @@ export default function DashboardDomainsPage() {
   const [won, setWon] = useState<WonAuctionRow[] | null>(null);
   const [appraisals, setAppraisals] = useState<AppraisalRow[] | null>(null);
   const [searches, setSearches] = useState<SearchRow[] | null>(null);
+  const [bulkSearches, setBulkSearches] = useState<BulkSearchRow[] | null>(null);
   const [whoisLookups, setWhoisLookups] = useState<WhoisRow[] | null>(null);
+  const [watches, setWatches] = useState<AvailabilityWatchDto[] | null>(null);
   const [transactions, setTransactions] = useState<TransactionRow[] | null>(null);
+  const [lost, setLost] = useState<LostAuctionRow[] | null>(null);
+  const [membership, setMembership] = useState<MembershipDto | null | undefined>(undefined);
+  const [brokerCases, setBrokerCases] = useState<BrokerCaseRow[] | null>(null);
 
   const loadDomains = useCallback(() => {
     let cancelled = false;
@@ -164,6 +220,9 @@ export default function DashboardDomainsPage() {
       apiFetch<{ auctions: WonAuctionRow[] }>('/api/v1/domain-services/auctions/my/won')
         .then((r) => setWon(r.auctions))
         .catch(() => setWon([]));
+      apiFetch<{ auctions: LostAuctionRow[] }>('/api/v1/domain-services/auctions/my/lost')
+        .then((r) => setLost(r.auctions ?? []))
+        .catch(() => setLost([]));
     }
     if (tab === 'appraisals' && appraisals === null) {
       apiFetch<{ appraisals: AppraisalRow[] }>('/api/v1/domain-services/appraisals')
@@ -174,16 +233,32 @@ export default function DashboardDomainsPage() {
       apiFetch<{ searches: SearchRow[] }>('/api/v1/domain-services/searches')
         .then((r) => setSearches(r.searches))
         .catch(() => setSearches([]));
+      apiFetch<{ searches: BulkSearchRow[] }>('/api/v1/domain-services/searches/bulk')
+        .then((r) => setBulkSearches(r.searches ?? []))
+        .catch(() => setBulkSearches([]));
       apiFetch<{ lookups: WhoisRow[] }>('/api/v1/domain-services/whois/history')
         .then((r) => setWhoisLookups(r.lookups))
         .catch(() => setWhoisLookups([]));
+      listMyWatches()
+        .then((r) => setWatches(r.watches ?? []))
+        .catch(() => setWatches([]));
+    }
+    if (tab === 'club' && membership === undefined) {
+      apiFetch<{ membership: MembershipDto | null }>('/api/v1/domain-services/club/membership')
+        .then((r) => setMembership(r.membership ?? null))
+        .catch(() => setMembership(null));
+    }
+    if (tab === 'broker' && brokerCases === null) {
+      apiFetch<{ cases: BrokerCaseRow[] }>('/api/v1/account/domain-brokerage/cases')
+        .then((r) => setBrokerCases(r.cases ?? []))
+        .catch(() => setBrokerCases([]));
     }
     if (tab === 'transactions' && transactions === null) {
       apiFetch<{ transactions: TransactionRow[] }>('/api/v1/domain-services/transactions')
         .then((r) => setTransactions(r.transactions))
         .catch(() => setTransactions([]));
     }
-  }, [tab, registrations, transfers, bids, appraisals, searches, transactions]);
+  }, [tab, registrations, transfers, bids, appraisals, searches, transactions, membership, brokerCases]);
 
   async function addDomain(event: React.FormEvent) {
     event.preventDefault();
@@ -201,6 +276,22 @@ export default function DashboardDomainsPage() {
       loadDomains();
     } catch (err) {
       setMessage(err instanceof Error ? err.message : 'Could not add the domain');
+    } finally {
+      setBusy('');
+    }
+  }
+
+  async function onCancelWatch(id: string) {
+    setBusy(`watch:${id}`);
+    setMessage('');
+    try {
+      await cancelWatch(id);
+      setMessage('Availability watch cancelled.');
+      listMyWatches()
+        .then((r) => setWatches(r.watches ?? []))
+        .catch(() => undefined);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'The watch could not be cancelled right now.');
     } finally {
       setBusy('');
     }
@@ -425,6 +516,30 @@ export default function DashboardDomainsPage() {
               </div>
             )}
           </SectionCard>
+
+          <SectionCard title="Auctions you lost" style={{ marginTop: "1rem" }}>
+            {lost === null ? (
+              <CatalogLoadingBanner label="Loading lost auctions…" />
+            ) : lost.length === 0 ? (
+              <p className="ch247-page__hint">No lost auctions.</p>
+            ) : (
+              <div className="ch247-table-wrap">
+                <table className="ch247-table">
+                  <thead><tr><th>Domain</th><th>Winning bid</th><th>Auction</th><th>Ended</th></tr></thead>
+                  <tbody>
+                    {lost.map((auction) => (
+                      <tr key={auction.id}>
+                        <td><Link to={`/domains/auctions/${auction.id}`}>{auction.domain_name}</Link></td>
+                        <td>{auction.current_highest_bid ? formatPrice(auction.current_highest_bid, auction.currency) : '—'}</td>
+                        <td>{auction.status.replace(/_/g, ' ')}</td>
+                        <td>{formatDateTime(auction.ends_at)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </SectionCard>
         </>
       )}
 
@@ -482,6 +597,85 @@ export default function DashboardDomainsPage() {
             )}
           </SectionCard>
 
+          <SectionCard title="Your bulk searches" style={{ marginTop: "1rem" }} actions={<Link className="ch247-button ch247-button--outline" to="/domains/bulk-search">New bulk search</Link>}>
+            {bulkSearches === null ? (
+              <CatalogLoadingBanner label="Loading bulk searches…" />
+            ) : bulkSearches.length === 0 ? (
+              <p className="ch247-page__hint">No bulk searches yet.</p>
+            ) : (
+              <div className="ch247-table-wrap">
+                <table className="ch247-table">
+                  <thead><tr><th>List</th><th>Source</th><th>Status</th><th>Submitted</th><th>Accepted</th><th>Rejected</th><th>When</th></tr></thead>
+                  <tbody>
+                    {bulkSearches.map((bulk) => (
+                      <tr key={bulk.id}>
+                        <td>{bulk.query_label}</td>
+                        <td>{bulk.source_type.toUpperCase()}</td>
+                        <td>{bulk.status.replace(/_/g, ' ')}</td>
+                        <td>{bulk.submitted_count}</td>
+                        <td>{bulk.accepted_count}</td>
+                        <td>{bulk.rejected_count}</td>
+                        <td>{formatDateTime(bulk.created_at)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </SectionCard>
+
+          <SectionCard title="Domain availability watches" style={{ marginTop: "1rem" }} actions={<Link className="ch247-button ch247-button--outline" to="/domains/search">Watch a domain</Link>}>
+            {watches === null ? (
+              <CatalogLoadingBanner label="Loading availability watches…" />
+            ) : watches.length === 0 ? (
+              <p className="ch247-page__hint">
+                No availability watches. When a domain you want is taken, use the <em>Watch</em> button in{' '}
+                <Link to="/domains/search">Domain Search</Link> and we will notify you if it becomes available.
+              </p>
+            ) : (
+              <div className="ch247-table-wrap">
+                <table className="ch247-table">
+                  <thead><tr><th>Domain</th><th>Status</th><th>Last check</th><th>Availability</th><th>Watching since</th><th></th></tr></thead>
+                  <tbody>
+                    {watches.map((watch) => (
+                      <tr key={watch.id}>
+                        <td style={{ wordBreak: 'break-all' }}>
+                          {watch.status === 'available' ? (
+                            <Link to={`/domains/search?domain=${encodeURIComponent(watch.domainName)}`}>{watch.domainName}</Link>
+                          ) : (
+                            watch.domainName
+                          )}
+                        </td>
+                        <td>
+                          {watch.status === 'watching' ? 'Watching' : watch.status === 'available' ? (
+                            <span className="ch247-dsvc-status ch247-dsvc-status--available">Available now</span>
+                          ) : (
+                            'Cancelled'
+                          )}
+                        </td>
+                        <td>{watch.lastCheckedAt ? formatDateTime(watch.lastCheckedAt) : 'Pending'}</td>
+                        <td>{watch.lastAvailability ? watch.lastAvailability.replace(/_/g, ' ') : '—'}</td>
+                        <td>{formatDateTime(watch.createdAt)}</td>
+                        <td>
+                          {watch.status === 'watching' && (
+                            <button
+                              className="ch247-button ch247-button--small ch247-button--outline"
+                              type="button"
+                              onClick={() => void onCancelWatch(watch.id)}
+                              disabled={busy === `watch:${watch.id}`}
+                            >
+                              Stop watching
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </SectionCard>
+
           <SectionCard title="Your WHOIS / RDAP lookups" style={{ marginTop: "1rem" }}>
             {whoisLookups === null ? (
               <CatalogLoadingBanner label="Loading lookup history…" />
@@ -507,6 +701,68 @@ export default function DashboardDomainsPage() {
             )}
           </SectionCard>
         </>
+      )}
+
+      {tab === 'club' && (
+        <SectionCard title="Discount Domain Club membership" actions={<Link className="ch247-button ch247-button--outline" to="/domains/club">View plans</Link>}>
+          {membership === undefined ? (
+            <CatalogLoadingBanner label="Loading membership…" />
+          ) : membership === null ? (
+            <p className="ch247-page__hint">
+              You are not a Discount Domain Club member. <Link to="/domains/club">See member pricing</Link> to join and save
+              on eligible domain registrations.
+            </p>
+          ) : (
+            <div className="ch247-table-wrap">
+              <table className="ch247-table">
+                <tbody>
+                  <tr><th scope="row">Plan</th><td>{membership.planName}</td></tr>
+                  <tr><th scope="row">Status</th><td><StatusChip status={membership.status} /></td></tr>
+                  <tr><th scope="row">Price</th><td>{formatPrice(membership.priceAmount, membership.currency)} / {membership.billingPeriod === 'monthly' ? 'month' : 'year'}</td></tr>
+                  <tr><th scope="row">Member since</th><td>{membership.startsAt ? formatDateTime(membership.startsAt) : '—'}</td></tr>
+                  <tr><th scope="row">Renewal date</th><td>{membership.renewsAt ? formatDateTime(membership.renewsAt) : '—'}</td></tr>
+                  {membership.cancelledAt && <tr><th scope="row">Cancelled</th><td>{formatDateTime(membership.cancelledAt)}</td></tr>}
+                </tbody>
+              </table>
+              <p className="ch247-page__hint" style={{ marginTop: '0.75rem' }}>
+                Member pricing is applied automatically to eligible registrations at quote time. Membership charges appear
+                under the Transactions tab; manage the subscription from the <Link to="/domains/club">Domain Club page</Link>.
+              </p>
+            </div>
+          )}
+        </SectionCard>
+      )}
+
+      {tab === 'broker' && (
+        <SectionCard title="Domain broker requests" actions={<Link className="ch247-button ch247-button--outline" to="/domains/broker">Request a broker</Link>}>
+          {brokerCases === null ? (
+            <CatalogLoadingBanner label="Loading broker requests…" />
+          ) : brokerCases.length === 0 ? (
+            <p className="ch247-page__hint">
+              No broker requests yet. If the domain you want is already registered, our{' '}
+              <Link to="/domains/broker">Domain Broker Service</Link> can help you acquire it.
+            </p>
+          ) : (
+            <div className="ch247-table-wrap">
+              <table className="ch247-table">
+                <thead><tr><th>Case</th><th>Domain</th><th>Status</th><th>Current offer</th><th>Payment</th><th>Transfer</th><th>Updated</th></tr></thead>
+                <tbody>
+                  {brokerCases.map((brokerCase) => (
+                    <tr key={brokerCase.id}>
+                      <td><Link to="/account/domain-brokerage">{brokerCase.brokerage_id}</Link></td>
+                      <td style={{ wordBreak: 'break-all' }}>{brokerCase.domain}</td>
+                      <td>{BROKER_STATUS_LABELS[brokerCase.status] ?? brokerCase.status.replace(/_/g, ' ')}</td>
+                      <td>{brokerCase.current_offer ? formatPrice(brokerCase.current_offer, brokerCase.currency) : '—'}</td>
+                      <td>{brokerCase.payment_status.replace(/_/g, ' ')}</td>
+                      <td>{brokerCase.transfer_status.replace(/_/g, ' ')}</td>
+                      <td>{formatDateTime(brokerCase.updated_at)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </SectionCard>
       )}
 
       {tab === 'transactions' && (

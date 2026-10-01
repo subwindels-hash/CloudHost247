@@ -74,6 +74,41 @@ describe('/domains/search', () => {
     await waitFor(() => expect(screen.getByText('Service Provider Not Configured')).toBeTruthy());
     expect(screen.queryByText('example.com')).toBeNull();
   });
+
+  it('lets a signed-in customer watch a taken result and reflects the "Watching" state', async () => {
+    localStorage.setItem('ch247_token', 'test-token');
+    vi.stubGlobal('fetch', routeMock([
+      {
+        match: (path) => path.startsWith('/api/v1/domain-services/search'),
+        body: {
+          searchId: 's3', queryLabel: 'taken-brand', status: 'completed', message: null,
+          results: [
+            { domainName: 'taken-brand.com', availabilityStatus: 'registered', isPremium: false, registrationPrice: null, renewalPrice: null, transferPrice: '11.48', currency: 'USD' },
+          ],
+        },
+      },
+      {
+        match: (path, init) => path === '/api/v1/domain-services/watches' && (init?.method ?? 'GET') === 'POST',
+        status: 201,
+        body: { watch: { id: 'watch-42', domainName: 'taken-brand.com', status: 'watching', lastCheckedAt: null, lastAvailability: null, availableAt: null, createdAt: '2026-10-01T00:00:00Z' } },
+      },
+      {
+        match: (path, init) => path === '/api/v1/domain-services/watches' && (init?.method ?? 'GET') === 'GET',
+        body: { watches: [] },
+      },
+    ]));
+
+    render(<MemoryRouter initialEntries={['/domains/search']}><App /></MemoryRouter>);
+
+    fireEvent.change(screen.getByLabelText('Domain name'), { target: { value: 'taken-brand' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Search' }));
+
+    const watchButton = await screen.findByRole('button', { name: 'Watch' });
+    fireEvent.click(watchButton);
+
+    await waitFor(() => expect(screen.getByText('Watching ✓')).toBeTruthy());
+    expect(screen.getByText(/you will be notified if it becomes available/i)).toBeTruthy();
+  });
 });
 
 describe('/domains/whois', () => {
@@ -302,11 +337,48 @@ describe('/dashboard/domains Domain Services tabs', () => {
       },
       { match: (path) => path.startsWith('/api/v1/domain-services/auctions/my/won'), body: { auctions: [] } },
       {
+        match: (path) => path.startsWith('/api/v1/domain-services/auctions/my/lost'),
+        body: {
+          auctions: [
+            { id: 'a-lost', domain_name: 'lostbid.example', status: 'ended', current_highest_bid: '300.00', currency: 'USD', ends_at: '2026-09-28T00:00:00Z' },
+          ],
+        },
+      },
+      {
         match: (path) => path.startsWith('/api/v1/domain-services/appraisals'),
         body: { appraisals: [] },
       },
+      { match: (path) => path.startsWith('/api/v1/domain-services/searches/bulk'), body: {
+        searches: [
+          { id: 'bulk-1', query_label: 'portfolio list', status: 'completed', source_type: 'csv', submitted_count: 12, accepted_count: 10, rejected_count: 2, created_at: '2026-09-27T00:00:00Z' },
+        ],
+      } },
       { match: (path) => path.startsWith('/api/v1/domain-services/searches'), body: { searches: [] } },
       { match: (path) => path.startsWith('/api/v1/domain-services/whois/history'), body: { lookups: [] } },
+      { match: (path) => path === '/api/v1/domain-services/watches', body: {
+        watches: [
+          { id: 'watch-1', domainName: 'dreambrand.example', status: 'watching', lastCheckedAt: '2026-09-30T12:00:00Z', lastAvailability: 'registered', availableAt: null, createdAt: '2026-09-29T00:00:00Z' },
+        ],
+      } },
+      {
+        match: (path) => path.startsWith('/api/v1/domain-services/club/membership'),
+        body: {
+          membership: {
+            id: 'mem-1', planId: 'plan-1', planName: 'Domain Investor Club', status: 'active',
+            startsAt: '2026-01-01T00:00:00Z', renewsAt: '2027-01-01T00:00:00Z', cancelledAt: null,
+            createdAt: '2026-01-01T00:00:00Z', orderId: null, invoiceId: null,
+            billingPeriod: 'annually', priceAmount: '99.00', currency: 'USD',
+          },
+        },
+      },
+      {
+        match: (path) => path.startsWith('/api/v1/account/domain-brokerage/cases'),
+        body: {
+          cases: [
+            { id: 'case-1', brokerage_id: 'BRK-2026-ABC123', domain: 'wanted.example', status: 'negotiation', current_offer: '16000.00', currency: 'USD', payment_status: 'pending', transfer_status: 'not_started', created_at: '2026-09-20T00:00:00Z', updated_at: '2026-09-25T00:00:00Z' },
+          ],
+        },
+      },
       {
         match: (path) => path.startsWith('/api/v1/domain-services/transactions'),
         body: {
@@ -335,6 +407,24 @@ describe('/dashboard/domains Domain Services tabs', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Auctions' }));
     await waitFor(() => expect(screen.getByText('bid.example')).toBeTruthy());
     expect(screen.getByText('Winning')).toBeTruthy();
+    // Lost auctions are listed from the real endpoint.
+    expect(screen.getByText('lostbid.example')).toBeTruthy();
+
+    // Searches & Lookups tab includes bulk search history and availability watches.
+    fireEvent.click(screen.getByRole('button', { name: 'Searches & Lookups' }));
+    await waitFor(() => expect(screen.getByText('portfolio list')).toBeTruthy());
+    expect(screen.getByText('dreambrand.example')).toBeTruthy();
+    expect(screen.getByText('Watching')).toBeTruthy();
+
+    // Domain Club tab shows the live membership.
+    fireEvent.click(screen.getByRole('button', { name: 'Domain Club' }));
+    await waitFor(() => expect(screen.getByText('Domain Investor Club')).toBeTruthy());
+    expect(screen.getByText('active')).toBeTruthy();
+
+    // Broker Requests tab shows the customer's cases.
+    fireEvent.click(screen.getByRole('button', { name: 'Broker Requests' }));
+    await waitFor(() => expect(screen.getByText('BRK-2026-ABC123')).toBeTruthy());
+    expect(screen.getByText('wanted.example')).toBeTruthy();
 
     // Transactions tab
     fireEvent.click(screen.getByRole('button', { name: 'Transactions' }));

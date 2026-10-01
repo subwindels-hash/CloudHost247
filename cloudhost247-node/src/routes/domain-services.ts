@@ -49,6 +49,7 @@ import {
   memberPricingPreview,
 } from '../domain-services/club-service';
 import { domainProviderReadiness } from '../domain-services/provider-service';
+import { addWatch, listMyWatches, cancelWatch } from '../domain-services/availability-watch-service';
 
 const domainNameSchema = z
   .string()
@@ -503,6 +504,41 @@ export async function registerDomainServiceRoutes(app: FastifyInstance, env: Env
       }
     }
     return memberPricingPreview(pool, userId, standardPrice);
+  });
+
+  // ---------------------------------------------------------------------------------------
+  // Availability watches (authenticated): the sweep fulfils them from fresh provider checks.
+  // ---------------------------------------------------------------------------------------
+  app.post('/api/v1/domain-services/watches', async (request, reply) => {
+    const auth = await authenticate(request, env, pool);
+    const input = parseOrThrow(z.object({ domainName: domainNameSchema }), request.body);
+    const watch = await addWatch(pool, auth.userId, input.domainName);
+    await auditRequest(pool, request, auth.userId, {
+      action: 'domain_availability_watch_created',
+      resourceType: 'domain_availability_watch',
+      resourceId: watch.id,
+      metadata: { domainName: watch.domainName },
+    }).catch(() => undefined);
+    reply.code(201);
+    return { watch };
+  });
+
+  app.get('/api/v1/domain-services/watches', async (request) => {
+    const auth = await authenticate(request, env, pool);
+    return { watches: await listMyWatches(pool, auth.userId) };
+  });
+
+  app.delete<{ Params: { id: string } }>('/api/v1/domain-services/watches/:id', async (request, reply) => {
+    const auth = await authenticate(request, env, pool);
+    const id = parseOrThrow(uuidSchema, request.params.id);
+    await cancelWatch(pool, auth.userId, id);
+    await auditRequest(pool, request, auth.userId, {
+      action: 'domain_availability_watch_cancelled',
+      resourceType: 'domain_availability_watch',
+      resourceId: id,
+    }).catch(() => undefined);
+    reply.code(204);
+    return null;
   });
 
   // ---------------------------------------------------------------------------------------

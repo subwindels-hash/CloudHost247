@@ -200,11 +200,13 @@ async function runWorkerCycle(
       domainServices.transfers.completed > 0 ||
       domainServices.appraisals.executed > 0 ||
       domainServices.auctions.ended > 0 ||
-      domainServices.membershipsExpired > 0;
+      domainServices.membershipsExpired > 0 ||
+      domainServices.membershipRenewalReminders > 0 ||
+      domainServices.availabilityWatches.becameAvailable > 0;
     didWork ||= domainWork;
     if (domainWork) {
       logger.log(
-        `[worker:${ctx.workerId}] domain services: ${domainServices.registrations.claimed} registration(s) claimed (${domainServices.registrations.registered} registered, ${domainServices.registrations.failed} failed), ${domainServices.registrationConfirmations} confirmed, transfers ${domainServices.transfers.initiated} initiated/${domainServices.transfers.completed} completed, ${domainServices.appraisals.executed} appraisal(s), ${domainServices.auctions.ended} auction(s) ended, ${domainServices.membershipsExpired} membership(s) expired`
+        `[worker:${ctx.workerId}] domain services: ${domainServices.registrations.claimed} registration(s) claimed (${domainServices.registrations.registered} registered, ${domainServices.registrations.failed} failed), ${domainServices.registrationConfirmations} confirmed, transfers ${domainServices.transfers.initiated} initiated/${domainServices.transfers.completed} completed, ${domainServices.appraisals.executed} appraisal(s), ${domainServices.auctions.ended} auction(s) ended, ${domainServices.membershipsExpired} membership(s) expired, ${domainServices.membershipRenewalReminders} renewal reminder(s), ${domainServices.availabilityWatches.checked} watch(es) checked/${domainServices.availabilityWatches.becameAvailable} now available`
       );
     }
   }

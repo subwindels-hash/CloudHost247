@@ -6,6 +6,8 @@ import { apiFetch } from '../../lib/api';
 import {
   quoteRegistration,
   searchDomains,
+  watchDomain,
+  listMyWatches,
   type RegistrationQuote,
   type SearchResponse,
   type SearchResultRow,
@@ -65,6 +67,34 @@ export default function SearchPage() {
   const [orderError, setOrderError] = useState('');
   const [orderBusy, setOrderBusy] = useState(false);
   const [createdInvoice, setCreatedInvoice] = useState<{ invoiceId: string | null; invoiceNumber: string | null; amount: string; currency: string } | null>(null);
+  const [watchedDomains, setWatchedDomains] = useState<Set<string>>(new Set());
+  const [watchBusy, setWatchBusy] = useState('');
+  const [watchNotice, setWatchNotice] = useState('');
+
+  // Preload the customer's active watches so already-watched results render as "Watching".
+  useEffect(() => {
+    if (!token) return;
+    listMyWatches()
+      .then((response) => {
+        setWatchedDomains(new Set(response.watches.filter((watch) => watch.status === 'watching').map((watch) => watch.domainName.toLowerCase())));
+      })
+      .catch(() => undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
+
+  async function onWatchDomain(domainName: string) {
+    setWatchBusy(domainName);
+    setWatchNotice('');
+    try {
+      await watchDomain(domainName);
+      setWatchedDomains((previous) => new Set(previous).add(domainName.toLowerCase()));
+      setWatchNotice(`Watching ${domainName} — you will be notified if it becomes available.`);
+    } catch (err) {
+      setWatchNotice(err instanceof Error ? err.message : 'The watch could not be created right now.');
+    } finally {
+      setWatchBusy('');
+    }
+  }
 
   async function onSearch(event: React.FormEvent) {
     event.preventDefault();
@@ -206,6 +236,7 @@ export default function SearchPage() {
           </form>
 
           {error && <p className="ch247-banner ch247-banner--error" role="alert">{error}</p>}
+          {watchNotice && <p className="ch247-banner ch247-banner--info" role="status">{watchNotice}</p>}
 
           {search?.status === 'provider_not_configured' && (
             <div className="ch247-dsvc-provider-missing" role="status">
@@ -246,6 +277,21 @@ export default function SearchPage() {
                         ))}
                       {result.availabilityStatus === 'registered' && (
                         <Link className="ch247-button ch247-button--outline ch247-button--small" to="/domains/transfer">Transfer</Link>
+                      )}
+                      {(result.availabilityStatus === 'registered' || result.availabilityStatus === 'unavailable') && token && (
+                        watchedDomains.has(result.domainName.toLowerCase()) ? (
+                          <span className="ch247-dsvc-status ch247-dsvc-status--completed" title="You will be notified if this domain becomes available">Watching ✓</span>
+                        ) : (
+                          <button
+                            type="button"
+                            className="ch247-button ch247-button--outline ch247-button--small"
+                            onClick={() => void onWatchDomain(result.domainName)}
+                            disabled={watchBusy === result.domainName}
+                            title="Get notified if this domain becomes available"
+                          >
+                            {watchBusy === result.domainName ? 'Watching…' : 'Watch'}
+                          </button>
+                        )
                       )}
                     </div>
                   </div>

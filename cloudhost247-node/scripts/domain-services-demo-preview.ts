@@ -229,6 +229,73 @@ async function main() {
     payload: { domainName: 'taken-public.com' },
   });
 
+  // Discount Domain Club: Amaka subscribes through the REAL plan/subscribe flow, then the
+  // payment-verified hook (as the webhook would) activates the membership.
+  const { rows: planRows } = await db.query<{ id: string }>(
+    `SELECT id FROM domain_club_plans WHERE status='published' LIMIT 1`
+  );
+  if (planRows[0]) {
+    const subscribe = await app.inject({
+      method: 'POST',
+      url: `/api/v1/domain-services/club/plans/${planRows[0].id}/subscribe`,
+      headers: { authorization: `Bearer ${amakaToken}` },
+      payload: {},
+    });
+    if (subscribe.statusCode === 201) {
+      const membershipId = subscribe.json().membershipId as string;
+      const { markMembershipPaymentVerified } = await import('../src/domain-services/club-service');
+      await markMembershipPaymentVerified(db as never, membershipId);
+    }
+  }
+
+  // Domain Broker Service: Amaka requests help acquiring a registered domain, and the admin
+  // workflow moves the case forward — every step through the REAL broker case APIs.
+  const brokerCase = await app.inject({
+    method: 'POST',
+    url: '/api/v1/account/domain-brokerage/cases',
+    headers: { authorization: `Bearer ${amakaToken}` },
+    payload: {
+      domain: 'taken-public.com',
+      customerName: 'Amaka Demo',
+      contactInformation: 'amaka@demo-customer.test / +234.8012345678',
+      maxBudget: 20000,
+      currency: 'usd',
+      openingOffer: 4500,
+      message: 'This domain would be the flagship for our rebrand. Flexible on timing.',
+      termsAccepted: true,
+    },
+  });
+  if (brokerCase.statusCode !== 201) throw new Error(`demo broker case failed: ${brokerCase.body}`);
+  const brokerCaseId = brokerCase.json().case.id as string;
+  await app.inject({
+    method: 'PATCH',
+    url: `/api/v1/admin/domain-brokerage/cases/${brokerCaseId}/status`,
+    headers: { authorization: `Bearer ${rootToken}` },
+    payload: { status: 'contacting_seller', note: 'Seller identified through marketplace listing' },
+  });
+  const brokerOffer = await app.inject({
+    method: 'POST',
+    url: `/api/v1/admin/domain-brokerage/cases/${brokerCaseId}/offers`,
+    headers: { authorization: `Bearer ${rootToken}` },
+    payload: { amount: 12500, currency: 'usd', senderType: 'seller' },
+  });
+  if (brokerOffer.statusCode !== 201) throw new Error(`demo broker offer failed: ${brokerOffer.body}`);
+  await app.inject({
+    method: 'POST',
+    url: `/api/v1/admin/domain-brokerage/cases/${brokerCaseId}/messages`,
+    headers: { authorization: `Bearer ${rootToken}` },
+    payload: { body: 'The seller countered at 12,500 USD. It is inside your budget — open the case to accept or reject.', visibility: 'customer' },
+  });
+
+  // Availability watch: Amaka watches a registered domain; the 30s sweep re-checks it honestly
+  // (stays "watching" — the simulated registrar keeps it registered, no fake flips).
+  await app.inject({
+    method: 'POST',
+    url: '/api/v1/domain-services/watches',
+    headers: { authorization: `Bearer ${amakaToken}` },
+    payload: { domainName: 'taken-private.net' },
+  });
+
   // ------------------------------------------------------------------------------- serve ---
   const port = Number(env.PORT) || 3000;
   await app.listen({ port, host: '0.0.0.0' });
@@ -241,14 +308,20 @@ async function main() {
 Domain Services demo preview ready on http://0.0.0.0:${port}
 
   /domains                  — services hub (3 groups × 9 cards) + live search
-  /domains/search           — search + registration checkout (try "amaka-brand" or any name)
+  /domains/search           — search + registration checkout (try "amaka-brand" or any name);
+                              taken results get a Watch button (sign in as Amaka)
   /domains/extensions       — synced TLD catalogue with admin-curated trending badges
   /domains/auctions         — live auction (brandstack.com) + scheduled (cloudmetrics.io)
   /domains/whois            — RDAP lookup (try "taken-public.com" vs "taken-private.net")
   /domains/club             — published club plan with server-computed member pricing
+  /domains/broker           — broker request form (Amaka has a live case with a seller offer)
   /domains/appraisal        — honest "Service Provider Not Configured" (no valuation provider)
-  /dashboard/domains        — registrations, transfers, auctions, appraisals, transactions
-  /admin/domain-services    — providers, Test Connection, extensions, auctions, transfers, club
+  /dashboard/domains        — registrations, transfers, auctions (bids/won/lost), appraisals,
+                              searches & bulk lookups, availability watches (Amaka watches
+                              taken-private.net), Domain Club membership, Broker Requests
+  /admin/domain-services    — providers, Test Connection, extensions, auctions, transfers, club,
+                              the Broker tab (case workflow, offers, notes, fees, transfers)
+                              and the Activity tab (registrations/appraisals/WHOIS/transactions)
 
   Registrar/RDAP endpoints are SIMULATED (tests/helpers/mock-registrar.ts); production uses the
   real Namecheap/GoDaddy/RDAP services. Appraisal is intentionally left unconfigured to show the
@@ -256,7 +329,7 @@ Domain Services demo preview ready on http://0.0.0.0:${port}
 
   Logins (password "${PASSWORD}"):
     root@demo.cloudhost247.test   (super_admin)
-    amaka@demo-customer.test      (customer — already has a registration, a bid and a lookup)`);
+    amaka@demo-customer.test      (customer — registration, bid, lookup, club membership, broker case)`);
 }
 
 main().catch((err) => {
