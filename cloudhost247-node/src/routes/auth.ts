@@ -16,6 +16,7 @@ import {
 } from '../services/totp-mfa-service';
 import { createUserWithIdentity } from '../services/customer-identity-service';
 import { beginPasskeyRegistration, finishPasskeyRegistration, listPasskeys, removePasskey, renamePasskey } from '../services/passkey-service';
+import { beginPasskeyAuthentication, finishPasskeyAuthentication } from '../services/passkey-authentication-service';
 import {
   expiryFromNow,
   generateSecurityNumber,
@@ -74,6 +75,8 @@ const passkeyFinishSchema = z.object({
 });
 const passkeyRenameSchema = z.object({ name: z.string().trim().min(1).max(80) });
 const passkeyRemoveSchema = z.object({ password: z.string().min(1) });
+const passkeyLoginOptionsSchema = z.object({ email: z.string().email() });
+const passkeyLoginVerifySchema = z.object({ challengeId: z.string().uuid(), response: z.record(z.unknown()) });
 
 function publicUser(user: {
   id: string;
@@ -181,6 +184,21 @@ export async function registerAuthRoutes(app: FastifyInstance, env: Env, overrid
       };
     }
   );
+
+  app.post('/api/auth/passkeys/login/options', { config: { rateLimit: { max: 10, timeWindow: '15 minutes' } } }, async (request) => {
+    const parsed=passkeyLoginOptionsSchema.safeParse(request.body); if(!parsed.success) throw new ValidationError(parsed.error.issues.map(i=>i.message).join(', '));
+    const user=await findUserByEmail(pool,parsed.data.email); if(!user||user.status!=='active') throw new UnauthorizedError('No passkey is available for this account');
+    const result=await beginPasskeyAuthentication(pool,env,{id:user.id,authSessionVersion:user.auth_session_version}); if(!result) throw new UnauthorizedError('No passkey is available for this account');
+    return result;
+  });
+  app.post('/api/auth/passkeys/login/verify', { config: { rateLimit: { max: 10, timeWindow: '15 minutes' } } }, async (request,reply) => {
+    const parsed=passkeyLoginVerifySchema.safeParse(request.body); if(!parsed.success) throw new ValidationError(parsed.error.issues.map(i=>i.message).join(', '));
+    const assertion=await finishPasskeyAuthentication(pool,env,parsed.data.challengeId,parsed.data.response as never); if(!assertion) throw new UnauthorizedError('Invalid or expired passkey assertion');
+    const user=await findUserById(pool,assertion.userId); if(!user||user.status!=='active') throw new UnauthorizedError('This account is not active');
+    const mfa=await getMfaStatus(pool,user.id); if(mfa.enabled){const mfaToken=await issueMfaLoginChallenge(pool,env.JWT_SECRET,user.id,user.auth_session_version);reply.code(202);return {mfaRequired:true,mfaToken};}
+    await recordAuthEvent(pool,{id:randomUUID(),userId:user.id,eventType:'login_success',ipAddress:request.ip,userAgent:request.headers['user-agent']??null,metadata:{passkey:true}});
+    return {user:publicUser(user),token:signAuthToken(env,{sub:user.id,role:user.role,email:user.email,sv:assertion.sessionVersion})};
+  });
 
   app.post('/api/auth/login', { config: { rateLimit: { max: 10, timeWindow: '1 minute' } } }, async (request, reply) => {
     const parsed = loginSchema.safeParse(request.body);

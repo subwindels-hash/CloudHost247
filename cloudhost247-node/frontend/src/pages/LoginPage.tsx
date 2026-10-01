@@ -1,4 +1,5 @@
 import { FormEvent, useState } from 'react';
+import { startAuthentication } from '@simplewebauthn/browser';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { apiFetch } from '../lib/api';
 import { setSession, type StoredUser } from '../lib/auth';
@@ -71,6 +72,18 @@ export default function LoginPage() {
     }
   }
 
+  async function loginWithPasskey() {
+    if (!email) { setMessage({ kind:'error', text:'Enter your email address before using a passkey.' }); return; }
+    setSubmitting(true); setMessage(null);
+    try {
+      const start=await apiFetch<{challengeId:string;options:Parameters<typeof startAuthentication>[0]['optionsJSON']}>('/api/auth/passkeys/login/options',{method:'POST',body:JSON.stringify({email})});
+      const response=await startAuthentication({optionsJSON:start.options});
+      const result=await apiFetch<AuthResponse>('/api/auth/passkeys/login/verify',{method:'POST',body:JSON.stringify({challengeId:start.challengeId,response})});
+      if(result.mfaRequired&&result.mfaToken){setMfaToken(result.mfaToken);setMessage({kind:'ok',text:'Passkey verified. Enter your multi-factor code to finish logging in.'});return;}
+      if(!result.token||!result.user)throw new Error('Passkey login did not return a session'); setSession(result.token,result.user);navigate(redirectTo,{replace:true});
+    } catch(err){setMessage({kind:'error',text:err instanceof Error?err.message:'Could not verify passkey.'});} finally {setSubmitting(false);}
+  }
+
   function startOver() {
     setMfaToken(null);
     setMfaCode('');
@@ -122,6 +135,7 @@ export default function LoginPage() {
             <button type="submit" disabled={submitting}>
               {submitting ? 'Logging in…' : 'Login'}
             </button>
+            <button type="button" className="ch247-button ch247-button--outline" onClick={loginWithPasskey} disabled={submitting}>Use a passkey</button>
           </>
         )}
       </form>

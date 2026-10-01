@@ -2,7 +2,10 @@ import { createHash, createHmac, randomUUID } from 'node:crypto';
 import {
   generateRegistrationOptions,
   verifyRegistrationResponse,
+  generateAuthenticationOptions,
+  verifyAuthenticationResponse,
   type RegistrationResponseJSON,
+  type AuthenticationResponseJSON,
 } from '@simplewebauthn/server';
 import type { Env } from '../config/env';
 import type { Queryable } from '../db/types';
