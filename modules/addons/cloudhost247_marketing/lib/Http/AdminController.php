@@ -8,6 +8,7 @@ use CloudHost247\Integrations\Support\ResultCode;
 use CloudHost247\Marketing\Domain\CampaignStatus;
 use CloudHost247\Marketing\Domain\ConsentStatus;
 use CloudHost247\Marketing\Domain\QueueStatus;
+use CloudHost247\Marketing\Domain\CampaignAudience;
 use CloudHost247\Marketing\Domain\SubscriberSource;
 use CloudHost247\Marketing\Domain\TemplateBlock;
 use CloudHost247\Marketing\Repositories\TemplateRepository;
@@ -22,7 +23,9 @@ use CloudHost247\Marketing\Security\InputValidator;
 use CloudHost247\Marketing\Services\ExportService;
 use CloudHost247\Marketing\Services\ImportService;
 use CloudHost247\Marketing\Services\SegmentService;
+use CloudHost247\Marketing\Services\CampaignService;
 use CloudHost247\Marketing\Services\TemplateService;
+use CloudHost247\Marketing\Services\UnavailableTransport;
 use CloudHost247\Marketing\Services\SubscriptionService;
 use WHMCS\Database\Capsule;
 
@@ -37,7 +40,7 @@ final class AdminController
 
     /** Every view the module currently serves. */
     const VIEWS = array('dashboard', 'settings', 'subscribers', 'subscriber', 'lists', 'import', 'suppressions',
-        'segments', 'segment', 'templates', 'template');
+        'segments', 'segment', 'templates', 'template', 'campaigns', 'campaign');
 
     /**
      * Sections the admin menu already advertises but whose build session has not
@@ -47,7 +50,6 @@ final class AdminController
      * @var array<string,int>
      */
     const PLANNED_VIEWS = array(
-        'campaigns' => 5,
         'analytics' => 9,
         'automations' => 10,
     );
@@ -58,6 +60,8 @@ final class AdminController
     const SEGMENT_CAPABILITY = 'marketing.campaigns.manage';
     /** Templates are content, same capability boundary as campaigns. */
     const TEMPLATE_CAPABILITY = 'marketing.campaigns.manage';
+    /** A campaign is an audience plus approved content. */
+    const CAMPAIGN_CAPABILITY = 'marketing.campaigns.manage';
 
     private $settings;
     private $subscribers;
@@ -69,6 +73,7 @@ final class AdminController
     private $exporter;
     private $segments;
     private $templates;
+    private $campaigns;
 
     public function __construct(
         SettingsRepository $settings = null,
@@ -80,7 +85,8 @@ final class AdminController
         ImportService $imports = null,
         ExportService $exporter = null,
         SegmentService $segments = null,
-        TemplateService $templates = null
+        TemplateService $templates = null,
+        CampaignService $campaigns = null
     ) {
         $this->settings = $settings ?: new SettingsRepository();
         $this->subscribers = $subscribers ?: new SubscriberRepository();
@@ -92,6 +98,7 @@ final class AdminController
         $this->exporter = $exporter ?: new ExportService($this->subscribers, $this->lists, $this->tags);
         $this->segments = $segments ?: new SegmentService();
         $this->templates = $templates ?: new TemplateService();
+        $this->campaigns = $campaigns ?: new CampaignService(null, null, null, null, null, $this->campaignTransport());
     }
 
     public function handle()
@@ -110,6 +117,18 @@ final class AdminController
                 // reports validation failures as an Error notice (unchanged).
                 $notice = $this->saveSettings();
                 if (substr($notice, 0, 6) === 'Error:') { $error = $notice; $notice = ''; }
+            } elseif ($view === 'campaigns' || $view === 'campaign') {
+                $this->requireMutation(self::CAMPAIGN_CAPABILITY);
+                try {
+                    $result = $this->handleCampaignAction();
+                    $notice = isset($result['notice']) ? $result['notice'] : '';
+                    $error = isset($result['error']) ? $result['error'] : '';
+                    if (isset($result['campaignTest'])) { $extra['campaignTest'] = $result['campaignTest']; }
+                } catch (\InvalidArgumentException $e) {
+                    $error = 'Error: ' . $e->getMessage();
+                } catch (\RuntimeException $e) {
+                    $error = 'Error: ' . $e->getMessage();
+                }
             } elseif ($view === 'templates' || $view === 'template') {
                 $this->requireMutation(self::TEMPLATE_CAPABILITY);
                 try {
@@ -189,6 +208,11 @@ final class AdminController
             $detail = $this->segmentDetailView();
             $data = array_merge($data, $detail);
             if (empty($detail['segmentDetail'])) { $viewError = 'That segment does not exist.'; }
+        } elseif ($view === 'campaigns') { $data = array_merge($data, $this->campaignListView()); }
+        elseif ($view === 'campaign') {
+            $detail = $this->campaignDetailView();
+            $data = array_merge($data, $detail);
+            if (empty($detail['campaignDetail'])) { $viewError = 'That campaign does not exist.'; }
         } elseif ($view === 'templates') { $data = array_merge($data, $this->templateListView()); }
         elseif ($view === 'template') {
             $detail = $this->templateDetailView();
@@ -423,6 +447,141 @@ final class AdminController
         }
 
         return array('notice' => '', 'error' => 'Unknown list action.');
+    }
+
+    // ------------------------------------------------------------- campaigns
+
+    /**
+     * The campaign screens use a refusal transport until SESSION 6 wires the
+     * real sender. The reason shown is the provider state, so the operator is
+     * told what to fix instead of being offered a button that does nothing.
+     */
+    private function campaignTransport()
+    {
+        $status = $this->integrationStatus();
+        if (empty($status['configured'])) {
+            return new UnavailableTransport('Configure the cPanel SMTP provider in API & Integrations before sending.');
+        }
+        return new UnavailableTransport('The cPanel SMTP sender arrives in SESSION 6 of this build; test messages are refused rather than silently dropped.');
+    }
+
+    private function campaignListView()
+    {
+        $filters = array(
+            'status' => isset($_GET['status']) ? (string) $_GET['status'] : '',
+            'search' => isset($_GET['q']) ? substr((string) $_GET['q'], 0, 64) : '',
+        );
+        if ($filters['status'] !== '' && !CampaignStatus::isValid($filters['status'])) { $filters['status'] = ''; }
+        $page = isset($_GET['page']) ? max(1, (int) $_GET['page']) : 1;
+        return array('campaignsView' => array_merge($this->campaigns->repository()->paginate($filters, $page, 25), array(
+            'filters' => $filters,
+            'counts' => $this->campaigns->repository()->countsByStatus(),
+            'statuses' => CampaignStatus::all(),
+            'canManage' => $this->capAllowed(self::CAMPAIGN_CAPABILITY),
+            'transport' => array(
+                'available' => $this->campaigns->transport()->isAvailable(),
+                'key' => $this->campaigns->transport()->key(),
+                'reason' => $this->campaigns->transport()->reason(),
+            ),
+            'lists' => $this->lists->all('active'),
+            'segments' => $this->segments->repository()->all('active'),
+            'templates' => $this->templates->repository()->all('active'),
+            'audiences' => CampaignAudience::all(),
+        )));
+    }
+
+    private function campaignDetailView()
+    {
+        $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
+        $campaign = $id > 0 ? $this->campaigns->repository()->find($id) : null;
+        if (!$campaign) { return array('campaignDetail' => null); }
+
+        return array('campaignDetail' => array(
+            'row' => $campaign,
+            'checklist' => $this->campaigns->checklist($campaign),
+            'audience' => $this->campaigns->audiencePreview($campaign),
+            'editable' => in_array((string) $campaign->status, CampaignService::EDITABLE_STATUSES, true),
+            'transport' => array(
+                'available' => $this->campaigns->transport()->isAvailable(),
+                'key' => $this->campaigns->transport()->key(),
+                'reason' => $this->campaigns->transport()->reason(),
+            ),
+            'lists' => $this->lists->all('active'),
+            'segments' => $this->segments->repository()->all('active'),
+            'templates' => $this->templates->repository()->all('active'),
+            'canManage' => $this->capAllowed(self::CAMPAIGN_CAPABILITY),
+        ));
+    }
+
+    private function handleCampaignAction()
+    {
+        $action = isset($_POST['action']) ? (string) $_POST['action'] : '';
+        $id = isset($_POST['campaign_id']) ? (int) $_POST['campaign_id'] : 0;
+
+        if ($action === 'campaign.save') {
+            $input = array(
+                'name' => isset($_POST['name']) ? (string) $_POST['name'] : '',
+                'subject' => isset($_POST['subject']) ? (string) $_POST['subject'] : '',
+                'preview_text' => isset($_POST['preview_text']) ? (string) $_POST['preview_text'] : '',
+                'from_name' => isset($_POST['from_name']) ? (string) $_POST['from_name'] : '',
+                'from_email' => isset($_POST['from_email']) ? (string) $_POST['from_email'] : '',
+                'reply_to' => isset($_POST['reply_to']) ? (string) $_POST['reply_to'] : '',
+                'template_id' => isset($_POST['template_id']) ? (int) $_POST['template_id'] : 0,
+                'audience_type' => isset($_POST['audience_type']) ? (string) $_POST['audience_type'] : CampaignAudience::LIST,
+                'audience_id' => isset($_POST['audience_id']) ? (int) $_POST['audience_id'] : 0,
+            );
+            if ($id > 0) {
+                $campaign = $this->campaigns->update($id, $input);
+                $notice = 'Campaign saved.';
+                if ($campaign->status === CampaignStatus::DRAFT && isset($_POST['previous_status'])) {
+                    $notice = 'Campaign saved and returned to draft — approve it again before it can be scheduled.';
+                }
+            } else {
+                $campaign = $this->campaigns->create($input, isset($_SESSION['adminid']) ? (int) $_SESSION['adminid'] : 0);
+                $notice = 'Campaign created as a draft.';
+            }
+            return array('notice' => $notice, 'error' => '', 'campaign_id' => (int) $campaign->id);
+        }
+
+        if ($action === 'campaign.ready') {
+            $result = $this->campaigns->markReady($id);
+            return array('notice' => $result['message'], 'error' => '');
+        }
+
+        if ($action === 'campaign.schedule' || $action === 'campaign.resume') {
+            $datetime = isset($_POST['scheduled_at']) ? (string) $_POST['scheduled_at'] : '';
+            $timezone = isset($_POST['scheduled_timezone']) ? (string) $_POST['scheduled_timezone'] : 'UTC';
+            $result = $action === 'campaign.schedule'
+                ? $this->campaigns->schedule($id, $datetime, $timezone)
+                : $this->campaigns->resume($id, $datetime, $timezone);
+            return array('notice' => $result['message'], 'error' => '');
+        }
+
+        if ($action === 'campaign.pause') {
+            $result = $this->campaigns->pause($id);
+            return array('notice' => $result['message'], 'error' => '');
+        }
+
+        if ($action === 'campaign.cancel') {
+            $result = $this->campaigns->cancel($id);
+            return array('notice' => $result['message'], 'error' => '');
+        }
+
+        if ($action === 'campaign.archive') {
+            $result = $this->campaigns->archive($id);
+            return array('notice' => $result['message'], 'error' => '');
+        }
+
+        if ($action === 'campaign.test') {
+            $result = $this->campaigns->sendTest($id, isset($_POST['test_email']) ? (string) $_POST['test_email'] : '');
+            return array(
+                'notice' => 'Test message accepted by ' . $result['transport'] . ' for delivery.',
+                'error' => '',
+                'campaignTest' => $result,
+            );
+        }
+
+        return array('notice' => '', 'error' => 'Unknown campaign action.');
     }
 
     // ------------------------------------------------------------- templates

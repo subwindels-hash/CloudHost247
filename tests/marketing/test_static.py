@@ -42,6 +42,19 @@ class MarketingStaticTests(unittest.TestCase):
             os.path.join(LIB, "Domain", "SuppressionReason.php"),
             os.path.join(LIB, "Repositories", "SettingsRepository.php"),
             os.path.join(LIB, "Security", "InputValidator.php"),
+            os.path.join(LIB, "Security", "HtmlSanitizer.php"),
+            os.path.join(LIB, "Domain", "CampaignAudience.php"),
+            os.path.join(LIB, "Domain", "SegmentField.php"),
+            os.path.join(LIB, "Domain", "SegmentOperator.php"),
+            os.path.join(LIB, "Domain", "TemplateBlock.php"),
+            os.path.join(LIB, "Repositories", "CampaignRepository.php"),
+            os.path.join(LIB, "Repositories", "SegmentRepository.php"),
+            os.path.join(LIB, "Repositories", "TemplateRepository.php"),
+            os.path.join(LIB, "Services", "CampaignService.php"),
+            os.path.join(LIB, "Services", "MessageTransport.php"),
+            os.path.join(LIB, "Services", "UnavailableTransport.php"),
+            os.path.join(LIB, "Services", "SegmentService.php"),
+            os.path.join(LIB, "Services", "TemplateService.php"),
             os.path.join(LIB, "Http", "AdminController.php"),
             os.path.join(LIB, "Http", "AdminView.php"),
             os.path.join(ROOT, "tests", "marketing", "run.php"),
@@ -98,6 +111,21 @@ class MarketingStaticTests(unittest.TestCase):
         # the module must never read/write WHMCS core tables directly
         self.assertNotRegex(combined, r"Capsule::table\(['\"]tbl")
         self.assertNotRegex(combined, r"->(?:create|table|drop|rename)\(['\"]tbl")
+
+    def test_delivery_goes_through_the_transport_contract_only(self):
+        # Campaign, segment and template code must never open a socket, call the
+        # mail() function or name a credential. Delivery is a transport's job —
+        # which is also what keeps credentials in the integrations vault.
+        service = read(os.path.join(LIB, "Services", "CampaignService.php"))
+        self.assertIn("MessageTransport", service)
+        for forbidden in ("fsockopen", "stream_socket_client", "STARTTLS", "smtp_pass", "smtp_user"):
+            self.assertNotIn(forbidden, service)
+        self.assertNotRegex(service, r"(?<![A-Za-z_])mail\s*\(")  # `Email(` in a validator name is not a mail call
+        combined = ""
+        for path in iter_php(MODULE):
+            combined += read(path)
+        for forbidden in ("fsockopen", "stream_socket_client", "swiftmailer", "PHPMailer"):
+            self.assertNotIn(forbidden, combined)
 
     def test_module_never_touches_smtp_secrets_directly(self):
         combined = ""

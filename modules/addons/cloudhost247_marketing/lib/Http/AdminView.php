@@ -4,6 +4,7 @@ namespace CloudHost247\Marketing\Http;
 use CloudHost247\Marketing\Domain\CampaignStatus;
 use CloudHost247\Marketing\Domain\ConsentStatus;
 use CloudHost247\Marketing\Domain\QueueStatus;
+use CloudHost247\Marketing\Domain\CampaignAudience;
 use CloudHost247\Marketing\Domain\SegmentField;
 use CloudHost247\Marketing\Domain\TemplateBlock;
 use CloudHost247\Marketing\Domain\SegmentOperator;
@@ -40,6 +41,7 @@ final class AdminView
 
         $tabs = array(
             'dashboard' => array('Dashboard', ''),
+            'campaigns' => array('Campaigns', 'campaigns'),
             'subscribers' => array('Subscribers', 'subscribers'),
             'segments' => array('Segments', 'segments'),
             'templates' => array('Templates', 'templates'),
@@ -48,9 +50,13 @@ final class AdminView
             'suppressions' => array('Suppression List', 'suppressions'),
             'settings' => array('Delivery Settings', 'settings'),
         );
-        $active = $data['view'] === 'subscriber' ? 'subscribers'
-            : ($data['view'] === 'segment' ? 'segments'
-            : ($data['view'] === 'template' ? 'templates' : $data['view']));
+        $aliases = array(
+            'campaign' => 'campaigns',
+            'subscriber' => 'subscribers',
+            'segment' => 'segments',
+            'template' => 'templates',
+        );
+        $active = isset($aliases[$data['view']]) ? $aliases[$data['view']] : $data['view'];
         echo '<ul class="nav nav-tabs" role="tablist">';
         foreach ($tabs as $key => $tab) {
             echo '<li role="presentation" class="' . ($active === $key ? 'active' : '') . '"><a href="' . $this->base($tab[1]) . '">' . $this->e($tab[0]) . '</a></li>';
@@ -65,6 +71,8 @@ final class AdminView
         elseif ($data['view'] === 'suppressions') { $this->renderSuppressions($data); }
         elseif ($data['view'] === 'segments') { $this->renderSegments($data); }
         elseif ($data['view'] === 'segment') { $this->renderSegmentDetail($data); }
+        elseif ($data['view'] === 'campaigns') { $this->renderCampaigns($data); }
+        elseif ($data['view'] === 'campaign') { $this->renderCampaignDetail($data); }
         elseif ($data['view'] === 'templates') { $this->renderTemplates($data); }
         elseif ($data['view'] === 'template') { $this->renderTemplateDetail($data); }
         elseif (!empty($data['plannedSession'])) { $this->renderPlanned($data); }
@@ -303,6 +311,226 @@ final class AdminView
             . '<button class="btn btn-sm btn-default"' . ($canManage ? '' : ' disabled') . '>Restore to subscribed</button></form>';
         echo '<p class="text-muted">Restoring refuses while a suppression row exists — release it from the Suppression List first, so both decisions stay visible in the audit trail.</p>';
         echo '</div></div>';
+    }
+
+    // ------------------------------------------------------------- campaigns
+
+    private function statusBadge($status)
+    {
+        $labels = array(
+            CampaignStatus::DRAFT => 'label-default',
+            CampaignStatus::READY => 'label-info',
+            CampaignStatus::SCHEDULED => 'label-primary',
+            CampaignStatus::QUEUED => 'label-primary',
+            CampaignStatus::SENDING => 'label-warning',
+            CampaignStatus::PAUSED => 'label-warning',
+            CampaignStatus::COMPLETED => 'label-success',
+            CampaignStatus::CANCELLED => 'label-default',
+            CampaignStatus::FAILED => 'label-danger',
+            CampaignStatus::ARCHIVED => 'label-default',
+        );
+        $class = isset($labels[$status]) ? $labels[$status] : 'label-default';
+        return '<span class="label ' . $class . '">' . $this->e(CampaignStatus::label($status)) . '</span>';
+    }
+
+    private function transportNotice(array $transport)
+    {
+        if (!empty($transport['available'])) {
+            echo '<p class="text-muted">Delivery provider: <code>' . $this->e($transport['key']) . '</code>.</p>';
+            return;
+        }
+        echo '<div class="alert alert-warning"><strong>No delivery provider is wired in yet.</strong> ' . $this->e($transport['reason']) . '</div>';
+    }
+
+    private function audienceSelect($audiences, $lists, $segments, $selectedType, $selectedId)
+    {
+        echo '<select name="audience_type" class="form-control" style="width:260px;display:inline-block;">';
+        foreach ($audiences as $type) {
+            echo '<option value="' . $this->e($type) . '"' . ($selectedType === $type ? ' selected' : '') . '>' . $this->e(CampaignAudience::label($type)) . '</option>';
+        }
+        echo '</select> ';
+        echo '<select name="audience_id" class="form-control" style="width:320px;display:inline-block;">';
+        echo '<option value="0">— choose a list or segment —</option>';
+        if ($lists) {
+            echo '<optgroup label="Lists">';
+            foreach ($lists as $list) {
+                echo '<option value="' . (int) $list->id . '"' . ($selectedType === CampaignAudience::LIST && (int) $selectedId === (int) $list->id ? ' selected' : '') . '>' . $this->e($list->name) . ' (' . $this->e($list->list_key) . ')</option>';
+            }
+            echo '</optgroup>';
+        }
+        if ($segments) {
+            echo '<optgroup label="Segments">';
+            foreach ($segments as $segment) {
+                echo '<option value="' . (int) $segment->id . '"' . ($selectedType === CampaignAudience::SEGMENT && (int) $selectedId === (int) $segment->id ? ' selected' : '') . '>' . $this->e($segment->name) . ' (' . $this->e($segment->segment_key) . ')</option>';
+            }
+            echo '</optgroup>';
+        }
+        echo '</select> <span class="text-muted">"All subscribed addresses" is resolved at send time and still honours suppression and consent.</span>';
+    }
+
+    private function campaignForm(array $detail, $action)
+    {
+        $row = isset($detail['row']) ? $detail['row'] : null;
+        $canManage = !empty($detail['canManage']);
+        $audiences = isset($detail['audiences']) ? $detail['audiences'] : CampaignAudience::all();
+        $lists = isset($detail['lists']) ? $detail['lists'] : array();
+        $segments = isset($detail['segments']) ? $detail['segments'] : array();
+        $templates = isset($detail['templates']) ? $detail['templates'] : array();
+        $selectedType = $row ? (string) $row->audience_type : CampaignAudience::LIST;
+        $selectedId = $row ? (int) $row->audience_id : 0;
+
+        echo '<form method="post" action="' . $action . '" style="max-width:980px;">'
+            . '<input type="hidden" name="token" value="' . $this->e($this->token()) . '" />'
+            . '<input type="hidden" name="action" value="campaign.save" />';
+        if ($row) { echo '<input type="hidden" name="campaign_id" value="' . (int) $row->id . '" />'; }
+        echo '<table class="table">'
+            . '<tr><th style="width:170px;">Name</th><td><input name="name" class="form-control" value="' . $this->e($row ? $row->name : '') . '" /></td></tr>'
+            . '<tr><th>Subject</th><td><input name="subject" class="form-control" value="' . $this->e($row ? $row->subject : '') . '" /></td></tr>'
+            . '<tr><th>Preview text</th><td><input name="preview_text" class="form-control" value="' . $this->e($row ? $row->preview_text : '') . '" /> <span class="text-muted">shown next to the subject in most inboxes</span></td></tr>'
+            . '<tr><th>Sender name</th><td><input name="from_name" class="form-control" style="max-width:320px;" value="' . $this->e($row ? $row->from_name : '') . '" /></td></tr>'
+            . '<tr><th>Sender address</th><td><input name="from_email" class="form-control" style="max-width:320px;" value="' . $this->e($row ? $row->from_email : '') . '" /></td></tr>'
+            . '<tr><th>Reply-to</th><td><input name="reply_to" class="form-control" style="max-width:320px;" value="' . $this->e($row ? $row->reply_to : '') . '" /> <span class="text-muted">optional</span></td></tr>'
+            . '<tr><th>Audience</th><td>';
+        $this->audienceSelect($audiences, $lists, $segments, $selectedType, $selectedId);
+        echo '</td></tr><tr><th>Template</th><td><select name="template_id" class="form-control" style="width:320px;display:inline-block;">'
+            . '<option value="0">— keep the current content —</option>';
+        foreach ($templates as $template) {
+            $selected = $row && (int) $row->template_id === (int) $template->id ? ' selected' : '';
+            echo '<option value="' . (int) $template->id . '"' . $selected . '>' . $this->e($template->name) . ' (' . $this->e($template->template_key) . ')</option>';
+        }
+        echo '</select> <span class="text-muted">choosing a template copies its rendered content into this campaign now</span></td></tr></table>';
+        echo '<button class="btn btn-primary"' . ($canManage ? '' : ' disabled') . '>' . ($row ? 'Save campaign' : 'Create draft campaign') . '</button>';
+        echo '</form>';
+    }
+
+    private function renderCampaigns(array $data)
+    {
+        $view = $data['campaignsView'];
+        $canManage = !empty($view['canManage']);
+        echo '<h4>Campaigns</h4>';
+        echo '<p class="text-muted">A campaign is a draft until it passes the pre-send checklist, then a scheduled time, then a queue. Nothing here sends mail directly: the delivery worker owns that (SESSION 7).</p>';
+        $this->transportNotice($view['transport']);
+
+        echo '<form method="get" action="addonmodules.php" style="margin-bottom:10px;">'
+            . '<input type="hidden" name="module" value="cloudhost247_marketing" /><input type="hidden" name="view" value="campaigns" />'
+            . '<select name="status" class="form-control" style="width:200px;display:inline-block;"><option value="">All statuses</option>';
+        foreach ($view['statuses'] as $status) {
+            $count = isset($view['counts'][$status]) ? (int) $view['counts'][$status] : 0;
+            echo '<option value="' . $this->e($status) . '"' . ($view['filters']['status'] === $status ? ' selected' : '') . '>' . $this->e(CampaignStatus::label($status)) . ' (' . $count . ')</option>';
+        }
+        echo '</select> <input name="q" class="form-control" style="width:240px;display:inline-block;" value="' . $this->e($view['filters']['search']) . '" /> '
+            . '<button class="btn btn-default">Filter</button></form>';
+
+        echo '<table class="table table-striped"><tr><th>Name</th><th>Audience</th><th>Status</th><th>Schedule</th><th>Content</th><th></th></tr>';
+        foreach ($view['rows'] as $row) {
+            echo '<tr><td><strong>' . $this->e($row->name) . '</strong><br /><span class="text-muted">' . $this->e($row->subject !== '' ? $row->subject : 'no subject yet') . '</span></td>';
+            echo '<td>' . $this->e(CampaignAudience::label($row->audience_type));
+            if ((int) $row->audience_id > 0) { echo ' #' . (int) $row->audience_id; }
+            echo '</td><td>' . $this->statusBadge((string) $row->status) . '</td>';
+            echo '<td>' . ($row->scheduled_at ? $this->e($row->scheduled_at) . ' UTC<br /><span class="text-muted">' . $this->e($row->scheduled_timezone) . '</span>' : '<span class="text-muted">not scheduled</span>') . '</td>';
+            echo '<td>' . ((string) $row->html !== '' ? 'HTML + text' : '<span class="text-muted">no content</span>') . '</td>';
+            echo '<td><a class="btn btn-xs btn-default" href="' . $this->base('campaign', array('id' => (int) $row->id)) . '">Open</a></td></tr>';
+        }
+        if (!$view['rows']) { echo '<tr><td colspan="6" class="text-muted">No campaigns yet.</td></tr>'; }
+        echo '</table>';
+        $this->pagination('campaigns', $view['page'], $view['pages'], array('status' => $view['filters']['status'], 'q' => $view['filters']['search']));
+
+        echo '<h4>New campaign</h4>';
+        $this->campaignForm($view, $this->base('campaigns'));
+    }
+
+    private function renderCampaignDetail(array $data)
+    {
+        $detail = $data['campaignDetail'];
+        $row = $detail['row'];
+        $canManage = !empty($detail['canManage']);
+        $status = (string) $row->status;
+        echo '<a href="' . $this->base('campaigns') . '">&larr; All campaigns</a>';
+        echo '<h4>' . $this->e($row->name) . ' ' . $this->statusBadge($status) . '</h4>';
+
+        if ((string) $row->failure_reason !== '') {
+            echo '<div class="alert alert-danger">Last failure: ' . $this->e($row->failure_reason) . '</div>';
+        }
+        if ($row->scheduled_at) {
+            echo '<p>Scheduled for <strong>' . $this->e($row->scheduled_at) . ' UTC</strong> <span class="text-muted">(' . $this->e($row->scheduled_timezone) . ' local time entered)</span>.</p>';
+        }
+        $this->transportNotice($detail['transport']);
+
+        echo '<div class="row"><div class="col-sm-7">';
+        echo '<h4>Pre-send checklist</h4><table class="table table-condensed" style="max-width:640px;">';
+        foreach ($detail['checklist'] as $check) {
+            echo '<tr><td style="width:26px;">' . ($check['ok'] ? '<span class="label label-success">ok</span>' : '<span class="label label-danger">stop</span>') . '</td>'
+                . '<td><strong>' . $this->e($check['label']) . '</strong>' . ($check['blocking'] ? '' : ' <span class="text-muted">(advisory)</span>') . '<br />'
+                . '<span class="text-muted">' . $this->e($check['detail']) . '</span></td></tr>';
+        }
+        echo '</table>';
+
+        echo '<h4>Audience preview</h4>';
+        echo '<p>' . $this->e($detail['audience']['detail']) . '</p>';
+        foreach ($detail['audience']['issues'] as $issue) {
+            echo '<div class="alert alert-warning">' . $this->e($issue) . '</div>';
+        }
+        echo '</div><div class="col-sm-5">';
+
+        echo '<h4>Do next</h4>';
+        $button = function ($action, $label, $style = 'btn-default', $extra = '') use ($row, $canManage) {
+            return '<form method="post" action="' . $this->base('campaign', array('id' => (int) $row->id)) . '" style="display:inline-block;margin:0 4px 6px 0;">'
+                . '<input type="hidden" name="token" value="' . $this->e($this->token()) . '" /><input type="hidden" name="action" value="' . $action . '" />'
+                . '<input type="hidden" name="campaign_id" value="' . (int) $row->id . '" />' . $extra
+                . '<button class="btn btn-sm ' . $style . '"' . ($canManage ? '' : ' disabled') . '>' . $label . '</button></form>';
+        };
+        if ($status === CampaignStatus::DRAFT) { echo $button('campaign.ready', 'Mark ready', 'btn-primary'); }
+        if ($status === CampaignStatus::READY) {
+            echo '<form method="post" action="' . $this->base('campaign', array('id' => (int) $row->id)) . '" style="margin-bottom:8px;">'
+                . '<input type="hidden" name="token" value="' . $this->e($this->token()) . '" /><input type="hidden" name="action" value="campaign.schedule" />'
+                . '<input type="hidden" name="campaign_id" value="' . (int) $row->id . '" />'
+                . '<input name="scheduled_at" class="form-control" style="width:200px;display:inline-block;" value="" /> '
+                . '<input name="scheduled_timezone" class="form-control" style="width:220px;display:inline-block;" value="' . $this->e($data['settings']['default_timezone']) . '" /> '
+                . '<button class="btn btn-sm btn-primary"' . ($canManage ? '' : ' disabled') . '>Schedule</button>'
+                . '<div class="text-muted" style="font-size:12px;">local time YYYY-MM-DD HH:MM in the chosen timezone; stored as UTC</div></form>';
+            echo $button('campaign.pause', 'Pause / back to draft');
+        }
+        if ($status === CampaignStatus::SCHEDULED || $status === CampaignStatus::QUEUED) {
+            echo $button('campaign.pause', 'Pause');
+        }
+        if ($status === CampaignStatus::PAUSED) {
+            echo '<form method="post" action="' . $this->base('campaign', array('id' => (int) $row->id)) . '" style="margin-bottom:8px;">'
+                . '<input type="hidden" name="token" value="' . $this->e($this->token()) . '" /><input type="hidden" name="action" value="campaign.resume" />'
+                . '<input type="hidden" name="campaign_id" value="' . (int) $row->id . '" />'
+                . '<input name="scheduled_at" class="form-control" style="width:200px;display:inline-block;" value="" /> '
+                . '<input name="scheduled_timezone" class="form-control" style="width:220px;display:inline-block;" value="' . $this->e($row->scheduled_timezone) . '" /> '
+                . '<button class="btn btn-sm btn-primary"' . ($canManage ? '' : ' disabled') . '>Resume</button></form>';
+        }
+        if (!CampaignStatus::isTerminal($status)) { echo $button('campaign.cancel', 'Cancel campaign', 'btn-warning'); }
+        if (in_array($status, array(CampaignStatus::COMPLETED, CampaignStatus::CANCELLED, CampaignStatus::FAILED), true)) {
+            echo $button('campaign.archive', 'Archive');
+        }
+
+        echo '<h4>Test message</h4>';
+        if ($detail['transport']['available']) {
+            echo '<form method="post" action="' . $this->base('campaign', array('id' => (int) $row->id)) . '">'
+                . '<input type="hidden" name="token" value="' . $this->e($this->token()) . '" /><input type="hidden" name="action" value="campaign.test" />'
+                . '<input type="hidden" name="campaign_id" value="' . (int) $row->id . '" />'
+                . '<input name="test_email" class="form-control" style="max-width:280px;" value="" /> '
+                . '<button class="btn btn-sm btn-default"' . ($canManage ? '' : ' disabled') . ' style="margin-top:6px;">Send test</button></form>';
+        } else {
+            echo '<p class="text-muted">Unavailable until a delivery provider is configured and wired in — see the notice above. A refused test is recorded in the audit trail with its reason.</p>';
+        }
+        if (!empty($data['campaignTest'])) {
+            echo '<div class="alert alert-success">Test accepted by <code>' . $this->e($data['campaignTest']['transport']) . '</code> as "' . $this->e($data['campaignTest']['subject']) . '".</div>';
+        }
+        echo '</div></div>';
+
+        if ($detail['editable']) {
+            echo '<h4>Edit content</h4>';
+            $this->campaignForm($detail, $this->base('campaign', array('id' => (int) $row->id)));
+        } else {
+            echo '<h4>Edit content</h4><div class="alert alert-info">A campaign in "' . $this->e(CampaignStatus::label($status)) . '" is frozen so the content that was approved is the content that sends. Pause or cancel it first, or create a new draft.</div>';
+        }
+
+        echo '<h4>Content preview</h4>';
+        echo '<h5>Plain text</h5><pre style="white-space:pre-wrap;background:#f7f9fb;border:1px solid #e3e8ee;padding:10px;max-width:760px;">' . $this->e((string) $row->text) . '</pre>';
+        echo '<h5>HTML source</h5><textarea readonly class="form-control" rows="10" style="font-family:monospace;font-size:12px;">' . $this->e((string) $row->html) . '</textarea>';
     }
 
     // -------------------------------------------------------------- templates
