@@ -1,132 +1,29 @@
+import {
+  CreateSnapshotCommand, DescribeImagesCommand, DescribeInstancesCommand, DescribeRegionsCommand,
+  EC2Client, GetConsoleOutputCommand, ModifyInstanceAttributeCommand, RebootInstancesCommand,
+  RunInstancesCommand, StartInstancesCommand, StopInstancesCommand, TerminateInstancesCommand,
+} from '@aws-sdk/client-ec2';
 import type { InfrastructureProviderRow, ServerOsImageRow } from '../../db/infrastructure-providers';
 import { unsupportedRescue } from './common';
-import {
-  ProviderError,
-  type CreateProviderServerInput,
-  type InfrastructureProviderAdapter,
-  type ProviderHealthResult,
-  type ProviderImage,
-  type ProviderServer,
-  type ReinstallProviderServerInput,
-} from './types';
+import { ProviderError, asString, type CreateProviderServerInput, type InfrastructureProviderAdapter, type ProviderHealthResult, type ProviderImage, type ProviderServer, type ReinstallProviderServerInput } from './types';
+
+function server(instance: any): ProviderServer {
+ const ip=instance.PublicIpAddress??null;return {id:String(instance.InstanceId),status:instance.State?.Name??'unknown',name:instance.Tags?.find((t:any)=>t.Key==='Name')?.Value??null,ipAddress:ip,imageId:instance.ImageId??null,metadata:{instanceType:instance.InstanceType??null,availabilityZone:instance.Placement?.AvailabilityZone??null}};
+}
+function error(error:unknown):never { const e=error as {name?:string;message?:string;$metadata?:{httpStatusCode?:number}};const status=e.$metadata?.httpStatusCode; if(status===401||status===403)throw new ProviderError('AUTHENTICATION_FAILED','AWS rejected configured credentials',false);if(status===404||e.name==='InvalidInstanceID.NotFound')throw new ProviderError('RESOURCE_NOT_FOUND','AWS resource was not found',false);if(e.name?.includes('Throttl')||status===429)throw new ProviderError('RATE_LIMITED','AWS rate limited the request',true);throw new ProviderError('PROVIDER_ERROR',e.message??'AWS EC2 request failed',status===undefined||status>=500); }
 
 export class AwsProviderAdapter implements InfrastructureProviderAdapter {
-  readonly kind = 'aws';
-  private readonly accessKeyId: string | undefined;
-  private readonly secretAccessKey: string | undefined;
-
-  constructor(readonly provider: InfrastructureProviderRow, source: NodeJS.ProcessEnv = process.env) {
-    const prefix = provider.credential_env_prefix || 'AWS';
-    this.accessKeyId = source[`${prefix}_ACCESS_KEY_ID`] ?? source.AWS_ACCESS_KEY_ID;
-    this.secretAccessKey = source[`${prefix}_SECRET_ACCESS_KEY`] ?? source.AWS_SECRET_ACCESS_KEY;
-  }
-
-  private ensureConfigured(): void {
-    if (!this.accessKeyId || !this.secretAccessKey) {
-      throw new ProviderError('PROVIDER_NOT_CONFIGURED', 'AWS credentials (access key / secret) are not configured', false);
-    }
-  }
-
-  async validateConfiguration(): Promise<void> {
-    this.ensureConfigured();
-    // A credential id is not an AWS Signature Version 4 authorization header. Until a complete
-    // signer/native EC2 client is present, activation must fail rather than claiming a malformed
-    // request validated the account. Operators can use the real generic_http bridge adapter.
-    throw new ProviderError(
-      'SERVICE_UNAVAILABLE',
-      'The native AWS EC2 adapter is not enabled in this build; configure a generic_http provider bridge',
-      false
-    );
-  }
-
-  async createServer(input: CreateProviderServerInput): Promise<ProviderServer> {
-    this.ensureConfigured();
-    const existing = await this.findServerByIdempotencyKey(input.idempotencyKey);
-    if (existing) return existing;
-    throw new ProviderError('SERVICE_UNAVAILABLE', 'AWS EC2 server creation requires active provider bridge or AWS SDK credentials', false);
-  }
-
-  provisionServer(input: CreateProviderServerInput): Promise<ProviderServer> {
-    return this.createServer(input);
-  }
-
-  async findServerByIdempotencyKey(_idempotencyKey: string): Promise<ProviderServer | null> {
-    this.ensureConfigured();
-    return null;
-  }
-
-  async deleteServer(_providerServerId: string): Promise<void> {
-    this.ensureConfigured();
-    throw new ProviderError('SERVICE_UNAVAILABLE', 'AWS EC2 server termination requires active provider bridge', false);
-  }
-
-  rebootServer(_id: string): Promise<void> { this.ensureConfigured(); throw new ProviderError('SERVICE_UNAVAILABLE', 'AWS action not configured', false); }
-  shutdownServer(_id: string): Promise<void> { this.ensureConfigured(); throw new ProviderError('SERVICE_UNAVAILABLE', 'AWS action not configured', false); }
-  startServer(_id: string): Promise<void> { this.ensureConfigured(); throw new ProviderError('SERVICE_UNAVAILABLE', 'AWS action not configured', false); }
-  powerOnServer(id: string): Promise<void> { return this.startServer(id); }
-  powerOffServer(id: string): Promise<void> { return this.shutdownServer(id); }
-  getServer(id: string): Promise<ProviderServer> { return this.getServerStatus(id); }
-  rebuildServer(input: ReinstallProviderServerInput): Promise<ProviderServer> { return this.reinstallServer(input); }
-
-  async resizeServer(_providerServerId: string, _planMetadata: Record<string, unknown>): Promise<ProviderServer> {
-    this.ensureConfigured();
-    throw new ProviderError('SERVICE_UNAVAILABLE', 'AWS resize requires active provider bridge', false);
-  }
-
-  async createSnapshot(_providerServerId: string, _description: string): Promise<Record<string, unknown>> {
-    this.ensureConfigured();
-    throw new ProviderError('SERVICE_UNAVAILABLE', 'AWS snapshot creation requires active provider bridge', false);
-  }
-
-  async deleteSnapshot(_providerServerId: string, _snapshotId: string): Promise<void> {
-    this.ensureConfigured();
-    throw new ProviderError('SERVICE_UNAVAILABLE', 'AWS snapshot deletion requires active provider bridge', false);
-  }
-
-  async restoreSnapshot(_providerServerId: string, _snapshotId: string): Promise<void> {
-    this.ensureConfigured();
-    throw new ProviderError('SERVICE_UNAVAILABLE', 'AWS snapshot restore requires active provider bridge', false);
-  }
-
-  async getServerStatus(_providerServerId: string): Promise<ProviderServer> {
-    this.ensureConfigured();
-    throw new ProviderError('SERVICE_UNAVAILABLE', 'AWS status lookup requires an enabled native adapter or provider bridge', false);
-  }
-
-  async getServerIP(providerServerId: string): Promise<string | null> {
-    return (await this.getServerStatus(providerServerId)).ipAddress;
-  }
-
-  async getAvailableImages(): Promise<ProviderImage[]> {
-    this.ensureConfigured();
-    throw new ProviderError('SERVICE_UNAVAILABLE', 'AWS image discovery requires an enabled native adapter or provider bridge', false);
-  }
-
-  async getImage(_image: ServerOsImageRow): Promise<ProviderImage | null> {
-    this.ensureConfigured();
-    throw new ProviderError('SERVICE_UNAVAILABLE', 'AWS image lookup requires an enabled native adapter or provider bridge', false);
-  }
-
-  async reinstallServer(_input: ReinstallProviderServerInput): Promise<ProviderServer> {
-    this.ensureConfigured();
-    throw new ProviderError('SERVICE_UNAVAILABLE', 'AWS EC2 reinstall requires active provider bridge', false);
-  }
-
-  async enableRescue(): Promise<never> { return unsupportedRescue('aws'); }
-  async disableRescue(): Promise<never> { return unsupportedRescue('aws'); }
-
-  async getConsole(_providerServerId: string): Promise<Record<string, unknown>> {
-    this.ensureConfigured();
-    throw new ProviderError('SERVICE_UNAVAILABLE', 'AWS console access requires an enabled native adapter or provider bridge', false);
-  }
-
-  async getServerMetrics(_providerServerId: string): Promise<Record<string, unknown>> {
-    this.ensureConfigured();
-    throw new ProviderError('SERVICE_UNAVAILABLE', 'AWS metrics require an enabled native adapter or provider bridge', false);
-  }
-
-  async healthCheck(_providerServerId: string, _expectedImage: ServerOsImageRow): Promise<ProviderHealthResult> {
-    this.ensureConfigured();
-    throw new ProviderError('SERVICE_UNAVAILABLE', 'AWS health checks require an enabled native adapter or provider bridge', false);
-  }
+ readonly kind='aws'; private readonly client:EC2Client; private readonly region:string|undefined;
+ constructor(readonly provider:InfrastructureProviderRow,source:NodeJS.ProcessEnv=process.env){const p=provider.credential_env_prefix||'AWS';const accessKeyId=source[`${p}_ACCESS_KEY_ID`]??source.AWS_ACCESS_KEY_ID,secretAccessKey=source[`${p}_SECRET_ACCESS_KEY`]??source.AWS_SECRET_ACCESS_KEY;this.region=source[`${p}_REGION`]??source.AWS_REGION;if(!accessKeyId||!secretAccessKey||!this.region){this.client=new EC2Client({region:'us-east-1'});return;}this.client=new EC2Client({region:this.region,credentials:{accessKeyId,secretAccessKey}});}
+ private configured(){if(!this.region)throw new ProviderError('PROVIDER_NOT_CONFIGURED','AWS access key, secret access key, and region are required',false);}
+ private async send<T>(command:any):Promise<T>{this.configured();try{return await this.client.send(command) as T;}catch(e){return error(e);}}
+ async validateConfiguration(){await this.send(new DescribeRegionsCommand({RegionNames:[this.region!]}));}
+ async createServer(input:CreateProviderServerInput){const old=await this.findServerByIdempotencyKey(input.idempotencyKey);if(old)return old;const type=asString(input.planMetadata.providerServerType)??asString(input.planMetadata.instanceType);const image=input.image.provider_image_id??input.image.provider_template_id;if(!type)throw new ProviderError('INVALID_CONFIGURATION','AWS plan requires providerServerType (EC2 instance type)',false);if(!image)throw new ProviderError('IMAGE_UNAVAILABLE','OS image has no AWS AMI identifier',false);const keyName=asString(input.planMetadata.awsKeyName);const out:any=await this.send(new RunInstancesCommand({ImageId:image,InstanceType:type as never,MinCount:1,MaxCount:1,ClientToken:input.idempotencyKey,UserData:Buffer.from(input.userData).toString('base64'),KeyName:keyName??undefined,TagSpecifications:[{ResourceType:'instance',Tags:[{Key:'Name',Value:input.name},{Key:'cloudhost247:idempotency',Value:input.idempotencyKey}]}]}));const item=out.Instances?.[0];if(!item)throw new ProviderError('PROVIDER_ERROR','AWS returned no instance for RunInstances',true);return server(item);}
+ provisionServer(i:CreateProviderServerInput){return this.createServer(i);} async findServerByIdempotencyKey(key:string){const out:any=await this.send(new DescribeInstancesCommand({Filters:[{Name:'tag:cloudhost247:idempotency',Values:[key]}]}));const i=out.Reservations?.flatMap((r:any)=>r.Instances??[])[0];return i?server(i):null;}
+ async getServerStatus(id:string){const out:any=await this.send(new DescribeInstancesCommand({InstanceIds:[id]}));const i=out.Reservations?.flatMap((r:any)=>r.Instances??[])[0];if(!i)throw new ProviderError('RESOURCE_NOT_FOUND','AWS instance was not found',false);return server(i);} getServer(id:string){return this.getServerStatus(id);} async getServerIP(id:string){return (await this.getServerStatus(id)).ipAddress;}
+ async deleteServer(id:string){await this.send(new TerminateInstancesCommand({InstanceIds:[id]}));} async rebootServer(id:string){await this.send(new RebootInstancesCommand({InstanceIds:[id]}));} async shutdownServer(id:string){await this.send(new StopInstancesCommand({InstanceIds:[id]}));} async startServer(id:string){await this.send(new StartInstancesCommand({InstanceIds:[id]}));} powerOnServer(id:string){return this.startServer(id);} powerOffServer(id:string){return this.shutdownServer(id);} rebuildServer(i:ReinstallProviderServerInput):Promise<ProviderServer>{return this.reinstallServer(i);}
+ async resizeServer(id:string,metadata:Record<string,unknown>){const type=asString(metadata.providerServerType)??asString(metadata.instanceType);if(!type)throw new ProviderError('INVALID_CONFIGURATION','Target EC2 instance type missing',false);await this.send(new ModifyInstanceAttributeCommand({InstanceId:id,InstanceType:{Value:type}}));return this.getServerStatus(id);}
+ async createSnapshot(id:string,description:string):Promise<Record<string,unknown>>{const s=await this.getServerStatus(id);const volume=asString(s.metadata.rootVolumeId);if(!volume)throw new ProviderError('UNSUPPORTED_OPERATION','AWS snapshot needs a configured root EBS volume id',false);return this.send(new CreateSnapshotCommand({VolumeId:volume,Description:description}));} async deleteSnapshot(){throw new ProviderError('UNSUPPORTED_OPERATION','Deleting EBS snapshots is not enabled by this adapter',false);} async restoreSnapshot(){throw new ProviderError('UNSUPPORTED_OPERATION','Restoring an EC2 root volume from a snapshot requires a replacement-instance workflow',false);} async reinstallServer(_input:ReinstallProviderServerInput):Promise<ProviderServer>{throw new ProviderError('UNSUPPORTED_OPERATION','EC2 cannot safely reinstall an in-place root image; provision a replacement instance instead',false);}
+ async getAvailableImages(){const out:any=await this.send(new DescribeImagesCommand({Owners:['self','amazon']}));return (out.Images??[]).map((i:any):ProviderImage=>({id:i.ImageId,name:i.Name??i.Description??null,architecture:i.Architecture??null,available:i.State==='available',metadata:{creationDate:i.CreationDate??null}}));} async getImage(image:ServerOsImageRow){const id=image.provider_image_id??image.provider_template_id;if(!id)return null;const out:any=await this.send(new DescribeImagesCommand({ImageIds:[id]}));const i=out.Images?.[0];return i?{id:i.ImageId,name:i.Name??null,architecture:i.Architecture??null,available:i.State==='available',metadata:{}}:null;}
+ async enableRescue(){return unsupportedRescue('aws');} async disableRescue(){return unsupportedRescue('aws');} async getConsole(id:string){return this.send(new GetConsoleOutputCommand({InstanceId:id,Latest:true})) as any;} async getServerMetrics(_id:string):Promise<Record<string,unknown>>{throw new ProviderError('UNSUPPORTED_OPERATION','CloudWatch metrics require a separately scoped CloudWatch integration',false);} async healthCheck(id:string,expected:ServerOsImageRow):Promise<ProviderHealthResult>{try{const s=await this.getServerStatus(id);const image=expected.provider_image_id??expected.provider_template_id;return {exists:true,poweredOn:s.status==='running',ipAddress:s.ipAddress,imageMatches:!image||s.imageId===image,providerStatus:s.status};}catch(e){if(e instanceof ProviderError&&e.code==='RESOURCE_NOT_FOUND')return {exists:false,poweredOn:false,ipAddress:null,imageMatches:false,providerStatus:'missing'};throw e;}}
 }

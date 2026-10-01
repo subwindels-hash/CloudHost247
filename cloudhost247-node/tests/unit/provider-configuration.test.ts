@@ -148,15 +148,14 @@ describe('provider configuration reporting never leaks secrets', () => {
     expect(JSON.stringify(report)).not.toContain(secret);
   });
 
-  it('never reports the incomplete native AWS and Contabo adapters as ready', () => {
+  it('reports the native AWS adapter as ready with credentials while Contabo remains fail-closed', () => {
     const aws=describeProviderConfiguration(provider('aws','AWS'),{
       AWS_ACCESS_KEY_ID:'id',AWS_SECRET_ACCESS_KEY:'secret',AWS_REGION:'us-east-1',
     } as NodeJS.ProcessEnv);
     const contabo=describeProviderConfiguration(provider('contabo','CONTABO'),{
       CONTABO_CLIENT_ID:'id',CONTABO_CLIENT_SECRET:'secret',CONTABO_API_USER:'user',CONTABO_API_PASSWORD:'password',
     } as NodeJS.ProcessEnv);
-    expect(aws.ready).toBe(false);expect(contabo.ready).toBe(false);
-    expect(aws.missing.join(' ')).toContain('generic_http');
+    expect(aws.ready).toBe(true);expect(contabo.ready).toBe(false);
     expect(contabo.missing.join(' ')).toContain('generic_http');
   });
 

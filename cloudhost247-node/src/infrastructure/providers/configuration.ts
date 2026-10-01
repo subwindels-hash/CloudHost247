@@ -101,8 +101,8 @@ export const ADAPTER_PROFILES: Record<AdapterKind, AdapterProfile> = {
       { suffix: '_REGION', description: 'Default EC2 region', required: true, fallback: 'AWS_REGION' },
     ],
     planMetadata: [{ key: 'providerServerType', description: 'EC2 instance type', required: true }, ...RESOURCE_METADATA],
-    capabilities: { reinstall: false, snapshot: false, resize: false, console: false, metrics: false, rescue: false },
-    notes: 'Native EC2 is intentionally disabled until a complete SigV4 client is implemented. Use the generic_http bridge adapter for a tested AWS integration.',
+    capabilities: { reinstall: false, snapshot: true, resize: true, console: true, metrics: false, rescue: false },
+    notes: 'Native EC2 adapter uses the AWS SDK Signature Version 4 client. Reinstall and root-volume restore require an explicit replacement-instance workflow and are intentionally unavailable; CloudWatch metrics require separately scoped permissions.'
   },
   contabo: {
     kind: 'contabo',
@@ -322,7 +322,7 @@ export function describeProviderConfiguration(
     if (source.NODE_ENV === 'production') missing.push('mock provider is disabled in production');
     else if (source.ALLOW_MOCK_PROVIDER !== 'true') missing.push('ALLOW_MOCK_PROVIDER=true');
   }
-  if (profile.kind === 'aws' || profile.kind === 'contabo') {
+  if (profile.kind === 'contabo') {
     missing.push('native adapter implementation is disabled; configure a generic_http provider bridge');
   }
   return {
