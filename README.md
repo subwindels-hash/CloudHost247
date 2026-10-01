@@ -34,7 +34,7 @@ of this repository **into** an existing WHMCS installation root (cPanel
 │   │   │                                All 63 PHP files are ionCube-encoded vendor bytecode, so the
 │   │   │                                directory name (which is the WHMCS addon id) cannot be
 │   │   │                                rebranded here: see docs/BRANDING-COMPATIBILITY.md §1
-│   │   ├── cloudhost247_tools/               CloudHost247 Tools Platform v2.2.7 (66 online tools, hardened:
+│   │   ├── cloudhost247_tools/               CloudHost247 Tools Platform v2.2.7 (79 online tools, hardened:
 │   │   │                              TLS-verified APIs, no shell execution, REST API + tests)
 │   │   ├── cloudhost247_domain_lookup/       CloudHost247 Domain Lookup (4-tool WHOIS/IP/DNS/availability build,
 │   │   │                              renamed from a second "cloudhost247_tools" build — see module README)
