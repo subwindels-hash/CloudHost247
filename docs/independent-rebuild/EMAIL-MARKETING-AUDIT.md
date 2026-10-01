@@ -61,7 +61,7 @@ mandatory audit. Every claim below names the file that proves it.
 | `phoneservices/SendgridProvider` | Transactional notifications only; marketing does not reuse it (different concern), but its interface shape is a reference |
 | broker `NotificationService` / `localAPI('SendEmail')` | **Marketing campaigns never use WHMCS `SendEmail`** (transactional pipeline; spec #39 separation) |
 | Central `smtp` integration row | The shared transactional relay. Marketing gets its **own provider key** (below) so sender identity, rotation and failures never disturb transactional mail — while reusing 100% of the vault/probe/tester/UI code |
-| hostx + ionCube addons | Proprietary, covered by the 2,535-file integrity manifest — untouched |
+| Legacy ionCube-protected theme and currency addons | Proprietary, covered by the 2,535-file integrity manifest — untouched except for documented branding-only overrides |
 
 ## 4. Missing Capabilities (must be built new)
 

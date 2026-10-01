@@ -24,7 +24,7 @@ Status values: **Existing/vendor** (present but not an independent implementatio
 | OVH order form | `templates/orderforms/ovh_cart/` | 78 files; 2 local templates | Readable; inherits WHMCS `standard_cart` | WGS addon exposes order-form entitlement checks | **Existing/vendor; replacement needed** |
 | OVH automation | `crons/{getServer,getIpStatus,priceSync,emailSend}.php` | 4 scripts | Readable | Coupled to WGS classes/tables | **Existing/vendor only** |
 
-A SHA-256 inventory of every in-scope original file is in `original-file-manifest.sha256`. No original file was deleted, moved, decoded, or modified during this audit.
+A SHA-256 inventory of every in-scope original file is in `original-file-manifest.sha256`. The original manifest remains unchanged. Later approved branding-only changes to legal copy, theme logo assets, and three addon tour labels are listed in `rebrand-overrides.list` and independently hashed in `rebrand-overrides.sha256`; no encoded PHP or business logic was changed.
 
 ## Installation and configuration dependency inventory
 
@@ -216,7 +216,7 @@ The CI-level `scripts/release-candidate-check.sh` verifies syntax, behavior test
 
 **BLOCKED — STAGING/API AUTHORIZATION REQUIRED:** provider ownership/licensing, endpoint contract, bearer-token authorization, product IDs, permissions, real create/suspend/unsuspend/terminate semantics, WHMCS module activation, migration execution, UI, concurrency and disposable lifecycle tests. The module must not be activated until these pass. Required migration ordering adds RDP `1.0.0` after the existing Core, Currency, Theme and OVH sequences.
 
-## Email hosting (hostx_email) — added 2026-09-28
+## CloudHost247 Email Hosting — added 2026-09-28
 
 | Component | Path | Independent status |
 |---|---|---|
@@ -225,7 +225,7 @@ The CI-level `scripts/release-candidate-check.sh` verifies syntax, behavior test
 | Client-area email management | `modules/servers/hostx_email/templates/overview.tpl` | **Complete (source verified)** — ownership + CSRF enforced |
 | Provider adapters | `lib/Providers/{ProfessionalEmail,Microsoft365,GoogleWorkspace}Provider.php` | **Complete (mock verified)** — real Graph/Admin SDK/REST contracts, no SDKs |
 | Schema and migrations | `install/schema.sql`, `install/migrations/1.0.0_baseline.sql` | **Complete (source verified)** — `mod_hostx_email_*` only |
-| Automated diagnostics | `tests/hostx_email/run.php` | **Complete** — 44 mock checks in the PHP 7.4/8.2 CI matrix |
+| Automated diagnostics | `tests/cloudhost247_email/run.php` | **Complete** — 44 mock checks in the PHP 7.4/8.2 CI matrix |
 | Live tenant behaviour | Microsoft 365 / Google Workspace / mail platform | **Blocked from verification** — see `STAGING-TEST-MATRIX.md` rows HXE-01..HXE-27 |
 
-The pre-existing `modules/servers/cloudhost247_email` is left untouched and inactive; `hostx_email` is a separate module with its own tables, page and tests, so neither interferes with the other. Nothing in the hosting, OVH, currency, authentication, checkout or dashboard paths was modified.
+The pre-existing `modules/servers/cloudhost247_email` is left untouched and inactive. The separate CloudHost247 Email Hosting module uses the legacy WHMCS module ID `hostx_email` and its existing tables for compatibility; its customer-facing display name is CloudHost247 Email Hosting. Nothing in the hosting, OVH, currency, authentication, checkout or dashboard paths was modified.

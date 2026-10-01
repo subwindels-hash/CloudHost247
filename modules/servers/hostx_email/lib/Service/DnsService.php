@@ -13,19 +13,19 @@
  * The module never writes to a customer's DNS zone.
  *
  * @package    WHMCS
- * @subpackage hostx_email
+ * @subpackage CloudHost247 Email Hosting
  */
 
-namespace HostxEmail\Service;
+namespace CloudHost247\Email\Service;
 
-use HostxEmail\Dns\RecordSet;
-use HostxEmail\Providers\ProviderFactory;
-use HostxEmail\Providers\ProviderInterface;
-use HostxEmail\Repository\AccountRepository;
-use HostxEmail\Support\Config;
-use HostxEmail\Support\Logger;
-use HostxEmail\Support\Result;
-use HostxEmail\Support\Validator;
+use CloudHost247\Email\Dns\RecordSet;
+use CloudHost247\Email\Providers\ProviderFactory;
+use CloudHost247\Email\Providers\ProviderInterface;
+use CloudHost247\Email\Repository\AccountRepository;
+use CloudHost247\Email\Support\Config;
+use CloudHost247\Email\Support\Logger;
+use CloudHost247\Email\Support\Result;
+use CloudHost247\Email\Support\Validator;
 use WHMCS\Database\Capsule;
 
 final class DnsService

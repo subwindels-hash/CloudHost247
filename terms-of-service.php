@@ -2,12 +2,12 @@
 /**
  * Terms & Conditions Page
  *
- * WHMCS ClientArea page for displaying CloudHost247 Isc Terms & Conditions.
+ * WHMCS ClientArea page for displaying CloudHost247 Isc. Terms & Conditions.
  * Template: templates/cloudhost247_legacy/termsofservice.tpl
  *
  * @package    WHMCS
- * @author     CloudHost247 Isc
- * @copyright  Copyright (c) CloudHost247 Isc
+ * @author     CloudHost247 Isc.
+ * @copyright  Copyright (c) CloudHost247 Isc.
  * @license    Private
  */
 
@@ -44,7 +44,7 @@ $ca->assign('pageTitle', 'Terms & Conditions');
 $ca->assign('isLoggedIn', $isLoggedIn);
 $ca->assign('clientName', $clientName);
 $ca->assign('effectiveDate', 'August 14, 2025');
-$ca->assign('companyName', 'CloudHost247 Isc');
+$ca->assign('companyName', 'CloudHost247 Isc.');
 $ca->assign('supportEmail', 'support@cloudhost247.com');
 $ca->assign('companyUrl', 'https://www.cloudhost247.com');
 $ca->assign('jurisdiction', 'Federal Republic of Nigeria');
@@ -56,7 +56,7 @@ $ca->assign('termsSections', [
         'icon' => 'fa-file-contract',
         'content' => [
             'These Terms & Conditions ("Terms," "Agreement") govern your access to and use of our websites, products, and services (collectively, the "Services"). By accessing or using our Services, you agree to be bound by these Terms. If you do not agree with any part of these Terms, you may not access or use our Services.',
-            '"We," "us," "our" refer to CloudHost247 Isc and its affiliates. "You," "your" refer to the customer, account holder, or user of our Services. "Services" refer to all hosting, domain registration, related IT services, and any other products we provide.'
+            '"We," "us," "our" refer to CloudHost247 Isc. and its affiliates. "You," "your" refer to the customer, account holder, or user of our Services. "Services" refer to all hosting, domain registration, related IT services, and any other products we provide.'
         ]
     ],
     'account_terms' => [
@@ -73,7 +73,7 @@ $ca->assign('termsSections', [
         'icon' => 'fa-server',
         'content' => [
             'You agree not to use our Services to violate any applicable laws or regulations, engage in spamming, phishing, or distribution of malware, host or transmit illegal, harmful, or obscene content, infringe intellectual property rights of others, or interfere with or disrupt the operation of our Services or networks.',
-            'We reserve the right to remove content, suspend accounts, or terminate Services for violations. All content, trademarks, and materials on our website are owned by CloudHost247 Isc or our licensors. You are granted a limited, non-exclusive, non-transferable license to use our Services for personal or business purposes in accordance with these Terms.'
+            'We reserve the right to remove content, suspend accounts, or terminate Services for violations. All content, trademarks, and materials on our website are owned by CloudHost247 Isc. or our licensors. You are granted a limited, non-exclusive, non-transferable license to use our Services for personal or business purposes in accordance with these Terms.'
         ]
     ],
     'payments_billing' => [
@@ -90,7 +90,7 @@ $ca->assign('termsSections', [
         'icon' => 'fa-user-check',
         'content' => [
             'You agree to use the Services only for lawful purposes and in compliance with all applicable laws and regulations. You are solely responsible for any content you upload, transmit, or store using our Services.',
-            'You agree to indemnify, defend, and hold harmless CloudHost247 Isc, its employees, and affiliates from any claims, damages, or expenses arising from your use of the Services or violation of these Terms.',
+            'You agree to indemnify, defend, and hold harmless CloudHost247 Isc., its employees, and affiliates from any claims, damages, or expenses arising from your use of the Services or violation of these Terms.',
             'Your use of our Services is subject to our Privacy Policy, which explains how we collect, use, and protect your personal information.'
         ]
     ],
@@ -98,7 +98,7 @@ $ca->assign('termsSections', [
         'heading' => 'Limitations of Liability',
         'icon' => 'fa-balance-scale',
         'content' => [
-            'To the maximum extent permitted by law, CloudHost247 Isc shall not be liable for any indirect, incidental, or consequential damages. Our total liability for any claim shall not exceed the amount you paid for the Services in the 12 months prior to the claim.',
+            'To the maximum extent permitted by law, CloudHost247 Isc. shall not be liable for any indirect, incidental, or consequential damages. Our total liability for any claim shall not exceed the amount you paid for the Services in the 12 months prior to the claim.',
             'Our Services are provided "as is" and "as available" without warranties of any kind, either express or implied. We do not warrant that the Services will be error-free, secure, or uninterrupted.'
         ]
     ],

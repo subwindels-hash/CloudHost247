@@ -5,8 +5,9 @@ ROOT = Path(__file__).resolve().parents[2]
 MODULE = ROOT / 'modules/addons/cloudhost247_integrations'
 DOCS = ROOT / 'docs/independent-rebuild'
 
-# Code this rebuild owns and is allowed to change. Vendor modules covered by the
-# proprietary integrity manifest are audited and documented, never edited.
+# Code this rebuild owns and is allowed to change. The original vendor baseline
+# stays immutable; explicitly reviewed branding-only exceptions are tracked and
+# re-hashed separately. Encoded vendor PHP and behavior are not edited.
 OWNED = [
     ROOT / 'modules/addons/cloudhost247_core',
     ROOT / 'modules/addons/cloudhost247_currency',

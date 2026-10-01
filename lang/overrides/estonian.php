@@ -556,7 +556,7 @@ duration.";
 /* for v2.2.0 */
 $_LANG['contactuspagemainhead'] = "Võta meiega ühendust";
 $_LANG['contactuspagemainsubhead'] = "rohkem informatsiooni";
-$_LANG['contactuscompanyname'] = "CloudHost247 Pvt Ltd.";
+$_LANG['contactuscompanyname'] = "CloudHost247 Isc.";
 $_LANG['contactusaddress'] = "abcdd, Phase 123, IND Piirkond - Hotelli Abcd lähedal, <br> XYZ, XYZ, XYZ 123456";
 $_LANG['contactushotlinesale'] = "<b> Vihjeliin: </b> +91 8360944358";
 $_LANG['contactusbusinesshoursale'] = "<b> Teenindus </b> Tööaeg: 9:00 - 18:00 (E – L)";

@@ -633,7 +633,7 @@ duration.";
 /* for v2.2.0 */
 $_LANG['contactuspagemainhead'] = "Связаться с нами";
 $_LANG['contactuspagemainsubhead'] = "Чтобы получить больше информации";
-$_LANG['contactuscompanyname'] = "CloudHost247 Pvt Ltd.";
+$_LANG['contactuscompanyname'] = "CloudHost247 Isc.";
 $_LANG['contactusaddress'] = "abcdd, Phase 123, IND Area <br> Рядом с отелем Abcd, <br> XYZ, XYZ, XYZ 123456";
 $_LANG['contactushotlinesale'] = "<b>Горячая линия:</b> +91 8360944358";
 $_LANG['contactusbusinesshoursale'] = "<b> Обслуживание </b> Часы работы: 9:00 - 18:00 (пн - сб)";

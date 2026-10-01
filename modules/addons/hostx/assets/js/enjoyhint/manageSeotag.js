@@ -24,7 +24,7 @@ var enjoyhint_script_steps = [
 	{'next .seog1' : "Click to Enable the knowledgebase URLS in the sitemap.xml file"},
 	{'next .seog2' : "Click to Enable the product group URLS in the sitemap.xml file"},
 	{'next .seog3' : "Click to Enable the product URLS in the sitemap.xml file"},
-	{'next .seog4' : "Click to Enable the HostX page URLS in the sitemap.xml file"},
+	{'next .seog4' : "Click to Enable the CloudHost247 page URLs in the sitemap.xml file"},
 	{'next .seog5' : "Enter any custom URL that you want to add in sitemap.xml file."},
 	{'next .wgs-sve' : "Click to generate the sitemap.xml file"},
 	{'next .tblSecti' : "Here you can see the tag listing"},

@@ -1,6 +1,6 @@
 <?php
 /**
- * hostx_email - WHMCS hooks.
+ * CloudHost247 Email Hosting - WHMCS hooks.
  *
  * Only two responsibilities:
  *   1. run the bounded reconciler from the WHMCS daily cron, so no separate
@@ -10,7 +10,7 @@
  * Nothing here performs a provider API call during page rendering.
  *
  * @package    WHMCS
- * @subpackage hostx_email
+ * @subpackage CloudHost247 Email Hosting
  */
 
 if (!defined('WHMCS')) {
@@ -19,10 +19,10 @@ if (!defined('WHMCS')) {
 
 require_once __DIR__ . '/bootstrap.php';
 
-use HostxEmail\Database\Migrator;
-use HostxEmail\Service\Reconciler;
-use HostxEmail\Support\Logger;
-use HostxEmail\Webhook\Verifier;
+use CloudHost247\Email\Database\Migrator;
+use CloudHost247\Email\Service\Reconciler;
+use CloudHost247\Email\Support\Logger;
+use CloudHost247\Email\Webhook\Verifier;
 use WHMCS\Database\Capsule;
 
 /**

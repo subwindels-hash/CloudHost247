@@ -734,7 +734,7 @@ tr.gproduct td {
 
 
 /*
-Hostx Module menu style
+CloudHost247 theme-helper menu styles
 */
 body,h3,h2,h1,h4,h5,h6,p,ul,li{margin:0px;padding:0px;padding-bottom: 15px;}
 *, *:before, *:after {
@@ -1746,7 +1746,7 @@ tr.wgs-th-rw {
     color: #0967C7;
     pointer-events: none;
 }
-/** hostxV-2.2.0 **/
+/** CloudHost247-theme-helper-v2.2.0 **/
 .headerSections {
     clear: both;
     padding-left: 15px;

@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * CloudHost247 Isc LTE Proxy Module - English Language File
+ * CloudHost247 LTE Proxy Module - English Language File
  *
  * @package CloudHost247\LTEProxy
  * @version 1.0.0

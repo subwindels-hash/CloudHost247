@@ -4,8 +4,8 @@
  * Domain Name Registration Agreement
  *
  * @package    WHMCS
- * @author     CloudHost247 ISC
- * @copyright  Copyright (c) CloudHost247 ISC
+ * @author     CloudHost247 Isc.
+ * @copyright  Copyright (c) CloudHost247 Isc.
  * @license    https://www.cloudhost247.com/license/
  */
 

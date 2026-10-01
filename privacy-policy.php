@@ -4,7 +4,7 @@
  *
  * @package    WHMCS
  * @author     CloudHost247
- * @copyright  Copyright (c) CloudHost247, All Rights Reserved
+ * @copyright  Copyright (c) CloudHost247 Isc., All Rights Reserved
  * @license    Private Use
  * @version    1.0.0
  * @link       https://www.cloudhost247.com

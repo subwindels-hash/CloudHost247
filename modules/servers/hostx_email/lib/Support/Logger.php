@@ -12,10 +12,10 @@
  * service-account private keys and Authorization headers never reach either.
  *
  * @package    WHMCS
- * @subpackage hostx_email
+ * @subpackage CloudHost247 Email Hosting
  */
 
-namespace HostxEmail\Support;
+namespace CloudHost247\Email\Support;
 
 use WHMCS\Database\Capsule;
 
@@ -95,7 +95,7 @@ final class Logger
         $safe = Redactor::redact($context);
 
         if (self::$writing) {
-            error_log('[hostx_email][' . $level . '] ' . $event);
+            error_log('[CH247_EMAIL][' . $level . '] ' . $event);
 
             return;
         }
@@ -117,7 +117,7 @@ final class Logger
                 'created_at'     => date('Y-m-d H:i:s'),
             ]);
         } catch (\Throwable $e) {
-            error_log('[hostx_email][' . $level . '] ' . $event . ' (log write failed: ' . $e->getMessage() . ')');
+            error_log('[CH247_EMAIL][' . $level . '] ' . $event . ' (log write failed: ' . $e->getMessage() . ')');
         } finally {
             self::$writing = false;
         }
@@ -137,7 +137,7 @@ final class Logger
 
         try {
             logModuleCall(
-                HOSTX_EMAIL_MODULE,
+                CH247_EMAIL_MODULE,
                 substr($action, 0, 64),
                 Redactor::redact($request),
                 Redactor::redact($response),
@@ -146,7 +146,7 @@ final class Logger
                 self::replacements($request, $response)
             );
         } catch (\Throwable $e) {
-            error_log('[hostx_email] logModuleCall failed: ' . $e->getMessage());
+            error_log('[CH247_EMAIL] logModuleCall failed: ' . $e->getMessage());
         }
     }
 

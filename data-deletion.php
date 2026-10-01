@@ -22,7 +22,7 @@ $ca->initPage();
 
 // Assign template variables
 $ca->assign('effectiveDate', 'August 14, 2025');
-$ca->assign('companyName', 'CloudHost247 Inc');
+$ca->assign('companyName', 'CloudHost247 Isc.');
 
 // Output the page
 $ca->setTemplate('datadeletion');

@@ -16,12 +16,12 @@
             <div class="col-md-12">
 
                 <h3>1. Overview</h3>
-                <p>Domain names registered through CloudHost247 Isc are automatically renewed before expiration to prevent service interruption and domain loss. This policy explains how auto-renewal works, what happens if renewal fails, and the lifecycle of a domain after expiration.</p>
+                <p>Domain names registered through CloudHost247 Isc. are automatically renewed before expiration to prevent service interruption and domain loss. This policy explains how auto-renewal works, what happens if renewal fails, and the lifecycle of a domain after expiration.</p>
 
                 <h3>2. Auto-Renewal Process</h3>
-                <p>CloudHost247 Isc provides an optional Auto-Renew feature to ensure uninterrupted domain service for all registrants. When enabled, your domain will be automatically renewed using available funds in your account balance or via the credit/debit card you have securely saved in our system.</p>
+                <p>CloudHost247 Isc. provides an optional Auto-Renew feature to ensure uninterrupted domain service for all registrants. When enabled, your domain will be automatically renewed using available funds in your account balance or via the credit/debit card you have securely saved in our system.</p>
                 <p>Auto-renewals are processed for a one-year extension per cycle. Renewal charges will be based on the current applicable rates at the time of renewal, which may differ from the original purchase price. To help prevent service interruption or domain loss, domain registrations may be set to Auto-Renew by default.</p>
-                <p>By using this feature, you authorize CloudHost247 Isc to securely store and charge your selected payment method during domain registration, renewal, or transfer processes. You may disable Auto-Renewal at any time from your account settings.</p>
+                <p>By using this feature, you authorize CloudHost247 Isc. to securely store and charge your selected payment method during domain registration, renewal, or transfer processes. You may disable Auto-Renewal at any time from your account settings.</p>
 
                 <h3>3. Renewal Notices</h3>
                 <p>We send email reminder notifications before your domain expiration date to ensure you are aware of upcoming renewals. These reminders are sent at intervals prior to expiration so you have sufficient time to update payment methods or take manual action if needed.</p>
@@ -45,7 +45,7 @@
 
                 <h3>8. Customer Responsibility</h3>
                 <p>You are solely responsible for keeping your payment methods updated, monitoring your domain expiration dates, and ensuring timely renewal of your domain registrations. This includes maintaining accurate contact information and email addresses so you receive renewal notifications.</p>
-                <p>CloudHost247 Isc is not liable for any loss of domain names, associated services, data, revenue, or business resulting from expired domains, failed renewals, or deletion by the registry.</p>
+                <p>CloudHost247 Isc. is not liable for any loss of domain names, associated services, data, revenue, or business resulting from expired domains, failed renewals, or deletion by the registry.</p>
 
                 <h3>9. Policy Changes</h3>
                 <p>This Domain Name Auto-Renewal and Deletion Policy may be updated or modified at any time without prior notice. Changes become effective immediately upon posting to our website. We encourage you to review this policy periodically to stay informed of any updates that may affect your domain registrations.</p>

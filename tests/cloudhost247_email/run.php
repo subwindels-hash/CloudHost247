@@ -1,9 +1,9 @@
 <?php
 /**
- * hostx_email - behaviour diagnostics.
+ * CloudHost247 Email Hosting - behaviour diagnostics.
  *
  * MOCK TESTS. Every provider call in this suite is served by
- * HostxEmail\Testing\MockHttpClient. Passing here proves the module builds the
+ * CloudHost247\Email\Testing\MockHttpClient. Passing here proves the module builds the
  * right requests, interprets documented responses correctly and fails safe - it
  * does NOT prove that a live Microsoft 365 tenant, Google Workspace tenant or
  * mail platform behaves identically. Staging verification against real tenants
@@ -18,19 +18,19 @@ $module = $root . '/modules/servers/hostx_email';
 
 require_once $module . '/bootstrap.php';
 
-use HostxEmail\Database\Migrator;
-use HostxEmail\Dns\RecordSet;
-use HostxEmail\Providers\AbstractProvider;
-use HostxEmail\Providers\GoogleWorkspaceProvider;
-use HostxEmail\Providers\Microsoft365Provider;
-use HostxEmail\Providers\ProfessionalEmailProvider;
-use HostxEmail\Providers\ProviderFactory;
-use HostxEmail\Support\Config;
-use HostxEmail\Support\Redactor;
-use HostxEmail\Support\Result;
-use HostxEmail\Support\Validator;
-use HostxEmail\Testing\MockHttpClient;
-use HostxEmail\Webhook\Verifier;
+use CloudHost247\Email\Database\Migrator;
+use CloudHost247\Email\Dns\RecordSet;
+use CloudHost247\Email\Providers\AbstractProvider;
+use CloudHost247\Email\Providers\GoogleWorkspaceProvider;
+use CloudHost247\Email\Providers\Microsoft365Provider;
+use CloudHost247\Email\Providers\ProfessionalEmailProvider;
+use CloudHost247\Email\Providers\ProviderFactory;
+use CloudHost247\Email\Support\Config;
+use CloudHost247\Email\Support\Redactor;
+use CloudHost247\Email\Support\Result;
+use CloudHost247\Email\Support\Validator;
+use CloudHost247\Email\Testing\MockHttpClient;
+use CloudHost247\Email\Webhook\Verifier;
 
 /**
  * @param array<string,mixed> $overrides
@@ -546,7 +546,7 @@ $tests['MOCK: an existing remote user is adopted, never duplicated'] = static fu
 /* =========================================== idempotency and reconciliation */
 
 $tests['idempotency keys are deterministic and input-sensitive'] = static function () {
-    $repository = \HostxEmail\Repository\OperationRepository::class;
+    $repository = \CloudHost247\Email\Repository\OperationRepository::class;
 
     $a = $repository::key(10, 'create', ['email' => 'a@b.com', 'sku' => 'X']);
     $b = $repository::key(10, 'create', ['sku' => 'X', 'email' => 'a@b.com']); // different order
@@ -945,7 +945,7 @@ $tests['the module never logs raw provider bodies unredacted'] = static function
 /* ================================================= transport and security */
 
 $tests['plain HTTP provider endpoints are refused'] = static function () {
-    $client = new \HostxEmail\Support\CurlClient();
+    $client = new \CloudHost247\Email\Support\CurlClient();
     $response = $client->request('GET', 'http://insecure.example.net/mailboxes');
 
     return $response['status'] === 0 && strpos($response['error'], 'non-HTTPS') !== false
@@ -1061,7 +1061,7 @@ $tests['provider capability matrix is honest'] = static function () {
 
 $tests['the provisioner refuses an unsupported capability'] = static function () {
     $config = new Config(hxe_params(['configoption1' => Config::PROVIDER_PROFESSIONAL, 'serverhostname' => 'https://mail-api.example.net']));
-    $provisioner = new \HostxEmail\Service\Provisioner($config, new MockHttpClient());
+    $provisioner = new \CloudHost247\Email\Service\Provisioner($config, new MockHttpClient());
 
     $result = $provisioner->preflight('assign_license');
 
@@ -1071,7 +1071,7 @@ $tests['the provisioner refuses an unsupported capability'] = static function ()
 
 $tests['Microsoft licensing requires a usage location'] = static function () {
     $config = new Config(hxe_params(['configoption6' => '']));
-    $provisioner = new \HostxEmail\Service\Provisioner($config, new MockHttpClient());
+    $provisioner = new \CloudHost247\Email\Service\Provisioner($config, new MockHttpClient());
 
     $result = $provisioner->preflight('create');
 
@@ -1127,7 +1127,7 @@ $tests['page rendering performs no provider API calls'] = static function () use
 };
 
 $tests['default page content makes no false partnership claim'] = static function () {
-    $content = \HostxEmail\Repository\ContentRepository::defaults();
+    $content = \CloudHost247\Email\Repository\ContentRepository::defaults();
     $disclaimer = strtolower($content['hero']['disclaimer']);
 
     if (strpos($disclaimer, 'not affiliated') === false) {
@@ -1171,7 +1171,7 @@ $tests['cron work is bounded and lock protected'] = static function () use ($mod
 
 $failures = 0;
 
-echo "hostx_email diagnostics (provider calls are MOCKED)\n\n";
+echo "CloudHost247 Email Hosting diagnostics (provider calls are MOCKED)\n\n";
 
 foreach ($tests as $name => $test) {
     try {
@@ -1189,7 +1189,7 @@ foreach ($tests as $name => $test) {
     echo "FAIL  {$name}" . (is_string($result) ? " - {$result}" : '') . "\n";
 }
 
-echo "\n" . (count($tests) - $failures) . '/' . count($tests) . " hostx_email checks passed"
+echo "\n" . (count($tests) - $failures) . '/' . count($tests) . " CloudHost247 Email Hosting checks passed"
     . " (mock transport; live-tenant verification is a staging requirement)\n";
 
 exit($failures === 0 ? 0 : 1);

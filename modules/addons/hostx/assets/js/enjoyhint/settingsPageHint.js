@@ -15,7 +15,7 @@ var enjoyhint_script_steps = [
 	{'next .themePrev3' : "Click to Preview the theme in front end."},
 	{'click #headingOne' : "Clik to Open General Settings"},
 	{'next #collapseOne' : "Manage the following settings"},
-	{'next .showTour' : "Enable/Disable Hostx Admin Site Tour"},
+	{'next .showTour' : "Enable/Disable CloudHost247 Admin Site Tour"},
 	{'next #wgsPhoneNoSe' : "Change Phone Number"},
 	{'next .showNo' : "Enable/Disable Phone Number on Header"},
 	{'next .mnLay' : "Select Menu Layout"},

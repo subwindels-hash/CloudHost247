@@ -1,6 +1,6 @@
 <?php
 /**
- * hostx_email - CLI runner.
+ * CloudHost247 Email Hosting - CLI runner.
  *
  * Bounded background work. Safe to run from the system cron alongside the WHMCS
  * cron; a persistent lock prevents overlapping runs.
@@ -20,7 +20,7 @@
  * file is optional.
  *
  * @package    WHMCS
- * @subpackage hostx_email
+ * @subpackage CloudHost247 Email Hosting
  */
 
 if (PHP_SAPI !== 'cli') {
@@ -47,12 +47,12 @@ if ($whmcsRoot === null) {
 require_once $whmcsRoot . '/init.php';
 require_once __DIR__ . '/bootstrap.php';
 
-use HostxEmail\Database\Migrator;
-use HostxEmail\Repository\AccountRepository;
-use HostxEmail\Service\Reconciler;
-use HostxEmail\Support\Logger;
-use HostxEmail\Support\Result;
-use HostxEmail\Webhook\Verifier;
+use CloudHost247\Email\Database\Migrator;
+use CloudHost247\Email\Repository\AccountRepository;
+use CloudHost247\Email\Service\Reconciler;
+use CloudHost247\Email\Support\Logger;
+use CloudHost247\Email\Support\Result;
+use CloudHost247\Email\Webhook\Verifier;
 use WHMCS\Database\Capsule;
 
 $command = $argv[1] ?? 'help';
@@ -126,7 +126,7 @@ switch ($command) {
     case 'status':
         Migrator::ensureSchema();
 
-        echo "hostx_email " . HOSTX_EMAIL_VERSION . "\n\n";
+        echo "CloudHost247 Email Hosting " . CH247_EMAIL_VERSION . "\n\n";
 
         foreach (Migrator::tableStatus() as $table => $present) {
             echo '  ' . str_pad($table, 34) . ($present ? "ok\n" : "MISSING\n");
@@ -159,7 +159,7 @@ switch ($command) {
 
     default:
         echo <<<TEXT
-hostx_email CLI
+CloudHost247 Email Hosting CLI
 
   migrate                                  Create/upgrade the schema
   sync       [--batch=25] [--stale=360]    Bounded status synchronisation

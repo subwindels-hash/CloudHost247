@@ -3,7 +3,7 @@
  *
  * @package    CloudHost247
  * @author     CloudHost247
- * @copyright  Copyright (c) CloudHost247, All Rights Reserved
+ * @copyright  Copyright (c) CloudHost247 Isc., All Rights Reserved
  * @link       https://www.cloudhost247.com
  *}
 

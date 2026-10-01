@@ -7,10 +7,10 @@
  * lib/Testing/MockHttpClient.php) without touching the network.
  *
  * @package    WHMCS
- * @subpackage hostx_email
+ * @subpackage CloudHost247 Email Hosting
  */
 
-namespace HostxEmail\Support;
+namespace CloudHost247\Email\Support;
 
 interface HttpClient
 {

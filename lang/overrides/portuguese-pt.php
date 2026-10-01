@@ -557,7 +557,7 @@ $_LANG['msisdnCodeErrorNotValid'] = "não é válido Vodacom MSISDN.";
 /* for v2.2.0 */
 $_LANG['contactuspagemainhead'] = "Contate-Nos";
 $_LANG['contactuspagemainsubhead'] = "Para maiores informações";
-$_LANG['contactuscompanyname'] = "CloudHost247 Pvt Ltd.";
+$_LANG['contactuscompanyname'] = "CloudHost247 Isc.";
 $_LANG['contactusaddress'] = "abcdd, Fase 123, Área IND <br> Perto do Hotel Abcd, <br> XYZ, XYZ, XYZ 123456";
 $_LANG['contactushotlinesale'] = "<b> Linha direta: </b> +91 8360944358";
 $_LANG['contactusbusinesshoursale'] = "<b> Serviço </b> Horário: 9:00 - 18:00 (Seg - Sáb)";

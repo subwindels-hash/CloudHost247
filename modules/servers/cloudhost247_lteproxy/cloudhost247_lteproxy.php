@@ -3,13 +3,13 @@
 declare(strict_types=1);
 
 /**
- * CloudHost247 Isc LTE Proxy Reseller Module for WHMCS
+ * CloudHost247 LTE Proxy Reseller Module for WHMCS
  *
  * A comprehensive WHMCS provisioning module that integrates with the
  * CloudHost247 LTE Proxy API to provide proxy reselling capabilities.
  *
  * @package CloudHost247\LTEProxy
- * @author CloudHost247 Isc
+ * @author CloudHost247 Isc.
  * @version 1.0.0
  * @license Proprietary
  */
@@ -35,7 +35,7 @@ use CloudHost247\LTEProxy\Helpers;
 
 // Module metadata
 const CH247_LTEPROXY_VERSION = '1.0.0';
-const CH247_LTEPROXY_NAME = 'CloudHost247 Isc LTE Proxy Module';
+const CH247_LTEPROXY_NAME = 'CloudHost247 LTE Proxy Module';
 
 /**
  * Define module configuration options

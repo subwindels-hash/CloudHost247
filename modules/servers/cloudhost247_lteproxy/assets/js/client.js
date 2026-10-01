@@ -1,5 +1,5 @@
 /**
- * CloudHost247 Isc LTE Proxy Module - Client JavaScript
+ * CloudHost247 LTE Proxy Module - Client JavaScript
  * Version: 1.0.0
  */
 

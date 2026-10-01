@@ -16,14 +16,14 @@
  * remote API.
  *
  * @package    WHMCS
- * @subpackage hostx_email
+ * @subpackage CloudHost247 Email Hosting
  */
 
-namespace HostxEmail\Service;
+namespace CloudHost247\Email\Service;
 
-use HostxEmail\Providers\ProviderFactory;
-use HostxEmail\Support\Config;
-use HostxEmail\Support\Logger;
+use CloudHost247\Email\Providers\ProviderFactory;
+use CloudHost247\Email\Support\Config;
+use CloudHost247\Email\Support\Logger;
 use WHMCS\Database\Capsule;
 
 final class PublicCatalog

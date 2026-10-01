@@ -24,7 +24,7 @@
             <div class="col-md-12">
                 <div class="inner-policy-content">
                     <p><strong>Effective Date: August 14, 2025</strong></p>
-                    <p>This Cookie Policy explains how CloudHost247 Inc ("we," "us," "our") uses cookies and similar tracking technologies when you visit our websites, use our services, or interact with our content.</p>
+                    <p>This Cookie Policy explains how CloudHost247 Isc. ("we," "us," "our") uses cookies and similar tracking technologies when you visit our websites, use our services, or interact with our content.</p>
                     <p>By using our website and services, you consent to the use of cookies as described in this policy.</p>
 
                     <h2>1. What Are Cookies?</h2>

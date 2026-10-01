@@ -1,11 +1,11 @@
 -- ---------------------------------------------------------------------------
 -- Complete the CloudHost247 rebrand in the database.
 --
--- REQUIRED. The code rename alone is not sufficient: WHMCS resolves modules,
--- templates and order forms by name out of the database. Deploying the code
--- without running this leaves the addons invisible in admin, every email
--- service pointing at a table that no longer exists, and the client area
--- requesting a theme directory that no longer exists.
+-- REQUIRED for deployments moving the renamed addon modules and legacy theme.
+-- WHMCS resolves addon modules, templates and order forms by database value.
+-- This script deliberately leaves the separate Email Hosting server module's
+-- type (hostx_email) and mod_hostx_email_* tables unchanged: the source at
+-- modules/servers/hostx_email still uses those identifiers for compatibility.
 --
 -- Run it in the SAME maintenance window as the deploy, with the site in
 -- maintenance mode, AFTER a full database backup.
@@ -20,12 +20,15 @@
 --     those function names are baked into the encoded vendor files, so the
 --     addon registration and its directory keep the legacy vendor name and
 --     cannot be rebranded without replacing the addon.
---   * the four data tables that encoded helper owns and queries at runtime:
---     mod_hostx_pages, mod_hostx_page_products, mod_hostx_setting,
---     mod_hostx_dynmic_translation. The root marketing pages query the same
---     tables and were left pointed at them for exactly this reason.
---   See docs/independent-rebuild/BRAND-RENAME.md for the full list of retained
---   names and the reasoning.
+--   * the Email Hosting server module's technical type `hostx_email` and its
+--     mod_hostx_email_* data tables. WHMCS products/servers and the current
+--     module source depend on those stable identifiers; renaming them would
+--     require a separate staged module/data migration.
+--   * the four data tables that the encoded page-builder helper owns and
+--     queries at runtime: mod_hostx_pages, mod_hostx_page_products,
+--     mod_hostx_setting, mod_hostx_dynmic_translation. Root marketing pages
+--     and the encoded helper still address them by these names.
+--   See docs/BRANDING-COMPATIBILITY.md for the full exception register.
 -- ---------------------------------------------------------------------------
 
 DELIMITER //
@@ -53,11 +56,8 @@ END //
 DELIMITER ;
 
 -- 1. Module data tables -----------------------------------------------------
---    mod_hostx_email_accounts carries live customer mailbox records; it is
---    renamed rather than recreated so no row is lost.
-CALL ch247_rename_if_exists('mod_hostx_email_accounts',     'mod_cloudhost247_email_accounts');
-CALL ch247_rename_if_exists('mod_hostx_email_api_logs',     'mod_cloudhost247_email_api_logs');
-CALL ch247_rename_if_exists('mod_hostx_email_webhook_logs', 'mod_cloudhost247_email_webhook_logs');
+--    Only the renamed tools-module tables move. Email Hosting tables retain
+--    their original prefix because modules/servers/hostx_email reads them.
 CALL ch247_rename_if_exists('mod_hostx_tools_cache',        'mod_cloudhost247_tools_cache');
 CALL ch247_rename_if_exists('mod_hostx_tools_logs',         'mod_cloudhost247_tools_logs');
 CALL ch247_rename_if_exists('mod_hostx_tools_rate_limit',   'mod_cloudhost247_tools_rate_limit');
@@ -72,13 +72,10 @@ UPDATE tbladdonmodules SET module = 'cloudhost247_tools'
 UPDATE tbladdonmodules SET module = 'cloudhost247_domain_lookup'
     WHERE module = 'hostx_domain_lookup';
 
--- 3. Provisioning bindings --------------------------------------------------
---    Without this, every product built on the email module loses its server
---    module and provisioning, suspension and renewal stop working.
-UPDATE tblproducts SET servertype = 'cloudhost247_email'
-    WHERE servertype = 'hostx_email';
-UPDATE tblservers  SET type       = 'cloudhost247_email'
-    WHERE type       = 'hostx_email';
+-- 3. Email Hosting provisioning bindings -----------------------------------
+--    Intentionally unchanged. Existing tblproducts.servertype and
+--    tblservers.type values `hostx_email` resolve to
+--    modules/servers/hostx_email and remain valid.
 
 -- 4. Admin role permissions, which are keyed by addon module name -----------
 UPDATE tbladminroles
@@ -105,28 +102,34 @@ UPDATE tblproductgroups SET orderfrmtpl = 'cloudhost247_legacy'
 UPDATE mod_hostx_setting SET value = 'cloudhost247_legacy'
     WHERE setting = 'template_name_custom' AND value = 'hostx';
 
+-- 6. Company legal name ------------------------------------------------------
+--    Only exact legacy company-name values are changed. Custom product names,
+--    customer records, contacts, invoice items, and credentials are untouched.
+UPDATE tblconfiguration
+    SET value = 'CloudHost247 Isc.'
+    WHERE setting = 'CompanyName'
+      AND LOWER(TRIM(value)) IN (
+          'hostx', 'host x', 'host-x', 'host_x',
+          'hostx inc', 'hostx inc.', 'host x inc', 'host x inc.',
+          'host-x inc', 'host-x inc.', 'host_x inc', 'host_x inc.',
+          'cloudhost247 isc',
+          'cloudhost247 inc', 'cloudhost247 inc.',
+          'cloudhost247 pvt ltd', 'cloudhost247 pvt ltd.'
+      );
+
 -- ---------------------------------------------------------------------------
 -- Verification. Every MUST-BE-ZERO count below must be 0 once the migration
--- has run. The final counts are informational: they list the tables and the
--- addon registration that intentionally keep the legacy vendor name because
--- the ionCube-encoded helper still addresses them.
+-- has run. Informational counts at the end include identifiers intentionally
+-- retained for the encoded page-builder and Email Hosting compatibility.
 -- ---------------------------------------------------------------------------
 SELECT 'addon rows still on the old name' AS check_name,
        COUNT(*) AS must_be_zero FROM tbladdonmodules
        WHERE module IN ('hostx_tools', 'hostx_domain_lookup')
 UNION ALL
-SELECT 'products still bound to hostx_email',
-       COUNT(*) FROM tblproducts WHERE servertype = 'hostx_email'
-UNION ALL
-SELECT 'servers still typed hostx_email',
-       COUNT(*) FROM tblservers  WHERE type = 'hostx_email'
-UNION ALL
-SELECT 'renamed-away mod_hostx_* tables remaining',
+SELECT 'renamed-away mod_hostx_tools_* tables remaining',
        COUNT(*) FROM information_schema.tables
        WHERE table_schema = DATABASE()
-         AND table_name LIKE 'mod\_hostx\_%'
-         AND table_name NOT IN ('mod_hostx_pages', 'mod_hostx_page_products',
-                                'mod_hostx_setting', 'mod_hostx_dynmic_translation')
+         AND table_name LIKE 'mod\_hostx\_tools\_%'
 UNION ALL
 SELECT 'system theme still on the old directory',
        COUNT(*) FROM tblconfiguration
@@ -134,11 +137,32 @@ SELECT 'system theme still on the old directory',
 UNION ALL
 SELECT 'order form still on the old directory',
        COUNT(*) FROM tblconfiguration
-       WHERE setting = 'OrderFormTemplate' AND value = 'hostx';
+       WHERE setting = 'OrderFormTemplate' AND value = 'hostx'
+UNION ALL
+SELECT 'company name still has a recognized legacy value',
+       COUNT(*) FROM tblconfiguration
+       WHERE setting = 'CompanyName'
+         AND LOWER(TRIM(value)) IN (
+             'hostx', 'host x', 'host-x', 'host_x',
+             'hostx inc', 'hostx inc.', 'host x inc', 'host x inc.',
+             'host-x inc', 'host-x inc.', 'host_x inc', 'host_x inc.',
+             'cloudhost247 isc',
+             'cloudhost247 inc', 'cloudhost247 inc.',
+             'cloudhost247 pvt ltd', 'cloudhost247 pvt ltd.'
+         );
 
--- Informational, expected to be non-zero while the encoded helper is in use.
+-- Informational, expected to be non-zero while the encoded helper and/or
+-- compatibility-bound Email Hosting products remain in service.
 SELECT 'retained legacy page-builder tables (expected)' AS note,
        COUNT(*) AS retained FROM information_schema.tables
        WHERE table_schema = DATABASE()
          AND table_name IN ('mod_hostx_pages', 'mod_hostx_page_products',
                             'mod_hostx_setting', 'mod_hostx_dynmic_translation');
+SELECT 'Email Hosting products retaining hostx_email (expected)' AS note,
+       COUNT(*) AS retained FROM tblproducts WHERE servertype = 'hostx_email';
+SELECT 'Email Hosting servers retaining hostx_email (expected)' AS note,
+       COUNT(*) AS retained FROM tblservers WHERE type = 'hostx_email';
+SELECT 'Email Hosting tables retaining mod_hostx_email_* (expected)' AS note,
+       COUNT(*) AS retained FROM information_schema.tables
+       WHERE table_schema = DATABASE()
+         AND table_name LIKE 'mod\_hostx\_email\_%';

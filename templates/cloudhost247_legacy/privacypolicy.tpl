@@ -8,11 +8,11 @@
         <div class="container inner_term_container">
             <h3>Privacy Policy</h3>
             <p><strong>Effective August 14, 2025</strong></p>
-            <p>CloudHost247 Isc ("we," "us" or "CloudHost247.com") cares about protecting the personal information of our customers and visitors who use our websites, products, or services (collectively, our "Users"). This privacy policy provides details about how your personal information is collected, shared, and used by us.</p>
+            <p>CloudHost247 Isc. ("we," "us" or "CloudHost247.com") cares about protecting the personal information of our customers and visitors who use our websites, products, or services (collectively, our "Users"). This privacy policy provides details about how your personal information is collected, shared, and used by us.</p>
 
             <h3>Information Covered by this Privacy Policy</h3>
             <p>This privacy policy covers personal information, including any information we collect, use, and share from you, as described further below. This privacy policy applies to all CloudHost247.com websites, our products and services, and our mobile applications (collectively, the "Services"). This privacy policy does not cover how our Users may use or share data that they collect using our Services.</p>
-            <p>When you purchase a Service from us, your personal information will be collected, used, and shared consistent with this privacy policy as well as any product-specific addendums related to particular services offered by CloudHost247 Isc, which are incorporated into this privacy policy.</p>
+            <p>When you purchase a Service from us, your personal information will be collected, used, and shared consistent with this privacy policy as well as any product-specific addendums related to particular services offered by CloudHost247 Isc., which are incorporated into this privacy policy.</p>
 
             <h3>Information We Collect From You</h3>
             <p>In the course of your use of the Services, we obtain the following information about you, as described below. We collect this data for the purposes described under "How We Use Your Information."</p>

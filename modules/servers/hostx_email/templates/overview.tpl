@@ -1,5 +1,5 @@
 {*
-    hostx_email - client area service overview (Smarty, WHMCS
+    CloudHost247 Email Hosting - client area service overview (Smarty, WHMCS
     tabOverviewReplacementTemplate).
 
     Every value is escaped. No credential, provider payload or diagnostic is
@@ -10,14 +10,14 @@
 {else}
 
 {if $notice}
-    <div class="alert alert-{$notice.type|escape} hostx-email-notice" role="alert">{$notice.message|escape}</div>
+    <div class="alert alert-{$notice.type|escape} ch247-email-notice" role="alert">{$notice.message|escape}</div>
 {/if}
 
-<div class="hostx-email-service">
+<div class="ch247-email-service">
 
-    <div class="row hostx-email-summary">
+    <div class="row ch247-email-summary">
         <div class="col-md-8">
-            <h3 class="hostx-email-address">{$email|escape}</h3>
+            <h3 class="ch247-email-address">{$email|escape}</h3>
             <p class="text-muted">
                 {$providerLabel|escape} &middot; {$planTier|escape} plan
                 {if $planSku} &middot; <span title="Provider SKU">{$planSku|escape}</span>{/if}
@@ -33,31 +33,31 @@
                 {/if}
             </p>
         </div>
-        <div class="col-md-4 text-right hostx-email-actions">
+        <div class="col-md-4 text-right ch247-email-actions">
             {if $loginUrl}
                 <a href="{$loginUrl|escape}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
                     {$loginLabel|escape}
                 </a>
             {/if}
             {if $canRefreshStatus}
-                <form method="post" action="" class="hostx-email-inline-form">
+                <form method="post" action="" class="ch247-email-inline-form">
                     <input type="hidden" name="token" value="{$token|escape}">
-                    <input type="hidden" name="hostx_email_action" value="refresh_status">
+                    <input type="hidden" name="ch247_email_action" value="refresh_status">
                     <button type="submit" class="btn btn-default">Refresh status</button>
                 </form>
             {/if}
         </div>
     </div>
 
-    <div class="row hostx-email-facts">
+    <div class="row ch247-email-facts">
         <div class="col-sm-3">
-            <div class="hostx-email-fact">
-                <span class="hostx-email-fact__label">Storage used</span>
-                <span class="hostx-email-fact__value">{$storage.used_label|escape}</span>
+            <div class="ch247-email-fact">
+                <span class="ch247-email-fact__label">Storage used</span>
+                <span class="ch247-email-fact__value">{$storage.used_label|escape}</span>
                 {if $storage.quota_mb}<small class="text-muted">of {$storage.quota_label|escape}</small>{/if}
             </div>
             {if $storage.percent !== null}
-                <div class="progress hostx-email-progress">
+                <div class="progress ch247-email-progress">
                     <div class="progress-bar" role="progressbar" style="width: {$storage.percent|escape}%"
                          aria-valuenow="{$storage.percent|escape}" aria-valuemin="0" aria-valuemax="100">
                         {$storage.percent|escape}%
@@ -66,46 +66,46 @@
             {/if}
         </div>
         <div class="col-sm-3">
-            <div class="hostx-email-fact">
-                <span class="hostx-email-fact__label">DNS setup</span>
-                <span class="hostx-email-fact__value">{$dnsStateLabel|escape}</span>
+            <div class="ch247-email-fact">
+                <span class="ch247-email-fact__label">DNS setup</span>
+                <span class="ch247-email-fact__value">{$dnsStateLabel|escape}</span>
                 {if $dnsCheckedAt}<small class="text-muted">checked {$dnsCheckedAt|escape}</small>{/if}
             </div>
         </div>
         <div class="col-sm-3">
-            <div class="hostx-email-fact">
-                <span class="hostx-email-fact__label">Last synchronised</span>
-                <span class="hostx-email-fact__value">{if $lastSyncAt}{$lastSyncAt|escape}{else}Not yet{/if}</span>
+            <div class="ch247-email-fact">
+                <span class="ch247-email-fact__label">Last synchronised</span>
+                <span class="ch247-email-fact__value">{if $lastSyncAt}{$lastSyncAt|escape}{else}Not yet{/if}</span>
                 {if $lastSyncResult}<small class="text-muted">{$lastSyncResult|escape}</small>{/if}
             </div>
         </div>
         <div class="col-sm-3">
-            <div class="hostx-email-fact">
-                <span class="hostx-email-fact__label">Provider</span>
-                <span class="hostx-email-fact__value">{$providerLabel|escape}</span>
+            <div class="ch247-email-fact">
+                <span class="ch247-email-fact__label">Provider</span>
+                <span class="ch247-email-fact__value">{$providerLabel|escape}</span>
             </div>
         </div>
     </div>
 
     {* ------------------------------------------------------------------ *}
-    <div class="panel panel-default hostx-email-panel">
+    <div class="panel panel-default ch247-email-panel">
         <div class="panel-heading"><strong>Mailbox password</strong></div>
         <div class="panel-body">
             {if $canChangePassword}
-                <form method="post" action="" class="form-horizontal hostx-email-password-form">
+                <form method="post" action="" class="form-horizontal ch247-email-password-form">
                     <input type="hidden" name="token" value="{$token|escape}">
-                    <input type="hidden" name="hostx_email_action" value="change_password">
+                    <input type="hidden" name="ch247_email_action" value="change_password">
                     <div class="form-group">
-                        <label class="col-sm-3 control-label" for="hostx-email-new-password">New password</label>
+                        <label class="col-sm-3 control-label" for="ch247-email-new-password">New password</label>
                         <div class="col-sm-5">
-                            <input type="password" class="form-control" id="hostx-email-new-password"
+                            <input type="password" class="form-control" id="ch247-email-new-password"
                                    name="new_password" autocomplete="new-password" required minlength="12">
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-3 control-label" for="hostx-email-confirm-password">Confirm password</label>
+                        <label class="col-sm-3 control-label" for="ch247-email-confirm-password">Confirm password</label>
                         <div class="col-sm-5">
-                            <input type="password" class="form-control" id="hostx-email-confirm-password"
+                            <input type="password" class="form-control" id="ch247-email-confirm-password"
                                    name="confirm_password" autocomplete="new-password" required minlength="12">
                         </div>
                     </div>
@@ -125,12 +125,12 @@
     </div>
 
     {* ------------------------------------------------------------------ *}
-    <div class="panel panel-default hostx-email-panel hostx-email-dns">
+    <div class="panel panel-default ch247-email-panel ch247-email-dns">
         <div class="panel-heading">
             <strong>DNS records</strong>
             <span class="pull-right">
                 {if $dnsRecords}
-                    <button type="button" class="btn btn-xs btn-default" data-hostx-copy-all
+                    <button type="button" class="btn btn-xs btn-default" data-ch247-copy-all
                             data-clipboard="{$dnsCopyAll|escape}">Copy all</button>
                 {/if}
             </span>
@@ -142,7 +142,7 @@
                     DNS is hosted. We never change your DNS automatically.
                 </p>
                 <div class="table-responsive">
-                    <table class="table table-condensed hostx-email-dns-table">
+                    <table class="table table-condensed ch247-email-dns-table">
                         <thead>
                             <tr>
                                 <th scope="col">Purpose</th>
@@ -160,11 +160,11 @@
                                 <td>{$record.purpose|upper|escape}</td>
                                 <td><code>{$record.type|escape}</code></td>
                                 <td><code>{$record.host|escape}</code></td>
-                                <td class="hostx-email-dns-value"><code>{$record.value|escape}</code></td>
+                                <td class="ch247-email-dns-value"><code>{$record.value|escape}</code></td>
                                 <td>{if $record.priority !== null}{$record.priority|escape}{else}&mdash;{/if}</td>
                                 <td>{if $record.ttl !== null}{$record.ttl|escape}{else}&mdash;{/if}</td>
                                 <td class="text-right">
-                                    <button type="button" class="btn btn-xs btn-default" data-hostx-copy
+                                    <button type="button" class="btn btn-xs btn-default" data-ch247-copy
                                             data-clipboard="{$record.clipboard|escape}"
                                             aria-label="Copy the {$record.type|escape} record for {$record.host|escape}">
                                         Copy
@@ -187,16 +187,16 @@
             {/if}
 
             {if $dnsSupported}
-                <form method="post" action="" class="hostx-email-inline-form">
+                <form method="post" action="" class="ch247-email-inline-form">
                     <input type="hidden" name="token" value="{$token|escape}">
-                    <input type="hidden" name="hostx_email_action" value="refresh_dns">
+                    <input type="hidden" name="ch247_email_action" value="refresh_dns">
                     <button type="submit" class="btn btn-default btn-sm">Refresh and re-check DNS</button>
                 </form>
             {/if}
         </div>
     </div>
 
-    <p class="text-muted small hostx-email-footnote">
+    <p class="text-muted small ch247-email-footnote">
         Status and usage are read from the provider on a schedule; figures the provider does not report are shown as
         "not reported" rather than estimated. Module {$moduleVersion|escape}.
     </p>
@@ -248,7 +248,7 @@
     }
 
     document.addEventListener('click', function (event) {
-        var button = event.target.closest('[data-hostx-copy], [data-hostx-copy-all]');
+        var button = event.target.closest('[data-ch247-copy], [data-ch247-copy-all]');
 
         if (button) {
             event.preventDefault();

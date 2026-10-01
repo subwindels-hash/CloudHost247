@@ -4,7 +4,7 @@
  *
  * @package    WHMCS
  * @author     CloudHost247
- * @copyright  Copyright (c) CloudHost247, All Rights Reserved
+ * @copyright  Copyright (c) CloudHost247 Isc., All Rights Reserved
  * @link       https://www.cloudhost247.com
  */
 
@@ -36,7 +36,7 @@ $refundSections = [
     ],
     'introduction' => [
         'title' => '',
-        'content' => 'At CloudHost247 Inc., we are committed to providing high-quality hosting, domain registration, and related services. We understand that sometimes circumstances change, and you may need to request a refund. This Refund Policy explains the terms under which refunds may be granted.'
+        'content' => 'At CloudHost247 Isc., we are committed to providing high-quality hosting, domain registration, and related services. We understand that sometimes circumstances change, and you may need to request a refund. This Refund Policy explains the terms under which refunds may be granted.'
     ],
     'sections' => [
         [
@@ -120,7 +120,7 @@ $refundSections = [
         [
             'id' => 'exceptions',
             'title' => '9. Exceptions & Special Circumstances',
-            'content' => 'In exceptional circumstances, CloudHost247 Inc. reserves the right to grant or deny refunds outside the scope of this standard policy. Such circumstances include, but are not limited to:',
+            'content' => 'In exceptional circumstances, CloudHost247 Isc. reserves the right to grant or deny refunds outside the scope of this standard policy. Such circumstances include, but are not limited to:',
             'items' => [
                 'Prolonged service outages caused by infrastructure failures on our end.',
                 'Billing errors or duplicate charges caused by system malfunction.',

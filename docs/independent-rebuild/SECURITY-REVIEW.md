@@ -145,7 +145,7 @@ Full detail: [WEBSITE-BUILDER.md](WEBSITE-BUILDER.md).
 | Credential leakage through forms | The builder stores no SMTP or API credentials. Notifications go through `localAPI('OpenTicket')` / `localAPI('SendAdminEmail')`; anything else must come from the central API & Integrations vault | Static verified |
 | Privilege abuse | Ten capabilities (`builder.view/pages/publish/delete/templates/theme/media/forms/settings/css`) enforced per view, per admin action and per editor API operation via `AdminGuard`, seeded Super-Admin-only. `publish`, `css`, `settings` and `delete` are PRIVILEGED | Unit/static verified |
 | CSRF | Every mutating admin action and every writing editor API operation passes `AdminGuard::requirePostToken()` | Unit/static verified |
-| Overwriting proprietary theme files | The builder adds `builder-page.php` and `templates/cloudhost247/cloudhost247-builder-page.tpl` only. `templates/cloudhost247_legacy/**`, `modules/addons/hostx*` and `modules/addons/soyoustart/**` are untouched and the integrity manifest is unchanged | Manifest verified |
+| Overwriting proprietary theme files | The builder adds `builder-page.php` and `templates/cloudhost247/cloudhost247-builder-page.tpl` only. The original integrity manifest is unchanged; explicitly approved legal-copy, logo, and theme-tour branding overrides are separately hashed in `rebrand-overrides.sha256`. No encoded PHP or functional vendor code was changed. | Original baseline plus override manifest verified |
 | Weakening authentication | Theme Builder edits login/registration **layout** only; no authentication code path is modified, and client-only pages check the real WHMCS session in `PageResolver` | Static verified |
 
 **IMPLEMENTED — SOURCE/MOCK VERIFIED:** `modules/addons/cloudhost247_builder` provides the Super Admin Website Builder: a versioned page schema (`cloudhost247-page/v1`) driving the editor, preview renderer, published renderer, template import/export and revision history; a drag-and-drop editor; 37 catalogue entries across layout/content/business/site; per-device responsive styling; Theme Builder parts with display conditions; a template library with nine seeded starters; a validating media library; a visual form builder; and an additive `cloudhost247_builder:1.0.0` migration creating eleven `mod_cloudhost247_builder_*` tables. 307 PHP behavioural assertions (`tests/builder/run.php`) and 46 static-policy assertions (`tests/builder/test_static.py`) run on PHP 7.4 and 8.2 in the release gate. The addon ships inactive; `builder-page.php` serves nothing while it is deactivated.
@@ -223,9 +223,9 @@ warnings were masking. The suite goes from 20 assertions with 12 diagnostics to
 
 **Verification note:** `@php-wasm/cli`, the runtime used for local PHP in this environment, does not propagate PHP's exit code — `exit(1)`, fatal errors and a failing `php -l` all return shell status `0`. `scripts/release-candidate-check.sh` relies on `set -e` and is therefore only meaningful under a real PHP binary, which is what GitHub Actions uses. Local runs in a php-wasm environment must assert on command **output**, not exit status, or they will report success unconditionally.
 
-## hostx_email (email hosting module and public page)
+## CloudHost247 Email Hosting module and public page
 
-Date: 2026-09-28. Scope: `modules/servers/hostx_email`, `email-hosting.php`, `templates/cloudhost247/cloudhost247-email-hosting.tpl`. Source/mock verified only; every runtime row is **BLOCKED — STAGING REQUIRED**.
+Date: 2026-09-28. Scope: `modules/servers/hostx_email`, `email-hosting.php`, `templates/cloudhost247/cloudhost247-email-hosting.tpl`. Source/mock verified only; every runtime row is **BLOCKED — STAGING REQUIRED**. The WHMCS server module ID remains `hostx_email` for compatibility.
 
 | Risk | Control / finding | Status |
 |---|---|---|

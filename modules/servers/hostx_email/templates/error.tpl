@@ -1,5 +1,5 @@
 {*
-    hostx_email - safe error view.
+    CloudHost247 Email Hosting - safe error view.
 
     Shown when the client-area controller could not render. No diagnostics are
     exposed: the correlation id lets support find the (redacted) log entry.

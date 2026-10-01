@@ -8,12 +8,12 @@
  * a real Microsoft/Google/provider tenant behaves identically.
  *
  * @package    WHMCS
- * @subpackage hostx_email
+ * @subpackage CloudHost247 Email Hosting
  */
 
-namespace HostxEmail\Testing;
+namespace CloudHost247\Email\Testing;
 
-use HostxEmail\Support\HttpClient;
+use CloudHost247\Email\Support\HttpClient;
 
 final class MockHttpClient implements HttpClient
 {

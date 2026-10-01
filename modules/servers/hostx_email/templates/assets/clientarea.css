@@ -1,28 +1,28 @@
 /**
- * hostx_email - client area styling.
+ * CloudHost247 Email Hosting - client area styling.
  *
- * Scoped to .hostx-email-* so it cannot affect the rest of the CloudHost247
+ * Scoped to .ch247-email-* so it cannot affect the rest of the CloudHost247
  * theme. Uses the theme's Bootstrap grid and colour variables where possible.
  */
 
-.hostx-email-service { margin-top: 10px; }
+.ch247-email-service { margin-top: 10px; }
 
-.hostx-email-address {
+.ch247-email-address {
     margin: 0 0 4px;
     font-size: 24px;
     font-weight: 600;
     word-break: break-all;
 }
 
-.hostx-email-summary { margin-bottom: 18px; }
+.ch247-email-summary { margin-bottom: 18px; }
 
-.hostx-email-actions .btn { margin-left: 6px; margin-bottom: 6px; }
+.ch247-email-actions .btn { margin-left: 6px; margin-bottom: 6px; }
 
-.hostx-email-inline-form { display: inline-block; margin: 0; }
+.ch247-email-inline-form { display: inline-block; margin: 0; }
 
-.hostx-email-facts { margin-bottom: 18px; }
+.ch247-email-facts { margin-bottom: 18px; }
 
-.hostx-email-fact {
+.ch247-email-fact {
     border: 1px solid #e5e9ef;
     border-radius: 6px;
     padding: 12px 14px;
@@ -31,7 +31,7 @@
     margin-bottom: 10px;
 }
 
-.hostx-email-fact__label {
+.ch247-email-fact__label {
     display: block;
     font-size: 11px;
     letter-spacing: .06em;
@@ -39,28 +39,28 @@
     color: #8a93a2;
 }
 
-.hostx-email-fact__value {
+.ch247-email-fact__value {
     display: block;
     font-size: 16px;
     font-weight: 600;
     margin-top: 2px;
 }
 
-.hostx-email-progress { height: 8px; margin-top: 6px; margin-bottom: 0; }
+.ch247-email-progress { height: 8px; margin-top: 6px; margin-bottom: 0; }
 
-.hostx-email-panel { border-radius: 6px; }
+.ch247-email-panel { border-radius: 6px; }
 
-.hostx-email-dns-table code { white-space: nowrap; }
+.ch247-email-dns-table code { white-space: nowrap; }
 
-.hostx-email-dns-value code {
+.ch247-email-dns-value code {
     white-space: normal;
     word-break: break-all;
 }
 
-.hostx-email-footnote { margin-top: 14px; }
+.ch247-email-footnote { margin-top: 14px; }
 
 @media (max-width: 767px) {
-    .hostx-email-actions { text-align: left; margin-top: 12px; }
-    .hostx-email-actions .btn { margin-left: 0; margin-right: 6px; }
-    .hostx-email-dns-table { font-size: 12px; }
+    .ch247-email-actions { text-align: left; margin-top: 12px; }
+    .ch247-email-actions .btn { margin-left: 0; margin-right: 6px; }
+    .ch247-email-dns-table { font-size: 12px; }
 }

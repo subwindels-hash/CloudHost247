@@ -1,5 +1,5 @@
 /**
- * CloudHost247 Isc LTE Proxy Module - Admin JavaScript
+ * CloudHost247 LTE Proxy Module - Admin JavaScript
  * Version: 1.0.0
  */
 

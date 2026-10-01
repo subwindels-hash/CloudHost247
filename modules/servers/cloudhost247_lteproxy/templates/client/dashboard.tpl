@@ -1,4 +1,4 @@
-{* CloudHost247 Isc LTE Proxy Client Dashboard *}
+{* CloudHost247 LTE Proxy Client Dashboard *}
 {* Version: 1.0.0 *}
 
 <div class="ch247-lteproxy-dashboard" data-service-id="{$serviceId}" data-csrf-token="{$csrfToken}">

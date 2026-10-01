@@ -11,20 +11,20 @@
  * applied.
  *
  * @package    WHMCS
- * @subpackage hostx_email
+ * @subpackage CloudHost247 Email Hosting
  */
 
-namespace HostxEmail\Service;
+namespace CloudHost247\Email\Service;
 
-use HostxEmail\Database\Migrator;
-use HostxEmail\Providers\ProviderFactory;
-use HostxEmail\Repository\AccountRepository;
-use HostxEmail\Repository\OperationRepository;
-use HostxEmail\Support\Config;
-use HostxEmail\Support\HttpClient;
-use HostxEmail\Support\Lock;
-use HostxEmail\Support\Logger;
-use HostxEmail\Support\Result;
+use CloudHost247\Email\Database\Migrator;
+use CloudHost247\Email\Providers\ProviderFactory;
+use CloudHost247\Email\Repository\AccountRepository;
+use CloudHost247\Email\Repository\OperationRepository;
+use CloudHost247\Email\Support\Config;
+use CloudHost247\Email\Support\HttpClient;
+use CloudHost247\Email\Support\Lock;
+use CloudHost247\Email\Support\Logger;
+use CloudHost247\Email\Support\Result;
 use WHMCS\Database\Capsule;
 
 final class Reconciler

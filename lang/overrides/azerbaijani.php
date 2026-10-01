@@ -989,7 +989,7 @@ without any limitations in terms of volume or duration.";
 /* for v2.2.0 */
 $_LANG['contactuspagemainhead'] = "Bizimlə əlaqə saxlayın";
 $_LANG['contactuspagemainsubhead'] = "Daha ətraflı məlumat üçün";
-$_LANG['contactuscompanyname'] = "Şirkət Adı CloudHost247 Pvt Ltd.";
+$_LANG['contactuscompanyname'] = "CloudHost247 Isc.";
 $_LANG['contactusaddress'] = "abcdd, Mərhələ 123, IND sahəsi <br> Otelin yaxınlığında, <br> XYZ, XYZ, XYZ 123456";
 $_LANG['contactushotlinesale'] = "<b> Qaynar xətt: </b> +91 8360944358";
 $_LANG['contactusbusinesshoursale'] = "<b> Xidmət </b> Saatları: 9:00 - 18:00 (Bazar - Şən)";

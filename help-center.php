@@ -4,7 +4,7 @@
  *
  * @package    WHMCS
  * @subpackage CloudHost247 Theme
- * @copyright  CloudHost247 Isc
+ * @copyright  CloudHost247 Isc.
  * @license    Private
  */
 

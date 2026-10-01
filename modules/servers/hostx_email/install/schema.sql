@@ -1,5 +1,5 @@
 -- ---------------------------------------------------------------------------
--- hostx_email - canonical schema (version 1.0.0)
+-- CloudHost247 Email Hosting - canonical schema (version 1.0.0)
 --
 -- Applied by lib/Database/Migrator.php on first use and by
 -- `php cron.php migrate`. Every statement is idempotent; the file can also be

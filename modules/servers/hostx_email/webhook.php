@@ -1,6 +1,6 @@
 <?php
 /**
- * hostx_email - provider webhook endpoint.
+ * CloudHost247 Email Hosting - provider webhook endpoint.
  *
  * URL: https://<whmcs>/modules/servers/hostx_email/webhook.php?provider=<key>
  *
@@ -19,16 +19,16 @@
  *    cause a destructive action.
  *
  * @package    WHMCS
- * @subpackage hostx_email
+ * @subpackage CloudHost247 Email Hosting
  */
 
-use HostxEmail\Database\Migrator;
-use HostxEmail\Repository\AccountRepository;
-use HostxEmail\Service\Reconciler;
-use HostxEmail\Support\Logger;
-use HostxEmail\Support\Redactor;
-use HostxEmail\Support\Validator;
-use HostxEmail\Webhook\Verifier;
+use CloudHost247\Email\Database\Migrator;
+use CloudHost247\Email\Repository\AccountRepository;
+use CloudHost247\Email\Service\Reconciler;
+use CloudHost247\Email\Support\Logger;
+use CloudHost247\Email\Support\Redactor;
+use CloudHost247\Email\Support\Validator;
+use CloudHost247\Email\Webhook\Verifier;
 use WHMCS\Database\Capsule;
 
 $whmcsRoot = null;
