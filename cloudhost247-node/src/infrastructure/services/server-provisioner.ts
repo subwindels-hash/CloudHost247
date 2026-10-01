@@ -27,6 +27,7 @@ import {
   type CreateProviderServerInput,
   type InfrastructureProviderAdapter,
 } from '../providers/types';
+import { sanitizeProviderRecord } from '../providers/sanitize-provider-response';
 // Provisioning is composed from focused services (spec §8): image resolution, server
 // configuration inputs, and health verification each live in their own module.
 import { resolveVerifiedProviderImage } from './image-resolver';
@@ -95,8 +96,7 @@ async function fail(
     attempts: deployment.attempts,
     errorCode: classified.code,errorMessage: classified.message,retryable: classified.retryable,
     failedAt: willRetry ? null : new Date().toISOString(),
-    providerResponse: classified.providerResponse && typeof classified.providerResponse === 'object'
-      ? classified.providerResponse as Record<string,unknown> : null,
+    providerResponse: sanitizeProviderRecord(classified.providerResponse),
   });
   await appendProvisioningLog(db,job.id,{
     stage: 'FAILED',level: 'error',message: `${classified.code}: ${classified.message}`,
@@ -162,7 +162,7 @@ async function executeLifecycleAction(
     }
     await updateProvisioningJob(db,job.id,{
       status: 'READY',attempts: deployment.attempts,completedAt: new Date().toISOString(),
-      errorCode: null,errorMessage: null,providerResponse,
+      errorCode: null,errorMessage: null,providerResponse: sanitizeProviderRecord(providerResponse),
     });
     await recordAuditBestEffort(db,{ action: `SERVER_${job.operation}`,resourceType: 'server',resourceId: server.id,actorId: deployment.requested_by });
     // Complete the broker row last. If the worker crashes after the durable job reaches READY,
@@ -310,7 +310,9 @@ export async function executeServerProvisioning(
         if (!remote) remote = await adapter.createServer(createInput);
         // Persist immediately. A crash after this write reuses the resource id; a crash before it
         // is recovered by provider-side idempotency lookup on the next attempt.
-        await updateProvisioningJob(db,job.id,{ status: 'CREATING',providerServerId: remote.id,providerResponse: { ...remote } });
+        await updateProvisioningJob(db,job.id,{
+          status: 'CREATING',providerServerId: remote.id,providerResponse: sanitizeProviderRecord(remote),
+        });
         await updateCustomerServerProvisioning(db,server.id,{ status: 'provisioning',provisioningStatus: 'CREATING',providerServerId: remote.id,ipAddress: remote.ipAddress });
         server.provider_server_id = remote.id;
         healthEvidenceAfterMs = Date.now();
