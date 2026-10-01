@@ -141,8 +141,14 @@ describe('marketplace + application installation flow', () => {
 
     const detail = await app().inject({ method: 'GET', url: '/api/v1/apps/n8n' });
     expect(detail.statusCode).toBe(200);
-    const { app: n8n } = detail.json() as { app: { environment: { required: Array<{ key: string }> }; versions: Array<{ id: string; stable: boolean }> } };
-    expect(n8n.environment.required.map((e) => e.key)).toContain('N8N_ENCRYPTION_KEY');
+    const { app: n8n } = detail.json() as {
+      app: {
+        environment: { required: Array<{ key: string; generated: boolean; customerProvided: boolean }> };
+        versions: Array<{ id: string; stable: boolean }>;
+      };
+    };
+    const encryptionKey = n8n.environment.required.find((e) => e.key === 'N8N_ENCRYPTION_KEY');
+    expect(encryptionKey).toMatchObject({ generated: true, customerProvided: false });
     expect(n8n.versions[0].stable).toBe(true);
 
     // Slug that never existed → 404.
@@ -200,6 +206,14 @@ describe('marketplace + application installation flow', () => {
       result.installationId,
     ]);
     expect(deployments.rows[0].count).toBe(0);
+
+    // Blank values for auto-generated manifest fields are treated as "generate server-side" —
+    // not stored as empty encrypted overrides that would break the worker later.
+    const storedBlankSecret = await db.query<{ count: number }>(
+      `SELECT count(*)::int AS count FROM application_environment WHERE installation_id = $1 AND key = 'N8N_ENCRYPTION_KEY'`,
+      [result.installationId]
+    );
+    expect(storedBlankSecret.rows[0].count).toBe(0);
 
     // The installation is visible to its owner only — another customer gets a 404, not 403.
     const mine = await app().inject({

@@ -47,6 +47,11 @@ final class MigrationRunner
 
     private function assertModule($module)
     {
-        if (!preg_match('/^cloudhost247_[a-z]+$/', $module)) { throw new RuntimeException('Unsafe module identifier'); }
+        // CloudHost247 first-party modules use cloudhost247_* identifiers, while
+        // legacy first-party WHMCS addons such as digitalproducts keep their
+        // original module name.  The identifier is stored only in the migration
+        // ledger, but still constrain it tightly to avoid unsafe values being
+        // logged or queried later.
+        if (!preg_match('/^[a-z][a-z0-9_]{1,63}$/', (string) $module)) { throw new RuntimeException('Unsafe module identifier'); }
     }
 }
