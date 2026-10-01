@@ -19,6 +19,7 @@ import type { Queryable } from '../db/types';
 import { listOrderItemsForOrder, type OrderRow } from '../db/orders';
 import { findPlanById } from '../db/catalog-plans';
 import { listPublishedPricingForPlan } from '../db/catalog-pricing';
+import { resolveAvailableConfiguration } from '../db/operating-systems';
 import { findInstallationById, updateInstallation } from '../db/application-installations';
 import { createSubscription, findSubscriptionById } from '../db/ops-tables';
 import { enqueueDeployment } from '../db/deployments';
@@ -42,6 +43,13 @@ interface OrderItemMetadata {
   cloudflare?: Record<string, unknown>;
   serverProvision?: {
     serverId: string;
+  };
+  serverResize?: {
+    serverId: string;
+    sourcePlanId?: string;
+    targetPlanId: string;
+    targetConfigurationId?: string;
+    subscriptionId?: string | null;
   };
   hosting?: {
     serverId: string;
@@ -97,6 +105,50 @@ export async function provisionPaidOrder(tx: Queryable, order: OrderRow, genId: 
       const { provisionCloudflareOrderItem } = await import('./cloudflare-service');
       const result = await provisionCloudflareOrderItem(tx, order, item, genId);
       if (result.cloudflareServiceId) report.cloudflareServicesQueued.push(result.cloudflareServiceId);
+      continue;
+    }
+
+    // --- Paid server resize: re-resolve the target at settlement, then queue the provider call --
+    if (metadata.serverResize?.serverId) {
+      const resize = metadata.serverResize;
+      const server = await findCustomerServerById(tx, resize.serverId);
+      if (!server || server.customer_id !== order.user_id || !server.provider_id || !server.region_id
+        || !server.operating_system_version_id || !server.architecture || !server.provider_server_id) continue;
+      if (!['active', 'stopped'].includes(server.status) || server.plan_id !== resize.sourcePlanId) continue;
+
+      // The price snapshot was captured at quote time, but provider/location/image availability is
+      // deliberately checked again after payment. A stale paid order never grants an unverified
+      // provider resize simply because an operator disabled a template in the meantime.
+      const configuration = await resolveAvailableConfiguration(tx, {
+        planId: resize.targetPlanId,
+        providerId: server.provider_id,
+        regionId: server.region_id,
+        datacenterId: server.datacenter_id,
+        operatingSystemVersionId: server.operating_system_version_id,
+        architecture: server.architecture,
+        serverType: server.server_type,
+      });
+      const targetMetadata = configuration?.configuration_metadata ?? null;
+      const capabilities = targetMetadata && typeof targetMetadata.capabilities === 'object' && targetMetadata.capabilities !== null
+        ? targetMetadata.capabilities as Record<string, unknown>
+        : {};
+      if (!configuration || capabilities.resize !== true) continue;
+
+      const result = await enqueueServerProvisioningJob(tx, {
+        serverId: server.id,
+        orderId: order.id,
+        providerId: server.provider_id,
+        osImageId: server.os_image_id,
+        operation: 'RESIZE',
+        requestedBy: order.user_id,
+        idempotencyKey: `server-resize:${server.id}:${order.id}`,
+        payload: {
+          targetPlanId: resize.targetPlanId,
+          targetConfigurationId: configuration.configuration_id,
+          subscriptionId: resize.subscriptionId ?? null,
+        },
+      }, { alreadyInTransaction: true });
+      if (result.created) report.serverJobsQueued.push(result.job.id);
       continue;
     }
 

@@ -142,6 +142,27 @@ export function serverAction(id: string,action: string,body: unknown = {}) {
   return apiFetch<{ jobId: string; status: string; queued: boolean }>(`/api/v1/servers/${id}/${action}`,{ method: 'POST',headers: { 'Idempotency-Key': crypto.randomUUID() },body: JSON.stringify(body) });
 }
 
+export interface ServerResizeOption {
+  planId: string;
+  name: string;
+  cpuCores: number;
+  memoryMb: number;
+  storageMb: number;
+  bandwidthGb: number | null;
+  upgradeAmount: string;
+  currency: string;
+}
+
+export function fetchServerResizeOptions(id: string) {
+  return apiFetch<{ options: ServerResizeOption[] }>(`/api/v1/servers/${id}/resize-options`);
+}
+
+export function orderServerResize(id: string, targetPlanId: string) {
+  return apiFetch<{ orderId: string; orderNumber: string; invoiceId: string; invoiceNumber: string; totalAmount: string; currency: string; targetPlanId: string; created: boolean; paymentRequired: boolean }>(
+    `/api/v1/servers/${id}/resize`, { method: 'POST', headers: { 'Idempotency-Key': crypto.randomUUID() }, body: JSON.stringify({ targetPlanId }) },
+  );
+}
+
 export interface ConsoleSession { url?: string; password?: string; type?: string; expiresAt?: string; [key: string]: unknown }
 
 /**

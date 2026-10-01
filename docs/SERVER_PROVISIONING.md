@@ -515,8 +515,15 @@ infrastructure:
   until a provider adapter or authenticated server-agent firewall operation actually applies and
   verifies rules. Existing `firewall_rules` rows are compatibility/audit data, not proof of an
   active network policy.
-- self-service `resize` refuses customer-supplied provider sizing metadata. A provider resize must
-  be reached through a priced, paid upgrade-order flow; that billing flow is not implemented yet.
+- self-service `resize` never accepts customer-supplied provider sizing metadata. `POST
+  /api/v1/servers/:id/resize` accepts only a target plan id and creates an invoice from server-side
+  catalogue data. It supports non-destructive, same-product plan increases only: the exact original
+  order-item amount is credited against the currently published target-plan price. After verified
+  payment, the worker re-resolves the target provider/image/template before it calls the provider.
+  The local plan, resource limits, provider plan metadata, and matching subscription change only
+  after that provider action succeeds. Downgrades, proration, and legacy servers without an
+  immutable source-order price snapshot remain deliberately unavailable rather than estimating a
+  charge or allowing an unbilled resize.
 
 Rows are created `DISABLED` on purpose. Enable one only after a verified provider image exists
 for that provider, OS version, architecture and region; the ordering and reinstall queries join

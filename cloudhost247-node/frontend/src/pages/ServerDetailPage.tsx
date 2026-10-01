@@ -21,6 +21,9 @@ import {
   type AvailableOperatingSystem,
   type CustomerServer,
   type ServerConfiguration,
+  type ServerResizeOption,
+  fetchServerResizeOptions,
+  orderServerResize,
 } from '../lib/infrastructure-api';
 import { usePageMeta } from '../lib/usePageMeta';
 
@@ -81,6 +84,9 @@ export default function ServerDetailPage() {
   const [busy, setBusy] = useState('');
   const [showReinstall, setShowReinstall] = useState(false);
   const [showSnapshotModal, setShowSnapshotModal] = useState(false);
+  const [showResize, setShowResize] = useState(false);
+  const [resizeOptions, setResizeOptions] = useState<ServerResizeOption[] | null>(null);
+  const [resizePlanId, setResizePlanId] = useState('');
   const [consoleSession, setConsoleSession] = useState<ConsoleSession | null>(null);
   const [showCancel, setShowCancel] = useState(false);
   const [cancelConfirm, setCancelConfirm] = useState('');
@@ -120,6 +126,18 @@ export default function ServerDetailPage() {
       .then(setConfiguration)
       .catch((cause: Error) => setError(cause.message));
   }, [showReinstall, server?.plan_id, server?.server_type]);
+
+  useEffect(() => {
+    if (!showResize) return;
+    setResizeOptions(null);
+    setResizePlanId('');
+    fetchServerResizeOptions(id)
+      .then(({ options }) => {
+        setResizeOptions(options);
+        setResizePlanId(options[0]?.planId ?? '');
+      })
+      .catch((cause: Error) => setError(cause.message));
+  }, [showResize, id]);
 
   const reinstallSystems = useMemo<AvailableOperatingSystem[]>(() => {
     if (!server) return [];
@@ -272,6 +290,24 @@ export default function ServerDetailPage() {
     setShowSnapshotModal(false);
     await action('snapshot_create', { description: snapshotDesc || `Manual-Snapshot-${new Date().toISOString().slice(0, 10)}` });
     setSnapshotDesc('');
+  }
+
+  async function orderResize() {
+    if (!resizePlanId) return;
+    setBusy('resize');
+    setError('');
+    setMessage('');
+    try {
+      const result = await orderServerResize(id, resizePlanId);
+      setMessage(result.created
+        ? `Upgrade invoice ${result.invoiceNumber} for ${result.currency} ${result.totalAmount} was created. Pay it from Billing to queue the resize.`
+        : `Existing upgrade invoice ${result.invoiceNumber} is awaiting payment.`);
+      setShowResize(false);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Could not create the upgrade invoice');
+    } finally {
+      setBusy('');
+    }
   }
 
   async function reinstall() {
@@ -489,6 +525,16 @@ export default function ServerDetailPage() {
                   </button>
                 )
             )}
+            {server.capabilities?.resize === true && (
+              <button
+                type="button"
+                className="ch247-btn ch247-btn--primary"
+                disabled={busy !== '' || !!runningJob || terminating}
+                onClick={() => setShowResize(true)}
+              >
+                Upgrade plan
+              </button>
+            )}
             {server.capabilities?.snapshot === true && (
               <button
                 type="button"
@@ -665,6 +711,38 @@ export default function ServerDetailPage() {
             )}
             <button type="button" className="ch247-btn" onClick={() => setConsoleSession(null)}>
               Close
+            </button>
+          </div>
+        </section>
+      )}
+
+      {showResize && (
+        <section className="ch247-card">
+          <span className="ch247-eyebrow">Paid plan upgrade</span>
+          <h2>Upgrade server resources</h2>
+          <p className="ch247-page__hint">
+            Select a larger verified plan for this location. CloudHost247 creates an invoice from the published catalogue price and your original server-order credit; no provider resize is requested until that invoice is paid.
+          </p>
+          {resizeOptions === null ? (
+            <CatalogLoadingBanner label="Loading eligible upgrade plans…" />
+          ) : resizeOptions.length === 0 ? (
+            <p className="ch247-banner ch247-banner--info">No eligible self-service upgrades are available for this server.</p>
+          ) : (
+            <label className="ch247-field">
+              Target plan
+              <select value={resizePlanId} onChange={(event) => setResizePlanId(event.target.value)}>
+                {resizeOptions.map((option) => (
+                  <option key={option.planId} value={option.planId}>
+                    {option.name} — {option.cpuCores} vCPU, {Math.round(option.memoryMb / 1024)} GB RAM, {Math.round(option.storageMb / 1024)} GB storage — {option.currency} {option.upgradeAmount} due
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+          <div className="ch247-actions">
+            <button type="button" className="ch247-btn" disabled={busy !== ''} onClick={() => setShowResize(false)}>Cancel</button>
+            <button type="button" className="ch247-btn ch247-btn--primary" disabled={busy !== '' || !resizePlanId} onClick={() => void orderResize()}>
+              {busy === 'resize' ? 'Creating invoice…' : 'Create upgrade invoice'}
             </button>
           </div>
         </section>
