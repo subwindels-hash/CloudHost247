@@ -135,6 +135,11 @@ export default function Header() {
                 Admin
               </NavLink>
             )}
+            {user && STAFF_ROLES.includes(user.role) && (
+              <NavLink to="/admin/domain-services" onClick={closeMenu}>
+                Domain Services
+              </NavLink>
+            )}
           </nav>
         </div>
       )}

@@ -121,3 +121,103 @@ this Phase 1 work.
   RBAC-protected and audit logged.
 - Provider errors are separate from availability/registration states and are rendered as safe
   customer messages while technical context remains server-side.
+
+## Delivery record (all phases implemented)
+
+Phases 1–12 are implemented and verified. Summary of what shipped, where:
+
+### Backend (`cloudhost247-node/src/domain-services/`, `src/routes/`, `src/worker/`)
+
+- **Migration 0063** creates the full schema: providers + encrypted credentials, extension
+  catalogue and offerings, searches/results, registrations (+ encrypted contacts), transfers,
+  auctions/bids, club plans/memberships, appraisals, WHOIS lookups, domain transactions. No
+  existing table was altered destructively; commerce/payment/audit/notification tables are reused.
+- **Provider abstraction:** `providers/types.ts` (adapter contract + `DomainProviderError` +
+  `safeDomainProviderMessage`), `registry.ts` (explicit registration, no fallback), HTTP/XML
+  helpers, and four adapters: `namecheap` (search/register/transfer/TLD catalogue/balance test),
+  `godaddy` (search/register/transfer/shopper test), `rdap` (IANA-bootstrapped lookup, classic
+  WHOIS fallback, privacy-aware), `godaddy-govalue` (appraisal). Credentials are encrypted with
+  the platform key ring and are **write-only** — no API returns them.
+- **Services:** search (single public + rate-limited, bulk authenticated with DB throttles and a
+  hard 200-domain cap), registration (server-side quote incl. club discount → order →
+  payment-verified sweep → registrar confirm → `customer_domains` link), transfer (EPP code
+  encrypted at rest, one live transfer per domain, sweep-polled provider status), WHOIS/RDAP
+  (public projection only, privacy respected), appraisal (provider-gated, fee via order),
+  auctions (transactional `FOR UPDATE` bidding, server-computed minimum, idempotency keys,
+  sweep-driven close, one-time winner payment, payment-verified completion), club (admin plans,
+  member pricing applied at quote time, membership activation on verified payment).
+- **Payments:** every billable action creates a real order + invoice through the existing
+  commerce stack; provider actions only run after webhook-verified settlement
+  (`provisioning-service.ts` dispatch + `worker/domain-services-sweep.ts` CAS state machine,
+  60 s interval).
+- **Admin API** (`/api/v1/admin/domain-services/*`): provider CRUD + credential write + **real
+  Test Connection** (live authenticated provider call; `connected` status is only ever set by a
+  successful test), extension sync + trending/description curation, auction CRUD + lifecycle
+  actions, transfer oversight + refresh, club plans, appraisals/WHOIS/transaction oversight,
+  overview. All mutations audit-logged.
+- **Error mapping:** `DomainProviderError` → 503/429 with a safe message (`app.ts`), so provider
+  failure is distinguishable from registered/unavailable and never leaks provider detail.
+
+### Frontend (`cloudhost247-node/frontend/src/`)
+
+- `/domains` hub: the reference 3-group × 9-card layout (Find a Domain / Domain Investing /
+  Domain Tools and Services) plus a live search box.
+- Pages: `search` (quote + contact + checkout), `transfer`, `extensions`, `auctions` +
+  `auctions/:id` (bidding, anonymized history, winner payment), `appraisal`, `club`, `whois`,
+  `bulk-search` (paste/upload + CSV export), `broker` (full workflow over the existing brokerage
+  module: offers, counter-offers, decisions, messages, timeline).
+- Dashboard `Domains` page: original owned-domain management preserved, plus Domain Services
+  tabs (registrations, transfers, auctions incl. won, appraisals, searches & lookups,
+  transactions).
+- `/admin/domain-services`: overview readiness + activity, providers (create, credentials,
+  Test Connection), extensions (sync, trending), auctions (create/pause/resume/cancel/complete),
+  transfers (refresh), club plans (draft → published → disabled).
+- Every unconfigured service renders the honest **“Service Provider Not Configured”** state —
+  no placeholder availability, prices, valuations or listings, ever.
+
+### Verification
+
+- `tsc` clean (server + frontend strict), `vitest run`: **726 tests / 100 files pass**
+  (including the new `tests/integration/domain-services-api.test.ts` PGlite end-to-end suite and
+  `frontend/tests/unit/domain-services-pages.test.tsx`), `vite build` succeeds.
+- The integration suite caught and fixed four real defects: an unmatchable domain-name regex
+  (rejected every `example.com`-style input), a SQL parameter-type conflict that broke search
+  persistence (SQLSTATE 42P08), the same conflict in auction/registration/transfer status
+  updates, and registration sweeps using the wrong (latest) contact row instead of the
+  registration's own `contact_id`.
+
+### Simulated providers for tests and preview
+
+`tests/helpers/mock-registrar.ts` runs local HTTP servers that speak the **real wire protocols** —
+MockNamecheap (Namecheap XML API: balance, check, TLD list, create, transfer, getInfo) and
+MockRdap (IANA-style bootstrap + RFC 9083 responses). These are external test doubles at the
+transport boundary only: the production adapters, services, payments and admin APIs run unchanged
+against them. The registry itself still contains no mock adapter — an unconfigured production
+system keeps returning `Service Provider Not Configured`.
+
+Three integration tests use them to prove the provider-backed flows end to end: catalogue sync +
+search with real provider prices (available/premium/registered), the full registration lifecycle
+(quote → order → verified payment → sweep → registrar confirmation → `customer_domains` link →
+duplicate rejection), and RDAP WHOIS privacy reporting (redacted vs public registrant, and a
+registry 404 mapped to a genuine `not_found` rather than an error).
+
+### Live demo preview
+
+`scripts/domain-services-demo-preview.ts` boots the real app (PGlite, built frontend on
+`0.0.0.0:3000`) with the simulated providers and seeds all demo state **through the production
+admin APIs** — provider creation, encrypted credential write, real Test Connection, and catalogue
+sync. Booting this preview exposed and led to fixes for two catalogue-sync defects:
+
+1. Sync stored dotted labels (`.com`) while `domain_extensions.shape_check` requires bare labels
+   (`com`), so every real registrar catalogue sync failed with a constraint violation. Sync,
+   price lookup and search now consistently use bare labels; display layers re-add the dot.
+2. **Migration `0064_relax_domain_extensions_shape.sql`** extends the shape check to multi-label
+   public suffixes (`com.ng`, `co.uk`, `co.za`) that real registrar TLD catalogues include.
+
+### Operational activation checklist
+
+1. Super Admin → Domain Services → Providers: add provider (e.g. Namecheap production), write
+   credentials, **Test Connection** until it succeeds.
+2. Sync the extension catalogue (Extensions tab) — search and bulk search become live.
+3. Optionally connect the RDAP and GoValue appraisal providers the same way.
+4. Publish a Domain Club plan and schedule auctions as commercially appropriate.

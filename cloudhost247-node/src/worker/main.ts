@@ -17,6 +17,7 @@ import { reconcileServerState } from '../services/infrastructure-reconciliation-
 import { revalidateProviderImages } from '../services/os-image-revalidation-service';
 import { runRevenueGuardianCycle } from '../revenue-guardian/jobs/scheduler';
 import { sweepCloudflareJobs } from './cloudflare-sweep';
+import { sweepDomainServices, DOMAIN_SERVICES_SWEEP_INTERVAL_MS } from './domain-services-sweep';
 import type { EngineOptions } from '../deployments/engine';
 import {
   DEFAULT_WORKER_CYCLE_LEASE_NAME,
@@ -63,6 +64,7 @@ interface WorkerSchedule {
   lastSecurityNumberSweep: number;
   lastRevenueGuardianSweep: number;
   lastCloudflareSweep: number;
+  lastDomainServicesSweep: number;
 }
 
 function createWorkerSchedule(): WorkerSchedule {
@@ -77,6 +79,7 @@ function createWorkerSchedule(): WorkerSchedule {
     lastSecurityNumberSweep: 0,
     lastRevenueGuardianSweep: 0,
     lastCloudflareSweep: 0,
+    lastDomainServicesSweep: 0,
   };
 }
 
@@ -184,6 +187,24 @@ async function runWorkerCycle(
     if (cloudflare.claimed > 0 || cloudflare.syncsScheduled > 0) {
       logger.log(
         `[worker:${ctx.workerId}] cloudflare jobs: ${cloudflare.succeeded} succeeded, ${cloudflare.retrying} retrying, ${cloudflare.failed} failed, ${cloudflare.syncsScheduled} sync(s) scheduled`
+      );
+    }
+  }
+  if (now - schedule.lastDomainServicesSweep >= DOMAIN_SERVICES_SWEEP_INTERVAL_MS) {
+    schedule.lastDomainServicesSweep = now;
+    const domainServices = await sweepDomainServices(ctx.db);
+    const domainWork =
+      domainServices.registrations.claimed > 0 ||
+      domainServices.registrationConfirmations > 0 ||
+      domainServices.transfers.claimed > 0 ||
+      domainServices.transfers.completed > 0 ||
+      domainServices.appraisals.executed > 0 ||
+      domainServices.auctions.ended > 0 ||
+      domainServices.membershipsExpired > 0;
+    didWork ||= domainWork;
+    if (domainWork) {
+      logger.log(
+        `[worker:${ctx.workerId}] domain services: ${domainServices.registrations.claimed} registration(s) claimed (${domainServices.registrations.registered} registered, ${domainServices.registrations.failed} failed), ${domainServices.registrationConfirmations} confirmed, transfers ${domainServices.transfers.initiated} initiated/${domainServices.transfers.completed} completed, ${domainServices.appraisals.executed} appraisal(s), ${domainServices.auctions.ended} auction(s) ended, ${domainServices.membershipsExpired} membership(s) expired`
       );
     }
   }

@@ -90,6 +90,7 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0061_create_webauthn_passkeys.sql',
     '0062_create_webauthn_authentication_challenges.sql',
     '0063_create_domain_services_foundation.sql',
+    '0064_relax_domain_extensions_shape.sql',
   ];
 
   it('finds the committed migration files in order', () => {
