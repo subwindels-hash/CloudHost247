@@ -86,6 +86,7 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0057_create_ai_support_operator.sql',
     '0058_create_worker_cycle_leases.sql',
     '0059_create_auth_recovery.sql',
+    '0060_create_totp_mfa.sql',
   ];
 
   it('finds the committed migration files in order', () => {
@@ -153,6 +154,9 @@ describe('migration runner against the real database/migrations SQL files', () =
         'worker_cycle_leases',
         'auth_action_tokens',
         'auth_email_outbox',
+        'user_mfa_totp',
+        'user_mfa_recovery_codes',
+        'auth_mfa_login_challenges',
       ])
     );
   });

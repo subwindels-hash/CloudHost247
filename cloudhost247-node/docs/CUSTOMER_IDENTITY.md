@@ -1,12 +1,15 @@
 # Customer identity, Security Number, user management and support mode
 
-This document is the contract for the identity layer added in migration
-`0053_customer_identity_and_support_sessions.sql`. It covers four related features:
+This document is the contract for the identity layer introduced by migrations
+`0053_customer_identity_and_support_sessions.sql`, `0059_create_auth_recovery.sql`, and
+`0060_create_totp_mfa.sql`. It covers:
 
 1. the permanent six-digit **Customer ID**,
 2. the rotating four-digit **Security Number**,
-3. **admin user management** (including soft deletion), and
-4. **support mode** — an administrator temporarily working inside a customer's account.
+3. **admin user management** (including soft deletion),
+4. **support mode** — an administrator temporarily working inside a customer's account,
+5. email verification and password recovery, and
+6. TOTP multi-factor authentication and recovery codes.
 
 Everything here is additive: `users.id` (uuid) is still the primary key, every existing foreign
 key still points at it, and existing authentication, billing and RBAC behaviour is unchanged.
@@ -109,8 +112,8 @@ short-lived JWT with two extra claims: `sup` (the session id) and `act` (the act
   the admin losing their role) invalidates the token immediately.
 * The customer's password, sessions and Security Number are never read or modified. Their own
   session keeps working throughout.
-* Restricted actions — password change, Security Number reveal/change, payment-method change,
-  account deletion, email change, role change — are refused with 403 and audited
+* Restricted actions — password change, Security Number reveal/change, MFA enrollment/disable,
+  payment-method change, account deletion, email change, role change — are refused with 403 and audited
   (`src/lib/support-mode.ts` owns the list).
 * The UI shows a persistent banner for the whole session (`SupportModeBanner`), driven by what
   the server reports on `/api/auth/me`, with a one-click "Exit support mode" that ends the
@@ -184,3 +187,35 @@ Email verification currently confirms contactability and is surfaced in `/api/au
 Account page. It does not yet gate all customer actions; enforcing verification as a policy gate
 should be a separately reviewed product decision so existing customers and administrator-created
 accounts are migrated deliberately.
+
+## 8. TOTP multi-factor authentication
+
+Migration `0060_create_totp_mfa.sql` adds optional RFC 6238 TOTP MFA and single-use recovery
+codes. It is deliberately a full login boundary—not merely an account-page preference.
+
+| Method | Path | Contract |
+| --- | --- | --- |
+| POST | `/api/auth/mfa/totp/enroll` | Authenticated password step-up; returns a pending setup secret/standard `otpauth://` URI once. |
+| POST | `/api/auth/mfa/totp/confirm` | Proves the pending authenticator and returns ten one-time recovery codes once. |
+| GET | `/api/auth/mfa/status` | Authenticated MFA state and remaining recovery-code count. |
+| POST | `/api/auth/mfa/disable` | Requires current password and a current TOTP or unused recovery code. |
+| POST | `/api/auth/mfa/login/verify` | Anonymous continuation of a password-authenticated, 5-minute MFA login challenge. |
+
+* TOTP seeds in `user_mfa_totp` are encrypted with the existing versioned AES-256-GCM credential
+  key ring (`CREDENTIAL_ENCRYPTION_KEY` or `CREDENTIAL_ENCRYPTION_KEYS`). Enrollment fails closed
+  with 503 until that key ring is configured; MFA is never quietly enabled with a plaintext or
+  unrecoverable seed.
+* Recovery codes have 80 random bits each and only SHA-256 digests are stored. They are shown once
+  at confirmation, are accepted at login or disable as a fallback, and atomically become unusable
+  after redemption.
+* Password login returns `202 { mfaRequired, mfaToken }` for an MFA-enrolled user instead of a
+  JWT. The short-lived continuation token is stored only as a hash, is bound to the current
+  password-session version, permits five attempts, is single-use, and is kept only in frontend
+  component memory. A JWT is minted only after a TOTP or recovery factor succeeds. A password
+  reset/change invalidates outstanding MFA challenges as well as ordinary sessions.
+* Accepted TOTP timesteps are recorded, preventing replay of the same authenticator code within
+  its validity period. A one-period clock-skew allowance is supported.
+* Enrollment and disable are blocked in delegated support mode and audit all enrollment,
+  challenge, failure, enable, disable, and recovery-code events. Passkeys/WebAuthn remain a
+  separate future module because they require a reviewed relying-party and origin-registration
+  policy.

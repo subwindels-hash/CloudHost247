@@ -6,6 +6,14 @@ import { getPool } from '../db/pool';
 import type { Queryable } from '../db/types';
 import { findUserByEmail, findUserById, recordAuthEvent } from '../db/users';
 import { confirmEmailVerification, completePasswordReset, issueAuthAction } from '../services/auth-recovery-service';
+import {
+  beginTotpEnrollment,
+  completeMfaLogin,
+  confirmTotpEnrollment,
+  disableTotpMfa,
+  getMfaStatus,
+  issueMfaLoginChallenge,
+} from '../services/totp-mfa-service';
 import { createUserWithIdentity } from '../services/customer-identity-service';
 import {
   expiryFromNow,
@@ -18,7 +26,9 @@ import { revokeToken } from '../db/revoked-tokens';
 import { hashPassword, verifyPassword } from '../lib/password';
 import { signAuthToken } from '../lib/jwt';
 import { authenticate } from '../lib/require-auth';
-import { ConflictError, UnauthorizedError, ValidationError } from '../lib/errors';
+import { guardSupportMode } from '../lib/support-mode';
+import { MissingEncryptionKeyError } from '../lib/crypto';
+import { ConflictError, ServiceUnavailableError, UnauthorizedError, ValidationError } from '../lib/errors';
 
 const registerSchema = z.object({
   email: z.string().email(),
@@ -44,6 +54,19 @@ const actionTokenSchema = z.object({
 const passwordResetConfirmSchema = actionTokenSchema.extend({
   password: z.string().min(10, 'Password must be at least 10 characters'),
 });
+
+const mfaCodeSchema = z.object({
+  // Accept six-digit TOTP values or a formatted 80-bit recovery code. The service normalizes
+  // whitespace/hyphens and determines which kind it is without telling an attacker.
+  code: z.string().min(6).max(64),
+});
+
+const mfaLoginVerifySchema = mfaCodeSchema.extend({
+  mfaToken: z.string().min(32).max(128).regex(/^[A-Za-z0-9_-]+$/, 'Invalid MFA challenge'),
+});
+
+const mfaEnrollSchema = z.object({ password: z.string().min(1) });
+const mfaDisableSchema = mfaCodeSchema.extend({ password: z.string().min(1) });
 
 function publicUser(user: {
   id: string;
@@ -178,6 +201,22 @@ export async function registerAuthRoutes(app: FastifyInstance, env: Env, overrid
       throw new UnauthorizedError('This account is not active');
     }
 
+    const mfa = await getMfaStatus(pool, user.id);
+    if (mfa.enabled) {
+      const mfaToken = await issueMfaLoginChallenge(pool, env.JWT_SECRET, user.id, user.auth_session_version);
+      await recordAuthEvent(pool, {
+        id: randomUUID(),
+        userId: user.id,
+        eventType: 'mfa_login_challenge',
+        ipAddress: request.ip,
+        userAgent: request.headers['user-agent'] ?? null,
+      });
+      reply.code(202);
+      // This is only a short-lived, single-use continuation credential. It is deliberately not a
+      // JWT and the browser must keep it in component memory, never localStorage/cookies.
+      return { mfaRequired: true, mfaToken };
+    }
+
     await recordAuthEvent(pool, {
       id: randomUUID(),
       userId: user.id,
@@ -189,6 +228,156 @@ export async function registerAuthRoutes(app: FastifyInstance, env: Env, overrid
     const token = signAuthToken(env, { sub: user.id, role: user.role, email: user.email, sv: user.auth_session_version });
     reply.code(200);
     return { user: publicUser(user), token };
+  });
+
+  /** Complete the second factor of a password-authenticated login. */
+  app.post(
+    '/api/auth/mfa/login/verify',
+    { config: { rateLimit: { max: 10, timeWindow: '15 minutes' } } },
+    async (request, reply) => {
+      const parsed = mfaLoginVerifySchema.safeParse(request.body);
+      if (!parsed.success) throw new ValidationError(parsed.error.issues.map((i) => i.message).join(', '));
+
+      let result;
+      try {
+        result = await completeMfaLogin(pool, env, parsed.data.mfaToken, parsed.data.code);
+      } catch (error) {
+        if (error instanceof MissingEncryptionKeyError) {
+          throw new ServiceUnavailableError('Multi-factor authentication is temporarily unavailable. Contact support.');
+        }
+        throw error;
+      }
+      if (!result.success || !result.userId || result.sessionVersion === null) {
+        if (result.userId) {
+          await recordAuthEvent(pool, {
+            id: randomUUID(),
+            userId: result.userId,
+            eventType: 'mfa_login_failure',
+            ipAddress: request.ip,
+            userAgent: request.headers['user-agent'] ?? null,
+          });
+        }
+        throw new UnauthorizedError('Invalid or expired multi-factor authentication code');
+      }
+
+      const user = await findUserById(pool, result.userId);
+      if (!user || user.status !== 'active') throw new UnauthorizedError('This account is not active');
+      await recordAuthEvent(pool, {
+        id: randomUUID(),
+        userId: user.id,
+        eventType: 'login_success',
+        ipAddress: request.ip,
+        userAgent: request.headers['user-agent'] ?? null,
+        metadata: { mfa: result.method },
+      });
+      if (result.method === 'recovery_code') {
+        await recordAuthEvent(pool, {
+          id: randomUUID(),
+          userId: user.id,
+          eventType: 'mfa_recovery_code_used',
+          ipAddress: request.ip,
+          userAgent: request.headers['user-agent'] ?? null,
+        });
+      }
+      return {
+        user: publicUser(user),
+        token: signAuthToken(env, { sub: user.id, role: user.role, email: user.email, sv: result.sessionVersion }),
+      };
+    }
+  );
+
+  /** Begins TOTP enrollment after a password step-up; no plaintext secret is stored server-side. */
+  app.post('/api/auth/mfa/totp/enroll', { config: { rateLimit: { max: 5, timeWindow: '15 minutes' } } }, async (request) => {
+    const auth = await authenticate(request, env, pool);
+    await guardSupportMode(pool, request, auth, 'mfa.enroll');
+    const parsed = mfaEnrollSchema.safeParse(request.body);
+    if (!parsed.success) throw new ValidationError(parsed.error.issues.map((i) => i.message).join(', '));
+    const user = await findUserById(pool, auth.userId);
+    if (!user) throw new UnauthorizedError('Account no longer exists');
+    if (!(await verifyPassword(parsed.data.password, user.password_hash))) {
+      throw new ValidationError('Current password is incorrect');
+    }
+
+    let enrollment;
+    try {
+      enrollment = await beginTotpEnrollment(pool, env, user);
+    } catch (error) {
+      if (error instanceof MissingEncryptionKeyError) {
+        throw new ServiceUnavailableError('Multi-factor enrollment requires credential encryption to be configured.');
+      }
+      throw error;
+    }
+    if (enrollment.alreadyEnabled) throw new ConflictError('Multi-factor authentication is already enabled. Disable it before enrolling a new authenticator.');
+    await recordAuthEvent(pool, {
+      id: randomUUID(),
+      userId: user.id,
+      eventType: 'mfa_enrollment_started',
+      ipAddress: request.ip,
+      userAgent: request.headers['user-agent'] ?? null,
+    });
+    return { secret: enrollment.secret, otpauthUrl: enrollment.otpauthUrl };
+  });
+
+  /** Confirms a pending TOTP authenticator and returns one-time recovery codes once. */
+  app.post('/api/auth/mfa/totp/confirm', { config: { rateLimit: { max: 10, timeWindow: '15 minutes' } } }, async (request) => {
+    const auth = await authenticate(request, env, pool);
+    await guardSupportMode(pool, request, auth, 'mfa.enroll');
+    const parsed = mfaCodeSchema.safeParse(request.body);
+    if (!parsed.success) throw new ValidationError(parsed.error.issues.map((i) => i.message).join(', '));
+    let confirmed;
+    try {
+      confirmed = await confirmTotpEnrollment(pool, env, auth.userId, parsed.data.code);
+    } catch (error) {
+      if (error instanceof MissingEncryptionKeyError) {
+        throw new ServiceUnavailableError('Multi-factor authentication is temporarily unavailable.');
+      }
+      throw error;
+    }
+    if (!confirmed.confirmed) throw new ValidationError('Invalid authenticator code or no enrollment is pending.');
+    await recordAuthEvent(pool, {
+      id: randomUUID(),
+      userId: auth.userId,
+      eventType: 'mfa_enabled',
+      ipAddress: request.ip,
+      userAgent: request.headers['user-agent'] ?? null,
+    });
+    return { recoveryCodes: confirmed.recoveryCodes };
+  });
+
+  app.get('/api/auth/mfa/status', async (request) => {
+    const auth = await authenticate(request, env, pool);
+    return { mfa: await getMfaStatus(pool, auth.userId) };
+  });
+
+  app.post('/api/auth/mfa/disable', { config: { rateLimit: { max: 5, timeWindow: '15 minutes' } } }, async (request) => {
+    const auth = await authenticate(request, env, pool);
+    await guardSupportMode(pool, request, auth, 'mfa.disable');
+    const parsed = mfaDisableSchema.safeParse(request.body);
+    if (!parsed.success) throw new ValidationError(parsed.error.issues.map((i) => i.message).join(', '));
+    const user = await findUserById(pool, auth.userId);
+    if (!user) throw new UnauthorizedError('Account no longer exists');
+    if (!(await verifyPassword(parsed.data.password, user.password_hash))) {
+      throw new ValidationError('Current password is incorrect');
+    }
+    let method;
+    try {
+      method = await disableTotpMfa(pool, env, user.id, parsed.data.code);
+    } catch (error) {
+      if (error instanceof MissingEncryptionKeyError) {
+        throw new ServiceUnavailableError('Multi-factor authentication is temporarily unavailable.');
+      }
+      throw error;
+    }
+    if (!method) throw new ValidationError('Invalid authenticator or recovery code.');
+    await recordAuthEvent(pool, {
+      id: randomUUID(),
+      userId: user.id,
+      eventType: 'mfa_disabled',
+      ipAddress: request.ip,
+      userAgent: request.headers['user-agent'] ?? null,
+      metadata: { method },
+    });
+    return { message: 'Multi-factor authentication has been disabled.' };
   });
 
   /**
@@ -294,7 +483,8 @@ export async function registerAuthRoutes(app: FastifyInstance, env: Env, overrid
     const supportSession = auth.supportSessionId
       ? { id: auth.supportSessionId, originalAdminId: auth.actingAdminId, expiresAt: new Date(auth.exp * 1000).toISOString() }
       : null;
-    return { user: publicUser(user), supportSession };
+    const mfa = await getMfaStatus(pool, user.id);
+    return { user: { ...publicUser(user), mfaEnabled: mfa.enabled }, supportSession };
   });
 
   /**

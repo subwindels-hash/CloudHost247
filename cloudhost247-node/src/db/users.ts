@@ -256,7 +256,13 @@ export async function recordAuthEvent(
       | 'email_verification_requested'
       | 'email_verified'
       | 'password_reset_requested'
-      | 'password_reset_completed';
+      | 'password_reset_completed'
+      | 'mfa_enrollment_started'
+      | 'mfa_enabled'
+      | 'mfa_disabled'
+      | 'mfa_login_challenge'
+      | 'mfa_login_failure'
+      | 'mfa_recovery_code_used';
     ipAddress?: string | null;
     userAgent?: string | null;
     metadata?: Record<string, unknown>;

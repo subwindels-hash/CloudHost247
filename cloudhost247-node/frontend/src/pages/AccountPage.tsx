@@ -16,7 +16,11 @@ import { clearSession, getSupportOrigin, setSession, type StoredUser } from '../
 import { usePageMeta } from '../lib/usePageMeta';
 
 interface MeResponse {
-  user: { id: string; email: string; fullName: string; role: string; status: string; emailVerified: boolean };
+  user: { id: string; email: string; fullName: string; role: string; status: string; emailVerified: boolean; mfaEnabled?: boolean };
+}
+
+interface MfaStatusResponse {
+  mfa: { enabled: boolean; recoveryCodesRemaining: number };
 }
 
 /**
@@ -56,6 +60,16 @@ export default function AccountPage() {
   const [passwordMessage, setPasswordMessage] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null);
   const [verificationSubmitting, setVerificationSubmitting] = useState(false);
   const [verificationMessage, setVerificationMessage] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null);
+
+  const [mfaStatus, setMfaStatus] = useState<MfaStatusResponse['mfa'] | null>(null);
+  const [mfaBusy, setMfaBusy] = useState(false);
+  const [mfaMessage, setMfaMessage] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null);
+  const [mfaPassword, setMfaPassword] = useState('');
+  const [mfaSetup, setMfaSetup] = useState<{ secret: string; otpauthUrl: string } | null>(null);
+  const [mfaCode, setMfaCode] = useState('');
+  const [recoveryCodes, setRecoveryCodes] = useState<string[] | null>(null);
+  const [mfaDisablePassword, setMfaDisablePassword] = useState('');
+  const [mfaDisableCode, setMfaDisableCode] = useState('');
 
   const [securityStatus, setSecurityStatus] = useState<SecurityNumberStatus | null>(null);
   const [revealPassword, setRevealPassword] = useState('');
@@ -113,6 +127,14 @@ export default function AccountPage() {
         /* Non-fatal — the panel shows its unavailable state. */
       });
 
+    apiFetch<MfaStatusResponse>('/api/auth/mfa/status')
+      .then((res) => {
+        if (!cancelled) setMfaStatus(res.mfa);
+      })
+      .catch(() => {
+        /* Non-fatal — MFA controls report their unavailable state below. */
+      });
+
     return () => {
       cancelled = true;
     };
@@ -151,6 +173,71 @@ export default function AccountPage() {
     const timer = setTimeout(() => setRevealedNumber(null), 120_000);
     return () => clearTimeout(timer);
   }, [revealedNumber]);
+
+  async function beginMfaEnrollment(e: FormEvent) {
+    e.preventDefault();
+    setMfaBusy(true);
+    setMfaMessage(null);
+    try {
+      const result = await apiFetch<{ secret: string; otpauthUrl: string }>('/api/auth/mfa/totp/enroll', {
+        method: 'POST',
+        body: JSON.stringify({ password: mfaPassword }),
+      });
+      setMfaPassword('');
+      setMfaSetup(result);
+      setRecoveryCodes(null);
+      setMfaMessage({ kind: 'ok', text: 'Add the secret to your authenticator app, then enter its current six-digit code to confirm.' });
+    } catch (err) {
+      setMfaMessage({ kind: 'error', text: err instanceof Error ? err.message : 'Could not start multi-factor enrollment.' });
+    } finally {
+      setMfaBusy(false);
+    }
+  }
+
+  async function confirmMfaEnrollment(e: FormEvent) {
+    e.preventDefault();
+    setMfaBusy(true);
+    setMfaMessage(null);
+    try {
+      const result = await apiFetch<{ recoveryCodes: string[] }>('/api/auth/mfa/totp/confirm', {
+        method: 'POST',
+        body: JSON.stringify({ code: mfaCode }),
+      });
+      setMfaCode('');
+      setMfaSetup(null);
+      setRecoveryCodes(result.recoveryCodes);
+      setMfaStatus({ enabled: true, recoveryCodesRemaining: result.recoveryCodes.length });
+      setMe((current) => (current ? { ...current, mfaEnabled: true } : current));
+      setMfaMessage({ kind: 'ok', text: 'Multi-factor authentication is enabled. Save every recovery code now; they will not be shown again.' });
+    } catch (err) {
+      setMfaMessage({ kind: 'error', text: err instanceof Error ? err.message : 'Could not confirm multi-factor authentication.' });
+    } finally {
+      setMfaBusy(false);
+    }
+  }
+
+  async function disableMfa(e: FormEvent) {
+    e.preventDefault();
+    setMfaBusy(true);
+    setMfaMessage(null);
+    try {
+      const result = await apiFetch<{ message: string }>('/api/auth/mfa/disable', {
+        method: 'POST',
+        body: JSON.stringify({ password: mfaDisablePassword, code: mfaDisableCode }),
+      });
+      setMfaDisablePassword('');
+      setMfaDisableCode('');
+      setMfaSetup(null);
+      setRecoveryCodes(null);
+      setMfaStatus({ enabled: false, recoveryCodesRemaining: 0 });
+      setMe((current) => (current ? { ...current, mfaEnabled: false } : current));
+      setMfaMessage({ kind: 'ok', text: result.message });
+    } catch (err) {
+      setMfaMessage({ kind: 'error', text: err instanceof Error ? err.message : 'Could not disable multi-factor authentication.' });
+    } finally {
+      setMfaBusy(false);
+    }
+  }
 
   async function resendVerification() {
     setVerificationSubmitting(true);
@@ -365,6 +452,72 @@ export default function AccountPage() {
         <button type="button" className="ch247-button ch247-button--outline" onClick={handleLogout} disabled={loggingOut}>
           {loggingOut ? 'Logging out…' : 'Log out of this device'}
         </button>
+      </div>
+
+      <div className="ch247-card">
+        <h2>Multi-factor authentication</h2>
+        {mfaStatus ? (
+          <p className="ch247-page__hint">
+            {mfaStatus.enabled
+              ? `Enabled with an authenticator app. ${mfaStatus.recoveryCodesRemaining} recovery code${mfaStatus.recoveryCodesRemaining === 1 ? '' : 's'} remaining.`
+              : 'Not enabled. An authenticator app adds a second check when you log in.'}
+          </p>
+        ) : (
+          <p className="ch247-page__hint">Multi-factor status is unavailable right now.</p>
+        )}
+
+        {inSupportMode ? (
+          <p className="ch247-status-error">Multi-factor settings are blocked while an administrator is signed in to this account.</p>
+        ) : mfaStatus?.enabled ? (
+          <form className="ch247-form ch247-form--wide" onSubmit={disableMfa}>
+            <label>
+              <span className="ch247-field-label">Current password</span>
+              <input type="password" value={mfaDisablePassword} onChange={(e) => setMfaDisablePassword(e.target.value)} autoComplete="current-password" required />
+            </label>
+            <label>
+              <span className="ch247-field-label">Authenticator or recovery code</span>
+              <input value={mfaDisableCode} onChange={(e) => setMfaDisableCode(e.target.value)} autoComplete="one-time-code" required />
+            </label>
+            <button type="submit" className="ch247-button ch247-button--outline" disabled={mfaBusy}>
+              {mfaBusy ? 'Working…' : 'Disable multi-factor authentication'}
+            </button>
+          </form>
+        ) : mfaSetup ? (
+          <>
+            <p className="ch247-page__hint">
+              Add this setup key to your authenticator app. You may also paste the provisioning URI into a compatible app.
+            </p>
+            <p><code>{mfaSetup.secret}</code></p>
+            <details>
+              <summary>Show provisioning URI</summary>
+              <p className="ch247-page__hint" style={{ overflowWrap: 'anywhere' }}>{mfaSetup.otpauthUrl}</p>
+            </details>
+            <form className="ch247-form ch247-form--wide" onSubmit={confirmMfaEnrollment}>
+              <label>
+                <span className="ch247-field-label">Authenticator code</span>
+                <input value={mfaCode} onChange={(e) => setMfaCode(e.target.value)} inputMode="numeric" autoComplete="one-time-code" required />
+              </label>
+              <button type="submit" disabled={mfaBusy}>{mfaBusy ? 'Confirming…' : 'Confirm and enable MFA'}</button>
+            </form>
+          </>
+        ) : (
+          <form className="ch247-form ch247-form--wide" onSubmit={beginMfaEnrollment}>
+            <label>
+              <span className="ch247-field-label">Confirm your password to begin setup</span>
+              <input type="password" value={mfaPassword} onChange={(e) => setMfaPassword(e.target.value)} autoComplete="current-password" required />
+            </label>
+            <button type="submit" disabled={mfaBusy || !mfaStatus}> {mfaBusy ? 'Starting…' : 'Set up authenticator app'} </button>
+          </form>
+        )}
+
+        {recoveryCodes && (
+          <div className="ch247-placeholder-notice">
+            <strong>Save these recovery codes now.</strong>
+            <p>Each can be used once if your authenticator is unavailable. They will not be shown again.</p>
+            <ul>{recoveryCodes.map((code) => <li key={code}><code>{code}</code></li>)}</ul>
+          </div>
+        )}
+        {mfaMessage && <p className={mfaMessage.kind === 'ok' ? 'ch247-status-ok' : 'ch247-status-error'}>{mfaMessage.text}</p>}
       </div>
 
       <div className="ch247-card">

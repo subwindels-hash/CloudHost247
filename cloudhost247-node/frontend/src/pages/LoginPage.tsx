@@ -5,8 +5,10 @@ import { setSession, type StoredUser } from '../lib/auth';
 import { usePageMeta } from '../lib/usePageMeta';
 
 interface AuthResponse {
-  user: StoredUser;
-  token: string;
+  user?: StoredUser;
+  token?: string;
+  mfaRequired?: boolean;
+  mfaToken?: string;
 }
 
 interface LocationState {
@@ -18,6 +20,8 @@ export default function LoginPage() {
   usePageMeta('Log in', 'Log in to your CloudHost247 account.');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [mfaToken, setMfaToken] = useState<string | null>(null);
+  const [mfaCode, setMfaCode] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -32,10 +36,31 @@ export default function LoginPage() {
     setSubmitting(true);
     setMessage(null);
     try {
+      if (mfaToken) {
+        const res = await apiFetch<AuthResponse>('/api/auth/mfa/login/verify', {
+          method: 'POST',
+          body: JSON.stringify({ mfaToken, code: mfaCode }),
+        });
+        if (!res.token || !res.user) throw new Error('Multi-factor authentication did not complete the login');
+        setSession(res.token, res.user);
+        setMessage({ kind: 'ok', text: `Welcome back, ${res.user.fullName}.` });
+        navigate(redirectTo, { replace: true });
+        return;
+      }
+
       const res = await apiFetch<AuthResponse>('/api/auth/login', {
         method: 'POST',
         body: JSON.stringify({ email, password }),
       });
+      if (res.mfaRequired && res.mfaToken) {
+        // The continuation credential lives only in this component's memory. It is never saved
+        // into localStorage or presented as an authenticated session.
+        setMfaToken(res.mfaToken);
+        setPassword('');
+        setMessage({ kind: 'ok', text: 'Enter a code from your authenticator app or a recovery code to finish logging in.' });
+        return;
+      }
+      if (!res.token || !res.user) throw new Error('Login did not return a session');
       setSession(res.token, res.user);
       setMessage({ kind: 'ok', text: `Welcome back, ${res.user.fullName}.` });
       navigate(redirectTo, { replace: true });
@@ -46,27 +71,59 @@ export default function LoginPage() {
     }
   }
 
+  function startOver() {
+    setMfaToken(null);
+    setMfaCode('');
+    setPassword('');
+    setMessage(null);
+  }
+
   return (
     <div className="ch247-card">
       <h1>Log in</h1>
       <form className="ch247-form" onSubmit={onSubmit}>
-        <input
-          placeholder="Email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          placeholder="Password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button type="submit" disabled={submitting}>
-          {submitting ? 'Logging in…' : 'Login'}
-        </button>
+        {mfaToken ? (
+          <>
+            <p className="ch247-page__hint">Use the six-digit code from your authenticator, or one of your saved recovery codes.</p>
+            <input
+              aria-label="Multi-factor authentication code"
+              placeholder="Authenticator or recovery code"
+              value={mfaCode}
+              onChange={(e) => setMfaCode(e.target.value)}
+              autoComplete="one-time-code"
+              required
+              autoFocus
+            />
+            <button type="submit" disabled={submitting}>
+              {submitting ? 'Verifying…' : 'Verify and log in'}
+            </button>
+            <button type="button" className="ch247-button ch247-button--outline" onClick={startOver} disabled={submitting}>
+              Use a different account
+            </button>
+          </>
+        ) : (
+          <>
+            <input
+              placeholder="Email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
+              required
+            />
+            <input
+              placeholder="Password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
+              required
+            />
+            <button type="submit" disabled={submitting}>
+              {submitting ? 'Logging in…' : 'Login'}
+            </button>
+          </>
+        )}
       </form>
       {message && <p className={message.kind === 'ok' ? 'ch247-status-ok' : 'ch247-status-error'}>{message.text}</p>}
       <p><Link to="/forgot-password">Forgot your password?</Link></p>
