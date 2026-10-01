@@ -112,7 +112,9 @@ export async function syncExtensionsFromProvider(db: Queryable, actorId: string)
   let updated = 0;
 
   for (const offering of offerings) {
-    const extension = normalizeExtension(offering.extension);
+    // domain_extensions.extension stores the BARE label (e.g. `com`) — the table's shape check
+    // enforces it; display layers re-add the leading dot.
+    const extension = normalizeExtension(offering.extension).slice(1);
     // Upsert the canonical extension row (admin-curated columns preserved on conflict).
     const { rows: extensionRows } = await db.query<{ id: string }>(
       `INSERT INTO domain_extensions (id, extension, description, restrictions, registration_requirements, is_trending, status, created_by)
@@ -205,7 +207,7 @@ export async function baseOfferingPriceFor(
   db: Queryable,
   domainName: string
 ): Promise<{ registration: string; renewal: string | null; transfer: string | null; currency: string; premium: false } | null> {
-  const tld = domainName.slice(domainName.lastIndexOf('.'));
+  const tld = domainName.slice(domainName.lastIndexOf('.')).replace(/^\./, '');
   const { rows } = await db.query<{
     registration_price: string | null;
     renewal_price: string | null;

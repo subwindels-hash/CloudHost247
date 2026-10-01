@@ -1417,6 +1417,18 @@ form.ch247-form select {
 .ch247-dsvc-status--cancelled { background: rgba(220, 38, 38, 0.12); color: #b91c1c; }
 .ch247-dsvc-status--completed,
 .ch247-dsvc-status--registered-ok { background: rgba(18, 184, 134, 0.14); color: #0b7a58; }
+/* Auction lifecycle + provider/plan statuses rendered dynamically by StatusChip. */
+.ch247-dsvc-status--live,
+.ch247-dsvc-status--ending_soon,
+.ch247-dsvc-status--connected,
+.ch247-dsvc-status--published { background: rgba(18, 184, 134, 0.14); color: #0b7a58; }
+.ch247-dsvc-status--scheduled,
+.ch247-dsvc-status--paused,
+.ch247-dsvc-status--configured { background: rgba(7, 86, 216, 0.10); color: var(--ch247-primary); }
+.ch247-dsvc-status--not_configured,
+.ch247-dsvc-status--auth_failed { background: rgba(214, 158, 46, 0.16); color: #8a5a00; }
+.ch247-dsvc-status--draft,
+.ch247-dsvc-status--disabled { background: rgba(100, 116, 139, 0.14); color: #475569; }
 
 .ch247-dsvc-trending {
   display: inline-flex;

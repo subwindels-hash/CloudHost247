@@ -72,8 +72,9 @@ export async function enabledExtensions(db: Queryable): Promise<OfferingRow[]> {
 
 function offeringFor(offerings: OfferingRow[], domainName: string): OfferingRow | null {
   const normalized = normalizeDomainName(domainName);
-  const tld = normalized.slice(normalized.lastIndexOf('.'));
-  return offerings.find((offering) => offering.extension.toLowerCase() === tld) ?? null;
+  // Compare bare labels on both sides (domain_extensions stores `com`, not `.com`).
+  const tld = normalized.slice(normalized.lastIndexOf('.') + 1);
+  return offerings.find((offering) => offering.extension.toLowerCase().replace(/^\./, '') === tld) ?? null;
 }
 
 function priceFromAvailability(availability: DomainAvailability): {

@@ -9,6 +9,7 @@ import { signAuthToken } from '../../src/lib/jwt';
 import { hashPassword } from '../../src/lib/password';
 import { sweepDomainServices } from '../../src/worker/domain-services-sweep';
 import { markAuctionPaymentVerified } from '../../src/domain-services/auction-service';
+import { MockNamecheap, MockRdap } from '../helpers/mock-registrar';
 
 /**
  * Domain Services platform behaviour against a real embedded Postgres engine — no mocks. Covers
@@ -634,5 +635,277 @@ describe('Domain Services platform (/api/v1/domain-services)', () => {
       headers: { authorization: `Bearer ${bob.token}` },
     });
     expect(bobTxns.json().transactions).toEqual([]);
+  });
+});
+
+// ============================================================================================
+// Registrar-backed flows against a SIMULATED provider (tests/helpers/mock-registrar.ts). The
+// adapters are transport boundaries — pointing them at the local mock exercises the real
+// sync/search/quote/registration code paths end to end without external credentials.
+// ============================================================================================
+describe('Domain Services with a connected (simulated) registrar', () => {
+  let db: PGlite;
+  process.env.DATABASE_URL ??= 'postgresql://user:pass@localhost:5432/cloudhost247';
+  process.env.JWT_SECRET ??= 'g'.repeat(32);
+  process.env.CREDENTIAL_ENCRYPTION_KEY ??= 'a'.repeat(64);
+  const env = loadEnv({
+    NODE_ENV: 'test',
+    DATABASE_URL: process.env.DATABASE_URL,
+    JWT_SECRET: process.env.JWT_SECRET,
+    CREDENTIAL_ENCRYPTION_KEY: process.env.CREDENTIAL_ENCRYPTION_KEY,
+  } as NodeJS.ProcessEnv);
+
+  let mockNamecheap: MockNamecheap;
+  let mockRdap: MockRdap;
+
+  function buildTestApp() {
+    return buildApp(env, { serveFrontend: false, pool: db });
+  }
+
+  async function createUser(email: string, role: 'customer' | 'admin' | 'super_admin' = 'customer', fullName = 'Test User') {
+    const id = randomUUID();
+    const hash = await hashPassword('password123');
+    await db.query(
+      `INSERT INTO users (id, email, password_hash, full_name, role) VALUES ($1, $2, $3, $4, $5)`,
+      [id, email, hash, fullName, role]
+    );
+    const token = signAuthToken(env, { sub: id, email, role });
+    return { id, email, role, token };
+  }
+
+  beforeEach(async () => {
+    db = new PGlite();
+    await migrateUp(new PgliteClient(db), { isProduction: false });
+    mockNamecheap = new MockNamecheap();
+    mockRdap = new MockRdap();
+    await mockNamecheap.start();
+    await mockRdap.start();
+  });
+
+  afterEach(async () => {
+    await mockNamecheap.stop();
+    await mockRdap.stop();
+    await db.close();
+  });
+
+  async function connectRegistrar(app: ReturnType<typeof buildApp>, adminToken: string): Promise<string> {
+    const created = await app.inject({
+      method: 'POST',
+      url: '/api/v1/admin/domain-services/providers',
+      headers: { authorization: `Bearer ${adminToken}` },
+      payload: {
+        providerKey: 'test-registrar',
+        name: 'Test Registrar',
+        adapterKey: 'namecheap',
+        providerType: 'registrar',
+        apiBaseUrl: mockNamecheap.url(),
+        environment: 'sandbox',
+      },
+    });
+    expect(created.statusCode).toBe(201);
+    const providerId = created.json().provider.id as string;
+    await app.inject({
+      method: 'PUT',
+      url: `/api/v1/admin/domain-services/providers/${providerId}/credentials`,
+      headers: { authorization: `Bearer ${adminToken}` },
+      payload: { credentials: { apiUser: 'u', apiKey: 'k', userName: 'u', clientIp: '127.0.0.1' } },
+    });
+    const tested = await app.inject({
+      method: 'POST',
+      url: `/api/v1/admin/domain-services/providers/${providerId}/test`,
+      headers: { authorization: `Bearer ${adminToken}` },
+    });
+    expect(tested.json().result.status).toBe('connected');
+    return providerId;
+  }
+
+  it('syncs the extension catalogue and serves provider-backed search with real prices', async () => {
+    const app = buildTestApp();
+    const admin = await createUser('sync-admin@example.com', 'super_admin');
+    await connectRegistrar(app, admin.token);
+
+    const sync = await app.inject({
+      method: 'POST',
+      url: '/api/v1/admin/domain-services/extensions/sync',
+      headers: { authorization: `Bearer ${admin.token}` },
+    });
+    expect(sync.statusCode).toBe(200);
+    expect(sync.json().synced).toBeGreaterThan(5);
+
+    // The catalogue stores BARE labels — including multi-label suffixes like com.ng;
+    // the directory re-adds the dot and exposes prices.
+    const { rows } = await db.query(`SELECT extension FROM domain_extensions ORDER BY extension LIMIT 3`);
+    expect(rows.map((r) => r.extension)).toEqual(['ai', 'app', 'co']);
+    const suffixRows = await db.query(`SELECT extension FROM domain_extensions WHERE extension LIKE '%.%'`);
+    expect(suffixRows.rows.map((r) => r.extension)).toEqual(['com.ng']);
+
+    const directory = await app.inject({ method: 'GET', url: '/api/v1/domain-services/extensions' });
+    const entries = directory.json().extensions as Array<{ extension: string; registrationPrice: string | null }>;
+    const com = entries.find((entry) => entry.extension === '.com');
+    expect(com?.registrationPrice).toBe('10.98');
+
+    // Term search expands across the synced catalogue; availability comes from the provider.
+    const user = await createUser('searcher2@example.com');
+    const search = await app.inject({
+      method: 'POST',
+      url: '/api/v1/domain-services/search',
+      headers: { authorization: `Bearer ${user.token}` },
+      payload: { query: 'mybrand' },
+    });
+    expect(search.statusCode).toBe(200);
+    const body = search.json();
+    expect(body.status).toBe('completed');
+    const available = body.results.find((r: { domainName: string }) => r.domainName === 'mybrand.com');
+    expect(available.availabilityStatus).toBe('available');
+    expect(available.registrationPrice).toBe('10.98');
+    const premium = body.results.find((r: { domainName: string }) => r.domainName === 'mybrand.ai');
+    expect(premium.availabilityStatus).toBe('premium');
+
+    // A query whose label is taken comes back as registered — never fabricated as available.
+    const takenSearch = await app.inject({
+      method: 'POST',
+      url: '/api/v1/domain-services/search',
+      headers: { authorization: `Bearer ${user.token}` },
+      payload: { query: 'mybrand-taken' },
+    });
+    const takenBody = takenSearch.json();
+    const registered = takenBody.results.find((r: { domainName: string }) => r.domainName === 'mybrand-taken.com');
+    expect(registered.availabilityStatus).toBe('registered');
+  });
+
+  it('runs a registration end to end: quote → order → verified payment → sweep → registrar → customer_domains', async () => {
+    const app = buildTestApp();
+    const admin = await createUser('reg-admin@example.com', 'super_admin');
+    await connectRegistrar(app, admin.token);
+    await app.inject({
+      method: 'POST',
+      url: '/api/v1/admin/domain-services/extensions/sync',
+      headers: { authorization: `Bearer ${admin.token}` },
+    });
+
+    const user = await createUser('buyer@example.com');
+    const contact = {
+      firstName: 'Bola', lastName: 'Buyer', email: 'bola@example.com', phone: '+234.8012345678',
+      addressLine1: '1 Demo Way', city: 'Lagos', state: 'LA', postalCode: '100001', countryCode: 'NG',
+    };
+
+    // Quote: availability + price straight from the (simulated) provider.
+    const quote = await app.inject({
+      method: 'POST',
+      url: '/api/v1/domain-services/registrations/quote',
+      headers: { authorization: `Bearer ${user.token}` },
+      payload: { domainName: 'bola-demo.com', years: 1 },
+    });
+    expect(quote.statusCode).toBe(200);
+    expect(quote.json().quote.standardPrice).toBe('10.98');
+
+    const order = await app.inject({
+      method: 'POST',
+      url: '/api/v1/domain-services/registrations',
+      headers: { authorization: `Bearer ${user.token}` },
+      payload: { domainName: 'bola-demo.com', years: 1, contact },
+    });
+    expect(order.statusCode).toBe(201);
+    const registrationId = order.json().registrationId as string;
+    expect(order.json().invoiceId).toBeTruthy();
+
+    // The registration only advances after verified payment — the sweep does nothing before.
+    await sweepDomainServices(db as unknown as Parameters<typeof sweepDomainServices>[0]);
+    let mid = await db.query(`SELECT status FROM domain_registrations WHERE id=$1`, [registrationId]);
+    expect(mid.rows[0].status).toBe('pending_payment');
+
+    // Verified payment (as the webhook flow would), then the sweep registers with the provider.
+    const { markRegistrationPaymentVerified } = await import('../../src/domain-services/registration-service');
+    await markRegistrationPaymentVerified(db as never, registrationId);
+    await sweepDomainServices(db as unknown as Parameters<typeof sweepDomainServices>[0]);
+
+    mid = await db.query(
+      `SELECT status, provider_reference FROM domain_registrations WHERE id=$1`,
+      [registrationId]
+    );
+    expect(mid.rows[0].status).toBe('registered');
+    expect(mid.rows[0].provider_reference).toMatch(/^demo-order-/);
+    expect(mockNamecheap.registered.has('bola-demo.com')).toBe(true);
+
+    // The confirmed domain is linked into the customer's domain list for hosting/DNS.
+    const domains = await app.inject({
+      method: 'GET',
+      url: '/api/v1/domains',
+      headers: { authorization: `Bearer ${user.token}` },
+    });
+    const mine = domains.json().domains as Array<{ domain_name: string; verification_status: string }>;
+    const linked = mine.find((d) => d.domain_name === 'bola-demo.com');
+    expect(linked?.verification_status).toBe('verified');
+
+    // A second registration for the same domain is rejected while it is live.
+    const again = await app.inject({
+      method: 'POST',
+      url: '/api/v1/domain-services/registrations',
+      headers: { authorization: `Bearer ${user.token}` },
+      payload: { domainName: 'bola-demo.com', years: 1, contact },
+    });
+    expect(again.statusCode).toBe(409);
+  });
+
+  it('WHOIS lookup through the (simulated) RDAP registry reports privacy protection honestly', async () => {
+    const app = buildTestApp();
+    const admin = await createUser('rdap-admin@example.com', 'super_admin');
+    const created = await app.inject({
+      method: 'POST',
+      url: '/api/v1/admin/domain-services/providers',
+      headers: { authorization: `Bearer ${admin.token}` },
+      payload: {
+        providerKey: 'test-rdap',
+        name: 'Test RDAP',
+        adapterKey: 'rdap',
+        providerType: 'rdap',
+        apiBaseUrl: mockRdap.bootstrapUrl(),
+        environment: 'production',
+      },
+    });
+    const rdapId = created.json().provider.id as string;
+    await app.inject({
+      method: 'PUT',
+      url: `/api/v1/admin/domain-services/providers/${rdapId}/credentials`,
+      headers: { authorization: `Bearer ${admin.token}` },
+      payload: { credentials: { public: 'no-authentication-required' } },
+    });
+    const tested = await app.inject({
+      method: 'POST',
+      url: `/api/v1/admin/domain-services/providers/${rdapId}/test`,
+      headers: { authorization: `Bearer ${admin.token}` },
+    });
+    expect(tested.json().result.status).toBe('connected');
+
+    // A privacy-protected (redacted registrant) record is reported exactly as protected.
+    const protectedLookup = await app.inject({
+      method: 'POST',
+      url: '/api/v1/domain-services/whois',
+      payload: { domainName: 'taken-private.net' },
+    });
+    expect(protectedLookup.statusCode).toBe(200);
+    const protectedBody = protectedLookup.json();
+    expect(protectedBody.status).toBe('completed');
+    expect(protectedBody.result.source).toBe('rdap');
+    expect(protectedBody.result.registrar).toBe('Simulated Registrar LLC');
+    expect(protectedBody.result.privacyProtected).toBe(true);
+
+    // A public record shows the registrant.
+    const publicLookup = await app.inject({
+      method: 'POST',
+      url: '/api/v1/domain-services/whois',
+      payload: { domainName: 'taken-public.com' },
+    });
+    const publicBody = publicLookup.json();
+    expect(publicBody.result.privacyProtected).toBe(false);
+
+    // An unregistered domain is a real not-found answer, not a provider failure.
+    const missing = await app.inject({
+      method: 'POST',
+      url: '/api/v1/domain-services/whois',
+      payload: { domainName: 'no-record-anywhere.com' },
+    });
+    expect(missing.statusCode).toBe(200);
+    expect(missing.json().status).toBe('not_found');
   });
 });
