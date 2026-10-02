@@ -1084,3 +1084,59 @@ sub-phase before the next one begins.
   - **The request construction is a pure module** (`aws-replacement.ts`): guards, tags and the launch object are asserted without an AWS client, so the destructive-path rules are testable and live in one place.
   - **Tests added:** `tests/unit/aws-replacement.test.ts` (12) — both workflows refusing with no commands sent when the flag is off, snapshot deletion and its input guard, the replacement command order and launch shape (AMI, type, subnet, security groups, zone, key, user data, tags), the assertion that `TerminateInstancesCommand` is never sent, the in-place restore command order including the detached old volume and the `Device` name, a stopped instance staying stopped, and the two refusal paths. Backend and frontend TypeScript compile clean.
   - **Still honest about what is missing:** rescue mode and CloudWatch metrics remain unsupported on EC2, and the adapter's own comments say why.
+
+---
+
+## A7 — deployment adapter operations that were refused, now real (or honestly still refused)
+
+- **Source/local verification:** PASSED on branch `arena/01a0f9c1-cloudhost247`.
+  - **Full platform verification: 105 / 105 test files passing (782 / 782 tests), backend and frontend TypeScript clean.**
+  - **No migration required.**
+- **cPanel — start/stop now mean the account's own state.** A cPanel server has no container, so
+  `startApplication`/`stopApplication` previously threw. They now use what cPanel actually has:
+  suspension. `stop` calls WHM `suspendacct` with a reason (cPanel's own definition blocks the
+  account's web, mail and FTP), `start` checks `accountsummary` and calls `unsuspendacct` only when
+  the account really is suspended. `restartApplication` and `applicationLogs` still refuse —
+  cPanel exposes no per-account process restart and the platform cannot read inside a customer's
+  account — and the refusals are explicit rather than silent successes.
+- **cPanel — status and backups are real UAPI/WHM operations.** `applicationStatus` reads WHM
+  `accountsummary`: suspended means `running: false`, a missing account is `ACCOUNT_NOT_FOUND`,
+  and health stays `unknown` because cPanel has no application health signal. `runBackup` calls
+  UAPI `Backup::fullbackup_to_homedir`, then polls the account's own `Backup::list_backups` until a
+  new archive reports `complete`, and returns the **server-side** path (`/home/<user>/<archive>`)
+  and size. cPanel's UAPI has no remote-download function, so the platform does not claim to hold a
+  copy it does not have. `restoreBackup` calls UAPI `Backup::restore_backup` with the file name
+  only, after refusing any archive outside `/home/<user>/` — a restore overwrites the account's
+  files and must never be pointed at an arbitrary path.
+- **Defect fixed while wiring it:** the cPanel username was derived by stripping non-lowercase
+  characters, so `My-Project` became `roject`. Derivation now lowercases first, guards a leading
+  digit with the `u` prefix and caps at cPanel's 16 characters, and every cPanel path (deploy,
+  status, stop, backup, restore) uses the same function.
+- **Kubernetes — real API paths.** Objects were applied to `/apis/namespaced/...`, which is not a
+  Kubernetes route. Each rendered kind now maps to its own group/version/resource collection
+  (`/api/v1/namespaces/{ns}/secrets`, `/apis/apps/v1/namespaces/{ns}/deployments`, …), created with
+  POST; a 409 re-PUTs the desired body with the live `resourceVersion` so a concurrent writer is
+  not silently overwritten. The Secret is applied before the PVCs and Deployment that reference it.
+- **Kubernetes — lifecycle through the cluster's own mechanisms.** `stop` patches `spec.replicas`
+  to 0 and records the previous count in a `cloudhost247.io/last-replicas` annotation; `start`
+  restores that count (or 1); `restart` patches the pod template's
+  `kubectl.kubernetes.io/restartedAt` annotation — the mechanism behind `kubectl rollout restart` —
+  instead of deleting pods. `applicationStatus`/`runHealthcheck` read the Deployment and its Pods
+  (available vs desired replicas, ready pods, restart counts, conditions) and never assume health;
+  `applicationLogs` streams the newest pod's log with a bounded `tailLines`.
+- **Kubernetes — teardown discovers the live object set by label** instead of guessing names, so
+  PVCs and any renamed object are removed too; missing objects are not an error.
+- **Kubernetes — backups stay refused, with the reason recorded.** The platform's backup contract
+  requires a retrievable archive (storage path, size, checksum) it can restore and verify; Velero
+  backups are cluster-side and asynchronous. `runBackup`/`restoreBackup` return a structured
+  `K8S_BACKUP_REQUIRES_VELERO` failure (the engine marks the backup row failed with a message an
+  operator can act on) rather than recording an empty success.
+- **Docker — hosting operations point at the right adapter.** `provisionHosting`/`suspendHosting`/
+  `terminateHosting` returned a thrown `UnsupportedOperationError`; they now return a structured
+  `HOSTING_REQUIRES_CPANEL_ADAPTER` failure, consistent with the rest of the adapter contract and
+  with spec §35 ("do not deploy Docker applications into ordinary cPanel hosting").
+- **Tests added:** `tests/unit/deployment-adapter-operations.test.ts` (17) — cPanel suspension
+  start/stop, status truthfulness, the UAPI backup/restore flows (including the home-directory
+  path guard), the username derivation; Kubernetes collection mapping, idempotent apply with
+  `resourceVersion`, replica stop/start, the rollout-restart annotation, health and log reads,
+  label-discovered teardown, the structured backup refusal, and the disabled switch.

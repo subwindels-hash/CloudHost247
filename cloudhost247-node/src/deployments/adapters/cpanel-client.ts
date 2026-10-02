@@ -287,6 +287,39 @@ export async function uapiAccountInformation(config: CpanelServerConfig, user: s
   return uapiRequest(config, user, 'Variables', 'get_server_information');
 }
 
+/**
+ * cPanel's own account backup operations (UAPI Backup module):
+ *   fullbackup_to_homedir → generate a full account archive into the account home directory
+ *   list_backups          → list the account's backup files
+ *   restore_backup        → restore a full backup that is already in the account home directory
+ * There is no remote-download function: the archive lives on the server, and the adapter reports
+ * its server-side path and size rather than pretending to hold a copy.
+ */
+export async function uapiStartBackup(config: CpanelServerConfig, user: string) {
+  return uapiRequest(config, user, 'Backup', 'fullbackup_to_homedir', {});
+}
+
+export interface UapiBackupEntry {
+  file?: string;
+  status?: string;
+  time?: number;
+  size?: number;
+}
+
+export async function uapiListBackups(config: CpanelServerConfig, user: string) {
+  return uapiRequest<{ backup?: UapiBackupEntry[]; backups?: UapiBackupEntry[] }>(
+    config,
+    user,
+    'Backup',
+    'list_backups',
+    {}
+  );
+}
+
+export async function uapiRestoreBackupFromHomedir(config: CpanelServerConfig, user: string, archiveFile: string) {
+  return uapiRequest(config, user, 'Backup', 'restore_backup', { file: archiveFile });
+}
+
 /** Uploads a file (base64) into the account's home directory — used for the WordPress payload. */
 export async function uapiUploadFile(
   config: CpanelServerConfig,

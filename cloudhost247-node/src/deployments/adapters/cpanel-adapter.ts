@@ -26,12 +26,17 @@ import type {
 import { UnsupportedOperationError } from './types';
 import {
   CpanelApiError,
+  uapiAccountInformation,
   uapiCreateDatabase,
   uapiCreateDatabaseUser,
   uapiExtractArchive,
+  uapiListBackups,
+  uapiRestoreBackupFromHomedir,
   uapiSetDatabasePrivileges,
+  uapiStartBackup,
   uapiUploadFile,
   uapiWriteFile,
+  whmAccountSummary,
   whmCreateAccount,
   whmSuspendAccount,
   whmTerminateAccount,
@@ -75,7 +80,9 @@ export function createCpanelAdapter(options: CpanelAdapterOptions): DeploymentAd
       try {
         // The marketplace wizard's cPanel path provisions under the customer's account; the
         // username is derived from the project name (validated charset by WHM conventions).
-        const username = input.project.replace(/[^a-z0-9]/g, '').slice(0, 16) || `u${randomBytes(3).toString('hex')}`;
+        // Same derivation the status/stop paths use, with a random fallback for a project whose
+        // name has no usable characters (the account still has to be addressable afterwards).
+        const username = cpanelUsernameForProject(input.project) || `u${randomBytes(3).toString('hex')}`;
         const password = input.environment.CPANEL_ACCOUNT_PASSWORD ?? randomBytes(16).toString('base64url');
         await whmCreateAccount(config, {
           username,
@@ -162,19 +169,92 @@ export function createCpanelAdapter(options: CpanelAdapterOptions): DeploymentAd
       }
     },
 
-    // Container-style operations do not exist on cPanel hosting (spec §35).
-    async startApplication() {
-      throw new UnsupportedOperationError('cpanel', 'startApplication');
+    /**
+     * cPanel has no container to start, stop or restart — but it does have an account suspension
+     * state, and that is what the customer's start/stop actually means on this hosting type
+     * (spec §35 deliberately keeps containers off cPanel). Suspending blocks the account's web,
+     * mail and FTP service (cPanel's own definition); starting unsuspends it. Restarting is
+     * refused because cPanel exposes no per-account process restart, and inventing one would be
+     * a silent no-op.
+     */
+    async startApplication(ctx, project): Promise<DeploymentOperationResult> {
+      if (options.simulationMode) return ok(`Simulated cPanel start of ${project}`);
+      const config = await loadWhmConfig(ctx);
+      if (!config) return fail('WHM_NOT_CONFIGURED', 'Server has no WHM API token stored');
+      const username = cpanelUsernameForProject(project);
+      try {
+        const account = (await whmAccountSummary(config, username)).acct?.[0];
+        if (!account) return fail('ACCOUNT_NOT_FOUND', `WHM does not know the account ${username}`);
+        if (!account.suspended) return ok(`Account ${username} is already active`);
+        await whmUnsuspendAccount(config, username);
+        await ctx.log('info', `WHM account ${username} unsuspended`);
+        return ok(`Account ${username} is active again`);
+      } catch (err) {
+        return fail('START_FAILED', err);
+      }
     },
-    async stopApplication() {
-      throw new UnsupportedOperationError('cpanel', 'stopApplication');
+
+    async stopApplication(ctx, project): Promise<DeploymentOperationResult> {
+      if (options.simulationMode) return ok(`Simulated cPanel stop of ${project}`);
+      const config = await loadWhmConfig(ctx);
+      if (!config) return fail('WHM_NOT_CONFIGURED', 'Server has no WHM API token stored');
+      const username = cpanelUsernameForProject(project);
+      try {
+        await whmSuspendAccount(config, username, 'Application stopped by the account owner');
+        await ctx.log('info', `WHM account ${username} suspended (web, mail and FTP blocked)`);
+        return ok(`Account ${username} suspended`);
+      } catch (err) {
+        return fail('STOP_FAILED', err);
+      }
     },
-    async restartApplication() {
+
+    async restartApplication(): Promise<DeploymentOperationResult> {
+      // No per-account restart exists in WHM/UAPI. A silent success here would be a lie.
       throw new UnsupportedOperationError('cpanel', 'restartApplication');
     },
-    async applicationStatus(): Promise<ApplicationStatusResult> {
-      throw new UnsupportedOperationError('cpanel', 'applicationStatus');
+
+    /**
+     * Account status from WHM's own account summary. `running` means the account is not suspended;
+     * health is UNKNOWN because cPanel exposes no application health signal and claiming a healthy
+     * website from "the account exists" would be fabricated.
+     */
+    async applicationStatus(ctx, project): Promise<ApplicationStatusResult> {
+      if (options.simulationMode) {
+        return { ok: true, code: 'OK', message: `Simulated cPanel status of ${project}`, running: true, health: 'unknown' };
+      }
+      const config = await loadWhmConfig(ctx);
+      if (!config) {
+        return { ok: false, code: 'WHM_NOT_CONFIGURED', message: 'Server has no WHM API token stored', running: false, health: 'unknown' };
+      }
+      const username = cpanelUsernameForProject(project);
+      try {
+        const account = (await whmAccountSummary(config, username)).acct?.[0];
+        if (!account) {
+          return { ok: false, code: 'ACCOUNT_NOT_FOUND', message: `WHM does not know the account ${username}`, running: false, health: 'unknown' };
+        }
+        const suspended = Boolean(account.suspended);
+        return {
+          ok: true,
+          code: suspended ? 'ACCOUNT_SUSPENDED' : 'OK',
+          message: suspended
+            ? `Account ${username} is suspended; web, mail and FTP are blocked`
+            : `Account ${username} exists and is not suspended`,
+          running: !suspended,
+          health: 'unknown',
+          detail: `diskused=${account.diskused ?? 'unknown'}, disklimit=${account.disklimit ?? 'unknown'}, domain=${account.domain ?? 'unknown'}`,
+        };
+      } catch (err) {
+        if (err instanceof CpanelApiError) {
+          return { ok: false, code: 'ACCOUNT_NOT_FOUND', message: err.message, running: false, health: 'unknown' };
+        }
+        return { ok: false, code: 'STATUS_FAILED', message: (err as Error).message, running: false, health: 'unknown' };
+      }
     },
+
+    /**
+     * Per-account application logs do not exist on cPanel: the platform cannot read inside the
+     * customer's account. Refused explicitly; the customer's own cPanel is where logs live.
+     */
     async applicationLogs(): Promise<LogsResult> {
       throw new UnsupportedOperationError('cpanel', 'applicationLogs');
     },
@@ -194,13 +274,110 @@ export function createCpanelAdapter(options: CpanelAdapterOptions): DeploymentAd
         health: 'unknown',
       };
     },
-    async runBackup(): Promise<BackupResult> {
-      throw new UnsupportedOperationError('cpanel', 'runBackup');
+    /**
+     * A full account backup generated through UAPI on cPanel's own terms. The archive is written
+     * into the account's home directory on the server; cPanel's UAPI has no remote-download
+     * function, so the adapter waits for the backup engine to report completion and records the
+     * archive's server-side path and size rather than claiming to hold a copy it does not have.
+     */
+    async runBackup(ctx, project): Promise<BackupResult> {
+      if (options.simulationMode) {
+        return { ok: true, code: 'OK', message: 'Simulated cPanel backup', archivePath: `/home/${project}/simulated-backup.tar.gz`, sizeBytes: 1024, checksum: null };
+      }
+      const config = await loadWhmConfig(ctx);
+      if (!config) {
+        return { ok: false, code: 'WHM_NOT_CONFIGURED', message: 'Server has no WHM API token stored', archivePath: null, sizeBytes: null, checksum: null };
+      }
+      const username = cpanelUsernameForProject(project);
+      try {
+        const before = new Set((await backupEntries(config, username)).map((entry) => entry.file));
+        await uapiStartBackup(config, username);
+        await ctx.log('info', `cPanel full backup requested for ${username}`);
+        // cPanel queues the backup; poll its own list until a new completed archive appears.
+        const deadline = Date.now() + 10 * 60_000;
+        while (Date.now() < deadline) {
+          const entries = await backupEntries(config, username);
+          const fresh = entries.find((entry) => entry.file && !before.has(entry.file));
+          if (fresh?.file) {
+            const status = String(fresh.status ?? '');
+            if (status === 'complete' || status === 'completed') {
+              const archivePath = `/home/${username}/${fresh.file}`;
+              await ctx.log('info', `cPanel backup archived at ${archivePath}`);
+              return {
+                ok: true,
+                code: 'OK',
+                message: `cPanel backup ${fresh.file} completed on the server`,
+                archivePath,
+                sizeBytes: typeof fresh.size === 'number' && fresh.size > 0 ? fresh.size : null,
+                checksum: null,
+              };
+            }
+          }
+          await sleep(backupPollIntervalMs);
+        }
+        return {
+          ok: false,
+          code: 'BACKUP_TIMEOUT',
+          message: 'cPanel did not report a completed backup within 10 minutes',
+          archivePath: null,
+          sizeBytes: null,
+          checksum: null,
+        };
+      } catch (err) {
+        return { ok: false, code: 'BACKUP_FAILED', message: (err as Error).message, archivePath: null, sizeBytes: null, checksum: null };
+      }
     },
-    async restoreBackup() {
-      throw new UnsupportedOperationError('cpanel', 'restoreBackup');
+
+    /**
+     * UAPI restores a full backup that is already in the account's home directory. The path is
+     * validated to be the platform's own archive location, because a restore overwrites the
+     * account's files and must never be pointed at an arbitrary file.
+     */
+    async restoreBackup(ctx, project, archivePath) {
+      if (options.simulationMode) return ok(`Simulated cPanel restore of ${archivePath}`);
+      const config = await loadWhmConfig(ctx);
+      if (!config) return fail('WHM_NOT_CONFIGURED', 'Server has no WHM API token stored');
+      const username = cpanelUsernameForProject(project);
+      const expectedPrefix = `/home/${username}/`;
+      if (!archivePath.startsWith(expectedPrefix) || archivePath.includes('..')) {
+        return fail('INVALID_ARCHIVE_PATH', `cPanel restores only accept an archive inside ${expectedPrefix}, not ${archivePath}`);
+      }
+      const archiveFile = archivePath.slice(expectedPrefix.length);
+      try {
+        await uapiRestoreBackupFromHomedir(config, username, archiveFile);
+        await ctx.log('info', `cPanel restore of ${archiveFile} requested for ${username}`);
+        return ok(`Account ${username} restore from ${archiveFile} submitted`);
+      } catch (err) {
+        return fail('RESTORE_FAILED', err);
+      }
     },
   };
+}
+
+/**
+ * The cPanel username the platform derives from a deployment project name. Real cPanel usernames
+ * are lowercase alphanumerics that cannot start with a digit, so the project name is lowercased
+ * first (stripping capitals silently dropped characters — "My-Project" became "roject"), a leading
+ * digit gets the `u` prefix, and the result is capped at cPanel's 16 characters. An empty result
+ * is returned for an empty project so lookups cannot address an unrelated account.
+ */
+export function cpanelUsernameForProject(project: string): string {
+  const cleaned = project.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 16);
+  if (!cleaned) return '';
+  return /^[0-9]/.test(cleaned) ? `u${cleaned}`.slice(0, 16) : cleaned;
+}
+
+/** How often the adapter asks cPanel whether its backup engine has finished. */
+export const backupPollIntervalMs = 10_000;
+
+const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+async function backupEntries(
+  config: { whmBaseUrl: string; whmUsername: string; whmApiToken: string },
+  username: string
+): Promise<Array<{ file?: string; status?: string; size?: number }>> {
+  const result = await uapiListBackups(config, username);
+  return result.backup ?? result.backups ?? [];
 }
 
 async function loadWhmConfig(ctx: AdapterContext) {
