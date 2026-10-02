@@ -154,4 +154,12 @@ never committed; documentation-only)* · `xtreme_currency_rates` · `soyoustart`
 **Rescue mode — the 6 that still refuse it, each re-verified against its provider's documented API:**
 `aws` (no native rescue) · `digitalocean` (Recovery ISO is control-panel only) · `vultr` (no v2
 endpoint) · `proxmox` (no API endpoint) · `virtualizor` (rescue is enduser-API/4083 only; this
-adapter uses the Admin API/4085) · `solusvm` (not exposed by SolusVM 1)
+adapter uses the Admin API/4085)
+  - **CORRECTED 2026-10-02 — `solusvm` is now IMPLEMENTED, not refused.** The claim that
+    SolusVM 1's Admin API v1 has no rescue action was false: `action=vserver-rescue` with
+    `rescueenable` (1 = 4.x 64-bit, 2 = 3.x 64-bit, 3 = 3.x 32-bit) or `rescuedisable` is
+    documented on the same `api/admin/command.php` endpoint the adapter already uses, returning
+    `{status, statusmsg, password, user, port, ip}`. `enableRescue`/`disableRescue` now call it,
+    report `rebooted: true` (enabling rescue reboots the VPS — SolusVM states this explicitly),
+    carry the returned ip/port into `notes`, and refuse arm64 rather than booting an x86 rescue
+    kernel into it. Profile `rescue: true`; 4 new tests pin the form body and the refusals.
