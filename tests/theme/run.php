@@ -217,6 +217,12 @@ class CH247ThemeClientAreaRecorder
 
 ch247_theme_fresh();
 $repository = new ThemeRepository();
+// The reset above also cleared the WHMCS catalogue rows seeded earlier; put them
+// back, because the page product component reads the real reader.
+\WHMCS\Database\Capsule::table('tblproducts')->insert(array('id' => 21, 'gid' => 2, 'name' => 'Cloud Starter', 'description' => 'Small plan', 'hidden' => 0, 'order' => 0));
+\WHMCS\Database\Capsule::table('tblproductgroups')->insert(array('id' => 2, 'name' => 'Hosting', 'hidden' => 0, 'order' => 0));
+\WHMCS\Database\Capsule::table('tblcurrencies')->insert(array('id' => 1, 'code' => 'USD', 'prefix' => '$', 'suffix' => '', 'default' => 1));
+\WHMCS\Database\Capsule::table('tblpricing')->insert(array('id' => 1, 'type' => 'product', 'relid' => 21, 'currency' => 1, 'monthly' => 9.5, 'annually' => 95, 'msetupfee' => 0, 'asetupfee' => 0));
 ch247_theme_seed_content(101, 'page', 'dedicated-server', 'Dedicated servers from us', 0, true, array('summary' => 'Bare metal', 'body' => '<p>Real page body</p>', 'seo_title' => 'Dedicated servers | CloudHost247'));
 ch247_theme_seed_content(102, 'page', 'offers', 'Draft offers', 0, false, array('body' => '<p>Not published</p>'));
 
@@ -238,6 +244,21 @@ $result = \CloudHost247\Theme\PublicPage::route($recorder, 'offers', 'Offers');
 $tests['an unpublished route answers 404'] = $result['status'] === 404 && $result['page']['missing'] === true;
 $tests['an unpublished route explains itself'] = strpos($result['page']['body'], 'no published content') !== false;
 $tests['an unpublished route still uses the first-party template'] = $recorder->template() === 'cloudhost247-page';
+
+ch247_theme_seed_content(104, 'page', 'cpanel-hosting', 'cPanel Hosting', 0, true, array('body' => '<p>Copy</p>', 'product_group' => 2, 'product_cycle' => 'annually'));
+ProductComponents::useReader(null);
+$productRecorder = new CH247ThemeClientAreaRecorder();
+$productResult = \CloudHost247\Theme\PublicPage::route($productRecorder, 'cpanel-hosting', 'cPanel Hosting');
+$component = isset($productResult['page']['product_component']) ? $productResult['page']['product_component'] : null;
+$tests['a page naming a product group is resolved through the shared reader'] = is_array($component) && $component['available'] === true && $component['component']['group'] === 2 && $component['component']['cycle'] === 'annually';
+$tests['the resolved products are the real catalogue rows'] = count($component['products']) === 1 && $component['products'][0]['name'] === 'Cloud Starter';
+$tests['a page without a product group carries no component'] = !isset(\CloudHost247\Theme\PublicPage::resolve('dedicated-server')['product_component']);
+
+ProductComponents::useReader(function () { return null; });
+$unavailableRecorder = new CH247ThemeClientAreaRecorder();
+$unavailableResult = \CloudHost247\Theme\PublicPage::route($unavailableRecorder, 'cpanel-hosting', 'cPanel Hosting');
+$tests['a page says when its catalogue cannot be read'] = isset($unavailableResult['page']['product_component']['available']) && $unavailableResult['page']['product_component']['available'] === false && $unavailableResult['page']['product_component']['reason'] !== '';
+ProductComponents::useReader(null);
 
 $recorder = new CH247ThemeClientAreaRecorder();
 $result = \CloudHost247\Theme\PublicPage::notFound($recorder, 'page-not-found', 'Page Not Found');

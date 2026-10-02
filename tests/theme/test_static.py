@@ -117,6 +117,19 @@ class PublicRouteTests(unittest.TestCase):
         'legal-notice.php': 'legal-notice',
         'help-center.php': 'help-center',
         'blog.php': 'blog',
+        'cpanel-hosting.php': 'cpanel-hosting',
+        'plesk-hosting.php': 'plesk-hosting',
+        'vps-hosting.php': 'vps-hosting',
+        'vps-privatecloud.php': 'vps-privatecloud',
+        'web-hosting.php': 'web-hosting',
+        'website-design.php': 'website-design',
+        'windows-hosting.php': 'windows-hosting',
+        'wordpress-hosting.php': 'wordpress-hosting',
+        'ssl-certificate.php': 'ssl-certificate',
+        'tables.php': 'tables',
+        'cloudhost247-vps-sample.php': 'vps-sample',
+        'data-protection-standards.php': 'data-protection-standards',
+        'terms-of-service.php': 'terms-of-service',
     }
 
     def test_converted_routes_render_published_content(self):
@@ -146,12 +159,34 @@ class PublicRouteTests(unittest.TestCase):
         self.assertNotIn('setTemplate', text)
         self.assertNotIn('init.php', text)
 
+    def test_no_root_page_renders_the_vendor_shell(self):
+        offenders = []
+        for path in ROOT.glob('*.php'):
+            text = path.read_text()
+            if "setTemplate('cloudhost247_legacy')" in text or 'setTemplate("cloudhost247_legacy")' in text:
+                offenders.append(path.name)
+            if path.name == 'cloudhost247-page.php':
+                continue
+            self.assertNotIn('mod_cloudhost247_theme_pages', text, path.name)
+        self.assertEqual(offenders, [])
+
+    def test_page_template_renders_the_product_component_safely(self):
+        tpl = (ROOT / 'templates/cloudhost247/cloudhost247-page.tpl').read_text()
+        self.assertIn('cloudhost247Page.product_component', tpl)
+        self.assertIn('product_component.products', tpl)
+        # Every dynamic value in the product markup goes through an escape.
+        for marker in ('$product.name|escape', '$product.description|escape', '$product.price.formatted|escape', '$product.order_url|escape', '$cloudhost247Page.product_component.reason|escape'):
+            self.assertIn(marker, tpl)
+        self.assertNotIn('$product.order_url}', tpl)
+
     def test_front_controller_is_fail_safe_and_escaped(self):
         controller = (THEME / 'lib/PublicPage.php').read_text()
         self.assertIn('catch (\Throwable', controller)
         self.assertIn('htmlspecialchars', controller)
         self.assertIn('no published content', controller)
         self.assertNotIn('mod_cloudhost247_theme_pages', controller)
+        self.assertIn('withProducts', controller)
+        self.assertIn('ProductComponents::resolve', controller)
 
 
 if __name__ == '__main__':

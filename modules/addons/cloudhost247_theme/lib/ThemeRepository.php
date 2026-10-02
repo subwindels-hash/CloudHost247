@@ -176,6 +176,11 @@ final class ThemeRepository
             'pages' => $this->slugList(isset($input['pages']) ? $input['pages'] : ''),
             'widgets' => $this->widgets(isset($input['widgets']) ? $input['widgets'] : ''),
             'product_widget' => $this->productWidget($input),
+            // A page route may render the products of one WHMCS product group
+            // beneath its copy. The group is deployment data, so it lives in the
+            // content store, not in the route file; 0 means no product list.
+            'product_group' => isset($input['page_product_group']) ? max(0, (int) $input['page_product_group']) : 0,
+            'product_cycle' => isset($input['page_product_cycle']) && in_array($input['page_product_cycle'], ProductComponents::CYCLES, true) ? (string) $input['page_product_cycle'] : 'monthly',
         );
         if (!$this->safeRelativeOrHttpsUrl($payload['image_url']) || !$this->safeRelativeOrHttpsUrl($payload['canonical_url'])) throw new InvalidArgumentException('Unsafe image or canonical URL.');
         foreach ($payload as $value) if (is_string($value) && strlen($value) > 50000) throw new InvalidArgumentException('Content field is too long.');

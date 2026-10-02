@@ -1,6 +1,8 @@
 <?php
 namespace CloudHost247\Theme;
 
+use CloudHost247\Theme\Content\ProductComponents;
+
 /**
  * Front controller for the public root pages.
  *
@@ -45,6 +47,7 @@ final class PublicPage
             return self::respond($clientArea, self::missing($title), $label, 404);
         }
         $page['title'] = $page['title'] !== '' ? $page['title'] : $title;
+        $page = self::withProducts($page);
         return self::respond($clientArea, $page, $label, 200);
     }
 
@@ -115,6 +118,28 @@ final class PublicPage
         $clientArea->setTemplate(self::TEMPLATE);
         $clientArea->output();
         return array('status' => (int) $status, 'page' => $page, 'template' => self::TEMPLATE);
+    }
+
+    /**
+     * When the published entry names a WHMCS product group, resolve that group
+     * through the same bounded reader the landing blocks use and attach the
+     * result. Unavailable is attached too: a product page that cannot read the
+     * catalogue says so rather than showing an empty grid as if the operator had
+     * no products.
+     */
+    private static function withProducts(array $page)
+    {
+        $group = isset($page['product_group']) ? (int) $page['product_group'] : 0;
+        if ($group <= 0) { return $page; }
+        $page['product_component'] = ProductComponents::resolve(array(
+            'type' => 'products',
+            'heading' => isset($page['title']) ? (string) $page['title'] : '',
+            'group' => $group,
+            'limit' => 12,
+            'cycle' => isset($page['product_cycle']) ? (string) $page['product_cycle'] : 'monthly',
+            'layout' => 'grid',
+        ));
+        return $page;
     }
 
     private static function homeLabel()
