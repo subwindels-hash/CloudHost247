@@ -29,6 +29,7 @@ const appLinks = [
   { to: '/billing', label: 'Billing' },
   { to: '/invoices', label: 'Invoices' },
   { to: '/support', label: 'Support' },
+  { to: '/account/assistant', label: 'Cloud AI' },
 ];
 
 // "Admin" is only ever shown to an account whose *locally cached* role is admin/super_admin —
@@ -128,6 +129,11 @@ export default function Header() {
             {user && SUPPORT_ROLES.includes(user.role) && (
               <NavLink to="/admin/ai-support" onClick={closeMenu}>
                 AI Support Desk
+              </NavLink>
+            )}
+            {user && SUPPORT_ROLES.includes(user.role) && (
+              <NavLink to="/admin/ai-command" onClick={closeMenu}>
+                AI Command
               </NavLink>
             )}
             {user && STAFF_ROLES.includes(user.role) && (
