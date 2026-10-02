@@ -14,7 +14,7 @@
  */
 import { randomUUID } from 'node:crypto';
 import type { InfrastructureProviderRow, ServerOsImageRow } from '../../db/infrastructure-providers';
-import { idempotentResourceName } from './common';
+import { idempotentResourceName, unsupportedConsole } from './common';
 import {
   ProviderError,
   type CreateProviderServerInput,
@@ -190,14 +190,26 @@ export class MockProviderAdapter implements InfrastructureProviderAdapter {
     this.state(providerServerId).status = 'running';
   }
 
-  async getConsole(providerServerId: string): Promise<Record<string, unknown>> {
-    this.state(providerServerId);
-    return { mock: true, type: 'none', message: 'Mock provider has no console' };
+  /**
+   * The mock issues no console and measures nothing, and refuses both with the same non-retryable
+   * `UNSUPPORTED_OPERATION` every other adapter without those capabilities uses. It used to answer
+   * successfully with `{ type: 'none' }` / `{ series: [] }` while the profile declared `console` and
+   * `metrics` false — the exact drift the capability matrix test now forbids in either direction.
+   * Simulating a console, or inventing telemetry numbers, would teach a developer to trust a reading
+   * no provider ever produced; the production lock (`guard()`) still runs first.
+   */
+  async getConsole(): Promise<never> {
+    this.guard();
+    return unsupportedConsole('mock', 'the development simulator issues no console session');
   }
 
-  async getServerMetrics(providerServerId: string): Promise<Record<string, unknown>> {
-    this.state(providerServerId);
-    return { mock: true, series: [] };
+  async getServerMetrics(): Promise<never> {
+    this.guard();
+    throw new ProviderError(
+      'UNSUPPORTED_OPERATION',
+      'mock produces no metrics: it is a development simulator, and host telemetry comes from the CloudHost247 server agent',
+      false
+    );
   }
 
   async healthCheck(providerServerId: string, expectedImage: ServerOsImageRow): Promise<ProviderHealthResult> {

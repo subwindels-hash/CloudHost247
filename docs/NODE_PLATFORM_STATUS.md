@@ -1264,3 +1264,147 @@ sub-phase before the next one begins.
   permissions (code-owned by design), provisioning write-adapters beyond `restart_installation`/
   `suspend_installation`, Customer-facing Copilot inbound message threading (conversations are the
   AI-support system's remit, already live at `/admin/ai-support`).
+- **Boot is database-independent again (fixed 2026-10-02).** The registry seed used to be awaited *inside
+  route registration*, which runs while the app is being built, so an unreachable database made
+  `buildApp()`/`app.ready()` throw and took the whole platform down with it — including `/health`
+  (contractually database-free), `/ready` (whose job is to *report* the outage) and every static/SPA
+  route; under Passenger that is a restart loop a brief database blip can keep alive. Seeding now runs
+  in an `onReady` hook that logs and continues on failure, and `ensureAgentRegistrySeeded()` repairs the
+  registry on the next **authorized** AI request (after `requireAiPermission`/`authenticate`, never
+  before — an anonymous or non-staff caller cannot trigger registry writes) as well as on every worker
+  sweep. It is single-flight, so concurrent first requests share one seed instead of racing the
+  initial `ai_agent_versions` stamp, and a failed attempt is not remembered, so it retries. While the
+  registry genuinely cannot be written the AI routes error; they never answer `200` with an empty
+  workforce. The seed's initial version stamp is tracked **per database** (the old process-global
+  boolean silently denied version history to the second and every later database seeded in one
+  process). Verified: `npm test` **114 files / 895 tests passing** (this fix turned 29 red tests green:
+  `health`, `spa-routing`, `rate-limit`), plus `tests/unit/ai-registry-boot.test.ts` (10) and
+  `tests/integration/ai-registry-seed.test.ts` (4, real PGlite + real migrations).
+
+---
+
+## A13 — Console and metrics truth for DigitalOcean and Vultr (capability drift, found 2026-10-02)
+
+- **Source/local verification:** PASSED on branch `arena/01a0fe1f-cloudhost247`.
+  - `npm run typecheck` clean; `tests/unit/provider-console-metrics-truth.test.ts` (15) new;
+    `provider-capability-truth.test.ts` extended to 10; the full suite is re-run at the end of this
+    session's work and recorded there.
+  - **No migration required.** Adapter capabilities are code, and the provider profiles are read at
+    runtime; nothing is stored per provider row.
+- **The defect.** Two adapters advertised capabilities they did not deliver, in both directions:
+  - `digitalocean.getConsole()` returned `GET /droplets/{id}/actions` and `vultr.getConsole()`
+    returned `GET /instances/{id}/actions`. Those are the resource's **action history**, not a
+    console. Both profiles said `console: true`, and the customer route
+    (`POST /api/v1/servers/:id/console`) gates on `server.capabilities.console === true` — so the
+    customer saw an "Open console" button, the platform wrote a `SERVER_CONSOLE_OPENED` audit row for
+    a console that was never opened, and `ServerDetailPage.tsx` rendered the action list inside a
+    panel titled "Serial console session".
+  - `digitalocean.getServerMetrics()` returned `GET /droplets/{id}/neighbors`, which is not a metrics
+    endpoint at all: it lists the **other droplets sharing the same physical host**. The profile said
+    `metrics: false`, so the flag and the implementation disagreed in the opposite direction too.
+- **Console is now refused where no console operation exists** (`unsupportedConsole()` in
+  `providers/common.ts`, alongside the existing `unsupportedRescue()`), with the verified reason in
+  the message and in the profile notes: DigitalOcean's Droplet Console and out-of-band Recovery
+  Console are Control Panel features and API v2 has no console operation; Vultr's web console is a
+  customer-portal feature. Both profiles now say `console: false`, so the button is never rendered
+  and no console audit row can be written for a session that did not happen. Contabo already refused
+  correctly and is pinned by the same test.
+- **Metrics are now implemented for both, against each provider's documented surface**, and each
+  payload states its own limits:
+  - **DigitalOcean** reads the Monitoring API — `GET /v2/monitoring/metrics/droplet/{metric}` with the
+    documented `host_id`, `start`, `end` (UNIX seconds) over a one-hour window, matching the Hetzner
+    and AWS windows. CPU arrives as cumulative **per-mode counters** (`idle`, `user`, `system`,
+    `iowait`, `steal`, …), so utilisation is derived as `(Δtotal − Δidle) / Δtotal` from each mode's
+    first and last sample; a counter that went *backwards* means the droplet rebooted inside the
+    window, and the metric is then reported missing rather than clamped to something plausible. Load
+    (1/5/15) and memory (`memory_total`, `memory_available`) are read as gauges and summarised as
+    latest/average/maximum/samples; `filesystem_size` + `filesystem_free` are merged per mountpoint
+    with the provider's own labels passed through untouched, so a multi-disk droplet reports multiple
+    entries. Bandwidth is deliberately not read: it needs `interface` + `direction` (four
+    combinations) and reports a billing counter rather than host telemetry. A droplet whose monitoring
+    agent is not reporting answers `200` with `data.result: []` — that lands in `missing` with a
+    reason, never as a zero. Profile `metrics: true`.
+  - **Vultr** has exactly one metrics endpoint, `GET /v2/instances/{id}/bandwidth` (`date_range`
+    1–180 days, this adapter reads 30), which returns per-UTC-day in/out byte counters and which
+    Vultr's own documentation warns against using for real-time metrics. The adapter reports exactly
+    that — daily bandwidth with explicit totals — and names `cpu`, `memory`, `filesystem` and `load`
+    in `missing` with the reason "Vultr API v2 exposes no endpoint for this metric". Host telemetry
+    for a Vultr server therefore comes from the CloudHost247 server agent (`server_metrics`, which is
+    what the customer Monitoring panel already reads), not from the provider. An empty bandwidth
+    history reports `null` totals, not `0` bytes. Profile `metrics: true`.
+- **Known follow-up for staging (data, not code).** `servers.capabilities` is stored per server row
+  when the order is accepted, so a DigitalOcean or Vultr server provisioned **before** this change
+  still carries `console: true` in its own row and will still render the button; clicking it now
+  returns the honest `UNSUPPORTED_OPERATION` refusal instead of an action list. New orders inherit the
+  corrected capability. A backfill of `servers.capabilities` for existing rows is a staging task and
+  is deliberately not done from here — production data is read-only for this repository.
+
+---
+
+## A14 — Capability-flag truth across all 12 adapters (72 cells, pinned in both directions)
+
+- **Source/local verification:** PASSED on branch `arena/01a0fe1f-cloudhost247`.
+  - `npm run typecheck` clean. `tests/unit/adapter-capability-matrix.test.ts` (76) new; the
+    provider suites re-run green (`provider-configuration` 23, `provider-rescue` 12,
+    `provider-capability-truth` 10, `infrastructure-provider-registry` 8,
+    `provider-console-metrics-truth` 15) and so did the two integration suites that build providers
+    through the admin API (`infrastructure-admin-operations` 10 — it publishes the adapter
+    configuration contract, so the changed profiles flow through it — and `server-console` 5).
+  - **No migration required.** Profiles are code; nothing per-provider is stored.
+- **Why this section exists.** A13 was not a one-off typo, it was an instance of a class: a
+  capability flag and its implementation had drifted, and nothing in the suite failed. So the whole
+  matrix was audited — 12 adapters × 6 capabilities (`reinstall`, `snapshot`, `resize`, `console`,
+  `metrics`, `rescue`) = 72 cells — by comparing each profile flag against what the method body
+  actually does, and the comparison is now a test instead of a reading.
+- **Three further disagreements found and fixed:**
+  - **`generic_http`: `snapshot` and `resize` were `false` while the adapter delegates both.** It
+    posts `/v1/servers/{id}/resize`, `/v1/servers/{id}/snapshots`,
+    `/v1/servers/{id}/restore-snapshot` and deletes `/v1/servers/{id}/snapshots/{snapshotId}` — the
+    same bridge contract its rescue delegation already used. The consequence was not a fake success
+    but a *forbidden* one: template validation rejects any capability the profile declares false, so
+    an operator could not offer resize or snapshots on a bridge-backed provider even though the
+    adapter performs them. Both flags are now `true`, and the bridge contract in
+    `docs/SERVER_PROVISIONING.md` lists those endpoints with the rule that a bridge which does not
+    implement one must answer with its own explicit HTTP failure — the adapter never invents a
+    snapshot id, a resized plan or a rescue session.
+  - **`openstack`: `metrics` was `false` while `getServerMetrics` reads Nova
+    `GET /servers/{id}/diagnostics`.** Nova diagnostics are policy-gated per cloud, so the adapter
+    already maps a policy denial to a non-retryable `UNSUPPORTED_OPERATION` naming that reason at
+    call time. That is an implemented capability with an honest runtime refusal, not a missing one:
+    the flag is now `true`, and the profile note records both the gating and the fact that Nova
+    returns hypervisor counters (CPU times, memory, `vda_errors`, rx/tx packets) rather than
+    percentages.
+  - **`mock`: `console` and `metrics` were `false` but both answered successfully** — `{ type:
+    'none', message: 'Mock provider has no console' }` and `{ mock: true, series: [] }`. Both now
+    refuse with the same non-retryable `UNSUPPORTED_OPERATION` every other adapter without them
+    uses, behind the existing production lock. Simulating a console, or emitting telemetry numbers,
+    would teach a developer to trust a reading no provider produced; the mock keeps simulating only
+    what it says it simulates (state, lifecycle, rescue).
+- **Two documented exceptions, verified rather than assumed:**
+  - `aws.reinstall` is `false` **by default** and implemented behind
+    `AWS_ALLOW_ROOT_VOLUME_REPLACEMENT=true`; the matrix test pins both states (refused with zero AWS
+    calls when unset, actually executing when set).
+  - Conditional runtime refusals are not capability drift: `aws.createSnapshot` refuses an instance
+    with no discoverable root EBS volume, and `solusvm.enableRescue` refuses arm64 because SolusVM
+    ships no arm64 rescue kernel. The matrix fixtures describe servers neither condition applies to,
+    so the invariant stays strict instead of being weakened to accommodate them.
+- **What the test asserts.** For every `false` cell: the call rejects with
+  `{ code: 'UNSUPPORTED_OPERATION', retryable: false }` **with the transport throwing**, and the
+  transport call count is 0 — so an adapter that reached the network fails here instead of silently
+  pretending. For every `true` cell: with a permissive transport the call must not reject with
+  `UNSUPPORTED_OPERATION` (any other failure is accepted; payload shapes have their own suites). Two
+  non-vacuity guards assert the matrix actually found cells to test in both directions. The test was
+  **mutation-verified**: re-introducing the OpenStack drift turns `openstack refuses metrics` red
+  with the network error the refusal should have prevented.
+- **Documentation drift corrected in the same pass** (`docs/SERVER_PROVISIONING.md`, 12 claims):
+  AWS "Rescue mode and CloudWatch metrics remain unavailable" (metrics are implemented — §A4);
+  Contabo "resize, console URLs, metrics, and rescue mode are also explicitly unsupported" (rescue is
+  implemented — §A5/A6, and the three real refusals now carry their verified reasons); "Five adapters
+  declare `rescue: true`" (it is seven, and the refusing list is five: AWS, DigitalOcean, Vultr,
+  Proxmox, Virtualizor); the unsupported-adapter registry rejecting with `SERVICE_UNAVAILABLE` (it is
+  a non-retryable `UNSUPPORTED_OPERATION` naming the kind — §A8); SolusVM's section silent on rescue
+  and on why snapshots refuse; and the per-provider `Capabilities:` lines for DigitalOcean, Vultr,
+  OpenStack, the bridge and the mock.
+- **Standing rule this establishes.** `ADAPTER_PROFILES` is a promise in *two* directions: a new
+  adapter, a new capability, or a change to either must move the flag and the implementation
+  together, and the matrix test fails the build if they disagree.

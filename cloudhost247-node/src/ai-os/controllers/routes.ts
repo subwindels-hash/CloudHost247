@@ -10,7 +10,7 @@
  *   HARD-scoped server-side to their own account id. A customer can never read another
  *   customer's data or execute staff-only AI actions.
  */
-import type { FastifyInstance } from 'fastify';
+import type { FastifyInstance, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import type { Env } from '../../config/env';
 import { getPool } from '../../db/pool';
@@ -18,8 +18,8 @@ import type { Queryable } from '../../db/types';
 import { ValidationError, NotFoundError } from '../../lib/errors';
 import { authenticate } from '../../lib/require-auth';
 import { recordAudit, requestAuditContext } from '../../lib/audit';
-import { requireAiPermission } from '../permissions';
-import { seedAgentRegistry } from '../registry/seed';
+import { requireAiPermission, type AiPermission, type AiRequestContext } from '../permissions';
+import { ensureAgentRegistrySeeded } from '../registry/seed';
 import { TOOL_CATALOG } from '../registry/tool-catalog';
 import { AGENT_CATALOG } from '../registry/agent-catalog';
 import {
@@ -95,34 +95,43 @@ export async function registerAiControlPlaneRoutes(parent: FastifyInstance, env:
 async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, env: Env, extPool?: Queryable): Promise<void> {
   const db = () => extPool ?? getPool(env);
 
-  // Registry seeding is idempotent (catalog key: slug) but MUST NOT run at boot: awaiting a DB
-  // round-trip during plugin registration made the whole app (including /health) fail to start
-  // whenever the database was unreachable or migration 0066 was not yet applied — a Passenger
-  // crash-loop on cPanel, and every buildApp()-based unit test failing with ECONNREFUSED.
-  // Instead seed once, on the first AI request; a failed attempt is retried on the next request.
-  let seeded: Promise<void> | null = null;
-  const ensureSeeded = (): Promise<void> => {
-    if (!seeded) {
-      seeded = seedAgentRegistry(db()).then(
-        () => undefined,
-        (err: unknown) => {
-          seeded = null;
-          throw err;
-        }
+  // Seeding at boot keeps agents/workflows/models present before the first request — but it must
+  // NEVER be a boot requirement. Route registration runs while the app is being built, so an
+  // `await` here turned "the database is unreachable right now" into "the whole platform fails to
+  // start", taking `/health` (contractually database-free), `/ready` and every static/SPA route
+  // down with it. onReady runs at the same point in the lifecycle, and a failure is reported
+  // instead of thrown: the AI surface stays fail-closed per request, the platform still boots, and
+  // the registry self-heals on the next authorized AI request or the next worker sweep.
+  instance.addHook('onReady', async () => {
+    try {
+      await ensureAgentRegistrySeeded(db());
+    } catch (error) {
+      instance.log.warn(
+        { err: error instanceof Error ? error.message : String(error) },
+        'AI registry seed skipped at boot; the AI Control Plane will retry on the next authorized request and on every worker sweep'
       );
     }
-    return seeded;
-  };
-  instance.addHook('preHandler', async () => {
-    await ensureSeeded();
   });
+
+  /**
+   * Every admin AI route goes through this: authenticate, re-verify the caller's role against the
+   * database, assert the named AI permission — and only then make sure the registry exists. The
+   * order matters: `ensureAgentRegistrySeeded` can write, so it must never be reachable before the
+   * caller is authorized. It is a WeakSet check once the registry is seeded, so it costs nothing on
+   * the normal path, and it is what recovers a boot whose seed failed.
+   */
+  const authorize = async (request: FastifyRequest, permission: AiPermission): Promise<AiRequestContext> => {
+    const context = await requireAiPermission(request, env, db(), permission);
+    await ensureAgentRegistrySeeded(db());
+    return context;
+  };
 
   // ==============================================================================================
   // Overview + observability
   // ==============================================================================================
 
   instance.get(`${ADMIN_BASE}/overview`, async (request) => {
-    await requireAiPermission(request, env, db(), 'ai.view');
+    await authorize(request, 'ai.view');
     const pool = db();
     const [summary, pendingApprovals, board] = await Promise.all([
       getObservabilitySummary(pool),
@@ -133,7 +142,7 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
   });
 
   instance.get(`${ADMIN_BASE}/observability`, async (request) => {
-    await requireAiPermission(request, env, db(), 'ai.observability.view');
+    await authorize(request, 'ai.observability.view');
     const summary = await getObservabilitySummary(db());
     return {
       ...summary,
@@ -146,14 +155,14 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
   // ==============================================================================================
 
   instance.get(`${ADMIN_BASE}/agents`, async (request) => {
-    await requireAiPermission(request, env, db(), 'ai.view');
+    await authorize(request, 'ai.view');
     const query = z.object({ category: z.string().max(24).optional(), boardOnly: z.coerce.boolean().optional() }).parse(request.query ?? {});
     const agents = await listAgents(db(), { category: query.category, boardOnly: query.boardOnly });
     return { count: agents.length, agents };
   });
 
   instance.get(`${ADMIN_BASE}/agents/:id`, async (request) => {
-    await requireAiPermission(request, env, db(), 'ai.view');
+    await authorize(request, 'ai.view');
     const { id } = parseOrThrow(idParam, request.params);
     const agent = await getAgentById(db(), id);
     if (!agent) throw new NotFoundError('Agent not found');
@@ -166,7 +175,7 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
   });
 
   instance.post(`${ADMIN_BASE}/agents/:id/enabled`, async (request) => {
-    const auth = await requireAiPermission(request, env, db(), 'ai.agents.manage');
+    const auth = await authorize(request, 'ai.agents.manage');
     const { id } = parseOrThrow(idParam, request.params);
     const body = parseOrThrow(z.object({ enabled: z.boolean() }), request.body);
     const agent = await getAgentById(db(), id);
@@ -181,7 +190,7 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
   });
 
   instance.get(`${ADMIN_BASE}/tools`, async (request) => {
-    await requireAiPermission(request, env, db(), 'ai.view');
+    await authorize(request, 'ai.view');
     return { count: TOOL_CATALOG.length, tools: TOOL_CATALOG };
   });
 
@@ -190,7 +199,7 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
   // ==============================================================================================
 
   instance.get(`${ADMIN_BASE}/tasks`, async (request) => {
-    await requireAiPermission(request, env, db(), 'ai.view');
+    await authorize(request, 'ai.view');
     const query = parseOrThrow(
       paginationSchema.extend({ status: z.string().max(20).optional(), agentId: z.string().uuid().optional(), customerId: z.string().uuid().optional() }),
       request.query ?? {}
@@ -200,7 +209,7 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
   });
 
   instance.post(`${ADMIN_BASE}/tasks`, async (request) => {
-    const auth = await requireAiPermission(request, env, db(), 'ai.tasks.run');
+    const auth = await authorize(request, 'ai.tasks.run');
     const body = parseOrThrow(
       z.object({
         agentSlug: z.string().min(1).max(64),
@@ -236,7 +245,7 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
   });
 
   instance.get(`${ADMIN_BASE}/tasks/:id`, async (request) => {
-    await requireAiPermission(request, env, db(), 'ai.view');
+    await authorize(request, 'ai.view');
     const { id } = parseOrThrow(idParam, request.params);
     const task = await getTask(db(), id);
     if (!task) throw new NotFoundError('Task not found');
@@ -251,14 +260,14 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
   // ==============================================================================================
 
   instance.get(`${ADMIN_BASE}/approvals`, async (request) => {
-    await requireAiPermission(request, env, db(), 'ai.approvals.view');
+    await authorize(request, 'ai.approvals.view');
     const query = parseOrThrow(paginationSchema.extend({ status: z.string().max(16).optional(), customerId: z.string().uuid().optional() }), request.query ?? {});
     const approvals = await listApprovals(db(), query);
     return { count: approvals.length, approvals };
   });
 
   instance.post(`${ADMIN_BASE}/approvals/:id/decision`, async (request) => {
-    const auth = await requireAiPermission(request, env, db(), 'ai.approvals.manage');
+    const auth = await authorize(request, 'ai.approvals.manage');
     const { id } = parseOrThrow(idParam, request.params);
     const body = parseOrThrow(
       z.object({ decision: z.enum(['approved', 'rejected']), note: z.string().max(2000).optional() }),
@@ -291,14 +300,14 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
   // ==============================================================================================
 
   instance.get(`${ADMIN_BASE}/events`, async (request) => {
-    await requireAiPermission(request, env, db(), 'ai.events.view');
+    await authorize(request, 'ai.events.view');
     const query = parseOrThrow(z.object({ eventType: z.string().max(64).optional(), limit: z.coerce.number().int().positive().max(500).optional() }), request.query ?? {});
     const events = await listEvents(db(), query);
     return { count: events.length, events, knownTypes: AI_EVENT_TYPES };
   });
 
   instance.post(`${ADMIN_BASE}/events`, async (request) => {
-    const auth = await requireAiPermission(request, env, db(), 'ai.workflows.manage');
+    const auth = await authorize(request, 'ai.workflows.manage');
     const body = parseOrThrow(
       z.object({ eventType: z.enum(AI_EVENT_TYPES), payload: z.record(z.unknown()).optional(), processNow: z.boolean().optional() }),
       request.body
@@ -318,13 +327,13 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
   });
 
   instance.get(`${ADMIN_BASE}/workflows`, async (request) => {
-    await requireAiPermission(request, env, db(), 'ai.view');
+    await authorize(request, 'ai.view');
     const workflows = await listWorkflows(db());
     return { count: workflows.length, workflows };
   });
 
   instance.patch(`${ADMIN_BASE}/workflows/:id`, async (request) => {
-    const auth = await requireAiPermission(request, env, db(), 'ai.workflows.manage');
+    const auth = await authorize(request, 'ai.workflows.manage');
     const { id } = parseOrThrow(idParam, request.params);
     const body = parseOrThrow(z.object({ enabled: z.boolean() }), request.body);
     const workflow = await setWorkflowEnabled(db(), id, body.enabled);
@@ -338,7 +347,7 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
   });
 
   instance.get(`${ADMIN_BASE}/workflow-runs`, async (request) => {
-    await requireAiPermission(request, env, db(), 'ai.view');
+    await authorize(request, 'ai.view');
     const query = parseOrThrow(paginationSchema.extend({ workflowId: z.string().uuid().optional() }), request.query ?? {});
     const runs = await listWorkflowRuns(db(), query);
     return { count: runs.length, runs };
@@ -349,7 +358,7 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
   // ==============================================================================================
 
   instance.get(`${ADMIN_BASE}/findings`, async (request) => {
-    await requireAiPermission(request, env, db(), 'ai.view');
+    await authorize(request, 'ai.view');
     const query = parseOrThrow(
       z.object({ status: z.string().max(12).optional(), agentId: z.string().uuid().optional(), severity: z.string().max(8).optional(), limit: z.coerce.number().int().positive().max(200).optional() }),
       request.query ?? {}
@@ -359,7 +368,7 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
   });
 
   instance.post(`${ADMIN_BASE}/findings/:id/status`, async (request) => {
-    const auth = await requireAiPermission(request, env, db(), 'ai.findings.manage');
+    const auth = await authorize(request, 'ai.findings.manage');
     const { id } = parseOrThrow(idParam, request.params);
     const body = parseOrThrow(z.object({ status: z.enum(['acknowledged', 'resolved', 'dismissed']) }), request.body);
     const finding = await updateFindingStatus(db(), id, body.status);
@@ -373,14 +382,14 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
   });
 
   instance.get(`${ADMIN_BASE}/incidents`, async (request) => {
-    await requireAiPermission(request, env, db(), 'ai.view');
+    await authorize(request, 'ai.view');
     const query = parseOrThrow(z.object({ status: z.string().max(14).optional(), limit: z.coerce.number().int().positive().max(200).optional() }), request.query ?? {});
     const incidents = await listIncidents(db(), query);
     return { count: incidents.length, incidents };
   });
 
   instance.post(`${ADMIN_BASE}/incidents`, async (request) => {
-    const auth = await requireAiPermission(request, env, db(), 'ai.incidents.manage');
+    const auth = await authorize(request, 'ai.incidents.manage');
     const body = parseOrThrow(
       z.object({
         title: z.string().min(3).max(255),
@@ -408,7 +417,7 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
   });
 
   instance.post(`${ADMIN_BASE}/incidents/:id/notes`, async (request) => {
-    const auth = await requireAiPermission(request, env, db(), 'ai.incidents.manage');
+    const auth = await authorize(request, 'ai.incidents.manage');
     const { id } = parseOrThrow(idParam, request.params);
     const body = parseOrThrow(
       z.object({ note: z.string().min(1).max(5000), status: z.enum(['open', 'investigating', 'mitigated', 'resolved']).optional() }),
@@ -432,7 +441,7 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
   // ==============================================================================================
 
   instance.get(`${ADMIN_BASE}/audit`, async (request) => {
-    await requireAiPermission(request, env, db(), 'ai.audit.view');
+    await authorize(request, 'ai.audit.view');
     const query = parseOrThrow(paginationSchema.extend({ agentId: z.string().uuid().optional(), action: z.string().max(120).optional() }), request.query ?? {});
     const entries = await listAiAudit(db(), query);
     return { count: entries.length, entries };
@@ -443,14 +452,14 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
   // ==============================================================================================
 
   instance.get(`${ADMIN_BASE}/evaluations`, async (request) => {
-    await requireAiPermission(request, env, db(), 'ai.evaluations.view');
+    await authorize(request, 'ai.evaluations.view');
     const query = parseOrThrow(z.object({ agentId: z.string().uuid().optional(), limit: z.coerce.number().int().positive().max(500).optional() }), request.query ?? {});
     const evaluations = await listEvaluations(db(), query.agentId, query.limit);
     return { count: evaluations.length, evaluations };
   });
 
   instance.post(`${ADMIN_BASE}/agents/:id/evaluate`, async (request) => {
-    const auth = await requireAiPermission(request, env, db(), 'ai.evaluations.write');
+    const auth = await authorize(request, 'ai.evaluations.write');
     const { id } = parseOrThrow(idParam, request.params);
     const body = parseOrThrow(
       z.object({ metric: z.string().min(1).max(40), value: z.coerce.number().min(-1000).max(1000), notes: z.string().max(2000).optional() }),
@@ -467,13 +476,13 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
   // ==============================================================================================
 
   instance.get(`${ADMIN_BASE}/knowledge`, async (request) => {
-    await requireAiPermission(request, env, db(), 'ai.knowledge.view');
+    await authorize(request, 'ai.knowledge.view');
     const sources = await listKnowledgeSources(db());
     return { count: sources.length, sources };
   });
 
   instance.post(`${ADMIN_BASE}/knowledge`, async (request) => {
-    const auth = await requireAiPermission(request, env, db(), 'ai.knowledge.manage');
+    const auth = await authorize(request, 'ai.knowledge.manage');
     const body = parseOrThrow(
       z.object({
         title: z.string().min(3).max(255),
@@ -505,7 +514,7 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
   });
 
   instance.get(`${ADMIN_BASE}/knowledge/search`, async (request) => {
-    await requireAiPermission(request, env, db(), 'ai.knowledge.view');
+    await authorize(request, 'ai.knowledge.view');
     const query = parseOrThrow(z.object({ q: z.string().min(2).max(400), limit: z.coerce.number().int().positive().max(10).optional() }), request.query ?? {});
     const hits = await searchKnowledge(db(), query.q, query.limit ?? 5);
     return { query: query.q, count: hits.length, results: hits.map((h) => ({ chunkId: h.chunk.id, content: h.chunk.content, score: h.score, citation: { source: h.source.title, version: h.source.version, type: h.source.source_type, uri: h.source.uri } })) };
@@ -516,13 +525,13 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
   // ==============================================================================================
 
   instance.get(`${ADMIN_BASE}/models`, async (request) => {
-    await requireAiPermission(request, env, db(), 'ai.models.view');
+    await authorize(request, 'ai.models.view');
     const models = await listModelConfigs(db());
     return { count: models.length, models, note: 'API keys/credentials are never stored here — only connection metadata. Disabled engines fail closed with CONFIGURATION_REQUIRED.' };
   });
 
   instance.put(`${ADMIN_BASE}/models/:engine`, async (request) => {
-    const auth = await requireAiPermission(request, env, db(), 'ai.models.manage');
+    const auth = await authorize(request, 'ai.models.manage');
     const { engine } = parseOrThrow(z.object({ engine: z.string().min(1).max(32).regex(/^[a-z0-9_]+$/) }), request.params);
     const body = parseOrThrow(
       z.object({
@@ -549,13 +558,13 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
   // ==============================================================================================
 
   instance.get(`${ADMIN_BASE}/board`, async (request) => {
-    await requireAiPermission(request, env, db(), 'ai.board.view');
+    await authorize(request, 'ai.board.view');
     const board = await getBoardOverview(db());
     return board;
   });
 
   instance.post(`${ADMIN_BASE}/board/briefings`, async (request) => {
-    const auth = await requireAiPermission(request, env, db(), 'ai.board.briefings');
+    const auth = await authorize(request, 'ai.board.briefings');
     const body = parseOrThrow(z.object({ type: z.enum(['daily', 'weekly', 'monthly']) }), request.body);
     const pool = db();
     const outcome = await generateExecutiveBriefing(pool, body.type, auth.userId, runTask);
@@ -573,13 +582,13 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
   });
 
   instance.get(`${ADMIN_BASE}/board/briefings`, async (request) => {
-    await requireAiPermission(request, env, db(), 'ai.board.view');
+    await authorize(request, 'ai.board.view');
     const reports = await listExecutiveReports(db(), 30);
     return { count: reports.length, reports };
   });
 
   instance.get(`${ADMIN_BASE}/board/briefings/:id`, async (request) => {
-    await requireAiPermission(request, env, db(), 'ai.board.view');
+    await authorize(request, 'ai.board.view');
     const { id } = parseOrThrow(idParam, request.params);
     const report = await getExecutiveReportById(db(), id);
     if (!report) throw new NotFoundError('Briefing not found');
@@ -591,7 +600,7 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
   // ==============================================================================================
 
   instance.post(`${ADMIN_BASE}/copilot`, async (request) => {
-    const auth = await requireAiPermission(request, env, db(), 'ai.copilot.execute');
+    const auth = await authorize(request, 'ai.copilot.execute');
     const body = parseOrThrow(z.object({ command: z.string().min(3).max(1000) }), request.body);
     const pool = db();
     const agent = await getAgentBySlug(pool, 'admin-copilot');
@@ -624,6 +633,9 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
     const auth = await authenticate(request, env, db());
     const body = parseOrThrow(z.object({ message: z.string().min(2).max(2000) }), request.body);
     const pool = db();
+    // Authenticated first, then the registry: without this the assistant would answer
+    // "agent is not registered" for the whole lifetime of a process whose boot seed failed.
+    await ensureAgentRegistrySeeded(pool);
     const agent = await getAgentBySlug(pool, 'customer-cloud-assistant');
     if (!agent) throw new NotFoundError('Customer Cloud Assistant agent is not registered');
     const { task } = await createTask(pool, {
@@ -650,6 +662,7 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
   instance.get(`${CUSTOMER_BASE}/activity`, async (request) => {
     const auth = await authenticate(request, env, db());
     const pool = db();
+    await ensureAgentRegistrySeeded(pool);
     // Server-side scoping: userId is the caller's own id, not a parameter.
     const activity = await executeToolImplementation({ db: pool, customerScopeUserId: auth.userId }, 'get_ai_activity', { userId: auth.userId, limit: 25 });
     if (!activity.ok) throw new ValidationError(activity.message);
@@ -659,6 +672,7 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
   instance.get(`${CUSTOMER_BASE}/profile`, async (request) => {
     const auth = await authenticate(request, env, db());
     const pool = db();
+    await ensureAgentRegistrySeeded(pool);
     const profile = await executeToolImplementation({ db: pool, customerScopeUserId: auth.userId }, 'get_customer_profile', { userId: auth.userId });
     if (!profile.ok) throw new ValidationError(profile.message);
     return profile.data as Record<string, unknown>;

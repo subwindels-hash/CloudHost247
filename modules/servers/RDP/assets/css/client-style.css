@@ -1,0 +1,85 @@
+#togglePassword {
+    border: none;
+    background: none;
+    cursor: pointer;
+    outline: none;
+    vertical-align: middle;  /* Aligns with text */
+    height: 20px; /* Prevents height issues */
+    padding: 0;  /* Ensures no extra space */
+    margin-left: 5px; /* Adds spacing from the password */
+}
+
+#togglePassword:focus {
+    outline: none; /* Ensures no border when clicked */
+}
+
+.deviceCell h4 {
+    color: #1a4d80;
+    font-weight: 600;
+    text-align: left;
+}
+
+h4 {
+    color: #1a4d80;
+    font-weight: 600;
+}
+
+.add_hdr {
+    background: transparent;
+    margin: 0px;
+    padding: 27px 2%;
+    width: 100%;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between !important;
+    align-items: center;
+    box-shadow: 0 3px 10px #0000002b;
+    border: none;
+    height: 50px;
+    justify-content: end;
+}
+
+.add_nav {
+    margin: 0px;
+    padding: 0px;
+}
+
+.add_nav ul {
+    margin: 0px;
+    padding: 0px;
+    float: right;
+}
+
+.add_nav ul li {
+    margin: 0px;
+    padding: 0px;
+    float: left;
+    line-height: 32px;
+    list-style: none;
+}
+
+.add_nav .active {
+    color: #1a4d80;
+    background-color: transparent;
+    border-radius: 0;
+    /* border-color: #1a4d80; */
+    border-color: #3680cb;
+    width: fit-content;
+    border-width: 3px;
+    padding: 0 !important;
+}
+
+.add_nav ul li a {
+    color: #1a4d80;
+    display: block;
+    border-bottom: 2px solid transparent;
+    font-size: 14px;
+    margin: 0;
+    padding: 0 21px !important;
+    text-decoration: none;
+}
+/* @media (min-width: 1200px) {
+    .container {
+        width: 1000px;
+    }
+} */

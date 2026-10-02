@@ -1,0 +1,27 @@
+# The vendor RDP module was extracted byte-for-byte from RDP.zip on 2026-10-02 and every text
+# file in it uses CRLF line endings. Marking exactly those files `text eol=crlf` stores LF in the
+# blobs while checking CRLF back out, so the files on disk stay byte-identical to the archive and
+# the release gate's `git diff --check` whitespace step stays strict for the whole tree instead of
+# carrying an exemption for these paths. The list is explicit on purpose: the rebuild's own files
+# in the same directory (bootstrap.php, lib/Api/, lib/Contracts/, lib/Operations/, migrations/,
+# assets/css/client.css) are LF first-party source and must not be converted, and
+# assets/images/netlink.webp is binary and is left for git to detect.
+modules/servers/RDP/RDP.php text eol=crlf
+modules/servers/RDP/hooks.php text eol=crlf
+modules/servers/RDP/lib/Helper.php text eol=crlf
+modules/servers/RDP/lib/index.php text eol=crlf
+modules/servers/RDP/assets/index.php text eol=crlf
+modules/servers/RDP/assets/css/index.php text eol=crlf
+modules/servers/RDP/assets/js/index.php text eol=crlf
+modules/servers/RDP/assets/css/admin-style.css text eol=crlf
+modules/servers/RDP/assets/css/client-style.css text eol=crlf
+modules/servers/RDP/assets/js/admin-script.js text eol=crlf
+modules/servers/RDP/assets/js/client-script.js text eol=crlf
+modules/servers/RDP/templates/error.tpl text eol=crlf
+modules/servers/RDP/templates/overview.tpl text eol=crlf
+# Two vendor lines carry trailing spaces (RDP.php:303, admin-script.js:3). Disabling the
+# trailing-space check for exactly these two paths keeps the extracted files byte-identical to
+# the archive - which is what makes 'we did not tamper with the vendor code' provable against
+# the pinned archive hash - while the check stays on for every first-party path.
+modules/servers/RDP/RDP.php whitespace=-trailing-space
+modules/servers/RDP/assets/js/admin-script.js whitespace=-trailing-space

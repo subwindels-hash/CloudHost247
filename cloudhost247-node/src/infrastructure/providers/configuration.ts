@@ -75,8 +75,8 @@ export const ADAPTER_PROFILES: Record<AdapterKind, AdapterProfile> = {
     requiresApiBaseUrl: false,
     credentials: [{ suffix: '_API_TOKEN', description: 'DigitalOcean personal access token', required: true, fallback: 'DIGITALOCEAN_API_TOKEN' }],
     planMetadata: [{ key: 'providerServerType', description: 'Droplet size slug', required: true }, ...RESOURCE_METADATA],
-    capabilities: { reinstall: true, snapshot: true, resize: true, console: true, metrics: false, rescue: false },
-    notes: 'Native droplet API with user-data, rebuild, resize and snapshots.',
+    capabilities: { reinstall: true, snapshot: true, resize: true, console: false, metrics: true, rescue: false },
+    notes: 'Native droplet API with user-data, rebuild, resize and snapshots. Metrics read the documented Monitoring API (GET /v2/monitoring/metrics/droplet/{metric} with host_id/start/end): CPU utilisation is derived from the per-mode counters over a one-hour window, load and memory are read as gauges and filesystems are reported per provider mountpoint label; a metric the monitoring agent does not report is listed in `missing`, never zero-filled. There is no console: the Droplet Console and the out-of-band Recovery Console are Control Panel features and API v2 has no console operation.',
   },
   vultr: {
     kind: 'vultr',
@@ -86,8 +86,8 @@ export const ADAPTER_PROFILES: Record<AdapterKind, AdapterProfile> = {
     requiresApiBaseUrl: false,
     credentials: [{ suffix: '_API_KEY', description: 'Vultr API key', required: true, fallback: 'VULTR_API_KEY' }],
     planMetadata: [{ key: 'providerServerType', description: 'Vultr plan id', required: true }, ...RESOURCE_METADATA],
-    capabilities: { reinstall: true, snapshot: true, resize: true, console: true, metrics: false, rescue: false },
-    notes: 'Native instance API.',
+    capabilities: { reinstall: true, snapshot: true, resize: true, console: false, metrics: true, rescue: false },
+    notes: 'Native instance API. Metrics are bandwidth-only because that is all Vultr exposes: GET /v2/instances/{id}/bandwidth returns per-UTC-day in/out byte counters (date_range 1-180 days) and Vultr documents that it should not be used for real-time metrics, so CPU/memory/filesystem/load are reported in `missing` and left to the CloudHost247 server agent. There is no console: the web console is a customer-portal feature and API v2 has no console operation.',
   },
   aws: {
     kind: 'aws',
@@ -232,8 +232,8 @@ export const ADAPTER_PROFILES: Record<AdapterKind, AdapterProfile> = {
       { key: 'providerKeypairName', description: 'Optional Nova keypair injected in addition to customer keys', required: false },
       ...RESOURCE_METADATA,
     ],
-    capabilities: { reinstall: true, snapshot: true, resize: true, console: true, metrics: false, rescue: true },
-    notes: 'Keystone v3 + Nova + Glance. Either password login or a pre-issued token is required. Rescue uses the native Nova rescue/unrescue actions.',
+    capabilities: { reinstall: true, snapshot: true, resize: true, console: true, metrics: true, rescue: true },
+    notes: 'Keystone v3 + Nova + Glance. Either password login or a pre-issued token is required. Rescue uses the native Nova rescue/unrescue actions. Metrics read Nova GET /servers/{id}/diagnostics, which is policy-gated per cloud: a project the policy does not allow gets a non-retryable UNSUPPORTED_OPERATION naming that reason at call time, never a fabricated reading, and the returned values are the hypervisor counters Nova reports (CPU times, memory, vda errors, rx/tx packets) rather than percentages.',
   },
   generic_http: {
     kind: 'generic_http',
@@ -243,8 +243,8 @@ export const ADAPTER_PROFILES: Record<AdapterKind, AdapterProfile> = {
     requiresApiBaseUrl: true,
     credentials: [{ suffix: '_API_TOKEN', description: 'Bearer token for the operator-owned bridge', required: true }],
     planMetadata: [{ key: 'providerServerType', description: 'Plan identifier understood by the bridge', required: false }, ...RESOURCE_METADATA],
-    capabilities: { reinstall: true, snapshot: false, resize: false, console: true, metrics: true, rescue: true },
-    notes: 'For providers without a native adapter. The bridge is a real integration, never a simulator. Rescue is delegated like every other action — POST /v1/servers/{id}/rescue returns the rescue system, login user, optional one-time password and whether the bridge rebooted the server, and POST /v1/servers/{id}/unrescue leaves it. A bridge that does not implement rescue answers with its own error; this adapter never invents a rescue session.',
+    capabilities: { reinstall: true, snapshot: true, resize: true, console: true, metrics: true, rescue: true },
+    notes: 'For providers without a native adapter. The bridge is a real integration, never a simulator. Every operation is delegated on one contract: POST /v1/servers/{id}/{start,shutdown,reboot,reinstall,resize,rescue,unrescue,restore-snapshot}, POST /v1/servers/{id}/snapshots, DELETE /v1/servers/{id}/snapshots/{snapshotId} and GET /v1/servers/{id}/{health,console,metrics}. Resize, snapshots and rescue were already delegated but two of them were advertised as false, so a template could not offer an operation the adapter really performs; the flags now match the code. A bridge that does not implement an endpoint answers with its own HTTP failure — this adapter never invents a snapshot id, a resized plan or a rescue session.',
   },
   mock: {
     kind: 'mock',
@@ -257,7 +257,7 @@ export const ADAPTER_PROFILES: Record<AdapterKind, AdapterProfile> = {
     ],
     planMetadata: RESOURCE_METADATA,
     capabilities: { reinstall: true, snapshot: true, resize: true, console: false, metrics: false, rescue: true },
-    notes: 'Never selected automatically and disabled in production. Mock resources are labelled mock:true with mock- ids. Rescue is simulated in the same state machine so the full request flow can be exercised without a provider.',
+    notes: 'Never selected automatically and disabled in production. Mock resources are labelled mock:true with mock- ids. Rescue is simulated in the same state machine so the full request flow can be exercised without a provider. Console and metrics are refused rather than simulated: the simulator issues no console session and measures nothing, and inventing either would teach a developer to trust a reading no provider produced.',
   },
 };
 

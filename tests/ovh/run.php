@@ -258,6 +258,39 @@ $tests['address sub-paths allow a dotted IPv4']=$ss->invoke($sm,'/firewall/203.0
 $tests['service sub-paths still allow a query']=$ss->invoke($sm,'/boot?bootType=rescue','service')==='/boot?bootType=rescue';
 $tests['sub-paths refuse traversal']=$throws(function()use($ss,$sm){$ss->invoke($sm,'/../../etc','address');})&&$throws(function()use($ss,$sm){$ss->invoke($sm,'/firewall/../secret','service');})&&$throws(function()use($ss,$sm){$ss->invoke($sm,'/firewall/..%2fsecret','address');});
 
+// --- HostingProductManager::create — one plan, one product, all four writes or none.
+// Fixtures the creation path needs: an endpoint, a category, two currencies and a
+// persisted catalog plan with evidence for some specification fields only.
+\WHMCS\Database\Capsule::table('mod_cloudhost247_ovh_endpoints')->insert(array('id'=>2,'name'=>'EU','region'=>'eu','server_id'=>0,'integration_key'=>'ovh'));
+\WHMCS\Database\Capsule::table('tblproductgroups')->insert(array('id'=>9,'name'=>'VPS created','hidden'=>0,'order'=>0));
+\WHMCS\Database\Capsule::table('tblcurrencies')->insert(array('id'=>1,'code'=>'USD','rate'=>1,'default'=>1));
+\WHMCS\Database\Capsule::table('tblcurrencies')->insert(array('id'=>2,'code'=>'EUR','rate'=>0.92,'default'=>0));
+\WHMCS\Database\Capsule::table('mod_cloudhost247_ovh_catalog')->insert(array('id'=>61,'endpoint_id'=>2,'family'=>'vps','plan_code'=>'vps-created-1','catalog_json'=>json_encode(array('normalized'=>array('plan'=>array('plan_code'=>'vps-created-1','cpu'=>'4 cores','ram'=>'8 GB','storage'=>'160 GB','datacenters'=>array('GRA'),'ipv4'=>'1'))))));
+$creator=new \CloudHost247\Ovh\Products\HostingProductManager();
+$createInput=array('endpoint_id'=>2,'family'=>'vps','plan_code'=>'vps-created-1','subsidiary'=>'us','gid'=>9,'name'=>'VPS Created 4/8','description'=>'Created from persisted catalog evidence','product_kind'=>'vps','availability_status'=>'available','display_order'=>5,'margin_percent'=>12.5);
+$creationPreview=$creator->previewCreate($createInput);
+$tests['create preview resolves catalog evidence and writes nothing']=$creationPreview['status']==='preview'&&$creationPreview['specifications']['cpu']==='4 cores'&&in_array('ipv6',$creationPreview['unverified'],true)&&$creationPreview['sources']['ipv6']==='not_verified'&&$creationPreview['product']['hidden']===1&&$creationPreview['orderable_cycles']===0&&$creationPreview['mapping_active']===false&&$creationPreview['currencies']===2&&count(ch247_ovh_rows('tblproducts'))===0;
+$createdId=$creator->create($createInput,true,3);
+$createdProduct=ch247_ovh_rows('tblproducts')[0];
+$tests['create writes the product hidden, unpriced and pointed only at this module']=(int)$createdProduct->id===(int)$createdId&&(int)$createdProduct->hidden===1&&$createdProduct->name==='VPS Created 4/8'&&(int)$createdProduct->gid===9&&$createdProduct->servertype==='cloudhost247_ovh'&&$createdProduct->autosetup===''&&$createdProduct->type==='hostingaccount'&&$createdProduct->paytype==='recurring';
+$createdMeta=ch247_ovh_rows('mod_cloudhost247_hosting_products')[0];
+$createdSpecs=json_decode($createdMeta->specifications_json,true);$createdSources=json_decode($createdMeta->specification_sources_json,true);
+$tests['create stores the proved specifications and names the unproved ones']=$createdMeta->product_kind==='vps'&&$createdSpecs['cpu']==='4 cores'&&$createdSpecs['ipv6']===''&&$createdSources['cpu']==='catalog'&&$createdSources['ipv6']==='not_verified'&&$createdMeta->availability_status==='available'&&(int)$createdMeta->display_order===5;
+$createdMapping=ch247_ovh_rows('mod_cloudhost247_ovh_product_mappings')[1];
+$tests['create binds the plan with an inactive mapping and the normalized subsidiary']=(int)$createdMapping->whmcs_product_id===(int)$createdId&&$createdMapping->plan_code==='vps-created-1'&&$createdMapping->subsidiary==='US'&&(int)$createdMapping->active===0&&(float)$createdMapping->margin_percent===12.5;
+$createdPrices=ch247_ovh_rows('tblpricing');
+$tests['create disables every cycle in every currency and writes no price']=count($createdPrices)===2&&$createdPrices[0]->monthly==='-1.00'&&$createdPrices[0]->triennially==='-1.00'&&$createdPrices[0]->msetupfee==='-1.00'&&$createdPrices[1]->annually==='-1.00';
+$createAudits=array_values(array_filter(ch247_ovh_rows('mod_cloudhost247_audit_events'),function($row){return $row->action==='product.create';}));
+$tests['create is audited against the created product']=count($createAudits)===1&&(int)$createAudits[0]->resource_id===(int)$createdId;
+try{$creator->create($createInput,false,3);$tests['create requires explicit confirmation']=false;}catch(Throwable$e){$tests['create requires explicit confirmation']=strpos($e->getMessage(),'confirmation')!==false;}
+try{$creator->create($createInput,true,3);$tests['one OVH plan maps to one product']=false;}catch(Throwable$e){$tests['one OVH plan maps to one product']=strpos($e->getMessage(),'already mapped')!==false;}
+try{$creator->create(array_merge($createInput,array('plan_code'=>'vps-never-synced')),true,3);$tests['a plan with no persisted evidence is refused']=false;}catch(Throwable$e){$tests['a plan with no persisted evidence is refused']=strpos($e->getMessage(),'No persisted catalog evidence')!==false&&strpos($e->getMessage(),'never created from an invented specification')!==false;}
+try{$creator->create(array_merge($createInput,array('servertype'=>'soyoustart')),true,3);$tests['create refuses an unverified provisioning module']=false;}catch(Throwable$e){$tests['create refuses an unverified provisioning module']=strpos($e->getMessage(),'not verified by this repository')!==false;}
+try{$creator->create(array_merge($createInput,array('gid'=>4242)),true,3);$tests['create refuses a category that does not exist']=false;}catch(Throwable$e){$tests['create refuses a category that does not exist']=strpos($e->getMessage(),'Product category does not exist')!==false;}
+\WHMCS\Database\Capsule::table('mod_cloudhost247_ovh_catalog')->insert(array('id'=>62,'endpoint_id'=>2,'family'=>'vps','plan_code'=>'vps-created-2','catalog_json'=>json_encode(array('normalized'=>array('plan'=>array('cpu'=>'8 cores'))))));
+try{$creator->create(array_merge($createInput,array('plan_code'=>'vps-created-2')),true,3);$tests['a duplicate name in the category is refused']=false;}catch(Throwable$e){$tests['a duplicate name in the category is refused']=strpos($e->getMessage(),'already exists in this category')!==false;}
+$tests['every refused creation wrote nothing']=count(ch247_ovh_rows('tblproducts'))===1&&count(ch247_ovh_rows('mod_cloudhost247_hosting_products'))===1&&count(ch247_ovh_rows('mod_cloudhost247_ovh_product_mappings'))===2&&count(ch247_ovh_rows('tblpricing'))===2;
+
 restore_error_handler();
 $tests['no php diagnostics raised']=($phpDiagnostics===array());
 foreach(array_slice(array_unique($phpDiagnostics),0,5)as$d)echo "# diagnostic: $d\n";

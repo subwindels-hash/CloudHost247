@@ -59,6 +59,11 @@ describe('adapter profiles tell the truth about their capabilities', () => {
   it.each([
     ['aws', { reinstall: false, rescue: false }],
     ['contabo', { resize: false, console: false, metrics: false }],
+    // Added 2026-10-02: both used to advertise console:true while returning the provider's *action
+    // history* (see tests/unit/provider-console-metrics-truth.test.ts). metrics is now true for both
+    // because each has a real, documented metrics endpoint that is now implemented.
+    ['digitalocean', { console: false, rescue: false, metrics: true }],
+    ['vultr', { console: false, rescue: false, metrics: true }],
   ] as const)('%s advertises the capabilities it actually refuses', (kind, expected) => {
     const capabilities = ADAPTER_PROFILES[kind].capabilities as unknown as Record<string, boolean>;
     for (const [capability, value] of Object.entries(expected)) {

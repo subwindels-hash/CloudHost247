@@ -1,5 +1,5 @@
 import type { InfrastructureProviderRow, ServerOsImageRow } from '../../db/infrastructure-providers';
-import { unsupportedRescue } from './common';
+import { unsupportedConsole, unsupportedRescue } from './common';
 import { providerRequest } from './http';
 import {
   ProviderError,
@@ -34,6 +34,12 @@ function toServer(instance: VultrInstancePayload): ProviderServer {
     metadata: { tag: instance.tag, powerStatus: instance.power_status },
   };
 }
+
+/** Days of bandwidth history to read; Vultr accepts 1-180 and defaults to 30. */
+const VULTR_BANDWIDTH_DAYS = 30;
+
+/** Vultr has no host-telemetry endpoint at all — monitoring graphs are a portal feature. */
+const VULTR_NO_TELEMETRY = 'Vultr API v2 exposes no endpoint for this metric';
 
 export class VultrProviderAdapter implements InfrastructureProviderAdapter {
   readonly kind = 'vultr';
@@ -189,12 +195,74 @@ export class VultrProviderAdapter implements InfrastructureProviderAdapter {
   async enableRescue(): Promise<never> { return unsupportedRescue('vultr'); }
   async disableRescue(): Promise<never> { return unsupportedRescue('vultr'); }
 
-  async getConsole(providerServerId: string): Promise<Record<string, unknown>> {
-    return asRecord(await this.request(`/instances/${encodeURIComponent(providerServerId)}/actions`));
+  /**
+   * Vultr has no console endpoint. API v2 exposes no operation that issues a console URL or
+   * credential — the web console is a customer-portal feature. This used to return
+   * `/instances/{id}/actions`, the instance's *action history*, which the customer UI rendered in a
+   * panel titled "Serial console session" while the platform audited `SERVER_CONSOLE_OPENED` for a
+   * console that was never opened.
+   */
+  async getConsole(): Promise<never> {
+    return unsupportedConsole(
+      'vultr',
+      'the web console is a customer-portal feature and API v2 has no console operation'
+    );
   }
 
+  /**
+   * Vultr's only metrics surface is `GET /v2/instances/{instance-id}/bandwidth` (`date_range` in
+   * days, default 30, max 180), which returns per-UTC-day byte counters. Vultr's own documentation
+   * warns: "We do not recommend using this endpoint to gather real-time metrics."
+   *
+   * So this reports exactly what it is — daily bandwidth — and names every metric Vultr does not
+   * expose (CPU, memory, filesystem, load) in `missing` instead of implying they were measured.
+   */
   async getServerMetrics(providerServerId: string): Promise<Record<string, unknown>> {
-    return asRecord(await this.request(`/instances/${encodeURIComponent(providerServerId)}/bandwidth`));
+    const payload = await this.request<{ bandwidth?: unknown }>(
+      `/instances/${encodeURIComponent(providerServerId)}/bandwidth?date_range=${VULTR_BANDWIDTH_DAYS}`
+    );
+
+    const days: Array<{ date: string; incomingBytes: number; outgoingBytes: number }> = [];
+    const bandwidth = payload?.bandwidth;
+    if (bandwidth && typeof bandwidth === 'object') {
+      for (const [date, entry] of Object.entries(bandwidth as Record<string, unknown>)) {
+        if (!entry || typeof entry !== 'object') continue;
+        const incoming = Number((entry as Record<string, unknown>).incoming_bytes);
+        const outgoing = Number((entry as Record<string, unknown>).outgoing_bytes);
+        if (!Number.isFinite(incoming) || !Number.isFinite(outgoing)) continue;
+        days.push({ date, incomingBytes: incoming, outgoingBytes: outgoing });
+      }
+    }
+    days.sort((a, b) => a.date.localeCompare(b.date));
+
+    // No day entries means Vultr reported no bandwidth history at all. That is "no data", not
+    // "zero traffic", so the totals stay null rather than claiming a measurement that never happened.
+    const totalIncoming = days.length > 0 ? days.reduce((sum, day) => sum + day.incomingBytes, 0) : null;
+    const totalOutgoing = days.length > 0 ? days.reduce((sum, day) => sum + day.outgoingBytes, 0) : null;
+
+    return {
+      provider: 'vultr',
+      instanceId: providerServerId,
+      source: '/v2/instances/{instance-id}/bandwidth',
+      dateRangeDays: VULTR_BANDWIDTH_DAYS,
+      metrics: {
+        bandwidth: {
+          daysReported: days.length,
+          days,
+          totalIncomingBytes: totalIncoming,
+          totalOutgoingBytes: totalOutgoing,
+        },
+      },
+      // Honest about what Vultr does not measure: these are never zero-filled or estimated.
+      missing: ['cpu', 'memory', 'filesystem', 'load'],
+      missingReasons: {
+        cpu: VULTR_NO_TELEMETRY,
+        memory: VULTR_NO_TELEMETRY,
+        filesystem: VULTR_NO_TELEMETRY,
+        load: VULTR_NO_TELEMETRY,
+      },
+      note: 'Vultr exposes daily bandwidth byte counters only, and its documentation advises against treating them as real-time metrics. Host telemetry (CPU, memory, disk, load) comes from the CloudHost247 server agent, not from Vultr.',
+    };
   }
 
   async healthCheck(providerServerId: string, expectedImage: ServerOsImageRow): Promise<ProviderHealthResult> {

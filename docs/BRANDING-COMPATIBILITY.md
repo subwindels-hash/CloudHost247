@@ -169,9 +169,19 @@ blocks and banners.
   integrity baseline of the vendor-derived tree. Its paths and hashes record
   the historical state by design and are verified byte-for-byte by
   `scripts/release-candidate-check.sh`.
-- `docs/independent-rebuild/rebrand-overrides.list` / `.sha256` list the
-  branding-only exceptions to that baseline, which include four real paths
-  under `modules/addons/[retired-addon]/assets/`.
+- There is **no** side-car exception list. An earlier design described
+  `rebrand-overrides.list` / `.sha256` as branding-only exemptions to that
+  baseline; neither file was ever committed and the checker never implemented
+  an exemption. The design was superseded by re-cutting the baseline in place
+  (the manifest header records each re-cut and its reason), so the manifest now
+  hashes the *rebranded* state and `sha256sum --check --strict` passes with no
+  path excluded. The four `modules/addons/[retired-addon]/assets/` paths that
+  design named no longer exist at all: the vendor addon's 266 encoded files
+  were removed when it was retired. `branding-exceptions.list` is a different
+  mechanism — a register of tolerated retired-brand *text*, consumed by
+  `scripts/branding-audit.py`, and empty by design since 2026-10-01. Corrected
+  2026-10-02; `tests/security/test_release_gate_static.py` now fails if a
+  document claims an override manifest that is not in the tree.
 - `docs/independent-rebuild/BRAND-RENAME.md`, `docs/pre-restructuring-audit.md`
   and `docs/RESTRUCTURING.md` are rename/audit records: they describe what the
   old names were. Their current-state statements were updated in this pass.
@@ -211,14 +221,35 @@ addon build (see §1) before the admin Addon Modules entry can change.
 
 ## Integrity of original protected files
 
-The baseline `docs/independent-rebuild/original-file-manifest.sha256` was not
-changed in this pass — no manifest-listed file was edited. Branding-only
-exceptions to that baseline (legal copy, footer, logo assets, editable tour
-labels) are listed in `docs/independent-rebuild/rebrand-overrides.list` and
-verified by `docs/independent-rebuild/rebrand-overrides.sha256`. The
-release-candidate checker excludes only those explicitly listed paths from the
-original-baseline comparison and validates their new hashes separately. No
-encoded PHP or business logic is exempted.
+The baseline `docs/independent-rebuild/original-file-manifest.sha256` is
+**strict and total**: `scripts/release-candidate-check.sh` runs
+`sha256sum --check --strict --quiet` over all 2269 listed paths and exempts
+none of them, so editing any vendor-derived file — legal copy, footer, logo
+asset, tour label or encoded PHP — fails the release candidate. Verified green
+on 2026-10-02.
+
+Two corrections to what this section previously claimed:
+
+- There is no `rebrand-overrides.list` / `.sha256` in the tree and the checker
+  has never had exclusion logic. The approved branding changes to legal copy,
+  theme logo assets and the editable tour labels were folded into the baseline
+  by re-cutting it, which the manifest header dates and explains (generated
+  2026-09-27; regenerated 2026-09-28 for the legacy rebrand; regenerated
+  2026-10-01 after the vendor theme-helper addon was retired). The manifest
+  therefore records the *current, rebranded* state of the vendor-derived tree,
+  not its pre-rebrand state.
+- Changing a vendor-derived file from here on is a deliberate act, not an
+  exception entry: re-cut the baseline (regenerate the affected hashes), date
+  and explain the reason in the manifest header, and record it here. A file
+  that must differ per deployment belongs outside the baseline — in a new
+  first-party path such as `templates/cloudhost247/` or
+  `modules/addons/cloudhost247_*`.
+
+One consequence worth stating plainly: seven vendor files are baseline-locked
+**empty** (`templates/cloudhost247_legacy/{pwreset,creditcard,clientareacreditcard}.tpl`,
+`css/overrides/override.css{,.new}`, `js/overrides/override.js{,.new}`), so
+they cannot be "completed" by writing content into them without a re-cut.
+`docs/UNFINISHED-MODULES.md` rows C7-C11 record why each one stays empty.
 
 ## Database / deployment status
 
