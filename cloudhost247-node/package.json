@@ -33,6 +33,7 @@
     "catalog:import": "tsx scripts/import-catalog.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-cloudwatch": "3.1144.0",
     "@aws-sdk/client-ec2": "3.1144.0",
     "@aws-sdk/client-route-53": "^3.1144.0",
     "@fastify/cors": "^11.3.0",

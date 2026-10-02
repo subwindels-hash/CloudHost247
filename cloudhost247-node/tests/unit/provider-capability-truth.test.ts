@@ -57,7 +57,7 @@ function contaboAdapter() {
 
 describe('adapter profiles tell the truth about their capabilities', () => {
   it.each([
-    ['aws', { reinstall: false, metrics: false, rescue: false }],
+    ['aws', { reinstall: false, rescue: false }],
     ['contabo', { resize: false, console: false, metrics: false }],
   ] as const)('%s advertises the capabilities it actually refuses', (kind, expected) => {
     const capabilities = ADAPTER_PROFILES[kind].capabilities as unknown as Record<string, boolean>;
@@ -67,10 +67,11 @@ describe('adapter profiles tell the truth about their capabilities', () => {
   });
 
   it('refuses every capability it does not advertise, without calling the provider', async () => {
+    // AWS metrics is NOT asserted here any more: getServerMetrics now reads CloudWatch
+    // (GetMetricStatistics, AWS/EC2) and is pinned by tests/unit/aws-adapter.test.ts instead.
     const { instance, send } = awsAdapter();
     await expect(instance.enableRescue('i-1', { architecture: 'x86_64' })).rejects.toMatchObject({ code: 'UNSUPPORTED_OPERATION', retryable: false });
     await expect(instance.disableRescue('i-1')).rejects.toMatchObject({ code: 'UNSUPPORTED_OPERATION', retryable: false });
-    await expect(instance.getServerMetrics('i-1')).rejects.toMatchObject({ code: 'UNSUPPORTED_OPERATION', retryable: false });
     expect(send).not.toHaveBeenCalled();
   });
 

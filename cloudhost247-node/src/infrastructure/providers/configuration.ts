@@ -101,8 +101,8 @@ export const ADAPTER_PROFILES: Record<AdapterKind, AdapterProfile> = {
       { suffix: '_REGION', description: 'Default EC2 region', required: true, fallback: 'AWS_REGION' },
     ],
     planMetadata: [{ key: 'providerServerType', description: 'EC2 instance type', required: true }, ...RESOURCE_METADATA],
-    capabilities: { reinstall: false, snapshot: true, resize: true, console: true, metrics: false, rescue: false },
-    notes: 'Native EC2 adapter uses the AWS SDK Signature Version 4 client. Reinstall (replacement instance) and root-volume restore (snapshot onto the existing root device) are implemented but stay disabled until the deployment sets AWS_ALLOW_ROOT_VOLUME_REPLACEMENT=true; the previous instance is stopped, never terminated, and the detached root volume is kept. CloudWatch metrics require separately scoped permissions.'
+    capabilities: { reinstall: false, snapshot: true, resize: true, console: true, metrics: true, rescue: false },
+    notes: 'Native EC2 adapter uses the AWS SDK Signature Version 4 client. Reinstall (replacement instance) and root-volume restore (snapshot onto the existing root device) are implemented but stay disabled until the deployment sets AWS_ALLOW_ROOT_VOLUME_REPLACEMENT=true; the previous instance is stopped, never terminated, and the detached root volume is kept. CloudWatch metrics require separately scoped permissions. Metrics come from CloudWatch GetMetricStatistics (namespace AWS/EC2, dimension InstanceId, 300s period, basic monitoring); a metric with no datapoints is reported in the `missing` list rather than zero-filled.'
   },
   contabo: {
     kind: 'contabo',
