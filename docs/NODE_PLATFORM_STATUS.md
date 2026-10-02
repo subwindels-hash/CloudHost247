@@ -1285,3 +1285,36 @@ sub-phase before the next one begins.
   ledger above, the quarantined set still names exactly those versions with reasons,
   `migrate plan` executes nothing and matches `migrate up`'s decisions, and non-production
   environments are unaffected.
+
+## C1–C11 — the zero-byte stubs, resolved without inventing anything
+
+- **Source/local verification:** PASSED on branch `arena/01a0f9c1-cloudhost247`.
+  - **Nothing was authored, deleted or renamed by this unit.** It establishes, mechanically, what the
+    empty files are — and pins that so a future reader cannot mistake them for missing work.
+- **The seven `cloudhost247_legacy` files are empty in the *accepted original package*.** The
+  manifest `docs/independent-rebuild/original-file-manifest.sha256` records
+  `clientareacreditcard.tpl`, `creditcard.tpl`, `pwreset.tpl`, `css/overrides/override.css`(+`.new`)
+  and `js/overrides/override.js`(+`.new`) with the SHA-256 of an empty file
+  (`e3b0c442…b855`) — and `scripts/release-candidate-check.sh` verifies that manifest with
+  `sha256sum --check --strict` (2269 files, all OK on this branch). Editing them would break the
+  accepted-package check and would fabricate content the vendor never shipped.
+- **They are superseded names, not missing pages.** The three empty templates are WHMCS 6/7-era
+  names: card management is served by `account-paymentmethods-manage.tpl` (27 KB) with `3dsecure.tpl`,
+  and the password reset flow by `password-reset-email-prompt.tpl`,
+  `password-reset-security-prompt.tpl`, `password-reset-change-prompt.tpl` and
+  `pwresetvalidation.tpl` — all present, all non-empty, in the same theme. The two override hooks are
+  *loaded* (`includes/head.tpl` links `override.css`, `footer.tpl` loads `override.js`), and an empty
+  override hook is the intended no-overrides state: a valid, empty stylesheet/script, not a broken
+  page.
+- **The six `Smtphosting` files are third-party packaging.** That module is ModulesGarden vendor code
+  (`Loader.php` loads `vendor/autoload.php`; `vendor/` is present) and sits in the audit's
+  "never independently built" list. None of the six files appears in the original-site manifest, and
+  the Smtphosting module's own packaging — an empty seed `data.sql`, empty template slots — is not
+  ours to author. No content is invented for a module this rebuild does not own.
+- **The one stub that *was* ours is gone:** `frontend/src/components/Placeholder.tsx` (C12) was a
+  dead Phase-1 scaffold with no importer and was removed earlier.
+- **Pinned by test:** `tests/security/test_security.py::test_zero_byte_stubs_are_original_or_vendor_packaging`
+  (every manifest-recorded empty file is still empty and still in the manifest; every Smtphosting
+  stub is empty, vendor-owned and absent from the manifest) and
+  `…::test_empty_legacy_theme_names_are_superseded_not_missing_pages` (the live counterparts exist
+  and are non-empty; the override hooks are the ones the theme loads).

@@ -95,6 +95,33 @@ class RebuildSecurityReview(unittest.TestCase):
     if "['contactuscompanyname']" in line:
      matched+=1;self.assertIn('CloudHost247 Isc.',line,str(p));self.assertNotRegex(line,r'(?i)\b(pvt|inc)\b',str(p))
   self.assertEqual(matched,27)
+ def test_zero_byte_stubs_are_original_or_vendor_packaging(self):
+  # C1-C11 in docs/UNFINISHED-MODULES.md. Emptiness is never silently "fixed" by inventing content:
+  # the theme files are recorded empty in the accepted original manifest, the Smtphosting files are
+  # vendor packaging outside that manifest, and neither set is a rebuild omission.
+  empty = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
+  manifest = (ROOT / 'docs/independent-rebuild/original-file-manifest.sha256').read_text()
+  recorded_empty = {line.split('  ', 1)[1] for line in manifest.splitlines() if line.startswith(empty + '  ')}
+  original = ['templates/cloudhost247_legacy/clientareacreditcard.tpl', 'templates/cloudhost247_legacy/creditcard.tpl', 'templates/cloudhost247_legacy/pwreset.tpl', 'templates/cloudhost247_legacy/css/overrides/override.css', 'templates/cloudhost247_legacy/css/overrides/override.css.new', 'templates/cloudhost247_legacy/js/overrides/override.js', 'templates/cloudhost247_legacy/js/overrides/override.js.new']
+  for rel in original:
+   self.assertIn(rel, recorded_empty, rel)
+   self.assertEqual((ROOT / rel).stat().st_size, 0, rel)
+  vendor = ROOT / 'modules/servers/Smtphosting'
+  for rel in ('App/Config/di/services.yml', 'Core/Database/data.sql', 'Packages/Provisioning/Database/data.sql', 'templates/admin/pages/home/home.tpl', 'templates/assets/tpl/EasyDCIM/home.tpl', 'templates/client/default/pages/home/home.tpl'):
+   self.assertEqual((vendor / rel).stat().st_size, 0, rel)
+   self.assertNotIn('modules/servers/Smtphosting/' + rel, recorded_empty, rel)
+  # The module really is third-party code (never independently built), not our own scaffolding.
+  self.assertIn('ModulesGarden', (vendor / 'Loader.php').read_text())
+  self.assertTrue((vendor / 'vendor').is_dir())
+  self.assertFalse((vendor / 'App/Config/di/services.yml').read_text().strip())
+ def test_empty_legacy_theme_names_are_superseded_not_missing_pages(self):
+  # The empty legacy template names must have a live, non-empty counterpart in the same theme, and
+  # the empty override hooks must be no-ops that the theme actually loads.
+  theme = ROOT / 'templates/cloudhost247_legacy'
+  for rel in ('account-paymentmethods-manage.tpl', 'password-reset-email-prompt.tpl', 'password-reset-security-prompt.tpl', 'password-reset-change-prompt.tpl', 'pwresetvalidation.tpl'):
+   self.assertGreater((theme / rel).stat().st_size, 0, rel)
+  self.assertIn('css/overrides/override.css', (theme / 'includes/head.tpl').read_text())
+  self.assertIn('js/overrides/override.js', (theme / 'footer.tpl').read_text())
  def test_release_candidate_check_is_complete(self):
   s=(ROOT/'scripts/release-candidate-check.sh').read_text()
   for marker in ('php -l','tests/foundation/run.php','tests/cloudhost247_email/run.php','unittest','validate-migrations.py','branding-audit.py','original-file-manifest.sha256','sha256sum --check','core.whitespace=cr-at-eol diff --check'):self.assertIn(marker,s)

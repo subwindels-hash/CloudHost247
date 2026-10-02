@@ -55,17 +55,17 @@ zero-byte/placeholder files, and modules documented as vendor-only, gated, super
 
 | # | File | Size | Note |
 |---|---|---|---|
-| C1 | `modules/servers/Smtphosting/App/Config/di/services.yml` | 0 B | placeholder |
-| C2 | `modules/servers/Smtphosting/Core/Database/data.sql` | 0 B | placeholder |
-| C3 | `modules/servers/Smtphosting/Packages/Provisioning/Database/data.sql` | 0 B | placeholder |
-| C4 | `modules/servers/Smtphosting/templates/admin/pages/home/home.tpl` | 0 B | placeholder |
-| C5 | `modules/servers/Smtphosting/templates/assets/tpl/EasyDCIM/home.tpl` | 0 B | placeholder |
-| C6 | `modules/servers/Smtphosting/templates/client/default/pages/home/home.tpl` | 0 B | placeholder |
-| C7 | `templates/cloudhost247_legacy/clientareacreditcard.tpl` | 0 B | placeholder theme page |
-| C8 | `templates/cloudhost247_legacy/creditcard.tpl` | 0 B | placeholder theme page |
-| C9 | `templates/cloudhost247_legacy/pwreset.tpl` | 0 B | placeholder theme page |
-| C10 | `templates/cloudhost247_legacy/css/overrides/override.css` / `.css.new` | 0 B | override hooks never filled in |
-| C11 | `templates/cloudhost247_legacy/js/overrides/override.js` / `.js.new` | 0 B | override hooks never filled in |
+| C1 | `modules/servers/Smtphosting/App/Config/di/services.yml` | 0 B | placeholder. **CLOSED — vendor packaging, not a rebuild omission.** The file belongs to the third-party ModulesGarden Smtphosting module (`Loader.php` loads `vendor/autoload.php`; the module is listed as never independently built), and it is not part of the accepted original-site manifest. Vendor packaging is documented, never authored: no content is invented for a module the rebuild does not own. |
+| C2 | `modules/servers/Smtphosting/Core/Database/data.sql` | 0 B | placeholder. **CLOSED — vendor packaging, not a rebuild omission.** An empty seed file is the vendor's normal "no rows" packaging; not in the original manifest. |
+| C3 | `modules/servers/Smtphosting/Packages/Provisioning/Database/data.sql` | 0 B | placeholder. **CLOSED — vendor packaging, not a rebuild omission.** Same as C2 — empty seed data, vendor-owned, not in the original manifest. |
+| C4 | `modules/servers/Smtphosting/templates/admin/pages/home/home.tpl` | 0 B | placeholder. **CLOSED — vendor packaging, not a rebuild omission.** Vendor admin template packaging; not in the original manifest. |
+| C5 | `modules/servers/Smtphosting/templates/assets/tpl/EasyDCIM/home.tpl` | 0 B | placeholder. **CLOSED — vendor packaging, not a rebuild omission.** Vendor EasyDCIM template packaging; not in the original manifest. |
+| C6 | `modules/servers/Smtphosting/templates/client/default/pages/home/home.tpl` | 0 B | placeholder. **CLOSED — vendor packaging, not a rebuild omission.** Vendor client template packaging; not in the original manifest. |
+| C7 | `templates/cloudhost247_legacy/clientareacreditcard.tpl` | 0 B | **CLOSED — original emptiness; superseded no-op.** Recorded **empty in the accepted original manifest** (`e3b0c44…b855`), so the emptiness is the delivered state, not a rebuild omission — and `scripts/release-candidate-check.sh` verifies that manifest with `sha256sum --check --strict`, so the file must stay byte-identical. It is a WHMCS 6/7-era template name; the live card-management page is `account-paymentmethods-manage.tpl` (27 KB) plus `3dsecure.tpl`. |
+| C8 | `templates/cloudhost247_legacy/creditcard.tpl` | 0 B | **CLOSED — original emptiness; superseded no-op.** Same as C7: empty in the original manifest, superseded by the payment-methods templates; no other theme in the tree carries a non-empty copy, so there is nothing to copy from without inventing WHMCS markup. |
+| C9 | `templates/cloudhost247_legacy/pwreset.tpl` | 0 B | **CLOSED — original emptiness; superseded no-op.** Empty in the original manifest; the imported reset flow uses `password-reset-email-prompt.tpl`, `password-reset-security-prompt.tpl`, `password-reset-change-prompt.tpl` and `pwresetvalidation.tpl`, all present and non-empty. |
+| C10 | `templates/cloudhost247_legacy/css/overrides/override.css` / `.css.new` | 0 B | **CLOSED — original emptiness; superseded no-op.** Both files are recorded empty in the original manifest, and `includes/head.tpl` links `css/overrides/override.css` — an empty override hook is the intended "no overrides" state (a valid, empty stylesheet), and `.css.new` is the vendor's unused backup copy. |
+| C11 | `templates/cloudhost247_legacy/js/overrides/override.js` / `.js.new` | 0 B | **CLOSED — original emptiness; superseded no-op.** Same as C10 for JavaScript: `footer.tpl` loads `js/overrides/override.js`, an empty script is a valid no-op, and `.js.new` is unreferenced. |
 | C12 | `cloudhost247-node/frontend/src/components/Placeholder.tsx` | — | Phase-1 "route is part of the routing foundation … feature will be implemented in a later phase" component; **no page imports it any more** — dead scaffold |
 | C13 | `cloudhost247-node/src/ai/knowledge.ts` | 204 lines | Deliberately a small curated knowledge base, not a general assistant: *"The operator can answer only when a matching entry exists; everything else is escalated."* (intentional scope boundary, listed for completeness) |
 
@@ -136,6 +136,11 @@ webhook pipeline (frozen) · migrations `0023`, `0024`, `0025`, `0041`
 `ovh_cart` · vendor crons `getServer.php` / `getIpStatus.php` / `priceSync.php` / `emailSend.php` ·
 `Smtphosting` · `cloudhost247_email` (inactive) · `smmaddon` + `smmprovisioning` (prototype)
 
-**Stubs / zero-byte:** 6 × `Smtphosting` placeholder files · `clientareacreditcard.tpl` ·
-`creditcard.tpl` · `pwreset.tpl` · `override.css`(+`.new`) · `override.js`(+`.new`) ·
-`Placeholder.tsx` (dead)
+**Stubs / zero-byte (all resolved — none invented):** 6 × `Smtphosting` placeholder files
+(vendor packaging, outside the original manifest) · `clientareacreditcard.tpl` · `creditcard.tpl` ·
+`pwreset.tpl` (empty in the accepted original manifest; superseded by the modern payment-method and
+password-reset templates, which are present and non-empty) · `override.css`(+`.new`) ·
+`override.js`(+`.new`) (empty override hooks that the theme loads — the intended no-overrides state) ·
+`Placeholder.tsx` (ours, dead → removed under C12). Pinned by
+`tests/security/test_security.py::test_zero_byte_stubs_are_original_or_vendor_packaging` and
+`…::test_empty_legacy_theme_names_are_superseded_not_missing_pages`.
