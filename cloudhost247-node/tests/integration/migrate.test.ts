@@ -4,7 +4,7 @@ import path from 'node:path';
 import { PGlite } from '@electric-sql/pglite';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { PgliteClient } from '../../database/db-client';
-import { getAppliedMigrations, listMigrationFiles, migrateUp, status, verify } from '../../database/migrate';
+import { getAppliedMigrations, listMigrationFiles, QUARANTINED_MIGRATIONS, migrateUp, status, verify } from '../../database/migrate';
 
 /**
  * Runs the *real* migration SQL files against @electric-sql/pglite — a WASM-compiled, real
@@ -223,9 +223,14 @@ describe('migration runner against the real database/migrations SQL files', () =
     expect(applied).toEqual([]);
   });
 
-  it('applies in production once explicitly confirmed', async () => {
-    const result = await migrateUp(client, { isProduction: true, confirmedForProduction: true });
+  it('applies in production once explicitly confirmed and the quarantined artifacts are authorized', async () => {
+    const result = await migrateUp(client, {
+      isProduction: true,
+      confirmedForProduction: true,
+      authorizedQuarantined: Object.keys(QUARANTINED_MIGRATIONS),
+    });
     expect(result.applied.length).toBe(EXPECTED_MIGRATIONS.length);
+    expect(result.quarantined).toBeUndefined();
   });
 
   it('status reports pending migrations before running and applied after', async () => {

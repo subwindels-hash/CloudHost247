@@ -27,6 +27,16 @@ sub-phase before the next one begins.
 ### Standing restrictions until the user explicitly lifts them
 
 - **Migrations 0023, 0024, 0025, and 0041**: Prepared and tested migration artifacts only. **NOT authorized for production execution**; do not run against any production database until separately authorized.
+  - **Enforced in code, not only in this document.** `cloudhost247-node/database/migrate.ts` holds
+    those four artifacts in `QUARANTINED_MIGRATIONS`; a production `migrate up` never executes them.
+    Standalone artifacts are skipped and reported, and if a pending migration depends on a skipped
+    artifact the entire run refuses **before any DDL**, so no production database is upgraded past
+    the frozen set or left half-migrated. `migrate status` marks them, and the only way to apply one
+    is an explicit per-run authorization (`AUTHORIZED_MIGRATIONS=<versions>`). This does **not**
+    authorize anything: 0023, 0024, 0025, and 0041 remain NOT executed in production.
+  - Practical consequence: because 0041 creates the `operating_systems`/`infrastructure_providers`
+    tables that 0042+ build on, a production database cannot advance beyond 0040 until 0041 is
+    separately authorized — the run refuses rather than failing midway.
 - **Production Safety**: Zero production financial records modified. Zero deployment executed.
 - **PR #12 (`subwindels-hash/CloudHost247#12`)**: Remains **OPEN and UNMERGED**.
 - **Historical Integrity**: Current state is preserved: no history rewrite, no force-push, no whole-PR revert.
@@ -1167,3 +1177,31 @@ sub-phase before the next one begins.
   never substituted by the mock, that every declared kind resolves to its own adapter, and that a
   provider described as undeclared is reported not-ready with all capabilities false and the reason
   "adapter implementation" missing.
+
+## A9 — external payment webhook pipeline (Phase 5D): verified, and the freeze is now enforced
+
+- **Source/local verification:** PASSED on branch `arena/01a0f9c1-cloudhost247`.
+  - **No new migration.** Migration 0024 remains prepared-only and NOT executed in production.
+- **The pipeline was re-verified as real and registered.** `src/routes/webhooks.ts` is wired into
+  `src/app.ts` (raw-body capture via `addContentTypeParser('application/json', { parseAs: 'buffer' })`,
+  both `POST /api/v1/webhooks/:gateway` and `POST /api/v1/webhooks/payment/:provider`). The service
+  verifies the gateway signature against the raw body **before** parsing JSON or touching the
+  database, records a SHA-256 payload hash, takes a 60-second lease with expired-lease takeover, and
+  applies payment/invoice/order/ledger changes in one transaction. Handlers exist for
+  `sandbox`/`stripe`/`paypal`/`paystack`; the integration suites pass: `tests/integration/webhooks-api.test.ts`,
+  `payments-api.test.ts`, `payments-schema.test.ts` — **73 / 73 tests**.
+- **A frozen pipeline on a production host must fail closed, so that is now pinned.** Every webhook
+  gateway refuses a delivery when its signing secret is not configured — including PayPal with no
+  `PAYPAL_WEBHOOK_ID`, which refuses before any outbound certificate call.
+  `tests/unit/webhook-secret-fail-closed.test.ts` (4) pairs each rejection with a positive control
+  signed by the same secret, so a gateway that returned `false` unconditionally cannot pass.
+- **The freeze itself can no longer be reversed by a routine deploy.** See §Standing restrictions:
+  `database/migrate.ts` quarantines 0023/0024/0025/0041, so a production migration run cannot execute
+  the webhook ledger migration as a side effect of an unrelated release.
+  `tests/integration/migration-quarantine.test.ts` (8) pins the quarantined set, the doc-to-code list,
+  the fail-closed whole-run refusal, the standalone skip, the explicit authorization path, and that
+  `migrate status` marks them; `tests/integration/migrate.test.ts` was updated for the new production
+  semantics.
+- **Nothing about authorization changed.** `docs/PROPOSED_SCOPE_WEBHOOK_PIPELINE.md` keeps its
+  "NOT AUTHORIZED · NOT IMPLEMENTED · NOT DEPLOYED" stamp, migration 0024 remains prepared-only, PR #12
+  remains open and unmerged, and no production database, credential, or financial record was touched.
