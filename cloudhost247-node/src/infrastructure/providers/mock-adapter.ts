@@ -14,7 +14,7 @@
  */
 import { randomUUID } from 'node:crypto';
 import type { InfrastructureProviderRow, ServerOsImageRow } from '../../db/infrastructure-providers';
-import { idempotentResourceName, unsupportedRescue } from './common';
+import { idempotentResourceName } from './common';
 import {
   ProviderError,
   type CreateProviderServerInput,
@@ -23,13 +23,15 @@ import {
   type ProviderImage,
   type ProviderServer,
   type ReinstallProviderServerInput,
+  type RescueRequest,
+  type RescueSession,
 } from './types';
 
 interface MockServerState {
   id: string;
   name: string;
   idempotencyKey: string;
-  status: 'running' | 'stopped';
+  status: 'running' | 'stopped' | 'rescue';
   imageId: string;
   hostname: string;
   createdAt: number;
@@ -167,8 +169,26 @@ export class MockProviderAdapter implements InfrastructureProviderAdapter {
     return this.toServer(state);
   }
 
-  async enableRescue(): Promise<never> { return unsupportedRescue('mock'); }
-  async disableRescue(): Promise<never> { return unsupportedRescue('mock'); }
+  /**
+   * Simulated rescue: the state machine moves to `rescue` so the ordering → queue → worker flow can
+   * exercise the whole path in development. The returned value is labelled mock and must never be
+   * mistaken for a real credential.
+   */
+  async enableRescue(providerServerId: string, _input: RescueRequest): Promise<RescueSession> {
+    const state = this.state(providerServerId);
+    state.status = 'rescue';
+    return {
+      type: 'mock-rescue',
+      username: 'root',
+      password: `mock-rescue-${state.id.slice(-8)}`,
+      rebooted: true,
+      notes: 'Simulated rescue mode. No provider was contacted.',
+    };
+  }
+
+  async disableRescue(providerServerId: string): Promise<void> {
+    this.state(providerServerId).status = 'running';
+  }
 
   async getConsole(providerServerId: string): Promise<Record<string, unknown>> {
     this.state(providerServerId);

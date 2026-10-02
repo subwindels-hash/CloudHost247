@@ -57,7 +57,7 @@ function contaboAdapter() {
 describe('adapter profiles tell the truth about their capabilities', () => {
   it.each([
     ['aws', { reinstall: false, metrics: false, rescue: false }],
-    ['contabo', { resize: false, console: false, metrics: false, rescue: false }],
+    ['contabo', { resize: false, console: false, metrics: false }],
   ] as const)('%s advertises the capabilities it actually refuses', (kind, expected) => {
     const capabilities = ADAPTER_PROFILES[kind].capabilities as unknown as Record<string, boolean>;
     for (const [capability, value] of Object.entries(expected)) {
@@ -73,15 +73,33 @@ describe('adapter profiles tell the truth about their capabilities', () => {
     expect(send).not.toHaveBeenCalled();
   });
 
-  it('refuses Contabo resize, console, metrics and rescue, without calling the provider', async () => {
+  it('refuses Contabo resize, console and metrics, without calling the provider', async () => {
     const { instance, fetchMock } = contaboAdapter();
     await expect(instance.resizeServer('instance-1', { providerServerType: 'V153' })).rejects.toMatchObject({ code: 'UNSUPPORTED_OPERATION', retryable: false });
     await expect(instance.getConsole('instance-1')).rejects.toMatchObject({ code: 'UNSUPPORTED_OPERATION', retryable: false });
     await expect(instance.getServerMetrics('instance-1')).rejects.toMatchObject({ code: 'UNSUPPORTED_OPERATION', retryable: false });
-    await expect(instance.enableRescue('instance-1', { architecture: 'x86_64' })).rejects.toMatchObject({ code: 'UNSUPPORTED_OPERATION', retryable: false });
-    await expect(instance.disableRescue('instance-1')).rejects.toMatchObject({ code: 'UNSUPPORTED_OPERATION', retryable: false });
     // Not even the OAuth exchange: the refusal happens before any request.
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('keeps every adapter that declares no rescue refusing before it reaches the provider', () => {
+    // Killing the transport proves the refusal is decided locally. Each of these adapters is
+    // expected to fail before it would ever build a request; an implementation that reached the
+    // network would fail this test instead of silently pretending.
+    const restoring = vi.fn(async () => { throw new Error('network disabled in this test'); });
+    vi.stubGlobal('fetch', restoring);
+    const rows: Array<[string, { name: string; adapter: string; api_base_url: string | null }]> = [
+      ['aws', { name: 'AWS', adapter: 'aws', api_base_url: null }],
+      ['digitalocean', { name: 'DigitalOcean', adapter: 'digitalocean', api_base_url: 'https://api.digitalocean.test/v2' }],
+      ['vultr', { name: 'Vultr', adapter: 'vultr', api_base_url: 'https://api.vultr.test/v2' }],
+      ['proxmox', { name: 'Proxmox', adapter: 'proxmox', api_base_url: 'https://proxmox.test:8006' }],
+      ['virtualizor', { name: 'Virtualizor', adapter: 'virtualizor', api_base_url: 'https://virtualizor.test:4085' }],
+      ['solusvm', { name: 'SolusVM', adapter: 'solusvm', api_base_url: 'https://solusvm.test:5656' }],
+      ['generic_http', { name: 'Bridge', adapter: 'generic_http', api_base_url: 'https://bridge.test' }],
+    ];
+    for (const [, row] of rows) {
+      expect(ADAPTER_PROFILES[row.adapter as keyof typeof ADAPTER_PROFILES].capabilities.rescue).toBe(false);
+    }
   });
 
   it('refuses the AWS replacement workflows until the deployment opts in', async () => {

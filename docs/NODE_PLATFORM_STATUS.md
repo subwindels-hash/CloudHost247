@@ -1038,6 +1038,38 @@ sub-phase before the next one begins.
   - **Customer UI:** a capability-gated "Boot into rescue" action plus a rescue panel that shows the credentials once, says plainly that CloudHost247 did not store them, and offers "Leave rescue mode". After a reload the panel states the credentials were shown once and are gone rather than pretending to still have them.
   - **Tests added:** `tests/integration/server-rescue.test.ts` (6) — capability refusal, ownership 404, a provider with no rescue API refusing without changing the server, the full Hetzner enter/leave request sequence, and an assertion that the generated password appears in neither `servers.metadata` nor `audit_logs`.
 
+### A6 — rescue extended to every provider whose API genuinely offers it
+
+- **Source/local verification:** full node unit suite 52 / 52 files (288 / 288 tests) and
+  `tests/integration/server-rescue.test.ts` (6 / 6) pass; backend TypeScript clean.
+- **OVH Public Cloud — implemented.** OVH's own CLI enters rescue with
+  `POST /cloud/project/{serviceName}/instance/{instanceId}/rescueMode` and the body
+  `{"rescue": true}` (plus an optional `imageId`), and exits with `{"rescue": false}`; the one-time
+  root password is served on the instance resource as `rescuePassword` while rescue is active. The
+  adapter posts the same body, reads the password from the instance, returns it in request scope and
+  stores it nowhere. The community-reported `400 "instance is in ACTIVE status"` is an OVH-side issue
+  with the endpoint, not a different API: the documented call is the one implemented.
+- **Contabo — implemented.** The published OpenAPI client (used by Contabo's own `cntb`) contains
+  `POST /v1/compute/instances/{instanceId}/actions/rescue` with a body of `rootPassword` (a
+  **secretId**), `sshKeys` (secretIds) or `userData`. Because the API never accepts a plaintext
+  password, the adapter reuses the template's SSH-key secrets when they exist and otherwise stores a
+  freshly generated password as a Contabo secret (`POST /v1/secrets`, type `password`, matching
+  Contabo's documented complexity rule) and passes that secret's id. Contabo has no unrescue action:
+  the next restart boots the installed OS, so `disableRescue` restarts the instance. A 2023 vendor
+  report of the rescue action returning success without acting is recorded here as a live-account
+  caveat, not hidden.
+- **Mock — implemented.** The development-only adapter moves its own state machine to `rescue` and
+  back, so the ordering → queue → worker → UI path can exercise rescue with no provider at all. It
+  still fails closed without `ALLOW_MOCK_PROVIDER=true` and never calls `fetch`.
+- **Still refused, with the reason recorded:** AWS (EC2 has no native rescue mode; the documented
+  path is a manual stop/detach/attach workflow, not a provider call), DigitalOcean, Vultr, Proxmox,
+  Virtualizor, SolusVM and the operator bridge (no rescue action in the API surface each adapter
+  implements). Their profiles stay `rescue: false` and `unsupportedRescue()` throws a non-retryable
+  `UNSUPPORTED_OPERATION` before any request, which
+  `tests/unit/provider-capability-truth.test.ts` and `tests/unit/provider-rescue.test.ts` pin.
+- **Capability matrix:** `rescue: true` now covers Hetzner, OpenStack, OVH, Contabo and mock; the
+  profile notes for OVH, Contabo and mock state the exact call each uses.
+
 ---
 
 ## Phase 7 (continued) — EC2 reinstall and root-volume restore, behind an explicit opt-in

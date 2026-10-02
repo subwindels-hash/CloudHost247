@@ -126,8 +126,8 @@ export const ADAPTER_PROFILES: Record<AdapterKind, AdapterProfile> = {
       { key: 'contaboLicense', description: 'Optional Contabo license code', required: false },
       ...RESOURCE_METADATA,
     ],
-    capabilities: { reinstall: true, snapshot: true, resize: false, console: false, metrics: false, rescue: false },
-    notes: 'Native Compute API with cached in-memory OAuth2 tokens, lifecycle actions, image validation, in-place reinstall and snapshots. The platform refuses scheduled Contabo cancellation as DELETE, because it is not immediate resource destruction.',
+    capabilities: { reinstall: true, snapshot: true, resize: false, console: false, metrics: false, rescue: true },
+    notes: 'Native Compute API with cached in-memory OAuth2 tokens, lifecycle actions, image validation, in-place reinstall and snapshots. Rescue posts /compute/instances/{id}/actions/rescue; because Contabo takes secret ids (not key material or plaintext passwords) the adapter reuses the template SSH-key secrets when present, otherwise it stores a freshly generated one-time password as a Contabo secret. Leaving rescue is Contabo\'s next restart. The platform refuses scheduled Contabo cancellation as DELETE, because it is not immediate resource destruction.',
   },
   ovh: {
     kind: 'ovh',
@@ -147,8 +147,8 @@ export const ADAPTER_PROFILES: Record<AdapterKind, AdapterProfile> = {
       { key: 'providerSshKeyId', description: 'Optional OVH SSH key id injected in addition to customer keys', required: false },
       ...RESOURCE_METADATA,
     ],
-    capabilities: { reinstall: true, snapshot: true, resize: true, console: true, metrics: true, rescue: false },
-    notes: 'Signed OVH v1 API against /cloud/project/{id}/instance. Instances are named from the job idempotency key and looked up before creation.',
+    capabilities: { reinstall: true, snapshot: true, resize: true, console: true, metrics: true, rescue: true },
+    notes: 'Signed OVH v1 API against /cloud/project/{id}/instance. Instances are named from the job idempotency key and looked up before creation. Rescue is the instance boot mode (POST .../rescueMode with rescue:true/false); the one-time root password is read from the instance resource as rescuePassword and is never persisted.',
   },
   proxmox: {
     kind: 'proxmox',
@@ -256,8 +256,8 @@ export const ADAPTER_PROFILES: Record<AdapterKind, AdapterProfile> = {
       { suffix: '_UNUSED', description: 'No credentials. Requires ALLOW_MOCK_PROVIDER=true and a non-production NODE_ENV.', required: false },
     ],
     planMetadata: RESOURCE_METADATA,
-    capabilities: { reinstall: true, snapshot: true, resize: true, console: false, metrics: false, rescue: false },
-    notes: 'Never selected automatically and disabled in production. Mock resources are labelled mock:true with mock- ids.',
+    capabilities: { reinstall: true, snapshot: true, resize: true, console: false, metrics: false, rescue: true },
+    notes: 'Never selected automatically and disabled in production. Mock resources are labelled mock:true with mock- ids. Rescue is simulated in the same state machine so the full request flow can be exercised without a provider.',
   },
 };
 

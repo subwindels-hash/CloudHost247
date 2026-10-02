@@ -85,6 +85,11 @@ export interface OvhInstance {
   flavorId?: string;
   imageId?: string;
   image?: { id?: string; name?: string; status?: string } | null;
+  /**
+   * Present on the instance resource while the instance is booted in rescue mode. It is a
+   * one-time credential and must never be stored, logged or audited.
+   */
+  rescuePassword?: string | null;
   ipAddresses?: Array<{ ip?: string; type?: string; version?: number }>;
 }
 
