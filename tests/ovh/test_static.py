@@ -39,8 +39,52 @@ class OvhSafetyTests(unittest.TestCase):
   p=(ADDON/'lib/Reconciliation/OrderDiscovery.php').read_text()
   self.assertIn('count($matches)!==1',p);self.assertIn('hash_equals',p);self.assertIn("'reconciliation_required'",p)
  def test_option_mapping_is_exact_and_confirmed(self):
+  # The exactness rule lives in the pure matcher and is proved by the run suite;
+  # here the wiring is asserted: confirmation is required, the rule is consulted,
+  # and the provenance flag is derived rather than trusted from the request.
   p=(ADDON/'lib/Catalog/ConfigurableOptionMapper.php').read_text()
-  self.assertIn('Explicit configurable-option mapping confirmation',p);self.assertIn('$allowed=false',p);self.assertIn('exact discovered match',p)
+  self.assertIn('Explicit configurable-option mapping confirmation',p)
+  self.assertIn('matcher->admits',p)
+  self.assertIn('exact discovered match',p)
+  self.assertIn('$verified = $whmcsSuboptionId',p)
+  self.assertIn('valueWasProven',p)
+  matcher=(ADDON/'lib/Catalog/DiscoveredOptionMatcher.php').read_text()
+  self.assertIn('$whmcsSuboptionId',matcher)
+  self.assertIn('unambiguous',matcher)
+  extractor=(ADDON/'lib/Normalization/OptionValueExtractor.php').read_text()
+  self.assertIn("'unverified'",extractor)
+
+ def test_discovery_and_specification_ui_is_read_only_and_explicit(self):
+  # The admin screen surfaces the directory, the prefill and the value-level
+  # mapping, and none of those paths writes without the confirmation checkbox.
+  ui=(ADDON/'cloudhost247_ovh.php').read_text()
+  self.assertIn("value=\"link_directory\"",ui)
+  self.assertIn("value=\"product_prefill\"",ui)
+  self.assertIn("value=\"intervention_reconcile\"",ui)
+  self.assertIn('Confirm link',ui)
+  self.assertIn('Replace existing binding',ui)
+  self.assertIn('not verified',ui)
+  controller=(ADDON/'lib/Services/AdminController.php').read_text()
+  self.assertIn("'link_directory'",controller)
+  self.assertIn("'intervention_reconcile'",controller)
+  self.assertIn("'product_prefill'",controller)
+  # Reads stay on operations.run; the reconciling write joins the apply set.
+  self.assertIn("in_array($op,array('price_apply','link_confirm','intervention_reconcile'",controller)
+  linker=(ADDON/'lib/Reconciliation/ExistingServiceLinker.php').read_text()
+  self.assertIn('Confirm the replacement explicitly to rebind it.',linker)
+  self.assertIn('service.relink',linker)
+  self.assertIn('service.reconcile',linker)
+  self.assertIn('intervention_required',linker)
+
+ def test_new_migrations_are_additive_and_registered(self):
+  addon=(ADDON/'cloudhost247_ovh.php').read_text()
+  self.assertIn('V170.php',addon);self.assertIn('V180.php',addon)
+  self.assertIn('OptionVerificationMigration',addon);self.assertIn('ProductSpecificationEvidenceMigration',addon)
+  for name in ('V170.php','V180.php'):
+   text=(ADDON/'migrations'/name).read_text()
+   self.assertIn('hasColumn',text)     # additive: the column is added only if absent
+   self.assertNotIn('dropColumn',text)
+   self.assertNotIn('dropTable',text)
  def test_capability_guards_cover_admin_mutations(self):
   for p in [ROOT/'modules/addons/cloudhost247_theme/lib/AdminController.php',ROOT/'modules/addons/cloudhost247_currency/lib/Services/AdminController.php',ADDON/'lib/Services/AdminController.php']:
    self.assertIn('requireCapability(',p.read_text(),str(p))
