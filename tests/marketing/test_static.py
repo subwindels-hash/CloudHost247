@@ -182,6 +182,19 @@ class MarketingStaticTests(unittest.TestCase):
         for capability in re.findall(r"requireCapability\('cloudhost247_marketing', '([a-z.]+)'\)", controller):
             self.assertTrue(capability.startswith("marketing."))
 
+    def test_the_failure_taxonomy_and_the_unsubscribe_ledger_are_honest(self):
+        # SESSION 12: the queue classifies a refusal from the provider code, so the
+        # transport must always produce one — including when no client exists.
+        transport = read(os.path.join(LIB, "Services", "SmtpTransport.php"))
+        self.assertIn("ResultCode::PROVIDER_UNAVAILABLE", transport)
+        self.assertIn("ResultCode::INVALID_CONFIGURATION", transport)
+        self.assertIn("'code' => $code", transport)
+        # A repeat unsubscribe request changes nothing, so it must not write a
+        # second ledger row: the reporting screen counts events, not clicks on a link.
+        tracking = read(os.path.join(LIB, "Services", "TrackingService.php"))
+        self.assertIn("$changed = !empty($result['changed']) || !empty($result['suppression_created']);", tracking)
+        self.assertIn("if (!empty($result['ok']) && $changed) {", tracking)
+
     def test_automation_delivers_through_the_queue_and_never_sends_directly(self):
         # SESSION 10: an automation fills the queue; it never grows its own
         # delivery path, never touches a WHMCS core table, and never mails.

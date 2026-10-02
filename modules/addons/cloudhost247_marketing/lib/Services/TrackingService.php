@@ -307,7 +307,11 @@ final class TrackingService
     {
         $email = (string) $queueRow->email;
         $result = $this->subscriptions->unsubscribe($email, $source, 'campaign unsubscribe link');
-        if (!empty($result['ok'])) {
+        // Only a call that changed something is an event. Mail clients, scanners
+        // and people double-click: a repeat unsubscribe request must not inflate
+        // the reporting the operator reads.
+        $changed = !empty($result['changed']) || !empty($result['suppression_created']);
+        if (!empty($result['ok']) && $changed) {
             $this->events->record(EventType::UNSUBSCRIBED, (int) $queueRow->campaign_id, (int) $queueRow->id, $queueRow->subscriber_id, array('source' => $source));
         }
         return $result;

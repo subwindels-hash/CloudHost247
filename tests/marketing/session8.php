@@ -249,9 +249,10 @@ return array(
     $events = new EventRepository();
     if ($events->countsFor((int) $delivery['campaign']->id, EventType::UNSUBSCRIBED) !== 1) { return false; }
 
-    // A second POST is idempotent: still one event, still one suppression.
+    // A second POST is idempotent: the address is already suppressed, so nothing
+    // changes and the ledger is not inflated by a repeat request (SESSION 12).
     $controller->handle(array('e' => 'unsubscribe', 'c' => $token), array('confirm' => '1'), 'POST');
-    return $events->countsFor((int) $delivery['campaign']->id, EventType::UNSUBSCRIBED) === 2
+    return $events->countsFor((int) $delivery['campaign']->id, EventType::UNSUBSCRIBED) === 1
         && in_array('subscriber.unsubscribed', ch247_marketing_audit_actions(), true);
 },
 

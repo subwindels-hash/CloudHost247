@@ -335,6 +335,11 @@ foreach (require __DIR__ . '/session11.php' as $name => $test) {
     $tests[$name] = $test;
 }
 
+foreach (require __DIR__ . '/session12.php' as $name => $test) {
+    if (isset($tests[$name])) { throw new RuntimeException('Duplicate marketing test name: ' . $name); }
+    $tests[$name] = $test;
+}
+
 // ------------------------------------------------------------------------- run
 
 $failed = 0;

@@ -1,6 +1,8 @@
 <?php
 namespace CloudHost247\Marketing\Services;
 
+use CloudHost247\Integrations\Support\ResultCode;
+
 /**
  * The cPanel SMTP delivery provider (SESSION 6).
  *
@@ -77,29 +79,44 @@ final class SmtpTransport implements MessageTransport, SenderPolicy
     {
         $resolution = $this->resolve();
         if ($resolution['client'] === null) {
-            return array('ok' => false, 'error' => $resolution['reason'], 'provider_message_id' => '');
+            // `code` is part of the transport contract: the queue classifies a
+            // refusal (hard bounce, stop-the-pass misconfiguration, retryable
+            // failure) from it, never from the message text.
+            return array('ok' => false, 'code' => ResultCode::PROVIDER_UNAVAILABLE,
+                'error' => $resolution['reason'], 'detail' => $resolution['reason'],
+                'latency_ms' => 0, 'provider_message_id' => '');
         }
 
         $policy = $this->senderPolicy(isset($message['from_email']) ? $message['from_email'] : '');
         if (!$policy['ok']) {
-            return array('ok' => false, 'error' => $policy['detail'], 'provider_message_id' => '');
+            return array('ok' => false, 'code' => ResultCode::INVALID_CONFIGURATION,
+                'error' => $policy['detail'], 'detail' => $policy['detail'],
+                'latency_ms' => 0, 'provider_message_id' => '');
         }
 
         $result = $resolution['client']->send($message);
         if (!empty($result['ok'])) {
             return array(
                 'ok' => true,
+                'code' => isset($result['code']) ? (string) $result['code'] : ResultCode::CONNECTED,
                 'error' => '',
+                'detail' => isset($result['detail']) ? (string) $result['detail'] : '',
+                'latency_ms' => isset($result['latency_ms']) ? (int) $result['latency_ms'] : 0,
                 'provider_message_id' => isset($result['provider_message_id']) ? (string) $result['provider_message_id'] : '',
             );
         }
 
+        $code = isset($result['code']) ? (string) $result['code'] : ResultCode::PROVIDER_UNAVAILABLE;
         $detail = isset($result['detail']) ? (string) $result['detail'] : 'The relay refused the message.';
-        call_user_func($this->reporter,
-            isset($result['code']) ? (string) $result['code'] : 'provider_unavailable',
-            $detail
+        call_user_func($this->reporter, $code, $detail);
+        return array(
+            'ok' => false,
+            'code' => $code,
+            'error' => $detail,
+            'detail' => $detail,
+            'latency_ms' => isset($result['latency_ms']) ? (int) $result['latency_ms'] : 0,
+            'provider_message_id' => '',
         );
-        return array('ok' => false, 'error' => $detail, 'provider_message_id' => '');
     }
 
     /**
