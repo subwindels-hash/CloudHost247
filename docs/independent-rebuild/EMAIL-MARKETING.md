@@ -137,7 +137,7 @@ Delivery chain (built in SESSION 6/7):
   seeding, settings persistence/audit/capability denial, dashboard honesty,
   catalog registration, enum closures, validator) plus the SESSION 2 file below;
   runs under PHP 7.4 and 8.2 in CI.
-* `tests/marketing/session9.php` — SESSION 9 behavior suite (9 cases):
+* `tests/marketing/session9.php` — SESSION 9 behavior suite (10 cases):
   ledger-only summaries, rates that refuse a zero denominator, the click map
   (including clicks pointing at a link that no longer exists), bounded recipient
   activity, timeline bucketing with quiet days, the rolling deployment window
