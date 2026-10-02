@@ -32,7 +32,7 @@ function cloudhost247_marketing_config()
     return array(
         'name' => 'CloudHost247 Marketing',
         'description' => 'Native email marketing: campaigns, subscribers, lists, segments, templates, visual builder, queue-based cPanel SMTP delivery, tracking, suppression and automation.',
-        'version' => '1.2.0',
+        'version' => '1.3.0',
         'author' => 'CloudHost247',
         'language' => 'english',
         'fields' => array(),

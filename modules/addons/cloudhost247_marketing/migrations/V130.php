@@ -29,7 +29,7 @@ use WHMCS\Database\Capsule;
  */
 final class AutomationMigration implements Migration
 {
-    public function version() { return '1.2.0'; }
+    public function version() { return '1.3.0'; }
     public function description() { return 'Add automation tables, campaign origin and queue run linkage'; }
 
     public function up()

@@ -130,7 +130,7 @@ $tests['Activation installs all module tables idempotently and seeds settings wi
 $tests['Module registration exposes the required WHMCS hooks'] = function () {
     $config = cloudhost247_marketing_config();
     return $config['name'] === 'CloudHost247 Marketing'
-        && $config['version'] === '1.2.0'
+        && $config['version'] === '1.3.0'
         && function_exists('cloudhost247_marketing_activate')
         && function_exists('cloudhost247_marketing_deactivate')
         && function_exists('cloudhost247_marketing_output');

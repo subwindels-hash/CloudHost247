@@ -113,7 +113,7 @@ class MarketingStaticTests(unittest.TestCase):
         # The validator must know every migration this module ships; a new
         # migration that is not registered there fails the release candidate.
         validator = read(os.path.join(ROOT, "scripts", "validate-migrations.py"))
-        self.assertIn("'cloudhost247_marketing':['1.0.0','1.1.0','1.2.0']", validator)
+        self.assertIn("'cloudhost247_marketing':['1.0.0','1.1.0','1.2.0','1.3.0']", validator)
 
     # ---------------------------------------------------------- security
     def test_no_dangerous_calls_and_no_core_table_writes_anywhere(self):

@@ -1,6 +1,6 @@
 # CloudHost247 Email Marketing Platform
 
-Module: `modules/addons/cloudhost247_marketing` (version 1.2.0, in build — SESSIONS 1–12 complete).
+Module: `modules/addons/cloudhost247_marketing` (version 1.3.0, in build — SESSIONS 1–12 complete).
 Native WHMCS addon — no separate application, no separate frontend, no
 duplicate SMTP/credential infrastructure. Delivery credentials live
 exclusively in the central CloudHost247 API & Integrations vault under the
@@ -116,6 +116,17 @@ Delivery chain (built in SESSION 6/7):
 | `…_imports` | import audit records |
 | `…_links` | registered campaign links for click tracking (unique campaign+url_hash) |
 | `…_settings` | operational settings (throttle, retries, toggles, identity, footer) |
+
+### Migration ladder correction (branch `arena/01a0f9c1-cloudhost247`)
+
+The automations migration (`migrations/V130.php`, `AutomationMigration`) declared
+version `1.2.0` — the same version the templates/status migration already used.
+The runner keys applied migrations on `(module, version)`, so on any installation
+that had already applied `1.2.0` the automations migration would be skipped for
+ever (and on a fresh activation the second insert would collide with the unique
+key inside the transaction). It now declares `1.3.0` and the module version follows
+to `1.3.0`. `scripts/validate-migrations.py` and the static suite pin the new
+ladder, and the OVH expectations were updated for `1.7.0`/`1.8.0`.
 
 ## Session log
 
