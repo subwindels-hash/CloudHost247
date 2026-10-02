@@ -86,11 +86,36 @@ const paginationSchema = z.object({
   offset: z.coerce.number().int().min(0).optional(),
 });
 
-export async function registerAiControlPlaneRoutes(instance: FastifyInstance, env: Env, extPool?: Queryable): Promise<void> {
+export async function registerAiControlPlaneRoutes(parent: FastifyInstance, env: Env, extPool?: Queryable): Promise<void> {
+  // The AI routes live in their own child context so the lazy-seeding hook below applies only to
+  // them. Security hooks (helmet/CORS/rate-limit) registered on the parent still apply here.
+  await parent.register(async (instance) => registerAiControlPlaneRoutesInContext(instance, env, extPool));
+}
+
+async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, env: Env, extPool?: Queryable): Promise<void> {
   const db = () => extPool ?? getPool(env);
-  // Registry seeding at boot keeps agents/workflows/models present before the first request and
-  // is idempotent (catalog key: slug).
-  await seedAgentRegistry(db());
+
+  // Registry seeding is idempotent (catalog key: slug) but MUST NOT run at boot: awaiting a DB
+  // round-trip during plugin registration made the whole app (including /health) fail to start
+  // whenever the database was unreachable or migration 0066 was not yet applied — a Passenger
+  // crash-loop on cPanel, and every buildApp()-based unit test failing with ECONNREFUSED.
+  // Instead seed once, on the first AI request; a failed attempt is retried on the next request.
+  let seeded: Promise<void> | null = null;
+  const ensureSeeded = (): Promise<void> => {
+    if (!seeded) {
+      seeded = seedAgentRegistry(db()).then(
+        () => undefined,
+        (err: unknown) => {
+          seeded = null;
+          throw err;
+        }
+      );
+    }
+    return seeded;
+  };
+  instance.addHook('preHandler', async () => {
+    await ensureSeeded();
+  });
 
   // ==============================================================================================
   // Overview + observability

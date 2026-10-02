@@ -10,6 +10,7 @@ import { hashPassword } from '../../src/lib/password';
 import { AGENT_CATALOG } from '../../src/ai-os/registry/agent-catalog';
 import { resolveModelForAgent, ModelResolutionError } from '../../src/ai-os/models/router';
 import { getAgentBySlug } from '../../src/ai-os/repositories/registry-repo';
+import { seedAgentRegistry } from '../../src/ai-os/registry/seed';
 import { gatedToolCall } from '../../src/ai-os/runtime/executor';
 import type { RunHandles } from '../../src/ai-os/runtime/executor';
 import { createTask, insertRun } from '../../src/ai-os/repositories/tasks-repo';
@@ -112,6 +113,11 @@ describe('AI Control Plane', () => {
   it('seeds the full workforce registry from the catalog (DB ⇄ catalog agreement)', async () => {
     const app = buildTestApp();
     await app.ready();
+    // Booting must NOT touch the database (a DB outage or an unapplied 0066 must not stop the
+    // whole app from starting) — the registry is seeded lazily by the first AI request.
+    const before = await db.query<{ n: number }>(`SELECT COUNT(*)::int AS n FROM ai_agents`);
+    expect(before.rows[0]?.n).toBe(0);
+    await app.inject({ method: 'GET', url: '/api/v1/admin/ai/overview' });
     const { rows: agents } = await db.query<{ slug: string; board_seat: string | null }>(`SELECT slug, board_seat FROM ai_agents`);
     const slugs = new Set(agents.map((a) => a.slug));
     for (const entry of AGENT_CATALOG) expect(slugs.has(entry.slug)).toBe(true);
@@ -287,6 +293,7 @@ describe('AI Control Plane', () => {
     const facts = await seedPlatformFacts(customer.userId);
     const admin = await createUser('admin', 'admin4@example.com');
     await app.ready();
+    await seedAgentRegistry(db);
 
     // The registry is code-owned: seed stamps tool grants from the catalog and the `enabled`
     // flag is the operator kill switch. The gate must therefore reject any tool NOT present in
@@ -546,6 +553,7 @@ describe('AI Control Plane', () => {
   it('model routing fails closed for disabled/misconfigured external engines', async () => {
     const app = buildTestApp();
     await app.ready();
+    await seedAgentRegistry(db);
     const agent = (await getAgentBySlug(db, 'ai-ceo')) as AgentRow;
     const externalAgent: AgentRow = { ...agent, engine: 'openai' };
     await expect(resolveModelForAgent(db, externalAgent)).rejects.toThrowError(ModelResolutionError);
