@@ -1249,3 +1249,39 @@ sub-phase before the next one begins.
   selection) and `tests/integration/dns-external-providers.test.ts` (8: fail-closed with no zone row
   written, real zone + record create/update/delete through the API, zone reuse, PTR refusal with zero
   live calls, Route 53 zone and record set, unknown provider refusal, internal engine unchanged).
+
+## A10 — migrations prepared but never executed: the frozen artifacts are now auditable
+
+- **Source/local verification:** PASSED on branch `arena/01a0f9c1-cloudhost247`.
+  - **No artifact was executed, and none was changed.** This unit records what "prepared and tested
+    only" means in verifiable terms.
+- **Why this exists.** 0023 and 0024 each carried a recorded SHA-256 in this document, while 0025 and
+  0041 carried none — so for two of the four frozen artifacts there was no way to tell whether the
+  file on disk was still the one that had been reviewed. The ledger below closes that, and
+  `tests/integration/prepared-migrations-frozen.test.ts` pins every row: any future edit to a frozen
+  artifact fails the suite instead of silently changing what "prepared" refers to.
+- **The recorded prepared set (SHA-256 of the file as it stands, all four unexecuted):**
+
+| Migration artifact | SHA-256 | Test evidence | Production execution |
+| --- | --- | --- | --- |
+| `0023_enforce_billing_invariants.sql` | `7a98a4a758686db2c15d8043da5381dbdb9c835d8934a4c4591efa8a66b2fe3d` | `tests/integration/migration-0023.test.ts` | **NOT EXECUTED** |
+| `0024_create_webhook_events.sql` | `b8694deae80340e8a826450d1ab5b800f1c363c2fe540e7986a921f744adbbd7` | `tests/integration/migration-0024.test.ts`, `tests/integration/webhooks-api.test.ts` | **NOT EXECUTED** |
+| `0025_extend_auth_audit_log_for_admin_billing.sql` | `35470996c4ec0225b73d96ffa79f33c732134d02960bc59b194c7d7b5cff6875` | `tests/integration/migration-0025.test.ts`, `tests/integration/admin-billing-api.test.ts` | **NOT EXECUTED** |
+| `0041_create_os_catalog_and_server_provisioning.sql` | `e9daef1aee1369cf8daaa7d7ebf53acfbb2abe2ece0d5c6d783be302e9a66b28` | `tests/integration/*provisioning*`, `*infrastructure*` suites | **NOT EXECUTED** |
+
+  The 0023 and 0024 hashes were already recorded in this document (§Migration 0023 Status and §Phase
+  5D); the 0025 and 0041 rows are recorded here for the first time, from the committed files — no
+  claim is made that they were previously attested.
+- **An operator can now see the result of a production run without performing one.** `migrate plan`
+  prints, read-only and without executing any DDL: the pending migrations, what a run would apply,
+  the quarantined artifacts it would skip (with their reasons), and whether the run would refuse and
+  why. It shares the single decision path used by `migrate up`, so the plan cannot disagree with what
+  a run does; the suite pins that parity directly.
+- **What a production run does today (unchanged by this unit):** it would refuse before applying
+  anything, because 0041 (quarantined) has pending dependents (0042 onwards) and 0041 creates the
+  `operating_systems`/`infrastructure_providers` tables they build on. 0023, 0024 and 0025 are
+  standalone and would be skipped with a report if the run were authorized to proceed.
+- **Tests:** `tests/integration/prepared-migrations-frozen.test.ts` — the four hashes match the
+  ledger above, the quarantined set still names exactly those versions with reasons,
+  `migrate plan` executes nothing and matches `migrate up`'s decisions, and non-production
+  environments are unaffected.

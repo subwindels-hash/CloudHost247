@@ -187,36 +187,60 @@ export interface MigrateUpResult {
   quarantined?: QuarantinedMigration[];
 }
 
+export type MigrationRefusal = 'CONFIRMATION_REQUIRED' | 'QUARANTINED_DEPENDENCY';
+
+/** What the runner would do for a given environment, computed without executing anything. */
+export interface MigrationPlan {
+  upToDate: boolean;
+  /** Pending migrations in order, i.e. everything the database has not recorded yet. */
+  pending: string[];
+  /** Pending migrations a run would apply (empty when the run would refuse). */
+  wouldApply: string[];
+  /** Frozen artifacts this run deliberately will not execute. */
+  quarantined: QuarantinedMigration[];
+  refusal?: { code: MigrationRefusal; reason: string };
+}
+
 /**
- * Applies all pending migrations, each in its own transaction. Stops at the first failure
- * (leaving that migration's transaction rolled back) so re-running after a fix is always safe.
+ * The single decision path shared by `migrate up` and `migrate plan`, so a plan can never disagree
+ * with what a run would actually do. Pure with respect to the database: it reads the applied set and
+ * executes nothing.
  */
-export async function migrateUp(client: DbClient, opts: MigrateUpOptions, dir: string = MIGRATIONS_DIR): Promise<MigrateUpResult> {
+async function decideMigrationRun(
+  client: DbClient,
+  opts: MigrateUpOptions,
+  dir: string,
+): Promise<{ plan: MigrationPlan; runnable: MigrationFile[] }> {
   await ensureMigrationsTable(client);
-
-  const driftCheck = await verify(client, dir);
-  if (!driftCheck.ok) {
-    throw new Error(
-      `Refusing to migrate: checksum drift detected for already-applied migration(s): ${driftCheck.drift
-        .map((d) => d.name)
-        .join(', ')}. Investigate before proceeding — do not edit already-applied migration files.`
-    );
-  }
-
   const files = listMigrationFiles(dir);
   const applied = await getAppliedMigrations(client);
   const appliedVersions = new Set(applied.map((a) => a.version));
   const pending = files.filter((f) => !appliedVersions.has(f.version));
 
   if (pending.length === 0) {
-    return { applied: [] };
+    return {
+      plan: { upToDate: true, pending: [], wouldApply: [], quarantined: [] },
+      runnable: [],
+    };
   }
 
+  const base = { upToDate: false, pending: pending.map((file) => file.name) };
+
+  // Confirmation is required before anything else: an unconfirmed production run does nothing at
+  // all, not even a partial migration.
   if (opts.isProduction && !opts.confirmedForProduction) {
     return {
-      applied: [],
-      skippedReason:
-        'Production migration requires explicit confirmation. Re-run with --yes (or CONFIRM_MIGRATION=yes) after verifying a database backup exists.',
+      plan: {
+        ...base,
+        wouldApply: [],
+        quarantined: [],
+        refusal: {
+          code: 'CONFIRMATION_REQUIRED',
+          reason:
+            'Production migration requires explicit confirmation. Re-run with --yes (or CONFIRM_MIGRATION=yes) after verifying a database backup exists.',
+        },
+      },
+      runnable: [],
     };
   }
 
@@ -239,15 +263,65 @@ export async function migrateUp(client: DbClient, opts: MigrateUpOptions, dir: s
     const blocked = entry.dependents.filter((version) => pendingVersions.has(version));
     if (blocked.length > 0) {
       return {
-        applied: [],
-        quarantined,
-        skippedReason:
-          `Refusing to migrate production: ${entry.version} (${entry.name}) is quarantined — ${entry.reason} — ` +
-          `but pending migration(s) ${blocked.join(', ')} depend on it. Nothing was applied. ` +
-          `Authorize it explicitly for this run (AUTHORIZED_MIGRATIONS=${entry.version}) once that is authorized, ` +
-          `or leave the production database unchanged.`,
+        plan: {
+          ...base,
+          wouldApply: [],
+          quarantined,
+          refusal: {
+            code: 'QUARANTINED_DEPENDENCY',
+            reason:
+              `Refusing to migrate production: ${entry.version} (${entry.name}) is quarantined — ${entry.reason} — ` +
+              `but pending migration(s) ${blocked.join(', ')} depend on it. Nothing was applied. ` +
+              `Authorize it explicitly for this run (AUTHORIZED_MIGRATIONS=${entry.version}) once that is authorized, ` +
+              `or leave the production database unchanged.`,
+          },
+        },
+        runnable: [],
       };
     }
+  }
+
+  return {
+    plan: { ...base, wouldApply: runnable.map((file) => file.name), quarantined },
+    runnable,
+  };
+}
+
+/** Read-only view of what a run would do, including why it would refuse. Executes nothing. */
+export async function planMigration(
+  client: DbClient,
+  opts: MigrateUpOptions,
+  dir: string = MIGRATIONS_DIR,
+): Promise<MigrationPlan> {
+  const { plan } = await decideMigrationRun(client, opts, dir);
+  return plan;
+}
+
+/**
+ * Applies all pending migrations, each in its own transaction. Stops at the first failure
+ * (leaving that migration's transaction rolled back) so re-running after a fix is always safe.
+ */
+export async function migrateUp(client: DbClient, opts: MigrateUpOptions, dir: string = MIGRATIONS_DIR): Promise<MigrateUpResult> {
+  const driftCheck = await verify(client, dir);
+  if (!driftCheck.ok) {
+    throw new Error(
+      `Refusing to migrate: checksum drift detected for already-applied migration(s): ${driftCheck.drift
+        .map((d) => d.name)
+        .join(', ')}. Investigate before proceeding — do not edit already-applied migration files.`
+    );
+  }
+
+  const { plan, runnable } = await decideMigrationRun(client, opts, dir);
+  if (plan.upToDate) return { applied: [] };
+  if (plan.refusal) {
+    return {
+      applied: [],
+      skippedReason: plan.refusal.reason,
+      ...(plan.quarantined.length > 0 ? { quarantined: plan.quarantined } : {}),
+    };
+  }
+  if (runnable.length === 0) {
+    return { applied: [] };
   }
 
   const appliedNow: string[] = [];
@@ -269,7 +343,9 @@ export async function migrateUp(client: DbClient, opts: MigrateUpOptions, dir: s
     }
   }
 
-  return quarantined.length > 0 ? { applied: appliedNow, quarantined } : { applied: appliedNow };
+  return plan.quarantined.length > 0
+    ? { applied: appliedNow, quarantined: plan.quarantined }
+    : { applied: appliedNow };
 }
 
 export function scaffoldMigration(name: string, dir: string = MIGRATIONS_DIR): string {
@@ -328,6 +404,47 @@ async function main() {
         // eslint-disable-next-line no-console
         console.table(result.drift);
         process.exitCode = 1;
+      }
+      return;
+    }
+
+    if (command === 'plan') {
+      // Read-only: answers "what would `migrate up` do here, and would it refuse?" without
+      // executing anything. Uses the same authorization/confirmation inputs as `up`.
+      const authorizedQuarantined = (process.env.AUTHORIZED_MIGRATIONS ?? '')
+        .split(',')
+        .map((entry) => entry.trim())
+        .filter((entry) => entry.length > 0);
+      const plan = await planMigration(client, {
+        isProduction: env.NODE_ENV === 'production',
+        confirmedForProduction: rest.includes('--yes') || process.env.CONFIRM_MIGRATION === 'yes',
+        authorizedQuarantined,
+      });
+      // eslint-disable-next-line no-console
+      console.log(`Environment: ${env.NODE_ENV === 'production' ? 'production' : env.NODE_ENV}`);
+      if (plan.upToDate) {
+        // eslint-disable-next-line no-console
+        console.log('No pending migrations. Database schema is up to date.');
+        return;
+      }
+      // eslint-disable-next-line no-console
+      console.log(`Pending: ${plan.pending.length} migration(s)`);
+      if (plan.refusal) {
+        // eslint-disable-next-line no-console
+        console.warn(`WOULD REFUSE (${plan.refusal.code}): ${plan.refusal.reason}`);
+      } else {
+        // eslint-disable-next-line no-console
+        console.log(`Would apply ${plan.wouldApply.length} migration(s): ${plan.wouldApply.join(', ')}`);
+      }
+      if (plan.quarantined.length > 0) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          [
+            'Quarantined — will NOT be executed (standing restriction, NOT authorized for production execution):',
+            ...plan.quarantined.map((entry) => `  ${entry.version} ${entry.name}\n      ${entry.reason}`),
+            'Authorize specific versions for a run with: AUTHORIZED_MIGRATIONS=<comma-separated versions>',
+          ].join('\n')
+        );
       }
       return;
     }
