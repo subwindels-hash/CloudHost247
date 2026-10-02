@@ -489,7 +489,10 @@ export class AwsProviderAdapter implements InfrastructureProviderAdapter {
     return found ? toImage(found) : null;
   }
 
-  enableRescue(_providerServerId: string, _input: RescueRequest): Promise<RescueSession> {
+  // `async` on purpose: an unreachable rescue must reject, not throw
+  // synchronously, so a caller using `.catch()` handles it like every other
+  // provider failure.
+  async enableRescue(_providerServerId: string, _input: RescueRequest): Promise<RescueSession> {
     return unsupportedRescue('aws');
   }
 

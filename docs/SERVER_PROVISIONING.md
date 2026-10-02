@@ -120,9 +120,13 @@ Native instance API.
 Native EC2 uses the AWS SDK's Signature Version 4 client. Plan metadata must set
 `providerServerType` to an EC2 instance type; the mapped OS image must hold an AMI id. It supports
 create/retry lookup through a CloudHost247 idempotency tag, status, start/stop/reboot, terminate,
-resize, snapshots, image lookup and console output. In-place reinstall and root-volume restore are
-intentionally unavailable because they need an explicit replacement-instance workflow. CloudWatch
-metrics require separately scoped permissions and are not supplied by this adapter.
+resize, snapshots, image lookup and console output. Reinstall is implemented as a replacement
+instance (same zone, subnet, security groups and key; the previous instance is stopped, never
+terminated) and root-volume restore runs in place from a completed snapshot, keeping the detached
+root volume. Both are opt-in: they refuse with `UNSUPPORTED_OPERATION` unless the deployment sets
+`AWS_ALLOW_ROOT_VOLUME_REPLACEMENT=true` (or the provider-prefix equivalent), and the profile keeps
+advertising `reinstall: false` until it is enabled. Rescue mode and CloudWatch metrics remain
+unavailable; metrics need separately scoped permissions.
 
 ### Contabo (`contabo`)
 
