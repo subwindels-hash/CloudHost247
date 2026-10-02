@@ -193,7 +193,9 @@ final class SubscriberRepository
         if (!empty($filters['client_id'])) { $query->where('client_id', (int) $filters['client_id']); }
 
         if (!empty($filters['search'])) {
-            $term = '%' . str_replace('%', '', (string) $filters['search']) . '%';
+            // Both wildcards are stripped: a search box is for finding things, not
+            // for asking the database to scan every row.
+            $term = '%' . str_replace(array('%', '_'), '', (string) $filters['search']) . '%';
             $query->where(function ($group) use ($term) {
                 $group->where('email', 'like', $term)
                     ->orWhere('first_name', 'like', $term)

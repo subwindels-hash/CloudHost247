@@ -107,7 +107,9 @@ final class ExportService
     private function cell($value)
     {
         // Excel/LibreOffice formula injection: neutralise by prefixing a quote.
-        if ($value !== '' && preg_match('/^[=+\-@]/', $value)) { $value = "'" . $value; }
+        // Leading tab/CR/LF count too — a spreadsheet trims them and then runs the
+        // formula, which is the whole trick.
+        if ($value !== '' && preg_match('/^[=+\-@\t\r\n]/', $value)) { $value = "'" . $value; }
         $value = str_replace('"', '""', $value);
         return '"' . $value . '"';
     }

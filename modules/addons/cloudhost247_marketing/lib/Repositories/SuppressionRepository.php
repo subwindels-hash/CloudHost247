@@ -108,7 +108,9 @@ final class SuppressionRepository
         if (!empty($filters['reason'])) { $query->where('reason', (string) $filters['reason']); }
         if (!empty($filters['source'])) { $query->where('source', (string) $filters['source']); }
         if (!empty($filters['search'])) {
-            $term = '%' . str_replace('%', '', (string) $filters['search']) . '%';
+            // Both wildcards are stripped: a search box is for finding things, not
+            // for asking the database to scan every row.
+            $term = '%' . str_replace(array('%', '_'), '', (string) $filters['search']) . '%';
             $query->where('email', 'like', $term);
         }
         $totalRow = $query->selectRaw('COUNT(*) AS aggregate')->first();

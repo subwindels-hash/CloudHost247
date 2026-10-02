@@ -144,6 +144,44 @@ class MarketingStaticTests(unittest.TestCase):
         for forbidden in ("fsockopen", "stream_socket_client", "swiftmailer", "PHPMailer"):
             self.assertNotIn(forbidden, combined)
 
+    def test_personalisation_is_escaped_in_html_and_exports_neutralise_formulas(self):
+        # SESSION 11: a subscriber's own name is a value, not markup, and an
+        # exported CSV cannot hand a spreadsheet a formula.
+        tracking = read(os.path.join(LIB, "Services", "TrackingService.php"))
+        self.assertIn("$htmlContext", tracking)
+        self.assertIn("personalise($htmlSource, $personal, $token, true)", tracking)
+        self.assertIn("personalise($textSource, $personal, $token)", tracking)
+        # The subject is personalised in text context too.
+        self.assertIn("personalise(isset($content['subject'])", tracking)
+        export = read(os.path.join(LIB, "Services", "ExportService.php"))
+        self.assertIn("[=+\\-@\\t\\r\\n]", export)
+        self.assertIn("$value = chr(39) . $value", export.replace("\"'\" . $value", "chr(39) . $value"))
+        # The public endpoint is the only module file that reads request input
+        # without the WHMCS guard, and the module never touches a core table.
+        for path in iter_php(MODULE):
+            source = read(path)
+            if "cannot be accessed directly" in source:
+                continue
+            self.assertIn("namespace ", source)
+            self.assertNotIn("tbl", source.split("namespace ", 1)[1].split("class ", 1)[0])
+
+    def test_admin_mutations_are_guarded_by_post_token_and_capability(self):
+        controller = read(os.path.join(LIB, "Http", "AdminController.php"))
+        # Every mutating branch calls requireMutation (POST + CSRF + capability)
+        # except settings, whose saver performs the same guard itself.
+        self.assertIn("private function requireMutation($capability)", controller)
+        self.assertIn("AdminGuard::requirePostToken();", controller)
+        self.assertIn("AdminGuard::requireCapability('cloudhost247_marketing', $capability);", controller)
+        branches = re.findall(r"\$this->requireMutation\((self::[A-Z_]+)\)", controller)
+        # automation, campaigns, segments, subscribers, templates
+        self.assertGreaterEqual(len(branches), 5)
+        saver = controller.split("private function saveSettings()", 1)[1].split("private function ", 1)[0]
+        self.assertIn("AdminGuard::requirePostToken();", saver)
+        self.assertIn("requireCapability", saver)
+        # Capability names are the module's own, never a core admin role check.
+        for capability in re.findall(r"requireCapability\('cloudhost247_marketing', '([a-z.]+)'\)", controller):
+            self.assertTrue(capability.startswith("marketing."))
+
     def test_automation_delivers_through_the_queue_and_never_sends_directly(self):
         # SESSION 10: an automation fills the queue; it never grows its own
         # delivery path, never touches a WHMCS core table, and never mails.

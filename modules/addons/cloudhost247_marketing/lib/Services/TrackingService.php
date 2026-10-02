@@ -79,14 +79,19 @@ final class TrackingService
         // A queued automation message carries its own content: the step's
         // template, subject and sender. The container campaign still owns the
         // links and the ledger rows, so everything downstream is unchanged.
-        $subject = isset($content['subject']) ? (string) $content['subject'] : (string) $campaign->subject;
+        // The subject is personalised too, in text context: a recipient who is
+        // greeted by name in the body should be greeted by name in the inbox.
+        $subject = $this->personalise(isset($content['subject']) ? (string) $content['subject'] : (string) $campaign->subject, $personal, '', false);
         $htmlSource = isset($content['html']) ? (string) $content['html'] : (string) $campaign->html;
         $textSource = isset($content['text']) ? (string) $content['text'] : (string) $campaign->text;
         $fromEmail = isset($content['from_email']) && trim((string) $content['from_email']) !== '' ? (string) $content['from_email'] : (string) $campaign->from_email;
         $fromName = isset($content['from_name']) && trim((string) $content['from_name']) !== '' ? (string) $content['from_name'] : (string) $campaign->from_name;
         $replyTo = isset($content['reply_to']) && trim((string) $content['reply_to']) !== '' ? (string) $content['reply_to'] : (string) $campaign->reply_to;
 
-        $html = $this->personalise($htmlSource, $personal, $token);
+        // Personalisation values are subscriber-controlled, so in the HTML part
+        // they are escaped: a name is a name, never markup. The text part stays
+        // literal because there is no markup context to escape for.
+        $html = $this->personalise($htmlSource, $personal, $token, true);
         $text = $this->personalise($textSource, $personal, $token);
 
         if ($this->settingEnabled('open_tracking_enabled') && $html !== '') {
@@ -127,7 +132,7 @@ final class TrackingService
     public function composeTest($campaign, $to, $subscriber = null)
     {
         $personal = $this->personalisation($subscriber, (string) $to);
-        $html = $this->personalise((string) $campaign->html, $personal, '');
+        $html = $this->personalise((string) $campaign->html, $personal, '', true);
         $text = $this->personalise((string) $campaign->text, $personal, '');
         $notice = 'This is a test message sent from the CloudHost247 Marketing console. '
             . 'Tracking is disabled for tests, and the unsubscribe link appears only in real sends.';
@@ -180,8 +185,15 @@ final class TrackingService
         return substr($html, 0, $position) . $pixel . substr($html, $position);
     }
 
-    /** Substitutes the closed token set; unknown tokens are blanked, never echoed. */
-    public function personalise($content, array $personal, $token = '')
+    /**
+     * Substitutes the closed token set; unknown tokens are blanked, never echoed.
+     *
+     * `$htmlContext` escapes the substituted values for HTML. Those values come
+     * from the subscriber's own record (a first name, a company), so without this
+     * a subscriber could put markup — or a phishing link — inside somebody
+     * else's email by editing their own profile.
+     */
+    public function personalise($content, array $personal, $token = '', $htmlContext = false)
     {
         $values = array(
             'first_name' => isset($personal['first_name']) ? (string) $personal['first_name'] : '',
@@ -192,11 +204,12 @@ final class TrackingService
         if ($token !== '') { $values['unsubscribe_url'] = $this->unsubscribeUrl($token); }
         $values['physical_address'] = (string) $this->settings->get('physical_address');
 
-        return (string) preg_replace_callback('/\\{\\{\\s*([a-z_]+)\\s*\\}\\}/i', function ($match) use ($values) {
+        return (string) preg_replace_callback('/\\{\\{\\s*([a-z_]+)\\s*\\}\\}/i', function ($match) use ($values, $htmlContext) {
             $key = strtolower($match[1]);
             if (!in_array($key, self::TOKENS, true)) { return ''; }
             if ($key === 'unsubscribe_url' && !isset($values[$key])) { return ''; }
-            return isset($values[$key]) ? $values[$key] : '';
+            $value = isset($values[$key]) ? (string) $values[$key] : '';
+            return $htmlContext ? $this->escape($value) : $value;
         }, (string) $content);
     }
 

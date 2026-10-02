@@ -345,6 +345,41 @@ $check('smtp client transmits the credential only inside base64 auth lines',
     strpos(implode('', ScriptedSmtpStream::$writes), 'mailbox-password') === false
     && strpos(implode('', ScriptedSmtpStream::$writes), base64_encode('mailbox-password')) !== false);
 
+// Header injection: a subscriber's own name (or a campaign's sender name) must
+// never be able to add a header line of its own.
+ScriptedSmtpStream::$writes = array();
+(new SmtpClient($smtpSettings, $smtpScript(array(
+    '220 mail.example.com ESMTP', '250-mail.example.com', '250 AUTH LOGIN',
+    '334 VXNlcm5hbWU6', '334 UGFzc3dvcmQ6', '235 accepted',
+    '250 sender ok', '250 recipient ok', '354 go ahead', '250 queued', '221 bye',
+))))->send(array(
+    'to' => 'reader@example.com',
+    'to_name' => "Reader\r\nBcc: attacker@example.com",
+    'subject' => 'Hello',
+    'html' => '<p>Hi</p>', 'text' => 'Hi',
+    'from_email' => 'marketing@example.com',
+    'from_name' => "Marketing\r\nX-Evil: yes",
+));
+$wire = implode('', ScriptedSmtpStream::$writes);
+// The display name keeps its text (CRLF stripped), so the property to prove is
+// that no *line* was created: nothing in the DATA block starts a new header.
+$injected = false;
+foreach (explode("\r\n", $wire) as $line) {
+    if (preg_match('/^(Bcc|X-Evil)\s*:/i', $line)) { $injected = true; }
+}
+$check('a display name containing CRLF cannot inject a header line',
+    !$injected && strpos($wire, "Reader\r\nBcc") === false);
+
+$result = (new SmtpClient($smtpSettings, $smtpScript(array(
+    '220 mail.example.com ESMTP', '250-mail.example.com', '250 AUTH LOGIN',
+    '334 VXNlcm5hbWU6', '334 UGFzc3dvcmQ6', '235 accepted',
+))))->send(array(
+    'to' => 'reader@example.com', 'subject' => "Hello\r\nBcc: attacker@example.com",
+    'html' => '', 'text' => 'x', 'from_email' => 'marketing@example.com',
+));
+$check('a subject containing a line break is refused before the relay is told anything',
+    $result['ok'] === false && $result['code'] === ResultCode::INVALID_CONFIGURATION);
+
 $reject = $smtpScript(array(
     '220 mail.example.com ESMTP', '250-mail.example.com', '250 AUTH LOGIN',
     '334 VXNlcm5hbWU6', '334 UGFzc3dvcmQ6', '235 accepted',

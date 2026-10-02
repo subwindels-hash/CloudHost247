@@ -327,6 +327,14 @@ foreach (require __DIR__ . '/session10.php' as $name => $test) {
     $tests[$name] = $test;
 }
 
+// --------------------------------------------------------- SESSION 11 - security review
+// Escaping, link abuse, guards, exports and endpoint limits live in session11.php.
+
+foreach (require __DIR__ . '/session11.php' as $name => $test) {
+    if (isset($tests[$name])) { throw new RuntimeException('Duplicate marketing test name: ' . $name); }
+    $tests[$name] = $test;
+}
+
 // ------------------------------------------------------------------------- run
 
 $failed = 0;
