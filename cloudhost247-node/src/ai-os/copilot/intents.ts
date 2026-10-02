@@ -6,6 +6,7 @@
  * improvised answer (spec §29, §33, §34).
  */
 import type { AgentRunContext, ToolCallOutcome } from '../runtime/types';
+import { explainMrzWithAi } from '../../tools/mrz/mrz-engine';
 
 export interface IntentResolution {
   intent: string;
@@ -374,6 +375,20 @@ export function resolveCustomerMessage(raw: string): IntentResolution {
           Number(m.invoicesUnpaid) > 0 ? 'You can settle open invoices from the Billing area of your dashboard.' : 'Nothing is due on your account.',
         ];
         return { answer: lines.join('\n'), toolOutcomes: [profile] };
+      },
+    };
+  }
+
+  if (has('mrz', 'machine readable zone', 'td3', 'icao 9303', 'check digit')) {
+    return {
+      intent: 'tools.mrz_explanation', confidence: 'exact',
+      async execute() {
+        const exp = explainMrzWithAi({ topic: 'overview', question: raw });
+        const answer = [
+          exp.title,
+          ...exp.sections.map((s) => `${s.heading}:\n${s.body}`),
+        ].join('\n\n');
+        return { answer, toolOutcomes: [] };
       },
     };
   }

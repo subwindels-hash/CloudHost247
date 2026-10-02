@@ -47,6 +47,7 @@ import { registerCloudflareRoutes } from './routes/cloudflare';
 import { registerAdminCloudflareRoutes } from './routes/admin-cloudflare';
 import { registerAiSupportRoutes } from './routes/ai-support';
 import { registerAiControlPlaneRoutes } from './ai-os/controllers/routes';
+import { registerMrzToolRoutes } from './routes/mrz-tools';
 import { HttpError, ValidationError } from './lib/errors';
 import { createLogger } from './lib/logger';
 import type { Queryable } from './db/types';
@@ -188,6 +189,9 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     // AI Control Plane — the shared AI operating system (agent registry, gated tool executor,
     // approvals, events/workflows, executive board, copilots, customer AI transparency).
     await registerAiControlPlaneRoutes(instance, env, pool);
+
+    // Native Developer / Document Tools — ePassport MRZ Calculator, Validator, Parser & Super Admin settings.
+    await registerMrzToolRoutes(instance, env, pool);
 
     // The frontend (static assets + SPA fallback) MUST be registered inside this same
     // encapsulated context. Hooks added by registerSecurityPlugins (helmet headers, CORS, rate

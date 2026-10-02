@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { usePageMeta } from '../lib/usePageMeta';
 import { apiFetch } from '../lib/api';
 import { CatalogErrorBanner, CatalogLoadingBanner } from '../components/CatalogStateBanner';
@@ -72,6 +73,9 @@ export default function AdminSettingsPage() {
         <p className="ch247-page__hint">
           Only the settings below are configurable at runtime — everything else is code. Each
           change is audit-logged with the admin who made it.
+        </p>
+        <p className="ch247-page__hint">
+          <Link to="/admin/settings/tools/mrz">Super Admin → Settings → Tools → MRZ →</Link>
         </p>
         {message && <p className="ch247-banner ch247-banner--info">{message}</p>}
         {error && <CatalogErrorBanner message={error} />}
