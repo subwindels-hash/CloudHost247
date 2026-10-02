@@ -1140,3 +1140,30 @@ sub-phase before the next one begins.
   path guard), the username derivation; Kubernetes collection mapping, idempotent apply with
   `resourceVersion`, replica stop/start, the rollout-restart annotation, health and log reads,
   label-discovered teardown, the structured backup refusal, and the disabled switch.
+
+---
+
+## A8 — undeclared provider adapters fail closed, non-retryably
+
+- **Source/local verification:** PASSED on branch `arena/01a0f9c1-cloudhost247`.
+  - **Full platform verification: 106 / 106 test files passing (788 / 788 tests), backend and frontend TypeScript clean.**
+  - **No migration required.**
+- **The accepted adapter list is now derived, not duplicated.** `ADAPTER_KINDS` is computed from
+  `ADAPTER_PROFILES`, and the admin API's provider schema (`z.enum`) uses it, so a provider row can
+  no longer be saved with an adapter kind that has no implementation — and a new profile cannot be
+  added while the API silently refuses it. The registry's fallback stays what it should be: a
+  last-resort guard for a row that predates or bypasses the API.
+- **The refusal is no longer a retry invitation.** An undeclared kind used to fail with
+  `SERVICE_UNAVAILABLE`, which the error mapper renders to the customer as "temporarily
+  unavailable. Please try again shortly" — advice that can never succeed, because only a build
+  change adds an adapter. It now fails with a non-retryable `UNSUPPORTED_OPERATION` naming the
+  provider kind and stating that no native adapter is implemented for it in this build; the
+  customer-facing mapping is a 400 `VALIDATION_ERROR` ("This action is not supported for this
+  server."), never a 503 retry.
+- **Pinned across the whole contract.** `tests/unit/undeclared-adapter-fail-closed.test.ts` (6)
+  enumerates every method of the adapter interface — all 26 — and asserts each rejects with
+  `UNSUPPORTED_OPERATION` + `retryable: false` with the network disabled, so a newly added
+  operation cannot slip through unimplemented or silently succeed; it also asserts the fallback is
+  never substituted by the mock, that every declared kind resolves to its own adapter, and that a
+  provider described as undeclared is reported not-ready with all capabilities false and the reason
+  "adapter implementation" missing.

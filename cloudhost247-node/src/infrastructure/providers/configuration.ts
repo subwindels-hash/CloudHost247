@@ -277,6 +277,14 @@ export interface ProviderConfigurationReport {
   missing: string[];
 }
 
+/**
+ * Every adapter kind this build implements, in one place. The admin API's accepted values are
+ * derived from this list (not from a second hand-kept copy), so a provider row can never be saved
+ * with an adapter that has no implementation — and the registry's fail-closed fallback stays a
+ * last-resort guard for rows that predate or bypass the API rather than the normal path.
+ */
+export const ADAPTER_KINDS = Object.keys(ADAPTER_PROFILES) as AdapterKind[];
+
 export function getAdapterProfile(adapter: string): AdapterProfile | null {
   return ADAPTER_PROFILES[adapter as AdapterKind] ?? null;
 }

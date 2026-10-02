@@ -79,8 +79,10 @@ describe('every adapter kind fails closed without server-side credentials', () =
       provider('not-a-real-adapter' as ProviderAdapterKind),
       {} as NodeJS.ProcessEnv
     );
+    // UNSUPPORTED_OPERATION, not SERVICE_UNAVAILABLE: "temporarily unavailable, try again
+    // shortly" would invite a retry loop for a condition only a build change can fix.
     await expect(instance.validateConfiguration()).rejects.toMatchObject<Partial<ProviderError>>({
-      code: 'SERVICE_UNAVAILABLE',
+      code: 'UNSUPPORTED_OPERATION',
       retryable: false,
     });
   });
