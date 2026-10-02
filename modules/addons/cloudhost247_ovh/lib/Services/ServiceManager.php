@@ -8,8 +8,25 @@ final class ServiceManager
  /** Linked OVH identity for a WHMCS service: family (vps|dedicated|eco) and remote service name. */
  function identity($id){$s=$this->binding($id);return array('family'=>(string)$s->family,'service_name'=>(string)$s->remote_service_name,'endpoint_id'=>(int)$s->endpoint_id);}
  /** Read-only GET beneath the linked service's own base path; the suffix is validated, never taken verbatim from a request. */
- function readSub($id,$suffix){if(!preg_match('#^(/[A-Za-z0-9/_-]+)?(\?[A-Za-z0-9_=-]+)?$#',(string)$suffix))throw new RuntimeException('Unsafe service sub-path.');$s=$this->binding($id);return$this->bounded($this->r->endpoint($s->endpoint_id)->get($this->base($s).$suffix));}
+ function readSub($id,$suffix){$suffix=$this->safeSub($suffix,'service');$s=$this->binding($id);return$this->bounded($this->r->endpoint($s->endpoint_id)->get($this->base($s).$suffix));}
  /** Ledgered, idempotent, non-retried mutation beneath the linked service's base path. Caller owns validation and confirmation. */
- function performSub($id,$action,$method,$suffix,array $body=array()){if(!in_array($method,array('POST','PUT','DELETE'),true))throw new RuntimeException('Unsupported mutation method.');if(!preg_match('#^(/[A-Za-z0-9/_-]+)?$#',(string)$suffix))throw new RuntimeException('Unsafe service sub-path.');$s=$this->binding($id);return$this->mutate($s,$action,$this->base($s).$suffix,$method,$body);}
+ function performSub($id,$action,$method,$suffix,array $body=array()){if(!in_array($method,array('POST','PUT','DELETE'),true))throw new RuntimeException('Unsupported mutation method.');$suffix=$this->safeSub($suffix,'service');$s=$this->binding($id);return$this->mutate($s,$action,$this->base($s).$suffix,$method,$body);}
+ /**
+  * Address ownership: the only addresses a request may name are the ones OVH
+  * itself reports for the linked service. A free-form IP would let an
+  * administrator (or a forged request) address another customer's block, so an
+  * address is verified against the provider's own list before any call is made.
+  */
+ function boundAddress($id,$ip){$ip=trim((string)$ip);if(!filter_var($ip,FILTER_VALIDATE_IP))throw new RuntimeException('A valid IP address is required.');$owned=array();foreach($this->ips($id)['addresses']as$address)$owned[]=$address['address'];if(!in_array($ip,$owned,true))throw new RuntimeException('The address is not one OVH reports for this service.');return array($this->binding($id),$ip);}
+ /** Read-only GET beneath an address the service owns. Suffix is validated, never taken verbatim. */
+ function ipSub($id,$ip,$suffix){$suffix=$this->safeSub($suffix,'address');list($s,$address)=$this->boundAddress($id,$ip);return$this->bounded($this->r->endpoint($s->endpoint_id)->get('/ip/'.rawurlencode($address).$suffix));}
+ /** Ledgered, idempotent, non-retried mutation beneath an address the service owns. */
+ function performIpSub($id,$ip,$action,$method,$suffix,array $body=array()){if(!in_array($method,array('POST','PUT','DELETE'),true))throw new RuntimeException('Unsupported mutation method.');$suffix=$this->safeSub($suffix,'address');list($s,$address)=$this->boundAddress($id,$ip);return$this->mutate($s,$action,'/ip/'.rawurlencode($address).$suffix,$method,$body);}
+ /**
+  * A sub-path is allowlisted and can never traverse: an address-scoped path
+  * carries a dotted IPv4 (the address on the firewall), so dots are allowed,
+  * but a `..` segment is refused outright.
+  */
+ private function safeSub($suffix,$context){$s=(string)$suffix;if(strpos($s,'..')!==false||!preg_match('#^(/[A-Za-z0-9._/-]+)?(\\?[A-Za-z0-9_=.-]+)?$#',$s))throw new RuntimeException('Unsafe '.$context.' sub-path.');return $s;}
  private function bounded($value){if(is_array($value))return array_slice($value,0,200,true);return$value;}
 }

@@ -96,4 +96,59 @@ class OvhSafetyTests(unittest.TestCase):
   m=(ADDON/'lib/Services/ServiceManager.php').read_text();self.assertIn('function performSub',m);self.assertIn('reconciliation_required',m)
  def test_advanced_operations_not_exposed_to_customers(self):
   s=(SERVER/'cloudhost247_ovh.php').read_text();self.assertNotIn('AdvancedOperations',s)
+ def test_address_scoped_actions_verify_ownership(self):
+  m=(ADDON/'lib/Services/ServiceManager.php').read_text()
+  self.assertIn('function boundAddress',m);self.assertIn('filter_var($ip,FILTER_VALIDATE_IP)',m)
+  self.assertIn("not one OVH reports for this service",m)
+  self.assertIn('function ipSub',m);self.assertIn('function performIpSub',m)
+  # The allowlisted sub-path carries the dotted IPv4 of the firewall entry, and never traverses.
+  self.assertIn('private function safeSub($suffix,$context)',m)
+  self.assertIn("strpos($s,'..')!==false",m)
+  self.assertIn("[A-Za-z0-9._/-]",m)
+  a=(ADDON/'lib/Services/AdvancedOperations.php').read_text()
+  # An address is only accepted through the declared field, and the path is built here.
+  self.assertIn("'address' => true",a);self.assertIn("private function address(array $in)",a)
+  self.assertIn("'/ip/'.rawurlencode($address)",m)
+  # No request path may come from a raw posted value.
+  self.assertNotIn("_POST['path']",a);self.assertNotIn("$in['path']",a)
+ def test_catalog_families_may_be_lists_and_firewall_is_destructive(self):
+  a=(ADDON/'lib/Services/AdvancedOperations.php').read_text()
+  self.assertIn("array('vps', 'dedicated')",a)
+  self.assertIn("in_array($identity['family'], (array) $catalog[$action]['family'], true)",a)
+  c=(ADDON/'lib/Services/AdvancedOperations.php').read_text()
+  for action in ('firewall_status','firewall_rules','firewall_rule_add','firewall_rule_delete'):
+   self.assertIn("'"+action+"'",c,action)
+  # There is no /firewall/option route on the published surface: the module must not invent one.
+  self.assertNotIn('firewall_option',c)
+  self.assertNotIn('/firewall/option',c)
+  # Enums and shapes come from OVH's own firewall-rule schema.
+  self.assertIn("const FIREWALL_ACTIONS = array('permit', 'deny')",c)
+  self.assertIn("const FIREWALL_PROTOCOLS = array('ah', 'esp', 'gre', 'icmp', 'ipv4', 'tcp', 'udp')",c)
+  self.assertIn('MAX_RULE_SEQUENCE = 19',c)
+  self.assertIn("private function firewallAddress(array $in)",c)
+  self.assertIn('FILTER_FLAG_IPV4',c)
+  self.assertIn('private function portNumber($value, $label)',c)
+  self.assertNotIn('ipv6-icmp',c)
+  self.assertNotIn('portSpec',c)
+  self.assertIn("'firewall_rule_add'     => array('family' => array('vps', 'dedicated'), 'kind' => 'write', 'label' => 'Add a firewall rule (changes network reachability)', 'destructive' => true",c)
+  self.assertIn("'firewall_rule_delete'  => array('family' => array('vps', 'dedicated'), 'kind' => 'write', 'label' => 'Delete a firewall rule (changes network reachability)', 'destructive' => true",c)
+  for action in ('dedicated_interventions','dedicated_intervention','dedicated_boot_options'):
+   self.assertIn("'"+action+"'",c,action)
+  self.assertIn('BOOT_TYPES',c);self.assertIn("array('harddisk', 'rescue', 'netboot')",c)
+  self.assertIn('fillPath',c)
+ def test_admin_form_carries_the_new_advanced_inputs(self):
+  view=(ADDON/'cloudhost247_ovh.php').read_text()
+  for field in ('name="intervention_id"','name="ip"','name="firewall"','name="sequence"','name="destination_port"','name="boot_type"','name="kernel"'):
+   self.assertIn(field,view,field)
+  # The rule action select must post `action`, and the read button must pass the form through.
+  self.assertIn('<select name="action" class="form-control">',view)
+  c=(ADDON/'lib/Services/AdminController.php').read_text()
+  self.assertIn("advanced_action'],$_POST)",c)
+  self.assertIn('->read(',c)
+ def test_backup_restore_is_not_invented(self):
+  a=(ADDON/'lib/Services/AdvancedOperations.php').read_text()
+  # No restore route may be invented: only the snapshot revert that OVH documents.
+  self.assertIn("'vps_snapshot_revert'",a)
+  for marker in ('automatedBackup/restore','backupFTP/requestRestore','restoreBackup'):
+   self.assertNotIn(marker,a,marker)
 if __name__=='__main__':unittest.main()
