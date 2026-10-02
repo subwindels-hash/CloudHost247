@@ -39,6 +39,7 @@ import { registerMonitoringRoutes } from './routes/monitoring';
 import { registerProvisioningRoutes } from './routes/provisioning';
 import { registerAuditRoutes } from './routes/audit';
 import { registerDnsRoutes } from './routes/dns';
+import type { DnsPropagationOptions } from './dns/propagation';
 import { registerSslRoutes } from './routes/ssl';
 import { registerFirewallRoutes } from './routes/firewall';
 import { registerRevenueGuardianRoutes } from './revenue-guardian/controllers/routes';
@@ -55,6 +56,12 @@ export interface BuildAppOptions {
   publicDir?: string;
   /** Test-only: substitute a real embedded Postgres engine instead of the live pg Pool. */
   pool?: Queryable;
+  /**
+   * DNS provider propagation options. Production leaves this unset so the real
+   * Cloudflare/Route53 connectors are built from credentials at call time; tests inject a provider
+   * so the genuine route handlers run against a scripted provider.
+   */
+  dnsPropagation?: DnsPropagationOptions;
 }
 
 /**
@@ -62,7 +69,7 @@ export interface BuildAppOptions {
  * use `app.inject()` without binding a real TCP port.
  */
 export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstance {
-  const { serveFrontend = true, publicDir = path.join(__dirname, '..', '..', 'public'), pool } = options;
+  const { serveFrontend = true, publicDir = path.join(__dirname, '..', '..', 'public'), pool, dnsPropagation } = options;
 
   const app = Fastify({
     // Cast: pino's Logger type is a structural superset of Fastify's FastifyBaseLogger but TS's
@@ -160,7 +167,7 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     await registerMonitoringRoutes(instance, env, pool);
     await registerProvisioningRoutes(instance, env, pool);
     await registerAuditRoutes(instance, env, pool);
-    await registerDnsRoutes(instance, env, pool);
+    await registerDnsRoutes(instance, env, pool, dnsPropagation ?? {});
     await registerSslRoutes(instance, env, pool);
     await registerFirewallRoutes(instance, env, pool);
 

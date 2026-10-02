@@ -174,6 +174,24 @@ export class CloudflareDnsProvider implements DnsProvider {
     await cfDns.deleteDnsRecord(this.client(), zoneId, recordId);
   }
 
+  /**
+   * Deletes a record addressed by its current values rather than by Cloudflare's record id, which
+   * is what a caller holding only the platform's own record row can supply.
+   *
+   * A record that Cloudflare does not have is reported as deleted: absence is the end state a delete
+   * is trying to reach, so a retried delete after a partial failure cannot wedge the caller.
+   */
+  async deleteRecordByValues(
+    zoneId: string,
+    record: { name: string; type: CreateDnsRecordInput['type'] }
+  ): Promise<string | null> {
+    this.assertSupportedType(record.type);
+    const existing = await cfDns.findDnsRecord(this.client(), zoneId, record.type, record.name);
+    if (!existing) return null;
+    await cfDns.deleteDnsRecord(this.client(), zoneId, existing.id);
+    return existing.id;
+  }
+
   private assertSupportedType(type: string): void {
     if (CLOUDFLARE_UNSUPPORTED_TYPES.has(type) || !SUPPORTED_DNS_TYPES.includes(type as never)) {
       throw new CloudflareError(

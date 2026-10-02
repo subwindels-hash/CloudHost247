@@ -18,6 +18,14 @@ import {
   updateDnsRecord,
   deleteDnsRecord,
 } from '../db/dns';
+import {
+  propagateZoneCreate,
+  propagateZoneDelete,
+  propagateRecordCreate,
+  propagateRecordUpdate,
+  propagateRecordDelete,
+  type DnsPropagationOptions,
+} from '../dns/propagation';
 
 const idSchema = z.string().uuid();
 const domainSchema = z
@@ -58,7 +66,8 @@ function parseOrThrow<T>(schema: z.ZodType<T>, value: unknown): T {
 export async function registerDnsRoutes(
   app: FastifyInstance,
   env: Env,
-  overridePool?: Queryable
+  overridePool?: Queryable,
+  dnsPropagation: DnsPropagationOptions = {}
 ) {
   const pool = overridePool ?? getPool(env);
 
@@ -86,10 +95,21 @@ export async function registerDnsRoutes(
         throw new ConflictError('A DNS zone for that domain already exists');
       }
 
+      // Push the zone to its declared provider FIRST, so the local row is written only once the
+      // zone genuinely exists upstream. An unconfigured or failing provider is an error, never a
+      // silently local-only zone whose nameservers resolve nothing.
+      const provisioned = await propagateZoneCreate(
+        pool,
+        input.domainName.toLowerCase(),
+        input.provider,
+        dnsPropagation
+      );
+
       const zone = await createDnsZone(pool, {
         userId: auth.userId,
         domainName: input.domainName.toLowerCase(),
-        provider: input.provider,
+        provider: provisioned?.provider ?? input.provider,
+        ...(provisioned ? { nameservers: provisioned.nameservers, metadata: provisioned.metadata } : {}),
       });
 
       await auditRequest(pool, request, auth.userId, {
@@ -119,6 +139,7 @@ export async function registerDnsRoutes(
       const zone = await findDnsZoneById(pool, id);
       if (!zone || zone.user_id !== auth.userId) throw new NotFoundError('DNS zone not found');
 
+      await propagateZoneDelete(pool, zone, dnsPropagation);
       await deleteDnsZone(pool, id);
       await auditRequest(pool, request, auth.userId, {
         action: 'DNS_ZONE_DELETED',
@@ -138,6 +159,21 @@ export async function registerDnsRoutes(
       const input = parseOrThrow(createDirectRecordSchema, request.body);
       const zone = await findDnsZoneById(pool, input.zoneId);
       if (!zone || zone.user_id !== auth.userId) throw new NotFoundError('DNS zone not found');
+
+      await propagateRecordCreate(
+        pool,
+        zone,
+        {
+          zoneId: input.zoneId,
+          name: input.name,
+          type: input.type,
+          content: input.content,
+          ttl: input.ttl,
+          priority: input.priority,
+          proxied: input.proxied,
+        },
+        dnsPropagation
+      );
 
       const record = await createDnsRecord(pool, {
         zoneId: input.zoneId,
@@ -170,6 +206,7 @@ export async function registerDnsRoutes(
       if (!zone || zone.user_id !== auth.userId) throw new NotFoundError('DNS record not found');
 
       const patch = parseOrThrow(patchRecordSchema, request.body);
+      await propagateRecordUpdate(pool, zone, existingRecord, patch, dnsPropagation);
       const updated = await updateDnsRecord(pool, recordId, patch);
 
       await auditRequest(pool, request, auth.userId, {
@@ -191,6 +228,7 @@ export async function registerDnsRoutes(
       const zone = await findDnsZoneById(pool, existingRecord.zone_id);
       if (!zone || zone.user_id !== auth.userId) throw new NotFoundError('DNS record not found');
 
+      await propagateRecordDelete(pool, zone, existingRecord, dnsPropagation);
       await deleteDnsRecord(pool, recordId);
       await auditRequest(pool, request, auth.userId, {
         action: 'DNS_RECORD_DELETED',
@@ -222,6 +260,20 @@ export async function registerDnsRoutes(
       if (!zone || zone.user_id !== auth.userId) throw new NotFoundError('DNS zone not found');
 
       const input = parseOrThrow(createNestedRecordSchema, request.body);
+      await propagateRecordCreate(
+        pool,
+        zone,
+        {
+          zoneId,
+          name: input.name,
+          type: input.type,
+          content: input.content,
+          ttl: input.ttl,
+          priority: input.priority,
+          proxied: input.proxied,
+        },
+        dnsPropagation
+      );
       const record = await createDnsRecord(pool, {
         zoneId,
         name: input.name,
@@ -259,6 +311,7 @@ export async function registerDnsRoutes(
         }
 
         const patch = parseOrThrow(patchRecordSchema, request.body);
+        await propagateRecordUpdate(pool, zone, existingRecord, patch, dnsPropagation);
         const updated = await updateDnsRecord(pool, recordId, patch);
 
         await auditRequest(pool, request, auth.userId, {
@@ -287,6 +340,7 @@ export async function registerDnsRoutes(
           throw new NotFoundError('DNS record not found in this zone');
         }
 
+        await propagateRecordDelete(pool, zone, existingRecord, dnsPropagation);
         await deleteDnsRecord(pool, recordId);
         await auditRequest(pool, request, auth.userId, {
           action: 'DNS_RECORD_DELETED',

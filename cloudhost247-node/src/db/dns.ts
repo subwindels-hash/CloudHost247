@@ -45,12 +45,20 @@ export async function createDnsZone(db: Queryable, input: CreateDnsZoneInput): P
     [id, input.userId, input.domainName, provider, nameservers, JSON.stringify(metadata)]
   );
 
-  // Auto-seed default SOA and NS records for internal zone
+  // Auto-seed default NS records for the zone. The content is derived from the zone's own
+  // nameservers rather than hardcoded, so a zone that lives at an external provider records that
+  // provider's delegation set instead of nameservers that would resolve nothing for it.
+  const seededNameservers = nameservers.length > 0 ? nameservers.slice(0, 2) : ['ns1.cloudhost247.com', 'ns2.cloudhost247.com'];
+  const nsPlaceholders: string[] = [];
+  const nsParams: unknown[] = [];
+  seededNameservers.forEach((ns, index) => {
+    const base = index * 3 + 1;
+    nsPlaceholders.push(`($${base}, $${base + 1}, '@', 'NS', $${base + 2}, 86400)`);
+    nsParams.push(randomUUID(), id, ns);
+  });
   await db.query(
-    `INSERT INTO dns_records (id, zone_id, name, type, content, ttl) VALUES
-      ($1, $2, '@', 'NS', 'ns1.cloudhost247.com', 86400),
-      ($3, $2, '@', 'NS', 'ns2.cloudhost247.com', 86400)`,
-    [randomUUID(), id, randomUUID()]
+    `INSERT INTO dns_records (id, zone_id, name, type, content, ttl) VALUES ${nsPlaceholders.join(', ')}`,
+    nsParams
   );
 
   return rows[0]!;

@@ -79,4 +79,13 @@ export interface DnsProvider {
   createRecord(zoneId: string, record: CreateDnsRecordInput): Promise<{ recordId: string }>;
   updateRecord(zoneId: string, recordId: string, record: UpdateDnsRecordInput): Promise<void>;
   deleteRecord(zoneId: string, recordId: string): Promise<void>;
+  /**
+   * Optional: delete a record addressed by its current values instead of the provider's own record
+   * id. Providers that cannot address records by a stable platform-visible id implement this so a
+   * caller holding only its own record row can still delete honestly.
+   */
+  deleteRecordByValues?(
+    zoneId: string,
+    record: { name: string; type: DnsRecordType; content?: string; ttl?: number; priority?: number | null }
+  ): Promise<string | null>;
 }
