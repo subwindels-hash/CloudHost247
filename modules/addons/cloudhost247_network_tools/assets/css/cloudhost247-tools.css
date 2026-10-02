@@ -1,0 +1,111 @@
+/*
+ * CloudHost247 Network Tools — client-area styles.
+ *
+ * The module follows the CloudHost247 theme's design tokens, so the tools look
+ * like the rest of the client area and adapt to dark mode automatically. Rules
+ * are mobile-first: tables become labelled cards below 720px, and nothing
+ * depends on JavaScript to be readable.
+ */
+
+.ch247-tools {
+  --ch247-tools-border: rgba(15, 23, 42, 0.12);
+  --ch247-tools-muted: rgba(15, 23, 42, 0.62);
+  --ch247-tools-surface: rgba(255, 255, 255, 0.75);
+  --ch247-tools-accent: #0b5fff;
+  display: block;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .ch247-tools {
+    --ch247-tools-border: rgba(226, 232, 240, 0.2);
+    --ch247-tools-muted: rgba(226, 232, 240, 0.7);
+    --ch247-tools-surface: rgba(15, 23, 42, 0.55);
+  }
+}
+
+.ch247-tools__hero { margin-bottom: 1.5rem; }
+.ch247-tools__hero h1 { margin-bottom: 0.35rem; }
+.ch247-tools .lead { color: var(--ch247-tools-muted); max-width: 70ch; }
+.ch247-tools__nav { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
+.ch247-tools__nav a { text-decoration: none; }
+
+.ch247-tools__searchrow { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+.ch247-tools__searchrow input[type="search"] { flex: 1 1 16rem; }
+
+.ch247-tools__chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.5rem 0 1rem; }
+.ch247-chip {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  border: 1px solid var(--ch247-tools-border);
+  border-radius: 999px;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+.ch247-chip--active { border-color: var(--ch247-tools-accent); color: var(--ch247-tools-accent); }
+
+.ch247-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+.ch247-tool-card { display: flex; flex-direction: column; justify-content: space-between; padding: 1rem; border: 1px solid var(--ch247-tools-border); border-radius: 12px; background: var(--ch247-tools-surface); }
+.ch247-tool-card header { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; }
+.ch247-tool-card h2 { font-size: 1.05rem; margin: 0; }
+.ch247-tool-card footer { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; margin-top: 0.75rem; }
+
+.ch247-tools__hint { color: var(--ch247-tools-muted); font-size: 0.85rem; margin: 0.25rem 0; }
+.ch247-tools__message { font-weight: 500; }
+
+.ch247-tools__toolhead { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; }
+.ch247-tools__toolmeta { display: flex; align-items: center; gap: 0.5rem; }
+
+.ch247-tools__fields { display: grid; gap: 0.5rem; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.ch247-field { display: flex; flex-direction: column; gap: 0.25rem; }
+.ch247-field--textarea, .ch247-field--json { grid-column: 1 / -1; }
+.ch247-field label { font-weight: 600; font-size: 0.9rem; }
+.ch247-field input, .ch247-field select, .ch247-field textarea { width: 100%; padding: 0.45rem 0.55rem; border: 1px solid var(--ch247-tools-border); border-radius: 8px; background: transparent; color: inherit; }
+.ch247-tools__actions { display: flex; gap: 0.5rem; margin: 1rem 0; }
+
+.ch247-tools__result { border: 1px solid var(--ch247-tools-border); border-radius: 12px; padding: 1rem; margin-top: 1rem; }
+.ch247-tools__resulthead { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.ch247-tools__rows { display: grid; gap: 0.25rem; margin: 0.75rem 0; }
+.ch247-tools__row { display: grid; grid-template-columns: minmax(10rem, 22%) 1fr; gap: 0.75rem; padding: 0.3rem 0; border-bottom: 1px dotted var(--ch247-tools-border); }
+.ch247-tools__row dt { font-weight: 600; color: var(--ch247-tools-muted); }
+.ch247-tools__row dd { margin: 0; word-break: break-word; }
+.ch247-tools code, .ch247-tools pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.85rem; }
+.ch247-tools pre { white-space: pre-wrap; word-break: break-word; background: rgba(15, 23, 42, 0.06); padding: 0.6rem; border-radius: 8px; overflow-x: auto; }
+
+.ch247-tools__warnings { border-left: 3px solid #d97706; padding-left: 0.75rem; margin: 0.75rem 0; }
+.ch247-tools__warnings li { margin-bottom: 0.25rem; }
+.ch247-tools__notice summary, .ch247-tools__raw summary { cursor: pointer; font-weight: 600; }
+.ch247-tools__resultfoot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem; margin-top: 0.75rem; }
+
+.ch247-table-wrap { overflow-x: auto; }
+.ch247-table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; }
+.ch247-table caption { text-align: left; color: var(--ch247-tools-muted); font-size: 0.85rem; padding-bottom: 0.4rem; }
+.ch247-table th, .ch247-table td { text-align: left; padding: 0.4rem 0.5rem; border-bottom: 1px solid var(--ch247-tools-border); vertical-align: top; }
+.ch247-badge { display: inline-block; padding: 0.1rem 0.5rem; border-radius: 999px; font-size: 0.78rem; border: 1px solid currentColor; }
+.ch247-badge--success { color: #0f7b4f; }
+.ch247-badge--warning { color: #b45309; }
+.ch247-badge--danger { color: #b91c1c; }
+.ch247-badge--muted { color: var(--ch247-tools-muted); }
+.ch247-badge--info { color: var(--ch247-tools-accent); }
+
+.ch247-tools__context, .ch247-tools__section, .ch247-tools__tableblock { margin: 1rem 0; }
+.ch247-inline-form { display: inline-block; margin: 0; }
+
+/* Mobile: tables become labelled cards, exactly as the specification requires. */
+@media (max-width: 720px) {
+  .ch247-table thead { display: none; }
+  .ch247-table, .ch247-table tbody, .ch247-table tr, .ch247-table td { display: block; width: 100%; }
+  .ch247-table tr { border: 1px solid var(--ch247-tools-border); border-radius: 10px; margin-bottom: 0.6rem; padding: 0.4rem; }
+  .ch247-table td { border: 0; padding: 0.25rem 0.3rem; }
+  .ch247-table td::before { content: attr(data-label) ": "; font-weight: 600; color: var(--ch247-tools-muted); }
+  .ch247-tools__row { grid-template-columns: 1fr; }
+}
+
+/* Print / PDF export view: the browser's print pipeline is the PDF engine. */
+@media print {
+  .ch247-tools__nav, .ch247-tools__chips, .ch247-tools__actions, .ch247-button, form { display: none !important; }
+  .ch247-tools__print { color: #000; }
+  .ch247-tools__row { border-bottom: 1px solid #ccc; }
+}

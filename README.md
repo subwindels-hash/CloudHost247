@@ -138,6 +138,7 @@ under `docs/independent-rebuild/` and covered by the release gate
 | **CloudHost247 Marketing** | addon | `modules/addons/cloudhost247_marketing/` (native email marketing: campaigns, subscribers, segments, visual builder, queue-based cPanel SMTP delivery, tracking, suppression, automation; cPanel SMTP credentials live in API & Integrations as `cpanel_smtp`; docs: `docs/independent-rebuild/EMAIL-MARKETING.md`) |
 | CloudHost247 Currency | addon | `modules/addons/cloudhost247_currency/` |
 | CloudHost247 OVH | addon / server | `modules/addons/cloudhost247_ovh/`, `modules/servers/cloudhost247_ovh/` |
+| **CloudHost247 Network & Developer Tools** | addon | `modules/addons/cloudhost247_network_tools/` (native multi-provider platform: DNS propagation/lookup/health/MX/SPF/DMARC/DKIM/DNSSEC/DS/BIMI, IP lookup/WHOIS/blacklist, network subnet/ping/traceroute/port/MAC/ASN/speed, developer and webmaster tools, security and productivity tools; client front controller `tools.php`, REST `modules/addons/cloudhost247_network_tools/api/index.php`, cron `crons/cloudhost247_network_tools.php`, 17 tables `mod_cloudhost247_nt_*`, docs: `docs/tools/`) |
 | CloudHost247 Theme | addon | `modules/addons/cloudhost247_theme/` |
 | Secure RDP provisioning | server | `modules/servers/RDP/` |
 
