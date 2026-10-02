@@ -92,6 +92,7 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0063_create_domain_services_foundation.sql',
     '0064_relax_domain_extensions_shape.sql',
     '0065_create_domain_availability_watches.sql',
+    '0066_add_provider_record_id_to_dns_records.sql',
   ];
 
   it('finds the committed migration files in order', () => {

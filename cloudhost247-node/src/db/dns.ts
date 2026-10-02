@@ -45,13 +45,14 @@ export async function createDnsZone(db: Queryable, input: CreateDnsZoneInput): P
     [id, input.userId, input.domainName, provider, nameservers, JSON.stringify(metadata)]
   );
 
-  // Auto-seed default SOA and NS records for internal zone
-  await db.query(
-    `INSERT INTO dns_records (id, zone_id, name, type, content, ttl) VALUES
-      ($1, $2, '@', 'NS', 'ns1.cloudhost247.com', 86400),
-      ($3, $2, '@', 'NS', 'ns2.cloudhost247.com', 86400)`,
-    [randomUUID(), id, randomUUID()]
-  );
+  // Seed the zone's apex NS records from the nameservers actually in effect: the platform pair for
+  // the internal engine, or the provider's delegation for an external connector (A11).
+  for (const nameserver of nameservers) {
+    await db.query(
+      `INSERT INTO dns_records (id, zone_id, name, type, content, ttl) VALUES ($1, $2, '@', 'NS', $3, 86400)`,
+      [randomUUID(), id, nameserver]
+    );
+  }
 
   return rows[0]!;
 }
@@ -88,10 +89,10 @@ export async function createDnsRecord(db: Queryable, input: CreateDnsRecordInput
   const status = input.status ?? 'ACTIVE';
 
   const { rows } = await db.query<DnsRecordRow>(
-    `INSERT INTO dns_records (id, zone_id, name, type, content, ttl, priority, proxied, status)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+    `INSERT INTO dns_records (id, zone_id, name, type, content, ttl, priority, proxied, status, provider_record_id)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
      RETURNING *`,
-    [id, input.zoneId, input.name, input.type, input.content, ttl, priority, proxied, status]
+    [id, input.zoneId, input.name, input.type, input.content, ttl, priority, proxied, status, input.providerRecordId ?? null]
   );
   return rows[0]!;
 }
@@ -106,8 +107,9 @@ export async function updateDnsRecord(
 
   const { rows } = await db.query<DnsRecordRow>(
     `UPDATE dns_records
-     SET name = $1, type = $2, content = $3, ttl = $4, priority = $5, proxied = $6, status = $7, updated_at = now()
-     WHERE id = $8
+     SET name = $1, type = $2, content = $3, ttl = $4, priority = $5, proxied = $6, status = $7,
+         provider_record_id = $8, updated_at = now()
+     WHERE id = $9
      RETURNING *`,
     [
       patch.name ?? current.name,
@@ -117,6 +119,7 @@ export async function updateDnsRecord(
       patch.priority !== undefined ? patch.priority : current.priority,
       patch.proxied !== undefined ? patch.proxied : current.proxied,
       patch.status ?? current.status,
+      patch.providerRecordId !== undefined ? patch.providerRecordId : current.provider_record_id,
       id,
     ]
   );

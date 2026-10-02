@@ -1205,3 +1205,47 @@ sub-phase before the next one begins.
 - **Nothing about authorization changed.** `docs/PROPOSED_SCOPE_WEBHOOK_PIPELINE.md` keeps its
   "NOT AUTHORIZED · NOT IMPLEMENTED · NOT DEPLOYED" stamp, migration 0024 remains prepared-only, PR #12
   remains open and unmerged, and no production database, credential, or financial record was touched.
+
+## A11 — DNS live connectors (Cloudflare, Route 53): wired, and honest about their limits
+
+- **Source/local verification:** PASSED on branch `arena/01a0f9c1-cloudhost247`.
+  - **New migration artifact (additive):** `0066_add_provider_record_id_to_dns_records.sql` — one
+    nullable `provider_record_id` column plus a partial index. It is needed because Cloudflare
+    addresses records by its own record id and Route 53 record sets are identified by (name, type);
+    without it, an update or delete from the portal could not name the live record.
+- **Both connectors are real, and they were dead code before this unit.** `src/dns/providers.ts`
+  advertised Cloudflare and Route 53 while every live call threw
+  `SERVICE_UNAVAILABLE: … live API connector is unconfigured in this environment`, and the API
+  accepted any provider string and stored it — so a zone marked `CLOUDFLARE` never existed at
+  Cloudflare, and nothing said so.
+- **Cloudflare reuses the existing integration** (`src/integrations/cloudflare/*`): the vault-backed
+  account row, the shared client with its retries/timeouts/API-log sink, and `ensureZone`'s
+  search-then-create idempotency. Zones are created at Cloudflare **first** and only recorded
+  locally once they exist, with Cloudflare's own nameservers stored and mirrored as the apex NS
+  records. Records are created/updated/deleted by Cloudflare's record id, which is persisted.
+  Types Cloudflare's DNS module does not serve (PTR, SOA) are refused with the reason and proxying is
+  only offered for A/AAAA/CNAME.
+- **Route 53 speaks Route 53's contract, not a per-record fiction** (`@aws-sdk/client-route-53`,
+  matching the EC2 adapter's SDK + injectable-transport pattern): a record's identity is
+  `name|type`, every change carries the complete deployed values (update/delete read the live record
+  set first), MX/SRV priority is folded into the value exactly once, TXT values are quoted and
+  chunked, target names are written fully qualified, and a TTL below Route 53's minimum of 60 (it has
+  no "automatic" TTL) is refused rather than quietly changed. Renaming or changing a record's type is
+  refused as a different record set. `deleteZone` on a non-empty zone surfaces Route 53's
+  `HostedZoneNotEmpty` as a conflict, mapped alongside auth, throttling and "already exists" cases
+  by a documented error taxonomy (`src/dns/errors.ts`).
+- **Fail-closed, with no silent fallbacks.** Both connectors refuse every operation before any network
+  call when credentials are absent (503 `DNS_PROVIDER_CONFIGURATION_REQUIRED`, non-retryable), a
+  provider name with no connector in this build is refused non-retryably (never a fallback to the
+  internal engine, never a mock), and a zone recorded as an external provider with no attached remote
+  zone refuses record changes instead of pretending to be internal. Cloudflare's "no active account"
+  failure is translated to the same 503 — the API never reports success without a live record.
+- **What is still not claimed:** out-of-band drift (records edited directly in Cloudflare or Route 53)
+  is not reconciled back into the mirror, and live-account verification against real Cloudflare/Route 53
+  credentials is still owed; the connectors are exercised against scripted provider layers, as the
+  Cloudflare integration's own suites are.
+- **Tests:** `tests/unit/dns-route53-connector.test.ts` (19: value shaping, record-set addressing,
+  exact-value delete, fail-closed guard with an untouched transport, error taxonomy, provider
+  selection) and `tests/integration/dns-external-providers.test.ts` (8: fail-closed with no zone row
+  written, real zone + record create/update/delete through the API, zone reuse, PTR refusal with zero
+  live calls, Route 53 zone and record set, unknown provider refusal, internal engine unchanged).

@@ -1,15 +1,17 @@
 /**
  * DNS Provider Adapters.
  *
- * Implements authoritative DNS propagation across internal database engine and external providers
- * (Cloudflare, Route53, Hetzner DNS) with fail-closed behavior when credentials are unconfigured.
+ * Three connectors exist in this build:
+ *   INTERNAL  — the platform's own authoritative engine, stored in `dns_zones` / `dns_records`.
+ *   CLOUDFLARE — the vault-backed Cloudflare integration (real zones and records).
+ *   ROUTE53    — the AWS Route 53 integration (real hosted zones and record sets).
+ *
+ * Anything else is refused before a call is made. There is no silent fallback to INTERNAL (a typo
+ * must never quietly keep a customer's DNS on a provider they did not choose) and no simulated
+ * provider data. Each connector fails closed with DNS_PROVIDER_CONFIGURATION_REQUIRED until its
+ * credentials are configured.
  */
-
-import type {
-  DnsProvider,
-  CreateDnsRecordInput,
-  UpdateDnsRecordInput,
-} from './types';
+import type { DnsProvider, CreateDnsRecordInput, UpdateDnsRecordInput } from './types';
 import type { Queryable } from '../db/types';
 import {
   createDnsZone,
@@ -18,6 +20,9 @@ import {
   updateDnsRecord,
   deleteDnsRecord,
 } from '../db/dns';
+import { CloudflareDnsProvider, type CloudflareDnsSeam } from './cloudflare-provider';
+import { Route53DnsProvider, type Route53Transport } from './route53-provider';
+import { unsupportedDnsOperation } from './errors';
 
 export class DatabaseDnsProvider implements DnsProvider {
   readonly name = 'INTERNAL';
@@ -47,94 +52,47 @@ export class DatabaseDnsProvider implements DnsProvider {
   }
 }
 
-export class CloudflareDnsProvider implements DnsProvider {
-  readonly name = 'CLOUDFLARE';
+export const SUPPORTED_DNS_PROVIDERS = ['INTERNAL', 'CLOUDFLARE', 'ROUTE53'] as const;
+export type SupportedDnsProvider = (typeof SUPPORTED_DNS_PROVIDERS)[number];
 
-  constructor(private readonly apiToken?: string) {}
-
-  private checkConfigured(): string {
-    const token = this.apiToken ?? process.env.CLOUDFLARE_API_TOKEN;
-    if (!token) {
-      throw new Error('CONFIGURATION_REQUIRED: CLOUDFLARE_API_TOKEN is required for Cloudflare DNS provider integration.');
-    }
-    return token;
-  }
-
-  async createZone(domainName: string): Promise<{ zoneId: string; nameservers: string[] }> {
-    this.checkConfigured();
-    throw new Error('SERVICE_UNAVAILABLE: Cloudflare live API connector is unconfigured in this environment.');
-  }
-
-  async deleteZone(zoneId: string): Promise<void> {
-    this.checkConfigured();
-    throw new Error('SERVICE_UNAVAILABLE: Cloudflare live API connector is unconfigured in this environment.');
-  }
-
-  async createRecord(zoneId: string, record: CreateDnsRecordInput): Promise<{ recordId: string }> {
-    this.checkConfigured();
-    throw new Error('SERVICE_UNAVAILABLE: Cloudflare live API connector is unconfigured in this environment.');
-  }
-
-  async updateRecord(zoneId: string, recordId: string, record: UpdateDnsRecordInput): Promise<void> {
-    this.checkConfigured();
-    throw new Error('SERVICE_UNAVAILABLE: Cloudflare live API connector is unconfigured in this environment.');
-  }
-
-  async deleteRecord(zoneId: string, recordId: string): Promise<void> {
-    this.checkConfigured();
-    throw new Error('SERVICE_UNAVAILABLE: Cloudflare live API connector is unconfigured in this environment.');
-  }
+export function isSupportedDnsProvider(name: string): name is SupportedDnsProvider {
+  return (SUPPORTED_DNS_PROVIDERS as readonly string[]).includes(name.toUpperCase());
 }
 
-export class Route53DnsProvider implements DnsProvider {
-  readonly name = 'ROUTE53';
-
-  constructor(private readonly accessKey?: string, private readonly secretKey?: string) {}
-
-  private checkConfigured() {
-    const key = this.accessKey ?? process.env.AWS_ACCESS_KEY_ID;
-    const secret = this.secretKey ?? process.env.AWS_SECRET_ACCESS_KEY;
-    if (!key || !secret) {
-      throw new Error('CONFIGURATION_REQUIRED: AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY are required for Route53 DNS integration.');
-    }
-  }
-
-  async createZone(domainName: string): Promise<{ zoneId: string; nameservers: string[] }> {
-    this.checkConfigured();
-    throw new Error('SERVICE_UNAVAILABLE: AWS Route53 live API connector is unconfigured in this environment.');
-  }
-
-  async deleteZone(zoneId: string): Promise<void> {
-    this.checkConfigured();
-    throw new Error('SERVICE_UNAVAILABLE: AWS Route53 live API connector is unconfigured in this environment.');
-  }
-
-  async createRecord(zoneId: string, record: CreateDnsRecordInput): Promise<{ recordId: string }> {
-    this.checkConfigured();
-    throw new Error('SERVICE_UNAVAILABLE: AWS Route53 live API connector is unconfigured in this environment.');
-  }
-
-  async updateRecord(zoneId: string, recordId: string, record: UpdateDnsRecordInput): Promise<void> {
-    this.checkConfigured();
-    throw new Error('SERVICE_UNAVAILABLE: AWS Route53 live API connector is unconfigured in this environment.');
-  }
-
-  async deleteRecord(zoneId: string, recordId: string): Promise<void> {
-    this.checkConfigured();
-    throw new Error('SERVICE_UNAVAILABLE: AWS Route53 live API connector is unconfigured in this environment.');
-  }
+export interface DnsProviderOverrides {
+  /** Already-resolved Cloudflare client + account id (tests, or callers that resolved already). */
+  cloudflare?: CloudflareDnsSeam;
+  /** Injected Route 53 transport (tests); production builds the real client from the environment. */
+  route53?: Route53Transport;
+  /** Environment the Route 53 client reads credentials from. Defaults to process.env. */
+  route53Env?: NodeJS.ProcessEnv;
 }
 
-export function createDnsProvider(providerName: string, db: Queryable): DnsProvider {
-  switch (providerName.toUpperCase()) {
+/**
+ * Builds the connector for a provider name. An unsupported name is a hard, non-retryable refusal —
+ * never a fallback to another provider, and never a mock.
+ */
+export function createDnsProvider(
+  providerName: string,
+  db: Queryable,
+  overrides: DnsProviderOverrides = {},
+): DnsProvider {
+  const normalized = providerName.trim().toUpperCase();
+  switch (normalized) {
     case 'INTERNAL':
     case 'DEFAULT':
       return new DatabaseDnsProvider(db);
     case 'CLOUDFLARE':
-      return new CloudflareDnsProvider();
+      return new CloudflareDnsProvider(db, overrides.cloudflare);
     case 'ROUTE53':
-      return new Route53DnsProvider();
+      return new Route53DnsProvider(overrides.route53Env ?? process.env, overrides.route53);
     default:
-      return new DatabaseDnsProvider(db);
+      throw unsupportedDnsOperation(
+        normalized || providerName,
+        'no DNS connector is implemented for this provider in this build',
+      );
   }
 }
+
+export { CloudflareDnsProvider, Route53DnsProvider };
+export type { CloudflareDnsSeam, Route53Transport };

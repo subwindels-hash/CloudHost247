@@ -39,6 +39,8 @@ export interface DnsRecordRow {
   priority: number | null;
   proxied: boolean;
   status: DnsRecordStatus;
+  /** The external provider's identifier for this record; null on the internal engine. */
+  provider_record_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -60,6 +62,8 @@ export interface CreateDnsRecordInput {
   priority?: number | null;
   proxied?: boolean;
   status?: DnsRecordStatus;
+  /** The external provider's identifier for this record; null for the internal engine. */
+  providerRecordId?: string | null;
 }
 
 export interface UpdateDnsRecordInput {
@@ -70,6 +74,8 @@ export interface UpdateDnsRecordInput {
   priority?: number | null;
   proxied?: boolean;
   status?: DnsRecordStatus;
+  /** Set when the connector's identifier for the record changes (for example after a re-resolve). */
+  providerRecordId?: string | null;
 }
 
 export interface DnsProvider {
@@ -79,4 +85,10 @@ export interface DnsProvider {
   createRecord(zoneId: string, record: CreateDnsRecordInput): Promise<{ recordId: string }>;
   updateRecord(zoneId: string, recordId: string, record: UpdateDnsRecordInput): Promise<void>;
   deleteRecord(zoneId: string, recordId: string): Promise<void>;
+  /**
+   * The provider's own identifier for a (name, type) pair, used only as a fallback for rows that
+   * were created before the connector was wired. Returns null when no such record exists, and
+   * refuses when the pair is ambiguous rather than guessing (see the connector implementations).
+   */
+  resolveRecordId?(zoneId: string, name: string, type: DnsRecordType): Promise<string | null>;
 }

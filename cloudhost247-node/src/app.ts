@@ -39,6 +39,7 @@ import { registerMonitoringRoutes } from './routes/monitoring';
 import { registerProvisioningRoutes } from './routes/provisioning';
 import { registerAuditRoutes } from './routes/audit';
 import { registerDnsRoutes } from './routes/dns';
+import type { DnsProviderOverrides } from './dns/providers';
 import { registerSslRoutes } from './routes/ssl';
 import { registerFirewallRoutes } from './routes/firewall';
 import { registerRevenueGuardianRoutes } from './revenue-guardian/controllers/routes';
@@ -55,6 +56,8 @@ export interface BuildAppOptions {
   publicDir?: string;
   /** Test-only: substitute a real embedded Postgres engine instead of the live pg Pool. */
   pool?: Queryable;
+  /** Test-only: inject DNS connector transports instead of the live vault/environment clients. */
+  dnsProviders?: DnsProviderOverrides;
 }
 
 /**
@@ -160,7 +163,7 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     await registerMonitoringRoutes(instance, env, pool);
     await registerProvisioningRoutes(instance, env, pool);
     await registerAuditRoutes(instance, env, pool);
-    await registerDnsRoutes(instance, env, pool);
+    await registerDnsRoutes(instance, env, pool, { providers: options.dnsProviders });
     await registerSslRoutes(instance, env, pool);
     await registerFirewallRoutes(instance, env, pool);
 
