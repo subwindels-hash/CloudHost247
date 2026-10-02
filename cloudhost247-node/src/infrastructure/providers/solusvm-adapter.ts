@@ -26,7 +26,6 @@ import {
   planMetadataString,
   requirePlanMetadataString,
   requireSecureBaseUrl,
-  unsupportedRescue,
 } from './common';
 import { providerRequest } from './http';
 import {
@@ -38,6 +37,8 @@ import {
   type ProviderImage,
   type ProviderServer,
   type ReinstallProviderServerInput,
+  type RescueRequest,
+  type RescueSession,
 } from './types';
 
 interface SolusResponse extends Record<string, unknown> {
@@ -262,8 +263,57 @@ export class SolusvmProviderAdapter implements InfrastructureProviderAdapter {
     return this.getServerStatus(input.providerServerId);
   }
 
-  async enableRescue(): Promise<never> { return unsupportedRescue('solusvm'); }
-  async disableRescue(): Promise<never> { return unsupportedRescue('solusvm'); }
+  /**
+   * Enters SolusVM's rescue system via the documented Admin API v1 `vserver-rescue` action
+   * (docs.solusvm.com/v1/api/admin/virtual-server-functions/Rescue+Mode.html).
+   *
+   * `rescueenable` selects the rescue kernel: 1 = 4.x 64-bit, 2 = 3.x 64-bit, 3 = 3.x 32-bit. Those
+   * are the only kernels SolusVM offers, and all of them are x86 — an arm64 server therefore has no
+   * rescue system to boot into, and this refuses rather than booting the wrong architecture.
+   *
+   * Enabling rescue reboots the virtual server (SolusVM states this explicitly for the same
+   * operation in the admin panel), so `rebooted: true` is a fact about the call, not an assumption.
+   * The returned password is a one-time credential: it is handed to the requester and never stored.
+   */
+  async enableRescue(providerServerId: string, input: RescueRequest): Promise<RescueSession> {
+    if (input.architecture !== 'x86_64') {
+      throw new ProviderError(
+        'UNSUPPORTED_OPERATION',
+        'SolusVM offers only x86 rescue kernels (4.x 64-bit, 3.x 64-bit, 3.x 32-bit); there is no arm64 rescue system to boot',
+        false
+      );
+    }
+    const response = await this.call('vserver-rescue', { vserverid: providerServerId, rescueenable: 1 });
+    const user = typeof response.user === 'string' && response.user.length > 0 ? response.user : null;
+    if (!user) {
+      // SolusVM answers success with the access details; without a login user there is nothing
+      // usable to hand back, and inventing one would send the customer to a locked rescue system.
+      throw new ProviderError(
+        'PROVIDER_ERROR',
+        'SolusVM accepted the rescue request but returned no rescue login user',
+        false
+      );
+    }
+    const password = typeof response.password === 'string' && response.password.length > 0 ? response.password : undefined;
+    const port = response.port !== undefined && response.port !== null ? String(response.port) : null;
+    const ip = typeof response.ip === 'string' && response.ip.length > 0 ? response.ip : null;
+    const access = [ip ? `ip ${ip}` : null, port ? `port ${port}` : null].filter(Boolean).join(', ');
+    return {
+      type: '4.x kernel 64bit',
+      username: user,
+      password,
+      rebooted: true,
+      notes: `SolusVM rebooted the server into its rescue system${access ? ` (${access})` : ''}. The next restart boots the installed operating system again.`,
+    };
+  }
+
+  /**
+   * Leaves the rescue system. SolusVM's `rescuedisable` clears rescue; the installed operating
+   * system comes back on the next restart, which is SolusVM's documented way out of rescue.
+   */
+  async disableRescue(providerServerId: string): Promise<void> {
+    await this.call('vserver-rescue', { vserverid: providerServerId, rescuedisable: 'true' });
+  }
 
   async getConsole(providerServerId: string): Promise<Record<string, unknown>> {
     return asRecord(await this.call('vserver-console', { vserverid: providerServerId, access: 'enable', time: 2 }));

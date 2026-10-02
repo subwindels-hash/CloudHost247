@@ -209,8 +209,8 @@ export const ADAPTER_PROFILES: Record<AdapterKind, AdapterProfile> = {
       { key: 'providerNode', description: 'SolusVM node (or providerNodeGroup)', required: false },
       ...RESOURCE_METADATA,
     ],
-    capabilities: { reinstall: true, snapshot: false, resize: true, console: true, metrics: true, rescue: false },
-    notes: 'Admin API v1 (api/admin/command.php). Snapshots are not exposed by SolusVM 1.',
+    capabilities: { reinstall: true, snapshot: false, resize: true, console: true, metrics: true, rescue: true },
+    notes: 'Admin API v1 (api/admin/command.php). Snapshots are not exposed by SolusVM 1. Rescue uses the documented vserver-rescue action (rescueenable / rescuedisable) and returns the rescue login and one-time password; SolusVM offers only x86 rescue kernels, so an arm64 server is refused rather than booted into the wrong architecture.',
   },
   openstack: {
     kind: 'openstack',

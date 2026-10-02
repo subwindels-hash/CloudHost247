@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ContaboProviderAdapter } from '../../src/infrastructure/providers/contabo-adapter';
 import { MockProviderAdapter, resetMockProviderState } from '../../src/infrastructure/providers/mock-adapter';
 import { OvhProviderAdapter } from '../../src/infrastructure/providers/ovh-adapter';
+import { SolusvmProviderAdapter } from '../../src/infrastructure/providers/solusvm-adapter';
 import { ADAPTER_PROFILES } from '../../src/infrastructure/providers/configuration';
 import type { InfrastructureProviderRow } from '../../src/db/infrastructure-providers';
 
@@ -42,7 +43,7 @@ describe('rescue mode is implemented only where the provider API offers it', () 
     // generic_http is here because it delegates rescue to the operator's bridge on the same
     // action contract it already delegates reboot/resize/reinstall to — the bridge, not this
     // adapter, decides whether the underlying provider offers a rescue system.
-    expect(withRescue).toEqual(['contabo', 'generic_http', 'hetzner', 'mock', 'openstack', 'ovh']);
+    expect(withRescue).toEqual(['contabo', 'generic_http', 'hetzner', 'mock', 'openstack', 'ovh', 'solusvm']);
   });
 
   describe('Contabo', () => {
@@ -215,6 +216,82 @@ describe('rescue mode is implemented only where the provider API offers it', () 
       const adapter = new MockProviderAdapter(providerRow('mock', null), { NODE_ENV: 'test' } as NodeJS.ProcessEnv);
       await expect(adapter.enableRescue('mock-1', { architecture: 'x86_64' })).rejects.toMatchObject({
         code: 'CONFIGURATION_REQUIRED', retryable: false,
+      });
+    });
+  });
+
+  describe('SolusVM (Admin API v1)', () => {
+    const credentials = {
+      SOLUSVM_API_ID: 'admin-api-id',
+      SOLUSVM_API_KEY: 'admin-api-key',
+    } as NodeJS.ProcessEnv;
+
+    function installFetch(bodies: Array<Record<string, unknown>>) {
+      const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
+        const next = bodies.shift();
+        if (!next) throw new Error(`Unexpected fetch to ${url}`);
+        return new Response(JSON.stringify(next), {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        });
+      });
+      vi.stubGlobal('fetch', fetchMock);
+      return fetchMock;
+    }
+
+    function adapter() {
+      return new SolusvmProviderAdapter(providerRow('solusvm', 'https://solus.test'), credentials);
+    }
+
+    it('boots the documented x86_64 rescue kernel and returns the login SolusVM issues', async () => {
+      const fetchMock = installFetch([{
+        status: 'success', statusmsg: 'Rescue mode enabled',
+        password: 'ZkBa5SKtY7MiQT6', user: 'root', port: '22', ip: '203.0.113.7',
+      }]);
+
+      const session = await adapter().enableRescue('2041', { architecture: 'x86_64' });
+
+      const [url, init] = fetchMock.mock.calls[0]!;
+      expect(String(url)).toBe('https://solus.test/api/admin/command.php');
+      const form = new URLSearchParams(String(init?.body));
+      expect(form.get('action')).toBe('vserver-rescue');
+      expect(form.get('vserverid')).toBe('2041');
+      expect(form.get('rescueenable')).toBe('1');
+      expect(form.get('rdtype')).toBe('json');
+      // Enabling rescue reboots the virtual server; the adapter reports that rather than guessing.
+      expect(session.rebooted).toBe(true);
+      expect(session.username).toBe('root');
+      expect(session.password).toBe('ZkBa5SKtY7MiQT6');
+      // The access details SolusVM returns must reach the customer, not be silently dropped.
+      expect(session.notes).toContain('203.0.113.7');
+      expect(session.notes).toContain('22');
+    });
+
+    it('refuses an arm64 server instead of booting an x86 rescue kernel into it', async () => {
+      const fetchMock = installFetch([]);
+
+      await expect(adapter().enableRescue('2041', { architecture: 'arm64' })).rejects.toMatchObject({
+        code: 'UNSUPPORTED_OPERATION',
+      });
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    it('leaves the rescue system with rescuedisable', async () => {
+      const fetchMock = installFetch([{ status: 'success', statusmsg: 'Rescue mode disabled' }]);
+
+      await adapter().disableRescue('2041');
+
+      const form = new URLSearchParams(String(fetchMock.mock.calls[0]![1]?.body));
+      expect(form.get('action')).toBe('vserver-rescue');
+      expect(form.get('vserverid')).toBe('2041');
+      expect(form.get('rescuedisable')).toBe('true');
+    });
+
+    it('does not fabricate a rescue login when SolusVM returns none', async () => {
+      installFetch([{ status: 'success', statusmsg: 'Rescue mode enabled', password: 'pw' }]);
+
+      await expect(adapter().enableRescue('2041', { architecture: 'x86_64' })).rejects.toMatchObject({
+        code: 'PROVIDER_ERROR',
       });
     });
   });

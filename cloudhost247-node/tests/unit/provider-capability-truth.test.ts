@@ -95,7 +95,6 @@ describe('adapter profiles tell the truth about their capabilities', () => {
       ['vultr', { name: 'Vultr', adapter: 'vultr', api_base_url: 'https://api.vultr.test/v2' }],
       ['proxmox', { name: 'Proxmox', adapter: 'proxmox', api_base_url: 'https://proxmox.test:8006' }],
       ['virtualizor', { name: 'Virtualizor', adapter: 'virtualizor', api_base_url: 'https://virtualizor.test:4085' }],
-      ['solusvm', { name: 'SolusVM', adapter: 'solusvm', api_base_url: 'https://solusvm.test:5656' }],
     ];
     for (const [, row] of rows) {
       expect(ADAPTER_PROFILES[row.adapter as keyof typeof ADAPTER_PROFILES].capabilities.rescue).toBe(false);
