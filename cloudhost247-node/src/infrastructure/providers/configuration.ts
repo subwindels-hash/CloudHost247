@@ -243,8 +243,8 @@ export const ADAPTER_PROFILES: Record<AdapterKind, AdapterProfile> = {
     requiresApiBaseUrl: true,
     credentials: [{ suffix: '_API_TOKEN', description: 'Bearer token for the operator-owned bridge', required: true }],
     planMetadata: [{ key: 'providerServerType', description: 'Plan identifier understood by the bridge', required: false }, ...RESOURCE_METADATA],
-    capabilities: { reinstall: true, snapshot: false, resize: false, console: true, metrics: true, rescue: false },
-    notes: 'For providers without a native adapter. The bridge is a real integration, never a simulator.',
+    capabilities: { reinstall: true, snapshot: false, resize: false, console: true, metrics: true, rescue: true },
+    notes: 'For providers without a native adapter. The bridge is a real integration, never a simulator. Rescue is delegated like every other action — POST /v1/servers/{id}/rescue returns the rescue system, login user, optional one-time password and whether the bridge rebooted the server, and POST /v1/servers/{id}/unrescue leaves it. A bridge that does not implement rescue answers with its own error; this adapter never invents a rescue session.',
   },
   mock: {
     kind: 'mock',

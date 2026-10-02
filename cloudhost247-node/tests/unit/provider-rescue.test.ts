@@ -39,7 +39,10 @@ describe('rescue mode is implemented only where the provider API offers it', () 
       .filter((profile) => profile.capabilities.rescue)
       .map((profile) => profile.kind)
       .sort();
-    expect(withRescue).toEqual(['contabo', 'hetzner', 'mock', 'openstack', 'ovh']);
+    // generic_http is here because it delegates rescue to the operator's bridge on the same
+    // action contract it already delegates reboot/resize/reinstall to — the bridge, not this
+    // adapter, decides whether the underlying provider offers a rescue system.
+    expect(withRescue).toEqual(['contabo', 'generic_http', 'hetzner', 'mock', 'openstack', 'ovh']);
   });
 
   describe('Contabo', () => {

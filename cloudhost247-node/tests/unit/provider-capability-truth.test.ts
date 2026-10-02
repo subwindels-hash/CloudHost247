@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AwsProviderAdapter } from '../../src/infrastructure/providers/aws-adapter';
 import { ContaboProviderAdapter } from '../../src/infrastructure/providers/contabo-adapter';
+import { GenericHttpProviderAdapter } from '../../src/infrastructure/providers/generic-http-adapter';
 import { ADAPTER_PROFILES } from '../../src/infrastructure/providers/configuration';
 import type { InfrastructureProviderRow } from '../../src/db/infrastructure-providers';
 
@@ -95,11 +96,71 @@ describe('adapter profiles tell the truth about their capabilities', () => {
       ['proxmox', { name: 'Proxmox', adapter: 'proxmox', api_base_url: 'https://proxmox.test:8006' }],
       ['virtualizor', { name: 'Virtualizor', adapter: 'virtualizor', api_base_url: 'https://virtualizor.test:4085' }],
       ['solusvm', { name: 'SolusVM', adapter: 'solusvm', api_base_url: 'https://solusvm.test:5656' }],
-      ['generic_http', { name: 'Bridge', adapter: 'generic_http', api_base_url: 'https://bridge.test' }],
     ];
     for (const [, row] of rows) {
       expect(ADAPTER_PROFILES[row.adapter as keyof typeof ADAPTER_PROFILES].capabilities.rescue).toBe(false);
     }
+  });
+
+  it('delegates generic_http rescue to the operator bridge and never fabricates a session', async () => {
+    const calls: Array<{ url: string; method: string; body: string }> = [];
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      calls.push({ url: String(input), method: init?.method ?? 'GET', body: String(init?.body ?? '') });
+      return new Response(
+        JSON.stringify({ type: 'bridge-rescue', username: 'root', password: 'one-time', rebooted: true }),
+        { status: 200, headers: { 'content-type': 'application/json' } }
+      );
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const adapter = new GenericHttpProviderAdapter(
+      {
+        id: 'p-1', name: 'Bridge', slug: 'bridge', provider_type: 'BRIDGE', adapter: 'generic_http',
+        status: 'ACTIVE', api_base_url: 'https://bridge.test', credential_env_prefix: 'BRIDGE',
+        capabilities: {}, metadata: {}, last_health_check_at: null, last_health_status: null,
+        created_at: '', updated_at: '',
+      },
+      { BRIDGE_API_TOKEN: 'token' } as NodeJS.ProcessEnv
+    );
+
+    const session = await adapter.enableRescue('srv-1', { architecture: 'x86_64', providerSshKeyIds: [7] });
+    expect(session).toEqual({ type: 'bridge-rescue', username: 'root', password: 'one-time', rebooted: true });
+    expect(calls[0]).toMatchObject({ url: 'https://bridge.test/v1/servers/srv-1/rescue', method: 'POST' });
+    expect(JSON.parse(calls[0].body)).toEqual({ architecture: 'x86_64', providerSshKeyIds: [7] });
+
+    await adapter.disableRescue('srv-1');
+    expect(calls[1]).toMatchObject({ url: 'https://bridge.test/v1/servers/srv-1/unrescue', method: 'POST' });
+  });
+
+  it('refuses a bridge rescue response that names no rescue system, and does not claim a reboot it was not told about', async () => {
+    const fetchMock = vi.fn(async () =>
+      new Response(JSON.stringify({ rebooted: false }), { status: 200, headers: { 'content-type': 'application/json' } })
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    const adapter = new GenericHttpProviderAdapter(
+      {
+        id: 'p-1', name: 'Bridge', slug: 'bridge', provider_type: 'BRIDGE', adapter: 'generic_http',
+        status: 'ACTIVE', api_base_url: 'https://bridge.test', credential_env_prefix: 'BRIDGE',
+        capabilities: {}, metadata: {}, last_health_check_at: null, last_health_status: null,
+        created_at: '', updated_at: '',
+      },
+      { BRIDGE_API_TOKEN: 'token' } as NodeJS.ProcessEnv
+    );
+    await expect(adapter.enableRescue('srv-1', { architecture: 'x86_64' })).rejects.toMatchObject({
+      code: 'PROVIDER_ERROR',
+      retryable: false,
+    });
+
+    // A well-formed response that omits `rebooted` must report false, never an assumed reboot.
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ type: 'linux64', username: 'root' }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      })
+    );
+    const session = await adapter.enableRescue('srv-1', { architecture: 'x86_64' });
+    expect(session.rebooted).toBe(false);
+    expect(session.password).toBeUndefined();
   });
 
   it('refuses the AWS replacement workflows until the deployment opts in', async () => {
