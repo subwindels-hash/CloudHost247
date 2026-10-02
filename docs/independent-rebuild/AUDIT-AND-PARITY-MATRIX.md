@@ -144,7 +144,7 @@ The detailed legacy-theme comparison is maintained in `PHASE-2-LEGACY-PARITY.md`
 
 **Implemented in source:** independent client/cart themes, responsive visual system, real settings-to-client CSS/output path, authenticated/CSRF-protected CMS administration, publish/draft content, ordered sections, banners, testimonials, nested navigation, footer blocks, per-page SEO title/description, custom WHMCS ClientArea page route, native account/cart inheritance, output escaping and HTML allowlisting.
 
-**Partial:** localized CMS, dedicated product-query landing components, sitemap, OG metadata, visual preview and drag/drop ordering. Numeric section ordering is the practical builder currently delivered. **Staging-blocked:** every browser/runtime assertion, WHMCS menu/head/footer hook behavior, auth/account/cart workflows and screenshots. These are not marked runtime-verified.
+**Implemented since that record:** localized CMS, sitemap and Open Graph metadata; the product-query landing component (the theme renders products through the page builder's read-only catalogue reader, one bounded query, and says so when the catalogue is unavailable instead of inventing a price); a visual preview of unsaved settings and content that emits the live custom properties; and drag-and-drop ordering that posts a validated permutation, with a numeric fallback for no-JavaScript admins. Block composition — layout template, assigned pages and widgets — is authorable, which the theme template already consumed but the form never wrote. **Staging-blocked:** every browser/runtime assertion, WHMCS menu/head/footer hook behavior, auth/account/cart workflows and screenshots. These are not marked runtime-verified.
 
 ## Independent currency implementation update — 2026-09-27
 
@@ -166,7 +166,8 @@ OVH partials were reduced with catalog normalization, discovered options, explic
 
 | Area | Source status | Runtime status |
 |---|---|---|
-| Localized CMS and safe preview | IMPLEMENTED with base fallback and sanitizer | BLOCKED — STAGING REQUIRED |
+| Localized CMS and safe preview | IMPLEMENTED with base fallback and sanitizer; visual preview of unsaved values | BLOCKED — STAGING REQUIRED |
+| Landing product components and ordering | IMPLEMENTED through the page builder reader; drag-and-drop ordering validated server-side | BLOCKED — STAGING REQUIRED |
 | Admin capability restrictions | IMPLEMENTED over WHMCS addon-role access | BLOCKED — STAGING REQUIRED |
 | OVH regional/product normalization | IMPLEMENTED conservatively for returned fields | BLOCKED — STAGING REQUIRED |
 | Source-price extraction | IMPLEMENTED only for exactly one numeric/currency candidate | BLOCKED — STAGING REQUIRED |

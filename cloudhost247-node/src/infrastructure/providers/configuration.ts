@@ -102,7 +102,7 @@ export const ADAPTER_PROFILES: Record<AdapterKind, AdapterProfile> = {
     ],
     planMetadata: [{ key: 'providerServerType', description: 'EC2 instance type', required: true }, ...RESOURCE_METADATA],
     capabilities: { reinstall: false, snapshot: true, resize: true, console: true, metrics: false, rescue: false },
-    notes: 'Native EC2 adapter uses the AWS SDK Signature Version 4 client. Reinstall and root-volume restore require an explicit replacement-instance workflow and are intentionally unavailable; CloudWatch metrics require separately scoped permissions.'
+    notes: 'Native EC2 adapter uses the AWS SDK Signature Version 4 client. Reinstall (replacement instance) and root-volume restore (snapshot onto the existing root device) are implemented but stay disabled until the deployment sets AWS_ALLOW_ROOT_VOLUME_REPLACEMENT=true; the previous instance is stopped, never terminated, and the detached root volume is kept. CloudWatch metrics require separately scoped permissions.'
   },
   contabo: {
     kind: 'contabo',
@@ -126,8 +126,8 @@ export const ADAPTER_PROFILES: Record<AdapterKind, AdapterProfile> = {
       { key: 'contaboLicense', description: 'Optional Contabo license code', required: false },
       ...RESOURCE_METADATA,
     ],
-    capabilities: { reinstall: true, snapshot: true, resize: false, console: false, metrics: false, rescue: false },
-    notes: 'Native Compute API with cached in-memory OAuth2 tokens, lifecycle actions, image validation, in-place reinstall and snapshots. The platform refuses scheduled Contabo cancellation as DELETE, because it is not immediate resource destruction.',
+    capabilities: { reinstall: true, snapshot: true, resize: false, console: false, metrics: false, rescue: true },
+    notes: 'Native Compute API with cached in-memory OAuth2 tokens, lifecycle actions, image validation, in-place reinstall and snapshots. Rescue posts /compute/instances/{id}/actions/rescue; because Contabo takes secret ids (not key material or plaintext passwords) the adapter reuses the template SSH-key secrets when present, otherwise it stores a freshly generated one-time password as a Contabo secret. Leaving rescue is Contabo\'s next restart. The platform refuses scheduled Contabo cancellation as DELETE, because it is not immediate resource destruction.',
   },
   ovh: {
     kind: 'ovh',
@@ -147,8 +147,8 @@ export const ADAPTER_PROFILES: Record<AdapterKind, AdapterProfile> = {
       { key: 'providerSshKeyId', description: 'Optional OVH SSH key id injected in addition to customer keys', required: false },
       ...RESOURCE_METADATA,
     ],
-    capabilities: { reinstall: true, snapshot: true, resize: true, console: true, metrics: true, rescue: false },
-    notes: 'Signed OVH v1 API against /cloud/project/{id}/instance. Instances are named from the job idempotency key and looked up before creation.',
+    capabilities: { reinstall: true, snapshot: true, resize: true, console: true, metrics: true, rescue: true },
+    notes: 'Signed OVH v1 API against /cloud/project/{id}/instance. Instances are named from the job idempotency key and looked up before creation. Rescue is the instance boot mode (POST .../rescueMode with rescue:true/false); the one-time root password is read from the instance resource as rescuePassword and is never persisted.',
   },
   proxmox: {
     kind: 'proxmox',
@@ -256,8 +256,8 @@ export const ADAPTER_PROFILES: Record<AdapterKind, AdapterProfile> = {
       { suffix: '_UNUSED', description: 'No credentials. Requires ALLOW_MOCK_PROVIDER=true and a non-production NODE_ENV.', required: false },
     ],
     planMetadata: RESOURCE_METADATA,
-    capabilities: { reinstall: true, snapshot: true, resize: true, console: false, metrics: false, rescue: false },
-    notes: 'Never selected automatically and disabled in production. Mock resources are labelled mock:true with mock- ids.',
+    capabilities: { reinstall: true, snapshot: true, resize: true, console: false, metrics: false, rescue: true },
+    notes: 'Never selected automatically and disabled in production. Mock resources are labelled mock:true with mock- ids. Rescue is simulated in the same state machine so the full request flow can be exercised without a provider.',
   },
 };
 
@@ -276,6 +276,14 @@ export interface ProviderConfigurationReport {
   ready: boolean;
   missing: string[];
 }
+
+/**
+ * Every adapter kind this build implements, in one place. The admin API's accepted values are
+ * derived from this list (not from a second hand-kept copy), so a provider row can never be saved
+ * with an adapter that has no implementation — and the registry's fail-closed fallback stays a
+ * last-resort guard for rows that predate or bypass the API rather than the normal path.
+ */
+export const ADAPTER_KINDS = Object.keys(ADAPTER_PROFILES) as AdapterKind[];
 
 export function getAdapterProfile(adapter: string): AdapterProfile | null {
   return ADAPTER_PROFILES[adapter as AdapterKind] ?? null;

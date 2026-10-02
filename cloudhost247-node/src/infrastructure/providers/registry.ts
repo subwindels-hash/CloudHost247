@@ -30,10 +30,16 @@ import { VultrProviderAdapter } from './vultr-adapter';
 class UnavailableNativeProviderAdapter implements InfrastructureProviderAdapter {
   readonly kind: string;
   constructor(readonly provider: InfrastructureProviderRow) { this.kind = provider.adapter; }
+  /**
+   * UNSUPPORTED_OPERATION, not SERVICE_UNAVAILABLE: nothing about this condition changes by
+   * retrying. SERVICE_UNAVAILABLE is rendered to the customer as "temporarily unavailable, please
+   * try again shortly" and would send an operator into a retry loop that cannot succeed, because
+   * the adapter kind has no implementation in this build.
+   */
   private unavailable(): ProviderError {
     return new ProviderError(
-      'SERVICE_UNAVAILABLE',
-      `The ${this.provider.adapter} native adapter is not enabled in this CloudHost247 build`,
+      'UNSUPPORTED_OPERATION',
+      `No native adapter is implemented for the ${this.provider.adapter} provider kind in this CloudHost247 build`,
       false
     );
   }

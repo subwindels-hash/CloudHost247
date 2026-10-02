@@ -12,12 +12,13 @@ foreach (array(
     'Security/MasterKey', 'Security/SecretVault', 'Security/UrlGuard',
     'Registry/FieldDefinition', 'Registry/ProviderDefinition', 'Registry/ProviderCatalog', 'Registry/ProviderRegistry',
     'Api/Transport', 'Api/TransportException', 'Api/CurlTransport', 'Api/Signers/OvhSigner', 'Api/Signers/AwsV4Signer',
-    'Api/IntegrationClient', 'Api/SmtpProbe', 'Services/ConnectionTester', 'Services/AdminView',
+    'Api/IntegrationClient', 'Api/SmtpProbe', 'Api/SmtpClient', 'Services/ConnectionTester', 'Services/AdminView',
 ) as $file) {
     require_once $base . $file . '.php';
 }
 
 use CloudHost247\Integrations\Api\IntegrationClient;
+use CloudHost247\Integrations\Api\SmtpClient;
 use CloudHost247\Integrations\Api\SmtpProbe;
 use CloudHost247\Integrations\Api\Signers\AwsV4Signer;
 use CloudHost247\Integrations\Api\Transport;
@@ -270,6 +271,7 @@ $check('aws signing keys are derived per date, region and service',
 class ScriptedSmtpStream
 {
     public static $script = array();
+    public static $writes = array();
     public $context;
     private $buffer = '';
     public function stream_open($path, $mode, $options, &$openedPath)
@@ -286,7 +288,7 @@ class ScriptedSmtpStream
         $this->buffer = (string) substr($this->buffer, $length);
         return $chunk;
     }
-    public function stream_write($data) { return strlen($data); }
+    public function stream_write($data) { self::$writes[] = $data; return strlen($data); }
     public function stream_eof() { return $this->buffer === ''; }
     public function stream_close() { $this->buffer = ''; }
     public function stream_flush() { return true; }
@@ -314,6 +316,111 @@ $result = (new SmtpProbe($smtpScript(array('220 ok'))))->check(array('host' => '
 $check('smtp requires a fully qualified relay host', $result['code'] === ResultCode::INVALID_CONFIGURATION);
 $result = (new SmtpProbe($smtpScript(array('220 ok'))))->check(array('host' => 'smtp.example.com', 'port' => 587, 'encryption' => 'tls', 'username' => '', 'password' => ''));
 $check('smtp refuses to test without credentials', $result['code'] === ResultCode::INVALID_CONFIGURATION);
+
+/* ------------------------------------------------------ smtp client ------- */
+$smtpSettings = array(
+    'host' => 'mail.example.com', 'port' => 465, 'encryption' => 'ssl',
+    'username' => 'marketing@example.com', 'password' => 'mailbox-password',
+    'from_address' => 'marketing@example.com', 'from_name' => 'CloudHost247',
+);
+$accept = $smtpScript(array(
+    '220 mail.example.com ESMTP', '250-mail.example.com', '250 AUTH LOGIN PLAIN',
+    '334 VXNlcm5hbWU6', '334 UGFzc3dvcmQ6', '235 2.7.0 accepted',
+    '250 2.1.0 sender ok', '250 2.1.5 recipient ok', '354 go ahead',
+    '250 2.0.0 Ok: queued as 4Wx1Yz9Bq2', '221 bye',
+));
+ScriptedSmtpStream::$writes = array();
+$client = new SmtpClient($smtpSettings, $accept);
+$result = $client->send(array(
+    'to' => 'reader@example.com', 'to_name' => '', 'subject' => 'October news',
+    'html' => '<p>Hello</p>', 'text' => 'Hello',
+    'from_email' => 'marketing@example.com', 'from_name' => 'CloudHost247', 'reply_to' => 'support@example.com',
+    'headers' => array('X-CloudHost247-Campaign' => '12'),
+));
+$check('smtp client delivers a message and reports the relay queue id', $result['ok'] === true && $result['provider_message_id'] === '4Wx1Yz9Bq2');
+$check('smtp client announces both body alternatives and the queued campaign header',
+    strpos(implode('', ScriptedSmtpStream::$writes), 'multipart/alternative') !== false
+    && strpos(implode('', ScriptedSmtpStream::$writes), 'X-CloudHost247-Campaign: 12') !== false);
+$check('smtp client transmits the credential only inside base64 auth lines',
+    strpos(implode('', ScriptedSmtpStream::$writes), 'mailbox-password') === false
+    && strpos(implode('', ScriptedSmtpStream::$writes), base64_encode('mailbox-password')) !== false);
+
+// Header injection: a subscriber's own name (or a campaign's sender name) must
+// never be able to add a header line of its own.
+ScriptedSmtpStream::$writes = array();
+(new SmtpClient($smtpSettings, $smtpScript(array(
+    '220 mail.example.com ESMTP', '250-mail.example.com', '250 AUTH LOGIN',
+    '334 VXNlcm5hbWU6', '334 UGFzc3dvcmQ6', '235 accepted',
+    '250 sender ok', '250 recipient ok', '354 go ahead', '250 queued', '221 bye',
+))))->send(array(
+    'to' => 'reader@example.com',
+    'to_name' => "Reader\r\nBcc: attacker@example.com",
+    'subject' => 'Hello',
+    'html' => '<p>Hi</p>', 'text' => 'Hi',
+    'from_email' => 'marketing@example.com',
+    'from_name' => "Marketing\r\nX-Evil: yes",
+));
+$wire = implode('', ScriptedSmtpStream::$writes);
+// The display name keeps its text (CRLF stripped), so the property to prove is
+// that no *line* was created: nothing in the DATA block starts a new header.
+$injected = false;
+foreach (explode("\r\n", $wire) as $line) {
+    if (preg_match('/^(Bcc|X-Evil)\s*:/i', $line)) { $injected = true; }
+}
+$check('a display name containing CRLF cannot inject a header line',
+    !$injected && strpos($wire, "Reader\r\nBcc") === false);
+
+$result = (new SmtpClient($smtpSettings, $smtpScript(array(
+    '220 mail.example.com ESMTP', '250-mail.example.com', '250 AUTH LOGIN',
+    '334 VXNlcm5hbWU6', '334 UGFzc3dvcmQ6', '235 accepted',
+))))->send(array(
+    'to' => 'reader@example.com', 'subject' => "Hello\r\nBcc: attacker@example.com",
+    'html' => '', 'text' => 'x', 'from_email' => 'marketing@example.com',
+));
+$check('a subject containing a line break is refused before the relay is told anything',
+    $result['ok'] === false && $result['code'] === ResultCode::INVALID_CONFIGURATION);
+
+$reject = $smtpScript(array(
+    '220 mail.example.com ESMTP', '250-mail.example.com', '250 AUTH LOGIN',
+    '334 VXNlcm5hbWU6', '334 UGFzc3dvcmQ6', '235 accepted',
+    '250 sender ok', '250 recipient ok', '354 go ahead', '550 5.7.1 message rejected',
+));
+$result = (new SmtpClient($smtpSettings, $reject))->send(array('to' => 'reader@example.com', 'subject' => 'x', 'text' => 'x', 'html' => '', 'from_email' => 'marketing@example.com'));
+$check('a 5xx on the message is a refusal, not a silent success', $result['ok'] === false && $result['code'] === ResultCode::PERMISSION_DENIED);
+
+$badCredentials = $smtpScript(array(
+    '220 mail.example.com ESMTP', '250-mail.example.com', '250 AUTH LOGIN',
+    '334 VXNlcm5hbWU6', '334 UGFzc3dvcmQ6', '535 5.7.8 bad credentials',
+));
+$result = (new SmtpClient($smtpSettings, $badCredentials))->send(array('to' => 'reader@example.com', 'subject' => 'x', 'text' => 'x', 'html' => '', 'from_email' => 'marketing@example.com'));
+$check('smtp client reports rejected credentials without repeating them',
+    $result['ok'] === false && $result['code'] === ResultCode::AUTHENTICATION_FAILED
+    && strpos($result['detail'], 'mailbox-password') === false);
+
+$check('smtp client refuses plaintext submission and header injection before dialling', (function () use ($smtpSettings) {
+    $dialled = false;
+    $dialer = function ($host, $port, $timeout, $tls) use (&$dialled) { $dialled = true; return false; };
+    $plain = new SmtpClient(array_merge($smtpSettings, array('encryption' => 'none', 'port' => 25)), $dialer);
+    if ($plain->send(array('to' => 'reader@example.com', 'subject' => 'x', 'text' => 'x', 'html' => '', 'from_email' => 'marketing@example.com'))['ok'] !== false) { return false; }
+    $injected = new SmtpClient($smtpSettings, $dialer);
+    $bad = $injected->send(array('to' => "reader@example.com\r\nBcc: leak@example.com", 'subject' => 'x', 'text' => 'x', 'html' => '', 'from_email' => 'marketing@example.com'));
+    $badSubject = $injected->send(array('to' => 'reader@example.com', 'subject' => "x\r\nBcc: leak@example.com", 'text' => 'x', 'html' => '', 'from_email' => 'marketing@example.com'));
+    $offDomain = $injected->send(array('to' => 'reader@example.com', 'subject' => 'x', 'text' => 'x', 'html' => '', 'from_email' => 'spoof@other-domain.example'));
+    return $dialled === false && $bad['ok'] === false && $badSubject['ok'] === false && $offDomain['ok'] === false;
+})());
+
+$check('smtp client accepts another address on the configured mailbox domain', (function () use ($smtpScript, $smtpSettings) {
+    $accept = $smtpScript(array(
+        '220 relay', '250-relay', '250 AUTH LOGIN', '334 VXNlcm5hbWU6', '334 UGFzc3dvcmQ6', '235 ok',
+        '250 sender ok', '250 recipient ok', '354 go', '250 queued as ABC123', '221 bye',
+    ));
+    $result = (new SmtpClient($smtpSettings, $accept))->send(array(
+        'to' => 'reader@example.com', 'subject' => 'x', 'text' => 'x', 'html' => '',
+        'from_email' => 'newsletter@example.com',
+    ));
+    return $result['ok'] === true;
+})());
+
 
 /* -------------------------------------------------- connection tester --- */
 $tester = function (array $responses) { return new ConnectionTester(new RecordingTransport($responses)); };

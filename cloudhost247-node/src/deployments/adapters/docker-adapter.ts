@@ -16,7 +16,6 @@ import type {
   DeployInstallationInput,
   LogsResult,
 } from './types';
-import { UnsupportedOperationError } from './types';
 import { generateComposeProject } from '../compose-generator';
 import {
   AgentUnavailableError,
@@ -212,14 +211,33 @@ export function createDockerAdapter(options: DockerAdapterOptions): DeploymentAd
       }
     },
 
-    async provisionHosting() {
-      throw new UnsupportedOperationError('docker', 'provisionHosting');
+    /**
+     * Hosting accounts (WHM/cPanel) are not containers: creating, suspending or deleting a hosting
+     * account on a VPS/dedicated server is the cPanel adapter's job on a CPANEL-typed server
+     * (spec §35 — never deploy Docker applications into ordinary cPanel hosting, and never fake a
+     * hosting account with a container). A structured refusal keeps the deployment log honest and
+     * tells the operator which adapter to use; the engine's server-type selection routes there.
+     */
+    async provisionHosting(): Promise<DeploymentOperationResult> {
+      return {
+        ok: false,
+        code: 'HOSTING_REQUIRES_CPANEL_ADAPTER',
+        message: 'Hosting accounts are provisioned by the cPanel adapter on a CPANEL server, not by containers',
+      };
     },
-    async suspendHosting() {
-      throw new UnsupportedOperationError('docker', 'suspendHosting');
+    async suspendHosting(): Promise<DeploymentOperationResult> {
+      return {
+        ok: false,
+        code: 'HOSTING_REQUIRES_CPANEL_ADAPTER',
+        message: 'Hosting account suspension is a WHM operation (cPanel adapter), not a container action',
+      };
     },
-    async terminateHosting() {
-      throw new UnsupportedOperationError('docker', 'terminateHosting');
+    async terminateHosting(): Promise<DeploymentOperationResult> {
+      return {
+        ok: false,
+        code: 'HOSTING_REQUIRES_CPANEL_ADAPTER',
+        message: 'Hosting account termination is a WHM operation (cPanel adapter), not a container action',
+      };
     },
   };
 }

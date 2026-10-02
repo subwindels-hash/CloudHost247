@@ -35,7 +35,7 @@ final class WhmcsDataSource implements LiveDataSource
     private $currency = null;
     private $sanitizer;
 
-    public function __construct(HtmlSanitizer $sanitizer = null)
+    public function __construct(?HtmlSanitizer $sanitizer = null)
     {
         $this->sanitizer = $sanitizer ? $sanitizer : new HtmlSanitizer();
     }

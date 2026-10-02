@@ -49,7 +49,36 @@ namespace {
         public function table($table, $callback) {}
     }
 
-    final class CH247MarketingFakeCollection implements \IteratorAggregate, \Countable
+    /**
+ * Test-only readers for the in-memory tables: suites need to inspect rows the
+ * module wrote (a queue token, an aged event) without reaching into the double.
+ */
+function ch247_mkt_rows($table)
+{
+    // The double stores plain arrays; the module always sees row objects, so the
+    // reader casts to the shape a real Capsule result has.
+    $rows = CH247MarketingFakeDB::rowsRef((string) $table);
+    $objects = array();
+    foreach ($rows as $row) { $objects[] = is_array($row) ? (object) $row : $row; }
+    return $objects;
+}
+
+function ch247_mkt_update_row($table, $id, array $values)
+{
+    $rows = &CH247MarketingFakeDB::rowsRef((string) $table);
+    foreach ($rows as $index => $row) {
+        $object = is_array($row) ? (object) $row : $row;
+        if ((int) $object->id !== (int) $id) { continue; }
+        foreach ($values as $key => $value) {
+            if (is_array($rows[$index])) { $rows[$index][$key] = $value; }
+            else { $rows[$index]->{$key} = $value; }
+        }
+        return true;
+    }
+    return false;
+}
+
+final class CH247MarketingFakeCollection implements \IteratorAggregate, \Countable
     {
         private $rows;
         public function __construct(array $rows) { $this->rows = $rows; }
@@ -66,13 +95,32 @@ namespace {
         private $orderBy = array();
         private $paging = array('limit' => null, 'offset' => 0);
         private $selectCount = false;
+        private $columns = null;
 
         public function __construct($table) { $this->table = $table; }
 
         public function where($column, $operator = null, $value = null)
         {
+            return $this->addWhere('and', $column, $operator, $value);
+        }
+
+        /** Nested OR group support: where(function ($q) { $q->where(...)->orWhere(...); }) */
+        public function orWhere($column, $operator = null, $value = null)
+        {
+            return $this->addWhere('or', $column, $operator, $value);
+        }
+
+        private function addWhere($boolean, $column, $operator = null, $value = null)
+        {
+            if ($column instanceof \Closure) {
+                $group = new CH247MarketingFakeQuery($this->table);
+                $column($group);
+                // The first condition inside a group is always ANDed with the rest of the query.
+                $this->wheres[] = array('__group', $group, null, 'and');
+                return $this;
+            }
             if ($value === null && $operator !== null) { $value = $operator; $operator = '='; }
-            $this->wheres[] = array($column, $operator ?: '=', $value);
+            $this->wheres[] = array($column, $operator ?: '=', $value, $boolean);
             return $this;
         }
 
@@ -81,7 +129,22 @@ namespace {
 
         public function whereIn($column, array $values)
         {
-            $this->wheres[] = array($column, 'in', $values);
+            $this->wheres[] = array($column, 'in', $values, 'and');
+            return $this;
+        }
+
+        public function when($value, $callback)
+        {
+            if ($value) { $callback($this); }
+            return $this;
+        }
+
+        /** Column projection: select('id', 'email') / select(array('id', 'email')). */
+        public function select()
+        {
+            $args = func_get_args();
+            if (count($args) === 1 && is_array($args[0])) { $args = $args[0]; }
+            $this->columns = array_map('strval', $args);
             return $this;
         }
 
@@ -96,23 +159,44 @@ namespace {
         public function take($n) { return $this->limit($n); }
         public function skip($n) { return $this->offset($n); }
 
-        private function match(array $row)
+        /** Evaluates one row against the collected conditions (AND/OR aware). */
+        public function match(array $row)
         {
+            if (!$this->wheres) { return true; }
+            $result = null;
             foreach ($this->wheres as $w) {
-                $actual = array_key_exists($w[0], $row) ? $row[$w[0]] : null;
-                switch ($w[1]) {
-                    case '=': $ok = ($actual == $w[2]); break;
-                    case '!=': $ok = ($actual != $w[2]); break;
-                    case '>': $ok = ($actual > $w[2]); break;
-                    case '>=': $ok = ($actual >= $w[2]); break;
-                    case '<': $ok = ($actual < $w[2]); break;
-                    case '<=': $ok = ($actual <= $w[2]); break;
-                    case 'in': $ok = in_array($actual, $w[2]); break;
-                    default: $ok = false;
+                if ($w[0] === '__group') {
+                    $ok = $w[1]->match($row);
+                } else {
+                    $ok = $this->compare($row, $w[0], $w[1], $w[2]);
                 }
-                if (!$ok) { return false; }
+                $boolean = isset($w[3]) ? $w[3] : 'and';
+                if ($result === null) { $result = $ok; }
+                elseif ($boolean === 'or') { $result = $result || $ok; }
+                else { $result = $result && $ok; }
             }
-            return true;
+            return (bool) $result;
+        }
+
+        private function compare(array $row, $column, $operator, $value)
+        {
+            $actual = array_key_exists($column, $row) ? $row[$column] : null;
+            switch ($operator) {
+                case '=': return ($actual == $value);
+                case '!=': return ($actual != $value);
+                case '>': return ($actual > $value);
+                case '>=': return ($actual >= $value);
+                case '<': return ($actual < $value);
+                case '<=': return ($actual <= $value);
+                case 'in': return in_array($actual, (array) $value);
+                case 'not in': return !in_array($actual, (array) $value);
+                case 'like':
+                case 'not like':
+                    $pattern = '/^' . str_replace(array('%', '_'), array('.*', '.'), preg_quote((string) $value, '/')) . '$/is';
+                    $matched = (bool) preg_match($pattern, (string) $actual);
+                    return $operator === 'like' ? $matched : !$matched;
+                default: return false;
+            }
         }
 
         private function rows()
@@ -133,6 +217,15 @@ namespace {
             }
             if ($this->paging['offset'] > 0 || $this->paging['limit'] !== null) {
                 $out = array_slice($out, $this->paging['offset'], $this->paging['limit'] === null ? null : $this->paging['limit']);
+            }
+            if ($this->columns !== null) {
+                $out = array_map(function ($row) {
+                    $keep = array();
+                    foreach ($this->columns as $column) {
+                        if (array_key_exists($column, $row)) { $keep[$column] = $row[$column]; }
+                    }
+                    return $keep;
+                }, $out);
             }
             return $out;
         }

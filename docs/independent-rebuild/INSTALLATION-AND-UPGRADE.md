@@ -141,6 +141,11 @@ Reference: [API-INTEGRATIONS.md](API-INTEGRATIONS.md) (per-provider credentials,
 4. Configure each provider you actually use, for the `production` environment, and press **Test** until it reports `Connected successfully`. Leave unused providers unconfigured.
 5. Upgrade OVH to migration `1.6.0` (adds the nullable `integration_key` / `integration_environment` columns to `mod_cloudhost247_ovh_endpoints`) and tick *Use central OVH credentials* on each endpoint you want to migrate.
 6. Schedule the verification cron: `0 */6 * * * php /path/to/whmcs/crons/cloudhost247_integrations.php production`.
+7. Schedule the email-marketing delivery worker once the marketing addon is active:
+   `* * * * * /usr/bin/php /path/to/whmcs/crons/cloudhost247_marketing.php >> /path/outside/webroot/marketing-cron.log 2>&1`
+   (every minute is ideal; five minutes is the practical minimum. The pass is bounded by the module's
+   `batch_size` / `messages_per_minute` / `hourly_limit` settings, so a slower schedule only means
+   slower delivery — never a burst. `--dry-run` freezes audiences and queues without sending.)
 7. Clear the legacy credential copies — the WHMCS server record for RDP, the deprecated LTE proxy product configuration options — so exactly one copy of each credential exists.
 
 **Upgrade safety.** Every migration is additive and `hasTable`-guarded; deactivation retains all data. Each migrated module keeps its legacy credential source as an explicit fallback, so an upgrade that has not yet been configured centrally continues to work unchanged. Rotating `CH247_INTEGRATIONS_KEY` does not destroy anything: credentials encrypted under the previous key are flagged in the UI as *"Encrypted with a previous master key"* and must be re-entered.

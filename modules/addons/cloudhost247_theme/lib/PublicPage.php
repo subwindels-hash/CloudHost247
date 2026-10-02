@@ -1,0 +1,168 @@
+<?php
+namespace CloudHost247\Theme;
+
+use CloudHost247\Theme\Content\ProductComponents;
+
+/**
+ * Front controller for the public root pages.
+ *
+ * Every root page used to hand the request to the vendor theme shell
+ * (`setTemplate('cloudhost247_legacy')`), which only renders anything when the
+ * encoded theme-helper addon is installed and someone has assigned blocks to the
+ * page in it. That made the page's existence depend on a licence-gated vendor
+ * module and produced the "assign blocks via our Drag N Drop Blocks Manager"
+ * placeholder on a fresh install.
+ *
+ * A page now renders a published entry from the independent theme's own content
+ * store. The URL, the page title and the breadcrumb are kept; the content is the
+ * operator's, edited in the Theme Manager, and the template is the first-party
+ * `cloudhost247-page` — which also means a page can use the theme's section,
+ * block and product-component rendering.
+ *
+ * What it deliberately does not do: invent content. A route whose slug has no
+ * published entry answers 404 with a plain explanation rather than a broken or
+ * vendor-branded page.
+ */
+final class PublicPage
+{
+    const TEMPLATE = 'cloudhost247-page';
+    const FALLBACK_TITLE = 'Page unavailable';
+    const FALLBACK_BODY = '<p>This page has no published content yet. An administrator can publish it in the Theme Manager.</p>';
+
+    /**
+     * Render the published entry for $slug.
+     *
+     * @param object $clientArea anything exposing setPageTitle/addToBreadCrumb/
+     *                           assign/setTemplate/output (WHMCS\ClientArea in
+     *                           production; the tests pass a recorder).
+     * @param string $slug       content slug the route is responsible for
+     * @param string $label      breadcrumb and fallback title
+     * @param array  $options    'title' overrides the label for the document title
+     */
+    public static function route($clientArea, $slug, $label, array $options = array())
+    {
+        $page = self::resolve($slug);
+        $title = isset($options['title']) && $options['title'] !== '' ? (string) $options['title'] : (string) $label;
+        if ($page === null) {
+            return self::respond($clientArea, self::missing($title), $label, 404);
+        }
+        $page['title'] = $page['title'] !== '' ? $page['title'] : $title;
+        $page = self::withProducts($page);
+        return self::respond($clientArea, $page, $label, 200);
+    }
+
+    /**
+     * The 404 route: always answers 404, using the published entry for
+     * $slug when one exists so the operator can still write the page.
+     */
+    public static function notFound($clientArea, $slug = 'page-not-found', $label = 'Page Not Found')
+    {
+        $page = self::resolve($slug);
+        if ($page === null) {
+            return self::respond($clientArea, self::missing($label), $label, 404);
+        }
+        $page['title'] = $page['title'] !== '' ? $page['title'] : $label;
+        return self::respond($clientArea, $page, $label, 404);
+    }
+
+    /**
+     * The published entry for a slug, or null. Never throws: a failure to read
+     * the store is a 404, not a fatal error on a public page.
+     */
+    public static function resolve($slug)
+    {
+        try {
+            self::loadDependencies();
+            $page = (new ThemeRepository())->findPublishedPage($slug);
+        } catch (\Throwable $unavailable) {
+            return null;
+        }
+        return is_array($page) ? $page : null;
+    }
+
+    /**
+     * The page a route falls back to: the caller's label as the title and a
+     * sentence explaining that nothing is published. Both are escaped before the
+     * template sees them, so a label can never inject markup.
+     */
+    public static function missing($title)
+    {
+        return array(
+            'id' => 0,
+            'slug' => '',
+            'title' => self::escape($title !== '' ? $title : self::FALLBACK_TITLE),
+            'summary' => '',
+            'body' => self::FALLBACK_BODY,
+            'seo_title' => '',
+            'seo_description' => '',
+            'missing' => true,
+        );
+    }
+
+    private static function respond($clientArea, array $page, $label, $status)
+    {
+        if (!headers_sent()) {
+            http_response_code((int) $status);
+        }
+        $documentTitle = trim((string) (isset($page['seo_title']) ? $page['seo_title'] : ''));
+        if ($documentTitle === '') {
+            $documentTitle = trim((string) (isset($page['title']) ? $page['title'] : '')) !== ''
+                ? (string) $page['title']
+                : self::FALLBACK_TITLE;
+        }
+        $clientArea->setPageTitle($documentTitle);
+        $clientArea->addToBreadCrumb('index.php', self::homeLabel());
+        $clientArea->addToBreadCrumb(isset($_SERVER['PHP_SELF']) ? basename($_SERVER['PHP_SELF']) : '', (string) $label);
+        $clientArea->assign('cloudhost247Page', $page);
+        $clientArea->assign('sidebarCloudHost247Remove', 'true');
+        $clientArea->setTemplate(self::TEMPLATE);
+        $clientArea->output();
+        return array('status' => (int) $status, 'page' => $page, 'template' => self::TEMPLATE);
+    }
+
+    /**
+     * When the published entry names a WHMCS product group, resolve that group
+     * through the same bounded reader the landing blocks use and attach the
+     * result. Unavailable is attached too: a product page that cannot read the
+     * catalogue says so rather than showing an empty grid as if the operator had
+     * no products.
+     */
+    private static function withProducts(array $page)
+    {
+        $group = isset($page['product_group']) ? (int) $page['product_group'] : 0;
+        if ($group <= 0) { return $page; }
+        $page['product_component'] = ProductComponents::resolve(array(
+            'type' => 'products',
+            'heading' => isset($page['title']) ? (string) $page['title'] : '',
+            'group' => $group,
+            'limit' => 12,
+            'cycle' => isset($page['product_cycle']) ? (string) $page['product_cycle'] : 'monthly',
+            'layout' => 'grid',
+        ));
+        return $page;
+    }
+
+    private static function homeLabel()
+    {
+        if (class_exists('Lang') && method_exists('Lang', 'trans')) {
+            try { return (string) \Lang::trans('globalsystemname'); } catch (\Throwable $ignored) { }
+        }
+        return 'Home';
+    }
+
+    /** Bootstrap the module and its collaborators; safe to call repeatedly. */
+    private static function loadDependencies()
+    {
+        $root = dirname(__DIR__, 3);
+        $core = $root . '/modules/addons/cloudhost247_core/bootstrap.php';
+        if (is_file($core)) { require_once $core; }
+        require_once __DIR__ . '/Content/ProductComponents.php';
+        require_once __DIR__ . '/View/PreviewRenderer.php';
+        require_once __DIR__ . '/ThemeRepository.php';
+    }
+
+    private static function escape($value)
+    {
+        return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+    }
+}

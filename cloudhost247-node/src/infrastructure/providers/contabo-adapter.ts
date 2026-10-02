@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { randomInt, randomUUID } from 'node:crypto';
 import type { InfrastructureProviderRow, ServerOsImageRow } from '../../db/infrastructure-providers';
 import { providerRequest } from './http';
 import {
@@ -105,6 +105,29 @@ function asPositiveInteger(value: unknown): number | null {
   if (typeof value === 'number' && Number.isInteger(value) && value > 0) return value;
   if (typeof value === 'string' && /^\d+$/.test(value) && Number(value) > 0) return Number(value);
   return null;
+}
+
+interface ContaboSecret {
+  secretId?: number | string;
+}
+
+/**
+ * Contabo accepts only a `secretId` for the rescue root password, never a raw password. Entering
+ * rescue therefore starts by storing a freshly generated one-time password as a Contabo secret and
+ * passing that secret's id to the rescue action. The pattern below satisfies Contabo's documented
+ * requirement: at least one upper and one lower case character, and at least three digits with one
+ * special character from `!@#$^&*?_~`.
+ */
+function generateRescuePassword(pick: (max: number) => number = randomInt): string {
+  const letters = 'abcdefghijkmnpqrstuvwxyz';
+  const digits = '23456789';
+  const specials = '!@#$^&*?_~';
+  const choose = (alphabet: string): string => alphabet.charAt(pick(alphabet.length));
+  let password = `${choose(letters.toUpperCase())}${choose(letters)}`;
+  for (let index = 0; index < 3; index += 1) password += choose(digits);
+  password += choose(specials);
+  for (let index = 0; index < 4; index += 1) password += choose(letters);
+  return password;
 }
 
 /**
@@ -386,16 +409,54 @@ export class ContaboProviderAdapter implements InfrastructureProviderAdapter {
     return this.getServerStatus(input.providerServerId);
   }
 
-  async enableRescue(_providerServerId: string, _input: RescueRequest): Promise<RescueSession> {
-    throw new ProviderError(
-      'UNSUPPORTED_OPERATION',
-      'Contabo rescue mode requires a caller-managed Contabo secret for access and is not exposed by this adapter',
-      false,
-    );
+  /**
+   * Enter Contabo's rescue system. The rescue action takes `sshKeys`/`rootPassword` Contabo
+   * *secret ids*, not key material or a plaintext password: when the server template already
+   * carries SSH-key secrets they are reused, otherwise a one-time password is stored as a Contabo
+   * secret and handed to the requesting customer exactly once.
+   */
+  async enableRescue(providerServerId: string, input: RescueRequest): Promise<RescueSession> {
+    const instancePath = `/compute/instances/${encodeURIComponent(providerServerId)}/actions/rescue`;
+    const sshKeySecrets = (input.providerSshKeyIds ?? [])
+      .map((value) => asPositiveInteger(value))
+      .filter((value): value is number => value !== null);
+    if (sshKeySecrets.length > 0) {
+      await this.requestEnvelope(instancePath, { method: 'POST', body: JSON.stringify({ sshKeys: sshKeySecrets }) });
+      return {
+        type: 'contabo-rescue',
+        username: 'root',
+        rebooted: true,
+        notes: 'Contabo boots the rescue system instead of the installed OS; access uses the SSH-key secrets from the server template.',
+      };
+    }
+
+    const password = generateRescuePassword();
+    const secret = await this.requestEnvelope<ContaboSecret>('/secrets', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: `ch247-rescue-${providerServerId}-${Date.now()}`,
+        value: password,
+        type: 'password',
+      }),
+    });
+    const secretId = asPositiveInteger(firstData(secret, 'created rescue secret').secretId);
+    if (secretId === null) {
+      throw new ProviderError('PROVIDER_ERROR', 'Contabo returned a rescue secret without a secretId', false);
+    }
+    await this.requestEnvelope(instancePath, { method: 'POST', body: JSON.stringify({ rootPassword: secretId }) });
+    return {
+      type: 'contabo-rescue',
+      username: 'root',
+      password,
+      rebooted: true,
+      notes: 'Contabo boots the rescue system instead of the installed OS. The one-time password exists only as the Contabo secret passed to the rescue action; the next restart boots the installed OS again.',
+    };
   }
 
-  async disableRescue(_providerServerId: string): Promise<void> {
-    throw new ProviderError('UNSUPPORTED_OPERATION', 'Contabo rescue mode is not exposed by this adapter', false);
+  async disableRescue(providerServerId: string): Promise<void> {
+    // Contabo has no unrescue action: the next restart boots the installed operating system again,
+    // which is the documented way out of the rescue system.
+    await this.requestEnvelope(`/compute/instances/${encodeURIComponent(providerServerId)}/actions/restart`, { method: 'POST' });
   }
 
   async getConsole(_providerServerId: string): Promise<Record<string, unknown>> {

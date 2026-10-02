@@ -1,8 +1,13 @@
 import {
+  AttachVolumeCommand,
   CreateSnapshotCommand,
+  CreateVolumeCommand,
+  DeleteSnapshotCommand,
   DescribeImagesCommand,
   DescribeInstancesCommand,
   DescribeRegionsCommand,
+  DescribeSnapshotsCommand,
+  DetachVolumeCommand,
   EC2Client,
   GetConsoleOutputCommand,
   ModifyInstanceAttributeCommand,
@@ -16,11 +21,18 @@ import type {
   CreateSnapshotCommandOutput,
   DescribeImagesCommandOutput,
   DescribeInstancesCommandOutput,
+  DescribeSnapshotsCommandOutput,
   GetConsoleOutputCommandOutput,
   Instance,
 } from '@aws-sdk/client-ec2';
 import type { InfrastructureProviderRow, ServerOsImageRow } from '../../db/infrastructure-providers';
 import { unsupportedRescue } from './common';
+import {
+  buildReplacementLaunch,
+  replacementEnabled,
+  replacementSourceState,
+  rootDeviceName,
+} from './aws-replacement';
 import {
   ProviderError,
   asString,
@@ -127,6 +139,8 @@ export class AwsProviderAdapter implements InfrastructureProviderAdapter {
   readonly kind = 'aws';
   private readonly client: Ec2Transport;
   private readonly region: string | undefined;
+  /** Replacement workflows stay unavailable until the deployment opts in. */
+  private readonly allowRootVolumeReplacement: boolean;
 
   constructor(
     readonly provider: InfrastructureProviderRow,
@@ -138,6 +152,7 @@ export class AwsProviderAdapter implements InfrastructureProviderAdapter {
     const secretAccessKey = source[`${prefix}_SECRET_ACCESS_KEY`] ?? source.AWS_SECRET_ACCESS_KEY;
     const sessionToken = source[`${prefix}_SESSION_TOKEN`] ?? source.AWS_SESSION_TOKEN;
     this.region = source[`${prefix}_REGION`] ?? source.AWS_REGION;
+    this.allowRootVolumeReplacement = replacementEnabled(source, prefix);
 
     this.client = client ?? new EC2Client({
       // The fallback only permits construction: every operation fails closed in configured().
@@ -157,6 +172,17 @@ export class AwsProviderAdapter implements InfrastructureProviderAdapter {
       );
     }
     return this.region;
+  }
+
+  private requireRootVolumeReplacement(): void {
+    if (!this.allowRootVolumeReplacement) {
+      throw new ProviderError(
+        'UNSUPPORTED_OPERATION',
+        'Replacement-instance and root-volume-restore workflows are disabled; set '
+          + 'AWS_ALLOW_ROOT_VOLUME_REPLACEMENT=true (or the provider prefix equivalent) to enable them',
+        false,
+      );
+    }
   }
 
   private async send<T>(command: object): Promise<T> {
@@ -321,24 +347,128 @@ export class AwsProviderAdapter implements InfrastructureProviderAdapter {
     };
   }
 
-  async deleteSnapshot(_providerServerId: string, _snapshotId: string): Promise<void> {
-    throw new ProviderError('UNSUPPORTED_OPERATION', 'Deleting EBS snapshots is not enabled by this adapter', false);
+  async deleteSnapshot(_providerServerId: string, snapshotId: string): Promise<void> {
+    if (!snapshotId) {
+      throw new ProviderError('INVALID_CONFIGURATION', 'A snapshot id is required to delete a snapshot', false);
+    }
+    await this.send(new DeleteSnapshotCommand({ SnapshotId: snapshotId }));
   }
 
-  async restoreSnapshot(_providerServerId: string, _snapshotId: string): Promise<void> {
-    throw new ProviderError(
-      'UNSUPPORTED_OPERATION',
-      'Restoring an EC2 root volume from a snapshot requires a replacement-instance workflow',
-      false,
-    );
+  /**
+   * Restore a snapshot onto this instance's root volume.
+   *
+   * EC2 has no in-place root restore call, so the workflow is: create a volume
+   * from the snapshot in the instance's own availability zone, stop the
+   * instance, detach the old root volume, attach the new one at the same device
+   * name, and start the instance again if it was running. The previous root
+   * volume is detached, not deleted, so the pre-restore data stays recoverable.
+   */
+  async restoreSnapshot(providerServerId: string, snapshotId: string): Promise<void> {
+    this.requireRootVolumeReplacement();
+    if (!snapshotId) {
+      throw new ProviderError('INVALID_CONFIGURATION', 'A snapshot id is required to restore a root volume', false);
+    }
+    const source = (await this.send<DescribeInstancesCommandOutput>(new DescribeInstancesCommand({
+      InstanceIds: [providerServerId],
+    })));
+    const instance = instances(source)[0];
+    if (!instance) {
+      throw new ProviderError('RESOURCE_NOT_FOUND', 'AWS instance was not found', false);
+    }
+    const state = replacementSourceState(instance.State?.Name);
+    if (!state) {
+      throw new ProviderError(
+        'INVALID_CONFIGURATION',
+        `A root volume can only be restored on a running or stopped instance (instance is ${instance.State?.Name ?? 'unknown'})`,
+        false,
+      );
+    }
+    const deviceName = rootDeviceName(instance);
+    const availabilityZone = instance.Placement?.AvailabilityZone;
+    if (!deviceName || !availabilityZone) {
+      throw new ProviderError(
+        'UNSUPPORTED_OPERATION',
+        'The instance has no discoverable root device or availability zone, so its root volume cannot be restored',
+        false,
+      );
+    }
+    const snapshot = await this.send<DescribeSnapshotsCommandOutput>(new DescribeSnapshotsCommand({
+      SnapshotIds: [snapshotId],
+    }));
+    const found = snapshot.Snapshots?.[0];
+    if (!found) {
+      throw new ProviderError('RESOURCE_NOT_FOUND', 'The requested EBS snapshot was not found', false);
+    }
+    if ((found.State ?? '') !== 'completed') {
+      throw new ProviderError(
+        'IMAGE_UNAVAILABLE',
+        `The snapshot is not ready to restore (state ${found.State ?? 'unknown'})`,
+        true,
+      );
+    }
+    const volume = await this.send<{ VolumeId?: string }>(new CreateVolumeCommand({
+      SnapshotId: snapshotId,
+      AvailabilityZone: availabilityZone,
+      VolumeType: 'gp3',
+    }));
+    const newVolumeId = volume?.VolumeId;
+    if (!newVolumeId) {
+      throw new ProviderError('PROVIDER_ERROR', 'AWS returned no volume for CreateVolume', true);
+    }
+    const oldVolumeId = rootVolumeId(instance);
+    await this.send(new StopInstancesCommand({ InstanceIds: [providerServerId] }));
+    if (oldVolumeId) {
+      await this.send(new DetachVolumeCommand({ VolumeId: oldVolumeId, InstanceId: providerServerId, Force: false }));
+    }
+    await this.send(new AttachVolumeCommand({ VolumeId: newVolumeId, InstanceId: providerServerId, Device: deviceName }));
+    if (state === 'running') {
+      await this.send(new StartInstancesCommand({ InstanceIds: [providerServerId] }));
+    }
   }
 
-  async reinstallServer(_input: ReinstallProviderServerInput): Promise<ProviderServer> {
-    throw new ProviderError(
-      'UNSUPPORTED_OPERATION',
-      'EC2 cannot safely reinstall an in-place root image; provision a replacement instance instead',
-      false,
-    );
+  /**
+   * Reinstall by replacement: a new instance from the requested AMI in the same
+   * zone, subnet and security groups, with the previous instance stopped (never
+   * terminated) once the replacement exists.
+   */
+  async reinstallServer(input: ReinstallProviderServerInput): Promise<ProviderServer> {
+    this.requireRootVolumeReplacement();
+    const imageId = input.image.provider_image_id ?? input.image.provider_template_id;
+    if (!imageId) {
+      throw new ProviderError('IMAGE_UNAVAILABLE', 'OS image has no AWS AMI identifier', false);
+    }
+    const source = await this.send<DescribeInstancesCommandOutput>(new DescribeInstancesCommand({
+      InstanceIds: [input.providerServerId],
+    }));
+    const instance = instances(source)[0];
+    if (!instance) {
+      throw new ProviderError('RESOURCE_NOT_FOUND', 'AWS instance was not found', false);
+    }
+    const launch = buildReplacementLaunch(instance, {
+      imageId,
+      name: input.hostname || instance.Tags?.find((tag) => tag.Key === 'Name')?.Value || input.providerServerId,
+      idempotencyKey: input.idempotencyKey,
+      userData: input.userData,
+      confirm: true,
+    });
+    const created = await this.send<{ Instances?: Instance[] }>(new RunInstancesCommand(launch as never));
+    const replacement = created.Instances?.[0];
+    if (!replacement) {
+      throw new ProviderError('PROVIDER_ERROR', 'AWS returned no instance for the replacement launch', true);
+    }
+    await this.send(new StopInstancesCommand({ InstanceIds: [input.providerServerId] }));
+    return {
+      ...toServer(replacement),
+      metadata: {
+        ...toServer(replacement).metadata,
+        replacement: {
+          previousServerId: input.providerServerId,
+          previousState: instance.State?.Name ?? 'unknown',
+          previousAction: 'stopped',
+          workflow: 'replacement-instance',
+        },
+      },
+    };
   }
 
   async getAvailableImages(): Promise<ProviderImage[]> {
@@ -359,7 +489,10 @@ export class AwsProviderAdapter implements InfrastructureProviderAdapter {
     return found ? toImage(found) : null;
   }
 
-  enableRescue(_providerServerId: string, _input: RescueRequest): Promise<RescueSession> {
+  // `async` on purpose: an unreachable rescue must reject, not throw
+  // synchronously, so a caller using `.catch()` handles it like every other
+  // provider failure.
+  async enableRescue(_providerServerId: string, _input: RescueRequest): Promise<RescueSession> {
     return unsupportedRescue('aws');
   }
 

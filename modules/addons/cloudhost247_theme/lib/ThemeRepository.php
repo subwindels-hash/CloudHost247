@@ -1,6 +1,8 @@
 <?php
 namespace CloudHost247\Theme;
 
+use CloudHost247\Theme\Content\ProductComponents;
+use CloudHost247\Theme\View\PreviewRenderer;
 use WHMCS\Database\Capsule;
 use InvalidArgumentException;
 
@@ -8,6 +10,8 @@ final class ThemeRepository
 {
     const SETTINGS = 'mod_cloudhost247_theme_settings';
     const CONTENT = 'mod_cloudhost247_theme_content';
+    /** Content types the admin can author and order. */
+    const TYPES = array('page', 'section', 'navigation', 'banner', 'testimonial', 'footer', 'landing', 'block');
     private $defaults = array(
         'brand_name' => 'CloudHost247', 'logo_url' => '', 'primary_color' => '#0756d8',
         'accent_color' => '#12b886', 'font_family' => 'Inter, system-ui, sans-serif',
@@ -145,7 +149,7 @@ final class ThemeRepository
 
     public function saveContent(array $input)
     {
-        $types = array('page', 'section', 'navigation', 'banner', 'testimonial', 'footer', 'landing');
+        $types = self::TYPES;
         $type = isset($input['content_type']) ? (string) $input['content_type'] : '';
         if (!in_array($type, $types, true)) throw new InvalidArgumentException('Unsupported content type.');
         $id = isset($input['id']) ? (int) $input['id'] : 0;
@@ -166,6 +170,17 @@ final class ThemeRepository
             'sitemap' => !isset($input['sitemap']) || !empty($input['sitemap']),
             'parent_slug' => $this->slug(isset($input['parent_slug']) ? $input['parent_slug'] : ''),
             'open_new' => !empty($input['open_new']),
+            // Block composition: the layout filename pageLayout() resolves and
+            // the pages a block is assigned to were stored but never authorable.
+            'layout' => $this->layoutName(isset($input['layout']) ? $input['layout'] : ''),
+            'pages' => $this->slugList(isset($input['pages']) ? $input['pages'] : ''),
+            'widgets' => $this->widgets(isset($input['widgets']) ? $input['widgets'] : ''),
+            'product_widget' => $this->productWidget($input),
+            // A page route may render the products of one WHMCS product group
+            // beneath its copy. The group is deployment data, so it lives in the
+            // content store, not in the route file; 0 means no product list.
+            'product_group' => isset($input['page_product_group']) ? max(0, (int) $input['page_product_group']) : 0,
+            'product_cycle' => isset($input['page_product_cycle']) && in_array($input['page_product_cycle'], ProductComponents::CYCLES, true) ? (string) $input['page_product_cycle'] : 'monthly',
         );
         if (!$this->safeRelativeOrHttpsUrl($payload['image_url']) || !$this->safeRelativeOrHttpsUrl($payload['canonical_url'])) throw new InvalidArgumentException('Unsafe image or canonical URL.');
         foreach ($payload as $value) if (is_string($value) && strlen($value) > 50000) throw new InvalidArgumentException('Content field is too long.');
@@ -204,6 +219,63 @@ final class ThemeRepository
 
     public function deleteContent($id) { Capsule::table('mod_cloudhost247_theme_translations')->where('content_id',(int)$id)->delete(); return Capsule::table(self::CONTENT)->where('id', (int) $id)->delete(); }
 
+    /**
+     * Reorder every item of one content type.
+     *
+     * Two accepted shapes, both validated before anything is written:
+     *   ids[]=3&ids[]=1&ids[]=2   a complete permutation (what the drag-and-drop
+     *                             list and the up/down buttons post)
+     *   order[3]=0&order[1]=1     partial positions; unlisted rows keep their
+     *                             relative place after the listed ones
+     * A partial or unknown id list is refused whole — ordering is never applied
+     * to half a set.
+     */
+    public function reorder(array $input)
+    {
+        $type = isset($input['content_type']) ? (string) $input['content_type'] : '';
+        if (!in_array($type, self::TYPES, true)) throw new InvalidArgumentException('Unsupported content type.');
+        $stored = array();
+        foreach (Capsule::table(self::CONTENT)->where('content_type', $type)->orderBy('sort_order')->orderBy('id')->get() as $row) {
+            $stored[(int) $row->id] = (int) $row->sort_order;
+        }
+        if (!$stored) throw new InvalidArgumentException('There is no content of that type to order.');
+        if (isset($input['ids'])) {
+            $ids = is_array($input['ids']) ? array_map('intval', $input['ids']) : array_map('intval', preg_split('/[,\s]+/', (string) $input['ids'], -1, PREG_SPLIT_NO_EMPTY));
+            $given = $ids; $expected = array_keys($stored);
+            sort($given); sort($expected);
+            if ($given !== $expected) throw new InvalidArgumentException('Reordering must list every item of that type exactly once; nothing was changed.');
+        } else {
+            $positions = isset($input['order']) && is_array($input['order']) ? $input['order'] : array();
+            $unknown = array_diff(array_map('intval', array_keys($positions)), array_keys($stored));
+            if ($unknown) throw new InvalidArgumentException('Reordering referenced an item that does not belong to that type; nothing was changed.');
+            $ranked = array();
+            foreach ($stored as $id => $current) {
+                $ranked[$id] = array(isset($positions[$id]) ? (int) $positions[$id] : PHP_INT_MAX, $current, $id);
+            }
+            uasort($ranked, function ($a, $b) {
+                if ($a[0] !== $b[0]) { return $a[0] < $b[0] ? -1 : 1; }
+                if ($a[1] !== $b[1]) { return $a[1] < $b[1] ? -1 : 1; }
+                return $a[2] < $b[2] ? -1 : ($a[2] > $b[2] ? 1 : 0);
+            });
+            $ids = array_keys($ranked);
+        }
+        foreach ($ids as $index => $id) {
+            Capsule::table(self::CONTENT)->where('id', (int) $id)->update(array('sort_order' => $index, 'updated_at' => date('Y-m-d H:i:s')));
+        }
+        return count($ids);
+    }
+
+    /**
+     * Visual preview of unsaved settings and content. Pure: it reads nothing and
+     * writes nothing, so the controller can hand it the merge of the saved state
+     * with the posted values.
+     */
+    public function visualPreview(array $settings, array $content = array())
+    {
+        return PreviewRenderer::render($settings, $content);
+    }
+
+
     public function clientContext($locale = null)
     {
         return array('settings' => $this->settings(), 'navigation' => $this->published('navigation',$locale), 'banners' => $this->published('banner',$locale), 'testimonials' => $this->published('testimonial',$locale), 'sections' => $this->published('section',$locale), 'footer' => $this->published('footer',$locale), 'landing_pages' => $this->published('landing',$locale), 'blocks' => $this->blocks($locale), 'current_page_link' => $this->currentPageLink());
@@ -216,13 +288,17 @@ final class ThemeRepository
     public function blocks($locale = null)
     {
         $blocks = array();
-        foreach ($this->published('block', $locale) as $item) {
+        foreach (ProductComponents::forContent($this->published('block', $locale)) as $item) {
             $widgets = isset($item['widgets']) && is_array($item['widgets']) ? $item['widgets'] : array();
             $blocks[$item['slug']] = (object) array(
                 'title' => isset($item['title']) ? (string) $item['title'] : '',
                 'sub_title' => isset($item['sub_title']) ? (string) $item['sub_title'] : '',
                 'description' => isset($item['description']) ? (string) $item['description'] : '',
                 'widgets' => array_values(array_map(function ($widget) { return (object) (is_array($widget) ? $widget : array('widget_description' => (string) $widget)); }, $widgets)),
+                // Null unless the block declares a product component; when it
+                // does, this is the bounded catalogue result (or an explained
+                // unavailable marker) from ProductComponents.
+                'product_component' => isset($item['product_component']) ? $item['product_component'] : null,
             );
         }
         return $blocks;
@@ -266,6 +342,71 @@ final class ThemeRepository
     public function defaultProductCopy()
     {
         return array('pHeadSortDesc' => '', 'pDescription' => '', 'pFootCaption' => '', 'pFootSortDesc' => '');
+    }
+
+    /**
+     * Block composition fields, authorable in the admin form.
+     *
+     * `layout` is the template filename pageLayout() maps a block to; `pages`
+     * is the list of page slugs a block is assigned to (empty means every
+     * page); `widgets` is one widget per line, "title | description | url".
+     * Text is stored already stripped so the theme template only escapes.
+     */
+    private function layoutName($value)
+    {
+        $value = preg_replace('/[^A-Za-z0-9_\-]/', '', (string) $value);
+        if (strlen($value) > 64) { $value = substr($value, 0, 64); }
+        return $value;
+    }
+
+    private function slugList($value)
+    {
+        $parts = is_array($value) ? $value : preg_split('/[,\n]+/', (string) $value, -1, PREG_SPLIT_NO_EMPTY);
+        $out = array();
+        foreach ($parts as $part) {
+            $slug = $this->slug($part);
+            if ($slug !== '' && !in_array($slug, $out, true)) { $out[] = $slug; }
+            if (count($out) >= 50) { break; }
+        }
+        return $out;
+    }
+
+    private function widgets($value)
+    {
+        $lines = is_array($value) ? $value : preg_split('/\r\n|\r|\n/', (string) $value);
+        $out = array();
+        foreach ($lines as $line) {
+            if (is_array($line)) { $fields = array_map(function ($field) { return trim(strip_tags((string) $field)); }, array_values($line)); }
+            else { $fields = array_map('trim', explode('|', (string) $line)); }
+            $title = isset($fields[0]) ? trim(strip_tags($fields[0])) : '';
+            $description = isset($fields[1]) ? trim(strip_tags($fields[1])) : '';
+            $url = isset($fields[2]) ? trim((string) $fields[2]) : '';
+            if ($title === '' && $description === '' && $url === '') { continue; }
+            if (!$this->safeRelativeOrHttpsUrl($url)) { throw new InvalidArgumentException('Widget links must be local or HTTPS, like every other theme link.'); }
+            $out[] = array('title' => substr($title, 0, 120), 'description' => substr($description, 0, 300), 'url' => substr($url, 0, 500));
+            if (count($out) >= 20) { break; }
+        }
+        return $out;
+    }
+
+    /**
+     * The optional product component declared on a block. The spec is bounded
+     * here and resolved (or honestly reported unavailable) by ProductComponents.
+     */
+    private function productWidget(array $input)
+    {
+        if (empty($input['show_products'])) { return null; }
+        $spec = array(
+            'type' => 'products',
+            'heading' => isset($input['product_heading']) ? $input['product_heading'] : '',
+            'group' => isset($input['product_group']) ? (int) $input['product_group'] : 0,
+            'limit' => isset($input['product_limit']) ? (int) $input['product_limit'] : 3,
+            'cycle' => isset($input['product_cycle']) ? $input['product_cycle'] : 'monthly',
+            'layout' => isset($input['product_layout']) ? $input['product_layout'] : 'grid',
+        );
+        $normalised = ProductComponents::normalise($spec);
+        if ($normalised === null) throw new InvalidArgumentException('The product component could not be understood.');
+        return $normalised;
     }
 
     private function localize(array $items, $locale)

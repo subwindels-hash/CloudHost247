@@ -1,6 +1,6 @@
 # CloudHost247 OVH Integration
 
-Version 1.1.0 — independent source implementation. Real OVH/WHMCS execution is **not verified**.
+Version 1.5.0 — independent source implementation. Real OVH/WHMCS execution is **not verified**.
 
 ## Licensing and authentication boundary
 
@@ -20,8 +20,8 @@ The audit inspected readable addon/server PHP, hooks, templates and four cron sc
 | Secret-safe logs/errors | Path/status logging; no auth headers/body secrets; shared redaction | IMPLEMENTED/static-tested | Runtime log review blocked |
 | Connectivity/permission test | Admin invokes authenticated `/me` | IMPLEMENTED source | BLOCKED |
 | Eco/VPS catalog discovery | Public catalog endpoint, plan persistence and availability retirement | IMPLEMENTED source | API catalog shape/availability BLOCKED |
-| Dedicated/VPS configuration options | Mapping stores allowlisted route plus validated JSON configurations | PARTIAL | Admin enters API-supported labels; automatic option discovery remains |
-| Regions/datacenters/OS/storage/RAM/network | Raw plan JSON retained for supported API fields | PARTIAL | Dedicated normalization/UI not complete; do not infer unavailable fields |
+| Dedicated/VPS configuration options | `OptionValueExtractor` reads the selectable values out of the stored catalog payload (flat list, object list or key/label map; anything else is reported unverified) and `DiscoveredOptionMatcher` matches them exactly, at option and value level, against existing WHMCS options. The admin screen offers only exact suboption matches, and the mapping row records whether the catalog evidence proved it | IMPLEMENTED, mock-tested | Payload shapes vary per family and region; shapes the extractor does not recognise must be mapped by hand. The mapping is applied to WHMCS options, not synced to OVH |
+| Regions/datacenters/OS/storage/RAM/network | `ProductSpecifications` maps the persisted catalog plan onto the eight specification fields, fills IPs by version from the plan's own address evidence, and names every field it cannot prove. `HostingProductManager::specificationPrefill()` shows the result read-only and save() records each field's provenance (`prefill`, `manual`, `not_verified`, V180) | IMPLEMENTED, mock-tested | A field the catalog does not carry stays empty and is labelled not verified; nothing is inferred from a plan code or name |
 | Product-to-WHMCS mapping | Validated product, endpoint, family, plan, subsidiary, config, active state | IMPLEMENTED source | WHMCS DB runtime BLOCKED |
 | Product creation/configurable options | Existing WHMCS products are mapped, not auto-created | PARTIAL | Non-destructive design; automatic creation deferred |
 | Pricing sync/margins | Margin retained on mapping; catalog currency retained | PARTIAL | No automatic `tblpricing` mutation; preview/apply workflow remains |
@@ -29,8 +29,8 @@ The audit inspected readable addon/server PHP, hooks, templates and four cron sc
 | Cart/order provisioning | Cart, assign, item, configuration and checkout workflow | IMPLEMENTED source, BLOCKED | Exact plan/order route and OVH account permissions must be staged |
 | Provisioning idempotency | Unique service/mapping key, persisted cart/item/order checkpoints | IMPLEMENTED/static-tested | Crash behavior/live checkout must be verified |
 | Automatic payment | Not performed | NOT APPLICABLE by safety | OVH order may require operator payment/preferred method |
-| Order-to-service completion | Order ID persisted | PARTIAL | Polling order details and automatic service-name binding remain |
-| Existing-service linking | Binding table supports stable service name; sync skips unknown services | PARTIAL | Admin lookup/link UI remains |
+| Order-to-service completion | Order ID persisted; polling resolves the delivered service name when OVH reports one. When it cannot, the binding becomes `intervention_required` and the admin screen offers a reasoned reconciliation: the operator supplies the exact service name against the order reference, with confirmation, uniqueness checks and an audit record (`ExistingServiceLinker::resolveIntervention`), which also completes the provisioning operation | IMPLEMENTED, mock-tested | Automatic resolution still depends on the region/account returning a resolvable identifier; the hand path exists precisely because it may not |
+| Existing-service linking | Bounded, paginated read-only directory of what OVH owns with binding state, family/name filters and ranked WHMCS suggestions (exact domain or matching dedicated IP). Linking needs explicit confirmation; rebinding an existing binding is a separate confirmation that refuses a remote service another binding owns and is audited as `service.relink` with the previous identity | IMPLEMENTED, mock-tested | Ranking is a suggestion, never an automatic link: the operator chooses |
 | Status/details | Dedicated/VPS details and status | IMPLEMENTED source | Endpoint permissions BLOCKED |
 | IP information | VPS IP and routed dedicated IP queries | IMPLEMENTED source | Response normalization/UI partial |
 | Reboot | Dedicated/VPS reboot | IMPLEMENTED source | BLOCKED |
@@ -38,7 +38,8 @@ The audit inspected readable addon/server PHP, hooks, templates and four cron sc
 | Termination | Explicit WHMCS terminate action invokes supported endpoint | IMPLEMENTED source | Destructive runtime test requires disposable service |
 | Reverse DNS | Admin set/delete with IP-block/address/hostname validation, confirmation and audit | IMPLEMENTED source, BLOCKED runtime | Needs an IP block the OVH account owns |
 | Snapshot / automated-backup status / task history / reinstall / rescue boot / IPMI access / monitoring | Admin-only `AdvancedOperations` (see below) | IMPLEMENTED source, BLOCKED runtime | Endpoint shapes follow OVH's public API reference; never exercised against a live account; consumer key needs matching rules |
-| Firewall, network-boot beyond boot-id selection, intervention history, backup restore | Legacy API capability audited | NOT IMPLEMENTED | Product/permission dependent; must not be guessed |
+| Firewall, network-boot beyond boot-id selection, intervention history | Legacy API capability audited; the vendor used all three | IMPLEMENTED, mock-tested | The call shapes follow OVH's published schema for these routes (`/ip/{ip}/firewall` and `/ip/{ip}/firewall/{ipOnFirewall}/rule`) but are unverified against a live account. Rule `action` (`permit|deny`) and `protocol` (`ah|esp|gre|icmp|ipv4|tcp|udp`) come from that schema, a port is a single number (OVH takes no ranges), a sequence is 0–19, and `ipOnFirewall` is an IPv4 scoped by the verified `/ip/{ip}` base, so a wrong value can only fail at the provider and can never reach another account. Firewall rule changes require the typed service name because they change network reachability |
+| Automated-backup restore | The verified surface exposes backup *status* and, for VPS, a snapshot to revert to | NOT IMPLEMENTED | No automated-backup restore route is exposed on the surface this module is scoped to. Inventing one would risk a destructive mutation on an unverified path; the supported restore path stays `vps_snapshot_revert`, and `vps_backup_status` reports what the provider has. Confirming a provider restore route is a staging task, not a code guess |
 | Service synchronization | Lists dedicated/VPS, updates only known bindings, counts unchanged/updated/failed/skipped | IMPLEMENTED source | BLOCKED runtime |
 | Catalog synchronization | Idempotent upsert and unavailable marking | IMPLEMENTED source | BLOCKED runtime |
 | Locked cron | CLI-only worker, endpoint leases, stale recovery and structured run counts | IMPLEMENTED source | Scheduling/runtime BLOCKED |
@@ -117,7 +118,49 @@ Version 1.3.0 adds recursive-but-conservative region/product normalization, an u
 - **BLOCKED — STAGING REQUIRED:** real migrations/database transactions, WHMCS hooks and client area, browser/accessibility rendering, cron, currency HTTP providers, OVH authentication/API calls, provisioning and lifecycle operations.
 - **NOT IMPLEMENTED — API/PRODUCT DEPENDENCY:** provider capabilities not exposed by an authenticated OVH product/API are not guessed; unsafe mutation retry is intentionally unavailable.
 
-Migration ordering is core `1.1.0`, currency `1.0.0 → 1.1.0`, theme `1.0.0 → 1.1.0`, and OVH `1.0.0 → 1.1.0 → 1.2.0 → 1.3.0 → 1.4.0 → 1.5.0`. All migrations are additive/idempotent and retain data on module deactivation. No WHMCS core schema is altered. Before upgrade, back up the database; rollback means restoring that backup and the prior source commit because additive tables/columns are deliberately retained.
+Migration ordering is core `1.1.0`, currency `1.0.0 → 1.1.0`, theme `1.0.0 → 1.1.0`, and OVH `1.0.0 → … → 1.6.0 → 1.7.0 → 1.8.0` (1.7.0 adds the option-mapping provenance flag, 1.8.0 the specification provenance column). All migrations are additive/idempotent and retain data on module deactivation. No WHMCS core schema is altered. Before upgrade, back up the database; rollback means restoring that backup and the prior source commit because additive tables/columns are deliberately retained.
+
+## Discovery, specifications and reconciliation (version 1.5.0)
+
+Three PARTIAL items from the parity matrix were completed in source:
+
+**Automatic option discovery.** Catalog sync already stored each discovered option's
+raw value. `OptionValueExtractor` now reads the selectable values out of it and
+classifies the shape as `resolved`, `unverified` or `empty` — the module refuses
+payload shapes it does not recognise instead of inventing a value list.
+`DiscoveredOptionMatcher` (no database, no decisions) matches option names by
+normalization, matches each value to a WHMCS suboption by the same rule, reports
+ambiguity, and exposes one exactness rule that both the suggestion screen and the
+confirmation path use, so they cannot drift apart. `ConfigurableOptionMapper`
+confirms a mapping only through that rule and derives the new `verified` flag
+(V170) from the evidence: a suboption confirmed against an unreadable payload is
+recorded as unverified.
+
+**Product specifications.** `ProductSpecifications` maps the persisted catalog
+plan onto the eight specification fields the product editor stores — CPU, RAM,
+storage, network, IPv4, IPv6, datacenter, operating system — filling only what the
+payload proves and returning the list of fields it could not. The hosting-product
+screen shows a specifications column and a "prefill from catalog" button that
+writes nothing; saving records each field's provenance in V180's
+`specification_sources_json` (`prefill`, `manual`, `not_verified`).
+
+**Existing services and delivered orders.** `ExistingServiceLinker::directory()`
+is a bounded, paginated, read-only view of what OVH owns: family and name
+filters, binding state, and ranked WHMCS suggestions. Linking requires explicit
+confirmation; rebinding a service that is already bound to a different remote
+name requires its own confirmation and is audited as `service.relink` with the
+previous identity, and a remote name owned by another binding is refused. For an
+order that was delivered but whose service name could not be resolved
+automatically, `resolveIntervention()` closes the loop by hand: the operator
+supplies the exact name against the persisted order reference, the service is
+bound, the provisioning operation is completed, and the action is audited as
+`service.reconcile`.
+
+Tests: `tests/ovh/run.php` (87 assertions) exercises the extractor, the matcher,
+the prefill and the whole linking/reconciliation path against a join-capable
+in-memory Capsule double in `tests/ovh/fakes.php`; `tests/ovh/test_static.py`
+asserts the UI wiring, the capability split (reads stay on `operations.run`, the
+reconciling write joins the apply set) and that both new migrations are additive.
 
 ## Advanced service operations (admin-only)
 
@@ -134,7 +177,13 @@ Migration ordering is core `1.1.0`, currency `1.0.0 → 1.1.0`, theme `1.0.0 →
 | Select next boot | Dedicated | `PUT <base> {bootId}` (use the existing Reboot action afterwards) | write |
 | IPMI access | Dedicated | `POST /features/ipmi/access {ipToAllow, ttl, type}` | write |
 | Reinstall | Dedicated | `POST /install/start {templateName, details.customHostname}` | **destructive** |
+| All boot options | Dedicated | `GET /boot` (every type, not only rescue) | read |
+| Intervention history / detail | Dedicated | `GET /intervention`, `GET /intervention/{id}` | read |
+| Select next boot (type/kernel) | Dedicated | `PUT <base> {bootId, bootType?, kernel?}` — `kernel` only with `netboot` | write |
+| Addresses on the network firewall | VPS + Dedicated | `GET /ip/{ip}/firewall` (the `ipOnFirewall` entries) | read |
+| Firewall rules | VPS + Dedicated | `GET /ip/{ip}/firewall/{ipOnFirewall}/rule` | read |
+| Add / delete firewall rule | VPS + Dedicated | `POST /ip/{ip}/firewall/{ipOnFirewall}/rule {action: permit\|deny, protocol, source, destinationPort?, sourcePort?, sequence?}`, `DELETE .../rule/{sequence}` | **destructive** |
 
-Controls: CSRF token; `operations.run` capability for reads and `changes.apply` for writes; an explicit confirmation checkbox on every write; typing the exact OVH service name for destructive actions; strict validation of every field (numeric IDs, template-name pattern, IP address, hostname, closed IPMI ttl/type lists); the same ledgered, idempotent, never-auto-retried mutation path used for reboot and terminate (an uncertain outcome becomes `reconciliation_required`); and an audit event. Reverse-DNS set/delete in the same page are confirmed and audited too.
+Address-scoped actions (the firewall, which lives in the `/ip` namespace rather than beneath the VPS or dedicated service base) can only name an address OVH itself reports for the linked service: `ServiceManager::boundAddress()` re-verifies membership before any call, so a request cannot address another account's block, the sub-path allowlist permits the dotted IPv4 but refuses any `..` segment, and reads that carry an identifier (`/intervention/{id}`, `/firewall/{ipOnFirewall}/rule`) build the path from validated values rather than from the request. Controls: CSRF token; `operations.run` capability for reads and `changes.apply` for writes; an explicit confirmation checkbox on every write; typing the exact OVH service name for destructive actions; strict validation of every field (numeric IDs, template-name pattern, IP address, hostname, closed IPMI ttl/type lists); the same ledgered, idempotent, never-auto-retried mutation path used for reboot and terminate (an uncertain outcome becomes `reconciliation_required`); and an audit event. Reverse-DNS set/delete in the same page are confirmed and audited too.
 
 Staging evidence still required: each call against a disposable OVH VPS and dedicated server, with a consumer key limited to the paths used.

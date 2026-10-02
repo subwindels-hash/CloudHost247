@@ -120,9 +120,13 @@ Native instance API.
 Native EC2 uses the AWS SDK's Signature Version 4 client. Plan metadata must set
 `providerServerType` to an EC2 instance type; the mapped OS image must hold an AMI id. It supports
 create/retry lookup through a CloudHost247 idempotency tag, status, start/stop/reboot, terminate,
-resize, snapshots, image lookup and console output. In-place reinstall and root-volume restore are
-intentionally unavailable because they need an explicit replacement-instance workflow. CloudWatch
-metrics require separately scoped permissions and are not supplied by this adapter.
+resize, snapshots, image lookup and console output. Reinstall is implemented as a replacement
+instance (same zone, subnet, security groups and key; the previous instance is stopped, never
+terminated) and root-volume restore runs in place from a completed snapshot, keeping the detached
+root volume. Both are opt-in: they refuse with `UNSUPPORTED_OPERATION` unless the deployment sets
+`AWS_ALLOW_ROOT_VOLUME_REPLACEMENT=true` (or the provider-prefix equivalent), and the profile keeps
+advertising `reinstall: false` until it is enabled. Rescue mode and CloudWatch metrics remain
+unavailable; metrics need separately scoped permissions.
 
 ### Contabo (`contabo`)
 
@@ -574,11 +578,21 @@ was booted.
 
 Two deliberate constraints:
 
-- **Only adapters with a real rescue API may offer it.** Hetzner (`enable_rescue` + `reset`) and
-  OpenStack (Nova `rescue` / `unrescue`) implement it; every other adapter refuses with a
-  non-retryable `UNSUPPORTED_OPERATION`, and their profile capability stays `false` so a template
-  cannot offer the button in the first place. A rescue that silently did nothing would strand a
-  customer who believes they are about to repair a disk.
+- **Only adapters with a real rescue API may offer it.** Five adapters declare `rescue: true`
+  because their provider exposes a rescue system, and each is pinned to the documented call shape:
+  Hetzner (`enable_rescue` + `reset`, `disable_rescue` + `reset`), OpenStack (Nova `rescue` /
+  `unrescue`), OVH Public Cloud (`POST /cloud/project/{id}/instance/{id}/rescueMode` with
+  `{"rescue": true|false}`, the password read from the instance resource's `rescuePassword`), Contabo
+  (`POST /v1/compute/instances/{id}/actions/rescue`, which takes Contabo *secret ids* — the adapter
+  reuses the template SSH-key secrets when present, otherwise it stores a freshly generated one-time
+  password as a Contabo secret; leaving rescue is Contabo's next restart), and the development-only
+  mock adapter, which simulates the state machine so the whole flow can be exercised without a
+  provider. The remaining adapters — AWS, DigitalOcean, Vultr, Proxmox, Virtualizor, SolusVM and the
+  operator bridge — have no rescue action in the API surface their adapter implements; they refuse
+  with a non-retryable `UNSUPPORTED_OPERATION` and keep the capability `false` so a template cannot
+  offer the button in the first place. A rescue that silently did nothing would strand a customer
+  who believes they are about to repair a disk. `tests/unit/provider-rescue.test.ts` pins both
+  halves: the four real call shapes and the refusal list.
 - **The one-time root password is never stored.** Like the console session, it runs in request
   scope and is returned only to the browser that asked for it — never a job payload, a log line,
   an audit row or a database column. Reloading the page does not show it again; leaving and

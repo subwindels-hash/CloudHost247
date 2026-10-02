@@ -90,6 +90,8 @@ export async function status(client: DbClient, dir: string = MIGRATIONS_DIR) {
     name: f.name,
     applied: appliedByVersion.has(f.version),
     checksumMatches: appliedByVersion.has(f.version) ? appliedByVersion.get(f.version)!.checksum === f.checksum : null,
+    quarantined: Boolean(QUARANTINED_MIGRATIONS[f.version]),
+    quarantineReason: QUARANTINED_MIGRATIONS[f.version]?.reason ?? null,
   }));
 }
 
@@ -99,15 +101,90 @@ export async function verify(client: DbClient, dir: string = MIGRATIONS_DIR) {
   return { ok: drift.length === 0, drift };
 }
 
+/**
+ * Migrations whose artifacts are prepared and tested, but which a standing restriction forbids
+ * executing against a production database until they are separately authorized:
+ *
+ *   "Migrations 0023, 0024, 0025, and 0041: Prepared and tested migration artifacts only. NOT
+ *    authorized for production execution; do not run against any production database until
+ *    separately authorized."  — docs/NODE_PLATFORM_STATUS.md, Standing restrictions
+ *
+ * The restriction is enforced here rather than left to documentation. A production run never
+ * executes a quarantined artifact: standalone ones are skipped and reported, and if a pending
+ * migration depends on a skipped artifact the whole run refuses up front, before any DDL, so a
+ * production database is never left half-upgraded. `migrate status` marks them. Authorization is
+ * per-run and explicit: AUTHORIZED_MIGRATIONS=0023,0024 (or `authorizedQuarantined` for library
+ * callers). Non-production environments (tests, local, previews) are unaffected.
+ */
+export interface QuarantinedMigrationRule {
+  reason: string;
+  /**
+   * Migrations that cannot be applied while this artifact is quarantined. A production run that
+   * would have to leave one of them pending refuses entirely, before executing anything.
+   */
+  dependents: string[];
+}
+
+export const QUARANTINED_MIGRATIONS: Record<string, QuarantinedMigrationRule> = {
+  '0023': {
+    reason:
+      'billing-invariant enforcement (B5) — prepared and tested only, NOT authorized for production execution',
+    dependents: [],
+  },
+  '0024': {
+    reason:
+      'Phase 5D webhook event ledger — prepared and tested only, NOT authorized for production execution',
+    dependents: [],
+  },
+  '0025': {
+    reason:
+      'Phase 5F admin billing audit extension — prepared and tested only, NOT authorized for production execution',
+    dependents: [],
+  },
+  '0041': {
+    reason:
+      'OS catalog and server provisioning — prepared and tested only, NOT authorized for production execution',
+    // 0042+ build on the tables 0041 creates; everything later in the ordered run is covered by
+    // the first dependent, because migrateUp stops rather than skipping past a failure.
+    dependents: [
+      '0042',
+      '0043',
+      '0047',
+      '0048',
+      '0049',
+      '0051',
+      '0052',
+      '0054',
+      '0056',
+      '0059',
+    ],
+  },
+};
+
 export interface MigrateUpOptions {
   /** Required to be true to actually apply anything when NODE_ENV=production. */
   confirmedForProduction?: boolean;
   isProduction: boolean;
+  /**
+   * Migration versions the operator has separately authorized this run despite the standing
+   * quarantine (e.g. ['0024']). Nothing else lifts the quarantine for a production database.
+   */
+  authorizedQuarantined?: string[];
+}
+
+export interface QuarantinedMigration {
+  version: string;
+  name: string;
+  reason: string;
+  /** Migrations that cannot be applied while this artifact is quarantined. */
+  dependents: string[];
 }
 
 export interface MigrateUpResult {
   applied: string[];
   skippedReason?: string;
+  /** Quarantined migrations this run deliberately did not execute. Reported, never silent. */
+  quarantined?: QuarantinedMigration[];
 }
 
 /**
@@ -143,8 +220,38 @@ export async function migrateUp(client: DbClient, opts: MigrateUpOptions, dir: s
     };
   }
 
+  // The standing quarantine applies to production execution. A production run applies everything
+  // except the quarantined artifacts, unless the operator authorized them for this run.
+  const authorized = new Set(opts.authorizedQuarantined ?? []);
+  const quarantined: QuarantinedMigration[] = [];
+  const runnable = pending.filter((file) => {
+    const rule = QUARANTINED_MIGRATIONS[file.version];
+    if (!rule || !opts.isProduction || authorized.has(file.version)) return true;
+    quarantined.push({ version: file.version, name: file.name, reason: rule.reason, dependents: rule.dependents });
+    return false;
+  });
+
+  // Fail closed, before executing anything: if a later pending migration depends on a quarantined
+  // artifact this run will not execute, the upgrade cannot be completed correctly. Refuse the whole
+  // run instead of committing a partial upgrade that dies on a relation/foreign-key error.
+  const pendingVersions = new Set(pending.map((file) => file.version));
+  for (const entry of quarantined) {
+    const blocked = entry.dependents.filter((version) => pendingVersions.has(version));
+    if (blocked.length > 0) {
+      return {
+        applied: [],
+        quarantined,
+        skippedReason:
+          `Refusing to migrate production: ${entry.version} (${entry.name}) is quarantined — ${entry.reason} — ` +
+          `but pending migration(s) ${blocked.join(', ')} depend on it. Nothing was applied. ` +
+          `Authorize it explicitly for this run (AUTHORIZED_MIGRATIONS=${entry.version}) once that is authorized, ` +
+          `or leave the production database unchanged.`,
+      };
+    }
+  }
+
   const appliedNow: string[] = [];
-  for (const file of pending) {
+  for (const file of runnable) {
     const sql = readFileSync(file.filePath, 'utf8');
     try {
       await client.exec('BEGIN');
@@ -162,7 +269,7 @@ export async function migrateUp(client: DbClient, opts: MigrateUpOptions, dir: s
     }
   }
 
-  return { applied: appliedNow };
+  return quarantined.length > 0 ? { applied: appliedNow, quarantined } : { applied: appliedNow };
 }
 
 export function scaffoldMigration(name: string, dir: string = MIGRATIONS_DIR): string {
@@ -227,7 +334,15 @@ async function main() {
 
     if (command === 'up') {
       const confirmedForProduction = rest.includes('--yes') || process.env.CONFIRM_MIGRATION === 'yes';
-      const result = await migrateUp(client, { isProduction: env.NODE_ENV === 'production', confirmedForProduction });
+      const authorizedQuarantined = (process.env.AUTHORIZED_MIGRATIONS ?? '')
+        .split(',')
+        .map((entry) => entry.trim())
+        .filter((entry) => entry.length > 0);
+      const result = await migrateUp(client, {
+        isProduction: env.NODE_ENV === 'production',
+        confirmedForProduction,
+        authorizedQuarantined,
+      });
       if (result.skippedReason) {
         // eslint-disable-next-line no-console
         console.warn(result.skippedReason);
@@ -240,6 +355,19 @@ async function main() {
       } else {
         // eslint-disable-next-line no-console
         console.log(`Applied ${result.applied.length} migration(s): ${result.applied.join(', ')}`);
+      }
+      if (result.quarantined && result.quarantined.length > 0) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          [
+            '',
+            'NOT APPLIED — quarantined by a standing restriction (NOT authorized for production execution):',
+            ...result.quarantined.map((entry) => `  ${entry.version} ${entry.name}\n      ${entry.reason}`),
+            'These migrations were deliberately skipped. To authorize specific ones for this run:',
+            '  AUTHORIZED_MIGRATIONS=<comma-separated versions> migrate up --yes',
+            '',
+          ].join('\n')
+        );
       }
       return;
     }

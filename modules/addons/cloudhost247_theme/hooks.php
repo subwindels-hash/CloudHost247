@@ -1,6 +1,8 @@
 <?php
 if (!defined('WHMCS')) { die('This file cannot be accessed directly'); }
 require_once __DIR__ . '/../cloudhost247_core/bootstrap.php';
+require_once __DIR__ . '/lib/Content/ProductComponents.php';
+require_once __DIR__ . '/lib/View/PreviewRenderer.php';
 require_once __DIR__ . '/lib/ThemeRepository.php';
 
 use CloudHost247\Theme\ThemeRepository;

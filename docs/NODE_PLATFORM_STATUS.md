@@ -27,6 +27,16 @@ sub-phase before the next one begins.
 ### Standing restrictions until the user explicitly lifts them
 
 - **Migrations 0023, 0024, 0025, and 0041**: Prepared and tested migration artifacts only. **NOT authorized for production execution**; do not run against any production database until separately authorized.
+  - **Enforced in code, not only in this document.** `cloudhost247-node/database/migrate.ts` holds
+    those four artifacts in `QUARANTINED_MIGRATIONS`; a production `migrate up` never executes them.
+    Standalone artifacts are skipped and reported, and if a pending migration depends on a skipped
+    artifact the entire run refuses **before any DDL**, so no production database is upgraded past
+    the frozen set or left half-migrated. `migrate status` marks them, and the only way to apply one
+    is an explicit per-run authorization (`AUTHORIZED_MIGRATIONS=<versions>`). This does **not**
+    authorize anything: 0023, 0024, 0025, and 0041 remain NOT executed in production.
+  - Practical consequence: because 0041 creates the `operating_systems`/`infrastructure_providers`
+    tables that 0042+ build on, a production database cannot advance beyond 0040 until 0041 is
+    separately authorized — the run refuses rather than failing midway.
 - **Production Safety**: Zero production financial records modified. Zero deployment executed.
 - **PR #12 (`subwindels-hash/CloudHost247#12`)**: Remains **OPEN and UNMERGED**.
 - **Historical Integrity**: Current state is preserved: no history rewrite, no force-push, no whole-PR revert.
@@ -1037,3 +1047,161 @@ sub-phase before the next one begins.
   - **Request-scoped, like the console, and for the same reason:** the provider's one-time root password is only useful in the browser that asked for it. `POST /api/v1/servers/:id/rescue` returns it directly and writes it nowhere — not a job payload, not a log line, not an audit row, not a column. `DELETE` on the same path leaves rescue and reboots into the installed OS. While rescue is active the server is `maintenance`, which is honest: it is up, but it is not running the customer's operating system.
   - **Customer UI:** a capability-gated "Boot into rescue" action plus a rescue panel that shows the credentials once, says plainly that CloudHost247 did not store them, and offers "Leave rescue mode". After a reload the panel states the credentials were shown once and are gone rather than pretending to still have them.
   - **Tests added:** `tests/integration/server-rescue.test.ts` (6) — capability refusal, ownership 404, a provider with no rescue API refusing without changing the server, the full Hetzner enter/leave request sequence, and an assertion that the generated password appears in neither `servers.metadata` nor `audit_logs`.
+
+### A6 — rescue extended to every provider whose API genuinely offers it
+
+- **Source/local verification:** full node unit suite 52 / 52 files (288 / 288 tests) and
+  `tests/integration/server-rescue.test.ts` (6 / 6) pass; backend TypeScript clean.
+- **OVH Public Cloud — implemented.** OVH's own CLI enters rescue with
+  `POST /cloud/project/{serviceName}/instance/{instanceId}/rescueMode` and the body
+  `{"rescue": true}` (plus an optional `imageId`), and exits with `{"rescue": false}`; the one-time
+  root password is served on the instance resource as `rescuePassword` while rescue is active. The
+  adapter posts the same body, reads the password from the instance, returns it in request scope and
+  stores it nowhere. The community-reported `400 "instance is in ACTIVE status"` is an OVH-side issue
+  with the endpoint, not a different API: the documented call is the one implemented.
+- **Contabo — implemented.** The published OpenAPI client (used by Contabo's own `cntb`) contains
+  `POST /v1/compute/instances/{instanceId}/actions/rescue` with a body of `rootPassword` (a
+  **secretId**), `sshKeys` (secretIds) or `userData`. Because the API never accepts a plaintext
+  password, the adapter reuses the template's SSH-key secrets when they exist and otherwise stores a
+  freshly generated password as a Contabo secret (`POST /v1/secrets`, type `password`, matching
+  Contabo's documented complexity rule) and passes that secret's id. Contabo has no unrescue action:
+  the next restart boots the installed OS, so `disableRescue` restarts the instance. A 2023 vendor
+  report of the rescue action returning success without acting is recorded here as a live-account
+  caveat, not hidden.
+- **Mock — implemented.** The development-only adapter moves its own state machine to `rescue` and
+  back, so the ordering → queue → worker → UI path can exercise rescue with no provider at all. It
+  still fails closed without `ALLOW_MOCK_PROVIDER=true` and never calls `fetch`.
+- **Still refused, with the reason recorded:** AWS (EC2 has no native rescue mode; the documented
+  path is a manual stop/detach/attach workflow, not a provider call), DigitalOcean, Vultr, Proxmox,
+  Virtualizor, SolusVM and the operator bridge (no rescue action in the API surface each adapter
+  implements). Their profiles stay `rescue: false` and `unsupportedRescue()` throws a non-retryable
+  `UNSUPPORTED_OPERATION` before any request, which
+  `tests/unit/provider-capability-truth.test.ts` and `tests/unit/provider-rescue.test.ts` pin.
+- **Capability matrix:** `rescue: true` now covers Hetzner, OpenStack, OVH, Contabo and mock; the
+  profile notes for OVH, Contabo and mock state the exact call each uses.
+
+---
+
+## Phase 7 (continued) — EC2 reinstall and root-volume restore, behind an explicit opt-in
+
+- **Source/local verification:** PASSED on branch `arena/01a0f9c1-cloudhost247`.
+  - **Full platform verification: 102 / 102 test files passing (751 / 751 tests), backend and frontend TypeScript clean.**
+  - **No migration required.**
+  - **Closed gap:** the AWS profile declared `reinstall: false` and both `reinstallServer()` and `restoreSnapshot()` refused with a message pointing at a replacement-instance workflow that did not exist. The two EC2 workflows EC2 actually supports are now implemented, and they are the reason the profile kept saying no.
+  - **Reinstall is a replacement instance.** `reinstallServer()` describes the source, builds a launch in the same availability zone, subnet and security groups, with the same instance type and key, tagging it `cloudhost247:replacement-for=<old id>` and `cloudhost247:idempotency=<new key>`, launches it from the requested AMI, and then **stops** the previous instance. It never terminates it: the old volumes stay attached and recoverable, and the returned `ProviderServer` carries `metadata.replacement` with the previous id, its state and the action taken, so the orchestrator can record which instance superseded which. The previous idempotency tag is deliberately not carried forward — two instances answering the same lookup would be worse than none.
+  - **Root-volume restore is in place, on the same instance.** `restoreSnapshot()` creates a volume from the snapshot in the instance's own availability zone, stops the instance, detaches the old root volume (kept, not deleted), attaches the new one at the same device name, and restarts the instance only if it was running before. It refuses before the first mutating call when the snapshot is not `completed` (retryable `IMAGE_UNAVAILABLE`), when the instance is not in a running/stopped state, or when no root device or zone can be discovered.
+  - **Guarded by deployment opt-in, not by a code comment.** Both workflows require `AWS_ALLOW_ROOT_VOLUME_REPLACEMENT=true` (or the provider-prefix equivalent); without it every call fails with a non-retryable `UNSUPPORTED_OPERATION` **before a single AWS request is sent**, and the profile keeps advertising `reinstall: false`. The static profile cannot know a deployment's IAM scope, so the capability stays off until an operator says otherwise; the profiles notes now say exactly that. `deleteSnapshot()` is implemented for real (it only ever touches the id it was given).
+  - **The request construction is a pure module** (`aws-replacement.ts`): guards, tags and the launch object are asserted without an AWS client, so the destructive-path rules are testable and live in one place.
+  - **Tests added:** `tests/unit/aws-replacement.test.ts` (12) — both workflows refusing with no commands sent when the flag is off, snapshot deletion and its input guard, the replacement command order and launch shape (AMI, type, subnet, security groups, zone, key, user data, tags), the assertion that `TerminateInstancesCommand` is never sent, the in-place restore command order including the detached old volume and the `Device` name, a stopped instance staying stopped, and the two refusal paths. Backend and frontend TypeScript compile clean.
+  - **Still honest about what is missing:** rescue mode and CloudWatch metrics remain unsupported on EC2, and the adapter's own comments say why.
+
+---
+
+## A7 — deployment adapter operations that were refused, now real (or honestly still refused)
+
+- **Source/local verification:** PASSED on branch `arena/01a0f9c1-cloudhost247`.
+  - **Full platform verification: 105 / 105 test files passing (782 / 782 tests), backend and frontend TypeScript clean.**
+  - **No migration required.**
+- **cPanel — start/stop now mean the account's own state.** A cPanel server has no container, so
+  `startApplication`/`stopApplication` previously threw. They now use what cPanel actually has:
+  suspension. `stop` calls WHM `suspendacct` with a reason (cPanel's own definition blocks the
+  account's web, mail and FTP), `start` checks `accountsummary` and calls `unsuspendacct` only when
+  the account really is suspended. `restartApplication` and `applicationLogs` still refuse —
+  cPanel exposes no per-account process restart and the platform cannot read inside a customer's
+  account — and the refusals are explicit rather than silent successes.
+- **cPanel — status and backups are real UAPI/WHM operations.** `applicationStatus` reads WHM
+  `accountsummary`: suspended means `running: false`, a missing account is `ACCOUNT_NOT_FOUND`,
+  and health stays `unknown` because cPanel has no application health signal. `runBackup` calls
+  UAPI `Backup::fullbackup_to_homedir`, then polls the account's own `Backup::list_backups` until a
+  new archive reports `complete`, and returns the **server-side** path (`/home/<user>/<archive>`)
+  and size. cPanel's UAPI has no remote-download function, so the platform does not claim to hold a
+  copy it does not have. `restoreBackup` calls UAPI `Backup::restore_backup` with the file name
+  only, after refusing any archive outside `/home/<user>/` — a restore overwrites the account's
+  files and must never be pointed at an arbitrary path.
+- **Defect fixed while wiring it:** the cPanel username was derived by stripping non-lowercase
+  characters, so `My-Project` became `roject`. Derivation now lowercases first, guards a leading
+  digit with the `u` prefix and caps at cPanel's 16 characters, and every cPanel path (deploy,
+  status, stop, backup, restore) uses the same function.
+- **Kubernetes — real API paths.** Objects were applied to `/apis/namespaced/...`, which is not a
+  Kubernetes route. Each rendered kind now maps to its own group/version/resource collection
+  (`/api/v1/namespaces/{ns}/secrets`, `/apis/apps/v1/namespaces/{ns}/deployments`, …), created with
+  POST; a 409 re-PUTs the desired body with the live `resourceVersion` so a concurrent writer is
+  not silently overwritten. The Secret is applied before the PVCs and Deployment that reference it.
+- **Kubernetes — lifecycle through the cluster's own mechanisms.** `stop` patches `spec.replicas`
+  to 0 and records the previous count in a `cloudhost247.io/last-replicas` annotation; `start`
+  restores that count (or 1); `restart` patches the pod template's
+  `kubectl.kubernetes.io/restartedAt` annotation — the mechanism behind `kubectl rollout restart` —
+  instead of deleting pods. `applicationStatus`/`runHealthcheck` read the Deployment and its Pods
+  (available vs desired replicas, ready pods, restart counts, conditions) and never assume health;
+  `applicationLogs` streams the newest pod's log with a bounded `tailLines`.
+- **Kubernetes — teardown discovers the live object set by label** instead of guessing names, so
+  PVCs and any renamed object are removed too; missing objects are not an error.
+- **Kubernetes — backups stay refused, with the reason recorded.** The platform's backup contract
+  requires a retrievable archive (storage path, size, checksum) it can restore and verify; Velero
+  backups are cluster-side and asynchronous. `runBackup`/`restoreBackup` return a structured
+  `K8S_BACKUP_REQUIRES_VELERO` failure (the engine marks the backup row failed with a message an
+  operator can act on) rather than recording an empty success.
+- **Docker — hosting operations point at the right adapter.** `provisionHosting`/`suspendHosting`/
+  `terminateHosting` returned a thrown `UnsupportedOperationError`; they now return a structured
+  `HOSTING_REQUIRES_CPANEL_ADAPTER` failure, consistent with the rest of the adapter contract and
+  with spec §35 ("do not deploy Docker applications into ordinary cPanel hosting").
+- **Tests added:** `tests/unit/deployment-adapter-operations.test.ts` (17) — cPanel suspension
+  start/stop, status truthfulness, the UAPI backup/restore flows (including the home-directory
+  path guard), the username derivation; Kubernetes collection mapping, idempotent apply with
+  `resourceVersion`, replica stop/start, the rollout-restart annotation, health and log reads,
+  label-discovered teardown, the structured backup refusal, and the disabled switch.
+
+---
+
+## A8 — undeclared provider adapters fail closed, non-retryably
+
+- **Source/local verification:** PASSED on branch `arena/01a0f9c1-cloudhost247`.
+  - **Full platform verification: 106 / 106 test files passing (788 / 788 tests), backend and frontend TypeScript clean.**
+  - **No migration required.**
+- **The accepted adapter list is now derived, not duplicated.** `ADAPTER_KINDS` is computed from
+  `ADAPTER_PROFILES`, and the admin API's provider schema (`z.enum`) uses it, so a provider row can
+  no longer be saved with an adapter kind that has no implementation — and a new profile cannot be
+  added while the API silently refuses it. The registry's fallback stays what it should be: a
+  last-resort guard for a row that predates or bypasses the API.
+- **The refusal is no longer a retry invitation.** An undeclared kind used to fail with
+  `SERVICE_UNAVAILABLE`, which the error mapper renders to the customer as "temporarily
+  unavailable. Please try again shortly" — advice that can never succeed, because only a build
+  change adds an adapter. It now fails with a non-retryable `UNSUPPORTED_OPERATION` naming the
+  provider kind and stating that no native adapter is implemented for it in this build; the
+  customer-facing mapping is a 400 `VALIDATION_ERROR` ("This action is not supported for this
+  server."), never a 503 retry.
+- **Pinned across the whole contract.** `tests/unit/undeclared-adapter-fail-closed.test.ts` (6)
+  enumerates every method of the adapter interface — all 26 — and asserts each rejects with
+  `UNSUPPORTED_OPERATION` + `retryable: false` with the network disabled, so a newly added
+  operation cannot slip through unimplemented or silently succeed; it also asserts the fallback is
+  never substituted by the mock, that every declared kind resolves to its own adapter, and that a
+  provider described as undeclared is reported not-ready with all capabilities false and the reason
+  "adapter implementation" missing.
+
+## A9 — external payment webhook pipeline (Phase 5D): verified, and the freeze is now enforced
+
+- **Source/local verification:** PASSED on branch `arena/01a0f9c1-cloudhost247`.
+  - **No new migration.** Migration 0024 remains prepared-only and NOT executed in production.
+- **The pipeline was re-verified as real and registered.** `src/routes/webhooks.ts` is wired into
+  `src/app.ts` (raw-body capture via `addContentTypeParser('application/json', { parseAs: 'buffer' })`,
+  both `POST /api/v1/webhooks/:gateway` and `POST /api/v1/webhooks/payment/:provider`). The service
+  verifies the gateway signature against the raw body **before** parsing JSON or touching the
+  database, records a SHA-256 payload hash, takes a 60-second lease with expired-lease takeover, and
+  applies payment/invoice/order/ledger changes in one transaction. Handlers exist for
+  `sandbox`/`stripe`/`paypal`/`paystack`; the integration suites pass: `tests/integration/webhooks-api.test.ts`,
+  `payments-api.test.ts`, `payments-schema.test.ts` — **73 / 73 tests**.
+- **A frozen pipeline on a production host must fail closed, so that is now pinned.** Every webhook
+  gateway refuses a delivery when its signing secret is not configured — including PayPal with no
+  `PAYPAL_WEBHOOK_ID`, which refuses before any outbound certificate call.
+  `tests/unit/webhook-secret-fail-closed.test.ts` (4) pairs each rejection with a positive control
+  signed by the same secret, so a gateway that returned `false` unconditionally cannot pass.
+- **The freeze itself can no longer be reversed by a routine deploy.** See §Standing restrictions:
+  `database/migrate.ts` quarantines 0023/0024/0025/0041, so a production migration run cannot execute
+  the webhook ledger migration as a side effect of an unrelated release.
+  `tests/integration/migration-quarantine.test.ts` (8) pins the quarantined set, the doc-to-code list,
+  the fail-closed whole-run refusal, the standalone skip, the explicit authorization path, and that
+  `migrate status` marks them; `tests/integration/migrate.test.ts` was updated for the new production
+  semantics.
+- **Nothing about authorization changed.** `docs/PROPOSED_SCOPE_WEBHOOK_PIPELINE.md` keeps its
+  "NOT AUTHORIZED · NOT IMPLEMENTED · NOT DEPLOYED" stamp, migration 0024 remains prepared-only, PR #12
+  remains open and unmerged, and no production database, credential, or financial record was touched.

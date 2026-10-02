@@ -42,6 +42,36 @@ class MarketingStaticTests(unittest.TestCase):
             os.path.join(LIB, "Domain", "SuppressionReason.php"),
             os.path.join(LIB, "Repositories", "SettingsRepository.php"),
             os.path.join(LIB, "Security", "InputValidator.php"),
+            os.path.join(LIB, "Security", "HtmlSanitizer.php"),
+            os.path.join(LIB, "Domain", "CampaignAudience.php"),
+            os.path.join(LIB, "Domain", "SegmentField.php"),
+            os.path.join(LIB, "Domain", "SegmentOperator.php"),
+            os.path.join(LIB, "Domain", "TemplateBlock.php"),
+            os.path.join(LIB, "Repositories", "CampaignRepository.php"),
+            os.path.join(LIB, "Repositories", "QueueRepository.php"),
+            os.path.join(LIB, "Repositories", "RecipientRepository.php"),
+            os.path.join(LIB, "Services", "QueueService.php"),
+            os.path.join(LIB, "Services", "TrackingService.php"),
+            os.path.join(LIB, "Services", "BounceParser.php"),
+            os.path.join(LIB, "Services", "AnalyticsService.php"),
+            os.path.join(LIB, "Services", "AutomationService.php"),
+            os.path.join(LIB, "Repositories", "AutomationRepository.php"),
+            os.path.join(LIB, "Domain", "AutomationStatus.php"),
+            os.path.join(LIB, "Domain", "AutomationStepType.php"),
+            os.path.join(LIB, "Domain", "AutomationTrigger.php"),
+            os.path.join(LIB, "Domain", "AutomationRunStatus.php"),
+            os.path.join(MODULE, "migrations", "V130.php"),
+            os.path.join(LIB, "Http", "TrackController.php"),
+            os.path.join(LIB, "Repositories", "EventRepository.php"),
+            os.path.join(LIB, "Repositories", "SegmentRepository.php"),
+            os.path.join(LIB, "Repositories", "TemplateRepository.php"),
+            os.path.join(LIB, "Services", "CampaignService.php"),
+            os.path.join(LIB, "Services", "MessageTransport.php"),
+            os.path.join(LIB, "Services", "SenderPolicy.php"),
+            os.path.join(LIB, "Services", "SmtpTransport.php"),
+            os.path.join(LIB, "Services", "UnavailableTransport.php"),
+            os.path.join(LIB, "Services", "SegmentService.php"),
+            os.path.join(LIB, "Services", "TemplateService.php"),
             os.path.join(LIB, "Http", "AdminController.php"),
             os.path.join(LIB, "Http", "AdminView.php"),
             os.path.join(ROOT, "tests", "marketing", "run.php"),
@@ -66,9 +96,24 @@ class MarketingStaticTests(unittest.TestCase):
         # no credentials of any kind are persisted by the module
         self.assertNotIn("password", migration)
 
-    def test_migration_validator_is_pinned_to_marketing_100(self):
+    def test_every_later_migration_is_additive_namespaced_and_guarded(self):
+        # Additive is a property of the whole migration set, not just the first
+        # one: a later migration that drops, renames or reaches into a WHMCS
+        # core table would break an existing install.
+        for name in ("V110.php", "V120.php"):
+            migration = read(os.path.join(MODULE, "migrations", name))
+            for forbidden in ("dropIfExists", "DROP TABLE", "->dropColumn", "->rename("):
+                self.assertNotIn(forbidden, migration, "%s contains %s" % (name, forbidden))
+            self.assertNotRegex(migration, r"->(?:create|table)\(\s*'(?!mod_cloudhost247_marketing_)", name)
+            self.assertNotIn("password", migration)
+            self.assertNotRegex(migration, r"(?:tblclients|tblhosting|tbldomains)", name)
+            self.assertTrue("hasTable" in migration or "hasColumn" in migration, "%s is unguarded" % name)
+
+    def test_migration_validator_is_pinned_to_marketing_versions(self):
+        # The validator must know every migration this module ships; a new
+        # migration that is not registered there fails the release candidate.
         validator = read(os.path.join(ROOT, "scripts", "validate-migrations.py"))
-        self.assertIn("'cloudhost247_marketing':['1.0.0']", validator)
+        self.assertIn("'cloudhost247_marketing':['1.0.0','1.1.0','1.2.0','1.3.0']", validator)
 
     # ---------------------------------------------------------- security
     def test_no_dangerous_calls_and_no_core_table_writes_anywhere(self):
@@ -83,6 +128,157 @@ class MarketingStaticTests(unittest.TestCase):
         # the module must never read/write WHMCS core tables directly
         self.assertNotRegex(combined, r"Capsule::table\(['\"]tbl")
         self.assertNotRegex(combined, r"->(?:create|table|drop|rename)\(['\"]tbl")
+
+    def test_delivery_goes_through_the_transport_contract_only(self):
+        # Campaign, segment and template code must never open a socket, call the
+        # mail() function or name a credential. Delivery is a transport's job —
+        # which is also what keeps credentials in the integrations vault.
+        service = read(os.path.join(LIB, "Services", "CampaignService.php"))
+        self.assertIn("MessageTransport", service)
+        for forbidden in ("fsockopen", "stream_socket_client", "STARTTLS", "smtp_pass", "smtp_user"):
+            self.assertNotIn(forbidden, service)
+        self.assertNotRegex(service, r"(?<![A-Za-z_])mail\s*\(")  # `Email(` in a validator name is not a mail call
+        combined = ""
+        for path in iter_php(MODULE):
+            combined += read(path)
+        for forbidden in ("fsockopen", "stream_socket_client", "swiftmailer", "PHPMailer"):
+            self.assertNotIn(forbidden, combined)
+
+    def test_personalisation_is_escaped_in_html_and_exports_neutralise_formulas(self):
+        # SESSION 11: a subscriber's own name is a value, not markup, and an
+        # exported CSV cannot hand a spreadsheet a formula.
+        tracking = read(os.path.join(LIB, "Services", "TrackingService.php"))
+        self.assertIn("$htmlContext", tracking)
+        self.assertIn("personalise($htmlSource, $personal, $token, true)", tracking)
+        self.assertIn("personalise($textSource, $personal, $token)", tracking)
+        # The subject is personalised in text context too.
+        self.assertIn("personalise(isset($content['subject'])", tracking)
+        export = read(os.path.join(LIB, "Services", "ExportService.php"))
+        self.assertIn("[=+\\-@\\t\\r\\n]", export)
+        self.assertIn("$value = chr(39) . $value", export.replace("\"'\" . $value", "chr(39) . $value"))
+        # The public endpoint is the only module file that reads request input
+        # without the WHMCS guard, and the module never touches a core table.
+        for path in iter_php(MODULE):
+            source = read(path)
+            if "cannot be accessed directly" in source:
+                continue
+            self.assertIn("namespace ", source)
+            self.assertNotIn("tbl", source.split("namespace ", 1)[1].split("class ", 1)[0])
+
+    def test_admin_mutations_are_guarded_by_post_token_and_capability(self):
+        controller = read(os.path.join(LIB, "Http", "AdminController.php"))
+        # Every mutating branch calls requireMutation (POST + CSRF + capability)
+        # except settings, whose saver performs the same guard itself.
+        self.assertIn("private function requireMutation($capability)", controller)
+        self.assertIn("AdminGuard::requirePostToken();", controller)
+        self.assertIn("AdminGuard::requireCapability('cloudhost247_marketing', $capability);", controller)
+        branches = re.findall(r"\$this->requireMutation\((self::[A-Z_]+)\)", controller)
+        # automation, campaigns, segments, subscribers, templates
+        self.assertGreaterEqual(len(branches), 5)
+        saver = controller.split("private function saveSettings()", 1)[1].split("private function ", 1)[0]
+        self.assertIn("AdminGuard::requirePostToken();", saver)
+        self.assertIn("requireCapability", saver)
+        # Capability names are the module's own, never a core admin role check.
+        for capability in re.findall(r"requireCapability\('cloudhost247_marketing', '([a-z.]+)'\)", controller):
+            self.assertTrue(capability.startswith("marketing."))
+
+    def test_the_failure_taxonomy_and_the_unsubscribe_ledger_are_honest(self):
+        # SESSION 12: the queue classifies a refusal from the provider code, so the
+        # transport must always produce one — including when no client exists.
+        transport = read(os.path.join(LIB, "Services", "SmtpTransport.php"))
+        self.assertIn("ResultCode::PROVIDER_UNAVAILABLE", transport)
+        self.assertIn("ResultCode::INVALID_CONFIGURATION", transport)
+        self.assertIn("'code' => $code", transport)
+        # A repeat unsubscribe request changes nothing, so it must not write a
+        # second ledger row: the reporting screen counts events, not clicks on a link.
+        tracking = read(os.path.join(LIB, "Services", "TrackingService.php"))
+        self.assertIn("$changed = !empty($result['changed']) || !empty($result['suppression_created']);", tracking)
+        self.assertIn("if (!empty($result['ok']) && $changed) {", tracking)
+
+    def test_automation_delivers_through_the_queue_and_never_sends_directly(self):
+        # SESSION 10: an automation fills the queue; it never grows its own
+        # delivery path, never touches a WHMCS core table, and never mails.
+        service = read(os.path.join(LIB, "Services", "AutomationService.php"))
+        for forbidden in ("Capsule::table('tbl", "tblclients", "->send(", "PHPMailer"):
+            self.assertNotIn(forbidden, service)
+        # `email(` inside `InputValidator::email(` is not a mailer; a bare call is.
+        self.assertIsNone(re.search(r"(?<![A-Za-z_])mail\s*\(", service))
+        self.assertIn("->enqueue(", service)
+        # The container campaign is how links, events and tracking find a home.
+        self.assertIn("createContainer(", read(os.path.join(LIB, "Repositories", "CampaignRepository.php")))
+        # Suppression, unsubscribe and consent are checked before a step queues.
+        for guard in ("isSuppressed", "UNSUBSCRIBED", "consent_status"):
+            self.assertIn(guard, service)
+        # The delivery pass composes an automation message from its own step.
+        queue = read(os.path.join(LIB, "Services", "QueueService.php"))
+        self.assertIn("contentForQueueRow", queue)
+        self.assertIn("automation_run_id", queue)
+        # Migration 130 is additive and guarded.
+        migration = read(os.path.join(MODULE, "migrations", "V130.php"))
+        for guard in ("hasTable", "hasColumn", "schema()->create"):
+            self.assertIn(guard, migration)
+        self.assertNotIn("drop(", migration)
+        self.assertNotIn("rename(", migration)
+
+    def test_reporting_counts_events_and_refuses_to_invent_numbers(self):
+        # Analytics is a read-only reader of the ledger: no writes, no random
+        # numbers, no WHMCS core tables, and a rate of "unknown" (null) when the
+        # denominator is zero instead of a comforting 0%.
+        analytics = read(os.path.join(LIB, "Services", "AnalyticsService.php"))
+        for forbidden in ("->insert(", "->insertGetId(", "->update(", "->delete(", "->drop(",
+                          "rand(", "mt_rand(", "uniqid(", "tblclients", "tblconfiguration", "tblhosting"):
+            self.assertNotIn(forbidden, analytics)
+        self.assertIn("return null;", analytics)
+        self.assertIn("'—'", analytics)
+        # It says, in the product itself, what "accepted" and "pixel" mean.
+        self.assertIn("DELIVERY_NOTE", analytics)
+        self.assertIn("OPEN_RATE_NOTE", analytics)
+        # The report screen is read-only as well: no POST-only helper may be
+        # reachable from the analytics view of the controller.
+        controller = read(os.path.join(LIB, "Http", "AdminController.php"))
+        analytics_view = controller.split("private function analyticsView()", 1)[1].split("private function campaignListView()", 1)[0]
+        for forbidden in ("requirePost(", "csrf", "->delete", "->update", "->insert"):
+            self.assertNotIn(forbidden, analytics_view)
+
+    def test_the_public_tracking_endpoint_is_narrow(self):
+        # The one web-reachable file may only serve the tracking routes, must
+        # build redirects from the database (never from a request parameter) and
+        # must never echo an address back.
+        endpoint = read(os.path.join(MODULE, "..", "..", "..", "cloudhost247-marketing-track.php"))
+        self.assertIn("TrackController", endpoint)
+        self.assertIn("$_GET", endpoint)
+        controller = read(os.path.join(LIB, "Http", "TrackController.php"))
+        self.assertIn("linkDestination", controller)
+        self.assertNotIn("Location' => $", controller.replace("'Location' => $destination", ""))
+        for forbidden in ("$_GET['l'] .", "header('Location: ' . $"):
+            self.assertNotIn(forbidden, controller)
+        self.assertIn('self::PIXEL', controller)
+        tracking = read(os.path.join(LIB, "Services", "TrackingService.php"))
+        self.assertIn("safeHttpUrl", tracking)
+        # No tracking URL may be built from an address or a subscriber id.
+        for forbidden in ("$subscriber->email . '?e=", "?email=", "&id=' . $subscriber"):
+            self.assertNotIn(forbidden, tracking)
+
+    def test_the_delivery_worker_cron_is_cli_only_and_bounded(self):
+        # The worker must never be reachable from the web, must load the module's
+        # own bootstrap, and must expose the flags the runbook documents.
+        cron = read(os.path.join(MODULE, "..", "..", "..", "crons", "cloudhost247_marketing.php"))
+        self.assertIn("PHP_SAPI !== 'cli'", cron)
+        self.assertIn("cloudhost247_marketing/bootstrap.php", cron)
+        self.assertIn("--dry-run", cron)
+        self.assertIn("--campaign=", cron)
+        self.assertIn("QueueService", cron)
+
+    def test_smtp_delivery_is_resolved_through_the_integrations_vault(self):
+        # The transport asks the integrations addon for a ready client; it never
+        # reads a configuration table, decrypts a secret or names a credential.
+        transport = read(os.path.join(LIB, "Services", "SmtpTransport.php"))
+        self.assertIn("IntegrationManager", transport)
+        self.assertIn("'smtp'", transport)
+        self.assertIn("smtpIdentity", transport)
+        for forbidden in ("SecretVault", "options_json", "value_fingerprint", "password", "smtp_pass"):
+            self.assertNotIn(forbidden, transport, "%s must not appear in the marketing transport" % forbidden)
+        self.assertIn("SenderPolicy", transport)
 
     def test_module_never_touches_smtp_secrets_directly(self):
         combined = ""
@@ -136,9 +332,12 @@ class MarketingStaticTests(unittest.TestCase):
         self.assertIn("Accepted by relay", queue)  # never claims "delivered" for SMTP-accepted
 
     def test_no_placeholder_language(self):
+        # "placeholder" is banned as *copy* (an unfinished-content marker), not as
+        # the HTML input attribute: input[placeholder] is the standard way to hint
+        # a field, so that one form is normalised away before the scan.
         banned = ("coming soon", "todo:", "fixme", "lorem ipsum", "placeholder")
         for path in iter_php(MODULE):
-            body = read(path).lower()
+            body = re.sub(r'placeholder\s*=\s*"', 'input-hint="', read(path).lower())
             for phrase in banned:
                 self.assertNotIn(phrase, body, "'%s' in %s" % (phrase, path))
 

@@ -25,7 +25,6 @@ import {
   planMetadataString,
   requirePlanMetadataString,
   requireSecureBaseUrl,
-  unsupportedRescue,
 } from './common';
 import { OvhClient, type OvhImage, type OvhInstance } from './ovh-client';
 import {
@@ -37,6 +36,8 @@ import {
   type ProviderImage,
   type ProviderServer,
   type ReinstallProviderServerInput,
+  type RescueRequest,
+  type RescueSession,
 } from './types';
 
 const RUNNING_STATUSES = new Set(['ACTIVE', 'RESCUE', 'VERIFY_RESIZE']);
@@ -265,8 +266,32 @@ export class OvhProviderAdapter implements InfrastructureProviderAdapter {
     return this.getServerStatus(input.providerServerId);
   }
 
-  async enableRescue(): Promise<never> { return unsupportedRescue('ovh'); }
-  async disableRescue(): Promise<never> { return unsupportedRescue('ovh'); }
+  /**
+   * OVH Public Cloud rescue is an instance boot mode rather than a Nova action: the API flips it on
+   * with `rescue: true` (OVH's own CLI posts the same body) and serves the one-time root password on
+   * the instance resource as `rescuePassword`. That password is handed to the requesting customer
+   * and is never stored, logged or audited.
+   */
+  async enableRescue(providerServerId: string, _input: RescueRequest): Promise<RescueSession> {
+    const instancePath = `${this.project()}/instance/${encodeURIComponent(providerServerId)}`;
+    await this.api().request('POST', `${instancePath}/rescueMode`, { rescue: true });
+    const instance = await this.api().request<OvhInstance>('GET', instancePath);
+    const password =
+      typeof instance.rescuePassword === 'string' && instance.rescuePassword.length > 0
+        ? instance.rescuePassword
+        : undefined;
+    return {
+      type: 'ovh-rescue',
+      username: 'root',
+      password,
+      rebooted: true,
+      notes: 'OVH boots the instance in rescue mode. The rescue password is served by the instance resource while rescue mode is active.',
+    };
+  }
+
+  async disableRescue(providerServerId: string): Promise<void> {
+    await this.api().request('POST', `${this.project()}/instance/${encodeURIComponent(providerServerId)}/rescueMode`, { rescue: false });
+  }
 
   async getConsole(providerServerId: string): Promise<Record<string, unknown>> {
     return asRecord(await this.action(providerServerId, 'vnc'));

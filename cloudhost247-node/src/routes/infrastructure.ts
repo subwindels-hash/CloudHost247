@@ -47,7 +47,7 @@ import { findPlanById, listActivePlansForProduct } from '../db/catalog-plans';
 import { listPublishedPricingForPlan } from '../db/catalog-pricing';
 import { listAllProducts } from '../db/catalog-products';
 import { createInfrastructureProviderAdapter } from '../infrastructure/providers/registry';
-import { ADAPTER_PROFILES, describeProviderConfiguration, getAdapterProfile } from '../infrastructure/providers/configuration';
+import { ADAPTER_KINDS, ADAPTER_PROFILES, describeProviderConfiguration, getAdapterProfile, type AdapterKind } from '../infrastructure/providers/configuration';
 import { ProviderError } from '../infrastructure/providers/types';
 import { sweepScheduledTerminations } from '../services/server-termination-service';
 import { listServerDrift, reconcileServerState } from '../services/infrastructure-reconciliation-service';
@@ -184,7 +184,7 @@ const patchVersionSchema = versionSchema.omit({ version: true }).partial();
 const providerSchema = z.object({
   name: z.string().min(1).max(160),slug,
   providerType: z.enum(['OVH','HETZNER','AWS','DIGITALOCEAN','VULTR','CONTABO','PROXMOX','VIRTUALIZOR','SOLUSVM','OPENSTACK','GENERIC_HTTP','MOCK','OTHER']),
-  adapter: z.enum(['hetzner','ovh','aws','digitalocean','vultr','contabo','proxmox','virtualizor','solusvm','openstack','generic_http','mock']),
+  adapter: z.enum(ADAPTER_KINDS as [AdapterKind, ...AdapterKind[]]),
   status: providerStatus.optional(),apiBaseUrl: z.string().url().nullable().optional(),credentialEnvPrefix: z.string().max(64).regex(/^[A-Z][A-Z0-9_]*$/).nullable().optional(),
   capabilities: z.record(z.unknown()).optional(),metadata: safeMetadata.optional(),
 });

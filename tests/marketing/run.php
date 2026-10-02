@@ -1,6 +1,6 @@
 <?php
 /**
- * CloudHost247 Marketing — SESSION 1 behavior suite.
+ * CloudHost247 Marketing — behavior suite (SESSION 1 + SESSION 2).
  *
  * Pure PHP, no network, fake in-memory storage (see fakes.php); mirrors
  * tests/broker/run.php conventions. Run: php tests/marketing/run.php
@@ -130,7 +130,7 @@ $tests['Activation installs all module tables idempotently and seeds settings wi
 $tests['Module registration exposes the required WHMCS hooks'] = function () {
     $config = cloudhost247_marketing_config();
     return $config['name'] === 'CloudHost247 Marketing'
-        && $config['version'] === '1.0.0'
+        && $config['version'] === '1.3.0'
         && function_exists('cloudhost247_marketing_activate')
         && function_exists('cloudhost247_marketing_deactivate')
         && function_exists('cloudhost247_marketing_output');
@@ -151,6 +151,34 @@ $tests['Admin dashboard is real data only: zero-filled until campaigns exist, ho
     if (strpos($data['integration']['configure_url'], 'module=cloudhost247_integrations') === false) { return false; }
     foreach ($data['capabilities'] as $cap => $allowed) { if (!$allowed) { return false; } } // no policy = normal addon authorization
     return array_sum(array_map(function ($exists) { return $exists ? 1 : 0; }, $data['tables'])) === count($data['tables']);
+};
+
+$tests['Every advertised menu section is routable and unbuilt ones say so instead of falling back to the dashboard'] = function () {
+    ch247_marketing_fresh();
+    cloudhost247_marketing_activate();
+    $_SESSION['adminid'] = 1;
+    $_SESSION['adminroleid'] = 1;
+    $_SERVER['REQUEST_METHOD'] = 'GET';
+    // The menu advertises more sections than the build has landed; each of them
+    // must keep its own address and explain itself rather than silently render
+    // the dashboard under a different URL.
+    $planned = array();
+    foreach ($planned as $view => $session) {
+        $_GET = array('view' => $view);
+        $data = (new AdminController())->handle();
+        if ($data['view'] !== $view || (int) $data['plannedSession'] !== $session) { return false; }
+    }
+    // SESSIONS 3 to 9 landed: segments, templates, campaigns and analytics are real views.
+    foreach (array('segments', 'templates', 'campaigns', 'analytics', 'automations') as $realView) {
+        $_GET = array('view' => $realView);
+        $data = (new AdminController())->handle();
+        if ($data['view'] !== $realView || (int) $data['plannedSession'] !== 0) { return false; }
+    }
+
+    // A genuinely unknown view still resolves to the dashboard.
+    $_GET = array('view' => 'does-not-exist');
+    $data = (new AdminController())->handle();
+    return $data['view'] === 'dashboard' && (int) $data['plannedSession'] === 0;
 };
 
 $tests['Settings save requires POST+CSRF and is sanitized, audited and capability-gated'] = function () {
@@ -226,6 +254,91 @@ $tests['The central catalog defines cpanel_smtp as the marketing delivery provid
     return $hasSecretPassword && $hasHost && $hasEncryption
         && is_array($health) && strtoupper(isset($health['method']) ? $health['method'] : '') === 'SMTP';
 };
+
+// ------------------------------------------------------------ SESSION 2 - subscribers
+// Subscribers, lists, tags, imports/exports and suppressions live in session2.php.
+
+foreach (require __DIR__ . '/session2.php' as $name => $test) {
+    if (isset($tests[$name])) { throw new RuntimeException('Duplicate marketing test name: ' . $name); }
+    $tests[$name] = $test;
+}
+
+// ------------------------------------------------------------ SESSION 3 - segments
+// The closed segment rule DSL and its fail-closed evaluation live in session3.php.
+
+foreach (require __DIR__ . '/session3.php' as $name => $test) {
+    if (isset($tests[$name])) { throw new RuntimeException('Duplicate marketing test name: ' . $name); }
+    $tests[$name] = $test;
+}
+
+// ------------------------------------------------------------ SESSION 4 - templates
+// The block catalog, sanitised rendering and builtin library live in session4.php.
+
+foreach (require __DIR__ . '/session4.php' as $name => $test) {
+    if (isset($tests[$name])) { throw new RuntimeException('Duplicate marketing test name: ' . $name); }
+    $tests[$name] = $test;
+}
+
+// ------------------------------------------------------------ SESSION 5 - campaigns
+// The campaign lifecycle, checklist and transport contract live in session5.php.
+
+foreach (require __DIR__ . '/session5.php' as $name => $test) {
+    if (isset($tests[$name])) { throw new RuntimeException('Duplicate marketing test name: ' . $name); }
+    $tests[$name] = $test;
+}
+
+// ------------------------------------------------------------ SESSION 6 - cPanel SMTP
+// The delivery provider, sender-domain policy and failure reporting live in session6.php; the SMTP wire protocol is covered by tests/integrations.
+
+foreach (require __DIR__ . '/session6.php' as $name => $test) {
+    if (isset($tests[$name])) { throw new RuntimeException('Duplicate marketing test name: ' . $name); }
+    $tests[$name] = $test;
+}
+
+// ------------------------------------------------------------ SESSION 7 - queue and worker
+// Freezing audiences, queueing once, claiming safely, throttling, retries and the render smoke test live in session7.php.
+
+foreach (require __DIR__ . '/session7.php' as $name => $test) {
+    if (isset($tests[$name])) { throw new RuntimeException('Duplicate marketing test name: ' . $name); }
+    $tests[$name] = $test;
+}
+
+// ------------------------------------------------------------ SESSION 8 - tracking endpoints
+// Composition, the public pixel/click/unsubscribe routes and bounce evidence ingestion live in session8.php.
+
+foreach (require __DIR__ . '/session8.php' as $name => $test) {
+    if (isset($tests[$name])) { throw new RuntimeException('Duplicate marketing test name: ' . $name); }
+    $tests[$name] = $test;
+}
+
+// ------------------------------------------------------------- SESSION 9 - analytics
+// Rates, click maps, recipient activity and the reporting screen live in session9.php.
+
+foreach (require __DIR__ . '/session9.php' as $name => $test) {
+    if (isset($tests[$name])) { throw new RuntimeException('Duplicate marketing test name: ' . $name); }
+    $tests[$name] = $test;
+}
+
+// ---------------------------------------------------------- SESSION 10 - automation
+// Authoring, enrolment, the wait/send engine and the stopping rules live in session10.php.
+
+foreach (require __DIR__ . '/session10.php' as $name => $test) {
+    if (isset($tests[$name])) { throw new RuntimeException('Duplicate marketing test name: ' . $name); }
+    $tests[$name] = $test;
+}
+
+// --------------------------------------------------------- SESSION 11 - security review
+// Escaping, link abuse, guards, exports and endpoint limits live in session11.php.
+
+foreach (require __DIR__ . '/session11.php' as $name => $test) {
+    if (isset($tests[$name])) { throw new RuntimeException('Duplicate marketing test name: ' . $name); }
+    $tests[$name] = $test;
+}
+
+foreach (require __DIR__ . '/session12.php' as $name => $test) {
+    if (isset($tests[$name])) { throw new RuntimeException('Duplicate marketing test name: ' . $name); }
+    $tests[$name] = $test;
+}
 
 // ------------------------------------------------------------------------- run
 

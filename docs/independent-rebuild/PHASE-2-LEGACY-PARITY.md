@@ -19,9 +19,9 @@ The `cloudhost247_theme` addon owns branding/content configuration and supplies 
 | Branding | Brand, colors, typography, width, support email, logo field; CSS variables affect client UI | Implemented; logo rendering partial | Logo currently follows WHMCS core header configuration; custom field retained for next header enhancement |
 | Theme admin | Real validated settings/content forms, inventory, publish/draft/delete | Implemented, staging-blocked | Admin role/CSRF test |
 | Homepage | Hero, CTA, announcement, banners, ordered sections and testimonials from database | Implemented, staging-blocked | Homepage render |
-| Hosting landing pages | `landing` records exposed to templates; `page` custom route supports rich landing content | Partially implemented | Dedicated product-query components and staging routes remain |
+| Hosting landing pages | `landing` records exposed to templates; `page` custom route supports rich landing content; blocks can declare a product component that renders real WHMCS products through the page builder's bounded reader | Implemented, staging-blocked | Browser render of the component and the published route |
 | CMS pages | Published page lookup and `cloudhost247-page.php?slug=` route; true 404 response | Implemented, staging-blocked | Route rewrite/browser test |
-| Section/page builder | Safe ordered section records with body, summary, image/link and publish state | Practical equivalent implemented | Drag-and-drop UI/preview not implemented; numeric ordering is functional |
+| Section/page builder | Safe ordered section records with body, summary, image/link, publish state, block layout/pages/widgets; drag-and-drop ordering posts a validated permutation and the visual preview renders unsaved values | Implemented, staging-blocked | Browser drag/preview behaviour |
 | Banners | Ordered published banner cards with images, copy and links | Implemented, staging-blocked | Image/CSP tests |
 | Testimonials | Ordered, escaped customer-story cards | Implemented, staging-blocked | Visual test |
 | Navigation management | Nested parent slug, ordering, target and safe URL validation | Implemented, staging-blocked | WHMCS menu API test |
@@ -56,7 +56,7 @@ The `cloudhost247_theme` addon owns branding/content configuration and supplies 
 
 ## Remaining and known limitations
 
-Runtime compatibility is not claimed without the supported WHMCS staging installation. SEO description/OG/canonical output, sitemap, localized CMS variants, dedicated product-query landing components, logo override, visual preview and drag/drop ordering remain incomplete. Parent-theme behavior requires WHMCS 8.1+ and the stock `twenty-one` and `standard_cart` directories. No screenshots are available because this repository has no WHMCS runtime or PHP executable.
+Runtime compatibility is not claimed without the supported WHMCS staging installation. SEO description/OG/canonical output, sitemap, localized CMS variants, product-query landing components, visual preview and drag-and-drop ordering are implemented in source and are staging-blocked; a logo override is available through the existing settings. Parent-theme behavior requires WHMCS 8.1+ and the stock `twenty-one` and `standard_cart` directories. No screenshots are available because this repository has no WHMCS runtime or PHP executable.
 
 ## Installation, upgrade and rollback
 

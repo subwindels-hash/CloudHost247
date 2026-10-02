@@ -3,6 +3,7 @@ namespace CloudHost247\Integrations\Services;
 
 use CloudHost247\Foundation\Support\Logger;
 use CloudHost247\Integrations\Api\IntegrationClient;
+use CloudHost247\Integrations\Api\SmtpClient;
 use CloudHost247\Integrations\Api\Transport;
 use CloudHost247\Integrations\Registry\ProviderRegistry;
 use CloudHost247\Integrations\Security\MasterKey;
@@ -85,6 +86,72 @@ final class IntegrationManager
             self::repository()->configuration($row),
             $secrets,
             $transport
+        );
+    }
+
+    /**
+     * Build an SMTP submission client for an smtp-typed provider.
+     *
+     * Returns null when the provider is not configured for this environment —
+     * which lets callers answer "can we send?" without an exception — and raises
+     * IntegrationException for a configured-but-unusable integration, because a
+     * broken relay is an incident, not an empty state.
+     *
+     * @param callable|null $dialer test seam; production uses a verified TLS socket
+     */
+    public static function smtp($providerKey, $environment = null, $dialer = null)
+    {
+        $credentials = self::optionalCredentials($providerKey, $environment);
+        if ($credentials === null) { return null; }
+
+        $definition = $credentials['definition'];
+        if ($definition->authType() !== 'smtp') {
+            throw new IntegrationException(ResultCode::INVALID_CONFIGURATION, $providerKey, '', 'This integration is not an SMTP provider.');
+        }
+
+        return new SmtpClient(self::smtpSettings($credentials), $dialer);
+    }
+
+    /**
+     * The non-secret sending identity of an SMTP provider: which mailbox is
+     * authenticated and which from/reply-to addresses were configured. Used by
+     * modules that must enforce a sender-domain policy without ever touching a
+     * credential.
+     *
+     * @return array{username:string,from_address:string,from_name:string,reply_to:string}|null
+     */
+    public static function smtpIdentity($providerKey, $environment = null)
+    {
+        $credentials = self::optionalCredentials($providerKey, $environment);
+        if ($credentials === null) { return null; }
+        $config = $credentials['config'];
+        $options = isset($config['options']) && is_array($config['options']) ? $config['options'] : array();
+        return array(
+            'username' => isset($config['username']) ? (string) $config['username'] : '',
+            'from_address' => isset($options['from_address']) ? (string) $options['from_address'] : '',
+            'from_name' => isset($options['from_name']) ? (string) $options['from_name'] : '',
+            'reply_to' => isset($options['reply_to']) ? (string) $options['reply_to'] : '',
+        );
+    }
+
+    /** Maps vault configuration + secrets onto SmtpClient settings. */
+    private static function smtpSettings(array $credentials)
+    {
+        $config = $credentials['config'];
+        $options = isset($config['options']) && is_array($config['options']) ? $config['options'] : array();
+        $secrets = $credentials['secrets'];
+
+        return array(
+            'host' => isset($options['host']) ? (string) $options['host'] : '',
+            'port' => isset($options['port']) ? (int) $options['port'] : 0,
+            'encryption' => isset($options['encryption']) ? (string) $options['encryption'] : 'tls',
+            'username' => isset($config['username']) ? (string) $config['username'] : '',
+            'password' => isset($secrets['password']) ? (string) $secrets['password'] : '',
+            'from_address' => isset($options['from_address']) ? (string) $options['from_address'] : '',
+            'from_name' => isset($options['from_name']) ? (string) $options['from_name'] : '',
+            'reply_to' => isset($options['reply_to']) ? (string) $options['reply_to'] : '',
+            'timeout' => isset($config['timeout_seconds']) ? (int) $config['timeout_seconds'] : 15,
+            'connect_timeout' => isset($config['connect_timeout_seconds']) ? (int) $config['connect_timeout_seconds'] : 5,
         );
     }
 
