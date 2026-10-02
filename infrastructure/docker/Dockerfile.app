@@ -10,7 +10,6 @@ COPY cloudhost247-node/tsconfig.json ./
 COPY cloudhost247-node/src ./src
 COPY cloudhost247-node/database ./database
 COPY cloudhost247-node/frontend ./frontend
-COPY cloudhost247-node/public ./public
 COPY cloudhost247-node/server.js ./
 RUN npm run build && npm prune --omit=dev
 
