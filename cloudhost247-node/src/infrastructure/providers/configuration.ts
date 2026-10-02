@@ -102,7 +102,7 @@ export const ADAPTER_PROFILES: Record<AdapterKind, AdapterProfile> = {
     ],
     planMetadata: [{ key: 'providerServerType', description: 'EC2 instance type', required: true }, ...RESOURCE_METADATA],
     capabilities: { reinstall: false, snapshot: true, resize: true, console: true, metrics: false, rescue: false },
-    notes: 'Native EC2 adapter uses the AWS SDK Signature Version 4 client. Reinstall and root-volume restore require an explicit replacement-instance workflow and are intentionally unavailable; CloudWatch metrics require separately scoped permissions.'
+    notes: 'Native EC2 adapter uses the AWS SDK Signature Version 4 client. Reinstall (replacement instance) and root-volume restore (snapshot onto the existing root device) are implemented but stay disabled until the deployment sets AWS_ALLOW_ROOT_VOLUME_REPLACEMENT=true; the previous instance is stopped, never terminated, and the detached root volume is kept. CloudWatch metrics require separately scoped permissions.'
   },
   contabo: {
     kind: 'contabo',
