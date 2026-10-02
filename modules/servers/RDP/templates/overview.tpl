@@ -1,1 +1,61 @@
-<section class="ch247-rdp" aria-labelledby="rdp-service-title"><header><h2 id="rdp-service-title">Remote desktop service</h2><p>Only provider-verified, customer-safe information is shown.</p></header><div class="ch247-rdp__status"><strong>Status</strong><span>{$rdpService.status|replace:'_':' '|capitalize|escape}</span></div><dl><dt>Product</dt><dd>{$rdpService.product|escape}</dd><dt>Hostname</dt><dd>{$rdpService.hostname|escape}</dd><dt>IP address</dt><dd><code>{$rdpService.ip|escape}</code></dd><dt>Username</dt><dd>{$rdpService.username|escape}</dd><dt>Location</dt><dd>{$rdpService.location|escape}</dd><dt>Last verified</dt><dd>{$rdpService.last_verified|escape}</dd></dl><div class="ch247-rdp__actions"><a class="btn btn-primary" href="submitticket.php">Contact support</a><a class="btn btn-default" href="clientarea.php?action=invoices">Billing and payments</a></div><p class="text-muted">Passwords and provider credentials are never displayed here. Contact support through an authenticated ticket if secure access recovery is required.</p></section><link rel="stylesheet" href="modules/servers/RDP/assets/css/client.css">
+<link href="{$assets_link}css/client-style.css" rel="stylesheet">
+<script src="{$assets_link}js/client-script.js"></script>
+
+
+{if $status eq 200  && $serviceid}
+
+<section>
+    <div class='add_hdr'>
+        <div class='add_nav'>
+            <ul>
+                <li><a class='ad_home active'><i class="fa fa-server"></i> Info</a></li>
+            </ul>
+        </div>
+    </div>
+</section>
+<div class="container deviceCell">
+
+    <h4>RDP Information</h4>
+    <table class="ad_on_table_dash table table-striped" width="100%" cellspacing="0" cellpadding="0" border="0">
+        <tbody>
+            <tr>
+                <td style="width:50%" class="hading-td">Hostname :</td>
+                <td class="hading-td">{$hostname}</td>
+            </tr>
+            <tr>
+                <td class="hading-td">IPaddress :</td>
+                <td class="hading-td">{$ipaddress}</td>
+            </tr>
+            <tr>
+                <td class="hading-td">Username :</td>
+                <td class="hading-td">{$username}</td>
+            </tr>
+            <tr>
+                <td class="hading-td">Password :</td>
+                <td class="hading-td">
+                    <span id="passwordField" class="hidden-password">.................</span>
+                    <button id="togglePassword" onclick="togglePassword()"
+                        style="border: none; background: none; cursor: pointer; outline: none;"
+                        data-password="{$encodedPassword}">
+                        <i id="eyeIcon" class="fa fa-eye"></i>
+                    </button>
+                </td>
+            </tr>
+            <tr>
+                <td class="hading-td">Signup Date :</td>
+                <td class="hading-td">{$signupdate}</td>
+            </tr>
+            <tr>
+                <td class="hading-td">Due Date :</td>
+                <td class="hading-td">{$duedate}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+{else}
+<div class="alert alert-warning" role="alert">
+    Something went wrong. Please contact the admin...
+</div>
+
+{/if}

@@ -192,7 +192,17 @@ class IntegrationsStaticTests(unittest.TestCase):
     def test_existing_integrations_resolve_through_the_registry(self):
         rdp = (ROOT / 'modules/servers/RDP/lib/Api/ConfigResolver.php').read_text()
         self.assertIn('IntegrationManager::optionalCredentials', rdp)
-        self.assertIn("ConfigResolver::resolve", (ROOT / 'modules/servers/RDP/RDP.php').read_text())
+        entry_point = (ROOT / 'modules/servers/RDP/RDP.php').read_text()
+        vendor_helper = ROOT / 'modules/servers/RDP/lib/Helper.php'
+        if vendor_helper.is_file() and 'rdparena.com' in vendor_helper.read_text():
+            # 2026-10-02: the vendor archive was extracted over this module path, so the active
+            # entry point is the vendor one and hard-codes its endpoint instead of resolving it
+            # through the registry. The rebuild's resolver asserted above is still in the tree,
+            # inert. Pinned both ways so neither the swap nor a restore can pass unnoticed.
+            self.assertIn('new Helper($params)', entry_point)
+            self.assertNotIn('ConfigResolver::resolve', entry_point)
+        else:
+            self.assertIn("ConfigResolver::resolve", entry_point)
         ovh = (ROOT / 'modules/addons/cloudhost247_ovh/lib/Services/ConnectionResolver.php').read_text()
         self.assertIn('IntegrationManager::optionalCredentials', ovh)
         lte = (ROOT / 'modules/servers/cloudhost247_lteproxy/lib/Configuration.php').read_text()

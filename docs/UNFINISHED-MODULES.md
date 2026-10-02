@@ -214,6 +214,29 @@ Not "unfinished code", but none of these may be called done until the gate close
   second reset form. If, as the in-repo evidence indicates, core renders the modern
   `password-reset-container` / `account-payment-methods` flows instead, C7-C9 close as
   verified-vestigial with no change.
+- **`modules/servers/RDP/` - the vendor archive was extracted over the secure rebuild (2026-10-02, at the
+  owner's explicit direction).** `RDP.zip` (SHA-256 `89bf89129458032ffe9efff4000f5c695d0534cc05e785b3a2602ec9784c5aa2`,
+  the hash the gate pins) was extracted into the module path and then deleted from the tree, which is what
+  `.gitignore`'s `*.zip` rule and the `pages.zip` precedent already required. Three files were overwritten
+  (`RDP.php`, `templates/error.tpl`, `templates/overview.tpl`) and eleven vendor files added; the rebuild's
+  ten files survive and are inert, because the vendor entry point requires none of them. The active module is
+  therefore the vendor RDP Arena module, with the consequences recorded and pinned rather than hidden: one
+  hard-coded endpoint (`https://www.rdparena.com/payments/resellerapi.php`); redirects followed with no TLS
+  verification option set, a 10000-second timeout and no response cap; RDP passwords emailed in clear text
+  through a template the module inserts itself, and written to `tblhosting` by a direct Capsule update that
+  bypasses WHMCS's encryption of that column; direct writes to `tblcustomfields`, `tblcustomfieldsvalues` and
+  `tblemailtemplates`; an unescaped `data-password="{$encodedPassword}"` in the client template, which has no
+  `|escape` filter at all; suspend, unsuspend and terminate that `return true` without calling the provider,
+  so WHMCS records lifecycle changes that never happened; and PHP 8-only named arguments
+  (`trim(string: $stock->{'name '})`) that are a **parse error on PHP 7.4** - the version
+  `scripts/release-candidate-check.sh` lints and the version the build notes name as a target.
+  `tests/rdp/test_static.py` pins both halves - the vendor facts and the surviving guarantees of the inert
+  rebuild - and skips, with the exact restore command, the two guarantees that belonged to the overwritten
+  files: `git checkout f8df7de -- modules/servers/RDP/RDP.php modules/servers/RDP/templates/`.
+  `docs/independent-rebuild/RDP-SECURE-REBUILD-WORK-ITEM.md` carries the full cited list, and six status docs
+  carry a dated correction of the sentence that used to say no code from `RDP.zip` was copied. Provider API
+  authorization and the licence/redistribution position of this third-party module remain unsatisfied
+  prerequisites, so it stays staging-blocked and nothing here has been run against a live provider.
 - **Modules whose runtime verification is BLOCKED — STAGING REQUIRED:** `modules/servers/RDP/`
   (also needs provider API authorization before activation), `cloudhost247_broker`,
   `cloudhost247_integrations`, `cloudhost247_modules`, `cloudhost247_builder`,

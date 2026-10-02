@@ -1,0 +1,31 @@
+#togglePassword {
+    border: none;
+    background: none;
+    cursor: pointer;
+    outline: none;
+    vertical-align: middle;
+    height: 20px;
+    padding: 0;
+    margin-left: 5px;
+}
+#togglePassword:focus {
+    outline: none;
+}
+.deviceCell h4 {
+    color: #1a4d80;
+    font-weight: 600;
+    text-align: left;
+}
+h4 {
+    color: #1a4d80;
+    font-weight: 600;
+}
+.hidden-password {
+    font-weight: bold;
+    letter-spacing: 3px;
+}
+/* @media (min-width: 1200px) {
+    .container {
+        width: 1000px;
+    }
+} */
