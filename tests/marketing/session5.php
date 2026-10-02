@@ -43,6 +43,10 @@ final class CH247MarketingFakeTransport implements MessageTransport
 function ch247_marketing_campaign_fixture()
 {
     ch247_marketing_admin(); // fresh tables, activation, admin session
+    // Every campaign needs a reachable public tracking base; the suite uses a
+    // fixed one so the unaffected default (unset) stays covered by session8.
+    $settings = new CloudHost247\Marketing\Repositories\SettingsRepository();
+    $settings->set('tracking_base_url', 'https://cloudhost247.example');
     $lists = new ListRepository();
     $list = $lists->create('newsletter', 'Newsletter');
     $subscribers = new SubscriptionService();
@@ -411,7 +415,7 @@ return array(
     $_POST = array(); $_REQUEST = array();
     $detail = (new CloudHost247\Marketing\Http\AdminController())->handle();
     if (empty($detail['campaignDetail']['row'])) { return false; }
-    if (count($detail['campaignDetail']['checklist']) !== 9) { return false; }
+    if (count($detail['campaignDetail']['checklist']) !== 10) { return false; }
     if ($detail['campaignDetail']['audience']['count'] !== 1) { return false; }
 
     $ready = ch247_marketing_post('campaign', array('action' => 'campaign.ready', 'campaign_id' => (int) $campaign->id), array('id' => (int) $campaign->id));

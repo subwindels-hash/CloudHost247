@@ -564,6 +564,32 @@ final class AdminView
             echo '<h4>Edit content</h4><div class="alert alert-info">A campaign in "' . $this->e(CampaignStatus::label($status)) . '" is frozen so the content that was approved is the content that sends. Pause or cancel it first, or create a new draft.</div>';
         }
 
+        echo '<h4>Tracking &amp; unsubscribe</h4>';
+        echo '<p class="text-muted">Opens, clicks and unsubscribes are recorded against this campaign through '
+            . '<code>cloudhost247-marketing-track.php</code> using a per-message token. A GET never changes anything: the '
+            . 'unsubscribe link shows a confirmation page, and the one-click List-Unsubscribe header (RFC 8058) posts instead. '
+            . 'Link destinations come from the table below, so the endpoint cannot be used as an open redirect.</p>';
+        $links = $detail['links'];
+        if ($links) {
+            echo '<table class="table table-condensed" style="max-width:860px;"><tr><th style="width:60px;">Link</th><th>Destination</th></tr>';
+            foreach ($links as $link) {
+                echo '<tr><td>#' . (int) $link->id . '</td><td><code style="word-break:break-all;">' . $this->e($link->url) . '</code></td></tr>';
+            }
+            echo '</table>';
+        } else {
+            echo '<p class="text-muted">No links are registered yet: they are recorded the first time a message is composed for delivery.</p>';
+        }
+
+        echo '<h4>Bounce evidence</h4>';
+        echo '<p class="text-muted">Paste a delivery status notification (DSN) from the mailbox. Only the recipient and the '
+            . 'permanent/temporary classification are read; the message itself is never stored. Permanent failures suppress the '
+            . 'address immediately, temporary ones count towards the soft-bounce threshold.</p>';
+        echo '<form method="post" action="' . $this->base('campaign', array('id' => (int) $row->id)) . '">'
+            . '<input type="hidden" name="token" value="' . $this->e($this->token()) . '" />'
+            . '<input type="hidden" name="action" value="bounce.ingest" />'
+            . '<textarea name="evidence" class="form-control" rows="4" placeholder="Final-Recipient: rfc822; someone@example.com&#10;Action: failed&#10;Status: 5.1.1"></textarea>'
+            . '<button class="btn btn-sm btn-default" style="margin-top:6px;"' . ($canManage ? '' : ' disabled') . '>Process bounce evidence</button></form>';
+
         echo '<h4>Content preview</h4>';
         echo '<h5>Plain text</h5><pre style="white-space:pre-wrap;background:#f7f9fb;border:1px solid #e3e8ee;padding:10px;max-width:760px;">' . $this->e((string) $row->text) . '</pre>';
         echo '<h5>HTML source</h5><textarea readonly class="form-control" rows="10" style="font-family:monospace;font-size:12px;">' . $this->e((string) $row->html) . '</textarea>';
@@ -1069,6 +1095,7 @@ final class AdminView
         $field('retry_backoff_minutes', 'Retry backoff (minutes)', 'Comma-separated, e.g. 5,30,120.');
         $field('bounce_soft_threshold', 'Soft-bounce threshold', 'Soft bounces before suppression.');
         echo '<tr><th colspan="2">Tracking &amp; compliance</th></tr>';
+        $field('tracking_base_url', 'Public tracking base URL', 'Where the tracking endpoint is reachable by recipients, e.g. https://cloudhost247.com. Required before a campaign can be scheduled: unsubscribe links live there.');
         $select = function ($key, $label, $help = '') use ($s) {
             $value = isset($s[$key]) ? $s[$key] : '0';
             echo '<tr><td><strong>' . $this->e($label) . '</strong>' . ($help !== '' ? '<br><small class="text-muted">' . $this->e($help) . '</small>' : '')

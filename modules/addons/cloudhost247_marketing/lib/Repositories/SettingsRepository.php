@@ -38,6 +38,7 @@ final class SettingsRepository
             'compliance_note' => '',
             'queue_lock_seconds' => '120',
             'events_retention_days' => '180',
+            'tracking_base_url' => '',
         );
     }
 

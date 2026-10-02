@@ -1,6 +1,6 @@
 # CloudHost247 Email Marketing Platform
 
-Module: `modules/addons/cloudhost247_marketing` (version 1.2.0, in build — SESSIONS 1–7 of 12 complete).
+Module: `modules/addons/cloudhost247_marketing` (version 1.2.0, in build — SESSIONS 1–8 of 12 complete).
 Native WHMCS addon — no separate application, no separate frontend, no
 duplicate SMTP/credential infrastructure. Delivery credentials live
 exclusively in the central CloudHost247 API & Integrations vault under the
@@ -29,15 +29,17 @@ modules/addons/cloudhost247_marketing
  ├─ lib/Repositories             SettingsRepository, SubscriberRepository, ListRepository,
  │                               TagRepository, SuppressionRepository, SegmentRepository,
  │                               ClientDirectoryRepository (read-only WHMCS facts, SESSION 3),
- │                               TemplateRepository (SESSION 4), CampaignRepository (SESSION 5)
+ │                               TemplateRepository (SESSION 4), CampaignRepository (SESSION 5),
+ │                               RecipientRepository + QueueRepository (SESSION 7), EventRepository (SESSION 8)
  ├─ lib/Services                 SubscriptionService (subscribe/unsubscribe/bounce/suppression),
  │                               ImportService, ExportService, SegmentService (live evaluation, fail-closed),
  │                               TemplateService (block rendering + builtin library, SESSION 4),
  │                               CampaignService + MessageTransport / UnavailableTransport (SESSION 5),
  │                               SmtpTransport + SenderPolicy (SESSION 6);
- │                               QueueService + recipient/queue repositories (SESSION 7);
+ │                               QueueService (SESSION 7), TrackingService + BounceParser (SESSION 8);
  │                               analytics and automation services land in later sessions
- ├─ lib/Http                     AdminController / AdminView (dashboard, Delivery Settings,
+ ├─ lib/Http                     TrackController (public pixel/click/unsubscribe, SESSION 8),
+ │                               AdminController / AdminView (dashboard, Delivery Settings,
  │                               Campaigns, Subscribers, Segments, Templates, Lists, Import,
  │                               Suppression List)
  ├─ lib/Security                 InputValidator, HtmlSanitizer (rich-text subset + URL rules, SESSION 4)
@@ -52,9 +54,15 @@ Delivery chain (built in SESSION 6/7):
               claim with locks, rate limits, backoff, suppression re-check, campaign settle)
             → cpanel_smtp (IntegrationManager credentials + integrations SmtpClient) → relay
              events → mod_cloudhost247_marketing_email_events → analytics
+   Recipient ← cloudhost247-marketing-track.php (open pixel / click redirect / one-click unsubscribe)
+             → the same ledger, deduplicated per message and per link
 ```
 
 ## Safety model
+
+* **Tracking is opt-in per deployment and privacy-safe.** Only opaque tokens
+  travel in URLs; opens and clicks are counted, links can only redirect to URLs
+  registered for that campaign, and a GET never changes a subscription.
 
 * **No credentials in this module.** Provider config/test/rotate/screens are
   the existing `Super Admin → API & Integrations` pages (deep links are shown
@@ -114,7 +122,7 @@ Delivery chain (built in SESSION 6/7):
 | 5 — Campaigns | **DONE** | `CampaignAudience` (list / segment / all subscribed addresses, resolved live — never frozen); `CampaignRepository` with path-independent idempotency keys, status-owned timestamps (pause keeps `scheduled_at`, cancel keeps `started_at`) and a `due()` lookup for the worker; `CampaignService` with the pre-send checklist (name, single-line subject ≤150 chars, sender, reply-to, HTML **and** text content, non-empty audience; provider reported as advisory), an explicit transition map (draft→ready→scheduled→queued→sending→completed, with pause/resume/cancel/archive and per-state editability), local-time scheduling converted to UTC, audience previews that count subscribed members only and surface segment truncation/unverified rows, and a test send that goes through the same checklist and transport and audits refusals (`campaign.test_refused` / `failed` / `sent`) instead of pretending. Delivery itself is behind the new `MessageTransport` contract (`UnavailableTransport` until SESSION 6), which is what keeps sockets and credentials out of this module. Admin: Campaigns tab with status/search filters, counts, campaign detail (checklist, audience preview, lifecycle buttons, test send, content preview), edits returning an approved campaign to draft. Tests: 12 new behavior cases in `tests/marketing/session5.php` (68 total in the suite) + 13 static invariants |
 | 6 — cPanel SMTP | **DONE** | Shared `SmtpClient` added to `cloudhost247_integrations` (`lib/Api/SmtpClient.php`): implicit-TLS/STARTTLS only, AUTH LOGIN, MAIL/RCPT/DATA with base64 MIME and a generated boundary, CR/LF header-injection guards, address validation, 250/4xx/5xx classification through `ResultCode`, relay queue-id capture, and a dialer seam for tests; `IntegrationManager::smtp()` builds it from the vault and `smtpIdentity()` returns the non-secret mailbox/from-address. Marketing's `SmtpTransport` (implements `MessageTransport` + `SenderPolicy`) resolves that client lazily, answers availability with a specific reason (addon missing / not configured / unreadable), forwards messages verbatim, reports relay failures to the integrations event history, and enforces the sender-domain rule ("mailbox domain or configured from-address domain") both in the checklist and again at send time. The campaign detail screen now shows the sending identity and a real test-send panel. Tests: 6 new SMTP-protocol cases in `tests/integrations/run.php` (106 total) and 10 new marketing cases in `tests/marketing/session6.php` (78 total) |
 | 7 — Queue + delivery | **DONE** | `RecipientRepository` freezes the audience (`unique(campaign_id,email)`, whitelisted personalisation, pending/sent/failed/skipped); `QueueRepository` owns one row per message with a unique idempotency key, two-step claim locking, `releaseStaleLocks()` for workers that die mid-send, `release()` for paused campaigns (no retry spent), retry/permanent failure/skip transitions and the event ledger; `QueueService` runs one pass: release stale locks → `materialize()` (segment/list resolved once, suppression and consent applied) → `enqueue()` (idempotent) → `dispatch()` (claims, re-checks suppression, sends through `MessageTransport`, hard refusal ⇒ suppress, transient ⇒ backoff from settings, provider-session refusal ⇒ stop the run and hand unattempted messages back) → `settle()` (completed, or failed when nothing got out). Throttling is an allowance per pass (`batch_size`, `messages_per_minute`, rolling `hourly_limit`); the worker never sleeps in-request. `CampaignService::sendNow()` gives an approved campaign a deliberate "queue immediately" action — drafts still never send. Admin: delivery-queue panel with per-status counts, settings summary and a bounded "Run a worker pass now" button. `crons/cloudhost247_marketing.php` (CLI-only, `--campaign=N`, `--dry-run`, JSON summary, exit codes). Tests: 13 new cases in `tests/marketing/session7.php` (91 total) including a render smoke test over all 13 admin screens, which uncovered and fixed a latent fatal on the dashboard (missing `QueueStatus` import) |
-| 8 — Tracking | planned | pixel/click endpoints, suppression/unsubscribe flows, bounce ingestion |
+| 8 — Tracking | **DONE** | `TrackingService` composes the real message: closed personalisation token set (`{{first_name}}`, `{{last_name}}`, `{{email}}`, `{{company}}`, `{{unsubscribe_url}}`, `{{physical_address}}`; unknown tokens are blanked, never echoed), campaign links registered in `…_links` and rewritten to click URLs, a 1×1 pixel, and an unsubscribe footer that is injected even when tracking is switched off. `EventRepository` is the single writer of the tracking ledger, with dedupe (one open per message, one click per link per message), per-campaign counts and retention pruning from the worker. `cloudhost247-marketing-track.php` (the module's only web-reachable file) serves `e=open` (gif), `e=click` (302, destination resolved from the campaign's own link rows — no open redirect), and `e=unsubscribe` (GET is a confirmation page; POST unsubscribes, including RFC 8058 `List-Unsubscribe=One-Click`; GET never changes state). Tokens are opaque 128-bit values; unknown/malformed tokens get a generic 404 and URLs never contain an address, campaign name or subscriber id. `BounceParser` reads only recipients and 5.x/4.x classification from a pasted DSN (never the message itself), and the campaign screen has a bounce-evidence panel that suppresses hard bounces and counts soft ones. `tracking_base_url` is a required, validated setting (the campaign checklist blocks sending without it) because the module never reads WHMCS core tables. Tests: 15 new cases in `tests/marketing/session8.php` (107 total) |
 | 9 — Analytics | planned | rates from the event ledger only, click map, recipient activity |
 | 10 — Automation | planned | triggers via WHMCS hooks, wait/email steps, idempotent runs |
 | 11 — Security review | planned | CSRF/XSS/auth/upload/tracking-abuse/redirect review |
@@ -126,6 +134,15 @@ Delivery chain (built in SESSION 6/7):
   seeding, settings persistence/audit/capability denial, dashboard honesty,
   catalog registration, enum closures, validator) plus the SESSION 2 file below;
   runs under PHP 7.4 and 8.2 in CI.
+* `tests/marketing/session8.php` — SESSION 8 behavior suite (15 cases):
+  composition (personalisation, link registration/rewriting, pixel, footer), the
+  closed token set, URL privacy, test sends carrying no token, the pixel and its
+  one-open-per-message rule, click recording with registered-destination-only
+  redirects (forged/foreign link ids are 404), generic 404s, the GET-confirm /
+  POST-unsubscribe pair plus one-click, tracking after a campaign closes,
+  tracking-off behaviour, the DSN parser (including unreadable evidence), bounce
+  ingestion through the admin action, ledger retention pruning, and the blocking
+  "public URL not configured" checklist item.
 * `tests/marketing/session7.php` — SESSION 7 behavior suite (13 cases): audience
   freezing with suppression/consent skips, idempotent queueing, delivery and
   honest completion counters, stale-lock recovery after a worker dies mid-send,

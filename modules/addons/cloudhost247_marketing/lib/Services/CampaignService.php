@@ -260,6 +260,7 @@ final class CampaignService
                 trim((string) $campaign->html) !== '' && trim((string) $campaign->text) !== '',
                 'Choose a template so the campaign carries both an HTML and a plain-text body.', true),
             $this->check('audience', 'Audience', $audience['count'] > 0, $audience['detail'], true),
+            $this->publicLinkCheck(),
             $this->senderDomainCheck($campaign),
             $this->check('transport', 'Delivery provider',
                 $this->transport->isAvailable(),
@@ -292,6 +293,24 @@ final class CampaignService
         $policy = $this->transport->senderPolicy((string) $campaign->from_email);
         return $this->check('sender_domain', 'Sender domain', !empty($policy['ok']),
             (string) $policy['detail'], !empty($policy['enforced']));
+    }
+
+    /**
+     * A campaign must be able to carry a working unsubscribe link, and that link
+     * lives on the public tracking URL. Without it the module would be sending
+     * mail that a recipient cannot leave, so this blocks.
+     */
+    private function publicLinkCheck()
+    {
+        $tracking = new TrackingService(null, null, null, null, $this->settings);
+        $base = $tracking->baseUrl();
+        if ($base !== '') {
+            return $this->check('unsubscribe_link', 'Unsubscribe link', true,
+                'Recipients can unsubscribe at ' . $tracking->unsubscribeUrl('TOKEN') . ' (one click, no login).', true);
+        }
+        return $this->check('unsubscribe_link', 'Unsubscribe link', false,
+            'Set Delivery Settings → Public tracking base URL (for example https://cloudhost247.com) so that unsubscribe and tracking links work.',
+            true);
     }
 
     private function check($key, $label, $ok, $detail, $blocking)
@@ -534,12 +553,24 @@ final class CampaignService
         );
     }
 
-    /** Builds the exact message a real send would hand to the transport. */
+    /**
+     * Builds a test message. Real sends are composed by TrackingService, which
+     * adds the per-message tracking token; a test deliberately carries none, so
+     * it can never appear in a campaign's open or click numbers.
+     */
     public function message($campaign, $to, $prefix = '')
     {
-        $subject = (string) $campaign->subject;
-        if ($prefix !== '') { $subject = '[' . $prefix . '] ' . $subject; }
-        $subject = substr($subject, 0, self::MAX_SUBJECT);
+        if ($prefix !== '') {
+            return (new TrackingService())->composeTest($campaign, $to);
+        }
+        return $this->plainMessage($campaign, $to);
+        return $this->plainMessage($campaign, $to);
+    }
+
+    /** The bare message without tracking (used for previews and tests). */
+    private function plainMessage($campaign, $to)
+    {
+        $subject = substr((string) $campaign->subject, 0, self::MAX_SUBJECT);
 
         return array(
             'to' => $to,

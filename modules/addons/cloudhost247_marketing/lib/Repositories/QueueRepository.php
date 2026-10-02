@@ -1,8 +1,8 @@
 <?php
 namespace CloudHost247\Marketing\Repositories;
 
-use CloudHost247\Marketing\Domain\EventType;
 use CloudHost247\Marketing\Domain\QueueStatus;
+use CloudHost247\Marketing\Repositories\EventRepository;
 use WHMCS\Database\Capsule;
 
 /**
@@ -23,6 +23,13 @@ final class QueueRepository
     public function find($id)
     {
         return Capsule::table(self::TABLE)->where('id', (int) $id)->first();
+    }
+
+    public function findByTrackingToken($token)
+    {
+        $token = strtolower(trim((string) $token));
+        if ($token === '') { return null; }
+        return Capsule::table(self::TABLE)->where('tracking_token', $token)->first();
     }
 
     public function findByIdempotencyKey($key)
@@ -271,21 +278,8 @@ final class QueueRepository
      */
     public function recordEvent($type, $campaignId, $queueId, $subscriberId, array $meta = array())
     {
-        if (!EventType::isValid($type)) {
-            throw new \InvalidArgumentException('Unknown event type: ' . (string) $type);
-        }
-        $clean = array();
-        foreach ($meta as $key => $value) {
-            if (!is_scalar($value)) { continue; }
-            $clean[substr((string) $key, 0, 32)] = substr((string) $value, 0, 190);
-        }
-        return Capsule::table(self::EVENTS_TABLE)->insertGetId(array(
-            'campaign_id' => (int) $campaignId,
-            'queue_id' => $queueId === null ? null : (int) $queueId,
-            'subscriber_id' => $subscriberId === null ? null : (int) $subscriberId,
-            'type' => (string) $type,
-            'meta_json' => $clean ? json_encode($clean) : null,
-            'occurred_at' => date('Y-m-d H:i:s'),
-        ));
+        // The ledger has exactly one writer: EventRepository. This method stays
+        // as the queue-side shorthand used by the worker.
+        return (new EventRepository())->record($type, $campaignId, $queueId, $subscriberId, $meta);
     }
 }

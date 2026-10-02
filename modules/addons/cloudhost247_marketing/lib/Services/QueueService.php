@@ -7,6 +7,7 @@ use CloudHost247\Marketing\Domain\CampaignStatus;
 use CloudHost247\Marketing\Domain\QueueStatus;
 use CloudHost247\Marketing\Domain\SubscriberStatus;
 use CloudHost247\Marketing\Repositories\CampaignRepository;
+use CloudHost247\Marketing\Repositories\EventRepository;
 use CloudHost247\Marketing\Repositories\QueueRepository;
 use CloudHost247\Marketing\Repositories\RecipientRepository;
 use CloudHost247\Marketing\Repositories\SettingsRepository;
@@ -48,6 +49,7 @@ final class QueueService
     private $suppressions;
     private $subscriptions;
     private $settings;
+    private $trackingService;
 
     public function __construct(
         CampaignRepository $campaigns = null,
@@ -72,6 +74,13 @@ final class QueueService
     public function repository()
     {
         return $this->queue;
+    }
+
+    /** Lazily built so a worker run pays for tracking only when it sends. */
+    private function tracking()
+    {
+        if ($this->trackingService === null) { $this->trackingService = new TrackingService(); }
+        return $this->trackingService;
     }
 
     public function recipients()
@@ -105,6 +114,7 @@ final class QueueService
             'suppressed' => 0,
             'released_locks' => 0,
             'completed' => 0,
+            'pruned_events' => 0,
             'campaign_errors' => array(),
             'rate_limited' => '',
         );
@@ -172,7 +182,17 @@ final class QueueService
         $summary['completed'] += $settle['completed'];
         foreach ($settle['errors'] as $message) { $summary['campaign_errors'][] = $message; }
 
+        // Retention is part of the worker's job (requirement #27): the ledger is
+        // trimmed here, never during a web request.
+        $summary['pruned_events'] = $this->pruneEvents();
+
         return $summary;
+    }
+
+    /** Trims the tracking ledger to the configured retention window. */
+    public function pruneEvents()
+    {
+        return (new EventRepository())->prune((int) $this->settings->get('events_retention_days'));
     }
 
     /** How many messages this run may attempt, from settings. */
@@ -315,12 +335,12 @@ final class QueueService
                 continue;
             }
 
-            $message = $this->campaignService->message($campaign, (string) $row->email);
+            // TrackingService composes the real message: personalisation, the
+            // campaign's own links rewritten to click URLs, the open pixel and the
+            // unsubscribe footer. A test send uses composeTest() instead, which
+            // carries no token.
             $subscriber = $row->subscriber_id === null ? null : $this->subscribers->find((int) $row->subscriber_id);
-            if ($subscriber) {
-                $personal = $this->recipients->personalisation($subscriber);
-                $message['to_name'] = trim($personal['first_name'] . ' ' . $personal['last_name']);
-            }
+            $message = $this->tracking()->compose($campaign, $row, $subscriber);
 
             $outcome = $transport->send($message);
             if (!empty($outcome['ok'])) {

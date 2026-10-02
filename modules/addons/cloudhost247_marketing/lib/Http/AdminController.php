@@ -26,7 +26,9 @@ use CloudHost247\Marketing\Services\SegmentService;
 use CloudHost247\Marketing\Services\CampaignService;
 use CloudHost247\Marketing\Services\TemplateService;
 use CloudHost247\Marketing\Repositories\QueueRepository;
+use CloudHost247\Marketing\Services\BounceParser;
 use CloudHost247\Marketing\Services\QueueService;
+use CloudHost247\Marketing\Services\TrackingService;
 use CloudHost247\Marketing\Services\SmtpTransport;
 use CloudHost247\Marketing\Services\SubscriptionService;
 use WHMCS\Database\Capsule;
@@ -518,6 +520,7 @@ final class AdminController
             'segments' => $this->segments->repository()->all('active'),
             'templates' => $this->templates->repository()->all('active'),
             'canManage' => $this->capAllowed(self::CAMPAIGN_CAPABILITY),
+            'links' => (new TrackingService())->linksFor((int) $campaign->id),
             'queue' => array_merge($queueCounts, array(
                 'total' => array_sum($queueCounts),
                 'settings' => array(
@@ -591,6 +594,32 @@ final class AdminController
         if ($action === 'campaign.archive') {
             $result = $this->campaigns->archive($id);
             return array('notice' => $result['message'], 'error' => '');
+        }
+
+        if ($action === 'bounce.ingest') {
+            $evidence = isset($_POST['evidence']) ? (string) $_POST['evidence'] : '';
+            if (trim($evidence) === '') { return array('notice' => '', 'error' => 'Paste the bounce message first.'); }
+            $parsed = (new BounceParser())->parse($evidence);
+            $tracking = new TrackingService();
+            $hard = 0;
+            $soft = 0;
+            foreach ($parsed['hard'] as $email) {
+                $result = $tracking->recordBounce($email, 'hard', 'dsn');
+                if (!empty($result['ok'])) { $hard++; }
+            }
+            foreach ($parsed['soft'] as $email) {
+                $result = $tracking->recordBounce($email, 'soft', 'dsn');
+                if (!empty($result['ok'])) { $soft++; }
+            }
+            AuditLogger::record('cloudhost247_marketing', 'bounce.evidence_ingested', 'marketing_campaign', $id, array(), array(
+                'hard' => $hard, 'soft' => $soft, 'unrecognised' => (int) $parsed['unrecognised'],
+            ), $hard + $soft > 0 ? 'success' : 'denied');
+            if ($hard + $soft === 0) {
+                return array('notice' => '', 'error' => 'No recipient could be read from that evidence; nothing was changed.');
+            }
+            $summary = 'Recorded ' . $hard . ' permanent and ' . $soft . ' temporary failure(s).';
+            if ((int) $parsed['unrecognised'] > 0) { $summary .= ' ' . (int) $parsed['unrecognised'] . ' block(s) could not be read and were left alone.'; }
+            return array('notice' => $summary, 'error' => '');
         }
 
         if ($action === 'campaign.work') {
@@ -1106,7 +1135,8 @@ final class AdminController
                         $value = implode(',', $clean);
                         break;
                     case 'support_url':
-                    case 'account_url': $value = $value === '' ? '' : InputValidator::url($value, $key); break;
+                    case 'account_url':
+                    case 'tracking_base_url': $value = $value === '' ? '' : rtrim(InputValidator::url($value, $key), '/'); break;
                     case 'default_from_name':
                     case 'company_name': $value = InputValidator::shortText($value, 128, $key); break;
                     case 'physical_address': $value = InputValidator::shortText($value, 500, $key); break;

@@ -255,18 +255,16 @@ $tests['The central catalog defines cpanel_smtp as the marketing delivery provid
         && is_array($health) && strtoupper(isset($health['method']) ? $health['method'] : '') === 'SMTP';
 };
 
-// ---------------------------------------------------- SESSION 2 - subscribers
-// Subscribers, lists, tags, import/export and the suppression engine live in
-// session2.php so each session keeps its own test file.
+// ------------------------------------------------------------ SESSION 2 - subscribers
+// Subscribers, lists, tags, imports/exports and suppressions live in session2.php.
 
 foreach (require __DIR__ . '/session2.php' as $name => $test) {
     if (isset($tests[$name])) { throw new RuntimeException('Duplicate marketing test name: ' . $name); }
     $tests[$name] = $test;
 }
 
-// ------------------------------------------------------------- SESSION 3 - segments
-// The segment DSL, live evaluation and the fail-closed send path live in
-// session3.php for the same reason.
+// ------------------------------------------------------------ SESSION 3 - segments
+// The closed segment rule DSL and its fail-closed evaluation live in session3.php.
 
 foreach (require __DIR__ . '/session3.php' as $name => $test) {
     if (isset($tests[$name])) { throw new RuntimeException('Duplicate marketing test name: ' . $name); }
@@ -274,7 +272,7 @@ foreach (require __DIR__ . '/session3.php' as $name => $test) {
 }
 
 // ------------------------------------------------------------ SESSION 4 - templates
-// The block builder, sanitizer and rendered-output fidelity live in session4.php.
+// The block catalog, sanitised rendering and builtin library live in session4.php.
 
 foreach (require __DIR__ . '/session4.php' as $name => $test) {
     if (isset($tests[$name])) { throw new RuntimeException('Duplicate marketing test name: ' . $name); }
@@ -289,20 +287,26 @@ foreach (require __DIR__ . '/session5.php' as $name => $test) {
     $tests[$name] = $test;
 }
 
-// --------------------------------------------------- SESSION 7 - queue and worker
-// Freezing audiences, queueing once, claiming safely, throttling, retries and
-// the render smoke test live in session7.php.
+// ------------------------------------------------------------ SESSION 6 - cPanel SMTP
+// The delivery provider, sender-domain policy and failure reporting live in session6.php; the SMTP wire protocol is covered by tests/integrations.
+
+foreach (require __DIR__ . '/session6.php' as $name => $test) {
+    if (isset($tests[$name])) { throw new RuntimeException('Duplicate marketing test name: ' . $name); }
+    $tests[$name] = $test;
+}
+
+// ------------------------------------------------------------ SESSION 7 - queue and worker
+// Freezing audiences, queueing once, claiming safely, throttling, retries and the render smoke test live in session7.php.
 
 foreach (require __DIR__ . '/session7.php' as $name => $test) {
     if (isset($tests[$name])) { throw new RuntimeException('Duplicate marketing test name: ' . $name); }
     $tests[$name] = $test;
 }
 
-// -------------------------------------------------------- SESSION 6 - cPanel SMTP
-// The delivery provider, sender-domain policy and failure reporting live in
-// session6.php; the SMTP wire protocol is covered by tests/integrations.
+// ------------------------------------------------------------ SESSION 8 - tracking endpoints
+// Composition, the public pixel/click/unsubscribe routes and bounce evidence ingestion live in session8.php.
 
-foreach (require __DIR__ . '/session6.php' as $name => $test) {
+foreach (require __DIR__ . '/session8.php' as $name => $test) {
     if (isset($tests[$name])) { throw new RuntimeException('Duplicate marketing test name: ' . $name); }
     $tests[$name] = $test;
 }

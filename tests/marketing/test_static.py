@@ -51,6 +51,10 @@ class MarketingStaticTests(unittest.TestCase):
             os.path.join(LIB, "Repositories", "QueueRepository.php"),
             os.path.join(LIB, "Repositories", "RecipientRepository.php"),
             os.path.join(LIB, "Services", "QueueService.php"),
+            os.path.join(LIB, "Services", "TrackingService.php"),
+            os.path.join(LIB, "Services", "BounceParser.php"),
+            os.path.join(LIB, "Http", "TrackController.php"),
+            os.path.join(LIB, "Repositories", "EventRepository.php"),
             os.path.join(LIB, "Repositories", "SegmentRepository.php"),
             os.path.join(LIB, "Repositories", "TemplateRepository.php"),
             os.path.join(LIB, "Services", "CampaignService.php"),
@@ -131,6 +135,25 @@ class MarketingStaticTests(unittest.TestCase):
             combined += read(path)
         for forbidden in ("fsockopen", "stream_socket_client", "swiftmailer", "PHPMailer"):
             self.assertNotIn(forbidden, combined)
+
+    def test_the_public_tracking_endpoint_is_narrow(self):
+        # The one web-reachable file may only serve the tracking routes, must
+        # build redirects from the database (never from a request parameter) and
+        # must never echo an address back.
+        endpoint = read(os.path.join(MODULE, "..", "..", "..", "cloudhost247-marketing-track.php"))
+        self.assertIn("TrackController", endpoint)
+        self.assertIn("$_GET", endpoint)
+        controller = read(os.path.join(LIB, "Http", "TrackController.php"))
+        self.assertIn("linkDestination", controller)
+        self.assertNotIn("Location' => $", controller.replace("'Location' => $destination", ""))
+        for forbidden in ("$_GET['l'] .", "header('Location: ' . $"):
+            self.assertNotIn(forbidden, controller)
+        self.assertIn('self::PIXEL', controller)
+        tracking = read(os.path.join(LIB, "Services", "TrackingService.php"))
+        self.assertIn("safeHttpUrl", tracking)
+        # No tracking URL may be built from an address or a subscriber id.
+        for forbidden in ("$subscriber->email . '?e=", "?email=", "&id=' . $subscriber"):
+            self.assertNotIn(forbidden, tracking)
 
     def test_the_delivery_worker_cron_is_cli_only_and_bounded(self):
         # The worker must never be reachable from the web, must load the module's

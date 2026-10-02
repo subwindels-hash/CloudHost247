@@ -49,7 +49,36 @@ namespace {
         public function table($table, $callback) {}
     }
 
-    final class CH247MarketingFakeCollection implements \IteratorAggregate, \Countable
+    /**
+ * Test-only readers for the in-memory tables: suites need to inspect rows the
+ * module wrote (a queue token, an aged event) without reaching into the double.
+ */
+function ch247_mkt_rows($table)
+{
+    // The double stores plain arrays; the module always sees row objects, so the
+    // reader casts to the shape a real Capsule result has.
+    $rows = CH247MarketingFakeDB::rowsRef((string) $table);
+    $objects = array();
+    foreach ($rows as $row) { $objects[] = is_array($row) ? (object) $row : $row; }
+    return $objects;
+}
+
+function ch247_mkt_update_row($table, $id, array $values)
+{
+    $rows = &CH247MarketingFakeDB::rowsRef((string) $table);
+    foreach ($rows as $index => $row) {
+        $object = is_array($row) ? (object) $row : $row;
+        if ((int) $object->id !== (int) $id) { continue; }
+        foreach ($values as $key => $value) {
+            if (is_array($rows[$index])) { $rows[$index][$key] = $value; }
+            else { $rows[$index]->{$key} = $value; }
+        }
+        return true;
+    }
+    return false;
+}
+
+final class CH247MarketingFakeCollection implements \IteratorAggregate, \Countable
     {
         private $rows;
         public function __construct(array $rows) { $this->rows = $rows; }
