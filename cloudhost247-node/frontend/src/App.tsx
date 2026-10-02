@@ -67,6 +67,8 @@ import AdminControlPanelsPage from './pages/AdminControlPanelsPage';
 import AdminLicensesPage from './pages/AdminLicensesPage';
 import AdminMonitoringPage from './pages/AdminMonitoringPage';
 import AdminAiSupportPage from './pages/AdminAiSupportPage';
+import AdminAiCommandPage from './pages/ai-os/AdminAiCommandPage';
+import AiAssistantPage from './pages/ai-os/AiAssistantPage';
 import RGDashboardPage from './pages/revenue-guardian/DashboardPage';
 import RecoveryQueuePage from './pages/revenue-guardian/RecoveryQueuePage';
 import RGCaseDetailPage from './pages/revenue-guardian/CaseDetailPage';
@@ -161,6 +163,9 @@ export default function App() {
         {/* Authenticated app shell — real protected routes (see components/RequireAuth.tsx). A
             signed-out visitor is redirected to /login instead of ever rendering these. */}
         <Route element={<RequireAuth />}>
+          {/* Customer Cloud Assistant — server-side scoped to the caller's own account; safe for
+              every signed-in role (customers see only their own data, staff see only theirs). */}
+          <Route path="/account/assistant" element={<AiAssistantPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/dashboard/apps" element={<MyAppsPage />} />
           <Route path="/dashboard/apps/:id" element={<AppInstancePage />} />
@@ -208,6 +213,9 @@ export default function App() {
               backend independently re-verifies the role on every request. */}
           <Route element={<RequireRole roles={['staff', 'admin', 'super_admin']} />}>
             <Route path="/admin/ai-support" element={<AdminAiSupportPage />} />
+            {/* AI Command Center: the full control plane (staff can view; gate-keeping actions
+                like approvals/model-config are re-verified server-side per permission). */}
+            <Route path="/admin/ai-command" element={<AdminAiCommandPage />} />
           </Route>
 
           {/* Staff-only (admin + super_admin) customer/ticket/billing management. RequireRole is a

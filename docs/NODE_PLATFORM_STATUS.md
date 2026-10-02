@@ -1206,3 +1206,61 @@ sub-phase before the next one begins.
 - **Nothing about authorization changed.** `docs/PROPOSED_SCOPE_WEBHOOK_PIPELINE.md` keeps its
   "NOT AUTHORIZED · NOT IMPLEMENTED · NOT DEPLOYED" stamp, migration 0024 remains prepared-only, PR #12
   remains open and unmerged, and no production database, credential, or financial record was touched.
+
+## A10 — AI Control Plane (`src/ai-os/`): registry-gated workforce, approvals-executed, sweeps scheduled
+
+- **Source/local verification:** PASSED on branch `arena/01a0fd61-cloudhost247`.
+  - Migration `0066_create_ai_control_plane.sql` added (19 tables + indexes, idempotent). It is **DDL-prepared and test-executed only** — NOT executed in production.
+  - `npm run typecheck` clean; `frontend/tsconfig.json` clean; `vite build` clean.
+  - Full per-file vitest sweep: every integration + unit file passes (`ai-control-plane.test.ts` 14 integration + 23 unit).
+- **Registry is code-owned and stamped into the DB.** `src/ai-os/registry/seed.ts` seeds the 44-agent catalog
+  (10 Executive Board seats + workforce), the 3 default event→workflow chains and the model configs into
+  `ai_agents` / `ai_workflows` / `ai_model_configs` with ON-CONFLICT upserts — **tool grants are the catalog's,
+  never the DB's**, so a seeded gate cannot be widened by database edit alone; disabling an agent is the
+  operator kill switch. Catalog self-integrity (`validateCatalogIntegrity`) passes with zero errors:
+  every declared task type has an owner and a handler, no legacy agent types, board composition is CEO + 9 seats.
+- **Every mutating/reversible tool is approval-gated in code.** Executor gates in order: registered tool →
+  agent grant → permission → customer-workspace eligibility (`customerUsable`, enforced server-side) →
+  approval policy (`always`, or `policy` for non-`automatic` agents). External-impact tools
+  (`send_notification`, `restart_installation`, `suspend_installation`, `set_agent_enabled`) are `always`;
+  customer-facing helpers (`customer-cloud-assistant`) are read-heavy/write-narrow and only create tickets
+  in the caller's own workspace. Designed exceptions (`record_evaluation`) are append-only telemetry.
+- **Approvals are sealed, single-use, and hand off to real execution.** `/api/v1/admin/ai/approvals/:id/decision`
+  claims the row atomically (`pending`→`approved`/`rejected`), then `executeApprovedApproval` runs the sealed
+  tool call end-to-end (`ai.tool.executed` audit rows); the rejection path never fires the tool. The Collector
+  integration test proves the full chain: seeded overdue invoice → finding + draft → `send_notification` pending
+  → staff approve → real `user_notifications` row + `notification_outbox` email queued by the real outbox sweep.
+- **Event→workflow dispatch is exactly-once per fingerprint.** `emitEvent` stores the dedupe fingerprint;
+  `processPendingEvents` (admin API `POST /admin/ai/events?processNow=true` and the worker sweep) claims
+  unprocessed events and dispatches each seed workflow step as its own audited task with idempotency keys
+  `wf:<slug>:<eventId>:<agent>`. The invoice.overdue integration test proves a real `ai_workflow_runs` row and
+  the collector task executing for the right customer.
+- **Executive Board briefings are idempotent per (type, period) and never ghost-written.** `generateExecutiveBriefing`
+  runs the CEO task, which fans out to all nine seat digest tasks via depth-limited child tasks; a second click
+  the same day returns the same final report (`created=false`). A seat that fails to run shows as `UNAVAILABLE`
+  in the section list rather than a fabricated summary. The daily-briefing integration test verifies every seat's
+  headline (CFO: "overdue invoices: 1") is computed from real tables.
+- **Workers run the sweep on a 5-minute cadence in `src/worker/main.ts`.** `runAiSweep` detects real platform
+  state (overdue invoices, expiring SSL/domains in 7d, stuck deployments >2h, unhealthy servers, failed payments
+  24h), fingerprint-deduplicates daily, processes pending events, expires stale approvals, prunes expired memory,
+  bucket-locked scheduled scans (provisioning.stuck 1h, infrastructure.health 2h, domain/ssl 6h, security.auth 6h,
+  billing.overdue 12h — keyed in `ai_memories` scope organizational, slug 'sweeps'), then generates the daily
+  briefing if new. The sweep is idempotent: a second run the same day emits nothing twice and never re-briefs.
+- **Customer Cloud Assistant is intrinsically tenant-scoped.** `POST /api/v1/account/ai/assistant` forces
+  `customerScopeUserId = auth.userId` regardless of payload; the intent layer only routes through
+  `customerUsable` tools; the smuggle test ("show invoices for user <other>") returns only the caller's data.
+  `GET /api/v1/account/ai/activity`/`profile` expose the caller's own AI footprint — and nothing more.
+- **Knowledge answers stay citation-first with an honest "NOT DOCUMENTED".** `knowledge.answer` cites source
+  title+version per chunk; no chunk → explicit "not documented, stated plainly" and no improvisation. The
+  knowledge service exists in TS only (no external model is enabled); the two-phrase probe test passes.
+- **Admin SPA is the full surface and ships.** `frontend/src/pages/ai-os/AdminAiCommandPage.tsx` exposes tabs
+  Overview / Copilot / Agents / Tasks / Decision Inbox / Executive Board / Findings & Incidents / Events &
+  Workflows / Knowledge / Models / Audit — every card, toggle, approval and briefing click hits the real
+  `/api/v1/admin/ai/*` API and re-verifies server-side (staff read, admin decides, super_admin configures models).
+  `frontend/src/pages/ai-os/AiAssistantPage.tsx` is the customer assistant. Routes `/admin/ai-command` and
+  `/account/assistant` are in `App.tsx`; `AdminPage` and the signed-in Header link to both; App.tsx guards match
+  the server's role checks. `vite build` passes; `frontend` tsc clean.
+- **Not in this phase (explicitly deferred):** external LLM/model people, staff persona editing of registry
+  permissions (code-owned by design), provisioning write-adapters beyond `restart_installation`/
+  `suspend_installation`, Customer-facing Copilot inbound message threading (conversations are the
+  AI-support system's remit, already live at `/admin/ai-support`).

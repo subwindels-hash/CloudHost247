@@ -18,6 +18,7 @@ import { revalidateProviderImages } from '../services/os-image-revalidation-serv
 import { runRevenueGuardianCycle } from '../revenue-guardian/jobs/scheduler';
 import { sweepCloudflareJobs } from './cloudflare-sweep';
 import { sweepDomainServices, DOMAIN_SERVICES_SWEEP_INTERVAL_MS } from './domain-services-sweep';
+import { runAiSweep, AI_SWEEP_INTERVAL_MS } from '../ai-os/jobs/sweep';
 import type { EngineOptions } from '../deployments/engine';
 import {
   DEFAULT_WORKER_CYCLE_LEASE_NAME,
@@ -65,6 +66,7 @@ interface WorkerSchedule {
   lastRevenueGuardianSweep: number;
   lastCloudflareSweep: number;
   lastDomainServicesSweep: number;
+  lastAiControlPlaneSweep: number;
 }
 
 function createWorkerSchedule(): WorkerSchedule {
@@ -80,6 +82,7 @@ function createWorkerSchedule(): WorkerSchedule {
     lastRevenueGuardianSweep: 0,
     lastCloudflareSweep: 0,
     lastDomainServicesSweep: 0,
+    lastAiControlPlaneSweep: 0,
   };
 }
 
@@ -227,6 +230,24 @@ async function runWorkerCycle(
     didWork ||= rotated > 0 || closed > 0;
     if (rotated > 0 || closed > 0) {
       logger.log(`[worker:${ctx.workerId}] security numbers rotated: ${rotated}; support sessions expired: ${closed}`);
+    }
+  }
+  if (now - schedule.lastAiControlPlaneSweep >= AI_SWEEP_INTERVAL_MS) {
+    schedule.lastAiControlPlaneSweep = now;
+    const ai = await runAiSweep(ctx.db);
+    const aiWork =
+      ai.eventsProcessed > 0 ||
+      ai.workflowsDispatched > 0 ||
+      ai.scansLaunched.length > 0 ||
+      ai.approvalsExpired > 0 ||
+      ai.memoriesPruned > 0 ||
+      ai.briefing.created === true ||
+      Object.values(ai.detected).some((n) => n > 0);
+    didWork ||= aiWork;
+    if (aiWork) {
+      logger.log(
+        `[worker:${ctx.workerId}] ai control plane: detected ${JSON.stringify(ai.detected)}, events processed ${ai.eventsProcessed}, workflows dispatched ${ai.workflowsDispatched}, scans launched [${ai.scansLaunched.join(', ')}], approvals expired ${ai.approvalsExpired}, briefing ${ai.briefing.runStatus ?? 'n/a'}${ai.briefing.created ? ' (generated)' : ''}`
+      );
     }
   }
 
