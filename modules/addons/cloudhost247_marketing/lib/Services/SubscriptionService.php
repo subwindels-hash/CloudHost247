@@ -31,17 +31,20 @@ final class SubscriptionService
     private $suppressions;
     private $lists;
     private $tags;
+    private $automations;
 
     public function __construct(
         SubscriberRepository $subscribers = null,
         SuppressionRepository $suppressions = null,
         ListRepository $lists = null,
-        TagRepository $tags = null
+        TagRepository $tags = null,
+        AutomationService $automations = null
     ) {
         $this->subscribers = $subscribers ?: new SubscriberRepository();
         $this->suppressions = $suppressions ?: new SuppressionRepository();
         $this->lists = $lists ?: new ListRepository();
         $this->tags = $tags ?: new TagRepository();
+        $this->automations = $automations ?: new AutomationService();
     }
 
     /**
@@ -114,9 +117,15 @@ final class SubscriptionService
                 ), 'success');
         }
 
+        // Triggers fire after the row and its memberships exist. The hook is
+        // deliberately inside the service, not in a WHMCS hook: an import or an
+        // API call must start a journey exactly like the admin form does.
+        $enrolled = $this->automations->enrollForSubscriber((int) $subscriber->id,
+            isset($input['list_ids']) ? (array) $input['list_ids'] : array(), (bool) $result['created']);
+
         return array(
             'ok' => true, 'reason' => '', 'subscriber' => $subscriber, 'created' => (bool) $result['created'],
-            'lists_added' => $listsAdded, 'tags_added' => $tagsAdded,
+            'lists_added' => $listsAdded, 'tags_added' => $tagsAdded, 'automations_started' => $enrolled,
         );
     }
 
@@ -139,12 +148,16 @@ final class SubscriptionService
             $this->subscribers->setConsent((int) $subscriber->id, ConsentStatus::REVOKED, $source);
         }
         $suppression = $this->suppressions->suppress($email, SuppressionReason::UNSUBSCRIBED, $source === 'admin' ? 'admin' : 'recipient', $detail);
+        // A journey that enrolled this address must stop: consent was withdrawn,
+        // and a queue filled five minutes ago is not consent.
+        $cancelledRuns = $subscriber ? $this->automations->cancelRunsForSubscriber((int) $subscriber->id, 'unsubscribed') : 0;
         if ($changed || $suppression['created']) {
             AuditLogger::record('cloudhost247_marketing', 'subscriber.unsubscribed', 'marketing_subscriber',
                 $subscriber ? (int) $subscriber->id : 0, array('status' => $subscriber ? (string) $subscriber->status : ''),
-                array('email' => $email, 'reason' => 'unsubscribed', 'source' => $source), 'success');
+                array('email' => $email, 'reason' => 'unsubscribed', 'source' => $source, 'automations_cancelled' => $cancelledRuns), 'success');
         }
-        return array('ok' => true, 'reason' => 'unsubscribed', 'changed' => $changed, 'suppression_created' => (bool) $suppression['created']);
+        return array('ok' => true, 'reason' => 'unsubscribed', 'changed' => $changed,
+            'suppression_created' => (bool) $suppression['created'], 'automations_cancelled' => $cancelledRuns);
     }
 
     /** Administrator action: put an address on the suppression list directly. */
@@ -155,6 +168,7 @@ final class SubscriptionService
         if ($subscriber) {
             $this->subscribers->setStatus((int) $subscriber->id, SubscriberStatus::SUPPRESSED);
             $this->subscribers->setConsent((int) $subscriber->id, ConsentStatus::REVOKED, 'admin');
+            $this->automations->cancelRunsForSubscriber((int) $subscriber->id, 'suppressed');
         }
         AuditLogger::record('cloudhost247_marketing', 'suppression.added', 'marketing_suppression',
             $result['row'] ? (int) $result['row']->id : 0, array(), array('email' => $email, 'reason' => $reason), 'success');
@@ -221,6 +235,7 @@ final class SubscriptionService
             $this->suppressions->suppress($email, SuppressionReason::HARD_BOUNCE, 'bounce',
                 $type . ' bounce #' . $result['count'] . ' reached the configured threshold');
             $this->subscribers->setStatus((int) $subscriber->id, SubscriberStatus::BOUNCED);
+            $this->automations->cancelRunsForSubscriber((int) $subscriber->id, 'bounced');
             $suppressed = true;
         }
         AuditLogger::record('cloudhost247_marketing', 'subscriber.bounced', 'marketing_subscriber', (int) $subscriber->id,

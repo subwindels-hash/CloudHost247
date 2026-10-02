@@ -1,6 +1,6 @@
 # CloudHost247 Email Marketing Platform
 
-Module: `modules/addons/cloudhost247_marketing` (version 1.2.0, in build — SESSIONS 1–9 of 12 complete).
+Module: `modules/addons/cloudhost247_marketing` (version 1.2.0, in build — SESSIONS 1–10 of 12 complete).
 Native WHMCS addon — no separate application, no separate frontend, no
 duplicate SMTP/credential infrastructure. Delivery credentials live
 exclusively in the central CloudHost247 API & Integrations vault under the
@@ -21,7 +21,7 @@ Admin → Marketing menu (hooks.php, AdminAreaMainMenu)
 modules/addons/cloudhost247_marketing
  ├─ cloudhost247_marketing.php   registration / activation (MigrationRunner) / admin dispatch
  ├─ bootstrap.php                PSR-4 autoloader + defensive core/integrations requires
- ├─ hooks.php                    Admin → Marketing menu; (automation triggers land in SESSION 10)
+ ├─ hooks.php                    Admin → Marketing menu (the menu is cosmetic; triggers fire in SubscriptionService)
  ├─ lib/Domain                   closed state enums (Campaign/Subscriber/Queue/Result/Event/Suppression,
  │                               ConsentStatus, SubscriberSource) + SegmentField / SegmentOperator
  │                               closed catalogs (SESSION 3) + TemplateBlock catalog (SESSION 4)
@@ -37,7 +37,7 @@ modules/addons/cloudhost247_marketing
  │                               CampaignService + MessageTransport / UnavailableTransport (SESSION 5),
  │                               SmtpTransport + SenderPolicy (SESSION 6);
  │                               QueueService (SESSION 7), TrackingService + BounceParser (SESSION 8),
- │                               AnalyticsService (SESSION 9); the automation engine lands in session 10
+ │                               AnalyticsService (SESSION 9), AutomationService (SESSION 10)
  ├─ lib/Http                     TrackController (public pixel/click/unsubscribe, SESSION 8),
  │                               AdminController / AdminView (dashboard, Delivery Settings,
  │                               Campaigns, Subscribers, Segments, Templates, Lists, Import,
@@ -59,6 +59,10 @@ Delivery chain (built in SESSION 6/7):
 ```
 
 ## Safety model
+
+* **An automation is a way of filling the queue, not a second delivery path.**
+  Every journey message is a queue row, and the three ways a journey stops are
+  enforced before it is queued and again when it is delivered.
 
 * **Reporting never guesses.** A rate with no denominator is shown as "—", and
   the screens repeat that a relay-accepted message is not a human reading it.
@@ -127,7 +131,7 @@ Delivery chain (built in SESSION 6/7):
 | 7 — Queue + delivery | **DONE** | `RecipientRepository` freezes the audience (`unique(campaign_id,email)`, whitelisted personalisation, pending/sent/failed/skipped); `QueueRepository` owns one row per message with a unique idempotency key, two-step claim locking, `releaseStaleLocks()` for workers that die mid-send, `release()` for paused campaigns (no retry spent), retry/permanent failure/skip transitions and the event ledger; `QueueService` runs one pass: release stale locks → `materialize()` (segment/list resolved once, suppression and consent applied) → `enqueue()` (idempotent) → `dispatch()` (claims, re-checks suppression, sends through `MessageTransport`, hard refusal ⇒ suppress, transient ⇒ backoff from settings, provider-session refusal ⇒ stop the run and hand unattempted messages back) → `settle()` (completed, or failed when nothing got out). Throttling is an allowance per pass (`batch_size`, `messages_per_minute`, rolling `hourly_limit`); the worker never sleeps in-request. `CampaignService::sendNow()` gives an approved campaign a deliberate "queue immediately" action — drafts still never send. Admin: delivery-queue panel with per-status counts, settings summary and a bounded "Run a worker pass now" button. `crons/cloudhost247_marketing.php` (CLI-only, `--campaign=N`, `--dry-run`, JSON summary, exit codes). Tests: 13 new cases in `tests/marketing/session7.php` (91 total) including a render smoke test over all 13 admin screens, which uncovered and fixed a latent fatal on the dashboard (missing `QueueStatus` import) |
 | 8 — Tracking | **DONE** | `TrackingService` composes the real message: closed personalisation token set (`{{first_name}}`, `{{last_name}}`, `{{email}}`, `{{company}}`, `{{unsubscribe_url}}`, `{{physical_address}}`; unknown tokens are blanked, never echoed), campaign links registered in `…_links` and rewritten to click URLs, a 1×1 pixel, and an unsubscribe footer that is injected even when tracking is switched off. `EventRepository` is the single writer of the tracking ledger, with dedupe (one open per message, one click per link per message), per-campaign counts and retention pruning from the worker. `cloudhost247-marketing-track.php` (the module's only web-reachable file) serves `e=open` (gif), `e=click` (302, destination resolved from the campaign's own link rows — no open redirect), and `e=unsubscribe` (GET is a confirmation page; POST unsubscribes, including RFC 8058 `List-Unsubscribe=One-Click`; GET never changes state). Tokens are opaque 128-bit values; unknown/malformed tokens get a generic 404 and URLs never contain an address, campaign name or subscriber id. `BounceParser` reads only recipients and 5.x/4.x classification from a pasted DSN (never the message itself), and the campaign screen has a bounce-evidence panel that suppresses hard bounces and counts soft ones. `tracking_base_url` is a required, validated setting (the campaign checklist blocks sending without it) because the module never reads WHMCS core tables. Tests: 15 new cases in `tests/marketing/session8.php` (107 total) |
 | 9 — Analytics | **DONE** | `AnalyticsService` (read-only) turns the event ledger into the numbers the operator asked for — per campaign: audience frozen, accepted by the relay, failed/skipped, still queued, opens, clicks, bounces, unsubscribes, plus open / click / click-to-open / bounce / unsubscribe rates; deployment-wide rolling windows (7/30/90/365 days) with the busiest campaigns, campaign-state counts, a click map per registered link (clicks attributed through the event's `link_id`, unattributable clicks reported rather than hidden), bounded per-recipient activity, and a 14-day daily timeline that fills quiet days with zeroes. Every figure is a count of recorded events — nothing is estimated — and a rate with a zero denominator is `null`, rendered as "—", never as a comforting 0%. The screen states that "accepted" means the relay took the message and that opens are pixel events that can include client prefetching. A 30-day panel sits on the dashboard, and a static invariant proves the report view issues no writes and reads no core table. Tests: 10 new cases in `tests/marketing/session9.php` (117 total) |
-| 10 — Automation | planned | triggers via WHMCS hooks, wait/email steps, idempotent runs |
+| 10 — Automation | **DONE** | A journey is a list of `wait` / `send_email` steps and a run is one subscriber walking it. Three rules shape the engine: **nothing is delivered by the automation code** — a send step puts a row on the same queue campaigns use, so suppression, throttling, retries, tracking and the ledger apply unchanged; **one live journey per subscriber** (the enrolment key is unique, so a retried trigger cannot enrol twice, and re-enrolment only happens when the operator allowed it, as a new run); **stopping always works** — unsubscribing, a hard bounce, an admin suppression or archiving the automation cancels the live runs, and a queued message is re-checked at delivery. A run advances at most one step per cron pass, so a burst of send steps is spread over successive passes instead of fired in a loop. Triggers (`subscriber_added`, `list_joined`, `manual`) fire inside `SubscriptionService`, so an import or an API call starts a journey exactly like the admin form. Each automation owns one long-lived container campaign (`origin='automation'`, status `sending`) that holds its links and ledger rows while never appearing in the Campaigns list, never being due and never being settled — automation sends reuse the whole campaign pipeline, and Analytics reports them under "Automation: …". The queue row freezes which run and which step it belongs to, so the delivery pass composes the step's own template even if the run has moved on, and a step whose template was archived mid-flight is skipped with a reason rather than sent wrong. Tests: 14 new cases in `tests/marketing/session10.php` (131 total) |
 | 11 — Security review | planned | CSRF/XSS/auth/upload/tracking-abuse/redirect review |
 | 12 — Production QA | planned | full matrix incl. SMTP failure taxonomy, queue concurrency, soak tests |
 
@@ -137,6 +141,17 @@ Delivery chain (built in SESSION 6/7):
   seeding, settings persistence/audit/capability denial, dashboard honesty,
   catalog registration, enum closures, validator) plus the SESSION 2 file below;
   runs under PHP 7.4 and 8.2 in CI.
+* `tests/marketing/session10.php` — SESSION 10 behavior suite (14 cases):
+  authoring and the pre-activation checks, the container campaign (hidden from
+  the campaign list and never due), step removal renumbering the journey,
+  one-live-journey enrolment and controlled re-enrolment, refusals for addresses
+  that left/bounced/were suppressed, the one-step-per-tick engine (send, wait,
+  resume, complete), same-pass delivery from the step's own template, unsubscribe
+  cancelling a journey before its queued message can go out, bounce/suppression
+  stopping journeys, pause holding and archive cancelling, a mid-flight archived
+  template being skipped with a reason, trigger hooks for new subscribers and
+  list joins, the CSRF/capability-guarded automations screen, and analytics
+  attribution to the container.
 * `tests/marketing/session9.php` — SESSION 9 behavior suite (10 cases):
   ledger-only summaries, rates that refuse a zero denominator, the click map
   (including clicks pointing at a link that no longer exists), bounded recipient

@@ -14,11 +14,13 @@ require_once __DIR__ . '/bootstrap.php';
 require_once __DIR__ . '/migrations/V100.php';
 require_once __DIR__ . '/migrations/V110.php';
 require_once __DIR__ . '/migrations/V120.php';
+require_once __DIR__ . '/migrations/V130.php';
 
 use CloudHost247\Foundation\Database\MigrationRunner;
 use CloudHost247\Foundation\Support\Logger;
 use CloudHost247\Marketing\Http\AdminController;
 use CloudHost247\Marketing\Http\AdminView;
+use CloudHost247\Marketing\Migrations\AutomationMigration;
 use CloudHost247\Marketing\Migrations\InitialMigration;
 use CloudHost247\Marketing\Migrations\TagMigration;
 use CloudHost247\Marketing\Migrations\TemplateMigration;
@@ -40,7 +42,7 @@ function cloudhost247_marketing_config()
 function cloudhost247_marketing_activate()
 {
     try {
-        (new MigrationRunner())->run('cloudhost247_marketing', array(new InitialMigration(), new TagMigration(), new TemplateMigration()));
+        (new MigrationRunner())->run('cloudhost247_marketing', array(new InitialMigration(), new TagMigration(), new TemplateMigration(), new AutomationMigration()));
         (new SettingsRepository())->seedDefaults();
         (new TemplateService())->ensureBuiltins();
         return array(

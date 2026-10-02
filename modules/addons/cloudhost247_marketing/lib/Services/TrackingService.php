@@ -66,16 +66,28 @@ final class TrackingService
      * @param object $campaign campaign row
      * @param object $queueRow the claimed queue row (token + idempotency)
      * @param object|null $subscriber subscriber row, when the recipient has one
+     * @param array $content optional override from a queued automation step
+     *                       (subject, html, text, from_name, from_email, reply_to)
      * @return array message for MessageTransport::send()
      */
-    public function compose($campaign, $queueRow, $subscriber = null)
+    public function compose($campaign, $queueRow, $subscriber = null, array $content = array())
     {
         $token = (string) $queueRow->tracking_token;
         $personal = $this->personalisation($subscriber, (string) $queueRow->email);
         $base = $this->baseUrl();
 
-        $html = $this->personalise((string) $campaign->html, $personal, $token);
-        $text = $this->personalise((string) $campaign->text, $personal, $token);
+        // A queued automation message carries its own content: the step's
+        // template, subject and sender. The container campaign still owns the
+        // links and the ledger rows, so everything downstream is unchanged.
+        $subject = isset($content['subject']) ? (string) $content['subject'] : (string) $campaign->subject;
+        $htmlSource = isset($content['html']) ? (string) $content['html'] : (string) $campaign->html;
+        $textSource = isset($content['text']) ? (string) $content['text'] : (string) $campaign->text;
+        $fromEmail = isset($content['from_email']) && trim((string) $content['from_email']) !== '' ? (string) $content['from_email'] : (string) $campaign->from_email;
+        $fromName = isset($content['from_name']) && trim((string) $content['from_name']) !== '' ? (string) $content['from_name'] : (string) $campaign->from_name;
+        $replyTo = isset($content['reply_to']) && trim((string) $content['reply_to']) !== '' ? (string) $content['reply_to'] : (string) $campaign->reply_to;
+
+        $html = $this->personalise($htmlSource, $personal, $token);
+        $text = $this->personalise($textSource, $personal, $token);
 
         if ($this->settingEnabled('open_tracking_enabled') && $html !== '') {
             $html = $this->rewriteLinks($campaign, $html, $token);
@@ -93,12 +105,12 @@ final class TrackingService
         $body = array(
             'to' => (string) $queueRow->email,
             'to_name' => trim($personal['first_name'] . ' ' . $personal['last_name']),
-            'subject' => (string) $campaign->subject,
+            'subject' => $subject,
             'html' => $html,
             'text' => $text,
-            'from_email' => (string) $campaign->from_email,
-            'from_name' => (string) $campaign->from_name,
-            'reply_to' => (string) $campaign->reply_to,
+            'from_email' => $fromEmail,
+            'from_name' => $fromName,
+            'reply_to' => $replyTo,
             'headers' => array(
                 'X-CloudHost247-Campaign' => (int) $campaign->id,
                 'List-Unsubscribe' => '<' . $unsubscribeUrl . '>',

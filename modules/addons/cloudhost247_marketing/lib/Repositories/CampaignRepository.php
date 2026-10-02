@@ -17,6 +17,8 @@ use WHMCS\Database\Capsule;
 final class CampaignRepository
 {
     const TABLE = 'mod_cloudhost247_marketing_campaigns';
+    const ORIGIN_CAMPAIGN = 'campaign';
+    const ORIGIN_AUTOMATION = 'automation';
     const MAX_PER_PAGE = 100;
 
     public function find($id)
@@ -34,6 +36,10 @@ final class CampaignRepository
         $page = max(1, (int) $page);
         $perPage = max(1, min(self::MAX_PER_PAGE, (int) $perPage));
         $query = Capsule::table(self::TABLE);
+
+        // Automation container campaigns are bookkeeping for a journey, not
+        // something an operator sends or edits: they are excluded unless asked for.
+        $query->where('origin', isset($filters['origin']) ? (string) $filters['origin'] : self::ORIGIN_CAMPAIGN);
 
         if (!empty($filters['status'])) {
             $status = (string) $filters['status'];
@@ -105,6 +111,9 @@ final class CampaignRepository
             'text' => (string) $data['text'],
             'audience_type' => $data['audience_type'],
             'audience_id' => $data['audience_id'],
+            // Explicit, not left to the column default: the Campaigns list filters
+            // on origin, and an unset value would hide the campaign from it.
+            'origin' => self::ORIGIN_CAMPAIGN,
             'status' => CampaignStatus::DRAFT,
             'scheduled_at' => null,
             'scheduled_timezone' => 'UTC',
@@ -169,6 +178,47 @@ final class CampaignRepository
     }
 
     /** Campaigns a dispatcher should pick up, oldest schedule first. */
+
+    /**
+     * The long-lived container campaign an automation owns: it is never due, it
+     * is never settled (status `sending`, so the worker's campaign scans skip it)
+     * and it exists so that queue rows, registered links and ledger events have
+     * the same home a campaign gives them.
+     */
+    public function createContainer($name, $idempotencyKey, $createdBy = 0)
+    {
+        $existing = $this->findByIdempotencyKey((string) $idempotencyKey);
+        if ($existing) { return $existing; }
+        $now = date('Y-m-d H:i:s');
+        $id = Capsule::table(self::TABLE)->insertGetId(array(
+            'name' => substr((string) $name, 0, 128),
+            'subject' => '',
+            'preview_text' => '',
+            'from_name' => '',
+            'from_email' => '',
+            'reply_to' => '',
+            'template_id' => null,
+            'design_json' => null,
+            'html' => '',
+            'text' => '',
+            'audience_type' => 'all_subscribers',
+            'audience_id' => 0,
+            'status' => CampaignStatus::SENDING,
+            'scheduled_at' => null,
+            'scheduled_timezone' => 'UTC',
+            'started_at' => $now,
+            'completed_at' => null,
+            'failed_at' => null,
+            'failure_reason' => '',
+            'origin' => self::ORIGIN_AUTOMATION,
+            'created_by' => (int) $createdBy,
+            'idempotency_key' => (string) $idempotencyKey,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ));
+        return $this->find($id);
+    }
+
     public function due($now, $limit = 25)
     {
         $rows = Capsule::table(self::TABLE)

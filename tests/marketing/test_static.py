@@ -54,6 +54,13 @@ class MarketingStaticTests(unittest.TestCase):
             os.path.join(LIB, "Services", "TrackingService.php"),
             os.path.join(LIB, "Services", "BounceParser.php"),
             os.path.join(LIB, "Services", "AnalyticsService.php"),
+            os.path.join(LIB, "Services", "AutomationService.php"),
+            os.path.join(LIB, "Repositories", "AutomationRepository.php"),
+            os.path.join(LIB, "Domain", "AutomationStatus.php"),
+            os.path.join(LIB, "Domain", "AutomationStepType.php"),
+            os.path.join(LIB, "Domain", "AutomationTrigger.php"),
+            os.path.join(LIB, "Domain", "AutomationRunStatus.php"),
+            os.path.join(MODULE, "migrations", "V130.php"),
             os.path.join(LIB, "Http", "TrackController.php"),
             os.path.join(LIB, "Repositories", "EventRepository.php"),
             os.path.join(LIB, "Repositories", "SegmentRepository.php"),
@@ -136,6 +143,31 @@ class MarketingStaticTests(unittest.TestCase):
             combined += read(path)
         for forbidden in ("fsockopen", "stream_socket_client", "swiftmailer", "PHPMailer"):
             self.assertNotIn(forbidden, combined)
+
+    def test_automation_delivers_through_the_queue_and_never_sends_directly(self):
+        # SESSION 10: an automation fills the queue; it never grows its own
+        # delivery path, never touches a WHMCS core table, and never mails.
+        service = read(os.path.join(LIB, "Services", "AutomationService.php"))
+        for forbidden in ("Capsule::table('tbl", "tblclients", "->send(", "PHPMailer"):
+            self.assertNotIn(forbidden, service)
+        # `email(` inside `InputValidator::email(` is not a mailer; a bare call is.
+        self.assertIsNone(re.search(r"(?<![A-Za-z_])mail\s*\(", service))
+        self.assertIn("->enqueue(", service)
+        # The container campaign is how links, events and tracking find a home.
+        self.assertIn("createContainer(", read(os.path.join(LIB, "Repositories", "CampaignRepository.php")))
+        # Suppression, unsubscribe and consent are checked before a step queues.
+        for guard in ("isSuppressed", "UNSUBSCRIBED", "consent_status"):
+            self.assertIn(guard, service)
+        # The delivery pass composes an automation message from its own step.
+        queue = read(os.path.join(LIB, "Services", "QueueService.php"))
+        self.assertIn("contentForQueueRow", queue)
+        self.assertIn("automation_run_id", queue)
+        # Migration 130 is additive and guarded.
+        migration = read(os.path.join(MODULE, "migrations", "V130.php"))
+        for guard in ("hasTable", "hasColumn", "schema()->create"):
+            self.assertIn(guard, migration)
+        self.assertNotIn("drop(", migration)
+        self.assertNotIn("rename(", migration)
 
     def test_reporting_counts_events_and_refuses_to_invent_numbers(self):
         # Analytics is a read-only reader of the ledger: no writes, no random

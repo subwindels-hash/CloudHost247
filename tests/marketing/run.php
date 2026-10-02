@@ -162,14 +162,14 @@ $tests['Every advertised menu section is routable and unbuilt ones say so instea
     // The menu advertises more sections than the build has landed; each of them
     // must keep its own address and explain itself rather than silently render
     // the dashboard under a different URL.
-    $planned = array('automations' => 10);
+    $planned = array();
     foreach ($planned as $view => $session) {
         $_GET = array('view' => $view);
         $data = (new AdminController())->handle();
         if ($data['view'] !== $view || (int) $data['plannedSession'] !== $session) { return false; }
     }
     // SESSIONS 3 to 9 landed: segments, templates, campaigns and analytics are real views.
-    foreach (array('segments', 'templates', 'campaigns', 'analytics') as $realView) {
+    foreach (array('segments', 'templates', 'campaigns', 'analytics', 'automations') as $realView) {
         $_GET = array('view' => $realView);
         $data = (new AdminController())->handle();
         if ($data['view'] !== $realView || (int) $data['plannedSession'] !== 0) { return false; }
@@ -315,6 +315,14 @@ foreach (require __DIR__ . '/session8.php' as $name => $test) {
 // Rates, click maps, recipient activity and the reporting screen live in session9.php.
 
 foreach (require __DIR__ . '/session9.php' as $name => $test) {
+    if (isset($tests[$name])) { throw new RuntimeException('Duplicate marketing test name: ' . $name); }
+    $tests[$name] = $test;
+}
+
+// ---------------------------------------------------------- SESSION 10 - automation
+// Authoring, enrolment, the wait/send engine and the stopping rules live in session10.php.
+
+foreach (require __DIR__ . '/session10.php' as $name => $test) {
     if (isset($tests[$name])) { throw new RuntimeException('Duplicate marketing test name: ' . $name); }
     $tests[$name] = $test;
 }

@@ -10,10 +10,14 @@ if (PHP_SAPI !== 'cli') { http_response_code(403); exit('CLI only'); }
  *
  * One pass does the whole delivery path, bounded by the module's settings:
  * stale locks are released, due campaigns are frozen into recipient rows,
- * recipients are queued, an allowance of messages is attempted through the
- * configured cPanel SMTP provider, and drained campaigns are closed. Every step
- * is idempotent, so a run that is interrupted (or overlapped with another
- * worker) sends a message at most once and never loses one.
+ * recipients are queued, due automation steps are advanced onto the same queue,
+ * an allowance of messages is attempted through the configured cPanel SMTP
+ * provider, and drained campaigns are closed. Every step is idempotent, so a run
+ * that is interrupted (or overlapped with another worker) sends a message at
+ * most once and never loses one.
+ *
+ * Automation runs advance one step per pass: a journey with two send steps takes
+ * two passes, not one loop.
  *
  * Options:
  *   --campaign=N   work on one campaign only

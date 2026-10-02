@@ -4,6 +4,10 @@ namespace CloudHost247\Marketing\Http;
 use CloudHost247\Marketing\Domain\CampaignStatus;
 use CloudHost247\Marketing\Domain\ConsentStatus;
 use CloudHost247\Marketing\Domain\QueueStatus;
+use CloudHost247\Marketing\Domain\AutomationRunStatus;
+use CloudHost247\Marketing\Domain\AutomationStatus;
+use CloudHost247\Marketing\Domain\AutomationStepType;
+use CloudHost247\Marketing\Domain\AutomationTrigger;
 use CloudHost247\Marketing\Domain\CampaignAudience;
 use CloudHost247\Marketing\Domain\EventType;
 use CloudHost247\Marketing\Domain\SegmentField;
@@ -55,6 +59,7 @@ final class AdminView
             'dashboard' => array('Dashboard', ''),
             'campaigns' => array('Campaigns', 'campaigns'),
             'analytics' => array('Analytics', 'analytics'),
+            'automations' => array('Automations', 'automations'),
             'subscribers' => array('Subscribers', 'subscribers'),
             'segments' => array('Segments', 'segments'),
             'templates' => array('Templates', 'templates'),
@@ -85,6 +90,7 @@ final class AdminView
         elseif ($data['view'] === 'segments') { $this->renderSegments($data); }
         elseif ($data['view'] === 'segment') { $this->renderSegmentDetail($data); }
         elseif ($data['view'] === 'analytics') { $this->renderAnalytics($data); }
+        elseif ($data['view'] === 'automations') { $this->renderAutomations($data); }
         elseif ($data['view'] === 'campaigns') { $this->renderCampaigns($data); }
         elseif ($data['view'] === 'campaign') { $this->renderCampaignDetail($data); }
         elseif ($data['view'] === 'templates') { $this->renderTemplates($data); }
@@ -445,6 +451,179 @@ final class AdminView
         }
         echo '</table>';
         foreach ($overview['notes'] as $note) { echo '<p class="text-muted" style="font-size:12px;">' . $this->e($note) . '</p>'; }
+    }
+
+    // ----------------------------------------------------------- automations
+
+    private function renderAutomations(array $data)
+    {
+        $view = $data['automationsView'];
+        echo '<h4>Automations</h4>';
+        echo '<p class="text-muted">A journey is a list of steps — wait, send email — that one subscriber walks through. '
+            . 'Each send step puts one message on the same queue campaigns use: the same suppression checks, throttling, retries, '
+            . 'tracking and ledger apply. A run advances at most one step per cron pass, so nothing is fired in a loop.</p>';
+
+        $counts = $view['list']['status_counts'];
+        echo '<p>';
+        foreach ($view['statuses'] as $status) {
+            echo '<span class="label label-default" style="margin-right:6px;">' . $this->e(AutomationStatus::label($status)) . ': ' . (int) $counts[$status] . '</span>';
+        }
+        echo '</p>';
+
+        // ------------------------------------------------------------- create
+        if (!empty($view['canManage'])) {
+            echo '<div class="panel panel-default" style="max-width:900px;"><div class="panel-heading">New automation</div><div class="panel-body">';
+            echo '<form method="post" action="' . $this->base('automations') . '">'
+                . '<input type="hidden" name="token" value="' . $this->e($data['csrf']) . '" />'
+                . '<input type="hidden" name="action" value="automation.create" />';
+            echo '<div class="row"><div class="col-sm-4"><input class="form-control" name="name" placeholder="Name, e.g. Welcome journey" /></div>'
+                . '<div class="col-sm-3"><select class="form-control" name="trigger_type">';
+            foreach ($view['triggers'] as $trigger) {
+                echo '<option value="' . $this->e($trigger) . '">' . $this->e(AutomationTrigger::label($trigger)) . '</option>';
+            }
+            echo '</select></div><div class="col-sm-3"><select class="form-control" name="list_id"><option value="0">— list (for list trigger) —</option>';
+            foreach ($view['lists'] as $list) {
+                echo '<option value="' . (int) $list->id . '">' . $this->e($list->name) . '</option>';
+            }
+            echo '</select></div><div class="col-sm-2"><button class="btn btn-primary">Create</button></div></div>';
+            echo '<p class="text-muted" style="margin-top:8px;font-size:12px;">Nothing is sent until the automation is active and a step says so.</p>';
+            echo '</form></div></div>';
+        }
+
+        // --------------------------------------------------------------- list
+        echo '<table class="table table-striped" style="max-width:1100px;"><tr><th>Automation</th><th>Trigger</th><th>Steps</th>'
+            . '<th>Runs</th><th>Messages</th><th>Status</th><th></th></tr>';
+        foreach ($view['list']['rows'] as $entry) {
+            $automation = $entry['automation'];
+            $runs = $entry['runs'];
+            echo '<tr><td>' . $this->e($automation->name) . '<div class="text-muted" style="font-size:11px;">' . $this->e($automation->description) . '</div></td>'
+                . '<td>' . $this->e(AutomationTrigger::label((string) $automation->trigger_type)) . ((int) $automation->trigger_delay_minutes > 0 ? '<div class="text-muted" style="font-size:11px;">after ' . (int) $automation->trigger_delay_minutes . ' min</div>' : '') . '</td>'
+                . '<td>' . (int) $entry['steps'] . '</td>'
+                . '<td>' . (int) $runs['running'] . ' running, ' . (int) $runs['waiting'] . ' waiting, ' . (int) $runs['completed'] . ' done'
+                . ((int) $runs['cancelled'] > 0 ? ', ' . (int) $runs['cancelled'] . ' cancelled' : '')
+                . ((int) $runs['failed'] > 0 ? ', <span class="text-danger">' . (int) $runs['failed'] . ' failed</span>' : '') . '</td>'
+                . '<td>' . (int) $runs['messages'] . '</td>'
+                . '<td>' . $this->automationBadge((string) $automation->status) . '</td>'
+                . '<td><a class="btn btn-xs btn-default" href="' . $this->base('automations', array('automation_id' => (int) $automation->id)) . '">Open</a></td></tr>';
+        }
+        if (!$view['list']['rows']) {
+            echo '<tr><td colspan="7" class="text-muted">No automations yet. A welcome journey is a good first one: trigger on “subscriber added”, wait 5 minutes, send your welcome template.</td></tr>';
+        }
+        echo '</table>';
+
+        if (empty($view['detail'])) { return; }
+
+        // ------------------------------------------------------------- detail
+        $detail = $view['detail'];
+        $automation = $detail['automation'];
+        echo '<hr /><h4>' . $this->e($automation->name) . ' ' . $this->automationBadge((string) $automation->status) . '</h4>';
+        echo '<p class="text-muted">Trigger: ' . $this->e(AutomationTrigger::label((string) $automation->trigger_type))
+            . ((int) $automation->trigger_delay_minutes > 0 ? ', after a ' . (int) $automation->trigger_delay_minutes . '-minute delay' : '')
+            . '. ' . (!empty($automation->reenrollable) ? 'A subscriber may be enrolled again after finishing.' : 'One journey per subscriber; re-running is refused.')
+            . '</p>';
+        if (!empty($detail['container'])) {
+            echo '<p class="text-muted">Delivery container: campaign #' . (int) $detail['container']->id . ' (' . $this->e($detail['container']->name) . '). '
+                . 'It exists for links and reporting and is never sent as a campaign.</p>';
+        }
+        if ($detail['issues']) {
+            echo '<div class="alert alert-warning"><strong>Not activatable yet:</strong><ul style="margin:6px 0 0 18px;">';
+            foreach ($detail['issues'] as $issue) { echo '<li>' . $this->e($issue) . '</li>'; }
+            echo '</ul></div>';
+        }
+
+        echo '<h5>Steps</h5>';
+        echo '<table class="table table-condensed" style="max-width:900px;"><tr><th>#</th><th>Step</th><th>Detail</th><th></th></tr>';
+        foreach ($detail['steps_detail'] as $entry) {
+            $step = $entry['step'];
+            $isSend = AutomationStepType::isSending((string) $step->step_type);
+            echo '<tr><td>' . (int) $step->position . '</td><td>' . $this->e(AutomationStepType::label((string) $step->step_type)) . '</td><td>'
+                . ($isSend
+                    ? $this->e($step->subject) . ' <span class="text-muted">via ' . $this->e($entry['template_name']) . '</span>'
+                    : 'wait ' . (int) $step->wait_minutes . ' minute(s)')
+                . '</td><td>';
+            if (!empty($view['canManage'])) {
+                echo '<form method="post" action="' . $this->base('automations', array('automation_id' => (int) $automation->id)) . '" style="display:inline">'
+                    . '<input type="hidden" name="token" value="' . $this->e($data['csrf']) . '" />'
+                    . '<input type="hidden" name="action" value="automation.step_remove" />'
+                    . '<input type="hidden" name="automation_id" value="' . (int) $automation->id . '" />'
+                    . '<input type="hidden" name="step_id" value="' . (int) $step->id . '" />'
+                    . '<button class="btn btn-xs btn-default">Remove</button></form>';
+            }
+            echo '</td></tr>';
+        }
+        if (!$detail['steps_detail']) { echo '<tr><td colspan="4" class="text-muted">No steps yet.</td></tr>'; }
+        echo '</table>';
+
+        if (!empty($view['canManage'])) {
+            echo '<div class="panel panel-default" style="max-width:900px;"><div class="panel-heading">Add a step</div><div class="panel-body">';
+            // Wait step
+            echo '<form method="post" action="' . $this->base('automations', array('automation_id' => (int) $automation->id)) . '" class="form-inline" style="margin-bottom:10px;">'
+                . '<input type="hidden" name="token" value="' . $this->e($data['csrf']) . '" />'
+                . '<input type="hidden" name="action" value="automation.step_add" />'
+                . '<input type="hidden" name="automation_id" value="' . (int) $automation->id . '" />'
+                . '<input type="hidden" name="step_type" value="' . AutomationStepType::WAIT . '" />'
+                . '<label>Wait</label> <input class="form-control" style="width:110px;" name="wait_minutes" value="60" /> <label>minutes</label> '
+                . '<button class="btn btn-default">Add wait</button></form>';
+            // Send step
+            echo '<form method="post" action="' . $this->base('automations', array('automation_id' => (int) $automation->id)) . '" class="form-inline">'
+                . '<input type="hidden" name="token" value="' . $this->e($data['csrf']) . '" />'
+                . '<input type="hidden" name="action" value="automation.step_add" />'
+                . '<input type="hidden" name="automation_id" value="' . (int) $automation->id . '" />'
+                . '<input type="hidden" name="step_type" value="' . AutomationStepType::SEND_EMAIL . '" />'
+                . '<input class="form-control" style="width:220px;" name="subject" placeholder="Subject line" /> '
+                . '<select class="form-control" name="template_id"><option value="0">— template —</option>';
+            foreach ($view['templates'] as $template) {
+                echo '<option value="' . (int) $template->id . '">' . $this->e($template->name) . '</option>';
+            }
+            echo '</select> <button class="btn btn-primary">Add send step</button></form>';
+            echo '<p class="text-muted" style="margin-top:8px;font-size:12px;">Steps run top to bottom. A send step uses the template as it exists when the message is queued.</p>';
+            echo '</div></div>';
+        }
+
+        echo '<h5>Run this automation</h5>';
+        if (!empty($view['canManage'])) {
+            echo '<form method="post" action="' . $this->base('automations', array('automation_id' => (int) $automation->id)) . '" class="form-inline" style="margin-bottom:10px;">'
+                . '<input type="hidden" name="token" value="' . $this->e($data['csrf']) . '" />'
+                . '<input type="hidden" name="action" value="automation.activate" />'
+                . '<input type="hidden" name="automation_id" value="' . (int) $automation->id . '" />'
+                . '<button class="btn btn-success"' . ($detail['issues'] ? ' disabled' : '') . '>Activate</button></form>';
+            echo '<form method="post" action="' . $this->base('automations', array('automation_id' => (int) $automation->id)) . '" class="form-inline" style="margin-bottom:10px;">'
+                . '<input type="hidden" name="token" value="' . $this->e($data['csrf']) . '" />'
+                . '<input type="hidden" name="action" value="automation.pause" />'
+                . '<input type="hidden" name="automation_id" value="' . (int) $automation->id . '" />'
+                . '<button class="btn btn-default">Pause (holds live journeys)</button></form>';
+            echo '<form method="post" action="' . $this->base('automations', array('automation_id' => (int) $automation->id)) . '" class="form-inline" style="margin-bottom:10px;">'
+                . '<input type="hidden" name="token" value="' . $this->e($data['csrf']) . '" />'
+                . '<input type="hidden" name="action" value="automation.archive" />'
+                . '<input type="hidden" name="automation_id" value="' . (int) $automation->id . '" />'
+                . '<button class="btn btn-danger">Archive (cancels live journeys)</button></form>';
+            echo '<form method="post" action="' . $this->base('automations', array('automation_id' => (int) $automation->id)) . '" class="form-inline" style="margin-bottom:10px;">'
+                . '<input type="hidden" name="token" value="' . $this->e($data['csrf']) . '" />'
+                . '<input type="hidden" name="action" value="automation.enroll" />'
+                . '<input type="hidden" name="automation_id" value="' . (int) $automation->id . '" />'
+                . '<input class="form-control" name="email" placeholder="subscriber@example.com" /> '
+                . '<button class="btn btn-default">Enrol one subscriber</button></form>';
+        }
+
+        echo '<h5>Runs</h5>';
+        echo '<table class="table table-condensed" style="max-width:900px;"><tr><th>Subscriber</th><th>Status</th><th>At step</th><th>Messages</th><th>Next attempt</th><th>Note</th></tr>';
+        foreach ($detail['recent_runs'] as $run) {
+            echo '<tr><td>' . $this->e($run->subscriber_email) . '</td><td>' . $this->e(AutomationRunStatus::label((string) $run->status)) . '</td>'
+                . '<td>' . (int) $run->position . '</td><td>' . (int) $run->sent_count . '</td>'
+                . '<td>' . ($run->next_run_at === null ? '—' : $this->e($run->next_run_at)) . '</td>'
+                . '<td class="text-muted">' . $this->e($run->last_error) . '</td></tr>';
+        }
+        if (!$detail['recent_runs']) { echo '<tr><td colspan="6" class="text-muted">Nobody has been enrolled yet.</td></tr>'; }
+        echo '</table>';
+    }
+
+    private function automationBadge($status)
+    {
+        $class = 'label-default';
+        if ($status === AutomationStatus::ACTIVE) { $class = 'label-success'; }
+        elseif ($status === AutomationStatus::PAUSED) { $class = 'label-warning'; }
+        elseif ($status === AutomationStatus::ARCHIVED) { $class = 'label-default'; }
+        return '<span class="label ' . $class . '">' . $this->e(AutomationStatus::label($status)) . '</span>';
     }
 
     // ------------------------------------------------------------- campaigns

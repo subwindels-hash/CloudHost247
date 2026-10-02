@@ -5,6 +5,9 @@ use CloudHost247\Foundation\Security\AdminGuard;
 use CloudHost247\Foundation\Support\AuditLogger;
 use CloudHost247\Integrations\Services\IntegrationManager;
 use CloudHost247\Integrations\Support\ResultCode;
+use CloudHost247\Marketing\Domain\AutomationStatus;
+use CloudHost247\Marketing\Domain\AutomationStepType;
+use CloudHost247\Marketing\Domain\AutomationTrigger;
 use CloudHost247\Marketing\Domain\CampaignStatus;
 use CloudHost247\Marketing\Domain\ConsentStatus;
 use CloudHost247\Marketing\Domain\QueueStatus;
@@ -27,6 +30,7 @@ use CloudHost247\Marketing\Services\CampaignService;
 use CloudHost247\Marketing\Services\TemplateService;
 use CloudHost247\Marketing\Repositories\QueueRepository;
 use CloudHost247\Marketing\Services\AnalyticsService;
+use CloudHost247\Marketing\Services\AutomationService;
 use CloudHost247\Marketing\Services\BounceParser;
 use CloudHost247\Marketing\Services\QueueService;
 use CloudHost247\Marketing\Services\TrackingService;
@@ -45,7 +49,7 @@ final class AdminController
 
     /** Every view the module currently serves. */
     const VIEWS = array('dashboard', 'settings', 'subscribers', 'subscriber', 'lists', 'import', 'suppressions',
-        'segments', 'segment', 'templates', 'template', 'campaigns', 'campaign', 'analytics');
+        'segments', 'segment', 'templates', 'template', 'campaigns', 'campaign', 'analytics', 'automations');
 
     /**
      * Sections the admin menu already advertises but whose build session has not
@@ -54,9 +58,7 @@ final class AdminController
      *
      * @var array<string,int>
      */
-    const PLANNED_VIEWS = array(
-        'automations' => 10,
-    );
+    const PLANNED_VIEWS = array();
 
     /** Capability required for each mutating view (SESSION 2 scope). */
     const SUBSCRIBER_CAPABILITY = 'marketing.subscribers.manage';
@@ -66,6 +68,8 @@ final class AdminController
     const TEMPLATE_CAPABILITY = 'marketing.campaigns.manage';
     /** A campaign is an audience plus approved content. */
     const CAMPAIGN_CAPABILITY = 'marketing.campaigns.manage';
+    /** Journeys send mail, so they sit behind the same capability as campaigns. */
+    const AUTOMATION_CAPABILITY = 'marketing.campaigns.manage';
 
     private $settings;
     private $subscribers;
@@ -80,6 +84,7 @@ final class AdminController
     private $campaigns;
     private $queue;
     private $analytics;
+    private $automations;
 
     public function __construct(
         SettingsRepository $settings = null,
@@ -94,7 +99,8 @@ final class AdminController
         TemplateService $templates = null,
         CampaignService $campaigns = null,
         QueueService $queue = null,
-        AnalyticsService $analytics = null
+        AnalyticsService $analytics = null,
+        AutomationService $automations = null
     ) {
         $this->settings = $settings ?: new SettingsRepository();
         $this->subscribers = $subscribers ?: new SubscriberRepository();
@@ -109,6 +115,7 @@ final class AdminController
         $this->campaigns = $campaigns ?: new CampaignService(null, null, null, null, null, $this->campaignTransport());
         $this->queue = $queue ?: new QueueService(null, $this->campaigns);
         $this->analytics = $analytics ?: new AnalyticsService();
+        $this->automations = $automations ?: new AutomationService();
     }
 
     public function handle()
@@ -162,6 +169,17 @@ final class AdminController
                 } catch (\RuntimeException $e) {
                     $error = 'Error: ' . $e->getMessage();
                 }
+            } elseif ($view === 'automations') {
+                $this->requireMutation(self::AUTOMATION_CAPABILITY);
+                try {
+                    $result = $this->handleAutomationAction();
+                    $notice = isset($result['notice']) ? $result['notice'] : '';
+                    $error = isset($result['error']) ? $result['error'] : '';
+                } catch (\InvalidArgumentException $e) {
+                    $error = 'Error: ' . $e->getMessage();
+                } catch (\RuntimeException $e) {
+                    $error = 'Error: ' . $e->getMessage();
+                }
             } elseif (in_array($view, array('subscribers', 'subscriber', 'lists', 'suppressions', 'import'), true)) {
                 // The guard runs outside the try block on purpose: a missing
                 // capability or CSRF token must refuse the request outright, never
@@ -201,6 +219,7 @@ final class AdminController
                 'subscribers.manage' => $this->capAllowed(self::SUBSCRIBER_CAPABILITY),
                 'sending.manage' => $this->capAllowed('marketing.sending.manage'),
                 'analytics.view' => $this->capAllowed('marketing.analytics.view'),
+                'automations.manage' => $this->capAllowed(self::AUTOMATION_CAPABILITY),
             ),
         );
 
@@ -219,6 +238,7 @@ final class AdminController
             $data = array_merge($data, $detail);
             if (empty($detail['segmentDetail'])) { $viewError = 'That segment does not exist.'; }
         } elseif ($view === 'analytics') { $data = array_merge($data, $this->analyticsView()); }
+        elseif ($view === 'automations') { $data = array_merge($data, $this->automationView()); }
         elseif ($view === 'campaigns') { $data = array_merge($data, $this->campaignListView()); }
         elseif ($view === 'campaign') {
             $detail = $this->campaignDetailView();
@@ -458,6 +478,134 @@ final class AdminController
         }
 
         return array('notice' => '', 'error' => 'Unknown list action.');
+    }
+
+    // ----------------------------------------------------------- automations
+
+    private function automationView()
+    {
+        $filters = array(
+            'status' => isset($_GET['status']) ? (string) $_GET['status'] : '',
+            'trigger_type' => isset($_GET['trigger']) ? (string) $_GET['trigger'] : '',
+            'page' => isset($_GET['page']) ? max(1, (int) $_GET['page']) : 1,
+        );
+        $selected = isset($_GET['automation_id']) ? (int) $_GET['automation_id'] : 0;
+        return array('automationsView' => array(
+            'list' => $this->automations->listAutomations($filters),
+            'filters' => $filters,
+            'statuses' => AutomationStatus::all(),
+            'triggers' => AutomationTrigger::all(),
+            'step_types' => AutomationStepType::all(),
+            // Templates are a small library, so the screen shows the active ones
+            // in one list rather than a pager nobody needs.
+            'templates' => $this->activeTemplates(),
+            'lists' => $this->lists->all('active'),
+            'detail' => $selected > 0 ? $this->automationDetailFor($selected) : null,
+            'canManage' => $this->capAllowed(self::AUTOMATION_CAPABILITY),
+        ));
+    }
+
+    /** Active templates, for the send-step form. */
+    private function activeTemplates()
+    {
+        $active = array();
+        foreach ($this->templates->repository()->all() as $row) {
+            if ((string) $row->status === 'active') { $active[] = $row; }
+        }
+        return $active;
+    }
+
+    /** The detail block, with the template name behind every send step. */
+    private function automationDetailFor($automationId)
+    {
+        $detail = $this->automations->detail($automationId);
+        if ($detail === null) { return null; }
+        $steps = array();
+        foreach ($this->automations->stepsWithTemplates($automationId) as $entry) {
+            $steps[] = $entry;
+        }
+        $detail['steps_detail'] = $steps;
+        foreach ($detail['recent_runs'] as $run) {
+            $subscriber = $this->subscribers->find((int) $run->subscriber_id);
+            $run->subscriber_email = $subscriber ? (string) $subscriber->email : (string) $run->email;
+        }
+        return $detail;
+    }
+
+    private function handleAutomationAction()
+    {
+        $action = isset($_POST['action']) ? (string) $_POST['action'] : '';
+        $automationId = isset($_POST['automation_id']) ? (int) $_POST['automation_id'] : 0;
+
+        if ($action === 'automation.create') {
+            $automation = $this->automations->create(array(
+                'name' => isset($_POST['name']) ? (string) $_POST['name'] : '',
+                'description' => isset($_POST['description']) ? (string) $_POST['description'] : '',
+                'trigger_type' => isset($_POST['trigger_type']) ? (string) $_POST['trigger_type'] : '',
+                'list_id' => isset($_POST['list_id']) ? (int) $_POST['list_id'] : 0,
+                'trigger_delay_minutes' => isset($_POST['trigger_delay_minutes']) ? (int) $_POST['trigger_delay_minutes'] : 0,
+                'reenrollable' => !empty($_POST['reenrollable']),
+            ), isset($_SESSION['adminid']) ? (int) $_SESSION['adminid'] : 0);
+            return array('notice' => 'Automation #' . (int) $automation->id . ' created. Add its steps below, then activate it.', 'error' => '');
+        }
+
+        if ($action === 'automation.update') {
+            $automation = $this->automations->update($automationId, array(
+                'name' => isset($_POST['name']) ? (string) $_POST['name'] : '',
+                'description' => isset($_POST['description']) ? (string) $_POST['description'] : '',
+                'trigger_type' => isset($_POST['trigger_type']) ? (string) $_POST['trigger_type'] : '',
+                'list_id' => isset($_POST['list_id']) ? (int) $_POST['list_id'] : 0,
+                'trigger_delay_minutes' => isset($_POST['trigger_delay_minutes']) ? (int) $_POST['trigger_delay_minutes'] : 0,
+                'reenrollable' => !empty($_POST['reenrollable']),
+            ));
+            return array('notice' => 'Automation saved.', 'error' => '');
+        }
+
+        if ($action === 'automation.step_add') {
+            $type = isset($_POST['step_type']) ? (string) $_POST['step_type'] : '';
+            $this->automations->addStep($automationId, array(
+                'step_type' => $type,
+                'wait_minutes' => isset($_POST['wait_minutes']) ? (int) $_POST['wait_minutes'] : 0,
+                'template_id' => isset($_POST['template_id']) ? (int) $_POST['template_id'] : 0,
+                'subject' => isset($_POST['subject']) ? (string) $_POST['subject'] : '',
+                'from_name' => isset($_POST['from_name']) ? (string) $_POST['from_name'] : '',
+                'from_email' => isset($_POST['from_email']) ? (string) $_POST['from_email'] : '',
+            ));
+            return array('notice' => AutomationStepType::isSending($type) ? 'Send step added.' : 'Wait step added.', 'error' => '');
+        }
+
+        if ($action === 'automation.step_remove') {
+            $this->automations->removeStep($automationId, isset($_POST['step_id']) ? (int) $_POST['step_id'] : 0);
+            return array('notice' => 'Step removed; the remaining steps were renumbered in order.', 'error' => '');
+        }
+
+        if ($action === 'automation.activate') {
+            $this->automations->activate($automationId);
+            return array('notice' => 'Automation activated. Triggering subscribers will be enrolled from now on.', 'error' => '');
+        }
+
+        if ($action === 'automation.pause') {
+            $this->automations->pause($automationId);
+            return array('notice' => 'Automation paused. Live journeys are held exactly where they are — nothing is lost.', 'error' => '');
+        }
+
+        if ($action === 'automation.archive') {
+            $this->automations->archive($automationId);
+            return array('notice' => 'Automation archived; its live journeys were cancelled. Runs and messages are retained.', 'error' => '');
+        }
+
+        if ($action === 'automation.enroll') {
+            $email = isset($_POST['email']) ? (string) $_POST['email'] : '';
+            $subscriber = $this->subscribers->findByEmail(strtolower(trim($email)));
+            if (!$subscriber) { return array('notice' => '', 'error' => 'That address has no subscriber row. Add the subscriber first.'); }
+            $result = $this->automations->enroll($automationId, (int) $subscriber->id, 'admin');
+            if (empty($result['ok'])) {
+                return array('notice' => '', 'error' => 'Not enrolled: ' . str_replace('_', ' ', (string) $result['reason']) . '.');
+            }
+            return array('notice' => $result['created'] ? 'Subscriber enrolled at step 1.' : 'That subscriber is already in this journey.', 'error' => '');
+        }
+
+        return array('notice' => '', 'error' => 'Unknown automation action.');
     }
 
     // ------------------------------------------------------------- campaigns

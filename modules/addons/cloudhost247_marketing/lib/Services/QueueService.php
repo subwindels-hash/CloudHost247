@@ -44,6 +44,7 @@ final class QueueService
     private $campaigns;
     private $campaignService;
     private $queue;
+    private $automations;
     private $recipients;
     private $subscribers;
     private $suppressions;
@@ -59,7 +60,8 @@ final class QueueService
         SubscriberRepository $subscribers = null,
         SuppressionRepository $suppressions = null,
         SubscriptionService $subscriptions = null,
-        SettingsRepository $settings = null
+        SettingsRepository $settings = null,
+        AutomationService $automations = null
     ) {
         $this->campaigns = $campaigns ?: new CampaignRepository();
         $this->campaignService = $campaignService ?: new CampaignService();
@@ -69,6 +71,7 @@ final class QueueService
         $this->suppressions = $suppressions ?: new SuppressionRepository();
         $this->subscriptions = $subscriptions ?: new SubscriptionService();
         $this->settings = $settings ?: new SettingsRepository();
+        $this->automations = $automations ?: new AutomationService();
     }
 
     public function repository()
@@ -115,6 +118,7 @@ final class QueueService
             'released_locks' => 0,
             'completed' => 0,
             'pruned_events' => 0,
+            'automations' => array(),
             'campaign_errors' => array(),
             'rate_limited' => '',
         );
@@ -163,6 +167,14 @@ final class QueueService
         if ($dryRun) {
             $summary['rate_limited'] = 'dry run: nothing was sent';
             return $summary;
+        }
+
+        // Automations fill the same queue the campaigns use, so they are ticked
+        // here and their messages can go out in this very pass. A single-campaign
+        // run (`--campaign=N`) is deliberately left alone: it means "work on that
+        // campaign", and journey mail is not campaign mail.
+        if ($onlyCampaign === 0) {
+            $summary['automations'] = $this->automations->tick(50);
         }
 
         $allowance = $this->allowance();
@@ -335,12 +347,31 @@ final class QueueService
                 continue;
             }
 
+            // A queued automation message carries its own content (the step's
+            // template, subject and sender); the container campaign still owns the
+            // links and the ledger, so the composer and everything downstream are
+            // the same as for campaign mail.
+            $subscriber = $row->subscriber_id === null ? null : $this->subscribers->find((int) $row->subscriber_id);
+            $content = array();
+            if ((int) $row->automation_run_id > 0) {
+                $resolved = $this->automations->contentForQueueRow((int) $row->automation_run_id, (int) $row->automation_step_position, $subscriber);
+                if ($resolved === null) {
+                    $detail = 'Automation step no longer sendable: ' . $this->automations->contentError();
+                    $this->queue->markSkipped((int) $row->id, 'automation_content_missing');
+                    $this->queue->recordEvent('skipped', (int) $row->campaign_id, (int) $row->id, $row->subscriber_id, array('reason' => 'automation_content_missing'));
+                    AuditLogger::record('cloudhost247_marketing', 'automation.message_skipped', 'marketing_automation', 0,
+                        array('queue_id' => (int) $row->id), array('reason' => $detail), 'failure', $detail);
+                    $result['skipped_content'] = (isset($result['skipped_content']) ? $result['skipped_content'] : 0) + 1;
+                    continue;
+                }
+                $content = $resolved;
+            }
+
             // TrackingService composes the real message: personalisation, the
             // campaign's own links rewritten to click URLs, the open pixel and the
             // unsubscribe footer. A test send uses composeTest() instead, which
             // carries no token.
-            $subscriber = $row->subscriber_id === null ? null : $this->subscribers->find((int) $row->subscriber_id);
-            $message = $this->tracking()->compose($campaign, $row, $subscriber);
+            $message = $this->tracking()->compose($campaign, $row, $subscriber, $content);
 
             $outcome = $transport->send($message);
             if (!empty($outcome['ok'])) {

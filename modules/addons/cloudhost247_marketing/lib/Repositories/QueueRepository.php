@@ -57,6 +57,9 @@ final class QueueRepository
             'locked_until' => null,
             'locked_by' => '',
             'tracking_token' => (string) $row['tracking_token'],
+            // 0 for campaign messages; an automation run otherwise (SESSION 10).
+            'automation_run_id' => isset($row['automation_run_id']) ? (int) $row['automation_run_id'] : 0,
+            'automation_step_position' => isset($row['automation_step_position']) ? (int) $row['automation_step_position'] : 0,
             'message_id' => '',
             'sent_at' => null,
             'failed_at' => null,
