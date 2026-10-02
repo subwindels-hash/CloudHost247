@@ -188,24 +188,31 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     // AI Control Plane — the shared AI operating system (agent registry, gated tool executor,
     // approvals, events/workflows, executive board, copilots, customer AI transparency).
     await registerAiControlPlaneRoutes(instance, env, pool);
-  });
 
-  if (serveFrontend) {
-    app.register(fastifyStatic, {
-      root: publicDir,
-      index: false,
-      wildcard: false,
-    });
-  }
-
-  app.setNotFoundHandler((request, reply) => {
-    const isApiRoute =
-      request.raw.url?.startsWith('/api') || request.raw.url === '/health' || request.raw.url === '/ready';
-    if (!serveFrontend || isApiRoute || request.method !== 'GET') {
-      reply.code(404).send({ error: 'NOT_FOUND', message: 'Resource not found' });
-      return;
+    // The frontend (static assets + SPA fallback) MUST be registered inside this same
+    // encapsulated context. Hooks added by registerSecurityPlugins (helmet headers, CORS, rate
+    // limiting) do not propagate to a parent/sibling context, so registering these on the root
+    // instance served every HTML/JS/CSS response without CSP, HSTS, X-Frame-Options, etc.
+    // Pinned by tests/unit/spa-security-headers.test.ts.
+    if (serveFrontend) {
+      await instance.register(fastifyStatic, {
+        root: publicDir,
+        index: false,
+        wildcard: false,
+      });
     }
-    reply.type('text/html').sendFile('index.html');
+
+    // @fastify/rate-limit attaches per-route (onRoute), so the not-found handler — which serves
+    // every SPA page — needs the limiter wired in explicitly.
+    instance.setNotFoundHandler({ preHandler: instance.rateLimit() }, (request, reply) => {
+      const isApiRoute =
+        request.raw.url?.startsWith('/api') || request.raw.url === '/health' || request.raw.url === '/ready';
+      if (!serveFrontend || isApiRoute || request.method !== 'GET') {
+        reply.code(404).send({ error: 'NOT_FOUND', message: 'Resource not found' });
+        return;
+      }
+      reply.type('text/html').sendFile('index.html');
+    });
   });
 
   return app;

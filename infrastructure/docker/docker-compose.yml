@@ -8,7 +8,7 @@
 # Usage:
 #   cp .env.example .env   # fill in secrets
 #   docker compose up -d
-#   docker compose exec app npm run migrate up     # explicit, controlled migrations
+#   docker compose exec -e CONFIRM_MIGRATION=yes app npm run migrate   # explicit, controlled migrations
 #   docker compose exec app node dist/src/scripts-import-manifests.js   # or POST /api/v1/admin/manifests/import
 #
 # Keep this shared map on both app and worker. The app validates providers and resolves customer

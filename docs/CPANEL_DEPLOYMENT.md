@@ -71,6 +71,53 @@ any of these from this document, from prior hosts, or from local development:
 
 ---
 
+## 0a. Pre-built package (recommended for shared hosting)
+
+Shared hosting accounts usually run under CloudLinux LVE memory/process limits, which commonly kill
+`npm run build` (TypeScript + Vite) part-way through. To avoid building on the server, build the
+upload package on any machine with Node 22+ (your laptop, or CI):
+
+```
+cd cloudhost247-node
+bash scripts/package-cpanel.sh        # -> release/cloudhost247-cpanel-<sha>.zip (~1.5 MB)
+```
+
+The zip contains only what the server executes: `server.js`, `package.json`, `package-lock.json`,
+`dist/` (compiled server + migration CLI), `public/` (built frontend), `database/migrations/`,
+`manifests/` and `.env.example`. With it, the server-side steps in section 2 become:
+
+- step 1: upload the zip with File Manager, *Extract*, and move the contents of
+  `cloudhost247-cpanel-<sha>/` into `<APP_ROOT>`;
+- step 4: install **production dependencies only** — the *Run NPM Install* button on the app page,
+  or `npm ci --omit=dev` in the app's virtual-environment terminal. (CloudLinux keeps
+  `node_modules` in `~/nodevenv/...` and symlinks it; if the app page complains that a
+  `node_modules` folder already exists in the app root, delete that folder and retry);
+- step 5 (`npm run build`) is **skipped**.
+
+Every later update is: build a new package, upload/extract over `<APP_ROOT>`, run section 6 if the
+release has new migrations, and *Restart*. Re-run the NPM install only if `package-lock.json`
+changed.
+
+This flow was exercised end-to-end outside cPanel (fresh extract → `npm ci --omit=dev` →
+`NODE_ENV=production` env check → production migration → `node server.js` → health/ready/SPA routes,
+register/login, worker one-shot). That is **not** a cPanel run; Appendix C still applies.
+
+### Production migration lock (read before section 6)
+
+`database/migrate.ts` quarantines migrations **0023, 0024, 0025 and 0041** in production (see
+`docs/NODE_PLATFORM_STATUS.md` → *Standing restrictions*). Because every later migration (0042 onward) depends on 0041, a
+production `migrate up` against a fresh database applies nothing past 0040 and stops with
+`Refusing to migrate production: 0041 ... is quarantined`, and the app's later features will not
+work until the schema is complete. Only the project owner can lift this, per run, with:
+
+```
+CONFIRM_MIGRATION=yes AUTHORIZED_MIGRATIONS=0023,0024,0025,0041 node dist/database/migrate.js up
+```
+
+Do this only as a deliberate owner decision, with a backup taken first (section 6).
+
+---
+
 ## 1. Directory layout on the server
 
 The production application root (`<APP_ROOT>`, e.g. `/home/cpaneluser/cloudhost247`) mirrors the

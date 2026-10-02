@@ -5,6 +5,7 @@
  * right after configuring environment variables, and before starting/restarting the app, so
  * misconfiguration is caught with a clear message instead of a crash-looping Passenger process.
  */
+import 'dotenv/config';
 import { loadEnv, EnvValidationError } from './env';
 
 try {
