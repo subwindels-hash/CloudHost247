@@ -56,6 +56,9 @@ describe('SPA fallback routing (Apache/cPanel refresh safety)', () => {
     '/faq',
     '/legal',
     '/legal/privacy-policy',
+    '/tools',
+    '/tools/document/mrz',
+    '/tools/document/mrz-parser',
   ];
 
   it.each(routes)('GET %s resolves to the SPA shell (not a 404)', async (route) => {

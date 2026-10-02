@@ -113,6 +113,9 @@ import DomainBulkSearchPage from './pages/domains/BulkSearchPage';
 import DomainBrokerPage from './pages/domains/BrokerPage';
 import DnsManagementPage from './pages/DnsManagementPage';
 import SslManagementPage from './pages/SslManagementPage';
+import ToolsHubPage from './pages/tools/ToolsHubPage';
+import MrzToolPage from './pages/tools/MrzToolPage';
+import AdminMrzSettingsPage from './pages/AdminMrzSettingsPage';
 
 export default function App() {
   return (
@@ -149,6 +152,12 @@ export default function App() {
             outside RequireAuth so visitors can browse the catalog before signing in. */}
         <Route path="/apps" element={<MarketplacePage />} />
         <Route path="/apps/:slug" element={<AppDetailPage />} />
+
+        {/* Developer / Document Tools — ePassport MRZ Calculator & Parser */}
+        <Route path="/tools" element={<ToolsHubPage />} />
+        <Route path="/tools/document" element={<ToolsHubPage />} />
+        <Route path="/tools/document/mrz" element={<MrzToolPage defaultTab="calculator" />} />
+        <Route path="/tools/document/mrz-parser" element={<MrzToolPage defaultTab="parser" />} />
 
         <Route path="/legal" element={<LegalIndexPage />} />
         <Route path="/legal/privacy-policy" element={<PrivacyPolicyPage />} />
@@ -237,6 +246,8 @@ export default function App() {
             <Route path="/admin/servers" element={<AdminServersPage />} />
             <Route path="/admin/servers/:id" element={<AdminServersPage />} />
             <Route path="/admin/settings" element={<AdminSettingsPage />} />
+            <Route path="/admin/settings/tools/mrz" element={<AdminMrzSettingsPage />} />
+            <Route path="/admin/tools/mrz" element={<AdminMrzSettingsPage />} />
             <Route path="/admin/audit" element={<AdminAuditPage />} />
             <Route path="/admin/infrastructure" element={<AdminProvidersPage />} />
             <Route path="/admin/infrastructure/operating-systems" element={<AdminOperatingSystemsPage />} />

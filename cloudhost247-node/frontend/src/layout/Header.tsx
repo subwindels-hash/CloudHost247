@@ -10,6 +10,7 @@ const marketingLinks = [
   { to: '/hosting/control-panels', label: 'Control Panels' },
   { to: '/apps', label: 'App Marketplace' },
   { to: '/domains', label: 'Domains' },
+  { to: '/tools', label: 'Tools' },
   { to: '/about', label: 'About' },
   { to: '/contact', label: 'Contact' },
   { to: '/faq', label: 'FAQ' },

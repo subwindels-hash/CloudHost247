@@ -178,6 +178,16 @@ export const CLOUDHOST247_KNOWLEDGE: readonly SupportKnowledgeEntry[] = [
     source: 'CloudHost247 account and authorization workflow',
     weight: 12,
   },
+  {
+    id: 'mrz-developer-tool',
+    intent: 'mrz_developer_tool',
+    title: 'ePassport MRZ Calculator, Validator, and Parser',
+    keywords: ['mrz', 'machine readable zone', 'td3', 'icao 9303', 'check digit', 'mrz calculator', 'mrz parser', 'epassport mrz'],
+    answer:
+      'CloudHost247 provides a privacy-first ePassport MRZ Calculator (/tools/document/mrz) and MRZ Parser (/tools/document/mrz-parser) for legitimate software development and OCR/parser testing. It implements the ICAO Doc 9303 TD3 two-line (44 characters per line) format, Latin diacritic transliteration, and 7-3-1 modulo-10 check digits. Mathematical MRZ validation only checks syntax and check digits—it never verifies whether a physical passport is genuine or government-issued, and submitted MRZ inputs are never stored.',
+    source: 'CloudHost247 Developer / Document Tools — MRZ Calculator & Parser',
+    weight: 26,
+  },
 ] as const;
 
 const normalized = (value: string): string => value.toLocaleLowerCase().replace(/\s+/g, ' ').trim();
