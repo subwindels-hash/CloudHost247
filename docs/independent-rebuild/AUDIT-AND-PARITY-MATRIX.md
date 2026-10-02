@@ -24,7 +24,7 @@ Status values: **Existing/vendor** (present but not an independent implementatio
 | OVH order form | `templates/orderforms/ovh_cart/` | 78 files; 2 local templates | Readable; inherits WHMCS `standard_cart` | WGS addon exposes order-form entitlement checks | **Existing/vendor; replacement needed** |
 | OVH automation | `crons/{getServer,getIpStatus,priceSync,emailSend}.php` | 4 scripts | Readable | Coupled to WGS classes/tables | **Existing/vendor only** |
 
-A SHA-256 inventory of every in-scope original file is in `original-file-manifest.sha256`. The original manifest remains unchanged. Later approved branding-only changes to legal copy, theme logo assets, and three addon tour labels are listed in `rebrand-overrides.list` and independently hashed in `rebrand-overrides.sha256`; no encoded PHP or business logic was changed.
+A SHA-256 inventory of every in-scope original file is in `original-file-manifest.sha256`, and `scripts/release-candidate-check.sh` verifies all 2269 of them byte-for-byte with `sha256sum --check --strict` and **no exemptions**. The approved branding-only changes to legal copy, theme logo assets and three addon tour labels were folded into that baseline by re-cutting it — the manifest header dates each re-cut (2026-09-27 generated, 2026-09-28 legacy rebrand, 2026-10-01 vendor theme-helper retirement) — so it records the current rebranded state. The `rebrand-overrides.list` / `.sha256` side-car this document used to describe was never committed and the checker never implemented an exemption for it; no encoded PHP or business logic was changed. Corrected 2026-10-02 and pinned by `tests/security/test_release_gate_static.py`.
 
 ## Installation and configuration dependency inventory
 

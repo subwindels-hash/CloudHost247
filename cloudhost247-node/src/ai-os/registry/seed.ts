@@ -73,10 +73,41 @@ const DEFAULT_WORKFLOWS: ReadonlyArray<{
   },
 ];
 
-let seeded = false;
+export interface RegistrySeedResult {
+  agents: number;
+  workflows: number;
+  models: number;
+}
 
-/** Idempotent registry seed. Call at app boot (route registration) and in the worker sweep. */
-export async function seedAgentRegistry(db: Queryable): Promise<{ agents: number; workflows: number; models: number }> {
+/**
+ * Databases this process has already stamped the initial `ai_agent_versions` row into.
+ *
+ * Keyed per database object and NEVER process-global: one process can legitimately seed several
+ * distinct databases (the test suite builds a fresh embedded Postgres per test; an operator can
+ * point the worker at a different pool), and every one of them is entitled to its own version
+ * history. The old process-wide `seeded` boolean silently denied version rows to the second and
+ * every later database in the same process.
+ *
+ * Correctness does not depend on this set: `insertAgentVersion` is `ON CONFLICT DO NOTHING`, so
+ * it only avoids repeating one no-op write per agent on every sweep.
+ */
+const versionStamped = new WeakSet<object>();
+
+/** Databases whose registry seed has already succeeded in this process. */
+const seedSucceeded = new WeakSet<object>();
+
+/** In-flight seed per database, so concurrent callers share one run instead of racing. */
+const seedInFlight = new WeakMap<object, Promise<RegistrySeedResult>>();
+
+/**
+ * Idempotent registry seed. Call from the worker sweep and the workflow engine — both of which
+ * want the catalog re-applied on every cycle so a code-side catalog change always wins over a
+ * hand edit, while `enabled` flags (the operator kill switch) are deliberately left untouched.
+ *
+ * App boot does NOT call this directly: see `ensureAgentRegistrySeeded` and the AI routes'
+ * `onReady` hook. Booting must never depend on a database write succeeding.
+ */
+export async function seedAgentRegistry(db: Queryable): Promise<RegistrySeedResult> {
   for (const agent of AGENT_CATALOG) {
     const { rows } = await db.query<{ id: string; slug: string }>(
       `INSERT INTO ai_agents (slug, name, description, category, board_seat, version, engine, model_tier,
@@ -107,7 +138,7 @@ export async function seedAgentRegistry(db: Queryable): Promise<{ agents: number
         agent.riskLevel,
       ]
     );
-    if (rows[0] && !seeded) {
+    if (rows[0] && !versionStamped.has(db)) {
       await insertAgentVersion(
         db,
         rows[0].id,
@@ -146,8 +177,47 @@ export async function seedAgentRegistry(db: Queryable): Promise<{ agents: number
      ON CONFLICT (engine) DO NOTHING`
   );
 
-  const seeded_now = seeded;
-  seeded = true;
-  void seeded_now;
+  versionStamped.add(db);
+  seedSucceeded.add(db);
   return { agents: AGENT_CATALOG.length, workflows: DEFAULT_WORKFLOWS.length, models: 4 };
+}
+
+/**
+ * Single-flight, self-healing registry seed for the HTTP surface.
+ *
+ * Why this exists: the registry used to be seeded *inside route registration*, which made
+ * `buildApp()`/`app.ready()` throw whenever the database was momentarily unreachable — the whole
+ * platform (including `/health`, which is contractually database-free, and every static/SPA route)
+ * failed to boot because an AI seeding write failed. Boot now tolerates a seed failure, and this
+ * function is what puts the registry back afterwards:
+ *
+ *   - resolves immediately (`null`) once a seed has succeeded against this database, so adding it
+ *     to a request path costs a `WeakSet.has`, not a query;
+ *   - concurrent first callers share ONE run, which also closes the old race where two overlapping
+ *     seeds could both decide to write the initial agent-version rows;
+ *   - a FAILED attempt is not remembered, so the next authorized request tries again instead of
+ *     the process running with an empty registry until someone restarts it.
+ *
+ * Callers must be authenticated and authorized first: this can perform database writes, so it is
+ * never reachable from an unauthenticated request (the AI routes call it after `requireAiPermission`
+ * / `authenticate`, and the boot `onReady` hook runs it as the server itself).
+ */
+export async function ensureAgentRegistrySeeded(db: Queryable): Promise<RegistrySeedResult | null> {
+  if (seedSucceeded.has(db)) return null;
+  const inFlight = seedInFlight.get(db);
+  if (inFlight) return inFlight;
+
+  const attempt = seedAgentRegistry(db).then(
+    (result) => {
+      seedInFlight.delete(db);
+      return result;
+    },
+    (error: unknown) => {
+      // Not remembered as success: the next call retries. The caller decides how to report it.
+      seedInFlight.delete(db);
+      throw error;
+    }
+  );
+  seedInFlight.set(db, attempt);
+  return attempt;
 }

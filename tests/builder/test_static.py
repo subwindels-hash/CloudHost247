@@ -1,4 +1,5 @@
 from pathlib import Path
+import subprocess
 import json
 import re
 import unittest
@@ -463,11 +464,21 @@ class WebsiteBuilderStaticTests(unittest.TestCase):
         check = (ROOT / 'scripts/release-candidate-check.sh').read_text()
         self.assertIn('tests/builder/run.php', check)
         self.assertIn('tests/builder/test_static.py', check)
-        self.assertIn('builder-page.php', check)
+        self.assertIn('scripts/php-lint-targets.sh', check)
 
         workflow = (ROOT / '.github/workflows/independent-foundation.yml').read_text()
         self.assertIn('tests/builder/run.php', workflow)
-        self.assertIn('builder-page.php', workflow)
+        self.assertIn('scripts/php-lint-targets.sh', workflow)
+
+        # The builder's public entry point used to be linted because its name was typed into two
+        # hand-kept lists, which is how 199 first-party PHP files came to be in neither. Both
+        # gates now ask scripts/php-lint-targets.sh, so assert the stronger property: the file is
+        # in the computed target list, i.e. it is linted by rule and cannot fall off a list.
+        targets = subprocess.run(['bash', 'scripts/php-lint-targets.sh'], cwd=ROOT,
+                                 capture_output=True, text=True, timeout=300)
+        self.assertEqual(0, targets.returncode, targets.stderr)
+        self.assertIn('builder-page.php', targets.stdout.splitlines())
+        self.assertIn('cloudhost247-page.php', targets.stdout.splitlines())
 
         migrations = (ROOT / 'scripts/validate-migrations.py').read_text()
         self.assertIn("'cloudhost247_builder'", migrations)

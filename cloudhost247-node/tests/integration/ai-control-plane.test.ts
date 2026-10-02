@@ -113,10 +113,15 @@ describe('AI Control Plane', () => {
   it('seeds the full workforce registry from the catalog (DB ⇄ catalog agreement)', async () => {
     const app = buildTestApp();
     await app.ready();
-    // Booting must NOT touch the database (a DB outage or an unapplied 0066 must not stop the
-    // whole app from starting) — the registry is seeded lazily by the first AI request.
+    // Booting must never *require* the database: a DB outage or an unapplied 0066 must not stop the
+    // whole app from starting. The seed runs in onReady inside a try/catch and a failure is logged
+    // rather than thrown, so /health, /ready and every static route survive it — that half is pinned
+    // by tests/unit/ai-registry-boot.test.ts. When the database IS reachable the registry is present
+    // before the first request, and the write only ever happens behind authorization: an anonymous
+    // request cannot trigger a seed (routes.ts authorize() re-ensures after requireAiPermission),
+    // and ensureAgentRegistrySeeded is single-flight per database, not per app instance.
     const before = await db.query<{ n: number }>(`SELECT COUNT(*)::int AS n FROM ai_agents`);
-    expect(before.rows[0]?.n).toBe(0);
+    expect(before.rows[0]?.n).toBe(AGENT_CATALOG.length);
     await app.inject({ method: 'GET', url: '/api/v1/admin/ai/overview' });
     const { rows: agents } = await db.query<{ slug: string; board_seat: string | null }>(`SELECT slug, board_seat FROM ai_agents`);
     const slugs = new Set(agents.map((a) => a.slug));

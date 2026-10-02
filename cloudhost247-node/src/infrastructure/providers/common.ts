@@ -122,3 +122,17 @@ export function encodeUserData(userData: string): string {
 export function unsupportedRescue(kind: string): never {
   throw new ProviderError('UNSUPPORTED_OPERATION', `${kind} does not offer a rescue system through its API`, false);
 }
+
+/**
+ * A console session hands a customer an interactive login to their own machine, so an adapter may
+ * only return one when the provider really issues one. Two adapters used to answer this call with
+ * the provider's *action history* endpoint instead — the customer clicked "Open console", the
+ * platform audited `SERVER_CONSOLE_OPENED`, and the UI rendered a list of past power events in a
+ * panel labelled "Serial console session". Refusing is the honest answer: the capability is then
+ * false, the button is never shown, and the reason is on the record.
+ *
+ * `reason` must state what the provider documents, not what we wish it did.
+ */
+export function unsupportedConsole(kind: string, reason: string): never {
+  throw new ProviderError('UNSUPPORTED_OPERATION', `${kind} offers no console session through its API: ${reason}`, false);
+}

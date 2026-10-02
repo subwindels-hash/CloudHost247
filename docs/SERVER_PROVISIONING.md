@@ -93,9 +93,19 @@ Native API. Idempotency uses the cloudhost247_idempotency label plus lookup-befo
 
 Plan/availability metadata: `providerServerType`, `cpuCores`, `memoryMb`, `storageMb`.
 
-Capabilities: reinstall, snapshot, resize, console.
+Capabilities: reinstall, snapshot, resize, metrics.
 
-Native droplet API with user-data, rebuild, resize and snapshots.
+Native droplet API with user-data, rebuild, resize and snapshots. **No console:** the Droplet Console
+and the out-of-band Recovery Console are Control Panel features and API v2 has no console operation,
+so `getConsole` refuses with a non-retryable `UNSUPPORTED_OPERATION` and the customer never sees the
+button. Metrics read the Monitoring API (`GET /v2/monitoring/metrics/droplet/{metric}` with the
+documented `host_id`, `start` and `end` UNIX seconds, one-hour window): CPU utilisation is derived
+from the per-mode counters as `(Δtotal − Δidle) / Δtotal` — a counter that went backwards means the
+droplet rebooted inside the window, so CPU is reported missing rather than clamped; load 1/5/15 and
+memory are read as gauges; `filesystem_size`/`filesystem_free` are merged per provider mountpoint
+label. Bandwidth is not read (it needs `interface` + `direction` and is a billing counter, not host
+telemetry). A droplet whose monitoring agent is not reporting answers `200` with an empty result set,
+which lands in `missing` with a reason — never as a zero.
 
 ### Vultr (`vultr`)
 
@@ -108,9 +118,17 @@ Native droplet API with user-data, rebuild, resize and snapshots.
 
 Plan/availability metadata: `providerServerType`, `cpuCores`, `memoryMb`, `storageMb`.
 
-Capabilities: reinstall, snapshot, resize, console.
+Capabilities: reinstall, snapshot, resize, metrics.
 
-Native instance API.
+Native instance API. **No console:** the web console is a customer-portal feature and API v2 has no
+console operation, so `getConsole` refuses with a non-retryable `UNSUPPORTED_OPERATION`. Metrics are
+bandwidth-only because that is all Vultr exposes: `GET /v2/instances/{id}/bandwidth` (`date_range`
+1–180 days; this adapter reads 30) returns per-UTC-day `incoming_bytes`/`outgoing_bytes`, and Vultr's
+own documentation advises against treating it as real-time metrics. `cpu`, `memory`, `filesystem` and
+`load` are therefore named in `missing` with the reason "Vultr API v2 exposes no endpoint for this
+metric", and host telemetry for a Vultr server comes from the CloudHost247 server agent
+(`server_metrics`), which is what the customer Monitoring panel reads. An empty bandwidth history
+reports `null` totals, not `0` bytes.
 
 ### Amazon EC2 (`aws`)
 
@@ -125,8 +143,13 @@ instance (same zone, subnet, security groups and key; the previous instance is s
 terminated) and root-volume restore runs in place from a completed snapshot, keeping the detached
 root volume. Both are opt-in: they refuse with `UNSUPPORTED_OPERATION` unless the deployment sets
 `AWS_ALLOW_ROOT_VOLUME_REPLACEMENT=true` (or the provider-prefix equivalent), and the profile keeps
-advertising `reinstall: false` until it is enabled. Rescue mode and CloudWatch metrics remain
-unavailable; metrics need separately scoped permissions.
+advertising `reinstall: false` until it is enabled. CloudWatch metrics **are** implemented
+(`GetMetricStatistics`, namespace `AWS/EC2`, `InstanceId` dimension, 300s period — basic-monitoring
+granularity — over a one-hour window, requesting `CPUUtilization`, `NetworkIn`, `NetworkOut`,
+`DiskReadOps`, `DiskWriteOps` and `StatusCheckFailed`); they need separately scoped IAM permissions,
+a metric with no datapoints is reported in `missing` rather than zero-filled, and an unset region
+fails closed with `PROVIDER_NOT_CONFIGURED` before any call. Rescue mode remains unavailable: EC2 has
+no rescue or recovery-ISO API surface, so the refusal is correct rather than a gap.
 
 ### Contabo (`contabo`)
 
@@ -159,9 +182,19 @@ and provider-side injection is optional through trusted `providerSshKeyIds` meta
 
 Contabo's documented cancellation endpoint schedules cancellation rather than immediately removing
 an instance. CloudHost247 therefore refuses the platform's destructive `DELETE` operation for this
-adapter rather than claiming a resource is gone or billing has stopped. Resize/product upgrades,
-console URLs, metrics, and rescue mode are also explicitly unsupported until each has a safe,
-operator-confirmed workflow. Do not enable production sales until the intended account's full
+adapter rather than claiming a resource is gone or billing has stopped.
+
+Rescue **is** implemented: `POST /v1/compute/instances/{id}/actions/rescue`. Because Contabo takes
+*secret ids* rather than key material or a plaintext password, the adapter reuses the template's SSH
+key secrets when present and otherwise stores a freshly generated one-time password as a Contabo
+secret; leaving rescue is Contabo's next restart, so `disableRescue` is a documented no-op. Three
+operations remain unsupported, each verified against Contabo's own API rather than assumed: **resize**
+(the only upgrade endpoint, `POST /v1/compute/instances/{id}/upgrade`, purchases add-ons — "currently
+only firewalling and private network addon is allowed" — and Contabo documents plan upgrades as an
+in-place Control Panel action), **console** (the generated client's `InstanceActionsApi` lists exactly
+`rescue`, `resetPassword`, `restart`, `shutdown`, `start`, `stop`; the VNC console is a Control Panel
+feature) and **metrics** (no metrics endpoint exists; monitoring is a paid Control Panel add-on). All
+three refuse with a non-retryable `UNSUPPORTED_OPERATION` before any request. Do not enable production sales until the intended account's full
 create/retry/reinstall/snapshot/lifecycle/health matrix has been exercised with a low-cost test
 instance.
 
@@ -232,7 +265,13 @@ Plan/availability metadata: `providerVirtType`, `providerClientId`, `providerPla
 
 Capabilities: reinstall, resize, console, metrics.
 
-Admin API v1 (api/admin/command.php). Snapshots are not exposed by SolusVM 1.
+Admin API v1 (api/admin/command.php). Snapshots are not exposed by SolusVM 1, so `createSnapshot`
+refuses. Rescue **is** exposed and implemented: `action=vserver-rescue` with `rescueenable`
+(1 = 4.x 64-bit, 2 = 3.x 64-bit, 3 = 3.x 32-bit) or `rescuedisable` on the same admin endpoint,
+returning `{status, statusmsg, password, user, port, ip}`; enabling rescue reboots the VPS (SolusVM
+states this explicitly) so the session reports `rebooted: true`, the returned ip/port are carried into
+`notes`, and an arm64 server is refused rather than booted into an x86 rescue kernel — SolusVM offers
+no arm64 rescue system.
 
 ### OpenStack (`openstack`)
 
@@ -250,9 +289,13 @@ Admin API v1 (api/admin/command.php). Snapshots are not exposed by SolusVM 1.
 
 Plan/availability metadata: `providerFlavorId`, `providerNetworkId` (optional), `providerKeypairName` (optional), `cpuCores`, `memoryMb`, `storageMb`.
 
-Capabilities: reinstall, snapshot, resize, console.
+Capabilities: reinstall, snapshot, resize, console, metrics.
 
-Keystone v3 + Nova + Glance. Either password login or a pre-issued token is required.
+Keystone v3 + Nova + Glance. Either password login or a pre-issued token is required. Metrics read
+Nova `GET /servers/{id}/diagnostics`, which is policy-gated per cloud: the values are the hypervisor
+counters Nova reports (CPU times, memory, `vda_errors`, rx/tx packets), not percentages, and a project
+the policy does not allow gets a non-retryable `UNSUPPORTED_OPERATION` naming that reason at call time
+rather than a fabricated reading.
 
 ### Operator provider bridge (`generic_http`)
 
@@ -260,7 +303,7 @@ Keystone v3 + Nova + Glance. Either password login or a pre-issued token is requ
 - API base URL: **required on the provider row**
 - Variable: `<PREFIX>_API_TOKEN` (bearer token for the operator-owned bridge, required)
 - Plan metadata: `providerServerType` (optional), `cpuCores`, `memoryMb`, `storageMb`
-- Capabilities: reinstall, console, metrics
+- Capabilities: reinstall, snapshot, resize, console, metrics, rescue
 
 When a provider has no native adapter, deploy a separately secured HTTPS bridge and select the
 `generic_http` adapter. Set the provider's `api_base_url`, choose a unique
@@ -275,6 +318,19 @@ API/worker host only. The bridge is a real integration, not a simulator, and mus
 - `POST /v1/servers/:id/{start,shutdown,reboot,reinstall}`
 - `GET /v1/servers/:id/{health,console,metrics}`
 
+and, for the capabilities the adapter also delegates:
+
+- `POST /v1/servers/:id/resize` with `{ "plan": <plan metadata> }`
+- `POST /v1/servers/:id/snapshots` with `{ "description": ... }`, `DELETE /v1/servers/:id/snapshots/:snapshotId`
+  and `POST /v1/servers/:id/restore-snapshot` with `{ "snapshotId": ... }`
+- `POST /v1/servers/:id/rescue` and `POST /v1/servers/:id/unrescue`
+
+Resize, snapshots and rescue were already delegated by the adapter but two of them were advertised as
+`false`, so a template could not offer an operation the adapter really performs; the flags now match
+the code. A bridge that does not implement one of these endpoints must answer with its own explicit
+HTTP failure (404/501): the adapter never invents a snapshot id, a resized plan or a rescue session,
+and a rescue response naming no rescue system fails with a non-retryable `PROVIDER_ERROR`.
+
 It must preserve idempotency keys and return explicit HTTP failures. Only activate a
 bridge-backed provider after API reachability, image lookup, create/retry/delete, health, and
 reinstall have been tested.
@@ -283,7 +339,7 @@ reinstall have been tested.
 
 - Default credential prefix: `MOCK` (no credentials are read)
 - Plan metadata: `cpuCores`, `memoryMb`, `storageMb`
-- Capabilities: reinstall, snapshot, resize
+- Capabilities: reinstall, snapshot, resize, rescue (simulated)
 
 The `mock` adapter exists so the provisioning pipeline can be exercised without a provider
 account. It is deliberately isolated:
@@ -298,13 +354,21 @@ account. It is deliberately isolated:
   documentation range and carry `metadata.mock = true`, so mock and real inventory can always be
   told apart;
 - it is never selected automatically. Provider choice always comes from an explicit, enabled
-  product availability rule.
+  product availability rule;
+- console and metrics are **refused**, not simulated. The simulator issues no console session and
+  measures nothing, and inventing either would teach a developer to trust a reading no provider
+  produced; host telemetry in development comes from the server agent, exactly as in production.
 
 ### Unsupported adapters
 
 If a provider row names an adapter that has no implementation, the registry returns a
-fail-closed adapter that rejects every operation with `SERVICE_UNAVAILABLE`. A mock or partially
-working implementation is never substituted.
+fail-closed adapter that rejects every operation — all 26 interface methods — with a non-retryable
+`UNSUPPORTED_OPERATION` naming the adapter kind. It used to reject with `SERVICE_UNAVAILABLE`, which
+the error mapper renders as "temporarily unavailable, please try again shortly": a retry that can
+never succeed. A mock or partially working implementation is never substituted, and the admin API's
+accepted adapter list is derived from `ADAPTER_PROFILES`, so a provider row cannot be saved naming an
+adapter that has no implementation in the first place
+(`tests/unit/undeclared-adapter-fail-closed.test.ts`).
 
 ## Payment and queue guarantees
 
@@ -578,21 +642,31 @@ was booted.
 
 Two deliberate constraints:
 
-- **Only adapters with a real rescue API may offer it.** Five adapters declare `rescue: true`
-  because their provider exposes a rescue system, and each is pinned to the documented call shape:
-  Hetzner (`enable_rescue` + `reset`, `disable_rescue` + `reset`), OpenStack (Nova `rescue` /
-  `unrescue`), OVH Public Cloud (`POST /cloud/project/{id}/instance/{id}/rescueMode` with
-  `{"rescue": true|false}`, the password read from the instance resource's `rescuePassword`), Contabo
+- **Only adapters with a real rescue API may offer it.** Seven adapters declare `rescue: true`
+  because their provider exposes a rescue system (or, for the bridge, delegates that decision to the
+  operator), and each is pinned to the documented call shape: Hetzner (`enable_rescue` + `reset`,
+  `disable_rescue` + `reset`), OpenStack (Nova `rescue` / `unrescue`), OVH Public Cloud
+  (`POST /cloud/project/{id}/instance/{id}/rescueMode` with `{"rescue": true|false}`, the password read
+  from the instance resource's `rescuePassword`), Contabo
   (`POST /v1/compute/instances/{id}/actions/rescue`, which takes Contabo *secret ids* — the adapter
   reuses the template SSH-key secrets when present, otherwise it stores a freshly generated one-time
-  password as a Contabo secret; leaving rescue is Contabo's next restart), and the development-only
-  mock adapter, which simulates the state machine so the whole flow can be exercised without a
-  provider. The remaining adapters — AWS, DigitalOcean, Vultr, Proxmox, Virtualizor, SolusVM and the
-  operator bridge — have no rescue action in the API surface their adapter implements; they refuse
-  with a non-retryable `UNSUPPORTED_OPERATION` and keep the capability `false` so a template cannot
-  offer the button in the first place. A rescue that silently did nothing would strand a customer
-  who believes they are about to repair a disk. `tests/unit/provider-rescue.test.ts` pins both
-  halves: the four real call shapes and the refusal list.
+  password as a Contabo secret; leaving rescue is Contabo's next restart), SolusVM
+  (`action=vserver-rescue` with `rescueenable`/`rescuedisable` on the Admin API; arm64 is refused
+  because SolusVM ships no arm64 rescue kernel), the operator bridge
+  (`POST /v1/servers/{id}/rescue` and `/unrescue`, delegated on the same action contract as
+  reboot/shutdown/resize/reinstall — the bridge supplies the rescue system, login user and one-time
+  password, and `rebooted` defaults to false so the adapter never claims a reboot it was not told
+  about), and the development-only mock adapter, which simulates the state machine so the whole flow
+  can be exercised without a provider. The remaining five — AWS (no native rescue; manual workflow
+  only), DigitalOcean (the Recovery ISO is Control-Panel only), Vultr (no v2 endpoint), Proxmox VE (no
+  API endpoint) and Virtualizor (rescue exists only in the *enduser* API on port 4083, while this
+  adapter authenticates against the Admin API on 4085) — have no rescue action in the API surface their
+  adapter implements; they refuse with a non-retryable `UNSUPPORTED_OPERATION` and keep the capability
+  `false` so a template cannot offer the button in the first place. A rescue that silently did nothing
+  would strand a customer who believes they are about to repair a disk.
+  `tests/unit/provider-rescue.test.ts` pins the real call shapes and the refusal list, and
+  `tests/unit/adapter-capability-matrix.test.ts` pins every capability flag of every adapter in both
+  directions.
 - **The one-time root password is never stored.** Like the console session, it runs in request
   scope and is returned only to the browser that asked for it — never a job payload, a log line,
   an audit row or a database column. Reloading the page does not show it again; leaving and

@@ -23,9 +23,9 @@ The audit inspected readable addon/server PHP, hooks, templates and four cron sc
 | Dedicated/VPS configuration options | `OptionValueExtractor` reads the selectable values out of the stored catalog payload (flat list, object list or key/label map; anything else is reported unverified) and `DiscoveredOptionMatcher` matches them exactly, at option and value level, against existing WHMCS options. The admin screen offers only exact suboption matches, and the mapping row records whether the catalog evidence proved it | IMPLEMENTED, mock-tested | Payload shapes vary per family and region; shapes the extractor does not recognise must be mapped by hand. The mapping is applied to WHMCS options, not synced to OVH |
 | Regions/datacenters/OS/storage/RAM/network | `ProductSpecifications` maps the persisted catalog plan onto the eight specification fields, fills IPs by version from the plan's own address evidence, and names every field it cannot prove. `HostingProductManager::specificationPrefill()` shows the result read-only and save() records each field's provenance (`prefill`, `manual`, `not_verified`, V180) | IMPLEMENTED, mock-tested | A field the catalog does not carry stays empty and is labelled not verified; nothing is inferred from a plan code or name |
 | Product-to-WHMCS mapping | Validated product, endpoint, family, plan, subsidiary, config, active state | IMPLEMENTED source | WHMCS DB runtime BLOCKED |
-| Product creation/configurable options | Existing WHMCS products are mapped, not auto-created | PARTIAL | Non-destructive design; automatic creation deferred |
-| Pricing sync/margins | Margin retained on mapping; catalog currency retained | PARTIAL | No automatic `tblpricing` mutation; preview/apply workflow remains |
-| Currency integration | Catalog currency is recorded; CloudHost247 currency is separate | PARTIAL | Cross-currency pricing apply remains |
+| Product creation/configurable options | `HostingProductManager::previewCreate()` resolves the plan read-only and `create()` writes it on explicit confirmation: one WHMCS product (created **hidden**), its hosting metadata with specification provenance, an **inactive** OVH mapping, and one `tblpricing` row per currency with every cycle and setup fee at `-1.00` (WHMCS's "cycle not offered" sentinel) so the product has no orderable cycle and no invented price. All four writes are one transaction, re-guarded inside it | IMPLEMENTED, mock-tested | No pricing is created - the confirmed `price_apply` flow sets it. Configurable-option groups are still not auto-created: discovered options are mapped to existing WHMCS options, so an operator keeps control of the option schema. Real `tblproducts`/`tblpricing` column constraints must be staged (see below) |
+| Pricing sync/margins | Margin retained on the mapping; catalog currency retained on the preview; `price_apply` writes one allowlisted billing-cycle column per confirmed preview under `lockForUpdate`, rejecting a stale `current_price` | IMPLEMENTED, mock-tested | No **unattended** price mutation exists, and creation writes no price at all. OVH price shapes still vary per region and product, so automatic source-price extraction needs staging evidence |
+| Currency integration | Catalog currency is recorded; CloudHost247 currency policy is separate; a cross-currency preview carries the source price, the conversion rate and the converted value, and the confirmed apply writes that converted value | IMPLEMENTED, mock-tested | Live currency-rate providers and the resulting provider quotes must be staged |
 | Cart/order provisioning | Cart, assign, item, configuration and checkout workflow | IMPLEMENTED source, BLOCKED | Exact plan/order route and OVH account permissions must be staged |
 | Provisioning idempotency | Unique service/mapping key, persisted cart/item/order checkpoints | IMPLEMENTED/static-tested | Crash behavior/live checkout must be verified |
 | Automatic payment | Not performed | NOT APPLICABLE by safety | OVH order may require operator payment/preferred method |
@@ -161,6 +161,57 @@ the prefill and the whole linking/reconciliation path against a join-capable
 in-memory Capsule double in `tests/ovh/fakes.php`; `tests/ovh/test_static.py`
 asserts the UI wiring, the capability split (reads stay on `operations.run`, the
 reconciling write joins the apply set) and that both new migrations are additive.
+
+## Automatic product creation (2026-10-02)
+
+The last capability the vendor OVH automation had and this module did not was
+creating WHMCS products. `HostingProductManager` now does it, one plan at a time,
+in two steps that share a single resolver so a preview cannot promise what the
+write then refuses:
+
+1. `product_create_preview` (capability `operations.run`, read-only) resolves the
+   plan and shows every value it would write: the product row, the hosting
+   metadata, the mapping, the pricing columns, how many currencies would get a
+   row, each specification field with its provenance, and the fields the persisted
+   catalog payload does not prove.
+2. `product_create` (capability `changes.apply`, explicit confirmation checkbox)
+   writes all four records inside one transaction, re-checking both uniqueness
+   guards inside it because another request may have claimed the plan or the name
+   in between, then records one `product.create` audit event with the created
+   shape.
+
+What it deliberately does not do:
+
+- **No bulk import.** The vendor automation walked a catalog and created every
+  plan. This creates one plan per confirmed click, because each product is a
+  customer-facing promise.
+- **No invented specification.** A plan with no persisted `mod_cloudhost247_ovh_catalog`
+  row is refused with "synchronize the catalog first"; nothing is inferred from a
+  plan code or a product name. Fields the payload proves are filled through the
+  same `ProductSpecifications` reader the prefill uses, and the rest stay empty
+  and are recorded as `not_verified`.
+- **No invented price.** Every billing cycle and every setup fee is written as
+  `-1.00` - WHMCS's own "cycle not offered" sentinel, the value the vendor
+  automation used and rewrote zero prices to. `0.00` is never written, because in
+  WHMCS that means free. A pricing row that already exists is never overwritten.
+- **Nothing orderable or provisionable until the operator says so.** The product
+  is created `hidden`, its OVH mapping is created `active = 0` (activation is the
+  existing, separate mapping decision, and the provisioning path only acts on an
+  active mapping), `autosetup` defaults to off, and `servertype` may only be empty
+  or this repository's own `cloudhost247_ovh` module - never a vendor module.
+- **No duplicate.** The mapping table is unique on the WHMCS product, not on the
+  plan, so the code guards both directions: one plan may be mapped to only one
+  product, and a category may not gain a second product with the same name.
+- **No new migration.** Only WHMCS core tables and existing module tables are
+  touched, and no WHMCS core file changes.
+
+Staging evidence still required: the exact `tblproducts` and `tblpricing` column
+set and constraints of the live WHMCS version. The columns written here are the
+ones the vendor's own production product-creation code used (plus
+`specification_sources_json` from V180), which is repository evidence rather than
+schema evidence; the transaction means a column the live schema rejects fails
+loudly and leaves no half-created product behind, but it must be proven against a
+real database.
 
 ## Advanced service operations (admin-only)
 
