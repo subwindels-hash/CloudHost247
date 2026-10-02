@@ -162,14 +162,14 @@ $tests['Every advertised menu section is routable and unbuilt ones say so instea
     // The menu advertises more sections than the build has landed; each of them
     // must keep its own address and explain itself rather than silently render
     // the dashboard under a different URL.
-    $planned = array('analytics' => 9, 'automations' => 10);
+    $planned = array('automations' => 10);
     foreach ($planned as $view => $session) {
         $_GET = array('view' => $view);
         $data = (new AdminController())->handle();
         if ($data['view'] !== $view || (int) $data['plannedSession'] !== $session) { return false; }
     }
-    // SESSIONS 3 to 5 landed: segments, templates and campaigns are real views.
-    foreach (array('segments', 'templates', 'campaigns') as $realView) {
+    // SESSIONS 3 to 9 landed: segments, templates, campaigns and analytics are real views.
+    foreach (array('segments', 'templates', 'campaigns', 'analytics') as $realView) {
         $_GET = array('view' => $realView);
         $data = (new AdminController())->handle();
         if ($data['view'] !== $realView || (int) $data['plannedSession'] !== 0) { return false; }
@@ -307,6 +307,14 @@ foreach (require __DIR__ . '/session7.php' as $name => $test) {
 // Composition, the public pixel/click/unsubscribe routes and bounce evidence ingestion live in session8.php.
 
 foreach (require __DIR__ . '/session8.php' as $name => $test) {
+    if (isset($tests[$name])) { throw new RuntimeException('Duplicate marketing test name: ' . $name); }
+    $tests[$name] = $test;
+}
+
+// ------------------------------------------------------------- SESSION 9 - analytics
+// Rates, click maps, recipient activity and the reporting screen live in session9.php.
+
+foreach (require __DIR__ . '/session9.php' as $name => $test) {
     if (isset($tests[$name])) { throw new RuntimeException('Duplicate marketing test name: ' . $name); }
     $tests[$name] = $test;
 }

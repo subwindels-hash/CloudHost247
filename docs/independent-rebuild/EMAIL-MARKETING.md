@@ -1,6 +1,6 @@
 # CloudHost247 Email Marketing Platform
 
-Module: `modules/addons/cloudhost247_marketing` (version 1.2.0, in build — SESSIONS 1–8 of 12 complete).
+Module: `modules/addons/cloudhost247_marketing` (version 1.2.0, in build — SESSIONS 1–9 of 12 complete).
 Native WHMCS addon — no separate application, no separate frontend, no
 duplicate SMTP/credential infrastructure. Delivery credentials live
 exclusively in the central CloudHost247 API & Integrations vault under the
@@ -36,8 +36,8 @@ modules/addons/cloudhost247_marketing
  │                               TemplateService (block rendering + builtin library, SESSION 4),
  │                               CampaignService + MessageTransport / UnavailableTransport (SESSION 5),
  │                               SmtpTransport + SenderPolicy (SESSION 6);
- │                               QueueService (SESSION 7), TrackingService + BounceParser (SESSION 8);
- │                               analytics and automation services land in later sessions
+ │                               QueueService (SESSION 7), TrackingService + BounceParser (SESSION 8),
+ │                               AnalyticsService (SESSION 9); the automation engine lands in session 10
  ├─ lib/Http                     TrackController (public pixel/click/unsubscribe, SESSION 8),
  │                               AdminController / AdminView (dashboard, Delivery Settings,
  │                               Campaigns, Subscribers, Segments, Templates, Lists, Import,
@@ -59,6 +59,9 @@ Delivery chain (built in SESSION 6/7):
 ```
 
 ## Safety model
+
+* **Reporting never guesses.** A rate with no denominator is shown as "—", and
+  the screens repeat that a relay-accepted message is not a human reading it.
 
 * **Tracking is opt-in per deployment and privacy-safe.** Only opaque tokens
   travel in URLs; opens and clicks are counted, links can only redirect to URLs
@@ -134,6 +137,13 @@ Delivery chain (built in SESSION 6/7):
   seeding, settings persistence/audit/capability denial, dashboard honesty,
   catalog registration, enum closures, validator) plus the SESSION 2 file below;
   runs under PHP 7.4 and 8.2 in CI.
+* `tests/marketing/session9.php` — SESSION 9 behavior suite (9 cases):
+  ledger-only summaries, rates that refuse a zero denominator, the click map
+  (including clicks pointing at a link that no longer exists), bounded recipient
+  activity, timeline bucketing with quiet days, the rolling deployment window
+  (including events aged out of it), the read-only report screen, deployment-wide
+  reporting with no campaigns at all, the dashboard panel, and a source-level
+  proof that the service never writes.
 * `tests/marketing/session8.php` — SESSION 8 behavior suite (15 cases):
   composition (personalisation, link registration/rewriting, pixel, footer), the
   closed token set, URL privacy, test sends carrying no token, the pixel and its

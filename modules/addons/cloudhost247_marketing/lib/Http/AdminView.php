@@ -5,7 +5,9 @@ use CloudHost247\Marketing\Domain\CampaignStatus;
 use CloudHost247\Marketing\Domain\ConsentStatus;
 use CloudHost247\Marketing\Domain\QueueStatus;
 use CloudHost247\Marketing\Domain\CampaignAudience;
+use CloudHost247\Marketing\Domain\EventType;
 use CloudHost247\Marketing\Domain\SegmentField;
+use CloudHost247\Marketing\Services\AnalyticsService;
 use CloudHost247\Marketing\Domain\TemplateBlock;
 use CloudHost247\Marketing\Domain\SegmentOperator;
 use CloudHost247\Marketing\Domain\SubscriberSource;
@@ -52,6 +54,7 @@ final class AdminView
         $tabs = array(
             'dashboard' => array('Dashboard', ''),
             'campaigns' => array('Campaigns', 'campaigns'),
+            'analytics' => array('Analytics', 'analytics'),
             'subscribers' => array('Subscribers', 'subscribers'),
             'segments' => array('Segments', 'segments'),
             'templates' => array('Templates', 'templates'),
@@ -81,6 +84,7 @@ final class AdminView
         elseif ($data['view'] === 'suppressions') { $this->renderSuppressions($data); }
         elseif ($data['view'] === 'segments') { $this->renderSegments($data); }
         elseif ($data['view'] === 'segment') { $this->renderSegmentDetail($data); }
+        elseif ($data['view'] === 'analytics') { $this->renderAnalytics($data); }
         elseif ($data['view'] === 'campaigns') { $this->renderCampaigns($data); }
         elseif ($data['view'] === 'campaign') { $this->renderCampaignDetail($data); }
         elseif ($data['view'] === 'templates') { $this->renderTemplates($data); }
@@ -159,6 +163,16 @@ final class AdminView
             echo '<tr><td>' . $this->e(QueueStatus::label($status)) . '</td><td class="text-right">' . (int) $stats['queue'][$status] . '</td></tr>';
         }
         echo '</table></div></div>';
+
+        echo '<h4>Last 30 days</h4>';
+        $analytics = (new AnalyticsService())->overview(30);
+        echo '<table class="table table-condensed" style="max-width:640px;">';
+        echo '<tr><th>Accepted by relay</th><td>' . number_format((int) $analytics['totals'][EventType::SENT]) . '</td>'
+            . '<th>Opens (pixel)</th><td>' . number_format((int) $analytics['totals'][EventType::OPENED]) . ' (' . $this->rateCell($analytics['rates']['open']) . ')</td></tr>';
+        echo '<tr><th>Clicks</th><td>' . number_format((int) $analytics['totals'][EventType::CLICKED]) . ' (' . $this->rateCell($analytics['rates']['click']) . ')</td>'
+            . '<th>Unsubscribes</th><td>' . number_format((int) $analytics['totals'][EventType::UNSUBSCRIBED]) . '</td></tr>';
+        echo '</table>';
+        echo '<p class="text-muted">Full reporting is on the Analytics tab. ' . $this->e(AnalyticsService::DELIVERY_NOTE) . '</p>';
 
         $missing = array();
         foreach ($data['tables'] as $table => $exists) { if (!$exists) { $missing[] = $table; } }
@@ -321,6 +335,116 @@ final class AdminView
             . '<button class="btn btn-sm btn-default"' . ($canManage ? '' : ' disabled') . '>Restore to subscribed</button></form>';
         echo '<p class="text-muted">Restoring refuses while a suppression row exists — release it from the Suppression List first, so both decisions stay visible in the audit trail.</p>';
         echo '</div></div>';
+    }
+
+    // ------------------------------------------------------------- analytics
+
+    private function rateCell($rate)
+    {
+        if ($rate === null) { return '<span class="text-muted" title="No accepted messages to divide by">—</span>'; }
+        return number_format((float) $rate, 1) . '%';
+    }
+
+    private function renderAnalytics(array $data)
+    {
+        $view = $data['analyticsView'];
+        $overview = $view['overview'];
+        echo '<h4>Delivery analytics</h4>';
+        echo '<p class="text-muted">Every figure below counts recorded events. "Accepted" means the relay took the message; '
+            . 'opens come from the tracking pixel and can include client prefetching, so they are reported as a pixel rate, never as proof somebody read the email.</p>';
+
+        echo '<form method="get" action="addonmodules.php" style="margin-bottom:12px;">'
+            . '<input type="hidden" name="module" value="cloudhost247_marketing" /><input type="hidden" name="view" value="analytics" />'
+            . '<select name="days" class="form-control" style="width:150px;display:inline-block;">';
+        foreach (array(7 => 'Last 7 days', 30 => 'Last 30 days', 90 => 'Last 90 days', 365 => 'Last year') as $value => $label) {
+            echo '<option value="' . (int) $value . '"' . ((int) $view['days'] === (int) $value ? ' selected' : '') . '>' . $this->e($label) . '</option>';
+        }
+        echo '</select> '
+            . '<select name="campaign_id" class="form-control" style="width:300px;display:inline-block;"><option value="0">Deployment-wide</option>';
+        foreach ($overview['campaigns'] as $entry) {
+            echo '<option value="' . (int) $entry['campaign_id'] . '"' . ((int) $view['campaign_id'] === (int) $entry['campaign_id'] ? ' selected' : '') . '>'
+                . $this->e($entry['name']) . ' (' . (int) $entry['accepted'] . ' accepted)</option>';
+        }
+        echo '</select> <button class="btn btn-default">Apply</button></form>';
+
+        echo '<div class="row" style="max-width:1100px;">';
+        $tiles = array(
+            array('Campaigns sent', number_format((int) $overview['totals'][EventType::SENT]), 'messages accepted by the relay'),
+            array('Opens (pixel)', number_format((int) $overview['totals'][EventType::OPENED]), 'open rate ' . $this->rateCell($overview['rates']['open'])),
+            array('Clicks', number_format((int) $overview['totals'][EventType::CLICKED]), 'click rate ' . $this->rateCell($overview['rates']['click'])),
+            array('Unsubscribes', number_format((int) $overview['totals'][EventType::UNSUBSCRIBED]), 'rate ' . $this->rateCell($overview['rates']['unsubscribe'])),
+            array('Bounces', number_format((int) $overview['totals'][EventType::BOUNCED]), 'rate ' . $this->rateCell($overview['rates']['bounce'])),
+        );
+        foreach ($tiles as $tile) {
+            echo '<div class="col-sm-2" style="min-width:180px;"><div class="panel panel-default"><div class="panel-body text-center">'
+                . '<div style="font-size:22px;font-weight:600;">' . $tile[1] . '</div>'
+                . '<div class="text-muted">' . $this->e($tile[0]) . '</div>'
+                . '<div class="text-muted" style="font-size:11px;">' . $tile[2] . '</div></div></div></div>';
+        }
+        echo '</div>';
+
+        if (!empty($view['missing'])) {
+            echo '<div class="alert alert-warning">That campaign no longer exists; showing deployment-wide figures instead.</div>';
+        }
+
+        if (!empty($view['summary'])) {
+            $summary = $view['summary'];
+            echo '<h4>' . $this->e($summary['campaign']->name) . ' ' . $this->statusBadge($summary['status']) . '</h4>';
+            echo '<table class="table table-striped" style="max-width:760px;">'
+                . '<tr><th>Audience frozen</th><td>' . number_format((int) $summary['audience_size']) . '</td></tr>'
+                . '<tr><th>Accepted by relay</th><td>' . number_format((int) $summary['counts']['accepted']) . '</td></tr>'
+                . '<tr><th>Failed / skipped</th><td>' . number_format((int) $summary['counts']['failed']) . ' / ' . number_format((int) $summary['counts']['skipped']) . '</td></tr>'
+                . '<tr><th>Still queued</th><td>' . number_format((int) $summary['counts']['queued'] + (int) $summary['counts']['sending']) . '</td></tr>'
+                . '<tr><th>Opens (pixel)</th><td>' . number_format((int) $summary['counts']['opened']) . ' — open rate ' . $this->rateCell($summary['rates']['open']) . '</td></tr>'
+                . '<tr><th>Clicks</th><td>' . number_format((int) $summary['counts']['clicked']) . ' — click rate ' . $this->rateCell($summary['rates']['click']) . ', click-to-open ' . $this->rateCell($summary['rates']['click_to_open']) . '</td></tr>'
+                . '<tr><th>Bounces</th><td>' . number_format((int) $summary['counts']['bounced']) . ' — ' . $this->rateCell($summary['rates']['bounce']) . ' of the audience</td></tr>'
+                . '<tr><th>Unsubscribes</th><td>' . number_format((int) $summary['counts']['unsubscribed']) . ' — ' . $this->rateCell($summary['rates']['unsubscribe']) . '</td></tr>'
+                . '</table>';
+
+            $map = $view['clickMap'];
+            echo '<h5>Click map</h5>';
+            if ($map['links']) {
+                echo '<table class="table table-condensed" style="max-width:860px;"><tr><th>Clicks</th><th>Destination</th></tr>';
+                foreach ($map['links'] as $link) {
+                    echo '<tr><td>' . number_format((int) $link['clicks']) . '</td><td><code style="word-break:break-all;">' . $this->e($link['url']) . '</code></td></tr>';
+                }
+                echo '</table>';
+            } else {
+                echo '<p class="text-muted">No links were registered for this campaign.</p>';
+            }
+            if ((int) $map['unattributed'] > 0) {
+                echo '<p class="text-muted">' . number_format((int) $map['unattributed']) . ' click event(s) reference a link that no longer exists.</p>';
+            }
+
+            echo '<h5>Recipient activity</h5>';
+            echo '<table class="table table-condensed" style="max-width:900px;"><tr><th>Recipient</th><th>Status</th><th>Attempts</th><th>Opens</th><th>Clicks</th><th>Accepted</th></tr>';
+            foreach (array_slice($view['activity'], 0, 50) as $entry) {
+                echo '<tr><td>' . $this->e($entry['email']) . ($entry['unsubscribed'] ? ' <span class="label label-default">unsubscribed</span>' : '') . '</td>'
+                    . '<td>' . $this->e(QueueStatus::label($entry['status'])) . '</td>'
+                    . '<td>' . (int) $entry['attempts'] . '</td>'
+                    . '<td>' . (int) $entry['opens'] . '</td>'
+                    . '<td>' . (int) $entry['clicks'] . '</td>'
+                    . '<td>' . ($entry['accepted_at'] !== '' ? $this->e($entry['accepted_at']) : '<span class="text-muted">—</span>') . '</td></tr>';
+            }
+            if (!$view['activity']) { echo '<tr><td colspan="6" class="text-muted">Nothing has been queued for this campaign yet.</td></tr>'; }
+            echo '</table>';
+        }
+
+        echo '<h5>Daily activity</h5>';
+        echo '<table class="table table-condensed" style="max-width:760px;"><tr><th>Day</th><th>Accepted</th><th>Opens</th><th>Clicks</th><th>Failed</th><th>Unsubscribes</th><th>Bounces</th></tr>';
+        foreach ($view['timeline'] as $day) {
+            echo '<tr><td>' . $this->e($day['day']) . '</td><td>' . (int) $day['sent'] . '</td><td>' . (int) $day['opened'] . '</td>'
+                . '<td>' . (int) $day['clicked'] . '</td><td>' . (int) $day['failed'] . '</td>'
+                . '<td>' . (int) $day['unsubscribed'] . '</td><td>' . (int) $day['bounced'] . '</td></tr>';
+        }
+        echo '</table>';
+
+        echo '<h5>Campaign states</h5><table class="table table-condensed" style="max-width:420px;">';
+        foreach ($overview['campaign_statuses'] as $status => $count) {
+            echo '<tr><td>' . $this->e(CampaignStatus::label($status)) . '</td><td style="text-align:right;">' . (int) $count . '</td></tr>';
+        }
+        echo '</table>';
+        foreach ($overview['notes'] as $note) { echo '<p class="text-muted" style="font-size:12px;">' . $this->e($note) . '</p>'; }
     }
 
     // ------------------------------------------------------------- campaigns

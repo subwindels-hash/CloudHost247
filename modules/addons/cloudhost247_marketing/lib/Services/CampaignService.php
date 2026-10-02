@@ -8,6 +8,7 @@ use CloudHost247\Marketing\Domain\SubscriberStatus;
 use CloudHost247\Marketing\Repositories\CampaignRepository;
 use CloudHost247\Marketing\Repositories\ListRepository;
 use CloudHost247\Marketing\Repositories\SegmentRepository;
+use CloudHost247\Marketing\Repositories\SettingsRepository;
 use CloudHost247\Marketing\Repositories\SubscriberRepository;
 use CloudHost247\Marketing\Repositories\TemplateRepository;
 use CloudHost247\Marketing\Security\InputValidator;
@@ -302,7 +303,9 @@ final class CampaignService
      */
     private function publicLinkCheck()
     {
-        $tracking = new TrackingService(null, null, null, null, $this->settings);
+        // Settings are read here rather than injected: the checklist is the only
+        // place the campaign service needs deployment-level configuration.
+        $tracking = new TrackingService(null, null, null, null, new SettingsRepository());
         $base = $tracking->baseUrl();
         if ($base !== '') {
             return $this->check('unsubscribe_link', 'Unsubscribe link', true,

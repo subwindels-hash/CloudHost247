@@ -26,6 +26,7 @@ use CloudHost247\Marketing\Services\SegmentService;
 use CloudHost247\Marketing\Services\CampaignService;
 use CloudHost247\Marketing\Services\TemplateService;
 use CloudHost247\Marketing\Repositories\QueueRepository;
+use CloudHost247\Marketing\Services\AnalyticsService;
 use CloudHost247\Marketing\Services\BounceParser;
 use CloudHost247\Marketing\Services\QueueService;
 use CloudHost247\Marketing\Services\TrackingService;
@@ -44,7 +45,7 @@ final class AdminController
 
     /** Every view the module currently serves. */
     const VIEWS = array('dashboard', 'settings', 'subscribers', 'subscriber', 'lists', 'import', 'suppressions',
-        'segments', 'segment', 'templates', 'template', 'campaigns', 'campaign');
+        'segments', 'segment', 'templates', 'template', 'campaigns', 'campaign', 'analytics');
 
     /**
      * Sections the admin menu already advertises but whose build session has not
@@ -54,7 +55,6 @@ final class AdminController
      * @var array<string,int>
      */
     const PLANNED_VIEWS = array(
-        'analytics' => 9,
         'automations' => 10,
     );
 
@@ -79,6 +79,7 @@ final class AdminController
     private $templates;
     private $campaigns;
     private $queue;
+    private $analytics;
 
     public function __construct(
         SettingsRepository $settings = null,
@@ -92,7 +93,8 @@ final class AdminController
         SegmentService $segments = null,
         TemplateService $templates = null,
         CampaignService $campaigns = null,
-        QueueService $queue = null
+        QueueService $queue = null,
+        AnalyticsService $analytics = null
     ) {
         $this->settings = $settings ?: new SettingsRepository();
         $this->subscribers = $subscribers ?: new SubscriberRepository();
@@ -106,6 +108,7 @@ final class AdminController
         $this->templates = $templates ?: new TemplateService();
         $this->campaigns = $campaigns ?: new CampaignService(null, null, null, null, null, $this->campaignTransport());
         $this->queue = $queue ?: new QueueService(null, $this->campaigns);
+        $this->analytics = $analytics ?: new AnalyticsService();
     }
 
     public function handle()
@@ -215,7 +218,8 @@ final class AdminController
             $detail = $this->segmentDetailView();
             $data = array_merge($data, $detail);
             if (empty($detail['segmentDetail'])) { $viewError = 'That segment does not exist.'; }
-        } elseif ($view === 'campaigns') { $data = array_merge($data, $this->campaignListView()); }
+        } elseif ($view === 'analytics') { $data = array_merge($data, $this->analyticsView()); }
+        elseif ($view === 'campaigns') { $data = array_merge($data, $this->campaignListView()); }
         elseif ($view === 'campaign') {
             $detail = $this->campaignDetailView();
             $data = array_merge($data, $detail);
@@ -480,6 +484,31 @@ final class AdminController
         );
         if ($transport instanceof SmtpTransport) { $summary['identity'] = $transport->identity(); }
         return $summary;
+    }
+
+    /**
+     * Reporting screen. Reads only, and it names the one campaign it is
+     * reporting on — an aggregate with a deleted campaign cannot silently drop
+     * rows, it reports them under their id.
+     */
+    private function analyticsView()
+    {
+        $days = isset($_GET['days']) ? (int) $_GET['days'] : 30;
+        $campaignId = isset($_GET['campaign_id']) ? (int) $_GET['campaign_id'] : 0;
+        $data = array('analyticsView' => array(
+            'days' => max(1, min(365, $days)),
+            'overview' => $this->analytics->overview($days),
+            'campaign_id' => $campaignId,
+            'summary' => $campaignId > 0 ? $this->analytics->campaignSummary($campaignId) : null,
+            'clickMap' => $campaignId > 0 ? $this->analytics->clickMap($campaignId) : null,
+            'activity' => $campaignId > 0 ? $this->analytics->recipientActivity($campaignId, 100) : array(),
+            'timeline' => $this->analytics->timeline($campaignId, 14),
+            'canView' => $this->capAllowed('marketing.analytics.view'),
+        ));
+        if ($campaignId > 0 && $data['analyticsView']['summary'] === null) {
+            $data['analyticsView']['missing'] = true;
+        }
+        return $data;
     }
 
     private function campaignListView()

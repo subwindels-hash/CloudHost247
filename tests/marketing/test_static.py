@@ -53,6 +53,7 @@ class MarketingStaticTests(unittest.TestCase):
             os.path.join(LIB, "Services", "QueueService.php"),
             os.path.join(LIB, "Services", "TrackingService.php"),
             os.path.join(LIB, "Services", "BounceParser.php"),
+            os.path.join(LIB, "Services", "AnalyticsService.php"),
             os.path.join(LIB, "Http", "TrackController.php"),
             os.path.join(LIB, "Repositories", "EventRepository.php"),
             os.path.join(LIB, "Repositories", "SegmentRepository.php"),
@@ -135,6 +136,26 @@ class MarketingStaticTests(unittest.TestCase):
             combined += read(path)
         for forbidden in ("fsockopen", "stream_socket_client", "swiftmailer", "PHPMailer"):
             self.assertNotIn(forbidden, combined)
+
+    def test_reporting_counts_events_and_refuses_to_invent_numbers(self):
+        # Analytics is a read-only reader of the ledger: no writes, no random
+        # numbers, no WHMCS core tables, and a rate of "unknown" (null) when the
+        # denominator is zero instead of a comforting 0%.
+        analytics = read(os.path.join(LIB, "Services", "AnalyticsService.php"))
+        for forbidden in ("->insert(", "->insertGetId(", "->update(", "->delete(", "->drop(",
+                          "rand(", "mt_rand(", "uniqid(", "tblclients", "tblconfiguration", "tblhosting"):
+            self.assertNotIn(forbidden, analytics)
+        self.assertIn("return null;", analytics)
+        self.assertIn("'—'", analytics)
+        # It says, in the product itself, what "accepted" and "pixel" mean.
+        self.assertIn("DELIVERY_NOTE", analytics)
+        self.assertIn("OPEN_RATE_NOTE", analytics)
+        # The report screen is read-only as well: no POST-only helper may be
+        # reachable from the analytics view of the controller.
+        controller = read(os.path.join(LIB, "Http", "AdminController.php"))
+        analytics_view = controller.split("private function analyticsView()", 1)[1].split("private function campaignListView()", 1)[0]
+        for forbidden in ("requirePost(", "csrf", "->delete", "->update", "->insert"):
+            self.assertNotIn(forbidden, analytics_view)
 
     def test_the_public_tracking_endpoint_is_narrow(self):
         # The one web-reachable file may only serve the tracking routes, must
