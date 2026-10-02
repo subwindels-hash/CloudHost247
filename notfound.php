@@ -1,13 +1,12 @@
 <?php
-use WHMCS\ClientArea;
-use WHMCS\Database\Capsule;
+/**
+ * Page Not Found — public 404 route.
+ *
+ * Always answers 404. When a published "page-not-found" entry exists the
+ * operator's wording is shown in place of the built-in explanation.
+ */
 define('CLIENTAREA', true);
 require __DIR__ . '/init.php';
-$ca = new ClientArea();
-$ca->setPageTitle('Page Not Found');
-$ca->addToBreadCrumb('index.php', Lang::trans('globalsystemname'));
-$ca->addToBreadCrumb('notfound.php', 'Page Not Found');
-$ca->initPage();
-$ca->assign('sidebarCloudHost247Remove', 'true');
-$ca->setTemplate('notfound');
-$ca->output();
+require_once __DIR__ . '/modules/addons/cloudhost247_theme/lib/PublicPage.php';
+
+\CloudHost247\Theme\PublicPage::notFound(new \WHMCS\ClientArea());

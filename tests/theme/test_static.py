@@ -99,5 +99,60 @@ class ThemeStaticTests(unittest.TestCase):
         self.assertIn('visual preview', parity)
 
 
+class PublicRouteTests(unittest.TestCase):
+    """The root pages must not depend on the encoded vendor theme helper."""
+
+    CONVERTED = {
+        'dedicated-server.php': 'dedicated-server',
+        'developer-friendly.php': 'developer-friendly',
+        'domain.php': 'domain',
+        'enterprise-servers.php': 'enterprise-servers',
+        'game-servers.php': 'game-servers',
+        'offers.php': 'offers',
+        'vps-publiccloud.php': 'vps-publiccloud',
+        'cloudhost247-sample.php': 'cloudhost247-sample',
+        'future-element.php': 'future-element',
+        'comingsoon.php': 'coming-soon',
+        'all-element-cloudhost247.php': 'all-elements',
+        'legal-notice.php': 'legal-notice',
+        'help-center.php': 'help-center',
+        'blog.php': 'blog',
+    }
+
+    def test_converted_routes_render_published_content(self):
+        for page, slug in self.CONVERTED.items():
+            text = (ROOT / page).read_text()
+            self.assertIn("define('CLIENTAREA', true);", text, page)
+            self.assertIn("require __DIR__ . '/init.php';", text, page)
+            self.assertIn('PublicPage.php', text, page)
+            self.assertIn("PublicPage::route(", text, page)
+            self.assertIn("'%s'" % slug, text, page)
+            # The vendor shell is gone, and so is the vendor content table.
+            self.assertNotIn('cloudhost247_legacy', text, page)
+            self.assertNotIn('mod_cloudhost247_theme_pages', text, page)
+
+    def test_not_found_route_always_answers_404(self):
+        text = (ROOT / 'notfound.php').read_text()
+        self.assertIn('PublicPage::notFound(', text)
+        self.assertNotIn('cloudhost247_legacy', text)
+        controller = (THEME / 'lib/PublicPage.php').read_text()
+        self.assertIn('http_response_code((int) $status)', controller)
+        self.assertIn('const TEMPLATE = ', controller)
+
+    def test_misspelled_duplicate_redirects_permanently(self):
+        text = (ROOT / 'dedeicated-server.php').read_text()
+        self.assertIn('301', text)
+        self.assertIn('dedicated-server.php', text)
+        self.assertNotIn('setTemplate', text)
+        self.assertNotIn('init.php', text)
+
+    def test_front_controller_is_fail_safe_and_escaped(self):
+        controller = (THEME / 'lib/PublicPage.php').read_text()
+        self.assertIn('catch (\Throwable', controller)
+        self.assertIn('htmlspecialchars', controller)
+        self.assertIn('no published content', controller)
+        self.assertNotIn('mod_cloudhost247_theme_pages', controller)
+
+
 if __name__ == '__main__':
     unittest.main()

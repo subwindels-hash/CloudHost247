@@ -18,6 +18,7 @@ require_once $root . '/modules/addons/cloudhost247_theme/lib/Content/ProductComp
 require_once $root . '/modules/addons/cloudhost247_theme/lib/View/PreviewRenderer.php';
 require_once $root . '/modules/addons/cloudhost247_theme/lib/View/AdminPanels.php';
 require_once $root . '/modules/addons/cloudhost247_theme/lib/ThemeRepository.php';
+require_once $root . '/modules/addons/cloudhost247_theme/lib/PublicPage.php';
 
 use CloudHost247\Theme\Content\ProductComponents;
 use CloudHost247\Theme\ThemeRepository;
@@ -197,6 +198,64 @@ $escapedPanel = AdminPanels::order(array(array('id' => 5, 'content_type' => 'pag
 $tests['the ordering panel escapes titles'] = strpos($escapedPanel, '<img src=x') === false && strpos($escapedPanel, '&lt;img src=x') !== false;
 $visualPanel = AdminPanels::visual($visual);
 $tests['the visual panel wraps the preview css and reports notes'] = strpos($visualPanel, '<style>') !== false && strpos($visualPanel, $visual['css']) !== false;
+
+/* ------------------------------------------------------------ public routes */
+
+/** Records what a root page's front controller asked the client area to do. */
+class CH247ThemeClientAreaRecorder
+{
+    public $calls = array();
+    public $assigned = array();
+    public function setPageTitle($title) { $this->calls[] = array('setPageTitle', $title); }
+    public function addToBreadCrumb($url, $label) { $this->calls[] = array('addToBreadCrumb', $url, $label); }
+    public function assign($key, $value) { $this->assigned[$key] = $value; }
+    public function setTemplate($template) { $this->calls[] = array('setTemplate', $template); }
+    public function output() { $this->calls[] = array('output'); }
+    public function template() { foreach ($this->calls as $call) { if ($call[0] === 'setTemplate') { return $call[1]; } } return null; }
+    public function title() { foreach ($this->calls as $call) { if ($call[0] === 'setPageTitle') { return $call[1]; } } return null; }
+}
+
+ch247_theme_fresh();
+$repository = new ThemeRepository();
+ch247_theme_seed_content(101, 'page', 'dedicated-server', 'Dedicated servers from us', 0, true, array('summary' => 'Bare metal', 'body' => '<p>Real page body</p>', 'seo_title' => 'Dedicated servers | CloudHost247'));
+ch247_theme_seed_content(102, 'page', 'offers', 'Draft offers', 0, false, array('body' => '<p>Not published</p>'));
+
+$resolvedPage = \CloudHost247\Theme\PublicPage::resolve('dedicated-server');
+$tests['a published page resolves for its route'] = is_array($resolvedPage) && $resolvedPage['title'] === 'Dedicated servers from us' && $resolvedPage['body'] === '<p>Real page body</p>';
+$tests['an unpublished page does not resolve'] = \CloudHost247\Theme\PublicPage::resolve('offers') === null;
+$tests['an unknown slug does not resolve'] = \CloudHost247\Theme\PublicPage::resolve('never-written') === null;
+
+$_SERVER['PHP_SELF'] = '/dedicated-server.php';
+$recorder = new CH247ThemeClientAreaRecorder();
+$result = \CloudHost247\Theme\PublicPage::route($recorder, 'dedicated-server', 'Dedicated Servers');
+$tests['a published route renders the first-party page template'] = $result['status'] === 200 && $recorder->template() === 'cloudhost247-page';
+$tests['the rendered page is assigned to the theme variable'] = isset($recorder->assigned['cloudhost247Page']) && $recorder->assigned['cloudhost247Page']['slug'] === 'dedicated-server';
+$tests['seo title wins for the document title'] = $recorder->title() === 'Dedicated servers | CloudHost247';
+$tests['the breadcrumb keeps the route label'] = in_array(array('addToBreadCrumb', 'dedicated-server.php', 'Dedicated Servers'), $recorder->calls, true);
+
+$recorder = new CH247ThemeClientAreaRecorder();
+$result = \CloudHost247\Theme\PublicPage::route($recorder, 'offers', 'Offers');
+$tests['an unpublished route answers 404'] = $result['status'] === 404 && $result['page']['missing'] === true;
+$tests['an unpublished route explains itself'] = strpos($result['page']['body'], 'no published content') !== false;
+$tests['an unpublished route still uses the first-party template'] = $recorder->template() === 'cloudhost247-page';
+
+$recorder = new CH247ThemeClientAreaRecorder();
+$result = \CloudHost247\Theme\PublicPage::notFound($recorder, 'page-not-found', 'Page Not Found');
+$tests['the not-found route answers 404 with built-in wording'] = $result['status'] === 404 && strpos($result['page']['body'], 'no published content') !== false;
+
+ch247_theme_seed_content(103, 'page', 'page-not-found', 'We could not find that page', 0, true, array('body' => '<p>Operator wording</p>'));
+$recorder = new CH247ThemeClientAreaRecorder();
+$result = \CloudHost247\Theme\PublicPage::notFound($recorder, 'page-not-found', 'Page Not Found');
+$tests['the not-found route uses the operators wording when published'] = $result['status'] === 404 && $result['page']['body'] === '<p>Operator wording</p>' && $recorder->title() === 'We could not find that page';
+
+$hostile = \CloudHost247\Theme\PublicPage::missing('<script>alert(1)</script>');
+$tests['a fallback title is escaped'] = strpos($hostile['title'], '<script') === false && strpos($hostile['title'], '&lt;script&gt;') !== false;
+
+CH247ThemeFakeDB::$failTables = array('mod_cloudhost247_theme_content');
+$tests['a failing content store is a 404, not a fatal error'] = \CloudHost247\Theme\PublicPage::resolve('dedicated-server') === null;
+$recorder = new CH247ThemeClientAreaRecorder();
+$tests['a failing content store still renders a page'] = \CloudHost247\Theme\PublicPage::route($recorder, 'dedicated-server', 'Dedicated Servers')['status'] === 404;
+CH247ThemeFakeDB::$failTables = array();
 
 restore_error_handler();
 $tests['no php diagnostics raised'] = ($phpDiagnostics === array());

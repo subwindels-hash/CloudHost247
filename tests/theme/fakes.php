@@ -16,8 +16,10 @@ namespace {
     {
         private static $tables = array();
         private static $auto = array();
+        /** Tables whose queries should fail, so failure paths can be exercised. */
+        public static $failTables = array();
 
-        public static function reset() { self::$tables = array(); self::$auto = array(); }
+        public static function reset() { self::$tables = array(); self::$auto = array(); self::$failTables = array(); }
 
         public static function &rowsRef($table)
         {
@@ -76,6 +78,9 @@ namespace {
         {
             if (preg_match('/^(\S+)\s+as\s+(\S+)$/i', (string) $table, $m)) { $this->table = $m[1]; $this->alias = $m[2]; }
             else { $this->table = (string) $table; }
+            if (in_array($this->table, CH247ThemeFakeDB::$failTables, true)) {
+                throw new \RuntimeException('The theme fake DB was told to fail on ' . $this->table);
+            }
         }
 
         public function join($table, $first, $operator, $second) { return $this->addJoin('inner', $table, $first, $operator, $second); }

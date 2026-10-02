@@ -1,14 +1,9 @@
 <?php
-use WHMCS\ClientArea;
-use WHMCS\Database\Capsule;
-define('CLIENTAREA', true);
-require __DIR__ . '/init.php';
-$ca = new ClientArea();
-$ca->setPageTitle('Dedeicated Server');
-$ca->addToBreadCrumb('index.php', Lang::trans('globalsystemname'));
-$ca->addToBreadCrumb('dedeicated-server.php', 'Dedeicated Server');
-$ca->initPage();
-$ca->assign('sidebarCloudHost247Remove', 'true');
-$ca->setTemplate('cloudhost247_legacy');
-$ca->output();
-
+/**
+ * Misspelled duplicate of dedicated-server.php.
+ *
+ * Kept so the old URL keeps working; permanently redirected to the correctly
+ * spelled route rather than serving a second copy of the page.
+ */
+header('Location: dedicated-server.php', true, 301);
+exit;

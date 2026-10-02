@@ -71,30 +71,37 @@ zero-byte/placeholder files, and modules documented as vendor-only, gated, super
 
 ---
 
-## D. Route stubs that render the legacy theme shell instead of real content
+## D. Root routes that used to render the legacy theme shell
 
-**D1 — Content-less stubs.** These root pages have **no dedicated template**, carry no page logic,
-and call `setTemplate('cloudhost247_legacy')`, i.e. they fall through to the vendor theme's
-block-renderer (`templates/cloudhost247_legacy/cloudhost247_legacy.tpl`), which prints
-*"It is very easy to assign the blocks to page via our Drag N Drop Blocks Manager"* when no blocks
-are assigned for that page:
+**D1/D3 — CLOSED (this branch).** Fifteen routes were content-less stubs or thin wrappers that called
+`setTemplate('cloudhost247_legacy')` or a legacy-only template, i.e. they fell through to the vendor
+theme's block-renderer (which prints *"It is very easy to assign the blocks to page via our Drag N
+Drop Blocks Manager"* when nothing is assigned) and depended on the encoded vendor helper (B1). They
+now render a published entry from the independent theme content store through the shared front
+controller `modules/addons/cloudhost247_theme/lib/PublicPage.php`, with the same URLs, titles and
+breadcrumbs:
 
-`dedeicated-server.php` (also a misspelling duplicate of `dedicated-server.php`), `dedicated-server.php`,
-`developer-friendly.php`, `domain.php`, `enterprise-servers.php`, `game-servers.php`, `offers.php`,
-`vps-publiccloud.php`, `cloudhost247-sample.php`.
+`dedicated-server.php`, `developer-friendly.php`, `domain.php`, `enterprise-servers.php`,
+`game-servers.php`, `offers.php`, `vps-publiccloud.php`, `cloudhost247-sample.php`,
+`future-element.php`, `comingsoon.php`, `all-element-cloudhost247.php`, `legal-notice.php`,
+`help-center.php`, `blog.php`, and `notfound.php` (which always answers 404, using the operator's
+published wording when it exists). `dedeicated-server.php`, the misspelled duplicate, is now a
+permanent 301 to `dedicated-server.php`.
 
-**D2 — Legacy-theme-dependent pages.** These read `mod_cloudhost247_theme_pages` /
-`mod_cloudhost247_theme_settings` (tables owned by the **encoded vendor theme-helper addon**, B1) and
-also fall back to the same `cloudhost247_legacy` shell template — the code is real, but it cannot render
-anything without the vendor helper and its block assignments:
+A route whose slug has no published entry answers 404 with a plain explanation instead of a
+placeholder, and a failure to read the content store is a 404 rather than a fatal error on a public
+page. Nothing in the front controller touches `mod_cloudhost247_theme_pages` or the vendor shell.
+
+**D2 — product and policy pages, still on the vendor shell (next unit).** These carry real logic that
+reads `mod_cloudhost247_theme_pages` / `mod_cloudhost247_theme_settings` (tables owned by the encoded
+vendor helper, B1) and/or render through the legacy template. The independent replacement is the
+product catalogue route (`cloudhost247-hosting.php` + `PublicCatalog`) and a published CMS entry for
+the policy copy:
 
 `cpanel-hosting.php`, `plesk-hosting.php`, `vps-hosting.php`, `vps-privatecloud.php`,
 `web-hosting.php`, `website-design.php`, `windows-hosting.php`, `wordpress-hosting.php`,
-`ssl-certificate.php`, `tables.php`, `cloudhost247-vps-sample.php`.
-
-**D3 — Thin wrappers** whose templates exist in the theme but whose content likewise depends on the
-encoded vendor helper: `future-element.php`, `comingsoon.php`, `all-element-cloudhost247.php`,
-`notfound.php`, `legal-notice.php`, `help-center.php`, `blog.php`.
+`ssl-certificate.php`, `tables.php`, `cloudhost247-vps-sample.php`, `data-protection-standards.php`,
+`terms-of-service.php`.
 
 ---
 
