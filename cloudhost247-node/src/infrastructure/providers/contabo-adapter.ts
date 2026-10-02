@@ -331,7 +331,7 @@ export class ContaboProviderAdapter implements InfrastructureProviderAdapter {
   async resizeServer(_providerServerId: string, _planMetadata: Record<string, unknown>): Promise<ProviderServer> {
     throw new ProviderError(
       'UNSUPPORTED_OPERATION',
-      'Contabo product changes require an operator-confirmed upgrade workflow and are not available through this adapter',
+      'Contabo has no API resize: its only upgrade endpoint (POST /v1/compute/instances/{id}/upgrade) purchases add-ons — Contabo documents it as allowing only firewalling and the private network add-on — and PATCH only changes the display name. Product/size changes are made in the Control Panel',
       false,
     );
   }
@@ -460,11 +460,11 @@ export class ContaboProviderAdapter implements InfrastructureProviderAdapter {
   }
 
   async getConsole(_providerServerId: string): Promise<Record<string, unknown>> {
-    throw new ProviderError('UNSUPPORTED_OPERATION', 'Contabo VNC console URLs are not available through the Compute API', false);
+    throw new ProviderError('UNSUPPORTED_OPERATION', 'Contabo exposes no VNC endpoint in the Compute API: the documented instance actions are start, stop, shutdown, restart, rescue and resetPassword. The VNC console is a Control Panel feature', false);
   }
 
   async getServerMetrics(_providerServerId: string): Promise<Record<string, unknown>> {
-    throw new ProviderError('UNSUPPORTED_OPERATION', 'Contabo Compute API does not provide server metrics', false);
+    throw new ProviderError('UNSUPPORTED_OPERATION', 'Contabo exposes no instance metrics endpoint; monitoring is a Control Panel add-on', false);
   }
 
   async healthCheck(providerServerId: string, expectedImage: ServerOsImageRow): Promise<ProviderHealthResult> {

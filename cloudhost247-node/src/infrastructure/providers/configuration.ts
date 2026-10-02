@@ -101,8 +101,8 @@ export const ADAPTER_PROFILES: Record<AdapterKind, AdapterProfile> = {
       { suffix: '_REGION', description: 'Default EC2 region', required: true, fallback: 'AWS_REGION' },
     ],
     planMetadata: [{ key: 'providerServerType', description: 'EC2 instance type', required: true }, ...RESOURCE_METADATA],
-    capabilities: { reinstall: false, snapshot: true, resize: true, console: true, metrics: false, rescue: false },
-    notes: 'Native EC2 adapter uses the AWS SDK Signature Version 4 client. Reinstall (replacement instance) and root-volume restore (snapshot onto the existing root device) are implemented but stay disabled until the deployment sets AWS_ALLOW_ROOT_VOLUME_REPLACEMENT=true; the previous instance is stopped, never terminated, and the detached root volume is kept. CloudWatch metrics require separately scoped permissions.'
+    capabilities: { reinstall: false, snapshot: true, resize: true, console: true, metrics: true, rescue: false },
+    notes: 'Native EC2 adapter uses the AWS SDK Signature Version 4 client. Reinstall (replacement instance) and root-volume restore (snapshot onto the existing root device) are implemented but stay disabled until the deployment sets AWS_ALLOW_ROOT_VOLUME_REPLACEMENT=true; the previous instance is stopped, never terminated, and the detached root volume is kept. CloudWatch metrics require separately scoped permissions. Metrics come from CloudWatch GetMetricStatistics (namespace AWS/EC2, dimension InstanceId, 300s period, basic monitoring); a metric with no datapoints is reported in the `missing` list rather than zero-filled.'
   },
   contabo: {
     kind: 'contabo',
@@ -209,8 +209,8 @@ export const ADAPTER_PROFILES: Record<AdapterKind, AdapterProfile> = {
       { key: 'providerNode', description: 'SolusVM node (or providerNodeGroup)', required: false },
       ...RESOURCE_METADATA,
     ],
-    capabilities: { reinstall: true, snapshot: false, resize: true, console: true, metrics: true, rescue: false },
-    notes: 'Admin API v1 (api/admin/command.php). Snapshots are not exposed by SolusVM 1.',
+    capabilities: { reinstall: true, snapshot: false, resize: true, console: true, metrics: true, rescue: true },
+    notes: 'Admin API v1 (api/admin/command.php). Snapshots are not exposed by SolusVM 1. Rescue uses the documented vserver-rescue action (rescueenable / rescuedisable) and returns the rescue login and one-time password; SolusVM offers only x86 rescue kernels, so an arm64 server is refused rather than booted into the wrong architecture.',
   },
   openstack: {
     kind: 'openstack',
@@ -243,8 +243,8 @@ export const ADAPTER_PROFILES: Record<AdapterKind, AdapterProfile> = {
     requiresApiBaseUrl: true,
     credentials: [{ suffix: '_API_TOKEN', description: 'Bearer token for the operator-owned bridge', required: true }],
     planMetadata: [{ key: 'providerServerType', description: 'Plan identifier understood by the bridge', required: false }, ...RESOURCE_METADATA],
-    capabilities: { reinstall: true, snapshot: false, resize: false, console: true, metrics: true, rescue: false },
-    notes: 'For providers without a native adapter. The bridge is a real integration, never a simulator.',
+    capabilities: { reinstall: true, snapshot: false, resize: false, console: true, metrics: true, rescue: true },
+    notes: 'For providers without a native adapter. The bridge is a real integration, never a simulator. Rescue is delegated like every other action — POST /v1/servers/{id}/rescue returns the rescue system, login user, optional one-time password and whether the bridge rebooted the server, and POST /v1/servers/{id}/unrescue leaves it. A bridge that does not implement rescue answers with its own error; this adapter never invents a rescue session.',
   },
   mock: {
     kind: 'mock',

@@ -97,6 +97,73 @@ describe('AwsProviderAdapter', () => {
     await expect(failingAdapter.validateConfiguration()).rejects.toMatchObject({
       code: 'AUTHENTICATION_FAILED', retryable: false,
     } satisfies Partial<ProviderError>);
-    await expect(instance.getServerMetrics('i-123')).rejects.toMatchObject({ code: 'UNSUPPORTED_OPERATION' });
+  });
+
+  describe('CloudWatch metrics', () => {
+    /** Builds an adapter whose metrics transport answers one GetMetricStatistics call at a time. */
+    function metricsAdapter(datapoints: Array<Array<{ Average?: number; Maximum?: number; Unit?: string }>>) {
+      const send = vi.fn(async () => ({ Datapoints: datapoints.shift() ?? [] }));
+      const instance = new AwsProviderAdapter(provider(), {
+        AWS_ACCESS_KEY_ID: 'access', AWS_SECRET_ACCESS_KEY: 'secret', AWS_REGION: 'us-east-1',
+      }, { send: vi.fn(async () => ({})) }, { send });
+      return { instance, send };
+    }
+
+    it('reads EC2 metrics from CloudWatch with the documented namespace, dimension and period', async () => {
+      const { instance, send } = metricsAdapter([
+        [{ Average: 12.5, Maximum: 40, Unit: 'Percent' }],
+        [{ Average: 1024, Maximum: 2048, Unit: 'Bytes' }],
+        [{ Average: 512, Maximum: 900, Unit: 'Bytes' }],
+        [{ Average: 3, Maximum: 7, Unit: 'Count' }],
+        [{ Average: 1, Maximum: 2, Unit: 'Count' }],
+        [{ Average: 0, Maximum: 0, Unit: 'Count' }],
+      ]);
+
+      const result = await instance.getServerMetrics('i-0abc123');
+
+      const first = commandInput(send.mock.calls[0]?.[0]);
+      expect(first).toMatchObject({
+        Namespace: 'AWS/EC2',
+        MetricName: 'CPUUtilization',
+        Dimensions: [{ Name: 'InstanceId', Value: 'i-0abc123' }],
+        Period: 300,
+        Statistics: ['Average', 'Maximum'],
+      });
+      expect(send).toHaveBeenCalledTimes(6);
+      expect(result).toMatchObject({
+        instanceId: 'i-0abc123', region: 'us-east-1', namespace: 'AWS/EC2', periodSeconds: 300, missing: [],
+      });
+      expect(result.metrics).toMatchObject({
+        CPUUtilization: { unit: 'Percent', average: 12.5, maximum: 40, samples: 1 },
+        NetworkIn: { unit: 'Bytes', average: 1024, maximum: 2048, samples: 1 },
+      });
+    });
+
+    it('reports metrics with no datapoints as missing rather than zero-filling them', async () => {
+      const { instance } = metricsAdapter([
+        [{ Average: 5, Maximum: 9, Unit: 'Percent' }],
+        [], [], [], [], [],
+      ]);
+
+      const result = await instance.getServerMetrics('i-0abc123');
+
+      // A stopped instance has no samples; reporting 0 would read as a real idle measurement.
+      expect(Object.keys(result.metrics as object)).toEqual(['CPUUtilization']);
+      expect(result.missing).toEqual([
+        'NetworkIn', 'NetworkOut', 'DiskReadOps', 'DiskWriteOps', 'StatusCheckFailed',
+      ]);
+    });
+
+    it('fails closed before any CloudWatch call when no region is configured', async () => {
+      const send = vi.fn(async () => ({ Datapoints: [] }));
+      const instance = new AwsProviderAdapter(provider(), {
+        AWS_ACCESS_KEY_ID: 'access', AWS_SECRET_ACCESS_KEY: 'secret',
+      }, { send: vi.fn(async () => ({})) }, { send });
+
+      await expect(instance.getServerMetrics('i-0abc123')).rejects.toMatchObject({
+        code: 'PROVIDER_NOT_CONFIGURED', retryable: false,
+      } satisfies Partial<ProviderError>);
+      expect(send).not.toHaveBeenCalled();
+    });
   });
 });

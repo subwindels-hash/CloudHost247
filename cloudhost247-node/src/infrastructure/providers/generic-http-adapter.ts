@@ -1,5 +1,5 @@
 import type { InfrastructureProviderRow, ServerOsImageRow } from '../../db/infrastructure-providers';
-import { requireSecureBaseUrl, unsupportedRescue } from './common';
+import { requireSecureBaseUrl } from './common';
 import { providerRequest } from './http';
 import {
   ProviderError,
@@ -10,6 +10,8 @@ import {
   type ProviderImage,
   type ProviderServer,
   type ReinstallProviderServerInput,
+  type RescueRequest,
+  type RescueSession,
 } from './types';
 
 /**
@@ -125,8 +127,52 @@ export class GenericHttpProviderAdapter implements InfrastructureProviderAdapter
     });
     return this.getServerStatus(input.providerServerId);
   }
-  async enableRescue(): Promise<never> { return unsupportedRescue('This provider'); }
-  async disableRescue(): Promise<never> { return unsupportedRescue('This provider'); }
+  /**
+   * Enters rescue mode through the operator's bridge, on the same `POST /v1/servers/{id}/{action}`
+   * contract the bridge already implements for reboot/shutdown/start/resize/reinstall.
+   *
+   * This adapter used to refuse rescue unconditionally, which contradicted its own design: unlike
+   * the native adapters it makes no claim about what the remote provider can do — it delegates, and
+   * the bridge answers. A bridge that does not implement rescue returns its own error, which
+   * surfaces as a provider failure rather than a fabricated success.
+   *
+   * The session is taken from the bridge's response rather than assembled here, because the rescue
+   * system's name, login and one-time password are the provider's to state. `rebooted` defaults to
+   * false: claiming a reboot the bridge did not report would be a lie about the server's state.
+   */
+  async enableRescue(id: string, input: RescueRequest): Promise<RescueSession> {
+    const result = asRecord(
+      await this.request(`/v1/servers/${encodeURIComponent(id)}/rescue`, {
+        method: 'POST',
+        body: JSON.stringify({
+          architecture: input.architecture,
+          providerSshKeyIds: input.providerSshKeyIds,
+        }),
+      })
+    );
+    const type = typeof result.type === 'string' ? result.type : null;
+    const username = typeof result.username === 'string' ? result.username : null;
+    if (!type || !username) {
+      throw new ProviderError(
+        'PROVIDER_ERROR',
+        `${this.provider.name} accepted the rescue request but returned no rescue system or login user`,
+        false
+      );
+    }
+    const password = typeof result.password === 'string' && result.password.length > 0 ? result.password : undefined;
+    return {
+      type,
+      username,
+      password,
+      rebooted: result.rebooted === true,
+      notes: typeof result.notes === 'string' ? result.notes : undefined,
+    };
+  }
+
+  /** Leaves rescue mode through the bridge. */
+  async disableRescue(id: string): Promise<void> {
+    await this.action(id, 'unrescue');
+  }
 
   async getConsole(id: string): Promise<Record<string, unknown>> { return asRecord(await this.request(`/v1/servers/${encodeURIComponent(id)}/console`)); }
   async getServerMetrics(id: string): Promise<Record<string, unknown>> { return asRecord(await this.request(`/v1/servers/${encodeURIComponent(id)}/metrics`)); }

@@ -1,3 +1,4 @@
+import { CloudWatchClient, GetMetricStatisticsCommand } from '@aws-sdk/client-cloudwatch';
 import {
   AttachVolumeCommand,
   CreateSnapshotCommand,
@@ -138,6 +139,8 @@ function translateError(error: unknown): never {
 export class AwsProviderAdapter implements InfrastructureProviderAdapter {
   readonly kind = 'aws';
   private readonly client: Ec2Transport;
+  /** CloudWatch transport, kept separate because metrics are a different service and scope. */
+  private readonly metricsClient: Ec2Transport;
   private readonly region: string | undefined;
   /** Replacement workflows stay unavailable until the deployment opts in. */
   private readonly allowRootVolumeReplacement: boolean;
@@ -146,6 +149,7 @@ export class AwsProviderAdapter implements InfrastructureProviderAdapter {
     readonly provider: InfrastructureProviderRow,
     source: NodeJS.ProcessEnv = process.env,
     client?: Ec2Transport,
+    metricsClient?: Ec2Transport,
   ) {
     const prefix = provider.credential_env_prefix || 'AWS';
     const accessKeyId = source[`${prefix}_ACCESS_KEY_ID`] ?? source.AWS_ACCESS_KEY_ID;
@@ -156,6 +160,12 @@ export class AwsProviderAdapter implements InfrastructureProviderAdapter {
 
     this.client = client ?? new EC2Client({
       // The fallback only permits construction: every operation fails closed in configured().
+      region: this.region ?? 'us-east-1',
+      ...(accessKeyId && secretAccessKey
+        ? { credentials: { accessKeyId, secretAccessKey, ...(sessionToken ? { sessionToken } : {}) } }
+        : {}),
+    });
+    this.metricsClient = metricsClient ?? new CloudWatchClient({
       region: this.region ?? 'us-east-1',
       ...(accessKeyId && secretAccessKey
         ? { credentials: { accessKeyId, secretAccessKey, ...(sessionToken ? { sessionToken } : {}) } }
@@ -512,12 +522,72 @@ export class AwsProviderAdapter implements InfrastructureProviderAdapter {
     };
   }
 
-  async getServerMetrics(_providerServerId: string): Promise<Record<string, unknown>> {
-    throw new ProviderError(
-      'UNSUPPORTED_OPERATION',
-      'CloudWatch metrics require a separately scoped CloudWatch integration',
-      false,
-    );
+  /**
+   * Reads instance metrics from CloudWatch (`GetMetricStatistics`, namespace `AWS/EC2`,
+   * dimension `InstanceId`).
+   *
+   * These are the metrics EC2 publishes with basic monitoring, so no CloudWatch agent and no
+   * detailed monitoring are required. The period is 300s because basic monitoring reports at
+   * five-minute granularity; a shorter period would return holes rather than data.
+   *
+   * A metric with no datapoints is reported in `missing` instead of being zero-filled: a stopped
+   * or freshly launched instance genuinely has no samples, and `0` would read as a real
+   * measurement of an idle machine.
+   */
+  async getServerMetrics(providerServerId: string): Promise<Record<string, unknown>> {
+    const region = this.configured();
+    const to = new Date();
+    const from = new Date(to.getTime() - 60 * 60 * 1000);
+    const metricNames = [
+      'CPUUtilization',
+      'NetworkIn',
+      'NetworkOut',
+      'DiskReadOps',
+      'DiskWriteOps',
+      'StatusCheckFailed',
+    ] as const;
+
+    const metrics: Record<string, unknown> = {};
+    const missing: string[] = [];
+
+    for (const metricName of metricNames) {
+      const result = (await this.metricsClient.send(
+        new GetMetricStatisticsCommand({
+          Namespace: 'AWS/EC2',
+          MetricName: metricName,
+          Dimensions: [{ Name: 'InstanceId', Value: providerServerId }],
+          StartTime: from,
+          EndTime: to,
+          Period: 300,
+          Statistics: ['Average', 'Maximum'],
+        })
+      )) as { Datapoints?: Array<{ Average?: number; Maximum?: number; Unit?: string }> };
+
+      const points = Array.isArray(result?.Datapoints) ? result.Datapoints : [];
+      if (points.length === 0) {
+        missing.push(metricName);
+        continue;
+      }
+      const averages = points.map((p) => p.Average).filter((v): v is number => typeof v === 'number');
+      const maxima = points.map((p) => p.Maximum).filter((v): v is number => typeof v === 'number');
+      metrics[metricName] = {
+        unit: typeof points[0]?.Unit === 'string' ? points[0].Unit : null,
+        average: averages.length > 0 ? Math.max(...averages) : null,
+        maximum: maxima.length > 0 ? Math.max(...maxima) : null,
+        samples: points.length,
+      };
+    }
+
+    return {
+      provider: 'aws',
+      instanceId: providerServerId,
+      region,
+      namespace: 'AWS/EC2',
+      periodSeconds: 300,
+      window: { from: from.toISOString(), to: to.toISOString() },
+      metrics,
+      missing,
+    };
   }
 
   async healthCheck(providerServerId: string, expectedImage: ServerOsImageRow): Promise<ProviderHealthResult> {
