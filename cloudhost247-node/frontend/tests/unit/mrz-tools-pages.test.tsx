@@ -38,37 +38,37 @@ describe('ePassport MRZ Calculator, Validator, Parser & Admin UI', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByRole('heading', { name: 'MRZ Calculator' })).toBeTruthy();
+    expect(await screen.findByRole('heading', { name: 'MRZ Calculator' })).toBeTruthy();
 
     // Generate synthetic test data
-    fireEvent.click(screen.getByRole('button', { name: 'Generate Test Data' }));
-    expect(screen.getByText(/SYNTHETIC TEST DATA/i)).toBeTruthy();
-    expect(screen.getByTestId('mrz-line-1').textContent).toHaveLength(44);
-    expect(screen.getByTestId('mrz-line-2').textContent).toHaveLength(44);
+    fireEvent.click(await screen.findByRole('button', { name: 'Generate Test Data' }));
+    expect(await screen.findByText(/SYNTHETIC TEST DATA/i)).toBeTruthy();
+    expect((await screen.findByTestId('mrz-line-1')).textContent).toHaveLength(44);
+    expect((await screen.findByTestId('mrz-line-2')).textContent).toHaveLength(44);
 
     // Fill in canonical ICAO Doc 9303 test case
-    fireEvent.change(screen.getByLabelText('Issuing State'), { target: { value: 'UTO' } });
-    fireEvent.change(screen.getByLabelText('Surname'), { target: { value: 'Eriksson' } });
-    fireEvent.change(screen.getByLabelText('Given Names'), { target: { value: 'Anna Maria' } });
-    fireEvent.change(screen.getByLabelText('Nationality'), { target: { value: 'UTO' } });
-    fireEvent.change(screen.getByLabelText('Date of Birth (YYMMDD)'), { target: { value: '740812' } });
-    fireEvent.change(screen.getByLabelText('Sex'), { target: { value: 'F' } });
-    fireEvent.change(screen.getByLabelText('Document Number'), { target: { value: 'L898902C3' } });
-    fireEvent.change(screen.getByLabelText('Expiry Date (YYMMDD)'), { target: { value: '120415' } });
-    fireEvent.change(screen.getByLabelText('Optional Data'), { target: { value: 'ZE184226B' } });
+    fireEvent.change(await screen.findByLabelText('Issuing State'), { target: { value: 'UTO' } });
+    fireEvent.change(await screen.findByLabelText('Surname'), { target: { value: 'Eriksson' } });
+    fireEvent.change(await screen.findByLabelText('Given Names'), { target: { value: 'Anna Maria' } });
+    fireEvent.change(await screen.findByLabelText('Nationality'), { target: { value: 'UTO' } });
+    fireEvent.change(await screen.findByLabelText('Date of Birth (YYMMDD)'), { target: { value: '740812' } });
+    fireEvent.change(await screen.findByLabelText('Sex'), { target: { value: 'F' } });
+    fireEvent.change(await screen.findByLabelText('Document Number'), { target: { value: 'L898902C3' } });
+    fireEvent.change(await screen.findByLabelText('Expiry Date (YYMMDD)'), { target: { value: '120415' } });
+    fireEvent.change(await screen.findByLabelText('Optional Data'), { target: { value: 'ZE184226B' } });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Generate MRZ' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Generate MRZ' }));
 
-    expect(screen.getByTestId('mrz-line-1').textContent).toBe(ICAO_LINE_1);
-    expect(screen.getByTestId('mrz-line-2').textContent).toBe(ICAO_LINE_2);
+    expect((await screen.findByTestId('mrz-line-1')).textContent).toBe(ICAO_LINE_1);
+    expect((await screen.findByTestId('mrz-line-2')).textContent).toBe(ICAO_LINE_2);
 
     // Validate the generated MRZ
-    fireEvent.click(screen.getByRole('button', { name: 'Validate' }));
-    expect(screen.getByText('MRZ structure is valid.')).toBeTruthy();
+    fireEvent.click(await screen.findByRole('button', { name: 'Validate' }));
+    expect(await screen.findByText('MRZ structure is valid.')).toBeTruthy();
 
     // Explain with CloudHost247 AI
-    fireEvent.click(screen.getByRole('button', { name: 'Explain with CloudHost247 AI' }));
-    expect(screen.getByText('CloudHost247 AI — MRZ Technical Explanation')).toBeTruthy();
+    fireEvent.click(await screen.findByRole('button', { name: 'Explain with CloudHost247 AI' }));
+    expect(await screen.findByText('CloudHost247 AI — MRZ Technical Explanation')).toBeTruthy();
   });
 
   it('renders /tools/document/mrz-parser and distinguishes Successfully parsed from Authenticity verified', async () => {
@@ -90,18 +90,18 @@ describe('ePassport MRZ Calculator, Validator, Parser & Admin UI', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByRole('heading', { name: 'MRZ Parser' })).toBeTruthy();
+    expect(await screen.findByRole('heading', { name: 'MRZ Parser' })).toBeTruthy();
 
-    fireEvent.change(screen.getByLabelText('Paste MRZ'), {
+    fireEvent.change(await screen.findByLabelText('Paste MRZ'), {
       target: { value: `${ICAO_LINE_1}\n${ICAO_LINE_2}` },
     });
-    fireEvent.click(screen.getByRole('button', { name: 'Parse MRZ' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Parse MRZ' }));
 
-    expect(screen.getByText('Successfully parsed')).toBeTruthy();
-    expect(screen.getByText('Not verified — MRZ format and check-digit validation only')).toBeTruthy();
-    expect(screen.getByText('ERIKSSON')).toBeTruthy();
-    expect(screen.getByText('ANNA MARIA')).toBeTruthy();
-    expect(screen.getByText('L898902C3')).toBeTruthy();
+    expect(await screen.findByText('Successfully parsed')).toBeTruthy();
+    expect(await screen.findByText('Not verified — MRZ format and check-digit validation only')).toBeTruthy();
+    expect(await screen.findByText('ERIKSSON')).toBeTruthy();
+    expect(await screen.findByText('ANNA MARIA')).toBeTruthy();
+    expect(await screen.findByText('L898902C3')).toBeTruthy();
   });
 
   it('renders Super Admin → Settings → Tools → MRZ (/admin/settings/tools/mrz) with locked privacy controls', async () => {
@@ -160,9 +160,9 @@ describe('ePassport MRZ Calculator, Validator, Parser & Admin UI', () => {
     await waitFor(() =>
       expect(screen.getByRole('heading', { name: 'Super Admin → Settings → Tools → MRZ' })).toBeTruthy()
     );
-    expect(screen.getByText('Mandatory Privacy Protections (Locked)')).toBeTruthy();
+    expect(await screen.findByText('Mandatory Privacy Protections (Locked)')).toBeTruthy();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Save MRZ Tool Settings' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Save MRZ Tool Settings' }));
     await waitFor(() => expect(screen.getByText('MRZ tool settings saved and audit-logged.')).toBeTruthy());
   });
 });

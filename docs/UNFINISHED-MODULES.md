@@ -108,6 +108,26 @@ zero-byte/placeholder files, and modules documented as vendor-only, gated, super
 > **Not claimed:** the agent was never run against real Docker, and no request has crossed a real network
 > between the two implementations — the suites prove the protocol agrees, not that a deployment works.
 
+| A17 | **Node platform — SPA shipped as one 993 kB bundle** (no row existed; found by building it) | `cloudhost247-node/frontend/src/App.tsx`, `frontend/src/layout/Layout.tsx` | **FOUND AND FIXED 2026-10-03 — CLOSED.** `npm run build:frontend` emitted a single `index-*.js` of **993,185 bytes (gzip 239 kB)** and printed Vite's warning *"Some chunks are larger than 500 kB after minification"*, so every visitor — including a first-time visitor to the marketing homepage — downloaded the entire admin console, the MRZ tool, the revenue-guardian suite and the Tools Center before the first paint. The cause was structural, not a stray import: `App.tsx` imported all 107 pages eagerly. A throwaway `manualChunks` build measured the composition and settled the fix — the frontend imports exactly four external packages, and their chunks total only ~**191 kB** (`react-dom` 130.48, `react-router-dom` 39.67, `@simplewebauthn/browser` 8.78, `react` 7.91, `scheduler` 4.17), so ~**800 kB of the 993 kB was first-party page code** and no dependency swap or chunking policy could remove it. All 122 page imports are now `React.lazy(() => import(...))` route chunks; `Layout`, `RequireAuth` and `RequireRole` stay eager (the shell and the auth gate), and the `Suspense` boundary sits **inside `Layout` around the routed `<Outlet/>`** rather than above `<Routes>` — a boundary above `Routes` would replace the whole document with the fallback on every navigation, which is also what made a pre-existing test (`hosting-catalog-page`: "shows a loading state before the catalog responds") tautological, since the fallback and the page's own loading state both render `role="status"`. That test now asserts the page's own label. | — none open; the remaining >500 kB warning is gone and no chunk exceeds 500 kB | `frontend/src/App.tsx` (107 → 122 lazy route consts), `frontend/src/layout/Layout.tsx`, `frontend/tests/unit/*.test.tsx` (10 files: assertions now `await` the lazy render) |
+
+> **A17 verification (2026-10-03).** `npm run build:frontend` → entry `index-BUAHi5Te.js` **229.44 kB / gzip
+> 72.14 kB** (from 993,185 B / 239 kB gzip — an initial-load reduction of ~76 %, gzip −70 %), **122 route chunks**,
+> largest page chunk `AdminDomainServicesPage` 46.69 kB, and **zero** chunks over 500 kB; the >500 kB warning is gone.
+> `npm run typecheck` exit 0. The code-split was verified against the built artifact, not the config: the emitted
+> `public/index.html` references exactly one entry bundle, that entry contains **109** dynamic `import()` targets that
+> **all exist on disk**, and page-specific strings (`MRZ Calculator`, `Admin — Customers`, `ePassport`, `Tools Center`)
+> are **absent from the entry chunk** — i.e. the page code really left the initial download.
+> `npm test` → **124 files / 1093 tests, all passing, exit 0** (unchanged counts from the pre-split baseline: no test
+> was deleted). The 10 test files that asserted synchronously after `render(<App/>)` were repaired with `await`
+> (mostly `await waitFor(...)`/`findBy*`), and that repair was itself checked for weakening: normalising the new files
+> back (strip `await`, `findBy`→`getBy`, unwrap the added parentheses, drop `async`) reproduces the committed files
+> **byte-for-byte in all 10**, so every change is timing-only. A first attempt at that repair was rejected and redone —
+> it had inserted `await` into non-`async` `waitFor` callbacks (4 files failed to compile) and had bound `await` to
+> calls whose result was then member-accessed (`await screen.findAllByText('X').length` → `undefined`), which would
+> have silently weakened assertions instead of failing.
+> **Not claimed:** no browser was driven and no Lighthouse/field measurement was taken — the numbers are build-output
+> sizes, and the runtime behaviour is covered only by the jsdom tests.
+
 ---
 
 ## B. Never independently built — vendor, licence-gated, or superseded builds

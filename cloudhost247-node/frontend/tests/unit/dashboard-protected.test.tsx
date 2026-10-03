@@ -20,7 +20,7 @@ describe('/dashboard end-to-end route protection', () => {
     vi.unstubAllGlobals();
   });
 
-  it('redirects a signed-out visitor navigating directly to /dashboard to /login', () => {
+  it('redirects a signed-out visitor navigating directly to /dashboard to /login', async () => {
     render(
       <MemoryRouter initialEntries={['/dashboard']}>
         <App />
@@ -28,7 +28,7 @@ describe('/dashboard end-to-end route protection', () => {
     );
 
     // The login form, not any dashboard content, is what actually renders.
-    expect(screen.getByRole('heading', { name: 'Log in' })).toBeTruthy();
+    expect(await screen.findByRole('heading', { name: 'Log in' })).toBeTruthy();
   });
 
   it('shows real account data for a signed-in visitor, including real (empty) services/domains/tickets/installations', async () => {

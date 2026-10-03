@@ -37,15 +37,15 @@ describe('MFA login continuation', () => {
       </MemoryRouter>
     );
 
-    await userEvent.type(screen.getByPlaceholderText('Email'), 'mfa@example.com');
-    await userEvent.type(screen.getByPlaceholderText('Password'), 'correct-horse-battery');
+    await userEvent.type(await screen.findByPlaceholderText('Email'), 'mfa@example.com');
+    await userEvent.type(await screen.findByPlaceholderText('Password'), 'correct-horse-battery');
     await userEvent.click(screen.getByRole('button', { name: 'Login' }));
     await screen.findByLabelText('Multi-factor authentication code');
     expect(getToken()).toBeNull();
     expect(JSON.stringify(localStorage)).not.toContain('M'.repeat(43));
 
     await userEvent.type(screen.getByLabelText('Multi-factor authentication code'), '123456');
-    await userEvent.click(screen.getByRole('button', { name: 'Verify and log in' }));
+    await userEvent.click(await screen.findByRole('button', { name: 'Verify and log in' }));
     await waitFor(() => expect(getToken()).toBe('final-session-token'));
     expect(getStoredUser()?.email).toBe('mfa@example.com');
   });

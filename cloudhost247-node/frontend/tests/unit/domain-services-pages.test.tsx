@@ -49,13 +49,13 @@ describe('/domains/search', () => {
 
     render(<MemoryRouter initialEntries={['/domains/search']}><App /></MemoryRouter>);
 
-    fireEvent.change(screen.getByLabelText('Domain name'), { target: { value: 'example' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Search' }));
+    fireEvent.change(await screen.findByLabelText('Domain name'), { target: { value: 'example' } });
+    fireEvent.click(await screen.findByRole('button', { name: 'Search' }));
 
     await waitFor(() => expect(screen.getByText('example.com')).toBeTruthy());
-    expect(screen.getByText('Premium')).toBeTruthy();
+    expect(await screen.findByText('Premium')).toBeTruthy();
     // Signed-out visitors see sign-in prompts, never a fake checkout.
-    expect(screen.getAllByText('Sign in to register').length).toBe(2);
+    expect((await screen.findAllByText('Sign in to register')).length).toBe(2);
   });
 
   it('shows the honest provider-missing state without placeholder prices', async () => {
@@ -68,8 +68,8 @@ describe('/domains/search', () => {
 
     render(<MemoryRouter initialEntries={['/domains/search']}><App /></MemoryRouter>);
 
-    fireEvent.change(screen.getByLabelText('Domain name'), { target: { value: 'example' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Search' }));
+    fireEvent.change(await screen.findByLabelText('Domain name'), { target: { value: 'example' } });
+    fireEvent.click(await screen.findByRole('button', { name: 'Search' }));
 
     await waitFor(() => expect(screen.getByText('Service Provider Not Configured')).toBeTruthy());
     expect(screen.queryByText('example.com')).toBeNull();
@@ -100,14 +100,14 @@ describe('/domains/search', () => {
 
     render(<MemoryRouter initialEntries={['/domains/search']}><App /></MemoryRouter>);
 
-    fireEvent.change(screen.getByLabelText('Domain name'), { target: { value: 'taken-brand' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Search' }));
+    fireEvent.change(await screen.findByLabelText('Domain name'), { target: { value: 'taken-brand' } });
+    fireEvent.click(await screen.findByRole('button', { name: 'Search' }));
 
     const watchButton = await screen.findByRole('button', { name: 'Watch' });
     fireEvent.click(watchButton);
 
     await waitFor(() => expect(screen.getByText('Watching ✓')).toBeTruthy());
-    expect(screen.getByText(/you will be notified if it becomes available/i)).toBeTruthy();
+    expect(await screen.findByText(/you will be notified if it becomes available/i)).toBeTruthy();
   });
 });
 
@@ -130,12 +130,12 @@ describe('/domains/whois', () => {
 
     render(<MemoryRouter initialEntries={['/domains/whois']}><App /></MemoryRouter>);
 
-    fireEvent.change(screen.getByLabelText('Domain name'), { target: { value: 'example.com' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Look up' }));
+    fireEvent.change(await screen.findByLabelText('Domain name'), { target: { value: 'example.com' } });
+    fireEvent.click(await screen.findByRole('button', { name: 'Look up' }));
 
     await waitFor(() => expect(screen.getByText('Example Registrar, Inc.')).toBeTruthy());
-    expect(screen.getByText(/Privacy protection is respected/i)).toBeTruthy();
-    expect(screen.getByText('Privacy Protected')).toBeTruthy();
+    expect(await screen.findByText(/Privacy protection is respected/i)).toBeTruthy();
+    expect(await screen.findByText('Privacy Protected')).toBeTruthy();
   });
 });
 
@@ -169,12 +169,12 @@ describe('/domains/auctions/:id', () => {
 
     await waitFor(() => expect(screen.getByText('premium.example')).toBeTruthy());
     // Current highest + increment = 125.00, shown as the minimum next bid.
-    expect(screen.getByText(/125\.00/)).toBeTruthy();
+    expect(await screen.findByText(/125\.00/)).toBeTruthy();
     // Bidding history is anonymized.
-    expect(screen.getByText('Bidder 02')).toBeTruthy();
+    expect(await screen.findByText('Bidder 02')).toBeTruthy();
 
-    fireEvent.change(screen.getByLabelText(/Your bid/), { target: { value: '125' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Place bid' }));
+    fireEvent.change(await screen.findByLabelText(/Your bid/), { target: { value: '125' } });
+    fireEvent.click(await screen.findByRole('button', { name: 'Place bid' }));
 
     await waitFor(() => expect(screen.getByText(/you are the highest bidder/i)).toBeTruthy());
     expect(bidCall).toHaveBeenCalled();
@@ -214,12 +214,12 @@ describe('/domains/appraisal', () => {
 
     render(<MemoryRouter initialEntries={['/domains/appraisal']}><App /></MemoryRouter>);
 
-    fireEvent.change(screen.getByLabelText('Domain name'), { target: { value: 'example.com' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Get estimate' }));
+    fireEvent.change(await screen.findByLabelText('Domain name'), { target: { value: 'example.com' } });
+    fireEvent.click(await screen.findByRole('button', { name: 'Get estimate' }));
 
     await waitFor(() => expect(screen.getByText('$1847.00')).toBeTruthy());
-    expect(screen.getByText(/not a guaranteed selling price/i)).toBeTruthy();
-    expect(screen.getByText('Medium')).toBeTruthy();
+    expect(await screen.findByText(/not a guaranteed selling price/i)).toBeTruthy();
+    expect(await screen.findByText('Medium')).toBeTruthy();
   });
 
   it('refuses to invent a value when no appraisal provider is connected', async () => {
@@ -237,8 +237,8 @@ describe('/domains/appraisal', () => {
 
     render(<MemoryRouter initialEntries={['/domains/appraisal']}><App /></MemoryRouter>);
 
-    fireEvent.change(screen.getByLabelText('Domain name'), { target: { value: 'example.com' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Get estimate' }));
+    fireEvent.change(await screen.findByLabelText('Domain name'), { target: { value: 'example.com' } });
+    fireEvent.click(await screen.findByRole('button', { name: 'Get estimate' }));
 
     await waitFor(() => expect(screen.getByText('Service Provider Not Configured')).toBeTruthy());
     expect(screen.queryByText(/Estimated value/i)).toBeNull();
@@ -251,7 +251,7 @@ describe('/domains/bulk-search', () => {
 
     render(<MemoryRouter initialEntries={['/domains/bulk-search']}><App /></MemoryRouter>);
 
-    expect(screen.getByText('Sign in to use bulk search')).toBeTruthy();
+    expect(await screen.findByText('Sign in to use bulk search')).toBeTruthy();
     expect(screen.queryByLabelText('Domains — one per line, comma-separated, or a CSV column (bare terms are checked against leading extensions)')).toBeNull();
   });
 });
@@ -278,8 +278,8 @@ describe('/domains/club', () => {
 
     await waitFor(() => expect(screen.getByText('Domain Club Monthly')).toBeTruthy());
     // The discount is rendered from the plan record — 25% off — never invented client-side.
-    expect(screen.getByText(/25% off eligible registrations/)).toBeTruthy();
-    expect(screen.getByText('Sign in to join')).toBeTruthy();
+    expect(await screen.findByText(/25% off eligible registrations/)).toBeTruthy();
+    expect(await screen.findByText('Sign in to join')).toBeTruthy();
   });
 
   it('shows an honest empty state when no plans are published', async () => {
@@ -300,7 +300,7 @@ describe('/domains/transfer', () => {
 
     render(<MemoryRouter initialEntries={['/domains/transfer']}><App /></MemoryRouter>);
 
-    expect(screen.getByText('Sign in to start a transfer')).toBeTruthy();
+    expect(await screen.findByText('Sign in to start a transfer')).toBeTruthy();
   });
 });
 
@@ -394,40 +394,40 @@ describe('/dashboard/domains Domain Services tabs', () => {
     render(<MemoryRouter initialEntries={['/dashboard/domains']}><App /></MemoryRouter>);
 
     // Registrations tab
-    fireEvent.click(screen.getByRole('button', { name: 'Registrations' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Registrations' }));
     await waitFor(() => expect(screen.getByText('registered.example')).toBeTruthy());
-    expect(screen.getByText('registered')).toBeTruthy();
+    expect(await screen.findByText('registered')).toBeTruthy();
 
     // Transfers tab
-    fireEvent.click(screen.getByRole('button', { name: 'Transfers' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Transfers' }));
     await waitFor(() => expect(screen.getByText('moved.example')).toBeTruthy());
-    expect(screen.getByText('Transfer completed')).toBeTruthy();
+    expect(await screen.findByText('Transfer completed')).toBeTruthy();
 
     // Auctions tab
-    fireEvent.click(screen.getByRole('button', { name: 'Auctions' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Auctions' }));
     await waitFor(() => expect(screen.getByText('bid.example')).toBeTruthy());
-    expect(screen.getByText('Winning')).toBeTruthy();
+    expect(await screen.findByText('Winning')).toBeTruthy();
     // Lost auctions are listed from the real endpoint.
-    expect(screen.getByText('lostbid.example')).toBeTruthy();
+    expect(await screen.findByText('lostbid.example')).toBeTruthy();
 
     // Searches & Lookups tab includes bulk search history and availability watches.
-    fireEvent.click(screen.getByRole('button', { name: 'Searches & Lookups' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Searches & Lookups' }));
     await waitFor(() => expect(screen.getByText('portfolio list')).toBeTruthy());
-    expect(screen.getByText('dreambrand.example')).toBeTruthy();
-    expect(screen.getByText('Watching')).toBeTruthy();
+    expect(await screen.findByText('dreambrand.example')).toBeTruthy();
+    expect(await screen.findByText('Watching')).toBeTruthy();
 
     // Domain Club tab shows the live membership.
-    fireEvent.click(screen.getByRole('button', { name: 'Domain Club' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Domain Club' }));
     await waitFor(() => expect(screen.getByText('Domain Investor Club')).toBeTruthy());
-    expect(screen.getByText('active')).toBeTruthy();
+    expect(await screen.findByText('active')).toBeTruthy();
 
     // Broker Requests tab shows the customer's cases.
-    fireEvent.click(screen.getByRole('button', { name: 'Broker Requests' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Broker Requests' }));
     await waitFor(() => expect(screen.getByText('BRK-2026-ABC123')).toBeTruthy());
-    expect(screen.getByText('wanted.example')).toBeTruthy();
+    expect(await screen.findByText('wanted.example')).toBeTruthy();
 
     // Transactions tab
-    fireEvent.click(screen.getByRole('button', { name: 'Transactions' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Transactions' }));
     await waitFor(() => expect(screen.getByText('$25.96')).toBeTruthy());
   });
 });
@@ -463,12 +463,12 @@ describe('/admin/domain-services', () => {
 
     // Overview readiness reflects the real provider state (provider key, honest gaps).
     await waitFor(() => expect(screen.getByText('Connected — namecheap-primary')).toBeTruthy());
-    expect(screen.getAllByText('Not configured').length).toBe(2);
+    expect((await screen.findAllByText('Not configured')).length).toBe(2);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Providers' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Providers' }));
     await waitFor(() => expect(screen.getByText('Namecheap Production')).toBeTruthy());
     // Credential names are visible (write-only pattern), values never are.
-    expect(screen.getByText('apiUser, apiKey, clientIp')).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Test Connection' })).toBeTruthy();
+    expect(await screen.findByText('apiUser, apiKey, clientIp')).toBeTruthy();
+    expect(await screen.findByRole('button', { name: 'Test Connection' })).toBeTruthy();
   });
 });

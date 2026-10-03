@@ -60,7 +60,7 @@ describe('/admin — frontend RBAC gate (UX only, server re-verifies independent
       </MemoryRouter>
     );
 
-    expect(screen.getByRole('heading', { name: 'Admin — Customers' })).toBeTruthy();
+    expect(await screen.findByRole('heading', { name: 'Admin — Customers' })).toBeTruthy();
     await waitFor(() => expect(screen.getByText('Ada Lovelace')).toBeTruthy());
   });
 
@@ -75,6 +75,6 @@ describe('/admin — frontend RBAC gate (UX only, server re-verifies independent
     );
 
     await waitFor(() => expect(screen.getByRole('alert')).toBeTruthy());
-    expect(screen.getByText(/does not have permission to view the customer directory/)).toBeTruthy();
+    expect(await screen.findByText(/does not have permission to view the customer directory/)).toBeTruthy();
   });
 });

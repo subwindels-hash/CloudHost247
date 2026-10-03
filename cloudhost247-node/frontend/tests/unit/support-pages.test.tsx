@@ -19,13 +19,13 @@ afterEach(() => {
 });
 
 describe('/support — customer support tickets', () => {
-  it('redirects a signed-out visitor to /login', () => {
+  it('redirects a signed-out visitor to /login', async () => {
     render(
       <MemoryRouter initialEntries={['/support']}>
         <App />
       </MemoryRouter>
     );
-    expect(screen.getByRole('heading', { name: 'Log in' })).toBeTruthy();
+    expect(await screen.findByRole('heading', { name: 'Log in' })).toBeTruthy();
   });
 
   it('shows an honest empty state, then opens a new ticket and shows it in the list', async () => {
@@ -69,12 +69,12 @@ describe('/support — customer support tickets', () => {
 
     await waitFor(() => expect(screen.getByText(/haven't opened any support tickets yet/)).toBeTruthy());
 
-    await userEvent.type(screen.getByLabelText('Subject'), 'Help with DNS');
-    await userEvent.type(screen.getByLabelText('Message'), 'My DNS records are not resolving.');
-    await userEvent.click(screen.getByRole('button', { name: 'Open ticket' }));
+    await userEvent.type(await screen.findByLabelText('Subject'), 'Help with DNS');
+    await userEvent.type(await screen.findByLabelText('Message'), 'My DNS records are not resolving.');
+    await userEvent.click(await screen.findByRole('button', { name: 'Open ticket' }));
 
     await waitFor(() => expect(screen.getByText('Help with DNS')).toBeTruthy());
-    expect(screen.getByText(/ticket has been opened/)).toBeTruthy();
+    expect(await screen.findByText(/ticket has been opened/)).toBeTruthy();
   });
 
   it('/support/:id shows a real ticket thread', async () => {
@@ -108,8 +108,8 @@ describe('/support — customer support tickets', () => {
     );
 
     await waitFor(() => expect(screen.getByRole('heading', { name: 'Help with DNS' })).toBeTruthy());
-    expect(screen.getByText('My DNS records are not resolving.')).toBeTruthy();
-    expect(screen.getByText('You')).toBeTruthy();
+    expect(await screen.findByText('My DNS records are not resolving.')).toBeTruthy();
+    expect(await screen.findByText('You')).toBeTruthy();
   });
 
   it('/support/:id shows an honest not-found message for another customer\'s ticket (404, not 403)', async () => {
