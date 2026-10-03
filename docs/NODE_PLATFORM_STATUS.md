@@ -1431,3 +1431,35 @@ sub-phase before the next one begins.
 - **Standing rule this establishes.** `ADAPTER_PROFILES` is a promise in *two* directions: a new
   adapter, a new capability, or a change to either must move the flag and the implementation
   together, and the matrix test fails the build if they disagree.
+
+---
+
+## A21 — The two financial probes nothing executed (found and fixed 2026-10-03)
+
+- **Source/local verification:** PASSED on branch `arena/01a0ff64-cloudhost247`.
+- **Why this section exists.** Phase 5C's accepted evidence includes a **39/39 authorization matrix**
+  and a **49/49 financial invariant sweep**, and `PHASE_5_CHECKPOINT_REPORT.md` invites the reader to
+  reproduce both. No test, npm script, release-gate step or CI job executed either probe, and the
+  reproduction command the report printed (`cd cloudhost247-node && npx tsx ../recovery/<probe>.ts`)
+  failed on its first import with `Cannot find module 'pg'` — bare-specifier resolution starts at the
+  importing file's directory and `node_modules` lives in `cloudhost247-node/`. The claim was true but
+  **unreproducible by anyone**.
+- **Fixed:** both probes moved to `cloudhost247-node/tools/`, are exported as functions over the
+  shared `Queryable` interface with a CLI entry point (`npm run verify:financial`,
+  `npm run verify:authorization`; `CH247_PROBE_PG_*`, throwaway database), and now run on **every
+  `npm test`** against the embedded WASM PostgreSQL — no server required. The authorization matrix
+  drives the real Fastify app through `app.inject`; the sweep reports the single-connection
+  concurrency race as **`unproven`** rather than letting a serialised run count as a pass.
+- **Two defects found in the probes themselves while making them executable:** the sweep was not
+  re-runnable (its own negative-control fixture was excluded by an in-memory list, so a second run
+  reported a violation caused by the first run — the fixture is now removed after its check and the
+  sweep SQL is unconditional), and the matrix compared two "no customer-side request produced…"
+  counts against absolute zero, so any database already holding a successful payment went red for a
+  reason unrelated to the caller (now deltas across the attack window).
+- **Evidence:** real PostgreSQL 18.4 — `49/49` and `39/39`, both exit 0; three consecutive sweep runs
+  on one database `49/49 · 49/49 · 49/49`; `npm test` **126 files / 1119 tests** (124/1111 before);
+  `tsc --noEmit` 0; four mutations all red (a customer allowed into the staff confirm route, the two
+  delta checks reverted to absolute counts, the double-credit sweep entry deleted, the fixture
+  cleanup removed → all six sweep tests red). **Not claimed:** the probes have never been run against
+  the production database, and the CLI still needs a real PostgreSQL — the embedded engine is
+  installed outside the repository so the release gate's inputs do not change.

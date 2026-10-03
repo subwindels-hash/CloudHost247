@@ -122,6 +122,26 @@ better-targeted change.
 
 ---
 
+## Where the two verification probes went
+
+This directory used to hold `verify-financial-invariants.ts` and `verify-payment-authorization.ts`.
+They were moved to **`cloudhost247-node/tools/`** on 2026-10-03 (row A21 in
+`docs/UNFINISHED-MODULES.md`), because the command this repository documented for them —
+`cd cloudhost247-node && npx tsx ../recovery/<probe>.ts` — could not run at all: a bare `pg` import
+resolves from the importing file's directory, and `node_modules` is in `cloudhost247-node/`. They are
+now functions with a CLI entry point and run as:
+
+```bash
+cd cloudhost247-node
+LOG_LEVEL=silent npm run verify:financial       # 49/49 against a real PostgreSQL
+LOG_LEVEL=silent npm run verify:authorization   # 39/39
+```
+
+Both also run on every `npm test` against the embedded WASM PostgreSQL, so the results quoted in
+`PHASE_5_CHECKPOINT_REPORT.md` are reproducible without a server. Connection defaults are documented
+at the top of `tools/verify-financial-invariants.ts` (`CH247_PROBE_PG_*`); the CLI creates and drops
+its own throwaway database.
+
 ---
 
 ## 3. `check-production-state.sql` (+ `.sh` wrapper) — answer the one open question
