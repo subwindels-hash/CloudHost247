@@ -228,6 +228,7 @@ export function createDockerAdapter(options: DockerAdapterOptions): DeploymentAd
           checksum: result.checksum,
           // Verbatim, so the row records the agent's evidence and not this adapter's summary of it.
           databaseDump: result.databaseDump ?? null,
+          includes: result.includes ?? null,
         };
       } catch (err) {
         return { ok: false, code: 'BACKUP_FAILED', message: (err as Error).message, archivePath: null, sizeBytes: null, checksum: null };

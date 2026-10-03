@@ -66,6 +66,12 @@ export interface BackupResult extends DeploymentOperationResult {
    * the difference survives the deployment log.
    */
   databaseDump?: BackupDatabaseDumpReport | null;
+  /**
+   * What the archive was asked for and actually holds (agent `includes` block). `null`/absent means
+   * the agent reported nothing — an older agent — never "nothing is inside". Persisted verbatim on
+   * the backup row (migration 0070).
+   */
+  includes?: { volumes: boolean; databases: string | null } | null;
 }
 
 /** The complete adapter surface the engine can invoke. Adapters may be partial (cPanel deploys

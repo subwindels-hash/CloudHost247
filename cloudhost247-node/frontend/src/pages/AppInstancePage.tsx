@@ -37,6 +37,10 @@ interface BackupRow {
   storage_provider: string | null;
   /** Recorded by the platform from the agent's report (0068). Absent on older rows. */
   database_dump?: { engine: string | null; reason?: string } | null;
+  /** What the archive holds, as the agent reported it (0070). Absent on older rows. */
+  includes?: { volumes: boolean; databases: string | null } | null;
+  /** Why the row exists (0069): `safety_snapshot` marks the undo copy a destructive restore took. */
+  backup_kind?: string;
 }
 
 /**
@@ -49,6 +53,15 @@ function backupContents(backup: BackupRow): { label: string; title?: string } {
   if (!dump) return { label: 'not recorded' };
   if (dump.engine) return { label: `database (${dump.engine})` };
   return { label: 'no database dump', title: dump.reason };
+}
+
+/**
+ * The archived-volumes evidence from the agent's includes report (0070). Only a recorded value is
+ * shown: a row with no report (older rows) says nothing either way, exactly like the dump label.
+ */
+function includesEvidence(backup: BackupRow): string | undefined {
+  if (!backup.includes) return undefined;
+  return backup.includes.volumes ? 'volumes archived' : 'volumes not archived';
 }
 
 interface EnvironmentKeyRow {
@@ -357,10 +370,20 @@ export default function AppInstancePage() {
                   <tr key={backup.id}>
                     <td>{new Date(backup.created_at).toLocaleString()}</td>
                     <td>
-                      <span className="ch247-badge">{backup.status}</span>
+                      <span className="ch247-badge">{backup.status}</span>{' '}
+                      {backup.backup_kind === 'safety_snapshot' && (
+                        <span
+                          className="ch247-badge"
+                          title="Taken automatically before a destructive restore — restoring this archive undoes that restore"
+                        >
+                          safety snapshot
+                        </span>
+                      )}
                     </td>
                     <td>{backup.size_bytes ? `${(backup.size_bytes / 1024 / 1024).toFixed(1)} MB` : '—'}</td>
-                    <td title={backupContents(backup).title}>{backupContents(backup).label}</td>
+                    <td title={[backupContents(backup).title, includesEvidence(backup)].filter(Boolean).join(' — ') || undefined}>
+                      {backupContents(backup).label}
+                    </td>
                     <td>{backup.storage_provider ?? 'local'}</td>
                     <td>
                       {backup.status === 'completed' && (
