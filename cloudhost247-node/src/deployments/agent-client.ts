@@ -8,6 +8,7 @@
  * the server (spec §31).
  */
 import { buildSignedHeaders } from './agent-protocol';
+import type { BackupDatabaseDumpReport } from '../db/ops-tables';
 import { getKeyRing } from '../lib/keyring';
 import { getCredential } from '../db/servers';
 import type { Queryable } from '../db/types';
@@ -192,13 +193,7 @@ export function agentRunBackup(
      * "the database dump is there".
      */
     includes?: { volumes: boolean; databases: string | null };
-    databaseDump?: {
-      engine: string | null;
-      service: string | null;
-      file: string | null;
-      reason?: string;
-      attempted?: string[];
-    };
+    databaseDump?: BackupDatabaseDumpReport;
   }>(
     db,
     server,

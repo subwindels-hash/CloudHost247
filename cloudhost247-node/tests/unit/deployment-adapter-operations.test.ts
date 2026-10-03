@@ -440,6 +440,15 @@ describe('docker adapter reports what a backup really contains', () => {
     expect(logs[0]).toContain('a database dump but the agent produced none');
     expect(logs[0]).toContain('no service produced a logical database dump');
     expect(logs[0]).toContain('cache:postgres (empty output)');
+    // The same evidence the log names travels back structured, so the caller can record it on the
+    // backup row instead of leaving the difference in a log line (A18(c)).
+    expect(result.databaseDump).toEqual({
+      engine: null,
+      service: null,
+      file: null,
+      reason: 'no service produced a logical database dump',
+      attempted: ['cache:postgres (empty output)'],
+    });
   });
 
   it('stays quiet when the dump was produced, and names the engine in the result', async () => {
@@ -452,6 +461,7 @@ describe('docker adapter reports what a backup really contains', () => {
     );
 
     expect(result).toMatchObject({ ok: true, message: 'Backup completed (postgres dump included)' });
+    expect(result.databaseDump).toMatchObject({ engine: 'postgres', service: 'db', file: '/opt/db-dump-postgres.sql' });
     expect(logs).toEqual([]);
   });
 
@@ -465,6 +475,9 @@ describe('docker adapter reports what a backup really contains', () => {
     );
 
     expect(result).toMatchObject({ ok: true, message: 'Backup completed' });
+    // Not asked for, so there is nothing to report: the row must not read as "a dump was needed and
+    // missing" — and equally must not read as "a dump is inside".
+    expect(result.databaseDump ?? null).toBeNull();
     expect(logs).toEqual([]);
   });
 
@@ -479,6 +492,9 @@ describe('docker adapter reports what a backup really contains', () => {
     );
 
     expect(result).toMatchObject({ ok: true, message: 'Backup completed' });
+    // The row records nothing, and "nothing" is exactly what it must say: an agent that cannot
+    // report must never become evidence that the database dump is missing.
+    expect(result.databaseDump ?? null).toBeNull();
     expect(logs).toEqual([]);
   });
 });

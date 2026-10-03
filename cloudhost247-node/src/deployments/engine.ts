@@ -709,6 +709,7 @@ function backupPipeline(ctx: PipelineContext): StepDefinitionInternal[] {
           storagePath: result.archivePath,
           sizeBytes: result.sizeBytes,
           checksum: result.checksum,
+          databaseDump: result.databaseDump ?? null,
           completedAt: new Date().toISOString(),
         });
         await updateInstallation(ctx.db, installation.id, { lastBackupAt: new Date().toISOString() });

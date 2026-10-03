@@ -508,6 +508,73 @@ describe('deployment worker', () => {
     }
   });
 
+  it('records on the backup row what the archive actually contains', async () => {
+    const userId = await seedCustomer();
+    const { app } = await seedPublishedApp('uptime-kuma');
+    const server = await seedServer();
+    const request = await createInstallationRequest(db, userId, {
+      applicationIdOrSlug: app.id ?? 'uptime-kuma',
+      serverId: server.id,
+    });
+
+    await processNextJob({ db, options: options(stubAdapter()), workerId: 'worker-backup-contents' });
+    const installation = (
+      await db.query<{ id: string }>(`SELECT id FROM application_installations WHERE id = $1`, [request.installationId])
+    ).rows[0];
+    await db.query(`UPDATE application_installations SET status = 'healthy' WHERE id = $1`, [installation.id]);
+
+    const runBackupWith = async (result: Record<string, unknown>): Promise<void> => {
+      const adapter: DeploymentAdapter = {
+        ...stubAdapter(),
+        runBackup: async (_ctx, project) => ({
+          ok: true,
+          code: 'OK',
+          message: 'Backup completed',
+          archivePath: '/backups/x.tar.gz',
+          sizeBytes: 1024,
+          checksum: 'abc',
+          ...result,
+        }),
+      };
+      await enqueueDeployment(db, {
+        installationId: installation.id,
+        serverId: server.id,
+        action: 'backup',
+        idempotencyKey: `backup:${installation.id}:${randomUUID()}`,
+        requestedBy: userId,
+      });
+      const claimed = await processNextJob({ db, options: options(adapter), workerId: 'worker-backup-contents' });
+      expect(claimed?.action).toBe('backup');
+      expect((await findDeploymentById(db, claimed!.id))?.status).toBe('succeeded');
+    };
+
+    // 1. A dump was produced: the engine is recorded.
+    await runBackupWith({ databaseDump: { engine: 'postgres', service: 'db', file: '/opt/dump.sql' } });
+    // 2. A dump was requested and none was produced: the reason and every attempt are recorded, so
+    //    the difference between this archive and the one above survives the deployment log.
+    await runBackupWith({
+      databaseDump: { engine: null, service: null, file: null, reason: 'no service produced a logical database dump', attempted: ['cache:postgres (empty output)'] },
+    });
+    // 3. An adapter that reports nothing (an older agent) leaves the column NULL — "not recorded",
+    //    never "the database dump is there".
+    await runBackupWith({});
+
+    const rows = (
+      await db.query<{ database_dump: Record<string, unknown> | null }>(
+        `SELECT database_dump FROM backups WHERE installation_id = $1 ORDER BY created_at, id`,
+        [installation.id]
+      )
+    ).rows;
+    expect(rows).toHaveLength(3);
+    expect(rows[0].database_dump).toMatchObject({ engine: 'postgres', service: 'db' });
+    expect(rows[1].database_dump).toMatchObject({
+      engine: null,
+      reason: 'no service produced a logical database dump',
+      attempted: ['cache:postgres (empty output)'],
+    });
+    expect(rows[2].database_dump).toBeNull();
+  });
+
   it('uninstalls: teardown with volumes, installation marked deleted', async () => {
     const userId = await seedCustomer();
     const { app } = await seedPublishedApp('uptime-kuma');

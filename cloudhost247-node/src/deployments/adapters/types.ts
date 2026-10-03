@@ -13,6 +13,7 @@
  * the deployment + step rows and decides retry vs rollback (spec §14).
  */
 import type { ApplicationManifest } from '../../marketplace/manifest-schema';
+import type { BackupDatabaseDumpReport } from '../../db/ops-tables';
 import type { Queryable } from '../../db/types';
 import type { ServerRow } from '../../db/servers';
 
@@ -58,6 +59,13 @@ export interface BackupResult extends DeploymentOperationResult {
   archivePath: string | null;
   sizeBytes: number | null;
   checksum: string | null;
+  /**
+   * The agent's report of the database dump inside the archive (engine, service, file — or the
+   * reason there is none). `null`/absent means the agent reported nothing, which is not the same
+   * claim as "no database dump": an older agent says nothing at all. Persisted on the backup row so
+   * the difference survives the deployment log.
+   */
+  databaseDump?: BackupDatabaseDumpReport | null;
 }
 
 /** The complete adapter surface the engine can invoke. Adapters may be partial (cPanel deploys

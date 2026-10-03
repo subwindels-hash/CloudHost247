@@ -111,6 +111,14 @@ dump at all (`redis` is allowed by the manifest schema and persists in the volum
 part of the archive). An agent older than this contract omits `databaseDump` entirely, and the adapter
 treats *absent* as *unknown* — never as a missing dump.
 
+**The report is recorded, not just logged** (migration 0068). The adapter returns `databaseDump`
+verbatim on its `BackupResult` and the worker stores it on the backup row (`backups.database_dump`),
+so the difference between an archive that holds a database dump and one that does not survives the
+deployment log and is visible in the customer's backup list. Three states are distinguishable and
+must stay that way: `NULL` (the agent reported nothing — an older agent, or a backup that never asked
+for a database), `{ "engine": "postgres", … }` (a dump is inside) and `{ "engine": null, "reason": … }`
+(a dump was requested and none was produced, with the reason and every attempt recorded).
+
 **Hashing is streamed**, in both directions: a customer database backup can be gigabytes, and
 buffering it whole to hash it would throw the agent process away on exactly the deployments that most
 need a backup to succeed.

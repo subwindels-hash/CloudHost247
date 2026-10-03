@@ -10,6 +10,19 @@ import type { Queryable } from './types';
 
 // --- Backups -------------------------------------------------------------------------------------
 
+/**
+ * What the agent reported about the database dump inside a backup archive, stored verbatim on the
+ * row. `engine` is null when a dump was requested and none was produced, in which case `reason` and
+ * `attempted` say why. Absent means the agent reported nothing — never "no dump was needed".
+ */
+export interface BackupDatabaseDumpReport {
+  engine: string | null;
+  service?: string | null;
+  file?: string | null;
+  reason?: string;
+  attempted?: string[];
+}
+
 export interface BackupRow {
   id: string;
   installation_id: string;
@@ -20,6 +33,7 @@ export interface BackupRow {
   size_bytes: number | null;
   status: string;
   checksum: string | null;
+  database_dump: BackupDatabaseDumpReport | null;
   started_at: string | null;
   completed_at: string | null;
   expires_at: string | null;
@@ -56,6 +70,8 @@ export async function updateBackup(
     storagePath?: string | null;
     sizeBytes?: number | null;
     checksum?: string | null;
+    /** The agent's report; `undefined` and `null` both mean "leave the column as it is". */
+    databaseDump?: BackupDatabaseDumpReport | null;
     startedAt?: string | null;
     completedAt?: string | null;
     errorMessage?: string | null;
@@ -70,7 +86,8 @@ export async function updateBackup(
        status = COALESCE($2, status), storage_path = COALESCE($3, storage_path),
        size_bytes = COALESCE($4, size_bytes), checksum = COALESCE($5, checksum),
        started_at = COALESCE($6, started_at), completed_at = COALESCE($7, completed_at),
-       error_message = $8, expires_at = COALESCE($9, expires_at)
+       error_message = $8, expires_at = COALESCE($9, expires_at),
+       database_dump = COALESCE($10::jsonb, database_dump)
      WHERE id = $1 RETURNING *`,
     [
       id,
@@ -82,6 +99,11 @@ export async function updateBackup(
       patch.completedAt ?? null,
       patch.errorMessage !== undefined ? patch.errorMessage : null,
       patch.expiresAt ?? null,
+      // Serialised here, not by the driver: `pg` and PGlite both accept a JS object for jsonb, but
+      // only by accident of their own serialisers, and this column must mean the same thing on both.
+      patch.databaseDump === undefined || patch.databaseDump === null
+        ? null
+        : JSON.stringify(patch.databaseDump),
     ]
   );
   return rows[0] ?? null;

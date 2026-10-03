@@ -95,6 +95,8 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0066_create_ai_control_plane.sql',
     // Phase 7 — Native Tools Center (DNS/IP/network/developer/webmaster/security/domain/productivity).
     '0067_create_tools_center.sql',
+    // A18(c) — a backup row records the agent's database-dump evidence (see backup-contents.test.ts).
+    '0068_record_backup_database_dump.sql',
   ];
 
   it('finds the committed migration files in order', () => {

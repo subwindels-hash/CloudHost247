@@ -226,6 +226,8 @@ export function createDockerAdapter(options: DockerAdapterOptions): DeploymentAd
           archivePath: result.archivePath,
           sizeBytes: result.sizeBytes,
           checksum: result.checksum,
+          // Verbatim, so the row records the agent's evidence and not this adapter's summary of it.
+          databaseDump: result.databaseDump ?? null,
         };
       } catch (err) {
         return { ok: false, code: 'BACKUP_FAILED', message: (err as Error).message, archivePath: null, sizeBytes: null, checksum: null };

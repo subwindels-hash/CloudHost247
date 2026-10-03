@@ -1463,3 +1463,30 @@ sub-phase before the next one begins.
   cleanup removed → all six sweep tests red). **Not claimed:** the probes have never been run against
   the production database, and the CLI still needs a real PostgreSQL — the embedded engine is
   installed outside the repository so the release gate's inputs do not change.
+
+---
+
+## A22 — A backup that held no database dump looked exactly like one that did (found and fixed 2026-10-03)
+
+- **Source/local verification:** PASSED on branch `arena/01a0ff64-cloudhost247`.
+- **Why this section exists.** A18 taught the agent to report what it actually dumped, and the control
+  plane used that evidence twice and discarded it: a deployment-log `warn` line and a clause in the
+  result message. `backups` had no column for it, so in the customer's backup list a **completed
+  archive with no database dump was indistinguishable from a complete one** — same status, same
+  recorded checksum. A log line is not a record: it rotates, it is per-deployment, and nothing reads
+  it back. This is the open item A18(c), closed here.
+- **Fixed:** the agent's report travels the whole way (`agentRunBackup` → `BackupResult.databaseDump`
+  → the worker → `backups.database_dump`, migration 0068) and is returned by
+  `GET /api/v1/app-installations/:id/backups` and shown in the app's Backups tab. One **jsonb** column
+  holds the agent's reply verbatim — it is provider-shaped evidence, not platform state, and a column
+  per field would need a migration each time the agent reports one more thing; a CHECK keeps it an
+  object. Three states stay distinguishable, because collapsing any two recreates the defect: `NULL`
+  (nothing reported — never read as "no dump"), `{"engine":"postgres"}` (a dump is inside) and
+  `{"engine":null,"reason":…,"attempted":[…]}` (requested, none produced, with the reason).
+- **Evidence:** `npm test` **128 files / 1124 tests** (126/1119 before); `tsc --noEmit` 0 in both the
+  node and frontend projects; six mutations all red (the write path, the overwrite-on-patch guard, the
+  adapter pass-through, the engine hand-off, the migration CHECK, the UI's three-state rendering).
+  Tested end-to-end rather than by unit only: the worker test runs the real backup pipeline and reads
+  the row back, the API test drives the real route, the frontend test renders the real page.
+- **Not claimed:** the reply's `includes` block is still not stored (only the dump evidence is), and
+  A18(b) stands unchanged — `includeVolumes: false` is accepted and does not narrow the archive.
