@@ -39,13 +39,25 @@ final class OrderService
     private $orders;
     private $recorder;
     private $factory;
+    private $linkValidator;
 
-    public function __construct(ProviderFinder $finder, OrderStore $orders, ApiRecorder $recorder, AdapterFactory $factory)
+    /**
+     * @param callable|null $linkValidator optional seam for validating a customer target link.
+     *        Production omits it, and the SSRF-checked `Validator::targetLink()` (public-host
+     *        resolution, scheme and credential rules) is used unchanged. It exists so tests can
+     *        supply a resolver with deterministic DNS: `UrlPolicy::resolveHost()` performs a live
+     *        `gethostbynamel()`, so without this seam every submission test would depend on the
+     *        machine's DNS answers and would fail on any host whose resolver answers private
+     *        addresses for public names — reporting a security refusal as a test failure and
+     *        hiding real regressions behind an environmental one.
+     */
+    public function __construct(ProviderFinder $finder, OrderStore $orders, ApiRecorder $recorder, AdapterFactory $factory, $linkValidator = null)
     {
         $this->finder = $finder;
         $this->orders = $orders;
         $this->recorder = $recorder;
         $this->factory = $factory;
+        $this->linkValidator = is_callable($linkValidator) ? $linkValidator : null;
     }
 
     /**
@@ -97,7 +109,9 @@ final class OrderService
         }
 
         try {
-            $link = Validator::targetLink(isset($input['target_url']) ? $input['target_url'] : '');
+            $link = $this->linkValidator !== null
+                ? call_user_func($this->linkValidator, isset($input['target_url']) ? $input['target_url'] : '')
+                : Validator::targetLink(isset($input['target_url']) ? $input['target_url'] : '');
             $quantity = Validator::quantity(
                 isset($input['quantity']) ? $input['quantity'] : 0,
                 $mapping->min_quantity !== null ? (int) $mapping->min_quantity : ($service->min_quantity !== null ? (int) $service->min_quantity : null),

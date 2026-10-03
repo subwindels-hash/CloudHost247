@@ -487,13 +487,25 @@ function handleGetAvailableProxies(ApiClient $api, Logger $logger): void
 {
     $type = $_GET['type'] ?? 'us';
 
-    $response = match ($type) {
-        '1by1' => $api->getAvailable1By1Proxies(),
-        'us' => $api->getAvailableUsProxies(),
-        'non_us' => $api->getAvailableNonUsProxies(),
-        'us_carrier' => $api->getAvailableUsCarrierProxies($_GET['carrier'] ?? null),
-        default => $api->getAvailableUsProxies(),
-    };
+    // A `match` expression here is a parse error on PHP 7.4, which this repository's
+    // release-candidate gate lints and the build notes name as a supported target:
+    // the whole file would be a fatal include rather than a working endpoint. The
+    // switch below is the exact PHP 7.4 equivalent - same arms, same default.
+    switch ($type) {
+        case '1by1':
+            $response = $api->getAvailable1By1Proxies();
+            break;
+        case 'non_us':
+            $response = $api->getAvailableNonUsProxies();
+            break;
+        case 'us_carrier':
+            $response = $api->getAvailableUsCarrierProxies($_GET['carrier'] ?? null);
+            break;
+        case 'us':
+        default:
+            $response = $api->getAvailableUsProxies();
+            break;
+    }
 
     Helpers::jsonSuccess([
         'proxies' => $response['data'] ?? [],

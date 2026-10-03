@@ -23,3 +23,7 @@ __pycache__/
 # Convenience symlink to cloudhost247-node/node_modules so tooling run from the repository
 # root (e.g. recovery/verify-financial-invariants.ts) can resolve dependencies.
 /node_modules
+
+# Build tooling for scripts/php-wasm (installed on first use; never shipped)
+/scripts/php-wasm/node_modules/
+/scripts/php-wasm/.install-lock/

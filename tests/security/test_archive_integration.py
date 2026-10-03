@@ -4,6 +4,20 @@ ROOT=Path(__file__).resolve().parents[2]
 # The vendor RDP archive as it was received. `*.zip` is git-ignored, so this file is not
 # distributed: the byte-for-byte half of the check can only run where the archive is held.
 RDP_ARCHIVE_SHA256='89bf89129458032ffe9efff4000f5c695d0534cc05e785b3a2602ec9784c5aa2'
+# Reviewed, deliberate deviations from the extracted archive. Every other entry must still
+# match byte-for-byte; these are pinned by (byte delta, post-edit sha256) so the exact change
+# is asserted rather than the comparison being skipped.
+#
+# `RDP.php` - 2026-10-03. `RDP_ConfigOptions` used `trim(string: $stock->{'name '})`, a PHP
+# 8.0 named argument. On PHP 7.4 - the version scripts/release-candidate-check.sh lints and
+# the version the build notes name as a working target - that is a parse error, so WHMCS hit
+# a fatal include and the module could not load. Exactly eight bytes (`string: `) were
+# removed; the file is otherwise byte-identical to the archive (verified by comparing the
+# prefix and suffix either side of the single differing region). Rationale and scope:
+# docs/independent-rebuild/RDP-SECURE-REBUILD-WORK-ITEM.md.
+REVIEWED_DEVIATIONS={
+ 'RDP.php':(8,'81c3c277de44f731c07bee5ab3dca32d94773e9c8b506080fa32d9f3990c751d','RDP.php: the reviewed PHP 8 -> 7.4 named-argument fix must be exactly 8 bytes'),
+}
 class ArchiveIntegrationTests(unittest.TestCase):
  def test_pages_archive_removed_after_complete_review(self):
   self.assertFalse((ROOT/'pages.zip').exists())
@@ -67,6 +81,15 @@ class ArchiveIntegrationTests(unittest.TestCase):
     if info.is_dir(): continue
     extracted=ROOT/'modules/servers/RDP'/info.filename
     self.assertTrue(extracted.is_file(),info.filename)
+    if info.filename in REVIEWED_DEVIATIONS:
+     # Reviewed and deliberate, 2026-10-03: see the rationale on REVIEWED_DEVIATIONS. Pinned
+     # by exact byte delta and subject hash rather than skipped, so an unreviewed second edit
+     # to the same file still fails here.
+     expected_delta,expected_subject,reason=REVIEWED_DEVIATIONS[info.filename]
+     archived=z.read(info.filename);current=extracted.read_bytes()
+     self.assertEqual(len(archived)-len(current),expected_delta,reason+' (byte delta changed)')
+     self.assertEqual(hashlib.sha256(current).hexdigest(),expected_subject,reason+' (content changed beyond the reviewed edit)')
+     continue
     self.assertEqual(hashlib.sha256(z.read(info.filename)).hexdigest(),hashlib.sha256(extracted.read_bytes()).hexdigest(),'extracted copy drifted from the archive: '+info.filename)
  def test_no_reviewed_archive_is_left_in_the_tree(self):
   # pages.zip was removed after its review, RDP.zip after its extraction, DNS Checker.zip

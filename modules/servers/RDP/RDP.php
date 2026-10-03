@@ -36,7 +36,7 @@ function RDP_ConfigOptions($params)
 
     if (isset($allstock['result']) && is_array($allstock['result'])) {
         foreach ($allstock['result'] as $stock) {
-            $name = trim(string: $stock->{'name '});
+            $name = trim($stock->{'name '});
             $id = $stock->id;
             $price = trim($stock->{'price '});
 
