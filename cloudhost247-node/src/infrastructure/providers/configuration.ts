@@ -86,8 +86,8 @@ export const ADAPTER_PROFILES: Record<AdapterKind, AdapterProfile> = {
     requiresApiBaseUrl: false,
     credentials: [{ suffix: '_API_KEY', description: 'Vultr API key', required: true, fallback: 'VULTR_API_KEY' }],
     planMetadata: [{ key: 'providerServerType', description: 'Vultr plan id', required: true }, ...RESOURCE_METADATA],
-    capabilities: { reinstall: true, snapshot: true, resize: true, console: false, metrics: true, rescue: false },
-    notes: 'Native instance API. Metrics are bandwidth-only because that is all Vultr exposes: GET /v2/instances/{id}/bandwidth returns per-UTC-day in/out byte counters (date_range 1-180 days) and Vultr documents that it should not be used for real-time metrics, so CPU/memory/filesystem/load are reported in `missing` and left to the CloudHost247 server agent. There is no console: the web console is a customer-portal feature and API v2 has no console operation.',
+    capabilities: { reinstall: true, snapshot: true, resize: true, console: true, metrics: true, rescue: false },
+    notes: 'Native instance API. Metrics are bandwidth-only because that is all Vultr exposes: GET /v2/instances/{id}/bandwidth returns per-UTC-day in/out byte counters (date_range 1-180 days) and Vultr documents that it should not be used for real-time metrics, so CPU/memory/filesystem/load are reported in `missing` and left to the CloudHost247 server agent. The console is real and is read from the instance itself: every API v2 instance carries `kvm`, "the server\'s current KVM URL", which Vultr documents as changing periodically and advises against caching — the adapter reads it fresh on each request and never stores it (bare metal has a separate /v2/bare-metals/{id}/vnc operation).',
   },
   aws: {
     kind: 'aws',

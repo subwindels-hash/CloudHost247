@@ -118,10 +118,17 @@ which lands in `missing` with a reason — never as a zero.
 
 Plan/availability metadata: `providerServerType`, `cpuCores`, `memoryMb`, `storageMb`.
 
-Capabilities: reinstall, snapshot, resize, metrics.
+Capabilities: reinstall, snapshot, resize, console, metrics.
 
-Native instance API. **No console:** the web console is a customer-portal feature and API v2 has no
-console operation, so `getConsole` refuses with a non-retryable `UNSUPPORTED_OPERATION`. Metrics are
+Native instance API. **Console:** every API v2 instance object carries `kvm` — "the server's current
+KVM URL. This URL will change periodically. It is not advised to cache this value" — so `getConsole`
+reads `GET /v2/instances/{id}` and returns that URL as a `{ url, type: 'novnc' }` session, fresh on
+every call and never cached, stored or audited (a console URL is a link to a root console; bare metal
+has its own `GET /v2/bare-metals/{id}/vnc`). An instance that has no `kvm` yet — still provisioning —
+fails as a retryable `SERVICE_UNAVAILABLE` naming the provider's `power_status`, not as
+`UNSUPPORTED_OPERATION`: the console exists, the instance just has no URL to hand out. **Amended
+2026-10-03:** this section previously read "No console: the web console is a customer-portal
+feature", which refused a capability Vultr really exposes. Metrics are
 bandwidth-only because that is all Vultr exposes: `GET /v2/instances/{id}/bandwidth` (`date_range`
 1–180 days; this adapter reads 30) returns per-UTC-day `incoming_bytes`/`outgoing_bytes`, and Vultr's
 own documentation advises against treating it as real-time metrics. `cpu`, `memory`, `filesystem` and

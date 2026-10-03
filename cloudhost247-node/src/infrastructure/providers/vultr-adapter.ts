@@ -1,5 +1,5 @@
 import type { InfrastructureProviderRow, ServerOsImageRow } from '../../db/infrastructure-providers';
-import { unsupportedConsole, unsupportedRescue } from './common';
+import { unsupportedRescue } from './common';
 import { providerRequest } from './http';
 import {
   ProviderError,
@@ -22,6 +22,12 @@ interface VultrInstancePayload {
   os?: string;
   image_id?: string;
   tag?: string;
+  /**
+   * "The server's current KVM URL. This URL will change periodically. It is not advised to cache
+   * this value." — the API v2 instance schema, which is where Vultr's console actually lives
+   * (bare metal has a separate `/v2/bare-metals/{id}/vnc` operation).
+   */
+  kvm?: string;
 }
 
 function toServer(instance: VultrInstancePayload): ProviderServer {
@@ -196,17 +202,37 @@ export class VultrProviderAdapter implements InfrastructureProviderAdapter {
   async disableRescue(): Promise<never> { return unsupportedRescue('vultr'); }
 
   /**
-   * Vultr has no console endpoint. API v2 exposes no operation that issues a console URL or
-   * credential — the web console is a customer-portal feature. This used to return
-   * `/instances/{id}/actions`, the instance's *action history*, which the customer UI rendered in a
-   * panel titled "Serial console session" while the platform audited `SERVER_CONSOLE_OPENED` for a
-   * console that was never opened.
+   * Vultr issues the console URL **on the instance object**, not through a console endpoint: every
+   * instance carries `kvm`, documented in the API v2 instance schema as "the server's current KVM
+   * URL. This URL will change periodically. It is not advised to cache this value." The URL is read
+   * fresh on every call, which is what that sentence asks for, and it is never written to a log, a
+   * job payload or an audit row — it is a link to a root console.
+   *
+   * This is what the adapter should always have done. It used to return `/instances/{id}/actions`,
+   * the instance's *action history*, while the profile advertised `console: true`: the customer UI
+   * rendered a list of past power events in a panel titled "Serial console session" and the platform
+   * audited `SERVER_CONSOLE_OPENED` for a console that was never opened. That defect was corrected
+   * *too far* — into a refusal whose stated reason ("the web console is a customer-portal feature")
+   * is contradicted by the field Vultr documents on the instance it returns.
    */
-  async getConsole(): Promise<never> {
-    return unsupportedConsole(
-      'vultr',
-      'the web console is a customer-portal feature and API v2 has no console operation'
+  async getConsole(providerServerId: string): Promise<Record<string, unknown>> {
+    const result = await this.request<{ instance?: VultrInstancePayload }>(
+      `/instances/${encodeURIComponent(providerServerId)}`
     );
+    const url = asString(result.instance?.kvm);
+    if (!url) {
+      // The capability is real, so this is a runtime refusal and not `UNSUPPORTED_OPERATION` (which
+      // would mean the operation does not exist); the provider's own state is named so an operator
+      // can tell a stopped instance from a product limitation.
+      const state =
+        asString(result.instance?.power_status) ?? asString(result.instance?.status) ?? 'unknown';
+      throw new ProviderError(
+        'SERVICE_UNAVAILABLE',
+        `Vultr returned no KVM console URL for instance ${providerServerId} (power_status=${state})`,
+        true
+      );
+    }
+    return { url, type: 'novnc' };
   }
 
   /**

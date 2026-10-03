@@ -6,10 +6,10 @@ import { ADAPTER_PROFILES } from '../../src/infrastructure/providers/configurati
 import type { InfrastructureProviderRow } from '../../src/db/infrastructure-providers';
 
 /**
- * Console and metrics truth for the two adapters that advertised a console they could not deliver
- * and a metrics call that read the wrong endpoint.
+ * Console and metrics truth for the adapters that advertised a console they could not deliver, then
+ * refused one that did exist, and for a metrics call that read the wrong endpoint.
  *
- * Before this change:
+ * Before this work:
  *   - `digitalocean.getConsole()` returned `/droplets/{id}/actions` (the droplet's action history)
  *     and `vultr.getConsole()` returned `/instances/{id}/actions`, while both profiles advertised
  *     `console: true`. The customer route gates on `server.capabilities.console === true`, so the
@@ -18,11 +18,16 @@ import type { InfrastructureProviderRow } from '../../src/db/infrastructure-prov
  *   - `digitalocean.getServerMetrics()` returned `/droplets/{id}/neighbors` — not metrics at all,
  *     but the list of *other customers' droplets sharing the same physical host*.
  *
- * Neither provider has a console operation in its API (verified against the DigitalOcean API v2
- * reference — the Droplet Console and out-of-band Recovery Console are Control Panel features — and
- * against Vultr API v2, whose web console is a customer-portal feature). Both DO have a real
- * metrics surface, so metrics are implemented rather than refused: DigitalOcean's Monitoring API
- * and Vultr's daily bandwidth endpoint, each reporting only what the provider actually measures.
+ * The first correction (2026-10-02) went one step too far for Vultr: it turned the wrong URL into a
+ * refusal — `console: false`, reason "the web console is a customer-portal feature" — which is
+ * contradicted by Vultr's own API v2 schema, where every instance object carries `kvm`, "the
+ * server's current KVM URL… not advised to cache". That refusal withheld a capability the provider
+ * really exposes, so Vultr's console is implemented again, this time read from the instance and
+ * read fresh per call. Only DigitalOcean's refusal survived the re-check: the API v2 droplet action
+ * list contains no console action, so the Droplet Console and the out-of-band Recovery Console are
+ * Control Panel features. Both providers do have a real metrics surface, so metrics are implemented
+ * rather than refused: DigitalOcean's Monitoring API and Vultr's daily bandwidth endpoint, each
+ * reporting only what the provider actually measures.
  */
 
 afterEach(() => {
@@ -57,10 +62,12 @@ function digitaloceanAdapter(responses: Map<string, unknown> | ((url: string) =>
   return { instance, urls, fetchMock };
 }
 
-function vultrAdapter(body: unknown) {
+function vultrAdapter(responses: unknown | ((url: string) => unknown)) {
   const urls: string[] = [];
   const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
-    urls.push(String(input));
+    const url = String(input);
+    urls.push(url);
+    const body = typeof responses === 'function' ? (responses as (url: string) => unknown)(url) : responses;
     return json(body);
   });
   vi.stubGlobal('fetch', fetchMock);
@@ -82,7 +89,9 @@ function monitoring(result: unknown[]) {
 describe('profiles advertise the console and metrics they actually deliver', () => {
   it.each([
     ['digitalocean', { console: false, metrics: true }],
-    ['vultr', { console: false, metrics: true }],
+    // Console flipped back to true on 2026-10-03: the refusal below was wrong (Vultr returns the
+    // KVM URL on the instance object). See the Vultr console suite in this file.
+    ['vultr', { console: true, metrics: true }],
   ] as const)('%s declares console/metrics that match its implementation', (kind, expected) => {
     const capabilities = ADAPTER_PROFILES[kind].capabilities as unknown as Record<string, boolean>;
     for (const [capability, value] of Object.entries(expected)) {
@@ -90,10 +99,13 @@ describe('profiles advertise the console and metrics they actually deliver', () 
     }
   });
 
-  it('every real-provider adapter that declares console:false refuses it before any request', async () => {
+  it('the adapters that still declare console:false refuse it before any request', async () => {
     // The drift this pins, in both directions: a capability flag and the implementation must agree.
-    // `mock` is excluded on purpose — it is a simulator that answers with `{ type: 'none' }` rather
-    // than a console, so it never claims one either.
+    // Vultr was the third entry here until 2026-10-03, when the instance object's `kvm` field proved
+    // the refusal wrong; what is left is DigitalOcean (no console action exists in API v2) and
+    // Contabo (console not offered through its compute API). `mock` is excluded on purpose — it is
+    // a simulator that answers with `{ type: 'none' }` rather than a console, so it never claims one
+    // either. The full matrix is swept by tests/unit/adapter-capability-matrix.test.ts.
     const fetchMock = vi.fn(async () => {
       throw new Error('network disabled in this test');
     });
@@ -102,9 +114,6 @@ describe('profiles advertise the console and metrics they actually deliver', () 
     const adapters = [
       new DigitalOceanProviderAdapter(providerRow('digitalocean', 'https://api.digitalocean.test/v2'), {
         DIGITALOCEAN_API_TOKEN: 'token',
-      } as NodeJS.ProcessEnv),
-      new VultrProviderAdapter(providerRow('vultr', 'https://api.vultr.test/v2'), {
-        VULTR_API_KEY: 'token',
       } as NodeJS.ProcessEnv),
       new ContaboProviderAdapter(providerRow('contabo', 'https://api.contabo.test/v1'), {
         CONTABO_CLIENT_ID: 'client-id', CONTABO_CLIENT_SECRET: 'client-secret',
@@ -125,8 +134,8 @@ describe('profiles advertise the console and metrics they actually deliver', () 
   });
 });
 
-describe('console is refused where the provider has no console operation', () => {
-  it('refuses DigitalOcean and Vultr consoles before any provider request', async () => {
+describe('console is refused where the provider has no console operation at all', () => {
+  it('refuses a DigitalOcean console before any provider request', async () => {
     // Killing the transport proves the refusal is decided locally, not by a provider response.
     const fetchMock = vi.fn(async () => {
       throw new Error('network disabled in this test');
@@ -136,16 +145,11 @@ describe('console is refused where the provider has no console operation', () =>
     const digitalocean = new DigitalOceanProviderAdapter(providerRow('digitalocean', 'https://api.digitalocean.test/v2'), {
       DIGITALOCEAN_API_TOKEN: 'token',
     } as NodeJS.ProcessEnv);
-    const vultr = new VultrProviderAdapter(providerRow('vultr', 'https://api.vultr.test/v2'), {
-      VULTR_API_KEY: 'token',
-    } as NodeJS.ProcessEnv);
 
-    for (const adapter of [digitalocean, vultr]) {
-      await expect(adapter.getConsole('server-1')).rejects.toMatchObject({
-        code: 'UNSUPPORTED_OPERATION',
-        retryable: false,
-      });
-    }
+    await expect(digitalocean.getConsole('server-1')).rejects.toMatchObject({
+      code: 'UNSUPPORTED_OPERATION',
+      retryable: false,
+    });
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
@@ -273,6 +277,64 @@ describe('DigitalOcean metrics read the Monitoring API', () => {
     vi.stubGlobal('fetch', fetchMock);
     const adapter = new DigitalOceanProviderAdapter(providerRow('digitalocean', 'https://api.digitalocean.test/v2'), {} as NodeJS.ProcessEnv);
     await expect(adapter.getServerMetrics('123')).rejects.toMatchObject({ code: 'PROVIDER_NOT_CONFIGURED', retryable: false });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("Vultr console is the instance's own KVM URL, read fresh per call", () => {
+  const kvm = 'https://my.vultr.test/subs/vps/novnc/api.php?data=one-time-token';
+
+  it('reads the instance and returns its kvm URL as a novnc session', async () => {
+    const { instance, urls } = vultrAdapter(() => ({
+      instance: { id: 'inst-1', status: 'active', power_status: 'running', kvm },
+    }));
+
+    const session = await instance.getConsole('inst-1');
+
+    // The console lives on the instance object, not behind an /actions list; the panel in the
+    // customer UI already renders any `url` it is handed, so no frontend change is needed.
+    expect(session).toEqual({ url: kvm, type: 'novnc' });
+    expect(urls).toEqual(['https://api.vultr.test/v2/instances/inst-1']);
+  });
+
+  it('reads a fresh URL on every call instead of caching one', async () => {
+    // Vultr documents the field as "the server's current KVM URL. This URL will change periodically.
+    // It is not advised to cache this value." — so two calls must be two provider requests.
+    let issued = 0;
+    const { instance, urls } = vultrAdapter(() => {
+      issued += 1;
+      return { instance: { id: 'inst-1', kvm: `https://my.vultr.test/subs/vps/novnc/api.php?data=${issued}` } };
+    });
+
+    const first = await instance.getConsole('inst-1');
+    const second = await instance.getConsole('inst-1');
+
+    expect(first.url).toBe('https://my.vultr.test/subs/vps/novnc/api.php?data=1');
+    expect(second.url).toBe('https://my.vultr.test/subs/vps/novnc/api.php?data=2');
+    expect(urls).toHaveLength(2);
+  });
+
+  it.each([
+    ['the instance is still provisioning', { id: 'inst-1', status: 'pending', power_status: 'stopped' }],
+    ['the instance reports a non-string kvm', { id: 'inst-1', status: 'active', kvm: null }],
+  ])('reports the provider state instead of a stale URL when %s', async (_label, instancePayload) => {
+    // A missing KVM URL is a state problem, not a missing capability: the capability is real, so the
+    // failure is retryable SERVICE_UNAVAILABLE (it names the provider's own state) and never the
+    // non-retryable UNSUPPORTED_OPERATION that would tell the operator the operation does not exist.
+    const { instance } = vultrAdapter(() => ({ instance: instancePayload }));
+
+    await expect(instance.getConsole('inst-1')).rejects.toMatchObject({
+      code: 'SERVICE_UNAVAILABLE',
+      retryable: true,
+    });
+    await expect(instance.getConsole('inst-1')).rejects.toThrow(/power_status=/);
+  });
+
+  it('fails closed without an API key, before any request', async () => {
+    const fetchMock = vi.fn(async () => json({}));
+    vi.stubGlobal('fetch', fetchMock);
+    const adapter = new VultrProviderAdapter(providerRow('vultr', 'https://api.vultr.test/v2'), {} as NodeJS.ProcessEnv);
+    await expect(adapter.getConsole('inst-1')).rejects.toMatchObject({ code: 'PROVIDER_NOT_CONFIGURED', retryable: false });
     expect(fetchMock).not.toHaveBeenCalled();
   });
 });

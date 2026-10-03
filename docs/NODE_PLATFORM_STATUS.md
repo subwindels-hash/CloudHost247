@@ -1308,10 +1308,15 @@ sub-phase before the next one begins.
 
 ## A13 — Console and metrics truth for DigitalOcean and Vultr (capability drift, found 2026-10-02)
 
+> **Amended 2026-10-03 — see §A23.** The Vultr half of this fix was itself wrong: the console it
+> refused is real (the instance object's `kvm` field). DigitalOcean's half (refusal) was re-verified
+> and stands. The paragraphs below are kept as the record of what was done on 2026-10-02, with the
+> false Vultr claim corrected in place.
+
 - **Source/local verification:** PASSED on branch `arena/01a0fe1f-cloudhost247`.
-  - `npm run typecheck` clean; `tests/unit/provider-console-metrics-truth.test.ts` (15) new;
-    `provider-capability-truth.test.ts` extended to 10; the full suite is re-run at the end of this
-    session's work and recorded there.
+  - `npm run typecheck` clean; `tests/unit/provider-console-metrics-truth.test.ts` (15 at the time;
+    **20** after §A23 corrected the Vultr console); `provider-capability-truth.test.ts` extended to
+    10; the full suite is re-run at the end of this session's work and recorded there.
   - **No migration required.** Adapter capabilities are code, and the provider profiles are read at
     runtime; nothing is stored per provider row.
 - **The defect.** Two adapters advertised capabilities they did not deliver, in both directions:
@@ -1327,11 +1332,16 @@ sub-phase before the next one begins.
     `metrics: false`, so the flag and the implementation disagreed in the opposite direction too.
 - **Console is now refused where no console operation exists** (`unsupportedConsole()` in
   `providers/common.ts`, alongside the existing `unsupportedRescue()`), with the verified reason in
-  the message and in the profile notes: DigitalOcean's Droplet Console and out-of-band Recovery
-  Console are Control Panel features and API v2 has no console operation; Vultr's web console is a
-  customer-portal feature. Both profiles now say `console: false`, so the button is never rendered
-  and no console audit row can be written for a session that did not happen. Contabo already refused
-  correctly and is pinned by the same test.
+  the message and in the profile notes. For DigitalOcean that is right and was re-verified on
+  2026-10-03: the Droplet Console and the out-of-band Recovery Console are Control Panel features and
+  the API v2 droplet action list contains no console action. For Vultr it was **wrong** — the claim
+  that "Vultr's web console is a customer-portal feature" is contradicted by the `kvm` field Vultr
+  documents on every instance object — so Vultr's profile was flipped back to `console: true` and
+  `getConsole()` implemented against the instance (§A23), while DigitalOcean stays `console: false`.
+  This is the pitfall in both directions: a flag and its implementation can disagree by *advertising*
+  a capability that is not delivered **or by refusing one that is**. Contabo still refuses its console
+  and is pinned by the same test; that refusal has not been re-verified against api.contabo.com
+  (§A23, open item).
 - **Metrics are now implemented for both, against each provider's documented surface**, and each
   payload states its own limits:
   - **DigitalOcean** reads the Monitoring API — `GET /v2/monitoring/metrics/droplet/{metric}` with the
@@ -1355,12 +1365,16 @@ sub-phase before the next one begins.
     for a Vultr server therefore comes from the CloudHost247 server agent (`server_metrics`, which is
     what the customer Monitoring panel already reads), not from the provider. An empty bandwidth
     history reports `null` totals, not `0` bytes. Profile `metrics: true`.
-- **Known follow-up for staging (data, not code).** `servers.capabilities` is stored per server row
-  when the order is accepted, so a DigitalOcean or Vultr server provisioned **before** this change
-  still carries `console: true` in its own row and will still render the button; clicking it now
-  returns the honest `UNSUPPORTED_OPERATION` refusal instead of an action list. New orders inherit the
-  corrected capability. A backfill of `servers.capabilities` for existing rows is a staging task and
-  is deliberately not done from here — production data is read-only for this repository.
+- **Known follow-up for staging (data, not code).** `servers.capabilities` is copied per server row
+  from the product configuration's `configuration_metadata.capabilities` when the order is accepted.
+  Two backfills are therefore owed: (i) a **DigitalOcean** server provisioned before this change still
+  carries `console: true` and will still render the button — clicking it now returns the honest
+  `UNSUPPORTED_OPERATION` refusal instead of an action list; (ii) a **Vultr** server (or a stored Vultr
+  product configuration) created while this change was in force, 2026-10-02 → 2026-10-03, carries
+  `console: false` and so shows no button for a console Vultr really exposes — §A23 flips the profile,
+  and those rows need the flag backfilled to `true`. A backfill of `servers.capabilities` for existing
+  rows is a staging task and is deliberately not done from here — production data is read-only for this
+  repository.
 
 ---
 
@@ -1490,3 +1504,52 @@ sub-phase before the next one begins.
   the row back, the API test drives the real route, the frontend test renders the real page.
 - **Not claimed:** the reply's `includes` block is still not stored (only the dump evidence is), and
   A18(b) stands unchanged — `includeVolumes: false` is accepted and does not narrow the archive.
+
+---
+
+## A23 — The Vultr console refusal refused a console Vultr really exposes (found and fixed 2026-10-03)
+
+- **Source/local verification:** PASSED on branch `arena/01a0ff64-cloudhost247`.
+- **Why this section exists.** A23 is A13 correcting itself. A13's first half was right —
+  `vultr.getConsole()` returned `/instances/{id}/actions`, the instance's *action history*, while the
+  profile advertised `console: true` — but the fix went one step too far: it declared `console: false`
+  with the reason "the web console is a customer-portal feature and API v2 has no console operation".
+  Vultr's own API v2 says the opposite. Every instance object carries **`kvm`**, documented as "the
+  server's current KVM URL. This URL will change periodically. It is not advised to cache this
+  value", and bare metal has a dedicated `GET /v2/bare-metals/{id}/vnc` operation. So the refusal
+  withheld a capability the provider exposes: the customer console route
+  (`POST /api/v1/servers/:id/console`) gates on `server.capabilities.console === true`, the profile
+  said `false`, and the "Open console" button never rendered for a Vultr server. Re-checking section
+  A's remaining rows is how the contradiction was found; at the same time DigitalOcean's half of A13
+  was re-verified against the API v2 droplet action list (no console action exists) and stands.
+- **Fixed:** `getConsole(providerServerId)` reads `GET /v2/instances/{id}` and returns the instance's
+  own `kvm` URL as `{ url, type: 'novnc' }`, **fresh on every call** — Vultr rotates the URL and says
+  not to cache it, so the adapter holds it nowhere: not in a field, not in a log, not in an audit row.
+  When the field is absent (for example an instance still provisioning) the failure is a **retryable
+  `SERVICE_UNAVAILABLE` naming the provider's own `power_status`**, deliberately not
+  `UNSUPPORTED_OPERATION`, which would tell the operator the operation does not exist. The refusal
+  helper is no longer imported by this adapter.
+- **No frontend change was needed.** `ServerDetailPage.tsx` already renders any `consoleSession.url`
+  it is handed as a "Launch console" link, so the adapter change is the whole fix; the customer route
+  already audits `SERVER_CONSOLE_OPENED` with no session payload.
+- **Pinned in both directions, including through the customer route.** The profile pin and the
+  capability-truth pin now read `console: true` for Vultr; the unit suite asserts the request shape,
+  the `novnc` session, the fresh-per-call behaviour (two calls → two provider requests), the
+  state-named retryable failure and the fail-closed no-token case. The capability matrix's permissive
+  Vultr fixture supplies a `kvm` URL, so the advertised capability is exercised on the success path
+  rather than passing because a failure happened not to be `UNSUPPORTED_OPERATION`. And
+  `tests/integration/server-console.test.ts` (now **6** tests) drives a real `vultr` provider and a
+  server row carrying the stored `console: true` through `POST /api/v1/servers/:id/console`: the two
+  requests return the two rotated URLs, the two provider reads are asserted by URL, and the audit row
+  is checked to hold no session URL.
+- **Evidence:** `npm test` **128 files / 1130 tests, pass** (128/1124 before), exit 0; `npx tsc -p tsconfig.json --noEmit` → 0. Four mutations
+  each turned the intended assertions red and nothing else: caching the URL, restoring the
+  `UNSUPPORTED_OPERATION` refusal, restoring the `/actions` URL, and flipping the profile flag back to
+  `false`.
+- **Not claimed:** Contabo's console refusal rides the same `unsupportedConsole` pattern and has
+  in-repo evidence (the generated client's action list, `docs/SERVER_PROVISIONING.md` §Contabo) but
+  was **not** re-fetched from api.contabo.com in this round, so it is recorded as an open item rather
+  than assumed either way. And the flag is data as well as code: `servers.capabilities` is copied onto
+  each server row from the product configuration's `configuration_metadata.capabilities` at order
+  acceptance, so Vultr rows created while A13 was in force still carry `console: false` and need the
+  staging backfill (§A13 follow-up).

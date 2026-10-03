@@ -7,10 +7,13 @@ import type { InfrastructureProviderRow } from '../../src/db/infrastructure-prov
 
 /**
  * A capability flag is a promise to the operator and to the customer UI. These
- * tests pin the two adapters that declare capabilities they do not implement:
- * every capability advertised as false must be refused at runtime with a
- * non-retryable UNSUPPORTED_OPERATION, before any provider request is made, and
- * the refusal must not be quietly turned into a success by a later change.
+ * tests pin the adapters that declare capabilities they do not implement, or
+ * those whose refusal is easy to get wrong in either direction: every capability
+ * advertised as false must be refused at runtime with a non-retryable
+ * UNSUPPORTED_OPERATION, before any provider request is made, and the refusal
+ * must not be quietly turned into a success by a later change — nor a working
+ * capability quietly refused (Vultr's console was, between 2026-10-02 and
+ * 2026-10-03).
  *
  * If a capability is genuinely implemented later, this test is expected to fail
  * until the profile and the assertion are updated together — that is the point.
@@ -61,10 +64,13 @@ describe('adapter profiles tell the truth about their capabilities', () => {
     ['contabo', { resize: false, console: false, metrics: false }],
     // Added 2026-10-02: both used to advertise console:true while returning the provider's *action
     // history* (see tests/unit/provider-console-metrics-truth.test.ts). metrics is now true for both
-    // because each has a real, documented metrics endpoint that is now implemented.
+    // because each has a real, documented metrics endpoint that is now implemented. Vultr's console
+    // is true again as of 2026-10-03: the API v2 instance object carries the KVM URL (`kvm`), so the
+    // 2026-10-02 refusal refused a real capability; DigitalOcean's refusal stands (API v2 has no
+    // console action, and the Droplet/Recovery consoles are Control Panel features).
     ['digitalocean', { console: false, rescue: false, metrics: true }],
-    ['vultr', { console: false, rescue: false, metrics: true }],
-  ] as const)('%s advertises the capabilities it actually refuses', (kind, expected) => {
+    ['vultr', { console: true, rescue: false, metrics: true }],
+  ] as const)('%s advertises exactly the capabilities it implements or refuses', (kind, expected) => {
     const capabilities = ADAPTER_PROFILES[kind].capabilities as unknown as Record<string, boolean>;
     for (const [capability, value] of Object.entries(expected)) {
       expect(capabilities[capability]).toBe(value);

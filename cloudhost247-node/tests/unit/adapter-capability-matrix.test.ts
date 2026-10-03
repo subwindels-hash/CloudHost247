@@ -228,7 +228,15 @@ function permissivePayload(kind: string, url: string, method: string): unknown {
     return { droplet: { id: 1, name: 'matrix-host', status: 'active', networks: { v4: [{ ip_address: '203.0.113.11', type: 'public' }] } }, action: { id: 1, status: 'in-progress' } };
   }
   if (kind === 'vultr') {
-    return { instance: { id: 'srv-1', label: 'matrix-host', status: 'active', main_ip: '203.0.113.12' }, bandwidth: {} };
+    return {
+      instance: {
+        id: 'srv-1', label: 'matrix-host', status: 'active', main_ip: '203.0.113.12',
+        // The console is a field on the instance (Vultr API v2 `kvm`), so the matrix must supply
+        // one for the advertised `console: true` to be exercised, not merely not-refused.
+        kvm: 'https://my.vultr.test/subs/vps/novnc/api.php?data=matrix',
+      },
+      bandwidth: {},
+    };
   }
   return {};
 }
