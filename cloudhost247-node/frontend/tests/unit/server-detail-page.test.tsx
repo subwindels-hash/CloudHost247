@@ -132,6 +132,35 @@ describe('ServerDetailPage — honest access and security controls',()=>{
   });
 });
 
+describe('ServerDetailPage — serial console credentials', () => {
+  it('renders the one-time key and the provider instructions for a serial-console session, and no dead link', async () => {
+    // EC2's serial console is reached over SSH with a key AWS accepts for 60 seconds: the session has
+    // a private key and a command, but no URL, so the panel must not offer a "Launch console" link
+    // that goes nowhere.
+    stubApi({
+      server: { ...server, capabilities: { ...server.capabilities, console: true } },
+      [`POST /api/v1/servers/${SERVER_ID}/console`]: {
+        console: {
+          type: 'ec2-serial-console-ssh',
+          username: 'i-0abc123.port0',
+          privateKey: '-----BEGIN RSA PRIVATE KEY-----\nMIIEowIBAAKCAQEA\n-----END RSA PRIVATE KEY-----',
+          expiresAt: '2026-01-02T00:01:00.000Z',
+          notes: 'Save the private key to a file (chmod 600) and connect within 60 seconds: ssh -i <saved-key-file> i-0abc123.port0@serial-console.ec2-instance-connect.us-east-1.aws.',
+        },
+      },
+    });
+    renderPage();
+    await waitFor(() => expect(screen.getByText('Open console')).toBeTruthy());
+    fireEvent.click(screen.getByText('Open console'));
+
+    expect(await screen.findByText('One-time SSH private key')).toBeTruthy();
+    expect(screen.getByText(/BEGIN RSA PRIVATE KEY/)).toBeTruthy();
+    expect(screen.getByText(/serial-console\.ec2-instance-connect\.us-east-1\.aws/)).toBeTruthy();
+    expect(screen.getByText('ec2-serial-console-ssh')).toBeTruthy();
+    expect(screen.queryByText('Launch console')).toBeNull();
+  });
+});
+
 describe('ServerDetailPage — rescue instructions', () => {
   it('shows what the provider actually requires instead of assuming a passwordless rescue is SSH-key based', async () => {
     // Vultr: the session carries no password and no SSH key — the documented rescue is the

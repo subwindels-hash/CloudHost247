@@ -162,7 +162,7 @@ really offers (the A23 lesson: check the documented recovery procedure, not the 
 Native EC2 uses the AWS SDK's Signature Version 4 client. Plan metadata must set
 `providerServerType` to an EC2 instance type; the mapped OS image must hold an AMI id. It supports
 create/retry lookup through a CloudHost247 idempotency tag, status, start/stop/reboot, terminate,
-resize, snapshots, image lookup and console output. Reinstall is implemented as a replacement
+resize, snapshots, image lookup and a real interactive serial console session. Reinstall is implemented as a replacement
 instance (same zone, subnet, security groups and key; the previous instance is stopped, never
 terminated) and root-volume restore runs in place from a completed snapshot, keeping the detached
 root volume. Both are opt-in: they refuse with `UNSUPPORTED_OPERATION` unless the deployment sets
@@ -172,8 +172,23 @@ advertising `reinstall: false` until it is enabled. CloudWatch metrics **are** i
 granularity — over a one-hour window, requesting `CPUUtilization`, `NetworkIn`, `NetworkOut`,
 `DiskReadOps`, `DiskWriteOps` and `StatusCheckFailed`); they need separately scoped IAM permissions,
 a metric with no datapoints is reported in `missing` rather than zero-filled, and an unset region
-fails closed with `PROVIDER_NOT_CONFIGURED` before any call. Rescue mode remains unavailable: EC2 has
-no rescue or recovery-ISO API surface, so the refusal is correct rather than a gap.
+fails closed with `PROVIDER_NOT_CONFIGURED` before any call. **Console (rewritten 2026-10-03):** EC2 has no console URL and no console session token, but the serial console is
+interactive and API-reachable, so this adapter starts a real session instead of returning console *output*
+text (which the customer panel never rendered). `getConsole` generates a one-time RSA key pair, pushes the
+public half through EC2 Instance Connect's `SendSerialConsoleSSHPublicKey`, and returns the private half as
+`{ type: 'ec2-serial-console-ssh', username: '<instance-id>.port0', privateKey, expiresAt, notes }`. The key is
+valid for the **60 seconds** the API allows and is stored nowhere; the customer connects with
+`ssh -i <key> <instance-id>.port0@serial-console.ec2-instance-connect.<region>.aws` while the serial console
+asks for a local OS user and password. The API's conditions are reported as their own errors: Serial Console
+access must be enabled for the account (`EnableSerialConsoleAccess` → non-retryable `UNSUPPORTED_OPERATION`),
+only Nitro instance types are supported (non-retryable `UNSUPPORTED_OPERATION`), the instance must be running
+(retryable `SERVICE_UNAVAILABLE`) and only one session may be open at a time (retryable
+`SERVICE_UNAVAILABLE`).
+
+Rescue mode remains unavailable: EC2 has
+no rescue or recovery-ISO API surface, and the documented recovery paths are the serial console (above) plus
+restoring the root volume from a completed snapshot (implemented behind `AWS_ALLOW_ROOT_VOLUME_REPLACEMENT`), so
+the refusal is correct rather than a gap.
 
 ### Contabo (`contabo`)
 
@@ -685,8 +700,9 @@ Two deliberate constraints:
   reboot/shutdown/resize/reinstall — the bridge supplies the rescue system, login user and one-time
   password, and `rebooted` defaults to false so the adapter never claims a reboot it was not told
   about), and the development-only mock adapter, which simulates the state machine so the whole flow
-  can be exercised without a provider. The remaining four — AWS (no native rescue; manual workflow
-  only), DigitalOcean (the Recovery ISO is Control-Panel only), Proxmox VE (no API endpoint) and
+  can be exercised without a provider. The remaining four — AWS (no native rescue; the API's repair
+  paths are the serial console — a real session since 2026-10-03 — and restoring the root volume from a
+  completed snapshot, neither of which is a rescue boot), DigitalOcean (the Recovery ISO is Control-Panel only), Proxmox VE (no API endpoint) and
   Virtualizor (rescue exists only in the *enduser* API on port 4083, while this adapter
   authenticates against the Admin API on 4085) — have no rescue action in the API surface their
   adapter implements; they refuse with a non-retryable `UNSUPPORTED_OPERATION` and keep the capability

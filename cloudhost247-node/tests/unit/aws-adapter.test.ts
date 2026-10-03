@@ -1,7 +1,10 @@
+import { createPrivateKey, createPublicKey } from 'node:crypto';
 import { describe, expect, it, vi } from 'vitest';
 import { AwsProviderAdapter } from '../../src/infrastructure/providers/aws-adapter';
 import { ProviderError, type CreateProviderServerInput } from '../../src/infrastructure/providers/types';
 import type { InfrastructureProviderRow, ServerOsImageRow } from '../../src/db/infrastructure-providers';
+// eslint-disable-next-line import/first
+import { decodeSshRsaPublicKey } from '../helpers/ssh-public-key';
 
 function provider(): InfrastructureProviderRow {
   return {
@@ -33,6 +36,23 @@ function adapter(responses: unknown[]) {
 
 function commandInput(command: unknown): Record<string, unknown> {
   return (command as { input: Record<string, unknown> }).input;
+}
+
+/** The serial console is a third AWS service, so it gets its own fake transport. */
+function consoleAdapter(serialConsoleResponses: unknown[]) {
+  const serialConsoleSend = vi.fn(async () => {
+    const next = serialConsoleResponses.shift();
+    if (next instanceof Error) throw next;
+    return next;
+  });
+  const instance = new AwsProviderAdapter(provider(), {
+    AWS_ACCESS_KEY_ID: 'access', AWS_SECRET_ACCESS_KEY: 'secret', AWS_REGION: 'us-east-1',
+  }, { send: vi.fn(async () => ({})) }, { send: vi.fn(async () => ({})) }, { send: serialConsoleSend });
+  return { instance, serialConsoleSend };
+}
+
+function serialConsoleError(name: string): Error {
+  return Object.assign(new Error('the serial console service refused'), { name, $metadata: { httpStatusCode: 400 } });
 }
 
 describe('AwsProviderAdapter', () => {
@@ -164,6 +184,70 @@ describe('AwsProviderAdapter', () => {
         code: 'PROVIDER_NOT_CONFIGURED', retryable: false,
       } satisfies Partial<ProviderError>);
       expect(send).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('serial console (EC2 Instance Connect)', () => {
+    it('pushes a public key and hands over the private half with the 60-second API deadline', async () => {
+      const { instance, serialConsoleSend } = consoleAdapter([{ Success: true }]);
+      const before = Date.now();
+
+      const session = await instance.getConsole('i-0abc123');
+
+      expect(session).toMatchObject({ type: 'ec2-serial-console-ssh', username: 'i-0abc123.port0' });
+      expect(session.privateKey).toMatch(/^-----BEGIN RSA PRIVATE KEY-----/);
+      const expiresAt = Date.parse(String(session.expiresAt));
+      expect(expiresAt - before).toBeGreaterThanOrEqual(59_000);
+      expect(expiresAt - before).toBeLessThanOrEqual(61_000);
+      expect(String(session.notes)).toContain(
+        'ssh -i <saved-key-file> i-0abc123.port0@serial-console.ec2-instance-connect.us-east-1.aws'
+      );
+      // This is a session, not the read-only console output text the adapter used to return.
+      expect(session.output).toBeUndefined();
+
+      expect(serialConsoleSend).toHaveBeenCalledTimes(1);
+      const command = serialConsoleSend.mock.calls[0]?.[0];
+      expect((command as { constructor: { name: string } }).constructor.name).toBe('SendSerialConsoleSSHPublicKeyCommand');
+      expect(commandInput(command)).toMatchObject({ InstanceId: 'i-0abc123', SerialPort: 0 });
+
+      // The public key AWS receives is the public half of the private key the customer receives.
+      const parsed = decodeSshRsaPublicKey(String(commandInput(command).SSHPublicKey));
+      const jwk = createPublicKey(createPrivateKey(String(session.privateKey))).export({ format: 'jwk' }) as { n?: string; e?: string };
+      expect(parsed.modulus.toString('hex')).toBe(Buffer.from(jwk.n ?? '', 'base64url').toString('hex'));
+      expect(parsed.exponent.toString('hex')).toBe(Buffer.from(jwk.e ?? '', 'base64url').toString('hex'));
+    });
+
+    it('refuses a 200 that did not actually start a session instead of handing over a dead key', async () => {
+      const { instance } = consoleAdapter([{ Success: false }]);
+
+      await expect(instance.getConsole('i-0abc123')).rejects.toMatchObject({
+        code: 'PROVIDER_ERROR', retryable: false,
+      } satisfies Partial<ProviderError>);
+    });
+
+    it.each([
+      ['SerialConsoleAccessDisabledException', 'UNSUPPORTED_OPERATION', false],
+      ['EC2InstanceTypeInvalidException', 'UNSUPPORTED_OPERATION', false],
+      ['EC2InstanceStateInvalidException', 'SERVICE_UNAVAILABLE', true],
+      ['SerialConsoleSessionLimitExceededException', 'SERVICE_UNAVAILABLE', true],
+      ['AuthException', 'AUTHENTICATION_FAILED', false],
+      ['EC2InstanceNotFoundException', 'RESOURCE_NOT_FOUND', false],
+    ])('maps the service error %s to %s', async (name, code, retryable) => {
+      const { instance } = consoleAdapter([serialConsoleError(name)]);
+
+      await expect(instance.getConsole('i-0abc123')).rejects.toMatchObject({ code, retryable });
+    });
+
+    it('fails closed before generating or pushing a key when no region is configured', async () => {
+      const serialConsoleSend = vi.fn(async () => ({ Success: true }));
+      const instance = new AwsProviderAdapter(provider(), {
+        AWS_ACCESS_KEY_ID: 'access', AWS_SECRET_ACCESS_KEY: 'secret',
+      }, { send: vi.fn(async () => ({})) }, { send: vi.fn(async () => ({})) }, { send: serialConsoleSend });
+
+      await expect(instance.getConsole('i-0abc123')).rejects.toMatchObject({
+        code: 'PROVIDER_NOT_CONFIGURED', retryable: false,
+      } satisfies Partial<ProviderError>);
+      expect(serialConsoleSend).not.toHaveBeenCalled();
     });
   });
 });

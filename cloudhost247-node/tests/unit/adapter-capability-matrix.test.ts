@@ -141,7 +141,7 @@ function awsResponse(command: unknown): unknown {
     case 'RunInstancesCommand': return { Instances: [{ ...instance, InstanceId: 'i-replacement' }] };
     case 'CreateSnapshotCommand': return { SnapshotId: 'snap-1', State: 'pending' };
     case 'DescribeSnapshotsCommand': return { Snapshots: [{ SnapshotId: 'snap-1', State: 'completed' }] };
-    case 'GetConsoleOutputCommand': return { Output: Buffer.from('boot log').toString('base64') };
+    case 'SendSerialConsoleSSHPublicKeyCommand': return { Success: true };
     case 'GetMetricStatisticsCommand': return { Datapoints: [{ Average: 12.5, Maximum: 30, Unit: 'Percent', Timestamp: new Date() }] };
     case 'DescribeImagesCommand': return { Images: [{ ImageId: 'ami-1', Name: 'ubuntu', State: 'available', Architecture: 'x86_64' }] };
     default: return {};
@@ -157,7 +157,13 @@ function buildAdapter(kind: string, mode: 'blocked' | 'permissive'): { adapter: 
       if (mode === 'blocked') throw new Error('network disabled in this test');
       return awsResponse(command);
     });
-    return { adapter: new AwsProviderAdapter(row, env, { send }) as unknown as InfrastructureProviderAdapter, transportCalls: () => send.mock.calls.length };
+    // The same permissive transport answers all three AWS services the adapter can call (EC2,
+    // CloudWatch and EC2 Instance Connect), so every advertised AWS cell runs its success path
+    // instead of passing because a real client happened to fail with a non-refusal error.
+    return {
+      adapter: new AwsProviderAdapter(row, env, { send }, { send }, { send }) as unknown as InfrastructureProviderAdapter,
+      transportCalls: () => send.mock.calls.length,
+    };
   }
 
   let calls = 0;

@@ -1,5 +1,9 @@
 import { CloudWatchClient, GetMetricStatisticsCommand } from '@aws-sdk/client-cloudwatch';
 import {
+  EC2InstanceConnectClient,
+  SendSerialConsoleSSHPublicKeyCommand,
+} from '@aws-sdk/client-ec2-instance-connect';
+import {
   AttachVolumeCommand,
   CreateSnapshotCommand,
   CreateVolumeCommand,
@@ -10,7 +14,6 @@ import {
   DescribeSnapshotsCommand,
   DetachVolumeCommand,
   EC2Client,
-  GetConsoleOutputCommand,
   ModifyInstanceAttributeCommand,
   RebootInstancesCommand,
   RunInstancesCommand,
@@ -23,11 +26,15 @@ import type {
   DescribeImagesCommandOutput,
   DescribeInstancesCommandOutput,
   DescribeSnapshotsCommandOutput,
-  GetConsoleOutputCommandOutput,
   Instance,
 } from '@aws-sdk/client-ec2';
 import type { InfrastructureProviderRow, ServerOsImageRow } from '../../db/infrastructure-providers';
 import { unsupportedRescue } from './common';
+import {
+  SERIAL_CONSOLE_KEY_TTL_MS,
+  generateSerialConsoleKeyPair,
+  serialConsoleCommand,
+} from './aws-serial-console';
 import {
   buildReplacementLaunch,
   replacementEnabled,
@@ -127,6 +134,39 @@ function translateError(error: unknown): never {
   if (/ECONNRESET|ENOTFOUND|NetworkingError|Network/i.test(name)) {
     throw new ProviderError('NETWORK_TEMPORARY_FAILURE', 'AWS network request failed', true);
   }
+  // EC2 Instance Connect's serial console errors (the service's own exception names, so they cannot
+  // be confused with an EC2 API error). Each one says something an operator or customer can act on.
+  if (/^AuthException$/i.test(name)) {
+    throw new ProviderError('AUTHENTICATION_FAILED', 'AWS rejected the configured credentials for EC2 Instance Connect', false);
+  }
+  if (/SerialConsoleAccessDisabled/i.test(name)) {
+    throw new ProviderError(
+      'UNSUPPORTED_OPERATION',
+      'EC2 Serial Console access is disabled for this AWS account; an operator must enable it with EnableSerialConsoleAccess',
+      false,
+    );
+  }
+  if (/EC2InstanceTypeInvalid/i.test(name)) {
+    throw new ProviderError(
+      'UNSUPPORTED_OPERATION',
+      'AWS offers the serial console only on Nitro instance types',
+      false,
+    );
+  }
+  if (/EC2InstanceStateInvalid/i.test(name)) {
+    throw new ProviderError(
+      'SERVICE_UNAVAILABLE',
+      'The instance is not in a state that supports the serial console; start it and try again',
+      true,
+    );
+  }
+  if (/SerialConsoleSessionLimitExceeded/i.test(name)) {
+    throw new ProviderError(
+      'SERVICE_UNAVAILABLE',
+      'The instance already has an open serial console session; only one is supported at a time',
+      true,
+    );
+  }
 
   throw new ProviderError(
     'PROVIDER_ERROR',
@@ -141,6 +181,8 @@ export class AwsProviderAdapter implements InfrastructureProviderAdapter {
   private readonly client: Ec2Transport;
   /** CloudWatch transport, kept separate because metrics are a different service and scope. */
   private readonly metricsClient: Ec2Transport;
+  /** Instance Connect transport: the serial console is a different service from EC2 itself. */
+  private readonly serialConsoleClient: Ec2Transport;
   private readonly region: string | undefined;
   /** Replacement workflows stay unavailable until the deployment opts in. */
   private readonly allowRootVolumeReplacement: boolean;
@@ -150,6 +192,7 @@ export class AwsProviderAdapter implements InfrastructureProviderAdapter {
     source: NodeJS.ProcessEnv = process.env,
     client?: Ec2Transport,
     metricsClient?: Ec2Transport,
+    serialConsoleClient?: Ec2Transport,
   ) {
     const prefix = provider.credential_env_prefix || 'AWS';
     const accessKeyId = source[`${prefix}_ACCESS_KEY_ID`] ?? source.AWS_ACCESS_KEY_ID;
@@ -166,6 +209,12 @@ export class AwsProviderAdapter implements InfrastructureProviderAdapter {
         : {}),
     });
     this.metricsClient = metricsClient ?? new CloudWatchClient({
+      region: this.region ?? 'us-east-1',
+      ...(accessKeyId && secretAccessKey
+        ? { credentials: { accessKeyId, secretAccessKey, ...(sessionToken ? { sessionToken } : {}) } }
+        : {}),
+    });
+    this.serialConsoleClient = serialConsoleClient ?? new EC2InstanceConnectClient({
       region: this.region ?? 'us-east-1',
       ...(accessKeyId && secretAccessKey
         ? { credentials: { accessKeyId, secretAccessKey, ...(sessionToken ? { sessionToken } : {}) } }
@@ -199,6 +248,15 @@ export class AwsProviderAdapter implements InfrastructureProviderAdapter {
     this.configured();
     try {
       return await this.client.send(command) as T;
+    } catch (error) {
+      return translateError(error);
+    }
+  }
+
+  /** Instance Connect is a separate service, so it needs its own transport and error translation. */
+  private async sendSerialConsole<T>(command: object): Promise<T> {
+    try {
+      return await this.serialConsoleClient.send(command) as T;
     } catch (error) {
       return translateError(error);
     }
@@ -510,15 +568,46 @@ export class AwsProviderAdapter implements InfrastructureProviderAdapter {
     return Promise.reject(new ProviderError('UNSUPPORTED_OPERATION', 'AWS EC2 rescue mode is not supported', false));
   }
 
+  /**
+   * Starts a real interactive serial console session. EC2 has no console URL and no console session
+   * token: the interactive console is reached over SSH by pushing a public key through Instance
+   * Connect and connecting with the matching private key, which is what the platform does here —
+   * generate the pair, push the public half, hand the private half back once.
+   *
+   * `GetConsoleOutput` returned the serial console's output *text*, which is a diagnostic, not a
+   * session: the console route hands the caller a session and the customer UI renders a session, so
+   * the previous implementation advertised a capability and then gave the customer nothing usable.
+   *
+   * Conditions the AWS API itself reports, mapped to messages a caller can act on: serial console
+   * access must be enabled for the account (`EnableSerialConsoleAccess`), the instance must be a
+   * Nitro type (the API states this), it must be running, and only one session may be open at a
+   * time. The 60-second key lifetime is the API's, not a platform choice, so the session carries it
+   * as `expiresAt`.
+   */
   async getConsole(providerServerId: string): Promise<Record<string, unknown>> {
-    const output = await this.send<GetConsoleOutputCommandOutput>(new GetConsoleOutputCommand({
-      InstanceId: providerServerId,
-      Latest: true,
-    }));
+    const region = this.configured();
+    const keyPair = generateSerialConsoleKeyPair();
+    const result = await this.sendSerialConsole<{ Success?: boolean }>(
+      new SendSerialConsoleSSHPublicKeyCommand({
+        InstanceId: providerServerId,
+        SerialPort: 0,
+        SSHPublicKey: keyPair.publicKey,
+      }),
+    );
+    if (result.Success !== true) {
+      // A 200 without `Success` means the serial console service did not start a session; handing
+      // over the private half anyway would send the customer to a key the service never registered.
+      throw new ProviderError('PROVIDER_ERROR', 'AWS did not accept the serial console public key', false);
+    }
     return {
-      output: output.Output ?? null,
-      timestamp: output.Timestamp?.toISOString() ?? null,
-      instanceId: output.InstanceId ?? providerServerId,
+      type: 'ec2-serial-console-ssh',
+      username: `${providerServerId}.port0`,
+      privateKey: keyPair.privateKey,
+      expiresAt: new Date(Date.now() + SERIAL_CONSOLE_KEY_TTL_MS).toISOString(),
+      notes: `Save the private key to a file (chmod 600) and connect within 60 seconds: `
+        + `${serialConsoleCommand(providerServerId, region)}. AWS removes the key after 60 seconds and `
+        + `allows one serial console session per instance; the console itself then asks for a local `
+        + `operating-system user and password.`,
     };
   }
 

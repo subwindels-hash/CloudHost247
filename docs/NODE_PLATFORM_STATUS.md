@@ -1121,7 +1121,14 @@ sub-phase before the next one begins.
   - **Guarded by deployment opt-in, not by a code comment.** Both workflows require `AWS_ALLOW_ROOT_VOLUME_REPLACEMENT=true` (or the provider-prefix equivalent); without it every call fails with a non-retryable `UNSUPPORTED_OPERATION` **before a single AWS request is sent**, and the profile keeps advertising `reinstall: false`. The static profile cannot know a deployment's IAM scope, so the capability stays off until an operator says otherwise; the profiles notes now say exactly that. `deleteSnapshot()` is implemented for real (it only ever touches the id it was given).
   - **The request construction is a pure module** (`aws-replacement.ts`): guards, tags and the launch object are asserted without an AWS client, so the destructive-path rules are testable and live in one place.
   - **Tests added:** `tests/unit/aws-replacement.test.ts` (12) — both workflows refusing with no commands sent when the flag is off, snapshot deletion and its input guard, the replacement command order and launch shape (AMI, type, subnet, security groups, zone, key, user data, tags), the assertion that `TerminateInstancesCommand` is never sent, the in-place restore command order including the detached old volume and the `Device` name, a stopped instance staying stopped, and the two refusal paths. Backend and frontend TypeScript compile clean.
-  - **Still honest about what is missing:** rescue mode and CloudWatch metrics remain unsupported on EC2, and the adapter's own comments say why.
+  - **Still honest about what is missing (corrected 2026-10-03):** the two items this bullet used to name are no
+    longer missing. CloudWatch metrics were implemented on 2026-10-02 (§A4 metrics: `GetMetricStatistics` over
+    `AWS/EC2`), and the console was replaced on 2026-10-03 by a real EC2 serial console session — the round-11
+    section at the end of this document records why the previous `GetConsoleOutput` implementation was not the
+    capability the flag promised. **Rescue mode is the one EC2 capability still refused**, and the reason is
+    recorded rather than implied: EC2 exposes no rescue-boot API, and the documented recovery paths for an
+    unbootable instance are the serial console (now implemented as the console) and restoring the root volume
+    from a completed snapshot (implemented behind `AWS_ALLOW_ROOT_VOLUME_REPLACEMENT`).
 
 ---
 
@@ -1641,3 +1648,61 @@ sub-phase before the next one begins.
   `configuration_metadata.capabilities` at order acceptance, so existing Vultr rows and product
   configurations created while the old profile was live still carry `rescue: false` and must be
   re-derived before customers can see the rescue action.
+
+---
+
+## A4 — EC2's console capability promised a session and delivered console output text (found and fixed 2026-10-03)
+
+- **Source/local verification:** PASSED on branch `arena/01a0ff64-cloudhost247`.
+- **Why this section exists.** The AWS profile advertised `console: true`, and `getConsole()` answered with
+  `GetConsoleOutput` — the instance's console **output text**. The console route
+  (`POST /api/v1/servers/:id/console`) returns a *session* and the customer panel renders a *session*: a URL,
+  a type, an expiry, a one-time password. For an EC2 server it therefore rendered a panel with nothing in it
+  while the platform had already written the `SERVER_CONSOLE_OPENED` audit row. The A4 row described this as
+  "console output" and left it there, which is how a capability flag and an implementation drift apart: the flag
+  promises interactive access, the implementation returns a diagnostic.
+- **The provider does expose the capability — over SSH.** EC2 has no console URL and no console session token,
+  but its **serial console** is interactive and API-reachable: Instance Connect's
+  `SendSerialConsoleSSHPublicKey` pushes a public key that is valid for **60 seconds**, and the customer then
+  connects with the matching private key to
+  `<instance-id>.port0@serial-console.ec2-instance-connect.<region>.aws`. Only one serial console session may be
+  open per instance; the account must have Serial Console access enabled (`EnableSerialConsoleAccess`); only
+  Nitro instance types are supported; and the instance must be running. The API returns one distinct exception
+  for each of those conditions.
+- **Fixed.** `getConsole()` now starts a real session: it generates a one-time RSA key pair
+  (`aws-serial-console.ts`, OpenSSH wire-format public half + PKCS#1 PEM private half), pushes the public half
+  through Instance Connect on a transport of its own (the serial console is a different AWS service from EC2 and
+  from CloudWatch, so it has its own injected client), and returns
+  `{ type: 'ec2-serial-console-ssh', username: '<instance-id>.port0', privateKey, expiresAt, notes }`. The private
+  key is handed over once and stored nowhere — the same request-scope rule as every other console/rescue
+  credential — and `expiresAt` is the API's own 60-second deadline, not a platform invention. The four API
+  conditions map to their own messages (`UNSUPPORTED_OPERATION` for disabled access and non-Nitro types,
+  retryable `SERVICE_UNAVAILABLE` for a stopped instance and for the one-session limit, `AUTHENTICATION_FAILED`
+  for `AuthException`), and a 200 that is not `Success: true` fails non-retryably instead of handing over a key
+  the serial console service never registered.
+- **The customer panel renders what it is given.** The console panel now shows a `privateKey` as a copyable
+  block and the session `notes` (the exact `ssh` command and the 60-second/one-session caveats), and it no
+  longer offers a "Launch console" link when the provider returned no URL. The hint text was corrected to say
+  not to share the credential, not just the link.
+- **Tests, and what they can and cannot prove.** `tests/unit/aws-serial-console.test.ts` (4) proves the public
+  half AWS receives is the public half of the private half the customer receives — it decodes the OpenSSH blob
+  and compares modulus and exponent against the key derived from the returned PEM — plus the endpoint, the
+  command and the mpint high-bit rule. `tests/unit/aws-adapter.test.ts` (16, was 7) pins the command input, the
+  session shape, the 60-second window, the "not `Success`" refusal, all five error mappings and the
+  no-region fail-closed path, using an injected Instance Connect transport. The capability matrix now answers
+  the Instance Connect call from the same permissive transport as EC2 and CloudWatch, so the `console: true`
+  cell runs its success path instead of passing because a real client failed. The frontend suite renders the
+  private key, the notes and the absence of a dead link. **Not claimed:** AWS itself was not called — no live
+  account is available in this environment — so what is verified is the request the adapter builds and the
+  failures it maps, not that a given AWS account has serial console access enabled.
+- **Evidence:** `tests/unit/aws-serial-console.test.ts` 4 + `tests/unit/aws-adapter.test.ts` 16 → 20 passed;
+  touched capability suites (`provider-capability-truth` 10, `adapter-capability-matrix` 76,
+  `provider-console-metrics-truth` 20, `undeclared-adapter-fail-closed` 6, `server-console` 6) → 118 passed;
+  `frontend/tests/unit/server-detail-page.test.tsx` 8. `npx tsc --noEmit` → 0 in both projects. Seven mutations
+  each turned the intended assertions red and nothing else: dropping the mpint leading zero, ignoring
+  `Success`, routing the session through the EC2 client, making the one-session limit non-retryable, flipping
+  the profile flag while the implementation stayed, removing the private-key row, and dropping the region from
+  the serial console endpoint. Full-suite evidence: **`npm test` 129 files / 1151 tests pass** (128 files / 1137 before), exit 0, 1158.5 s.
+- **Not claimed, again:** the read-only console output that `GetConsoleOutput` used to return is no longer
+  surfaced anywhere. It was never rendered, and a boot log can contain secrets; if it is wanted later it should
+  be a deliberate, separately designed diagnostic surface, not a side effect of the console flag.

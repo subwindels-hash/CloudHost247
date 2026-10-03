@@ -81,8 +81,9 @@ describe('adapter profiles tell the truth about their capabilities', () => {
   });
 
   it('refuses every capability it does not advertise, without calling the provider', async () => {
-    // AWS metrics is NOT asserted here any more: getServerMetrics now reads CloudWatch
-    // (GetMetricStatistics, AWS/EC2) and is pinned by tests/unit/aws-adapter.test.ts instead.
+    // AWS metrics and console are NOT asserted here any more: getServerMetrics reads CloudWatch
+    // (GetMetricStatistics, AWS/EC2) and getConsole starts a real EC2 serial console session through
+    // Instance Connect — both pinned by tests/unit/aws-adapter.test.ts instead.
     const { instance, send } = awsAdapter();
     await expect(instance.enableRescue('i-1', { architecture: 'x86_64' })).rejects.toMatchObject({ code: 'UNSUPPORTED_OPERATION', retryable: false });
     await expect(instance.disableRescue('i-1')).rejects.toMatchObject({ code: 'UNSUPPORTED_OPERATION', retryable: false });

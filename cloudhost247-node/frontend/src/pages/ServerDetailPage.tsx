@@ -686,7 +686,8 @@ export default function ServerDetailPage() {
           <h2>Serial console session</h2>
           <p className="ch247-page__hint">
             This session was issued by the provider for your account only. It is short lived, is never stored by
-            CloudHost247, and disappears from this page when you reload it. Do not share the link.
+            CloudHost247, and disappears from this page when you reload it. Do not share the link or any
+            credential below.
           </p>
           <dl className="ch247-kv">
             {typeof consoleSession.type === 'string' && (
@@ -707,7 +708,16 @@ export default function ServerDetailPage() {
                 <dd><code>{consoleSession.password}</code></dd>
               </>
             )}
+            {typeof consoleSession.privateKey === 'string' && (
+              <>
+                <dt>One-time SSH private key</dt>
+                <dd><code style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>{consoleSession.privateKey}</code></dd>
+              </>
+            )}
           </dl>
+          {typeof consoleSession.notes === 'string' && (
+            <p className="ch247-banner ch247-banner--info">{consoleSession.notes}</p>
+          )}
           <div className="ch247-actions">
             {typeof consoleSession.url === 'string' && (
               <a className="ch247-btn ch247-btn--primary" href={consoleSession.url} target="_blank" rel="noreferrer noopener">
