@@ -232,7 +232,15 @@ operations remain unsupported, each verified against Contabo's own API rather th
 only firewalling and private network addon is allowed" — and Contabo documents plan upgrades as an
 in-place Control Panel action), **console** (the generated client's `InstanceActionsApi` lists exactly
 `rescue`, `resetPassword`, `restart`, `shutdown`, `start`, `stop`; the VNC console is a Control Panel
-feature) and **metrics** (no metrics endpoint exists; monitoring is a paid Control Panel add-on). All
+feature — **re-verified against the live `api.contabo.com` reference on 2026-10-03**, closing the
+A23(i) follow-up: the current documented surface — Instances, Instance Actions, Snapshots, Images,
+Object Storages, Private Networks, Tags, Users, Roles, Secrets, VIP, Domains, DNS, Firewalls and
+Troubleshooting — contains no VNC or console operation, and Contabo's own product documentation
+describes console access as VNC credentials used with an external client, not an API call. Older
+generated clients from ~2022 ship `FindVncResponse`/`PatchVncRequest` models, i.e. a VNC endpoint
+existed in an earlier API version; it is absent from the current reference and an undocumented
+endpoint is not a surface this platform builds on) and **metrics** (no metrics endpoint exists;
+monitoring is a paid Control Panel add-on). All
 three refuse with a non-retryable `UNSUPPORTED_OPERATION` before any request. Do not enable production sales until the intended account's full
 create/retry/reinstall/snapshot/lifecycle/health matrix has been exercised with a low-cost test
 instance.
