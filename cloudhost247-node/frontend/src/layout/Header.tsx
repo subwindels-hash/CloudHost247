@@ -27,6 +27,7 @@ const appLinks = [
   { to: '/dashboard/domains', label: 'My Domains' },
   { to: '/dashboard/dns', label: 'DNS Zones' },
   { to: '/dashboard/ssl', label: 'SSL Certificates' },
+  { to: '/tools/monitors', label: 'Monitoring' },
   { to: '/billing', label: 'Billing' },
   { to: '/invoices', label: 'Invoices' },
   { to: '/support', label: 'Support' },
