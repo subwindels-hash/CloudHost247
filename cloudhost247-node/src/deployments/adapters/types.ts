@@ -65,6 +65,21 @@ export interface BackupResult extends DeploymentOperationResult {
 export interface DeploymentAdapter {
   readonly kind: 'docker' | 'cpanel' | 'kubernetes';
 
+  /**
+   * Whether `restoreBackup` writes underneath live workloads, so the restore pipeline has to stop the
+   * application first and start it again afterwards.
+   *
+   * True for docker-compose: the agent untars `compose.yaml`, `.env` and `volumes/` straight into the
+   * project directory, and if the containers are still running they keep writing to the very volume
+   * files being replaced — a running database's data files are overwritten under it, and the compose
+   * file on disk stops matching the containers that are up. cPanel restores a hosting account's home
+   * directory through the panel's own UAPI, which is the account's normal (live) restore path, and
+   * Kubernetes restores are refused outright, so neither sets this.
+   *
+   * Omitted means false. A restore into an already-`stopped` installation is never un-stopped by this.
+   */
+  readonly restoreRequiresStoppedApplication?: boolean;
+
   deployApplication(ctx: AdapterContext, input: DeployInstallationInput): Promise<DeploymentOperationResult>;
   destroyApplication(ctx: AdapterContext, project: string): Promise<DeploymentOperationResult>;
   startApplication(ctx: AdapterContext, project: string): Promise<DeploymentOperationResult>;

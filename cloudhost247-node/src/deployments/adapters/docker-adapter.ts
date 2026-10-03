@@ -57,6 +57,14 @@ export function createDockerAdapter(options: DockerAdapterOptions): DeploymentAd
   return {
     kind: 'docker',
 
+    /**
+     * The agent's restore untars the project directory — compose.yaml, .env and volumes/ — while the
+     * containers are up, so a running database's data files are replaced under it and the file on
+     * disk stops matching the running containers. The restore pipeline stops the application first
+     * and starts it again afterwards (see DeploymentAdapter.restoreRequiresStoppedApplication).
+     */
+    restoreRequiresStoppedApplication: true,
+
     async deployApplication(ctx, input) {
       if (await isSimulated(ctx)) {
         await ctx.log('info', `Simulated deploy of ${input.project} (image ${input.appImage})`);

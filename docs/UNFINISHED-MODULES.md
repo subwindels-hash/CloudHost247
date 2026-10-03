@@ -162,6 +162,34 @@ zero-byte/placeholder files, and modules documented as vendor-only, gated, super
 > which is the intent (Docker is a hard requirement of the installer), but it has not been observed on a real host.
 > `mongodump --archive` is implemented from its documented behaviour and exercised only against a stub.
 
+| A19 | **Node platform — restoring a backup over a *running* application** (the open item A18 recorded; found by following it up) | `cloudhost247-node/src/deployments/engine.ts` (`restorePipeline`), `src/deployments/adapters/types.ts`, `src/deployments/adapters/docker-adapter.ts` | **FOUND AND FIXED 2026-10-03 — CLOSED.** A18 recorded that the agent untars `compose.yaml`, `.env` and `volumes/` straight into the project directory and that the restore pipeline never stopped the application. Following it up showed it was the *normal* path, not an edge case: the customer route registers `action('restore', 'restore', ['healthy', 'unhealthy', 'stopped'])`, so a **healthy, running** application could be restored — replacing a live database's volume data under the containers still writing to it, and leaving the `compose.yaml` on disk no longer matching the containers that were up. The pipeline now consults a new adapter declaration, `DeploymentAdapter.restoreRequiresStoppedApplication`: **docker-compose declares it** (its restore is a directory replacement), and cPanel and Kubernetes deliberately do not — cPanel restores an account's home directory through the panel's own UAPI `restore_backup`, which is the account's normal live path and where suspending the account would take the customer's site and mail offline for a routine restore, and Kubernetes restores are refused outright (`K8S_BACKUP_REQUIRES_VELERO`). The application is stopped, the restore runs, then it is started again **and health-probed — including when the restore itself fails**, because a failed restore must not leave a customer's application down and nothing later in the pipeline would start it; the restart sets the installation to `starting` first, the same transition `lifecyclePipeline` uses, so the probe promotes it to `healthy` rather than leaving the `stopped` the quiesce step had set. An installation that was **already `stopped`** is restored without being started: nothing is running to quiesce, and a restore must not be what starts a customer's app. A second defect was closed in the same pass: the pipeline fetches the backup and checks only `status === 'completed'`, so the ownership scoping that the customer route performs (`backup.installation_id !== installation.id` → 404) was never re-checked by the component that actually performs the destructive, irreversible write — the engine now verifies it again at the point of harm. | **Open, recorded rather than implied:** (a) a restore never verifies `backups.checksum` — the pipeline holds it (the agent computes it) but the agent API takes no expected checksum, so silent corruption of an archive at rest is still undetectable at restore time; (b) a destructive restore is not preceded by a safety snapshot of the current state, so "restore the backup I took an hour ago" cannot be undone; both are product decisions with real disk/time cost and are listed here rather than quietly assumed | `cloudhost247-node/src/deployments/engine.ts` (`restorePipeline`), `tests/integration/worker-deployments.test.ts` (+7 restore cases), `tests/unit/deployment-adapter-operations.test.ts` (+2), `docs/NODE_PLATFORM_STATUS.md` §Deployment adapters, `docs/SERVER_AGENT.md` §Backups |
+
+> **A19 verification (2026-10-03).** `npx vitest run tests/integration/worker-deployments.test.ts` → **13 tests, 13 pass**,
+> driving the **real** `processNextJob`/`executeDeployment` against real migrations in PGlite with a stub adapter, so the
+> asserted call order is the order the engine really issues. `npm test` → **124 files / 1106 tests, pass** (1097 before;
+> +9). `npm run typecheck` → 0.
+>
+> **Mutation-verified** — re-introducing each defect turns the intended tests red, and nothing else:
+>
+> | mutation | result |
+> |---|---|
+> | quiesce disabled in the pipeline | 3 red (order, restart-on-failure, cannot-stop) |
+> | the already-`stopped` guard removed | 1 red (*"restores an already-stopped installation without starting it"*) |
+> | the restart in the `finally` block removed | 2 red |
+> | the docker adapter's capability declaration removed | **initially 12/12 green — a real gap** |
+> | the cross-installation ownership check removed | 1 red |
+>
+> The fourth row is the instructive one: the pipeline's integration tests inject a stub adapter that declares the flag
+> itself, so nothing noticed when the **real** docker adapter stopped declaring it — a capability that can silently
+> disappear again, which is the same failure mode this whole inventory catalogues. Two tests were added to pin the
+> declaration against the real adapters (docker declares it; cPanel and Kubernetes do not), and the mutation then goes
+> **1 red / 34 green** as intended. The PHP legs of the release gate were **not** re-run for this change: it touches no
+> PHP file and no gate input (`git diff --name-only` for the commit lists TypeScript, tests and documentation only).
+>
+> **Not claimed:** the tests use a stub adapter, so no real `docker compose` was stopped or started, and the cPanel and
+> Kubernetes branches are pinned at the declaration rather than exercised end-to-end (the cPanel restore path is
+> staging-blocked — see §E). Simulation mode is on throughout.
+
 ---
 
 ## B. Never independently built — vendor, licence-gated, or superseded builds

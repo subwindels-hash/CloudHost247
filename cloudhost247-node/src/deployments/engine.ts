@@ -723,10 +723,21 @@ function restorePipeline(ctx: PipelineContext): StepDefinitionInternal[] {
     {
       name: 'Validate backup archive',
       run: async () => {
+        const { installation } = requireInstallation(ctx);
         const backupId = String((ctx.deployment.payload as { backupId?: string }).backupId ?? '');
         const { findBackupById } = await import('../db/ops-tables');
         const backup = await findBackupById(ctx.db, backupId);
         if (!backup || backup.status !== 'completed') fail('BACKUP_NOT_AVAILABLE', 'Backup not found or not completed');
+        /**
+         * The customer route already scopes the backup to the installation it is being restored into
+         * (`backup.installation_id !== installation.id` → 404). The engine checks it again because
+         * this pipeline is what actually overwrites the installation's data, and a deployment row can
+         * be enqueued by any worker path, not only through that route. A restore is destructive and
+         * irreversible, so it gets the check at the point of harm as well as at the point of entry.
+         */
+        if (backup.installation_id !== installation.id) {
+          fail('BACKUP_NOT_AVAILABLE', 'Backup belongs to a different installation');
+        }
       },
     },
     {
@@ -738,12 +749,55 @@ function restorePipeline(ctx: PipelineContext): StepDefinitionInternal[] {
         const { findBackupById } = await import('../db/ops-tables');
         const backup = await findBackupById(ctx.db, String((ctx.deployment.payload as { backupId?: string }).backupId ?? ''));
         if (!backup) fail('BACKUP_NOT_AVAILABLE', 'Backup disappeared');
-        const result = await adapter.restoreBackup(
-          { db, server, log: ctx.log },
-          installation.container_project ?? installation.id,
-          backup.storage_path ?? ''
-        );
-        if (!result.ok) fail(result.code, result.message);
+        const project = installation.container_project ?? installation.id;
+
+        /**
+         * Quiesce first where the engine writes underneath live workloads. A docker-compose restore
+         * untars compose.yaml, .env and volumes/ into the project directory, so restoring a *running*
+         * application replaces its volume data under the containers that are still writing to it —
+         * a database's data files are overwritten mid-write, and the compose file on disk stops
+         * matching the containers that are up. The route already allows `restore` on a `healthy`
+         * installation, so this is the normal path, not an edge case.
+         *
+         * An installation that is already `stopped` is restored without being started afterwards:
+         * nothing is running to quiesce, and a restore must not be what starts a customer's app.
+         */
+        const quiesce = adapter.restoreRequiresStoppedApplication === true && installation.status !== 'stopped';
+        if (quiesce) {
+          const stop = await adapter.stopApplication({ db, server, log: ctx.log }, project);
+          if (!stop.ok) fail(stop.code, `Application could not be stopped before restoring: ${stop.message}`);
+          await setInstallationStatus(db, installation.id, 'stopped', { force: true }).catch(() => undefined);
+          await ctx.log('info', 'Application stopped for restore — nothing is writing to the volume data being replaced');
+        }
+
+        try {
+          const result = await adapter.restoreBackup(
+            { db, server, log: ctx.log },
+            project,
+            backup.storage_path ?? ''
+          );
+          if (!result.ok) fail(result.code, result.message);
+        } finally {
+          // Started again even when the restore failed: a failed restore must never leave the
+          // customer's application down, and nothing later in this pipeline would start it. The
+          // volume data may be partially replaced, which is exactly why the restart is logged.
+          if (quiesce) {
+            // Same transition the lifecycle pipeline uses before a start: the health probe below
+            // promotes 'starting' to 'healthy', while a 'stopped' status would stay 'stopped' even
+            // though the application is up again.
+            await setInstallationStatus(db, installation.id, 'starting').catch(() => undefined);
+            const start = await adapter
+              .startApplication({ db, server, log: ctx.log }, project)
+              .catch((err) => ({ ok: false, code: 'START_FAILED', message: String((err as Error)?.message ?? err) }));
+            if (start.ok) {
+              const report = await adapter.runHealthcheck({ db, server, log: ctx.log }, project, manifest);
+              await recordHealthResult(db, installation.id, healthValue(report.health), {});
+            } else {
+              await ctx.log('error', `Application could not be restarted after the restore: ${start.message}`);
+              await setInstallationStatus(db, installation.id, 'failed').catch(() => undefined);
+            }
+          }
+        }
       },
     },
   ];

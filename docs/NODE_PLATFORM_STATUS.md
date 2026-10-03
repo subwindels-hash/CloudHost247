@@ -1119,6 +1119,18 @@ sub-phase before the next one begins.
   copy it does not have. `restoreBackup` calls UAPI `Backup::restore_backup` with the file name
   only, after refusing any archive outside `/home/<user>/` — a restore overwrites the account's
   files and must never be pointed at an arbitrary path.
+- **Application restores quiesce a running docker-compose project (2026-10-03).** `restorePipeline`
+  restored straight into the project directory while the containers were still up, and the customer
+  route allows `restore` on a `healthy` installation — so a running database's volume data was
+  replaced under it and the `compose.yaml` on disk stopped matching the containers that were running.
+  The pipeline now consults `DeploymentAdapter.restoreRequiresStoppedApplication`: docker-compose
+  declares it, cPanel and Kubernetes do not (cPanel restores an account's home directory through the
+  panel's own live UAPI path; Kubernetes refuses restores). The application is stopped, the restore
+  runs, and it is started again and health-probed — including when the restore itself fails, because
+  a failed restore must not leave a customer's app down. An installation that was already `stopped`
+  is restored without being started. The same pass added the ownership re-check the pipeline was
+  missing: the route scopes a backup to its installation, and the engine now verifies
+  `backup.installation_id === installation.id` again at the point that overwrites the data.
 - **Defect fixed while wiring it:** the cPanel username was derived by stripping non-lowercase
   characters, so `My-Project` became `roject`. Derivation now lowercases first, guards a leading
   digit with the `u` prefix and caps at cPanel's 16 characters, and every cPanel path (deploy,

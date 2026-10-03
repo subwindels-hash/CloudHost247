@@ -124,10 +124,13 @@ written. It lists the archive first and returns the member count it applied. Wit
 successful restore of a project that had been only partly replaced; on an empty archive it wrote
 nothing and still reported success.
 
-**Known gap, not fixed here:** restores extract over a *running* project — the deployment pipeline does
-not stop the app first, so a restore can write volume data under live containers. That is a
-control-plane pipeline decision (stop → restore → start), not an agent one, and it is recorded as an
-open item in `docs/UNFINISHED-MODULES.md`.
+**Restores are quiesced by the control plane.** The agent untars into the project directory of
+whatever is running there, so the deployment pipeline stops the application first and starts it again
+afterwards — for engines that declare
+`restoreRequiresStoppedApplication` (docker-compose does; cPanel restores through its own UAPI live,
+and Kubernetes refuses restores outright). An installation that was already `stopped` is restored
+without being started. If the restore fails the application is still started again, because a failed
+restore must never leave a customer's app down, and the volume data may be partially replaced.
 
 ## Failure modes and recovery
 

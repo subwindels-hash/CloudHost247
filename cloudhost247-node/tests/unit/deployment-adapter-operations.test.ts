@@ -482,3 +482,26 @@ describe('docker adapter reports what a backup really contains', () => {
     expect(logs).toEqual([]);
   });
 });
+
+/**
+ * The restore pipeline stops a running application before restoring *only* when the engine declares
+ * that its restore writes underneath live workloads (see restorePipeline and
+ * DeploymentAdapter.restoreRequiresStoppedApplication). That declaration is what makes the pipeline
+ * correct, and the pipeline's own integration tests inject a stub adapter — so nothing there notices
+ * if the real docker adapter stops declaring it. This pins the declaration against the real adapters.
+ */
+describe('restore quiescence is declared by the engine, not inferred by the pipeline', () => {
+  it('the docker engine declares that its restore replaces volume data under running containers', () => {
+    expect(createDockerAdapter({ simulationMode: false }).restoreRequiresStoppedApplication).toBe(true);
+  });
+
+  it('cPanel and Kubernetes do not, because their restores are not container-volume replacements', () => {
+    // cPanel restores an account's home directory through the panel's own UAPI, which is the
+    // account's normal live path; suspending the account around a restore would take the customer's
+    // site and mail offline. Kubernetes restores are refused outright.
+    expect(createCpanelAdapter({ simulationMode: false }).restoreRequiresStoppedApplication).toBeUndefined();
+    expect(
+      createKubernetesAdapter({ enabled: true, simulationMode: false }).restoreRequiresStoppedApplication
+    ).toBeUndefined();
+  });
+});

@@ -11,6 +11,7 @@ import { createServer } from '../../src/db/servers';
 import { createInstallationRequest } from '../../src/services/installation-service';
 import { processNextJob, recoverOrphanedJobs } from '../../src/worker/handlers';
 import { enqueueDeployment, findDeploymentById } from '../../src/db/deployments';
+import { createBackup, updateBackup } from '../../src/db/ops-tables';
 import type { DeploymentAdapter } from '../../src/deployments/adapters/types';
 import type { Queryable } from '../../src/db/types';
 
@@ -40,7 +41,10 @@ describe('deployment worker', () => {
    * — no `as never` casting, so a renamed adapter method breaks this test at compile time, not
    * at 2am in production. Records every call; configured names fail.
    */
-  function stubAdapter(fail: Set<string> = new Set()): DeploymentAdapter & { calls: string[] } {
+  function stubAdapter(
+    fail: Set<string> = new Set(),
+    { quiesceRestore = false }: { quiesceRestore?: boolean } = {}
+  ): DeploymentAdapter & { calls: string[] } {
     const calls: string[] = [];
     const op = (name: string) => {
       calls.push(name);
@@ -48,6 +52,7 @@ describe('deployment worker', () => {
     };
     return {
       kind: 'docker',
+      ...(quiesceRestore ? { restoreRequiresStoppedApplication: true } : {}),
       calls,
       deployApplication: async (_ctx, input) => op(`deploy:${input.project}`),
       destroyApplication: async (_ctx, project) => op(`teardown:${project}`),
@@ -163,6 +168,182 @@ describe('deployment worker', () => {
 
     // Queue empty now.
     expect(await processNextJob(ctx)).toBeNull();
+  });
+
+  /**
+   * Restoring a running docker-compose application. The agent's restore untars compose.yaml, .env
+   * and volumes/ into the project directory, so a running database's data files are replaced under
+   * it — and the route already allows `restore` on a `healthy` installation, so this is the normal
+   * path. The pipeline must stop the application first and start it again afterwards.
+   */
+  describe('restore quiesces a running application', () => {
+    /** Installs a free app through the real pipeline and returns everything a restore needs. */
+    async function installedApp(adapter: DeploymentAdapter) {
+      const userId = await seedCustomer();
+      const { app } = await seedPublishedApp('uptime-kuma');
+      const server = await seedServer();
+      const request = await createInstallationRequest(db, userId, {
+        applicationIdOrSlug: app.id ?? 'uptime-kuma',
+        serverId: server.id,
+      });
+      const ctx = { db, options: options(adapter), workerId: 'worker-restore' };
+      const claimed = await processNextJob(ctx);
+      expect(claimed?.action).toBe('install');
+      const installation = (
+        await db.query<{ container_project: string; status: string }>(
+          `SELECT container_project, status FROM application_installations WHERE id = $1`,
+          [request.installationId]
+        )
+      ).rows[0];
+      adapter.calls.length = 0; // only the restore's own calls are asserted
+      return { userId, server, ctx, installationId: request.installationId, project: installation.container_project };
+    }
+
+    async function completedBackup(installationId: string, serverId: string) {
+      const backup = await createBackup(db, { installationId, serverId });
+      return await updateBackup(db, backup.id, {
+        status: 'completed',
+        storagePath: '/opt/cloudhost247/backups/proj-2026.tar.gz',
+        sizeBytes: 4096,
+        checksum: 'b'.repeat(64),
+        completedAt: new Date().toISOString(),
+      });
+    }
+
+    function enqueueRestore(userId: string, installationId: string, serverId: string, backupId: string) {
+      return enqueueDeployment(db, {
+        installationId,
+        serverId,
+        action: 'restore',
+        idempotencyKey: `restore:${installationId}:${randomUUID()}`,
+        requestedBy: userId,
+        payload: { backupId },
+      });
+    }
+
+    it('stops the application, restores, and starts it again', async () => {
+      const adapter = stubAdapter(new Set(), { quiesceRestore: true });
+      const { userId, server, ctx, installationId, project } = await installedApp(adapter);
+      const backup = await completedBackup(installationId, server.id);
+
+      await enqueueRestore(userId, installationId, server.id, backup!.id);
+      const claimed = await processNextJob(ctx);
+      expect(claimed?.action).toBe('restore');
+
+      expect(adapter.calls).toEqual([`stop:${project}`, `restore:${project}`, `start:${project}`, `healthcheck:${project}`]);
+      const finished = await findDeploymentById(db, claimed!.id);
+      expect(finished?.status).toBe('succeeded');
+      const installation = (
+        await db.query<{ status: string; health_status: string }>(
+          `SELECT status, health_status FROM application_installations WHERE id = $1`,
+          [installationId]
+        )
+      ).rows[0];
+      expect(installation.status).toBe('healthy');
+      expect(installation.health_status).toBe('healthy');
+
+      const events = (
+        await db.query<{ message: string }>(`SELECT message FROM deployment_events WHERE deployment_id = $1`, [claimed!.id])
+      ).rows.map((row) => row.message);
+      expect(events.some((m) => m.includes('stopped for restore'))).toBe(true);
+    });
+
+    it('restores an already-stopped installation without starting it', async () => {
+      // A restore must never be what starts a customer's application: nothing is writing to quiesce.
+      const adapter = stubAdapter(new Set(), { quiesceRestore: true });
+      const { userId, server, ctx, installationId, project } = await installedApp(adapter);
+      await db.query(`UPDATE application_installations SET status = 'stopped' WHERE id = $1`, [installationId]);
+      const backup = await completedBackup(installationId, server.id);
+
+      await enqueueRestore(userId, installationId, server.id, backup!.id);
+      const claimed = await processNextJob(ctx);
+      expect(claimed?.action).toBe('restore');
+
+      expect(adapter.calls).toEqual([`restore:${project}`]);
+      const installation = (
+        await db.query<{ status: string }>(`SELECT status FROM application_installations WHERE id = $1`, [installationId])
+      ).rows[0];
+      expect(installation.status).toBe('stopped');
+    });
+
+    it('does not stop anything for an engine that restores live', async () => {
+      // cPanel restores an account's home directory through the panel's own UAPI, which is its normal
+      // live restore path; the capability is what decides, not the pipeline guessing from the engine.
+      const adapter = stubAdapter();
+      const { userId, server, ctx, installationId, project } = await installedApp(adapter);
+      const backup = await completedBackup(installationId, server.id);
+
+      await enqueueRestore(userId, installationId, server.id, backup!.id);
+      const claimed = await processNextJob(ctx);
+
+      expect(adapter.calls).toEqual([`restore:${project}`]);
+      expect((await findDeploymentById(db, claimed!.id))?.status).toBe('succeeded');
+    });
+
+    it('starts the application again when the restore itself fails', async () => {
+      const adapter = stubAdapter(new Set(), { quiesceRestore: true });
+      const { userId, server, ctx, installationId, project } = await installedApp(adapter);
+      adapter.calls.length = 0;
+      const failing = stubAdapter(new Set([`restore:${project}`]), { quiesceRestore: true });
+      const backups = await completedBackup(installationId, server.id);
+
+      await enqueueRestore(userId, installationId, server.id, backups!.id);
+      const claimed = await processNextJob({ ...ctx, options: options(failing) });
+
+      // The stop and the restart both happened even though the restore failed: a failed restore must
+      // not leave the customer's application down.
+      expect(failing.calls).toEqual([`stop:${project}`, `restore:${project}`, `start:${project}`, `healthcheck:${project}`]);
+      const retrying = await findDeploymentById(db, claimed!.id);
+      expect(retrying?.error_code).toBe('AGENT_UNREACHABLE');
+      expect(['queued', 'failed']).toContain(retrying?.status); // queued for retry while attempts remain
+    });
+
+    it('never touches the application when it cannot be stopped', async () => {
+      const adapter = stubAdapter(new Set(), { quiesceRestore: true });
+      const { userId, server, ctx, installationId, project } = await installedApp(adapter);
+      const failing = stubAdapter(new Set([`stop:${project}`]), { quiesceRestore: true });
+      const backup = await completedBackup(installationId, server.id);
+
+      await enqueueRestore(userId, installationId, server.id, backup!.id);
+      const claimed = await processNextJob({ ...ctx, options: options(failing) });
+
+      // Restoring into a project whose containers are still up is the thing this prevents.
+      expect(failing.calls).toEqual([`stop:${project}`]);
+      const deployment = await findDeploymentById(db, claimed!.id);
+      expect(deployment?.error_code).toBe('AGENT_UNREACHABLE');
+      expect(String(deployment?.error_message)).toContain('could not be stopped before restoring');
+    });
+
+    it('refuses to restore a backup taken from a different installation', async () => {
+      // The route scopes backups to their installation; the engine re-checks because this pipeline is
+      // what overwrites the data, and a restore is destructive and irreversible.
+      const adapter = stubAdapter(new Set(), { quiesceRestore: true });
+      const { userId, server, ctx, installationId, project } = await installedApp(adapter);
+      const other = await installedApp(adapter); // a second customer's installation
+      const foreign = await completedBackup(other.installationId, server.id);
+      expect(project).not.toBe(other.project);
+
+      await enqueueRestore(userId, installationId, server.id, foreign!.id);
+      const claimed = await processNextJob(ctx);
+
+      expect(adapter.calls).toEqual([]);
+      const deployment = await findDeploymentById(db, claimed!.id);
+      expect(deployment?.error_code).toBe('BACKUP_NOT_AVAILABLE');
+      expect(String(deployment?.error_message)).toContain('different installation');
+    });
+
+    it('refuses to restore a backup that is not completed', async () => {
+      const adapter = stubAdapter(new Set(), { quiesceRestore: true });
+      const { userId, server, ctx, installationId } = await installedApp(adapter);
+      const running = await createBackup(db, { installationId, serverId: server.id });
+      await updateBackup(db, running.id, { status: 'running' });
+
+      await enqueueRestore(userId, installationId, server.id, running.id);
+      const claimed = await processNextJob(ctx);
+
+      expect(adapter.calls).toEqual([]);
+      expect((await findDeploymentById(db, claimed!.id))?.error_code).toBe('BACKUP_NOT_AVAILABLE');
+    });
   });
 
   it('never lets two workers claim the same job (SKIP LOCKED)', async () => {
