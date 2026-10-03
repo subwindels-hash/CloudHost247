@@ -191,11 +191,34 @@ export function createDockerAdapter(options: DockerAdapterOptions): DeploymentAd
         return { ok: true, code: 'OK', message: 'Simulated backup', archivePath: `/simulated/${project}.tar.gz`, sizeBytes: 1024, checksum: 'simulated' };
       }
       try {
+        const includeDatabases = manifest.backup.includes.includes('database');
         const result = await agentRunBackup(ctx.db, agentRef(ctx.server), project, {
           includeVolumes: manifest.backup.includes.includes('volumes'),
-          includeDatabases: manifest.backup.includes.includes('database'),
+          includeDatabases,
         });
-        return { ok: true, code: 'OK', message: 'Backup completed', archivePath: result.archivePath, sizeBytes: result.sizeBytes, checksum: result.checksum };
+        // A backup that was asked for a database dump and produced none must not read as a clean
+        // backup in the deployment log: the archive is still valid (volumes are in it), so this is a
+        // warning that names the reason, not a failure — the platform has no way to know whether the
+        // service runs an engine with a logical dump at all (redis persists in the volume tar).
+        if (includeDatabases && result.databaseDump && !result.databaseDump.engine) {
+          await ctx.log(
+            'warn',
+            `Backup for ${project} was requested with a database dump but the agent produced none: ` +
+              `${result.databaseDump.reason ?? 'no reason reported'}` +
+              (result.databaseDump.attempted?.length
+                ? ` (tried: ${result.databaseDump.attempted.join('; ')})`
+                : '')
+          );
+        }
+        const dumped = result.databaseDump?.engine;
+        return {
+          ok: true,
+          code: 'OK',
+          message: dumped ? `Backup completed (${dumped} dump included)` : 'Backup completed',
+          archivePath: result.archivePath,
+          sizeBytes: result.sizeBytes,
+          checksum: result.checksum,
+        };
       } catch (err) {
         return { ok: false, code: 'BACKUP_FAILED', message: (err as Error).message, archivePath: null, sizeBytes: null, checksum: null };
       }

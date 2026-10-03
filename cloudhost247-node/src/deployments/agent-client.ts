@@ -182,7 +182,24 @@ export function agentRunBackup(
   project: string,
   options: { includeVolumes: boolean; includeDatabases: boolean }
 ) {
-  return agentRequest<{ archivePath: string; sizeBytes: number; checksum: string }>(
+  return agentRequest<{
+    archivePath: string;
+    sizeBytes: number;
+    checksum: string;
+    /**
+     * What the archive was actually asked for and actually holds. Optional because an agent older
+     * than this contract does not report it — the caller must treat "absent" as "unknown", never as
+     * "the database dump is there".
+     */
+    includes?: { volumes: boolean; databases: string | null };
+    databaseDump?: {
+      engine: string | null;
+      service: string | null;
+      file: string | null;
+      reason?: string;
+      attempted?: string[];
+    };
+  }>(
     db,
     server,
     'POST',
