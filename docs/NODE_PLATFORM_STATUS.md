@@ -1176,6 +1176,21 @@ sub-phase before the next one begins.
   restores as before, and the adapter's message says "Restored" without the "verified against the
   recorded checksum" clause, so the absence of a check is never read as a passed one. The agent's
   hashing is now streamed in both directions rather than buffering the whole archive.
+- **A destructive restore is now preceded by a safety snapshot of the current state (2026-10-03).**
+  The open item the quiesce and checksum fixes recorded — "a destructive restore is not preceded by
+  a safety snapshot of the current state, so 'restore the backup I took an hour ago' cannot be
+  undone" — is closed. The same `restoreRequiresStoppedApplication` declaration that names a restore
+  as a directory replacement now also names it as needing an undo copy: before the application is
+  stopped and before a single byte is replaced, the pipeline takes a backup through the ordinary
+  agent path and records it as `backup_kind = 'safety_snapshot'` (migration 0069), tied to the
+  restore's deployment. The snapshot is a real backup row — same checksum, same retention, visible
+  in the customer's backup list with a "safety snapshot" label — because restoring that row IS the
+  undo. Fail-closed: when the snapshot fails, the restore is refused with `Nothing was changed`,
+  the failed attempt is recorded as a failed snapshot row, and the untouched installation keeps its
+  real status (a new `installationTouched` flag on `DeploymentExecutionError` stops pure validation
+  refusals — foreign backup, incomplete backup, failed safety snapshot — from repainting an
+  untouched application as `failed`). Adapters that restore live (cPanel's own UAPI path) take no
+  snapshot, pinned alongside the quiesce behaviour.
 - **Defect fixed while wiring it:** the cPanel username was derived by stripping non-lowercase
   characters, so `My-Project` became `roject`. Derivation now lowercases first, guards a leading
   digit with the `u` prefix and caps at cPanel's 16 characters, and every cPanel path (deploy,

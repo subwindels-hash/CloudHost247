@@ -34,6 +34,12 @@ export interface BackupRow {
   status: string;
   checksum: string | null;
   database_dump: BackupDatabaseDumpReport | null;
+  /**
+   * Why the row exists (0069): `standard` is a backup the customer or the schedule asked for;
+   * `safety_snapshot` is the copy of the current state the restore pipeline takes before a
+   * destructive restore, so the restore can be undone by restoring that row.
+   */
+  backup_kind: string;
   started_at: string | null;
   completed_at: string | null;
   expires_at: string | null;
@@ -43,11 +49,19 @@ export interface BackupRow {
 
 export async function createBackup(
   db: Queryable,
-  input: { installationId: string; serverId?: string | null; deploymentId?: string | null; storageProvider?: string; expiresAt?: string | null }
+  input: {
+    installationId: string;
+    serverId?: string | null;
+    deploymentId?: string | null;
+    storageProvider?: string;
+    expiresAt?: string | null;
+    /** Defaults to `standard`; the restore pipeline passes `safety_snapshot` (migration 0069). */
+    backupKind?: 'standard' | 'safety_snapshot';
+  }
 ): Promise<BackupRow> {
   const { rows } = await db.query<BackupRow>(
-    `INSERT INTO backups (id, installation_id, server_id, deployment_id, storage_provider, expires_at)
-     VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+    `INSERT INTO backups (id, installation_id, server_id, deployment_id, storage_provider, expires_at, backup_kind)
+     VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
     [
       randomUUID(),
       input.installationId,
@@ -55,6 +69,7 @@ export async function createBackup(
       input.deploymentId ?? null,
       input.storageProvider ?? 'local',
       input.expiresAt ?? null,
+      input.backupKind ?? 'standard',
     ]
   );
   const row = rows[0];

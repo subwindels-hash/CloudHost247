@@ -235,7 +235,9 @@ describe('deployment worker', () => {
       const claimed = await processNextJob(ctx);
       expect(claimed?.action).toBe('restore');
 
-      expect(adapter.calls).toEqual([`stop:${project}`, `restore:${project}`, `start:${project}`, `healthcheck:${project}`]);
+      // The safety snapshot of the current state comes first — before the stop, before anything
+      // is replaced — because the undo copy must hold exactly what the restore is about to replace.
+      expect(adapter.calls).toEqual([`backup:${project}`, `stop:${project}`, `restore:${project}`, `start:${project}`, `healthcheck:${project}`]);
       const finished = await findDeploymentById(db, claimed!.id);
       expect(finished?.status).toBe('succeeded');
       const installation = (
@@ -264,7 +266,9 @@ describe('deployment worker', () => {
       const claimed = await processNextJob(ctx);
       expect(claimed?.action).toBe('restore');
 
-      expect(adapter.calls).toEqual([`restore:${project}`]);
+      // Still snapshotted: a stopped application's volumes ARE the state being replaced, and a tar
+      // of them (with no database running to dump) is the correct undo copy.
+      expect(adapter.calls).toEqual([`backup:${project}`, `restore:${project}`]);
       const installation = (
         await db.query<{ status: string }>(`SELECT status FROM application_installations WHERE id = $1`, [installationId])
       ).rows[0];
@@ -283,6 +287,10 @@ describe('deployment worker', () => {
 
       expect(adapter.calls).toEqual([`restore:${project}`]);
       expect((await findDeploymentById(db, claimed!.id))?.status).toBe('succeeded');
+      // And no safety snapshot was taken: the live-restore declaration is what suppresses it, not
+      // an adapter-kind guess — nothing on this installation may claim to be an undo copy.
+      const snapshots = await db.query(`SELECT id FROM backups WHERE backup_kind = 'safety_snapshot'`);
+      expect(snapshots.rows).toHaveLength(0);
     });
 
     it('starts the application again when the restore itself fails', async () => {
@@ -296,8 +304,9 @@ describe('deployment worker', () => {
       const claimed = await processNextJob({ ...ctx, options: options(failing) });
 
       // The stop and the restart both happened even though the restore failed: a failed restore must
-      // not leave the customer's application down.
-      expect(failing.calls).toEqual([`stop:${project}`, `restore:${project}`, `start:${project}`, `healthcheck:${project}`]);
+      // not leave the customer's application down. (The safety snapshot succeeded on this adapter —
+      // only the restore itself is configured to fail.)
+      expect(failing.calls).toEqual([`backup:${project}`, `stop:${project}`, `restore:${project}`, `start:${project}`, `healthcheck:${project}`]);
       const retrying = await findDeploymentById(db, claimed!.id);
       expect(retrying?.error_code).toBe('AGENT_UNREACHABLE');
       expect(['queued', 'failed']).toContain(retrying?.status); // queued for retry while attempts remain
@@ -312,8 +321,9 @@ describe('deployment worker', () => {
       await enqueueRestore(userId, installationId, server.id, backup!.id);
       const claimed = await processNextJob({ ...ctx, options: options(failing) });
 
-      // Restoring into a project whose containers are still up is the thing this prevents.
-      expect(failing.calls).toEqual([`stop:${project}`]);
+      // Restoring into a project whose containers are still up is the thing this prevents. The
+      // snapshot still runs first — it is the undo copy, taken while nothing has changed yet.
+      expect(failing.calls).toEqual([`backup:${project}`, `stop:${project}`]);
       const deployment = await findDeploymentById(db, claimed!.id);
       expect(deployment?.error_code).toBe('AGENT_UNREACHABLE');
       expect(String(deployment?.error_message)).toContain('could not be stopped before restoring');
@@ -363,6 +373,11 @@ describe('deployment worker', () => {
       const deployment = await findDeploymentById(db, claimed!.id);
       expect(deployment?.error_code).toBe('BACKUP_NOT_AVAILABLE');
       expect(String(deployment?.error_message)).toContain('different installation');
+      // A refusal that attempted nothing must not repaint the untouched installation as failed.
+      const installation = (
+        await db.query<{ status: string }>(`SELECT status FROM application_installations WHERE id = $1`, [installationId])
+      ).rows[0];
+      expect(installation.status).toBe('healthy');
     });
 
     it('refuses to restore a backup that is not completed', async () => {
@@ -376,6 +391,77 @@ describe('deployment worker', () => {
 
       expect(adapter.calls).toEqual([]);
       expect((await findDeploymentById(db, claimed!.id))?.error_code).toBe('BACKUP_NOT_AVAILABLE');
+      // Nothing was attempted against the installation, so its real status stands.
+      const installation = (
+        await db.query<{ status: string }>(`SELECT status FROM application_installations WHERE id = $1`, [installationId])
+      ).rows[0];
+      expect(installation.status).toBe('healthy');
+    });
+
+    it('records the safety snapshot as a completed safety_snapshot backup tied to the restore', async () => {
+      // The undo copy must be a real backup row: restoring THAT row is the undo, so the customer
+      // has to find it in the ordinary backup list, and it has to be distinguishable from a backup
+      // they asked for.
+      const adapter = stubAdapter(new Set(), { quiesceRestore: true });
+      const { userId, server, ctx, installationId, project } = await installedApp(adapter);
+      const backup = await completedBackup(installationId, server.id);
+
+      await enqueueRestore(userId, installationId, server.id, backup!.id);
+      const claimed = await processNextJob(ctx);
+      expect(claimed?.action).toBe('restore');
+
+      const snapshots = (
+        await db.query<{ id: string; status: string; deployment_id: string; storage_path: string; checksum: string; installation_id: string }>(
+          `SELECT id, status, deployment_id, storage_path, checksum, installation_id FROM backups WHERE backup_kind = 'safety_snapshot'`
+        )
+      ).rows;
+      expect(snapshots).toHaveLength(1);
+      expect(snapshots[0].status).toBe('completed');
+      expect(snapshots[0].deployment_id).toBe(claimed!.id);
+      expect(snapshots[0].installation_id).toBe(installationId);
+      // The archive evidence the adapter reported, not an invented path.
+      expect(snapshots[0].storage_path).toBe('/backups/x.tar.gz');
+      expect(snapshots[0].checksum).toBe('abc');
+      // The customer's own backup row is untouched — the snapshot is a second row, not a relabel.
+      const standard = (await db.query<{ backup_kind: string }>(`SELECT backup_kind FROM backups WHERE id = $1`, [backup!.id])).rows[0];
+      expect(standard.backup_kind).toBe('standard');
+
+      const events = (
+        await db.query<{ message: string }>(`SELECT message FROM deployment_events WHERE deployment_id = $1`, [claimed!.id])
+      ).rows.map((row) => row.message);
+      expect(events.some((m) => m.includes('Safety snapshot') && m.includes(snapshots[0].id))).toBe(true);
+      void project;
+    });
+
+    it('refuses the restore when the safety snapshot fails, before anything is touched', async () => {
+      // Fail-closed: a destructive restore with no undo copy is exactly the gap the snapshot
+      // closes, so a failed snapshot stops the whole restore — no stop, no restore, no restart.
+      const adapter = stubAdapter(new Set(), { quiesceRestore: true });
+      const { userId, server, ctx, installationId, project } = await installedApp(adapter);
+      const failing = stubAdapter(new Set([`backup:${project}`]), { quiesceRestore: true });
+      const backup = await completedBackup(installationId, server.id);
+
+      await enqueueRestore(userId, installationId, server.id, backup!.id);
+      const claimed = await processNextJob({ ...ctx, options: options(failing) });
+
+      expect(failing.calls).toEqual([`backup:${project}`]);
+      const deployment = await findDeploymentById(db, claimed!.id);
+      expect(deployment?.error_code).toBe('AGENT_UNREACHABLE');
+      expect(String(deployment?.error_message)).toContain('safety snapshot');
+      expect(String(deployment?.error_message)).toContain('Nothing was changed');
+      // The failed attempt itself is recorded as a failed snapshot row — the backup list tells the
+      // truth about what was tried.
+      const snapshots = (
+        await db.query<{ status: string; error_message: string }>(`SELECT status, error_message FROM backups WHERE backup_kind = 'safety_snapshot'`)
+      ).rows;
+      expect(snapshots).toHaveLength(1);
+      expect(snapshots[0].status).toBe('failed');
+      expect(String(snapshots[0].error_message)).toContain('agent is down');
+      // And the installation kept its pre-restore status.
+      const installation = (
+        await db.query<{ status: string }>(`SELECT status FROM application_installations WHERE id = $1`, [installationId])
+      ).rows[0];
+      expect(installation.status).toBe('healthy');
     });
   });
 

@@ -37,6 +37,8 @@ interface BackupRow {
   storage_provider: string | null;
   /** Recorded by the platform from the agent's report (0068). Absent on older rows. */
   database_dump?: { engine: string | null; reason?: string } | null;
+  /** Why the row exists (0069): `safety_snapshot` marks the undo copy a destructive restore took. */
+  backup_kind?: string;
 }
 
 /**
@@ -357,7 +359,15 @@ export default function AppInstancePage() {
                   <tr key={backup.id}>
                     <td>{new Date(backup.created_at).toLocaleString()}</td>
                     <td>
-                      <span className="ch247-badge">{backup.status}</span>
+                      <span className="ch247-badge">{backup.status}</span>{' '}
+                      {backup.backup_kind === 'safety_snapshot' && (
+                        <span
+                          className="ch247-badge"
+                          title="Taken automatically before a destructive restore — restoring this archive undoes that restore"
+                        >
+                          safety snapshot
+                        </span>
+                      )}
                     </td>
                     <td>{backup.size_bytes ? `${(backup.size_bytes / 1024 / 1024).toFixed(1)} MB` : '—'}</td>
                     <td title={backupContents(backup).title}>{backupContents(backup).label}</td>

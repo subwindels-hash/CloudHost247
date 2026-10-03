@@ -84,7 +84,14 @@ export class DeploymentExecutionError extends Error {
   constructor(
     public readonly code: string,
     message: string,
-    public readonly rollbackNeeded: boolean
+    public readonly rollbackNeeded: boolean,
+    /**
+     * Whether the failed pipeline actually attempted something against the installation. Defaults
+     * to true — when in doubt, the panel must say "failed". Pure validation refusals (a restore
+     * declined before a single adapter call) pass false, so an untouched application is not shown
+     * as broken just because a deployment was refused.
+     */
+    public readonly installationTouched: boolean = true
   ) {
     super(message);
     this.name = 'DeploymentExecutionError';
@@ -208,7 +215,9 @@ export async function executeDeployment(
       }
 
       await failDeployment(db, deployment, { errorCode: lastError.code, errorMessage: lastError.message });
-      if (installation) await setInstallationStatus(db, installation.id, 'failed').catch(() => undefined);
+      // A refusal that never attempted anything against the installation must not repaint it as
+      // broken: the application is untouched and its real status is the truth the panel should show.
+      if (installation && lastError.installationTouched) await setInstallationStatus(db, installation.id, 'failed').catch(() => undefined);
       return { outcome: 'failed' };
     }
 
@@ -241,8 +250,8 @@ interface PipelineContext {
   log: (level: 'debug' | 'info' | 'warn' | 'error', message: string) => Promise<void>;
 }
 
-function fail(code: string, message: string, rollbackNeeded = false): never {
-  throw new DeploymentExecutionError(code, message, rollbackNeeded);
+function fail(code: string, message: string, rollbackNeeded = false, installationTouched = true): never {
+  throw new DeploymentExecutionError(code, message, rollbackNeeded, installationTouched);
 }
 
 /** Preserve UNKNOWN when infrastructure cannot verify application health. A missing probe,
@@ -728,7 +737,7 @@ function restorePipeline(ctx: PipelineContext): StepDefinitionInternal[] {
         const backupId = String((ctx.deployment.payload as { backupId?: string }).backupId ?? '');
         const { findBackupById } = await import('../db/ops-tables');
         const backup = await findBackupById(ctx.db, backupId);
-        if (!backup || backup.status !== 'completed') fail('BACKUP_NOT_AVAILABLE', 'Backup not found or not completed');
+        if (!backup || backup.status !== 'completed') fail('BACKUP_NOT_AVAILABLE', 'Backup not found or not completed', false, false);
         /**
          * The customer route already scopes the backup to the installation it is being restored into
          * (`backup.installation_id !== installation.id` → 404). The engine checks it again because
@@ -737,8 +746,62 @@ function restorePipeline(ctx: PipelineContext): StepDefinitionInternal[] {
          * irreversible, so it gets the check at the point of harm as well as at the point of entry.
          */
         if (backup.installation_id !== installation.id) {
-          fail('BACKUP_NOT_AVAILABLE', 'Backup belongs to a different installation');
+          fail('BACKUP_NOT_AVAILABLE', 'Backup belongs to a different installation', false, false);
         }
+      },
+    },
+    {
+      name: 'Take safety snapshot of current state',
+      run: async () => {
+        const { installation, manifest } = requireInstallation(ctx);
+        const server = requireServer(ctx, manifest.supportedHostingTypes);
+        const adapter = selectAdapter(server, manifest, ctx.options);
+        /**
+         * The same declaration that makes the pipeline quiesce the application names the restore
+         * as one that replaces state on disk — so it is also the declaration that makes an undo
+         * copy necessary. Adapters that restore live (cPanel's own UAPI path) do not take one:
+         * their restore is the panel's normal recovery operation, not a directory replacement.
+         *
+         * Fail-closed: when the snapshot cannot be taken the restore is refused BEFORE the
+         * application is stopped or a single byte is replaced. A destructive restore with no undo
+         * copy is exactly the gap this step closes ("restore the backup I took an hour ago" must
+         * be undoable), so a failed snapshot is not a warning to proceed past. The snapshot is a
+         * real backup row — same agent path, checksum and retention — because restoring that row
+         * IS the undo, so the customer finds it in the ordinary backup list.
+         */
+        if (adapter.restoreRequiresStoppedApplication !== true) {
+          await ctx.log('debug', 'No safety snapshot: this engine restores live and does not replace state on disk');
+          return;
+        }
+        const project = installation.container_project ?? installation.id;
+        const retentionDays = await getSetting<number>(ctx.db, 'backup.retention_days', 30);
+        const snapshot = await createBackup(ctx.db, {
+          installationId: installation.id,
+          serverId: server.id,
+          deploymentId: ctx.deployment.id,
+          backupKind: 'safety_snapshot',
+          expiresAt: new Date(Date.now() + retentionDays * 86_400_000).toISOString(),
+        });
+        await updateBackup(ctx.db, snapshot.id, { status: 'running', startedAt: new Date().toISOString() });
+        const result = await adapter.runBackup({ db, server, log: ctx.log }, project, manifest);
+        if (!result.ok) {
+          await updateBackup(ctx.db, snapshot.id, { status: 'failed', errorMessage: result.message, completedAt: new Date().toISOString() });
+          fail(
+            result.code,
+            `Restore refused: the safety snapshot of the current state failed (${result.message}). Nothing was changed — a destructive restore never runs without an undo copy.`,
+            false,
+            false
+          );
+        }
+        await updateBackup(ctx.db, snapshot.id, {
+          status: 'completed',
+          storagePath: result.archivePath,
+          sizeBytes: result.sizeBytes,
+          checksum: result.checksum,
+          databaseDump: result.databaseDump ?? null,
+          completedAt: new Date().toISOString(),
+        });
+        await ctx.log('info', `Safety snapshot ${snapshot.id} of the current state completed — if this restore goes wrong, restore that snapshot to undo it`);
       },
     },
     {

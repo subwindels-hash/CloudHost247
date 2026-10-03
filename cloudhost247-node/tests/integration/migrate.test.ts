@@ -97,6 +97,8 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0067_create_tools_center.sql',
     // A18(c) — a backup row records the agent's database-dump evidence (see backup-contents.test.ts).
     '0068_record_backup_database_dump.sql',
+    // A19(b) — classify backup rows: the restore pipeline's safety snapshot vs standard backups.
+    '0069_classify_backup_kind.sql',
   ];
 
   it('finds the committed migration files in order', () => {

@@ -101,4 +101,78 @@ describe('/dashboard/apps/:id/backups — what each archive holds', () => {
       expect(screen.getByText('no database dump').getAttribute('title')).toContain('no service produced');
     });
   });
+
+  it('marks the undo copy a destructive restore took, so it is recognisable in the list', async () => {
+    // A safety snapshot (0069) is the only way back after a destructive restore, so the customer
+    // must be able to tell it apart from a backup they asked for — and a row with no kind (older
+    // rows, standard backups) must not borrow the label.
+    const backups = [
+      {
+        id: 's1',
+        status: 'completed',
+        size_bytes: 4096,
+        created_at: '2026-10-03T11:00:00.000Z',
+        storage_provider: 'local',
+        database_dump: null,
+        backup_kind: 'safety_snapshot',
+      },
+      {
+        id: 'b1',
+        status: 'completed',
+        size_bytes: 2048,
+        created_at: '2026-10-03T10:00:00.000Z',
+        storage_provider: 'local',
+        database_dump: { engine: 'postgres' },
+        backup_kind: 'standard',
+      },
+      {
+        id: 'old',
+        status: 'completed',
+        size_bytes: 1024,
+        created_at: '2026-10-02T10:00:00.000Z',
+        storage_provider: 'local',
+        database_dump: null,
+      },
+    ];
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = typeof input === 'string' ? input : input.toString();
+        if (url.includes(`/api/v1/app-installations/${INSTALLATION_ID}/backups`)) {
+          return { ok: true, status: 200, json: async () => ({ backups }) };
+        }
+        if (url.includes(`/api/v1/app-installations/${INSTALLATION_ID}`)) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              installation: {
+                id: INSTALLATION_ID,
+                name: 'My n8n',
+                status: 'healthy',
+                application_name: 'n8n',
+                server_name: 'docker-1',
+                domain: null,
+                last_backup_at: null,
+                created_at: '2026-10-01T00:00:00.000Z',
+              },
+            }),
+          };
+        }
+        return { ok: true, status: 200, json: async () => ({}) };
+      })
+    );
+
+    render(
+      <MemoryRouter initialEntries={[`/dashboard/apps/${INSTALLATION_ID}/backups`]}>
+        <App />
+      </MemoryRouter>
+    );
+
+    const snapshotBadge = await screen.findByText('safety snapshot');
+    expect(snapshotBadge.getAttribute('title')).toContain('undo');
+    // Exactly one row carries the label: the standard backup and the pre-0069 row do not.
+    expect(screen.getAllByText('safety snapshot')).toHaveLength(1);
+  });
 });
