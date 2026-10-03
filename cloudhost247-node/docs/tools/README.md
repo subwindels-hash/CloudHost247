@@ -41,6 +41,14 @@ customer more than no answer.
 A tool that requires an account is labelled **Sign-in required** on its card and on its page, and the
 server enforces it again on every call — the badge is a courtesy, never the control.
 
+## Sibling features under /tools
+
+The Tools Center owns `/tools` and the catalogue paths beneath it. The **Document Tools** section
+(ePassport MRZ calculator, validator and parser) is implemented by its own module — pages at
+`/tools/document`, `/tools/document/mrz`, `/tools/document/mrz-parser`, API at `/api/tools/mrz/*`
+(see `docs/MRZ_DEVELOPER_TOOL.md`). The Tools Center links to it rather than duplicating it; React
+Router ranks those static paths above the centre's `/tools/*` page route.
+
 ## Architecture
 
 ```

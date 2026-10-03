@@ -27,12 +27,23 @@ function parseOrThrow<T>(schema: z.ZodType<T>, value: unknown): T {
   return parsed.data;
 }
 
+const booleanSettingSchema = z.preprocess(
+  (v) => (typeof v === 'boolean' ? String(v) : v),
+  z.enum(['true', 'false']).transform((v) => v === 'true')
+);
+
 const SETTING_SCHEMAS: Record<string, z.ZodType<unknown>> = {
   'subscription.grace_period_days': z.coerce.number().int().min(1).max(90),
   'subscription.suspend_after_days': z.coerce.number().int().min(1).max(90),
   'backup.retention_days': z.coerce.number().int().min(1).max(3650),
   'deployment.max_attempts': z.coerce.number().int().min(1).max(10),
-  'marketplace.require_approval': z.enum(['true', 'false']).transform((v) => v === 'true'),
+  'marketplace.require_approval': booleanSettingSchema,
+  'tools.mrz.calculator_enabled': booleanSettingSchema,
+  'tools.mrz.parser_enabled': booleanSettingSchema,
+  'tools.mrz.test_data_enabled': booleanSettingSchema,
+  'tools.mrz.rate_limit_per_minute': z.coerce.number().int().min(1).max(600),
+  'tools.mrz.logging_level': z.enum(['none', 'errors_only', 'minimal_operational']),
+  'tools.mrz.availability': z.enum(['public', 'authenticated', 'admin_only']),
 };
 
 export async function registerAdminPlatformRoutes(app: FastifyInstance, env: Env, overridePool?: Queryable) {
@@ -123,6 +134,54 @@ export async function registerAdminPlatformRoutes(app: FastifyInstance, env: Env
       type: 'boolean',
       label: 'Marketplace submissions require approval',
       description: 'When true, imported or submitted applications start as draft and need the review workflow before publication.',
+      min: null,
+      max: null,
+    },
+    {
+      key: 'tools.mrz.calculator_enabled',
+      type: 'boolean',
+      label: 'MRZ Calculator enabled',
+      description: 'Enable or disable the TD3 ePassport MRZ Calculator developer tool (/tools/document/mrz).',
+      min: null,
+      max: null,
+    },
+    {
+      key: 'tools.mrz.parser_enabled',
+      type: 'boolean',
+      label: 'MRZ Parser enabled',
+      description: 'Enable or disable the TD3 ePassport MRZ Parser developer tool (/tools/document/mrz-parser).',
+      min: null,
+      max: null,
+    },
+    {
+      key: 'tools.mrz.test_data_enabled',
+      type: 'boolean',
+      label: 'MRZ Synthetic Test Data Generator enabled',
+      description: 'Enable or disable synthetic test specimen generation in the MRZ developer tool.',
+      min: null,
+      max: null,
+    },
+    {
+      key: 'tools.mrz.rate_limit_per_minute',
+      type: 'number',
+      label: 'MRZ tool rate limit (requests/minute)',
+      description: 'Maximum MRZ API requests allowed per IP per minute.',
+      min: 1,
+      max: 600,
+    },
+    {
+      key: 'tools.mrz.logging_level',
+      type: 'string',
+      label: 'MRZ tool operational logging level',
+      description: 'Operational logging level (none, errors_only, minimal_operational). Never logs MRZ strings or personal data.',
+      min: null,
+      max: null,
+    },
+    {
+      key: 'tools.mrz.availability',
+      type: 'string',
+      label: 'MRZ tool availability',
+      description: 'Access requirement for MRZ developer tools (public, authenticated, admin_only).',
       min: null,
       max: null,
     },

@@ -48,6 +48,7 @@ import { registerAdminCloudflareRoutes } from './routes/admin-cloudflare';
 import { registerAiSupportRoutes } from './routes/ai-support';
 import { registerAiControlPlaneRoutes } from './ai-os/controllers/routes';
 import { registerToolsRoutes } from './tools/routes';
+import { registerMrzToolRoutes } from './routes/mrz-tools';
 import { HttpError, ValidationError } from './lib/errors';
 import { createLogger } from './lib/logger';
 import type { Queryable } from './db/types';
@@ -193,7 +194,16 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     // Tools Center — DNS/IP/network/developer/webmaster/security/diagnostics tooling with its own
     // Super Admin control centre. Reuses this platform's auth, RBAC, audit log, notifications and
     // worker rather than introducing a parallel stack.
+    //
+    // Registered before the Document Tools module on purpose: this plugin owns the generic
+    // /api/tools/:slug execution route, while the MRZ module registers its own static
+    // /api/tools/mrz/* paths. find-my-way prefers static segments, so both coexist regardless of
+    // order — the ordering here is only so the more general registration is the one that reads
+    // first when someone traces the routes.
     await registerToolsRoutes(instance, env, pool);
+
+    // Native Developer / Document Tools — ePassport MRZ Calculator, Validator, Parser & Super Admin settings.
+    await registerMrzToolRoutes(instance, env, pool);
 
     // The frontend (static assets + SPA fallback) MUST be registered inside this same
     // encapsulated context. Hooks added by registerSecurityPlugins (helmet headers, CORS, rate

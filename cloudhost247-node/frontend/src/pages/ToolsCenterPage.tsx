@@ -93,6 +93,9 @@ export default function ToolsCenterPage() {
           <Link className="ch247-button ch247-button--ghost" to="/tools/favorites">Favorites</Link>
           <Link className="ch247-button ch247-button--ghost" to="/tools/reports">Saved reports</Link>
           <Link className="ch247-button ch247-button--ghost" to="/tools/monitors">Monitoring</Link>
+          {/* Document Tools (ePassport MRZ calculator/validator/parser) is its own module with its
+              own pages and API; the centre links to it instead of re-implementing it. */}
+          <Link className="ch247-button ch247-button--ghost" to="/tools/document">Document tools (MRZ)</Link>
         </div>
       </header>
 

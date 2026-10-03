@@ -121,6 +121,9 @@ import ToolsMonitorsPage from './pages/ToolsMonitorsPage';
 import DomainHealthPage from './pages/DomainHealthPage';
 import AdminToolsPage from './pages/AdminToolsPage';
 import SslManagementPage from './pages/SslManagementPage';
+import ToolsHubPage from './pages/tools/ToolsHubPage';
+import MrzToolPage from './pages/tools/MrzToolPage';
+import AdminMrzSettingsPage from './pages/AdminMrzSettingsPage';
 
 export default function App() {
   return (
@@ -158,18 +161,6 @@ export default function App() {
         <Route path="/apps" element={<MarketplacePage />} />
         <Route path="/apps/:slug" element={<AppDetailPage />} />
 
-        <Route path="/legal" element={<LegalIndexPage />} />
-        <Route path="/legal/privacy-policy" element={<PrivacyPolicyPage />} />
-
-        {/* Auth */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/reset-password" element={<ResetPasswordPage />} />
-        <Route path="/verify-email" element={<VerifyEmailPage />} />
-
-        {/* Authenticated app shell — real protected routes (see components/RequireAuth.tsx). A
-            signed-out visitor is redirected to /login instead of ever rendering these. */}
         {/* Tools Center: public discovery + individual tools. Tools that need an account say so
             on their card and are enforced again server-side, so a signed-out visitor never gets a
             broken page — only a clear "sign in to use this" message. */}
@@ -182,6 +173,26 @@ export default function App() {
             whole /tools/* branch is handled by one page that resolves the path back to a tool. */}
         <Route path="/tools/*" element={<ToolPage />} />
 
+        {/* Developer / Document Tools — ePassport MRZ Calculator & Parser. This is the Document
+            Tools section of /tools, owned by its own module; React Router ranks these static paths
+            above the Tools Center's /tools/* page route, so the MRZ pages keep working unchanged.
+            The Tools Center hub links here rather than re-implementing them. */}
+        <Route path="/tools/document" element={<ToolsHubPage />} />
+        <Route path="/tools/document/mrz" element={<MrzToolPage defaultTab="calculator" />} />
+        <Route path="/tools/document/mrz-parser" element={<MrzToolPage defaultTab="parser" />} />
+
+        <Route path="/legal" element={<LegalIndexPage />} />
+        <Route path="/legal/privacy-policy" element={<PrivacyPolicyPage />} />
+
+        {/* Auth */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
+
+        {/* Authenticated app shell — real protected routes (see components/RequireAuth.tsx). A
+            signed-out visitor is redirected to /login instead of ever rendering these. */}
         <Route element={<RequireAuth />}>
           {/* Customer Cloud Assistant — server-side scoped to the caller's own account; safe for
               every signed-in role (customers see only their own data, staff see only theirs). */}
@@ -258,6 +269,8 @@ export default function App() {
             <Route path="/admin/servers" element={<AdminServersPage />} />
             <Route path="/admin/servers/:id" element={<AdminServersPage />} />
             <Route path="/admin/settings" element={<AdminSettingsPage />} />
+            <Route path="/admin/settings/tools/mrz" element={<AdminMrzSettingsPage />} />
+            <Route path="/admin/tools/mrz" element={<AdminMrzSettingsPage />} />
             <Route path="/admin/audit" element={<AdminAuditPage />} />
             <Route path="/admin/infrastructure" element={<AdminProvidersPage />} />
             <Route path="/admin/infrastructure/operating-systems" element={<AdminOperatingSystemsPage />} />
