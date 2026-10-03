@@ -114,6 +114,7 @@ describe('/dashboard/apps/:id/backups — what each archive holds', () => {
         created_at: '2026-10-03T11:00:00.000Z',
         storage_provider: 'local',
         database_dump: null,
+        includes: { volumes: true, databases: 'postgres' },
         backup_kind: 'safety_snapshot',
       },
       {
@@ -123,6 +124,7 @@ describe('/dashboard/apps/:id/backups — what each archive holds', () => {
         created_at: '2026-10-03T10:00:00.000Z',
         storage_provider: 'local',
         database_dump: { engine: 'postgres' },
+        includes: { volumes: true, databases: 'postgres' },
         backup_kind: 'standard',
       },
       {
@@ -174,5 +176,17 @@ describe('/dashboard/apps/:id/backups — what each archive holds', () => {
     expect(snapshotBadge.getAttribute('title')).toContain('undo');
     // Exactly one row carries the label: the standard backup and the pre-0069 row do not.
     expect(screen.getAllByText('safety snapshot')).toHaveLength(1);
+
+    // The includes evidence (0070) is shown where it was recorded…
+    const recordedCell = screen.getByText('database (postgres)').closest('td');
+    expect(recordedCell?.getAttribute('title')).toContain('volumes archived');
+    // …including on a row whose dump evidence says "not recorded": the two reports are independent.
+    const notRecordedCells = screen.getAllByText('not recorded');
+    expect(notRecordedCells).toHaveLength(2);
+    const withEvidence = notRecordedCells.filter((el) => (el.getAttribute('title') ?? '').includes('volumes archived'));
+    expect(withEvidence).toHaveLength(1);
+    // …and the pre-0070 row says nothing either way — no title invented.
+    const legacyCell = notRecordedCells.find((el) => el.getAttribute('title') === null);
+    expect(legacyCell).toBeDefined();
   });
 });

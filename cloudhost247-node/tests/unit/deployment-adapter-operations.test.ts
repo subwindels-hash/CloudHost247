@@ -413,12 +413,15 @@ describe('docker adapter reports what a backup really contains', () => {
     return fakeDb('agent_secret', 'agent-secret-value');
   }
 
-  function backupReply(databaseDump: unknown) {
+  function backupReply(databaseDump: unknown, { withIncludes = true }: { withIncludes?: boolean } = {}) {
+    // The agent reports `includes.databases` as the dump's engine (backups.js: it is what was
+    // actually produced), so the fixture echoes the dump it is given — never a disconnected value.
+    const engine = databaseDump && typeof databaseDump === 'object' ? (databaseDump as { engine?: string | null }).engine ?? null : null;
     return json({
       archivePath: '/opt/cloudhost247/backups/shop-2026.tar.gz',
       sizeBytes: 4096,
       checksum: 'a'.repeat(64),
-      includes: { volumes: true, databases: null },
+      ...(withIncludes ? { includes: { volumes: true, databases: engine } } : {}),
       ...(databaseDump === undefined ? {} : { databaseDump }),
     });
   }
@@ -449,6 +452,9 @@ describe('docker adapter reports what a backup really contains', () => {
       reason: 'no service produced a logical database dump',
       attempted: ['cache:postgres (empty output)'],
     });
+    // The includes half of the same evidence travels back verbatim too (A22 open item, 0070): the
+    // volumes flag and the engine actually dumped — here none.
+    expect(result.includes).toEqual({ volumes: true, databases: null });
   });
 
   it('stays quiet when the dump was produced, and names the engine in the result', async () => {
@@ -462,6 +468,8 @@ describe('docker adapter reports what a backup really contains', () => {
 
     expect(result).toMatchObject({ ok: true, message: 'Backup completed (postgres dump included)' });
     expect(result.databaseDump).toMatchObject({ engine: 'postgres', service: 'db', file: '/opt/db-dump-postgres.sql' });
+    // The includes report names the engine that was actually dumped.
+    expect(result.includes).toEqual({ volumes: true, databases: 'postgres' });
     expect(logs).toEqual([]);
   });
 
@@ -496,6 +504,19 @@ describe('docker adapter reports what a backup really contains', () => {
     // report must never become evidence that the database dump is missing.
     expect(result.databaseDump ?? null).toBeNull();
     expect(logs).toEqual([]);
+  });
+
+  it('records nothing for the includes report when the agent is too old to send one', async () => {
+    // Same discipline as the dump evidence: absence means unknown, never "nothing is inside".
+    installFetch(() => backupReply(undefined, { withIncludes: false }));
+    const result = await createDockerAdapter({ simulationMode: false }).runBackup(
+      context(dockerServer, db(), []),
+      'shop',
+      dockerManifest(['volumes'])
+    );
+
+    expect(result.ok).toBe(true);
+    expect(result.includes ?? null).toBeNull();
   });
 });
 

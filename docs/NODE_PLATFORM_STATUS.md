@@ -1191,6 +1191,12 @@ sub-phase before the next one begins.
   refusals — foreign backup, incomplete backup, failed safety snapshot — from repainting an
   untouched application as `failed`). Adapters that restore live (cPanel's own UAPI path) take no
   snapshot, pinned alongside the quiesce behaviour.
+- **The agent's `includes` report is stored on the backup row (2026-10-03).** The open item row A22
+  recorded — "the reply's `includes` block is still not stored" — is closed by migration 0070:
+  `backups.includes` jsonb holds `{ volumes, databases }` verbatim with the same shape guard and
+  three-state discipline as 0068 (NULL is an older agent, never "nothing inside"). The docker
+  adapter passes it through beside the dump evidence, both engine backup paths persist it, the
+  backups endpoint returns it, and the Backups tab shows the volumes evidence where it was recorded.
 - **Defect fixed while wiring it:** the cPanel username was derived by stripping non-lowercase
   characters, so `My-Project` became `roject`. Derivation now lowercases first, guards a leading
   digit with the `u` prefix and caps at cPanel's 16 characters, and every cPanel path (deploy,

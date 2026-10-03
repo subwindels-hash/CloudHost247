@@ -23,6 +23,15 @@ export interface BackupDatabaseDumpReport {
   attempted?: string[];
 }
 
+/**
+ * What the archive was asked for and actually holds, reported by the agent (0070). Absent on rows
+ * written before the platform stored it — never read absence as "nothing is inside".
+ */
+export interface BackupIncludesReport {
+  volumes: boolean;
+  databases: string | null;
+}
+
 export interface BackupRow {
   id: string;
   installation_id: string;
@@ -34,6 +43,7 @@ export interface BackupRow {
   status: string;
   checksum: string | null;
   database_dump: BackupDatabaseDumpReport | null;
+  includes: BackupIncludesReport | null;
   /**
    * Why the row exists (0069): `standard` is a backup the customer or the schedule asked for;
    * `safety_snapshot` is the copy of the current state the restore pipeline takes before a
@@ -87,6 +97,8 @@ export async function updateBackup(
     checksum?: string | null;
     /** The agent's report; `undefined` and `null` both mean "leave the column as it is". */
     databaseDump?: BackupDatabaseDumpReport | null;
+    /** The agent's includes report (0070); same "leave as is" semantics as `databaseDump`. */
+    includes?: BackupIncludesReport | null;
     startedAt?: string | null;
     completedAt?: string | null;
     errorMessage?: string | null;
@@ -102,7 +114,8 @@ export async function updateBackup(
        size_bytes = COALESCE($4, size_bytes), checksum = COALESCE($5, checksum),
        started_at = COALESCE($6, started_at), completed_at = COALESCE($7, completed_at),
        error_message = $8, expires_at = COALESCE($9, expires_at),
-       database_dump = COALESCE($10::jsonb, database_dump)
+       database_dump = COALESCE($10::jsonb, database_dump),
+       includes = COALESCE($11::jsonb, includes)
      WHERE id = $1 RETURNING *`,
     [
       id,
@@ -119,6 +132,7 @@ export async function updateBackup(
       patch.databaseDump === undefined || patch.databaseDump === null
         ? null
         : JSON.stringify(patch.databaseDump),
+      patch.includes === undefined || patch.includes === null ? null : JSON.stringify(patch.includes),
     ]
   );
   return rows[0] ?? null;

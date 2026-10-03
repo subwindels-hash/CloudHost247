@@ -719,6 +719,7 @@ function backupPipeline(ctx: PipelineContext): StepDefinitionInternal[] {
           sizeBytes: result.sizeBytes,
           checksum: result.checksum,
           databaseDump: result.databaseDump ?? null,
+          includes: result.includes ?? null,
           completedAt: new Date().toISOString(),
         });
         await updateInstallation(ctx.db, installation.id, { lastBackupAt: new Date().toISOString() });
@@ -799,6 +800,7 @@ function restorePipeline(ctx: PipelineContext): StepDefinitionInternal[] {
           sizeBytes: result.sizeBytes,
           checksum: result.checksum,
           databaseDump: result.databaseDump ?? null,
+          includes: result.includes ?? null,
           completedAt: new Date().toISOString(),
         });
         await ctx.log('info', `Safety snapshot ${snapshot.id} of the current state completed — if this restore goes wrong, restore that snapshot to undo it`);
