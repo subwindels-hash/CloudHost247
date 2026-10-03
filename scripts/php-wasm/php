@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# `php` for hosts that have no PHP — drops into scripts/release-candidate-check.sh,
+# scripts/php-lint-targets.sh and every tests/<suite>/run.php unchanged.
+#
+#   scripts/php-wasm/php -l modules/addons/cloudhost247_core/lib/Support/Logger.php
+#   PHP_WASM_VERSION=7.4 scripts/php-wasm/php tests/foundation/run.php
+#
+# Dependencies are installed on first use (Node >= 20 required). See README.md.
+set -euo pipefail
+
+# Resolve symlinks before deriving the script directory. `${BASH_SOURCE[0]}` is the path used
+# to invoke this file, so when it is reached through a symlink (the documented way to put it on
+# PATH: `ln -sf .../scripts/php-wasm/php /tmp/ch247-bin/php`) an unresolved dirname points at
+# the symlink's directory, where install and shim.mjs do not exist.
+self="${BASH_SOURCE[0]}"
+while [ -L "$self" ]; do
+  target="$(readlink "$self")"
+  case "$target" in
+    /*) self="$target" ;;
+    *) self="$(dirname "$self")/$target" ;;
+  esac
+done
+here="$(cd "$(dirname "$self")" && pwd)"
+
+# First use installs the runtime. The gate lints with `xargs -P`, so several processes reach
+# this point simultaneously on a cold start; an atomic mkdir lock means one installs while the
+# rest wait, instead of eight concurrent `npm install` runs writing the same node_modules.
+if [ ! -d "$here/node_modules/@php-wasm/node" ]; then
+  lock="$here/.install-lock"
+  if mkdir "$lock" 2>/dev/null; then
+    trap 'rmdir "$lock" 2>/dev/null || true' EXIT
+    echo 'php (wasm): installing the PHP runtime on first use ...' >&2
+    ( cd "$here" && npm install --silent --no-fund --no-audit >&2 )
+    rmdir "$lock" 2>/dev/null || true
+    trap - EXIT
+  else
+    for _ in $(seq 1 120); do
+      [ -d "$here/node_modules/@php-wasm/node" ] && [ ! -d "$lock" ] && break
+      sleep 1
+    done
+  fi
+  if [ ! -d "$here/node_modules/@php-wasm/node" ]; then
+    echo 'php (wasm): the PHP runtime is not installed and could not be installed.' >&2
+    echo 'php (wasm): run `npm install` in scripts/php-wasm and retry.' >&2
+    exit 127
+  fi
+fi
+
+# Both legs of the CI matrix must be reproducible locally; 8.2 is the modern default.
+export PHP_WASM_VERSION="${PHP_WASM_VERSION:-8.2}"
+
+# The WebAssembly OpenSSL build cannot fopen its compiled-in default config path
+# ("fopen: Permission denied"), which makes openssl_pkey_new() fail for every key type
+# and takes the passkey and cloudhost247_email suites down with it. An empty or minimal
+# config fails differently ("module_load_dso: missing init function"), so a readable
+# copy of the real system config is what works.
+if [ -z "${OPENSSL_CONF:-}" ] && [ -r /etc/ssl/openssl.cnf ]; then
+  openssl_conf="${TMPDIR:-/tmp}/cloudhost247-openssl.cnf"
+  if [ ! -r "$openssl_conf" ]; then
+    cp /etc/ssl/openssl.cnf "$openssl_conf" 2>/dev/null || true
+  fi
+  if [ -r "$openssl_conf" ]; then
+    export OPENSSL_CONF="$openssl_conf"
+  fi
+fi
+
+exec node "$here/shim.mjs" "$@"

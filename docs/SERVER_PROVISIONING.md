@@ -118,10 +118,17 @@ which lands in `missing` with a reason — never as a zero.
 
 Plan/availability metadata: `providerServerType`, `cpuCores`, `memoryMb`, `storageMb`.
 
-Capabilities: reinstall, snapshot, resize, metrics.
+Capabilities: reinstall, snapshot, resize, console, metrics, rescue.
 
-Native instance API. **No console:** the web console is a customer-portal feature and API v2 has no
-console operation, so `getConsole` refuses with a non-retryable `UNSUPPORTED_OPERATION`. Metrics are
+Native instance API. **Console:** every API v2 instance object carries `kvm` — "the server's current
+KVM URL. This URL will change periodically. It is not advised to cache this value" — so `getConsole`
+reads `GET /v2/instances/{id}` and returns that URL as a `{ url, type: 'novnc' }` session, fresh on
+every call and never cached, stored or audited (a console URL is a link to a root console; bare metal
+has its own `GET /v2/bare-metals/{id}/vnc`). An instance that has no `kvm` yet — still provisioning —
+fails as a retryable `SERVICE_UNAVAILABLE` naming the provider's `power_status`, not as
+`UNSUPPORTED_OPERATION`: the console exists, the instance just has no URL to hand out. **Amended
+2026-10-03:** this section previously read "No console: the web console is a customer-portal
+feature", which refused a capability Vultr really exposes. Metrics are
 bandwidth-only because that is all Vultr exposes: `GET /v2/instances/{id}/bandwidth` (`date_range`
 1–180 days; this adapter reads 30) returns per-UTC-day `incoming_bytes`/`outgoing_bytes`, and Vultr's
 own documentation advises against treating it as real-time metrics. `cpu`, `memory`, `filesystem` and
@@ -129,6 +136,23 @@ own documentation advises against treating it as real-time metrics. `cpu`, `memo
 metric", and host telemetry for a Vultr server comes from the CloudHost247 server agent
 (`server_metrics`), which is what the customer Monitoring panel reads. An empty bandwidth history
 reports `null` totals, not `0` bytes.
+
+**Rescue (added 2026-10-03):** Vultr has no operation *named* rescue — rescue mode is a bare-metal
+portal feature — but its documented recovery path for a cloud instance is booting **SystemRescue**
+from the public ISO library, and API v2 exposes the whole path. `enableRescue` reads
+`GET /v2/iso-public`, picks the SystemRescue entry matching the server's architecture (an arm64
+server needs an entry naming arm64/aarch64; the x86 image is the entry that names no arm
+architecture), attaches it with `POST /v2/instances/{id}/iso/attach` `{iso_id}` and reboots
+(`POST /v2/instances/{id}/reboot`). The returned session is
+`{ type: 'systemrescue-iso', username: 'root', rebooted: true, notes }` and carries **no password**:
+SystemRescue signs in at the serial console as `root` with no password, and the notes send the
+operator there. A library listing no SystemRescue image fails non-retryably with `PROVIDER_ERROR`; a
+library listing none for the requested architecture fails non-retryably with
+`UNSUPPORTED_OPERATION`, and neither path attaches anything. Exit is
+`POST /v2/instances/{id}/iso/detach`, which Vultr documents as detaching the ISO **and rebooting the
+instance** — the adapter therefore adds no second reboot call. **Amended 2026-10-03:** this section
+previously said only that Vultr exposes no rescue endpoint, which withheld a capability the provider
+really offers (the A23 lesson: check the documented recovery procedure, not the endpoint's name).
 
 ### Amazon EC2 (`aws`)
 
@@ -138,7 +162,7 @@ reports `null` totals, not `0` bytes.
 Native EC2 uses the AWS SDK's Signature Version 4 client. Plan metadata must set
 `providerServerType` to an EC2 instance type; the mapped OS image must hold an AMI id. It supports
 create/retry lookup through a CloudHost247 idempotency tag, status, start/stop/reboot, terminate,
-resize, snapshots, image lookup and console output. Reinstall is implemented as a replacement
+resize, snapshots, image lookup and a real interactive serial console session. Reinstall is implemented as a replacement
 instance (same zone, subnet, security groups and key; the previous instance is stopped, never
 terminated) and root-volume restore runs in place from a completed snapshot, keeping the detached
 root volume. Both are opt-in: they refuse with `UNSUPPORTED_OPERATION` unless the deployment sets
@@ -148,8 +172,23 @@ advertising `reinstall: false` until it is enabled. CloudWatch metrics **are** i
 granularity — over a one-hour window, requesting `CPUUtilization`, `NetworkIn`, `NetworkOut`,
 `DiskReadOps`, `DiskWriteOps` and `StatusCheckFailed`); they need separately scoped IAM permissions,
 a metric with no datapoints is reported in `missing` rather than zero-filled, and an unset region
-fails closed with `PROVIDER_NOT_CONFIGURED` before any call. Rescue mode remains unavailable: EC2 has
-no rescue or recovery-ISO API surface, so the refusal is correct rather than a gap.
+fails closed with `PROVIDER_NOT_CONFIGURED` before any call. **Console (rewritten 2026-10-03):** EC2 has no console URL and no console session token, but the serial console is
+interactive and API-reachable, so this adapter starts a real session instead of returning console *output*
+text (which the customer panel never rendered). `getConsole` generates a one-time RSA key pair, pushes the
+public half through EC2 Instance Connect's `SendSerialConsoleSSHPublicKey`, and returns the private half as
+`{ type: 'ec2-serial-console-ssh', username: '<instance-id>.port0', privateKey, expiresAt, notes }`. The key is
+valid for the **60 seconds** the API allows and is stored nowhere; the customer connects with
+`ssh -i <key> <instance-id>.port0@serial-console.ec2-instance-connect.<region>.aws` while the serial console
+asks for a local OS user and password. The API's conditions are reported as their own errors: Serial Console
+access must be enabled for the account (`EnableSerialConsoleAccess` → non-retryable `UNSUPPORTED_OPERATION`),
+only Nitro instance types are supported (non-retryable `UNSUPPORTED_OPERATION`), the instance must be running
+(retryable `SERVICE_UNAVAILABLE`) and only one session may be open at a time (retryable
+`SERVICE_UNAVAILABLE`).
+
+Rescue mode remains unavailable: EC2 has
+no rescue or recovery-ISO API surface, and the documented recovery paths are the serial console (above) plus
+restoring the root volume from a completed snapshot (implemented behind `AWS_ALLOW_ROOT_VOLUME_REPLACEMENT`), so
+the refusal is correct rather than a gap.
 
 ### Contabo (`contabo`)
 
@@ -642,7 +681,7 @@ was booted.
 
 Two deliberate constraints:
 
-- **Only adapters with a real rescue API may offer it.** Seven adapters declare `rescue: true`
+- **Only adapters with a real rescue API may offer it.** Eight adapters declare `rescue: true`
   because their provider exposes a rescue system (or, for the bridge, delegates that decision to the
   operator), and each is pinned to the documented call shape: Hetzner (`enable_rescue` + `reset`,
   `disable_rescue` + `reset`), OpenStack (Nova `rescue` / `unrescue`), OVH Public Cloud
@@ -652,15 +691,20 @@ Two deliberate constraints:
   reuses the template SSH-key secrets when present, otherwise it stores a freshly generated one-time
   password as a Contabo secret; leaving rescue is Contabo's next restart), SolusVM
   (`action=vserver-rescue` with `rescueenable`/`rescuedisable` on the Admin API; arm64 is refused
-  because SolusVM ships no arm64 rescue kernel), the operator bridge
+  because SolusVM ships no arm64 rescue kernel), Vultr (which has no rescue endpoint at all — the
+  documented cloud recovery is the SystemRescue image from the public ISO library: resolve it with
+  `GET /v2/iso-public`, attach it with `POST /v2/instances/{id}/iso/attach`, reboot, and leave by
+  detaching, which reboots back into the installed system; SystemRescue logs in at the console as
+  `root` with no password, so the session carries none), the operator bridge
   (`POST /v1/servers/{id}/rescue` and `/unrescue`, delegated on the same action contract as
   reboot/shutdown/resize/reinstall — the bridge supplies the rescue system, login user and one-time
   password, and `rebooted` defaults to false so the adapter never claims a reboot it was not told
   about), and the development-only mock adapter, which simulates the state machine so the whole flow
-  can be exercised without a provider. The remaining five — AWS (no native rescue; manual workflow
-  only), DigitalOcean (the Recovery ISO is Control-Panel only), Vultr (no v2 endpoint), Proxmox VE (no
-  API endpoint) and Virtualizor (rescue exists only in the *enduser* API on port 4083, while this
-  adapter authenticates against the Admin API on 4085) — have no rescue action in the API surface their
+  can be exercised without a provider. The remaining four — AWS (no native rescue; the API's repair
+  paths are the serial console — a real session since 2026-10-03 — and restoring the root volume from a
+  completed snapshot, neither of which is a rescue boot), DigitalOcean (the Recovery ISO is Control-Panel only), Proxmox VE (no API endpoint) and
+  Virtualizor (rescue exists only in the *enduser* API on port 4083, while this adapter
+  authenticates against the Admin API on 4085) — have no rescue action in the API surface their
   adapter implements; they refuse with a non-retryable `UNSUPPORTED_OPERATION` and keep the capability
   `false` so a template cannot offer the button in the first place. A rescue that silently did nothing
   would strand a customer who believes they are about to repair a disk.

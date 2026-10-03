@@ -57,6 +57,14 @@ export function createDockerAdapter(options: DockerAdapterOptions): DeploymentAd
   return {
     kind: 'docker',
 
+    /**
+     * The agent's restore untars the project directory — compose.yaml, .env and volumes/ — while the
+     * containers are up, so a running database's data files are replaced under it and the file on
+     * disk stops matching the running containers. The restore pipeline stops the application first
+     * and starts it again afterwards (see DeploymentAdapter.restoreRequiresStoppedApplication).
+     */
+    restoreRequiresStoppedApplication: true,
+
     async deployApplication(ctx, input) {
       if (await isSimulated(ctx)) {
         await ctx.log('info', `Simulated deploy of ${input.project} (image ${input.appImage})`);
@@ -191,21 +199,60 @@ export function createDockerAdapter(options: DockerAdapterOptions): DeploymentAd
         return { ok: true, code: 'OK', message: 'Simulated backup', archivePath: `/simulated/${project}.tar.gz`, sizeBytes: 1024, checksum: 'simulated' };
       }
       try {
+        const includeDatabases = manifest.backup.includes.includes('database');
         const result = await agentRunBackup(ctx.db, agentRef(ctx.server), project, {
           includeVolumes: manifest.backup.includes.includes('volumes'),
-          includeDatabases: manifest.backup.includes.includes('database'),
+          includeDatabases,
         });
-        return { ok: true, code: 'OK', message: 'Backup completed', archivePath: result.archivePath, sizeBytes: result.sizeBytes, checksum: result.checksum };
+        // A backup that was asked for a database dump and produced none must not read as a clean
+        // backup in the deployment log: the archive is still valid (volumes are in it), so this is a
+        // warning that names the reason, not a failure — the platform has no way to know whether the
+        // service runs an engine with a logical dump at all (redis persists in the volume tar).
+        if (includeDatabases && result.databaseDump && !result.databaseDump.engine) {
+          await ctx.log(
+            'warn',
+            `Backup for ${project} was requested with a database dump but the agent produced none: ` +
+              `${result.databaseDump.reason ?? 'no reason reported'}` +
+              (result.databaseDump.attempted?.length
+                ? ` (tried: ${result.databaseDump.attempted.join('; ')})`
+                : '')
+          );
+        }
+        const dumped = result.databaseDump?.engine;
+        return {
+          ok: true,
+          code: 'OK',
+          message: dumped ? `Backup completed (${dumped} dump included)` : 'Backup completed',
+          archivePath: result.archivePath,
+          sizeBytes: result.sizeBytes,
+          checksum: result.checksum,
+          // Verbatim, so the row records the agent's evidence and not this adapter's summary of it.
+          databaseDump: result.databaseDump ?? null,
+        };
       } catch (err) {
         return { ok: false, code: 'BACKUP_FAILED', message: (err as Error).message, archivePath: null, sizeBytes: null, checksum: null };
       }
     },
 
-    async restoreBackup(ctx, project, archivePath) {
+    async restoreBackup(ctx, project, archivePath, options) {
       if (await isSimulated(ctx)) return ok(`Simulated restore of ${archivePath}`);
       try {
-        await agentRestoreBackup(ctx.db, agentRef(ctx.server), project, archivePath);
-        return ok(`Restored ${project} from ${archivePath}`);
+        const result = await agentRestoreBackup(
+          ctx.db,
+          agentRef(ctx.server),
+          project,
+          archivePath,
+          options?.expectedChecksum
+        );
+        // Say which of the two happened. "Restored" and "restored and verified against the recorded
+        // checksum" are different facts, and a caller reading only the first would have no way to tell
+        // whether the integrity check ran, was skipped because no digest was on record, or was skipped
+        // because this agent is older than the check.
+        return ok(
+          result.checksumVerified
+            ? `Restored ${project} from ${archivePath} (archive verified against the recorded checksum)`
+            : `Restored ${project} from ${archivePath}`
+        );
       } catch (err) {
         return fail('RESTORE_FAILED', err);
       }

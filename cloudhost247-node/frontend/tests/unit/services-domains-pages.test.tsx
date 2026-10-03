@@ -22,13 +22,13 @@ afterEach(() => {
 });
 
 describe('/services — customer\'s own passive service records', () => {
-  it('redirects a signed-out visitor to /login', () => {
+  it('redirects a signed-out visitor to /login', async () => {
     render(
       <MemoryRouter initialEntries={['/services']}>
         <App />
       </MemoryRouter>
     );
-    expect(screen.getByRole('heading', { name: 'Log in' })).toBeTruthy();
+    expect(await screen.findByRole('heading', { name: 'Log in' })).toBeTruthy();
   });
 
   it('shows an honest empty state when the account has no services', async () => {
@@ -72,8 +72,8 @@ describe('/services — customer\'s own passive service records', () => {
     );
 
     await waitFor(() => expect(screen.getByText('My cPanel account')).toBeTruthy());
-    expect(screen.getByText('cPanel Hosting — Plan A')).toBeTruthy();
-    expect(screen.getByText('active')).toBeTruthy();
+    expect(await screen.findByText('cPanel Hosting — Plan A')).toBeTruthy();
+    expect(await screen.findByText('active')).toBeTruthy();
   });
 
   it('shows a visible error banner, not a blank page, when the API fails', async () => {
@@ -87,7 +87,7 @@ describe('/services — customer\'s own passive service records', () => {
     );
 
     await waitFor(() => expect(screen.getByRole('alert')).toBeTruthy());
-    expect(screen.getByText('Something broke')).toBeTruthy();
+    expect(await screen.findByText('Something broke')).toBeTruthy();
   });
 });
 
@@ -131,6 +131,6 @@ describe('/account/domains — customer\'s own passive domain records', () => {
     );
 
     await waitFor(() => expect(screen.getByText('example.com')).toBeTruthy());
-    expect(screen.getByText('Example Registrar')).toBeTruthy();
+    expect(await screen.findByText('Example Registrar')).toBeTruthy();
   });
 });

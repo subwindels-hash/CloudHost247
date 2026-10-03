@@ -1,5 +1,4 @@
 import type { InfrastructureProviderRow, ServerOsImageRow } from '../../db/infrastructure-providers';
-import { unsupportedConsole, unsupportedRescue } from './common';
 import { providerRequest } from './http';
 import {
   ProviderError,
@@ -11,6 +10,8 @@ import {
   type ProviderImage,
   type ProviderServer,
   type ReinstallProviderServerInput,
+  type RescueRequest,
+  type RescueSession,
 } from './types';
 
 interface VultrInstancePayload {
@@ -22,6 +23,48 @@ interface VultrInstancePayload {
   os?: string;
   image_id?: string;
   tag?: string;
+  /**
+   * "The server's current KVM URL. This URL will change periodically. It is not advised to cache
+   * this value." — the API v2 instance schema, which is where Vultr's console actually lives
+   * (bare metal has a separate `/v2/bare-metals/{id}/vnc` operation).
+   */
+  kvm?: string;
+}
+
+interface VultrPublicIso {
+  id?: string;
+  name?: string;
+  description?: string;
+}
+
+/** An ISO entry that names arm64/aarch64 anywhere in its own metadata is not an x86 image. */
+function namesArmArchitecture(iso: VultrPublicIso): boolean {
+  return /(aarch64|arm64|arm)/i.test(`${iso.name ?? ''} ${iso.description ?? ''}`);
+}
+
+/**
+ * Vultr publishes no operation called "rescue", and its documentation says rescue mode is a
+ * **bare metal** portal feature; for cloud compute the documented way to repair a server that will
+ * not boot is to boot the SystemRescue image from the public ISO library — the customer portal's
+ * "Attach ISO and Reboot", and the API's `POST /instances/{id}/iso/attach` plus
+ * `POST /instances/{id}/reboot`.
+ *
+ * The image is resolved from Vultr's live public ISO list at call time rather than hardcoded,
+ * because the ids change as SystemRescue is updated. An entry that names no architecture is
+ * Vultr's x86_64 image; an arm64 request needs an entry that names arm64/aarch64, because booting
+ * an x86 kernel on an ARM instance would produce a machine that cannot come up.
+ */
+function findSystemRescueIso(
+  isos: VultrPublicIso[],
+  architecture: RescueRequest['architecture']
+): { candidates: VultrPublicIso[]; match: VultrPublicIso | undefined } {
+  const candidates = isos.filter((iso) =>
+    /systemrescue/i.test(`${iso.name ?? ''} ${iso.description ?? ''}`)
+  );
+  return {
+    candidates,
+    match: candidates.find((iso) => (architecture === 'arm64' ? namesArmArchitecture(iso) : !namesArmArchitecture(iso))),
+  };
 }
 
 function toServer(instance: VultrInstancePayload): ProviderServer {
@@ -192,21 +235,84 @@ export class VultrProviderAdapter implements InfrastructureProviderAdapter {
     return this.getServerStatus(input.providerServerId);
   }
 
-  async enableRescue(): Promise<never> { return unsupportedRescue('vultr'); }
-  async disableRescue(): Promise<never> { return unsupportedRescue('vultr'); }
+  /**
+   * Rescue for a Vultr cloud instance is the ISO-library recovery path Vultr documents: attach the
+   * SystemRescue image from the public ISO library, reboot, and use the serial console — the image
+   * signs the operator in as root with no password, so there is no credential to hand back and
+   * nothing that could be stored.
+   */
+  async enableRescue(providerServerId: string, input: RescueRequest): Promise<RescueSession> {
+    const library = await this.request<{ public_isos?: VultrPublicIso[] }>('/iso-public');
+    const { candidates, match } = findSystemRescueIso(library.public_isos ?? [], input.architecture);
+    if (candidates.length === 0) {
+      // A provider-side state, not a capability decision: the library answered without any
+      // SystemRescue image, which an operator may need to know about.
+      throw new ProviderError(
+        'PROVIDER_ERROR',
+        "Vultr's public ISO library listed no SystemRescue image, so this instance cannot be booted into rescue",
+        false
+      );
+    }
+    if (!match?.id) {
+      throw new ProviderError(
+        'UNSUPPORTED_OPERATION',
+        `Vultr's public ISO library offers no SystemRescue image for ${input.architecture}`,
+        false
+      );
+    }
+    await this.request(`/instances/${encodeURIComponent(providerServerId)}/iso/attach`, {
+      method: 'POST',
+      body: JSON.stringify({ iso_id: match.id }),
+    });
+    await this.rebootServer(providerServerId);
+    return {
+      type: 'systemrescue-iso',
+      username: 'root',
+      rebooted: true,
+      notes: `Vultr attached the public SystemRescue image (${match.name ?? match.id}) and rebooted the instance. Open the server console and press Enter to boot the rescue kernel; SystemRescue signs you in as root with no password. Leaving rescue mode detaches the ISO and reboots back into the installed system.`,
+    };
+  }
 
   /**
-   * Vultr has no console endpoint. API v2 exposes no operation that issues a console URL or
-   * credential — the web console is a customer-portal feature. This used to return
-   * `/instances/{id}/actions`, the instance's *action history*, which the customer UI rendered in a
-   * panel titled "Serial console session" while the platform audited `SERVER_CONSOLE_OPENED` for a
-   * console that was never opened.
+   * Detaching is the documented way out: "Vultr detaches the ISO and reboots the instance
+   * automatically", which is exactly what leaving rescue means.
    */
-  async getConsole(): Promise<never> {
-    return unsupportedConsole(
-      'vultr',
-      'the web console is a customer-portal feature and API v2 has no console operation'
+  async disableRescue(providerServerId: string): Promise<void> {
+    await this.request(`/instances/${encodeURIComponent(providerServerId)}/iso/detach`, { method: 'POST' });
+  }
+
+  /**
+   * Vultr issues the console URL **on the instance object**, not through a console endpoint: every
+   * instance carries `kvm`, documented in the API v2 instance schema as "the server's current KVM
+   * URL. This URL will change periodically. It is not advised to cache this value." The URL is read
+   * fresh on every call, which is what that sentence asks for, and it is never written to a log, a
+   * job payload or an audit row — it is a link to a root console.
+   *
+   * This is what the adapter should always have done. It used to return `/instances/{id}/actions`,
+   * the instance's *action history*, while the profile advertised `console: true`: the customer UI
+   * rendered a list of past power events in a panel titled "Serial console session" and the platform
+   * audited `SERVER_CONSOLE_OPENED` for a console that was never opened. That defect was corrected
+   * *too far* — into a refusal whose stated reason ("the web console is a customer-portal feature")
+   * is contradicted by the field Vultr documents on the instance it returns.
+   */
+  async getConsole(providerServerId: string): Promise<Record<string, unknown>> {
+    const result = await this.request<{ instance?: VultrInstancePayload }>(
+      `/instances/${encodeURIComponent(providerServerId)}`
     );
+    const url = asString(result.instance?.kvm);
+    if (!url) {
+      // The capability is real, so this is a runtime refusal and not `UNSUPPORTED_OPERATION` (which
+      // would mean the operation does not exist); the provider's own state is named so an operator
+      // can tell a stopped instance from a product limitation.
+      const state =
+        asString(result.instance?.power_status) ?? asString(result.instance?.status) ?? 'unknown';
+      throw new ProviderError(
+        'SERVICE_UNAVAILABLE',
+        `Vultr returned no KVM console URL for instance ${providerServerId} (power_status=${state})`,
+        true
+      );
+    }
+    return { url, type: 'novnc' };
   }
 
   /**

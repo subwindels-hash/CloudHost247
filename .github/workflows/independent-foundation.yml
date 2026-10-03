@@ -17,6 +17,11 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
+      - uses: actions/setup-node@v4
+        with:
+          # The server agent's authentication suite (server-agent/tests/) and the protocol
+          # conformance suite need Node. The agent declares "engines": { "node": ">=20.0.0" }.
+          node-version: '20'
       - name: PHP syntax diagnostics (every PHP file this repository owns)
         # pipefail so a php -l failure cannot hide behind a successful xargs
         run: set -o pipefail; bash scripts/php-lint-targets.sh | xargs -r -n1 php -l
@@ -24,5 +29,7 @@ jobs:
         run: php tests/foundation/run.php && php -d display_errors=1 tests/theme/run.php && php tests/currency/run.php && php -d display_errors=1 tests/ovh/run.php && php -d display_errors=1 tests/rdp/run.php && php -d display_errors=1 tests/integrations/run.php && php -d display_errors=1 tests/modules/run.php && php -d display_errors=1 tests/builder/run.php && php -d display_errors=1 tests/smm/run.php && php -d display_errors=1 tests/tools/run.php && php -d display_errors=1 tests/broker/run.php && php -d display_errors=1 tests/marketing/run.php && php -d display_errors=1 tests/cart_recovery/run.php && php -d display_errors=1 tests/passkey/run.php && php -d display_errors=1 tests/phoneservices/run.php && php -d display_errors=1 tests/customaffiliate/run.php && php -d display_errors=1 tests/cloudhost247_email/run.php && php -d display_errors=1 tests/payments/run.php
       - name: Retired-brand audit (repository-wide)
         run: python3 scripts/branding-audit.py
+      - name: Server agent authentication (Node, no dependencies)
+        run: node --test server-agent/tests/*.test.js
       - name: Complete release-candidate verification
         run: bash scripts/release-candidate-check.sh

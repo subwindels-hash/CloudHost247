@@ -1072,14 +1072,41 @@ sub-phase before the next one begins.
 - **Mock — implemented.** The development-only adapter moves its own state machine to `rescue` and
   back, so the ordering → queue → worker → UI path can exercise rescue with no provider at all. It
   still fails closed without `ALLOW_MOCK_PROVIDER=true` and never calls `fetch`.
+- **SolusVM — implemented (2026-10-02).** `action=vserver-rescue` on the Admin API the adapter already
+  authenticates against, with `rescueenable` (1 = 4.x 64-bit, 2 = 3.x 64-bit, 3 = 3.x 32-bit) and
+  `rescuedisable`; the response's login user, password, ip and port became the returned session, the
+  next restart boots the installed OS (SolusVM reboots into rescue, so `rebooted: true`), and an arm64
+  server is refused with an explicit message rather than booted into an x86 kernel. A response with no
+  login user fails non-retryably instead of inventing one. This was added after the body of this
+  section was written and the section was not updated at the time — corrected here, not claimed as new.
+- **Vultr — implemented (2026-10-03).** Rescue mode is a **bare-metal portal feature** on Vultr, so
+  there is deliberately no `rescue` operation to call; the documented recovery path for a *cloud*
+  instance is to boot **SystemRescue** from the **public ISO library**. API v2 exposes every step:
+  `GET /v2/iso-public` lists the library (`public_isos[]` with id/name/description), and
+  `POST /v2/instances/{id}/iso/attach` with `{iso_id}` attaches the image, after which the instance is
+  rebooted. `enableRescue` resolves the SystemRescue entry from the live library at call time (ids
+  change as the image is updated) and matches it to the server's architecture — an arm64 instance needs
+  an entry naming arm64/aarch64, because booting an x86 kernel into ARM is worse than refusing. The
+  returned session carries no password: SystemRescue signs in at the serial console as `root` with no
+  password, and the `notes` field says exactly that. Exit is `POST /v2/instances/{id}/iso/detach`,
+  which Vultr's docs (and its own Go client) describe as detaching the ISO **and rebooting the
+  instance** — so it is the whole way back to the installed OS, with no second reboot call. When the
+  library lists no SystemRescue image the failure is a non-retryable `PROVIDER_ERROR`; when it lists
+  none for the requested architecture it is a non-retryable `UNSUPPORTED_OPERATION`, and nothing is
+  attached in either case.
 - **Still refused, with the reason recorded:** AWS (EC2 has no native rescue mode; the documented
-  path is a manual stop/detach/attach workflow, not a provider call), DigitalOcean, Vultr, Proxmox,
-  Virtualizor, SolusVM and the operator bridge (no rescue action in the API surface each adapter
-  implements). Their profiles stay `rescue: false` and `unsupportedRescue()` throws a non-retryable
-  `UNSUPPORTED_OPERATION` before any request, which
+  path is a manual stop/detach/attach workflow, not a provider call), DigitalOcean (Recovery ISO and
+  console are control-panel only; the API v2 droplet action list has neither), Proxmox VE (no rescue
+  endpoint) and Virtualizor (rescue exists only in the enduser API on port 4083, while this adapter
+  holds Admin API/4085 credentials). Their profiles stay `rescue: false` and `unsupportedRescue()`
+  throws a non-retryable `UNSUPPORTED_OPERATION` before any request, which
   `tests/unit/provider-capability-truth.test.ts` and `tests/unit/provider-rescue.test.ts` pin.
-- **Capability matrix:** `rescue: true` now covers Hetzner, OpenStack, OVH, Contabo and mock; the
-  profile notes for OVH, Contabo and mock state the exact call each uses.
+- **Capability matrix:** `rescue: true` covers **eight of the twelve adapters** — Hetzner,
+  OpenStack, OVH, Contabo, SolusVM, Vultr, `generic_http` (operator bridge) and the development mock —
+  and the four that refuse are AWS, DigitalOcean, Proxmox VE and Virtualizor. The profile notes state
+  the exact call each implementation uses. `tests/unit/adapter-capability-matrix.test.ts` (76) pins
+  every cell in both directions, so a refusal and a flag can no longer disagree silently — which is
+  precisely how both stale claims in this section survived until now.
 
 ---
 
@@ -1094,7 +1121,14 @@ sub-phase before the next one begins.
   - **Guarded by deployment opt-in, not by a code comment.** Both workflows require `AWS_ALLOW_ROOT_VOLUME_REPLACEMENT=true` (or the provider-prefix equivalent); without it every call fails with a non-retryable `UNSUPPORTED_OPERATION` **before a single AWS request is sent**, and the profile keeps advertising `reinstall: false`. The static profile cannot know a deployment's IAM scope, so the capability stays off until an operator says otherwise; the profiles notes now say exactly that. `deleteSnapshot()` is implemented for real (it only ever touches the id it was given).
   - **The request construction is a pure module** (`aws-replacement.ts`): guards, tags and the launch object are asserted without an AWS client, so the destructive-path rules are testable and live in one place.
   - **Tests added:** `tests/unit/aws-replacement.test.ts` (12) — both workflows refusing with no commands sent when the flag is off, snapshot deletion and its input guard, the replacement command order and launch shape (AMI, type, subnet, security groups, zone, key, user data, tags), the assertion that `TerminateInstancesCommand` is never sent, the in-place restore command order including the detached old volume and the `Device` name, a stopped instance staying stopped, and the two refusal paths. Backend and frontend TypeScript compile clean.
-  - **Still honest about what is missing:** rescue mode and CloudWatch metrics remain unsupported on EC2, and the adapter's own comments say why.
+  - **Still honest about what is missing (corrected 2026-10-03):** the two items this bullet used to name are no
+    longer missing. CloudWatch metrics were implemented on 2026-10-02 (§A4 metrics: `GetMetricStatistics` over
+    `AWS/EC2`), and the console was replaced on 2026-10-03 by a real EC2 serial console session — the round-11
+    section at the end of this document records why the previous `GetConsoleOutput` implementation was not the
+    capability the flag promised. **Rescue mode is the one EC2 capability still refused**, and the reason is
+    recorded rather than implied: EC2 exposes no rescue-boot API, and the documented recovery paths for an
+    unbootable instance are the serial console (now implemented as the console) and restoring the root volume
+    from a completed snapshot (implemented behind `AWS_ALLOW_ROOT_VOLUME_REPLACEMENT`).
 
 ---
 
@@ -1119,6 +1153,29 @@ sub-phase before the next one begins.
   copy it does not have. `restoreBackup` calls UAPI `Backup::restore_backup` with the file name
   only, after refusing any archive outside `/home/<user>/` — a restore overwrites the account's
   files and must never be pointed at an arbitrary path.
+- **Application restores quiesce a running docker-compose project (2026-10-03).** `restorePipeline`
+  restored straight into the project directory while the containers were still up, and the customer
+  route allows `restore` on a `healthy` installation — so a running database's volume data was
+  replaced under it and the `compose.yaml` on disk stopped matching the containers that were running.
+  The pipeline now consults `DeploymentAdapter.restoreRequiresStoppedApplication`: docker-compose
+  declares it, cPanel and Kubernetes do not (cPanel restores an account's home directory through the
+  panel's own live UAPI path; Kubernetes refuses restores). The application is stopped, the restore
+  runs, and it is started again and health-probed — including when the restore itself fails, because
+  a failed restore must not leave a customer's app down. An installation that was already `stopped`
+  is restored without being started. The same pass added the ownership re-check the pipeline was
+  missing: the route scopes a backup to its installation, and the engine now verifies
+  `backup.installation_id === installation.id` again at the point that overwrites the data.
+- **Restores verify the archive they apply (2026-10-03).** The platform records the sha256 the agent
+  computes when a backup is taken, and the restore path never used it: the agent extracted whatever
+  was on disk at that path. Gross damage trips the agent's `tar -t` pass, but damage that still
+  decompresses — one flipped byte inside a member, a partially written archive — passes it and is
+  extracted over the live project, surfacing later as quietly wrong data. The pipeline now passes
+  `backups.checksum` down through the adapter to the agent, which verifies it before reading or writing
+  anything and refuses on a mismatch, naming both digests. It is an integrity check against corruption,
+  not authentication (the same agent computes the digest at backup time). A backup row with no checksum
+  restores as before, and the adapter's message says "Restored" without the "verified against the
+  recorded checksum" clause, so the absence of a check is never read as a passed one. The agent's
+  hashing is now streamed in both directions rather than buffering the whole archive.
 - **Defect fixed while wiring it:** the cPanel username was derived by stripping non-lowercase
   characters, so `My-Project` became `roject`. Derivation now lowercases first, guards a leading
   digit with the `u` prefix and caps at cPanel's 16 characters, and every cPanel path (deploy,
@@ -1285,10 +1342,15 @@ sub-phase before the next one begins.
 
 ## A13 — Console and metrics truth for DigitalOcean and Vultr (capability drift, found 2026-10-02)
 
+> **Amended 2026-10-03 — see §A23.** The Vultr half of this fix was itself wrong: the console it
+> refused is real (the instance object's `kvm` field). DigitalOcean's half (refusal) was re-verified
+> and stands. The paragraphs below are kept as the record of what was done on 2026-10-02, with the
+> false Vultr claim corrected in place.
+
 - **Source/local verification:** PASSED on branch `arena/01a0fe1f-cloudhost247`.
-  - `npm run typecheck` clean; `tests/unit/provider-console-metrics-truth.test.ts` (15) new;
-    `provider-capability-truth.test.ts` extended to 10; the full suite is re-run at the end of this
-    session's work and recorded there.
+  - `npm run typecheck` clean; `tests/unit/provider-console-metrics-truth.test.ts` (15 at the time;
+    **20** after §A23 corrected the Vultr console); `provider-capability-truth.test.ts` extended to
+    10; the full suite is re-run at the end of this session's work and recorded there.
   - **No migration required.** Adapter capabilities are code, and the provider profiles are read at
     runtime; nothing is stored per provider row.
 - **The defect.** Two adapters advertised capabilities they did not deliver, in both directions:
@@ -1304,11 +1366,16 @@ sub-phase before the next one begins.
     `metrics: false`, so the flag and the implementation disagreed in the opposite direction too.
 - **Console is now refused where no console operation exists** (`unsupportedConsole()` in
   `providers/common.ts`, alongside the existing `unsupportedRescue()`), with the verified reason in
-  the message and in the profile notes: DigitalOcean's Droplet Console and out-of-band Recovery
-  Console are Control Panel features and API v2 has no console operation; Vultr's web console is a
-  customer-portal feature. Both profiles now say `console: false`, so the button is never rendered
-  and no console audit row can be written for a session that did not happen. Contabo already refused
-  correctly and is pinned by the same test.
+  the message and in the profile notes. For DigitalOcean that is right and was re-verified on
+  2026-10-03: the Droplet Console and the out-of-band Recovery Console are Control Panel features and
+  the API v2 droplet action list contains no console action. For Vultr it was **wrong** — the claim
+  that "Vultr's web console is a customer-portal feature" is contradicted by the `kvm` field Vultr
+  documents on every instance object — so Vultr's profile was flipped back to `console: true` and
+  `getConsole()` implemented against the instance (§A23), while DigitalOcean stays `console: false`.
+  This is the pitfall in both directions: a flag and its implementation can disagree by *advertising*
+  a capability that is not delivered **or by refusing one that is**. Contabo still refuses its console
+  and is pinned by the same test; that refusal has not been re-verified against api.contabo.com
+  (§A23, open item).
 - **Metrics are now implemented for both, against each provider's documented surface**, and each
   payload states its own limits:
   - **DigitalOcean** reads the Monitoring API — `GET /v2/monitoring/metrics/droplet/{metric}` with the
@@ -1332,12 +1399,16 @@ sub-phase before the next one begins.
     for a Vultr server therefore comes from the CloudHost247 server agent (`server_metrics`, which is
     what the customer Monitoring panel already reads), not from the provider. An empty bandwidth
     history reports `null` totals, not `0` bytes. Profile `metrics: true`.
-- **Known follow-up for staging (data, not code).** `servers.capabilities` is stored per server row
-  when the order is accepted, so a DigitalOcean or Vultr server provisioned **before** this change
-  still carries `console: true` in its own row and will still render the button; clicking it now
-  returns the honest `UNSUPPORTED_OPERATION` refusal instead of an action list. New orders inherit the
-  corrected capability. A backfill of `servers.capabilities` for existing rows is a staging task and
-  is deliberately not done from here — production data is read-only for this repository.
+- **Known follow-up for staging (data, not code).** `servers.capabilities` is copied per server row
+  from the product configuration's `configuration_metadata.capabilities` when the order is accepted.
+  Two backfills are therefore owed: (i) a **DigitalOcean** server provisioned before this change still
+  carries `console: true` and will still render the button — clicking it now returns the honest
+  `UNSUPPORTED_OPERATION` refusal instead of an action list; (ii) a **Vultr** server (or a stored Vultr
+  product configuration) created while this change was in force, 2026-10-02 → 2026-10-03, carries
+  `console: false` and so shows no button for a console Vultr really exposes — §A23 flips the profile,
+  and those rows need the flag backfilled to `true`. A backfill of `servers.capabilities` for existing
+  rows is a staging task and is deliberately not done from here — production data is read-only for this
+  repository.
 
 ---
 
@@ -1400,11 +1471,238 @@ sub-phase before the next one begins.
   AWS "Rescue mode and CloudWatch metrics remain unavailable" (metrics are implemented — §A4);
   Contabo "resize, console URLs, metrics, and rescue mode are also explicitly unsupported" (rescue is
   implemented — §A5/A6, and the three real refusals now carry their verified reasons); "Five adapters
-  declare `rescue: true`" (it is seven, and the refusing list is five: AWS, DigitalOcean, Vultr,
-  Proxmox, Virtualizor); the unsupported-adapter registry rejecting with `SERVICE_UNAVAILABLE` (it is
+  declare `rescue: true`" (it is eight, after Vultr's SystemRescue path was implemented on
+  2026-10-03, and the refusing list is four: AWS, DigitalOcean, Proxmox VE, Virtualizor); the unsupported-adapter registry rejecting with `SERVICE_UNAVAILABLE` (it is
   a non-retryable `UNSUPPORTED_OPERATION` naming the kind — §A8); SolusVM's section silent on rescue
   and on why snapshots refuse; and the per-provider `Capabilities:` lines for DigitalOcean, Vultr,
   OpenStack, the bridge and the mock.
 - **Standing rule this establishes.** `ADAPTER_PROFILES` is a promise in *two* directions: a new
   adapter, a new capability, or a change to either must move the flag and the implementation
   together, and the matrix test fails the build if they disagree.
+
+---
+
+## A21 — The two financial probes nothing executed (found and fixed 2026-10-03)
+
+- **Source/local verification:** PASSED on branch `arena/01a0ff64-cloudhost247`.
+- **Why this section exists.** Phase 5C's accepted evidence includes a **39/39 authorization matrix**
+  and a **49/49 financial invariant sweep**, and `PHASE_5_CHECKPOINT_REPORT.md` invites the reader to
+  reproduce both. No test, npm script, release-gate step or CI job executed either probe, and the
+  reproduction command the report printed (`cd cloudhost247-node && npx tsx ../recovery/<probe>.ts`)
+  failed on its first import with `Cannot find module 'pg'` — bare-specifier resolution starts at the
+  importing file's directory and `node_modules` lives in `cloudhost247-node/`. The claim was true but
+  **unreproducible by anyone**.
+- **Fixed:** both probes moved to `cloudhost247-node/tools/`, are exported as functions over the
+  shared `Queryable` interface with a CLI entry point (`npm run verify:financial`,
+  `npm run verify:authorization`; `CH247_PROBE_PG_*`, throwaway database), and now run on **every
+  `npm test`** against the embedded WASM PostgreSQL — no server required. The authorization matrix
+  drives the real Fastify app through `app.inject`; the sweep reports the single-connection
+  concurrency race as **`unproven`** rather than letting a serialised run count as a pass.
+- **Two defects found in the probes themselves while making them executable:** the sweep was not
+  re-runnable (its own negative-control fixture was excluded by an in-memory list, so a second run
+  reported a violation caused by the first run — the fixture is now removed after its check and the
+  sweep SQL is unconditional), and the matrix compared two "no customer-side request produced…"
+  counts against absolute zero, so any database already holding a successful payment went red for a
+  reason unrelated to the caller (now deltas across the attack window).
+- **Evidence:** real PostgreSQL 18.4 — `49/49` and `39/39`, both exit 0; three consecutive sweep runs
+  on one database `49/49 · 49/49 · 49/49`; `npm test` **126 files / 1119 tests** (124/1111 before);
+  `tsc --noEmit` 0; four mutations all red (a customer allowed into the staff confirm route, the two
+  delta checks reverted to absolute counts, the double-credit sweep entry deleted, the fixture
+  cleanup removed → all six sweep tests red). **Not claimed:** the probes have never been run against
+  the production database, and the CLI still needs a real PostgreSQL — the embedded engine is
+  installed outside the repository so the release gate's inputs do not change.
+
+---
+
+## A22 — A backup that held no database dump looked exactly like one that did (found and fixed 2026-10-03)
+
+- **Source/local verification:** PASSED on branch `arena/01a0ff64-cloudhost247`.
+- **Why this section exists.** A18 taught the agent to report what it actually dumped, and the control
+  plane used that evidence twice and discarded it: a deployment-log `warn` line and a clause in the
+  result message. `backups` had no column for it, so in the customer's backup list a **completed
+  archive with no database dump was indistinguishable from a complete one** — same status, same
+  recorded checksum. A log line is not a record: it rotates, it is per-deployment, and nothing reads
+  it back. This is the open item A18(c), closed here.
+- **Fixed:** the agent's report travels the whole way (`agentRunBackup` → `BackupResult.databaseDump`
+  → the worker → `backups.database_dump`, migration 0068) and is returned by
+  `GET /api/v1/app-installations/:id/backups` and shown in the app's Backups tab. One **jsonb** column
+  holds the agent's reply verbatim — it is provider-shaped evidence, not platform state, and a column
+  per field would need a migration each time the agent reports one more thing; a CHECK keeps it an
+  object. Three states stay distinguishable, because collapsing any two recreates the defect: `NULL`
+  (nothing reported — never read as "no dump"), `{"engine":"postgres"}` (a dump is inside) and
+  `{"engine":null,"reason":…,"attempted":[…]}` (requested, none produced, with the reason).
+- **Evidence:** `npm test` **128 files / 1124 tests** (126/1119 before); `tsc --noEmit` 0 in both the
+  node and frontend projects; six mutations all red (the write path, the overwrite-on-patch guard, the
+  adapter pass-through, the engine hand-off, the migration CHECK, the UI's three-state rendering).
+  Tested end-to-end rather than by unit only: the worker test runs the real backup pipeline and reads
+  the row back, the API test drives the real route, the frontend test renders the real page.
+- **Not claimed:** the reply's `includes` block is still not stored (only the dump evidence is), and
+  A18(b) stands unchanged — `includeVolumes: false` is accepted and does not narrow the archive.
+
+---
+
+## A23 — The Vultr console refusal refused a console Vultr really exposes (found and fixed 2026-10-03)
+
+- **Source/local verification:** PASSED on branch `arena/01a0ff64-cloudhost247`.
+- **Why this section exists.** A23 is A13 correcting itself. A13's first half was right —
+  `vultr.getConsole()` returned `/instances/{id}/actions`, the instance's *action history*, while the
+  profile advertised `console: true` — but the fix went one step too far: it declared `console: false`
+  with the reason "the web console is a customer-portal feature and API v2 has no console operation".
+  Vultr's own API v2 says the opposite. Every instance object carries **`kvm`**, documented as "the
+  server's current KVM URL. This URL will change periodically. It is not advised to cache this
+  value", and bare metal has a dedicated `GET /v2/bare-metals/{id}/vnc` operation. So the refusal
+  withheld a capability the provider exposes: the customer console route
+  (`POST /api/v1/servers/:id/console`) gates on `server.capabilities.console === true`, the profile
+  said `false`, and the "Open console" button never rendered for a Vultr server. Re-checking section
+  A's remaining rows is how the contradiction was found; at the same time DigitalOcean's half of A13
+  was re-verified against the API v2 droplet action list (no console action exists) and stands.
+- **Fixed:** `getConsole(providerServerId)` reads `GET /v2/instances/{id}` and returns the instance's
+  own `kvm` URL as `{ url, type: 'novnc' }`, **fresh on every call** — Vultr rotates the URL and says
+  not to cache it, so the adapter holds it nowhere: not in a field, not in a log, not in an audit row.
+  When the field is absent (for example an instance still provisioning) the failure is a **retryable
+  `SERVICE_UNAVAILABLE` naming the provider's own `power_status`**, deliberately not
+  `UNSUPPORTED_OPERATION`, which would tell the operator the operation does not exist. The refusal
+  helper is no longer imported by this adapter.
+- **No frontend change was needed.** `ServerDetailPage.tsx` already renders any `consoleSession.url`
+  it is handed as a "Launch console" link, so the adapter change is the whole fix; the customer route
+  already audits `SERVER_CONSOLE_OPENED` with no session payload.
+- **Pinned in both directions, including through the customer route.** The profile pin and the
+  capability-truth pin now read `console: true` for Vultr; the unit suite asserts the request shape,
+  the `novnc` session, the fresh-per-call behaviour (two calls → two provider requests), the
+  state-named retryable failure and the fail-closed no-token case. The capability matrix's permissive
+  Vultr fixture supplies a `kvm` URL, so the advertised capability is exercised on the success path
+  rather than passing because a failure happened not to be `UNSUPPORTED_OPERATION`. And
+  `tests/integration/server-console.test.ts` (now **6** tests) drives a real `vultr` provider and a
+  server row carrying the stored `console: true` through `POST /api/v1/servers/:id/console`: the two
+  requests return the two rotated URLs, the two provider reads are asserted by URL, and the audit row
+  is checked to hold no session URL.
+- **Evidence:** `npm test` **128 files / 1130 tests, pass** (128/1124 before), exit 0; `npx tsc -p tsconfig.json --noEmit` → 0. Four mutations
+  each turned the intended assertions red and nothing else: caching the URL, restoring the
+  `UNSUPPORTED_OPERATION` refusal, restoring the `/actions` URL, and flipping the profile flag back to
+  `false`.
+- **Not claimed:** Contabo's console refusal rides the same `unsupportedConsole` pattern and has
+  in-repo evidence (the generated client's action list, `docs/SERVER_PROVISIONING.md` §Contabo) but
+  was **not** re-fetched from api.contabo.com in this round, so it is recorded as an open item rather
+  than assumed either way. And the flag is data as well as code: `servers.capabilities` is copied onto
+  each server row from the product configuration's `configuration_metadata.capabilities` at order
+  acceptance, so Vultr rows created while A13 was in force still carry `console: false` and need the
+  staging backfill (§A13 follow-up).
+
+---
+
+## A6 (correction, round 10) — the Vultr rescue refusal withheld a rescue Vultr really offers (found and fixed 2026-10-03)
+
+- **Source/local verification:** PASSED on branch `arena/01a0ff64-cloudhost247`.
+- **Why this section exists.** A6's refusal list said "Vultr exposes no rescue endpoint in API v2" and
+  kept `rescue: false`. That sentence is true of the endpoint *name* and false of the capability.
+  Vultr's rescue mode is a **bare-metal portal feature**, but its documented recovery path for a
+  *cloud* instance is to boot **SystemRescue from the public ISO library**, and API v2 exposes the
+  whole path. Refusing on the strength of the word "rescue" hid a capability the provider really
+  offers — the same defect class as A23, one round after A23 was fixed. The same re-read found the
+  row's other two stales: it listed **SolusVM 1** among the refusals although SolusVM's rescue had
+  been implemented on 2026-10-02, and it cited `provider-rescue.test.ts` (8) and
+  `provider-capability-truth.test.ts` (8) when the suites had 12 and 10 tests.
+- **Fixed:** `vultr-adapter.enableRescue()` reads `GET /v2/iso-public`, picks the SystemRescue entry
+  that matches the server's architecture (an arm64 server needs an entry naming arm64/aarch64; the
+  x86 image is the entry that names no arm architecture), attaches it with
+  `POST /v2/instances/{id}/iso/attach {iso_id}` and reboots. The returned session is
+  `{ type: 'systemrescue-iso', username: 'root', rebooted: true, notes }` with **no password** —
+  SystemRescue signs in at the serial console as `root` with no password, and the notes say to open
+  the console. A library with no SystemRescue image at all is a non-retryable `PROVIDER_ERROR`; a
+  library with none for the requested architecture is a non-retryable `UNSUPPORTED_OPERATION`, and
+  neither path attaches anything. `disableRescue()` posts to
+  `POST /v2/instances/{id}/iso/detach`, which Vultr documents (and its own Go client states) as
+  detaching the ISO **and rebooting the instance** — so it is the entire way back into the installed
+  OS, and the adapter adds no second reboot call. The profile is now `rescue: true`.
+- **The no-password frontend assumed SSH keys.** `ServerDetailPage.tsx` answered every password-less
+  rescue session with "This provider grants rescue access through the SSH keys attached to the server
+  rather than a password" — false for a console-only SystemRescue boot — and it never rendered the
+  `notes` field at all, so Vultr's actual instructions would have been invisible. The panel now shows
+  the provider's own `notes` when present and states only what is true: that CloudHost247 stores no
+  rescue credential and the material shown came from the provider for this session. The SSH-key
+  sentence is kept for the one case it describes (a password-less session with no notes).
+- **Pinned in both directions, including through the customer route.** The unit suite's new
+  `Vultr (documented SystemRescue ISO path)` block asserts the exact request sequence and body, both
+  architecture directions, the honest failure for a library without SystemRescue, the refusal that
+  attaches nothing when the architecture has no image, and the detach-only exit.
+  `tests/integration/server-rescue.test.ts` drives a real `vultr` provider through
+  `POST /api/v1/servers/:id/rescue` and checks the three provider calls by URL, the password-less
+  session, the `maintenance` status with `metadata.rescue.type = 'systemrescue-iso'`, and that no
+  audit or metadata row holds the ISO id or any credential. The profile pins in
+  `provider-rescue.test.ts` (advertised-rescue set), `provider-capability-truth.test.ts` and the
+  76-cell `adapter-capability-matrix.test.ts` all moved with it.
+- **Evidence (touched suites):** `provider-rescue.test.ts` **17** (was 12),
+  `provider-capability-truth.test.ts` **10**, `adapter-capability-matrix.test.ts` **76** → 3 files /
+  103 passed; `tests/integration/server-rescue.test.ts` **7** (was 6);
+  `frontend/tests/unit/server-detail-page.test.tsx` **7** (was 6); `npx tsc -p tsconfig.json --noEmit`
+  → 0 and the frontend project's typecheck → 0. Six mutations each turned the intended assertions red
+  and nothing else: dropping the reboot after attach, ignoring the requested architecture, flipping
+  the profile flag back to `false`, making the detach a no-op, attaching when no image matches, and
+  restoring the SSH-key banner for a password-less console rescue. Full-suite evidence: **`npm test` 128 files / 1137 tests pass** (128 files / 1130 before), exit 0, 1181.5 s.
+- **Not claimed:** AWS's and Proxmox VE's refusals were re-read in-repo but not re-fetched from their
+  documentation this round, and DigitalOcean's refusal is re-verified against the API v2 droplet
+  action list (no rescue or console action) rather than a fresh fetch. Vultr's attach/reboot flow was taken from Vultr's own API
+  reference, its support documentation and its Go client; the account-level id list is
+  resolved at call time precisely so an image id change cannot break it. And the staging backfill
+  note stands: `servers.capabilities` is copied from the product configuration's
+  `configuration_metadata.capabilities` at order acceptance, so existing Vultr rows and product
+  configurations created while the old profile was live still carry `rescue: false` and must be
+  re-derived before customers can see the rescue action.
+
+---
+
+## A4 — EC2's console capability promised a session and delivered console output text (found and fixed 2026-10-03)
+
+- **Source/local verification:** PASSED on branch `arena/01a0ff64-cloudhost247`.
+- **Why this section exists.** The AWS profile advertised `console: true`, and `getConsole()` answered with
+  `GetConsoleOutput` — the instance's console **output text**. The console route
+  (`POST /api/v1/servers/:id/console`) returns a *session* and the customer panel renders a *session*: a URL,
+  a type, an expiry, a one-time password. For an EC2 server it therefore rendered a panel with nothing in it
+  while the platform had already written the `SERVER_CONSOLE_OPENED` audit row. The A4 row described this as
+  "console output" and left it there, which is how a capability flag and an implementation drift apart: the flag
+  promises interactive access, the implementation returns a diagnostic.
+- **The provider does expose the capability — over SSH.** EC2 has no console URL and no console session token,
+  but its **serial console** is interactive and API-reachable: Instance Connect's
+  `SendSerialConsoleSSHPublicKey` pushes a public key that is valid for **60 seconds**, and the customer then
+  connects with the matching private key to
+  `<instance-id>.port0@serial-console.ec2-instance-connect.<region>.aws`. Only one serial console session may be
+  open per instance; the account must have Serial Console access enabled (`EnableSerialConsoleAccess`); only
+  Nitro instance types are supported; and the instance must be running. The API returns one distinct exception
+  for each of those conditions.
+- **Fixed.** `getConsole()` now starts a real session: it generates a one-time RSA key pair
+  (`aws-serial-console.ts`, OpenSSH wire-format public half + PKCS#1 PEM private half), pushes the public half
+  through Instance Connect on a transport of its own (the serial console is a different AWS service from EC2 and
+  from CloudWatch, so it has its own injected client), and returns
+  `{ type: 'ec2-serial-console-ssh', username: '<instance-id>.port0', privateKey, expiresAt, notes }`. The private
+  key is handed over once and stored nowhere — the same request-scope rule as every other console/rescue
+  credential — and `expiresAt` is the API's own 60-second deadline, not a platform invention. The four API
+  conditions map to their own messages (`UNSUPPORTED_OPERATION` for disabled access and non-Nitro types,
+  retryable `SERVICE_UNAVAILABLE` for a stopped instance and for the one-session limit, `AUTHENTICATION_FAILED`
+  for `AuthException`), and a 200 that is not `Success: true` fails non-retryably instead of handing over a key
+  the serial console service never registered.
+- **The customer panel renders what it is given.** The console panel now shows a `privateKey` as a copyable
+  block and the session `notes` (the exact `ssh` command and the 60-second/one-session caveats), and it no
+  longer offers a "Launch console" link when the provider returned no URL. The hint text was corrected to say
+  not to share the credential, not just the link.
+- **Tests, and what they can and cannot prove.** `tests/unit/aws-serial-console.test.ts` (4) proves the public
+  half AWS receives is the public half of the private half the customer receives — it decodes the OpenSSH blob
+  and compares modulus and exponent against the key derived from the returned PEM — plus the endpoint, the
+  command and the mpint high-bit rule. `tests/unit/aws-adapter.test.ts` (16, was 7) pins the command input, the
+  session shape, the 60-second window, the "not `Success`" refusal, all five error mappings and the
+  no-region fail-closed path, using an injected Instance Connect transport. The capability matrix now answers
+  the Instance Connect call from the same permissive transport as EC2 and CloudWatch, so the `console: true`
+  cell runs its success path instead of passing because a real client failed. The frontend suite renders the
+  private key, the notes and the absence of a dead link. **Not claimed:** AWS itself was not called — no live
+  account is available in this environment — so what is verified is the request the adapter builds and the
+  failures it maps, not that a given AWS account has serial console access enabled.
+- **Evidence:** `tests/unit/aws-serial-console.test.ts` 4 + `tests/unit/aws-adapter.test.ts` 16 → 20 passed;
+  touched capability suites (`provider-capability-truth` 10, `adapter-capability-matrix` 76,
+  `provider-console-metrics-truth` 20, `undeclared-adapter-fail-closed` 6, `server-console` 6) → 118 passed;
+  `frontend/tests/unit/server-detail-page.test.tsx` 8. `npx tsc --noEmit` → 0 in both projects. Seven mutations
+  each turned the intended assertions red and nothing else: dropping the mpint leading zero, ignoring
+  `Success`, routing the session through the EC2 client, making the one-session limit non-retryable, flipping
+  the profile flag while the implementation stayed, removing the private-key row, and dropping the region from
+  the serial console endpoint. Full-suite evidence: **`npm test` 129 files / 1151 tests pass** (128 files / 1137 before), exit 0, 1158.5 s.
+- **Not claimed, again:** the read-only console output that `GetConsoleOutput` used to return is no longer
+  surfaced anywhere. It was never rendered, and a boot log can contain secrets; if it is wanted later it should
+  be a deliberate, separately designed diagnostic surface, not a side effect of the console flag.

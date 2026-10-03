@@ -80,10 +80,20 @@ export function buildSignedHeaders(
   };
 }
 
-/** Constant-time signature comparison. */
-export function signatureMatches(expected: string, provided: string): boolean {
-  const a = Buffer.from(expected, 'utf8');
-  const b = Buffer.from(provided, 'utf8');
+/**
+ * Constant-time signature comparison.
+ *
+ * Tolerant of a missing or non-string argument, matching server-agent/src/auth.js: a
+ * degenerate signature must be a clean `false` (→ 401) rather than a thrown TypeError
+ * (→ 500), and the two implementations must agree on that. An empty or length-mismatched
+ * value returns false without calling timingSafeEqual, which throws on unequal lengths.
+ */
+export function signatureMatches(
+  expected: string,
+  provided: string | null | undefined
+): boolean {
+  const a = Buffer.from(String(expected ?? ''), 'utf8');
+  const b = Buffer.from(String(provided ?? ''), 'utf8');
   if (a.length !== b.length || a.length === 0) return false;
   return timingSafeEqual(a, b);
 }

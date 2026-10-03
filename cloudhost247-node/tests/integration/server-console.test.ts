@@ -28,6 +28,8 @@ describe('serial console sessions', () => {
   let ownerToken = '';
   let strangerToken = '';
   let ownerId = '';
+  const vultrProviderId = randomUUID();
+  let vultrServerId = '';
   let consoleServerId = '';
   let noConsoleServerId = '';
   let unconfiguredServerId = '';
@@ -52,6 +54,13 @@ describe('serial console sessions', () => {
              ($2,'Silent bridge','silent-bridge','OTHER','generic_http','ACTIVE','https://silent.invalid','SILENT_TEST')`,
       [configuredProviderId, unconfiguredProviderId]
     );
+    // A real Vultr provider, used to prove the corrected capability end to end: the profile flag is
+    // `console: true`, the server row carries the flag, and the route builds the real adapter.
+    await db.query(
+      `INSERT INTO infrastructure_providers(id,name,slug,provider_type,adapter,status,api_base_url,credential_env_prefix)
+       VALUES($1,'Vultr console','vultr-console','VULTR','vultr','ACTIVE','https://api.vultr.test/v2','CONSOLE_VULTR')`,
+      [vultrProviderId]
+    );
     await db.query(
       `INSERT INTO infrastructure_regions(id,provider_id,code,name,status) VALUES($1,$2,'console-1','Console Region','ACTIVE')`,
       [regionId, configuredProviderId]
@@ -61,6 +70,17 @@ describe('serial console sessions', () => {
       `INSERT INTO server_os_images(id,provider_id,operating_system_version_id,provider_image_id,architecture,region_id,status,verified_at)
        VALUES($1,$2,$3,'ubuntu-24.04','x86_64',$4,'ACTIVE',now())`,
       [imageId, configuredProviderId, UBUNTU_2404, regionId]
+    );
+    const vultrRegionId = randomUUID();
+    await db.query(
+      `INSERT INTO infrastructure_regions(id,provider_id,code,name,status) VALUES($1,$2,'vultr-1','Vultr Region','ACTIVE')`,
+      [vultrRegionId, vultrProviderId]
+    );
+    const vultrImageId = randomUUID();
+    await db.query(
+      `INSERT INTO server_os_images(id,provider_id,operating_system_version_id,provider_image_id,architecture,region_id,status,verified_at)
+       VALUES($1,$2,$3,'vultr-ubuntu-24.04','x86_64',$4,'ACTIVE',now())`,
+      [vultrImageId, vultrProviderId, UBUNTU_2404, vultrRegionId]
     );
 
     consoleServerId = randomUUID();
@@ -78,11 +98,19 @@ describe('serial console sessions', () => {
       [consoleServerId, noConsoleServerId, unconfiguredServerId, notCreatedServerId,
         ownerId, configuredProviderId, regionId, UBUNTU_2404, imageId, unconfiguredProviderId]
     );
+    vultrServerId = randomUUID();
+    await db.query(
+      `INSERT INTO servers(id,name,hostname,server_type,status,customer_id,provider_id,region_id,
+         operating_system_version_id,os_image_id,architecture,provisioning_status,provider_server_id,capabilities)
+       VALUES($1,'vultr-vps','vultr.example.test','VPS','active',$2,$3,$4,$5,$6,'x86_64','READY','vultr-inst-1','{"console":true}'::jsonb)`,
+      [vultrServerId, ownerId, vultrProviderId, vultrRegionId, UBUNTU_2404, vultrImageId]
+    );
   });
 
   afterEach(() => {
     vi.unstubAllGlobals();
     delete process.env.CONSOLE_TEST_API_TOKEN;
+    delete process.env.CONSOLE_VULTR_API_TOKEN;
   });
 
   afterAll(async () => { await db.close(); });
@@ -153,6 +181,50 @@ describe('serial console sessions', () => {
     );
     expect(audit.rows).toHaveLength(1);
     expect(JSON.stringify(audit.rows[0]?.metadata ?? {})).not.toMatch(/one-time-secret|console\/abc/);
+    await app.close();
+  });
+
+  it('serves a Vultr KVM URL through the real adapter, read fresh on every request', async () => {
+    // The whole A23 correction, end to end: the stored server capability says console, the route
+    // builds the real Vultr adapter, and the adapter reads the instance's own `kvm` field. Two
+    // requests are two provider reads, because Vultr rotates the URL and says not to cache it.
+    process.env.CONSOLE_VULTR_API_TOKEN = 'vultr-token';
+    const urls: string[] = [];
+    vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL) => {
+      urls.push(String(input));
+      return new Response(JSON.stringify({
+        instance: {
+          id: 'vultr-inst-1', status: 'active', power_status: 'running',
+          kvm: `https://my.vultr.test/subs/vps/novnc/api.php?data=${urls.length}`,
+        },
+      }), { status: 200, headers: { 'content-type': 'application/json' } });
+    }));
+    const app = buildApp(env, { serveFrontend: false, pool: db });
+
+    const first = await app.inject({
+      method: 'POST', url: `/api/v1/servers/${vultrServerId}/console`,
+      headers: { authorization: `Bearer ${ownerToken}` },
+    });
+    const second = await app.inject({
+      method: 'POST', url: `/api/v1/servers/${vultrServerId}/console`,
+      headers: { authorization: `Bearer ${ownerToken}` },
+    });
+
+    expect(first.statusCode).toBe(200);
+    expect(first.json().console).toEqual({ url: 'https://my.vultr.test/subs/vps/novnc/api.php?data=1', type: 'novnc' });
+    expect(second.json().console).toEqual({ url: 'https://my.vultr.test/subs/vps/novnc/api.php?data=2', type: 'novnc' });
+    expect(urls).toEqual([
+      'https://api.vultr.test/v2/instances/vultr-inst-1',
+      'https://api.vultr.test/v2/instances/vultr-inst-1',
+    ]);
+
+    // The audit trail records that access happened, never the credential.
+    const audit = await db.query<{ metadata: Record<string, unknown> }>(
+      `SELECT metadata FROM audit_logs WHERE resource_id=$1 AND action='SERVER_CONSOLE_OPENED'`,
+      [vultrServerId]
+    );
+    expect(audit.rows).toHaveLength(2);
+    expect(JSON.stringify(audit.rows)).not.toMatch(/novnc\/api\.php|my\.vultr\.test/);
     await app.close();
   });
 });

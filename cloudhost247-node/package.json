@@ -31,11 +31,14 @@
     "env:check": "node dist/src/config/check-env.js",
     "catalog:validate": "tsx scripts/validate-catalog.ts",
     "catalog:docs": "tsx scripts/generate-tools-catalog-doc.ts",
-    "catalog:import": "tsx scripts/import-catalog.ts"
+    "catalog:import": "tsx scripts/import-catalog.ts",
+    "verify:financial": "tsx tools/verify-financial-invariants.ts",
+    "verify:authorization": "tsx tools/verify-payment-authorization.ts"
   },
   "dependencies": {
     "@aws-sdk/client-cloudwatch": "3.1144.0",
     "@aws-sdk/client-ec2": "3.1144.0",
+    "@aws-sdk/client-ec2-instance-connect": "3.1144.0",
     "@aws-sdk/client-route-53": "^3.1144.0",
     "@fastify/cors": "^11.3.0",
     "@fastify/helmet": "^13.1.1",

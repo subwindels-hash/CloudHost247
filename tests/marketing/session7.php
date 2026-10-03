@@ -414,13 +414,20 @@ return array(
         'suppressions' => array(),
         'settings' => array(),
     );
+    // Every screen in $screens needs an entry here. The two detail screens were missing,
+    // which made $expected[$screen] null: on PHP 8 a null needle is coerced to '' and
+    // strpos() returns 0, so the check silently passed without verifying anything, while
+    // on PHP 7.4 (the other half of the release-gate matrix) strpos() returned false and
+    // the whole test failed. Both screens render an "Edit …" heading.
     $expected = array(
         'dashboard' => 'Email queue',
         'campaigns' => 'New campaign',
         'campaign' => 'Pre-send checklist',
         'subscribers' => 'Subscribers',
         'segments' => 'Segments',
+        'segment' => 'Edit segment:',
         'templates' => 'Templates',
+        'template' => 'Edit template:',
         'lists' => 'Lists',
         'import' => 'Import',
         'suppressions' => 'Suppression',

@@ -35,6 +35,20 @@ interface BackupRow {
   size_bytes: number | null;
   created_at: string;
   storage_provider: string | null;
+  /** Recorded by the platform from the agent's report (0068). Absent on older rows. */
+  database_dump?: { engine: string | null; reason?: string } | null;
+}
+
+/**
+ * What a backup holds, from the agent's own report — the difference between an archive that can
+ * restore a database and one that only restores files. "Not recorded" is a third state and is
+ * printed as such: a backup taken before the platform stored this says nothing either way.
+ */
+function backupContents(backup: BackupRow): { label: string; title?: string } {
+  const dump = backup.database_dump;
+  if (!dump) return { label: 'not recorded' };
+  if (dump.engine) return { label: `database (${dump.engine})` };
+  return { label: 'no database dump', title: dump.reason };
 }
 
 interface EnvironmentKeyRow {
@@ -333,6 +347,7 @@ export default function AppInstancePage() {
                   <th>Created</th>
                   <th>Status</th>
                   <th>Size</th>
+                  <th>Contents</th>
                   <th>Storage</th>
                   <th></th>
                 </tr>
@@ -345,6 +360,7 @@ export default function AppInstancePage() {
                       <span className="ch247-badge">{backup.status}</span>
                     </td>
                     <td>{backup.size_bytes ? `${(backup.size_bytes / 1024 / 1024).toFixed(1)} MB` : '—'}</td>
+                    <td title={backupContents(backup).title}>{backupContents(backup).label}</td>
                     <td>{backup.storage_provider ?? 'local'}</td>
                     <td>
                       {backup.status === 'completed' && (

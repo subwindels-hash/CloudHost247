@@ -36,11 +36,15 @@ function dotenvValue(value) {
   // Keep simple values readable. Quote everything else so spaces, $, #, quotes, and newlines
   // cannot change how Compose parses a secret or turn one value into multiple variables.
   if (/^[A-Za-z0-9_./:@+\-]+$/.test(text)) return text;
+  // The closing quote is load-bearing: without it the value is written as `KEY="value`, which is not
+  // a quoted value at all — a strict env-file parser rejects it, and a parser that lets a quoted value
+  // span lines (the docker compose --env-file grammar does) reads on into the *next* variable and
+  // silently absorbs it, so a secret ends up one line wrong and a variable disappears.
   return `"${text
     .replace(/\\/g, '\\\\')
     .replace(/"/g, '\\"')
     .replace(/\r/g, '\\r')
-    .replace(/\n/g, '\\n')}`;
+    .replace(/\n/g, '\\n')}"`;
 }
 
 function envFileContent(environment) {
@@ -60,11 +64,18 @@ async function runCompose(appsDir, project, args, { maxBuffer = 4 * 1024 * 1024 
 }
 
 /** Raw docker compose invocation returning stdout — used by status/logs/backup dumps. */
-export async function runComposeWithOutput(appsDir, project, args, { maxBuffer = 4 * 1024 * 1024 } = {}) {
+export async function runComposeWithOutput(
+  appsDir,
+  project,
+  args,
+  { maxBuffer = 4 * 1024 * 1024, encoding } = {}
+) {
   const dir = projectDir(appsDir, project);
-  const { stdout } = await exec('docker', ['compose', '--project-directory', dir, ...args], {
-    maxBuffer,
-  });
+  const options = { maxBuffer };
+  // `encoding: 'buffer'` is required for binary output (mongodump --archive): the default utf8
+  // decoding replaces every invalid byte sequence and would corrupt the dump beyond recovery.
+  if (encoding) options.encoding = encoding;
+  const { stdout } = await exec('docker', ['compose', '--project-directory', dir, ...args], options);
   return stdout;
 }
 
@@ -136,11 +147,21 @@ export async function appLogs(appsDir, project, tail = 200) {
  *           (docker compose exec keeps the probe inside the project network, not public).
  *   tcp   → bash /dev/tcp probe via docker compose exec.
  *   command → runs the manifest-declared in-container command.
+ *
+ * Unknown or malformed checks fail closed. The previous implementation returned
+ * `{ healthy: true, detail: 'no probe executed (unknown type treated as pass)' }` for anything it
+ * did not recognise, so an unrecognised check type reported a *passing* health check — and a passing
+ * health check is what tells the platform an application is serving traffic. A health verdict must
+ * never default to healthy when nothing was probed; `command` with a non-array `command` (which the
+ * control plane's manifest schema prevents, but a direct signed call does not) took that same path.
  */
 export async function runHealthcheck(appsDir, project, service, check) {
   const timeoutMs = Math.min(check.timeoutMs ?? 10_000, 30_000);
   try {
-    if (check.type === 'command' && Array.isArray(check.command)) {
+    if (check.type === 'command') {
+      if (!Array.isArray(check.command) || check.command.length === 0) {
+        return { healthy: false, detail: 'invalid healthcheck: type "command" requires a non-empty command array' };
+      }
       await runCompose(appsDir, project, ['exec', '-T', service, ...check.command]);
       return { healthy: true, detail: 'command healthcheck passed' };
     }
@@ -156,7 +177,10 @@ export async function runHealthcheck(appsDir, project, service, check) {
       await runCompose(appsDir, project, ['exec', '-T', service, 'sh', '-c', probe]);
       return { healthy: true, detail: `tcp connect ok on :${port}` };
     }
-    return { healthy: true, detail: 'no probe executed (unknown type treated as pass)' };
+    return {
+      healthy: false,
+      detail: `unsupported healthcheck type "${String(check.type)}" — no probe was executed (supported: command, http, tcp)`,
+    };
   } catch (err) {
     return { healthy: false, detail: `healthcheck failed: ${err.message?.slice(0, 300) ?? 'error'}` };
   }

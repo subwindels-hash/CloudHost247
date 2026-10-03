@@ -29,20 +29,20 @@ describe('/domains Domain Services hub', () => {
     );
 
     // The three groups from the reference layout.
-    expect(screen.getByText('Find a Domain')).toBeTruthy();
-    expect(screen.getByText('Domain Investing')).toBeTruthy();
-    expect(screen.getByText('Domain Tools and Services')).toBeTruthy();
+    expect(await screen.findByText('Find a Domain')).toBeTruthy();
+    expect(await screen.findByText('Domain Investing')).toBeTruthy();
+    expect(await screen.findByText('Domain Tools and Services')).toBeTruthy();
 
     // The nine services.
-    expect(screen.getByText('Search for Domain Names')).toBeTruthy();
-    expect(screen.getByText('Transfer Domain Names')).toBeTruthy();
-    expect(screen.getByText('gTLD Domain Extensions')).toBeTruthy();
-    expect(screen.getByText('Auctions for Domain Names')).toBeTruthy();
-    expect(screen.getByText('Appraise Domain Name Value')).toBeTruthy();
-    expect(screen.getByText('Discount Domain Club')).toBeTruthy();
-    expect(screen.getByText('Find a Domain Owner (WHOIS/RDAP)')).toBeTruthy();
-    expect(screen.getByText('Bulk Domain Search')).toBeTruthy();
-    expect(screen.getByText('Domain Broker Service')).toBeTruthy();
+    expect(await screen.findByText('Search for Domain Names')).toBeTruthy();
+    expect(await screen.findByText('Transfer Domain Names')).toBeTruthy();
+    expect(await screen.findByText('gTLD Domain Extensions')).toBeTruthy();
+    expect(await screen.findByText('Auctions for Domain Names')).toBeTruthy();
+    expect(await screen.findByText('Appraise Domain Name Value')).toBeTruthy();
+    expect(await screen.findByText('Discount Domain Club')).toBeTruthy();
+    expect(await screen.findByText('Find a Domain Owner (WHOIS/RDAP)')).toBeTruthy();
+    expect(await screen.findByText('Bulk Domain Search')).toBeTruthy();
+    expect(await screen.findByText('Domain Broker Service')).toBeTruthy();
   });
 
   it('performs a real provider-backed search and renders live availability + prices', async () => {
@@ -89,16 +89,16 @@ describe('/domains Domain Services hub', () => {
       </MemoryRouter>
     );
 
-    const input = screen.getByLabelText('Domain name to search');
+    const input = await screen.findByLabelText('Domain name to search');
     fireEvent.change(input, { target: { value: 'example' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Search' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Search' }));
 
     await waitFor(() => expect(screen.getByText('example.com')).toBeTruthy());
-    expect(screen.getByText('example.io')).toBeTruthy();
-    expect(screen.getByText('Available')).toBeTruthy();
-    expect(screen.getByText('Registered')).toBeTruthy();
+    expect(await screen.findByText('example.io')).toBeTruthy();
+    expect(await screen.findByText('Available')).toBeTruthy();
+    expect(await screen.findByText('Registered')).toBeTruthy();
     // Prices come from the provider response, verbatim.
-    expect(screen.getAllByText('$12.98').length).toBeGreaterThan(0);
+    expect((await screen.findAllByText('$12.98')).length).toBeGreaterThan(0);
   });
 
   it('shows the honest Service Provider Not Configured state — never placeholder availability', async () => {
@@ -126,8 +126,8 @@ describe('/domains Domain Services hub', () => {
       </MemoryRouter>
     );
 
-    fireEvent.change(screen.getByLabelText('Domain name to search'), { target: { value: 'example' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Search' }));
+    fireEvent.change(await screen.findByLabelText('Domain name to search'), { target: { value: 'example' } });
+    fireEvent.click(await screen.findByRole('button', { name: 'Search' }));
 
     await waitFor(() => expect(screen.getByText('Service Provider Not Configured')).toBeTruthy());
     // No fabricated results are ever shown in this state.
@@ -143,10 +143,10 @@ describe('/domains Domain Services hub', () => {
       </MemoryRouter>
     );
 
-    fireEvent.change(screen.getByLabelText('Domain name to search'), { target: { value: 'example' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Search' }));
+    fireEvent.change(await screen.findByLabelText('Domain name to search'), { target: { value: 'example' } });
+    fireEvent.click(await screen.findByRole('button', { name: 'Search' }));
 
     await waitFor(() => expect(screen.getByRole('alert')).toBeTruthy());
-    expect(screen.getByText('Search failed')).toBeTruthy();
+    expect(await screen.findByText('Search failed')).toBeTruthy();
   });
 });

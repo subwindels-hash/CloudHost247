@@ -1,0 +1,11 @@
+{
+  "name": "cloudhost247-php-wasm",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Runs the CloudHost247 release-candidate PHP gate on hosts with no PHP installed.",
+  "type": "module",
+  "dependencies": {
+    "@php-wasm/node": "3.1.56",
+    "@php-wasm/universal": "3.1.56"
+  }
+}

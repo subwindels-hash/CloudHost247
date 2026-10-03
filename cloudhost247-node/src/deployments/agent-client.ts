@@ -8,6 +8,7 @@
  * the server (spec §31).
  */
 import { buildSignedHeaders } from './agent-protocol';
+import type { BackupDatabaseDumpReport } from '../db/ops-tables';
 import { getKeyRing } from '../lib/keyring';
 import { getCredential } from '../db/servers';
 import type { Queryable } from '../db/types';
@@ -182,7 +183,18 @@ export function agentRunBackup(
   project: string,
   options: { includeVolumes: boolean; includeDatabases: boolean }
 ) {
-  return agentRequest<{ archivePath: string; sizeBytes: number; checksum: string }>(
+  return agentRequest<{
+    archivePath: string;
+    sizeBytes: number;
+    checksum: string;
+    /**
+     * What the archive was actually asked for and actually holds. Optional because an agent older
+     * than this contract does not report it — the caller must treat "absent" as "unknown", never as
+     * "the database dump is there".
+     */
+    includes?: { volumes: boolean; databases: string | null };
+    databaseDump?: BackupDatabaseDumpReport;
+  }>(
     db,
     server,
     'POST',
@@ -195,14 +207,17 @@ export function agentRestoreBackup(
   db: Queryable,
   server: AgentServerRef,
   project: string,
-  archivePath: string
+  archivePath: string,
+  expectedChecksum?: string | null
 ) {
-  return agentRequest<{ restored: boolean }>(
+  return agentRequest<{ restored: boolean; members?: number; checksumVerified?: boolean }>(
     db,
     server,
     'POST',
     `/v1/apps/${encodeURIComponent(project)}/restore`,
-    { archivePath }
+    // The agent verifies this against the archive on disk before extracting anything, so an archive
+    // damaged in storage is refused rather than extracted over the live project.
+    expectedChecksum ? { archivePath, checksum: expectedChecksum } : { archivePath }
   );
 }
 

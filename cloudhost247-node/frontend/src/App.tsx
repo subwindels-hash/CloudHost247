@@ -1,130 +1,149 @@
+import { lazy } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import Layout from './layout/Layout';
 import RequireAuth from './components/RequireAuth';
 import RequireRole from './components/RequireRole';
-import HomePage from './pages/HomePage';
-import AboutPage from './pages/AboutPage';
-import HostingPage from './pages/HostingPage';
-import HostingCpanelPage from './pages/HostingCpanelPage';
-import HostingVpsPage from './pages/HostingVpsPage';
-import HostingDedicatedPage from './pages/HostingDedicatedPage';
-import HostingApplicationHostingPage from './pages/HostingApplicationHostingPage';
-import DomainsMarketingPage from './pages/DomainsMarketingPage';
-import ContactPage from './pages/ContactPage';
-import FaqPage from './pages/FaqPage';
-import LegalIndexPage from './pages/LegalIndexPage';
-import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import ForgotPasswordPage from './pages/ForgotPasswordPage';
-import ResetPasswordPage from './pages/ResetPasswordPage';
-import VerifyEmailPage from './pages/VerifyEmailPage';
-import DashboardPage from './pages/DashboardPage';
-import AccountPage from './pages/AccountPage';
-import ServicesPage from './pages/ServicesPage';
-import DomainsPage from './pages/DomainsPage';
-import DomainBrokeragePage from './pages/DomainBrokeragePage';
-import BillingPage from './pages/BillingPage';
-import InvoicesPage from './pages/InvoicesPage';
-import InvoiceDetailPage from './pages/InvoiceDetailPage';
-import SupportPage from './pages/SupportPage';
-import SupportTicketPage from './pages/SupportTicketPage';
-import AdminPage from './pages/AdminPage';
-import AdminCustomerDetailPage from './pages/AdminCustomerDetailPage';
-import AdminTicketsPage from './pages/AdminTicketsPage';
-import AdminTicketDetailPage from './pages/AdminTicketDetailPage';
-import { AdminInvoicesPage } from './pages/AdminInvoicesPage';
-import { AdminInvoiceDetailPage } from './pages/AdminInvoiceDetailPage';
-import { AdminLedgerPage } from './pages/AdminLedgerPage';
-import MarketplacePage from './pages/MarketplacePage';
-import AppDetailPage from './pages/AppDetailPage';
-import MyAppsPage from './pages/MyAppsPage';
-import AppInstancePage from './pages/AppInstancePage';
-import DeploymentDetailPage from './pages/DeploymentDetailPage';
-import DashboardServersPage from './pages/DashboardServersPage';
-import NotificationsPage from './pages/NotificationsPage';
-import DashboardDomainsPage from './pages/DashboardDomainsPage';
-import AdminAppsPage from './pages/AdminAppsPage';
-import AdminAppDetailPage from './pages/AdminAppDetailPage';
-import AdminDeploymentsPage from './pages/AdminDeploymentsPage';
-import AdminServersPage from './pages/AdminServersPage';
-import AdminSettingsPage from './pages/AdminSettingsPage';
-import AdminAuditPage from './pages/AdminAuditPage';
-import NotFoundPage from './pages/NotFoundPage';
-import NewServerPage from './pages/NewServerPage';
-import ServerDetailPage from './pages/ServerDetailPage';
-import ServerLogsPage from './pages/ServerLogsPage';
-import AdminOperatingSystemsPage from './pages/AdminOperatingSystemsPage';
-import AdminOsVersionsPage from './pages/AdminOsVersionsPage';
-import AdminOsImagesPage from './pages/AdminOsImagesPage';
-import AdminProvidersPage from './pages/AdminProvidersPage';
-import AdminAvailabilityPage from './pages/AdminAvailabilityPage';
-import AdminProvisioningPage from './pages/AdminProvisioningPage';
-import AdminInfrastructureLogsPage from './pages/AdminInfrastructureLogsPage';
-import ControlPanelsPage from './pages/ControlPanelsPage';
-import ControlPanelDetailPage from './pages/ControlPanelDetailPage';
-import AdminControlPanelsPage from './pages/AdminControlPanelsPage';
-import AdminLicensesPage from './pages/AdminLicensesPage';
-import AdminMonitoringPage from './pages/AdminMonitoringPage';
-import AdminAiSupportPage from './pages/AdminAiSupportPage';
-import AdminAiCommandPage from './pages/ai-os/AdminAiCommandPage';
-import AiAssistantPage from './pages/ai-os/AiAssistantPage';
-import RGDashboardPage from './pages/revenue-guardian/DashboardPage';
-import RecoveryQueuePage from './pages/revenue-guardian/RecoveryQueuePage';
-import RGCaseDetailPage from './pages/revenue-guardian/CaseDetailPage';
-import RGKanbanPage from './pages/revenue-guardian/KanbanPage';
-import RGFollowUpsPage from './pages/revenue-guardian/FollowUpsPage';
-import RGPromisesPage from './pages/revenue-guardian/PromisesPage';
-import RGAssignmentsPage from './pages/revenue-guardian/AssignmentsPage';
-import RGCustomerProfilePage from './pages/revenue-guardian/CustomerProfilePage';
-import RGReportsPage from './pages/revenue-guardian/ReportsPage';
-import {
-  OrdersPage as RGOrdersPage,
-  RenewalsPage as RGRenewalsPage,
-  RenewalRescuePage,
-  ExpiringServicesPage,
-  PreSuspensionPage,
-  PreTerminationPage,
-} from './pages/revenue-guardian/MonitorPages';
-import {
-  RevenueAtRiskPage,
-  CustomerHealthPage,
-  HighValuePage,
-  RiskAnalysisPage,
-  ForecastPage,
-} from './pages/revenue-guardian/InsightPages';
-import { MyWorkPage, StaffPerformancePage } from './pages/revenue-guardian/WorkPages';
-import { AutomationPage as RGAutomationPage, AutomationRunsPage } from './pages/revenue-guardian/AutomationPages';
-import { ActivityLogPage as RGActivityLogPage, EmailLogsPage as RGEmailLogsPage } from './pages/revenue-guardian/LogsPages';
-import { RGSettingsPage, ModuleHealthPage as RGModuleHealthPage } from './pages/revenue-guardian/SettingsPages';
-import CloudflareServicesPage from './pages/cloudflare/CloudflareServicesPage';
-import CloudflareServicePage from './pages/cloudflare/CloudflareServicePage';
-import AdminCloudflarePage from './pages/AdminCloudflarePage';
-import AdminDomainServicesPage from './pages/AdminDomainServicesPage';
-import DomainSearchPage from './pages/domains/SearchPage';
-import DomainTransferPage from './pages/domains/TransferPage';
-import DomainExtensionsPage from './pages/domains/ExtensionsPage';
-import DomainAuctionsPage from './pages/domains/AuctionsPage';
-import DomainAuctionDetailPage from './pages/domains/AuctionDetailPage';
-import DomainAppraisalPage from './pages/domains/AppraisalPage';
-import DomainClubPage from './pages/domains/ClubPage';
-import DomainWhoisPage from './pages/domains/WhoisPage';
-import DomainBulkSearchPage from './pages/domains/BulkSearchPage';
-import DomainBrokerPage from './pages/domains/BrokerPage';
-import DnsManagementPage from './pages/DnsManagementPage';
-import ToolsCenterPage from './pages/ToolsCenterPage';
-import ToolPage from './pages/ToolPage';
-import ToolsHistoryPage from './pages/ToolsHistoryPage';
-import ToolsFavoritesPage from './pages/ToolsFavoritesPage';
-import ToolsReportsPage from './pages/ToolsReportsPage';
-import ToolsMonitorsPage from './pages/ToolsMonitorsPage';
-import DomainHealthPage from './pages/DomainHealthPage';
-import AdminToolsPage from './pages/AdminToolsPage';
-import SslManagementPage from './pages/SslManagementPage';
-import ToolsHubPage from './pages/tools/ToolsHubPage';
-import MrzToolPage from './pages/tools/MrzToolPage';
-import AdminMrzSettingsPage from './pages/AdminMrzSettingsPage';
 
+/**
+ * Route components load on demand.
+ *
+ * Every page used to be imported at module scope, so the SPA shipped as ONE bundle: a visitor
+ * landing on the marketing homepage downloaded the whole admin console, the revenue-guardian
+ * suite and the Tools Center before the first paint — 993 kB of which ~800 kB was first-party
+ * page code (the four remaining third-party packages total only ~191 kB). Each route is now its
+ * own chunk, so a page only costs the browser that page.
+ *
+ * `Layout`, `RequireAuth` and `RequireRole` stay eager deliberately: they are the shell and the
+ * auth gate, they render on every route, and lazy-loading them would add a round trip before the
+ * shell could paint at all.
+ *
+ * The `Suspense` boundary for those chunks lives in `layout/Layout.tsx`, around the routed
+ * outlet, so a loading chunk shows the shared CatalogLoadingBanner (role="status") in the page
+ * body while the shell stays painted, instead of replacing the whole screen.
+ */
+
+const HomePage = lazy(() => import('./pages/HomePage'));
+const AboutPage = lazy(() => import('./pages/AboutPage'));
+const HostingPage = lazy(() => import('./pages/HostingPage'));
+const HostingCpanelPage = lazy(() => import('./pages/HostingCpanelPage'));
+const HostingVpsPage = lazy(() => import('./pages/HostingVpsPage'));
+const HostingDedicatedPage = lazy(() => import('./pages/HostingDedicatedPage'));
+const HostingApplicationHostingPage = lazy(() => import('./pages/HostingApplicationHostingPage'));
+const DomainsMarketingPage = lazy(() => import('./pages/DomainsMarketingPage'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
+const FaqPage = lazy(() => import('./pages/FaqPage'));
+const LegalIndexPage = lazy(() => import('./pages/LegalIndexPage'));
+const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const RegisterPage = lazy(() => import('./pages/RegisterPage'));
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
+const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
+const VerifyEmailPage = lazy(() => import('./pages/VerifyEmailPage'));
+const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const AccountPage = lazy(() => import('./pages/AccountPage'));
+const ServicesPage = lazy(() => import('./pages/ServicesPage'));
+const DomainsPage = lazy(() => import('./pages/DomainsPage'));
+const DomainBrokeragePage = lazy(() => import('./pages/DomainBrokeragePage'));
+const BillingPage = lazy(() => import('./pages/BillingPage'));
+const InvoicesPage = lazy(() => import('./pages/InvoicesPage'));
+const InvoiceDetailPage = lazy(() => import('./pages/InvoiceDetailPage'));
+const SupportPage = lazy(() => import('./pages/SupportPage'));
+const SupportTicketPage = lazy(() => import('./pages/SupportTicketPage'));
+const AdminPage = lazy(() => import('./pages/AdminPage'));
+const AdminCustomerDetailPage = lazy(() => import('./pages/AdminCustomerDetailPage'));
+const AdminTicketsPage = lazy(() => import('./pages/AdminTicketsPage'));
+const AdminTicketDetailPage = lazy(() => import('./pages/AdminTicketDetailPage'));
+const AdminInvoicesPage = lazy(() => import('./pages/AdminInvoicesPage').then((m) => ({ default: m.AdminInvoicesPage })));
+const AdminInvoiceDetailPage = lazy(() => import('./pages/AdminInvoiceDetailPage').then((m) => ({ default: m.AdminInvoiceDetailPage })));
+const AdminLedgerPage = lazy(() => import('./pages/AdminLedgerPage').then((m) => ({ default: m.AdminLedgerPage })));
+const MarketplacePage = lazy(() => import('./pages/MarketplacePage'));
+const AppDetailPage = lazy(() => import('./pages/AppDetailPage'));
+const MyAppsPage = lazy(() => import('./pages/MyAppsPage'));
+const AppInstancePage = lazy(() => import('./pages/AppInstancePage'));
+const DeploymentDetailPage = lazy(() => import('./pages/DeploymentDetailPage'));
+const DashboardServersPage = lazy(() => import('./pages/DashboardServersPage'));
+const NotificationsPage = lazy(() => import('./pages/NotificationsPage'));
+const DashboardDomainsPage = lazy(() => import('./pages/DashboardDomainsPage'));
+const AdminAppsPage = lazy(() => import('./pages/AdminAppsPage'));
+const AdminAppDetailPage = lazy(() => import('./pages/AdminAppDetailPage'));
+const AdminDeploymentsPage = lazy(() => import('./pages/AdminDeploymentsPage'));
+const AdminServersPage = lazy(() => import('./pages/AdminServersPage'));
+const AdminSettingsPage = lazy(() => import('./pages/AdminSettingsPage'));
+const AdminAuditPage = lazy(() => import('./pages/AdminAuditPage'));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+const NewServerPage = lazy(() => import('./pages/NewServerPage'));
+const ServerDetailPage = lazy(() => import('./pages/ServerDetailPage'));
+const ServerLogsPage = lazy(() => import('./pages/ServerLogsPage'));
+const AdminOperatingSystemsPage = lazy(() => import('./pages/AdminOperatingSystemsPage'));
+const AdminOsVersionsPage = lazy(() => import('./pages/AdminOsVersionsPage'));
+const AdminOsImagesPage = lazy(() => import('./pages/AdminOsImagesPage'));
+const AdminProvidersPage = lazy(() => import('./pages/AdminProvidersPage'));
+const AdminAvailabilityPage = lazy(() => import('./pages/AdminAvailabilityPage'));
+const AdminProvisioningPage = lazy(() => import('./pages/AdminProvisioningPage'));
+const AdminInfrastructureLogsPage = lazy(() => import('./pages/AdminInfrastructureLogsPage'));
+const ControlPanelsPage = lazy(() => import('./pages/ControlPanelsPage'));
+const ControlPanelDetailPage = lazy(() => import('./pages/ControlPanelDetailPage'));
+const AdminControlPanelsPage = lazy(() => import('./pages/AdminControlPanelsPage'));
+const AdminLicensesPage = lazy(() => import('./pages/AdminLicensesPage'));
+const AdminMonitoringPage = lazy(() => import('./pages/AdminMonitoringPage'));
+const AdminAiSupportPage = lazy(() => import('./pages/AdminAiSupportPage'));
+const AdminAiCommandPage = lazy(() => import('./pages/ai-os/AdminAiCommandPage'));
+const AiAssistantPage = lazy(() => import('./pages/ai-os/AiAssistantPage'));
+const RGDashboardPage = lazy(() => import('./pages/revenue-guardian/DashboardPage'));
+const RecoveryQueuePage = lazy(() => import('./pages/revenue-guardian/RecoveryQueuePage'));
+const RGCaseDetailPage = lazy(() => import('./pages/revenue-guardian/CaseDetailPage'));
+const RGKanbanPage = lazy(() => import('./pages/revenue-guardian/KanbanPage'));
+const RGFollowUpsPage = lazy(() => import('./pages/revenue-guardian/FollowUpsPage'));
+const RGPromisesPage = lazy(() => import('./pages/revenue-guardian/PromisesPage'));
+const RGAssignmentsPage = lazy(() => import('./pages/revenue-guardian/AssignmentsPage'));
+const RGCustomerProfilePage = lazy(() => import('./pages/revenue-guardian/CustomerProfilePage'));
+const RGReportsPage = lazy(() => import('./pages/revenue-guardian/ReportsPage'));
+const RGOrdersPage = lazy(() => import('./pages/revenue-guardian/MonitorPages').then((m) => ({ default: m.OrdersPage })));
+const RGRenewalsPage = lazy(() => import('./pages/revenue-guardian/MonitorPages').then((m) => ({ default: m.RenewalsPage })));
+const RenewalRescuePage = lazy(() => import('./pages/revenue-guardian/MonitorPages').then((m) => ({ default: m.RenewalRescuePage })));
+const ExpiringServicesPage = lazy(() => import('./pages/revenue-guardian/MonitorPages').then((m) => ({ default: m.ExpiringServicesPage })));
+const PreSuspensionPage = lazy(() => import('./pages/revenue-guardian/MonitorPages').then((m) => ({ default: m.PreSuspensionPage })));
+const PreTerminationPage = lazy(() => import('./pages/revenue-guardian/MonitorPages').then((m) => ({ default: m.PreTerminationPage })));
+const RevenueAtRiskPage = lazy(() => import('./pages/revenue-guardian/InsightPages').then((m) => ({ default: m.RevenueAtRiskPage })));
+const CustomerHealthPage = lazy(() => import('./pages/revenue-guardian/InsightPages').then((m) => ({ default: m.CustomerHealthPage })));
+const HighValuePage = lazy(() => import('./pages/revenue-guardian/InsightPages').then((m) => ({ default: m.HighValuePage })));
+const RiskAnalysisPage = lazy(() => import('./pages/revenue-guardian/InsightPages').then((m) => ({ default: m.RiskAnalysisPage })));
+const ForecastPage = lazy(() => import('./pages/revenue-guardian/InsightPages').then((m) => ({ default: m.ForecastPage })));
+const MyWorkPage = lazy(() => import('./pages/revenue-guardian/WorkPages').then((m) => ({ default: m.MyWorkPage })));
+const StaffPerformancePage = lazy(() => import('./pages/revenue-guardian/WorkPages').then((m) => ({ default: m.StaffPerformancePage })));
+const RGAutomationPage = lazy(() => import('./pages/revenue-guardian/AutomationPages').then((m) => ({ default: m.AutomationPage })));
+const AutomationRunsPage = lazy(() => import('./pages/revenue-guardian/AutomationPages').then((m) => ({ default: m.AutomationRunsPage })));
+const RGActivityLogPage = lazy(() => import('./pages/revenue-guardian/LogsPages').then((m) => ({ default: m.ActivityLogPage })));
+const RGEmailLogsPage = lazy(() => import('./pages/revenue-guardian/LogsPages').then((m) => ({ default: m.EmailLogsPage })));
+const RGSettingsPage = lazy(() => import('./pages/revenue-guardian/SettingsPages').then((m) => ({ default: m.RGSettingsPage })));
+const RGModuleHealthPage = lazy(() => import('./pages/revenue-guardian/SettingsPages').then((m) => ({ default: m.ModuleHealthPage })));
+const CloudflareServicesPage = lazy(() => import('./pages/cloudflare/CloudflareServicesPage'));
+const CloudflareServicePage = lazy(() => import('./pages/cloudflare/CloudflareServicePage'));
+const AdminCloudflarePage = lazy(() => import('./pages/AdminCloudflarePage'));
+const AdminDomainServicesPage = lazy(() => import('./pages/AdminDomainServicesPage'));
+const DomainSearchPage = lazy(() => import('./pages/domains/SearchPage'));
+const DomainTransferPage = lazy(() => import('./pages/domains/TransferPage'));
+const DomainExtensionsPage = lazy(() => import('./pages/domains/ExtensionsPage'));
+const DomainAuctionsPage = lazy(() => import('./pages/domains/AuctionsPage'));
+const DomainAuctionDetailPage = lazy(() => import('./pages/domains/AuctionDetailPage'));
+const DomainAppraisalPage = lazy(() => import('./pages/domains/AppraisalPage'));
+const DomainClubPage = lazy(() => import('./pages/domains/ClubPage'));
+const DomainWhoisPage = lazy(() => import('./pages/domains/WhoisPage'));
+const DomainBulkSearchPage = lazy(() => import('./pages/domains/BulkSearchPage'));
+const DomainBrokerPage = lazy(() => import('./pages/domains/BrokerPage'));
+const DnsManagementPage = lazy(() => import('./pages/DnsManagementPage'));
+const ToolsCenterPage = lazy(() => import('./pages/ToolsCenterPage'));
+const ToolPage = lazy(() => import('./pages/ToolPage'));
+const ToolsHistoryPage = lazy(() => import('./pages/ToolsHistoryPage'));
+const ToolsFavoritesPage = lazy(() => import('./pages/ToolsFavoritesPage'));
+const ToolsReportsPage = lazy(() => import('./pages/ToolsReportsPage'));
+const ToolsMonitorsPage = lazy(() => import('./pages/ToolsMonitorsPage'));
+const DomainHealthPage = lazy(() => import('./pages/DomainHealthPage'));
+const AdminToolsPage = lazy(() => import('./pages/AdminToolsPage'));
+const SslManagementPage = lazy(() => import('./pages/SslManagementPage'));
+const ToolsHubPage = lazy(() => import('./pages/tools/ToolsHubPage'));
+const MrzToolPage = lazy(() => import('./pages/tools/MrzToolPage'));
+const AdminMrzSettingsPage = lazy(() => import('./pages/AdminMrzSettingsPage'));
 export default function App() {
   return (
     <Routes>

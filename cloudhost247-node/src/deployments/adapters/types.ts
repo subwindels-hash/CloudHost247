@@ -13,6 +13,7 @@
  * the deployment + step rows and decides retry vs rollback (spec §14).
  */
 import type { ApplicationManifest } from '../../marketplace/manifest-schema';
+import type { BackupDatabaseDumpReport } from '../../db/ops-tables';
 import type { Queryable } from '../../db/types';
 import type { ServerRow } from '../../db/servers';
 
@@ -58,12 +59,34 @@ export interface BackupResult extends DeploymentOperationResult {
   archivePath: string | null;
   sizeBytes: number | null;
   checksum: string | null;
+  /**
+   * The agent's report of the database dump inside the archive (engine, service, file — or the
+   * reason there is none). `null`/absent means the agent reported nothing, which is not the same
+   * claim as "no database dump": an older agent says nothing at all. Persisted on the backup row so
+   * the difference survives the deployment log.
+   */
+  databaseDump?: BackupDatabaseDumpReport | null;
 }
 
 /** The complete adapter surface the engine can invoke. Adapters may be partial (cPanel deploys
  * hosting accounts, not containers) and throw UnsupportedOperationError where N/A. */
 export interface DeploymentAdapter {
   readonly kind: 'docker' | 'cpanel' | 'kubernetes';
+
+  /**
+   * Whether `restoreBackup` writes underneath live workloads, so the restore pipeline has to stop the
+   * application first and start it again afterwards.
+   *
+   * True for docker-compose: the agent untars `compose.yaml`, `.env` and `volumes/` straight into the
+   * project directory, and if the containers are still running they keep writing to the very volume
+   * files being replaced — a running database's data files are overwritten under it, and the compose
+   * file on disk stops matching the containers that are up. cPanel restores a hosting account's home
+   * directory through the panel's own UAPI, which is the account's normal (live) restore path, and
+   * Kubernetes restores are refused outright, so neither sets this.
+   *
+   * Omitted means false. A restore into an already-`stopped` installation is never un-stopped by this.
+   */
+  readonly restoreRequiresStoppedApplication?: boolean;
 
   deployApplication(ctx: AdapterContext, input: DeployInstallationInput): Promise<DeploymentOperationResult>;
   destroyApplication(ctx: AdapterContext, project: string): Promise<DeploymentOperationResult>;
@@ -74,7 +97,19 @@ export interface DeploymentAdapter {
   applicationLogs(ctx: AdapterContext, project: string, tail?: number): Promise<LogsResult>;
   runHealthcheck(ctx: AdapterContext, project: string, manifest: ApplicationManifest): Promise<ApplicationStatusResult>;
   runBackup(ctx: AdapterContext, project: string, manifest: ApplicationManifest): Promise<BackupResult>;
-  restoreBackup(ctx: AdapterContext, project: string, archivePath: string): Promise<DeploymentOperationResult>;
+  /**
+   * `options.expectedChecksum` is the sha256 the platform recorded when the archive was created. It is
+   * an integrity check against an archive damaged in storage (partial write, full disk at backup time,
+   * bit rot, a truncated copy) — not authentication: the same agent computes the digest at backup time,
+   * so an agent able to rewrite the archive could rewrite the digest with it. Engines that restore
+   * through a provider's own archive handling (cPanel) have nothing to verify against and ignore it.
+   */
+  restoreBackup(
+    ctx: AdapterContext,
+    project: string,
+    archivePath: string,
+    options?: { expectedChecksum?: string | null }
+  ): Promise<DeploymentOperationResult>;
   /** Platform-level hosting provisioning (cPanel account creation — spec §37); no-op elsewhere. */
   provisionHosting(ctx: AdapterContext, input: HostingProvisionInput): Promise<DeploymentOperationResult>;
   suspendHosting(ctx: AdapterContext, externalId: string): Promise<DeploymentOperationResult>;

@@ -891,12 +891,25 @@ fixtures were aligned rather than the constraint weakened.
 
 ## The probe is now committed
 
-`recovery/verify-financial-invariants.ts` is in the repository so this is reproducible by you
-rather than a claim about a sandbox you cannot inspect:
+`cloudhost247-node/tools/verify-financial-invariants.ts` is in the repository so this is reproducible
+by you rather than a claim about a sandbox you cannot inspect:
 
 ```
-cd cloudhost247-node && LOG_LEVEL=silent npx tsx ../recovery/verify-financial-invariants.ts
+cd cloudhost247-node && LOG_LEVEL=silent npm run verify:financial
 ```
+
+> **Correction, 2026-10-03 (round 7).** The command printed here until this date was
+> `cd cloudhost247-node && npx tsx ../recovery/verify-financial-invariants.ts`, and it could not run:
+> bare-specifier resolution starts at the importing file's directory and `node_modules` lives in
+> `cloudhost247-node/`, so the first import failed with `Cannot find module 'pg'`. Nothing in the
+> repository — no test, npm script, gate or CI job — executed either probe, so the 49/49 and 39/39
+> results below rested on a command a reader could not reproduce. Both probes now live in
+> `cloudhost247-node/tools/`, take any `Queryable`, run via `npm run verify:financial` /
+> `npm run verify:authorization`, and are executed on every `npm test` against the embedded WASM
+> PostgreSQL (`tests/integration/financial-invariant-sweep.test.ts`,
+> `tests/integration/payment-authorization-matrix.test.ts`) — see row A21 in
+> `docs/UNFINISHED-MODULES.md`. Making them executable also exposed two defects in the probes
+> themselves (an un-rerunnable sweep and two absolute-count checks), both fixed there.
 
 It creates and drops its own throwaway database and never contacts production.
 
@@ -921,7 +934,7 @@ plainly rather than padding.
 
 ## Authorization matrix — 39/39
 
-`recovery/verify-payment-authorization.ts` (committed) drives the real Fastify app from
+`cloudhost247-node/tools/verify-payment-authorization.ts` (committed) drives the real Fastify app from
 `src/app.ts` against real PostgreSQL 18.4, through the real auth middleware, with nothing mocked.
 It attacks all six financial routes:
 
@@ -1007,8 +1020,8 @@ Both probes are committed and reproducible by you:
 
 ```
 cd cloudhost247-node
-LOG_LEVEL=silent npx tsx ../recovery/verify-financial-invariants.ts
-LOG_LEVEL=silent npx tsx ../recovery/verify-payment-authorization.ts
+LOG_LEVEL=silent npm run verify:financial
+LOG_LEVEL=silent npm run verify:authorization
 ```
 
 ## Standing assessment

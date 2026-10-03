@@ -79,10 +79,10 @@ describe('Phase 5E: /billing — Billing & Ledger Dashboard', () => {
     );
 
     expect(await screen.findByText('Billing & Ledger')).toBeTruthy();
-    expect(screen.getByText('Account Balance Due')).toBeTruthy();
-    expect(screen.getByText('$49.99')).toBeTruthy();
-    expect(screen.getByText(/You have 1 unpaid invoice/)).toBeTruthy();
-    expect(screen.getByText('Transaction Ledger')).toBeTruthy();
-    expect(screen.getByText('Invoice INV-00000001 for order CH-10000001')).toBeTruthy();
+    expect(await screen.findByText('Account Balance Due')).toBeTruthy();
+    expect(await screen.findByText('$49.99')).toBeTruthy();
+    expect(await screen.findByText(/You have 1 unpaid invoice/)).toBeTruthy();
+    expect(await screen.findByText('Transaction Ledger')).toBeTruthy();
+    expect(await screen.findByText('Invoice INV-00000001 for order CH-10000001')).toBeTruthy();
   });
 });

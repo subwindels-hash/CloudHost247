@@ -119,11 +119,23 @@ try {
     check($tests, 'target link scheme trick rejected', true);
 }
 try {
-    $link = Validator::targetLink('https://www.instagram.com/somepage/');
+    // Resolved through the deterministic policy rather than Validator::targetLink: the two are
+    // the same code path (Validator::targetLink is a one-line delegation to UrlPolicy, pinned
+    // below), but Validator resolves hosts with a live gethostbynamel(), which makes this
+    // assertion depend on the machine's DNS. A resolver answering a private address for a
+    // public name is the SSRF guard working correctly, not a failure - so the assertion that
+    // must never be environment-dependent is the one that has to accept a public URL.
+    $link = TestUrlPolicy::assertPublicTargetLink('https://www.instagram.com/somepage/');
     check($tests, 'target link https accepted', $link === 'https://www.instagram.com/somepage/');
 } catch (RuntimeException $e) {
     check($tests, 'target link https accepted', false);
 }
+// The production entry point must stay a delegation to the policy this test exercises, so the
+// hermetic substitution above cannot drift away from what production actually calls.
+check($tests, 'Validator::targetLink delegates to UrlPolicy', (function () use ($root) {
+    $source = file_get_contents($root . '/modules/addons/cloudhost247_smm/lib/Support/Validator.php');
+    return strpos($source, 'return UrlPolicy::assertPublicTargetLink($link);') !== false;
+})());
 
 // --------------------------------------------------------------- Validator
 check($tests, 'quantity below provider minimum rejected', (function () {
@@ -258,7 +270,15 @@ check($tests, 'factory test through adapter', $built->testConnection()['ok'] ===
 // ------------------------------------------- OrderService: happy path + idempotency
 function buildOrderService(FakeProviderFinder $finder, FakeOrderStore $orders, FakeApiRecorder $recorder, FakeTransport $transport)
 {
-    return new OrderService($finder, $orders, $recorder, new AdapterFactory($transport));
+    // Hermetic target-link validation. UrlPolicy::resolveHost() calls gethostbynamel() on the
+    // live resolver, so without this seam the submission tests below would pass or fail
+    // according to the DNS answers of whatever machine runs them: on a host whose resolver
+    // returns private addresses for public names, the SSRF guard correctly refuses and all
+    // fifteen submission assertions fail as though the order pipeline were broken. Passing
+    // TestUrlPolicy's deterministic DNS provider keeps the production call path
+    // (assertPublicTargetLink: scheme, credentials, host shape, public-IP rules) fully intact
+    // while removing the network from the test.
+    return new OrderService($finder, $orders, $recorder, new AdapterFactory($transport), array(TestUrlPolicy::class, 'assertPublicTargetLink'));
 }
 
 $finder = new FakeProviderFinder();

@@ -22,8 +22,8 @@ describe('public account recovery pages', () => {
       </MemoryRouter>
     );
 
-    await userEvent.type(screen.getByLabelText('Email address'), 'customer@example.com');
-    await userEvent.click(screen.getByRole('button', { name: 'Send reset link' }));
+    await userEvent.type(await screen.findByLabelText('Email address'), 'customer@example.com');
+    await userEvent.click(await screen.findByRole('button', { name: 'Send reset link' }));
     await waitFor(() => expect(screen.getByText(/If an active account matches that email address/i)).toBeTruthy());
     expect(fetchMock).toHaveBeenCalledWith(
       '/api/auth/password-reset/request',
@@ -39,10 +39,10 @@ describe('public account recovery pages', () => {
       </MemoryRouter>
     );
 
-    await userEvent.type(screen.getByLabelText('New password'), 'new-correct-horse-battery');
-    await userEvent.type(screen.getByLabelText('Confirm new password'), 'new-correct-horse-battery');
-    await userEvent.click(screen.getByRole('button', { name: 'Reset password' }));
+    await userEvent.type(await screen.findByLabelText('New password'), 'new-correct-horse-battery');
+    await userEvent.type(await screen.findByLabelText('Confirm new password'), 'new-correct-horse-battery');
+    await userEvent.click(await screen.findByRole('button', { name: 'Reset password' }));
     await waitFor(() => expect(screen.getByRole('heading', { name: 'Log in' })).toBeTruthy());
-    expect(screen.getByText('Password reset complete.')).toBeTruthy();
+    expect(await screen.findByText('Password reset complete.')).toBeTruthy();
   });
 });

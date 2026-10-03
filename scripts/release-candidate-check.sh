@@ -44,6 +44,25 @@ php -d display_errors=1 tests/customaffiliate/run.php
 php -d display_errors=1 tests/cloudhost247_email/run.php
 php -d display_errors=1 tests/payments/run.php
 
+# --- Server agent (Node) -----------------------------------------------------------------------
+# The agent is the only component that touches Docker on a customer's server, and its HMAC
+# verification, skew window and replay cache are the entire boundary between the control plane and
+# that machine. It shipped with no tests at all until 2026-10-03. Its protocol exists twice by
+# design (server-agent/src/auth.js and cloudhost247-node/src/deployments/agent-protocol.ts,
+# because the agent must run dependency-free on a customer host) and the two files must be
+# changed together — so the cross-implementation conformance suite in the Node platform
+# (tests/integration/agent-protocol-conformance.test.ts) is what proves they are one protocol.
+#
+# Node is required rather than optional: a silent skip here would make "releasable" mean something
+# different on a machine without Node, which is the drift the shared lint-target list exists to
+# prevent.
+if ! command -v node >/dev/null 2>&1; then
+  echo 'Release-candidate FAILED: node is required to run the server-agent authentication suite.' >&2
+  echo 'Install Node >= 20 (see server-agent/package.json "engines").' >&2
+  exit 1
+fi
+node --test server-agent/tests/*.test.js
+
 # --- Static verification (runs without PHP or WHMCS) -------------------------------------------
 python3 -m unittest -v tests/foundation/test_static.py tests/theme/test_static.py tests/currency/test_static.py tests/marketing/test_static.py tests/ovh/test_static.py tests/ovh/test_product_services_static.py tests/ovh/test_public_catalog_static.py tests/rdp/test_static.py tests/integrations/test_static.py tests/modules/test_static.py tests/builder/test_static.py tests/smm/test_static.py tests/tools/test_static.py tests/broker/test_static.py tests/cart_recovery/test_static.py tests/passkey/test_static.py tests/digitalproducts/test_static.py tests/payments/test_static.py tests/security/test_security.py tests/security/test_archive_integration.py tests/security/test_release_gate_static.py
 python3 -m unittest -v tests/staging/test_staging_tools.py

@@ -40,7 +40,12 @@ X-CH247-Signature:  hex(HMAC-SHA256(secret, agentId\n timestamp\n nonce\n METHOD
 - Timestamp outside the window → rejected. Nonce seen before → rejected (replay protection).
 - Signature mismatch → rejected, and the agent logs it.
 - The mirror implementation lives in `cloudhost247-node/src/deployments/agent-protocol.ts`.
-  The two files define **one protocol** and must be changed together.
+  The two files define **one protocol** and must be changed together. That is enforced, not just
+  requested: `cloudhost247-node/tests/integration/agent-protocol-conformance.test.ts` imports
+  **both** implementations and asserts they produce the same canonical string, the same signature
+  bytes, the same nonce shape and the same accept/reject verdict — including signing on one side
+  and verifying on the other. Deliberately breaking the agent's canonical form fails 8 of those
+  assertions, so a drift cannot ship unnoticed.
 
 ## Install
 

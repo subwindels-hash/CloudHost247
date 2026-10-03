@@ -163,7 +163,7 @@ export function orderServerResize(id: string, targetPlanId: string) {
   );
 }
 
-export interface ConsoleSession { url?: string; password?: string; type?: string; expiresAt?: string; [key: string]: unknown }
+export interface ConsoleSession { url?: string; password?: string; privateKey?: string; notes?: string; type?: string; expiresAt?: string; [key: string]: unknown }
 
 /**
  * Requests a short-lived provider console session. The credential is returned to the owner's

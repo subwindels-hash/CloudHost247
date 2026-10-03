@@ -63,18 +63,25 @@ class SecureRdpStaticTests(unittest.TestCase):
    body=body[:body.index('\n}')]
    self.assertNotIn('$helper',body,callback+' is expected to be a no-op; if it now calls the provider, update this pin')
    self.assertIn('return true',body,callback)
- def test_vendor_php8_only_syntax_is_recorded_not_silent(self):
-  # `trim(string: $stock->{'name '})` is a PHP 8.0 named argument. On PHP 7.4 - which this
-  # repository's release-candidate gate lints and which the build notes name as a target -
-  # it is a parse error, so the module would be a fatal include rather than a working one.
-  # Recorded rather than patched: the vendor files are extracted byte-for-byte, and silently
-  # editing them would make the archive check and this suite lie about what is in the tree.
+ def test_vendor_php8_only_named_arguments_are_patched(self):
+  # `RDP_ConfigOptions` used the PHP 8.0 named argument `trim(string: $stock->{'name '})`.
+  # On PHP 7.4 - the version scripts/release-candidate-check.sh lints and the version the
+  # build notes name as a target - that is a parse error, so WHMCS hit a fatal include and
+  # the module could not load at all. It was recorded rather than patched while the gate was
+  # unrunnable; the owner then instructed that it be fixed, and it now is: exactly eight
+  # bytes (`string: `) were removed from RDP.php and nothing else changed.
+  #
+  # This asserts the fixed state, so the guard is not vacuous in either direction: it fails
+  # if the PHP-8-only syntax comes back (a restore from the archive would reintroduce it),
+  # and it fails if the doc stops recording that the file is a reviewed deviation.
   named=re.findall(r"\b\w+\(\s*[A-Za-z_]\w*\s*:",entry())
+  self.assertEqual([],named,'PHP 8-only named arguments are a parse error on PHP 7.4 and must not reappear in the vendor entry point')
   doc=DOC.read_text()
-  if named:
-   self.assertIn('trim(string:',doc,'the PHP 8-only named argument must be recorded in the work-item doc')
-   self.assertIn('PHP 8',doc);self.assertIn('7.4',doc)
-   self.assertIn('parse error',doc)
+  self.assertIn('PATCHED 2026-10-03',doc,'the deliberate deviation from the byte-for-byte archive must stay recorded')
+  self.assertIn('PHP 8',doc);self.assertIn('7.4',doc)
+  self.assertIn('parse error',doc)
+  # The patched call must still be the vendor call: same object, same property name.
+  self.assertIn("trim($stock->{'name '})",entry())
  def test_the_archive_was_extracted_and_removed(self):
   self.assertFalse((ROOT/'RDP.zip').exists())
   self.assertIn('*.zip',(ROOT/'.gitignore').read_text())
@@ -97,7 +104,7 @@ class SecureRdpStaticTests(unittest.TestCase):
     self.assertIsNone(re.search(r"Capsule::table\(['\"]tbl",(BASE/name).read_text()),name)
  def test_client_ownership_and_template_escaping_belong_to_the_rebuild_entry_point(self):
   if vendor_active():
-   self.skipTest('the vendor entry point is active: it relies on WHMCS routing for ownership and escapes nothing in overview.tpl. These assertions apply again after: git checkout f8df7de -- modules/servers/RDP/RDP.php modules/servers/RDP/templates/')
+   self.skipTest('the vendor entry point is active: it relies on WHMCS routing for ownership and escapes nothing in overview.tpl. These assertions apply again only after the vendor entry point and templates are replaced by the rebuild - see tests/security/test_archive_integration.py, which pins both states.')
   s=entry();self.assertIn("$_SESSION['uid']",s);self.assertIn("$uid!==(int)$p['userid']",s);self.assertIn("$b->client_id!==$uid",s)
   t=(BASE/'templates/overview.tpl').read_text();self.assertGreaterEqual(t.count('|escape'),7);self.assertNotIn('nofilter',t)
 if __name__=='__main__':unittest.main()

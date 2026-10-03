@@ -9,6 +9,7 @@ import {
   RESTART_ANNOTATION,
   LAST_REPLICAS_ANNOTATION,
 } from '../../src/deployments/adapters/kubernetes-adapter';
+import { createDockerAdapter } from '../../src/deployments/adapters/docker-adapter';
 import { UnsupportedOperationError } from '../../src/deployments/adapters/types';
 import type { AdapterContext } from '../../src/deployments/adapters/types';
 import type { ServerRow } from '../../src/db/servers';
@@ -390,5 +391,200 @@ describe('Kubernetes adapter addresses the cluster API the way Kubernetes does',
       appImage: 'app:1', domain: null, sslEnabled: false, cpuLimit: 1, memoryLimitMb: 256, storageLimitMb: 256, environment: {},
     });
     expect(result).toMatchObject({ ok: false, code: 'KUBERNETES_ADAPTER_DISABLED' });
+  });
+});
+
+/**
+ * The agent's backup reply now says what the archive actually holds. A manifest that asks for a
+ * database dump and gets none must leave a trace in the deployment log: silently reporting a clean
+ * backup is what let a MongoDB deployment (a first-class manifest dependency) be backed up for as
+ * long as the agent has existed with no database dump inside the archive at all.
+ */
+describe('docker adapter reports what a backup really contains', () => {
+  const dockerServer = serverRow({
+    server_type: 'VPS',
+    docker_enabled: true,
+    agent_id: 'agent-1',
+    metadata: { agent_url: 'https://agent.test:8787' },
+  });
+  const dockerManifest = (includes: string[]) =>
+    ({ services: { app: { port: 3000 } }, requirements: { storage: 1 }, backup: { includes } }) as never;
+  function db() {
+    return fakeDb('agent_secret', 'agent-secret-value');
+  }
+
+  function backupReply(databaseDump: unknown) {
+    return json({
+      archivePath: '/opt/cloudhost247/backups/shop-2026.tar.gz',
+      sizeBytes: 4096,
+      checksum: 'a'.repeat(64),
+      includes: { volumes: true, databases: null },
+      ...(databaseDump === undefined ? {} : { databaseDump }),
+    });
+  }
+
+  it('warns, and names the reason, when a requested database dump produced nothing', async () => {
+    installFetch(() =>
+      backupReply({ engine: null, service: null, file: null, reason: 'no service produced a logical database dump', attempted: ['cache:postgres (empty output)'] })
+    );
+    const logs: string[] = [];
+    const result = await createDockerAdapter({ simulationMode: false }).runBackup(
+      context(dockerServer, db(), logs),
+      'shop',
+      dockerManifest(['volumes', 'database'])
+    );
+
+    expect(result.ok).toBe(true);
+    expect(logs).toHaveLength(1);
+    expect(logs[0]).toContain('warn:');
+    expect(logs[0]).toContain('a database dump but the agent produced none');
+    expect(logs[0]).toContain('no service produced a logical database dump');
+    expect(logs[0]).toContain('cache:postgres (empty output)');
+    // The same evidence the log names travels back structured, so the caller can record it on the
+    // backup row instead of leaving the difference in a log line (A18(c)).
+    expect(result.databaseDump).toEqual({
+      engine: null,
+      service: null,
+      file: null,
+      reason: 'no service produced a logical database dump',
+      attempted: ['cache:postgres (empty output)'],
+    });
+  });
+
+  it('stays quiet when the dump was produced, and names the engine in the result', async () => {
+    installFetch(() => backupReply({ engine: 'postgres', service: 'db', file: '/opt/db-dump-postgres.sql' }));
+    const logs: string[] = [];
+    const result = await createDockerAdapter({ simulationMode: false }).runBackup(
+      context(dockerServer, db(), logs),
+      'shop',
+      dockerManifest(['volumes', 'database'])
+    );
+
+    expect(result).toMatchObject({ ok: true, message: 'Backup completed (postgres dump included)' });
+    expect(result.databaseDump).toMatchObject({ engine: 'postgres', service: 'db', file: '/opt/db-dump-postgres.sql' });
+    expect(logs).toEqual([]);
+  });
+
+  it('does not warn when the manifest never asked for a database dump', async () => {
+    installFetch(() => backupReply(undefined));
+    const logs: string[] = [];
+    const result = await createDockerAdapter({ simulationMode: false }).runBackup(
+      context(dockerServer, db(), logs),
+      'shop',
+      dockerManifest(['volumes'])
+    );
+
+    expect(result).toMatchObject({ ok: true, message: 'Backup completed' });
+    // Not asked for, so there is nothing to report: the row must not read as "a dump was needed and
+    // missing" — and equally must not read as "a dump is inside".
+    expect(result.databaseDump ?? null).toBeNull();
+    expect(logs).toEqual([]);
+  });
+
+  it('does not warn about an agent too old to report a dump outcome', async () => {
+    // "absent" must mean unknown, not "the dump is missing" — an older agent must not be accused.
+    installFetch(() => backupReply(undefined));
+    const logs: string[] = [];
+    const result = await createDockerAdapter({ simulationMode: false }).runBackup(
+      context(dockerServer, db(), logs),
+      'shop',
+      dockerManifest(['volumes', 'database'])
+    );
+
+    expect(result).toMatchObject({ ok: true, message: 'Backup completed' });
+    // The row records nothing, and "nothing" is exactly what it must say: an agent that cannot
+    // report must never become evidence that the database dump is missing.
+    expect(result.databaseDump ?? null).toBeNull();
+    expect(logs).toEqual([]);
+  });
+});
+
+/**
+ * The restore pipeline stops a running application before restoring *only* when the engine declares
+ * that its restore writes underneath live workloads (see restorePipeline and
+ * DeploymentAdapter.restoreRequiresStoppedApplication). That declaration is what makes the pipeline
+ * correct, and the pipeline's own integration tests inject a stub adapter — so nothing there notices
+ * if the real docker adapter stops declaring it. This pins the declaration against the real adapters.
+ */
+describe('restore quiescence is declared by the engine, not inferred by the pipeline', () => {
+  it('the docker engine declares that its restore replaces volume data under running containers', () => {
+    expect(createDockerAdapter({ simulationMode: false }).restoreRequiresStoppedApplication).toBe(true);
+  });
+
+  it('cPanel and Kubernetes do not, because their restores are not container-volume replacements', () => {
+    // cPanel restores an account's home directory through the panel's own UAPI, which is the
+    // account's normal live path; suspending the account around a restore would take the customer's
+    // site and mail offline. Kubernetes restores are refused outright.
+    expect(createCpanelAdapter({ simulationMode: false }).restoreRequiresStoppedApplication).toBeUndefined();
+    expect(
+      createKubernetesAdapter({ enabled: true, simulationMode: false }).restoreRequiresStoppedApplication
+    ).toBeUndefined();
+  });
+});
+
+/**
+ * A restore is destructive and irreversible, so the archive it applies must be the archive that was
+ * taken. The platform records the sha256 at backup time; this pins that the adapter sends it and that
+ * the result distinguishes "verified against the recorded digest" from "nothing was available to check
+ * against" — a caller reading only "Restored" could not tell the two apart.
+ */
+describe('docker adapter verifies a restore archive against the recorded checksum', () => {
+  const dockerServer = serverRow({
+    server_type: 'VPS',
+    docker_enabled: true,
+    agent_id: 'agent-1',
+    metadata: { agent_url: 'https://agent.test:8787' },
+  });
+  function db() {
+    return fakeDb('agent_secret', 'agent-secret-value');
+  }
+
+  it('sends the recorded checksum with the restore request and reports the verification', async () => {
+    const calls = installFetch(() => json({ restored: true, members: 6, checksumVerified: true }));
+    const recorded = 'c'.repeat(64);
+
+    const result = await createDockerAdapter({ simulationMode: false }).restoreBackup(
+      context(dockerServer, db()),
+      'shop',
+      '/opt/cloudhost247/backups/shop-2026.tar.gz',
+      { expectedChecksum: recorded }
+    );
+
+    expect(result.ok).toBe(true);
+    expect(result.message).toContain('verified against the recorded checksum');
+    const body = JSON.parse(String(calls[0]?.init.body));
+    expect(body).toEqual({ archivePath: '/opt/cloudhost247/backups/shop-2026.tar.gz', checksum: recorded });
+  });
+
+  it('does not claim a verification that did not happen', async () => {
+    // No digest on record (a backup row written before checksums were stored), or an agent older than
+    // the check: the restore still succeeds, and the message must not imply the archive was checked.
+    const calls = installFetch(() => json({ restored: true, members: 6 }));
+    const result = await createDockerAdapter({ simulationMode: false }).restoreBackup(
+      context(dockerServer, db()),
+      'shop',
+      '/opt/cloudhost247/backups/shop-old.tar.gz',
+      { expectedChecksum: null }
+    );
+
+    expect(result.ok).toBe(true);
+    expect(result.message).not.toContain('verified');
+    expect(JSON.parse(String(calls[0]?.init.body))).toEqual({ archivePath: '/opt/cloudhost247/backups/shop-old.tar.gz' });
+  });
+
+  it('surfaces the agent refusal when the archive does not match the recorded digest', async () => {
+    installFetch(() =>
+      json({ error: 'OPERATION_FAILED', message: 'backup archive checksum mismatch: the control plane recorded ccc…, the archive on disk is ddd…' }, 500)
+    );
+    const result = await createDockerAdapter({ simulationMode: false }).restoreBackup(
+      context(dockerServer, db()),
+      'shop',
+      '/opt/cloudhost247/backups/shop-2026.tar.gz',
+      { expectedChecksum: 'c'.repeat(64) }
+    );
+
+    expect(result.ok).toBe(false);
+    expect(result.code).toBe('RESTORE_FAILED');
+    expect(result.message).toContain('checksum mismatch');
   });
 });

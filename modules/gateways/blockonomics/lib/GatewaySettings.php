@@ -25,6 +25,8 @@ namespace Blockonomics;
 
 use WHMCS\Database\Capsule;
 
+require_once __DIR__ . '/Keccak256.php';
+
 class GatewaySettings
 {
     const GATEWAY_MODULE = 'blockonomics';
@@ -69,10 +71,23 @@ class GatewaySettings
         return isset($settings[$key]) && $settings[$key] === 'on';
     }
 
-    /** A syntactically valid EVM receiving address is required before USDT can be offered. */
+    /**
+     * A valid EVM receiving address is required before USDT can be offered.
+     *
+     * Syntax alone is not enough: an address written in mixed case carries an EIP-55
+     * checksum, and accepting one whose capitalisation does not match would send funds
+     * to the mistyped address it decodes to. All-lowercase and all-uppercase addresses
+     * carry no checksum information and stay valid, which is also how every wallet
+     * renders them. The keccak-256 digest behind the checksum is implemented in
+     * Keccak256.php because no supported PHP build ships keccak-256 in ext-hash
+     * (`sha3-256` is a different algorithm and would silently mis-verify).
+     */
     public static function usdtAddressValid($address)
     {
-        return is_string($address) && preg_match('/^0x[0-9a-fA-F]{40}$/', $address) === 1;
+        if (!is_string($address) || preg_match('/^0x[0-9a-fA-F]{40}$/', $address) !== 1) {
+            return false;
+        }
+        return Keccak256::checksumValid($address);
     }
 
     /** The configured network must be one the implementation actually supports (spec §9). */
