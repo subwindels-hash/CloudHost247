@@ -13,6 +13,22 @@ protection (`src/deployments/agent-protocol.ts` ⇄ `server-agent/src/auth.js` �
 two files, change them together). A leaked URL, a replayed capture, or a stale request all
 fail closed.
 
+Two test suites hold that boundary, and both run in the release candidate:
+
+- `server-agent/tests/auth.test.js` (`node --test`, no dependencies) covers the agent's own
+  verification: mandatory headers, agent-id binding, the skew window in both directions, nonce
+  replay, body/method/path tampering, the nonce cache, and the outbound signing path.
+- `cloudhost247-node/tests/integration/agent-protocol-conformance.test.ts` imports both
+  implementations and proves they are one protocol by cross-verifying signatures in both
+  directions. It exists because a drift between the two files is not cosmetic: every deployment
+  on every customer server would fail closed at once and look like an authentication fault
+  rather than a version mismatch.
+
+**Nonce generation (fixed 2026-10-03).** The agent's outbound `signOutbound()` derived its nonce
+from `Math.random()` — a predictable PRNG, while this document and the control-plane mirror both
+specify "random 16-byte hex per request". It now uses `randomBytes(16)` from `node:crypto`, and a
+static regression guard fails the suite if `Math.random()` reappears anywhere in the agent.
+
 What an attacker who fully compromises the control plane's agent secret can do is **exactly**
 the fixed operation set below, on that one server, while that credential is current — and
 nothing else:

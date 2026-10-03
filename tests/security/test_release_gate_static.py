@@ -118,6 +118,59 @@ class ReleaseGateCoverageTests(unittest.TestCase):
                    if suite not in script]
         self.assertEqual([], unwired, 'these suites exist but the release gate never runs them')
 
+    def test_the_server_agent_suites_run_in_both_gates(self):
+        """The agent shipped untested; its protocol is implemented twice by design.
+
+        `server-agent/src/auth.js` and `cloudhost247-node/src/deployments/agent-protocol.ts` both
+        say they are one protocol that must change together. Nothing enforced that until
+        2026-10-03, so this pins the three facts that make the claim real:
+
+        * the agent's own suite exists and is wired into both gates (a Node suite at
+          `server-agent/tests/`, which the PHP/Python suite patterns above cannot see);
+        * the cross-implementation conformance suite exists in the Node platform;
+        * the conformance suite imports BOTH implementations rather than a third hand-written
+          copy of the protocol — importing only one, or re-implementing the signing inline, is
+          exactly the failure this guards against, because such a suite stays green while the two
+          real implementations drift apart.
+
+        A gate that silently skips the agent when Node is absent would make "releasable" mean
+        something different per machine, so the gate is required to fail loudly instead.
+        """
+        agent_suite = ROOT / 'server-agent/tests/auth.test.js'
+        conformance = ROOT / 'cloudhost247-node/tests/integration/agent-protocol-conformance.test.ts'
+        self.assertTrue(agent_suite.is_file(), 'the agent authentication suite must exist')
+        self.assertTrue(conformance.is_file(), 'the protocol conformance suite must exist')
+
+        for gate in (SCRIPT, WORKFLOW):
+            text = gate.read_text()
+            self.assertIn('server-agent/tests/', text,
+                          f'{gate.name} must run the server-agent suite')
+
+        gate_text = SCRIPT.read_text()
+        self.assertIn('command -v node', gate_text,
+                      'the gate must fail loudly when node is missing, not skip the agent suite')
+
+        suite_text = conformance.read_text()
+        self.assertIn('server-agent/src/auth.js', suite_text,
+                      'conformance must import the agent implementation, not re-implement it')
+        self.assertIn('src/deployments/agent-protocol', suite_text,
+                      'conformance must import the control-plane implementation too')
+
+    def test_the_agent_never_generates_a_nonce_with_math_random(self):
+        """A nonce is a replay-protection primitive, so it must come from the CSPRNG.
+
+        `signOutbound()` originally built its nonce from `Math.random()` — a predictable PRNG —
+        while `docs/SERVER_AGENT.md` and the control-plane mirror both specify "random 16-byte hex
+        per request". Comments are stripped before the check so the guard cannot fire on the note
+        that explains the fix.
+        """
+        source = (ROOT / 'server-agent/src/auth.js').read_text()
+        code = re.sub(r'/\*[\s\S]*?\*/', '', source)
+        code = re.sub(r'^\s*//.*$', '', code, flags=re.MULTILINE)
+        self.assertNotIn('Math.random', code,
+                         'the server agent must not use Math.random() anywhere in code')
+        self.assertIn("randomBytes(16).toString('hex')", code)
+
     def test_both_gates_share_one_computed_lint_list(self):
         """Two hand-kept lists drifted; one computed list cannot."""
         for gate in (SCRIPT, WORKFLOW):

@@ -3,12 +3,14 @@
  *
  * Mirrors src/deployments/agent-protocol.ts in the control plane: HMAC-SHA256 over
  * agentId + timestamp + nonce + method + path + sha256(body), with timestamp skew and nonce
- * replay protection. The two files define ONE protocol and must change together.
+ * replay protection. The two files define ONE protocol and must change together — the
+ * agreement is enforced by tests/integration/agent-protocol-conformance.test.ts, not only by
+ * this comment.
  *
  * The agent never holds a Docker credential of any kind for the control plane — knowing the
  * secret only lets the control plane call this agent's small allowlisted operation set.
  */
-import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
+import { createHash, createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 
 export const HEADERS = {
   agentId: 'x-ch247-agent-id',
@@ -91,9 +93,13 @@ export function verifyRequest({ config, headers, method, path, rawBody, nonceCac
 }
 
 /** Signs an OUTBOUND request to the control plane (same scheme, reverse direction). */
-export function signOutbound(config, method, path, body) {
-  const timestamp = Math.floor(Date.now() / 1000).toString();
-  const nonce = createHash('sha256').update(`${config.agentId}:${timestamp}:${Math.random()}`).digest('hex').slice(0, 32);
+export function signOutbound(config, method, path, body, nowSeconds) {
+  const timestamp = Math.floor(nowSeconds ?? Date.now() / 1000).toString();
+  // 16 random bytes from the CSPRNG, hex-encoded — exactly what docs/SERVER_AGENT.md and the
+  // control-plane mirror specify ("random 16-byte hex per request"). This must not be derived
+  // from Math.random(): the nonce is the replay-protection primitive, and Math.random() is a
+  // predictable PRNG, not a cryptographic one.
+  const nonce = randomBytes(16).toString('hex');
   const signature = signCanonical(
     config.agentSecret,
     canonicalRequest(config.agentId, timestamp, nonce, method, path, sha256Hex(body))

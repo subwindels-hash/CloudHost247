@@ -98,6 +98,16 @@ zero-byte/placeholder files, and modules documented as vendor-only, gated, super
 > gate; until then the lint expansion is evidenced structurally, and that limit is stated rather than
 > glossed over.
 
+| A16 | **Server agent (Node) — request authentication** | `server-agent/` (`src/auth.js`, `src/config.js`, `src/server.js`), mirrored by `cloudhost247-node/src/deployments/agent-protocol.ts` | **FOUND AND FIXED 2026-10-03 — CLOSED.** This row did not exist in any earlier revision of this inventory: the agent was absent from it entirely, so nothing recorded that it had **no tests at all**. It is the only component that touches Docker on a customer's server, and its HMAC verification, skew window and nonce cache are the whole boundary between the control plane and that machine. Two defects were found by reading both implementations side by side, and both are now fixed and pinned. **(1) The outbound nonce came from a predictable PRNG.** `signOutbound()` built it as `sha256(\`${agentId}:${timestamp}:${Math.random()}\`)`, while `docs/SERVER_AGENT.md` and the control-plane mirror both specify "random 16-byte hex per request". The nonce *is* the replay-protection primitive, so `Math.random()` is the wrong source; it now uses `randomBytes(16)` from `node:crypto`, and a static guard (comments stripped, so it cannot fire on its own explanation) fails if `Math.random()` reappears anywhere in the agent. **(2) The "must change together" rule was unenforced.** Both files carry a header saying they define one protocol and must be changed together, and nothing checked it. `tests/integration/agent-deployments-api.test.ts` covered the control plane's *route* behaviour using its own hand-written signing helper — which keeps passing if the agent drifts, the exact failure mode. A conformance suite now imports **both** real implementations and asserts agreement on the canonical string, the signature bytes, the header names, the nonce shape and the accept/reject verdict, including signing on one side and verifying on the other. Mutation-verified: swapping two fields in the agent's canonical form turns 8 of its 22 assertions red. | — none open. Coverage added: `server-agent/tests/auth.test.js` (29 tests, `node --test`, zero dependencies, matching the agent's own dependency-free design) and `cloudhost247-node/tests/integration/agent-protocol-conformance.test.ts` (22 tests). Both now run in the release candidate, which additionally **requires Node and fails loudly without it** rather than skipping — a silent skip would make "releasable" mean something different per machine, and CI gained `actions/setup-node`. | `server-agent/tests/auth.test.js`, `cloudhost247-node/tests/integration/agent-protocol-conformance.test.ts`, `tests/security/test_release_gate_static.py` (2 new pins: both gates run the agent suite, and neither implementation may use `Math.random()`), `scripts/release-candidate-check.sh`, `docs/SERVER_AGENT.md` |
+
+> **A16 verification (2026-10-03).** `node --test server-agent/tests/*.test.js` → 29 tests, 29 pass, exit 0.
+> `npx vitest run tests/integration/agent-protocol-conformance.test.ts` → 22 tests, 22 pass.
+> `bash scripts/release-candidate-check.sh` → exit 0, with the agent section reporting `# tests 29 / # pass 29 / # fail 0`.
+> The conformance guard was proven non-vacuous by mutation: `[agentId, timestamp, nonce, …]` changed to
+> `[agentId, nonce, timestamp, …]` in the agent → 8 failed / 14 passed; reverted → 22/22 green.
+> **Not claimed:** the agent was never run against real Docker, and no request has crossed a real network
+> between the two implementations — the suites prove the protocol agrees, not that a deployment works.
+
 ---
 
 ## B. Never independently built — vendor, licence-gated, or superseded builds
@@ -251,6 +261,9 @@ Not "unfinished code", but none of these may be called done until the gate close
 **In-build first-party:** `cloudhost247_marketing` · `cloudhost247_ovh` *(advanced ops; automatic
 product creation and cross-currency pricing apply closed 2026-10-02 — source-complete, staging-blocked)* ·
 `cloudhost247_theme` (partials)
+
+**Server agent:** `server-agent` *(closed 2026-10-03: no tests existed at all; the outbound nonce came from
+`Math.random()` and the "two files, one protocol" rule was unenforced — see A16)*
 
 **In-build Node adapters/modules:** `aws` (reinstall gated behind `AWS_ALLOW_ROOT_VOLUME_REPLACEMENT`;
 rescue is a correct refusal) · `contabo` (resize, console, metrics — all three verified as correct
