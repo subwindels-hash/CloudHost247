@@ -19,6 +19,8 @@ import { runRevenueGuardianCycle } from '../revenue-guardian/jobs/scheduler';
 import { sweepCloudflareJobs } from './cloudflare-sweep';
 import { sweepDomainServices, DOMAIN_SERVICES_SWEEP_INTERVAL_MS } from './domain-services-sweep';
 import { runAiSweep, AI_SWEEP_INTERVAL_MS } from '../ai-os/jobs/sweep';
+import { monitorSweep, providerHealthSweep, resolverHealthSweep } from '../tools/worker/sweep';
+import { getSetting } from '../db/ops-tables';
 import type { EngineOptions } from '../deployments/engine';
 import {
   DEFAULT_WORKER_CYCLE_LEASE_NAME,
@@ -48,6 +50,10 @@ const IMAGE_REVALIDATION_INTERVAL_MS = 6 * 60 * 60_000;
 const REVENUE_GUARDIAN_SWEEP_INTERVAL_MS = 5 * 60_000;
 // Cloudflare durable job queue: claim-lease with per-job backoff, so sweeping often is cheap.
 const CLOUDFLARE_SWEEP_INTERVAL_MS = 60_000;
+// Tools Center: provider/resolver probes are external API/DNS calls, so they run on a slower
+// cadence than the monitor sweep, which is due-driven and cheap when nothing is stale.
+const TOOLS_HEALTH_SWEEP_INTERVAL_MS = 15 * 60_000;
+const TOOLS_MONITOR_SWEEP_INTERVAL_MS = 5 * 60_000;
 
 interface WorkerLogger {
   log(message: string): void;
@@ -67,6 +73,8 @@ interface WorkerSchedule {
   lastCloudflareSweep: number;
   lastDomainServicesSweep: number;
   lastAiControlPlaneSweep: number;
+  lastToolsHealthSweep: number;
+  lastToolsMonitorSweep: number;
 }
 
 function createWorkerSchedule(): WorkerSchedule {
@@ -83,6 +91,8 @@ function createWorkerSchedule(): WorkerSchedule {
     lastCloudflareSweep: 0,
     lastDomainServicesSweep: 0,
     lastAiControlPlaneSweep: 0,
+    lastToolsHealthSweep: 0,
+    lastToolsMonitorSweep: 0,
   };
 }
 
@@ -210,6 +220,32 @@ async function runWorkerCycle(
     if (domainWork) {
       logger.log(
         `[worker:${ctx.workerId}] domain services: ${domainServices.registrations.claimed} registration(s) claimed (${domainServices.registrations.registered} registered, ${domainServices.registrations.failed} failed), ${domainServices.registrationConfirmations} confirmed, transfers ${domainServices.transfers.initiated} initiated/${domainServices.transfers.completed} completed, ${domainServices.appraisals.executed} appraisal(s), ${domainServices.auctions.ended} auction(s) ended, ${domainServices.membershipsExpired} membership(s) expired, ${domainServices.membershipRenewalReminders} renewal reminder(s), ${domainServices.availabilityWatches.checked} watch(es) checked/${domainServices.availabilityWatches.becameAvailable} now available`
+      );
+    }
+  }
+  if (now - schedule.lastToolsHealthSweep >= TOOLS_HEALTH_SWEEP_INTERVAL_MS) {
+    schedule.lastToolsHealthSweep = now;
+    // Batch sizes are operator settings, not constants: a shared-hosting account needs to be able to
+    // turn the per-cycle work down without editing code.
+    const resolverBatch = await getSetting<number>(ctx.db, 'tools.resolver_health_batch', 6);
+    const providers = await providerHealthSweep(ctx.db);
+    const resolvers = await resolverHealthSweep(ctx.db, Number.isFinite(resolverBatch) && resolverBatch > 0 ? Math.min(Math.floor(resolverBatch), 50) : 6);
+    const degraded = providers.failing + resolvers.down;
+    didWork ||= providers.checked > 0 || resolvers.checked > 0;
+    if (degraded > 0) {
+      logger.log(
+        `[worker:${ctx.workerId}] tools center: ${providers.checked} provider(s) probed (${providers.failing} failing), ${resolvers.checked} resolver(s) probed (${resolvers.down} down, ${resolvers.degraded} degraded)`
+      );
+    }
+  }
+  if (now - schedule.lastToolsMonitorSweep >= TOOLS_MONITOR_SWEEP_INTERVAL_MS) {
+    schedule.lastToolsMonitorSweep = now;
+    const monitorBatch = await getSetting<number>(ctx.db, 'tools.monitor_sweep_batch', 25);
+    const monitors = await monitorSweep(ctx.db, Number.isFinite(monitorBatch) && monitorBatch > 0 ? Math.min(Math.floor(monitorBatch), 200) : 25);
+    didWork ||= monitors.changed > 0;
+    if (monitors.changed > 0 || monitors.errors > 0) {
+      logger.log(
+        `[worker:${ctx.workerId}] tools monitors: ${monitors.checked} checked, ${monitors.changed} changed, ${monitors.notified} notification(s) delivered, ${monitors.errors} error(s)`
       );
     }
   }

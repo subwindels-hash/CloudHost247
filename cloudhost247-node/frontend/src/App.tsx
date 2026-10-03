@@ -112,6 +112,14 @@ import DomainWhoisPage from './pages/domains/WhoisPage';
 import DomainBulkSearchPage from './pages/domains/BulkSearchPage';
 import DomainBrokerPage from './pages/domains/BrokerPage';
 import DnsManagementPage from './pages/DnsManagementPage';
+import ToolsCenterPage from './pages/ToolsCenterPage';
+import ToolPage from './pages/ToolPage';
+import ToolsHistoryPage from './pages/ToolsHistoryPage';
+import ToolsFavoritesPage from './pages/ToolsFavoritesPage';
+import ToolsReportsPage from './pages/ToolsReportsPage';
+import ToolsMonitorsPage from './pages/ToolsMonitorsPage';
+import DomainHealthPage from './pages/DomainHealthPage';
+import AdminToolsPage from './pages/AdminToolsPage';
 import SslManagementPage from './pages/SslManagementPage';
 
 export default function App() {
@@ -162,6 +170,18 @@ export default function App() {
 
         {/* Authenticated app shell — real protected routes (see components/RequireAuth.tsx). A
             signed-out visitor is redirected to /login instead of ever rendering these. */}
+        {/* Tools Center: public discovery + individual tools. Tools that need an account say so
+            on their card and are enforced again server-side, so a signed-out visitor never gets a
+            broken page — only a clear "sign in to use this" message. */}
+        <Route path="/tools" element={<ToolsCenterPage />} />
+        <Route path="/tools/history" element={<ToolsHistoryPage />} />
+        <Route path="/tools/favorites" element={<ToolsFavoritesPage />} />
+        <Route path="/tools/reports" element={<ToolsReportsPage />} />
+        <Route path="/tools/monitors" element={<ToolsMonitorsPage />} />
+        {/* Tool pages use the catalogue's own nested paths (e.g. /tools/dns/propagation), so the
+            whole /tools/* branch is handled by one page that resolves the path back to a tool. */}
+        <Route path="/tools/*" element={<ToolPage />} />
+
         <Route element={<RequireAuth />}>
           {/* Customer Cloud Assistant — server-side scoped to the caller's own account; safe for
               every signed-in role (customers see only their own data, staff see only theirs). */}
@@ -183,6 +203,7 @@ export default function App() {
           <Route path="/dashboard/servers/:id/logs" element={<ServerLogsPage />} />
           <Route path="/servers/new" element={<NewServerPage />} />
           <Route path="/dashboard/domains" element={<DashboardDomainsPage />} />
+          <Route path="/domains/:domain/health" element={<DomainHealthPage />} />
           <Route path="/dashboard/dns" element={<DnsManagementPage />} />
           <Route path="/dashboard/ssl" element={<SslManagementPage />} />
           <Route path="/account" element={<AccountPage />} />
@@ -253,6 +274,7 @@ export default function App() {
             <Route path="/admin/licenses" element={<AdminLicensesPage />} />
             <Route path="/admin/monitoring" element={<AdminMonitoringPage />} />
             <Route path="/admin/dns" element={<DnsManagementPage />} />
+          <Route path="/admin/tools" element={<AdminToolsPage />} />
             <Route path="/admin/ssl" element={<SslManagementPage />} />
             <Route path="/admin/audit-logs" element={<AdminAuditPage />} />
             <Route path="/admin/cloudflare" element={<AdminCloudflarePage />} />

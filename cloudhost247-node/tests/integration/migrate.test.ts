@@ -93,6 +93,8 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0064_relax_domain_extensions_shape.sql',
     '0065_create_domain_availability_watches.sql',
     '0066_create_ai_control_plane.sql',
+    // Phase 7 — Native Tools Center (DNS/IP/network/developer/webmaster/security/domain/productivity).
+    '0067_create_tools_center.sql',
   ];
 
   it('finds the committed migration files in order', () => {
