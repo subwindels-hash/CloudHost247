@@ -232,11 +232,25 @@ export function createDockerAdapter(options: DockerAdapterOptions): DeploymentAd
       }
     },
 
-    async restoreBackup(ctx, project, archivePath) {
+    async restoreBackup(ctx, project, archivePath, options) {
       if (await isSimulated(ctx)) return ok(`Simulated restore of ${archivePath}`);
       try {
-        await agentRestoreBackup(ctx.db, agentRef(ctx.server), project, archivePath);
-        return ok(`Restored ${project} from ${archivePath}`);
+        const result = await agentRestoreBackup(
+          ctx.db,
+          agentRef(ctx.server),
+          project,
+          archivePath,
+          options?.expectedChecksum
+        );
+        // Say which of the two happened. "Restored" and "restored and verified against the recorded
+        // checksum" are different facts, and a caller reading only the first would have no way to tell
+        // whether the integrity check ran, was skipped because no digest was on record, or was skipped
+        // because this agent is older than the check.
+        return ok(
+          result.checksumVerified
+            ? `Restored ${project} from ${archivePath} (archive verified against the recorded checksum)`
+            : `Restored ${project} from ${archivePath}`
+        );
       } catch (err) {
         return fail('RESTORE_FAILED', err);
       }

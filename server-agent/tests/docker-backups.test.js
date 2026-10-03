@@ -14,7 +14,7 @@
  * The stubs are shell scripts with no dependencies, matching the agent's own dependency-free design.
  */
 import assert from 'node:assert/strict';
-import test from 'node:test';
+import test, { describe, it } from 'node:test';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { chmodSync, mkdirSync, mkdtempSync, readFileSync, statSync, writeFileSync } from 'node:fs';
@@ -509,6 +509,121 @@ test('restore still refuses an archive outside the agent backup directory', asyn
     /restore path must be inside the agent backup directory/
   );
   assert.deepEqual(box.calls(), [], 'neither refusal may reach a command');
+});
+
+// --- restore: integrity of the archive at rest ---------------------------------------------------
+
+describe('restore verifies the archive against the recorded checksum', () => {
+  /**
+   * The control plane stores the sha256 the agent computed when the archive was created and sends it
+   * back on restore. Without this check an archive damaged after the backup — a partial write, a full
+   * disk, bit rot, a truncated copy — is extracted over the live project, because damage that still
+   * decompresses passes `tar -t` and only shows up as missing or corrupted data afterwards.
+   */
+  it('extracts when the recorded checksum matches, and says the archive was verified', async (t) => {
+    const box = sandbox(t, { delegateTar: true });
+    const archive = makeArchive(box.backupDir, 'verified.tar.gz', {
+      'compose.yaml': 'services: {}\n',
+      'volumes/app/data.txt': 'payload',
+    });
+    const recorded = createHash('sha256').update(readFileSync(archive)).digest('hex');
+
+    const result = await restoreBackup(box.appsDir, box.backupDir, PROJECT, archive, { expectedChecksum: recorded });
+
+    assert.equal(result.restored, true);
+    assert.equal(result.checksumVerified, true);
+    assert.equal(readFileSync(path.join(box.projectDir, 'volumes/app/data.txt'), 'utf8'), 'payload');
+  });
+
+  it('refuses a damaged archive, and extracts nothing at all', async (t) => {
+    const box = sandbox(t, { delegateTar: true });
+    const archive = makeArchive(box.backupDir, 'damaged.tar.gz', {
+      'compose.yaml': 'services: {}\n',
+      'volumes/app/wallet.txt': 'important',
+    });
+    const recorded = createHash('sha256').update(readFileSync(archive)).digest('hex');
+
+    // Flip one byte in the middle of the file. The gzip stream still decompresses and `tar -t` still
+    // lists every member, which is exactly why the tar pass alone cannot catch this.
+    const bytes = readFileSync(archive);
+    bytes[Math.floor(bytes.length / 2)] ^= 0x20;
+    writeFileSync(archive, bytes);
+
+    await assert.rejects(
+      () => restoreBackup(box.appsDir, box.backupDir, PROJECT, archive, { expectedChecksum: recorded }),
+      /checksum mismatch/
+    );
+    assert.deepEqual(box.calls(), [], 'nothing may be read or written once the digest does not match');
+    assert.throws(
+      () => readFileSync(path.join(box.projectDir, 'volumes/app/wallet.txt')),
+      /ENOENT/,
+      'the live project must be untouched'
+    );
+  });
+
+  it('names both digests in the refusal, so the damage is diagnosable', async (t) => {
+    const box = sandbox(t, { delegateTar: true });
+    const archive = makeArchive(box.backupDir, 'diagnose.tar.gz', { 'compose.yaml': 'x' });
+    const recorded = 'a'.repeat(64);
+    const actual = createHash('sha256').update(readFileSync(archive)).digest('hex');
+
+    await assert.rejects(
+      () => restoreBackup(box.appsDir, box.backupDir, PROJECT, archive, { expectedChecksum: recorded }),
+      (err) => {
+        assert.match(err.message, new RegExp(recorded));
+        assert.match(err.message, new RegExp(actual));
+        return true;
+      }
+    );
+  });
+
+  it('rejects a malformed checksum instead of treating it as no check', async (t) => {
+    const box = sandbox(t, { delegateTar: true });
+    const archive = makeArchive(box.backupDir, 'malformed.tar.gz', { 'compose.yaml': 'x' });
+    const real = createHash('sha256').update(readFileSync(archive)).digest('hex');
+
+    for (const bad of [real.toUpperCase(), real.slice(0, 63), ` ${real}`, `${real}0`, 'not-a-digest', '']) {
+      await assert.rejects(
+        () => restoreBackup(box.appsDir, box.backupDir, PROJECT, archive, { expectedChecksum: bad }),
+        /expectedChecksum must be a lowercase sha256 hex digest/,
+        `expected rejection of ${JSON.stringify(bad.slice(0, 12))}…`
+      );
+    }
+    assert.deepEqual(box.calls(), []);
+  });
+
+  it('still restores when no checksum is on record, and reports that it was not verified', async (t) => {
+    // An older backup row (or an older control plane) has nothing to check against. The restore must
+    // still work — and must not report a verification that never happened.
+    const box = sandbox(t, { delegateTar: true });
+    const archive = makeArchive(box.backupDir, 'unverifiable.tar.gz', { 'compose.yaml': 'services: {}\n' });
+
+    const result = await restoreBackup(box.appsDir, box.backupDir, PROJECT, archive);
+
+    assert.equal(result.restored, true);
+    assert.equal(result.checksumVerified, false);
+    assert.equal(readFileSync(path.join(box.projectDir, 'compose.yaml'), 'utf8'), 'services: {}\n');
+  });
+
+  it('hashes the archive it writes exactly as it hashes the archive it verifies', async (t) => {
+    // The streaming hash replaced a readFile+createHash pair in runBackup; if the two ever disagreed,
+    // every restore of a freshly taken backup would be refused as corrupt.
+    const box = sandbox(t, { delegateTar: true });
+    writeFileSync(path.join(box.projectDir, 'compose.yaml'), 'services: {}\n');
+    writeFileSync(path.join(box.projectDir, '.env'), 'DB_PASSWORD="secret"\n');
+
+    const taken = await runBackup(box.appsDir, box.backupDir, PROJECT, { includeDatabases: false });
+    assert.equal(
+      taken.checksum,
+      createHash('sha256').update(readFileSync(taken.archivePath)).digest('hex'),
+      'the recorded checksum must be the digest of the archive that was written'
+    );
+
+    const result = await restoreBackup(box.appsDir, box.backupDir, PROJECT, taken.archivePath, {
+      expectedChecksum: taken.checksum,
+    });
+    assert.equal(result.checksumVerified, true);
+  });
 });
 
 // --- non-vacuity guard ---------------------------------------------------------------------------

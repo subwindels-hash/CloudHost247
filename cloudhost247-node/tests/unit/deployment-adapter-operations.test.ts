@@ -505,3 +505,70 @@ describe('restore quiescence is declared by the engine, not inferred by the pipe
     ).toBeUndefined();
   });
 });
+
+/**
+ * A restore is destructive and irreversible, so the archive it applies must be the archive that was
+ * taken. The platform records the sha256 at backup time; this pins that the adapter sends it and that
+ * the result distinguishes "verified against the recorded digest" from "nothing was available to check
+ * against" — a caller reading only "Restored" could not tell the two apart.
+ */
+describe('docker adapter verifies a restore archive against the recorded checksum', () => {
+  const dockerServer = serverRow({
+    server_type: 'VPS',
+    docker_enabled: true,
+    agent_id: 'agent-1',
+    metadata: { agent_url: 'https://agent.test:8787' },
+  });
+  function db() {
+    return fakeDb('agent_secret', 'agent-secret-value');
+  }
+
+  it('sends the recorded checksum with the restore request and reports the verification', async () => {
+    const calls = installFetch(() => json({ restored: true, members: 6, checksumVerified: true }));
+    const recorded = 'c'.repeat(64);
+
+    const result = await createDockerAdapter({ simulationMode: false }).restoreBackup(
+      context(dockerServer, db()),
+      'shop',
+      '/opt/cloudhost247/backups/shop-2026.tar.gz',
+      { expectedChecksum: recorded }
+    );
+
+    expect(result.ok).toBe(true);
+    expect(result.message).toContain('verified against the recorded checksum');
+    const body = JSON.parse(String(calls[0]?.init.body));
+    expect(body).toEqual({ archivePath: '/opt/cloudhost247/backups/shop-2026.tar.gz', checksum: recorded });
+  });
+
+  it('does not claim a verification that did not happen', async () => {
+    // No digest on record (a backup row written before checksums were stored), or an agent older than
+    // the check: the restore still succeeds, and the message must not imply the archive was checked.
+    const calls = installFetch(() => json({ restored: true, members: 6 }));
+    const result = await createDockerAdapter({ simulationMode: false }).restoreBackup(
+      context(dockerServer, db()),
+      'shop',
+      '/opt/cloudhost247/backups/shop-old.tar.gz',
+      { expectedChecksum: null }
+    );
+
+    expect(result.ok).toBe(true);
+    expect(result.message).not.toContain('verified');
+    expect(JSON.parse(String(calls[0]?.init.body))).toEqual({ archivePath: '/opt/cloudhost247/backups/shop-old.tar.gz' });
+  });
+
+  it('surfaces the agent refusal when the archive does not match the recorded digest', async () => {
+    installFetch(() =>
+      json({ error: 'OPERATION_FAILED', message: 'backup archive checksum mismatch: the control plane recorded ccc…, the archive on disk is ddd…' }, 500)
+    );
+    const result = await createDockerAdapter({ simulationMode: false }).restoreBackup(
+      context(dockerServer, db()),
+      'shop',
+      '/opt/cloudhost247/backups/shop-2026.tar.gz',
+      { expectedChecksum: 'c'.repeat(64) }
+    );
+
+    expect(result.ok).toBe(false);
+    expect(result.code).toBe('RESTORE_FAILED');
+    expect(result.message).toContain('checksum mismatch');
+  });
+});

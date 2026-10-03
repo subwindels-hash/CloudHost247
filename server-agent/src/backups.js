@@ -12,14 +12,17 @@
  * local user on the host.
  */
 import { execFile } from 'node:child_process';
-import { readFileSync } from 'node:fs';
-import { chmod, mkdir, stat, writeFile, readFile } from 'node:fs/promises';
+import { createReadStream, readFileSync } from 'node:fs';
+import { chmod, mkdir, stat, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { promisify } from 'node:util';
 import { projectDir, assertProjectName, runComposeWithOutput } from './docker.js';
 
 const exec = promisify(execFile);
+
+/** Lowercase sha256 hex digest — the only shape accepted as an expected checksum. */
+const SHA256_HEX_RE = /^[0-9a-f]{64}$/;
 
 /** Logical dump engines, tried in order against each candidate service (see dumpDatabases). */
 const DUMP_ENGINES = [
@@ -30,6 +33,21 @@ const DUMP_ENGINES = [
   // (decoding it as utf8 would corrupt every document).
   { name: 'mongodb', command: ['mongodump', '--archive'], extension: 'archive', binary: true },
 ];
+
+/**
+ * sha256 of a file, streamed.
+ *
+ * Streaming rather than `readFile` + hash: a customer database backup can be gigabytes, and buffering
+ * it whole to hash it would throw the agent process away on exactly the deployments that most need a
+ * backup to succeed. The digest is identical either way.
+ */
+async function sha256OfFile(file) {
+  const hash = createHash('sha256');
+  for await (const chunk of createReadStream(file)) {
+    hash.update(chunk);
+  }
+  return hash.digest('hex');
+}
 
 export async function runBackup(appsDir, backupDir, project, { includeVolumes, includeDatabases }) {
   assertProjectName(project);
@@ -57,8 +75,7 @@ export async function runBackup(appsDir, backupDir, project, { includeVolumes, i
   await exec('tar', ['-czf', archivePath, '-C', dir, '.']);
   await chmod(archivePath, 0o600);
   const info = await stat(archivePath);
-  const contents = await readFile(archivePath);
-  const checksum = createHash('sha256').update(contents).digest('hex');
+  const checksum = await sha256OfFile(archivePath);
   return {
     archivePath,
     sizeBytes: info.size,
@@ -146,7 +163,13 @@ async function dumpDatabases(appsDir, project, dir) {
   };
 }
 
-export async function restoreBackup(appsDir, backupDir, project, archivePath) {
+/**
+ * @param {object} [options]
+ * @param {string|undefined} [options.expectedChecksum] sha256 the control plane recorded when the
+ *   archive was created. When supplied it must match the archive byte-for-byte or the restore is
+ *   refused before a single file is written.
+ */
+export async function restoreBackup(appsDir, backupDir, project, archivePath, { expectedChecksum } = {}) {
   assertProjectName(project);
   // Path traversal guard: the archive must live inside the backup root.
   const resolvedRoot = path.resolve(backupDir);
@@ -155,6 +178,33 @@ export async function restoreBackup(appsDir, backupDir, project, archivePath) {
     throw new Error('restore path must be inside the agent backup directory');
   }
   const dir = projectDir(appsDir, project);
+
+  /**
+   * Integrity check before the tar verification pass, and before anything is written.
+   *
+   * The control plane stores the checksum the agent computed when the archive was created, so this is
+   * what catches an archive that has been damaged since — a partial write, a full disk during the
+   * backup, bit rot on the storage, a truncated copy. Gross damage also trips the `tar -t` pass below,
+   * but damage that still decompresses (one flipped byte inside a member) does not, and would be
+   * extracted over the live project without this.
+   *
+   * This is an integrity check, not authentication: the same agent computes the checksum at backup
+   * time, so an agent that can rewrite the archive can rewrite the checksum with it. What it rules out
+   * is silent corruption, not a hostile agent.
+   */
+  let checksumVerified = false;
+  if (expectedChecksum !== undefined && expectedChecksum !== null) {
+    if (typeof expectedChecksum !== 'string' || !SHA256_HEX_RE.test(expectedChecksum)) {
+      throw new Error('expectedChecksum must be a lowercase sha256 hex digest');
+    }
+    const actual = await sha256OfFile(resolvedArchive);
+    if (actual !== expectedChecksum) {
+      throw new Error(
+        `backup archive checksum mismatch: the control plane recorded ${expectedChecksum}, the archive on disk is ${actual}`
+      );
+    }
+    checksumVerified = true;
+  }
 
   // Verification pass BEFORE anything is written. `tar -xzf` on a truncated or corrupt archive
   // extracted whatever members it reached, exited 0, and the control plane recorded a successful
@@ -178,7 +228,10 @@ export async function restoreBackup(appsDir, backupDir, project, archivePath) {
   }
 
   await exec('tar', ['-xzf', resolvedArchive, '-C', dir]);
-  return { restored: true, members: members.length };
+  // `checksumVerified` distinguishes "the archive was confirmed against the recorded digest" from
+  // "nothing was available to check it against", so a caller can never read the absence of a check as
+  // a passed one.
+  return { restored: true, members: members.length, checksumVerified };
 }
 
 // --- System metrics (Linux /proc readers; null when unavailable) --------------------------------

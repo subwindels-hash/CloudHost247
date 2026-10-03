@@ -46,6 +46,7 @@ describe('deployment worker', () => {
     { quiesceRestore = false }: { quiesceRestore?: boolean } = {}
   ): DeploymentAdapter & { calls: string[] } {
     const calls: string[] = [];
+    const restoreOptions: Array<{ expectedChecksum?: string | null } | undefined> = [];
     const op = (name: string) => {
       calls.push(name);
       return fail.has(name) ? boom : ok;
@@ -54,6 +55,7 @@ describe('deployment worker', () => {
       kind: 'docker',
       ...(quiesceRestore ? { restoreRequiresStoppedApplication: true } : {}),
       calls,
+      restoreOptions,
       deployApplication: async (_ctx, input) => op(`deploy:${input.project}`),
       destroyApplication: async (_ctx, project) => op(`teardown:${project}`),
       startApplication: async (_ctx, project) => op(`start:${project}`),
@@ -63,7 +65,10 @@ describe('deployment worker', () => {
       applicationLogs: async () => ({ ...ok, logs: 'fake logs' }),
       runHealthcheck: async (_ctx, project) => ({ ...op(`healthcheck:${project}`), running: !fail.has(`healthcheck:${project}`), health: 'healthy' }),
       runBackup: async (_ctx, project) => ({ ...op(`backup:${project}`), archivePath: '/backups/x.tar.gz', sizeBytes: 1024, checksum: 'abc' }),
-      restoreBackup: async (_ctx, project, _archive) => op(`restore:${project}`),
+      restoreBackup: async (_ctx, project, _archive, options) => {
+        restoreOptions.push(options);
+        return op(`restore:${project}`);
+      },
       provisionHosting: async () => op('provisionHosting'),
       suspendHosting: async () => op('suspendHosting'),
       terminateHosting: async () => op('terminateHosting'),
@@ -312,6 +317,34 @@ describe('deployment worker', () => {
       const deployment = await findDeploymentById(db, claimed!.id);
       expect(deployment?.error_code).toBe('AGENT_UNREACHABLE');
       expect(String(deployment?.error_message)).toContain('could not be stopped before restoring');
+    });
+
+    it('passes the checksum recorded with the backup to the engine that applies it', async () => {
+      // Without this the agent has nothing to verify the archive against, and an archive damaged in
+      // storage is extracted over the live project.
+      const adapter = stubAdapter(new Set(), { quiesceRestore: true });
+      const { userId, server, ctx, installationId } = await installedApp(adapter);
+      const backup = await completedBackup(installationId, server.id);
+
+      await enqueueRestore(userId, installationId, server.id, backup!.id);
+      await processNextJob(ctx);
+
+      expect(adapter.restoreOptions).toEqual([{ expectedChecksum: 'b'.repeat(64) }]);
+    });
+
+    it('passes a null checksum when the backup row has none, so no verification is implied', async () => {
+      const adapter = stubAdapter(new Set(), { quiesceRestore: true });
+      const { userId, server, ctx, installationId } = await installedApp(adapter);
+      const legacy = await createBackup(db, { installationId, serverId: server.id });
+      await updateBackup(db, legacy.id, {
+        status: 'completed',
+        storagePath: '/opt/cloudhost247/backups/legacy.tar.gz',
+      });
+
+      await enqueueRestore(userId, installationId, server.id, legacy.id);
+      await processNextJob(ctx);
+
+      expect(adapter.restoreOptions).toEqual([{ expectedChecksum: null }]);
     });
 
     it('refuses to restore a backup taken from a different installation', async () => {

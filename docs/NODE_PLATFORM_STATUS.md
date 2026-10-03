@@ -1131,6 +1131,17 @@ sub-phase before the next one begins.
   is restored without being started. The same pass added the ownership re-check the pipeline was
   missing: the route scopes a backup to its installation, and the engine now verifies
   `backup.installation_id === installation.id` again at the point that overwrites the data.
+- **Restores verify the archive they apply (2026-10-03).** The platform records the sha256 the agent
+  computes when a backup is taken, and the restore path never used it: the agent extracted whatever
+  was on disk at that path. Gross damage trips the agent's `tar -t` pass, but damage that still
+  decompresses — one flipped byte inside a member, a partially written archive — passes it and is
+  extracted over the live project, surfacing later as quietly wrong data. The pipeline now passes
+  `backups.checksum` down through the adapter to the agent, which verifies it before reading or writing
+  anything and refuses on a mismatch, naming both digests. It is an integrity check against corruption,
+  not authentication (the same agent computes the digest at backup time). A backup row with no checksum
+  restores as before, and the adapter's message says "Restored" without the "verified against the
+  recorded checksum" clause, so the absence of a check is never read as a passed one. The agent's
+  hashing is now streamed in both directions rather than buffering the whole archive.
 - **Defect fixed while wiring it:** the cPanel username was derived by stripping non-lowercase
   characters, so `My-Project` became `roject`. Derivation now lowercases first, guards a leading
   digit with the `u` prefix and caps at cPanel's 16 characters, and every cPanel path (deploy,

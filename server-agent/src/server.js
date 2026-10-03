@@ -139,7 +139,22 @@ const server = http.createServer(async (req, res) => {
             send(res, 400, { error: 'BAD_REQUEST', message: 'archivePath is required' });
             return;
           }
-          send(res, 200, await restoreBackup(config.appsDir, config.backupDir, project, body.archivePath));
+          // The control plane records the checksum the agent returned when the archive was created and
+          // sends it back on restore, so an archive damaged in storage is refused instead of being
+          // extracted over the live project. Optional: an older control plane does not send one.
+          if (body.checksum !== undefined) {
+            if (typeof body.checksum !== 'string' || !/^[0-9a-f]{64}$/.test(body.checksum)) {
+              send(res, 400, { error: 'BAD_REQUEST', message: 'checksum must be a lowercase sha256 hex digest' });
+              return;
+            }
+          }
+          send(
+            res,
+            200,
+            await restoreBackup(config.appsDir, config.backupDir, project, body.archivePath, {
+              expectedChecksum: body.checksum,
+            })
+          );
           return;
         }
         default:

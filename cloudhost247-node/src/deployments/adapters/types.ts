@@ -89,7 +89,19 @@ export interface DeploymentAdapter {
   applicationLogs(ctx: AdapterContext, project: string, tail?: number): Promise<LogsResult>;
   runHealthcheck(ctx: AdapterContext, project: string, manifest: ApplicationManifest): Promise<ApplicationStatusResult>;
   runBackup(ctx: AdapterContext, project: string, manifest: ApplicationManifest): Promise<BackupResult>;
-  restoreBackup(ctx: AdapterContext, project: string, archivePath: string): Promise<DeploymentOperationResult>;
+  /**
+   * `options.expectedChecksum` is the sha256 the platform recorded when the archive was created. It is
+   * an integrity check against an archive damaged in storage (partial write, full disk at backup time,
+   * bit rot, a truncated copy) — not authentication: the same agent computes the digest at backup time,
+   * so an agent able to rewrite the archive could rewrite the digest with it. Engines that restore
+   * through a provider's own archive handling (cPanel) have nothing to verify against and ignore it.
+   */
+  restoreBackup(
+    ctx: AdapterContext,
+    project: string,
+    archivePath: string,
+    options?: { expectedChecksum?: string | null }
+  ): Promise<DeploymentOperationResult>;
   /** Platform-level hosting provisioning (cPanel account creation — spec §37); no-op elsewhere. */
   provisionHosting(ctx: AdapterContext, input: HostingProvisionInput): Promise<DeploymentOperationResult>;
   suspendHosting(ctx: AdapterContext, externalId: string): Promise<DeploymentOperationResult>;

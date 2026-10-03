@@ -774,7 +774,11 @@ function restorePipeline(ctx: PipelineContext): StepDefinitionInternal[] {
           const result = await adapter.restoreBackup(
             { db, server, log: ctx.log },
             project,
-            backup.storage_path ?? ''
+            backup.storage_path ?? '',
+            // The digest recorded when the archive was created. Null on a backup row written before
+            // checksums were stored, in which case the agent has nothing to verify against — and the
+            // adapter says so rather than implying the archive was checked.
+            { expectedChecksum: backup.checksum }
           );
           if (!result.ok) fail(result.code, result.message);
         } finally {

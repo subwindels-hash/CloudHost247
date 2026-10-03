@@ -212,14 +212,17 @@ export function agentRestoreBackup(
   db: Queryable,
   server: AgentServerRef,
   project: string,
-  archivePath: string
+  archivePath: string,
+  expectedChecksum?: string | null
 ) {
-  return agentRequest<{ restored: boolean }>(
+  return agentRequest<{ restored: boolean; members?: number; checksumVerified?: boolean }>(
     db,
     server,
     'POST',
     `/v1/apps/${encodeURIComponent(project)}/restore`,
-    { archivePath }
+    // The agent verifies this against the archive on disk before extracting anything, so an archive
+    // damaged in storage is refused rather than extracted over the live project.
+    expectedChecksum ? { archivePath, checksum: expectedChecksum } : { archivePath }
   );
 }
 

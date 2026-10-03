@@ -190,6 +190,33 @@ zero-byte/placeholder files, and modules documented as vendor-only, gated, super
 > Kubernetes branches are pinned at the declaration rather than exercised end-to-end (the cPanel restore path is
 > staging-blocked — see §E). Simulation mode is on throughout.
 
+| A20 | **Node platform — a restore trusted whatever archive was on disk** (the first open item A19 recorded) | `server-agent/src/backups.js`, `src/server.js`; `cloudhost247-node/src/deployments/{engine.ts,agent-client.ts}`, `src/deployments/adapters/{types.ts,docker-adapter.ts}` | **FOUND AND FIXED 2026-10-03 — CLOSED.** The platform computed a sha256 when a backup was taken, stored it on the backup row, and then **never used it**: the restore sent only an archive path, and the agent extracted whatever file was there. The agent's `tar -t` pass (A18) catches gross damage, but damage that *still decompresses* — a single flipped byte inside a member, a partially written archive, bit rot on the storage, a truncated copy — passes that pass and is extracted over the live project, surfacing later as quietly wrong data rather than as an error. The recorded digest now travels the whole way down (`restorePipeline` → `adapter.restoreBackup(..., { expectedChecksum })` → `agentRestoreBackup` → the agent's `POST /v1/apps/:project/restore` `checksum`) and the agent verifies it **before reading or writing anything**, refusing on a mismatch and naming both digests so the damage is diagnosable. Stated precisely because it matters: this is an **integrity** check, not authentication — the same agent computes the digest at backup time, so what it rules out is corruption, not a hostile agent. Two honesty details are pinned by tests rather than left to convention: a malformed digest is **rejected**, never silently treated as "no check to perform" (an uppercase or truncated digest must not degrade into skipping verification), and an unverified restore **says so** — `checksumVerified` is returned by the agent and the adapter's message omits the "verified against the recorded checksum" clause, so a caller reading "Restored" can never mistake the absence of a check for a passed one. A backup row with no digest (written before checksums were stored) restores as before. Same pass: the agent's hashing is now **streamed** in both directions instead of buffering the whole archive, which is the difference between working and OOM-killing the agent on a multi-gigabyte customer database — the fix would otherwise have added a second whole-file buffer on the restore path. | **Open, recorded:** a destructive restore is still not preceded by a safety snapshot of the current state (A19(b)) — a product decision with real disk/time cost, not an oversight. This row does **not** claim to have addressed tampering by a compromised agent. | `server-agent/tests/docker-backups.test.js` (+6 restore-integrity cases), `cloudhost247-node/tests/unit/deployment-adapter-operations.test.ts` (+3), `tests/integration/worker-deployments.test.ts` (+2), `docs/SERVER_AGENT.md` §Backups, `docs/NODE_PLATFORM_STATUS.md` §Deployment adapters |
+
+> **A20 verification (2026-10-03).** `node --test server-agent/tests/*.test.js` → **71 tests, 71 pass, 0 fail** (65 before).
+> `npm test` (cloudhost247-node) → **124 files / 1111 tests, pass** (1106 before; +5). `npm run typecheck` → 0.
+> The damaged-archive case is built by flipping **one byte in the middle** of a real gzip tar and asserting that it is
+> still listable by `tar -t` (i.e. the tar pass alone would have accepted it) while the checksum refuses it, and that the
+> live project's files are **untouched** — the assertion is `ENOENT` on the file the archive would have overwritten.
+>
+> **Mutation-verified** — re-introducing each defect turns the intended tests red, and nothing else:
+>
+> | mutation | result |
+> |---|---|
+> | agent: verification skipped entirely | 5 red |
+> | agent: mismatch no longer refuses | 2 red |
+> | agent: malformed digest accepted | 1 red |
+> | agent: `checksumVerified` always `true` | 1 red |
+> | control plane: digest not sent to the agent | 1 red |
+> | engine: recorded digest not passed to the adapter | 2 red |
+> | adapter: unverified restore reported as verified | 1 red |
+>
+> The PHP legs of the release gate were **not** re-run: `git diff --name-only` for this commit lists JavaScript,
+> TypeScript, tests and documentation only — no PHP file and no gate input.
+>
+> **Not claimed:** no real multi-gigabyte archive was hashed (the streaming change is asserted for correctness against
+> the previous digest, not for memory behaviour on a large file), and no archive was corrupted on a real disk — the
+> damaged input is built in the test.
+
 ---
 
 ## B. Never independently built — vendor, licence-gated, or superseded builds

@@ -111,13 +111,25 @@ dump at all (`redis` is allowed by the manifest schema and persists in the volum
 part of the archive). An agent older than this contract omits `databaseDump` entirely, and the adapter
 treats *absent* as *unknown* — never as a missing dump.
 
+**Hashing is streamed**, in both directions: a customer database backup can be gigabytes, and
+buffering it whole to hash it would throw the agent process away on exactly the deployments that most
+need a backup to succeed.
+
 **File modes.** The archive is created 0600 *before* `tar` runs. It deliberately contains the project's
 `.env`, and `tar` creates its output from the process umask (0644 for the usual 022), so fixing the
 mode afterwards would leave every application secret readable by any local user for the duration of
 the archive. `tar` truncates an existing file and keeps its mode, so pre-creating it closes the window;
 the post-run `chmod` is defence in depth.
 
-**Restore** (`POST /v1/apps/:project/restore`) refuses an archive that is not a readable gzip tar,
+**Restore** (`POST /v1/apps/:project/restore`) verifies the archive against **the checksum the platform
+recorded when the backup was taken** (`checksum`, optional) and refuses on a mismatch *before reading
+or writing anything*, so an archive damaged in storage — a partial write, a full disk at backup time,
+bit rot, a truncated copy — is not extracted over the live project. The tar integrity pass below cannot
+catch that on its own: damage that still decompresses passes `tar -t` and only surfaces as silently
+wrong data. It is an **integrity** check, not authentication — the same agent computes the digest at
+backup time, so what it rules out is corruption, not a hostile agent. No `checksum` means nothing was
+available to verify against; the reply then reports `checksumVerified: false` rather than implying the
+archive was checked. It refuses an archive that is not a readable gzip tar,
 refuses an archive with no members, and refuses absolute or `..` member paths — all before anything is
 written. It lists the archive first and returns the member count it applied. Without that pass,
 `tar -xzf` on a truncated archive extracted what it could and exited 0, so the control plane recorded a
