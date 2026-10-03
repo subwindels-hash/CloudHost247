@@ -21,7 +21,7 @@ nothing in this runbook is invented; every command below is read from `database/
 
 | Artifact | Content | Quarantine rule in `database/migrate.ts` |
 |---|---|---|
-| `0023_enforce_billing_invariants.sql` | Billing invariants B1–B4 (currency/user/amount agreement between `payments`, `billing_ledger` and `invoices`) enforced at database level | standalone; no dependents |
+| `0023_enforce_billing_invariants.sql` | Billing invariants B1–B5 (currency/user/amount agreement between `payments`, `billing_ledger` and `invoices`, and invoice↔order agreement) enforced by BEFORE INSERT/UPDATE triggers — historical data is not scanned | standalone; no dependents |
 | `0024_create_webhook_events.sql` | The Phase 5D webhook event ledger (`webhook_events`) + `auth_audit_log` extension | standalone; no dependents |
 | `0025_extend_auth_audit_log_for_admin_billing.sql` | Admin billing audit extension | standalone; no dependents |
 | `0041_create_os_catalog_and_server_provisioning.sql` | OS catalog + server provisioning tables; extends `servers`, `deployments` | **dependents: 0042, 0043, 0047, 0048, 0049, 0051, 0052, 0054, 0056, 0059** — production cannot progress past 0040 until 0041 is authorized, and authorizing it unblocks the whole chain |
@@ -61,17 +61,46 @@ The pipeline itself is code-complete and fail-closed while frozen:
 
 ## Step 1 — Pre-flight on the target database (read-only)
 
-1. `migrate status` — confirm the highest applied version (production is expected to sit at 0040
-   with the quarantined artifacts pending) and that no checksum drift is reported
-   (`migrate verify`).
-2. **0023 pre-check**: run the financial invariant sweep against the target database
-   (`npm run verify:financial`, `CH247_PROBE_PG_*` pointing at the target — a throwaway database is
-   created and dropped per run only in the probe's own fixtures; point it at the target schema
-   read-only if adapting). If any of the B1–B4 invariants currently has a violating row, 0023's
-   constraints will refuse mid-migration; reconcile those rows first. Expected result on a clean
-   database: **49/49**.
-3. `npm run verify:authorization` against the same environment — **39/39** expected; confirms no
-   customer-side request path can produce a successful payment before the pipeline changes.
+1. `migrate status` / `migrate verify` — confirm the highest applied version (production is
+   expected to sit at 0040 with the quarantined artifacts pending) and that no checksum drift is
+   reported.
+2. **Know what 0023 does and does not do.** It installs BEFORE INSERT/UPDATE **triggers** on
+   `invoices`, `payments` and `billing_ledger` — not CHECK constraints. Triggers never scan
+   historical data, so the migration applies cleanly even when past rows violate an invariant; the
+   consequence arrives later, as every **update** of a violating row (a refund, a status change, a
+   reconciliation) failing with the trigger's exception. The pre-check below is therefore not about
+   whether the migration will fail — it is about enumerating the rows that would block future
+   writes, so they can be reconciled before authorization rather than discovered by a stuck refund.
+3. **Run the violation sweep against the target, read-only** — one query per invariant, derived
+   from the trigger functions in `0023_enforce_billing_invariants.sql`:
+
+```sql
+-- B5: every invoice must match its parent order exactly
+SELECT i.id FROM invoices i JOIN orders o ON o.id = i.order_id
+WHERE i.user_id <> o.user_id OR i.currency <> o.currency
+   OR i.subtotal_amount <> o.subtotal_amount OR i.discount_amount <> o.discount_amount
+   OR i.tax_amount <> o.tax_amount OR i.total_amount <> o.total_amount;
+SELECT id FROM invoices i WHERE NOT EXISTS (SELECT 1 FROM orders o WHERE o.id = i.order_id);
+
+-- B1/B2/B4: every payment must agree with its invoice on user, currency and amount
+SELECT p.id FROM payments p JOIN invoices i ON i.id = p.invoice_id
+WHERE p.user_id <> i.user_id OR p.currency <> i.currency OR p.amount > i.total_amount;
+SELECT id FROM payments p WHERE NOT EXISTS (SELECT 1 FROM invoices i WHERE i.id = p.invoice_id);
+
+-- B3: every invoice-linked ledger entry must agree with that invoice on user and currency
+SELECT l.id FROM billing_ledger l JOIN invoices i ON i.id = l.invoice_id
+WHERE l.user_id <> i.user_id OR l.currency <> i.currency;
+SELECT id FROM billing_ledger l
+WHERE l.invoice_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM invoices i WHERE i.id = l.invoice_id);
+```
+
+   All six queries must return zero rows. Any non-zero result is reconciled **before**
+   authorization: after 0023 those rows cannot be updated until they agree.
+4. **Run the executable probes once to confirm the tooling is green** — they execute against a
+   throwaway database they create and drop per run, so they prove the checks and the commands work
+   but do **not** read the target: `npm run verify:financial` → expect **49/49**,
+   `npm run verify:authorization` → expect **39/39** (`CH247_PROBE_PG_*` env vars point the
+   throwaway at any reachable PostgreSQL server).
 
 ## Step 2 — Authorized migration run (staging first)
 
@@ -84,8 +113,9 @@ node dist/database/migrate.js up --yes
 - Authorize only what step 0 named; the runner applies the rest of the pending chain normally and
   reports anything still quarantined.
 - Then `node dist/database/migrate.js verify` — every applied file's checksum must match.
-- Repeat steps 1.2 and 1.3 on the migrated database: the invariants must still be 49/49 and the
-  authorization matrix 39/39 **after** the constraints exist.
+- Repeat step 1.3's six read-only queries on the migrated database (0023's triggers change no data,
+  so the answers must be unchanged — all zero) and re-run step 1.4's probes (**49/49** and
+  **39/39**) to confirm the financial surface is intact with the triggers in place.
 
 ## Step 3 — Configure secrets and deploy
 
@@ -112,9 +142,9 @@ For **each** configured gateway, in test/sandbox mode:
 
 - 0024 and 0041 are additive (new tables/columns); rolling back means dropping exactly what they
   created, after confirming no application version still reads them.
-- 0023 adds constraints — removal is dropping those constraints, but **the point of 0023 is that it
-  should not be removed**: if it fires, the correct response is to fix the violating write, not the
-  guard.
+- 0023 adds three validation triggers and their functions — removal is dropping exactly those, but
+  **the point of 0023 is that it should not be removed**: if a trigger fires, the correct response
+  is to fix the violating write, not the guard.
 - 0025 is an additive audit extension.
 - In every case: `migrate verify` before and after, and a fresh `verify:financial` sweep after.
 
