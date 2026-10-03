@@ -301,7 +301,7 @@ zero-byte/placeholder files, and modules documented as vendor-only, gated, super
 | B4 | `soyoustart` (dedicated server module) | `modules/servers/soyoustart/` | Same vendor licence gate; *"Existing/vendor only"* | `AUDIT-AND-PARITY-MATRIX.md` row 6 |
 | B5 | `soyoustart_vps` (VPS server module) | `modules/servers/soyoustart_vps/` | Same vendor licence gate; *"Existing/vendor only"* | `AUDIT-AND-PARITY-MATRIX.md` row 7 |
 | B6 | `ovh_cart` order form | `templates/orderforms/ovh_cart/` | *"Existing/vendor; replacement needed"* — inherits WHMCS `standard_cart` | `AUDIT-AND-PARITY-MATRIX.md` row 8 |
-| B7 | Vendor cron scripts `getServer.php`, `getIpStatus.php`, `priceSync.php`, `emailSend.php` | `crons/` | Coupled to WGS classes/tables; *"Existing/vendor only"*; replacement planned | `AUDIT-AND-PARITY-MATRIX.md` row 9, `docs/pre-restructuring-audit.md` §5 |
+| B7 | Vendor cron scripts `getServer.php`, `getIpStatus.php`, `priceSync.php`, `emailSend.php` | `crons/` | Coupled to WGS classes/tables; *"Existing/vendor only"*; replacement planned. **Verified 2026-10-03 on `arena/01a1027e-cloudhost247`: the independent replacements are SHIPPED** — `crons/cloudhost247_ovh.php` (order polling + per-endpoint service synchronization, replacing `getServer.php`/`getIpStatus.php`), the OVH module's `PricingService` preview/apply flow (replacing `priceSync.php`), and `crons/cloudhost247_marketing.php` (the delivery worker, replacing `emailSend.php`). The four vendor scripts remain in the tree only because all four are hash-locked by `docs/independent-rebuild/original-file-manifest.sha256`; removing them requires the same deliberate baseline re-cut as section C, a staging decision — there is no code left to write | `AUDIT-AND-PARITY-MATRIX.md` row 9, `docs/pre-restructuring-audit.md` §5, `crons/cloudhost247_ovh.php`, `crons/cloudhost247_marketing.php`, manifest grep (4/4 pinned) |
 | B8 | `Smtphosting` (ModulesGarden v3 provisioning) | `modules/servers/Smtphosting/` | Third-party vendor module shipped incomplete — **6 zero-byte placeholder files** (see C1) | file scan; `docs/RESTRUCTURING.md` line 144 |
 | B9 | `cloudhost247_email` (earlier email provisioning build) | `modules/servers/cloudhost247_email/` | Documented as *"an earlier, **inactive** build"*, superseded by `cloudhost247_email_hosting` | root `README.md`, modules table note |
 | B10 | `smmaddon` + `smmprovisioning` (single-provider SMM prototype) | `modules/addons/smmaddon/`, `modules/servers/smmprovisioning/` | Prototype explicitly superseded by `cloudhost247_smm`; left in tree untouched/inactive | `modules/addons/cloudhost247_smm/README.md` |
@@ -458,7 +458,7 @@ refusals) · `digitalocean` *(console closed 2026-10-02: refusal re-verified cor
 
 **Never independently built (vendor/gated/superseded):** ~~`[retired-addon]`~~ *(not in this repository —
 never committed; documentation-only)* · `xtreme_currency_rates` · `soyoustart` (addon) · `soyoustart` (server) ·
-`soyoustart_vps` · `ovh_cart` · vendor crons `getServer.php` / `getIpStatus.php` / `priceSync.php` / `emailSend.php` ·
+`soyoustart_vps` · `ovh_cart` · vendor crons `getServer.php` / `getIpStatus.php` / `priceSync.php` / `emailSend.php` *(replacements shipped — `crons/cloudhost247_ovh.php`, the OVH `PricingService`, `crons/cloudhost247_marketing.php`; the vendor scripts persist only as hash-locked baseline artifacts)* ·
 `Smtphosting` · `cloudhost247_email` (inactive) · `smmaddon` + `smmprovisioning` (prototype)
 
 **Stubs / zero-byte - CLOSED 2026-10-02 (section C):** 6 × `Smtphosting` vendor placeholders (do

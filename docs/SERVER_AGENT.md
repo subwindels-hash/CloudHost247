@@ -151,6 +151,10 @@ afterwards — for engines that declare
 and Kubernetes refuses restores outright). An installation that was already `stopped` is restored
 without being started. If the restore fails the application is still started again, because a failed
 restore must never leave a customer's app down, and the volume data may be partially replaced.
+**Before any such destructive restore the pipeline also takes a safety snapshot of the current state
+through this same backup path** (`backup_kind = 'safety_snapshot'`, migration 0069) and refuses the
+restore when that snapshot fails — the agent does nothing different for it; restoring that row is the
+undo.
 
 ## Failure modes and recovery
 
