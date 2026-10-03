@@ -118,7 +118,7 @@ which lands in `missing` with a reason — never as a zero.
 
 Plan/availability metadata: `providerServerType`, `cpuCores`, `memoryMb`, `storageMb`.
 
-Capabilities: reinstall, snapshot, resize, console, metrics.
+Capabilities: reinstall, snapshot, resize, console, metrics, rescue.
 
 Native instance API. **Console:** every API v2 instance object carries `kvm` — "the server's current
 KVM URL. This URL will change periodically. It is not advised to cache this value" — so `getConsole`
@@ -136,6 +136,23 @@ own documentation advises against treating it as real-time metrics. `cpu`, `memo
 metric", and host telemetry for a Vultr server comes from the CloudHost247 server agent
 (`server_metrics`), which is what the customer Monitoring panel reads. An empty bandwidth history
 reports `null` totals, not `0` bytes.
+
+**Rescue (added 2026-10-03):** Vultr has no operation *named* rescue — rescue mode is a bare-metal
+portal feature — but its documented recovery path for a cloud instance is booting **SystemRescue**
+from the public ISO library, and API v2 exposes the whole path. `enableRescue` reads
+`GET /v2/iso-public`, picks the SystemRescue entry matching the server's architecture (an arm64
+server needs an entry naming arm64/aarch64; the x86 image is the entry that names no arm
+architecture), attaches it with `POST /v2/instances/{id}/iso/attach` `{iso_id}` and reboots
+(`POST /v2/instances/{id}/reboot`). The returned session is
+`{ type: 'systemrescue-iso', username: 'root', rebooted: true, notes }` and carries **no password**:
+SystemRescue signs in at the serial console as `root` with no password, and the notes send the
+operator there. A library listing no SystemRescue image fails non-retryably with `PROVIDER_ERROR`; a
+library listing none for the requested architecture fails non-retryably with
+`UNSUPPORTED_OPERATION`, and neither path attaches anything. Exit is
+`POST /v2/instances/{id}/iso/detach`, which Vultr documents as detaching the ISO **and rebooting the
+instance** — the adapter therefore adds no second reboot call. **Amended 2026-10-03:** this section
+previously said only that Vultr exposes no rescue endpoint, which withheld a capability the provider
+really offers (the A23 lesson: check the documented recovery procedure, not the endpoint's name).
 
 ### Amazon EC2 (`aws`)
 
@@ -649,7 +666,7 @@ was booted.
 
 Two deliberate constraints:
 
-- **Only adapters with a real rescue API may offer it.** Seven adapters declare `rescue: true`
+- **Only adapters with a real rescue API may offer it.** Eight adapters declare `rescue: true`
   because their provider exposes a rescue system (or, for the bridge, delegates that decision to the
   operator), and each is pinned to the documented call shape: Hetzner (`enable_rescue` + `reset`,
   `disable_rescue` + `reset`), OpenStack (Nova `rescue` / `unrescue`), OVH Public Cloud
@@ -659,15 +676,19 @@ Two deliberate constraints:
   reuses the template SSH-key secrets when present, otherwise it stores a freshly generated one-time
   password as a Contabo secret; leaving rescue is Contabo's next restart), SolusVM
   (`action=vserver-rescue` with `rescueenable`/`rescuedisable` on the Admin API; arm64 is refused
-  because SolusVM ships no arm64 rescue kernel), the operator bridge
+  because SolusVM ships no arm64 rescue kernel), Vultr (which has no rescue endpoint at all — the
+  documented cloud recovery is the SystemRescue image from the public ISO library: resolve it with
+  `GET /v2/iso-public`, attach it with `POST /v2/instances/{id}/iso/attach`, reboot, and leave by
+  detaching, which reboots back into the installed system; SystemRescue logs in at the console as
+  `root` with no password, so the session carries none), the operator bridge
   (`POST /v1/servers/{id}/rescue` and `/unrescue`, delegated on the same action contract as
   reboot/shutdown/resize/reinstall — the bridge supplies the rescue system, login user and one-time
   password, and `rebooted` defaults to false so the adapter never claims a reboot it was not told
   about), and the development-only mock adapter, which simulates the state machine so the whole flow
-  can be exercised without a provider. The remaining five — AWS (no native rescue; manual workflow
-  only), DigitalOcean (the Recovery ISO is Control-Panel only), Vultr (no v2 endpoint), Proxmox VE (no
-  API endpoint) and Virtualizor (rescue exists only in the *enduser* API on port 4083, while this
-  adapter authenticates against the Admin API on 4085) — have no rescue action in the API surface their
+  can be exercised without a provider. The remaining four — AWS (no native rescue; manual workflow
+  only), DigitalOcean (the Recovery ISO is Control-Panel only), Proxmox VE (no API endpoint) and
+  Virtualizor (rescue exists only in the *enduser* API on port 4083, while this adapter
+  authenticates against the Admin API on 4085) — have no rescue action in the API surface their
   adapter implements; they refuse with a non-retryable `UNSUPPORTED_OPERATION` and keep the capability
   `false` so a template cannot offer the button in the first place. A rescue that silently did nothing
   would strand a customer who believes they are about to repair a disk.

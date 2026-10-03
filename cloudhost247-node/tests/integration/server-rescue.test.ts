@@ -178,6 +178,58 @@ describe('rescue mode', () => {
     await app.close();
   });
 
+  it('boots a Vultr cloud instance into SystemRescue and hands the customer instructions, not a credential', async () => {
+    // Vultr publishes no rescue operation: its documented repair path for a cloud instance is the
+    // SystemRescue image from the public ISO library, reached through API v2. This drives the whole
+    // route with the real adapter, so the capability flag, the ISO lookup, the attach and the reboot
+    // are all exercised through the customer-facing contract.
+    const { serverId } = await seedServer({ adapter: 'vultr', capabilities: { rescue: true } });
+    const calls: Array<{ url: string; method: string }> = [];
+    const original = globalThis.fetch;
+    globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      calls.push({ url, method: init?.method ?? 'GET' });
+      const body = url.endsWith('/iso-public')
+        ? { public_isos: [{ id: 'systemrescue-11.03', name: 'SystemRescue', description: '11.03' }] }
+        : { iso_status: { status: 'isattaching' } };
+      return new Response(JSON.stringify(body), { status: 200, headers: { 'content-type': 'application/json' } });
+    }) as typeof globalThis.fetch;
+    process.env.VULTR_API_KEY = 'test-token';
+    const app = buildApp(env, { serveFrontend: false, pool: db });
+    try {
+      const response = await app.inject({
+        method: 'POST', url: `/api/v1/servers/${serverId}/rescue`,
+        headers: { authorization: `Bearer ${ownerToken}` }, payload: { confirmation: 'RESCUE' },
+      });
+      expect(response.statusCode).toBe(200);
+      const session = response.json().rescue as Record<string, unknown>;
+      expect(session).toMatchObject({ type: 'systemrescue-iso', username: 'root', rebooted: true });
+      expect(session.password).toBeUndefined();
+      expect(String(session.notes)).toMatch(/console/);
+      expect(calls).toEqual([
+        { url: 'https://api.vultr.com/v2/iso-public', method: 'GET' },
+        { url: 'https://api.vultr.com/v2/instances/provider-77/iso/attach', method: 'POST' },
+        { url: 'https://api.vultr.com/v2/instances/provider-77/reboot', method: 'POST' },
+      ]);
+    } finally {
+      globalThis.fetch = original;
+      delete process.env.VULTR_API_KEY;
+      await app.close();
+    }
+
+    // The row records that rescue was entered, never a session URL or a credential.
+    const server = (await db.query<{ status: string; metadata: Record<string, unknown> }>(
+      `SELECT status,metadata FROM servers WHERE id=$1`, [serverId]
+    )).rows[0]!;
+    expect(server.status).toBe('maintenance');
+    expect((server.metadata.rescue as { type?: string }).type).toBe('systemrescue-iso');
+    const audits = await db.query<{ action: string; metadata: Record<string, unknown> }>(
+      `SELECT action,metadata FROM audit_logs WHERE resource_id=$1`, [serverId]
+    );
+    expect(audits.rows.map((row) => row.action)).toContain('SERVER_RESCUE_ENTERED');
+    expect(JSON.stringify(audits.rows)).not.toMatch(/systemrescue-11\.03|novnc|password/i);
+  });
+
   it('every adapter without a rescue API refuses it as a non-retryable unsupported operation', async () => {
     const row = { id: randomUUID(), adapter: 'proxmox', name: 'P', slug: 'p', provider_type: 'PROXMOX', status: 'ACTIVE' } as unknown as InfrastructureProviderRow;
     const proxmox = new ProxmoxProviderAdapter(row, { PROXMOX_API_TOKEN: 't', PROXMOX_API_URL: 'https://pve.example.test' } as NodeJS.ProcessEnv);

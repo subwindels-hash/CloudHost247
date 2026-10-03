@@ -132,6 +132,30 @@ describe('ServerDetailPage — honest access and security controls',()=>{
   });
 });
 
+describe('ServerDetailPage — rescue instructions', () => {
+  it('shows what the provider actually requires instead of assuming a passwordless rescue is SSH-key based', async () => {
+    // Vultr: the session carries no password and no SSH key — the documented rescue is the
+    // SystemRescue ISO behind the serial console, and the adapter says so in `notes`. The panel
+    // used to answer every passwordless rescue with a claim about SSH keys.
+    stubApi({
+      server: { ...server, capabilities: { ...server.capabilities, rescue: true } },
+      [`POST /api/v1/servers/${SERVER_ID}/rescue`]: {
+        rescue: {
+          type: 'systemrescue-iso', username: 'root', rebooted: true,
+          notes: 'Vultr attached the public SystemRescue image and rebooted the instance. Open the server console and press Enter to boot the rescue kernel.',
+        },
+      },
+    });
+    renderPage();
+    await waitFor(() => expect(screen.getByText('Boot into rescue')).toBeTruthy());
+    fireEvent.click(screen.getByText('Boot into rescue'));
+
+    expect(await screen.findByText(/Vultr attached the public SystemRescue image/)).toBeTruthy();
+    expect(screen.queryByText(/SSH keys attached to the server/)).toBeNull();
+    expect(screen.getByText(/systemrescue-iso/)).toBeTruthy();
+  });
+});
+
 describe('ServerDetailPage — reinstall confirmation', () => {
   it('states the destructive consequence and keeps the action disabled until it is typed exactly', async () => {
     stubApi();

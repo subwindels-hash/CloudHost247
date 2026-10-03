@@ -1072,14 +1072,41 @@ sub-phase before the next one begins.
 - **Mock — implemented.** The development-only adapter moves its own state machine to `rescue` and
   back, so the ordering → queue → worker → UI path can exercise rescue with no provider at all. It
   still fails closed without `ALLOW_MOCK_PROVIDER=true` and never calls `fetch`.
+- **SolusVM — implemented (2026-10-02).** `action=vserver-rescue` on the Admin API the adapter already
+  authenticates against, with `rescueenable` (1 = 4.x 64-bit, 2 = 3.x 64-bit, 3 = 3.x 32-bit) and
+  `rescuedisable`; the response's login user, password, ip and port became the returned session, the
+  next restart boots the installed OS (SolusVM reboots into rescue, so `rebooted: true`), and an arm64
+  server is refused with an explicit message rather than booted into an x86 kernel. A response with no
+  login user fails non-retryably instead of inventing one. This was added after the body of this
+  section was written and the section was not updated at the time — corrected here, not claimed as new.
+- **Vultr — implemented (2026-10-03).** Rescue mode is a **bare-metal portal feature** on Vultr, so
+  there is deliberately no `rescue` operation to call; the documented recovery path for a *cloud*
+  instance is to boot **SystemRescue** from the **public ISO library**. API v2 exposes every step:
+  `GET /v2/iso-public` lists the library (`public_isos[]` with id/name/description), and
+  `POST /v2/instances/{id}/iso/attach` with `{iso_id}` attaches the image, after which the instance is
+  rebooted. `enableRescue` resolves the SystemRescue entry from the live library at call time (ids
+  change as the image is updated) and matches it to the server's architecture — an arm64 instance needs
+  an entry naming arm64/aarch64, because booting an x86 kernel into ARM is worse than refusing. The
+  returned session carries no password: SystemRescue signs in at the serial console as `root` with no
+  password, and the `notes` field says exactly that. Exit is `POST /v2/instances/{id}/iso/detach`,
+  which Vultr's docs (and its own Go client) describe as detaching the ISO **and rebooting the
+  instance** — so it is the whole way back to the installed OS, with no second reboot call. When the
+  library lists no SystemRescue image the failure is a non-retryable `PROVIDER_ERROR`; when it lists
+  none for the requested architecture it is a non-retryable `UNSUPPORTED_OPERATION`, and nothing is
+  attached in either case.
 - **Still refused, with the reason recorded:** AWS (EC2 has no native rescue mode; the documented
-  path is a manual stop/detach/attach workflow, not a provider call), DigitalOcean, Vultr, Proxmox,
-  Virtualizor, SolusVM and the operator bridge (no rescue action in the API surface each adapter
-  implements). Their profiles stay `rescue: false` and `unsupportedRescue()` throws a non-retryable
-  `UNSUPPORTED_OPERATION` before any request, which
+  path is a manual stop/detach/attach workflow, not a provider call), DigitalOcean (Recovery ISO and
+  console are control-panel only; the API v2 droplet action list has neither), Proxmox VE (no rescue
+  endpoint) and Virtualizor (rescue exists only in the enduser API on port 4083, while this adapter
+  holds Admin API/4085 credentials). Their profiles stay `rescue: false` and `unsupportedRescue()`
+  throws a non-retryable `UNSUPPORTED_OPERATION` before any request, which
   `tests/unit/provider-capability-truth.test.ts` and `tests/unit/provider-rescue.test.ts` pin.
-- **Capability matrix:** `rescue: true` now covers Hetzner, OpenStack, OVH, Contabo and mock; the
-  profile notes for OVH, Contabo and mock state the exact call each uses.
+- **Capability matrix:** `rescue: true` covers **eight of the twelve adapters** — Hetzner,
+  OpenStack, OVH, Contabo, SolusVM, Vultr, `generic_http` (operator bridge) and the development mock —
+  and the four that refuse are AWS, DigitalOcean, Proxmox VE and Virtualizor. The profile notes state
+  the exact call each implementation uses. `tests/unit/adapter-capability-matrix.test.ts` (76) pins
+  every cell in both directions, so a refusal and a flag can no longer disagree silently — which is
+  precisely how both stale claims in this section survived until now.
 
 ---
 
@@ -1437,8 +1464,8 @@ sub-phase before the next one begins.
   AWS "Rescue mode and CloudWatch metrics remain unavailable" (metrics are implemented — §A4);
   Contabo "resize, console URLs, metrics, and rescue mode are also explicitly unsupported" (rescue is
   implemented — §A5/A6, and the three real refusals now carry their verified reasons); "Five adapters
-  declare `rescue: true`" (it is seven, and the refusing list is five: AWS, DigitalOcean, Vultr,
-  Proxmox, Virtualizor); the unsupported-adapter registry rejecting with `SERVICE_UNAVAILABLE` (it is
+  declare `rescue: true`" (it is eight, after Vultr's SystemRescue path was implemented on
+  2026-10-03, and the refusing list is four: AWS, DigitalOcean, Proxmox VE, Virtualizor); the unsupported-adapter registry rejecting with `SERVICE_UNAVAILABLE` (it is
   a non-retryable `UNSUPPORTED_OPERATION` naming the kind — §A8); SolusVM's section silent on rescue
   and on why snapshots refuse; and the per-provider `Capabilities:` lines for DigitalOcean, Vultr,
   OpenStack, the bridge and the mock.
@@ -1553,3 +1580,64 @@ sub-phase before the next one begins.
   each server row from the product configuration's `configuration_metadata.capabilities` at order
   acceptance, so Vultr rows created while A13 was in force still carry `console: false` and need the
   staging backfill (§A13 follow-up).
+
+---
+
+## A6 (correction, round 10) — the Vultr rescue refusal withheld a rescue Vultr really offers (found and fixed 2026-10-03)
+
+- **Source/local verification:** PASSED on branch `arena/01a0ff64-cloudhost247`.
+- **Why this section exists.** A6's refusal list said "Vultr exposes no rescue endpoint in API v2" and
+  kept `rescue: false`. That sentence is true of the endpoint *name* and false of the capability.
+  Vultr's rescue mode is a **bare-metal portal feature**, but its documented recovery path for a
+  *cloud* instance is to boot **SystemRescue from the public ISO library**, and API v2 exposes the
+  whole path. Refusing on the strength of the word "rescue" hid a capability the provider really
+  offers — the same defect class as A23, one round after A23 was fixed. The same re-read found the
+  row's other two stales: it listed **SolusVM 1** among the refusals although SolusVM's rescue had
+  been implemented on 2026-10-02, and it cited `provider-rescue.test.ts` (8) and
+  `provider-capability-truth.test.ts` (8) when the suites had 12 and 10 tests.
+- **Fixed:** `vultr-adapter.enableRescue()` reads `GET /v2/iso-public`, picks the SystemRescue entry
+  that matches the server's architecture (an arm64 server needs an entry naming arm64/aarch64; the
+  x86 image is the entry that names no arm architecture), attaches it with
+  `POST /v2/instances/{id}/iso/attach {iso_id}` and reboots. The returned session is
+  `{ type: 'systemrescue-iso', username: 'root', rebooted: true, notes }` with **no password** —
+  SystemRescue signs in at the serial console as `root` with no password, and the notes say to open
+  the console. A library with no SystemRescue image at all is a non-retryable `PROVIDER_ERROR`; a
+  library with none for the requested architecture is a non-retryable `UNSUPPORTED_OPERATION`, and
+  neither path attaches anything. `disableRescue()` posts to
+  `POST /v2/instances/{id}/iso/detach`, which Vultr documents (and its own Go client states) as
+  detaching the ISO **and rebooting the instance** — so it is the entire way back into the installed
+  OS, and the adapter adds no second reboot call. The profile is now `rescue: true`.
+- **The no-password frontend assumed SSH keys.** `ServerDetailPage.tsx` answered every password-less
+  rescue session with "This provider grants rescue access through the SSH keys attached to the server
+  rather than a password" — false for a console-only SystemRescue boot — and it never rendered the
+  `notes` field at all, so Vultr's actual instructions would have been invisible. The panel now shows
+  the provider's own `notes` when present and states only what is true: that CloudHost247 stores no
+  rescue credential and the material shown came from the provider for this session. The SSH-key
+  sentence is kept for the one case it describes (a password-less session with no notes).
+- **Pinned in both directions, including through the customer route.** The unit suite's new
+  `Vultr (documented SystemRescue ISO path)` block asserts the exact request sequence and body, both
+  architecture directions, the honest failure for a library without SystemRescue, the refusal that
+  attaches nothing when the architecture has no image, and the detach-only exit.
+  `tests/integration/server-rescue.test.ts` drives a real `vultr` provider through
+  `POST /api/v1/servers/:id/rescue` and checks the three provider calls by URL, the password-less
+  session, the `maintenance` status with `metadata.rescue.type = 'systemrescue-iso'`, and that no
+  audit or metadata row holds the ISO id or any credential. The profile pins in
+  `provider-rescue.test.ts` (advertised-rescue set), `provider-capability-truth.test.ts` and the
+  76-cell `adapter-capability-matrix.test.ts` all moved with it.
+- **Evidence (touched suites):** `provider-rescue.test.ts` **17** (was 12),
+  `provider-capability-truth.test.ts` **10**, `adapter-capability-matrix.test.ts` **76** → 3 files /
+  103 passed; `tests/integration/server-rescue.test.ts` **7** (was 6);
+  `frontend/tests/unit/server-detail-page.test.tsx` **7** (was 6); `npx tsc -p tsconfig.json --noEmit`
+  → 0 and the frontend project's typecheck → 0. Six mutations each turned the intended assertions red
+  and nothing else: dropping the reboot after attach, ignoring the requested architecture, flipping
+  the profile flag back to `false`, making the detach a no-op, attaching when no image matches, and
+  restoring the SSH-key banner for a password-less console rescue. Full-suite evidence: **`npm test` 128 files / 1137 tests pass** (128 files / 1130 before), exit 0, 1181.5 s.
+- **Not claimed:** AWS's and Proxmox VE's refusals were re-read in-repo but not re-fetched from their
+  documentation this round, and DigitalOcean's refusal is re-verified against the API v2 droplet
+  action list (no rescue or console action) rather than a fresh fetch. Vultr's attach/reboot flow was taken from Vultr's own API
+  reference, its support documentation and its Go client; the account-level id list is
+  resolved at call time precisely so an image id change cannot break it. And the staging backfill
+  note stands: `servers.capabilities` is copied from the product configuration's
+  `configuration_metadata.capabilities` at order acceptance, so existing Vultr rows and product
+  configurations created while the old profile was live still carry `rescue: false` and must be
+  re-derived before customers can see the rescue action.

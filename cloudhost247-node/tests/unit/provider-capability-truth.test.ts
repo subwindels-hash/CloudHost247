@@ -69,7 +69,10 @@ describe('adapter profiles tell the truth about their capabilities', () => {
     // 2026-10-02 refusal refused a real capability; DigitalOcean's refusal stands (API v2 has no
     // console action, and the Droplet/Recovery consoles are Control Panel features).
     ['digitalocean', { console: false, rescue: false, metrics: true }],
-    ['vultr', { console: true, rescue: false, metrics: true }],
+    // Vultr's rescue is true as of 2026-10-03 too: rescue mode is a bare-metal portal feature, but
+    // the documented repair path for a cloud instance — boot the SystemRescue image from the public
+    // ISO library — is reachable through API v2, so the adapter implements it instead of refusing.
+    ['vultr', { console: true, rescue: true, metrics: true }],
   ] as const)('%s advertises exactly the capabilities it implements or refuses', (kind, expected) => {
     const capabilities = ADAPTER_PROFILES[kind].capabilities as unknown as Record<string, boolean>;
     for (const [capability, value] of Object.entries(expected)) {
@@ -101,10 +104,11 @@ describe('adapter profiles tell the truth about their capabilities', () => {
     // network would fail this test instead of silently pretending.
     const restoring = vi.fn(async () => { throw new Error('network disabled in this test'); });
     vi.stubGlobal('fetch', restoring);
+    // Vultr left this list on 2026-10-03: its console *and* rescue were both refused at some point
+    // while the provider's API exposes them (see A6/A23).
     const rows: Array<[string, { name: string; adapter: string; api_base_url: string | null }]> = [
       ['aws', { name: 'AWS', adapter: 'aws', api_base_url: null }],
       ['digitalocean', { name: 'DigitalOcean', adapter: 'digitalocean', api_base_url: 'https://api.digitalocean.test/v2' }],
-      ['vultr', { name: 'Vultr', adapter: 'vultr', api_base_url: 'https://api.vultr.test/v2' }],
       ['proxmox', { name: 'Proxmox', adapter: 'proxmox', api_base_url: 'https://proxmox.test:8006' }],
       ['virtualizor', { name: 'Virtualizor', adapter: 'virtualizor', api_base_url: 'https://virtualizor.test:4085' }],
     ];

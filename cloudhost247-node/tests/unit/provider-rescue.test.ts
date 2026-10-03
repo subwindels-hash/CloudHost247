@@ -3,15 +3,21 @@ import { ContaboProviderAdapter } from '../../src/infrastructure/providers/conta
 import { MockProviderAdapter, resetMockProviderState } from '../../src/infrastructure/providers/mock-adapter';
 import { OvhProviderAdapter } from '../../src/infrastructure/providers/ovh-adapter';
 import { SolusvmProviderAdapter } from '../../src/infrastructure/providers/solusvm-adapter';
+import { VultrProviderAdapter } from '../../src/infrastructure/providers/vultr-adapter';
 import { ADAPTER_PROFILES } from '../../src/infrastructure/providers/configuration';
 import type { InfrastructureProviderRow } from '../../src/db/infrastructure-providers';
 
 /**
- * A6 — rescue mode. Only providers whose API genuinely offers a rescue system may implement it:
- * Hetzner (`enable_rescue`), OpenStack (Nova `rescue`/`unrescue`), OVH Public Cloud
- * (`POST .../rescueMode` plus the instance's `rescuePassword`) and Contabo (`POST
- * .../actions/rescue` with Contabo secret ids). This suite pins the call shapes and the
- * one-time-credential rules those providers imply.
+ * A6 — rescue mode. Only providers whose API genuinely offers a way to boot a repair system may
+ * implement it, and "offers" includes a documented path that is not called rescue: Hetzner
+ * (`enable_rescue`), OpenStack (Nova `rescue`/`unrescue`), OVH Public Cloud
+ * (`POST .../rescueMode` plus the instance's `rescuePassword`), Contabo (`POST .../actions/rescue`
+ * with Contabo secret ids), SolusVM (`vserver-rescue`), the development-only mock,
+ * `generic_http` (delegates to the operator's bridge) and — since 2026-10-03 — Vultr, whose cloud
+ * instances are repaired by booting the SystemRescue image from its public ISO library.
+ *
+ * This suite pins the call shapes, the one-time-credential rules and the architecture checks
+ * those providers imply, and it pins which providers must *not* advertise rescue.
  */
 
 afterEach(() => {
@@ -43,7 +49,7 @@ describe('rescue mode is implemented only where the provider API offers it', () 
     // generic_http is here because it delegates rescue to the operator's bridge on the same
     // action contract it already delegates reboot/resize/reinstall to — the bridge, not this
     // adapter, decides whether the underlying provider offers a rescue system.
-    expect(withRescue).toEqual(['contabo', 'generic_http', 'hetzner', 'mock', 'openstack', 'ovh', 'solusvm']);
+    expect(withRescue).toEqual(['contabo', 'generic_http', 'hetzner', 'mock', 'openstack', 'ovh', 'solusvm', 'vultr']);
   });
 
   describe('Contabo', () => {
@@ -293,6 +299,104 @@ describe('rescue mode is implemented only where the provider API offers it', () 
       await expect(adapter().enableRescue('2041', { architecture: 'x86_64' })).rejects.toMatchObject({
         code: 'PROVIDER_ERROR',
       });
+    });
+  });
+
+  describe('Vultr (documented SystemRescue ISO path)', () => {
+    const credentials = { VULTR_API_KEY: 'vultr-token' } as NodeJS.ProcessEnv;
+
+    function installFetch(handler: (url: string) => unknown) {
+      const calls: Array<{ url: string; method: string; body: string }> = [];
+      const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = String(input);
+        calls.push({ url, method: init?.method ?? 'GET', body: String(init?.body ?? '') });
+        return json(handler(url));
+      });
+      vi.stubGlobal('fetch', fetchMock);
+      return calls;
+    }
+
+    const library = (isos: unknown[]) => ({ public_isos: isos });
+
+    it('resolves SystemRescue from the live public ISO list, attaches it and reboots', async () => {
+      const calls = installFetch((url) => {
+        if (url.endsWith('/iso-public')) {
+          return library([
+            { id: 'gparted-x64', name: 'GParted', description: '1.6.0' },
+            { id: 'systemrescue-11.03', name: 'SystemRescue', description: '11.03' },
+          ]);
+        }
+        return { iso_status: { status: 'isattaching' } };
+      });
+      const adapter = new VultrProviderAdapter(providerRow('vultr', 'https://api.vultr.test/v2'), credentials);
+
+      const session = await adapter.enableRescue('inst-1', { architecture: 'x86_64' });
+
+      expect(session).toMatchObject({ type: 'systemrescue-iso', username: 'root', rebooted: true });
+      // There is no credential: SystemRescue signs the operator in at the console as root.
+      expect(session.password).toBeUndefined();
+      expect(calls.map((call) => `${call.method} ${call.url}`)).toEqual([
+        'GET https://api.vultr.test/v2/iso-public',
+        'POST https://api.vultr.test/v2/instances/inst-1/iso/attach',
+        'POST https://api.vultr.test/v2/instances/inst-1/reboot',
+      ]);
+      expect(JSON.parse(calls[1]!.body)).toEqual({ iso_id: 'systemrescue-11.03' });
+      expect(session.notes).toMatch(/SystemRescue/);
+      expect(session.notes).toMatch(/no password/);
+      expect(session.notes).toMatch(/console/);
+    });
+
+    it('never hands an ARM image to an x86_64 instance, or an x86 image to an arm64 one', async () => {
+      const calls = installFetch((url) =>
+        url.endsWith('/iso-public')
+          ? library([
+              { id: 'systemrescue-aarch64', name: 'SystemRescue', description: '11.03 aarch64' },
+              { id: 'systemrescue-x64', name: 'SystemRescue', description: '11.03 x86_64' },
+            ])
+          : { iso_status: { status: 'isattaching' } }
+      );
+      const adapter = new VultrProviderAdapter(providerRow('vultr', 'https://api.vultr.test/v2'), credentials);
+
+      await adapter.enableRescue('inst-1', { architecture: 'arm64' });
+      expect(JSON.parse(calls[1]!.body)).toEqual({ iso_id: 'systemrescue-aarch64' });
+
+      calls.length = 0;
+      await adapter.enableRescue('inst-1', { architecture: 'x86_64' });
+      expect(JSON.parse(calls[1]!.body)).toEqual({ iso_id: 'systemrescue-x64' });
+    });
+
+    it('refuses an arm64 instance when the library holds only the x86 image, without attaching it', async () => {
+      const calls = installFetch(() => library([{ id: 'systemrescue-x64', name: 'SystemRescue', description: '11.03' }]));
+      const adapter = new VultrProviderAdapter(providerRow('vultr', 'https://api.vultr.test/v2'), credentials);
+
+      await expect(adapter.enableRescue('inst-1', { architecture: 'arm64' })).rejects.toMatchObject({
+        code: 'UNSUPPORTED_OPERATION',
+        retryable: false,
+      });
+      // Only the library was read: nothing was attached to a machine that could not boot it.
+      expect(calls).toHaveLength(1);
+    });
+
+    it('reports a library that lists no SystemRescue image instead of attaching something else', async () => {
+      const calls = installFetch(() => library([{ id: 'gparted-x64', name: 'GParted', description: '1.6.0' }]));
+      const adapter = new VultrProviderAdapter(providerRow('vultr', 'https://api.vultr.test/v2'), credentials);
+
+      await expect(adapter.enableRescue('inst-1', { architecture: 'x86_64' })).rejects.toMatchObject({
+        code: 'PROVIDER_ERROR',
+        retryable: false,
+      });
+      expect(calls).toHaveLength(1);
+    });
+
+    it('leaves rescue by detaching the ISO, which Vultr reboots back into the installed system', async () => {
+      const calls = installFetch(() => ({ iso_status: { status: 'isunmounting' } }));
+      const adapter = new VultrProviderAdapter(providerRow('vultr', 'https://api.vultr.test/v2'), credentials);
+
+      await adapter.disableRescue('inst-1');
+
+      expect(calls).toEqual([
+        { url: 'https://api.vultr.test/v2/instances/inst-1/iso/detach', method: 'POST', body: '' },
+      ]);
     });
   });
 });

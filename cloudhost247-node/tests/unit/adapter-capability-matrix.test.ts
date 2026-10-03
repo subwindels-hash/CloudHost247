@@ -228,6 +228,11 @@ function permissivePayload(kind: string, url: string, method: string): unknown {
     return { droplet: { id: 1, name: 'matrix-host', status: 'active', networks: { v4: [{ ip_address: '203.0.113.11', type: 'public' }] } }, action: { id: 1, status: 'in-progress' } };
   }
   if (kind === 'vultr') {
+    // Vultr's rescue boots the SystemRescue image from the public ISO library, so the matrix has to
+    // answer that lookup too — otherwise the advertised `rescue: true` cell would not be exercised.
+    if (url.endsWith('/iso-public')) {
+      return { public_isos: [{ id: 'systemrescue-x64', name: 'SystemRescue', description: '11.03' }] };
+    }
     return {
       instance: {
         id: 'srv-1', label: 'matrix-host', status: 'active', main_ip: '203.0.113.12',
