@@ -61,13 +61,13 @@ test('the attestation carries the report it was given, so the field cannot drift
   assert.equal(provisioningAttestation({ ...liveReport, cpuPercent: null }, deps()).monitoringRunning, false);
 });
 
-test('this sandbox has no docker, so the live report proves the field is not hardcoded', async () => {
-  // Executes the real systemReport(): there is no docker binary here, so the docker reading is null
-  // and the attestation built from that very report must say monitoring is not running. A literal
-  // `true` could not survive this test.
+test('the live report drives monitoring status in Docker and non-Docker environments', async () => {
+  // Execute the real systemReport() on whichever host runs this suite. CI may have Docker while a
+  // developer sandbox does not, so assert that the attestation reflects the readings actually
+  // collected rather than assuming either environment (or a hardcoded boolean).
   const report = await systemReport();
-  assert.equal(report.dockerContainers, null, 'expected no docker in this environment');
-  assert.equal(provisioningAttestation(report, deps()).monitoringRunning, false);
+  const expected = report.dockerContainers != null && report.cpuPercent != null;
+  assert.equal(provisioningAttestation(report, deps()).monitoringRunning, expected);
 });
 
 // --- security marker (unchanged behaviour, now pinned) --------------------------------------------
