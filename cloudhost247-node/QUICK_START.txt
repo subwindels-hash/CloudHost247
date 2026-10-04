@@ -1,0 +1,115 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                  CloudHost247 Node Platform - QUICK START                       ║
+║                         Generated: 2026-10-04                                 ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+📦 DEPLOYMENT PACKAGE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Location: cloudhost247-node/release/cloudhost247-cpanel-df2ef1c.zip
+  Size:    2.3 MB
+  Files:   1,138
+
+🔐 ENVIRONMENT FILES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  .env              - Simplified template with essentials
+  .env.production   - Complete configuration with all secrets
+
+📖 DOCUMENTATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  DEPLOYMENT_GUIDE.md    - Step-by-step deployment instructions
+  DEPLOYMENT_SUMMARY.md  - Complete overview of all files
+
+🚀 5-MINUTE DEPLOYMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  1. UPLOAD
+     → Upload cloudhost247-cpanel-df2ef1c.zip to cPanel File Manager
+     → Extract and move contents to your app directory (e.g., cloudhost247)
+
+  2. CREATE APP
+     → cPanel → Software → Setup Node.js App → Create Application
+     → Node.js version: ≥ 20.9.0
+     → Application root: cloudhost247
+     → Application URL: https://yourdomain.com
+     → Startup file: server.js
+
+  3. CONFIGURE ENV
+     → Copy .env to your server and customize DATABASE_URL
+     → OR use cPanel's Environment Variables UI
+     → Set file permissions: chmod 600 .env
+
+  4. INSTALL DEPS
+     → In cPanel terminal: cd cloudhost247
+     → Run: npm ci --omit=dev
+
+  5. RUN MIGRATIONS
+     → CONFIRM_MIGRATION=yes node dist/database/migrate.js up
+
+  6. START
+     → In cPanel Application Manager: Click Restart
+
+  7. VERIFY
+     → Visit https://yourdomain.com
+     → Test: curl https://yourdomain.com/health
+
+⚡ ESSENTIAL COMMANDS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Build:              npm run build
+  Check environment:  npm run env:check
+  Migrations status:  node dist/database/migrate.js status
+  Migrations up:      CONFIRM_MIGRATION=yes node dist/database/migrate.js up
+  Worker (cron):      * * * * * cd /path && node dist/src/worker/main.js --once
+
+⚠️  CRITICAL NOTES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✗ NEVER commit .env files to Git
+  ✗ NEVER set PORT on cPanel (Passenger injects it)
+  ✗ ALWAYS backup database before migrations
+  ✗ ALWAYS test on staging first
+  ✗ Restart required after frontend builds
+
+🔧 TROUBLESHOOTING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Check logs:          cPanel Application Manager → View Logs
+  Check env:           npm run env:check
+  Check DB connection: node dist/database/migrate.js status
+  Check health:        curl https://yourdomain.com/health
+  Check ready:        curl https://yourdomain.com/ready
+
+📊 WHAT'S INCLUDED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✓ 70 Database migrations
+  ✓ 70+ Application manifests
+  ✓ React SPA frontend (200+ chunks)
+  ✓ Fastify backend API
+  ✓ Authentication (JWT, TOTP, WebAuthn)
+  ✓ 15+ Infrastructure providers
+  ✓ Billing & payments system
+  ✓ Support ticket system
+  ✓ Revenue Guardian
+  ✓ AI Support Operator
+  ✓ Tools Center (79+ tools)
+
+🎯 NEXT STEPS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  1. Upload deployment package to cPanel
+  2. Create Node.js application
+  3. Configure environment variables
+  4. Install dependencies
+  5. Run migrations
+  6. Start application
+  7. Configure cron job for worker
+  8. Test thoroughly
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Questions? See DEPLOYMENT_GUIDE.md for detailed instructions.
+
+  Need help? Check docs/CPANEL_DEPLOYMENT.md for official documentation.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
