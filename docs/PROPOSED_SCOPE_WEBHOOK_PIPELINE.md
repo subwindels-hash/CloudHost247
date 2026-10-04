@@ -6,6 +6,14 @@
 **Prerequisites**: Phase 5A (Accepted), Phase 5B (Accepted B1–B4; B5 separately recorded), Phase 5C (Accepted manual/sandbox synchronous flows)  
 **Standing Restrictions**: Financial code frozen, no live credentials, no database migrations created or executed, PR #12 open and unmerged.
 
+> **Status update 2026-10-04 (owner authorization — staging scope only; recorded by the platform
+> agent).** The repository owner explicitly authorized execution of migrations **0023, 0024, 0025**
+> and **0041** against the **staging database to be provisioned**. **Production remains NOT
+> authorized**, the code quarantine in `database/migrate.ts` is unchanged, and nothing has executed
+> yet. Per `docs/WEBHOOK_PIPELINE_UNFREEZE_RUNBOOK.md`, the stamp above is updated after an
+> authorized execution has taken place. The "PR #12 open and unmerged" wording in the header line
+> above is stale — re-verified 2026-10-04: `gh pr view 12` returns `state: CLOSED`, `mergedAt: null`.
+
 ---
 
 ## 1. Gateway Architecture & Provider Abstraction

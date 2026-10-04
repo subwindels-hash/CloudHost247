@@ -1,19 +1,29 @@
 # Webhook pipeline & quarantined migrations — unfreeze runbook
 
-**Status of this document: PREPARATION ONLY. It authorizes nothing.**
-The standing restriction remains in force until the owner performs step 0 below:
+**Status of this document: PREPARATION ONLY — it authorizes nothing by itself.**
+**AUTHORIZATION RECORDED 2026-10-04 (staging scope only).** The repository owner explicitly
+authorized execution of all four quarantined migrations — **0023, 0024, 0025, 0041** — against the
+**staging database to be provisioned** (step 0.2 below). **Production remains NOT authorized**, and
+nothing has executed: the staging database (step 0.2) and the provider test secrets (step 0.3) do
+not exist yet, so steps 1–4 below have not been run.
+The production standing restriction remains in force until the owner lifts it there:
 
 > "Migrations 0023, 0024, 0025, and 0041: Prepared and tested migration artifacts only. **NOT
 > authorized for production execution**; do not run against any production database until
 > separately authorized." — `docs/NODE_PLATFORM_STATUS.md`, Standing restrictions
 
-> `docs/PROPOSED_SCOPE_WEBHOOK_PIPELINE.md` keeps its stamp **NOT AUTHORIZED · NOT IMPLEMENTED ·
-> NOT DEPLOYED**. PR #12 is CLOSED and unmerged. No production database has been touched.
+> `docs/PROPOSED_SCOPE_WEBHOOK_PIPELINE.md` keeps its historical stamp **NOT AUTHORIZED · NOT
+> IMPLEMENTED · NOT DEPLOYED**, now with the dated 2026-10-04 staging-authorization status update
+> recorded beneath it; per this runbook's own sequencing the stamp itself is updated after an
+> authorized execution has happened. PR #12 is CLOSED and unmerged (re-verified 2026-10-04). No
+> production database has been touched.
 
 **Written 2026-10-03** on `arena/01a1027e-cloudhost247` so that the moment the owner decides to
 proceed, the exact mechanics, pre-checks and rollback plan are already verified against the code —
 nothing in this runbook is invented; every command below is read from `database/migrate.ts`,
 `src/config/env.ts` and the gateway implementations.
+**Amended 2026-10-04** on `arena/01a104fc-cloudhost247`: the owner's authorization (staging scope
+only, all four versions) is now recorded in step 0.1; production remains not authorized.
 
 ---
 
@@ -46,7 +56,10 @@ The pipeline itself is code-complete and fail-closed while frozen:
 ## Step 0 — Owner prerequisites (none of these can be skipped)
 
 1. **Written owner authorization** naming which of 0023/0024/0025/0041 are authorized and for which
-   database. The runbook does not supply this.
+   database. **DONE — recorded 2026-10-04:** the owner authorized **all four** (0023, 0024, 0025,
+   0041) against the **staging database to be provisioned**; production is explicitly excluded. The
+   concrete staging database identity (host and database name, never credentials) is recorded here
+   when step 0.2 is satisfied.
 2. **A staging database** — a production-shaped clone or a disposable instance. Nothing here runs
    against production first.
 3. **Provider credentials in test mode** (live-gateway verification has never been performed):

@@ -37,8 +37,16 @@ sub-phase before the next one begins.
   - Practical consequence: because 0041 creates the `operating_systems`/`infrastructure_providers`
     tables that 0042+ build on, a production database cannot advance beyond 0040 until 0041 is
     separately authorized — the run refuses rather than failing midway.
+  - **2026-10-04 — the owner explicitly authorized staging execution only.** All four artifacts
+    (0023, 0024, 0025, 0041) are authorized for execution against the **staging database to be
+    provisioned** (inventory §E). **Production remains NOT authorized**: this does not lift, weaken
+    or bypass the restriction above — `QUARANTINED_MIGRATIONS` is unchanged and a production run
+    still refuses without an explicit per-run `AUTHORIZED_MIGRATIONS`. Nothing has executed: the
+    staging database and the provider test secrets do not exist yet.
 - **Production Safety**: Zero production financial records modified. Zero deployment executed.
-- **PR #12 (`subwindels-hash/CloudHost247#12`)**: Remains **OPEN and UNMERGED**.
+- **PR #12 (`subwindels-hash/CloudHost247#12`)**: **CLOSED and unmerged** — corrected 2026-10-04;
+  the earlier "OPEN and UNMERGED" wording was stale (`gh pr view 12` re-verified 2026-10-04:
+  `state: CLOSED`, `mergedAt: null`; no PRs are open on the repository).
 - **Historical Integrity**: Current state is preserved: no history rewrite, no force-push, no whole-PR revert.
 
 ### Formal Acceptance Summary
@@ -1281,9 +1289,16 @@ sub-phase before the next one begins.
   the fail-closed whole-run refusal, the standalone skip, the explicit authorization path, and that
   `migrate status` marks them; `tests/integration/migrate.test.ts` was updated for the new production
   semantics.
-- **Nothing about authorization changed.** `docs/PROPOSED_SCOPE_WEBHOOK_PIPELINE.md` keeps its
-  "NOT AUTHORIZED · NOT IMPLEMENTED · NOT DEPLOYED" stamp, migration 0024 remains prepared-only, PR #12
-  remains open and unmerged, and no production database, credential, or financial record was touched.
+- **Nothing about authorization changed at the time of the 2026-10-02 freeze work.** `docs/PROPOSED_SCOPE_WEBHOOK_PIPELINE.md` kept its
+  "NOT AUTHORIZED · NOT IMPLEMENTED · NOT DEPLOYED" stamp, migration 0024 remains prepared-only, and
+  no production database, credential, or financial record was touched. (The bullet's on-the-day
+  "PR #12 remains open and unmerged" wording was stale; corrected in the bullet below.)
+- **2026-10-04 — the owner authorized staging execution (production unchanged).** All four
+  quarantined migrations (0023, 0024, 0025, 0041) are authorized against the staging database to be
+  provisioned; production remains NOT authorized and the code quarantine is untouched. Nothing has
+  executed yet — no staging database exists. Recorded in `docs/WEBHOOK_PIPELINE_UNFREEZE_RUNBOOK.md`
+  step 0.1 and in §Standing restrictions above. The "PR #12 remains open" wording in the bullet
+  above is stale: re-verified 2026-10-04, `gh pr view 12` returns `state: CLOSED`, `mergedAt: null`.
 
 ## A10 — AI Control Plane (`src/ai-os/`): registry-gated workforce, approvals-executed, sweeps scheduled
 
