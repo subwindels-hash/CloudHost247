@@ -28,6 +28,15 @@ intermediate `capabilities` object when it is absent — configurations with no 
 would be silently skipped. The configuration statement below uses a merge that handles all three
 states. Do not "simplify" it back to a nested-path `jsonb_set`.
 
+**Rehearsed again 2026-10-04 (agent sandbox, throwaway PostgreSQL 18.4 — no staging or production database).** On an
+empty database migrated through all 70 artifacts, with a fixture covering the same four states plus a DigitalOcean
+control: the diagnostics named exactly the affected rows (3 servers, 2 configurations — including the
+absent-`capabilities` case reporting `capabilities: null`); the backfill changed exactly those (**UPDATE 3 + UPDATE 2**);
+a second run changed nothing (UPDATE 0 + UPDATE 0); both DigitalOcean rows kept `console: false`; sibling keys
+(`snapshot`, `rescue`) survived on every row; and the nested-path bug was reproduced live — on the
+absent-`capabilities` row, the nested-path `jsonb_set` updates the row yet leaves `capabilities` NULL, while the merge
+form above produces `{"console": true}`.
+
 ---
 
 ## Step 1 — Diagnostics (read-only; run on staging and production, report both)

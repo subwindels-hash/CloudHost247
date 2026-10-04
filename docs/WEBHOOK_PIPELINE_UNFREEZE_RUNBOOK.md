@@ -53,6 +53,27 @@ The pipeline itself is code-complete and fail-closed while frozen:
 
 ---
 
+## Local rehearsal (2026-10-04) — throwaway PostgreSQL in the agent sandbox
+
+Run to prove the mechanics below **execute**, not merely read correctly. Target: an **empty** database on a
+throwaway PostgreSQL 18.4 cluster (embedded binaries, created outside the repository; throwaway credentials chosen
+to match the probe defaults). **No staging or production database exists or was touched** — this rehearsal
+authorizes nothing and changes nothing in step 0.
+
+| Rehearsed step | Result |
+|---|---|
+| Unauthorized production run (`NODE_ENV=production`, no `AUTHORIZED_MIGRATIONS`) | **Refused before any DDL**, naming 0041 and its ten dependents; `schema_migrations` left with **0 rows** — nothing applied |
+| Step 2's command verbatim (`AUTHORIZED_MIGRATIONS=0023,0024,0025,0041`) | **All 70 migrations applied**; `migrate verify` → *"OK: no checksum drift detected"* |
+| Post-run objects | `webhook_events` created by 0024; 0023's **three validation triggers** present on `invoices`, `payments`, `billing_ledger` (alongside the two pre-existing `billing_ledger` no-update/no-delete guards — 5 in total); the `auth_audit_log` event-type CHECK now allows `admin_invoice_refunded` / `admin_invoice_cancelled` and `orders.payment_status` is `varchar(20)` (0025) |
+| Step 1.3 six-query invariant sweep | **0 rows on all six**, before and after the authorized run |
+| Step 1.4 probes against a real PostgreSQL | `verify:financial` **49/49**, `verify:authorization` **39/39** |
+| `migrate status` on a production-shaped database | 0023/0024/0025/0041 marked `quarantined: true` with their reasons; all 70 listed |
+
+Still unperformable without the real environment, and therefore still open: the staging database (0.2), the provider
+test-mode secrets (0.3), CI (0.4), and steps 3–4 (live-gateway verification). Step 0.1's recorded scope is unchanged.
+
+---
+
 ## Step 0 — Owner prerequisites (none of these can be skipped)
 
 1. **Written owner authorization** naming which of 0023/0024/0025/0041 are authorized and for which
