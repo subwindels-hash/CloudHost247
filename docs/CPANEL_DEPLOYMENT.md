@@ -79,7 +79,7 @@ upload package on any machine with Node 22+ (your laptop, or CI):
 
 ```
 cd cloudhost247-node
-bash scripts/package-cpanel.sh        # -> release/cloudhost247-cpanel-<sha>.zip (~1.5 MB)
+bash scripts/package-cpanel.sh        # -> release/cloudhost247-cpanel-<sha>.zip (2.3 MB in the 2026-10-04 artifact; size varies)
 ```
 
 The zip contains only what the server executes: `server.js`, `package.json`, `package-lock.json`,
