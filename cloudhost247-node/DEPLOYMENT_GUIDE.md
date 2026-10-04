@@ -16,30 +16,28 @@ This guide provides step-by-step instructions for deploying the CloudHost247 Nod
 
 3. **SSL Certificate** installed for your domain
 
-## Files Generated
+## Generated Artifacts (2026-10-04)
 
-✅ **Deployment Package**: `release/cloudhost247-cpanel-df2ef1c.zip` (2.3MB)
-- Contains pre-compiled server and frontend assets
-- Includes all database migrations (0001-0070)
-- Ready for production deployment
+- **Deployment ZIP:** `release/cloudhost247-cpanel-b54b047.zip` (2.3 MB; 1,138 files; 70 migrations)
+  - Includes compiled server/frontend, production package metadata, migrations, manifests, and `.env.example`.
+  - SHA-256: `d2321760556f36cc68e05c9f7dac1691db248b08003fc5820ea1fb6384888236`.
+  - The archive passed `unzip -t`; it does **not** contain `.env`, real credentials, or `node_modules`.
+- **Full environment file:** `cloudhost247-node/.env` (mode `0600`, git-ignored, not included in the ZIP).
+  - App-local secrets were generated with Node's cryptographic random generator.
+  - `DATABASE_URL` is deliberately a placeholder, and provider/email credentials are unset. Replace these and verify `APP_URL`/database TLS settings before deploying.
+  - `npm run env:check` passes; this validates configuration shape only and does not test database connectivity or provider credentials.
 
-✅ **Environment Configuration**: `.env.production`
-- Complete set of environment variables
-- All secrets pre-generated with cryptographically secure values
-- Template for your actual deployment values
+The package build succeeded, the full test suite passed (129 files / 1,158 tests), and environment validation passed in this workspace. This is **not** evidence of a real cPanel/Passenger staging run; see `docs/CPANEL_DEPLOYMENT.md` for prerequisites and the outstanding staging gate.
 
-✅ **Simplified Environment**: `.env`
-- Essential variables only
-- Placeholder values for database and provider credentials
-- Easier to customize for your specific setup
+The ZIP and `.env` are local generated outputs, ignored by Git, and are not included in this PR. Rebuild the ZIP with `bash scripts/package-cpanel.sh`; keep the private `.env` separate and configure it through the hosting provider's secure environment-variable UI where possible.
 
 ## Quick Start Deployment
 
 ### Step 1: Download the Deployment Package
 
-The deployment zip file has been created at:
+The deployment zip file is:
 ```
-cloudhost247-node/release/cloudhost247-cpanel-df2ef1c.zip
+cloudhost247-node/release/cloudhost247-cpanel-b54b047.zip
 ```
 
 ### Step 2: Upload to cPanel
@@ -48,7 +46,7 @@ cloudhost247-node/release/cloudhost247-cpanel-df2ef1c.zip
 2. Navigate to **File Manager**
 3. Upload the zip file to your home directory
 4. Extract the zip file
-5. Move the contents of `cloudhost247-cpanel-df2ef1c/` to your desired application root (e.g., `cloudhost247`)
+5. Move the contents of `cloudhost247-cpanel-b54b047/` to your desired application root (e.g., `cloudhost247`)
 
 ### Step 3: Create the Node.js Application
 
@@ -66,7 +64,7 @@ cloudhost247-node/release/cloudhost247-cpanel-df2ef1c.zip
 
 **Option A (Recommended):** Use cPanel's Environment Variables UI
 1. On the Application Manager detail page, find the **Environment Variables** section
-2. Add each variable from the `.env` file (excluding PORT - Passenger sets this automatically)
+2. Add the active (uncommented) variables from `cloudhost247-node/.env`, after replacing its database placeholder and confirming `APP_URL`; omit PORT because Passenger supplies it automatically. Configure any provider credentials you need separately.
 
 **Option B:** Upload the `.env` file
 1. Upload your customized `.env` file to the application root
@@ -81,11 +79,12 @@ cloudhost247-node/release/cloudhost247-cpanel-df2ef1c.zip
 
 ### Step 6: Run Database Migrations
 
-1. In the virtual environment terminal, run:
+1. Back up the target database and review the pending migration status first. Production migrations `0023`, `0024`, `0025`, and `0041` are quarantined; a fresh production schema needs explicit owner authorization for those migrations. Follow `docs/CPANEL_DEPLOYMENT.md` §0a/§6 before proceeding.
+2. If the owner has approved that production change, run:
    ```bash
-   CONFIRM_MIGRATION=yes node dist/database/migrate.js up
+   CONFIRM_MIGRATION=yes AUTHORIZED_MIGRATIONS=0023,0024,0025,0041 node dist/database/migrate.js up
    ```
-2. Verify migrations applied successfully:
+3. Verify migrations applied successfully:
    ```bash
    node dist/database/migrate.js status
    node dist/database/migrate.js verify
@@ -116,19 +115,19 @@ cloudhost247-node/release/cloudhost247-cpanel-df2ef1c.zip
 | Variable | Description | Example |
 |----------|-------------|---------|
 | `DATABASE_URL` | PostgreSQL connection string | `postgresql://user:pass@localhost:5432/dbname` |
-| `JWT_SECRET` | JWT signing secret | Pre-generated in `.env` files |
-| `CREDENTIAL_ENCRYPTION_KEY` | Encryption key for secrets | Pre-generated in `.env` files |
+| `JWT_SECRET` | JWT signing secret | Generated in `cloudhost247-node/.env`; keep private |
+| `CREDENTIAL_ENCRYPTION_KEY` | Encryption key for secrets | Generated in `cloudhost247-node/.env`; back it up securely and do not rotate without a migration plan |
 | `APP_URL` | Public URL of your app | `https://cloudhost247.com` |
 
 ### Optional Variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `NODE_ENV` | `production` | Environment mode |
+| `NODE_ENV` | Set to `production` | Production mode (the code default is `development`, so configure this explicitly) |
 | `LOG_LEVEL` | `info` | Logging level (error, warn, info, debug) |
-| `DATABASE_SSL` | `true` | Enable SSL for database connection |
+| `DATABASE_SSL` | `true` in the generated `.env` | Enable TLS when required by the database provider; confirm cPanel-hosted PostgreSQL settings rather than assuming |
 | `DATABASE_SSL_REJECT_UNAUTHORIZED` | `true` | Reject unauthorized SSL certificates |
-| `DATABASE_POOL_MAX` | `10` | Maximum database connections in pool |
+| `DATABASE_POOL_MAX` | `5` | Maximum database connections in pool (raise only after checking the database connection limit) |
 | `JWT_EXPIRES_IN` | `12h` | JWT token expiration time |
 | `WORKER_CONCURRENCY` | `4` | Maximum concurrent worker jobs |
 
@@ -162,7 +161,7 @@ All provider variables are optional. Configure only the providers you plan to us
 
 ### Option 2: External PostgreSQL
 
-Use a managed PostgreSQL service (AWS RDS, Cloudflare, etc.):
+Use a managed PostgreSQL service from your chosen database provider:
 ```
 DATABASE_URL=postgresql://user:password@your-db-host:5432/cloudhost247_prod
 DATABASE_SSL=true
@@ -234,11 +233,10 @@ For cPanel shared hosting, configure a cron job for the worker:
 4. **Restart required** after any frontend build (SPA fallback needs process restart)
 5. **Test on staging** before deploying to production
 
-## Files Created
+## Generated Files
 
-- `release/cloudhost247-cpanel-df2ef1c.zip` - Deployment package (2.3MB)
-- `.env` - Simplified environment template
-- `.env.production` - Complete environment with all pre-generated secrets
+- `release/cloudhost247-cpanel-b54b047.zip` - Pre-built deployment package (2.3 MB; SHA-256 is listed above)
+- `.env` - Full private environment file; update the database URL and deployment-specific values before use. It is git-ignored and excluded from the ZIP.
 - `DEPLOYMENT_GUIDE.md` - This guide
 
 ## Next Steps
