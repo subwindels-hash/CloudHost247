@@ -220,7 +220,7 @@ describe('Tools Center API', () => {
       const body = response.json();
       if (body.success === true) {
         // A deployment with working DNS egress: the answer must still be attributable.
-        expect(body.data.meta.resolver.name).toBeTruthy();
+        expect(body.data.resolver.name).toBeTruthy();
       } else {
         expect(['DNS_LOOKUP_FAILED', 'TIMEOUT', 'SERVICE_UNAVAILABLE']).toContain(body.code);
         expect(body.success).toBe(false);
