@@ -26,6 +26,7 @@
 | PostgreSQL | **Real PostgreSQL 18.4**, throwaway cluster on `127.0.0.1:55432` (native x86_64 binaries via npm `@embedded-postgres/linux-x64`) | `postgres (PostgreSQL) 18.4`; cluster created with `initdb` |
 | Browser | **Real Chromium 153.0.8010.0** driven by `playwright-core` (bundled via npm `@sparticuz/chromium`, libs extracted from `al2023.tar.br`) | `Chromium 153.0.8010.0`; page load + screenshots produced |
 | Node / npm / Python | Node v22.22.3 · npm 10.9.8 · Python 3.11.2 | `node -v`, `python3 -V` |
+| Node platform build & suite | **`npm test` → 129 files / 1158 tests passed (129)**, `tsc --noEmit` → exit 0, `vite build` → entry `index-Ti2UwGlH.js` 229.44 kB / gzip 72.12 kB, 132 assets | `/tmp/vitest.log`, `/tmp/vite-build.log` |
 | Network | **Allowlist-only.** npm registry and github.com reachable; **Maven Central, `api.stripe.com`, `api-m.sandbox.paypal.com`, `api.paystack.co`, Playwright CDN and the Debian mirrors are blocked** (`SSL_ERROR_SYSCALL` / `Connection failed`) | curl matrix in the run log |
 | WHMCS / cPanel staging host | **Not available.** No staging host, database, credentials or provider test secrets exist in this environment | `find` for `.env*` → only `.env.example`; PR #47 records "no staging database exists and no provider test secrets are configured" |
 | Docker daemon | **Not available** (`docker` absent) | toolchain probe |
@@ -38,7 +39,7 @@
 
 | # | Area | Status |
 |---|---|---|
-| 1 | 15 staging-blocked modules — behavioural suites under real PHP 8.2.33 | **PASS** (all 18 suites, exit 0) |
+| 1 | 15 staging-blocked modules — behavioural suites under real PHP 8.2.33 **and 7.4.33** | **PASS** (all 18 suites, exit 0 on both legs) |
 | 1 | 15 staging-blocked modules — real WHMCS/cPanel staging verification | **BLOCKED** |
 | 2 | Migrations 0023 / 0024 / 0025 — executed + objects verified on throwaway PostgreSQL 18.4 | **PASS** |
 | 2 | Migrations 0023 / 0024 / 0025 — executed on **staging** | **BLOCKED** (no staging database provisioned) |
@@ -51,6 +52,7 @@
 | 5 | Browser/UI acceptance — WHMCS admin/client area & the 15 module UIs | **BLOCKED** |
 | 6 | Provider adapters (AWS, Contabo, DigitalOcean, Proxmox, Virtualizor, SolusVM, cPanel, Kubernetes, Docker) | **NOT APPLICABLE** — deliberate refusals, unchanged, still pinned |
 | 7 | Release-candidate gate, PHP 8.2 leg | **PASS** (exit 0) |
+| 7 | Node platform suite + typecheck + build | **PASS** — 129 files / 1158 tests, typecheck exit 0, build clean |
 | 7 | Release-candidate gate, PHP 7.4 leg | **PASS** (exit 0) |
 | 7 | GitHub Actions CI | **BLOCKED** (account/billing; job never started) |
 | 8 | This report | delivered |
@@ -177,6 +179,7 @@ Screenshots retained: `login-form-1440.png`, `after-login-1440.png`, `hosting-cp
 |---|---|---|---|
 | 7a | `bash scripts/release-candidate-check.sh` with the repo's `php-wasm` shim, **PHP 8.2 leg** | **exit 0** — 785 computed lint targets clean, 18 PHP behavioural suites green, Node agent suite green, Python suites green, hash-locked baseline intact ("Release-candidate source verification passed") | **PASS** |
 | 7b | same, **PHP 7.4 leg** | **exit 0** — 785 lint targets clean (PHP **7.4.33**), all 18 PHP behavioural suites green (`60 assertions, 0 failed`; `104 tests, 0 failures`; `85 tests, 0 failures`; `237 assertions, 0 failed`; `All broker tests passed.`; `23/23` phoneservices; `36/36` customaffiliate; `59/59` email), agent + Python suites green, "Release-candidate source verification passed" | **PASS** |
+| 7c0 | `npm test` (cloudhost247-node), `tsc --noEmit`, `npm run build:frontend`, `npm run build:server` | 129 files / **1158 tests passed**; typecheck **exit 0**; frontend entry **229.44 kB / 72.12 kB gzip** with 132 assets; server build exit 0 | **PASS** |
 | 7c | GitHub Actions | **BLOCKED — infrastructure.** Run `37176974172` ("Independent foundation", job *Release candidate (PHP 7.4)*) started 04:25:55Z and failed 04:25:57Z with **0 steps executed**; further runs on 2026-10-04 failed in 3–4 s. No CI signal exists on any commit. | **BLOCKED** |
 | 7d | Sandbox-only limitations, recorded honestly | `php -l` **was** executed here on **both** matrix versions (real PHP 8.2.33 and 7.4.33 interpreters via the repo's `scripts/php-wasm` shim) — this materially corrects the earlier standing note that "`php -l` was never executed (no PHP in the sandbox)". Still **not** performed: **real Docker daemon testing**, **live provider staging**, **WHMCS/cPanel staging**, and browser/visual testing was done **only** against the Node platform, **not** the WHMCS UI | recorded |
 
@@ -249,7 +252,7 @@ All of the following require the real staging environment; none can be produced 
 
 ## 12. Verdict
 
-- **Sandbox-executable verification: complete and green.** Release gate **both** matrix legs exit 0 — PHP 8.2.33 and **PHP 7.4.33**, 785 lint targets and all 18 behavioural suites each, agent and Python suites green, hash-locked baseline intact; this is the first execution of the PHP half of the gate in this repository's recorded history; all 15 modules' behavioural suites pass under real PHP; migrations 0023/0024/0025 execute and verify on real PostgreSQL with their objects confirmed live; the sandbox webhook pipeline is verified end-to-end including idempotency and ledger discipline; and the Node platform passes browser acceptance on 113 desktop + 12 mobile routes with zero overflow and a working UI login.
+- **Sandbox-executable verification: complete and green.** Node platform `npm test` **129 files / 1158 tests pass** with `typecheck` exit 0 and a clean build; release gate **both** matrix legs exit 0 — PHP 8.2.33 and **PHP 7.4.33**, 785 lint targets and all 18 behavioural suites each, agent and Python suites green, hash-locked baseline intact; this is the first execution of the PHP half of the gate in this repository's recorded history; all 15 modules' behavioural suites pass under real PHP; migrations 0023/0024/0025 execute and verify on real PostgreSQL with their objects confirmed live; the sandbox webhook pipeline is verified end-to-end including idempotency and ledger discipline; and the Node platform passes browser acceptance on 113 desktop + 12 mobile routes with zero overflow and a working UI login.
 - **Staging verification: BLOCKED, not skipped.** No staging host, database, credentials or provider test secrets exist in this environment; each blocked item is listed in §11 with its closing action.
 - **Two blocking findings (D1, D2) must be resolved by an owner decision** before staging work can complete, because the authorized migration boundary (0040) is incompatible with the merged application code and with the repository's own financial probes.
 - **CloudHost247 is not yet ready for formal acceptance** — it is ready for the **staging execution phase**, with all sandbox-verifiable evidence green and the staging run-sheet defined.
