@@ -202,9 +202,9 @@ const FOOTER_COLS = [
     ['/security#ssl', 'SSL Certificates'],
   ]],
   ['Cloud & Servers', [
-    ['/hosting/cloud', 'Public Cloud'], ['/hosting/cloud', 'Private Cloud'],
+    ['/hosting/cloud', 'Public Cloud'], ['/hosting/cloud#private-cloud', 'Private Cloud'],
     ['/server-management', 'Server Management'], ['/app-deployment', 'Application Deployment'],
-    ['/app-deployment', 'PaaS'], ['/operating-systems', 'Operating Systems'],
+    ['/app-deployment#paas', 'PaaS'], ['/operating-systems', 'Operating Systems'],
     ['/control-panels', 'Control Panels'],
   ]],
   ['Domains', [
@@ -615,6 +615,23 @@ pages.push({
         [I.key, 'Control', 'Manage instances through the dashboard or the platform API.'],
       ],
       product: 'cloud',
+      extraSections: `
+    <section class="section section--soft" id="private-cloud">
+      <div class="container">
+        <div class="split">
+          <div>
+            <span class="eyebrow">Private Cloud</span>
+            <h2>Dedicated, isolated cloud capacity</h2>
+            <p class="muted">For workloads that must not share hardware, we provision cloud capacity isolated to your account — dedicated compute and storage, dedicated networking, and the same API-driven control as our public cloud. Scope and pricing are confirmed per deployment rather than published as a generic package.</p>
+            <a class="btn btn--primary" href="/contact">Discuss a private deployment</a>
+          </div>
+          <div class="grid grid--2">
+            <div class="card"><div class="card-icon">${I.shield}</div><h3>Isolation</h3><p>Single-tenant capacity so noisy neighbours are never a factor.</p></div>
+            <div class="card"><div class="card-icon">${I.layers}</div><h3>Same control plane</h3><p>Dashboard and API management identical to public cloud.</p></div>
+          </div>
+        </div>
+      </div>
+    </section>`,
     }).body,
   }),
 });
@@ -1398,7 +1415,7 @@ pages.push({
         </div>
       </div>
     </section>
-    <section class="section section--soft">
+    <section class="section section--soft" id="paas">
       <div class="container">
         <div class="section-head"><span class="eyebrow">Platform capabilities</span><h2>What the pipeline gives you</h2></div>
         ${grid3([
@@ -1544,7 +1561,7 @@ pages.push({
       ],
       product: 'dedicated',
       extraSections: ctaBand({ title: 'Start an enterprise conversation', text: 'Describe your workload and constraints — an engineer, not a sales script, will reply.', label: 'Contact Support', href: '/contact' }),
-    }),
+    }).body,
   }),
 });
 
@@ -1568,7 +1585,7 @@ pages.push({
       ],
       product: 'vps',
       extraSections: ctaBand({ title: 'Spin up a game server', text: 'Choose a VPS configuration, install your game and invite your community.', label: 'Choose a Configuration', href: '/app/catalog?product=vps' }),
-    }),
+    }).body,
   }),
 });
 
