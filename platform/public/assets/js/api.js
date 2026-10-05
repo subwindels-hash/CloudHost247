@@ -139,6 +139,67 @@ export const catalogApi = {
   plans: (slug) => api(`/api/v1/catalog/products/${encodeURIComponent(slug)}/plans`, { auth: false }),
 };
 
+export const cartApi = {
+  /**
+   * The caller's open cart. Signed-in callers get their own cart; the server creates one on first
+   * request, so this is safe to call on page load.
+   */
+  get: () => api('/api/v1/cart'),
+  addItem: (planSlug, { billingCycle = 'monthly', quantity = 1, domain } = {}) => api('/api/v1/cart/items', {
+    method: 'POST',
+    body: { planSlug, billingCycle, quantity, ...(domain ? { domain } : {}) },
+  }),
+  /**
+   * PATCH answers `{ cart }` while GET/POST answer the cart itself (the ported original is
+   * inconsistent here); unwrap so callers always get a cart.
+   */
+  updateItem: async (id, quantity) => {
+    const res = await api(`/api/v1/cart/items/${encodeURIComponent(id)}`, { method: 'PATCH', body: { quantity } });
+    return res?.cart ?? res;
+  },
+  removeItem: (id) => api(`/api/v1/cart/items/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  /** Turns the cart into an order + invoice + ledger charge, atomically, server-side. */
+  checkout: () => api('/api/v1/orders', { method: 'POST', body: {} }),
+};
+
+export const billingApi = {
+  invoices: () => api('/api/v1/invoices'),
+  invoice: (id) => api(`/api/v1/invoices/${encodeURIComponent(id)}`),
+  ledger: () => api('/api/v1/billing/ledger'),
+  subscriptions: () => api('/api/v1/billing/subscriptions'),
+  cancelSubscription: (id) =>
+    api(`/api/v1/billing/subscriptions/${encodeURIComponent(id)}/cancel`, { method: 'POST', body: {} }),
+  /**
+   * Request a plan change. Accepts either the plan's id or its slug: the public catalog is keyed by
+   * slug and never publishes plan ids, so a customer client can only name a slug.
+   */
+  changePlan: (id, { planId, planSlug } = {}) =>
+    api(`/api/v1/billing/subscriptions/${encodeURIComponent(id)}/change-plan`, {
+      method: 'POST',
+      body: planId ? { planId } : { planSlug },
+    }),
+  paymentMethods: (invoiceId) =>
+    api(`/api/v1/billing/invoices/${encodeURIComponent(invoiceId)}/payment-methods`),
+  /**
+   * Starts a payment for an invoice. Uses POST /payments rather than the invoice-scoped route
+   * because only this one answers with the sandbox token (or the manual gateway's instructions)
+   * that the pay button needs. Real gateways are refused by the server with a named reason.
+   * The invoice-scoped equivalent, which returns the { payment } DTO, is startInvoicePayment.
+   */
+  startPayment: (invoiceId, gateway) =>
+    api('/api/v1/payments', { method: 'POST', body: { invoiceId, gateway } }),
+  startInvoicePayment: (invoiceId, gateway) =>
+    api(`/api/v1/invoices/${encodeURIComponent(invoiceId)}/payments`, { method: 'POST', body: { gateway } }),
+  payments: () => api('/api/v1/payments'),
+  payment: (id) => api(`/api/v1/payments/${encodeURIComponent(id)}`),
+  /**
+   * Sandbox only: completes the simulated provider flow through the genuine webhook receiver, so
+   * the invoice is settled by the same code path a real provider would drive.
+   */
+  completeSandboxPayment: (id) =>
+    api(`/api/v1/payments/${encodeURIComponent(id)}/sandbox/complete`, { method: 'POST', body: {} }),
+};
+
 export const accountApi = {
   profile: () => api('/api/v1/account/profile'),
   updateProfile: (patch) => api('/api/v1/account/profile', { method: 'PATCH', body: patch }),

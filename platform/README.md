@@ -103,6 +103,13 @@ Everything else is identical — the repositories expose the same API on both ba
 The SPA dev server proxies `/api` to the monolith; in production the monolith serves the built SPA
 and the same-origin API, so auth tokens work without CORS.
 
+The dashboard covers the customer purchase path end to end: catalog → cart → checkout → invoice →
+payment (manual instructions, or the sandbox gateway settling through the real webhook receiver),
+plus services, domains, subscriptions and the ledger. The SPA's API client is exercised unmodified
+by `tests/spa-commerce.test.js` against the real server; the React pages themselves are verified by
+the production build, and no browser has rendered them in this environment — that limit is recorded
+in `docs/UNFINISHED-BUILD-CODE-NAMES.md` rather than implied away.
+
 ## API surface (ported so far)
 
 - `GET /health`, `/ready`, `/api/v1/system/status`
@@ -121,7 +128,9 @@ and the same-origin API, so auth tokens work without CORS.
 ## Tests
 
 ```bash
-npm test
+npm test          # server + API-client integration tests (node:test)
+npm --prefix spa run build   # compiles every SPA page
+npm --prefix spa run smoke   # renders each SPA page once on the server (imports, hooks, initial state)
 ```
 
 The integration tests boot the real app on an ephemeral port and drive it over HTTP — no mocking of

@@ -12,7 +12,14 @@ const path = require('node:path');
 const { loadConfig } = require('../src/core/config');
 const { buildApp } = require('../src/app');
 
-async function startServer(overrides = {}) {
+/**
+ * @param {object} [options] config overrides, plus an optional `seed` hook.
+ *   `seed({ store, dir })` runs against the JSON store *before* the app is built, so fixtures are
+ *   on disk when the app first reads them. (A second store opened afterwards would write to disk
+ *   while the app's store keeps its own in-memory copy — seeding must happen first.)
+ */
+async function startServer(options = {}) {
+  const { seed, ...overrides } = options;
   const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ch247-test-'));
 
   const { config } = loadConfig({
@@ -25,6 +32,17 @@ async function startServer(overrides = {}) {
       ...overrides,
     },
   });
+
+  if (seed) {
+    const { JsonStore } = require('../src/store/json-store');
+    const seedStore = new JsonStore({ dir: dataDir, logger: { info() {}, warn() {}, error() {}, debug() {} } });
+    await seedStore.connect();
+    try {
+      await seed({ store: seedStore, dir: dataDir });
+    } finally {
+      await seedStore.close(); // flushes to disk before the app loads it
+    }
+  }
 
   const app = await buildApp(config);
   const server = http.createServer((req, res) => {

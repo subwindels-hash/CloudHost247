@@ -3,11 +3,12 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "CloudHost247 customer dashboard — React + Vite single-page application.",
+  "description": "CloudHost247 customer dashboard \u2014 React + Vite single-page application.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "smoke": "vite build --ssr ssr-smoke.jsx --outDir dist-ssr --logLevel error && node dist-ssr/ssr-smoke.js"
   },
   "dependencies": {
     "react": "^18.3.1",

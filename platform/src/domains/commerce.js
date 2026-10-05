@@ -84,7 +84,36 @@ async function resolvePlan(store, planSlug, billingCycle) {
   return { plan, pricing };
 }
 
-function publicCart(cart, items) {
+/**
+ * Resolves the catalog names behind cart item plan ids.
+ *
+ * The cart row stores only a plan id, which no public catalog endpoint exposes (the catalog is
+ * keyed by slug), so without this a cart UI can only render a UUID. Additive fields: the ids stay
+ * exactly where they were for the checkout path.
+ */
+async function planDetailsFor(store, items) {
+  const planIds = [...new Set(items.map((i) => i.plan_id).filter(Boolean))];
+  if (planIds.length === 0) return new Map();
+
+  const { rows: plans } = await store.table('catalog_product_plans').find({ id: { $in: planIds } });
+  const productIds = [...new Set(plans.map((p) => p.product_id).filter(Boolean))];
+  const { rows: products } = productIds.length
+    ? await store.table('catalog_products').find({ id: { $in: productIds } })
+    : { rows: [] };
+  const productById = new Map(products.map((p) => [String(p.id), p]));
+
+  const details = new Map();
+  for (const plan of plans) {
+    details.set(String(plan.id), {
+      planName: plan.name,
+      planSlug: plan.slug,
+      productName: productById.get(String(plan.product_id))?.name ?? null,
+    });
+  }
+  return details;
+}
+
+function publicCart(cart, items, details = new Map()) {
   const subtotal = round2(items.reduce((sum, i) => sum + i.unit_price * i.quantity + i.setup_fee, 0));
   return {
     id: cart.id,
@@ -93,6 +122,7 @@ function publicCart(cart, items) {
     items: items.map((i) => ({
       id: i.id,
       planId: i.plan_id,
+      ...(details.get(String(i.plan_id)) ?? {}),
       billingCycle: i.billing_cycle,
       quantity: i.quantity,
       unitPrice: i.unit_price,
@@ -119,7 +149,7 @@ function register(router, deps) {
     const cart = await getOrCreateCart(store, userId, sessionToken);
     const { rows } = await store.table('cart_items').find({ cart_id: cart.id });
     ctx.cookie('cart', cart.session_token ?? cart.id, { httpOnly: true });
-    ctx.json(publicCart(cart, rows));
+    ctx.json(publicCart(cart, rows, await planDetailsFor(store, rows)));
   });
 
   router.post('/api/v1/cart/items', async (ctx) => {
@@ -149,7 +179,7 @@ function register(router, deps) {
     });
 
     const { rows } = await store.table('cart_items').find({ cart_id: cart.id });
-    ctx.code(201).json(publicCart(cart, rows));
+    ctx.code(201).json(publicCart(cart, rows, await planDetailsFor(store, rows)));
     return;
   });
 
@@ -170,7 +200,7 @@ function register(router, deps) {
 
     await store.table('cart_items').updateById(item.id, { quantity });
     const { rows } = await store.table('cart_items').find({ cart_id: cart.id });
-    ctx.json({ cart: publicCart(cart, rows) });
+    ctx.json({ cart: publicCart(cart, rows, await planDetailsFor(store, rows)) });
   });
 
   router.delete('/api/v1/cart/items/:id', async (ctx) => {
