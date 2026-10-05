@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 48" role="img" aria-label="CloudHost247">
+  <!-- White variant for dark / navy infrastructure backgrounds. -->
+  <g>
+    <path d="M33.9 16.9A12.4 12.4 0 1 0 33.9 31.1" stroke="#7FD1FF" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+    <circle cx="34.2" cy="24" r="3.8" fill="#FFFFFF"/>
+  </g>
+  <text x="48" y="31" font-family="Inter, 'Segoe UI', system-ui, -apple-system, sans-serif" font-size="21" font-weight="700" fill="#FFFFFF" letter-spacing="-0.4">CloudHost<tspan fill="#7FD1FF">247</tspan></text>
+</svg>

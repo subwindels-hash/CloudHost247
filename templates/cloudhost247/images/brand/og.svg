@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="CloudHost247 — professional cloud hosting and digital infrastructure">
+  <!-- OpenGraph / social preview card (1200×630). Original CloudHost247 artwork:
+       navy infrastructure field with the orbital mark and network grid. -->
+  <defs>
+    <radialGradient id="glow" cx="72%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#16305E"/>
+      <stop offset="100%" stop-color="#0B1B33"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+  <!-- network grid -->
+  <g stroke="#1E3A6B" stroke-width="1" opacity="0.55">
+    <path d="M0 150H1200M0 315H1200M0 480H1200"/>
+    <path d="M200 0V630M600 0V630M1000 0V630"/>
+  </g>
+  <g fill="#4D8EF7" opacity="0.9">
+    <circle cx="200" cy="150" r="5"/><circle cx="600" cy="315" r="5"/><circle cx="1000" cy="480" r="5"/>
+    <circle cx="1000" cy="150" r="5"/><circle cx="200" cy="480" r="5"/>
+  </g>
+  <!-- mark -->
+  <g transform="translate(96,120) scale(2.4)">
+    <path d="M45.5 22.6A16.5 16.5 0 1 0 45.5 41.4" stroke="#4D8EF7" stroke-width="6" stroke-linecap="round" fill="none"/>
+    <circle cx="46" cy="32" r="5" fill="#7FD1FF"/>
+  </g>
+  <text x="96" y="380" font-family="Inter, 'Segoe UI', system-ui, sans-serif" font-size="72" font-weight="800" fill="#FFFFFF" letter-spacing="-1.5">CloudHost<tspan fill="#4D8EF7">247</tspan></text>
+  <text x="96" y="440" font-family="Inter, 'Segoe UI', system-ui, sans-serif" font-size="30" fill="#9FB6DC">Professional cloud hosting &amp; digital infrastructure</text>
+  <text x="96" y="540" font-family="Inter, 'Segoe UI', system-ui, sans-serif" font-size="22" fill="#6E87AD">Hosting · Domains · Cloud · Applications · Servers</text>
+</svg>
