@@ -8,7 +8,8 @@
 'use strict';
 
 const { v } = require('../core/validate');
-const { NotFoundError } = require('../core/errors');
+const { NotFoundError, ConflictError } = require('../core/errors');
+const { uuidv7 } = require('../lib/ids');
 const { authenticate, asAdmin, asStaff } = require('../lib/auth');
 
 const name = 'provisioning';
@@ -19,6 +20,16 @@ function publicJob(row) {
   return {
     id: row.id, kind: row.kind, resourceType: row.resource_type, resourceId: row.resource_id,
     status: row.status, error: row.error, createdAt: row.created_at, updatedAt: row.updated_at,
+  };
+}
+
+// Admin-facing job projection: everything the operator needs to triage a stuck build.
+function adminJob(row) {
+  return {
+    ...publicJob(row),
+    userId: row.user_id ?? null, serverId: row.server_id ?? null, serviceId: row.service_id ?? null,
+    type: row.type ?? null, attempts: row.attempts ?? 0, payload: row.payload ?? null,
+    result: row.result ?? null, startedAt: row.started_at ?? null, finishedAt: row.finished_at ?? null,
   };
 }
 
@@ -67,6 +78,60 @@ function register(router, deps) {
       }
     }
     ctx.json({ reconciled });
+  });
+
+  // ---- Original admin/provisioning-jobs surface (spec §infrastructure) -------------------------
+  async function audit(ctx, action, jobId) {
+    await store.table('audit_logs').insert({
+      id: uuidv7(), actor_id: ctx.user.id, actor_role: ctx.user.role, action,
+      entity_type: 'provisioning_job', entity_id: jobId ?? null,
+      ip_address: ctx.ip, user_agent: ctx.userAgent, after: null,
+    });
+  }
+
+  router.get('/api/v1/admin/provisioning-jobs', async (ctx) => {
+    await asAdmin(ctx, deps);
+    const query = await ctx.validateQuery(v.object({
+      status: v.string().max(32).optional(),
+      serverId: v.string().optional(),
+      limit: v.coerce.number().int().min(1).max(200).optional(),
+    }));
+    const where = {};
+    if (query.status) where.status = query.status;
+    if (query.serverId) where.server_id = query.serverId;
+    const { rows } = await store.table('provisioning_jobs').find(where, { orderBy: '-created_at', limit: query.limit ?? 100 });
+    ctx.json({ jobs: rows.map(adminJob) });
+  });
+
+  router.get('/api/v1/admin/provisioning-jobs/:id', async (ctx) => {
+    await asAdmin(ctx, deps);
+    const job = await store.table('provisioning_jobs').findById(ctx.params.id);
+    if (!job) throw new NotFoundError('Provisioning job not found');
+    // The thin job model here carries no separate deployment step/event rows; the arrays are
+    // returned for contract parity and stay empty until a deployment ledger is wired in.
+    ctx.json({ job: adminJob(job), steps: [], events: [] });
+  });
+
+  router.post('/api/v1/admin/provisioning-jobs/:id/retry', async (ctx) => {
+    const auth = await asAdmin(ctx, deps);
+    const job = await store.table('provisioning_jobs').findById(ctx.params.id);
+    if (!job) throw new NotFoundError('Provisioning job not found');
+    // Only a failed job can be retried (mirrors retryProvisioningJob's status='FAILED' guard).
+    if (job.status !== 'failed') throw new ConflictError('Only retryable failed jobs can be retried');
+    await store.table('provisioning_jobs').updateById(job.id, { status: 'queued', error: null, finished_at: null });
+    await audit(ctx, 'PROVISIONING_JOB_RETRIED', job.id);
+    ctx.json({ queued: true });
+  });
+
+  router.post('/api/v1/admin/provisioning-jobs/:id/cancel', async (ctx) => {
+    const auth = await asAdmin(ctx, deps);
+    const job = await store.table('provisioning_jobs').findById(ctx.params.id);
+    if (!job) throw new NotFoundError('Provisioning job not found');
+    // Only a queued job can be cancelled (mirrors cancelProvisioningJob's status='QUEUED' guard).
+    if (job.status !== 'queued') throw new ConflictError('Only queued jobs can be cancelled');
+    await store.table('provisioning_jobs').updateById(job.id, { status: 'cancelled', finished_at: new Date().toISOString() });
+    await audit(ctx, 'PROVISIONING_JOB_CANCELLED', job.id);
+    ctx.json({ cancelled: true });
   });
 }
 
