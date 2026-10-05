@@ -911,7 +911,14 @@ const TABLES = {
       id: pk(),
       user_id: uuid({ required: true }),
       application_id: uuid({ required: true }),
+      version_id: uuid({ nullable: true }),
       server_id: uuid({ nullable: true }),
+      name: text({ nullable: true }),
+      domain: text({ nullable: true }),
+      plan_id: uuid({ nullable: true }),
+      billing_period: text({ nullable: true }),
+      backup_enabled: bool({ default: false }),
+      order_id: uuid({ nullable: true }),
       status: text({ default: 'installing' }),
       url: text({ nullable: true }),
       created_at: ts(),
@@ -927,6 +934,11 @@ const TABLES = {
       id: pk(),
       user_id: uuid({ required: true }),
       installation_id: uuid({ nullable: true }),
+      server_id: uuid({ nullable: true }),
+      action: text({ nullable: true }),
+      idempotency_key: text({ nullable: true }),
+      requested_by: uuid({ nullable: true }),
+      payload: jsonb({ default: {} }),
       status: text({ default: 'queued' }),
       source: text({ nullable: true }),
       logs: jsonb({ default: [] }),
@@ -934,6 +946,44 @@ const TABLES = {
       updated_at: ts(),
     },
     indexes: [{ name: 'deployments_user_idx', columns: ['user_id'] }],
+  },
+
+  // Application installation sub-resources: encrypted environment, backups, attached domains.
+  // Environment values are WRITE-ONLY (encrypted, never returned); only keys are listed.
+  application_environment: {
+    columns: {
+      id: pk(),
+      installation_id: uuid({ required: true }),
+      key: text({ required: true }),
+      value_encrypted: text({ nullable: true }),
+      is_secret: bool({ default: true }),
+      created_at: ts(),
+      updated_at: ts(),
+    },
+    indexes: [{ name: 'app_env_installation_idx', columns: ['installation_id'] }],
+  },
+  application_backups: {
+    columns: {
+      id: pk(),
+      installation_id: uuid({ required: true }),
+      status: text({ default: 'pending' }),
+      size_bytes: int({ nullable: true }),
+      location: text({ nullable: true }),
+      completed_at: { type: 'timestamptz', nullable: true },
+      created_at: ts(),
+      updated_at: ts(),
+    },
+    indexes: [{ name: 'app_backups_installation_idx', columns: ['installation_id'] }],
+  },
+  application_domains: {
+    columns: {
+      id: pk(),
+      installation_id: uuid({ required: true }),
+      domain_id: uuid({ required: true }),
+      primary: bool({ default: false }),
+      created_at: ts(),
+    },
+    indexes: [{ name: 'app_domains_installation_idx', columns: ['installation_id'] }],
   },
 
   // -------------------------------------------------------------------------
