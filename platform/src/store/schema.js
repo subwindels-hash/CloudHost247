@@ -1045,6 +1045,155 @@ const TABLES = {
   },
 
   // -------------------------------------------------------------------------
+  // Domain brokerage workflow (spec §11): cases + offers, messages, events,
+  // payments, transfers, assignments and providers. Mirrors the Fastify schema.
+  // -------------------------------------------------------------------------
+  domain_broker_cases: {
+    columns: {
+      id: pk(),
+      brokerage_id: text({ required: true }),
+      user_id: uuid({ required: true }),
+      customer_name: text({ nullable: true }),
+      contact_information: text({ nullable: true }),
+      domain: text({ required: true }),
+      domain_status: text({ default: 'registered' }),
+      acquisition_route: text({ default: 'manual_broker_required' }),
+      max_budget: num({ nullable: true }),
+      currency: text({ default: 'USD' }),
+      opening_offer: num({ nullable: true }),
+      current_offer: num({ nullable: true }),
+      deadline_at: { type: 'timestamptz', nullable: true },
+      negotiation_instructions: text({ nullable: true }),
+      customer_message: text({ nullable: true }),
+      terms_accepted_at: { type: 'timestamptz', nullable: true },
+      idempotency_key: text({ nullable: true }),
+      status: text({ default: 'request_submitted' }),
+      payment_status: text({ nullable: true }),
+      transfer_status: text({ nullable: true }),
+      assigned_broker_id: uuid({ nullable: true }),
+      provider_id: uuid({ nullable: true }),
+      created_at: ts(),
+      updated_at: ts(),
+    },
+    indexes: [
+      { name: 'domain_broker_cases_user_idx', columns: ['user_id'] },
+      { name: 'domain_broker_cases_idem_uq', columns: ['user_id', 'idempotency_key'], unique: true },
+    ],
+  },
+  domain_broker_offers: {
+    columns: {
+      id: pk(),
+      case_id: uuid({ required: true }),
+      amount: num({ required: true }),
+      currency: text({ default: 'USD' }),
+      sender_type: text({ default: 'customer' }),
+      recipient_type: text({ default: 'customer' }),
+      status: text({ default: 'open' }),
+      expires_at: { type: 'timestamptz', nullable: true },
+      provider_reference: text({ nullable: true }),
+      created_at: ts(),
+    },
+    indexes: [{ name: 'domain_broker_offers_case_idx', columns: ['case_id'] }],
+  },
+  domain_broker_messages: {
+    columns: {
+      id: pk(),
+      case_id: uuid({ required: true }),
+      author_id: uuid({ nullable: true }),
+      visibility: text({ default: 'customer' }),
+      body: text({ required: true }),
+      created_at: ts(),
+    },
+    indexes: [{ name: 'domain_broker_messages_case_idx', columns: ['case_id'] }],
+  },
+  domain_broker_events: {
+    columns: {
+      id: pk(),
+      case_id: uuid({ required: true }),
+      actor_id: uuid({ nullable: true }),
+      event_type: text({ required: true }),
+      result: text({ nullable: true }),
+      metadata: jsonb(),
+      correlation_id: text({ nullable: true }),
+      created_at: ts(),
+    },
+    indexes: [{ name: 'domain_broker_events_case_idx', columns: ['case_id'] }],
+  },
+  domain_broker_documents: {
+    columns: {
+      id: pk(),
+      case_id: uuid({ required: true }),
+      name: text({ nullable: true }),
+      visibility: text({ default: 'customer' }),
+      created_at: ts(),
+    },
+  },
+  domain_broker_payments: {
+    columns: {
+      id: pk(),
+      case_id: uuid({ required: true }),
+      acquisition_amount: num({ default: 0 }),
+      brokerage_fee: num({ default: 0 }),
+      transfer_fee: num({ default: 0 }),
+      payment_fee: num({ default: 0 }),
+      total_amount: num({ default: 0 }),
+      currency: text({ default: 'USD' }),
+      status: text({ default: 'pending' }),
+      created_at: ts(),
+      updated_at: ts(),
+    },
+    indexes: [{ name: 'domain_broker_payments_case_uq', columns: ['case_id'], unique: true }],
+  },
+  domain_broker_transfers: {
+    columns: {
+      id: pk(),
+      case_id: uuid({ required: true }),
+      status: text({ default: 'not_started' }),
+      registrar: text({ nullable: true }),
+      provider_reference: text({ nullable: true }),
+      failure_reason: text({ nullable: true }),
+      initiated_at: { type: 'timestamptz', nullable: true },
+      completed_at: { type: 'timestamptz', nullable: true },
+      created_at: ts(),
+      updated_at: ts(),
+    },
+    indexes: [{ name: 'domain_broker_transfers_case_uq', columns: ['case_id'], unique: true }],
+  },
+  domain_broker_assignments: {
+    columns: {
+      id: pk(),
+      case_id: uuid({ required: true }),
+      broker_id: uuid({ required: true }),
+      assigned_by: uuid({ nullable: true }),
+      created_at: ts(),
+    },
+  },
+  domain_broker_providers: {
+    columns: {
+      id: pk(),
+      provider_key: text({ required: true }),
+      name: text({ required: true }),
+      provider_type: text({ default: 'manual' }),
+      status: text({ default: 'configured' }),
+      environment: text({ default: 'production' }),
+      capabilities: jsonb(),
+      last_health_check_at: { type: 'timestamptz', nullable: true },
+      last_error: text({ nullable: true }),
+      created_at: ts(),
+    },
+  },
+  domain_broker_audit_logs: {
+    columns: {
+      id: pk(),
+      case_id: uuid({ nullable: true }),
+      actor_id: uuid({ nullable: true }),
+      action: text({ required: true }),
+      metadata: jsonb(),
+      created_at: ts(),
+    },
+  },
+
+  // -------------------------------------------------------------------------
   // Cloudflare
   // -------------------------------------------------------------------------
   cloudflare_accounts: {

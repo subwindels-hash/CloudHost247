@@ -225,8 +225,19 @@ test('integration: ported domains over real HTTP', async (t) => {
 
   // ---- brokerage + ai support --------------------------------------------
   await t.test('brokerage case + ai-support conversation with canned reply', async () => {
-    const kase = await jsonFetch(base, { path: '/api/v1/brokerage', method: 'POST', body: { domainName: 'taken.com' } }, token);
+    const kase = await jsonFetch(base, {
+      path: '/api/v1/account/domain-brokerage/cases', method: 'POST',
+      body: { domain: 'taken.com', customerName: 'Test User', contactInformation: 'test@example.com', maxBudget: 5000, currency: 'usd', termsAccepted: true },
+    }, token);
     assert.strictEqual(kase.status, 201);
+    assert.match(kase.data.case.brokerageId, /^BRK-\d{4}-/);
+
+    // Opening offer above the confidential max budget is refused.
+    const badOffer = await jsonFetch(base, {
+      path: `/api/v1/account/domain-brokerage/cases/${kase.data.case.id}/offers`, method: 'POST',
+      body: { amount: 99999, currency: 'usd', recipientType: 'seller' },
+    }, token);
+    assert.strictEqual(badOffer.status, 400);
 
     const conv = await jsonFetch(base, { path: '/api/v1/ai-support/conversations', method: 'POST', body: { subject: 'Help' } }, token);
     assert.strictEqual(conv.status, 201);
@@ -275,12 +286,15 @@ test('integration: ported domains over real HTTP', async (t) => {
   await t.test('notifications list, mark read, read all', async () => {
     const cust = await app.store.table('users').findOne({ email: 'customer@example.com' });
     const { uuidv7 } = require('../src/lib/ids');
+
+    const before = await jsonFetch(base, { path: '/api/v1/notifications' }, token);
+    const baseline = before.data.unread;
     await app.store.table('notifications').insert({ id: uuidv7(), user_id: cust.id, title: 'Welcome', body: 'Hello' });
     await app.store.table('notifications').insert({ id: uuidv7(), user_id: cust.id, title: 'Invoice', body: 'Due soon' });
 
     const list = await jsonFetch(base, { path: '/api/v1/notifications' }, token);
     assert.strictEqual(list.status, 200);
-    assert.strictEqual(list.data.unread, 2);
+    assert.strictEqual(list.data.unread, baseline + 2);
 
     const one = await jsonFetch(base, { path: `/api/v1/notifications/${list.data.notifications[0].id}/read`, method: 'POST', body: {} }, token);
     assert.strictEqual(one.status, 200);
