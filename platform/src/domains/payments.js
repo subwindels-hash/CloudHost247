@@ -12,7 +12,7 @@
 
 const crypto = require('node:crypto');
 const { v } = require('../core/validate');
-const { NotFoundError, ValidationError, ForbiddenError } = require('../core/errors');
+const { NotFoundError, ValidationError, UnauthorizedError } = require('../core/errors');
 const { uuidv7 } = require('../lib/ids');
 const { authenticate, asAdmin } = require('../lib/auth');
 const { applySuccessfulPayment } = require('../lib/billing-apply');
@@ -173,7 +173,8 @@ async function handleProviderWebhook(store, config, provider, rawBody, signature
 
   if (!valid) {
     await store.table('webhook_events').updateById(record.id, { status: 'failed', error: 'bad signature' });
-    throw new ForbiddenError('Webhook signature verification failed');
+    // Matches the original webhook-service contract: an unverifiable signature is a 401.
+    throw new UnauthorizedError('Invalid or unverified webhook signature');
   }
 
   let applied = false;
