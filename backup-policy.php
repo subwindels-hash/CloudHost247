@@ -1,33 +1,15 @@
 <?php
 /**
- * WHMCS Client Area Backup Policy Page
+ * CloudHost247 — professional standalone page.
  *
- * @package    WHMCS
- * @author     CloudHost247
- * @copyright  Copyright (c) CloudHost247 Isc., All Rights Reserved
- * @link       https://www.cloudhost247.com
+ * Shares the platform design system and shows only content that actually
+ * exists: either authored policy text preserved from the previous site, or
+ * live data pulled from the CloudHost247 platform API.
  */
 
-define('CLIENTAREA', true);
-require __DIR__ . '/init.php';
+declare(strict_types=1);
 
-use WHMCS\ClientArea;
-use WHMCS\Authentication\CurrentUser;
-
-$ca = new ClientArea();
-$ca->setPageTitle('Backup Policy');
-$ca->addToBreadCrumb('index.php', Lang::trans('globalsystemname'));
-$ca->addToBreadCrumb('backup-policy.php', 'Backup Policy');
-$ca->initPage();
-
-/**
- * ================================================================
- * BACKUP POLICY DATA
- * ================================================================
- * Professional backup policy content covering provider and user
- * responsibilities, schedules, retention, and liability.
- * ================================================================
- */
+require_once __DIR__ . '/php/bootstrap.php';
 
 $backupSections = [
     'hero' => [
@@ -122,6 +104,10 @@ $backupSections = [
     ]
 ];
 
-$ca->assign('backupData', $backupSections);
-$ca->setTemplate('backuppolicy');
-$ca->output();
+echo ch247_page([
+    'title' => "Backup Policy — Data Protection Practices | CloudHost247",
+    'description' => "How CloudHost247 approaches backups: provider responsibilities, customer responsibilities, schedules, retention and restore scope.",
+    'canonical' => 'backup-policy.php',
+    'active' => 'company',
+    'crumbs' => [['index.php', 'Home'], [null, "Backup Policy"]],
+], '<section class="section"><div class="container"><div class="card" style="padding:28px">' . ch247_policy_doc($backupSections) . '</div></div></section>');

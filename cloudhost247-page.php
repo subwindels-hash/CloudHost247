@@ -1,19 +1,23 @@
 <?php
-use WHMCS\ClientArea;
+/**
+ * Legacy theme-CMS front controller. The theme content store it rendered was
+ * part of the retired WHMCS layer, so this route now answers a clean 404 and
+ * points visitors at the live site instead of a blank page.
+ */
 
-define('CLIENTAREA', true);
-require __DIR__ . '/init.php';
-require_once __DIR__ . '/modules/addons/cloudhost247_core/bootstrap.php';
-require_once __DIR__ . '/modules/addons/cloudhost247_theme/lib/ThemeRepository.php';
+declare(strict_types=1);
 
-$ca = new ClientArea();
-$ca->setPageTitle('CloudHost247');
-$ca->initPage();
-$slug = isset($_GET['slug']) ? (string) $_GET['slug'] : '';
-try { $page = (new \CloudHost247\Theme\ThemeRepository())->findPublishedPage($slug); }
-catch (\Throwable $e) { $page = null; }
-if (!$page) { http_response_code(404); $ca->setPageTitle('Page not found'); $page = array('title' => 'Page not found', 'summary' => '', 'body' => '<p>The requested page is unavailable.</p>'); }
-$ca->setPageTitle($page['seo_title'] ?: $page['title']);
-$ca->assign('cloudhost247Page', $page);
-$ca->setTemplate('cloudhost247-page');
-$ca->output();
+require_once __DIR__ . '/php/bootstrap.php';
+
+http_response_code(404);
+echo ch247_page([
+    'title' => 'Page Not Found | CloudHost247',
+    'description' => 'The page you requested is no longer available.',
+    'canonical' => 'notfound.php',
+    'noindex' => true,
+    'active' => '',
+    'crumbs' => [['index.php', 'Home'], [null, 'Not Found']],
+], ch247_page_head([['index.php', 'Home'], [null, 'Not Found']], 'Page not found', 'This page was part of an older version of our site and is no longer published.')
+    . '<section class="section"><div class="container">'
+    . ch247_notice('Looking for something specific? Try the <a href="index.php">homepage</a>, browse <a href="offers.php">current offers</a>, or visit the <a href="help-center.php">Help Center</a>.')
+    . '</div></section>');

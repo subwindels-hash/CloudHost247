@@ -1,44 +1,23 @@
 <?php
 /**
- * XML sitemap for Website Builder pages.
+ * Website Builder sitemap.
  *
- * Lists only pages a search engine may legitimately index (public, live, not noindex,
- * not canonicalised elsewhere) -- see SitemapService. It is served only while the builder
- * addon is active; otherwise it is a 404, matching builder-page.php. The existing
- * cloudhost247-sitemap.php (Theme CMS pages) is unchanged; submit both to search engines.
+ * The builder runs on the retired WHMCS layer. This entry point checks that
+ * the layer is actually present and answers a clean 404 when it is not, so
+ * the URL never fatals on a plain web server. When the layer IS present the
+ * original, unchanged builder logic runs from legacy-builder-sitemap-router.php.
  */
 
-use CloudHost247\Builder\Services\SitemapService;
-use WHMCS\Database\Capsule;
+declare(strict_types=1);
 
-require __DIR__ . '/init.php';
-
+$init = __DIR__ . '/init.php';
 $moduleDirectory = __DIR__ . '/modules/addons/cloudhost247_builder';
-$active = false;
-if (is_file($moduleDirectory . '/bootstrap.php')) {
-    try {
-        $active = (bool) Capsule::table('tbladdonmodules')->where('module', 'cloudhost247_builder')->exists();
-    } catch (\Throwable $unavailable) {
-        $active = false;
-    }
-}
-if (!$active) {
+
+if (!is_file($init) || !is_file($moduleDirectory . '/bootstrap.php')) {
     http_response_code(404);
-    exit;
-}
-require_once $moduleDirectory . '/bootstrap.php';
-
-try {
-    $systemUrl = (string) Capsule::table('tblconfiguration')->where('setting', 'SystemURL')->value('value');
-    if (!preg_match('#^https?://#i', $systemUrl)) { throw new \RuntimeException('SystemURL is not configured.'); }
-    $xml = (new SitemapService())->xml($systemUrl);
-} catch (\Throwable $failure) {
-    http_response_code(503);
-    header('Retry-After: 300');
-    exit;
+    header('Content-Type: text/plain; charset=UTF-8');
+    exit('Not found');
 }
 
-header('Content-Type: application/xml; charset=UTF-8');
-header('Cache-Control: public, max-age=900');
-header('X-Robots-Tag: noindex');
-echo $xml;
+require_once $init;
+require __DIR__ . '/legacy-builder-sitemap-router.php';

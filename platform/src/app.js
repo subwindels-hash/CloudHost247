@@ -32,6 +32,9 @@ const API_PREFIX = '/api/v1';
 const DOMAINS = [
   // Core
   require('./domains/health'),
+  require('./domains/site'),
+  require('./domains/content'),
+  require('./domains/marketplace'),
   require('./domains/auth'),
   require('./domains/passkeys'),
   require('./domains/account'),

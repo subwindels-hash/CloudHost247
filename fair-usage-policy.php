@@ -1,24 +1,23 @@
 <?php
+/**
+ * CloudHost247 — professional standalone page.
+ *
+ * Shares the platform design system and shows only content that actually
+ * exists: either authored policy text preserved from the previous site, or
+ * live data pulled from the CloudHost247 platform API.
+ */
 
 declare(strict_types=1);
 
-use WHMCS\ClientArea;
-use WHMCS\User\Client;
+require_once __DIR__ . '/php/bootstrap.php';
 
-define('CLIENTAREA', true);
+$prose = "<section class=\"policy-content\">\n    <div class=\"container\">\n        <h3>Introduction</h3>\n        <p>The use of CloudHost247 Isc. products and services is governed by this Fair Usage Policy. It applies to all hosting plans, including shared hosting, reseller hosting, and WordPress hosting, whether they are advertised with limited or \"unlimited\" resources such as disk space, bandwidth/data transfer, email accounts, databases, and related server resources across Nigeria and globally.</p>\n        <p>Our hosting services are designed to remain affordable by allowing multiple customers to share the same server infrastructure. To maintain performance and reliability for all users, each customer must ensure that their usage does not negatively impact other users on the same server.</p>\n        <h3>Acceptable Use of Resources</h3>\n        <p>All hosting plans are subject to reasonable usage limits. Customers may use allocated resources for legitimate website operations, provided such use remains within normal fair usage standards and complies with our Acceptable Use Policy.</p>\n        <p>Excessive usage of resources such as CPU, RAM, disk I/O, inodes, bandwidth, or email storage that impacts server performance or other customers may result in a warning or requirement to upgrade to a higher plan or a dedicated/cloud hosting solution.</p>\n        <h3>Prohibited Activities</h3>\n        <p>The following activities are not permitted under this policy:</p>\n        <ul>\n            <li>Using hosting services primarily as a file storage platform (e.g., Google Drive, Dropbox, OneDrive equivalents)</li>\n            <li>Large-scale file archiving unrelated to website functionality</li>\n            <li>Video or audio streaming services (e.g., YouTube-like platforms)</li>\n        </ul>\n        <p>Customers are encouraged to use third-party storage services for such purposes and embed or link content on their websites where appropriate. Files uploaded to CloudHost247 Isc. hosting must be directly related to and actively used by the website.</p>\n        <h3>Resource Monitoring and Enforcement</h3>\n        <p>If a website consumes excessive server resources due to poor optimization, security issues, or unusual traffic, the account owner will be notified once usage approaches or exceeds fair usage thresholds.</p>\n        <p>Customers will be given a reasonable opportunity to resolve the issue, optimize their website, or upgrade their plan. Continued excessive usage that affects server stability or other users may require immediate migration to a virtual or cloud server.</p>\n        <p>In cases where system stability or security is at risk, CloudHost247 Isc. reserves the right to temporarily suspend an account without prior notice.</p>\n        <h3>Shared Infrastructure Notice</h3>\n        <p>Shared, reseller, and WordPress hosting customers operate on a shared infrastructure where server resources are distributed among multiple users. To ensure consistent performance, any account that negatively impacts server or network stability must either resolve the issue or upgrade to a more suitable hosting environment.</p>\n        <p>This transition is considered a positive step, as it typically indicates growth in website traffic and resource needs, and allows for greater performance, flexibility, and control.</p>\n        <h3>Policy Updates</h3>\n        <p>CloudHost247 Isc. reserves the right to modify or update this Fair Usage Policy at any time. Where significant changes occur, customers will be notified via email or through the client dashboard before the changes take effect.</p>\n        <p>For clarity, the terms \"bandwidth\" and \"data transfer\" are used interchangeably within this policy.</p>\n    </div>\n</section>";
 
-require __DIR__ . '/init.php';
-
-$ca = new ClientArea();
-
-$ca->setPageTitle('Fair Usage Policy');
-$ca->addToBreadCrumb('index.php', Lang::trans('globalsystemname'));
-$ca->addToBreadCrumb('fair-usage-policy.php', 'Fair Usage Policy');
-
-$ca->initPage();
-
-$ca->assign('templatefile', 'fairusagepolicy');
-
-$ca->setTemplate('fairusagepolicy');
-
-$ca->output();
+echo ch247_page([
+    'title' => "Fair Usage Policy | CloudHost247",
+    'description' => "The fair usage policy that keeps shared resources fast and reliable for every CloudHost247 customer.",
+    'canonical' => 'fair-usage-policy.php',
+    'active' => 'company',
+    'crumbs' => [['index.php', 'Home'], ['legal.php', 'Legal'], [null, "Fair Usage Policy"]],
+], ch247_page_head([['index.php', 'Home'], ['legal.php', 'Legal'], [null, "Fair Usage Policy"]], "Fair Usage Policy", "The rules that keep shared infrastructure fast and fair for everyone.")
+    . '<section class="section"><div class="container"><div class="card" style="padding:28px">' . ch247_prose($prose) . '</div></div></section>');

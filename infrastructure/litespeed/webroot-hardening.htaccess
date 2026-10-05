@@ -1,0 +1,47 @@
+# ---------------------------------------------------------------------------
+# CloudHost247 — web root hardening for Apache/LiteSpeed (cPanel)
+#
+# USE CASE 1 (stopgap — repo uploaded as the docroot, e.g. rent.windelsai.com):
+#   Copy THIS file to the web root AS `.htaccess`. It disables directory
+#   browsing and blocks source/config directories from being served.
+#
+# USE CASE 2 (recommended end state):
+#   Point the domain's document root at platform/public/ (static site) or at
+#   the Passenger-managed Node app, and DELETE the raw repository checkout
+#   from any web-accessible path. This file then goes into that docroot.
+#
+# LiteSpeed honors Apache-style .htaccess (Options, IndexIgnore, Rewrite).
+# ---------------------------------------------------------------------------
+
+# 1) Never show directory listings.
+Options -Indexes
+IndexIgnore *
+
+# 2) Block dotfiles (.env, .git, .gitignore, ...) — LiteSpeed already denies
+#    these by default, this is belt-and-suspenders.
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+# 3) Never serve repository internals from the docroot.
+#    (Docs, tests, scripts, manifests, server-agent, recovery, templates,
+#     language overrides and the Node/PHP source trees are not web content.)
+RedirectMatch 404 ^/(docs|tests|scripts|recovery|server-agent|infrastructure|crons|lang|modules|cloudhost247-node|platform/(src|tests|scripts|manifests|spa/src|mobile))(/|$)
+
+# 4) Deny common non-web artifacts outright.
+<FilesMatch "\.(md|sql|sh|py|ts|tsx|cjs|mjs|lock|log|env)$">
+    Require all denied
+</FilesMatch>
+<FilesMatch "^(package(-lock)?\.json|tsconfig\.json|composer\.(json|lock))$">
+    Require all denied
+</FilesMatch>
+
+# 5) If the raw repo stays the docroot, serve the static platform/public site
+#    for the homepage instead of an index error. Remove these lines when you
+#    repoint the document root properly.
+RewriteEngine On
+RewriteRule ^$ platform/public/index.html [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{DOCUMENT_ROOT}/platform/public%{REQUEST_URI} -f
+RewriteRule ^ platform/public%{REQUEST_URI} [L]

@@ -1,17 +1,25 @@
 <?php
 /**
- * Tables — public route.
- *
- * Renders the published "tables" entry from the independent theme content store
- * (Theme Manager). When the entry names a WHMCS product group, the page also
- * lists that group's products through the page builder's bounded read-only
- * catalogue reader. It no longer hands the page to the vendor legacy theme shell
- * or reads the vendor content tables, so the route works without the encoded
- * theme-helper addon. Until an entry is published the page answers 404 with a
- * plain explanation instead of a placeholder.
+ * Legacy URL kept alive as a permanent redirect so bookmarks and search
+ * results land somewhere professional instead of a dead page.
+ * Design sample page.
  */
-define('CLIENTAREA', true);
-require __DIR__ . '/init.php';
-require_once __DIR__ . '/modules/addons/cloudhost247_theme/lib/PublicPage.php';
 
-\CloudHost247\Theme\PublicPage::route(new \WHMCS\ClientArea(), 'tables', 'Tables');
+declare(strict_types=1);
+
+header('Location: offers.php', true, 301);
+header('Cache-Control: public, max-age=86400');
+?>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Redirecting… | CloudHost247</title>
+  <meta http-equiv="refresh" content="0; url=offers.php">
+  <meta name="robots" content="noindex">
+</head>
+<body style="font-family:system-ui,sans-serif;display:grid;place-items:center;min-height:60vh;margin:0">
+  <p>You are being redirected to <a href="offers.php">offers.php</a>.</p>
+</body>
+</html>

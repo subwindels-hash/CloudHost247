@@ -231,6 +231,14 @@ function staticMiddleware(options) {
 
     if (serveFile(ctx, absolute, options)) return true;
 
+    // Clean URLs: an extensionless path may name a page file (`/hosting` -> `/hosting.html`).
+    // Only for static roots that are not SPA shells, and only for paths without a trailing
+    // slash component that already resolved to nothing above. The candidate stays inside the
+    // already-validated directory because it is the same path plus a literal suffix.
+    if (!options.spaFallback && !path.extname(urlPath) && !urlPath.endsWith('/')) {
+      if (serveFile(ctx, `${absolute}.html`, options)) return true;
+    }
+
     // SPA fallback: any unmatched GET gets the app shell so client-side routes work on refresh.
     if (options.spaFallback && !path.extname(urlPath)) {
       const shell = path.join(root, 'index.html');

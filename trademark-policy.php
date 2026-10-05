@@ -1,34 +1,15 @@
 <?php
 /**
- * WHMCS Client Area Trademark & Copyright Infringement Policy Page
+ * CloudHost247 — professional standalone page.
  *
- * @package    WHMCS
- * @author     CloudHost247
- * @copyright  Copyright (c) CloudHost247 Isc., All Rights Reserved
- * @link       https://www.cloudhost247.com
+ * Shares the platform design system and shows only content that actually
+ * exists: either authored policy text preserved from the previous site, or
+ * live data pulled from the CloudHost247 platform API.
  */
 
-define('CLIENTAREA', true);
-require __DIR__ . '/init.php';
+declare(strict_types=1);
 
-use WHMCS\ClientArea;
-use WHMCS\Authentication\CurrentUser;
-
-$ca = new ClientArea();
-$ca->setPageTitle('Trademark & Copyright Infringement Policy');
-$ca->addToBreadCrumb('index.php', Lang::trans('globalsystemname'));
-$ca->addToBreadCrumb('trademark-policy.php', 'Trademark & Copyright Infringement Policy');
-$ca->initPage();
-
-/**
- * ================================================================
- * TRADEMARK & COPYRIGHT INFRINGEMENT POLICY DATA
- * ================================================================
- * Professional intellectual property policy covering trademark
- * claims, DMCA-style copyright complaints, counter-notifications,
- * repeat infringer actions, and provider liability limitations.
- * ================================================================
- */
+require_once __DIR__ . '/php/bootstrap.php';
 
 $trademarkSections = [
     'hero' => [
@@ -150,6 +131,10 @@ $trademarkSections = [
     ]
 ];
 
-$ca->assign('trademarkData', $trademarkSections);
-$ca->setTemplate('trademarkpolicy');
-$ca->output();
+echo ch247_page([
+    'title' => "Trademark & Copyright Policy | CloudHost247",
+    'description' => "How CloudHost247 reviews and responds to trademark and copyright infringement claims, and how rights holders can report concerns.",
+    'canonical' => 'trademark-policy.php',
+    'active' => 'company',
+    'crumbs' => [['index.php', 'Home'], [null, "Trademark & Copyright Policy"]],
+], '<section class="section"><div class="container"><div class="card" style="padding:28px">' . ch247_policy_doc($trademarkSections) . '</div></div></section>');

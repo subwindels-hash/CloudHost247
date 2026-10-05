@@ -614,6 +614,82 @@ const TABLES = {
     },
   },
 
+  // Knowledgebase / blog articles. Admin-managed content for the public site:
+  // nothing is published until a staff member writes and publishes it.
+  site_articles: {
+    columns: {
+      id: pk(),
+      kind: text({ default: 'kb' }), // 'kb' | 'blog'
+      slug: text({ required: true }),
+      title: text({ required: true }),
+      category: text({ default: 'general' }),
+      author: text({ default: 'CloudHost247 Team' }),
+      summary: text({ nullable: true }),
+      body: text({ required: true }), // markdown-lite: paragraphs, `##` headings, - lists
+      status: text({ default: 'draft' }), // draft | published
+      search_keywords: text({ nullable: true }),
+      published_at: ts({ nullable: true }),
+      created_at: ts(),
+      updated_at: ts(),
+    },
+    indexes: [{ name: 'site_articles_slug_idx', columns: ['slug'], unique: true }],
+  },
+
+  // Application marketplace catalog. Seeded from the REAL deployment manifests
+  // in cloudhost247-node/manifests/ (docs/PHASE_6_MARKETPLACE_DEPLOYMENTS.md:
+  // "The catalog lives in the database — no application is ever installed by a
+  // name hardcoded in code"). Only listed apps are ever advertised publicly.
+  marketplace_applications: {
+    columns: {
+      id: pk(),
+      slug: text({ required: true }),
+      name: text({ required: true }),
+      category: text({ default: 'general' }),
+      summary: text({ nullable: true }),
+      featured: bool({ default: false }),
+      hosting_types: jsonb({ nullable: true }), // e.g. ["docker","vps","dedicated","cpanel"]
+      status: text({ default: 'active' }), // active | hidden
+      created_at: ts(),
+      updated_at: ts(),
+    },
+    indexes: [{ name: 'marketplace_applications_slug_idx', columns: ['slug'], unique: true }],
+  },
+
+  // Control panels actually offered. Operator-configured: nothing is listed
+  // until a panel is genuinely provisioned (spec: never claim unsupported panels).
+  control_panels: {
+    columns: {
+      id: pk(),
+      slug: text({ required: true }),
+      name: text({ required: true }),
+      summary: text({ nullable: true }),
+      services: jsonb({ nullable: true }), // product slugs the panel ships with
+      status: text({ default: 'active' }),
+      created_at: ts(),
+      updated_at: ts(),
+    },
+    indexes: [{ name: 'control_panels_slug_idx', columns: ['slug'], unique: true }],
+  },
+
+  // Operating-system catalog exposed to customers. Mirrors the provisioning
+  // chain (docs/SERVER_PROVISIONING.md): only ENABLED versions publish; draft
+  // or unverified images never appear publicly.
+  operating_systems: {
+    columns: {
+      id: pk(),
+      slug: text({ required: true }),
+      family: text({ required: true }), // linux | windows | specialized
+      name: text({ required: true }),
+      version: text({ nullable: true }),
+      architectures: jsonb({ nullable: true }), // ["x86_64","arm64"]
+      products: jsonb({ nullable: true }), // product slugs that can deploy it
+      status: text({ default: 'draft' }), // draft | enabled
+      created_at: ts(),
+      updated_at: ts(),
+    },
+    indexes: [{ name: 'operating_systems_slug_idx', columns: ['slug'], unique: true }],
+  },
+
   server_metrics: {
     columns: {
       id: pk(),

@@ -1,91 +1,43 @@
 <?php
 /**
- * CloudHost247 - public email hosting page.
- *
- * A real WHMCS client-area page: every plan, price and availability flag comes
- * from live WHMCS product records belonging to the CloudHost247 Email Hosting
- * provisioning module, in the visitor's active currency, and every "Get started" button
- * links into the normal WHMCS configure/checkout flow.
- *
- * No provider API is called while this page renders.
- *
- * @package    WHMCS
- * @subpackage CloudHost247 Email Hosting
+ * CloudHost247 — Business Email. Plans and pricing are live from the catalog.
  */
 
-use CloudHost247\Email\Repository\ContentRepository;
-use CloudHost247\Email\Service\PublicCatalog;
-use WHMCS\ClientArea;
+declare(strict_types=1);
 
-define('CLIENTAREA', true);
+require_once __DIR__ . '/php/bootstrap.php';
 
-require __DIR__ . '/init.php';
-require_once __DIR__ . '/modules/servers/cloudhost247_email_hosting/bootstrap.php';
+$content = ch247_page_head(
+    [['index.php', 'Home'], [null, 'Business Email']],
+    'Business Email',
+    'Professional mailboxes on your own domain — webmail, mobile access and anti-spam protection.'
+) . '
+    <section class="section">
+      <div class="container">
+        <div class="section-head"><span class="eyebrow">Plans</span><h2>Email that looks like your business</h2></div>
+        <p class="muted" style="max-width:760px">Your name, your domain, your email. Business email plans appear below as soon as they are published in the catalog — and many of our web hosting plans already include email accounts, so check what you get with hosting first.</p>
+        <div class="mt-2">' . ch247_plan_cards('business-email', 'Standalone business email plans have not been published yet. Email accounts are included with our Web Hosting plans — or contact us and we will set up mailboxes for your domain.') . '</div>
+      </div>
+    </section>
+    <section class="section section--soft">
+      <div class="container">
+        <div class="section-head"><span class="eyebrow">Included</span><h2>Professional mail, properly run</h2></div>
+        ' . ch247_feature_grid([
+            ['Your domain', 'Mailboxes at you@yourcompany — the professional standard.'],
+            ['Webmail & clients', 'Work from the browser or connect Outlook, Thunderbird and mobile.'],
+            ['Spam & virus filtering', 'Filtering on inbound mail to keep inboxes clean.'],
+            ['Forwarders & aliases', 'Route mail to the right person or team.'],
+            ['DNS handled', 'SPF/DKIM records configured for deliverability.'],
+            ['Restore options', 'Recover deleted messages where backups cover them.'],
+        ]) . '
+      </div>
+    </section>
+' . ch247_cta_band('Get your business mailbox', 'Choose a plan or add mailboxes alongside your hosting — all managed from one client area.', 'Choose a Plan', CH247_APP_BASE . '/app/catalog?product=business-email');
 
-$ca = new ClientArea();
-$ca->setPageTitle('CloudHost247 Email Hosting');
-$ca->addToBreadCrumb('index.php', Lang::trans('globalsystemname'));
-$ca->addToBreadCrumb('email-hosting.php', 'Email Hosting');
-$ca->initPage();
-
-$currencyId = 0;
-
-if (!empty($_SESSION['uid'])) {
-    try {
-        $clientCurrency = (int) WHMCS\Database\Capsule::table('tblclients')
-            ->where('id', (int) $_SESSION['uid'])
-            ->value('currency');
-
-        $currencyId = $clientCurrency > 0 ? $clientCurrency : 0;
-    } catch (\Throwable $e) {
-        $currencyId = 0;
-    }
-}
-
-if ($currencyId === 0 && !empty($_SESSION['currency'])) {
-    $currencyId = (int) $_SESSION['currency'];
-}
-
-$catalogError = '';
-$providers = [];
-$comparison = [];
-$currency = ['id' => 0, 'code' => ''];
-$totalPlans = 0;
-
-try {
-    $catalog = new PublicCatalog();
-    $currency = $catalog->currency($currencyId);
-    $providers = $catalog->byProvider($currency['id']);
-    $comparison = $catalog->comparison($currency['id']);
-
-    foreach ($providers as $group) {
-        $totalPlans += count($group['plans']);
-    }
-} catch (\Throwable $e) {
-    // Never leak an exception to a public page.
-    $reference = \CloudHost247\Email\Support\Logger::correlationId();
-
-    try {
-        \CloudHost247\Email\Support\Logger::error('public_page.catalog_failed', ['error' => $e->getMessage()]);
-    } catch (\Throwable $logFailure) {
-        error_log('[CloudHost247 Email Hosting] public page catalog failure: ' . $e->getMessage());
-    }
-
-    $catalogError = 'Plan information is temporarily unavailable. Reference: ' . $reference;
-}
-
-$content = ContentRepository::all();
-
-$ca->assign('emailHero', $content['hero']);
-$ca->assign('emailProviderContent', $content['providers']);
-$ca->assign('emailDnsContent', $content['dns']);
-$ca->assign('emailFaqs', $content['faqs']);
-$ca->assign('emailProviders', $providers);
-$ca->assign('emailComparison', $comparison);
-$ca->assign('emailCurrency', $currency['code']);
-$ca->assign('emailPlanCount', $totalPlans);
-$ca->assign('emailCatalogError', $catalogError);
-$ca->assign('sidebarCloudHost247Remove', 'true');
-
-$ca->setTemplate('cloudhost247-email-hosting');
-$ca->output();
+echo ch247_page([
+    'title' => 'Business Email — Professional Mailboxes | CloudHost247',
+    'description' => 'Business email on your own domain with webmail, mobile access and spam filtering. Plans load live from the CloudHost247 catalog.',
+    'canonical' => 'email-hosting.php',
+    'active' => 'business',
+    'crumbs' => [['index.php', 'Home'], [null, 'Business Email']],
+], $content);

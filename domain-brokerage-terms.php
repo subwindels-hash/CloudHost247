@@ -1,25 +1,17 @@
 <?php
 /**
- * CloudHost247 Domain Brokerage Terms.
+ * CloudHost247 — professional standalone page.
  *
- * Served through the standard WHMCS ClientArea page architecture, exactly
- * like refund-policy.php / terms-of-service.php: no standalone template
- * includes, the content lives in this file's data array and is rendered by
- * templates/<active theme>/domainbrokerageterms.tpl.
+ * Shares the platform design system and shows only content that actually
+ * exists: either authored policy text preserved from the previous site, or
+ * live data pulled from the CloudHost247 platform API.
  */
 
-define('CLIENTAREA', true);
-require __DIR__ . '/init.php';
+declare(strict_types=1);
 
-use WHMCS\ClientArea;
+require_once __DIR__ . '/php/bootstrap.php';
 
-$ca = new ClientArea();
-$ca->setPageTitle('Domain Brokerage Terms');
-$ca->addToBreadCrumb('index.php', Lang::trans('globalsystemname'));
-$ca->addToBreadCrumb('domain-brokerage-terms.php', 'Domain Brokerage Terms');
-$ca->initPage();
-
-$terms = array(
+$brokerageTerms = array(
     'hero' => array(
         'title' => 'Domain Brokerage Terms',
         'subtitle' => 'Domain acquisition and brokerage service — CloudHost247',
@@ -109,6 +101,10 @@ $terms = array(
     ),
 );
 
-$ca->assign('brokerageTerms', $terms);
-$ca->setTemplate('domainbrokerageterms');
-$ca->output();
+echo ch247_page([
+    'title' => "Domain Brokerage Service Terms | CloudHost247",
+    'description' => "The terms under which CloudHost247 negotiates the acquisition of already-registered domains on your behalf.",
+    'canonical' => 'domain-brokerage-terms.php',
+    'active' => 'domains',
+    'crumbs' => [['index.php', 'Home'], [null, "Domain Brokerage Terms"]],
+], '<section class="section"><div class="container"><div class="card" style="padding:28px">' . ch247_policy_doc($brokerageTerms) . '</div></div></section>');

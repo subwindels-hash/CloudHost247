@@ -1,20 +1,21 @@
 /* CloudHost247 dashboard — React SPA styles. Mirrors the public site palette. */
 
 :root {
-  --navy: #071b3d;
-  --blue: #1573ef;
-  --blue-dark: #0756d8;
-  --green: #12b886;
-  --ink: #16233a;
+  /* Aligned with the public-site design system (public/assets/css/site.css). */
+  --navy: #0a1c3f;
+  --blue: #1a5fd0;
+  --blue-dark: #134aa5;
+  --green: #0f8a4c;
+  --ink: #0c1526;
   --muted: #52657c;
-  --line: #dce4ee;
-  --bg: #f7f9fc;
-  --danger: #d64545;
+  --line: #dde4ef;
+  --bg: #f5f7fb;
+  --danger: #c02626;
   --danger-soft: #fdecec;
-  --green-soft: #e6f6ed;
+  --green-soft: #e5f5ec;
   --radius: 12px;
-  --shadow: 0 2px 8px rgba(7, 27, 61, 0.06);
-  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --shadow: 0 1px 2px rgba(12, 21, 38, 0.06);
+  --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -25,6 +26,14 @@ body {
   background: var(--bg);
   color: var(--ink);
   line-height: 1.55;
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; border-radius: 4px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
 
 a { color: var(--blue-dark); }
