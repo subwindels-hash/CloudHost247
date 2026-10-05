@@ -136,18 +136,18 @@ test('integration: ported domains over real HTTP', async (t) => {
   });
 
   // ---- firewall -----------------------------------------------------------
-  await t.test('firewall: valid rule accepted, allow-any refused', async () => {
-    const ok = await jsonFetch(base, {
-      path: '/api/v1/firewall/rules', method: 'POST',
-      body: { direction: 'in', action: 'allow', protocol: 'tcp', port: 443, cidr: '0.0.0.0/0' },
-    }, token);
-    assert.strictEqual(ok.status, 201);
+  await t.test('firewall is per-server and honestly refuses (no provider/agent)', async () => {
+    const srv = await jsonFetch(base, { path: '/api/v1/servers', method: 'POST', body: { name: 'fw-vps' } }, token);
+    const sid = srv.data.server.id;
 
-    const bad = await jsonFetch(base, {
-      path: '/api/v1/firewall/rules', method: 'POST',
-      body: { action: 'allow', protocol: 'any' },
-    }, token);
-    assert.strictEqual(bad.status, 400);
+    const list = await jsonFetch(base, { path: `/api/v1/servers/${sid}/firewall` }, token);
+    assert.strictEqual(list.status, 400, 'managed firewall refuses without a provider/agent');
+    assert.match(list.data.message, /Managed firewall is unavailable/);
+
+    // A server you do not own is a 404, not a 400.
+    const other = await register(base, 'fw-intruder@example.com');
+    const denied = await jsonFetch(base, { path: `/api/v1/servers/${sid}/firewall` }, other.data.accessToken);
+    assert.strictEqual(denied.status, 404);
   });
 
   // ---- servers / deployments / licenses ----------------------------------
