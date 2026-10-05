@@ -36,7 +36,8 @@ jobs:
               echo "::endgroup::"
               echo "--- $suite output tail ---"
               tail -40 "/tmp/$suite.out"
-              echo "::error file=tests/$suite/run.php,line=1::SUITE $suite FAILED :: $(tail -c 600 "/tmp/$suite.out" | tr '\n' '|')"
+              echo "::error file=tests/$suite/run.php,line=1::SUITE $suite FAILED-LINES :: $(grep -E 'not ok|FAIL|failed|Failed' "/tmp/$suite.out" | head -12 | tr '\n' '~')"
+              echo "::error file=tests/$suite/run.php,line=1::SUITE $suite FAILED-CONTEXT :: $(grep -B6 -A6 -E 'not ok|FAIL' "/tmp/$suite.out" | head -40 | tr '\n' '~')"
               exit 1
             fi
           done
