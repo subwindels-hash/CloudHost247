@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Domains — CloudHost247</title>
+  <meta name="description" content="Register and manage domains with free WHOIS privacy and DNS." />
+  <meta name="theme-color" content="#0756d8" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="stylesheet" href="/assets/css/site.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="container">
+      <a class="brand" href="/"><img src="/icons/icon-192.png" alt="" width="32" height="32" /> CloudHost247</a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="main-nav"><span class="sr-only">Toggle navigation</span> ☰</button>
+      <nav class="nav" id="main-nav" data-nav aria-label="Primary">
+        <a href="/">Home</a>
+        <a href="/web-hosting.html">Web Hosting</a>
+        <a href="/vps-hosting.html">VPS</a>
+        <a href="/domains.html" aria-current="page">Domains</a>
+        <a href="/app/support">Support</a>
+        <span data-auth-slot></span>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="container">
+        <span class="eyebrow" style="color:#7ab7ff">Domains</span>
+        <h1>Find the perfect name</h1>
+        <p>Free WHOIS privacy, free DNS, and auto-renewal protection on every registration.</p>
+        <div class="domain-search" style="max-width:560px;margin-top:28px">
+          <form data-domain-form>
+            <label class="sr-only" for="domain">Domain name</label>
+            <input id="domain" name="domain" type="text" placeholder="youridea.com" autocomplete="off" autocapitalize="none" />
+            <button class="btn btn-primary" type="submit">Search</button>
+          </form>
+          <div class="tlds" aria-hidden="true"><span>.com</span><span>.net</span><span>.org</span><span>.io</span><span>.ng</span><span>.africa</span></div>
+          <div class="search-result" data-domain-result role="status" aria-live="polite"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" data-pricing data-category="domain">
+      <div class="container">
+        <div class="section-head"><span class="eyebrow">Pricing</span><h2>Domain pricing</h2></div>
+        <div class="grid grid-3" data-pricing-list></div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="/assets/js/site.js"></script>
+</body>
+</html>

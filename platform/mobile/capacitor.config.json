@@ -1,0 +1,29 @@
+{
+  "appId": "com.cloudhost247.app",
+  "appName": "CloudHost247",
+  "webDir": "../spa/dist",
+  "backgroundColor": "#071b3d",
+  "server": {
+    "androidScheme": "https",
+    "allowNavigation": ["*.cloudhost247.example.com"]
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1200,
+      "backgroundColor": "#0756d8",
+      "showSpinner": false,
+      "androidSplashResourceName": "splash"
+    },
+    "StatusBar": {
+      "style": "LIGHT",
+      "backgroundColor": "#0756d8"
+    }
+  },
+  "android": {
+    "allowMixedContent": false
+  },
+  "ios": {
+    "contentInset": "automatic",
+    "allowsLinkPreview": true
+  }
+}
