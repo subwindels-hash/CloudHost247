@@ -1,7 +1,13 @@
 # Unfinished build code — name list
 
 **Scope:** every module/build artifact in this repository whose code is *not finished and verified*.
-**Compiled:** 2026-10-05, against `HEAD 3ee7e21` on `arena/01a10c4a-cloudhost247`.
+**Compiled:** 2026-10-05. **Re-verified the same day against `cf576ca`** — the tip of
+`arena/01a10cfb-cloudhost247`, which this checkout holds as a single squashed commit. The earlier
+provenance line named `HEAD 3ee7e21` on `arena/01a10c4a-cloudhost247`; that commit is not reachable
+from this history, so every claim below was re-checked against the tree rather than trusted from the
+header. Four corrections came out of that pass and are dated where they appear: the marker count (16
+domain modules, not 17), the three misattributed rows in §1a, and the `infrastructure.js` closure
+recorded as row 7 of the progress log.
 **Sources:** `docs/UNFINISHED-MODULES.md` (canonical audit), `platform/MIGRATION.md`, per-file
 `deferred` markers, `ADAPTER_PROFILES` in `cloudhost247-node/src/infrastructure/providers/configuration.ts`,
 `QUARANTINED_MIGRATIONS` in `cloudhost247-node/database/migrate.ts`, and a zero-byte file scan.
@@ -20,29 +26,37 @@ staging-blocked — see §5).
 | 4 | `platform/spa/` commerce and billing — cart, checkout, invoices, payments, services, domains | **DONE 2026-10-05 (server + client verified end-to-end; no browser has rendered the pages)** — see §1b. Two server-side blockers were fixed on the way: cart lines carried no plan names, and plan changes demanded a plan UUID that no public endpoint reveals |
 | 5 | `platform/spa/` admin console — staff-gated shell, dashboard counts, customer directory/detail, service + domain records, ticket queue, staff directory, "switch to customer" delegation | **DONE 2026-10-05 (server + client verified end-to-end; no browser has rendered the pages)** — see §1b. Delegation parks the admin's credentials so the delegated token is never refreshable, and the role boundaries are the server's own (a staff account is refused on status/role/switch/directory; a super admin cannot change their own role) |
 | 6 | `platform/src/lib/providers/` — infrastructure provider egress (`provider-adapters.js`) | **DONE 2026-10-05: all 12 kinds ported, no live provider call made from this environment** — `hetzner`, `digitalocean`, `vultr`, `aws` (EC2 query protocol + SigV4), `contabo`, `ovh`, `proxmox`, `virtualizor`, `solusvm`, `openstack`, `generic_http` (operator bridge) and the development-only `mock`. 37 tests: the published AWS SigV4 vectors, per-adapter wire contracts over real loopback HTTP, idempotency, capability refusals, error classification and the sanitizer. Provider-side acceptance of every request is unverified — no credentials exist here and no provider was contacted. See §1a |
+| 7 | `platform/src/domains/infrastructure.js` — wiring the ported adapters into the domain, so a route performs provider egress | **DONE 2026-10-05 (loopback-verified; no real provider contacted)** — see §1a. New `platform/src/lib/provider-egress.js` is now the only place a domain may build an adapter, and it enforces three rules: fail closed before egress (naming the missing variables), never fake a result, and never return the provider's own message to a browser. Three endpoints now talk to a provider inside the request: provider diagnostics, OS image verification and server reconciliation. 14 tests drive the real routes over the real HTTP pipeline against a loopback provider API, and all five behaviours were mutation-verified (reverting image verification to unconditional stamping turns 4 red, a diagnostics route that never calls the provider turns 3 red, returning the raw provider message turns 2 red, dropping reconciliation egress turns 5 red, auto-applying a provider status turns 3 red) |
 
 ---
 
 ## 1. `platform/` — the newest build (added 2026-10-05) — largest unfinished surface
 
-41 domains exist and its 563 tests pass, but 17 modules still ship **explicit `deferred` markers**
-for the live integration side (the provider egress layer was closed on 2026-10-05 — see §1a), and the
-frontend is a fraction of the old one.
+41 domains exist and its 577 tests pass, but **15 domain modules still ship explicit `deferred`
+markers** for the live integration side (`grep -rl deferred platform/src/domains` = 15 files; 18 under
+`platform/src` counting `lib/provider-adapters.js`, `lib/provider-egress.js` and `store/schema.js`).
+An earlier revision of this document said 17 and listed `provisioning.js`, `marketplace.js` and
+`marketplace-admin.js` in the same table — **corrected 2026-10-05** on two counts: none of those three
+ever contained the marker (`provisioning.js` defers in substance, "no live workers here"; the two
+marketplace modules carry no deferral note at all), and `infrastructure.js` was 16th until its three
+deferrals were closed in progress-log row 7, which removed the word from that file entirely. The
+provider egress layer was closed on 2026-10-05 — see §1a — and the frontend is a fraction of the old
+one.
 
 ### 1a. Modules whose live integration is deferred (code present, egress missing)
 
 | Module | What is deferred |
 |---|---|
 | `platform/src/lib/provider-adapters.js` | **Closed 2026-10-05** — `platform/src/lib/providers/` now implements real egress for **all 12 kinds** (the last three: `aws` — EC2 query protocol with this build's own SigV4 signer, verified against the published AWS test-suite vectors; `contabo` — OAuth2 password grant with an in-memory token; `openstack` — Keystone password or static-token login with service-catalog resolution). The configuration registry reports per-kind implementation readiness; nothing in the domain layer calls the layer yet |
-| `platform/src/domains/infrastructure.js` | Wiring the ported adapters into the domain: provider diagnostics inside a request, image verification and provider reconciliation still answer from local rows. The adapter layer itself is complete in `platform/src/lib/providers/`; nothing in `infrastructure.js` calls it yet, so no route currently performs provider egress |
+| `platform/src/domains/infrastructure.js` | **Closed 2026-10-05 — the first three deferred behaviours are real provider egress**, through the new `platform/src/lib/provider-egress.js`: provider diagnostics inside a request (`POST /admin/providers/:id/test` calls `validateConfiguration`), image verification (`POST /admin/os-images/:id/test` asks the provider and only stamps `verified_at` on a real answer, including the provider's availability flag and an architecture cross-check) and reconciliation (`POST /admin/server-reconciliation/sweep` calls `healthCheck` per server and reports `PROVIDER_STATUS_MISMATCH` / `PROVIDER_MISSING`). **Still open here:** nothing *writes* provider state from this domain (no create/resize/snapshot path), and servers this platform holds no provider handle for are still reconciled against local records only — the response now says how many were really compared (`reconciled.providerChecked` vs `localOnly`) so a sweep cannot under-report what it skipped. No call has been made to a real provider account |
 | `platform/src/domains/servers.js` | Hypervisor/provider actions, live console session (issues a token only) |
-| `platform/src/domains/provisioning.js` | Provider-side build execution |
+| `platform/src/domains/provisioning.js` | Provider-side build execution. **Corrected 2026-10-05:** the evidence is not a `deferred` marker but the module's own words — *"no live workers here"* (line 6) and a reconciliation sweep that fails jobs stuck in a non-terminal state with `reconciled: no active worker` (line 116). Jobs are queued and never executed |
 | `platform/src/domains/operating-systems.js` | Provider mapping filter |
 | `platform/src/domains/monitoring.js` | Agent metric ingestion |
 | `platform/src/domains/deployments.js` | CI/CD execution (created deployments only start) |
 | `platform/src/domains/app-installations.js` | Paid-order provisioning worker, deployment log streaming |
 | `platform/src/domains/services.js` | Provisioning worker |
-| `platform/src/domains/marketplace.js`, `marketplace-admin.js` | One-click deploy execution |
+| ~~`platform/src/domains/marketplace.js`, `marketplace-admin.js`~~ | **Row removed 2026-10-05 — it was wrong.** Both are catalogue surfaces only: `marketplace.js` is public browsing (its sole mention of installing is the header comment "auth required for install") and `marketplace-admin.js` is admin CRUD over categories, applications and versions. Neither contains a deploy route, a worker reference or a `deferred` marker. One-click deploy execution lives in `app-installations.js` (paid-order provisioning hook, deployment log streaming) and `deployments.js` (CI/CD execution), both already listed above |
 | `platform/src/domains/dns.js` | Cloudflare/Route53 provider egress |
 | `platform/src/domains/ssl.js` | Certificate issuance integration |
 | `platform/src/domains/cloudflare.js`, `admin-cloudflare.js` | Live Cloudflare client, "Test Connection", live purge |

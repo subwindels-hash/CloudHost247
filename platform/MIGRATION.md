@@ -139,6 +139,15 @@ out so nobody mistakes absence for parity:
    provisioning / marketplace / deployments / dns / ssl / firewall / revenue-guardian / ai domains.
    By design these are the largest surface and are ported incrementally; adding their tables to
    `src/store/schema.js` and a `domains/*.js` module is the established pattern.
+   **Update 2026-10-05 — the adapter layer is fully ported and the first domain calls it.**
+   All twelve kinds live in `src/lib/providers/`, and `src/lib/provider-egress.js` is now the single
+   place a domain may construct one (it fails closed before egress, never fabricates a result, and
+   keeps the provider's own error text server-side). `src/domains/infrastructure.js` uses it for
+   three request-scope calls: provider diagnostics (`POST /admin/providers/:id/test`), OS image
+   verification (`POST /admin/os-images/:id/test`, which now stamps `verified_at` only on a real
+   provider answer) and server reconciliation (`healthCheck` per server). What is still deferred is
+   *writing* provider state — create/resize/snapshot and the provisioning worker that would execute
+   queued jobs — and no call has been made to a real provider account.
 4. **Real payment gateways — INBOUND HALF IMPLEMENTED, initiation still deferred.** Received and
    settled: `stripe`, `paypal` and `paystack` webhooks via `src/lib/gateways/` +
    `src/lib/provider-webhook-service.js` (signature verified before any database access, canonical
