@@ -517,6 +517,20 @@ const TABLES = {
       external_reference: text({ nullable: true }),
       notes: text({ nullable: true }),
       created_by: uuid({ nullable: true }),
+      // Migration 0034 (spec §15): domains became operational — a customer adds one, proves
+      // control with a DNS TXT record, then has SSL provisioned. `domain` is this platform's name
+      // for the source schema's `domain_name`; other domains already read it under that key.
+      domain_type: text({ default: 'custom' }),
+      provider: text({ nullable: true }),
+      verification_status: text({ default: 'unverified' }),
+      verification_method: text({ nullable: true }),
+      verification_token: text({ nullable: true }),
+      verified_at: { type: 'timestamptz', nullable: true },
+      ssl_status: text({ default: 'none' }),
+      ssl_issued_at: { type: 'timestamptz', nullable: true },
+      ssl_expires_at: { type: 'timestamptz', nullable: true },
+      created_by_user: bool({ default: false }),
+      points_to: text({ nullable: true }),
       created_at: ts(),
       updated_at: ts(),
     },
