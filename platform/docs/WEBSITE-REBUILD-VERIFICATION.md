@@ -244,3 +244,67 @@ vendor core. All of them were regenerated as professional, standalone pages:
 7. **PHP pages verification** — no PHP interpreter exists in this workspace, so the
    regenerated root pages were verified statically (tokenizer + cross-reference checks).
    Run `php -l *.php php/*.php` once on the target host before launch.
+
+---
+
+## Phase 4–5 (2026-10-05, evening): global rebuild on the real architecture
+
+### Audit
+- `docs/WEBSITE-INVENTORY.md` documents the full route/module audit: backend
+  capability map, per-page decisions for all 58 root PHP pages, nav/footer
+  contract, branding rules and the asset plan. No working functionality removed.
+
+### Marketplace / platform data model — REUSED, not reinvented
+- First attempt introduced parallel tables/domain; this was discovered via the
+  test suite (11 failures) and fully reverted. The platform already ships
+  `marketplace`, `marketplace-admin`, `control-panels`, `operating-systems`,
+  `app-installations` and `deployments` domains with the real schema
+  (`application_categories`, `applications`, `control_panels`, `operating_systems`, …).
+- `scripts/seed.js` now seeds the REAL `application_categories` + `applications`
+  tables with the genuine 52-app catalog extracted from
+  `cloudhost247-node/manifests/` (23 categories). Public APIs verified live:
+  `GET /api/v1/marketplace/apps` (52 apps), `GET /api/v1/app-categories` (23),
+  `GET /api/v1/control-panels` (ACTIVE panels only), `GET /api/v1/operating-systems`
+  (ACTIVE + orderable-only — honestly empty until operator-configured).
+- Frontend renderers (`site.js`) consume those endpoints with honest empty states.
+
+### Static site (42 pages)
+- Mega-menu navigation: Hosting / Servers / Domains / Applications / Developers /
+  Resources / Company with grouped multi-column dropdowns (`.dropdown--mega`).
+- Footer rebuilt to spec structure: Products, Cloud & Servers, Domains, Developers,
+  Resources, Company, Legal + legal-entity line ("CloudHost247 Isc. — CloudHost247 · CH247").
+- 11 new pages: applications, app-deployment, operating-systems, control-panels,
+  developers, server-management (Available vs Coming Soon split), offers, faqs,
+  hosting/enterprise, hosting/game-servers, domains/brokerage.
+- Domains page gains a Renewals section (#renewals); hosting/cloud gains an honest
+  #private-cloud section; OG image + og:site_name/og:url; FAQPage JSON-LD on /faqs.
+- Homepage extended with live-data sections: marketplace preview (top-6 + count),
+  deployment platform, OS/panel availability counts, developers docs.
+
+### Brand asset library (original artwork)
+- `assets/brand/`: icon.svg, logo.svg (currentColor), logo-white/dark,
+  logo-compact (CH247), favicon.svg, og.svg — all hand-authored SVG.
+- `assets/icons/icons.svg`: unified 24×24 stroke icon system (23 symbols).
+- 4 original hero illustrations generated in a consistent navy/electric-blue
+  style, converted 1.2–1.9 MB PNG → WebP (6.3 MB → 288 KB, ~96% reduction),
+  plus a 1200×630 og-image.jpg.
+- Mirrored into `templates/cloudhost247/images/{brand,icons,hero}` with the full
+  spec directory structure created.
+
+### Automated verification
+- NEW `tests/site-footer-links.test.js` (spec §28/§59): rebuilds the static site
+  and audits every header/footer link — no `#`/empty hrefs, every internal link
+  resolves, no case-mismatched targets, no in-column duplicates, full footer
+  structure present incl. legal entity. Suite now **640/640 pass**.
+- Live crawl of the running server: 53 unique internal URLs, **zero broken links**.
+- Sitemap (`/sitemap.xml`) includes all 11 new routes; all 44 sitemap URLs return 200.
+- PHP layer nav/footer cross-check: all 23 unique PHP hrefs resolve to real files.
+
+### Still outstanding (honest status)
+- OS catalog and control-panel commercial tie-ins are operator-configured data:
+  OS page honestly reports "no operating systems orderable yet" until versions
+  pass the availability-rule chain; panels page lists the 18 configured ACTIVE
+  panel definitions (catalog metadata) — sale-level plans are added via admin API.
+- Spec §5's 20-section homepage is implemented as 9 substantive live-data sections
+  + hero + CTA; all content is sourced from the real platform (no invented claims).
+  Additional sections can be added as more operator data is configured.
