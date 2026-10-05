@@ -614,6 +614,28 @@ const TABLES = {
     },
   },
 
+  // Knowledgebase / blog articles. Admin-managed content for the public site:
+  // nothing is published until a staff member writes and publishes it.
+  site_articles: {
+    columns: {
+      id: pk(),
+      kind: text({ default: 'kb' }), // 'kb' | 'blog'
+      slug: text({ required: true }),
+      title: text({ required: true }),
+      category: text({ default: 'general' }),
+      author: text({ default: 'CloudHost247 Team' }),
+      summary: text({ nullable: true }),
+      body: text({ required: true }), // markdown-lite: paragraphs, `##` headings, - lists
+      status: text({ default: 'draft' }), // draft | published
+      search_keywords: text({ nullable: true }),
+      published_at: ts({ nullable: true }),
+      created_at: ts(),
+      updated_at: ts(),
+    },
+    indexes: [{ name: 'site_articles_slug_idx', columns: ['slug'], unique: true }],
+  },
+
+
   server_metrics: {
     columns: {
       id: pk(),

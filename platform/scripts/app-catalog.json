@@ -1,0 +1,635 @@
+[
+  {
+    "slug": "adguard-home",
+    "name": "AdGuard Home",
+    "category": "networking",
+    "description": "Network-wide ad and tracker blocking with DHCP and encrypted DNS support.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "adminer",
+    "name": "Adminer",
+    "category": "database",
+    "description": "Lightweight database management UI for MySQL, PostgreSQL, SQLite, and MongoDB.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "akaunting",
+    "name": "Akaunting",
+    "category": "finance",
+    "description": "Free and online accounting software for small businesses and freelancers.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "bookstack",
+    "name": "BookStack",
+    "category": "documents",
+    "description": "Platform for organising and storing information in books, chapters, and pages.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "code-server",
+    "name": "code-server",
+    "category": "developer-tools",
+    "description": "VS Code in the browser, running on your own server with your own hardware.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "docker-registry",
+    "name": "Docker Registry",
+    "category": "infrastructure",
+    "description": "Private OCI/Docker image registry for your own builds and deployments.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "dockge",
+    "name": "Dockge",
+    "category": "system-administration",
+    "description": "Fancy, easy-to-use docker compose stack management with a live log view.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "espocrm",
+    "name": "EspoCRM",
+    "category": "crm",
+    "description": "Open-source CRM with a clean interface, workflows, and full data ownership.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "filebrowser",
+    "name": "File Browser",
+    "category": "storage",
+    "description": "Web file manager providing a clean UI over your files on any volume.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "firefly-iii",
+    "name": "Firefly III",
+    "category": "finance",
+    "description": "A free and open-source personal finance manager with budgets and reports.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "focalboard",
+    "name": "Focalboard",
+    "category": "productivity",
+    "description": "Open-source project management tool that mirrors Trello and Notion workflows.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "ghost",
+    "name": "Ghost",
+    "category": "cms",
+    "description": "Modern publishing platform for professional blogs and newsletters with built-in memberships.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "gitea",
+    "name": "Gitea",
+    "category": "developer-tools",
+    "description": "Painless self-hosted Git service with issues, pull requests, and built-in CI.",
+    "featured": true,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated",
+      "kubernetes"
+    ]
+  },
+  {
+    "slug": "grafana",
+    "name": "Grafana",
+    "category": "monitoring",
+    "description": "The open observability platform for dashboards, alerting, and analytics.",
+    "featured": true,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated",
+      "kubernetes"
+    ]
+  },
+  {
+    "slug": "home-assistant",
+    "name": "Home Assistant",
+    "category": "home-automation",
+    "description": "Open-source home automation hub that puts local control and privacy first.",
+    "featured": true,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "immich",
+    "name": "Immich",
+    "category": "media",
+    "description": "High-performance self-hosted photo and video backup solution with mobile apps.",
+    "featured": true,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "jellyfin",
+    "name": "Jellyfin",
+    "category": "media",
+    "description": "Free software media system that puts you in control of your media library.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "keycloak",
+    "name": "Keycloak",
+    "category": "security",
+    "description": "Open-source identity and access management with SSO, SAML, and social login.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated",
+      "kubernetes"
+    ]
+  },
+  {
+    "slug": "mariadb",
+    "name": "MariaDB",
+    "category": "database",
+    "description": "Enhanced, community-developed drop-in replacement for MySQL.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "matomo",
+    "name": "Matomo",
+    "category": "analytics",
+    "description": "Google Analytics alternative that gives you full data ownership and privacy compliance.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "minio",
+    "name": "MinIO",
+    "category": "storage",
+    "description": "S3-compatible high-performance object storage for your own private cloud.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated",
+      "kubernetes"
+    ]
+  },
+  {
+    "slug": "mongodb",
+    "name": "MongoDB",
+    "category": "database",
+    "description": "Document database built for modern applications with flexible schemas and scaling.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "moodle",
+    "name": "Moodle",
+    "category": "education",
+    "description": "The world’s most popular learning management system for online courses.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "mysql",
+    "name": "MySQL",
+    "category": "database",
+    "description": "The world’s most popular open-source database, trusted for web applications of every scale.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "n8n",
+    "name": "n8n",
+    "category": "automation",
+    "description": "Fair-code workflow automation with 400+ integrations and native AI capabilities.",
+    "featured": true,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated",
+      "kubernetes"
+    ]
+  },
+  {
+    "slug": "navidrome",
+    "name": "Navidrome",
+    "category": "media",
+    "description": "Modern music collection server and streamer with Subsonic API compatibility.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "netdata",
+    "name": "Netdata",
+    "category": "monitoring",
+    "description": "Real-time, per-second infrastructure monitoring with zero configuration.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "nextcloud",
+    "name": "Nextcloud",
+    "category": "storage",
+    "description": "Self-hosted file sync and share platform with calendars, contacts, and collaboration.",
+    "featured": true,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "node-red",
+    "name": "Node-RED",
+    "category": "automation",
+    "description": "Low-code programming for event-driven applications, built on Node.js.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "odoo",
+    "name": "Odoo",
+    "category": "business",
+    "description": "All-in-one business software: CRM, accounting, inventory, manufacturing, and e-commerce.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "ollama",
+    "name": "Ollama",
+    "category": "ai",
+    "description": "Run large language models like Llama, Mistral, and Gemma locally on your own GPU.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "open-webui",
+    "name": "Open WebUI",
+    "category": "ai",
+    "description": "Self-hosted AI interface for Ollama and OpenAI-compatible APIs with users and RBAC.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "openproject",
+    "name": "OpenProject",
+    "category": "project-management",
+    "description": "Leading open-source project management software with agile and classic teams in mind.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "paperless-ngx",
+    "name": "Paperless-ngx",
+    "category": "documents",
+    "description": "Scan, OCR, index, and archive all your physical documents, fully searchable.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "photoprism",
+    "name": "PhotoPrism",
+    "category": "media",
+    "description": "AI-powered photos app for the decentralized web — browse, organize, and share.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "phpmyadmin",
+    "name": "phpMyAdmin",
+    "category": "database",
+    "description": "Classic web interface for MySQL and MariaDB administration.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "pi-hole",
+    "name": "Pi-hole",
+    "category": "networking",
+    "description": "Network-level ad and tracker blocking DNS server for your whole network.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "plausible",
+    "name": "Plausible Analytics",
+    "category": "analytics",
+    "description": "Lightweight and open-source web analytics, cookie-free and GDPR compliant.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "portainer",
+    "name": "Portainer",
+    "category": "system-administration",
+    "description": "Lightweight container management UI for Docker environments.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "postgresql",
+    "name": "PostgreSQL",
+    "category": "database",
+    "description": "The world’s most advanced open-source relational database, as a dedicated instance.",
+    "featured": true,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "prestashop",
+    "name": "PrestaShop",
+    "category": "e-commerce",
+    "description": "Open-source e-commerce platform with 300+ features and a thriving module ecosystem.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "prometheus",
+    "name": "Prometheus",
+    "category": "monitoring",
+    "description": "Open-source systems monitoring and alerting toolkit with a powerful query language.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated",
+      "kubernetes"
+    ]
+  },
+  {
+    "slug": "redis",
+    "name": "Redis",
+    "category": "database",
+    "description": "In-memory data store for caching, queues, session storage, and pub/sub.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "rocketchat",
+    "name": "Rocket.Chat",
+    "category": "communication",
+    "description": "Open-source team chat with channels, video calls, and unlimited message history.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "roundcube",
+    "name": "Roundcube",
+    "category": "communication",
+    "description": "Browser-based multilingual IMAP webmail client with full MIME and LDAP support.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "traefik",
+    "name": "Traefik",
+    "category": "infrastructure",
+    "description": "Cloud-native reverse proxy and load balancer — the platform’s routing layer.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated",
+      "kubernetes"
+    ]
+  },
+  {
+    "slug": "umami",
+    "name": "Umami",
+    "category": "analytics",
+    "description": "Simple, fast, privacy-focused web analytics without cookies or personal data collection.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "uptime-kuma",
+    "name": "Uptime Kuma",
+    "category": "monitoring",
+    "description": "Fancy self-hosted monitoring tool with status pages and 90+ notification providers.",
+    "featured": true,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "vaultwarden",
+    "name": "Vaultwarden",
+    "category": "security",
+    "description": "Unofficial Bitwarden-compatible server — password manager for your whole team.",
+    "featured": true,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "vikunja",
+    "name": "Vikunja",
+    "category": "project-management",
+    "description": "The to-do app to organize your life — lists, kanban, gantt, and teams.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "wireguard-easy",
+    "name": "WireGuard Easy",
+    "category": "networking",
+    "description": "The easiest way to install and manage WireGuard VPN on your server.",
+    "featured": false,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated"
+    ]
+  },
+  {
+    "slug": "wordpress",
+    "name": "WordPress",
+    "category": "cms",
+    "description": "The world’s most popular publishing platform — deploy on Docker or cPanel hosting.",
+    "featured": true,
+    "hosting": [
+      "docker",
+      "vps",
+      "dedicated",
+      "cpanel",
+      "kubernetes"
+    ]
+  }
+]

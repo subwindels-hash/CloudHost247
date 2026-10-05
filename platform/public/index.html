@@ -3,161 +3,385 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CloudHost247 — Cloud hosting, built for your next idea</title>
-  <meta name="description" content="CloudHost247 provides cloud hosting with fast provisioning, straightforward billing, and support whenever you need it." />
-  <meta name="theme-color" content="#0756d8" />
-  <meta property="og:title" content="CloudHost247 — Cloud hosting, built for your next idea" />
-  <meta property="og:description" content="Fast provisioning, straightforward billing, and support whenever you need it." />
+  <title>CloudHost247 — Professional Cloud Hosting & Digital Infrastructure</title>
+  <meta name="description" content="Fast, secure and scalable hosting infrastructure: web hosting, cloud, VPS, dedicated servers, domains, business email and security — built for businesses and developers worldwide." />
+  <link rel="canonical" href="/" />
+  <meta name="theme-color" content="#0a1730" />
   <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="CloudHost247" />
+  <meta property="og:url" content="/" />
+  <meta property="og:image" content="/assets/img/og-image.jpg" />
+  <meta name="twitter:image" content="/assets/img/og-image.jpg" />
+  <meta property="og:title" content="CloudHost247 — Professional Cloud Hosting & Digital Infrastructure" />
+  <meta property="og:description" content="Fast, secure and scalable hosting infrastructure: web hosting, cloud, VPS, dedicated servers, domains, business email and security — built for businesses and developers worldwide." />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="CloudHost247 — Professional Cloud Hosting & Digital Infrastructure" />
+  <meta name="twitter:description" content="Fast, secure and scalable hosting infrastructure: web hosting, cloud, VPS, dedicated servers, domains, business email and security — built for businesses and developers worldwide." />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="stylesheet" href="/assets/css/site.css" />
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"CloudHost247","url":"/","description":"Professional cloud hosting and digital infrastructure."}</script>
 </head>
 <body>
-  <a class="skip-link" href="#main">Skip to content</a>
-
-  <header class="site-header">
-    <div class="container">
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <header class="site-header" data-header>
+    <div class="container nav-bar">
       <a class="brand" href="/" aria-label="CloudHost247 home">
-        <img src="/icons/icon-192.png" alt="" width="32" height="32" />
-        CloudHost247
+        <span class="brand-mark" aria-hidden="true">C</span>
+        <span>CloudHost247</span>
       </a>
-      <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="main-nav">
-        <span class="sr-only">Toggle navigation</span> ☰
+
+      <button class="nav-toggle" data-nav-toggle aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+        <span></span><span></span><span></span>
       </button>
-      <nav class="nav" id="main-nav" data-nav aria-label="Primary">
-        <a href="/" aria-current="page">Home</a>
-        <a href="/web-hosting.html">Web Hosting</a>
-        <a href="/vps-hosting.html">VPS</a>
-        <a href="/domains.html">Domains</a>
-        <a href="/app/support">Support</a>
-        <span data-auth-slot></span>
-      </nav>
+
+      <li>
+          <a class="nav-link" href="/hosting/web-hosting">Hosting</a><span class="nav-caret" aria-hidden="true"></span>
+          <div class="dropdown dropdown--mega"><div class="mega-grid">
+            <div class="mega-col"><h4>Web Hosting</h4><ul>
+              <ul class="dropdown"><li><a href="/hosting/web-hosting">Web Hosting<span class="dd-note">Fast shared hosting</span></a></li></ul>
+              <ul class="dropdown"><li><a href="/hosting/wordpress">WordPress Hosting<span class="dd-note">Optimized & managed</span></a></li></ul>
+              <ul class="dropdown"><li><a href="/hosting/web-hosting">Business Hosting<span class="dd-note">Hosting for companies</span></a></li></ul>
+              <ul class="dropdown"><li><a href="/hosting/web-hosting">Managed Hosting<span class="dd-note">We run it for you</span></a></li></ul>
+            </ul></div>
+            <div class="mega-col"><h4>Cloud Hosting</h4><ul>
+              <ul class="dropdown"><li><a href="/hosting/cloud">Cloud Hosting<span class="dd-note">Scalable infrastructure</span></a></li></ul>
+              <ul class="dropdown"><li><a href="/hosting/vps">Cloud VPS<span class="dd-note">Dedicated resources</span></a></li></ul>
+              <ul class="dropdown"><li><a href="/hosting/cloud">Public Cloud<span class="dd-note">Elastic capacity</span></a></li></ul>
+              <ul class="dropdown"><li><a href="/hosting/cloud">Private Cloud<span class="dd-note">Isolated environments</span></a></li></ul>
+            </ul></div>
+            <div class="mega-col"><h4>Specialized</h4><ul>
+              <ul class="dropdown"><li><a href="/business-email">Email Hosting<span class="dd-note">Professional mailboxes</span></a></li></ul>
+              <ul class="dropdown"><li><a href="/security#ssl">SSL Certificates<span class="dd-note">Encrypt your site</span></a></li></ul>
+              <ul class="dropdown"><li><a href="/migration">Website Migration<span class="dd-note">Guided transfer</span></a></li></ul>
+              <ul class="dropdown"><li><a href="/security#backups">Backup Services<span class="dd-note">Automated recovery</span></a></li></ul>
+            </ul></div>
+          </div></div>
+        </li>
+        <li>
+          <a class="nav-link" href="/hosting/vps">Servers</a><span class="nav-caret" aria-hidden="true"></span>
+          <div class="dropdown dropdown--mega"><div class="mega-grid">
+            <div class="mega-col"><h4>Servers</h4><ul>
+              <ul class="dropdown"><li><a href="/hosting/vps">VPS Hosting<span class="dd-note">Virtual servers</span></a></li></ul>
+              <ul class="dropdown"><li><a href="/hosting/dedicated">Dedicated Servers<span class="dd-note">Single-tenant hardware</span></a></li></ul>
+              <ul class="dropdown"><li><a href="/hosting/enterprise">Enterprise Servers<span class="dd-note">Large-scale deployments</span></a></li></ul>
+              <ul class="dropdown"><li><a href="/hosting/game-servers">Game Servers<span class="dd-note">Low-latency play</span></a></li></ul>
+            </ul></div>
+            <div class="mega-col"><h4>Platform</h4><ul>
+              <ul class="dropdown"><li><a href="/operating-systems">Operating Systems<span class="dd-note">Verified OS catalog</span></a></li></ul>
+              <ul class="dropdown"><li><a href="/control-panels">Control Panels<span class="dd-note">Configured panels</span></a></li></ul>
+              <ul class="dropdown"><li><a href="/server-management">Server Management<span class="dd-note">Monitor & control</span></a></li></ul>
+              <ul class="dropdown"><li><a href="/infrastructure">Infrastructure<span class="dd-note">Network & locations</span></a></li></ul>
+            </ul></div>
+          </div></div>
+        </li>
+        <li>
+          <a class="nav-link" href="/domains">Domains</a><span class="nav-caret" aria-hidden="true"></span>
+          <ul class="dropdown"><li><a href="/domains#search">Search Domains<span class="dd-note">Find your name</span></a></li><li><a href="/domains#transfer">Transfer a Domain<span class="dd-note">Move your domains</span></a></li><li><a href="/domains#pricing">Domain Pricing<span class="dd-note">All extensions</span></a></li><li><a href="/domains/brokerage">Domain Brokerage<span class="dd-note">Premium acquisition</span></a></li><li><a href="/domains#renewals">Renewals<span class="dd-note">Grace periods explained</span></a></li></ul>
+        </li>
+        <li>
+          <a class="nav-link" href="/applications">Applications</a><span class="nav-caret" aria-hidden="true"></span>
+          <ul class="dropdown"><li><a href="/applications">App Marketplace<span class="dd-note">52 deployable applications</span></a></li><li><a href="/applications?category=cms">CMS<span class="dd-note">WordPress, Ghost & more</span></a></li><li><a href="/applications?category=e-commerce">E-commerce<span class="dd-note">PrestaShop & stores</span></a></li><li><a href="/applications?category=database">Databases<span class="dd-note">MySQL, PostgreSQL, Redis</span></a></li><li><a href="/app-deployment">App Deployment<span class="dd-note">Pipeline & PaaS</span></a></li></ul>
+        </li>
+        <li>
+          <a class="nav-link" href="/developers">Developers</a><span class="nav-caret" aria-hidden="true"></span>
+          <ul class="dropdown"><li><a href="/developers">Developer Platform<span class="dd-note">Infrastructure for builders</span></a></li><li><a href="/app-deployment">Deployment & PaaS<span class="dd-note">Ship from Git to live</span></a></li><li><a href="/operating-systems">Operating Systems<span class="dd-note">Provisioned OS catalog</span></a></li><li><a href="/control-panels">Control Panels<span class="dd-note">What we actually offer</span></a></li><li><a href="/knowledgebase">Documentation<span class="dd-note">Guides & how-tos</span></a></li></ul>
+        </li>
+        <li>
+          <a class="nav-link" href="/support">Resources</a><span class="nav-caret" aria-hidden="true"></span>
+          <ul class="dropdown"><li><a href="/knowledgebase">Knowledgebase<span class="dd-note">Guides & how-tos</span></a></li><li><a href="/blog">Blog<span class="dd-note">News & insights</span></a></li><li><a href="/support">Help Center<span class="dd-note">Support center</span></a></li><li><a href="/status">Status<span class="dd-note">Live service status</span></a></li><li><a href="/offers">Offers<span class="dd-note">Live catalog pricing</span></a></li></ul>
+        </li>
+        <li>
+          <a class="nav-link" href="/about">Company</a><span class="nav-caret" aria-hidden="true"></span>
+          <ul class="dropdown"><li><a href="/about">About CloudHost247<span class="dd-note">Who we are</span></a></li><li><a href="/about#why">Why CloudHost247<span class="dd-note">What sets us apart</span></a></li><li><a href="/infrastructure">Data Centers<span class="dd-note">Our infrastructure</span></a></li><li><a href="/contact">Contact<span class="dd-note">Talk to us</span></a></li></ul>
+        </li></ul>
+
+      <div class="nav-actions" data-auth-slot>
+        <a class="btn btn--ghost" href="/login" data-auth-login>Log in</a>
+        <a class="btn btn--secondary" href="/app" data-auth-client>Client Area</a>
+        <a class="btn btn--primary" href="/app/catalog">Get Started</a>
+      </div>
     </div>
   </header>
-
   <main id="main">
     <section class="hero">
-      <div class="container hero-grid">
-        <div>
-          <span class="eyebrow" style="color:#7ab7ff">Reliable since day one</span>
-          <h1>Cloud hosting, built for your next idea</h1>
-          <p>Launch websites, applications, and servers in minutes. Transparent pricing, NVMe storage, and human support around the clock.</p>
-          <div class="stack">
-            <a class="btn btn-primary" href="/web-hosting.html">View hosting</a>
-            <a class="btn btn-light" href="/register.html">Create account</a>
-          </div>
-          <div class="hero-stats">
-            <div><strong>99.9%</strong> uptime SLA</div>
-            <div><strong>24/7</strong> human support</div>
-            <div><strong>5&nbsp;min</strong> average provisioning</div>
+      <div class="container">
+        <div class="hero-inner">
+          <span class="eyebrow" style="color:#7fb2ff">Professional Cloud Hosting &amp; Digital Infrastructure</span>
+          <h1>Power Your Digital World With CloudHost247</h1>
+          <p class="lede">Fast, secure and scalable hosting infrastructure built for websites, businesses, developers and growing digital companies worldwide.</p>
+          <div class="hero-ctas">
+            <a class="btn btn--primary btn--lg" href="/app/catalog">Get Started</a>
+            <a class="btn btn--navy-outline btn--lg" href="/hosting">Explore Hosting</a>
           </div>
         </div>
-        <div class="domain-search">
-          <h3 class="mt-0">Find your domain</h3>
-          <form data-domain-form>
-            <label class="sr-only" for="domain">Domain name</label>
-            <input id="domain" name="domain" type="text" placeholder="youridea.com" autocomplete="off" autocapitalize="none" />
-            <button class="btn btn-primary" type="submit">Search</button>
-          </form>
-          <div class="tlds" aria-hidden="true">
-            <span>.com</span><span>.net</span><span>.org</span><span>.io</span><span>.ng</span><span>.africa</span>
-          </div>
-          <div class="search-result" data-domain-result role="status" aria-live="polite"></div>
+        <div class="hero-visual" role="img" aria-label="Illustration of CloudHost247 infrastructure nodes and network health">
+          <div class="hv-node"><b><span class="hv-dot"></span>Compute</b>Virtual &amp; dedicated servers<span class="hv-bar"><i style="width:72%"></i></span></div>
+          <div class="hv-node"><b><span class="hv-dot"></span>Network</b>Global-ready connectivity<span class="hv-bar"><i style="width:58%"></i></span></div>
+          <div class="hv-node"><b><span class="hv-dot"></span>Storage</b>NVMe-backed persistence<span class="hv-bar"><i style="width:64%"></i></span></div>
+          <div class="hv-node"><b><span class="hv-dot"></span>Protection</b>Security-first platform<span class="hv-bar"><i style="width:81%"></i></span></div>
+        </div>
+      </div>
+      <div class="trust-strip">
+        <div class="container">
+          <div class="trust-item"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg> High-performance infrastructure</div>
+          <div class="trust-item"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 20V6M4 20h16"/><path d="M8 16v-5M12 16V8M16 16v-3M20 16V6"/></svg> 24/7 monitoring</div>
+          <div class="trust-item"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.6-3 8.4-7 10-4-1.6-7-5.4-7-10V6l7-3z"/><path d="M9.5 12l2 2 3.5-4"/></svg> Enterprise-grade security</div>
+          <div class="trust-item"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.7 2.6 4 5.6 4 9s-1.3 6.4-4 9c-2.7-2.6-4-5.6-4-9s1.3-6.4 4-9z"/></svg> Global-ready infrastructure</div>
+          <div class="trust-item"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><ellipse cx="12" cy="5.5" rx="7" ry="2.5"/><path d="M5 5.5v13c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-13M5 12c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5"/></svg> Automated backups</div>
+          <div class="trust-item"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 13a8 8 0 0 1 16 0"/><rect x="3" y="13" width="4" height="6" rx="2"/><rect x="17" y="13" width="4" height="6" rx="2"/><path d="M20 19a3 3 0 0 1-3 3h-3"/></svg> Expert support</div>
         </div>
       </div>
     </section>
 
     <section class="section">
       <div class="container">
-        <div class="section-head">
-          <span class="eyebrow">Why CloudHost247</span>
-          <h2>Everything you need to ship</h2>
-          <p>We run the servers, you run the product. Each plan is provisioned automatically and monitored continuously.</p>
-        </div>
-        <div class="grid grid-3">
-          <div class="card">
-            <div class="icon">⚡</div>
-            <h3>Fast provisioning</h3>
-            <p>Servers and hosting accounts spin up in minutes, not days, with instant access to your control panel.</p>
-          </div>
-          <div class="card">
-            <div class="icon">🔒</div>
-            <h3>Security first</h3>
-            <p>Free SSL, two-factor authentication, passkeys, and DDoS protection included on every plan.</p>
-          </div>
-          <div class="card">
-            <div class="icon"></div>
-            <h3>Transparent billing</h3>
-            <p>Clear invoices, no surprise overages, and a billing ledger you can actually read.</p>
-          </div>
-        </div>
+            <div class="domain-search">
+      <h2>Find Your Perfect Domain</h2>
+      <p class="muted">Search availability across popular extensions. Results are estimates until a registrar connector is configured — you will always see that clearly.</p>
+      <form data-domain-form novalidate>
+        <label class="visually-hidden" for="domain-q">Domain name</label>
+        <input id="domain-q" type="text" name="domain" inputmode="url" autocomplete="off" placeholder="yourdomain.com" required />
+        <button class="btn btn--primary" type="submit">Search Domain</button>
+      </form>
+      <div class="domain-result" data-domain-result aria-live="polite"></div>
+      <ul class="tld-row" data-tld-row aria-label="Popular extensions"></ul>
+      <div class="domain-links">
+        <a href="/domains">Domain Registration</a>
+        <a href="/domains#transfer">Domain Transfer</a>
+        <a href="/domains#pricing">Domain Pricing</a>
+      </div>
+    </div>
+
       </div>
     </section>
 
-    <section class="section section-soft" data-pricing>
+    <section class="section section--soft" id="services">
       <div class="container">
         <div class="section-head">
-          <span class="eyebrow">Pricing</span>
-          <h2>Simple plans, published live</h2>
-          <p>These prices come straight from our catalog, so what you see here is what you pay.</p>
+          <span class="eyebrow">Hosting Services</span>
+          <h2>One platform for every workload</h2>
+          <p>From a first website to demanding production infrastructure — each service is built on the same professional platform.</p>
         </div>
-        <div class="grid grid-4" data-pricing-list></div>
+        <div class="grid grid--3">
+          <article class="card">
+            <div class="card-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.7 2.6 4 5.6 4 9s-1.3 6.4-4 9c-2.7-2.6-4-5.6-4-9s1.3-6.4 4-9z"/></svg></div>
+            <h3>Web Hosting</h3>
+            <p>Reliable hosting for personal websites, businesses and professional websites.</p>
+            <ul class="tick"><li>NVMe storage</li><li>Free SSL included</li><li>Daily backups</li></ul>
+            <span data-price-from data-product="web-hosting"></span>
+            <a class="btn btn--ghost" href="/hosting/web-hosting">Explore Web Hosting <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          </article>
+          <article class="card">
+            <div class="card-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 3h8l4 4v14H6V3z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></svg></div>
+            <h3>WordPress Hosting</h3>
+            <p>Optimized hosting for WordPress websites with security, performance and automated management.</p>
+            <ul class="tick"><li>WordPress-tuned stack</li><li>Automated updates</li><li>Staging-friendly</li></ul>
+            <a class="btn btn--ghost" href="/hosting/wordpress">Learn More <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          </article>
+          <article class="card">
+            <div class="card-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M7 18a4.5 4.5 0 0 1-.9-8.9 6 6 0 0 1 11.6 1.6A4 4 0 0 1 17 18H7z"/></svg></div>
+            <h3>Cloud Hosting</h3>
+            <p>Scalable infrastructure designed for growing applications and websites.</p>
+            <ul class="tick"><li>Elastic resources</li><li>API-driven control</li><li>Usage-based growth</li></ul>
+            <a class="btn btn--ghost" href="/hosting/cloud">Learn More <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          </article>
+          <article class="card">
+            <div class="card-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/><path d="M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3"/></svg></div>
+            <h3>VPS Hosting</h3>
+            <p>Dedicated virtual resources with greater control, performance and flexibility.</p>
+            <ul class="tick"><li>Full root access</li><li>Dedicated vCPU &amp; RAM</li><li>Choice of OS</li></ul>
+            <span data-price-from data-product="vps"></span>
+            <a class="btn btn--ghost" href="/hosting/vps">Learn More <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          </article>
+          <article class="card">
+            <div class="card-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01M11 7.5h2M11 16.5h2"/></svg></div>
+            <h3>Dedicated Servers</h3>
+            <p>High-performance physical infrastructure for demanding workloads.</p>
+            <ul class="tick"><li>Single-tenant hardware</li><li>Configurable specs</li><li>Managed options</li></ul>
+            <a class="btn btn--ghost" href="/hosting/dedicated">Learn More <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          </article>
+          <article class="card">
+            <div class="card-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.2 3.4-5 6.5-5s5.7 1.8 6.5 5"/><circle cx="17.5" cy="9" r="2.5"/><path d="M16.5 14.5c2.6.2 4.4 1.8 5 4.5"/></svg></div>
+            <h3>Reseller Hosting</h3>
+            <p>Build and manage your own hosting business with professional reseller infrastructure.</p>
+            <ul class="tick"><li>Client accounts</li><li>White-label ready</li><li>Pooled resources</li></ul>
+            <a class="btn btn--ghost" href="/hosting/reseller">Learn More <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          </article>
+        </div>
       </div>
     </section>
 
     <section class="section">
-      <div class="container text-center">
-        <h2>Ready to get online?</h2>
-        <p class="muted">Create a free account and launch your first project today.</p>
-        <div class="stack" style="justify-content:center">
-          <a class="btn btn-primary" href="/register.html">Get started</a>
-          <a class="btn btn-ghost" href="/login.html">Sign in</a>
+      <div class="container">
+        <div class="split">
+          <div>
+            <span class="eyebrow">Why CloudHost247</span>
+            <h2>Infrastructure you can build a business on</h2>
+            <p class="muted">CloudHost247 is built for companies that take their online presence seriously: performance, security and honest operations come first — and every claim on this site is backed by the platform's actual configuration, not marketing fiction.</p>
+            <div class="mt-3">
+              <a class="btn btn--primary" href="/about#why">Why CloudHost247</a>
+              <a class="btn btn--ghost" href="/infrastructure">See the infrastructure</a>
+            </div>
+          </div>
+          <div class="grid grid--2">
+            <div class="card"><div class="card-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg></div><h3>Performance</h3><p>High-performance hosting infrastructure designed for fast websites and applications.</p></div>
+            <div class="card"><div class="card-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.6-3 8.4-7 10-4-1.6-7-5.4-7-10V6l7-3z"/><path d="M9.5 12l2 2 3.5-4"/></svg></div><h3>Security</h3><p>Security-first infrastructure, monitoring and account protection.</p></div>
+            <div class="card"><div class="card-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 20V6M4 20h16"/><path d="M8 16v-5M12 16V8M16 16v-3M20 16V6"/></svg></div><h3>Reliability</h3><p>Infrastructure designed for stable, dependable service.</p></div>
+            <div class="card"><div class="card-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5M3 17.5l9 5 9-5"/></svg></div><h3>Scalability</h3><p>Upgrade resources as your website or business grows.</p></div>
+          </div>
         </div>
       </div>
     </section>
+
+    <section class="section section--navy">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Global Infrastructure</span>
+          <h2>Global-ready, honestly reported</h2>
+          <p style="color:#b9c8e6">The locations below are the regions actually configured on this platform — nothing invented. As CloudHost247 grows, this list grows with it.</p>
+        </div>
+        <div data-locations></div>
+      </div>
+    </section>
+
+    <section class="section" id="applications">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Application Marketplace</span>
+          <h2>Deploy real applications in minutes</h2>
+          <p>Every app below lives in our actual deployment catalog — manifest-verified and installed by the same pipeline that powers the client area. Nothing is listed we cannot install.</p>
+        </div>
+        <div data-home-apps></div>
+        <p class="hint mt-3"><a href="/applications">Browse the full marketplace <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
+      </div>
+    </section>
+
+    <section class="section section--soft" id="platform">
+      <div class="container">
+        <div class="split">
+          <div>
+            <span class="eyebrow">Deployment Platform</span>
+            <h2>From order to running application</h2>
+            <p class="muted">Choose an application, order a server, and the platform takes it from there: isolated containers, payment-gated provisioning, encrypted credentials, domain verification and a complete event history.</p>
+            <div class="mt-3"><a class="btn btn--primary" href="/app-deployment">How deployment works <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+          </div>
+          <div class="grid grid--2">
+            <div class="card"><div class="card-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15c-1.5-4.5.5-9.5 5-12 .8 4.8-1.5 9.5-5 12z"/><path d="M7 12c-1.8.2-3.4 1.2-4.5 3 1.8.3 3.3.1 4.5-.5M12 17c-.2 1.8-1.2 3.4-3 4.5-.3-1.8-.1-3.3.5-4.5M12 15c-2 .5-4 2-4.5 4.5C10 19 11.5 17 12 15z"/></svg></div><h3>One-click installs</h3><p>Order, pay, and the pipeline installs and configures your app automatically.</p></div>
+            <div class="card"><div class="card-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8 10.5V8a4 4 0 1 1 8 0v2.5M12 14.5v2"/></svg></div><h3>Encrypted by default</h3><p>Credentials are encrypted at rest and shown exactly once.</p></div>
+            <div class="card"><div class="card-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.7 2.6 4 5.6 4 9s-1.3 6.4-4 9c-2.7-2.6-4-5.6-4-9s1.3-6.4 4-9z"/></svg></div><h3>Domains &amp; SSL</h3><p>Attach verified domains with DNS checks and SSL.</p></div>
+            <div class="card"><div class="card-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 3h8l4 4v14H6V3z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></svg></div><h3>Full history</h3><p>Every install, update, backup and restore is logged.</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="servers-platform">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Server Platform</span>
+          <h2>Operating systems, panels and management — honestly reported</h2>
+          <p>We only publish what is genuinely provisioned: OS versions with verified provider images, control panels configured for sale, and the management features live today.</p>
+        </div>
+        <div class="grid grid--2">
+          <div class="card">
+            <div class="card-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><path d="M17 13.5v7M13.5 17h7"/></svg></div><h3>Operating Systems</h3>
+            <p class="muted">Only combinations that pass plan, availability and live-image verification are shown.</p>
+            <p class="mt-2" data-home-os-count><span class="hint">Checking availability…</span></p>
+            <a class="btn btn--ghost mt-2" href="/operating-systems">View the OS catalog <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          </div>
+          <div class="card">
+            <div class="card-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5M3 17.5l9 5 9-5"/></svg></div><h3>Control Panels</h3>
+            <p class="muted">Listed only when genuinely provisioned with a service — never claimed otherwise.</p>
+            <p class="mt-2" data-home-panels-count><span class="hint">Checking availability…</span></p>
+            <a class="btn btn--ghost mt-2" href="/control-panels">View control panels <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          </div>
+        </div>
+        <p class="hint mt-3">Manage it all — health, metrics, snapshots and lifecycle — from <a href="/server-management">Server Management</a>.</p>
+      </div>
+    </section>
+
+    <section class="section section--soft" id="developers-home">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Developers</span>
+          <h2>Infrastructure built for builders</h2>
+          <p>Root access, encrypted environment credentials, domain verification and a full deployment event log — a platform that gets out of your way.</p>
+        </div>
+        <div data-dev-docs-root></div>
+        <p class="hint mt-3"><a href="/developers">Explore the developer platform <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="cta-band">
+          <div>
+            <h2>Ready to get started?</h2>
+            <p>Choose a plan, check out securely and manage everything from one professional client area.</p>
+          </div>
+          <a class="btn btn--secondary btn--lg" href="/app/catalog">Get Started</a>
+        </div>
+      </div>
+    </section>
+
   </main>
-
   <footer class="site-footer">
     <div class="container">
       <div class="footer-grid">
-        <div>
-          <a class="brand" href="/" style="color:#fff"><img src="/icons/icon-192.png" alt="" width="32" height="32"/> CloudHost247</a>
-          <p style="margin-top:12px;max-width:32ch">Cloud hosting with fast provisioning, straightforward billing, and support whenever you need it.</p>
-          <p><button type="button" data-install-app hidden class="btn btn-ghost" style="border-color:#33475f;color:#c8d3e4">Install app</button></p>
+        <div class="footer-brand">
+          <a class="brand" href="/" style="color:#fff"><span class="brand-mark" aria-hidden="true">C</span><span>CloudHost247</span></a>
+          <p>Professional global hosting and infrastructure for websites, businesses, developers and growing digital companies.</p>
         </div>
-        <div>
-          <h4>Products</h4>
+        
+        <nav aria-label="Products">
+          <h3>Products</h3>
+          <ul><li><a href="/hosting/web-hosting">Web Hosting</a></li><li><a href="/hosting/wordpress">WordPress Hosting</a></li><li><a href="/hosting/cloud">Cloud Hosting</a></li><li><a href="/hosting/vps">VPS Hosting</a></li><li><a href="/hosting/dedicated">Dedicated Servers</a></li><li><a href="/hosting/enterprise">Enterprise Servers</a></li><li><a href="/hosting/game-servers">Game Servers</a></li><li><a href="/business-email">Email Hosting</a></li><li><a href="/security#ssl">SSL Certificates</a></li></ul>
+        </nav>
+        <nav aria-label="Cloud & Servers">
+          <h3>Cloud & Servers</h3>
+          <ul><li><a href="/hosting/cloud">Public Cloud</a></li><li><a href="/hosting/cloud#private-cloud">Private Cloud</a></li><li><a href="/server-management">Server Management</a></li><li><a href="/app-deployment">Application Deployment</a></li><li><a href="/app-deployment#paas">PaaS</a></li><li><a href="/operating-systems">Operating Systems</a></li><li><a href="/control-panels">Control Panels</a></li></ul>
+        </nav>
+        <nav aria-label="Domains">
+          <h3>Domains</h3>
+          <ul><li><a href="/domains#search">Domain Search</a></li><li><a href="/domains">Registration</a></li><li><a href="/domains#transfer">Transfer</a></li><li><a href="/domains#pricing">Pricing</a></li><li><a href="/domains/brokerage">Domain Brokerage</a></li><li><a href="/domains#renewals">Renewal</a></li></ul>
+        </nav>
+        <nav aria-label="Developers">
+          <h3>Developers</h3>
+          <ul><li><a href="/developers">Developer Platform</a></li><li><a href="/app-deployment">Deployment</a></li><li><a href="/applications">Applications</a></li><li><a href="/applications?category=database">Databases</a></li><li><a href="/knowledgebase">Documentation</a></li></ul>
+        </nav>
+        <nav aria-label="Resources">
+          <h3>Resources</h3>
+          <ul><li><a href="/support">Help Center</a></li><li><a href="/knowledgebase">Knowledgebase</a></li><li><a href="/faqs">FAQs</a></li><li><a href="/blog">Blog</a></li><li><a href="/status">Server Status</a></li><li><a href="/contact">Contact Support</a></li></ul>
+        </nav>
+        <nav aria-label="Company">
+          <h3>Company</h3>
+          <ul><li><a href="/about">About CloudHost247</a></li><li><a href="/contact">Contact</a></li><li><a href="/offers">Offers</a></li><li><a href="/infrastructure">Infrastructure</a></li></ul>
+        </nav>
+        <nav aria-label="Legal">
+          <h3>Legal</h3>
           <ul>
-            <li><a href="/web-hosting.html">Web Hosting</a></li>
-            <li><a href="/vps-hosting.html">VPS</a></li>
-            <li><a href="/domains.html">Domains</a></li>
+            <li><a href="/legal/terms">Terms of Service</a></li>
+            <li><a href="/legal/privacy">Privacy Policy</a></li>
+            <li><a href="/legal/cookies">Cookie Policy</a></li>
+            <li><a href="/legal/acceptable-use">Acceptable Use</a></li>
+            <li><a href="/legal/refund-policy">Refund Policy</a></li>
+            <li><a href="/legal/sla">SLA</a></li>
           </ul>
-        </div>
-        <div>
-          <h4>Account</h4>
-          <ul>
-            <li><a href="/login.html">Sign in</a></li>
-            <li><a href="/register.html">Register</a></li>
-            <li><a href="/app/account">Dashboard</a></li>
-          </ul>
-        </div>
-        <div>
-          <h4>Company</h4>
-          <ul>
-            <li><a href="/domains.html">Support</a></li>
-            <li><a href="/app/support">Open a ticket</a></li>
-          </ul>
-        </div>
+        </nav>
       </div>
       <div class="footer-bottom">
-        <span>© <span data-year></span> CloudHost247. All rights reserved.</span>
-        <span>Made with ♥ for builders</span>
+        <span>&copy; <span data-year>2026</span> CloudHost247 Isc. — CloudHost247 · CH247. All rights reserved.</span>
+        <nav aria-label="Legal summary">
+          <a href="/legal/terms">Terms</a>
+          <a href="/legal/privacy">Privacy</a>
+          <a href="/legal/cookies">Cookies</a>
+          <a href="/legal/acceptable-use">Acceptable Use</a>
+          <a href="/legal/refund-policy">Refund Policy</a>
+        </nav>
       </div>
     </div>
   </footer>
-
   <script type="module" src="/assets/js/site.js"></script>
 </body>
 </html>

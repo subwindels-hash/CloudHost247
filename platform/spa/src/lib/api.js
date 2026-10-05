@@ -264,6 +264,18 @@ export const adminApi = {
   setTicketStatus: (id, status) =>
     api(`/api/v1/admin/tickets/${encodeURIComponent(id)}`, { method: 'PATCH', body: { status } }),
 
+  // --- website content: knowledgebase and blog articles (admin+) ---
+  articles: () => api('/api/v1/admin/articles'),
+  createArticle: (payload) => api('/api/v1/admin/articles', { method: 'POST', body: payload }),
+  updateArticle: (id, patch) =>
+    api(`/api/v1/admin/articles/${encodeURIComponent(id)}`, { method: 'PATCH', body: patch }),
+  deleteArticle: (id) => api(`/api/v1/admin/articles/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+
+  // --- platform settings key/value store (reads admin+, writes super_admin) ---
+  settings: () => api('/api/v1/admin/settings'),
+  saveSetting: (key, value) =>
+    api(`/api/v1/admin/settings/${encodeURIComponent(key)}`, { method: 'PUT', body: { value } }),
+
   // --- staff directory and the catalog ids the service form needs (admin+) ---
   users: () => api('/api/v1/admin/users'),
   catalogProducts: () => api('/api/v1/admin/catalog/products'),

@@ -1,11 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { cartApi, catalogApi, describeError } from '../lib/api.js';
 import { formatMoney } from '../lib/format.js';
 
 const CYCLES = ['monthly', 'quarterly', 'semiannual', 'annual', 'biennial'];
 
+/**
+ * ?product=<slug> deep-links from the marketing site's "Choose Plan" buttons, pre-selecting that
+ * product so the order flow starts at the right place.
+ */
 export default function CatalogPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const focusProduct = searchParams.get('product') || '';
   const [catalog, setCatalog] = useState(null);
   const [error, setError] = useState(false);
   const [cycles, setCycles] = useState({});
@@ -45,6 +51,12 @@ export default function CatalogPage() {
       </div>
 
       {error && <div className="alert alert-error" role="alert">Could not load the catalog.</div>}
+      {focusProduct && catalog && (
+        <div className="alert alert-success" role="status">
+          Showing plans for <strong>{catalog.products.find((p) => p.slug === focusProduct)?.name ?? focusProduct}</strong>.{' '}
+          <button type="button" className="linklike" onClick={() => setSearchParams({})}>Show all products</button>
+        </div>
+      )}
       {cartError && (
         <div className="alert alert-error" role="alert">
           {cartError} {/sign in/i.test(cartError) && <Link to="/account">Sign in</Link>}
@@ -55,7 +67,9 @@ export default function CatalogPage() {
       {catalog === null && !error ? <p className="muted">Loading catalog…</p>
         : catalog.products.length === 0 ? (
           <div className="card"><p className="muted">No products are published yet. Add some from the admin catalog to see them here.</p></div>
-        ) : catalog.products.map((product) => (
+        ) : catalog.products
+          .filter((product) => !focusProduct || product.slug === focusProduct)
+          .map((product) => (
           <section className="card" key={product.slug}>
             <h2>{product.name}</h2>
             <p className="muted">{product.description}</p>

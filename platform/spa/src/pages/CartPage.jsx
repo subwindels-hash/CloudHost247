@@ -16,6 +16,7 @@ export default function CartPage() {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState('');
   const [checkingOut, setCheckingOut] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -140,9 +141,33 @@ export default function CartPage() {
             <p className="muted">
               Totals are recalculated by the server at checkout; nothing here is trusted for billing.
             </p>
-            <button type="button" className="btn btn-primary" onClick={checkout} disabled={checkingOut}>
+            <div className="field">
+              <label htmlFor="accept-terms" style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontWeight: 500 }}>
+                <input
+                  id="accept-terms"
+                  type="checkbox"
+                  checked={termsAccepted}
+                  onChange={(event) => setTermsAccepted(event.target.checked)}
+                  style={{ width: 'auto', marginTop: 4 }}
+                  required
+                />
+                <span>
+                  I agree to the <a href="/legal/terms" target="_blank" rel="noopener">Terms of Service</a>,{' '}
+                  <a href="/legal/acceptable-use" target="_blank" rel="noopener">Acceptable Use Policy</a> and{' '}
+                  <a href="/legal/refund-policy" target="_blank" rel="noopener">Refund Policy</a>.
+                </span>
+              </label>
+            </div>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={checkout}
+              disabled={checkingOut || !termsAccepted}
+              aria-disabled={checkingOut || !termsAccepted}
+            >
               {checkingOut ? 'Creating your order…' : 'Checkout'}
             </button>
+            {!termsAccepted && <p className="hint">Accept the terms to continue to payment.</p>}
           </section>
         </div>
       )}
