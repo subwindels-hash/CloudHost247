@@ -105,10 +105,18 @@ and the same-origin API, so auth tokens work without CORS.
 
 The dashboard covers the customer purchase path end to end: catalog → cart → checkout → invoice →
 payment (manual instructions, or the sandbox gateway settling through the real webhook receiver),
-plus services, domains, subscriptions and the ledger. The SPA's API client is exercised unmodified
-by `tests/spa-commerce.test.js` against the real server; the React pages themselves are verified by
-the production build, and no browser has rendered them in this environment — that limit is recorded
-in `docs/UNFINISHED-BUILD-CODE-NAMES.md` rather than implied away.
+plus services, domains, subscriptions and the ledger. It also carries the first admin console slice:
+a staff-gated shell with live queue counts, the customer directory and detail (service/domain
+records for staff; status and role changes for super admins only), the ticket queue with replies and
+status, the staff directory, and "switch to customer" delegation — which parks the admin's tokens in
+`sessionStorage` and installs a one-hour customer-scoped token that carries no refresh token, so the
+delegated session can never be refreshed back into the admin's identity.
+
+The SPA's API client is exercised unmodified by `tests/spa-commerce.test.js` and
+`tests/spa-admin.test.js` against the real server; every page module is server-rendered once by
+`npm --prefix spa run smoke` and the whole set is compiled by the production build. No browser has
+rendered these pages in this environment — that limit is recorded in
+`docs/UNFINISHED-BUILD-CODE-NAMES.md` rather than implied away.
 
 ## API surface (ported so far)
 
@@ -135,7 +143,8 @@ npm --prefix spa run smoke   # renders each SPA page once on the server (imports
 
 The integration tests boot the real app on an ephemeral port and drive it over HTTP — no mocking of
 the request path — covering auth, MFA, session invalidation, RBAC, static caching/304, and traversal
-protection.
+protection. The two SPA suites import `spa/src/lib/api.js` (the same file the pages import) and run
+it against that server, so the client, not a stub, is what is verified.
 
 ## What is ported vs still open
 

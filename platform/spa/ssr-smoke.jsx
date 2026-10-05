@@ -9,6 +9,7 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { MemoryRouter } from 'react-router-dom';
+import DashboardPage from './src/pages/DashboardPage.jsx';
 import CatalogPage from './src/pages/CatalogPage.jsx';
 import CartPage from './src/pages/CartPage.jsx';
 import BillingPage from './src/pages/BillingPage.jsx';
@@ -16,8 +17,19 @@ import InvoiceDetailPage from './src/pages/InvoiceDetailPage.jsx';
 import ServicesPage from './src/pages/ServicesPage.jsx';
 import SecurityPage from './src/pages/SecurityPage.jsx';
 import SupportPage from './src/pages/SupportPage.jsx';
+import AdminLayout from './src/pages/AdminLayout.jsx';
+import AdminDashboardPage from './src/pages/AdminDashboardPage.jsx';
+import AdminCustomersPage from './src/pages/AdminCustomersPage.jsx';
+import AdminCustomerDetailPage from './src/pages/AdminCustomerDetailPage.jsx';
+import AdminTicketsPage from './src/pages/AdminTicketsPage.jsx';
+import AdminTicketDetailPage from './src/pages/AdminTicketDetailPage.jsx';
+import AdminUsersPage from './src/pages/AdminUsersPage.jsx';
 
-const pages = { CatalogPage, CartPage, BillingPage, InvoiceDetailPage, ServicesPage, SecurityPage, SupportPage };
+const pages = {
+  DashboardPage, CatalogPage, CartPage, BillingPage, InvoiceDetailPage, ServicesPage, SecurityPage, SupportPage,
+  AdminLayout, AdminDashboardPage, AdminCustomersPage, AdminCustomerDetailPage,
+  AdminTicketsPage, AdminTicketDetailPage, AdminUsersPage,
+};
 const results = {};
 for (const [name, Page] of Object.entries(pages)) {
   try {

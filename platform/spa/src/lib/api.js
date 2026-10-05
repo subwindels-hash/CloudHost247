@@ -211,6 +211,65 @@ export const accountApi = {
   reply: (id, body) => api(`/api/v1/account/tickets/${encodeURIComponent(id)}/replies`, { method: 'POST', body: { body } }),
 };
 
+/**
+ * Staff-side API (the admin console).
+ *
+ * The server decides who may do what — these methods only carry the request. Role boundaries are
+ * asserted in tests/spa-admin.test.js: staff may work the directory, tickets and the passive
+ * service/domain records; only admins may delegate into a customer's session; only super_admins may
+ * change an account's status or role, and never their own role.
+ */
+const queryString = (params) => {
+  const search = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== null && value !== '') search.set(key, String(value));
+  }
+  const qs = search.toString();
+  return qs ? `?${qs}` : '';
+};
+
+export const adminApi = {
+  // --- customer directory (staff+) ---
+  customers: (params = {}) => api(`/api/v1/admin/customers${queryString(params)}`),
+  customer: (id) => api(`/api/v1/admin/customers/${encodeURIComponent(id)}`),
+
+  // --- account integrity (super_admin only) ---
+  setCustomerStatus: (id, status) =>
+    api(`/api/v1/admin/customers/${encodeURIComponent(id)}/status`, { method: 'PATCH', body: { status } }),
+  setCustomerRole: (id, role) =>
+    api(`/api/v1/admin/customers/${encodeURIComponent(id)}/role`, { method: 'PATCH', body: { role } }),
+
+  // --- passive service/domain records (staff+) ---
+  createCustomerService: (id, payload) =>
+    api(`/api/v1/admin/customers/${encodeURIComponent(id)}/services`, { method: 'POST', body: payload }),
+  updateCustomerService: (id, recordId, patch) =>
+    api(`/api/v1/admin/customers/${encodeURIComponent(id)}/services/${encodeURIComponent(recordId)}`, { method: 'PATCH', body: patch }),
+  createCustomerDomain: (id, payload) =>
+    api(`/api/v1/admin/customers/${encodeURIComponent(id)}/domains`, { method: 'POST', body: payload }),
+  updateCustomerDomain: (id, recordId, patch) =>
+    api(`/api/v1/admin/customers/${encodeURIComponent(id)}/domains/${encodeURIComponent(recordId)}`, { method: 'PATCH', body: patch }),
+
+  // --- support sessions: act as the customer, then come back (admin+) ---
+  switchToCustomer: (id, reason) =>
+    api(`/api/v1/admin/customers/${encodeURIComponent(id)}/switch${queryString({ reason })}`, { method: 'POST', body: {} }),
+  supportSessions: () => api('/api/v1/admin/support-sessions'),
+  endSupportSession: (id) =>
+    api(`/api/v1/admin/support-sessions/${encodeURIComponent(id)}/end`, { method: 'POST', body: {} }),
+
+  // --- ticket queue (staff+) ---
+  tickets: (params = {}) => api(`/api/v1/admin/tickets${queryString(params)}`),
+  ticket: (id) => api(`/api/v1/admin/tickets/${encodeURIComponent(id)}`),
+  replyToTicket: (id, message) =>
+    api(`/api/v1/admin/tickets/${encodeURIComponent(id)}/messages`, { method: 'POST', body: { message } }),
+  setTicketStatus: (id, status) =>
+    api(`/api/v1/admin/tickets/${encodeURIComponent(id)}`, { method: 'PATCH', body: { status } }),
+
+  // --- staff directory and the catalog ids the service form needs (admin+) ---
+  users: () => api('/api/v1/admin/users'),
+  catalogProducts: () => api('/api/v1/admin/catalog/products'),
+  catalogProduct: (id) => api(`/api/v1/admin/catalog/products/${encodeURIComponent(id)}`),
+};
+
 /** Human-readable rendering of an ApiError for form alerts. */
 export function describeError(err) {
   if (err instanceof ApiError) {

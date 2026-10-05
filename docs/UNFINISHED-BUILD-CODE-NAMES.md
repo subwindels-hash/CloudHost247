@@ -17,13 +17,15 @@ staging-blocked — see §5).
 | 1 | `platform/` payment gateways — Stripe / PayPal / Paystack inbound webhooks + strict settlement receiver | **DONE 2026-10-05** — see §1b. Initiation of a real-provider checkout remains deferred (needs provider egress) and is refused with that reason |
 | 2 | `platform/` passkeys / WebAuthn — enrolment, management, sign-in (email-first + usernameless) and the browser ceremony helper | **DONE 2026-10-05 (server + both frontends; not browser-verified)** — see §1b. Attestation formats other than `none` are refused by name; no real browser or hardware authenticator has driven a ceremony in this environment |
 | 3 | `platform/` quick wins — TOTP enrolment QR image; `scripts/rehash-passwords.js` | **DONE 2026-10-05** — see §1b. QR matrices are byte-identical to python-qrcode and the API's PNG was decoded back by OpenCV; the rehash tool only ever invites a reset, because a bcrypt hash cannot be verified or transposed |
+| 5 | `platform/spa/` admin console — staff-gated shell, dashboard counts, customer directory/detail, service + domain records, ticket queue, staff directory, "switch to customer" delegation | **DONE 2026-10-05 (server + client verified end-to-end; no browser has rendered the pages)** — see §1b. Delegation parks the admin's credentials so the delegated token is never refreshable, and the role boundaries are the server's own (a staff account is refused on status/role/switch/directory; a super admin cannot change their own role) |
 | 4 | `platform/spa/` commerce and billing — cart, checkout, invoices, payments, services, domains | **DONE 2026-10-05 (server + client verified end-to-end; no browser has rendered the pages)** — see §1b. Two server-side blockers were fixed on the way: cart lines carried no plan names, and plan changes demanded a plan UUID that no public endpoint reveals |
+| 5 | `platform/spa/` admin console — role-gated shell, dashboard counts, customer directory and detail, service/domain records, ticket queue, delegation into a customer session | **DONE 2026-10-05 (server + client verified end-to-end; no browser has rendered the pages)** — see §1b. Role boundaries (staff / admin / super_admin), the audited status+role rules and the support-session lifecycle are pinned by `platform/tests/spa-admin.test.js`; nothing was relaxed on the server |
 
 ---
 
 ## 1. `platform/` — the newest build (added 2026-10-05) — largest unfinished surface
 
-41 domains exist and its 494 tests pass, but 15 modules ship **explicit `deferred` markers** for the
+41 domains exist and its 528 tests pass, but 15 modules ship **explicit `deferred` markers** for the
 live integration side, and the frontend is a fraction of the old one.
 
 ### 1a. Modules whose live integration is deferred (code present, egress missing)
@@ -110,26 +112,38 @@ live integration side, and the frontend is a fraction of the old one.
   Still open, and refused with that reason: **initiating** a real-provider checkout (needs live
   provider egress + PSP credentials), and the Blockonomics (Bitcoin/USDT) gateway used by the WHMCS
   build, which has no `platform/` equivalent at all.
-- **SPA dashboard (`platform/spa/`)** — **8 of ~84 pages ported**: `CatalogPage` (now with
-  add-to-cart and a billing-cycle picker), `CartPage` (quantity, remove, checkout), `BillingPage`
+- **SPA dashboard (`platform/spa/`)** — **15 page modules of ~84 ported** (8 customer pages + 7 admin
+  modules, the shell included): `DashboardPage` (overview), `CatalogPage` (with add-to-cart and a
+  billing-cycle picker), `CartPage` (quantity, remove, checkout), `BillingPage`
   (invoices, subscriptions with cancel-at-period-end and plan-change requests, ledger),
   `InvoiceDetailPage` (balance, ledger, gateway list including refusals with reasons, manual
-  instructions, sandbox settlement), `ServicesPage` (services and domains), `DashboardPage`,
-  `SecurityPage`, `SupportPage`. The customer purchase path is therefore closed end to end in the
+  instructions, sandbox settlement), `ServicesPage` (services and domains), `SecurityPage`,
+  `SupportPage`. The customer purchase path is therefore closed end to end in the
   UI: catalog → cart → order/invoice → payment → settled invoice.
   Two server-side blockers surfaced while wiring it and were fixed additively: cart items now carry
   `planName`/`planSlug`/`productName` (the cart stores a plan id that no public catalog endpoint
   exposes, so a cart UI could only render a UUID), and
   `POST /billing/subscriptions/:id/change-plan` accepts `planSlug` as well as `planId` (the public
   catalog is keyed by slug; slugs resolve inside the subscription's own product).
-  Still missing: the whole admin console, server detail, DNS, Cloudflare, marketplace, AI and Tools
-  screens, and the admin-side security screens.
+  The admin console slice is now built: a staff-gated `AdminLayout`, `AdminDashboardPage` (live
+  queue counts plus open support sessions), `AdminCustomersPage` (server-side search/role/paging),
+  `AdminCustomerDetailPage` (service and domain records for staff; status and role for super admins
+  only, with the server's own refusals shown verbatim; "switch to customer" for admins, which parks
+  the admin's credentials in `sessionStorage` and adopts a one-hour delegated token that carries no
+  refresh token), `AdminTicketsPage` and `AdminTicketDetailPage` (status filter, replies, closing)
+  and the admin-only `AdminUsersPage`.
+  Still missing: the remaining ~35 admin groups (catalog authoring, servers, DNS, Cloudflare,
+  marketplace, AI/tools, security-number policy, …), the customer-facing DNS, Cloudflare and
+  marketplace screens, server detail, and the mobile shell.
   **Verification, stated exactly:** the SPA's own API client is imported unmodified and driven
   through the real HTTP pipeline by `platform/tests/spa-commerce.test.js` (26 assertions across the
-  journey, scoping and refusal paths) plus `spa-format.test.js` for the money/date/status helpers,
-  and the pages are compiled by the production Vite build. **No browser has rendered these pages in
-  this environment** — there is no DOM here — so layout and interaction are not claimed as visually
-  verified.
+  journey, scoping and refusal paths), `platform/tests/spa-admin.test.js` (a customer, a staff
+  account, an admin and a super admin against the real guards; delegation parked and restored; both
+  delegating while delegated and super-admin self-role change refused) plus `spa-format.test.js` for
+  the money/date/status helpers. All 15 page modules are also server-rendered once each by
+  `npm --prefix spa run smoke` (bad imports and render-time mistakes), and the whole set is compiled
+  by the production Vite build. **No browser has rendered these pages in this environment** — there
+  is no DOM here — so layout and interaction are not claimed as visually verified.
 - **`platform/mobile/`** — Capacitor config/resources only; no app code.
 
 ---
