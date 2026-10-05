@@ -8,6 +8,7 @@
  */
 'use strict';
 
+const crypto = require('node:crypto');
 const { v } = require('../core/validate');
 const { NotFoundError, ForbiddenError, ConflictError } = require('../core/errors');
 const { uuidv7 } = require('../lib/ids');
@@ -100,6 +101,120 @@ function register(router, deps) {
       status: 'deleted', deleted_at: new Date().toISOString(), deleted_by: auth.id,
     });
     ctx.json({ ok: true });
+  });
+
+  // ---- User detail ------------------------------------------------------------------------------
+  router.get('/api/v1/admin/users/:id', async (ctx) => {
+    await asAdmin(ctx, deps);
+    const user = await store.table('users').findById(ctx.params.id);
+    if (!user) throw new NotFoundError('User not found');
+    ctx.json({ user: publicUser(user) });
+  });
+
+  // ---- Security Number oversight ----------------------------------------------------------------
+  // Admins NEVER see the value or its hash — only lifecycle metadata. Rotation issues a new value
+  // that only the customer can retrieve via their own step-up reveal (out of scope here).
+  const SN_DEFAULTS = {
+    rotationHours: 720, allowManualRotation: true, requireStepUp: true,
+    maxVerificationAttempts: 5, attemptWindowSeconds: 900, revealTtlSeconds: 300, supportSessionMinutes: 30,
+  };
+
+  async function getPolicy() {
+    const policy = { ...SN_DEFAULTS };
+    const { rows } = await store.table('platform_settings').find({});
+    for (const r of rows) if (Object.prototype.hasOwnProperty.call(policy, r.key)) policy[r.key] = r.value;
+    return policy;
+  }
+  async function setSetting(key, value, actorId) {
+    const existing = await store.table('platform_settings').findById(key);
+    if (existing) await store.table('platform_settings').updateById(key, { value, updated_by: actorId });
+    else await store.table('platform_settings').insert({ key, value, updated_by: actorId });
+  }
+  // Lifecycle metadata only — there is no code path that returns the value or the hash.
+  function snStatus(user) {
+    return {
+      initialized: !!user.security_number_initialized,
+      requiresReinitialization: !user.security_number_initialized,
+      version: user.security_number_version ?? 0,
+      createdAt: user.security_number_created_at ?? null,
+      expiresAt: user.security_number_expires_at ?? null,
+    };
+  }
+  function generateSecurityNumber() {
+    return String(crypto.randomInt(0, 1000000)).padStart(6, '0');
+  }
+  function hashSecurityNumber(sn) {
+    return crypto.createHash('sha256').update(String(sn)).digest('hex');
+  }
+
+  router.get('/api/v1/admin/users/:id/security-number', async (ctx) => {
+    await asAdmin(ctx, deps);
+    const user = await store.table('users').findById(ctx.params.id);
+    if (!user) throw new NotFoundError('User not found');
+    ctx.json({ securityNumber: snStatus(user) });
+  });
+
+  router.post('/api/v1/admin/users/:id/security-number/rotate', async (ctx) => {
+    const auth = await asAdmin(ctx, deps);
+    const user = await store.table('users').findById(ctx.params.id);
+    if (!user) throw new NotFoundError('User not found');
+    const policy = await getPolicy();
+    const nextVersion = (user.security_number_version ?? 0) + 1;
+    // The new value is hashed and stored; the plaintext is deliberately discarded — the customer
+    // retrieves it through their own authenticated reveal, never the admin.
+    const newValue = generateSecurityNumber();
+    const refreshed = await store.table('users').updateById(user.id, {
+      security_number_hash: hashSecurityNumber(newValue),
+      security_number_version: nextVersion,
+      security_number_initialized: true,
+      security_number_created_at: new Date().toISOString(),
+      security_number_expires_at: new Date(Date.now() + policy.rotationHours * 3600 * 1000).toISOString(),
+    });
+    await store.table('audit_logs').insert({
+      id: uuidv7(), actor_id: auth.id, actor_role: auth.role, action: 'security_number_force_rotated',
+      entity_type: 'user', entity_id: user.id, ip_address: ctx.ip, user_agent: ctx.userAgent,
+      after: { version: nextVersion, trigger: 'admin_forced' },
+    });
+    ctx.json({ securityNumber: snStatus(refreshed) });
+  });
+
+  router.post('/api/v1/admin/users/:id/security-number/require-reinitialization', async (ctx) => {
+    const auth = await asSuperAdmin(ctx, deps);
+    const user = await store.table('users').findById(ctx.params.id);
+    if (!user) throw new NotFoundError('User not found');
+    const refreshed = await store.table('users').updateById(user.id, { security_number_initialized: false });
+    await store.table('audit_logs').insert({
+      id: uuidv7(), actor_id: auth.id, actor_role: auth.role, action: 'security_number_reinitialization_required',
+      entity_type: 'user', entity_id: user.id, ip_address: ctx.ip, user_agent: ctx.userAgent, after: null,
+    });
+    ctx.json({ securityNumber: snStatus(refreshed) });
+  });
+
+  router.get('/api/v1/admin/security-number/policy', async (ctx) => {
+    await asAdmin(ctx, deps);
+    ctx.json({ policy: await getPolicy() });
+  });
+
+  router.put('/api/v1/admin/security-number/policy', async (ctx) => {
+    const auth = await asSuperAdmin(ctx, deps);
+    const input = await ctx.validate(v.object({
+      rotationHours: v.coerce.number().int().min(1).max(8760).optional(),
+      allowManualRotation: v.boolean().optional(),
+      requireStepUp: v.boolean().optional(),
+      maxVerificationAttempts: v.coerce.number().int().min(1).max(100).optional(),
+      attemptWindowSeconds: v.coerce.number().int().min(10).max(86400).optional(),
+      revealTtlSeconds: v.coerce.number().int().min(10).max(3600).optional(),
+      supportSessionMinutes: v.coerce.number().int().min(1).max(240).optional(),
+    }));
+    const keys = Object.keys(input);
+    if (keys.length === 0) throw new ConflictError('At least one setting must be provided');
+    for (const key of keys) await setSetting(key, input[key], auth.id);
+    await store.table('audit_logs').insert({
+      id: uuidv7(), actor_id: auth.id, actor_role: auth.role, action: 'security_number_policy_updated',
+      entity_type: 'platform_settings', entity_id: null, ip_address: ctx.ip, user_agent: ctx.userAgent,
+      after: { keys },
+    });
+    ctx.json({ policy: await getPolicy() });
   });
 
   /** Delegate: mint a short-lived token that authenticates as the customer, acting as the admin. */
