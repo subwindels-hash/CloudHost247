@@ -17,12 +17,43 @@ const name = 'commerce';
 
 const round2 = (n) => Math.round(n * 100) / 100;
 
+// MAX_CART_ITEM_QUANTITY in the original (src/config/billing.ts).
+const MAX_CART_ITEM_QUANTITY = 20;
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 const addItemSchema = v.object({
   planSlug: v.string().min(1).max(160),
   billingCycle: v.enum(['monthly', 'quarterly', 'semiannual', 'annual', 'biennial', 'once']).default('monthly'),
-  quantity: v.coerce.number().int().min(1).max(99).default(1),
+  quantity: v.coerce.number().int().min(1).max(MAX_CART_ITEM_QUANTITY).default(1),
   domain: v.string().trim().max(253).optional(),
 });
+
+const updateCartItemSchema = v.object({
+  quantity: v.coerce.number().int().min(1).max(MAX_CART_ITEM_QUANTITY),
+});
+
+/**
+ * Mirrors toOrderSummaryDTO in the original (src/dto/commerce.ts). This schema names the columns
+ * reference/subtotal/discount_total/tax_total/total and keeps no payment_status on the order, so
+ * those are mapped — payment status is derived from the order's invoice.
+ */
+function orderSummaryDto(order, invoice) {
+  return {
+    id: order.id,
+    orderNumber: order.reference,
+    status: order.status,
+    paymentStatus: invoice ? (invoice.status === 'paid' ? 'paid' : 'unpaid') : 'unpaid',
+    currency: order.currency,
+    subtotalAmount: order.subtotal,
+    discountAmount: order.discount_total ?? 0,
+    taxAmount: order.tax_total ?? 0,
+    totalAmount: order.total,
+    createdAt: order.created_at,
+    invoiceId: invoice?.id ?? null,
+    invoiceNumber: invoice?.number ?? null,
+  };
+}
 
 async function getOrCreateCart(store, userId, sessionToken) {
   const predicate = userId ? { user_id: userId, status: 'open' } : { session_token: sessionToken, status: 'open' };
@@ -122,6 +153,26 @@ function register(router, deps) {
     return;
   });
 
+  /** Change a line's quantity. Answers with the refreshed cart, as the original does. */
+  router.patch('/api/v1/cart/items/:id', async (ctx) => {
+    const auth = await authenticate(ctx, deps);
+    if (!UUID_RE.test(String(ctx.params.id ?? ''))) throw new ValidationError('id must be a valid UUID');
+    const { quantity } = await ctx.validate(updateCartItemSchema);
+
+    const item = await store.table('cart_items').findById(ctx.params.id);
+    if (!item) throw new NotFoundError('Cart item not found');
+
+    // The item must belong to a cart this caller owns — updateCartItemQuantity is user-scoped.
+    const cart = await store.table('carts').findById(item.cart_id);
+    if (!cart || (auth.id ? cart.user_id !== auth.id : cart.session_token !== ctx.cookies.cart)) {
+      throw new NotFoundError('Cart item not found');
+    }
+
+    await store.table('cart_items').updateById(item.id, { quantity });
+    const { rows } = await store.table('cart_items').find({ cart_id: cart.id });
+    ctx.json({ cart: publicCart(cart, rows) });
+  });
+
   router.delete('/api/v1/cart/items/:id', async (ctx) => {
     const item = await store.table('cart_items').findById(ctx.params.id);
     if (!item) throw new NotFoundError('Cart item not found');
@@ -217,6 +268,39 @@ function register(router, deps) {
       })),
       total,
     });
+  });
+
+  /** Order detail with its line items (commerce.ts getMyOrderDetail). */
+  router.get('/api/v1/orders/:id', async (ctx) => {
+    const auth = await authenticate(ctx, deps);
+    if (!UUID_RE.test(String(ctx.params.id ?? ''))) throw new ValidationError('id must be a valid UUID');
+
+    const order = await store.table('orders').findById(ctx.params.id);
+    if (!order || order.user_id !== auth.id) throw new NotFoundError('No order was found with that id');
+
+    const { rows: items } = await store.table('order_items').find({ order_id: order.id });
+    const invoice = order.invoice_id
+      ? await store.table('invoices').findById(order.invoice_id)
+      : await store.table('invoices').findOne({ order_id: order.id });
+
+    // order_items stores a plan_id, so resolve the snapshot names the DTO exposes.
+    const resolved = [];
+    for (const item of items) {
+      const plan = item.plan_id ? await store.table('catalog_product_plans').findById(item.plan_id) : null;
+      const product = plan?.product_id ? await store.table('catalog_products').findById(plan.product_id) : null;
+      resolved.push({
+        id: item.id,
+        productName: product?.name ?? item.description ?? null,
+        planName: plan?.name ?? item.description ?? null,
+        billingPeriod: item.billing_cycle,
+        quantity: item.quantity,
+        unitPriceAmount: item.unit_price,
+        lineTotalAmount: item.line_total,
+        currency: order.currency,
+      });
+    }
+
+    ctx.json({ order: { ...orderSummaryDto(order, invoice), items: resolved } });
   });
 }
 

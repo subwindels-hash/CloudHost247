@@ -22,6 +22,18 @@ function publicApp(row) {
 function register(router, deps) {
   const { store } = deps;
 
+  /**
+   * The public category list (marketplace.ts GET /app-categories) — active categories only, in
+   * sort_order then name order, as toCategoryDTO exposes them.
+   */
+  router.get('/api/v1/app-categories', async (ctx) => {
+    const { rows } = await store.table('app_categories').find(
+      { active: true },
+      { orderBy: ['sort_order', 'name'] }
+    );
+    ctx.json({ categories: rows.map((c) => ({ slug: c.slug, name: c.name, description: c.description ?? null })) });
+  });
+
   router.get('/api/v1/marketplace/categories', async (ctx) => {
     const rows = await store.table('application_categories').all();
     ctx.json({ categories: rows.map((c) => ({ id: c.id, name: c.name, slug: c.slug, active: c.active })) });

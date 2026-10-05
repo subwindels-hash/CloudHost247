@@ -39,6 +39,41 @@ function cannedReply(knowledge, text) {
 function register(router, deps) {
   const { store } = deps;
 
+  /**
+   * Human-support availability for the widget (public — the original takes no auth).
+   * ONLINE when at least one staff member is present with spare capacity, BUSY when staff are
+   * present but at capacity, otherwise OFFLINE.
+   */
+  router.get('/api/v1/ai-support/availability', async (ctx) => {
+    const [users, presence, conversations] = await Promise.all([
+      store.table('users').all(),
+      store.table('support_agent_presence').all(),
+      store.table('ai_support_conversations').all(),
+    ]);
+
+    const eligible = new Set(
+      users.filter((u) => u.status === 'active' && ['staff', 'admin', 'super_admin'].includes(u.role)).map((u) => u.id),
+    );
+
+    let available = 0;
+    let online = 0;
+    let busy = 0;
+    for (const p of presence) {
+      if (!eligible.has(p.user_id)) continue;
+      if (p.status === 'ONLINE') {
+        online += 1;
+        const load = conversations.filter(
+          (c) => c.assigned_agent_id === p.user_id && ['ASSIGNED', 'IN_PROGRESS'].includes(c.status),
+        ).length;
+        if (load < (p.capacity ?? 3)) available += 1;
+      } else if (p.status === 'BUSY') {
+        busy += 1;
+      }
+    }
+
+    ctx.json({ status: available > 0 ? 'ONLINE' : (online > 0 || busy > 0) ? 'BUSY' : 'OFFLINE' });
+  });
+
   router.get('/api/v1/ai-support/agents', async (ctx) => {
     await authenticate(ctx, deps);
     const rows = await store.table('ai_support_agents').all();
@@ -94,6 +129,43 @@ function register(router, deps) {
 
   // Newsletter sign-up captured from inside a support conversation. Idempotent on email: an
   // existing subscription is returned with alreadySubscribed=true rather than duplicated.
+  // Capture contact details from inside a conversation. The widget can be used before sign-in, so
+  // auth is optional — but a conversation that belongs to an account is only editable by it.
+  router.patch('/api/v1/ai-support/conversations/:id/contact', async (ctx) => {
+    const body = await ctx.validate(v.object({
+      name: v.string().trim().min(2).max(160),
+      email: v.string().trim().toLowerCase().email(),
+    }));
+    const auth = await authenticate(ctx, { ...deps, allowMissing: true });
+
+    const conv = await store.table('ai_support_conversations').findById(ctx.params.id);
+    if (!conv) throw new NotFoundError('Conversation not found');
+    if (conv.user_id && conv.user_id !== auth?.id) throw new NotFoundError('Conversation not found');
+
+    const email = body.email.toLowerCase();
+    await store.table('ai_support_conversations').updateById(conv.id, {
+      visitor_name: body.name, visitor_email: email, updated_at: new Date().toISOString(),
+    });
+
+    // Still waiting on the AI (or escalated but unassigned) — tell the human queue who to contact.
+    if (conv.status !== 'AI_ACTIVE' && conv.user_id) {
+      await store.table('notifications').insert({
+        id: uuidv7(), user_id: conv.user_id,
+        title: 'CloudHost247 Support has your contact details',
+        body: `We recorded ${email} on your support conversation and a representative will follow up.`,
+      });
+    }
+
+    if (auth) {
+      await store.table('audit_logs').insert({
+        id: uuidv7(), actor_id: auth.id, actor_role: auth.role, action: 'SUPPORT_CONTACT_DETAILS_CAPTURED',
+        entity_type: 'ai_support_conversation', entity_id: conv.id,
+        ip_address: ctx.ip, user_agent: ctx.userAgent, after: null,
+      });
+    }
+    ctx.json({ saved: true });
+  });
+
   router.post('/api/v1/ai-support/conversations/:id/newsletter', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const conv = await store.table('ai_support_conversations').findOne({ id: ctx.params.id, user_id: auth.id });

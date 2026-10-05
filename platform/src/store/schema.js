@@ -1011,6 +1011,23 @@ const TABLES = {
     indexes: [{ name: 'app_categories_slug_key', columns: ['slug'], unique: true }],
   },
 
+  // Mirrors migration 0029. The marketplace groups published applications by category; the public
+  // listing only ever shows active ones (listCategories(db, true)).
+  app_categories: {
+    columns: {
+      id: pk(),
+      name: text({ required: true }),
+      slug: text({ required: true }),
+      description: text({ nullable: true }),
+      icon_url: text({ nullable: true }),
+      sort_order: int({ default: 0 }),
+      active: bool({ default: true }),
+      created_at: ts(),
+      updated_at: ts(),
+    },
+    indexes: [{ name: 'app_categories_active_sort_idx', columns: ['active', 'sort_order'] }],
+  },
+
   applications: {
     columns: {
       version: text({ nullable: true }),
@@ -1075,6 +1092,11 @@ const TABLES = {
       order_id: uuid({ nullable: true }),
       status: text({ default: 'installing' }),
       url: text({ nullable: true }),
+      // Migration 0032 — the Docker Compose project name the agent reports health against
+      // (customer-<userIdShort>-<installShort>), unique when set.
+      container_project: text({ nullable: true }),
+      health_status: text({ default: 'unknown' }),
+      last_health_check_at: ts({ nullable: true }),
       created_at: ts(),
       updated_at: ts(),
     },

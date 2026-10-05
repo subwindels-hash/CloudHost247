@@ -8,7 +8,7 @@
 
 const crypto = require('node:crypto');
 const { v } = require('../core/validate');
-const { UnauthorizedError } = require('../core/errors');
+const { UnauthorizedError, NotFoundError } = require('../core/errors');
 const { uuidv7 } = require('../lib/ids');
 const { asAdmin } = require('../lib/auth');
 
@@ -24,7 +24,7 @@ function constantTimeEqual(a, b) {
 function requireAgentToken(ctx, config) {
   const expected = config.AGENT_TOKEN;
   if (!expected) throw new UnauthorizedError('Agent endpoints are disabled (no AGENT_TOKEN configured)');
-  const header = ctx.request.headers.authorization || '';
+  const header = ctx.headers.authorization || '';
   const token = header.startsWith('Bearer ') ? header.slice(7) : '';
   if (!token || !constantTimeEqual(token, expected)) throw new UnauthorizedError('Invalid agent token');
 }
@@ -63,6 +63,35 @@ function register(router, deps) {
       await store.table('agent_heartbeats').insert({ id: uuidv7(), server_id: body.serverId, last_seen_at: new Date().toISOString() });
     }
     ctx.json({ ok: true });
+  });
+
+  /**
+   * The agent reporting an installation's health (agent.ts POST /agent/health). The original
+   * derives the server from the signed agent identity; this port's shared-token auth carries no
+   * server identity, so serverId is taken from the body when supplied and the project name alone
+   * otherwise.
+   */
+  router.post('/api/v1/agent/health', async (ctx) => {
+    requireAgentToken(ctx, config);
+    const body = await ctx.validate(v.object({
+      project: v.string().min(1).max(120),
+      healthy: v.boolean(),
+      detail: v.string().max(500).optional(),
+      serverId: v.string().uuid().optional(),
+    }));
+
+    const predicate = body.serverId
+      ? { container_project: body.project, server_id: body.serverId }
+      : { container_project: body.project };
+    const installation = await store.table('application_installations').findOne(predicate);
+    if (!installation) throw new NotFoundError('No installation found for that project on this server');
+
+    await store.table('application_installations').updateById(installation.id, {
+      health_status: body.healthy ? 'healthy' : 'unhealthy',
+      last_health_check_at: new Date().toISOString(),
+    });
+
+    ctx.json({ ok: true, installationId: installation.id, status: body.healthy ? 'healthy' : 'unhealthy' });
   });
 
   router.get('/api/v1/agent/health', async (ctx) => {
