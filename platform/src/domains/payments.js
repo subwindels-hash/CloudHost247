@@ -19,10 +19,39 @@ const { applySuccessfulPayment } = require('../lib/billing-apply');
 
 const name = 'payments';
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 const initiateSchema = v.object({
   invoiceId: v.string().min(1),
   gateway: v.enum(['sandbox', 'manual']),
 });
+
+/** The invoice-scoped route takes the gateway alone; the invoice comes from the path. */
+const gatewayOnlySchema = v.object({
+  gateway: v.enum(['sandbox', 'manual']),
+});
+
+/**
+ * Mirrors toPaymentDTO in the original (src/dto/payments.ts). This schema names the gateway column
+ * `gateway` where the source calls it `provider`, and records a rejection rather than a generic
+ * failure reason, so those two are mapped on the way out.
+ */
+function paymentDto(row) {
+  return {
+    id: row.id,
+    invoiceId: row.invoice_id,
+    provider: row.gateway,
+    providerReference: row.gateway_reference ?? null,
+    method: row.method ?? null,
+    amount: row.amount,
+    currency: row.currency,
+    status: row.status,
+    failureReason: row.rejection_reason ?? null,
+    initiatedAt: row.created_at,
+    completedAt: row.confirmed_at ?? null,
+    instructions: null,
+  };
+}
 
 function signWebhook(secret, body) {
   return crypto.createHmac('sha256', secret).update(body).digest('hex');
@@ -80,6 +109,45 @@ function register(router, deps) {
       metadata: { sandbox_token: sandboxToken },
     });
     ctx.code(201).json({ paymentId: payment.id, gateway: 'sandbox', sandboxToken, status: 'pending' });
+  });
+
+  /**
+   * Invoice-scoped initiation (payments.ts). Same rules as POST /payments — a payment that exists
+   * but belongs to another customer is indistinguishable from one that does not (404, never 403) —
+   * but it answers with the original's { payment } DTO rather than the platform's flat shape.
+   */
+  router.post('/api/v1/invoices/:id/payments', async (ctx) => {
+    const auth = await authenticate(ctx, deps);
+    if (!UUID_RE.test(String(ctx.params.id ?? ''))) throw new ValidationError('id must be a valid UUID');
+    const { gateway } = await ctx.validate(gatewayOnlySchema);
+
+    const invoice = await store.table('invoices').findOne({ id: ctx.params.id, user_id: auth.id });
+    if (!invoice) throw new NotFoundError('Invoice not found');
+
+    const balance = Math.round((invoice.total - (invoice.amount_paid ?? 0)) * 100) / 100;
+    if (balance <= 0) throw new ValidationError('This invoice is already paid');
+
+    const payment = await store.table('payments').insert({
+      id: uuidv7(),
+      invoice_id: invoice.id,
+      order_id: invoice.order_id,
+      user_id: auth.id,
+      gateway,
+      currency: invoice.currency,
+      amount: balance,
+      status: 'pending',
+    });
+    ctx.code(201).json({ payment: paymentDto(payment) });
+  });
+
+  /** A customer's own payment detail (payments.ts getMyPaymentDetail). */
+  router.get('/api/v1/payments/:id', async (ctx) => {
+    const auth = await authenticate(ctx, deps);
+    if (!UUID_RE.test(String(ctx.params.id ?? ''))) throw new ValidationError('id must be a valid UUID');
+
+    const payment = await store.table('payments').findById(ctx.params.id);
+    if (!payment || payment.user_id !== auth.id) throw new NotFoundError('No payment was found with that id');
+    ctx.json({ payment: paymentDto(payment) });
   });
 
   /**
