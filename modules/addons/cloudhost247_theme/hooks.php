@@ -25,6 +25,7 @@ add_hook('ClientAreaPage', 1, function ($vars) {
 });
 
 add_hook('ClientAreaHeadOutput', 1, function ($vars) {
+    if (isset($vars['template']) && $vars['template'] === 'cloudhost247') { return ''; }
     try {
         $settings = (new ThemeRepository())->settings();
         $primary = htmlspecialchars($settings['primary_color'], ENT_QUOTES, 'UTF-8');
@@ -52,6 +53,7 @@ add_hook('ClientAreaPrimaryNavbar', 30, function ($primaryNavbar) {
 });
 
 add_hook('ClientAreaFooterOutput', 30, function ($vars) {
+    if (isset($vars['template']) && $vars['template'] === 'cloudhost247') { return ''; }
     try {
         $repository = new ThemeRepository(); $context = $repository->clientContext(); $settings = $context['settings'];
         $brand = htmlspecialchars($settings['brand_name'], ENT_QUOTES, 'UTF-8');
@@ -62,4 +64,11 @@ add_hook('ClientAreaFooterOutput', 30, function ($vars) {
         foreach ($context['footer'] as $item) $extra .= '<div><strong>' . htmlspecialchars($item['title'], ENT_QUOTES, 'UTF-8') . '</strong><div>' . $item['body'] . '</div></div>';
         return '<aside class="ch247-footer-extra" aria-label="CloudHost247 information"><div class="ch247-footer-extra__inner"><div>' . ($logo ? '<img src="' . $logo . '" alt="' . $brand . '" style="max-width:180px;max-height:55px">' : '<strong>' . $brand . '</strong>') . '<p>' . $text . '</p></div>' . $extra . ($email ? '<div><a href="mailto:' . $email . '">' . $email . '</a></div>' : '') . '</div></aside>';
     } catch (\Throwable $e) { return ''; }
+});
+
+// Shared shell data is available even while the content database is unavailable.
+add_hook('ClientAreaPage', 50, function ($vars) {
+    require_once __DIR__ . '/lib/Site.php';
+    try { $settings = (new ThemeRepository())->settings(); } catch (\Throwable $e) { $settings = array(); }
+    return array('ch247Site' => \CloudHost247\Theme\Site::context($vars, $settings));
 });

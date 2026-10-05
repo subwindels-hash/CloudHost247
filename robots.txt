@@ -1,0 +1,19 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /modules/
+Disallow: /clientarea.php
+Disallow: /cart.php
+Disallow: /register.php
+Disallow: /pwreset.php
+Disallow: /site-search.php
+Disallow: /service-error.php
+Disallow: /errors/
+Disallow: /cloudhost247-marketing-track.php
+Disallow: /cloudhost247-sample.php
+Disallow: /cloudhost247-vps-sample.php
+Disallow: /all-element-cloudhost247.php
+Disallow: /future-element.php
+Disallow: /tables.php
+# Submit cloudhost247-sitemap.php and builder-sitemap.php in your search console.
+# Add their absolute Sitemap URLs using your configured WHMCS SystemURL on deployment.
+# This file is crawl guidance, never an authorization mechanism.

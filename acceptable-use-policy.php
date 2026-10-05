@@ -15,4 +15,5 @@ $ca->addToBreadCrumb("acceptable-use-policy.php", "Acceptable Use Policy (AUP)")
 
 $ca->initPage();
 
+$ca->setTemplate('acceptableusepolicy');
 $ca->output();

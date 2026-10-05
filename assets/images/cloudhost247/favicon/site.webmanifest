@@ -1,0 +1,19 @@
+{
+  "name": "CloudHost247",
+  "short_name": "CH247",
+  "display": "browser",
+  "background_color": "#101e2c",
+  "theme_color": "#101e2c",
+  "icons": [
+    {
+      "src": "favicon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "favicon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

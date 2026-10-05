@@ -1,0 +1,14 @@
+<p>These terms govern the CloudHost247 Domain Brokerage service, under which CloudHost247 attempts to acquire an already-registered domain on your behalf. By submitting a brokerage request you accept these terms together with the general CloudHost247 Terms of Service.</p>
+{foreach $brokerageTerms.sections as $section}
+<h2 id="{$section.id|escape:'html'}">{$section.title|escape}</h2>
+{if $section.content}<p>{$section.content|escape}</p>{/if}
+{/foreach}
+{if $brokerageTerms.contact}
+<h2 id="contact">{$brokerageTerms.contact.title|escape}</h2>
+<p>{$brokerageTerms.contact.content|escape}</p>
+<ul>
+<li><strong>Email:</strong> <a href="mailto:{$brokerageTerms.contact.email|escape:'html'}">{$brokerageTerms.contact.email|escape}</a></li>
+<li><strong>Website:</strong> <a href="{$WEB_ROOT}/index.php" target="_blank" rel="noopener">{$brokerageTerms.contact.website|escape}</a></li>
+<li><strong>Support:</strong> Open a ticket through our client <a href="{$WEB_ROOT}/submitticket.php">support portal</a>.</li>
+</ul>
+{/if}

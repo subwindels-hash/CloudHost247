@@ -21,12 +21,17 @@ final class AdminController
                 // capability and the CSRF token are both required before any
                 // posted value reaches the repository.
                 $operation = isset($_POST['operation']) ? $_POST['operation'] : '';
-                $capability = in_array($operation,array('delete','content','translation','localized_preview','reorder','visual_preview'),true) ? 'content.manage' : 'settings.manage';
+                $capability = in_array($operation,array('delete','content','translation','localized_preview','reorder','visual_preview','website_drafts','publish'),true) ? 'content.manage' : 'settings.manage';
                 AdminGuard::requireCapability('cloudhost247_theme',$capability);
-                if (($operation === 'delete' || ($operation === 'content' && !empty($_POST['published']))) && empty($_POST['confirm'])) throw new \InvalidArgumentException('Explicit publication or deletion confirmation is required.');
+                if (($operation === 'delete' || $operation === 'publish' || ($operation === 'content' && !empty($_POST['published']))) && empty($_POST['confirm'])) throw new \InvalidArgumentException('Explicit publication or deletion confirmation is required.');
                 $before = $operation === 'settings' ? $this->repository->settings() : $this->repository->all();
                 if ($operation === 'settings') { $this->repository->saveSettings($_POST); $notice = 'Theme settings saved.'; }
+                elseif ($operation === 'website_drafts') {
+                    require_once __DIR__ . '/Site.php';
+                    $notice = Site::importDrafts($this->repository) . ' website drafts imported. Review and publish individually; existing content was preserved.';
+                }
                 elseif ($operation === 'content') { $this->repository->saveContent($_POST); $notice = 'Content saved and is reflected in the client theme according to its publication state.'; }
+                elseif ($operation === 'publish') { $this->repository->publishContent(isset($_POST['id']) ? (int) $_POST['id'] : 0); $notice = 'Reviewed page published.'; }
                 elseif ($operation === 'translation') { $this->repository->saveTranslation($_POST); $notice = 'Localized content saved with base-content fallback.'; }
                 elseif ($operation === 'reorder') { $moved = $this->repository->reorder($_POST); $notice = 'Content order saved (' . $moved . ' items).'; }
                 elseif ($operation === 'visual_preview') { $visual = $this->visualPreview($_POST); $notice = 'Visual preview generated from the submitted values without saving.'; }

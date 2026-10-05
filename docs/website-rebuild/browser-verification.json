@@ -1,0 +1,83 @@
+{
+  "scope": "Real Smarty template fixtures only. No WHMCS core, sessions, database, checkout or authentication.",
+  "routes": 48,
+  "widths": [
+    320,
+    360,
+    375,
+    390,
+    414,
+    768,
+    1024,
+    1280,
+    1440,
+    1920
+  ],
+  "cases": 480,
+  "overflow": [],
+  "brokenImages": [],
+  "errors": [],
+  "accessibility": [
+    {
+      "route": "index.php",
+      "violations": []
+    },
+    {
+      "route": "web-hosting.php",
+      "violations": []
+    },
+    {
+      "route": "vps-hosting.php",
+      "violations": []
+    },
+    {
+      "route": "dedicated-server.php",
+      "violations": []
+    },
+    {
+      "route": "domain.php",
+      "violations": []
+    },
+    {
+      "route": "applications.php",
+      "violations": []
+    },
+    {
+      "route": "operating-systems.php",
+      "violations": []
+    },
+    {
+      "route": "privacy-policy.php",
+      "violations": []
+    },
+    {
+      "route": "faqs.php",
+      "violations": []
+    },
+    {
+      "route": "notfound.php",
+      "violations": []
+    },
+    {
+      "route": "cloudhost247-hosting.php",
+      "violations": []
+    },
+    {
+      "route": "email-hosting.php",
+      "violations": []
+    }
+  ],
+  "navigation": [
+    {
+      "width": 1440,
+      "open": true,
+      "escape": true
+    },
+    {
+      "width": 375,
+      "open": true,
+      "escape": true
+    }
+  ],
+  "passed": true
+}

@@ -1,0 +1,2294 @@
+[
+  {
+    "source": "cloudhost247-node/src/routes/account-identity.ts",
+    "method": "GET",
+    "path": "/api/v1/account",
+    "category": "Client Area"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/account-identity.ts",
+    "method": "PATCH",
+    "path": "/api/v1/account",
+    "category": "Client Area"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/account-identity.ts",
+    "method": "GET",
+    "path": "/api/v1/account/security-number/status",
+    "category": "Client Area"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/account-identity.ts",
+    "method": "POST",
+    "path": "/api/v1/account/security-number/reveal",
+    "category": "Client Area"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/account-identity.ts",
+    "method": "POST",
+    "path": "/api/v1/account/security-number/change",
+    "category": "Client Area"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/account-identity.ts",
+    "method": "GET",
+    "path": "/api/v1/account/profile-image",
+    "category": "Client Area"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/account-identity.ts",
+    "method": "PUT",
+    "path": "/api/v1/account/profile-image",
+    "category": "Client Area"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/account-identity.ts",
+    "method": "DELETE",
+    "path": "/api/v1/account/profile-image",
+    "category": "Client Area"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/account.ts",
+    "method": "PATCH",
+    "path": "/api/v1/account/profile",
+    "category": "Client Area"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/account.ts",
+    "method": "POST",
+    "path": "/api/v1/account/password",
+    "category": "Authentication"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/account.ts",
+    "method": "GET",
+    "path": "/api/v1/account/services",
+    "category": "Client Area"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/account.ts",
+    "method": "GET",
+    "path": "/api/v1/account/domains",
+    "category": "Client Area"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/account.ts",
+    "method": "GET",
+    "path": "/api/v1/account/tickets",
+    "category": "Client Area"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/account.ts",
+    "method": "POST",
+    "path": "/api/v1/account/tickets",
+    "category": "Client Area"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/account.ts",
+    "method": "GET",
+    "path": "/api/v1/account/tickets/:id",
+    "category": "Client Area"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/account.ts",
+    "method": "POST",
+    "path": "/api/v1/account/tickets/:id/messages",
+    "category": "Client Area"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-billing.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/invoices",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-billing.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/invoices/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-billing.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/invoices/:id/refund",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-billing.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/invoices/:id/cancel",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-billing.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/billing/ledger",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-billing.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/billing/reconciliation",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-billing.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/payments/:id/confirm-manual",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-billing.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/payments/:id/reject-manual",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-cloudflare.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/cloudflare",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-cloudflare.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/cloudflare/accounts",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-cloudflare.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/cloudflare/accounts",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-cloudflare.ts",
+    "method": "PATCH",
+    "path": "/api/v1/admin/cloudflare/accounts/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-cloudflare.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/cloudflare/accounts/:id/test",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-cloudflare.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/cloudflare/available-plans",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-cloudflare.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/cloudflare/plan-mappings",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-cloudflare.ts",
+    "method": "PUT",
+    "path": "/api/v1/admin/cloudflare/plan-mappings",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-cloudflare.ts",
+    "method": "DELETE",
+    "path": "/api/v1/admin/cloudflare/plan-mappings/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-cloudflare.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/cloudflare/services",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-cloudflare.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/cloudflare/services/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-cloudflare.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/cloudflare/services/:id/purge-cache",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-cloudflare.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/cloudflare/jobs",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-cloudflare.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/cloudflare/logs",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-customers.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/customers",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-customers.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/customers/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-customers.ts",
+    "method": "PATCH",
+    "path": "/api/v1/admin/customers/:id/status",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-customers.ts",
+    "method": "PATCH",
+    "path": "/api/v1/admin/customers/:id/role",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-customers.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/customers/:id/services",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-customers.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/customers/:id/domains",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-customers.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/tickets",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-customers.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/tickets/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-customers.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/tickets/:id/messages",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-customers.ts",
+    "method": "PATCH",
+    "path": "/api/v1/admin/tickets/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-domain-services.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/domain-services/providers",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-domain-services.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/domain-services/providers",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-domain-services.ts",
+    "method": "PATCH",
+    "path": "/api/v1/admin/domain-services/providers/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-domain-services.ts",
+    "method": "PUT",
+    "path": "/api/v1/admin/domain-services/providers/:id/credentials",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-domain-services.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/domain-services/providers/:id/test",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-domain-services.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/domain-services/extensions",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-domain-services.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/domain-services/extensions/sync",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-domain-services.ts",
+    "method": "PATCH",
+    "path": "/api/v1/admin/domain-services/extensions/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-domain-services.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/domain-services/registrations",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-domain-services.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/domain-services/transfers",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-domain-services.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/domain-services/transfers/:id/refresh",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-domain-services.ts",
+    "method": "PATCH",
+    "path": "/api/v1/admin/domain-services/transfers/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-domain-services.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/domain-services/auctions",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-domain-services.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/domain-services/auctions",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-domain-services.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/domain-services/auctions/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-domain-services.ts",
+    "method": "PATCH",
+    "path": "/api/v1/admin/domain-services/auctions/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-domain-services.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/domain-services/club/plans",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-domain-services.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/domain-services/club/plans",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-domain-services.ts",
+    "method": "PATCH",
+    "path": "/api/v1/admin/domain-services/club/plans/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-domain-services.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/domain-services/overview",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-domain-services.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/domain-services/appraisals",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-domain-services.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/domain-services/whois-lookups",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-domain-services.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/domain-services/transactions",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-platform.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/audit",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-platform.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/settings",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-platform.ts",
+    "method": "PUT",
+    "path": "/api/v1/admin/settings/:key",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-platform.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/deployments",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-platform.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/deployments/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-platform.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/installations",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-platform.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/subscriptions",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-platform.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/subscriptions/:id/activate",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-platform.ts",
+    "method": "GET",
+    "path": "/api/v1/billing/subscriptions",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-platform.ts",
+    "method": "POST",
+    "path": "/api/v1/billing/subscriptions/:id/cancel",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-platform.ts",
+    "method": "POST",
+    "path": "/api/v1/billing/subscriptions/:id/change-plan",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-users.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/users",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-users.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/users",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-users.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/users/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-users.ts",
+    "method": "PATCH",
+    "path": "/api/v1/admin/users/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-users.ts",
+    "method": "DELETE",
+    "path": "/api/v1/admin/users/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-users.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/users/:id/security-number",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-users.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/users/:id/security-number/rotate",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-users.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/users/:id/security-number/require-reinitialization",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-users.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/security-number/policy",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-users.ts",
+    "method": "PUT",
+    "path": "/api/v1/admin/security-number/policy",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-users.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/customers/:id/switch",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-users.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/support-sessions",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-users.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/support-sessions/:id/end",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/agent.ts",
+    "method": "GET",
+    "path": "/api/v1/agent/ping",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/agent.ts",
+    "method": "POST",
+    "path": "/api/v1/agent/report",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/agent.ts",
+    "method": "POST",
+    "path": "/api/v1/agent/health",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/ai-support.ts",
+    "method": "POST",
+    "path": "/api/v1/ai-support/conversations",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/ai-support.ts",
+    "method": "GET",
+    "path": "/api/v1/ai-support/conversations/:id",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/ai-support.ts",
+    "method": "POST",
+    "path": "/api/v1/ai-support/conversations/:id/messages",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/ai-support.ts",
+    "method": "PATCH",
+    "path": "/api/v1/ai-support/conversations/:id/contact",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/ai-support.ts",
+    "method": "POST",
+    "path": "/api/v1/ai-support/conversations/:id/newsletter",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/ai-support.ts",
+    "method": "GET",
+    "path": "/api/v1/ai-support/availability",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/ai-support.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/ai-support/agents",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/ai-support.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/ai-support/knowledge",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/ai-support.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/ai-support/conversations",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/ai-support.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/ai-support/conversations/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/ai-support.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/ai-support/conversations/:id/reply",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/ai-support.ts",
+    "method": "PATCH",
+    "path": "/api/v1/admin/ai-support/conversations/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/ai-support.ts",
+    "method": "PUT",
+    "path": "/api/v1/admin/ai-support/presence",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/ai-support.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/ai-support/overview",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/ai-support.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/newsletter-subscriptions",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/app-installations.ts",
+    "method": "POST",
+    "path": "/api/v1/app-installations",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/app-installations.ts",
+    "method": "GET",
+    "path": "/api/v1/app-installations",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/app-installations.ts",
+    "method": "GET",
+    "path": "/api/v1/app-installations/:id",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/app-installations.ts",
+    "method": "DELETE",
+    "path": "/api/v1/app-installations/:id",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/app-installations.ts",
+    "method": "GET",
+    "path": "/api/v1/app-installations/:id/deployments",
+    "category": "Deployment/PaaS"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/app-installations.ts",
+    "method": "GET",
+    "path": "/api/v1/app-installations/:id/logs",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/app-installations.ts",
+    "method": "GET",
+    "path": "/api/v1/app-installations/:id/backups",
+    "category": "Server Management"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/app-installations.ts",
+    "method": "GET",
+    "path": "/api/v1/app-installations/:id/environment",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/app-installations.ts",
+    "method": "PUT",
+    "path": "/api/v1/app-installations/:id/environment",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/app-installations.ts",
+    "method": "DELETE",
+    "path": "/api/v1/app-installations/:id/environment/:key",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/app-installations.ts",
+    "method": "GET",
+    "path": "/api/v1/app-installations/:id/domains",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/app-installations.ts",
+    "method": "POST",
+    "path": "/api/v1/app-installations/:id/domains",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/app-installations.ts",
+    "method": "GET",
+    "path": "/api/v1/app-installations/summary",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/auth.ts",
+    "method": "POST",
+    "path": "/api/auth/register",
+    "category": "Authentication"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/auth.ts",
+    "method": "POST",
+    "path": "/api/auth/passkeys/login/options",
+    "category": "Authentication"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/auth.ts",
+    "method": "POST",
+    "path": "/api/auth/passkeys/login/verify",
+    "category": "Authentication"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/auth.ts",
+    "method": "POST",
+    "path": "/api/auth/login",
+    "category": "Authentication"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/auth.ts",
+    "method": "POST",
+    "path": "/api/auth/mfa/login/verify",
+    "category": "Authentication"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/auth.ts",
+    "method": "POST",
+    "path": "/api/auth/mfa/totp/enroll",
+    "category": "Authentication"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/auth.ts",
+    "method": "POST",
+    "path": "/api/auth/mfa/totp/confirm",
+    "category": "Authentication"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/auth.ts",
+    "method": "GET",
+    "path": "/api/auth/mfa/status",
+    "category": "Authentication"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/auth.ts",
+    "method": "GET",
+    "path": "/api/auth/passkeys",
+    "category": "Authentication"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/auth.ts",
+    "method": "POST",
+    "path": "/api/auth/passkeys/register/options",
+    "category": "Authentication"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/auth.ts",
+    "method": "POST",
+    "path": "/api/auth/passkeys/register/verify",
+    "category": "Authentication"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/auth.ts",
+    "method": "PATCH",
+    "path": "/api/auth/passkeys/:id",
+    "category": "Authentication"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/auth.ts",
+    "method": "DELETE",
+    "path": "/api/auth/passkeys/:id",
+    "category": "Authentication"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/auth.ts",
+    "method": "POST",
+    "path": "/api/auth/mfa/disable",
+    "category": "Authentication"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/auth.ts",
+    "method": "POST",
+    "path": "/api/auth/password-reset/request",
+    "category": "Authentication"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/auth.ts",
+    "method": "POST",
+    "path": "/api/auth/password-reset/confirm",
+    "category": "Authentication"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/auth.ts",
+    "method": "POST",
+    "path": "/api/auth/email-verification/confirm",
+    "category": "Authentication"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/auth.ts",
+    "method": "POST",
+    "path": "/api/auth/email-verification/resend",
+    "category": "Authentication"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/auth.ts",
+    "method": "GET",
+    "path": "/api/auth/me",
+    "category": "Authentication"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/auth.ts",
+    "method": "POST",
+    "path": "/api/auth/logout",
+    "category": "Authentication"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/billing.ts",
+    "method": "GET",
+    "path": "/api/v1/invoices",
+    "category": "Checkout"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/billing.ts",
+    "method": "GET",
+    "path": "/api/v1/billing/ledger",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/billing.ts",
+    "method": "GET",
+    "path": "/api/v1/invoices/:id",
+    "category": "Checkout"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/catalog-admin.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/catalog/products",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/catalog-admin.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/catalog/products/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/catalog-admin.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/catalog/products",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/catalog-admin.ts",
+    "method": "PATCH",
+    "path": "/api/v1/admin/catalog/products/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/catalog-admin.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/catalog/products/:id/status",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/catalog-admin.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/catalog/products/:id/plans",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/catalog-admin.ts",
+    "method": "PATCH",
+    "path": "/api/v1/admin/catalog/plans/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/catalog-admin.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/catalog/plans/:id/status",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/catalog-admin.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/catalog/plans/:id/pricing",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/catalog-admin.ts",
+    "method": "PATCH",
+    "path": "/api/v1/admin/catalog/pricing/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/catalog-admin.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/catalog/pricing/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/catalog-admin.ts",
+    "method": "PUT",
+    "path": "/api/v1/admin/catalog/plans/:id/features",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/catalog-public.ts",
+    "method": "GET",
+    "path": "/api/v1/catalog",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/catalog-public.ts",
+    "method": "GET",
+    "path": "/api/v1/catalog/products",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/catalog-public.ts",
+    "method": "GET",
+    "path": "/api/v1/catalog/products/:slug",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/catalog-public.ts",
+    "method": "GET",
+    "path": "/api/v1/catalog/products/:slug/plans",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/cloudflare.ts",
+    "method": "GET",
+    "path": "/api/v1/cloudflare/catalog",
+    "category": "Cloud"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/cloudflare.ts",
+    "method": "POST",
+    "path": "/api/v1/cloudflare/orders",
+    "category": "Cloud"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/cloudflare.ts",
+    "method": "GET",
+    "path": "/api/v1/cloudflare/services",
+    "category": "Cloud"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/cloudflare.ts",
+    "method": "GET",
+    "path": "/api/v1/cloudflare/services/:id",
+    "category": "Cloud"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/cloudflare.ts",
+    "method": "POST",
+    "path": "/api/v1/cloudflare/services/:id/sync",
+    "category": "Cloud"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/cloudflare.ts",
+    "method": "GET",
+    "path": "/api/v1/cloudflare/services/:id/activity",
+    "category": "Cloud"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/cloudflare.ts",
+    "method": "GET",
+    "path": "/api/v1/cloudflare/services/:id/dns",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/cloudflare.ts",
+    "method": "POST",
+    "path": "/api/v1/cloudflare/services/:id/dns",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/cloudflare.ts",
+    "method": "GET",
+    "path": "/api/v1/cloudflare/services/:id/dnssec",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/cloudflare.ts",
+    "method": "GET",
+    "path": "/api/v1/cloudflare/services/:id/analytics",
+    "category": "Cloud"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/cloudflare.ts",
+    "method": "POST",
+    "path": "/api/v1/cloudflare/services/:id/firewall/rules",
+    "category": "Server Management"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/cloudflare.ts",
+    "method": "POST",
+    "path": "/api/v1/cloudflare/services/:id/caching/purge",
+    "category": "Cloud"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/cloudflare.ts",
+    "method": "GET",
+    "path": "/api/v1/cloudflare/services/:id/plan",
+    "category": "Cloud"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/cloudflare.ts",
+    "method": "POST",
+    "path": "/api/v1/cloudflare/services/:id/plan/change",
+    "category": "Cloud"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/commerce.ts",
+    "method": "GET",
+    "path": "/api/v1/cart",
+    "category": "Checkout"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/commerce.ts",
+    "method": "POST",
+    "path": "/api/v1/cart/items",
+    "category": "Checkout"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/commerce.ts",
+    "method": "PATCH",
+    "path": "/api/v1/cart/items/:id",
+    "category": "Checkout"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/commerce.ts",
+    "method": "DELETE",
+    "path": "/api/v1/cart/items/:id",
+    "category": "Checkout"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/commerce.ts",
+    "method": "POST",
+    "path": "/api/v1/orders",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/commerce.ts",
+    "method": "GET",
+    "path": "/api/v1/orders",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/commerce.ts",
+    "method": "GET",
+    "path": "/api/v1/orders/:id",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/deployments.ts",
+    "method": "GET",
+    "path": "/api/v1/deployments",
+    "category": "Deployment/PaaS"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/deployments.ts",
+    "method": "GET",
+    "path": "/api/v1/deployments/:id",
+    "category": "Deployment/PaaS"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/deployments.ts",
+    "method": "GET",
+    "path": "/api/v1/deployments/:id/logs",
+    "category": "Deployment/PaaS"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/deployments.ts",
+    "method": "POST",
+    "path": "/api/v1/deployments/:id/cancel",
+    "category": "Deployment/PaaS"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/deployments.ts",
+    "method": "GET",
+    "path": "/api/v1/deployments/:id/events",
+    "category": "Deployment/PaaS"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-brokerage.ts",
+    "method": "GET",
+    "path": "/api/v1/domains/:domain/brokerage-status",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-brokerage.ts",
+    "method": "POST",
+    "path": "/api/v1/account/domain-brokerage/cases",
+    "category": "Client Area"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-brokerage.ts",
+    "method": "GET",
+    "path": "/api/v1/account/domain-brokerage/cases",
+    "category": "Client Area"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-brokerage.ts",
+    "method": "GET",
+    "path": "/api/v1/account/domain-brokerage/cases/:id",
+    "category": "Client Area"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-brokerage.ts",
+    "method": "POST",
+    "path": "/api/v1/account/domain-brokerage/cases/:id/offers",
+    "category": "Client Area"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-brokerage.ts",
+    "method": "POST",
+    "path": "/api/v1/account/domain-brokerage/cases/:id/messages",
+    "category": "Client Area"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-brokerage.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/domain-brokerage/cases",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-brokerage.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/domain-brokerage/cases/:id/assign",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-brokerage.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/domain-brokerage/providers",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-brokerage.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/domain-brokerage/providers",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-brokerage.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/domain-brokerage/overview",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-brokerage.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/domain-brokerage/cases/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-brokerage.ts",
+    "method": "PATCH",
+    "path": "/api/v1/admin/domain-brokerage/cases/:id/status",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-brokerage.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/domain-brokerage/cases/:id/offers",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-brokerage.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/domain-brokerage/cases/:id/messages",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-brokerage.ts",
+    "method": "PUT",
+    "path": "/api/v1/admin/domain-brokerage/cases/:id/payment",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-brokerage.ts",
+    "method": "PUT",
+    "path": "/api/v1/admin/domain-brokerage/cases/:id/transfer",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-services.ts",
+    "method": "GET",
+    "path": "/api/v1/domain-services/readiness",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-services.ts",
+    "method": "POST",
+    "path": "/api/v1/domain-services/search",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-services.ts",
+    "method": "POST",
+    "path": "/api/v1/domain-services/bulk-search",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-services.ts",
+    "method": "GET",
+    "path": "/api/v1/domain-services/searches",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-services.ts",
+    "method": "GET",
+    "path": "/api/v1/domain-services/searches/bulk",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-services.ts",
+    "method": "GET",
+    "path": "/api/v1/domain-services/searches/:id",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-services.ts",
+    "method": "GET",
+    "path": "/api/v1/domain-services/extensions",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-services.ts",
+    "method": "POST",
+    "path": "/api/v1/domain-services/registrations/quote",
+    "category": "Checkout"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-services.ts",
+    "method": "POST",
+    "path": "/api/v1/domain-services/registrations",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-services.ts",
+    "method": "GET",
+    "path": "/api/v1/domain-services/registrations",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-services.ts",
+    "method": "GET",
+    "path": "/api/v1/domain-services/registrations/:id",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-services.ts",
+    "method": "POST",
+    "path": "/api/v1/domain-services/transfers",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-services.ts",
+    "method": "GET",
+    "path": "/api/v1/domain-services/transfers",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-services.ts",
+    "method": "GET",
+    "path": "/api/v1/domain-services/transfers/:id",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-services.ts",
+    "method": "POST",
+    "path": "/api/v1/domain-services/whois",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-services.ts",
+    "method": "GET",
+    "path": "/api/v1/domain-services/whois/history",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-services.ts",
+    "method": "POST",
+    "path": "/api/v1/domain-services/appraisals",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-services.ts",
+    "method": "GET",
+    "path": "/api/v1/domain-services/appraisals",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-services.ts",
+    "method": "GET",
+    "path": "/api/v1/domain-services/appraisals/:id",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-services.ts",
+    "method": "GET",
+    "path": "/api/v1/domain-services/auctions",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-services.ts",
+    "method": "GET",
+    "path": "/api/v1/domain-services/auctions/:id",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-services.ts",
+    "method": "POST",
+    "path": "/api/v1/domain-services/auctions/:id/bids",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-services.ts",
+    "method": "GET",
+    "path": "/api/v1/domain-services/auctions/my/bids",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-services.ts",
+    "method": "GET",
+    "path": "/api/v1/domain-services/auctions/my/won",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-services.ts",
+    "method": "GET",
+    "path": "/api/v1/domain-services/auctions/my/lost",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-services.ts",
+    "method": "POST",
+    "path": "/api/v1/domain-services/auctions/:id/pay",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-services.ts",
+    "method": "GET",
+    "path": "/api/v1/domain-services/club/plans",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-services.ts",
+    "method": "POST",
+    "path": "/api/v1/domain-services/club/plans/:id/subscribe",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-services.ts",
+    "method": "GET",
+    "path": "/api/v1/domain-services/club/membership",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-services.ts",
+    "method": "DELETE",
+    "path": "/api/v1/domain-services/club/membership",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-services.ts",
+    "method": "GET",
+    "path": "/api/v1/domain-services/club/pricing-preview",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-services.ts",
+    "method": "POST",
+    "path": "/api/v1/domain-services/watches",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-services.ts",
+    "method": "GET",
+    "path": "/api/v1/domain-services/watches",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-services.ts",
+    "method": "DELETE",
+    "path": "/api/v1/domain-services/watches/:id",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domain-services.ts",
+    "method": "GET",
+    "path": "/api/v1/domain-services/transactions",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domains.ts",
+    "method": "GET",
+    "path": "/api/v1/domains",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domains.ts",
+    "method": "POST",
+    "path": "/api/v1/domains",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domains.ts",
+    "method": "GET",
+    "path": "/api/v1/domains/:id",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domains.ts",
+    "method": "POST",
+    "path": "/api/v1/domains/:id/verify",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domains.ts",
+    "method": "POST",
+    "path": "/api/v1/domains/:id/ssl",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/domains.ts",
+    "method": "DELETE",
+    "path": "/api/v1/domains/:id",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/firewall.ts",
+    "method": "GET",
+    "path": "/api/v1/servers/:serverId/firewall",
+    "category": "Server Management"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/firewall.ts",
+    "method": "POST",
+    "path": "/api/v1/servers/:serverId/firewall",
+    "category": "Server Management"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/firewall.ts",
+    "method": "POST",
+    "path": "/api/v1/servers/:serverId/firewall/baseline",
+    "category": "Server Management"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/health.ts",
+    "method": "GET",
+    "path": "/health",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/health.ts",
+    "method": "GET",
+    "path": "/ready",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "GET",
+    "path": "/api/v1/operating-systems",
+    "category": "Operating Systems"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "GET",
+    "path": "/api/v1/operating-systems/:id/logo",
+    "category": "Operating Systems"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "GET",
+    "path": "/api/v1/operating-systems/:id",
+    "category": "Operating Systems"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "GET",
+    "path": "/api/v1/operating-systems/:id/versions",
+    "category": "Operating Systems"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "GET",
+    "path": "/api/v1/server-products",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "GET",
+    "path": "/api/v1/server-products/:id/configuration",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "GET",
+    "path": "/api/v1/server-products/:id/operating-systems",
+    "category": "Operating Systems"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "GET",
+    "path": "/api/v1/notifications",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "POST",
+    "path": "/api/v1/notifications/:id/read",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "POST",
+    "path": "/api/v1/notifications/read-all",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/operating-systems",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/operating-systems",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "PATCH",
+    "path": "/api/v1/admin/operating-systems/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/operating-systems/:id/logo",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "DELETE",
+    "path": "/api/v1/admin/operating-systems/:id/logo",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "DELETE",
+    "path": "/api/v1/admin/operating-systems/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/operating-systems/:id/versions",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/operating-systems/:id/versions",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "PATCH",
+    "path": "/api/v1/admin/operating-system-versions/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/providers",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/providers",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/provider-adapters",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/providers/:id/configuration",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "PATCH",
+    "path": "/api/v1/admin/providers/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/regions",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "PATCH",
+    "path": "/api/v1/admin/regions/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/datacenters",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "PATCH",
+    "path": "/api/v1/admin/datacenters/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/os-images",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/os-images",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "PATCH",
+    "path": "/api/v1/admin/os-images/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/os-images/:id/test",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "DELETE",
+    "path": "/api/v1/admin/os-images/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/server-plans",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/server-product-configurations",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/server-product-configurations",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "PATCH",
+    "path": "/api/v1/admin/server-product-configurations/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/provisioning-jobs",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/provisioning-jobs/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/provisioning-jobs/:id/retry",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/provisioning-jobs/:id/cancel",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/provisioning-metrics",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/os-lifecycle/sweep",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/server-terminations/sweep",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/os-image-verifications",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/os-images/revalidate",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/server-drift",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/server-reconciliation/sweep",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/notification-outbox",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/notification-outbox/drain",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/infrastructure.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/infrastructure-logs",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/marketplace-admin.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/app-categories",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/marketplace-admin.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/app-categories",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/marketplace-admin.ts",
+    "method": "PATCH",
+    "path": "/api/v1/admin/app-categories/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/marketplace-admin.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/apps",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/marketplace-admin.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/apps",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/marketplace-admin.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/apps/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/marketplace-admin.ts",
+    "method": "PATCH",
+    "path": "/api/v1/admin/apps/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/marketplace-admin.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/apps/:id/status",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/marketplace-admin.ts",
+    "method": "DELETE",
+    "path": "/api/v1/admin/apps/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/marketplace-admin.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/manifests/validate",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/marketplace-admin.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/manifests/import",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/marketplace-admin.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/manifests/seed-categories",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/marketplace.ts",
+    "method": "GET",
+    "path": "/api/v1/apps",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/marketplace.ts",
+    "method": "GET",
+    "path": "/api/v1/app-categories",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/marketplace.ts",
+    "method": "GET",
+    "path": "/api/v1/apps/:slug",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/marketplace.ts",
+    "method": "GET",
+    "path": "/api/v1/apps/:slug/versions",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/mrz-tools.ts",
+    "method": "GET",
+    "path": "/api/tools/mrz/config",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/mrz-tools.ts",
+    "method": "GET",
+    "path": "/api/v1/tools/mrz/config",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/mrz-tools.ts",
+    "method": "POST",
+    "path": "/api/tools/mrz/generate",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/mrz-tools.ts",
+    "method": "POST",
+    "path": "/api/v1/tools/mrz/generate",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/mrz-tools.ts",
+    "method": "POST",
+    "path": "/api/tools/mrz/validate",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/mrz-tools.ts",
+    "method": "POST",
+    "path": "/api/v1/tools/mrz/validate",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/mrz-tools.ts",
+    "method": "POST",
+    "path": "/api/tools/mrz/parse",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/mrz-tools.ts",
+    "method": "POST",
+    "path": "/api/v1/tools/mrz/parse",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/mrz-tools.ts",
+    "method": "POST",
+    "path": "/api/tools/mrz/test-data",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/mrz-tools.ts",
+    "method": "POST",
+    "path": "/api/v1/tools/mrz/test-data",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/mrz-tools.ts",
+    "method": "POST",
+    "path": "/api/tools/mrz/explain",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/mrz-tools.ts",
+    "method": "POST",
+    "path": "/api/v1/tools/mrz/explain",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/mrz-tools.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/tools/mrz/settings",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/mrz-tools.ts",
+    "method": "GET",
+    "path": "/api/admin/tools/mrz/settings",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/mrz-tools.ts",
+    "method": "PUT",
+    "path": "/api/v1/admin/tools/mrz/settings",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/mrz-tools.ts",
+    "method": "PUT",
+    "path": "/api/admin/tools/mrz/settings",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/payments.ts",
+    "method": "POST",
+    "path": "/api/v1/invoices/:id/payments",
+    "category": "Checkout"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/payments.ts",
+    "method": "GET",
+    "path": "/api/v1/payments/:id",
+    "category": "Checkout"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/servers",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/servers",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/servers/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "PATCH",
+    "path": "/api/v1/admin/servers/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "DELETE",
+    "path": "/api/v1/admin/servers/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/servers/:id/rotate-credentials",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/servers/:id/credentials",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "GET",
+    "path": "/api/v1/ssh-keys",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "GET",
+    "path": "/api/ssh-keys",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "POST",
+    "path": "/api/v1/ssh-keys",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "POST",
+    "path": "/api/ssh-keys",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "DELETE",
+    "path": "/api/v1/ssh-keys/:id",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "DELETE",
+    "path": "/api/ssh-keys/:id",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "POST",
+    "path": "/api/v1/servers",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "POST",
+    "path": "/api/servers",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "GET",
+    "path": "/api/v1/servers",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "GET",
+    "path": "/api/servers",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "GET",
+    "path": "/api/v1/servers/:id",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "GET",
+    "path": "/api/servers/:id",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "GET",
+    "path": "/api/v1/servers/:id/resize-options",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "POST",
+    "path": "/api/v1/servers/:id/resize",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "POST",
+    "path": "/api/servers/:id/resize",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "POST",
+    "path": "/api/v1/servers/:id/snapshots",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "POST",
+    "path": "/api/v1/servers/:id/reinstall",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "POST",
+    "path": "/api/v1/servers/:id/rebuild",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "POST",
+    "path": "/api/servers/:id/reinstall",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "POST",
+    "path": "/api/servers/:id/rebuild",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "DELETE",
+    "path": "/api/v1/servers/:id",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "DELETE",
+    "path": "/api/servers/:id",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "GET",
+    "path": "/api/v1/servers/:id/status",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "GET",
+    "path": "/api/v1/servers/:id/provisioning-status",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "GET",
+    "path": "/api/v1/servers/:id/logs",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "POST",
+    "path": "/api/v1/servers/:id/cancel",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "DELETE",
+    "path": "/api/v1/servers/:id/cancel",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "POST",
+    "path": "/api/v1/servers/:id/console",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "POST",
+    "path": "/api/v1/servers/:id/rescue",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "DELETE",
+    "path": "/api/v1/servers/:id/rescue",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "GET",
+    "path": "/api/v1/servers/:id/metrics",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "GET",
+    "path": "/api/v1/servers/:id/health",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "GET",
+    "path": "/api/v1/servers/:id/applications",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/servers.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/servers/trim-metrics",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/webhooks.ts",
+    "method": "POST",
+    "path": "/api/v1/webhooks/:gateway",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/webhooks.ts",
+    "method": "POST",
+    "path": "/api/v1/webhooks/payment/:provider",
+    "category": "Checkout"
+  }
+]

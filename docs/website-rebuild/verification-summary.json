@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-05",
+  "branch": "arena/ad9fd719-cloudhost247",
+  "release_gate": {
+    "command": "PATH=/tmp/ch247-bin:$PATH PHP_LINT_JOBS=2 bash scripts/release-candidate-check.sh",
+    "exit_code": 0,
+    "php_runtime": "PHP 8.2 WebAssembly",
+    "lint_targets": 796,
+    "python_runs": [
+      "422",
+      "6",
+      "7"
+    ],
+    "agent_tests": 71,
+    "vendor_baseline": "passed, no re-cut",
+    "retired_brand_matches": 0,
+    "log_sha256": "4b44c3bdf20a6f0547e5af7234dda837fa209d027d98a8d512f479340c5db280"
+  },
+  "php_74": {
+    "runtime": "PHP 7.4 WebAssembly",
+    "changed_php_linted": 19,
+    "theme_assertions": 60,
+    "website_assertions": 20,
+    "failed": 0
+  },
+  "node": {
+    "typecheck": "passed",
+    "production_build": "passed",
+    "focused_tests_passed": 32,
+    "full_suite": "incomplete: timeout, partial log contained DNS propagation failure under load; stopped"
+  },
+  "runtime_acceptance": {
+    "live_whmcs": "not tested: licensed runtime and database absent",
+    "production_site": "TLS connection failed from sandbox",
+    "deployed": false
+  },
+  "browser_evidence": "browser-verification.json",
+  "source_evidence": "source-verification.json"
+}

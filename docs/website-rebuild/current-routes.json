@@ -1,0 +1,551 @@
+[
+  {
+    "path": "aboutus.php",
+    "category": "Marketing",
+    "original": true,
+    "renderer": "aboutus",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "acceptable-use-policy.php",
+    "category": "Legal",
+    "original": true,
+    "renderer": "acceptableusepolicy",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "all-element-cloudhost247.php",
+    "category": "Administrative/internal",
+    "original": true,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'all-elements', 'All Elements')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "applications.php",
+    "category": "Applications",
+    "original": false,
+    "renderer": "cloudhost247-platform",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "backup-policy.php",
+    "category": "Legal",
+    "original": true,
+    "renderer": "backuppolicy",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "blog.php",
+    "category": "Marketing",
+    "original": true,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'blog', 'Blog')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "builder-page.php",
+    "category": "Marketing",
+    "original": true,
+    "renderer": "cloudhost247-builder-page, cloudhost247-builder-page",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "existing route preserved; review renderer",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "builder-sitemap.php",
+    "category": "Administrative/internal",
+    "original": true,
+    "renderer": "",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "existing route preserved; review renderer",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "cloudhost247-hosting.php",
+    "category": "Cloud",
+    "original": true,
+    "renderer": "cloudhost247-product-catalog",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "cloudhost247-marketing-track.php",
+    "category": "Administrative/internal",
+    "original": true,
+    "renderer": "",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "existing route preserved; review renderer",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "cloudhost247-page.php",
+    "category": "Marketing",
+    "original": true,
+    "renderer": "cloudhost247-page",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "existing route preserved; review renderer",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "cloudhost247-sample.php",
+    "category": "Administrative/internal",
+    "original": true,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'cloudhost247-sample', 'Sample Page')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "cloudhost247-sitemap.php",
+    "category": "Administrative/internal",
+    "original": true,
+    "renderer": "",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "existing route preserved; review renderer",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "cloudhost247-vps-sample.php",
+    "category": "Administrative/internal",
+    "original": true,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'vps-sample', 'VPS Sample')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "comingsoon.php",
+    "category": "Marketing",
+    "original": true,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'coming-soon', 'Coming Soon')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "cookie-policy.php",
+    "category": "Legal",
+    "original": true,
+    "renderer": "cookiepolicy",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "cpanel-hosting.php",
+    "category": "Hosting",
+    "original": true,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'cpanel-hosting', 'cPanel Hosting')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "cybercrime-policy.php",
+    "category": "Legal",
+    "original": true,
+    "renderer": "cybercrimepolicy",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "data-deletion.php",
+    "category": "Legal",
+    "original": true,
+    "renderer": "datadeletion",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "data-privacy-notice-and-consent-form.php",
+    "category": "Legal",
+    "original": true,
+    "renderer": "dataprivacynoticeandconsentform",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "data-protection-standards.php",
+    "category": "Legal",
+    "original": true,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'data-protection-standards', 'Data Protection Standards')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "dedeicated-server.php",
+    "category": "Dedicated",
+    "original": true,
+    "renderer": "",
+    "http": "not exercised",
+    "template_status": "existing route preserved; review renderer",
+    "dependency": "none / inspect"
+  },
+  {
+    "path": "dedicated-server.php",
+    "category": "Dedicated",
+    "original": true,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'dedicated-server', 'Dedicated Servers')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "deployments.php",
+    "category": "Deployment/PaaS",
+    "original": false,
+    "renderer": "cloudhost247-platform",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "developer-friendly.php",
+    "category": "Developer",
+    "original": true,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'developer-friendly', 'Developer Friendly')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "domain-agreement.php",
+    "category": "Legal",
+    "original": true,
+    "renderer": "domainagreement",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "domain-brokerage-terms.php",
+    "category": "Legal",
+    "original": true,
+    "renderer": "domainbrokerageterms",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "domain-renewal-policy.php",
+    "category": "Legal",
+    "original": true,
+    "renderer": "domainrenewalpolicy",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "domain.php",
+    "category": "Domains",
+    "original": true,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'domain', 'Domains')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "domainregistrationaddendum.php",
+    "category": "Legal",
+    "original": true,
+    "renderer": "domainregistrationaddendum",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "email-hosting.php",
+    "category": "Email",
+    "original": true,
+    "renderer": "cloudhost247-email-hosting",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "enterprise-servers.php",
+    "category": "Dedicated",
+    "original": true,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'enterprise-servers', 'Enterprise Servers')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "fair-usage-policy.php",
+    "category": "Legal",
+    "original": true,
+    "renderer": "fairusagepolicy",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "faqs.php",
+    "category": "Support",
+    "original": true,
+    "renderer": "faqs",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "future-element.php",
+    "category": "Administrative/internal",
+    "original": true,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'future-element', 'Future Element')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "game-servers.php",
+    "category": "Dedicated",
+    "original": true,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'game-servers', 'Game Servers')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "help-center.php",
+    "category": "Support",
+    "original": true,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'help-center', 'Help Center')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "infrastructure.php",
+    "category": "Cloud",
+    "original": false,
+    "renderer": "cloudhost247-infrastructure",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "legal-notice.php",
+    "category": "Legal",
+    "original": true,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'legal-notice', 'Legal Notice')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "legal.php",
+    "category": "Legal",
+    "original": true,
+    "renderer": "legal",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "notfound.php",
+    "category": "Marketing",
+    "original": true,
+    "renderer": "PublicPage::notFound(new \\WHMCS\\ClientArea())",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "offers.php",
+    "category": "Marketing",
+    "original": true,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'offers', 'Offers')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "operating-systems.php",
+    "category": "Operating Systems",
+    "original": false,
+    "renderer": "cloudhost247-platform",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "plesk-hosting.php",
+    "category": "Hosting",
+    "original": true,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'plesk-hosting', 'Plesk Hosting')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "privacy-policy.php",
+    "category": "Legal",
+    "original": true,
+    "renderer": "privacypolicy",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "refund-and-cancellation-policy.php",
+    "category": "Legal",
+    "original": true,
+    "renderer": "refund-and-vancellation-policy",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "refund-policy.php",
+    "category": "Legal",
+    "original": true,
+    "renderer": "refundpolicy",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "server-management.php",
+    "category": "Server Management",
+    "original": false,
+    "renderer": "cloudhost247-platform",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "service-error.php",
+    "category": "Administrative/internal",
+    "original": false,
+    "renderer": "cloudhost247-error",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "existing route preserved; review renderer",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "site-search.php",
+    "category": "Marketing",
+    "original": false,
+    "renderer": "cloudhost247-search",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "existing route preserved; review renderer",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "ssl-certificate.php",
+    "category": "Product",
+    "original": true,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'ssl-certificate', 'SSL Certificates')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "tables.php",
+    "category": "Administrative/internal",
+    "original": true,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'tables', 'Tables')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "terms-of-service.php",
+    "category": "Legal",
+    "original": true,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'terms-of-service', 'Terms of Service')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "trademark-policy.php",
+    "category": "Legal",
+    "original": true,
+    "renderer": "trademarkpolicy",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "vps-hosting.php",
+    "category": "VPS",
+    "original": true,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'vps-hosting', 'VPS Hosting')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "vps-privatecloud.php",
+    "category": "Cloud",
+    "original": true,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'vps-privatecloud', 'VPS Private Cloud')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "vps-publiccloud.php",
+    "category": "Cloud",
+    "original": true,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'vps-publiccloud', 'VPS Public Cloud')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "web-hosting.php",
+    "category": "Hosting",
+    "original": true,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'web-hosting', 'Web Hosting')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "website-design.php",
+    "category": "Business",
+    "original": true,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'website-design', 'Website Design')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "windows-hosting.php",
+    "category": "Hosting",
+    "original": true,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'windows-hosting', 'Windows Hosting')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "wordpress-hosting.php",
+    "category": "Hosting",
+    "original": true,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'wordpress-hosting', 'WordPress Hosting')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  }
+]
