@@ -152,6 +152,12 @@ out so nobody mistakes absence for parity:
    (normalized through an explicit field whitelist, with the session's credential never written to an
    audit log), and every lifecycle action passes one capability gate in `queueAction`, so a provider
    that documents no rescue system refuses instead of returning `202` and a job that could only fail.
+   `src/lib/provisioning-worker.js` closes the loop the same day: it executes every queued job kind
+   against the provider that owns the machine — idempotent creation on the job id, retryable-vs-final
+   failure classification, and secrets kept off the job row an admin can read. Exposed as one cycle
+   per request (`POST /admin/provisioning/worker/run`) rather than a background timer, so a deployment
+   schedules it. What is still deferred is the *order-driven* provisioning path — `services.js` and
+   `app-installations.js` still queue paid-order work this worker does not yet know about.
 4. **Real payment gateways — INBOUND HALF IMPLEMENTED, initiation still deferred.** Received and
    settled: `stripe`, `paypal` and `paystack` webhooks via `src/lib/gateways/` +
    `src/lib/provider-webhook-service.js` (signature verified before any database access, canonical

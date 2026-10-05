@@ -21,6 +21,8 @@ const {
   callProvider, resolveServerProvider, assertCapabilitySupported,
   normalizeConsoleSession, consoleSessionEvidence,
 } = require('../lib/provider-egress');
+// One map for both the queue-time gate and the worker that executes the job, so they cannot drift.
+const { PROVISIONING_CAPABILITY } = require('../lib/provisioning-worker');
 
 const name = 'servers';
 
@@ -48,21 +50,6 @@ async function ownedServer(store, auth, id) {
   return server;
 }
 
-/**
- * Which provider capability a queued action needs before it may be queued. Power actions are absent
- * on purpose: start/stop/reboot/shutdown are available on every adapter, so they need no gate.
- */
-const OPERATION_CAPABILITY = Object.freeze({
-  RESIZE: 'resize',
-  SNAPSHOT_CREATE: 'snapshot',
-  SNAPSHOT_DELETE: 'snapshot',
-  SNAPSHOT_RESTORE: 'snapshot',
-  REINSTALL: 'reinstall',
-  REBUILD: 'reinstall',
-  RESCUE_ENABLE: 'rescue',
-  RESCUE_DISABLE: 'rescue',
-});
-
 function register(router, deps) {
   const { store, config = {}, logger } = deps;
 
@@ -79,7 +66,7 @@ function register(router, deps) {
    * a request that outlives a provider timeout would leave a customer staring at a spinner.
    */
   async function queueAction(auth, server, operation, payload) {
-    const capability = OPERATION_CAPABILITY[operation];
+    const capability = PROVISIONING_CAPABILITY[operation];
     if (capability) {
       const { provider } = await resolveServerProvider(store, server, config);
       if (provider) assertCapabilitySupported(provider, config, capability);

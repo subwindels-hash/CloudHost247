@@ -2,8 +2,13 @@
  * Provisioning jobs.
  *
  * Ported from cloudhost247-node/src/routes/provisioning.ts. Jobs are queued work items for the
- * infrastructure adapters. Customers see their own jobs; admins see all and can cancel. The
- * reconciliation sweep marks jobs stuck in a non-terminal state as failed (no live workers here).
+ * infrastructure adapters. Customers see their own jobs; admins see all and can cancel.
+ *
+ * The execution side lives in `lib/provisioning-worker.js`, and this module exposes it as one cycle
+ * per request (`POST /admin/provisioning/worker/run`) so it can be driven by cron, by an operator or
+ * by a test rather than depending on a process staying alive. Reconciliation now means what its name
+ * says: it fails a job only when the worker's own lease rule agrees nobody is running it, and a
+ * queued job is left alone as backlog instead of being destroyed to tidy a dashboard.
  */
 'use strict';
 
@@ -11,6 +16,7 @@ const { v } = require('../core/validate');
 const { NotFoundError, ConflictError } = require('../core/errors');
 const { uuidv7 } = require('../lib/ids');
 const { authenticate, asAdmin, asStaff } = require('../lib/auth');
+const { runProvisioningCycle, isClaimable } = require('../lib/provisioning-worker');
 
 const name = 'provisioning';
 
@@ -109,15 +115,60 @@ function register(router, deps) {
 
   router.post('/api/v1/admin/provisioning/reconcile', async (ctx) => {
     await asAdmin(ctx, deps);
+    const nowMs = Date.now();
     const rows = await store.table('provisioning_jobs').all();
     let reconciled = 0;
+    let leftQueued = 0;
     for (const job of rows) {
-      if (!TERMINAL.includes(job.status)) {
-        await store.table('provisioning_jobs').updateById(job.id, { status: 'failed', error: 'reconciled: no active worker' });
+      if (job.status === 'queued') {
+        // Backlog is not drift. Since the worker exists, a queued job is work waiting its turn, and
+        // failing it here would destroy a customer's pending action to tidy a dashboard.
+        leftQueued += 1;
+        continue;
+      }
+      // `isClaimable` is the worker's own rule for "this lease has expired", so a job is only failed
+      // here when the same code that would run it agrees nobody is running it.
+      if (job.status === 'running' && isClaimable(job, nowMs)) {
+        await store.table('provisioning_jobs').updateById(job.id, {
+          status: 'failed', error: 'reconciled: the worker holding this job stopped responding',
+          finished_at: new Date(nowMs).toISOString(), updated_at: new Date(nowMs).toISOString(),
+        });
         reconciled += 1;
       }
     }
-    ctx.json({ reconciled });
+    ctx.json({ reconciled, leftQueued });
+  });
+
+  /**
+   * Run one worker cycle.
+   *
+   * Exposed as a route rather than a background timer for the same reason as every other sweep on
+   * this platform: it can be driven by cron, by an operator, and by a test over the real HTTP
+   * pipeline, and nothing about it depends on a process staying alive. `runProvisioningCycle` is
+   * exported for a deployment that would rather schedule it directly.
+   */
+  router.post('/api/v1/admin/provisioning/worker/run', async (ctx) => {
+    const auth = await asAdmin(ctx, deps);
+    const body = await ctx.validate(v.object({
+      limit: v.coerce.number().int().min(1).max(200).optional(),
+    }).default({}));
+    const cycle = await runProvisioningCycle(deps, { limit: body.limit ?? 25 });
+    await store.table('audit_logs').insert({
+      id: uuidv7(), actor_id: auth.id, actor_role: auth.role, action: 'PROVISIONING_WORKER_RAN',
+      entity_type: 'provisioning_job', entity_id: null, ip_address: ctx.ip, user_agent: ctx.userAgent,
+      after: {
+        claimed: cycle.claimed, completed: cycle.completed, failed: cycle.failed,
+        requeued: cycle.requeued, dead_lettered: cycle.dead_lettered,
+      },
+    });
+    ctx.json({
+      claimed: cycle.claimed, completed: cycle.completed, failed: cycle.failed,
+      requeued: cycle.requeued, deadLettered: cycle.dead_lettered,
+      results: cycle.results.map((r) => ({
+        jobId: r.jobId, kind: r.kind, outcome: r.outcome,
+        status: r.job?.status ?? null, error: r.job?.error ?? null, attempts: r.job?.attempts ?? 0,
+      })),
+    });
   });
 
   // ---- Original admin/provisioning-jobs surface (spec §infrastructure) -------------------------

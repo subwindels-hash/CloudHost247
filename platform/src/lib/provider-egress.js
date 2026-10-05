@@ -160,6 +160,22 @@ function providerServerIdOf(server) {
 }
 
 /**
+ * The provider that owns a server's region — whether or not this platform holds a provider handle
+ * for the machine yet. Provisioning needs this before the server exists on the provider's side.
+ */
+async function resolveOwningProvider(store, server, config) {
+  if (!server.region_id) {
+    return { provider: null, region: null, reason: 'That server is not assigned to a region, so the provider that owns it is unknown' };
+  }
+  const region = await store.table('regions').findById(server.region_id);
+  const provider = region ? await store.table('infra_providers').findById(region.provider_id) : null;
+  if (!provider) {
+    return { provider: null, region: region ?? null, reason: 'The region that server belongs to has no provider record' };
+  }
+  return { provider, region, description: describeProvider(provider, config), reason: null };
+}
+
+/**
  * The provider that owns a server, plus the handle to talk to it about.
  *
  * Returns a reason whenever it cannot answer, because every caller has to tell an operator or a
@@ -173,16 +189,14 @@ async function resolveServerProvider(store, server, config) {
       reason: 'This platform holds no provider record for that server, so no provider action can be sent to it',
     };
   }
-  if (!server.region_id) {
-    return { provider: null, providerServerId, reason: 'That server is not assigned to a region, so the provider that owns it is unknown' };
+  const owning = await resolveOwningProvider(store, server, config);
+  if (!owning.provider) {
+    return { provider: null, providerServerId, reason: owning.reason };
   }
-  const region = await store.table('regions').findById(server.region_id);
-  const provider = region ? await store.table('infra_providers').findById(region.provider_id) : null;
-  if (!provider) {
-    return { provider: null, providerServerId, reason: 'The region that server belongs to has no provider record' };
-  }
-  const description = describeProvider(provider, config);
-  return { provider, providerServerId, description, reason: null };
+  return {
+    provider: owning.provider, providerServerId, region: owning.region,
+    description: owning.description, reason: null,
+  };
 }
 
 /**
@@ -271,6 +285,7 @@ module.exports = {
   runProviderDiagnostics,
   providerServerIdOf,
   resolveServerProvider,
+  resolveOwningProvider,
   effectiveCapabilities,
   assertCapabilitySupported,
   normalizeConsoleSession,
