@@ -49,6 +49,24 @@ const DUAL_ROUTES = [
   ['GET', `/monitoring/servers/${GHOST}`, undefined, 'customer'],
   ['GET', `/monitoring/services/${GHOST}`, undefined, 'customer'],
   ['GET', '/audit-logs', undefined, 'admin'],
+  // servers.ts mounts its whole customer surface — including the parameterised power-action
+  // routes — under both prefixes.
+  ['GET', '/servers', undefined, 'customer'],
+  ['POST', '/servers', {}, 'customer'],
+  ['GET', `/servers/${GHOST}`, undefined, 'customer'],
+  ['DELETE', `/servers/${GHOST}`, undefined, 'customer'],
+  ['POST', `/servers/${GHOST}/resize`, {}, 'customer'],
+  ['POST', `/servers/${GHOST}/reinstall`, {}, 'customer'],
+  ['POST', `/servers/${GHOST}/rebuild`, {}, 'customer'],
+  ['POST', `/servers/${GHOST}/start`, {}, 'customer'],
+  ['POST', `/servers/${GHOST}/stop`, {}, 'customer'],
+  ['POST', `/servers/${GHOST}/power-on`, {}, 'customer'],
+  ['POST', `/servers/${GHOST}/power-off`, {}, 'customer'],
+  ['POST', `/servers/${GHOST}/reboot`, {}, 'customer'],
+  ['POST', `/servers/${GHOST}/shutdown`, {}, 'customer'],
+  ['GET', '/ssh-keys', undefined, 'customer'],
+  ['POST', '/ssh-keys', {}, 'customer'],
+  ['DELETE', `/ssh-keys/${GHOST}`, undefined, 'customer'],
 ];
 
 test('integration: the legacy /api prefix mirrors /api/v1', async (t) => {

@@ -734,6 +734,16 @@ const TABLES = {
       ip_address: text({ nullable: true }),
       plan: text({ nullable: true }),
       metadata: jsonb({ default: {} }),
+      // Admin-registered platform targets (spec §5). A server with no user_id is a deployment
+      // target rather than a customer's own machine.
+      server_type: text({ nullable: true }),
+      cpu_cores: int({ nullable: true }),
+      memory_mb: int({ nullable: true }),
+      storage_mb: int({ nullable: true }),
+      docker_enabled: bool({ default: false }),
+      kubernetes_enabled: bool({ default: false }),
+      cpanel_enabled: bool({ default: false }),
+      agent_id: text({ nullable: true }),
       created_at: ts(),
       updated_at: ts(),
     },

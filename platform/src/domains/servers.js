@@ -54,6 +54,12 @@ async function queueAction(store, auth, server, operation, payload) {
 function register(router, deps) {
   const { store } = deps;
 
+  // servers.ts registers these handlers twice — under '/api/v1' and under the legacy '/api'
+  // prefix — so both mounts must serve the same handler instances.
+  const dual = (method, path, handler) => {
+    for (const prefix of ['/api/v1', '/api']) router[method](`${prefix}${path}`, handler);
+  };
+
   // ---- reference ----------------------------------------------------------
   router.get('/api/v1/operating-systems', async (ctx) => {
     const rows = await store.table('operating_systems').all();
@@ -61,13 +67,23 @@ function register(router, deps) {
   });
 
   // ---- customer: list / create / get / patch / delete ---------------------
-  router.get('/api/v1/servers', async (ctx) => {
-    const auth = await authenticate(ctx, deps);
-    const { rows, total } = await store.table('servers').find({ user_id: auth.id }, { orderBy: '-created_at' });
-    ctx.json({ servers: rows.map(publicServer), total });
+  dual('get', '/servers', async (ctx) => {
+    // Platform deployment targets were public before customer compute existed and remain public
+    // scheduling metadata — the app wizard needs them before anyone signs in. A customer's own
+    // inventory is only ever returned to its owner.
+    const auth = await authenticate(ctx, { ...deps, allowMissing: true });
+    const owned = auth
+      ? (await store.table('servers').find({ user_id: auth.id }, { orderBy: '-created_at' })).rows
+      : [];
+    const all = (await store.table('servers').find({}, { orderBy: '-created_at' })).rows;
+    ctx.json({
+      servers: owned.map(publicServer),
+      total: owned.length,
+      deploymentTargets: all.filter((s) => !s.user_id).map(publicServer),
+    });
   });
 
-  router.post('/api/v1/servers', async (ctx) => {
+  dual('post', '/servers', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const body = await ctx.validate(v.object({
       name: v.string().trim().min(1).max(120),
@@ -88,7 +104,7 @@ function register(router, deps) {
     ctx.code(201).json({ server: publicServer(server) });
   });
 
-  router.get('/api/v1/servers/:id', async (ctx) => {
+  dual('get', '/servers/:id', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const server = await ownedServer(store, auth, ctx.params.id);
     ctx.json({ server: publicServer(server) });
@@ -104,7 +120,7 @@ function register(router, deps) {
     ctx.json({ server: publicServer(updated) });
   });
 
-  router.delete('/api/v1/servers/:id', async (ctx) => {
+  dual('delete', '/servers/:id', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const server = await ownedServer(store, auth, ctx.params.id);
     await queueAction(store, auth, server, 'DELETE');
@@ -114,7 +130,7 @@ function register(router, deps) {
 
   // ---- customer: power actions -------------------------------------------
   for (const [path, operation] of Object.entries(POWER_ACTIONS)) {
-    router.post(`/api/v1/servers/:id/${path}`, async (ctx) => {
+    dual('post', `/servers/:id/${path}`, async (ctx) => {
       const auth = await authenticate(ctx, deps);
       const server = await ownedServer(store, auth, ctx.params.id);
       ctx.code(202).json(await queueAction(store, auth, server, operation));
@@ -132,7 +148,7 @@ function register(router, deps) {
     });
   });
 
-  router.post('/api/v1/servers/:id/resize', async (ctx) => {
+  dual('post', '/servers/:id/resize', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const server = await ownedServer(store, auth, ctx.params.id);
     const body = await ctx.validate(v.object({ targetPlanId: v.string().min(1) }));
@@ -172,14 +188,14 @@ function register(router, deps) {
   });
 
   // ---- customer: reinstall / rebuild --------------------------------------
-  router.post('/api/v1/servers/:id/reinstall', async (ctx) => {
+  dual('post', '/servers/:id/reinstall', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const server = await ownedServer(store, auth, ctx.params.id);
     const body = await ctx.validate(v.object({ osId: v.string().optional() }));
     ctx.code(202).json(await queueAction(store, auth, server, 'REINSTALL', { osId: body.osId ?? server.os_id }));
   });
 
-  router.post('/api/v1/servers/:id/rebuild', async (ctx) => {
+  dual('post', '/servers/:id/rebuild', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const server = await ownedServer(store, auth, ctx.params.id);
     ctx.code(202).json(await queueAction(store, auth, server, 'REBUILD'));
@@ -308,13 +324,13 @@ function register(router, deps) {
     ctx.json({ ok: true });
   });
 
-  router.get('/api/v1/ssh-keys', async (ctx) => {
+  dual('get', '/ssh-keys', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const { rows } = await store.table('ssh_keys').find({ user_id: auth.id }, { orderBy: '-created_at' });
     ctx.json({ keys: rows.map((k) => ({ id: k.id, name: k.name, fingerprint: k.fingerprint, createdAt: k.created_at })) });
   });
 
-  router.post('/api/v1/ssh-keys', async (ctx) => {
+  dual('post', '/ssh-keys', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const body = await ctx.validate(v.object({ name: v.string().trim().min(1).max(120), publicKey: v.string().min(1).max(8192) }));
     const fingerprint = crypto.createHash('sha256').update(body.publicKey).digest('hex').slice(0, 47);
@@ -322,7 +338,7 @@ function register(router, deps) {
     ctx.code(201).json({ key: { id: key.id, name: key.name, fingerprint: key.fingerprint } });
   });
 
-  router.delete('/api/v1/ssh-keys/:id', async (ctx) => {
+  dual('delete', '/ssh-keys/:id', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const key = await store.table('ssh_keys').findOne({ id: ctx.params.id, user_id: auth.id });
     if (!key) throw new NotFoundError('Key not found');
@@ -331,6 +347,97 @@ function register(router, deps) {
   });
 
   // ---- admin --------------------------------------------------------------
+  /**
+   * Register a platform deployment target (spec §5). The row is owned by nobody — a server with a
+   * user_id is a customer's own machine. Agent/WHM secrets are stored write-only; a generated
+   * agent secret is shown exactly once, here, and never returned again.
+   */
+  router.post('/api/v1/admin/servers', async (ctx) => {
+    const auth = await asAdmin(ctx, deps);
+    const input = await ctx.validate(v.object({
+      name: v.string().trim().min(1).max(255),
+      hostname: v.string().trim().min(1).max(255),
+      ipAddress: v.string().trim().max(64).nullable().optional(),
+      serverType: v.enum(['VPS', 'DEDICATED', 'CPANEL', 'KUBERNETES', 'SHARED']),
+      provider: v.string().trim().max(64).nullable().optional(),
+      region: v.string().trim().max(64).nullable().optional(),
+      cpuCores: v.coerce.number().int().min(1).max(1024),
+      memoryMb: v.coerce.number().int().min(256).max(4_194_304),
+      storageMb: v.coerce.number().int().min(1024).max(67_108_864),
+      dockerEnabled: v.boolean().default(false),
+      kubernetesEnabled: v.boolean().default(false),
+      cpanelEnabled: v.boolean().default(false),
+      agentUrl: v.string().url().optional(),
+      whmUrl: v.string().url().optional(),
+      whmUser: v.string().trim().max(64).optional(),
+      agentSecret: v.string().min(24).max(512).optional(),
+      whmApiToken: v.string().min(16).max(512).optional(),
+    }));
+
+    const metadata = {};
+    if (input.agentUrl) metadata.agent_url = input.agentUrl;
+    if (input.whmUrl) metadata.whm_url = input.whmUrl;
+    if (input.whmUser) metadata.whm_user = input.whmUser;
+
+    const agentId = (input.agentUrl || input.agentSecret)
+      ? `agent-${crypto.randomBytes(4).toString('hex')}`
+      : null;
+
+    const server = await store.table('servers').insert({
+      id: uuidv7(),
+      user_id: null,
+      name: input.name,
+      hostname: input.hostname,
+      ip_address: input.ipAddress ?? null,
+      server_type: input.serverType,
+      provider: input.provider ?? null,
+      region: input.region ?? null,
+      cpu_cores: input.cpuCores,
+      memory_mb: input.memoryMb,
+      storage_mb: input.storageMb,
+      docker_enabled: input.dockerEnabled,
+      kubernetes_enabled: input.kubernetesEnabled,
+      cpanel_enabled: input.cpanelEnabled,
+      agent_id: agentId,
+      panel: input.cpanelEnabled ? 'cpanel' : null,
+      status: 'active',
+      metadata,
+    });
+
+    // Register the agent identity and secrets. Anything the caller supplied is stored as-is; when
+    // only an agent URL was given, a secret is generated and returned once so the agent can be
+    // configured — after this response it is unreadable.
+    let agentSecret = null;
+    if (input.agentSecret) {
+      await store.table('server_credentials').insert({
+        id: uuidv7(), server_id: server.id, kind: 'agent_secret', secret: input.agentSecret,
+      });
+    } else if (agentId) {
+      agentSecret = crypto.randomBytes(32).toString('base64url');
+      await store.table('server_credentials').insert({
+        id: uuidv7(), server_id: server.id, kind: 'agent_secret', secret: agentSecret,
+      });
+    }
+    if (input.whmApiToken) {
+      await store.table('server_credentials').insert({
+        id: uuidv7(), server_id: server.id, kind: 'whm_api_token', secret: input.whmApiToken,
+      });
+    }
+
+    await store.table('audit_logs').insert({
+      id: uuidv7(), actor_id: auth.id, actor_role: auth.role,
+      action: 'server.registered', entity_type: 'server', entity_id: server.id,
+      ip_address: ctx.ip, user_agent: ctx.userAgent,
+      after: { name: server.name, serverType: input.serverType, agentId },
+    });
+
+    ctx.code(201).json({
+      server: { ...publicServer(server), userId: null },
+      ...(agentId ? { agentId } : {}),
+      ...(agentSecret ? { agentSecret } : {}),
+    });
+  });
+
   router.get('/api/v1/admin/servers', async (ctx) => {
     await asAdmin(ctx, deps);
     const { rows, total } = await store.table('servers').find({}, { orderBy: '-created_at', limit: 200 });
