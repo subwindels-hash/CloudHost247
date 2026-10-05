@@ -274,9 +274,12 @@ function register(router, deps) {
         });
         await audit(deps, { eventType: 'mfa_login_challenge', userId: user.id, ipAddress: ctx.ip });
       } else {
-        // Correct password but MFA is on: return a challenge rather than a session.
+        // Correct password but a second factor is still owed. The original answers 202 with a
+        // short-lived, single-use continuation credential (never a session token) and the client
+        // finishes at POST /auth/mfa/login/verify.
         authLimiter.reset(`auth:${ctx.ip}`);
-        ctx.code(200).json({ mfaRequired: true, method: 'totp' });
+        const mfaToken = await issueMfaLoginChallenge(user.id);
+        ctx.code(202).json({ mfaRequired: true, method: 'totp', mfaToken });
         return;
       }
     }
@@ -640,6 +643,238 @@ function register(router, deps) {
     ctx.json({ ok: true });
   };
 
+  // ------------------------------------------------------------------ MFA + recovery
+
+  /** A short-lived, single-use continuation credential for the second login factor. */
+  const issueMfaLoginChallenge = async (userId) => {
+    const token = randomToken(32);
+    await store.table('mfa_login_challenges').insert({
+      id: uuidv7(),
+      user_id: userId,
+      token_hash: sha256(token),
+      expires_at: new Date(Date.now() + 5 * 60_000).toISOString(),
+    });
+    return token;
+  };
+
+  /**
+   * Verify a second factor, accepting either a TOTP code or a single-use recovery code (which is
+   * consumed on success). Mirrors the check the inline login path performs so both entry points
+   * enforce exactly the same rules.
+   */
+  const verifyMfaFactor = async (mfa, code) => {
+    const index = totp.findRecoveryCode(mfa.recovery_code_hashes ?? [], code);
+    if (index !== null) {
+      const hashes = [...(mfa.recovery_code_hashes ?? [])];
+      hashes.splice(index, 1);
+      await store.table('totp_mfa').updateById(mfa.id, { recovery_code_hashes: hashes });
+      return { ok: true, method: 'recovery_code' };
+    }
+    const { valid, counter } = totp.verifyTotp(mfa.secret_encrypted, code, {
+      lastCounter: mfa.last_used_counter ?? -1,
+    });
+    if (!valid) return { ok: false, method: 'totp' };
+    await store.table('totp_mfa').updateById(mfa.id, {
+      last_used_at: new Date().toISOString(),
+      last_used_counter: counter,
+    });
+    return { ok: true, method: 'totp' };
+  };
+
+  /** Issue a single-use recovery token for email verification or password reset. */
+  const issueRecoveryToken = async (userId, kind, ttlMs) => {
+    const token = randomToken(32);
+    await store.table('auth_recovery').insert({
+      id: uuidv7(),
+      user_id: userId,
+      kind,
+      token_hash: sha256(token),
+      expires_at: new Date(Date.now() + ttlMs).toISOString(),
+    });
+    return token;
+  };
+
+  /** Load an unexpired, unconsumed recovery token of the given kind. */
+  const loadRecoveryToken = async (rawToken, kind) => {
+    const record = await store.table('auth_recovery').findOne({
+      token_hash: sha256(rawToken),
+      kind,
+    });
+    if (!record || record.consumed_at) return null;
+    if (new Date(record.expires_at).getTime() < Date.now()) return null;
+    return record;
+  };
+
+  /**
+   * Complete a password-authenticated login with its second factor (auth.ts
+   * POST /auth/mfa/login/verify). A bad or expired code is a single, non-specific 401 so the
+   * response cannot be used to probe for valid accounts or codes.
+   */
+  const handleMfaLoginVerify = async (ctx) => {
+    const body = await ctx.validate(v.object({
+      mfaToken: v.string().min(10).max(200),
+      code: v.string().min(6).max(64),
+    }));
+
+    const challenge = await store.table('mfa_login_challenges').findOne({ token_hash: sha256(body.mfaToken) });
+    if (!challenge || challenge.consumed_at || new Date(challenge.expires_at).getTime() < Date.now()) {
+      throw new UnauthorizedError('Invalid or expired multi-factor authentication code');
+    }
+
+    const mfa = await store.table('totp_mfa').findOne({ user_id: challenge.user_id, status: 'enabled' });
+    if (!mfa) throw new UnauthorizedError('Invalid or expired multi-factor authentication code');
+
+    const result = await verifyMfaFactor(mfa, body.code);
+    if (!result.ok) {
+      await audit(deps, {
+        eventType: 'mfa_login_failure',
+        userId: challenge.user_id,
+        ipAddress: ctx.ip,
+        userAgent: ctx.userAgent,
+      });
+      throw new UnauthorizedError('Invalid or expired multi-factor authentication code');
+    }
+
+    const user = await users().findById(challenge.user_id);
+    if (!user || user.status !== 'active') throw new UnauthorizedError('This account is not active');
+
+    // Single use: the challenge cannot be replayed even with a valid code.
+    await store.table('mfa_login_challenges').updateById(challenge.id, { consumed_at: new Date().toISOString() });
+
+    await audit(deps, {
+      eventType: 'login_success',
+      userId: user.id,
+      ipAddress: ctx.ip,
+      userAgent: ctx.userAgent,
+      metadata: { mfa: result.method },
+    });
+    if (result.method === 'recovery_code') {
+      await audit(deps, {
+        eventType: 'mfa_recovery_code_used',
+        userId: user.id,
+        ipAddress: ctx.ip,
+        userAgent: ctx.userAgent,
+      });
+    }
+
+    const { accessToken, refreshToken } = signSession(deps, user);
+    await storeRefreshToken(deps, user, refreshToken, config.REFRESH_TOKEN_EXPIRES_MS);
+    ctx.json({ user: publicUser(user), token: accessToken, accessToken, refreshToken });
+  };
+
+  /**
+   * Request a password reset (auth.ts POST /auth/password-reset/request). Anonymous and
+   * deliberately non-enumerating: an unknown address, a suspended account and a real one all get
+   * the same 202 and the same body.
+   */
+  const handlePasswordResetRequest = async (ctx) => {
+    const body = await ctx.validate(v.object({ email: v.string().trim().toLowerCase().email() }));
+    const user = await users().findOneCi('email', body.email);
+
+    let resetToken = null;
+    if (user && user.status === 'active') {
+      resetToken = await issueRecoveryToken(user.id, 'password_reset', 3600_000);
+      await audit(deps, {
+        eventType: 'password_reset_requested',
+        userId: user.id,
+        ipAddress: ctx.ip,
+        userAgent: ctx.userAgent,
+      });
+    }
+
+    ctx.code(202).json({
+      message: 'If an active account matches that email address, a password reset link will be sent shortly.',
+      // No mail transport in development; production must deliver this by email (src/services/mailer.js).
+      ...(config.NODE_ENV !== 'production' && resetToken ? { resetToken } : {}),
+    });
+  };
+
+  const handlePasswordResetConfirm = async (ctx) => {
+    const body = await ctx.validate(v.object({
+      token: v.string().min(10).max(200),
+      password: passwordSchema,
+    }));
+
+    const record = await loadRecoveryToken(body.token, 'password_reset');
+    if (!record) {
+      throw new ValidationError('This password reset link is invalid or has expired. Request a new link to continue.');
+    }
+    const user = await users().findById(record.user_id);
+    if (!user) {
+      throw new ValidationError('This password reset link is invalid or has expired. Request a new link to continue.');
+    }
+
+    const updated = await users().updateById(user.id, {
+      password_hash: await hashPassword(body.password),
+      password_changed_at: new Date().toISOString(),
+      auth_session_version: (user.auth_session_version ?? 0) + 1,
+    });
+    await store.table('auth_recovery').updateById(record.id, { consumed_at: new Date().toISOString() });
+    await audit(deps, {
+      eventType: 'password_reset_completed',
+      userId: user.id,
+      ipAddress: ctx.ip,
+      userAgent: ctx.userAgent,
+    });
+
+    const { accessToken, refreshToken } = signSession(deps, updated);
+    await storeRefreshToken(deps, updated, refreshToken, config.REFRESH_TOKEN_EXPIRES_MS);
+    ctx.json({
+      message: 'Your password has been reset. You can now log in with your new password.',
+      accessToken,
+      refreshToken,
+      user: publicUser(updated),
+    });
+  };
+
+  const handleEmailVerificationConfirm = async (ctx) => {
+    const body = await ctx.validate(v.object({ token: v.string().min(10).max(200) }));
+    const record = await loadRecoveryToken(body.token, 'email_verification');
+    if (!record) {
+      throw new ValidationError('This verification link is invalid or has expired. Request a new link to continue.');
+    }
+
+    const user = await users().updateById(record.user_id, { email_verified_at: new Date().toISOString() });
+    await store.table('auth_recovery').updateById(record.id, { consumed_at: new Date().toISOString() });
+    await audit(deps, {
+      eventType: 'email_verified',
+      userId: user.id,
+      ipAddress: ctx.ip,
+      userAgent: ctx.userAgent,
+    });
+    ctx.json({ message: 'Your email address has been verified.', user: publicUser(user) });
+  };
+
+  /**
+   * Resend the verification link (auth.ts POST /auth/email-verification/resend). 202 for both a
+   * fresh queue and the throttled case, so a stolen session cannot be turned into a mail flood and
+   * the browser learns nothing either way.
+   */
+  const handleEmailVerificationResend = async (ctx) => {
+    const auth = await authenticate(ctx, deps);
+    const user = await users().findById(auth.id);
+    if (!user) throw new UnauthorizedError('Account no longer exists');
+
+    if (user.email_verified_at) {
+      ctx.json({ message: 'This email address is already verified.', alreadyVerified: true, queued: false });
+      return;
+    }
+
+    const token = await issueRecoveryToken(user.id, 'email_verification', 86400_000);
+    await audit(deps, {
+      eventType: 'email_verification_requested',
+      userId: user.id,
+      ipAddress: ctx.ip,
+      userAgent: ctx.userAgent,
+    });
+    ctx.code(202).json({
+      message: 'A new verification link has been queued for delivery.',
+      alreadyVerified: false,
+      queued: true,
+      ...(config.NODE_ENV !== 'production' ? { verificationToken: token } : {}),
+    });
+  };
+
   // ------------------------------------------------------------------ routes
   const routes = [
     ['post', '/api/v1/auth/register', handleRegister],
@@ -656,6 +891,13 @@ function register(router, deps) {
     ['post', '/api/v1/auth/mfa/totp/confirm', handleMfaConfirm],
     ['post', '/api/v1/auth/mfa/disable', handleMfaDisable],
     ['get', '/api/v1/auth/mfa/status', handleMfaStatus],
+    // The original mounts auth at /api/auth/*; these paths exist there in the source and the
+    // alias loop below reproduces that. The /api/v1 forms are additive.
+    ['post', '/api/v1/auth/password-reset/request', handlePasswordResetRequest],
+    ['post', '/api/v1/auth/password-reset/confirm', handlePasswordResetConfirm],
+    ['post', '/api/v1/auth/email-verification/confirm', handleEmailVerificationConfirm],
+    ['post', '/api/v1/auth/email-verification/resend', handleEmailVerificationResend],
+    ['post', '/api/v1/auth/mfa/login/verify', handleMfaLoginVerify],
   ];
 
   for (const [method, pattern, ...handlers] of routes) {

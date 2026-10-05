@@ -144,6 +144,21 @@ const TABLES = {
     indexes: [{ name: 'auth_recovery_token_key', columns: ['token_hash'], unique: true }],
   },
 
+  mfa_login_challenges: {
+    // The short-lived, single-use continuation credential handed back when a password is correct
+    // but a second factor is still owed. Deliberately not a JWT: it can only be exchanged, once,
+    // for a session by POST /auth/mfa/login/verify.
+    columns: {
+      id: pk(),
+      user_id: uuid({ required: true }),
+      token_hash: text({ required: true }),    // sha256(token) — plaintext is never stored
+      consumed_at: { type: 'timestamptz', nullable: true },
+      expires_at: { type: 'timestamptz', required: true },
+      created_at: ts(),
+    },
+    indexes: [{ name: 'mfa_login_challenges_token_key', columns: ['token_hash'], unique: true }],
+  },
+
   totp_mfa: {
     columns: {
       id: pk(),

@@ -144,20 +144,53 @@ test('integration: full platform over real HTTP', async (t) => {
     assert.ok(en.data.otpauthUri.startsWith('otpauth://totp/'));
 
     const totpLib = require('../src/lib/totp');
-    const code = totpLib.totp(en.data.secret);
+    // Pin explicit counters rather than reading the clock: confirming enrolment consumes its
+    // counter, and the platform's replay protection (correctly) refuses to accept the same code
+    // twice, so the login must use the next window's code.
+    const baseCounter = Math.floor(Date.now() / 1000 / 30);
+    const code = totpLib.hotp(en.data.secret, baseCounter);
     const confirm = await jsonFetch(base, {
       path: '/api/v1/auth/mfa/totp/confirm', method: 'POST', body: { code },
     }, reg.data.accessToken);
     assert.strictEqual(confirm.status, 200);
     assert.strictEqual(confirm.data.recoveryCodes.length, 10);
 
-    // Login without a code now demands MFA.
+    // Login without a code now demands MFA, and hands back a single-use continuation credential.
     const gated = await jsonFetch(base, {
       path: '/api/v1/auth/login', method: 'POST',
       body: { email: 'mfa@example.com', password: 'SuperSecret123!' },
     });
-    assert.strictEqual(gated.status, 200);
+    assert.strictEqual(gated.status, 202, 'a second factor is still owed');
     assert.strictEqual(gated.data.mfaRequired, true);
+    assert.ok(gated.data.mfaToken, 'a continuation credential is issued, not a session');
+
+    // The challenge is exchanged, once, for a session at the completion route.
+    const verified = await jsonFetch(base, {
+      path: '/api/v1/auth/mfa/login/verify', method: 'POST',
+      body: { mfaToken: gated.data.mfaToken, code: totpLib.hotp(en.data.secret, baseCounter + 1) },
+    });
+    assert.strictEqual(verified.status, 200);
+    assert.ok(verified.data.token, 'a session token is returned');
+    assert.strictEqual(verified.data.user.email, 'mfa@example.com');
+
+    // Single use: the same challenge cannot be replayed.
+    const replay = await jsonFetch(base, {
+      path: '/api/v1/auth/mfa/login/verify', method: 'POST',
+      body: { mfaToken: gated.data.mfaToken, code: totpLib.hotp(en.data.secret, baseCounter + 1) },
+    });
+    assert.strictEqual(replay.status, 401);
+
+    // A wrong code against a fresh challenge is a single, non-specific 401.
+    const fresh = await jsonFetch(base, {
+      path: '/api/v1/auth/login', method: 'POST',
+      body: { email: 'mfa@example.com', password: 'SuperSecret123!' },
+    });
+    const wrong = await jsonFetch(base, {
+      path: '/api/v1/auth/mfa/login/verify', method: 'POST',
+      body: { mfaToken: fresh.data.mfaToken, code: '000000' },
+    });
+    assert.strictEqual(wrong.status, 401);
+    assert.match(wrong.data.message, /Invalid or expired multi-factor authentication code/);
   });
 
   await t.test('public site and assets served with caching + 304', async () => {
