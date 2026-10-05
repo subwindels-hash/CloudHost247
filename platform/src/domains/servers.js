@@ -2,10 +2,13 @@
  * Customer servers (VPS/dedicated instances) and the admin server console.
  *
  * Ported from cloudhost247-node/src/routes/servers.ts. Lifecycle actions (power, resize, snapshot,
- * reinstall, rebuild, rescue, termination) are recorded as provisioning jobs and audited; the
- * actual hypervisor/provider call is an infrastructure adapter that is deferred, so an action
- * returns the queued job rather than pretending the provider ran. Reads return stored state.
- * Credentials are write-only: secrets are stored but never returned.
+ * reinstall, rebuild, rescue, termination) are recorded as provisioning jobs and audited, and an
+ * action returns the queued job rather than pretending the provider ran — provisioning is durable
+ * work and never runs in request scope. What the provider boundary does add here is honesty about
+ * what can be queued at all: an action a provider documents no support for is refused before a job
+ * is written, and the console route issues a real provider session instead of a token that leads
+ * nowhere. Reads return stored state. Credentials are write-only: secrets are stored but never
+ * returned, and a console session's key material is never written to an audit log.
  */
 'use strict';
 
@@ -14,6 +17,10 @@ const { v } = require('../core/validate');
 const { NotFoundError, ValidationError } = require('../core/errors');
 const { uuidv7 } = require('../lib/ids');
 const { authenticate, asAdmin, asStaff } = require('../lib/auth');
+const {
+  callProvider, resolveServerProvider, assertCapabilitySupported,
+  normalizeConsoleSession, consoleSessionEvidence,
+} = require('../lib/provider-egress');
 
 const name = 'servers';
 
@@ -41,18 +48,49 @@ async function ownedServer(store, auth, id) {
   return server;
 }
 
-/** Queue a provisioning job for a server action and return the job handle. */
-async function queueAction(store, auth, server, operation, payload) {
-  const job = await store.table('provisioning_jobs').insert({
-    id: uuidv7(), user_id: auth.id, kind: operation,
-    resource_type: 'servers', resource_id: server.id, server_id: server.id,
-    status: 'queued', payload: payload ?? {},
-  });
-  return { jobId: job.id, status: job.status, queued: true };
-}
+/**
+ * Which provider capability a queued action needs before it may be queued. Power actions are absent
+ * on purpose: start/stop/reboot/shutdown are available on every adapter, so they need no gate.
+ */
+const OPERATION_CAPABILITY = Object.freeze({
+  RESIZE: 'resize',
+  SNAPSHOT_CREATE: 'snapshot',
+  SNAPSHOT_DELETE: 'snapshot',
+  SNAPSHOT_RESTORE: 'snapshot',
+  REINSTALL: 'reinstall',
+  REBUILD: 'reinstall',
+  RESCUE_ENABLE: 'rescue',
+  RESCUE_DISABLE: 'rescue',
+});
 
 function register(router, deps) {
-  const { store } = deps;
+  const { store, config = {}, logger } = deps;
+
+  /**
+   * Queue a provisioning job for a server action and return the job handle.
+   *
+   * Every lifecycle action goes through here, so the capability check lives here rather than in each
+   * route: a route cannot forget it and queue work the provider will never perform. The check is
+   * deliberately one-directional — it refuses only when a provider *is* resolved and that provider
+   * documents the capability as absent. A server this platform holds no provider handle for is still
+   * queued, because it may legitimately be mid-provision and the worker is what reports that.
+   *
+   * The action stays queued rather than running in request scope: provisioning is durable work, and
+   * a request that outlives a provider timeout would leave a customer staring at a spinner.
+   */
+  async function queueAction(auth, server, operation, payload) {
+    const capability = OPERATION_CAPABILITY[operation];
+    if (capability) {
+      const { provider } = await resolveServerProvider(store, server, config);
+      if (provider) assertCapabilitySupported(provider, config, capability);
+    }
+    const job = await store.table('provisioning_jobs').insert({
+      id: uuidv7(), user_id: auth.id, kind: operation,
+      resource_type: 'servers', resource_id: server.id, server_id: server.id,
+      status: 'queued', payload: payload ?? {},
+    });
+    return { jobId: job.id, status: job.status, queued: true };
+  }
 
   // servers.ts registers these handlers twice — under '/api/v1' and under the legacy '/api'
   // prefix — so both mounts must serve the same handler instances.
@@ -123,7 +161,7 @@ function register(router, deps) {
   dual('delete', '/servers/:id', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const server = await ownedServer(store, auth, ctx.params.id);
-    await queueAction(store, auth, server, 'DELETE');
+    await queueAction(auth, server, 'DELETE');
     await store.table('servers').updateById(server.id, { status: 'terminating' });
     ctx.json({ ok: true, status: 'terminating' });
   });
@@ -133,7 +171,7 @@ function register(router, deps) {
     dual('post', `/servers/:id/${path}`, async (ctx) => {
       const auth = await authenticate(ctx, deps);
       const server = await ownedServer(store, auth, ctx.params.id);
-      ctx.code(202).json(await queueAction(store, auth, server, operation));
+      ctx.code(202).json(await queueAction(auth, server, operation));
     });
   }
 
@@ -152,7 +190,7 @@ function register(router, deps) {
     const auth = await authenticate(ctx, deps);
     const server = await ownedServer(store, auth, ctx.params.id);
     const body = await ctx.validate(v.object({ targetPlanId: v.string().min(1) }));
-    const result = await queueAction(store, auth, server, 'RESIZE', { targetPlanId: body.targetPlanId });
+    const result = await queueAction(auth, server, 'RESIZE', { targetPlanId: body.targetPlanId });
     ctx.code(202).json(result);
   });
 
@@ -169,21 +207,21 @@ function register(router, deps) {
     const auth = await authenticate(ctx, deps);
     const server = await ownedServer(store, auth, ctx.params.id);
     const body = await ctx.validate(v.object({ description: v.string().trim().max(200).optional() }));
-    const result = await queueAction(store, auth, server, 'SNAPSHOT_CREATE', { description: body.description ?? null });
+    const result = await queueAction(auth, server, 'SNAPSHOT_CREATE', { description: body.description ?? null });
     ctx.code(202).json(result);
   });
 
   router.delete('/api/v1/servers/:id/snapshots/:snapshotId', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const server = await ownedServer(store, auth, ctx.params.id);
-    const result = await queueAction(store, auth, server, 'SNAPSHOT_DELETE', { snapshotId: ctx.params.snapshotId });
+    const result = await queueAction(auth, server, 'SNAPSHOT_DELETE', { snapshotId: ctx.params.snapshotId });
     ctx.code(202).json(result);
   });
 
   router.post('/api/v1/servers/:id/snapshots/:snapshotId/restore', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const server = await ownedServer(store, auth, ctx.params.id);
-    const result = await queueAction(store, auth, server, 'SNAPSHOT_RESTORE', { snapshotId: ctx.params.snapshotId });
+    const result = await queueAction(auth, server, 'SNAPSHOT_RESTORE', { snapshotId: ctx.params.snapshotId });
     ctx.code(202).json(result);
   });
 
@@ -192,13 +230,13 @@ function register(router, deps) {
     const auth = await authenticate(ctx, deps);
     const server = await ownedServer(store, auth, ctx.params.id);
     const body = await ctx.validate(v.object({ osId: v.string().optional() }));
-    ctx.code(202).json(await queueAction(store, auth, server, 'REINSTALL', { osId: body.osId ?? server.os_id }));
+    ctx.code(202).json(await queueAction(auth, server, 'REINSTALL', { osId: body.osId ?? server.os_id }));
   });
 
   dual('post', '/servers/:id/rebuild', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const server = await ownedServer(store, auth, ctx.params.id);
-    ctx.code(202).json(await queueAction(store, auth, server, 'REBUILD'));
+    ctx.code(202).json(await queueAction(auth, server, 'REBUILD'));
   });
 
   // ---- customer: status / logs -------------------------------------------
@@ -243,25 +281,58 @@ function register(router, deps) {
   });
 
   // ---- customer: console / rescue -----------------------------------------
+  /**
+   * A live console session from the provider that owns the machine.
+   *
+   * This used to hand back a random token and a placeholder provider name, which meant the platform
+   * recorded a console being opened for a session that never existed and the customer's panel
+   * rendered a login it could not complete. It now asks the provider. An adapter that documents no
+   * console refuses before any network call, and that refusal *is* the answer: a button that cannot
+   * work should never have been offered in the first place.
+   *
+   * The session is the customer's own credential to their own machine, so it is returned to them and
+   * never logged — the audit row records that a session was issued and of what kind, and nothing that
+   * could be replayed. The EC2 session carries a private key that exists nowhere else, and Hetzner's
+   * carries a one-time password.
+   */
   router.post('/api/v1/servers/:id/console', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const server = await ownedServer(store, auth, ctx.params.id);
-    // A real console URL requires a provider session (deferred); issue a short-lived token only.
-    ctx.json({ serverId: server.id, consoleToken: crypto.randomBytes(16).toString('base64url'), provider: 'deferred', note: 'Live console requires a provider adapter (deferred).' });
+    const { provider, providerServerId, description, reason } = await resolveServerProvider(store, server, config);
+    if (!provider) throw new ValidationError(reason);
+    // Gated on the documented capability before any call, so the refusal names the provider and the
+    // capability instead of arriving as a generic "not supported" from the adapter boundary.
+    assertCapabilitySupported(provider, config, 'console');
+    const session = normalizeConsoleSession(
+      await callProvider(provider, { config, logger }, 'getConsole', providerServerId),
+    );
+    await store.table('audit_logs').insert({
+      id: uuidv7(), actor_id: auth.id, actor_role: auth.role,
+      action: 'server.console_opened', entity_type: 'server', entity_id: server.id,
+      ip_address: ctx.ip, user_agent: ctx.userAgent,
+      after: { adapter: description.adapter, ...consoleSessionEvidence(session) },
+    });
+    ctx.json({ serverId: server.id, provider: description.adapter, console: session });
   });
 
+  /**
+   * Rescue mode. The status is written *after* the job is accepted, not before: a refused action
+   * used to leave the server row saying `rescue` when nothing had been asked of any provider.
+   */
   router.post('/api/v1/servers/:id/rescue', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const server = await ownedServer(store, auth, ctx.params.id);
+    const result = await queueAction(auth, server, 'RESCUE_ENABLE');
     await store.table('servers').updateById(server.id, { status: 'rescue' });
-    ctx.code(202).json(await queueAction(store, auth, server, 'RESCUE_ENABLE'));
+    ctx.code(202).json(result);
   });
 
   router.delete('/api/v1/servers/:id/rescue', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const server = await ownedServer(store, auth, ctx.params.id);
+    const result = await queueAction(auth, server, 'RESCUE_DISABLE');
     await store.table('servers').updateById(server.id, { status: 'active' });
-    ctx.code(202).json(await queueAction(store, auth, server, 'RESCUE_DISABLE'));
+    ctx.code(202).json(result);
   });
 
   // ---- customer: metrics / health / applications --------------------------

@@ -29,6 +29,8 @@ const { ProviderError } = require('./providers/types');
 const { createInfrastructureProviderAdapter } = require('./providers/registry');
 const { providerErrorToHttpError, CUSTOMER_MESSAGES } = require('./providers/error-mapping');
 const { describeProviderConfiguration } = require('./provider-adapters');
+// Reused rather than re-implemented, so the capability gate cannot drift from the adapter.
+const { replacementEnabled } = require('./providers/adapters/aws-replacement');
 
 /** Neutral sentence for a failure code the customer-facing table does not name. */
 const FALLBACK_MESSAGE = 'The infrastructure provider could not complete this request.';
@@ -157,6 +159,109 @@ function providerServerIdOf(server) {
   return null;
 }
 
+/**
+ * The provider that owns a server, plus the handle to talk to it about.
+ *
+ * Returns a reason whenever it cannot answer, because every caller has to tell an operator or a
+ * customer *why* an action is impossible rather than failing with a bare "not found".
+ */
+async function resolveServerProvider(store, server, config) {
+  const providerServerId = providerServerIdOf(server);
+  if (!providerServerId) {
+    return {
+      provider: null, providerServerId: null,
+      reason: 'This platform holds no provider record for that server, so no provider action can be sent to it',
+    };
+  }
+  if (!server.region_id) {
+    return { provider: null, providerServerId, reason: 'That server is not assigned to a region, so the provider that owns it is unknown' };
+  }
+  const region = await store.table('regions').findById(server.region_id);
+  const provider = region ? await store.table('infra_providers').findById(region.provider_id) : null;
+  if (!provider) {
+    return { provider: null, providerServerId, reason: 'The region that server belongs to has no provider record' };
+  }
+  const description = describeProvider(provider, config);
+  return { provider, providerServerId, description, reason: null };
+}
+
+/**
+ * The capabilities an adapter will actually honour for this deployment.
+ *
+ * `describeProviderConfiguration` returns the profile's documented defaults, which are correct for
+ * every kind except one: AWS `reinstall` is deployment-scoped, enabled by
+ * `<PREFIX>_ALLOW_ROOT_VOLUME_REPLACEMENT`. Re-implementing that rule here would let this gate drift
+ * away from the adapter — exactly how a capability flag stops being trustworthy — so it reuses the
+ * adapter's own `replacementEnabled` predicate instead.
+ */
+function effectiveCapabilities(description, config) {
+  const capabilities = { ...(description.capabilities ?? {}) };
+  if (description.adapter === 'aws' && capabilities.reinstall === false) {
+    if (replacementEnabled(config ?? process.env, description.envPrefix || 'AWS')) capabilities.reinstall = true;
+  }
+  return capabilities;
+}
+
+/**
+ * Refuse a queued action the provider will never perform.
+ *
+ * Without this, a customer on a provider that documents no rescue system gets a `202` and a job that
+ * can only fail, and a server row left in the state the refused action would have set. The refusal
+ * is a 400 naming the provider and the capability; it is thrown before any state is written.
+ */
+function assertCapabilitySupported(provider, config, capability) {
+  const description = describeProvider(provider, config);
+  const capabilities = effectiveCapabilities(description, config);
+  if (capabilities[capability] === false) {
+    throw new ValidationError(
+      `The ${description.label} provider does not offer ${capability} for this server through its API`,
+    );
+  }
+  return capabilities;
+}
+
+/**
+ * The fields a console session may carry, as an explicit whitelist.
+ *
+ * Adapters return provider-shaped records — Hetzner hands back a raw action record with `wss_url`
+ * and a one-time `password`, Vultr a `{url, type}` pair, EC2 a generated `privateKey`. A whitelist
+ * means a future adapter cannot add a field and have it reach a browser unnoticed, and it is what
+ * keeps `consoleSessionEvidence` below safe to audit.
+ */
+const CONSOLE_SESSION_FIELDS = Object.freeze([
+  'type', 'url', 'username', 'password', 'privateKey', 'expiresAt', 'notes',
+]);
+
+/** Normalize any adapter's console record into one shape for the customer. */
+function normalizeConsoleSession(session) {
+  const record = session && typeof session === 'object' ? session : {};
+  const url = typeof record.url === 'string' ? record.url
+    : (typeof record.wss_url === 'string' ? record.wss_url : null);
+  const out = { type: record.type ?? (url ? 'web-console' : 'provider-session') };
+  if (url) out.url = url;
+  for (const field of CONSOLE_SESSION_FIELDS) {
+    if (field === 'type' || field === 'url') continue;
+    if (typeof record[field] === 'string' && record[field].length > 0) out[field] = record[field];
+  }
+  return out;
+}
+
+/**
+ * What may be written to an audit log about a console session: the shape of it, never its contents.
+ *
+ * A console session is an interactive login to a customer's own machine, and the EC2 one carries a
+ * private key that exists nowhere else. Recording the fact that a session was issued — and what kind
+ * — is what an operator needs; recording the key would put a live credential in a table every staff
+ * account can read.
+ */
+function consoleSessionEvidence(session) {
+  return {
+    type: session?.type ?? null,
+    hasUrl: Boolean(session?.url),
+    credentialKind: session?.privateKey ? 'private-key' : (session?.password ? 'one-time-password' : null),
+  };
+}
+
 module.exports = {
   customerMessage,
   describeProvider,
@@ -165,4 +270,10 @@ module.exports = {
   callProvider,
   runProviderDiagnostics,
   providerServerIdOf,
+  resolveServerProvider,
+  effectiveCapabilities,
+  assertCapabilitySupported,
+  normalizeConsoleSession,
+  consoleSessionEvidence,
+  CONSOLE_SESSION_FIELDS,
 };

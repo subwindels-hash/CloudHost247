@@ -148,6 +148,10 @@ out so nobody mistakes absence for parity:
    provider answer) and server reconciliation (`healthCheck` per server). What is still deferred is
    *writing* provider state — create/resize/snapshot and the provisioning worker that would execute
    queued jobs — and no call has been made to a real provider account.
+   `src/domains/servers.js` followed the same day: the console route issues a real provider session
+   (normalized through an explicit field whitelist, with the session's credential never written to an
+   audit log), and every lifecycle action passes one capability gate in `queueAction`, so a provider
+   that documents no rescue system refuses instead of returning `202` and a job that could only fail.
 4. **Real payment gateways — INBOUND HALF IMPLEMENTED, initiation still deferred.** Received and
    settled: `stripe`, `paypal` and `paystack` webhooks via `src/lib/gateways/` +
    `src/lib/provider-webhook-service.js` (signature verified before any database access, canonical
