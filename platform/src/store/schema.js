@@ -929,6 +929,7 @@ const TABLES = {
       product: text({ required: true }),
       license_key: text({ nullable: true }),
       status: text({ default: 'active' }),
+      activated_at: { type: 'timestamptz', nullable: true },
       expires_at: { type: 'timestamptz', nullable: true },
       created_at: ts(),
       updated_at: ts(),
