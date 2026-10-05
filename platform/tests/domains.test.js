@@ -121,9 +121,12 @@ test('integration: ported domains over real HTTP', async (t) => {
     }, token);
     assert.strictEqual(rec.status, 201);
 
-    const ssl = await jsonFetch(base, { path: '/api/v1/ssl/certificates', method: 'POST', body: { domain: 'example.com' } }, token);
+    const ssl = await jsonFetch(base, { path: '/api/v1/ssl/certificates', method: 'POST', body: { domainName: 'example.com' } }, token);
     assert.strictEqual(ssl.status, 201);
-    assert.strictEqual(ssl.data.certificate.status, 'pending');
+    // ssl.ts contract: domainName in, uppercase lifecycle status out, PENDING until issued.
+    assert.strictEqual(ssl.data.certificate.status, 'PENDING');
+    assert.strictEqual(ssl.data.certificate.domain_name, 'example.com');
+    assert.strictEqual(ssl.data.certificate.issuer, 'LETS_ENCRYPT');
   });
 
   await t.test('dns record on a zone you do not own is refused', async () => {

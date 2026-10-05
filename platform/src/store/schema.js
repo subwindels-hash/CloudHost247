@@ -634,16 +634,24 @@ const TABLES = {
     indexes: [{ name: 'dns_records_zone_idx', columns: ['zone_id'] }],
   },
 
+  // Mirrors migration 0045. sans is JSONB rather than varchar(255)[] because the pg backend
+  // serialises structured columns as JSON, which is not a valid TEXT[] literal.
   ssl_certificates: {
     columns: {
       id: pk(),
       user_id: uuid({ required: true }),
-      domain: text({ required: true }),
-      issuer: text({ default: 'letsencrypt' }),
-      status: text({ default: 'pending' }),
-      issued_at: { type: 'timestamptz', nullable: true },
+      server_id: uuid({ nullable: true }),
+      domain_id: uuid({ nullable: true }),
+      domain_name: text({ required: true }),
+      sans: jsonb({ default: [] }),
+      issuer: text({ default: 'LETS_ENCRYPT' }),
+      certificate_pem: text({ nullable: true }),
+      private_key_encrypted: text({ nullable: true }),
       expires_at: { type: 'timestamptz', nullable: true },
+      status: text({ default: 'PENDING' }),
+      challenge_type: text({ default: 'HTTP_01' }),
       auto_renew: bool({ default: true }),
+      metadata: jsonb({ default: {} }),
       created_at: ts(),
       updated_at: ts(),
     },
