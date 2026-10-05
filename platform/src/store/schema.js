@@ -1018,6 +1018,86 @@ const TABLES = {
     },
   },
 
+  // Domain services extras: appraisals, WHOIS history, club, extensions, transactions.
+  domain_appraisals: {
+    columns: {
+      id: pk(),
+      user_id: uuid({ required: true }),
+      domain: text({ required: true }),
+      status: text({ default: 'pending' }),
+      estimated_value: num({ nullable: true }),
+      currency: text({ default: 'USD' }),
+      provider: text({ nullable: true }),
+      created_at: ts(),
+      updated_at: ts(),
+    },
+    indexes: [{ name: 'domain_appraisals_user_idx', columns: ['user_id'] }],
+  },
+  domain_whois_lookups: {
+    columns: {
+      id: pk(),
+      user_id: uuid({ nullable: true }),
+      domain: text({ required: true }),
+      status: text({ default: 'unknown' }),
+      registrar: text({ nullable: true }),
+      raw: jsonb(),
+      created_at: ts(),
+    },
+    indexes: [{ name: 'domain_whois_user_idx', columns: ['user_id'] }],
+  },
+  domain_club_plans: {
+    columns: {
+      id: pk(),
+      name: text({ required: true }),
+      price_cents: int({ default: 0 }),
+      discount_type: text({ default: 'percentage' }),
+      discount_value: num({ default: 0 }),
+      active: bool({ default: true }),
+      created_at: ts(),
+    },
+  },
+  domain_club_memberships: {
+    columns: {
+      id: pk(),
+      user_id: uuid({ required: true }),
+      plan_id: uuid({ required: true }),
+      status: text({ default: 'active' }),
+      started_at: ts(),
+      cancelled_at: { type: 'timestamptz', nullable: true },
+      created_at: ts(),
+      updated_at: ts(),
+    },
+    indexes: [{ name: 'domain_club_memberships_user_idx', columns: ['user_id'] }],
+  },
+  domain_extensions: {
+    columns: {
+      id: pk(),
+      tld: text({ required: true }),
+      register_price_cents: int({ default: 0 }),
+      renew_price_cents: int({ default: 0 }),
+      active: bool({ default: true }),
+      created_at: ts(),
+    },
+  },
+  domain_transactions: {
+    columns: {
+      id: pk(),
+      user_id: uuid({ required: true }),
+      transaction_type: text({ nullable: true }),
+      status: text({ default: 'pending' }),
+      amount: num({ default: 0 }),
+      currency: text({ default: 'USD' }),
+      order_id: uuid({ nullable: true }),
+      invoice_id: uuid({ nullable: true }),
+      payment_id: uuid({ nullable: true }),
+      provider_reference: text({ nullable: true }),
+      error_code: text({ nullable: true }),
+      created_at: ts(),
+      updated_at: ts(),
+    },
+    indexes: [{ name: 'domain_transactions_user_idx', columns: ['user_id'] }],
+  },
+
   domain_brokerage_cases: {
     columns: {
       id: pk(),
