@@ -45,6 +45,14 @@ function licenseDto(row, isStaff) {
 function register(router, deps) {
   const { store } = deps;
 
+  // The original calls registerHandlers() for both '/api/v1' and the legacy '/api' prefix, so the
+  // same handler instances are mounted twice. Only the routes the original dual-mounts go through
+  // here; platform-specific extras stay on '/api/v1' alone.
+  const dual = (method, path, handler) => {
+    for (const prefix of ['/api/v1', '/api']) router[method](`${prefix}${path}`, handler);
+  };
+
+
   async function audit(ctx, action, resourceId, metadata) {
     await store.table('audit_logs').insert({
       id: uuidv7(), actor_id: ctx.user.id, actor_role: ctx.user.role, action,
@@ -53,13 +61,13 @@ function register(router, deps) {
     });
   }
 
-  router.get('/api/v1/licenses', async (ctx) => {
+  dual('get', '/licenses', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const { rows, total } = await store.table('licenses').find({ user_id: auth.id }, { orderBy: '-created_at' });
     ctx.json({ licenses: rows.map((l) => ({ id: l.id, product: l.product, status: l.status, expiresAt: l.expires_at, licenseKey: mask(l.license_key) })), total });
   });
 
-  router.post('/api/v1/licenses', async (ctx) => {
+  dual('post', '/licenses', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const body = await ctx.validate(v.object({ product: v.string().trim().min(1).max(120) }));
 
@@ -75,7 +83,7 @@ function register(router, deps) {
   });
 
   // License detail — staff see any license (with the real key); customers only their own (masked).
-  router.get('/api/v1/licenses/:id', async (ctx) => {
+  dual('get', '/licenses/:id', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const license = await store.table('licenses').findById(ctx.params.id);
     const staff = isStaffRole(auth.role);
@@ -84,7 +92,7 @@ function register(router, deps) {
   });
 
   // Activate a license (admin only): status -> active, stamp activated_at.
-  router.post('/api/v1/licenses/:id/activate', async (ctx) => {
+  dual('post', '/licenses/:id/activate', async (ctx) => {
     const auth = await asAdmin(ctx, deps);
     const license = await store.table('licenses').findById(ctx.params.id);
     if (!license) throw new NotFoundError('License not found');
@@ -94,7 +102,7 @@ function register(router, deps) {
   });
 
   // Renew a license (admin only): status -> active, set the new expiry.
-  router.post('/api/v1/licenses/:id/renew', async (ctx) => {
+  dual('post', '/licenses/:id/renew', async (ctx) => {
     const auth = await asAdmin(ctx, deps);
     const body = await ctx.validate(v.object({ expiresAt: v.string().datetime() }));
     const license = await store.table('licenses').findById(ctx.params.id);
@@ -105,7 +113,7 @@ function register(router, deps) {
   });
 
   // Cancel a license (admin only): status -> cancelled.
-  router.post('/api/v1/licenses/:id/cancel', async (ctx) => {
+  dual('post', '/licenses/:id/cancel', async (ctx) => {
     const auth = await asAdmin(ctx, deps);
     const license = await store.table('licenses').findById(ctx.params.id);
     if (!license) throw new NotFoundError('License not found');

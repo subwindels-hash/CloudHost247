@@ -45,7 +45,7 @@ function register(router, deps) {
 
   // Unified server monitoring: health banner, latest + historical metrics, core service probes
   // and installed-application containers. Owners see their own server; staff see any.
-  router.get('/api/v1/monitoring/servers/:id', async (ctx) => {
+  const serverMonitoring = async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const server = await store.table('servers').findById(ctx.params.id);
     const staff = isStaffRole(auth.role);
@@ -74,10 +74,10 @@ function register(router, deps) {
         containers: installations.map((i) => ({ id: i.id, name: i.name ?? i.id, status: i.status, health: i.status === 'running' ? 'HEALTHY' : 'DEGRADED' })),
       },
     });
-  });
+  };
 
   // Service monitoring: the customer-service record plus the latest metrics of its underlying server.
-  router.get('/api/v1/monitoring/services/:id', async (ctx) => {
+  const serviceMonitoring = async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const service = await store.table('customer_services').findById(ctx.params.id);
     const staff = isStaffRole(auth.role);
@@ -99,7 +99,14 @@ function register(router, deps) {
         metrics: metricDto(serverMetrics),
       },
     });
-  });
+  };
+
+  // The original calls registerHandlers() twice — once for '/api/v1' and once for the legacy
+  // '/api' prefix — so both mounts serve exactly the same handlers.
+  for (const prefix of ['/api/v1', '/api']) {
+    router.get(`${prefix}/monitoring/servers/:id`, serverMonitoring);
+    router.get(`${prefix}/monitoring/services/:id`, serviceMonitoring);
+  }
 
   router.get('/api/v1/monitoring/servers/:id/metrics', async (ctx) => {
     const auth = await authenticate(ctx, deps);

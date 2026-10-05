@@ -36,7 +36,15 @@ function adminJob(row) {
 function register(router, deps) {
   const { store } = deps;
 
-  router.get('/api/v1/provisioning/jobs', async (ctx) => {
+  // The original calls registerHandlers() for both '/api/v1' and the legacy '/api' prefix, so the
+  // same handler instances are mounted twice. Only the routes the original dual-mounts go through
+  // here; platform-specific extras stay on '/api/v1' alone.
+  const dual = (method, path, handler) => {
+    for (const prefix of ['/api/v1', '/api']) router[method](`${prefix}${path}`, handler);
+  };
+
+
+  dual('get', '/provisioning/jobs', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const { rows, total } = await store.table('provisioning_jobs').find({ user_id: auth.id }, { orderBy: '-created_at' });
     ctx.json({ jobs: rows.map(publicJob), total });
@@ -44,7 +52,7 @@ function register(router, deps) {
 
   // Customer job detail — owners see their own job; staff see any. The thin job model carries no
   // deployment step/event rows, so those arrays stay empty (contract parity).
-  router.get('/api/v1/provisioning/jobs/:id', async (ctx) => {
+  dual('get', '/provisioning/jobs/:id', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const job = await store.table('provisioning_jobs').findById(ctx.params.id);
     if (!job) throw new NotFoundError('Provisioning job not found');
@@ -54,7 +62,7 @@ function register(router, deps) {
   });
 
   // Retry/cancel on the customer surface are admin-gated in the original (requireRole admin/super_admin).
-  router.post('/api/v1/provisioning/jobs/:id/retry', async (ctx) => {
+  dual('post', '/provisioning/jobs/:id/retry', async (ctx) => {
     const auth = await asAdmin(ctx, deps);
     const job = await store.table('provisioning_jobs').findById(ctx.params.id);
     if (!job) throw new NotFoundError('Provisioning job not found');
@@ -64,7 +72,7 @@ function register(router, deps) {
     ctx.json({ queued: true, message: 'Provisioning job queued for retry' });
   });
 
-  router.post('/api/v1/provisioning/jobs/:id/cancel', async (ctx) => {
+  dual('post', '/provisioning/jobs/:id/cancel', async (ctx) => {
     const auth = await asAdmin(ctx, deps);
     const job = await store.table('provisioning_jobs').findById(ctx.params.id);
     if (!job) throw new NotFoundError('Provisioning job not found');

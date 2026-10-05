@@ -25,6 +25,14 @@ const isStaffRole = (role) => ['admin', 'super_admin', 'staff'].includes(role);
 function register(router, deps) {
   const { store } = deps;
 
+  // The original calls registerHandlers() for both '/api/v1' and the legacy '/api' prefix, so the
+  // same handler instances are mounted twice. Only the routes the original dual-mounts go through
+  // here; platform-specific extras stay on '/api/v1' alone.
+  const dual = (method, path, handler) => {
+    for (const prefix of ['/api/v1', '/api']) router[method](`${prefix}${path}`, handler);
+  };
+
+
   async function audit(ctx, action, resourceId, metadata) {
     await store.table('audit_logs').insert({
       id: uuidv7(), actor_id: ctx.user.id, actor_role: ctx.user.role, action,
@@ -80,7 +88,7 @@ function register(router, deps) {
   });
 
   // ------------------------------------------------------------------- list
-  router.get('/api/v1/services', async (ctx) => {
+  dual('get', '/services', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     if (isStaffRole(auth.role)) {
       const query = await ctx.validateQuery(v.object({ status: v.string().optional(), search: v.string().optional(), serverId: v.string().optional(), panelId: v.string().optional() }));
@@ -103,7 +111,7 @@ function register(router, deps) {
   });
 
   // ----------------------------------------------------------------- detail
-  router.get('/api/v1/services/:id', async (ctx) => {
+  dual('get', '/services/:id', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const service = await store.table('customer_services').findById(ctx.params.id);
     const staff = isStaffRole(auth.role);
@@ -112,7 +120,7 @@ function register(router, deps) {
   });
 
   // ----------------------------------------------------------------- create
-  router.post('/api/v1/services', async (ctx) => {
+  dual('post', '/services', async (ctx) => {
     const auth = await asAdmin(ctx, deps);
     const input = await ctx.validate(createServiceSchema());
     const service = await store.table('customer_services').insert({
@@ -129,7 +137,7 @@ function register(router, deps) {
   });
 
   // ----------------------------------------------------------------- update
-  router.patch('/api/v1/services/:id', async (ctx) => {
+  dual('patch', '/services/:id', async (ctx) => {
     const auth = await asAdmin(ctx, deps);
     const id = ctx.params.id;
     const input = await ctx.validate(createServiceSchema().omit(['customerId']).partial());
@@ -144,7 +152,7 @@ function register(router, deps) {
   });
 
   // -------------------------------------------------------------- provision
-  router.post('/api/v1/services/:id/provision', async (ctx) => {
+  dual('post', '/services/:id/provision', async (ctx) => {
     const auth = await asAdmin(ctx, deps);
     const id = ctx.params.id;
     const service = await store.table('customer_services').findById(id);
@@ -155,7 +163,7 @@ function register(router, deps) {
   });
 
   // ---------------------------------------------------------------- suspend
-  router.post('/api/v1/services/:id/suspend', async (ctx) => {
+  dual('post', '/services/:id/suspend', async (ctx) => {
     const auth = await asStaff(ctx, deps);
     const id = ctx.params.id;
     const service = await store.table('customer_services').findById(id);
@@ -166,7 +174,7 @@ function register(router, deps) {
   });
 
   // -------------------------------------------------------------- unsuspend
-  router.post('/api/v1/services/:id/unsuspend', async (ctx) => {
+  dual('post', '/services/:id/unsuspend', async (ctx) => {
     const auth = await asStaff(ctx, deps);
     const id = ctx.params.id;
     const service = await store.table('customer_services').findById(id);
@@ -177,7 +185,7 @@ function register(router, deps) {
   });
 
   // --------------------------------------------------------------- terminate
-  router.post('/api/v1/services/:id/terminate', async (ctx) => {
+  dual('post', '/services/:id/terminate', async (ctx) => {
     const auth = await asAdmin(ctx, deps);
     const id = ctx.params.id;
     const service = await store.table('customer_services').findById(id);

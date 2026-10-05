@@ -47,6 +47,14 @@ async function requireZone(store, zoneId, userId) {
 function register(router, deps) {
   const { store } = deps;
 
+  // The original calls registerHandlers() for both '/api/v1' and the legacy '/api' prefix, so the
+  // same handler instances are mounted twice. Only the routes the original dual-mounts go through
+  // here; platform-specific extras stay on '/api/v1' alone.
+  const dual = (method, path, handler) => {
+    for (const prefix of ['/api/v1', '/api']) router[method](`${prefix}${path}`, handler);
+  };
+
+
   async function audit(ctx, action, resourceType, resourceId, metadata) {
     await store.table('audit_logs').insert({
       id: uuidv7(), actor_id: ctx.user.id, actor_role: ctx.user.role, action,
@@ -68,13 +76,13 @@ function register(router, deps) {
   }
 
   // --- Zones ---------------------------------------------------------------------------------
-  router.get('/api/v1/dns/zones', async (ctx) => {
+  dual('get', '/dns/zones', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const { rows, total } = await store.table('dns_zones').find({ user_id: auth.id }, { orderBy: 'domain' });
     ctx.json({ zones: rows.map((z) => ({ id: z.id, domain: z.domain, status: z.status })), total });
   });
 
-  router.post('/api/v1/dns/zones', async (ctx) => {
+  dual('post', '/dns/zones', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const body = await ctx.validate(zoneSchema);
     const existing = await store.table('dns_zones').find({ user_id: auth.id, domain: body.domain });
@@ -87,14 +95,14 @@ function register(router, deps) {
     ctx.code(201).json({ zone: { id: zone.id, domain: zone.domain, status: zone.status } });
   });
 
-  router.get('/api/v1/dns/zones/:id', async (ctx) => {
+  dual('get', '/dns/zones/:id', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const zone = await requireZone(store, ctx.params.id, auth.id);
     const { rows } = await store.table('dns_records').find({ zone_id: zone.id }, { orderBy: ['type', 'name'] });
     ctx.json({ zone: { id: zone.id, domain: zone.domain, status: zone.status }, records: rows.map(recordDto) });
   });
 
-  router.delete('/api/v1/dns/zones/:id', async (ctx) => {
+  dual('delete', '/dns/zones/:id', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const zone = await requireZone(store, ctx.params.id, auth.id);
     const { rows } = await store.table('dns_records').find({ zone_id: zone.id });
@@ -105,7 +113,7 @@ function register(router, deps) {
   });
 
   // --- Flat records surface ------------------------------------------------------------------
-  router.post('/api/v1/dns/records', async (ctx) => {
+  dual('post', '/dns/records', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const body = await ctx.validate(directRecordSchema);
     const zone = await requireZone(store, body.zoneId, auth.id);
@@ -113,7 +121,7 @@ function register(router, deps) {
     ctx.code(201).json({ record: recordDto(record) });
   });
 
-  router.patch('/api/v1/dns/records/:id', async (ctx) => {
+  dual('patch', '/dns/records/:id', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const record = await store.table('dns_records').findById(ctx.params.id);
     if (!record) throw new NotFoundError('DNS record not found');
@@ -131,7 +139,7 @@ function register(router, deps) {
     ctx.json({ record: recordDto(updated) });
   });
 
-  router.delete('/api/v1/dns/records/:id', async (ctx) => {
+  dual('delete', '/dns/records/:id', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const record = await store.table('dns_records').findById(ctx.params.id);
     if (!record) throw new NotFoundError('DNS record not found');
@@ -142,14 +150,14 @@ function register(router, deps) {
   });
 
   // --- Nested records surface ----------------------------------------------------------------
-  router.get('/api/v1/dns/zones/:id/records', async (ctx) => {
+  dual('get', '/dns/zones/:id/records', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const zone = await requireZone(store, ctx.params.id, auth.id);
     const { rows } = await store.table('dns_records').find({ zone_id: zone.id }, { orderBy: ['type', 'name'] });
     ctx.json({ records: rows.map(recordDto) });
   });
 
-  router.post('/api/v1/dns/zones/:id/records', async (ctx) => {
+  dual('post', '/dns/zones/:id/records', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const zone = await requireZone(store, ctx.params.id, auth.id);
     const input = await ctx.validate(nestedRecordSchema);
@@ -157,7 +165,7 @@ function register(router, deps) {
     ctx.code(201).json({ record: recordDto(record) });
   });
 
-  router.patch('/api/v1/dns/zones/:id/records/:recordId', async (ctx) => {
+  dual('patch', '/dns/zones/:id/records/:recordId', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const zone = await requireZone(store, ctx.params.id, auth.id);
     const record = await store.table('dns_records').findById(ctx.params.recordId);
@@ -175,7 +183,7 @@ function register(router, deps) {
     ctx.json({ record: recordDto(updated) });
   });
 
-  router.delete('/api/v1/dns/zones/:id/records/:recordId', async (ctx) => {
+  dual('delete', '/dns/zones/:id/records/:recordId', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const zone = await requireZone(store, ctx.params.id, auth.id);
     const record = await store.table('dns_records').findById(ctx.params.recordId);
