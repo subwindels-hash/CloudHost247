@@ -28,12 +28,89 @@ const WORKFLOW_TRANSITIONS = {
 };
 const VERSION_TRANSITIONS = { draft: ['published', 'deprecated'], published: ['deprecated'], deprecated: [] };
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 function publicApp(row) {
   return { id: row.id, name: row.name, slug: row.slug, categoryId: row.category_id, version: row.version, priceCents: row.price_cents, active: row.active };
 }
 
 function register(router, deps) {
   const { store } = deps;
+
+  /**
+   * The original's category surface (marketplace-admin.ts). Unlike the platform's
+   * /admin/marketplace/categories aliases below, these list every category including inactive
+   * ones, order by sort_order then name, and treat the slug as case-insensitively unique.
+   */
+  const categorySchema = v.object({
+    name: v.string().min(1).max(80),
+    slug: v.string().min(1).max(160).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
+    description: v.string().max(500).optional(),
+    iconUrl: v.string().url().optional(),
+    sortOrder: v.coerce.number().int().min(0).max(1000).optional(),
+    active: v.boolean().optional(),
+  });
+
+  router.get('/api/v1/admin/app-categories', async (ctx) => {
+    await asAdmin(ctx, deps);
+    const { rows } = await store.table('application_categories').find({}, { orderBy: ['sort_order', 'name'] });
+    ctx.json({ categories: rows });
+  });
+
+  router.post('/api/v1/admin/app-categories', async (ctx) => {
+    const auth = await asAdmin(ctx, deps);
+    const input = await ctx.validate(categorySchema);
+
+    if (await store.table('application_categories').findOne({ slug: input.slug.toLowerCase() })) {
+      throw new ConflictError(`Category "${input.slug}" already exists`);
+    }
+
+    const category = await store.table('application_categories').insert({
+      id: uuidv7(),
+      name: input.name,
+      slug: input.slug,
+      description: input.description ?? null,
+      icon_url: input.iconUrl ?? null,
+      sort_order: input.sortOrder ?? 0,
+      active: input.active ?? true,
+    });
+
+    await store.table('audit_logs').insert({
+      id: uuidv7(), actor_id: auth.id, actor_role: auth.role,
+      action: 'app_category.created', entity_type: 'application_category', entity_id: category.id,
+      ip_address: ctx.ip, user_agent: ctx.userAgent, after: { slug: category.slug },
+    });
+    ctx.code(201).json({ category });
+  });
+
+  router.patch('/api/v1/admin/app-categories/:id', async (ctx) => {
+    const auth = await asAdmin(ctx, deps);
+    if (!UUID_RE.test(String(ctx.params.id ?? ''))) throw new ValidationError('id must be a valid UUID');
+    const patch = await ctx.validate(categorySchema.partial());
+
+    const existing = await store.table('application_categories').findById(ctx.params.id);
+    if (!existing) throw new NotFoundError('No category was found with that id');
+
+    const fields = {};
+    if (patch.name !== undefined) fields.name = patch.name;
+    if (patch.description !== undefined) fields.description = patch.description;
+    if (patch.iconUrl !== undefined) fields.icon_url = patch.iconUrl;
+    if (patch.sortOrder !== undefined) fields.sort_order = patch.sortOrder;
+    if (patch.active !== undefined) fields.active = patch.active;
+    if (patch.slug !== undefined) {
+      const clash = await store.table('application_categories').findOne({ slug: patch.slug.toLowerCase() });
+      if (clash && clash.id !== existing.id) throw new ConflictError(`Category "${patch.slug}" already exists`);
+      fields.slug = patch.slug;
+    }
+
+    const category = await store.table('application_categories').updateById(existing.id, fields);
+    await store.table('audit_logs').insert({
+      id: uuidv7(), actor_id: auth.id, actor_role: auth.role,
+      action: 'app_category.updated', entity_type: 'application_category', entity_id: existing.id,
+      ip_address: ctx.ip, user_agent: ctx.userAgent, after: patch,
+    });
+    ctx.json({ category });
+  });
 
   // ---- categories ---------------------------------------------------------
   router.get('/api/v1/admin/marketplace/categories', async (ctx) => {

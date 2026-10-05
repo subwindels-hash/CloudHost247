@@ -1010,32 +1010,24 @@ const TABLES = {
   // -------------------------------------------------------------------------
   // Marketplace / deployments
   // -------------------------------------------------------------------------
+  // Mirrors migration 0029. The marketplace groups published applications by category; the public
+  // listing only ever shows active ones (listCategories(db, true)).
   application_categories: {
     columns: {
       active: bool({ default: true }),
       id: pk(),
       slug: text({ required: true }),
       name: text({ required: true }),
-      created_at: ts(),
-    },
-    indexes: [{ name: 'app_categories_slug_key', columns: ['slug'], unique: true }],
-  },
-
-  // Mirrors migration 0029. The marketplace groups published applications by category; the public
-  // listing only ever shows active ones (listCategories(db, true)).
-  app_categories: {
-    columns: {
-      id: pk(),
-      name: text({ required: true }),
-      slug: text({ required: true }),
       description: text({ nullable: true }),
       icon_url: text({ nullable: true }),
       sort_order: int({ default: 0 }),
-      active: bool({ default: true }),
       created_at: ts(),
       updated_at: ts(),
     },
-    indexes: [{ name: 'app_categories_active_sort_idx', columns: ['active', 'sort_order'] }],
+    indexes: [
+      { name: 'app_categories_slug_key', columns: ['slug'], unique: true },
+      { name: 'app_categories_active_sort_idx', columns: ['active', 'sort_order'] },
+    ],
   },
 
   applications: {

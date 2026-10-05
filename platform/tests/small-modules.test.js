@@ -206,9 +206,9 @@ test('integration: ai-support availability and contact details', async (t) => {
 test('integration: marketplace app categories', async (t) => {
   const { base, app, close } = await startServer();
   try {
-    await app.store.table('app_categories').insert({ name: 'E-commerce', slug: 'ecommerce', sort_order: 2, active: true });
-    await app.store.table('app_categories').insert({ name: 'Blogging', slug: 'blogging', sort_order: 1, active: true });
-    await app.store.table('app_categories').insert({ name: 'Retired', slug: 'retired', sort_order: 0, active: false });
+    await app.store.table('application_categories').insert({ name: 'E-commerce', slug: 'ecommerce', sort_order: 2, active: true });
+    await app.store.table('application_categories').insert({ name: 'Blogging', slug: 'blogging', sort_order: 1, active: true });
+    await app.store.table('application_categories').insert({ name: 'Retired', slug: 'retired', sort_order: 0, active: false });
 
     await t.test('GET /app-categories is public, active-only and sorted', async () => {
       const res = await jsonFetch(base, { path: '/api/v1/app-categories' });

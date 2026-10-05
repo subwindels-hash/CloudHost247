@@ -27,7 +27,7 @@ function register(router, deps) {
    * sort_order then name order, as toCategoryDTO exposes them.
    */
   router.get('/api/v1/app-categories', async (ctx) => {
-    const { rows } = await store.table('app_categories').find(
+    const { rows } = await store.table('application_categories').find(
       { active: true },
       { orderBy: ['sort_order', 'name'] }
     );
