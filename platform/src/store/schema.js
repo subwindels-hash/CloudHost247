@@ -1059,6 +1059,9 @@ const TABLES = {
     indexes: [{ name: 'app_installations_user_idx', columns: ['user_id'] }],
   },
 
+  // Mirrors migration 0033. user_id/source/ref/logs are platform additions kept for the admin and
+  // app-installation views; the queue-worker columns (attempts, lease, run_after) and the error
+  // fields are the original's.
   deployments: {
     columns: {
       ref: text({ nullable: true }),
@@ -1067,6 +1070,7 @@ const TABLES = {
       user_id: uuid({ required: true }),
       installation_id: uuid({ nullable: true }),
       server_id: uuid({ nullable: true }),
+      order_id: uuid({ nullable: true }),
       action: text({ nullable: true }),
       idempotency_key: text({ nullable: true }),
       requested_by: uuid({ nullable: true }),
@@ -1074,10 +1078,52 @@ const TABLES = {
       status: text({ default: 'queued' }),
       source: text({ nullable: true }),
       logs: jsonb({ default: [] }),
+      attempts: int({ default: 0 }),
+      max_attempts: int({ default: 3 }),
+      run_after: ts(),
+      lease_expires_at: ts({ nullable: true }),
+      worker_id: text({ nullable: true }),
+      started_at: ts({ nullable: true }),
+      completed_at: ts({ nullable: true }),
+      error_code: text({ nullable: true }),
+      error_message: text({ nullable: true }),
       created_at: ts(),
       updated_at: ts(),
     },
-    indexes: [{ name: 'deployments_user_idx', columns: ['user_id'] }],
+    indexes: [
+      { name: 'deployments_user_idx', columns: ['user_id'] },
+      { name: 'deployments_installation_idx', columns: ['installation_id'] },
+      { name: 'deployments_created_idx', columns: ['created_at'] },
+    ],
+  },
+
+  // Ordered pipeline steps for a deployment (migration 0033).
+  deployment_steps: {
+    columns: {
+      id: pk(),
+      deployment_id: uuid({ required: true }),
+      step_order: int({ required: true }),
+      name: text({ required: true }),
+      status: text({ default: 'pending' }),
+      started_at: ts({ nullable: true }),
+      completed_at: ts({ nullable: true }),
+      output: text({ nullable: true }),
+      error: text({ nullable: true }),
+      created_at: ts(),
+    },
+    indexes: [{ name: 'deployment_steps_deployment_idx', columns: ['deployment_id', 'step_order'] }],
+  },
+
+  // Append-only event log for a deployment (migration 0033).
+  deployment_events: {
+    columns: {
+      id: pk(),
+      deployment_id: uuid({ required: true }),
+      level: text({ default: 'info' }),
+      message: text({ required: true }),
+      created_at: ts(),
+    },
+    indexes: [{ name: 'deployment_events_deployment_idx', columns: ['deployment_id', 'created_at'] }],
   },
 
   // Application installation sub-resources: encrypted environment, backups, attached domains.
