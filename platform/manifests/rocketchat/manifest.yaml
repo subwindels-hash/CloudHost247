@@ -1,0 +1,61 @@
+id: rocketchat
+name: Rocket.Chat
+category: communication
+description: Open-source team chat with channels, video calls, and unlimited message history.
+website: https://rocket.chat
+repository: https://github.com/RocketChat/Rocket.Chat
+documentation: https://rocket.chat/docs
+license: MIT
+featured: false
+popularity: 600
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 2
+  memory: 4096
+  storage: 30720
+  recommended:
+    cpu: 4
+    memory: 8192
+    storage: 61440
+services:
+  app:
+    image: rocketchat/rocket.chat
+    internal: false
+    port: 3000
+    volumes:
+    - /app/uploads
+    dependsOn:
+    - db
+  db:
+    image: mongo:8
+    internal: true
+    command: mongod --oplogSize 128 --replSet rs0 --bind_ip_all
+    database: mongodb
+environment:
+  required: []
+  optional: []
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /api/info
+  port: 3000
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+  - database
+update:
+  strategy: pull-and-recreate
+versions:
+- version: 7.2.0
+  image: rocketchat/rocket.chat:7.2.0
+  stable: true

@@ -1,0 +1,54 @@
+id: adguard-home
+name: AdGuard Home
+category: networking
+description: Network-wide ad and tracker blocking with DHCP and encrypted DNS support.
+website: https://adguard.com/adguard-home.html
+repository: https://github.com/AdguardTeam/AdGuardHome
+documentation: https://github.com/AdguardTeam/AdGuardHome/wiki
+license: GPL-3.0
+featured: false
+popularity: 780
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 1
+  memory: 512
+  storage: 5120
+  recommended:
+    cpu: 1
+    memory: 1024
+    storage: 10240
+services:
+  app:
+    image: adguard/adguardhome
+    internal: false
+    port: 3000
+    volumes:
+    - /opt/adguardhome/conf
+    - /opt/adguardhome/work
+environment:
+  required: []
+  optional: []
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /
+  port: 3000
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+update:
+  strategy: pull-and-recreate
+versions:
+- version: 0.107.54
+  image: adguard/adguardhome:v0.107.54
+  stable: true

@@ -1,0 +1,53 @@
+id: adminer
+name: Adminer
+category: database
+description: Lightweight database management UI for MySQL, PostgreSQL, SQLite, and MongoDB.
+website: https://adminer.org
+repository: https://github.com/vrana/adminer
+documentation: https://adminer.org
+license: Apache-2.0/GPL-2.0
+featured: false
+popularity: 520
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 1
+  memory: 256
+  storage: 2560
+  recommended:
+    cpu: 1
+    memory: 512
+    storage: 5120
+services:
+  app:
+    image: adminer
+    internal: false
+    port: 8080
+environment:
+  required: []
+  optional:
+  - key: ADMINER_DESIGN
+    default: pepa-linha-dark
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /
+  port: 8080
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+update:
+  strategy: pull-and-recreate
+versions:
+- version: 4.8.1
+  image: adminer:4.8.1
+  stable: true

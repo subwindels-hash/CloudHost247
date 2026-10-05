@@ -1,0 +1,53 @@
+id: dockge
+name: Dockge
+category: system-administration
+description: Fancy, easy-to-use docker compose stack management with a live log view.
+website: https://dockge.kuma.pet
+repository: https://github.com/louislam/dockge
+documentation: https://github.com/louislam/dockge/wiki
+license: MIT
+featured: false
+popularity: 660
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 1
+  memory: 512
+  storage: 10240
+  recommended:
+    cpu: 1
+    memory: 1024
+    storage: 20480
+services:
+  app:
+    image: louislam/dockge
+    internal: false
+    port: 5001
+    volumes:
+    - /data
+environment:
+  required: []
+  optional: []
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /
+  port: 5001
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+update:
+  strategy: pull-and-recreate
+versions:
+- version: 1.4.2
+  image: louislam/dockge:1.4.2
+  stable: true

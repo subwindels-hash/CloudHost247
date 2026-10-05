@@ -1,0 +1,55 @@
+id: node-red
+name: Node-RED
+category: automation
+description: Low-code programming for event-driven applications, built on Node.js.
+website: https://nodered.org
+repository: https://github.com/node-red/node-red
+documentation: https://nodered.org/docs
+license: Apache-2.0
+featured: false
+popularity: 640
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 1
+  memory: 1024
+  storage: 10240
+  recommended:
+    cpu: 1
+    memory: 2048
+    storage: 20480
+services:
+  app:
+    image: nodered/node-red
+    internal: false
+    port: 1880
+    volumes:
+    - /data
+environment:
+  required: []
+  optional:
+  - key: TZ
+    default: UTC
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /
+  port: 1880
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+update:
+  strategy: pull-and-recreate
+versions:
+- version: 4.1.0
+  image: nodered/node-red:4.1.0
+  stable: true

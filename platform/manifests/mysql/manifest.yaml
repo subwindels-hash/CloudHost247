@@ -1,0 +1,56 @@
+id: mysql
+name: MySQL
+category: database
+description: The world’s most popular open-source database, trusted for web applications of every scale.
+website: https://mysql.com
+repository: https://github.com/mysql/mysql-server
+documentation: https://dev.mysql.com/doc
+license: GPL-2.0
+featured: false
+popularity: 780
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 1
+  memory: 1024
+  storage: 20480
+  recommended:
+    cpu: 2
+    memory: 4096
+    storage: 102400
+services:
+  app:
+    image: mysql
+    internal: false
+    port: 3306
+    volumes:
+    - /var/lib/mysql
+environment:
+  required: []
+  optional: []
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: command
+  command:
+  - mysqladmin
+  - ping
+  - -h
+  - localhost
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+update:
+  strategy: pull-and-recreate
+versions:
+- version: '8.4'
+  image: mysql:8.4
+  stable: true

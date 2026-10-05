@@ -1,0 +1,53 @@
+id: focalboard
+name: Focalboard
+category: productivity
+description: Open-source project management tool that mirrors Trello and Notion workflows.
+website: https://focalboard.com
+repository: https://github.com/mattermost/focalboard
+documentation: https://www.focalboard.com/docs
+license: MIT/AGPL-3.0
+featured: false
+popularity: 470
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 1
+  memory: 1024
+  storage: 10240
+  recommended:
+    cpu: 1
+    memory: 2048
+    storage: 20480
+services:
+  app:
+    image: mattermost/focalboard
+    internal: false
+    port: 8000
+    volumes:
+    - /data
+environment:
+  required: []
+  optional: []
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /
+  port: 8000
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+update:
+  strategy: pull-and-recreate
+versions:
+- version: '7.11'
+  image: mattermost/focalboard:7.11.4
+  stable: true

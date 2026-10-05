@@ -1,0 +1,72 @@
+id: wordpress
+name: WordPress
+category: cms
+description: The world’s most popular publishing platform — deploy on Docker or cPanel hosting.
+website: https://wordpress.org
+repository: https://github.com/WordPress/WordPress
+documentation: https://wordpress.org/documentation
+license: GPL-2.0
+featured: true
+popularity: 1000
+deployment:
+  engine: docker-compose
+  cpanelInstaller: wordpress
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+- cpanel
+- kubernetes
+requirements:
+  cpu: 1
+  memory: 1024
+  storage: 10240
+  recommended:
+    cpu: 2
+    memory: 2048
+    storage: 40960
+services:
+  app:
+    image: wordpress
+    internal: false
+    port: 80
+    volumes:
+    - /var/www/html
+    dependsOn:
+    - db
+  db:
+    image: mariadb:11
+    internal: true
+    volumes:
+    - /var/lib/mysql
+    database: mariadb
+environment:
+  required: []
+  optional:
+  - key: WORDPRESS_CONFIG_EXTRA
+    default: 'define(''WP_HOME'', ''https://''.(isset($_SERVER[''HTTP_HOST'']) ? $_SERVER[''HTTP_HOST''] : ''''));
+      define(''WP_SITEURL'', WP_HOME);'
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /wp-login.php
+  port: 80
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+  - database
+update:
+  strategy: pull-and-recreate
+versions:
+- version: '6.7'
+  image: wordpress:6.7-apache
+  stable: true
+longDescription: 'WordPress powers over 40% of the web. CloudHost247 deploys it two ways: as an isolated Docker
+  Compose stack (WordPress + MariaDB behind Traefik with automatic SSL) on VPS/dedicated hosting, or as a fully
+  provisioned cPanel account with database, core files, and wp-config generated via the WHM/UAPI integration. You
+  pick the plan; the platform picks the right deployment engine.'

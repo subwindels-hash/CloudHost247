@@ -1,0 +1,56 @@
+id: netdata
+name: Netdata
+category: monitoring
+description: Real-time, per-second infrastructure monitoring with zero configuration.
+website: https://netdata.cloud
+repository: https://github.com/netdata/netdata
+documentation: https://learn.netdata.cloud
+license: GPL-3.0
+featured: false
+popularity: 690
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 1
+  memory: 1024
+  storage: 20480
+  recommended:
+    cpu: 1
+    memory: 2048
+    storage: 40960
+services:
+  app:
+    image: netdata/netdata
+    internal: false
+    port: 19999
+    capabilities:
+    - SYS_PTRACE
+    volumes:
+    - /var/lib/netdata
+    - /etc/netdata
+environment:
+  required: []
+  optional: []
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /api/v1/info
+  port: 19999
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+update:
+  strategy: pull-and-recreate
+versions:
+- version: '2.2'
+  image: netdata/netdata:v2.2
+  stable: true

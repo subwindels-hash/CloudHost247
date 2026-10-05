@@ -1,0 +1,65 @@
+id: odoo
+name: Odoo
+category: business
+description: 'All-in-one business software: CRM, accounting, inventory, manufacturing, and e-commerce.'
+website: https://odoo.com
+repository: https://github.com/odoo/odoo
+documentation: https://www.odoo.com/documentation
+license: LGPL-3.0
+featured: false
+popularity: 660
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 2
+  memory: 4096
+  storage: 51200
+  recommended:
+    cpu: 4
+    memory: 8192
+    storage: 102400
+services:
+  app:
+    image: odoo
+    internal: false
+    port: 8069
+    volumes:
+    - /var/lib/odoo
+    - /mnt/extra-addons
+    dependsOn:
+    - db
+  db:
+    image: postgres:17-alpine
+    internal: true
+    volumes:
+    - /var/lib/postgresql/data
+    database: postgres
+environment:
+  required: []
+  optional:
+  - key: HOST
+    defaultFromDomain: true
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /
+  port: 8069
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+  - database
+update:
+  strategy: pull-and-recreate
+versions:
+- version: '18.0'
+  image: odoo:18.0
+  stable: true

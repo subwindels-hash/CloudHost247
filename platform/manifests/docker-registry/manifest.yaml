@@ -1,0 +1,55 @@
+id: docker-registry
+name: Docker Registry
+category: infrastructure
+description: Private OCI/Docker image registry for your own builds and deployments.
+website: https://distribution.github.io/distribution
+repository: https://github.com/distribution/distribution
+documentation: https://distribution.github.io/distribution/about
+license: Apache-2.0
+featured: false
+popularity: 560
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 1
+  memory: 512
+  storage: 102400
+  recommended:
+    cpu: 1
+    memory: 1024
+    storage: 512000
+services:
+  app:
+    image: registry
+    internal: false
+    port: 5000
+    volumes:
+    - /var/lib/registry
+environment:
+  required:
+  - key: REGISTRY_STORAGE_DELETE_ENABLED
+    default: 'true'
+  optional: []
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /v2/
+  port: 5000
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+update:
+  strategy: pull-and-recreate
+versions:
+- version: 2.8.3
+  image: registry:2.8.3
+  stable: true

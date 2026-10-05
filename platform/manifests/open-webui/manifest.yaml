@@ -1,0 +1,56 @@
+id: open-webui
+name: Open WebUI
+category: ai
+description: Self-hosted AI interface for Ollama and OpenAI-compatible APIs with users and RBAC.
+website: https://openwebui.com
+repository: https://github.com/open-webui/open-webui
+documentation: https://docs.openwebui.com
+license: BSD-3-Clause
+featured: false
+popularity: 760
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 2
+  memory: 2048
+  storage: 10240
+  recommended:
+    cpu: 2
+    memory: 4096
+    storage: 20480
+services:
+  app:
+    image: ghcr.io/open-webui/open-webui
+    internal: false
+    port: 8080
+    volumes:
+    - /app/backend/data
+environment:
+  required:
+  - key: OLLAMA_BASE_URL
+    description: URL of your Ollama instance, e.g. http://ollama:11434
+    default: http://ollama:11434
+  optional: []
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /health
+  port: 8080
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+update:
+  strategy: pull-and-recreate
+versions:
+- version: 0.5.12
+  image: ghcr.io/open-webui/open-webui:0.5.12
+  stable: true

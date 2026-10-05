@@ -10,6 +10,10 @@ const { v } = require('../core/validate');
 const { NotFoundError, ConflictError, ValidationError } = require('../core/errors');
 const { uuidv7 } = require('../lib/ids');
 const { asAdmin, asStaff, asSuperAdmin } = require('../lib/auth');
+const {
+  resolveManifestsDir, loadManifestCatalog, validateManifestYaml, validatedManifests,
+  ensureCanonicalCategories, importManifests,
+} = require('../lib/manifest-catalog');
 
 const name = 'marketplace-admin';
 
@@ -35,7 +39,8 @@ function publicApp(row) {
 }
 
 function register(router, deps) {
-  const { store } = deps;
+  const { store, config = {} } = deps;
+  const manifestsDir = () => resolveManifestsDir(config.MARKETPLACE_MANIFESTS_DIR, config.CWD ?? process.cwd());
 
   /**
    * The original's category surface (marketplace-admin.ts). Unlike the platform's
@@ -344,6 +349,44 @@ function register(router, deps) {
     await store.table('applications').deleteById(id);
     await audit(ctx, 'app.deleted', 'application', id, { slug: detail.application.slug });
     ctx.noContent();
+  });
+
+  // ---- manifests (spec §10, §46) ------------------------------------------
+  /**
+   * Validates a manifest without importing anything. The YAML is parsed by the dependency-free
+   * subset parser in lib/yaml.js, so a document using an unsupported construct is reported as a
+   * parse error rather than being silently misread.
+   */
+  router.post('/api/v1/admin/manifests/validate', async (ctx) => {
+    await asAdmin(ctx, deps);
+    const body = await ctx.validate(v.object({ manifestYaml: v.string().min(1).max(200000) }));
+    const result = validateManifestYaml(body.manifestYaml);
+    ctx.json({ valid: result.valid, errors: result.errors });
+  });
+
+  /**
+   * Imports the whole on-disk catalog. The original refuses to import when any file in the
+   * directory is invalid — a partially imported catalog is harder to reason about than none.
+   */
+  router.post('/api/v1/admin/manifests/import', async (ctx) => {
+    const auth = await asAdmin(ctx, deps);
+    const catalog = loadManifestCatalog(manifestsDir());
+    if (catalog.invalid.length > 0) {
+      throw new ValidationError(
+        `Refusing to import: ${catalog.invalid.length} invalid manifest(s): `
+        + catalog.invalid.map((i) => `${i.source} (${i.errors[0]})`).join('; '),
+      );
+    }
+    if (catalog.loaded.length === 0) throw new ValidationError(`No manifests found in ${catalog.dir}`);
+    const report = await importManifests(store, validatedManifests(catalog));
+    await audit(ctx, 'marketplace.imported', 'marketplace', null, { ...report, dir: catalog.dir });
+    ctx.json({ imported: catalog.loaded.length, report });
+  });
+
+  /** Seeds the canonical category tree (spec §7); existing rows, including admin edits, are kept. */
+  router.post('/api/v1/admin/manifests/seed-categories', async (ctx) => {
+    await asAdmin(ctx, deps);
+    ctx.json({ created: await ensureCanonicalCategories(store) });
   });
 }
 
