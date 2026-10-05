@@ -92,6 +92,27 @@ function register(router, deps) {
     ctx.code(201).json({ userMessage: userMsg, reply: { id: botMsg.id, role: 'assistant', content: reply } });
   });
 
+  // Newsletter sign-up captured from inside a support conversation. Idempotent on email: an
+  // existing subscription is returned with alreadySubscribed=true rather than duplicated.
+  router.post('/api/v1/ai-support/conversations/:id/newsletter', async (ctx) => {
+    const auth = await authenticate(ctx, deps);
+    const conv = await store.table('ai_support_conversations').findOne({ id: ctx.params.id, user_id: auth.id });
+    if (!conv) throw new NotFoundError('Conversation not found');
+    const body = await ctx.validate(v.object({ name: v.string().trim().min(2).max(160), email: v.string().trim().toLowerCase().email() }));
+    const email = body.email.toLowerCase();
+    let subscription = await store.table('newsletter_subscriptions').findOne({ email });
+    const alreadySubscribed = !!subscription;
+    if (!subscription) {
+      subscription = await store.table('newsletter_subscriptions').insert({ id: uuidv7(), name: body.name, email, status: 'active', source: 'ai_assistant' });
+    }
+    await store.table('audit_logs').insert({
+      id: uuidv7(), actor_id: auth.id, actor_role: auth.role, action: 'NEWSLETTER_SUBSCRIPTION_COMPLETED',
+      entity_type: 'newsletter_subscription', entity_id: subscription.id, ip_address: ctx.ip, user_agent: ctx.userAgent,
+      after: { source: 'ai_assistant', alreadySubscribed },
+    });
+    ctx.json({ subscribed: true, alreadySubscribed, status: subscription.status });
+  });
+
   router.get('/api/v1/ai-support/knowledge', async (ctx) => {
     await asAdmin(ctx, deps);
     const rows = await store.table('ai_support_knowledge').all();
@@ -249,6 +270,17 @@ function register(router, deps) {
     ctx.json({
       counts, newsletterSubscriptions: newsletter, aiHandledConversations: aiHandled, humanHandledConversations: humanHandled,
       humanEscalations: conversations.filter((c) => c.status !== 'AI_ACTIVE').length, byReason,
+    });
+  });
+
+  router.get('/api/v1/admin/newsletter-subscriptions', async (ctx) => {
+    await asStaff(ctx, deps);
+    const { rows } = await store.table('newsletter_subscriptions').find({}, { orderBy: '-created_at', limit: 500 });
+    ctx.json({
+      subscriptions: rows.map((s) => ({
+        id: s.id, name: s.name, email: s.email, source: s.source ?? null,
+        status: s.status, createdAt: s.created_at,
+      })),
     });
   });
 }
