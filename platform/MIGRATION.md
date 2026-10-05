@@ -158,6 +158,20 @@ out so nobody mistakes absence for parity:
    per request (`POST /admin/provisioning/worker/run`) rather than a background timer, so a deployment
    schedules it. What is still deferred is the *order-driven* provisioning path — `services.js` and
    `app-installations.js` still queue paid-order work this worker does not yet know about.
+   `src/domains/operating-systems.js` closed its last deferral the same day, and it is the read side
+   of the same question: which of these can a customer actually order. New
+   `src/lib/os-availability.js` resolves each OS version through `server_product_configurations` →
+   `regions` → `infra_providers` → `os_images` and answers `orderable` plus exactly one reason
+   (`NO_CONFIGURATION`, `CONFIGURATION_DISABLED`, `ARCHITECTURE_UNSUPPORTED`, `NO_IMAGE`,
+   `IMAGE_UNVERIFIED`). `GET /api/v1/operating-systems/:id/versions` returns only buildable versions,
+   each with an `availability` block, plus a `hidden` count; `?includeUnavailable=true` is
+   staff-only and returns the withheld ones with their reasons. `GET /api/v1/operating-systems` omits
+   any OS with no orderable version. **An `os_images` row is not a mapping until it carries a
+   `version`:** matching images on `os_id` alone let Ubuntu 22.04 borrow 24.04's verified mapping, and
+   the same join was how the worker picked a build image — so a customer could have been given a
+   machine running the wrong release from a mapping that had passed verification. Both the catalogue
+   and the worker match the version now, and the worker refuses when `servers.os` is unrecorded and
+   more than one version is mapped instead of choosing a release for the customer.
 4. **Real payment gateways — INBOUND HALF IMPLEMENTED, initiation still deferred.** Received and
    settled: `stripe`, `paypal` and `paystack` webhooks via `src/lib/gateways/` +
    `src/lib/provider-webhook-service.js` (signature verified before any database access, canonical

@@ -320,6 +320,62 @@ test('integration: the provisioning worker', async (t) => {
       );
     });
 
+    await t.test('CREATE builds the version the server asked for, not whichever image maps first', async () => {
+      // Two verified versions of one OS. Matching on the OS alone would let a server ordered as
+      // 22.04 be built from the 24.04 mapping — a machine running the wrong release.
+      const multiOs = 'f1f1f1f1-1111-4111-8111-111111111111';
+      for (const [imageId, version, providerImage] of [
+        ['f2f2f2f2-1111-4111-8111-111111111111', '24.04', 'img-2404'],
+        ['f3f3f3f3-1111-4111-8111-111111111111', '22.04', 'img-2204'],
+      ]) {
+        await app.store.table('os_images').insert({
+          id: imageId, os_id: multiOs, version, provider_image_id: providerImage,
+          region_id: regionId, arch: 'x86_64', status: 'active', active: true,
+          verified_at: now(), verified_by: adminUser.id, created_at: now(), updated_at: now(),
+        });
+      }
+
+      const wanted = await app.store.table('servers').insert({
+        id: 'f4f4f4f4-aaaa-4aaa-8aaa-f4f4f4f4f4f4', user_id: owner.id, name: 'jammy',
+        hostname: 'jammy.example.com', provider: 'hetzner', region_id: regionId,
+        plan_id: planId, os_id: multiOs, os: '22.04', status: 'provisioning',
+        metadata: {}, created_at: now(), updated_at: now(),
+      });
+      await mkJob('f5f5f5f5-aaaa-4aaa-8aaa-f5f5f5f5f5f5', wanted.id, 'CREATE');
+      createdOnce = false; // let the fake accept a create for this job
+      let cycle = await runWorker();
+      assert.strictEqual(cycle.data.completed, 1, JSON.stringify(cycle.data.results));
+      const sent = fake.requests.filter((r) => r.method === 'POST' && r.url === '/servers').pop();
+      assert.strictEqual(JSON.parse(sent.body).image, 'img-2204', 'the requested version, not the first mapping');
+
+      // A version with no mapping is refused rather than substituted.
+      const unmapped = await app.store.table('servers').insert({
+        id: 'f6f6f6f6-aaaa-4aaa-8aaa-f6f6f6f6f6f6', user_id: owner.id, name: 'mantic',
+        hostname: 'mantic.example.com', provider: 'hetzner', region_id: regionId,
+        plan_id: planId, os_id: multiOs, os: '23.10', status: 'provisioning',
+        metadata: {}, created_at: now(), updated_at: now(),
+      });
+      await mkJob('f7f7f7f7-aaaa-4aaa-8aaa-f7f7f7f7f7f7', unmapped.id, 'CREATE');
+      cycle = await runWorker();
+      assert.strictEqual(cycle.data.failed, 1, JSON.stringify(cycle.data.results));
+      const row = await app.store.table('provisioning_jobs').findById('f7f7f7f7-aaaa-4aaa-8aaa-f7f7f7f7f7f7');
+      assert.match(row.error, /No image mapping exists for 23\.10/);
+
+      // With no version recorded and two versions mapped, guessing is worse than refusing.
+      const ambiguous = await app.store.table('servers').insert({
+        id: 'f8f8f8f8-aaaa-4aaa-8aaa-f8f8f8f8f8f8', user_id: owner.id, name: 'unknown-version',
+        hostname: 'unknown.example.com', provider: 'hetzner', region_id: regionId,
+        plan_id: planId, os_id: multiOs, os: null, status: 'provisioning',
+        metadata: {}, created_at: now(), updated_at: now(),
+      });
+      await mkJob('f9f9f9f9-aaaa-4aaa-8aaa-f9f9f9f9f9f9', ambiguous.id, 'CREATE');
+      cycle = await runWorker();
+      assert.strictEqual(cycle.data.failed, 1, JSON.stringify(cycle.data.results));
+      const ambiguousRow = await app.store.table('provisioning_jobs').findById('f9f9f9f9-aaaa-4aaa-8aaa-f9f9f9f9f9f9');
+      assert.match(ambiguousRow.error, /no unambiguous image to build from/);
+      assert.match(ambiguousRow.error, /24\.04, 22\.04/, 'and it names the versions that are mapped');
+    });
+
     await t.test('reconcile leaves the backlog alone and only fails a job whose lease expired', async () => {
       const server = await mkServer('c1c1c1c1-aaaa-4aaa-8aaa-c1c1c1c1c1c1');
       const queued = await mkJob('d2d2d2d2-aaaa-4aaa-8aaa-d2d2d2d2d2d2', server.id, 'REBOOT');

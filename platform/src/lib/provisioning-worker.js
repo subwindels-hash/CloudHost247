@@ -90,12 +90,35 @@ async function planMetadataFor(store, planId) {
   return spec;
 }
 
-/** The OS image row a server should be built from, or a refusal naming what is missing. */
+/**
+ * The OS image row a server should be built from, or a refusal naming what is missing.
+ *
+ * Images are mapped per OS *version*, so the version is part of the lookup: matching on the OS alone
+ * lets a server ordered as 22.04 be built from the 24.04 mapping, which is a machine running the
+ * wrong release and a support ticket nobody can explain. Where the server row records no version and
+ * more than one version is mapped, that is genuinely ambiguous — the refusal says so instead of
+ * picking one.
+ */
 async function imageFor(store, server) {
   const images = await store.table('os_images').all();
-  const candidates = images.filter((image) => image.os_id === server.os_id);
+  let candidates = images.filter((image) => image.os_id === server.os_id);
   if (candidates.length === 0) {
     throw new JobRefusal('The server names an operating system that has no image mapping at all');
+  }
+  if (server.os) {
+    const versioned = candidates.filter((image) => !image.version || image.version === server.os);
+    if (versioned.length === 0) {
+      throw new JobRefusal(`No image mapping exists for ${server.os} of that operating system`);
+    }
+    candidates = versioned;
+  } else {
+    const distinct = new Set(candidates.map((image) => image.version ?? '').filter(Boolean));
+    if (distinct.size > 1) {
+      throw new JobRefusal(
+        `The server records no operating-system version and ${distinct.size} versions are mapped `
+        + `(${[...distinct].join(', ')}), so there is no unambiguous image to build from`,
+      );
+    }
   }
   const match = candidates.find((image) => image.region_id === server.region_id)
     ?? candidates.find((image) => !image.region_id);

@@ -23,6 +23,8 @@ const {
 } = require('../lib/provider-egress');
 // One map for both the queue-time gate and the worker that executes the job, so they cannot drift.
 const { PROVISIONING_CAPABILITY } = require('../lib/provisioning-worker');
+// The same availability rule the OS versions route uses, so the two cannot disagree about an OS.
+const { computeVersionAvailability } = require('../lib/os-availability');
 
 const name = 'servers';
 
@@ -86,9 +88,36 @@ function register(router, deps) {
   };
 
   // ---- reference ----------------------------------------------------------
+  /**
+   * The operating systems a customer can actually build a server from.
+   *
+   * This returned every row in the table — including disabled and archived ones, since it exposed
+   * `active` as a field rather than filtering on it — so the order wizard offered choices no product
+   * configuration or verified image could deliver. It now uses the same availability rule as the
+   * versions route, and reports how many versions are orderable so a caller can tell an OS with one
+   * mapping from one with twelve.
+   */
   router.get('/api/v1/operating-systems', async (ctx) => {
-    const rows = await store.table('operating_systems').all();
-    ctx.json({ operatingSystems: rows.map((o) => ({ id: o.id, name: o.name, slug: o.slug, family: o.family, active: o.active })) });
+    const [rows, versions, availability] = await Promise.all([
+      store.table('operating_systems').all(),
+      store.table('operating_system_versions').all(),
+      computeVersionAvailability(store),
+    ]);
+    const orderableByOs = new Map();
+    for (const version of versions) {
+      if (!['ACTIVE', 'MAINTENANCE', 'EOL_WARNING'].includes(String(version.status ?? '').toUpperCase())) continue;
+      if (availability.get(version.id)?.orderable !== true) continue;
+      orderableByOs.set(version.operating_system_id, (orderableByOs.get(version.operating_system_id) ?? 0) + 1);
+    }
+    ctx.json({
+      operatingSystems: rows
+        .filter((o) => String(o.status ?? (o.active === false ? 'DISABLED' : 'ACTIVE')).toUpperCase() === 'ACTIVE')
+        .filter((o) => orderableByOs.has(o.id))
+        .map((o) => ({
+          id: o.id, name: o.name, slug: o.slug, family: o.family, active: o.active,
+          orderableVersions: orderableByOs.get(o.id),
+        })),
+    });
   });
 
   // ---- customer: list / create / get / patch / delete ---------------------
