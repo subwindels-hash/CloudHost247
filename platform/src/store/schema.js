@@ -625,6 +625,7 @@ const TABLES = {
       content: text({ required: true }),
       ttl: int({ default: 3600 }),
       priority: int({ nullable: true }),
+      proxied: bool({ default: false }),
       created_at: ts(),
       updated_at: ts(),
     },

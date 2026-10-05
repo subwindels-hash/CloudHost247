@@ -113,7 +113,7 @@ test('integration: ported domains over real HTTP', async (t) => {
 
     const zone = await jsonFetch(base, { path: '/api/v1/dns/zones', method: 'POST', body: { domain: 'example.com' } }, token);
     assert.strictEqual(zone.status, 201);
-    zoneId = zone.data.id;
+    zoneId = zone.data.zone.id;
 
     const rec = await jsonFetch(base, {
       path: '/api/v1/dns/records', method: 'POST',
