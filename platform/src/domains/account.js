@@ -24,6 +24,7 @@ const {
 } = require('../core/errors');
 const { uuidv7 } = require('../lib/ids');
 const { authenticate } = require('../lib/auth');
+const { hashPassword, verifyPassword } = require('../lib/password');
 const { publicUser } = require('./auth');
 
 const name = 'account';
@@ -163,6 +164,38 @@ function register(router, deps) {
     ctx.json({ user: publicUser(user) });
   }));
 
+  // ---------------------------------------------------------------- password
+  router.post('/api/v1/account/password', authed(async (ctx) => {
+    // An admin inside this account in support mode must never take it over by setting a password.
+    guardSupportMode(ctx, 'password.change');
+    const body = await ctx.validate(v.object({
+      currentPassword: v.string().min(1),
+      newPassword: v.string().min(8).max(200),
+    }));
+
+    const user = await store.table('users').findById(ctx.user.id);
+    if (!user) throw new NotFoundError('Account no longer exists');
+
+    const ok = await verifyPassword(body.currentPassword, user.password_hash);
+    if (!ok) {
+      // Deliberately 400, not 401: the bearer token is fine (authenticate already passed) — only
+      // the submitted currentPassword field failed. A 401 would make the SPA treat the token as
+      // dead and clear the whole session on a simple mistyped current password.
+      throw new ValidationError('Current password is incorrect');
+    }
+
+    // Bumping auth_session_version + password_changed_at invalidates every token issued before now
+    // on its next request — a real server-side session invalidation, not just a client logout.
+    await store.table('users').updateById(user.id, {
+      password_hash: await hashPassword(body.newPassword),
+      password_changed_at: new Date().toISOString(),
+      auth_session_version: (user.auth_session_version ?? 1) + 1,
+    });
+
+    await audit(deps, { eventType: 'password_change', userId: user.id, ipAddress: ctx.ip, userAgent: ctx.userAgent });
+    ctx.noContent();
+  }));
+
   // ----------------------------------------------------------------- services
   router.get('/api/v1/account/services', authed(async (ctx) => {
     const { rows, total } = await store.table('customer_services').find(
@@ -238,7 +271,7 @@ function register(router, deps) {
     });
   }));
 
-  router.post('/api/v1/account/tickets/:id/replies', authed(async (ctx) => {
+  const replyToTicket = authed(async (ctx) => {
     const body = await ctx.validate(v.object({ body: v.string().trim().min(1).max(20000) }));
 
     const ticket = await store.table('support_tickets').findOne({
@@ -262,7 +295,9 @@ function register(router, deps) {
     });
 
     ctx.code(201).json({ message: publicMessage(message) });
-  }));
+  });
+  router.post('/api/v1/account/tickets/:id/replies', replyToTicket);
+  router.post('/api/v1/account/tickets/:id/messages', replyToTicket);
 }
 
 module.exports = { name, register };

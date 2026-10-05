@@ -237,6 +237,40 @@ test('integration: ported domains over real HTTP', async (t) => {
     assert.ok(msg.data.reply.content.length > 0);
   });
 
+  // ---- account: password change + security number -------------------------
+  await t.test('account password change and security-number reveal/change', async () => {
+    const acct = await register(base, 'accountant@example.com', 'OriginalPass123!');
+    const at = acct.data.accessToken;
+
+    // Wrong current password is 400 (not 401 — a 401 would clear the SPA session).
+    const bad = await jsonFetch(base, { path: '/api/v1/account/password', method: 'POST', body: { currentPassword: 'nope', newPassword: 'BrandNewPass123!' } }, at);
+    assert.strictEqual(bad.status, 400);
+
+    const good = await jsonFetch(base, { path: '/api/v1/account/password', method: 'POST', body: { currentPassword: 'OriginalPass123!', newPassword: 'BrandNewPass123!' } }, at);
+    assert.strictEqual(good.status, 204);
+
+    // The password bump invalidated the old token; the new password works.
+    const stale = await jsonFetch(base, { path: '/api/v1/auth/me' }, at);
+    assert.strictEqual(stale.status, 401);
+    const relogin = await jsonFetch(base, { path: '/api/v1/auth/login', method: 'POST', body: { email: 'accountant@example.com', password: 'BrandNewPass123!' } });
+    assert.strictEqual(relogin.status, 200);
+    const at2 = relogin.data.accessToken;
+
+    // Security number: set, then reveal (step-up) rotates and returns a value.
+    await jsonFetch(base, { path: '/api/v1/account/security-number', method: 'POST', body: { securityNumber: '1234' } }, at2);
+    const reveal = await jsonFetch(base, { path: '/api/v1/account/security-number/reveal', method: 'POST', body: { password: 'BrandNewPass123!' } }, at2);
+    assert.strictEqual(reveal.status, 200);
+    assert.match(reveal.data.securityNumber.value, /^\d{4}$/);
+
+    // Reveal with the wrong password is refused.
+    const badReveal = await jsonFetch(base, { path: '/api/v1/account/security-number/reveal', method: 'POST', body: { password: 'wrong' } }, at2);
+    assert.strictEqual(badReveal.status, 401);
+
+    // Change requires the current value.
+    const change = await jsonFetch(base, { path: '/api/v1/account/security-number/change', method: 'POST', body: { currentSecurityNumber: reveal.data.securityNumber.value, newSecurityNumber: '9876' } }, at2);
+    assert.strictEqual(change.status, 200);
+  });
+
   // ---- admin surface ------------------------------------------------------
   await t.test('admin endpoints require elevation and return data', async () => {
     const forbidden = await jsonFetch(base, { path: '/api/v1/admin/ai/overview' }, token);

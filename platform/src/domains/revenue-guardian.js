@@ -10,7 +10,7 @@
 const { v } = require('../core/validate');
 const { NotFoundError } = require('../core/errors');
 const { uuidv7 } = require('../lib/ids');
-const { asAdmin, asStaff } = require('../lib/auth');
+const { authenticate, asAdmin, asStaff } = require('../lib/auth');
 
 const name = 'revenue-guardian';
 
@@ -55,6 +55,31 @@ function publicCase(row) {
 
 function register(router, deps) {
   const { store } = deps;
+
+  // ---- customer-facing revenue health -------------------------------------
+  router.get('/api/v1/account/revenue-health', async (ctx) => {
+    const auth = await authenticate(ctx, deps);
+
+    const invoices = await store.table('invoices').all();
+    const outstandingInvoices = invoices
+      .filter((i) => i.user_id === auth.id && i.status === 'unpaid')
+      .map((i) => ({ id: i.id, number: i.number, currency: i.currency, total: i.total, status: i.status, dueAt: i.due_at, isOverdue: new Date(i.due_at).getTime() < Date.now() }));
+
+    const subs = await store.table('subscriptions').all();
+    const services = subs
+      .filter((s) => s.user_id === auth.id)
+      .map((s) => ({ id: s.id, status: s.status, expiresAt: s.renews_at }));
+
+    // Payment promises hang off recovery cases; map cases owned by this customer to their promises.
+    const cases = await store.table('rg_recovery_cases').all();
+    const myCaseIds = new Set(cases.filter((c) => c.customer_id === auth.id).map((c) => c.id));
+    const promises = await store.table('rg_payment_promises').all();
+    const paymentArrangements = promises
+      .filter((p) => myCaseIds.has(p.case_id) && (p.status === 'promised' || p.status === 'partially_fulfilled'))
+      .map((p) => ({ amountCents: p.amount_cents, dueAt: p.due_at, status: p.status }));
+
+    ctx.json({ outstandingInvoices, services, paymentArrangements });
+  });
 
   // ---- dashboard ----------------------------------------------------------
   router.get('/api/v1/revenue-guardian/dashboard', async (ctx) => {
