@@ -19,21 +19,22 @@ staging-blocked — see §5).
 | 3 | `platform/` quick wins — TOTP enrolment QR image; `scripts/rehash-passwords.js` | **DONE 2026-10-05** — see §1b. QR matrices are byte-identical to python-qrcode and the API's PNG was decoded back by OpenCV; the rehash tool only ever invites a reset, because a bcrypt hash cannot be verified or transposed |
 | 4 | `platform/spa/` commerce and billing — cart, checkout, invoices, payments, services, domains | **DONE 2026-10-05 (server + client verified end-to-end; no browser has rendered the pages)** — see §1b. Two server-side blockers were fixed on the way: cart lines carried no plan names, and plan changes demanded a plan UUID that no public endpoint reveals |
 | 5 | `platform/spa/` admin console — staff-gated shell, dashboard counts, customer directory/detail, service + domain records, ticket queue, staff directory, "switch to customer" delegation | **DONE 2026-10-05 (server + client verified end-to-end; no browser has rendered the pages)** — see §1b. Delegation parks the admin's credentials so the delegated token is never refreshable, and the role boundaries are the server's own (a staff account is refused on status/role/switch/directory; a super admin cannot change their own role) |
-| 6 | `platform/src/lib/providers/` — infrastructure provider egress (`provider-adapters.js`) | **PARTIAL 2026-10-05: 9 of 12 kinds ported** — `hetzner`, `digitalocean`, `vultr`, `ovh`, `proxmox`, `virtualizor`, `solusvm`, `generic_http` (operator bridge) and the development `mock` now issue real provider requests through one shared HTTP entry point, with per-provider idempotency, capability refusals and error classification. `aws` (SigV4/EC2), `contabo` (OAuth2) and `openstack` (Keystone) are **not ported yet** and are refused by name (`UNSUPPORTED_OPERATION`) from the registry. Verification: `platform/tests/provider-adapters.test.js` (19 tests) drives the real adapters over real HTTP against loopback fake provider APIs. **No call to a real provider has been made from this environment** |
+| 6 | `platform/src/lib/providers/` — infrastructure provider egress (`provider-adapters.js`) | **DONE 2026-10-05: all 12 kinds ported, no live provider call made from this environment** — `hetzner`, `digitalocean`, `vultr`, `aws` (EC2 query protocol + SigV4), `contabo`, `ovh`, `proxmox`, `virtualizor`, `solusvm`, `openstack`, `generic_http` (operator bridge) and the development-only `mock`. 37 tests: the published AWS SigV4 vectors, per-adapter wire contracts over real loopback HTTP, idempotency, capability refusals, error classification and the sanitizer. Provider-side acceptance of every request is unverified — no credentials exist here and no provider was contacted. See §1a |
 
 ---
 
 ## 1. `platform/` — the newest build (added 2026-10-05) — largest unfinished surface
 
-41 domains exist and its 547 tests pass, but 15 modules ship **explicit `deferred` markers** for the
-live integration side, and the frontend is a fraction of the old one.
+41 domains exist and its 563 tests pass, but 17 modules still ship **explicit `deferred` markers**
+for the live integration side (the provider egress layer was closed on 2026-10-05 — see §1a), and the
+frontend is a fraction of the old one.
 
 ### 1a. Modules whose live integration is deferred (code present, egress missing)
 
 | Module | What is deferred |
 |---|---|
-| `platform/src/lib/provider-adapters.js` | **Partially closed 2026-10-05** — the configuration registry now reports implementation readiness, and `platform/src/lib/providers/` implements real egress for **9 of the 12 kinds**: `hetzner`, `digitalocean`, `vultr`, `ovh`, `proxmox`, `virtualizor`, `solusvm`, `generic_http` (operator bridge) and the development-only `mock`. Still deferred: `aws` (EC2 query protocol + SigV4), `contabo` (OAuth2 client-credentials) and `openstack` (Keystone password or token login) — the registry refuses those three with `UNSUPPORTED_OPERATION` naming the missing adapter, and the admin adapter list marks them `implemented: false` |
-| `platform/src/domains/infrastructure.js` | Wiring the now-ported adapters into the domain (provider diagnostics inside a request, image verification, provider reconciliation) — the adapter layer itself exists in `platform/src/lib/providers/`; nothing in `infrastructure.js` calls it yet |
+| `platform/src/lib/provider-adapters.js` | **Closed 2026-10-05** — `platform/src/lib/providers/` now implements real egress for **all 12 kinds** (the last three: `aws` — EC2 query protocol with this build's own SigV4 signer, verified against the published AWS test-suite vectors; `contabo` — OAuth2 password grant with an in-memory token; `openstack` — Keystone password or static-token login with service-catalog resolution). The configuration registry reports per-kind implementation readiness; nothing in the domain layer calls the layer yet |
+| `platform/src/domains/infrastructure.js` | Wiring the ported adapters into the domain: provider diagnostics inside a request, image verification and provider reconciliation still answer from local rows. The adapter layer itself is complete in `platform/src/lib/providers/`; nothing in `infrastructure.js` calls it yet, so no route currently performs provider egress |
 | `platform/src/domains/servers.js` | Hypervisor/provider actions, live console session (issues a token only) |
 | `platform/src/domains/provisioning.js` | Provider-side build execution |
 | `platform/src/domains/operating-systems.js` | Provider mapping filter |

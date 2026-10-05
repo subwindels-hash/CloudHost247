@@ -126,16 +126,24 @@ credentials), the failure vocabulary (`ProviderError` with retryability and a sa
 response), the credential-free base-URL rule, and a response sanitizer that redacts credentials,
 cloud-init and private key material before anything is stored or logged.
 
-Nine kinds issue real provider requests — Hetzner, DigitalOcean, Vultr, OVH, Proxmox, Virtualizor,
-SolusVM, the operator HTTPS bridge and the development-only mock. AWS EC2, Contabo and OpenStack are
-not ported yet: the registry refuses them with `UNSUPPORTED_OPERATION` naming the missing adapter
-(instead of a retryable "temporarily unavailable"), and the admin adapter list reports
-`implemented: false`.
+All twelve kinds issue real provider requests: Hetzner, DigitalOcean, Vultr, AWS EC2, Contabo, OVH,
+Proxmox, Virtualizor, SolusVM, OpenStack, the operator HTTPS bridge and the development-only mock.
+Each adapter is a separate implementation of the same 26-method interface — one provider's client is
+never reused for another platform — and an operation a provider does not genuinely offer fails with
+`UNSUPPORTED_OPERATION` naming the provider's own reason rather than being simulated.
 
-`tests/provider-adapters.test.js` starts a loopback HTTP server that plays each provider API and
-answers with provider-shaped documents, so the request an adapter constructs, the response it
-understands and the failure it reports are all verified end to end. No call to a real provider has
-been made from this environment, and the tests say so.
+Two pieces are written from the provider's published protocol because this build has no dependencies:
+
+- **AWS SigV4** (`src/lib/providers/aws-sigv4.js`) signs the EC2, CloudWatch and EC2 Instance Connect
+  query calls; `tests/aws-sigv4.test.js` checks it against the published AWS test-suite vectors
+  (`get-vanilla`, `post-x-www-form-urlencoded`), and the adapter tests re-derive each signature from
+  the bytes actually sent.
+- **AWS XML** (`src/lib/providers/aws-xml.js`) reads the query-protocol responses, and the EC2
+  Serial Console is reported for what it is: an SSH key pushed for 60 seconds, not a VNC session.
+
+Two EC2 workflows can destroy a customer's instance — reinstalling means launching a replacement and
+stopping the old one, and restoring a root volume means detach/attach surgery — so both are off
+unless an operator sets `<PREFIX>_ALLOW_ROOT_VOLUME_REPLACEMENT=true`.
 
 ## API surface (ported so far)
 

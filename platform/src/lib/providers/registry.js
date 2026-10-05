@@ -16,6 +16,9 @@
 
 const { ADAPTER_METHODS, ProviderError } = require('./types');
 const { HetznerProviderAdapter } = require('./adapters/hetzner');
+const { AwsProviderAdapter } = require('./adapters/aws');
+const { ContaboProviderAdapter } = require('./adapters/contabo');
+const { OpenStackProviderAdapter } = require('./adapters/openstack');
 const { DigitalOceanProviderAdapter } = require('./adapters/digitalocean');
 const { VultrProviderAdapter } = require('./adapters/vultr');
 const { VirtualizorProviderAdapter } = require('./adapters/virtualizor');
@@ -27,16 +30,17 @@ const { MockProviderAdapter } = require('./adapters/mock');
 
 /** Adapter kinds with a real implementation in this build. */
 const IMPLEMENTED_ADAPTERS = Object.freeze([
-  'hetzner', 'digitalocean', 'vultr', 'ovh', 'proxmox', 'virtualizor', 'solusvm', 'generic_http', 'mock',
+  'hetzner', 'digitalocean', 'vultr', 'aws', 'contabo', 'ovh', 'proxmox', 'virtualizor', 'solusvm',
+  'openstack', 'generic_http', 'mock',
 ]);
 
 /**
- * Adapter kinds the audited original implements but this build has not ported yet. They are listed
- * explicitly — rather than falling through to the generic "unknown adapter" branch — so the refusal
- * says *which* adapter is missing and the gap is visible to an operator instead of looking like a
- * typo in the provider row.
+ * Adapter kinds the audited original implements but this build has not ported yet. Every kind is
+ * ported now, so this list is empty — it is kept (and still reported by the admin adapter list and
+ * the readiness check) because the next kind the original learns about must land here and be
+ * refused by name rather than looking like a typo in a provider row.
  */
-const PENDING_ADAPTERS = Object.freeze(['aws', 'contabo', 'openstack']);
+const PENDING_ADAPTERS = Object.freeze([]);
 
 class UnavailableProviderAdapter {
   constructor(provider, reason) {
@@ -53,10 +57,13 @@ function createInfrastructureProviderAdapter(provider, options = {}) {
   const adapterOptions = { source: options.source, transport: options.transport };
   switch (provider.adapter) {
     case 'hetzner': return new HetznerProviderAdapter(provider, adapterOptions);
+    case 'aws': return new AwsProviderAdapter(provider, adapterOptions);
     case 'digitalocean': return new DigitalOceanProviderAdapter(provider, adapterOptions);
     case 'vultr': return new VultrProviderAdapter(provider, adapterOptions);
     case 'ovh': return new OvhProviderAdapter(provider, adapterOptions);
     case 'proxmox': return new ProxmoxProviderAdapter(provider, adapterOptions);
+    case 'contabo': return new ContaboProviderAdapter(provider, adapterOptions);
+    case 'openstack': return new OpenStackProviderAdapter(provider, adapterOptions);
     case 'virtualizor': return new VirtualizorProviderAdapter(provider, adapterOptions);
     case 'solusvm': return new SolusvmProviderAdapter(provider, adapterOptions);
     case 'generic_http': return new GenericHttpProviderAdapter(provider, adapterOptions);

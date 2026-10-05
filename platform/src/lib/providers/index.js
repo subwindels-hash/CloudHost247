@@ -26,6 +26,35 @@ const {
 } = require('./registry');
 const { resetMockProviderState, isMockProviderEnabled } = require('./adapters/mock');
 
+/**
+ * The adapter modules themselves, for callers that need a piece an adapter keeps out of the
+ * interface — the providers layer calls nothing in here at runtime; the test-suite uses it to drive
+ * the deterministic helpers (the Contabo rescue-password generator, the AWS SigV4 signer, …).
+ */
+const adapters = {
+  hetzner: require('./adapters/hetzner'),
+  aws: require('./adapters/aws'),
+  awsClient: require('./adapters/aws-client'),
+  awsReplacement: require('./adapters/aws-replacement'),
+  awsSerialConsole: require('./adapters/aws-serial-console'),
+  digitalocean: require('./adapters/digitalocean'),
+  vultr: require('./adapters/vultr'),
+  ovh: require('./adapters/ovh'),
+  ovhClient: require('./adapters/ovh-client'),
+  proxmox: require('./adapters/proxmox'),
+  proxmoxClient: require('./adapters/proxmox-client'),
+  virtualizor: require('./adapters/virtualizor'),
+  solusvm: require('./adapters/solusvm'),
+  contabo: require('./adapters/contabo'),
+  openstack: require('./adapters/openstack'),
+  openstackClient: require('./adapters/openstack-client'),
+  genericHttp: require('./adapters/generic-http'),
+  mock: require('./adapters/mock'),
+};
+
+const awsSigV4 = require('./aws-sigv4');
+const awsXml = require('./aws-xml');
+
 module.exports = {
   ...types,
   ...common,
@@ -39,4 +68,7 @@ module.exports = {
   PENDING_ADAPTERS,
   resetMockProviderState,
   isMockProviderEnabled,
+  adapters,
+  awsSigV4,
+  awsXml,
 };

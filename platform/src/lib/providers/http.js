@@ -13,6 +13,26 @@
 
 const { ProviderError, classifyStatus } = require('./types');
 
+/**
+ * Merges header sources with HTTP's own rule: names are case-insensitive, and a later source
+ * replaces an earlier one rather than arriving beside it. Without this, a caller that supplies
+ * `content-type` while the default is `Content-Type` produces one header with two values
+ * ("application/json, application/x-www-form-urlencoded…"), which a form-encoded provider API is
+ * entitled to reject — and which SigV4 would sign as something other than what was sent.
+ */
+function mergeHeaders(...sources) {
+  const merged = new Map();
+  for (const source of sources) {
+    for (const [name, value] of Object.entries(source ?? {})) {
+      if (value === undefined || value === null) continue;
+      merged.set(name.toLowerCase(), { name, value });
+    }
+  }
+  const out = {};
+  for (const { name, value } of merged.values()) out[name] = value;
+  return out;
+}
+
 function classifyProviderErrorBody(body, status) {
   const errorField = body && typeof body === 'object' && 'error' in body ? body.error : undefined;
   if (errorField !== undefined) {
@@ -33,6 +53,13 @@ function classifyProviderErrorBody(body, status) {
  *   NETWORK_TEMPORARY_FAILURE (retryable). Both are non-2xx statuses mapped by classifyStatus.
  * - The provider's own error body is attached as `providerResponse` for the job record, with a
  *   500-character bound; it is the *error* response only, never the request.
+ * - `options.returnResponse` hands back `{ status, headers, body }` instead of the body alone, which
+ *   the OpenStack client needs for Keystone's `x-subject-token`. The accessor is the transport's own
+ *   headers object; nothing is copied or cached.
+ * - `options.as = 'text'` returns the raw response text instead of a JSON parse. The AWS query APIs
+ *   answer with XML, and a JSON.parse failure would truncate the document to a 500-character
+ *   "message" — unusable for a DescribeInstances answer. Even then, what is attached to a failure as
+ *   `providerResponse` is bounded, because that evidence is stored on the job record.
  */
 async function providerRequest(url, init = {}, options = {}) {
   const transport = options.transport ?? globalThis.fetch;
@@ -48,21 +75,25 @@ async function providerRequest(url, init = {}, options = {}) {
     const response = await transport(url, {
       ...init,
       signal: controller.signal,
-      headers: {
-        Accept: 'application/json',
-        ...(init.body ? { 'Content-Type': 'application/json' } : {}),
-        ...(options.headers ?? {}),
-        ...(init.headers ?? {}),
-      },
+      headers: mergeHeaders(
+        { Accept: 'application/json' },
+        init.body ? { 'Content-Type': 'application/json' } : {},
+        options.headers,
+        init.headers,
+      ),
     });
 
     const raw = await response.text();
     let body = null;
     if (raw) {
-      try {
-        body = JSON.parse(raw);
-      } catch {
-        body = { message: raw.slice(0, 500) };
+      if (options.as === 'text') {
+        body = raw;
+      } else {
+        try {
+          body = JSON.parse(raw);
+        } catch {
+          body = { message: raw.slice(0, 500) };
+        }
       }
     }
 
@@ -70,8 +101,11 @@ async function providerRequest(url, init = {}, options = {}) {
       const failure = classifyStatus(response.status);
       throw new ProviderError(failure.code, classifyProviderErrorBody(body, response.status), failure.retryable, {
         status: response.status,
-        body,
+        body: typeof body === 'string' ? body.slice(0, 4096) : body,
       });
+    }
+    if (options.returnResponse === true) {
+      return { status: response.status, headers: response.headers ?? null, body };
     }
     return body;
   } catch (error) {
@@ -85,4 +119,4 @@ async function providerRequest(url, init = {}, options = {}) {
   }
 }
 
-module.exports = { providerRequest };
+module.exports = { providerRequest, mergeHeaders };
