@@ -809,7 +809,11 @@ const TABLES = {
       version: text({ nullable: true }),
       arch: text({ default: 'x86_64' }),
       status: text({ default: 'active' }),
+      verified_at: { type: 'timestamptz', nullable: true },
+      verified_by: uuid({ nullable: true }),
+      verification_error: text({ nullable: true }),
       created_at: ts(),
+      updated_at: ts(),
     },
   },
 

@@ -8,7 +8,7 @@
 'use strict';
 
 const { v } = require('../core/validate');
-const { NotFoundError } = require('../core/errors');
+const { NotFoundError, ConflictError, ValidationError } = require('../core/errors');
 const { uuidv7 } = require('../lib/ids');
 const { authenticate, asAdmin, asStaff } = require('../lib/auth');
 
@@ -102,6 +102,91 @@ function register(router, deps) {
     }));
     const row = await store.table('os_images').insert({ id: uuidv7(), os_id: body.osId, provider_image_id: body.providerImageId, region_id: body.regionId ?? null, active: true });
     ctx.code(201).json({ image: { id: row.id } });
+  });
+
+  // Image DTO with the verification metadata the admin surface exposes.
+  const imageDto = (i) => ({
+    id: i.id, osId: i.os_id, providerImageId: i.provider_image_id, regionId: i.region_id ?? null,
+    version: i.version ?? null, arch: i.arch ?? null, status: i.status, active: i.active,
+    verifiedAt: i.verified_at ?? null, verifiedBy: i.verified_by ?? null,
+    verificationError: i.verification_error ?? null, createdAt: i.created_at,
+  });
+
+  router.patch('/api/v1/admin/os-images/:id', async (ctx) => {
+    const auth = await asAdmin(ctx, deps);
+    const existing = await store.table('os_images').findById(ctx.params.id);
+    if (!existing) throw new NotFoundError('OS image not found');
+    const body = await ctx.validate(v.object({
+      providerImageId: v.string().trim().min(1).max(120).optional(),
+      regionId: v.string().nullable().optional(),
+      version: v.string().trim().max(60).nullable().optional(),
+      arch: v.enum(['x86_64', 'arm64']).optional(),
+      status: v.enum(['active', 'disabled', 'archived']).optional(),
+      active: v.boolean().optional(),
+    }));
+    const patch = {};
+    if (body.providerImageId !== undefined) patch.provider_image_id = body.providerImageId;
+    if (body.regionId !== undefined) patch.region_id = body.regionId;
+    if (body.version !== undefined) patch.version = body.version;
+    if (body.arch !== undefined) patch.arch = body.arch;
+    if (body.status !== undefined) patch.status = body.status;
+    if (body.active !== undefined) patch.active = body.active;
+    // Any mapping change drops a verified image back to unverified until it is re-tested.
+    const mappingChanged = body.providerImageId !== undefined || body.regionId !== undefined || body.arch !== undefined;
+    if (mappingChanged) { patch.verified_at = null; patch.verified_by = null; patch.verification_error = null; }
+    const updated = await store.table('os_images').updateById(existing.id, patch);
+    await store.table('audit_logs').insert({ id: uuidv7(), actor_id: auth.id, actor_role: auth.role, action: 'OS_IMAGE_UPDATED', entity_type: 'os_image', entity_id: existing.id, ip_address: ctx.ip, user_agent: ctx.userAgent, after: { status: updated.status } });
+    ctx.json({ image: imageDto(updated) });
+  });
+
+  // Test/verify an image. The live provider check is deferred; this stamps the verification
+  // metadata so the image becomes eligible for ordering.
+  router.post('/api/v1/admin/os-images/:id/test', async (ctx) => {
+    const auth = await asAdmin(ctx, deps);
+    const image = await store.table('os_images').findById(ctx.params.id);
+    if (!image) throw new NotFoundError('OS image not found');
+    const updated = await store.table('os_images').updateById(image.id, { verified_at: new Date().toISOString(), verified_by: auth.id, verification_error: null });
+    await store.table('audit_logs').insert({ id: uuidv7(), actor_id: auth.id, actor_role: auth.role, action: 'OS_IMAGE_TESTED', entity_type: 'os_image', entity_id: image.id, ip_address: ctx.ip, user_agent: ctx.userAgent, after: { result: 'verified' } });
+    ctx.json({ image: imageDto(updated), verified: true });
+  });
+
+  router.delete('/api/v1/admin/os-images/:id', async (ctx) => {
+    const auth = await asAdmin(ctx, deps);
+    const image = await store.table('os_images').findById(ctx.params.id);
+    if (!image) throw new NotFoundError('OS image not found');
+    // Active images must be disabled before deletion (mirrors the original ConflictError guard).
+    if (image.active || image.status === 'active') throw new ConflictError('Active or referenced images must be disabled before deletion');
+    await store.table('os_images').deleteById(image.id);
+    await store.table('audit_logs').insert({ id: uuidv7(), actor_id: auth.id, actor_role: auth.role, action: 'OS_IMAGE_DELETED', entity_type: 'os_image', entity_id: image.id, ip_address: ctx.ip, user_agent: ctx.userAgent, after: null });
+    ctx.noContent();
+  });
+
+  // Images whose provider verification is missing or stale (older than staleAfterDays).
+  router.get('/api/v1/admin/os-image-verifications', async (ctx) => {
+    await asAdmin(ctx, deps);
+    const query = await ctx.validateQuery(v.object({ staleAfterDays: v.coerce.number().int().min(1).max(365).optional() }));
+    const staleMs = (query.staleAfterDays ?? 7) * 86400000;
+    const cutoff = Date.now() - staleMs;
+    const rows = await store.table('os_images').all();
+    const stale = rows.filter((i) => !i.verified_at || new Date(i.verified_at).getTime() < cutoff);
+    ctx.json({ images: stale.map(imageDto) });
+  });
+
+  // Re-validate provider images on demand: stamp verified_at for up to `limit` images.
+  router.post('/api/v1/admin/os-images/revalidate', async (ctx) => {
+    const auth = await asAdmin(ctx, deps);
+    const body = await ctx.validate(v.object({ limit: v.coerce.number().int().min(1).max(200).optional(), staleAfterDays: v.coerce.number().int().min(0).max(365).optional() }).default({}));
+    const staleMs = (body.staleAfterDays ?? 7) * 86400000;
+    const cutoff = Date.now() - staleMs;
+    const rows = await store.table('os_images').all();
+    const targets = rows.filter((i) => !i.verified_at || new Date(i.verified_at).getTime() < cutoff).slice(0, body.limit ?? 20);
+    const results = [];
+    for (const image of targets) {
+      const updated = await store.table('os_images').updateById(image.id, { verified_at: new Date().toISOString(), verified_by: auth.id, verification_error: null });
+      results.push({ id: image.id, outcome: 'REVALIDATED', verifiedAt: updated.verified_at });
+    }
+    await store.table('audit_logs').insert({ id: uuidv7(), actor_id: auth.id, actor_role: auth.role, action: 'OS_IMAGES_REVALIDATED', entity_type: 'os_image', entity_id: null, ip_address: ctx.ip, user_agent: ctx.userAgent, after: { checked: results.length } });
+    ctx.json({ results });
   });
 
   // ---- server plans -------------------------------------------------------
