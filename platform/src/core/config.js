@@ -107,6 +107,13 @@ const envSchema = v.object({
   // --- payments (optional) ---
   MANUAL_PAYMENT_INSTRUCTIONS: v.string().max(2000).optional(),
   SANDBOX_GATEWAY_WEBHOOK_SECRET: v.string().min(16).optional(),
+  // Real-provider webhook credentials. Each one enables *receiving* verified deliveries from that
+  // provider (src/lib/gateways/); with the value unset the gateway refuses every delivery with a
+  // 401 naming the missing variable, rather than accepting an unverifiable body. Names match the
+  // Fastify platform's env so one .env can serve both during the cutover.
+  STRIPE_WEBHOOK_SECRET: v.string().min(16).optional(),
+  PAYPAL_WEBHOOK_ID: v.string().min(10).optional(),
+  PAYSTACK_SECRET_KEY: v.string().min(16).optional(),
   // When true, the sandbox gateway can be charged/completed without a live PSP. Refused in
   // production so a misconfigured prod host cannot mint "paid" invoices.
   SANDBOX_PAYMENTS: boolSchema.default('true'),

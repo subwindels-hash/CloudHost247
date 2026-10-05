@@ -7,6 +7,11 @@
  * SANDBOX_GATEWAY_WEBHOOK_SECRET; the receiver in webhooks.js verifies that signature. The manual
  * gateway never fabricates bank details — with no configured instructions it returns an honest
  * "contact support" message.
+ *
+ * The real providers (stripe / paypal / paystack) are recognized here so the customer-facing
+ * gateway list and the initiation guards can name them, but initiation is refused with the exact
+ * reason: creating a provider-side checkout needs live provider egress this build does not have.
+ * Their *inbound* webhooks are fully implemented in src/lib/provider-webhook-service.js.
  */
 'use strict';
 
@@ -17,6 +22,10 @@ const { uuidv7 } = require('../lib/ids');
 const { paymentDto } = require('../lib/payments-dto');
 const { authenticate, asAdmin } = require('../lib/auth');
 const { applySuccessfulPayment } = require('../lib/billing-apply');
+const {
+  INITIATION_GATEWAYS, isWebhookGateway, initiationStatus, listGateways,
+} = require('../lib/gateways');
+const { processProviderWebhook } = require('../lib/provider-webhook-service');
 
 const name = 'payments';
 
@@ -24,13 +33,24 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 
 const initiateSchema = v.object({
   invoiceId: v.string().min(1),
-  gateway: v.enum(['sandbox', 'manual']),
+  gateway: v.enum(INITIATION_GATEWAYS),
 });
 
 /** The invoice-scoped route takes the gateway alone; the invoice comes from the path. */
 const gatewayOnlySchema = v.object({
-  gateway: v.enum(['sandbox', 'manual']),
+  gateway: v.enum(INITIATION_GATEWAYS),
 });
+
+/**
+ * Refuses a gateway this deployment cannot actually run, naming the reason. A 400 rather than a
+ * generic failure: the caller asked for something the deployment does not offer, and the message
+ * says which piece is missing (credentials, or provider egress) instead of leaving a dead end.
+ */
+function assertGatewayCanInitiate(gatewayId, config) {
+  const status = initiationStatus(gatewayId, config);
+  if (!status.available) throw new ValidationError(status.reason);
+  return status;
+}
 
 function signWebhook(secret, body) {
   return crypto.createHmac('sha256', secret).update(body).digest('hex');
@@ -47,16 +67,14 @@ function register(router, deps) {
     ctx.json({
       invoiceId: invoice.id,
       balanceDue: Math.round((invoice.total - (invoice.amount_paid ?? 0)) * 100) / 100,
-      gateways: [
-        { id: 'sandbox', label: 'Card (sandbox)', available: true },
-        { id: 'manual', label: 'Bank transfer', available: true },
-      ],
+      gateways: listGateways(config),
     });
   });
 
   router.post('/api/v1/payments', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const input = await ctx.validate(initiateSchema);
+    assertGatewayCanInitiate(input.gateway, config);
 
     const invoice = await store.table('invoices').findOne({ id: input.invoiceId, user_id: auth.id });
     if (!invoice) throw new NotFoundError('Invoice not found');
@@ -99,6 +117,7 @@ function register(router, deps) {
     const auth = await authenticate(ctx, deps);
     if (!UUID_RE.test(String(ctx.params.id ?? ''))) throw new ValidationError('id must be a valid UUID');
     const { gateway } = await ctx.validate(gatewayOnlySchema);
+    assertGatewayCanInitiate(gateway, config);
 
     const invoice = await store.table('invoices').findOne({ id: ctx.params.id, user_id: auth.id });
     if (!invoice) throw new NotFoundError('Invoice not found');
@@ -178,22 +197,48 @@ function register(router, deps) {
 }
 
 /**
- * Shared provider-webhook handler (also used by webhooks.js).
- * Verifies the HMAC signature, de-duplicates by provider+event_id, records the event, and applies
- * the payment. Returns { applied }.
+ * Shared provider-webhook entrypoint.
+ *
+ * Two deliberately different paths:
+ *
+ *  - **sandbox** — the self-contained test rig. It emits its own HMAC-SHA256-signed deliveries and
+ *    verifies them with the same secret, and a failed attempt is recorded on the event row for
+ *    audit (the integration suite pins that).
+ *  - **stripe / paypal / paystack** — real providers, handled by the strict receiver in
+ *    src/lib/provider-webhook-service.js: signature verified before any database access, canonical
+ *    event parsing, unique-index claiming with lease takeover, zero-trust amount/currency/owner
+ *    invariants, and settlement through the same `applySuccessfulPayment` the other paths use.
+ *
+ * An unknown provider is a 404 rather than falling back to the sandbox secret: a caller must never
+ * be able to pick which verification scheme applies to them.
+ *
+ * `rawBody` may be a Buffer (preferred — the exact bytes the provider signed) or a string.
+ * `signature` is kept for the sandbox path's backwards-compatible call shape; the real gateways read
+ * their own headers from `headers`.
  */
-async function handleProviderWebhook(store, config, provider, rawBody, signature) {
+async function handleProviderWebhook(store, config, provider, rawBody, signature, headers = {}) {
+  const rawBuffer = Buffer.isBuffer(rawBody) ? rawBody : Buffer.from(String(rawBody ?? ''), 'utf8');
+  const rawText = rawBuffer.toString('utf8');
+
+  if (isWebhookGateway(provider)) {
+    return processProviderWebhook(store, config, provider, rawBuffer, headers);
+  }
+
+  if (provider !== 'sandbox') {
+    throw new NotFoundError(`Unknown webhook gateway: ${provider}`);
+  }
+
   let payload;
   try {
-    payload = JSON.parse(rawBody);
+    payload = JSON.parse(rawText);
   } catch {
     throw new ValidationError('Webhook body is not valid JSON');
   }
 
-  const secret = provider === 'sandbox' ? config.SANDBOX_GATEWAY_WEBHOOK_SECRET : config.SANDBOX_GATEWAY_WEBHOOK_SECRET;
+  const secret = config.SANDBOX_GATEWAY_WEBHOOK_SECRET;
   if (!secret) throw new ValidationError(`No webhook secret configured for ${provider}`);
 
-  const expected = signWebhook(secret, rawBody);
+  const expected = signWebhook(secret, rawText);
   const provided = String(signature ?? '');
   const valid = provided.length === expected.length
     && crypto.timingSafeEqual(Buffer.from(provided, 'hex'), Buffer.from(expected, 'hex'));

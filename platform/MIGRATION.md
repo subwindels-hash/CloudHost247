@@ -75,8 +75,16 @@ out so nobody mistakes absence for parity:
    provisioning / marketplace / deployments / dns / ssl / firewall / revenue-guardian / ai domains.
    By design these are the largest surface and are ported incrementally; adding their tables to
    `src/store/schema.js` and a `domains/*.js` module is the established pattern.
-4. **Payment gateways** (sandbox + manual + webhook signing) and the billing/ordering flows beyond
-   the schema. The ledger/invoice/order tables exist and are finance-safe, but no gateway routes yet.
+4. **Real payment gateways — INBOUND HALF IMPLEMENTED, initiation still deferred.** Received and
+   settled: `stripe`, `paypal` and `paystack` webhooks via `src/lib/gateways/` +
+   `src/lib/provider-webhook-service.js` (signature verified before any database access, canonical
+   event mapping, unique-index claiming with lease takeover, zero-trust amount/currency/owner
+   invariants, settlement through the shared `applySuccessfulPayment`). Still open, and refused with
+   the reason rather than faked: **initiating** a checkout with a real provider, which needs live
+   provider egress and PSP credentials this build does not have. `GET
+   /api/v1/billing/invoices/:id/payment-methods` reports each gateway's availability and why, and
+   initiation of an unavailable gateway is a 400 naming the missing piece. The sandbox and manual
+   gateways remain the usable ones locally.
 5. **Domain availability lookup** (`GET /api/v1/domains/availability`). The public site degrades to
    honest client-side validation until the domain-services domain is ported.
 

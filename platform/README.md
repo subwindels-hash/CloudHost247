@@ -129,4 +129,10 @@ protection.
 ## What is ported vs still open
 
 See [MIGRATION.md](./MIGRATION.md) for the per-module parity table and the deliberately deferred
-items (WebAuthn/passkeys, AWS adapters, payment gateways, domain availability).
+items (WebAuthn/passkeys, AWS adapters, provider checkout initiation, domain availability).
+
+Payment webhooks from Stripe, PayPal and Paystack are implemented — each provider's own signature
+scheme (`src/lib/gateways/`), verified before the receiver touches the database, with event-id
+idempotency, lease-based crash recovery and zero-trust amount/currency/owner checks. Only *starting*
+a checkout with those providers is still deferred (it needs live provider egress); the API reports
+that reason instead of handing back a fabricated provider reference.
