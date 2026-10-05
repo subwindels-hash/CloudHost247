@@ -7,11 +7,12 @@
  * with an ETag (304 on match). Statuses follow the original uppercase enum (ACTIVE/DISABLED/
  * ARCHIVED for OS; ACTIVE/MAINTENANCE/EOL_WARNING/EOL/ARCHIVED/DISABLED for versions).
  *
- * The original customer list/versions queries filter to combinations backed by a verified provider
- * image + active product configuration. That full availability join spans the whole infrastructure
- * catalog (providers/regions/datacenters/os-images/server-product-configurations); this port returns
- * the ACTIVE OS/version definitions directly and leaves the provider-mapping filter to the deferred
- * provisioning layer, which is honest about what is seeded.
+ * The customer versions query filters to combinations backed by a verified provider image and an
+ * active product configuration, through `lib/os-availability.js` — the same rule the operating-system
+ * list in `domains/servers.js` uses. Before that join existed this route returned every non-retired
+ * version, so a customer could select an OS whose image mapping had never been verified and the
+ * provisioning worker would then refuse to build it: the catalogue was advertising something the
+ * platform had already decided it could not deliver.
  */
 'use strict';
 
@@ -19,7 +20,8 @@ const crypto = require('node:crypto');
 const { v } = require('../core/validate');
 const { NotFoundError, ConflictError, ValidationError } = require('../core/errors');
 const { uuidv7 } = require('../lib/ids');
-const { asAdmin } = require('../lib/auth');
+const { asAdmin, asStaff } = require('../lib/auth');
+const { computeVersionAvailability, UNAVAILABLE_REASONS } = require('../lib/os-availability');
 
 const name = 'operating-systems';
 
@@ -118,13 +120,42 @@ function register(router, deps) {
     ctx.send(Buffer.from(asset.content, 'base64'));
   });
 
+  /**
+   * The versions of one operating system that a customer can actually order.
+   *
+   * This used to return every non-retired version regardless of the infrastructure behind it, so a
+   * customer could pick an OS whose image mapping had never been verified — and the provisioning
+   * worker would then refuse to build it. The list is now filtered by the shared availability rule,
+   * and each version carries its verdict so the UI can say *why* rather than showing a shorter list.
+   *
+   * `?includeUnavailable=true` is staff-only: an operator triaging a catalogue gap needs to see the
+   * versions that are missing their mapping, and a customer has no use for them.
+   */
   router.get('/api/v1/operating-systems/:id/versions', async (ctx) => {
     const os = await store.table('operating_systems').findById(ctx.params.id);
     if (!os || !isActive(os)) throw new NotFoundError('No operating system was found with that id');
+    const query = await ctx.validateQuery(v.object({
+      includeUnavailable: v.string().max(8).optional(),
+    }).default({}));
+    const includeUnavailable = String(query.includeUnavailable ?? '').toLowerCase() === 'true';
+    if (includeUnavailable) await asStaff(ctx, deps);
+
     const versions = (await store.table('operating_system_versions').all())
       .filter((ver) => ver.operating_system_id === os.id && ['ACTIVE', 'MAINTENANCE', 'EOL_WARNING'].includes(String(ver.status).toUpperCase()));
-    versions.sort((a, b) => (b.is_default - a.is_default) || (b.is_recommended - a.is_recommended) || String(b.display_name ?? '').localeCompare(String(a.display_name ?? '')));
-    ctx.json({ operatingSystem: osDto(os), versions: versions.map(versionDto) });
+    const availability = await computeVersionAvailability(store);
+    const annotated = versions.map((ver) => ({
+      ver,
+      availability: availability.get(ver.id)
+        ?? { orderable: false, reason: UNAVAILABLE_REASONS.NO_CONFIGURATION },
+    }));
+    const visible = includeUnavailable ? annotated : annotated.filter((entry) => entry.availability.orderable);
+    visible.sort((a, b) => (b.ver.is_default - a.ver.is_default) || (b.ver.is_recommended - a.ver.is_recommended) || String(b.ver.display_name ?? '').localeCompare(String(a.ver.display_name ?? '')));
+    ctx.json({
+      operatingSystem: osDto(os),
+      versions: visible.map((entry) => ({ ...versionDto(entry.ver), availability: entry.availability })),
+      // So a caller can tell "nothing is orderable yet" from "the response is broken".
+      hidden: annotated.length - visible.length,
+    });
   });
 
   // ------------------------------------------------------------- admin CRUD

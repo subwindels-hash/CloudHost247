@@ -1,7 +1,13 @@
 # Unfinished build code — name list
 
 **Scope:** every module/build artifact in this repository whose code is *not finished and verified*.
-**Compiled:** 2026-10-05, against `HEAD 3ee7e21` on `arena/01a10c4a-cloudhost247`.
+**Compiled:** 2026-10-05. **Re-verified the same day against `cf576ca`** — the tip of
+`arena/01a10cfb-cloudhost247`, which this checkout holds as a single squashed commit. The earlier
+provenance line named `HEAD 3ee7e21` on `arena/01a10c4a-cloudhost247`; that commit is not reachable
+from this history, so every claim below was re-checked against the tree rather than trusted from the
+header. Four corrections came out of that pass and are dated where they appear: the marker count (16
+domain modules, not 17), the three misattributed rows in §1a, and the `infrastructure.js` closure
+recorded as row 7 of the progress log.
 **Sources:** `docs/UNFINISHED-MODULES.md` (canonical audit), `platform/MIGRATION.md`, per-file
 `deferred` markers, `ADAPTER_PROFILES` in `cloudhost247-node/src/infrastructure/providers/configuration.ts`,
 `QUARANTINED_MIGRATIONS` in `cloudhost247-node/database/migrate.ts`, and a zero-byte file scan.
@@ -20,29 +26,46 @@ staging-blocked — see §5).
 | 4 | `platform/spa/` commerce and billing — cart, checkout, invoices, payments, services, domains | **DONE 2026-10-05 (server + client verified end-to-end; no browser has rendered the pages)** — see §1b. Two server-side blockers were fixed on the way: cart lines carried no plan names, and plan changes demanded a plan UUID that no public endpoint reveals |
 | 5 | `platform/spa/` admin console — staff-gated shell, dashboard counts, customer directory/detail, service + domain records, ticket queue, staff directory, "switch to customer" delegation | **DONE 2026-10-05 (server + client verified end-to-end; no browser has rendered the pages)** — see §1b. Delegation parks the admin's credentials so the delegated token is never refreshable, and the role boundaries are the server's own (a staff account is refused on status/role/switch/directory; a super admin cannot change their own role) |
 | 6 | `platform/src/lib/providers/` — infrastructure provider egress (`provider-adapters.js`) | **DONE 2026-10-05: all 12 kinds ported, no live provider call made from this environment** — `hetzner`, `digitalocean`, `vultr`, `aws` (EC2 query protocol + SigV4), `contabo`, `ovh`, `proxmox`, `virtualizor`, `solusvm`, `openstack`, `generic_http` (operator bridge) and the development-only `mock`. 37 tests: the published AWS SigV4 vectors, per-adapter wire contracts over real loopback HTTP, idempotency, capability refusals, error classification and the sanitizer. Provider-side acceptance of every request is unverified — no credentials exist here and no provider was contacted. See §1a |
+| 7 | `platform/src/domains/infrastructure.js` — wiring the ported adapters into the domain, so a route performs provider egress | **DONE 2026-10-05 (loopback-verified; no real provider contacted)** — see §1a. New `platform/src/lib/provider-egress.js` is now the only place a domain may build an adapter, and it enforces three rules: fail closed before egress (naming the missing variables), never fake a result, and never return the provider's own message to a browser. Three endpoints now talk to a provider inside the request: provider diagnostics, OS image verification and server reconciliation. 14 tests drive the real routes over the real HTTP pipeline against a loopback provider API, and all five behaviours were mutation-verified (reverting image verification to unconditional stamping turns 4 red, a diagnostics route that never calls the provider turns 3 red, returning the raw provider message turns 2 red, dropping reconciliation egress turns 5 red, auto-applying a provider status turns 3 red) |
+| 8 | `platform/src/domains/servers.js` — hypervisor/provider actions and the live console session | **DONE 2026-10-05 (loopback-verified; no real provider contacted)** — see §1a. The console route issues a real provider session instead of a random token that led nowhere, normalized through an explicit field whitelist so a future adapter cannot leak an unexpected field into a browser. Every lifecycle action now passes one capability gate in `queueAction`, so a provider that documents no rescue system refuses with a 400 naming the provider and capability instead of returning `202` and a job that could only fail. Two real defects were closed on the way: a refused rescue used to leave the server row saying `rescue` when nothing had been asked of any provider (the status write now happens *after* the job is accepted), and the audit log records the *shape* of a console session rather than its contents. The gate reuses the adapter's own `replacementEnabled` predicate for EC2's deployment-scoped `reinstall`, so it cannot drift from the adapter — pinned by a test that flips `AWS_ALLOW_ROOT_VOLUME_REPLACEMENT`. 12 tests; **all seven mutations caught** (deferred console token restored → 4 red, audit storing the whole session → 2 red, gate removed → 3 red, rescue status written before the job → 2 red, console pre-check removed → 2 red, gate ignoring the deployment opt-in → 1 red, whitelist replaced by a pass-through spread → 2 red) |
+| 9 | `platform/src/domains/provisioning.js` — provider-side build execution (the worker that runs the queued jobs) | **DONE 2026-10-05 (loopback-verified; no real provider contacted)** — see §1a. New `platform/src/lib/provisioning-worker.js` executes every queued kind against the provider that owns the machine, exposed as one cycle per request so it can be driven by cron, an operator or a test. Four properties hold and are pinned: creation is idempotent on the job id, so a crash between the provider call and the local write cannot allocate a second billable machine; `ProviderError.retryable` decides between re-queueing with backoff and dead-lettering at three attempts; a rescue password goes to the write-only `server_credentials` table and is redacted from `job.result`, which the admin API returns; and an unknown job kind fails by name instead of going green. Two real defects were found by the tests rather than by reading: a job that failed retryably was re-queued and then immediately re-claimed by the same cycle, burning all three attempts with no backoff; and attempts were double-counted, dead-lettering one attempt early. The capability map is now single-sourced between the queue-time gate in `servers.js` and the worker, so they cannot drift. 11 tests; **all ten mutations caught** (random idempotency key → 2 red, unsanitized job result → 2, rescue password discarded → 2, unknown kind marked complete → 2, retryable dead-lettered at once → 2, same-cycle re-claim → 2, double-counted attempts → 2, reconcile failing the backlog → 2, unverified image provisioned → 2, CREATE not writing the handle back → 3) |
+| 10 | `platform/src/domains/operating-systems.js` — provider mapping filter (what a customer can actually order) | **DONE 2026-10-05** — see §1a. New `platform/src/lib/os-availability.js` resolves each OS version through `server_product_configurations` → `regions` → `infra_providers` → `os_images` and answers with `orderable` plus exactly one reason in reporting order: `NO_CONFIGURATION`, `CONFIGURATION_DISABLED`, `ARCHITECTURE_UNSUPPORTED`, `NO_IMAGE`, `IMAGE_UNVERIFIED`. `GET /api/v1/operating-systems/:id/versions` now returns only buildable versions, each carrying its `availability` block, with a `hidden` count so the UI can say how much it withheld; staff may pass `?includeUnavailable=true` (403 for a customer). `GET /api/v1/operating-systems` drops any OS with no orderable version and reports `orderableVersions`. Reads four tables once and evaluates in memory, so the list route is not quadratic. No frontend or SPA consumer reads either route, so the response shape changed freely. **This closed a live defect in row 9 rather than only adding a filter:** the worker's `imageFor` matched `os_images` on `os_id` alone, so a server ordered as 22.04 could be built from a verified 24.04 mapping — a machine running the wrong release, from a mapping that had passed verification. The version is now part of the join in both the catalogue and the worker, and the worker refuses outright when `servers.os` is unrecorded and more than one version is mapped instead of guessing. 8 new subtests plus a worker subtest pinning the wrong-version refusal, the unmapped-version refusal and the ambiguity refusal; **all six mutations caught** (availability ignoring the image version → 5 red, worker ignoring `server.os` → 2, worker guessing when ambiguous → 2, versions route not filtering → 3, `includeUnavailable` not staff-gated → 2, OS list not filtering → 2) |
 
 ---
 
 ## 1. `platform/` — the newest build (added 2026-10-05) — largest unfinished surface
 
-41 domains exist and its 563 tests pass, but 17 modules still ship **explicit `deferred` markers**
-for the live integration side (the provider egress layer was closed on 2026-10-05 — see §1a), and the
-frontend is a fraction of the old one.
+41 domains exist and its 610 tests pass, but **13 domain modules still ship explicit `deferred` markers** for the
+live integration side (`grep -rl deferred platform/src/domains` = 13 files; 16 under `platform/src` counting
+`lib/provider-adapters.js`, `lib/provider-egress.js` and `store/schema.js`).
+
+> **Caveat on that grep, found while closing row 8.** `grep -rl deferred` counts any *mention*, and a
+> closing comment that quotes the old placeholder wording keeps its file on the list after the
+> deferral is gone — `servers.js` did exactly that. The word was reworded so the count means what the
+> audit says it means. When a module is closed, check that it actually leaves this list; if it does
+> not, either the deferral is still there or the prose is.
+An earlier revision of this document said 17 and listed `provisioning.js`, `marketplace.js` and
+`marketplace-admin.js` in the same table — **corrected 2026-10-05** on two counts: none of those three
+ever contained the marker (`provisioning.js` defers in substance, "no live workers here"; the two
+marketplace modules carry no deferral note at all), and `infrastructure.js` was 16th until its three
+deferrals were closed in progress-log row 7, which removed the word from that file entirely. The
+provider egress layer was closed on 2026-10-05 — see §1a — and the frontend is a fraction of the old
+one.
 
 ### 1a. Modules whose live integration is deferred (code present, egress missing)
 
 | Module | What is deferred |
 |---|---|
 | `platform/src/lib/provider-adapters.js` | **Closed 2026-10-05** — `platform/src/lib/providers/` now implements real egress for **all 12 kinds** (the last three: `aws` — EC2 query protocol with this build's own SigV4 signer, verified against the published AWS test-suite vectors; `contabo` — OAuth2 password grant with an in-memory token; `openstack` — Keystone password or static-token login with service-catalog resolution). The configuration registry reports per-kind implementation readiness; nothing in the domain layer calls the layer yet |
-| `platform/src/domains/infrastructure.js` | Wiring the ported adapters into the domain: provider diagnostics inside a request, image verification and provider reconciliation still answer from local rows. The adapter layer itself is complete in `platform/src/lib/providers/`; nothing in `infrastructure.js` calls it yet, so no route currently performs provider egress |
-| `platform/src/domains/servers.js` | Hypervisor/provider actions, live console session (issues a token only) |
-| `platform/src/domains/provisioning.js` | Provider-side build execution |
-| `platform/src/domains/operating-systems.js` | Provider mapping filter |
+| `platform/src/domains/infrastructure.js` | **Closed 2026-10-05 — the first three deferred behaviours are real provider egress**, through the new `platform/src/lib/provider-egress.js`: provider diagnostics inside a request (`POST /admin/providers/:id/test` calls `validateConfiguration`), image verification (`POST /admin/os-images/:id/test` asks the provider and only stamps `verified_at` on a real answer, including the provider's availability flag and an architecture cross-check) and reconciliation (`POST /admin/server-reconciliation/sweep` calls `healthCheck` per server and reports `PROVIDER_STATUS_MISMATCH` / `PROVIDER_MISSING`). **Still open here:** nothing *writes* provider state from this domain (no create/resize/snapshot path), and servers this platform holds no provider handle for are still reconciled against local records only — the response now says how many were really compared (`reconciled.providerChecked` vs `localOnly`) so a sweep cannot under-report what it skipped. No call has been made to a real provider account |
+| `platform/src/domains/servers.js` | **Closed 2026-10-05 — the console is a real provider session and actions are gated on what the provider performs.** `POST /servers/:id/console` calls `getConsole` and returns a normalized session (Hetzner's `wss_url` + one-time password, Vultr's `kvm` URL, EC2's generated key pair) through an explicit field whitelist, and the audit row records only the shape of the session — never the credential, since the EC2 private key exists nowhere else. Every lifecycle action is gated in the single `queueAction` choke point, so a route cannot forget it. **Still open:** the queued jobs are still not executed — that is `provisioning.js` — and a server this platform holds no provider handle for is deliberately still queued rather than refused, because it may legitimately be mid-provision |
+| `platform/src/domains/provisioning.js` | **Closed 2026-10-05 — the worker exists** (`platform/src/lib/provisioning-worker.js`), and the module's own words *"no live workers here"* are gone. Every queued kind now executes against the provider: `CREATE` (idempotent on the job id, writes the provider handle and IP back onto the server row), `START`/`STOP`/`SHUTDOWN`/`REBOOT`, `DELETE`, `RESIZE`, `SNAPSHOT_CREATE`/`DELETE`/`RESTORE`, `REINSTALL`, `REBUILD`, `RESCUE_ENABLE`/`DISABLE`. Reconciliation now fails a job only when the worker's own lease rule agrees nobody is running it, and leaves a queued job alone as backlog. **Still open:** one attempt per job per cycle with no scheduled timer — a deployment must run the cycle from cron — and the claim is a single-writer guarantee within one process, because the store abstraction exposes no `SELECT … FOR UPDATE` |
+| `platform/src/domains/operating-systems.js` | **Closed 2026-10-05 — the catalogue offers only what can be built** (`platform/src/lib/os-availability.js`), and the reason a version is withheld is reported rather than implied by absence. |
 | `platform/src/domains/monitoring.js` | Agent metric ingestion |
 | `platform/src/domains/deployments.js` | CI/CD execution (created deployments only start) |
 | `platform/src/domains/app-installations.js` | Paid-order provisioning worker, deployment log streaming |
 | `platform/src/domains/services.js` | Provisioning worker |
-| `platform/src/domains/marketplace.js`, `marketplace-admin.js` | One-click deploy execution |
+| ~~`platform/src/domains/marketplace.js`, `marketplace-admin.js`~~ | **Row removed 2026-10-05 — it was wrong.** Both are catalogue surfaces only: `marketplace.js` is public browsing (its sole mention of installing is the header comment "auth required for install") and `marketplace-admin.js` is admin CRUD over categories, applications and versions. Neither contains a deploy route, a worker reference or a `deferred` marker. One-click deploy execution lives in `app-installations.js` (paid-order provisioning hook, deployment log streaming) and `deployments.js` (CI/CD execution), both already listed above |
 | `platform/src/domains/dns.js` | Cloudflare/Route53 provider egress |
 | `platform/src/domains/ssl.js` | Certificate issuance integration |
 | `platform/src/domains/cloudflare.js`, `admin-cloudflare.js` | Live Cloudflare client, "Test Connection", live purge |
@@ -232,6 +255,14 @@ hooks are *supposed* to be empty.
 `cloudhost247_currency` · `cloudhost247_ovh` — plus `cloudhost247_marketing` (module complete; the
 `crons/cloudhost247_marketing.php` delivery worker still has to be scheduled on the host).
 
-**Whole-platform gates still open:** cPanel staging verification (*BLOCKED — NOT PERFORMED*),
-visual/browser tests (*NOT PERFORMED*), and GitHub Actions cannot start on this account (billing
-blocker), so no commit has a CI signal.
+**Whole-platform gates still open:** cPanel staging verification (*BLOCKED — NOT PERFORMED*) and
+visual/browser tests (*NOT PERFORMED*).
+
+~~GitHub Actions cannot start on this account (billing blocker), so no commit has a CI signal.~~
+**CORRECTED 2026-10-05 — the billing blocker is cleared and CI is green.** Observed on this branch,
+not inferred: `Independent foundation` completed `success` on the pushes of both commits here (runs
+`37347168282`, `37349198441`, 1m40s and 1m46s), and PR #54's two jobs — `Release candidate (PHP 7.4)`
+and `Release candidate (PHP 8.2)` — both `pass` (1m39s, 1m47s). That is also the first time the PHP
+release-candidate gate has run on a change in this repository's recorded history, so row A15's caveat
+that `php -l` over the 778 computed lint targets "was never executed here" no longer applies to CI,
+only to the local sandbox.

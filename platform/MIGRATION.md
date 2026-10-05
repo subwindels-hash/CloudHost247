@@ -139,6 +139,39 @@ out so nobody mistakes absence for parity:
    provisioning / marketplace / deployments / dns / ssl / firewall / revenue-guardian / ai domains.
    By design these are the largest surface and are ported incrementally; adding their tables to
    `src/store/schema.js` and a `domains/*.js` module is the established pattern.
+   **Update 2026-10-05 — the adapter layer is fully ported and the first domain calls it.**
+   All twelve kinds live in `src/lib/providers/`, and `src/lib/provider-egress.js` is now the single
+   place a domain may construct one (it fails closed before egress, never fabricates a result, and
+   keeps the provider's own error text server-side). `src/domains/infrastructure.js` uses it for
+   three request-scope calls: provider diagnostics (`POST /admin/providers/:id/test`), OS image
+   verification (`POST /admin/os-images/:id/test`, which now stamps `verified_at` only on a real
+   provider answer) and server reconciliation (`healthCheck` per server). What is still deferred is
+   *writing* provider state — create/resize/snapshot and the provisioning worker that would execute
+   queued jobs — and no call has been made to a real provider account.
+   `src/domains/servers.js` followed the same day: the console route issues a real provider session
+   (normalized through an explicit field whitelist, with the session's credential never written to an
+   audit log), and every lifecycle action passes one capability gate in `queueAction`, so a provider
+   that documents no rescue system refuses instead of returning `202` and a job that could only fail.
+   `src/lib/provisioning-worker.js` closes the loop the same day: it executes every queued job kind
+   against the provider that owns the machine — idempotent creation on the job id, retryable-vs-final
+   failure classification, and secrets kept off the job row an admin can read. Exposed as one cycle
+   per request (`POST /admin/provisioning/worker/run`) rather than a background timer, so a deployment
+   schedules it. What is still deferred is the *order-driven* provisioning path — `services.js` and
+   `app-installations.js` still queue paid-order work this worker does not yet know about.
+   `src/domains/operating-systems.js` closed its last deferral the same day, and it is the read side
+   of the same question: which of these can a customer actually order. New
+   `src/lib/os-availability.js` resolves each OS version through `server_product_configurations` →
+   `regions` → `infra_providers` → `os_images` and answers `orderable` plus exactly one reason
+   (`NO_CONFIGURATION`, `CONFIGURATION_DISABLED`, `ARCHITECTURE_UNSUPPORTED`, `NO_IMAGE`,
+   `IMAGE_UNVERIFIED`). `GET /api/v1/operating-systems/:id/versions` returns only buildable versions,
+   each with an `availability` block, plus a `hidden` count; `?includeUnavailable=true` is
+   staff-only and returns the withheld ones with their reasons. `GET /api/v1/operating-systems` omits
+   any OS with no orderable version. **An `os_images` row is not a mapping until it carries a
+   `version`:** matching images on `os_id` alone let Ubuntu 22.04 borrow 24.04's verified mapping, and
+   the same join was how the worker picked a build image — so a customer could have been given a
+   machine running the wrong release from a mapping that had passed verification. Both the catalogue
+   and the worker match the version now, and the worker refuses when `servers.os` is unrecorded and
+   more than one version is mapped instead of choosing a release for the customer.
 4. **Real payment gateways — INBOUND HALF IMPLEMENTED, initiation still deferred.** Received and
    settled: `stripe`, `paypal` and `paystack` webhooks via `src/lib/gateways/` +
    `src/lib/provider-webhook-service.js` (signature verified before any database access, canonical

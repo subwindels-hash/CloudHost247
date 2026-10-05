@@ -2,8 +2,10 @@
  * Infrastructure admin: providers, regions, OS images, server plans, notification outbox.
  *
  * Ported from cloudhost247-node/src/routes/infrastructure.ts. These are admin-managed catalog and
- * config tables. The live provider adapters (AWS EC2, etc.) are deferred; this module manages the
- * definitions the adapters consume, plus a notification outbox that is drained by a worker.
+ * config tables: the definitions the adapters consume, plus a notification outbox drained by a
+ * worker. Three endpoints talk to a provider inside the request — the provider diagnostics test, OS
+ * image verification and server reconciliation — and they do it through `lib/provider-egress.js`,
+ * which fails closed before egress and never reports a success the provider did not give.
  */
 'use strict';
 
@@ -12,6 +14,9 @@ const { NotFoundError, ConflictError, ValidationError } = require('../core/error
 const { uuidv7 } = require('../lib/ids');
 const { authenticate, asAdmin, asStaff } = require('../lib/auth');
 const { ADAPTER_KINDS, describeProviderConfiguration, listAdapterProfiles } = require('../lib/provider-adapters');
+const {
+  callProvider, runProviderDiagnostics, providerServerIdOf,
+} = require('../lib/provider-egress');
 
 const name = 'infrastructure';
 
@@ -23,6 +28,36 @@ const ARCHITECTURES = ['x86_64', 'arm64'];
 const SERVER_TYPES = ['VPS', 'DEDICATED', 'CLOUD'];
 // Statuses worth reconciling: a server in a terminal state has nothing left to disagree about.
 const RECONCILABLE_STATUSES = ['active', 'pending', 'provisioning', 'deleting', 'terminating', 'error'];
+/**
+ * Which of our own statuses *agree* with a provider's word for the same state, so reconciliation
+ * reports genuine disagreement instead of a vocabulary difference. Provider status words differ per
+ * platform (Hetzner `running`/`off`, DigitalOcean `active`/`off`, EC2 `running`/`stopped`,
+ * OpenStack `ACTIVE`/`SHUTOFF`, Contabo `RUNNING`/`SHUTOFF`, SolusVM `running`/`suspended`), so
+ * they are matched case-insensitively against this table and an unknown word is reported as
+ * "unknown" rather than guessed at.
+ */
+const PROVIDER_STATUS_ALIASES = Object.freeze({
+  running: ['active', 'provisioning', 'pending'],
+  active: ['active', 'provisioning', 'pending'],
+  ok: ['active', 'provisioning', 'pending'],
+  starting: ['active', 'pending', 'provisioning'],
+  initializing: ['pending', 'provisioning', 'active'],
+  pending: ['pending', 'provisioning', 'active'],
+  building: ['provisioning', 'pending', 'active'],
+  migrating: ['provisioning', 'active'],
+  rebuilding: ['provisioning', 'active'],
+  resizing: ['provisioning', 'active'],
+  reinstalling: ['provisioning', 'active'],
+  stopped: ['stopped', 'suspended', 'deleting', 'terminating', 'error', 'provisioning'],
+  off: ['stopped', 'suspended', 'deleting', 'terminating', 'error', 'provisioning'],
+  shutoff: ['stopped', 'suspended', 'deleting', 'terminating', 'error', 'provisioning'],
+  suspended: ['suspended', 'stopped', 'error'],
+  error: ['error', 'provisioning'],
+  deleting: ['deleting', 'terminating', 'retired', 'stopped'],
+  deleted: ['retired', 'terminated', 'deleting', 'terminating'],
+  terminated: ['retired', 'terminated', 'deleting', 'terminating'],
+  unknown: null,
+});
 const STALLED_JOB_MS = 30 * 60 * 1000;
 const BACKOFF_MINUTES = [1, 5, 15, 60, 240];
 const CONFIGURATION_RECHECK_MINUTES = 60;
@@ -459,15 +494,73 @@ function register(router, deps) {
     ctx.json({ image: imageDto(updated) });
   });
 
-  // Test/verify an image. The live provider check is deferred; this stamps the verification
-  // metadata so the image becomes eligible for ordering.
+  /**
+   * Verify an OS image against the provider that would actually have to boot it.
+   *
+   * This route used to stamp `verified_at` unconditionally, which made "verified" mean "an admin
+   * clicked the button": a template could be enabled for an image the provider had renamed or
+   * retired, and the customer would find out at provision time after paying. It now asks the
+   * provider for the image by its provider id and only stamps on a real answer — including the
+   * provider's own availability flag and an architecture that must match the image row, because a
+   * verified arm64 mapping over an x86_64 image is exactly the failure the check exists to catch.
+   *
+   * A provider that refuses is *not* an error to the operator: the verdict is recorded on the image
+   * as `verification_error` and returned with `verified: false`, so the reason is visible where the
+   * image is. The image is left unverified either way — never stamped on a failure.
+   */
   router.post('/api/v1/admin/os-images/:id/test', async (ctx) => {
     const auth = await asAdmin(ctx, deps);
     const image = await store.table('os_images').findById(ctx.params.id);
     if (!image) throw new NotFoundError('OS image not found');
-    const updated = await store.table('os_images').updateById(image.id, { verified_at: new Date().toISOString(), verified_by: auth.id, verification_error: null });
-    await store.table('audit_logs').insert({ id: uuidv7(), actor_id: auth.id, actor_role: auth.role, action: 'OS_IMAGE_TESTED', entity_type: 'os_image', entity_id: image.id, ip_address: ctx.ip, user_agent: ctx.userAgent, after: { result: 'verified' } });
-    ctx.json({ image: imageDto(updated), verified: true });
+
+    const fail = async (reason) => {
+      const updated = await store.table('os_images').updateById(image.id, {
+        verified_at: null, verified_by: null, verification_error: reason,
+        updated_at: new Date().toISOString(),
+      });
+      await audit(auth, 'OS_IMAGE_TESTED', 'os_image', image.id, { result: 'failed', reason });
+      return ctx.json({ image: imageDto(updated), verified: false, reason });
+    };
+
+    if (!image.provider_image_id) {
+      return fail('The image has no provider image id, so there is nothing to ask the provider about');
+    }
+    if (!image.region_id) {
+      return fail('The image is not assigned to a region, so the provider to verify it against is unknown');
+    }
+    const region = await store.table('regions').findById(image.region_id);
+    const provider = region ? await store.table('infra_providers').findById(region.provider_id) : null;
+    if (!provider) {
+      return fail('The region this image belongs to has no provider record');
+    }
+
+    let found;
+    try {
+      found = await callProvider(provider, { config, logger: deps.logger }, 'getImage', image);
+    } catch (error) {
+      return fail(error.message ?? 'The provider could not be reached');
+    }
+    if (!found) {
+      return fail(`The provider does not have an image called "${image.provider_image_id}"`);
+    }
+    if (found.available === false) {
+      return fail(`The provider reports image "${found.id}" as unavailable or deprecated`);
+    }
+    if (found.architecture && image.arch && found.architecture !== image.arch) {
+      return fail(`Architecture mismatch: the image row says ${image.arch}, the provider says ${found.architecture}`);
+    }
+
+    const updated = await store.table('os_images').updateById(image.id, {
+      verified_at: new Date().toISOString(), verified_by: auth.id, verification_error: null,
+      updated_at: new Date().toISOString(),
+    });
+    await audit(auth, 'OS_IMAGE_TESTED', 'os_image', image.id, {
+      result: 'verified', providerImageId: String(found.id), providerAdapter: provider.adapter ?? null,
+    });
+    ctx.json({
+      image: imageDto(updated), verified: true,
+      providerImage: { id: String(found.id), name: found.name ?? null, architecture: found.architecture ?? null },
+    });
   });
 
   router.delete('/api/v1/admin/os-images/:id', async (ctx) => {
@@ -585,6 +678,33 @@ function register(router, deps) {
         verifiedActive: images.filter((image) => image.verified_at && isActiveRow(image)).length,
       },
     });
+  });
+
+  /**
+   * Real provider diagnostics. "Test connection" used to have no provider to ask, so an operator
+   * could only read whether the environment variables were present — which says nothing about
+   * whether the token is still valid or the endpoint still answers. This makes one authenticated,
+   * read-only call (`validateConfiguration`) and reports the honest verdict.
+   *
+   * Three deliberate choices. A half-configured provider is refused *before* any request, so a
+   * missing variable cannot be mistaken for a provider outage. The provider's own error text is
+   * logged server-side and never returned, because it can name internal endpoints. And the
+   * provider's `status` is left alone: a transient provider outage must not disable a working
+   * provider row, and activation stays the operator's explicit act through the PATCH route.
+   */
+  router.post('/api/v1/admin/providers/:id/test', async (ctx) => {
+    const auth = await asAdmin(ctx, deps);
+    const provider = await store.table('infra_providers').findById(ctx.params.id);
+    if (!provider) throw new NotFoundError('No provider was found with that id');
+    const diagnostics = await runProviderDiagnostics(provider, { config, logger: deps.logger });
+    const updated = await store.table('infra_providers').updateById(provider.id, {
+      metadata: { ...(provider.metadata ?? {}), connectionTest: diagnostics },
+      updated_at: new Date().toISOString(),
+    });
+    await audit(auth, 'PROVIDER_CONNECTION_TESTED', 'provider', provider.id, {
+      ok: diagnostics.ok, attempted: diagnostics.attempted, code: diagnostics.code,
+    });
+    ctx.json({ provider: providerDto(updated), diagnostics });
   });
 
   /**
@@ -998,10 +1118,10 @@ function register(router, deps) {
 
   /**
    * Server state drift. The worker asks each provider what it actually has every ten minutes; this
-   * lists what disagreed with our records, and lets an operator re-check immediately. With live
-   * adapters deferred, reconciliation compares our own records against each other — a terminal
-   * deployment against the server row it was for — so it can still catch a machine left in a
-   * state its job never reached.
+   * lists what disagreed with our records, and lets an operator re-check immediately. A sweep now
+   * asks the provider for every server this platform holds a handle for, and falls back to comparing
+   * our own records — a terminal deployment against the server row it was for — only where there is
+   * no provider handle yet, so a machine left in a state its job never reached is still caught.
    */
   router.get('/api/v1/admin/server-drift', async (ctx) => {
     await asAdmin(ctx, deps);
@@ -1038,14 +1158,69 @@ function register(router, deps) {
       .slice(0, body.limit ?? 25);
 
     const drifts = [];
+    // A server row only disagrees with reality if we ask the provider that owns it. Servers this
+    // platform has no handle for keep the local-record check below, and the response says how many
+    // were really compared against a provider so a sweep of zero cannot read as "all agreed".
+    const providerCache = new Map();
+    const providerForServer = async (server) => {
+      if (!server.region_id) return null;
+      if (providerCache.has(server.region_id)) return providerCache.get(server.region_id);
+      const region = await store.table('regions').findById(server.region_id);
+      const provider = region ? await store.table('infra_providers').findById(region.provider_id) : null;
+      providerCache.set(server.region_id, provider ?? null);
+      return provider ?? null;
+    };
+    let providerChecked = 0;
+    let providerUnreachable = 0;
+
     for (const server of candidates) {
       const serverDeployments = deployments.filter((d) => d.server_id === server.id);
       const serverJobs = jobs.filter((job) => job.server_id === server.id);
       let drift = null;
 
+      const providerServerId = providerServerIdOf(server);
+      if (providerServerId) {
+        const provider = await providerForServer(server);
+        if (provider) {
+          providerChecked += 1;
+          try {
+            // healthCheck swallows RESOURCE_NOT_FOUND into `exists: false`, which is exactly the
+            // answer a drift sweep needs rather than an exception.
+            const state = await callProvider(provider, { config, logger: deps.logger }, 'healthCheck', providerServerId);
+            if (state.exists === false && !['retired', 'cancelled', 'terminated'].includes(server.status)) {
+              drift = {
+                kind: 'PROVIDER_MISSING', from: server.status, to: server.status, applied: false,
+                detail: `The provider no longer has ${providerServerId}, but this platform still records the server as ${server.status}.`,
+              };
+            } else if (state.exists && state.providerStatus && state.providerStatus !== 'unknown') {
+              const agrees = PROVIDER_STATUS_ALIASES[String(state.providerStatus).toLowerCase()];
+              // An unrecognised provider word is not a disagreement, and reporting one would teach
+              // an operator to ignore this list. `null` (and an absent entry) means "no opinion".
+              if (Array.isArray(agrees) && !agrees.includes(server.status)) {
+                drift = {
+                  kind: 'PROVIDER_STATUS_MISMATCH', from: server.status, to: state.providerStatus, applied: false,
+                  detail: `The provider reports ${state.providerStatus} while this platform records ${server.status}.`,
+                };
+              }
+            }
+          } catch (error) {
+            // A provider we could not reach proves nothing either way: report it rather than
+            // recording the server as agreed.
+            providerUnreachable += 1;
+            deps.logger?.warn({ serverId: server.id, providerId: provider.id, reason: error.message }, 'reconciliation could not reach the provider');
+          }
+        }
+      }
+
       const confirmed = serverDeployments.find((d) => String(d.action ?? '').includes('terminat')
         && ['ready', 'succeeded', 'completed'].includes(d.status));
-      if (confirmed && ['deleting', 'terminating', 'cancelled'].includes(server.status)) {
+      if (drift) {
+        // The provider answered, and its answer outranks anything our own job records can infer.
+        // It is reported and never auto-applied: a provider-side power change can be the customer's
+        // own action, so flipping a customer's server status off a single read is not ours to do.
+        // (A provider that could not be reached left `drift` null, so those servers still get the
+        // local-record check below rather than being passed over in silence.)
+      } else if (confirmed && ['deleting', 'terminating', 'cancelled'].includes(server.status)) {
         drift = {
           kind: 'TERMINATION_CONFIRMED', from: server.status, to: 'retired', applied: true,
           detail: 'The termination job completed; the server is now retired.',
@@ -1083,8 +1258,20 @@ function register(router, deps) {
       }
       await store.table('servers').updateById(server.id, { metadata, updated_at: now.toISOString() });
     }
-    await audit(auth, 'SERVER_RECONCILIATION_SWEPT', 'server', null, { drifts: drifts.length });
-    ctx.json({ drifts });
+    await audit(auth, 'SERVER_RECONCILIATION_SWEPT', 'server', null, {
+      drifts: drifts.length, candidates: candidates.length, providerChecked, providerUnreachable,
+    });
+    ctx.json({
+      drifts,
+      // A sweep that checked nothing against a provider must not read as "everything agreed", so the
+      // counts travel with the verdict.
+      reconciled: {
+        candidates: candidates.length,
+        providerChecked,
+        providerUnreachable,
+        localOnly: candidates.length - providerChecked,
+      },
+    });
   });
 
   // ---- notification delivery ----------------------------------------------
