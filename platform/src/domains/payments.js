@@ -14,6 +14,7 @@ const crypto = require('node:crypto');
 const { v } = require('../core/validate');
 const { NotFoundError, ValidationError, UnauthorizedError } = require('../core/errors');
 const { uuidv7 } = require('../lib/ids');
+const { paymentDto } = require('../lib/payments-dto');
 const { authenticate, asAdmin } = require('../lib/auth');
 const { applySuccessfulPayment } = require('../lib/billing-apply');
 
@@ -30,28 +31,6 @@ const initiateSchema = v.object({
 const gatewayOnlySchema = v.object({
   gateway: v.enum(['sandbox', 'manual']),
 });
-
-/**
- * Mirrors toPaymentDTO in the original (src/dto/payments.ts). This schema names the gateway column
- * `gateway` where the source calls it `provider`, and records a rejection rather than a generic
- * failure reason, so those two are mapped on the way out.
- */
-function paymentDto(row) {
-  return {
-    id: row.id,
-    invoiceId: row.invoice_id,
-    provider: row.gateway,
-    providerReference: row.gateway_reference ?? null,
-    method: row.method ?? null,
-    amount: row.amount,
-    currency: row.currency,
-    status: row.status,
-    failureReason: row.rejection_reason ?? null,
-    initiatedAt: row.created_at,
-    completedAt: row.confirmed_at ?? null,
-    instructions: null,
-  };
-}
 
 function signWebhook(secret, body) {
   return crypto.createHmac('sha256', secret).update(body).digest('hex');
