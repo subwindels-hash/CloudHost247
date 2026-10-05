@@ -30,7 +30,9 @@ const TYPES = {
 
 /** Shorthand helpers so the table definitions below stay scannable. */
 const text = (extra = {}) => ({ type: 'text', ...extra });
-const uuid = (extra = {}) => ({ type: 'uuid', default: 'uuidv7', ...extra });
+// A nullable uuid column must stay null when it is omitted. Generating an id for it would invent a
+// foreign key out of thin air — a link row would silently point at a random plan.
+const uuid = (extra = {}) => ({ type: 'uuid', ...(extra.nullable ? {} : { default: 'uuidv7' }), ...extra });
 const pk = () => uuid({ primaryKey: true });
 const int = (extra = {}) => ({ type: 'integer', ...extra });
 const num = (extra = {}) => ({ type: 'numeric', ...extra });
@@ -886,7 +888,14 @@ const TABLES = {
       kind: text({ default: 'cloud' }),
       status: text({ default: 'active' }),
       config: jsonb({ default: {} }),
+      provider_type: text({ nullable: true }),
+      adapter: text({ nullable: true }),
+      api_base_url: text({ nullable: true }),
+      credential_env_prefix: text({ nullable: true }),
+      capabilities: jsonb({ default: {} }),
+      metadata: jsonb({ default: {} }),
       created_at: ts(),
+      updated_at: ts(),
     },
     indexes: [{ name: 'infra_providers_slug_key', columns: ['slug'], unique: true }],
   },
@@ -898,7 +907,11 @@ const TABLES = {
       provider_id: uuid({ required: true }),
       code: text({ required: true }),
       name: text({ required: true }),
+      status: text({ default: 'ACTIVE' }),
+      country_code: text({ nullable: true }),
+      metadata: jsonb({ default: {} }),
       created_at: ts(),
+      updated_at: ts(),
     },
   },
 
@@ -931,6 +944,65 @@ const TABLES = {
     },
   },
 
+  // Datacenters are the third level of the provider hierarchy: provider > region > datacenter.
+  // A product configuration may target a whole region (datacenter_id null) or one facility.
+  infra_datacenters: {
+    columns: {
+      id: pk(),
+      provider_id: uuid({ required: true }),
+      region_id: uuid({ required: true }),
+      code: text({ required: true }),
+      name: text({ required: true }),
+      status: text({ default: 'ACTIVE' }),
+      metadata: jsonb({ default: {} }),
+      created_at: ts(),
+      updated_at: ts(),
+    },
+    indexes: [
+      { name: 'infra_datacenters_region_code_key', columns: ['region_id', 'code'], unique: true },
+      { name: 'infra_datacenters_provider_idx', columns: ['provider_id'] },
+    ],
+  },
+
+  // A deployable template: this plan can be built on this provider, in this region (or one
+  // datacenter), with this OS version on this architecture. Ordering is only offered where a
+  // configuration exists, so an empty table means nothing can be sold.
+  server_product_configurations: {
+    columns: {
+      id: pk(),
+      plan_id: uuid({ required: true }),
+      provider_id: uuid({ required: true }),
+      region_id: uuid({ required: true }),
+      datacenter_id: uuid({ nullable: true }),
+      operating_system_version_id: uuid({ required: true }),
+      architecture: text({ default: 'x86_64' }),
+      server_type: text({ default: 'VPS' }),
+      status: text({ default: 'DISABLED' }),
+      metadata: jsonb({ default: {} }),
+      created_at: ts(),
+      updated_at: ts(),
+    },
+    indexes: [
+      { name: 'server_product_configurations_plan_idx', columns: ['plan_id'] },
+      { name: 'server_product_configurations_provider_idx', columns: ['provider_id'] },
+    ],
+  },
+
+  // Which control panels may be installed on which OS version (optionally scoped to one plan).
+  control_panel_compatibility: {
+    columns: {
+      id: pk(),
+      control_panel_id: uuid({ required: true }),
+      operating_system_version_id: uuid({ required: true }),
+      architecture: text({ default: 'x86_64' }),
+      plan_id: uuid({ nullable: true }),
+      status: text({ default: 'ACTIVE' }),
+      metadata: jsonb({ default: {} }),
+      created_at: ts(),
+    },
+    indexes: [{ name: 'control_panel_compatibility_version_idx', columns: ['operating_system_version_id'] }],
+  },
+
   notification_outbox: {
     columns: {
       updated_at: ts(),
@@ -941,6 +1013,10 @@ const TABLES = {
       body: text({ nullable: true }),
       status: text({ default: 'pending' }),
       delivered_at: { type: 'timestamptz', nullable: true },
+      attempts: int({ default: 0 }),
+      max_attempts: int({ default: 5 }),
+      next_attempt_at: { type: 'timestamptz', nullable: true },
+      last_error: text({ nullable: true }),
       created_at: ts(),
     },
   },
