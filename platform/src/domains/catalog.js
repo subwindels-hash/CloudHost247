@@ -207,6 +207,27 @@ function register(router, deps) {
     ctx.json({ products: rows, total });
   }));
 
+  // Product detail with its plans, and each plan's pricing + features (admin sees everything,
+  // including draft/archived rows and inactive pricing — unlike the public surface).
+  router.get('/api/v1/admin/catalog/products/:id', admin(async (ctx) => {
+    const product = await store.table('catalog_products').findById(ctx.params.id);
+    if (!product) throw new NotFoundError('No product was found with that id');
+    const { rows: plans } = await store.table('catalog_product_plans').find(
+      { product_id: product.id }, { orderBy: ['sort_order', 'name'] }
+    );
+    const plansWithDetail = [];
+    for (const plan of plans) {
+      const { rows: pricing } = await store.table('catalog_plan_pricing').find(
+        { plan_id: plan.id }, { orderBy: ['currency', 'billing_cycle'] }
+      );
+      const { rows: features } = await store.table('catalog_plan_features').find(
+        { plan_id: plan.id }, { orderBy: 'sort_order' }
+      );
+      plansWithDetail.push({ ...plan, pricing, features });
+    }
+    ctx.json({ product, plans: plansWithDetail });
+  }));
+
   router.post('/api/v1/admin/catalog/products', admin(async (ctx) => {
     const input = await ctx.validate(productSchema);
     const product = await store.table('catalog_products').insert({
@@ -235,6 +256,13 @@ function register(router, deps) {
 
     const product = await store.table('catalog_products').updateById(ctx.params.id, patch);
     if (!product) throw new NotFoundError('Product not found');
+    ctx.json({ product });
+  }));
+
+  router.post('/api/v1/admin/catalog/products/:id/status', admin(async (ctx) => {
+    const body = await ctx.validate(v.object({ status: v.enum(['draft', 'active', 'archived']) }));
+    const product = await store.table('catalog_products').updateById(ctx.params.id, { status: body.status });
+    if (!product) throw new NotFoundError('No product was found with that id');
     ctx.json({ product });
   }));
 
@@ -299,6 +327,13 @@ function register(router, deps) {
     ctx.json({ plan });
   }));
 
+  router.post('/api/v1/admin/catalog/plans/:id/status', admin(async (ctx) => {
+    const body = await ctx.validate(v.object({ status: v.enum(['draft', 'active', 'archived']) }));
+    const plan = await store.table('catalog_product_plans').updateById(ctx.params.id, { status: body.status });
+    if (!plan) throw new NotFoundError('No plan was found with that id');
+    ctx.json({ plan });
+  }));
+
   // ---- pricing -------------------------------------------------------------
 
   router.get('/api/v1/admin/catalog/plans/:id/pricing', admin(async (ctx) => {
@@ -347,6 +382,12 @@ function register(router, deps) {
     ctx.json({ pricing });
   }));
 
+  router.get('/api/v1/admin/catalog/pricing/:id', admin(async (ctx) => {
+    const pricing = await store.table('catalog_plan_pricing').findById(ctx.params.id);
+    if (!pricing) throw new NotFoundError('No pricing entry was found with that id');
+    ctx.json({ pricing });
+  }));
+
   // ---- features ------------------------------------------------------------
 
   router.get('/api/v1/admin/catalog/plans/:id/features', admin(async (ctx) => {
@@ -371,6 +412,22 @@ function register(router, deps) {
       sort_order: input.sortOrder,
     });
     ctx.code(201).json({ feature });
+  }));
+
+  // Replace the entire feature set for a plan in one atomic call (the original's PUT contract).
+  router.put('/api/v1/admin/catalog/plans/:id/features', admin(async (ctx) => {
+    const plan = await store.table('catalog_product_plans').findById(ctx.params.id);
+    if (!plan) throw new NotFoundError('No plan was found with that id');
+    const input = await ctx.validate(v.object({ features: v.array(featureSchema).max(100) }));
+    await store.table('catalog_plan_features').deleteMany({ plan_id: plan.id });
+    const created = [];
+    for (const f of input.features) {
+      created.push(await store.table('catalog_plan_features').insert({
+        id: uuidv7(), plan_id: plan.id, label: f.label, value: f.value ?? null,
+        icon: f.icon ?? null, sort_order: f.sortOrder,
+      }));
+    }
+    ctx.json({ features: created });
   }));
 
   router.delete('/api/v1/admin/catalog/features/:id', admin(async (ctx) => {
