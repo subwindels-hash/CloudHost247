@@ -568,6 +568,50 @@ async function initMarketplace() {
     }
   }
 
+  /* ---- Homepage compact previews (counts + top picks, no full grids) ---- */
+  const homeApps = document.querySelector('[data-home-apps]');
+  if (homeApps) {
+    try {
+      const [appsRes, catRes] = await Promise.all([api('/api/v1/marketplace/apps'), api('/api/v1/app-categories')]);
+      const cats = new Map((catRes.categories || []).map((c) => [c.id || c.slug, c]));
+      const apps = (appsRes.apps || []).slice(0, 6);
+      homeApps.innerHTML = apps.length
+        ? '<div class="grid grid--3">' + apps.map((a) => {
+          const cat = cats.get(a.categoryId) || { name: 'App' };
+          return '<div class="card" style="display:flex;gap:12px;align-items:flex-start"><div class="card-icon">' + icon(cat.slug || '') + '</div>'
+            + '<div><h3 style="margin-top:0">' + escHtml(a.name) + '</h3><p class="muted" style="margin:4px 0 6px">' + escHtml(a.description || '') + '</p>'
+            + '<span class="badge">' + escHtml(cat.name) + '</span></div></div>';
+        }).join('') + '</div><p class="hint mt-2">' + (appsRes.total || apps.length) + ' applications available in the marketplace.</p>'
+        : '<div class="notice notice--empty">The application catalog is being prepared.</div>';
+    } catch {
+      homeApps.innerHTML = '<div class="notice notice--empty">The application preview could not be loaded right now.</div>';
+    }
+  }
+  const homeOs = document.querySelector('[data-home-os-count]');
+  if (homeOs) {
+    try {
+      const res = await api('/api/v1/operating-systems');
+      const n = (res.operatingSystems || []).length;
+      homeOs.innerHTML = n
+        ? '<span class="badge badge--ok">' + n + ' operating system' + (n === 1 ? '' : 's') + ' orderable now</span>'
+        : '<span class="hint">No OS images published yet — added only after provider-image verification.</span>';
+    } catch {
+      homeOs.innerHTML = '<span class="hint">Availability could not be loaded right now.</span>';
+    }
+  }
+  const homePanels = document.querySelector('[data-home-panels-count]');
+  if (homePanels) {
+    try {
+      const res = await api('/api/v1/control-panels');
+      const n = (res.controlPanels || []).length;
+      homePanels.innerHTML = n
+        ? '<span class="badge badge--ok">' + n + ' control panel' + (n === 1 ? '' : 's') + ' configured for sale</span>'
+        : '<span class="hint">No panels published yet — we only list what we actually provision.</span>';
+    } catch {
+      homePanels.innerHTML = '<span class="hint">Availability could not be loaded right now.</span>';
+    }
+  }
+
   /* ---- Developer docs (published KB articles tagged for developers) ---- */
   const docsRoot = document.querySelector('[data-dev-docs-root]');
   if (docsRoot) {

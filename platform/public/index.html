@@ -245,6 +245,74 @@
       </div>
     </section>
 
+    <section class="section" id="applications">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Application Marketplace</span>
+          <h2>Deploy real applications in minutes</h2>
+          <p>Every app below lives in our actual deployment catalog — manifest-verified and installed by the same pipeline that powers the client area. Nothing is listed we cannot install.</p>
+        </div>
+        <div data-home-apps></div>
+        <p class="hint mt-3"><a href="/applications">Browse the full marketplace <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
+      </div>
+    </section>
+
+    <section class="section section--soft" id="platform">
+      <div class="container">
+        <div class="split">
+          <div>
+            <span class="eyebrow">Deployment Platform</span>
+            <h2>From order to running application</h2>
+            <p class="muted">Choose an application, order a server, and the platform takes it from there: isolated containers, payment-gated provisioning, encrypted credentials, domain verification and a complete event history.</p>
+            <div class="mt-3"><a class="btn btn--primary" href="/app-deployment">How deployment works <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+          </div>
+          <div class="grid grid--2">
+            <div class="card"><div class="card-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15c-1.5-4.5.5-9.5 5-12 .8 4.8-1.5 9.5-5 12z"/><path d="M7 12c-1.8.2-3.4 1.2-4.5 3 1.8.3 3.3.1 4.5-.5M12 17c-.2 1.8-1.2 3.4-3 4.5-.3-1.8-.1-3.3.5-4.5M12 15c-2 .5-4 2-4.5 4.5C10 19 11.5 17 12 15z"/></svg></div><h3>One-click installs</h3><p>Order, pay, and the pipeline installs and configures your app automatically.</p></div>
+            <div class="card"><div class="card-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8 10.5V8a4 4 0 1 1 8 0v2.5M12 14.5v2"/></svg></div><h3>Encrypted by default</h3><p>Credentials are encrypted at rest and shown exactly once.</p></div>
+            <div class="card"><div class="card-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.7 2.6 4 5.6 4 9s-1.3 6.4-4 9c-2.7-2.6-4-5.6-4-9s1.3-6.4 4-9z"/></svg></div><h3>Domains &amp; SSL</h3><p>Attach verified domains with DNS checks and SSL.</p></div>
+            <div class="card"><div class="card-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 3h8l4 4v14H6V3z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></svg></div><h3>Full history</h3><p>Every install, update, backup and restore is logged.</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="servers-platform">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Server Platform</span>
+          <h2>Operating systems, panels and management — honestly reported</h2>
+          <p>We only publish what is genuinely provisioned: OS versions with verified provider images, control panels configured for sale, and the management features live today.</p>
+        </div>
+        <div class="grid grid--2">
+          <div class="card">
+            <div class="card-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><path d="M17 13.5v7M13.5 17h7"/></svg></div><h3>Operating Systems</h3>
+            <p class="muted">Only combinations that pass plan, availability and live-image verification are shown.</p>
+            <p class="mt-2" data-home-os-count><span class="hint">Checking availability…</span></p>
+            <a class="btn btn--ghost mt-2" href="/operating-systems">View the OS catalog <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          </div>
+          <div class="card">
+            <div class="card-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5M3 17.5l9 5 9-5"/></svg></div><h3>Control Panels</h3>
+            <p class="muted">Listed only when genuinely provisioned with a service — never claimed otherwise.</p>
+            <p class="mt-2" data-home-panels-count><span class="hint">Checking availability…</span></p>
+            <a class="btn btn--ghost mt-2" href="/control-panels">View control panels <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          </div>
+        </div>
+        <p class="hint mt-3">Manage it all — health, metrics, snapshots and lifecycle — from <a href="/server-management">Server Management</a>.</p>
+      </div>
+    </section>
+
+    <section class="section section--soft" id="developers-home">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Developers</span>
+          <h2>Infrastructure built for builders</h2>
+          <p>Root access, encrypted environment credentials, domain verification and a full deployment event log — a platform that gets out of your way.</p>
+        </div>
+        <div data-dev-docs-root></div>
+        <p class="hint mt-3"><a href="/developers">Explore the developer platform <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
+      </div>
+    </section>
+
     <section class="section">
       <div class="container">
         <div class="cta-band">
