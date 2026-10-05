@@ -1358,10 +1358,14 @@ const TABLES = {
   cloudflare_plan_mappings: {
     columns: {
       product_id: uuid({ nullable: true }),
+      plan_id: uuid({ nullable: true }),
       plan_name: text({ nullable: true }),
+      product_name: text({ nullable: true }),
       id: pk(),
       plan_slug: text({ nullable: true }),
       cloudflare_plan: text({ nullable: true }),
+      plan_status: text({ default: 'active' }),
+      entitlements: jsonb({ default: {} }),
       created_at: ts(),
     },
   },
@@ -1375,6 +1379,14 @@ const TABLES = {
       user_id: uuid({ required: true }),
       zone: text({ nullable: true }),
       plan: text({ nullable: true }),
+      zone_id: text({ nullable: true }),
+      name_server_1: text({ nullable: true }),
+      name_server_2: text({ nullable: true }),
+      cloudflare_plan: text({ nullable: true }),
+      plan_name: text({ nullable: true }),
+      ssl_mode: text({ nullable: true }),
+      development_mode_until: { type: 'timestamptz', nullable: true },
+      customer_domain_id: uuid({ nullable: true }),
       status: text({ default: 'pending' }),
       created_at: ts(),
       updated_at: ts(),
@@ -1403,6 +1415,52 @@ const TABLES = {
       message: text({ required: true }),
       created_at: ts(),
     },
+  },
+
+  // Customer Cloudflare feature caches. The live Cloudflare client is deferred, so these tables
+  // are the synchronized local view: DNS records, firewall access rules and per-zone settings.
+  // Cloudflare remains the source of truth; Sync refreshes the cache from the (deferred) worker.
+  cloudflare_dns_records: {
+    columns: {
+      id: pk(),
+      service_id: uuid({ required: true }),
+      cloudflare_record_id: text({ nullable: true }),
+      type: text({ required: true }),
+      name: text({ required: true }),
+      content: text({ required: true }),
+      ttl: int({ default: 1 }),
+      proxied: bool({ default: false }),
+      priority: int({ nullable: true }),
+      comment: text({ nullable: true }),
+      ownership: text({ default: 'CUSTOMER_MANAGED' }),
+      created_at: ts(),
+      updated_at: ts(),
+    },
+    indexes: [{ name: 'cf_dns_records_service_idx', columns: ['service_id'] }],
+  },
+  cloudflare_access_rules: {
+    columns: {
+      id: pk(),
+      service_id: uuid({ required: true }),
+      cloudflare_rule_id: text({ nullable: true }),
+      target: text({ nullable: true }),
+      value: text({ required: true }),
+      mode: text({ required: true }),
+      notes: text({ nullable: true }),
+      created_at: ts(),
+      updated_at: ts(),
+    },
+    indexes: [{ name: 'cf_access_rules_service_idx', columns: ['service_id'] }],
+  },
+  cloudflare_zone_settings: {
+    columns: {
+      id: pk(),
+      service_id: uuid({ required: true }),
+      settings: jsonb({ default: {} }),
+      created_at: ts(),
+      updated_at: ts(),
+    },
+    indexes: [{ name: 'cf_zone_settings_service_idx', columns: ['service_id'], unique: true }],
   },
 
   // -------------------------------------------------------------------------
