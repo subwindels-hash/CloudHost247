@@ -66,6 +66,7 @@ const DOMAINS = [
   require('./domains/servers'),
   require('./domains/provisioning'),
   require('./domains/infrastructure'),
+  require('./domains/operating-systems'),
   require('./domains/monitoring'),
   require('./domains/firewall'),
   require('./domains/agent'),
