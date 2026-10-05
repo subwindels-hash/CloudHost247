@@ -1,0 +1,62 @@
+id: akaunting
+name: Akaunting
+category: finance
+description: Free and online accounting software for small businesses and freelancers.
+website: https://akaunting.com
+repository: https://github.com/akaunting/akaunting
+documentation: https://akaunting.com/docs
+license: GPL-3.0
+featured: false
+popularity: 400
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 1
+  memory: 1024
+  storage: 20480
+  recommended:
+    cpu: 2
+    memory: 2048
+    storage: 40960
+services:
+  app:
+    image: akaunting/akaunting
+    internal: false
+    port: 80
+    volumes:
+    - /var/www/html
+    dependsOn:
+    - db
+  db:
+    image: mariadb:11
+    internal: true
+    volumes:
+    - /var/lib/mysql
+    database: mariadb
+environment:
+  required: []
+  optional: []
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /
+  port: 80
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+  - database
+update:
+  strategy: pull-and-recreate
+versions:
+- version: '3.1'
+  image: akaunting/akaunting:3.1.9
+  stable: true

@@ -1,0 +1,55 @@
+id: mariadb
+name: MariaDB
+category: database
+description: Enhanced, community-developed drop-in replacement for MySQL.
+website: https://mariadb.org
+repository: https://github.com/MariaDB/server
+documentation: https://mariadb.com/kb/en/documentation
+license: GPL-2.0
+featured: false
+popularity: 720
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 1
+  memory: 1024
+  storage: 20480
+  recommended:
+    cpu: 2
+    memory: 4096
+    storage: 102400
+services:
+  app:
+    image: mariadb
+    internal: false
+    port: 3306
+    volumes:
+    - /var/lib/mysql
+environment:
+  required: []
+  optional: []
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: command
+  command:
+  - healthcheck.sh
+  - --connect
+  - --innodb_initialized
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+update:
+  strategy: pull-and-recreate
+versions:
+- version: '11.7'
+  image: mariadb:11.7
+  stable: true

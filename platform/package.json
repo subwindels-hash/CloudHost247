@@ -1,0 +1,33 @@
+{
+  "name": "cloudhost247-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CloudHost247 full-stack monolith. Zero-framework Node.js http platform + Vanilla JS public site + React Vite SPA + PWA + Capacitor native apps.",
+  "license": "UNLICENSED",
+  "type": "commonjs",
+  "main": "server.js",
+  "engines": {
+    "node": ">=22.20.0 <25"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test tests/*.test.js",
+    "test:watch": "node --test --watch tests/*.test.js",
+    "db:migrate": "node scripts/migrate.js up",
+    "db:status": "node scripts/migrate.js status",
+    "db:seed": "node scripts/seed.js",
+    "spa:dev": "npm --prefix spa run dev",
+    "spa:build": "npm --prefix spa run build",
+    "spa:preview": "npm --prefix spa run preview",
+    "mobile:sync": "npm --prefix mobile run sync",
+    "build": "npm run spa:build",
+    "check": "node --test tests/*.test.js"
+  },
+  "dependencies": {
+    "pg": "8.16.3"
+  },
+  "optionalDependencies": {},
+  "peerDependenciesMeta": {},
+  "comment": "pg is the ONLY dependency and is optional at runtime: when DATABASE_URL is unset the platform uses the zero-dependency JSON file store in src/store/json-store.js. Every other capability (http, routing, validation, crypto, passwords, JWT, TOTP, WebAuthn, QR, PNG, YAML, logging, static files, multipart, rate limiting) is implemented on Node core modules only."
+}

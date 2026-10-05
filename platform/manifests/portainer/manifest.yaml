@@ -1,0 +1,53 @@
+id: portainer
+name: Portainer
+category: system-administration
+description: Lightweight container management UI for Docker environments.
+website: https://portainer.io
+repository: https://github.com/portainer/portainer
+documentation: https://docs.portainer.io
+license: Zlib
+featured: false
+popularity: 920
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 1
+  memory: 512
+  storage: 5120
+  recommended:
+    cpu: 1
+    memory: 1024
+    storage: 10240
+services:
+  app:
+    image: portainer/portainer-ce
+    internal: false
+    port: 9000
+    volumes:
+    - /data
+environment:
+  required: []
+  optional: []
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /
+  port: 9000
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+update:
+  strategy: pull-and-recreate
+versions:
+- version: 2.21.0
+  image: portainer/portainer-ce:2.21.4
+  stable: true

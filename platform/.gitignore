@@ -1,0 +1,12 @@
+node_modules/
+.env
+.env.local
+data/
+spa/dist/
+spa/node_modules/
+mobile/node_modules/
+mobile/android/
+mobile/ios/
+*.log
+.DS_Store
+coverage/

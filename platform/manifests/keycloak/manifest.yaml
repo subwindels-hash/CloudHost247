@@ -1,0 +1,71 @@
+id: keycloak
+name: Keycloak
+category: security
+description: Open-source identity and access management with SSO, SAML, and social login.
+website: https://keycloak.org
+repository: https://github.com/keycloak/keycloak
+documentation: https://www.keycloak.org/documentation
+license: Apache-2.0
+featured: false
+popularity: 790
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+- kubernetes
+requirements:
+  cpu: 2
+  memory: 2048
+  storage: 20480
+  recommended:
+    cpu: 2
+    memory: 4096
+    storage: 40960
+services:
+  app:
+    image: quay.io/keycloak/keycloak
+    internal: false
+    port: 8080
+    command: start-dev
+    volumes:
+    - /opt/keycloak/data
+    dependsOn:
+    - db
+  db:
+    image: postgres:17-alpine
+    internal: true
+    volumes:
+    - /var/lib/postgresql/data
+    database: postgres
+environment:
+  required:
+  - key: KC_BOOTSTRAP_ADMIN_PASSWORD
+    secret: true
+    generate: random_32
+  optional:
+  - key: KC_HOSTNAME
+    defaultFromDomain: true
+  - key: KC_PROXY_HEADERS
+    default: xforwarded
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /health/ready
+  port: 8080
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+  - database
+update:
+  strategy: pull-and-recreate
+versions:
+- version: '26.1'
+  image: quay.io/keycloak/keycloak:26.1.0
+  stable: true

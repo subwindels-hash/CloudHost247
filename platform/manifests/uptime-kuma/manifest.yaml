@@ -1,0 +1,53 @@
+id: uptime-kuma
+name: Uptime Kuma
+category: monitoring
+description: Fancy self-hosted monitoring tool with status pages and 90+ notification providers.
+website: https://github.com/louislam/uptime-kuma
+repository: https://github.com/louislam/uptime-kuma
+documentation: https://github.com/louislam/uptime-kuma/wiki
+license: MIT
+featured: true
+popularity: 930
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 1
+  memory: 512
+  storage: 5120
+  recommended:
+    cpu: 1
+    memory: 1024
+    storage: 20480
+services:
+  app:
+    image: louislam/uptime-kuma
+    internal: false
+    port: 3001
+    volumes:
+    - /app/data
+environment:
+  required: []
+  optional: []
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /
+  port: 3001
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+update:
+  strategy: pull-and-recreate
+versions:
+- version: 1.23.15
+  image: louislam/uptime-kuma:1.23.15
+  stable: true

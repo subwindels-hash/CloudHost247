@@ -1,0 +1,56 @@
+id: mongodb
+name: MongoDB
+category: database
+description: Document database built for modern applications with flexible schemas and scaling.
+website: https://mongodb.com
+repository: https://github.com/mongodb/mongo
+documentation: https://www.mongodb.com/docs
+license: SSPL-1.0
+featured: false
+popularity: 690
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 1
+  memory: 2048
+  storage: 20480
+  recommended:
+    cpu: 2
+    memory: 4096
+    storage: 102400
+services:
+  app:
+    image: mongo
+    internal: false
+    port: 27017
+    volumes:
+    - /data/db
+environment:
+  required: []
+  optional: []
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: command
+  command:
+  - mongosh
+  - --quiet
+  - --eval
+  - db.adminCommand("ping").ok
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+update:
+  strategy: pull-and-recreate
+versions:
+- version: '8.0'
+  image: mongo:8.0
+  stable: true

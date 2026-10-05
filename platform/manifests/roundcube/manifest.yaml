@@ -1,0 +1,62 @@
+id: roundcube
+name: Roundcube
+category: communication
+description: Browser-based multilingual IMAP webmail client with full MIME and LDAP support.
+website: https://roundcube.net
+repository: https://github.com/roundcube/roundcubemail
+documentation: https://roundcube.net/download
+license: GPL-3.0
+featured: false
+popularity: 480
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 1
+  memory: 512
+  storage: 10240
+  recommended:
+    cpu: 1
+    memory: 1024
+    storage: 20480
+services:
+  app:
+    image: roundcube/roundcubemail
+    internal: false
+    port: 80
+    volumes:
+    - /var/www/html
+    dependsOn:
+    - db
+  db:
+    image: mariadb:11
+    internal: true
+    volumes:
+    - /var/lib/mysql
+    database: mariadb
+environment:
+  required: []
+  optional: []
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /
+  port: 80
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+  - database
+update:
+  strategy: pull-and-recreate
+versions:
+- version: 1.6.9
+  image: roundcube/roundcubemail:1.6.9-apache
+  stable: true

@@ -1,0 +1,55 @@
+id: filebrowser
+name: File Browser
+category: storage
+description: Web file manager providing a clean UI over your files on any volume.
+website: https://filebrowser.org
+repository: https://github.com/filebrowser/filebrowser
+documentation: https://filebrowser.org
+license: Apache-2.0
+featured: false
+popularity: 590
+deployment:
+  engine: docker-compose
+supportedHostingTypes:
+- docker
+- vps
+- dedicated
+requirements:
+  cpu: 1
+  memory: 256
+  storage: 10240
+  recommended:
+    cpu: 1
+    memory: 512
+    storage: 51200
+services:
+  app:
+    image: filebrowser/filebrowser
+    internal: false
+    port: 80
+    volumes:
+    - /srv
+    - /database
+    - /config
+environment:
+  required: []
+  optional: []
+domain:
+  enabled: true
+  primaryRequired: false
+healthcheck:
+  type: http
+  path: /health
+  port: 80
+ssl:
+  enabled: true
+backup:
+  enabled: true
+  includes:
+  - volumes
+update:
+  strategy: pull-and-recreate
+versions:
+- version: 2.32.0
+  image: filebrowser/filebrowser:v2.32.0
+  stable: true
