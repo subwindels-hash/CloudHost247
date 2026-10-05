@@ -19,7 +19,7 @@ the cutover.
 | `dotenv` | `src/core/config.js` | own `.env` parser; host env wins over file; empty string reads as unset |
 | `bcryptjs` | `src/lib/password.js` | scrypt (memory-hard, no toolchain). See "Password hashes" below. |
 | `jsonwebtoken` | `src/lib/jwt.js` | HS256, byte-compatible; rejects `alg:none` and wrong-secret; per-token `jti` |
-| TOTP/QR deps | `src/lib/totp.js` + `scripts/generate-icons.js` | RFC 6238 + recovery codes; QR enrolment image deferred (see below) |
+| TOTP/QR deps | `src/lib/totp.js` + `src/lib/qr.js` | RFC 6238 + recovery codes; QR enrolment image implemented (see "QR codes") |
 
 ## Domain parity
 
@@ -59,24 +59,96 @@ the cutover.
 
 The new platform hashes with scrypt and can *read* scrypt hashes, but deliberately does **not**
 re-implement Blowfish, so a legacy `bcrypt$...`/`$2b$...` hash verifies `false`. Those users must
-reset their password (the login route says exactly that). A bulk re-enrolment tool
-(`scripts/rehash-passwords.js`) is the intended follow-up; it is **not yet implemented**.
+reset their password (the login route says exactly that). `scripts/rehash-passwords.js` is the
+supported migration path, and it **cannot do more than invite a reset** — re-hashing needs the
+plaintext, and nobody has it. It runs dry by default, reports `legacy-bcrypt` accounts, stale-parameter
+scrypt hashes (which only need the login route's upgrade-on-sign-in) and blank hashes, and with
+`--apply` writes only `auth_recovery` rows of kind `password_reset` with
+`sha256(random 32-byte token)` and a one-hour expiry — the same contract as
+`POST /api/v1/auth/password/forgot`. It refuses to stack a second invite on a live one unless
+`--force`; raw tokens go to stdout only outside production, otherwise to a `0600` `--out` file, and
+production `--apply` refuses to run without one. There is no mail transport in this build, so
+delivery is explicitly the operator's job.
+
+## QR codes (TOTP enrolment)
+
+`src/lib/qr.js` is a dependency-free QR encoder (byte mode, versions 1–40, EC L/M/Q/H, automatic
+version and mask selection, SVG + 1-bit greyscale PNG + `data:` URI output). `POST
+/api/v1/auth/mfa/totp/enroll` returns `qrPngDataUri` next to `secret` and `otpauthUri`, so clients
+never have to draw a QR code themselves; the React Security page renders it.
+
+Confidence comes from independent tools, not from the encoder agreeing with itself:
+
+- `tests/fixtures/qr-reference.json` holds **744 matrices from python-qrcode 8.2**, an unrelated
+  implementation: every version at every level, every mask at a spread of versions, full-capacity
+  payloads, and four real `otpauth://` URIs. All 744 match byte-for-byte, and all 264 full-capacity
+  payloads select the same version unaided. Regenerate with `tests/fixtures/generate-qr-fixtures.py`
+  (needs `qrcode==8.2`; `segno==1.6.6` is optional).
+- The same fixture carries **32 penalty-score checks from segno 1.6.6** and five synthetic matrices
+  that isolate each penalty rule, so a single wrong rule cannot hide in a plausible total.
+- The test suite reads the **bits back out** of a finished matrix and recomputes the Reed–Solomon
+  codewords with a second, independently written GF(256) implementation, and decodes the PNG with a
+  reader that shares no code with the writer.
+- The PNG the API actually serves was decoded back to the exact `otpauth://` URI by an **independent
+  decoder** — OpenCV 5.0.0, `cv2.QRCodeDetector`:
+  `python -c "import cv2; print(cv2.QRCodeDetector().detectAndDecode(cv2.imread('enrol.png', 0))[0])"`
+  (install `opencv-python-headless`; not a project dependency).
+
+Two honest limits: mask *choice* is not compared across encoders (all eight masks encode the same
+data; scoring-border conventions differ), and `margin: 0` output is legal but not scanner-readable —
+the API always uses the standard 4-module quiet zone, and `tests/qr.test.js` covers a margin of 0
+only as an image-encoding edge case. One deviation is documented rather than hidden: segno 1.6.6
+appends a spurious `0x00` pad codeword where ISO/IEC 18004 §7.4.10 says to start the `0xEC`/`0x11`
+alternation immediately; that matrix is stored as `segno_padding_deviation` and the test asserts the
+difference.
 
 ## Deliberately deferred (open items)
 
 These are real capabilities of the old platform that were not ported in this pass. They are called
 out so nobody mistakes absence for parity:
 
-1. **WebAuthn / passkeys** (`@simplewebauthn/server`, CBOR attestation). Requires a CBOR
-   codec + attestation verification; the schema tables exist (`webauthn_*`) but no routes yet.
-2. **QR enrolment image** for TOTP. The secret + `otpauth://` URI are returned; a self-contained
-   QR+PNG encoder is not yet written (the PNG encoder in `scripts/generate-icons.js` is a start).
+1. **WebAuthn / passkeys — IMPLEMENTED without `@simplewebauthn/server`.** This platform has no
+   runtime dependencies, so the protocol is written in-tree on `node:crypto`:
+   `src/lib/webauthn/{cbor,cose,authenticator-data,verify,options}.js` (strict RFC 8949 decoder,
+   COSE_Key → SPKI, ceremony verification for ES256/RS256/PS256/EdDSA) and the routes in
+   `src/domains/passkeys.js`: `GET /auth/passkeys`,
+   `POST /auth/passkeys/register/options|verify`, `PATCH|DELETE /auth/passkeys/:id`,
+   `POST /auth/passkeys/login/options|verify` — each also under the legacy `/api/auth/*` alias.
+   Enrolment and removal require the current password and are refused during a support session.
+   A challenge is single-use, expires in five minutes, belongs to one ceremony, and is burned
+   *before* verification so a failed attempt cannot be ground against it. Sign-in mints the same
+   session shape as password login. Sign-in is email-first **or** usernameless via a discoverable
+   credential: with no email the ceremony carries an empty `allowCredentials`, the account is
+   resolved from the credential the authenticator chose, and `userHandle` is matched against it.
+   (With `residentKey: 'preferred'`, a hardware key configured for non-resident credentials will not
+   appear in the usernameless flow; those users type their email.)
+   Deliberately **not** implemented, and refused by name rather than faked: attestation formats
+   other than `none` — this build requests `attestation: 'none'` and has no trust-anchor store for
+   `packed` / `tpm` / `android-key` / Apple / `fido-u2f` attestation, so a non-`none` `fmt` is a
+   named refusal. Coverage is unit + integration (a software authenticator drives the real server
+   over HTTP, including the browser-shaped base64url marshalling that
+   `public/assets/js/webauthn.js` performs) with mutation checks on every refusal rule — but **no
+   real browser or hardware authenticator has driven a ceremony** (the sandbox has no WebAuthn
+   stack). That limitation is recorded in `docs/UNFINISHED-BUILD-CODE-NAMES.md` rather than
+   presented as verified.
+2. ~~**QR enrolment image** for TOTP.~~ **Implemented 2026-10-05** — `src/lib/qr.js` and
+   `qrPngDataUri` on the enrolment response; see "QR codes" above for the evidence and the limits
+   (mask choice is not compared across encoders; a zero-margin render is legal but not
+   scanner-readable).
 3. **AWS SDK adapters** (EC2/Route53/CloudWatch/instance-connect) and the infrastructure /
    provisioning / marketplace / deployments / dns / ssl / firewall / revenue-guardian / ai domains.
    By design these are the largest surface and are ported incrementally; adding their tables to
    `src/store/schema.js` and a `domains/*.js` module is the established pattern.
-4. **Payment gateways** (sandbox + manual + webhook signing) and the billing/ordering flows beyond
-   the schema. The ledger/invoice/order tables exist and are finance-safe, but no gateway routes yet.
+4. **Real payment gateways — INBOUND HALF IMPLEMENTED, initiation still deferred.** Received and
+   settled: `stripe`, `paypal` and `paystack` webhooks via `src/lib/gateways/` +
+   `src/lib/provider-webhook-service.js` (signature verified before any database access, canonical
+   event mapping, unique-index claiming with lease takeover, zero-trust amount/currency/owner
+   invariants, settlement through the shared `applySuccessfulPayment`). Still open, and refused with
+   the reason rather than faked: **initiating** a checkout with a real provider, which needs live
+   provider egress and PSP credentials this build does not have. `GET
+   /api/v1/billing/invoices/:id/payment-methods` reports each gateway's availability and why, and
+   initiation of an unavailable gateway is a 400 naming the missing piece. The sandbox and manual
+   gateways remain the usable ones locally.
 5. **Domain availability lookup** (`GET /api/v1/domains/availability`). The public site degrades to
    honest client-side validation until the domain-services domain is ported.
 

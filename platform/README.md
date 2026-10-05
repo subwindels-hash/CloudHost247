@@ -103,12 +103,56 @@ Everything else is identical — the repositories expose the same API on both ba
 The SPA dev server proxies `/api` to the monolith; in production the monolith serves the built SPA
 and the same-origin API, so auth tokens work without CORS.
 
+The dashboard covers the customer purchase path end to end: catalog → cart → checkout → invoice →
+payment (manual instructions, or the sandbox gateway settling through the real webhook receiver),
+plus services, domains, subscriptions and the ledger. It also carries the first admin console slice:
+a staff-gated shell with live queue counts, the customer directory and detail (service/domain
+records for staff; status and role changes for super admins only), the ticket queue with replies and
+status, the staff directory, and "switch to customer" delegation — which parks the admin's tokens in
+`sessionStorage` and installs a one-hour customer-scoped token that carries no refresh token, so the
+delegated session can never be refreshed back into the admin's identity.
+
+The SPA's API client is exercised unmodified by `tests/spa-commerce.test.js` and
+`tests/spa-admin.test.js` against the real server; every page module is server-rendered once by
+`npm --prefix spa run smoke` and the whole set is compiled by the production build. No browser has
+rendered these pages in this environment — that limit is recorded in
+`docs/UNFINISHED-BUILD-CODE-NAMES.md` rather than implied away.
+
+### Infrastructure provider egress
+
+`src/lib/providers/` is the ported provider boundary: one adapter per provider kind, a single HTTP
+entry point (`providerRequest`, with an injectable transport so the behaviour is testable without
+credentials), the failure vocabulary (`ProviderError` with retryability and a sanitized provider
+response), the credential-free base-URL rule, and a response sanitizer that redacts credentials,
+cloud-init and private key material before anything is stored or logged.
+
+All twelve kinds issue real provider requests: Hetzner, DigitalOcean, Vultr, AWS EC2, Contabo, OVH,
+Proxmox, Virtualizor, SolusVM, OpenStack, the operator HTTPS bridge and the development-only mock.
+Each adapter is a separate implementation of the same 26-method interface — one provider's client is
+never reused for another platform — and an operation a provider does not genuinely offer fails with
+`UNSUPPORTED_OPERATION` naming the provider's own reason rather than being simulated.
+
+Two pieces are written from the provider's published protocol because this build has no dependencies:
+
+- **AWS SigV4** (`src/lib/providers/aws-sigv4.js`) signs the EC2, CloudWatch and EC2 Instance Connect
+  query calls; `tests/aws-sigv4.test.js` checks it against the published AWS test-suite vectors
+  (`get-vanilla`, `post-x-www-form-urlencoded`), and the adapter tests re-derive each signature from
+  the bytes actually sent.
+- **AWS XML** (`src/lib/providers/aws-xml.js`) reads the query-protocol responses, and the EC2
+  Serial Console is reported for what it is: an SSH key pushed for 60 seconds, not a VNC session.
+
+Two EC2 workflows can destroy a customer's instance — reinstalling means launching a replacement and
+stopping the old one, and restoring a root volume means detach/attach surgery — so both are off
+unless an operator sets `<PREFIX>_ALLOW_ROOT_VOLUME_REPLACEMENT=true`.
+
 ## API surface (ported so far)
 
 - `GET /health`, `/ready`, `/api/v1/system/status`
 - `POST /api/v1/auth/register|login|refresh|logout`, `GET /api/v1/auth/me`
 - `POST /api/v1/auth/password/change|forgot|reset`, `POST /api/v1/auth/email/verify-request|verify`
 - MFA: `POST /api/v1/auth/mfa/totp/enroll|confirm|disable`, `GET /api/v1/auth/mfa/status`
+- Passkeys (WebAuthn): `GET /api/v1/auth/passkeys`, `POST /api/v1/auth/passkeys/register/options|verify`,
+  `PATCH|DELETE /api/v1/auth/passkeys/:id`, `POST /api/v1/auth/passkeys/login/options|verify`
   (legacy `/api/auth/*` aliases registered for existing clients)
 - Account: `PATCH/GET /api/v1/account/profile`, `GET services|domains|tickets`, `POST tickets`,
   `GET tickets/:id`, `POST tickets/:id/replies`
@@ -119,14 +163,40 @@ and the same-origin API, so auth tokens work without CORS.
 ## Tests
 
 ```bash
-npm test
+npm test          # server + API-client integration tests (node:test)
+npm --prefix spa run build   # compiles every SPA page
+npm --prefix spa run smoke   # renders each SPA page once on the server (imports, hooks, initial state)
 ```
 
 The integration tests boot the real app on an ephemeral port and drive it over HTTP — no mocking of
 the request path — covering auth, MFA, session invalidation, RBAC, static caching/304, and traversal
-protection.
+protection. The two SPA suites import `spa/src/lib/api.js` (the same file the pages import) and run
+it against that server, so the client, not a stub, is what is verified.
 
 ## What is ported vs still open
 
 See [MIGRATION.md](./MIGRATION.md) for the per-module parity table and the deliberately deferred
-items (WebAuthn/passkeys, AWS adapters, payment gateways, domain availability).
+items (AWS adapters, provider checkout initiation, domain availability, real-provider checkout
+egress).
+
+TOTP enrolment returns a QR image the client can display directly (`qrPngDataUri` from
+`POST /api/v1/auth/mfa/totp/enroll`, drawn by the dependency-free `src/lib/qr.js`). The encoder is
+pinned against an unrelated implementation — 744 python-qrcode matrices reproduced byte-for-byte,
+penalty scores checked against segno rule by rule — and the image the API serves has been decoded
+back to its `otpauth://` URI by OpenCV. See "QR codes" in [MIGRATION.md](./MIGRATION.md), including
+the two limits that are stated rather than glossed over. Legacy bcrypt hashes cannot be verified or
+transposed; `scripts/rehash-passwords.js` reports them and, on `--apply`, issues real reset
+invitations (never a fabricated hash).
+
+Passkeys (WebAuthn) are implemented without `@simplewebauthn/server`: the CBOR/COSE/ceremony
+verification is hand-written on `node:crypto` in `src/lib/webauthn/`, the routes live in
+`src/domains/passkeys.js`, and the browser ceremony is driven by the shared dependency-free helper
+`public/assets/js/webauthn.js` (used by both the public site and the React dashboard, whose passkey
+management UI is on the Security page). Attestation formats other than `none` are refused by name;
+nothing is claimed about a browser ceremony that has not been run.
+
+Payment webhooks from Stripe, PayPal and Paystack are implemented — each provider's own signature
+scheme (`src/lib/gateways/`), verified before the receiver touches the database, with event-id
+idempotency, lease-based crash recovery and zero-trust amount/currency/owner checks. Only *starting*
+a checkout with those providers is still deferred (it needs live provider egress); the API reports
+that reason instead of handing back a fabricated provider reference.

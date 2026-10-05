@@ -10,3 +10,6 @@ mobile/ios/
 *.log
 .DS_Store
 coverage/
+
+# SSR smoke-check build output
+spa/dist-ssr/

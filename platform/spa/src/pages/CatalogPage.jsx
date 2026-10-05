@@ -1,15 +1,42 @@
 import React, { useEffect, useState } from 'react';
-import { catalogApi } from '../lib/api.js';
+import { Link } from 'react-router-dom';
+import { cartApi, catalogApi, describeError } from '../lib/api.js';
+import { formatMoney } from '../lib/format.js';
+
+const CYCLES = ['monthly', 'quarterly', 'semiannual', 'annual', 'biennial'];
 
 export default function CatalogPage() {
   const [catalog, setCatalog] = useState(null);
   const [error, setError] = useState(false);
+  const [cycles, setCycles] = useState({});
+  const [adding, setAdding] = useState('');
+  const [added, setAdded] = useState('');
+  const [cartError, setCartError] = useState('');
 
   useEffect(() => {
     catalogApi.all()
       .then(setCatalog)
       .catch(() => setError(true));
   }, []);
+
+  const cycleFor = (plan) => cycles[plan.slug]
+    ?? (plan.pricing.some((p) => p.billingCycle === 'monthly') ? 'monthly' : plan.pricing[0]?.billingCycle);
+
+  const priceFor = (plan) => plan.pricing.find((p) => p.billingCycle === cycleFor(plan));
+
+  const addToCart = async (plan) => {
+    setCartError('');
+    setAdded('');
+    setAdding(plan.slug);
+    try {
+      const cart = await cartApi.addItem(plan.slug, { billingCycle: cycleFor(plan) });
+      setAdded(`${plan.name} added — ${cart.items.length} item(s) in your cart.`);
+    } catch (err) {
+      setCartError(describeError(err));
+    } finally {
+      setAdding('');
+    }
+  };
 
   return (
     <div className="page">
@@ -18,6 +45,12 @@ export default function CatalogPage() {
       </div>
 
       {error && <div className="alert alert-error" role="alert">Could not load the catalog.</div>}
+      {cartError && (
+        <div className="alert alert-error" role="alert">
+          {cartError} {/sign in/i.test(cartError) && <Link to="/account">Sign in</Link>}
+        </div>
+      )}
+      {added && <div className="alert alert-success" role="status">{added} <Link to="/cart">Go to cart</Link></div>}
 
       {catalog === null && !error ? <p className="muted">Loading catalog…</p>
         : catalog.products.length === 0 ? (
@@ -29,17 +62,50 @@ export default function CatalogPage() {
             {product.plans.length === 0 ? <p className="muted">No plans published.</p> : (
               <div className="plans">
                 {product.plans.map((plan) => {
-                  const monthly = plan.pricing.find((p) => p.billingCycle === 'monthly');
+                  const price = priceFor(plan);
+                  const ready = plan.pricing.length > 0;
                   return (
                     <div className="plan-card" key={plan.slug}>
                       <h3>{plan.name}</h3>
-                      {monthly && <p className="plan-price">{monthly.currency} {monthly.price.toFixed(2)}<span>/mo</span></p>}
+                      {price && (
+                        <p className="plan-price">
+                          {formatMoney(price.price, price.currency)}
+                          <span>/{cycleFor(plan)}</span>
+                        </p>
+                      )}
                       <ul>
                         {plan.features.slice(0, 5).map((f) => (
                           <li key={f.label}>{f.value ? `${f.label}: ${f.value}` : f.label}</li>
                         ))}
                       </ul>
-                      <a className="btn btn-primary" href="/register.html">Order</a>
+                      {ready ? (
+                        <>
+                          <div className="field">
+                            <label htmlFor={`cycle-${plan.slug}`}>Billing cycle</label>
+                            <select
+                              id={`cycle-${plan.slug}`}
+                              value={cycleFor(plan)}
+                              onChange={(event) => setCycles((c) => ({ ...c, [plan.slug]: event.target.value }))}
+                            >
+                              {plan.pricing.map((p) => (
+                                <option key={p.billingCycle} value={p.billingCycle}>
+                                  {p.billingCycle} — {formatMoney(p.price, p.currency)}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          <button
+                            type="button"
+                            className="btn btn-primary"
+                            disabled={adding === plan.slug}
+                            onClick={() => addToCart(plan)}
+                          >
+                            {adding === plan.slug ? 'Adding…' : 'Add to cart'}
+                          </button>
+                        </>
+                      ) : (
+                        <p className="muted">No published pricing for this plan yet.</p>
+                      )}
                     </div>
                   );
                 })}

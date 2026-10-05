@@ -127,22 +127,45 @@ function register(router, deps) {
   router.post('/api/v1/billing/subscriptions/:id/change-plan', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     if (!UUID_RE.test(String(ctx.params.id ?? ''))) throw new ValidationError('id must be a valid UUID');
-    const body = await ctx.validate(v.object({ planId: v.string().uuid() }));
+    // planSlug is accepted alongside planId because the public catalog is keyed by slug and never
+    // exposes plan ids — without it a customer-facing client cannot name the plan it wants. Slugs
+    // are unique per product (catalog_plans_slug_key), so a slug is resolved inside the product the
+    // subscription is already on.
+    const body = await ctx.validate(v.object({
+      planId: v.string().uuid().optional(),
+      planSlug: v.string().min(1).max(160).optional(),
+    }));
+    if (!body.planId && !body.planSlug) throw new ValidationError('planId or planSlug is required');
 
     const subscription = await store.table('subscriptions').findById(ctx.params.id);
     if (!subscription || subscription.user_id !== auth.id) throw new NotFoundError('No subscription was found with that id');
 
-    const plan = await store.table('catalog_product_plans').findById(body.planId);
-    if (!plan || plan.status !== 'active') throw new NotFoundError('No purchasable plan was found with that id');
+    let plan = body.planId
+      ? await store.table('catalog_product_plans').findById(body.planId)
+      : null;
+    if (!plan && body.planSlug) {
+      const current = subscription.plan_id
+        ? await store.table('catalog_product_plans').findById(subscription.plan_id)
+        : null;
+      plan = current
+        ? await store.table('catalog_product_plans').findOne({ product_id: current.product_id, slug: body.planSlug })
+        : null;
+      plan = plan ?? await store.table('catalog_product_plans').findOne({ slug: body.planSlug, status: 'active' });
+    }
+    if (!plan || plan.status !== 'active') {
+      throw new NotFoundError(body.planSlug
+        ? 'No purchasable plan was found with that slug'
+        : 'No purchasable plan was found with that id');
+    }
     if (subscription.status !== 'active') throw new ValidationError('Only active subscriptions can change plan');
 
     await store.table('audit_logs').insert({
       id: uuidv7(), actor_id: auth.id, actor_role: auth.role,
       action: 'subscription.plan_change_requested', entity_type: 'subscription', entity_id: subscription.id,
       ip_address: ctx.ip, user_agent: ctx.userAgent,
-      after: { fromPlan: subscription.plan_id, toPlan: body.planId },
+      after: { fromPlan: subscription.plan_id, toPlan: plan.id },
     });
-    ctx.json({ subscription: subscriptionRow(subscription), pendingPlanId: body.planId });
+    ctx.json({ subscription: subscriptionRow(subscription), pendingPlanId: plan.id });
   });
 }
 
