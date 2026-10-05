@@ -33,6 +33,7 @@ const DOMAINS = [
   // Core
   require('./domains/health'),
   require('./domains/auth'),
+  require('./domains/passkeys'),
   require('./domains/account'),
   require('./domains/account-identity'),
   require('./domains/catalog'),

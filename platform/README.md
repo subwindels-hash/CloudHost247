@@ -109,6 +109,8 @@ and the same-origin API, so auth tokens work without CORS.
 - `POST /api/v1/auth/register|login|refresh|logout`, `GET /api/v1/auth/me`
 - `POST /api/v1/auth/password/change|forgot|reset`, `POST /api/v1/auth/email/verify-request|verify`
 - MFA: `POST /api/v1/auth/mfa/totp/enroll|confirm|disable`, `GET /api/v1/auth/mfa/status`
+- Passkeys (WebAuthn): `GET /api/v1/auth/passkeys`, `POST /api/v1/auth/passkeys/register/options|verify`,
+  `PATCH|DELETE /api/v1/auth/passkeys/:id`, `POST /api/v1/auth/passkeys/login/options|verify`
   (legacy `/api/auth/*` aliases registered for existing clients)
 - Account: `PATCH/GET /api/v1/account/profile`, `GET services|domains|tickets`, `POST tickets`,
   `GET tickets/:id`, `POST tickets/:id/replies`
@@ -129,7 +131,14 @@ protection.
 ## What is ported vs still open
 
 See [MIGRATION.md](./MIGRATION.md) for the per-module parity table and the deliberately deferred
-items (WebAuthn/passkeys, AWS adapters, provider checkout initiation, domain availability).
+items (AWS adapters, provider checkout initiation, domain availability, TOTP QR images).
+
+Passkeys (WebAuthn) are implemented without `@simplewebauthn/server`: the CBOR/COSE/ceremony
+verification is hand-written on `node:crypto` in `src/lib/webauthn/`, the routes live in
+`src/domains/passkeys.js`, and the browser ceremony is driven by the shared dependency-free helper
+`public/assets/js/webauthn.js` (used by both the public site and the React dashboard, whose passkey
+management UI is on the Security page). Attestation formats other than `none` are refused by name;
+nothing is claimed about a browser ceremony that has not been run.
 
 Payment webhooks from Stripe, PayPal and Paystack are implemented — each provider's own signature
 scheme (`src/lib/gateways/`), verified before the receiver touches the database, with event-id

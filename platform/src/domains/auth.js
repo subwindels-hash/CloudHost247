@@ -907,4 +907,6 @@ function register(router, deps) {
   }
 }
 
-module.exports = { name, register, publicUser };
+// signSession/storeRefreshToken/audit are exported for the passkey domain, which issues the
+// same session shape and records into the same audit table as password auth.
+module.exports = { name, register, publicUser, signSession, storeRefreshToken, audit };

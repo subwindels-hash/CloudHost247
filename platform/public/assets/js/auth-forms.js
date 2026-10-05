@@ -6,6 +6,7 @@
  */
 
 import { authApi, store, describeError } from './api.js';
+import { isPasskeySupported, getAssertion } from './webauthn.js';
 
 function bindForm(selector, onSubmit) {
   const form = document.querySelector(selector);
@@ -80,6 +81,56 @@ function initLogin() {
   });
 }
 
+/**
+ * Passkey sign-in.
+ *
+ * Deliberately not an auto-triggered ceremony on page load: a WebAuthn prompt that appears before
+ * the visitor has asked for anything is confusing, and browsers increasingly refuse unrequested
+ * ones. The button is revealed only when the browser can actually run the ceremony.
+ *
+ * The email field is optional — leaving it blank asks the server for a discoverable-credential
+ * sign-in, and the authenticator itself picks the account.
+ */
+function initPasskeyLogin() {
+  const block = document.querySelector('[data-passkey-block]');
+  const button = document.querySelector('[data-passkey-login]');
+  const hint = document.querySelector('[data-passkey-hint]');
+  if (!block || !button) return;
+
+  if (!isPasskeySupported()) return; // Leave the block hidden rather than offering a dead button.
+  block.hidden = false;
+
+  const showHint = (message) => {
+    if (!hint) return;
+    hint.textContent = message;
+    hint.hidden = false;
+  };
+
+  button.addEventListener('click', async () => {
+    button.disabled = true;
+    if (hint) hint.hidden = true;
+    try {
+      const email = document.querySelector('#email')?.value?.trim() || undefined;
+      const options = await authApi.passkeyLoginOptions(email);
+      const response = await getAssertion(options.options);
+      const result = await authApi.passkeyLoginVerify(options.challengeId, response);
+      store.save(result);
+      window.location.href = afterAuthRedirect();
+    } catch (err) {
+      // A cancelled ceremony is a normal outcome, not an error worth a scary alert.
+      if (err?.name === 'NotAllowedError') {
+        showHint('Passkey sign-in was cancelled, or your device did not recognise a passkey.');
+      } else if (err?.status === 401) {
+        showHint('No passkey on this device matches that account. Sign in with your password instead.');
+      } else {
+        showHint(describeError(err));
+      }
+    } finally {
+      button.disabled = false;
+    }
+  });
+}
+
 function initRegister() {
   bindForm('[data-register-form]', async (data) => {
     if (data.password !== data.confirmPassword) {
@@ -124,6 +175,7 @@ function initReset() {
 
 function init() {
   initLogin();
+  initPasskeyLogin();
   initRegister();
   initForgot();
   initReset();

@@ -118,6 +118,13 @@ const envSchema = v.object({
   // production so a misconfigured prod host cannot mint "paid" invoices.
   SANDBOX_PAYMENTS: boolSchema.default('true'),
 
+  // --- passkeys / WebAuthn (optional) ---
+  // Origins the browser may complete a ceremony on, in addition to APP_URL's own origin (for
+  // example `https://www.example.com` when APP_URL is the apex). Comma-separated, exact matches
+  // only — the incoming Origin header is never trusted by itself.
+  WEBAUTHN_ALLOWED_ORIGINS: v.string().max(1000).optional(),
+  WEBAUTHN_RP_NAME: v.string().max(80).default('CloudHost247'),
+
   // --- agent (optional) ---
   // Shared secret the on-server agent presents. Absent disables the agent endpoints.
   AGENT_TOKEN: v.string().min(16).optional(),

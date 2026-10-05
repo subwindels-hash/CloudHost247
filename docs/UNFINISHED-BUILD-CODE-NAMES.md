@@ -15,12 +15,13 @@ staging-blocked — see §5).
 | # | Module | Status |
 |---|---|---|
 | 1 | `platform/` payment gateways — Stripe / PayPal / Paystack inbound webhooks + strict settlement receiver | **DONE 2026-10-05** — see §1b. Initiation of a real-provider checkout remains deferred (needs provider egress) and is refused with that reason |
+| 2 | `platform/` passkeys / WebAuthn — enrolment, management, sign-in (email-first + usernameless) and the browser ceremony helper | **DONE 2026-10-05 (server + both frontends; not browser-verified)** — see §1b. Attestation formats other than `none` are refused by name; no real browser or hardware authenticator has driven a ceremony in this environment |
 
 ---
 
 ## 1. `platform/` — the newest build (added 2026-10-05) — largest unfinished surface
 
-41 domains exist and its 317 tests pass, but 15 modules ship **explicit `deferred` markers** for the
+41 domains exist and its 450 tests pass, but 15 modules ship **explicit `deferred` markers** for the
 live integration side, and the frontend is a fraction of the old one.
 
 ### 1a. Modules whose live integration is deferred (code present, egress missing)
@@ -48,7 +49,26 @@ live integration side, and the frontend is a fraction of the old one.
 
 ### 1b. Named but absent features
 
-- **WebAuthn / passkeys** — schema tables (`webauthn_*`) exist, **no routes** in `platform/`.
+- ~~**WebAuthn / passkeys** — schema tables (`webauthn_*`) exist, **no routes** in `platform/`.~~
+  **Closed 2026-10-05:** implemented **without** `@simplewebauthn/server` (this platform has no
+  runtime dependencies), so the protocol lives in-tree — `platform/src/lib/webauthn/{cbor,cose,
+  authenticator-data,verify,options}.js` (strict RFC 8949 decoder, COSE_Key → SPKI, ceremony
+  verification for ES256/RS256/PS256/EdDSA) and `platform/src/domains/passkeys.js`
+  (`GET /auth/passkeys`, `POST /auth/passkeys/register/options|verify`,
+  `PATCH|DELETE /auth/passkeys/:id`, `POST /auth/passkeys/login/options|verify`, legacy
+  `/api/auth/*` aliases included). Enrolment and removal need the current password and are refused
+  during a support session; challenges are single-use, 5-minute and burned before verification;
+  sign-in mints the same session as password login, either email-first or usernameless via a
+  discoverable credential (account resolved from the chosen credential, `userHandle` matched).
+  The browser ceremony is driven by `platform/public/assets/js/webauthn.js`, shared by the public
+  login page and the dashboard's Security page. Evidence: `tests/webauthn.test.js` (84) and
+  `tests/webauthn-browser.test.js` (10) on top of a software authenticator that signs real
+  assertions against a real HTTP server, plus 11 mutation checks on the refusal rules. **Limits
+  stated rather than papered over:** no real browser/hardware authenticator has run a ceremony here
+  (Node has no WebAuthn stack, and the sandbox preview cannot host one — the ceremony needs a
+  permitted RP origin and the platform refuses framing), so the marshalling is verified by
+  round-trip tests and by feeding the helper's output to the real server, not by a device; and
+  attestation `fmt !== 'none'` is refused because there is no trust-anchor store.
 - **TOTP QR enrolment image** — secret + `otpauth://` URI returned; QR/PNG encoder not written.
 - **`platform/scripts/rehash-passwords.js`** — bcrypt → scrypt re-enrolment tool: *not yet implemented*.
 - ~~**Payment gateways** — only `sandbox` + `manual` ported; no Stripe / PayPal / Paystack / Blockonomics.~~
@@ -63,7 +83,9 @@ live integration side, and the frontend is a fraction of the old one.
   build, which has no `platform/` equivalent at all.
 - **SPA dashboard (`platform/spa/`)** — 4 of ~84 pages ported (`CatalogPage`, `DashboardPage`,
   `SecurityPage`, `SupportPage`); the whole admin console, server detail, billing, DNS, Cloudflare,
-  marketplace, AI and Tools screens are missing.
+  marketplace, AI and Tools screens are missing. `SecurityPage` now carries the passkey management
+  UI (list, rename, remove-with-password, add) and the public `/login` page carries passkey sign-in;
+  the admin-side security screens do not exist.
 - **`platform/mobile/`** — Capacitor config/resources only; no app code.
 
 ---

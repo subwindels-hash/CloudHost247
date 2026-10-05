@@ -117,6 +117,20 @@ export const authApi = {
   mfaEnroll: () => api('/api/v1/auth/mfa/totp/enroll', { method: 'POST', body: {} }),
   mfaConfirm: (code) => api('/api/v1/auth/mfa/totp/confirm', { method: 'POST', body: { code } }),
   mfaDisable: (password) => api('/api/v1/auth/mfa/disable', { method: 'POST', body: { password } }),
+
+  // Passkeys (WebAuthn). The ceremony itself (navigator.credentials) is run by the shared browser
+  // helper, public/assets/js/webauthn.js; these methods only carry the options and responses.
+  passkeys: () => api('/api/v1/auth/passkeys'),
+  passkeyRegisterOptions: (password) => api('/api/v1/auth/passkeys/register/options', { method: 'POST', body: { password } }),
+  passkeyRegisterVerify: (challengeId, response, name) => api('/api/v1/auth/passkeys/register/verify', { method: 'POST', body: { challengeId, response, name } }),
+  passkeyRename: (id, name) => api(`/api/v1/auth/passkeys/${encodeURIComponent(id)}`, { method: 'PATCH', body: { name } }),
+  passkeyRemove: (id, password) => api(`/api/v1/auth/passkeys/${encodeURIComponent(id)}`, { method: 'DELETE', body: { password } }),
+  passkeyLoginOptions: (email) => api('/api/v1/auth/passkeys/login/options', {
+    method: 'POST', body: email ? { email } : {}, auth: false,
+  }),
+  passkeyLoginVerify: (challengeId, response) => api('/api/v1/auth/passkeys/login/verify', {
+    method: 'POST', body: { challengeId, response }, auth: false,
+  }),
 };
 
 export const catalogApi = {

@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { authApi, describeError } from '../lib/api.js';
+// The WebAuthn ceremony helper is shared with the public site, so both frontends marshal the
+// base64url <-> ArrayBuffer boundary through exactly one implementation.
+import { createPasskey, isPasskeySupported } from '../../../public/assets/js/webauthn.js';
 
 export default function SecurityPage() {
   const [status, setStatus] = useState(null);
@@ -8,9 +11,75 @@ export default function SecurityPage() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
+  const [passkeys, setPasskeys] = useState(null);
+  const [passkeySupported, setPasskeySupported] = useState(false);
+  const [addingPasskey, setAddingPasskey] = useState(false);
+
+  const loadPasskeys = () => authApi.passkeys()
+    .then((data) => setPasskeys(data.passkeys))
+    .catch(() => setPasskeys([]));
+
   useEffect(() => {
     authApi.mfaStatus().then(setStatus).catch(() => setStatus(null));
+    setPasskeySupported(isPasskeySupported());
+    loadPasskeys();
   }, []);
+
+  const addPasskey = async (event) => {
+    event.preventDefault();
+    setError('');
+    setMessage('');
+    const form = event.currentTarget;
+    const data = Object.fromEntries(new FormData(form).entries());
+    setAddingPasskey(true);
+    try {
+      // The server re-checks the password; the client only sends it and does not gate on it.
+      const options = await authApi.passkeyRegisterOptions(data.password);
+      const response = await createPasskey(options.options);
+      const created = await authApi.passkeyRegisterVerify(
+        options.challengeId, response, data.name?.trim() || 'Passkey',
+      );
+      setMessage(`"${created.passkey.name}" registered. You can now sign in with this device.`);
+      form.reset();
+      await loadPasskeys();
+    } catch (err) {
+      if (err?.name === 'NotAllowedError') {
+        setError('The passkey ceremony was cancelled, or the device refused it.');
+      } else {
+        setError(describeError(err));
+      }
+    } finally {
+      setAddingPasskey(false);
+    }
+  };
+
+  const renamePasskey = async (event, id, currentName) => {
+    event.preventDefault();
+    setError('');
+    setMessage('');
+    const name = event.currentTarget.name.value.trim();
+    if (!name || name === currentName) return;
+    try {
+      await authApi.passkeyRename(id, name);
+      setMessage('Passkey renamed.');
+      await loadPasskeys();
+    } catch (err) {
+      setError(describeError(err));
+    }
+  };
+
+  const removePasskey = async (event, id) => {
+    event.preventDefault();
+    setError('');
+    setMessage('');
+    try {
+      await authApi.passkeyRemove(id, event.currentTarget.password.value);
+      setMessage('Passkey removed.');
+      await loadPasskeys();
+    } catch (err) {
+      setError(describeError(err));
+    }
+  };
 
   const changePassword = async (event) => {
     event.preventDefault();
@@ -136,6 +205,65 @@ export default function SecurityPage() {
           )}
         </section>
       </div>
+
+      <section className="card">
+        <h2>Passkeys</h2>
+        {!passkeySupported ? (
+          <p className="muted">
+            This browser or device cannot use passkeys. Open this page on a device with a platform
+            authenticator (Face ID, Touch ID, Windows Hello, or a hardware security key).
+          </p>
+        ) : (
+          <>
+            <p className="muted">
+              Sign in without typing your password. A passkey stays on your device and never leaves it —
+              the server only ever stores its public half.
+            </p>
+
+            {passkeys === null ? (
+              <p className="muted">Loading passkeys…</p>
+            ) : passkeys.length === 0 ? (
+              <p className="muted">No passkeys yet.</p>
+            ) : (
+              <ul className="list">
+                {passkeys.map((passkey) => (
+                  <li key={passkey.id} className="list-row">
+                    <form onSubmit={(event) => renamePasskey(event, passkey.id, passkey.name)}>
+                      <input name="name" defaultValue={passkey.name} aria-label="Passkey name" maxLength="64" />
+                      <button className="btn btn-ghost" type="submit">Rename</button>
+                    </form>
+                    <p className="muted" style={{ margin: '4px 0 8px' }}>
+                      Added {new Date(passkey.createdAt).toLocaleDateString()}
+                      {passkey.lastUsedAt ? ` · last used ${new Date(passkey.lastUsedAt).toLocaleDateString()}` : ' · never used'}
+                    </p>
+                    <form onSubmit={(event) => removePasskey(event, passkey.id)}>
+                      <div className="field">
+                        <label htmlFor={`pw-${passkey.id}`}>Password (to remove)</label>
+                        <input id={`pw-${passkey.id}`} name="password" type="password" autoComplete="current-password" required />
+                      </div>
+                      <button className="btn btn-ghost" type="submit">Remove</button>
+                    </form>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <form onSubmit={addPasskey}>
+              <div className="field">
+                <label htmlFor="passkey-name">Device name</label>
+                <input id="passkey-name" name="name" placeholder="Work laptop" maxLength="64" />
+              </div>
+              <div className="field">
+                <label htmlFor="passkey-password">Current password</label>
+                <input id="passkey-password" name="password" type="password" autoComplete="current-password" required />
+              </div>
+              <button className="btn btn-primary" type="submit" disabled={addingPasskey}>
+                {addingPasskey ? 'Waiting for your device…' : 'Add a passkey'}
+              </button>
+            </form>
+          </>
+        )}
+      </section>
 
       {recovery && (
         <section className="card">

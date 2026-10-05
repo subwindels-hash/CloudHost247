@@ -67,8 +67,30 @@ reset their password (the login route says exactly that). A bulk re-enrolment to
 These are real capabilities of the old platform that were not ported in this pass. They are called
 out so nobody mistakes absence for parity:
 
-1. **WebAuthn / passkeys** (`@simplewebauthn/server`, CBOR attestation). Requires a CBOR
-   codec + attestation verification; the schema tables exist (`webauthn_*`) but no routes yet.
+1. **WebAuthn / passkeys — IMPLEMENTED without `@simplewebauthn/server`.** This platform has no
+   runtime dependencies, so the protocol is written in-tree on `node:crypto`:
+   `src/lib/webauthn/{cbor,cose,authenticator-data,verify,options}.js` (strict RFC 8949 decoder,
+   COSE_Key → SPKI, ceremony verification for ES256/RS256/PS256/EdDSA) and the routes in
+   `src/domains/passkeys.js`: `GET /auth/passkeys`,
+   `POST /auth/passkeys/register/options|verify`, `PATCH|DELETE /auth/passkeys/:id`,
+   `POST /auth/passkeys/login/options|verify` — each also under the legacy `/api/auth/*` alias.
+   Enrolment and removal require the current password and are refused during a support session.
+   A challenge is single-use, expires in five minutes, belongs to one ceremony, and is burned
+   *before* verification so a failed attempt cannot be ground against it. Sign-in mints the same
+   session shape as password login. Sign-in is email-first **or** usernameless via a discoverable
+   credential: with no email the ceremony carries an empty `allowCredentials`, the account is
+   resolved from the credential the authenticator chose, and `userHandle` is matched against it.
+   (With `residentKey: 'preferred'`, a hardware key configured for non-resident credentials will not
+   appear in the usernameless flow; those users type their email.)
+   Deliberately **not** implemented, and refused by name rather than faked: attestation formats
+   other than `none` — this build requests `attestation: 'none'` and has no trust-anchor store for
+   `packed` / `tpm` / `android-key` / Apple / `fido-u2f` attestation, so a non-`none` `fmt` is a
+   named refusal. Coverage is unit + integration (a software authenticator drives the real server
+   over HTTP, including the browser-shaped base64url marshalling that
+   `public/assets/js/webauthn.js` performs) with mutation checks on every refusal rule — but **no
+   real browser or hardware authenticator has driven a ceremony** (the sandbox has no WebAuthn
+   stack). That limitation is recorded in `docs/UNFINISHED-BUILD-CODE-NAMES.md` rather than
+   presented as verified.
 2. **QR enrolment image** for TOTP. The secret + `otpauth://` URI are returned; a self-contained
    QR+PNG encoder is not yet written (the PNG encoder in `scripts/generate-icons.js` is a start).
 3. **AWS SDK adapters** (EC2/Route53/CloudWatch/instance-connect) and the infrastructure /
