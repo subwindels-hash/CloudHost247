@@ -181,6 +181,35 @@ test('integration: ported domains over real HTTP', async (t) => {
     assert.strictEqual(parsed.data.surname, 'DOE');
   });
 
+  // ---- server lifecycle actions (queued provisioning jobs) ---------------
+  await t.test('server actions queue jobs and reads return stored state', async () => {
+    const created = await jsonFetch(base, { path: '/api/v1/servers', method: 'POST', body: { name: 'action-vps' } }, token);
+    assert.strictEqual(created.status, 201);
+    const sid = created.data.server.id;
+
+    const reboot = await jsonFetch(base, { path: `/api/v1/servers/${sid}/reboot`, method: 'POST', body: {} }, token);
+    assert.strictEqual(reboot.status, 202);
+    assert.ok(reboot.data.jobId);
+
+    const snap = await jsonFetch(base, { path: `/api/v1/servers/${sid}/snapshots`, method: 'POST', body: { description: 'pre-upgrade' } }, token);
+    assert.strictEqual(snap.status, 202);
+
+    const status = await jsonFetch(base, { path: `/api/v1/servers/${sid}/status` }, token);
+    assert.strictEqual(status.status, 200);
+
+    const prov = await jsonFetch(base, { path: `/api/v1/servers/${sid}/provisioning-status` }, token);
+    assert.strictEqual(prov.status, 200);
+    assert.ok(prov.data.latestJob, 'a provisioning job was recorded');
+
+    const health = await jsonFetch(base, { path: `/api/v1/servers/${sid}/health` }, token);
+    assert.strictEqual(health.status, 200);
+
+    // Another customer cannot touch this server.
+    const other = await register(base, 'intruder@example.com');
+    const denied = await jsonFetch(base, { path: `/api/v1/servers/${sid}/reboot`, method: 'POST', body: {} }, other.data.accessToken);
+    assert.strictEqual(denied.status, 404);
+  });
+
   // ---- marketplace (exercises ctx.validateQuery) -------------------------
   await t.test('marketplace browse validates the query string', async () => {
     const apps = await jsonFetch(base, { path: '/api/v1/marketplace/apps' }, token);
