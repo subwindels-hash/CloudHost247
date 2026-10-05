@@ -819,6 +819,19 @@ const TABLES = {
     },
   },
 
+  // Customer notification centre (read/unread per user).
+  notifications: {
+    columns: {
+      id: pk(),
+      user_id: uuid({ required: true }),
+      title: text({ nullable: true }),
+      body: text({ nullable: true }),
+      read_at: { type: 'timestamptz', nullable: true },
+      created_at: ts(),
+    },
+    indexes: [{ name: 'notifications_user_idx', columns: ['user_id'] }],
+  },
+
   // -------------------------------------------------------------------------
   // Control panels / licenses / services
   // -------------------------------------------------------------------------

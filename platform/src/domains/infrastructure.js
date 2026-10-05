@@ -10,12 +10,45 @@
 const { v } = require('../core/validate');
 const { NotFoundError } = require('../core/errors');
 const { uuidv7 } = require('../lib/ids');
-const { asAdmin, asStaff } = require('../lib/auth');
+const { authenticate, asAdmin, asStaff } = require('../lib/auth');
 
 const name = 'infrastructure';
 
 function register(router, deps) {
   const { store } = deps;
+
+  // ---- customer notification centre ---------------------------------------
+  router.get('/api/v1/notifications', async (ctx) => {
+    const auth = await authenticate(ctx, deps);
+    const rows = await store.table('notifications').all();
+    const mine = rows.filter((n) => n.user_id === auth.id).sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
+    const unread = mine.filter((n) => !n.read_at).length;
+    ctx.json({
+      notifications: mine.map((n) => ({ id: n.id, title: n.title, body: n.body, readAt: n.read_at, createdAt: n.created_at })),
+      unread,
+    });
+  });
+
+  router.post('/api/v1/notifications/:id/read', async (ctx) => {
+    const auth = await authenticate(ctx, deps);
+    const note = await store.table('notifications').findOne({ id: ctx.params.id, user_id: auth.id });
+    if (!note) throw new NotFoundError('No notification was found with that id');
+    await store.table('notifications').updateById(note.id, { read_at: new Date().toISOString() });
+    ctx.json({ read: true });
+  });
+
+  router.post('/api/v1/notifications/read-all', async (ctx) => {
+    const auth = await authenticate(ctx, deps);
+    const rows = await store.table('notifications').all();
+    let read = 0;
+    for (const n of rows) {
+      if (n.user_id === auth.id && !n.read_at) {
+        await store.table('notifications').updateById(n.id, { read_at: new Date().toISOString() });
+        read += 1;
+      }
+    }
+    ctx.json({ read });
+  });
 
   // ---- providers ----------------------------------------------------------
   router.get('/api/v1/admin/providers', async (ctx) => {

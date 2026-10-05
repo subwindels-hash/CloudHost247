@@ -271,6 +271,27 @@ test('integration: ported domains over real HTTP', async (t) => {
     assert.strictEqual(change.status, 200);
   });
 
+  // ---- notifications centre ----------------------------------------------
+  await t.test('notifications list, mark read, read all', async () => {
+    const cust = await app.store.table('users').findOne({ email: 'customer@example.com' });
+    const { uuidv7 } = require('../src/lib/ids');
+    await app.store.table('notifications').insert({ id: uuidv7(), user_id: cust.id, title: 'Welcome', body: 'Hello' });
+    await app.store.table('notifications').insert({ id: uuidv7(), user_id: cust.id, title: 'Invoice', body: 'Due soon' });
+
+    const list = await jsonFetch(base, { path: '/api/v1/notifications' }, token);
+    assert.strictEqual(list.status, 200);
+    assert.strictEqual(list.data.unread, 2);
+
+    const one = await jsonFetch(base, { path: `/api/v1/notifications/${list.data.notifications[0].id}/read`, method: 'POST', body: {} }, token);
+    assert.strictEqual(one.status, 200);
+
+    const all = await jsonFetch(base, { path: '/api/v1/notifications/read-all', method: 'POST', body: {} }, token);
+    assert.strictEqual(all.status, 200);
+
+    const after = await jsonFetch(base, { path: '/api/v1/notifications' }, token);
+    assert.strictEqual(after.data.unread, 0);
+  });
+
   // ---- admin surface ------------------------------------------------------
   await t.test('admin endpoints require elevation and return data', async () => {
     const forbidden = await jsonFetch(base, { path: '/api/v1/admin/ai/overview' }, token);
