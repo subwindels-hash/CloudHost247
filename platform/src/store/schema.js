@@ -1394,12 +1394,19 @@ const TABLES = {
   // -------------------------------------------------------------------------
   cloudflare_accounts: {
     columns: {
-      user_id: uuid({ required: true }),
+      user_id: uuid({ nullable: true }),
       account_name: text(),
       api_token: text(),
       id: pk(),
       name: text({ nullable: true }),
       account_id: text({ nullable: true }),
+      cloudflare_account_id: text({ nullable: true }),
+      encrypted_api_token: text({ nullable: true }),
+      api_base_url: text({ nullable: true }),
+      default_zone_type: text({ nullable: true }),
+      default_ssl_mode: text({ nullable: true }),
+      default_proxied: bool({ nullable: true }),
+      created_by: uuid({ nullable: true }),
       status: text({ default: 'active' }),
       created_at: ts(),
     },
@@ -1416,7 +1423,13 @@ const TABLES = {
       cloudflare_plan: text({ nullable: true }),
       plan_status: text({ default: 'active' }),
       entitlements: jsonb({ default: {} }),
+      max_domains: int({ nullable: true }),
+      provisioning_mode: text({ nullable: true }),
+      default_ssl_mode: text({ nullable: true }),
+      default_proxied: bool({ nullable: true }),
+      created_by: uuid({ nullable: true }),
       created_at: ts(),
+      updated_at: ts(),
     },
   },
 
@@ -1437,6 +1450,8 @@ const TABLES = {
       ssl_mode: text({ nullable: true }),
       development_mode_until: { type: 'timestamptz', nullable: true },
       customer_domain_id: uuid({ nullable: true }),
+      activation_status: text({ nullable: true }),
+      last_synced_at: { type: 'timestamptz', nullable: true },
       status: text({ default: 'pending' }),
       created_at: ts(),
       updated_at: ts(),
@@ -1465,6 +1480,24 @@ const TABLES = {
       message: text({ required: true }),
       created_at: ts(),
     },
+  },
+
+  // Upstream Cloudflare API call log (admin observability). Populated by the deferred provider
+  // worker; the admin logs/overview endpoints read it. success=false drives the error counters.
+  cloudflare_api_logs: {
+    columns: {
+      id: pk(),
+      account_id: uuid({ nullable: true }),
+      service_id: uuid({ nullable: true }),
+      method: text({ nullable: true }),
+      path: text({ nullable: true }),
+      status_code: int({ nullable: true }),
+      success: bool({ default: true }),
+      error_code: text({ nullable: true }),
+      duration_ms: int({ nullable: true }),
+      created_at: ts(),
+    },
+    indexes: [{ name: 'cf_api_logs_service_idx', columns: ['service_id'] }],
   },
 
   // Customer Cloudflare feature caches. The live Cloudflare client is deferred, so these tables
