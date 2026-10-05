@@ -387,7 +387,7 @@ Not "unfinished code", but none of these may be called done until the gate close
 
 - **Whole-platform gates:** *cPanel staging verification: `BLOCKED — NOT PERFORMED`*;
   *Visual/browser tests: `NOT PERFORMED`* (headless browsers unavailable); production DB read-only.
-- **GitHub Actions cannot run at all on this account (BLOCKER, found 2026-10-02).** Every recent run
+- **GitHub Actions cannot run at all on this account (BLOCKER, found 2026-10-02).** **RESOLVED — corrected 2026-10-05.** CI runs and passes: `Independent foundation` completed `success` on `arena/01a10cfb-cloudhost247` (runs `37347168282` 1m40s, `37349198441` 1m46s) and PR #54's `Release candidate (PHP 7.4)` / `Release candidate (PHP 8.2)` jobs both `pass` (1m39s / 1m47s). The account/billing action described below has therefore been taken. What follows is retained as the historical record of the blocker and of what was verified without CI while it stood. Every recent run
   of both workflows — `Independent foundation` and `CloudHost247 Node platform`, on `main` and on
   every branch — failed in 1-4 seconds with *"The job was not started because recent account payments
   have failed or your spending limit needs to be increased"*. No job ever started, so there is **no

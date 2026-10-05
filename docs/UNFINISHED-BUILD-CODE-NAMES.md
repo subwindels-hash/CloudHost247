@@ -253,6 +253,14 @@ hooks are *supposed* to be empty.
 `cloudhost247_currency` · `cloudhost247_ovh` — plus `cloudhost247_marketing` (module complete; the
 `crons/cloudhost247_marketing.php` delivery worker still has to be scheduled on the host).
 
-**Whole-platform gates still open:** cPanel staging verification (*BLOCKED — NOT PERFORMED*),
-visual/browser tests (*NOT PERFORMED*), and GitHub Actions cannot start on this account (billing
-blocker), so no commit has a CI signal.
+**Whole-platform gates still open:** cPanel staging verification (*BLOCKED — NOT PERFORMED*) and
+visual/browser tests (*NOT PERFORMED*).
+
+~~GitHub Actions cannot start on this account (billing blocker), so no commit has a CI signal.~~
+**CORRECTED 2026-10-05 — the billing blocker is cleared and CI is green.** Observed on this branch,
+not inferred: `Independent foundation` completed `success` on the pushes of both commits here (runs
+`37347168282`, `37349198441`, 1m40s and 1m46s), and PR #54's two jobs — `Release candidate (PHP 7.4)`
+and `Release candidate (PHP 8.2)` — both `pass` (1m39s, 1m47s). That is also the first time the PHP
+release-candidate gate has run on a change in this repository's recorded history, so row A15's caveat
+that `php -l` over the 778 computed lint targets "was never executed here" no longer applies to CI,
+only to the local sandbox.
