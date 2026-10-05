@@ -1687,11 +1687,34 @@ const TABLES = {
       agent_id: uuid({ nullable: true }),
       subject: text({ nullable: true }),
       id: pk(),
-      user_id: uuid({ required: true }),
-      status: text({ default: 'open' }),
+      user_id: uuid({ nullable: true }),
+      visitor_name: text({ nullable: true }),
+      visitor_email: text({ nullable: true }),
+      escalation_reason: text({ nullable: true }),
+      escalation_note: text({ nullable: true }),
+      priority: text({ default: 'normal' }),
+      assigned_agent_id: uuid({ nullable: true }),
+      support_ticket_id: uuid({ nullable: true }),
+      source: text({ nullable: true }),
+      status: text({ default: 'AI_ACTIVE' }),
+      last_message_at: { type: 'timestamptz', nullable: true },
+      resolved_at: { type: 'timestamptz', nullable: true },
       created_at: ts(),
       updated_at: ts(),
     },
+  },
+
+  // Support agent presence (online/busy/offline + capacity). One row per agent, upserted.
+  support_agent_presence: {
+    columns: {
+      id: pk(),
+      user_id: uuid({ required: true }),
+      status: text({ default: 'OFFLINE' }),
+      capacity: int({ default: 3 }),
+      created_at: ts(),
+      updated_at: ts(),
+    },
+    indexes: [{ name: 'support_presence_user_idx', columns: ['user_id'], unique: true }],
   },
 
   ai_support_messages: {
@@ -1718,9 +1741,12 @@ const TABLES = {
   newsletter_subscriptions: {
     columns: {
       id: pk(),
+      name: text({ nullable: true }),
       email: text({ required: true }),
-      status: text({ default: 'active' }),
+      source: text({ nullable: true }),
+      status: text({ default: 'ACTIVE' }),
       created_at: ts(),
+      updated_at: ts(),
     },
     indexes: [{ name: 'newsletter_email_key', columns: ['email'], unique: true }],
   },
