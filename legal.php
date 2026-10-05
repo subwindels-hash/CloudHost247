@@ -1,17 +1,31 @@
 <?php
 /**
- * CloudHost247 — professional standalone page.
+ * Legal & Policy Center
  *
- * Shares the platform design system and shows only content that actually
- * exists: either authored policy text preserved from the previous site, or
- * live data pulled from the CloudHost247 platform API.
+ * Centralized legal hub page that brings together all key legal,
+ * privacy, and policy documents for the platform.
+ *
+ * @package    WHMCS
+ * @copyright  Copyright (c) WHMCS Limited 2025
+ * @license    MIT License
  */
 
-declare(strict_types=1);
+use WHMCS\ClientArea;
 
-require_once __DIR__ . '/php/bootstrap.php';
+define('CLIENTAREA', true);
 
-$legalSections = [
+require __DIR__ . '/init.php';
+
+$ca = new ClientArea();
+
+$ca->setPageTitle('Legal & Policy Center');
+
+$ca->addToBreadCrumb('index.php', Lang::trans('globalsystemname'));
+$ca->addToBreadCrumb('legal.php', 'Legal & Policy Center');
+
+$ca->initPage();
+
+$ca->assign('legalSections', [
     [
         'id'     => 'terms-of-service',
         'title'  => 'Terms of Service',
@@ -82,26 +96,8 @@ $legalSections = [
         'link'   => 'cybercrime-detection-policy.php',
         'icon'   => 'fa-shield-alt',
     ],
-];
+]);
 
-$cards = '';
-foreach ($legalSections as $section) {
-    $link = (string) ($section['link'] ?? '');
-    if ($link === '' || $link === '#') {
-        continue;
-    }
-    $cards .= '<div class="card"><h3>' . ch247_e($section['title'] ?? '') . '</h3>'
-        . '<p>' . ch247_e($section['desc'] ?? '') . '</p>'
-        . '<a class="btn btn--secondary" href="' . ch247_e($link) . '">Read the document</a></div>';
-}
+$ca->setTemplate('legal');
 
-echo ch247_page([
-    'title' => 'Legal & Policy Center | CloudHost247',
-    'description' => 'All CloudHost247 legal documents in one place: terms, privacy, cookies, acceptable use, refunds, domain policies and more.',
-    'canonical' => 'legal.php',
-    'active' => 'company',
-    'crumbs' => [['index.php', 'Home'], [null, 'Legal & Policy Center']],
-], ch247_page_head([['index.php', 'Home'], [null, 'Legal & Policy Center']], 'Legal & Policy Center', 'Every policy that governs our services, written to be read — plain language, current versions, all in one place.')
-    . '<section class="section"><div class="container"><div class="grid grid--3">' . $cards . '</div>'
-    . '<p class="hint" style="margin-top:22px">Documents that are not yet published here are maintained as versioned pages on the platform at /legal. Nothing on this page is legal advice; it describes our actual policies.</p>'
-    . '</div></section>');
+$ca->output();

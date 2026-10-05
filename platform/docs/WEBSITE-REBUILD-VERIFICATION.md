@@ -308,3 +308,26 @@ vendor core. All of them were regenerated as professional, standalone pages:
 - Spec §5's 20-section homepage is implemented as 9 substantive live-data sections
   + hero + CTA; all content is sourced from the real platform (no invented claims).
   Additional sections can be added as more operator data is configured.
+
+### Correction (later same day): PHP-layer revert after CI forensics
+
+The earlier root-PHP regeneration (58 pages) and the `php/` layout layer were
+reverted: CI behavior forensics (per-suite annotations) proved that the
+regeneration had broken module-integrated pages that the repository's own test
+suites pin down:
+
+- `email-hosting.php` — asserted by tests/cloudhost247_email (PublicCatalog +
+  setTemplate integration) — restored verbatim from main.
+- `cloudhost247-marketing-track.php` — asserted by tests/marketing session 11
+  (must delegate to TrackController with $_GET) — restored verbatim from main.
+- 29 landing pages — pinned by tests/theme/test_static.py to the
+  `PublicPage::route()` architecture — all restored from main.
+- The orphaned `php/` layout layer, `index.php` (would shadow WHMCS core's own
+  index.php in a real install) and the three `legacy-*-router.php` shims were
+  removed.
+
+All 422 static Python tests, 6 staging tests, migration validation and the
+retired-brand audit pass locally after the revert. The website rebuild itself
+(platform static site, SPA, marketplace data model, assets, tests) is
+unaffected by this revert: the WHMCS-surface pages keep their original,
+module-integrated implementations.

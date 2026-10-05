@@ -1,23 +1,26 @@
 <?php
 /**
- * CloudHost247 — professional standalone page.
+ * WHMCS Domain Name Auto-Renewal and Deletion Policy Page
  *
- * Shares the platform design system and shows only content that actually
- * exists: either authored policy text preserved from the previous site, or
- * live data pulled from the CloudHost247 platform API.
+ * @package WHMCS
+ * @author CloudHost247 Isc.
+ * @copyright Copyright (c) CloudHost247 Isc., All Rights Reserved
+ * @license https://www.cloudhost247.com/license/
  */
 
-declare(strict_types=1);
+define('CLIENTAREA', true);
 
-require_once __DIR__ . '/php/bootstrap.php';
+require __DIR__ . '/init.php';
 
-$prose = "<div class=\"policy-content\">\n    <div class=\"container\">\n        <div>\n            <div>\n                <h3>1. Overview</h3>\n                <p>Domain names registered through CloudHost247 Isc. are automatically renewed before expiration to prevent service interruption and domain loss. This policy explains how auto-renewal works, what happens if renewal fails, and the lifecycle of a domain after expiration.</p>\n                <h3>2. Auto-Renewal Process</h3>\n                <p>CloudHost247 Isc. provides an optional Auto-Renew feature to ensure uninterrupted domain service for all registrants. When enabled, your domain will be automatically renewed using available funds in your account balance or via the credit/debit card you have securely saved in our system.</p>\n                <p>Auto-renewals are processed for a one-year extension per cycle. Renewal charges will be based on the current applicable rates at the time of renewal, which may differ from the original purchase price. To help prevent service interruption or domain loss, domain registrations may be set to Auto-Renew by default.</p>\n                <p>By using this feature, you authorize CloudHost247 Isc. to securely store and charge your selected payment method during domain registration, renewal, or transfer processes. You may disable Auto-Renewal at any time from your account settings.</p>\n                <h3>3. Renewal Notices</h3>\n                <p>We send email reminder notifications before your domain expiration date to ensure you are aware of upcoming renewals. These reminders are sent at intervals prior to expiration so you have sufficient time to update payment methods or take manual action if needed.</p>\n                <p>If sufficient funds are not available at the time of renewal, we will notify you via email so you can complete the renewal manually before the domain expires.</p>\n                <h3>4. Failed Renewal / Payment Issues</h3>\n                <p>If payment is not successfully processed on or before the domain renewal date, your domain will expire. It is your responsibility to ensure that your payment method on file is valid, active, and has sufficient funds or credit available at the time of renewal.</p>\n                <p>We are not responsible for domains that expire due to failed payments, invalid payment details, expired credit cards, or any other issue that prevents successful automatic renewal.</p>\n                <h3>5. Grace Period</h3>\n                <p>Within one day after expiration, the domain may be deactivated and replaced with a parking page indicating expiration. Associated services such as websites or email may stop functioning.</p>\n                <p>During the grace period, you may still be able to renew your domain at the standard renewal rate. The exact length of the grace period varies by domain extension (TLD) and is determined by the domain registry. We recommend renewing as soon as possible to avoid complications.</p>\n                <h3>6. Redemption Period</h3>\n                <p>From approximately 36 days after expiration, the domain may become available for registration by third parties. If another party acquires the domain, it can no longer be recovered or renewed by you.</p>\n                <p>If the domain is not purchased by a third party, it may enter the registry redemption period as defined by the domain registry. During this stage, recovery may still be possible, but a redemption fee plus standard renewal charges will apply. Fees vary depending on the domain extension (TLD).</p>\n                <h3>7. Deletion and Release</h3>\n                <p>After the redemption period ends, the domain may be held briefly (typically up to five days) by the registry before being released for general public registration. Once deleted and released, the domain becomes available to anyone on a first-come, first-served basis.</p>\n                <p>We cannot guarantee recovery of a domain once it has entered the deletion process or been released to the public. It is your responsibility to renew your domain before expiration to retain ownership.</p>\n                <h3>8. Customer Responsibility</h3>\n                <p>You are solely responsible for keeping your payment methods updated, monitoring your domain expiration dates, and ensuring timely renewal of your domain registrations. This includes maintaining accurate contact information and email addresses so you receive renewal notifications.</p>\n                <p>CloudHost247 Isc. is not liable for any loss of domain names, associated services, data, revenue, or business resulting from expired domains, failed renewals, or deletion by the registry.</p>\n                <h3>9. Policy Changes</h3>\n                <p>This Domain Name Auto-Renewal and Deletion Policy may be updated or modified at any time without prior notice. Changes become effective immediately upon posting to our website. We encourage you to review this policy periodically to stay informed of any updates that may affect your domain registrations.</p>\n                <p>If you have any questions about this policy or your domain renewal status, please contact our support team for assistance.</p>\n            </div>\n        </div>\n    </div>\n</div>";
+$ca = new WHMCS\ClientArea();
 
-echo ch247_page([
-    'title' => "Domain Renewal & Deletion Policy | CloudHost247",
-    'description' => "How domain auto-renewal works at CloudHost247, the grace and redemption periods after expiry, and deletion timing.",
-    'canonical' => 'domain-renewal-policy.php',
-    'active' => 'domains',
-    'crumbs' => [['index.php', 'Home'], ['legal.php', 'Legal'], [null, "Domain Auto-Renewal & Deletion Policy"]],
-], ch247_page_head([['index.php', 'Home'], ['legal.php', 'Legal'], [null, "Domain Auto-Renewal & Deletion Policy"]], "Domain Auto-Renewal & Deletion Policy", "What happens when a domain renews, expires, or is deleted — including every grace period.")
-    . '<section class="section"><div class="container"><div class="card" style="padding:28px">' . ch247_prose($prose) . '</div></div></section>');
+$ca->setPageTitle(Lang::trans('Domain Name Auto-Renewal and Deletion Policy'));
+
+$ca->addToBreadCrumb('index.php', Lang::trans('Home'));
+$ca->addToBreadCrumb('domain-renewal-policy.php', Lang::trans('Domain Name Auto-Renewal and Deletion Policy'));
+
+$ca->initPage();
+
+$ca->setTemplate('domainrenewalpolicy');
+
+$ca->output();

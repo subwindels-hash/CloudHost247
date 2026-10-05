@@ -26,21 +26,7 @@ jobs:
         # pipefail so a php -l failure cannot hide behind a successful xargs
         run: set -o pipefail; bash scripts/php-lint-targets.sh | xargs -r -n1 php -l
       - name: PHP behavior diagnostics
-        run: |
-          for suite in foundation theme currency ovh rdp integrations modules builder smm tools broker marketing cart_recovery passkey phoneservices customaffiliate cloudhost247_email payments; do
-            echo "::group::$suite"
-            if php -d display_errors=1 "tests/$suite/run.php" > "/tmp/$suite.out" 2>&1; then
-              tail -3 "/tmp/$suite.out"
-              echo "::endgroup::"
-            else
-              echo "::endgroup::"
-              echo "--- $suite output tail ---"
-              tail -40 "/tmp/$suite.out"
-              echo "::error file=tests/$suite/run.php,line=1::SUITE $suite FAILED-LINES :: $(grep -E 'not ok|FAIL|failed|Failed' "/tmp/$suite.out" | head -12 | tr '\n' '~')"
-              echo "::error file=tests/$suite/run.php,line=1::SUITE $suite FAILED-CONTEXT :: $(grep -B6 -A6 -E 'not ok|FAIL' "/tmp/$suite.out" | head -40 | tr '\n' '~')"
-              exit 1
-            fi
-          done
+        run: php tests/foundation/run.php && php -d display_errors=1 tests/theme/run.php && php tests/currency/run.php && php -d display_errors=1 tests/ovh/run.php && php -d display_errors=1 tests/rdp/run.php && php -d display_errors=1 tests/integrations/run.php && php -d display_errors=1 tests/modules/run.php && php -d display_errors=1 tests/builder/run.php && php -d display_errors=1 tests/smm/run.php && php -d display_errors=1 tests/tools/run.php && php -d display_errors=1 tests/broker/run.php && php -d display_errors=1 tests/marketing/run.php && php -d display_errors=1 tests/cart_recovery/run.php && php -d display_errors=1 tests/passkey/run.php && php -d display_errors=1 tests/phoneservices/run.php && php -d display_errors=1 tests/customaffiliate/run.php && php -d display_errors=1 tests/cloudhost247_email/run.php && php -d display_errors=1 tests/payments/run.php
       - name: Retired-brand audit (repository-wide)
         run: python3 scripts/branding-audit.py
       - name: Server agent authentication (Node, no dependencies)

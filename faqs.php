@@ -1,17 +1,32 @@
 <?php
 /**
- * CloudHost247 — professional standalone page.
+ * CloudHost247 - Frequently Asked Questions (FAQs)
  *
- * Shares the platform design system and shows only content that actually
- * exists: either authored policy text preserved from the previous site, or
- * live data pulled from the CloudHost247 platform API.
+ * @package    WHMCS
+ * @author     CloudHost247
+ * @copyright  Copyright (c) CloudHost247 Isc.
+ * @license    https://www.cloudhost247.com/license
  */
 
-declare(strict_types=1);
+use WHMCS\ClientArea;
+use WHMCS\Authentication\CurrentUser;
 
-require_once __DIR__ . '/php/bootstrap.php';
+require_once __DIR__ . '/init.php';
 
-$faqItems = [
+$ca = new ClientArea();
+
+// Set page title
+$ca->setPageTitle('Frequently Asked Questions');
+
+// Add breadcrumb
+$ca->addToBreadCrumb('index.php', Lang::trans('globalsystemname'));
+$ca->addToBreadCrumb('faqs.php', 'Frequently Asked Questions');
+
+// Initialize template
+$ca->initPage();
+
+// Assign FAQ data to template
+$ca->assign('faqItems', [
     [
         'id' => 'faq-1',
         'question' => 'What is CloudHost247?',
@@ -72,34 +87,8 @@ $faqItems = [
         'question' => 'Where can I read your full policies?',
         'answer' => 'All our policies, including Privacy Policy, Terms & Conditions, Refund Policy, Cookie Policy, and Data Protection Standards, are available on our website at <a href="https://www.cloudhost247.com/legal" target="_blank">www.cloudhost247.com/legal</a>.'
     ]
-];
+]);
 
-$itemsHtml = '';
-foreach ($faqItems as $item) {
-    $itemsHtml .= '<details class="card"><summary style="font-weight:700;cursor:pointer">'
-        . ch247_e($item['question'] ?? '')
-        . '</summary><div style="margin-top:10px">'
-        . ($item['answer'] ?? '')
-        . '</div></details>';
-}
-
-echo ch247_page([
-    'title' => 'Frequently Asked Questions | CloudHost247',
-    'description' => 'Answers to common questions about CloudHost247 hosting, domains, billing, support and account management.',
-    'canonical' => 'faqs.php',
-    'active' => 'resources',
-    'crumbs' => [['index.php', 'Home'], [null, 'FAQs']],
-    'jsonld' => [
-        '@context' => 'https://schema.org',
-        '@type' => 'FAQPage',
-        'mainEntity' => array_map(static function ($item) {
-            return [
-                '@type' => 'Question',
-                'name' => $item['question'] ?? '',
-                'acceptedAnswer' => ['@type' => 'Answer', 'text' => strip_tags((string) ($item['answer'] ?? ''))],
-            ];
-        }, $faqItems),
-    ],
-], ch247_page_head([['index.php', 'Home'], [null, 'FAQs']], 'Frequently Asked Questions', 'Straight answers about our services, billing and support. If your question is not covered, open a ticket and a human will answer.')
-    . '<section class="section"><div class="container" style="display:grid;gap:14px;max-width:880px">' . $itemsHtml . '</div></section>'
-    . ch247_cta_band('Still have a question?', 'Our support team answers tickets personally — no bots, no canned replies.', 'Contact Support', 'help-center.php'));
+// Output template
+$ca->setTemplate('faqs');
+$ca->output();

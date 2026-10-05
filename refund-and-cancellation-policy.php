@@ -1,23 +1,13 @@
 <?php
-/**
- * CloudHost247 — professional standalone page.
- *
- * Shares the platform design system and shows only content that actually
- * exists: either authored policy text preserved from the previous site, or
- * live data pulled from the CloudHost247 platform API.
- */
-
-declare(strict_types=1);
-
-require_once __DIR__ . '/php/bootstrap.php';
-
-$prose = "<div class=\"term-domain_banner register-domain-banner2\" style=\"background-image: url('/templates//images/term_bg_1.jpg');\">\n  <div class=\"container\">\n    </div>\n</div>\n<div class=\"inner-term-domain-page\">\n        <div class=\"container inner_term_container\">\n           <h3>Refund and Cancellation Policy</h3>\n           <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. </p>\n           <p>It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. </p>\n           <p>It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</p>\n           <h3>7-Day Free Access</h3>\n           <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. </p>\n           <h3>Refunds</h3>\n           <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. </p>\n          <ul class=\"term_lis\">\n            <li> <span><img src=\"/templates//images/chcek_price_icon.png\" class=\"chcek_ic\">\n          Full Inbox protection at competitive prices</span></li>\n            <li><span><img src=\"/templates//images/chcek_price_icon.png\" class=\"chcek_ic\">\n                 Easy configuration </span>   </li>\n            <li><span><img src=\"/templates//images/chcek_price_icon.png\" class=\"chcek_ic\">\n                     Various reporting options </span></li>\n            <li><span><img src=\"/templates//images/chcek_price_icon.png\" class=\"chcek_ic\">\n                Increase employee productivity </span>  </li>\n              </ul>\n            <h3>Product Services</h3>\n           <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. </p>\n           <p>It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled .</p>\n             <h3>Refunds </h3>\n           <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. </p>\n          <ul class=\"term_lis\">\n            <li> <span><img src=\"/templates//images/chcek_price_icon.png\" class=\"chcek_ic\">\n         Proin in ligula ut mi iaculis porta nec quis odio.</span></li>\n            <li><span><img src=\"/templates//images/chcek_price_icon.png\" class=\"chcek_ic\">\n                 Sed id dui at ipsum lacinia interdum vitae sit amet quam. </span>   </li>\n            <li><span><img src=\"/templates//images/chcek_price_icon.png\" class=\"chcek_ic\">\n                    Quisque fermentum nulla eu magna elementum, in aliquam turpis posuere. </span></li>\n              </ul>\n                <p>VPS, Cloud VPS, Dedicated Servers, Cloud Servers, Infrastructure Services, AWS or Google Cloud Computing services are not eligible for 30 days money back guarantee.</p>\n            <p>If the TOS/AUP agreed upon when ordering is violated this voids your eligibility for the 30 day money back guarantee. WIPL reserves the right to deny the refund if we feel abuse of services has occurred.</p>\n        </div>\n    </div>";
-
-echo ch247_page([
-    'title' => "Refund & Cancellation Policy | CloudHost247",
-    'description' => "How to cancel a CloudHost247 service and when refunds apply — including cancellation windows and exclusions.",
-    'canonical' => 'refund-and-cancellation-policy.php',
-    'active' => 'company',
-    'crumbs' => [['index.php', 'Home'], ['legal.php', 'Legal'], [null, "Refund & Cancellation Policy"]],
-], ch247_page_head([['index.php', 'Home'], ['legal.php', 'Legal'], [null, "Refund & Cancellation Policy"]], "Refund & Cancellation Policy", "How cancellations and refunds work, step by step.")
-    . '<section class="section"><div class="container"><div class="card" style="padding:28px">' . ch247_prose($prose) . '</div></div></section>');
+use WHMCS\ClientArea;
+use WHMCS\Database\Capsule;
+define('CLIENTAREA', true);
+require __DIR__ . '/init.php';
+$ca = new ClientArea();
+$ca->setPageTitle('Refund and Cancellation Policy');
+$ca->addToBreadCrumb('index.php', Lang::trans('globalsystemname'));
+$ca->addToBreadCrumb('refund-and-cancellation-policy.php', 'Refund and Cancellation Policy');
+$ca->initPage();
+$ca->assign('sidebarCloudHost247Remove', 'true');
+$ca->setTemplate('refund-and-vancellation-policy');
+$ca->output();

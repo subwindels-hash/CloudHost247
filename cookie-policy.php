@@ -1,23 +1,17 @@
 <?php
 /**
- * CloudHost247 — professional standalone page.
+ * Cookie Policy Page
  *
- * Shares the platform design system and shows only content that actually
- * exists: either authored policy text preserved from the previous site, or
- * live data pulled from the CloudHost247 platform API.
+ * @package    WHMCS
+ * @subpackage ClientArea
  */
 
-declare(strict_types=1);
+define('CLIENTAREA', true);
+require __DIR__ . '/init.php';
 
-require_once __DIR__ . '/php/bootstrap.php';
-
-$prose = "<section class=\"inner-policy-section\">\n    <div class=\"container\">\n        <div>\n            <div>\n                <div class=\"inner-policy-content\">\n                    <p><strong>Effective Date: August 14, 2025</strong></p>\n                    <p>This Cookie Policy explains how CloudHost247 Isc. (\"we,\" \"us,\" \"our\") uses cookies and similar tracking technologies when you visit our websites, use our services, or interact with our content.</p>\n                    <p>By using our website and services, you consent to the use of cookies as described in this policy.</p>\n                    <h2>1. What Are Cookies?</h2>\n                    <p>Cookies are small text files placed on your computer, smartphone, or other device when you visit a website. They help websites function, remember preferences, and understand how visitors use the site.</p>\n                    <h2>2. Types of Cookies We Use</h2>\n                    <p>We use the following categories of cookies:</p>\n                    <h3>a. Strictly Necessary Cookies</h3>\n                    <p>These cookies are essential for the operation of our website and services, enabling core functionality such as:</p>\n                    <ul>\n                        <li>Logging into your account</li>\n                        <li>Managing your hosting services</li>\n                        <li>Processing transactions</li>\n                    </ul>\n                    <p>Without these cookies, our website and services may not function properly.</p>\n                    <h3>b. Performance & Analytics Cookies</h3>\n                    <p>These cookies collect information about how visitors use our website, such as:</p>\n                    <ul>\n                        <li>Pages visited</li>\n                        <li>Time spent on each page</li>\n                        <li>Errors encountered</li>\n                    </ul>\n                    <p>We use this data to improve website performance and user experience.</p>\n                    <h3>c. Functional Cookies</h3>\n                    <p>These cookies remember your preferences and choices, such as:</p>\n                    <ul>\n                        <li>Language settings</li>\n                        <li>Login details</li>\n                        <li>Customized layouts</li>\n                    </ul>\n                    <p>This allows us to provide a more personalized experience.</p>\n                    <h3>d. Targeting & Advertising Cookies</h3>\n                    <p>These cookies track your browsing habits to show relevant advertisements on our site or third-party platforms. They may be set by us or by advertising partners.</p>\n                    <h2>3. Third-Party Cookies</h2>\n                    <p>Some cookies on our site are placed by third parties, including:</p>\n                    <ul>\n                        <li>Analytics providers (e.g., Google Analytics)</li>\n                        <li>Advertising networks</li>\n                        <li>Social media platforms</li>\n                    </ul>\n                    <p>We do not control third-party cookies and recommend checking their privacy/cookie policies.</p>\n                    <h2>4. How We Use Cookies</h2>\n                    <p>We use cookies to:</p>\n                    <ul>\n                        <li>Enable essential website functionality</li>\n                        <li>Monitor and analyze usage for improvements</li>\n                        <li>Save your settings and preferences</li>\n                        <li>Deliver relevant marketing and promotions</li>\n                        <li>Improve overall service performance</li>\n                    </ul>\n                    <h2>5. How to Manage & Disable Cookies</h2>\n                    <p>You can control or disable cookies through your browser settings. However, please note that some site features may not work correctly if you disable certain cookies.</p>\n                    <p>For instructions, visit:</p>\n                    <ul>\n                        <li>Chrome: <a href=\"https://support.google.com/chrome/answer/95647\" target=\"_blank\" rel=\"noopener noreferrer\">https://support.google.com/chrome/answer/95647</a></li>\n                        <li>Firefox: <a href=\"https://support.mozilla.org/en-US/kb/enable-and-disable-cookies\" target=\"_blank\" rel=\"noopener noreferrer\">https://support.mozilla.org/en-US/kb/enable-and-disable-cookies</a></li>\n                        <li>Safari: <a href=\"https://support.apple.com/guide/safari/manage-cookies\" target=\"_blank\" rel=\"noopener noreferrer\">https://support.apple.com/guide/safari/manage-cookies</a></li>\n                    </ul>\n                    <h2>6. Changes to This Policy</h2>\n                    <p>We may update this Cookie Policy from time to time. Any changes will be posted on this page with a new Effective Date. Continued use of our website after changes means you accept the updated policy.</p>\n                    <h2>Contact Us</h2>\n                    <p>If you have questions about our Cookie Policy, please contact:</p>\n                    <p><a href=\"mailto:privacy@cloudhost247.com\">privacy@cloudhost247.com</a></p>\n                    <p><a href=\"https://www.cloudhost247.com\" target=\"_blank\" rel=\"noopener noreferrer\">www.cloudhost247.com</a></p>\n                </div>\n            </div>\n        </div>\n    </div>\n</section>";
-
-echo ch247_page([
-    'title' => "Cookie Policy | CloudHost247",
-    'description' => "How CloudHost247 uses cookies and similar technologies across its websites, and how you can control them.",
-    'canonical' => 'cookie-policy.php',
-    'active' => 'company',
-    'crumbs' => [['index.php', 'Home'], ['legal.php', 'Legal'], [null, "Cookie Policy"]],
-], ch247_page_head([['index.php', 'Home'], ['legal.php', 'Legal'], [null, "Cookie Policy"]], "Cookie Policy", "Which cookies we use, what they do, and how to control them.")
-    . '<section class="section"><div class="container"><div class="card" style="padding:28px">' . ch247_prose($prose) . '</div></div></section>');
+$ca = new WHMCS_ClientArea();
+$ca->setPageTitle('COOKIE POLICY');
+$ca->addToBreadCrumb('index.php', 'Home');
+$ca->addToBreadCrumb('cookie-policy.php', 'Cookie Policy');
+$ca->setTemplate('cookiepolicy');
+$ca->output();

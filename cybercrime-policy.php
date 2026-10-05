@@ -1,15 +1,34 @@
 <?php
 /**
- * CloudHost247 — professional standalone page.
+ * WHMCS Client Area Cybercrime Detection Policy Page
  *
- * Shares the platform design system and shows only content that actually
- * exists: either authored policy text preserved from the previous site, or
- * live data pulled from the CloudHost247 platform API.
+ * @package    WHMCS
+ * @author     CloudHost247
+ * @copyright  Copyright (c) CloudHost247 Isc., All Rights Reserved
+ * @link       https://www.cloudhost247.com
  */
 
-declare(strict_types=1);
+define('CLIENTAREA', true);
+require __DIR__ . '/init.php';
 
-require_once __DIR__ . '/php/bootstrap.php';
+use WHMCS\ClientArea;
+use WHMCS\Authentication\CurrentUser;
+
+$ca = new ClientArea();
+$ca->setPageTitle('Cybercrime Detection Policy');
+$ca->addToBreadCrumb('index.php', Lang::trans('globalsystemname'));
+$ca->addToBreadCrumb('cybercrime-policy.php', 'Cybercrime Detection Policy');
+$ca->initPage();
+
+/**
+ * ================================================================
+ * CYBERCRIME DETECTION POLICY DATA
+ * ================================================================
+ * Professional policy covering monitoring, detection, fraud
+ * prevention, data collection, automated systems, user obligations,
+ * reporting, enforcement, privacy, and updates.
+ * ================================================================
+ */
 
 $cybercrimeSections = [
     'hero' => [
@@ -160,10 +179,6 @@ $cybercrimeSections = [
     ]
 ];
 
-echo ch247_page([
-    'title' => "Cybercrime Detection Policy | CloudHost247",
-    'description' => "How CloudHost247 prevents, detects and reports illegal or fraudulent activity on domains and hosting under its care.",
-    'canonical' => 'cybercrime-policy.php',
-    'active' => 'company',
-    'crumbs' => [['index.php', 'Home'], [null, "Cybercrime Detection Policy"]],
-], '<section class="section"><div class="container"><div class="card" style="padding:28px">' . ch247_policy_doc($cybercrimeSections) . '</div></div></section>');
+$ca->assign('cybercrimeData', $cybercrimeSections);
+$ca->setTemplate('cybercrimepolicy');
+$ca->output();
