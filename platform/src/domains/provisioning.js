@@ -42,6 +42,38 @@ function register(router, deps) {
     ctx.json({ jobs: rows.map(publicJob), total });
   });
 
+  // Customer job detail — owners see their own job; staff see any. The thin job model carries no
+  // deployment step/event rows, so those arrays stay empty (contract parity).
+  router.get('/api/v1/provisioning/jobs/:id', async (ctx) => {
+    const auth = await authenticate(ctx, deps);
+    const job = await store.table('provisioning_jobs').findById(ctx.params.id);
+    if (!job) throw new NotFoundError('Provisioning job not found');
+    const isStaff = ['admin', 'super_admin', 'staff'].includes(auth.role);
+    if (!isStaff && job.user_id !== auth.id) throw new NotFoundError('Provisioning job not found');
+    ctx.json({ job: adminJob(job), steps: [], events: [] });
+  });
+
+  // Retry/cancel on the customer surface are admin-gated in the original (requireRole admin/super_admin).
+  router.post('/api/v1/provisioning/jobs/:id/retry', async (ctx) => {
+    const auth = await asAdmin(ctx, deps);
+    const job = await store.table('provisioning_jobs').findById(ctx.params.id);
+    if (!job) throw new NotFoundError('Provisioning job not found');
+    if (job.status !== 'failed') throw new ConflictError('Only retryable failed jobs can be retried');
+    await store.table('provisioning_jobs').updateById(job.id, { status: 'queued', error: null, finished_at: null });
+    await audit(ctx, 'PROVISIONING_JOB_RETRIED', job.id);
+    ctx.json({ queued: true, message: 'Provisioning job queued for retry' });
+  });
+
+  router.post('/api/v1/provisioning/jobs/:id/cancel', async (ctx) => {
+    const auth = await asAdmin(ctx, deps);
+    const job = await store.table('provisioning_jobs').findById(ctx.params.id);
+    if (!job) throw new NotFoundError('Provisioning job not found');
+    if (job.status !== 'queued') throw new ConflictError('Only queued jobs can be cancelled');
+    await store.table('provisioning_jobs').updateById(job.id, { status: 'cancelled', finished_at: new Date().toISOString() });
+    await audit(ctx, 'PROVISIONING_JOB_CANCELLED', job.id);
+    ctx.json({ cancelled: true, message: 'Provisioning job cancelled' });
+  });
+
   router.get('/api/v1/admin/provisioning/jobs', async (ctx) => {
     await asAdmin(ctx, deps);
     const query = await ctx.validateQuery(v.object({ status: v.string().optional() }));
