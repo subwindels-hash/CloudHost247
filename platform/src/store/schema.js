@@ -13,6 +13,8 @@
  */
 'use strict';
 
+const { controlPanels, controlPanelPlans } = require('./seed-data/control-panels');
+
 /** Column types supported by both backends. Maps to a PostgreSQL type for the pg backend. */
 const TYPES = {
   uuid: 'UUID',
@@ -902,28 +904,61 @@ const TABLES = {
   // -------------------------------------------------------------------------
   // Control panels / licenses / services
   // -------------------------------------------------------------------------
+  // Mirrors migrations 0041 (base table) + 0043 (marketplace metadata and commercial plans).
+  // supported_os/capabilities are JSONB rather than TEXT[]/JSONB-in-SQL because the pg backend
+  // serialises every structured column as JSON (see toDriverValue in src/store/pg-store.js), and a
+  // JSON-encoded array is not a valid TEXT[] literal.
   control_panels: {
     columns: {
       id: pk(),
       slug: text({ required: true }),
       name: text({ required: true }),
       vendor: text({ nullable: true }),
-      status: text({ default: 'active' }),
+      status: text({ default: 'ACTIVE' }),
+      category: text({ default: 'SERVER_PANEL' }),
+      description: text({ nullable: true }),
+      logo_url: text({ nullable: true }),
+      website_url: text({ nullable: true }),
+      documentation_url: text({ nullable: true }),
+      installation_method: text({ default: 'SCRIPT' }),
+      requires_license: bool({ default: false }),
+      license_provider: text({ default: 'NONE' }),
+      minimum_ram_mb: int({ default: 1024 }),
+      minimum_cpu_cores: int({ default: 1 }),
+      minimum_disk_gb: int({ default: 20 }),
+      supported_os: jsonb({ default: ['ubuntu', 'debian'] }),
+      capabilities: jsonb({ default: {} }),
+      sort_order: int({ default: 100 }),
+      metadata: jsonb({ default: {} }),
       created_at: ts(),
+      updated_at: ts(),
     },
     indexes: [{ name: 'control_panels_slug_key', columns: ['slug'], unique: true }],
+    seed: controlPanels,
   },
 
+  // Commercial licence tiers for a panel (migration 0043). This is a catalogue, not a per-customer
+  // assignment — a customer's chosen panel lives on customer_services.control_panel_id.
   control_panel_plans: {
     columns: {
-      user_id: uuid({ required: true }),
-      hosting_plan_id: uuid({ nullable: true }),
       id: pk(),
-      panel_id: uuid({ required: true }),
-      name: text({ nullable: true }),
-      price: num({ nullable: true }),
+      control_panel_id: uuid({ required: true }),
+      name: text({ required: true }),
+      description: text({ nullable: true }),
+      billing_cycle: text({ default: 'monthly' }),
+      price: num({ default: 0 }),
+      currency: text({ default: 'USD' }),
+      setup_fee: num({ default: 0 }),
+      license_type: text({ default: 'FREE' }),
+      included_domains: int({ nullable: true }),
+      included_accounts: int({ nullable: true }),
+      status: text({ default: 'ACTIVE' }),
+      metadata: jsonb({ default: {} }),
       created_at: ts(),
+      updated_at: ts(),
     },
+    indexes: [{ name: 'control_panel_plans_panel_idx', columns: ['control_panel_id', 'status'] }],
+    seed: controlPanelPlans,
   },
 
   licenses: {
