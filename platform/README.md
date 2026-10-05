@@ -131,7 +131,17 @@ protection.
 ## What is ported vs still open
 
 See [MIGRATION.md](./MIGRATION.md) for the per-module parity table and the deliberately deferred
-items (AWS adapters, provider checkout initiation, domain availability, TOTP QR images).
+items (AWS adapters, provider checkout initiation, domain availability, real-provider checkout
+egress).
+
+TOTP enrolment returns a QR image the client can display directly (`qrPngDataUri` from
+`POST /api/v1/auth/mfa/totp/enroll`, drawn by the dependency-free `src/lib/qr.js`). The encoder is
+pinned against an unrelated implementation — 744 python-qrcode matrices reproduced byte-for-byte,
+penalty scores checked against segno rule by rule — and the image the API serves has been decoded
+back to its `otpauth://` URI by OpenCV. See "QR codes" in [MIGRATION.md](./MIGRATION.md), including
+the two limits that are stated rather than glossed over. Legacy bcrypt hashes cannot be verified or
+transposed; `scripts/rehash-passwords.js` reports them and, on `--apply`, issues real reset
+invitations (never a fabricated hash).
 
 Passkeys (WebAuthn) are implemented without `@simplewebauthn/server`: the CBOR/COSE/ceremony
 verification is hand-written on `node:crypto` in `src/lib/webauthn/`, the routes live in

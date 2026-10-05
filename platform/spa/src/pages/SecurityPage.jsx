@@ -187,7 +187,23 @@ export default function SecurityPage() {
             </>
           ) : enrolment ? (
             <>
-              <p className="muted">Scan or paste this secret into your authenticator app, then enter the code.</p>
+              <p className="muted">
+                Scan this code with your authenticator app, or paste the secret if you cannot scan.
+              </p>
+              {enrolment.qrPngDataUri ? (
+                <img
+                  src={enrolment.qrPngDataUri}
+                  alt="Two-factor enrolment QR code"
+                  width={192}
+                  height={192}
+                  style={{ imageRendering: 'pixelated', display: 'block', margin: '8px 0' }}
+                />
+              ) : (
+                <p className="muted">
+                  This server did not return a QR image. Paste the secret below, or add the account
+                  link manually: <span className="code">{enrolment.otpauthUri}</span>
+                </p>
+              )}
               <p className="code">{enrolment.secret}</p>
               <form onSubmit={confirmEnrol}>
                 <div className="field">

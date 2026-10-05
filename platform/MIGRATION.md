@@ -19,7 +19,7 @@ the cutover.
 | `dotenv` | `src/core/config.js` | own `.env` parser; host env wins over file; empty string reads as unset |
 | `bcryptjs` | `src/lib/password.js` | scrypt (memory-hard, no toolchain). See "Password hashes" below. |
 | `jsonwebtoken` | `src/lib/jwt.js` | HS256, byte-compatible; rejects `alg:none` and wrong-secret; per-token `jti` |
-| TOTP/QR deps | `src/lib/totp.js` + `scripts/generate-icons.js` | RFC 6238 + recovery codes; QR enrolment image deferred (see below) |
+| TOTP/QR deps | `src/lib/totp.js` + `src/lib/qr.js` | RFC 6238 + recovery codes; QR enrolment image implemented (see "QR codes") |
 
 ## Domain parity
 
@@ -59,8 +59,48 @@ the cutover.
 
 The new platform hashes with scrypt and can *read* scrypt hashes, but deliberately does **not**
 re-implement Blowfish, so a legacy `bcrypt$...`/`$2b$...` hash verifies `false`. Those users must
-reset their password (the login route says exactly that). A bulk re-enrolment tool
-(`scripts/rehash-passwords.js`) is the intended follow-up; it is **not yet implemented**.
+reset their password (the login route says exactly that). `scripts/rehash-passwords.js` is the
+supported migration path, and it **cannot do more than invite a reset** — re-hashing needs the
+plaintext, and nobody has it. It runs dry by default, reports `legacy-bcrypt` accounts, stale-parameter
+scrypt hashes (which only need the login route's upgrade-on-sign-in) and blank hashes, and with
+`--apply` writes only `auth_recovery` rows of kind `password_reset` with
+`sha256(random 32-byte token)` and a one-hour expiry — the same contract as
+`POST /api/v1/auth/password/forgot`. It refuses to stack a second invite on a live one unless
+`--force`; raw tokens go to stdout only outside production, otherwise to a `0600` `--out` file, and
+production `--apply` refuses to run without one. There is no mail transport in this build, so
+delivery is explicitly the operator's job.
+
+## QR codes (TOTP enrolment)
+
+`src/lib/qr.js` is a dependency-free QR encoder (byte mode, versions 1–40, EC L/M/Q/H, automatic
+version and mask selection, SVG + 1-bit greyscale PNG + `data:` URI output). `POST
+/api/v1/auth/mfa/totp/enroll` returns `qrPngDataUri` next to `secret` and `otpauthUri`, so clients
+never have to draw a QR code themselves; the React Security page renders it.
+
+Confidence comes from independent tools, not from the encoder agreeing with itself:
+
+- `tests/fixtures/qr-reference.json` holds **744 matrices from python-qrcode 8.2**, an unrelated
+  implementation: every version at every level, every mask at a spread of versions, full-capacity
+  payloads, and four real `otpauth://` URIs. All 744 match byte-for-byte, and all 264 full-capacity
+  payloads select the same version unaided. Regenerate with `tests/fixtures/generate-qr-fixtures.py`
+  (needs `qrcode==8.2`; `segno==1.6.6` is optional).
+- The same fixture carries **32 penalty-score checks from segno 1.6.6** and five synthetic matrices
+  that isolate each penalty rule, so a single wrong rule cannot hide in a plausible total.
+- The test suite reads the **bits back out** of a finished matrix and recomputes the Reed–Solomon
+  codewords with a second, independently written GF(256) implementation, and decodes the PNG with a
+  reader that shares no code with the writer.
+- The PNG the API actually serves was decoded back to the exact `otpauth://` URI by an **independent
+  decoder** — OpenCV 5.0.0, `cv2.QRCodeDetector`:
+  `python -c "import cv2; print(cv2.QRCodeDetector().detectAndDecode(cv2.imread('enrol.png', 0))[0])"`
+  (install `opencv-python-headless`; not a project dependency).
+
+Two honest limits: mask *choice* is not compared across encoders (all eight masks encode the same
+data; scoring-border conventions differ), and `margin: 0` output is legal but not scanner-readable —
+the API always uses the standard 4-module quiet zone, and `tests/qr.test.js` covers a margin of 0
+only as an image-encoding edge case. One deviation is documented rather than hidden: segno 1.6.6
+appends a spurious `0x00` pad codeword where ISO/IEC 18004 §7.4.10 says to start the `0xEC`/`0x11`
+alternation immediately; that matrix is stored as `segno_padding_deviation` and the test asserts the
+difference.
 
 ## Deliberately deferred (open items)
 
@@ -91,8 +131,10 @@ out so nobody mistakes absence for parity:
    real browser or hardware authenticator has driven a ceremony** (the sandbox has no WebAuthn
    stack). That limitation is recorded in `docs/UNFINISHED-BUILD-CODE-NAMES.md` rather than
    presented as verified.
-2. **QR enrolment image** for TOTP. The secret + `otpauth://` URI are returned; a self-contained
-   QR+PNG encoder is not yet written (the PNG encoder in `scripts/generate-icons.js` is a start).
+2. ~~**QR enrolment image** for TOTP.~~ **Implemented 2026-10-05** — `src/lib/qr.js` and
+   `qrPngDataUri` on the enrolment response; see "QR codes" above for the evidence and the limits
+   (mask choice is not compared across encoders; a zero-margin render is legal but not
+   scanner-readable).
 3. **AWS SDK adapters** (EC2/Route53/CloudWatch/instance-connect) and the infrastructure /
    provisioning / marketplace / deployments / dns / ssl / firewall / revenue-guardian / ai domains.
    By design these are the largest surface and are ported incrementally; adding their tables to

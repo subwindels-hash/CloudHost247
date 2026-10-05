@@ -16,12 +16,13 @@ staging-blocked — see §5).
 |---|---|---|
 | 1 | `platform/` payment gateways — Stripe / PayPal / Paystack inbound webhooks + strict settlement receiver | **DONE 2026-10-05** — see §1b. Initiation of a real-provider checkout remains deferred (needs provider egress) and is refused with that reason |
 | 2 | `platform/` passkeys / WebAuthn — enrolment, management, sign-in (email-first + usernameless) and the browser ceremony helper | **DONE 2026-10-05 (server + both frontends; not browser-verified)** — see §1b. Attestation formats other than `none` are refused by name; no real browser or hardware authenticator has driven a ceremony in this environment |
+| 3 | `platform/` quick wins — TOTP enrolment QR image; `scripts/rehash-passwords.js` | **DONE 2026-10-05** — see §1b. QR matrices are byte-identical to python-qrcode and the API's PNG was decoded back by OpenCV; the rehash tool only ever invites a reset, because a bcrypt hash cannot be verified or transposed |
 
 ---
 
 ## 1. `platform/` — the newest build (added 2026-10-05) — largest unfinished surface
 
-41 domains exist and its 450 tests pass, but 15 modules ship **explicit `deferred` markers** for the
+41 domains exist and its 494 tests pass, but 15 modules ship **explicit `deferred` markers** for the
 live integration side, and the frontend is a fraction of the old one.
 
 ### 1a. Modules whose live integration is deferred (code present, egress missing)
@@ -69,8 +70,35 @@ live integration side, and the frontend is a fraction of the old one.
   permitted RP origin and the platform refuses framing), so the marshalling is verified by
   round-trip tests and by feeding the helper's output to the real server, not by a device; and
   attestation `fmt !== 'none'` is refused because there is no trust-anchor store.
-- **TOTP QR enrolment image** — secret + `otpauth://` URI returned; QR/PNG encoder not written.
-- **`platform/scripts/rehash-passwords.js`** — bcrypt → scrypt re-enrolment tool: *not yet implemented*.
+- ~~**TOTP QR enrolment image** — secret + `otpauth://` URI returned; QR/PNG encoder not written.~~
+  **Closed 2026-10-05:** `platform/src/lib/qr.js` (651 lines, no dependencies) encodes byte-mode QR
+  versions 1–40 at all four error-correction levels, picks the version from capacity and the mask
+  from the ISO penalty rules, and renders SVG, a 1-bit greyscale PNG and a `data:` URI. `POST
+  /api/v1/auth/mfa/totp/enroll` now returns `qrPngDataUri` next to `secret` and `otpauthUri` (the
+  JSON stays under 1 kB — no SVG copy), and `SecurityPage` renders the image instead of telling the
+  user to "scan" a secret it never drew. Evidence, in layers: **744/744 matrices** from an unrelated
+  encoder (python-qrcode 8.2, `platform/tests/fixtures/qr-reference.json`, regenerable via
+  `tests/fixtures/generate-qr-fixtures.py`) match byte-for-byte, plus 264/264 auto-version selections;
+  the penalty score is pinned rule-by-rule against **segno 1.6.6**'s scorer (32 matrices); the bit
+  stream is read back out of a finished matrix and its Reed–Solomon check symbols recomputed by a
+  second GF(256) implementation; the PNG is decoded by a reader that shares no code with the writer;
+  and the image the API actually served was decoded back to the exact `otpauth://` URI by an
+  **independent decoder (OpenCV 5.0.0, `cv2.QRCodeDetector`)**. Two limits stated plainly: mask
+  *choice* is deliberately not compared across encoders (scanners do not care, and scoring-border
+  conventions differ), and a margin-0 / 1-pixel render is legal but not what a scanner reads — the
+  API always uses the standard 4-module quiet zone. `segno` 1.6.6's extra `0x00` pad codeword is
+  recorded as `segno_padding_deviation` and asserted as a known deviation, not papered over.
+- ~~**`platform/scripts/rehash-passwords.js`** — bcrypt → scrypt re-enrolment tool: *not yet implemented*.~~
+  **Closed 2026-10-05:** dry-run by default; classifies every account with a password hash as
+  `legacy-bcrypt` (cannot be verified or re-hashed — re-hashing needs the plaintext nobody has),
+  `stale-scrypt-params` (reported only: the login route upgrades it in place on the next successful
+  sign-in) or `blank-hash`, and skips current hashes. `--apply` writes nothing but `auth_recovery`
+  rows of kind `password_reset` — `sha256(random 32-byte token)`, one-hour expiry, exactly like
+  `POST /api/v1/auth/password/forgot` — and will not stack a second invite on a live one unless
+  `--force`. Raw tokens are surfaced only where the platform itself would: stdout in development, or
+  a `0600` `--out` file; production refuses `--apply` without one. 9 tests
+  (`platform/tests/rehash-passwords.test.js`) run the real CLI as a subprocess against a real store
+  and check that the delivered token hashes to the stored row.
 - ~~**Payment gateways** — only `sandbox` + `manual` ported; no Stripe / PayPal / Paystack / Blockonomics.~~
   **Closed 2026-10-05 (inbound half, `platform/`):** Stripe, PayPal and Paystack webhooks are now
   implemented in `platform/src/lib/gateways/` + `platform/src/lib/provider-webhook-service.js` —
@@ -84,8 +112,8 @@ live integration side, and the frontend is a fraction of the old one.
 - **SPA dashboard (`platform/spa/`)** — 4 of ~84 pages ported (`CatalogPage`, `DashboardPage`,
   `SecurityPage`, `SupportPage`); the whole admin console, server detail, billing, DNS, Cloudflare,
   marketplace, AI and Tools screens are missing. `SecurityPage` now carries the passkey management
-  UI (list, rename, remove-with-password, add) and the public `/login` page carries passkey sign-in;
-  the admin-side security screens do not exist.
+  UI (list, rename, remove-with-password, add) plus the TOTP enrolment QR image, and the public
+  `/login` page carries passkey sign-in; the admin-side security screens do not exist.
 - **`platform/mobile/`** — Capacitor config/resources only; no app code.
 
 ---

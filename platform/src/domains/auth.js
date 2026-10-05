@@ -26,6 +26,7 @@ const { uuidv7, randomToken, generateCustomerId } = require('../lib/ids');
 const { hashPassword, verifyPassword, needsRehash, isLegacyHash } = require('../lib/password');
 const jwt = require('../lib/jwt');
 const totp = require('../lib/totp');
+const qr = require('../lib/qr');
 const { authenticate } = require('../lib/auth');
 const { rateLimit } = require('../core/ratelimit');
 
@@ -577,7 +578,17 @@ function register(router, deps) {
       userAgent: ctx.userAgent,
     });
 
-    ctx.json({ id: record.id, secret, otpauthUri: uri });
+    // The enrolment image is rendered here rather than by the client so every client (dashboard,
+    // public site, mobile shell) gets a code that is byte-identical to the stored secret. Level M is
+    // what authenticator apps expect for otpauth URIs; scale 4 with the standard 4-module quiet zone
+    // keeps the PNG under a kilobyte and has been read back by an independent decoder.
+    const code = qr.encode(uri, { ecLevel: 'M' });
+    ctx.json({
+      id: record.id,
+      secret,
+      otpauthUri: uri,
+      qrPngDataUri: qr.toPngDataUri(code.matrix, { scale: 4, margin: 4 }),
+    });
   };
 
   const handleMfaConfirm = async (ctx) => {
