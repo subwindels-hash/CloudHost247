@@ -459,6 +459,130 @@ async function initArticles(kind) {
 /* ------------------------------------------------------------------ */
 /* Misc                                                                */
 /* ------------------------------------------------------------------ */
+async function initMarketplace() {
+  const GLYPHS = {
+    doc: '<rect x="6" y="3" width="12" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/>',
+    card: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/>',
+    database: '<ellipse cx="12" cy="5.5" rx="7" ry="2.8"/><path d="M5 5.5v13c0 1.5 3.1 2.8 7 2.8s7-1.3 7-2.8v-13"/>',
+    shield: '<path d="M12 3l7 3v5c0 4.6-3 8.4-7 10-4-1.6-7-5.4-7-10V6l7-3z"/>',
+    chart: '<path d="M4 20V10M10 20V4M16 20v-8M21 20H3"/>',
+    zap: '<path d="M13 2L5 13h6l-1 9 8-11h-6l1-9z"/>',
+    globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.7 2.6 4 5.6 4 9s-1.3 6.4-4 9c-2.7-2.6-4-5.6-4-9s1.3-6.4 4-9z"/>',
+    server: '<rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/>',
+    users: '<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3 2.8-4.8 5.5-4.8s4.9 1.8 5.5 4.8"/>',
+    mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/>',
+    code: '<path d="m8 6-5 6 5 6M16 6l5 6-5 6"/>',
+    check: '<path d="m5 12 5 5 9-10"/>',
+    terminal: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7 9 3 3-3 3M13 15h4"/>',
+    play: '<circle cx="12" cy="12" r="9"/><path d="m10 8 6 4-6 4V8z"/>',
+    gauge: '<path d="M4 14a8 8 0 1 1 16 0"/><path d="m12 14 4-4"/>',
+  };
+  const CAT_ICON = { cms: 'doc', 'e-commerce': 'card', database: 'database', security: 'shield', analytics: 'chart', ai: 'zap', media: 'play', networking: 'globe', monitoring: 'gauge', storage: 'database', finance: 'card', crm: 'users', communication: 'mail', 'developer-tools': 'code', 'project-management': 'check', productivity: 'doc', automation: 'zap', infrastructure: 'server', business: 'users', education: 'doc', documents: 'doc', 'home-automation': 'zap', 'system-administration': 'terminal' };
+  const icon = (cat) => '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (GLYPHS[CAT_ICON[cat] || 'server']) + '</svg>';
+
+  /* ---- Application marketplace (real catalog: GET /api/v1/marketplace/apps) ---- */
+  const appsRoot = document.querySelector('[data-apps-root]');
+  if (appsRoot) {
+    const state = { q: '', category: '' };
+    const form = document.querySelector('[data-apps-search]');
+    const q = document.getElementById('app-q');
+    if (form && q) {
+      const params = new URLSearchParams(location.search);
+      state.category = params.get('category') || '';
+      q.value = params.get('q') || '';
+      state.q = q.value;
+      form.addEventListener('submit', (ev) => { ev.preventDefault(); state.q = q.value.trim(); render(); });
+    }
+    let cache = null; let categories = [];
+    async function load() {
+      if (!cache) {
+        const [appsRes, catRes] = await Promise.all([api('/api/v1/marketplace/apps'), api('/api/v1/app-categories')]);
+        categories = catRes.categories || [];
+        cache = appsRes.apps || [];
+      }
+      return { apps: cache, categories };
+    }
+    async function render() {
+      try {
+        const { apps, categories: cats } = await load();
+        const byId = new Map(cats.map((c) => [c.id || c.slug, c]));
+        const withCat = apps.map((a) => ({ ...a, cat: byId.get(a.categoryId) || { slug: '', name: '' } }));
+        const filtered = withCat.filter((a) => {
+          const okCat = !state.category || (a.cat && a.cat.slug === state.category);
+          const needle = state.q.toLowerCase();
+          const okQ = !needle || a.name.toLowerCase().includes(needle) || (a.description || '').toLowerCase().includes(needle) || a.slug.includes(needle);
+          return okCat && okQ;
+        });
+        const chipHtml = ['<button type="button" class="btn ' + (!state.category ? 'btn--primary' : 'btn--ghost') + '" style="padding:6px 12px;font-size:.85rem" data-cat="">All</button>']
+          .concat(cats.map((c) => '<button type="button" class="btn ' + (state.category === c.slug ? 'btn--primary' : 'btn--ghost') + '" style="padding:6px 12px;font-size:.85rem" data-cat="' + escHtml(c.slug) + '">' + escHtml(c.name) + '</button>')).join(' ');
+        if (!filtered.length) {
+          appsRoot.innerHTML = '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px">' + chipHtml + '</div><div class="notice notice--empty">No applications match that search. The catalog only contains apps our deployment pipeline can actually install.</div>';
+        } else {
+          const rows = filtered.map((a) => '<div class="card" style="display:flex;gap:12px;align-items:flex-start">'
+            + '<div class="card-icon">' + icon(a.cat ? a.cat.slug : '') + '</div>'
+            + '<div><h3 style="margin-top:0">' + escHtml(a.name) + (a.version ? ' <span class="hint">v' + escHtml(a.version) + '</span>' : '') + '</h3>'
+            + '<p class="muted" style="margin:4px 0 8px">' + escHtml(a.description || '') + '</p>'
+            + '<div class="flex-between"><span class="badge">' + escHtml(a.cat ? a.cat.name : 'App') + '</span>'
+            + '<span class="hint">' + (a.free ? 'Free' : money(a.priceCents / 100)) + '</span></div></div></div>').join('');
+          appsRoot.innerHTML = '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px">' + chipHtml + '</div>'
+            + '<p class="muted small">' + filtered.length + ' application' + (filtered.length === 1 ? '' : 's') + ' — all installable through the CloudHost247 deployment pipeline.</p>'
+            + '<div class="grid grid--3">' + rows + '</div>'
+            + '<p class="hint mt-3">Order any application with a VPS or dedicated server from the <a href="/app/catalog">catalog</a>; installation runs automatically after payment.</p>';
+        }
+        appsRoot.querySelectorAll('[data-cat]').forEach((btn) => btn.addEventListener('click', () => { state.category = btn.dataset.cat; render(); }));
+      } catch {
+        appsRoot.innerHTML = '<div class="notice notice--empty">The application catalog could not be loaded right now. Please try again shortly.</div>';
+      }
+    }
+    render();
+  }
+
+  /* ---- Operating systems (real provisioning catalog, ACTIVE + orderable only) ---- */
+  const osRoot = document.querySelector('[data-os-root]');
+  if (osRoot) {
+    try {
+      const res = await api('/api/v1/operating-systems');
+      const items = res.operatingSystems || [];
+      const FAMILY = { linux: 'Linux', windows: 'Windows', specialized: 'Specialized' };
+      osRoot.innerHTML = items.length
+        ? '<div class="grid grid--3">' + items.map((os) => '<div class="card"><h3>' + escHtml(os.name) + '</h3><p class="muted">' + escHtml(FAMILY[os.family] || os.family || '') + '</p><p class="hint">' + os.orderableVersions + ' orderable version' + (os.orderableVersions === 1 ? '' : 's') + '</p></div>').join('') + '</div>'
+        : '<div class="notice notice--empty"><strong>No operating systems are orderable yet.</strong><br/>OS versions publish here only after an availability rule and a live-verified provider image are in place — nothing is listed until it is genuinely provisionable. Ask about a specific distribution via <a href="/support">support</a>.</div>';
+    } catch {
+      osRoot.innerHTML = '<div class="notice notice--empty">The operating system catalog could not be loaded right now.</div>';
+    }
+  }
+
+  /* ---- Control panels (ACTIVE panels only — never claimed otherwise) ---- */
+  const panelsRoot = document.querySelector('[data-panels-root]');
+  if (panelsRoot) {
+    try {
+      const res = await api('/api/v1/control-panels');
+      const items = res.controlPanels || [];
+      panelsRoot.innerHTML = items.length
+        ? '<div class="grid grid--3">' + items.map((p) => '<div class="card"><h3>' + escHtml(p.name) + '</h3><p class="muted">' + escHtml(p.description || '') + '</p><p class="hint">'
+          + (p.requiresLicense ? 'Commercial license' : 'No license required')
+          + ((p.supportedOs || []).length ? ' · ' + p.supportedOs.map(escHtml).join(', ') : '') + '</p></div>').join('') + '</div>'
+        : '<div class="notice notice--empty"><strong>No control panels are currently published.</strong><br/>We only list panels that are genuinely provisioned with our services. Every VPS still ships with full root access, so you can run your preferred panel yourself — or ask <a href="/support">support</a> what we can enable for you.</div>';
+    } catch {
+      panelsRoot.innerHTML = '<div class="notice notice--empty">The control panel list could not be loaded right now.</div>';
+    }
+  }
+
+  /* ---- Developer docs (published KB articles tagged for developers) ---- */
+  const docsRoot = document.querySelector('[data-dev-docs-root]');
+  if (docsRoot) {
+    try {
+      const res = await api('/api/v1/public/articles?kind=kb');
+      const arts = (res.articles || []).filter((a) => (a.category || '').toLowerCase().includes('dev')).slice(0, 6);
+      docsRoot.innerHTML = arts.length
+        ? '<div class="grid grid--3">' + arts.map((a) => '<div class="card"><h3><a href="/knowledgebase?article=' + encodeURIComponent(a.slug) + '">' + escHtml(a.title) + '</a></h3><p class="muted">' + escHtml(a.excerpt || a.summary || '') + '</p></div>').join('') + '</div>'
+        : '<div class="notice notice--empty">Developer documentation is being written — check the <a href="/knowledgebase">Knowledgebase</a> for what is published.</div>';
+    } catch {
+      docsRoot.innerHTML = '<div class="notice notice--empty">Documentation could not be loaded right now.</div>';
+    }
+  }
+}
+
 function initYear() {
   for (const el of document.querySelectorAll('[data-year]')) {
     el.textContent = String(new Date().getFullYear());
@@ -477,6 +601,7 @@ function init() {
   initContact();
   initArticles('kb');
   initArticles('blog');
+  initMarketplace();
 }
 
 if (document.readyState === 'loading') {

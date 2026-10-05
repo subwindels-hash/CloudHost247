@@ -46,7 +46,7 @@ const I = {
 /* ------------------------------------------------------------------ */
 /* Shared chrome                                                       */
 /* ------------------------------------------------------------------ */
-function head({ title, description, canonical }) {
+function head({ title, description, canonical, jsonldExtra }) {
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -57,6 +57,10 @@ function head({ title, description, canonical }) {
   <link rel="canonical" href="${canonical}" />
   <meta name="theme-color" content="#0a1730" />
   <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="CloudHost247" />
+  <meta property="og:url" content="${canonical}" />
+  <meta property="og:image" content="/assets/img/og-image.jpg" />
+  <meta name="twitter:image" content="/assets/img/og-image.jpg" />
   <meta property="og:title" content="${title}" />
   <meta property="og:description" content="${description}" />
   <meta name="twitter:card" content="summary_large_image" />
@@ -66,7 +70,7 @@ function head({ title, description, canonical }) {
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="stylesheet" href="/assets/css/site.css" />
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"CloudHost247","url":"/","description":"Professional cloud hosting and digital infrastructure."}</script>
-</head>
+${jsonldExtra ? `  <script type="application/ld+json">${JSON.stringify(jsonldExtra)}</script>\n` : ''}</head>
 <body>
   <a class="skip-link" href="#main">Skip to main content</a>
 `;
@@ -89,44 +93,74 @@ function header(active) {
         <span></span><span></span><span></span>
       </button>
 
-      <ul class="nav-primary" id="primary-nav" data-nav>
+      <li>
+          ${link('/hosting/web-hosting', 'Hosting', 'hosting')}<span class="nav-caret" aria-hidden="true"></span>
+          <div class="dropdown dropdown--mega"><div class="mega-grid">
+            <div class="mega-col"><h4>Web Hosting</h4><ul>
+              ${dd([['/hosting/web-hosting','Web Hosting','Fast shared hosting']])}
+              ${dd([['/hosting/wordpress','WordPress Hosting','Optimized & managed']])}
+              ${dd([['/hosting/web-hosting','Business Hosting','Hosting for companies']])}
+              ${dd([['/hosting/web-hosting','Managed Hosting','We run it for you']])}
+            </ul></div>
+            <div class="mega-col"><h4>Cloud Hosting</h4><ul>
+              ${dd([['/hosting/cloud','Cloud Hosting','Scalable infrastructure']])}
+              ${dd([['/hosting/vps','Cloud VPS','Dedicated resources']])}
+              ${dd([['/hosting/cloud','Public Cloud','Elastic capacity']])}
+              ${dd([['/hosting/cloud','Private Cloud','Isolated environments']])}
+            </ul></div>
+            <div class="mega-col"><h4>Specialized</h4><ul>
+              ${dd([['/business-email','Email Hosting','Professional mailboxes']])}
+              ${dd([['/security#ssl','SSL Certificates','Encrypt your site']])}
+              ${dd([['/migration','Website Migration','Guided transfer']])}
+              ${dd([['/security#backups','Backup Services','Automated recovery']])}
+            </ul></div>
+          </div></div>
+        </li>
         <li>
-          ${link('/hosting', 'Hosting', 'hosting')}<span class="nav-caret" aria-hidden="true"></span>
-          ${dd([
-            ['/hosting/web-hosting', 'Web Hosting', 'Fast shared hosting'],
-            ['/hosting/wordpress', 'WordPress Hosting', 'Optimized & managed'],
-            ['/hosting/cloud', 'Cloud Hosting', 'Scalable infrastructure'],
-            ['/hosting/vps', 'VPS Hosting', 'Dedicated resources'],
-            ['/hosting/dedicated', 'Dedicated Servers', 'Physical machines'],
-            ['/hosting/reseller', 'Reseller Hosting', 'Start a hosting business'],
-          ])}
+          ${link('/hosting/vps', 'Servers', 'servers')}<span class="nav-caret" aria-hidden="true"></span>
+          <div class="dropdown dropdown--mega"><div class="mega-grid">
+            <div class="mega-col"><h4>Servers</h4><ul>
+              ${dd([['/hosting/vps','VPS Hosting','Virtual servers']])}
+              ${dd([['/hosting/dedicated','Dedicated Servers','Single-tenant hardware']])}
+              ${dd([['/hosting/enterprise','Enterprise Servers','Large-scale deployments']])}
+              ${dd([['/hosting/game-servers','Game Servers','Low-latency play']])}
+            </ul></div>
+            <div class="mega-col"><h4>Platform</h4><ul>
+              ${dd([['/operating-systems','Operating Systems','Verified OS catalog']])}
+              ${dd([['/control-panels','Control Panels','Configured panels']])}
+              ${dd([['/server-management','Server Management','Monitor & control']])}
+              ${dd([['/infrastructure','Infrastructure','Network & locations']])}
+            </ul></div>
+          </div></div>
         </li>
         <li>
           ${link('/domains', 'Domains', 'domains')}<span class="nav-caret" aria-hidden="true"></span>
           ${dd([
-            ['/domains#search', 'Register a Domain', 'Search & register'],
+            ['/domains#search', 'Search Domains', 'Find your name'],
             ['/domains#transfer', 'Transfer a Domain', 'Move your domains'],
             ['/domains#pricing', 'Domain Pricing', 'All extensions'],
-            ['/domains#search', 'WHOIS / Domain Search', 'Availability check'],
+            ['/domains/brokerage', 'Domain Brokerage', 'Premium acquisition'],
+            ['/domains#renewals', 'Renewals', 'Grace periods explained'],
           ])}
         </li>
         <li>
-          ${link('/business-email', 'Business', 'business')}<span class="nav-caret" aria-hidden="true"></span>
+          ${link('/applications', 'Applications', 'applications')}<span class="nav-caret" aria-hidden="true"></span>
           ${dd([
-            ['/business-email', 'Business Email', 'Professional mailbox'],
-            ['/security#ssl', 'SSL Certificates', 'Encrypt your site'],
-            ['/security', 'Website Security', 'Protection & monitoring'],
-            ['/security#backups', 'Backups', 'Automated recovery'],
-            ['/hosting/web-hosting', 'Business Hosting', 'Hosting for companies'],
+            ['/applications', 'App Marketplace', '52 deployable applications'],
+            ['/applications?category=cms', 'CMS', 'WordPress, Ghost & more'],
+            ['/applications?category=e-commerce', 'E-commerce', 'PrestaShop & stores'],
+            ['/applications?category=database', 'Databases', 'MySQL, PostgreSQL, Redis'],
+            ['/app-deployment', 'App Deployment', 'Pipeline & PaaS'],
           ])}
         </li>
         <li>
-          ${link('/infrastructure', 'Servers', 'servers')}<span class="nav-caret" aria-hidden="true"></span>
+          ${link('/developers', 'Developers', 'developers')}<span class="nav-caret" aria-hidden="true"></span>
           ${dd([
-            ['/hosting/vps', 'VPS', 'Virtual servers'],
-            ['/hosting/dedicated', 'Dedicated Servers', 'Single-tenant hardware'],
-            ['/infrastructure#locations', 'Server Locations', 'Configured regions'],
-            ['/infrastructure', 'Infrastructure', 'Network & platform'],
+            ['/developers', 'Developer Platform', 'Infrastructure for builders'],
+            ['/app-deployment', 'Deployment & PaaS', 'Ship from Git to live'],
+            ['/operating-systems', 'Operating Systems', 'Provisioned OS catalog'],
+            ['/control-panels', 'Control Panels', 'What we actually offer'],
+            ['/knowledgebase', 'Documentation', 'Guides & how-tos'],
           ])}
         </li>
         <li>
@@ -134,9 +168,9 @@ function header(active) {
           ${dd([
             ['/knowledgebase', 'Knowledgebase', 'Guides & how-tos'],
             ['/blog', 'Blog', 'News & insights'],
-            ['/support', 'Documentation', 'Support center'],
+            ['/support', 'Help Center', 'Support center'],
             ['/status', 'Status', 'Live service status'],
-            ['/support', 'Contact Support', 'Open a ticket'],
+            ['/offers', 'Offers', 'Live catalog pricing'],
           ])}
         </li>
         <li>
@@ -147,8 +181,7 @@ function header(active) {
             ['/infrastructure', 'Data Centers', 'Our infrastructure'],
             ['/contact', 'Contact', 'Talk to us'],
           ])}
-        </li>
-      </ul>
+        </li></ul>
 
       <div class="nav-actions" data-auth-slot>
         <a class="btn btn--ghost" href="/login" data-auth-login>Log in</a>
@@ -161,26 +194,37 @@ function header(active) {
 }
 
 const FOOTER_COLS = [
-  ['Hosting', [
-    ['/hosting/web-hosting', 'Web Hosting'], ['/hosting/wordpress', 'WordPress'],
-    ['/hosting/cloud', 'Cloud Hosting'], ['/hosting/vps', 'VPS'],
-    ['/hosting/dedicated', 'Dedicated Servers'], ['/hosting/reseller', 'Reseller Hosting'],
+  ['Products', [
+    ['/hosting/web-hosting', 'Web Hosting'], ['/hosting/wordpress', 'WordPress Hosting'],
+    ['/hosting/cloud', 'Cloud Hosting'], ['/hosting/vps', 'VPS Hosting'],
+    ['/hosting/dedicated', 'Dedicated Servers'], ['/hosting/enterprise', 'Enterprise Servers'],
+    ['/hosting/game-servers', 'Game Servers'], ['/business-email', 'Email Hosting'],
+    ['/security#ssl', 'SSL Certificates'],
+  ]],
+  ['Cloud & Servers', [
+    ['/hosting/cloud', 'Public Cloud'], ['/hosting/cloud', 'Private Cloud'],
+    ['/server-management', 'Server Management'], ['/app-deployment', 'Application Deployment'],
+    ['/app-deployment', 'PaaS'], ['/operating-systems', 'Operating Systems'],
+    ['/control-panels', 'Control Panels'],
   ]],
   ['Domains', [
-    ['/domains#search', 'Domain Search'], ['/domains', 'Register'],
+    ['/domains#search', 'Domain Search'], ['/domains', 'Registration'],
     ['/domains#transfer', 'Transfer'], ['/domains#pricing', 'Pricing'],
+    ['/domains/brokerage', 'Domain Brokerage'], ['/domains#renewals', 'Renewal'],
   ]],
-  ['Business', [
-    ['/business-email', 'Business Email'], ['/security#ssl', 'SSL'],
-    ['/security', 'Security'], ['/security#backups', 'Backups'],
+  ['Developers', [
+    ['/developers', 'Developer Platform'], ['/app-deployment', 'Deployment'],
+    ['/applications', 'Applications'], ['/applications?category=database', 'Databases'],
+    ['/knowledgebase', 'Documentation'],
   ]],
   ['Resources', [
-    ['/knowledgebase', 'Knowledgebase'], ['/support', 'Documentation'],
-    ['/blog', 'Blog'], ['/status', 'Status'], ['/support', 'Support'],
+    ['/support', 'Help Center'], ['/knowledgebase', 'Knowledgebase'],
+    ['/faqs', 'FAQs'], ['/blog', 'Blog'], ['/status', 'Server Status'],
+    ['/contact', 'Contact Support'],
   ]],
   ['Company', [
-    ['/about', 'About'], ['/contact', 'Contact'],
-    ['/infrastructure', 'Infrastructure'], ['/contact', 'Careers'],
+    ['/about', 'About CloudHost247'], ['/contact', 'Contact'],
+    ['/offers', 'Offers'], ['/infrastructure', 'Infrastructure'],
   ]],
 ];
 
@@ -197,10 +241,21 @@ function footer() {
           <h3>${title}</h3>
           <ul>${links.map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join('')}</ul>
         </nav>`).join('')}
+        <nav aria-label="Legal">
+          <h3>Legal</h3>
+          <ul>
+            <li><a href="/legal/terms">Terms of Service</a></li>
+            <li><a href="/legal/privacy">Privacy Policy</a></li>
+            <li><a href="/legal/cookies">Cookie Policy</a></li>
+            <li><a href="/legal/acceptable-use">Acceptable Use</a></li>
+            <li><a href="/legal/refund-policy">Refund Policy</a></li>
+            <li><a href="/legal/sla">SLA</a></li>
+          </ul>
+        </nav>
       </div>
       <div class="footer-bottom">
-        <span>&copy; <span data-year>${new Date().getFullYear()}</span> CloudHost247. All rights reserved.</span>
-        <nav aria-label="Legal">
+        <span>&copy; <span data-year>${new Date().getFullYear()}</span> CloudHost247 Isc. — CloudHost247 · CH247. All rights reserved.</span>
+        <nav aria-label="Legal summary">
           <a href="/legal/terms">Terms</a>
           <a href="/legal/privacy">Privacy</a>
           <a href="/legal/cookies">Cookies</a>
@@ -216,9 +271,24 @@ function footer() {
 `;
 }
 
-function page({ title, description, canonical, active, body, scripts }) {
-  return head({ title, description, canonical }) + header(active) + `  <main id="main">\n${body}\n  </main>\n` + footer() + (scripts || '');
+function page({ title, description, canonical, active, body, scripts, jsonldExtra }) {
+  return head({ title, description, canonical, jsonldExtra }) + header(active) + `  <main id="main">\n${body}\n  </main>\n` + footer() + (scripts || '');
 }
+
+function grid3(items) {
+  return `<div class="grid grid--3">${items.map(([title, text]) => `<div class="card"><h3>${title}</h3><p>${text}</p></div>`).join('')}</div>`;
+}
+
+const FAQ_ITEMS = [
+  ['What happens after I place an order?', 'Your order generates an invoice; provisioning begins once payment is verified. For hosting, setup completes automatically; for servers, provisioning starts through the configured provider.'],
+  ['Do you offer refunds?', 'Yes — see the Refund Policy for eligible services and time windows. Domain registrations, once submitted to a registry, are generally non-refundable.'],
+  ['How do I get support?', 'Open a ticket from the client area — a human replies. Documentation lives in the Knowledgebase.'],
+  ['Can I upgrade later?', 'Most plans can be upgraded in place; the difference is prorated where supported.'],
+  ['Which payment methods are supported?', 'We accept the payment gateways enabled for your account and currency at checkout. Crypto payments are available through Blockonomics where enabled.'],
+  ['Do you provide domain registration?', 'Yes — search, register and manage domains through the platform, with real registry pricing shown before checkout.'],
+  ['Is my data safe?', 'Your account is protected with strong authentication, including passkeys. Server-side, credentials are encrypted at rest.'],
+  ['Can you migrate my website?', 'We offer guided migration — open a ticket with the details of your current setup and we will plan the move with you.'],
+];
 
 function pageHead({ crumbs = [], title, lede }) {
   return `    <div class="page-head">
@@ -692,6 +762,17 @@ pages.push({
             <div class="card"><div class="card-icon">${I.key}</div><h3>Transfers</h3><p>Bring existing domains to CloudHost247 with a guided transfer flow.</p></div>
           </div>
         </div>
+      </div>
+    </section>
+    <section class="section section--soft" id="renewals">
+      <div class="container">
+        <div class="section-head"><span class="eyebrow">Renewals</span><h2>Never lose a domain to an oversight</h2></div>
+        <div class="grid grid--3">
+          <div class="card"><h3>Auto-renew</h3><p>Enable auto-renew per domain in the client area; renewals use your configured payment method before expiry.</p></div>
+          <div class="card"><h3>Grace periods</h3><p>If a renewal fails, registries apply grace and redemption windows before deletion. Full lifecycle documented in the knowledgebase.</p></div>
+          <div class="card"><h3>Reminder emails</h3><p>Renewal reminders are sent ahead of expiry so you always have time to act manually.</p></div>
+        </div>
+        <p class="hint" style="margin-top:16px">Premium names that are already registered can be acquired through our <a href="/domains/brokerage">Domain Brokerage service</a>.</p>
       </div>
     </section>
 ${ctaBand({ title: 'Found the perfect name?', text: 'Register it before someone else does — checkout takes minutes.', label: 'Search Domains', href: '#search' })}`,
@@ -1255,6 +1336,314 @@ pages.push({
             <button class="btn btn--primary" type="submit" style="width:100%">Set New Password</button>
           </form>`,
   ),
+});
+
+/* ------------------------------------------------------------------ */
+/* Global rebuild (spec phase 4): marketplace, deployment, OS, panels, */
+/* server management, enterprise, game servers, brokerage, offers, FAQ */
+/* ------------------------------------------------------------------ */
+
+pages.push({
+  file: 'applications.html',
+  html: page({
+    title: 'Application Marketplace — One-Click Deployable Apps | CloudHost247',
+    description: 'Browse the CloudHost247 application marketplace: every app below exists in our real deployment catalog with verified manifests — CMS, e-commerce, databases, analytics, AI and more.',
+    canonical: '/applications', active: 'applications',
+    body: pageHead({
+      crumbs: [['/', 'Home'], [null, 'Applications']],
+      title: 'Application Marketplace',
+      lede: 'Every application below is a real entry in our deployment catalog — manifest-verified, deployed through the same pipeline that powers the client area. Nothing is listed that the platform cannot install.',
+    }) + `
+    <section class="section">
+      <div class="container">
+        <form class="domain-search" data-apps-search novalidate>
+          <h2>Find an application</h2>
+          <p class="muted">Search the live catalog by name or purpose.</p>
+          <div class="domain-form">
+            <label class="visually-hidden" for="app-q">Search applications</label>
+            <input id="app-q" type="search" name="q" placeholder="e.g. WordPress, Nextcloud, Redis" />
+            <button class="btn btn--primary" type="submit">Search</button>
+          </div>
+        </form>
+        <div class="mt-4" data-apps-root>
+          <div class="card"><div class="skeleton" style="height:20px;width:40%"></div><div class="skeleton mt-2" style="height:14px;width:90%"></div></div>
+        </div>
+      </div>
+    </section>
+${ctaBand({ title: 'Ready to deploy?', text: 'Pick an application, choose a server plan, and the deployment pipeline takes it from there.', label: 'View App Deployment', href: '/app-deployment' })}`,
+  }),
+});
+
+pages.push({
+  file: 'app-deployment.html',
+  html: page({
+    title: 'App Deployment & PaaS — Ship From Git to Live | CloudHost247',
+    description: 'The CloudHost247 deployment platform: manifest-driven apps, async deployment pipeline, isolated containers, encrypted credentials, domains with DNS verification and full event logs.',
+    canonical: '/app-deployment', active: 'developers',
+    body: pageHead({
+      crumbs: [['/', 'Home'], [null, 'App Deployment']],
+      title: 'Application Deployment Platform',
+      lede: 'A modern deployment pipeline built into CloudHost247: choose an application, order a server, and the platform installs, configures and monitors it — with every step visible.',
+    }) + `
+    <section class="section">
+      <div class="container">
+        <div class="split">
+          <div>
+            <span class="eyebrow">How it works</span>
+            <h2>From catalog to running application</h2>
+            <p class="muted">Applications come from a manifest-driven catalog stored in the database — no hard-coded installs. Your order creates an invoice, and installation begins only after verified payment. Every action runs through an async queue with retries, rollback and a complete event history.</p>
+            <a class="btn btn--primary" href="/applications">Browse the Marketplace</a>
+          </div>
+          <img src="/assets/img/hero-deployment.webp" width="800" height="450" alt="Illustration of the CloudHost247 deployment pipeline moving containers from code to cloud" loading="lazy" style="width:100%;height:auto;border-radius:14px" />
+        </div>
+      </div>
+    </section>
+    <section class="section section--soft">
+      <div class="container">
+        <div class="section-head"><span class="eyebrow">Platform capabilities</span><h2>What the pipeline gives you</h2></div>
+        ${grid3([
+          ['Manifest-driven catalog', 'Adding an application means importing its manifest — the engine reads it at deploy time.'],
+          ['Isolated containers', 'Each installation runs in its own container project, managed by our server agent over a signed channel.'],
+          ['Payment-gated provisioning', 'Installs are enqueued only after a verified payment webhook — never before.'],
+          ['Encrypted credentials', 'Agent secrets and environment values are encrypted at rest and shown exactly once.'],
+          ['Domains with verification', 'Attach your own domains after DNS TXT verification — served with SSL.'],
+          ['Full deployment history', 'Every step and event is logged: installs, updates, backups, restores and uninstalls.'],
+        ])}
+      </div>
+    </section>
+${ctaBand({ title: 'Deploy your first application', text: 'Pick from the marketplace or bring your workload to a VPS and shape it yourself.', label: 'Browse Applications', href: '/applications' })}`,
+  }),
+});
+
+pages.push({
+  file: 'operating-systems.html',
+  html: page({
+    title: 'Operating Systems — Verified OS Catalog | CloudHost247',
+    description: 'The CloudHost247 operating system catalog: only OS versions with verified provider images and active plans are ever shown.',
+    canonical: '/operating-systems', active: 'developers',
+    body: pageHead({
+      crumbs: [['/', 'Home'], [null, 'Operating Systems']],
+      title: 'Operating Systems',
+      lede: 'Our OS catalog follows the provisioning chain: plan, availability rule, OS version, architecture and a live-verified provider image. Only combinations that pass every stage are shown here.',
+    }) + `
+    <section class="section">
+      <div class="container" data-os-root>
+        <div class="card"><div class="skeleton" style="height:20px;width:40%"></div><div class="skeleton mt-2" style="height:14px;width:85%"></div></div>
+      </div>
+    </section>
+${ctaBand({ title: 'Need a specific distribution?', text: 'Tell us the OS and architecture your workload requires — if it is supported by the provider, we can add the verified image.', label: 'Contact Support', href: '/support' })}`,
+  }),
+});
+
+pages.push({
+  file: 'control-panels.html',
+  html: page({
+    title: 'Control Panels — What We Actually Offer | CloudHost247',
+    description: 'Control panels offered with CloudHost247 services — published only when genuinely provisioned, never claimed otherwise.',
+    canonical: '/control-panels', active: 'developers',
+    body: pageHead({
+      crumbs: [['/', 'Home'], [null, 'Control Panels']],
+      title: 'Control Panels',
+      lede: 'We publish a control panel only when it is genuinely provisioned with a service. Until a panel is configured for sale, it does not appear here — we would rather show an honest empty list than an unsupported claim.',
+    }) + `
+    <section class="section">
+      <div class="container" data-panels-root>
+        <div class="card"><div class="skeleton" style="height:20px;width:40%"></div><div class="skeleton mt-2" style="height:14px;width:85%"></div></div>
+      </div>
+    </section>
+${ctaBand({ title: 'Prefer to manage things yourself?', text: 'Every VPS ships with full root access — run whatever panel or stack you like.', label: 'View VPS Plans', href: '/hosting/vps' })}`,
+  }),
+});
+
+pages.push({
+  file: 'developers.html',
+  html: page({
+    title: 'Developer Platform — Infrastructure Built for Developers | CloudHost247',
+    description: 'CloudHost247 for developers: root access, a manifest-driven application marketplace, encrypted environment credentials, domain verification and a full deployment event log.',
+    canonical: '/developers', active: 'developers',
+    body: pageHead({
+      crumbs: [['/', 'Home'], [null, 'Developers']],
+      title: 'Infrastructure Built for Developers',
+      lede: 'Real resources, real access, real control — a platform that gets out of your way while you build.',
+    }) + `
+    <section class="section">
+      <div class="container">
+        ${grid3([
+          ['Full root on VPS', 'Install the runtime, database and services your stack needs — nothing locked down.'],
+          ['Application marketplace', 'Deploy from a manifest-verified catalog of applications with one order.'],
+          ['Deployment pipeline', 'Async installs with retries, rollback and an append-only event log.'],
+          ['Encrypted credentials', 'Environment values and agent secrets are encrypted at rest and shown once.'],
+          ['Domains & SSL', 'Attach verified domains to any installation — DNS TXT check, then SSL.'],
+          ['Snapshots & backups', 'Point-in-time safety before risky changes, restore from the client area.'],
+        ])}
+      </div>
+    </section>
+    <section class="section section--soft">
+      <div class="container">
+        <div class="section-head"><span class="eyebrow">Documentation</span><h2>How the platform actually works</h2></div>
+        <div data-dev-docs-root>
+          <div class="card"><div class="skeleton" style="height:20px;width:40%"></div><div class="skeleton mt-2" style="height:14px;width:85%"></div></div>
+        </div>
+      </div>
+    </section>
+${ctaBand({ title: 'Build on CloudHost247', text: 'Start with a VPS or deploy straight from the application marketplace.', label: 'Get Started', href: '/app/catalog' })}`,
+  }),
+});
+
+pages.push({
+  file: 'server-management.html',
+  html: page({
+    title: 'Server Management — Monitor, Control, Recover | CloudHost247',
+    description: 'Manage CloudHost247 servers from the client area: agent-verified health, start/stop/reboot, snapshots, reinstall and metrics — with a clear split between live and upcoming capabilities.',
+    canonical: '/server-management', active: 'servers',
+    body: pageHead({
+      crumbs: [['/', 'Home'], [null, 'Server Management']],
+      title: 'Server Management',
+      lede: 'Operate your servers from one place. Capabilities below are split honestly: what is available today, and what is being built.',
+    }) + `
+    <section class="section">
+      <div class="container">
+        <div class="section-head"><span class="eyebrow">Available</span><h2>In the client area now</h2></div>
+        ${grid3([
+          ['Agent-verified health', 'A signed agent reports OS, hostname and service state; attestation is checked, not assumed.'],
+          ['Resource metrics', 'CPU, memory, disk and load collected from your server and shown in the dashboard.'],
+          ['Start / stop / reboot', 'Lifecycle controls for virtual servers directly from the client area.'],
+          ['Snapshots', 'Point-in-time images before changes; restore when you need to roll back.'],
+          ['Reinstall', 'Re-provision a server from a verified OS image without losing your billing record.'],
+          ['Managed support', 'Engineers on tickets for the operational questions — not scripts.'],
+        ])}
+      </div>
+    </section>
+    <section class="section section--soft">
+      <div class="container">
+        <div class="section-head"><span class="eyebrow">Coming soon</span><h2>On the roadmap, not yet for sale</h2></div>
+        <div class="notice notice--empty">Firewall management, reverse-DNS self-service, rescue mode and automated patching are in active development. They will be announced here and in the client area when genuinely available — never before.</div>
+      </div>
+    </section>
+${ctaBand({ title: 'Put it to work', text: 'Order a VPS and manage it from day one — metrics, snapshots and lifecycle included.', label: 'View VPS Plans', href: '/hosting/vps' })}`,
+  }),
+});
+
+pages.push({
+  file: path.join('hosting', 'enterprise.html'),
+  html: page({
+    title: 'Enterprise Servers — Large-Scale Compute | CloudHost247',
+    description: 'Enterprise-scale server deployments on CloudHost247: scoped per project, quoted transparently, delivered with managed support options.',
+    canonical: '/hosting/enterprise', active: 'servers',
+    body: servicePage({
+      key: 'enterprise',
+      crumbs: [['/', 'Home'], ['/hosting', 'Hosting'], [null, 'Enterprise Servers']],
+      title: 'Enterprise Servers',
+      lede: 'Large-scale compute for organizations that run serious infrastructure — scoped, quoted and delivered per deployment.',
+      intro: { heading: 'Enterprise capacity, engineered with you', text: 'Enterprise deployments rarely fit a price list: multi-server environments, specific interconnects, compliance constraints and growth plans all shape the build. Rather than publish invented packages, we scope each deployment with you and quote the real configuration.' },
+      features: ['Requirements-first scoping', 'Itemized formal quotes', 'Dedicated hardware options', 'Managed support tiers', 'Growth-path architecture', 'Single point of contact'],
+      specs: [
+        [I.cpu, 'Capacity', 'CPU, RAM, storage and network sized to the workload — not a fixed menu.'],
+        [I.shield, 'Compliance', 'Single-tenant options where your requirements demand isolation.'],
+        [I.headset, 'Operation', 'Managed support tiers for the lifetime of the deployment.'],
+      ],
+      product: 'dedicated',
+      extraSections: ctaBand({ title: 'Start an enterprise conversation', text: 'Describe your workload and constraints — an engineer, not a sales script, will reply.', label: 'Contact Support', href: '/contact' }),
+    }),
+  }),
+});
+
+pages.push({
+  file: path.join('hosting', 'game-servers.html'),
+  html: page({
+    title: 'Game Servers — Low-Latency Community Hosting | CloudHost247',
+    description: 'Game server hosting on CloudHost247: dedicated resources, full root access and snapshots, built on our transparent VPS line.',
+    canonical: '/hosting/game-servers', active: 'servers',
+    body: servicePage({
+      key: 'game-servers',
+      crumbs: [['/', 'Home'], ['/hosting', 'Hosting'], [null, 'Game Servers']],
+      title: 'Game Servers',
+      lede: 'Low-latency virtual servers for community game servers — sized for the games you host.',
+      intro: { heading: 'Your server, your rules', text: 'Dedicated game-server packages have not been published yet. Until they are, our VPS line is the right foundation: dedicated CPU and RAM, full root access to install your game server software, and enough network capacity for a busy community.' },
+      features: ['Dedicated CPU & RAM', 'Full root access', 'Mod & plugin freedom', 'Snapshots & backups', 'Player slots your call', 'Upgrade any time'],
+      specs: [
+        [I.zap, 'Performance', 'Allocated resources keep tick rates stable — no noisy neighbours.'],
+        [I.key, 'Control', 'Install any game server binary and configure it your way.'],
+        [I.database, 'Safety', 'Snapshot before updates; restore in minutes if a mod goes wrong.'],
+      ],
+      product: 'vps',
+      extraSections: ctaBand({ title: 'Spin up a game server', text: 'Choose a VPS configuration, install your game and invite your community.', label: 'Choose a Configuration', href: '/app/catalog?product=vps' }),
+    }),
+  }),
+});
+
+pages.push({
+  file: path.join('domains', 'brokerage.html'),
+  html: page({
+    title: 'Domain Brokerage — Premium Domain Acquisition | CloudHost247',
+    description: 'CloudHost247 Domain Brokerage: we negotiate the acquisition of already-registered domains on your behalf — confidential budget, itemized charges, recorded offers.',
+    canonical: '/domains/brokerage', active: 'domains',
+    body: pageHead({
+      crumbs: [['/', 'Home'], ['/domains', 'Domains'], [null, 'Domain Brokerage']],
+      title: 'Domain Brokerage',
+      lede: 'The name you want is already registered? Our brokerage team attempts to acquire it for you through legitimate channels — with a confidential budget and itemized charges.',
+    }) + `
+    <section class="section">
+      <div class="container">
+        <div class="section-head"><span class="eyebrow">The service</span><h2>How brokerage works</h2></div>
+        ${grid3([
+          ['Research & contact', 'We research legitimate acquisition routes and attempt contact with the domain owner or an authorized channel.'],
+          ['Negotiation on your behalf', 'Your broker negotiates according to your instructions; offers and counteroffers are recorded permanently.'],
+          ['Confidential budget', 'Your maximum budget is never disclosed unless you explicitly authorize it.'],
+          ['Itemized charges', 'Acquisition price, brokerage fee, transfer fee and any escrow charges are always listed separately before you pay.'],
+          ['Secure payment', 'Payment is coordinated through your CloudHost247 account — never to unknown third parties.'],
+          ['Transfer to completion', 'We track the domain transfer until it is verified in your account.'],
+        ])}
+        <div class="notice" style="margin-top:22px">Acquisition is never guaranteed — a registered domain does not mean its owner will sell. The complete terms are published in the <a href="/legal/refund-policy">knowledgebase legal center</a> and the Domain Brokerage Terms you accept when a case is created.</div>
+      </div>
+    </section>
+${ctaBand({ title: 'Request a brokerage case', text: 'Open a ticket with the domain you want and your budget — we will tell you honestly whether an acquisition route exists.', label: 'Contact Support', href: '/support' })}`,
+  }),
+});
+
+pages.push({
+  file: 'offers.html',
+  html: page({
+    title: 'Current Offers — Live Plans & Pricing | CloudHost247',
+    description: 'Every CloudHost247 plan currently available for order, with live pricing, billing cycles and limits pulled straight from the catalog.',
+    canonical: '/offers', active: 'resources',
+    body: pageHead({
+      crumbs: [['/', 'Home'], [null, 'Current Offers']],
+      title: 'Current Offers',
+      lede: 'Everything available for order right now — with the real prices, cycles and limits from our catalog. No invented promotions.',
+    }) + `
+    <section class="section">
+      <div class="container">
+        <div data-pricing data-product=""></div>
+        <p class="muted small mt-3">Prices shown are for new orders. Renewal pricing is shown per plan where it differs. Taxes are calculated at checkout where applicable.</p>
+      </div>
+    </section>
+${ctaBand({ title: 'Questions before you order?', text: 'Our team will help you pick the right plan — and tell you when a cheaper one fits.', label: 'Contact Sales', href: '/contact' })}`,
+  }),
+});
+
+pages.push({
+  file: 'faqs.html',
+  html: page({
+    title: 'Frequently Asked Questions | CloudHost247',
+    description: 'Straight answers about CloudHost247 services, billing, support and account security.',
+    canonical: '/faqs', active: 'resources',
+    jsonldExtra: {
+      '@context': 'https://schema.org', '@type': 'FAQPage',
+      mainEntity: FAQ_ITEMS.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })),
+    },
+    body: pageHead({
+      crumbs: [['/', 'Home'], [null, 'FAQs']],
+      title: 'Frequently Asked Questions',
+      lede: 'Straight answers about our services, billing and support. If your question is not covered, open a ticket and a human will answer.',
+    }) + `
+    <section class="section">
+      <div class="container" style="max-width:880px;display:grid;gap:14px">
+        ${FAQ_ITEMS.map(([q, a]) => `<details class="card"><summary style="font-weight:700;cursor:pointer">${q}</summary><p style="margin-top:10px">${a}</p></details>`).join('\n        ')}
+      </div>
+    </section>
+${ctaBand({ title: 'Still have a question?', text: 'Our support team answers tickets personally — no bots, no canned replies.', label: 'Contact Support', href: '/support' })}`,
+  }),
 });
 
 /* ------------------------------------------------------------------ */

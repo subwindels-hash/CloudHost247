@@ -345,25 +345,46 @@ async function main() {
   }
 
   // --- application marketplace catalog --------------------------------------
-  // Source of truth: the real deployment manifests in cloudhost247-node/manifests
-  // (extracted once into scripts/app-catalog.json). Only these are advertised.
-  let applications = 0;
+  // Source of truth: the REAL deployment manifests in cloudhost247-node/manifests
+  // (extracted once into scripts/app-catalog.json; see docs/PHASE_6_MARKETPLACE_DEPLOYMENTS.md
+  // — "The catalog lives in the database — no application is ever installed by a name
+  // hardcoded in code"). Only these apps are advertised publicly. Control panels and
+  // operating systems are intentionally NOT seeded: they publish only when an operator
+  // configures real, provisioned entries through the admin APIs.
+  const CATEGORY_META = {
+    cms: ['Content Management', 10], 'e-commerce': ['E-commerce', 20], database: ['Databases', 30],
+    analytics: ['Analytics', 40], monitoring: ['Monitoring', 50], security: ['Security', 60],
+    productivity: ['Productivity', 70], 'project-management': ['Project Management', 80],
+    communication: ['Communication', 90], crm: ['CRM', 100], business: ['Business', 110],
+    finance: ['Finance', 120], documents: ['Documents', 130], storage: ['Storage', 140],
+    media: ['Media', 150], education: ['Education', 160], ai: ['AI', 170],
+    automation: ['Automation', 180], 'home-automation': ['Home Automation', 190],
+    networking: ['Networking', 200], infrastructure: ['Infrastructure', 210],
+    'developer-tools': ['Developer Tools', 220], 'system-administration': ['System Administration', 230],
+  };
   const appCatalog = JSON.parse(fs.readFileSync(path.join(__dirname, 'app-catalog.json'), 'utf8'));
+  const categoryIds = {};
+  for (const [slug, [label, order]] of Object.entries(CATEGORY_META)) {
+    const row = await upsertBy(store, 'application_categories', 'slug', slug, {
+      id: uuidv7(), slug, name: label, description: null, active: true, sort_order: order,
+    });
+    categoryIds[slug] = row.id;
+  }
+  let applications = 0;
   for (const app of appCatalog) {
-    await upsertBy(store, 'marketplace_applications', 'slug', app.slug, {
+    await upsertBy(store, 'applications', 'slug', app.slug, {
       id: uuidv7(),
       slug: app.slug,
       name: app.name,
-      category: app.category || 'general',
-      summary: app.description || null,
+      description: app.description || null,
+      category_id: categoryIds[app.category] ?? null,
+      supported_hosting_types: app.hosting ?? [],
       featured: app.featured === true,
-      hosting_types: app.hosting ?? [],
-      status: 'active',
+      active: true,
+      status: 'published',
     });
     applications += 1;
   }
-  // Control panels and OS entries are intentionally NOT seeded: they publish
-  // only when an operator configures real, provisioned entries via the admin API.
 
   await store.flush?.();
   logger.info({ products, plans, extensions, articles: articlesSeeded, applications, backend: store.backend }, 'seed complete');

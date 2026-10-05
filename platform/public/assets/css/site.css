@@ -172,6 +172,21 @@ li:hover > .dropdown, li:focus-within > .dropdown { opacity: 1; visibility: visi
 .dropdown a:hover { background: var(--bg-soft); color: var(--brand); text-decoration: none; }
 .dropdown .dd-note { display: block; font-size: .78rem; color: var(--ink-500); font-weight: 400; }
 
+/* Mega-menu variant: multi-column grouped dropdown (§4–10 of the rebuild spec). */
+.dropdown--mega { min-width: 620px; max-width: 780px; padding: 16px 18px; }
+.mega-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px 26px; }
+.mega-col h4 {
+  margin: 0 0 6px; font-size: .72rem; font-weight: 700; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--ink-500);
+}
+.mega-col ul { list-style: none; margin: 0; padding: 0; }
+.dropdown--mega .mega-col a { padding: 6px 8px; font-size: .9rem; }
+.mega-col .dd-note { display: block; font-size: .75rem; color: var(--ink-500); }
+@media (max-width: 1023px) {
+  .dropdown--mega { min-width: 0; max-width: none; box-shadow: none; border: 0; padding: 4px 0 4px 14px; }
+  .mega-grid { grid-template-columns: 1fr 1fr; }
+}
+
 .nav-actions { display: flex; align-items: center; gap: 10px; margin-left: auto; }
 .nav-actions .btn { padding: 9px 16px; font-size: 0.92rem; }
 
