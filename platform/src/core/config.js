@@ -107,6 +107,13 @@ const envSchema = v.object({
   // --- payments (optional) ---
   MANUAL_PAYMENT_INSTRUCTIONS: v.string().max(2000).optional(),
   SANDBOX_GATEWAY_WEBHOOK_SECRET: v.string().min(16).optional(),
+  // When true, the sandbox gateway can be charged/completed without a live PSP. Refused in
+  // production so a misconfigured prod host cannot mint "paid" invoices.
+  SANDBOX_PAYMENTS: boolSchema.default('true'),
+
+  // --- agent (optional) ---
+  // Shared secret the on-server agent presents. Absent disables the agent endpoints.
+  AGENT_TOKEN: v.string().min(16).optional(),
 }).passthrough();
 
 /** Parse "12h", "30d", "90s", "500ms" into milliseconds. */

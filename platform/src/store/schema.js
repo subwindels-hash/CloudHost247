@@ -567,6 +567,740 @@ const TABLES = {
     },
     indexes: [{ name: 'server_metrics_server_idx', columns: ['server_id'] }],
   },
+
+  // -------------------------------------------------------------------------
+  // Identity extras
+  // -------------------------------------------------------------------------
+  profile_images: {
+    columns: {
+      id: pk(),
+      user_id: uuid({ required: true }),
+      content_type: text({ default: 'image/png' }),
+      data_base64: text({ required: true }),
+      size_bytes: int({ default: 0 }),
+      created_at: ts(),
+      updated_at: ts(),
+    },
+    indexes: [{ name: 'profile_images_user_key', columns: ['user_id'], unique: true }],
+  },
+
+  // -------------------------------------------------------------------------
+  // Networking: DNS / SSL / firewall
+  // -------------------------------------------------------------------------
+  dns_zones: {
+    columns: {
+      id: pk(),
+      user_id: uuid({ required: true }),
+      domain: text({ required: true }),
+      provider: text({ default: 'internal' }),
+      status: text({ default: 'active' }),
+      created_at: ts(),
+      updated_at: ts(),
+    },
+    indexes: [{ name: 'dns_zones_domain_key', columns: ['domain'], unique: true }],
+  },
+
+  dns_records: {
+    columns: {
+      id: pk(),
+      zone_id: uuid({ required: true }),
+      type: text({ required: true }),
+      name: text({ required: true }),
+      content: text({ required: true }),
+      ttl: int({ default: 3600 }),
+      priority: int({ nullable: true }),
+      created_at: ts(),
+      updated_at: ts(),
+    },
+    indexes: [{ name: 'dns_records_zone_idx', columns: ['zone_id'] }],
+  },
+
+  ssl_certificates: {
+    columns: {
+      id: pk(),
+      user_id: uuid({ required: true }),
+      domain: text({ required: true }),
+      issuer: text({ default: 'letsencrypt' }),
+      status: text({ default: 'pending' }),
+      issued_at: { type: 'timestamptz', nullable: true },
+      expires_at: { type: 'timestamptz', nullable: true },
+      auto_renew: bool({ default: true }),
+      created_at: ts(),
+      updated_at: ts(),
+    },
+    indexes: [{ name: 'ssl_certificates_user_idx', columns: ['user_id'] }],
+  },
+
+  firewall_rules: {
+    columns: {
+      id: pk(),
+      server_id: uuid({ nullable: true }),
+      user_id: uuid({ nullable: true }),
+      direction: text({ default: 'in' }),
+      action: text({ default: 'allow' }),
+      protocol: text({ default: 'tcp' }),
+      port: int({ nullable: true }),
+      cidr: text({ nullable: true }),
+      description: text({ nullable: true }),
+      enabled: bool({ default: true }),
+      created_at: ts(),
+      updated_at: ts(),
+    },
+  },
+
+  // -------------------------------------------------------------------------
+  // Servers / provisioning / infrastructure
+  // -------------------------------------------------------------------------
+  servers: {
+    columns: {
+      name: text({ nullable: true }),
+      plan_id: uuid({ nullable: true }),
+      region_id: uuid({ nullable: true }),
+      os_id: uuid({ nullable: true }),
+      id: pk(),
+      user_id: uuid({ nullable: true }),
+      hostname: text({ required: true }),
+      provider: text({ nullable: true }),
+      region: text({ nullable: true }),
+      os: text({ nullable: true }),
+      panel: text({ nullable: true }),
+      status: text({ default: 'pending' }),
+      ip_address: text({ nullable: true }),
+      plan: text({ nullable: true }),
+      metadata: jsonb({ default: {} }),
+      created_at: ts(),
+      updated_at: ts(),
+    },
+    indexes: [{ name: 'servers_hostname_key', columns: ['hostname'], unique: true }],
+  },
+
+  server_credentials: {
+    columns: {
+      kind: text({ default: 'password' }),
+      secret: text({ nullable: true }),
+      id: pk(),
+      server_id: uuid({ required: true }),
+      username: text({ nullable: true }),
+      password_encrypted: text({ nullable: true }),
+      ssh_key: text({ nullable: true }),
+      created_at: ts(),
+    },
+    indexes: [{ name: 'server_credentials_server_idx', columns: ['server_id'] }],
+  },
+
+  ssh_keys: {
+    columns: {
+      id: pk(),
+      user_id: uuid({ required: true }),
+      name: text({ required: true }),
+      public_key: text({ required: true }),
+      fingerprint: text({ nullable: true }),
+      created_at: ts(),
+    },
+    indexes: [{ name: 'ssh_keys_user_idx', columns: ['user_id'] }],
+  },
+
+  provisioning_jobs: {
+    columns: {
+      user_id: uuid({ nullable: true }),
+      kind: text({ nullable: true }),
+      resource_type: text({ nullable: true }),
+      resource_id: text({ nullable: true }),
+      error: text({ nullable: true }),
+      id: pk(),
+      server_id: uuid({ nullable: true }),
+      service_id: uuid({ nullable: true }),
+      type: text({ nullable: true }),
+      status: text({ default: 'queued' }),
+      payload: jsonb({ default: {} }),
+      result: jsonb({ nullable: true }),
+      attempts: int({ default: 0 }),
+      started_at: { type: 'timestamptz', nullable: true },
+      finished_at: { type: 'timestamptz', nullable: true },
+      created_at: ts(),
+      updated_at: ts(),
+    },
+    indexes: [{ name: 'provisioning_jobs_status_idx', columns: ['status'] }],
+  },
+
+  operating_systems: {
+    columns: {
+      id: pk(),
+      slug: text({ required: true }),
+      name: text({ required: true }),
+      family: text({ nullable: true }),
+      status: text({ default: 'active' }),
+      eol_at: { type: 'timestamptz', nullable: true },
+      created_at: ts(),
+    },
+    indexes: [{ name: 'operating_systems_slug_key', columns: ['slug'], unique: true }],
+  },
+
+  os_images: {
+    columns: {
+      provider_image_id: text({ nullable: true }),
+      region_id: uuid({ nullable: true }),
+      active: bool({ default: true }),
+      id: pk(),
+      os_id: uuid({ required: true }),
+      version: text({ nullable: true }),
+      arch: text({ default: 'x86_64' }),
+      status: text({ default: 'active' }),
+      created_at: ts(),
+    },
+  },
+
+  infra_providers: {
+    columns: {
+      type: text({ nullable: true }),
+      active: bool({ default: true }),
+      id: pk(),
+      slug: text({ nullable: true }),
+      name: text({ required: true }),
+      kind: text({ default: 'cloud' }),
+      status: text({ default: 'active' }),
+      config: jsonb({ default: {} }),
+      created_at: ts(),
+    },
+    indexes: [{ name: 'infra_providers_slug_key', columns: ['slug'], unique: true }],
+  },
+
+  regions: {
+    columns: {
+      active: bool({ default: true }),
+      id: pk(),
+      provider_id: uuid({ required: true }),
+      code: text({ required: true }),
+      name: text({ required: true }),
+      created_at: ts(),
+    },
+  },
+
+  server_plans: {
+    columns: {
+      price_cents: int({ default: 0 }),
+      spec: jsonb(),
+      active: bool({ default: true }),
+      id: pk(),
+      provider_id: uuid({ nullable: true }),
+      slug: text({ nullable: true }),
+      name: text({ required: true }),
+      vcpu: int({ nullable: true }),
+      ram_gb: num({ nullable: true }),
+      disk_gb: num({ nullable: true }),
+      monthly_price: num({ nullable: true }),
+      created_at: ts(),
+    },
+    indexes: [{ name: 'server_plans_slug_key', columns: ['slug'], unique: true }],
+  },
+
+  infrastructure_logs: {
+    columns: {
+      id: pk(),
+      server_id: uuid({ nullable: true }),
+      level: text({ default: 'info' }),
+      message: text({ required: true }),
+      context: jsonb({ default: {} }),
+      created_at: ts(),
+    },
+  },
+
+  notification_outbox: {
+    columns: {
+      updated_at: ts(),
+      id: pk(),
+      user_id: uuid({ nullable: true }),
+      channel: text({ default: 'email' }),
+      subject: text({ nullable: true }),
+      body: text({ nullable: true }),
+      status: text({ default: 'pending' }),
+      delivered_at: { type: 'timestamptz', nullable: true },
+      created_at: ts(),
+    },
+  },
+
+  // -------------------------------------------------------------------------
+  // Control panels / licenses / services
+  // -------------------------------------------------------------------------
+  control_panels: {
+    columns: {
+      id: pk(),
+      slug: text({ required: true }),
+      name: text({ required: true }),
+      vendor: text({ nullable: true }),
+      status: text({ default: 'active' }),
+      created_at: ts(),
+    },
+    indexes: [{ name: 'control_panels_slug_key', columns: ['slug'], unique: true }],
+  },
+
+  control_panel_plans: {
+    columns: {
+      user_id: uuid({ required: true }),
+      hosting_plan_id: uuid({ nullable: true }),
+      id: pk(),
+      panel_id: uuid({ required: true }),
+      name: text({ nullable: true }),
+      price: num({ nullable: true }),
+      created_at: ts(),
+    },
+  },
+
+  licenses: {
+    columns: {
+      id: pk(),
+      user_id: uuid({ nullable: true }),
+      product: text({ required: true }),
+      license_key: text({ nullable: true }),
+      status: text({ default: 'active' }),
+      expires_at: { type: 'timestamptz', nullable: true },
+      created_at: ts(),
+      updated_at: ts(),
+    },
+  },
+
+  // -------------------------------------------------------------------------
+  // Marketplace / deployments
+  // -------------------------------------------------------------------------
+  application_categories: {
+    columns: {
+      active: bool({ default: true }),
+      id: pk(),
+      slug: text({ required: true }),
+      name: text({ required: true }),
+      created_at: ts(),
+    },
+    indexes: [{ name: 'app_categories_slug_key', columns: ['slug'], unique: true }],
+  },
+
+  applications: {
+    columns: {
+      version: text({ nullable: true }),
+      price_cents: int({ default: 0 }),
+      active: bool({ default: true }),
+      icon: text({ nullable: true }),
+      id: pk(),
+      slug: text({ required: true }),
+      name: text({ required: true }),
+      category_id: uuid({ nullable: true }),
+      description: text({ nullable: true }),
+      manifest: jsonb({ default: {} }),
+      status: text({ default: 'active' }),
+      created_at: ts(),
+      updated_at: ts(),
+    },
+    indexes: [{ name: 'applications_slug_key', columns: ['slug'], unique: true }],
+  },
+
+  application_installations: {
+    columns: {
+      config: jsonb(),
+      id: pk(),
+      user_id: uuid({ required: true }),
+      application_id: uuid({ required: true }),
+      server_id: uuid({ nullable: true }),
+      status: text({ default: 'installing' }),
+      url: text({ nullable: true }),
+      created_at: ts(),
+      updated_at: ts(),
+    },
+    indexes: [{ name: 'app_installations_user_idx', columns: ['user_id'] }],
+  },
+
+  deployments: {
+    columns: {
+      ref: text({ nullable: true }),
+      service_id: uuid({ nullable: true }),
+      id: pk(),
+      user_id: uuid({ required: true }),
+      installation_id: uuid({ nullable: true }),
+      status: text({ default: 'queued' }),
+      source: text({ nullable: true }),
+      logs: jsonb({ default: [] }),
+      created_at: ts(),
+      updated_at: ts(),
+    },
+    indexes: [{ name: 'deployments_user_idx', columns: ['user_id'] }],
+  },
+
+  // -------------------------------------------------------------------------
+  // Domain services & brokerage
+  // -------------------------------------------------------------------------
+  domain_searches: {
+    columns: {
+      id: pk(),
+      user_id: uuid({ nullable: true }),
+      query: text({ required: true }),
+      results: jsonb({ default: [] }),
+      created_at: ts(),
+    },
+  },
+
+  domain_registrations: {
+    columns: {
+      domain_name: text({ nullable: true }),
+      id: pk(),
+      user_id: uuid({ required: true }),
+      domain: text({ nullable: true }),
+      registrar: text({ nullable: true }),
+      years: int({ default: 1 }),
+      status: text({ default: 'pending' }),
+      price: num({ nullable: true }),
+      registered_at: { type: 'timestamptz', nullable: true },
+      expires_at: { type: 'timestamptz', nullable: true },
+      created_at: ts(),
+      updated_at: ts(),
+    },
+  },
+
+  domain_transfers: {
+    columns: {
+      domain_name: text({ nullable: true }),
+      id: pk(),
+      user_id: uuid({ required: true }),
+      domain: text({ nullable: true }),
+      auth_code: text({ nullable: true }),
+      status: text({ default: 'pending' }),
+      created_at: ts(),
+      updated_at: ts(),
+    },
+  },
+
+  domain_auctions: {
+    columns: {
+      user_id: uuid({ required: true }),
+      domain_name: text(),
+      starting_bid_cents: int({ default: 0 }),
+      current_bid_cents: int({ default: 0 }),
+      id: pk(),
+      domain: text({ nullable: true }),
+      starting_bid: num({ default: 0 }),
+      current_bid: num({ default: 0 }),
+      status: text({ default: 'open' }),
+      ends_at: { type: 'timestamptz', nullable: true },
+      created_at: ts(),
+    },
+  },
+
+  domain_auction_bids: {
+    columns: {
+      amount_cents: int({ default: 0 }),
+      id: pk(),
+      auction_id: uuid({ required: true }),
+      user_id: uuid({ required: true }),
+      amount: num({ nullable: true }),
+      created_at: ts(),
+    },
+    indexes: [{ name: 'auction_bids_auction_idx', columns: ['auction_id'] }],
+  },
+
+  domain_watches: {
+    columns: {
+      domain_name: text({ nullable: true }),
+      id: pk(),
+      user_id: uuid({ required: true }),
+      domain: text({ nullable: true }),
+      status: text({ default: 'active' }),
+      created_at: ts(),
+    },
+  },
+
+  domain_brokerage_cases: {
+    columns: {
+      id: pk(),
+      user_id: uuid({ required: true }),
+      domain_name: text({ required: true }),
+      owner_id: uuid({ nullable: true }),
+      priority: text({ default: 'normal' }),
+      budget_cents: int({ nullable: true }),
+      notes: text({ nullable: true }),
+      status: text({ default: 'open' }),
+      created_at: ts(),
+      updated_at: ts(),
+    },
+  },
+
+  domain_brokerage_providers: {
+    columns: {
+      type: text({ nullable: true }),
+      active: bool({ default: true }),
+      id: pk(),
+      name: text({ required: true }),
+      status: text({ default: 'active' }),
+      created_at: ts(),
+    },
+  },
+
+  // -------------------------------------------------------------------------
+  // Cloudflare
+  // -------------------------------------------------------------------------
+  cloudflare_accounts: {
+    columns: {
+      user_id: uuid({ required: true }),
+      account_name: text(),
+      api_token: text(),
+      id: pk(),
+      name: text({ nullable: true }),
+      account_id: text({ nullable: true }),
+      status: text({ default: 'active' }),
+      created_at: ts(),
+    },
+  },
+
+  cloudflare_plan_mappings: {
+    columns: {
+      product_id: uuid({ nullable: true }),
+      plan_name: text({ nullable: true }),
+      id: pk(),
+      plan_slug: text({ nullable: true }),
+      cloudflare_plan: text({ nullable: true }),
+      created_at: ts(),
+    },
+  },
+
+  cloudflare_services: {
+    columns: {
+      account_id: uuid({ nullable: true }),
+      plan_id: uuid({ nullable: true }),
+      zone_name: text({ nullable: true }),
+      id: pk(),
+      user_id: uuid({ required: true }),
+      zone: text({ nullable: true }),
+      plan: text({ nullable: true }),
+      status: text({ default: 'pending' }),
+      created_at: ts(),
+      updated_at: ts(),
+    },
+  },
+
+  cloudflare_jobs: {
+    columns: {
+      account_id: uuid({ nullable: true }),
+      kind: text({ nullable: true }),
+      payload: jsonb(),
+      id: pk(),
+      service_id: uuid({ nullable: true }),
+      type: text({ nullable: true }),
+      status: text({ default: 'queued' }),
+      created_at: ts(),
+      updated_at: ts(),
+    },
+  },
+
+  cloudflare_logs: {
+    columns: {
+      id: pk(),
+      job_id: uuid({ nullable: true }),
+      level: text({ default: 'info' }),
+      message: text({ required: true }),
+      created_at: ts(),
+    },
+  },
+
+  // -------------------------------------------------------------------------
+  // Revenue Guardian
+  // -------------------------------------------------------------------------
+  rg_recovery_cases: {
+    columns: {
+      customer_id: uuid({ nullable: true }),
+      owner_id: uuid({ nullable: true }),
+      priority: text({ default: 'normal' }),
+      risk_level: text({ nullable: true }),
+      id: pk(),
+      user_id: uuid({ required: true }),
+      invoice_id: uuid({ nullable: true }),
+      amount: num({ default: 0 }),
+      status: text({ default: 'open' }),
+      assigned_to: uuid({ nullable: true }),
+      created_at: ts(),
+      updated_at: ts(),
+    },
+  },
+
+  rg_follow_ups: {
+    columns: {
+      kind: text({ default: 'note' }),
+      body: text({ nullable: true }),
+      created_by: uuid({ nullable: true }),
+      id: pk(),
+      case_id: uuid({ required: true }),
+      note: text({ nullable: true }),
+      due_at: { type: 'timestamptz', nullable: true },
+      done: bool({ default: false }),
+      created_at: ts(),
+    },
+  },
+
+  rg_payment_promises: {
+    columns: {
+      amount_cents: int({ default: 0 }),
+      due_at: text({ nullable: true }),
+      status: text({ default: 'promised' }),
+      created_by: uuid({ nullable: true }),
+      id: pk(),
+      case_id: uuid({ required: true }),
+      promised_at: { type: 'timestamptz', nullable: true },
+      amount: num({ default: 0 }),
+      kept: bool({ nullable: true }),
+      created_at: ts(),
+    },
+  },
+
+  rg_assignment_rules: {
+    columns: {
+      staff_id: uuid({ nullable: true }),
+      priority: int({ default: 100 }),
+      active: bool({ default: true }),
+      id: pk(),
+      name: text({ nullable: true }),
+      predicate: jsonb({ default: {} }),
+      assignee: uuid({ nullable: true }),
+      enabled: bool({ default: true }),
+      created_at: ts(),
+    },
+  },
+
+  rg_automation_rules: {
+    columns: {
+      trigger: text({ nullable: true }),
+      active: bool({ default: true }),
+      id: pk(),
+      name: text({ required: true }),
+      action: text({ required: true }),
+      enabled: bool({ default: true }),
+      created_at: ts(),
+    },
+  },
+
+  // -------------------------------------------------------------------------
+  // AI support & AI control plane
+  // -------------------------------------------------------------------------
+  ai_support_agents: {
+    columns: {
+      active: bool({ default: true }),
+      role: text({ nullable: true }),
+      system_prompt: text({ nullable: true }),
+      id: pk(),
+      name: text({ required: true }),
+      presence: text({ default: 'offline' }),
+      created_at: ts(),
+    },
+  },
+
+  ai_support_conversations: {
+    columns: {
+      agent_id: uuid({ nullable: true }),
+      subject: text({ nullable: true }),
+      id: pk(),
+      user_id: uuid({ required: true }),
+      status: text({ default: 'open' }),
+      created_at: ts(),
+      updated_at: ts(),
+    },
+  },
+
+  ai_support_messages: {
+    columns: {
+      id: pk(),
+      conversation_id: uuid({ required: true }),
+      role: text({ default: 'user' }),
+      content: text({ required: true }),
+      created_at: ts(),
+    },
+    indexes: [{ name: 'ai_messages_conversation_idx', columns: ['conversation_id'] }],
+  },
+
+  ai_support_knowledge: {
+    columns: {
+      trigger: text({ nullable: true }),
+      id: pk(),
+      title: text({ required: true }),
+      body: text({ required: true }),
+      created_at: ts(),
+    },
+  },
+
+  newsletter_subscriptions: {
+    columns: {
+      id: pk(),
+      email: text({ required: true }),
+      status: text({ default: 'active' }),
+      created_at: ts(),
+    },
+    indexes: [{ name: 'newsletter_email_key', columns: ['email'], unique: true }],
+  },
+
+  ai_registry: {
+    columns: {
+      id: pk(),
+      slug: text({ required: true }),
+      name: text({ required: true }),
+      kind: text({ default: 'model' }),
+      status: text({ default: 'active' }),
+      metadata: jsonb({ default: {} }),
+      created_at: ts(),
+    },
+    indexes: [{ name: 'ai_registry_slug_key', columns: ['slug'], unique: true }],
+  },
+
+  // -------------------------------------------------------------------------
+  // Tools center
+  // -------------------------------------------------------------------------
+  tools_history: {
+    columns: {
+      id: pk(),
+      user_id: uuid({ required: true }),
+      tool_slug: text({ required: true }),
+      input: jsonb({ nullable: true }),
+      output: jsonb({ nullable: true }),
+      created_at: ts(),
+    },
+  },
+
+  tools_favorites: {
+    columns: {
+      id: pk(),
+      user_id: uuid({ required: true }),
+      tool_slug: text({ required: true }),
+      created_at: ts(),
+    },
+    indexes: [{ name: 'tools_favorites_unique', columns: ['user_id', 'tool_slug'], unique: true }],
+  },
+
+  tools_reports: {
+    columns: {
+      id: pk(),
+      user_id: uuid({ required: true }),
+      tool_slug: text({ required: true }),
+      title: text({ required: true }),
+      content: jsonb({ default: {} }),
+      created_at: ts(),
+    },
+  },
+
+  tools_monitors: {
+    columns: {
+      id: pk(),
+      user_id: uuid({ required: true }),
+      url: text({ required: true }),
+      interval_seconds: int({ default: 60 }),
+      status: text({ default: 'unknown' }),
+      last_checked_at: { type: 'timestamptz', nullable: true },
+      created_at: ts(),
+      updated_at: ts(),
+    },
+  },
+
+  agent_heartbeats: {
+    columns: {
+      last_seen_at: ts(),
+      id: pk(),
+      agent_id: text({ nullable: true }),
+      server_id: uuid({ nullable: true }),
+      payload: jsonb({ default: {} }),
+      created_at: ts(),
+    },
+  },
 };
 
 /** Column metadata for a table; throws if the table is unknown (a typo must not pass silently). */

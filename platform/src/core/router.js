@@ -52,9 +52,32 @@ function compilePath(pattern) {
   return { pattern, segments, params, match };
 }
 
+/**
+ * Per-segment specificity: a literal segment is more specific than a parameter, which is more
+ * specific than a wildcard. Routes are resolved most-specific-first so a literal route like
+ * /tools/history is never shadowed by an earlier-registered /tools/:slug. Ties fall back to
+ * registration order, so non-overlapping routes keep their original precedence.
+ */
+function segmentRank(segment) {
+  if (segment === '*') return 0;
+  if (segment.startsWith(':')) return 1;
+  return 2;
+}
+
+function compareSpecificity(a, b) {
+  const shared = Math.min(a.segments.length, b.segments.length);
+  for (let i = 0; i < shared; i += 1) {
+    const delta = segmentRank(b.segments[i]) - segmentRank(a.segments[i]);
+    if (delta !== 0) return delta; // higher rank (more specific) sorts first
+  }
+  if (a.segments.length !== b.segments.length) return b.segments.length - a.segments.length;
+  return a.order - b.order; // stable: preserve registration order on ties
+}
+
 class Router {
   constructor() {
     this.routes = [];
+    this._sorted = false;
     this.hooks = { onRequest: [], preHandler: [], onSend: [], onError: [] };
   }
 
@@ -65,10 +88,19 @@ class Router {
       method,
       pattern,
       ...compiled,
+      order: this.routes.length,
       middleware: handlers.slice(0, -1),
       handler: handlers[handlers.length - 1],
     });
+    this._sorted = false;
     return this;
+  }
+
+  /** Sort routes most-specific-first once, lazily, after all domains have registered. */
+  _ensureSorted() {
+    if (this._sorted) return;
+    this.routes.sort(compareSpecificity);
+    this._sorted = true;
   }
 
   get(pattern, ...handlers) { return this.add('GET', pattern, ...handlers); }
@@ -110,6 +142,7 @@ class Router {
    * @returns {{ route, params }} or throws NotFoundError / HttpError(405)
    */
   resolve(method, pathname) {
+    this._ensureSorted();
     const normalized = pathname.length > 1 ? pathname.replace(/\/+$/, '') || '/' : pathname;
     let pathMatched = false;
 

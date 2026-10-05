@@ -203,6 +203,11 @@ class Ctx {
     return schema.parseHttp(this.body);
   }
 
+  /** Validate the parsed query string against a schema (throws 400 ValidationError). */
+  async validateQuery(schema) {
+    return schema.parseHttp(this.query);
+  }
+
   // -- response helpers -----------------------------------------------------
 
   code(status) {

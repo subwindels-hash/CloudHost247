@@ -30,10 +30,66 @@ const API_PREFIX = '/api/v1';
  * `{ name, register(router, deps) }` and adds its own routes under API_PREFIX.
  */
 const DOMAINS = [
+  // Core
   require('./domains/health'),
   require('./domains/auth'),
   require('./domains/account'),
+  require('./domains/account-identity'),
   require('./domains/catalog'),
+  require('./domains/audit'),
+
+  // Commerce & billing
+  require('./domains/commerce'),
+  require('./domains/billing'),
+  require('./domains/payments'),
+  require('./domains/webhooks'),
+  require('./domains/admin-billing'),
+
+  // Hosting & services
+  require('./domains/services'),
+  require('./domains/licenses'),
+  require('./domains/control-panels'),
+  require('./domains/marketplace'),
+  require('./domains/marketplace-admin'),
+  require('./domains/app-installations'),
+  require('./domains/deployments'),
+
+  // Domains & DNS & SSL
+  require('./domains/domains'),
+  require('./domains/dns'),
+  require('./domains/ssl'),
+  require('./domains/domain-services'),
+  require('./domains/domain-brokerage'),
+  require('./domains/admin-domain-services'),
+
+  // Infrastructure & servers
+  require('./domains/servers'),
+  require('./domains/provisioning'),
+  require('./domains/infrastructure'),
+  require('./domains/monitoring'),
+  require('./domains/firewall'),
+  require('./domains/agent'),
+
+  // Cloudflare
+  require('./domains/cloudflare'),
+  require('./domains/admin-cloudflare'),
+
+  // Admin platform & customers & users
+  require('./domains/admin-platform'),
+  require('./domains/admin-customers'),
+  require('./domains/admin-users'),
+
+  // Revenue Guardian
+  require('./domains/revenue-guardian'),
+
+  // AI
+  require('./domains/ai-support'),
+  require('./domains/ai-os'),
+
+  // Tools
+  require('./domains/tools'),
+  require('./domains/mrz-tools'),
+  require('./domains/admin-tools'),
 ];
 
 class App {
