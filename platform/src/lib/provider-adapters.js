@@ -6,11 +6,14 @@
  * are missing without ever reading, returning, or logging a secret value, and behind the
  * fail-closed CONFIGURATION_REQUIRED state.
  *
- * The live adapters themselves (AWS SigV4, live Cloudflare, …) stay at the adapter boundary and are
- * not part of this build; what ships here is the registry, so an operator can see what a provider
- * needs and the platform can refuse to promise an operation no adapter implements.
+ * Readiness here is configuration readiness plus implementation readiness: a provider whose adapter
+ * is not ported into this build (see lib/providers/registry.js) is reported as not ready, with the
+ * missing adapter named, rather than being offered as usable because its environment variables
+ * happen to be present.
  */
 'use strict';
+
+const { IMPLEMENTED_ADAPTERS, PENDING_ADAPTERS } = require('./providers/registry');
 
 const RESOURCE_METADATA = [
   { key: 'cpuCores', description: 'vCPU cores billed by the plan', required: true },
@@ -195,6 +198,12 @@ function describeProviderConfiguration(provider, source = process.env) {
     }
   }
   const missing = credentials.filter((c) => c.required && !c.present).map((c) => c.name);
+  const adapterImplemented = IMPLEMENTED_ADAPTERS.includes(profile.kind);
+  if (!adapterImplemented) {
+    missing.push(PENDING_ADAPTERS.includes(profile.kind)
+      ? `${profile.kind} adapter implementation is not ported into this build`
+      : 'adapter implementation');
+  }
   if (configuredBaseUrl && !apiBaseUrlConfigured) missing.push('api_base_url must use https');
   else if (profile.requiresApiBaseUrl && !apiBaseUrlConfigured) missing.push('api_base_url');
   if (profile.kind === 'openstack') {
@@ -216,7 +225,7 @@ function describeProviderConfiguration(provider, source = process.env) {
     apiBaseUrl: apiBaseUrl ?? profile.defaultApiBaseUrl,
     apiBaseUrlRequired: profile.requiresApiBaseUrl, apiBaseUrlConfigured,
     credentials, planMetadata: profile.planMetadata, capabilities: profile.capabilities,
-    notes: profile.notes, ready: missing.length === 0, missing,
+    adapterImplemented, notes: profile.notes, ready: missing.length === 0, missing,
   };
 }
 
@@ -232,10 +241,12 @@ function listAdapterProfiles() {
     })),
     planMetadata: profile.planMetadata, capabilities: profile.capabilities,
     notes: profile.notes, developmentOnly: profile.kind === 'mock',
+    implemented: IMPLEMENTED_ADAPTERS.includes(profile.kind),
   }));
 }
 
 module.exports = {
   ADAPTER_PROFILES, ADAPTER_KINDS, ALWAYS_AVAILABLE_CAPABILITIES, NO_CAPABILITIES,
+  IMPLEMENTED_ADAPTERS, PENDING_ADAPTERS,
   getAdapterProfile, describeProviderConfiguration, listAdapterProfiles,
 };

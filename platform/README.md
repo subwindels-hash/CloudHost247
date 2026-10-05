@@ -118,6 +118,25 @@ The SPA's API client is exercised unmodified by `tests/spa-commerce.test.js` and
 rendered these pages in this environment — that limit is recorded in
 `docs/UNFINISHED-BUILD-CODE-NAMES.md` rather than implied away.
 
+### Infrastructure provider egress
+
+`src/lib/providers/` is the ported provider boundary: one adapter per provider kind, a single HTTP
+entry point (`providerRequest`, with an injectable transport so the behaviour is testable without
+credentials), the failure vocabulary (`ProviderError` with retryability and a sanitized provider
+response), the credential-free base-URL rule, and a response sanitizer that redacts credentials,
+cloud-init and private key material before anything is stored or logged.
+
+Nine kinds issue real provider requests — Hetzner, DigitalOcean, Vultr, OVH, Proxmox, Virtualizor,
+SolusVM, the operator HTTPS bridge and the development-only mock. AWS EC2, Contabo and OpenStack are
+not ported yet: the registry refuses them with `UNSUPPORTED_OPERATION` naming the missing adapter
+(instead of a retryable "temporarily unavailable"), and the admin adapter list reports
+`implemented: false`.
+
+`tests/provider-adapters.test.js` starts a loopback HTTP server that plays each provider API and
+answers with provider-shaped documents, so the request an adapter constructs, the response it
+understands and the failure it reports are all verified end to end. No call to a real provider has
+been made from this environment, and the tests say so.
+
 ## API surface (ported so far)
 
 - `GET /health`, `/ready`, `/api/v1/system/status`
