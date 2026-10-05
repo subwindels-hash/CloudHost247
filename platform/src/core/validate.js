@@ -219,6 +219,15 @@ class StringSchema extends Schema {
     return this.regex(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/, 'Invalid UUID');
   }
 
+  datetime() {
+    // ISO-8601 date-time, matching zod's .datetime(): YYYY-MM-DDTHH:mm:ss with optional
+    // fractional seconds and a Z or ±HH:MM offset.
+    return this.regex(
+      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$/,
+      'Invalid ISO datetime',
+    );
+  }
+
   trim() { return this.transform((v) => v.trim()); }
   toLowerCase() { return this.transform((v) => v.toLowerCase()); }
   nonempty() { return this.min(1); }
