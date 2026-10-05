@@ -6,10 +6,15 @@
  */
 'use strict';
 
+const { v } = require('../core/validate');
 const { authenticate } = require('../lib/auth');
-const { NotFoundError } = require('../core/errors');
+const { NotFoundError, ValidationError } = require('../core/errors');
+const { uuidv7 } = require('../lib/ids');
+const { subscriptionRow } = require('../lib/subscription-dto');
 
 const name = 'billing';
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function publicInvoice(row) {
   return {
@@ -82,6 +87,62 @@ function register(router, deps) {
         currentPeriodEnd: s.current_period_end,
       })),
     });
+  });
+
+  /**
+   * Cancel the caller's own subscription. Cancellation takes effect at the end of the paid period
+   * (cancel_at_period_end), and a subscription that is already cancelled/terminated/expired is
+   * returned as-is with alreadyCancelled rather than erroring — the original's idempotent answer.
+   */
+  router.post('/api/v1/billing/subscriptions/:id/cancel', async (ctx) => {
+    const auth = await authenticate(ctx, deps);
+    if (!UUID_RE.test(String(ctx.params.id ?? ''))) throw new ValidationError('id must be a valid UUID');
+
+    const subscription = await store.table('subscriptions').findById(ctx.params.id);
+    if (!subscription || subscription.user_id !== auth.id) throw new NotFoundError('No subscription was found with that id');
+
+    if (['cancelled', 'terminated', 'expired'].includes(subscription.status)) {
+      ctx.json({ subscription: subscriptionRow(subscription), alreadyCancelled: true });
+      return;
+    }
+
+    const updated = await store.table('subscriptions').updateById(subscription.id, {
+      status: 'cancelled',
+      cancel_at_period_end: true,
+      cancelled_at: new Date().toISOString(),
+    });
+    await store.table('audit_logs').insert({
+      id: uuidv7(), actor_id: auth.id, actor_role: auth.role,
+      action: 'subscription.cancelled', entity_type: 'subscription', entity_id: subscription.id,
+      ip_address: ctx.ip, user_agent: ctx.userAgent,
+    });
+    ctx.json({ subscription: subscriptionRow(updated) });
+  });
+
+  /**
+   * Request a plan change. The subscription keeps its current period — the change is priced into
+   * the next renewal — so this records the request and returns the target plan as pendingPlanId
+   * rather than mutating plan_id, exactly as the original does.
+   */
+  router.post('/api/v1/billing/subscriptions/:id/change-plan', async (ctx) => {
+    const auth = await authenticate(ctx, deps);
+    if (!UUID_RE.test(String(ctx.params.id ?? ''))) throw new ValidationError('id must be a valid UUID');
+    const body = await ctx.validate(v.object({ planId: v.string().uuid() }));
+
+    const subscription = await store.table('subscriptions').findById(ctx.params.id);
+    if (!subscription || subscription.user_id !== auth.id) throw new NotFoundError('No subscription was found with that id');
+
+    const plan = await store.table('catalog_product_plans').findById(body.planId);
+    if (!plan || plan.status !== 'active') throw new NotFoundError('No purchasable plan was found with that id');
+    if (subscription.status !== 'active') throw new ValidationError('Only active subscriptions can change plan');
+
+    await store.table('audit_logs').insert({
+      id: uuidv7(), actor_id: auth.id, actor_role: auth.role,
+      action: 'subscription.plan_change_requested', entity_type: 'subscription', entity_id: subscription.id,
+      ip_address: ctx.ip, user_agent: ctx.userAgent,
+      after: { fromPlan: subscription.plan_id, toPlan: body.planId },
+    });
+    ctx.json({ subscription: subscriptionRow(subscription), pendingPlanId: body.planId });
   });
 }
 

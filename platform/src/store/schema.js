@@ -459,6 +459,16 @@ const TABLES = {
       current_period_start: { type: 'timestamptz', nullable: true },
       current_period_end: { type: 'timestamptz', nullable: true },
       renews_at: { type: 'timestamptz', nullable: true },
+      // Subscription lifecycle fields the platform's admin/billing surface sets. The original
+      // carries these on the same table (subscriptions.customer_id is user_id here).
+      cancel_at_period_end: bool({ default: false }),
+      cancelled_at: { type: 'timestamptz', nullable: true },
+      past_due_since: { type: 'timestamptz', nullable: true },
+      suspended_at: { type: 'timestamptz', nullable: true },
+      terminated_at: { type: 'timestamptz', nullable: true },
+      grace_period_days: int({ nullable: true }),
+      provider_subscription_id: text({ nullable: true }),
+      installation_id: uuid({ nullable: true }),
       created_at: ts(),
       updated_at: ts(),
     },
