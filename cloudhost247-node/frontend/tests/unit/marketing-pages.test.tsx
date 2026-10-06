@@ -83,7 +83,8 @@ describe('public marketing pages', () => {
       const html = render(page.route);
 
       it('renders its H1, hero and breadcrumb', () => {
-        expect(html).toContain(page.hero.heading);
+        expect(html).toContain(escaped(page.hero.heading));
+        expect(html).toContain(escaped(page.hero.lede));
         expect(html).toContain('aria-label="Breadcrumb"');
         expect(html).toContain('<h1');
       });

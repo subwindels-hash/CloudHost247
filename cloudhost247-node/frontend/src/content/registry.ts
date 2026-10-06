@@ -36,6 +36,8 @@ export interface MarketingSection {
   rows?: string[][];
   items?: MarketingItem[];
   links?: MarketingItem[];
+  /** For a `plans` section: the catalogue product whose live plans and prices to render. */
+  productSlug?: string;
 }
 
 export interface MarketingFaq {

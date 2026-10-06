@@ -33,11 +33,10 @@ const DocsIndexPage = lazy(() => import('./pages/marketing/DocsPages').then((m) 
 const DocPage = lazy(() => import('./pages/marketing/DocsPages').then((m) => ({ default: m.DocPage })));
 const SitemapPage = lazy(() => import('./pages/marketing/SitemapPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
-const HostingPage = lazy(() => import('./pages/HostingPage'));
-const HostingCpanelPage = lazy(() => import('./pages/HostingCpanelPage'));
-const HostingVpsPage = lazy(() => import('./pages/HostingVpsPage'));
-const HostingDedicatedPage = lazy(() => import('./pages/HostingDedicatedPage'));
-const HostingApplicationHostingPage = lazy(() => import('./pages/HostingApplicationHostingPage'));
+// Superseded by content pages under pages/marketing/ (see shared/site/content/products.json):
+// /hosting, /hosting/cpanel, /hosting/vps, /hosting/dedicated and /hosting/application-hosting now
+// render the marketing shell plus the same live ProductPlansSection. The modules are kept because
+// their test suites pin the catalogue honesty contract; nothing routes to them.
 const DomainsMarketingPage = lazy(() => import('./pages/DomainsMarketingPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
 const FaqPage = lazy(() => import('./pages/FaqPage'));
@@ -210,10 +209,8 @@ export default function App() {
         ))}
         <Route path="/docs" element={<DocsIndexPage />} />
         <Route path="/docs/:slug" element={<DocPage />} />
-        <Route path="/hosting/cpanel" element={<HostingCpanelPage />} />
-        <Route path="/hosting/vps" element={<HostingVpsPage />} />
-        <Route path="/hosting/dedicated" element={<HostingDedicatedPage />} />
-        <Route path="/hosting/application-hosting" element={<HostingApplicationHostingPage />} />
+        {/* /hosting/control-panels is a live, admin-configurable catalogue of the panels this
+            deployment is actually set up to provision, so it stays a dedicated page. */}
         <Route path="/hosting/control-panels" element={<ControlPanelsPage />} />
         <Route path="/hosting/control-panels/:slug" element={<ControlPanelDetailPage />} />
         <Route path="/domains" element={<DomainsMarketingPage />} />

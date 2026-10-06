@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Icon, CheckIcon, ArrowIcon } from '../../components/ui/Icon';
 import { CatalogErrorBanner, CatalogLoadingBanner } from '../../components/CatalogStateBanner';
 import { useApiResource } from '../../lib/useApiResource';
+import { ProductPlansSection } from '../../components/ProductPlansSection';
 import type { CatalogListResponse, ProductPlansResponse, PublicPlan } from '../../lib/catalog-types';
 import { usePageMeta } from '../../lib/usePageMeta';
 import { findPage, type MarketingItem, type MarketingPage, type MarketingSection } from '../../content/registry';
@@ -558,6 +559,23 @@ function renderSection(section: MarketingSection, index: number) {
       return <section className="ch-section ch-section--soft" key={key}><div className="ch-wrap"><Catalog section={section} /></div></section>;
     case 'site-search':
       return <section className="ch-section" key={key}><div className="ch-wrap">{kicker}<SiteSearch section={section} /></div></section>;
+    case 'plans':
+      return (
+        <section className={`ch-section${index % 2 === 1 ? ' ch-section--soft' : ''}`} key={key}>
+          <div className="ch-wrap">
+            {(kicker || heading) ? (
+              <div className="ch-section__head">
+                <div>
+                  {kicker}
+                  {heading}
+                </div>
+                {section.lede ? <p className="ch-lede">{section.lede}</p> : null}
+              </div>
+            ) : null}
+            <ProductPlansSection slug={(section as { productSlug: string }).productSlug} />
+          </div>
+        </section>
+      );
     case 'doc-index':
       return <section className="ch-section ch-section--soft" key={key}><div className="ch-wrap"><DocIndex section={section} /></div></section>;
     case 'news':

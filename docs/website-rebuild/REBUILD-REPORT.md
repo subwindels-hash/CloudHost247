@@ -18,7 +18,7 @@
 | WHMCS theme templates (`templates/cloudhost247`) | 86 |
 | Legacy vendor theme templates (`templates/cloudhost247_legacy`) | ~130 (reported, not rewritten) |
 | SPA route declarations (`App.tsx`) | 138 |
-| Marketing page definitions (`shared/site/content/*.json`) | 51 |
+| Marketing page definitions (`shared/site/content/*.json`) | 54 |
 | API route handlers | 49 |
 | Tool catalogue entries | 105 (67 indexed for the website) |
 
@@ -27,8 +27,12 @@ reported — and the category for each root PHP page is listed in the audit, §8
 
 ## 2. Pages rebuilt
 
-* **51 marketing pages** created or rebuilt (from 8 thin pages), with 106 content sections and 159
+* **54 marketing pages** created or rebuilt (from 8 thin pages), with 116 content sections and 170
   FAQs, all rendered by one content-driven component.
+* **41 PHP product pages** enriched from the same content source, so the WHMCS surface and the
+  application say the same thing about the same product.
+* **3 thin product pages rebuilt** in the second pass (`/hosting/vps`, `/hosting/dedicated`,
+  `/hosting/cpanel`), which had three static cards each while the rest of the site had real pages.
 * **18 legal documents** published as real documents (10,787 words) where two placeholder legal
   pages existed before.
 * **14 documentation files** published in a reader at `/docs/:slug` where nothing existed before.
@@ -39,11 +43,11 @@ reported — and the category for each root PHP page is listed in the audit, §8
 
 138 SPA route declarations + 83 root PHP pages + 14 licensed WHMCS entry points + 67 tool paths,
 all cross-checked against the registry. `node scripts/site/generate.mjs --check` is the gate:
-**221 links validated, 0 unresolved**.
+**222 links validated, 0 unresolved**.
 
 ## 4. Navigation links audited
 
-**221** navigation and footer links across 9 mega menus and 9 footer columns, each checked for a
+**222** navigation and footer links across 9 mega menus and 9 footer columns, each checked for a
 destination on *both* the app and the PHP surface. 103 of them pointed at routes that had no page
 before this rebuild; 45 pages were created for them and the remainder resolved onto existing app
 routes.
@@ -62,6 +66,10 @@ the same tool-category list the Tools Center uses. Every footer item resolves.
 | Legal routes rendering "this page is a placeholder" | 2 | replaced with the real policies |
 | Product cards saying *"Not yet built on this platform"* | 5 | replaced with real product pages |
 | `#`/empty/`javascript:` links on a published surface | 0 found | gate added so they cannot appear |
+| **PHP theme never loaded the shared design system** | all templates | `site-head.tpl` now loads it after `site.css`; load order asserted by a test |
+| **PHP Tools mega menu empty without JavaScript** | 1 menu | ten tool categories server-rendered; script enhancement still applies |
+| **PHP product pages thinner than the application** | 41 pages | shared content folded into the PHP registry |
+| **Relative `Sitemap:` directives in `robots.txt`** (silently ignored) | 2 | `robots.php` emits absolute URLs from `SystemURL`; rewrite rule documented |
 | `#`/`javascript:void(0)` inside vendor themes and modules | 647 hrefs | **reported, not rewritten** — licensed third-party admin UI and marketplace templates; see audit §5 |
 
 **Final state: 0 broken, placeholder or dangling links across 2,171 surfaces.**
@@ -123,17 +131,18 @@ theme.
 
 | Suite | Result |
 |---|---|
-| Backend (`npx vitest run tests`) | **1,607 passed**, 135 files |
-| Frontend (`npx vitest run frontend/tests`) | **488 passed**, 32 files |
-| Page render verification | all **51 public pages** rendered server-side and asserted |
+| Backend (`npx vitest run tests`) | **1,632 passed**, 136 files |
+| Frontend (`npx vitest run frontend/tests`) | **513 passed**, 33 files |
+| Page render verification | all **54 public pages** rendered server-side and asserted |
 | Design-system contract | breakpoints, overflow, palette, touch targets, reduced motion |
-| Link integrity | 0 broken links across 2,171 surfaces |
-| Registry validation | 221 destinations, 0 unresolved |
-| PHP contract (`verify-website.py`) | passed — 67 registry pages, 92 navigation destinations |
+| Link integrity | 0 broken links across 2,175 surfaces |
+| Registry validation | 222 destinations, 0 unresolved |
+| PHP contract (`verify-website.py`) | passed — 67 registry pages, 93 navigation destinations |
+| PHP theme contract (`tests/website/test_static.py`) | 10 passed, including design-system load order and registry provenance |
 | PHP syntax balance | 1,737 files, all balanced |
 | Branding audit | passed |
 | TypeScript | clean, server and frontend |
-| **Total** | **2,095 tests passing** |
+| **Total** | **2,145 tests passing** |
 
 ## 13. Build result
 
@@ -177,8 +186,10 @@ Preview: a harness serving the production build on port 8080 (not part of the re
    asserted without a layout engine — overflow prevention, breakpoints, touch targets, reduced
    motion, one palette, no placeholder copy — is asserted.
 2. **No PHP binary.** `php -l` could not run; the repository's token checker (unbalanced brackets,
-   unterminated strings, broken heredocs) was used instead across all 1,737 files, and the theme's
-   own PHP tests remain the authority.
+   unterminated strings, broken heredocs) was used across all 1,738 PHP files, and the theme's own
+   PHP test suite — including the static contract tests extended in this pass — remains the
+   authority. The Smarty render fixture (`tests/website/render-shell.php`) needs a PHP binary and
+   was not executed here.
 3. **No database in the sandbox.** The platform's own server could not be started (`DATABASE_URL`
    and `JWT_SECRET` are required), so the website preview runs on a harness that returns empty
    catalogue, region and status payloads. That is why those sections show their honest empty states

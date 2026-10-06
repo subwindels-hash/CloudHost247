@@ -41,17 +41,42 @@ surfaces 3–5 alone except where the brief required them to stop competing visu
 
 ## 2. Inventory of surface 2 (the live website)
 
+### The PHP surface
+
+The first pass generated the design system and registry *into* the WHMCS theme but did not verify
+the theme consumed them. A second pass found four real defects, all fixed:
+
+1. **`design-system.css` was never loaded** by the theme — `site-head.tpl` had only `site.css`, so
+   the whole WHMCS site still rendered the old palette. It now loads the design system after
+   `site.css`, and `tests/website/test_static.py` asserts the order, because with two stylesheets
+   styling the same `ch-*` classes, load order *is* the behaviour.
+2. **The PHP Tools mega menu rendered empty** with JavaScript disabled — its entries come from
+   `/api/tools/navigation` at runtime. The ten tool categories are now server-rendered, and
+   `site.js` still enriches them into the live tool list when the catalogue answers.
+3. **The PHP product pages carried thinner copy than the application** (3 generic features, a
+   hard-coded FAQ block). The generator now folds the same content the application renders
+   — headline, features, use cases, FAQs, related services, SEO description — into 41 PHP product
+   pages, so a product page says the same thing on both sites and there is one place to correct it.
+4. **`robots.txt` advertised its sitemaps with relative URLs.** The specification requires absolute
+   URLs in a `Sitemap:` directive, so every crawler silently ignored them. `robots.php` now
+   generates the file from the configured `SystemURL`, with one documented rewrite rule; the static
+   file stays as a working fallback and says plainly why it cannot do this itself.
+
 ### Routes
 
 | Category | Before | After |
 |---|---|---|
 | App routes declared in `App.tsx` | 138 | 138 (unchanged) |
-| Public marketing pages | 8 thin pages | **51** content-complete pages |
+| Public marketing pages | 8 thin pages | **54** content-complete pages |
 | Legal documents published | 2, both placeholders | **18 real documents**, 10,787 words |
 | Documentation pages | 0 | **14 documents** served by a reader at `/docs/:slug` |
 | Miscellaneous placeholder pages | `LegalPage.tsx` ("this page is a placeholder"), `/hosting` ("Not yet built on this platform") | removed |
 
-New public routes added (all generated from `shared/site/content/*.json`):
+New public routes added (all generated from `shared/site/content/*.json`). `/hosting/vps`,
+`/hosting/dedicated` and `/hosting/cpanel` were added in the second pass: they had been thin
+leftovers with three static cards each while every product around them had a real page, and VPS is
+one of the most-linked products on the site. They are now content pages that render the same live
+`ProductPlansSection` the old pages used, so the catalogue honesty contract is unchanged.
 
 ```
 /hosting                      /hosting/web-hosting     /hosting/business
@@ -216,16 +241,16 @@ deployment gets broken. What it does instead:
 
 | Check | Command | Result |
 |---|---|---|
-| Registry + content generation | `node scripts/site/generate.mjs` | 9 menus, 9 footer columns, **221 links validated**, 51 pages, 106 sections, 159 FAQs |
+| Registry + content generation | `node scripts/site/generate.mjs` | 9 menus, 9 footer columns, **222 links validated**, 54 pages, 116 sections, 170 FAQs; 41 PHP product pages enriched |
 | Link integrity | `node scripts/site/check-links.mjs` | **0 broken links** across 2,171 surfaces |
 | PHP contract | `python3 scripts/verify-website.py` | passed — 67 registry pages, 92 navigation destinations |
 | PHP syntax sanity | `node scripts/php-syntax-check.cjs $(git ls-files '*.php')` | 1,737 files, all parse-balanced |
 | TypeScript (server) | `npx tsc -p tsconfig.json --noEmit` | clean |
 | TypeScript (frontend) | `npx tsc -p frontend/tsconfig.json --noEmit` | clean |
 | Frontend production build | `npm run build` | clean — 525 kB main chunk / 155 kB gzip + per-route chunks |
-| Frontend tests | `npx vitest run frontend/tests` | **488 passed**, 32 files |
-| Backend tests | `npx vitest run tests` | **1,607 passed**, 135 files |
-| Page render verification | `frontend/tests/unit/marketing-pages.test.tsx` | all 51 pages rendered server-side, content asserted |
+| Frontend tests | `npx vitest run frontend/tests` | **513 passed**, 33 files |
+| Backend tests | `npx vitest run tests` | **1,632 passed**, 136 files |
+| Page render verification | `frontend/tests/unit/marketing-pages.test.tsx` | all 54 pages rendered server-side, content asserted |
 | Responsive/overflow contract | `frontend/tests/unit/design-system.test.ts` | passed |
 | Production package | `python3 scripts/build-production-zip.py --verify` | 7,885 files, 55.3 MB, extract-and-verify passed, 0 secrets |
 

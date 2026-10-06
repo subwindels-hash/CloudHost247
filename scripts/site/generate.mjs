@@ -374,7 +374,97 @@ export const REGISTRY_ROUTES: string[] = ${json([
 }
 
 /** site.json keeps its rich page-content map; only navigation and footer are generated. */
-function emitPhpSiteJson(registry, previous) {
+/**
+ * Route → PHP file, taken from the registry's own dual-destination links. A content page can
+ * therefore inherit the rich copy written for the application on the PHP page that covers the same
+ * product, without either surface maintaining a second copy of it.
+ */
+function phpRouteMap(registry) {
+  const map = new Map();
+  const visit = (href) => {
+    if (href?.spa && href?.php && !href.php.includes('?')) {
+      map.set(href.spa, href.php.replace(/^\.?\//, '').replace(/#.*$/, ''));
+    }
+  };
+  for (const menu of registry.menus) {
+    visit(menu.href);
+    visit(menu.featured?.href);
+    for (const column of menu.columns ?? []) for (const item of column.items ?? []) visit(item.href);
+  }
+  for (const column of registry.footer) for (const item of column.items) visit(item.href);
+  return map;
+}
+
+/**
+ * Fold the marketing page content into the PHP theme registry.
+ *
+ * The PHP pages render `$ch247Site.page.{headline,features,uses,related,faqs}`. Those keys were
+ * previously authored separately (and thinly); now they are derived from the same content the
+ * application renders, so a product page says the same thing on both sites and there is one place
+ * to correct it.
+ *
+ * Only the PHP pages that exist are touched, and only additive keys plus the SEO description. The
+ * page's own `visual`, `slug` and `category` stay as the theme registry defined them.
+ */
+function decoratePhpPages(previous, contentPages, registry) {
+  const byRoute = new Map(contentPages.map((page) => [page.route, page]));
+  const routeMap = phpRouteMap(registry);
+  const matched = new Set();
+
+  const pages = {};
+  for (const [file, existing] of Object.entries(previous.pages ?? {})) {
+    // Find the content page for this PHP file: through the registry's paired links first, then by
+    // slug, because some PHP pages are named after the product rather than the route.
+    let content = [...routeMap.entries()].filter(([, php]) => php === file).map(([spa]) => byRoute.get(spa)).find(Boolean);
+    if (!content) {
+      content = contentPages.find((page) => {
+        const last = page.route.split('/').filter(Boolean).slice(-1)[0] ?? '';
+        return existing.slug === last
+          || existing.slug === `${last}-hosting`
+          || page.route === `/${existing.slug}`;
+      });
+    }
+    if (!content) {
+      pages[file] = existing;
+      continue;
+    }
+    matched.add(file);
+
+    const features = [];
+    for (const section of content.sections) {
+      if (section.type !== 'features' && section.type !== 'cards') continue;
+      for (const item of section.items ?? []) {
+        if (item.title && item.body && features.length < 9) features.push([item.title, item.body]);
+      }
+    }
+    const uses = [];
+    for (const section of content.sections) {
+      if (section.type !== 'checks') continue;
+      for (const item of section.items ?? []) {
+        if ((item.label || item.title) && uses.length < 6) uses.push(item.label ?? item.title);
+      }
+    }
+    const related = (content.related ?? [])
+      .map((route) => routeMap.get(route) ?? `${route.split('/').filter(Boolean).slice(-1)[0]}.php`)
+      .filter((php) => php && Object.prototype.hasOwnProperty.call(previous.pages, php));
+    for (const phrase of content.hero.points ?? []) {
+      if (uses.length < 6 && !uses.includes(phrase)) uses.push(phrase);
+    }
+
+    pages[file] = {
+      ...existing,
+      headline: content.hero.heading,
+      seo_description: content.description,
+      features: features.length ? features : existing.features,
+      uses: uses.length ? uses.slice(0, 6) : existing.uses,
+      faqs: (content.faqs ?? []).map((faq) => ({ q: faq.q, a: faq.a })),
+      related: related.length ? [...new Set(related)] : existing.related,
+    };
+  }
+  return { pages, matched: matched.size };
+}
+
+function emitPhpSiteJson(registry, previous, contentPages) {
   const navigation = registry.menus.map((menu) => ({
     title: menu.label,
     description: menu.blurb,
@@ -395,7 +485,16 @@ function emitPhpSiteJson(registry, previous) {
     }))
     .filter((column) => column.links.length > 0);
 
-  return { ...previous, navigation, footer };
+  const { pages, matched } = decoratePhpPages(previous, contentPages, registry);
+  // Tool categories are generated too, so the PHP Tools mega menu has content before any script
+  // runs. `site.js` still enriches it from the live catalogue when it can; this is the floor, not
+  // the ceiling — a menu that is empty with JavaScript disabled is a broken menu.
+  const toolCategories = registry.toolsCategories.map((category) => ({
+    label: category.label,
+    desc: category.desc,
+    url: `tools/category/${category.slug}`,
+  }));
+  return { payload: { ...previous, navigation, footer, pages, toolCategories }, matched };
 }
 
 /* ------------------------------------------------------------------ */
@@ -422,6 +521,11 @@ export function loadContentPages() {
 
 const ALLOWED_SECTIONS = new Set([
   'features', 'cards', 'steps', 'split', 'checks', 'note', 'table',
+  // `plans` renders one product's live plans and prices from the catalogue, using the same
+  // component and the same honest empty states the product pages have always used. It is separate
+  // from `catalog` (which lists every product) because a product page must not show somebody
+  // else's plans.
+  'plans',
   'live-locations', 'live-status', 'catalog', 'site-search', 'doc-index', 'news',
 ]);
 
@@ -470,6 +574,9 @@ function validatePages(pages, spaRouteSet, tools, registryRoutes, legalSlugs) {
         if (item.link?.to && !spaTargetExists(item.link.to, spaRouteSet, tools, legalSlugs, relatedTargets)) {
           fail(`${where}/${section.type}: link → ${item.link.to} is not a route this app serves.`);
         }
+      }
+      if (section.type === 'plans' && !section.productSlug) {
+        fail(`${where}/plans: a plans section needs a productSlug to know whose plans to show.`);
       }
       if (section.type !== 'news' && section.type !== 'site-search' && !section.heading && !section.items?.length) {
         fail(`${where}/${section.type}: section has neither heading nor items.`);
@@ -638,6 +745,7 @@ function main() {
     documentationFiles: docs.index.length,
     documentationBytes: docs.copied.reduce((total, doc) => total + doc.markdown.length, 0),
     assetsCopied: 0, // filled in by the write phase, once the illustration copy has run
+    phpPagesEnriched: 0,
     errors,
     warnings,
   };
@@ -710,7 +818,8 @@ function main() {
   report.assetsCopied = assetCount;
 
   const previousSiteJson = JSON.parse(readFileSync(PHP_SITE_JSON, 'utf8'));
-  const nextSiteJson = emitPhpSiteJson(registry, previousSiteJson);
+  const { payload: nextSiteJson, matched: phpPagesEnriched } = emitPhpSiteJson(registry, previousSiteJson, contentPages);
+  report.phpPagesEnriched = phpPagesEnriched;
   writeFileSync(PHP_SITE_JSON, `${json(nextSiteJson)}\n`);
 
   mkdirSync(dirname(REPORT_OUT), { recursive: true });
@@ -725,6 +834,7 @@ function main() {
     + `${report.marketingSections} sections, ${report.faqs} FAQs, `
     + `${docs.index.length} published documents (${Math.round(report.documentationBytes / 1024)} KB)\n`
   );
+  process.stdout.write(`✓ PHP theme → navigation, footer and ${phpPagesEnriched} product pages enriched from the shared content\n`);
   for (const warning of warnings) process.stderr.write(`  ! ${warning}\n`);
 }
 

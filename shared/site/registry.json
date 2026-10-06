@@ -91,6 +91,15 @@
               }
             },
             {
+              "label": "cPanel Hosting",
+              "icon": "control",
+              "desc": "Mailboxes, databases and installs from the panel your team knows.",
+              "href": {
+                "spa": "/hosting/cpanel",
+                "php": "cpanel-hosting.php"
+              }
+            },
+            {
               "label": "WordPress Hosting",
               "icon": "wordpress",
               "desc": "WordPress with a managed runtime, cache and staging path.",

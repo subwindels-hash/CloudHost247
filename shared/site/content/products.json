@@ -1,0 +1,360 @@
+{
+  "family": "products",
+  "pages": [
+    {
+      "route": "/hosting/vps",
+      "title": "VPS Hosting",
+      "category": "Cloud",
+      "seoTitle": "VPS Hosting — Root Access Virtual Servers | CloudHost247",
+      "description": "VPS hosting from CloudHost247: guaranteed virtual resources, full administrative access, a choice of operating system and live plan pricing from the catalogue.",
+      "visual": "cloud/vps",
+      "hero": {
+        "kicker": "Cloud & Servers",
+        "heading": "A real server, without a real server's commitment",
+        "lede": "Guaranteed CPU, memory and storage with administrator access, so you can install what the application needs instead of asking whether the host allows it.",
+        "ctas": [
+          {
+            "label": "See live plans",
+            "to": "/hosting/vps#plans",
+            "variant": "primary"
+          },
+          {
+            "label": "Compare with cloud",
+            "to": "/cloud/public",
+            "variant": "ghost"
+          }
+        ],
+        "points": [
+          "Guaranteed, not burstable",
+          "Full administrative access",
+          "Choose the operating system",
+          "Firewall and backups included"
+        ]
+      },
+      "sections": [
+        {
+          "type": "plans",
+          "kicker": "Live pricing",
+          "heading": "VPS plans on this deployment",
+          "lede": "Read from the product catalogue, so what you see here is what the order form charges.",
+          "productSlug": "vps-hosting"
+        },
+        {
+          "type": "features",
+          "kicker": "What you get",
+          "heading": "The difference between a VPS and a share of one",
+          "items": [
+            {
+              "icon": "server",
+              "title": "Guaranteed resources",
+              "body": "Your allocation of CPU, memory and storage is reserved for your server. A neighbour's traffic peak is not your performance problem."
+            },
+            {
+              "icon": "terminal",
+              "title": "Administrator access",
+              "body": "Root or administrator access, so you install the runtime, the extensions and the services the application actually requires."
+            },
+            {
+              "icon": "os",
+              "title": "Your choice of operating system",
+              "body": "Provision from the operating-system catalogue, and rebuild from a known-good image if a change goes wrong."
+            },
+            {
+              "icon": "firewall",
+              "title": "Network control",
+              "body": "Firewall rules attached to the server, applied in a defined order, with the effective ruleset visible in your account."
+            },
+            {
+              "icon": "hard-drive",
+              "title": "Backups",
+              "body": "Scheduled backup jobs against the server, with a run history and a restore performed from your account."
+            },
+            {
+              "icon": "activity",
+              "title": "Monitoring",
+              "body": "CPU, memory, storage and traffic recorded over time, so a capacity problem is a graph rather than a guess."
+            }
+          ]
+        },
+        {
+          "type": "checks",
+          "kicker": "Choose carefully",
+          "heading": "A VPS expects you to operate it",
+          "items": [
+            {
+              "label": "You own the operating system",
+              "body": "Root access means the patching, the hardening and the service configuration are yours. That is the trade you are making for control."
+            },
+            {
+              "label": "Or hand it over",
+              "body": "Managed services cover the platform layer — patching, monitoring response and administration — without taking away your access.",
+              "link": {
+                "label": "See managed services",
+                "to": "/cloud/server-management"
+              }
+            },
+            {
+              "label": "Not sure which size?",
+              "body": "Start from what the application needs: memory for its working set, cores for concurrency, storage for its data. Support will size it with you."
+            }
+          ]
+        },
+        {
+          "type": "split",
+          "kicker": "VPS, cloud or dedicated",
+          "heading": "Pick by what you need from the machine",
+          "body": [
+            "A VPS is a fixed allocation on shared hardware: predictable, economical, and the right answer for most applications that have outgrown hosting.",
+            "Public cloud adds elasticity — resize when demand changes instead of migrating. A dedicated server removes the shared hardware entirely, which matters when you need the whole machine's I/O or a defined physical boundary."
+          ],
+          "points": [
+            "VPS: predictable resources at a predictable price",
+            "Public cloud: resize rather than migrate",
+            "Dedicated: the entire physical machine"
+          ],
+          "visual": "cloud/public-cloud",
+          "link": {
+            "label": "Compare cloud and dedicated",
+            "to": "/cloud"
+          }
+        }
+      ],
+      "faqs": [
+        {
+          "q": "What is the difference between VPS hosting and shared hosting?",
+          "a": "Shared hosting gives you an account inside a managed platform. A VPS gives you an operating system you administer, with resources reserved for you. Move to a VPS when you need software the shared platform cannot run, or when resources are the constraint."
+        },
+        {
+          "q": "Can I install any software?",
+          "a": "Yes, subject to the Acceptable Use Policy. Administrator access means the runtime, the extensions and the services are your choice."
+        },
+        {
+          "q": "Is a control panel included?",
+          "a": "Panel availability is configuration on this platform, not a fixed promise. The control panels page lists what this deployment is set up to provision, and the panel attached to your server is shown in your account."
+        },
+        {
+          "q": "Can I upgrade a VPS later?",
+          "a": "Yes, where the plan allows a resize. Where it does not, the server can be rebuilt at a larger size from the same image with data restored from backup."
+        }
+      ],
+      "related": [
+        "/cloud",
+        "/cloud/public",
+        "/cloud/operating-systems",
+        "/cloud/firewall",
+        "/cloud/backups",
+        "/cloud/server-management"
+      ]
+    },
+    {
+      "route": "/hosting/dedicated",
+      "title": "Dedicated Servers",
+      "category": "Servers",
+      "seoTitle": "Dedicated Servers — Single-Tenant Hardware | CloudHost247",
+      "description": "Dedicated servers from CloudHost247: an entire physical machine, full administrative control, hardware-level isolation and options for redundancy.",
+      "visual": "servers/dedicated-servers",
+      "hero": {
+        "kicker": "Servers",
+        "heading": "The whole machine, nobody else on it",
+        "lede": "No shared CPU, no shared disk throughput, no noisy neighbour, and a physical boundary that is easy to describe in a security questionnaire.",
+        "ctas": [
+          {
+            "label": "See live plans",
+            "to": "/hosting/dedicated#plans",
+            "variant": "primary"
+          },
+          {
+            "label": "Discuss a configuration",
+            "to": "/contact",
+            "variant": "ghost"
+          }
+        ],
+        "points": [
+          "Whole-machine resources",
+          "Hardware isolation",
+          "Full administrative control",
+          "Managed operations optional"
+        ]
+      },
+      "sections": [
+        {
+          "type": "plans",
+          "kicker": "Live pricing",
+          "heading": "Dedicated configurations on this deployment",
+          "productSlug": "dedicated-server"
+        },
+        {
+          "type": "features",
+          "kicker": "Why physical",
+          "heading": "When a VPS is not the right answer",
+          "items": [
+            {
+              "icon": "cpu",
+              "title": "Undivided performance",
+              "body": "Disk throughput, memory bandwidth and core count belong to your workload alone. That is what database and virtualisation hosts actually need."
+            },
+            {
+              "icon": "shield",
+              "title": "A physical boundary",
+              "body": "Isolation is a property of the hardware rather than of a hypervisor configuration, which is far easier to state in a compliance answer."
+            },
+            {
+              "icon": "server-rack",
+              "title": "Sized to the workload",
+              "body": "Configurations are chosen around measured requirements — cores, memory, storage and throughput — not a fixed tier list."
+            },
+            {
+              "icon": "terminal",
+              "title": "Full control",
+              "body": "Administrator access to the whole machine: the operating system, the partitioning and every service on it."
+            },
+            {
+              "icon": "wrench",
+              "title": "Managed if you want",
+              "body": "Patching, hardening, monitoring response and administration available as part of the service."
+            },
+            {
+              "icon": "hard-drive",
+              "title": "Backups and recovery",
+              "body": "Backup jobs sized to the data, with a restore plan agreed before it is needed."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "Hardware detail is confirmed per configuration, not published as a guarantee",
+          "body": "Redundancy (power, networking, disks), facility and region all depend on the provider configured for the region you choose. Those options are confirmed in writing for your configuration rather than asserted on a marketing page — and if a specific requirement cannot be met, that is said before you order rather than after."
+        }
+      ],
+      "faqs": [
+        {
+          "q": "How long does a dedicated server take to provision?",
+          "a": "Hardware availability depends on the provider and region. For standard configurations it is typically fast; for custom requirements the lead time is confirmed with the quote."
+        },
+        {
+          "q": "Can I get additional IP addresses?",
+          "a": "Yes, subject to the region and provider, and assessed against real need. Addresses are assigned to the server and visible in your account."
+        },
+        {
+          "q": "Do you offer redundant power and networking?",
+          "a": "Where the facility provides it. Facility-level redundancy is confirmed for your configuration, because it is not something that can be claimed across every region."
+        },
+        {
+          "q": "Can I run virtualisation on it?",
+          "a": "Yes. A dedicated server is the right product when a host needs to run virtual machines or containers of its own."
+        }
+      ],
+      "related": [
+        "/cloud",
+        "/cloud/enterprise-servers",
+        "/cloud/private",
+        "/cloud/server-management",
+        "/cloud/data-centers",
+        "/contact"
+      ]
+    },
+    {
+      "route": "/hosting/cpanel",
+      "title": "cPanel Hosting",
+      "category": "Hosting",
+      "seoTitle": "cPanel Hosting | CloudHost247",
+      "description": "cPanel-based hosting from CloudHost247: mailboxes, databases, subdomains, SSL and one-click application installs, managed from the panel your team already knows.",
+      "visual": "hosting/cpanel-hosting",
+      "hero": {
+        "kicker": "Hosting",
+        "heading": "The hosting panel your team already knows",
+        "lede": "Mailboxes, databases, subdomains, certificates and application installs in one interface — and a platform underneath that is patched, monitored and backed up for you.",
+        "ctas": [
+          {
+            "label": "See live plans",
+            "to": "/hosting/cpanel#plans",
+            "variant": "primary"
+          },
+          {
+            "label": "See every panel",
+            "to": "/hosting/control-panels",
+            "variant": "ghost"
+          }
+        ],
+        "points": [
+          "One interface for the whole account",
+          "Mailboxes, databases and SSL",
+          "Application installs",
+          "Managed underneath"
+        ]
+      },
+      "sections": [
+        {
+          "type": "plans",
+          "kicker": "Live pricing",
+          "heading": "cPanel hosting plans on this deployment",
+          "productSlug": "cpanel-hosting"
+        },
+        {
+          "type": "features",
+          "kicker": "In the panel",
+          "heading": "Everything an account needs, in one place",
+          "items": [
+            {
+              "icon": "mail",
+              "title": "Mailboxes and forwarders",
+              "body": "Create addresses at your domain, set forwarders and autoresponders, and reach mail from webmail or a client."
+            },
+            {
+              "icon": "database",
+              "title": "Databases",
+              "body": "MySQL-compatible databases with their own users, created and revoked from the panel."
+            },
+            {
+              "icon": "globe",
+              "title": "Domains and subdomains",
+              "body": "Add domains and subdomains to the account and manage their document roots."
+            },
+            {
+              "icon": "lock",
+              "title": "Certificates",
+              "body": "Issue and renew TLS for the domains in the account, with HTTPS enforced where you want it."
+            },
+            {
+              "icon": "app",
+              "title": "Application installs",
+              "body": "Install common applications onto the account without setting up a database or a document root by hand."
+            },
+            {
+              "icon": "hard-drive",
+              "title": "Backups",
+              "body": "Scheduled backups of the account with a run history and a restore from your CloudHost247 account."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "What panel you actually get is configuration, and the platform says which",
+          "body": "Panels are provisioned where this deployment is configured to provision them. The control panels page lists what is genuinely available, and the panel attached to a service is shown in your account. We would rather show a short list than advertise an interface a particular server does not have."
+        }
+      ],
+      "faqs": [
+        {
+          "q": "Is cPanel available on every plan?",
+          "a": "Panel availability depends on the plan and on the deployment's configuration. The control panels page lists what is provisioned here, and the service in your account shows its own panel."
+        },
+        {
+          "q": "Can I migrate an existing cPanel account?",
+          "a": "Yes. The migration process copies the account's files, databases and mail, and verifies it on the new infrastructure before DNS changes."
+        },
+        {
+          "q": "Do I get SSH access?",
+          "a": "Where the plan provides it, yes. Full administrative access is what a VPS or dedicated server is for, and those are separate products."
+        }
+      ],
+      "related": [
+        "/hosting",
+        "/hosting/web-hosting",
+        "/hosting/control-panels",
+        "/hosting/migration",
+        "/hosting/ssl",
+        "/hosting/backups"
+      ]
+    }
+  ]
+}
