@@ -1,31 +1,83 @@
 <?php
-/** Public WHMCS adapter: no duplicated DNS/network business logic, no exposed API token. */
+/**
+ * Public tools front controller.
+ * Uses the WHMCS theme when this tree is deployed into WHMCS. Without init.php
+ * it still renders the same tools HTML so the route is not a blank placeholder.
+ */
+require __DIR__ . '/lib/bootstrap.php';
+
+use CloudHost247\Tools\Catalog;
+use CloudHost247\Tools\View;
+
+$root = dirname(__DIR__);
+$base = rtrim(str_replace('\\', '/', dirname(isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : '/tools/index.php')), '/');
+$base = rtrim(str_replace('\\', '/', dirname($base)), '/');
+$request = parse_url(isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/tools', PHP_URL_PATH);
+$request = is_string($request) ? $request : '/tools';
+$path = $base !== '' && strpos($request, $base) === 0 ? substr($request, strlen($base)) : $request;
+if ($path === '' || $path === '/') {
+    $path = '/tools';
+}
+$query = isset($_GET['q']) && is_string($_GET['q']) ? trim(substr($_GET['q'], 0, 80)) : '';
+$page = Catalog::resolve($path);
+$legacy = null;
+if (!$page && is_file($root . '/modules/addons/cloudhost247_theme/lib/ToolsSite.php')) {
+    require_once $root . '/modules/addons/cloudhost247_theme/lib/ToolsSite.php';
+    $legacy = \CloudHost247\Theme\ToolsSite::resolve($path);
+    if ($legacy && isset($legacy['path']) && $legacy['path'] !== $path) {
+        header('Location: ' . $base . $legacy['path'], true, 301);
+        exit;
+    }
+}
+
+$whmcs = is_file($root . '/init.php');
+if (!$page && !$legacy) {
+    http_response_code(404);
+    header('X-Robots-Tag: noindex');
+}
+if ($whmcs && $page) {
+    define('CLIENTAREA', true);
+    require $root . '/init.php';
+    require_once $root . '/modules/addons/cloudhost247_theme/lib/Site.php';
+    $ca = new \WHMCS\ClientArea();
+    $ca->initPage();
+    $document = isset($page['seoTitle']) ? preg_replace('/\s*\|\s*CloudHost247$/', '', $page['seoTitle']) : $page['name'];
+    $ca->setPageTitle($document);
+    $ca->addToBreadCrumb($base . '/tools', 'Tools');
+    if (!empty($page['slug'])) {
+        $ca->addToBreadCrumb($base . $page['path'], $page['name']);
+    }
+    $ca->assign('cloudhost247ToolsPage', array(
+        'path' => $page['path'],
+        'name' => $page['name'],
+        'summary' => isset($page['summary']) ? $page['summary'] : '',
+        'slug' => isset($page['slug']) ? $page['slug'] : '',
+    ));
+    $ca->assign('chToolsReady', true);
+    $ca->assign('chToolsBase', $base);
+    $ca->assign('chToolsHtml', View::fragment($page, $query, $base));
+    $ca->setTemplate('cloudhost247-tools');
+    $ca->output();
+    return;
+}
+
+if (!$whmcs) {
+    if (!$page) {
+        $page = array('kind' => 'hub', 'path' => '/tools', 'name' => 'Tool not found', 'summary' => 'That tool is not in the CloudHost247 catalogue.', 'slug' => '');
+    }
+    header('Content-Type: text/html; charset=UTF-8');
+    echo View::document($page, $query, $base === '' ? '' : $base);
+    return;
+}
+
 define('CLIENTAREA', true);
-require dirname(__DIR__) . '/init.php';
-require_once dirname(__DIR__) . '/modules/addons/cloudhost247_theme/lib/ToolsSite.php';
-require_once dirname(__DIR__) . '/modules/addons/cloudhost247_theme/lib/Site.php';
-require_once dirname(__DIR__) . '/modules/addons/cloudhost247_core/bootstrap.php';
-require_once dirname(__DIR__) . '/modules/addons/cloudhost247_theme/lib/ThemeRepository.php';
-$base = rtrim(str_replace('\\', '/', dirname(dirname($_SERVER['SCRIPT_NAME']))), '/');
-$path = parse_url(isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '', PHP_URL_PATH);
-$path = is_string($path) ? substr($path, strlen($base)) : '';
-$page = \CloudHost247\Theme\ToolsSite::resolve($path);
-if ($page && $page['path'] !== $path) { header('Location: ' . $base . $page['path'], true, 301); exit; }
+require $root . '/init.php';
 $ca = new \WHMCS\ClientArea();
 $ca->initPage();
-$ca->setPageTitle($page ? $page['name'] : 'Tool not found');
-$ca->addToBreadCrumb($base . '/tools', 'Tools');
-$platform = '';
-try {
-    $settings = (new \CloudHost247\Theme\ThemeRepository())->settings();
-    $platform = \CloudHost247\Theme\Site::platformPath(isset($settings['platform_base_path']) ? $settings['platform_base_path'] : '');
-} catch (\Throwable $e) { /* The page reports unavailable, not fabricated lookup data. */ }
-$ready = $page && $platform !== '' && is_file(dirname(__DIR__) . '/assets/cloudhost247-tools/tools.js');
-if (!$page) { http_response_code(404); header('X-Robots-Tag: noindex'); }
-elseif (!$ready) { http_response_code(503); header('Retry-After: 300'); header('X-Robots-Tag: noindex'); }
-$ca->assign('cloudhost247ToolsPage', $page);
-$ca->assign('chToolsReady', $ready);
-$ca->assign('chToolsPlatform', $platform);
+$ca->setPageTitle($legacy ? $legacy['name'] : 'Tool not found');
+$ca->assign('cloudhost247ToolsPage', $legacy);
+$ca->assign('chToolsReady', false);
+$ca->assign('chToolsHtml', '');
 $ca->assign('chToolsBase', $base);
 $ca->setTemplate('cloudhost247-tools');
 $ca->output();

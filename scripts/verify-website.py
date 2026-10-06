@@ -6,6 +6,20 @@ ROOT=Path(__file__).resolve().parents[1]
 CATALOG=ROOT/'modules/addons/cloudhost247_theme/resources/site.json'
 # Licensed WHMCS entry points, deliberately not vendored. HTTP mode verifies their deployment.
 WHMCS={'index.php','cart.php','clientarea.php','register.php','logout.php','pwreset.php','contact.php','knowledgebase.php','submitticket.php','serverstatus.php','announcements.php','supporttickets.php','viewticket.php','domainchecker.php'}
+def tool_routes():
+ routes={'tools'}
+ catalog=ROOT/'modules/addons/cloudhost247_theme/resources/tools-public.json'
+ if catalog.is_file():
+  data=json.loads(catalog.read_text())
+  for tool in data.get('tools',[]):
+   routes.add(tool['path'].lstrip('/'))
+   for legacy in tool.get('legacyPaths',[]):
+    if isinstance(legacy,str) and legacy.startswith('/tools/'):routes.add(legacy.lstrip('/'))
+  for slug in data.get('categories',{}):routes.add('tools/category/'+slug)
+ return routes
+def route_exists(path):
+ if path in WHMCS or path in tool_routes():return True
+ return (ROOT/path).is_file()
 def validate(data):
  errors=[];links=[]
  for menu in data['navigation']:
@@ -15,7 +29,7 @@ def validate(data):
   url=link.get('url','');p=urllib.parse.urlsplit(url)
   if not url or url.startswith('#') or p.scheme or p.netloc or '..' in p.path.split('/') or p.path.startswith('/'):
    errors.append('Unsafe/placeholder navigation URL: '+repr(url));continue
-  if p.path not in WHMCS and not ((ROOT/p.path).is_file() or (p.path == 'tools' and (ROOT/'tools/index.php').is_file())):errors.append('Missing navigation route: '+url)
+  if not route_exists(p.path):errors.append('Missing navigation route: '+url)
   if p.path=='dedeicated-server.php':errors.append('Navigation must use canonical dedicated-server.php')
   if not link.get('label','').strip():errors.append('Empty navigation label: '+url)
  for path,page in data['pages'].items():

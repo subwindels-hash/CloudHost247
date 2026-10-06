@@ -3,5 +3,8 @@ Options -Indexes
 DirectoryIndex index.php
 DirectorySlash Off
 RewriteEngine On
+RewriteRule ^data/ - [F]
 RewriteRule ^index\.php$ - [END]
+RewriteRule ^api\.php$ - [END]
+RewriteRule ^admin(?:/|$) - [END]
 RewriteRule ^ index.php [END]

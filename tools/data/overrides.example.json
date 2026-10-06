@@ -1,0 +1,20 @@
+{
+  "tools": {
+    "dns-checker": {
+      "enabled": true,
+      "featured": true,
+      "maintenance": "",
+      "summary": "Check A, AAAA, CNAME, MX, NS, TXT and SOA records for a domain in one view.",
+      "seoTitle": "DNS Checker — Free DNS Tool | CloudHost247",
+      "seoDescription": "Check published DNS records with CloudHost247.",
+      "category": "dns",
+      "icon": "dns",
+      "ratePerMinute": 8
+    }
+  },
+  "providers": {
+    "doh": ["https://cloudflare-dns.com/dns-query", "https://dns.google/resolve"],
+    "rdap": "https://rdap.org",
+    "geo": "https://ipwho.is"
+  }
+}
