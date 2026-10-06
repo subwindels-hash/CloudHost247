@@ -1,0 +1,17 @@
+{
+  "scope": "Production /platform/ build: BrowserRouter, static assets, same-origin real Tools API and UUID execution",
+  "errors": [],
+  "requests": [
+    "/platform/tools/uuid-generator",
+    "/platform/assets/index-C7Z128Hd.js",
+    "/platform/assets/index-DbIWAutr.css",
+    "/platform/assets/ToolPage-BP-7VHxs.js",
+    "/platform/assets/ToolSeo-DURv4ez8.js",
+    "/platform/assets/usePageMeta-D95BxZyC.js",
+    "/platform/assets/tools-api-B5KTTfnM.js",
+    "/platform/api/tools/navigation",
+    "/platform/api/tools/catalog",
+    "/platform/api/tools/uuid-generator"
+  ],
+  "canonical": "http://127.0.0.1:8090/platform/tools/uuid-generator"
+}

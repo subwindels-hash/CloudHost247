@@ -14,7 +14,7 @@
     "dev": "concurrently -k -n server,frontend -c blue,green \"npm:dev:server\" \"npm:dev:frontend\"",
     "dev:server": "tsx watch src/server.ts",
     "dev:frontend": "vite --config frontend/vite.config.ts",
-    "build": "npm run build:server && npm run build:frontend",
+    "build": "npm run tools:catalog:check && npm run build:server && npm run build:frontend && npm run build:tools",
     "build:server": "tsc -p tsconfig.json",
     "build:frontend": "vite build --config frontend/vite.config.ts",
     "start": "node server.js",
@@ -33,7 +33,10 @@
     "catalog:docs": "tsx scripts/generate-tools-catalog-doc.ts",
     "catalog:import": "tsx scripts/import-catalog.ts",
     "verify:financial": "tsx tools/verify-financial-invariants.ts",
-    "verify:authorization": "tsx tools/verify-payment-authorization.ts"
+    "verify:authorization": "tsx tools/verify-payment-authorization.ts",
+    "tools:catalog": "tsx scripts/export-tools-site.ts",
+    "tools:catalog:check": "tsx scripts/export-tools-site.ts --check",
+    "build:tools": "vite build --config frontend/vite.tools.config.ts"
   },
   "dependencies": {
     "@aws-sdk/client-cloudwatch": "3.1144.0",

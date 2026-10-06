@@ -39,23 +39,8 @@
                     <p class="ch247-email-hero__note">{$emailHero.disclaimer|escape}</p>
                 </div>
 
-                <div class="col-md-5 ch247-email-hero__visual" aria-hidden="true">
-                    {* CSS/SVG illustration - no third-party logos, no remote assets. *}
-                    <div class="ch247-mailcard">
-                        <div class="ch247-mailcard__bar">
-                            <span></span><span></span><span></span>
-                        </div>
-                        <div class="ch247-mailcard__row ch247-mailcard__row--head">
-                            <div class="ch247-mailcard__avatar">@</div>
-                            <div class="ch247-mailcard__lines">
-                                <i class="w70"></i><i class="w40"></i>
-                            </div>
-                        </div>
-                        <div class="ch247-mailcard__row"><i class="w90"></i></div>
-                        <div class="ch247-mailcard__row"><i class="w60"></i></div>
-                        <div class="ch247-mailcard__row"><i class="w80"></i></div>
-                        <div class="ch247-mailcard__badge">you@yourdomain</div>
-                    </div>
+                <div class="col-md-5 ch247-email-hero__visual">
+                    <img src="{$WEB_ROOT}/assets/images/cloudhost247/hosting/email-hosting.svg" width="660" height="560" alt="Business email connected to domain and hosting infrastructure">
                 </div>
             </div>
         </div>
@@ -66,7 +51,7 @@
         <div class="container">
             <header class="ch247-email-section__head">
                 <h2 id="ch247-email-providers-title">Choose your email platform</h2>
-                <p>Three independent platforms, one billing account, one support team.</p>
+                <p>Review the provider options and plans currently published in the catalog.</p>
             </header>
 
             <div class="row">
@@ -148,7 +133,7 @@
                                 <div class="col-md-4 col-sm-6">
                                     <article class="ch247-plan-card{if $plan.tier == 'standard'} ch247-plan-card--featured{/if}">
                                         {if $plan.tier == 'standard'}
-                                            <span class="ch247-plan-card__flag">Most chosen</span>
+                                            <span class="ch247-plan-card__flag">Standard plan</span>
                                         {/if}
 
                                         <header>

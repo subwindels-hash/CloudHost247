@@ -1,49 +1,69 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { usePageMeta } from '../lib/usePageMeta';
-import { toolsApi, type ToolStatus, type ToolSummary, type ToolsDashboard } from '../lib/tools-api';
+import {
+  toolsApi,
+  type ToolSummary,
+  type ToolsDashboard,
+} from '../lib/tools-api';
+import { toolsHost } from '../lib/tools-runtime';
+import ToolSeo from '../components/tools/ToolSeo';
 
-const STATUS_LABEL: Record<ToolStatus, string> = {
+const LABELS: Record<string, string> = {
   ACTIVE: 'Available',
   DISABLED: 'Disabled',
   MAINTENANCE: 'Maintenance',
   CONFIGURATION_REQUIRED: 'Needs setup',
   SERVICE_UNAVAILABLE: 'Unavailable here',
 };
-
-/** Catalogue paths can contain a literal parameter (the Domain Health Center uses /domains/:domain/health);
- * those entries are linked through their tool page, which asks for the missing value. */
-function toolHref(tool: ToolSummary): string {
-  return tool.path.includes(':') ? `/tools/${tool.slug}` : tool.path;
-}
-
+const CURATED = [
+  'dns-lookup',
+  'dns-propagation',
+  'my-ip',
+  'ssl-checker',
+  'json-tools',
+  'subnet-calculator',
+];
 export default function ToolsCenterPage() {
-  usePageMeta('Tools Center', 'DNS, IP, network, developer, webmaster and security tools with real resolver data — built into CloudHost247.');
   const [params, setParams] = useSearchParams();
-  const [dashboard, setDashboard] = useState<ToolsDashboard | null>(null);
+  const route = useParams();
+  const category = route.category ?? params.get('category');
+  const [search, setSearch] = useState(params.get('q') ?? '');
   const [tools, setTools] = useState<ToolSummary[]>([]);
-  const [categories, setCategories] = useState<Array<{ slug: string; label: string; toolCount: number }>>([]);
-  const [search, setSearch] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [categories, setCategories] = useState<
+    Array<{ slug: string; label: string }>
+  >([]);
+  const [dashboard, setDashboard] = useState<ToolsDashboard | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [showUnavailable, setShowUnavailable] = useState(false);
+  const [revision, setRevision] = useState(0);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
-
-  const activeCategory = params.get('category');
-
+  const [notice, setNotice] = useState<string | null>(null);
+  const categoryLabel = categories.find(
+    (item) => item.slug === category
+  )?.label;
+  const title = categoryLabel ? `${categoryLabel} Tools` : 'CloudHost247 Tools';
+  const description =
+    'Powerful DNS, domain, IP, network, security, email and developer tools for websites, servers and infrastructure.';
+  usePageMeta(title, description);
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    Promise.all([toolsApi.catalog(activeCategory ?? undefined), toolsApi.dashboard()])
+    setError(null);
+    Promise.all([toolsApi.catalog(), toolsApi.dashboard().catch(() => null)])
       .then(([catalog, board]) => {
         if (cancelled) return;
         setTools(catalog.tools);
-        setCategories(catalog.categories);
+        setCategories(catalog.discoveryCategories ?? catalog.categories);
         setDashboard(board);
-        setFavorites(new Set(board.favorites.map((tool) => tool.slug)));
-        setError(null);
+        setFavorites(new Set(board?.favorites?.map((tool) => tool.slug) ?? []));
       })
-      .catch((loadError: Error) => {
-        if (!cancelled) setError(loadError.message);
+      .catch((reason: Error) => {
+        if (!cancelled) {
+          setError(reason.message);
+          setTools([]);
+        }
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -51,176 +71,300 @@ export default function ToolsCenterPage() {
     return () => {
       cancelled = true;
     };
-  }, [activeCategory]);
-
-  const filtered = useMemo(() => {
-    const needle = search.trim().toLowerCase();
-    if (needle.length === 0) return tools;
-    return tools.filter((tool) =>
-      [tool.name, tool.summary, tool.slug, ...(tool.keywords ?? [])].join(' ').toLowerCase().includes(needle)
+  }, [revision]);
+  const available = useMemo(
+    () =>
+      tools.filter(
+        (tool) =>
+          tool.status === 'ACTIVE' &&
+          tool.visibility !== 'admin' &&
+          !tool.slug.startsWith('tool-') &&
+          (!toolsHost().embedded || tool.visibility !== 'customer')
+      ),
+    [tools]
+  );
+  const filtered = useMemo(
+    () =>
+      tools.filter((tool) => {
+        if (
+          tool.visibility === 'admin' ||
+          tool.slug.startsWith('tool-') ||
+          (toolsHost().embedded && tool.visibility === 'customer')
+        )
+          return false;
+        if (!showUnavailable && tool.status !== 'ACTIVE') return false;
+        if (
+          category &&
+          tool.category !== category &&
+          !tool.discoveryCategories?.includes(category)
+        )
+          return false;
+        return [tool.name, tool.summary, tool.slug, ...(tool.keywords ?? [])]
+          .join(' ')
+          .toLowerCase()
+          .includes(search.trim().toLowerCase());
+      }),
+    [tools, category, search, showUnavailable]
+  );
+  const popular = (dashboard?.popular ?? []).filter((tool) =>
+    available.some((entry) => entry.slug === tool.slug)
+  );
+  const picks = popular.length
+    ? popular
+    : CURATED.map((slug) =>
+        available.find((tool) => tool.slug === slug)
+      ).filter((tool): tool is ToolSummary => Boolean(tool));
+  let recentSlugs: string[] = [];
+  try {
+    const stored = JSON.parse(
+      localStorage.getItem('ch247_recent_tools') ?? '[]'
     );
-  }, [search, tools]);
-
-  async function toggleFavorite(tool: ToolSummary) {
-    const isFavorite = favorites.has(tool.slug);
+    if (Array.isArray(stored))
+      recentSlugs = stored.filter((x) => typeof x === 'string').slice(0, 8);
+  } catch {
+    /* Private browsing can disable local storage. */
+  }
+  const recent = (
+    dashboard?.recent?.length
+      ? dashboard.recent
+      : recentSlugs
+          .map((slug) => available.find((tool) => tool.slug === slug))
+          .filter((tool): tool is ToolSummary => Boolean(tool))
+  ).filter((tool) => available.some((entry) => entry.slug === tool.slug));
+  async function favorite(tool: ToolSummary) {
     try {
-      if (isFavorite) {
-        await toolsApi.removeFavorite(tool.slug);
-        setFavorites((current) => {
-          const next = new Set(current);
-          next.delete(tool.slug);
-          return next;
-        });
-      } else {
-        await toolsApi.addFavorite(tool.slug);
-        setFavorites((current) => new Set(current).add(tool.slug));
-      }
+      if (favorites.has(tool.slug)) await toolsApi.removeFavorite(tool.slug);
+      else await toolsApi.addFavorite(tool.slug);
+      setFavorites((current) => {
+        const next = new Set(current);
+        next.has(tool.slug) ? next.delete(tool.slug) : next.add(tool.slug);
+        return next;
+      });
     } catch {
-      // Favourites are a convenience; a failure must not disturb the page.
+      setNotice(
+        'Favorites could not be updated. Please sign in to the platform and try again.'
+      );
     }
   }
-
   return (
     <div className="tools-center">
+      <ToolSeo
+        title={`${title} | CloudHost247`}
+        description={description}
+        path={
+          category && route.category ? `/tools/category/${category}` : '/tools'
+        }
+      />
       <header className="tools-hero">
-        <h1>Tools Center</h1>
-        <p>
-          DNS, IP, network, developer, webmaster, security, domain and productivity tools that run on CloudHost247 itself.
-          Every answer comes from a real query, connection or handshake — a tool that cannot run says so instead of guessing.
-        </p>
-        <div className="tools-hero__actions">
-          <Link className="ch247-button ch247-button--ghost" to="/tools/history">My history</Link>
-          <Link className="ch247-button ch247-button--ghost" to="/tools/favorites">Favorites</Link>
-          <Link className="ch247-button ch247-button--ghost" to="/tools/reports">Saved reports</Link>
-          <Link className="ch247-button ch247-button--ghost" to="/tools/monitors">Monitoring</Link>
-          {/* Document Tools (ePassport MRZ calculator/validator/parser) is its own module with its
-              own pages and API; the centre links to it instead of re-implementing it. */}
-          <Link className="ch247-button ch247-button--ghost" to="/tools/document">Document tools (MRZ)</Link>
-        </div>
-      </header>
-
-      {dashboard && !dashboard.masterEnabled ? (
-        <div className="tools-notice tools-notice--warning" role="status">
-          The Tools Center is currently disabled by an administrator. Existing saved reports and monitors remain visible.
-        </div>
-      ) : null}
-
-      <div className="tools-toolbar">
+        <p className="tools-eyebrow">THE INFRASTRUCTURE TOOLKIT</p>
+        <h1>{title}</h1>
+        <p>{description}</p>
         <label className="tools-search">
           <span className="sr-only">Search tools</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="10" cy="10" r="6" />
+            <path d="m15 15 6 6" />
+          </svg>
           <input
             type="search"
+            maxLength={100}
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search 60+ tools — try “dmarc”, “subnet”, “ssl”…"
+            placeholder="Find a tool — DNS, IP, SSL, JSON…"
           />
         </label>
-        <div className="tools-chips" role="tablist" aria-label="Tool categories">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeCategory === null}
-            className={`tools-chip${activeCategory === null ? ' is-active' : ''}`}
-            onClick={() => setParams({})}
+        <div className="tools-hero__actions">
+          <span>Live diagnostics. Clear results. No guesswork.</span>
+          {!toolsHost().embedded && (
+            <Link to="/tools/history">Your tool history →</Link>
+          )}
+        </div>
+      </header>
+      <nav className="tools-chips" aria-label="Tool categories">
+        <Link
+          className={`tools-chip${!category ? ' is-active' : ''}`}
+          to="/tools"
+          onClick={() => setParams({})}
+        >
+          All tools
+        </Link>
+        {categories.map((item) => (
+          <Link
+            key={item.slug}
+            className={`tools-chip${category === item.slug ? ' is-active' : ''}`}
+            to={`/tools/category/${item.slug}`}
+            aria-current={category === item.slug ? 'page' : undefined}
           >
-            All tools
-          </button>
-          {categories.map((category) => (
-            <button
-              key={category.slug}
-              type="button"
-              role="tab"
-              aria-selected={activeCategory === category.slug}
-              className={`tools-chip${activeCategory === category.slug ? ' is-active' : ''}`}
-              onClick={() => setParams({ category: category.slug })}
-            >
-              {category.label} <span className="tools-chip__count">{category.toolCount}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {dashboard && (dashboard.popular.length > 0 || dashboard.recent.length > 0) ? (
-        <div className="tools-highlights">
-          {dashboard.popular.length > 0 ? (
-            <section aria-labelledby="tools-popular">
-              <h2 id="tools-popular">Popular this fortnight</h2>
-              <ul>
-                {dashboard.popular.map((tool) => (
-                  <li key={tool.slug}>
-                    <Link to={toolHref(tool)}>{tool.name}</Link>
-                    {typeof tool.runs === 'number' ? <span className="tools-highlights__runs">{tool.runs} runs</span> : null}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
-          {dashboard.recent.length > 0 ? (
-            <section aria-labelledby="tools-recent">
-              <h2 id="tools-recent">Recently used by you</h2>
-              <ul>
-                {dashboard.recent.map((tool) => (
-                  <li key={tool.slug}>
-                    <Link to={toolHref(tool)}>{tool.name}</Link>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
-        </div>
-      ) : null}
-
-      {error ? <div className="tools-notice tools-notice--error" role="alert">{error}</div> : null}
-      {loading ? <p className="tools-loading">Loading the tool catalogue…</p> : null}
-
-      {!loading && filtered.length === 0 ? (
-        <p className="tools-empty">No tool matches “{search}”. Try a different word, or clear the category filter.</p>
-      ) : null}
-
-      <div className="tools-grid">
-        {filtered.map((tool) => (
-          <article key={tool.slug} className={`tools-card tools-card--${tool.status.toLowerCase()}`}>
-            <div className="tools-card__head">
-              <h3>
-                <Link to={toolHref(tool)}>{tool.name}</Link>
-              </h3>
-              <button
-                type="button"
-                className={`tools-fav${favorites.has(tool.slug) ? ' is-active' : ''}`}
-                aria-pressed={favorites.has(tool.slug)}
-                title={favorites.has(tool.slug) ? 'Remove from favorites' : 'Add to favorites'}
-                onClick={() => void toggleFavorite(tool)}
-              >
-                ★<span className="sr-only"> favorite</span>
-              </button>
-            </div>
-            <p>{tool.summary}</p>
-            <div className="tools-card__meta">
-              <span className={`tools-badge tools-badge--${tool.status.toLowerCase()}`}>{STATUS_LABEL[tool.status]}</span>
-              {tool.authRequired ? <span className="tools-badge tools-badge--auth">Sign-in required</span> : <span className="tools-badge">No sign-in needed</span>}
-              {tool.providerKind ? <span className="tools-badge tools-badge--provider">{tool.providerKind} provider</span> : null}
-            </div>
-            {tool.status !== 'ACTIVE' && tool.statusMessage ? <p className="tools-card__status">{tool.statusMessage}</p> : null}
-          </article>
+            {item.label}
+          </Link>
         ))}
-      </div>
-
-      {dashboard ? (
-        <section className="tools-status-summary" aria-labelledby="tools-status">
-          <h2 id="tools-status">Tool status at a glance</h2>
+      </nav>
+      {notice && (
+        <p role="status" className="tools-notice">
+          {notice}
+        </p>
+      )}
+      {!category && !search && picks.length > 0 && (
+        <section className="tools-highlights" aria-labelledby="tools-popular">
+          <div>
+            <p className="tools-eyebrow">A GOOD PLACE TO START</p>
+            <h2 id="tools-popular">
+              {popular.length
+                ? 'Popular this fortnight'
+                : 'Selected essentials'}
+            </h2>
+            <p>
+              {popular.length
+                ? 'Based on recorded tool executions.'
+                : 'A curated selection of available tools — not usage rankings.'}
+            </p>
+          </div>
           <ul>
-            {Object.entries(dashboard.statusSummary).map(([status, count]) => (
-              <li key={status}>
-                <span className={`tools-badge tools-badge--${status.toLowerCase()}`}>{STATUS_LABEL[status as ToolStatus] ?? status}</span> {count}
+            {picks.map((tool) => (
+              <li key={tool.slug}>
+                <Link to={tool.path}>
+                  {tool.name} <span aria-hidden="true">↗</span>
+                </Link>
               </li>
             ))}
           </ul>
-          <p className="tools-muted">
-            “Needs setup” means an administrator has not configured the external provider that feature requires — the tool
-            will tell you exactly that instead of returning an empty result.
-          </p>
         </section>
-      ) : null}
+      )}
+      {!search && recent.length > 0 && (
+        <section aria-labelledby="tools-recent">
+          <h2 id="tools-recent">Recently used</h2>
+          <p className="tools-muted">
+            Only tool names are remembered on this browser, never inputs or
+            results.
+          </p>
+          <div className="tools-chips">
+            {recent.map((tool) => (
+              <Link className="tools-chip" key={tool.slug} to={tool.path}>
+                {tool.name}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+      <section aria-labelledby="tools-directory">
+        <div className="tools-directory-heading">
+          <div>
+            <p className="tools-eyebrow">EXPLORE THE TOOLKIT</p>
+            <h2 id="tools-directory">
+              {categoryLabel ?? 'Find the right tool'}
+            </h2>
+          </div>
+          <label className="tools-toggle">
+            <input
+              type="checkbox"
+              checked={showUnavailable}
+              onChange={(event) => setShowUnavailable(event.target.checked)}
+            />{' '}
+            Show unavailable tools
+          </label>
+        </div>
+        {loading && (
+          <p role="status" className="tools-loading">
+            Loading the tool catalogue…
+          </p>
+        )}
+        {error && (
+          <div role="alert" className="tools-notice tools-notice--error">
+            <p>Tools are temporarily unavailable. {error}</p>
+            <button
+              type="button"
+              onClick={() => setRevision((value) => value + 1)}
+            >
+              Try again
+            </button>
+          </div>
+        )}
+        {!loading && !error && (
+          <p role="status" className="tools-muted">
+            {filtered.length} matching{' '}
+            {filtered.length === 1 ? 'tool' : 'tools'}
+          </p>
+        )}
+        {!loading && !error && filtered.length === 0 && (
+          <p className="tools-empty">
+            No tool matches “{search}”. Try a different word or category.
+          </p>
+        )}
+        <div className="tools-grid">
+          {!loading &&
+            !error &&
+            filtered.map((tool) => (
+              <article
+                key={tool.slug}
+                className={`tools-card tools-card--${tool.status.toLowerCase()}`}
+              >
+                <span className="tools-card-icon" aria-hidden="true">
+                  {(
+                    {
+                      dns: '◎',
+                      ip: '⊙',
+                      network: '⌘',
+                      developer: '⌗',
+                      security: '◇',
+                      domain: '◎',
+                      webmaster: '↗',
+                    } as Record<string, string>
+                  )[tool.category] ?? '＋'}
+                </span>
+                <div className="tools-card__head">
+                  <h3>
+                    <Link to={tool.path}>{tool.name}</Link>
+                  </h3>
+                  {dashboard?.signedIn && !toolsHost().embedded && (
+                    <button
+                      type="button"
+                      className="tools-fav"
+                      aria-label={`Favorite ${tool.name}`}
+                      aria-pressed={favorites.has(tool.slug)}
+                      onClick={() => void favorite(tool)}
+                    >
+                      ★
+                    </button>
+                  )}
+                </div>
+                <p>{tool.summary}</p>
+                <div className="tools-card__meta">
+                  <span
+                    className={`tools-badge tools-badge--${tool.status.toLowerCase()}`}
+                  >
+                    {LABELS[tool.status]}
+                  </span>
+                  {tool.authRequired && (
+                    <span className="tools-badge">Sign-in required</span>
+                  )}
+                </div>
+                {tool.status !== 'ACTIVE' && (
+                  <p className="tools-card__status">{tool.statusMessage}</p>
+                )}
+                <Link className="tools-card-link" to={tool.path}>
+                  Open tool <span aria-hidden="true">↗</span>
+                  <span className="sr-only">: {tool.name}</span>
+                </Link>
+              </article>
+            ))}
+        </div>
+      </section>
+      {!toolsHost().embedded && (
+        <nav className="tools-portal-links" aria-label="Your tools workspace">
+          <Link to="/tools/favorites">Favorites</Link>
+          <Link to="/tools/reports">Saved reports</Link>
+          <Link to="/tools/monitors">Monitoring</Link>
+          <Link to="/tools/document">Document tools (MRZ)</Link>
+        </nav>
+      )}
+      <aside className="tools-notice">
+        <h2>Know what your result means</h2>
+        <p>
+          Lookups reflect the configured resolver, registry or connection at the
+          time of the check. Cached results are labelled. A timeout or missing
+          provider is reported as an error, never as a made-up answer.
+        </p>
+      </aside>
     </div>
   );
 }

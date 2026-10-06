@@ -119,6 +119,61 @@ describe('Tools Center API', () => {
     });
   });
 
+  describe('Tools Center integration hardening', () => {
+    it('publishes only runnable public tools and keeps navigation no-store', async () => {
+      const catalog = (await app.inject({method:'GET',url:'/api/tools/catalog'})).json().tools;
+      const response = await app.inject({method:'GET',url:'/api/v1/tools/navigation'});
+      expect(response.headers['cache-control']).toBe('no-store');
+      expect(response.json().tools.length).toBeGreaterThan(10);
+      for (const tool of response.json().tools) {
+        expect(catalog.find((row:any)=>row.slug===tool.slug)).toMatchObject({status:'ACTIVE',authRequired:false,visibility:'public'});
+        expect(TOOL_HANDLERS[tool.slug]).toBeTypeOf('function');
+        expect(Object.keys(tool)).not.toContain('configuration');
+      }
+      expect(response.json().tools.map((tool:any)=>tool.slug)).not.toContain('whois');
+    });
+    it('cannot force an unconfigured provider ACTIVE or remove customer authentication', async () => {
+      for (const [slug,payload] of [['whois',{statusOverride:'ACTIVE'}],['word-counter',{visibility:'customer'}]] as const) {
+        const update = await app.inject({method:'PATCH',url:'/api/admin/tools/tools/'+slug,headers:auth(adminToken),payload});
+        expect(update.statusCode).toBe(200);
+      }
+      const tools = (await app.inject({method:'GET',url:'/api/tools/catalog'})).json().tools;
+      expect(tools.find((tool:any)=>tool.slug==='whois').status).toBe('CONFIGURATION_REQUIRED');
+      expect((await runTool('word-counter',{text:'private text'})).statusCode).toBe(401);
+    });
+    it('never enables caching of generated secrets or text via admin override', async () => {
+      const updated=await app.inject({method:'PATCH',url:'/api/admin/tools/tools/uuid-generator',headers:auth(adminToken),payload:{cacheSeconds:600}});
+      expect(updated.statusCode).toBe(200);
+      const a=await runTool('uuid-generator',{count:2}), b=await runTool('uuid-generator',{count:2});
+      expect(a.json().data.identifiers).toHaveLength(2);
+      expect(a.json().data.identifiers).not.toEqual(b.json().data.identifiers);
+      const rows=await client.query(`SELECT * FROM tool_cache WHERE tool_slug='uuid-generator'`);
+      expect(rows.rows).toHaveLength(0);
+      expect((await runTool('uuid-generator',{count:1.5})).statusCode).toBe(400);
+      expect((await runTool('uuid-generator',{count:51})).statusCode).toBe(400);
+    });
+    it('scopes even public tool caches by authenticated caller and labels hits', async () => {
+      // No outbound fixture: MAC bit inspection is real, provider unavailability stays explicit.
+      await client.query(`UPDATE tool_provider_configs SET enabled=false`);
+      const input={mac:'02:00:00:00:00:01'};
+      const first=await runTool('mac-lookup',input,customerToken);
+      const hit=await runTool('mac-lookup',input,customerToken);
+      const other=await runTool('mac-lookup',input,adminToken);
+      expect(first.statusCode).toBe(200);
+      expect(first.headers['cache-control']).toBe('no-store');
+      expect(first.json().meta.cached).toBe(false);
+      expect(hit.json().meta.cached).toBe(true);
+      expect(other.json().meta.cached).toBe(false);
+      expect((await client.query(`SELECT * FROM tool_cache WHERE tool_slug='mac-lookup'`)).rows).toHaveLength(2);
+    });
+    it('preserves input whitespace/case and never stores a text tool in shared cache', async () => {
+      const input=' CloudHost247 ';
+      const response=await runTool('encoding-tools',{format:'base64',mode:'encode',text:input});
+      expect(response.json().data.output).toBe(Buffer.from(input).toString('base64'));
+      expect((await client.query(`SELECT * FROM tool_cache WHERE tool_slug='encoding-tools'`)).rows).toHaveLength(0);
+    });
+  });
+
   describe('pure tools', () => {
     it('formats JSON and reports the exact error position for invalid input', async () => {
       const ok = await runTool('json-tools', { operation: 'format', text: '{"b":1,"a":2}', sortKeys: true, indent: 2 });
@@ -391,6 +446,13 @@ describe('Tools Center API', () => {
   });
 
   describe('speed test endpoints', () => {
+    it('raw transfers cannot bypass operator disablement or per-route limits', async () => {
+      await app.inject({method:'PATCH',url:'/api/admin/tools/tools/speed-test',headers:auth(adminToken),payload:{enabled:false}});
+      expect((await app.inject({method:'GET',url:'/api/tools/speed-test/download?bytes=64'})).statusCode).toBe(503);
+      await app.inject({method:'DELETE',url:'/api/admin/tools/tools/speed-test/override',headers:auth(adminToken)});
+      for(let i=0;i<12;i++) await app.inject({method:'GET',url:'/api/tools/speed-test/download?bytes=64'});
+      expect((await app.inject({method:'GET',url:'/api/tools/speed-test/download?bytes=64'})).statusCode).toBe(429);
+    });
     it('serves an incompressible download payload with no-store caching', async () => {
       const response = await app.inject({ method: 'GET', url: '/api/tools/speed-test/download?bytes=4096' });
       expect(response.statusCode).toBe(200);
@@ -420,9 +482,10 @@ describe('Tools Center API', () => {
 
     it('honours the operator size cap instead of advertising a hard-coded one', async () => {
       // The seeded value is 20 MB (20971520 bytes); the test asserts the *setting* is what the API
-      // reports, then proves it is live by lowering it and observing the download clamp.
+      // reports, subject to the lower 16 MiB hard transfer cap, then proves it is live
+      // by lowering it and observing the download clamp.
       const before = await app.inject({ method: 'GET', url: '/api/tools/speed-test/config' });
-      expect(before.json().data.payload.maxBytes).toBe(20 * 1024 * 1024);
+      expect(before.json().data.payload.maxBytes).toBe(16 * 1024 * 1024);
 
       const oversized = await app.inject({ method: 'GET', url: '/api/tools/speed-test/download?bytes=999999999' });
       expect(oversized.statusCode).toBe(200);

@@ -1,0 +1,1455 @@
+{
+  "pages": {
+    "web-hosting.php": {
+      "title": "Web Hosting",
+      "category": "Hosting",
+      "headline": "A home for your next big idea.",
+      "summary": "Bring your website online with a hosting plan that fits your project. Compare the published resources and choose your next step with confidence.",
+      "visual": "hosting/web-hosting",
+      "features": [
+        [
+          "Your website, your way",
+          "Publish your business website, portfolio or online project. Check each plan for supported software and resource limits."
+        ],
+        [
+          "Room to grow",
+          "Compare storage, traffic and upgrade options before choosing your plan."
+        ],
+        [
+          "One customer workspace",
+          "Manage your services, invoices and support requests from your CloudHost247 account."
+        ]
+      ],
+      "uses": [
+        "Business websites",
+        "Personal portfolios",
+        "Growing online projects"
+      ],
+      "related": [
+        "domain.php",
+        "ssl-certificate.php",
+        "email-hosting.php"
+      ],
+      "slug": "web-hosting"
+    },
+    "wordpress-hosting.php": {
+      "title": "WordPress Hosting",
+      "category": "Hosting",
+      "headline": "Your content. A stronger foundation.",
+      "summary": "Build your WordPress website on a plan suited to your publishing workflow. Review the available hosting options before you launch.",
+      "visual": "hosting/wordpress-hosting",
+      "features": [
+        [
+          "Built around your content",
+          "Choose resources for your pages, media library and editorial workflow."
+        ],
+        [
+          "Plan your launch",
+          "Confirm PHP, database and plugin requirements against the selected hosting plan."
+        ],
+        [
+          "Keep ownership",
+          "Bring your existing domain and website, or start with a new project."
+        ]
+      ],
+      "uses": [
+        "Editorial websites",
+        "Business sites",
+        "WordPress projects"
+      ],
+      "related": [
+        "web-hosting.php",
+        "domain.php",
+        "website-design.php"
+      ],
+      "slug": "wordpress-hosting"
+    },
+    "cpanel-hosting.php": {
+      "title": "cPanel Hosting",
+      "category": "Hosting",
+      "headline": "Familiar tools. A fresh start.",
+      "summary": "Explore hosting options for a cPanel workflow. Compare the published plan details for account limits, storage and included tools.",
+      "visual": "hosting/cpanel-hosting",
+      "features": [
+        [
+          "Start with the requirements",
+          "Define the software, capacity and access your project needs."
+        ],
+        [
+          "Compare the details",
+          "Review the published specifications and service terms. Availability is confirmed through the product catalog."
+        ],
+        [
+          "Keep everything connected",
+          "Access service management, billing and support from your customer account."
+        ]
+      ],
+      "uses": [
+        "Website management",
+        "PHP websites",
+        "Small business projects"
+      ],
+      "related": [
+        "cloudhost247-hosting.php",
+        "domain.php",
+        "help-center.php"
+      ],
+      "slug": "cpanel-hosting"
+    },
+    "plesk-hosting.php": {
+      "title": "Plesk Hosting",
+      "category": "Hosting",
+      "headline": "Take control of your web projects.",
+      "summary": "Find a hosting configuration for your Plesk-based workflow. Panel licensing and platform support depend on the selected plan.",
+      "visual": "hosting/plesk-hosting",
+      "features": [
+        [
+          "Start with the requirements",
+          "Define the software, capacity and access your project needs."
+        ],
+        [
+          "Compare the details",
+          "Review the published specifications and service terms. Availability is confirmed through the product catalog."
+        ],
+        [
+          "Keep everything connected",
+          "Access service management, billing and support from your customer account."
+        ]
+      ],
+      "uses": [
+        "Multiple websites",
+        "Agency workflows",
+        "Application management"
+      ],
+      "related": [
+        "cloudhost247-hosting.php",
+        "domain.php",
+        "help-center.php"
+      ],
+      "slug": "plesk-hosting"
+    },
+    "windows-hosting.php": {
+      "title": "Windows Hosting",
+      "category": "Hosting",
+      "headline": "A foundation for your Windows workload.",
+      "summary": "Discuss the runtime, licensing and resource requirements of your Windows application, then compare the currently published plans.",
+      "visual": "hosting/windows-hosting",
+      "features": [
+        [
+          "Start with the requirements",
+          "Define the software, capacity and access your project needs."
+        ],
+        [
+          "Compare the details",
+          "Review the published specifications and service terms. Availability is confirmed through the product catalog."
+        ],
+        [
+          "Keep everything connected",
+          "Access service management, billing and support from your customer account."
+        ]
+      ],
+      "uses": [
+        "Windows applications",
+        "Business workloads",
+        "Migration planning"
+      ],
+      "related": [
+        "cloudhost247-hosting.php",
+        "domain.php",
+        "help-center.php"
+      ],
+      "slug": "windows-hosting"
+    },
+    "vps-hosting.php": {
+      "title": "VPS Hosting",
+      "category": "VPS",
+      "headline": "Your own space to build more.",
+      "summary": "Choose a virtual server around your application, not the other way around. Review real configurations, available images and plan-specific limits before ordering.",
+      "visual": "cloud/vps",
+      "features": [
+        [
+          "Start with the requirements",
+          "Define the software, capacity and access your project needs."
+        ],
+        [
+          "Compare the details",
+          "Review the published specifications and service terms. Availability is confirmed through the product catalog."
+        ],
+        [
+          "Keep everything connected",
+          "Access service management, billing and support from your customer account."
+        ]
+      ],
+      "uses": [
+        "Application servers",
+        "Development environments",
+        "Independent websites"
+      ],
+      "related": [
+        "cloudhost247-hosting.php",
+        "domain.php",
+        "help-center.php"
+      ],
+      "slug": "vps-hosting"
+    },
+    "vps-privatecloud.php": {
+      "title": "Private Cloud",
+      "category": "Cloud",
+      "headline": "Infrastructure shaped around your business.",
+      "summary": "Plan a private-cloud environment around your isolation, capacity and operational requirements. Contact the team to confirm available configurations.",
+      "visual": "cloud/private-cloud",
+      "features": [
+        [
+          "Start with the requirements",
+          "Define the software, capacity and access your project needs."
+        ],
+        [
+          "Compare the details",
+          "Review the published specifications and service terms. Availability is confirmed through the product catalog."
+        ],
+        [
+          "Keep everything connected",
+          "Access service management, billing and support from your customer account."
+        ]
+      ],
+      "uses": [
+        "Isolated workloads",
+        "Business infrastructure",
+        "Capacity planning"
+      ],
+      "related": [
+        "cloudhost247-hosting.php",
+        "domain.php",
+        "help-center.php"
+      ],
+      "slug": "vps-privatecloud"
+    },
+    "vps-publiccloud.php": {
+      "title": "Public Cloud",
+      "category": "Cloud",
+      "headline": "Make room for what comes next.",
+      "summary": "Explore cloud resources for your online services. Availability, locations and scaling options are determined by the selected product and provider.",
+      "visual": "cloud/public-cloud",
+      "features": [
+        [
+          "Start with the requirements",
+          "Define the software, capacity and access your project needs."
+        ],
+        [
+          "Compare the details",
+          "Review the published specifications and service terms. Availability is confirmed through the product catalog."
+        ],
+        [
+          "Keep everything connected",
+          "Access service management, billing and support from your customer account."
+        ]
+      ],
+      "uses": [
+        "Web applications",
+        "Variable workloads",
+        "Online services"
+      ],
+      "related": [
+        "cloudhost247-hosting.php",
+        "domain.php",
+        "help-center.php"
+      ],
+      "slug": "vps-publiccloud"
+    },
+    "dedicated-server.php": {
+      "title": "Dedicated Servers",
+      "category": "Dedicated",
+      "headline": "Dedicated resources. Focused possibilities.",
+      "summary": "Match your workload to a dedicated server configuration. Compare published hardware, network allowances and management options.",
+      "visual": "servers/dedicated-servers",
+      "features": [
+        [
+          "Start with the requirements",
+          "Define the software, capacity and access your project needs."
+        ],
+        [
+          "Compare the details",
+          "Review the published specifications and service terms. Availability is confirmed through the product catalog."
+        ],
+        [
+          "Keep everything connected",
+          "Access service management, billing and support from your customer account."
+        ]
+      ],
+      "uses": [
+        "Resource-intensive applications",
+        "Large websites",
+        "Custom environments"
+      ],
+      "related": [
+        "cloudhost247-hosting.php",
+        "domain.php",
+        "help-center.php"
+      ],
+      "slug": "dedicated-server"
+    },
+    "enterprise-servers.php": {
+      "title": "Enterprise Servers",
+      "category": "Dedicated",
+      "headline": "Plan for your most important workloads.",
+      "summary": "Start with your operational requirements. Our team can help you review available server configurations, capacity and service scope.",
+      "visual": "servers/enterprise-servers",
+      "features": [
+        [
+          "Start with the requirements",
+          "Define the software, capacity and access your project needs."
+        ],
+        [
+          "Compare the details",
+          "Review the published specifications and service terms. Availability is confirmed through the product catalog."
+        ],
+        [
+          "Keep everything connected",
+          "Access service management, billing and support from your customer account."
+        ]
+      ],
+      "uses": [
+        "Business systems",
+        "Capacity planning",
+        "Custom infrastructure"
+      ],
+      "related": [
+        "cloudhost247-hosting.php",
+        "domain.php",
+        "help-center.php"
+      ],
+      "slug": "enterprise-servers"
+    },
+    "game-servers.php": {
+      "title": "Game Servers",
+      "category": "Dedicated",
+      "headline": "Give your community a place to play.",
+      "summary": "Find a server configuration for your game and community. Confirm supported software, regional availability and resource requirements before ordering.",
+      "visual": "servers/game-servers",
+      "features": [
+        [
+          "Start with the requirements",
+          "Define the software, capacity and access your project needs."
+        ],
+        [
+          "Compare the details",
+          "Review the published specifications and service terms. Availability is confirmed through the product catalog."
+        ],
+        [
+          "Keep everything connected",
+          "Access service management, billing and support from your customer account."
+        ]
+      ],
+      "uses": [
+        "Community servers",
+        "Private game worlds",
+        "Multiplayer projects"
+      ],
+      "related": [
+        "cloudhost247-hosting.php",
+        "domain.php",
+        "help-center.php"
+      ],
+      "slug": "game-servers"
+    },
+    "developer-friendly.php": {
+      "title": "Developer Hosting",
+      "category": "Developer",
+      "headline": "From your first commit to what’s next.",
+      "summary": "Choose infrastructure for your code and workflow. Review runtime support, access options and resource limits for the selected service.",
+      "visual": "deployment/developer-hosting",
+      "features": [
+        [
+          "Start with the requirements",
+          "Define the software, capacity and access your project needs."
+        ],
+        [
+          "Compare the details",
+          "Review the published specifications and service terms. Availability is confirmed through the product catalog."
+        ],
+        [
+          "Keep everything connected",
+          "Access service management, billing and support from your customer account."
+        ]
+      ],
+      "uses": [
+        "Web applications",
+        "Development environments",
+        "API projects"
+      ],
+      "related": [
+        "cloudhost247-hosting.php",
+        "domain.php",
+        "help-center.php"
+      ],
+      "slug": "developer-friendly"
+    },
+    "ssl-certificate.php": {
+      "title": "SSL Certificates",
+      "category": "Product",
+      "headline": "Make secure connections part of your foundation.",
+      "summary": "Explore certificates for your website and domain. Compare validation requirements, domain coverage and renewal terms in the available products.",
+      "visual": "security/ssl",
+      "features": [
+        [
+          "Start with the requirements",
+          "Define the software, capacity and access your project needs."
+        ],
+        [
+          "Compare the details",
+          "Review the published specifications and service terms. Availability is confirmed through the product catalog."
+        ],
+        [
+          "Keep everything connected",
+          "Access service management, billing and support from your customer account."
+        ]
+      ],
+      "uses": [
+        "Business websites",
+        "Domain protection",
+        "Encrypted connections"
+      ],
+      "related": [
+        "cloudhost247-hosting.php",
+        "domain.php",
+        "help-center.php"
+      ],
+      "slug": "ssl-certificate"
+    },
+    "website-design.php": {
+      "title": "Website Design",
+      "category": "Business",
+      "headline": "Turn your idea into a considered website.",
+      "summary": "Discuss your goals, content and project requirements with CloudHost247. Confirm scope, deliverables and timing before a project begins.",
+      "visual": "hosting/website-design",
+      "features": [
+        [
+          "Start with the requirements",
+          "Define the software, capacity and access your project needs."
+        ],
+        [
+          "Compare the details",
+          "Review the published specifications and service terms. Availability is confirmed through the product catalog."
+        ],
+        [
+          "Keep everything connected",
+          "Access service management, billing and support from your customer account."
+        ]
+      ],
+      "uses": [
+        "New business websites",
+        "Website refreshes",
+        "Launch planning"
+      ],
+      "related": [
+        "cloudhost247-hosting.php",
+        "domain.php",
+        "help-center.php"
+      ],
+      "slug": "website-design"
+    },
+    "domain.php": {
+      "title": "Domains",
+      "category": "Domains",
+      "headline": "Every great idea starts with a name.",
+      "summary": "Find your next domain, transfer an existing name, or manage your domain portfolio through your CloudHost247 account.",
+      "visual": "domains/domain-network",
+      "features": [
+        [
+          "Find your name",
+          "Use live domain search to check registration availability."
+        ],
+        [
+          "Bring your domain",
+          "Review eligibility and transfer your existing domain through the domain checkout."
+        ],
+        [
+          "Manage your portfolio",
+          "Access renewal, nameservers and available DNS tools from your domain details."
+        ]
+      ],
+      "uses": [
+        "New brands",
+        "Business websites",
+        "Domain portfolios"
+      ],
+      "related": [
+        "web-hosting.php",
+        "ssl-certificate.php",
+        "email-hosting.php"
+      ],
+      "slug": "domain"
+    },
+    "cloudhost247-hosting.php": {
+      "title": "Cloud Hosting Plans",
+      "category": "Cloud",
+      "headline": "The right resources for your next step.",
+      "summary": "Compare verified hosting, VPS and dedicated server products. Specifications and pricing come from the configured catalog.",
+      "visual": "cloud/cloud-hosting",
+      "features": [],
+      "uses": [],
+      "related": [],
+      "slug": "cloudhost247-hosting"
+    },
+    "email-hosting.php": {
+      "title": "Email Hosting",
+      "category": "Email",
+      "headline": "Business communication, under your own name.",
+      "summary": "Compare the email plans and provider options currently configured for CloudHost247. Connect your domain and choose the right mailbox capacity.",
+      "visual": "hosting/email-hosting",
+      "features": [],
+      "uses": [],
+      "related": [],
+      "slug": "email-hosting"
+    },
+    "aboutus.php": {
+      "title": "About CloudHost247",
+      "category": "Company",
+      "headline": "One platform. Your next chapter.",
+      "summary": "CloudHost247 brings hosting, domains and digital infrastructure into one customer experience for businesses, developers and organizations.",
+      "visual": "hero/infrastructure",
+      "features": [],
+      "uses": [],
+      "related": [],
+      "slug": "aboutus"
+    },
+    "offers.php": {
+      "title": "Offers",
+      "category": "Marketing",
+      "headline": "Find the right plan. Not just a headline.",
+      "summary": "Explore the currently available products and confirm any eligible offer in checkout. Promotions apply only when explicitly shown for your order.",
+      "visual": "cloud/cloud-hosting",
+      "features": [],
+      "uses": [],
+      "related": [],
+      "slug": "offers"
+    },
+    "help-center.php": {
+      "title": "Help Center",
+      "category": "Support",
+      "headline": "Let’s find your next step.",
+      "summary": "Browse the knowledgebase, review your services or open a support ticket from your CloudHost247 account.",
+      "visual": "management/support",
+      "features": [],
+      "uses": [],
+      "related": [],
+      "slug": "help-center"
+    },
+    "blog.php": {
+      "title": "Blog",
+      "category": "Marketing",
+      "headline": "Ideas for what you’re building.",
+      "summary": "Read published CloudHost247 updates and explore the knowledgebase for product guidance.",
+      "visual": "blog/insights",
+      "features": [],
+      "uses": [],
+      "related": [],
+      "slug": "blog"
+    },
+    "faqs.php": {
+      "title": "Frequently Asked Questions",
+      "category": "Support",
+      "headline": "Good questions. Clear next steps.",
+      "summary": "Find answers about choosing a plan, managing your account and getting support.",
+      "visual": "management/support",
+      "features": [],
+      "uses": [],
+      "related": [],
+      "slug": "faqs"
+    },
+    "applications.php": {
+      "title": "Applications",
+      "category": "Applications",
+      "headline": "Start with the software that fits.",
+      "summary": "Explore configured applications in the connected CloudHost247 platform. A software name alone does not guarantee an available deployment.",
+      "visual": "applications/application-stack",
+      "features": [],
+      "uses": [],
+      "related": [],
+      "slug": "applications"
+    },
+    "deployments.php": {
+      "title": "Deployment Platform",
+      "category": "Deployment/PaaS",
+      "headline": "A clear path from code to infrastructure.",
+      "summary": "Use the connected CloudHost247 platform for supported application deployments. Deployment controls stay in the authenticated platform.",
+      "visual": "deployment/deployment-pipeline",
+      "features": [],
+      "uses": [],
+      "related": [],
+      "slug": "deployments"
+    },
+    "operating-systems.php": {
+      "title": "Operating Systems",
+      "category": "Operating Systems",
+      "headline": "The right foundation for your server.",
+      "summary": "Select from provider-mapped images in the connected platform. Image availability depends on the provider, region and server configuration.",
+      "visual": "operating-systems/os-catalog",
+      "features": [],
+      "uses": [],
+      "related": [],
+      "slug": "operating-systems"
+    },
+    "server-management.php": {
+      "title": "Server Management",
+      "category": "Server Management",
+      "headline": "Your infrastructure. A clearer view.",
+      "summary": "Open your service details to see the controls available for your server. Operations are shown only when supported by that service and your permissions.",
+      "visual": "management/server-control",
+      "features": [],
+      "uses": [],
+      "related": [],
+      "slug": "server-management"
+    },
+    "infrastructure.php": {
+      "title": "Infrastructure",
+      "category": "Cloud",
+      "headline": "Connected by design. Grounded in detail.",
+      "summary": "Explore CloudHost247 infrastructure products and verify the provider, location and network specifications of each available configuration.",
+      "visual": "hero/global-network",
+      "features": [],
+      "uses": [],
+      "related": [],
+      "slug": "infrastructure"
+    },
+    "acceptable-use-policy.php": {
+      "title": "Acceptable Use Policy",
+      "category": "Legal",
+      "headline": "Acceptable Use Policy",
+      "summary": "Review the acceptable use policy for CloudHost247 services, including the terms and responsibilities that apply to your account.",
+      "visual": "security/security",
+      "features": [],
+      "uses": [],
+      "related": [],
+      "slug": "acceptable-use-policy"
+    },
+    "backup-policy.php": {
+      "title": "Backup Policy",
+      "category": "Legal",
+      "headline": "Backup Policy",
+      "summary": "Review the backup policy for CloudHost247 services, including the terms and responsibilities that apply to your account.",
+      "visual": "security/security",
+      "features": [],
+      "uses": [],
+      "related": [],
+      "slug": "backup-policy"
+    },
+    "cookie-policy.php": {
+      "title": "Cookie Policy",
+      "category": "Legal",
+      "headline": "Cookie Policy",
+      "summary": "Review the cookie policy for CloudHost247 services, including the terms and responsibilities that apply to your account.",
+      "visual": "security/security",
+      "features": [],
+      "uses": [],
+      "related": [],
+      "slug": "cookie-policy"
+    },
+    "cybercrime-policy.php": {
+      "title": "Cybercrime Policy",
+      "category": "Legal",
+      "headline": "Cybercrime Policy",
+      "summary": "Review the cybercrime policy for CloudHost247 services, including the terms and responsibilities that apply to your account.",
+      "visual": "security/security",
+      "features": [],
+      "uses": [],
+      "related": [],
+      "slug": "cybercrime-policy"
+    },
+    "data-deletion.php": {
+      "title": "Data Deletion Instructions",
+      "category": "Legal",
+      "headline": "Data Deletion Instructions",
+      "summary": "Review the data deletion instructions for CloudHost247 services, including the terms and responsibilities that apply to your account.",
+      "visual": "security/security",
+      "features": [],
+      "uses": [],
+      "related": [],
+      "slug": "data-deletion"
+    },
+    "data-privacy-notice-and-consent-form.php": {
+      "title": "Data Privacy Notice and Consent Form",
+      "category": "Legal",
+      "headline": "Data Privacy Notice and Consent Form",
+      "summary": "Review the data privacy notice and consent form for CloudHost247 services, including the terms and responsibilities that apply to your account.",
+      "visual": "security/security",
+      "features": [],
+      "uses": [],
+      "related": [],
+      "slug": "data-privacy-notice-and-consent-form"
+    },
+    "data-protection-standards.php": {
+      "title": "Data Protection Standards",
+      "category": "Legal",
+      "headline": "Data Protection Standards",
+      "summary": "Review the data protection standards for CloudHost247 services, including the terms and responsibilities that apply to your account.",
+      "visual": "security/security",
+      "features": [],
+      "uses": [],
+      "related": [],
+      "slug": "data-protection-standards"
+    },
+    "domain-agreement.php": {
+      "title": "Domain Agreement",
+      "category": "Legal",
+      "headline": "Domain Agreement",
+      "summary": "Review the domain agreement for CloudHost247 services, including the terms and responsibilities that apply to your account.",
+      "visual": "security/security",
+      "features": [],
+      "uses": [],
+      "related": [],
+      "slug": "domain-agreement"
+    },
+    "domain-brokerage-terms.php": {
+      "title": "Domain Brokerage Terms",
+      "category": "Legal",
+      "headline": "Domain Brokerage Terms",
+      "summary": "Review the domain brokerage terms for CloudHost247 services, including the terms and responsibilities that apply to your account.",
+      "visual": "security/security",
+      "features": [],
+      "uses": [],
+      "related": [],
+      "slug": "domain-brokerage-terms"
+    },
+    "domain-renewal-policy.php": {
+      "title": "Domain Renewal Policy",
+      "category": "Legal",
+      "headline": "Domain Renewal Policy",
+      "summary": "Review the domain renewal policy for CloudHost247 services, including the terms and responsibilities that apply to your account.",
+      "visual": "security/security",
+      "features": [],
+      "uses": [],
+      "related": [],
+      "slug": "domain-renewal-policy"
+    },
+    "domainregistrationaddendum.php": {
+      "title": "Domain Registration Addendum",
+      "category": "Legal",
+      "headline": "Domain Registration Addendum",
+      "summary": "Review the domain registration addendum for CloudHost247 services, including the terms and responsibilities that apply to your account.",
+      "visual": "security/security",
+      "features": [],
+      "uses": [],
+      "related": [],
+      "slug": "domainregistrationaddendum"
+    },
+    "fair-usage-policy.php": {
+      "title": "Fair Usage Policy",
+      "category": "Legal",
+      "headline": "Fair Usage Policy",
+      "summary": "Review the fair usage policy for CloudHost247 services, including the terms and responsibilities that apply to your account.",
+      "visual": "security/security",
+      "features": [],
+      "uses": [],
+      "related": [],
+      "slug": "fair-usage-policy"
+    },
+    "legal-notice.php": {
+      "title": "Legal Notice",
+      "category": "Legal",
+      "headline": "Legal Notice",
+      "summary": "Review the legal notice for CloudHost247 services, including the terms and responsibilities that apply to your account.",
+      "visual": "security/security",
+      "features": [],
+      "uses": [],
+      "related": [],
+      "slug": "legal-notice"
+    },
+    "legal.php": {
+      "title": "Legal & Policy Center",
+      "category": "Legal",
+      "headline": "Legal & Policy Center",
+      "summary": "Review the legal & policy center for CloudHost247 services, including the terms and responsibilities that apply to your account.",
+      "visual": "security/security",
+      "features": [],
+      "uses": [],
+      "related": [],
+      "slug": "legal"
+    },
+    "privacy-policy.php": {
+      "title": "Privacy Policy",
+      "category": "Legal",
+      "headline": "Privacy Policy",
+      "summary": "Review the privacy policy for CloudHost247 services, including the terms and responsibilities that apply to your account.",
+      "visual": "security/security",
+      "features": [],
+      "uses": [],
+      "related": [],
+      "slug": "privacy-policy"
+    },
+    "refund-and-cancellation-policy.php": {
+      "title": "Refund and Cancellation Policy",
+      "category": "Legal",
+      "headline": "Refund and Cancellation Policy",
+      "summary": "Review the refund and cancellation policy for CloudHost247 services, including the terms and responsibilities that apply to your account.",
+      "visual": "security/security",
+      "features": [],
+      "uses": [],
+      "related": [],
+      "slug": "refund-and-cancellation-policy"
+    },
+    "refund-policy.php": {
+      "title": "Refund Policy",
+      "category": "Legal",
+      "headline": "Refund Policy",
+      "summary": "Review the refund policy for CloudHost247 services, including the terms and responsibilities that apply to your account.",
+      "visual": "security/security",
+      "features": [],
+      "uses": [],
+      "related": [],
+      "slug": "refund-policy"
+    },
+    "terms-of-service.php": {
+      "title": "Terms of Service",
+      "category": "Legal",
+      "headline": "Terms of Service",
+      "summary": "Review the terms of service for CloudHost247 services, including the terms and responsibilities that apply to your account.",
+      "visual": "security/security",
+      "features": [],
+      "uses": [],
+      "related": [],
+      "slug": "terms-of-service"
+    },
+    "trademark-policy.php": {
+      "title": "Trademark Policy",
+      "category": "Legal",
+      "headline": "Trademark Policy",
+      "summary": "Review the trademark policy for CloudHost247 services, including the terms and responsibilities that apply to your account.",
+      "visual": "security/security",
+      "features": [],
+      "uses": [],
+      "related": [],
+      "slug": "trademark-policy"
+    }
+  },
+  "navigation": [
+    {
+      "title": "Hosting",
+      "description": "Give your website a place to grow.",
+      "groups": [
+        {
+          "title": "Web hosting",
+          "links": [
+            {
+              "label": "Web Hosting",
+              "url": "web-hosting.php"
+            },
+            {
+              "label": "WordPress Hosting",
+              "url": "wordpress-hosting.php"
+            },
+            {
+              "label": "cPanel Hosting",
+              "url": "cpanel-hosting.php"
+            },
+            {
+              "label": "Plesk Hosting",
+              "url": "plesk-hosting.php"
+            },
+            {
+              "label": "Windows Hosting",
+              "url": "windows-hosting.php"
+            },
+            {
+              "label": "Email Hosting",
+              "url": "email-hosting.php"
+            }
+          ]
+        },
+        {
+          "title": "Your website",
+          "links": [
+            {
+              "label": "Website Design",
+              "url": "website-design.php"
+            },
+            {
+              "label": "SSL Certificates",
+              "url": "ssl-certificate.php"
+            },
+            {
+              "label": "Domain Search",
+              "url": "cart.php?a=add&domain=register"
+            }
+          ]
+        },
+        {
+          "title": "Find your fit",
+          "links": [
+            {
+              "label": "All Available Plans",
+              "url": "cloudhost247-hosting.php"
+            },
+            {
+              "label": "Developer Hosting",
+              "url": "developer-friendly.php"
+            },
+            {
+              "label": "Discuss a Migration",
+              "url": "contact.php"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Cloud & Servers",
+      "description": "Build on the right foundation.",
+      "groups": [
+        {
+          "title": "Cloud",
+          "links": [
+            {
+              "label": "Cloud Hosting",
+              "url": "cloudhost247-hosting.php"
+            },
+            {
+              "label": "Public Cloud",
+              "url": "vps-publiccloud.php"
+            },
+            {
+              "label": "Private Cloud",
+              "url": "vps-privatecloud.php"
+            },
+            {
+              "label": "VPS Hosting",
+              "url": "vps-hosting.php"
+            }
+          ]
+        },
+        {
+          "title": "Servers",
+          "links": [
+            {
+              "label": "Dedicated Servers",
+              "url": "dedicated-server.php"
+            },
+            {
+              "label": "Enterprise Servers",
+              "url": "enterprise-servers.php"
+            },
+            {
+              "label": "Game Servers",
+              "url": "game-servers.php"
+            }
+          ]
+        },
+        {
+          "title": "Infrastructure",
+          "links": [
+            {
+              "label": "Infrastructure",
+              "url": "infrastructure.php"
+            },
+            {
+              "label": "Operating Systems",
+              "url": "operating-systems.php"
+            },
+            {
+              "label": "Server Management",
+              "url": "server-management.php"
+            },
+            {
+              "label": "System Status",
+              "url": "serverstatus.php"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Domains",
+      "description": "Make a name for your next idea.",
+      "groups": [
+        {
+          "title": "Find a domain",
+          "links": [
+            {
+              "label": "Search Domains",
+              "url": "domain.php"
+            },
+            {
+              "label": "Register Domain",
+              "url": "cart.php?a=add&domain=register"
+            },
+            {
+              "label": "Transfer Domain",
+              "url": "cart.php?a=add&domain=transfer"
+            },
+            {
+              "label": "Domain Pricing",
+              "url": "index.php?rp=/domain/pricing"
+            }
+          ]
+        },
+        {
+          "title": "Your domains",
+          "links": [
+            {
+              "label": "Domain Renewal",
+              "url": "clientarea.php?action=domains"
+            },
+            {
+              "label": "Domain Management",
+              "url": "clientarea.php?action=domains"
+            },
+            {
+              "label": "DNS & Nameservers",
+              "url": "clientarea.php?action=domains"
+            }
+          ]
+        },
+        {
+          "title": "Guidance",
+          "links": [
+            {
+              "label": "Domain Agreement",
+              "url": "domain-agreement.php"
+            },
+            {
+              "label": "Renewal Policy",
+              "url": "domain-renewal-policy.php"
+            },
+            {
+              "label": "Brokerage Terms",
+              "url": "domain-brokerage-terms.php"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Applications",
+      "description": "Your software. Connected infrastructure.",
+      "groups": [
+        {
+          "title": "Explore",
+          "links": [
+            {
+              "label": "Application Catalog",
+              "url": "applications.php"
+            },
+            {
+              "label": "WordPress Hosting",
+              "url": "wordpress-hosting.php"
+            }
+          ]
+        },
+        {
+          "title": "Build",
+          "links": [
+            {
+              "label": "Developer Hosting",
+              "url": "developer-friendly.php"
+            },
+            {
+              "label": "Deployment Platform",
+              "url": "deployments.php"
+            }
+          ]
+        },
+        {
+          "title": "Configure",
+          "links": [
+            {
+              "label": "Operating Systems",
+              "url": "operating-systems.php"
+            },
+            {
+              "label": "Available Plans",
+              "url": "cloudhost247-hosting.php"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Developers",
+      "description": "A foundation for whatever you build next.",
+      "groups": [
+        {
+          "title": "Deploy",
+          "links": [
+            {
+              "label": "Deployment Platform",
+              "url": "deployments.php"
+            },
+            {
+              "label": "Developer Hosting",
+              "url": "developer-friendly.php"
+            },
+            {
+              "label": "Applications",
+              "url": "applications.php"
+            }
+          ]
+        },
+        {
+          "title": "Operate",
+          "links": [
+            {
+              "label": "Server Management",
+              "url": "server-management.php"
+            },
+            {
+              "label": "Operating Systems",
+              "url": "operating-systems.php"
+            },
+            {
+              "label": "VPS Hosting",
+              "url": "vps-hosting.php"
+            }
+          ]
+        },
+        {
+          "title": "Get help",
+          "links": [
+            {
+              "label": "Knowledgebase",
+              "url": "knowledgebase.php"
+            },
+            {
+              "label": "Submit Ticket",
+              "url": "submitticket.php"
+            },
+            {
+              "label": "Contact Sales",
+              "url": "contact.php"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Resources",
+      "description": "Find answers. Keep moving forward.",
+      "groups": [
+        {
+          "title": "Learn",
+          "links": [
+            {
+              "label": "Knowledgebase",
+              "url": "knowledgebase.php"
+            },
+            {
+              "label": "Blog & Updates",
+              "url": "blog.php"
+            },
+            {
+              "label": "FAQs",
+              "url": "faqs.php"
+            }
+          ]
+        },
+        {
+          "title": "Support",
+          "links": [
+            {
+              "label": "Help Center",
+              "url": "help-center.php"
+            },
+            {
+              "label": "Submit Ticket",
+              "url": "submitticket.php"
+            },
+            {
+              "label": "System Status",
+              "url": "serverstatus.php"
+            },
+            {
+              "label": "Service Alerts",
+              "url": "announcements.php"
+            }
+          ]
+        },
+        {
+          "title": "Company",
+          "links": [
+            {
+              "label": "About CloudHost247",
+              "url": "aboutus.php"
+            },
+            {
+              "label": "Contact",
+              "url": "contact.php"
+            },
+            {
+              "label": "Infrastructure",
+              "url": "infrastructure.php"
+            },
+            {
+              "label": "Legal & Policies",
+              "url": "legal.php"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Tools",
+      "description": "DNS, domain, network and developer utilities with clear results.",
+      "groups": [
+        {
+          "title": "Explore",
+          "links": [
+            {
+              "label": "All Tools →",
+              "url": "tools"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "footer": [
+    {
+      "title": "Products",
+      "links": [
+        {
+          "label": "Web Hosting",
+          "url": "web-hosting.php"
+        },
+        {
+          "label": "WordPress Hosting",
+          "url": "wordpress-hosting.php"
+        },
+        {
+          "label": "Cloud Hosting Plans",
+          "url": "cloudhost247-hosting.php"
+        },
+        {
+          "label": "VPS Hosting",
+          "url": "vps-hosting.php"
+        },
+        {
+          "label": "Dedicated Servers",
+          "url": "dedicated-server.php"
+        },
+        {
+          "label": "Enterprise Servers",
+          "url": "enterprise-servers.php"
+        },
+        {
+          "label": "Email Hosting",
+          "url": "email-hosting.php"
+        }
+      ]
+    },
+    {
+      "title": "Find a domain",
+      "links": [
+        {
+          "label": "Search Domains",
+          "url": "domain.php"
+        },
+        {
+          "label": "Register Domain",
+          "url": "cart.php?a=add&domain=register"
+        },
+        {
+          "label": "Transfer Domain",
+          "url": "cart.php?a=add&domain=transfer"
+        },
+        {
+          "label": "Domain Pricing",
+          "url": "index.php?rp=/domain/pricing"
+        }
+      ]
+    },
+    {
+      "title": "Developers",
+      "links": [
+        {
+          "label": "Developer Hosting",
+          "url": "developer-friendly.php"
+        },
+        {
+          "label": "Applications",
+          "url": "applications.php"
+        },
+        {
+          "label": "Deployment Platform",
+          "url": "deployments.php"
+        },
+        {
+          "label": "Operating Systems",
+          "url": "operating-systems.php"
+        }
+      ]
+    },
+    {
+      "title": "Applications",
+      "links": [
+        {
+          "label": "Application Catalog",
+          "url": "applications.php"
+        },
+        {
+          "label": "WordPress Hosting",
+          "url": "wordpress-hosting.php"
+        },
+        {
+          "label": "Operating Systems",
+          "url": "operating-systems.php"
+        }
+      ]
+    },
+    {
+      "title": "Servers",
+      "links": [
+        {
+          "label": "VPS Hosting",
+          "url": "vps-hosting.php"
+        },
+        {
+          "label": "Dedicated Servers",
+          "url": "dedicated-server.php"
+        },
+        {
+          "label": "Game Servers",
+          "url": "game-servers.php"
+        },
+        {
+          "label": "Server Management",
+          "url": "server-management.php"
+        },
+        {
+          "label": "Backup Policy",
+          "url": "backup-policy.php"
+        }
+      ]
+    },
+    {
+      "title": "Support",
+      "links": [
+        {
+          "label": "Help Center",
+          "url": "help-center.php"
+        },
+        {
+          "label": "Submit Ticket",
+          "url": "submitticket.php"
+        },
+        {
+          "label": "System Status",
+          "url": "serverstatus.php"
+        },
+        {
+          "label": "Service Alerts",
+          "url": "announcements.php"
+        }
+      ]
+    },
+    {
+      "title": "Company",
+      "links": [
+        {
+          "label": "About CloudHost247",
+          "url": "aboutus.php"
+        },
+        {
+          "label": "Contact",
+          "url": "contact.php"
+        },
+        {
+          "label": "Infrastructure",
+          "url": "infrastructure.php"
+        },
+        {
+          "label": "Legal & Policies",
+          "url": "legal.php"
+        }
+      ]
+    },
+    {
+      "title": "Legal",
+      "links": [
+        {
+          "label": "Acceptable Use Policy",
+          "url": "acceptable-use-policy.php"
+        },
+        {
+          "label": "Backup Policy",
+          "url": "backup-policy.php"
+        },
+        {
+          "label": "Cookie Policy",
+          "url": "cookie-policy.php"
+        },
+        {
+          "label": "Cybercrime Policy",
+          "url": "cybercrime-policy.php"
+        },
+        {
+          "label": "Data Deletion Instructions",
+          "url": "data-deletion.php"
+        },
+        {
+          "label": "Data Privacy Notice and Consent Form",
+          "url": "data-privacy-notice-and-consent-form.php"
+        },
+        {
+          "label": "Data Protection Standards",
+          "url": "data-protection-standards.php"
+        },
+        {
+          "label": "Domain Agreement",
+          "url": "domain-agreement.php"
+        },
+        {
+          "label": "Domain Brokerage Terms",
+          "url": "domain-brokerage-terms.php"
+        },
+        {
+          "label": "Domain Renewal Policy",
+          "url": "domain-renewal-policy.php"
+        },
+        {
+          "label": "Domain Registration Addendum",
+          "url": "domainregistrationaddendum.php"
+        },
+        {
+          "label": "Fair Usage Policy",
+          "url": "fair-usage-policy.php"
+        },
+        {
+          "label": "Legal Notice",
+          "url": "legal-notice.php"
+        },
+        {
+          "label": "Privacy Policy",
+          "url": "privacy-policy.php"
+        },
+        {
+          "label": "Refund and Cancellation Policy",
+          "url": "refund-and-cancellation-policy.php"
+        },
+        {
+          "label": "Refund Policy",
+          "url": "refund-policy.php"
+        },
+        {
+          "label": "Terms of Service",
+          "url": "terms-of-service.php"
+        },
+        {
+          "label": "Trademark Policy",
+          "url": "trademark-policy.php"
+        }
+      ]
+    },
+    {
+      "title": "Tools",
+      "links": [
+        {
+          "label": "All Tools",
+          "url": "tools"
+        },
+        {
+          "label": "View All Tools →",
+          "url": "tools"
+        }
+      ]
+    }
+  ]
+}

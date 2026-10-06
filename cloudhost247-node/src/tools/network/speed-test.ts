@@ -125,12 +125,12 @@ export async function speedTestConfig(db: Queryable, options: { measureServerEgr
     },
     payload: {
       minBytes: 64 * 1024,
-      maxBytes: caps.maxBytes,
+      maxBytes: Math.min(caps.maxBytes, 16 * 1024 * 1024),
       // Never ask a browser for more than the cap allows, even when the nominal measurement size is larger.
       defaultBytes: Math.min(MEASURED_BYTES, caps.maxBytes),
       measuredBytes: Math.min(MEASURED_BYTES, caps.maxBytes),
     },
-    limits: { maxUploadBytes: caps.maxBytes, totalBudgetMs: caps.maxMs },
+    limits: { maxUploadBytes: Math.min(caps.maxBytes, 8 * 1024 * 1024), totalBudgetMs: caps.maxMs },
     rules: [
       'Download speed is measured by your browser fetching an uncached payload from CloudHost247 and timing the transfer; the server never stores the payload.',
       'Upload speed is measured by your browser sending a buffer to CloudHost247, which measures the request duration and discards the body immediately.',

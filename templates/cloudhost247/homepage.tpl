@@ -1,72 +1,14 @@
-<a class="ch247-skip" href="#main-content">Skip to main content</a>
-{if $cloudhost247.settings.show_announcement eq '1' && $cloudhost247.settings.announcement_text}
-<div class="ch247-announcement" role="status">{$cloudhost247.settings.announcement_text|escape}</div>
-{/if}
 <main id="main-content">
-<section class="ch247-hero"><div class="ch247-hero__inner">
-<h1>{$cloudhost247.settings.hero_title|escape}</h1>
-<p>{$cloudhost247.settings.hero_text|escape}</p>
-<a class="ch247-button" href="{$cloudhost247.settings.hero_cta_url|escape:'html'}">{$cloudhost247.settings.hero_cta_label|escape}</a>
-</div></section>
-{if $cloudhost247.banners}
-<section class="ch247-section" aria-label="Featured services"><div class="ch247-grid">{foreach $cloudhost247.banners as $banner}<article class="ch247-card">{if $banner.image_url}<img src="{$banner.image_url|escape:'html'}" alt="">{/if}<h2>{$banner.title|escape}</h2><p>{$banner.summary|escape}</p>{if $banner.url}<a href="{$banner.url|escape:'html'}">Learn more <span aria-hidden="true">→</span></a>{/if}</article>{/foreach}</div></section>
-{/if}
-<section class="ch247-section ch247-platform-features" aria-labelledby="ch247-platform-features-title">
-    <div class="ch247-platform-features__inner">
-        <div class="ch247-section-heading">
-            <p class="ch247-eyebrow">Platform capabilities</p>
-            <h2 id="ch247-platform-features-title">CloudHost247 Platform Features</h2>
-            <p>Everything needed to operate a professional WHMCS-powered hosting and digital services business from one responsive customer portal.</p>
-        </div>
-        <div class="ch247-feature-grid">
-            <article class="ch247-feature-card">
-                <span class="ch247-feature-card__icon" aria-hidden="true">WH</span>
-                <h3>WHMCS Integrated</h3>
-                <p>CloudHost247 is fully integrated with WHMCS for automated hosting provisioning, client management, billing, invoicing, service management, domain registration, support tickets, and subscription lifecycle management.</p>
-            </article>
-            <article class="ch247-feature-card">
-                <span class="ch247-feature-card__icon" aria-hidden="true">ML</span>
-                <h3>Multi-Language Support</h3>
-                <p>Support multiple languages across the CloudHost247 customer portal, hosting marketplace, account dashboard, billing pages, knowledge base, notifications, and administrative interfaces.</p>
-            </article>
-            <article class="ch247-feature-card">
-                <span class="ch247-feature-card__icon" aria-hidden="true">RS</span>
-                <h3>Fully Responsive</h3>
-                <p>The CloudHost247 platform is designed to work seamlessly across desktop computers, tablets, and mobile devices, providing a consistent and professional experience on every screen size.</p>
-            </article>
-            <article class="ch247-feature-card">
-                <span class="ch247-feature-card__icon" aria-hidden="true">WC</span>
-                <h3>Standards-Compliant</h3>
-                <p>The frontend is built using modern web standards with a focus on clean, maintainable HTML, CSS, JavaScript, accessibility, and browser compatibility.</p>
-            </article>
-            <article class="ch247-feature-card">
-                <span class="ch247-feature-card__icon" aria-hidden="true">CX</span>
-                <h3>Highly Customizable</h3>
-                <p>CloudHost247 provides a flexible architecture that allows administrators to customize branding, themes, navigation, pages, hosting products, pricing, payment methods, emails, customer dashboards, marketplace content, and platform settings.</p>
-            </article>
-            <article class="ch247-feature-card">
-                <span class="ch247-feature-card__icon" aria-hidden="true">SEO</span>
-                <h3>SEO &amp; Performance Optimized</h3>
-                <p>Optimize public-facing CloudHost247 pages for search engines and performance through optimized metadata, structured content, responsive images, caching, compression, efficient asset loading, clean URLs, sitemap generation, and performance-focused frontend architecture.</p>
-            </article>
-            <article class="ch247-feature-card">
-                <span class="ch247-feature-card__icon" aria-hidden="true">MM</span>
-                <h3>Mega Menu</h3>
-                <p>Provide a powerful mega-menu navigation system for organizing hosting, domains, VPS, dedicated servers, cloud services, email hosting, security products, software, marketplace products, support resources, and other CloudHost247 services.</p>
-            </article>
-            <article class="ch247-feature-card">
-                <span class="ch247-feature-card__icon" aria-hidden="true">PC</span>
-                <h3>Privacy &amp; Compliance Ready</h3>
-                <p>Provide configurable privacy and compliance features including cookie consent, privacy controls, data-management settings, legal pages, user consent records, and configurable data-retention policies to support applicable privacy regulations.</p>
-            </article>
-            <article class="ch247-feature-card">
-                <span class="ch247-feature-card__icon" aria-hidden="true">RTL</span>
-                <h3>RTL Support</h3>
-                <p>Support right-to-left languages with appropriate RTL layouts across the customer portal, public website, dashboards, forms, navigation, invoices, account pages, and administrative interfaces.</p>
-            </article>
-        </div>
-    </div>
-</section>
-{foreach $cloudhost247.sections as $section}<section class="ch247-section"><div class="ch247-page"><h2>{$section.title|escape}</h2>{$section.body nofilter}</div></section>{/foreach}
-{if $cloudhost247.testimonials}<section class="ch247-section" aria-labelledby="customer-stories"><div class="ch247-page"><h2 id="customer-stories">Customer stories</h2><div class="ch247-grid">{foreach $cloudhost247.testimonials as $item}<blockquote class="ch247-card"><p>{$item.summary|escape}</p><footer>— {$item.title|escape}</footer></blockquote>{/foreach}</div></div></section>{/if}
+<section class="ch-hero ch-home-hero"><div class="ch-wrap ch-hero-grid"><div class="ch-hero-copy"><p class="ch-kicker"><span class="ch-dot"></span> Your ambition. Our infrastructure.</p><h1>{if $cloudhost247.settings.hero_title && $cloudhost247.settings.hero_title != 'Build. Host. Deploy. Scale.' && $cloudhost247.settings.hero_title != 'Cloud infrastructure built for your next idea'}{$cloudhost247.settings.hero_title|escape}{else}Build. Host.<br>Deploy. <em>Scale.</em>{/if}</h1><p class="ch-lead">{if $cloudhost247.settings.hero_text && $cloudhost247.settings.hero_text != 'Fast hosting, straightforward billing, and support whenever you need it.'}{$cloudhost247.settings.hero_text|escape}{else}CloudHost247 gives businesses, developers and organizations the infrastructure they need to build and operate online — from domains and websites to cloud servers, applications and deployment platforms.{/if}</p><div class="ch-actions"><a class="ch-btn" href="{$WEB_ROOT}/cloudhost247-hosting.php">Explore CloudHost247 <span aria-hidden="true">↗</span></a><a class="ch-text-link" href="{$WEB_ROOT}/web-hosting.php">View Hosting Plans <span aria-hidden="true">→</span></a></div><p class="ch-hero-note">One connected platform. Possibilities that grow with you.</p></div><div class="ch-hero-visual"><img src="{$WEB_ROOT}/assets/images/cloudhost247/hero/infrastructure.svg" width="660" height="560" fetchpriority="high" alt="Conceptual architecture connecting a domain, website, application, cloud, server and user"><span class="ch-visual-caption">THE CLOUDHOST247 ECOSYSTEM <span>01 — 06</span></span></div></div></section>
+<div class="ch-principles"><div class="ch-wrap"><span>Considered infrastructure</span><span>Connected services</span><span>Support through your account</span><span>Built around your requirements</span></div></div>
+<section class="ch-section" id="explore"><div class="ch-wrap"><div class="ch-section-heading"><div><p class="ch-kicker">Your next step starts here</p><h2>Big ideas need<br>the right foundation.</h2></div><p>From your first domain to your next cloud workload. Find the services that fit where you are — and where you’re going.</p></div><div class="ch-service-grid">
+{foreach ['web-hosting.php','vps-hosting.php','domain.php','email-hosting.php','dedicated-server.php','developer-friendly.php'] as $path}{assign var=p value=$ch247Site.pages[$path]}<a class="ch-service-card" href="{$WEB_ROOT}/{$path|escape}"><div class="ch-card-top"><img src="{$WEB_ROOT}/assets/images/cloudhost247/icons/{$p.slug|escape}.svg" width="48" height="48" alt="" loading="lazy"><span aria-hidden="true">↗</span></div><h3>{$p.title|escape}</h3><p>{$p.summary|escape}</p><span class="ch-card-link">Explore {$p.title|escape} <span aria-hidden="true">→</span></span></a>{/foreach}
+</div></div></section>
+<section class="ch-section ch-soft"><div class="ch-wrap ch-split"><div><p class="ch-kicker">Less fragmentation. More possibility.</p><h2>Everything connects.<br>So should your infrastructure.</h2><p class="ch-muted">A domain for your brand. Hosting for your website. Servers for your applications. Bring the pieces together with CloudHost247, with service management, billing and support close at hand.</p><a class="ch-btn ch-btn-dark" href="{$WEB_ROOT}/infrastructure.php">Explore the platform <span aria-hidden="true">↗</span></a></div><div class="ch-workflow"><div><span>01</span><h3>Make it yours</h3><p>Start with a domain and a clear plan.</p></div><div><span>02</span><h3>Bring it online</h3><p>Choose hosting or server resources for your workload.</p></div><div><span>03</span><h3>Build your next chapter</h3><p>Review your services and plan the next step as you grow.</p></div></div></div></section>
+<section class="ch-section ch-dark"><div class="ch-wrap ch-split"><div class="ch-map"><img src="{$WEB_ROOT}/assets/images/cloudhost247/hero/global-network.svg" width="660" height="560" loading="lazy" alt="Conceptual global connectivity diagram, not a map of CloudHost247 data center locations"></div><div><p class="ch-kicker">Global perspective. Clear specifications.</p><h2>Think beyond<br>your next launch.</h2><p class="ch-muted">Build for the people who will use your service. Compare the provider, location and resources of each available configuration before you choose.</p><p class="ch-small">Illustration is conceptual. Locations and availability are shown only when verified by the product catalog.</p><a class="ch-text-link" href="{$WEB_ROOT}/cloudhost247-hosting.php">Explore infrastructure <span aria-hidden="true">→</span></a></div></div></section>
+{if $cloudhost247.banners}<section class="ch-section"><div class="ch-wrap"><p class="ch-kicker">From CloudHost247</p><h2>Featured services & updates.</h2><div class="ch-grid-3">{foreach $cloudhost247.banners as $banner}<article class="ch-resource-card">{if $banner.image_url}<img src="{$banner.image_url|escape}" alt="{$banner.title|escape}" width="480" height="270" loading="lazy">{/if}<h3>{$banner.title|escape}</h3><p>{$banner.summary|escape}</p>{if $banner.url && $banner.url != '#'}<a class="ch-text-link" href="{$banner.url|escape}">Learn More →</a>{/if}</article>{/foreach}</div></div></section>{/if}
+{if $cloudhost247.testimonials}<section class="ch-section"><div class="ch-wrap"><p class="ch-kicker">Published customer stories</p><h2>In their own words.</h2><div class="ch-grid-3">{foreach $cloudhost247.testimonials as $story}<blockquote class="ch-resource-card"><p>{$story.summary|escape}</p><cite>{$story.title|escape}</cite></blockquote>{/foreach}</div></div></section>{/if}
+{foreach $cloudhost247.sections as $section}<section class="ch-section"><div class="ch-wrap ch-prose"><h2>{$section.title|escape}</h2>{$section.body nofilter}</div></section>{/foreach}
+<section class="ch-section"><div class="ch-wrap"><div class="ch-section-heading"><div><p class="ch-kicker">A little guidance goes a long way</p><h2>Keep building.<br>We’ll help with the next step.</h2></div><a class="ch-text-link" href="{$WEB_ROOT}/help-center.php">Visit the Help Center →</a></div><div class="ch-grid-3"><a class="ch-resource-card" href="{$WEB_ROOT}/knowledgebase.php"><span>01 / LEARN</span><h3>Find your answer</h3><p>Explore the knowledgebase for guidance on your services.</p><b aria-hidden="true">↗</b></a><a class="ch-resource-card" href="{$WEB_ROOT}/submitticket.php"><span>02 / SUPPORT</span><h3>Talk to the team</h3><p>Open a support ticket linked to your CloudHost247 account.</p><b aria-hidden="true">↗</b></a><a class="ch-resource-card" href="{$WEB_ROOT}/contact.php"><span>03 / PLAN</span><h3>Let’s work it out</h3><p>Discuss requirements before you choose your next service.</p><b aria-hidden="true">↗</b></a></div></div></section>
+{include file="cloudhost247/includes/site-cta.tpl"}
 </main>

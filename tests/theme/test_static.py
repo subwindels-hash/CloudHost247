@@ -172,6 +172,8 @@ class PublicRouteTests(unittest.TestCase):
 
     def test_page_template_renders_the_product_component_safely(self):
         tpl = (ROOT / 'templates/cloudhost247/cloudhost247-page.tpl').read_text()
+        self.assertIn('includes/product-plans.tpl', tpl)
+        tpl += (ROOT / 'templates/cloudhost247/includes/product-plans.tpl').read_text()
         self.assertIn('cloudhost247Page.product_component', tpl)
         self.assertIn('product_component.products', tpl)
         # Every dynamic value in the product markup goes through an escape.

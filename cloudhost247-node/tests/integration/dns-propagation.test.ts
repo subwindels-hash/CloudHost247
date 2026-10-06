@@ -13,7 +13,7 @@
  *
  * INTERNAL zones are asserted to be untouched, so the pre-existing behaviour is pinned too.
  */
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { PGlite } from '@electric-sql/pglite';
 import { PgliteClient } from '../../database/db-client';
 import { migrateUp } from '../../database/migrate';
@@ -80,7 +80,7 @@ describe('DNS propagation through the customer API', () => {
   let client: PgliteClient;
   let env: Env;
   let provider: RecordingProvider;
-  let app: ReturnType<typeof buildApp>;
+  let app: ReturnType<typeof buildApp> | undefined;
   let token: string;
   const userId = randomUUID();
 
@@ -108,6 +108,17 @@ describe('DNS propagation through the customer API', () => {
     await app.ready();
   }
 
+  afterEach(async () => {
+    // A new embedded database is created for every case. Release both resources,
+    // including when a handler/assertion fails, before starting the next one.
+    try {
+      await app?.close();
+    } finally {
+      app = undefined;
+      await db?.close();
+    }
+  });
+
   beforeEach(async () => {
     env = loadEnv({
       NODE_ENV: 'test',
@@ -128,13 +139,13 @@ describe('DNS propagation through the customer API', () => {
   });
 
   async function post(url: string, payload: unknown) {
-    return app.inject({ method: 'POST', url, headers: { authorization: `Bearer ${token}` }, payload });
+    return app!.inject({ method: 'POST', url, headers: { authorization: `Bearer ${token}` }, payload });
   }
   async function patch(url: string, payload: unknown) {
-    return app.inject({ method: 'PATCH', url, headers: { authorization: `Bearer ${token}` }, payload });
+    return app!.inject({ method: 'PATCH', url, headers: { authorization: `Bearer ${token}` }, payload });
   }
   async function del(url: string) {
-    return app.inject({ method: 'DELETE', url, headers: { authorization: `Bearer ${token}` } });
+    return app!.inject({ method: 'DELETE', url, headers: { authorization: `Bearer ${token}` } });
   }
 
   it('creates an external zone at the provider and records the provider\'s own nameservers', async () => {
@@ -151,7 +162,7 @@ describe('DNS propagation through the customer API', () => {
     expect(zone.metadata.providerZoneId).toBe('cf-zone-1');
 
     // The auto-seeded NS records point at the provider's nameservers, not the platform's.
-    const detail = await app.inject({
+    const detail = await app!.inject({
       method: 'GET',
       url: `/api/v1/dns/zones/${zone.id}`,
       headers: { authorization: `Bearer ${token}` },

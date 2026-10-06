@@ -12,6 +12,7 @@ import react from '@vitejs/plugin-react';
  */
 export default defineConfig({
   root: __dirname,
+  base: process.env.VITE_BASE_PATH || '/',
   plugins: [react()],
   build: {
     outDir: path.resolve(__dirname, '../public'),

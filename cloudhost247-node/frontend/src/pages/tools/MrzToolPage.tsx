@@ -1,3 +1,4 @@
+import { toolsApiPath } from '../../lib/tools-runtime';
 import { FormEvent, useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { usePageMeta } from '../../lib/usePageMeta';
@@ -62,7 +63,7 @@ export default function MrzToolPage({ defaultTab }: MrzToolPageProps) {
 
   useEffect(() => {
     let active = true;
-    fetch('/api/tools/mrz/config')
+    fetch(toolsApiPath('/api/tools/mrz/config'))
       .then(async (res) => {
         if (!res.ok) return null;
         return (await res.json()) as MrzToolConfigResponse;

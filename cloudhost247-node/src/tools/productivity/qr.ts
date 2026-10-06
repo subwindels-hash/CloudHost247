@@ -91,7 +91,7 @@ export async function qrGenerate(input: QrGenerateInput): Promise<QrGenerateResu
     options: { errorCorrectionLevel, size, margin, dark, light },
     warnings,
     notes: [
-      'The image encodes exactly the text you provided. Nothing is uploaded: generation happens on the CloudHost247 server and returns the image inline.',
+      'The image encodes exactly the text you provided. The submitted text is processed on the CloudHost247 server and the image is returned inline; it is not sent to a third-party QR service.',
       'Error correction level: L recovers ~7%, M ~15%, Q ~25%, H ~30% of the code. Higher levels survive damage and logos better but make the code denser.',
       'Keep a quiet zone (the margin) clear, and test the printed code with a phone at the intended distance and size.',
       estimateModules(content, errorCorrectionLevel) > 57 ? 'This payload needs a dense code (version 10 or above); print it larger than 3 cm and avoid curved surfaces.' : 'This payload fits a low-density code that prints reliably at small sizes.',

@@ -55,6 +55,11 @@ export type ProviderKind =
   | 'OTHER';
 
 export interface ToolCatalogEntry {
+  legacyPaths?: string[];
+  discoveryCategories?: string[];
+  seoTitle?: string;
+  relatedTools?: string[];
+  resultMode?: string;
   slug: string;
   name: string;
   category: ToolCategorySlug;
@@ -91,7 +96,7 @@ const STANDARD_NOTES = {
     'IP geolocation is approximate and describes where an address is registered/announced — it is not a physical location of a person or device.',
 } as const;
 
-export const TOOL_CATALOG: readonly ToolCatalogEntry[] = [
+const BASE_TOOL_CATALOG: readonly ToolCatalogEntry[] = [
   // ------------------------------------------------------------------ DNS
   {
     slug: 'dns-propagation',
@@ -571,9 +576,9 @@ export const TOOL_CATALOG: readonly ToolCatalogEntry[] = [
     slug: 'mac-lookup',
     name: 'MAC Address Lookup',
     category: 'network',
-    summary: 'Identify the OUI/vendor registered to a MAC address prefix.',
+    summary: 'Inspect MAC address bits and query a configured IEEE OUI reference.',
     description:
-      'Looks up the first three octets (OUI) of a MAC address against the locally-held IEEE OUI prefix table and reports the registrant, plus the address\'s unicast/multicast and global/local bits.',
+      'Inspects unicast/multicast and global/local bits. Vendor information comes from a configured IEEE OUI source, cached with its load time; unavailable source data is explicitly reported, never invented.',
     icon: 'barcode',
     path: '/tools/network/mac-lookup',
     apiPath: '/api/tools/mac-lookup',
@@ -1323,6 +1328,53 @@ export const TOOL_CATALOG: readonly ToolCatalogEntry[] = [
   },
 ];
 
+// Presentation metadata is derived once here; PHP exports and React both consume it.
+const dnsBase = BASE_TOOL_CATALOG.find(tool => tool.slug === 'dns-lookup')!;
+const newTools: ToolCatalogEntry[] = [
+  ...(['nameserver-lookup', 'cname-lookup'] as const).map(slug => ({
+    ...dnsBase, slug, name: slug === 'nameserver-lookup' ? 'Nameserver Lookup' : 'CNAME Lookup',
+    path: `/tools/${slug}`, apiPath: `/api/tools/${slug}`,
+    summary: slug === 'nameserver-lookup' ? 'Inspect the nameservers published for a domain.' : 'Inspect a hostname’s canonical-name records.',
+    description: 'Query the configured resolver for the published DNS record, including the returned TTL. No records are invented when a lookup fails.',
+  })),
+  { ...BASE_TOOL_CATALOG.find(tool => tool.slug === 'ip-whois')!, slug: 'whois', name: 'Domain WHOIS', category: 'domain',
+    path: '/tools/whois', apiPath: '/api/tools/whois', providerKind: undefined,
+    summary: 'Inspect public domain registration information through the connected RDAP provider.',
+    description: 'Reuses CloudHost247 Domain Services to look up registrar, registration dates, nameservers and public status. Privacy-protected registrants stay protected.',
+    notes: ['Requires a connected RDAP provider under Domain Services. This tool does not bypass registrant privacy.'], keywords: ['whois','domain','information','rdap','registration'],
+  },
+  { ...BASE_TOOL_CATALOG.find(tool => tool.slug === 'mac-generator')!, slug: 'uuid-generator', name: 'UUID Generator', category: 'developer',
+    path: '/tools/uuid-generator', apiPath: '/api/tools/uuid-generator', methods: ['POST'],
+    summary: 'Generate cryptographically random version 4 identifiers.',
+    description: 'Generate up to 50 UUID v4 identifiers using the server’s cryptographic random source. Results are never cached.',
+    keywords: ['uuid','identifier','random','generator','developer'],
+  },
+];
+export const DISCOVERY_CATEGORIES: Record<string, string> = {
+  'dns-domains': 'DNS & Domains', 'ip-network': 'IP & Network', security: 'Security', ssl: 'SSL',
+  email: 'Email', website: 'Website', developer: 'Developer', calculators: 'Calculators', utilities: 'Utilities',
+};
+const allTools = [...BASE_TOOL_CATALOG, ...newTools];
+export const TOOL_CATALOG: readonly ToolCatalogEntry[] = allTools.map(tool => {
+  const canonical = ({ 'my-ip': 'what-is-my-ip', 'ip-to-hostname': 'ip-to-domain', 'asn-whois': 'asn-lookup' } as Record<string,string>)[tool.slug] ?? tool.slug;
+  const path = tool.slug.startsWith('tool-') ? tool.path : `/tools/${canonical}`;
+  const aliases: Record<string,string[]> = {
+    'dns-lookup': ['/tools/dns-record-lookup'], 'http-headers': ['/tools/redirect-checker','/tools/website-response'],
+    'ssl-checker': ['/tools/ssl-certificate-information'], 'ip-lookup': ['/tools/ip-location'],
+    'password-tools': ['/tools/password-generator'], 'whois': ['/tools/domain-information'],
+  };
+  const categories = [({ dns: 'dns-domains', domain: 'dns-domains', ip: 'ip-network', network: 'ip-network', webmaster: 'website', productivity: 'utilities', diagnostics: 'utilities' } as Record<string,string>)[tool.category] ?? tool.category];
+  if (['mx-lookup','spf-checker','dkim-checker','dmarc-checker','dmarc-generator','bimi-checker','smtp-tester','email-header'].includes(tool.slug)) categories.push('email');
+  if (tool.slug === 'ssl-checker') categories.push('ssl');
+  if (['http-headers','server-os','broken-links','open-graph'].includes(tool.slug)) categories.push('website');
+  if (['subnet-calculator','ip-converters','time-card'].includes(tool.slug)) categories.push('calculators');
+  return { ...tool, path, legacyPaths: [...new Set([tool.path, `/tools/${tool.slug}`, ...(aliases[tool.slug] ?? [])])].filter(alias => alias !== path && !alias.includes(':')),
+    discoveryCategories: [...new Set(categories)], seoTitle: `${tool.name} | CloudHost247`,
+    relatedTools: allTools.filter(other => other.category === tool.category && other.slug !== tool.slug && !other.slug.startsWith('tool-')).slice(0,3).map(other => other.slug),
+    resultMode: ['mac-lookup','reverse-image-search'].includes(tool.slug) ? 'static' : tool.capability || tool.providerKind || ['whois','speed-test','my-ip'].includes(tool.slug) ? 'lookup' : 'calculated',
+  };
+});
+
 export const CATEGORY_LABELS: Record<ToolCategorySlug, string> = {
   dns: 'DNS Tools',
   ip: 'IP Tools',
@@ -1353,3 +1405,5 @@ export const NON_RUNNABLE_TOOL_SLUGS = new Set([
 
 /** Public marketing-safe tool list used by tests to assert the catalogue is coherent. */
 export const TOOL_SLUGS: readonly string[] = TOOL_CATALOG.map((entry) => entry.slug);
+
+export const TOOLS_FOOTER = ['dns-lookup','dns-propagation','whois','ip-lookup','my-ip','ssl-checker','mx-lookup','spf-checker','dmarc-checker','subnet-calculator','json-tools','uuid-generator'];

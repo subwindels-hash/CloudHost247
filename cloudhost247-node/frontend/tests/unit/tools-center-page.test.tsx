@@ -101,6 +101,8 @@ describe('Tools Center', () => {
 
     // The same tool appears in the catalogue grid and in the "popular" strip, so both are expected.
     await waitFor(() => expect(screen.getAllByText('DNS Lookup').length).toBeGreaterThan(0));
+    expect(screen.queryByText('BIN Checker')).toBeNull();
+    fireEvent.click(screen.getByLabelText('Show unavailable tools'));
     expect(screen.getAllByText('BIN Checker').length).toBeGreaterThan(0);
     // A tool that cannot run on this deployment says why, on the card, before it is clicked.
     expect(screen.getAllByText(/must be configured by an administrator/i).length).toBeGreaterThan(0);
@@ -146,6 +148,7 @@ describe('Tools Center', () => {
     );
 
     await waitFor(() => expect(screen.getByRole('heading', { level: 1, name: 'DNS Lookup' })).toBeTruthy());
+    fireEvent.change(screen.getByLabelText(/Domain or hostname/i), {target:{value:'example.com'}});
     fireEvent.click(screen.getByRole('button', { name: /^Run tool$/i }));
 
     await waitFor(() => expect(screen.getByText('CONFIGURATION_REQUIRED')).toBeTruthy());

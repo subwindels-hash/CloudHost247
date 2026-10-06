@@ -1,3 +1,4 @@
+import { toolsApiPath } from './tools-runtime';
 /**
  * Revenue Guardian API client — thin typed wrappers over /api/admin/revenue-guardian/*.
  * Uses the shared apiFetch (same-origin, bearer token) like every other module client.
@@ -85,7 +86,7 @@ export function rgPatch<T>(path: string, body: unknown): Promise<T> {
 /** CSV export needs the raw body, so it bypasses apiFetch's JSON parsing. */
 export async function rgExportCsv(body: Record<string, unknown>): Promise<Blob> {
   const token = localStorage.getItem('ch247_token');
-  const res = await fetch(`${BASE}/reports/export`, {
+  const res = await fetch(toolsApiPath(`${BASE}/reports/export`), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
     body: JSON.stringify(body),

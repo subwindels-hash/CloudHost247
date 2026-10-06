@@ -1,3 +1,4 @@
+import { toolsApiPath } from '../lib/tools-runtime';
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { startRegistration } from '@simplewebauthn/browser';
 import { useNavigate } from 'react-router-dom';
@@ -157,7 +158,7 @@ export default function AccountPage() {
     let revoked = false;
     let url: string | null = null;
     const token = localStorage.getItem('ch247_token');
-    fetch('/api/v1/account/profile-image', { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+    fetch(toolsApiPath('/api/v1/account/profile-image'), { headers: token ? { Authorization: `Bearer ${token}` } : {} })
       .then((res) => (res.ok ? res.blob() : Promise.reject(new Error('unavailable'))))
       .then((blob) => {
         if (revoked) return;

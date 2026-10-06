@@ -1,0 +1,114 @@
+{
+  "date": "2026-10-06",
+  "branch": "arena/ad9fd719-cloudhost247",
+  "php_74": {
+    "runtime": "PHP 7.4 WebAssembly (also covered by native CI above)",
+    "followup_changed_php_linted": 6,
+    "theme_assertions": 60,
+    "website_assertions": 53,
+    "failed": 0
+  },
+  "node": {
+    "runtime": "v22.22.3",
+    "command": "npm test -- --maxWorkers=2",
+    "exit_code": 0,
+    "duration_seconds": 875.96,
+    "test_files_passed": 129,
+    "tests_passed": 1158,
+    "failed": 0,
+    "checks": {
+      "server_typecheck": "passed",
+      "frontend_typecheck": "passed",
+      "server_frontend_build": "passed",
+      "compiled_app_import": "passed; no server or network connection started",
+      "production_dependency_audit": "found 0 vulnerabilities"
+    },
+    "log_sha256": "3e522262161d2c2ce5d8e8f5009afce832618da2b532ec93ab3841e0c73793f3",
+    "evidence": "node-verification.json",
+    "github_matrix": {
+      "code_commit": "a7da6dc0685c75d92889c37df1e069858830fff5",
+      "node_tree_sha": "936b960c681bde09b56b292524668d311de8fa39",
+      "current_node_tree_identical": true,
+      "conclusion": "success",
+      "url": "https://github.com/subwindels-hash/CloudHost247/actions/runs/37394203303",
+      "checks": [
+        {
+          "name": "Build, typecheck, test (Node 24.8.0)",
+          "conclusion": "success",
+          "url": "https://github.com/subwindels-hash/CloudHost247/actions/runs/37394203303/job/112046155527"
+        },
+        {
+          "name": "Build, typecheck, test (Node 22.12.0)",
+          "conclusion": "success",
+          "url": "https://github.com/subwindels-hash/CloudHost247/actions/runs/37394203303/job/112046155668"
+        }
+      ],
+      "note": "Later security-assertion/documentation commits have an unchanged Node tree; their head-specific CI reruns remain required before merge."
+    }
+  },
+  "runtime_acceptance": {
+    "live_whmcs": "not tested: licensed runtime and database absent",
+    "production_site": "Read-only HTTPS retry on 2026-10-06 failed: curl exit 35, SSL_ERROR_SYSCALL; HTTP 000. No TLS bypass used.",
+    "deployed": false
+  },
+  "browser_evidence": "browser-verification.json",
+  "source_evidence": "source-verification.json",
+  "historical_php82_wasm_release_gate": {
+    "command": "PATH=/tmp/ch247-bin:$PATH PHP_LINT_JOBS=2 bash scripts/release-candidate-check.sh",
+    "exit_code": 0,
+    "php_runtime": "PHP 8.2 WebAssembly",
+    "lint_targets": 796,
+    "python_runs": [
+      "422",
+      "6",
+      "7"
+    ],
+    "agent_tests": 71,
+    "vendor_baseline": "passed, no re-cut",
+    "retired_brand_matches": 0,
+    "log_sha256": "4b44c3bdf20a6f0547e5af7234dda837fa209d027d98a8d512f479340c5db280"
+  },
+  "release_gate": {
+    "runtime": "Native PHP 7.4 and 8.2 in GitHub Actions",
+    "code_commit": "9cf1b15f2f49c8319cd06a64dd723375d92a4948",
+    "checks": [
+      {
+        "name": "Release candidate (PHP 7.4)",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/subwindels-hash/CloudHost247/actions/runs/37394659015/job/112047647054"
+      },
+      {
+        "name": "Release candidate (PHP 7.4)",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/subwindels-hash/CloudHost247/actions/runs/37394653787/job/112047630385"
+      },
+      {
+        "name": "Release candidate (PHP 8.2)",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/subwindels-hash/CloudHost247/actions/runs/37394659015/job/112047646778"
+      },
+      {
+        "name": "Release candidate (PHP 8.2)",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/subwindels-hash/CloudHost247/actions/runs/37394653787/job/112047629955"
+      }
+    ],
+    "lint_targets": 797,
+    "python_runs": [
+      423,
+      6,
+      7
+    ],
+    "agent_tests": 71,
+    "website_assertions": 53,
+    "vendor_baseline": "passed, no re-cut",
+    "local_python_source_suite_skips": 2
+  },
+  "responsive_checks": 520,
+  "menu_checks": 60,
+  "axe_views": 16
+}

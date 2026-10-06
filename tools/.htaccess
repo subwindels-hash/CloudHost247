@@ -1,0 +1,7 @@
+# Scoped to /tools only; never intercepts WHMCS account/cart routes.
+Options -Indexes
+DirectoryIndex index.php
+DirectorySlash Off
+RewriteEngine On
+RewriteRule ^index\.php$ - [END]
+RewriteRule ^ index.php [END]

@@ -22,7 +22,7 @@ if [ "${#php_lint_targets[@]}" -lt 700 ]; then
   echo "Release-candidate FAILED: only ${#php_lint_targets[@]} PHP lint targets resolved (expected 700+)." >&2
   exit 1
 fi
-printf '%s\n' "${php_lint_targets[@]}" | xargs -r -n1 php -l
+printf '%s\n' "${php_lint_targets[@]}" | xargs -r -P "${PHP_LINT_JOBS:-1}" -n1 php -l
 
 # --- Module behavioural suites (PHP) -----------------------------------------------------------
 php tests/foundation/run.php
@@ -85,4 +85,11 @@ if ! sha256sum --check --strict --quiet "$original_manifest"; then
   exit 1
 fi
 # Embedded-secret and core-schema policies are enforced by test_security.py and validate-migrations.py.
+# First-party website gate adds to (never replaces) the existing security checks.
+npm --prefix cloudhost247-node run tools:catalog:check
+npm --prefix cloudhost247-node run build:tools
+php tests/tools/site-integration.php
+php tests/website/run.php
+python3 -m unittest -v tests/website/test_static.py
+python3 scripts/verify-website.py
 echo 'Release-candidate source verification passed.'

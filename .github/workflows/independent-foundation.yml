@@ -21,7 +21,10 @@ jobs:
         with:
           # The server agent's authentication suite (server-agent/tests/) and the protocol
           # conformance suite need Node. The agent declares "engines": { "node": ">=20.0.0" }.
-          node-version: '20'
+          node-version: '22.12.0'
+      - name: Build shared Tools adapter before PHP source and asset gates
+        working-directory: cloudhost247-node
+        run: npm ci && npm run tools:catalog:check && npm run build:tools
       - name: PHP syntax diagnostics (every PHP file this repository owns)
         # pipefail so a php -l failure cannot hide behind a successful xargs
         run: set -o pipefail; bash scripts/php-lint-targets.sh | xargs -r -n1 php -l

@@ -49,7 +49,17 @@ class FoundationStaticTests(unittest.TestCase):
 
     def test_sitemap_uses_published_cms_pages(self):
         route=(ROOT/'cloudhost247-sitemap.php').read_text()
-        self.assertIn("published('page')",route);self.assertIn('ENT_XML1',route)
+        discovery=(ROOT/'modules/addons/cloudhost247_theme/lib/PublicDiscovery.php').read_text()
+        repo=(ROOT/'modules/addons/cloudhost247_theme/lib/ThemeRepository.php').read_text()
+        publication=repo.split('public function publicPageIndex',1)[1].split('public function findPublishedPage',1)[0]
+        # Publication filtering moved into the shared read model; keep checking the
+        # route-to-query chain, not an obsolete direct repository call in the route.
+        self.assertIn('PublicDiscovery::pages($repo)',route)
+        self.assertIn('PublicDiscovery::sitemapPaths($pages)',route)
+        self.assertIn('$repository->publicPageIndex($locale)',discovery)
+        self.assertIn("whereIn('content_type', array('page', 'landing'))",publication)
+        self.assertIn('if ($row->published && $index[$row->slug] === null)',publication)
+        self.assertIn('ENT_XML1',route)
 
     def test_publication_and_localization_rules(self):
         repo=(ROOT/'modules/addons/cloudhost247_theme/lib/ThemeRepository.php').read_text()

@@ -16,6 +16,7 @@
  * A tool is never reported ACTIVE when any of those conditions hold, which is what keeps the UI
  * from offering a button that would return invented data (spec §89).
  */
+import { findConnectedDomainServiceProvider } from '../../db/domain-services';
 import type { Queryable } from '../../db/types';
 import { getSetting } from '../../db/ops-tables';
 import { TOOL_CATALOG, catalogEntry, type ToolCatalogEntry, type ToolVisibility, type RateLimitProfile } from '../catalog';
@@ -48,6 +49,11 @@ export interface ToolDefinitionOverrideRow {
 }
 
 export interface EffectiveTool {
+  legacyPaths?: string[];
+  discoveryCategories?: string[];
+  seoTitle?: string;
+  relatedTools?: string[];
+  resultMode?: string;
   slug: string;
   name: string;
   category: string;
@@ -82,6 +88,7 @@ export interface EffectiveTool {
 }
 
 export interface RegistryContext {
+  whoisConfigured?: boolean;
   masterEnabled: boolean;
   anonymousAccess: boolean;
   overrides: Map<string, ToolDefinitionOverrideRow>;
@@ -142,7 +149,7 @@ export function resolveTool(
   if (!context.masterEnabled) {
     status = 'DISABLED';
     statusMessage = 'The Tools Center is disabled platform-wide by an administrator.';
-  } else if (override?.status_override) {
+  } else if (override?.status_override && override.status_override !== 'ACTIVE') {
     status = override.status_override;
     statusMessage =
       status === 'MAINTENANCE'
@@ -158,6 +165,9 @@ export function resolveTool(
   } else if (featureFlags.maintenance === true) {
     status = 'MAINTENANCE';
     statusMessage = override?.maintenance_message ?? 'This tool is temporarily in maintenance.';
+  } else if (entry.slug === 'whois' && context.whoisConfigured === false) {
+    status = 'CONFIGURATION_REQUIRED';
+    statusMessage = 'Connect a Domain Services RDAP provider to use WHOIS.';
   } else if (!provider.satisfied) {
     status = 'CONFIGURATION_REQUIRED';
     statusMessage = provider.reason;
@@ -167,9 +177,10 @@ export function resolveTool(
   }
 
   const visibility: ToolVisibility = override?.visibility ?? entry.visibility;
-  const authRequired = entry.authRequired || (visibility === 'public' && !context.anonymousAccess);
+  const authRequired = entry.authRequired || visibility !== 'public' || !context.anonymousAccess;
 
   return {
+    legacyPaths: entry.legacyPaths, discoveryCategories: entry.discoveryCategories, seoTitle: entry.seoTitle, relatedTools: entry.relatedTools, resultMode: entry.resultMode,
     slug: entry.slug,
     name: override?.name ?? entry.name,
     category: override?.category ?? entry.category,
@@ -190,7 +201,7 @@ export function resolveTool(
     providerOptional: entry.providerOptional === true,
     requiresOwnership: entry.requiresOwnership === true,
     rateLimitProfile: override?.rate_limit_profile ?? entry.rateLimitProfile,
-    cacheSeconds: override?.cache_seconds ?? entry.cacheSeconds,
+    cacheSeconds: entry.cacheSeconds === 0 || entry.requiresOwnership ? 0 : (override?.cache_seconds ?? entry.cacheSeconds),
     timeoutMs: override?.timeout_ms ?? entry.timeoutMs,
     keywords: entry.keywords,
     notes: entry.notes ?? [],
@@ -204,6 +215,7 @@ export function resolveTool(
 /** All tools with their effective state. */
 export async function listEffectiveTools(db: Queryable): Promise<{ tools: EffectiveTool[]; masterEnabled: boolean; anonymousAccess: boolean }> {
   const context = await loadRegistryContext(db);
+  context.whoisConfigured = Boolean(await findConnectedDomainServiceProvider(db, 'rdap'));
   return {
     tools: TOOL_CATALOG.map((entry) => resolveTool(entry, context)),
     masterEnabled: context.masterEnabled,
@@ -215,6 +227,7 @@ export async function effectiveTool(db: Queryable, slug: string): Promise<Effect
   const entry = catalogEntry(slug);
   if (!entry) return null;
   const context = await loadRegistryContext(db);
+  context.whoisConfigured = Boolean(await findConnectedDomainServiceProvider(db, 'rdap'));
   return resolveTool(entry, context);
 }
 

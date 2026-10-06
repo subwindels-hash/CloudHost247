@@ -1,0 +1,423 @@
+[
+  {
+    "path": "aboutus.php",
+    "category": "Marketing",
+    "renderer": "aboutus",
+    "runtime": "WHMCS init.php required",
+    "templates": [
+      "aboutus"
+    ]
+  },
+  {
+    "path": "acceptable-use-policy.php",
+    "category": "Legal",
+    "renderer": "",
+    "runtime": "WHMCS init.php required",
+    "templates": []
+  },
+  {
+    "path": "all-element-cloudhost247.php",
+    "category": "Administrative/internal",
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'all-elements', 'All Elements')",
+    "runtime": "WHMCS init.php required",
+    "templates": []
+  },
+  {
+    "path": "backup-policy.php",
+    "category": "Legal",
+    "renderer": "backuppolicy",
+    "runtime": "WHMCS init.php required",
+    "templates": [
+      "backuppolicy"
+    ]
+  },
+  {
+    "path": "blog.php",
+    "category": "Marketing",
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'blog', 'Blog')",
+    "runtime": "WHMCS init.php required",
+    "templates": []
+  },
+  {
+    "path": "builder-page.php",
+    "category": "Marketing",
+    "renderer": "cloudhost247-builder-page, cloudhost247-builder-page",
+    "runtime": "WHMCS init.php required",
+    "templates": [
+      "cloudhost247-builder-page",
+      "cloudhost247-builder-page"
+    ]
+  },
+  {
+    "path": "builder-sitemap.php",
+    "category": "Administrative/internal",
+    "renderer": "",
+    "runtime": "WHMCS init.php required",
+    "templates": []
+  },
+  {
+    "path": "cloudhost247-hosting.php",
+    "category": "Cloud",
+    "renderer": "cloudhost247-product-catalog",
+    "runtime": "WHMCS init.php required",
+    "templates": [
+      "cloudhost247-product-catalog"
+    ]
+  },
+  {
+    "path": "cloudhost247-marketing-track.php",
+    "category": "Administrative/internal",
+    "renderer": "",
+    "runtime": "WHMCS init.php required",
+    "templates": []
+  },
+  {
+    "path": "cloudhost247-page.php",
+    "category": "Marketing",
+    "renderer": "cloudhost247-page",
+    "runtime": "WHMCS init.php required",
+    "templates": [
+      "cloudhost247-page"
+    ]
+  },
+  {
+    "path": "cloudhost247-sample.php",
+    "category": "Administrative/internal",
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'cloudhost247-sample', 'Sample Page')",
+    "runtime": "WHMCS init.php required",
+    "templates": []
+  },
+  {
+    "path": "cloudhost247-sitemap.php",
+    "category": "Administrative/internal",
+    "renderer": "",
+    "runtime": "WHMCS init.php required",
+    "templates": []
+  },
+  {
+    "path": "cloudhost247-vps-sample.php",
+    "category": "Administrative/internal",
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'vps-sample', 'VPS Sample')",
+    "runtime": "WHMCS init.php required",
+    "templates": []
+  },
+  {
+    "path": "comingsoon.php",
+    "category": "Marketing",
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'coming-soon', 'Coming Soon')",
+    "runtime": "WHMCS init.php required",
+    "templates": []
+  },
+  {
+    "path": "cookie-policy.php",
+    "category": "Legal",
+    "renderer": "cookiepolicy",
+    "runtime": "WHMCS init.php required",
+    "templates": [
+      "cookiepolicy"
+    ]
+  },
+  {
+    "path": "cpanel-hosting.php",
+    "category": "Hosting",
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'cpanel-hosting', 'cPanel Hosting')",
+    "runtime": "WHMCS init.php required",
+    "templates": []
+  },
+  {
+    "path": "cybercrime-policy.php",
+    "category": "Legal",
+    "renderer": "cybercrimepolicy",
+    "runtime": "WHMCS init.php required",
+    "templates": [
+      "cybercrimepolicy"
+    ]
+  },
+  {
+    "path": "data-deletion.php",
+    "category": "Legal",
+    "renderer": "datadeletion",
+    "runtime": "WHMCS init.php required",
+    "templates": [
+      "datadeletion"
+    ]
+  },
+  {
+    "path": "data-privacy-notice-and-consent-form.php",
+    "category": "Legal",
+    "renderer": "dataprivacynoticeandconsentform",
+    "runtime": "WHMCS init.php required",
+    "templates": [
+      "dataprivacynoticeandconsentform"
+    ]
+  },
+  {
+    "path": "data-protection-standards.php",
+    "category": "Legal",
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'data-protection-standards', 'Data Protection Standards')",
+    "runtime": "WHMCS init.php required",
+    "templates": []
+  },
+  {
+    "path": "dedeicated-server.php",
+    "category": "Dedicated",
+    "renderer": "",
+    "runtime": "compatibility redirect",
+    "templates": []
+  },
+  {
+    "path": "dedicated-server.php",
+    "category": "Dedicated",
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'dedicated-server', 'Dedicated Servers')",
+    "runtime": "WHMCS init.php required",
+    "templates": []
+  },
+  {
+    "path": "developer-friendly.php",
+    "category": "Developer",
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'developer-friendly', 'Developer Friendly')",
+    "runtime": "WHMCS init.php required",
+    "templates": []
+  },
+  {
+    "path": "domain-agreement.php",
+    "category": "Legal",
+    "renderer": "domainagreement",
+    "runtime": "WHMCS init.php required",
+    "templates": [
+      "domainagreement"
+    ]
+  },
+  {
+    "path": "domain-brokerage-terms.php",
+    "category": "Legal",
+    "renderer": "domainbrokerageterms",
+    "runtime": "WHMCS init.php required",
+    "templates": [
+      "domainbrokerageterms"
+    ]
+  },
+  {
+    "path": "domain-renewal-policy.php",
+    "category": "Legal",
+    "renderer": "domainrenewalpolicy",
+    "runtime": "WHMCS init.php required",
+    "templates": [
+      "domainrenewalpolicy"
+    ]
+  },
+  {
+    "path": "domain.php",
+    "category": "Domains",
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'domain', 'Domains')",
+    "runtime": "WHMCS init.php required",
+    "templates": []
+  },
+  {
+    "path": "domainregistrationaddendum.php",
+    "category": "Legal",
+    "renderer": "domainregistrationaddendum",
+    "runtime": "WHMCS init.php required",
+    "templates": [
+      "domainregistrationaddendum"
+    ]
+  },
+  {
+    "path": "email-hosting.php",
+    "category": "Email",
+    "renderer": "cloudhost247-email-hosting",
+    "runtime": "WHMCS init.php required",
+    "templates": [
+      "cloudhost247-email-hosting"
+    ]
+  },
+  {
+    "path": "enterprise-servers.php",
+    "category": "Dedicated",
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'enterprise-servers', 'Enterprise Servers')",
+    "runtime": "WHMCS init.php required",
+    "templates": []
+  },
+  {
+    "path": "fair-usage-policy.php",
+    "category": "Legal",
+    "renderer": "fairusagepolicy",
+    "runtime": "WHMCS init.php required",
+    "templates": [
+      "fairusagepolicy"
+    ]
+  },
+  {
+    "path": "faqs.php",
+    "category": "Support",
+    "renderer": "faqs",
+    "runtime": "WHMCS init.php required",
+    "templates": [
+      "faqs"
+    ]
+  },
+  {
+    "path": "future-element.php",
+    "category": "Administrative/internal",
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'future-element', 'Future Element')",
+    "runtime": "WHMCS init.php required",
+    "templates": []
+  },
+  {
+    "path": "game-servers.php",
+    "category": "Dedicated",
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'game-servers', 'Game Servers')",
+    "runtime": "WHMCS init.php required",
+    "templates": []
+  },
+  {
+    "path": "help-center.php",
+    "category": "Support",
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'help-center', 'Help Center')",
+    "runtime": "WHMCS init.php required",
+    "templates": []
+  },
+  {
+    "path": "legal-notice.php",
+    "category": "Legal",
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'legal-notice', 'Legal Notice')",
+    "runtime": "WHMCS init.php required",
+    "templates": []
+  },
+  {
+    "path": "legal.php",
+    "category": "Legal",
+    "renderer": "legal",
+    "runtime": "WHMCS init.php required",
+    "templates": [
+      "legal"
+    ]
+  },
+  {
+    "path": "notfound.php",
+    "category": "Marketing",
+    "renderer": "PublicPage::notFound(new \\WHMCS\\ClientArea())",
+    "runtime": "WHMCS init.php required",
+    "templates": []
+  },
+  {
+    "path": "offers.php",
+    "category": "Marketing",
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'offers', 'Offers')",
+    "runtime": "WHMCS init.php required",
+    "templates": []
+  },
+  {
+    "path": "plesk-hosting.php",
+    "category": "Hosting",
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'plesk-hosting', 'Plesk Hosting')",
+    "runtime": "WHMCS init.php required",
+    "templates": []
+  },
+  {
+    "path": "privacy-policy.php",
+    "category": "Legal",
+    "renderer": "privacypolicy",
+    "runtime": "WHMCS init.php required",
+    "templates": [
+      "privacypolicy"
+    ]
+  },
+  {
+    "path": "refund-and-cancellation-policy.php",
+    "category": "Legal",
+    "renderer": "refund-and-vancellation-policy",
+    "runtime": "WHMCS init.php required",
+    "templates": [
+      "refund-and-vancellation-policy"
+    ]
+  },
+  {
+    "path": "refund-policy.php",
+    "category": "Legal",
+    "renderer": "refundpolicy",
+    "runtime": "WHMCS init.php required",
+    "templates": [
+      "refundpolicy"
+    ]
+  },
+  {
+    "path": "ssl-certificate.php",
+    "category": "Product",
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'ssl-certificate', 'SSL Certificates')",
+    "runtime": "WHMCS init.php required",
+    "templates": []
+  },
+  {
+    "path": "tables.php",
+    "category": "Administrative/internal",
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'tables', 'Tables')",
+    "runtime": "WHMCS init.php required",
+    "templates": []
+  },
+  {
+    "path": "terms-of-service.php",
+    "category": "Legal",
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'terms-of-service', 'Terms of Service')",
+    "runtime": "WHMCS init.php required",
+    "templates": []
+  },
+  {
+    "path": "trademark-policy.php",
+    "category": "Legal",
+    "renderer": "trademarkpolicy",
+    "runtime": "WHMCS init.php required",
+    "templates": [
+      "trademarkpolicy"
+    ]
+  },
+  {
+    "path": "vps-hosting.php",
+    "category": "VPS",
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'vps-hosting', 'VPS Hosting')",
+    "runtime": "WHMCS init.php required",
+    "templates": []
+  },
+  {
+    "path": "vps-privatecloud.php",
+    "category": "Cloud",
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'vps-privatecloud', 'VPS Private Cloud')",
+    "runtime": "WHMCS init.php required",
+    "templates": []
+  },
+  {
+    "path": "vps-publiccloud.php",
+    "category": "Cloud",
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'vps-publiccloud', 'VPS Public Cloud')",
+    "runtime": "WHMCS init.php required",
+    "templates": []
+  },
+  {
+    "path": "web-hosting.php",
+    "category": "Hosting",
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'web-hosting', 'Web Hosting')",
+    "runtime": "WHMCS init.php required",
+    "templates": []
+  },
+  {
+    "path": "website-design.php",
+    "category": "Business",
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'website-design', 'Website Design')",
+    "runtime": "WHMCS init.php required",
+    "templates": []
+  },
+  {
+    "path": "windows-hosting.php",
+    "category": "Hosting",
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'windows-hosting', 'Windows Hosting')",
+    "runtime": "WHMCS init.php required",
+    "templates": []
+  },
+  {
+    "path": "wordpress-hosting.php",
+    "category": "Hosting",
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'wordpress-hosting', 'WordPress Hosting')",
+    "runtime": "WHMCS init.php required",
+    "templates": []
+  }
+]

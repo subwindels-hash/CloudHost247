@@ -13,6 +13,7 @@ final class ThemeRepository
     /** Content types the admin can author and order. */
     const TYPES = array('page', 'section', 'navigation', 'banner', 'testimonial', 'footer', 'landing', 'block');
     private $defaults = array(
+        'platform_base_path' => '',
         'brand_name' => 'CloudHost247', 'logo_url' => '', 'primary_color' => '#0756d8',
         'accent_color' => '#12b886', 'font_family' => 'Inter, system-ui, sans-serif',
         'footer_text' => 'Reliable cloud services, available around the clock.',
@@ -114,6 +115,7 @@ final class ThemeRepository
         foreach ($allowed as $key) {
             if (!array_key_exists($key, $input)) continue;
             $value = trim((string) $input[$key]);
+            if ($key === 'platform_base_path' && $value !== '' && !preg_match('~^/(?:[a-zA-Z0-9_-]+/)*[a-zA-Z0-9_-]+/?$~D', $value)) throw new InvalidArgumentException('Platform path must be a same-origin mount such as /platform.');
             if (in_array($key, array('primary_color', 'accent_color'), true) && !preg_match('/^#[0-9a-fA-F]{6}$/', $value)) throw new InvalidArgumentException('Colors must use six-digit hexadecimal notation.');
             if ($key === 'layout_width' && ((int) $value < 960 || (int) $value > 1600)) throw new InvalidArgumentException('Layout width must be between 960 and 1600 pixels.');
             if (substr($key, -4) === '_url' && !$this->safeRelativeOrHttpsUrl($value)) throw new InvalidArgumentException('Unsafe URL supplied for ' . $key);
@@ -139,12 +141,40 @@ final class ThemeRepository
         return array_map(array($this, 'hydrate'), $query->get()->all());
     }
 
+    /**
+     * One publication snapshot for public discovery. A null entry means the slug
+     * exists but has no published page/landing; draft payloads are never hydrated.
+     * Select the same lowest-ID published entry as findPublishedPage when a page
+     * and a landing share a slug. Database/localization failures must propagate.
+     */
+    public function publicPageIndex($locale = null)
+    {
+        $rows = Capsule::table(self::CONTENT)->whereIn('content_type', array('page', 'landing'))->orderBy('id')->get();
+        $index = array();
+        foreach ($rows as $row) {
+            if (!array_key_exists($row->slug, $index)) { $index[$row->slug] = null; }
+            if ($row->published && $index[$row->slug] === null) {
+                $index[$row->slug] = $this->hydrate($row);
+            }
+        }
+        foreach ($this->localize(array_filter($index), $locale) as $slug => $page) {
+            $index[$slug] = $page;
+        }
+        return $index;
+    }
+
     public function findPublishedPage($slug, $locale = null)
     {
-        $row = Capsule::table(self::CONTENT)->whereIn('content_type', array('page', 'landing'))->where('slug', $this->slug($slug))->where('published', 1)->first();
+        $row = Capsule::table(self::CONTENT)->whereIn('content_type', array('page', 'landing'))->where('slug', $this->slug($slug))->where('published', 1)->orderBy('id')->first();
         if (!$row) return null;
         $items = $this->localize(array($this->hydrate($row)), $locale);
         return $items[0];
+    }
+
+    /** Distinguish an intentionally unpublished page from a route with no CMS entry. */
+    public function hasPage($slug)
+    {
+        return Capsule::table(self::CONTENT)->whereIn('content_type', array('page', 'landing'))->where('slug', $this->slug($slug))->exists();
     }
 
     public function saveContent(array $input)
@@ -188,6 +218,15 @@ final class ThemeRepository
         if ($id) { Capsule::table(self::CONTENT)->where('id', $id)->update($record); return $id; }
         $record['created_at'] = date('Y-m-d H:i:s');
         return Capsule::table(self::CONTENT)->insertGetId($record);
+    }
+
+    /** Explicit publication of an existing reviewed page; never changes its copy or mappings. */
+    public function publishContent($id)
+    {
+        $id = (int) $id;
+        $row = Capsule::table(self::CONTENT)->where('id', $id)->whereIn('content_type', array('page', 'landing'))->first();
+        if (!$row) { throw new InvalidArgumentException('Page does not exist.'); }
+        return Capsule::table(self::CONTENT)->where('id', $id)->update(array('published' => 1, 'updated_at' => date('Y-m-d H:i:s')));
     }
 
     public function saveTranslation(array $input)

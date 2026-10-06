@@ -1,4 +1,6 @@
 import path from 'node:path';
+import { readFileSync } from 'node:fs';
+import { resolveToolPage, toolPageHtml } from './tools/presentation';
 import Fastify, { type FastifyBaseLogger, type FastifyInstance } from 'fastify';
 import fastifyStatic from '@fastify/static';
 import type { Env } from './config/env';
@@ -226,6 +228,17 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
       if (!serveFrontend || isApiRoute || request.method !== 'GET') {
         reply.code(404).send({ error: 'NOT_FOUND', message: 'Resource not found' });
         return;
+      }
+      const pathname = ((request.raw.url ?? '/').split('?')[0] ?? '/');
+      if (pathname === '/tools' || pathname.startsWith('/tools/')) {
+        const page = resolveToolPage(pathname);
+        if (page && page.path !== pathname) {
+          const mount = new URL(env.APP_URL).pathname.replace(/\/$/,'');
+          return reply.redirect(mount + page.path, 301);
+        }
+        if (page) return reply.type('text/html').send(toolPageHtml(readFileSync(path.join(publicDir,'index.html'),'utf8'), page, env.APP_URL));
+        // The independent Document Tools module retains its existing routes and authorization.
+        if (!['/tools/document','/tools/document/mrz','/tools/document/mrz-parser'].includes(pathname)) reply.code(404).header('X-Robots-Tag','noindex');
       }
       reply.type('text/html').sendFile('index.html');
     });

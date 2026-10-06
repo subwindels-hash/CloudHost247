@@ -20,6 +20,8 @@ const DEFAULT_DKIM_SELECTORS = ['default', 'google', 'selector1', 'selector2', '
 const MATCH_MODES = ['exact', 'contains', 'regex'] as const;
 
 export const dnsHandlers: Record<string, ToolHandler> = {
+  'nameserver-lookup': async (input, context) => dnsLookup(context.db, { name: str(input, 'domain', { required: true, max: 253 }), type: 'NS' }),
+  'cname-lookup': async (input, context) => dnsLookup(context.db, { name: str(input, 'domain', { required: true, max: 253 }), type: 'CNAME' }),
   'dns-propagation': async (input, context) => {
     const domain = str(input, 'domain', { required: true, max: 253 });
     const recordType = str(input, 'type', { max: 12 }) || str(input, 'recordType', { max: 12 }) || 'A';

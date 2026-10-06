@@ -1,0 +1,1 @@
+<form class="ch-search" method="get" action="{$WEB_ROOT}/site-search.php" role="search"><label for="ch-site-query">Search CloudHost247</label><div><input id="ch-site-query" type="search" name="q" maxlength="100" value="{$chSearchQuery|escape}" placeholder="Hosting, domains, support…" required><button class="ch-btn ch-btn-dark" type="submit">Search</button></div></form>

@@ -424,6 +424,9 @@ class BrokerStaticTests(unittest.TestCase):
             self.assertIn(point.lower(), page.lower())
         for theme in ("cloudhost247_legacy", "cloudhost247"):
             tpl = read(os.path.join(ROOT, "templates", theme, "domainbrokerageterms.tpl"))
+            if theme == "cloudhost247":
+                self.assertIn("includes/legal/domainbrokerageterms.tpl", tpl)
+                tpl += read(os.path.join(ROOT, "templates", theme, "includes", "legal", "domainbrokerageterms.tpl"))
             self.assertIn("brokerageTerms", tpl)
 
     # --------------------------------------------------------------- docs

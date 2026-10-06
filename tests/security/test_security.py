@@ -111,7 +111,26 @@ class RebuildSecurityReview(unittest.TestCase):
  def test_cms_open_graph_canonical_and_sitemap_controls(self):
   repo=(ROOT/'modules/addons/cloudhost247_theme/lib/ThemeRepository.php').read_text();hooks=(ROOT/'modules/addons/cloudhost247_theme/hooks.php').read_text();site=(ROOT/'cloudhost247-sitemap.php').read_text()
   for marker in ('og_title','og_description','canonical_url','sitemap'):self.assertIn(marker,repo)
-  self.assertIn('rel="canonical"',hooks);self.assertIn("published('landing')",site)
+  self.assertIn('rel="canonical"',hooks)
+  discovery=(ROOT/'modules/addons/cloudhost247_theme/lib/PublicDiscovery.php').read_text()
+  publication=repo.split('public function publicPageIndex',1)[1].split('public function findPublishedPage',1)[0]
+  self.assertIn('PublicDiscovery::pages($repo)',site)
+  self.assertIn('PublicDiscovery::sitemapPaths($pages)',site)
+  self.assertIn('$repository->publicPageIndex($locale)',discovery)
+  self.assertIn("whereIn('content_type', array('page', 'landing'))",publication)
+  self.assertIn('if ($row->published && $index[$row->slug] === null)',publication)
+  self.assertIn("if ($page['sitemap'])",discovery)
+  self.assertIn('http_response_code(503)',site)
+ def test_search_discovery_failure_has_no_registry_fallback(self):
+  route=(ROOT/'site-search.php').read_text()
+  discovery=(ROOT/'modules/addons/cloudhost247_theme/lib/PublicDiscovery.php').read_text()
+  failure=route.split('catch (\\Throwable $e)',1)[1]
+  self.assertIn('http_response_code(503)',failure)
+  self.assertIn("header('Retry-After: 300')",failure)
+  self.assertIn("header('Cache-Control: no-store')",route)
+  self.assertNotIn('Site::catalog',route)
+  self.assertNotIn('catch',discovery)
+  self.assertNotIn('getMessage()',route)
  def test_safe_errors_use_correlation_without_raw_customer_exception(self):
   s=(ROOT/'modules/addons/cloudhost247_core/lib/Support/SafeError.php').read_text();self.assertIn('correlation_id',s);self.assertNotIn('getMessage()',s);self.assertNotIn('getTrace',s)
  def test_localized_preview_is_non_persistent(self):

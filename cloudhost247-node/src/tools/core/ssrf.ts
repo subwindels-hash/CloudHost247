@@ -77,59 +77,19 @@ export function parseIpv4(value: string): number[] | null {
 }
 
 export function parseIpv6(value: string): number[] | null {
-  let text = value.trim().toLowerCase();
-  if (text.startsWith('[') && text.endsWith(']')) text = text.slice(1, -1);
-  // Zone index (fe80::1%eth0) is not a routable address form we accept.
-  if (text.includes('%')) return null;
-  if (text.length === 0) return null;
-
-  let tail: number[] = [];
-  const lastColon = text.lastIndexOf(':');
-  if (lastColon >= 0 && text.slice(lastColon + 1).includes('.')) {
-    // Embedded IPv4 (e.g. ::ffff:192.0.2.1)
-    const embedded = parseIpv4(text.slice(lastColon + 1));
-    if (!embedded) return null;
-    tail = [(embedded[0]! << 8) | embedded[1]!, (embedded[2]! << 8) | embedded[3]!];
-    text = text.slice(0, lastColon + 1) + '0:0';
+  let text = value.trim().toLowerCase().replace(/^\[|\]$/g, '');
+  if (text.includes('%') || net.isIP(text) !== 6) return null;
+  if (text.includes('.')) {
+    const at = text.lastIndexOf(':');
+    const bytes = parseIpv4(text.slice(at + 1));
+    if (!bytes) return null;
+    text = text.slice(0, at + 1) + ((bytes[0]! << 8) | bytes[1]!).toString(16) + ':' + ((bytes[2]! << 8) | bytes[3]!).toString(16);
   }
-
-  const doubleColon = text.indexOf('::');
-  if (doubleColon !== -1 && text.indexOf('::', doubleColon + 1) !== -1) return null;
-
-  const parseGroups = (segment: string): number[] | null => {
-    if (segment === '') return [];
-    const groups: number[] = [];
-    for (const group of segment.split(':')) {
-      if (!/^[0-9a-f]{1,4}$/.test(group)) return null;
-      groups.push(Number.parseInt(group, 16));
-    }
-    return groups;
-  };
-
-  let headGroups: number[];
-  let tailGroups: number[];
-  if (doubleColon === -1) {
-    const groups = parseGroups(text);
-    if (!groups) return null;
-    if (groups.length !== 8) return null;
-    headGroups = groups;
-    tailGroups = [];
-  } else {
-    const head = parseGroups(text.slice(0, doubleColon));
-    const rest = parseGroups(text.slice(doubleColon + 2));
-    if (!head || !rest) return null;
-    if (head.length + rest.length > 7) return null;
-    headGroups = head;
-    tailGroups = rest;
-  }
-
-  const words = [...headGroups, ...tailGroups, ...tail];
-  if (words.length > 8) return null;
-  const bytes: number[] = [];
-  for (const word of words) {
-    bytes.push((word >> 8) & 0xff, word & 0xff);
-  }
-  return bytes.length === 16 ? bytes : null;
+  const [left = '', right = ''] = text.split('::');
+  const head = left ? left.split(':') : [];
+  const tail = right ? right.split(':') : [];
+  const words = text.includes('::') ? [...head, ...Array(8 - head.length - tail.length).fill('0'), ...tail] : head;
+  return words.flatMap(word => { const n = parseInt(word, 16); return [n >> 8, n & 255]; });
 }
 
 export function formatIpv4(bytes: number[]): string {
@@ -161,20 +121,9 @@ export function formatIpv6(bytes: number[]): string {
     bestLength = 0;
   }
 
-  const parts: string[] = [];
-  let i = 0;
-  while (i < words.length) {
-    if (i === bestStart) {
-      parts.push('');
-      i += bestLength;
-      if (i === words.length) parts.push('');
-      continue;
-    }
-    parts.push((words[i] ?? 0).toString(16));
-    i += 1;
-  }
-  const joined = parts.join(':');
-  return joined === '' ? '::' : joined;
+  if (bestStart < 0) return words.map(word => word.toString(16)).join(':');
+  return words.slice(0, bestStart).map(word => word.toString(16)).join(':') + '::' +
+    words.slice(bestStart + bestLength).map(word => word.toString(16)).join(':');
 }
 
 /** True for IPv4-mapped IPv6 (`::ffff:a.b.c.d`). */
@@ -267,6 +216,10 @@ export function blockedReason(input: string): string | null {
   if ((bytes[0]! & 0xfe) === 0xfc) return 'fc00::/7 (unique local)';
   if (bytes[0] === 0xfe && (bytes[1]! & 0xc0) === 0x80) return 'fe80::/10 (link-local)';
   if (bytes[0] === 0xff) return 'ff00::/8 (multicast)';
+  if (isIpv4Mapped(bytes)) return null; // Embedded public IPv4 was checked above.
+  if ((bytes[0]! & 0xe0) !== 0x20) return 'Not globally routed IPv6 unicast';
+  if (bytes[0] === 0x20 && bytes[1] === 0x01 && bytes[2] === 0 && bytes[3]! < 0x20) return 'IPv6 special-purpose allocation';
+  if (bytes[0] === 0x3f && (bytes[1]! & 0xf0) === 0xf0) return '3fff::/20 (documentation)';
   return null;
 }
 
@@ -326,6 +279,7 @@ export async function validateUrl(url: URL, options: { allowHttp?: boolean } = {
  * a silently empty result.
  */
 export async function resolvePublicAddresses(hostname: string): Promise<string[]> {
+  assertHostnameSyntax(hostname);
   const literal = parseIp(hostname.replace(/^\[|\]$/g, ''));
   if (literal) {
     const reason = blockedReason(literal.normalized);
@@ -335,8 +289,9 @@ export async function resolvePublicAddresses(hostname: string): Promise<string[]
 
   let answers: Array<{ address: string; family: number }>;
   try {
-    answers = await dns.lookup(hostname, { all: true, verbatim: true });
-  } catch {
+    answers = await withinDeadline(dns.lookup(hostname, { all: true, verbatim: true }), 5000);
+  } catch (error) {
+    if (error instanceof ToolError) throw error;
     throw new ToolError('DNS_LOOKUP_FAILED', `The hostname "${hostname}" could not be resolved.`);
   }
   if (answers.length === 0) throw new ToolError('DNS_LOOKUP_FAILED', `The hostname "${hostname}" has no address records.`);
@@ -397,15 +352,26 @@ function headerValue(headers: http.IncomingHttpHeaders, name: string): string {
   return value ?? '';
 }
 
-function decompress(buffer: Buffer, encoding: string): Buffer {
+export function decompressBounded(buffer: Buffer, encoding: string, maxBytes: number): Buffer {
   try {
-    if (encoding.includes('br')) return brotliDecompressSync(buffer);
-    if (encoding.includes('gzip')) return gunzipSync(buffer);
-    if (encoding.includes('deflate')) return inflateSync(buffer);
-  } catch {
+    const opts = { maxOutputLength: maxBytes };
+    if (encoding.includes('br')) return brotliDecompressSync(buffer, opts);
+    if (encoding.includes('gzip')) return gunzipSync(buffer, opts);
+    if (encoding.includes('deflate')) return inflateSync(buffer, opts);
+    if (buffer.length > maxBytes) throw new Error('oversized');
     return buffer;
+  } catch {
+    throw new ToolError('PROVIDER_ERROR', 'The response exceeds the size limit or has invalid compression.');
   }
-  return buffer;
+}
+
+export async function withinDeadline<T>(work: Promise<T>, ms: number): Promise<T> {
+  let timer: NodeJS.Timeout | undefined;
+  try {
+    return await Promise.race([work, new Promise<never>((_, reject) => {
+      timer = setTimeout(() => reject(timeoutError('The lookup')), Math.max(1, ms));
+    })]);
+  } finally { if (timer) clearTimeout(timer); }
 }
 
 function singleRequest(
@@ -458,13 +424,16 @@ function singleRequest(
             chunks.push(chunk.subarray(0, Math.max(remaining, 0)));
             truncated = true;
             response.destroy();
+            reject(new ToolError('PROVIDER_ERROR', 'The response exceeds the size limit.'));
             return;
           }
           chunks.push(chunk);
         });
         const finish = () => {
           const raw = Buffer.concat(chunks);
-          const body = options.method === 'HEAD' ? Buffer.alloc(0) : decompress(raw, headerValue(response.headers, 'content-encoding'));
+          let body: Buffer;
+          try { body = options.method === 'HEAD' ? Buffer.alloc(0) : decompressBounded(raw, headerValue(response.headers, 'content-encoding'), maxBytes); }
+          catch (error) { reject(error); return; }
           resolve({
             status: response.statusCode ?? 0,
             statusText: response.statusMessage ?? '',
@@ -474,11 +443,13 @@ function singleRequest(
           });
         };
         response.on('end', finish);
-        response.on('close', finish);
-        response.on('error', finish);
+        response.on('close', () => { if (!response.complete) reject(new ToolError('PROVIDER_ERROR', 'The response was interrupted.')); });
+        response.on('error', () => reject(new ToolError('PROVIDER_ERROR', 'The response stream failed.')));
       }
     );
 
+    const deadlineTimer = setTimeout(() => request.destroy(new Error('TOOL_REQUEST_TIMEOUT')), timeoutMs);
+    request.once('close', () => clearTimeout(deadlineTimer));
     request.setTimeout(timeoutMs, () => {
       request.destroy(new Error('TOOL_REQUEST_TIMEOUT'));
     });
@@ -505,6 +476,7 @@ function singleRequest(
  */
 export async function fetchWithGuard(input: string, options: FetchOptions = {}): Promise<FetchResult> {
   const startedAt = Date.now();
+  const deadline = startedAt + Math.min(Math.max(options.timeoutMs ?? 8000, 1), 60000);
   let url: URL;
   try {
     url = new URL(input);
@@ -518,13 +490,14 @@ export async function fetchWithGuard(input: string, options: FetchOptions = {}):
   let tlsError: string | undefined;
 
   for (let hop = 0; hop <= maxRedirects; hop += 1) {
-    const target = await validateUrl(current, { allowHttp: options.allowHttp ?? true });
+    if (Date.now() >= deadline) throw timeoutError('The request');
+    const target = await withinDeadline(validateUrl(current, { allowHttp: options.allowHttp ?? true }), deadline - Date.now());
     const ip = target.ips[0];
     if (!ip) throw new ToolError('DNS_LOOKUP_FAILED', `No usable address for ${current.hostname}.`);
 
     let response: Awaited<ReturnType<typeof singleRequest>>;
     try {
-      response = await singleRequest(current, ip, options);
+      response = await singleRequest(current, ip, { ...options, timeoutMs: Math.max(1, deadline - Date.now()) });
       tlsError = undefined;
     } catch (error) {
       if (options.tolerateTlsError && error instanceof ToolError && error.code === 'PROVIDER_ERROR' && error.message.startsWith('TLS error')) {

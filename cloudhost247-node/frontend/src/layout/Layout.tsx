@@ -1,3 +1,4 @@
+import { ToolsNavigationProvider } from '../components/tools/ToolsNavigation';
 import { Suspense } from 'react';
 import { Outlet } from 'react-router-dom';
 import Header from './Header';
@@ -13,7 +14,7 @@ import { CatalogLoadingBanner } from '../components/CatalogStateBanner';
  */
 export default function Layout() {
   return (
-    <div className="ch247-shell">
+    <ToolsNavigationProvider><div className="ch247-shell">
       <a className="ch247-skip" href="#main-content">
         Skip to main content
       </a>
@@ -29,6 +30,6 @@ export default function Layout() {
       </main>
       <Footer />
       <AiSupportWidget />
-    </div>
+    </div></ToolsNavigationProvider>
   );
 }

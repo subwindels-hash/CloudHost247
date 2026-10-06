@@ -31,6 +31,8 @@ import {
 } from './types';
 import { httpStatusToProviderError, parseProviderJson, providerFetch } from './provider-http';
 
+import { resolvePublicAddresses, withinDeadline } from '../../tools/core/ssrf';
+
 const DEFAULT_BOOTSTRAP_URL = 'https://data.iana.org/rdap/dns.json';
 const WHOIS_QUERY_TIMEOUT_MS = 10_000;
 
@@ -49,16 +51,21 @@ export function setWhoisTransportForTesting(transport: ((server: string, query: 
 
 async function whoisQuery(server: string, query: string): Promise<string> {
   if (whoisTransportOverride) return whoisTransportOverride(server, query);
+  const addresses = await withinDeadline(resolvePublicAddresses(server), WHOIS_QUERY_TIMEOUT_MS);
   return new Promise<string>((resolve, reject) => {
-    const chunks: Buffer[] = [];
-    const socket = netConnect({ host: server, port: 43, timeout: WHOIS_QUERY_TIMEOUT_MS }, () => {
-      socket.write(`${query}\r\n`);
-    });
+    const chunks: Buffer[] = []; let size = 0;
+    const socket = netConnect({ host: addresses[0], port: 43, timeout: WHOIS_QUERY_TIMEOUT_MS }, () => socket.write(`${query}\r\n`));
+    const timer = setTimeout(() => socket.destroy(new Error('WHOIS query timed out')), WHOIS_QUERY_TIMEOUT_MS);
     socket.setTimeout(WHOIS_QUERY_TIMEOUT_MS);
-    socket.on('data', (chunk: Buffer) => chunks.push(chunk));
+    socket.on('data', (chunk: Buffer) => {
+      size += chunk.length;
+      if (size > 256 * 1024) { socket.destroy(new Error('WHOIS response exceeds limit')); return; }
+      chunks.push(chunk);
+    });
     socket.on('timeout', () => socket.destroy(new Error('WHOIS query timed out')));
-    socket.on('error', (err) => reject(err));
-    socket.on('close', () => resolve(Buffer.concat(chunks).toString('utf-8')));
+    socket.on('error', reject);
+    socket.on('end', () => resolve(Buffer.concat(chunks).toString('utf-8')));
+    socket.on('close', () => { clearTimeout(timer); if (!socket.readableEnded) reject(new Error('WHOIS response interrupted')); });
   });
 }
 
@@ -129,7 +136,7 @@ export class RdapAdapter implements DomainProviderAdapter {
   }
 
   async loadBootstrap(): Promise<Map<string, string[]>> {
-    const response = await providerFetch({ url: this.bootstrapUrl(), method: 'GET' });
+    const response = await providerFetch({ url: this.bootstrapUrl(), method: 'GET', guardPublic: true });
     if (!response.ok) throw httpStatusToProviderError(response.status, response.text);
     const registry = parseProviderJson<BootstrapRegistry>(response);
     const map = new Map<string, string[]>();
@@ -179,7 +186,7 @@ export class RdapAdapter implements DomainProviderAdapter {
     // --- Primary: RDAP ---
     const rdapUrl = await this.rdapUrlForDomain(normalized);
     if (rdapUrl) {
-      const response = await providerFetch({ url: rdapUrl, method: 'GET', headers: { Accept: 'application/rdap+json, application/json' } });
+      const response = await providerFetch({ url: rdapUrl, method: 'GET', guardPublic: true, headers: { Accept: 'application/rdap+json, application/json' } });
       if (response.ok) {
         const data = parseProviderJson<RdapResponse>(response);
         const registrarEntity = data.entities?.find((entity) => entity.roles?.includes('registrar'));
