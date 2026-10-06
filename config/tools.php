@@ -3483,6 +3483,169 @@ return array(
             'enabled' => true
         ),
         array(
+            'slug' => 'mrz-generator',
+            'name' => 'MRZ Generator / MRZ Tools',
+            'category' => 'developer',
+            'categoryLabel' => 'Developer',
+            'icon' => 'developer',
+            'summary' => 'Generate, validate and parse ICAO Doc 9303 TD3 passport machine-readable zones.',
+            'description' => 'Builds the two 44-character lines of a TD3 (passport-size) machine-readable zone from the document fields you enter, validates the structure and the 7-3-1 check digits of an existing zone, and parses a supplied zone back into labelled fields. Names are transliterated to the ICAO Latin character set, and an unsupported character is reported instead of being silently removed or guessed. Privacy: the calculation runs in this browser tab, so the values you type are not uploaded, logged or stored by CloudHost247. Scope: machine-readable text only — check digits prove the string is well formed, they do not prove that a physical or electronic document is genuine, and this page does not create passport artwork or travel documents.',
+            'seoTitle' => 'MRZ Generator / MRZ Tools — Free Developer Tool | CloudHost247',
+            'seoDescription' => 'Generate, validate and parse ICAO Doc 9303 TD3 passport machine-readable zones. Free CloudHost247 tool for administrators, developers and website owners.',
+            'keywords' => array(
+                'mrz',
+                'machine readable zone',
+                'passport',
+                'icao 9303',
+                'td3',
+                'check digit',
+                'ocr',
+                'document',
+                'parser',
+                'validator',
+                'mrz-generator',
+                'developer',
+                'mrz generator / mrz tools'
+            ),
+            'aliases' => array(),
+            'path' => '/tools/mrz-generator',
+            'legacyPaths' => array(),
+            'mode' => 'local',
+            'handler' => 'mrz_generate',
+            'options' => array(
+
+            ),
+            'inputs' => array(
+                array(
+                    'name' => 'mode',
+                    'label' => 'Action',
+                    'type' => 'select',
+                    'placeholder' => 'generate',
+                    'required' => true
+                ),
+                array(
+                    'name' => 'mrz',
+                    'label' => 'Existing MRZ, two lines (validate or parse)',
+                    'type' => 'textarea',
+                    'placeholder' => 'Paste the two 44-character lines here',
+                    'required' => false
+                ),
+                array(
+                    'name' => 'issuingState',
+                    'label' => 'Issuing state (3 letters)',
+                    'type' => 'text',
+                    'placeholder' => 'UTO',
+                    'required' => false
+                ),
+                array(
+                    'name' => 'surname',
+                    'label' => 'Surname (as printed)',
+                    'type' => 'text',
+                    'placeholder' => 'SURNAME',
+                    'required' => false
+                ),
+                array(
+                    'name' => 'givenNames',
+                    'label' => 'Given names (as printed)',
+                    'type' => 'text',
+                    'placeholder' => 'GIVEN NAMES',
+                    'required' => false
+                ),
+                array(
+                    'name' => 'nationality',
+                    'label' => 'Nationality (3 letters)',
+                    'type' => 'text',
+                    'placeholder' => 'UTO',
+                    'required' => false
+                ),
+                array(
+                    'name' => 'documentNumber',
+                    'label' => 'Document number',
+                    'type' => 'text',
+                    'placeholder' => 'AB1234567',
+                    'required' => false
+                ),
+                array(
+                    'name' => 'dateOfBirth',
+                    'label' => 'Date of birth (YYMMDD)',
+                    'type' => 'text',
+                    'placeholder' => 'YYMMDD',
+                    'required' => false
+                ),
+                array(
+                    'name' => 'sex',
+                    'label' => 'Sex',
+                    'type' => 'select',
+                    'placeholder' => 'F',
+                    'required' => false
+                ),
+                array(
+                    'name' => 'expiryDate',
+                    'label' => 'Expiry date (YYMMDD)',
+                    'type' => 'text',
+                    'placeholder' => 'YYMMDD',
+                    'required' => false
+                ),
+                array(
+                    'name' => 'optionalData',
+                    'label' => 'Optional data',
+                    'type' => 'text',
+                    'placeholder' => 'OPTIONAL',
+                    'required' => false
+                )
+            ),
+            'relatedTools' => array(
+                'http-headers-checker',
+                'website-os-checker',
+                'md5-generator',
+                'base64-generator'
+            ),
+            'services' => array(
+                array(
+                    'label' => 'Developer hosting',
+                    'url' => 'developer-friendly.php'
+                ),
+                array(
+                    'label' => 'PaaS',
+                    'url' => 'paas.php'
+                ),
+                array(
+                    'label' => 'Node.js',
+                    'url' => 'nodejs-hosting.php'
+                ),
+                array(
+                    'label' => 'Docker',
+                    'url' => 'docker-hosting.php'
+                ),
+                array(
+                    'label' => 'VPS',
+                    'url' => 'vps-hosting.php'
+                )
+            ),
+            'faq' => array(
+                array(
+                    'q' => 'What does MRZ Generator / MRZ Tools actually do?',
+                    'a' => 'It generates the TD3 machine-readable zone for the fields you supply, verifies the check digits of an existing zone, and reports the parsed fields. Results describe exactly the string you entered — nothing is inferred about a person or a document.'
+                ),
+                array(
+                    'q' => 'Is my input stored?',
+                    'a' => 'No. Everything is calculated in this browser tab. The values are not uploaded, not logged and not written to a database, and no MRZ string, document number or date of birth is sent to analytics or added to any URL.'
+                ),
+                array(
+                    'q' => 'Does a valid check digit prove a passport is genuine?',
+                    'a' => 'No. Check digits only prove the zone is internally consistent. Authenticity requires the document itself, the issuing authority and cryptographic verification (ICAO PKD / passive authentication), which this tool does not perform.'
+                ),
+                array(
+                    'q' => 'Can I use a real passport here?',
+                    'a' => 'Use synthetic test data. The built-in specimen uses the reserved ICAO test codes UTO and XXA, which belong to no real person or state.'
+                )
+            ),
+            'badge' => 'Browser-only',
+            'featured' => true,
+            'sensitive' => true,
+            'enabled' => true
+        ),
+        array(
             'slug' => 'smtp-test',
             'name' => 'SMTP Test',
             'category' => 'developer',

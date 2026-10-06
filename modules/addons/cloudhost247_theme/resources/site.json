@@ -1989,6 +1989,10 @@
               "url": "tools/ip-subnet-calculator"
             },
             {
+              "label": "MRZ Generator / MRZ Tools",
+              "url": "tools/mrz-generator"
+            },
+            {
               "label": "JSON Beautifier",
               "url": "tools/json-beautifier"
             },
@@ -2198,6 +2202,10 @@
             {
               "label": "Multi URL Opener",
               "url": "tools/multi-url-opener"
+            },
+            {
+              "label": "MRZ Generator / MRZ Tools",
+              "url": "tools/mrz-generator"
             },
             {
               "label": "SMTP Test",
@@ -2814,6 +2822,10 @@
         {
           "label": "QR Generator",
           "url": "tools/qr-code-generator"
+        },
+        {
+          "label": "MRZ Generator / MRZ Tools",
+          "url": "tools/mrz-generator"
         },
         {
           "label": "Speed Test",

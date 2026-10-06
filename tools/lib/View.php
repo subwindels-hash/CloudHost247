@@ -166,6 +166,8 @@ final class View
             'algo' => array('pbkdf2' => 'PBKDF2-SHA-256', 'sha256' => 'SHA-256', 'sha384' => 'SHA-384', 'sha512' => 'SHA-512'),
             'symbols' => array('yes' => 'Letters, numbers and symbols', 'no' => 'Letters and numbers'),
             'kind' => array('zwsp' => 'Zero-width space', 'zwnj' => 'Zero-width non-joiner', 'zwj' => 'Zero-width joiner', 'wj' => 'Word joiner'),
+            'mode' => array('generate' => 'Generate an MRZ', 'validate' => 'Validate an MRZ', 'parse' => 'Parse an MRZ'),
+            'sex' => array('F' => 'F — female', 'M' => 'M — male', '<' => '< — unspecified'),
         );
         return isset($maps[$name]) ? $maps[$name] : array('yes' => 'Yes', 'no' => 'No');
     }

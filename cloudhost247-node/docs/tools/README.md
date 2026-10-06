@@ -44,16 +44,24 @@ server enforces it again on every call — the badge is a courtesy, never the co
 ## Sibling features under /tools
 
 The Tools Center owns `/tools` and the catalogue paths beneath it. The **Document Tools** section
-(ePassport MRZ calculator, validator and parser) is implemented by its own module — pages at
-`/tools/document`, `/tools/document/mrz`, `/tools/document/mrz-parser`, API at `/api/tools/mrz/*`
-(see `docs/MRZ_DEVELOPER_TOOL.md`). The Tools Center links to it rather than duplicating it; React
-Router ranks those static paths above the centre's `/tools/*` page route.
+(ePassport MRZ calculator, validator and parser) is implemented by its own module and registered in
+the catalogue as `mrz-generator`, with its public page at `/tools/mrz-generator` and the original
+`/tools/document/mrz`, `/tools/document/mrz-parser` and `/tools/mrz-parser` URLs retained as
+aliases. Its API is `/api/tools/mrz/*`; the executor path `POST /api/tools/mrz-generator` runs the
+same engine with `cacheSeconds: 0`, no history target and report/ticket persistence refused
+(see `docs/MRZ_DEVELOPER_TOOL.md`).
+
+Because it is a catalogue entry, it appears everywhere a tool is supposed to: the Tools menu
+(Featured and Developer groups), the directory and category navigation, the footer Tools column,
+site search, the sitemap and the related-tools lists. Both shells read the same
+`/api/tools/navigation` and the same generated projection, so the link cannot exist in one shell and
+be missing in the other.
 
 ## Architecture
 
 ```
 src/tools/
-  catalog.ts              the 64-entry catalogue: identity, route, auth, provider, limits, notes
+  catalog.ts              the catalogue: identity, route, auth, provider, limits, notes
   routes.ts               the whole /api[/v1]/tools/* surface
   handlers/               one module per tool family; pure translation between HTTP input and services
   core/

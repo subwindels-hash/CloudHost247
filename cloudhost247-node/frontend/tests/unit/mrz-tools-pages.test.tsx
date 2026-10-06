@@ -71,6 +71,43 @@ describe('ePassport MRZ Calculator, Validator, Parser & Admin UI', () => {
     expect(await screen.findByText('CloudHost247 AI — MRZ Technical Explanation')).toBeTruthy();
   });
 
+  it('renders the canonical /tools/mrz-generator route with the catalogue name, breadcrumbs and no browser storage', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        jsonResponse(200, {
+          calculatorEnabled: true,
+          parserEnabled: true,
+          testDataEnabled: true,
+          availability: 'public',
+        })
+      )
+    );
+
+    render(
+      <MemoryRouter initialEntries={['/tools/mrz-generator']}>
+        <App />
+      </MemoryRouter>
+    );
+
+    // The heading must be the exact name the footer link and the catalogue entry publish, otherwise
+    // the footer link would land on a differently named page.
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'MRZ Generator / MRZ Tools' })
+    ).toBeTruthy();
+    const breadcrumb = screen.getByRole('navigation', { name: 'Breadcrumb' });
+    expect(breadcrumb.querySelector('a[href="/tools"]')).toBeTruthy();
+    expect(breadcrumb.querySelector('a[href="/tools/document"]')).toBeTruthy();
+    // The privacy notice states how a submission is processed.
+    expect(screen.getByText(/does not cache, log or permanently store/i)).toBeTruthy();
+
+    // Generating must not write anything to browser storage: the tool is stateless by contract.
+    fireEvent.click(await screen.findByRole('button', { name: 'Generate Test Data' }));
+    expect((await screen.findByTestId('mrz-line-1')).textContent).toHaveLength(44);
+    expect(window.localStorage.length).toBe(0);
+    expect(window.sessionStorage.length).toBe(0);
+  });
+
   it('renders /tools/document/mrz-parser and distinguishes Successfully parsed from Authenticity verified', async () => {
     vi.stubGlobal(
       'fetch',
