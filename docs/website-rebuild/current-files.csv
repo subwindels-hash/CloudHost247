@@ -6374,7 +6374,7 @@ tests/customaffiliate/run.php,Administrative/internal,16367
 tests/digitalproducts/run.py,Administrative/internal,1445
 tests/digitalproducts/test_static.py,Administrative/internal,1895
 tests/foundation/run.php,Administrative/internal,6380
-tests/foundation/test_static.py,Administrative/internal,3797
+tests/foundation/test_static.py,Administrative/internal,4612
 tests/integrations/run.php,Administrative/internal,42020
 tests/integrations/test_static.py,Administrative/internal,14742
 tests/marketing/fakes.php,Administrative/internal,13321
@@ -6410,7 +6410,7 @@ tests/rdp/run.php,Administrative/internal,6328
 tests/rdp/test_static.py,Administrative/internal,8930
 tests/security/test_archive_integration.py,Administrative/internal,8606
 tests/security/test_release_gate_static.py,Administrative/internal,21978
-tests/security/test_security.py,Administrative/internal,11003
+tests/security/test_security.py,Administrative/internal,12151
 tests/smm/fakes.php,Administrative/internal,16458
 tests/smm/fixtures/add.json,Administrative/internal,18
 tests/smm/fixtures/add_error.json,Administrative/internal,34
