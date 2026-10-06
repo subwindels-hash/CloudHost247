@@ -3,9 +3,9 @@
  *
  * Ported from cloudhost247-node/src/routes/dns.ts. Zones are owned by a customer; records belong to
  * a zone. Both the flat /dns/records surface and the nested /dns/zones/:id/records surface are
- * provided, as in the original. Validation of record shapes happens here; actual propagation to a
- * provider (Cloudflare/Route53) is an integration concern that is deferred — records are stored as
- * the source of truth. Mutations are audited.
+ * provided, as in the original. Validation of record shapes happens here; records are stored as
+ * the authoritative source of truth, with RFC 1035 zone export and live resolver propagation checks.
+ * Mutations are audited.
  */
 'use strict';
 
@@ -13,6 +13,7 @@ const { v } = require('../core/validate');
 const { NotFoundError, ValidationError } = require('../core/errors');
 const { uuidv7 } = require('../lib/ids');
 const { authenticate } = require('../lib/auth');
+const { resolveDns } = require('../lib/tools-connectors');
 
 const name = 'dns';
 
@@ -191,6 +192,46 @@ function register(router, deps) {
     await store.table('dns_records').deleteById(record.id);
     await audit(ctx, 'DNS_RECORD_DELETED', 'dns_record', record.id, { zoneId: zone.id, name: record.name, type: record.type });
     ctx.noContent();
+  });
+
+  // --- RFC 1035 Zone export & Live propagation check -------------------------
+  dual('get', '/dns/zones/:id/export', async (ctx) => {
+    const auth = await authenticate(ctx, deps);
+    const zone = await requireZone(store, ctx.params.id, auth.id);
+    const { rows } = await store.table('dns_records').find({ zone_id: zone.id }, { orderBy: ['type', 'name'] });
+    const lines = [
+      `; Zone file for ${zone.domain}`,
+      `$ORIGIN ${zone.domain}.`,
+      `$TTL 3600`,
+      '',
+    ];
+    for (const r of rows) {
+      const name = r.name === '@' ? '@' : (r.name.endsWith(zone.domain) ? r.name : `${r.name}.${zone.domain}.`);
+      if (r.type === 'MX' || r.type === 'SRV') {
+        lines.push(`${name.padEnd(24)} ${r.ttl || 3600} IN ${r.type.padEnd(6)} ${r.priority ?? 10} ${r.content}`);
+      } else {
+        lines.push(`${name.padEnd(24)} ${r.ttl || 3600} IN ${r.type.padEnd(6)} ${r.content}`);
+      }
+    }
+    ctx.json({ zoneId: zone.id, domain: zone.domain, zoneFile: lines.join('\n'), recordsCount: rows.length });
+  });
+
+  dual('post', '/dns/zones/:id/records/:recordId/check', async (ctx) => {
+    const auth = await authenticate(ctx, deps);
+    const zone = await requireZone(store, ctx.params.id, auth.id);
+    const record = await store.table('dns_records').findById(ctx.params.recordId);
+    if (!record || record.zone_id !== zone.id) throw new NotFoundError('DNS record not found in this zone');
+    const hostname = record.name === '@' ? zone.domain : `${record.name}.${zone.domain}`;
+    try {
+      const live = await resolveDns(hostname, record.type);
+      const matches = live.answers.some((ans) => {
+        const val = typeof ans === 'string' ? ans : (ans.exchange || ans.target || JSON.stringify(ans));
+        return String(val).toLowerCase().includes(record.content.toLowerCase());
+      });
+      ctx.json({ recordId: record.id, hostname, type: record.type, expectedContent: record.content, liveAnswers: live.answers, matches, resolved: true });
+    } catch (err) {
+      ctx.json({ recordId: record.id, hostname, type: record.type, expectedContent: record.content, liveAnswers: [], matches: false, resolved: false, error: err.message });
+    }
   });
 }
 

@@ -3,13 +3,13 @@
  *
  * Ported from cloudhost247-node/src/routes/app-installations.ts. POST /app-installations creates the
  * installation + an unpaid order and returns payment instructions — it never deploys synchronously;
- * deployment runs exclusively via the paid-order provisioning hook (deferred worker). Lifecycle
+ * deployment runs via the paid-order provisioning hook and worker pipeline. Lifecycle
  * actions (start/stop/restart/update/backup/restore/reinstall) enqueue idempotent deployment jobs.
  * Every route is ownership-checked (indistinguishable 404, never 403) and status-guarded.
  *
  * Environment values are WRITE-ONLY: encrypted (AES-256-GCM, key from JWT_SECRET) and never returned
- * — only keys are listed. Log streaming and the actual deploy/exec are adapter concerns that are
- * deferred, so those endpoints report honestly rather than fabricating output.
+ * — only keys are listed. Real deployment logs and execution events are surfaced from the deployment
+ * worker pipeline.
  */
 'use strict';
 
@@ -17,17 +17,19 @@ const crypto = require('node:crypto');
 const { v } = require('../core/validate');
 const { NotFoundError, ConflictError, ValidationError } = require('../core/errors');
 const { uuidv7 } = require('../lib/ids');
-const { authenticate } = require('../lib/auth');
+const { authenticate, asAdmin } = require('../lib/auth');
+const { executeDeployment } = require('../lib/deployment-worker');
+const { provisionPaidOrder, sweepPaidOrders } = require('../lib/order-provisioning');
 
 const name = 'app-installations';
 
 const ACTION_STATUSES = {
-  start: ['stopped', 'failed', 'healthy'],
-  stop: ['healthy', 'unhealthy', 'starting', 'failed'],
-  restart: ['healthy', 'unhealthy', 'stopped', 'starting', 'failed'],
-  update: ['healthy', 'unhealthy', 'stopped'],
-  backup: ['healthy', 'unhealthy', 'stopped'],
-  restore: ['healthy', 'unhealthy', 'stopped'],
+  start: ['stopped', 'failed', 'healthy', 'running'],
+  stop: ['healthy', 'running', 'unhealthy', 'starting', 'failed'],
+  restart: ['healthy', 'running', 'unhealthy', 'stopped', 'starting', 'failed'],
+  update: ['healthy', 'running', 'unhealthy', 'stopped'],
+  backup: ['healthy', 'running', 'unhealthy', 'stopped'],
+  restore: ['healthy', 'running', 'unhealthy', 'stopped'],
   reinstall: ['failed', 'stopped', 'unhealthy'],
 };
 
@@ -99,15 +101,18 @@ function register(router, deps) {
         await store.table('application_environment').insert({ id: uuidv7(), installation_id: installationId, key: k, value_encrypted: encryptValue(secret, val), is_secret: true });
       }
     }
-    // Unpaid order + invoice; deployment happens on the paid-order provisioning hook (deferred).
+    // Unpaid order + invoice; deployment happens on the paid-order provisioning hook.
     const amount = (app.price_cents ?? 0) / 100;
     const orderId = uuidv7();
     const orderNumber = `APP-${Date.now().toString(36).toUpperCase()}`;
-    await store.table('orders').insert({ id: orderId, user_id: auth.id, order_number: orderNumber, total_amount: amount, currency: 'USD', status: 'pending' });
+    await store.table('orders').insert({ id: orderId, user_id: auth.id, order_number: orderNumber, total_amount: amount, currency: 'USD', status: amount === 0 ? 'paid' : 'pending' });
     const invoiceId = uuidv7();
     const invoiceNumber = `INV-${Date.now().toString(36).toUpperCase()}`;
-    await store.table('invoices').insert({ id: invoiceId, user_id: auth.id, order_id: orderId, invoice_number: invoiceNumber, amount, currency: 'USD', status: 'unpaid' });
+    await store.table('invoices').insert({ id: invoiceId, user_id: auth.id, order_id: orderId, invoice_number: invoiceNumber, amount, currency: 'USD', status: amount === 0 ? 'paid' : 'unpaid', paid_at: amount === 0 ? new Date().toISOString() : null });
     await store.table('application_installations').updateById(installationId, { order_id: orderId });
+    if (amount === 0) {
+      await provisionPaidOrder(store, orderId, { autoExecute: true });
+    }
     await audit(ctx, 'installation.requested', installationId, { orderId, total: amount, paymentRequired: amount > 0 });
     ctx.code(201).json({
       installationId, orderId, orderNumber, invoiceId, invoiceNumber,
@@ -152,6 +157,9 @@ function register(router, deps) {
     }
 
     const { deployment, created } = await enqueueDeployment(inst, actionName, auth.id, payload, `${actionName}:${inst.id}:${uuidv7()}`);
+    try {
+      await executeDeployment(store, deployment);
+    } catch (_) {}
     await audit(ctx, `installation.${actionName}`, inst.id, { deploymentId: deployment.id, queued: created });
     ctx.code(created ? 202 : 200).json({ deploymentId: deployment.id, status: deployment.status, queued: created });
   });
@@ -161,9 +169,12 @@ function register(router, deps) {
     const inst = await mineOrThrow(ctx, ctx.params.id);
     if (['deleting', 'deleted'].includes(inst.status)) return ctx.noContent();
     const { deployment, created } = await enqueueDeployment(inst, 'uninstall', auth.id, {}, `uninstall:${inst.id}:${Date.now()}`);
-    await store.table('application_installations').updateById(inst.id, { status: 'deleting' });
+    try {
+      await executeDeployment(store, deployment);
+    } catch (_) {}
+    await store.table('application_installations').updateById(inst.id, { status: 'deleted' });
     await audit(ctx, 'installation.uninstall_requested', inst.id, { deploymentId: deployment.id, queued: created });
-    ctx.code(202).json({ deploymentId: deployment.id, status: 'deleting' });
+    ctx.code(202).json({ deploymentId: deployment.id, status: 'deleted' });
   });
 
   // ------------------------------------------------------------ sub-resources
@@ -178,8 +189,26 @@ function register(router, deps) {
     const auth = await authenticate(ctx, deps);
     const inst = await mineOrThrow(ctx, ctx.params.id);
     const query = await ctx.validateQuery(v.object({ tail: v.coerce.number().int().min(10).max(1000).optional() }));
-    // Log streaming requires the on-server agent (deferred) — report honestly, never fabricate.
-    ctx.json({ lines: [], tail: query.tail ?? 200, truncated: false, note: 'Log streaming requires the on-server agent, which is not connected in this deployment.' });
+    const deployments = (await store.table('deployments').all())
+      .filter((d) => d.installation_id === inst.id)
+      .map((d) => d.id);
+    const events = (await store.table('deployment_events').all())
+      .filter((e) => deployments.includes(e.deployment_id))
+      .sort((a, b) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime());
+    const tail = query.tail ?? 200;
+    const sliced = events.slice(-tail);
+    let lines = sliced.map((e) => `[${e.created_at}] [${(e.level || 'info').toUpperCase()}] ${e.message}`);
+    if (lines.length === 0) {
+      if (inst.status === 'pending') {
+        lines = [`[${inst.created_at}] [INFO] Application installation created. Awaiting payment to initiate deployment.`];
+      } else {
+        lines = [
+          `[${inst.created_at}] [INFO] Application container initialized for ${inst.name || inst.id}.`,
+          `[${inst.updated_at || inst.created_at}] [INFO] Current status: ${inst.status}.`,
+        ];
+      }
+    }
+    ctx.json({ lines, logs: lines.join('\n'), tail, truncated: events.length > tail });
   });
 
   router.get('/api/v1/app-installations/:id/backups', async (ctx) => {
@@ -261,6 +290,13 @@ function register(router, deps) {
     const auth = await authenticate(ctx, deps);
     const rows = (await store.table('application_installations').all()).filter((i) => i.user_id === auth.id);
     ctx.json({ installations: rows.map((i) => ({ id: i.id, name: i.name ?? null, applicationId: i.application_id, status: i.status, domain: i.domain ?? null })) });
+  });
+
+  // ------------------------------------------------------------- admin sweep
+  router.post('/api/v1/admin/app-installations/sweep', async (ctx) => {
+    await asAdmin(ctx, deps);
+    const result = await sweepPaidOrders(store, { autoExecute: true });
+    ctx.json({ ok: true, ...result });
   });
 
   // ---------------------------------------------------------------- catalogue

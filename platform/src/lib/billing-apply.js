@@ -9,6 +9,7 @@
 'use strict';
 
 const { uuidv7 } = require('./ids');
+const { provisionPaidOrder } = require('./order-provisioning');
 
 const round2 = (n) => Math.round(n * 100) / 100;
 
@@ -51,6 +52,7 @@ async function applySuccessfulPayment(tx, { paymentId, gatewayReference }) {
 
       if (invoice.order_id) {
         await tx.table('orders').updateById(invoice.order_id, { status: 'paid' });
+        await provisionPaidOrder(tx, invoice.order_id);
       }
     }
   }

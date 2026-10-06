@@ -12,6 +12,9 @@
     {if $captcha}{$captcha->getMarkup()}{/if}
     {$headeroutput}
 
+    {* CloudHost247 Announcement Bar — placed ABOVE the navbar *}
+    {include file="$template/includes/announcementbar.tpl"}
+
     {if !$ch247Builder.header_html}{include file="cloudhost247/includes/site-nav.tpl"}{/if}
         {if $loggedin}
             <div class="topbar">

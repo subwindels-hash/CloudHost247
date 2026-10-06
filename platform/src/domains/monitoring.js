@@ -1,15 +1,17 @@
 /**
- * Server monitoring.
+ * Server monitoring & telemetry ingestion.
  *
  * Ported from cloudhost247-node/src/routes/monitoring.ts. Metrics are collected into server_metrics
- * by an agent (deferred here) and read back. Customers see their own servers' latest metrics;
- * admins see health across all.
+ * by the on-server agent (via signed HMAC reports or direct API telemetry push) and read back.
+ * Customers see their own servers' latest metrics; admins see health across all.
  */
 'use strict';
 
 const { v } = require('../core/validate');
-const { NotFoundError } = require('../core/errors');
+const { NotFoundError, UnauthorizedError } = require('../core/errors');
+const { uuidv7 } = require('../lib/ids');
 const { authenticate, asAdmin } = require('../lib/auth');
+const { authenticateAgent } = require('../lib/agent-auth');
 
 const name = 'monitoring';
 
@@ -62,12 +64,16 @@ function register(router, deps) {
     ];
     if (server.panel) services.push({ name: server.panel, status: online ? 'ONLINE' : 'UNKNOWN', port: 8443 });
 
+    const heartbeat = await store.table('agent_heartbeats').findOne({ server_id: server.id });
+    const agentLastSeenAt = server.metadata?.agent_last_seen_at ?? heartbeat?.last_seen_at ?? null;
+
     ctx.json({
       monitoring: {
         serverId: server.id, serverName: server.name, hostname: server.hostname ?? null,
         ipAddress: server.ip_address ?? null, status: server.status,
         healthStatus: healthFromStatus(server.status, latest),
         panelHealth: server.panel ? (online ? 'HEALTHY' : 'DEGRADED') : 'UNKNOWN',
+        agentLastSeenAt,
         lastReconciledAt: server.updated_at,
         metrics: { current: metricDto(latest), history: metrics.map(metricDto) },
         services,
@@ -110,8 +116,9 @@ function register(router, deps) {
 
   router.get('/api/v1/monitoring/servers/:id/metrics', async (ctx) => {
     const auth = await authenticate(ctx, deps);
-    const server = await store.table('servers').findOne({ id: ctx.params.id, user_id: auth.id });
-    if (!server) throw new NotFoundError('Server not found');
+    const server = await store.table('servers').findById(ctx.params.id);
+    const staff = isStaffRole(auth.role);
+    if (!server || (!staff && server.user_id !== auth.id)) throw new NotFoundError('Server not found');
 
     const query = await ctx.validateQuery(v.object({ limit: v.coerce.number().int().min(1).max(500).default(60) }));
     const rows = await store.table('server_metrics').all();
@@ -120,6 +127,72 @@ function register(router, deps) {
       .sort((a, b) => String(a.collected_at).localeCompare(String(b.collected_at)))
       .slice(-query.limit);
     ctx.json({ serverId: server.id, metrics });
+  });
+
+  // Telemetry ingestion endpoint for a specific server (agent or owner/staff)
+  router.post('/api/v1/monitoring/servers/:id/metrics', async (ctx) => {
+    const server = await store.table('servers').findById(ctx.params.id);
+    if (!server) throw new NotFoundError('Server not found');
+
+    // Authenticate caller: check for agent signature first, then user auth
+    let callerType = 'user';
+    try {
+      const agentAuth = await authenticateAgent(ctx, deps);
+      if (agentAuth.server && agentAuth.server.id !== server.id) {
+        throw new UnauthorizedError('Agent signature does not match target server');
+      }
+      callerType = 'agent';
+    } catch {
+      const auth = await authenticate(ctx, deps);
+      const staff = isStaffRole(auth.role);
+      if (!staff && server.user_id !== auth.id) throw new NotFoundError('Server not found');
+    }
+
+    const body = await ctx.validate(v.object({
+      cpuPercent: v.coerce.number().min(0).max(100).optional(),
+      memoryPercent: v.coerce.number().min(0).max(100).optional(),
+      diskPercent: v.coerce.number().min(0).max(100).optional(),
+      loadAverage: v.coerce.number().min(0).optional(),
+      memoryUsedMb: v.coerce.number().int().min(0).optional(),
+      memoryTotalMb: v.coerce.number().int().min(0).optional(),
+      diskUsedMb: v.coerce.number().int().min(0).optional(),
+      diskTotalMb: v.coerce.number().int().min(0).optional(),
+      load1: v.coerce.number().min(0).optional(),
+    }));
+
+    let cpu = body.cpuPercent ?? null;
+    let mem = body.memoryPercent ?? null;
+    let disk = body.diskPercent ?? null;
+    let load = body.loadAverage ?? body.load1 ?? null;
+
+    if (mem === null && body.memoryUsedMb !== undefined && body.memoryTotalMb && body.memoryTotalMb > 0) {
+      mem = Math.round((body.memoryUsedMb / body.memoryTotalMb) * 10000) / 100;
+    }
+    if (disk === null && body.diskUsedMb !== undefined && body.diskTotalMb && body.diskTotalMb > 0) {
+      disk = Math.round((body.diskUsedMb / body.diskTotalMb) * 10000) / 100;
+    }
+
+    const metric = await store.table('server_metrics').insert({
+      id: uuidv7(),
+      server_id: server.id,
+      cpu_percent: cpu,
+      memory_percent: mem,
+      disk_percent: disk,
+      load_average: load,
+    });
+
+    const nowIso = new Date().toISOString();
+    const existingHeartbeat = await store.table('agent_heartbeats').findOne({ server_id: server.id });
+    if (existingHeartbeat) {
+      await store.table('agent_heartbeats').updateById(existingHeartbeat.id, { last_seen_at: nowIso });
+    } else {
+      await store.table('agent_heartbeats').insert({ id: uuidv7(), server_id: server.id, last_seen_at: nowIso });
+    }
+
+    const metadata = { ...(server.metadata || {}), agent_last_seen_at: nowIso };
+    await store.table('servers').updateById(server.id, { metadata });
+
+    ctx.code(201).json({ ok: true, metricId: metric.id, serverId: server.id, callerType });
   });
 
   router.get('/api/v1/admin/monitoring/server-health', async (ctx) => {
