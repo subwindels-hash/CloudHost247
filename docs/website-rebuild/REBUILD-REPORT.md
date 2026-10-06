@@ -132,22 +132,27 @@ theme.
 | Suite | Result |
 |---|---|
 | Backend (`npx vitest run tests`) | **1,632 passed**, 136 files |
-| Frontend (`npx vitest run frontend/tests`) | **513 passed**, 33 files |
+| Frontend (`npx vitest run frontend/tests`) | **514 passed**, 33 files |
 | Page render verification | all **54 public pages** rendered server-side and asserted |
 | Design-system contract | breakpoints, overflow, palette, touch targets, reduced motion |
 | Link integrity | 0 broken links across 2,175 surfaces |
 | Registry validation | 222 destinations, 0 unresolved |
 | PHP contract (`verify-website.py`) | passed — 67 registry pages, 93 navigation destinations |
 | PHP theme contract (`tests/website/test_static.py`) | 10 passed, including design-system load order and registry provenance |
+| Static document shell | brand, canonical, Open Graph, JSON-LD, `<noscript>` and icon paths asserted against the registry |
 | PHP syntax balance | 1,737 files, all balanced |
 | Branding audit | passed |
 | TypeScript | clean, server and frontend |
-| **Total** | **2,145 tests passing** |
+| **Total** | **2,146 tests passing** |
 
 ## 13. Build result
 
-* `npm run build` — clean. Main chunk 525 kB / **155 kB gzip**, plus per-route chunks; the marketing
-  page component is its own 36 kB chunk, and page content loads with it rather than with the shell.
+* `npm run build` — clean. The document shell preloads **276 kB / 86 kB gzip**; the page-content
+  chunk (172 kB) and the policy chunk (84 kB) are fetched only by the routes that render them, so a
+  visitor reading the homepage does not download 54 product pages or 10,000 words of legal text.
+  The previous phase's build shipped a single 525 kB / 155 kB gzip entry.
+* Every route remains its own chunk; the marketing component is shared by all 54 pages rather than
+  duplicated per page.
 * Server build (`tsc -p tsconfig.json`) — clean, 8.8 MB of compiled output.
 * Production package — **7,885 files, 55.3 MB**, extracted into a clean directory and verified:
   entry points present, 161 media assets, 14 documentation files, **0 secrets**.

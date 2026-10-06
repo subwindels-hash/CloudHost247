@@ -62,6 +62,13 @@ the theme consumed them. A second pass found four real defects, all fixed:
    generates the file from the configured `SystemURL`, with one documented rewrite rule; the static
    file stays as a working fallback and says plainly why it cannot do this itself.
 
+A third check found the static document shell (`cloudhost247-node/frontend/index.html`) still
+declaring "Cloud hosting, built for your next idea" with a two-line description and no Open Graph,
+canonical or structured data — so a crawler that does not execute JavaScript, and the first paint
+before the bundle boots, saw none of the new site's metadata. The shell now carries the real brand,
+canonical, Open Graph, JSON-LD, icons and a `<noscript>` summary, and a test pins it against
+`shared/site/registry.json` so it cannot drift again.
+
 ### Routes
 
 | Category | Before | After |
@@ -247,8 +254,8 @@ deployment gets broken. What it does instead:
 | PHP syntax sanity | `node scripts/php-syntax-check.cjs $(git ls-files '*.php')` | 1,737 files, all parse-balanced |
 | TypeScript (server) | `npx tsc -p tsconfig.json --noEmit` | clean |
 | TypeScript (frontend) | `npx tsc -p frontend/tsconfig.json --noEmit` | clean |
-| Frontend production build | `npm run build` | clean — 525 kB main chunk / 155 kB gzip + per-route chunks |
-| Frontend tests | `npx vitest run frontend/tests` | **513 passed**, 33 files |
+| Frontend production build | `npm run build` | clean — 276 kB shell / 86 kB gzip preloaded; content and policy chunks load on demand |
+| Frontend tests | `npx vitest run frontend/tests` | **514 passed**, 33 files |
 | Backend tests | `npx vitest run tests` | **1,632 passed**, 136 files |
 | Page render verification | `frontend/tests/unit/marketing-pages.test.tsx` | all 54 pages rendered server-side, content asserted |
 | Responsive/overflow contract | `frontend/tests/unit/design-system.test.ts` | passed |

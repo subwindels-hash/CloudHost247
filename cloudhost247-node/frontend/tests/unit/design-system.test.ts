@@ -75,6 +75,28 @@ describe('design system', () => {
     expect(body.trim()).toBe(DESIGN_SYSTEM.trim());
   });
 
+  it('keeps the static document shell consistent with the brand registry', () => {
+    // A crawler that does not run JavaScript reads this file, so a stale title or a missing icon
+    // here is a real defect, not a cosmetic one.
+    const shell = readFileSync(join(ROOT, 'cloudhost247-node', 'frontend', 'index.html'), 'utf8');
+    const registry = JSON.parse(readFileSync(join(ROOT, 'shared', 'site', 'registry.json'), 'utf8'));
+    expect(shell).toContain(registry.brand.name);
+    expect(shell).toContain(registry.brand.legalName);
+    expect(shell).toContain(registry.brand.tagline);
+    expect(shell).toContain('rel="canonical"');
+    expect(shell).toContain('og:site_name');
+    expect(shell).toContain('application/ld+json');
+    expect(shell).toContain('<noscript>');
+    for (const asset of [
+      '/media/cloudhost247/favicon/favicon.ico',
+      '/media/cloudhost247/brand/icon-mark.svg',
+      '/media/cloudhost247/favicon/apple-touch-icon.png',
+      '/media/cloudhost247/favicon/site.webmanifest',
+    ]) {
+      expect(shell, `static shell references ${asset}, which must exist in the published build`).toContain(asset);
+    }
+  });
+
   it('gives every interactive control a touch target of at least 44px', () => {
     const minimumHeights = [...DESIGN_SYSTEM.matchAll(/min-height:\s*(\d+)px/g)].map((match) => Number(match[1]));
     const tooSmall = minimumHeights.filter((value) => value > 0 && value < 38);
