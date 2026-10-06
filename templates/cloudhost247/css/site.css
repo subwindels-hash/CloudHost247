@@ -8,3 +8,6 @@
 @media(prefers-reduced-motion:reduce){.ch-site *{scroll-behavior:auto!important;animation:none!important;transition:none!important}}[dir=rtl] .ch-workflow>div{padding-left:0;padding-right:50px}[dir=rtl] .ch-workflow span{left:auto;right:0}
 
 .ch-site .ch247-email{--ch247-email-accent:#196947;--ch247-email-accent-dark:#125036;--ch247-email-muted:#556570}.ch-site .ch247-email-hero__inner{align-items:center}.ch-site .ch247-email-hero__copy h1{font-weight:600}.ch-site .ch247-email-hero .ch247-email-eyebrow{color:#b4f2cd}
+
+/* CMS titles and user queries may contain long, unbroken strings. */
+.ch-search-heading,.ch-resource-card{overflow-wrap:anywhere}

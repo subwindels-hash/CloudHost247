@@ -9,6 +9,7 @@ require $smartyPath . '/libs/Smarty.class.php';
 require $root . '/modules/addons/cloudhost247_theme/lib/Site.php';
 function routePath($name) { return '/knowledgebase.php'; }
 $smarty = new Smarty();
+$smarty->registerPlugin('modifier', 'routePath', 'routePath');
 $smarty->setTemplateDir($root . '/templates');
 $smarty->setCompileDir($out . '/compiled');
 $smarty->error_reporting = E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED;
@@ -24,6 +25,9 @@ $pages['aboutus.php'] = 'aboutus.tpl';
 $pages['faqs.php'] = 'faqs.tpl';
 foreach (array('applications.php','operating-systems.php','deployments.php','server-management.php') as $path) { $pages[$path] = 'cloudhost247-platform.tpl'; }
 $pages['infrastructure.php'] = 'cloudhost247-infrastructure.tpl';
+foreach (array('site-search.php', 'site-search-unavailable.php', 'site-search-empty.php', 'site-search-long.php') as $path) {
+    $pages[$path] = 'cloudhost247-search.tpl';
+}
 $pages['privacy-policy.php'] = 'privacypolicy.tpl';
 $pages['cookie-policy.php'] = 'cookiepolicy.tpl';
 $pages['acceptable-use-policy.php'] = 'acceptableusepolicy.tpl';
@@ -38,6 +42,16 @@ foreach ($pages as $path => $template) {
         require_once $root . '/modules/servers/cloudhost247_email_hosting/lib/Repository/ContentRepository.php';
         $content = \CloudHost247\Email\Repository\ContentRepository::defaults();
         $smarty->assign(array('emailHero'=>$content['hero'],'emailProviderContent'=>$content['providers'],'emailDnsContent'=>$content['dns'],'emailFaqs'=>$content['faqs'],'emailProviders'=>array(),'emailComparison'=>array(),'emailPlanCount'=>0,'emailCurrency'=>'','emailCatalogError'=>''));
+    }
+    if ($template === 'cloudhost247-search.tpl') {
+        $smarty->assign(array(
+            'chSearchQuery' => $path === 'site-search-long.php' ? str_repeat('q', 100) : 'hosting', 'chSearchUnavailable' => $path === 'site-search-unavailable.php',
+            'chSearchResults' => in_array($path, array('site-search.php', 'site-search-long.php'), true) ? array(array(
+                'title' => $path === 'site-search-long.php' ? str_repeat('CloudHost247', 8) : 'Web hosting',
+                'summary' => 'Hosting for your next project.',
+                'url' => 'web-hosting.php', 'category' => 'Hosting',
+            )) : array(), 'token' => 'fixture-only-not-a-session-token',
+        ));
     }
     $smarty->assign(array('ch247Products'=>array(),'ch247CatalogError'=>''));
     $html = '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' . htmlspecialchars($site['title'], ENT_QUOTES, 'UTF-8') . ' | CloudHost247</title><link rel="stylesheet" href="/templates/cloudhost247/css/custom.css"><link rel="stylesheet" href="/templates/cloudhost247/css/site.css"><script src="/templates/cloudhost247/js/site.js" defer></script></head><body class="ch-site ch-public">';

@@ -27,3 +27,6 @@ __pycache__/
 # Build tooling for scripts/php-wasm (installed on first use; never shipped)
 /scripts/php-wasm/node_modules/
 /scripts/php-wasm/.install-lock/
+
+# Local verification logs, caches and downloaded tooling (never release inputs).
+/.cache/

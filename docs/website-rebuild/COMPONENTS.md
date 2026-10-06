@@ -33,7 +33,7 @@ WHMCS still owns authentication, billing, checkout and service authorization.
 | Legal | `includes/legal-layout.tpl`, `includes/legal/*.tpl`; pre-existing policy content in a shared reading layout |
 | ApplicationLogo | Neutral text badge in `js/site.js` and `includes/application-logo.tpl`; no fabricated third-party mark |
 | OS / application cards | `cloudhost247-platform.tpl`, `site.js`; read-only existing public platform APIs, no example catalog or fake controls |
-| Search | `site-search.php`, `cloudhost247-search.tpl`, `includes/search-form.tpl`; bounded editorial search plus real WHMCS KB form |
+| Search | `PublicDiscovery`, `ThemeRepository::publicPageIndex`, `site-search.php`, `cloudhost247-search.tpl`; publication-aware page/landing discovery, bounded results and real WHMCS KB form |
 | Errors | `cloudhost247-error.tpl`, `error/page-not-found.tpl`, `access-denied.tpl`, `service-error.php`, static `errors/*.html` |
 | SEO | `includes/site-head.tpl`, Site context, canonical generic-route redirects, sitemap and robots; no invented review/offer structured data |
 | Builder | Existing published parts win on Builder pages; core schema, renderer, form processing and visibility unchanged |
@@ -79,7 +79,9 @@ fill a footer column.
 - `python3 scripts/verify-website.py`: fail on invalid critical navigation URLs,
   deleted baseline routes, unresolved registered page images and literal assets.
 - `php tests/website/run.php`: editorial/draft precedence, unsafe mount rejection,
-  safe JSON-LD, fail-closed DB behavior and explicit draft publication.
+  safe JSON-LD, fail-closed DB behavior, explicit draft publication, canonical
+  discovery, published custom pages/landings, translation visibility, slug
+  collisions, sitemap opt-out, missing optional fields and the 40-result limit.
 - `python3 -m unittest tests/website/test_static.py`: link mutation tests, parent
   hook contracts, Builder precedence and read-only API use.
 - `tests/website/render-fixtures.php`: real Smarty rendering of shipped templates

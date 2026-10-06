@@ -2,7 +2,7 @@ path,category,bytes
 .gitattributes,Administrative/internal,1920
 .github/workflows/independent-foundation.yml,Administrative/internal,2297
 .github/workflows/node-platform.yml,Administrative/internal,2799
-.gitignore,Administrative/internal,669
+.gitignore,Administrative/internal,760
 PHASE_5_CHECKPOINT_REPORT.md,Administrative/internal,64070
 README.md,Administrative/internal,18059
 aboutus.php,Marketing,397
@@ -912,7 +912,7 @@ cloudhost247-node/tests/integration/customer-app-schema.test.ts,Administrative/i
 cloudhost247-node/tests/integration/customer-identity-api.test.ts,Administrative/internal,27281
 cloudhost247-node/tests/integration/dev-catalog-seed.test.ts,Administrative/internal,1651
 cloudhost247-node/tests/integration/dns-api.test.ts,Administrative/internal,6309
-cloudhost247-node/tests/integration/dns-propagation.test.ts,Administrative/internal,11851
+cloudhost247-node/tests/integration/dns-propagation.test.ts,Administrative/internal,12178
 cloudhost247-node/tests/integration/domain-services-api.test.ts,Administrative/internal,38749
 cloudhost247-node/tests/integration/domain-services-notifications.test.ts,Administrative/internal,34649
 cloudhost247-node/tests/integration/domains-servers-admin.test.ts,Administrative/internal,13932
@@ -993,7 +993,7 @@ cloudhost247-node/tsconfig.json,Administrative/internal,559
 cloudhost247-node/vitest.config.ts,Administrative/internal,843
 cloudhost247-page.php,Marketing,1270
 cloudhost247-sample.php,Administrative/internal,678
-cloudhost247-sitemap.php,Administrative/internal,2126
+cloudhost247-sitemap.php,Administrative/internal,1315
 cloudhost247-vps-sample.php,Administrative/internal,806
 comingsoon.php,Marketing,662
 cookie-policy.php,Legal,365
@@ -1594,9 +1594,10 @@ modules/addons/cloudhost247_theme/hooks.php,Administrative/internal,5686
 modules/addons/cloudhost247_theme/landing-bootstrap.php,Administrative/internal,1785
 modules/addons/cloudhost247_theme/lib/AdminController.php,Administrative/internal,5687
 modules/addons/cloudhost247_theme/lib/Content/ProductComponents.php,Administrative/internal,6522
+modules/addons/cloudhost247_theme/lib/PublicDiscovery.php,Administrative/internal,3483
 modules/addons/cloudhost247_theme/lib/PublicPage.php,Administrative/internal,7526
 modules/addons/cloudhost247_theme/lib/Site.php,Administrative/internal,6348
-modules/addons/cloudhost247_theme/lib/ThemeRepository.php,Administrative/internal,28022
+modules/addons/cloudhost247_theme/lib/ThemeRepository.php,Administrative/internal,29016
 modules/addons/cloudhost247_theme/lib/View/AdminPanels.php,Administrative/internal,5107
 modules/addons/cloudhost247_theme/lib/View/PreviewRenderer.php,Administrative/internal,9171
 modules/addons/cloudhost247_theme/migrations/V100.php,Administrative/internal,1240
@@ -4372,7 +4373,7 @@ server-agent/tests/auth.test.js,Administrative/internal,13535
 server-agent/tests/docker-backups.test.js,Administrative/internal,30498
 server-management.php,Server Management,330
 service-error.php,Administrative/internal,608
-site-search.php,Marketing,1888
+site-search.php,Marketing,1449
 ssl-certificate.php,Administrative/internal,828
 tables.php,Administrative/internal,790
 templates/cloudhost247/aboutus.tpl,Marketing,737
@@ -4386,12 +4387,12 @@ templates/cloudhost247/cloudhost247-infrastructure.tpl,Cloud,857
 templates/cloudhost247/cloudhost247-page.tpl,Administrative/internal,2855
 templates/cloudhost247/cloudhost247-platform.tpl,Administrative/internal,1937
 templates/cloudhost247/cloudhost247-product-catalog.tpl,Administrative/internal,2074
-templates/cloudhost247/cloudhost247-search.tpl,Marketing,1449
+templates/cloudhost247/cloudhost247-search.tpl,Marketing,2382
 templates/cloudhost247/cookiepolicy.tpl,Legal,117
 templates/cloudhost247/css/announcementbar.css,Marketing,5532
 templates/cloudhost247/css/custom.css,Administrative/internal,6850
 templates/cloudhost247/css/email-hosting.css,Email,11735
-templates/cloudhost247/css/site.css,Administrative/internal,18877
+templates/cloudhost247/css/site.css,Administrative/internal,19009
 templates/cloudhost247/cybercrimepolicy.tpl,Legal,121
 templates/cloudhost247/datadeletion.tpl,Administrative/internal,117
 templates/cloudhost247/dataprivacynoticeandconsentform.tpl,Legal,136
@@ -6433,11 +6434,11 @@ tests/theme/run.php,Administrative/internal,23346
 tests/theme/test_static.py,Administrative/internal,10291
 tests/tools/run.php,Administrative/internal,53663
 tests/tools/test_static.py,Administrative/internal,11081
-tests/website/browser.cjs,Administrative/internal,4534
+tests/website/browser.cjs,Administrative/internal,6254
 tests/website/preview.py,Administrative/internal,1434
-tests/website/render-fixtures.php,Administrative/internal,4135
+tests/website/render-fixtures.php,Administrative/internal,5073
 tests/website/render-shell.php,Administrative/internal,2928
-tests/website/run.php,Administrative/internal,2797
+tests/website/run.php,Administrative/internal,8996
 tests/website/test_static.py,Administrative/internal,2322
 tools/build-manifests.py,Developer,58579
 trademark-policy.php,Legal,13760

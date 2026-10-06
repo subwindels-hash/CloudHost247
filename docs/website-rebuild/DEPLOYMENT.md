@@ -106,9 +106,19 @@ is implied by a diagram or menu entry. Availability comes from the backend.
 - Submit `cloudhost247-sitemap.php` and `builder-sitemap.php` in the search console.
   Insert their absolute URLs into `robots.txt` using your real SystemURL. No
   environment-specific production domain is hard-coded into the new assets.
-- Search covers editorial service/policy routes and delegates documentation
-  searches to WHMCS's real knowledgebase form. News links lead to published
-  announcements. This is not a cross-database full-text index of private records.
+- Search and the sitemap share one publication read model for CMS pages and
+  landings. Published custom pages, localized copy and canonical registered URLs
+  are discoverable; drafts are excluded. When a page and landing share a slug,
+  the lowest-ID published entry wins, matching the public renderer. A sitemap
+  opt-out removes the URL from the sitemap, not from internal search; it is not
+  an access-control mechanism.
+- With a nonempty query, a failed content/translation lookup returns a friendly
+  search-unavailable state with HTTP 503 and `Retry-After: 300`, rather than
+  bypassing publication controls. Search responses are non-cacheable/noindex.
+  Confirm these status codes, headers, draft exclusions and custom-page links
+  on the actual WHMCS staging installation, including subdirectory deployments.
+- Documentation searches use WHMCS's real knowledgebase form. News links lead to
+  published announcements. This is not a cross-database index of private records.
 
 ## Required staging tests — do not skip
 

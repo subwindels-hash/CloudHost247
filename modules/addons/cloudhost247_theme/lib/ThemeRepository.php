@@ -141,9 +141,31 @@ final class ThemeRepository
         return array_map(array($this, 'hydrate'), $query->get()->all());
     }
 
+    /**
+     * One publication snapshot for public discovery. A null entry means the slug
+     * exists but has no published page/landing; draft payloads are never hydrated.
+     * Select the same lowest-ID published entry as findPublishedPage when a page
+     * and a landing share a slug. Database/localization failures must propagate.
+     */
+    public function publicPageIndex($locale = null)
+    {
+        $rows = Capsule::table(self::CONTENT)->whereIn('content_type', array('page', 'landing'))->orderBy('id')->get();
+        $index = array();
+        foreach ($rows as $row) {
+            if (!array_key_exists($row->slug, $index)) { $index[$row->slug] = null; }
+            if ($row->published && $index[$row->slug] === null) {
+                $index[$row->slug] = $this->hydrate($row);
+            }
+        }
+        foreach ($this->localize(array_filter($index), $locale) as $slug => $page) {
+            $index[$slug] = $page;
+        }
+        return $index;
+    }
+
     public function findPublishedPage($slug, $locale = null)
     {
-        $row = Capsule::table(self::CONTENT)->whereIn('content_type', array('page', 'landing'))->where('slug', $this->slug($slug))->where('published', 1)->first();
+        $row = Capsule::table(self::CONTENT)->whereIn('content_type', array('page', 'landing'))->where('slug', $this->slug($slug))->where('published', 1)->orderBy('id')->first();
         if (!$row) return null;
         $items = $this->localize(array($this->hydrate($row)), $locale);
         return $items[0];

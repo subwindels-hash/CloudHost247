@@ -1,6 +1,6 @@
 {
   "scope": "Real Smarty template fixtures only. No WHMCS core, sessions, database, checkout or authentication.",
-  "routes": 48,
+  "routes": 52,
   "widths": [
     320,
     360,
@@ -13,7 +13,7 @@
     1440,
     1920
   ],
-  "cases": 480,
+  "cases": 520,
   "overflow": [],
   "brokenImages": [],
   "errors": [],
@@ -65,18 +65,444 @@
     {
       "route": "email-hosting.php",
       "violations": []
+    },
+    {
+      "route": "site-search.php",
+      "violations": []
+    },
+    {
+      "route": "site-search-unavailable.php",
+      "violations": []
+    },
+    {
+      "route": "site-search-empty.php",
+      "violations": []
+    },
+    {
+      "route": "site-search-long.php",
+      "violations": []
     }
   ],
   "navigation": [
     {
-      "width": 1440,
+      "width": 320,
+      "label": "Hosting\n⌄",
       "open": true,
-      "escape": true
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 320,
+      "label": "Cloud & Servers\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 320,
+      "label": "Domains\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 320,
+      "label": "Applications\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 320,
+      "label": "Developers\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 320,
+      "label": "Resources\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 360,
+      "label": "Hosting\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 360,
+      "label": "Cloud & Servers\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 360,
+      "label": "Domains\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 360,
+      "label": "Applications\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 360,
+      "label": "Developers\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 360,
+      "label": "Resources\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
     },
     {
       "width": 375,
+      "label": "Hosting\n⌄",
       "open": true,
-      "escape": true
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 375,
+      "label": "Cloud & Servers\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 375,
+      "label": "Domains\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 375,
+      "label": "Applications\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 375,
+      "label": "Developers\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 375,
+      "label": "Resources\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 390,
+      "label": "Hosting\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 390,
+      "label": "Cloud & Servers\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 390,
+      "label": "Domains\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 390,
+      "label": "Applications\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 390,
+      "label": "Developers\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 390,
+      "label": "Resources\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 414,
+      "label": "Hosting\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 414,
+      "label": "Cloud & Servers\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 414,
+      "label": "Domains\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 414,
+      "label": "Applications\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 414,
+      "label": "Developers\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 414,
+      "label": "Resources\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 768,
+      "label": "Hosting\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 768,
+      "label": "Cloud & Servers\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 768,
+      "label": "Domains\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 768,
+      "label": "Applications\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 768,
+      "label": "Developers\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 768,
+      "label": "Resources\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 1024,
+      "label": "Hosting\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 1024,
+      "label": "Cloud & Servers\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 1024,
+      "label": "Domains\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 1024,
+      "label": "Applications\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 1024,
+      "label": "Developers\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 1024,
+      "label": "Resources\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 1280,
+      "label": "Hosting\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 1280,
+      "label": "Cloud & Servers\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 1280,
+      "label": "Domains\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 1280,
+      "label": "Applications\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 1280,
+      "label": "Developers\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 1280,
+      "label": "Resources\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 1440,
+      "label": "Hosting\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 1440,
+      "label": "Cloud & Servers\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 1440,
+      "label": "Domains\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 1440,
+      "label": "Applications\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 1440,
+      "label": "Developers\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 1440,
+      "label": "Resources\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 1920,
+      "label": "Hosting\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 1920,
+      "label": "Cloud & Servers\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 1920,
+      "label": "Domains\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 1920,
+      "label": "Applications\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 1920,
+      "label": "Developers\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
+    },
+    {
+      "width": 1920,
+      "label": "Resources\n⌄",
+      "open": true,
+      "escape": true,
+      "focus": true
     }
   ],
   "passed": true
