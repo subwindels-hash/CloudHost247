@@ -348,6 +348,18 @@ async function runJob(deps, job) {
 
   try {
     const outcome = await executeJob(deps, job);
+    if (job.service_id || job.server_id) {
+      const linked = (await store.table('customer_services').all())
+        .filter((s) => s.id === job.service_id || (job.server_id && s.server_id === job.server_id));
+      for (const s of linked) {
+        if (['pending', 'provisioning'].includes(s.status)) {
+          await store.table('customer_services').updateById(s.id, {
+            status: 'active',
+            updated_at: new Date().toISOString(),
+          });
+        }
+      }
+    }
     const updated = await finish({ status: 'completed', result: outcome.result ?? null, error: null });
     return { jobId: job.id, kind: job.kind, outcome: 'completed', job: updated };
   } catch (error) {

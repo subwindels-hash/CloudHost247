@@ -6,8 +6,9 @@
  * role-aware: staff see every service (with filters), customers see only their own. Mutations and
  * lifecycle actions (provision/suspend/unsuspend/terminate) are admin/staff gated and audited.
  *
- * Provisioning is queued, not performed synchronously: the provision action flips the record to
- * 'provisioning'; the actual server build is the deferred provisioning worker's job.
+ * Provisioning is queued and executed via the infrastructure provisioning worker: the provision
+ * action flips the record to 'provisioning', enqueues a server build job if a server is attached,
+ * and completes to 'active' on execution.
  */
 'use strict';
 
@@ -157,9 +158,30 @@ function register(router, deps) {
     const id = ctx.params.id;
     const service = await store.table('customer_services').findById(id);
     if (!service) throw new NotFoundError('Service not found');
+    let jobId = null;
+    if (service.server_id) {
+      const activeJob = (await store.table('provisioning_jobs').all())
+        .find((j) => (j.server_id === service.server_id || j.service_id === service.id) && ['queued', 'running'].includes(j.status));
+      if (!activeJob) {
+        const job = await store.table('provisioning_jobs').insert({
+          id: uuidv7(),
+          user_id: service.user_id,
+          server_id: service.server_id,
+          service_id: service.id,
+          kind: 'CREATE',
+          resource_type: 'servers',
+          resource_id: service.server_id,
+          status: 'queued',
+          payload: { serviceId: service.id },
+        });
+        jobId = job.id;
+      } else {
+        jobId = activeJob.id;
+      }
+    }
     const updated = await store.table('customer_services').updateById(id, { status: 'provisioning' });
-    await audit(ctx, 'SERVICE_PROVISION_QUEUED', id, { serverId: service.server_id, panelId: service.control_panel_id });
-    ctx.json({ service: await adminDto(updated), message: 'Provisioning initiated' });
+    await audit(ctx, 'SERVICE_PROVISION_QUEUED', id, { serverId: service.server_id, panelId: service.control_panel_id, jobId });
+    ctx.json({ service: await adminDto(updated), message: 'Provisioning initiated', jobId });
   });
 
   // ---------------------------------------------------------------- suspend

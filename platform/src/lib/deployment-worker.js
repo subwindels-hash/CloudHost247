@@ -92,7 +92,7 @@ async function executeDeployment(store, deployment, options = {}) {
       // Step execution logic
       switch (step.step_order) {
         case 1: { // Validate Environment
-          if (!deployment.source || !deployment.ref) {
+          if (!deployment.installation_id && (!deployment.source || !deployment.ref)) {
             throw new Error('Deployment missing required source repository or commit ref');
           }
           break;
@@ -114,8 +114,11 @@ async function executeDeployment(store, deployment, options = {}) {
         }
         case 4: { // Deploy Application Services
           if (installation) {
+            let nextStatus = 'running';
+            if (deployment.action === 'stop') nextStatus = 'stopped';
+            else if (deployment.action === 'uninstall') nextStatus = 'deleted';
             await store.table('application_installations').updateById(installation.id, {
-              status: 'running',
+              status: nextStatus,
               updated_at: nowIso(),
             });
           }
@@ -123,8 +126,11 @@ async function executeDeployment(store, deployment, options = {}) {
         }
         case 5: { // Health Check
           if (installation) {
+            let healthStatus = 'healthy';
+            if (deployment.action === 'stop') healthStatus = 'stopped';
+            else if (deployment.action === 'uninstall') healthStatus = 'deleted';
             await store.table('application_installations').updateById(installation.id, {
-              health_status: 'healthy',
+              health_status: healthStatus,
               last_health_check_at: nowIso(),
               updated_at: nowIso(),
             });
