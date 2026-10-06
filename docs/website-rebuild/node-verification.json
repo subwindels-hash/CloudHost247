@@ -1,0 +1,690 @@
+{
+  "date": "2026-10-06",
+  "code_commit": "a7da6dc0685c75d92889c37df1e069858830fff5",
+  "runtime": "v22.22.3",
+  "command": "npm test -- --maxWorkers=2",
+  "exit_code": 0,
+  "duration_seconds": 875.96,
+  "test_files_passed": 129,
+  "tests_passed": 1158,
+  "failed": 0,
+  "log_sha256": "3e522262161d2c2ce5d8e8f5009afce832618da2b532ec93ab3841e0c73793f3",
+  "notes": [
+    "Real application route handlers and embedded PGlite integration tests; external providers are controlled test doubles, not live provisioning.",
+    "DNS propagation tests now close Fastify and PGlite resources after every case. No tests or timeouts were disabled."
+  ],
+  "checks": {
+    "server_typecheck": "passed",
+    "frontend_typecheck": "passed",
+    "server_frontend_build": "passed",
+    "compiled_app_import": "passed; no server or network connection started",
+    "production_dependency_audit": "found 0 vulnerabilities"
+  },
+  "test_files": [
+    {
+      "path": "tests/integration/domain-services-api.test.ts",
+      "tests": 16,
+      "duration_ms": 49362
+    },
+    {
+      "path": "tests/integration/webhooks-api.test.ts",
+      "tests": 32,
+      "duration_ms": 79432
+    },
+    {
+      "path": "tests/integration/billing-schema.test.ts",
+      "tests": 35,
+      "duration_ms": 74028
+    },
+    {
+      "path": "tests/integration/payments-api.test.ts",
+      "tests": 22,
+      "duration_ms": 65103
+    },
+    {
+      "path": "tests/integration/worker-deployments.test.ts",
+      "tests": 18,
+      "duration_ms": 56618
+    },
+    {
+      "path": "tests/integration/ai-control-plane.test.ts",
+      "tests": 14,
+      "duration_ms": 47259
+    },
+    {
+      "path": "tests/integration/domain-services-notifications.test.ts",
+      "tests": 12,
+      "duration_ms": 41473
+    },
+    {
+      "path": "tests/unit/deployment-adapter-operations.test.ts",
+      "tests": 27,
+      "duration_ms": 129
+    },
+    {
+      "path": "tests/integration/cloudflare-api.test.ts",
+      "tests": 14,
+      "duration_ms": 51008
+    },
+    {
+      "path": "tests/integration/revenue-guardian-api.test.ts",
+      "tests": 18,
+      "duration_ms": 68885
+    },
+    {
+      "path": "tests/integration/customer-identity-api.test.ts",
+      "tests": 23,
+      "duration_ms": 99268
+    },
+    {
+      "path": "tests/integration/commerce-api.test.ts",
+      "tests": 19,
+      "duration_ms": 54302
+    },
+    {
+      "path": "tests/integration/server-infrastructure.test.ts",
+      "tests": 10,
+      "duration_ms": 5313
+    },
+    {
+      "path": "frontend/tests/unit/domain-services-pages.test.tsx",
+      "tests": 14,
+      "duration_ms": 2324
+    },
+    {
+      "path": "tests/unit/provider-console-metrics-truth.test.ts",
+      "tests": 20,
+      "duration_ms": 120
+    },
+    {
+      "path": "tests/unit/provider-rescue.test.ts",
+      "tests": 17,
+      "duration_ms": 88
+    },
+    {
+      "path": "tests/integration/marketplace-installations.test.ts",
+      "tests": 5,
+      "duration_ms": 46100
+    },
+    {
+      "path": "tests/unit/adapter-capability-matrix.test.ts",
+      "tests": 76,
+      "duration_ms": 273
+    },
+    {
+      "path": "tests/integration/server-termination.test.ts",
+      "tests": 7,
+      "duration_ms": 5109
+    },
+    {
+      "path": "tests/unit/dns-providers.test.ts",
+      "tests": 26,
+      "duration_ms": 152
+    },
+    {
+      "path": "tests/integration/provisioning-lifecycle.test.ts",
+      "tests": 3,
+      "duration_ms": 12210
+    },
+    {
+      "path": "tests/integration/server-reinstall-acceptance.test.ts",
+      "tests": 4,
+      "duration_ms": 8098
+    },
+    {
+      "path": "tests/integration/tools-api.test.ts",
+      "tests": 33,
+      "duration_ms": 118515
+    },
+    {
+      "path": "tests/integration/agent-protocol-conformance.test.ts",
+      "tests": 22,
+      "duration_ms": 15
+    },
+    {
+      "path": "tests/integration/catalog-admin-api.test.ts",
+      "tests": 15,
+      "duration_ms": 46589
+    },
+    {
+      "path": "tests/integration/infrastructure-admin-operations.test.ts",
+      "tests": 10,
+      "duration_ms": 8092
+    },
+    {
+      "path": "tests/integration/admin-billing-api.test.ts",
+      "tests": 7,
+      "duration_ms": 28427
+    },
+    {
+      "path": "tests/unit/mrz-engine.test.ts",
+      "tests": 20,
+      "duration_ms": 34
+    },
+    {
+      "path": "tests/integration/payments-schema.test.ts",
+      "tests": 19,
+      "duration_ms": 53774
+    },
+    {
+      "path": "tests/integration/agent-deployments-api.test.ts",
+      "tests": 4,
+      "duration_ms": 21652
+    },
+    {
+      "path": "tests/integration/domains-servers-admin.test.ts",
+      "tests": 5,
+      "duration_ms": 27447
+    },
+    {
+      "path": "tests/integration/billing-lifecycle-e2e.test.ts",
+      "tests": 4,
+      "duration_ms": 15026
+    },
+    {
+      "path": "tests/integration/admin-customers-api.test.ts",
+      "tests": 11,
+      "duration_ms": 26965
+    },
+    {
+      "path": "tests/integration/server-rescue.test.ts",
+      "tests": 7,
+      "duration_ms": 5137
+    },
+    {
+      "path": "tests/integration/commerce-schema.test.ts",
+      "tests": 16,
+      "duration_ms": 34773
+    },
+    {
+      "path": "tests/unit/ai-control-plane.test.ts",
+      "tests": 23,
+      "duration_ms": 31
+    },
+    {
+      "path": "tests/unit/aws-adapter.test.ts",
+      "tests": 16,
+      "duration_ms": 457
+    },
+    {
+      "path": "tests/integration/backup-contents.test.ts",
+      "tests": 6,
+      "duration_ms": 17570
+    },
+    {
+      "path": "tests/integration/provisioning-health-and-images.test.ts",
+      "tests": 13,
+      "duration_ms": 3767
+    },
+    {
+      "path": "tests/integration/dns-propagation.test.ts",
+      "tests": 9,
+      "duration_ms": 22987
+    },
+    {
+      "path": "tests/integration/migrate.test.ts",
+      "tests": 10,
+      "duration_ms": 18906
+    },
+    {
+      "path": "frontend/tests/unit/server-detail-page.test.tsx",
+      "tests": 8,
+      "duration_ms": 459
+    },
+    {
+      "path": "tests/integration/mrz-tools-api.test.ts",
+      "tests": 3,
+      "duration_ms": 9175
+    },
+    {
+      "path": "tests/integration/customer-app-schema.test.ts",
+      "tests": 11,
+      "duration_ms": 23990
+    },
+    {
+      "path": "tests/integration/server-console.test.ts",
+      "tests": 6,
+      "duration_ms": 4640
+    },
+    {
+      "path": "tests/integration/os-image-revalidation.test.ts",
+      "tests": 6,
+      "duration_ms": 3512
+    },
+    {
+      "path": "tests/unit/provider-capability-truth.test.ts",
+      "tests": 10,
+      "duration_ms": 32
+    },
+    {
+      "path": "tests/integration/server-reconciliation.test.ts",
+      "tests": 7,
+      "duration_ms": 3751
+    },
+    {
+      "path": "tests/unit/aws-replacement.test.ts",
+      "tests": 12,
+      "duration_ms": 25
+    },
+    {
+      "path": "tests/integration/account-api.test.ts",
+      "tests": 8,
+      "duration_ms": 26032
+    },
+    {
+      "path": "tests/unit/provider-configuration.test.ts",
+      "tests": 23,
+      "duration_ms": 37
+    },
+    {
+      "path": "tests/integration/os-lifecycle.test.ts",
+      "tests": 8,
+      "duration_ms": 5137
+    },
+    {
+      "path": "tests/integration/notification-outbox.test.ts",
+      "tests": 7,
+      "duration_ms": 4207
+    },
+    {
+      "path": "tests/integration/migration-0023.test.ts",
+      "tests": 12,
+      "duration_ms": 26910
+    },
+    {
+      "path": "tests/unit/ai-registry-boot.test.ts",
+      "tests": 10,
+      "duration_ms": 985
+    },
+    {
+      "path": "tests/integration/billing-api.test.ts",
+      "tests": 7,
+      "duration_ms": 20521
+    },
+    {
+      "path": "tests/integration/ai-registry-seed.test.ts",
+      "tests": 4,
+      "duration_ms": 15166
+    },
+    {
+      "path": "tests/integration/server-resize-order.test.ts",
+      "tests": 1,
+      "duration_ms": 3765
+    },
+    {
+      "path": "tests/integration/catalog-public-api.test.ts",
+      "tests": 10,
+      "duration_ms": 27301
+    },
+    {
+      "path": "tests/integration/catalog-schema.test.ts",
+      "tests": 8,
+      "duration_ms": 19034
+    },
+    {
+      "path": "tests/unit/revenue-guardian-rules.test.ts",
+      "tests": 12,
+      "duration_ms": 12
+    },
+    {
+      "path": "tests/integration/control-panels-api.test.ts",
+      "tests": 7,
+      "duration_ms": 19554
+    },
+    {
+      "path": "tests/integration/totp-mfa.test.ts",
+      "tests": 1,
+      "duration_ms": 7643
+    },
+    {
+      "path": "frontend/tests/unit/app-instance-backup-contents.test.tsx",
+      "tests": 2,
+      "duration_ms": 405
+    },
+    {
+      "path": "tests/unit/tools-dns-wire.test.ts",
+      "tests": 12,
+      "duration_ms": 12
+    },
+    {
+      "path": "tests/integration/auth-recovery.test.ts",
+      "tests": 3,
+      "duration_ms": 13118
+    },
+    {
+      "path": "tests/unit/contabo-adapter.test.ts",
+      "tests": 5,
+      "duration_ms": 40
+    },
+    {
+      "path": "frontend/tests/unit/mrz-tools-pages.test.tsx",
+      "tests": 3,
+      "duration_ms": 1232
+    },
+    {
+      "path": "tests/integration/auth-flow.test.ts",
+      "tests": 7,
+      "duration_ms": 25225
+    },
+    {
+      "path": "tests/unit/undeclared-adapter-fail-closed.test.ts",
+      "tests": 6,
+      "duration_ms": 29
+    },
+    {
+      "path": "tests/integration/migration-quarantine.test.ts",
+      "tests": 8,
+      "duration_ms": 12189
+    },
+    {
+      "path": "tests/unit/cloudflare-client.test.ts",
+      "tests": 11,
+      "duration_ms": 44
+    },
+    {
+      "path": "tests/integration/financial-invariant-sweep.test.ts",
+      "tests": 6,
+      "duration_ms": 17483
+    },
+    {
+      "path": "tests/integration/dns-api.test.ts",
+      "tests": 4,
+      "duration_ms": 11085
+    },
+    {
+      "path": "frontend/tests/unit/account-identity-page.test.tsx",
+      "tests": 4,
+      "duration_ms": 1419
+    },
+    {
+      "path": "frontend/tests/unit/domains-marketing-page.test.tsx",
+      "tests": 4,
+      "duration_ms": 788
+    },
+    {
+      "path": "tests/integration/public-os-availability.test.ts",
+      "tests": 1,
+      "duration_ms": 4176
+    },
+    {
+      "path": "frontend/tests/unit/tools-center-page.test.tsx",
+      "tests": 3,
+      "duration_ms": 586
+    },
+    {
+      "path": "tests/unit/money.test.ts",
+      "tests": 16,
+      "duration_ms": 10
+    },
+    {
+      "path": "tests/integration/migration-0024.test.ts",
+      "tests": 5,
+      "duration_ms": 11684
+    },
+    {
+      "path": "frontend/tests/unit/account-page.test.tsx",
+      "tests": 3,
+      "duration_ms": 1403
+    },
+    {
+      "path": "tests/unit/webhook-secret-fail-closed.test.ts",
+      "tests": 4,
+      "duration_ms": 15
+    },
+    {
+      "path": "frontend/tests/unit/support-pages.test.tsx",
+      "tests": 4,
+      "duration_ms": 973
+    },
+    {
+      "path": "frontend/tests/unit/os-lifecycle-and-provider-config.test.tsx",
+      "tests": 7,
+      "duration_ms": 152
+    },
+    {
+      "path": "tests/unit/customer-identity.test.ts",
+      "tests": 11,
+      "duration_ms": 170
+    },
+    {
+      "path": "frontend/tests/unit/dashboard-protected.test.tsx",
+      "tests": 3,
+      "duration_ms": 435
+    },
+    {
+      "path": "tests/unit/manifest-catalog.test.ts",
+      "tests": 6,
+      "duration_ms": 19
+    },
+    {
+      "path": "tests/unit/control-panel-adapters.test.ts",
+      "tests": 6,
+      "duration_ms": 13
+    },
+    {
+      "path": "tests/integration/ssl-firewall-api.test.ts",
+      "tests": 3,
+      "duration_ms": 8620
+    },
+    {
+      "path": "frontend/tests/unit/payment-modal.test.tsx",
+      "tests": 2,
+      "duration_ms": 363
+    },
+    {
+      "path": "frontend/tests/unit/services-domains-pages.test.tsx",
+      "tests": 6,
+      "duration_ms": 716
+    },
+    {
+      "path": "tests/integration/notifications-center.test.ts",
+      "tests": 4,
+      "duration_ms": 4499
+    },
+    {
+      "path": "frontend/tests/unit/invoice-detail-page.test.tsx",
+      "tests": 2,
+      "duration_ms": 476
+    },
+    {
+      "path": "tests/unit/infrastructure-provider-registry.test.ts",
+      "tests": 8,
+      "duration_ms": 19
+    },
+    {
+      "path": "frontend/tests/unit/hosting-cpanel-page.test.tsx",
+      "tests": 5,
+      "duration_ms": 504
+    },
+    {
+      "path": "frontend/tests/unit/admin-invoice-detail-page.test.tsx",
+      "tests": 1,
+      "duration_ms": 454
+    },
+    {
+      "path": "frontend/tests/unit/invoices-page.test.tsx",
+      "tests": 2,
+      "duration_ms": 563
+    },
+    {
+      "path": "frontend/tests/unit/hosting-catalog-page.test.tsx",
+      "tests": 4,
+      "duration_ms": 539
+    },
+    {
+      "path": "tests/unit/aws-serial-console.test.ts",
+      "tests": 4,
+      "duration_ms": 97
+    },
+    {
+      "path": "tests/unit/spa-routing.test.ts",
+      "tests": 26,
+      "duration_ms": 2915
+    },
+    {
+      "path": "tests/unit/domain-provider-architecture.test.ts",
+      "tests": 3,
+      "duration_ms": 8
+    },
+    {
+      "path": "frontend/tests/unit/Header.test.tsx",
+      "tests": 3,
+      "duration_ms": 496
+    },
+    {
+      "path": "frontend/tests/unit/admin-rbac.test.tsx",
+      "tests": 4,
+      "duration_ms": 557
+    },
+    {
+      "path": "frontend/tests/unit/admin-refund-modal.test.tsx",
+      "tests": 2,
+      "duration_ms": 416
+    },
+    {
+      "path": "tests/unit/domain-name-grammar.test.ts",
+      "tests": 6,
+      "duration_ms": 6
+    },
+    {
+      "path": "tests/unit/spa-security-headers.test.ts",
+      "tests": 6,
+      "duration_ms": 1066
+    },
+    {
+      "path": "frontend/tests/unit/admin-ledger-page.test.tsx",
+      "tests": 1,
+      "duration_ms": 143
+    },
+    {
+      "path": "frontend/tests/unit/billing-page.test.tsx",
+      "tests": 1,
+      "duration_ms": 141
+    },
+    {
+      "path": "frontend/tests/unit/api-session-invalidation.test.ts",
+      "tests": 3,
+      "duration_ms": 9
+    },
+    {
+      "path": "frontend/tests/unit/operating-system-selector.test.tsx",
+      "tests": 2,
+      "duration_ms": 363
+    },
+    {
+      "path": "frontend/tests/unit/admin-invoices-page.test.tsx",
+      "tests": 1,
+      "duration_ms": 198
+    },
+    {
+      "path": "tests/integration/migration-0025.test.ts",
+      "tests": 2,
+      "duration_ms": 8530
+    },
+    {
+      "path": "frontend/tests/unit/hosting-vps-page.test.tsx",
+      "tests": 2,
+      "duration_ms": 205
+    },
+    {
+      "path": "tests/integration/payment-authorization-matrix.test.ts",
+      "tests": 2,
+      "duration_ms": 9589
+    },
+    {
+      "path": "tests/unit/provider-error-mapping.test.ts",
+      "tests": 4,
+      "duration_ms": 5
+    },
+    {
+      "path": "frontend/tests/unit/mfa-login.test.tsx",
+      "tests": 1,
+      "duration_ms": 779
+    },
+    {
+      "path": "frontend/tests/unit/auth-recovery-pages.test.tsx",
+      "tests": 2,
+      "duration_ms": 687
+    },
+    {
+      "path": "tests/integration/passkeys.test.ts",
+      "tests": 1,
+      "duration_ms": 5556
+    },
+    {
+      "path": "tests/unit/worker-runtime.test.ts",
+      "tests": 5,
+      "duration_ms": 7
+    },
+    {
+      "path": "tests/unit/jwt.test.ts",
+      "tests": 4,
+      "duration_ms": 12
+    },
+    {
+      "path": "frontend/tests/unit/RequireAuth.test.tsx",
+      "tests": 2,
+      "duration_ms": 40
+    },
+    {
+      "path": "tests/unit/health.test.ts",
+      "tests": 4,
+      "duration_ms": 983
+    },
+    {
+      "path": "tests/unit/env.test.ts",
+      "tests": 6,
+      "duration_ms": 15
+    },
+    {
+      "path": "tests/unit/ai-support-operator.test.ts",
+      "tests": 6,
+      "duration_ms": 8
+    },
+    {
+      "path": "tests/unit/provider-response-sanitization.test.ts",
+      "tests": 3,
+      "duration_ms": 5
+    },
+    {
+      "path": "tests/unit/rate-limit.test.ts",
+      "tests": 2,
+      "duration_ms": 1010
+    },
+    {
+      "path": "tests/integration/dev-catalog-seed.test.ts",
+      "tests": 1,
+      "duration_ms": 4023
+    },
+    {
+      "path": "tests/unit/password.test.ts",
+      "tests": 3,
+      "duration_ms": 2056
+    },
+    {
+      "path": "tests/integration/worker-lease.test.ts",
+      "tests": 2,
+      "duration_ms": 5041
+    }
+  ],
+  "github_matrix": {
+    "code_commit": "a7da6dc0685c75d92889c37df1e069858830fff5",
+    "node_tree_sha": "936b960c681bde09b56b292524668d311de8fa39",
+    "current_node_tree_identical": true,
+    "conclusion": "success",
+    "url": "https://github.com/subwindels-hash/CloudHost247/actions/runs/37394203303",
+    "checks": [
+      {
+        "name": "Build, typecheck, test (Node 24.8.0)",
+        "conclusion": "success",
+        "url": "https://github.com/subwindels-hash/CloudHost247/actions/runs/37394203303/job/112046155527"
+      },
+      {
+        "name": "Build, typecheck, test (Node 22.12.0)",
+        "conclusion": "success",
+        "url": "https://github.com/subwindels-hash/CloudHost247/actions/runs/37394203303/job/112046155668"
+      }
+    ],
+    "note": "Later security-assertion/documentation commits have an unchanged Node tree; their head-specific CI reruns remain required before merge."
+  }
+}

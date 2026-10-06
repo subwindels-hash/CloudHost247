@@ -1,6 +1,6 @@
 # CloudHost247 website rebuild — implementation and verification report
 
-**Date:** 2026-10-05
+**Updated:** 2026-10-06 (original rebuild: 2026-10-05)
 **Branch:** `arena/ad9fd719-cloudhost247`
 **Status:** Source implementation available for review. **Not production accepted or deployed.**
 
@@ -32,7 +32,7 @@ published HTTP destinations without the deployment database.
 |---|---|
 | Mega menu | Six shared multi-column menus: Hosting, Cloud & Servers, Domains, Applications, Developers, Resources. Actual route registry; no hard-coded unsupported app/OS list. |
 | Footer | Single grouped first-party footer. **54 unique navigation/footer destinations** pass source validation; licensed core destinations are explicit WHMCS dependencies, not pretend repository files. |
-| Mobile navigation | Native disclosure accordions + progressive mobile toggle. Opening/Escape/focus behavior tested in Chromium at 375px and 1440px. |
+| Mobile navigation | Native disclosure accordions + progressive mobile toggle. All six menus tested for opening, Escape, focus return and overflow at all ten widths: **60 menu checks**. |
 | Broken links | **0 source-verification failures** for critical registry navigation and literal assets. **Production HTTP results unknown.** CMS/Builder-authored URLs require staging verification. |
 | Existing custom menus | Core/account navbar integrations retained. Reconcile deployment-specific public Theme Manager menus with the new registry when activating the child theme. |
 
@@ -63,21 +63,44 @@ See `assets/images/cloudhost247/README.md` for provenance and regeneration.
 
 | Check | Real result |
 |---|---|
-| PHP lint | Final full release run linted **796 PHP targets on PHP 8.2 WebAssembly**, all passed. All **19 changed/added PHP files** and the website/theme behavior suites also passed PHP 7.4 WebAssembly checks. Native production PHP/ionCube runtime still requires staging. |
-| Existing PHP/security tests | `scripts/release-candidate-check.sh` passed: existing PHP behavior suites, **422 Python tests (2 existing skips)**, 6 staging-tool tests, migration policies, retired-brand scan, vendor integrity and **71 server-agent tests**. New website checks are additive. The final release run includes the extracted presentation fragments and explicit draft-publication flow. |
-| New website tests | **20 PHP assertions**, 7 Python website tests; theme suite **60 assertions**. No security gate was disabled. |
-| Node tests | **32 focused catalog/protocol tests passed**. The complete Node run did **not** finish within the tool timeout; its partial output included a DNS propagation failure under load. It was stopped and is **not reported as passing**. No Node application source was modified. |
-| Build | Existing Node `npm run typecheck` and production `npm run build` passed. WHMCS has no standalone frontend compilation step; real Smarty fixture rendering passed. |
-| Responsive QA | **48 rendered template scenarios × 10 widths = 480 checks**, covering 320/360/375/390/414/768/1024/1280/1440/1920. **0 horizontal-overflow failures**. Empty/unpublished/legal-dependent scenarios are explicitly fixture states, not live content certification. |
-| Accessibility | Automated axe WCAG 2/2.1 A/AA checks on **12 selected views: 0 detected violations**. Visible focus, skip link, semantic disclosure navigation and reduced-motion rules included. This is not a complete WCAG certification or a screen-reader audit. |
+| PHP lint | Current **797 PHP targets** and the complete release gate passed native **PHP 7.4 and 8.2 GitHub CI** at code commit `9cf1b15` (push and PR). Six follow-up PHP files also linted on PHP 7.4 WebAssembly. Licensed production PHP/ionCube integration still requires staging. |
+| Existing PHP/security tests | The native GitHub release gate passed: PHP behavior suites, Python source/staging checks, migration policies, retired-brand scan, vendor integrity and **71 server-agent tests**. The local Python source run passed **423 tests (2 existing skips)**. Static publication guards now follow the shared discovery read model instead of requiring obsolete direct calls in the sitemap; no security checks were removed. |
+| New website tests | **53 PHP assertions** on PHP 7.4 and 8.2, 7 Python website tests; theme suite **60 assertions**. No security gate was disabled. |
+| Node tests | **1,158 tests across 129 files passed** on Node 22.22.3 in **875.96 seconds**, using `npm test -- --maxWorkers=2`. This supersedes the earlier incomplete run. DNS tests now release Fastify/PGlite resources after every case; all 9 DNS propagation tests passed. No Node application source or test timeout was changed. The **GitHub Node 22.12/24.8 matrix also passed** at `a7da6dc`; the Node tree is byte-identical in the later security-check commit. Head-specific CI reruns must still be green before merge. |
+| Build | Server and frontend TypeScript checks, production server/frontend build and compiled-app import passed again. Production dependency audit: **0 vulnerabilities reported**. WHMCS has no standalone frontend compilation step; all 52 real Smarty fixtures rendered successfully. |
+| Responsive QA | **52 rendered template scenarios × 10 widths = 520 checks**, covering 320/360/375/390/414/768/1024/1280/1440/1920. **0 horizontal-overflow failures**. Coverage now includes search results, empty/unavailable search, 100-character unbroken queries and long CMS titles. A reproduced 320px query overflow was fixed with scoped text wrapping. Fixture states are not live content certification. |
+| Accessibility | Automated axe WCAG 2/2.1 A/AA checks on **16 selected views: 0 detected violations**. Visible focus, skip link, semantic disclosure navigation and reduced-motion rules included. This is not a complete WCAG certification or a screen-reader audit. |
 | SEO | Unique registry titles/descriptions, canonical URLs derived from SystemURL, OG/social image, safe WebSite/WebPage JSON-LD, canonical alias redirects, sitemap updates and crawl guidance. Absolute sitemap directives require the real deployment URL. No fake ratings, Offers or certification schema. |
 | Broken assets | **0 detected** in source checks and rendered browser fixtures. WHMCS-owned runtime assets and database-authored images require live verification. |
 | Broken routes | All original entry-point files and registered new routes exist; dedicated typo redirect retained. **Live HTTP route acceptance not verified.** |
 | Branding | Repository-wide retired-brand audit reported **0 matches**. Protected vendor compatibility identifiers and files retained. |
 | Security | Existing sessions, authorization, CSRF and checkout handlers retained. New admin actions require capability + token; publishing additionally requires confirmation and is audited. Platform catalog is read-only and does not expose credentials. |
 
-Machine-readable evidence: `source-verification.json`,
-`browser-verification.json`. Selected screenshots are in `screenshots/`.
+Machine-readable evidence: `verification-summary.json`, `node-verification.json`,
+`source-verification.json` and `browser-verification.json`. The Node evidence
+includes all 129 test-file counts and a SHA-256 digest of the full local log.
+Selected screenshots from the original design verification are in `screenshots/`.
+
+## Follow-up implementation — 2026-10-06
+
+- Search and sitemap now share `PublicDiscovery` and a single page/landing
+  publication snapshot. Draft bodies are never hydrated into that read model.
+- Published custom pages, landing pages and translations are discoverable;
+  canonical registered URLs are not duplicated. A published entry wins over an
+  unpublished page/landing collision; the lowest-ID published entry is selected
+  consistently with the actual page renderer.
+- Existing non-CMS policy routes remain discoverable. The three CMS-only legal
+  routes still require actual publication; no policy content was generated.
+- Search fails closed with an unavailable state, HTTP 503 and retry guidance on
+  a content/translation lookup failure. Search responses are non-cacheable and
+  noindex. Sitemap opt-out is preserved, but is not treated as access control.
+- The initial follow-up CI run correctly failed two static assertions that still
+  expected direct repository calls in the sitemap. The guards were updated to
+  inspect the complete route → discovery → publication-query chain, with an
+  additional failure-path guard. The subsequent native PHP matrix passed.
+- Changes are delivered on the same branch in draft
+  [PR #56](https://github.com/subwindels-hash/CloudHost247/pull/56).
+  Nothing was merged or deployed.
 
 ## Remaining blockers — production acceptance is not complete
 
@@ -86,19 +109,21 @@ Machine-readable evidence: `source-verification.json`,
    Live login/register/reset, payment, cart, client-area and provisioning flows
    therefore have **not** been certified.
 2. `https://rent.windelsai.com/` could not be reached from the sandbox: its TLS
-   connection failed. No live deployment was performed.
+   connection failed again on 2026-10-06 (`curl` exit 35, HTTP 000). No TLS
+   verification bypass or live deployment was performed.
 3. Confirm published Terms of Service, Legal Notice and Data Protection Standards
    in Theme Manager. Explicit unpublished content remains unpublished; prices,
    legal terms and infrastructure claims were not invented to fill gaps.
 4. Configure/verify the optional Node reverse-proxy mount and router base before
    enabling live app/OS browsing. The separate Node frontend was not globally
-   redesigned by this WHMCS theme change. Run its **complete** test suite in CI.
+   redesigned by this WHMCS theme change. The full local Node suite now passes;
+   the required GitHub Node matrix must also be green before merging.
 5. Configure actual invoice/email logo settings, server-level error responses and
    absolute sitemap declarations. Verify active parent-theme compatibility,
    language/currency controls, custom navigation and Builder-authored URLs.
 6. Perform authenticated staging visual/functional QA and full runtime crawling
-   before merging/deploying. Site search is editorial discovery + native KB
-   search, not a new cross-platform full-text database index.
+   before merging/deploying. Site search covers registered pages, published CMS pages/landings and native KB
+   search, not a cross-platform index of private account records.
 
 **Do not describe this report as “all acceptance criteria complete.”** It records
 implemented code, passing source/template checks and the exact remaining runtime

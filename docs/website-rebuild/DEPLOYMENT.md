@@ -142,8 +142,11 @@ sidebar/navigation hooks and responsive tables. Verify any Builder override,
 custom navbar item, database-authored media/URL, and multi-language/RTL content.
 
 The fixture preview is intentionally not a live WHMCS site. It cannot certify
-these workflows. The full Node test suite must also complete successfully in CI
-before merging; the local all-suite run did not finish cleanly.
+these workflows. The full local Node suite now passes (1,158 tests on Node
+22.22.3); reproduce with `cd cloudhost247-node && npm test -- --maxWorkers=2`.
+The required GitHub Node matrix must also pass before merging. Passing tests with
+embedded Postgres and provider doubles does not certify live providers or the
+optional subpath mount.
 
 ## Rollback
 

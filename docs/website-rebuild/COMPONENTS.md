@@ -91,9 +91,16 @@ fill a footer column.
   authentication is not exercised. Generic Smarty 4 reports expected deprecations
   for framework-provided functions; WHMCS supplies their production integration.
 - `tests/website/browser.cjs`: actual Chromium rendering, 10 widths, menu/Escape,
-  image/H1/shell/overflow assertions, selected axe WCAG A/AA checks.
+  image/H1/shell/overflow assertions, all six menus at every width, search-state
+  and long-query regressions, selected axe WCAG A/AA checks.
 
 Fixture tools use environment paths for Smarty, a disposable output directory,
 Playwright/Chromium and axe. No fixture is a production page or substitutes for
 `init.php`. The local preview server only serves rendered fixtures and an explicit
 allowlist of theme assets; it never exposes PHP sources or configuration files.
+
+Follow-up CI publication checks in `tests/foundation/test_static.py` and
+`tests/security/test_security.py` inspect the full route → shared discovery →
+repository publication chain. The original publication, sitemap opt-out, XML
+escaping and canonical checks remain enforced; the PHP behavior suite additionally
+exercises draft and database-failure paths with the actual repository classes.
