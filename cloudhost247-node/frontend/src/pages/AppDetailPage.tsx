@@ -1,3 +1,4 @@
+import { toolsApiPath } from '../lib/tools-runtime';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { usePageMeta } from '../lib/usePageMeta';
@@ -186,7 +187,7 @@ export default function AppDetailPage() {
         <h2>Install {app.name}</h2>
         {!getStoredUser() ? (
           <p className="ch247-page__hint">
-            <a href="/login">Sign in</a> or <a href="/register">create an account</a> to install this application.
+            <a href={toolsApiPath('/login')}>Sign in</a> or <a href={toolsApiPath('/register')}>create an account</a> to install this application.
           </p>
         ) : (
           <>
@@ -260,7 +261,7 @@ export default function AppDetailPage() {
                     />
                     <small>
                       Point the domain's DNS at your server before installing. Verify the domain under{' '}
-                      <a href="/dashboard/domains">Dashboard → Domains</a> first if you want it pre-verified.
+                      <a href={toolsApiPath('/dashboard/domains')}>Dashboard → Domains</a> first if you want it pre-verified.
                     </small>
                   </label>
                 ) : (

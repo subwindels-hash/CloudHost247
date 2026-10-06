@@ -3,14 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!--
-      This is a client-rendered SPA (see src/lib/usePageMeta.ts for how real browsers get an
-      accurate per-route <title>/description once React mounts). A crawler that does not execute
-      JavaScript will only ever see this static fallback title/description — that's a known
-      limitation of client-only rendering, not an oversight; server-side rendering/pre-rendering
-      would be a separate, explicitly-scoped piece of work if search ranking of specific public
-      pages becomes a priority.
-    -->
+    <!-- Public Tools metadata is also rendered by the Node fallback before React mounts. -->
     <title>CloudHost247 — Cloud hosting, built for your next idea</title>
     <meta
       name="description"

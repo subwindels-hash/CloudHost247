@@ -40,6 +40,13 @@ final class Site
             $result['description'] = isset($vars['cloudhost247Page']['summary']) ? $vars['cloudhost247Page']['summary'] : '';
             $result['canonical'] = $system ? $system . '/cloudhost247-page.php?slug=' . rawurlencode($vars['cloudhost247Page']['slug']) : '';
         }
+        if (!empty($vars['cloudhost247ToolsPage']['path'])) {
+            $toolPage = $vars['cloudhost247ToolsPage'];
+            $result['public'] = true;
+            $result['title'] = $toolPage['name'];
+            $result['description'] = $toolPage['summary'];
+            $result['canonical'] = $system ? $system . $toolPage['path'] : '';
+        }
         if (!empty($vars['cloudhost247Page']['seo_description'])) { $result['description'] = $vars['cloudhost247Page']['seo_description']; }
         $result['schema_json'] = '';
         if ($result['canonical'] !== '') {

@@ -1,0 +1,1730 @@
+{
+  "generatedFrom": "cloudhost247-node/src/tools/catalog.ts",
+  "categories": {
+    "dns-domains": "DNS & Domains",
+    "ip-network": "IP & Network",
+    "security": "Security",
+    "ssl": "SSL",
+    "email": "Email",
+    "website": "Website",
+    "developer": "Developer",
+    "calculators": "Calculators",
+    "utilities": "Utilities"
+  },
+  "footer": [
+    "dns-lookup",
+    "dns-propagation",
+    "whois",
+    "ip-lookup",
+    "my-ip",
+    "ssl-checker",
+    "mx-lookup",
+    "spf-checker",
+    "dmarc-checker",
+    "subnet-calculator",
+    "json-tools",
+    "uuid-generator"
+  ],
+  "tools": [
+    {
+      "slug": "dns-propagation",
+      "name": "DNS Propagation Checker",
+      "category": "dns",
+      "summary": "Query the same record against multiple public resolvers worldwide.",
+      "description": "Sends the same DNS question to each enabled resolver in the CloudHost247 resolver registry and reports, per resolver, the answer, response time and status. Results describe exactly the resolvers queried — CloudHost247 does not claim that these answers represent global propagation.",
+      "icon": "globe",
+      "path": "/tools/dns-propagation",
+      "apiPath": "/api/tools/dns-propagation",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/dns/propagation"
+      ],
+      "discoveryCategories": [
+        "dns-domains"
+      ],
+      "seoTitle": "DNS Propagation Checker | CloudHost247",
+      "relatedTools": [
+        "dns-lookup",
+        "dns-health",
+        "mx-lookup"
+      ],
+      "resultMode": "lookup"
+    },
+    {
+      "slug": "dns-lookup",
+      "name": "DNS Lookup",
+      "category": "dns",
+      "summary": "Look up A, AAAA, CNAME, MX, NS, TXT, SOA, SRV, CAA, PTR, DS and DNSKEY records.",
+      "description": "Queries a selected CloudHost247 resolver for one record type and shows every answer with TTL, priority (MX/SRV) and the resolver that answered. DS and DNSKEY come from the DNSSEC zone.",
+      "icon": "search",
+      "path": "/tools/dns-lookup",
+      "apiPath": "/api/tools/dns-lookup",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/dns/lookup",
+        "/tools/dns-record-lookup"
+      ],
+      "discoveryCategories": [
+        "dns-domains"
+      ],
+      "seoTitle": "DNS Lookup | CloudHost247",
+      "relatedTools": [
+        "dns-propagation",
+        "dns-health",
+        "mx-lookup"
+      ],
+      "resultMode": "lookup"
+    },
+    {
+      "slug": "dns-health",
+      "name": "DNS Health Checker",
+      "category": "dns",
+      "summary": "Run every DNS, delegation, email-authentication and DNSSEC check for a domain.",
+      "description": "Runs a battery of independent checks against the domain's authoritative servers and public resolvers: NS delegation consistency, A/AAAA/CNAME, MX, SPF, DKIM, DMARC, BIMI, CAA, SOA, TTL consistency, DNSSEC and resolution failures. Each check reports PASS, WARNING, ERROR, NOT_CHECKED or UNKNOWN with its own explanation.",
+      "icon": "activity",
+      "path": "/tools/dns-health",
+      "apiPath": "/api/tools/dns-health",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/dns/health"
+      ],
+      "discoveryCategories": [
+        "dns-domains"
+      ],
+      "seoTitle": "DNS Health Checker | CloudHost247",
+      "relatedTools": [
+        "dns-propagation",
+        "dns-lookup",
+        "mx-lookup"
+      ],
+      "resultMode": "lookup"
+    },
+    {
+      "slug": "mx-lookup",
+      "name": "MX Lookup",
+      "category": "dns",
+      "summary": "Resolve MX hosts, their addresses, reverse DNS and mail provider.",
+      "description": "Resolves the domain's MX records, then resolves each mail host to IPv4/IPv6 and performs a reverse lookup. The provider is identified only when the MX hostname matches a known CloudHost247 mapping; otherwise it is reported as Unknown rather than guessed.",
+      "icon": "mail",
+      "path": "/tools/mx-lookup",
+      "apiPath": "/api/tools/mx-lookup",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/dns/mx"
+      ],
+      "discoveryCategories": [
+        "dns-domains",
+        "email"
+      ],
+      "seoTitle": "MX Lookup | CloudHost247",
+      "relatedTools": [
+        "dns-propagation",
+        "dns-lookup",
+        "dns-health"
+      ],
+      "resultMode": "lookup"
+    },
+    {
+      "slug": "spf-checker",
+      "name": "SPF Checker",
+      "category": "dns",
+      "summary": "Parse and validate the domain's SPF policy, including DNS lookup count.",
+      "description": "Fetches the SPF TXT record, parses every mechanism and modifier, checks the RFC 7208 syntax, counts the DNS lookups the record requires (limit 10) and flags common misconfigurations: multiple SPF records, deprecated ptr, missing terminal all, lookups beyond 10, and include loops.",
+      "icon": "shield-check",
+      "path": "/tools/spf-checker",
+      "apiPath": "/api/tools/spf-checker",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/dns/spf"
+      ],
+      "discoveryCategories": [
+        "dns-domains",
+        "email"
+      ],
+      "seoTitle": "SPF Checker | CloudHost247",
+      "relatedTools": [
+        "dns-propagation",
+        "dns-lookup",
+        "dns-health"
+      ],
+      "resultMode": "lookup"
+    },
+    {
+      "slug": "dmarc-checker",
+      "name": "DMARC Checker",
+      "category": "dns",
+      "summary": "Inspect and validate a _dmarc policy, tag by tag.",
+      "description": "Fetches _dmarc.<domain> and validates every tag (v, p, sp, pct, rua, ruf, adkim, aspf, fo, rf, ri), explains what the policy means for receiving mail servers, and warns about combinations that are syntactically valid but operationally risky.",
+      "icon": "mail-check",
+      "path": "/tools/dmarc-checker",
+      "apiPath": "/api/tools/dmarc-checker",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/dns/dmarc"
+      ],
+      "discoveryCategories": [
+        "dns-domains",
+        "email"
+      ],
+      "seoTitle": "DMARC Checker | CloudHost247",
+      "relatedTools": [
+        "dns-propagation",
+        "dns-lookup",
+        "dns-health"
+      ],
+      "resultMode": "lookup"
+    },
+    {
+      "slug": "dmarc-generator",
+      "name": "DMARC Record Generator",
+      "category": "dns",
+      "summary": "Build a correctly formatted _dmarc record interactively.",
+      "description": "Generates the TXT value for a _dmarc record from a guided form and shows exactly where to publish it. Generation is deterministic and validated server-side, so the value can be pasted into CloudHost247 DNS management, cPanel or any DNS host.",
+      "icon": "wand",
+      "path": "/tools/dmarc-generator",
+      "apiPath": "/api/tools/dmarc-generator",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/dns/dmarc-generator"
+      ],
+      "discoveryCategories": [
+        "dns-domains",
+        "email"
+      ],
+      "seoTitle": "DMARC Record Generator | CloudHost247",
+      "relatedTools": [
+        "dns-propagation",
+        "dns-lookup",
+        "dns-health"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "dkim-checker",
+      "name": "DKIM Checker",
+      "category": "dns",
+      "summary": "Check selector._domainkey records for one or more selectors.",
+      "description": "Queries the DKIM public-key records for the selectors you supply, parses the key, reports the key type and flags syntax problems. CloudHost247 cannot confirm a signature actually validates from the public key alone — when an external DKIM verifier provider is configured, that extra verification is offered explicitly.",
+      "icon": "key",
+      "path": "/tools/dkim-checker",
+      "apiPath": "/api/tools/dkim-checker",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/dns/dkim"
+      ],
+      "discoveryCategories": [
+        "dns-domains",
+        "email"
+      ],
+      "seoTitle": "DKIM Checker | CloudHost247",
+      "relatedTools": [
+        "dns-propagation",
+        "dns-lookup",
+        "dns-health"
+      ],
+      "resultMode": "lookup"
+    },
+    {
+      "slug": "bimi-checker",
+      "name": "BIMI Checker",
+      "category": "dns",
+      "summary": "Inspect the BIMI record, logo URL and VMC certificate URL.",
+      "description": "Fetches default._bimi.<domain>, parses the l= and a= tags, validates the URL shape, and reports whether the DMARC policy satisfies BIMI's enforcement prerequisite. It reports what the DNS says; it does not claim a mailbox provider will display the logo.",
+      "icon": "badge-check",
+      "path": "/tools/bimi-checker",
+      "apiPath": "/api/tools/bimi-checker",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/dns/bimi"
+      ],
+      "discoveryCategories": [
+        "dns-domains",
+        "email"
+      ],
+      "seoTitle": "BIMI Checker | CloudHost247",
+      "relatedTools": [
+        "dns-propagation",
+        "dns-lookup",
+        "dns-health"
+      ],
+      "resultMode": "lookup"
+    },
+    {
+      "slug": "dnskey-lookup",
+      "name": "DNSKEY Lookup",
+      "category": "dns",
+      "summary": "Show the zone's DNSKEY records with key tag, algorithm, flags and public key.",
+      "description": "Queries DNSKEY at the zone apex, computes the RFC 4034 §5.1.4 key tag for each key and reports SEP/Zone flags, protocol and algorithm. Presence of DNSKEY records does not by itself prove DNSSEC validation; the DNS Health Checker reports delegation evidence separately.",
+      "icon": "key-round",
+      "path": "/tools/dnskey-lookup",
+      "apiPath": "/api/tools/dnskey-lookup",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/dns/dnskey"
+      ],
+      "discoveryCategories": [
+        "dns-domains"
+      ],
+      "seoTitle": "DNSKEY Lookup | CloudHost247",
+      "relatedTools": [
+        "dns-propagation",
+        "dns-lookup",
+        "dns-health"
+      ],
+      "resultMode": "lookup"
+    },
+    {
+      "slug": "ds-lookup",
+      "name": "DS Lookup",
+      "category": "dns",
+      "summary": "Show the DS records published by the parent zone and the DNSSEC chain state.",
+      "description": "Queries DS at the parent zone (or at the zone itself when it is a TLD), lists key tag, algorithm, digest type and digest, and reports whether a matching DNSKEY exists at the child so the delegation chain can be described factually.",
+      "icon": "link",
+      "path": "/tools/ds-lookup",
+      "apiPath": "/api/tools/ds-lookup",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/dns/ds"
+      ],
+      "discoveryCategories": [
+        "dns-domains"
+      ],
+      "seoTitle": "DS Lookup | CloudHost247",
+      "relatedTools": [
+        "dns-propagation",
+        "dns-lookup",
+        "dns-health"
+      ],
+      "resultMode": "lookup"
+    },
+    {
+      "slug": "reverse-dns",
+      "name": "Reverse DNS / PTR Lookup",
+      "category": "dns",
+      "summary": "PTR lookup for IPv4/IPv6 with forward-confirmed reverse DNS.",
+      "description": "Builds the in-addr.arpa / ip6.arpa name, resolves its PTR records and then resolves each returned hostname forward to confirm the address appears in its A/AAAA records (forward-confirmed reverse DNS).",
+      "icon": "undo",
+      "path": "/tools/reverse-dns",
+      "apiPath": "/api/tools/reverse-dns",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/dns/reverse"
+      ],
+      "discoveryCategories": [
+        "dns-domains"
+      ],
+      "seoTitle": "Reverse DNS / PTR Lookup | CloudHost247",
+      "relatedTools": [
+        "dns-propagation",
+        "dns-lookup",
+        "dns-health"
+      ],
+      "resultMode": "lookup"
+    },
+    {
+      "slug": "reverse-ip",
+      "name": "Reverse IP Lookup",
+      "category": "dns",
+      "summary": "Find hostnames hosted on an IP address, when a data provider is configured.",
+      "description": "There is no public DNS mechanism that lists the domains behind an IP address. This tool therefore requires an administrator-configured reverse-IP data provider and returns CONFIGURATION_REQUIRED until one exists. It never claims to discover every domain on an address.",
+      "icon": "layers",
+      "path": "/tools/reverse-ip",
+      "apiPath": "/api/tools/reverse-ip",
+      "authRequired": true,
+      "visibility": "customer",
+      "legacyPaths": [
+        "/tools/dns/reverse-ip"
+      ],
+      "discoveryCategories": [
+        "dns-domains"
+      ],
+      "seoTitle": "Reverse IP Lookup | CloudHost247",
+      "relatedTools": [
+        "dns-propagation",
+        "dns-lookup",
+        "dns-health"
+      ],
+      "resultMode": "lookup"
+    },
+    {
+      "slug": "ip-lookup",
+      "name": "IP Address Lookup",
+      "category": "ip",
+      "summary": "ASN, organisation, country, reverse DNS and network range for an IP.",
+      "description": "Combines the free, keyless Team Cymru DNS origin lookup (ASN, prefix, registry, country) with reverse DNS and, when a geolocation provider is configured, city/region/timezone enrichment. Address version, class (public/private/reserved) and prefix are always reported.",
+      "icon": "ip",
+      "path": "/tools/ip-lookup",
+      "apiPath": "/api/tools/ip-lookup",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/ip/lookup",
+        "/tools/ip-location"
+      ],
+      "discoveryCategories": [
+        "ip-network"
+      ],
+      "seoTitle": "IP Address Lookup | CloudHost247",
+      "relatedTools": [
+        "my-ip",
+        "ip-whois",
+        "domain-to-ip"
+      ],
+      "resultMode": "lookup"
+    },
+    {
+      "slug": "my-ip",
+      "name": "What Is My IP",
+      "category": "ip",
+      "summary": "Show the public IP this request arrived from, plus connection details.",
+      "description": "Reports the address the CloudHost247 edge actually observed for your request (and the IPv6 address separately when the connection used IPv6), with user-agent and, when detectable, the negotiated TLS protocol/cipher. No attempt is made to fingerprint the device beyond what the browser sends.",
+      "icon": "wifi",
+      "path": "/tools/what-is-my-ip",
+      "apiPath": "/api/tools/my-ip",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/ip/my-ip",
+        "/tools/my-ip"
+      ],
+      "discoveryCategories": [
+        "ip-network"
+      ],
+      "seoTitle": "What Is My IP | CloudHost247",
+      "relatedTools": [
+        "ip-lookup",
+        "ip-whois",
+        "domain-to-ip"
+      ],
+      "resultMode": "lookup"
+    },
+    {
+      "slug": "ip-whois",
+      "name": "IP WHOIS",
+      "category": "ip",
+      "summary": "Registry data for an IPv4/IPv6 address over RDAP.",
+      "description": "Queries RDAP (the structured, standards-based successor to port-43 WHOIS) for the address: network handle, name, range, CIDR blocks, registrant organisation, abuse contact, events and remarks. The RDAP bootstrap endpoint is operator-configurable.",
+      "icon": "file-search",
+      "path": "/tools/ip-whois",
+      "apiPath": "/api/tools/ip-whois",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/ip/whois"
+      ],
+      "discoveryCategories": [
+        "ip-network"
+      ],
+      "seoTitle": "IP WHOIS | CloudHost247",
+      "relatedTools": [
+        "ip-lookup",
+        "my-ip",
+        "domain-to-ip"
+      ],
+      "resultMode": "lookup"
+    },
+    {
+      "slug": "domain-to-ip",
+      "name": "Domain → IP",
+      "category": "ip",
+      "summary": "Resolve a hostname to IPv4/IPv6 with the full CNAME chain.",
+      "description": "Resolves A and AAAA through a chosen CloudHost247 resolver, showing the CNAME chain, TTLs and response time for each answer.",
+      "icon": "arrow-right-left",
+      "path": "/tools/domain-to-ip",
+      "apiPath": "/api/tools/domain-to-ip",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/ip/domain-to-ip"
+      ],
+      "discoveryCategories": [
+        "ip-network"
+      ],
+      "seoTitle": "Domain → IP | CloudHost247",
+      "relatedTools": [
+        "ip-lookup",
+        "my-ip",
+        "ip-whois"
+      ],
+      "resultMode": "lookup"
+    },
+    {
+      "slug": "ip-to-hostname",
+      "name": "IP → Hostname",
+      "category": "ip",
+      "summary": "Reverse DNS for an address, with FCRDNS confirmation.",
+      "description": "Performs the PTR lookup for an address and confirms each hostname resolves back to it.",
+      "icon": "arrow-left-right",
+      "path": "/tools/ip-to-domain",
+      "apiPath": "/api/tools/ip-to-hostname",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/ip/ip-to-hostname",
+        "/tools/ip-to-hostname"
+      ],
+      "discoveryCategories": [
+        "ip-network"
+      ],
+      "seoTitle": "IP → Hostname | CloudHost247",
+      "relatedTools": [
+        "ip-lookup",
+        "my-ip",
+        "ip-whois"
+      ],
+      "resultMode": "lookup"
+    },
+    {
+      "slug": "isp-lookup",
+      "name": "ISP Lookup",
+      "category": "ip",
+      "summary": "Network operator, ASN and country for an IP address.",
+      "description": "Uses the keyless Team Cymru DNS origin service for ASN/prefix/registry/country and the reverse-DNS operator name, and adds ISP/carrier names from a geolocation provider when one is configured.",
+      "icon": "radio",
+      "path": "/tools/isp-lookup",
+      "apiPath": "/api/tools/isp-lookup",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/ip/isp"
+      ],
+      "discoveryCategories": [
+        "ip-network"
+      ],
+      "seoTitle": "ISP Lookup | CloudHost247",
+      "relatedTools": [
+        "ip-lookup",
+        "my-ip",
+        "ip-whois"
+      ],
+      "resultMode": "lookup"
+    },
+    {
+      "slug": "ip-converters",
+      "name": "IP Converters",
+      "category": "ip",
+      "summary": "Decimal ↔ IP, IPv4 ↔ IPv6, IPv6 compression/expansion, CIDR ↔ range.",
+      "description": "Deterministic conversions with the intermediate steps shown: IPv4/IPv6 to decimal and back, IPv4-mapped IPv6 and NAT64 forms, IPv6 compression and expansion, and IPv6 CIDR ↔ address range.",
+      "icon": "calculator",
+      "path": "/tools/ip-converters",
+      "apiPath": "/api/tools/ip-converters",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/ip/converters"
+      ],
+      "discoveryCategories": [
+        "ip-network",
+        "calculators"
+      ],
+      "seoTitle": "IP Converters | CloudHost247",
+      "relatedTools": [
+        "ip-lookup",
+        "my-ip",
+        "ip-whois"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "subnet-calculator",
+      "name": "Subnet Calculator",
+      "category": "network",
+      "summary": "IPv4/IPv6 network, broadcast, host range, masks and splitting.",
+      "description": "Computes network address, broadcast, first/last usable host, address count, CIDR notation, subnet mask, wildcard mask and binary forms for IPv4 and IPv6, and can split a network into equal subnets.",
+      "icon": "network",
+      "path": "/tools/subnet-calculator",
+      "apiPath": "/api/tools/subnet-calculator",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/network/subnet-calculator"
+      ],
+      "discoveryCategories": [
+        "ip-network",
+        "calculators"
+      ],
+      "seoTitle": "Subnet Calculator | CloudHost247",
+      "relatedTools": [
+        "ping",
+        "traceroute",
+        "port-checker"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "ping",
+      "name": "Ping Tool",
+      "category": "network",
+      "summary": "Measure reachability and latency from the CloudHost247 server.",
+      "description": "Uses the ICMP ping utility when the deployment allows it, and otherwise falls back to TCP connect timing against the port you choose — clearly labelled as TCP latency, never presented as ICMP. Targets are validated, private ranges are refused and results are rate limited.",
+      "icon": "radio-tower",
+      "path": "/tools/ping",
+      "apiPath": "/api/tools/ping",
+      "authRequired": true,
+      "visibility": "customer",
+      "legacyPaths": [
+        "/tools/network/ping"
+      ],
+      "discoveryCategories": [
+        "ip-network"
+      ],
+      "seoTitle": "Ping Tool | CloudHost247",
+      "relatedTools": [
+        "subnet-calculator",
+        "traceroute",
+        "port-checker"
+      ],
+      "resultMode": "lookup"
+    },
+    {
+      "slug": "traceroute",
+      "name": "Traceroute",
+      "category": "network",
+      "summary": "Hop-by-hop path to a target, where the environment permits.",
+      "description": "Runs the system traceroute utility with a bounded hop count and timeout when the binary exists and the environment allows it. When it does not, the tool reports UNAVAILABLE_IN_THIS_ENVIRONMENT and explains why rather than returning fabricated hops.",
+      "icon": "route",
+      "path": "/tools/traceroute",
+      "apiPath": "/api/tools/traceroute",
+      "authRequired": true,
+      "visibility": "customer",
+      "legacyPaths": [
+        "/tools/network/traceroute"
+      ],
+      "discoveryCategories": [
+        "ip-network"
+      ],
+      "seoTitle": "Traceroute | CloudHost247",
+      "relatedTools": [
+        "subnet-calculator",
+        "ping",
+        "port-checker"
+      ],
+      "resultMode": "lookup"
+    },
+    {
+      "slug": "port-checker",
+      "name": "Port Checker",
+      "category": "network",
+      "summary": "Check whether a TCP port on a public host accepts connections.",
+      "description": "Opens a TCP connection to a validated public host and port with a short timeout, reporting open, closed, filtered/timeout or unreachable. Single ports and short ranges only, with strict per-account limits; private and reserved address ranges are refused.",
+      "icon": "plug",
+      "path": "/tools/port-checker",
+      "apiPath": "/api/tools/port-checker",
+      "authRequired": true,
+      "visibility": "customer",
+      "legacyPaths": [
+        "/tools/network/port-checker"
+      ],
+      "discoveryCategories": [
+        "ip-network"
+      ],
+      "seoTitle": "Port Checker | CloudHost247",
+      "relatedTools": [
+        "subnet-calculator",
+        "ping",
+        "traceroute"
+      ],
+      "resultMode": "lookup"
+    },
+    {
+      "slug": "mac-lookup",
+      "name": "MAC Address Lookup",
+      "category": "network",
+      "summary": "Inspect MAC address bits and query a configured IEEE OUI reference.",
+      "description": "Inspects unicast/multicast and global/local bits. Vendor information comes from a configured IEEE OUI source, cached with its load time; unavailable source data is explicitly reported, never invented.",
+      "icon": "barcode",
+      "path": "/tools/mac-lookup",
+      "apiPath": "/api/tools/mac-lookup",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/network/mac-lookup"
+      ],
+      "discoveryCategories": [
+        "ip-network"
+      ],
+      "seoTitle": "MAC Address Lookup | CloudHost247",
+      "relatedTools": [
+        "subnet-calculator",
+        "ping",
+        "traceroute"
+      ],
+      "resultMode": "static"
+    },
+    {
+      "slug": "mac-generator",
+      "name": "MAC Address Generator",
+      "category": "network",
+      "summary": "Generate valid random, locally-administered or globally-administered MACs.",
+      "description": "Generates cryptographically random MAC addresses with the correct unicast/multicast and U/L bits for the requested mode.",
+      "icon": "shuffle",
+      "path": "/tools/mac-generator",
+      "apiPath": "/api/tools/mac-generator",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/network/mac-generator"
+      ],
+      "discoveryCategories": [
+        "ip-network"
+      ],
+      "seoTitle": "MAC Address Generator | CloudHost247",
+      "relatedTools": [
+        "subnet-calculator",
+        "ping",
+        "traceroute"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "asn-whois",
+      "name": "ASN WHOIS",
+      "category": "network",
+      "summary": "Autonomous system details, announced prefixes and registry.",
+      "description": "Queries RDAP for the AS number and the DNS-based Team Cymru origin service for announced prefixes, then resolves the AS name from RDAP. Results are attributable: every field lists the source that produced it.",
+      "icon": "git-branch",
+      "path": "/tools/asn-lookup",
+      "apiPath": "/api/tools/asn-whois",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/network/asn",
+        "/tools/asn-whois"
+      ],
+      "discoveryCategories": [
+        "ip-network"
+      ],
+      "seoTitle": "ASN WHOIS | CloudHost247",
+      "relatedTools": [
+        "subnet-calculator",
+        "ping",
+        "traceroute"
+      ],
+      "resultMode": "lookup"
+    },
+    {
+      "slug": "speed-test",
+      "name": "Internet Speed Test",
+      "category": "network",
+      "summary": "Browser-based download, upload and latency measurement with hard limits.",
+      "description": "Measures throughput between your browser and CloudHost247 using bounded transfers: the server caps each measurement by size and duration, and rate limits each client. Latency is measured with small request/response timing and jitter is reported when at least three samples are collected.",
+      "icon": "gauge",
+      "path": "/tools/speed-test",
+      "apiPath": "/api/tools/speed-test",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/network/speed-test"
+      ],
+      "discoveryCategories": [
+        "ip-network"
+      ],
+      "seoTitle": "Internet Speed Test | CloudHost247",
+      "relatedTools": [
+        "subnet-calculator",
+        "ping",
+        "traceroute"
+      ],
+      "resultMode": "lookup"
+    },
+    {
+      "slug": "http-headers",
+      "name": "HTTP Headers Checker",
+      "category": "developer",
+      "summary": "Status, headers, redirect chain, cache and security-header analysis.",
+      "description": "Fetches a URL through the SSRF-protected client, follows redirects with a hop limit, and reports the status code, every response header, the redirect chain, and an assessment of security headers (HSTS, CSP, X-Content-Type-Options, X-Frame-Options/frame-ancestors, Referrer-Policy, Permissions-Policy) and cache directives.",
+      "icon": "file-code",
+      "path": "/tools/http-headers",
+      "apiPath": "/api/tools/http-headers",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/developer/http-headers",
+        "/tools/redirect-checker",
+        "/tools/website-response"
+      ],
+      "discoveryCategories": [
+        "developer",
+        "website"
+      ],
+      "seoTitle": "HTTP Headers Checker | CloudHost247",
+      "relatedTools": [
+        "server-os",
+        "smtp-tester",
+        "email-header"
+      ],
+      "resultMode": "lookup"
+    },
+    {
+      "slug": "server-os",
+      "name": "Website OS Checker",
+      "category": "developer",
+      "summary": "Infer server software with an explicit confidence level.",
+      "description": "Reads Server, X-Powered-By, Via and proxy-identifying headers and reports each technology with a confidence level — Confirmed when the server states it, Likely when derived from several weak signals, Unknown when nothing reliable is present. No probing of the server beyond the single HTTP request.",
+      "icon": "server",
+      "path": "/tools/server-os",
+      "apiPath": "/api/tools/server-os",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/developer/server-os"
+      ],
+      "discoveryCategories": [
+        "developer",
+        "website"
+      ],
+      "seoTitle": "Website OS Checker | CloudHost247",
+      "relatedTools": [
+        "http-headers",
+        "smtp-tester",
+        "email-header"
+      ],
+      "resultMode": "lookup"
+    },
+    {
+      "slug": "smtp-tester",
+      "name": "SMTP Tester",
+      "category": "developer",
+      "summary": "Test an SMTP server's reachability, TLS and (optionally) authentication.",
+      "description": "Connects to the SMTP host, reads the banner, negotiates STARTTLS or implicit TLS, and reports the server capabilities, certificate summary and whether AUTH is offered. When you supply credentials they are used for that single test only: never logged, never stored, and never echoed back.",
+      "icon": "send",
+      "path": "/tools/smtp-tester",
+      "apiPath": "/api/tools/smtp-tester",
+      "authRequired": true,
+      "visibility": "customer",
+      "legacyPaths": [
+        "/tools/developer/smtp-test"
+      ],
+      "discoveryCategories": [
+        "developer",
+        "email"
+      ],
+      "seoTitle": "SMTP Tester | CloudHost247",
+      "relatedTools": [
+        "http-headers",
+        "server-os",
+        "email-header"
+      ],
+      "resultMode": "lookup"
+    },
+    {
+      "slug": "email-header",
+      "name": "Email Header Analyzer",
+      "category": "developer",
+      "summary": "Parse a raw message header: Received chain, auth results, sending IP.",
+      "description": "Parses a pasted header, reconstructs the Received chain with per-hop delays, extracts SPF/DKIM/DMARC results from Authentication-Results, identifies the sending IP and mail servers, and flags alignment mismatches between From, Return-Path and the authenticated domain.",
+      "icon": "mail-search",
+      "path": "/tools/email-header",
+      "apiPath": "/api/tools/email-header",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/developer/email-header"
+      ],
+      "discoveryCategories": [
+        "developer",
+        "email"
+      ],
+      "seoTitle": "Email Header Analyzer | CloudHost247",
+      "relatedTools": [
+        "http-headers",
+        "server-os",
+        "smtp-tester"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "json-tools",
+      "name": "JSON Tools",
+      "category": "developer",
+      "summary": "Viewer, formatter, beautifier, minifier and validator.",
+      "description": "Validates JSON with precise error positions, formats it with the indentation you choose, minifies it, and can sort keys. All processing happens in the browser; the API endpoint exists so the same behaviour is available to integrations and is covered by tests.",
+      "icon": "braces",
+      "path": "/tools/json-tools",
+      "apiPath": "/api/tools/json-tools",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/developer/json"
+      ],
+      "discoveryCategories": [
+        "developer"
+      ],
+      "seoTitle": "JSON Tools | CloudHost247",
+      "relatedTools": [
+        "http-headers",
+        "server-os",
+        "smtp-tester"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "encoding-tools",
+      "name": "Encoding Tools",
+      "category": "developer",
+      "summary": "Base64, MD5, binary ↔ text, ROT13 and Morse code.",
+      "description": "Encodes and decodes Base64 (UTF-8 safe), computes MD5, converts between text and binary, applies ROT13 and translates to/from Morse code. MD5 is provided for checksum/interoperability work only and the UI states plainly that it is unsuitable for password storage.",
+      "icon": "binary",
+      "path": "/tools/encoding-tools",
+      "apiPath": "/api/tools/encoding-tools",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/developer/encoding"
+      ],
+      "discoveryCategories": [
+        "developer"
+      ],
+      "seoTitle": "Encoding Tools | CloudHost247",
+      "relatedTools": [
+        "http-headers",
+        "server-os",
+        "smtp-tester"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "url-tools",
+      "name": "URL Tools",
+      "category": "developer",
+      "summary": "Multi-URL opener, rewrite-rule and .htaccess generators.",
+      "description": "Opens several URLs in browser tabs (client-side only — no server-side fetching merely to open a link), parses and explains URL components, and generates common Apache rewrite/redirect rules and .htaccess blocks with safe defaults.",
+      "icon": "link-2",
+      "path": "/tools/url-tools",
+      "apiPath": "/api/tools/url-tools",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/developer/url"
+      ],
+      "discoveryCategories": [
+        "developer"
+      ],
+      "seoTitle": "URL Tools | CloudHost247",
+      "relatedTools": [
+        "http-headers",
+        "server-os",
+        "smtp-tester"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "user-agent",
+      "name": "User Agent Tool",
+      "category": "developer",
+      "summary": "Show the user-agent and headers your browser actually sent.",
+      "description": "Displays the exact User-Agent string and request headers CloudHost247 received, so a support conversation can start from the same facts.",
+      "icon": "monitor",
+      "path": "/tools/user-agent",
+      "apiPath": "/api/tools/user-agent",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/developer/user-agent"
+      ],
+      "discoveryCategories": [
+        "developer"
+      ],
+      "seoTitle": "User Agent Tool | CloudHost247",
+      "relatedTools": [
+        "http-headers",
+        "server-os",
+        "smtp-tester"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "broken-links",
+      "name": "Broken Link Checker",
+      "category": "webmaster",
+      "summary": "Crawl a site within strict limits and report failing links.",
+      "description": "Crawls the same host starting from the URL you provide, within hard limits on pages, links, runtime and response size, and reports each link with its status, type (internal/external), redirect chain, error and the page it was found on. Private and reserved destinations are refused.",
+      "icon": "unlink",
+      "path": "/tools/broken-links",
+      "apiPath": "/api/tools/broken-links",
+      "authRequired": true,
+      "visibility": "customer",
+      "legacyPaths": [
+        "/tools/webmaster/broken-links"
+      ],
+      "discoveryCategories": [
+        "website"
+      ],
+      "seoTitle": "Broken Link Checker | CloudHost247",
+      "relatedTools": [
+        "open-graph",
+        "robots-generator",
+        "serp-simulator"
+      ],
+      "resultMode": "lookup"
+    },
+    {
+      "slug": "open-graph",
+      "name": "Open Graph Checker",
+      "category": "webmaster",
+      "summary": "Inspect og: and Twitter card metadata and preview the link.",
+      "description": "Parses Open Graph and Twitter/X card tags, warns about missing or malformed required properties, resolves relative image URLs and renders a preview of how the link is likely to appear.",
+      "icon": "share-2",
+      "path": "/tools/open-graph",
+      "apiPath": "/api/tools/open-graph",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/webmaster/open-graph"
+      ],
+      "discoveryCategories": [
+        "website"
+      ],
+      "seoTitle": "Open Graph Checker | CloudHost247",
+      "relatedTools": [
+        "broken-links",
+        "robots-generator",
+        "serp-simulator"
+      ],
+      "resultMode": "lookup"
+    },
+    {
+      "slug": "robots-generator",
+      "name": "robots.txt Generator",
+      "category": "webmaster",
+      "summary": "Build a valid robots.txt with sitemaps and crawl delay.",
+      "description": "Generates robots.txt from a guided form (user-agent groups, allow/disallow rules, sitemaps, crawl-delay, common presets), validating directives so the file cannot be emitted in a malformed state.",
+      "icon": "file-text",
+      "path": "/tools/robots-generator",
+      "apiPath": "/api/tools/robots-generator",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/webmaster/robots-generator"
+      ],
+      "discoveryCategories": [
+        "website"
+      ],
+      "seoTitle": "robots.txt Generator | CloudHost247",
+      "relatedTools": [
+        "broken-links",
+        "open-graph",
+        "serp-simulator"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "serp-simulator",
+      "name": "SERP Simulator",
+      "category": "webmaster",
+      "summary": "Preview a search result snippet for title, URL and description length.",
+      "description": "Renders a desktop and mobile search-result preview and reports pixel-width and character guidance for the title and description. It is explicitly a simulator for appearance only; it shows no ranking data.",
+      "icon": "list",
+      "path": "/tools/serp-simulator",
+      "apiPath": "/api/tools/serp-simulator",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/webmaster/serp-simulator"
+      ],
+      "discoveryCategories": [
+        "website"
+      ],
+      "seoTitle": "SERP Simulator | CloudHost247",
+      "relatedTools": [
+        "broken-links",
+        "open-graph",
+        "robots-generator"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "ssl-checker",
+      "name": "SSL Certificate Checker",
+      "category": "security",
+      "summary": "Certificate chain, validity, SANs, protocol and expiry for a host.",
+      "description": "Opens a real TLS connection, reports the leaf and chain certificates (subject, issuer, SANs, validity, signature algorithm, key parameters), the negotiated protocol and cipher, hostname match, and days remaining. Private keys are never requested or displayed.",
+      "icon": "lock",
+      "path": "/tools/ssl-checker",
+      "apiPath": "/api/tools/ssl-checker",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/security/ssl",
+        "/tools/ssl-certificate-information"
+      ],
+      "discoveryCategories": [
+        "security",
+        "ssl"
+      ],
+      "seoTitle": "SSL Certificate Checker | CloudHost247",
+      "relatedTools": [
+        "ip-blacklist",
+        "password-tools",
+        "bin-checker"
+      ],
+      "resultMode": "lookup"
+    },
+    {
+      "slug": "ip-blacklist",
+      "name": "IP Blacklist Checker",
+      "category": "security",
+      "summary": "Check an IP against the DNS blocklists the operator has enabled.",
+      "description": "Queries each enabled DNS-based blocklist for the address and reports listed / not listed / error per provider, with the listing code or text the provider returned and delisting guidance. Providers are managed by a Super Admin — nothing is hard-coded.",
+      "icon": "shield-alert",
+      "path": "/tools/ip-blacklist",
+      "apiPath": "/api/tools/ip-blacklist",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/security/ip-blacklist"
+      ],
+      "discoveryCategories": [
+        "security"
+      ],
+      "seoTitle": "IP Blacklist Checker | CloudHost247",
+      "relatedTools": [
+        "ssl-checker",
+        "password-tools",
+        "bin-checker"
+      ],
+      "resultMode": "lookup"
+    },
+    {
+      "slug": "password-tools",
+      "name": "Password Tools",
+      "category": "security",
+      "summary": "Generate strong passwords and evaluate strength locally.",
+      "description": "Generates random passwords with the character classes and length you choose, evaluates the strength of a password using client-side entropy estimation against common patterns, and explains the difference between a one-way password hash and reversible encryption.",
+      "icon": "key-square",
+      "path": "/tools/password-tools",
+      "apiPath": "/api/tools/password-tools",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/security/password",
+        "/tools/password-generator"
+      ],
+      "discoveryCategories": [
+        "security"
+      ],
+      "seoTitle": "Password Tools | CloudHost247",
+      "relatedTools": [
+        "ssl-checker",
+        "ip-blacklist",
+        "bin-checker"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "bin-checker",
+      "name": "BIN Checker",
+      "category": "security",
+      "summary": "Issuer information for a card BIN/IIN from a configured provider.",
+      "description": "Accepts only the first 6–8 digits (the BIN/IIN) and returns the issuer data the configured provider supplies. CloudHost247 never accepts, transmits or stores a full card number, and this is not a card-validation or testing service.",
+      "icon": "credit-card",
+      "path": "/tools/bin-checker",
+      "apiPath": "/api/tools/bin-checker",
+      "authRequired": true,
+      "visibility": "customer",
+      "legacyPaths": [
+        "/tools/security/bin-checker"
+      ],
+      "discoveryCategories": [
+        "security"
+      ],
+      "seoTitle": "BIN Checker | CloudHost247",
+      "relatedTools": [
+        "ssl-checker",
+        "ip-blacklist",
+        "password-tools"
+      ],
+      "resultMode": "lookup"
+    },
+    {
+      "slug": "punycode",
+      "name": "Punycode / IDN Converter",
+      "category": "domain",
+      "summary": "Convert between Unicode domain names and their ASCII (punycode) form.",
+      "description": "Uses standards-compliant IDNA processing (Node's URL hostname parser, which implements UTS#46-style mapping) to convert between a Unicode domain and its punycode form, validating the result and reporting the label-by-label conversion.",
+      "icon": "languages",
+      "path": "/tools/punycode",
+      "apiPath": "/api/tools/punycode",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/domain/punycode"
+      ],
+      "discoveryCategories": [
+        "dns-domains"
+      ],
+      "seoTitle": "Punycode / IDN Converter | CloudHost247",
+      "relatedTools": [
+        "domain-availability",
+        "whois"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "domain-availability",
+      "name": "Domain Availability",
+      "category": "domain",
+      "summary": "Check whether a domain is available, using CloudHost247's registrar integration.",
+      "description": "Uses the existing CloudHost247 Domain Services providers (registrar APIs and RDAP) to check availability, and returns the same states the domain search does: available, registered, premium, unsupported, unknown. Signed-in customers can add a result straight to the cart.",
+      "icon": "search-check",
+      "path": "/tools/domain-availability",
+      "apiPath": "/api/tools/domain-availability",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/domain/search"
+      ],
+      "discoveryCategories": [
+        "dns-domains"
+      ],
+      "seoTitle": "Domain Availability | CloudHost247",
+      "relatedTools": [
+        "punycode",
+        "whois"
+      ],
+      "resultMode": "lookup"
+    },
+    {
+      "slug": "domain-health",
+      "name": "Domain Health Center",
+      "category": "diagnostics",
+      "summary": "Unified DNS, email, web, network and security view for a domain you own.",
+      "description": "Combines the DNS, email, web, network and security checks for one of your CloudHost247 domains into a single factual report, joining DNS answers to the hosting server, SSL certificate and mail configuration CloudHost247 already stores for that domain.",
+      "icon": "heart-pulse",
+      "path": "/tools/domain-health",
+      "apiPath": "/api/tools/domain-health",
+      "authRequired": true,
+      "visibility": "customer",
+      "legacyPaths": [],
+      "discoveryCategories": [
+        "utilities"
+      ],
+      "seoTitle": "Domain Health Center | CloudHost247",
+      "relatedTools": [],
+      "resultMode": "lookup"
+    },
+    {
+      "slug": "word-counter",
+      "name": "Word & Text Counter",
+      "category": "productivity",
+      "summary": "Words, characters, sentences, paragraphs and reading time.",
+      "description": "Counts words, characters (with and without spaces), sentences and paragraphs, and estimates reading time from word count.",
+      "icon": "type",
+      "path": "/tools/word-counter",
+      "apiPath": "/api/tools/word-counter",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/productivity/word-counter"
+      ],
+      "discoveryCategories": [
+        "utilities"
+      ],
+      "seoTitle": "Word & Text Counter | CloudHost247",
+      "relatedTools": [
+        "lorem-ipsum",
+        "notepad",
+        "small-text"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "lorem-ipsum",
+      "name": "Lorem Ipsum Generator",
+      "category": "productivity",
+      "summary": "Generate placeholder text by words, sentences or paragraphs.",
+      "description": "Generates classical Lorem Ipsum placeholder text in the quantity you request, with a choice of starting with \"Lorem ipsum dolor sit amet…\".",
+      "icon": "align-left",
+      "path": "/tools/lorem-ipsum",
+      "apiPath": "/api/tools/lorem-ipsum",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/productivity/lorem-ipsum"
+      ],
+      "discoveryCategories": [
+        "utilities"
+      ],
+      "seoTitle": "Lorem Ipsum Generator | CloudHost247",
+      "relatedTools": [
+        "word-counter",
+        "notepad",
+        "small-text"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "notepad",
+      "name": "Online Notepad",
+      "category": "productivity",
+      "summary": "A scratch pad that stays in your browser.",
+      "description": "A distraction-free text area with local persistence in your browser only. Nothing typed into the notepad is sent to CloudHost247 unless you explicitly save it as a report.",
+      "icon": "notebook-pen",
+      "path": "/tools/notepad",
+      "apiPath": "/api/tools/notepad",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/productivity/notepad"
+      ],
+      "discoveryCategories": [
+        "utilities"
+      ],
+      "seoTitle": "Online Notepad | CloudHost247",
+      "relatedTools": [
+        "word-counter",
+        "lorem-ipsum",
+        "small-text"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "small-text",
+      "name": "Small Text Generator",
+      "category": "productivity",
+      "summary": "Convert text to small caps, superscript and subscript Unicode.",
+      "description": "Maps letters to Unicode small-cap, superscript and subscript equivalents. Characters without a mapping are left unchanged and reported, so the output never silently loses content.",
+      "icon": "text",
+      "path": "/tools/small-text",
+      "apiPath": "/api/tools/small-text",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/productivity/small-text"
+      ],
+      "discoveryCategories": [
+        "utilities"
+      ],
+      "seoTitle": "Small Text Generator | CloudHost247",
+      "relatedTools": [
+        "word-counter",
+        "lorem-ipsum",
+        "notepad"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "invisible-character",
+      "name": "Invisible Character Generator",
+      "category": "productivity",
+      "summary": "Copy zero-width and invisible Unicode characters.",
+      "description": "Provides the standard invisible Unicode characters with their code points and names, ready to copy. Each entry is labelled with its code point so the output is auditable.",
+      "icon": "eye-off",
+      "path": "/tools/invisible-character",
+      "apiPath": "/api/tools/invisible-character",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/productivity/invisible-character"
+      ],
+      "discoveryCategories": [
+        "utilities"
+      ],
+      "seoTitle": "Invisible Character Generator | CloudHost247",
+      "relatedTools": [
+        "word-counter",
+        "lorem-ipsum",
+        "notepad"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "runic-translator",
+      "name": "Runic Translator",
+      "category": "productivity",
+      "summary": "Transliterate Latin text to Elder Futhark runes and back.",
+      "description": "Transliterates Latin letters to Elder Futhark runes using a documented, deterministic mapping (digraphs first), and transliterates back. Characters with no runic equivalent are reported rather than dropped.",
+      "icon": "scroll",
+      "path": "/tools/runic-translator",
+      "apiPath": "/api/tools/runic-translator",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/productivity/runic"
+      ],
+      "discoveryCategories": [
+        "utilities"
+      ],
+      "seoTitle": "Runic Translator | CloudHost247",
+      "relatedTools": [
+        "word-counter",
+        "lorem-ipsum",
+        "notepad"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "qr-generator",
+      "name": "QR Code Generator",
+      "category": "productivity",
+      "summary": "Create QR codes for URLs, text, email, phone, WiFi and vCards.",
+      "description": "Generates QR codes server-side (so the same PNG/SVG is reproducible from the API) for URLs, plain text, email, phone numbers, WiFi credentials and vCards. Nothing you enter is stored; the response contains the image and nothing else.",
+      "icon": "qr-code",
+      "path": "/tools/qr-generator",
+      "apiPath": "/api/tools/qr-generator",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/productivity/qr"
+      ],
+      "discoveryCategories": [
+        "utilities"
+      ],
+      "seoTitle": "QR Code Generator | CloudHost247",
+      "relatedTools": [
+        "word-counter",
+        "lorem-ipsum",
+        "notepad"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "qr-scanner",
+      "name": "QR Scanner",
+      "category": "productivity",
+      "summary": "Scan a QR code from your camera or an image file.",
+      "description": "Decodes QR codes in the browser using the device camera or an uploaded image, using the platform's QR reader support. Decoded content is shown for review and is never uploaded unless you explicitly save it.",
+      "icon": "scan-line",
+      "path": "/tools/qr-scanner",
+      "apiPath": "/api/tools/qr-scanner",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/productivity/qr-scanner"
+      ],
+      "discoveryCategories": [
+        "utilities"
+      ],
+      "seoTitle": "QR Scanner | CloudHost247",
+      "relatedTools": [
+        "word-counter",
+        "lorem-ipsum",
+        "notepad"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "wifi-qr",
+      "name": "WiFi QR Tool",
+      "category": "productivity",
+      "summary": "Share a WiFi network as a QR code, without storing the password.",
+      "description": "Builds the standard WIFI: QR payload from SSID, password, encryption type and hidden flag, then renders it as PNG or SVG. The password is used to render the image and is never written to the database; saving the result as a report stores only the SSID and encryption type.",
+      "icon": "wifi-pen",
+      "path": "/tools/wifi-qr",
+      "apiPath": "/api/tools/wifi-qr",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/productivity/wifi-qr"
+      ],
+      "discoveryCategories": [
+        "utilities"
+      ],
+      "seoTitle": "WiFi QR Tool | CloudHost247",
+      "relatedTools": [
+        "word-counter",
+        "lorem-ipsum",
+        "notepad"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "time-card",
+      "name": "Time Card Calculator",
+      "category": "productivity",
+      "summary": "Clock-in/clock-out totals with breaks and overtime.",
+      "description": "Calculates worked time from clock-in/clock-out pairs and breaks, in either 12- or 24-hour format, and applies the overtime rule you specify (daily or weekly thresholds).",
+      "icon": "clock",
+      "path": "/tools/time-card",
+      "apiPath": "/api/tools/time-card",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/productivity/time-card"
+      ],
+      "discoveryCategories": [
+        "utilities",
+        "calculators"
+      ],
+      "seoTitle": "Time Card Calculator | CloudHost247",
+      "relatedTools": [
+        "word-counter",
+        "lorem-ipsum",
+        "notepad"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "color-tools",
+      "name": "Designer Colour Tools",
+      "category": "productivity",
+      "summary": "Convert between HEX, RGB, HSL, HSV/HSB and CMYK.",
+      "description": "Converts a colour between HEX, RGB, HSL, HSV/HSB and CMYK, shows the preview, contrast ratio against black and white, and provides copy-ready values for each notation.",
+      "icon": "palette",
+      "path": "/tools/color-tools",
+      "apiPath": "/api/tools/color-tools",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/productivity/colors"
+      ],
+      "discoveryCategories": [
+        "utilities"
+      ],
+      "seoTitle": "Designer Colour Tools | CloudHost247",
+      "relatedTools": [
+        "word-counter",
+        "lorem-ipsum",
+        "notepad"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "reverse-image-search",
+      "name": "Reverse Image Search",
+      "category": "productivity",
+      "summary": "Launch an image search with the engines you choose.",
+      "description": "Opens the reverse-image-search service you pick (Google Lens, TinEye, Bing Visual Search, Yandex Images) in a new tab. This tool performs no crawling or scraping of third-party engines: the search itself happens in your browser, under those services' own terms.",
+      "icon": "image-search",
+      "path": "/tools/reverse-image-search",
+      "apiPath": "/api/tools/reverse-image-search",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/productivity/reverse-image"
+      ],
+      "discoveryCategories": [
+        "utilities"
+      ],
+      "seoTitle": "Reverse Image Search | CloudHost247",
+      "relatedTools": [
+        "word-counter",
+        "lorem-ipsum",
+        "notepad"
+      ],
+      "resultMode": "static"
+    },
+    {
+      "slug": "image-ocr",
+      "name": "Image → Text (OCR)",
+      "category": "productivity",
+      "summary": "Extract text from an image using a configured OCR provider.",
+      "description": "Uploads an image to the administrator-configured OCR provider and returns the extracted text with a confidence estimate where the provider supplies one. No OCR provider configured means CONFIGURATION_REQUIRED — the platform does not guess at text.",
+      "icon": "image",
+      "path": "/tools/image-ocr",
+      "apiPath": "/api/tools/image-ocr",
+      "authRequired": true,
+      "visibility": "customer",
+      "legacyPaths": [
+        "/tools/productivity/image-ocr"
+      ],
+      "discoveryCategories": [
+        "utilities"
+      ],
+      "seoTitle": "Image → Text (OCR) | CloudHost247",
+      "relatedTools": [
+        "word-counter",
+        "lorem-ipsum",
+        "notepad"
+      ],
+      "resultMode": "lookup"
+    },
+    {
+      "slug": "tool-history",
+      "name": "Tool History",
+      "category": "diagnostics",
+      "summary": "Your recent tool runs, with the metadata that was stored.",
+      "description": "Lists your own tool runs (tool, target, time, status) and lets you clear them. Credentials, SMTP passwords, API keys, private keys, full card numbers and email contents are never stored in history.",
+      "icon": "history",
+      "path": "/tools/history",
+      "apiPath": "/api/tools/tool-history",
+      "authRequired": true,
+      "visibility": "customer",
+      "legacyPaths": [
+        "/tools/tool-history"
+      ],
+      "discoveryCategories": [
+        "utilities"
+      ],
+      "seoTitle": "Tool History | CloudHost247",
+      "relatedTools": [
+        "domain-health"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "tool-favorites",
+      "name": "Favorites",
+      "category": "diagnostics",
+      "summary": "The tools you have starred.",
+      "description": "Shows your starred tools and lets you remove them. Favorites are per account.",
+      "icon": "star",
+      "path": "/tools/favorites",
+      "apiPath": "/api/tools/tool-favorites",
+      "authRequired": true,
+      "visibility": "customer",
+      "legacyPaths": [
+        "/tools/tool-favorites"
+      ],
+      "discoveryCategories": [
+        "utilities"
+      ],
+      "seoTitle": "Favorites | CloudHost247",
+      "relatedTools": [
+        "domain-health"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "tool-reports",
+      "name": "Saved Reports",
+      "category": "diagnostics",
+      "summary": "Diagnostic results you chose to save, downloadable and deletable.",
+      "description": "Saves the exact result you saw (with credential-shaped fields stripped) so it can be downloaded, attached to a support ticket or compared later.",
+      "icon": "file-archive",
+      "path": "/tools/reports",
+      "apiPath": "/api/tools/tool-reports",
+      "authRequired": true,
+      "visibility": "customer",
+      "legacyPaths": [
+        "/tools/tool-reports"
+      ],
+      "discoveryCategories": [
+        "utilities"
+      ],
+      "seoTitle": "Saved Reports | CloudHost247",
+      "relatedTools": [
+        "domain-health"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "tool-monitors",
+      "name": "Monitoring",
+      "category": "diagnostics",
+      "summary": "Scheduled SSL-expiry, DNS-record and email-configuration monitoring.",
+      "description": "Registers a monitor that the CloudHost247 worker evaluates on a schedule: SSL certificate expiry thresholds, specific DNS records whose value must not change, and the email authentication configuration (MX/SPF/DKIM/DMARC/BIMI). Notifications are delivered through the existing CloudHost247 notification system.",
+      "icon": "bell-ring",
+      "path": "/tools/monitors",
+      "apiPath": "/api/tools/tool-monitors",
+      "authRequired": true,
+      "visibility": "customer",
+      "legacyPaths": [
+        "/tools/tool-monitors"
+      ],
+      "discoveryCategories": [
+        "utilities"
+      ],
+      "seoTitle": "Monitoring | CloudHost247",
+      "relatedTools": [
+        "domain-health"
+      ],
+      "resultMode": "lookup"
+    },
+    {
+      "slug": "nameserver-lookup",
+      "name": "Nameserver Lookup",
+      "category": "dns",
+      "summary": "Inspect the nameservers published for a domain.",
+      "description": "Query the configured resolver for the published DNS record, including the returned TTL. No records are invented when a lookup fails.",
+      "icon": "search",
+      "path": "/tools/nameserver-lookup",
+      "apiPath": "/api/tools/nameserver-lookup",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [],
+      "discoveryCategories": [
+        "dns-domains"
+      ],
+      "seoTitle": "Nameserver Lookup | CloudHost247",
+      "relatedTools": [
+        "dns-propagation",
+        "dns-lookup",
+        "dns-health"
+      ],
+      "resultMode": "lookup"
+    },
+    {
+      "slug": "cname-lookup",
+      "name": "CNAME Lookup",
+      "category": "dns",
+      "summary": "Inspect a hostname’s canonical-name records.",
+      "description": "Query the configured resolver for the published DNS record, including the returned TTL. No records are invented when a lookup fails.",
+      "icon": "search",
+      "path": "/tools/cname-lookup",
+      "apiPath": "/api/tools/cname-lookup",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [],
+      "discoveryCategories": [
+        "dns-domains"
+      ],
+      "seoTitle": "CNAME Lookup | CloudHost247",
+      "relatedTools": [
+        "dns-propagation",
+        "dns-lookup",
+        "dns-health"
+      ],
+      "resultMode": "lookup"
+    },
+    {
+      "slug": "whois",
+      "name": "Domain WHOIS",
+      "category": "domain",
+      "summary": "Inspect public domain registration information through the connected RDAP provider.",
+      "description": "Reuses CloudHost247 Domain Services to look up registrar, registration dates, nameservers and public status. Privacy-protected registrants stay protected.",
+      "icon": "file-search",
+      "path": "/tools/whois",
+      "apiPath": "/api/tools/whois",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/domain-information"
+      ],
+      "discoveryCategories": [
+        "dns-domains"
+      ],
+      "seoTitle": "Domain WHOIS | CloudHost247",
+      "relatedTools": [
+        "punycode",
+        "domain-availability"
+      ],
+      "resultMode": "lookup"
+    },
+    {
+      "slug": "uuid-generator",
+      "name": "UUID Generator",
+      "category": "developer",
+      "summary": "Generate cryptographically random version 4 identifiers.",
+      "description": "Generate up to 50 UUID v4 identifiers using the server’s cryptographic random source. Results are never cached.",
+      "icon": "shuffle",
+      "path": "/tools/uuid-generator",
+      "apiPath": "/api/tools/uuid-generator",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [],
+      "discoveryCategories": [
+        "developer"
+      ],
+      "seoTitle": "UUID Generator | CloudHost247",
+      "relatedTools": [
+        "http-headers",
+        "server-os",
+        "smtp-tester"
+      ],
+      "resultMode": "calculated"
+    }
+  ]
+}

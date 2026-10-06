@@ -1,0 +1,1072 @@
+{
+  "scope": "Actual Node production frontend HTTP fallback, metadata, redirects and document-module compatibility",
+  "results": [
+    {
+      "url": "/tools/dns-propagation",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "DNS Propagation Checker | CloudHost247"
+    },
+    {
+      "url": "/tools/dns/propagation",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/dns-propagation",
+      "title": null
+    },
+    {
+      "url": "/tools/dns-lookup",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "DNS Lookup | CloudHost247"
+    },
+    {
+      "url": "/tools/dns/lookup",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/dns-lookup",
+      "title": null
+    },
+    {
+      "url": "/tools/dns-record-lookup",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/dns-lookup",
+      "title": null
+    },
+    {
+      "url": "/tools/dns-health",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "DNS Health Checker | CloudHost247"
+    },
+    {
+      "url": "/tools/dns/health",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/dns-health",
+      "title": null
+    },
+    {
+      "url": "/tools/mx-lookup",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "MX Lookup | CloudHost247"
+    },
+    {
+      "url": "/tools/dns/mx",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/mx-lookup",
+      "title": null
+    },
+    {
+      "url": "/tools/spf-checker",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "SPF Checker | CloudHost247"
+    },
+    {
+      "url": "/tools/dns/spf",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/spf-checker",
+      "title": null
+    },
+    {
+      "url": "/tools/dmarc-checker",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "DMARC Checker | CloudHost247"
+    },
+    {
+      "url": "/tools/dns/dmarc",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/dmarc-checker",
+      "title": null
+    },
+    {
+      "url": "/tools/dmarc-generator",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "DMARC Record Generator | CloudHost247"
+    },
+    {
+      "url": "/tools/dns/dmarc-generator",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/dmarc-generator",
+      "title": null
+    },
+    {
+      "url": "/tools/dkim-checker",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "DKIM Checker | CloudHost247"
+    },
+    {
+      "url": "/tools/dns/dkim",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/dkim-checker",
+      "title": null
+    },
+    {
+      "url": "/tools/bimi-checker",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "BIMI Checker | CloudHost247"
+    },
+    {
+      "url": "/tools/dns/bimi",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/bimi-checker",
+      "title": null
+    },
+    {
+      "url": "/tools/dnskey-lookup",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "DNSKEY Lookup | CloudHost247"
+    },
+    {
+      "url": "/tools/dns/dnskey",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/dnskey-lookup",
+      "title": null
+    },
+    {
+      "url": "/tools/ds-lookup",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "DS Lookup | CloudHost247"
+    },
+    {
+      "url": "/tools/dns/ds",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/ds-lookup",
+      "title": null
+    },
+    {
+      "url": "/tools/reverse-dns",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "Reverse DNS / PTR Lookup | CloudHost247"
+    },
+    {
+      "url": "/tools/dns/reverse",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/reverse-dns",
+      "title": null
+    },
+    {
+      "url": "/tools/reverse-ip",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "Reverse IP Lookup | CloudHost247"
+    },
+    {
+      "url": "/tools/dns/reverse-ip",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/reverse-ip",
+      "title": null
+    },
+    {
+      "url": "/tools/ip-lookup",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "IP Address Lookup | CloudHost247"
+    },
+    {
+      "url": "/tools/ip/lookup",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/ip-lookup",
+      "title": null
+    },
+    {
+      "url": "/tools/ip-location",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/ip-lookup",
+      "title": null
+    },
+    {
+      "url": "/tools/what-is-my-ip",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "What Is My IP | CloudHost247"
+    },
+    {
+      "url": "/tools/ip/my-ip",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/what-is-my-ip",
+      "title": null
+    },
+    {
+      "url": "/tools/my-ip",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/what-is-my-ip",
+      "title": null
+    },
+    {
+      "url": "/tools/ip-whois",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "IP WHOIS | CloudHost247"
+    },
+    {
+      "url": "/tools/ip/whois",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/ip-whois",
+      "title": null
+    },
+    {
+      "url": "/tools/domain-to-ip",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "Domain → IP | CloudHost247"
+    },
+    {
+      "url": "/tools/ip/domain-to-ip",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/domain-to-ip",
+      "title": null
+    },
+    {
+      "url": "/tools/ip-to-domain",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "IP → Hostname | CloudHost247"
+    },
+    {
+      "url": "/tools/ip/ip-to-hostname",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/ip-to-domain",
+      "title": null
+    },
+    {
+      "url": "/tools/ip-to-hostname",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/ip-to-domain",
+      "title": null
+    },
+    {
+      "url": "/tools/isp-lookup",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "ISP Lookup | CloudHost247"
+    },
+    {
+      "url": "/tools/ip/isp",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/isp-lookup",
+      "title": null
+    },
+    {
+      "url": "/tools/ip-converters",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "IP Converters | CloudHost247"
+    },
+    {
+      "url": "/tools/ip/converters",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/ip-converters",
+      "title": null
+    },
+    {
+      "url": "/tools/subnet-calculator",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "Subnet Calculator | CloudHost247"
+    },
+    {
+      "url": "/tools/network/subnet-calculator",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/subnet-calculator",
+      "title": null
+    },
+    {
+      "url": "/tools/ping",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "Ping Tool | CloudHost247"
+    },
+    {
+      "url": "/tools/network/ping",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/ping",
+      "title": null
+    },
+    {
+      "url": "/tools/traceroute",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "Traceroute | CloudHost247"
+    },
+    {
+      "url": "/tools/network/traceroute",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/traceroute",
+      "title": null
+    },
+    {
+      "url": "/tools/port-checker",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "Port Checker | CloudHost247"
+    },
+    {
+      "url": "/tools/network/port-checker",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/port-checker",
+      "title": null
+    },
+    {
+      "url": "/tools/mac-lookup",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "MAC Address Lookup | CloudHost247"
+    },
+    {
+      "url": "/tools/network/mac-lookup",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/mac-lookup",
+      "title": null
+    },
+    {
+      "url": "/tools/mac-generator",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "MAC Address Generator | CloudHost247"
+    },
+    {
+      "url": "/tools/network/mac-generator",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/mac-generator",
+      "title": null
+    },
+    {
+      "url": "/tools/asn-lookup",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "ASN WHOIS | CloudHost247"
+    },
+    {
+      "url": "/tools/network/asn",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/asn-lookup",
+      "title": null
+    },
+    {
+      "url": "/tools/asn-whois",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/asn-lookup",
+      "title": null
+    },
+    {
+      "url": "/tools/speed-test",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "Internet Speed Test | CloudHost247"
+    },
+    {
+      "url": "/tools/network/speed-test",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/speed-test",
+      "title": null
+    },
+    {
+      "url": "/tools/http-headers",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "HTTP Headers Checker | CloudHost247"
+    },
+    {
+      "url": "/tools/developer/http-headers",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/http-headers",
+      "title": null
+    },
+    {
+      "url": "/tools/redirect-checker",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/http-headers",
+      "title": null
+    },
+    {
+      "url": "/tools/website-response",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/http-headers",
+      "title": null
+    },
+    {
+      "url": "/tools/server-os",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "Website OS Checker | CloudHost247"
+    },
+    {
+      "url": "/tools/developer/server-os",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/server-os",
+      "title": null
+    },
+    {
+      "url": "/tools/smtp-tester",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "SMTP Tester | CloudHost247"
+    },
+    {
+      "url": "/tools/developer/smtp-test",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/smtp-tester",
+      "title": null
+    },
+    {
+      "url": "/tools/email-header",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "Email Header Analyzer | CloudHost247"
+    },
+    {
+      "url": "/tools/developer/email-header",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/email-header",
+      "title": null
+    },
+    {
+      "url": "/tools/json-tools",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "JSON Tools | CloudHost247"
+    },
+    {
+      "url": "/tools/developer/json",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/json-tools",
+      "title": null
+    },
+    {
+      "url": "/tools/encoding-tools",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "Encoding Tools | CloudHost247"
+    },
+    {
+      "url": "/tools/developer/encoding",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/encoding-tools",
+      "title": null
+    },
+    {
+      "url": "/tools/url-tools",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "URL Tools | CloudHost247"
+    },
+    {
+      "url": "/tools/developer/url",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/url-tools",
+      "title": null
+    },
+    {
+      "url": "/tools/user-agent",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "User Agent Tool | CloudHost247"
+    },
+    {
+      "url": "/tools/developer/user-agent",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/user-agent",
+      "title": null
+    },
+    {
+      "url": "/tools/broken-links",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "Broken Link Checker | CloudHost247"
+    },
+    {
+      "url": "/tools/webmaster/broken-links",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/broken-links",
+      "title": null
+    },
+    {
+      "url": "/tools/open-graph",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "Open Graph Checker | CloudHost247"
+    },
+    {
+      "url": "/tools/webmaster/open-graph",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/open-graph",
+      "title": null
+    },
+    {
+      "url": "/tools/robots-generator",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "robots.txt Generator | CloudHost247"
+    },
+    {
+      "url": "/tools/webmaster/robots-generator",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/robots-generator",
+      "title": null
+    },
+    {
+      "url": "/tools/serp-simulator",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "SERP Simulator | CloudHost247"
+    },
+    {
+      "url": "/tools/webmaster/serp-simulator",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/serp-simulator",
+      "title": null
+    },
+    {
+      "url": "/tools/ssl-checker",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "SSL Certificate Checker | CloudHost247"
+    },
+    {
+      "url": "/tools/security/ssl",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/ssl-checker",
+      "title": null
+    },
+    {
+      "url": "/tools/ssl-certificate-information",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/ssl-checker",
+      "title": null
+    },
+    {
+      "url": "/tools/ip-blacklist",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "IP Blacklist Checker | CloudHost247"
+    },
+    {
+      "url": "/tools/security/ip-blacklist",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/ip-blacklist",
+      "title": null
+    },
+    {
+      "url": "/tools/password-tools",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "Password Tools | CloudHost247"
+    },
+    {
+      "url": "/tools/security/password",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/password-tools",
+      "title": null
+    },
+    {
+      "url": "/tools/password-generator",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/password-tools",
+      "title": null
+    },
+    {
+      "url": "/tools/bin-checker",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "BIN Checker | CloudHost247"
+    },
+    {
+      "url": "/tools/security/bin-checker",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/bin-checker",
+      "title": null
+    },
+    {
+      "url": "/tools/punycode",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "Punycode / IDN Converter | CloudHost247"
+    },
+    {
+      "url": "/tools/domain/punycode",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/punycode",
+      "title": null
+    },
+    {
+      "url": "/tools/domain-availability",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "Domain Availability | CloudHost247"
+    },
+    {
+      "url": "/tools/domain/search",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/domain-availability",
+      "title": null
+    },
+    {
+      "url": "/tools/domain-health",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "Domain Health Center | CloudHost247"
+    },
+    {
+      "url": "/tools/word-counter",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "Word &amp; Text Counter | CloudHost247"
+    },
+    {
+      "url": "/tools/productivity/word-counter",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/word-counter",
+      "title": null
+    },
+    {
+      "url": "/tools/lorem-ipsum",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "Lorem Ipsum Generator | CloudHost247"
+    },
+    {
+      "url": "/tools/productivity/lorem-ipsum",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/lorem-ipsum",
+      "title": null
+    },
+    {
+      "url": "/tools/notepad",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "Online Notepad | CloudHost247"
+    },
+    {
+      "url": "/tools/productivity/notepad",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/notepad",
+      "title": null
+    },
+    {
+      "url": "/tools/small-text",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "Small Text Generator | CloudHost247"
+    },
+    {
+      "url": "/tools/productivity/small-text",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/small-text",
+      "title": null
+    },
+    {
+      "url": "/tools/invisible-character",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "Invisible Character Generator | CloudHost247"
+    },
+    {
+      "url": "/tools/productivity/invisible-character",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/invisible-character",
+      "title": null
+    },
+    {
+      "url": "/tools/runic-translator",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "Runic Translator | CloudHost247"
+    },
+    {
+      "url": "/tools/productivity/runic",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/runic-translator",
+      "title": null
+    },
+    {
+      "url": "/tools/qr-generator",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "QR Code Generator | CloudHost247"
+    },
+    {
+      "url": "/tools/productivity/qr",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/qr-generator",
+      "title": null
+    },
+    {
+      "url": "/tools/qr-scanner",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "QR Scanner | CloudHost247"
+    },
+    {
+      "url": "/tools/productivity/qr-scanner",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/qr-scanner",
+      "title": null
+    },
+    {
+      "url": "/tools/wifi-qr",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "WiFi QR Tool | CloudHost247"
+    },
+    {
+      "url": "/tools/productivity/wifi-qr",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/wifi-qr",
+      "title": null
+    },
+    {
+      "url": "/tools/time-card",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "Time Card Calculator | CloudHost247"
+    },
+    {
+      "url": "/tools/productivity/time-card",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/time-card",
+      "title": null
+    },
+    {
+      "url": "/tools/color-tools",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "Designer Colour Tools | CloudHost247"
+    },
+    {
+      "url": "/tools/productivity/colors",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/color-tools",
+      "title": null
+    },
+    {
+      "url": "/tools/reverse-image-search",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "Reverse Image Search | CloudHost247"
+    },
+    {
+      "url": "/tools/productivity/reverse-image",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/reverse-image-search",
+      "title": null
+    },
+    {
+      "url": "/tools/image-ocr",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "Image → Text (OCR) | CloudHost247"
+    },
+    {
+      "url": "/tools/productivity/image-ocr",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/image-ocr",
+      "title": null
+    },
+    {
+      "url": "/tools/history",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "Tool History | CloudHost247"
+    },
+    {
+      "url": "/tools/tool-history",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/history",
+      "title": null
+    },
+    {
+      "url": "/tools/favorites",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "Favorites | CloudHost247"
+    },
+    {
+      "url": "/tools/tool-favorites",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/favorites",
+      "title": null
+    },
+    {
+      "url": "/tools/reports",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "Saved Reports | CloudHost247"
+    },
+    {
+      "url": "/tools/tool-reports",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/reports",
+      "title": null
+    },
+    {
+      "url": "/tools/monitors",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "Monitoring | CloudHost247"
+    },
+    {
+      "url": "/tools/tool-monitors",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/monitors",
+      "title": null
+    },
+    {
+      "url": "/tools/nameserver-lookup",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "Nameserver Lookup | CloudHost247"
+    },
+    {
+      "url": "/tools/cname-lookup",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "CNAME Lookup | CloudHost247"
+    },
+    {
+      "url": "/tools/whois",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "Domain WHOIS | CloudHost247"
+    },
+    {
+      "url": "/tools/domain-information",
+      "status": 301,
+      "expected": 301,
+      "location": "/tools/whois",
+      "title": null
+    },
+    {
+      "url": "/tools/uuid-generator",
+      "status": 200,
+      "expected": 200,
+      "location": null,
+      "title": "UUID Generator | CloudHost247"
+    },
+    {
+      "url": "/tools/category/dns-domains",
+      "status": 200,
+      "expected": 200,
+      "title": "DNS &amp; Domains Tools | CloudHost247"
+    },
+    {
+      "url": "/tools/category/ip-network",
+      "status": 200,
+      "expected": 200,
+      "title": "IP &amp; Network Tools | CloudHost247"
+    },
+    {
+      "url": "/tools/category/security",
+      "status": 200,
+      "expected": 200,
+      "title": "Security Tools | CloudHost247"
+    },
+    {
+      "url": "/tools/category/ssl",
+      "status": 200,
+      "expected": 200,
+      "title": "SSL Tools | CloudHost247"
+    },
+    {
+      "url": "/tools/category/email",
+      "status": 200,
+      "expected": 200,
+      "title": "Email Tools | CloudHost247"
+    },
+    {
+      "url": "/tools/category/website",
+      "status": 200,
+      "expected": 200,
+      "title": "Website Tools | CloudHost247"
+    },
+    {
+      "url": "/tools/category/developer",
+      "status": 200,
+      "expected": 200,
+      "title": "Developer Tools | CloudHost247"
+    },
+    {
+      "url": "/tools/category/calculators",
+      "status": 200,
+      "expected": 200,
+      "title": "Calculators Tools | CloudHost247"
+    },
+    {
+      "url": "/tools/category/utilities",
+      "status": 200,
+      "expected": 200,
+      "title": "Utilities Tools | CloudHost247"
+    },
+    {
+      "url": "/tools/missing",
+      "status": 404,
+      "expected": 404
+    },
+    {
+      "url": "/tools/category/missing",
+      "status": 404,
+      "expected": 404
+    },
+    {
+      "url": "/tools/document",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "url": "/tools/document/mrz",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "url": "/tools/document/mrz-parser",
+      "status": 200,
+      "expected": 200
+    }
+  ],
+  "errors": []
+}

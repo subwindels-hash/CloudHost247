@@ -28,16 +28,23 @@ $pages['infrastructure.php'] = 'cloudhost247-infrastructure.tpl';
 foreach (array('site-search.php', 'site-search-unavailable.php', 'site-search-empty.php', 'site-search-long.php') as $path) {
     $pages[$path] = 'cloudhost247-search.tpl';
 }
+require $root . '/modules/addons/cloudhost247_theme/lib/ToolsSite.php';
+$pages['tools'] = 'cloudhost247-tools.tpl';
+foreach (\CloudHost247\Theme\ToolsSite::catalog()['tools'] as $entry) { $pages[ltrim($entry['path'],'/')] = 'cloudhost247-tools.tpl'; }
 $pages['privacy-policy.php'] = 'privacypolicy.tpl';
 $pages['cookie-policy.php'] = 'cookiepolicy.tpl';
 $pages['acceptable-use-policy.php'] = 'acceptableusepolicy.tpl';
 foreach ($pages as $path => $template) {
     $_SERVER['SCRIPT_NAME'] = '/' . $path;
-    $site = \CloudHost247\Theme\Site::context(array('WEB_ROOT' => '', 'systemurl' => 'https://example.test', 'templatefile' => $path === 'index.php' ? 'homepage' : ''));
+    $site = \CloudHost247\Theme\Site::context(array('WEB_ROOT' => '', 'systemurl' => 'https://example.test', 'templatefile' => $path === 'index.php' ? 'homepage' : ''), array('platform_base_path'=>'/platform'));
     $page = isset($catalog['pages'][$path]) ? \CloudHost247\Theme\Site::editorial($catalog['pages'][$path]['slug']) : null;
     if ($page === null) { $page = array('title' => isset($catalog['pages'][$path]) ? $catalog['pages'][$path]['title'] : "We couldn't find that page.", 'summary' => '', 'body' => '', 'missing' => true); }
     $smarty->clearAllAssign();
     $smarty->assign(array('WEB_ROOT'=>'','template'=>'cloudhost247','pagetitle'=>$site['title'],'ch247Site'=>$site,'cloudhost247Page'=>$page,'cloudhost247'=>array('settings'=>array(),'sections'=>array()),'date_year'=>'2026','loggedin'=>false,'languagechangeenabled'=>false,'currencies'=>array()));
+    if ($template === 'cloudhost247-tools.tpl') {
+        $tool = \CloudHost247\Theme\ToolsSite::resolve('/' . $path);
+        $smarty->assign(array('cloudhost247ToolsPage'=>$tool,'chToolsReady'=>true,'chToolsPlatform'=>'/platform','chToolsBase'=>''));
+    }
     if ($path === 'email-hosting.php') {
         require_once $root . '/modules/servers/cloudhost247_email_hosting/lib/Repository/ContentRepository.php';
         $content = \CloudHost247\Email\Repository\ContentRepository::defaults();
@@ -57,6 +64,7 @@ foreach ($pages as $path => $template) {
     $html = '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' . htmlspecialchars($site['title'], ENT_QUOTES, 'UTF-8') . ' | CloudHost247</title><link rel="stylesheet" href="/templates/cloudhost247/css/custom.css"><link rel="stylesheet" href="/templates/cloudhost247/css/site.css"><script src="/templates/cloudhost247/js/site.js" defer></script></head><body class="ch-site ch-public">';
     $html .= $smarty->fetch('cloudhost247/includes/site-nav.tpl') . '<div id="ch-main" tabindex="-1"></div>' . $smarty->fetch('cloudhost247/' . $template) . $smarty->fetch('cloudhost247/includes/site-footer.tpl');
     $html .= '</body></html>';
+    if (!is_dir(dirname($out . '/' . $path . '.html'))) { mkdir(dirname($out . '/' . $path . '.html'), 0777, true); }
     file_put_contents($out . '/' . $path . '.html', $html);
 }
 echo count($pages) . " first-party page fixtures rendered. No WHMCS or database behavior is simulated.\n";

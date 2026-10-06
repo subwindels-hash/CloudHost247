@@ -13,7 +13,9 @@ import { blacklistCheck } from '../ip/blacklist';
 import { convertPunycode } from '../domain/punycode';
 import { checkDomainAvailability } from '../domain/availability';
 import { domainHealthCenter } from '../domain/health';
-import { invalidInput } from '../core/errors';
+import { randomUUID } from 'node:crypto';
+import { lookupDomainInfo } from '../../domain-services/whois-service';
+import { invalidInput, ToolError } from '../core/errors';
 import type { ToolHandler } from './kit';
 import { bool, maybeNum, maybeStr, oneOf, str, strArray, targetLabel } from './kit';
 
@@ -21,6 +23,12 @@ const ALGORITHMS = ['md5', 'sha1', 'sha256', 'sha512', 'bcrypt'] as const;
 const PRESETS = ['pin', 'memorable', 'strong', 'maximum'] as const;
 
 export const securityDomainHandlers: Record<string, ToolHandler> = {
+  'uuid-generator': async input => ({ version: 4, identifiers: Array.from({ length: maybeNum(input, 'count', { min: 1, max: 50 }) ?? 1 }, () => randomUUID()) }),
+  whois: async (input, context) => {
+    const outcome = await lookupDomainInfo(context.db, context.caller.userId, str(input, 'domain', { required: true, max: 253 }));
+    if (outcome.status === 'completed' && outcome.result) return outcome.result;
+    throw new ToolError(outcome.status === 'provider_not_configured' ? 'CONFIGURATION_REQUIRED' : outcome.status === 'rate_limited' ? 'RATE_LIMITED' : outcome.status === 'not_found' ? 'DOMAIN_NOT_FOUND' : 'PROVIDER_ERROR', outcome.message ?? 'Domain registration lookup unavailable.');
+  },
   'ssl-checker': async (input) => {
     const hostInput = str(input, 'host', { max: 300 }) || str(input, 'domain', { max: 300 }) || str(input, 'url', { max: 2000 });
     if (hostInput.length === 0) throw invalidInput('Enter a hostname, for example example.com or https://example.com/.');

@@ -1,3 +1,4 @@
+import { DISCOVERY_CATEGORIES, TOOLS_FOOTER } from './catalog';
 /**
  * Tools Center — REST surface (`/api/tools/*`, mirrored at `/api/v1/tools/*`).
  *
@@ -65,9 +66,9 @@ function stableKey(input: Record<string, unknown>): string {
   const normalised: Record<string, unknown> = {};
   for (const key of keys) {
     const value = input[key];
-    normalised[key] = typeof value === 'string' ? value.trim() : value;
+    normalised[key] = value;
   }
-  return JSON.stringify(normalised).slice(0, 2000);
+  return JSON.stringify(normalised);
 }
 
 /** A compact, non-sensitive summary stored with the history row and the execution log. */
@@ -183,7 +184,17 @@ export async function registerToolsRoutes(app: FastifyInstance, env: Env, overri
   const registerHandlers = (prefix: string): void => {
     // --- Discovery -----------------------------------------------------------------------------
 
-    app.get(`${prefix}/tools/catalog`, async (request) => {
+    app.get(`${prefix}/tools/navigation`, async (_request, reply) => {
+      const { tools } = await listEffectiveTools(pool);
+      reply.header('Cache-Control', 'no-store');
+      return { categories: DISCOVERY_CATEGORIES, footer: TOOLS_FOOTER, tools: tools.filter(tool => tool.status === 'ACTIVE' && tool.visibility === 'public' && !tool.authRequired && handlerFor(tool.slug)).map(tool => ({
+        slug: tool.slug, name: tool.name, path: tool.path, category: tool.category, summary: tool.summary,
+        discoveryCategories: tool.discoveryCategories, icon: tool.icon,
+      })) };
+    });
+
+    app.get(`${prefix}/tools/catalog`, async (request, reply) => {
+      reply.header('Cache-Control', 'no-store');
       const { tools, masterEnabled, anonymousAccess } = await listEffectiveTools(pool);
       const categories = Object.entries(CATEGORY_LABELS).map(([slug, label]) => ({
         slug,
@@ -200,13 +211,15 @@ export async function registerToolsRoutes(app: FastifyInstance, env: Env, overri
         masterEnabled,
         anonymousAccess,
         categories,
+        discoveryCategories: Object.entries(DISCOVERY_CATEGORIES).map(([slug,label]) => ({slug,label,toolCount: tools.filter(tool=>tool.discoveryCategories?.includes(slug)).length})),
         count: filtered.length,
         missingImplementations: missingHandlers(),
         tools: filtered,
       };
     });
 
-    app.get(`${prefix}/tools/dashboard`, async (request) => {
+    app.get(`${prefix}/tools/dashboard`, async (request, reply) => {
+      reply.header('Cache-Control', 'no-store');
       const { tools, masterEnabled, anonymousAccess } = await listEffectiveTools(pool);
       const auth = request.headers.authorization ? await authenticate(request, env, pool).catch(() => null) : null;
       const categoryCounts = new Map<string, number>();
@@ -242,12 +255,22 @@ export async function registerToolsRoutes(app: FastifyInstance, env: Env, overri
 
     // --- Speed test (browser-side measurement) ---------------------------------------------------
 
-    app.get(`${prefix}/tools/speed-test/latency`, async (_request, reply) => {
+    // The raw transfer APIs must not bypass operator disable/auth controls.
+    const speedGate = async (request: FastifyRequest, reply: FastifyReply) => {
+      try {
+        const tool = await resolveToolOrThrow(pool, 'speed-test');
+        if (tool.status !== 'ACTIVE') throw new ToolError('SERVICE_UNAVAILABLE', tool.statusMessage ?? 'Speed test is unavailable.');
+        await resolveCaller(request, env, pool, tool);
+      } catch (error) { sendToolFailure(reply, error, 'speed-test', request); return reply; }
+    };
+    const speedOptions = {preHandler: speedGate, config:{rateLimit:{max:10,timeWindow:'1 minute'}}};
+
+    app.get(`${prefix}/tools/speed-test/latency`, {...speedOptions,config:{rateLimit:{max:30,timeWindow:'1 minute'}}}, async (_request, reply) => {
       reply.header('cache-control', 'no-store');
       return { success: true, serverTime: new Date().toISOString() };
     });
 
-    app.get(`${prefix}/tools/speed-test/download`, async (request, reply) => {
+    app.get(`${prefix}/tools/speed-test/download`, speedOptions, async (request, reply) => {
       const query = request.query as Record<string, unknown> | undefined;
       const requested = Number(query?.bytes ?? 0);
       // The operator-set cap (tools.speed_test_max_bytes) governs real transfers; the constant is the
@@ -264,7 +287,7 @@ export async function registerToolsRoutes(app: FastifyInstance, env: Env, overri
       return reply.send(payload);
     });
 
-    app.post(`${prefix}/tools/speed-test/upload`, async (request, reply) => {
+    app.post(`${prefix}/tools/speed-test/upload`, speedOptions, async (request, reply) => {
       const started = Date.now();
       const body = request.body;
       const bytes = Buffer.isBuffer(body) ? body.length : Buffer.isBuffer((body as { payload?: unknown } | undefined)?.payload) ? ((body as { payload: Buffer }).payload.length) : 0;
@@ -280,7 +303,7 @@ export async function registerToolsRoutes(app: FastifyInstance, env: Env, overri
       return { success: true, receivedBytes: bytes, serverDurationMs: Date.now() - started };
     });
 
-    app.get(`${prefix}/tools/speed-test/config`, async (request) => {
+    app.get(`${prefix}/tools/speed-test/config`, speedOptions, async (request) => {
       const query = request.query as Record<string, unknown> | undefined;
       const measure = ['true', '1', 'yes', 'on'].includes(String(query?.measureServerEgress ?? '').toLowerCase());
       return { success: true, data: await speedTestConfig(pool, { measureServerEgress: measure }) };
@@ -291,6 +314,9 @@ export async function registerToolsRoutes(app: FastifyInstance, env: Env, overri
     // segments, so `/tools/history` never falls into `:slug`.
 
     const executeHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+      // HTTP intermediaries must never cache visitor IPs, secrets or private results.
+      // Public result caching is owned exclusively by the typed executor cache.
+      reply.header('Cache-Control', 'no-store');
       const slug = (request.params as { slug?: string }).slug ?? '';
       try {
         const tool = await resolveToolOrThrow(pool, slug);

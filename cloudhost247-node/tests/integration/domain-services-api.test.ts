@@ -9,6 +9,7 @@ import { signAuthToken } from '../../src/lib/jwt';
 import { hashPassword } from '../../src/lib/password';
 import { sweepDomainServices } from '../../src/worker/domain-services-sweep';
 import { markAuctionPaymentVerified } from '../../src/domain-services/auction-service';
+import { setDomainProviderTestOverrides } from '../../src/domain-services/providers/provider-http';
 import { MockNamecheap, MockRdap } from '../helpers/mock-registrar';
 
 /**
@@ -684,6 +685,7 @@ describe('Domain Services with a connected (simulated) registrar', () => {
 
   afterEach(async () => {
     await mockNamecheap.stop();
+    setDomainProviderTestOverrides(null);
     await mockRdap.stop();
     await db.close();
   });
@@ -848,6 +850,8 @@ describe('Domain Services with a connected (simulated) registrar', () => {
   });
 
   it('WHOIS lookup through the (simulated) RDAP registry reports privacy protection honestly', async () => {
+    // Explicit test transport allows the loopback fixture; production RDAP rejects private targets.
+    setDomainProviderTestOverrides({ fetchImpl: fetch });
     const app = buildTestApp();
     const admin = await createUser('rdap-admin@example.com', 'super_admin');
     const created = await app.inject({

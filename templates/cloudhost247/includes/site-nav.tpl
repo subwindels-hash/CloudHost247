@@ -8,8 +8,8 @@
     <nav id="ch-navigation" aria-label="Main navigation">
       <div class="ch-nav-items">
       {foreach $ch247Site.navigation as $menu}
-        <details class="ch-nav-item"><summary>{$menu.title|escape} <span aria-hidden="true">⌄</span></summary>
-          <div class="ch-mega"><div class="ch-mega-intro"><span class="ch-kicker">Explore CloudHost247</span><h2>{$menu.title|escape}</h2><p>{$menu.description|escape}</p><a href="{$WEB_ROOT}/cloudhost247-hosting.php">View Plans <span aria-hidden="true">↗</span></a></div>
+        <details class="ch-nav-item"{if $menu.title == 'Tools'} data-ch-tools-menu data-tools-api="{$ch247Site.platform|escape}" data-tools-root="{$WEB_ROOT|escape}"{/if}><summary>{$menu.title|escape} <span aria-hidden="true">⌄</span></summary>
+          <div class="ch-mega"><div class="ch-mega-intro"><span class="ch-kicker">Explore CloudHost247</span><h2>{$menu.title|escape}</h2><p>{$menu.description|escape}</p><a href="{$WEB_ROOT}/{if $menu.title == 'Tools'}tools{else}cloudhost247-hosting.php{/if}">{if $menu.title == 'Tools'}All Tools{else}View Plans{/if} <span aria-hidden="true">↗</span></a></div>
           {foreach $menu.groups as $group}<div class="ch-mega-group"><h3>{$group.title|escape}</h3><ul>{foreach $group.links as $link}<li><a href="{$WEB_ROOT}/{$link.url|escape}">{$link.label|escape}<span aria-hidden="true">↗</span></a></li>{/foreach}</ul></div>{/foreach}
           </div>
         </details>

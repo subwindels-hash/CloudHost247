@@ -1,3 +1,4 @@
+import { ToolsMegaMenu } from '../components/tools/ToolsNavigation';
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { apiFetch } from '../lib/api';
@@ -88,7 +89,7 @@ export default function Header() {
 
         <div id="ch247-primary-nav" className={`ch247-header__collapsible${menuOpen ? ' is-open' : ''}`}>
           <nav className="ch247-nav-links" aria-label="Primary">
-            {marketingLinks.map((link) => (
+            {marketingLinks.map((link) => link.to === '/tools' ? <ToolsMegaMenu key={link.to} onNavigate={closeMenu}/> : (
               <NavLink key={link.to} to={link.to} end={link.end} onClick={closeMenu}>
                 {link.label}
               </NavLink>

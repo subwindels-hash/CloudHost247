@@ -6,11 +6,17 @@
  * *as-is*: the UI renders `success: false` with the server's code/message instead of flattening it
  * into a generic error, because "CONFIGURATION_REQUIRED" and "RATE_LIMITED" need different advice.
  */
-import { apiFetch } from './api';
+import { apiFetch, ApiRequestError } from './api';
 
 export type ToolStatus = 'ACTIVE' | 'DISABLED' | 'MAINTENANCE' | 'CONFIGURATION_REQUIRED' | 'SERVICE_UNAVAILABLE';
 
 export interface ToolSummary {
+  legacyPaths?: string[];
+  discoveryCategories?: string[];
+  seoTitle?: string;
+  relatedTools?: string[];
+  resultMode?: string;
+  visibility?: string;
   slug: string;
   name: string;
   category: string;
@@ -188,6 +194,8 @@ export const TOOL_FORMS: Record<string, ToolForm> = {
 };
 
 export function toolForm(slug: string): ToolForm {
+  if (['nameserver-lookup', 'cname-lookup', 'whois'].includes(slug)) return { method: 'GET', fields: [{ name: 'domain', label: 'Domain', type: 'text', required: true, placeholder: 'example.com' }] };
+  if (slug === 'uuid-generator') return { fields: [{ name: 'count', label: 'Number of identifiers', type: 'number', min: 1, max: 50, defaultValue: 1 }] };
   return TOOL_FORMS[slug] ?? { method: 'POST', fields: [] };
 }
 
@@ -243,9 +251,15 @@ export function buildToolInput(slug: string, values: Record<string, string | boo
 // --- API calls ---------------------------------------------------------------------------------
 
 export const toolsApi = {
-  catalog: (category?: string) => apiFetch<{ success: true; categories: ToolCategory[]; tools: ToolSummary[]; count: number; masterEnabled: boolean; anonymousAccess: boolean }>(`/api/tools/catalog${category ? `?category=${encodeURIComponent(category)}` : ''}`),
+  catalog: (category?: string) => apiFetch<{ success: true; categories: ToolCategory[]; discoveryCategories?: ToolCategory[]; tools: ToolSummary[]; count: number; masterEnabled: boolean; anonymousAccess: boolean }>(`/api/tools/catalog${category ? `?category=${encodeURIComponent(category)}` : ''}`),
   dashboard: () => apiFetch<ToolsDashboard>('/api/tools/dashboard'),
-  run: <T>(slug: string, input: Record<string, unknown>) => apiFetch<ToolEnvelope<T>>(`/api/tools/${encodeURIComponent(slug)}`, { method: 'POST', body: JSON.stringify(input) }),
+  run: async <T>(slug: string, input: Record<string, unknown>, signal?: AbortSignal): Promise<ToolEnvelope<T>> => {
+    try { return await apiFetch<ToolEnvelope<T>>(`/api/tools/${encodeURIComponent(slug)}`, { method: 'POST', body: JSON.stringify(input), signal }); }
+    catch (error) {
+      if (error instanceof ApiRequestError) return { success: false, tool: slug, code: error.code, message: error.message, retryable: error.retryable ?? (error.status >= 500 || error.status === 429) };
+      throw error;
+    }
+  },
   explain: <T>(slug: string, input: Record<string, unknown>) => apiFetch<{ success: true; explanation: ToolExplanation; data: T }>(`/api/tools/${encodeURIComponent(slug)}/explain`, { method: 'POST', body: JSON.stringify(input) }),
   saveReport: <T>(slug: string, input: Record<string, unknown>) => apiFetch<{ success: true; report: { id: string; target: string; created_at: string } }>(`/api/tools/${encodeURIComponent(slug)}/report`, { method: 'POST', body: JSON.stringify(input) }),
   openTicket: <T>(slug: string, input: Record<string, unknown>, note?: string) => apiFetch<{ success: true; ticket: { id: string; subject: string } }>(`/api/tools/${encodeURIComponent(slug)}/ticket`, { method: 'POST', body: JSON.stringify({ ...input, ...(note ? { note } : {}) }) }),

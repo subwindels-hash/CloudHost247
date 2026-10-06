@@ -184,6 +184,7 @@ export default function App() {
             on their card and are enforced again server-side, so a signed-out visitor never gets a
             broken page — only a clear "sign in to use this" message. */}
         <Route path="/tools" element={<ToolsCenterPage />} />
+        <Route path="/tools/category/:category" element={<ToolsCenterPage />} />
         <Route path="/tools/history" element={<ToolsHistoryPage />} />
         <Route path="/tools/favorites" element={<ToolsFavoritesPage />} />
         <Route path="/tools/reports" element={<ToolsReportsPage />} />

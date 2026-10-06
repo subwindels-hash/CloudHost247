@@ -1,3 +1,4 @@
+import { toolsApiPath } from '../lib/tools-runtime';
 import { FormEvent, useEffect, useState } from 'react';
 import { getToken } from '../lib/auth';
 import { useAuthState } from '../layout/useAuthState';
@@ -51,7 +52,7 @@ export default function AiSupportWidget() {
     if (!session || !open) return undefined;
     let active = true;
     const refresh = () =>
-      fetch(`/api/v1/ai-support/conversations/${session.conversationId}`, { headers: headers(session.accessToken) })
+      fetch(toolsApiPath(`/api/v1/ai-support/conversations/${session.conversationId}`), { headers: headers(session.accessToken) })
         .then(async (response) => {
           if (!response.ok) throw new Error('Session expired');
           return response.json();
@@ -81,7 +82,7 @@ export default function AiSupportWidget() {
     setBusy(true);
     setError('');
     try {
-      const response = await fetch('/api/v1/ai-support/conversations', { method: 'POST', headers: headers() });
+      const response = await fetch(toolsApiPath('/api/v1/ai-support/conversations'), { method: 'POST', headers: headers() });
       if (!response.ok) throw new Error('Could not start support');
       const data = await response.json();
       const next = { conversationId: data.conversationId, accessToken: data.accessToken } as SupportSession;
@@ -105,7 +106,7 @@ export default function AiSupportWidget() {
     setBusy(true);
     setError('');
     try {
-      const response = await fetch(`/api/v1/ai-support/conversations/${session.conversationId}/messages`, {
+      const response = await fetch(toolsApiPath(`/api/v1/ai-support/conversations/${session.conversationId}/messages`), {
         method: 'POST',
         headers: headers(session.accessToken),
         body: JSON.stringify({ message: body }),
@@ -133,7 +134,7 @@ export default function AiSupportWidget() {
     setBusy(true);
     setError('');
     try {
-      const response = await fetch(`/api/v1/ai-support/conversations/${session.conversationId}/contact`, {
+      const response = await fetch(toolsApiPath(`/api/v1/ai-support/conversations/${session.conversationId}/contact`), {
         method: 'PATCH',
         headers: headers(session.accessToken),
         body: JSON.stringify(contact),
@@ -154,7 +155,7 @@ export default function AiSupportWidget() {
     setBusy(true);
     setError('');
     try {
-      const response = await fetch(`/api/v1/ai-support/conversations/${session.conversationId}/newsletter`, {
+      const response = await fetch(toolsApiPath(`/api/v1/ai-support/conversations/${session.conversationId}/newsletter`), {
         method: 'POST',
         headers: headers(session.accessToken),
         body: JSON.stringify(contact),

@@ -11,3 +11,10 @@
 
 /* CMS titles and user queries may contain long, unbroken strings. */
 .ch-search-heading,.ch-resource-card{overflow-wrap:anywhere}
+
+/* Registry-driven Tools navigation shares the native shell at every breakpoint. */
+[data-ch-tools-menu] .ch-mega{max-height:75vh;overflow:auto;grid-template-columns:repeat(4,minmax(0,1fr))}
+[data-ch-tools-menu] .ch-mega-intro{grid-column:1/-1}
+.ch-footer-grid{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+@media(min-width:1200px){.ch-nav-items{gap:10px}.ch-account{gap:12px}}
+@media(max-width:767px){[data-ch-tools-menu] .ch-mega{grid-template-columns:1fr;max-height:none}}

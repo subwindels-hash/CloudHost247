@@ -355,7 +355,7 @@
     "developer-friendly.php": {
       "title": "Developer Hosting",
       "category": "Developer",
-      "headline": "From your first commit to what\u2019s next.",
+      "headline": "From your first commit to what’s next.",
       "summary": "Choose infrastructure for your code and workflow. Review runtime support, access options and resource limits for the selected service.",
       "visual": "deployment/developer-hosting",
       "features": [
@@ -527,7 +527,7 @@
     "help-center.php": {
       "title": "Help Center",
       "category": "Support",
-      "headline": "Let\u2019s find your next step.",
+      "headline": "Let’s find your next step.",
       "summary": "Browse the knowledgebase, review your services or open a support ticket from your CloudHost247 account.",
       "visual": "management/support",
       "features": [],
@@ -538,7 +538,7 @@
     "blog.php": {
       "title": "Blog",
       "category": "Marketing",
-      "headline": "Ideas for what you\u2019re building.",
+      "headline": "Ideas for what you’re building.",
       "summary": "Read published CloudHost247 updates and explore the knowledgebase for product guidance.",
       "visual": "blog/insights",
       "features": [],
@@ -1184,6 +1184,21 @@
           ]
         }
       ]
+    },
+    {
+      "title": "Tools",
+      "description": "DNS, domain, network and developer utilities with clear results.",
+      "groups": [
+        {
+          "title": "Explore",
+          "links": [
+            {
+              "label": "All Tools →",
+              "url": "tools"
+            }
+          ]
+        }
+      ]
     }
   ],
   "footer": [
@@ -1420,6 +1435,19 @@
         {
           "label": "Trademark Policy",
           "url": "trademark-policy.php"
+        }
+      ]
+    },
+    {
+      "title": "Tools",
+      "links": [
+        {
+          "label": "All Tools",
+          "url": "tools"
+        },
+        {
+          "label": "View All Tools →",
+          "url": "tools"
         }
       ]
     }

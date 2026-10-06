@@ -52,6 +52,36 @@
     } catch (_) { status.textContent = 'The platform catalog is temporarily unavailable. No sample results are shown. Please try the platform or contact support.'; }
     finally { clearTimeout(timeout); }
   });
+  // One availability request for both shared menus. Nothing is promoted from static metadata.
+  const toolsMenu = document.querySelector('[data-ch-tools-menu]');
+  const toolsFooter = document.querySelector('[data-ch-tools-footer]');
+  if (toolsMenu) {
+    const base = toolsMenu.dataset.toolsApi || '';
+    const root = toolsMenu.dataset.toolsRoot || '';
+    if (/^\/(?:[a-zA-Z0-9_-]+\/)*[a-zA-Z0-9_-]+$/.test(base)) {
+      const abort = new AbortController(); const timeout = setTimeout(() => abort.abort(), 10000);
+      fetch(base + '/api/tools/navigation', {credentials: 'omit', signal: abort.signal, headers: {Accept: 'application/json'}})
+        .then(response => { if (!response.ok) throw new Error('Unavailable'); return response.json(); })
+        .then(data => {
+          if (!Array.isArray(data.tools)) return;
+          const tools = data.tools.filter(tool => typeof tool.name === 'string' && /^\/tools\/[a-z0-9-]+$/.test(tool.path));
+          const panel = toolsMenu.querySelector('.ch-mega');
+          const categories = data.categories || {};
+          if (panel) Object.entries(categories).forEach(([slug, label]) => {
+            const entries = tools.filter(tool => (tool.discoveryCategories || []).includes(slug)).slice(0, 5);
+            if (!entries.length) return;
+            const section = document.createElement('div'); section.className = 'ch-mega-group'; const title = document.createElement('h3'); title.textContent = label;
+            const list = document.createElement('ul'); section.append(title, list);
+            entries.forEach(tool => { const li = document.createElement('li'); li.append(toolLink(tool)); list.append(li); }); panel.append(section);
+          });
+          if (toolsFooter) (data.footer || []).forEach(slug => {
+            const tool = tools.find(row => row.slug === slug); if (!tool) return;
+            const li = document.createElement('li'); li.append(toolLink(tool)); toolsFooter.insertBefore(li, toolsFooter.lastElementChild);
+          });
+          function toolLink(tool) { const link = document.createElement('a'); link.href = root + tool.path; link.textContent = tool.name; return link; }
+        }).catch(() => { /* All Tools remains a normal server-rendered link. */ }).finally(() => clearTimeout(timeout));
+    }
+  }
   /** A neutral software badge; does not imitate third-party trademarks or imply affiliation. */
   function ApplicationLogo(name) {
     const logo = document.createElement('span'); logo.className = 'ch-application-logo';

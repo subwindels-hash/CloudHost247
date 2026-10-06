@@ -31,7 +31,17 @@ cp -R database/migrations "${STAGE}/database/"
 cp server.js package.json package-lock.json .env.example "${STAGE}/"
 # Source maps are useful for stack traces but not required; keep them (small).
 
+# The WHMCS adapter lives at the WHMCS web root, NOT inside the Node application.
+# Ship it as a separately named overlay so operators cannot accidentally overwrite WHMCS core.
+TOOLS_STAGE="$(dirname "${STAGE}")/cloudhost247-whmcs-tools-overlay"
+mkdir -p "${TOOLS_STAGE}/assets" "${TOOLS_STAGE}/tools" "${TOOLS_STAGE}/templates/cloudhost247"
+cp -R ../assets/cloudhost247-tools "${TOOLS_STAGE}/assets/"
+cp ../tools/index.php ../tools/.htaccess "${TOOLS_STAGE}/tools/"
+cp ../templates/cloudhost247/cloudhost247-tools.tpl "${TOOLS_STAGE}/templates/cloudhost247/"
+# Requires the matching theme/module sources from this Git revision; see TOOLS-ARCHITECTURE.md.
+cp ../docs/tools/TOOLS-ARCHITECTURE.md "${TOOLS_STAGE}/DEPLOYMENT.md"
 mkdir -p "${OUT_DIR}"
+( cd "$(dirname "${STAGE}")" && zip -qr "${OUT_DIR}/cloudhost247-whmcs-tools-${SHA}.zip" cloudhost247-whmcs-tools-overlay )
 rm -f "${OUT_DIR}/${NAME}.zip"
 ( cd "$(dirname "${STAGE}")" && zip -qr "${OUT_DIR}/${NAME}.zip" "${NAME}" )
 

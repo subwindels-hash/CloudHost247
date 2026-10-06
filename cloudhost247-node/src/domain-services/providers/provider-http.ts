@@ -7,6 +7,7 @@
  *   3. tests can script the entire HTTP layer (see setDomainProviderTestOverrides) and exercise
  *      the real adapter code against a fake network, exactly like the Cloudflare client.
  */
+import { fetchWithGuard } from '../../tools/core/ssrf';
 import { DomainProviderError } from './types';
 
 export interface ProviderHttpRequest {
@@ -15,6 +16,7 @@ export interface ProviderHttpRequest {
   headers?: Record<string, string>;
   body?: string;
   timeoutMs?: number;
+  guardPublic?: boolean;
 }
 
 export interface ProviderHttpResponse {
@@ -55,6 +57,10 @@ export async function providerFetch(request: ProviderHttpRequest): Promise<Provi
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), request.timeoutMs ?? 20_000);
   try {
+    if (request.guardPublic && !testOverrides?.fetchImpl) {
+      const response = await fetchWithGuard(request.url, { method: 'GET', headers: request.headers, timeoutMs: request.timeoutMs ?? 10000, maxBytes: 2 * 1024 * 1024, maxRedirects: 3, allowHttp: false });
+      return {status: response.status, ok: response.status >= 200 && response.status < 300, text: response.bodyText};
+    }
     const response = await domainProviderFetchImpl()(request.url, {
       method: request.method,
       headers: request.headers,

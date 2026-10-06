@@ -12,13 +12,11 @@
  *   - Expired rows are removed opportunistically on write; there is also a worker sweep.
  *   - `force` (the UI's refresh button) skips the read but still refreshes the entry.
  */
+import { createHash } from 'node:crypto';
 import type { Queryable } from '../../db/types';
 
 export function cacheKey(toolSlug: string, parts: Array<string | number | boolean | null | undefined>): string {
-  const normalized = parts
-    .map((part) => (part === null || part === undefined ? '' : String(part).toLowerCase().trim()))
-    .join('|');
-  return `${toolSlug}:${normalized}`.slice(0, 200);
+  return `${toolSlug}:${createHash('sha256').update(JSON.stringify(parts)).digest('hex')}`;
 }
 
 export interface CachedResult<T> {

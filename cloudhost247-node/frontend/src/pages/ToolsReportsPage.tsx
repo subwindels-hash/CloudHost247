@@ -1,3 +1,4 @@
+import { toolsApiPath } from '../lib/tools-runtime';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { usePageMeta } from '../lib/usePageMeta';
@@ -33,7 +34,7 @@ export default function ToolsReportsPage() {
     setError(null);
     try {
       const token = localStorage.getItem('ch247_token');
-      const response = await fetch(`/api/tools/reports/${report.id}/export?format=${format}`, {
+      const response = await fetch(toolsApiPath(`/api/tools/reports/${report.id}/export?format=${format}`), {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (!response.ok) {

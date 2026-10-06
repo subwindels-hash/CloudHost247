@@ -4,10 +4,13 @@
  * never needs to know a hostname/port. This is required for the app to work correctly whether
  * it is reached through cPanel/Apache/Passenger or a local dev server.
  */
+import { toolsApiPath, toolsHost } from './tools-runtime';
 import { clearSession } from './auth';
 
 export interface ApiError {
   error: string;
+  code?: string;
+  retryable?: boolean;
   message: string;
 }
 
@@ -22,7 +25,7 @@ export class ApiRequestError extends Error {
   readonly status: number;
   readonly code: string;
 
-  constructor(status: number, code: string, message: string) {
+  constructor(status: number, code: string, message: string, public readonly retryable?: boolean) {
     super(message);
     this.name = 'ApiRequestError';
     this.status = status;
@@ -31,8 +34,8 @@ export class ApiRequestError extends Error {
 }
 
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const token = localStorage.getItem('ch247_token');
-  const res = await fetch(path, {
+  const token = toolsHost().embedded ? null : localStorage.getItem('ch247_token');
+  const res = await fetch(toolsApiPath(path), {
     ...init,
     headers: {
       'Content-Type': 'application/json',
@@ -52,7 +55,7 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
     if (res.status === 401 && token) {
       clearSession();
     }
-    throw new ApiRequestError(res.status, body.error || 'UNKNOWN', body.message || 'Request failed');
+    throw new ApiRequestError(res.status, body.error || body.code || 'UNKNOWN', body.message || 'Request failed', body.retryable);
   }
 
   if (res.status === 204) {

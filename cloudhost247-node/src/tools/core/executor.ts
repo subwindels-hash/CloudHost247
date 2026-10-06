@@ -25,6 +25,7 @@ import { ToolError, type ToolSuccessEnvelope } from './errors';
 import { cacheKey, withCache } from './cache';
 import { abuseBlockState, checkRateLimits, rateLimitedError, recordAbuseEvent } from './rate-limit';
 import { recordExecution, recordHistory, type ExecutionStatus } from './history';
+import { catalogEntry } from '../catalog';
 import type { EffectiveTool } from './registry';
 
 export interface ToolCaller {
@@ -192,12 +193,12 @@ export async function runTool<T>(
   let storedAt: string | null = null;
 
   try {
-    if (options.cacheParts && tool.cacheSeconds > 0) {
+    if (options.cacheParts && tool.cacheSeconds > 0 && !tool.requiresOwnership && catalogEntry(tool.slug)?.cacheSeconds !== 0) {
       const outcome = await withCache(
         context.db,
         {
           toolSlug: tool.slug,
-          key: cacheKey(tool.slug, options.cacheParts),
+          key: cacheKey(tool.slug, [...options.cacheParts, context.caller.userId]),
           seconds: tool.cacheSeconds,
           force: options.refresh === true,
         },

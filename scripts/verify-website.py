@@ -15,7 +15,7 @@ def validate(data):
   url=link.get('url','');p=urllib.parse.urlsplit(url)
   if not url or url.startswith('#') or p.scheme or p.netloc or '..' in p.path.split('/') or p.path.startswith('/'):
    errors.append('Unsafe/placeholder navigation URL: '+repr(url));continue
-  if p.path not in WHMCS and not (ROOT/p.path).is_file():errors.append('Missing navigation route: '+url)
+  if p.path not in WHMCS and not ((ROOT/p.path).is_file() or (p.path == 'tools' and (ROOT/'tools/index.php').is_file())):errors.append('Missing navigation route: '+url)
   if p.path=='dedeicated-server.php':errors.append('Navigation must use canonical dedicated-server.php')
   if not link.get('label','').strip():errors.append('Empty navigation label: '+url)
  for path,page in data['pages'].items():

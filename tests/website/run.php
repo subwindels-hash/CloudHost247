@@ -30,7 +30,7 @@ $repository->publishContent(1);
 $tests['reviewed draft publishes without changing its body'] = PublicPage::resolve('web-hosting')['body'] === 'NEVER PUBLIC';
 try { $repository->publishContent(9999); $missingRejected = false; } catch (\InvalidArgumentException $e) { $missingRejected = true; }
 $tests['publishing a missing record is refused'] = $missingRejected;
-$tests['registry has all six mega menu categories'] = count(Site::catalog()['navigation']) === 6;
+$tests['registry has all seven mega menu categories'] = count(Site::catalog()['navigation']) === 7;
 // Exercise actual repository reads, including localization and a failed database.
 ch247_theme_fresh();
 $pages = PublicDiscovery::pages($repository);

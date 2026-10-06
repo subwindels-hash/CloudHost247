@@ -1,0 +1,50 @@
+{
+  "verifiedDate": "2026-10-06",
+  "registryEntries": 68,
+  "runnableSurfaces": 64,
+  "categories": [
+    "dns-domains",
+    "ip-network",
+    "security",
+    "ssl",
+    "email",
+    "website",
+    "developer",
+    "calculators",
+    "utilities"
+  ],
+  "buildCommand": "cd cloudhost247-node && npm run build",
+  "nodeBase": "/",
+  "testedAlternateNodeBase": "/platform/",
+  "artifacts": [
+    {
+      "path": "cloudhost247-node/public/index.html",
+      "bytes": 777,
+      "sha256": "17b0dc9262a1f187bdddf15cfd2981c4f4d90c53e3b470bccfd1d083a4b96a7e",
+      "committed": false
+    },
+    {
+      "path": "assets/cloudhost247-tools/tools.js",
+      "bytes": 337689,
+      "sha256": "67b0afdc9b8dc7e298eb9c75ac5a8ccfbd18a069a85e288e9ebc7a72f2fac907",
+      "committed": false
+    },
+    {
+      "path": "assets/cloudhost247-tools/tools.css",
+      "bytes": 18093,
+      "sha256": "c2bc3ac50a6f149dcb8d8ea8d1710c922d58d7f9a042f31a486c14fc31f82ad9",
+      "committed": false
+    },
+    {
+      "path": "modules/addons/cloudhost247_theme/resources/tools.json",
+      "bytes": 62455,
+      "sha256": "6fdcc1a4f871ed21f84dfeea3187fe198cbf52a1b1ef3b41bb4c39a0bcada739",
+      "committed": true
+    }
+  ],
+  "notes": [
+    "Generated JS/CSS/dist/public assets are built at deployment and are not committed.",
+    "Hashes describe the verified local build, not a byte-reproducibility guarantee across Node/Vite versions.",
+    "Licensed WHMCS, production proxy/rewrites and live provider acceptance remain staging requirements."
+  ]
+}
