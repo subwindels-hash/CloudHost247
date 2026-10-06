@@ -79,6 +79,8 @@ export interface ProvisioningReport {
   hostingJobsQueued: string[];
   serverJobsQueued: string[];
   cloudflareServicesQueued: string[];
+  /** Platform-service tiers attached to a customer resource by the fulfilment hook. */
+  platformPlanResourcesAttached: string[];
 }
 
 /**
@@ -101,6 +103,7 @@ export async function provisionPaidOrder(tx: Queryable, order: OrderRow, genId: 
     hostingJobsQueued: [],
     serverJobsQueued: [],
     cloudflareServicesQueued: [],
+    platformPlanResourcesAttached: [],
   };
   const items = await listOrderItemsForOrder(tx, order.id);
 
@@ -141,6 +144,27 @@ export async function provisionPaidOrder(tx: Queryable, order: OrderRow, genId: 
       const { provisionCloudflareOrderItem } = await import('./cloudflare-service');
       const result = await provisionCloudflareOrderItem(tx, order, item, genId);
       if (result.cloudflareServiceId) report.cloudflareServicesQueued.push(result.cloudflareServiceId);
+      continue;
+    }
+
+    // --- Packaged CloudHost247 platform services (Website Builder tiers, AI builder, Online Store,
+    // Digital Marketing, Unified Inbox) and paid expert/marketing engagements. One dispatch point
+    // (src/commerce/fulfilment-service.ts) so no product module needs its own payment listener. ---
+    if (metadata.kind === 'platform_plan') {
+      const { fulfilPlatformPlanItem } = await import('../commerce/fulfilment-service');
+      const result = await fulfilPlatformPlanItem(tx, order, item);
+      if (result.subscriptionId) report.subscriptionsCreated.push(result.subscriptionId);
+      if (result.resourceId) report.platformPlanResourcesAttached.push(`${result.resourceType}:${result.resourceId}`);
+      continue;
+    }
+    if (metadata.kind === 'expert_service') {
+      const { fulfilExpertServiceItem } = await import('../commerce/fulfilment-service');
+      await fulfilExpertServiceItem(tx, order, item);
+      continue;
+    }
+    if (metadata.kind === 'marketing_plan') {
+      const { fulfilMarketingPlanItem } = await import('../commerce/fulfilment-service');
+      await fulfilMarketingPlanItem(tx, order, item);
       continue;
     }
 

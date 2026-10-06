@@ -1,17 +1,17 @@
 import { ToolsMegaMenu } from '../components/tools/ToolsNavigation';
+import { PlatformMegaMenu, PlatformMobileNav } from '../components/navigation/PlatformMegaMenu';
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { apiFetch } from '../lib/api';
 import { clearSession } from '../lib/auth';
 import { useAuthState } from './useAuthState';
 
+// Domains / Websites / Marketing / Hosting come from the mega navigation definition
+// (src/navigation/mega-menu.ts via GET /api/v1/navigation) so the menu, the mobile drawer, the
+// sitemap and the footer can never disagree. What remains here are the flat, always-visible links.
 const marketingLinks = [
   { to: '/', label: 'Home', end: true },
-  { to: '/hosting', label: 'Hosting' },
-  { to: '/hosting/control-panels', label: 'Control Panels' },
   { to: '/apps', label: 'App Marketplace' },
-  { to: '/domains', label: 'Domains' },
-  { to: '/tools', label: 'Tools' },
   { to: '/about', label: 'About' },
   { to: '/contact', label: 'Contact' },
   { to: '/faq', label: 'FAQ' },
@@ -32,6 +32,9 @@ const appLinks = [
   { to: '/billing', label: 'Billing' },
   { to: '/invoices', label: 'Invoices' },
   { to: '/support', label: 'Support' },
+  { to: '/websites/builder', label: 'Websites' },
+  { to: '/marketing/inbox', label: 'Inbox' },
+  { to: '/cart', label: 'Cart' },
   { to: '/account/assistant', label: 'Cloud AI' },
 ];
 
@@ -88,13 +91,18 @@ export default function Header() {
         </button>
 
         <div id="ch247-primary-nav" className={`ch247-header__collapsible${menuOpen ? ' is-open' : ''}`}>
-          <nav className="ch247-nav-links" aria-label="Primary">
-            {marketingLinks.map((link) => link.to === '/tools' ? <ToolsMegaMenu key={link.to} onNavigate={closeMenu}/> : (
+          <PlatformMegaMenu onNavigate={closeMenu} />
+          <nav className="ch247-nav-links" aria-label="Platform">
+            {marketingLinks.map((link) => (
               <NavLink key={link.to} to={link.to} end={link.end} onClick={closeMenu}>
                 {link.label}
               </NavLink>
             ))}
+            <ToolsMegaMenu onNavigate={closeMenu} />
           </nav>
+          <div className="ch247-mobile-nav-host">
+            <PlatformMobileNav onNavigate={closeMenu} />
+          </div>
           <div className="ch247-auth-links">
             {token ? (
               <>
@@ -147,6 +155,16 @@ export default function Header() {
             {user && STAFF_ROLES.includes(user.role) && (
               <NavLink to="/admin/domain-services" onClick={closeMenu}>
                 Domain Services
+              </NavLink>
+            )}
+            {user && SUPPORT_ROLES.includes(user.role) && (
+              <NavLink to="/admin/unified-inbox" onClick={closeMenu}>
+                Inbox
+              </NavLink>
+            )}
+            {user && SUPPORT_ROLES.includes(user.role) && (
+              <NavLink to="/admin/platform-services" onClick={closeMenu}>
+                Platform Services
               </NavLink>
             )}
           </nav>

@@ -28,8 +28,35 @@ export interface CartLineDTO {
   priceUnavailable: boolean;
 }
 
+/**
+ * A non-catalogue cart line (see database/migrations/0071 and src/commerce/service-cart.ts):
+ * a provider-confirmed domain registration draft, or a packaged platform-service tier. Same cart,
+ * same checkout, same order — a second line *kind*, not a second commerce system.
+ *
+ * `serviceKind`/`serviceRef` are the only things a client may echo back; the amount is always the
+ * one the server resolved for this read.
+ */
+export interface CartServiceLineDTO {
+  id: string;
+  lineKind: 'service';
+  serviceKind: 'domain_registration' | 'platform_plan';
+  serviceRef: string;
+  serviceName: string;
+  billingPeriod: string;
+  quantity: number;
+  unitPriceAmount: string | null;
+  lineTotalAmount: string | null;
+  currency: string | null;
+  priceUnavailable: boolean;
+  /** Customer-safe reason the line cannot be checked out right now (provider outage, plan
+   * unpublished, domain taken). Never contains provider internals. */
+  unavailableReason: string | null;
+}
+
 export interface CartSummaryDTO {
   items: CartLineDTO[];
+  /** Service lines, kept separate so existing consumers of `items` are unaffected. */
+  serviceItems: CartServiceLineDTO[];
   currency: string;
   subtotalAmount: string;
   itemCount: number;
@@ -115,5 +142,41 @@ export function toOrderItemDTO(row: OrderItemRow): OrderItemDTO {
     unitPriceAmount: row.unit_price_amount,
     lineTotalAmount: row.line_total_amount,
     currency: row.currency,
+  };
+}
+
+/**
+ * Maps a resolved service line to its cart DTO. `priceUnavailable` is the same honest flag the
+ * catalogue lines carry and drives the same UI state and the same checkout refusal — a service
+ * line is never quietly dropped from the cart or checked out at a stale price.
+ */
+export function toCartServiceLineDTO(
+  line: {
+    id: string;
+    serviceKind: string;
+    serviceRef: string;
+    serviceName: string;
+    billingPeriod: string;
+    quantity: number;
+    unitAmount: string | null;
+    lineAmount: string | null;
+    currency: string | null;
+    available: boolean;
+    unavailableReason: string | null;
+  }
+): CartServiceLineDTO {
+  return {
+    id: line.id,
+    lineKind: 'service',
+    serviceKind: line.serviceKind as CartServiceLineDTO['serviceKind'],
+    serviceRef: line.serviceRef,
+    serviceName: line.serviceName,
+    billingPeriod: line.billingPeriod,
+    quantity: line.quantity,
+    unitPriceAmount: line.unitAmount,
+    lineTotalAmount: line.lineAmount,
+    currency: line.currency,
+    priceUnavailable: !line.available,
+    unavailableReason: line.unavailableReason,
   };
 }

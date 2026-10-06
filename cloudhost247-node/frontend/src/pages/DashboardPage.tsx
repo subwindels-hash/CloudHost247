@@ -7,6 +7,48 @@ import { fetchMyInstallations, type MyInstallation } from '../lib/marketplace-ap
 import { usePageMeta } from '../lib/usePageMeta';
 import StatusBadge from '../components/StatusBadge';
 
+/**
+ * Counts for the platform services the customer has bought or can start. Deliberately a union with
+ * 'error' rather than a number: a service whose API call failed shows "unavailable" — the dashboard
+ * never displays a zero that would read as "you have nothing" when the truth is "we could not ask".
+ */
+type PlatformCount = number | 'error';
+
+interface PlatformSummary {
+  sites: PlatformCount;
+  stores: PlatformCount;
+  aiProjects: PlatformCount;
+  logoProjects: PlatformCount;
+  campaigns: PlatformCount;
+  expertRequests: PlatformCount;
+  conversations: PlatformCount;
+  cartItems: PlatformCount;
+}
+
+/** Runs one of the platform list endpoints and returns how many rows it holds, or 'error'. */
+function countFrom<T>(path: string, pick: (response: T) => unknown[]): Promise<PlatformCount> {
+  return apiFetch<T>(path)
+    .then((response) => pick(response).length)
+    .catch(() => 'error' as const);
+}
+
+const platformTiles: Array<{
+  key: keyof PlatformSummary;
+  label: string;
+  to: string;
+  hint: string;
+  empty: string;
+}> = [
+  { key: 'sites', label: 'Websites', to: '/websites/builder', hint: 'Builder sites you own', empty: 'Start a site in the Website Builder' },
+  { key: 'aiProjects', label: 'AI website drafts', to: '/websites/ai-builder', hint: 'Generated from a description', empty: 'Generate a site from a prompt' },
+  { key: 'stores', label: 'Online stores', to: '/websites/store', hint: 'Physical, digital and service products', empty: 'Open your first store' },
+  { key: 'logoProjects', label: 'Logo projects', to: '/marketing/logo-maker', hint: 'Vector marks you can export', empty: 'Design a logo' },
+  { key: 'campaigns', label: 'Marketing campaigns', to: '/marketing', hint: 'Managed campaigns and reports', empty: 'Request a managed campaign' },
+  { key: 'expertRequests', label: 'Expert requests', to: '/websites/experts', hint: 'Design and build work you ordered', empty: 'Hire a specialist' },
+  { key: 'conversations', label: 'Inbox conversations', to: '/marketing/inbox', hint: 'Messages from you and your sites', empty: 'Nothing waiting for you' },
+  { key: 'cartItems', label: 'Cart', to: '/cart', hint: 'Items waiting for checkout', empty: 'Your cart is empty' },
+];
+
 interface MeResponse {
   user: { id: string; email: string; fullName: string; role: string };
 }
@@ -28,6 +70,7 @@ export default function DashboardPage() {
   const [domains, setDomains] = useState<CustomerDomain[] | 'loading' | 'error'>('loading');
   const [tickets, setTickets] = useState<TicketSummary[] | 'loading' | 'error'>('loading');
   const [installations, setInstallations] = useState<MyInstallation[] | 'loading' | 'error'>('loading');
+  const [platform, setPlatform] = useState<PlatformSummary | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -61,6 +104,25 @@ export default function DashboardPage() {
     fetchMyInstallations()
       .then((res) => !cancelled && setInstallations(res.installations))
       .catch(() => !cancelled && setInstallations('error'));
+
+    // Each platform service is asked independently, so one slow or failing endpoint never blanks
+    // the whole dashboard — the affected tile says "unavailable" and the rest stay real.
+    void Promise.all([
+      countFrom<{ sites: unknown[] }>('/api/v1/builder/sites', (r) => r.sites),
+      countFrom<{ stores: unknown[] }>('/api/v1/store/stores', (r) => r.stores),
+      countFrom<{ projects: unknown[] }>('/api/v1/ai-builder/projects', (r) => r.projects),
+      countFrom<{ projects: unknown[] }>('/api/v1/logo-maker/projects', (r) => r.projects),
+      countFrom<{ campaigns: unknown[] }>('/api/v1/marketing-services/campaigns', (r) => r.campaigns),
+      countFrom<{ requests: unknown[] }>('/api/v1/experts/requests', (r) => r.requests),
+      countFrom<{ conversations: unknown[] }>('/api/v1/inbox/my-conversations', (r) => r.conversations),
+      apiFetch<{ cart: { itemCount: number } | null }>('/api/v1/cart')
+        .then((r) => r.cart?.itemCount ?? 0)
+        .catch(() => 'error' as const),
+    ]).then(([sites, stores, aiProjects, logoProjects, campaigns, expertRequests, conversations, cartItems]) => {
+      if (cancelled) return;
+      setPlatform({ sites, stores, aiProjects, logoProjects, campaigns, expertRequests, conversations, cartItems });
+    });
+
     return () => {
       cancelled = true;
     };
@@ -78,6 +140,34 @@ export default function DashboardPage() {
 
   return (
     <div className="ch247-stack">
+      <div className="ch247-card">
+        <h2>Your platform services</h2>
+        <p className="ch247-page__hint">
+          Everything here is part of your CLOUDHOST247 account. Counts are read live from each
+          service; a tile that says “unavailable” could not be reached just now.
+        </p>
+        <ul className="ch247-service-grid">
+          {platformTiles.map((tile) => {
+            const value = platform ? platform[tile.key] : undefined;
+            const count = typeof value === 'number' ? value : null;
+            return (
+              <li key={tile.key} className="ch247-service-tile">
+                <Link to={tile.to} className="ch247-service-tile__link">
+                  <span className="ch247-service-tile__label">{tile.label}</span>
+                  <span className="ch247-service-tile__count">
+                    {value === undefined ? '…' : value === 'error' ? 'unavailable' : count === 0 ? 'None yet' : `${count}`}
+                  </span>
+                </Link>
+                <span className="ch247-service-tile__hint">{count === 0 ? tile.empty : tile.hint}</span>
+              </li>
+            );
+          })}
+        </ul>
+        <p className="ch247-page__hint">
+          Need something built for you? <Link to="/websites/experts">Hire an expert</Link> or start
+          from the <Link to="/websites/templates">template gallery</Link>.
+        </p>
+      </div>
       <div className="ch247-card">
         <h1>Welcome back, {me.fullName}</h1>
         <p>

@@ -51,6 +51,15 @@ import { registerAiSupportRoutes } from './routes/ai-support';
 import { registerAiControlPlaneRoutes } from './ai-os/controllers/routes';
 import { registerToolsRoutes } from './tools/routes';
 import { registerMrzToolRoutes } from './routes/mrz-tools';
+import { registerNavigationRoutes } from './routes/navigation';
+import { registerSeoRoutes } from './routes/seo';
+import { registerBuilderRoutes } from './routes/builder';
+import { registerStoreRoutes } from './routes/store';
+import { registerLogoMakerRoutes } from './routes/logo-maker';
+import { registerExpertRoutes } from './routes/experts';
+import { registerMarketingServiceRoutes } from './routes/marketing-services';
+import { registerInboxRoutes } from './routes/inbox';
+import { registerAdminPlatformServiceRoutes } from './routes/admin-platform-services';
 import { HttpError, ValidationError } from './lib/errors';
 import { createLogger } from './lib/logger';
 import type { Queryable } from './db/types';
@@ -206,6 +215,22 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
 
     // Native Developer / Document Tools — ePassport MRZ Calculator, Validator, Parser & Super Admin settings.
     await registerMrzToolRoutes(instance, env, pool);
+
+    // CLOUDHOST247 global platform — the mega navigation definition every menu, drawer, footer and
+    // sitemap renders; the Website Builder + AI Website Builder; the Online Store; the Logo Maker;
+    // Hire an Expert; managed Digital Marketing; and the Unified Inbox. All of these reuse the
+    // existing auth, RBAC, audit log, notification pipeline, commerce stack and worker.
+    await registerNavigationRoutes(instance, env, pool);
+    // The public SEO surface (sitemap.xml / robots.txt) is generated from that same navigation
+    // definition plus the content customers actually published, so it can never drift from the menu.
+    await registerSeoRoutes(instance, env, pool);
+    await registerBuilderRoutes(instance, env, pool);
+    await registerStoreRoutes(instance, env, pool);
+    await registerLogoMakerRoutes(instance, env, pool);
+    await registerExpertRoutes(instance, env, pool);
+    await registerMarketingServiceRoutes(instance, env, pool);
+    await registerInboxRoutes(instance, env, pool);
+    await registerAdminPlatformServiceRoutes(instance, env, pool);
 
     // The frontend (static assets + SPA fallback) MUST be registered inside this same
     // encapsulated context. Hooks added by registerSecurityPlugins (helmet headers, CORS, rate

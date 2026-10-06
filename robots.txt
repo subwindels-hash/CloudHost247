@@ -18,3 +18,8 @@ Disallow: /tables.php
 # Add their absolute Sitemap URLs using your configured WHMCS SystemURL on deployment.
 # This file is crawl guidance, never an authorization mechanism.
 Sitemap: /tools-sitemap.php
+# The CloudHost247 platform (Node app) generates a live robots.txt and sitemap from the navigation
+# definition and the customers' published sites, stores and guides. When that app owns the domain
+# root, its route answers /robots.txt and /sitemap.xml and this file is only the fallback used by
+# a deployment that serves the PHP tree directly.
+Sitemap: /sitemap.xml

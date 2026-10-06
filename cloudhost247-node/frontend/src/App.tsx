@@ -71,6 +71,45 @@ const AdminServersPage = lazy(() => import('./pages/AdminServersPage'));
 const AdminSettingsPage = lazy(() => import('./pages/AdminSettingsPage'));
 const AdminAuditPage = lazy(() => import('./pages/AdminAuditPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+
+// CLOUDHOST247 platform services — website builder + AI builder, online store, experts, digital
+// marketing, logo maker, unified inbox and the central cart. Each is its own chunk like every
+// other route.
+const PlatformHubPage = lazy(() => import('./pages/platform/PlatformHubPage'));
+const BuilderPage = lazy(() => import('./pages/platform/BuilderPage'));
+const WebsiteTemplatesPage = lazy(() => import('./pages/platform/BuilderPage').then((module) => ({ default: module.WebsiteTemplatesPage })));
+const AiBuilderPage = lazy(() => import('./pages/platform/AiBuilderPage'));
+const StorePage = lazy(() => import('./pages/platform/StorePage'));
+const StorefrontPage = lazy(() => import('./pages/platform/StorefrontPage'));
+const ExpertsPage = lazy(() => import('./pages/platform/ExpertsPage'));
+const ExpertRequestForm = lazy(() => import('./pages/platform/ExpertsPage').then((module) => ({ default: module.ExpertRequestForm })));
+const MarketingPage = lazy(() => import('./pages/platform/MarketingPage'));
+const MarketingServicesPage = lazy(() => import('./pages/platform/MarketingPage').then((module) => ({ default: module.MarketingServicesPage })));
+const MarketingCampaignView = lazy(() => import('./pages/platform/MarketingPage').then((module) => ({ default: module.MarketingCampaignView })));
+const MarketingChannelPage = lazy(() => import('./pages/platform/MarketingPage').then((module) => ({ default: module.MarketingChannelPage })));
+const LogoMakerPage = lazy(() => import('./pages/platform/LogoMakerPage'));
+const InboxPage = lazy(() => import('./pages/platform/InboxPage'));
+const CartPage = lazy(() => import('./pages/platform/CartPage'));
+const PublicSitePage = lazy(() => import('./pages/platform/PublicSitePage'));
+const AdminPlatformServicesPage = lazy(() =>
+  import('./pages/platform/AdminPlatformServicesPage').then((module) => ({ default: module.AdminPlatformServicesPage }))
+);
+const AdminPlatformPlansPage = lazy(() =>
+  import('./pages/platform/AdminPlatformServicesPage').then((module) => ({ default: module.AdminPlatformPlansPage }))
+);
+const AdminExpertServicesPage = lazy(() =>
+  import('./pages/platform/AdminPlatformServicesPage').then((module) => ({ default: module.AdminExpertServicesPage }))
+);
+const AdminMarketingServicesPage = lazy(() =>
+  import('./pages/platform/AdminPlatformServicesPage').then((module) => ({ default: module.AdminMarketingServicesPage }))
+);
+const AdminOnlineStorePage = lazy(() =>
+  import('./pages/platform/AdminPlatformServicesPage').then((module) => ({ default: module.AdminOnlineStorePage }))
+);
+const AdminWebsiteBuilderPage = lazy(() =>
+  import('./pages/platform/AdminPlatformServicesPage').then((module) => ({ default: module.AdminWebsiteBuilderPage }))
+);
+const AdminUnifiedInboxPage = lazy(() => import('./pages/platform/AdminUnifiedInboxPage'));
 const NewServerPage = lazy(() => import('./pages/NewServerPage'));
 const ServerDetailPage = lazy(() => import('./pages/ServerDetailPage'));
 const ServerLogsPage = lazy(() => import('./pages/ServerLogsPage'));
@@ -221,6 +260,23 @@ export default function App() {
           {/* Customer Cloud Assistant — server-side scoped to the caller's own account; safe for
               every signed-in role (customers see only their own data, staff see only theirs). */}
           <Route path="/account/assistant" element={<AiAssistantPage />} />
+          <Route path="/websites/builder" element={<BuilderPage />} />
+          <Route path="/websites/builder/:siteId" element={<BuilderPage />} />
+          <Route path="/websites/ai-builder" element={<AiBuilderPage />} />
+          <Route path="/websites/ai-builder/:projectId" element={<AiBuilderPage />} />
+          <Route path="/websites/store" element={<StorePage />} />
+          <Route path="/websites/store/:storeId" element={<StorePage />} />
+          <Route path="/websites/experts" element={<ExpertsPage />} />
+          <Route path="/websites/experts/new" element={<ExpertRequestForm />} />
+          <Route path="/websites/experts/:id" element={<ExpertsPage />} />
+          <Route path="/marketing/digital" element={<MarketingServicesPage />} />
+          <Route path="/marketing/digital/:id" element={<MarketingCampaignView />} />
+          <Route path="/marketing/logo-maker" element={<LogoMakerPage />} />
+          <Route path="/marketing/logo-maker/:projectId" element={<LogoMakerPage />} />
+          <Route path="/marketing/inbox" element={<InboxPage />} />
+          <Route path="/marketing/inbox/:conversationId" element={<InboxPage />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/checkout" element={<CartPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/dashboard/apps" element={<MyAppsPage />} />
           <Route path="/dashboard/apps/:id" element={<AppInstancePage />} />
@@ -262,6 +318,12 @@ export default function App() {
           <Route path="/billing" element={<BillingPage />} />
           <Route path="/invoices" element={<InvoicesPage />} />
           <Route path="/invoices/:id" element={<InvoiceDetailPage />} />
+          <Route path="/websites" element={<PlatformHubPage sectionId="websites" fallback={{ title: 'Websites', intro: 'Build a website yourself, have one generated from a description, or hire a CloudHost247 specialist — then run the store and the marketing on top.' }} />} />
+          <Route path="/websites/templates" element={<WebsiteTemplatesPage />} />
+          <Route path="/websites/design-services" element={<ExpertsPage />} />
+          <Route path="/marketing" element={<MarketingPage />} />
+          <Route path="/marketing/seo" element={<MarketingChannelPage channel="seo" />} />
+          <Route path="/marketing/analytics" element={<MarketingChannelPage channel="analytics" />} />
           <Route path="/support" element={<SupportPage />} />
           <Route path="/support/:id" element={<SupportTicketPage />} />
 
@@ -272,6 +334,14 @@ export default function App() {
             {/* AI Command Center: the full control plane (staff can view; gate-keeping actions
                 like approvals/model-config are re-verified server-side per permission). */}
             <Route path="/admin/ai-command" element={<AdminAiCommandPage />} />
+            {/* Platform-services control centre: the delivery queues (staff) and, separately
+                below, the pricing/offerings authority (admin). Server-side RBAC re-verifies. */}
+            <Route path="/admin/platform-services" element={<AdminPlatformServicesPage />} />
+            <Route path="/admin/website-builder" element={<AdminWebsiteBuilderPage />} />
+            <Route path="/admin/online-store" element={<AdminOnlineStorePage />} />
+            <Route path="/admin/expert-services" element={<AdminExpertServicesPage />} />
+            <Route path="/admin/marketing-services" element={<AdminMarketingServicesPage />} />
+            <Route path="/admin/unified-inbox" element={<AdminUnifiedInboxPage />} />
           </Route>
 
           {/* Staff-only (admin + super_admin) customer/ticket/billing management. RequireRole is a
@@ -320,6 +390,9 @@ export default function App() {
             {/* Domain Services control room: providers + credentials + real Test Connection,
                 extension catalogue + trending, auctions, transfers, Domain Club plans. */}
             <Route path="/admin/domain-services" element={<AdminDomainServicesPage />} />
+            {/* Pricing authority for the packaged platform plans — admin only, because it changes
+                what the public can buy. */}
+            <Route path="/admin/platform-plans" element={<AdminPlatformPlansPage />} />
           </Route>
 
           {/* Revenue Guardian — staff accounts also participate (with a server-enforced,
@@ -355,6 +428,11 @@ export default function App() {
             <Route path="/admin/revenue-guardian/settings" element={<RGSettingsPage />} />
           </Route>
         </Route>
+
+        {/* Visitor-facing surfaces: a published website renders in its own chrome (it belongs to
+            the customer, not to the CloudHost247 dashboard) and so does a shopper storefront. */}
+        <Route path="/sites/:slug/*" element={<PublicSitePage />} />
+        <Route path="/store/:slug" element={<StorefrontPage />} />
 
         <Route path="*" element={<NotFoundPage />} />
       </Route>
