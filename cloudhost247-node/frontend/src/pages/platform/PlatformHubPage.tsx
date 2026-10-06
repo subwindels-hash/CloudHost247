@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { usePageMeta } from '../../lib/usePageMeta';
 import { CatalogErrorBanner } from '../../components/CatalogStateBanner';
 import { Pill } from '../../components/platform/ui';
-import { useNavigation } from '../../components/navigation/PlatformMegaMenu';
+import { useNavigationSections } from '../../components/navigation/PlatformMegaMenu';
 import { fetchPublishedPlans, money, titleCase, type PlatformPlan } from '../../lib/platform-api';
 import type { NavSection } from '../../lib/platform-api';
 
@@ -14,7 +14,8 @@ import type { NavSection } from '../../lib/platform-api';
  */
 export default function PlatformHubPage({ sectionId, fallback }: { sectionId: string; fallback: { title: string; intro: string } }) {
   usePageMeta(fallback.title, fallback.intro, { canonical: `/${sectionId}` });
-  const { sections, error: navError } = useNavigation();
+  const sections = useNavigationSections();
+  const navError: string | null = null;
   const [plans, setPlans] = useState<PlatformPlan[]>([]);
 
   useEffect(() => {
@@ -23,7 +24,7 @@ export default function PlatformHubPage({ sectionId, fallback }: { sectionId: st
       .catch(() => setPlans([]));
   }, []);
 
-  const section: NavSection | undefined = sections?.find((entry) => entry.id === sectionId);
+  const section = sections.find((entry: NavSection) => entry.id === sectionId);
 
   return (
     <div className="ch247-page">

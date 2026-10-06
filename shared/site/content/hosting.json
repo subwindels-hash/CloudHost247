@@ -1,0 +1,1553 @@
+{
+  "family": "hosting",
+  "pages": [
+    {
+      "route": "/hosting",
+      "title": "Hosting",
+      "category": "Hosting",
+      "seoTitle": "Web, WordPress, Business & Reseller Hosting | CloudHost247",
+      "description": "Compare CloudHost247 hosting: web, business, WordPress, reseller, Windows and email hosting — with free SSL, backups, mailboxes, databases and 24/7 support.",
+      "visual": "hosting/web-hosting",
+      "hero": {
+        "kicker": "Hosting",
+        "heading": "Hosting for the site you actually run",
+        "lede": "Six hosting lines, one account, one support relationship. Pick the one that matches the workload — every plan on this page is read live from the product catalogue, not typed into a template.",
+        "ctas": [
+          {
+            "label": "See live plans",
+            "to": "/pricing",
+            "variant": "primary"
+          },
+          {
+            "label": "Talk to us first",
+            "to": "/contact",
+            "variant": "ghost"
+          }
+        ],
+        "points": [
+          "Live catalogue pricing",
+          "SSL, mail and databases included",
+          "Backups with a restore path",
+          "Support staffed by operators"
+        ]
+      },
+      "sections": [
+        {
+          "type": "cards",
+          "kicker": "Choose a line",
+          "heading": "Which hosting is which",
+          "lede": "The differences are resources, isolation and what the account is expected to carry — not marketing tiers.",
+          "items": [
+            {
+              "icon": "globe",
+              "title": "Web Hosting",
+              "body": "Shared hosting for websites that need to be fast, secure and always up.",
+              "to": "/hosting/web-hosting",
+              "badge": "POPULAR"
+            },
+            {
+              "icon": "briefcase",
+              "title": "Business Hosting",
+              "body": "More resources, stronger isolation and priority support handling for company sites.",
+              "to": "/hosting/business"
+            },
+            {
+              "icon": "wordpress",
+              "title": "WordPress Hosting",
+              "body": "A WordPress-tuned runtime with caching, HTTPS and scheduled backups.",
+              "to": "/hosting/wordpress"
+            },
+            {
+              "icon": "users",
+              "title": "Reseller Hosting",
+              "body": "Run your own hosting brand on infrastructure you do not have to operate.",
+              "to": "/hosting/reseller"
+            },
+            {
+              "icon": "windows",
+              "title": "Windows Hosting",
+              "body": "ASP.NET, IIS and MSSQL for stacks that genuinely require Windows.",
+              "to": "/hosting/windows"
+            },
+            {
+              "icon": "mail",
+              "title": "Email Hosting",
+              "body": "Professional mailboxes on your own domain, with filtering and TLS.",
+              "to": "/hosting/email"
+            }
+          ]
+        },
+        {
+          "type": "catalog",
+          "kicker": "Live pricing",
+          "heading": "Plans currently configured on this deployment"
+        },
+        {
+          "type": "features",
+          "kicker": "Included with hosting",
+          "heading": "The parts that are not add-ons",
+          "items": [
+            {
+              "icon": "lock",
+              "title": "SSL certificates",
+              "body": "Issued and renewed automatically for every domain on the account.",
+              "to": "/hosting/ssl"
+            },
+            {
+              "icon": "hard-drive",
+              "title": "Backups",
+              "body": "Scheduled jobs with a visible run history and a restore from your account.",
+              "to": "/hosting/backups"
+            },
+            {
+              "icon": "database",
+              "title": "Databases",
+              "body": "MySQL-compatible databases alongside the site, managed in the same place.",
+              "to": "/platforms/databases"
+            },
+            {
+              "icon": "transfer",
+              "title": "Migration",
+              "body": "An existing site and its mail moved across with a verified cutover.",
+              "to": "/hosting/migration"
+            },
+            {
+              "icon": "shield",
+              "title": "Security",
+              "body": "Isolation, platform patching, abuse filtering and monitored recovery.",
+              "to": "/hosting/security"
+            },
+            {
+              "icon": "control",
+              "title": "Control panels",
+              "body": "The panel families the platform is genuinely configured to provision.",
+              "to": "/hosting/control-panels"
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "Why this page shows a catalogue instead of a price table",
+          "body": "A price list on a marketing page is a copy of the truth that goes stale. Every plan and price you see above is read from the live product catalogue, so what is displayed is what the order form will charge — and a deployment with nothing configured shows an explicit empty state rather than a placeholder figure."
+        }
+      ],
+      "faqs": [
+        {
+          "q": "Which hosting should I choose for a single business website?",
+          "a": "Web hosting covers a normal brochure or content site. Move to business hosting when the website is a revenue channel, when mail runs on the same domain, or when several applications share the account."
+        },
+        {
+          "q": "Can I change hosting plan later?",
+          "a": "Yes. Plans can be upgraded or downgraded without rebuilding the site, and the change is prorated according to the billing configuration."
+        },
+        {
+          "q": "Is email included with web hosting?",
+          "a": "Mailboxes are part of the hosting services where the plan includes them, and business email hosting is a product in its own right when you need more mailboxes or stricter requirements."
+        },
+        {
+          "q": "Do you offer a money-back guarantee?",
+          "a": "Refund eligibility and cancellation windows are set out in the Refund and Cancellation Policy, which is the authoritative document for any refund claim."
+        }
+      ],
+      "related": [
+        "/hosting/web-hosting",
+        "/hosting/wordpress",
+        "/hosting/email",
+        "/hosting/migration",
+        "/cloud",
+        "/domains"
+      ]
+    },
+    {
+      "route": "/hosting/web-hosting",
+      "title": "Web Hosting",
+      "category": "Hosting",
+      "seoTitle": "Web Hosting for Fast, Reliable Websites | CloudHost247",
+      "description": "CloudHost247 web hosting runs your website on managed infrastructure with SSD-backed storage, free SSL, mailboxes, databases and 24/7 support.",
+      "visual": "hosting/web-hosting",
+      "catalogSlug": "web-hosting",
+      "hero": {
+        "kicker": "Hosting",
+        "heading": "Web hosting that stays fast as your site grows",
+        "lede": "Everything a website needs to go live and stay online: storage, bandwidth, mailboxes, databases, SSL and a control panel — on infrastructure we operate and monitor.",
+        "ctas": [
+          {
+            "label": "See hosting plans",
+            "to": "/hosting",
+            "variant": "primary"
+          },
+          {
+            "label": "Talk to us first",
+            "to": "/contact",
+            "variant": "ghost"
+          }
+        ],
+        "points": [
+          "Free SSL on every domain",
+          "Mailboxes and databases included",
+          "One-click application installs",
+          "Support from a real operator"
+        ]
+      },
+      "sections": [
+        {
+          "type": "features",
+          "kicker": "What you get",
+          "heading": "A hosting account built for real websites",
+          "lede": "The fundamentals are included rather than sold back to you in add-ons.",
+          "items": [
+            {
+              "icon": "lock",
+              "title": "SSL as standard",
+              "body": "Every domain you add to the account can be issued a certificate, so browsers treat it as secure from the first visit."
+            },
+            {
+              "icon": "mail",
+              "title": "Mailboxes on your domain",
+              "body": "Create addresses at your own domain with spam filtering, and reach them from webmail or any mail client."
+            },
+            {
+              "icon": "database",
+              "title": "Databases included",
+              "body": "MySQL-compatible databases for the applications you install, managed alongside the site rather than separately."
+            },
+            {
+              "icon": "app",
+              "title": "Application installs",
+              "body": "Common applications can be installed onto your account, and managed from the same place as the rest of your services."
+            },
+            {
+              "icon": "hard-drive",
+              "title": "Storage that is not fragile",
+              "body": "Web content lives on storage with scheduled backups, so a mistake is recoverable rather than final."
+            },
+            {
+              "icon": "activity",
+              "title": "Monitoring and alerts",
+              "body": "We watch the service so that an outage is something we are already responding to, not something you discover."
+            }
+          ]
+        },
+        {
+          "type": "steps",
+          "kicker": "Getting online",
+          "heading": "From order to a live website",
+          "lede": "Three steps, and a migration path if you are moving an existing site.",
+          "items": [
+            {
+              "title": "Choose a plan",
+              "body": "Pick the hosting level that matches the site you are running today. Plans can be changed later without rebuilding the site."
+            },
+            {
+              "title": "Point your domain",
+              "body": "Register a new domain with us or bring one you already own. We publish the DNS records and issue the certificate."
+            },
+            {
+              "title": "Publish",
+              "body": "Upload the site, install an application, or build it with the CloudHost247 website builder — then manage it all from your account."
+            }
+          ]
+        },
+        {
+          "type": "split",
+          "kicker": "Moving from another host",
+          "heading": "Migrations handled as a process, not a gamble",
+          "body": [
+            "A migration is a planned cutover: we copy the site and mail, verify it responds correctly on the new infrastructure, and only then change where the domain points. If something does not line up, the old host is still serving your site.",
+            "You keep control of the DNS, so you can decide exactly when the roll-over happens."
+          ],
+          "points": [
+            "Site and mail copied before any change",
+            "DNS change scheduled at your discretion",
+            "Verification on the new infrastructure first"
+          ],
+          "visual": "management/migration",
+          "link": {
+            "label": "See how migration works",
+            "to": "/hosting/migration"
+          }
+        }
+      ],
+      "faqs": [
+        {
+          "q": "Can I move my existing website to CloudHost247?",
+          "a": "Yes. We copy the site and mailboxes to the new hosting, verify it responds correctly, and schedule the DNS change with you. See the migration page for the exact sequence."
+        },
+        {
+          "q": "Is a control panel included?",
+          "a": "Plans are provisioned with a control panel where the plan supports it. The control panels page lists the panel families the platform is configured to provision, and your account shows the panel for the service you actually have."
+        },
+        {
+          "q": "What happens if I outgrow the plan?",
+          "a": "Hosting plans can be upgraded without rebuilding your website. Resources are reallocated on the same infrastructure the site already runs on."
+        },
+        {
+          "q": "Do you offer a money-back window?",
+          "a": "Refunds and cancellation windows are set out in the Refund and Cancellation Policy, which is the authoritative document for any claim about refunds."
+        }
+      ],
+      "related": [
+        "/hosting/wordpress",
+        "/hosting/business",
+        "/hosting/email",
+        "/hosting/ssl",
+        "/hosting/migration",
+        "/hosting/backups"
+      ]
+    },
+    {
+      "route": "/hosting/business",
+      "title": "Business Hosting",
+      "category": "Hosting",
+      "seoTitle": "Business Hosting — More Resources, Priority Handling | CloudHost247",
+      "description": "Business hosting from CloudHost247 gives company sites more resources, stronger isolation, priority support and the headroom to run mail, apps and databases.",
+      "visual": "hosting/business-hosting",
+      "hero": {
+        "kicker": "Hosting",
+        "heading": "Hosting sized for a business, not a hobby site",
+        "lede": "More resources and more isolation than entry-level hosting, for company websites that carry traffic, mail, forms and integrations every working day.",
+        "ctas": [
+          {
+            "label": "See hosting plans",
+            "to": "/hosting",
+            "variant": "primary"
+          },
+          {
+            "label": "Contact sales",
+            "to": "/contact",
+            "variant": "ghost"
+          }
+        ],
+        "points": [
+          "Higher resource allocation",
+          "Stronger tenant isolation",
+          "Room for mail, databases and apps",
+          "Priority handling in support"
+        ]
+      },
+      "sections": [
+        {
+          "type": "features",
+          "kicker": "Built for company workloads",
+          "heading": "Where business hosting differs",
+          "items": [
+            {
+              "icon": "gauge",
+              "title": "Headroom, not a ceiling",
+              "body": "Higher CPU, memory and process limits so a busy day does not turn into a 503 for your customers."
+            },
+            {
+              "icon": "shield",
+              "title": "Stronger isolation",
+              "body": "Business hosting is placed to reduce the blast radius of anything else on the platform, which matters when the site handles customer data."
+            },
+            {
+              "icon": "headset",
+              "title": "Priority support handling",
+              "body": "Business accounts are queued ahead of standard requests, reflecting what a business-hours outage actually costs."
+            },
+            {
+              "icon": "mail",
+              "title": "Business email alongside the site",
+              "body": "Company mailboxes live with the website, so a DNS change never silently breaks your email."
+            },
+            {
+              "icon": "hard-drive",
+              "title": "Backups and recovery",
+              "body": "Scheduled backups with a restorable history, and a documented restore path rather than a promise."
+            },
+            {
+              "icon": "activity",
+              "title": "Monitored service",
+              "body": "Availability and resource use are watched by the platform so degradation is caught before it becomes an outage."
+            }
+          ]
+        },
+        {
+          "type": "checks",
+          "kicker": "Who this fits",
+          "heading": "Business hosting is usually the right answer when",
+          "items": [
+            {
+              "label": "The website is a revenue channel",
+              "body": "Enquiries, orders or bookings arrive through it, so an hour of downtime has a number attached."
+            },
+            {
+              "label": "Mail runs on the same domain",
+              "body": "Staff mailboxes and the website need to stay in step when DNS or certificates change."
+            },
+            {
+              "label": "Several applications share the account",
+              "body": "A CMS, a shop, a form handler and a CRM connector all need to coexist without starving each other."
+            },
+            {
+              "label": "You need someone to answer quickly",
+              "body": "You want support handled as a priority rather than queued behind hobby accounts."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "Exact specifications are on the plan, not on this page",
+          "body": "Resource allocations change as the platform is upgraded. Rather than publishing numbers here that go stale, every plan's actual CPU, memory, storage and mailbox limits are shown on its order page and in your account — and support can confirm anything before you buy."
+        }
+      ],
+      "faqs": [
+        {
+          "q": "How is business hosting different from standard web hosting?",
+          "a": "Chiefly resources and isolation: a higher allocation of CPU, memory and concurrent processes, placed to limit the effect of other tenants, with priority handling in support queues."
+        },
+        {
+          "q": "Can I run email marketing or bulk mail from business hosting?",
+          "a": "Hosting is not a bulk-mail service. Volume sending is governed by the Fair Usage and Acceptable Use policies, and persistent bulk sending from shared infrastructure is restricted regardless of plan."
+        },
+        {
+          "q": "Do you provide an SLA?",
+          "a": "Any availability commitment is contractual and must come from the agreement attached to your account rather than a marketing page. If an SLA is part of what you need, raise it with sales before ordering."
+        }
+      ],
+      "related": [
+        "/hosting/web-hosting",
+        "/hosting/email",
+        "/hosting/ssl",
+        "/hosting/backups",
+        "/cloud/server-management",
+        "/legal/refund-policy"
+      ]
+    },
+    {
+      "route": "/hosting/wordpress",
+      "title": "WordPress Hosting",
+      "category": "Hosting",
+      "seoTitle": "Managed WordPress Hosting | CloudHost247",
+      "description": "WordPress hosting on CloudHost247: managed runtime, HTTPS, scheduled backups, database access and the operational work handled for you.",
+      "visual": "hosting/wordpress-hosting",
+      "hero": {
+        "kicker": "Hosting",
+        "heading": "WordPress hosting without the maintenance chores",
+        "lede": "WordPress runs on infrastructure tuned for it — with HTTPS, scheduled backups, database management and updates you control — so you spend your time on the site, not the server.",
+        "ctas": [
+          {
+            "label": "See WordPress plans",
+            "to": "/hosting",
+            "variant": "primary"
+          },
+          {
+            "label": "Browse the app catalogue",
+            "to": "/apps",
+            "variant": "ghost"
+          }
+        ],
+        "points": [
+          "WordPress-ready runtime",
+          "HTTPS from the first visit",
+          "Scheduled backups",
+          "Staging-friendly workflow"
+        ]
+      },
+      "sections": [
+        {
+          "type": "features",
+          "kicker": "Why it is different",
+          "heading": "Tuned for how WordPress actually behaves",
+          "items": [
+            {
+              "icon": "wordpress",
+              "title": "Runtime tuned for WordPress",
+              "body": "PHP versions and limits chosen for WordPress rather than left at a generic default that produces white screens on plugin-heavy sites."
+            },
+            {
+              "icon": "zap",
+              "title": "Caching that survives updates",
+              "body": "Page caching that is invalidated properly when content changes, so the cache helps instead of showing visitors stale pages."
+            },
+            {
+              "icon": "lock",
+              "title": "HTTPS end to end",
+              "body": "A certificate on every domain and subdomain in the account, renewed automatically."
+            },
+            {
+              "icon": "hard-drive",
+              "title": "Backups before you need them",
+              "body": "Scheduled backups of the site and its database, with restore handled from your account."
+            },
+            {
+              "icon": "database",
+              "title": "Database access you can use",
+              "body": "Reach the WordPress database directly for exports, migrations or debugging — no support ticket needed."
+            },
+            {
+              "icon": "shield",
+              "title": "Hardened by default",
+              "body": "Platform-level filtering, sensible file permissions and abuse monitoring that runs whether or not you installed a plugin for it."
+            }
+          ]
+        },
+        {
+          "type": "steps",
+          "kicker": "Launching a WordPress site",
+          "heading": "Live in three moves",
+          "items": [
+            {
+              "title": "Install",
+              "body": "Install WordPress onto hosting that is already configured for it — no manual PHP configuration or database setup."
+            },
+            {
+              "title": "Connect",
+              "body": "Point the domain and let the certificate issue, then configure permalinks, mail and your caching preferences."
+            },
+            {
+              "title": "Maintain",
+              "body": "Run core, theme and plugin updates on your schedule, with a backup taken before you do."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "Plugins are yours to choose — and yours to keep safe",
+          "body": "A plugin you install runs with the same privileges as the rest of the site. We keep the platform patched, filter abuse and back the site up; the plugin supply chain, its licence and its updates remain the site owner's responsibility. That is true on any host, and we would rather say it plainly."
+        }
+      ],
+      "faqs": [
+        {
+          "q": "Can I use my own WordPress plugins and themes?",
+          "a": "Yes. The hosting does not restrict which plugins or themes you install, subject to the Acceptable Use Policy."
+        },
+        {
+          "q": "Do you update WordPress for me?",
+          "a": "The platform keeps the underlying runtime patched. WordPress core, themes and plugins are updated from your own dashboard, because only you can know whether a specific update is safe for your plugins."
+        },
+        {
+          "q": "Can I stage a change before it goes live?",
+          "a": "You can keep a copy of the site and its database on the same account to test a change. If you want a formal staging workflow, talk to us about the plan you need."
+        },
+        {
+          "q": "Is WordPress migrations supported?",
+          "a": "Yes — the migration process copies both the WordPress files and the database, fixes the site URL, and only then switches DNS."
+        }
+      ],
+      "related": [
+        "/hosting/web-hosting",
+        "/hosting/ssl",
+        "/hosting/backups",
+        "/hosting/migration",
+        "/hosting/security",
+        "/apps"
+      ]
+    },
+    {
+      "route": "/hosting/reseller",
+      "title": "Reseller Hosting",
+      "category": "Hosting",
+      "seoTitle": "Reseller Hosting — Run Your Own Hosting Brand | CloudHost247",
+      "description": "Reseller hosting from CloudHost247: separate accounts, your own branding, WHMCS-compatible billing and the infrastructure operated for you.",
+      "visual": "hosting/reseller-hosting",
+      "hero": {
+        "kicker": "Hosting",
+        "heading": "Sell hosting under your own brand",
+        "lede": "Create and manage customer accounts on CloudHost247 infrastructure, with your own nameservers, your own pricing and a platform underneath that you do not have to operate.",
+        "ctas": [
+          {
+            "label": "See reseller plans",
+            "to": "/hosting",
+            "variant": "primary"
+          },
+          {
+            "label": "Talk to sales",
+            "to": "/contact",
+            "variant": "ghost"
+          }
+        ],
+        "points": [
+          "Isolated customer accounts",
+          "Your own nameservers",
+          "White-label client experience",
+          "Billing platform compatible"
+        ]
+      },
+      "sections": [
+        {
+          "type": "features",
+          "kicker": "The reseller toolkit",
+          "heading": "What you control, and what we take care of",
+          "items": [
+            {
+              "icon": "users",
+              "title": "Customer accounts",
+              "body": "Create, suspend and remove client hosting accounts yourself, without waiting on a support queue."
+            },
+            {
+              "icon": "globe",
+              "title": "Your own nameservers",
+              "body": "Brand the DNS so clients see your infrastructure, not ours, in their domain settings."
+            },
+            {
+              "icon": "layout",
+              "title": "Your brand throughout",
+              "body": "The client experience carries your identity. The platform is meant to disappear behind your business."
+            },
+            {
+              "icon": "invoice",
+              "title": "Billing platform compatible",
+              "body": "A WHMCS-compatible automation layer is supported, so orders and provisioning can be automated rather than handled by hand."
+            },
+            {
+              "icon": "server-rack",
+              "title": "Infrastructure you do not operate",
+              "body": "Hardware, network, patching and abuse handling are ours. Your obligation is your clients."
+            },
+            {
+              "icon": "headset",
+              "title": "Escalation path",
+              "body": "When something is genuinely infrastructure-level, there is a route to our engineers instead of a dead end."
+            }
+          ]
+        },
+        {
+          "type": "checks",
+          "kicker": "Before you start",
+          "heading": "What reseller hosting expects of you",
+          "items": [
+            {
+              "label": "You support your own clients",
+              "body": "First-line support is yours. We handle the platform behind it."
+            },
+            {
+              "label": "You own your commercial terms",
+              "body": "Your prices, your contracts, your refund policy — ours governs the account we sell you."
+            },
+            {
+              "label": "You are accountable for content",
+              "body": "The Acceptable Use Policy applies to what your clients host, and enforcement reaches your account."
+            },
+            {
+              "label": "You can grow a plan at a time",
+              "body": "Reseller allocations can be increased as your client base grows, without migrating them."
+            }
+          ]
+        }
+      ],
+      "faqs": [
+        {
+          "q": "Can I set my own prices?",
+          "a": "Yes. You buy capacity from us and set your own commercial terms with your customers."
+        },
+        {
+          "q": "Do clients see CloudHost247 branding?",
+          "a": "Client accounts, nameservers and the product experience are yours to brand. Domain registration and some infrastructure services necessarily involve named providers, which is disclosed in the relevant policy documents."
+        },
+        {
+          "q": "What happens if one of my clients abuses the platform?",
+          "a": "Abuse handling follows the Acceptable Use and Fair Usage policies. Enforcement is against the account that holds the service — yours — so you need a way to reach your clients quickly."
+        }
+      ],
+      "related": [
+        "/hosting/web-hosting",
+        "/hosting/business",
+        "/cloud",
+        "/domains",
+        "/legal/acceptable-use",
+        "/contact"
+      ]
+    },
+    {
+      "route": "/hosting/windows",
+      "title": "Windows Hosting",
+      "category": "Hosting",
+      "seoTitle": "Windows Hosting — ASP.NET & MSSQL | CloudHost247",
+      "description": "Windows hosting from CloudHost247 for ASP.NET and Windows-based stacks, with MSSQL databases, IIS configuration and managed certificates.",
+      "visual": "hosting/windows-hosting",
+      "hero": {
+        "kicker": "Hosting",
+        "heading": "Windows hosting for .NET and Microsoft stacks",
+        "lede": "Host the applications that genuinely need Windows — ASP.NET, IIS and MSSQL — on infrastructure that is patched and monitored for you.",
+        "ctas": [
+          {
+            "label": "See Windows plans",
+            "to": "/hosting",
+            "variant": "primary"
+          },
+          {
+            "label": "Ask a question",
+            "to": "/contact",
+            "variant": "ghost"
+          }
+        ],
+        "points": [
+          "ASP.NET runtime",
+          "IIS site configuration",
+          "MSSQL databases",
+          "Managed certificates"
+        ]
+      },
+      "sections": [
+        {
+          "type": "features",
+          "kicker": "What it supports",
+          "heading": "A Windows stack that is actually maintained",
+          "items": [
+            {
+              "icon": "windows",
+              "title": "ASP.NET",
+              "body": "Run ASP.NET applications in the version the application targets, without rebuilding it for another platform."
+            },
+            {
+              "icon": "control",
+              "title": "IIS management",
+              "body": "Bindings, application pools and site settings handled through a management interface rather than a ticket."
+            },
+            {
+              "icon": "database",
+              "title": "MSSQL databases",
+              "body": "Microsoft SQL databases alongside the site, with the connection details you need for your configuration files."
+            },
+            {
+              "icon": "lock",
+              "title": "Certificates and HTTPS",
+              "body": "Certificates issued and renewed for each binding so secure endpoints do not expire silently."
+            },
+            {
+              "icon": "hard-drive",
+              "title": "Backups",
+              "body": "Scheduled backups of site files and databases, restorable from your account."
+            },
+            {
+              "icon": "activity",
+              "title": "Monitoring",
+              "body": "The service is watched so failed application pools and exhausted disks are noticed before your users notice."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "Windows licensing is included, not passed to you",
+          "body": "Windows hosting plans include the operating-system licensing required to run the service. You are responsible for licensing any commercial application or component you deploy on top of it."
+        }
+      ],
+      "faqs": [
+        {
+          "q": "Can I use this for a classic ASP application?",
+          "a": "Yes, classic ASP can be enabled on supported plans. Tell us what the application needs before ordering so the environment can be matched to it."
+        },
+        {
+          "q": "Is MSSQL or MySQL available?",
+          "a": "Both are relevant to different applications — MSSQL for Microsoft stacks, MySQL for most PHP applications. Confirm the database flavour you need when ordering."
+        },
+        {
+          "q": "Can I reach the server over RDP?",
+          "a": "Shared Windows hosting is managed hosting, not a remote desktop session. If you need full administrative control, a Windows dedicated server or RDP service is the correct product."
+        }
+      ],
+      "related": [
+        "/hosting/web-hosting",
+        "/hosting/business",
+        "/hosting/ssl",
+        "/hosting/backups",
+        "/hosting/control-panels",
+        "/contact"
+      ]
+    },
+    {
+      "route": "/hosting/email",
+      "title": "Email Hosting",
+      "category": "Hosting",
+      "seoTitle": "Business Email Hosting on Your Own Domain | CloudHost247",
+      "description": "Email hosting from CloudHost247: professional mailboxes on your domain with spam filtering, TLS, IMAP/POP/SMTP and webmail access.",
+      "visual": "hosting/email-hosting",
+      "hero": {
+        "kicker": "Email",
+        "heading": "Business email on your own domain",
+        "lede": "Mailboxes that look professional, arrive reliably, and are protected by filtering — with the DNS, certificates and mailbox management in the same account as your website.",
+        "ctas": [
+          {
+            "label": "See email plans",
+            "to": "/hosting",
+            "variant": "primary"
+          },
+          {
+            "label": "Contact sales",
+            "to": "/contact",
+            "variant": "ghost"
+          }
+        ],
+        "points": [
+          "Your own domain",
+          "Spam and malware filtering",
+          "Webmail and mobile clients",
+          "SPF, DKIM and DMARC ready"
+        ]
+      },
+      "sections": [
+        {
+          "type": "features",
+          "kicker": "Mail that behaves",
+          "heading": "What a business mailbox needs",
+          "items": [
+            {
+              "icon": "mail",
+              "title": "Mailboxes on your domain",
+              "body": "Create, rename and remove addresses as your team changes, including aliases and forwarding."
+            },
+            {
+              "icon": "shield",
+              "title": "Filtering before delivery",
+              "body": "Spam and malware filtering applied ahead of the mailbox so your team is not the filter."
+            },
+            {
+              "icon": "lock",
+              "title": "TLS on the wire",
+              "body": "Encrypted connections for mail clients and webmail, so credentials and messages are not sent in the clear."
+            },
+            {
+              "icon": "globe",
+              "title": "SPF, DKIM and DMARC",
+              "body": "The DNS records that prove your mail is genuinely from your domain — published for you when DNS is managed here."
+            },
+            {
+              "icon": "puzzle",
+              "title": "Any mail client",
+              "body": "Standard IMAP, POP and SMTP, so Outlook, Apple Mail, Thunderbird and mobile clients all work."
+            },
+            {
+              "icon": "activity",
+              "title": "Deliverability watched",
+              "body": "Queue and delivery problems are monitored, because mail that silently stops arriving is the worst kind of outage."
+            }
+          ]
+        },
+        {
+          "type": "split",
+          "kicker": "Protect your domain's reputation",
+          "heading": "Why authentication records matter",
+          "body": [
+            "Anyone can put your domain in the From header. SPF, DKIM and DMARC are what tell the receiving server whether a message that claims to be from you actually is.",
+            "Without them, an attacker who spoofs your domain gets your customers' trust, and your genuine mail is more likely to be filtered."
+          ],
+          "points": [
+            "SPF authorises the servers that may send for you",
+            "DKIM cryptographically signs your messages",
+            "DMARC tells receivers what to do with failures"
+          ],
+          "visual": "security/ssl",
+          "link": {
+            "label": "See DNS management",
+            "to": "/dashboard/dns"
+          }
+        }
+      ],
+      "faqs": [
+        {
+          "q": "Can I keep my existing mailboxes when I move?",
+          "a": "Yes. The migration process copies existing messages before DNS changes, so mailboxes arrive populated."
+        },
+        {
+          "q": "Does email hosting include Office or Google Workspace?",
+          "a": "No. Those are separate Microsoft and Google subscriptions. CloudHost247 can provision Microsoft 365 and Google Workspace plans through the platform, and this page describes the mailboxes hosted directly on your account."
+        },
+        {
+          "q": "Can I send marketing email from these mailboxes?",
+          "a": "Transactional mail from your application is fine. Bulk or unsolicited marketing is governed by the Fair Usage and Acceptable Use policies, and volume sending needs a dedicated service rather than a shared mailbox."
+        },
+        {
+          "q": "How many addresses can I create?",
+          "a": "Each plan states its own mailbox and alias limits on the order page, and your account shows the allocation you have."
+        }
+      ],
+      "related": [
+        "/hosting/web-hosting",
+        "/hosting/business",
+        "/hosting/security",
+        "/dashboard/dns",
+        "/legal/acceptable-use",
+        "/contact"
+      ]
+    },
+    {
+      "route": "/hosting/developer",
+      "title": "Developer Hosting",
+      "category": "Hosting",
+      "seoTitle": "Developer Hosting — Runtimes, Git and APIs | CloudHost247",
+      "description": "Developer hosting from CloudHost247: runtimes, SSH, Git-based deployment, environment variables, logs and APIs, without a control panel in the way.",
+      "visual": "deployment/developer-hosting",
+      "hero": {
+        "kicker": "Developers",
+        "heading": "Hosting shaped around your code",
+        "lede": "Runtimes, shell access, deployment from Git, environment configuration and real logs — the parts developers actually use, rather than a button that overwrites your application.",
+        "ctas": [
+          {
+            "label": "See the deployment platform",
+            "to": "/developers/deployment",
+            "variant": "primary"
+          },
+          {
+            "label": "Browse runtimes",
+            "to": "/developers",
+            "variant": "ghost"
+          }
+        ],
+        "points": [
+          "Node.js, PHP, Python",
+          "SSH and Git access",
+          "Environment variables",
+          "Deployment logs"
+        ]
+      },
+      "sections": [
+        {
+          "type": "features",
+          "kicker": "Developer surface",
+          "heading": "What you get to work with",
+          "items": [
+            {
+              "icon": "terminal",
+              "title": "Shell access",
+              "body": "SSH into the environment to install dependencies and run the commands your workflow needs."
+            },
+            {
+              "icon": "git-branch",
+              "title": "Deploy from Git",
+              "body": "Connect a repository and let the platform build and release it, with the build output kept on the deployment record."
+            },
+            {
+              "icon": "settings",
+              "title": "Environment configuration",
+              "body": "Set variables per application so configuration lives outside the code and can differ per environment."
+            },
+            {
+              "icon": "file-text",
+              "title": "Logs you can read",
+              "body": "Application and build logs are available on the deployment itself, rather than only in a support reply."
+            },
+            {
+              "icon": "api",
+              "title": "APIs for automation",
+              "body": "Manage services, domains and deployments through HTTP APIs so provisioning can live in your pipeline."
+            },
+            {
+              "icon": "activity",
+              "title": "Telemetry",
+              "body": "Resource use and availability are recorded, so a regression is visible as a graph rather than a hunch."
+            }
+          ]
+        },
+        {
+          "type": "features",
+          "kicker": "Runtimes",
+          "heading": "Pick the stack you already write",
+          "lede": "Each runtime has its own page describing how it is hosted here.",
+          "items": [
+            {
+              "icon": "nodejs",
+              "title": "Node.js",
+              "body": "Long-running Node services with managed process supervision.",
+              "to": "/developers/nodejs"
+            },
+            {
+              "icon": "php",
+              "title": "PHP",
+              "body": "From a single script to a full framework, on a maintained runtime.",
+              "to": "/developers/php"
+            },
+            {
+              "icon": "python",
+              "title": "Python",
+              "body": "WSGI and ASGI applications with virtual environments.",
+              "to": "/developers/python"
+            },
+            {
+              "icon": "laravel",
+              "title": "Laravel",
+              "body": "Queues, scheduler, storage and deployment for Laravel apps.",
+              "to": "/developers/laravel"
+            },
+            {
+              "icon": "docker",
+              "title": "Docker",
+              "body": "Build and run container images with persistent volumes.",
+              "to": "/developers/docker"
+            },
+            {
+              "icon": "api",
+              "title": "APIs",
+              "body": "Host HTTP APIs with TLS, authentication and rate control.",
+              "to": "/hosting/api"
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "We will not pretend a runtime works before it does",
+          "body": "The platform exposes the runtimes it is genuinely configured to provision. Where a specific version, extension or orchestration system is not configured on a deployment, the interface says so instead of accepting an order it cannot fulfil."
+        }
+      ],
+      "faqs": [
+        {
+          "q": "Can I run a background worker or queue?",
+          "a": "Yes — long-running processes are supported on the runtimes that need them, and the process is supervised so it comes back after a failure."
+        },
+        {
+          "q": "Is root access included?",
+          "a": "Not on shared developer hosting. Full administrative access is what a VPS or a dedicated server provides, and those are separate products."
+        },
+        {
+          "q": "Can I deploy with CI/CD?",
+          "a": "Deployments are driven by the platform's deployment records, and the HTTP APIs let an existing pipeline trigger them. Whether to build a full pipeline is your choice."
+        },
+        {
+          "q": "Where do secrets live?",
+          "a": "In per-application environment configuration, not in the repository. Secrets set on an application are not echoed back once saved."
+        }
+      ],
+      "related": [
+        "/developers",
+        "/developers/deployment",
+        "/hosting/api",
+        "/platforms",
+        "/cloud/operating-systems",
+        "/docs"
+      ]
+    },
+    {
+      "route": "/hosting/api",
+      "title": "API Hosting",
+      "category": "Hosting",
+      "seoTitle": "API Hosting — HTTPS APIs, Rate Control, Monitoring | CloudHost247",
+      "description": "Host an HTTP API on CloudHost247 with TLS, environment-based secrets, rate limiting, logs and monitoring — on the same platform as your applications.",
+      "visual": "deployment/api",
+      "hero": {
+        "kicker": "Developers",
+        "heading": "Host the API your product depends on",
+        "lede": "An HTTP API needs four things to be taken seriously: TLS, secrets that are not in the code, limits that protect it, and visibility when it misbehaves. All four are part of the platform.",
+        "ctas": [
+          {
+            "label": "Deploy an API",
+            "to": "/developers/deployment",
+            "variant": "primary"
+          },
+          {
+            "label": "See runtimes",
+            "to": "/developers",
+            "variant": "ghost"
+          }
+        ],
+        "points": [
+          "HTTPS endpoints",
+          "Environment-based secrets",
+          "Rate limiting",
+          "Request and error logs"
+        ]
+      },
+      "sections": [
+        {
+          "type": "features",
+          "kicker": "Non-negotiables",
+          "heading": "What we put around an API by default",
+          "items": [
+            {
+              "icon": "lock",
+              "title": "TLS everywhere",
+              "body": "Certificates issued and renewed automatically, with the option to force HTTPS so a token is never sent in the clear."
+            },
+            {
+              "icon": "key",
+              "title": "Secrets outside the code",
+              "body": "Keys and connection strings are set as environment configuration per application, and are not returned once saved."
+            },
+            {
+              "icon": "gauge",
+              "title": "Rate limiting",
+              "body": "Request limiting protects the service from a runaway client — and from a bill caused by one."
+            },
+            {
+              "icon": "file-text",
+              "title": "Real logs",
+              "body": "Request and error logs available on the deployment, so a 500 can be diagnosed without guesswork."
+            },
+            {
+              "icon": "dns",
+              "title": "Custom domains and certificates",
+              "body": "Attach the domain that belongs on the endpoint, including subdomains, with a certificate per hostname."
+            },
+            {
+              "icon": "activity",
+              "title": "Uptime and latency signals",
+              "body": "The service is watched, so a regression shows up as a measurement rather than as a customer complaint."
+            }
+          ]
+        },
+        {
+          "type": "steps",
+          "kicker": "Deployment",
+          "heading": "Get an endpoint live",
+          "items": [
+            {
+              "title": "Connect the repository",
+              "body": "Point the platform at the code that implements the API. The build runs from the repository, not from a file you uploaded by hand."
+            },
+            {
+              "title": "Configure the environment",
+              "body": "Set the variables the API needs — database URL, signing keys, upstream credentials — as configuration on the application."
+            },
+            {
+              "title": "Attach the domain",
+              "body": "Add the hostname, publish the DNS record and let the certificate issue. Then verify with a real request."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "Design your own authentication — we host it",
+          "body": "CloudHost247 provides the transport, isolation, TLS and observability. The authentication and authorisation model inside your API is your design decision: token format, scopes, rotation and revocation are yours to implement."
+        }
+      ],
+      "faqs": [
+        {
+          "q": "Which languages can I write the API in?",
+          "a": "Whichever of the supported runtimes suits you — Node.js, PHP and Python are the documented runtimes, and containerised deployments cover most other stacks."
+        },
+        {
+          "q": "Can I restrict who can call the API?",
+          "a": "Yes, at the application layer and at the network layer. Firewall rules can restrict the network path, and your own code enforces authentication."
+        },
+        {
+          "q": "Do you offer a managed API gateway?",
+          "a": "No. The platform provides hosting, TLS, DNS, rate limiting and monitoring around your API. A productised gateway is a different product and is not claimed here."
+        }
+      ],
+      "related": [
+        "/developers",
+        "/developers/deployment",
+        "/hosting/developer",
+        "/cloud/firewall",
+        "/cloud/monitoring",
+        "/docs"
+      ]
+    },
+    {
+      "route": "/hosting/ssl",
+      "title": "SSL Certificates",
+      "category": "Security",
+      "seoTitle": "SSL Certificates & HTTPS | CloudHost247",
+      "description": "Issue and renew SSL/TLS certificates for every domain you host with CloudHost247, with automated renewal, forced HTTPS and coverage for subdomains.",
+      "visual": "security/ssl",
+      "hero": {
+        "kicker": "Security",
+        "heading": "Every domain encrypted, every renewal handled",
+        "lede": "A certificate is not a one-off purchase — it is a thing that must be issued, covered on the right hostnames, and renewed before it expires. We automate all three.",
+        "ctas": [
+          {
+            "label": "Manage certificates",
+            "to": "/dashboard/ssl",
+            "variant": "primary"
+          },
+          {
+            "label": "See security",
+            "to": "/cloud/security",
+            "variant": "ghost"
+          }
+        ],
+        "points": [
+          "Automatic issuance",
+          "Automatic renewal",
+          "Subdomain coverage",
+          "Forced HTTPS option"
+        ]
+      },
+      "sections": [
+        {
+          "type": "features",
+          "kicker": "What is automated",
+          "heading": "The failure modes we remove",
+          "items": [
+            {
+              "icon": "lock",
+              "title": "Issuance on demand",
+              "body": "Request a certificate for a hostname and it is validated and installed without you touching a CSR."
+            },
+            {
+              "icon": "puzzle",
+              "title": "Renewal before expiry",
+              "body": "Renewals run ahead of expiry, so the browser warning that costs you a customer never appears."
+            },
+            {
+              "icon": "globe",
+              "title": "Right hostnames, right coverage",
+              "body": "A certificate covers exactly the domains it is issued for — including www and subdomains where you need them."
+            },
+            {
+              "icon": "shield",
+              "title": "HTTPS enforced",
+              "body": "Optionally redirect all plain HTTP traffic, so a link that was written as http:// still lands on the encrypted site."
+            },
+            {
+              "icon": "activity",
+              "title": "Expiry visibility",
+              "body": "Every certificate in the account shows its status and expiry date, so nothing depends on someone remembering."
+            },
+            {
+              "icon": "layers",
+              "title": "Certificates per service",
+              "body": "Certificates attach at the service level, so a server, an application and a website each manage their own."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "Not every certificate type is offered, and we will say which",
+          "body": "Domain-validated certificates are issued automatically. Organisation-validated and extended-validation certificates require a real identity vetting process with a certificate authority, which is a different purchase with its own lead time. If your requirement is contractual — a specific CA, a specific validation level, a minimum key size — raise it with sales before you assume it is available."
+        }
+      ],
+      "faqs": [
+        {
+          "q": "Do I pay separately for a certificate?",
+          "a": "Domain-validated certificates are issued as part of the services that include them. Commercial certificate products are listed in the catalogue at their own prices when configured."
+        },
+        {
+          "q": "What happens if a certificate fails to renew?",
+          "a": "The failure is recorded against the certificate in your account and retried. Because the certificate status is visible, a failure is something you can see and raise, not something you discover from a browser warning."
+        },
+        {
+          "q": "Can I use my own certificate?",
+          "a": "Yes. An externally issued certificate and key can be supplied where the service supports importing them."
+        }
+      ],
+      "related": [
+        "/cloud/security",
+        "/hosting/web-hosting",
+        "/dashboard/ssl",
+        "/hosting/security",
+        "/cloud/firewall",
+        "/legal/acceptable-use"
+      ]
+    },
+    {
+      "route": "/hosting/backups",
+      "title": "Backups",
+      "category": "Data",
+      "seoTitle": "Website & Server Backups | CloudHost247",
+      "description": "Scheduled backups for CloudHost247 hosting, servers and applications, with visible job history and a documented restore path.",
+      "visual": "management/backups",
+      "hero": {
+        "kicker": "Data",
+        "heading": "A backup is only real if you can restore it",
+        "lede": "Scheduled backups with a job history you can inspect, a retention period you can see, and a restore path that has been thought through before you need it.",
+        "ctas": [
+          {
+            "label": "See backup plans",
+            "to": "/hosting",
+            "variant": "primary"
+          },
+          {
+            "label": "Read the Backup Policy",
+            "to": "/legal/backup-policy",
+            "variant": "ghost"
+          }
+        ],
+        "points": [
+          "Scheduled jobs",
+          "Visible job history",
+          "Per-service restore",
+          "Documented retention"
+        ]
+      },
+      "sections": [
+        {
+          "type": "features",
+          "kicker": "How it works",
+          "heading": "What the platform actually does",
+          "items": [
+            {
+              "icon": "clock",
+              "title": "Scheduled, not manual",
+              "body": "Backup jobs run on a schedule you can see, so protection does not depend on someone remembering to click a button."
+            },
+            {
+              "icon": "hard-drive",
+              "title": "What gets captured",
+              "body": "Files, databases and application data are captured according to the service, and each backup records what it contains."
+            },
+            {
+              "icon": "file-text",
+              "title": "A job history",
+              "body": "Every run is recorded with its status and size, so a silently failing job is visible rather than assumed to be working."
+            },
+            {
+              "icon": "refresh",
+              "title": "Restore from your account",
+              "body": "Restores are performed against the service they belong to, with the backup that will be used identified before it runs."
+            },
+            {
+              "icon": "layers",
+              "title": "Per-service scope",
+              "body": "Each hosting account, server and application has its own backup record, so restoring one thing does not touch another."
+            },
+            {
+              "icon": "shield",
+              "title": "Stored separately",
+              "body": "Backups are stored on storage separate from the live service, so losing the service does not lose the backup."
+            }
+          ]
+        },
+        {
+          "type": "checks",
+          "kicker": "Say this out loud",
+          "heading": "What backups do not replace",
+          "items": [
+            {
+              "label": "Your own copy of critical data",
+              "body": "For anything you cannot afford to lose, keep an export you control in addition to platform backups."
+            },
+            {
+              "label": "A tested recovery plan",
+              "body": "Knowing what you will restore, in what order, is a decision backups cannot make for you."
+            },
+            {
+              "label": "A version control system for code",
+              "body": "Backups return a service to a previous state. They are not a substitute for Git for your source code."
+            }
+          ]
+        }
+      ],
+      "faqs": [
+        {
+          "q": "How long are backups kept?",
+          "a": "Retention is set per service and stated in the Backup Policy. The policy is the authoritative source, not this page."
+        },
+        {
+          "q": "Can I restore a single file?",
+          "a": "Where file-level restore is supported for the service, yes. Otherwise the backup restores the service data as a set."
+        },
+        {
+          "q": "Are backups encrypted?",
+          "a": "Backup storage is access-controlled and separate from the live service. The specific controls are described in the Backup Policy and the platform's security documentation."
+        },
+        {
+          "q": "Can I trigger a backup before a big change?",
+          "a": "Yes. A manual backup can be taken before a migration, an upgrade or a plugin batch, and it appears in the same job history."
+        }
+      ],
+      "related": [
+        "/legal/backup-policy",
+        "/cloud/backups",
+        "/cloud/server-management",
+        "/hosting/web-hosting",
+        "/cloud/monitoring",
+        "/legal/data-deletion"
+      ]
+    },
+    {
+      "route": "/hosting/migration",
+      "title": "Website Migration",
+      "category": "Hosting",
+      "seoTitle": "Free Website & Email Migration | CloudHost247",
+      "description": "Move your website and email to CloudHost247 with a planned cutover: copy, verify on the new infrastructure, then switch DNS at your discretion.",
+      "visual": "management/migration",
+      "hero": {
+        "kicker": "Hosting",
+        "heading": "Move your site without holding your breath",
+        "lede": "A migration is a sequence of small, reversible steps — copy, verify, then switch. The old host keeps serving until the new one has proved itself.",
+        "ctas": [
+          {
+            "label": "Start a migration",
+            "to": "/contact",
+            "variant": "primary"
+          },
+          {
+            "label": "See hosting plans",
+            "to": "/hosting",
+            "variant": "ghost"
+          }
+        ],
+        "points": [
+          "We copy the files",
+          "We copy the databases",
+          "We verify before cutover",
+          "You choose when DNS changes"
+        ]
+      },
+      "sections": [
+        {
+          "type": "steps",
+          "kicker": "The sequence",
+          "heading": "Six steps, in this order",
+          "items": [
+            {
+              "title": "Inventory",
+              "body": "We establish what is moving: files, databases, mailboxes, cron jobs, DNS records and any external service the site calls."
+            },
+            {
+              "title": "Provision the target",
+              "body": "The destination account or server is created and configured to match the application's requirements before anything is copied."
+            },
+            {
+              "title": "Copy the data",
+              "body": "Files and databases are transferred and the application is adjusted for the new path, hostname and connection details."
+            },
+            {
+              "title": "Verify on a real hostname",
+              "body": "The copied site is served on a temporary hostname and checked: pages resolve, forms submit, mail authenticates, the certificate is valid."
+            },
+            {
+              "title": "Switch DNS",
+              "body": "Only after verification, the domain's records are updated. Because the old host is untouched, this step is reversible."
+            },
+            {
+              "title": "Confirm and tidy",
+              "body": "We confirm the live site and mail behave, then the old copies and any temporary hostnames are removed."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "What we need from you",
+          "body": "Access to the current host, the domain's DNS control, and a list of anything the site depends on that is not obvious from the files — third-party APIs, scheduled jobs, unusual mail routing. Migrations go wrong when a dependency is discovered afterwards."
+        }
+      ],
+      "faqs": [
+        {
+          "q": "How long does a migration take?",
+          "a": "It depends on the size of the data and how the current host allows access. The copy and verification happen before any customer-visible change, and the DNS switch itself is decided by you."
+        },
+        {
+          "q": "Will my site be down during the move?",
+          "a": "The intent of the sequence is no downtime: the site is verified on the new infrastructure while the old one still serves, and DNS is the only change that customers can observe."
+        },
+        {
+          "q": "Can you migrate email as well as the website?",
+          "a": "Yes. Mailboxes and their contents are part of the inventory, and the MX records change at the same carefully chosen moment as the web records."
+        },
+        {
+          "q": "What if the migration does not work?",
+          "a": "Verification happens before the switch, so a failed migration is caught while the original site is still live. If the new platform cannot run the application, you keep the old host and we say so."
+        }
+      ],
+      "related": [
+        "/hosting/web-hosting",
+        "/hosting/email",
+        "/hosting/wordpress",
+        "/hosting/backups",
+        "/contact",
+        "/legal/refund-policy"
+      ]
+    },
+    {
+      "route": "/hosting/security",
+      "title": "Hosting Security",
+      "category": "Security",
+      "seoTitle": "Hosting Security — Isolation, Hardening, Abuse Control | CloudHost247",
+      "description": "How CloudHost247 protects hosting: tenant isolation, platform patching, malware and abuse filtering, access control, certificates and monitored recovery.",
+      "visual": "security/platform-security",
+      "hero": {
+        "kicker": "Security",
+        "heading": "Security that is operational, not a badge",
+        "lede": "Isolation between tenants, a patched platform, filtering ahead of your site, controlled access, and a documented response when something does go wrong.",
+        "ctas": [
+          {
+            "label": "See security practices",
+            "to": "/security",
+            "variant": "primary"
+          },
+          {
+            "label": "Read the AUP",
+            "to": "/legal/acceptable-use",
+            "variant": "ghost"
+          }
+        ],
+        "points": [
+          "Tenant isolation",
+          "Platform patching",
+          "Abuse and malware filtering",
+          "Auditable access"
+        ]
+      },
+      "sections": [
+        {
+          "type": "features",
+          "kicker": "Layers",
+          "heading": "Where the protection actually sits",
+          "items": [
+            {
+              "icon": "layers",
+              "title": "Isolation between tenants",
+              "body": "Accounts are separated at the service level so one compromised site is not a route into another customer's data."
+            },
+            {
+              "icon": "refresh",
+              "title": "Platform patch management",
+              "body": "The operating systems, runtime versions and platform components we control are patched on a schedule, not when someone complains."
+            },
+            {
+              "icon": "shield",
+              "title": "Filtering before your site",
+              "body": "Known-malicious traffic patterns and abusive request rates are filtered at the platform edge, ahead of the application."
+            },
+            {
+              "icon": "key",
+              "title": "Access control",
+              "body": "Account access uses strong credentials, session controls and multi-factor authentication, including passkeys."
+            },
+            {
+              "icon": "lock",
+              "title": "Encryption in transit",
+              "body": "TLS on every web endpoint and mail transport, with automated certificate renewal."
+            },
+            {
+              "icon": "file-text",
+              "title": "Recovery and review",
+              "body": "Security-relevant events are logged, and the incident path is documented so a response does not start from zero."
+            }
+          ]
+        },
+        {
+          "type": "checks",
+          "kicker": "Shared responsibility",
+          "heading": "What is yours to own",
+          "items": [
+            {
+              "label": "Your application's code",
+              "body": "A vulnerable plugin or an injection flaw in your own code is not something the platform can patch for you."
+            },
+            {
+              "label": "Your credentials",
+              "body": "Weak or reused passwords on accounts you control are the most common route in, on any platform."
+            },
+            {
+              "label": "What you publish",
+              "body": "Content, scripts and third-party embeds you add to a site are your responsibility under the Acceptable Use Policy."
+            },
+            {
+              "label": "Your data handling",
+              "body": "What personal data you collect, why, and for how long is your decision and your legal obligation."
+            }
+          ]
+        }
+      ],
+      "faqs": [
+        {
+          "q": "Do you scan for malware?",
+          "a": "The platform filters known-malicious behaviour and monitors for abuse signals. That is detection and mitigation, not a guarantee of cleanliness — an application you control still needs its own updates."
+        },
+        {
+          "q": "Do you offer a web application firewall as a product?",
+          "a": "Network-level firewall rules are a real, configurable feature on servers. A separate productised WAF tier is not claimed here; if it is not in your catalogue, it is not available to buy."
+        },
+        {
+          "q": "How do you handle abuse reports?",
+          "a": "Reports go to the abuse contact published in the legal and policy documents, and handling follows the Acceptable Use and Cybercrime policies."
+        },
+        {
+          "q": "Can I get a security questionnaire completed?",
+          "a": "Yes — send the questionnaire through the contact route and the relevant answers are provided. We do not publish certifications we do not hold."
+        }
+      ],
+      "related": [
+        "/security",
+        "/cloud/security",
+        "/cloud/firewall",
+        "/legal/acceptable-use",
+        "/legal/cybercrime-policy",
+        "/hosting/ssl"
+      ]
+    }
+  ]
+}

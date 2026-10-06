@@ -1,0 +1,689 @@
+{
+  "family": "cloud",
+  "pages": [
+    {
+      "route": "/cloud",
+      "title": "Cloud & Servers",
+      "category": "Cloud",
+      "seoTitle": "Cloud Hosting, VPS, Dedicated Servers & Infrastructure | CloudHost247",
+      "description": "CloudHost247 cloud and servers: VPS, public and private cloud, dedicated and enterprise servers, operating systems, network, monitoring, firewalls and backups.",
+      "visual": "cloud/cloud-hosting",
+      "hero": {
+        "kicker": "Cloud & Servers",
+        "heading": "Compute you can reach, size and operate",
+        "lede": "Virtual servers, cloud capacity and dedicated hardware — with the operating system catalogue, network controls, monitoring and backups that turn a machine into a service you can run in production.",
+        "ctas": [
+          { "label": "Configure a server", "to": "/servers/new", "variant": "primary" },
+          { "label": "See VPS plans", "to": "/hosting/vps", "variant": "ghost" }
+        ],
+        "points": ["VPS and cloud instances", "Dedicated and enterprise hardware", "Operating system catalogue", "Monitoring, firewalls, backups"]
+      },
+      "sections": [
+        {
+          "type": "cards",
+          "kicker": "Compute",
+          "heading": "Pick the shape of the machine",
+          "lede": "Each option is a different trade between isolation, elasticity and control.",
+          "items": [
+            { "icon": "server", "title": "VPS Hosting", "body": "Guaranteed virtual resources with full administrative access, on shared hardware.", "to": "/hosting/vps" },
+            { "icon": "cloud", "title": "Public Cloud", "body": "Elastic compute that can be resized as demand changes.", "to": "/cloud/public" },
+            { "icon": "cloud-lock", "title": "Private Cloud", "body": "Isolated capacity reserved for a single tenant.", "to": "/cloud/private" },
+            { "icon": "server-rack", "title": "Dedicated Servers", "body": "An entire physical machine, with no neighbour.", "to": "/hosting/dedicated" },
+            { "icon": "building", "title": "Enterprise Servers", "body": "High-capacity configurations for serious workloads.", "to": "/cloud/enterprise-servers" },
+            { "icon": "gamepad", "title": "Game Servers", "body": "Low-latency hosting for multiplayer communities.", "to": "/cloud/game-servers" }
+          ]
+        },
+        {
+          "type": "cards",
+          "kicker": "Operations",
+          "heading": "Everything around the machine",
+          "lede": "A server without these is hardware. With them, it is a service.",
+          "items": [
+            { "icon": "os", "title": "Operating Systems", "body": "The catalogue available at provisioning time.", "to": "/cloud/operating-systems" },
+            { "icon": "network", "title": "Infrastructure", "body": "Regions, facilities and how the network fits together.", "to": "/cloud/infrastructure" },
+            { "icon": "activity", "title": "Monitoring", "body": "Telemetry and alerts on the resources you run.", "to": "/cloud/monitoring" },
+            { "icon": "firewall", "title": "Firewalls", "body": "Rule-based network filtering per server.", "to": "/cloud/firewall" },
+            { "icon": "hard-drive", "title": "Backups", "body": "Scheduled jobs with a restorable history.", "to": "/cloud/backups" },
+            { "icon": "ip", "title": "IP Management", "body": "Addresses, reverse DNS and floating IPs.", "to": "/cloud/ip-management" }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "What is on this page is what the platform can provision",
+          "body": "Regions, operating system versions, control panels and machine sizes are configuration, not marketing copy. The platform lists exactly what a given deployment is configured to offer, and a service that is not configured is shown as unavailable rather than sold and then apologised for."
+        }
+      ],
+      "faqs": [
+        { "q": "What is the difference between VPS, public cloud and private cloud?", "a": "A VPS is a fixed slice of a shared machine with guaranteed resources. Public cloud is elastic compute that can be resized. Private cloud is capacity reserved for one tenant, so nothing you run shares hardware with anyone else." },
+        { "q": "Which operating systems can I install?", "a": "The operating system catalogue page lists the families and versions the platform is configured to provision. It reflects configuration rather than a list of everything that technically exists." },
+        { "q": "Do servers include backups?", "a": "Backups are a separate, explicitly scheduled job. Some plans include a backup allocation; where they do not, backups can be added to the service." }
+      ],
+      "related": ["/hosting/vps", "/hosting/dedicated", "/cloud/operating-systems", "/cloud/server-management", "/cloud/monitoring", "/cloud/firewall"]
+    },
+
+    {
+      "route": "/cloud/public",
+      "title": "Public Cloud",
+      "category": "Cloud",
+      "seoTitle": "Public Cloud Compute | CloudHost247",
+      "description": "Elastic public cloud instances from CloudHost247: resize compute as demand changes, with the OS catalogue, network controls and monitoring included.",
+      "visual": "cloud/public-cloud",
+      "hero": {
+        "kicker": "Cloud",
+        "heading": "Compute that changes size when your traffic does",
+        "lede": "Public cloud instances on shared, managed infrastructure — sized for the workload you have today, resizable when it is not enough.",
+        "ctas": [
+          { "label": "Configure an instance", "to": "/servers/new", "variant": "primary" },
+          { "label": "Compare with VPS", "to": "/hosting/vps", "variant": "ghost" }
+        ],
+        "points": ["Resizable resources", "Wide OS catalogue", "Network and firewall controls", "Monitored host"]
+      },
+      "sections": [
+        {
+          "type": "features",
+          "kicker": "Why public cloud",
+          "heading": "Elastic where it matters",
+          "items": [
+            { "icon": "gauge", "title": "Resize without rebuilding", "body": "Move to a larger or smaller instance shape as the workload changes, rather than migrating to a new product." },
+            { "icon": "zap", "title": "Fast provisioning", "body": "Instances are created from a configured image, so a working server exists in minutes rather than days." },
+            { "icon": "os", "title": "Your choice of operating system", "body": "Provision from the catalogue of operating systems the platform holds images for." },
+            { "icon": "firewall", "title": "Network control", "body": "Firewall rules and private addressing so the instance is only reachable where it should be." },
+            { "icon": "hard-drive", "title": "Persistence", "body": "Attached storage survives a rebuild of the instance, which is what makes resizing safe." },
+            { "icon": "activity", "title": "Monitoring built in", "body": "Resource telemetry is collected so capacity decisions are made from data rather than from an alert at 03:00." }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "Region availability is configuration, not a claim",
+          "body": "A public cloud instance can only be created where the platform has a provider configured for it. The regions list on this deployment shows what is genuinely available; where it is empty, no region is configured and no instance can be promised."
+        }
+      ],
+      "faqs": [
+        { "q": "Is public cloud the same as a VPS?", "a": "They overlap. The practical difference is elasticity: a VPS is a fixed allocation, while public cloud instances are designed to be resized as demand changes." },
+        { "q": "Can I control the network at the instance level?", "a": "Yes. Firewall rules apply per server, and the platform records the addresses assigned to your service." },
+        { "q": "Can I run more than one instance?", "a": "Yes. Multiple servers can be provisioned and managed from the same account, each with its own operating system and configuration." }
+      ],
+      "related": ["/cloud", "/cloud/private", "/hosting/vps", "/cloud/infrastructure", "/cloud/monitoring", "/servers/new"]
+    },
+
+    {
+      "route": "/cloud/private",
+      "title": "Private Cloud",
+      "category": "Cloud",
+      "seoTitle": "Private Cloud — Isolated Capacity | CloudHost247",
+      "description": "Private cloud from CloudHost247: isolated compute capacity reserved for one tenant, for workloads that cannot share hardware with anyone else.",
+      "visual": "cloud/private-cloud",
+      "hero": {
+        "kicker": "Cloud",
+        "heading": "Capacity that belongs to one tenant only",
+        "lede": "Where a workload must not share a machine with anyone else, private cloud gives reserved resources and a defined boundary around them.",
+        "ctas": [
+          { "label": "Discuss requirements", "to": "/contact", "variant": "primary" },
+          { "label": "See dedicated servers", "to": "/hosting/dedicated", "variant": "ghost" }
+        ],
+        "points": ["Reserved, not shared", "Defined tenant boundary", "Your choice of OS", "Backed by dedicated hardware"]
+      },
+      "sections": [
+        {
+          "type": "features",
+          "kicker": "The boundary",
+          "heading": "What isolation actually changes",
+          "items": [
+            { "icon": "shield", "title": "No noisy neighbours", "body": "Performance is not affected by another tenant's load, because there is no other tenant on the same resources." },
+            { "icon": "lock", "title": "A smaller blast radius", "body": "Isolation is a security property as well as a performance one: there is no shared host to be reached through." },
+            { "icon": "file-text", "title": "Easier to explain", "body": "A defined boundary is far easier to describe in a compliance or customer questionnaire than shared hosting is." },
+            { "icon": "os", "title": "Your stack", "body": "Choose the operating system and configuration the workload needs, rather than working around a fixed image." },
+            { "icon": "network", "title": "Network under your control", "body": "Addressing, firewall rules and connectivity designed around the application." },
+            { "icon": "wrench", "title": "Managed if you want it", "body": "Operate it yourself, or have the CloudHost247 team run the platform layer for you." }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "Private cloud is scoped, not self-service",
+          "body": "Because the boundary has to be designed — capacity, region, network and operating system — private cloud is quoted against your requirement rather than sold from a fixed price list. The order flow starts with a conversation."
+        }
+      ],
+      "faqs": [
+        { "q": "How is this different from a dedicated server?", "a": "A dedicated server gives you one physical machine. Private cloud gives you reserved capacity that can be split across instances, with the boundary defined around your organisation." },
+        { "q": "Can I connect it to my office network?", "a": "Connectivity options depend on the facility and the provider configured for the region. Raise the requirement with sales and the available options are confirmed in writing." },
+        { "q": "Is it multi-tenant under the hood?", "a": "It is designed so that your workloads do not share resources with another customer's. The exact architecture depends on the provider and facility involved, and is documented for you before you commit." }
+      ],
+      "related": ["/cloud", "/cloud/public", "/hosting/dedicated", "/cloud/enterprise-servers", "/cloud/infrastructure", "/contact"]
+    },
+
+    {
+      "route": "/cloud/enterprise-servers",
+      "title": "Enterprise Servers",
+      "category": "Servers",
+      "seoTitle": "Enterprise Servers & High-Capacity Hosting | CloudHost247",
+      "description": "Enterprise-grade server configurations from CloudHost247 for high-capacity workloads, with redundancy options, managed operations and provider-backed hardware.",
+      "visual": "servers/enterprise-servers",
+      "hero": {
+        "kicker": "Servers",
+        "heading": "When a standard server is not enough",
+        "lede": "High-core, high-memory configurations for databases, virtualisation hosts and platforms that other services depend on — with the operational support to keep them running.",
+        "ctas": [
+          { "label": "Discuss a configuration", "to": "/contact", "variant": "primary" },
+          { "label": "See dedicated servers", "to": "/hosting/dedicated", "variant": "ghost" }
+        ],
+        "points": ["High core counts", "Large memory footprints", "Redundancy options", "Managed operations available"]
+      },
+      "sections": [
+        {
+          "type": "features",
+          "kicker": "Sizing up",
+          "heading": "What changes at this level",
+          "items": [
+            { "icon": "cpu", "title": "Sized to the workload", "body": "Configurations are chosen around measured requirements — core count, memory, storage throughput — rather than a fixed tier." },
+            { "icon": "database", "title": "Built for data-heavy services", "body": "The configuration that makes a database host viable: fast storage, memory for working sets, and cores for concurrency." },
+            { "icon": "layers", "title": "A platform under other services", "body": "When a host runs virtualisation or containers, its failure footprint is larger — so resilience is designed in." },
+            { "icon": "activity", "title": "Monitored as critical", "body": "Telemetry, alerting and capacity tracking so limits are seen before they become incidents." },
+            { "icon": "wrench", "title": "Managed operations", "body": "Patch management, hardening and hands-on administration available as part of the service." },
+            { "icon": "hard-drive", "title": "Backups and recovery", "body": "Backup jobs sized to the data volume, with a restore plan that has been agreed rather than improvised." }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "Quoted against requirements, not published as a price",
+          "body": "Enterprise configurations depend on hardware availability, redundancy choices and region. Rather than publishing a price that cannot be honoured, enterprise servers are quoted against the requirement you describe."
+        }
+      ],
+      "faqs": [
+        { "q": "Do you offer redundant power and networking?", "a": "Facility-level redundancy depends on the provider and region. The available options are confirmed per configuration before ordering." },
+        { "q": "Can you monitor a cluster rather than one server?", "a": "Yes. Multiple servers can be monitored from the same account, and the platform records telemetry per service." },
+        { "q": "Is there a managed option?", "a": "Yes. Managed services cover the platform layer — patching, hardening, monitoring response and administration — alongside the server itself." }
+      ],
+      "related": ["/cloud", "/hosting/dedicated", "/cloud/private", "/cloud/server-management", "/cloud/monitoring", "/contact"]
+    },
+
+    {
+      "route": "/cloud/game-servers",
+      "title": "Game Servers",
+      "category": "Servers",
+      "seoTitle": "Game Server Hosting | CloudHost247",
+      "description": "Low-latency game server hosting from CloudHost247 with the compute to hold a community, DDoS-path filtering and full administrative access.",
+      "visual": "servers/game-servers",
+      "hero": {
+        "kicker": "Servers",
+        "heading": "Low latency, high uptime, full access",
+        "lede": "Game servers live or die on two numbers: latency and whether the machine is up. Both come from infrastructure, not from a control panel skin.",
+        "ctas": [
+          { "label": "Discuss a game server", "to": "/contact", "variant": "primary" },
+          { "label": "See VPS plans", "to": "/hosting/vps", "variant": "ghost" }
+        ],
+        "points": ["Full administrative access", "Network-level protection", "Choose your own game stack", "Backups for world data"]
+      },
+      "sections": [
+        {
+          "type": "features",
+          "kicker": "What a game server needs",
+          "heading": "The things that actually matter",
+          "items": [
+            { "icon": "zap", "title": "Latency first", "body": "Placement and network path matter more than raw clock speed. The region is chosen to sit near the players." },
+            { "icon": "shield", "title": "Protection against floods", "body": "Game servers are a favourite target for traffic floods. Network-level filtering is part of the service, not an upsell." },
+            { "icon": "terminal", "title": "Full access", "body": "Root or administrator access, so you install and configure the game stack the way the community expects." },
+            { "icon": "cpu", "title": "Compute that holds a population", "body": "Player counts, plugins and world size drive requirements. Configurations are sized for the community you actually run." },
+            { "icon": "hard-drive", "title": "World data protected", "body": "Scheduled backups of the game data, because a corrupted world file is an unrecoverable community." },
+            { "icon": "activity", "title": "Monitored", "body": "Telemetry on CPU, memory and network so a growth problem shows up before players notice it." }
+          ]
+        }
+      ],
+      "faqs": [
+        { "q": "Do you offer a one-click game panel?", "a": "The platform provisions servers with the operating system and access you need. Where a specific game panel or a set of preconfigured game templates is not configured in your deployment, that is stated rather than implied." },
+        { "q": "Which games are supported?", "a": "The server is general compute with full access, so it is not limited to a whitelist of games. What matters is the resources the game server needs — tell us and we size for it." },
+        { "q": "Is DDoS protection included?", "a": "Network-level filtering and abuse mitigation are part of the platform. The specific capacity of that mitigation depends on the region and provider." }
+      ],
+      "related": ["/cloud", "/hosting/vps", "/hosting/dedicated", "/cloud/firewall", "/cloud/backups", "/contact"]
+    },
+
+    {
+      "route": "/cloud/infrastructure",
+      "title": "Infrastructure",
+      "category": "Infrastructure",
+      "seoTitle": "CloudHost247 Infrastructure, Regions & Network | CloudHost247",
+      "description": "How CloudHost247 infrastructure is organised: providers, regions, network, storage and the operational layer that runs customer services.",
+      "visual": "hero/global-network",
+      "hero": {
+        "kicker": "Infrastructure",
+        "heading": "The platform under the products",
+        "lede": "CloudHost247 runs customer services across facilities operated by infrastructure providers, with a control layer that owns provisioning, monitoring, DNS, certificates and backups.",
+        "ctas": [
+          { "label": "See available regions", "to": "/cloud/data-centers", "variant": "primary" },
+          { "label": "Contact sales", "to": "/contact", "variant": "ghost" }
+        ],
+        "points": ["Provider-backed facilities", "Explicit region configuration", "Platform control layer", "Monitoring and reconciliation"]
+      },
+      "sections": [
+        {
+          "type": "features",
+          "kicker": "Architecture",
+          "heading": "How the layers stack",
+          "items": [
+            { "icon": "building", "title": "Facilities and providers", "body": "Compute and network are delivered from data centres operated by infrastructure providers, chosen per region and recorded in the platform." },
+            { "icon": "network", "title": "Network", "body": "Public addressing, firewalling and private networking sit between the facility and your service, configured per server." },
+            { "icon": "control", "title": "Control layer", "body": "Provisioning, operating-system images, DNS, certificates, backups and monitoring are owned by the platform rather than by hand." },
+            { "icon": "refresh", "title": "Reconciliation", "body": "The platform continuously compares what it believes is provisioned against what the provider reports, so drift is detected rather than discovered." },
+            { "icon": "activity", "title": "Observability", "body": "Server telemetry, service state and operation logs feed the same account view you use." },
+            { "icon": "shield", "title": "Isolation", "body": "Services are separated at the platform layer, and access to provider credentials is restricted and audited." }
+          ]
+        },
+        {
+          "type": "checks",
+          "kicker": "Honesty",
+          "heading": "What this page will not tell you",
+          "items": [
+            { "label": "A list of cities", "body": "Regions exist only when a provider is configured for them. The data centres page shows what is genuinely configured in your deployment — no decorative world map." },
+            { "label": "An uptime percentage", "body": "A published percentage that does not come from measured, customer-visible monitoring would be a number we invented. Service status shows what the platform can verify right now." },
+            { "label": "Certifications we do not hold", "body": "Certification claims require an audit report with a name and a date. We publish none we cannot produce." }
+          ]
+        }
+      ],
+      "faqs": [
+        { "q": "Where are CloudHost247 servers located?", "a": "In the regions configured for your deployment of the platform, which are listed on the data centres page. That list is generated from configuration, so it cannot drift from reality." },
+        { "q": "Who operates the data centres?", "a": "The facilities are operated by infrastructure providers. CloudHost247 operates the platform layer: provisioning, network configuration, monitoring, security response and support." },
+        { "q": "Can I choose a specific region?", "a": "Where more than one region is configured, yes — region is a selection at provisioning time and is recorded on the service." }
+      ],
+      "related": ["/cloud/data-centers", "/cloud/network", "/cloud", "/security", "/status", "/about"]
+    },
+
+    {
+      "route": "/cloud/data-centers",
+      "title": "Data Centers",
+      "category": "Infrastructure",
+      "seoTitle": "Data Centres & Regions | CloudHost247",
+      "description": "The data centre regions CloudHost247 is configured to deploy into, listed from live configuration rather than a marketing map.",
+      "visual": "cloud/data-centers",
+      "hero": {
+        "kicker": "Infrastructure",
+        "heading": "Regions we can actually deploy into",
+        "lede": "This page lists the regions configured for this deployment of the platform. If a region is not configured, it is not offered — which is the only honest way to publish a locations page.",
+        "ctas": [
+          { "label": "Configure a server", "to": "/servers/new", "variant": "primary" },
+          { "label": "See infrastructure", "to": "/cloud/infrastructure", "variant": "ghost" }
+        ],
+        "points": ["Generated from configuration", "Provider named per region", "Region selected at provisioning", "Status shown per service"]
+      },
+      "sections": [
+        {
+          "type": "live-locations",
+          "kicker": "Available regions",
+          "heading": "Regions configured on this deployment",
+          "emptyMessage": "No regions are configured on this deployment yet, so no location is being claimed. Once an administrator configures a provider region it appears here automatically."
+        },
+        {
+          "type": "features",
+          "kicker": "Selecting a region",
+          "heading": "What region choice affects",
+          "items": [
+            { "icon": "zap", "title": "Latency to your users", "body": "The physical distance between the facility and the people using the service is the single largest factor in response time." },
+            { "icon": "scale", "title": "Data residency", "body": "Where data is stored is a legal question as well as a technical one. Region selection is how you answer it." },
+            { "icon": "building", "title": "The provider operating the facility", "body": "Each region names the provider that runs the physical site." },
+            { "icon": "network", "title": "Addressing and connectivity", "body": "IP ranges and the network path are determined by the region the service is deployed into." }
+          ]
+        }
+      ],
+      "faqs": [
+        { "q": "Why are some regions missing?", "a": "Because the platform is not configured to deploy there. Adding a region is an administrative configuration change, and it appears on this page as soon as it is configured." },
+        { "q": "Does CloudHost247 own the data centres?", "a": "No. The facilities are operated by infrastructure providers. CloudHost247 operates the platform and the services that run on the hardware." },
+        { "q": "Can I deploy across more than one region?", "a": "Yes, where more than one is configured. Multi-region architecture is designed per requirement — talk to us about what you are trying to achieve." }
+      ],
+      "related": ["/cloud/infrastructure", "/cloud/network", "/cloud", "/status", "/contact", "/about"]
+    },
+
+    {
+      "route": "/cloud/network",
+      "title": "Network",
+      "category": "Infrastructure",
+      "seoTitle": "Network, Connectivity & Addressing | CloudHost247",
+      "description": "The CloudHost247 network layer: public and private addressing, firewall filtering, reverse DNS, floating IPs and the observability that sits on top.",
+      "visual": "cloud/network",
+      "hero": {
+        "kicker": "Infrastructure",
+        "heading": "The path between your users and your service",
+        "lede": "Addressing, filtering, routing and the telemetry that tells you what is actually happening on the wire.",
+        "ctas": [
+          { "label": "Manage IPs", "to": "/cloud/ip-management", "variant": "primary" },
+          { "label": "See firewall rules", "to": "/cloud/firewall", "variant": "ghost" }
+        ],
+        "points": ["Public and private addressing", "Rule-based filtering", "Reverse DNS control", "Traffic telemetry"]
+      },
+      "sections": [
+        {
+          "type": "features",
+          "kicker": "Capabilities",
+          "heading": "What you can control",
+          "items": [
+            { "icon": "ip", "title": "IP addressing", "body": "Public addresses assigned to your service, managed in your account, with the option to move a floating address between servers." },
+            { "icon": "dns", "title": "Reverse DNS", "body": "PTR records set correctly, which matters for mail deliverability and for anything that logs connections." },
+            { "icon": "firewall", "title": "Firewall filtering", "body": "Rules applied in order to allow, deny or rate-limit traffic to a server, with the order visible." },
+            { "icon": "shield", "title": "Flood mitigation", "body": "Known-abusive traffic patterns are filtered at the network edge rather than reaching the application." },
+            { "icon": "activity", "title": "Traffic telemetry", "body": "Throughput and packet-level signals recorded per service so a change in behaviour is visible as a graph." },
+            { "icon": "globe", "title": "IPv6", "body": "Dual-stack addressing where the region and provider support it." }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "Bandwidth and traffic terms are contractual",
+          "body": "Whether a service is unmetered, capped or burstable depends on the product you have, and the number that matters is the one on the plan you bought — not a figure on a marketing page. Where a fair-use expectation applies, it is written down in the Fair Usage Policy."
+        }
+      ],
+      "faqs": [
+        { "q": "Can I get additional IP addresses?", "a": "Yes, subject to the region and provider. Addresses are assigned to the service and are visible in your account." },
+        { "q": "Do you support private networking between servers?", "a": "Where the provider and region support private networks, servers can be given private addressing that is not reachable from the internet." },
+        { "q": "Is there a bandwidth limit?", "a": "The limit is the one stated on the product you bought. Anything described as unmetered still operates under the Fair Usage Policy." }
+      ],
+      "related": ["/cloud/firewall", "/cloud/ip-management", "/cloud/monitoring", "/cloud/infrastructure", "/legal/fair-usage", "/status"]
+    },
+
+    {
+      "route": "/cloud/operating-systems",
+      "title": "Operating Systems",
+      "category": "Platform",
+      "seoTitle": "Supported Operating Systems for Servers | CloudHost247",
+      "description": "The operating system catalogue available when provisioning a server on CloudHost247, including version lifecycles and provider image availability.",
+      "visual": "operating-systems/os-catalog",
+      "hero": {
+        "kicker": "Platform",
+        "heading": "Choose the base your service runs on",
+        "lede": "The platform holds images for the operating systems it can provision, tracks their lifecycle status, and shows availability per provider region — so you know what you will actually get.",
+        "ctas": [
+          { "label": "Configure a server", "to": "/servers/new", "variant": "primary" },
+          { "label": "See control panels", "to": "/hosting/control-panels", "variant": "ghost" }
+        ],
+        "points": ["Version and architecture recorded", "Lifecycle status shown", "Per-provider availability", "Control panels where supported"]
+      },
+      "sections": [
+        {
+          "type": "features",
+          "kicker": "How the catalogue behaves",
+          "heading": "Facts the platform keeps track of",
+          "items": [
+            { "icon": "os", "title": "Families and versions", "body": "Each entry is a specific family, version and architecture rather than a vague name." },
+            { "icon": "clock", "title": "Lifecycle status", "body": "End-of-life operating systems are marked, because a server installed today should not be unsupported next year." },
+            { "icon": "server", "title": "Provider image availability", "body": "An operating system is only selectable where the provider in that region actually offers an image for it." },
+            { "icon": "control", "title": "Control panels", "body": "Where a panel is configured to be provisioned on top of an operating system, that mapping is explicit." },
+            { "icon": "refresh", "title": "Administerable", "body": "Versions, images and availability are configuration, maintained by administrators rather than hardcoded in the application." },
+            { "icon": "shield", "title": "Supported means patched", "body": "Operating systems with active vendor security support are the ones worth provisioning; the catalogue shows which those are." }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "If a version is not in the list, it is not provisionable",
+          "body": "This catalogue reflects what the platform is configured and able to install. A version that is not listed has no image configured for the selected region — we would rather show a shorter list than accept an order we cannot provision."
+        }
+      ],
+      "faqs": [
+        { "q": "Can I install a custom ISO?", "a": "Where the provider and region support custom images, yes. Availability depends on the underlying infrastructure provider." },
+        { "q": "Do you offer Windows Server?", "a": "Windows-based services are available as products, and Windows images appear in the catalogue where licensing and the region allow." },
+        { "q": "How are end-of-life systems handled?", "a": "They are marked in the catalogue so you can make an informed choice, and support will tell you if the version you are running has reached end of life." }
+      ],
+      "related": ["/cloud", "/hosting/control-panels", "/cloud/server-management", "/servers/new", "/docs", "/status"]
+    },
+
+    {
+      "route": "/cloud/server-management",
+      "title": "Server Management",
+      "category": "Operations",
+      "seoTitle": "Server Management & Managed Operations | CloudHost247",
+      "description": "Server management from CloudHost247: provisioning, operating-system lifecycle, monitoring, firewall control, backups, patching and hands-on administration.",
+      "visual": "management/server-control",
+      "hero": {
+        "kicker": "Operations",
+        "heading": "The work between a server and a reliable service",
+        "lede": "Provisioning is the easy part. Keeping a fleet patched, monitored, backed up and reachable — and knowing when something has drifted — is the job.",
+        "ctas": [
+          { "label": "See managed services", "to": "/contact", "variant": "primary" },
+          { "label": "See monitoring", "to": "/cloud/monitoring", "variant": "ghost" }
+        ],
+        "points": ["Provisioning and lifecycle", "Monitoring and alerting", "Firewall and access control", "Backups and patching"]
+      },
+      "sections": [
+        {
+          "type": "features",
+          "kicker": "Available today",
+          "heading": "What the platform does for you",
+          "items": [
+            { "icon": "control", "title": "Provisioning and rebuilds", "body": "Create servers from a catalogue image, rebuild them from a known-good state, and record which image each server runs." },
+            { "icon": "terminal", "title": "Access management", "body": "Administrative access is issued and rotated through the platform, and server credentials are stored encrypted rather than pasted into tickets." },
+            { "icon": "activity", "title": "Monitoring and alerting", "body": "Resource telemetry collected per server, with alerting so a saturation event is noticed while it is still an event." },
+            { "icon": "firewall", "title": "Firewall control", "body": "Rules attached to the server, applied in a defined order, with the effective ruleset visible." },
+            { "icon": "hard-drive", "title": "Backups", "body": "Scheduled jobs with a run history and a restore path from your account." },
+            { "icon": "refresh", "title": "Reconciliation and logs", "body": "The platform compares desired state with provider reality and records every infrastructure operation for audit." }
+          ]
+        },
+        {
+          "type": "checks",
+          "kicker": "Managed services",
+          "heading": "Hand the platform layer to us",
+          "items": [
+            { "label": "Patching and hardening", "body": "Operating system and platform components patched on a schedule, with the changes recorded." },
+            { "label": "Monitoring response", "body": "Alerts are acted on rather than merely delivered — the difference between monitoring and management." },
+            { "label": "Incident handling", "body": "A named path for an incident: who is looking, what is being tried, and what customers are told." },
+            { "label": "Change management", "body": "Changes made deliberately, with a way back, instead of directly on production at 17:55 on a Friday." }
+          ]
+        }
+      ],
+      "faqs": [
+        { "q": "Can you manage a server you did not provision?", "a": "That depends on the provider and the access you can grant. Bring the details and we will confirm what is possible." },
+        { "q": "What counts as managed?", "a": "The platform layer: operating system, runtime, monitoring, backups, firewall and response. Application-level administration and code changes are a separate engagement." },
+        { "q": "Do you support panels like cPanel or Plesk?", "a": "Panels are provisioned where the platform is configured to install them, and the control panels page lists what is available rather than what is theoretically possible." }
+      ],
+      "related": ["/cloud/monitoring", "/cloud/backups", "/cloud/firewall", "/hosting/control-panels", "/cloud/operating-systems", "/contact"]
+    },
+
+    {
+      "route": "/cloud/monitoring",
+      "title": "Monitoring",
+      "category": "Operations",
+      "seoTitle": "Server Monitoring & Telemetry | CloudHost247",
+      "description": "Resource monitoring and service telemetry for CloudHost247 servers, applications and hosting, with historical data and alerting you can act on.",
+      "visual": "management/monitoring",
+      "hero": {
+        "kicker": "Operations",
+        "heading": "Know before your customers do",
+        "lede": "Telemetry collected from the services you actually run, kept as history, so capacity planning is a data question and an incident has a timeline.",
+        "ctas": [
+          { "label": "Open monitoring", "to": "/dashboard/servers", "variant": "primary" },
+          { "label": "See service status", "to": "/status", "variant": "ghost" }
+        ],
+        "points": ["Resource telemetry", "Historical trend", "Per-service scope", "Status page driven by real checks"]
+      },
+      "sections": [
+        {
+          "type": "features",
+          "kicker": "What is measured",
+          "heading": "Signals worth keeping",
+          "items": [
+            { "icon": "cpu", "title": "Compute pressure", "body": "CPU and memory over time, so the difference between a busy day and a capacity problem is visible." },
+            { "icon": "hard-drive", "title": "Storage growth", "body": "Disk consumption trending, because a full disk takes a service down quietly and completely." },
+            { "icon": "network", "title": "Traffic", "body": "Throughput in and out, which is where a traffic spike or a leak is first detectable." },
+            { "icon": "server", "title": "Service state", "body": "Whether each service is reachable and answering, recorded as state rather than as a promise." },
+            { "icon": "alert", "title": "Alerts that mean something", "body": "Notifications tied to a threshold rather than to every fluctuation, so an alert is worth reading." },
+            { "icon": "file-text", "title": "History", "body": "Retained telemetry you can go back through when working out when a problem actually started." }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "Why there is no uptime figure on this page",
+          "body": "A meaningful uptime number has to come from independent, continuous, customer-visible measurement over a defined period. Anything else is a claim. The service status page reports the checks this platform can genuinely perform right now, and says plainly when something is not being monitored."
+        }
+      ],
+      "faqs": [
+        { "q": "Can I see monitoring for a service I have?", "a": "Yes — telemetry is attached to the service in your account, so the graphs for a given server appear with that server." },
+        { "q": "Do you alert me or fix it yourself?", "a": "Both are possible. Standard monitoring notifies; managed services mean the alert is acted on by us as well." },
+        { "q": "Can I monitor something outside CloudHost247?", "a": "The Tools Center includes network and DNS diagnostics that can check external endpoints from the platform." }
+      ],
+      "related": ["/cloud/server-management", "/status", "/cloud/firewall", "/cloud/backups", "/cloud", "/tools/category/network"]
+    },
+
+    {
+      "route": "/cloud/backups",
+      "title": "Server & Cloud Backups",
+      "category": "Data",
+      "seoTitle": "Server & Cloud Backups | CloudHost247",
+      "description": "Backup jobs for CloudHost247 servers and applications: scheduled runs, visible history, defined retention and restores performed from your account.",
+      "visual": "management/backup",
+      "hero": {
+        "kicker": "Data",
+        "heading": "Backups your services can be restored from",
+        "lede": "Scheduled jobs attached to the service they protect, with a run history and a retention period you can see — and a restore you can actually perform.",
+        "ctas": [
+          { "label": "Read the Backup Policy", "to": "/legal/backup-policy", "variant": "primary" },
+          { "label": "See hosting backups", "to": "/hosting/backups", "variant": "ghost" }
+        ],
+        "points": ["Per-service jobs", "Visible run history", "Defined retention", "Restore from your account"]
+      },
+      "sections": [
+        {
+          "type": "features",
+          "kicker": "Mechanics",
+          "heading": "How jobs are managed",
+          "items": [
+            { "icon": "clock", "title": "Scheduled runs", "body": "Backups happen on a schedule attached to the service, not on someone's memory." },
+            { "icon": "layers", "title": "Scoped per service", "body": "A server, an application and a hosting account each have their own backup record, so one restore never affects another." },
+            { "icon": "file-text", "title": "What a backup contains", "body": "Each record states what was captured — files, databases, volumes — so you know what a restore will bring back." },
+            { "icon": "hard-drive", "title": "Separate storage", "body": "Backup data is held on storage separate from the live service, so losing a server does not lose its backups." },
+            { "icon": "refresh", "title": "Restore path", "body": "Restores run against the service, with the selected backup shown before the restore begins." },
+            { "icon": "alert", "title": "Failure visibility", "body": "A failed run is recorded as failed, which is the only way to know a backup plan is not quietly doing nothing." }
+          ]
+        }
+      ],
+      "faqs": [
+        { "q": "How often do backups run?", "a": "The schedule is per service. The job history in your account shows the runs that actually happened, which is more reliable than any statement about intent." },
+        { "q": "Can I take a backup right now?", "a": "Yes. A manual run can be triggered before a change, and it appears in the same history as the scheduled runs." },
+        { "q": "What is the retention period?", "a": "Retention differs by service and is stated in the Backup Policy, which is the authoritative document." }
+      ],
+      "related": ["/hosting/backups", "/legal/backup-policy", "/cloud/server-management", "/cloud/monitoring", "/cloud", "/legal/data-deletion"]
+    },
+
+    {
+      "route": "/cloud/firewall",
+      "title": "Firewalls",
+      "category": "Security",
+      "seoTitle": "Server Firewall & Network Filtering | CloudHost247",
+      "description": "Rule-based firewall control for CloudHost247 servers: ordered allow, deny and rate-limit rules applied at the network layer, with the effective ruleset visible.",
+      "visual": "management/firewall",
+      "hero": {
+        "kicker": "Security",
+        "heading": "Close everything you do not need",
+        "lede": "Most exposed servers are exposed because a port was opened for one reason and never closed. Firewall rules make the intended surface explicit and reviewable.",
+        "ctas": [
+          { "label": "Manage firewall rules", "to": "/dashboard/servers", "variant": "primary" },
+          { "label": "See security", "to": "/cloud/security", "variant": "ghost" }
+        ],
+        "points": ["Ordered rules", "Allow, deny and rate-limit", "Per-server scope", "Effective ruleset visible"]
+      },
+      "sections": [
+        {
+          "type": "features",
+          "kicker": "Control",
+          "heading": "What you can express",
+          "items": [
+            { "icon": "firewall", "title": "Ordered evaluation", "body": "Rules are applied in sequence and the order is shown, because order is what determines the outcome." },
+            { "icon": "shield", "title": "Default deny", "body": "A policy of closing everything and opening what the service needs is the one that ages well." },
+            { "icon": "gauge", "title": "Rate limiting", "body": "Limit connections from a source so a brute-force attempt or a runaway client cannot consume the service." },
+            { "icon": "ip", "title": "Source restrictions", "body": "Restrict administrative ports to known addresses so SSH is not reachable from the whole internet." },
+            { "icon": "layers", "title": "Per-service rules", "body": "Rules are attached to a specific server, so a change is scoped to the thing it was meant for." },
+            { "icon": "file-text", "title": "Auditable changes", "body": "Rule changes are recorded against your account, which makes an incident review possible." }
+          ]
+        }
+      ],
+      "faqs": [
+        { "q": "Can I lock myself out?", "a": "Yes — that is a real risk with any firewall. Platform-level console access exists for the servers that support it, and support can help recover access." },
+        { "q": "Is the firewall in front of the server or on it?", "a": "Rules are applied at the network layer for the service, ahead of the application, and are managed from the platform rather than requiring you to edit rules on the host." },
+        { "q": "Does it protect against volumetric attacks?", "a": "Network-level flood mitigation is part of the platform, but the capacity available depends on the region and provider. A firewall is a policy control, not a substitute for mitigation capacity." }
+      ],
+      "related": ["/cloud/security", "/cloud/network", "/cloud/server-management", "/cloud/ip-management", "/hosting/security", "/legal/acceptable-use"]
+    },
+
+    {
+      "route": "/cloud/security",
+      "title": "Cloud Security",
+      "category": "Security",
+      "seoTitle": "Cloud & Infrastructure Security | CloudHost247",
+      "description": "How CloudHost247 secures cloud services: credential handling, isolation, network control, patch management, logging and incident response.",
+      "visual": "security/security",
+      "hero": {
+        "kicker": "Security",
+        "heading": "The controls behind the services",
+        "lede": "Credentials stored rather than pasted, access restricted and recorded, infrastructure patched on a schedule, and every operation logged.",
+        "ctas": [
+          { "label": "Read security practices", "to": "/security", "variant": "primary" },
+          { "label": "See the AUP", "to": "/legal/acceptable-use", "variant": "ghost" }
+        ],
+        "points": ["Restricted credential access", "Isolation by service", "Patch management", "Audited infrastructure operations"]
+      },
+      "sections": [
+        {
+          "type": "features",
+          "kicker": "Controls",
+          "heading": "What is enforced",
+          "items": [
+            { "icon": "key", "title": "Provider credentials", "body": "Infrastructure provider credentials are stored encrypted, never returned to a browser, and used only by the platform's own operations." },
+            { "icon": "file-text", "title": "Audit trail", "body": "Infrastructure operations and administrative actions are recorded, so who did what and when is answerable." },
+            { "icon": "users", "title": "Role-based access", "body": "Administrative capability is granted by role and re-verified server-side on every request rather than trusted from the interface." },
+            { "icon": "layers", "title": "Service isolation", "body": "Customer services are separated so that one cannot read or control another." },
+            { "icon": "refresh", "title": "Patch management", "body": "Operating systems and platform components are patched on a schedule, with changes tracked against the service." },
+            { "icon": "alert", "title": "Incident response", "body": "A defined path for detection, containment, notification and review — written down before it is needed." }
+          ]
+        },
+        {
+          "type": "checks",
+          "kicker": "Access you control",
+          "heading": "Protect your own account",
+          "items": [
+            { "label": "Turn on multi-factor authentication", "body": "TOTP and passkey authentication are supported. A password alone is the weakest link in any hosting account." },
+            { "label": "Review administrative users", "body": "Staff and administrative access should be limited to people who need it, and removed when they do not." },
+            { "label": "Keep recovery details current", "body": "Password recovery and second-factor recovery both depend on the contact details on the account being right." }
+          ]
+        }
+      ],
+      "faqs": [
+        { "q": "Where are credentials stored?", "a": "Provider and server credentials are encrypted at rest and are never included in API responses. Access is limited to the platform operations that need them." },
+        { "q": "Do you log administrative access?", "a": "Yes. Administrative actions and infrastructure operations are written to an audit log in the platform." },
+        { "q": "Who do I contact about a security issue?", "a": "Use the abuse and security route published in the legal and policy documents. Reports are handled under the Cybercrime and Abuse Policy." }
+      ],
+      "related": ["/security", "/cloud/firewall", "/hosting/security", "/legal/cybercrime-policy", "/legal/data-protection-standards", "/cloud/server-management"]
+    },
+
+    {
+      "route": "/cloud/ip-management",
+      "title": "IP Management",
+      "category": "Infrastructure",
+      "seoTitle": "IP Address & Reverse DNS Management | CloudHost247",
+      "description": "Manage the IP addresses assigned to your CloudHost247 services: public addressing, floating IPs, reverse DNS and the records that tie them to your services.",
+      "visual": "management/ip-management",
+      "hero": {
+        "kicker": "Infrastructure",
+        "heading": "Know which address belongs to what",
+        "lede": "Addresses assigned to services, reverse DNS that resolves correctly, and the ability to move an address between servers without asking support.",
+        "ctas": [
+          { "label": "Open server management", "to": "/dashboard/servers", "variant": "primary" },
+          { "label": "See network", "to": "/cloud/network", "variant": "ghost" }
+        ],
+        "points": ["Assigned and available addresses", "Reverse DNS control", "Floating addresses", "Addresses tied to services"]
+      },
+      "sections": [
+        {
+          "type": "features",
+          "kicker": "Address management",
+          "heading": "What you can do",
+          "items": [
+            { "icon": "ip", "title": "See the assignment", "body": "Every address shows the service it belongs to, so an audit does not require a spreadsheet." },
+            { "icon": "dns", "title": "Set reverse DNS", "body": "PTR records for your addresses, which mail servers and log correlation both depend on." },
+            { "icon": "transfer", "title": "Move an address", "body": "A floating address can be reassigned to another server, which is what makes failover practical." },
+            { "icon": "globe", "title": "IPv6 where available", "body": "Dual-stack assignment where the region and provider support it." },
+            { "icon": "file-text", "title": "Justification for more", "body": "Additional address requests are assessed against real need, which is what keeps the pool usable for everyone." },
+            { "icon": "shield", "title": "Abuse handling", "body": "Addresses reported for abuse are handled under the Acceptable Use Policy, whichever service holds them." }
+          ]
+        }
+      ],
+      "faqs": [
+        { "q": "Can I get a dedicated IP for a website?", "a": "Where the product supports it and the region has addresses available. Raise the requirement and the option is confirmed with the service." },
+        { "q": "Why does reverse DNS matter?", "a": "A PTR record that matches the sending hostname is a deliverability signal for mail, and it makes connection logs meaningful for everything else." },
+        { "q": "Do addresses transfer if I move servers?", "a": "A floating address can be reassigned within the same region. A change of region means a new address." }
+      ],
+      "related": ["/cloud/network", "/cloud/firewall", "/cloud/server-management", "/hosting/email", "/dashboard/servers", "/legal/acceptable-use"]
+    }
+  ]
+}

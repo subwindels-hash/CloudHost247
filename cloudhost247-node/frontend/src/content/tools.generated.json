@@ -1,0 +1,517 @@
+{
+  "version": "2.0.0",
+  "tools": [
+    {
+      "slug": "dns-propagation",
+      "name": "DNS Propagation Checker",
+      "path": "/tools/dns/propagation",
+      "category": "dns",
+      "description": "Query the same record against multiple public resolvers worldwide.",
+      "visibility": "public"
+    },
+    {
+      "slug": "dns-lookup",
+      "name": "DNS Lookup",
+      "path": "/tools/dns/lookup",
+      "category": "dns",
+      "description": "Look up A, AAAA, CNAME, MX, NS, TXT, SOA, SRV, CAA, PTR, DS and DNSKEY records.",
+      "visibility": "public"
+    },
+    {
+      "slug": "dns-health",
+      "name": "DNS Health Checker",
+      "path": "/tools/dns/health",
+      "category": "dns",
+      "description": "Run every DNS, delegation, email-authentication and DNSSEC check for a domain.",
+      "visibility": "public"
+    },
+    {
+      "slug": "mx-lookup",
+      "name": "MX Lookup",
+      "path": "/tools/dns/mx",
+      "category": "dns",
+      "description": "Resolve MX hosts, their addresses, reverse DNS and mail provider.",
+      "visibility": "public"
+    },
+    {
+      "slug": "spf-checker",
+      "name": "SPF Checker",
+      "path": "/tools/dns/spf",
+      "category": "dns",
+      "description": "Parse and validate the domain\\",
+      "visibility": "public"
+    },
+    {
+      "slug": "dmarc-checker",
+      "name": "DMARC Checker",
+      "path": "/tools/dns/dmarc",
+      "category": "dns",
+      "description": "Inspect and validate a _dmarc policy, tag by tag.",
+      "visibility": "public"
+    },
+    {
+      "slug": "dmarc-generator",
+      "name": "DMARC Record Generator",
+      "path": "/tools/dns/dmarc-generator",
+      "category": "dns",
+      "description": "Build a correctly formatted _dmarc record interactively.",
+      "visibility": "public"
+    },
+    {
+      "slug": "dkim-checker",
+      "name": "DKIM Checker",
+      "path": "/tools/dns/dkim",
+      "category": "dns",
+      "description": "Check selector._domainkey records for one or more selectors.",
+      "visibility": "public"
+    },
+    {
+      "slug": "bimi-checker",
+      "name": "BIMI Checker",
+      "path": "/tools/dns/bimi",
+      "category": "dns",
+      "description": "Inspect the BIMI record, logo URL and VMC certificate URL.",
+      "visibility": "public"
+    },
+    {
+      "slug": "dnskey-lookup",
+      "name": "DNSKEY Lookup",
+      "path": "/tools/dns/dnskey",
+      "category": "dns",
+      "description": "Show the zone\\",
+      "visibility": "public"
+    },
+    {
+      "slug": "ds-lookup",
+      "name": "DS Lookup",
+      "path": "/tools/dns/ds",
+      "category": "dns",
+      "description": "Show the DS records published by the parent zone and the DNSSEC chain state.",
+      "visibility": "public"
+    },
+    {
+      "slug": "reverse-dns",
+      "name": "Reverse DNS / PTR Lookup",
+      "path": "/tools/dns/reverse",
+      "category": "dns",
+      "description": "PTR lookup for IPv4/IPv6 with forward-confirmed reverse DNS.",
+      "visibility": "public"
+    },
+    {
+      "slug": "reverse-ip",
+      "name": "Reverse IP Lookup",
+      "path": "/tools/dns/reverse-ip",
+      "category": "dns",
+      "description": "Find hostnames hosted on an IP address, when a data provider is configured.",
+      "visibility": "customer"
+    },
+    {
+      "slug": "ip-lookup",
+      "name": "IP Address Lookup",
+      "path": "/tools/ip/lookup",
+      "category": "ip",
+      "description": "ASN, organisation, country, reverse DNS and network range for an IP.",
+      "visibility": "public"
+    },
+    {
+      "slug": "my-ip",
+      "name": "What Is My IP",
+      "path": "/tools/ip/my-ip",
+      "category": "ip",
+      "description": "Show the public IP this request arrived from, plus connection details.",
+      "visibility": "public"
+    },
+    {
+      "slug": "ip-whois",
+      "name": "IP WHOIS",
+      "path": "/tools/ip/whois",
+      "category": "ip",
+      "description": "Registry data for an IPv4/IPv6 address over RDAP.",
+      "visibility": "public"
+    },
+    {
+      "slug": "domain-to-ip",
+      "name": "Domain → IP",
+      "path": "/tools/ip/domain-to-ip",
+      "category": "ip",
+      "description": "Resolve a hostname to IPv4/IPv6 with the full CNAME chain.",
+      "visibility": "public"
+    },
+    {
+      "slug": "ip-to-hostname",
+      "name": "IP → Hostname",
+      "path": "/tools/ip/ip-to-hostname",
+      "category": "ip",
+      "description": "Reverse DNS for an address, with FCRDNS confirmation.",
+      "visibility": "public"
+    },
+    {
+      "slug": "isp-lookup",
+      "name": "ISP Lookup",
+      "path": "/tools/ip/isp",
+      "category": "ip",
+      "description": "Network operator, ASN and country for an IP address.",
+      "visibility": "public"
+    },
+    {
+      "slug": "ip-converters",
+      "name": "IP Converters",
+      "path": "/tools/ip/converters",
+      "category": "ip",
+      "description": "Decimal ↔ IP, IPv4 ↔ IPv6, IPv6 compression/expansion, CIDR ↔ range.",
+      "visibility": "public"
+    },
+    {
+      "slug": "subnet-calculator",
+      "name": "Subnet Calculator",
+      "path": "/tools/network/subnet-calculator",
+      "category": "network",
+      "description": "IPv4/IPv6 network, broadcast, host range, masks and splitting.",
+      "visibility": "public"
+    },
+    {
+      "slug": "ping",
+      "name": "Ping Tool",
+      "path": "/tools/network/ping",
+      "category": "network",
+      "description": "Measure reachability and latency from the CloudHost247 server.",
+      "visibility": "customer"
+    },
+    {
+      "slug": "traceroute",
+      "name": "Traceroute",
+      "path": "/tools/network/traceroute",
+      "category": "network",
+      "description": "Hop-by-hop path to a target, where the environment permits.",
+      "visibility": "customer"
+    },
+    {
+      "slug": "port-checker",
+      "name": "Port Checker",
+      "path": "/tools/network/port-checker",
+      "category": "network",
+      "description": "Check whether a TCP port on a public host accepts connections.",
+      "visibility": "customer"
+    },
+    {
+      "slug": "mac-lookup",
+      "name": "MAC Address Lookup",
+      "path": "/tools/network/mac-lookup",
+      "category": "network",
+      "description": "Inspect MAC address bits and query a configured IEEE OUI reference.",
+      "visibility": "public"
+    },
+    {
+      "slug": "mac-generator",
+      "name": "MAC Address Generator",
+      "path": "/tools/network/mac-generator",
+      "category": "network",
+      "description": "Generate valid random, locally-administered or globally-administered MACs.",
+      "visibility": "public"
+    },
+    {
+      "slug": "asn-whois",
+      "name": "ASN WHOIS",
+      "path": "/tools/network/asn",
+      "category": "network",
+      "description": "Autonomous system details, announced prefixes and registry.",
+      "visibility": "public"
+    },
+    {
+      "slug": "speed-test",
+      "name": "Internet Speed Test",
+      "path": "/tools/network/speed-test",
+      "category": "network",
+      "description": "Browser-based download, upload and latency measurement with hard limits.",
+      "visibility": "public"
+    },
+    {
+      "slug": "http-headers",
+      "name": "HTTP Headers Checker",
+      "path": "/tools/developer/http-headers",
+      "category": "developer",
+      "description": "Status, headers, redirect chain, cache and security-header analysis.",
+      "visibility": "public"
+    },
+    {
+      "slug": "server-os",
+      "name": "Website OS Checker",
+      "path": "/tools/developer/server-os",
+      "category": "developer",
+      "description": "Infer server software with an explicit confidence level.",
+      "visibility": "public"
+    },
+    {
+      "slug": "smtp-tester",
+      "name": "SMTP Tester",
+      "path": "/tools/developer/smtp-test",
+      "category": "developer",
+      "description": "Test an SMTP server\\",
+      "visibility": "customer"
+    },
+    {
+      "slug": "email-header",
+      "name": "Email Header Analyzer",
+      "path": "/tools/developer/email-header",
+      "category": "developer",
+      "description": "Parse a raw message header: Received chain, auth results, sending IP.",
+      "visibility": "public"
+    },
+    {
+      "slug": "json-tools",
+      "name": "JSON Tools",
+      "path": "/tools/developer/json",
+      "category": "developer",
+      "description": "Viewer, formatter, beautifier, minifier and validator.",
+      "visibility": "public"
+    },
+    {
+      "slug": "encoding-tools",
+      "name": "Encoding Tools",
+      "path": "/tools/developer/encoding",
+      "category": "developer",
+      "description": "Base64, MD5, binary ↔ text, ROT13 and Morse code.",
+      "visibility": "public"
+    },
+    {
+      "slug": "url-tools",
+      "name": "URL Tools",
+      "path": "/tools/developer/url",
+      "category": "developer",
+      "description": "Multi-URL opener, rewrite-rule and .htaccess generators.",
+      "visibility": "public"
+    },
+    {
+      "slug": "user-agent",
+      "name": "User Agent Tool",
+      "path": "/tools/developer/user-agent",
+      "category": "developer",
+      "description": "Show the user-agent and headers your browser actually sent.",
+      "visibility": "public"
+    },
+    {
+      "slug": "broken-links",
+      "name": "Broken Link Checker",
+      "path": "/tools/webmaster/broken-links",
+      "category": "webmaster",
+      "description": "Crawl a site within strict limits and report failing links.",
+      "visibility": "customer"
+    },
+    {
+      "slug": "open-graph",
+      "name": "Open Graph Checker",
+      "path": "/tools/webmaster/open-graph",
+      "category": "webmaster",
+      "description": "Inspect og: and Twitter card metadata and preview the link.",
+      "visibility": "public"
+    },
+    {
+      "slug": "robots-generator",
+      "name": "robots.txt Generator",
+      "path": "/tools/webmaster/robots-generator",
+      "category": "webmaster",
+      "description": "Build a valid robots.txt with sitemaps and crawl delay.",
+      "visibility": "public"
+    },
+    {
+      "slug": "serp-simulator",
+      "name": "SERP Simulator",
+      "path": "/tools/webmaster/serp-simulator",
+      "category": "webmaster",
+      "description": "Preview a search result snippet for title, URL and description length.",
+      "visibility": "public"
+    },
+    {
+      "slug": "ssl-checker",
+      "name": "SSL Certificate Checker",
+      "path": "/tools/security/ssl",
+      "category": "security",
+      "description": "Certificate chain, validity, SANs, protocol and expiry for a host.",
+      "visibility": "public"
+    },
+    {
+      "slug": "ip-blacklist",
+      "name": "IP Blacklist Checker",
+      "path": "/tools/security/ip-blacklist",
+      "category": "security",
+      "description": "Check an IP against the DNS blocklists the operator has enabled.",
+      "visibility": "public"
+    },
+    {
+      "slug": "password-tools",
+      "name": "Password Tools",
+      "path": "/tools/security/password",
+      "category": "security",
+      "description": "Generate strong passwords and evaluate strength locally.",
+      "visibility": "public"
+    },
+    {
+      "slug": "bin-checker",
+      "name": "BIN Checker",
+      "path": "/tools/security/bin-checker",
+      "category": "security",
+      "description": "Issuer information for a card BIN/IIN from a configured provider.",
+      "visibility": "customer"
+    },
+    {
+      "slug": "mrz-generator",
+      "name": "MRZ Generator / MRZ Tools",
+      "path": "/tools/mrz-generator",
+      "category": "developer",
+      "description": "Generate, validate and parse ICAO Doc 9303 TD3 passport machine-readable zones.",
+      "visibility": "public"
+    },
+    {
+      "slug": "punycode",
+      "name": "Punycode / IDN Converter",
+      "path": "/tools/domain/punycode",
+      "category": "domain",
+      "description": "Convert between Unicode domain names and their ASCII (punycode) form.",
+      "visibility": "public"
+    },
+    {
+      "slug": "domain-availability",
+      "name": "Domain Availability",
+      "path": "/tools/domain/search",
+      "category": "domain",
+      "description": "Check whether a domain is available, using CloudHost247\\",
+      "visibility": "public"
+    },
+    {
+      "slug": "word-counter",
+      "name": "Word & Text Counter",
+      "path": "/tools/productivity/word-counter",
+      "category": "productivity",
+      "description": "Words, characters, sentences, paragraphs and reading time.",
+      "visibility": "public"
+    },
+    {
+      "slug": "lorem-ipsum",
+      "name": "Lorem Ipsum Generator",
+      "path": "/tools/productivity/lorem-ipsum",
+      "category": "productivity",
+      "description": "Generate placeholder text by words, sentences or paragraphs.",
+      "visibility": "public"
+    },
+    {
+      "slug": "notepad",
+      "name": "Online Notepad",
+      "path": "/tools/productivity/notepad",
+      "category": "productivity",
+      "description": "A scratch pad that stays in your browser.",
+      "visibility": "public"
+    },
+    {
+      "slug": "small-text",
+      "name": "Small Text Generator",
+      "path": "/tools/productivity/small-text",
+      "category": "productivity",
+      "description": "Convert text to small caps, superscript and subscript Unicode.",
+      "visibility": "public"
+    },
+    {
+      "slug": "invisible-character",
+      "name": "Invisible Character Generator",
+      "path": "/tools/productivity/invisible-character",
+      "category": "productivity",
+      "description": "Copy zero-width and invisible Unicode characters.",
+      "visibility": "public"
+    },
+    {
+      "slug": "runic-translator",
+      "name": "Runic Translator",
+      "path": "/tools/productivity/runic",
+      "category": "productivity",
+      "description": "Transliterate Latin text to Elder Futhark runes and back.",
+      "visibility": "public"
+    },
+    {
+      "slug": "qr-generator",
+      "name": "QR Code Generator",
+      "path": "/tools/productivity/qr",
+      "category": "productivity",
+      "description": "Create QR codes for URLs, text, email, phone, WiFi and vCards.",
+      "visibility": "public"
+    },
+    {
+      "slug": "qr-scanner",
+      "name": "QR Scanner",
+      "path": "/tools/productivity/qr-scanner",
+      "category": "productivity",
+      "description": "Scan a QR code from your camera or an image file.",
+      "visibility": "public"
+    },
+    {
+      "slug": "wifi-qr",
+      "name": "WiFi QR Tool",
+      "path": "/tools/productivity/wifi-qr",
+      "category": "productivity",
+      "description": "Share a WiFi network as a QR code, without storing the password.",
+      "visibility": "public"
+    },
+    {
+      "slug": "time-card",
+      "name": "Time Card Calculator",
+      "path": "/tools/productivity/time-card",
+      "category": "productivity",
+      "description": "Clock-in/clock-out totals with breaks and overtime.",
+      "visibility": "public"
+    },
+    {
+      "slug": "color-tools",
+      "name": "Designer Colour Tools",
+      "path": "/tools/productivity/colors",
+      "category": "productivity",
+      "description": "Convert between HEX, RGB, HSL, HSV/HSB and CMYK.",
+      "visibility": "public"
+    },
+    {
+      "slug": "reverse-image-search",
+      "name": "Reverse Image Search",
+      "path": "/tools/productivity/reverse-image",
+      "category": "productivity",
+      "description": "Launch an image search with the engines you choose.",
+      "visibility": "public"
+    },
+    {
+      "slug": "image-ocr",
+      "name": "Image → Text (OCR)",
+      "path": "/tools/productivity/image-ocr",
+      "category": "productivity",
+      "description": "Extract text from an image using a configured OCR provider.",
+      "visibility": "customer"
+    },
+    {
+      "slug": "tool-history",
+      "name": "Tool History",
+      "path": "/tools/history",
+      "category": "diagnostics",
+      "description": "Your recent tool runs, with the metadata that was stored.",
+      "visibility": "customer"
+    },
+    {
+      "slug": "tool-favorites",
+      "name": "Favorites",
+      "path": "/tools/favorites",
+      "category": "diagnostics",
+      "description": "The tools you have starred.",
+      "visibility": "customer"
+    },
+    {
+      "slug": "tool-reports",
+      "name": "Saved Reports",
+      "path": "/tools/reports",
+      "category": "diagnostics",
+      "description": "Diagnostic results you chose to save, downloadable and deletable.",
+      "visibility": "customer"
+    },
+    {
+      "slug": "tool-monitors",
+      "name": "Monitoring",
+      "path": "/tools/monitors",
+      "category": "diagnostics",
+      "description": "Scheduled SSL-expiry, DNS-record and email-configuration monitoring.",
+      "visibility": "customer"
+    }
+  ]
+}

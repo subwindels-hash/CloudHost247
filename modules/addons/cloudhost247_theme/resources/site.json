@@ -355,7 +355,7 @@
     "developer-friendly.php": {
       "title": "Developer Hosting",
       "category": "Developer",
-      "headline": "From your first commit to what\u2019s next.",
+      "headline": "From your first commit to what’s next.",
       "summary": "Choose infrastructure for your code and workflow. Review runtime support, access options and resource limits for the selected service.",
       "visual": "deployment/developer-hosting",
       "features": [
@@ -527,7 +527,7 @@
     "help-center.php": {
       "title": "Help Center",
       "category": "Support",
-      "headline": "Let\u2019s find your next step.",
+      "headline": "Let’s find your next step.",
       "summary": "Browse the knowledgebase, review your services or open a support ticket from your CloudHost247 account.",
       "visual": "management/support",
       "features": [],
@@ -538,7 +538,7 @@
     "blog.php": {
       "title": "Blog",
       "category": "Marketing",
-      "headline": "Ideas for what you\u2019re building.",
+      "headline": "Ideas for what you’re building.",
       "summary": "Read published CloudHost247 updates and explore the knowledgebase for product guidance.",
       "visual": "blog/insights",
       "features": [],
@@ -1497,108 +1497,88 @@
   "navigation": [
     {
       "title": "Hosting",
-      "description": "Give your website a place to grow.",
+      "description": "Website, application and email hosting with a live product catalogue behind every plan page.",
       "groups": [
         {
-          "title": "Web hosting",
+          "title": "Website hosting",
           "links": [
             {
               "label": "Web Hosting",
               "url": "web-hosting.php"
             },
             {
-              "label": "WordPress",
-              "url": "wordpress-hosting.php"
-            },
-            {
-              "label": "Business",
+              "label": "Business Hosting",
               "url": "business-hosting.php"
             },
             {
-              "label": "cPanel",
-              "url": "cpanel-hosting.php"
+              "label": "WordPress Hosting",
+              "url": "wordpress-hosting.php"
             },
             {
-              "label": "Plesk",
-              "url": "plesk-hosting.php"
+              "label": "Reseller Hosting",
+              "url": "reseller-hosting.php"
             },
             {
-              "label": "Windows",
+              "label": "Windows Hosting",
               "url": "windows-hosting.php"
             },
             {
-              "label": "Email",
-              "url": "email-hosting.php"
-            },
-            {
-              "label": "Reseller",
-              "url": "reseller-hosting.php"
-            }
-          ]
-        },
-        {
-          "title": "Cloud",
-          "links": [
-            {
-              "label": "Cloud Hosting",
+              "label": "Website Hosting Overview",
               "url": "cloudhost247-hosting.php"
-            },
-            {
-              "label": "Public Cloud",
-              "url": "vps-publiccloud.php"
-            },
-            {
-              "label": "Private Cloud",
-              "url": "vps-privatecloud.php"
-            },
-            {
-              "label": "VPS",
-              "url": "vps-hosting.php"
-            },
-            {
-              "label": "Dedicated",
-              "url": "dedicated-server.php"
-            },
-            {
-              "label": "Enterprise",
-              "url": "enterprise-servers.php"
             }
           ]
         },
         {
-          "title": "Developer",
+          "title": "Applications & platform hosting",
           "links": [
             {
-              "label": "Node.js",
-              "url": "nodejs-hosting.php"
+              "label": "Application Hosting",
+              "url": "applications.php"
             },
             {
-              "label": "PHP",
-              "url": "php-hosting.php"
+              "label": "Developer Hosting",
+              "url": "developer-friendly.php"
             },
             {
-              "label": "Python",
-              "url": "python-hosting.php"
-            },
-            {
-              "label": "Docker",
-              "url": "docker-hosting.php"
-            },
-            {
-              "label": "Laravel",
-              "url": "laravel-hosting.php"
-            },
-            {
-              "label": "APIs",
+              "label": "API Hosting",
               "url": "api-hosting.php"
             },
             {
-              "label": "PaaS",
-              "url": "paas.php"
+              "label": "Email Hosting",
+              "url": "email-hosting.php"
             },
             {
-              "label": "Deployment",
-              "url": "deployments.php"
+              "label": "Control Panels",
+              "url": "cloudhost247-hosting.php"
+            }
+          ]
+        },
+        {
+          "title": "Managed for you",
+          "links": [
+            {
+              "label": "Website Migration",
+              "url": "migration.php"
+            },
+            {
+              "label": "Managed Services",
+              "url": "managed-services.php"
+            },
+            {
+              "label": "Website Design",
+              "url": "website-design.php"
+            },
+            {
+              "label": "SSL Certificates",
+              "url": "ssl-certificate.php"
+            },
+            {
+              "label": "Backups",
+              "url": "backups.php"
+            },
+            {
+              "label": "Security",
+              "url": "security.php"
             }
           ]
         }
@@ -1606,14 +1586,18 @@
     },
     {
       "title": "Cloud & Servers",
-      "description": "Build on the right foundation.",
+      "description": "Virtual servers, cloud platforms and the infrastructure operations layer behind them.",
       "groups": [
         {
           "title": "Servers",
           "links": [
             {
-              "label": "VPS",
+              "label": "VPS Hosting",
               "url": "vps-hosting.php"
+            },
+            {
+              "label": "Dedicated Servers",
+              "url": "dedicated-server.php"
             },
             {
               "label": "Public Cloud",
@@ -1624,11 +1608,7 @@
               "url": "vps-privatecloud.php"
             },
             {
-              "label": "Dedicated",
-              "url": "dedicated-server.php"
-            },
-            {
-              "label": "Enterprise",
+              "label": "Enterprise Servers",
               "url": "enterprise-servers.php"
             },
             {
@@ -1638,65 +1618,32 @@
           ]
         },
         {
-          "title": "Operating systems",
+          "title": "Infrastructure",
           "links": [
             {
-              "label": "OS catalog",
+              "label": "Infrastructure",
+              "url": "infrastructure.php"
+            },
+            {
+              "label": "Data Centers",
+              "url": "data-centers.php"
+            },
+            {
+              "label": "Network",
+              "url": "network.php"
+            },
+            {
+              "label": "Operating Systems",
               "url": "operating-systems.php"
             },
             {
-              "label": "Ubuntu",
-              "url": "operating-systems.php#ubuntu"
-            },
-            {
-              "label": "Debian",
-              "url": "operating-systems.php#debian"
-            },
-            {
-              "label": "AlmaLinux",
-              "url": "operating-systems.php#almalinux"
-            },
-            {
-              "label": "Rocky Linux",
-              "url": "operating-systems.php#rocky"
-            },
-            {
-              "label": "Windows Server",
-              "url": "operating-systems.php#windows"
+              "label": "Server Management",
+              "url": "server-management.php"
             }
           ]
         },
         {
-          "title": "Images",
-          "links": [
-            {
-              "label": "WordPress",
-              "url": "operating-systems.php#wordpress"
-            },
-            {
-              "label": "Docker",
-              "url": "operating-systems.php#docker"
-            },
-            {
-              "label": "LAMP",
-              "url": "operating-systems.php#lamp"
-            },
-            {
-              "label": "LEMP",
-              "url": "operating-systems.php#lemp"
-            },
-            {
-              "label": "cPanel",
-              "url": "operating-systems.php#cpanel"
-            },
-            {
-              "label": "Plesk",
-              "url": "operating-systems.php#plesk"
-            }
-          ]
-        },
-        {
-          "title": "Management",
+          "title": "Operations & protection",
           "links": [
             {
               "label": "Monitoring",
@@ -1707,40 +1654,16 @@
               "url": "backups.php"
             },
             {
+              "label": "Firewalls",
+              "url": "firewall.php"
+            },
+            {
               "label": "Security",
               "url": "security.php"
             },
             {
-              "label": "Firewall",
-              "url": "firewall.php"
-            },
-            {
-              "label": "DNS",
-              "url": "dns-management.php"
-            },
-            {
-              "label": "SSL",
-              "url": "ssl-certificate.php"
-            },
-            {
               "label": "IP Management",
               "url": "ip-management.php"
-            },
-            {
-              "label": "Server control",
-              "url": "clientarea.php?action=services"
-            },
-            {
-              "label": "Status",
-              "url": "serverstatus.php"
-            },
-            {
-              "label": "Migration",
-              "url": "migration.php"
-            },
-            {
-              "label": "Managed Services",
-              "url": "managed-services.php"
             }
           ]
         }
@@ -1748,133 +1671,149 @@
     },
     {
       "title": "Domains",
-      "description": "Make a name for your next idea.",
+      "description": "Search, register, transfer and manage domain names — with the full registrar toolkit.",
       "groups": [
         {
-          "title": "Find a domain",
+          "title": "Get a domain",
           "links": [
             {
-              "label": "Domain Search",
-              "url": "domain.php"
-            },
-            {
-              "label": "Registration",
+              "label": "Search Domains",
               "url": "cart.php?a=add&domain=register"
             },
             {
-              "label": "Transfer",
+              "label": "Domain Transfer",
               "url": "cart.php?a=add&domain=transfer"
             },
             {
-              "label": "Pricing",
-              "url": "index.php?rp=/domain/pricing"
+              "label": "Domain Extensions",
+              "url": "domain.php#pricing"
+            },
+            {
+              "label": "Bulk Domain Search",
+              "url": "domain.php#search"
+            },
+            {
+              "label": "Domain Registration",
+              "url": "cart.php?a=add&domain=register"
             }
           ]
         },
         {
-          "title": "Management",
+          "title": "Domain management",
           "links": [
             {
-              "label": "Domain Management",
+              "label": "DNS Management",
+              "url": "dns-management.php"
+            },
+            {
+              "label": "WHOIS / RDAP Lookup",
+              "url": "domain.php#whois"
+            },
+            {
+              "label": "My Domains",
               "url": "clientarea.php?action=domains"
-            },
-            {
-              "label": "DNS",
-              "url": "domain-dns.php"
-            },
-            {
-              "label": "Renewal Policy",
-              "url": "domain-renewal-policy.php"
-            },
-            {
-              "label": "Brokerage Terms",
-              "url": "domain-brokerage-terms.php"
             }
           ]
         },
         {
-          "title": "Diagnostics",
+          "title": "Domains as an asset",
           "links": [
             {
-              "label": "DNS Checker",
-              "url": "tools/dns-checker"
+              "label": "Domain Auctions",
+              "url": "domain.php#auctions"
             },
             {
-              "label": "DNS Lookup",
-              "url": "tools/dns-lookup"
+              "label": "Domain Appraisal",
+              "url": "domain.php#appraisal"
             },
             {
-              "label": "Domain WHOIS",
-              "url": "tools/domain-whois"
+              "label": "Domain Broker",
+              "url": "domain.php#broker"
+            },
+            {
+              "label": "Domain Club",
+              "url": "domain.php#club"
+            },
+            {
+              "label": "Domain Services Overview",
+              "url": "domain.php"
             }
           ]
         }
       ]
     },
     {
-      "title": "Applications",
-      "description": "Software the catalog can actually deploy.",
+      "title": "Platforms",
+      "description": "Applications, databases, containers and the deployment platform that runs them.",
       "groups": [
         {
-          "title": "CMS",
+          "title": "Applications",
           "links": [
             {
-              "label": "Application catalog",
+              "label": "Application Marketplace",
               "url": "applications.php"
             },
             {
-              "label": "WordPress",
-              "url": "wordpress-hosting.php"
-            },
-            {
-              "label": "Ghost",
-              "url": "applications.php#ghost"
-            }
-          ]
-        },
-        {
-          "title": "Ecommerce",
-          "links": [
-            {
-              "label": "PrestaShop",
-              "url": "applications.php#prestashop"
-            },
-            {
-              "label": "All applications",
+              "label": "Application Hosting",
               "url": "applications.php"
-            }
-          ]
-        },
-        {
-          "title": "Developer",
-          "links": [
-            {
-              "label": "Node.js",
-              "url": "nodejs-hosting.php"
             },
             {
-              "label": "PHP",
-              "url": "php-hosting.php"
+              "label": "Databases",
+              "url": "applications.php#databases"
             },
             {
-              "label": "Python",
-              "url": "python-hosting.php"
-            },
-            {
-              "label": "Laravel",
-              "url": "laravel-hosting.php"
-            },
-            {
-              "label": "Docker",
+              "label": "Containers & Docker",
               "url": "docker-hosting.php"
+            },
+            {
+              "label": "PaaS",
+              "url": "paas.php"
+            }
+          ]
+        },
+        {
+          "title": "Deployment platform",
+          "links": [
+            {
+              "label": "Deployment",
+              "url": "deployments.php"
+            },
+            {
+              "label": "Application Environments",
+              "url": "deployments.php#environments"
+            },
+            {
+              "label": "My Applications",
+              "url": "clientarea.php?action=services"
+            }
+          ]
+        },
+        {
+          "title": "Developer platform",
+          "links": [
+            {
+              "label": "Developer Platform",
+              "url": "developer-friendly.php"
+            },
+            {
+              "label": "APIs",
+              "url": "api-hosting.php"
+            },
+            {
+              "label": "Control Panels",
+              "url": "cloudhost247-hosting.php"
+            },
+            {
+              "label": "Documentation",
+              "url": "documentation.php"
             }
           ]
         }
       ]
     },
     {
-      "title": "Developers",
-      "description": "A foundation for whatever you build next.",
+      "title": "Developer / Deployment",
+      "description": "Runtimes, Git-based deployment, environments and APIs — the parts you actually build on.",
       "groups": [
         {
           "title": "Runtimes",
@@ -1892,30 +1831,30 @@
               "url": "python-hosting.php"
             },
             {
-              "label": "Docker",
-              "url": "docker-hosting.php"
-            },
-            {
               "label": "Laravel",
               "url": "laravel-hosting.php"
             },
             {
-              "label": "APIs",
-              "url": "api-hosting.php"
+              "label": "Docker",
+              "url": "docker-hosting.php"
+            }
+          ]
+        },
+        {
+          "title": "Deploy & operate",
+          "links": [
+            {
+              "label": "Deployment Platform",
+              "url": "deployments.php"
             },
             {
               "label": "PaaS",
               "url": "paas.php"
             },
             {
-              "label": "Deployment",
-              "url": "deployments.php"
-            }
-          ]
-        },
-        {
-          "title": "Operate",
-          "links": [
+              "label": "Application Environments",
+              "url": "deployments.php#environments"
+            },
             {
               "label": "Server Management",
               "url": "server-management.php"
@@ -1923,27 +1862,100 @@
             {
               "label": "Operating Systems",
               "url": "operating-systems.php"
-            },
-            {
-              "label": "VPS",
-              "url": "vps-hosting.php"
             }
           ]
         },
         {
-          "title": "Reference",
+          "title": "Build with CloudHost247",
           "links": [
+            {
+              "label": "API Hosting",
+              "url": "api-hosting.php"
+            },
+            {
+              "label": "Developer Hosting",
+              "url": "developer-friendly.php"
+            },
+            {
+              "label": "DNS for Developers",
+              "url": "dns-management.php"
+            },
             {
               "label": "Documentation",
               "url": "documentation.php"
             },
             {
-              "label": "Knowledgebase",
-              "url": "knowledgebase.php"
+              "label": "Developer Tools",
+              "url": "tools/category/developer"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Websites",
+      "description": "Build a website, launch a store, or have a specialist design and run it for you.",
+      "groups": [
+        {
+          "title": "Build it",
+          "links": [
+            {
+              "label": "Website Builder",
+              "url": "website-design.php"
             },
             {
-              "label": "Tools",
-              "url": "tools"
+              "label": "AI Website Builder",
+              "url": "website-design.php"
+            },
+            {
+              "label": "Website Templates",
+              "url": "website-design.php"
+            },
+            {
+              "label": "E-commerce & Stores",
+              "url": "website-design.php"
+            },
+            {
+              "label": "Website Design",
+              "url": "website-design.php"
+            }
+          ]
+        },
+        {
+          "title": "Have it built for you",
+          "links": [
+            {
+              "label": "Website Migration",
+              "url": "migration.php"
+            },
+            {
+              "label": "Website Management",
+              "url": "managed-services.php"
+            },
+            {
+              "label": "Talk to a specialist",
+              "url": "contact.php"
+            }
+          ]
+        },
+        {
+          "title": "Run it safely",
+          "links": [
+            {
+              "label": "SSL Certificates",
+              "url": "ssl-certificate.php"
+            },
+            {
+              "label": "Backups",
+              "url": "backups.php"
+            },
+            {
+              "label": "Website Hosting",
+              "url": "web-hosting.php"
+            },
+            {
+              "label": "Domain & DNS",
+              "url": "domain.php"
             }
           ]
         }
@@ -1951,538 +1963,39 @@
     },
     {
       "title": "Tools",
-      "description": "Free professional tools for DNS, networking, developers, security and webmasters.",
-      "groups": [
-        {
-          "title": "Featured",
-          "links": [
-            {
-              "label": "DNS Checker",
-              "url": "tools/dns-checker"
-            },
-            {
-              "label": "DNS Propagation",
-              "url": "tools/dns-propagation"
-            },
-            {
-              "label": "DNS Lookup",
-              "url": "tools/dns-lookup"
-            },
-            {
-              "label": "MX Lookup",
-              "url": "tools/mx-lookup"
-            },
-            {
-              "label": "What Is My IP",
-              "url": "tools/what-is-my-ip"
-            },
-            {
-              "label": "IP Location Lookup",
-              "url": "tools/ip-location-lookup"
-            },
-            {
-              "label": "IP WHOIS",
-              "url": "tools/ip-whois"
-            },
-            {
-              "label": "IP Subnet Calculator",
-              "url": "tools/ip-subnet-calculator"
-            },
-            {
-              "label": "MRZ Generator / MRZ Tools",
-              "url": "tools/mrz-generator"
-            },
-            {
-              "label": "JSON Beautifier",
-              "url": "tools/json-beautifier"
-            },
-            {
-              "label": "Port Checker",
-              "url": "tools/port-checker"
-            },
-            {
-              "label": "SSL Certificate Checker",
-              "url": "tools/ssl-certificate-checker"
-            },
-            {
-              "label": "QR Code Generator",
-              "url": "tools/qr-code-generator"
-            },
-            {
-              "label": "Internet Speed Test",
-              "url": "tools/internet-speed-test"
-            },
-            {
-              "label": "Domain WHOIS",
-              "url": "tools/domain-whois"
-            }
-          ]
-        },
-        {
-          "title": "DNS",
-          "links": [
-            {
-              "label": "DNS Checker",
-              "url": "tools/dns-checker"
-            },
-            {
-              "label": "DNS Propagation",
-              "url": "tools/dns-propagation"
-            },
-            {
-              "label": "Domain DNS Validation",
-              "url": "tools/domain-dns-validation"
-            },
-            {
-              "label": "Reverse IP Lookup",
-              "url": "tools/reverse-ip-lookup"
-            },
-            {
-              "label": "DNS Lookup",
-              "url": "tools/dns-lookup"
-            },
-            {
-              "label": "CNAME Lookup",
-              "url": "tools/cname-lookup"
-            },
-            {
-              "label": "NS Lookup",
-              "url": "tools/ns-lookup"
-            },
-            {
-              "label": "MX Lookup",
-              "url": "tools/mx-lookup"
-            },
-            {
-              "label": "SPF Record Checker",
-              "url": "tools/spf-record-checker"
-            },
-            {
-              "label": "DMARC Checker",
-              "url": "tools/dmarc-checker"
-            },
-            {
-              "label": "Domain DNS Health Checker",
-              "url": "tools/domain-dns-health"
-            },
-            {
-              "label": "DMARC Record Generator",
-              "url": "tools/dmarc-record-generator"
-            },
-            {
-              "label": "DNSKEY Lookup",
-              "url": "tools/dnskey-lookup"
-            },
-            {
-              "label": "DS Lookup",
-              "url": "tools/ds-lookup"
-            },
-            {
-              "label": "DKIM Checker",
-              "url": "tools/dkim-checker"
-            }
-          ]
-        },
-        {
-          "title": "IP",
-          "links": [
-            {
-              "label": "Ping IPv4",
-              "url": "tools/ping-ipv4"
-            },
-            {
-              "label": "Ping IPv6",
-              "url": "tools/ping-ipv6"
-            },
-            {
-              "label": "What Is My IP",
-              "url": "tools/what-is-my-ip"
-            },
-            {
-              "label": "Traceroute",
-              "url": "tools/traceroute"
-            },
-            {
-              "label": "IP Location Lookup",
-              "url": "tools/ip-location-lookup"
-            },
-            {
-              "label": "Trace Email",
-              "url": "tools/trace-email"
-            },
-            {
-              "label": "IP Blacklist Checker",
-              "url": "tools/ip-blacklist-checker"
-            },
-            {
-              "label": "Email Blacklist Checker",
-              "url": "tools/email-blacklist-checker"
-            },
-            {
-              "label": "IP to Decimal",
-              "url": "tools/ip-to-decimal"
-            },
-            {
-              "label": "IP to Hostname",
-              "url": "tools/ip-to-hostname"
-            },
-            {
-              "label": "IP WHOIS",
-              "url": "tools/ip-whois"
-            },
-            {
-              "label": "IPv6 WHOIS",
-              "url": "tools/ipv6-whois"
-            },
-            {
-              "label": "IPv4 to IPv6",
-              "url": "tools/ipv4-to-ipv6"
-            },
-            {
-              "label": "Local IPv6 Address Generator",
-              "url": "tools/local-ipv6-generator"
-            },
-            {
-              "label": "IPv6 CIDR to Range",
-              "url": "tools/ipv6-cidr-to-range"
-            },
-            {
-              "label": "IPv6 Range to CIDR",
-              "url": "tools/ipv6-range-to-cidr"
-            },
-            {
-              "label": "IPv6 Compression",
-              "url": "tools/ipv6-compression"
-            },
-            {
-              "label": "IPv6 Expand",
-              "url": "tools/ipv6-expand"
-            },
-            {
-              "label": "IP Subnet Calculator",
-              "url": "tools/ip-subnet-calculator"
-            },
-            {
-              "label": "IPv6 to IPv4",
-              "url": "tools/ipv6-to-ipv4"
-            },
-            {
-              "label": "IPv6 Compatibility Checker",
-              "url": "tools/ipv6-compatibility-checker"
-            },
-            {
-              "label": "What Is My ISP",
-              "url": "tools/what-is-my-isp"
-            },
-            {
-              "label": "Domain to IP",
-              "url": "tools/domain-to-ip"
-            }
-          ]
-        },
-        {
-          "title": "Developer",
-          "links": [
-            {
-              "label": "HTTP Headers Checker",
-              "url": "tools/http-headers-checker"
-            },
-            {
-              "label": "Website Operating System Checker",
-              "url": "tools/website-os-checker"
-            },
-            {
-              "label": "MD5 Generator",
-              "url": "tools/md5-generator"
-            },
-            {
-              "label": "Base64 Generator",
-              "url": "tools/base64-generator"
-            },
-            {
-              "label": "Multi URL Opener",
-              "url": "tools/multi-url-opener"
-            },
-            {
-              "label": "MRZ Generator / MRZ Tools",
-              "url": "tools/mrz-generator"
-            },
-            {
-              "label": "SMTP Test",
-              "url": "tools/smtp-test"
-            },
-            {
-              "label": ".htaccess Redirect Generator",
-              "url": "tools/htaccess-redirect-generator"
-            },
-            {
-              "label": "URL Rewrite Generator",
-              "url": "tools/url-rewrite-generator"
-            },
-            {
-              "label": "Broken Link Checker",
-              "url": "tools/broken-link-checker"
-            },
-            {
-              "label": "Open Graph Checker",
-              "url": "tools/open-graph-checker"
-            },
-            {
-              "label": "RAID Calculator",
-              "url": "tools/raid-calculator"
-            },
-            {
-              "label": "Binary Translator",
-              "url": "tools/binary-translator"
-            },
-            {
-              "label": "Text to Binary",
-              "url": "tools/text-to-binary"
-            },
-            {
-              "label": "JSON Viewer",
-              "url": "tools/json-viewer"
-            },
-            {
-              "label": "JSON Beautifier",
-              "url": "tools/json-beautifier"
-            },
-            {
-              "label": "JSON Minifier",
-              "url": "tools/json-minifier"
-            },
-            {
-              "label": "Email Verifier",
-              "url": "tools/email-verifier"
-            }
-          ]
-        },
-        {
-          "title": "Designer",
-          "links": [
-            {
-              "label": "RGB to Colortone",
-              "url": "tools/rgb-to-colortone"
-            },
-            {
-              "label": "HEX to Colortone",
-              "url": "tools/hex-to-colortone"
-            },
-            {
-              "label": "CMYK to Colortone",
-              "url": "tools/cmyk-to-colortone"
-            },
-            {
-              "label": "HSV to Colortone",
-              "url": "tools/hsv-to-colortone"
-            }
-          ]
-        },
-        {
-          "title": "Webmaster",
-          "links": [
-            {
-              "label": "Website Link Analyzer",
-              "url": "tools/website-link-analyzer"
-            },
-            {
-              "label": "User Agent Checker",
-              "url": "tools/user-agent-checker"
-            },
-            {
-              "label": "Google Page Rank Checker",
-              "url": "tools/pagerank-checker"
-            },
-            {
-              "label": "Punycode Converter",
-              "url": "tools/punycode-converter"
-            },
-            {
-              "label": "Google SERP Simulator",
-              "url": "tools/serp-simulator"
-            },
-            {
-              "label": "Robots.txt Generator",
-              "url": "tools/robots-txt-generator"
-            }
-          ]
-        },
-        {
-          "title": "Network",
-          "links": [
-            {
-              "label": "Port Checker",
-              "url": "tools/port-checker"
-            },
-            {
-              "label": "MAC Address Lookup",
-              "url": "tools/mac-address-lookup"
-            },
-            {
-              "label": "MAC Address Generator",
-              "url": "tools/mac-address-generator"
-            },
-            {
-              "label": "ASN WHOIS Lookup",
-              "url": "tools/asn-whois-lookup"
-            }
-          ]
-        },
-        {
-          "title": "Cybersecurity",
-          "links": [
-            {
-              "label": "SSL Certificate Checker",
-              "url": "tools/ssl-certificate-checker"
-            },
-            {
-              "label": "Password Encryption",
-              "url": "tools/password-encryption"
-            },
-            {
-              "label": "Random Password Generator",
-              "url": "tools/random-password-generator"
-            },
-            {
-              "label": "Password Strength Checker",
-              "url": "tools/password-strength-checker"
-            }
-          ]
-        },
-        {
-          "title": "Productivity",
-          "links": [
-            {
-              "label": "QR Code Generator",
-              "url": "tools/qr-code-generator"
-            },
-            {
-              "label": "QR Scanner",
-              "url": "tools/qr-scanner"
-            },
-            {
-              "label": "Lorem Ipsum Generator",
-              "url": "tools/lorem-ipsum-generator"
-            },
-            {
-              "label": "Time Card Calculator",
-              "url": "tools/time-card-calculator"
-            },
-            {
-              "label": "BIN Checker",
-              "url": "tools/bin-checker"
-            },
-            {
-              "label": "Credit Card Checker",
-              "url": "tools/credit-card-checker"
-            },
-            {
-              "label": "Reverse Image Search",
-              "url": "tools/reverse-image-search"
-            },
-            {
-              "label": "Name Checker",
-              "url": "tools/name-checker"
-            },
-            {
-              "label": "Online Notepad",
-              "url": "tools/online-notepad"
-            },
-            {
-              "label": "Small Text Generator",
-              "url": "tools/small-text-generator"
-            },
-            {
-              "label": "Word Counter",
-              "url": "tools/word-counter"
-            },
-            {
-              "label": "Domain Name Search",
-              "url": "tools/domain-name-search"
-            },
-            {
-              "label": "ROT13 Encoder/Decoder",
-              "url": "tools/rot13"
-            },
-            {
-              "label": "Morse Code Translator",
-              "url": "tools/morse-code-translator"
-            },
-            {
-              "label": "BIMI Checker & Generator",
-              "url": "tools/bimi-checker-generator"
-            },
-            {
-              "label": "Image to Text",
-              "url": "tools/image-to-text"
-            },
-            {
-              "label": "Runic Translator",
-              "url": "tools/runic-translator"
-            },
-            {
-              "label": "Invisible Character Generator",
-              "url": "tools/invisible-character-generator"
-            },
-            {
-              "label": "Internet Speed Test",
-              "url": "tools/internet-speed-test"
-            },
-            {
-              "label": "WiFi QR Scanner",
-              "url": "tools/wifi-qr-scanner"
-            }
-          ]
-        },
-        {
-          "title": "Gaming",
-          "links": [
-            {
-              "label": "Minecraft Color Codes",
-              "url": "tools/minecraft-color-codes"
-            }
-          ]
-        }
-      ]
+      "description": "Inspect, troubleshoot and build — with tools that explain their results instead of showing invented data.",
+      "groups": []
     },
     {
       "title": "Resources",
-      "description": "Find answers. Keep moving forward.",
+      "description": "Guides, documentation, service status and the policies that govern the platform.",
       "groups": [
         {
           "title": "Learn",
           "links": [
             {
-              "label": "Knowledgebase",
-              "url": "knowledgebase.php"
+              "label": "Documentation",
+              "url": "documentation.php"
+            },
+            {
+              "label": "Knowledge Base",
+              "url": "help-center.php"
             },
             {
               "label": "Blog",
               "url": "blog.php"
             },
             {
-              "label": "FAQs",
+              "label": "FAQ",
               "url": "faqs.php"
-            },
-            {
-              "label": "Documentation",
-              "url": "documentation.php"
             }
           ]
         },
         {
-          "title": "Support",
+          "title": "Stay informed",
           "links": [
             {
-              "label": "Help Center",
-              "url": "help-center.php"
-            },
-            {
-              "label": "Submit Ticket",
-              "url": "submitticket.php"
-            },
-            {
-              "label": "System Status",
+              "label": "Service Status",
               "url": "serverstatus.php"
             },
             {
@@ -2495,20 +2008,93 @@
           "title": "Company",
           "links": [
             {
-              "label": "About",
+              "label": "About CloudHost247",
               "url": "aboutus.php"
             },
             {
-              "label": "Contact",
-              "url": "contact.php"
+              "label": "Security & Compliance",
+              "url": "security.php"
             },
             {
               "label": "Infrastructure",
               "url": "infrastructure.php"
             },
             {
-              "label": "Legal",
+              "label": "Contact",
+              "url": "contact.php"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Support",
+      "description": "Get help from the knowledge base, open a ticket, or check what is happening right now.",
+      "groups": [
+        {
+          "title": "Get help",
+          "links": [
+            {
+              "label": "Help Center",
+              "url": "help-center.php"
+            },
+            {
+              "label": "Knowledge Base",
+              "url": "knowledgebase.php"
+            },
+            {
+              "label": "Open a Ticket",
+              "url": "submitticket.php"
+            },
+            {
+              "label": "FAQ",
+              "url": "faqs.php"
+            },
+            {
+              "label": "Contact",
+              "url": "contact.php"
+            }
+          ]
+        },
+        {
+          "title": "Your account",
+          "links": [
+            {
+              "label": "Client Area",
+              "url": "clientarea.php"
+            },
+            {
+              "label": "Billing & Invoices",
+              "url": "clientarea.php?action=invoices"
+            },
+            {
+              "label": "My Services",
+              "url": "clientarea.php?action=services"
+            },
+            {
+              "label": "Service Status",
+              "url": "serverstatus.php"
+            }
+          ]
+        },
+        {
+          "title": "Policies & help",
+          "links": [
+            {
+              "label": "Legal & Policy Center",
               "url": "legal.php"
+            },
+            {
+              "label": "Acceptable Use",
+              "url": "acceptable-use-policy.php"
+            },
+            {
+              "label": "Refund Policy",
+              "url": "refund-policy.php"
+            },
+            {
+              "label": "Cookie Policy",
+              "url": "cookie-policy.php"
             }
           ]
         }
@@ -2524,100 +2110,69 @@
           "url": "web-hosting.php"
         },
         {
+          "label": "Business Hosting",
+          "url": "business-hosting.php"
+        },
+        {
           "label": "WordPress Hosting",
           "url": "wordpress-hosting.php"
         },
         {
-          "label": "Cloud Hosting Plans",
-          "url": "cloudhost247-hosting.php"
+          "label": "Reseller Hosting",
+          "url": "reseller-hosting.php"
         },
         {
           "label": "VPS Hosting",
           "url": "vps-hosting.php"
         },
         {
+          "label": "Cloud Hosting",
+          "url": "cloudhost247-hosting.php"
+        },
+        {
           "label": "Dedicated Servers",
           "url": "dedicated-server.php"
         },
         {
-          "label": "Enterprise Servers",
-          "url": "enterprise-servers.php"
+          "label": "Windows Hosting",
+          "url": "windows-hosting.php"
         },
         {
           "label": "Email Hosting",
           "url": "email-hosting.php"
+        },
+        {
+          "label": "SSL Certificates",
+          "url": "ssl-certificate.php"
+        },
+        {
+          "label": "Backups",
+          "url": "backups.php"
+        },
+        {
+          "label": "Website Migration",
+          "url": "migration.php"
         }
       ]
     },
     {
-      "title": "Find a domain",
+      "title": "Cloud & Infrastructure",
       "links": [
         {
-          "label": "Search Domains",
-          "url": "domain.php"
+          "label": "Public Cloud",
+          "url": "vps-publiccloud.php"
         },
         {
-          "label": "Register Domain",
-          "url": "cart.php?a=add&domain=register"
+          "label": "Private Cloud",
+          "url": "vps-privatecloud.php"
         },
-        {
-          "label": "Transfer Domain",
-          "url": "cart.php?a=add&domain=transfer"
-        },
-        {
-          "label": "Domain Pricing",
-          "url": "index.php?rp=/domain/pricing"
-        }
-      ]
-    },
-    {
-      "title": "Developers",
-      "links": [
-        {
-          "label": "Developer Hosting",
-          "url": "developer-friendly.php"
-        },
-        {
-          "label": "Applications",
-          "url": "applications.php"
-        },
-        {
-          "label": "Deployment Platform",
-          "url": "deployments.php"
-        },
-        {
-          "label": "Operating Systems",
-          "url": "operating-systems.php"
-        }
-      ]
-    },
-    {
-      "title": "Applications",
-      "links": [
-        {
-          "label": "Application Catalog",
-          "url": "applications.php"
-        },
-        {
-          "label": "WordPress Hosting",
-          "url": "wordpress-hosting.php"
-        },
-        {
-          "label": "Operating Systems",
-          "url": "operating-systems.php"
-        }
-      ]
-    },
-    {
-      "title": "Servers",
-      "links": [
         {
           "label": "VPS Hosting",
           "url": "vps-hosting.php"
         },
         {
-          "label": "Dedicated Servers",
-          "url": "dedicated-server.php"
+          "label": "Enterprise Servers",
+          "url": "enterprise-servers.php"
         },
         {
           "label": "Game Servers",
@@ -2628,127 +2183,126 @@
           "url": "server-management.php"
         },
         {
-          "label": "Backup Policy",
-          "url": "backup-policy.php"
+          "label": "Data Centers",
+          "url": "data-centers.php"
+        },
+        {
+          "label": "Network",
+          "url": "network.php"
+        },
+        {
+          "label": "Operating Systems",
+          "url": "operating-systems.php"
+        },
+        {
+          "label": "Control Panels",
+          "url": "cloudhost247-hosting.php"
+        },
+        {
+          "label": "Monitoring",
+          "url": "monitoring.php"
+        },
+        {
+          "label": "Firewalls",
+          "url": "firewall.php"
         }
       ]
     },
     {
-      "title": "Support",
+      "title": "Domains",
       "links": [
         {
-          "label": "Help Center",
-          "url": "help-center.php"
+          "label": "Domain Search",
+          "url": "cart.php?a=add&domain=register"
         },
         {
-          "label": "Submit Ticket",
-          "url": "submitticket.php"
+          "label": "Register a Domain",
+          "url": "cart.php?a=add&domain=register"
         },
         {
-          "label": "System Status",
-          "url": "serverstatus.php"
+          "label": "Transfer a Domain",
+          "url": "cart.php?a=add&domain=transfer"
         },
         {
-          "label": "Service Alerts",
-          "url": "announcements.php"
+          "label": "Domain Extensions",
+          "url": "domain.php#pricing"
+        },
+        {
+          "label": "WHOIS / RDAP",
+          "url": "domain.php#whois"
+        },
+        {
+          "label": "DNS Management",
+          "url": "dns-management.php"
+        },
+        {
+          "label": "Bulk Domain Search",
+          "url": "domain.php#search"
+        },
+        {
+          "label": "Domain Auctions",
+          "url": "domain.php#auctions"
+        },
+        {
+          "label": "Domain Appraisal",
+          "url": "domain.php#appraisal"
+        },
+        {
+          "label": "Domain Broker",
+          "url": "domain.php#broker"
+        },
+        {
+          "label": "Domain Club",
+          "url": "domain.php#club"
         }
       ]
     },
     {
-      "title": "Company",
+      "title": "Platforms & Developers",
       "links": [
         {
-          "label": "About CloudHost247",
-          "url": "aboutus.php"
+          "label": "Application Marketplace",
+          "url": "applications.php"
         },
         {
-          "label": "Contact",
-          "url": "contact.php"
+          "label": "Databases",
+          "url": "applications.php#databases"
         },
         {
-          "label": "Infrastructure",
-          "url": "infrastructure.php"
+          "label": "Containers & Docker",
+          "url": "docker-hosting.php"
         },
         {
-          "label": "Legal & Policies",
-          "url": "legal.php"
-        }
-      ]
-    },
-    {
-      "title": "Legal",
-      "links": [
-        {
-          "label": "Acceptable Use Policy",
-          "url": "acceptable-use-policy.php"
+          "label": "PaaS",
+          "url": "paas.php"
         },
         {
-          "label": "Backup Policy",
-          "url": "backup-policy.php"
+          "label": "Deployment",
+          "url": "deployments.php"
         },
         {
-          "label": "Cookie Policy",
-          "url": "cookie-policy.php"
+          "label": "Developer Platform",
+          "url": "developer-friendly.php"
         },
         {
-          "label": "Cybercrime Policy",
-          "url": "cybercrime-policy.php"
+          "label": "API Hosting",
+          "url": "api-hosting.php"
         },
         {
-          "label": "Data Deletion Instructions",
-          "url": "data-deletion.php"
+          "label": "Node.js",
+          "url": "nodejs-hosting.php"
         },
         {
-          "label": "Data Privacy Notice and Consent Form",
-          "url": "data-privacy-notice-and-consent-form.php"
+          "label": "PHP",
+          "url": "php-hosting.php"
         },
         {
-          "label": "Data Protection Standards",
-          "url": "data-protection-standards.php"
+          "label": "Python",
+          "url": "python-hosting.php"
         },
         {
-          "label": "Domain Agreement",
-          "url": "domain-agreement.php"
-        },
-        {
-          "label": "Domain Brokerage Terms",
-          "url": "domain-brokerage-terms.php"
-        },
-        {
-          "label": "Domain Renewal Policy",
-          "url": "domain-renewal-policy.php"
-        },
-        {
-          "label": "Domain Registration Addendum",
-          "url": "domainregistrationaddendum.php"
-        },
-        {
-          "label": "Fair Usage Policy",
-          "url": "fair-usage-policy.php"
-        },
-        {
-          "label": "Legal Notice",
-          "url": "legal-notice.php"
-        },
-        {
-          "label": "Privacy Policy",
-          "url": "privacy-policy.php"
-        },
-        {
-          "label": "Refund and Cancellation Policy",
-          "url": "refund-and-cancellation-policy.php"
-        },
-        {
-          "label": "Refund Policy",
-          "url": "refund-policy.php"
-        },
-        {
-          "label": "Terms of Service",
-          "url": "terms-of-service.php"
-        },
-        {
-          "label": "Trademark Policy",
-          "url": "trademark-policy.php"
+          "label": "Laravel",
+          "url": "laravel-hosting.php"
         }
       ]
     },
@@ -2784,7 +2338,7 @@
           "url": "tools/category/network"
         },
         {
-          "label": "Cybersecurity Tools",
+          "label": "Security Tools",
           "url": "tools/category/cybersecurity"
         },
         {
@@ -2794,42 +2348,174 @@
         {
           "label": "Gaming Tools",
           "url": "tools/category/gaming"
+        }
+      ]
+    },
+    {
+      "title": "Websites",
+      "links": [
+        {
+          "label": "Website Builder",
+          "url": "website-design.php"
         },
         {
-          "label": "DNS Checker",
-          "url": "tools/dns-checker"
+          "label": "AI Website Builder",
+          "url": "website-design.php"
         },
         {
-          "label": "DNS Lookup",
-          "url": "tools/dns-lookup"
+          "label": "Website Templates",
+          "url": "website-design.php"
         },
         {
-          "label": "IP WHOIS",
-          "url": "tools/ip-whois"
+          "label": "E-commerce & Stores",
+          "url": "website-design.php"
         },
         {
-          "label": "SSL Checker",
-          "url": "tools/ssl-certificate-checker"
+          "label": "Website Design",
+          "url": "website-design.php"
+        }
+      ]
+    },
+    {
+      "title": "Company",
+      "links": [
+        {
+          "label": "About CloudHost247",
+          "url": "aboutus.php"
         },
         {
-          "label": "Port Checker",
-          "url": "tools/port-checker"
+          "label": "Contact",
+          "url": "contact.php"
         },
         {
-          "label": "JSON Beautifier",
-          "url": "tools/json-beautifier"
+          "label": "Blog",
+          "url": "blog.php"
         },
         {
-          "label": "QR Generator",
-          "url": "tools/qr-code-generator"
+          "label": "Security & Compliance",
+          "url": "security.php"
         },
         {
-          "label": "MRZ Generator / MRZ Tools",
-          "url": "tools/mrz-generator"
+          "label": "Infrastructure",
+          "url": "infrastructure.php"
         },
         {
-          "label": "Speed Test",
-          "url": "tools/internet-speed-test"
+          "label": "Offers",
+          "url": "offers.php"
+        }
+      ]
+    },
+    {
+      "title": "Support",
+      "links": [
+        {
+          "label": "Help Center",
+          "url": "help-center.php"
+        },
+        {
+          "label": "Knowledge Base",
+          "url": "knowledgebase.php"
+        },
+        {
+          "label": "FAQ",
+          "url": "faqs.php"
+        },
+        {
+          "label": "Open a Ticket",
+          "url": "submitticket.php"
+        },
+        {
+          "label": "Service Status",
+          "url": "serverstatus.php"
+        },
+        {
+          "label": "Client Area",
+          "url": "clientarea.php"
+        },
+        {
+          "label": "Billing & Invoices",
+          "url": "clientarea.php?action=invoices"
+        },
+        {
+          "label": "Documentation",
+          "url": "documentation.php"
+        }
+      ]
+    },
+    {
+      "title": "Legal",
+      "links": [
+        {
+          "label": "Legal & Policy Center",
+          "url": "legal.php"
+        },
+        {
+          "label": "Terms of Service",
+          "url": "terms-of-service.php"
+        },
+        {
+          "label": "Privacy Policy",
+          "url": "privacy-policy.php"
+        },
+        {
+          "label": "Cookie Policy",
+          "url": "cookie-policy.php"
+        },
+        {
+          "label": "Acceptable Use Policy",
+          "url": "acceptable-use-policy.php"
+        },
+        {
+          "label": "Refund Policy",
+          "url": "refund-policy.php"
+        },
+        {
+          "label": "Backup Policy",
+          "url": "backup-policy.php"
+        },
+        {
+          "label": "Fair Usage Policy",
+          "url": "fair-usage-policy.php"
+        },
+        {
+          "label": "Trademark Policy",
+          "url": "trademark-policy.php"
+        },
+        {
+          "label": "Domain Registration Agreement",
+          "url": "domain-agreement.php"
+        },
+        {
+          "label": "Domain Brokerage Terms",
+          "url": "domain-brokerage-terms.php"
+        },
+        {
+          "label": "Domain Renewal Policy",
+          "url": "domain-renewal-policy.php"
+        },
+        {
+          "label": "Cybercrime & Abuse Policy",
+          "url": "cybercrime-policy.php"
+        },
+        {
+          "label": "Data Deletion",
+          "url": "data-deletion.php"
+        },
+        {
+          "label": "Data Protection Standards",
+          "url": "data-protection-standards.php"
+        },
+        {
+          "label": "Privacy Notice & Consent",
+          "url": "data-privacy-notice-and-consent-form.php"
+        },
+        {
+          "label": "Domain Registration Addendum",
+          "url": "domainregistrationaddendum.php"
+        },
+        {
+          "label": "Legal Notice",
+          "url": "legal-notice.php"
         }
       ]
     }

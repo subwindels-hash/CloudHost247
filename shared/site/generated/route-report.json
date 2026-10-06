@@ -1,0 +1,23 @@
+{
+  "registryVersion": "2.0.0",
+  "generatedAtSource": "shared/site/registry.json",
+  "menus": 9,
+  "footerColumns": 9,
+  "linksChecked": 221,
+  "spaLinks": 221,
+  "phpLinks": 221,
+  "spaRoutesKnown": 138,
+  "toolPathsKnown": 67,
+  "phpPagesKnown": 83,
+  "legalDocuments": 17,
+  "toolsCategories": 10,
+  "marketingPages": 51,
+  "marketingSections": 106,
+  "faqs": 159,
+  "toolsIndexed": null,
+  "documentationFiles": 14,
+  "documentationBytes": 390787,
+  "assetsCopied": 161,
+  "errors": [],
+  "warnings": []
+}

@@ -312,6 +312,42 @@ export async function registerInfrastructureRoutes(app: FastifyInstance,env: Env
   const db = overridePool ?? getPool(env);
   const admin = (request: FastifyRequest) => requireRole(request,env,db,['admin','super_admin']);
 
+  /**
+   * Public locations: the data-centre regions this deployment is genuinely configured to deploy
+   * into, joined to the provider that operates each facility.
+   *
+   * This exists because a locations page is the single easiest place on a hosting website to lie
+   * — a decorative world map with pins is not a statement about infrastructure. Everything here is
+   * derived from configuration: an ACTIVE region belonging to an ACTIVE provider. Nothing is
+   * hardcoded, so an unconfigured deployment returns an empty list and the page says so.
+   *
+   * Deliberately excluded: credentials, API endpoints, capacity, and any region that is disabled
+   * or archived. Public means public.
+   */
+  app.get('/api/v1/public/locations', async () => {
+    const rows = await db.query<any>(
+      `SELECT r.code, r.name, r.country_code, p.name AS provider_name, p.slug AS provider_slug,
+              COUNT(dc.id)::int AS datacenter_count
+         FROM infrastructure_regions r
+         JOIN infrastructure_providers p ON p.id = r.provider_id AND p.status = 'ACTIVE'
+         LEFT JOIN infrastructure_datacenters dc ON dc.region_id = r.id AND dc.status = 'ACTIVE'
+        WHERE r.status = 'ACTIVE'
+        GROUP BY r.code, r.name, r.country_code, p.name, p.slug
+        ORDER BY r.name`
+    );
+    return {
+      configured: rows.rows.length > 0,
+      locations: rows.rows.map((row: any) => ({
+        code: row.code,
+        name: row.name,
+        countryCode: row.country_code ?? null,
+        provider: row.provider_name,
+        providerSlug: row.provider_slug,
+        datacenters: row.datacenter_count,
+      })),
+    };
+  });
+
   // Public catalog: only combinations backed by an active, verified provider mapping.
   app.get('/api/v1/operating-systems',async () => {
     const rows = await db.query(

@@ -1,109 +1,53 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { fetchNavigation, type NavSection } from '../../lib/platform-api';
+import { Icon } from '../ui/Icon';
+import { apiFetch } from '../../lib/api';
+import { NAV_SECTIONS, TOOLS_CATEGORIES } from '../../navigation/registry.generated';
 
 /**
- * CLOUDHOST247 mega navigation.
+ * CloudHost247 mega navigation.
  *
- * The menu is rendered from `GET /api/v1/navigation` — the same definition the sitemap and the
- * footer use — so the desktop mega panels, the keyboard-operable drawer and every deep link can
- * never disagree with each other, and a route can never be linked that the app does not serve.
+ * The menu renders `NAV_SECTIONS` — imported straight from the generated registry, not fetched
+ * over the network on mount. That is deliberate: a navigation that arrives late is a navigation
+ * that flashes empty on a cold load, and a failed request would leave the header with nothing in
+ * it. The definition is the same for every visitor, so it belongs in the bundle.
  *
- * Behaviour: hover opens a panel on wide screens, click/focus works everywhere, Escape closes and
- * restores focus to the trigger, clicking outside closes, and the mobile drawer is an accordion
- * with 44px+ touch targets and vertical scrolling (no horizontal overflow).
+ * `/api/v1/navigation` still serves the identical definition for `/sitemap.xml`, the SEO routes
+ * and automated link checks. Both come from `shared/site/registry.json`, so they cannot disagree.
+ *
+ * Interaction:
+ *  - desktop: pointer, click and keyboard all open a panel; it spans the viewport so it cannot
+ *    overflow the window whichever item is open;
+ *  - Escape closes and returns focus to the trigger; outside click closes; navigating closes;
+ *  - the panel is capped at `calc(100dvh - header)` and scrolls internally, so a long menu on a
+ *    short screen cannot push content out of reach;
+ *  - `aria-expanded` / `aria-controls` are always wired, and one panel is open at a time.
  */
 
-/* --------------------------------------------------------------------------------------------
- * Icons
- * A small, dependency-free stroke icon set, chosen from the link's own destination. Icons are
- * decorative (`aria-hidden`) — the label and the description carry the meaning — and every path is
- * inline SVG, so the menu never waits on an icon font or an image request to become usable.
- * ------------------------------------------------------------------------------------------ */
-
-type IconName =
-  | 'search' | 'list' | 'transfer' | 'globe' | 'gavel' | 'chart' | 'handshake' | 'star' | 'shield'
-  | 'folder' | 'layout' | 'sparkle' | 'grid' | 'cart' | 'user' | 'trend' | 'pen' | 'chat'
-  | 'server' | 'wrench';
-
-const ICON_PATHS: Record<IconName, string> = {
-  search: 'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14Zm5 12 5 5',
-  list: 'M4 6h16M4 12h16M4 18h16',
-  transfer: 'M4 8h13l-3-3m3 3-3 3M20 16H7l3-3m-3 3 3 3',
-  globe: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm0 0c3 3 3 15 0 18M3 12h18',
-  gavel: 'M4 20h9M6 16l6-6m-3-3 6 6m-8 2 4-4m6 0 4-4',
-  chart: 'M4 20V6m5 14V10m5 10V4m5 16v-7',
-  handshake: 'M8 12l3-3 3 3 3-3 4 4-6 6-3-3-3 3-4-4 3-3Zm-3-1 3-3 3 3',
-  star: 'M12 3l3 6 6 .9-4.5 4.3 1.1 6.3L12 17.6 6.4 20.5l1.1-6.3L3 9.9 9 9l3-6Z',
-  shield: 'M12 3l7 3v6c0 5-3 7-7 9-4-2-7-4-7-9V6l7-3Zm-3 9 2 2 4-4',
-  folder: 'M4 7h5l2 2h9v9H4V7Z',
-  layout: 'M4 5h16v14H4zM4 10h16M10 10v9',
-  sparkle: 'M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2 2-5Zm7 11 .8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8.8-2Z',
-  grid: 'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z',
-  cart: 'M4 5h2l2 10h11M9 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm8 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM8 9h11l-1.5 6',
-  user: 'M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-7 16c1.5-3.5 4-5 7-5s5.5 1.5 7 5',
-  trend: 'M4 17l5-5 4 3 7-8M20 7h-4m4 0v4',
-  pen: 'M4 20l4-1 10-10-3-3L5 16l-1 4Zm11-14 3 3',
-  chat: 'M5 5h14v10H9l-4 4V5Z',
-  server: 'M5 5h14v5H5zM5 14h14v5H5zM8 7.5h.01M8 16.5h.01',
-  wrench: 'M15 4a5 5 0 0 0-4.6 7L4 17l3 3 6-6.4A5 5 0 0 0 20 9l-3 1-2-2 1-3c-.6-.6-1.3-1-2-1Zm-8 13 .01.01',
-};
-
-/** Picks the icon that matches the destination. Longest prefix wins, so /domains/bulk-search beats /domains. */
-function iconFor(to: string): IconName {
-  const rules: Array<[string, IconName]> = [
-    ['/domains/bulk-search', 'list'],
-    ['/domains/search', 'search'],
-    ['/domains/transfer', 'transfer'],
-    ['/domains/extensions', 'globe'],
-    ['/domains/auctions', 'gavel'],
-    ['/domains/appraisal', 'chart'],
-    ['/domains/broker', 'handshake'],
-    ['/domains/club', 'star'],
-    ['/domains/whois', 'shield'],
-    ['/dashboard/domains', 'folder'],
-    ['/websites/ai-builder', 'sparkle'],
-    ['/websites/builder', 'layout'],
-    ['/websites/templates', 'grid'],
-    ['/websites/store', 'cart'],
-    ['/websites/experts', 'user'],
-    ['/websites/design-services', 'user'],
-    ['/marketing/logo-maker', 'pen'],
-    ['/marketing/inbox', 'chat'],
-    ['/marketing/seo', 'trend'],
-    ['/marketing/digital', 'trend'],
-    ['/marketing/analytics', 'chart'],
-    ['/hosting', 'server'],
-    ['/dashboard/dns', 'server'],
-  ];
-  const match = rules.filter(([prefix]) => to.startsWith(prefix)).sort((a, b) => b[0].length - a[0].length)[0];
-  return match ? match[1] : 'wrench';
+interface CatalogueTool {
+  slug: string;
+  name: string;
+  path: string;
+  discoveryCategories?: string[];
 }
 
-export function NavIcon({ to }: { to: string }) {
-  return (
-    <svg className="ch247-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
-      <path d={ICON_PATHS[iconFor(to)]} />
-    </svg>
-  );
-}
-
-function Badge({ kind }: { kind: NonNullable<NavSection['groups'][number]['links'][number]['badge']> }) {
-  return <span className={`ch247-nav-badge ch247-nav-badge--${kind.toLowerCase()}`}>{kind}</span>;
-}
-
-export function PlatformMegaMenu({ onNavigate }: { onNavigate?: () => void }) {
-  const [sections, setSections] = useState<NavSection[] | null>(null);
+/**
+ * Tools are the one menu whose *contents* are live data: an operator can add a tool to the
+ * catalogue without a redeploy. So the panel shows registry categories immediately, then fills
+ * each category with real tools from `/api/tools/navigation`. If that request fails the panel
+ * degrades into a working directory of tool categories rather than an empty box.
+ */
+function useCatalogueTools(enabled: boolean) {
+  const [tools, setTools] = useState<CatalogueTool[]>([]);
   const [failed, setFailed] = useState(false);
-  const [openId, setOpenId] = useState<string | null>(null);
-  const navRef = useRef<HTMLElement>(null);
-  const location = useLocation();
-
   useEffect(() => {
+    // Only fetch once somebody actually opens the Tools panel. Loading the catalogue on every
+    // page view would cost a request for the majority of visitors who never open this menu.
+    if (!enabled) return undefined;
     let active = true;
-    fetchNavigation()
-      .then((data) => {
-        if (active) setSections(data.sections);
+    apiFetch<{ tools: CatalogueTool[] }>('/api/tools/navigation')
+      .then((result) => {
+        if (active && Array.isArray(result.tools)) setTools(result.tools);
       })
       .catch(() => {
         if (active) setFailed(true);
@@ -111,22 +55,105 @@ export function PlatformMegaMenu({ onNavigate }: { onNavigate?: () => void }) {
     return () => {
       active = false;
     };
-  }, []);
+  }, [enabled]);
+  return { tools, failed };
+}
 
-  // Navigating always closes the menu: a panel left open over the page is a bug, not a feature.
+function ToolsGroups({ limit, active = true }: { limit: number; active?: boolean }) {
+  const { tools, failed } = useCatalogueTools(active);
+  return (
+    <>
+      {TOOLS_CATEGORIES.slice(0, limit).map((category) => {
+        const entries = tools.filter((tool) => tool.discoveryCategories?.includes(category.slug)).slice(0, 4);
+        const shown = entries.length > 0
+          ? entries
+          : [{ slug: `${category.slug}-index`, name: `${category.label} tools`, path: `/tools/category/${category.slug}` }];
+        return (
+          <section key={category.slug} className="ch247-mega-group" aria-label={category.label}>
+            <h3>{category.label}</h3>
+            <ul>
+              {shown.map((tool) => (
+                <li key={tool.slug}>
+                  <Link className="ch247-mega-link" to={tool.path}>
+                    <span className="ch247-mega-link__icon">
+                      <Icon name={category.icon} size={17} />
+                    </span>
+                    <span>
+                      <span className="ch247-mega-link__label">{tool.name}</span>
+                      <span className="ch247-mega-link__desc">{category.desc}</span>
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        );
+      })}
+      <section className="ch247-mega-group" aria-label="All tools">
+        <h3>Browse</h3>
+        <ul>
+          <li>
+            <Link className="ch247-mega-link" to="/tools">
+              <span className="ch247-mega-link__icon"><Icon name="grid" size={17} /></span>
+              <span>
+                <span className="ch247-mega-link__label">All CloudHost247 Tools</span>
+                <span className="ch247-mega-link__desc">Search the full catalogue by name or category.</span>
+              </span>
+            </Link>
+          </li>
+          {failed ? (
+            <li>
+              <span className="ch247-mega-link__desc" style={{ display: 'block', padding: '0 10px' }}>
+                The live tool catalogue could not be loaded, so only categories are listed.
+              </span>
+            </li>
+          ) : null}
+        </ul>
+      </section>
+    </>
+  );
+}
+
+export function Brand({ className }: { className?: string }) {
+  return (
+    <Link to="/" className={className ? `ch247-brand ${className}` : 'ch247-brand'} aria-label="CloudHost247 — home">
+      <span className="ch247-brand__mark">
+        <svg viewBox="0 0 24 24" aria-hidden focusable="false">
+          <path d="M12 2.5 21 7.5v9L12 21.5 3 16.5v-9L12 2.5Z" fill="none" stroke="#7ff0b4" strokeWidth="1.5" strokeLinejoin="round" />
+          <path d="M3 7.5 12 13l9-5.5M12 13v8.5" fill="none" stroke="#7ff0b4" strokeWidth="1" opacity="0.7" />
+          <circle cx="12" cy="13" r="1.7" fill="#7ff0b4" />
+        </svg>
+      </span>
+      <span>
+        CloudHost<span className="ch247-brand__suffix">247</span>
+      </span>
+    </Link>
+  );
+}
+
+function Badge({ kind }: { kind: string }) {
+  return <span className={`ch247-nav-badge ch247-nav-badge--${kind.toLowerCase()}`}>{kind}</span>;
+}
+
+export function PlatformMegaMenu() {
+  const [openId, setOpenId] = useState<string | null>(null);
+  const navRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
+
+  // Navigating always closes the menu: a panel left open over the page a visitor just asked for is
+  // a bug, not a feature.
   useEffect(() => {
     setOpenId(null);
   }, [location.pathname]);
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        setOpenId(null);
-        const trigger = navRef.current?.querySelector<HTMLElement>('button[aria-expanded="true"]');
-        trigger?.focus();
-      }
+      if (event.key !== 'Escape' || openId === null) return;
+      setOpenId(null);
+      navRef.current?.querySelector<HTMLElement>('button[aria-expanded="true"]')?.focus();
     }
     function onPointerDown(event: PointerEvent) {
+      if (navRef.current && !event.target) return;
       if (navRef.current && !navRef.current.contains(event.target as Node)) setOpenId(null);
     }
     document.addEventListener('keydown', onKeyDown);
@@ -135,210 +162,179 @@ export function PlatformMegaMenu({ onNavigate }: { onNavigate?: () => void }) {
       document.removeEventListener('keydown', onKeyDown);
       document.removeEventListener('pointerdown', onPointerDown);
     };
-  }, []);
-
-  if (failed) {
-    // Never render an empty menu bar: if the definition cannot be loaded the shell says so and
-    // offers the plain links that always work.
-    return (
-      <nav className="ch247-nav-links" aria-label="Primary" ref={navRef as never}>
-        <Link to="/domains/search" onClick={onNavigate}>
-          Domains
-        </Link>
-        <Link to="/websites/builder" onClick={onNavigate}>
-          Websites
-        </Link>
-        <Link to="/marketing/digital" onClick={onNavigate}>
-          Marketing
-        </Link>
-        <Link to="/tools" onClick={onNavigate}>
-          Tools
-        </Link>
-      </nav>
-    );
-  }
-
-  if (!sections) {
-    return (
-      <div className="ch247-nav-loading" aria-hidden="true">
-        Loading menu…
-      </div>
-    );
-  }
+  }, [openId]);
 
   return (
-    <nav className="ch247-platform-nav" aria-label="Primary" ref={navRef}>
-      <ul className="ch247-platform-nav__bar">
-        {sections.map((section) => {
-          const open = openId === section.id;
-          const panelId = `ch247-nav-panel-${section.id}`;
-          return (
-            <li
-              key={section.id}
-              className="ch247-platform-nav__item"
-              onMouseEnter={() => {
-                if (window.matchMedia('(min-width: 1024px)').matches) setOpenId(section.id);
-              }}
-              onMouseLeave={() => {
-                if (window.matchMedia('(min-width: 1024px)').matches) setOpenId((current) => (current === section.id ? null : current));
-              }}
-            >
-              <button
-                type="button"
-                className={`ch247-platform-nav__trigger${open ? ' is-open' : ''}`}
-                aria-expanded={open}
-                aria-controls={panelId}
-                onClick={() => setOpenId(open ? null : section.id)}
-              >
-                {section.label}
-                <span aria-hidden="true">⌄</span>
-              </button>
+    <div ref={navRef} className="ch247-header__nav-slot">
+      <nav className="ch247-platform-nav" aria-label="Primary">
+        <ul className="ch247-platform-nav__bar">
+          {NAV_SECTIONS.map((section) => {
+            const open = openId === section.id;
+            const panelId = `ch247-nav-panel-${section.id}`;
+            const expand = () => {
+              if (window.matchMedia('(min-width: 1181px)').matches) setOpenId(section.id);
+            };
+            const collapse = () => {
+              if (window.matchMedia('(min-width: 1181px)').matches) {
+                setOpenId((current) => (current === section.id ? null : current));
+              }
+            };
+            return (
+              <li key={section.id} className="ch247-platform-nav__item" onMouseEnter={expand} onMouseLeave={collapse}>
+                <button
+                  type="button"
+                  className={`ch247-platform-nav__trigger${open ? ' is-open' : ''}`}
+                  aria-expanded={open}
+                  aria-controls={panelId}
+                  onClick={() => setOpenId(open ? null : section.id)}
+                >
+                  {section.label}
+                  <span className="ch247-caret" aria-hidden>▾</span>
+                </button>
 
-              <div id={panelId} className={`ch247-mega-panel${open ? ' is-open' : ''}`} hidden={!open}>
-                <div className="ch247-mega-intro">
-                  <h2>{section.label}</h2>
-                  <p>{section.blurb}</p>
-                  {section.featured ? (
-                    <>
-                      <h3>{section.featured.title}</h3>
-                      <p>{section.featured.body}</p>
-                      <Link to={section.featured.to} onClick={onNavigate} className="ch247-button ch247-button--small">
-                        {section.featured.ctaLabel}
-                      </Link>
-                    </>
+                {/* The panel element always exists so `aria-controls` is never dangling, but its
+                    contents are mounted only while it is open: rendering every menu's ~110 links
+                    into the DOM of every page would cost parse time for content most visitors
+                    never open. The same links are always available in the footer and the sitemap. */}
+                <div id={panelId} className="ch247-mega-panel" hidden={!open}>
+                  {open ? (
+                  <div className="ch247-mega-panel__inner">
+                    <div className="ch247-mega-intro">
+                      <h2>{section.label}</h2>
+                      <p>{section.blurb}</p>
+                      {section.featured ? (
+                        <div className="ch247-mega-featured">
+                          <h3>{section.featured.title}</h3>
+                          <p>{section.featured.body}</p>
+                          <Link className="ch-link" to={section.featured.to}>
+                            {section.featured.ctaLabel}
+                            <span className="ch-link__arrow" aria-hidden>→</span>
+                          </Link>
+                        </div>
+                      ) : null}
+                      <p style={{ marginTop: '18px', marginBottom: 0 }}>
+                        <Link className="ch-link" to={section.to}>
+                          All {section.label.toLowerCase()}
+                          <span className="ch-link__arrow" aria-hidden>→</span>
+                        </Link>
+                      </p>
+                    </div>
+
+                    <div className="ch247-mega-groups">
+                      {section.toolsDriven ? (
+                        /* Mounted only while the panel is open, so the catalogue request happens
+                           when a visitor opens Tools — not on every page load. */
+                        open ? <ToolsGroups limit={6} active /> : null
+                      ) : (
+                        section.groups.map((group) => (
+                          <section key={group.title} className="ch247-mega-group" aria-label={group.title}>
+                            <h3>{group.title}</h3>
+                            <ul>
+                              {group.links.map((link) => (
+                                <li key={`${group.title}-${link.to}-${link.label}`}>
+                                  <Link className="ch247-mega-link" to={link.to}>
+                                    <span className="ch247-mega-link__icon">
+                                      <Icon name={link.icon} size={17} />
+                                    </span>
+                                    <span>
+                                      <span className="ch247-mega-link__label">
+                                        {link.label}
+                                        {link.badge ? <Badge kind={link.badge} /> : null}
+                                      </span>
+                                      <span className="ch247-mega-link__desc">{link.description}</span>
+                                    </span>
+                                  </Link>
+                                </li>
+                              ))}
+                            </ul>
+                          </section>
+                        ))
+                      )}
+                    </div>
+                  </div>
                   ) : null}
                 </div>
-                <div className="ch247-mega-groups">
-                  {section.groups.map((group) => (
-                    <section key={group.title} aria-label={group.title}>
-                      <h3>{group.title}</h3>
-                      <ul>
-                        {group.links.map((link) => (
-                          <li key={`${group.title}-${link.to}-${link.label}`}>
-                            <Link to={link.to} onClick={onNavigate} className="ch247-mega-link">
-                              <NavIcon to={link.to} />
-                              <span className="ch247-mega-link__body">
-                                <span className="ch247-mega-link__label">
-                                  {link.label}
-                                  {link.badge ? <Badge kind={link.badge} /> : null}
-                                </span>
-                                <span className="ch247-mega-link__desc">{link.description}</span>
-                              </span>
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </section>
-                  ))}
-                </div>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
-    </nav>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+    </div>
   );
 }
 
-/** Mobile drawer: the same navigation data as an accordion with large touch targets. */
+/**
+ * Mobile drawer: the same registry, rendered as an accordion built for thumbs rather than a
+ * collapsed desktop menu.
+ *
+ *  - 52 px minimum row height on every tappable element (well past the 44 px floor);
+ *  - one level of nesting, so the hierarchy stays legible on a phone;
+ *  - the drawer is capped to the viewport and scrolls vertically — no horizontal scrolling is
+ *    possible at any width;
+ *  - each open section ends with a visible "All …" link, so a visitor is never trapped in a long
+ *    sub-list looking for the overview page.
+ */
 export function PlatformMobileNav({ onNavigate }: { onNavigate?: () => void }) {
-  const [sections, setSections] = useState<NavSection[] | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
-
-  useEffect(() => {
-    let active = true;
-    fetchNavigation()
-      .then((data) => {
-        if (active) setSections(data.sections);
-      })
-      .catch(() => {
-        if (active) setSections([]);
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  if (!sections) return null;
+  const baseId = useId();
 
   return (
-    <div className="ch247-mobile-nav">
-      {sections.map((section) => {
+    <nav className="ch247-mobile-nav" aria-label="Mobile">
+      {NAV_SECTIONS.map((section) => {
         const open = openId === section.id;
+        const panelId = `${baseId}-${section.id}`;
         return (
           <div key={section.id} className="ch247-mobile-nav__group">
             <button
               type="button"
               className="ch247-mobile-nav__toggle"
               aria-expanded={open}
-              aria-controls={`ch247-mobile-panel-${section.id}`}
+              aria-controls={panelId}
               onClick={() => setOpenId(open ? null : section.id)}
             >
               <span>{section.label}</span>
-              <span aria-hidden="true">{open ? '−' : '+'}</span>
+              <span aria-hidden>{open ? '−' : '+'}</span>
             </button>
-            {open ? (
-              <div id={`ch247-mobile-panel-${section.id}`} className="ch247-mobile-nav__panel">
-                {section.groups.map((group) => (
-                  <div key={group.title} className="ch247-mobile-nav__subgroup">
-                    <h3>{group.title}</h3>
-                    <ul>
-                      {group.links.map((link) => (
-                        <li key={`${group.title}-${link.to}-${link.label}`}>
-                          <Link to={link.to} onClick={onNavigate} className="ch247-mobile-nav__link">
-                            <NavIcon to={link.to} />
-                            <span className="ch247-mega-link__body">
-                              <span className="ch247-mega-link__label">
-                                {link.label}
-                                {link.badge ? <Badge kind={link.badge} /> : null}
-                              </span>
-                              <span className="ch247-mega-link__desc">{link.description}</span>
+            <div id={panelId} className="ch247-mobile-nav__panel" hidden={!open}>
+              {open ? section.groups.map((group) => (
+                <div key={group.title} className="ch247-mobile-nav__subgroup">
+                  <h3>{group.title}</h3>
+                  <ul>
+                    {group.links.map((link) => (
+                      <li key={`${group.title}-${link.to}-${link.label}`}>
+                        <Link className="ch247-mobile-nav__link" to={link.to} onClick={onNavigate}>
+                          <span className="ch247-mega-link__icon">
+                            <Icon name={link.icon} size={17} />
+                          </span>
+                          <span>
+                            <span className="ch247-mega-link__label">
+                              {link.label}
+                              {link.badge ? <Badge kind={link.badge} /> : null}
                             </span>
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            ) : null}
+                            <span className="ch247-mega-link__desc">{link.description}</span>
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )) : null}
+              {open && section.toolsDriven ? <ToolsGroups limit={9} active /> : null}
+              {open ? (
+                <Link className="ch-link ch247-mobile-nav__all" to={section.to} onClick={onNavigate}>
+                  All {section.label.toLowerCase()}
+                  <span className="ch-link__arrow" aria-hidden>→</span>
+                </Link>
+              ) : null}
+            </div>
           </div>
         );
       })}
-    </div>
+    </nav>
   );
 }
 
-/** Small helper used by pages that need the navigation definition (e.g. the sitemap page). */
-export function useNavigation(): { sections: NavSection[] | null; error: string | null } {
-  const [sections, setSections] = useState<NavSection[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  useEffect(() => {
-    let active = true;
-    fetchNavigation()
-      .then((data) => {
-        if (active) setSections(data.sections);
-      })
-      .catch((err: Error) => {
-        if (active) setError(err.message);
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
-  return { sections, error };
-}
-
-/** Section pills used at the top of a hub page to move between the services in one area. */
-export function NavSectionLinks({ ids, current, render }: { ids: string[]; current: string; render?: (section: NavSection) => ReactNode }) {
-  const { sections } = useNavigation();
-  if (!sections) return null;
-  return (
-    <>
-      {sections
-        .filter((section) => ids.includes(section.id))
-        .map((section) => (render ? render(section) : null))}
-      <span className="ch247-visually-hidden">{current}</span>
-    </>
-  );
+/** Used by pages that need the definition (sitemap page, hub navigation) without a network call. */
+export function useNavigationSections() {
+  return NAV_SECTIONS;
 }

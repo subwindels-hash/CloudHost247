@@ -1,0 +1,412 @@
+{
+  "family": "developers",
+  "pages": [
+    {
+      "route": "/developers",
+      "title": "Developer Platform",
+      "category": "Developers",
+      "seoTitle": "CloudHost247 Developer Platform — Runtimes, Deployment, APIs",
+      "description": "Build on CloudHost247: supported runtimes, Git-based deployment, per-application environments, APIs, DNS and the observability to run it in production.",
+      "visual": "deployment/developer-hosting",
+      "hero": {
+        "kicker": "Developers",
+        "heading": "Infrastructure that gets out of the way",
+        "lede": "Runtimes that match the code you already write, deployment driven from Git, configuration held outside the repository, and logs where you expect them.",
+        "ctas": [
+          { "label": "See deployment", "to": "/developers/deployment", "variant": "primary" },
+          { "label": "Read the docs", "to": "/docs", "variant": "ghost" }
+        ],
+        "points": ["Node.js, PHP, Python, Laravel", "Deploy from Git", "Environments and secrets", "APIs for automation"]
+      },
+      "sections": [
+        {
+          "type": "cards",
+          "kicker": "Runtimes",
+          "heading": "Pick your stack",
+          "items": [
+            { "icon": "nodejs", "title": "Node.js", "body": "Long-running services with managed supervision.", "to": "/developers/nodejs" },
+            { "icon": "php", "title": "PHP", "body": "Single scripts through to full frameworks.", "to": "/developers/php" },
+            { "icon": "python", "title": "Python", "body": "WSGI and ASGI applications with virtual environments.", "to": "/developers/python" },
+            { "icon": "laravel", "title": "Laravel", "body": "Queues, scheduler, storage and deployment.", "to": "/developers/laravel" },
+            { "icon": "docker", "title": "Docker", "body": "Your own images with persistent volumes.", "to": "/developers/docker" },
+            { "icon": "api", "title": "APIs", "body": "HTTP APIs with TLS, secrets and rate control.", "to": "/hosting/api" }
+          ]
+        },
+        {
+          "type": "cards",
+          "kicker": "Platform",
+          "heading": "Everything around the runtime",
+          "items": [
+            { "icon": "git-branch", "title": "Deployment", "body": "Builds, releases, rollbacks and records.", "to": "/developers/deployment" },
+            { "icon": "terminal", "title": "Environments", "body": "Variables, secrets and volumes per application.", "to": "/developers/environments" },
+            { "icon": "dns", "title": "DNS", "body": "Zones and records for the services you run.", "to": "/dashboard/dns" },
+            { "icon": "hard-drive", "title": "Databases", "body": "Managed engines your application can connect to.", "to": "/platforms/databases" },
+            { "icon": "activity", "title": "Monitoring", "body": "Telemetry and alerts on your services.", "to": "/cloud/monitoring" },
+            { "icon": "firewall", "title": "Firewalls", "body": "Close everything the service does not need.", "to": "/cloud/firewall" }
+          ]
+        },
+        {
+          "type": "split",
+          "kicker": "Written down, not folklore",
+          "heading": "Documentation that matches the platform",
+          "body": [
+            "The platform reference documents the endpoints, the deployment behaviour, the environment model and the operational limits. It describes what the software does today, including the parts that are not finished.",
+            "Where a capability is not implemented, it is documented as not implemented — so you do not design around a feature that exists only in a roadmap."
+          ],
+          "points": ["API contracts", "Deployment and environment behaviour", "Operational limits and known gaps"],
+          "visual": "blog/documentation",
+          "link": { "label": "Open the documentation", "to": "/docs" }
+        }
+      ],
+      "faqs": [
+        { "q": "Do I get SSH access?", "a": "On developer hosting and servers, yes. On purely managed application environments, access is through the platform's own interfaces." },
+        { "q": "Can I automate provisioning?", "a": "Yes. The platform exposes authenticated HTTP APIs for services, domains, DNS and deployments, which is how an existing pipeline integrates." },
+        { "q": "Which Node, PHP and Python versions are available?", "a": "The versions the platform is configured to provision. The runtimes pages describe how each is hosted, and the operating system catalogue lists what the infrastructure can install." }
+      ],
+      "related": ["/developers/deployment", "/developers/environments", "/hosting/api", "/hosting/developer", "/platforms", "/docs"]
+    },
+
+    {
+      "route": "/developers/deployment",
+      "title": "Deployment",
+      "category": "Developers",
+      "seoTitle": "Git-Based Deployment Platform | CloudHost247",
+      "description": "Deploy from Git on CloudHost247: builds from your repository, releases with environment configuration, build and runtime logs, and recorded rollbacks.",
+      "visual": "deployment/deployment-pipeline",
+      "hero": {
+        "kicker": "Developers",
+        "heading": "A deployment you can describe afterwards",
+        "lede": "Every deployment is a record: which repository, which revision, what the build produced, and whether it succeeded — so a regression has a starting point instead of a story.",
+        "ctas": [
+          { "label": "Open deployments", "to": "/dashboard/apps", "variant": "primary" },
+          { "label": "See environments", "to": "/developers/environments", "variant": "ghost" }
+        ],
+        "points": ["Builds from a repository", "Release records", "Build and runtime logs", "Rollback path"]
+      },
+      "sections": [
+        {
+          "type": "steps",
+          "kicker": "The pipeline",
+          "heading": "What happens on a deployment",
+          "items": [
+            { "title": "Source", "body": "A deployment names the repository and the revision it builds. Nothing is deployed from a file someone edited on the server." },
+            { "title": "Build", "body": "Dependencies are installed and the build command runs in an isolated step, and its output is kept against the deployment." },
+            { "title": "Release", "body": "A successful build becomes the running release, with the application's environment configuration applied." },
+            { "title": "Observe", "body": "Runtime logs and resource telemetry attach to the same service, so whether a change fixed anything is a question with an answer." }
+          ]
+        },
+        {
+          "type": "features",
+          "kicker": "Properties worth having",
+          "heading": "What the platform guarantees about a deployment",
+          "items": [
+            { "icon": "file-text", "title": "It is recorded", "body": "The deployment exists as a durable record with its status, its source revision and its logs — not as a transient terminal session." },
+            { "icon": "refresh", "title": "It is repeatable", "body": "Because the build starts from a revision, running it again produces the same result rather than depending on machine state." },
+            { "icon": "key", "title": "Secrets stay out of the build", "body": "Environment configuration is applied at release rather than committed, so a repository can be shared without leaking credentials." },
+            { "icon": "activity", "title": "Failure is visible", "body": "A failed build is a failed deployment with its output kept, not a silence followed by an unchanged website." },
+            { "icon": "layers", "title": "Scoped per application", "body": "Deployments belong to an application, so releasing one does not touch another." },
+            { "icon": "clock", "title": "Tracked over time", "body": "The deployment history shows what changed and when, which is the first thing anyone needs during an incident." }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "Continuous integration is not bundled",
+          "body": "The platform deploys; it does not run your test suite. Run tests in your own pipeline and let it trigger a deployment through the API — that keeps the check that matters (your tests) where you can see it."
+        }
+      ],
+      "faqs": [
+        { "q": "Can I deploy on every commit?", "a": "Yes, by triggering a deployment from your pipeline. The platform records each one, so automatic deployment does not mean invisible deployment." },
+        { "q": "What happens if a deployment fails?", "a": "The previous release keeps running and the failed deployment is recorded with its build output, so the application is not left half-updated." },
+        { "q": "Are the logs kept after a deployment finishes?", "a": "Yes. Build and runtime logs are attached to the deployment and the service." },
+        { "q": "Can I deploy the same repository twice?", "a": "Yes — that is how you run separate staging and production environments from one codebase, with different configuration and domains." }
+      ],
+      "related": ["/developers/environments", "/platforms/paas", "/developers", "/platforms/containers", "/hosting/developer", "/docs"]
+    },
+
+    {
+      "route": "/developers/environments",
+      "title": "Application Environments",
+      "category": "Developers",
+      "seoTitle": "Environment Variables, Volumes & Per-App Domains | CloudHost247",
+      "description": "Configure CloudHost247 application environments: environment variables and secrets, persistent volumes, per-application domains and certificates.",
+      "visual": "deployment/deployment-pipeline",
+      "hero": {
+        "kicker": "Developers",
+        "heading": "Configuration belongs outside the code",
+        "lede": "Environment variables, secrets, persistent volumes and the domain the application answers on — all attached to the application rather than committed to a repository.",
+        "ctas": [
+          { "label": "Open an application", "to": "/dashboard/apps", "variant": "primary" },
+          { "label": "See deployment", "to": "/developers/deployment", "variant": "ghost" }
+        ],
+        "points": ["Variables per application", "Secrets not echoed back", "Volumes that persist", "Domains with certificates"]
+      },
+      "sections": [
+        {
+          "type": "features",
+          "kicker": "Configuration model",
+          "heading": "What lives on the environment",
+          "items": [
+            { "icon": "settings", "title": "Environment variables", "body": "Plain configuration values injected into the process, so the same image runs in different places with different values." },
+            { "icon": "key", "title": "Secrets", "body": "Sensitive values are stored encrypted in the platform, not shown again after saving, and never included in an API response." },
+            { "icon": "hard-drive", "title": "Volumes", "body": "Storage declared by the application so data survives a redeploy, a rebuild or a move between hosts." },
+            { "icon": "globe", "title": "Domains", "body": "A domain can be attached to the application, with its own certificate, so environments are distinguishable at a glance." },
+            { "icon": "database", "title": "Service connections", "body": "Reference a database or cache the account owns instead of pasting raw hostnames and ports everywhere." },
+            { "icon": "layers", "title": "Separate per environment", "body": "Staging and production are separate applications with separate configuration — the only way they can be safely different." }
+          ]
+        },
+        {
+          "type": "checks",
+          "kicker": "Practice",
+          "heading": "Things that keep environments sane",
+          "items": [
+            { "label": "Never commit secrets", "body": "If a credential is in the repository, it is in every clone and every backup of that repository. Rotate it once it has been." },
+            { "label": "Keep environments structurally identical", "body": "The same services, the same variable names, different values. Divergent structure is what turns a staging pass into a false negative." },
+            { "label": "Give the environment its own domain", "body": "An address that identifies the environment prevents the classic incident of debugging production while thinking it is staging." }
+          ]
+        }
+      ],
+      "faqs": [
+        { "q": "Can I change a variable without redeploying?", "a": "Configuration changes are applied to the application and take effect on the next release, so the running release always matches a recorded state." },
+        { "q": "Are secrets encrypted?", "a": "Yes. Secret values are stored encrypted, are not returned to the browser after being saved, and are excluded from API responses." },
+        { "q": "What happens to volumes on redeploy?", "a": "They persist. That is the point of declaring them: the container is replaceable, the data is not." }
+      ],
+      "related": ["/developers/deployment", "/platforms/containers", "/platforms/databases", "/developers", "/hosting/api", "/docs"]
+    },
+
+    {
+      "route": "/developers/nodejs",
+      "title": "Node.js Hosting",
+      "category": "Developers",
+      "seoTitle": "Node.js Application Hosting | CloudHost247",
+      "description": "Host Node.js applications on CloudHost247: managed process supervision, environment configuration, WebSocket-capable routing, logs and deployment from Git.",
+      "visual": "deployment/nodejs",
+      "hero": {
+        "kicker": "Runtime",
+        "heading": "Node.js as a long-running service, not a script",
+        "lede": "A Node application is a process that has to stay up. The platform supervises it, restarts it when it fails, keeps its logs and routes a domain to it.",
+        "ctas": [
+          { "label": "Deploy from Git", "to": "/developers/deployment", "variant": "primary" },
+          { "label": "See runtime options", "to": "/developers", "variant": "ghost" }
+        ],
+        "points": ["Process supervision", "Environment configuration", "Logs and telemetry", "DNS and TLS in front"]
+      },
+      "sections": [
+        {
+          "type": "features",
+          "kicker": "What the platform handles",
+          "heading": "The operational parts of a Node app",
+          "items": [
+            { "icon": "refresh", "title": "Supervision", "body": "The process is managed and restarted after a crash, which is what turns a successful test into a running service." },
+            { "icon": "settings", "title": "Configuration", "body": "Ports, connection strings and flags supplied as environment variables rather than edited into the source." },
+            { "icon": "file-text", "title": "Logs", "body": "Standard output and error are captured per application so an unhandled rejection is findable." },
+            { "icon": "git-branch", "title": "Deployment", "body": "Build from a repository, apply configuration, release — with the build output kept for the record." },
+            { "icon": "database", "title": "Data services", "body": "Managed MySQL-compatible, PostgreSQL, MongoDB and Redis services your application connects to." },
+            { "icon": "globe", "title": "Domains and certificates", "body": "Attach the hostname the service answers on, and let the certificate be issued for it." }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "Bring your own runtime discipline",
+          "body": "The platform supplies the process management, isolation and observability. Dependency pinning, lockfiles, dependency audits and choosing a supported Node release remain the application's responsibility — and the ones that go wrong in production are almost always there."
+        }
+      ],
+      "faqs": [
+        { "q": "Are WebSockets supported?", "a": "WebSocket connections terminate at the application, and the platform routes the domain to it. If your application upgrades connections, that works at the application layer." },
+        { "q": "Can I run a worker alongside the web process?", "a": "Yes. A worker is another process on the same environment, or its own application if you prefer to scale it separately." },
+        { "q": "Which Node versions are available?", "a": "The versions the platform is configured to provide. If you need a specific release for a dependency reason, confirm it before committing to a migration." }
+      ],
+      "related": ["/developers/deployment", "/developers/docker", "/developers/environments", "/platforms/databases", "/hosting/api", "/developers"]
+    },
+
+    {
+      "route": "/developers/php",
+      "title": "PHP Hosting",
+      "category": "Developers",
+      "seoTitle": "PHP Hosting & Application Runtime | CloudHost247",
+      "description": "Host PHP applications on CloudHost247: maintained PHP runtimes, Composer, databases, cron jobs, OPcache and deployment from Git.",
+      "visual": "deployment/php",
+      "hero": {
+        "kicker": "Runtime",
+        "heading": "PHP that is patched, tuned and yours",
+        "lede": "A maintained PHP runtime with the extensions applications actually declare, plus the pieces a real PHP application needs: Composer, cron, OPcache and a database.",
+        "ctas": [
+          { "label": "See hosting plans", "to": "/hosting/web-hosting", "variant": "primary" },
+          { "label": "See Laravel hosting", "to": "/developers/laravel", "variant": "ghost" }
+        ],
+        "points": ["Maintained runtime", "Composer available", "Cron scheduling", "Database and mail"]
+      },
+      "sections": [
+        {
+          "type": "features",
+          "kicker": "What a PHP app needs",
+          "heading": "Provided rather than assembled",
+          "items": [
+            { "icon": "php", "title": "Maintained PHP", "body": "Runtimes that receive security updates, so an old version is a choice rather than an inheritance." },
+            { "icon": "box", "title": "Extensions and Composer", "body": "The extension set applications declare, and Composer to resolve dependencies from the lock file." },
+            { "icon": "clock", "title": "Scheduled tasks", "body": "Cron entries for queues, imports and housekeeping, so the scheduled work a framework needs actually runs." },
+            { "icon": "zap", "title": "OPcache", "body": "Bytecode caching configured on, because it is the single cheapest performance win in PHP." },
+            { "icon": "database", "title": "Databases", "body": "MySQL-compatible, MariaDB and PostgreSQL services alongside the application." },
+            { "icon": "git-branch", "title": "Deployment", "body": "Deploy from a repository instead of uploading changed files over FTP." }
+          ]
+        },
+        {
+          "type": "checks",
+          "kicker": "The honest part",
+          "heading": "PHP shifts responsibility to the application",
+          "items": [
+            { "label": "Keep the framework current", "body": "A framework that no longer receives security fixes is the most common cause of a compromised PHP site." },
+            { "label": "Vet what you install", "body": "Packages run with the application's privileges. A dependency is code you are choosing to run." },
+            { "label": "Use the lock file", "body": "Deploying without a lock file means deploying whatever the registry serves today — which is not the same thing as what you tested." }
+          ]
+        }
+      ],
+      "faqs": [
+        { "q": "Can I choose the PHP version?", "a": "Where the platform is configured to offer more than one version, version is a per-application setting. The available versions are listed in the application environment rather than promised here." },
+        { "q": "Are extensions included?", "a": "Common extensions are pre-installed. If an application declares an extension that is not present, that is a deployment question to raise before you migrate." },
+        { "q": "Can I run a queue worker?", "a": "Yes — workers are long-running processes managed alongside the application, with cron available for scheduled work." }
+      ],
+      "related": ["/developers/laravel", "/hosting/web-hosting", "/platforms/databases", "/developers/deployment", "/cloud/operating-systems", "/developers"]
+    },
+
+    {
+      "route": "/developers/python",
+      "title": "Python Hosting",
+      "category": "Developers",
+      "seoTitle": "Python Application Hosting — WSGI & ASGI | CloudHost247",
+      "description": "Host Python applications on CloudHost247: virtual environments, WSGI and ASGI applications, background workers, scheduled jobs and managed data services.",
+      "visual": "deployment/python",
+      "hero": {
+        "kicker": "Runtime",
+        "heading": "Python applications, properly hosted",
+        "lede": "Virtual environments per application, a WSGI or ASGI front end, background workers when the workload needs them, and a database that is not your problem to run.",
+        "ctas": [
+          { "label": "Deploy an application", "to": "/developers/deployment", "variant": "primary" },
+          { "label": "See the runtimes", "to": "/developers", "variant": "ghost" }
+        ],
+        "points": ["Virtual environments", "WSGI / ASGI", "Background workers", "Scheduled tasks"]
+      },
+      "sections": [
+        {
+          "type": "features",
+          "kicker": "The stack",
+          "heading": "What Python needs to run in production",
+          "items": [
+            { "icon": "python", "title": "Isolated environments", "body": "Dependencies installed per application, so two applications that disagree about a library version can coexist." },
+            { "icon": "globe", "title": "WSGI and ASGI", "body": "Serve synchronous frameworks and asynchronous ones, with TLS and routing in front of the application." },
+            { "icon": "refresh", "title": "Workers", "body": "Long-running processes for queues and background work, supervised and restarted on failure." },
+            { "icon": "clock", "title": "Scheduled jobs", "body": "Cron for periodic work like synchronisation, reporting and cleanup, rather than a process that sleeps." },
+            { "icon": "database", "title": "Data services", "body": "PostgreSQL, MySQL-compatible, MongoDB and Redis services your application connects to." },
+            { "icon": "file-text", "title": "Logs and telemetry", "body": "Application output and resource use captured per service, so a slow query or a memory leak is visible." }
+          ]
+        }
+      ],
+      "faqs": [
+        { "q": "Can I use a virtual environment I control?", "a": "Yes. Dependencies are installed into the application's own environment from its declared requirements." },
+        { "q": "Do you support Celery or similar workers?", "a": "Background workers are supported as processes on the application or as a separate application, with Redis or another broker available as a managed service." },
+        { "q": "Which Python versions are available?", "a": "The versions the platform is configured to provide. Confirm the version your application targets before migrating." }
+      ],
+      "related": ["/developers/deployment", "/platforms/databases", "/developers/environments", "/hosting/api", "/hosting/developer", "/developers"]
+    },
+
+    {
+      "route": "/developers/laravel",
+      "title": "Laravel Hosting",
+      "category": "Developers",
+      "seoTitle": "Laravel Hosting — Queues, Scheduler, Storage | CloudHost247",
+      "description": "Host Laravel on CloudHost247 with the pieces a Laravel application actually needs: queue workers, scheduler cron, storage, databases and Git deployment.",
+      "visual": "deployment/laravel",
+      "hero": {
+        "kicker": "Runtime",
+        "heading": "Laravel with the parts that usually get forgotten",
+        "lede": "A Laravel application that works locally needs four things in production: a queue worker, the scheduler, writable storage and a database. All four are part of the hosting.",
+        "ctas": [
+          { "label": "Deploy Laravel", "to": "/developers/deployment", "variant": "primary" },
+          { "label": "See PHP hosting", "to": "/developers/php", "variant": "ghost" }
+        ],
+        "points": ["Queue workers", "Scheduler cron", "Persistent storage", "MySQL or PostgreSQL"]
+      },
+      "sections": [
+        {
+          "type": "features",
+          "kicker": "Laravel specifics",
+          "heading": "The four things that break in production",
+          "items": [
+            { "icon": "refresh", "title": "Queue workers", "body": "Supervised worker processes so queued jobs are processed and re-started after a deployment or a failure." },
+            { "icon": "clock", "title": "The scheduler", "body": "A single cron entry running Laravel's scheduler, so you do not have to remember which tasks need which timing." },
+            { "icon": "hard-drive", "title": "Writable storage", "body": "Persistent volumes for uploads and framework storage, so a redeploy does not erase user files." },
+            { "icon": "database", "title": "Migrations", "body": "A database that can be dumped, restored and migrated with a backup taken before the change." },
+            { "icon": "settings", "title": "Environment configuration", "body": "The values in .env supplied per environment instead of living in the repository." },
+            { "icon": "file-text", "title": "Logs", "body": "Application and queue output captured per service, which is where a failing job is actually visible." }
+          ]
+        },
+        {
+          "type": "steps",
+          "kicker": "Deploying a Laravel app",
+          "heading": "The sequence that avoids surprises",
+          "items": [
+            { "title": "Back up before migrating", "body": "Run the database backup first. A failed migration with no backup is a much worse day than a failed migration." },
+            { "title": "Release the new code", "body": "Deploy from the repository so the release is tied to a revision rather than to a folder someone edited." },
+            { "title": "Restart the workers", "body": "Queue workers must pick up new code; a supervised worker is restarted by the platform on release." }
+          ]
+        }
+      ],
+      "faqs": [
+        { "q": "Is Redis available for queues?", "a": "Redis is available as a managed service, and the database driver can also be used. Choose according to the load you expect." },
+        { "q": "Can I run Horizon?", "a": "Horizon is a Laravel process like any other worker; run it as the worker command where the plan's resources allow." },
+        { "q": "How are uploads handled?", "a": "Attach a volume for the storage path, or use an object storage service. Leaving uploads inside a replaceable container is how user files disappear." }
+      ],
+      "related": ["/developers/php", "/platforms/databases", "/developers/deployment", "/developers/environments", "/hosting/backups", "/developers"]
+    },
+
+    {
+      "route": "/developers/docker",
+      "title": "Docker Hosting",
+      "category": "Developers",
+      "seoTitle": "Docker Hosting — Images, Volumes, Registries | CloudHost247",
+      "description": "Run Docker containers on CloudHost247: pull from public or private registries, attach persistent volumes, inject configuration and route a domain with TLS.",
+      "visual": "deployment/docker",
+      "hero": {
+        "kicker": "Runtime",
+        "heading": "If it runs in a container, it runs here",
+        "lede": "Build the image you want, run it on infrastructure you control, attach the volumes it needs and put a domain in front of it.",
+        "ctas": [
+          { "label": "See containers", "to": "/platforms/containers", "variant": "primary" },
+          { "label": "See deployment", "to": "/developers/deployment", "variant": "ghost" }
+        ],
+        "points": ["Public and private registries", "Persistent volumes", "Environment configuration", "Domain and TLS"]
+      },
+      "sections": [
+        {
+          "type": "features",
+          "kicker": "Running containers",
+          "heading": "What the platform provides",
+          "items": [
+            { "icon": "docker", "title": "Image deployment", "body": "Run an image the platform can pull, so the tested artefact is the deployed artefact." },
+            { "icon": "key", "title": "Private registries", "body": "Registry credentials are stored so a private image can be pulled without embedding a token in a script." },
+            { "icon": "hard-drive", "title": "Volumes", "body": "State declared by the application lives on a volume, so replacing the container does not destroy data." },
+            { "icon": "settings", "title": "Configuration", "body": "Environment variables and secrets applied per application, not baked into the image." },
+            { "icon": "globe", "title": "Routing", "body": "Attach the hostname, let the certificate issue, and the container is on the internet the way you intended." },
+            { "icon": "activity", "title": "Observability", "body": "Logs, resource use and restart behaviour recorded, so a crash loop is something you can see." }
+          ]
+        },
+        {
+          "type": "checks",
+          "kicker": "Container hygiene",
+          "heading": "Things that make containers safe to run",
+          "items": [
+            { "label": "Pin the tag", "body": "A moving tag means a redeploy can change the application without anyone deciding to change it." },
+            { "label": "Do not run as root by default", "body": "A container that does not need root should not have it; privileged containers widen the blast radius for no benefit." },
+            { "label": "Keep state on volumes", "body": "Anything written inside the container filesystem is temporary by definition, whatever it looks like during testing." },
+            { "label": "Choose small base images", "body": "A smaller image pulls faster, starts faster and presents fewer packages to keep patched." }
+          ]
+        }
+      ],
+      "faqs": [
+        { "q": "Can I use docker-compose?", "a": "The platform runs containerised services rather than executing a compose file directly. Multi-service applications are modelled as the services the account owns." },
+        { "q": "Is image building supported?", "a": "Building from a repository is supported through the deployment platform; otherwise build the image in your own pipeline and deploy the resulting tag." },
+        { "q": "Do you provide a container registry?", "a": "Registries are not operated by this platform. Use a registry you control or a public one, and supply credentials where the image is private." }
+      ],
+      "related": ["/platforms/containers", "/developers/deployment", "/developers/environments", "/platforms/databases", "/cloud/firewall", "/developers"]
+    }
+  ]
+}

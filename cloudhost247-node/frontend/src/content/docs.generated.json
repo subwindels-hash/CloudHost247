@@ -1,0 +1,131 @@
+{
+  "version": "2.0.0",
+  "documents": [
+    {
+      "slug": "api-catalog",
+      "href": "/docs/api-catalog",
+      "section": "APIs",
+      "title": "Catalog API",
+      "summary": "This document is the API contract for the catalog/application-façade layer added in Phase 3. It covers everything under /api/v1/catalog/ (public) and /api/v1/admin/catalog/ (authenticated admin). Keep",
+      "source": "docs/API_CATALOG.md",
+      "bytes": 13058
+    },
+    {
+      "slug": "api-commerce",
+      "href": "/docs/api-commerce",
+      "section": "APIs",
+      "title": "Commerce API",
+      "summary": "This document is the API contract for Phase 5A, \"Commerce foundation\": a customer's cart and the orders it becomes when checked out. Keep this in sync with the code — the source of truth is cloudhost2",
+      "source": "docs/API_COMMERCE.md",
+      "bytes": 11717
+    },
+    {
+      "slug": "api-billing",
+      "href": "/docs/api-billing",
+      "section": "APIs",
+      "title": "Billing API",
+      "summary": "This document is the API contract for Phase 5B, \"Billing foundation\": real invoices, issued automatically and atomically when an order is checked out (Phase 5A), and the append-only billing ledger beh",
+      "source": "docs/API_BILLING.md",
+      "bytes": 10953
+    },
+    {
+      "slug": "api-payments",
+      "href": "/docs/api-payments",
+      "section": "APIs",
+      "title": "Payments API",
+      "summary": "This document is the API contract for Phase 5C, \"Payment integration\": a payment gateway abstraction, a manual/offline (bank-transfer) gateway with staff-confirmed resolution, and a self-contained san",
+      "source": "docs/API_PAYMENTS.md",
+      "bytes": 13321
+    },
+    {
+      "slug": "api-customer-app",
+      "href": "/docs/api-customer-app",
+      "section": "APIs",
+      "title": "Customer application API",
+      "summary": "This document is the API contract for the Phase 4 \"Customer App\" layer: self-service customer account management, passive/informational service and domain records, and a basic support ticket system, p",
+      "source": "docs/API_CUSTOMER_APP.md",
+      "bytes": 15327
+    },
+    {
+      "slug": "domain-services-architecture",
+      "href": "/docs/domain-services-architecture",
+      "section": "Services",
+      "title": "Domain services architecture",
+      "summary": "This document records the Phase 1 audit and data/provider architecture for the Domain Services platform. It deliberately does not present a search box, price, availability, registration, transfer, auc",
+      "source": "docs/DOMAIN_SERVICES_ARCHITECTURE.md",
+      "bytes": 15304
+    },
+    {
+      "slug": "domain-brokerage",
+      "href": "/docs/domain-brokerage",
+      "section": "Services",
+      "title": "Domain brokerage",
+      "summary": "The Node platform's Domain Brokerage Engine is provider-neutral. src/domain-brokerage/provider.ts defines the adapter contract and capability registry; database provider rows are not considered connec",
+      "source": "docs/DOMAIN_BROKERAGE.md",
+      "bytes": 2989
+    },
+    {
+      "slug": "server-provisioning",
+      "href": "/docs/server-provisioning",
+      "section": "Services",
+      "title": "Server provisioning",
+      "summary": "CloudHost247 keeps the customer-facing operating-system catalog separate from provider image identifiers:",
+      "source": "docs/SERVER_PROVISIONING.md",
+      "bytes": 55609
+    },
+    {
+      "slug": "server-agent",
+      "href": "/docs/server-agent",
+      "section": "Services",
+      "title": "Server agent",
+      "summary": "The agent source lives in /server-agent/ (its own package, zero npm dependencies, Node ≥ 20). See /server-agent/README.md for install instructions and the request-authentication spec. This document is",
+      "source": "docs/SERVER_AGENT.md",
+      "bytes": 11351
+    },
+    {
+      "slug": "platform-services-architecture",
+      "href": "/docs/platform-services-architecture",
+      "section": "Services",
+      "title": "Platform services architecture",
+      "summary": "The CLOUDHOST247 platform (the Node/TypeScript application in cloudhost247-node/) runs the domain, hosting, website-building, AI-website, store, expert, marketing, logo, inbox and commerce services. T",
+      "source": "docs/PLATFORM_SERVICES_ARCHITECTURE.md",
+      "bytes": 7208
+    },
+    {
+      "slug": "passkey",
+      "href": "/docs/passkey",
+      "section": "Accounts",
+      "title": "Passkeys and WebAuthn",
+      "summary": "Reference documentation for modules/addons/cloudhost247_passkey. The README in that module covers installation and day-to-day operation; this document covers the security decisions, the threat model a",
+      "source": "docs/PASSKEY.md",
+      "bytes": 11107
+    },
+    {
+      "slug": "mrz-developer-tool",
+      "href": "/docs/mrz-developer-tool",
+      "section": "Accounts",
+      "title": "Document tools (MRZ)",
+      "summary": "The CloudHost247 ePassport Machine Readable Zone (MRZ) Developer Tool provides a native, privacy-first utility for:",
+      "source": "docs/MRZ_DEVELOPER_TOOL.md",
+      "bytes": 15621
+    },
+    {
+      "slug": "cpanel-deployment",
+      "href": "/docs/cpanel-deployment",
+      "section": "Operations",
+      "title": "cPanel deployment",
+      "summary": "This document covers deploying, updating, and operating the new independent Node.js/TypeScript platform (cloudhost247-node/) on cPanel shared hosting only, using cPanel's Application Manager (Passenge",
+      "source": "docs/CPANEL_DEPLOYMENT.md",
+      "bytes": 37540
+    },
+    {
+      "slug": "node-platform-status",
+      "href": "/docs/node-platform-status",
+      "section": "Operations",
+      "title": "Platform status and known gaps",
+      "summary": "Single source of truth for \"what has actually been verified\" vs. \"what has only been built and locally/CI tested.\" Update this file at the end of every phase. Do not describe any phase as \"cPanel-read",
+      "source": "docs/NODE_PLATFORM_STATUS.md",
+      "bytes": 169682
+    }
+  ]
+}
