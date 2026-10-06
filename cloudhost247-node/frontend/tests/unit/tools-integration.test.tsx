@@ -55,9 +55,13 @@ describe('every production tools route', () => {
       const button = screen.getByRole('button', { name: 'Run tool' });
       expect((button as HTMLButtonElement).disabled).toBe(tool.authRequired);
       expect(screen.getByLabelText('Advanced JSON input')).toBeTruthy();
-      expect(
-        document.head.querySelector('link[rel=canonical]')?.getAttribute('href')
-      ).toContain(tool.path);
+      // Head metadata is installed in a passive effect after the heading commits.
+      // Wait for that contract, not a scheduler-dependent immediate observation.
+      await waitFor(() =>
+        expect(
+          document.head.querySelector('link[rel=canonical]')?.getAttribute('href')
+        ).toContain(tool.path)
+      );
     }
   );
   it('renders loading and network failure instead of an empty successful result', async () => {
