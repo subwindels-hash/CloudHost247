@@ -1,4 +1,4 @@
-<link rel="stylesheet" href="{$WEB_ROOT}/templates/cloudhost247/css/site.css?v=20261005">
+<link rel="stylesheet" href="{$WEB_ROOT}/templates/cloudhost247/css/site.css?v=20261006">
 <link rel="icon" href="{$WEB_ROOT}/assets/images/cloudhost247/favicon/favicon.ico" sizes="any">
 <link rel="icon" type="image/svg+xml" href="{$WEB_ROOT}/assets/images/cloudhost247/brand/icon-mark.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="{$WEB_ROOT}/assets/images/cloudhost247/favicon/apple-touch-icon.png">
@@ -17,4 +17,4 @@
 <meta name="twitter:card" content="summary_large_image">
 {if !$ch247Site.public || $cloudhost247Page.missing || $ch247Site.path == 'site-search.php' || $ch247Site.path == 'service-error.php'}<meta name="robots" content="noindex,follow">{/if}
 {/if}
-<script src="{$WEB_ROOT}/templates/cloudhost247/js/site.js?v=20261005" defer></script>
+<script src="{$WEB_ROOT}/templates/cloudhost247/js/site.js?v=20261006" defer></script>

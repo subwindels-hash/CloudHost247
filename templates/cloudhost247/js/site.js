@@ -52,6 +52,15 @@
     } catch (_) { status.textContent = 'The platform catalog is temporarily unavailable. No sample results are shown. Please try the platform or contact support.'; }
     finally { clearTimeout(timeout); }
   });
+  const toolFilter = document.querySelector('[data-ch-tools-filter]');
+  if (toolFilter) {
+    toolFilter.addEventListener('input', () => {
+      const query = toolFilter.value.trim().toLowerCase();
+      document.querySelectorAll('[data-ch-tools-menu] .ch-mega-group li').forEach(item => {
+        item.hidden = query !== '' && !item.textContent.toLowerCase().includes(query);
+      });
+    });
+  }
   // One availability request for both shared menus. Nothing is promoted from static metadata.
   const toolsMenu = document.querySelector('[data-ch-tools-menu]');
   const toolsFooter = document.querySelector('[data-ch-tools-footer]');

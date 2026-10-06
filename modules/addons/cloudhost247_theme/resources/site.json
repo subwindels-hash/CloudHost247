@@ -355,7 +355,7 @@
     "developer-friendly.php": {
       "title": "Developer Hosting",
       "category": "Developer",
-      "headline": "From your first commit to what’s next.",
+      "headline": "From your first commit to what\u2019s next.",
       "summary": "Choose infrastructure for your code and workflow. Review runtime support, access options and resource limits for the selected service.",
       "visual": "deployment/developer-hosting",
       "features": [
@@ -527,7 +527,7 @@
     "help-center.php": {
       "title": "Help Center",
       "category": "Support",
-      "headline": "Let’s find your next step.",
+      "headline": "Let\u2019s find your next step.",
       "summary": "Browse the knowledgebase, review your services or open a support ticket from your CloudHost247 account.",
       "visual": "management/support",
       "features": [],
@@ -538,7 +538,7 @@
     "blog.php": {
       "title": "Blog",
       "category": "Marketing",
-      "headline": "Ideas for what you’re building.",
+      "headline": "Ideas for what you\u2019re building.",
       "summary": "Read published CloudHost247 updates and explore the knowledgebase for product guidance.",
       "visual": "blog/insights",
       "features": [],
@@ -820,6 +820,678 @@
       "uses": [],
       "related": [],
       "slug": "trademark-policy"
+    },
+    "business-hosting.php": {
+      "title": "Business Hosting",
+      "category": "Hosting",
+      "headline": "A calmer home for a business website.",
+      "summary": "Compare hosting for a company site, with room for email and a domain you already own.",
+      "visual": "hosting/business-hosting",
+      "features": [
+        [
+          "Confirm the plan",
+          "Published specifications are the source of truth for resources and software."
+        ],
+        [
+          "Keep ownership",
+          "Bring a domain you already control, or register one in the same account."
+        ],
+        [
+          "Ask before you migrate",
+          "The team can scope a move when you share the source and the target plan."
+        ]
+      ],
+      "uses": [
+        "New projects",
+        "Migrations",
+        "Teams standardizing on one provider"
+      ],
+      "related": [
+        "web-hosting.php",
+        "email-hosting.php",
+        "domain.php"
+      ],
+      "slug": "business-hosting"
+    },
+    "reseller-hosting.php": {
+      "title": "Reseller Hosting",
+      "category": "Hosting",
+      "headline": "Infrastructure for teams who host more than one site.",
+      "summary": "Review reseller-style hosting only against the plans currently published in the catalog.",
+      "visual": "hosting/reseller-hosting",
+      "features": [
+        [
+          "Confirm the plan",
+          "Published specifications are the source of truth for resources and software."
+        ],
+        [
+          "Keep ownership",
+          "Bring a domain you already control, or register one in the same account."
+        ],
+        [
+          "Ask before you migrate",
+          "The team can scope a move when you share the source and the target plan."
+        ]
+      ],
+      "uses": [
+        "New projects",
+        "Migrations",
+        "Teams standardizing on one provider"
+      ],
+      "related": [
+        "web-hosting.php",
+        "cpanel-hosting.php",
+        "cloudhost247-hosting.php"
+      ],
+      "slug": "reseller-hosting"
+    },
+    "nodejs-hosting.php": {
+      "title": "Node.js Hosting",
+      "category": "Developers",
+      "headline": "A place to run the Node.js version your app requires.",
+      "summary": "Confirm the runtime, process manager and resources on the plan before you deploy.",
+      "visual": "deployment/nodejs",
+      "features": [
+        [
+          "Confirm the plan",
+          "Published specifications are the source of truth for resources and software."
+        ],
+        [
+          "Keep ownership",
+          "Bring a domain you already control, or register one in the same account."
+        ],
+        [
+          "Ask before you migrate",
+          "The team can scope a move when you share the source and the target plan."
+        ]
+      ],
+      "uses": [
+        "New projects",
+        "Migrations",
+        "Teams standardizing on one provider"
+      ],
+      "related": [
+        "developer-friendly.php",
+        "paas.php",
+        "vps-hosting.php"
+      ],
+      "slug": "nodejs-hosting"
+    },
+    "php-hosting.php": {
+      "title": "PHP Hosting",
+      "category": "Developers",
+      "headline": "PHP hosting with the version your application documents.",
+      "summary": "Match the PHP version, extensions and database to the application you are moving.",
+      "visual": "deployment/php",
+      "features": [
+        [
+          "Confirm the plan",
+          "Published specifications are the source of truth for resources and software."
+        ],
+        [
+          "Keep ownership",
+          "Bring a domain you already control, or register one in the same account."
+        ],
+        [
+          "Ask before you migrate",
+          "The team can scope a move when you share the source and the target plan."
+        ]
+      ],
+      "uses": [
+        "New projects",
+        "Migrations",
+        "Teams standardizing on one provider"
+      ],
+      "related": [
+        "web-hosting.php",
+        "cpanel-hosting.php",
+        "developer-friendly.php"
+      ],
+      "slug": "php-hosting"
+    },
+    "python-hosting.php": {
+      "title": "Python Hosting",
+      "category": "Developers",
+      "headline": "Python workloads on a plan that states its runtime.",
+      "summary": "Check the interpreter version and process model in the published plan, not in a slogan.",
+      "visual": "deployment/python",
+      "features": [
+        [
+          "Confirm the plan",
+          "Published specifications are the source of truth for resources and software."
+        ],
+        [
+          "Keep ownership",
+          "Bring a domain you already control, or register one in the same account."
+        ],
+        [
+          "Ask before you migrate",
+          "The team can scope a move when you share the source and the target plan."
+        ]
+      ],
+      "uses": [
+        "New projects",
+        "Migrations",
+        "Teams standardizing on one provider"
+      ],
+      "related": [
+        "developer-friendly.php",
+        "vps-hosting.php",
+        "paas.php"
+      ],
+      "slug": "python-hosting"
+    },
+    "docker-hosting.php": {
+      "title": "Docker Hosting",
+      "category": "Developers",
+      "headline": "Containers when the selected platform actually offers them.",
+      "summary": "Deployment availability comes from the connected catalog. This page does not invent images.",
+      "visual": "deployment/docker",
+      "features": [
+        [
+          "Confirm the plan",
+          "Published specifications are the source of truth for resources and software."
+        ],
+        [
+          "Keep ownership",
+          "Bring a domain you already control, or register one in the same account."
+        ],
+        [
+          "Ask before you migrate",
+          "The team can scope a move when you share the source and the target plan."
+        ]
+      ],
+      "uses": [
+        "New projects",
+        "Migrations",
+        "Teams standardizing on one provider"
+      ],
+      "related": [
+        "paas.php",
+        "deployments.php",
+        "vps-hosting.php"
+      ],
+      "slug": "docker-hosting"
+    },
+    "laravel-hosting.php": {
+      "title": "Laravel Hosting",
+      "category": "Developers",
+      "headline": "Hosting considerations for a Laravel application.",
+      "summary": "Confirm PHP, queue, scheduler and database requirements against the plan you select.",
+      "visual": "deployment/laravel",
+      "features": [
+        [
+          "Confirm the plan",
+          "Published specifications are the source of truth for resources and software."
+        ],
+        [
+          "Keep ownership",
+          "Bring a domain you already control, or register one in the same account."
+        ],
+        [
+          "Ask before you migrate",
+          "The team can scope a move when you share the source and the target plan."
+        ]
+      ],
+      "uses": [
+        "New projects",
+        "Migrations",
+        "Teams standardizing on one provider"
+      ],
+      "related": [
+        "php-hosting.php",
+        "developer-friendly.php",
+        "web-hosting.php"
+      ],
+      "slug": "laravel-hosting"
+    },
+    "api-hosting.php": {
+      "title": "API Hosting",
+      "category": "Developers",
+      "headline": "A foundation for HTTP APIs you operate.",
+      "summary": "Choose compute and a hostname, then confirm TLS and rate limits for your own API.",
+      "visual": "deployment/api",
+      "features": [
+        [
+          "Confirm the plan",
+          "Published specifications are the source of truth for resources and software."
+        ],
+        [
+          "Keep ownership",
+          "Bring a domain you already control, or register one in the same account."
+        ],
+        [
+          "Ask before you migrate",
+          "The team can scope a move when you share the source and the target plan."
+        ]
+      ],
+      "uses": [
+        "New projects",
+        "Migrations",
+        "Teams standardizing on one provider"
+      ],
+      "related": [
+        "developer-friendly.php",
+        "vps-hosting.php",
+        "ssl-certificate.php"
+      ],
+      "slug": "api-hosting"
+    },
+    "paas.php": {
+      "title": "PaaS",
+      "category": "Developers",
+      "headline": "Application deployment when the platform catalog is connected.",
+      "summary": "The deployment pipeline is described honestly: queue, worker, domains and environment variables where implemented.",
+      "visual": "deployment/paas",
+      "features": [
+        [
+          "Confirm the plan",
+          "Published specifications are the source of truth for resources and software."
+        ],
+        [
+          "Keep ownership",
+          "Bring a domain you already control, or register one in the same account."
+        ],
+        [
+          "Ask before you migrate",
+          "The team can scope a move when you share the source and the target plan."
+        ]
+      ],
+      "uses": [
+        "New projects",
+        "Migrations",
+        "Teams standardizing on one provider"
+      ],
+      "related": [
+        "deployments.php",
+        "developer-friendly.php",
+        "applications.php"
+      ],
+      "slug": "paas"
+    },
+    "data-centers.php": {
+      "title": "Data Centers",
+      "category": "Infrastructure",
+      "headline": "Locations only when a product configuration names them.",
+      "summary": "This page does not publish a city list. Available locations are the ones attached to a plan.",
+      "visual": "cloud/data-centers",
+      "features": [
+        [
+          "Confirm the plan",
+          "Published specifications are the source of truth for resources and software."
+        ],
+        [
+          "Keep ownership",
+          "Bring a domain you already control, or register one in the same account."
+        ],
+        [
+          "Ask before you migrate",
+          "The team can scope a move when you share the source and the target plan."
+        ]
+      ],
+      "uses": [
+        "New projects",
+        "Migrations",
+        "Teams standardizing on one provider"
+      ],
+      "related": [
+        "infrastructure.php",
+        "vps-hosting.php",
+        "dedicated-server.php"
+      ],
+      "slug": "data-centers"
+    },
+    "network.php": {
+      "title": "Network",
+      "category": "Infrastructure",
+      "headline": "How to read the network details a plan actually publishes.",
+      "summary": "Transit, bandwidth and addresses are plan fields, not a global claim on this page.",
+      "visual": "cloud/network",
+      "features": [
+        [
+          "Confirm the plan",
+          "Published specifications are the source of truth for resources and software."
+        ],
+        [
+          "Keep ownership",
+          "Bring a domain you already control, or register one in the same account."
+        ],
+        [
+          "Ask before you migrate",
+          "The team can scope a move when you share the source and the target plan."
+        ]
+      ],
+      "uses": [
+        "New projects",
+        "Migrations",
+        "Teams standardizing on one provider"
+      ],
+      "related": [
+        "infrastructure.php",
+        "vps-hosting.php",
+        "firewall.php"
+      ],
+      "slug": "network"
+    },
+    "security.php": {
+      "title": "Security",
+      "category": "Infrastructure",
+      "headline": "Security controls you can verify from your account and our policies.",
+      "summary": "TLS, access and abuse handling are documented. Certifications are listed only when published.",
+      "visual": "security/platform-security",
+      "features": [
+        [
+          "Confirm the plan",
+          "Published specifications are the source of truth for resources and software."
+        ],
+        [
+          "Keep ownership",
+          "Bring a domain you already control, or register one in the same account."
+        ],
+        [
+          "Ask before you migrate",
+          "The team can scope a move when you share the source and the target plan."
+        ]
+      ],
+      "uses": [
+        "New projects",
+        "Migrations",
+        "Teams standardizing on one provider"
+      ],
+      "related": [
+        "ssl-certificate.php",
+        "web-hosting.php",
+        "help-center.php"
+      ],
+      "slug": "security"
+    },
+    "monitoring.php": {
+      "title": "Monitoring",
+      "category": "Infrastructure",
+      "headline": "Service status and the checks your plan exposes.",
+      "summary": "Public status is the status page. Per-server graphs appear in the client area when the product provides them.",
+      "visual": "management/monitoring",
+      "features": [
+        [
+          "Confirm the plan",
+          "Published specifications are the source of truth for resources and software."
+        ],
+        [
+          "Keep ownership",
+          "Bring a domain you already control, or register one in the same account."
+        ],
+        [
+          "Ask before you migrate",
+          "The team can scope a move when you share the source and the target plan."
+        ]
+      ],
+      "uses": [
+        "New projects",
+        "Migrations",
+        "Teams standardizing on one provider"
+      ],
+      "related": [
+        "server-management.php",
+        "vps-hosting.php",
+        "help-center.php"
+      ],
+      "slug": "monitoring"
+    },
+    "backups.php": {
+      "title": "Backups",
+      "category": "Infrastructure",
+      "headline": "Backup options depend on the product you buy.",
+      "summary": "Read the backup policy and the plan description. This page does not promise a retention period the catalog does not state.",
+      "visual": "management/backups",
+      "features": [
+        [
+          "Confirm the plan",
+          "Published specifications are the source of truth for resources and software."
+        ],
+        [
+          "Keep ownership",
+          "Bring a domain you already control, or register one in the same account."
+        ],
+        [
+          "Ask before you migrate",
+          "The team can scope a move when you share the source and the target plan."
+        ]
+      ],
+      "uses": [
+        "New projects",
+        "Migrations",
+        "Teams standardizing on one provider"
+      ],
+      "related": [
+        "backup-policy.php",
+        "server-management.php",
+        "web-hosting.php"
+      ],
+      "slug": "backups"
+    },
+    "firewall.php": {
+      "title": "Firewall",
+      "category": "Infrastructure",
+      "headline": "Firewall controls when the server product includes them.",
+      "summary": "Open the service in your account to see which rules you can change. Marketing pages do not toggle live firewalls.",
+      "visual": "management/firewall",
+      "features": [
+        [
+          "Confirm the plan",
+          "Published specifications are the source of truth for resources and software."
+        ],
+        [
+          "Keep ownership",
+          "Bring a domain you already control, or register one in the same account."
+        ],
+        [
+          "Ask before you migrate",
+          "The team can scope a move when you share the source and the target plan."
+        ]
+      ],
+      "uses": [
+        "New projects",
+        "Migrations",
+        "Teams standardizing on one provider"
+      ],
+      "related": [
+        "server-management.php",
+        "security.php",
+        "vps-hosting.php"
+      ],
+      "slug": "firewall"
+    },
+    "dns-management.php": {
+      "title": "DNS Management",
+      "category": "Domains",
+      "headline": "Manage DNS for domains in your account, and diagnose any name with the tools.",
+      "summary": "Authoritative edits happen in the client area. The tools are read-only diagnostics.",
+      "visual": "domains/dns-management",
+      "features": [
+        [
+          "Confirm the plan",
+          "Published specifications are the source of truth for resources and software."
+        ],
+        [
+          "Keep ownership",
+          "Bring a domain you already control, or register one in the same account."
+        ],
+        [
+          "Ask before you migrate",
+          "The team can scope a move when you share the source and the target plan."
+        ]
+      ],
+      "uses": [
+        "New projects",
+        "Migrations",
+        "Teams standardizing on one provider"
+      ],
+      "related": [
+        "domain.php",
+        "domain-dns.php",
+        "web-hosting.php"
+      ],
+      "slug": "dns-management"
+    },
+    "domain-dns.php": {
+      "title": "Domain DNS",
+      "category": "Domains",
+      "headline": "DNS for the domains you register or transfer to CloudHost247.",
+      "summary": "Nameserver and record changes are available from the domain management screen after registration.",
+      "visual": "domains/domain-dns",
+      "features": [
+        [
+          "Confirm the plan",
+          "Published specifications are the source of truth for resources and software."
+        ],
+        [
+          "Keep ownership",
+          "Bring a domain you already control, or register one in the same account."
+        ],
+        [
+          "Ask before you migrate",
+          "The team can scope a move when you share the source and the target plan."
+        ]
+      ],
+      "uses": [
+        "New projects",
+        "Migrations",
+        "Teams standardizing on one provider"
+      ],
+      "related": [
+        "domain.php",
+        "dns-management.php",
+        "web-hosting.php"
+      ],
+      "slug": "domain-dns"
+    },
+    "ip-management.php": {
+      "title": "IP Management",
+      "category": "Infrastructure",
+      "headline": "Addresses assigned to a service are listed on that service.",
+      "summary": "Additional addresses, if offered, are part of the product configuration rather than a public claim.",
+      "visual": "management/ip-management",
+      "features": [
+        [
+          "Confirm the plan",
+          "Published specifications are the source of truth for resources and software."
+        ],
+        [
+          "Keep ownership",
+          "Bring a domain you already control, or register one in the same account."
+        ],
+        [
+          "Ask before you migrate",
+          "The team can scope a move when you share the source and the target plan."
+        ]
+      ],
+      "uses": [
+        "New projects",
+        "Migrations",
+        "Teams standardizing on one provider"
+      ],
+      "related": [
+        "server-management.php",
+        "vps-hosting.php",
+        "dedicated-server.php"
+      ],
+      "slug": "ip-management"
+    },
+    "migration.php": {
+      "title": "Migration",
+      "category": "Infrastructure",
+      "headline": "Plan a move with the team before you change nameservers.",
+      "summary": "Migrations are scoped per project. Contact the team with the source panel and the target plan.",
+      "visual": "management/migration",
+      "features": [
+        [
+          "Confirm the plan",
+          "Published specifications are the source of truth for resources and software."
+        ],
+        [
+          "Keep ownership",
+          "Bring a domain you already control, or register one in the same account."
+        ],
+        [
+          "Ask before you migrate",
+          "The team can scope a move when you share the source and the target plan."
+        ]
+      ],
+      "uses": [
+        "New projects",
+        "Migrations",
+        "Teams standardizing on one provider"
+      ],
+      "related": [
+        "web-hosting.php",
+        "help-center.php",
+        "aboutus.php"
+      ],
+      "slug": "migration"
+    },
+    "managed-services.php": {
+      "title": "Managed Services",
+      "category": "Infrastructure",
+      "headline": "Ask for management only where a plan offers it.",
+      "summary": "Managed options are confirmed in a proposal or plan feature, not assumed for every server.",
+      "visual": "management/managed-services",
+      "features": [
+        [
+          "Confirm the plan",
+          "Published specifications are the source of truth for resources and software."
+        ],
+        [
+          "Keep ownership",
+          "Bring a domain you already control, or register one in the same account."
+        ],
+        [
+          "Ask before you migrate",
+          "The team can scope a move when you share the source and the target plan."
+        ]
+      ],
+      "uses": [
+        "New projects",
+        "Migrations",
+        "Teams standardizing on one provider"
+      ],
+      "related": [
+        "enterprise-servers.php",
+        "server-management.php",
+        "help-center.php"
+      ],
+      "slug": "managed-services"
+    },
+    "documentation.php": {
+      "title": "Documentation",
+      "category": "Resources",
+      "headline": "Product guidance lives in the knowledgebase and the help center.",
+      "summary": "Search published articles, then open a ticket if the article does not cover your service.",
+      "visual": "blog/documentation",
+      "features": [
+        [
+          "Confirm the plan",
+          "Published specifications are the source of truth for resources and software."
+        ],
+        [
+          "Keep ownership",
+          "Bring a domain you already control, or register one in the same account."
+        ],
+        [
+          "Ask before you migrate",
+          "The team can scope a move when you share the source and the target plan."
+        ]
+      ],
+      "uses": [
+        "New projects",
+        "Migrations",
+        "Teams standardizing on one provider"
+      ],
+      "related": [
+        "help-center.php",
+        "faqs.php",
+        "blog.php"
+      ],
+      "slug": "documentation"
     }
   },
   "navigation": [
@@ -835,67 +1507,35 @@
               "url": "web-hosting.php"
             },
             {
-              "label": "WordPress Hosting",
+              "label": "WordPress",
               "url": "wordpress-hosting.php"
             },
             {
-              "label": "cPanel Hosting",
+              "label": "Business",
+              "url": "business-hosting.php"
+            },
+            {
+              "label": "cPanel",
               "url": "cpanel-hosting.php"
             },
             {
-              "label": "Plesk Hosting",
+              "label": "Plesk",
               "url": "plesk-hosting.php"
             },
             {
-              "label": "Windows Hosting",
+              "label": "Windows",
               "url": "windows-hosting.php"
             },
             {
-              "label": "Email Hosting",
+              "label": "Email",
               "url": "email-hosting.php"
+            },
+            {
+              "label": "Reseller",
+              "url": "reseller-hosting.php"
             }
           ]
         },
-        {
-          "title": "Your website",
-          "links": [
-            {
-              "label": "Website Design",
-              "url": "website-design.php"
-            },
-            {
-              "label": "SSL Certificates",
-              "url": "ssl-certificate.php"
-            },
-            {
-              "label": "Domain Search",
-              "url": "cart.php?a=add&domain=register"
-            }
-          ]
-        },
-        {
-          "title": "Find your fit",
-          "links": [
-            {
-              "label": "All Available Plans",
-              "url": "cloudhost247-hosting.php"
-            },
-            {
-              "label": "Developer Hosting",
-              "url": "developer-friendly.php"
-            },
-            {
-              "label": "Discuss a Migration",
-              "url": "contact.php"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "title": "Cloud & Servers",
-      "description": "Build on the right foundation.",
-      "groups": [
         {
           "title": "Cloud",
           "links": [
@@ -912,20 +1552,83 @@
               "url": "vps-privatecloud.php"
             },
             {
-              "label": "VPS Hosting",
+              "label": "VPS",
               "url": "vps-hosting.php"
+            },
+            {
+              "label": "Dedicated",
+              "url": "dedicated-server.php"
+            },
+            {
+              "label": "Enterprise",
+              "url": "enterprise-servers.php"
             }
           ]
         },
         {
+          "title": "Developer",
+          "links": [
+            {
+              "label": "Node.js",
+              "url": "nodejs-hosting.php"
+            },
+            {
+              "label": "PHP",
+              "url": "php-hosting.php"
+            },
+            {
+              "label": "Python",
+              "url": "python-hosting.php"
+            },
+            {
+              "label": "Docker",
+              "url": "docker-hosting.php"
+            },
+            {
+              "label": "Laravel",
+              "url": "laravel-hosting.php"
+            },
+            {
+              "label": "APIs",
+              "url": "api-hosting.php"
+            },
+            {
+              "label": "PaaS",
+              "url": "paas.php"
+            },
+            {
+              "label": "Deployment",
+              "url": "deployments.php"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Cloud & Servers",
+      "description": "Build on the right foundation.",
+      "groups": [
+        {
           "title": "Servers",
           "links": [
             {
-              "label": "Dedicated Servers",
+              "label": "VPS",
+              "url": "vps-hosting.php"
+            },
+            {
+              "label": "Public Cloud",
+              "url": "vps-publiccloud.php"
+            },
+            {
+              "label": "Private Cloud",
+              "url": "vps-privatecloud.php"
+            },
+            {
+              "label": "Dedicated",
               "url": "dedicated-server.php"
             },
             {
-              "label": "Enterprise Servers",
+              "label": "Enterprise",
               "url": "enterprise-servers.php"
             },
             {
@@ -935,23 +1638,109 @@
           ]
         },
         {
-          "title": "Infrastructure",
+          "title": "Operating systems",
           "links": [
             {
-              "label": "Infrastructure",
-              "url": "infrastructure.php"
-            },
-            {
-              "label": "Operating Systems",
+              "label": "OS catalog",
               "url": "operating-systems.php"
             },
             {
-              "label": "Server Management",
-              "url": "server-management.php"
+              "label": "Ubuntu",
+              "url": "operating-systems.php#ubuntu"
             },
             {
-              "label": "System Status",
+              "label": "Debian",
+              "url": "operating-systems.php#debian"
+            },
+            {
+              "label": "AlmaLinux",
+              "url": "operating-systems.php#almalinux"
+            },
+            {
+              "label": "Rocky Linux",
+              "url": "operating-systems.php#rocky"
+            },
+            {
+              "label": "Windows Server",
+              "url": "operating-systems.php#windows"
+            }
+          ]
+        },
+        {
+          "title": "Images",
+          "links": [
+            {
+              "label": "WordPress",
+              "url": "operating-systems.php#wordpress"
+            },
+            {
+              "label": "Docker",
+              "url": "operating-systems.php#docker"
+            },
+            {
+              "label": "LAMP",
+              "url": "operating-systems.php#lamp"
+            },
+            {
+              "label": "LEMP",
+              "url": "operating-systems.php#lemp"
+            },
+            {
+              "label": "cPanel",
+              "url": "operating-systems.php#cpanel"
+            },
+            {
+              "label": "Plesk",
+              "url": "operating-systems.php#plesk"
+            }
+          ]
+        },
+        {
+          "title": "Management",
+          "links": [
+            {
+              "label": "Monitoring",
+              "url": "monitoring.php"
+            },
+            {
+              "label": "Backups",
+              "url": "backups.php"
+            },
+            {
+              "label": "Security",
+              "url": "security.php"
+            },
+            {
+              "label": "Firewall",
+              "url": "firewall.php"
+            },
+            {
+              "label": "DNS",
+              "url": "dns-management.php"
+            },
+            {
+              "label": "SSL",
+              "url": "ssl-certificate.php"
+            },
+            {
+              "label": "IP Management",
+              "url": "ip-management.php"
+            },
+            {
+              "label": "Server control",
+              "url": "clientarea.php?action=services"
+            },
+            {
+              "label": "Status",
               "url": "serverstatus.php"
+            },
+            {
+              "label": "Migration",
+              "url": "migration.php"
+            },
+            {
+              "label": "Managed Services",
+              "url": "managed-services.php"
             }
           ]
         }
@@ -965,46 +1754,33 @@
           "title": "Find a domain",
           "links": [
             {
-              "label": "Search Domains",
+              "label": "Domain Search",
               "url": "domain.php"
             },
             {
-              "label": "Register Domain",
+              "label": "Registration",
               "url": "cart.php?a=add&domain=register"
             },
             {
-              "label": "Transfer Domain",
+              "label": "Transfer",
               "url": "cart.php?a=add&domain=transfer"
             },
             {
-              "label": "Domain Pricing",
+              "label": "Pricing",
               "url": "index.php?rp=/domain/pricing"
             }
           ]
         },
         {
-          "title": "Your domains",
+          "title": "Management",
           "links": [
-            {
-              "label": "Domain Renewal",
-              "url": "clientarea.php?action=domains"
-            },
             {
               "label": "Domain Management",
               "url": "clientarea.php?action=domains"
             },
             {
-              "label": "DNS & Nameservers",
-              "url": "clientarea.php?action=domains"
-            }
-          ]
-        },
-        {
-          "title": "Guidance",
-          "links": [
-            {
-              "label": "Domain Agreement",
-              "url": "domain-agreement.php"
+              "label": "DNS",
+              "url": "domain-dns.php"
             },
             {
               "label": "Renewal Policy",
@@ -1015,49 +1791,82 @@
               "url": "domain-brokerage-terms.php"
             }
           ]
+        },
+        {
+          "title": "Diagnostics",
+          "links": [
+            {
+              "label": "DNS Checker",
+              "url": "tools/dns-checker"
+            },
+            {
+              "label": "DNS Lookup",
+              "url": "tools/dns-lookup"
+            },
+            {
+              "label": "Domain WHOIS",
+              "url": "tools/domain-whois"
+            }
+          ]
         }
       ]
     },
     {
       "title": "Applications",
-      "description": "Your software. Connected infrastructure.",
+      "description": "Software the catalog can actually deploy.",
       "groups": [
         {
-          "title": "Explore",
+          "title": "CMS",
           "links": [
             {
-              "label": "Application Catalog",
+              "label": "Application catalog",
               "url": "applications.php"
             },
             {
-              "label": "WordPress Hosting",
+              "label": "WordPress",
               "url": "wordpress-hosting.php"
+            },
+            {
+              "label": "Ghost",
+              "url": "applications.php#ghost"
             }
           ]
         },
         {
-          "title": "Build",
+          "title": "Ecommerce",
           "links": [
             {
-              "label": "Developer Hosting",
-              "url": "developer-friendly.php"
+              "label": "PrestaShop",
+              "url": "applications.php#prestashop"
             },
             {
-              "label": "Deployment Platform",
-              "url": "deployments.php"
+              "label": "All applications",
+              "url": "applications.php"
             }
           ]
         },
         {
-          "title": "Configure",
+          "title": "Developer",
           "links": [
             {
-              "label": "Operating Systems",
-              "url": "operating-systems.php"
+              "label": "Node.js",
+              "url": "nodejs-hosting.php"
             },
             {
-              "label": "Available Plans",
-              "url": "cloudhost247-hosting.php"
+              "label": "PHP",
+              "url": "php-hosting.php"
+            },
+            {
+              "label": "Python",
+              "url": "python-hosting.php"
+            },
+            {
+              "label": "Laravel",
+              "url": "laravel-hosting.php"
+            },
+            {
+              "label": "Docker",
+              "url": "docker-hosting.php"
             }
           ]
         }
@@ -1068,19 +1877,39 @@
       "description": "A foundation for whatever you build next.",
       "groups": [
         {
-          "title": "Deploy",
+          "title": "Runtimes",
           "links": [
             {
-              "label": "Deployment Platform",
+              "label": "Node.js",
+              "url": "nodejs-hosting.php"
+            },
+            {
+              "label": "PHP",
+              "url": "php-hosting.php"
+            },
+            {
+              "label": "Python",
+              "url": "python-hosting.php"
+            },
+            {
+              "label": "Docker",
+              "url": "docker-hosting.php"
+            },
+            {
+              "label": "Laravel",
+              "url": "laravel-hosting.php"
+            },
+            {
+              "label": "APIs",
+              "url": "api-hosting.php"
+            },
+            {
+              "label": "PaaS",
+              "url": "paas.php"
+            },
+            {
+              "label": "Deployment",
               "url": "deployments.php"
-            },
-            {
-              "label": "Developer Hosting",
-              "url": "developer-friendly.php"
-            },
-            {
-              "label": "Applications",
-              "url": "applications.php"
             }
           ]
         },
@@ -1096,25 +1925,513 @@
               "url": "operating-systems.php"
             },
             {
-              "label": "VPS Hosting",
+              "label": "VPS",
               "url": "vps-hosting.php"
             }
           ]
         },
         {
-          "title": "Get help",
+          "title": "Reference",
           "links": [
+            {
+              "label": "Documentation",
+              "url": "documentation.php"
+            },
             {
               "label": "Knowledgebase",
               "url": "knowledgebase.php"
             },
             {
-              "label": "Submit Ticket",
-              "url": "submitticket.php"
+              "label": "Tools",
+              "url": "tools"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Tools",
+      "description": "Free professional tools for DNS, networking, developers, security and webmasters.",
+      "groups": [
+        {
+          "title": "Featured",
+          "links": [
+            {
+              "label": "DNS Checker",
+              "url": "tools/dns-checker"
             },
             {
-              "label": "Contact Sales",
-              "url": "contact.php"
+              "label": "DNS Propagation",
+              "url": "tools/dns-propagation"
+            },
+            {
+              "label": "DNS Lookup",
+              "url": "tools/dns-lookup"
+            },
+            {
+              "label": "MX Lookup",
+              "url": "tools/mx-lookup"
+            },
+            {
+              "label": "What Is My IP",
+              "url": "tools/what-is-my-ip"
+            },
+            {
+              "label": "IP Location Lookup",
+              "url": "tools/ip-location-lookup"
+            },
+            {
+              "label": "IP WHOIS",
+              "url": "tools/ip-whois"
+            },
+            {
+              "label": "IP Subnet Calculator",
+              "url": "tools/ip-subnet-calculator"
+            },
+            {
+              "label": "JSON Beautifier",
+              "url": "tools/json-beautifier"
+            },
+            {
+              "label": "Port Checker",
+              "url": "tools/port-checker"
+            },
+            {
+              "label": "SSL Certificate Checker",
+              "url": "tools/ssl-certificate-checker"
+            },
+            {
+              "label": "QR Code Generator",
+              "url": "tools/qr-code-generator"
+            },
+            {
+              "label": "Internet Speed Test",
+              "url": "tools/internet-speed-test"
+            },
+            {
+              "label": "Domain WHOIS",
+              "url": "tools/domain-whois"
+            }
+          ]
+        },
+        {
+          "title": "DNS",
+          "links": [
+            {
+              "label": "DNS Checker",
+              "url": "tools/dns-checker"
+            },
+            {
+              "label": "DNS Propagation",
+              "url": "tools/dns-propagation"
+            },
+            {
+              "label": "Domain DNS Validation",
+              "url": "tools/domain-dns-validation"
+            },
+            {
+              "label": "Reverse IP Lookup",
+              "url": "tools/reverse-ip-lookup"
+            },
+            {
+              "label": "DNS Lookup",
+              "url": "tools/dns-lookup"
+            },
+            {
+              "label": "CNAME Lookup",
+              "url": "tools/cname-lookup"
+            },
+            {
+              "label": "NS Lookup",
+              "url": "tools/ns-lookup"
+            },
+            {
+              "label": "MX Lookup",
+              "url": "tools/mx-lookup"
+            },
+            {
+              "label": "SPF Record Checker",
+              "url": "tools/spf-record-checker"
+            },
+            {
+              "label": "DMARC Checker",
+              "url": "tools/dmarc-checker"
+            },
+            {
+              "label": "Domain DNS Health Checker",
+              "url": "tools/domain-dns-health"
+            },
+            {
+              "label": "DMARC Record Generator",
+              "url": "tools/dmarc-record-generator"
+            },
+            {
+              "label": "DNSKEY Lookup",
+              "url": "tools/dnskey-lookup"
+            },
+            {
+              "label": "DS Lookup",
+              "url": "tools/ds-lookup"
+            },
+            {
+              "label": "DKIM Checker",
+              "url": "tools/dkim-checker"
+            }
+          ]
+        },
+        {
+          "title": "IP",
+          "links": [
+            {
+              "label": "Ping IPv4",
+              "url": "tools/ping-ipv4"
+            },
+            {
+              "label": "Ping IPv6",
+              "url": "tools/ping-ipv6"
+            },
+            {
+              "label": "What Is My IP",
+              "url": "tools/what-is-my-ip"
+            },
+            {
+              "label": "Traceroute",
+              "url": "tools/traceroute"
+            },
+            {
+              "label": "IP Location Lookup",
+              "url": "tools/ip-location-lookup"
+            },
+            {
+              "label": "Trace Email",
+              "url": "tools/trace-email"
+            },
+            {
+              "label": "IP Blacklist Checker",
+              "url": "tools/ip-blacklist-checker"
+            },
+            {
+              "label": "Email Blacklist Checker",
+              "url": "tools/email-blacklist-checker"
+            },
+            {
+              "label": "IP to Decimal",
+              "url": "tools/ip-to-decimal"
+            },
+            {
+              "label": "IP to Hostname",
+              "url": "tools/ip-to-hostname"
+            },
+            {
+              "label": "IP WHOIS",
+              "url": "tools/ip-whois"
+            },
+            {
+              "label": "IPv6 WHOIS",
+              "url": "tools/ipv6-whois"
+            },
+            {
+              "label": "IPv4 to IPv6",
+              "url": "tools/ipv4-to-ipv6"
+            },
+            {
+              "label": "Local IPv6 Address Generator",
+              "url": "tools/local-ipv6-generator"
+            },
+            {
+              "label": "IPv6 CIDR to Range",
+              "url": "tools/ipv6-cidr-to-range"
+            },
+            {
+              "label": "IPv6 Range to CIDR",
+              "url": "tools/ipv6-range-to-cidr"
+            },
+            {
+              "label": "IPv6 Compression",
+              "url": "tools/ipv6-compression"
+            },
+            {
+              "label": "IPv6 Expand",
+              "url": "tools/ipv6-expand"
+            },
+            {
+              "label": "IP Subnet Calculator",
+              "url": "tools/ip-subnet-calculator"
+            },
+            {
+              "label": "IPv6 to IPv4",
+              "url": "tools/ipv6-to-ipv4"
+            },
+            {
+              "label": "IPv6 Compatibility Checker",
+              "url": "tools/ipv6-compatibility-checker"
+            },
+            {
+              "label": "What Is My ISP",
+              "url": "tools/what-is-my-isp"
+            },
+            {
+              "label": "Domain to IP",
+              "url": "tools/domain-to-ip"
+            }
+          ]
+        },
+        {
+          "title": "Developer",
+          "links": [
+            {
+              "label": "HTTP Headers Checker",
+              "url": "tools/http-headers-checker"
+            },
+            {
+              "label": "Website Operating System Checker",
+              "url": "tools/website-os-checker"
+            },
+            {
+              "label": "MD5 Generator",
+              "url": "tools/md5-generator"
+            },
+            {
+              "label": "Base64 Generator",
+              "url": "tools/base64-generator"
+            },
+            {
+              "label": "Multi URL Opener",
+              "url": "tools/multi-url-opener"
+            },
+            {
+              "label": "SMTP Test",
+              "url": "tools/smtp-test"
+            },
+            {
+              "label": ".htaccess Redirect Generator",
+              "url": "tools/htaccess-redirect-generator"
+            },
+            {
+              "label": "URL Rewrite Generator",
+              "url": "tools/url-rewrite-generator"
+            },
+            {
+              "label": "Broken Link Checker",
+              "url": "tools/broken-link-checker"
+            },
+            {
+              "label": "Open Graph Checker",
+              "url": "tools/open-graph-checker"
+            },
+            {
+              "label": "RAID Calculator",
+              "url": "tools/raid-calculator"
+            },
+            {
+              "label": "Binary Translator",
+              "url": "tools/binary-translator"
+            },
+            {
+              "label": "Text to Binary",
+              "url": "tools/text-to-binary"
+            },
+            {
+              "label": "JSON Viewer",
+              "url": "tools/json-viewer"
+            },
+            {
+              "label": "JSON Beautifier",
+              "url": "tools/json-beautifier"
+            },
+            {
+              "label": "JSON Minifier",
+              "url": "tools/json-minifier"
+            },
+            {
+              "label": "Email Verifier",
+              "url": "tools/email-verifier"
+            }
+          ]
+        },
+        {
+          "title": "Designer",
+          "links": [
+            {
+              "label": "RGB to Colortone",
+              "url": "tools/rgb-to-colortone"
+            },
+            {
+              "label": "HEX to Colortone",
+              "url": "tools/hex-to-colortone"
+            },
+            {
+              "label": "CMYK to Colortone",
+              "url": "tools/cmyk-to-colortone"
+            },
+            {
+              "label": "HSV to Colortone",
+              "url": "tools/hsv-to-colortone"
+            }
+          ]
+        },
+        {
+          "title": "Webmaster",
+          "links": [
+            {
+              "label": "Website Link Analyzer",
+              "url": "tools/website-link-analyzer"
+            },
+            {
+              "label": "User Agent Checker",
+              "url": "tools/user-agent-checker"
+            },
+            {
+              "label": "Google Page Rank Checker",
+              "url": "tools/pagerank-checker"
+            },
+            {
+              "label": "Punycode Converter",
+              "url": "tools/punycode-converter"
+            },
+            {
+              "label": "Google SERP Simulator",
+              "url": "tools/serp-simulator"
+            },
+            {
+              "label": "Robots.txt Generator",
+              "url": "tools/robots-txt-generator"
+            }
+          ]
+        },
+        {
+          "title": "Network",
+          "links": [
+            {
+              "label": "Port Checker",
+              "url": "tools/port-checker"
+            },
+            {
+              "label": "MAC Address Lookup",
+              "url": "tools/mac-address-lookup"
+            },
+            {
+              "label": "MAC Address Generator",
+              "url": "tools/mac-address-generator"
+            },
+            {
+              "label": "ASN WHOIS Lookup",
+              "url": "tools/asn-whois-lookup"
+            }
+          ]
+        },
+        {
+          "title": "Cybersecurity",
+          "links": [
+            {
+              "label": "SSL Certificate Checker",
+              "url": "tools/ssl-certificate-checker"
+            },
+            {
+              "label": "Password Encryption",
+              "url": "tools/password-encryption"
+            },
+            {
+              "label": "Random Password Generator",
+              "url": "tools/random-password-generator"
+            },
+            {
+              "label": "Password Strength Checker",
+              "url": "tools/password-strength-checker"
+            }
+          ]
+        },
+        {
+          "title": "Productivity",
+          "links": [
+            {
+              "label": "QR Code Generator",
+              "url": "tools/qr-code-generator"
+            },
+            {
+              "label": "QR Scanner",
+              "url": "tools/qr-scanner"
+            },
+            {
+              "label": "Lorem Ipsum Generator",
+              "url": "tools/lorem-ipsum-generator"
+            },
+            {
+              "label": "Time Card Calculator",
+              "url": "tools/time-card-calculator"
+            },
+            {
+              "label": "BIN Checker",
+              "url": "tools/bin-checker"
+            },
+            {
+              "label": "Credit Card Checker",
+              "url": "tools/credit-card-checker"
+            },
+            {
+              "label": "Reverse Image Search",
+              "url": "tools/reverse-image-search"
+            },
+            {
+              "label": "Name Checker",
+              "url": "tools/name-checker"
+            },
+            {
+              "label": "Online Notepad",
+              "url": "tools/online-notepad"
+            },
+            {
+              "label": "Small Text Generator",
+              "url": "tools/small-text-generator"
+            },
+            {
+              "label": "Word Counter",
+              "url": "tools/word-counter"
+            },
+            {
+              "label": "Domain Name Search",
+              "url": "tools/domain-name-search"
+            },
+            {
+              "label": "ROT13 Encoder/Decoder",
+              "url": "tools/rot13"
+            },
+            {
+              "label": "Morse Code Translator",
+              "url": "tools/morse-code-translator"
+            },
+            {
+              "label": "BIMI Checker & Generator",
+              "url": "tools/bimi-checker-generator"
+            },
+            {
+              "label": "Image to Text",
+              "url": "tools/image-to-text"
+            },
+            {
+              "label": "Runic Translator",
+              "url": "tools/runic-translator"
+            },
+            {
+              "label": "Invisible Character Generator",
+              "url": "tools/invisible-character-generator"
+            },
+            {
+              "label": "Internet Speed Test",
+              "url": "tools/internet-speed-test"
+            },
+            {
+              "label": "WiFi QR Scanner",
+              "url": "tools/wifi-qr-scanner"
+            }
+          ]
+        },
+        {
+          "title": "Gaming",
+          "links": [
+            {
+              "label": "Minecraft Color Codes",
+              "url": "tools/minecraft-color-codes"
             }
           ]
         }
@@ -1132,12 +2449,16 @@
               "url": "knowledgebase.php"
             },
             {
-              "label": "Blog & Updates",
+              "label": "Blog",
               "url": "blog.php"
             },
             {
               "label": "FAQs",
               "url": "faqs.php"
+            },
+            {
+              "label": "Documentation",
+              "url": "documentation.php"
             }
           ]
         },
@@ -1157,8 +2478,8 @@
               "url": "serverstatus.php"
             },
             {
-              "label": "Service Alerts",
-              "url": "announcements.php"
+              "label": "Offers",
+              "url": "offers.php"
             }
           ]
         },
@@ -1166,7 +2487,7 @@
           "title": "Company",
           "links": [
             {
-              "label": "About CloudHost247",
+              "label": "About",
               "url": "aboutus.php"
             },
             {
@@ -1178,23 +2499,8 @@
               "url": "infrastructure.php"
             },
             {
-              "label": "Legal & Policies",
+              "label": "Legal",
               "url": "legal.php"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "title": "Tools",
-      "description": "DNS, domain, network and developer utilities with clear results.",
-      "groups": [
-        {
-          "title": "Explore",
-          "links": [
-            {
-              "label": "All Tools →",
-              "url": "tools"
             }
           ]
         }
@@ -1446,8 +2752,72 @@
           "url": "tools"
         },
         {
-          "label": "View All Tools →",
-          "url": "tools"
+          "label": "DNS Tools",
+          "url": "tools/category/dns"
+        },
+        {
+          "label": "IP Tools",
+          "url": "tools/category/ip"
+        },
+        {
+          "label": "Developer Tools",
+          "url": "tools/category/developer"
+        },
+        {
+          "label": "Designer Tools",
+          "url": "tools/category/designer"
+        },
+        {
+          "label": "Webmaster Tools",
+          "url": "tools/category/webmaster"
+        },
+        {
+          "label": "Network Tools",
+          "url": "tools/category/network"
+        },
+        {
+          "label": "Cybersecurity Tools",
+          "url": "tools/category/cybersecurity"
+        },
+        {
+          "label": "Productivity Tools",
+          "url": "tools/category/productivity"
+        },
+        {
+          "label": "Gaming Tools",
+          "url": "tools/category/gaming"
+        },
+        {
+          "label": "DNS Checker",
+          "url": "tools/dns-checker"
+        },
+        {
+          "label": "DNS Lookup",
+          "url": "tools/dns-lookup"
+        },
+        {
+          "label": "IP WHOIS",
+          "url": "tools/ip-whois"
+        },
+        {
+          "label": "SSL Checker",
+          "url": "tools/ssl-certificate-checker"
+        },
+        {
+          "label": "Port Checker",
+          "url": "tools/port-checker"
+        },
+        {
+          "label": "JSON Beautifier",
+          "url": "tools/json-beautifier"
+        },
+        {
+          "label": "QR Generator",
+          "url": "tools/qr-code-generator"
+        },
+        {
+          "label": "Speed Test",
+          "url": "tools/internet-speed-test"
         }
       ]
     }
