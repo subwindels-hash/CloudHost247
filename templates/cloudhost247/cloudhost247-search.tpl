@@ -22,13 +22,26 @@
                         {if $chSearchUnavailable}
                             Page search is temporarily unavailable. Please try again shortly, or use the knowledgebase below.
                         {elseif $chSearchQuery}
-                            No matching pages. Try a different term, or search the knowledgebase below.
+                            {if $chSearchTools}No matching pages — the tools below matched your search.{else}No matching pages. Try a different term, or search the knowledgebase below.{/if}
                         {else}
                             Search products, domains, applications, policies and support resources.
                         {/if}
                     </p>
                 {/foreach}
             </div>
+            {if $chSearchTools}
+            <h2>Tools</h2>
+            <div class="ch-grid-3">
+                {foreach $chSearchTools as $tool}
+                    <a class="ch-resource-card" href="{$WEB_ROOT}/{$tool.url|escape}">
+                        <span>Tool</span>
+                        <h3>{$tool.title|escape}</h3>
+                        <p>{$tool.summary|escape}</p>
+                        <b aria-hidden="true">↗</b>
+                    </a>
+                {/foreach}
+            </div>
+            {/if}
             <div class="ch-notice" style="margin-top:40px">
                 <h2>Looking for an answer?</h2>
                 <form method="post" action="{routePath('knowledgebase-search')}" class="ch-search">

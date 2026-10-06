@@ -13,7 +13,7 @@ use CloudHost247\Tools\View;
 $required = array(
     'dns-checker','dns-propagation','domain-dns-validation','reverse-ip-lookup','dns-lookup','cname-lookup','ns-lookup','mx-lookup','spf-record-checker','dmarc-checker','domain-dns-health','dmarc-record-generator','dnskey-lookup','ds-lookup','dkim-checker',
     'ping-ipv4','ping-ipv6','what-is-my-ip','traceroute','ip-location-lookup','trace-email','ip-blacklist-checker','email-blacklist-checker','ip-to-decimal','ip-to-hostname','ip-whois','ipv6-whois','ipv4-to-ipv6','local-ipv6-generator','ipv6-cidr-to-range','ipv6-range-to-cidr','ipv6-compression','ipv6-expand','ip-subnet-calculator','ipv6-to-ipv4','ipv6-compatibility-checker','what-is-my-isp','domain-to-ip',
-    'http-headers-checker','website-os-checker','md5-generator','base64-generator','multi-url-opener','smtp-test','htaccess-redirect-generator','url-rewrite-generator','broken-link-checker','open-graph-checker','raid-calculator','binary-translator','text-to-binary','json-viewer','json-beautifier','json-minifier','email-verifier',
+    'http-headers-checker','website-os-checker','md5-generator','base64-generator','multi-url-opener','mrz-generator','smtp-test','htaccess-redirect-generator','url-rewrite-generator','broken-link-checker','open-graph-checker','raid-calculator','binary-translator','text-to-binary','json-viewer','json-beautifier','json-minifier','email-verifier',
     'rgb-to-colortone','hex-to-colortone','cmyk-to-colortone','hsv-to-colortone',
     'website-link-analyzer','user-agent-checker','pagerank-checker','punycode-converter','serp-simulator','robots-txt-generator',
     'port-checker','mac-address-lookup','mac-address-generator','asn-whois-lookup',
@@ -31,7 +31,7 @@ function expect($condition, $message)
     }
 }
 
-expect(count($required) === 94, 'Required slug list must stay at 94');
+expect(count($required) === 95, 'Required slug list must stay at 95');
 $tools = Catalog::tools();
 expect(count($tools) >= 104, 'Catalogue has ' . count($tools) . ' tools');
 $bySlug = array();
@@ -54,6 +54,25 @@ foreach ($required as $slug) {
 expect(count(Catalog::categories()) === 9, 'Expected 9 categories');
 $hub = View::document(Catalog::resolve('/tools'), '', '');
 expect(substr_count($hub, 'ch-tool-card') >= 100, 'Hub did not list the catalogue');
+
+// The MRZ tool is a browser-only document tool: the page must state where the data is processed,
+// and the server executor must refuse it without echoing a submitted field back.
+$mrz = isset($bySlug['mrz-generator']) ? $bySlug['mrz-generator'] : null;
+expect($mrz !== null, 'MRZ tool missing from the catalogue');
+if ($mrz) {
+    expect($mrz['mode'] === 'local', 'MRZ tool must run in the browser, not on the server');
+    expect(!empty($mrz['sensitive']), 'MRZ tool must be flagged sensitive');
+    expect($mrz['path'] === '/tools/mrz-generator', 'Unexpected MRZ path ' . $mrz['path']);
+    $mrzHtml = View::document($mrz + array('kind' => 'tool'), '', '');
+    expect(strpos($mrzHtml, 'Processing stays in this browser') !== false, 'MRZ page must state that processing stays in the browser');
+    expect(strpos($mrzHtml, 'ch-tool-crumb') !== false, 'MRZ page must keep the breadcrumb');
+    expect(strpos($mrzHtml, 'name="mode"') !== false, 'MRZ page must render the action select');
+    expect(strpos($mrzHtml, 'name="mrz"') !== false, 'MRZ page must render the MRZ textarea');
+}
+$serverMrz = Engine::run('mrz-generator', array('documentNumber' => 'L898902C3', 'mrz' => 'P<UTOERIKSSON<<ANNA<MARIA<<<<<<<<<<<<<<<<<<<'), array('ip' => '203.0.113.10'));
+expect(empty($serverMrz['ok']), 'A browser-only MRZ tool must be refused by the server executor');
+expect(strpos(json_encode($serverMrz), 'L898902C3') === false, 'MRZ document number leaked into the server result');
+expect(strpos(json_encode($serverMrz), 'P<UTO') === false, 'MRZ string leaked into the server result');
 
 $local = Engine::run('password-encryption', array('password' => 'secret-value'), array('ip' => '203.0.113.10'));
 expect(empty($local['ok']), 'Password tool must be rejected by the server');
@@ -92,4 +111,4 @@ if ($failures) {
     echo count($failures) . " failed\n";
     exit(1);
 }
-echo "catalogue ok tools=" . count($tools) . " required=94\n";
+echo "catalogue ok tools=" . count($tools) . " required=95\n";

@@ -185,6 +185,45 @@ class ToolsPlatformStaticTests(unittest.TestCase):
         self.assertIn("add_hook('ClientAreaHeadOutput'", hooks)
         self.assertNotRegex(hooks, r"\b(eval|exec|shell_exec|system)\s*\(", re.I)
 
+    def test_public_mrz_surfaces_publish_no_specimen_persona(self):
+        """The MRZ tool must never ship a filled-in identity string.
+
+        config/tools.php and the theme resources are public files (they are served, indexed and
+        read by the footer/menu renderers), and the Node projection is compiled into the browser
+        bundle. The ICAO Doc 9303 specimen document number, birth date, expiry, optional data and
+        name may appear in tests and developer documentation, but a placeholder is a shape hint:
+        the ready-made specimen is produced locally by the page's own test-data button.
+        """
+        forbidden = (
+            "L898902C3",          # specimen document number
+            "740812",             # specimen date of birth
+            "120415",             # specimen expiry date
+            "ZE184226B",          # specimen optional data
+            "Eriksson",           # specimen surname
+            "Anna Maria",         # specimen given names
+            "P<UTO",              # first line of the specimen zone
+        )
+        surfaces = (
+            os.path.join(ROOT, "config", "tools.php"),
+            os.path.join(ROOT, "config", "tools-index.json"),
+            os.path.join(ROOT, "config", "required-tools.json"),
+            os.path.join(ROOT, "modules", "addons", "cloudhost247_theme", "resources", "tools.json"),
+            os.path.join(ROOT, "modules", "addons", "cloudhost247_theme", "resources", "tools-public.json"),
+            os.path.join(ROOT, "modules", "addons", "cloudhost247_theme", "resources", "site.json"),
+        )
+        for path in surfaces:
+            self.assertTrue(os.path.isfile(path), path)
+            text = read(path)
+            for token in forbidden:
+                self.assertNotIn(token, text, "%s leaks the MRZ specimen token %r" % (path, token))
+        # The generator itself must keep the placeholder values shape-only, so a regeneration
+        # cannot reintroduce a filled-in specimen into every surface above at once.
+        generator = read(os.path.join(ROOT, "scripts", "generate-global-platform.py"))
+        mrz_fields = generator.split("MRZ = [", 1)[1].split("]", 1)[0]
+        for token in forbidden:
+            self.assertNotIn(token, mrz_fields, "MRZ placeholder tuples reintroduce %r" % (token,))
+        self.assertIn('"YYMMDD"', mrz_fields)
+
     def test_duplicate_capitalized_module_is_gone(self):
         self.assertFalse(os.path.exists(os.path.join(ROOT, "modules", "addons", "CloudHost247_tools")),
                          "the duplicate CloudHost247_tools module must not be resurrected")

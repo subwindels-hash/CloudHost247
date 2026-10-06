@@ -44,12 +44,15 @@ SERVICES = {
 RAW = []
 
 
-def add(slug, name, cat, mode, handler, summary, keywords, inputs=None, options=None, featured=False, aliases=None, sensitive=False):
+def add(slug, name, cat, mode, handler, summary, keywords, inputs=None, options=None, featured=False, aliases=None, sensitive=False, description=None, faq_items=None):
+    """`description`/`faq_items` override the generated copy where the scope or privacy wording has
+    to be exact (for example the MRZ tool, which is not a network probe and must state plainly that
+    nothing is uploaded, logged or stored)."""
     RAW.append({
         "slug": slug, "name": name, "category": cat, "mode": mode, "handler": handler,
         "summary": summary, "keywords": keywords, "inputs": inputs or [],
         "options": options or {}, "featured": featured, "aliases": aliases or [],
-        "sensitive": sensitive,
+        "sensitive": sensitive, "description": description, "faq": faq_items,
     })
 
 
@@ -191,6 +194,46 @@ add("base64-generator", "Base64 Generator", "developer", "local", "base64",
 add("multi-url-opener", "Multi URL Opener", "developer", "local", "multi_url",
     "Open up to eight http(s) URLs in new tabs after you confirm. Other schemes are rejected.",
     ["url", "opener", "tabs"], TXT("URLs", "https://example.com"))
+MRZ = [
+    ("mode", "Action", "select", "generate", True),
+    ("mrz", "Existing MRZ, two lines (validate or parse)", "textarea", "Paste the two 44-character lines here", False),
+    # Placeholders state the expected shape only. The ready-made ICAO specimen is offered by the
+    # page's own "Generate test data" button inside the visitor's browser, so no specimen document
+    # number, date of birth or name is ever written into a shipped config, template or page.
+    ("issuingState", "Issuing state (3 letters)", "text", "UTO", False),
+    ("surname", "Surname (as printed)", "text", "SURNAME", False),
+    ("givenNames", "Given names (as printed)", "text", "GIVEN NAMES", False),
+    ("nationality", "Nationality (3 letters)", "text", "UTO", False),
+    ("documentNumber", "Document number", "text", "AB1234567", False),
+    ("dateOfBirth", "Date of birth (YYMMDD)", "text", "YYMMDD", False),
+    ("sex", "Sex", "select", "F", False),
+    ("expiryDate", "Expiry date (YYMMDD)", "text", "YYMMDD", False),
+    ("optionalData", "Optional data", "text", "OPTIONAL", False),
+]
+add("mrz-generator", "MRZ Generator / MRZ Tools", "developer", "local", "mrz_generate",
+    "Generate, validate and parse ICAO Doc 9303 TD3 passport machine-readable zones.",
+    ["mrz", "machine readable zone", "passport", "icao 9303", "td3", "check digit", "ocr", "document", "parser", "validator"],
+    MRZ, featured=True, sensitive=True,
+    description=(
+        "Builds the two 44-character lines of a TD3 (passport-size) machine-readable zone from the document "
+        "fields you enter, validates the structure and the 7-3-1 check digits of an existing zone, and parses a "
+        "supplied zone back into labelled fields. Names are transliterated to the ICAO Latin character set, and an "
+        "unsupported character is reported instead of being silently removed or guessed. Privacy: the calculation "
+        "runs in this browser tab, so the values you type are not uploaded, logged or stored by CloudHost247. Scope: "
+        "machine-readable text only \u2014 check digits prove the string is well formed, they do not prove that a "
+        "physical or electronic document is genuine, and this page does not create passport artwork or travel "
+        "documents."
+    ),
+    faq_items=[
+        {"q": "What does MRZ Generator / MRZ Tools actually do?",
+         "a": "It generates the TD3 machine-readable zone for the fields you supply, verifies the check digits of an existing zone, and reports the parsed fields. Results describe exactly the string you entered \u2014 nothing is inferred about a person or a document."},
+        {"q": "Is my input stored?",
+         "a": "No. Everything is calculated in this browser tab. The values are not uploaded, not logged and not written to a database, and no MRZ string, document number or date of birth is sent to analytics or added to any URL."},
+        {"q": "Does a valid check digit prove a passport is genuine?",
+         "a": "No. Check digits only prove the zone is internally consistent. Authenticity requires the document itself, the issuing authority and cryptographic verification (ICAO PKD / passive authentication), which this tool does not perform."},
+        {"q": "Can I use a real passport here?",
+         "a": "Use synthetic test data. The built-in specimen uses the reserved ICAO test codes UTO and XXA, which belong to no real person or state."},
+    ])
 add("smtp-test", "SMTP Test", "developer", "server", "smtp",
     "Connect to a public mail server, read the banner and send EHLO. Passwords are not accepted.",
     ["smtp", "email", "banner"], [("host", "Mail host", "text", "mail.example.com", True), ("port", "Port", "select", "25", True)])
@@ -385,7 +428,7 @@ def build_tools():
             "categoryLabel": CATEGORIES[cat],
             "icon": cat,
             "summary": tool["summary"],
-            "description": tool["summary"] + " CloudHost247 labels estimates, missing data and unavailable probes instead of filling them in.",
+            "description": tool["description"] or (tool["summary"] + " CloudHost247 labels estimates, missing data and unavailable probes instead of filling them in."),
             "seoTitle": f"{tool['name']} — Free {CATEGORIES[cat]} Tool | CloudHost247",
             "seoDescription": tool["summary"] + " Free CloudHost247 tool for administrators, developers and website owners.",
             "keywords": tool["keywords"] + [tool["slug"], cat, tool["name"].lower()],
@@ -401,7 +444,7 @@ def build_tools():
             ],
             "relatedTools": [],
             "services": [{"label": label, "url": url} for label, url in SERVICES[cat]],
-            "faq": faq(tool),
+            "faq": tool["faq"] or faq(tool),
             "badge": "Browser-only" if tool["mode"] == "local" else "Live check",
             "featured": tool["featured"],
             "sensitive": tool["sensitive"],
@@ -594,7 +637,7 @@ def footer(existing, tools):
     featured = [("DNS Checker", "tools/dns-checker"), ("DNS Lookup", "tools/dns-lookup"), ("IP WHOIS", "tools/ip-whois"),
                 ("SSL Checker", "tools/ssl-certificate-checker"), ("Port Checker", "tools/port-checker"),
                 ("JSON Beautifier", "tools/json-beautifier"), ("QR Generator", "tools/qr-code-generator"),
-                ("Speed Test", "tools/internet-speed-test")]
+                ("MRZ Generator / MRZ Tools", "tools/mrz-generator"), ("Speed Test", "tools/internet-speed-test")]
     tool_links = [{"label": "All Tools", "url": "tools"}]
     for slug, label in CATEGORIES.items():
         tool_links.append({"label": label + " Tools", "url": "tools/category/" + slug})

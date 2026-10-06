@@ -83,10 +83,19 @@
             const list = document.createElement('ul'); section.append(title, list);
             entries.forEach(tool => { const li = document.createElement('li'); li.append(toolLink(tool)); list.append(li); }); panel.append(section);
           });
-          if (toolsFooter) (data.footer || []).forEach(slug => {
-            const tool = tools.find(row => row.slug === slug); if (!tool) return;
-            const li = document.createElement('li'); li.append(toolLink(tool)); toolsFooter.insertBefore(li, toolsFooter.lastElementChild);
-          });
+          if (toolsFooter) {
+            // A slug the footer already publishes statically (so it also works without JavaScript)
+            // must not be added a second time. Comparing resolved URLs keeps this correct both at
+            // the domain root and under a subdirectory install.
+            const published = new Set(Array.from(toolsFooter.querySelectorAll('a')).map(anchor => anchor.href));
+            (data.footer || []).forEach(slug => {
+              const tool = tools.find(row => row.slug === slug); if (!tool) return;
+              const link = toolLink(tool);
+              if (published.has(link.href)) return;
+              published.add(link.href);
+              const li = document.createElement('li'); li.append(link); toolsFooter.insertBefore(li, toolsFooter.lastElementChild);
+            });
+          }
           function toolLink(tool) { const link = document.createElement('a'); link.href = root + tool.path; link.textContent = tool.name; return link; }
         }).catch(() => { /* All Tools remains a normal server-rendered link. */ }).finally(() => clearTimeout(timeout));
     }

@@ -22,10 +22,29 @@ The **CloudHost247 ePassport Machine Readable Zone (MRZ) Developer Tool** provid
 
 | Surface | Route / Navigation Path | Description |
 | --- | --- | --- |
-| **Tools Directory** | `/tools` (`Tools → Developer / Document Tools`) | Entry point listing the MRZ Calculator & Validator and MRZ Parser |
-| **MRZ Calculator & Validator** | `/tools/document/mrz` (`Tools → Developer / Document Tools → MRZ Calculator`) | Interactive TD3 MRZ generator, character normalization inspector, check-digit calculator, and structural validator |
-| **MRZ Parser** | `/tools/document/mrz-parser` (`Tools → Developer / Document Tools → MRZ Parser`) | Structured TD3 MRZ field parser and check-digit verifier |
+| **Canonical tool page** | `/tools/mrz-generator` (`Tools → Featured → MRZ Generator / MRZ Tools`, `Tools → Developer → MRZ Generator / MRZ Tools`, footer Tools column) | The public tool: TD3 generator, character-normalisation inspector, check-digit calculator, structural validator and field parser in one page |
+| **Tools Directory** | `/tools` (Tool card in the Developer category, and `/tools/document` for the Document Tools hub) | Entry point listing the MRZ Generator / MRZ Tools |
+| **Retained URLs** | `/tools/document/mrz`, `/tools/document/mrz-parser`, `/tools/mrz-parser` | The pre-catalogue URLs. They render the same tool (and resolve through the PHP shell's `ToolsSite`), so existing links and documentation keep working |
 | **Super Admin Settings** | `/admin/settings/tools/mrz` (`Super Admin → Settings → Tools → MRZ`) | Runtime feature toggles, rate limits, operational log levels, and availability controls |
+
+### 2.1 Public registration
+
+The tool is a first-class entry in the Tools Center catalogue (`cloudhost247-node/src/tools/catalog.ts`,
+slug `mrz-generator`), which is the single source of truth for every discovery surface:
+
+| Surface | How the tool appears |
+| --- | --- |
+| Tools mega menu | `Featured` group and the `Developer` category group (also injected at runtime from `/api/tools/navigation`) |
+| Tools directory + category navigation | The Developer category, with the usual card, badges and related tools |
+| Site search | Matched by name, summary and keywords (`mrz`, `machine readable zone`, `passport`, `icao 9303`, `td3`, `check digit`, `ocr`, `document`, `parser`, `validator`) |
+| Footer (Tools column) | Link labelled **MRZ Generator / MRZ Tools** pointing at `/tools/mrz-generator` without any query string or personal parameter |
+| XML sitemap | `tools-sitemap.php` lists the catalogue path; the API responses stay `noindex` |
+| Retained-URL aliases | Declared in the catalogue's `legacyPaths` so the PHP shell redirects them to the canonical route |
+
+`tests/tools/site-integration.php` (PHP) and `cloudhost247-node/tests/integration/mrz-tools-catalogue.test.ts`
+(Node) verify this: every published menu/footer link must resolve to a registered route, placeholder or
+off-site destinations are rejected, and the MRZ footer entry must stay a clean `/tools/mrz-generator`
+URL.
 
 ---
 
@@ -142,6 +161,9 @@ By default, the CloudHost247 MRZ tool is **stateless and privacy-first**:
 
 - **Client-side execution first**: Calculation, validation, parsing, synthetic test generation, and AI explanations execute directly in the browser without requiring external third-party APIs.
 - **Zero PII persistence**: Submitted MRZ lines, passport numbers, dates of birth, expiry dates, nationalities, surnames, given names, and optional data are **never** stored in the database or browser storage (`localStorage` / `sessionStorage`).
+- **Nothing durable, by construction**: the catalogue entry sets `cacheSeconds: 0` (no result cache), the executor records **no target** for this tool (the only candidate labels would be a passport number or a name), and the executor's persisted `status`/`summary` fields are fixed verdict strings that never contain the zone. `NON_PERSISTABLE_TOOL_SLUGS` additionally makes `POST /api/tools/mrz-generator/report` and `/ticket` refuse outright — an MRZ result cannot be saved as a report or attached to a support ticket. The page's copy/download actions are the only way to keep a value.
+- **No personal data in URLs, the footer, the sitemap or the catalogue**: every published link is the clean `/tools/mrz-generator` route.
+- **Placeholders are shape hints, never a filled-in specimen**: the shipped form fields (`config/tools.php`, the theme resources and the React bundle) carry values like `AB1234567`, `YYMMDD` and `SURNAME` only. The ready-made ICAO specimen is produced inside the visitor's browser by the page's own *Generate test data* button, so no specimen document number, date of birth or name is baked into a public file. `tests/tools/test_static.py` and `tests/integration/mrz-tools-catalogue.test.ts` fail if the specimen persona returns to any of those surfaces.
 - **Response minimization**: `POST /api/tools/mrz/generate` returns only the generated MRZ lines, check digits, and validation flags without echoing personal input fields.
 - **No-store headers**: All `/api/tools/mrz/*` responses set `Cache-Control: no-store, no-cache, must-revalidate, private` and `X-Robots-Tag: noindex, nofollow`.
 - **Log redaction**: `src/lib/logger.ts` and `redactMrzSensitiveData()` redact MRZ and identity fields across application logs.

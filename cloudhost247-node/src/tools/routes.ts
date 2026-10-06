@@ -31,7 +31,7 @@ import { listEffectiveTools, effectiveTool, type EffectiveTool } from './core/re
 import { runTool, resolveCaller, type ToolCaller } from './core/executor';
 import { isToolError, toErrorEnvelope, ToolError, type ToolSuccessEnvelope } from './core/errors';
 import { listHistory, clearHistory, listFavorites, addFavorite, removeFavorite, listReports, getReport, deleteReport, saveReport, recentlyUsed, popularTools } from './core/history';
-import { CATEGORY_LABELS, NON_RUNNABLE_TOOL_SLUGS, catalogEntry } from './catalog';
+import { CATEGORY_LABELS, NON_PERSISTABLE_TOOL_SLUGS, NON_RUNNABLE_TOOL_SLUGS, catalogEntry } from './catalog';
 import { handlerFor, targetFor, missingHandlers } from './handlers';
 import { registerAdminToolsRoutes } from '../routes/admin-tools';
 import { createMonitor, deleteMonitor, listMonitorEvents, listMonitors, updateMonitor, evaluateMonitor, applyMonitorEvaluation } from './diagnostics/monitors';
@@ -108,6 +108,18 @@ async function resolveToolOrThrow(db: Queryable, slug: string): Promise<Effectiv
   const tool = await effectiveTool(db, slug);
   if (!tool) throw new NotFoundError(`No tool is registered under "${slug}".`);
   return tool;
+}
+
+/**
+ * Refuses to copy a result into a durable store for the tools that must never be persisted
+ * (see NON_PERSISTABLE_TOOL_SLUGS). The message tells the caller what to do instead.
+ */
+function assertPersistable(slug: string, tool: EffectiveTool): void {
+  if (!NON_PERSISTABLE_TOOL_SLUGS.has(slug)) return;
+  throw new ToolError(
+    'INVALID_INPUT',
+    `${tool.name} results are never written to the report store or attached to a ticket. Copy or download the value you need from the tool page instead.`
+  );
 }
 
 /**
@@ -369,6 +381,7 @@ export async function registerToolsRoutes(app: FastifyInstance, env: Env, overri
       const slug = (request.params as { slug?: string }).slug ?? '';
       try {
         const tool = await resolveToolOrThrow(pool, slug);
+        assertPersistable(slug, tool);
         const { caller } = await resolveCaller(request, env, pool, tool);
         if (!caller.userId) throw new UnauthorizedError('Sign in to save a report.');
         const input = mergeInput(request);
@@ -398,6 +411,7 @@ export async function registerToolsRoutes(app: FastifyInstance, env: Env, overri
       const slug = (request.params as { slug?: string }).slug ?? '';
       try {
         const tool = await resolveToolOrThrow(pool, slug);
+        assertPersistable(slug, tool);
         const { caller } = await resolveCaller(request, env, pool, tool);
         if (!caller.userId) throw new UnauthorizedError('Sign in to open a support ticket from a tool result.');
         const input = mergeInput(request);

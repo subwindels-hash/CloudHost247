@@ -148,6 +148,36 @@ function render(container, payload, state) {
     scroll.append(table);
     box.append(scroll);
   }
+  // Tools that produce a short, copyable value (an MRZ pair, a generated record, a snippet) can
+  // return `copyText`. The value stays in this tab: the clipboard is written only when the visitor
+  // clicks, and the download is created from a Blob — never from a URL that would carry the data.
+  if (payload.copyText) {
+    const actions = el('div', 'ch-actions');
+    const copy = document.createElement('button');
+    copy.type = 'button'; copy.className = 'ch-btn ch-btn-small'; copy.textContent = 'Copy result';
+    copy.addEventListener('click', async () => {
+      try {
+        if (!navigator.clipboard || !navigator.clipboard.writeText) throw new Error('unavailable');
+        await navigator.clipboard.writeText(payload.copyText);
+        copy.textContent = 'Copied';
+      } catch (_) {
+        copy.textContent = 'Copy unavailable — select the value above';
+      }
+    });
+    const download = document.createElement('button');
+    download.type = 'button'; download.className = 'ch-btn ch-btn-dark ch-btn-small'; download.textContent = 'Download as text';
+    download.addEventListener('click', () => {
+      const blob = new Blob([payload.copyText + '\n'], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url; link.download = 'cloudhost247-result.txt';
+      document.body.append(link); link.click(); link.remove();
+      URL.revokeObjectURL(url);
+      download.textContent = 'Downloaded';
+    });
+    actions.append(copy, download);
+    box.append(actions);
+  }
   (payload.notes || []).forEach((note) => box.append(el('p', 'ch-muted', note)));
   container.append(box);
 }

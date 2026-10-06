@@ -57,8 +57,9 @@ describe('SPA fallback routing (Apache/cPanel refresh safety)', () => {
     '/legal',
     '/legal/privacy-policy',
     '/tools',
-    '/tools/document/mrz',
-    '/tools/document/mrz-parser',
+    // The canonical MRZ tool route registered in the Tools Center catalogue. It is served by the
+    // SPA shell with the catalogue's own <title>/canonical metadata (see src/tools/presentation.ts).
+    '/tools/mrz-generator',
   ];
 
   it.each(routes)('GET %s resolves to the SPA shell (not a 404)', async (route) => {
@@ -68,6 +69,23 @@ describe('SPA fallback routing (Apache/cPanel refresh safety)', () => {
     expect(res.body).toContain('SPA shell');
     await app.close();
   });
+
+  /**
+   * The Document Tools URLs that predate the catalogue entry are declared as the tool's
+   * `legacyPaths`, so the shell permanently redirects them to the canonical page instead of serving
+   * a second copy or 404ing. This is the contract that keeps documentation, bookmarks and the old
+   * footer links working after the tool moved to /tools/mrz-generator.
+   */
+  it.each(['/tools/document/mrz', '/tools/document/mrz-parser', '/tools/mrz-parser'])(
+    'GET %s permanently redirects to the canonical MRZ tool route',
+    async (route) => {
+      const app = buildApp(env, { serveFrontend: true, publicDir });
+      const res = await app.inject({ method: 'GET', url: route });
+      expect(res.statusCode).toBe(301);
+      expect(res.headers.location).toBe('/tools/mrz-generator');
+      await app.close();
+    }
+  );
 
   it('serves real static assets from public/', async () => {
     const app = buildApp(env, { serveFrontend: true, publicDir });

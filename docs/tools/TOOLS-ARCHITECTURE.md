@@ -4,8 +4,9 @@
 
 The audited repository already contained the production Tools execution stack.
 This change integrates it; it does **not** replace WHMCS or introduce a second
-DNS/network engine. The registry has 68 entries: 64 executable tool surfaces and
-four existing account portals. MRZ remains its independent existing module.
+DNS/network engine. The registry has four account portals plus the executable tool
+surfaces; the ePassport MRZ tool is registered in it as `mrz-generator`
+(`/tools/mrz-generator`) while keeping its own module, engine and `/api/tools/mrz/*` API.
 See the inventory for the preserved legacy PHP modules and their consumers.
 
 - Authority: `cloudhost247-node/src/tools/catalog.ts`. `slug` is the stable ID.

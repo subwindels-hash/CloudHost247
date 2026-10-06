@@ -294,6 +294,38 @@ const handlers = {
     if (!items.length) return fail('No text was detected.');
     return ok('Detected text', items.map((item) => ({ Text: item.rawValue })));
   },
+  /**
+   * ICAO Doc 9303 TD3 machine-readable zone: generate, validate and parse.
+   *
+   * Everything happens in this module — there is no fetch, no localStorage and no URL parameter, so
+   * the values a visitor types stay in the tab. That is the privacy promise the page and the
+   * catalogue entry both make, and this handler is where it is kept: the only things that leave are
+   * the numbers rendered on screen (and, if the visitor clicks it, the clipboard they asked for).
+   */
+  mrz_generate: async (input) => {
+    const action = ['generate', 'validate', 'parse'].includes(String(input.mode)) ? String(input.mode) : 'generate';
+    if (action !== 'generate') {
+      const lines = mrzLines(input.mrz);
+      const report = mrzInspect(lines);
+      const notes = report.notes.concat([MRZ_AUTHENTICITY_NOTE, MRZ_PRIVACY_NOTE]);
+      if (action === 'parse') {
+        if (!report.structureOk) return ok('Parse failed — this is not a two-line TD3 pair.', report.rows, notes);
+        return attachCopy(ok('Successfully parsed — format and check digits only; authenticity is not verified', report.rows.concat(report.fields), notes), lines.join('\n'));
+      }
+      return attachCopy(ok(report.ok ? 'MRZ structure is valid.' : 'MRZ validation failed.', report.rows, notes), lines.join('\n'));
+    }
+    const generated = mrzGenerate(input || {});
+    const report = mrzInspect([generated.line1, generated.line2]);
+    const rows = [
+      { Field: 'Line 1 (44 characters)', Value: generated.line1 },
+      { Field: 'Line 2 (44 characters)', Value: generated.line2 },
+      { Field: 'Name field as encoded', Value: generated.nameField },
+    ].concat(report.rows);
+    return attachCopy(ok(
+      report.ok ? 'TD3 MRZ generated: two 44-character lines with valid ICAO 9303 check digits.' : 'TD3 MRZ generated, but check-digit verification failed. Re-check the fields.',
+      rows, [generated.normalization, MRZ_AUTHENTICITY_NOTE, MRZ_PRIVACY_NOTE]
+    ), generated.line1 + '\n' + generated.line2);
+  },
 };
 
 const OUI = {
@@ -561,4 +593,188 @@ function md5(value) {
     a0 = (a0 + a) | 0; b0 = (b0 + b) | 0; c0 = (c0 + c) | 0; d0 = (d0 + d) | 0;
   }
   return [a0, b0, c0, d0].map((word) => { const buf = new ArrayBuffer(4); new DataView(buf).setUint32(0, word, true); return hex(new Uint8Array(buf)); }).join('');
+}
+
+// --- ICAO Doc 9303 TD3 machine-readable zone (browser-only, no network) -------------------------
+
+const MRZ_AUTHENTICITY_NOTE = 'Check digits only prove the zone is well formed. They do not prove that a passport is genuine — that needs the document itself and cryptographic verification (ICAO PKD / passive authentication).';
+const MRZ_PRIVACY_NOTE = 'Privacy: this ran in your browser. Nothing was uploaded, logged or stored — no MRZ string, document number or date of birth left this device.';
+const MRZ_TRANSLITERATION = {
+  'Ä': 'AE', 'Æ': 'AE', 'Ö': 'OE', 'Œ': 'OE', 'Ø': 'OE', 'Ü': 'UE', 'ẞ': 'SS', 'ß': 'SS', 'Å': 'AA',
+  'Þ': 'TH', 'Ĳ': 'IJ', 'Đ': 'D', 'Ð': 'D', 'Ł': 'L', 'Œ': 'OE', 'Ç': 'C', 'Ñ': 'N', 'Š': 'S', 'Ž': 'Z',
+  'Č': 'C', 'Ř': 'R', 'Ť': 'T', 'Ď': 'D', 'Ň': 'N', 'Ě': 'E', 'Ů': 'U', 'Ő': 'O', 'Ű': 'U', 'İ': 'I',
+  'Ğ': 'G', 'Ş': 'S', 'Ą': 'A', 'Ć': 'C', 'Ę': 'E', 'Ś': 'S', 'Ź': 'Z', 'Ż': 'Z', 'Ń': 'N', 'Ł': 'L',
+};
+
+function attachCopy(payload, copyText) { payload.copyText = copyText; return payload; }
+
+function mrzValue(ch) {
+  if (ch === '<') return 0;
+  if (ch >= '0' && ch <= '9') return ch.charCodeAt(0) - 48;
+  if (ch >= 'A' && ch <= 'Z') return ch.charCodeAt(0) - 55;
+  return null;
+}
+
+/** ICAO 9303 mod-10 check digit over weights 7, 3, 1. Returns null when a character is not allowed. */
+function mrzCheckDigit(segment) {
+  let sum = 0;
+  for (let i = 0; i < segment.length; i++) {
+    const value = mrzValue(segment[i]);
+    if (value === null) return null;
+    sum += value * [7, 3, 1][i % 3];
+  }
+  return String(sum % 10);
+}
+
+function mrzTransliterate(value) {
+  return Array.from(String(value).toUpperCase()).map((ch) => {
+    if (MRZ_TRANSLITERATION[ch]) return MRZ_TRANSLITERATION[ch];
+    if (/[A-Z0-9]/.test(ch)) return ch;
+    return ch.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  }).join('');
+}
+
+/** One name component. Unsupported characters fail loudly instead of being silently deleted. */
+function mrzNameComponent(value, label) {
+  const out = [];
+  for (const ch of mrzTransliterate(value)) {
+    if (ch === "'" || ch === '\u2019') continue;
+    if (ch === ' ' || ch === '-' || ch === '_') { if (out.length && out[out.length - 1] !== '<') out.push('<'); continue; }
+    if (ch >= 'A' && ch <= 'Z') { out.push(ch); continue; }
+    throw new Error('"' + ch + '" cannot be transliterated into the ' + label + ' field. Use the Latin letters printed on the document.');
+  }
+  while (out.length && out[out.length - 1] === '<') out.pop();
+  if (!out.length) throw new Error('Enter the ' + label + '.');
+  return out.join('');
+}
+
+function mrzStateCode(value, label) {
+  const text = mrzTransliterate(String(value).replace(/\s+/g, ''));
+  if (!/^[A-Z]{3}$/.test(text)) throw new Error(label + ' must be the three-letter ICAO code (for example UTO — the reserved test code).');
+  return text;
+}
+
+function mrzDateField(value, label) {
+  const text = String(value).trim();
+  if (!/^\d{6}$/.test(text)) throw new Error(label + ' must be six digits in YYMMDD order.');
+  const month = Number(text.slice(2, 4));
+  const day = Number(text.slice(4, 6));
+  if (month < 1 || month > 12) throw new Error(label + ' uses "' + text.slice(2, 4) + '" as its month; the MRZ stores YYMMDD.');
+  if (day < 1 || day > 31) throw new Error(label + ' uses "' + text.slice(4, 6) + '" as its day; the MRZ stores YYMMDD.');
+  return text;
+}
+
+function mrzDocumentField(value) {
+  const text = String(value).toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (!/^[A-Z0-9]{1,9}$/.test(text)) throw new Error('The document number must be 1 to 9 letters or digits.');
+  return text.padEnd(9, '<');
+}
+
+function mrzOptionalField(value) {
+  const text = String(value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (text.length > 14) throw new Error('Optional data allows at most 14 letters or digits.');
+  return text.padEnd(14, '<');
+}
+
+function mrzGenerate(input) {
+  const documentType = String(input.documentType || 'P<').toUpperCase().replace(/\s+/g, '') || 'P<';
+  if (!/^P[A-Z<]$/.test(documentType)) throw new Error('A TD3 document type starts with P, optionally followed by a letter or < (for example P< or PO).');
+  const issuingState = mrzStateCode(input.issuingState || '', 'The issuing state');
+  const surname = mrzNameComponent(input.surname || '', 'surname');
+  const givenNames = mrzNameComponent(input.givenNames || '', 'given names');
+  const nameField = surname + '<<' + givenNames;
+  if (nameField.length > 39) throw new Error('The combined name field is ' + nameField.length + ' characters; a TD3 line allows 39.');
+  const nationality = mrzStateCode(input.nationality || '', 'The nationality');
+  const documentNumber = mrzDocumentField(input.documentNumber || '');
+  const dateOfBirth = mrzDateField(input.dateOfBirth || '', 'The date of birth');
+  const sexRaw = String(input.sex || 'F').toUpperCase();
+  const sex = /^M/.test(sexRaw) ? 'M' : /^F/.test(sexRaw) ? 'F' : '<';
+  const expiryDate = mrzDateField(input.expiryDate || '', 'The expiry date');
+  const optionalData = mrzOptionalField(input.optionalData);
+
+  const line1 = documentType + issuingState + nameField.padEnd(39, '<');
+  const documentNumberCheck = mrzCheckDigit(documentNumber);
+  const birthCheck = mrzCheckDigit(dateOfBirth);
+  const expiryCheck = mrzCheckDigit(expiryDate);
+  const optionalCheck = mrzCheckDigit(optionalData);
+  const composite = mrzCheckDigit(documentNumber + documentNumberCheck + dateOfBirth + birthCheck + expiryDate + expiryCheck + optionalData + optionalCheck);
+  const line2 = documentNumber + documentNumberCheck + nationality + dateOfBirth + birthCheck + sex + expiryDate + expiryCheck + optionalData + optionalCheck + composite;
+
+  return {
+    line1,
+    line2,
+    nameField: nameField.padEnd(39, '<'),
+    checkDigits: { documentNumber: documentNumberCheck, dateOfBirth: birthCheck, expiryDate: expiryCheck, optionalData: optionalCheck, composite },
+    normalization: 'Names transliterated to the ICAO Latin character set; fields padded with < to the fixed TD3 width.',
+  };
+}
+
+function mrzLines(value) {
+  return String(value || '').replace(/\r\n?/g, '\n').split('\n').map((line) => line.trim().toUpperCase()).filter(Boolean);
+}
+
+/** Structural + check-digit inspection of a supplied pair. Reports every comparison it made. */
+function mrzInspect(lines) {
+  if (lines.length !== 2) {
+    return {
+      ok: false,
+      structureOk: false,
+      rows: [{ Field: 'Lines found', Expected: 2, Found: lines.length, Result: 'FAIL' }],
+      fields: [],
+      notes: ['A TD3 MRZ is exactly two lines of 44 characters each.'],
+    };
+  }
+  const [line1, line2] = lines;
+  const printable = /^[A-Z0-9<]+$/;
+  const rows = [
+    { Field: 'Line 1 length', Expected: 44, Found: line1.length, Result: line1.length === 44 ? 'PASS' : 'FAIL' },
+    { Field: 'Line 2 length', Expected: 44, Found: line2.length, Result: line2.length === 44 ? 'PASS' : 'FAIL' },
+    { Field: 'Document type starts with P', Expected: 'P', Found: line1.slice(0, 1), Result: line1.slice(0, 1) === 'P' ? 'PASS' : 'FAIL' },
+    { Field: 'Character set', Expected: 'A-Z, 0-9 or <', Found: printable.test(line1) && printable.test(line2) ? 'allowed characters only' : 'unsupported characters present', Result: printable.test(line1) && printable.test(line2) ? 'PASS' : 'FAIL' },
+    { Field: 'Issuing state', Expected: 'three letters', Found: line1.slice(2, 5), Result: /^[A-Z]{3}$/.test(line1.slice(2, 5)) ? 'PASS' : 'FAIL' },
+  ];
+  const documentNumber = line2.slice(0, 9);
+  const birth = line2.slice(13, 19);
+  const sex = line2.slice(20, 21);
+  const expiry = line2.slice(21, 27);
+  const optional = line2.slice(28, 42);
+  const compositeSource = line2.slice(0, 10) + line2.slice(13, 20) + line2.slice(21, 43);
+  const comparisons = [
+    ['Document number check digit', mrzCheckDigit(documentNumber), line2.slice(9, 10)],
+    ['Date of birth check digit', mrzCheckDigit(birth), line2.slice(19, 20)],
+    ['Expiry date check digit', mrzCheckDigit(expiry), line2.slice(27, 28)],
+    ['Optional data check digit', mrzCheckDigit(optional), line2.slice(42, 43)],
+    ['Composite check digit', mrzCheckDigit(compositeSource), line2.slice(43, 44)],
+  ];
+  comparisons.forEach(([field, expected, found]) => {
+    rows.push({ Field: field, Expected: expected === null ? 'computable' : expected, Found: found, Result: expected !== null && expected === found ? 'PASS' : 'FAIL' });
+  });
+  rows.push({ Field: 'Nationality', Expected: 'three letters', Found: line2.slice(10, 13), Result: /^[A-Z]{3}$/.test(line2.slice(10, 13)) ? 'PASS' : 'FAIL' });
+  rows.push({ Field: 'Sex code', Expected: 'M, F or <', Found: sex, Result: ['M', 'F', '<'].includes(sex) ? 'PASS' : 'FAIL' });
+  rows.push({ Field: 'Date of birth shape', Expected: 'YYMMDD with a valid month', Found: birth, Result: /^\d{6}$/.test(birth) && Number(birth.slice(2, 4)) >= 1 && Number(birth.slice(2, 4)) <= 12 ? 'PASS' : 'FAIL' });
+  rows.push({ Field: 'Expiry date shape', Expected: 'YYMMDD with a valid month', Found: expiry, Result: /^\d{6}$/.test(expiry) && Number(expiry.slice(2, 4)) >= 1 && Number(expiry.slice(2, 4)) <= 12 ? 'PASS' : 'FAIL' });
+
+  const structureOk = line1.length === 44 && line2.length === 44 && printable.test(line1) && printable.test(line2) && line1.slice(0, 1) === 'P';
+  const namePart = line1.slice(5, 44);
+  const separator = namePart.indexOf('<<');
+  const fields = structureOk ? [
+    { Field: 'Document type', Value: line1.slice(0, 2) },
+    { Field: 'Issuing state', Value: line1.slice(2, 5) },
+    { Field: 'Surname', Value: (separator >= 0 ? namePart.slice(0, separator) : namePart).replace(/</g, ' ').trim() },
+    { Field: 'Given names', Value: (separator >= 0 ? namePart.slice(separator + 2) : '').replace(/</g, ' ').trim() },
+    { Field: 'Document number', Value: documentNumber.replace(/</g, '') },
+    { Field: 'Nationality', Value: line2.slice(10, 13) },
+    { Field: 'Date of birth (YYMMDD)', Value: birth },
+    { Field: 'Sex (MRZ code)', Value: sex },
+    { Field: 'Expiry date (YYMMDD)', Value: expiry },
+    { Field: 'Optional data', Value: optional.replace(/</g, '') || '(none)' },
+  ] : [];
+
+  return {
+    ok: rows.every((row) => row.Result === 'PASS'),
+    structureOk,
+    rows,
+    fields,
+    notes: ['YYMMDD carries no century; the surrounding document, not this tool, determines the full date.'],
+  };
 }

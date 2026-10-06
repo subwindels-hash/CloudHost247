@@ -964,6 +964,31 @@ const BASE_TOOL_CATALOG: readonly ToolCatalogEntry[] = [
     keywords: ['bin', 'iin', 'card', 'issuer', 'bank'],
   },
 
+  // ------------------------------------------------------------------ Document
+  {
+    slug: 'mrz-generator',
+    name: 'MRZ Generator / MRZ Tools',
+    category: 'developer',
+    summary: 'Generate, validate and parse ICAO Doc 9303 TD3 passport machine-readable zones.',
+    description:
+      'Builds the two 44-character lines of a TD3 (passport-size) machine-readable zone from the document fields you enter, validates the structure and the 7-3-1 check digits of an existing MRZ, and parses a supplied MRZ back into labelled fields. Names are transliterated to the ICAO Latin character set and an unsupported character is reported instead of being silently removed. The page runs the calculation in your browser by default; the documented API path exists for integration testing and never caches, logs or persists the submitted values. This tool works on machine-readable text only — it does not produce passport artwork and does not verify that a physical or electronic document is genuine.',
+    icon: 'scan-text',
+    path: '/tools/mrz-generator',
+    apiPath: '/api/tools/mrz-generator',
+    methods: ['POST'],
+    authRequired: false,
+    visibility: 'public',
+    rateLimitProfile: 'light',
+    cacheSeconds: 0,
+    timeoutMs: 5_000,
+    keywords: ['mrz', 'machine readable zone', 'passport', 'icao 9303', 'td3', 'check digit', 'ocr', 'document', 'parser', 'validator'],
+    notes: [
+      'Privacy: the values you submit are processed in memory for this one request. There is no cache, no history target and no request-body logging for this tool.',
+      'Check digits prove the string is well formed. They do not prove a passport is genuine — use a document reader and the ICAO PKD for authenticity.',
+      'Use synthetic test data (or the built-in ICAO specimen) for development. Do not paste a real document into any third-party service.',
+    ],
+  },
+
   // ------------------------------------------------------------------ Domain
   {
     slug: 'punycode',
@@ -1362,15 +1387,22 @@ export const TOOL_CATALOG: readonly ToolCatalogEntry[] = allTools.map(tool => {
     'dns-lookup': ['/tools/dns-record-lookup'], 'http-headers': ['/tools/redirect-checker','/tools/website-response'],
     'ssl-checker': ['/tools/ssl-certificate-information'], 'ip-lookup': ['/tools/ip-location'],
     'password-tools': ['/tools/password-generator'], 'whois': ['/tools/domain-information'],
+    // Retained MRZ URLs from the Document Tools section. They keep working and forward to the
+    // canonical /tools/mrz-generator route registered in the Tools Center catalogue.
+    'mrz-generator': ['/tools/document/mrz', '/tools/document/mrz-parser', '/tools/mrz-parser'],
   };
   const categories = [({ dns: 'dns-domains', domain: 'dns-domains', ip: 'ip-network', network: 'ip-network', webmaster: 'website', productivity: 'utilities', diagnostics: 'utilities' } as Record<string,string>)[tool.category] ?? tool.category];
   if (['mx-lookup','spf-checker','dkim-checker','dmarc-checker','dmarc-generator','bimi-checker','smtp-tester','email-header'].includes(tool.slug)) categories.push('email');
   if (tool.slug === 'ssl-checker') categories.push('ssl');
   if (['http-headers','server-os','broken-links','open-graph'].includes(tool.slug)) categories.push('website');
   if (['subnet-calculator','ip-converters','time-card'].includes(tool.slug)) categories.push('calculators');
+  // Curated cross-links where the category sibling list would not be the most useful next step.
+  const relatedOverride: Record<string, string[]> = {
+    'mrz-generator': ['encoding-tools', 'json-tools', 'password-tools'],
+  };
   return { ...tool, path, legacyPaths: [...new Set([tool.path, `/tools/${tool.slug}`, ...(aliases[tool.slug] ?? [])])].filter(alias => alias !== path && !alias.includes(':')),
     discoveryCategories: [...new Set(categories)], seoTitle: `${tool.name} | CloudHost247`,
-    relatedTools: allTools.filter(other => other.category === tool.category && other.slug !== tool.slug && !other.slug.startsWith('tool-')).slice(0,3).map(other => other.slug),
+    relatedTools: relatedOverride[tool.slug] ?? allTools.filter(other => other.category === tool.category && other.slug !== tool.slug && !other.slug.startsWith('tool-')).slice(0,3).map(other => other.slug),
     resultMode: ['mac-lookup','reverse-image-search'].includes(tool.slug) ? 'static' : tool.capability || tool.providerKind || ['whois','speed-test','my-ip'].includes(tool.slug) ? 'lookup' : 'calculated',
   };
 });
@@ -1403,7 +1435,18 @@ export const NON_RUNNABLE_TOOL_SLUGS = new Set([
   'tool-monitors',
 ]);
 
+/**
+ * Tools whose results must never reach a durable store — the report store, a support-ticket body,
+ * an export or the tool cache.
+ *
+ * `mrz-generator` returns identity fields (a machine-readable zone, a document number and dates of
+ * birth). The privacy commitment for that tool is that a submission is processed in memory and
+ * forgotten; persisting a result because a button exists would quietly break that promise. The
+ * caller keeps what they need with the page's copy/download actions.
+ */
+export const NON_PERSISTABLE_TOOL_SLUGS = new Set(['mrz-generator']);
+
 /** Public marketing-safe tool list used by tests to assert the catalogue is coherent. */
 export const TOOL_SLUGS: readonly string[] = TOOL_CATALOG.map((entry) => entry.slug);
 
-export const TOOLS_FOOTER = ['dns-lookup','dns-propagation','whois','ip-lookup','my-ip','ssl-checker','mx-lookup','spf-checker','dmarc-checker','subnet-calculator','json-tools','uuid-generator'];
+export const TOOLS_FOOTER = ['dns-lookup','dns-propagation','whois','ip-lookup','my-ip','ssl-checker','mx-lookup','spf-checker','dmarc-checker','subnet-calculator','json-tools','uuid-generator','mrz-generator'];

@@ -11,6 +11,7 @@ import { ipNetworkHandlers, ipNetworkTargets } from './ip-network';
 import { developerWebmasterHandlers, developerWebmasterTargets } from './developer-webmaster';
 import { securityDomainHandlers, securityDomainTargets } from './security-domain';
 import { productivityHandlers, productivityTargets } from './productivity';
+import { documentHandlers, documentTargets } from './document';
 import type { ToolHandler } from './kit';
 
 export * from './kit';
@@ -21,6 +22,7 @@ export const TOOL_HANDLERS: Record<string, ToolHandler> = {
   ...developerWebmasterHandlers,
   ...securityDomainHandlers,
   ...productivityHandlers,
+  ...documentHandlers,
 };
 
 /** Safe target labels for history/audit rows; tools without a natural target return null. */
@@ -30,6 +32,7 @@ export const TOOL_TARGETS: Record<string, (input: Record<string, unknown>) => st
   ...developerWebmasterTargets,
   ...securityDomainTargets,
   ...productivityTargets,
+  ...documentTargets,
 };
 
 /** Slugs that are executable (everything in the catalogue except the portal pages). */

@@ -3,8 +3,10 @@ import { usePageMeta } from '../../lib/usePageMeta';
 
 /**
  * Tools → Developer / Document Tools directory page.
- * Provides navigation to the native ePassport MRZ Calculator (/tools/document/mrz)
- * and MRZ Parser (/tools/document/mrz-parser).
+ *
+ * Links to the canonical catalogue route (/tools/mrz-generator) plus the retained
+ * /tools/document/mrz and /tools/document/mrz-parser URLs, so every entry here is a route that is
+ * registered in the Tools Center catalogue and reachable from the footer, mega menu and search.
  */
 export default function ToolsHubPage() {
   usePageMeta(
@@ -43,9 +45,14 @@ export default function ToolsHubPage() {
                   inspect Latin diacritic transliteration, and verify 7-3-1 check digits for software testing.
                 </p>
                 <p style={{ marginBottom: 0 }}>
-                  <Link className="ch247-button" to="/tools/document/mrz">
-                    Open MRZ Calculator →
+                  <Link className="ch247-button" to="/tools/mrz-generator">
+                    Open MRZ Generator / MRZ Tools →
                   </Link>
+                </p>
+                <p className="ch247-page__hint" style={{ margin: '0.5rem 0 0' }}>
+                  Registered in the Tools Center catalogue, so it also appears in the Tools menu, the
+                  Developer category and the site footer. Calculator, validator and parser are tabs on
+                  the same page; the original <code>/tools/document/mrz</code> URL still works.
                 </p>
               </article>
 
@@ -56,9 +63,13 @@ export default function ToolsHubPage() {
                   individual and composite check digits with CloudHost247 AI technical explanations.
                 </p>
                 <p style={{ marginBottom: 0 }}>
-                  <Link className="ch247-button ch247-button--ghost" to="/tools/document/mrz-parser">
+                  <Link className="ch247-button ch247-button--ghost" to="/tools/mrz-parser">
                     Open MRZ Parser →
                   </Link>
+                </p>
+                <p className="ch247-page__hint" style={{ margin: '0.5rem 0 0' }}>
+                  Same engine and privacy behaviour; the retained <code>/tools/document/mrz-parser</code>{' '}
+                  URL still works.
                 </p>
               </article>
             </div>

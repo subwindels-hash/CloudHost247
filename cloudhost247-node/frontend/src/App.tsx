@@ -193,11 +193,15 @@ export default function App() {
             whole /tools/* branch is handled by one page that resolves the path back to a tool. */}
         <Route path="/tools/*" element={<ToolPage />} />
 
-        {/* Developer / Document Tools — ePassport MRZ Calculator & Parser. This is the Document
-            Tools section of /tools, owned by its own module; React Router ranks these static paths
-            above the Tools Center's /tools/* page route, so the MRZ pages keep working unchanged.
-            The Tools Center hub links here rather than re-implementing them. */}
+        {/* Developer / Document Tools — ePassport MRZ Calculator, Validator & Parser. This is the
+            Document Tools section of /tools, owned by its own module; React Router ranks these
+            static paths above the Tools Center's /tools/* page route.
+            /tools/mrz-generator is the canonical public route registered in the Tools Center
+            catalogue (it is the link the site footer, the Tools mega menu and search all use).
+            The original /tools/document/mrz* URLs are retained and render the same tool. */}
         <Route path="/tools/document" element={<ToolsHubPage />} />
+        <Route path="/tools/mrz-generator" element={<MrzToolPage defaultTab="calculator" />} />
+        <Route path="/tools/mrz-parser" element={<MrzToolPage defaultTab="parser" />} />
         <Route path="/tools/document/mrz" element={<MrzToolPage defaultTab="calculator" />} />
         <Route path="/tools/document/mrz-parser" element={<MrzToolPage defaultTab="parser" />} />
 

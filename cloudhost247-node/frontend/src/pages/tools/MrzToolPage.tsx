@@ -25,6 +25,15 @@ interface MrzToolConfigResponse {
 
 type ToolTab = 'calculator' | 'validator' | 'parser';
 
+/**
+ * The public tool name, identical to the Tools Center catalogue entry
+ * (cloudhost247-node/src/tools/catalog.ts → slug `mrz-generator`). The footer link, the Tools mega
+ * menu entry and the search result all render this exact string, so the canonical page heading
+ * must match it — a link that promises one page and lands on a differently named one is a broken
+ * link as far as a visitor is concerned.
+ */
+export const MRZ_TOOL_NAME = 'MRZ Generator / MRZ Tools';
+
 export interface MrzToolPageProps {
   defaultTab?: ToolTab;
 }
@@ -33,12 +42,16 @@ export default function MrzToolPage({ defaultTab }: MrzToolPageProps) {
   const location = useLocation();
   const initialTab: ToolTab =
     defaultTab ?? (location.pathname.endsWith('/mrz-parser') ? 'parser' : 'calculator');
+  /** The catalogue route is the combined tool; the retained /tools/document/mrz* URLs keep their mode-specific heading. */
+  const canonicalRoute = location.pathname === '/tools/mrz-generator';
 
   usePageMeta(
-    initialTab === 'parser'
-      ? 'MRZ Parser — Developer / Document Tools — CloudHost247'
-      : 'MRZ Calculator — Developer / Document Tools — CloudHost247',
-    'Generate, validate, and parse ICAO Doc 9303 TD3 machine-readable passport format data for software testing.'
+    canonicalRoute
+      ? `${MRZ_TOOL_NAME} — ICAO Doc 9303 TD3`
+      : initialTab === 'parser'
+        ? 'MRZ Parser — Developer / Document Tools'
+        : 'MRZ Calculator — Developer / Document Tools',
+    'Generate, validate, and parse ICAO Doc 9303 TD3 machine-readable passport format data for software testing. Calculations run in your browser and submitted values are never stored.'
   );
 
   const [activeTab, setActiveTab] = useState<ToolTab>(initialTab);
@@ -313,12 +326,16 @@ export default function MrzToolPage({ defaultTab }: MrzToolPageProps) {
             <Link to="/tools" style={{ color: '#fff', textDecoration: 'underline' }}>
               Tools
             </Link>{' '}
-            → <span>Developer / Document Tools</span> →{' '}
-            <strong>{activeTab === 'parser' ? 'MRZ Parser' : 'MRZ Calculator'}</strong>
+            →{' '}
+            <Link to="/tools/document" style={{ color: '#fff', textDecoration: 'underline' }}>
+              Developer / Document Tools
+            </Link>{' '}
+            → <strong>{canonicalRoute ? MRZ_TOOL_NAME : activeTab === 'parser' ? 'MRZ Parser' : 'MRZ Calculator'}</strong>
           </nav>
-          <h1>{activeTab === 'parser' ? 'MRZ Parser' : 'MRZ Calculator'}</h1>
+          <h1>{canonicalRoute ? MRZ_TOOL_NAME : activeTab === 'parser' ? 'MRZ Parser' : 'MRZ Calculator'}</h1>
           <p>
-            Generate and validate machine-readable passport-format data for software testing.
+            Generate, validate and parse machine-readable passport-format data for software testing.
+            {canonicalRoute ? ' Calculator, validator and parser are the three tabs below.' : ''}
           </p>
         </div>
       </section>
@@ -331,15 +348,21 @@ export default function MrzToolPage({ defaultTab }: MrzToolPageProps) {
               <div>
                 <strong>Developer &amp; OCR Testing Utility (ICAO Doc 9303 TD3 Format)</strong>
                 <p className="ch247-page__hint" style={{ margin: '0.25rem 0 0' }}>
-                  Privacy-first &amp; stateless by default: MRZ inputs are processed locally and are never stored or sent to analytics.
-                  {' '}{MRZ_AUTHENTICITY_NOTICE}
+                  Privacy notice: the calculator, validator and parser run in your browser, so the values you type stay on
+                  this device. If your integration calls the documented MRZ API instead, the submitted fields are
+                  processed in memory for that single request — CloudHost247 does not cache, log or permanently store the
+                  machine-readable zone, the document number or dates of birth.
+                  {' '}{MRZ_AUTHENTICITY_NOTICE}{' '}
+                  <Link to="/legal/privacy-policy" style={{ textDecoration: 'underline' }}>
+                    Privacy policy
+                  </Link>
                 </p>
               </div>
               <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                <Link className="ch247-button ch247-button--ghost" to="/tools/document/mrz">
-                  MRZ Calculator
+                <Link className="ch247-button ch247-button--ghost" to="/tools/mrz-generator">
+                  MRZ Generator / MRZ Tools
                 </Link>
-                <Link className="ch247-button ch247-button--ghost" to="/tools/document/mrz-parser">
+                <Link className="ch247-button ch247-button--ghost" to="/tools/mrz-parser">
                   MRZ Parser
                 </Link>
               </div>
