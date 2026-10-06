@@ -1,23 +1,22 @@
 /**
- * Deployments (spec §24): list / detail / logs / cancel plus a real-time SSE event stream.
+ * Deployments (spec §24): list / detail / logs / cancel / execution plus a real-time SSE event stream.
  *
  * Ported from cloudhost247-node/src/routes/deployments.ts.
  *
- * Visibility is deliberately identical to the original: the list endpoint lets admin|super_admin
- * see everything, while detail, logs and cancel go through canSeeDeployment(), which only matches
- * the requesting user (directly or through the installation row). The cancel route additionally
- * re-checks the role, so an administrator can only cancel a deployment they are already allowed to
- * see — that asymmetry is the original's, not an oversight introduced here.
+ * Visibility: the list endpoint lets admin|super_admin see everything, while detail, logs and
+ * cancel go through canSeeDeployment(), which only matches the requesting user (directly or through
+ * the installation row). The cancel route additionally re-checks the role.
  *
- * Actual CI/CD execution is an adapter concern and is deferred, so a deployment created here starts
- * as 'queued' with an empty step/event log.
+ * CI/CD execution is handled by the deployment worker (platform/src/lib/deployment-worker.js),
+ * which executes ordered pipeline steps and records logs and transitions.
  */
 'use strict';
 
 const { v } = require('../core/validate');
 const { NotFoundError, ConflictError, ValidationError } = require('../core/errors');
 const { uuidv7 } = require('../lib/ids');
-const { authenticate } = require('../lib/auth');
+const { authenticate, asAdmin } = require('../lib/auth');
+const { executeDeployment, runDeploymentCycle } = require('../lib/deployment-worker');
 
 const name = 'deployments';
 
@@ -46,8 +45,6 @@ function register(router, deps) {
     if (deployment.user_id && deployment.user_id === userId) return true;
     if (deployment.installation_id) {
       const installation = await store.table('application_installations').findById(deployment.installation_id);
-      // The original joins on application_installations.customer_id; this schema names the same
-      // owning-customer column user_id.
       if (installation && installation.user_id === userId) return true;
     }
     return false;
@@ -69,7 +66,6 @@ function register(router, deps) {
 
     let visible = rows;
     if (!isStaff(auth.role)) {
-      // The original narrows with `LEFT JOIN application_installations … WHERE i.customer_id = ?`.
       const ownedInstallations = new Set(
         (await store.table('application_installations').find({ user_id: auth.id })).rows.map((i) => i.id),
       );
@@ -118,7 +114,6 @@ function register(router, deps) {
       throw new NotFoundError('No deployment was found with that id');
     }
 
-    // UPDATE … WHERE status = 'queued' — anything already running is a conflict, not a no-op.
     if (deployment.status !== 'queued') throw new ConflictError('Only queued deployments can be cancelled');
     const now = new Date().toISOString();
     const cancelled = await deployments().updateById(id, {
@@ -130,11 +125,34 @@ function register(router, deps) {
     ctx.json({ deployment: cancelled });
   });
 
+  /** Trigger execution of a queued deployment pipeline */
+  router.post('/api/v1/deployments/:id/execute', async (ctx) => {
+    const auth = await authenticate(ctx, deps);
+    const id = requireUuid(ctx.params.id);
+    const deployment = await deployments().findById(id);
+    if (!deployment) throw new NotFoundError('No deployment was found with that id');
+    if (!(await canSeeDeployment(auth.id, deployment))) {
+      throw new NotFoundError('No deployment was found with that id');
+    }
+
+    if (deployment.status !== 'queued') {
+      throw new ConflictError('Only queued deployments can be executed');
+    }
+
+    const result = await executeDeployment(store, deployment);
+    ctx.json({ ok: result.ok, deployment: result.deployment });
+  });
+
+  /** Admin sweep: process all pending/queued deployments */
+  router.post('/api/v1/admin/deployments/sweep', async (ctx) => {
+    await asAdmin(ctx, deps);
+    const cycleResult = await runDeploymentCycle(store);
+    ctx.json({ ok: true, ...cycleResult });
+  });
+
   /**
    * SSE stream (spec §24). EventSource cannot send an Authorization header, so this one read-only
-   * endpoint also accepts the same bearer token as ?token=. It is fed into the very same
-   * authenticate() path — signature, expiry, revocation, live account status — so the token is only
-   * transported differently, never trusted differently.
+   * endpoint also accepts the same bearer token as ?token=.
    */
   router.get('/api/v1/deployments/:id/events', async (ctx) => {
     const queryToken = ctx.query?.token;
@@ -157,7 +175,6 @@ function register(router, deps) {
       connection: 'keep-alive',
       'x-accel-buffering': 'no',
     });
-    // The router must not append its own 204 once the handler returns; the stream owns the response.
     ctx._sent = true;
 
     const send = (event, data) => ctx.res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
@@ -199,7 +216,7 @@ function register(router, deps) {
     return null;
   });
 
-  /** Platform extension (no counterpart in the original): create a deployment record directly. */
+  /** Create a deployment record. */
   router.post('/api/v1/deployments', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const body = await ctx.validate(v.object({
@@ -208,9 +225,10 @@ function register(router, deps) {
       serviceId: v.string().optional(),
       installationId: v.string().optional(),
       action: v.string().max(24).optional(),
+      autoExecute: v.boolean().optional(),
     }));
 
-    const deployment = await deployments().insert({
+    let deployment = await deployments().insert({
       id: uuidv7(), user_id: auth.id, requested_by: auth.id,
       service_id: body.serviceId ?? null, installation_id: body.installationId ?? null,
       source: body.source, ref: body.ref, action: body.action ?? 'install',
@@ -220,6 +238,12 @@ function register(router, deps) {
       id: uuidv7(), deployment_id: deployment.id, level: 'info',
       message: `Deployment queued for ${body.source} ref ${body.ref}`,
     });
+
+    if (body.autoExecute) {
+      const execResult = await executeDeployment(store, deployment);
+      deployment = execResult.deployment;
+    }
+
     ctx.code(201).json({ deployment });
   });
 }
