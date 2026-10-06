@@ -101,6 +101,24 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0069_classify_backup_kind.sql',
     // A22 open item — record the agent's `includes` report (what the archive holds) on the row.
     '0070_record_backup_includes.sql',
+    // CLOUDHOST247 global platform — cart lines for non-catalogue services and packaged platform
+    // plans (0071), website builder (0072), AI website builder (0073), online store (0074),
+    // expert services (0075), digital marketing (0076), logo maker (0077), unified inbox (0078),
+    // platform-plan subscriptions (0079), multiple domain lines per order (0080), truthful inbox
+    // delivery statuses (0081).
+    '0071_create_service_cart_items_and_platform_plans.sql',
+    '0072_create_website_builder.sql',
+    '0073_create_ai_website_builder.sql',
+    '0074_create_online_store.sql',
+    '0075_create_expert_services.sql',
+    '0076_create_digital_marketing_services.sql',
+    '0077_create_logo_maker.sql',
+    '0078_create_unified_inbox.sql',
+    '0079_extend_subscriptions_for_platform_plans.sql',
+    '0080_allow_multiple_domain_lines_per_order.sql',
+    '0081_extend_inbox_delivery_status.sql',
+    // Delivery outcome for an online-store order's digital download links (sent | manual | failed).
+    '0082_record_digital_delivery.sql',
   ];
 
   it('finds the committed migration files in order', () => {

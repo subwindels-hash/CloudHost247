@@ -188,8 +188,40 @@ const envSchema = z.object({
   // provision/reinstall job can become READY; the worker refuses to skip monitoring attestation.
   SERVER_AGENT_INSTALL_URL: z.string().url().optional(),
   PROVISIONING_HEALTH_TIMEOUT_MS: z.coerce.number().int().min(10_000).max(3_600_000).default(600_000),
+  // --- AI Website Builder / Logo Maker: optional external model provider -----------------------
+  // The built-in ("rules") generator needs nothing. These configure an external chat-completion
+  // provider; while they are unset the model engines report CONFIGURATION_REQUIRED, exactly like an
+  // unconfigured registrar — no route ever substitutes the built-in generator for a model request.
+  // `AI_LLM_BASE_URL` is the API root (e.g. https://api.openai.com/v1 or an OpenAI-compatible
+  // gateway); `AI_LLM_API_STYLE` selects the request/response shape actually spoken.
+  AI_LLM_BASE_URL: z.string().url().optional(),
+  AI_LLM_API_KEY: z.string().min(8).optional(),
+  AI_LLM_MODEL: z.string().min(1).max(120).optional(),
+  AI_LLM_API_STYLE: z.enum(['openai', 'anthropic']).optional().default('openai'),
+  AI_LLM_TIMEOUT_MS: z.coerce.number().int().min(5_000).max(300_000).optional().default(60_000),
+
   // Existing mail systems can expose a server-side webhook. Neither value is sent to browsers.
+  /**
+   * Shared secret for `POST /api/v1/inbox/inbound`. Unset means external channels cannot post into
+   * the unified inbox yet, and the route answers 503 CONFIGURATION_REQUIRED rather than accepting an
+   * unauthenticated message.
+   */
+  INBOX_INBOUND_WEBHOOK_SECRET: z.string().min(24).optional(),
   NOTIFICATION_EMAIL_WEBHOOK_URL: z.string().url().optional(),
+  /**
+   * Digital-marketing integration credentials (all optional). A channel is reported as connected
+   * only when its own variable is present; see src/marketing-services/campaign-service.ts.
+   */
+  MARKETING_PROVIDER_GOOGLE_SEARCH_CONSOLE_TOKEN: z.string().min(8).optional(),
+  MARKETING_PROVIDER_AHREFS_TOKEN: z.string().min(8).optional(),
+  MARKETING_PROVIDER_SEMRUSH_TOKEN: z.string().min(8).optional(),
+  MARKETING_PROVIDER_GOOGLE_ADS_TOKEN: z.string().min(8).optional(),
+  MARKETING_PROVIDER_BING_ADS_TOKEN: z.string().min(8).optional(),
+  MARKETING_PROVIDER_META_BUSINESS_TOKEN: z.string().min(8).optional(),
+  MARKETING_PROVIDER_LINKEDIN_ADS_TOKEN: z.string().min(8).optional(),
+  MARKETING_PROVIDER_GOOGLE_ANALYTICS_TOKEN: z.string().min(8).optional(),
+  MARKETING_PROVIDER_PLAUSIBLE_TOKEN: z.string().min(8).optional(),
+  MARKETING_PROVIDER_GOOGLE_TAG_MANAGER_TOKEN: z.string().min(8).optional(),
   NOTIFICATION_EMAIL_WEBHOOK_TOKEN: z.string().min(16).optional(),
 });
 

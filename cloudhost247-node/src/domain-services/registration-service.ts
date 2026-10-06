@@ -666,3 +666,200 @@ export async function getMyRegistration(db: Queryable, userId: string, registrat
   if (!rows[0]) throw new NotFoundError('No registration was found with that id');
   return rows[0];
 }
+
+/* --------------------------------------------------------------------------------------------
+ * Cart integration (migration 0071: `cart_service_items`)
+ *
+ * The unified CloudHost247 cart can hold a domain registration alongside hosting and platform
+ * services and check them out as ONE order. These functions make that possible WITHOUT a second
+ * registration model: a cart line always points at a real `domain_registrations` draft created by
+ * the same provider-confirmed quote the direct flow uses, and the existing
+ * `markRegistrationPaymentVerified` + worker sweep finish the job once the order is paid.
+ *
+ * The only difference between "register now" and "add to cart" is therefore *when* the order is
+ * created — never what is charged, how the contact is stored, or who performs the registration.
+ * ------------------------------------------------------------------------------------------ */
+
+export interface RegistrationDraft {
+  registrationId: string;
+  displayName: string;
+  amount: string;
+  currency: string;
+  domainName: string;
+  years: number;
+  isPremium: boolean;
+}
+
+export interface CreateRegistrationDraftInput {
+  domainName: string;
+  years: number;
+  contact: RegistrationContactInput;
+}
+
+/**
+ * Creates the registration draft a cart line points at: encrypted contact, provider reference and
+ * `pending_payment` status, with a fresh provider-confirmed quote. No order and no invoice are
+ * created here — checkout owns that, exactly as it does for a catalogue plan.
+ */
+export async function createRegistrationDraft(
+  db: Queryable,
+  ring: EncryptionKeyRing,
+  userId: string,
+  input: CreateRegistrationDraftInput,
+  genId: () => string = randomUUID
+): Promise<RegistrationDraft> {
+  validateContact(input.contact);
+  const normalized = normalizeDomainName(input.domainName);
+  const quote = await registrationQuoteWithMembership(db, userId, normalized, input.years);
+  const chargeAmount = quote.memberPrice ?? quote.standardPrice;
+
+  const { rows: live } = await db.query<{ id: string }>(
+    `SELECT id FROM domain_registrations
+      WHERE lower(domain_name) = lower($1)
+        AND status IN ('payment_verified','registration_requested','pending_provider_confirmation','registered')`,
+    [normalized]
+  );
+  if (live[0]) {
+    throw new ConflictError('A registration for that domain is already in progress on an account.');
+  }
+
+  const providerRow = await resolveConnectedRegistrarRow(db);
+  const registrationId = genId();
+  const contactId = genId();
+
+  await withTransaction(db, async (tx) => {
+    await tx.query(
+      `INSERT INTO domain_contacts (id, user_id, encrypted_contact_data, key_version, display_label)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [
+        contactId,
+        userId,
+        encryptSecret(ring, JSON.stringify({ ...input.contact, countryCode: input.contact.countryCode.toUpperCase() })),
+        1,
+        `${input.contact.firstName} ${input.contact.lastName}`.slice(0, 120),
+      ]
+    );
+    await tx.query(
+      `INSERT INTO domain_registrations
+         (id, user_id, provider_id, contact_id, order_id, domain_name, registration_years, status, provider_metadata)
+       VALUES ($1,$2,$3,$4,NULL,$5,$6,'pending_payment',$7)`,
+      [
+        registrationId,
+        userId,
+        providerRow.id,
+        contactId,
+        normalized,
+        input.years,
+        JSON.stringify({
+          quotedPrice: quote.standardPrice,
+          memberPrice: quote.memberPrice,
+          isPremium: quote.isPremium,
+          source: 'cart',
+        }),
+      ]
+    );
+  });
+
+  return {
+    registrationId,
+    displayName: `Domain registration — ${normalized} (${input.years} year${input.years === 1 ? '' : 's'})`,
+    amount: chargeAmount,
+    currency: quote.currency,
+    domainName: normalized,
+    years: input.years,
+    isPremium: quote.isPremium,
+  };
+}
+
+/**
+ * Re-prices a cart line's registration right now. Called on every cart read and again inside the
+ * checkout transaction, so what the customer is charged is a live, provider-confirmed, member-
+ * discounted amount — and a registrar outage surfaces as an explicitly unavailable line instead of
+ * a stale price.
+ */
+export async function resolveRegistrationLinePrice(
+  db: Queryable,
+  userId: string,
+  registrationId: string
+): Promise<{ amount: string; currency: string; displayName: string; domainName: string; years: number } | null> {
+  const { rows } = await db.query<{
+    id: string;
+    user_id: string;
+    domain_name: string;
+    registration_years: number;
+    status: string;
+    order_id: string | null;
+  }>(
+    `SELECT id, user_id, domain_name, registration_years, status, order_id
+       FROM domain_registrations WHERE id = $1 LIMIT 1`,
+    [registrationId]
+  );
+  const registration = rows[0];
+  // Scoped to the owner: another customer's registration is indistinguishable from a missing one.
+  if (!registration || registration.user_id !== userId) return null;
+  if (registration.status !== 'pending_payment' || registration.order_id) return null;
+
+  const quote = await registrationQuoteWithMembership(
+    db,
+    userId,
+    registration.domain_name,
+    registration.registration_years
+  );
+  return {
+    amount: quote.memberPrice ?? quote.standardPrice,
+    currency: quote.currency,
+    displayName: `Domain registration — ${registration.domain_name} (${registration.registration_years} year${registration.registration_years === 1 ? '' : 's'})`,
+    domainName: registration.domain_name,
+    years: registration.registration_years,
+  };
+}
+
+/**
+ * Ties a checked-out draft to the order/invoice that now pay for it. Idempotent: a repeated call
+ * for the same order is a no-op, and the guarded WHERE clause refuses to re-point a draft that is
+ * already attached somewhere else.
+ */
+export async function attachRegistrationToOrder(
+  tx: Queryable,
+  registrationId: string,
+  orderId: string,
+  invoiceId: string | null
+): Promise<boolean> {
+  const { rows } = await tx.query<{ id: string }>(
+    `UPDATE domain_registrations
+        SET order_id = $2, invoice_id = $3, updated_at = now()
+      WHERE id = $1 AND status = 'pending_payment' AND (order_id IS NULL OR order_id = $2)
+      RETURNING id`,
+    [registrationId, orderId, invoiceId]
+  );
+  return Boolean(rows[0]);
+}
+
+/** Removes a draft whose cart line was removed. Refuses to touch anything already attached/paid. */
+export async function discardRegistrationDraft(db: Queryable, userId: string, registrationId: string): Promise<boolean> {
+  const { rows } = await db.query<{ id: string }>(
+    `DELETE FROM domain_registrations
+      WHERE id = $1 AND user_id = $2 AND status = 'pending_payment' AND order_id IS NULL
+      RETURNING id`,
+    [registrationId, userId]
+  );
+  return Boolean(rows[0]);
+}
+
+/**
+ * Housekeeping sweep: a draft that never reached checkout must not hold a domain name forever.
+ * `pending_payment` drafts older than the window with no order attached are cancelled, which also
+ * releases them from the cart-line uniqueness index on the next read.
+ */
+export async function expireStaleRegistrationDrafts(db: Queryable, olderThanDays = 14): Promise<number> {
+  const { rows } = await db.query<{ id: string }>(
+    `UPDATE domain_registrations
+        SET status = 'cancelled', updated_at = now()
+      WHERE status = 'pending_payment'
+        AND order_id IS NULL
+        AND created_at < now() - ($1 || ' days')::interval
+      RETURNING id`,
+    [String(olderThanDays)]
+  );
+  return rows.length;
+}

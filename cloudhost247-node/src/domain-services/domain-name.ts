@@ -1,3 +1,5 @@
+import { domainToASCII } from 'node:url';
+
 /**
  * Domain-name normalization and validation shared by every Domain Services workflow.
  *
@@ -24,7 +26,17 @@ const DOMAIN_PATTERN = new RegExp(`^(?=.{1,${MAX_DOMAIN_LENGTH}}$)${LABEL_SOURCE
 const TERM_PATTERN = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/;
 
 export function normalizeDomainName(input: string): string {
-  return input.trim().toLowerCase().replace(/\.$/, '');
+  const lowered = input.trim().toLowerCase().replace(/\.$/, '');
+  // Internationalised domain names: DNS and every registrar API speak the ASCII (punycode) form,
+  // so a Unicode name typed by a customer — münchen.de — is normalised to xn--mnchen-3ya.de here,
+  // once, before it is validated, stored, compared for ownership or sent to a provider. Input that
+  // cannot be converted is returned unchanged so the grammar below rejects it rather than the
+  // platform silently searching a different name.
+  if (/[^\x00-\x7f]/.test(lowered)) {
+    const ascii = domainToASCII(lowered);
+    if (ascii) return ascii.replace(/\.$/, '');
+  }
+  return lowered;
 }
 
 export function isValidDomainName(input: string): boolean {

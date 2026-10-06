@@ -55,7 +55,11 @@ async function main(): Promise<void> {
   // `serveFrontend` needs the built SPA directory. In a compiled deployment this resolves from
   // dist/; when run through tsx it has to be pointed at the repository's own `public/`.
   const publicDir = path.resolve(__dirname, '..', 'public');
-  const app = buildApp(env, { serveFrontend: true, publicDir, pool: client as never });
+  // The *raw* PGlite handle is what the app receives, exactly as the integration suites do it: it
+  // carries PGlite's own `.transaction()` API, which `withTransaction` requires in order to make
+  // multi-table writes (checkout, provisioning, auction settlement) atomic. The `PgliteClient`
+  // wrapper is only used for migrations and seeding.
+  const app = buildApp(env, { serveFrontend: true, publicDir, pool: db as never });
 
   /**
    * The platform's production CSP sends `frame-ancestors 'self'` (helmet's default), which is correct

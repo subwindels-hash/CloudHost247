@@ -6,6 +6,8 @@ import './styles.css';
 import './ai-support.css';
 import './infrastructure.css';
 import './tools-center.css';
+import './platform.css';
+import './published-site.css';
 
 const rootEl = document.getElementById('root');
 if (!rootEl) {
