@@ -1,9 +1,9 @@
 /**
  * Free tools — a catalogue of small utilities (formatters, encoders, checkers) plus history,
- * favorites, saved reports and uptime monitors.
+ * favorites, saved reports, live DNS resolution and HTTP uptime monitors.
  *
- * Ported from cloudhost247-node/src/tools/routes.ts. Tool execution is deterministic and local
- * (no external calls); speed-test endpoints return synthetic figures and say so.
+ * Ported from cloudhost247-node/src/tools/routes.ts. Connects to real DNS resolver
+ * and live outbound HTTP monitor probes. Speed-test endpoints return synthetic figures.
  */
 'use strict';
 
@@ -12,6 +12,7 @@ const { v } = require('../core/validate');
 const { NotFoundError, ValidationError } = require('../core/errors');
 const { uuidv7 } = require('../lib/ids');
 const { authenticate } = require('../lib/auth');
+const { resolveDns, checkHttpMonitor } = require('../lib/tools-connectors');
 
 const name = 'tools';
 
@@ -21,11 +22,11 @@ const CATALOG = [
   { slug: 'hash', name: 'Hash Generator', category: 'developers', description: 'SHA-256/SHA-1/MD5 of a string.' },
   { slug: 'uuid', name: 'UUID Generator', category: 'developers', description: 'Generate UUIDv7 identifiers.' },
   { slug: 'password', name: 'Password Generator', category: 'security', description: 'Generate a strong password.' },
-  { slug: 'dns-lookup', name: 'DNS Lookup', category: 'network', description: 'Resolve DNS records (estimate).' },
+  { slug: 'dns-lookup', name: 'DNS Lookup', category: 'network', description: 'Resolve live DNS records (A, AAAA, MX, TXT, NS, CNAME, SOA, PTR, SRV).' },
 ];
 const BY_SLUG = new Map(CATALOG.map((t) => [t.slug, t]));
 
-function runTool(slug, input) {
+async function runTool(slug, input) {
   const text = String(input.text ?? '');
   switch (slug) {
     case 'json-format': {
@@ -51,9 +52,20 @@ function runTool(slug, input) {
       for (let i = 0; i < len; i += 1) out += chars[bytes[i] % chars.length];
       return { result: out };
     }
-    case 'dns-lookup':
-      // No resolver here — be honest that this is a placeholder, not a real lookup.
-      return { result: null, estimate: true, note: 'Live DNS resolution requires a resolver connector (deferred).' };
+    case 'dns-lookup': {
+      const name = String(input.name || input.domain || input.text || '').trim();
+      const type = String(input.type || 'A').toUpperCase();
+      const dnsRes = await resolveDns(name, type);
+      return {
+        result: dnsRes.records,
+        records: dnsRes.records,
+        query: dnsRes.query,
+        count: dnsRes.count,
+        status: dnsRes.status,
+        durationMs: dnsRes.durationMs,
+        summary: dnsRes.summary,
+      };
+    }
     default:
       throw new NotFoundError('Unknown tool');
   }
@@ -93,7 +105,7 @@ function register(router, deps) {
     const tool = BY_SLUG.get(ctx.params.slug);
     if (!tool) throw new NotFoundError('Unknown tool');
     const body = await ctx.validate(v.object({}).passthrough());
-    const out = runTool(ctx.params.slug, body);
+    const out = await runTool(ctx.params.slug, body);
 
     await store.table('tools_history').insert({
       id: uuidv7(), user_id: auth.id, tool_slug: tool.slug, input: body, output: out,
@@ -248,9 +260,21 @@ function register(router, deps) {
     const auth = await authenticate(ctx, deps);
     const monitor = await store.table('tools_monitors').findOne({ id: ctx.params.id, user_id: auth.id });
     if (!monitor) throw new NotFoundError('Monitor not found');
-    // No outbound HTTP from the monitor here; record the check time and report synthetic status.
-    const updated = await store.table('tools_monitors').updateById(monitor.id, { last_checked_at: new Date().toISOString() });
-    ctx.json({ synthetic: true, status: 'unknown', lastCheckedAt: updated.last_checked_at, note: 'Live HTTP checks require an egress connector (deferred).' });
+    
+    const allowLoopback = deps?.config?.NODE_ENV === 'test' || process.env.NODE_ENV === 'test';
+    const checkResult = await checkHttpMonitor(monitor.url, { allowLoopback });
+    const updated = await store.table('tools_monitors').updateById(monitor.id, {
+      last_checked_at: checkResult.lastCheckedAt,
+      status: checkResult.status === 'up' ? 'active' : 'down',
+    });
+
+    ctx.json({
+      live: true,
+      status: checkResult.status,
+      statusCode: checkResult.statusCode,
+      latencyMs: checkResult.latencyMs,
+      lastCheckedAt: updated.last_checked_at,
+    });
   });
 }
 
