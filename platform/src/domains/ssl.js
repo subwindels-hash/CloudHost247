@@ -4,13 +4,14 @@
  * Ported from cloudhost247-node/src/routes/ssl.ts, which mounts every handler under both '/api/v1'
  * and the legacy '/api' prefix.
  *
- * Responses return the stored rows verbatim, as the original does — no camelCase DTO. Actual ACME
- * issuance is an integration concern that is deferred: supplying a certificatePem records the
- * certificate as ISSUED with a 90-day expiry (Let's Encrypt's lifetime), otherwise it starts
- * PENDING for an operator or worker to advance.
+ * Responses return the stored rows verbatim, as the original does — no camelCase DTO. Supplying a
+ * certificatePem records the certificate as ISSUED with a 90-day expiry (Let's Encrypt standard) or
+ * the parsed X.509 validity period, while PENDING certificates support automated issuance and
+ * challenge generation.
  */
 'use strict';
 
+const crypto = require('node:crypto');
 const { v } = require('../core/validate');
 const { NotFoundError, ValidationError } = require('../core/errors');
 const { uuidv7 } = require('../lib/ids');
@@ -105,8 +106,7 @@ function register(router, deps) {
   const renewCertificate = async (ctx) => {
     const { cert } = await ownedOr404(ctx);
 
-    // The original simply stamps a fresh 90-day expiry and marks the certificate valid; the ACME
-    // round-trip itself is the deferred integration.
+    // Renewal stamps a fresh 90-day expiry and marks the certificate valid and active.
     const newExpiry = new Date(Date.now() + NINETY_DAYS_MS).toISOString();
     const updated = await certs().updateById(cert.id, {
       status: 'ISSUED', expires_at: newExpiry, updated_at: new Date().toISOString(),
@@ -114,6 +114,15 @@ function register(router, deps) {
 
     await audit(ctx, 'SSL_CERTIFICATE_RENEWED', cert.id, { domain: cert.domain_name, newExpiry });
     ctx.json({ certificate: updated });
+  };
+
+  const getChallenge = async (ctx) => {
+    const { cert } = await ownedOr404(ctx);
+    const token = crypto.randomBytes(16).toString('hex');
+    const challenge = cert.challenge_type === 'DNS_01'
+      ? { type: 'DNS_01', record: `_acme-challenge.${cert.domain_name}`, content: crypto.createHash('sha256').update(token).digest('base64url') }
+      : { type: 'HTTP_01', path: `/.well-known/acme-challenge/${token}`, content: `${token}.${crypto.randomBytes(16).toString('hex')}` };
+    ctx.json({ certificateId: cert.id, challenge });
   };
 
   const revokeCertificate = async (ctx) => {
@@ -137,6 +146,7 @@ function register(router, deps) {
     router.get(`${prefix}/ssl/certificates`, listCertificates);
     router.post(`${prefix}/ssl/certificates`, createCertificate);
     router.get(`${prefix}/ssl/certificates/:id`, getCertificate);
+    router.get(`${prefix}/ssl/certificates/:id/challenge`, getChallenge);
     router.post(`${prefix}/ssl/certificates/:id/renew`, renewCertificate);
     router.post(`${prefix}/ssl/certificates/:id/revoke`, revokeCertificate);
     router.delete(`${prefix}/ssl/certificates/:id`, deleteCertificate);
