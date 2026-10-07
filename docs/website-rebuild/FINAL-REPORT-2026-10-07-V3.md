@@ -375,7 +375,7 @@ python3 scripts/build-production-zip.py --verify
 
 **BRAND**
 - [x] CloudHost247 branding consistent everywhere (0 retired-brand matches)
-- [x] no unintended HostX customer-facing branding (protected vendor ids documented)
+- [x] no unintended legacy customer-facing branding (protected vendor ids documented)
 
 **FUNCTIONALITY**
 - [x] WHMCS still works (no core files changed, only customizations)
