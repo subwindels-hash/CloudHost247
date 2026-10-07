@@ -100,8 +100,10 @@ def main():
     base = args.base if args.base.endswith('/') else args.base + '/'
     checks = []
 
-    def add(name, ok, detail):
-        checks.append({'check': name, 'ok': bool(ok), 'detail': detail})
+    def add(name, ok, detail, warn=False):
+        """Record a check. `warn=True` reports a problem that is not the deployment question
+        (e.g. the database being unreachable) and does not change the rebuild verdict."""
+        checks.append({'check': name, 'ok': bool(ok), 'warn': bool(warn), 'detail': detail})
         return ok
 
     # 1. The Node application answers at all.
@@ -150,11 +152,24 @@ def main():
     status, _, _ = fetch(base + media)
     add('media-tree-deployed', status == 200, f'GET /{media} -> {status}')
 
-    failed = [c for c in checks if not c['ok']]
+    # 8. Deployment health, kept OUT of the rebuild verdict: every marketing page renders from the
+    #    compiled bundle and never queries the database, so the design change appears even while the
+    #    database is unreachable -- but the catalogue, pricing, domain and account surfaces then
+    #    answer with their error/empty states, and `migrate up` cannot run at all.
+    status, body, _ = fetch(base + 'ready')
+    db_ok = status == 200 and '"status":"ok"' in body.replace(' ', '')
+    add('database-reachable', db_ok,
+        f'GET /ready -> {status} {body.strip()[:90]}'
+        + ('' if db_ok else '  <-- catalogue/account pages will show error states and migrations cannot run'),
+        warn=True)
+
+    failed = [c for c in checks if not c['ok'] and not c['warn']]
+    warnings = [c for c in checks if not c['ok'] and c['warn']]
     report = {
         'base': base,
         'passed': not failed,
         'checks': checks,
+        'warnings': warnings,
         'expected_entry_bundle': expected_entry,
         'live_entry_bundle': live_entry,
         'live_title': live_title,
@@ -163,7 +178,8 @@ def main():
     width = max(len(c['check']) for c in checks)
     print(f'CloudHost247 live deployment verification — {base}\n')
     for check in checks:
-        print(f"  {'PASS' if check['ok'] else 'FAIL'}  {check['check']:<{width}}  {check['detail']}")
+        label = 'PASS' if check['ok'] else ('WARN' if check['warn'] else 'FAIL')
+        print(f"  {label:<4}  {check['check']:<{width}}  {check['detail']}")
     print()
     if failed:
         print(f'{len(failed)} of {len(checks)} checks failed. The live host is NOT serving this '
@@ -174,6 +190,13 @@ def main():
         print('  # overwrite dist/ and public/, then Restart the application in Setup Node.js App.')
         print('See docs/website-rebuild/LIVE-SITE-DEPLOYMENT.md for the full procedure, the')
         print('migration step, and why uploading the WHMCS/PHP package changes nothing here.')
+    elif warnings:
+        print(f'The live host IS serving this build. {len(warnings)} non-deployment warning(s) '
+              f'remain:')
+        for warning in warnings:
+            print(f"  - {warning['check']}: {warning['detail']}")
+        print('See docs/website-rebuild/LIVE-SITE-DEPLOYMENT.md §0 (the database is a separate,')
+        print('older problem from the deployment itself).')
     else:
         print(f'All {len(checks)} checks passed — the live host is serving this build.')
 

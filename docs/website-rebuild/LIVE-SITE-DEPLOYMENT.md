@@ -11,6 +11,42 @@ live host returned, not an assumption.
 
 ---
 
+## 0. Read this first: there are two separate problems, and only one of them is the design
+
+The stale deployment is problem one. Production also has **no working database connection**, which is
+problem two — it predates this rebuild, it is not fixed by uploading the new build, and it blocks the
+migration step of the deployment.
+
+Evidence from the live host (2026-10-07), all public reads:
+
+| Probe | Live response | Meaning |
+|---|---|---|
+| `GET /health` | `{"status":"ok"}` | The process is up. `/health` is deliberately dependency-free. |
+| `GET /ready` | `{"status":"error","checks":{"database":"error"}}` (HTTP 503) | The app cannot reach its database. `/ready` only reports whether PostgreSQL is reachable. |
+| `GET /api/v1/apps?limit=24` | `{"error":"INTERNAL_ERROR",…}` | A DB-backed public endpoint failing — the deployed build's app catalogue. |
+| `GET /api/v1/operating-systems` | `{"error":"INTERNAL_ERROR",…}` | Same. This is also the endpoint the WHMCS theme reads for its catalogue. |
+
+`DEPLOYMENT_SUMMARY.md` describes the shipped `.env` as holding a **placeholder `DATABASE_URL`**.
+A syntactically valid placeholder passes the startup validator (so `/health` is green) and then fails
+every connection (so `/ready` and every catalogue route are red). That is the most likely cause; the
+alternatives are a database that was never created, wrong credentials, or `DATABASE_SSL`/
+`DATABASE_SSL_REJECT_UNAUTHORIZED` not matching the provider's requirements (see
+`docs/CPANEL_DEPLOYMENT.md` §0.3 and §4).
+
+**What this does and does not affect:**
+
+* The **design change does not depend on the database.** Every marketing page renders from the
+  compiled bundle; the homepage, the navigation and the 3D visuals issue no database query. The
+  rebuilt site will therefore look correct the moment the upload lands — with or without a database.
+* **Catalogue, pricing, domain, server and account surfaces do depend on it** and will answer with
+  their documented empty/error states until it is fixed. Those states are deliberate (they never
+  invent a price), but they are not the finished site.
+* **`migrate up` cannot run at all** without a reachable database. Fix the connection first
+  (§3.3–§3.4), then migrate.
+
+`scripts/verify-live-site.py` reports this as a `WARN`, not a `FAIL`: it is not part of the "is the
+rebuild deployed?" verdict, but it is not allowed to pass silently either.
+
 ## 1. What the live host is actually running
 
 The live host is the **Node/TypeScript platform** (`cloudhost247-node/`), not the WHMCS/PHP site.
@@ -123,10 +159,18 @@ the **Run NPM Install** button on the application page:
 npm ci --omit=dev
 ```
 
-### 3.4 Apply the 12 new migrations
+### 3.4 Fix the database, then apply the 12 new migrations
 
-The deployed build knows about 70 migrations; this build ships **82** (`0071`–`0082`: service cart
-items/platform plans, Website Builder, AI Website Builder, Online Store, Experts, Marketing
+**First: nothing in this step can run until the database connection works** (§0). Confirm it with
+`GET /ready` returning `{"status":"ok","checks":{"database":"ok"}}` — every catalogue endpoint
+answering `INTERNAL_ERROR` is the same root cause. Typical fixes, in order of likelihood: replace the
+placeholder `DATABASE_URL` in `.env` with the real connection string from the hosting provider
+(cPanel → *PostgreSQL Databases*); confirm the database and user actually exist; set `DATABASE_SSL`
+and, only for providers whose certificate cannot be validated, `DATABASE_SSL_REJECT_UNAUTHORIZED`
+(`docs/CPANEL_DEPLOYMENT.md` §4). Preserve `CREDENTIAL_ENCRYPTION_KEY` when editing `.env`.
+
+Then: the deployed build knows about 70 migrations; this build ships **82** (`0071`–`0082`: service
+cart items/platform plans, Website Builder, AI Website Builder, Online Store, Experts, Marketing
 Services, Logo Maker, Unified Inbox, subscription extension, multi-domain-line orders, inbox
 delivery status, digital delivery records).
 
@@ -136,10 +180,25 @@ node dist/database/migrate.js up
 ```
 
 Back up the database first. Migrations `0023`, `0024`, `0025` and `0041` remain quarantined in
-production; `migrate up` fails closed and names them if anything pending depends on them. Only the
-project owner can authorize them per run (see `docs/CPANEL_DEPLOYMENT.md` §0a). A database that was
-already running the October 4 build has them resolved already, so a normal `up` applies `0071`–`0082`
-and nothing else.
+production, so what `up` does depends on the state of the database you point it at. All three
+outcomes below were reproduced against a real Postgres engine (embedded) before writing them down:
+
+| Database state | What production `migrate up` does |
+|---|---|
+| **Already at 0070** (the October 4 build migrated it) | Applies exactly the 12 new migrations, `0071`–`0082`. No authorization needed. |
+| **Fresh / empty** (no tables, or a database that was never migrated) | **Refuses and applies nothing.** Prints `Refusing to migrate production: 0041 … is quarantined … but pending migration(s) 0042, 0043, 0047, … depend on it. Nothing was applied.` This is deliberate fail-closed behaviour, not a fault. |
+| **Fresh, with the owner's per-run authorization** | Applies all 82 migrations, `0001`–`0082`. |
+
+Because production's database is currently unreachable (§0), a repaired connection may well be an
+**empty** database — in which case the second row is what you will see. The authorization is a
+deliberate owner decision, per run, exactly as `docs/CPANEL_DEPLOYMENT.md` §0a requires:
+
+```bash
+CONFIRM_MIGRATION=yes AUTHORIZED_MIGRATIONS=0023,0024,0025,0041 node dist/database/migrate.js up
+```
+
+Read the `status` output before choosing: it marks each migration applied / pending / quarantined, so
+there is no need to guess which row of the table above applies to you.
 
 The public marketing pages, the navigation, the 3D visuals and the legal/documentation pages are
 served from the built bundle and do **not** depend on these migrations — the visual change appears as
@@ -161,10 +220,14 @@ soon as step 3.5 is done. The migrations enable the newer platform features that
 python3 scripts/verify-live-site.py --base https://rent.windelsai.com/
 ```
 
-Read-only, no authentication, exit code 0 only when every check passes. It fails with
+Read-only, no authentication, exit code 0 only when every deployment check passes. It fails with
 `live <title> = 'CloudHost247 — Cloud hosting, built for your next idea'  <-- PRE-REBUILD BUILD IS
 DEPLOYED` while the old build is still being served, and compares the live entry bundle filename
 against the local build so "did my upload land?" is answered by a filename, not an impression.
+
+The database is reported separately as `WARN database-reachable`, so "the rebuild is live but the
+database still needs fixing" is a distinct, honest result rather than a pass or a failure — exactly
+the state production is in today (§0).
 
 The same check runs from GitHub without any local tooling: **Actions → "Verify live deployment" →
 Run workflow**.
