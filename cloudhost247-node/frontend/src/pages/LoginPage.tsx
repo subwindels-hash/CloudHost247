@@ -135,7 +135,10 @@ export default function LoginPage() {
             <button type="submit" disabled={submitting}>
               {submitting ? 'Logging in…' : 'Login'}
             </button>
-            <button type="button" className="ch247-button ch247-button--passkey" onClick={loginWithPasskey} disabled={submitting}>Use a passkey</button>
+            {/* Deliberately unclassed: `form.ch247-form button` styles every control in this form,
+                and any class here would either outrank it or be outranked by it. Left bare, this is
+                styled identically to the primary Login button above it. */}
+            <button type="button" onClick={loginWithPasskey} disabled={submitting}>Use a passkey</button>
           </>
         )}
       </form>

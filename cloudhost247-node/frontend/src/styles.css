@@ -204,27 +204,23 @@ a {
 }
 
 /**
- * Secondary action on a light card: white fill, blue label.
+ * Outline buttons *inside a form* need their treatment restated at a matching specificity.
  *
- * The `!important`s are load-bearing, not decoration. `form.ch247-form button` (specificity 0-1-2)
- * paints *every* button inside a form with the primary fill and white text, and it outranks a bare
- * class (0-1-0) — including the border, which that rule removes. The result before this existed was
- * a button filled with `--ch247-primary` whose label was also `--ch247-primary`: an unreadable
- * blue-on-blue "Use a passkey" on the sign-in card. Restating fill, label and border here with
- * `!important` is what keeps the secondary button legible next to the primary one.
+ * `form.ch247-form button` (0-1-2) paints every button in the form with the primary fill and white
+ * text and strips its border. That outranks the bare `.ch247-button--outline` class (0-1-0), so an
+ * outline button in a form rendered as `--ch247-primary` fill with a `--ch247-primary` label:
+ * blue on blue, and the border that would have separated it from the card was gone. Matching the
+ * selector's specificity restores the intended secondary treatment — white fill, blue label, blue
+ * border — without touching outline buttons anywhere else.
  */
-.ch247-button--passkey {
-  background: #fff !important;
-  color: var(--ch247-primary) !important;
-  border: 1px solid var(--ch247-primary) !important;
+form.ch247-form .ch247-button--outline {
+  background: #fff;
+  color: var(--ch247-primary);
+  border: 1px solid var(--ch247-primary);
 }
-.ch247-button--passkey:hover:not(:disabled) {
-  background: #eef5ff !important;
-  border-color: #0648b4 !important;
-}
-.ch247-button--passkey:focus-visible {
-  outline: 2px solid var(--ch247-primary);
-  outline-offset: 2px;
+form.ch247-form .ch247-button--outline:hover:not(:disabled) {
+  background: #eef5ff;
+  border-color: #0648b4;
 }
 
 .ch247-button:disabled {
