@@ -84,7 +84,7 @@
       "name": "node test suite",
       "command": "npm test (cloudhost247-node)",
       "result": "passed",
-      "evidence": "136 test files, 1636 tests, 0 failures, 1113.72s (run on the final revision, including the two new SEO-surface tests)"
+      "evidence": "136 test files, 1,636 tests, 0 failed, exit 0 (1542.67s) for cloudhost247-node on the final revision; includes the agent-protocol conformance suite and the SEO surface suite (one-policy robots contract, sitemap/registry policy agreement)"
     },
     {
       "name": "php website suite (WASM PHP 8.2)",

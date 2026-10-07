@@ -129,7 +129,7 @@ emitted, PHP Tools mega menu floors, MRZ footer link.
 | `vitest tests/integration/seo-routes.test.ts` | 6 passed (2 new: one-policy robots, sitemap/policy agreement) |
 | `node scripts/site/check-links.mjs` | 2,176 surfaces / 955 internal / 441 PHP, 0 broken, 0 placeholder, 0 dangling |
 | `python3 scripts/verify-website.py` | 67 registry pages, 89 navigation destinations, 0 source errors |
-| `npm test` (cloudhost247-node) | 136 test files, 1,636 tests, 0 failures |
+| `npm test` (cloudhost247-node) | 136 test files, 1,636 tests, 0 failures, exit 0 |
 | `npm run typecheck` / `npm run build` | clean |
 | `python3 scripts/build-production-zip.py` (+ `--skip-build --verify`) | 7,890 members, 57,910,595 bytes (55.2 MB), 161 media assets, 13 published documents, 0 secret matches, extraction verified, member-level integrity clean |
 

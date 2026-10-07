@@ -272,7 +272,14 @@ specific sentences that were rewritten for this reason.
   `details`/`summary` disclosure menus operable from the keyboard, labelled form controls.
 * `:focus-visible` outlines defined globally, with a high-contrast variant on dark surfaces.
 * `prefers-reduced-motion` honoured in the design system and every component stylesheet, including
-  `css/tools.css`, which was the last one without it.
+  `css/tools.css`, which was the last one without it. The application inherits it rather than
+  duplicating it: `frontend/src/main.tsx` imports `shared/site/design-system.css` **last**, after the
+  feature stylesheets, so the same block and the same primitives win on both surfaces.
+* `css/site.css` no longer carries a parallel component vocabulary — `.ch-card-grid`, `.ch-steps`,
+  `.ch-note` and `.ch-check-list` are gone (the renderer and the legal pages take those from the
+  design system). The one name the two layers still share is `.ch-split`; `site.css` defines it for
+  the older templates and the design system, loading afterwards, owns it on every page that renders
+  the registry sections.
 * every `ch-`/`ch247-` class the fixtures render (133 distinct) is defined by a stylesheet the
   repository ships — asserted, so markup cannot drift back into unstyled boxes. The pattern covers
   BEM elements and modifiers as well as plain names (`ch-card__icon`, `ch-grid--3`,
@@ -304,7 +311,7 @@ specific sentences that were rewritten for this reason.
 | Link integrity | `node scripts/site/check-links.mjs` | 2,176 surfaces, 0 broken |
 | Website source gate | `python3 scripts/verify-website.py` | `registry_pages 67`, `navigation_destinations 95`, `source_errors []`, `passed true` |
 | Retired-brand audit | `python3 scripts/branding-audit.py --quiet` | 0 matches |
-| Node platform suite | `npm test` (cloudhost247-node) | **136 test files, 1,636 tests, 0 failures** (1113.72s) |
+| Node platform suite | `npm test` (cloudhost247-node) | **136 test files, 1,636 tests, 0 failures, exit 0** (1542.67s, run against revision `81e6d47`) |
 | Typecheck / build | `npm run typecheck`, `npm run build` | passed |
 
 ## 14. Build and production archive
