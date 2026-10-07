@@ -28,8 +28,8 @@ final class View
             . '<meta property="og:description" content="' . self::e($description) . '">'
             . '<meta property="og:type" content="website">'
             . '<link rel="icon" href="' . self::e($base) . '/assets/images/cloudhost247/favicon/favicon.ico">'
-            . '<link rel="stylesheet" href="' . self::e($base) . '/templates/cloudhost247/css/site.css?v=20261006">'
-            . '<link rel="stylesheet" href="' . self::e($base) . '/templates/cloudhost247/css/tools.css?v=20261006">'
+            . '<link rel="stylesheet" href="' . self::e($base) . '/templates/cloudhost247/css/site.css?v=20261007">'
+            . '<link rel="stylesheet" href="' . self::e($base) . '/templates/cloudhost247/css/tools.css?v=20261007">'
             . '</head><body class="ch-site ch-public">' . $body . '</body></html>';
     }
 
@@ -195,7 +195,7 @@ final class View
 
     private static function shellClose($base)
     {
-        return '<footer class="ch-footer"><div class="ch-wrap"><p>© ' . gmdate('Y') . ' CloudHost247 Isc.</p><p><a href="' . self::e($base . '/tools') . '">All tools</a></p></div></footer><script type="module" src="' . self::e($base) . '/templates/cloudhost247/js/tools.js?v=20261006"></script>';
+        return '<footer class="ch-footer"><div class="ch-wrap"><p>© ' . gmdate('Y') . ' CloudHost247 Isc.</p><p><a href="' . self::e($base . '/tools') . '">All tools</a></p></div></footer><script type="module" src="' . self::e($base) . '/templates/cloudhost247/js/tools.js?v=20261007"></script>';
     }
 
     public static function resultHtml(array $result)

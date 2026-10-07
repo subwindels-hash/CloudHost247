@@ -1,7 +1,7 @@
 {if $chToolsHtml}
-<link rel="stylesheet" href="{$WEB_ROOT}/templates/cloudhost247/css/tools.css?v=20261006">
+<link rel="stylesheet" href="{$WEB_ROOT}/templates/cloudhost247/css/tools.css?v=20261007">
 {$chToolsHtml nofilter}
-<script type="module" src="{$WEB_ROOT}/templates/cloudhost247/js/tools.js?v=20261006"></script>
+<script type="module" src="{$WEB_ROOT}/templates/cloudhost247/js/tools.js?v=20261007"></script>
 {else}
 <main id="ch-tools-content">
     <div class="ch-wrap ch-section"><h1>{if $cloudhost247ToolsPage}{$cloudhost247ToolsPage.name|escape}{else}Tool not found{/if}</h1>

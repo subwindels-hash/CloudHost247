@@ -376,7 +376,7 @@
           ]
         }
       ],
-      "visual3d": "hosting/web-hosting-3d"
+      "visual3d": "hosting/cpanel-hosting-3d"
     },
     "plesk-hosting.php": {
       "title": "Plesk Hosting",
@@ -647,7 +647,7 @@
             "Dedicated: the entire physical machine"
           ],
           "visual": "cloud/public-cloud",
-          "visual3d": "cloud/vps-3d",
+          "visual3d": "cloud/public-cloud-3d",
           "link": {
             "label": "Compare cloud and dedicated",
             "url": "cloudhost247-hosting.php"
@@ -759,7 +759,7 @@
           ]
         }
       ],
-      "visual3d": "cloud/vps-3d"
+      "visual3d": "cloud/private-cloud-3d"
     },
     "vps-publiccloud.php": {
       "title": "Public Cloud",
@@ -863,7 +863,7 @@
           ]
         }
       ],
-      "visual3d": "cloud/vps-3d"
+      "visual3d": "cloud/public-cloud-3d"
     },
     "dedicated-server.php": {
       "title": "Dedicated Servers",
@@ -1074,7 +1074,7 @@
           ]
         }
       ],
-      "visual3d": "servers/dedicated-servers-3d"
+      "visual3d": "servers/enterprise-servers-3d"
     },
     "game-servers.php": {
       "title": "Game Servers",
@@ -1982,7 +1982,7 @@
           ]
         }
       ],
-      "visual3d": "cloud/vps-3d"
+      "visual3d": "cloud/cloud-hosting-3d"
     },
     "email-hosting.php": {
       "title": "Email Hosting",
@@ -2104,7 +2104,7 @@
           }
         }
       ],
-      "visual3d": "hosting/web-hosting-3d"
+      "visual3d": "hosting/email-hosting-3d"
     },
     "aboutus.php": {
       "title": "About CloudHost247",
@@ -2316,7 +2316,7 @@
           ]
         }
       ],
-      "visual3d": "cloud/vps-3d"
+      "visual3d": "cloud/cloud-hosting-3d"
     },
     "help-center.php": {
       "title": "Help Center",
@@ -3211,7 +3211,7 @@
       "uses": [],
       "related": [],
       "slug": "acceptable-use-policy",
-      "visual3d": "hero/infrastructure-3d"
+      "visual3d": "security/security-3d"
     },
     "backup-policy.php": {
       "title": "Backup Policy",
@@ -3223,7 +3223,7 @@
       "uses": [],
       "related": [],
       "slug": "backup-policy",
-      "visual3d": "hero/infrastructure-3d"
+      "visual3d": "security/security-3d"
     },
     "cookie-policy.php": {
       "title": "Cookie Policy",
@@ -3235,7 +3235,7 @@
       "uses": [],
       "related": [],
       "slug": "cookie-policy",
-      "visual3d": "hero/infrastructure-3d"
+      "visual3d": "security/security-3d"
     },
     "cybercrime-policy.php": {
       "title": "Cybercrime Policy",
@@ -3247,7 +3247,7 @@
       "uses": [],
       "related": [],
       "slug": "cybercrime-policy",
-      "visual3d": "hero/infrastructure-3d"
+      "visual3d": "security/security-3d"
     },
     "data-deletion.php": {
       "title": "Data Deletion Instructions",
@@ -3259,7 +3259,7 @@
       "uses": [],
       "related": [],
       "slug": "data-deletion",
-      "visual3d": "hero/infrastructure-3d"
+      "visual3d": "security/security-3d"
     },
     "data-privacy-notice-and-consent-form.php": {
       "title": "Data Privacy Notice and Consent Form",
@@ -3271,7 +3271,7 @@
       "uses": [],
       "related": [],
       "slug": "data-privacy-notice-and-consent-form",
-      "visual3d": "hero/infrastructure-3d"
+      "visual3d": "security/security-3d"
     },
     "data-protection-standards.php": {
       "title": "Data Protection Standards",
@@ -3283,7 +3283,7 @@
       "uses": [],
       "related": [],
       "slug": "data-protection-standards",
-      "visual3d": "hero/infrastructure-3d"
+      "visual3d": "security/security-3d"
     },
     "domain-agreement.php": {
       "title": "Domain Agreement",
@@ -3295,7 +3295,7 @@
       "uses": [],
       "related": [],
       "slug": "domain-agreement",
-      "visual3d": "hero/infrastructure-3d"
+      "visual3d": "security/security-3d"
     },
     "domain-brokerage-terms.php": {
       "title": "Domain Brokerage Terms",
@@ -3307,7 +3307,7 @@
       "uses": [],
       "related": [],
       "slug": "domain-brokerage-terms",
-      "visual3d": "hero/infrastructure-3d"
+      "visual3d": "security/security-3d"
     },
     "domain-renewal-policy.php": {
       "title": "Domain Renewal Policy",
@@ -3319,7 +3319,7 @@
       "uses": [],
       "related": [],
       "slug": "domain-renewal-policy",
-      "visual3d": "hero/infrastructure-3d"
+      "visual3d": "security/security-3d"
     },
     "domainregistrationaddendum.php": {
       "title": "Domain Registration Addendum",
@@ -3331,7 +3331,7 @@
       "uses": [],
       "related": [],
       "slug": "domainregistrationaddendum",
-      "visual3d": "hero/infrastructure-3d"
+      "visual3d": "security/security-3d"
     },
     "fair-usage-policy.php": {
       "title": "Fair Usage Policy",
@@ -3343,7 +3343,7 @@
       "uses": [],
       "related": [],
       "slug": "fair-usage-policy",
-      "visual3d": "hero/infrastructure-3d"
+      "visual3d": "security/security-3d"
     },
     "legal-notice.php": {
       "title": "Legal Notice",
@@ -3355,7 +3355,7 @@
       "uses": [],
       "related": [],
       "slug": "legal-notice",
-      "visual3d": "hero/infrastructure-3d"
+      "visual3d": "security/security-3d"
     },
     "legal.php": {
       "title": "Legal & Policy Center",
@@ -3367,7 +3367,7 @@
       "uses": [],
       "related": [],
       "slug": "legal",
-      "visual3d": "hero/infrastructure-3d"
+      "visual3d": "security/security-3d"
     },
     "privacy-policy.php": {
       "title": "Privacy Policy",
@@ -3379,7 +3379,7 @@
       "uses": [],
       "related": [],
       "slug": "privacy-policy",
-      "visual3d": "hero/infrastructure-3d"
+      "visual3d": "security/security-3d"
     },
     "refund-and-cancellation-policy.php": {
       "title": "Refund and Cancellation Policy",
@@ -3391,7 +3391,7 @@
       "uses": [],
       "related": [],
       "slug": "refund-and-cancellation-policy",
-      "visual3d": "hero/infrastructure-3d"
+      "visual3d": "security/security-3d"
     },
     "refund-policy.php": {
       "title": "Refund Policy",
@@ -3403,7 +3403,7 @@
       "uses": [],
       "related": [],
       "slug": "refund-policy",
-      "visual3d": "hero/infrastructure-3d"
+      "visual3d": "security/security-3d"
     },
     "terms-of-service.php": {
       "title": "Terms of Service",
@@ -3415,7 +3415,7 @@
       "uses": [],
       "related": [],
       "slug": "terms-of-service",
-      "visual3d": "hero/infrastructure-3d"
+      "visual3d": "security/security-3d"
     },
     "trademark-policy.php": {
       "title": "Trademark Policy",
@@ -3427,7 +3427,7 @@
       "uses": [],
       "related": [],
       "slug": "trademark-policy",
-      "visual3d": "hero/infrastructure-3d"
+      "visual3d": "security/security-3d"
     },
     "business-hosting.php": {
       "title": "Business Hosting",
@@ -3556,7 +3556,7 @@
           ]
         }
       ],
-      "visual3d": "hosting/web-hosting-3d"
+      "visual3d": "hosting/business-hosting-3d"
     },
     "reseller-hosting.php": {
       "title": "Reseller Hosting",
@@ -5029,7 +5029,7 @@
           ]
         }
       ],
-      "visual3d": "servers/dedicated-servers-3d"
+      "visual3d": "management/monitoring-3d"
     },
     "backups.php": {
       "title": "Backups",
@@ -5312,7 +5312,7 @@
         "web-hosting.php"
       ],
       "slug": "dns-management",
-      "visual3d": "domains/domain-network-3d"
+      "visual3d": "domains/dns-management-3d"
     },
     "domain-dns.php": {
       "title": "Domain DNS",
