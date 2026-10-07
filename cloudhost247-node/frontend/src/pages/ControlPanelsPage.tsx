@@ -50,7 +50,7 @@ export default function ControlPanelsPage() {
           <span className="ch247-eyebrow">CloudHost247 Platform Catalog</span>
           <h1>Control Panels & Application Platforms</h1>
           <p className="ch247-page__subtitle">
-            Deploy production-ready hosting control panels, PaaS engines, and server management software directly onto high-performance CloudHost247 compute infrastructure.
+            Browse the control panels and application platforms in CloudHost247’s live catalogue. Availability, operating systems and product features depend on the configured service.
           </p>
         </div>
       </header>

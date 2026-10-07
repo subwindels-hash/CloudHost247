@@ -250,7 +250,7 @@ function tsString(value) {
   return `'${String(value).replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
 }
 
-function emitRegistryTs(registry, spaRoutePatterns, marketingRoutes) {
+function emitRegistryTs(registry, spaRoutePatterns, marketingRoutes, publicDocRoutes) {
   const banner = `/**
  * GENERATED FILE — do not edit.
  *
@@ -363,6 +363,9 @@ export const SPA_ROUTE_PATTERNS: string[] = ${json(spaRoutePatterns)};
  * carry a quarter of a megabyte of product copy on a cold start.
  */
 export const MARKETING_ROUTES: string[] = ${json(marketingRoutes)};
+
+/** Public documentation routes built from the same published-doc list as the Docs index. */
+export const PUBLIC_DOC_ROUTES: string[] = ${json(publicDocRoutes)};
 
 /** Every route the registry publishes, in menu order — the sitemap and audits read this. */
 export const REGISTRY_ROUTES: string[] = ${json([
@@ -764,7 +767,8 @@ function main() {
   const emitted = emitRegistryTs(
     registry,
     [...routes].filter((route) => !route.startsWith('PREFIX:') && !route.startsWith('PATTERN:')).sort(),
-    contentPages.map((page) => page.route).sort()
+    contentPages.map((page) => page.route).sort(),
+    docs.index.map((document) => document.href).sort()
   );
   for (const target of TS_OUT) {
     mkdirSync(dirname(target), { recursive: true });

@@ -47,7 +47,7 @@ const PILLARS = [
 
 const AUDIENCES = [
   { icon: 'briefcase', title: 'A business website', body: 'Domain, hosting, business email and HTTPS — with someone to call when it breaks.', to: '/hosting/business' },
-  { icon: 'code', title: 'An application', body: 'A runtime, a database, a domain and a deployment that records what it shipped.', to: '/developers/deployment' },
+  { icon: 'code', title: 'An application', body: 'A supported application version, its configuration, a domain and a deployment record you can inspect.', to: '/developers/deployment' },
   { icon: 'server-rack', title: 'Infrastructure you run', body: 'VPS, cloud or dedicated servers with firewall rules, backups and telemetry.', to: '/cloud' },
   { icon: 'store', title: 'A storefront', body: 'Sell products online, with the store and the hosting on the same platform.', to: '/websites' },
 ];
@@ -103,7 +103,7 @@ export default function HomePage() {
               </div>
               <ul className="ch-hero__points">
                 <li><CheckIcon size={15} />Live catalogue pricing, never a stale price list</li>
-                <li><CheckIcon size={15} />Certificates, backups and DNS included</li>
+                <li><CheckIcon size={15} />Manage DNS, certificates and backups where available</li>
                 <li><CheckIcon size={15} />Documented APIs for everything you own</li>
               </ul>
             </div>
@@ -132,9 +132,9 @@ export default function HomePage() {
               'Web & WordPress hosting',
               'VPS · Cloud · Dedicated',
               'Application marketplace',
-              'Deploy from Git',
+              'Application deployments',
               'Website builder & stores',
-              '100+ online tools',
+              'Online tools for everyday work',
               'Documented APIs',
             ].map((item) => (
               <li className="ch-pill" key={item}>{item}</li>

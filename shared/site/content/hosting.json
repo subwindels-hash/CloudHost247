@@ -866,13 +866,13 @@
       "route": "/hosting/developer",
       "title": "Developer Hosting",
       "category": "Hosting",
-      "seoTitle": "Developer Hosting — Runtimes, Git and APIs | CloudHost247",
-      "description": "Developer hosting from CloudHost247: runtimes, SSH, Git-based deployment, environment variables, logs and APIs, without a control panel in the way.",
+      "seoTitle": "Developer Hosting & Runtime Options | CloudHost247",
+      "description": "Developer hosting from CloudHost247: check available runtimes, SSH, configuration and logs in the product catalogue. Git support depends on the selected panel.",
       "visual": "deployment/developer-hosting",
       "hero": {
         "kicker": "Developers",
         "heading": "Hosting shaped around your code",
-        "lede": "Runtimes, shell access, deployment from Git, environment configuration and real logs — the parts developers actually use, rather than a button that overwrites your application.",
+        "lede": "Choose a published hosting or deployment product. Runtime versions, SSH access and repository integrations vary by service; check the live catalogue and selected product details.",
         "ctas": [
           {
             "label": "See the deployment platform",
@@ -886,10 +886,10 @@
           }
         ],
         "points": [
-          "Node.js, PHP, Python",
-          "SSH and Git access",
-          "Environment variables",
-          "Deployment logs"
+          "Runtimes listed in the catalogue",
+          "SSH where the plan allows",
+          "Configuration options per service",
+          "Deployment records and logs"
         ]
       },
       "sections": [
@@ -901,12 +901,12 @@
             {
               "icon": "terminal",
               "title": "Shell access",
-              "body": "SSH into the environment to install dependencies and run the commands your workflow needs."
+              "body": "SSH access is available on hosting products that include it; the selected plan and its access policy determine the scope."
             },
             {
               "icon": "git-branch",
-              "title": "Deploy from Git",
-              "body": "Connect a repository and let the platform build and release it, with the build output kept on the deployment record."
+              "title": "Deployment options",
+              "body": "The core platform deploys published application versions and configured images. Git-based source builds require an enabled control-panel integration."
             },
             {
               "icon": "settings",
@@ -916,12 +916,12 @@
             {
               "icon": "file-text",
               "title": "Logs you can read",
-              "body": "Application and build logs are available on the deployment itself, rather than only in a support reply."
+              "body": "Application logs are available through the service interfaces that expose them; source-build output depends on the selected deployment integration."
             },
             {
               "icon": "api",
               "title": "APIs for automation",
-              "body": "Manage services, domains and deployments through HTTP APIs so provisioning can live in your pipeline."
+              "body": "Authenticated APIs support selected service and deployment operations; consult the published API documentation for each endpoint."
             },
             {
               "icon": "activity",
@@ -991,7 +991,7 @@
         },
         {
           "q": "Can I deploy with CI/CD?",
-          "a": "Deployments are driven by the platform's deployment records, and the HTTP APIs let an existing pipeline trigger them. Whether to build a full pipeline is your choice."
+          "a": "The core deployment service does not run CI or watch Git repositories. APIs can trigger supported operations; Git-based commit triggers depend on an enabled control-panel integration."
         },
         {
           "q": "Where do secrets live?",
@@ -1012,12 +1012,12 @@
       "title": "API Hosting",
       "category": "Hosting",
       "seoTitle": "API Hosting — HTTPS APIs, Rate Control, Monitoring | CloudHost247",
-      "description": "Host an HTTP API on CloudHost247 with TLS, environment-based secrets, rate limiting, logs and monitoring — on the same platform as your applications.",
+      "description": "Host HTTP APIs on CloudHost247 using an available runtime or container product; confirm TLS, network controls, logs and monitoring in the selected service catalogue.",
       "visual": "deployment/api",
       "hero": {
         "kicker": "Developers",
         "heading": "Host the API your product depends on",
-        "lede": "An HTTP API needs four things to be taken seriously: TLS, secrets that are not in the code, limits that protect it, and visibility when it misbehaves. All four are part of the platform.",
+        "lede": "Choose a hosting or application service that matches your API runtime. TLS, secrets, network controls and monitoring depend on the published plan and its configured integrations.",
         "ctas": [
           {
             "label": "Deploy an API",
@@ -1046,7 +1046,7 @@
             {
               "icon": "lock",
               "title": "TLS everywhere",
-              "body": "Certificates issued and renewed automatically, with the option to force HTTPS so a token is never sent in the clear."
+              "body": "TLS is available on services and domains where the selected hosting product is configured to issue or accept certificates."
             },
             {
               "icon": "key",
@@ -1056,7 +1056,7 @@
             {
               "icon": "gauge",
               "title": "Rate limiting",
-              "body": "Request limiting protects the service from a runaway client — and from a bill caused by one."
+              "body": "Network and application rate controls depend on the selected product and its configured integrations; review the service details before designing around them."
             },
             {
               "icon": "file-text",
@@ -1071,7 +1071,7 @@
             {
               "icon": "activity",
               "title": "Uptime and latency signals",
-              "body": "The service is watched, so a regression shows up as a measurement rather than as a customer complaint."
+              "body": "Monitoring coverage varies by service. The platform status and product pages identify the checks the current deployment can genuinely perform."
             }
           ]
         },
@@ -1081,8 +1081,8 @@
           "heading": "Get an endpoint live",
           "items": [
             {
-              "title": "Connect the repository",
-              "body": "Point the platform at the code that implements the API. The build runs from the repository, not from a file you uploaded by hand."
+              "title": "Choose a deployment method",
+              "body": "The core deployment queue uses published application versions and configured images. Git source builds require a selected control-panel integration that explicitly supports them."
             },
             {
               "title": "Configure the environment",
@@ -1103,7 +1103,7 @@
       "faqs": [
         {
           "q": "Which languages can I write the API in?",
-          "a": "Whichever of the supported runtimes suits you — Node.js, PHP and Python are the documented runtimes, and containerised deployments cover most other stacks."
+          "a": "Use a runtime or container product that is currently published and configured for the application you plan to run; check its service details before committing to a migration."
         },
         {
           "q": "Can I restrict who can call the API?",

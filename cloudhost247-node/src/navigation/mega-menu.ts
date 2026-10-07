@@ -26,6 +26,7 @@ import {
   LEGAL_INDEX,
   MARKETING_ROUTES,
   NAV_SECTIONS,
+  PUBLIC_DOC_ROUTES,
   REGISTRY_ROUTES,
   REGISTRY_VERSION,
   SITEMAP_POLICY,
@@ -69,7 +70,7 @@ export interface NavFooterColumn {
   links: Array<{ label: string; to: string }>;
 }
 
-export { BRAND, REGISTRY_VERSION, UTILITY, TOOLS_CATEGORIES, SITEMAP_POLICY, REGISTRY_ROUTES, LEGAL_INDEX };
+export { BRAND, REGISTRY_VERSION, UTILITY, TOOLS_CATEGORIES, SITEMAP_POLICY, REGISTRY_ROUTES, LEGAL_INDEX, PUBLIC_DOC_ROUTES };
 
 /** The mega-menu definition, as the API serves it and every navigation surface renders it. */
 export const MEGA_MENU: readonly NavSection[] = NAV_SECTIONS.map((section) => ({
@@ -90,7 +91,13 @@ export const FOOTER_NAV: readonly NavFooterColumn[] = FOOTER_COLUMNS.map((column
 
 /** Flat list of every link in the menu, used by the sitemap and by link-integrity tests. */
 export function allNavLinks(): NavLink[] {
-  return MEGA_MENU.flatMap((section) => section.groups.flatMap((group) => group.links));
+  return MEGA_MENU.flatMap((section) => [
+    { label: section.label, to: section.to, description: section.blurb, icon: 'grid' },
+    ...(section.featured
+      ? [{ label: section.featured.title, to: section.featured.to, description: section.featured.body, icon: 'star' }]
+      : []),
+    ...section.groups.flatMap((group) => group.links),
+  ]);
 }
 
 /** Flat list of every footer link, for the same reasons. */

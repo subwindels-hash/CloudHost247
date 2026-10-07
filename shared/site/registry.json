@@ -74,12 +74,21 @@
             {
               "label": "Web Hosting",
               "icon": "globe",
-              "desc": "Shared hosting for sites that need to be fast and reliable.",
+              "desc": "Web hosting plans for websites, with current products shown in the live catalogue.",
               "href": {
                 "spa": "/hosting/web-hosting",
                 "php": "web-hosting.php"
               },
               "badge": "POPULAR"
+            },
+            {
+              "label": "Shared Hosting",
+              "icon": "globe",
+              "desc": "Shared web hosting plans shown in the live product catalogue.",
+              "href": {
+                "spa": "/hosting/web-hosting",
+                "php": "web-hosting.php"
+              }
             },
             {
               "label": "Business Hosting",
@@ -254,17 +263,16 @@
       "blurb": "Virtual servers, cloud platforms and the infrastructure operations layer behind them.",
       "href": {
         "spa": "/cloud",
-        "php": "vps-hosting.php"
+        "php": "cloudhost247-hosting.php"
       },
       "featured": {
-        "title": "Deploy a server",
-        "body": "Choose an operating system, size and region, and provision a server you can reach over SSH or RDP.",
+        "title": "Cloud hosting plans",
+        "body": "Review the cloud server options currently published to the live product catalogue.",
         "href": {
-          "spa": "/servers/new",
-          "php": "cart.php?a=add",
-          "phpLabel": "Order a server"
+          "spa": "/cloud",
+          "php": "cloudhost247-hosting.php"
         },
-        "cta": "Configure a server"
+        "cta": "View cloud plans"
       },
       "columns": [
         {
@@ -279,6 +287,15 @@
                 "php": "vps-hosting.php"
               },
               "badge": "POPULAR"
+            },
+            {
+              "label": "Cloud Hosting",
+              "icon": "cloud",
+              "desc": "Browse published cloud hosting products and their current plan details.",
+              "href": {
+                "spa": "/cloud",
+                "php": "cloudhost247-hosting.php"
+              }
             },
             {
               "label": "Dedicated Servers",
@@ -586,7 +603,7 @@
     {
       "id": "platforms",
       "label": "Platforms",
-      "blurb": "Applications, databases, containers and the deployment platform that runs them.",
+      "blurb": "Applications, databases, containers and deployment workflows configured for CloudHost247 services.",
       "href": {
         "spa": "/platforms",
         "php": "applications.php"
@@ -644,7 +661,7 @@
             {
               "label": "PaaS",
               "icon": "rocket",
-              "desc": "Push an application and let the platform run it.",
+              "desc": "Application deployment and environment management; source builds depend on an enabled panel integration.",
               "href": {
                 "spa": "/platforms/paas",
                 "php": "paas.php"
@@ -658,7 +675,7 @@
             {
               "label": "Deployment",
               "icon": "git-branch",
-              "desc": "Build, release and roll back deployments with a real log.",
+              "desc": "Track supported application installs and updates, including recorded status and deployment steps.",
               "href": {
                 "spa": "/developers/deployment",
                 "php": "deployments.php"
@@ -730,19 +747,19 @@
     {
       "id": "developers",
       "label": "Developer / Deployment",
-      "blurb": "Runtimes, Git-based deployment, environments and APIs — the parts you actually build on.",
+      "blurb": "Runtimes, application deployments, environments and APIs — with availability shown by the live catalogue.",
       "href": {
         "spa": "/developers",
         "php": "developer-friendly.php"
       },
       "featured": {
-        "title": "Deploy from Git",
-        "body": "Connect a repository, let the platform build it and release it, with the build log kept on the deployment record.",
+        "title": "Application deployments",
+        "body": "Track supported application installs and updates, their recorded steps, and environment configuration. Git-based builds depend on a separately configured control panel.",
         "href": {
           "spa": "/developers/deployment",
           "php": "deployments.php"
         },
-        "cta": "See how deployment works"
+        "cta": "See deployment options"
       },
       "columns": [
         {
@@ -799,9 +816,9 @@
           "title": "Deploy & operate",
           "items": [
             {
-              "label": "Deployment Platform",
+              "label": "Application Deployments",
               "icon": "git-branch",
-              "desc": "Git-driven builds, releases and rollbacks.",
+              "desc": "Track supported application installs, updates, status and step logs.",
               "href": {
                 "spa": "/developers/deployment",
                 "php": "deployments.php"
@@ -811,7 +828,7 @@
             {
               "label": "PaaS",
               "icon": "rocket",
-              "desc": "A push-to-deploy platform with managed routing.",
+              "desc": "Managed application deployment workflows; Git builds require an enabled control-panel integration.",
               "href": {
                 "spa": "/platforms/paas",
                 "php": "paas.php"
@@ -924,7 +941,7 @@
               "icon": "layout",
               "desc": "Templates, pages, sections, media and publishing.",
               "href": {
-                "spa": "/websites",
+                "spa": "/websites/builder",
                 "php": "website-design.php"
               },
               "badge": "INCLUDED"
@@ -934,7 +951,7 @@
               "icon": "sparkle",
               "desc": "Describe a site and get real pages you can edit.",
               "href": {
-                "spa": "/websites",
+                "spa": "/websites/ai-builder",
                 "php": "website-design.php"
               },
               "badge": "NEW"
@@ -944,7 +961,7 @@
               "icon": "grid",
               "desc": "Start from a layout that is already publishable.",
               "href": {
-                "spa": "/websites",
+                "spa": "/websites/templates",
                 "php": "website-design.php"
               }
             },
@@ -953,7 +970,7 @@
               "icon": "cart",
               "desc": "Sell physical, digital and service products online.",
               "href": {
-                "spa": "/websites",
+                "spa": "/websites/store",
                 "php": "website-design.php"
               }
             },
@@ -962,7 +979,7 @@
               "icon": "pen",
               "desc": "Scoped design and build by the CloudHost247 team.",
               "href": {
-                "spa": "/websites",
+                "spa": "/websites/design-services",
                 "php": "website-design.php"
               }
             }
@@ -974,7 +991,7 @@
             {
               "label": "Website Migration",
               "icon": "transfer",
-              "desc": "Bring an existing site across without downtime.",
+              "desc": "Plan a site transfer and its cutover with the CloudHost247 team.",
               "href": {
                 "spa": "/hosting/migration",
                 "php": "migration.php"
@@ -983,7 +1000,7 @@
             {
               "label": "Website Management",
               "icon": "wrench",
-              "desc": "Updates, backups and monitoring handled for you.",
+              "desc": "Explore available website operations, maintenance and support options.",
               "href": {
                 "spa": "/cloud/server-management",
                 "php": "managed-services.php"
@@ -1006,7 +1023,7 @@
             {
               "label": "SSL Certificates",
               "icon": "lock",
-              "desc": "Every site encrypted, with automatic renewal.",
+              "desc": "Review the TLS options available for the hosting service you select.",
               "href": {
                 "spa": "/hosting/ssl",
                 "php": "ssl-certificate.php"
@@ -1319,6 +1336,13 @@
       "items": [
         {
           "label": "Web Hosting",
+          "href": {
+            "spa": "/hosting/web-hosting",
+            "php": "web-hosting.php"
+          }
+        },
+        {
+          "label": "Shared Hosting",
           "href": {
             "spa": "/hosting/web-hosting",
             "php": "web-hosting.php"
@@ -1738,35 +1762,35 @@
         {
           "label": "Website Builder",
           "href": {
-            "spa": "/websites",
+            "spa": "/websites/builder",
             "php": "website-design.php"
           }
         },
         {
           "label": "AI Website Builder",
           "href": {
-            "spa": "/websites",
+            "spa": "/websites/ai-builder",
             "php": "website-design.php"
           }
         },
         {
           "label": "Website Templates",
           "href": {
-            "spa": "/websites",
+            "spa": "/websites/templates",
             "php": "website-design.php"
           }
         },
         {
           "label": "E-commerce & Stores",
           "href": {
-            "spa": "/websites",
+            "spa": "/websites/store",
             "php": "website-design.php"
           }
         },
         {
           "label": "Website Design",
           "href": {
-            "spa": "/websites",
+            "spa": "/websites/design-services",
             "php": "website-design.php"
           }
         }
@@ -2210,7 +2234,22 @@
       "/cart",
       "/checkout",
       "/inbox",
-      "/search"
+      "/search",
+      "/api/",
+      "/support",
+      "/services",
+      "/marketing",
+      "/servers/new",
+      "/websites/builder",
+      "/websites/ai-builder",
+      "/websites/store",
+      "/websites/experts",
+      "/websites/templates",
+      "/websites/design-services",
+      "/tools/history",
+      "/tools/favorites",
+      "/tools/reports",
+      "/tools/monitors"
     ],
     "priorities": {
       "/": 1.0,

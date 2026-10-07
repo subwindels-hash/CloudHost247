@@ -2,14 +2,15 @@
  * CLOUDHOST247 — public SEO surface.
  *
  * `GET /sitemap.xml` and `GET /robots.txt` are served by the API process itself (not by a static
- * file) so the sitemap always matches the live navigation definition and the content customers
- * actually published. Nothing here is hand-maintained: the static entries come from
- * `allNavLinks()` — the same single source of truth the mega menu, the mobile drawer and the
- * navigation validation test read — and the dynamic entries are SELECTed from the tables that own
- * them, so a page appears in the sitemap only when it is genuinely reachable:
+ * file). The sitemap is public-only: include pages reachable without authentication and exclude
+ * private or session-gated destinations. Static route sources are the generated marketing, legal,
+ * documentation, menu and footer registries, filtered by the registry's exclusion policy. Dynamic
+ * route sources are their owning database tables, included only when the content is published:
  *
- *   - builder sites appear once `status = 'published'` (a draft has no public URL at all),
- *   - online stores appear once `status = 'active'` (a draft storefront answers 404).
+ *   - applications require a published app and published version;
+ *   - builder sites appear once `status = 'published'`;
+ *   - online stores appear once `status = 'active'`;
+ *   - auction details are listed only while an auction is scheduled or live.
  *
  * Absolute URLs are built from the request's own scheme/host (honouring `X-Forwarded-*`), falling
  * back to the configured `APP_URL`, so the deployed domain is always the one the crawler sees.
@@ -17,7 +18,14 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import type { Env } from '../config/env';
 import type { Queryable } from '../db/types';
-import { allNavLinks } from '../navigation/mega-menu';
+import {
+  allFooterLinks,
+  allNavLinks,
+  LEGAL_INDEX,
+  MARKETING_ROUTES,
+  PUBLIC_DOC_ROUTES,
+  SITEMAP_POLICY,
+} from '../navigation/mega-menu';
 
 /** Longest sitemap we will emit per dynamic collection; a guard, not a paging mechanism. */
 const MAX_DYNAMIC_URLS = 5_000;

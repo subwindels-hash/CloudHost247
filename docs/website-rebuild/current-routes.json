@@ -27,6 +27,15 @@
     "dependency": "WHMCS init.php"
   },
   {
+    "path": "api-hosting.php",
+    "category": "Developers",
+    "original": false,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'api-hosting', 'API Hosting')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
     "path": "applications.php",
     "category": "Applications",
     "original": false,
@@ -40,6 +49,15 @@
     "category": "Legal",
     "original": true,
     "renderer": "backuppolicy",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "backups.php",
+    "category": "Infrastructure",
+    "original": false,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'backups', 'Backups')",
     "http": "requires licensed WHMCS staging",
     "template_status": "shared first-party shell and content templates",
     "dependency": "WHMCS init.php"
@@ -69,6 +87,15 @@
     "renderer": "",
     "http": "requires licensed WHMCS staging",
     "template_status": "existing route preserved; review renderer",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "business-hosting.php",
+    "category": "Hosting",
+    "original": false,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'business-hosting', 'Business Hosting')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
     "dependency": "WHMCS init.php"
   },
   {
@@ -162,6 +189,15 @@
     "dependency": "WHMCS init.php"
   },
   {
+    "path": "data-centers.php",
+    "category": "Infrastructure",
+    "original": false,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'data-centers', 'Data Centers')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
     "path": "data-deletion.php",
     "category": "Legal",
     "original": true,
@@ -225,6 +261,33 @@
     "dependency": "WHMCS init.php"
   },
   {
+    "path": "dns-management.php",
+    "category": "Domains",
+    "original": false,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'dns-management', 'DNS Management')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "docker-hosting.php",
+    "category": "Developers",
+    "original": false,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'docker-hosting', 'Docker Hosting')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "documentation.php",
+    "category": "Resources",
+    "original": false,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'documentation', 'Documentation')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
     "path": "domain-agreement.php",
     "category": "Legal",
     "original": true,
@@ -238,6 +301,15 @@
     "category": "Legal",
     "original": true,
     "renderer": "domainbrokerageterms",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "domain-dns.php",
+    "category": "Domains",
+    "original": false,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'domain-dns', 'Domain DNS')",
     "http": "requires licensed WHMCS staging",
     "template_status": "shared first-party shell and content templates",
     "dependency": "WHMCS init.php"
@@ -306,6 +378,15 @@
     "dependency": "WHMCS init.php"
   },
   {
+    "path": "firewall.php",
+    "category": "Infrastructure",
+    "original": false,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'firewall', 'Firewall')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
     "path": "future-element.php",
     "category": "Administrative/internal",
     "original": true,
@@ -342,6 +423,24 @@
     "dependency": "WHMCS init.php"
   },
   {
+    "path": "ip-management.php",
+    "category": "Infrastructure",
+    "original": false,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'ip-management', 'IP Management')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "laravel-hosting.php",
+    "category": "Developers",
+    "original": false,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'laravel-hosting', 'Laravel Hosting')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
     "path": "legal-notice.php",
     "category": "Legal",
     "original": true,
@@ -355,6 +454,51 @@
     "category": "Legal",
     "original": true,
     "renderer": "legal",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "managed-services.php",
+    "category": "Infrastructure",
+    "original": false,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'managed-services', 'Managed Services')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "migration.php",
+    "category": "Infrastructure",
+    "original": false,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'migration', 'Migration')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "monitoring.php",
+    "category": "Infrastructure",
+    "original": false,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'monitoring', 'Monitoring')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "network.php",
+    "category": "Infrastructure",
+    "original": false,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'network', 'Network')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "nodejs-hosting.php",
+    "category": "Developers",
+    "original": false,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'nodejs-hosting', 'Node.js Hosting')",
     "http": "requires licensed WHMCS staging",
     "template_status": "shared first-party shell and content templates",
     "dependency": "WHMCS init.php"
@@ -387,6 +531,24 @@
     "dependency": "WHMCS init.php"
   },
   {
+    "path": "paas.php",
+    "category": "Developers",
+    "original": false,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'paas', 'PaaS')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "php-hosting.php",
+    "category": "Developers",
+    "original": false,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'php-hosting', 'PHP Hosting')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
     "path": "plesk-hosting.php",
     "category": "Hosting",
     "original": true,
@@ -405,6 +567,15 @@
     "dependency": "WHMCS init.php"
   },
   {
+    "path": "python-hosting.php",
+    "category": "Developers",
+    "original": false,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'python-hosting', 'Python Hosting')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
     "path": "refund-and-cancellation-policy.php",
     "category": "Legal",
     "original": true,
@@ -418,6 +589,33 @@
     "category": "Legal",
     "original": true,
     "renderer": "refundpolicy",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "reseller-hosting.php",
+    "category": "Hosting",
+    "original": false,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'reseller-hosting', 'Reseller Hosting')",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "shared first-party shell and content templates",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "robots.php",
+    "category": "Administrative/internal",
+    "original": false,
+    "renderer": "",
+    "http": "requires licensed WHMCS staging",
+    "template_status": "existing route preserved; review renderer",
+    "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "security.php",
+    "category": "Infrastructure",
+    "original": false,
+    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'security', 'Security')",
     "http": "requires licensed WHMCS staging",
     "template_status": "shared first-party shell and content templates",
     "dependency": "WHMCS init.php"
@@ -475,6 +673,15 @@
     "http": "requires licensed WHMCS staging",
     "template_status": "shared first-party shell and content templates",
     "dependency": "WHMCS init.php"
+  },
+  {
+    "path": "tools-sitemap.php",
+    "category": "Administrative/internal",
+    "original": false,
+    "renderer": "",
+    "http": "not exercised",
+    "template_status": "existing route preserved; review renderer",
+    "dependency": "none / inspect"
   },
   {
     "path": "trademark-policy.php",
