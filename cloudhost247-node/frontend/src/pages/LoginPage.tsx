@@ -135,7 +135,7 @@ export default function LoginPage() {
             <button type="submit" disabled={submitting}>
               {submitting ? 'Logging in…' : 'Login'}
             </button>
-            <button type="button" className="ch247-button ch247-button--outline" onClick={loginWithPasskey} disabled={submitting}>Use a passkey</button>
+            <button type="button" className="ch247-button ch247-button--passkey" onClick={loginWithPasskey} disabled={submitting}>Use a passkey</button>
           </>
         )}
       </form>

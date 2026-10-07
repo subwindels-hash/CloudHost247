@@ -6,6 +6,7 @@ import Footer from './Footer';
 import SupportModeBanner from '../components/SupportModeBanner';
 import AiSupportWidget from '../components/AiSupportWidget';
 import { CatalogLoadingBanner } from '../components/CatalogStateBanner';
+import AnnouncementBar from '../components/AnnouncementBar';
 
 /**
  * Shared application shell — a single Header/Footer wrapping every route (public marketing pages
@@ -18,6 +19,9 @@ export default function Layout() {
       <a className="ch247-skip" href="#main-content">
         Skip to main content
       </a>
+      {/* Above the header, in DOM order and on screen: it is site-wide chrome, not page content.
+          The skip link stays first so keyboard users still reach the page in one press. */}
+      <AnnouncementBar />
       <SupportModeBanner />
       <Header />
       <main id="main-content" className="ch247-main">
