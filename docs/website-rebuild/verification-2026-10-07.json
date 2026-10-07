@@ -113,7 +113,7 @@
       "name": "release-candidate gate (full source verification)",
       "command": "PATH=<php-wasm shim>:$PATH PHP_LINT_JOBS=4 bash scripts/release-candidate-check.sh",
       "result": "passed",
-      "evidence": "Final run on the shipped revision: \"Release-candidate source verification passed.\" \u2014 git diff --check clean; every first-party PHP target linted with PHP 8.2 (WASM); 18 PHP behavioural suites; server-agent Node suite (71/71); 22 python static suites (424 tests, 2 documented skips); migration validator; retired-brand audit; vendor integrity baseline; tools projection (tools:catalog:check), tools build, tests/tools/site-integration.php (596 assertions) and tests/website/run.php (97 assertions, 0 failed); scripts/verify-website.py passed=true with source_errors=[]."
+      "evidence": "Green over revision `015434e`: \"Release-candidate source verification passed.\" (exit 0) \u2014 generated surfaces regenerated and diffed; 835 first-party PHP targets linted with PHP 8.2 (WASM), no syntax errors; 18 PHP behavioural suites including tests/tools/site-integration.php (882 assertions) and tests/website/run.php (315 assertions, 0 failed); server-agent Node suite (71 tests, 71 pass, 0 fail); 22 python static suites plus the 13-test website suite (OK); migration validator; retired-brand audit (0 matches); vendor integrity baseline; tools projection freshness check (tools:catalog:check) and tools build; scripts/verify-website.py passed=true with registry_pages 67, navigation_destinations 89, source_errors []"
     },
     {
       "name": "node SEO surface suite",
@@ -123,7 +123,7 @@
     },
     {
       "name": "php tools surface suite",
-      "command": "scripts/php-wasm/php tests/tools/site-integration.php",
+      "command": "scripts/php-wasm/php tests/tools/site-integration.php (also run inside the release-candidate gate)",
       "result": "passed",
       "evidence": "882 assertions, 0 failed \u2014 native resolution of all nine published categories, the discovery taxonomy labels, at least one tool per published category, the icon asset for every tool card, one published path per capability, no served path re-labelled by the registry (with an anti-vacuity guard), and the XML sitemap executed in-process: every served tool path published, every published <loc> resolvable in the catalogue, the signposts absent, each URL published once"
     },
@@ -205,5 +205,6 @@
     "docs/NODE_PLATFORM_STATUS.md was published as a public documentation page at /docs/node-platform-status. It is the internal phase-acceptance ledger (branch names, pull-request numbers, commit hashes, migrations that are prepared but not executed), so it was removed from the published set and stays in the repository for engineers.",
     "De-publishing a document only removed it from the index: the markdown file stayed in frontend/public/docs and was still served and crawled. The generator now prunes de-published files from the build output and reports each removal.",
     "The production archive shipped a de-published internal document from two stale build outputs (cloudhost247-node/public/docs and assets/cloudhost247-tools/docs) because it was packed with --skip-build. The outputs were rebuilt and the packer now compares the packaged documentation set against the generated index, failing the archive on a de-published or missing file instead of counting files."
-  ]
+  ],
+  "revision": "015434e"
 }

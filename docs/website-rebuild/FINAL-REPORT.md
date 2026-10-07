@@ -294,7 +294,7 @@ specific sentences that were rewritten for this reason.
 | Check | Command | Result |
 |---|---|---|
 | Registry generator | `node scripts/site/generate.mjs` and `--check` | passed — 227 links, 0 errors, 54 marketing pages, 116 sections, 13 published documents, 43 enriched product pages, crawl policy 23 exclusions / 86 public PHP paths |
-| Release-candidate gate | `bash scripts/release-candidate-check.sh` (WASM PHP 8.2) | **passed** — every first-party PHP target linted, 18 PHP behavioural suites, server-agent suite, 22 python static suites, retired-brand audit, vendor baseline, tools projection + build, website gates |
+| Release-candidate gate | `bash scripts/release-candidate-check.sh` (WASM PHP 8.2) | **passed, exit 0, over revision `015434e`** — generated surfaces regenerated and diffed, 835 first-party PHP targets linted, 18 PHP behavioural suites, server-agent suite (71/71), 22 python static suites, migration validator, retired-brand audit, vendor integrity baseline, tools projection freshness + tools build, website suites and `verify-website.py` |
 | PHP website suite | `scripts/php-wasm/php tests/website/run.php` | 315 assertions, 0 failed (section rendering, fragments, crawl policy, tool taxonomy, design-system class contract) |
 | PHP tools suite | `scripts/php-wasm/php tests/tools/site-integration.php` | 882 assertions, 0 failed (one published path per tool capability, no served path re-labelled by the registry, and the XML sitemap actually executed: every served tool path published, every published URL resolvable in the catalogue, the nine signposts absent) |
 | Static website tests | `python3 -m unittest discover -s tests/website -p 'test_*.py'` | 13 tests, OK (generator/template type parity, registry link and asset integrity) |
@@ -345,8 +345,9 @@ addon hooks and `tools/index.php` all inside.
 * `550f762` — render registry sections on design-system primitives, publish one URL per tool.
 * `c50317a` — rebuild the legal documents on the design system, with the copy verified.
 * `963d41f` — publish one path per tool from the catalogue source, not the projection.
-* This pass adds the class-coverage hardening, the served-path reconciliation and the sitemap
-  assertions above; the commit hash is recorded in the PR timeline.
+* `015434e` — serve one path per tool, and let the sitemap read the catalogue (the class-coverage
+  hardening, the served-path reconciliation, the sitemap assertions and the refreshed evidence
+  documents in this report).
 
 ## 16. Blockers, not verified, and next steps
 
