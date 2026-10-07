@@ -104,7 +104,7 @@
       "name": "production archive",
       "command": "python3 scripts/build-production-zip.py --skip-build --verify",
       "result": "passed",
-      "evidence": "pending rebuild after this pass; see docs/website-rebuild/FINAL-REPORT.md \u00a714"
+      "evidence": "CloudHost247-production-1.0.0.zip: 7888 members, 57870228 bytes, 161 media assets, 13 published documents, 0 secret matches; extraction verified; packaged documentation set now compared against the generated index so a de-published document cannot ship from a stale build directory"
     },
     {
       "name": "release-candidate gate (full source verification)",
@@ -149,6 +149,7 @@
     "The generator and scripts/verify-website.py validated PHP tool destinations against the legacy tools-public.json only; both now accept the authoritative theme projection tools.json (the file the PHP runtime reads) as well.",
     "The PHP website suite asserted 'all seven mega menu categories'; it now pins the nine published families by id, matching the SPA.",
     "docs/NODE_PLATFORM_STATUS.md was published as a public documentation page at /docs/node-platform-status. It is the internal phase-acceptance ledger (branch names, pull-request numbers, commit hashes, migrations that are prepared but not executed), so it was removed from the published set and stays in the repository for engineers.",
-    "De-publishing a document only removed it from the index: the markdown file stayed in frontend/public/docs and was still served and crawled. The generator now prunes de-published files from the build output and reports each removal."
+    "De-publishing a document only removed it from the index: the markdown file stayed in frontend/public/docs and was still served and crawled. The generator now prunes de-published files from the build output and reports each removal.",
+    "The production archive shipped a de-published internal document from two stale build outputs (cloudhost247-node/public/docs and assets/cloudhost247-tools/docs) because it was packed with --skip-build. The outputs were rebuilt and the packer now compares the packaged documentation set against the generated index, failing the archive on a de-published or missing file instead of counting files."
   ]
 }

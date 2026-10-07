@@ -83,6 +83,7 @@ the PHP footer is asserted item by item by `tests/tools/site-integration.php`.
 | `/tools/dns-checker`, `/tools/ssl-certificate-checker`, `/tools/json-beautifier` on the homepage were reported as broken in the previous pass | **verified working, no change made** — see below |
 | `docs/NODE_PLATFORM_STATUS.md` was published as a public documentation page, and it is the internal phase-acceptance ledger (branch names, PR numbers, commit hashes, unexecuted migrations) | removed from the published set; the file stays in the repository for engineers |
 | De-publishing a document left its markdown file in the built site (`/docs/<slug>.md` stayed fetchable) | the generator now prunes de-published files and reports what it removed |
+| The **production archive** still carried the de-published internal ledger in two stale build outputs (`cloudhost247-node/public/docs`, `assets/cloudhost247-tools/docs`) because it was packed with `--skip-build` | outputs rebuilt; the packer now compares the packaged documentation set against the generated index and fails the archive on a de-published or missing file |
 
 **The three homepage tool links are not broken.** The previous pass checked them against the theme
 projection (`tools.json`) only. The PHP surface resolves a native tool path first, and all three
@@ -210,12 +211,20 @@ specific sentences that were rewritten for this reason.
 
 ## 14. Build and production archive
 
-`python3 scripts/build-production-zip.py --skip-build --verify` →
-`/home/user/CloudHost247-release/CloudHost247-production-1.0.0.zip`.
-Exact member count, byte size, media/document counts and the secret-scan result for the current
-revision are recorded in `verification-2026-10-07.json` (the archive is rebuilt after every change
-to the tree and verified by extracting it). Secrets, `.git`, `node_modules`, test output and
-development artefacts are excluded by the packer's own allow-list.
+```
+python3 scripts/build-production-zip.py --skip-build --verify
+wrote /home/user/CloudHost247-release/CloudHost247-production-1.0.0.zip files=7888 bytes=57870228 secret_skipped=0
+media assets present: 161
+published documentation files: 13
+archive members: 7888 · archive size: 55.2 MB
+✓ production archive verified: deployable, complete, no secret material
+```
+
+The archive is verified by extracting it: required entry points present, the 161 media assets the
+website references are inside it, the packaged documentation set equals the published set exactly
+(13 documents — de-published and missing files both fail the archive), and no file matches the
+secret scanner. `node_modules`, `.git`, `dist`, build caches and development artefacts are excluded
+by the packer's own allow-list.
 
 ## 15. Commit and pull request
 
