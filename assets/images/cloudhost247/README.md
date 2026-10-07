@@ -8,6 +8,12 @@ customer logos, awards or location assertions. The mint / ink palette matches
   monochrome SVG variants, plus transparent PNG and lossless WebP exports.
 - `hero/`: six-part infrastructure ecosystem and conceptual world connectivity.
   **The world illustration is not a data-center location map.**
+  Pair files named `*-3d.jpg` are original 3D raster scenes in the same ink/mint art
+  direction. Templates prefer the JPEG via `<picture>` and keep the SVG as the
+  fallback, so a missing raster never becomes a broken image.
+- `website/`, `panels/`, `platforms/`, `backgrounds/`, `network/`: reserved families
+  for future artwork. Product pages currently fall back to the closest existing
+  family illustration rather than inventing unsupported panels or locations.
 - `hosting/`, `cloud/`, `servers/`, `domains/`: labeled, product-specific diagrams.
 - `applications/`, `deployment/`, `operating-systems/`: platform/catalog diagrams,
   not a claim that any particular runtime or image is provisionable.

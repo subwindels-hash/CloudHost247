@@ -1,5 +1,5 @@
 {
-  "registryVersion": "2.0.0",
+  "registryVersion": "2.1.0",
   "generatedAtSource": "shared/site/registry.json",
   "menus": 9,
   "footerColumns": 9,
@@ -17,7 +17,7 @@
   "toolsIndexed": null,
   "documentationFiles": 13,
   "documentationBytes": 221105,
-  "assetsCopied": 161,
+  "assetsCopied": 171,
   "phpPagesEnriched": 43,
   "phpSitemapPaths": 86,
   "phpCrawlExclusions": 23,

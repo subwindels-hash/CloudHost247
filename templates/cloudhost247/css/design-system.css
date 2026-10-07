@@ -438,8 +438,41 @@
   box-shadow: var(--ch-shadow-4);
 }
 .ch-visual img { width: 100%; display: block; }
+.ch-visual picture { display: block; }
 .ch-visual--light { background: var(--ch-soft); border-color: var(--ch-line); box-shadow: var(--ch-shadow-1); }
+.ch-visual--3d {
+  background:
+    radial-gradient(ellipse at 50% 42%, rgba(47, 213, 138, 0.16), transparent 58%),
+    linear-gradient(180deg, #0b1a24 0%, #071119 100%);
+  border-color: rgba(127, 240, 180, 0.18);
+  box-shadow: var(--ch-shadow-4), 0 0 60px rgba(47, 213, 138, 0.12);
+}
+.ch-visual--3d img { object-fit: cover; aspect-ratio: 16 / 9; }
+.ch-card > .ch-visual,
+.ch-card .ch-visual {
+  margin: 0 0 var(--ch-space-3);
+  border-radius: var(--ch-radius-sm);
+  overflow: hidden;
+}
+.ch-card > .ch-visual img,
+.ch-card .ch-visual img { aspect-ratio: 16 / 10; }
 .ch-split > .ch-visual { margin: 0; }
+
+/* Domain search — homepage and any marketing hero that offers a live search. */
+.ch-domain-search { margin: var(--ch-space-6) 0 0; max-width: 36rem; }
+.ch-domain-search__field {
+  display: flex; flex-wrap: wrap; gap: var(--ch-space-2);
+  padding: 6px; border-radius: var(--ch-radius); background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+.ch-domain-search__input {
+  flex: 1 1 12rem; min-width: 0; min-height: 46px; padding: 0 14px;
+  border: 0; border-radius: var(--ch-radius-sm); background: rgba(7, 17, 25, 0.55);
+  color: #fff; font: inherit;
+}
+.ch-domain-search__input::placeholder { color: var(--ch-on-dark-muted); }
+.ch-domain-search__input:focus { outline: 2px solid var(--ch-mint); outline-offset: 0; }
+.ch-domain-search .ch-btn { flex: 0 0 auto; }
 .ch-visual__caption {
   display: flex; justify-content: space-between; gap: var(--ch-space-3);
   padding: 10px var(--ch-space-4); border-top: 1px solid rgba(255, 255, 255, 0.12);
@@ -963,6 +996,9 @@ html, body { max-width: 100%; overflow-x: clip; }
   .ch-site .ch-mega { border-top-width: 2px; }
 }
 @media (max-width: 767px) {
+  .ch-domain-search__field { flex-direction: column; }
+  .ch-domain-search .ch-btn { width: 100%; }
+  .ch-visual--3d img { aspect-ratio: 4 / 3; }
   .ch-site .ch-wrap { width: calc(100% - 32px); }
   .ch-site .ch-footer-grid { gap: 28px 20px; }
   .ch-site .ch-faq summary { font-size: 0.98rem; }

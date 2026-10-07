@@ -1,6 +1,6 @@
 {
   "$schema": "./registry.schema.json",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "generatedNotice": "SOURCE OF TRUTH \u2014 edit this file, then run `node scripts/site/generate.mjs`. Do not edit modules/addons/cloudhost247_theme/resources/site.json's navigation/footer by hand, and do not edit cloudhost247-node/frontend/src/navigation/registry.generated.ts at all.",
   "brand": {
     "name": "CloudHost247",

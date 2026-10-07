@@ -39,7 +39,7 @@ export interface RegistryFooterColumn {
   links: Array<{ label: string; to: string }>;
 }
 
-export const REGISTRY_VERSION = '2.0.0';
+export const REGISTRY_VERSION = '2.1.0';
 
 export const BRAND = {
   "name": "CloudHost247",

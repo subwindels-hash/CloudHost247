@@ -122,4 +122,15 @@ class WebsiteTests(unittest.TestCase):
    self.assertTrue((ROOT/file).is_file(),php)
    self.assertIn(fragment,anchors,php)
 
+ def test_3d_rasters_exist_for_published_visuals(self):
+  catalog=json.loads((ROOT/'modules/addons/cloudhost247_theme/resources/site.json').read_text())
+  keys=set()
+  for page in catalog['pages'].values():
+   if page.get('visual3d'): keys.add(page['visual3d'])
+   for section in page.get('sections') or []:
+    if section.get('visual3d'): keys.add(section['visual3d'])
+  self.assertGreaterEqual(len(keys), 8, 'the 3D raster set should cover the product families')
+  for key in keys:
+   self.assertTrue((ROOT/'assets/images/cloudhost247'/(key+'.jpg')).is_file(), key)
+
 if __name__=='__main__':unittest.main()

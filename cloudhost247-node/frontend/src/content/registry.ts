@@ -36,6 +36,8 @@ export interface MarketingSection {
   rows?: string[][];
   items?: MarketingItem[];
   links?: MarketingItem[];
+  visual?: string;
+  visual3d?: string;
   /** For a `plans` section: the catalogue product whose live plans and prices to render. */
   productSlug?: string;
 }
@@ -52,6 +54,8 @@ export interface MarketingPage {
   seoTitle: string;
   description: string;
   visual: string;
+  /** Optional 3D raster key (`family/name-3d`) paired with `visual`. */
+  visual3d?: string;
   catalogSlug?: string;
   noindex?: boolean;
   hero: {

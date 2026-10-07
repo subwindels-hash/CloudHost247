@@ -31,7 +31,7 @@
 {foreach $section.body as $paragraph}<p>{$paragraph|escape}</p>{/foreach}
 {if $section.points}<ul class="ch-points">{foreach $section.points as $point}<li>{$point|escape}</li>{/foreach}</ul>{/if}
 {if $section.link}<a class="ch-text-link" href="{$WEB_ROOT}/{$section.link.url|escape}">{$section.link.label|escape} <span aria-hidden="true">→</span></a>{/if}
-</div><figure class="ch-visual ch-visual--light"><img src="{$WEB_ROOT}/assets/images/cloudhost247/{$section.visual|escape}.svg" width="660" height="520" loading="lazy" decoding="async" alt="{$section.heading|escape} — conceptual illustration"></figure></div></section>
+</div><figure class="ch-visual{if $section.visual3d} ch-visual--3d{else} ch-visual--light{/if}">{include file="cloudhost247/includes/visual.tpl" visual=$section.visual visual3d=$section.visual3d alt=$section.heading width=660 height=520}</figure></div></section>
 {elseif $section.type == 'note'}
 <section class="{$sectionClass} ch-section--tight"{if $section.anchor} id="{$section.anchor|escape}"{/if}><div class="ch-wrap ch-wrap--prose"><div class="ch-note"><h2>{$section.heading|escape}</h2>{foreach $section.body as $paragraph}<p>{$paragraph|escape}</p>{/foreach}</div></div></section>
 {elseif $section.type == 'steps'}
