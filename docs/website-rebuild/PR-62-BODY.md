@@ -37,8 +37,10 @@ categories, the sitemap lists them, and the generator asserts parity between the
 
 **Honest public documentation.** `docs/NODE_PLATFORM_STATUS.md` was published as a public page while
 being the internal phase-acceptance ledger (branch names, PR numbers, commit hashes, unexecuted
-migrations). It is no longer published; the generator now also prunes de-published documents from
-the build output instead of leaving them fetchable.
+migrations). It is no longer published; the generator prunes de-published documents from the build
+output, and `build-production-zip.py` now compares the packaged documentation set against the
+generated index — a de-published document left in a stale build directory fails the archive instead
+of shipping (two such copies were found in the previous archive and are gone).
 
 **Earlier in this PR:** sitemap/robots registry-driven, content and claim audit, navigation
 validation for section roots and featured destinations, `PUBLIC_DOC_ROUTES`/`PUBLIC_TOOL_ROUTES`
@@ -55,7 +57,9 @@ emitted, PHP Tools mega menu floors, MRZ footer link.
 | `vitest tests/integration/seo-routes.test.ts` | 6 passed (2 new: one-policy robots, sitemap/policy agreement) |
 | `node scripts/site/check-links.mjs` | 2,176 surfaces, 0 broken links |
 | `python3 scripts/verify-website.py` | 67 registry pages, 95 destinations, 0 source errors |
+| `npm test` (cloudhost247-node) | 136 test files, 1,636 tests, 0 failures |
 | `npm run typecheck` / `npm run build` | clean |
+| `python3 scripts/build-production-zip.py --skip-build --verify` | 7,888 members, 57,870,228 bytes, 161 media assets, 13 published documents, 0 secret matches, extraction verified |
 
 Investigated and **not** changed: `/tools/dns-checker`, `/tools/ssl-certificate-checker` and
 `/tools/json-beautifier` on the homepage are reachable and functional on the PHP surface (native

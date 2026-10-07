@@ -81,7 +81,7 @@
       "name": "node test suite",
       "command": "npm test (cloudhost247-node)",
       "result": "passed",
-      "evidence": "136 test files, 1634 tests, 0 failures, 1024s (re-run after the tool-category fix)"
+      "evidence": "136 test files, 1636 tests, 0 failures, 1113.72s (run on the final revision, including the two new SEO-surface tests)"
     },
     {
       "name": "php website suite (WASM PHP 8.2)",
@@ -110,7 +110,7 @@
       "name": "release-candidate gate (full source verification)",
       "command": "PATH=<php-wasm shim>:$PATH PHP_LINT_JOBS=4 bash scripts/release-candidate-check.sh",
       "result": "passed",
-      "evidence": "git diff --check clean; every first-party PHP target linted with PHP 8.2 (WASM); 18 PHP behavioural suites; server-agent Node suite; 22 python static suites; retired-brand audit; vendor integrity baseline; tools projection, tools build and the website gates. Output: \"Release-candidate source verification passed.\""
+      "evidence": "Final run on the shipped revision: \"Release-candidate source verification passed.\" \u2014 git diff --check clean; every first-party PHP target linted with PHP 8.2 (WASM); 18 PHP behavioural suites; server-agent Node suite (71/71); 22 python static suites (424 tests, 2 documented skips); migration validator; retired-brand audit; vendor integrity baseline; tools projection (tools:catalog:check), tools build, tests/tools/site-integration.php (596 assertions) and tests/website/run.php (97 assertions, 0 failed); scripts/verify-website.py passed=true with source_errors=[]."
     },
     {
       "name": "node SEO surface suite",
@@ -123,6 +123,12 @@
       "command": "scripts/php-wasm/php tests/tools/site-integration.php",
       "result": "passed",
       "evidence": "596 assertions, 0 failed \u2014 including the new native resolution of all nine published categories, the discovery taxonomy labels, at least one tool per published category and the icon asset for every tool card"
+    },
+    {
+      "name": "production archive documentation contract",
+      "command": "python3 scripts/build-production-zip.py --skip-build --verify",
+      "result": "passed",
+      "evidence": "The packaged documentation set is compared with the generated index in cloudhost247-node/public/docs and assets/cloudhost247-tools/docs. Before the rebuild it failed with two de-published copies; after rebuilding the outputs the archive verifies clean (7888 members, 57870228 bytes, 13 published documents)."
     }
   ],
   "not_run": [

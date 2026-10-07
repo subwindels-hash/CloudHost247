@@ -206,7 +206,7 @@ specific sentences that were rewritten for this reason.
 | Link integrity | `node scripts/site/check-links.mjs` | 2,176 surfaces, 0 broken |
 | Website source gate | `python3 scripts/verify-website.py` | `registry_pages 67`, `navigation_destinations 95`, `source_errors []`, `passed true` |
 | Retired-brand audit | `python3 scripts/branding-audit.py --quiet` | 0 matches |
-| Node platform suite | `npm test` (cloudhost247-node) | see `verification-2026-10-07.json` for the recorded run |
+| Node platform suite | `npm test` (cloudhost247-node) | **136 test files, 1,636 tests, 0 failures** (1113.72s) |
 | Typecheck / build | `npm run typecheck`, `npm run build` | passed |
 
 ## 14. Build and production archive
