@@ -121,7 +121,7 @@ emitted, PHP Tools mega menu floors, MRZ footer link.
 | Check | Result |
 |---|---|
 | `node scripts/site/generate.mjs` (+ `--check`) | 227 links (227 app / 227 PHP), 0 errors, 0 warnings |
-| `bash scripts/release-candidate-check.sh` (WASM PHP 8.2) | **passed (exit 0) over the final revision `bcb9575`** — 835 PHP targets linted, 18 PHP suites (tools 882 / website 315 assertions), server-agent suite (71/71), 22 python suites, migration validator, brand audit, vendor integrity baseline, tools projection + build, `verify-website.py` |
+| `bash scripts/release-candidate-check.sh` (WASM PHP 8.2) | **passed (exit 0)** over `963d41f`, `015434e`, `bcb9575` and `9059e1a`; later commits change only the three evidence documents — 835 PHP targets linted, 18 PHP suites (tools 882 / website 315 assertions), server-agent suite (71/71), 22 python suites, migration validator, brand audit, vendor integrity baseline, tools projection + build, `verify-website.py` |
 | `tests/website/run.php` | 315 assertions, 0 failed (sections, fragments, crawl policy, taxonomy, design-system class contract) |
 | `tests/tools/site-integration.php` | 882 assertions, 0 failed (one published path per capability, no served path re-labelled, and the tools sitemap executed: every served path published, every `<loc>` resolvable, signposts absent) |
 | `python3 -m unittest discover -s tests/website -p 'test_*.py'` | 13 tests OK |
