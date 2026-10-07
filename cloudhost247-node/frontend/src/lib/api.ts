@@ -84,6 +84,11 @@ async function readBody(res: Response): Promise<ResponseBody> {
 function describeNonJsonResponse(res: Response, path: string, text: string): string {
   const contentType = (res.headers?.get?.('content-type') ?? '').split(';')[0] || 'an unknown type';
   const looksLikeHtml = /^\s*<(?:!doctype|html|head|body)/i.test(text);
+  if (text.trim() === '') {
+    // Nothing at all came back. This is the shape a dev server or proxy produces when the
+    // application behind it is not running, so say that rather than "invalid JSON".
+    return `Nothing answered ${path}: the response was empty (HTTP ${res.status}). If this is a local or preview build, the application is not running behind the page — start it and reload.`;
+  }
   if (!looksLikeHtml) {
     return `The application did not answer ${path} with JSON (HTTP ${res.status}, ${contentType}). The URL is being served by something other than the application.`;
   }

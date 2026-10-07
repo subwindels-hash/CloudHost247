@@ -237,6 +237,12 @@ The application guarantees its own half of this: any unmatched `/api`, `/health`
 is answered with a JSON 404, never with the SPA shell — including when the app is mounted under a
 path prefix. That contract is pinned by `tests/unit/spa-routing.test.ts`.
 
+**Locally and in previews** the same symptom has one cause: the page is being served without the
+application behind it. `npm run dev` starts both halves (API on `:3000`, Vite on `:5173`), and
+`npm run tools:preview` runs the built frontend *and* the API from a single origin against an
+embedded database — which is what a browser actually needs. If the API is not running at all, the
+dev server now answers `/api/*` with a JSON 502 saying so, instead of an empty 500.
+
 ## Update Procedure
 
 ### Source-Only Updates

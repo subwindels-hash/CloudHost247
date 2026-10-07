@@ -63,6 +63,18 @@ describe('apiFetch on a non-JSON response', () => {
     }
   });
 
+  /**
+   * The localhost/preview case: `npm run dev` with the server not started, or `vite preview`
+   * serving the built SPA with no application behind it. The body is empty, so the message has to
+   * come from the status alone — "invalid JSON" would send someone hunting for a parser bug.
+   */
+  it('says the application is not running when the response body is empty', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(textResponse(502, '', 'text/plain')));
+    await expect(apiFetch('/api/tools/catalog')).rejects.toThrow(
+      /Nothing answered \/api\/tools\/catalog[\s\S]*application is not running/
+    );
+  });
+
   it('says plainly when the body is not JSON and not HTML either', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(textResponse(200, 'Bad gateway')));
     await expect(apiFetch('/api/tools/dashboard')).rejects.toThrow(/did not answer \/api\/tools\/dashboard with JSON/);
