@@ -160,7 +160,9 @@ archive size: 57.5 MB
 
 ## 15. Commit and pull request
 
-Recorded after commit. Branch `arena/14d4207f-cloudhost247`.
+* Commit: `8abf70d451cad0e6b17528214cc8187d79a37acd`
+* Branch: `arena/14d4207f-cloudhost247`
+* PR: https://github.com/subwindels-hash/CloudHost247/pull/63 (draft, base `main`)
 
 ## 16. Genuine blockers
 
