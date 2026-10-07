@@ -113,7 +113,7 @@
       "name": "release-candidate gate (full source verification)",
       "command": "PATH=<php-wasm shim>:$PATH PHP_LINT_JOBS=4 bash scripts/release-candidate-check.sh",
       "result": "passed",
-      "evidence": "Green over revision `015434e`: \"Release-candidate source verification passed.\" (exit 0) \u2014 generated surfaces regenerated and diffed; 835 first-party PHP targets linted with PHP 8.2 (WASM), no syntax errors; 18 PHP behavioural suites including tests/tools/site-integration.php (882 assertions) and tests/website/run.php (315 assertions, 0 failed); server-agent Node suite (71 tests, 71 pass, 0 fail); 22 python static suites plus the 13-test website suite (OK); migration validator; retired-brand audit (0 matches); vendor integrity baseline; tools projection freshness check (tools:catalog:check) and tools build; scripts/verify-website.py passed=true with registry_pages 67, navigation_destinations 89, source_errors []"
+      "evidence": "Green over the final revision `bcb9575` (and over `963d41f` and `015434e`; the two commits after that run touch only this JSON, the report and the PR body): \"Release-candidate source verification passed.\" (exit 0) \u2014 generated surfaces regenerated and diffed; 835 first-party PHP targets linted with PHP 8.2 (WASM), no syntax errors; 18 PHP behavioural suites including tests/tools/site-integration.php (882 assertions) and tests/website/run.php (315 assertions, 0 failed); server-agent Node suite (71 tests, 71 pass, 0 fail); 22 python static suites plus the 13-test website suite (OK); migration validator; retired-brand audit (0 matches); vendor integrity baseline; tools projection freshness check (tools:catalog:check) and tools build; scripts/verify-website.py passed=true with registry_pages 67, navigation_destinations 89, source_errors []"
     },
     {
       "name": "node SEO surface suite",
@@ -206,5 +206,10 @@
     "De-publishing a document only removed it from the index: the markdown file stayed in frontend/public/docs and was still served and crawled. The generator now prunes de-published files from the build output and reports each removal.",
     "The production archive shipped a de-published internal document from two stale build outputs (cloudhost247-node/public/docs and assets/cloudhost247-tools/docs) because it was packed with --skip-build. The outputs were rebuilt and the packer now compares the packaged documentation set against the generated index, failing the archive on a de-published or missing file instead of counting files."
   ],
-  "revision": "015434e"
+  "revision": "bcb9575",
+  "revisions_verified": [
+    "963d41f",
+    "015434e",
+    "bcb9575"
+  ]
 }
