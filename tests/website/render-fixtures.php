@@ -51,6 +51,37 @@ if (is_file($root . '/tools/lib/bootstrap.php')) {
         if (\CloudHost247\Theme\ToolsSite::resolve($path) === null) { $pages[ltrim($path, '/')] = 'cloudhost247-tools.tpl'; }
     }
 }
+// Legal documents whose text is assigned by their own root PHP page (which needs init.php and a
+// database). The fixture supplies the same array shape with a two-section sample, so the templates
+// are checked as hero + sections + anchors + contact instead of rendering as an empty shell.
+$legalFixtureDocuments = array(
+    'backup-policy.php' => array('backupData', 'Backup Policy'),
+    'cybercrime-policy.php' => array('cybercrimeData', 'Cybercrime Policy'),
+    'refund-policy.php' => array('refundData', 'Refund Policy'),
+    'trademark-policy.php' => array('trademarkData', 'Trademark Policy'),
+);
+$legalFixtureTerms = array(
+    'domain-brokerage-terms.php' => array('brokerageTerms', 'Domain Brokerage Terms'),
+);
+$legalFixtureData = array();
+foreach (array_merge($legalFixtureDocuments, $legalFixtureTerms) as $legalPath => $legalPage) {
+    $legalFixtureData[$legalPath] = array(
+        'hero' => array('title' => $legalPage[1], 'subtitle' => 'Last Updated: fixture date'),
+        'introduction' => array('content' => 'Fixture introduction. The live page supplies the published policy text; this text exists only so the template is rendered whole.'),
+        'sections' => array(
+            array('id' => 'fixture-section-one', 'title' => '1. Fixture Section One', 'content' => 'Fixture section copy.', 'items' => array('Fixture list item one', 'Fixture list item two')),
+            array('id' => 'fixture-section-two', 'title' => '2. Fixture Section Two', 'content' => 'Fixture section copy.'),
+        ),
+        'contact' => array('title' => 'Contact Us', 'content' => 'Fixture contact copy.', 'email' => 'support@example.test', 'website' => 'www.example.test', 'portal' => 'support portal'),
+    );
+}
+// `legal.php` publishes its own document list; these are its real entries.
+$legalFixtureSections = array(
+    array('id' => 'terms-of-service', 'title' => 'Terms of Service', 'desc' => 'The terms and conditions that govern your use of our platform, services, and products.', 'link' => 'terms-of-service.php', 'icon' => 'fa-file-contract'),
+    array('id' => 'privacy-policy', 'title' => 'Privacy Policy', 'desc' => 'Learn how we collect, store, protect, and process your personal data.', 'link' => 'privacy-policy.php', 'icon' => 'fa-user-shield'),
+    array('id' => 'acceptable-use-policy', 'title' => 'Acceptable Use Policy', 'desc' => 'The rules that apply to the content and activity hosted on our platform.', 'link' => 'acceptable-use-policy.php', 'icon' => 'fa-shield'),
+);
+$pages['legal.php'] = 'legal.tpl';
 $pages['privacy-policy.php'] = 'privacypolicy.tpl';
 $pages['cookie-policy.php'] = 'cookiepolicy.tpl';
 $pages['acceptable-use-policy.php'] = 'acceptableusepolicy.tpl';
@@ -84,6 +115,17 @@ foreach ($pages as $path => $template) {
         $page = \CloudHost247\Theme\PublicPage::missing("We couldn't find that page.");
     }
 
+    if (isset($legalFixtureData[$path])) {
+        $legalDocument = $legalFixtureData[$path];
+        if (isset($legalFixtureTerms[$path])) {
+            // The brokerage document is all sections plus a contact block: no hero, no introduction.
+            $smarty->assign($legalFixtureTerms[$path][0], array('sections' => $legalDocument['sections'], 'contact' => $legalDocument['contact']));
+        } else {
+            $smarty->assign($legalFixtureDocuments[$path][0], $legalDocument);
+        }
+    } elseif ($path === 'legal.php') {
+        $smarty->assign('legalSections', $legalFixtureSections);
+    }
     $vars = array('WEB_ROOT' => '', 'systemurl' => 'https://example.test', 'templatefile' => $path === 'index.php' ? 'homepage' : '');
     if ($page !== null) { $vars['cloudhost247Page'] = $page; }
     if ($tool !== null) {

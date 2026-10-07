@@ -66,6 +66,15 @@ it: `notfound.php` was indexable without a canonical, and the tool duplication a
 pairs of indexable pages sharing a title. `css/tools.css` also gained the `prefers-reduced-motion`
 block it was missing, and `ch-tool-explain` — rendered by every native tool page — is now styled.
 
+**The legal documents rebuilt onto the design system.** The fifteen `includes/legal/*.tpl` documents
+carried a parallel legacy vocabulary — Bootstrap grid classes, old theme blocks (`terms-banner`,
+`bg-navy`), icon-font markup and `btn btn-primary` — that no stylesheet defines, plus a title banner
+repeating the heading the layout already renders and a heading outline jumping from `h1` to `h3`.
+They now use the design system, with fragment anchors kept as `<section>` elements, document cards
+in `legal.tpl` and a real checklist on the consent page, whose "Submit Consent" button posted to a
+form nothing handles. Copy is untouched and verified: 214 of 218 rendered pages have byte-identical
+visible text, and the four that differ lost exactly their duplicate title.
+
 **Honest public documentation.** `docs/NODE_PLATFORM_STATUS.md` was published as a public page while
 being the internal phase-acceptance ledger (branch names, PR numbers, commit hashes, unexecuted
 migrations). It is no longer published; the generator prunes de-published documents from the build

@@ -153,6 +153,12 @@
       "command": "scripts/php-wasm/php tests/website/run.php",
       "result": "passed",
       "evidence": "product-sections.tpl may only use shipped classes (24 checked) and its card, step, check-list, note, grid and split classes must come from shared/site/design-system.css; the ad-hoc site.css block that duplicated the design system and lost the cascade was removed, and the three genuinely missing component rules (icon image sizing, points list, light illustration frame) were added to the design system source"
+    },
+    {
+      "name": "legal document rebuild (design system + copy preservation)",
+      "command": "python3 tests/website/check-fixtures.py + visible-text diff of both fixture sets",
+      "result": "passed",
+      "evidence": "the 15 legal includes lost their legacy Bootstrap/theme classes, repeated title banners and h1→h3 outline jumps; 214 of 218 rendered pages have byte-identical visible text and the four differences are exactly the removed duplicate titles; a self-posting 'Submit Consent' form that no code handles was replaced with an explicit checklist and the real route to record consent"
     }
   ],
   "not_run": [
@@ -161,6 +167,7 @@
     "Visual review of the PHP page templates rebuilt on the earlier branch"
   ],
   "open_items": [
+    "Legal document copy still says 'CloudHost247 Isc.' and the privacy document ends with a 'Powered by WHMCompleteSolution' attribution; changing published legal text needs the owner's approval.",
     "The fifteen `templates/cloudhost247/includes/legal/*.tpl` documents keep their copy verbatim but still carry legacy Bootstrap/WB class names that no stylesheet defines; they render as plain readable documents and are the next visual-consistency item.",
     "Five native tools (for example /tools/broken-link-checker, /tools/reverse-ip-lookup) are published publicly and in the sitemap while the shared registry labels the same capability `customer`/auth-required. The PHP page has no gating to enforce; the site owner should decide whether to gate them or relabel the registry.",
     "scripts/generate-global-platform.py still maintains the legacy tools-public.json export. It is now a secondary source (the PHP sitemap reads the registry and the generator validates against the theme projection), but nothing has been deleted.",

@@ -13,6 +13,8 @@ that do not need one — the ones that catch a broken build rather than a broken
   * every published navigation fragment lands on an element with that id;
   * every `ch-`/`ch247-` class a visitor sees is defined by a stylesheet the repository ships (a
     class nobody styles renders as an unstyled box, which is how parallel design systems start);
+  * a heading outline that never skips a level, and legal documents that render as documents (the
+    harness must supply the array their root PHP page publishes) rather than as empty shells;
   * the head a crawler receives: stylesheet order, one title, a description, and the rule that a
     page is either indexable with a canonical and JSON-LD or explicitly `noindex` — never indexed
     twice under the same title, never canonical without being indexable.
@@ -124,6 +126,8 @@ def main() -> int:
     failures: list[str] = []
     counters = {'pages': 0, 'images': 0, 'links': 0, 'assets': 0, 'controls': 0, 'classes': 0,
                 'indexable': 0, 'noindex': 0}
+    legal_documents = ('backup-policy.php', 'cybercrime-policy.php', 'refund-policy.php',
+                       'trademark-policy.php', 'domain-brokerage-terms.php')
     classes_seen: dict[str, set[str]] = {}
     titles: dict[str, list[str]] = {}
 
@@ -141,6 +145,15 @@ def main() -> int:
         ids = ID_RE.findall(source)
         duplicates = {value for value in ids if ids.count(value) > 1}
         check(failures, not duplicates, f'{route}: duplicate id(s) {sorted(duplicates)[:3]}')
+
+        body = source[source.lower().find('<body'):] if '<body' in source.lower() else source
+        levels = [int(level) for level in re.findall(r'<h([1-6])\b', body)]
+        previous = 1
+        for level in levels:
+            check(failures, level <= previous + 1, f'{route}: heading outline jumps from h{previous} to h{level}')
+            previous = level
+        if route in legal_documents:
+            check(failures, levels.count(2) >= 3, f'{route}: legal document rendered as an empty shell ({levels.count(2)} h2)')
 
         head = source[: source.lower().find('</head>')] if '</head>' in source.lower() else source
 

@@ -174,7 +174,26 @@ indexable, unreachable pages instead of a navigation path a visitor could follow
 ## 10. Remaining legacy branding
 
 `python3 scripts/branding-audit.py` → 6,913 text files scanned, **0** retired-brand matches,
-0 unregistered matches. The vendor integrity baseline
+0 unregistered matches.
+
+**The fifteen legal documents were rebuilt onto the design system.** They carried a parallel legacy
+vocabulary — Bootstrap grid (`container`, `row`, `col-md-12`), old theme blocks (`terms-banner`,
+`inner-policy-section`, `bg-navy`, `pd-top-100`), icon-font markup (`fas`, `fa-life-ring`) and
+`btn btn-primary` — none of which any stylesheet defines, plus a title banner that repeated the
+heading the layout already renders and a heading outline that jumped from `h1` to `h3`.
+
+The pass removed the dead attributes and the duplicated titles, promoted the section headings to
+`h2`, kept fragment anchors (`id` attributes) as `<section>` elements, and gave the two places that
+need real components (`legal.tpl` document cards, the consent checklist) design-system markup. The
+copy is untouched: of the 218 rendered fixtures, **214 have byte-identical visible text** and the
+four that differ lost exactly their duplicate title (verified by diffing the visible text of the
+pre-change and post-change fixture sets).
+
+One misleading control was removed rather than restyled: the Data Privacy Notice page had a
+"Submit Consent" button in a form posting to itself, and nothing in the theme, the root pages or
+WHMCS handles `agree_privacy_policy`/`consent_data_processing`. It is now an explicit checklist
+with the real route to record consent (a support ticket), so the page no longer implies that
+consent is stored automatically. The vendor integrity baseline
 (`docs/independent-rebuild/original-file-manifest.sha256`, 1,897 templates + 368 modules files)
 verifies clean in the release gate; no vendor file was modified in this pass.
 
@@ -243,7 +262,8 @@ specific sentences that were rewritten for this reason.
 | PHP website suite | `scripts/php-wasm/php tests/website/run.php` | 315 assertions, 0 failed (section rendering, fragments, crawl policy, tool taxonomy, design-system class contract) |
 | PHP tools suite | `scripts/php-wasm/php tests/tools/site-integration.php` | 650 assertions, 0 failed (adds one published path per tool capability) |
 | Static website tests | `python3 -m unittest discover -s tests/website -p 'test_*.py'` | 13 tests, OK (generator/template type parity, registry link and asset integrity) |
-| Rendered-page fixture QA | `CH247_FIXTURE_DIR=… python3 tests/website/check-fixtures.py` | 218 pages, 815 images, 2,492 asset references, 53,778 links, 116 classes, 182 indexable / 36 noindex — **0 problems** |
+| Rendered-page fixture QA | `CH247_FIXTURE_DIR=… python3 tests/website/check-fixtures.py` | 218 pages, 815 images, 2,492 asset references, 53,799 links, 116 classes, 182 indexable / 36 noindex, heading outlines without a skipped level, legal documents rendering with content — **0 problems** |
+| Legal copy preservation | visible-text diff of both fixture sets | 214 of 218 pages identical; the four differences are the duplicate titles that were removed |
 | Node SEO suite | `npx vitest run tests/integration/seo-routes.test.ts` | 6 tests passed (2 new: one-policy robots contract, sitemap/registry policy agreement) |
 | Link integrity | `node scripts/site/check-links.mjs` | 2,176 surfaces, 0 broken |
 | Website source gate | `python3 scripts/verify-website.py` | `registry_pages 67`, `navigation_destinations 95`, `source_errors []`, `passed true` |
@@ -291,10 +311,11 @@ by the packer's own allow-list.
 
 **Deliberately out of scope for this pass** (still open on the brief):
 
-* the fifteen `includes/legal/*.tpl` documents: their copy is preserved verbatim, but they still
-  carry the legacy Bootstrap/WB class soup (`terms-banner`, `inner-policy-section`, `bg-navy`, …)
-  that no stylesheet defines. They render as readable plain documents today and are listed as the
-  next visual-consistency item;
+* the legal documents' *copy* still needs an editorial pass: it contains "CloudHost247 Isc." (a
+  rename artefact for "Inc.") and "Powered by WHMCompleteSolution" appears at the end of the privacy
+  document. Both are text the owner should approve changing, so neither was touched;
+* the same five classes the legal pages used (`container`, `row`, `col-*`, `lead`, `text-muted`)
+  still appear inside three vendor `modules/` templates that this pass does not own;
 * per-page PHP visual regeneration beyond the registry-driven illustrations and card grids;
 * the illustration expansion (new artwork families) — the existing 161 assets are validated and
   organised, but no new art was commissioned;
