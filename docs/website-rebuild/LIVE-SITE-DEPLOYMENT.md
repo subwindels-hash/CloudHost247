@@ -60,6 +60,23 @@ by design: it validates the *shape* of the environment and never touches the net
 `scripts/verify-live-site.py` reports this as a `WARN`, not a `FAIL`: it is not part of the "is the
 rebuild deployed?" verdict, but it is not allowed to pass silently either.
 
+### 0.1 The Tools Center in each of the three states
+
+The tool catalogue is compiled into the app (`src/tools/catalog.ts`); only the operator settings
+layered on top of it — enable/disable, maintenance windows, per-provider availability, usage
+history — come from the database. That is why a database outage must not be reported as "the tools
+are gone". The page looks like this:
+
+| State | `/api/tools/catalog` | What the page shows |
+|---|---|---|
+| **Old build, live today** | the API path is answered with the SPA's `index.html` | *"Tools are temporarily unavailable. Unexpected token '<' …"* — the request never reached the API. **Fixed only by uploading the rebuild.** |
+| **Rebuild uploaded, database still down** | `200` with `"degraded": true` and every tool `SERVICE_UNAVAILABLE` | the full catalogue, one warning notice naming the cause and the fix, and a *Try again* button. Running a tool answers `503` with that same reason. |
+| **Rebuild uploaded, database fixed** | `200`, tools `ACTIVE` | the normal page, with usage panels populated. |
+
+The middle row is the one to expect immediately after the upload if §0's database problem is still
+unresolved: the tools are listed and the reason is stated, which is the honest answer, not a
+dead end. Nothing above requires a migration to have run.
+
 ## 1. What the live host is actually running
 
 The live host is the **Node/TypeScript platform** (`cloudhost247-node/`), not the WHMCS/PHP site.
@@ -78,7 +95,7 @@ the website rebuild. Evidence:
 | `GET /media/cloudhost247/brand/icon-mark.svg` | 404 | The rebuilt site's `/media/` tree (illustrations, 3D visuals, brand marks — 181 assets) **was never uploaded**. Only the old package's handful of asset folders exist on disk. |
 | `GET /hosting` | Renders *"Not yet built on this platform — see the current CloudHost247 site or contact us for details."* | That string exists in the pre-rebuild `HostingPage` bundle (`assets/HostingPage-CME9CCwy.js` in the old package) and was **deleted** by the rebuild. |
 | `GET /` | Hero reads "Cloud infrastructure built for your next idea" / "Fast provisioning", "Straightforward billing", "Support around the clock" | Those strings are in the old package's `assets/HomePage-D4kP70On.js`. The rebuilt homepage renders different copy and a different hero. |
-| `GET /` (script tag) | `/assets/index-Ti2UwGlH.js` (per the old package's shell) | The rebuilt bundle is `assets/index-Dnn-r-Du.js`. Vite content-hashes filenames, so these can only match if the deployed file is the old one. |
+| `GET /` (script tag) | `/assets/index-Ti2UwGlH.js` (per the old package's shell) | The rebuilt bundle is content-hashed under a different name — it changes on every build (`assets/index-DWNaWZa-.js` for `fc9d81a`, to pick one example), and the verifier always reads the expected name from the checkout it is run against. Vite content-hashes filenames, so these can only match if the deployed file is the old one. A live `/assets/index-Ti2UwGlH.js` returning 200 is the stale-copy signature. |
 
 **Conclusion:** the files on the server are the October 4 package. No part of PRs #61–#64 has ever
 reached that host. The design did not change because the deployed build did not change.
