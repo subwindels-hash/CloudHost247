@@ -93,21 +93,61 @@ export interface RegistryContext {
   anonymousAccess: boolean;
   overrides: Map<string, ToolDefinitionOverrideRow>;
   providers: ProviderRow[];
+  /**
+   * True when the operator-policy tables could not be read (the platform database is unreachable).
+   * Everything then resolves to SERVICE_UNAVAILABLE — see `resolveTool`. Not set when the read
+   * succeeded, so a healthy deployment is unaffected.
+   */
+  degraded?: boolean;
+  /** Operator-facing reason, shown verbatim when `degraded`. */
+  degradedReason?: string | null;
 }
 
+/**
+ * The message every tool carries while the policy tables are unreadable. It names the cause and
+ * the fix instead of blaming the tool, because the tool itself is fine.
+ */
+export const TOOLS_DEGRADED_REASON =
+  'Tool settings could not be read because the platform database is unreachable. Tools cannot run until it is restored — see docs/website-rebuild/LIVE-SITE-DEPLOYMENT.md §0 and `npm run db:doctor`.';
+
+/**
+ * Reads the operator policy that layers on top of the catalogue.
+ *
+ * Deliberately does NOT throw when the database is unreachable. A 500 here took the whole Tools
+ * Center down with "Tools are temporarily unavailable" and no explanation, which is both untrue
+ * (the tool catalogue is static and always available) and unactionable. Instead the failure is
+ * reported as `degraded`, and `resolveTool` refuses every tool — so an operator's disable/maintenance
+ * decision can never be silently lost, and no tool is ever reported as runnable when its policy is
+ * unknown. Execution fails closed for the same reason: `runTool` gates on status *before* it reads
+ * the abuse block and rate-limit tables.
+ */
 export async function loadRegistryContext(db: Queryable): Promise<RegistryContext> {
-  const [masterEnabled, anonymousAccess, overrideResult, providers] = await Promise.all([
-    getSetting<boolean>(db, 'tools.enabled', true),
-    getSetting<boolean>(db, 'tools.anonymous_access', true),
-    db.query<ToolDefinitionOverrideRow>(`SELECT * FROM tool_definitions`),
-    listProviders(db),
-  ]);
-  return {
-    masterEnabled,
-    anonymousAccess,
-    overrides: new Map(overrideResult.rows.map((row) => [row.slug, row])),
-    providers,
-  };
+  try {
+    const [masterEnabled, anonymousAccess, overrideResult, providers] = await Promise.all([
+      getSetting<boolean>(db, 'tools.enabled', true),
+      getSetting<boolean>(db, 'tools.anonymous_access', true),
+      db.query<ToolDefinitionOverrideRow>(`SELECT * FROM tool_definitions`),
+      listProviders(db),
+    ]);
+    return {
+      masterEnabled,
+      anonymousAccess,
+      overrides: new Map(overrideResult.rows.map((row) => [row.slug, row])),
+      providers,
+    };
+  } catch (err) {
+    return {
+      // Fail closed: with policy unknown, nothing may be reported runnable. These two flags keep
+      // their safe catalogue defaults rather than inventing an operator decision that was never
+      // recorded — the per-tool SERVICE_UNAVAILABLE below is what carries the truth.
+      masterEnabled: true,
+      anonymousAccess: true,
+      overrides: new Map(),
+      providers: [],
+      degraded: true,
+      degradedReason: `${TOOLS_DEGRADED_REASON} (${(err as Error).message})`,
+    };
+  }
 }
 
 function providerSatisfies(entry: ToolCatalogEntry, override: ToolDefinitionOverrideRow | undefined, context: RegistryContext): { satisfied: boolean; reason: string | null } {
@@ -146,7 +186,13 @@ export function resolveTool(
   let status: ToolStatus = 'ACTIVE';
   let statusMessage: string | null = null;
 
-  if (!context.masterEnabled) {
+  if (context.degraded) {
+    // Checked first, so it outranks every other rule: the other rules read the override row, which
+    // is exactly what could not be read. Reporting ACTIVE here would offer a button that cannot
+    // work; reporting DISABLED would claim an operator decision nobody made.
+    status = 'SERVICE_UNAVAILABLE';
+    statusMessage = context.degradedReason ?? TOOLS_DEGRADED_REASON;
+  } else if (!context.masterEnabled) {
     status = 'DISABLED';
     statusMessage = 'The Tools Center is disabled platform-wide by an administrator.';
   } else if (override?.status_override && override.status_override !== 'ACTIVE') {
@@ -213,13 +259,39 @@ export function resolveTool(
 }
 
 /** All tools with their effective state. */
-export async function listEffectiveTools(db: Queryable): Promise<{ tools: EffectiveTool[]; masterEnabled: boolean; anonymousAccess: boolean }> {
+export interface EffectiveToolsResult {
+  tools: EffectiveTool[];
+  masterEnabled: boolean;
+  anonymousAccess: boolean;
+  /** True when operator policy could not be read; every tool is then SERVICE_UNAVAILABLE. */
+  degraded: boolean;
+  degradedReason: string | null;
+}
+
+/**
+ * Resolves whether the WHOIS tool has an RDAP provider. A failure here means the same database
+ * that just answered is now unreachable, so it degrades the whole context rather than pretending
+ * WHOIS specifically is unconfigured — the two are different claims and only one of them is true.
+ */
+async function attachWhoisState(context: RegistryContext, db: Queryable): Promise<void> {
+  if (context.degraded) return;
+  try {
+    context.whoisConfigured = Boolean(await findConnectedDomainServiceProvider(db, 'rdap'));
+  } catch (err) {
+    context.degraded = true;
+    context.degradedReason = `${TOOLS_DEGRADED_REASON} (${(err as Error).message})`;
+  }
+}
+
+export async function listEffectiveTools(db: Queryable): Promise<EffectiveToolsResult> {
   const context = await loadRegistryContext(db);
-  context.whoisConfigured = Boolean(await findConnectedDomainServiceProvider(db, 'rdap'));
+  await attachWhoisState(context, db);
   return {
     tools: TOOL_CATALOG.map((entry) => resolveTool(entry, context)),
     masterEnabled: context.masterEnabled,
     anonymousAccess: context.anonymousAccess,
+    degraded: context.degraded === true,
+    degradedReason: context.degraded ? (context.degradedReason ?? TOOLS_DEGRADED_REASON) : null,
   };
 }
 
@@ -227,7 +299,7 @@ export async function effectiveTool(db: Queryable, slug: string): Promise<Effect
   const entry = catalogEntry(slug);
   if (!entry) return null;
   const context = await loadRegistryContext(db);
-  context.whoisConfigured = Boolean(await findConnectedDomainServiceProvider(db, 'rdap'));
+  await attachWhoisState(context, db);
   return resolveTool(entry, context);
 }
 

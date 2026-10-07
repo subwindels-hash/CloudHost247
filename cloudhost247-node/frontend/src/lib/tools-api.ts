@@ -69,6 +69,9 @@ export interface ToolsDashboard {
   generatedAt: string;
   masterEnabled: boolean;
   anonymousAccess: boolean;
+  /** Set when the platform database is unreachable: usage panels are empty and tools cannot run. */
+  degraded?: boolean;
+  degradedReason?: string | null;
   signedIn: boolean;
   categories: ToolCategory[];
   popular: ToolSummary[];
@@ -252,7 +255,20 @@ export function buildToolInput(slug: string, values: Record<string, string | boo
 // --- API calls ---------------------------------------------------------------------------------
 
 export const toolsApi = {
-  catalog: (category?: string) => apiFetch<{ success: true; categories: ToolCategory[]; discoveryCategories?: ToolCategory[]; tools: ToolSummary[]; count: number; masterEnabled: boolean; anonymousAccess: boolean }>(`/api/tools/catalog${category ? `?category=${encodeURIComponent(category)}` : ''}`),
+  catalog: (category?: string) =>
+    apiFetch<{
+      success: true;
+      categories: ToolCategory[];
+      discoveryCategories?: ToolCategory[];
+      tools: ToolSummary[];
+      count: number;
+      masterEnabled: boolean;
+      anonymousAccess: boolean;
+      /** True when operator policy could not be read (platform database unreachable). The
+       *  catalogue is still complete and every tool is reported SERVICE_UNAVAILABLE. */
+      degraded?: boolean;
+      degradedReason?: string | null;
+    }>(`/api/tools/catalog${category ? `?category=${encodeURIComponent(category)}` : ''}`),
   dashboard: () => apiFetch<ToolsDashboard>('/api/tools/dashboard'),
   run: async <T>(slug: string, input: Record<string, unknown>, signal?: AbortSignal): Promise<ToolEnvelope<T>> => {
     try { return await apiFetch<ToolEnvelope<T>>(`/api/tools/${encodeURIComponent(slug)}`, { method: 'POST', body: JSON.stringify(input), signal }); }

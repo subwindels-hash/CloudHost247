@@ -67,6 +67,28 @@ function validate(form, data, state) {
   return true;
 }
 
+// Reads a response as JSON, and when it is not JSON says what actually happened.
+//
+// Without this, a response that is not JSON (an HTML error page, a login redirect, a web-server
+// default document) surfaced as `Unexpected token '<', "<!doctype "... is not valid JSON` inside the
+// result panel: accurate, and meaningless to the person reading it. The body cannot be re-read
+// after a failed parse, so the raw text is parsed first and the Content-Type is only used for detail.
+async function readJsonResponse(response) {
+  const text = await response.text();
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    const contentType = response.headers.get('content-type') || '';
+    const looksLikeHtml = /^\s*(<!doctype|<html)/i.test(text) || /text\/html/i.test(contentType);
+    const reason = looksLikeHtml
+      ? 'the tools service is not reachable at this address (an HTML page came back instead of a result)'
+      : 'the tools service returned ' + (contentType || 'an unreadable body');
+    const failure = new Error('This check could not run: ' + reason + ' (status ' + response.status + ').');
+    failure.cause = error;
+    throw failure;
+  }
+}
+
 async function postTool(form, data) {
   const slug = form.dataset.slug;
   const input = { ...data };
@@ -76,7 +98,7 @@ async function postTool(form, data) {
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     body: JSON.stringify({ slug, input }),
   });
-  const payload = await response.json();
+  const payload = await readJsonResponse(response);
   if (!response.ok && payload && !payload.error) payload.error = 'The service returned ' + response.status + '.';
   return payload;
 }
@@ -210,7 +232,7 @@ if (speed) {
     const body = crypto.getRandomValues(new Uint8Array(200000));
     const uploadStart = performance.now();
     const uploaded = await fetch(api.pathname + '?op=upload', { method: 'POST', body });
-    const uploadJson = await uploaded.json();
+    const uploadJson = await readJsonResponse(uploaded);
     const uploadMbps = ((uploadJson.bytes * 8) / ((performance.now() - uploadStart) / 1000) / 1e6).toFixed(2);
     render(result, { ok: true, summary: 'Path measurement complete', checkedAt: new Date().toISOString(), rows: [{ Latency: latency + ' ms', Download: downloadMbps + ' Mbps', Upload: uploadMbps + ' Mbps', Bytes: blob.size }], notes: ['This measures only the browser path to this CloudHost247 service. It is not an ISP-wide speed claim.'] }, state);
   }, true);

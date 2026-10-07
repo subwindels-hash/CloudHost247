@@ -1,4 +1,5 @@
 import { toolsApiPath } from '../lib/tools-runtime';
+import { readJson } from '../lib/api';
 import { FormEvent, useEffect, useState } from 'react';
 import { getToken } from '../lib/auth';
 import { useAuthState } from '../layout/useAuthState';
@@ -53,9 +54,12 @@ export default function AiSupportWidget() {
     let active = true;
     const refresh = () =>
       fetch(toolsApiPath(`/api/v1/ai-support/conversations/${session.conversationId}`), { headers: headers(session.accessToken) })
-        .then(async (response) => {
+        .then((response) => {
           if (!response.ok) throw new Error('Session expired');
-          return response.json();
+          return readJson<{ messages: Message[]; conversation: { status: string; visitor_email?: string | null } }>(
+            response,
+            '/api/v1/ai-support/conversations'
+          );
         })
         .then((data) => {
           if (!active) return;
@@ -84,7 +88,10 @@ export default function AiSupportWidget() {
     try {
       const response = await fetch(toolsApiPath('/api/v1/ai-support/conversations'), { method: 'POST', headers: headers() });
       if (!response.ok) throw new Error('Could not start support');
-      const data = await response.json();
+      const data = await readJson<{ conversationId: string; accessToken: string; message?: Message }>(
+        response,
+        '/api/v1/ai-support/conversations'
+      );
       const next = { conversationId: data.conversationId, accessToken: data.accessToken } as SupportSession;
       localStorage.setItem(SESSION_KEY, JSON.stringify(next));
       setSession(next);
@@ -111,15 +118,24 @@ export default function AiSupportWidget() {
         headers: headers(session.accessToken),
         body: JSON.stringify({ message: body }),
       });
-      const data = await response.json();
+      // Read the body before checking the status: a non-2xx that is not JSON (an HTML error page
+      // from the web server, i.e. the API never answered) has to be described, not parsed.
+      const data = await readJson<{
+        message?: string;
+        decision?: { kind?: string } | null;
+        transfer?: { status: string; body: string; requiresContact?: boolean } | null;
+        response?: Message | null;
+      }>(response, '/api/v1/ai-support/conversations/messages');
       if (!response.ok) throw new Error(data.message ?? 'Message failed');
       if (data.decision?.kind === 'NEWSLETTER') setShowSubscribe(true);
-      if (data.transfer) {
-        setStatus(data.transfer.status);
-        setMessages((current) => [...current, { author_type: 'SYSTEM', body: data.transfer.body }]);
-        if (data.transfer.requiresContact) setShowContact(true);
+      const transfer = data.transfer;
+      if (transfer) {
+        setStatus(transfer.status);
+        setMessages((current) => [...current, { author_type: 'SYSTEM', body: transfer.body }]);
+        if (transfer.requiresContact) setShowContact(true);
       } else if (data.response) {
-        setMessages((current) => [...current, data.response]);
+        const reply = data.response;
+        setMessages((current) => [...current, reply]);
       }
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Message failed');
@@ -139,7 +155,11 @@ export default function AiSupportWidget() {
         headers: headers(session.accessToken),
         body: JSON.stringify(contact),
       });
-      if (!response.ok) throw new Error((await response.json()).message ?? 'Could not save contact details');
+      const data = await readJson<{ message?: string }>(
+        response,
+        '/api/v1/ai-support/conversations/contact'
+      );
+      if (!response.ok) throw new Error(data.message ?? 'Could not save contact details');
       setShowContact(false);
       setMessages((current) => [...current, { author_type: 'SYSTEM', body: 'Thanks. Your name and email are attached to this support conversation.' }]);
     } catch (cause) {
@@ -160,8 +180,11 @@ export default function AiSupportWidget() {
         headers: headers(session.accessToken),
         body: JSON.stringify(contact),
       });
-      if (!response.ok) throw new Error((await response.json()).message ?? 'Subscription failed');
-      const data = await response.json();
+      const data = await readJson<{ message?: string; alreadySubscribed?: boolean }>(
+        response,
+        '/api/v1/ai-support/conversations/newsletter'
+      );
+      if (!response.ok) throw new Error(data.message ?? 'Subscription failed');
       setShowSubscribe(false);
       setMessages((current) => [
         ...current,

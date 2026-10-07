@@ -40,6 +40,8 @@ export default function ToolsCenterPage() {
   const [revision, setRevision] = useState(0);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [notice, setNotice] = useState<string | null>(null);
+  /** Set when the server reports that operator policy could not be read (database unreachable). */
+  const [degraded, setDegraded] = useState<string | null>(null);
   const categoryLabel = categories.find(
     (item) => item.slug === category
   )?.label;
@@ -51,6 +53,7 @@ export default function ToolsCenterPage() {
     let cancelled = false;
     setLoading(true);
     setError(null);
+    setDegraded(null);
     Promise.all([toolsApi.catalog(), toolsApi.dashboard().catch(() => null)])
       .then(([catalog, board]) => {
         if (cancelled) return;
@@ -58,6 +61,15 @@ export default function ToolsCenterPage() {
         setCategories(catalog.discoveryCategories ?? catalog.categories);
         setDashboard(board);
         setFavorites(new Set(board?.favorites?.map((tool) => tool.slug) ?? []));
+        // The server tells us when operator policy could not be read (the platform database is
+        // unreachable). The catalogue is still real and complete, so it is shown — with the reason
+        // stated once, here, instead of the tools silently looking broken.
+        const reason = catalog.degraded ? (catalog.degradedReason ?? 'Tool settings could not be read.') : null;
+        setDegraded(reason);
+        // In the degraded state every tool is unavailable by definition, so the default filter
+        // would hide the entire catalogue and leave the banner explaining an empty page. Show the
+        // tools with their reasons instead — that is the useful answer to "where did the tools go?".
+        if (reason) setShowUnavailable(true);
       })
       .catch((reason: Error) => {
         if (!cancelled) {
@@ -267,6 +279,20 @@ export default function ToolsCenterPage() {
           <p role="status" className="tools-loading">
             Loading the tool catalogue…
           </p>
+        )}
+        {/* The catalogue itself loaded, but the server could not read operator policy. Every tool
+            below is shown as unavailable with this reason attached, so the page explains the state
+            once instead of looking randomly broken. */}
+        {!loading && degraded && (
+          <div role="alert" className="tools-notice tools-notice--warning">
+            <p>{degraded}</p>
+            <button
+              type="button"
+              onClick={() => setRevision((value) => value + 1)}
+            >
+              Try again
+            </button>
+          </div>
         )}
         {error && (
           <div role="alert" className="tools-notice tools-notice--error">

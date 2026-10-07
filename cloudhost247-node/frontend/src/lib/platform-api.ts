@@ -6,7 +6,7 @@
  * never sends (for example a client-chosen price, or order-line metadata, which is server-set), so
  * a page cannot accidentally render a number the platform did not authorise.
  */
-import { apiFetch } from './api';
+import { apiFetch, readJson } from './api';
 
 /* --------------------------------------------------------------------------------------------
  * Navigation
@@ -46,7 +46,10 @@ export async function fetchNavigation(): Promise<{ sections: NavSection[]; valid
   if (!response.ok) {
     throw new Error(`Navigation is unavailable (HTTP ${response.status})`);
   }
-  return (await response.json()) as { sections: NavSection[]; validation: { ok: boolean; errors: string[] } };
+  return readJson<{ sections: NavSection[]; validation: { ok: boolean; errors: string[] } }>(
+    response,
+    '/api/v1/navigation'
+  );
 }
 
 /* --------------------------------------------------------------------------------------------

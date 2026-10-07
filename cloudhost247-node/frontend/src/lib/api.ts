@@ -33,7 +33,46 @@ export class ApiRequestError extends Error {
   }
 }
 
-export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {  const token = toolsHost().embedded ? null : localStorage.getItem('ch247_token');
+/**
+ * Describes a response whose body is not JSON.
+ *
+ * This is the difference between a support ticket and a fix. A non-JSON body means the request did
+ * not reach the API at all: a static file server, an SPA fallback (which answers 200 with
+ * index.html, so `res.ok` is true and the status says nothing), a reverse proxy, or a misconfigured
+ * mount. `JSON.parse("<")` reports that as `Unexpected token '<', "<!doctype "... is not valid
+ * JSON`, which is what a customer saw on the Tools Center — accurate, and useless.
+ */
+export function notJsonError(res: Response, url: string): ApiRequestError {
+  // The body cannot be re-read after a parse failure, so the Content-Type header is what tells us
+  // what actually came back. An HTML body on a 200 is the signature of the SPA fallback (or a
+  // static file server) answering an API path: `res.ok` was true, so nothing upstream noticed.
+  const contentType = res.headers?.get?.('content-type') ?? '';
+  return new ApiRequestError(
+    res.status,
+    'NOT_JSON',
+    /text\/html/i.test(contentType)
+      ? `The request to ${url} returned an HTML page (status ${res.status}), not the API — the API is not served at this address.`
+      : `${url} did not return JSON (status ${res.status}${contentType ? `, content-type ${contentType}` : ''}).`,
+  );
+}
+
+/**
+ * Reads a response as JSON, and — when it is not JSON — fails with a sentence that names the real
+ * problem instead of leaking the parser's complaint.
+ *
+ * Exported so every caller that talks to the API directly (the AI support widget, tool pages) can
+ * make the same promise to the reader, rather than each one re-implementing it or forgetting to.
+ */
+export async function readJson<T>(res: Response, url: string): Promise<T> {
+  try {
+    return (await res.json()) as T;
+  } catch {
+    throw notJsonError(res, url);
+  }
+}
+
+export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+  const token = toolsHost().embedded ? null : localStorage.getItem('ch247_token');
   const res = await fetch(toolsApiPath(path), {
     ...init,
     headers: {
@@ -44,7 +83,10 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
   });
 
   if (!res.ok) {
-    const body = (await res.json().catch(() => ({ error: 'UNKNOWN', message: res.statusText }))) as ApiError;
+    // The body is usually the API's JSON error envelope, but when the request never reached the
+    // API it is whatever the web server sent instead (often an HTML error page). Only the JSON case
+    // can be reported as the server's own message; the other is described by what actually arrived.
+    const body = (await res.json().catch(() => null)) as ApiError | null;
     // The server is the only source of truth for whether a token is still valid (see
     // src/lib/auth.ts). If a request that *sent* a token comes back 401, that token is no longer
     // good — expired, or explicitly revoked by /api/auth/logout (possibly from another tab, or
@@ -54,6 +96,7 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
     if (res.status === 401 && token) {
       clearSession();
     }
+    if (!body) throw notJsonError(res, toolsApiPath(path));
     throw new ApiRequestError(res.status, body.error || body.code || 'UNKNOWN', body.message || 'Request failed', body.retryable);
   }
 
@@ -61,7 +104,7 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
     return undefined as T;
   }
 
-  return (await res.json()) as T;
+  return readJson<T>(res, toolsApiPath(path));
 }
 
 /**
@@ -82,7 +125,8 @@ export async function publicFetch<T>(path: string, init?: RequestInit): Promise<
   });
 
   if (!res.ok) {
-    const body = (await res.json().catch(() => ({ error: 'UNKNOWN', message: res.statusText }))) as ApiError;
+    const body = (await res.json().catch(() => null)) as ApiError | null;
+    if (!body) throw notJsonError(res, toolsApiPath(path));
     throw new ApiRequestError(res.status, body.error || body.code || 'UNKNOWN', body.message || 'Request failed', body.retryable);
   }
 
@@ -90,5 +134,5 @@ export async function publicFetch<T>(path: string, init?: RequestInit): Promise<
     return undefined as T;
   }
 
-  return (await res.json()) as T;
+  return readJson<T>(res, toolsApiPath(path));
 }

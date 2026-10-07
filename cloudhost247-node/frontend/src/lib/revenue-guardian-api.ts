@@ -1,4 +1,5 @@
 import { toolsApiPath } from './tools-runtime';
+import { notJsonError } from './api';
 /**
  * Revenue Guardian API client — thin typed wrappers over /api/admin/revenue-guardian/*.
  * Uses the shared apiFetch (same-origin, bearer token) like every other module client.
@@ -92,7 +93,10 @@ export async function rgExportCsv(body: Record<string, unknown>): Promise<Blob> 
     body: JSON.stringify(body),
   });
   if (!res.ok) {
-    const err = (await res.json().catch(() => ({ message: res.statusText }))) as { message?: string };
+    // The error body is JSON when the API answered and HTML when something else did; only the
+    // first case has a server-authored message to show.
+    const err = (await res.json().catch(() => null)) as { message?: string } | null;
+    if (!err) throw notJsonError(res, `${BASE}/reports/export`);
     throw new Error(err.message ?? 'Export failed');
   }
   return res.blob();

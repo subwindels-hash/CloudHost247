@@ -207,7 +207,7 @@ export async function registerToolsRoutes(app: FastifyInstance, env: Env, overri
 
     app.get(`${prefix}/tools/catalog`, async (request, reply) => {
       reply.header('Cache-Control', 'no-store');
-      const { tools, masterEnabled, anonymousAccess } = await listEffectiveTools(pool);
+      const { tools, masterEnabled, anonymousAccess, degraded, degradedReason } = await listEffectiveTools(pool);
       const categories = Object.entries(CATEGORY_LABELS).map(([slug, label]) => ({
         slug,
         label,
@@ -222,6 +222,11 @@ export async function registerToolsRoutes(app: FastifyInstance, env: Env, overri
         success: true,
         masterEnabled,
         anonymousAccess,
+        // The catalogue itself is static and always complete; `degraded` says only that operator
+        // policy could not be read, and `degradedReason` is the sentence the UI shows verbatim.
+        // HTTP 200 is correct even when degraded: we are returning a valid, complete catalogue.
+        degraded,
+        degradedReason,
         categories,
         discoveryCategories: Object.entries(DISCOVERY_CATEGORIES).map(([slug,label]) => ({slug,label,toolCount: tools.filter(tool=>tool.discoveryCategories?.includes(slug)).length})),
         count: filtered.length,
@@ -232,14 +237,17 @@ export async function registerToolsRoutes(app: FastifyInstance, env: Env, overri
 
     app.get(`${prefix}/tools/dashboard`, async (request, reply) => {
       reply.header('Cache-Control', 'no-store');
-      const { tools, masterEnabled, anonymousAccess } = await listEffectiveTools(pool);
-      const auth = request.headers.authorization ? await authenticate(request, env, pool).catch(() => null) : null;
+      const { tools, masterEnabled, anonymousAccess, degraded, degradedReason } = await listEffectiveTools(pool);
+      const auth = degraded ? null : request.headers.authorization ? await authenticate(request, env, pool).catch(() => null) : null;
       const categoryCounts = new Map<string, number>();
       for (const tool of tools) categoryCounts.set(tool.category, (categoryCounts.get(tool.category) ?? 0) + 1);
 
-      const popular = await popularTools(pool, 6);
-      const recent = auth ? await recentlyUsed(pool, auth.userId, 6) : [];
-      const favorites = auth ? await listFavorites(pool, auth.userId) : [];
+      // Usage panels (popular/recent/favourites) come from the same unreachable database. When the
+      // catalogue already reported that, these are left empty instead of throwing a second time:
+      // "no usage history to show" is the truth in that state, and `degraded` says why.
+      const popular = degraded ? [] : await popularTools(pool, 6);
+      const recent = !degraded && auth ? await recentlyUsed(pool, auth.userId, 6) : [];
+      const favorites = !degraded && auth ? await listFavorites(pool, auth.userId) : [];
       const favoriteSet = new Set(favorites.map((favorite) => favorite.tool_slug));
 
       const decorate = (slug: string, extra: Record<string, unknown> = {}) => {
@@ -253,6 +261,8 @@ export async function registerToolsRoutes(app: FastifyInstance, env: Env, overri
         generatedAt: new Date().toISOString(),
         masterEnabled,
         anonymousAccess,
+        degraded,
+        degradedReason,
         signedIn: Boolean(auth),
         categories: Object.entries(CATEGORY_LABELS).map(([slug, label]) => ({ slug, label, toolCount: categoryCounts.get(slug) ?? 0 })),
         popular: popular.map((entry) => decorate(entry.toolSlug, { runs: entry.runs })).filter(Boolean),

@@ -1,4 +1,5 @@
 import { getToken } from './auth';
+import { readJson } from './api';
 import { toolsApiPath, toolsHost } from './tools-runtime';
 interface Configuration {
   payload: { defaultBytes: number; maxBytes: number };
@@ -56,7 +57,10 @@ export async function measureBrowserConnection(
     const latencyMs: number[] = [];
     for (let i = 0; i < 3; i++) {
       const start = performance.now();
-      await (await request('latency?sample=' + i)).json();
+      await readJson<Record<string, unknown>>(
+        await request('latency?sample=' + i),
+        'api/tools/speed-test/latency'
+      );
       latencyMs.push(performance.now() - start);
     }
     const start = performance.now();
@@ -72,13 +76,14 @@ export async function measureBrowserConnection(
     for (let i = 0; i < bytes; i += 65536)
       crypto.getRandomValues(buffer.subarray(i, Math.min(i + 65536, bytes)));
     const uploadStart = performance.now();
-    const received = await (
+    const received = await readJson<{ receivedBytes?: number }>(
       await request('upload', {
         method: 'POST',
         body: buffer,
         headers: { 'Content-Type': 'application/octet-stream' },
-      })
-    ).json();
+      }),
+      'api/tools/speed-test/upload'
+    );
     const uploadMs = performance.now() - uploadStart;
     if (received.receivedBytes !== bytes || downloadMs <= 0 || uploadMs <= 0)
       throw new Error(
