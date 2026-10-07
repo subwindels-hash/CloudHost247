@@ -130,6 +130,65 @@ describe('the API answering with HTML instead of JSON', () => {
     expect(alert.textContent).not.toMatch(/Unexpected token/);
     expect(alert.textContent).not.toMatch(/is not valid JSON/);
     expect(alert.textContent).toMatch(/not the API|did not return JSON/i);
+    // The old fallback blamed the tool and then claimed the page did not exist. Neither is true
+    // here: the API was never reached, so nothing about this tool is known or broken.
+    expect(screen.queryByText(/Tools temporarily unavailable/)).toBeNull();
+    expect(screen.queryByText(/There is no tool registered under/)).toBeNull();
+    expect(screen.getByText(/catalogue could not be loaded/)).toBeTruthy();
+  });
+
+  /**
+   * The Tools Center is the one page that used to say "Tools are temporarily unavailable" for a
+   * request that never reached the API. That sentence is false in that state — the catalogue is a
+   * static document — so it must be replaced by the actual condition, while genuine API failures
+   * keep the familiar copy.
+   */
+  it('does not tell the reader the tools are unavailable when the API was never reached', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        headers: new Headers({ 'content-type': 'text/html; charset=utf-8' }),
+        json: async () => {
+          throw new SyntaxError("Unexpected token '<', \"<!doctype \"... is not valid JSON");
+        },
+      }),
+    );
+
+    render(
+      <MemoryRouter>
+        <ToolsCenterPage />
+      </MemoryRouter>,
+    );
+
+    const alert = await screen.findByRole('alert');
+    expect(alert.textContent).toMatch(/HTML page/i);
+    expect(alert.textContent).not.toMatch(/Unexpected token/);
+    expect(alert.textContent).not.toMatch(/Tools are temporarily unavailable/);
+    expect(alert.textContent).toMatch(/The tools themselves are fine/i);
+  });
+
+  it('keeps the familiar copy for a genuine API failure', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 500,
+        headers: new Headers({ 'content-type': 'application/json' }),
+        json: async () => ({ error: 'INTERNAL_ERROR', message: 'An unexpected error occurred' }),
+      }),
+    );
+
+    render(
+      <MemoryRouter>
+        <ToolsCenterPage />
+      </MemoryRouter>,
+    );
+
+    const alert = await screen.findByRole('alert');
+    expect(alert.textContent).toMatch(/Tools are temporarily unavailable/);
+    expect(alert.textContent).toMatch(/An unexpected error occurred/);
   });
 
   it('leaves a genuine JSON error message untouched', async () => {

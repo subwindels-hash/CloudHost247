@@ -7,6 +7,7 @@ import ToolSeo from '../components/tools/ToolSeo';
 import { toolsHost } from '../lib/tools-runtime';
 import { useAuthState } from '../layout/useAuthState';
 import { usePageMeta } from '../lib/usePageMeta';
+import { ApiRequestError } from '../lib/api';
 import {
   buildToolInput,
   toolForm,
@@ -37,6 +38,10 @@ export default function ToolPage() {
   const [busy, setBusy] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // 'NOT_JSON' means the API was never reached (an SPA fallback or static server answered the
+  // path with index.html). That is a deployment fact, not a tool state, and it must not be
+  // reported as "this tool is unavailable" — the tool is fine.
+  const [errorCode, setErrorCode] = useState<string | null>(null);
 
   /**
    * The catalogue is the source of truth for tool URLs: a tool is addressed by its own `path`
@@ -75,7 +80,9 @@ export default function ToolPage() {
         if (!cancelled) setTools(catalog.tools);
       })
       .catch((loadError: Error) => {
-        if (!cancelled) setError(loadError.message);
+        if (cancelled) return;
+        setError(loadError.message);
+        setErrorCode(loadError instanceof ApiRequestError ? loadError.code : null);
       })
       .finally(() => {
         if (!cancelled) setCatalogLoading(false);
@@ -90,6 +97,7 @@ export default function ToolPage() {
     pending.current?.abort();
     setBusy(null);
     setError(null);
+    setErrorCode(null);
     const initial: Record<string, string | boolean> = {};
     for (const field of form.fields) {
       if (field.defaultValue !== undefined)
@@ -181,6 +189,9 @@ export default function ToolPage() {
       setError(
         runError instanceof Error ? runError.message : 'The request failed.'
       );
+      setErrorCode(
+        runError instanceof ApiRequestError ? runError.code : null
+      );
     } finally {
       if (!controller.signal.aborted) setBusy(null);
     }
@@ -215,6 +226,9 @@ export default function ToolPage() {
           ? actionError.message
           : 'The action failed.'
       );
+      setErrorCode(
+        actionError instanceof ApiRequestError ? actionError.code : null
+      );
     } finally {
       setBusy(null);
     }
@@ -234,14 +248,38 @@ export default function ToolPage() {
   }
 
   if (!catalogLoading && !tool) {
+    if (!error) {
+      return (
+        <div className="tools-center">
+          <h1>Tool not found</h1>
+          <p>
+            There is no tool registered under “{location.pathname}”.{' '}
+            <Link to="/tools">Back to the Tools Center</Link>.
+          </p>
+        </div>
+      );
+    }
+    // The catalogue could not be loaded at all. When the API was never reached, say that — the
+    // old copy blamed the tool ("Tools temporarily unavailable") and then added "There is no tool
+    // registered under …", which is a second, false claim about a page nobody was able to read.
+    const unreachable = errorCode === 'NOT_JSON';
     return (
       <div className="tools-center">
-        <h1>{error ? 'Tools temporarily unavailable' : 'Tool not found'}</h1>
-        {error && <p role="alert">{error}</p>}
-        <p>
-          There is no tool registered under “{location.pathname}”.{' '}
-          <Link to="/tools">Back to the Tools Center</Link>.
-        </p>
+        <h1>{unreachable ? 'The tool catalogue could not be loaded' : 'Tools temporarily unavailable'}</h1>
+        <p role="alert">{error}</p>
+        {unreachable ? (
+          <p>
+            Every tool on this site lives on this page, so none of them can be opened until the
+            API answers again. This is a problem with the server, not with your account or this
+            tool.{' '}
+            <Link to="/tools">Back to the Tools Center</Link>.
+          </p>
+        ) : (
+          <p>
+            The catalogue did not load, so this page cannot tell you whether “{location.pathname}”
+            exists. <Link to="/tools">Back to the Tools Center</Link>.
+          </p>
+        )}
       </div>
     );
   }

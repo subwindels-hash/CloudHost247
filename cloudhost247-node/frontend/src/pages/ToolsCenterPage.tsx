@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { usePageMeta } from '../lib/usePageMeta';
+import { ApiRequestError } from '../lib/api';
 import {
   toolsApi,
   type ToolSummary,
@@ -36,6 +37,9 @@ export default function ToolsCenterPage() {
   const [dashboard, setDashboard] = useState<ToolsDashboard | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // 'NOT_JSON' means the request never reached the API (an SPA fallback or a static file server
+  // answered the path with index.html). The tools are fine; the address is wrong.
+  const [errorCode, setErrorCode] = useState<string | null>(null);
   const [showUnavailable, setShowUnavailable] = useState(false);
   const [revision, setRevision] = useState(0);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
@@ -53,6 +57,7 @@ export default function ToolsCenterPage() {
     let cancelled = false;
     setLoading(true);
     setError(null);
+    setErrorCode(null);
     setDegraded(null);
     Promise.all([toolsApi.catalog(), toolsApi.dashboard().catch(() => null)])
       .then(([catalog, board]) => {
@@ -74,6 +79,7 @@ export default function ToolsCenterPage() {
       .catch((reason: Error) => {
         if (!cancelled) {
           setError(reason.message);
+          setErrorCode(reason instanceof ApiRequestError ? reason.code : null);
           setTools([]);
         }
       })
@@ -296,7 +302,21 @@ export default function ToolsCenterPage() {
         )}
         {error && (
           <div role="alert" className="tools-notice tools-notice--error">
-            <p>Tools are temporarily unavailable. {error}</p>
+            {/* When the API was never reached, "Tools are temporarily unavailable" is simply
+                false: the catalogue is a static document and the request went to the wrong
+                place. State the real condition first, and only fall back to the generic
+                sentence for genuine API failures (a 500, a timeout, a lost connection). */}
+            {errorCode === 'NOT_JSON' ? (
+              <>
+                <p>{error}</p>
+                <p className="tools-muted">
+                  The tools themselves are fine — this page could not reach the API that lists
+                  them.
+                </p>
+              </>
+            ) : (
+              <p>Tools are temporarily unavailable. {error}</p>
+            )}
             <button
               type="button"
               onClick={() => setRevision((value) => value + 1)}
