@@ -1,4 +1,4 @@
-import unittest, importlib.util, copy
+import unittest, importlib.util, copy, re
 from pathlib import Path
 import json
 ROOT=Path(__file__).resolve().parents[2]
@@ -61,5 +61,65 @@ class WebsiteTests(unittest.TestCase):
   # Product pages inherit their copy from the same content the application renders.
   enriched=[p for p in catalog['pages'].values() if p.get('headline') and p.get('features')]
   self.assertGreaterEqual(len(enriched),30,'expected the shared content to enrich the PHP product pages')
+
+ def test_registry_sections_have_a_renderer_for_every_type(self):
+  # scripts/site/generate.mjs decides which section types the PHP surface can render statically;
+  # product-sections.tpl decides what they look like. If the two lists drift, a section is projected
+  # and then silently dropped from the page, which is how a product page ends up saying less than
+  # the application does.
+  generator=(ROOT/'scripts/site/generate.mjs').read_text()
+  marker='const PHP_SECTION_TYPES = new Set(['
+  start=generator.index(marker)+len(marker)
+  projected=[name.strip().strip("'\"") for name in generator[start:generator.index(']',start)].split(',') if name.strip()]
+  self.assertGreaterEqual(len(projected),5)
+  template=(ROOT/'templates/cloudhost247/includes/product-sections.tpl').read_text()
+  for section_type in projected:
+   if section_type in ('features','cards'):continue  # both render through the default card grid
+   self.assertIn("'" + section_type + "'",template,section_type)
+  for page in ('cloudhost247-page.tpl','cloudhost247-platform.tpl'):
+   self.assertIn('product-sections.tpl',(ROOT/'templates/cloudhost247'/page).read_text(),page)
+
+ def test_published_sections_are_renderable_and_linked(self):
+  catalog=json.loads((ROOT/'modules/addons/cloudhost247_theme/resources/site.json').read_text())
+  types={'features','cards','steps','checks','split','note'}
+  pages=0
+  for path,page in catalog['pages'].items():
+   sections=page.get('sections') or []
+   if sections:pages+=1
+   for section in sections:
+    self.assertIn(section['type'],types,path)
+    self.assertTrue(section['heading'].strip(),path)
+    if section['type']=='split':
+     self.assertTrue(section.get('visual'),path)
+     self.assertTrue((ROOT/'assets/images/cloudhost247'/(section['visual']+'.svg')).is_file(),section['visual'])
+    for item in section.get('items') or []:
+     self.assertTrue(item['title'].strip(),path)
+     if item.get('icon'):
+      self.assertTrue((ROOT/'assets/images/cloudhost247'/item['icon']).is_file(),item['icon'])
+  self.assertGreaterEqual(pages,30,'the shared content should reach most product pages')
+
+ def test_navigation_fragments_are_rendered_anchors(self):
+  # `deployments.php#environments` is a promise that the page has that section. Nothing checked it
+  # before this test; every domain fragment the menu published was empty.
+  catalog=json.loads((ROOT/'modules/addons/cloudhost247_theme/resources/site.json').read_text())
+  anchors=set()
+  for page in catalog['pages'].values():
+   for section in page.get('sections') or []:
+    if section.get('anchor'):anchors.add(section['anchor'])
+  for template in (ROOT/'templates/cloudhost247').rglob('*.tpl'):
+   for token in re.findall(r'id="([A-Za-z][\w-]*)"',template.read_text()):
+    anchors.add(token)
+  registry=json.loads((ROOT/'shared/site/registry.json').read_text())
+  destinations=[]
+  for menu in registry['menus']:
+   destinations.append(menu.get('href') or {})
+   for column in menu.get('columns',[]):
+    destinations.extend(item.get('href') or {} for item in column.get('items',[]))
+  for href in destinations:
+   php=href.get('php') or ''
+   if '#' not in php:continue
+   file,fragment=php.split('#',1)
+   self.assertTrue((ROOT/file).is_file(),php)
+   self.assertIn(fragment,anchors,php)
 
 if __name__=='__main__':unittest.main()

@@ -1,4 +1,7 @@
 <main id="main-content">{include file="cloudhost247/includes/product-hero.tpl"}
+{* The platform pages render the same registry sections as every other product page, then the
+   live catalogue block (or the honest "not connected" state) below. *}
+{if $ch247Site.page.sections}{include file="cloudhost247/includes/product-sections.tpl"}{/if}
 <section class="ch-section"><div class="ch-wrap">
 {if $ch247Site.path == 'server-management.php'}<div class="ch-split"><div><p class="ch-kicker">Service-specific controls</p><h2>Manage the services<br>you actually own.</h2><p>Start, stop, reboot, logs, backups and other operations depend on your product and provider. Open the service details in your account to see which actions are supported.</p><a class="ch-btn ch-btn-dark" href="{$WEB_ROOT}/clientarea.php?action=services">Open My Services →</a></div><img src="{$WEB_ROOT}/assets/images/cloudhost247/management/server-control.svg" width="660" height="560" loading="lazy" alt="Conceptual server management diagram"></div>
 {elseif $ch247Site.platform}

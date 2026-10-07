@@ -150,7 +150,26 @@ Now:
 * the generator asserts registry ↔ app catalogue ↔ theme projection taxonomy parity and that every
   published category has at least one tool;
 * the PHP tools suite asserts the native resolution and the icon asset for every tool card
-  (596 assertions).
+  (650 assertions).
+
+### One URL per tool capability
+
+The shared registry (`tools.json`) and the native catalogue (`config/tools.php`) slugged the same
+tool differently, so **18 capabilities were published twice**: two indexable pages with one title,
+and the second URL rendered by the theme fallback with no implementation behind it — `/tools/whois`
+and `/tools/domain-whois`, `/tools/ssl-checker` and `/tools/ssl-certificate-checker`,
+`/tools/speed-test` and `/tools/internet-speed-test`, and fifteen more.
+
+Fixed in data rather than with new routes: each of the 18 registry entries now carries the served
+(native) path and declares its previous path in `legacyPaths`, which the tools front controller
+already redirects. `tests/tools/site-integration.php` fails if a capability is ever published under
+two paths again, and the fixture QA fails on two indexable pages sharing a title.
+
+The 30 registry entries that only the platform application implements no longer present themselves
+as working tool pages. They send `X-Robots-Tag: noindex`, publish no canonical, explain that the
+tool runs in the connected platform, and link to it. They were orphan routes — no PHP page linked
+them, because the hub and the category pages publish the 105 native tools — so this removes thin,
+indexable, unreachable pages instead of a navigation path a visitor could follow.
 
 ## 10. Remaining legacy branding
 
@@ -178,6 +197,19 @@ registry (drift fails the suite); every sitemap entry must pass `isSitemapPathAl
 (asserted against a live `/sitemap.xml` response in the Node suite). A URL can therefore no longer
 be listed in a sitemap and disallowed in robots.txt at the same time.
 
+### What a page tells a crawler — asserted per page
+
+The fixture harness renders the shipped `includes/site-head.tpl` instead of a hand-written copy, so
+the QA checks the head a visitor and a crawler actually receive, on all 218 rendered pages:
+stylesheet order (`site.css`, then `design-system.css`), exactly one non-empty `<title>`, a meta
+description, and the rule that a page is **either** indexable with a canonical URL and parseable
+JSON-LD **or** explicitly `noindex` — never a canonical on a `noindex` page, never two indexable
+pages sharing a title. Result: 182 indexable / 36 `noindex`, 0 violations.
+
+Two defects fell out of that check and were fixed: `notfound.php` was indexable without a canonical
+(it is now in the noindex list), and the tool duplication above appeared as seventeen pairs of
+indexable pages with identical titles.
+
 Honest-claims work in the same area: product availability, pricing, locations, certifications and
 uptime remain product-catalogue facts; the marketing content carries no invented provider,
 location, OS/panel or customer claims, and the audit note in `GLOBAL-AUDIT.md` records the
@@ -188,20 +220,30 @@ specific sentences that were rewritten for this reason.
 * semantic landmarks, one `<h1>` per page, skip link, `aria-current` on the active navigation item,
   `details`/`summary` disclosure menus operable from the keyboard, labelled form controls.
 * `:focus-visible` outlines defined globally, with a high-contrast variant on dark surfaces.
-* `prefers-reduced-motion` honoured in the design system and the component stylesheets.
+* `prefers-reduced-motion` honoured in the design system and every component stylesheet, including
+  `css/tools.css`, which was the last one without it.
+* every `ch-`/`ch247-` class the fixtures render (116 distinct) is defined by a stylesheet the
+  repository ships — asserted, so markup cannot drift back into unstyled boxes. The registry section
+  renderer is stricter still: its 24 classes must all exist, and its card, step, check-list, note,
+  grid and split classes must come from the design system, because that layer loads last and wins
+  every name the two share.
 * responsive breakpoints at 1199 / 767 / 479 px, `overflow-x: clip` on the shell, fluid `clamp()`
   typography, no fixed-width element in the audited templates.
 * **Not verified in a browser** — no browser binary is available in this environment. Responsive and
-  accessibility behaviour is asserted at source level only (see §16).
+  accessibility behaviour is asserted at source level plus the static fixture checks above (one
+  `<h1>`/`<main>`/`<header>`/`<footer>` per page, no duplicate `id`, every image with an `alt`, every
+  fragment target present, 59,979 interactive controls enumerated) — see §16.
 
 ## 13. Tests and gates run for this pass
 
 | Check | Command | Result |
 |---|---|---|
-| Registry generator | `node scripts/site/generate.mjs` and `--check` | passed — 227 links, 0 errors, 1 expected warning (pruned de-published doc) |
+| Registry generator | `node scripts/site/generate.mjs` and `--check` | passed — 227 links, 0 errors, 54 marketing pages, 116 sections, 13 published documents, 43 enriched product pages, crawl policy 23 exclusions / 86 public PHP paths |
 | Release-candidate gate | `bash scripts/release-candidate-check.sh` (WASM PHP 8.2) | **passed** — every first-party PHP target linted, 18 PHP behavioural suites, server-agent suite, 22 python static suites, retired-brand audit, vendor baseline, tools projection + build, website gates |
-| PHP website suite | `scripts/php-wasm/php tests/website/run.php` | 97 assertions, 0 failed (41 new: crawl-policy agreement, tool-category taxonomy, sitemap endpoints) |
-| PHP tools suite | `scripts/php-wasm/php tests/tools/site-integration.php` | 596 assertions, 0 failed |
+| PHP website suite | `scripts/php-wasm/php tests/website/run.php` | 315 assertions, 0 failed (section rendering, fragments, crawl policy, tool taxonomy, design-system class contract) |
+| PHP tools suite | `scripts/php-wasm/php tests/tools/site-integration.php` | 650 assertions, 0 failed (adds one published path per tool capability) |
+| Static website tests | `python3 -m unittest discover -s tests/website -p 'test_*.py'` | 13 tests, OK (generator/template type parity, registry link and asset integrity) |
+| Rendered-page fixture QA | `CH247_FIXTURE_DIR=… python3 tests/website/check-fixtures.py` | 218 pages, 815 images, 2,492 asset references, 53,778 links, 116 classes, 182 indexable / 36 noindex — **0 problems** |
 | Node SEO suite | `npx vitest run tests/integration/seo-routes.test.ts` | 6 tests passed (2 new: one-policy robots contract, sitemap/registry policy agreement) |
 | Link integrity | `node scripts/site/check-links.mjs` | 2,176 surfaces, 0 broken |
 | Website source gate | `python3 scripts/verify-website.py` | `registry_pages 67`, `navigation_destinations 95`, `source_errors []`, `passed true` |
@@ -249,6 +291,10 @@ by the packer's own allow-list.
 
 **Deliberately out of scope for this pass** (still open on the brief):
 
+* the fifteen `includes/legal/*.tpl` documents: their copy is preserved verbatim, but they still
+  carry the legacy Bootstrap/WB class soup (`terms-banner`, `inner-policy-section`, `bg-navy`, …)
+  that no stylesheet defines. They render as readable plain documents today and are listed as the
+  next visual-consistency item;
 * per-page PHP visual regeneration beyond the registry-driven illustrations and card grids;
 * the illustration expansion (new artwork families) — the existing 161 assets are validated and
   organised, but no new art was commissioned;

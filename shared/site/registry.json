@@ -492,7 +492,7 @@
               "desc": "The full TLD catalogue with register and renewal prices.",
               "href": {
                 "spa": "/domains/extensions",
-                "php": "domain.php#pricing"
+                "php": "domain.php"
               }
             },
             {
@@ -501,7 +501,7 @@
               "desc": "Check a whole list of candidate names at once.",
               "href": {
                 "spa": "/domains/bulk-search",
-                "php": "domain.php#search"
+                "php": "domain.php"
               }
             },
             {
@@ -533,7 +533,7 @@
               "desc": "Public registration data, with privacy respected.",
               "href": {
                 "spa": "/domains/whois",
-                "php": "domain.php#whois"
+                "php": "tools/domain-whois"
               }
             },
             {
@@ -556,7 +556,7 @@
               "desc": "Bid on listed names with a recorded auction ledger.",
               "href": {
                 "spa": "/domains/auctions",
-                "php": "domain.php#auctions"
+                "php": "domain.php"
               },
               "badge": "NEW"
             },
@@ -566,7 +566,7 @@
               "desc": "An estimated market value \u2014 never a guaranteed price.",
               "href": {
                 "spa": "/domains/appraisal",
-                "php": "domain.php#appraisal"
+                "php": "domain.php"
               }
             },
             {
@@ -575,7 +575,7 @@
               "desc": "We approach the owner of a name you want to acquire.",
               "href": {
                 "spa": "/domains/broker",
-                "php": "domain.php#broker"
+                "php": "domain.php"
               }
             },
             {
@@ -584,7 +584,7 @@
               "desc": "Membership pricing on eligible registrations and renewals.",
               "href": {
                 "spa": "/domains/club",
-                "php": "domain.php#club"
+                "php": "domain.php"
               }
             },
             {
@@ -1544,14 +1544,14 @@
           "label": "Domain Extensions",
           "href": {
             "spa": "/domains/extensions",
-            "php": "domain.php#pricing"
+            "php": "domain.php"
           }
         },
         {
           "label": "WHOIS / RDAP",
           "href": {
             "spa": "/domains/whois",
-            "php": "domain.php#whois"
+            "php": "tools/domain-whois"
           }
         },
         {
@@ -1565,35 +1565,35 @@
           "label": "Bulk Domain Search",
           "href": {
             "spa": "/domains/bulk-search",
-            "php": "domain.php#search"
+            "php": "domain.php"
           }
         },
         {
           "label": "Domain Auctions",
           "href": {
             "spa": "/domains/auctions",
-            "php": "domain.php#auctions"
+            "php": "domain.php"
           }
         },
         {
           "label": "Domain Appraisal",
           "href": {
             "spa": "/domains/appraisal",
-            "php": "domain.php#appraisal"
+            "php": "domain.php"
           }
         },
         {
           "label": "Domain Broker",
           "href": {
             "spa": "/domains/broker",
-            "php": "domain.php#broker"
+            "php": "domain.php"
           }
         },
         {
           "label": "Domain Club",
           "href": {
             "spa": "/domains/club",
-            "php": "domain.php#club"
+            "php": "domain.php"
           }
         }
       ]

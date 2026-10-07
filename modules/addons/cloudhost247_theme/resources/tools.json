@@ -188,11 +188,12 @@
       "summary": "Build a correctly formatted _dmarc record interactively.",
       "description": "Generates the TXT value for a _dmarc record from a guided form and shows exactly where to publish it. Generation is deterministic and validated server-side, so the value can be pasted into CloudHost247 DNS management, cPanel or any DNS host.",
       "icon": "wand",
-      "path": "/tools/dmarc-generator",
+      "path": "/tools/dmarc-record-generator",
       "apiPath": "/api/tools/dmarc-generator",
       "authRequired": false,
       "visibility": "public",
       "legacyPaths": [
+        "/tools/dmarc-generator",
         "/tools/dns/dmarc-generator"
       ],
       "discoveryCategories": [
@@ -341,11 +342,12 @@
       "summary": "Find hostnames hosted on an IP address, when a data provider is configured.",
       "description": "There is no public DNS mechanism that lists the domains behind an IP address. This tool therefore requires an administrator-configured reverse-IP data provider and returns CONFIGURATION_REQUIRED until one exists. It never claims to discover every domain on an address.",
       "icon": "layers",
-      "path": "/tools/reverse-ip",
+      "path": "/tools/reverse-ip-lookup",
       "apiPath": "/api/tools/reverse-ip",
       "authRequired": true,
       "visibility": "customer",
       "legacyPaths": [
+        "/tools/reverse-ip",
         "/tools/dns/reverse-ip"
       ],
       "discoveryCategories": [
@@ -646,11 +648,12 @@
       "summary": "Inspect MAC address bits and query a configured IEEE OUI reference.",
       "description": "Inspects unicast/multicast and global/local bits. Vendor information comes from a configured IEEE OUI source, cached with its load time; unavailable source data is explicitly reported, never invented.",
       "icon": "barcode",
-      "path": "/tools/mac-lookup",
+      "path": "/tools/mac-address-lookup",
       "apiPath": "/api/tools/mac-lookup",
       "authRequired": false,
       "visibility": "public",
       "legacyPaths": [
+        "/tools/mac-lookup",
         "/tools/network/mac-lookup"
       ],
       "discoveryCategories": [
@@ -671,11 +674,12 @@
       "summary": "Generate valid random, locally-administered or globally-administered MACs.",
       "description": "Generates cryptographically random MAC addresses with the correct unicast/multicast and U/L bits for the requested mode.",
       "icon": "shuffle",
-      "path": "/tools/mac-generator",
+      "path": "/tools/mac-address-generator",
       "apiPath": "/api/tools/mac-generator",
       "authRequired": false,
       "visibility": "public",
       "legacyPaths": [
+        "/tools/mac-generator",
         "/tools/network/mac-generator"
       ],
       "discoveryCategories": [
@@ -722,11 +726,12 @@
       "summary": "Browser-based download, upload and latency measurement with hard limits.",
       "description": "Measures throughput between your browser and CloudHost247 using bounded transfers: the server caps each measurement by size and duration, and rate limits each client. Latency is measured with small request/response timing and jitter is reported when at least three samples are collected.",
       "icon": "gauge",
-      "path": "/tools/speed-test",
+      "path": "/tools/internet-speed-test",
       "apiPath": "/api/tools/speed-test",
       "authRequired": false,
       "visibility": "public",
       "legacyPaths": [
+        "/tools/speed-test",
         "/tools/network/speed-test"
       ],
       "discoveryCategories": [
@@ -747,11 +752,12 @@
       "summary": "Status, headers, redirect chain, cache and security-header analysis.",
       "description": "Fetches a URL through the SSRF-protected client, follows redirects with a hop limit, and reports the status code, every response header, the redirect chain, and an assessment of security headers (HSTS, CSP, X-Content-Type-Options, X-Frame-Options/frame-ancestors, Referrer-Policy, Permissions-Policy) and cache directives.",
       "icon": "file-code",
-      "path": "/tools/http-headers",
+      "path": "/tools/http-headers-checker",
       "apiPath": "/api/tools/http-headers",
       "authRequired": false,
       "visibility": "public",
       "legacyPaths": [
+        "/tools/http-headers",
         "/tools/developer/http-headers",
         "/tools/redirect-checker",
         "/tools/website-response"
@@ -953,11 +959,12 @@
       "summary": "Crawl a site within strict limits and report failing links.",
       "description": "Crawls the same host starting from the URL you provide, within hard limits on pages, links, runtime and response size, and reports each link with its status, type (internal/external), redirect chain, error and the page it was found on. Private and reserved destinations are refused.",
       "icon": "unlink",
-      "path": "/tools/broken-links",
+      "path": "/tools/broken-link-checker",
       "apiPath": "/api/tools/broken-links",
       "authRequired": true,
       "visibility": "customer",
       "legacyPaths": [
+        "/tools/broken-links",
         "/tools/webmaster/broken-links"
       ],
       "discoveryCategories": [
@@ -978,11 +985,12 @@
       "summary": "Inspect og: and Twitter card metadata and preview the link.",
       "description": "Parses Open Graph and Twitter/X card tags, warns about missing or malformed required properties, resolves relative image URLs and renders a preview of how the link is likely to appear.",
       "icon": "share-2",
-      "path": "/tools/open-graph",
+      "path": "/tools/open-graph-checker",
       "apiPath": "/api/tools/open-graph",
       "authRequired": false,
       "visibility": "public",
       "legacyPaths": [
+        "/tools/open-graph",
         "/tools/webmaster/open-graph"
       ],
       "discoveryCategories": [
@@ -1003,11 +1011,12 @@
       "summary": "Build a valid robots.txt with sitemaps and crawl delay.",
       "description": "Generates robots.txt from a guided form (user-agent groups, allow/disallow rules, sitemaps, crawl-delay, common presets), validating directives so the file cannot be emitted in a malformed state.",
       "icon": "file-text",
-      "path": "/tools/robots-generator",
+      "path": "/tools/robots-txt-generator",
       "apiPath": "/api/tools/robots-generator",
       "authRequired": false,
       "visibility": "public",
       "legacyPaths": [
+        "/tools/robots-generator",
         "/tools/webmaster/robots-generator"
       ],
       "discoveryCategories": [
@@ -1053,11 +1062,12 @@
       "summary": "Certificate chain, validity, SANs, protocol and expiry for a host.",
       "description": "Opens a real TLS connection, reports the leaf and chain certificates (subject, issuer, SANs, validity, signature algorithm, key parameters), the negotiated protocol and cipher, hostname match, and days remaining. Private keys are never requested or displayed.",
       "icon": "lock",
-      "path": "/tools/ssl-checker",
+      "path": "/tools/ssl-certificate-checker",
       "apiPath": "/api/tools/ssl-checker",
       "authRequired": false,
       "visibility": "public",
       "legacyPaths": [
+        "/tools/ssl-checker",
         "/tools/security/ssl",
         "/tools/ssl-certificate-information"
       ],
@@ -1080,11 +1090,12 @@
       "summary": "Check an IP against the DNS blocklists the operator has enabled.",
       "description": "Queries each enabled DNS-based blocklist for the address and reports listed / not listed / error per provider, with the listing code or text the provider returned and delisting guidance. Providers are managed by a Super Admin — nothing is hard-coded.",
       "icon": "shield-alert",
-      "path": "/tools/ip-blacklist",
+      "path": "/tools/ip-blacklist-checker",
       "apiPath": "/api/tools/ip-blacklist",
       "authRequired": false,
       "visibility": "public",
       "legacyPaths": [
+        "/tools/ip-blacklist",
         "/tools/security/ip-blacklist"
       ],
       "discoveryCategories": [
@@ -1275,11 +1286,12 @@
       "summary": "Generate placeholder text by words, sentences or paragraphs.",
       "description": "Generates classical Lorem Ipsum placeholder text in the quantity you request, with a choice of starting with \"Lorem ipsum dolor sit amet…\".",
       "icon": "align-left",
-      "path": "/tools/lorem-ipsum",
+      "path": "/tools/lorem-ipsum-generator",
       "apiPath": "/api/tools/lorem-ipsum",
       "authRequired": false,
       "visibility": "public",
       "legacyPaths": [
+        "/tools/lorem-ipsum",
         "/tools/productivity/lorem-ipsum"
       ],
       "discoveryCategories": [
@@ -1300,11 +1312,12 @@
       "summary": "A scratch pad that stays in your browser.",
       "description": "A distraction-free text area with local persistence in your browser only. Nothing typed into the notepad is sent to CloudHost247 unless you explicitly save it as a report.",
       "icon": "notebook-pen",
-      "path": "/tools/notepad",
+      "path": "/tools/online-notepad",
       "apiPath": "/api/tools/notepad",
       "authRequired": false,
       "visibility": "public",
       "legacyPaths": [
+        "/tools/notepad",
         "/tools/productivity/notepad"
       ],
       "discoveryCategories": [
@@ -1325,11 +1338,12 @@
       "summary": "Convert text to small caps, superscript and subscript Unicode.",
       "description": "Maps letters to Unicode small-cap, superscript and subscript equivalents. Characters without a mapping are left unchanged and reported, so the output never silently loses content.",
       "icon": "text",
-      "path": "/tools/small-text",
+      "path": "/tools/small-text-generator",
       "apiPath": "/api/tools/small-text",
       "authRequired": false,
       "visibility": "public",
       "legacyPaths": [
+        "/tools/small-text",
         "/tools/productivity/small-text"
       ],
       "discoveryCategories": [
@@ -1350,11 +1364,12 @@
       "summary": "Copy zero-width and invisible Unicode characters.",
       "description": "Provides the standard invisible Unicode characters with their code points and names, ready to copy. Each entry is labelled with its code point so the output is auditable.",
       "icon": "eye-off",
-      "path": "/tools/invisible-character",
+      "path": "/tools/invisible-character-generator",
       "apiPath": "/api/tools/invisible-character",
       "authRequired": false,
       "visibility": "public",
       "legacyPaths": [
+        "/tools/invisible-character",
         "/tools/productivity/invisible-character"
       ],
       "discoveryCategories": [
@@ -1400,11 +1415,12 @@
       "summary": "Create QR codes for URLs, text, email, phone, WiFi and vCards.",
       "description": "Generates QR codes server-side (so the same PNG/SVG is reproducible from the API) for URLs, plain text, email, phone numbers, WiFi credentials and vCards. Nothing you enter is stored; the response contains the image and nothing else.",
       "icon": "qr-code",
-      "path": "/tools/qr-generator",
+      "path": "/tools/qr-code-generator",
       "apiPath": "/api/tools/qr-generator",
       "authRequired": false,
       "visibility": "public",
       "legacyPaths": [
+        "/tools/qr-generator",
         "/tools/productivity/qr"
       ],
       "discoveryCategories": [
@@ -1475,11 +1491,12 @@
       "summary": "Clock-in/clock-out totals with breaks and overtime.",
       "description": "Calculates worked time from clock-in/clock-out pairs and breaks, in either 12- or 24-hour format, and applies the overtime rule you specify (daily or weekly thresholds).",
       "icon": "clock",
-      "path": "/tools/time-card",
+      "path": "/tools/time-card-calculator",
       "apiPath": "/api/tools/time-card",
       "authRequired": false,
       "visibility": "public",
       "legacyPaths": [
+        "/tools/time-card",
         "/tools/productivity/time-card"
       ],
       "discoveryCategories": [
@@ -1714,11 +1731,12 @@
       "summary": "Inspect public domain registration information through the connected RDAP provider.",
       "description": "Reuses CloudHost247 Domain Services to look up registrar, registration dates, nameservers and public status. Privacy-protected registrants stay protected.",
       "icon": "file-search",
-      "path": "/tools/whois",
+      "path": "/tools/domain-whois",
       "apiPath": "/api/tools/whois",
       "authRequired": false,
       "visibility": "public",
       "legacyPaths": [
+        "/tools/whois",
         "/tools/domain-information"
       ],
       "discoveryCategories": [

@@ -75,7 +75,23 @@ require $root . '/init.php';
 $ca = new \WHMCS\ClientArea();
 $ca->initPage();
 $ca->setPageTitle($legacy ? $legacy['name'] : 'Tool not found');
-$ca->assign('cloudhost247ToolsPage', $legacy);
+if ($legacy) {
+    // The shared registry knows this tool, but this PHP shell has no implementation for it: it runs
+    // in the platform application. Say that instead of showing an empty tool, keep it out of the
+    // index, and let the page link to the application's own tool route.
+    if (!headers_sent()) { header('X-Robots-Tag: noindex'); }
+    $ca->assign('cloudhost247ToolsPage', array(
+        'path' => $legacy['path'],
+        'name' => isset($legacy['name']) ? $legacy['name'] : 'CloudHost247 tool',
+        'summary' => isset($legacy['summary']) ? $legacy['summary'] : '',
+        'slug' => isset($legacy['slug']) ? $legacy['slug'] : '',
+        'unserved' => true,
+    ));
+    $ca->assign('chToolsPlatformUrl', isset($legacy['slug']) ? '/tools/' . rawurlencode($legacy['slug']) : '');
+} else {
+    $ca->assign('cloudhost247ToolsPage', null);
+    $ca->assign('chToolsPlatformUrl', '');
+}
 $ca->assign('chToolsReady', false);
 $ca->assign('chToolsHtml', '');
 $ca->assign('chToolsBase', $base);

@@ -30,6 +30,26 @@ foreach (ToolsSite::catalog()['tools'] as $tool) {
 }
 foreach (ToolsSite::catalog()['categories'] as $slug=>$label) { check(ToolsSite::resolve('/tools/category/'.$slug)['name']===$label.' Tools', 'category'); }
 
+// --- One URL per capability. The native catalogue serves the interactive page; the shared registry
+// describes the same tools for the app, the navigation and the sitemaps. When the two disagree on a
+// path the capability is published twice: two indexable pages with one title, and the second one
+// has no implementation behind it. Names are compared, not slugs, because the registries slug the
+// same tool differently on purpose. The old registry paths stay declared as aliases, so the route
+// still resolves and can redirect instead of turning into a 404.
+$nativePathByName = array();
+foreach (Catalog::tools() as $native) {
+    $nativePathByName[preg_replace('/[^a-z0-9]+/', '', strtolower((string) $native['name']))] = '/tools/' . $native['slug'];
+}
+$registryPaths = array();
+foreach (ToolsSite::catalog()['tools'] as $tool) {
+    $registryPaths[] = $tool['path'];
+    $key = preg_replace('/[^a-z0-9]+/', '', strtolower((string) $tool['name']));
+    if (isset($nativePathByName[$key])) {
+        check($tool['path'] === $nativePathByName[$key], 'one published path for ' . $tool['name'] . ': ' . $tool['path']);
+    }
+}
+check(count($registryPaths) === count(array_unique($registryPaths)), 'the shared registry publishes each tool path once');
+
 // --- One tool taxonomy: the categories the navigation publishes are the categories the PHP
 // engine serves. A published category that only the theme fallback can resolve means a visitor
 // who clicks "DNS & Domains" and a visitor who opens /tools are looking at different catalogues,

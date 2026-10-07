@@ -41,7 +41,7 @@
       "name": "site generator (validation + emit)",
       "command": "node scripts/site/generate.mjs",
       "result": "passed",
-      "evidence": "9 mega menus, 9 footer columns, 227 links validated (227 app / 227 PHP); 54 marketing pages; 14 published documents; crawl policy (23 PHP exclusions, 92 public PHP paths) and robots.txt regenerated; tool taxonomy parity asserted"
+      "evidence": "9 mega menus, 9 footer columns, 227 links validated (227 app / 227 PHP); 54 marketing pages; 116 registry sections across 43 enriched product pages; 13 published documents; crawl policy (23 PHP exclusions, 86 public PHP paths) and robots.txt regenerated; tool taxonomy parity asserted"
     },
     {
       "name": "link integrity",
@@ -87,7 +87,7 @@
       "name": "php website suite (WASM PHP 8.2)",
       "command": "scripts/php-wasm/php tests/website/run.php",
       "result": "passed",
-      "evidence": "97 assertions, 0 failed \u2014 41 of them added by this pass: crawl-policy agreement with the registry, compiled fallback equality, sitemap endpoints fetchable, no registered public page or published tool category excluded, sitemap filter behaviour"
+      "evidence": "97 assertions, 0 failed — 41 of them added by this pass: crawl-policy agreement with the registry, compiled fallback equality, sitemap endpoints fetchable, no registered public page or published tool category excluded, sitemap filter behaviour"
     },
     {
       "name": "php theme suite (WASM PHP 8.2)",
@@ -110,7 +110,7 @@
       "name": "release-candidate gate (full source verification)",
       "command": "PATH=<php-wasm shim>:$PATH PHP_LINT_JOBS=4 bash scripts/release-candidate-check.sh",
       "result": "passed",
-      "evidence": "Final run on the shipped revision: \"Release-candidate source verification passed.\" \u2014 git diff --check clean; every first-party PHP target linted with PHP 8.2 (WASM); 18 PHP behavioural suites; server-agent Node suite (71/71); 22 python static suites (424 tests, 2 documented skips); migration validator; retired-brand audit; vendor integrity baseline; tools projection (tools:catalog:check), tools build, tests/tools/site-integration.php (596 assertions) and tests/website/run.php (97 assertions, 0 failed); scripts/verify-website.py passed=true with source_errors=[]."
+      "evidence": "Final run on the shipped revision: \"Release-candidate source verification passed.\" — git diff --check clean; every first-party PHP target linted with PHP 8.2 (WASM); 18 PHP behavioural suites; server-agent Node suite (71/71); 22 python static suites (424 tests, 2 documented skips); migration validator; retired-brand audit; vendor integrity baseline; tools projection (tools:catalog:check), tools build, tests/tools/site-integration.php (596 assertions) and tests/website/run.php (97 assertions, 0 failed); scripts/verify-website.py passed=true with source_errors=[]."
     },
     {
       "name": "node SEO surface suite",
@@ -122,13 +122,37 @@
       "name": "php tools surface suite",
       "command": "scripts/php-wasm/php tests/tools/site-integration.php",
       "result": "passed",
-      "evidence": "596 assertions, 0 failed \u2014 including the new native resolution of all nine published categories, the discovery taxonomy labels, at least one tool per published category and the icon asset for every tool card"
+      "evidence": "596 assertions, 0 failed — including the new native resolution of all nine published categories, the discovery taxonomy labels, at least one tool per published category and the icon asset for every tool card"
     },
     {
       "name": "production archive documentation contract",
       "command": "python3 scripts/build-production-zip.py --skip-build --verify",
       "result": "passed",
       "evidence": "The packaged documentation set is compared with the generated index in cloudhost247-node/public/docs and assets/cloudhost247-tools/docs. Before the rebuild it failed with two de-published copies; after rebuilding the outputs the archive verifies clean (7888 members, 57870228 bytes, 13 published documents)."
+    },
+    {
+      "name": "rendered-page fixture QA (static)",
+      "command": "CH247_SMARTY_PATH=/tmp/smarty4 CH247_FIXTURE_DIR=/tmp/ch247-fixtures scripts/php-wasm/php tests/website/render-fixtures.php && CH247_FIXTURE_DIR=/tmp/ch247-fixtures python3 tests/website/check-fixtures.py",
+      "result": "passed",
+      "evidence": "218 pages rendered from the shipped templates (Smarty 4.5.8, real `site-head.tpl`, real tool fragments): 815 images, 2,492 asset references, 53,778 links, 59,979 interactive controls, 116 distinct ch- classes; exactly one h1/main/header/footer per page, no duplicate id, every alt present, every internal link live, every published fragment target rendered, every rendered class styled, 182 indexable / 36 noindex and 0 violations of the canonical-implies-indexable and unique-title rules"
+    },
+    {
+      "name": "tool capability reconciliation",
+      "command": "scripts/php-wasm/php tests/tools/site-integration.php",
+      "result": "passed",
+      "evidence": "18 duplicate capabilities (two published URLs, one title, one with no implementation) reconciled onto the served path with the previous path declared as an alias; 30 registry-only routes now send X-Robots-Tag: noindex, publish no canonical and signpost the platform route; 650 assertions including one published path per tool"
+    },
+    {
+      "name": "per-page crawler contract",
+      "command": "python3 tests/website/check-fixtures.py (SEO section)",
+      "result": "passed",
+      "evidence": "stylesheet order site.css → design-system.css asserted on every page; notfound.php moved into the noindex list (it was indexable without a canonical); indexable pages must carry a canonical, a JSON-LD block that parses and a description of at least 40 characters; no page may be canonical and noindex at once"
+    },
+    {
+      "name": "design-system ownership of the section renderer",
+      "command": "scripts/php-wasm/php tests/website/run.php",
+      "result": "passed",
+      "evidence": "product-sections.tpl may only use shipped classes (24 checked) and its card, step, check-list, note, grid and split classes must come from shared/site/design-system.css; the ad-hoc site.css block that duplicated the design system and lost the cascade was removed, and the three genuinely missing component rules (icon image sizing, points list, light illustration frame) were added to the design system source"
     }
   ],
   "not_run": [
@@ -137,17 +161,18 @@
     "Visual review of the PHP page templates rebuilt on the earlier branch"
   ],
   "open_items": [
-    "scripts/generate-global-platform.py still maintains the legacy tools-public.json export. It is now a secondary source (the PHP sitemap reads the registry and the generator validates against the theme projection), but it has not been retired.",
-    "tests/website/test_static.py and the generator validate the registry projections from source; the HTTP behaviour of the PHP sitemaps inside WHMCS can only be confirmed on staging.",
-    "Per-page PHP visual regeneration, new illustration artwork and browser-level responsive/accessibility QA remain out of this changeset.",
-    "docs/website-rebuild/verification-summary.json is historical evidence from arena/ad9fd719-cloudhost247 and must not be read as current-branch evidence."
+    "The fifteen `templates/cloudhost247/includes/legal/*.tpl` documents keep their copy verbatim but still carry legacy Bootstrap/WB class names that no stylesheet defines; they render as plain readable documents and are the next visual-consistency item.",
+    "Five native tools (for example /tools/broken-link-checker, /tools/reverse-ip-lookup) are published publicly and in the sitemap while the shared registry labels the same capability `customer`/auth-required. The PHP page has no gating to enforce; the site owner should decide whether to gate them or relabel the registry.",
+    "scripts/generate-global-platform.py still maintains the legacy tools-public.json export. It is now a secondary source (the PHP sitemap reads the registry and the generator validates against the theme projection), but nothing has been deleted.",
+    "Browser-level responsive/accessibility QA remains outstanding: no browser binary is available here, so the checks are source-level plus static fixture QA.",
+    "Staging verification of the PHP routes inside a licensed WHMCS runtime has not run; nothing was deployed."
   ],
   "findings_fixed": [
     "The PHP sitemap (cloudhost247-sitemap.php) filtered by publication state only, so it advertised submitticket.php while robots.txt disallowed it. Sitemaps and robots.txt now read one registry policy, and the build fails if the policy excludes a registered public page, a published tool category or a sitemap endpoint.",
-    "Sitemap endpoints (cloudhost247-sitemap.php, tools-sitemap.php, builder-sitemap.php, robots.php) were themselves listed as disallowed while robots.txt advertised them as Sitemap: \u2014 a disallowed sitemap cannot be fetched, which silently voids the directive. They are now excluded from the policy and send X-Robots-Tag: noindex instead.",
+    "Sitemap endpoints (cloudhost247-sitemap.php, tools-sitemap.php, builder-sitemap.php, robots.php) were themselves listed as disallowed while robots.txt advertised them as Sitemap: — a disallowed sitemap cannot be fetched, which silently voids the directive. They are now excluded from the policy and send X-Robots-Tag: noindex instead.",
     "robots.php kept its own hand-written private-path list, and the static robots.txt a third one. Both now read CloudHost247\\Theme\\CrawlPolicy, whose compiled fallback must equal the registry (asserted).",
     "The static robots.txt disallowed /cloudhost247-page.php, the canonical URL of every CMS-authored page the sitemap lists. The route stays crawlable; only the internal sample and element pages are excluded.",
-    "The tool surface published two category taxonomies: the menus advertised the nine discovery categories, while the native PHP catalogue (config/tools.php), the tools hub navigation and tools-sitemap.php used the engine grouping (dns, ip, designer, gaming\u2026). Eight of the nine published category URLs resolved only through the theme fallback, and the sitemap advertised nine category URLs no navigation surface linked to. The native catalogue now resolves the discovery taxonomy, the hub and breadcrumbs publish it, the sitemap lists it, and the generator asserts parity between the registry, src/tools/catalog.ts and tools.json.",
+    "The tool surface published two category taxonomies: the menus advertised the nine discovery categories, while the native PHP catalogue (config/tools.php), the tools hub navigation and tools-sitemap.php used the engine grouping (dns, ip, designer, gaming…). Eight of the nine published category URLs resolved only through the theme fallback, and the sitemap advertised nine category URLs no navigation surface linked to. The native catalogue now resolves the discovery taxonomy, the hub and breadcrumbs publish it, the sitemap lists it, and the generator asserts parity between the registry, src/tools/catalog.ts and tools.json.",
     "Node /robots.txt published only the single-page-app half of the crawl policy, so the file answering /robots.txt contradicted the rules the PHP surface obeys. It now publishes both halves, with rules normalised to root-relative paths (a registry entry written as admin/ previously produced an invalid Disallow: admin/ line).",
     "Nine of the ten tool-category links published by the header and footer pointed at slugs no engine could resolve (the registry carried the legacy PHP engine's slugs, while the theme runtime and the React Tools Center both serve the discovery categories). The registry now publishes dns-domains, ip-network, security, ssl, email, website, developer, calculators and utilities, and a new Node test pins every published category to a non-empty catalogue category.",
     "The Tools mega menu published zero links on the PHP surface (empty groups) and the PHP integration suite failed on it; the menu now publishes the nine server-rendered category floors, and the suite validates all of them.",

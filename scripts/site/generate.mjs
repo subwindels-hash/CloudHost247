@@ -22,7 +22,7 @@
  *   node scripts/site/generate.mjs           # validate + write
  *   node scripts/site/generate.mjs --check   # validate only, write nothing (CI)
  */
-import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, copyFileSync, rmSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, copyFileSync, rmSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -431,16 +431,216 @@ function phpRouteMap(registry) {
  * Only the PHP pages that exist are touched, and only additive keys plus the SEO description. The
  * page's own `visual`, `slug` and `category` stay as the theme registry defined them.
  */
+/**
+ * Section types the PHP surface renders statically. The others in the content model need live data
+ * the PHP page does not have (a product catalogue, the documentation index, DNS status, news), so
+ * they are deliberately not projected: publishing a heading with nothing under it would be worse
+ * than omitting the section.
+ */
+const PHP_SECTION_TYPES = new Set(['features', 'cards', 'steps', 'checks', 'split', 'note']);
+
+/** Icon assets a projected card may reference, keyed by the content model's icon name. */
+function contentIconAssets() {
+  if (contentIconAssets.cache) return contentIconAssets.cache;
+  const families = readdirSync(ASSET_SOURCE).filter((entry) => existsSync(join(ASSET_SOURCE, entry, `${entry}.svg`)) === false);
+  const index = new Map();
+  for (const family of families) {
+    const dir = join(ASSET_SOURCE, family);
+    if (!statSync(dir).isDirectory()) continue;
+    for (const file of readdirSync(dir)) {
+      if (!file.endsWith('.svg')) continue;
+      const name = file.slice(0, -4);
+      // `icons/cloud.svg` wins over `cloud/cloud.svg`: the icon family is the one drawn for cards.
+      if (!index.has(name) || family === 'icons') index.set(name, `${family}/${name}.svg`);
+    }
+  }
+  contentIconAssets.cache = index;
+  return index;
+}
+
+/**
+ * Every registry destination that pairs an app route with a PHP file, including the fragment the
+ * PHP URL promises (`deployments.php#environments`). Menu order is preserved because it is also
+ * the order the navigation presents the destinations in.
+ */
+function phpRoutePairs(registry) {
+  const pairs = [];
+  const seen = new Set();
+  const visit = (href) => {
+    if (!href?.spa || !href?.php) return;
+    const [file, fragment = ''] = href.php.replace(/^\.?\//, '').split('#');
+    if (!file || file.includes('?')) return;
+    const key = `${href.spa}->${file}#${fragment}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    pairs.push({ spa: href.spa, file, fragment });
+  };
+  for (const menu of registry.menus) {
+    visit(menu.href);
+    visit(menu.featured?.href);
+    for (const column of menu.columns ?? []) for (const item of column.items ?? []) visit(item.href);
+  }
+  for (const column of registry.footer) for (const item of column.items) visit(item.href);
+  for (const value of Object.values(registry.utility ?? {})) visit(value);
+  return pairs;
+}
+
+/** `id="…"` values a template declares, following its one level of theme includes. */
+function templateAnchors(name, seen = new Set()) {
+  const anchors = new Set();
+  if (seen.has(name)) return anchors;
+  seen.add(name);
+  const file = join(ROOT, 'templates', 'cloudhost247', `${name}.tpl`);
+  if (!existsSync(file)) return anchors;
+  const source = readFileSync(file, 'utf8');
+  for (const match of source.matchAll(/id="([A-Za-z][\w-]*)"/g)) anchors.add(match[1]);
+  for (const match of source.matchAll(/\{include file="cloudhost247\/([^"]+)\.tpl"\}/g)) {
+    for (const anchor of templateAnchors(match[1], seen)) anchors.add(anchor);
+  }
+  return anchors;
+}
+
+/** The Smarty template a root PHP page renders, read from its own `setTemplate()` call. */
+function pageTemplate(file) {
+  const path = join(ROOT, file);
+  if (!existsSync(path)) return '';
+  const match = readFileSync(path, 'utf8').match(/setTemplate\(\s*'([^']+)'\s*\)/);
+  return match ? match[1] : '';
+}
+
+/**
+ * A fragment is a promise: `deployments.php#environments` says the page has an environments
+ * section. Nothing verified those promises, and nine of them were empty — the visitor landed at
+ * the top of the page. This check resolves the page's template (and the anchors its folded
+ * registry sections declare) and fails on a fragment with no target.
+ */
+function validateFragments(pairs, pages) {
+  const checked = new Map();
+  for (const pair of pairs) {
+    if (!pair.fragment) continue;
+    const key = `${pair.file}#${pair.fragment}`;
+    if (checked.has(key)) continue;
+    let targets = new Set();
+    const template = pageTemplate(pair.file);
+    if (template) targets = templateAnchors(template);
+    for (const section of pages[pair.file]?.sections ?? []) {
+      if (section.anchor) targets.add(section.anchor);
+    }
+    if (!targets.has(pair.fragment)) {
+      fail(`${key} is published by the navigation (via ${pair.spa}) but ${pair.file} has no "${pair.fragment}" anchor.`);
+    }
+    checked.set(key, true);
+  }
+}
+
+/**
+ * The ordered narrative of a content page, filtered to what a server-rendered page can show and
+ * validated so a projection can never publish half a section.
+ *
+ * Types that need live data the PHP page does not have (a product catalogue, DNS status, the
+ * documentation index, news) are deliberately absent: a heading with nothing under it is worse than
+ * no section at all. Card links are resolved to the PHP surface or dropped, and card icons are
+ * resolved to real asset files or dropped, so the rendered grid can contain neither a dead link nor
+ * a broken image.
+ */
+function projectSections(content, file, routeMap) {
+  const where = file;
+  const phpTarget = (route) => {
+    if (!route || typeof route !== 'string') return '';
+    const mapped = routeMap.get(route);
+    if (mapped) return mapped;
+    const candidate = `${route.split('/').filter(Boolean).slice(-1)[0] ?? ''}.php`;
+    return existsSync(join(ROOT, candidate)) ? candidate : '';
+  };
+  const sections = [];
+  for (const section of content.sections ?? []) {
+    if (!PHP_SECTION_TYPES.has(section.type)) continue;
+    const heading = clean(section.heading);
+    if (!heading) {
+      fail(`${where}: a ${section.type} section has no heading.`);
+      continue;
+    }
+    const projected = { type: section.type, heading };
+    if (section.kicker) projected.kicker = clean(section.kicker);
+    if (section.lede) projected.lede = clean(section.lede);
+
+    if (section.type === 'split') {
+      const paragraphs = (Array.isArray(section.body) ? section.body : [section.body]).map(clean).filter(Boolean);
+      if (paragraphs.length === 0) {
+        fail(`${where}: the split section "${heading}" has no body.`);
+        continue;
+      }
+      projected.body = paragraphs;
+      projected.points = (section.points ?? []).map(clean).filter(Boolean).slice(0, 5);
+      if (section.visual) {
+        if (!existsSync(join(ASSET_SOURCE, `${section.visual}.svg`))) {
+          fail(`${where}: split section illustration assets/images/cloudhost247/${section.visual}.svg does not exist.`);
+          continue;
+        }
+        projected.visual = section.visual;
+      }
+      const url = phpTarget(section.link?.to);
+      if (url && section.link?.label) projected.link = { label: clean(section.link.label), url };
+      else if (section.link?.to) warn(`${where}: the split link "${section.link.to}" has no PHP destination and was dropped.`);
+    } else if (section.type === 'note') {
+      const note = clean(section.body);
+      if (!note) {
+        fail(`${where}: the note section "${heading}" has no body.`);
+        continue;
+      }
+      projected.body = [note];
+    } else {
+      const items = [];
+      for (const item of section.items ?? []) {
+        const title = clean(item.label ?? item.title);
+        if (!title) continue;
+        const entry = { title };
+        const body = clean(item.body);
+        if (body) entry.body = body;
+        const url = phpTarget(item.to);
+        if (url) entry.url = url;
+        const icon = item.icon ? contentIconAssets().get(item.icon) : '';
+        if (icon) entry.icon = icon;
+        items.push(entry);
+        if (section.type !== 'checks' && items.length >= 9) break;
+      }
+      if (items.length === 0) {
+        warn(`${where}: the ${section.type} section "${heading}" projected no cards.`);
+        continue;
+      }
+      projected.items = items;
+    }
+    sections.push(projected);
+  }
+  return sections;
+}
+
 function decoratePhpPages(previous, contentPages, registry) {
   const byRoute = new Map(contentPages.map((page) => [page.route, page]));
+  const icons = contentIconAssets();
   const routeMap = phpRouteMap(registry);
   const matched = new Set();
 
+  /**
+   * Several app routes can share one PHP page — `/domains/club` and `/domains/auctions` both land on
+   * `domain.php`, `/developers/deployment` and `/developers/environments` both land on
+   * `deployments.php`. The page therefore renders the union of their sections, in registry order,
+   * and the destination's fragment becomes the anchor that group is reachable at.
+   */
+  const pairsByFile = new Map();
+  for (const pair of phpRoutePairs(registry)) {
+    if (!pairsByFile.has(pair.file)) pairsByFile.set(pair.file, []);
+    pairsByFile.get(pair.file).push(pair);
+  }
+
   const pages = {};
   for (const [file, existing] of Object.entries(previous.pages ?? {})) {
-    // Find the content page for this PHP file: through the registry's paired links first, then by
+    // Find the content pages for this PHP file: through the registry's paired links first, then by
     // slug, because some PHP pages are named after the product rather than the route.
-    let content = [...routeMap.entries()].filter(([, php]) => php === file).map(([spa]) => byRoute.get(spa)).find(Boolean);
+    let group = (pairsByFile.get(file) ?? [])
+      .map((pair) => ({ pair, content: byRoute.get(pair.spa) }))
+      .filter((entry) => entry.content);
+    let content = group[0]?.content;
     if (!content) {
       content = contentPages.find((page) => {
         const last = page.route.split('/').filter(Boolean).slice(-1)[0] ?? '';
@@ -448,6 +648,7 @@ function decoratePhpPages(previous, contentPages, registry) {
           || existing.slug === `${last}-hosting`
           || page.route === `/${existing.slug}`;
       });
+      group = content ? [{ pair: { spa: content.route, file, fragment: '' }, content }] : [];
     }
     if (!content) {
       pages[file] = existing;
@@ -472,8 +673,36 @@ function decoratePhpPages(previous, contentPages, registry) {
     const related = (content.related ?? [])
       .map((route) => routeMap.get(route) ?? `${route.split('/').filter(Boolean).slice(-1)[0]}.php`)
       .filter((php) => php && Object.prototype.hasOwnProperty.call(previous.pages, php));
-    for (const phrase of content.hero.points ?? []) {
-      if (uses.length < 6 && !uses.includes(phrase)) uses.push(phrase);
+
+    // Internal destinations are resolved to the PHP surface or dropped: a card link that only
+    // works inside the single-page app would be a dead link on the page that renders it.
+    const phpTarget = (route) => {
+      if (!route || typeof route !== 'string') return '';
+      const mapped = routeMap.get(route);
+      if (mapped) return mapped;
+      const file = `${route.split('/').filter(Boolean).slice(-1)[0] ?? ''}.php`;
+      return Object.prototype.hasOwnProperty.call(previous.pages, file) ? file : '';
+    };
+
+    const sections = [];
+    const seenHeads = new Set();
+    for (const { pair, content: source } of group) {
+      let anchor = pair.fragment;
+      for (const section of projectSections(source, file, routeMap)) {
+        const key = `${section.type}|${section.heading}`;
+        if (seenHeads.has(key)) continue;
+        seenHeads.add(key);
+        if (anchor) {
+          // Exactly one element carries the id the navigation promises; it is the first section of
+          // the group that the fragment belongs to.
+          section.anchor = anchor;
+          anchor = '';
+        }
+        sections.push(section);
+      }
+      if (anchor && pair.fragment) {
+        warn(`${file}: the "${pair.fragment}" anchor has no content to attach to (${pair.spa}).`);
+      }
     }
 
     pages[file] = {
@@ -484,6 +713,10 @@ function decoratePhpPages(previous, contentPages, registry) {
       uses: uses.length ? uses.slice(0, 6) : existing.uses,
       faqs: (content.faqs ?? []).map((faq) => ({ q: faq.q, a: faq.a })),
       related: related.length ? [...new Set(related)] : existing.related,
+      // The ordered narrative the application renders, filtered to what a server-rendered page can
+      // show without live data. Legacy `features`/`uses` stay for compatibility and as the fallback
+      // when a page has no sections.
+      sections,
     };
   }
   return { pages, matched: matched.size };
@@ -740,6 +973,11 @@ function renderRobotsTxt(registry) {
  * `Sitemap:` directive, so the policy is checked against this list on every build; the endpoints
  * carry `X-Robots-Tag: noindex` instead of being blocked.
  */
+/** Trims a content string to a single-line, non-empty value (or ''). */
+function clean(value) {
+  return typeof value === 'string' ? value.replace(/\s+/g, ' ').trim() : '';
+}
+
 const SITEMAP_ENDPOINTS = ['sitemap.xml', 'cloudhost247-sitemap.php', 'tools-sitemap.php', 'builder-sitemap.php'];
 
 /** The canonical discovery taxonomy, parsed from the app catalogue that publishes the tool pages. */
@@ -949,6 +1187,10 @@ function main() {
    */
   const previousSiteJson = JSON.parse(readFileSync(PHP_SITE_JSON, 'utf8'));
   const excludePhp = phpExclusions(registry, previousSiteJson.pages);
+  // A destination may only promise a fragment the page it lands on actually renders. The anchors a
+  // folded registry section declares count as targets, so this runs against the freshly projected
+  // pages rather than the previous build's.
+  validateFragments(phpRoutePairs(registry), previousSiteJson.pages ?? {});
   for (const page of Object.keys(previousSiteJson.pages ?? {})) {
     if (isPrivatePath(page, registry)) {
       fail(`sitemap policy excludes "${page}", but it is a registered public marketing page.`);

@@ -65,6 +65,81 @@
           "q": "Do you offer a money-back window?",
           "a": "Refunds and cancellation windows are set out in the Refund and Cancellation Policy, which is the authoritative document for any claim about refunds."
         }
+      ],
+      "sections": [
+        {
+          "type": "features",
+          "heading": "A hosting account built for real websites",
+          "kicker": "What you get",
+          "lede": "The fundamentals are included rather than sold back to you in add-ons.",
+          "items": [
+            {
+              "title": "SSL as standard",
+              "body": "Every domain you add to the account can be issued a certificate, so browsers treat it as secure from the first visit."
+            },
+            {
+              "title": "Mailboxes on your domain",
+              "body": "Create addresses at your own domain with spam filtering, and reach them from webmail or any mail client.",
+              "icon": "icons/mail.svg"
+            },
+            {
+              "title": "Databases included",
+              "body": "MySQL-compatible databases for the applications you install, managed alongside the site rather than separately."
+            },
+            {
+              "title": "Application installs",
+              "body": "Common applications can be installed onto your account, and managed from the same place as the rest of your services.",
+              "icon": "icons/app.svg"
+            },
+            {
+              "title": "Storage that is not fragile",
+              "body": "Web content lives on storage with scheduled backups, so a mistake is recoverable rather than final."
+            },
+            {
+              "title": "Monitoring and alerts",
+              "body": "We watch the service so that an outage is something we are already responding to, not something you discover."
+            }
+          ]
+        },
+        {
+          "type": "steps",
+          "heading": "From order to a live website",
+          "kicker": "Getting online",
+          "lede": "Three steps, and a migration path if you are moving an existing site.",
+          "items": [
+            {
+              "title": "Choose a plan",
+              "body": "Pick the hosting level that matches the site you are running today. Plans can be changed later without rebuilding the site."
+            },
+            {
+              "title": "Point your domain",
+              "body": "Register a new domain with us or bring one you already own. We publish the DNS records and issue the certificate."
+            },
+            {
+              "title": "Publish",
+              "body": "Upload the site, install an application, or build it with the CloudHost247 website builder — then manage it all from your account."
+            }
+          ]
+        },
+        {
+          "type": "split",
+          "heading": "Migrations handled as a process, not a gamble",
+          "kicker": "Moving from another host",
+          "body": [
+            "A migration is a planned cutover: we copy the site and mail, verify it responds correctly on the new infrastructure, and only then change where the domain points. If something does not line up, the old host is still serving your site.",
+            "You keep control of the DNS, so you can decide exactly when the roll-over happens."
+          ],
+          "points": [
+            "Site and mail copied before any change",
+            "DNS change scheduled at your discretion",
+            "Verification on the new infrastructure first"
+          ],
+          "visual": "management/migration",
+          "link": {
+            "label": "See how migration works",
+            "url": "migration.php"
+          }
+        }
       ]
     },
     "wordpress-hosting.php": {
@@ -132,6 +207,67 @@
           "q": "Is WordPress migrations supported?",
           "a": "Yes — the migration process copies both the WordPress files and the database, fixes the site URL, and only then switches DNS."
         }
+      ],
+      "sections": [
+        {
+          "type": "features",
+          "heading": "Tuned for how WordPress actually behaves",
+          "kicker": "Why it is different",
+          "items": [
+            {
+              "title": "Runtime tuned for WordPress",
+              "body": "PHP versions and limits chosen for WordPress rather than left at a generic default that produces white screens on plugin-heavy sites.",
+              "icon": "applications/wordpress.svg"
+            },
+            {
+              "title": "Caching that survives updates",
+              "body": "Page caching that is invalidated properly when content changes, so the cache helps instead of showing visitors stale pages."
+            },
+            {
+              "title": "HTTPS end to end",
+              "body": "A certificate on every domain and subdomain in the account, renewed automatically."
+            },
+            {
+              "title": "Backups before you need them",
+              "body": "Scheduled backups of the site and its database, with restore handled from your account."
+            },
+            {
+              "title": "Database access you can use",
+              "body": "Reach the WordPress database directly for exports, migrations or debugging — no support ticket needed."
+            },
+            {
+              "title": "Hardened by default",
+              "body": "Platform-level filtering, sensible file permissions and abuse monitoring that runs whether or not you installed a plugin for it.",
+              "icon": "icons/shield.svg"
+            }
+          ]
+        },
+        {
+          "type": "steps",
+          "heading": "Live in three moves",
+          "kicker": "Launching a WordPress site",
+          "items": [
+            {
+              "title": "Install",
+              "body": "Install WordPress onto hosting that is already configured for it — no manual PHP configuration or database setup."
+            },
+            {
+              "title": "Connect",
+              "body": "Point the domain and let the certificate issue, then configure permalinks, mail and your caching preferences."
+            },
+            {
+              "title": "Maintain",
+              "body": "Run core, theme and plugin updates on your schedule, with a backup taken before you do."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "Plugins are yours to choose — and yours to keep safe",
+          "body": [
+            "A plugin you install runs with the same privileges as the rest of the site. We keep the platform patched, filter abuse and back the site up; the plugin supply chain, its licence and its updates remain the site owner's responsibility. That is true on any host, and we would rather say it plainly."
+          ]
+        }
       ]
     },
     "cpanel-hosting.php": {
@@ -193,6 +329,48 @@
         {
           "q": "Do I get SSH access?",
           "a": "Where the plan provides it, yes. Full administrative access is what a VPS or dedicated server is for, and those are separate products."
+        }
+      ],
+      "sections": [
+        {
+          "type": "features",
+          "heading": "Everything an account needs, in one place",
+          "kicker": "In the panel",
+          "items": [
+            {
+              "title": "Mailboxes and forwarders",
+              "body": "Create addresses at your domain, set forwarders and autoresponders, and reach mail from webmail or a client.",
+              "icon": "icons/mail.svg"
+            },
+            {
+              "title": "Databases",
+              "body": "MySQL-compatible databases with their own users, created and revoked from the panel."
+            },
+            {
+              "title": "Domains and subdomains",
+              "body": "Add domains and subdomains to the account and manage their document roots."
+            },
+            {
+              "title": "Certificates",
+              "body": "Issue and renew TLS for the domains in the account, with HTTPS enforced where you want it."
+            },
+            {
+              "title": "Application installs",
+              "body": "Install common applications onto the account without setting up a database or a document root by hand.",
+              "icon": "icons/app.svg"
+            },
+            {
+              "title": "Backups",
+              "body": "Scheduled backups of the account with a run history and a restore from your CloudHost247 account."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "What panel you actually get is configuration, and the platform says which",
+          "body": [
+            "Panels are provisioned where this deployment is configured to provision them. The control panels page lists what is genuinely available, and the panel attached to a service is shown in your account. We would rather show a short list than advertise an interface a particular server does not have."
+          ]
         }
       ]
     },
@@ -288,6 +466,47 @@
           "q": "Can I reach the server over RDP?",
           "a": "Shared Windows hosting is managed hosting, not a remote desktop session. If you need full administrative control, a Windows dedicated server or RDP service is the correct product."
         }
+      ],
+      "sections": [
+        {
+          "type": "features",
+          "heading": "A Windows stack that is actually maintained",
+          "kicker": "What it supports",
+          "items": [
+            {
+              "title": "ASP.NET",
+              "body": "Run ASP.NET applications in the version the application targets, without rebuilding it for another platform."
+            },
+            {
+              "title": "IIS management",
+              "body": "Bindings, application pools and site settings handled through a management interface rather than a ticket.",
+              "icon": "icons/control.svg"
+            },
+            {
+              "title": "MSSQL databases",
+              "body": "Microsoft SQL databases alongside the site, with the connection details you need for your configuration files."
+            },
+            {
+              "title": "Certificates and HTTPS",
+              "body": "Certificates issued and renewed for each binding so secure endpoints do not expire silently."
+            },
+            {
+              "title": "Backups",
+              "body": "Scheduled backups of site files and databases, restorable from your account."
+            },
+            {
+              "title": "Monitoring",
+              "body": "The service is watched so failed application pools and exhausted disks are noticed before your users notice."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "Windows licensing is included, not passed to you",
+          "body": [
+            "Windows hosting plans include the operating-system licensing required to run the service. You are responsible for licensing any commercial application or component you deploy on top of it."
+          ]
+        }
       ]
     },
     "vps-hosting.php": {
@@ -325,10 +544,7 @@
       "uses": [
         "You own the operating system",
         "Or hand it over",
-        "Not sure which size?",
-        "Guaranteed, not burstable",
-        "Full administrative access",
-        "Choose the operating system"
+        "Not sure which size?"
       ],
       "related": [
         "cloudhost247-hosting.php",
@@ -356,6 +572,79 @@
         {
           "q": "Can I upgrade a VPS later?",
           "a": "Yes, where the plan allows a resize. Where it does not, the server can be rebuilt at a larger size from the same image with data restored from backup."
+        }
+      ],
+      "sections": [
+        {
+          "type": "features",
+          "heading": "The difference between a VPS and a share of one",
+          "kicker": "What you get",
+          "items": [
+            {
+              "title": "Guaranteed resources",
+              "body": "Your allocation of CPU, memory and storage is reserved for your server. A neighbour's traffic peak is not your performance problem.",
+              "icon": "icons/server.svg"
+            },
+            {
+              "title": "Administrator access",
+              "body": "Root or administrator access, so you install the runtime, the extensions and the services the application actually requires."
+            },
+            {
+              "title": "Your choice of operating system",
+              "body": "Provision from the operating-system catalogue, and rebuild from a known-good image if a change goes wrong."
+            },
+            {
+              "title": "Network control",
+              "body": "Firewall rules attached to the server, applied in a defined order, with the effective ruleset visible in your account.",
+              "icon": "management/firewall.svg"
+            },
+            {
+              "title": "Backups",
+              "body": "Scheduled backup jobs against the server, with a run history and a restore performed from your account."
+            },
+            {
+              "title": "Monitoring",
+              "body": "CPU, memory, storage and traffic recorded over time, so a capacity problem is a graph rather than a guess."
+            }
+          ]
+        },
+        {
+          "type": "checks",
+          "heading": "A VPS expects you to operate it",
+          "kicker": "Choose carefully",
+          "items": [
+            {
+              "title": "You own the operating system",
+              "body": "Root access means the patching, the hardening and the service configuration are yours. That is the trade you are making for control."
+            },
+            {
+              "title": "Or hand it over",
+              "body": "Managed services cover the platform layer — patching, monitoring response and administration — without taking away your access."
+            },
+            {
+              "title": "Not sure which size?",
+              "body": "Start from what the application needs: memory for its working set, cores for concurrency, storage for its data. Support will size it with you."
+            }
+          ]
+        },
+        {
+          "type": "split",
+          "heading": "Pick by what you need from the machine",
+          "kicker": "VPS, cloud or dedicated",
+          "body": [
+            "A VPS is a fixed allocation on shared hardware: predictable, economical, and the right answer for most applications that have outgrown hosting.",
+            "Public cloud adds elasticity — resize when demand changes instead of migrating. A dedicated server removes the shared hardware entirely, which matters when you need the whole machine's I/O or a defined physical boundary."
+          ],
+          "points": [
+            "VPS: predictable resources at a predictable price",
+            "Public cloud: resize rather than migrate",
+            "Dedicated: the entire physical machine"
+          ],
+          "visual": "cloud/public-cloud",
+          "link": {
+            "label": "Compare cloud and dedicated",
+            "url": "cloudhost247-hosting.php"
+          }
         }
       ]
     },
@@ -419,6 +708,48 @@
           "q": "Is it multi-tenant under the hood?",
           "a": "It is designed so that your workloads do not share resources with another customer's. The exact architecture depends on the provider and facility involved, and is documented for you before you commit."
         }
+      ],
+      "sections": [
+        {
+          "type": "features",
+          "heading": "What isolation actually changes",
+          "kicker": "The boundary",
+          "items": [
+            {
+              "title": "No noisy neighbours",
+              "body": "Performance is not affected by another tenant's load, because there is no other tenant on the same resources.",
+              "icon": "icons/shield.svg"
+            },
+            {
+              "title": "A smaller blast radius",
+              "body": "Isolation is a security property as well as a performance one: there is no shared host to be reached through."
+            },
+            {
+              "title": "Easier to explain",
+              "body": "A defined boundary is far easier to describe in a compliance or customer questionnaire than shared hosting is."
+            },
+            {
+              "title": "Your stack",
+              "body": "Choose the operating system and configuration the workload needs, rather than working around a fixed image."
+            },
+            {
+              "title": "Network under your control",
+              "body": "Addressing, firewall rules and connectivity designed around the application.",
+              "icon": "cloud/network.svg"
+            },
+            {
+              "title": "Managed if you want it",
+              "body": "Operate it yourself, or have the CloudHost247 team run the platform layer for you."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "Private cloud is scoped, not self-service",
+          "body": [
+            "Because the boundary has to be designed — capacity, region, network and operating system — private cloud is quoted against your requirement rather than sold from a fixed price list. The order flow starts with a conversation."
+          ]
+        }
       ]
     },
     "vps-publiccloud.php": {
@@ -480,6 +811,47 @@
         {
           "q": "Can I run more than one instance?",
           "a": "Yes. Multiple servers can be provisioned and managed from the same account, each with its own operating system and configuration."
+        }
+      ],
+      "sections": [
+        {
+          "type": "features",
+          "heading": "Elastic where it matters",
+          "kicker": "Why public cloud",
+          "items": [
+            {
+              "title": "Resize without rebuilding",
+              "body": "Move to a larger or smaller instance shape as the workload changes, rather than migrating to a new product."
+            },
+            {
+              "title": "Fast provisioning",
+              "body": "Instances are created from a configured image, so a working server exists in minutes rather than days."
+            },
+            {
+              "title": "Your choice of operating system",
+              "body": "Provision from the catalogue of operating systems the platform holds images for."
+            },
+            {
+              "title": "Network control",
+              "body": "Firewall rules and private addressing so the instance is only reachable where it should be.",
+              "icon": "management/firewall.svg"
+            },
+            {
+              "title": "Persistence",
+              "body": "Attached storage survives a rebuild of the instance, which is what makes resizing safe."
+            },
+            {
+              "title": "Monitoring built in",
+              "body": "Resource telemetry is collected so capacity decisions are made from data rather than from an alert at 03:00."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "Region availability is configuration, not a claim",
+          "body": [
+            "A public cloud instance can only be created where the platform has a provider configured for it. The regions list on this deployment shows what is genuinely available; where it is empty, no region is configured and no instance can be promised."
+          ]
         }
       ]
     },
@@ -547,6 +919,47 @@
           "q": "Can I run virtualisation on it?",
           "a": "Yes. A dedicated server is the right product when a host needs to run virtual machines or containers of its own."
         }
+      ],
+      "sections": [
+        {
+          "type": "features",
+          "heading": "When a VPS is not the right answer",
+          "kicker": "Why physical",
+          "items": [
+            {
+              "title": "Undivided performance",
+              "body": "Disk throughput, memory bandwidth and core count belong to your workload alone. That is what database and virtualisation hosts actually need."
+            },
+            {
+              "title": "A physical boundary",
+              "body": "Isolation is a property of the hardware rather than of a hypervisor configuration, which is far easier to state in a compliance answer.",
+              "icon": "icons/shield.svg"
+            },
+            {
+              "title": "Sized to the workload",
+              "body": "Configurations are chosen around measured requirements — cores, memory, storage and throughput — not a fixed tier list."
+            },
+            {
+              "title": "Full control",
+              "body": "Administrator access to the whole machine: the operating system, the partitioning and every service on it."
+            },
+            {
+              "title": "Managed if you want",
+              "body": "Patching, hardening, monitoring response and administration available as part of the service."
+            },
+            {
+              "title": "Backups and recovery",
+              "body": "Backup jobs sized to the data, with a restore plan agreed before it is needed."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "Hardware detail is confirmed per configuration, not published as a guarantee",
+          "body": [
+            "Redundancy (power, networking, disks), facility and region all depend on the provider configured for the region you choose. Those options are confirmed in writing for your configuration rather than asserted on a marketing page — and if a specific requirement cannot be met, that is said before you order rather than after."
+          ]
+        }
       ]
     },
     "enterprise-servers.php": {
@@ -609,6 +1022,46 @@
           "q": "Is there a managed option?",
           "a": "Yes. Managed services cover the platform layer — patching, hardening, monitoring response and administration — alongside the server itself."
         }
+      ],
+      "sections": [
+        {
+          "type": "features",
+          "heading": "What changes at this level",
+          "kicker": "Sizing up",
+          "items": [
+            {
+              "title": "Sized to the workload",
+              "body": "Configurations are chosen around measured requirements — core count, memory, storage throughput — rather than a fixed tier."
+            },
+            {
+              "title": "Built for data-heavy services",
+              "body": "The configuration that makes a database host viable: fast storage, memory for working sets, and cores for concurrency."
+            },
+            {
+              "title": "A platform under other services",
+              "body": "When a host runs virtualisation or containers, its failure footprint is larger — so resilience is designed in."
+            },
+            {
+              "title": "Monitored as critical",
+              "body": "Telemetry, alerting and capacity tracking so limits are seen before they become incidents."
+            },
+            {
+              "title": "Managed operations",
+              "body": "Patch management, hardening and hands-on administration available as part of the service."
+            },
+            {
+              "title": "Backups and recovery",
+              "body": "Backup jobs sized to the data volume, with a restore plan that has been agreed rather than improvised."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "Quoted against requirements, not published as a price",
+          "body": [
+            "Enterprise configurations depend on hardware availability, redundancy choices and region. Rather than publishing a price that cannot be honoured, enterprise servers are quoted against the requirement you describe."
+          ]
+        }
       ]
     },
     "game-servers.php": {
@@ -670,6 +1123,40 @@
         {
           "q": "Is DDoS protection included?",
           "a": "Network-level filtering and abuse mitigation are part of the platform. The specific capacity of that mitigation depends on the region and provider."
+        }
+      ],
+      "sections": [
+        {
+          "type": "features",
+          "heading": "The things that actually matter",
+          "kicker": "What a game server needs",
+          "items": [
+            {
+              "title": "Latency first",
+              "body": "Placement and network path matter more than raw clock speed. The region is chosen to sit near the players."
+            },
+            {
+              "title": "Protection against floods",
+              "body": "Game servers are a favourite target for traffic floods. Network-level filtering is part of the service, not an upsell.",
+              "icon": "icons/shield.svg"
+            },
+            {
+              "title": "Full access",
+              "body": "Root or administrator access, so you install and configure the game stack the way the community expects."
+            },
+            {
+              "title": "Compute that holds a population",
+              "body": "Player counts, plugins and world size drive requirements. Configurations are sized for the community you actually run."
+            },
+            {
+              "title": "World data protected",
+              "body": "Scheduled backups of the game data, because a corrupted world file is an unrecoverable community."
+            },
+            {
+              "title": "Monitored",
+              "body": "Telemetry on CPU, memory and network so a growth problem shows up before players notice it."
+            }
+          ]
         }
       ]
     },
@@ -750,6 +1237,192 @@
           "q": "Where do secrets live?",
           "a": "In per-application environment configuration, not in the repository. Secrets set on an application are not echoed back once saved."
         }
+      ],
+      "sections": [
+        {
+          "type": "features",
+          "heading": "What you get to work with",
+          "kicker": "Developer surface",
+          "items": [
+            {
+              "title": "Shell access",
+              "body": "SSH access is available on hosting products that include it; the selected plan and its access policy determine the scope."
+            },
+            {
+              "title": "Deployment options",
+              "body": "The core platform deploys published application versions and configured images. Git-based source builds require an enabled control-panel integration."
+            },
+            {
+              "title": "Environment configuration",
+              "body": "Set variables per application so configuration lives outside the code and can differ per environment."
+            },
+            {
+              "title": "Logs you can read",
+              "body": "Application logs are available through the service interfaces that expose them; source-build output depends on the selected deployment integration."
+            },
+            {
+              "title": "APIs for automation",
+              "body": "Authenticated APIs support selected service and deployment operations; consult the published API documentation for each endpoint.",
+              "icon": "deployment/api.svg"
+            },
+            {
+              "title": "Telemetry",
+              "body": "Resource use and availability are recorded, so a regression is visible as a graph rather than a hunch."
+            }
+          ]
+        },
+        {
+          "type": "features",
+          "heading": "Pick the stack you already write",
+          "kicker": "Runtimes",
+          "lede": "Each runtime has its own page describing how it is hosted here.",
+          "items": [
+            {
+              "title": "Node.js",
+              "body": "Long-running Node services with managed process supervision.",
+              "url": "nodejs-hosting.php",
+              "icon": "deployment/nodejs.svg"
+            },
+            {
+              "title": "PHP",
+              "body": "From a single script to a full framework, on a maintained runtime.",
+              "url": "php-hosting.php",
+              "icon": "applications/php.svg"
+            },
+            {
+              "title": "Python",
+              "body": "WSGI and ASGI applications with virtual environments.",
+              "url": "python-hosting.php",
+              "icon": "applications/python.svg"
+            },
+            {
+              "title": "Laravel",
+              "body": "Queues, scheduler, storage and deployment for Laravel apps.",
+              "url": "laravel-hosting.php",
+              "icon": "applications/laravel.svg"
+            },
+            {
+              "title": "Docker",
+              "body": "Build and run container images with persistent volumes.",
+              "url": "docker-hosting.php",
+              "icon": "applications/docker.svg"
+            },
+            {
+              "title": "APIs",
+              "body": "Host HTTP APIs with TLS, authentication and rate control.",
+              "url": "api-hosting.php",
+              "icon": "deployment/api.svg"
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "We will not pretend a runtime works before it does",
+          "body": [
+            "The platform exposes the runtimes it is genuinely configured to provision. Where a specific version, extension or orchestration system is not configured on a deployment, the interface says so instead of accepting an order it cannot fulfil."
+          ]
+        },
+        {
+          "type": "cards",
+          "heading": "Pick your stack",
+          "kicker": "Runtimes",
+          "items": [
+            {
+              "title": "Node.js",
+              "body": "Long-running services with managed supervision.",
+              "url": "nodejs-hosting.php",
+              "icon": "deployment/nodejs.svg"
+            },
+            {
+              "title": "PHP",
+              "body": "Single scripts through to full frameworks.",
+              "url": "php-hosting.php",
+              "icon": "applications/php.svg"
+            },
+            {
+              "title": "Python",
+              "body": "WSGI and ASGI applications with virtual environments.",
+              "url": "python-hosting.php",
+              "icon": "applications/python.svg"
+            },
+            {
+              "title": "Laravel",
+              "body": "Queues, scheduler, storage and deployment.",
+              "url": "laravel-hosting.php",
+              "icon": "applications/laravel.svg"
+            },
+            {
+              "title": "Docker",
+              "body": "Your own images with persistent volumes.",
+              "url": "docker-hosting.php",
+              "icon": "applications/docker.svg"
+            },
+            {
+              "title": "APIs",
+              "body": "HTTP APIs with TLS, secrets and rate control.",
+              "url": "api-hosting.php",
+              "icon": "deployment/api.svg"
+            }
+          ]
+        },
+        {
+          "type": "cards",
+          "heading": "Everything around the runtime",
+          "kicker": "Platform",
+          "items": [
+            {
+              "title": "Deployment",
+              "body": "Supported application installs and updates, with recorded status, steps and available recovery.",
+              "url": "deployments.php"
+            },
+            {
+              "title": "Environments",
+              "body": "Variables, secrets and volumes per application.",
+              "url": "deployments.php"
+            },
+            {
+              "title": "DNS",
+              "body": "Zones and records for the services you run.",
+              "url": "dns-management.php",
+              "icon": "management/dns.svg"
+            },
+            {
+              "title": "Databases",
+              "body": "Managed engines your application can connect to.",
+              "url": "applications.php"
+            },
+            {
+              "title": "Monitoring",
+              "body": "Telemetry and alerts on your services.",
+              "url": "monitoring.php"
+            },
+            {
+              "title": "Firewalls",
+              "body": "Close everything the service does not need.",
+              "url": "firewall.php",
+              "icon": "management/firewall.svg"
+            }
+          ]
+        },
+        {
+          "type": "split",
+          "heading": "Documentation that matches the platform",
+          "kicker": "Written down, not folklore",
+          "body": [
+            "The platform reference documents the endpoints, the deployment behaviour, the environment model and the operational limits. It describes what the software does today, including the parts that are not finished.",
+            "Where a capability is not implemented, it is documented as not implemented — so you do not design around a feature that exists only in a roadmap."
+          ],
+          "points": [
+            "API contracts",
+            "Deployment and environment behaviour",
+            "Operational limits and known gaps"
+          ],
+          "visual": "blog/documentation",
+          "link": {
+            "label": "Open the documentation",
+            "url": "documentation.php"
+          }
+        }
       ]
     },
     "ssl-certificate.php": {
@@ -811,6 +1484,47 @@
           "q": "Can I use my own certificate?",
           "a": "Yes. An externally issued certificate and key can be supplied where the service supports importing them."
         }
+      ],
+      "sections": [
+        {
+          "type": "features",
+          "heading": "The failure modes we remove",
+          "kicker": "What is automated",
+          "items": [
+            {
+              "title": "Issuance on demand",
+              "body": "Request a certificate for a hostname and it is validated and installed without you touching a CSR."
+            },
+            {
+              "title": "Renewal before expiry",
+              "body": "Renewals run ahead of expiry, so the browser warning that costs you a customer never appears."
+            },
+            {
+              "title": "Right hostnames, right coverage",
+              "body": "A certificate covers exactly the domains it is issued for — including www and subdomains where you need them."
+            },
+            {
+              "title": "HTTPS enforced",
+              "body": "Optionally redirect all plain HTTP traffic, so a link that was written as http:// still lands on the encrypted site.",
+              "icon": "icons/shield.svg"
+            },
+            {
+              "title": "Expiry visibility",
+              "body": "Every certificate in the account shows its status and expiry date, so nothing depends on someone remembering."
+            },
+            {
+              "title": "Certificates per service",
+              "body": "Certificates attach at the service level, so a server, an application and a website each manage their own."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "Not every certificate type is offered, and we will say which",
+          "body": [
+            "Domain-validated certificates are issued automatically. Organisation-validated and extended-validation certificates require a real identity vetting process with a certificate authority, which is a different purchase with its own lead time. If your requirement is contractual — a specific CA, a specific validation level, a minimum key size — raise it with sales before you assume it is available."
+          ]
+        }
       ]
     },
     "website-design.php": {
@@ -857,9 +1571,7 @@
         "HTTPS from the first visitor",
         "Backups you can restore",
         "Hosting that keeps up",
-        "A domain that belongs to you",
-        "Browser-based builder",
-        "AI-generated first draft"
+        "A domain that belongs to you"
       ],
       "related": [
         "web-hosting.php",
@@ -885,6 +1597,84 @@
         {
           "q": "Do you offer a CDN product?",
           "a": "No CDN product is claimed here. Where a deployment integrates a provider's services, they appear in your account as the services you actually have."
+        }
+      ],
+      "sections": [
+        {
+          "type": "cards",
+          "heading": "Build it yourself",
+          "kicker": "The builder",
+          "items": [
+            {
+              "title": "Website Builder",
+              "body": "Pages, sections, media and publishing — with a real preview and a publish step, not a mock-up.",
+              "url": "website-design.php"
+            },
+            {
+              "title": "AI Website Builder",
+              "body": "Write a description of the site you need and get real pages, copy and SEO to edit.",
+              "url": "website-design.php"
+            },
+            {
+              "title": "Website Templates",
+              "body": "Start from a layout that is already structured for publishing instead of a blank page.",
+              "url": "website-design.php"
+            },
+            {
+              "title": "Online Store",
+              "body": "Sell physical, digital and service products from the same platform that hosts the site.",
+              "url": "website-design.php"
+            }
+          ]
+        },
+        {
+          "type": "cards",
+          "heading": "Or have it delivered",
+          "kicker": "Have it done for you",
+          "items": [
+            {
+              "title": "Website Design Services",
+              "body": "Scoped, quoted and delivered by the CloudHost247 team — brief, design, build, handover.",
+              "url": "website-design.php"
+            },
+            {
+              "title": "Hire an Expert",
+              "body": "Request a specialist for design, development, migration or ongoing maintenance."
+            },
+            {
+              "title": "Website Migration",
+              "body": "Move an existing site onto CloudHost247 infrastructure with a verified cutover.",
+              "url": "migration.php"
+            },
+            {
+              "title": "Digital Marketing",
+              "body": "Campaigns, search visibility and a unified inbox for the enquiries the site produces.",
+              "icon": "icons/mail.svg"
+            }
+          ]
+        },
+        {
+          "type": "checks",
+          "heading": "A website is not finished when it launches",
+          "kicker": "Run it properly",
+          "items": [
+            {
+              "title": "HTTPS from the first visitor",
+              "body": "A certificate is issued for the domain you publish on, and renewed without anyone remembering to."
+            },
+            {
+              "title": "Backups you can restore",
+              "body": "Scheduled backup jobs with a visible run history, so a mistake is recoverable."
+            },
+            {
+              "title": "Hosting that keeps up",
+              "body": "The site runs on hosting that can be upgraded without rebuilding the site."
+            },
+            {
+              "title": "A domain that belongs to you",
+              "body": "Register it with us or bring the one you own, and manage DNS from the same account."
+            }
+          ]
         }
       ]
     },
@@ -997,6 +1787,182 @@
           "q": "Do you offer a money-back guarantee?",
           "a": "Refund eligibility and cancellation windows are set out in the Refund and Cancellation Policy, which is the authoritative document for any refund claim."
         }
+      ],
+      "sections": [
+        {
+          "type": "cards",
+          "heading": "Which hosting is which",
+          "kicker": "Choose a line",
+          "lede": "The differences are resources, isolation and what the account is expected to carry — not marketing tiers.",
+          "items": [
+            {
+              "title": "Web Hosting",
+              "body": "Shared hosting for websites that need to be fast, secure and always up.",
+              "url": "web-hosting.php"
+            },
+            {
+              "title": "Business Hosting",
+              "body": "More resources, stronger isolation and priority support handling for company sites.",
+              "url": "business-hosting.php"
+            },
+            {
+              "title": "WordPress Hosting",
+              "body": "A WordPress-tuned runtime with caching, HTTPS and scheduled backups.",
+              "url": "wordpress-hosting.php",
+              "icon": "applications/wordpress.svg"
+            },
+            {
+              "title": "Reseller Hosting",
+              "body": "Run your own hosting brand on infrastructure you do not have to operate.",
+              "url": "reseller-hosting.php"
+            },
+            {
+              "title": "Windows Hosting",
+              "body": "ASP.NET, IIS and MSSQL for stacks that genuinely require Windows.",
+              "url": "windows-hosting.php"
+            },
+            {
+              "title": "Email Hosting",
+              "body": "Professional mailboxes on your own domain, with filtering and TLS.",
+              "url": "email-hosting.php",
+              "icon": "icons/mail.svg"
+            }
+          ]
+        },
+        {
+          "type": "features",
+          "heading": "The parts that are not add-ons",
+          "kicker": "Included with hosting",
+          "items": [
+            {
+              "title": "SSL certificates",
+              "body": "Issued and renewed automatically for every domain on the account.",
+              "url": "ssl-certificate.php"
+            },
+            {
+              "title": "Backups",
+              "body": "Scheduled jobs with a visible run history and a restore from your account.",
+              "url": "backups.php"
+            },
+            {
+              "title": "Databases",
+              "body": "MySQL-compatible databases alongside the site, managed in the same place.",
+              "url": "applications.php"
+            },
+            {
+              "title": "Migration",
+              "body": "An existing site and its mail moved across with a verified cutover.",
+              "url": "migration.php"
+            },
+            {
+              "title": "Security",
+              "body": "Isolation, platform patching, abuse filtering and monitored recovery.",
+              "url": "security.php",
+              "icon": "icons/shield.svg"
+            },
+            {
+              "title": "Control panels",
+              "body": "The panel families the platform is genuinely configured to provision.",
+              "url": "cloudhost247-hosting.php",
+              "icon": "icons/control.svg"
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "Why this page shows a catalogue instead of a price table",
+          "body": [
+            "A price list on a marketing page is a copy of the truth that goes stale. Every plan and price you see above is read from the live product catalogue, so what is displayed is what the order form will charge — and a deployment with nothing configured shows an explicit empty state rather than a placeholder figure."
+          ]
+        },
+        {
+          "type": "cards",
+          "heading": "Pick the shape of the machine",
+          "kicker": "Compute",
+          "lede": "Each option is a different trade between isolation, elasticity and control.",
+          "items": [
+            {
+              "title": "VPS Hosting",
+              "body": "Guaranteed virtual resources with full administrative access, on shared hardware.",
+              "url": "vps-hosting.php",
+              "icon": "icons/server.svg"
+            },
+            {
+              "title": "Public Cloud",
+              "body": "Elastic compute that can be resized as demand changes.",
+              "url": "vps-publiccloud.php",
+              "icon": "icons/cloud.svg"
+            },
+            {
+              "title": "Private Cloud",
+              "body": "Isolated capacity reserved for a single tenant.",
+              "url": "vps-privatecloud.php"
+            },
+            {
+              "title": "Dedicated Servers",
+              "body": "An entire physical machine, with no neighbour.",
+              "url": "dedicated-server.php"
+            },
+            {
+              "title": "Enterprise Servers",
+              "body": "High-capacity configurations for serious workloads.",
+              "url": "enterprise-servers.php"
+            },
+            {
+              "title": "Game Servers",
+              "body": "Low-latency hosting for multiplayer communities.",
+              "url": "game-servers.php"
+            }
+          ]
+        },
+        {
+          "type": "cards",
+          "heading": "Everything around the machine",
+          "kicker": "Operations",
+          "lede": "A server without these is hardware. With them, it is a service.",
+          "items": [
+            {
+              "title": "Operating Systems",
+              "body": "The catalogue available at provisioning time.",
+              "url": "operating-systems.php"
+            },
+            {
+              "title": "Infrastructure",
+              "body": "Regions, facilities and how the network fits together.",
+              "url": "infrastructure.php",
+              "icon": "cloud/network.svg"
+            },
+            {
+              "title": "Monitoring",
+              "body": "Telemetry and alerts on the resources you run.",
+              "url": "monitoring.php"
+            },
+            {
+              "title": "Firewalls",
+              "body": "Rule-based network filtering per server.",
+              "url": "firewall.php",
+              "icon": "management/firewall.svg"
+            },
+            {
+              "title": "Backups",
+              "body": "Scheduled jobs with a restorable history.",
+              "url": "backups.php"
+            },
+            {
+              "title": "IP Management",
+              "body": "Addresses, reverse DNS and floating IPs.",
+              "url": "ip-management.php",
+              "icon": "tools/ip.svg"
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "What is on this page is what the platform can provision",
+          "body": [
+            "Regions, operating system versions, control panels and machine sizes are configuration, not marketing copy. The platform lists exactly what a given deployment is configured to offer, and a service that is not configured is shown as unavailable rather than sold and then apologised for."
+          ]
+        }
       ]
     },
     "email-hosting.php": {
@@ -1062,6 +2028,60 @@
         {
           "q": "How many addresses can I create?",
           "a": "Each plan states its own mailbox and alias limits on the order page, and your account shows the allocation you have."
+        }
+      ],
+      "sections": [
+        {
+          "type": "features",
+          "heading": "What a business mailbox needs",
+          "kicker": "Mail that behaves",
+          "items": [
+            {
+              "title": "Mailboxes on your domain",
+              "body": "Create, rename and remove addresses as your team changes, including aliases and forwarding.",
+              "icon": "icons/mail.svg"
+            },
+            {
+              "title": "Filtering before delivery",
+              "body": "Spam and malware filtering applied ahead of the mailbox so your team is not the filter.",
+              "icon": "icons/shield.svg"
+            },
+            {
+              "title": "TLS on the wire",
+              "body": "Encrypted connections for mail clients and webmail, so credentials and messages are not sent in the clear."
+            },
+            {
+              "title": "SPF, DKIM and DMARC",
+              "body": "The DNS records that prove your mail is genuinely from your domain — published for you when DNS is managed here."
+            },
+            {
+              "title": "Any mail client",
+              "body": "Standard IMAP, POP and SMTP, so Outlook, Apple Mail, Thunderbird and mobile clients all work."
+            },
+            {
+              "title": "Deliverability watched",
+              "body": "Queue and delivery problems are monitored, because mail that silently stops arriving is the worst kind of outage."
+            }
+          ]
+        },
+        {
+          "type": "split",
+          "heading": "Why authentication records matter",
+          "kicker": "Protect your domain's reputation",
+          "body": [
+            "Anyone can put your domain in the From header. SPF, DKIM and DMARC are what tell the receiving server whether a message that claims to be from you actually is.",
+            "Without them, an attacker who spoofs your domain gets your customers' trust, and your genuine mail is more likely to be filtered."
+          ],
+          "points": [
+            "SPF authorises the servers that may send for you",
+            "DKIM cryptographically signs your messages",
+            "DMARC tells receivers what to do with failures"
+          ],
+          "visual": "security/ssl",
+          "link": {
+            "label": "See DNS management",
+            "url": "dns-management.php"
+          }
         }
       ]
     },
@@ -1137,6 +2157,99 @@
           "q": "Can I resell CloudHost247 services?",
           "a": "Yes, through reseller hosting and the automation platform. White-labelling and the commercial terms are described on the reseller page."
         }
+      ],
+      "sections": [
+        {
+          "type": "features",
+          "heading": "Principles we hold to",
+          "kicker": "How we work",
+          "items": [
+            {
+              "title": "Say what is true",
+              "body": "No invented uptime figures, no certifications we do not hold, no data centre pins on a decorative map. Where something is not available, the product page says so."
+            },
+            {
+              "title": "Show, do not imply",
+              "body": "Prices come from the catalogue, locations come from configuration, and a service status page reports only checks the platform can actually run."
+            },
+            {
+              "title": "Operate what we sell",
+              "body": "Provisioning, monitoring, DNS, certificates, backups and reconciliation are platform features, not arrangements with somebody else."
+            },
+            {
+              "title": "One relationship",
+              "body": "A domain problem, a server problem and a billing problem are the same support conversation rather than three vendors pointing at each other."
+            },
+            {
+              "title": "Open about the seams",
+              "body": "Documentation describes what is finished and what is not, so nobody builds on a feature that exists only in a roadmap.",
+              "icon": "icons/code.svg"
+            },
+            {
+              "title": "Protect the boring things",
+              "body": "Strong credentials, encryption everywhere, least-privilege administration and logs that answer questions after the fact.",
+              "icon": "icons/shield.svg"
+            }
+          ]
+        },
+        {
+          "type": "cards",
+          "heading": "What CloudHost247 covers",
+          "kicker": "The platform",
+          "items": [
+            {
+              "title": "Domains",
+              "body": "Search, registration, transfer, DNS and the registrar toolkit.",
+              "url": "domain.php",
+              "icon": "icons/domain.svg"
+            },
+            {
+              "title": "Hosting",
+              "body": "Web, business, WordPress, reseller and Windows hosting.",
+              "url": "cloudhost247-hosting.php"
+            },
+            {
+              "title": "Cloud & servers",
+              "body": "VPS, cloud, dedicated and enterprise servers with operations.",
+              "url": "cloudhost247-hosting.php",
+              "icon": "icons/server.svg"
+            },
+            {
+              "title": "Platforms",
+              "body": "Applications, databases, containers and PaaS.",
+              "url": "applications.php",
+              "icon": "icons/app.svg"
+            },
+            {
+              "title": "Developers",
+              "body": "Runtimes, Git deployment, environments and APIs.",
+              "url": "developer-friendly.php",
+              "icon": "icons/code.svg"
+            },
+            {
+              "title": "Websites",
+              "body": "Builder, AI builder, stores and design services.",
+              "url": "website-design.php"
+            },
+            {
+              "title": "Tools",
+              "body": "DNS, IP, network, security, developer and webmaster tools.",
+              "url": "tools"
+            },
+            {
+              "title": "Support",
+              "body": "Documentation, diagnostics, knowledge base and tickets.",
+              "url": "knowledgebase.php"
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "CloudHost247 Isc.",
+          "body": [
+            "CloudHost247 Isc. is the legal entity behind this platform. Contractual terms, policies and the agreements that govern a service are published in the Legal & Policy Center, which is the authoritative source for any of them."
+          ]
+        }
       ]
     },
     "offers.php": {
@@ -1171,18 +2284,119 @@
           "q": "Which currencies are supported?",
           "a": "The currencies configured in the billing platform. The currency selector on the order flow shows what is available."
         }
+      ],
+      "sections": [
+        {
+          "type": "note",
+          "heading": "No countdown timers, no invented discounts",
+          "body": [
+            "A discount that appears to expire but never does is a dark pattern, and a percentage invented for a landing page is a lie with a font. What is on offer here is the catalogue: the plans that exist, at the prices configured."
+          ]
+        }
       ]
     },
     "help-center.php": {
       "title": "Help Center",
       "category": "Support",
-      "headline": "Let’s find your next step.",
+      "headline": "How to get an answer quickly",
       "summary": "Browse the knowledgebase, review your services or open a support ticket from your CloudHost247 account.",
       "visual": "management/support",
-      "features": [],
-      "uses": [],
-      "related": [],
-      "slug": "help-center"
+      "features": [
+        [
+          "Documentation",
+          "Platform references: APIs, deployment, environments, provisioning and operations."
+        ],
+        [
+          "Diagnostic Tools",
+          "Check DNS, propagation, IPs, headers and more — and see the result rather than a description of it."
+        ],
+        [
+          "Knowledge Base",
+          "Task-oriented guides for hosting, domains, email, servers and billing."
+        ],
+        [
+          "Open a Ticket",
+          "Reach the support team from your account, with your services already attached to the request."
+        ]
+      ],
+      "uses": [
+        "The service or domain involved",
+        "What you expected and what happened",
+        "What changed just before",
+        "Any error message, verbatim"
+      ],
+      "related": [
+        "documentation.php",
+        "faqs.php"
+      ],
+      "slug": "help-center",
+      "seo_description": "CloudHost247 support: search the knowledge base and documentation, run a diagnostic tool, open a ticket with the team, or check what is happening right now.",
+      "faqs": [
+        {
+          "q": "What are your support hours?",
+          "a": "Support is staffed around the clock for service-affecting issues. Business-hour enquiries are handled in business hours, and the published contact details for your deployment are on the contact page."
+        },
+        {
+          "q": "Do you offer phone support?",
+          "a": "Where a support phone number is configured for the deployment it is published on the contact page. If no number is published, none is available."
+        },
+        {
+          "q": "Can I check whether an issue is mine or the platform's?",
+          "a": "Yes — the service status page reports what the platform can verify about itself, and the diagnostic tools check DNS, connectivity and protocol behaviour from the platform's side."
+        }
+      ],
+      "sections": [
+        {
+          "type": "cards",
+          "heading": "Four routes to an answer",
+          "kicker": "Start here",
+          "items": [
+            {
+              "title": "Documentation",
+              "body": "Platform references: APIs, deployment, environments, provisioning and operations.",
+              "url": "documentation.php"
+            },
+            {
+              "title": "Diagnostic Tools",
+              "body": "Check DNS, propagation, IPs, headers and more — and see the result rather than a description of it.",
+              "url": "tools"
+            },
+            {
+              "title": "Knowledge Base",
+              "body": "Task-oriented guides for hosting, domains, email, servers and billing.",
+              "url": "documentation.php"
+            },
+            {
+              "title": "Open a Ticket",
+              "body": "Reach the support team from your account, with your services already attached to the request.",
+              "url": "submitticket.php"
+            }
+          ]
+        },
+        {
+          "type": "checks",
+          "heading": "Four things that make a ticket solvable in one reply",
+          "kicker": "Before you open a ticket",
+          "items": [
+            {
+              "title": "The service or domain involved",
+              "body": "A ticket opening with the affected service is already in the right queue. The subject line is what gets it there."
+            },
+            {
+              "title": "What you expected and what happened",
+              "body": "Two sentences describing the difference resolves more tickets than any amount of log pasting."
+            },
+            {
+              "title": "What changed just before",
+              "body": "A deployment, an update, a DNS change, a new plugin. Most incidents have a preceding change."
+            },
+            {
+              "title": "Any error message, verbatim",
+              "body": "The exact text, copied rather than summarised. Paraphrased errors cost a round trip every time."
+            }
+          ]
+        }
+      ]
     },
     "blog.php": {
       "title": "Blog",
@@ -1212,7 +2426,8 @@
           "q": "Can I subscribe to updates?",
           "a": "Account announcements are delivered to signed-in customers through the notification system. There is no third-party newsletter tracker on this site."
         }
-      ]
+      ],
+      "sections": []
     },
     "faqs.php": {
       "title": "Frequently Asked Questions",
@@ -1285,6 +2500,154 @@
           "q": "Where does the application data live?",
           "a": "On attached volumes for anything that must persist, plus the database service you connect it to — both visible per service in your account."
         }
+      ],
+      "sections": [
+        {
+          "type": "features",
+          "heading": "The pieces an application needs",
+          "kicker": "What you get",
+          "items": [
+            {
+              "title": "Its own environment",
+              "body": "Dependencies and runtime for one application do not collide with another's, which removes an entire class of upgrade problem."
+            },
+            {
+              "title": "Configuration",
+              "body": "Environment variables and settings are held per application, so the same image can run in more than one place with different values."
+            },
+            {
+              "title": "Persistent volumes",
+              "body": "Data that must outlive a container or a rebuild is attached to a volume rather than left in the filesystem."
+            },
+            {
+              "title": "Domain and certificate",
+              "body": "Attach a domain to the application and have a certificate issued for it."
+            },
+            {
+              "title": "Logs",
+              "body": "Application output is captured per environment, so an error can be investigated where it happened."
+            },
+            {
+              "title": "Backups",
+              "body": "Backup jobs can be scheduled against the application and its volumes."
+            }
+          ]
+        },
+        {
+          "type": "steps",
+          "heading": "Install, configure, upgrade",
+          "kicker": "Lifecycle",
+          "items": [
+            {
+              "title": "Install",
+              "body": "Choose the application from the marketplace. The platform provisions the resources the manifest declares."
+            },
+            {
+              "title": "Configure",
+              "body": "Set the application's own settings, attach the domain, and connect any database it needs."
+            },
+            {
+              "title": "Operate",
+              "body": "Watch it, back it up, and upgrade it when you decide to — not when the platform decides to."
+            }
+          ]
+        },
+        {
+          "type": "cards",
+          "heading": "How much plumbing do you want to own?",
+          "kicker": "Choose your layer",
+          "items": [
+            {
+              "title": "Application Marketplace",
+              "body": "Install a catalogue application with its dependencies configured for you.",
+              "url": "applications.php",
+              "icon": "icons/app.svg"
+            },
+            {
+              "title": "Application Hosting",
+              "body": "A managed environment around one application, with logs and backups.",
+              "url": "applications.php"
+            },
+            {
+              "title": "Databases",
+              "body": "MySQL, PostgreSQL, MariaDB, MongoDB and Redis as managed services.",
+              "url": "applications.php"
+            },
+            {
+              "title": "Containers & Docker",
+              "body": "Run a container image you built, with persistent volumes attached.",
+              "url": "docker-hosting.php"
+            },
+            {
+              "title": "PaaS",
+              "body": "Manage supported application deployments, environment settings and recorded outcomes; Git source builds depend on an enabled panel integration.",
+              "url": "paas.php"
+            },
+            {
+              "title": "Deployment Platform",
+              "body": "Track supported installs and updates with deployment status, step events and available recovery.",
+              "url": "deployments.php"
+            }
+          ]
+        },
+        {
+          "type": "split",
+          "heading": "A catalogue that reflects real deployments",
+          "kicker": "What is installed, not what is listed",
+          "body": [
+            "The marketplace is generated from application manifests, each of which describes the image, the ports, the volumes and the configuration an application needs. An application appears because the platform can deploy it, not because a logo was uploaded.",
+            "That means the catalogue is honest about what it supports: if a manifest is not present, the application is not offered."
+          ],
+          "points": [
+            "Manifest-defined applications",
+            "Declared ports, volumes and configuration",
+            "Install and manage from your account"
+          ],
+          "visual": "applications/application-stack",
+          "link": {
+            "label": "Browse the catalogue",
+            "url": "applications.php"
+          }
+        },
+        {
+          "type": "features",
+          "heading": "What the platform deploys",
+          "kicker": "Engines",
+          "items": [
+            {
+              "title": "MySQL-compatible",
+              "body": "The default for most web applications and content management systems, and the engine most hosting features assume."
+            },
+            {
+              "title": "MariaDB",
+              "body": "A MySQL-compatible engine where an application prefers or requires it."
+            },
+            {
+              "title": "PostgreSQL",
+              "body": "For applications that want stricter SQL semantics, richer indexing or extensions."
+            },
+            {
+              "title": "MongoDB",
+              "body": "Document storage for applications that model data as documents."
+            },
+            {
+              "title": "Redis",
+              "body": "In-memory key-value storage for caching, sessions and queues."
+            },
+            {
+              "title": "Backups",
+              "body": "Backup jobs scoped to the database service, so a restore brings back the data rather than the whole machine."
+            }
+          ],
+          "anchor": "databases"
+        },
+        {
+          "type": "note",
+          "heading": "Managed means operated — it does not mean clustered",
+          "body": [
+            "The platform deploys and can back up and monitor a database service. Automatic multi-node failover and read replicas are not claimed here; where a workload needs them, that is a design conversation about the infrastructure it runs on."
+          ]
+        }
       ]
     },
     "deployments.php": {
@@ -1351,6 +2714,120 @@
           "q": "Can I use the same application in staging and production?",
           "a": "You can create separate application installations with distinct configuration and domains, subject to the services and capacity available in your account."
         }
+      ],
+      "sections": [
+        {
+          "type": "steps",
+          "heading": "What happens to a supported application",
+          "kicker": "The deployment flow",
+          "items": [
+            {
+              "title": "Choose a published application",
+              "body": "Select an application and version that the live marketplace marks as published. The native deployment flow uses that version’s stored manifest."
+            },
+            {
+              "title": "Validate the target",
+              "body": "The worker checks the application version, target server, supported hosting type and available capacity before provisioning."
+            },
+            {
+              "title": "Provision and record",
+              "body": "The deployment uses the configured image and resources, then records the operation status, step state and events against the installation."
+            },
+            {
+              "title": "Review the outcome",
+              "body": "Inspect the deployment record and application logs. If a supported infrastructure step fails, the worker attempts to reverse completed steps and records the result."
+            }
+          ]
+        },
+        {
+          "type": "features",
+          "heading": "What the deployment workflow records",
+          "kicker": "Properties worth having",
+          "items": [
+            {
+              "title": "It is recorded",
+              "body": "Each operation has a durable status, step states and event history rather than disappearing with a terminal session."
+            },
+            {
+              "title": "Versions are explicit",
+              "body": "Native deployments use a published application version and its stored manifest; an arbitrary repository commit is not implied."
+            },
+            {
+              "title": "Configuration is separate",
+              "body": "Application environment values are managed per installation; sensitive values are encrypted in storage and omitted from API responses."
+            },
+            {
+              "title": "Failure is visible",
+              "body": "A failed operation is recorded with its error and event history. The worker attempts to reverse completed infrastructure steps where it can."
+            },
+            {
+              "title": "Scoped per application",
+              "body": "Installations and deployment records are linked to the application and server they operate on."
+            },
+            {
+              "title": "Tracked over time",
+              "body": "The deployment history shows which supported operation ran and when."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "Git builds and CI are separate capabilities",
+          "body": [
+            "The core application deployment queue does not clone arbitrary Git repositories, run build commands or execute test suites. It deploys published application versions and their configured images. Git-based builds depend on a control-panel integration that is enabled for the selected service; check the live panel catalogue before ordering. Run tests in your own CI system."
+          ]
+        },
+        {
+          "type": "features",
+          "heading": "What lives on the environment",
+          "kicker": "Configuration model",
+          "items": [
+            {
+              "title": "Environment variables",
+              "body": "Plain configuration values injected into the process, so the same image runs in different places with different values."
+            },
+            {
+              "title": "Secrets",
+              "body": "Sensitive values are stored encrypted in the platform, not shown again after saving, and never included in an API response."
+            },
+            {
+              "title": "Volumes",
+              "body": "Storage declared by the application so data survives a redeploy, a rebuild or a move between hosts."
+            },
+            {
+              "title": "Domains",
+              "body": "A domain can be attached to the application, with its own certificate, so environments are distinguishable at a glance."
+            },
+            {
+              "title": "Service connections",
+              "body": "Reference a database or cache the account owns instead of pasting raw hostnames and ports everywhere."
+            },
+            {
+              "title": "Separate per environment",
+              "body": "Staging and production are separate applications with separate configuration — the only way they can be safely different."
+            }
+          ],
+          "anchor": "environments"
+        },
+        {
+          "type": "checks",
+          "heading": "Things that keep environments sane",
+          "kicker": "Practice",
+          "items": [
+            {
+              "title": "Never commit secrets",
+              "body": "If a credential is in the repository, it is in every clone and every backup of that repository. Rotate it once it has been."
+            },
+            {
+              "title": "Keep environments structurally identical",
+              "body": "The same services, the same variable names, different values. Divergent structure is what turns a staging pass into a false negative."
+            },
+            {
+              "title": "Give the environment its own domain",
+              "body": "An address that identifies the environment prevents the classic incident of debugging production while thinking it is staging."
+            }
+          ]
+        }
       ]
     },
     "operating-systems.php": {
@@ -1411,6 +2888,49 @@
           "q": "How are end-of-life systems handled?",
           "a": "They are marked in the catalogue so you can make an informed choice, and support will tell you if the version you are running has reached end of life."
         }
+      ],
+      "sections": [
+        {
+          "type": "features",
+          "heading": "Facts the platform keeps track of",
+          "kicker": "How the catalogue behaves",
+          "items": [
+            {
+              "title": "Families and versions",
+              "body": "Each entry is a specific family, version and architecture rather than a vague name."
+            },
+            {
+              "title": "Lifecycle status",
+              "body": "End-of-life operating systems are marked, because a server installed today should not be unsupported next year."
+            },
+            {
+              "title": "Provider image availability",
+              "body": "An operating system is only selectable where the provider in that region actually offers an image for it.",
+              "icon": "icons/server.svg"
+            },
+            {
+              "title": "Control panels",
+              "body": "Where a panel is configured to be provisioned on top of an operating system, that mapping is explicit.",
+              "icon": "icons/control.svg"
+            },
+            {
+              "title": "Administerable",
+              "body": "Versions, images and availability are configuration, maintained by administrators rather than hardcoded in the application."
+            },
+            {
+              "title": "Supported means patched",
+              "body": "Operating systems with active vendor security support are the ones worth provisioning; the catalogue shows which those are.",
+              "icon": "icons/shield.svg"
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "If a version is not in the list, it is not provisionable",
+          "body": [
+            "This catalogue reflects what the platform is configured and able to install. A version that is not listed has no image configured for the selected region — we would rather show a shorter list than accept an order we cannot provision."
+          ]
+        }
       ]
     },
     "server-management.php": {
@@ -1449,9 +2969,7 @@
         "Patching and hardening",
         "Monitoring response",
         "Incident handling",
-        "Change management",
-        "Provisioning and lifecycle",
-        "Monitoring and alerting"
+        "Change management"
       ],
       "related": [
         "monitoring.php",
@@ -1474,6 +2992,64 @@
         {
           "q": "Do you support panels like cPanel or Plesk?",
           "a": "Panels are provisioned where the platform is configured to install them, and the control panels page lists what is available rather than what is theoretically possible."
+        }
+      ],
+      "sections": [
+        {
+          "type": "features",
+          "heading": "What the platform does for you",
+          "kicker": "Available today",
+          "items": [
+            {
+              "title": "Provisioning and rebuilds",
+              "body": "Create servers from a catalogue image, rebuild them from a known-good state, and record which image each server runs.",
+              "icon": "icons/control.svg"
+            },
+            {
+              "title": "Access management",
+              "body": "Administrative access is issued and rotated through the platform, and server credentials are stored encrypted rather than pasted into tickets."
+            },
+            {
+              "title": "Monitoring and alerting",
+              "body": "Resource telemetry collected per server, with alerting so a saturation event is noticed while it is still an event."
+            },
+            {
+              "title": "Firewall control",
+              "body": "Rules attached to the server, applied in a defined order, with the effective ruleset visible.",
+              "icon": "management/firewall.svg"
+            },
+            {
+              "title": "Backups",
+              "body": "Scheduled jobs with a run history and a restore path from your account."
+            },
+            {
+              "title": "Reconciliation and logs",
+              "body": "The platform compares desired state with provider reality and records every infrastructure operation for audit."
+            }
+          ]
+        },
+        {
+          "type": "checks",
+          "heading": "Hand the platform layer to us",
+          "kicker": "Managed services",
+          "items": [
+            {
+              "title": "Patching and hardening",
+              "body": "Operating system and platform components patched on a schedule, with the changes recorded."
+            },
+            {
+              "title": "Monitoring response",
+              "body": "Alerts are acted on rather than merely delivered — the difference between monitoring and management."
+            },
+            {
+              "title": "Incident handling",
+              "body": "A named path for an incident: who is looking, what is being tried, and what customers are told."
+            },
+            {
+              "title": "Change management",
+              "body": "Changes made deliberately, with a way back, instead of directly on production at 17:55 on a Friday."
+            }
+          ]
         }
       ]
     },
@@ -1512,10 +3088,7 @@
       "uses": [
         "A list of cities",
         "An uptime percentage",
-        "Certifications we do not hold",
-        "Provider-backed facilities",
-        "Explicit region configuration",
-        "Platform control layer"
+        "Certifications we do not hold"
       ],
       "related": [
         "data-centers.php",
@@ -1538,6 +3111,61 @@
         {
           "q": "Can I choose a specific region?",
           "a": "Where more than one region is configured, yes — region is a selection at provisioning time and is recorded on the service."
+        }
+      ],
+      "sections": [
+        {
+          "type": "features",
+          "heading": "How the layers stack",
+          "kicker": "Architecture",
+          "items": [
+            {
+              "title": "Facilities and providers",
+              "body": "Compute and network are delivered from data centres operated by infrastructure providers, chosen per region and recorded in the platform."
+            },
+            {
+              "title": "Network",
+              "body": "Public addressing, firewalling and private networking sit between the facility and your service, configured per server.",
+              "icon": "cloud/network.svg"
+            },
+            {
+              "title": "Control layer",
+              "body": "Provisioning, operating-system images, DNS, certificates, backups and monitoring are owned by the platform rather than by hand.",
+              "icon": "icons/control.svg"
+            },
+            {
+              "title": "Reconciliation",
+              "body": "The platform continuously compares what it believes is provisioned against what the provider reports, so drift is detected rather than discovered."
+            },
+            {
+              "title": "Observability",
+              "body": "Server telemetry, service state and operation logs feed the same account view you use."
+            },
+            {
+              "title": "Isolation",
+              "body": "Services are separated at the platform layer, and access to provider credentials is restricted and audited.",
+              "icon": "icons/shield.svg"
+            }
+          ]
+        },
+        {
+          "type": "checks",
+          "heading": "What this page will not tell you",
+          "kicker": "Honesty",
+          "items": [
+            {
+              "title": "A list of cities",
+              "body": "Regions exist only when a provider is configured for them. The data centres page shows what is genuinely configured in your deployment — no decorative world map."
+            },
+            {
+              "title": "An uptime percentage",
+              "body": "A published percentage that does not come from measured, customer-visible monitoring would be a number we invented. Service status shows what the platform can verify right now."
+            },
+            {
+              "title": "Certifications we do not hold",
+              "body": "Certification claims require an audit report with a name and a date. We publish none we cannot produce."
+            }
+          ]
         }
       ]
     },
@@ -1786,9 +3414,7 @@
         "The website is a revenue channel",
         "Mail runs on the same domain",
         "Several applications share the account",
-        "You need someone to answer quickly",
-        "Higher resource allocation",
-        "Stronger tenant isolation"
+        "You need someone to answer quickly"
       ],
       "related": [
         "web-hosting.php",
@@ -1812,6 +3438,71 @@
         {
           "q": "Do you provide an SLA?",
           "a": "Any availability commitment is contractual and must come from the agreement attached to your account rather than a marketing page. If an SLA is part of what you need, raise it with sales before ordering."
+        }
+      ],
+      "sections": [
+        {
+          "type": "features",
+          "heading": "Where business hosting differs",
+          "kicker": "Built for company workloads",
+          "items": [
+            {
+              "title": "Headroom, not a ceiling",
+              "body": "Higher CPU, memory and process limits so a busy day does not turn into a 503 for your customers."
+            },
+            {
+              "title": "Stronger isolation",
+              "body": "Business hosting is placed to reduce the blast radius of anything else on the platform, which matters when the site handles customer data.",
+              "icon": "icons/shield.svg"
+            },
+            {
+              "title": "Priority support handling",
+              "body": "Business accounts are queued ahead of standard requests, reflecting what a business-hours outage actually costs."
+            },
+            {
+              "title": "Business email alongside the site",
+              "body": "Company mailboxes live with the website, so a DNS change never silently breaks your email.",
+              "icon": "icons/mail.svg"
+            },
+            {
+              "title": "Backups and recovery",
+              "body": "Scheduled backups with a restorable history, and a documented restore path rather than a promise."
+            },
+            {
+              "title": "Monitored service",
+              "body": "Availability and resource use are watched by the platform so degradation is caught before it becomes an outage."
+            }
+          ]
+        },
+        {
+          "type": "checks",
+          "heading": "Business hosting is usually the right answer when",
+          "kicker": "Who this fits",
+          "items": [
+            {
+              "title": "The website is a revenue channel",
+              "body": "Enquiries, orders or bookings arrive through it, so an hour of downtime has a number attached."
+            },
+            {
+              "title": "Mail runs on the same domain",
+              "body": "Staff mailboxes and the website need to stay in step when DNS or certificates change."
+            },
+            {
+              "title": "Several applications share the account",
+              "body": "A CMS, a shop, a form handler and a CRM connector all need to coexist without starving each other."
+            },
+            {
+              "title": "You need someone to answer quickly",
+              "body": "You want support handled as a priority rather than queued behind hobby accounts."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "Exact specifications are on the plan, not on this page",
+          "body": [
+            "Resource allocations change as the platform is upgraded. Rather than publishing numbers here that go stale, every plan's actual CPU, memory, storage and mailbox limits are shown on its order page and in your account — and support can confirm anything before you buy."
+          ]
         }
       ]
     },
@@ -1851,9 +3542,7 @@
         "You support your own clients",
         "You own your commercial terms",
         "You are accountable for content",
-        "You can grow a plan at a time",
-        "Isolated customer accounts",
-        "Your own nameservers"
+        "You can grow a plan at a time"
       ],
       "related": [
         "web-hosting.php",
@@ -1876,6 +3565,62 @@
         {
           "q": "What happens if one of my clients abuses the platform?",
           "a": "Abuse handling follows the Acceptable Use and Fair Usage policies. Enforcement is against the account that holds the service — yours — so you need a way to reach your clients quickly."
+        }
+      ],
+      "sections": [
+        {
+          "type": "features",
+          "heading": "What you control, and what we take care of",
+          "kicker": "The reseller toolkit",
+          "items": [
+            {
+              "title": "Customer accounts",
+              "body": "Create, suspend and remove client hosting accounts yourself, without waiting on a support queue."
+            },
+            {
+              "title": "Your own nameservers",
+              "body": "Brand the DNS so clients see your infrastructure, not ours, in their domain settings."
+            },
+            {
+              "title": "Your brand throughout",
+              "body": "The client experience carries your identity. The platform is meant to disappear behind your business."
+            },
+            {
+              "title": "Billing platform compatible",
+              "body": "A WHMCS-compatible automation layer is supported, so orders and provisioning can be automated rather than handled by hand."
+            },
+            {
+              "title": "Infrastructure you do not operate",
+              "body": "Hardware, network, patching and abuse handling are ours. Your obligation is your clients."
+            },
+            {
+              "title": "Escalation path",
+              "body": "When something is genuinely infrastructure-level, there is a route to our engineers instead of a dead end."
+            }
+          ]
+        },
+        {
+          "type": "checks",
+          "heading": "What reseller hosting expects of you",
+          "kicker": "Before you start",
+          "items": [
+            {
+              "title": "You support your own clients",
+              "body": "First-line support is yours. We handle the platform behind it."
+            },
+            {
+              "title": "You own your commercial terms",
+              "body": "Your prices, your contracts, your refund policy — ours governs the account we sell you."
+            },
+            {
+              "title": "You are accountable for content",
+              "body": "The Acceptable Use Policy applies to what your clients host, and enforcement reaches your account."
+            },
+            {
+              "title": "You can grow a plan at a time",
+              "body": "Reseller allocations can be increased as your client base grows, without migrating them."
+            }
+          ]
         }
       ]
     },
@@ -1939,6 +3684,46 @@
           "q": "Which Node versions are available?",
           "a": "The versions the platform is configured to provide. If you need a specific release for a dependency reason, confirm it before committing to a migration."
         }
+      ],
+      "sections": [
+        {
+          "type": "features",
+          "heading": "The operational parts of a Node app",
+          "kicker": "What the platform handles",
+          "items": [
+            {
+              "title": "Supervision",
+              "body": "The process is managed and restarted after a crash, which is what turns a successful test into a running service."
+            },
+            {
+              "title": "Configuration",
+              "body": "Ports, connection strings and flags supplied as environment variables rather than edited into the source."
+            },
+            {
+              "title": "Logs",
+              "body": "Standard output and error are captured per application so an unhandled rejection is findable."
+            },
+            {
+              "title": "Deployment",
+              "body": "Native application deployments install published versions and configured images. Git source builds depend on an enabled control-panel integration."
+            },
+            {
+              "title": "Data services",
+              "body": "Managed MySQL-compatible, PostgreSQL, MongoDB and Redis services your application connects to."
+            },
+            {
+              "title": "Domains and certificates",
+              "body": "Attach the hostname the service answers on, and let the certificate be issued for it."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "Bring your own runtime discipline",
+          "body": [
+            "The platform supplies the process management, isolation and observability. Dependency pinning, lockfiles, dependency audits and choosing a supported Node release remain the application's responsibility — and the ones that go wrong in production are almost always there."
+          ]
+        }
       ]
     },
     "php-hosting.php": {
@@ -1976,10 +3761,7 @@
       "uses": [
         "Keep the framework current",
         "Vet what you install",
-        "Use the lock file",
-        "Maintained runtime",
-        "Composer available",
-        "Cron scheduling"
+        "Use the lock file"
       ],
       "related": [
         "laravel-hosting.php",
@@ -2003,6 +3785,59 @@
         {
           "q": "Can I run a queue worker?",
           "a": "Yes — workers are long-running processes managed alongside the application, with cron available for scheduled work."
+        }
+      ],
+      "sections": [
+        {
+          "type": "features",
+          "heading": "Provided rather than assembled",
+          "kicker": "What a PHP app needs",
+          "items": [
+            {
+              "title": "Maintained PHP",
+              "body": "Runtimes that receive security updates, so an old version is a choice rather than an inheritance.",
+              "icon": "applications/php.svg"
+            },
+            {
+              "title": "Extensions and Composer",
+              "body": "The extension set applications declare, and Composer to resolve dependencies from the lock file."
+            },
+            {
+              "title": "Scheduled tasks",
+              "body": "Cron entries for queues, imports and housekeeping, so the scheduled work a framework needs actually runs."
+            },
+            {
+              "title": "OPcache",
+              "body": "Bytecode caching configured on, because it is the single cheapest performance win in PHP."
+            },
+            {
+              "title": "Databases",
+              "body": "MySQL-compatible, MariaDB and PostgreSQL services alongside the application."
+            },
+            {
+              "title": "Deployment",
+              "body": "Use the deployment method available on the selected hosting plan. Native application deployments install published images; source builds depend on a configured control-panel integration."
+            }
+          ]
+        },
+        {
+          "type": "checks",
+          "heading": "PHP shifts responsibility to the application",
+          "kicker": "The honest part",
+          "items": [
+            {
+              "title": "Keep the framework current",
+              "body": "A framework that no longer receives security fixes is the most common cause of a compromised PHP site."
+            },
+            {
+              "title": "Vet what you install",
+              "body": "Packages run with the application's privileges. A dependency is code you are choosing to run."
+            },
+            {
+              "title": "Use the lock file",
+              "body": "Deploying without a lock file means deploying whatever the registry serves today — which is not the same thing as what you tested."
+            }
+          ]
         }
       ]
     },
@@ -2064,6 +3899,40 @@
         {
           "q": "Which Python versions are available?",
           "a": "The versions the platform is configured to provide. Confirm the version your application targets before migrating."
+        }
+      ],
+      "sections": [
+        {
+          "type": "features",
+          "heading": "What Python needs to run in production",
+          "kicker": "The stack",
+          "items": [
+            {
+              "title": "Isolated environments",
+              "body": "Dependencies installed per application, so two applications that disagree about a library version can coexist.",
+              "icon": "applications/python.svg"
+            },
+            {
+              "title": "WSGI and ASGI",
+              "body": "Serve synchronous frameworks and asynchronous ones, with TLS and routing in front of the application."
+            },
+            {
+              "title": "Workers",
+              "body": "Long-running processes for queues and background work, supervised and restarted on failure."
+            },
+            {
+              "title": "Scheduled jobs",
+              "body": "Cron for periodic work like synchronisation, reporting and cleanup, rather than a process that sleeps."
+            },
+            {
+              "title": "Data services",
+              "body": "PostgreSQL, MySQL-compatible, MongoDB and Redis services your application connects to."
+            },
+            {
+              "title": "Logs and telemetry",
+              "body": "Application output and resource use captured per service, so a slow query or a memory leak is visible."
+            }
+          ]
         }
       ]
     },
@@ -2127,6 +3996,102 @@
           "q": "Can containers talk to each other?",
           "a": "Applications on the same account can be connected where the platform's networking allows it, and databases are reachable as services rather than by raw host address."
         }
+      ],
+      "sections": [
+        {
+          "type": "features",
+          "heading": "How it works in practice",
+          "kicker": "Containers here",
+          "items": [
+            {
+              "title": "Images",
+              "body": "Deploy from an image reference the platform can pull, so the artefact you tested is the artefact that runs.",
+              "icon": "applications/docker.svg"
+            },
+            {
+              "title": "Volumes",
+              "body": "State lives on volumes declared by the application, so replacing a container does not destroy its data."
+            },
+            {
+              "title": "Environment configuration",
+              "body": "Configuration injected as environment variables, which is what makes one image runnable in several environments."
+            },
+            {
+              "title": "Routing and TLS",
+              "body": "Attach a domain to the container and certificates are issued for it."
+            },
+            {
+              "title": "Logs",
+              "body": "Container output captured per application, so debugging does not require shell access to a host."
+            },
+            {
+              "title": "Resource visibility",
+              "body": "CPU, memory and traffic recorded, so a container that is quietly restarting becomes visible."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "What is not offered",
+          "body": [
+            "There is no managed Kubernetes control plane on this platform, and no claim of cluster orchestration. Containers run as services attached to your account. If your architecture genuinely requires an orchestrator, that is a conversation about architecture rather than a checkbox."
+          ]
+        },
+        {
+          "type": "features",
+          "heading": "What the platform provides",
+          "kicker": "Running containers",
+          "items": [
+            {
+              "title": "Image deployment",
+              "body": "Run an image the platform can pull, so the tested artefact is the deployed artefact.",
+              "icon": "applications/docker.svg"
+            },
+            {
+              "title": "Private registries",
+              "body": "Registry credentials are stored so a private image can be pulled without embedding a token in a script."
+            },
+            {
+              "title": "Volumes",
+              "body": "State declared by the application lives on a volume, so replacing the container does not destroy data."
+            },
+            {
+              "title": "Configuration",
+              "body": "Environment variables and secrets applied per application, not baked into the image."
+            },
+            {
+              "title": "Routing",
+              "body": "Attach the hostname, let the certificate issue, and the container is on the internet the way you intended."
+            },
+            {
+              "title": "Observability",
+              "body": "Logs, resource use and restart behaviour recorded, so a crash loop is something you can see."
+            }
+          ]
+        },
+        {
+          "type": "checks",
+          "heading": "Things that make containers safe to run",
+          "kicker": "Container hygiene",
+          "items": [
+            {
+              "title": "Pin the tag",
+              "body": "A moving tag means a redeploy can change the application without anyone deciding to change it."
+            },
+            {
+              "title": "Do not run as root by default",
+              "body": "A container that does not need root should not have it; privileged containers widen the blast radius for no benefit."
+            },
+            {
+              "title": "Keep state on volumes",
+              "body": "Anything written inside the container filesystem is temporary by definition, whatever it looks like during testing."
+            },
+            {
+              "title": "Choose small base images",
+              "body": "A smaller image pulls faster, starts faster and presents fewer packages to keep patched."
+            }
+          ]
+        }
       ]
     },
     "laravel-hosting.php": {
@@ -2188,6 +4153,58 @@
         {
           "q": "How are uploads handled?",
           "a": "Attach a volume for the storage path, or use an object storage service. Leaving uploads inside a replaceable container is how user files disappear."
+        }
+      ],
+      "sections": [
+        {
+          "type": "features",
+          "heading": "The four things that break in production",
+          "kicker": "Laravel specifics",
+          "items": [
+            {
+              "title": "Queue workers",
+              "body": "Supervised worker processes so queued jobs are processed and re-started after a deployment or a failure."
+            },
+            {
+              "title": "The scheduler",
+              "body": "A single cron entry running Laravel's scheduler, so you do not have to remember which tasks need which timing."
+            },
+            {
+              "title": "Writable storage",
+              "body": "Persistent volumes for uploads and framework storage, so a redeploy does not erase user files."
+            },
+            {
+              "title": "Migrations",
+              "body": "A database that can be dumped, restored and migrated with a backup taken before the change."
+            },
+            {
+              "title": "Environment configuration",
+              "body": "The values in .env supplied per environment instead of living in the repository."
+            },
+            {
+              "title": "Logs",
+              "body": "Application and queue output captured per service, which is where a failing job is actually visible."
+            }
+          ]
+        },
+        {
+          "type": "steps",
+          "heading": "The sequence that avoids surprises",
+          "kicker": "Deploying a Laravel app",
+          "items": [
+            {
+              "title": "Back up before migrating",
+              "body": "Run the database backup first. A failed migration with no backup is a much worse day than a failed migration."
+            },
+            {
+              "title": "Release the new code",
+              "body": "Deploy from the repository so the release is tied to a revision rather than to a folder someone edited."
+            },
+            {
+              "title": "Restart the workers",
+              "body": "Queue workers must pick up new code; a supervised worker is restarted by the platform on release."
+            }
+          ]
         }
       ]
     },
@@ -2251,6 +4268,66 @@
           "q": "Do you offer a managed API gateway?",
           "a": "No. The platform provides hosting, TLS, DNS, rate limiting and monitoring around your API. A productised gateway is a different product and is not claimed here."
         }
+      ],
+      "sections": [
+        {
+          "type": "features",
+          "heading": "What we put around an API by default",
+          "kicker": "Non-negotiables",
+          "items": [
+            {
+              "title": "TLS everywhere",
+              "body": "TLS is available on services and domains where the selected hosting product is configured to issue or accept certificates."
+            },
+            {
+              "title": "Secrets outside the code",
+              "body": "Keys and connection strings are set as environment configuration per application, and are not returned once saved."
+            },
+            {
+              "title": "Rate limiting",
+              "body": "Network and application rate controls depend on the selected product and its configured integrations; review the service details before designing around them."
+            },
+            {
+              "title": "Real logs",
+              "body": "Request and error logs available on the deployment, so a 500 can be diagnosed without guesswork."
+            },
+            {
+              "title": "Custom domains and certificates",
+              "body": "Attach the domain that belongs on the endpoint, including subdomains, with a certificate per hostname.",
+              "icon": "management/dns.svg"
+            },
+            {
+              "title": "Uptime and latency signals",
+              "body": "Monitoring coverage varies by service. The platform status and product pages identify the checks the current deployment can genuinely perform."
+            }
+          ]
+        },
+        {
+          "type": "steps",
+          "heading": "Get an endpoint live",
+          "kicker": "Deployment",
+          "items": [
+            {
+              "title": "Choose a deployment method",
+              "body": "The core deployment queue uses published application versions and configured images. Git source builds require a selected control-panel integration that explicitly supports them."
+            },
+            {
+              "title": "Configure the environment",
+              "body": "Set the variables the API needs — database URL, signing keys, upstream credentials — as configuration on the application."
+            },
+            {
+              "title": "Attach the domain",
+              "body": "Add the hostname, publish the DNS record and let the certificate issue. Then verify with a real request."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "Design your own authentication — we host it",
+          "body": [
+            "CloudHost247 provides the transport, isolation, TLS and observability. The authentication and authorisation model inside your API is your design decision: token format, scopes, rotation and revocation are yours to implement."
+          ]
+        }
       ]
     },
     "paas.php": {
@@ -2312,6 +4389,63 @@
           "q": "Does this replace my CI pipeline?",
           "a": "No. The native flow does not run test suites or provide continuous integration. Use your own CI and, where supported, a configured integration to trigger deployment."
         }
+      ],
+      "sections": [
+        {
+          "type": "features",
+          "heading": "What the native deployment flow handles",
+          "kicker": "The platform layer",
+          "items": [
+            {
+              "title": "Published application versions",
+              "body": "The marketplace exposes versions that have been published with a validated deployment manifest and configured image.",
+              "icon": "icons/app.svg"
+            },
+            {
+              "title": "Deployment records",
+              "body": "Installs and updates produce a durable record with status, step states and event history."
+            },
+            {
+              "title": "Failure handling",
+              "body": "When an infrastructure step fails, the worker attempts to reverse completed steps and records whether recovery succeeded."
+            },
+            {
+              "title": "Configuration per application",
+              "body": "Environment values and secrets are managed per installation, separately from the published application manifest."
+            },
+            {
+              "title": "Routing",
+              "body": "Domains and certificates can be attached where the selected service and provider support them."
+            },
+            {
+              "title": "Logs",
+              "body": "Deployment events and application logs are available through their respective service records; source-build output depends on a Git-enabled panel."
+            }
+          ]
+        },
+        {
+          "type": "steps",
+          "heading": "Use the published deployment path",
+          "kicker": "Adopting it",
+          "items": [
+            {
+              "title": "Select a published application",
+              "body": "Choose an application version the live catalogue makes available for deployment."
+            },
+            {
+              "title": "Validate the target",
+              "body": "The platform checks the selected server, supported hosting type and capacity before it changes infrastructure."
+            },
+            {
+              "title": "Provision the configured image",
+              "body": "The worker deploys the image and resources described by that application version’s manifest."
+            },
+            {
+              "title": "Inspect the record",
+              "body": "Review status, step states, event history and any recovery result in the deployment record."
+            }
+          ]
+        }
       ]
     },
     "data-centers.php": {
@@ -2364,6 +4498,32 @@
         {
           "q": "Can I deploy across more than one region?",
           "a": "Yes, where more than one is configured. Multi-region architecture is designed per requirement — talk to us about what you are trying to achieve."
+        }
+      ],
+      "sections": [
+        {
+          "type": "features",
+          "heading": "What region choice affects",
+          "kicker": "Selecting a region",
+          "items": [
+            {
+              "title": "Latency to your users",
+              "body": "The physical distance between the facility and the people using the service is the single largest factor in response time."
+            },
+            {
+              "title": "Data residency",
+              "body": "Where data is stored is a legal question as well as a technical one. Region selection is how you answer it."
+            },
+            {
+              "title": "The provider operating the facility",
+              "body": "Each region names the provider that runs the physical site."
+            },
+            {
+              "title": "Addressing and connectivity",
+              "body": "IP ranges and the network path are determined by the region the service is deployed into.",
+              "icon": "cloud/network.svg"
+            }
+          ]
         }
       ]
     },
@@ -2427,6 +4587,50 @@
           "q": "Is there a bandwidth limit?",
           "a": "The limit is the one stated on the product you bought. Anything described as unmetered still operates under the Fair Usage Policy."
         }
+      ],
+      "sections": [
+        {
+          "type": "features",
+          "heading": "What you can control",
+          "kicker": "Capabilities",
+          "items": [
+            {
+              "title": "IP addressing",
+              "body": "Public addresses assigned to your service, managed in your account, with the option to move a floating address between servers.",
+              "icon": "tools/ip.svg"
+            },
+            {
+              "title": "Reverse DNS",
+              "body": "PTR records set correctly, which matters for mail deliverability and for anything that logs connections.",
+              "icon": "management/dns.svg"
+            },
+            {
+              "title": "Firewall filtering",
+              "body": "Rules applied in order to allow, deny or rate-limit traffic to a server, with the order visible.",
+              "icon": "management/firewall.svg"
+            },
+            {
+              "title": "Flood mitigation",
+              "body": "Known-abusive traffic patterns are filtered at the network edge rather than reaching the application.",
+              "icon": "icons/shield.svg"
+            },
+            {
+              "title": "Traffic telemetry",
+              "body": "Throughput and packet-level signals recorded per service so a change in behaviour is visible as a graph."
+            },
+            {
+              "title": "IPv6",
+              "body": "Dual-stack addressing where the region and provider support it."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "Bandwidth and traffic terms are contractual",
+          "body": [
+            "Whether a service is unmetered, capped or burstable depends on the product you have, and the number that matters is the one on the plan you bought — not a figure on a marketing page. Where a fair-use expectation applies, it is written down in the Fair Usage Policy."
+          ]
+        }
       ]
     },
     "security.php": {
@@ -2465,9 +4669,7 @@
         "Your application's code",
         "Your credentials",
         "What you publish",
-        "Your data handling",
-        "Tenant isolation",
-        "Platform patching"
+        "Your data handling"
       ],
       "related": [
         "security.php",
@@ -2494,6 +4696,170 @@
         {
           "q": "Can I get a security questionnaire completed?",
           "a": "Yes — send the questionnaire through the contact route and the relevant answers are provided. We do not publish certifications we do not hold."
+        }
+      ],
+      "sections": [
+        {
+          "type": "features",
+          "heading": "Where the protection actually sits",
+          "kicker": "Layers",
+          "items": [
+            {
+              "title": "Isolation between tenants",
+              "body": "Accounts are separated at the service level so one compromised site is not a route into another customer's data."
+            },
+            {
+              "title": "Platform patch management",
+              "body": "The operating systems, runtime versions and platform components we control are patched on a schedule, not when someone complains."
+            },
+            {
+              "title": "Filtering before your site",
+              "body": "Known-malicious traffic patterns and abusive request rates are filtered at the platform edge, ahead of the application.",
+              "icon": "icons/shield.svg"
+            },
+            {
+              "title": "Access control",
+              "body": "Account access uses strong credentials, session controls and multi-factor authentication, including passkeys."
+            },
+            {
+              "title": "Encryption in transit",
+              "body": "TLS on every web endpoint and mail transport, with automated certificate renewal."
+            },
+            {
+              "title": "Recovery and review",
+              "body": "Security-relevant events are logged, and the incident path is documented so a response does not start from zero."
+            }
+          ]
+        },
+        {
+          "type": "checks",
+          "heading": "What is yours to own",
+          "kicker": "Shared responsibility",
+          "items": [
+            {
+              "title": "Your application's code",
+              "body": "A vulnerable plugin or an injection flaw in your own code is not something the platform can patch for you."
+            },
+            {
+              "title": "Your credentials",
+              "body": "Weak or reused passwords on accounts you control are the most common route in, on any platform."
+            },
+            {
+              "title": "What you publish",
+              "body": "Content, scripts and third-party embeds you add to a site are your responsibility under the Acceptable Use Policy."
+            },
+            {
+              "title": "Your data handling",
+              "body": "What personal data you collect, why, and for how long is your decision and your legal obligation."
+            }
+          ]
+        },
+        {
+          "type": "features",
+          "heading": "What is enforced",
+          "kicker": "Controls",
+          "items": [
+            {
+              "title": "Provider credentials",
+              "body": "Infrastructure provider credentials are stored encrypted, never returned to a browser, and used only by the platform's own operations."
+            },
+            {
+              "title": "Audit trail",
+              "body": "Infrastructure operations and administrative actions are recorded, so who did what and when is answerable."
+            },
+            {
+              "title": "Role-based access",
+              "body": "Administrative capability is granted by role and re-verified server-side on every request rather than trusted from the interface."
+            },
+            {
+              "title": "Service isolation",
+              "body": "Customer services are separated so that one cannot read or control another."
+            },
+            {
+              "title": "Patch management",
+              "body": "Operating systems and platform components are patched on a schedule, with changes tracked against the service."
+            },
+            {
+              "title": "Incident response",
+              "body": "A defined path for detection, containment, notification and review — written down before it is needed."
+            }
+          ]
+        },
+        {
+          "type": "checks",
+          "heading": "Protect your own account",
+          "kicker": "Access you control",
+          "items": [
+            {
+              "title": "Turn on multi-factor authentication",
+              "body": "TOTP and passkey authentication are supported. A password alone is the weakest link in any hosting account."
+            },
+            {
+              "title": "Review administrative users",
+              "body": "Staff and administrative access should be limited to people who need it, and removed when they do not."
+            },
+            {
+              "title": "Keep recovery details current",
+              "body": "Password recovery and second-factor recovery both depend on the contact details on the account being right."
+            }
+          ]
+        },
+        {
+          "type": "features",
+          "heading": "What is implemented",
+          "kicker": "Controls",
+          "items": [
+            {
+              "title": "Authentication",
+              "body": "Password hashing with a memory-hard algorithm, multi-factor authentication by TOTP, and passkey (WebAuthn) sign-in as a phishing-resistant option."
+            },
+            {
+              "title": "Least privilege",
+              "body": "Role-based access for administrative functions, re-verified server-side on every request rather than trusted from the interface."
+            },
+            {
+              "title": "Encryption",
+              "body": "TLS for every public endpoint and mail transport, with certificates issued and renewed automatically; sensitive values encrypted at rest."
+            },
+            {
+              "title": "Isolation",
+              "body": "Customer services are separated, and provider credentials are held encrypted and used only by platform operations."
+            },
+            {
+              "title": "Logging and audit",
+              "body": "Authentication events, administrative actions and infrastructure operations are recorded, giving an answer to who did what and when."
+            },
+            {
+              "title": "Response",
+              "body": "A defined incident path: detection, containment, notification and review — documented before it is needed."
+            }
+          ]
+        },
+        {
+          "type": "checks",
+          "heading": "If you find a vulnerability",
+          "kicker": "Disclosure",
+          "items": [
+            {
+              "title": "Tell us, privately",
+              "body": "Report through the contact route with enough detail to reproduce it. Do not test against another customer's service or data."
+            },
+            {
+              "title": "We will acknowledge and investigate",
+              "body": "Reports are triaged, and you get a response from a person who can act on it rather than an automated reply."
+            },
+            {
+              "title": "Do not access data that is not yours",
+              "body": "Proof of concept that stops at the boundary of your own account is welcome. Going further is not authorised, whatever the intention."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "Certifications we do not claim",
+          "body": [
+            "Where a compliance framework matters to you — ISO 27001, SOC 2, PCI DSS, HIPAA — ask, and you will get an accurate answer including 'not certified'. Publishing a certification we do not hold would be the single most damaging thing this page could do."
+          ]
         }
       ]
     },
@@ -2557,6 +4923,48 @@
           "q": "Can I monitor something outside CloudHost247?",
           "a": "The Tools Center includes network and DNS diagnostics that can check external endpoints from the platform."
         }
+      ],
+      "sections": [
+        {
+          "type": "features",
+          "heading": "Signals worth keeping",
+          "kicker": "What is measured",
+          "items": [
+            {
+              "title": "Compute pressure",
+              "body": "CPU and memory over time, so the difference between a busy day and a capacity problem is visible."
+            },
+            {
+              "title": "Storage growth",
+              "body": "Disk consumption trending, because a full disk takes a service down quietly and completely."
+            },
+            {
+              "title": "Traffic",
+              "body": "Throughput in and out, which is where a traffic spike or a leak is first detectable.",
+              "icon": "cloud/network.svg"
+            },
+            {
+              "title": "Service state",
+              "body": "Whether each service is reachable and answering, recorded as state rather than as a promise.",
+              "icon": "icons/server.svg"
+            },
+            {
+              "title": "Alerts that mean something",
+              "body": "Notifications tied to a threshold rather than to every fluctuation, so an alert is worth reading."
+            },
+            {
+              "title": "History",
+              "body": "Retained telemetry you can go back through when working out when a problem actually started."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "Why there is no uptime figure on this page",
+          "body": [
+            "A meaningful uptime number has to come from independent, continuous, customer-visible measurement over a defined period. Anything else is a claim. The service status page reports the checks this platform can genuinely perform right now, and says plainly when something is not being monitored."
+          ]
+        }
       ]
     },
     "backups.php": {
@@ -2594,10 +5002,7 @@
       "uses": [
         "Your own copy of critical data",
         "A tested recovery plan",
-        "A version control system for code",
-        "Scheduled jobs",
-        "Visible job history",
-        "Per-service restore"
+        "A version control system for code"
       ],
       "related": [
         "backup-policy.php",
@@ -2625,6 +5030,90 @@
         {
           "q": "Can I trigger a backup before a big change?",
           "a": "Yes. A manual backup can be taken before a migration, an upgrade or a plugin batch, and it appears in the same job history."
+        }
+      ],
+      "sections": [
+        {
+          "type": "features",
+          "heading": "What the platform actually does",
+          "kicker": "How it works",
+          "items": [
+            {
+              "title": "Scheduled, not manual",
+              "body": "Backup jobs run on a schedule you can see, so protection does not depend on someone remembering to click a button."
+            },
+            {
+              "title": "What gets captured",
+              "body": "Files, databases and application data are captured according to the service, and each backup records what it contains."
+            },
+            {
+              "title": "A job history",
+              "body": "Every run is recorded with its status and size, so a silently failing job is visible rather than assumed to be working."
+            },
+            {
+              "title": "Restore from your account",
+              "body": "Restores are performed against the service they belong to, with the backup that will be used identified before it runs."
+            },
+            {
+              "title": "Per-service scope",
+              "body": "Each hosting account, server and application has its own backup record, so restoring one thing does not touch another."
+            },
+            {
+              "title": "Stored separately",
+              "body": "Backups are stored on storage separate from the live service, so losing the service does not lose the backup.",
+              "icon": "icons/shield.svg"
+            }
+          ]
+        },
+        {
+          "type": "checks",
+          "heading": "What backups do not replace",
+          "kicker": "Say this out loud",
+          "items": [
+            {
+              "title": "Your own copy of critical data",
+              "body": "For anything you cannot afford to lose, keep an export you control in addition to platform backups."
+            },
+            {
+              "title": "A tested recovery plan",
+              "body": "Knowing what you will restore, in what order, is a decision backups cannot make for you."
+            },
+            {
+              "title": "A version control system for code",
+              "body": "Backups return a service to a previous state. They are not a substitute for Git for your source code."
+            }
+          ]
+        },
+        {
+          "type": "features",
+          "heading": "How jobs are managed",
+          "kicker": "Mechanics",
+          "items": [
+            {
+              "title": "Scheduled runs",
+              "body": "Backups happen on a schedule attached to the service, not on someone's memory."
+            },
+            {
+              "title": "Scoped per service",
+              "body": "A server, an application and a hosting account each have their own backup record, so one restore never affects another."
+            },
+            {
+              "title": "What a backup contains",
+              "body": "Each record states what was captured — files, databases, volumes — so you know what a restore will bring back."
+            },
+            {
+              "title": "Separate storage",
+              "body": "Backup data is held on storage separate from the live service, so losing a server does not lose its backups."
+            },
+            {
+              "title": "Restore path",
+              "body": "Restores run against the service, with the selected backup shown before the restore begins."
+            },
+            {
+              "title": "Failure visibility",
+              "body": "A failed run is recorded as failed, which is the only way to know a backup plan is not quietly doing nothing."
+            }
+          ]
         }
       ]
     },
@@ -2687,6 +5176,42 @@
         {
           "q": "Does it protect against volumetric attacks?",
           "a": "Network-level flood mitigation is part of the platform, but the capacity available depends on the region and provider. A firewall is a policy control, not a substitute for mitigation capacity."
+        }
+      ],
+      "sections": [
+        {
+          "type": "features",
+          "heading": "What you can express",
+          "kicker": "Control",
+          "items": [
+            {
+              "title": "Ordered evaluation",
+              "body": "Rules are applied in sequence and the order is shown, because order is what determines the outcome.",
+              "icon": "management/firewall.svg"
+            },
+            {
+              "title": "Default deny",
+              "body": "A policy of closing everything and opening what the service needs is the one that ages well.",
+              "icon": "icons/shield.svg"
+            },
+            {
+              "title": "Rate limiting",
+              "body": "Limit connections from a source so a brute-force attempt or a runaway client cannot consume the service."
+            },
+            {
+              "title": "Source restrictions",
+              "body": "Restrict administrative ports to known addresses so SSH is not reachable from the whole internet.",
+              "icon": "tools/ip.svg"
+            },
+            {
+              "title": "Per-service rules",
+              "body": "Rules are attached to a specific server, so a change is scoped to the thing it was meant for."
+            },
+            {
+              "title": "Auditable changes",
+              "body": "Rule changes are recorded against your account, which makes an incident review possible."
+            }
+          ]
         }
       ]
     },
@@ -2814,6 +5339,42 @@
           "q": "Do addresses transfer if I move servers?",
           "a": "A floating address can be reassigned within the same region. A change of region means a new address."
         }
+      ],
+      "sections": [
+        {
+          "type": "features",
+          "heading": "What you can do",
+          "kicker": "Address management",
+          "items": [
+            {
+              "title": "See the assignment",
+              "body": "Every address shows the service it belongs to, so an audit does not require a spreadsheet.",
+              "icon": "tools/ip.svg"
+            },
+            {
+              "title": "Set reverse DNS",
+              "body": "PTR records for your addresses, which mail servers and log correlation both depend on.",
+              "icon": "management/dns.svg"
+            },
+            {
+              "title": "Move an address",
+              "body": "A floating address can be reassigned to another server, which is what makes failover practical."
+            },
+            {
+              "title": "IPv6 where available",
+              "body": "Dual-stack assignment where the region and provider support it."
+            },
+            {
+              "title": "Justification for more",
+              "body": "Additional address requests are assessed against real need, which is what keeps the pool usable for everyone."
+            },
+            {
+              "title": "Abuse handling",
+              "body": "Addresses reported for abuse are handled under the Acceptable Use Policy, whichever service holds them.",
+              "icon": "icons/shield.svg"
+            }
+          ]
+        }
       ]
     },
     "migration.php": {
@@ -2868,39 +5429,167 @@
           "q": "What if the migration does not work?",
           "a": "Verification happens before the switch, so a failed migration is caught while the original site is still live. If the new platform cannot run the application, you keep the old host and we say so."
         }
+      ],
+      "sections": [
+        {
+          "type": "steps",
+          "heading": "Six steps, in this order",
+          "kicker": "The sequence",
+          "items": [
+            {
+              "title": "Inventory",
+              "body": "We establish what is moving: files, databases, mailboxes, cron jobs, DNS records and any external service the site calls."
+            },
+            {
+              "title": "Provision the target",
+              "body": "The destination account or server is created and configured to match the application's requirements before anything is copied."
+            },
+            {
+              "title": "Copy the data",
+              "body": "Files and databases are transferred and the application is adjusted for the new path, hostname and connection details."
+            },
+            {
+              "title": "Verify on a real hostname",
+              "body": "The copied site is served on a temporary hostname and checked: pages resolve, forms submit, mail authenticates, the certificate is valid."
+            },
+            {
+              "title": "Switch DNS",
+              "body": "Only after verification, the domain's records are updated. Because the old host is untouched, this step is reversible."
+            },
+            {
+              "title": "Confirm and tidy",
+              "body": "We confirm the live site and mail behave, then the old copies and any temporary hostnames are removed."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "What we need from you",
+          "body": [
+            "Access to the current host, the domain's DNS control, and a list of anything the site depends on that is not obvious from the files — third-party APIs, scheduled jobs, unusual mail routing. Migrations go wrong when a dependency is discovered afterwards."
+          ]
+        }
       ]
     },
     "managed-services.php": {
       "title": "Managed Services",
       "category": "Infrastructure",
-      "headline": "Ask for management only where a plan offers it.",
+      "headline": "The work between a server and a reliable service",
       "summary": "Managed options are confirmed in a proposal or plan feature, not assumed for every server.",
       "visual": "management/managed-services",
       "features": [
         [
-          "Confirm the plan",
-          "Published specifications are the source of truth for resources and software."
+          "Provisioning and rebuilds",
+          "Create servers from a catalogue image, rebuild them from a known-good state, and record which image each server runs."
         ],
         [
-          "Keep ownership",
-          "Bring a domain you already control, or register one in the same account."
+          "Access management",
+          "Administrative access is issued and rotated through the platform, and server credentials are stored encrypted rather than pasted into tickets."
         ],
         [
-          "Ask before you migrate",
-          "The team can scope a move when you share the source and the target plan."
+          "Monitoring and alerting",
+          "Resource telemetry collected per server, with alerting so a saturation event is noticed while it is still an event."
+        ],
+        [
+          "Firewall control",
+          "Rules attached to the server, applied in a defined order, with the effective ruleset visible."
+        ],
+        [
+          "Backups",
+          "Scheduled jobs with a run history and a restore path from your account."
+        ],
+        [
+          "Reconciliation and logs",
+          "The platform compares desired state with provider reality and records every infrastructure operation for audit."
         ]
       ],
       "uses": [
-        "New projects",
-        "Migrations",
-        "Teams standardizing on one provider"
+        "Patching and hardening",
+        "Monitoring response",
+        "Incident handling",
+        "Change management"
       ],
       "related": [
-        "enterprise-servers.php",
-        "server-management.php",
-        "help-center.php"
+        "monitoring.php",
+        "backups.php",
+        "firewall.php",
+        "cloudhost247-hosting.php",
+        "operating-systems.php"
       ],
-      "slug": "managed-services"
+      "slug": "managed-services",
+      "seo_description": "Server management from CloudHost247: provisioning, operating-system lifecycle, monitoring, firewall control, backups, patching and hands-on administration.",
+      "faqs": [
+        {
+          "q": "Can you manage a server you did not provision?",
+          "a": "That depends on the provider and the access you can grant. Bring the details and we will confirm what is possible."
+        },
+        {
+          "q": "What counts as managed?",
+          "a": "The platform layer: operating system, runtime, monitoring, backups, firewall and response. Application-level administration and code changes are a separate engagement."
+        },
+        {
+          "q": "Do you support panels like cPanel or Plesk?",
+          "a": "Panels are provisioned where the platform is configured to install them, and the control panels page lists what is available rather than what is theoretically possible."
+        }
+      ],
+      "sections": [
+        {
+          "type": "features",
+          "heading": "What the platform does for you",
+          "kicker": "Available today",
+          "items": [
+            {
+              "title": "Provisioning and rebuilds",
+              "body": "Create servers from a catalogue image, rebuild them from a known-good state, and record which image each server runs.",
+              "icon": "icons/control.svg"
+            },
+            {
+              "title": "Access management",
+              "body": "Administrative access is issued and rotated through the platform, and server credentials are stored encrypted rather than pasted into tickets."
+            },
+            {
+              "title": "Monitoring and alerting",
+              "body": "Resource telemetry collected per server, with alerting so a saturation event is noticed while it is still an event."
+            },
+            {
+              "title": "Firewall control",
+              "body": "Rules attached to the server, applied in a defined order, with the effective ruleset visible.",
+              "icon": "management/firewall.svg"
+            },
+            {
+              "title": "Backups",
+              "body": "Scheduled jobs with a run history and a restore path from your account."
+            },
+            {
+              "title": "Reconciliation and logs",
+              "body": "The platform compares desired state with provider reality and records every infrastructure operation for audit."
+            }
+          ]
+        },
+        {
+          "type": "checks",
+          "heading": "Hand the platform layer to us",
+          "kicker": "Managed services",
+          "items": [
+            {
+              "title": "Patching and hardening",
+              "body": "Operating system and platform components patched on a schedule, with the changes recorded."
+            },
+            {
+              "title": "Monitoring response",
+              "body": "Alerts are acted on rather than merely delivered — the difference between monitoring and management."
+            },
+            {
+              "title": "Incident handling",
+              "body": "A named path for an incident: who is looking, what is being tried, and what customers are told."
+            },
+            {
+              "title": "Change management",
+              "body": "Changes made deliberately, with a way back, instead of directly on production at 17:55 on a Friday."
+            }
+          ]
+        }
+      ]
     },
     "documentation.php": {
       "title": "Documentation",
@@ -2947,7 +5636,8 @@
           "q": "Can I contribute a fix to the documentation?",
           "a": "Documentation lives with the platform source. Raise it through support and it goes to the team that owns the relevant area."
         }
-      ]
+      ],
+      "sections": []
     }
   },
   "navigation": [
@@ -3157,11 +5847,11 @@
             },
             {
               "label": "Domain Extensions",
-              "url": "domain.php#pricing"
+              "url": "domain.php"
             },
             {
               "label": "Bulk Domain Search",
-              "url": "domain.php#search"
+              "url": "domain.php"
             },
             {
               "label": "Domain Registration",
@@ -3178,7 +5868,7 @@
             },
             {
               "label": "WHOIS / RDAP Lookup",
-              "url": "domain.php#whois"
+              "url": "tools/domain-whois"
             },
             {
               "label": "My Domains",
@@ -3191,19 +5881,19 @@
           "links": [
             {
               "label": "Domain Auctions",
-              "url": "domain.php#auctions"
+              "url": "domain.php"
             },
             {
               "label": "Domain Appraisal",
-              "url": "domain.php#appraisal"
+              "url": "domain.php"
             },
             {
               "label": "Domain Broker",
-              "url": "domain.php#broker"
+              "url": "domain.php"
             },
             {
               "label": "Domain Club",
-              "url": "domain.php#club"
+              "url": "domain.php"
             },
             {
               "label": "Domain Services Overview",
@@ -3706,11 +6396,11 @@
         },
         {
           "label": "Domain Extensions",
-          "url": "domain.php#pricing"
+          "url": "domain.php"
         },
         {
           "label": "WHOIS / RDAP",
-          "url": "domain.php#whois"
+          "url": "tools/domain-whois"
         },
         {
           "label": "DNS Management",
@@ -3718,23 +6408,23 @@
         },
         {
           "label": "Bulk Domain Search",
-          "url": "domain.php#search"
+          "url": "domain.php"
         },
         {
           "label": "Domain Auctions",
-          "url": "domain.php#auctions"
+          "url": "domain.php"
         },
         {
           "label": "Domain Appraisal",
-          "url": "domain.php#appraisal"
+          "url": "domain.php"
         },
         {
           "label": "Domain Broker",
-          "url": "domain.php#broker"
+          "url": "domain.php"
         },
         {
           "label": "Domain Club",
-          "url": "domain.php#club"
+          "url": "domain.php"
         }
       ]
     },
