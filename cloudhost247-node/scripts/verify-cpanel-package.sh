@@ -103,6 +103,28 @@ else
   fail "migrations complete" "package has $PACKED_MIGRATIONS, source has $SOURCE_MIGRATIONS"
 fi
 
+# --- The package is the checkout's own build, not an older one -----------------------------------
+# Every check above answers "is this a complete rebuild?"; they cannot tell two rebuilds apart, so a
+# package built from an earlier commit passes them all (and one such package really did pass, two
+# commits behind, while `release/` still held it). A one-commit-old upload is exactly the failure
+# this script exists to prevent, so the compiled trees are compared file by file against the
+# checkout the package would be deployed from. `package-cpanel.sh` builds before it zips, so after a
+# build these directories are present; when they are not (a fresh clone, no npm install), the check
+# says so instead of pretending to have compared something.
+LOCAL_BUILT=0
+if [ -d public/assets ] && [ -d dist/src ]; then LOCAL_BUILT=1; fi
+if [ "$LOCAL_BUILT" = 1 ]; then
+  DRIFT="$( { diff -rq --exclude='*.map' "$ROOT/public" public 2>/dev/null || true; } | head -4)"
+  DRIFT="${DRIFT}$( { diff -rq --exclude='*.map' "$ROOT/dist" dist 2>/dev/null || true; } | head -4)"
+  if [ -z "$DRIFT" ]; then
+    pass "matches this checkout" "public/ and dist/ are byte-identical to the current build"
+  else
+    fail "matches this checkout" "the package was built from different source (run bash scripts/package-cpanel.sh again): $(echo "$DRIFT" | head -1)"
+  fi
+else
+  pass "matches this checkout" "skipped: public/ and dist/ are not built here (run npm run build first)"
+fi
+
 # --- Nothing secret is inside --------------------------------------------------------------------
 if unzip -l "$ZIP" | grep -qE '(^|/)\.env$'; then
   fail "no .env" "the archive contains .env — never ship the environment file"

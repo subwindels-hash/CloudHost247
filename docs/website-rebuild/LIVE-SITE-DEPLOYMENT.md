@@ -161,9 +161,14 @@ bash scripts/verify-cpanel-package.sh            # newest package in release/
 It opens the archive and fails loudly on the pre-rebuild shell
 (`the package is PRE-REBUILD (its shell reads "CloudHost247 — Cloud hosting, built for your next
 idea") — do not upload it`), on a shell whose entry bundle is missing, on any bundle still carrying
-the deleted `Not yet built on this platform` copy, on a missing media tree, and on fewer migrations
-than the source tree. `scripts/package-cpanel.sh` runs it automatically against its own output, so a
-fresh build cannot hand you a stale archive silently.
+the deleted `Not yet built on this platform` copy, on a missing media tree, on fewer migrations than
+the source tree, and — the check that catches a package which is a *rebuild* but an **older** one —
+on any file under `public/` or `dist/` that differs from the checkout you run it in
+(`the package was built from different source (run bash scripts/package-cpanel.sh again)`). That last
+one matters: a package one commit behind passes every "is this a rebuild?" check, which is exactly
+how a fix can be tested, verified and then not deployed.
+`scripts/package-cpanel.sh` runs the verifier automatically against its own output, so a fresh build
+cannot hand you a stale archive silently.
 
 **No local Node?** The same build runs in GitHub: **Actions → "Build deployment package" → Run
 workflow**. It builds from the selected commit, verifies the package with the same script, and
