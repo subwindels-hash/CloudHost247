@@ -16,6 +16,7 @@ export default defineConfig({
     include: ['tests/**/*.test.ts', 'frontend/tests/**/*.test.{ts,tsx}'],
     environment: 'node',
     environmentMatchGlobs: [['frontend/**', 'jsdom']],
+    setupFiles: ['./frontend/tests/setup.ts'],
     testTimeout: 30_000,
     hookTimeout: 30_000,
   },

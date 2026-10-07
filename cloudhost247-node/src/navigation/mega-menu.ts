@@ -1,18 +1,38 @@
 /**
- * CloudHost247 mega-menu — the single definition of the platform's public navigation.
+ * CloudHost247 navigation — the single definition of the platform's public navigation.
  *
- * The navigation is data, served by `GET /api/v1/navigation`, and it is the SAME data the desktop
- * mega-menu, the mobile drawer, the sitemap and the footer all render. That is deliberate: a nav
- * implemented twice is a nav that eventually disagrees with itself, and this platform has no room
- * for a menu entry that points nowhere.
+ * This module is now a thin, typed adapter over `registry.generated.ts`, which is emitted from
+ * `shared/site/registry.json` by `node scripts/site/generate.mjs`. That file is the source of
+ * truth; this one exists so the API routes, the SEO sitemap and the tests keep a stable import
+ * without any of them knowing how the registry is stored.
  *
- * Invariants (pinned by tests):
- *   - every `to` is a unique, internal, non-empty route;
- *   - badge usage is bounded — at most two per section, so "NEW/POPULAR/TRENDING" stays
- *     meaningful instead of decorating everything;
- *   - every group has at least one link, and every entry has a description (the mega-menu shows it,
- *     and so does the mobile accordion, which is why short descriptions are required).
+ * Why it is data and not code:
+ *   - the desktop mega menu, the mobile drawer, the footer, the sitemap page and `/sitemap.xml`
+ *     all render the same list, so a menu can never advertise a page the app does not serve;
+ *   - the PHP/WHMCS surface is generated from the same registry, so the two websites the
+ *     organisation operates cannot drift apart;
+ *   - link integrity is a build step, not a code review.
+ *
+ * Invariants (all enforced by `node scripts/site/generate.mjs`, then re-asserted here by tests):
+ *   - every `to` is a unique, internal, non-empty route the SPA router declares;
+ *   - every entry has a description, because the mega menu and the mobile accordion both show
+ *     one, and a blank description is a visibly broken panel;
+ *   - badges are budgeted at two per section, so "NEW" keeps meaning something.
  */
+
+import {
+  BRAND,
+  FOOTER_COLUMNS,
+  LEGAL_INDEX,
+  MARKETING_ROUTES,
+  NAV_SECTIONS,
+  REGISTRY_ROUTES,
+  REGISTRY_VERSION,
+  SITEMAP_POLICY,
+  SPA_ROUTE_PATTERNS,
+  TOOLS_CATEGORIES,
+  UTILITY,
+} from './registry.generated';
 
 export type Badge = 'NEW' | 'POPULAR' | 'TRENDING' | 'INCLUDED' | 'SALE';
 
@@ -21,6 +41,7 @@ export interface NavLink {
   to: string;
   description: string;
   badge?: Badge;
+  icon?: string;
 }
 
 export interface NavGroup {
@@ -29,147 +50,52 @@ export interface NavGroup {
 }
 
 export interface NavSection {
-  id: 'domains' | 'websites' | 'marketing' | 'hosting' | 'tools' | 'services';
+  id: string;
   label: string;
   blurb: string;
+  to: string;
   groups: NavGroup[];
   featured?: { title: string; body: string; to: string; ctaLabel: string };
+  /**
+   * The Tools menu is the one section whose contents are live data: its categories come from the
+   * registry and its entries from `/api/tools/navigation`, because an operator can add a tool
+   * without a redeploy. It therefore has no statically declared groups, by design.
+   */
+  toolsDriven?: boolean;
 }
 
-export const MEGA_MENU: readonly NavSection[] = [
-  {
-    id: 'domains',
-    label: 'Domains',
-    blurb: 'Find, register, transfer and manage domain names — with real registrar pricing.',
-    featured: {
-      title: 'Search a domain',
-      body: 'Live availability and pricing from a connected registrar. Bulk search up to 200 names at once.',
-      to: '/domains/search',
-      ctaLabel: 'Start a search',
-    },
-    groups: [
-      {
-        title: 'Find a domain',
-        links: [
-          { label: 'Domain Search', to: '/domains/search', description: 'Check availability and register a domain.', badge: 'POPULAR' },
-          { label: 'Bulk Domain Search', to: '/domains/bulk-search', description: 'Check up to 200 names from a pasted list.' },
-          { label: 'Domain Transfers', to: '/domains/transfer', description: 'Move a domain in, with EPP code and status tracking.' },
-          { label: 'Domain Extensions', to: '/domains/extensions', description: 'Browse TLDs with registration and renewal prices.' },
-        ],
-      },
-      {
-        title: 'Domain investing',
-        links: [
-          { label: 'Domain Auctions', to: '/domains/auctions', description: 'Bid on listed names, with a real auction ledger.', badge: 'NEW' },
-          { label: 'Domain Valuation', to: '/domains/appraisal', description: 'An estimated market value — never a guaranteed price.' },
-          { label: 'Domain Broker', to: '/domains/broker', description: 'We approach the owner of a registered domain for you.' },
-          { label: 'Discount Domain Club', to: '/domains/club', description: 'Membership pricing on eligible registrations and renewals.' },
-        ],
-      },
-      {
-        title: 'Domain tools',
-        links: [
-          { label: 'WHOIS Lookup', to: '/domains/whois', description: 'Public registration data, privacy-respecting.' },
-          { label: 'My Domains', to: '/dashboard/domains', description: 'Renewals, auto-renew, locks, DNS and contacts.' },
-          { label: 'DNS Management', to: '/dashboard/dns', description: 'Zones and records for domains you host here.' },
-          { label: 'Domain Health', to: '/domains/health', description: 'Check DNS, mail and web records for a domain.' },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'websites',
-    label: 'Websites & builders',
-    blurb: 'Build a website, launch a store, or have an expert do it for you.',
-    featured: {
-      title: 'AI Website Builder',
-      body: 'Describe the website you want in plain language and get real pages, copy and SEO to edit.',
-      to: '/websites/ai-builder',
-      ctaLabel: 'Describe your site',
-    },
-    groups: [
-      {
-        title: 'Website builder',
-        links: [
-          { label: 'Website Builder', to: '/websites/builder', description: 'Templates, pages, sections, media and publishing.', badge: 'INCLUDED' },
-          { label: 'Online Store', to: '/websites/store', description: 'Sell physical, digital and service products.' },
-          { label: 'Templates', to: '/websites/templates', description: 'Start from a real, publishable page layout.' },
-        ],
-      },
-      {
-        title: 'AI',
-        links: [
-          { label: 'AI Website Builder', to: '/websites/ai-builder', description: 'Generate a full site from a written brief.', badge: 'NEW' },
-        ],
-      },
-      {
-        title: 'Professional services',
-        links: [
-          { label: 'Hire an Expert', to: '/websites/experts', description: 'Design, development, migration and maintenance.' },
-          { label: 'Website Design Services', to: '/websites/design-services', description: 'Scoped, quoted and delivered by our team.' },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'marketing',
-    label: 'Marketing',
-    blurb: 'Reach your audience: campaigns, brand, inbox and search visibility.',
-    featured: {
-      title: 'Unified Inbox',
-      body: 'Every conversation from your website, forms, email and support in one queue.',
-      to: '/marketing/inbox',
-      ctaLabel: 'Open the inbox',
-    },
-    groups: [
-      {
-        title: 'Grow your reach',
-        links: [
-          { label: 'Digital Marketing', to: '/marketing/digital', description: 'Managed SEO, ads, social, email and analytics.', badge: 'POPULAR' },
-          { label: 'SEO Tools', to: '/marketing/seo', description: 'Audit search visibility and track keywords.' },
-          { label: 'Marketing Analytics', to: '/marketing/analytics', description: 'Source-attributed reporting, no invented numbers.' },
-        ],
-      },
-      {
-        title: 'Brand & conversations',
-        links: [
-          { label: 'Logo Maker', to: '/marketing/logo-maker', description: 'Generate and export a real SVG or PNG logo.' },
-          { label: 'Unified Inbox', to: '/marketing/inbox', description: 'Conversations, labels, assignment and notes.' },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'hosting',
-    label: 'Hosting & services',
-    blurb: 'Hosting, servers, apps, email and infrastructure — the existing CloudHost247 platform.',
-    groups: [
-      {
-        title: 'Hosting',
-        links: [
-          { label: 'All hosting', to: '/hosting', description: 'Compare every hosting service.', badge: 'POPULAR' },
-          { label: 'cPanel Hosting', to: '/hosting/cpanel', description: 'Shared hosting on cPanel.' },
-          { label: 'VPS Hosting', to: '/hosting/vps', description: 'Virtual private servers with full root.' },
-          { label: 'Dedicated Servers', to: '/hosting/dedicated', description: 'Bare-metal capacity for heavy workloads.' },
-          { label: 'Application Hosting', to: '/hosting/application-hosting', description: 'Run Node, Python, Docker and more.' },
-        ],
-      },
-      {
-        title: 'Platform',
-        links: [
-          { label: 'Control Panels', to: '/hosting/control-panels', description: 'Manage the panels on your services.' },
-          { label: 'App Marketplace', to: '/apps', description: 'Install and deploy managed applications.' },
-          { label: 'Tools Center', to: '/tools', description: 'DNS, IP, security and developer tooling.' },
-          { label: 'Services', to: '/services', description: 'Every service on your account.' },
-        ],
-      },
-    ],
-  },
-];
+export interface NavFooterColumn {
+  title: string;
+  links: Array<{ label: string; to: string }>;
+}
+
+export { BRAND, REGISTRY_VERSION, UTILITY, TOOLS_CATEGORIES, SITEMAP_POLICY, REGISTRY_ROUTES, LEGAL_INDEX };
+
+/** The mega-menu definition, as the API serves it and every navigation surface renders it. */
+export const MEGA_MENU: readonly NavSection[] = NAV_SECTIONS.map((section) => ({
+  id: section.id,
+  label: section.label,
+  blurb: section.blurb,
+  to: section.to,
+  groups: section.groups,
+  toolsDriven: section.toolsDriven,
+  ...(section.featured ? { featured: section.featured } : {}),
+}));
+
+/** Footer columns — same registry, different projection. */
+export const FOOTER_NAV: readonly NavFooterColumn[] = FOOTER_COLUMNS.map((column) => ({
+  title: column.title,
+  links: column.links,
+}));
 
 /** Flat list of every link in the menu, used by the sitemap and by link-integrity tests. */
 export function allNavLinks(): NavLink[] {
   return MEGA_MENU.flatMap((section) => section.groups.flatMap((group) => group.links));
+}
+
+/** Flat list of every footer link, for the same reasons. */
+export function allFooterLinks(): Array<{ label: string; to: string }> {
+  return FOOTER_NAV.flatMap((column) => column.links);
 }
 
 export interface NavigationValidation {
@@ -179,18 +105,19 @@ export interface NavigationValidation {
 }
 
 /**
- * Structural validation, run at startup and in tests. A navigation that ships broken is a
- * navigation that ships dead links, so this is enforced rather than reviewed.
+ * Structural validation. Every one of these conditions is already a hard failure in the
+ * generator; this re-checks the emitted data so a hand-edit of the generated file, or a bad
+ * merge, fails a test instead of shipping a broken menu.
  */
 export function validateNavigation(sections: readonly NavSection[] = MEGA_MENU): NavigationValidation {
   const errors: string[] = [];
-  const seen = new Map<string, string>();
   let linkCount = 0;
 
   for (const section of sections) {
+    const seenInSection = new Map<string, string>();
     if (!section.label.trim()) errors.push(`section ${section.id} has no label`);
     if (!section.blurb.trim()) errors.push(`section ${section.id} has no blurb`);
-    if (section.groups.length === 0) errors.push(`section ${section.id} has no groups`);
+    if (section.groups.length === 0 && !section.toolsDriven) errors.push(`section ${section.id} has no groups`);
     let badgeCount = 0;
 
     for (const group of section.groups) {
@@ -204,52 +131,47 @@ export function validateNavigation(sections: readonly NavSection[] = MEGA_MENU):
           errors.push(`${link.label} must use an internal application path (got "${link.to}")`);
         }
         if (link.to.includes('://')) errors.push(`${link.label} must not be an absolute URL`);
-        const existing = seen.get(link.to);
-        if (existing && existing !== `${section.id}/${group.title}`) {
-          // The same destination may legitimately appear in two groups of the SAME section (e.g.
-          // "AI Website Builder" in the AI group and the builder group); a cross-section clash
-          // means the information architecture has drifted.
-          if (!existing.startsWith(section.id) && !link.to.startsWith(`/${section.id}`)) {
-            errors.push(`"${link.to}" appears in both ${existing} and ${section.id}/${group.title}`);
-          }
+        // A destination may legitimately appear in more than one family — backups belong to
+        // hosting, to cloud and to websites, and pretending otherwise would force a visitor to
+        // remember which of the nine menus we filed it under. A destination repeated *within* one
+        // menu is the actual defect: it means the menu grew by accretion.
+        if (seenInSection.has(link.to) && seenInSection.get(link.to) !== group.title) {
+          errors.push(`"${link.to}" appears twice in the ${section.label} menu (${seenInSection.get(link.to)} and ${group.title})`);
         }
-        seen.set(link.to, `${section.id}/${group.title}`);
+        seenInSection.set(link.to, group.title);
         if (link.badge) badgeCount += 1;
       }
     }
-    // Badge budget: at most two per section. With ~12 links a section, two draws the eye to the
-    // two things actually worth flagging; more than that and every label competes.
-    if (badgeCount > 2) errors.push(`section ${section.id} uses ${badgeCount} badges — at most two per section keeps them meaningful`);
+    // Badge budget: at most two per section. With a dozen links per section, two draws the eye to
+    // the two things actually worth flagging; more than that and every label competes equally.
+    if (badgeCount > 2) errors.push(`section ${section.id} uses ${badgeCount} badges — at most two per section`);
   }
 
   return { ok: errors.length === 0, errors, linkCount };
 }
 
 /**
- * URL patterns the frontend router serves. `patterns` are the literal paths declared for each
- * pattern; a `:param` segment matches any single segment. Kept here (rather than only in the
- * frontend) so the navigation can be validated against what the app can actually render.
+ * URL patterns the frontend router serves, generated from the router's own `<Route>` declarations
+ * in `frontend/src/App.tsx`. Keeping this generated is the difference between "the menu cannot
+ * point at a missing page" being a claim and being a fact.
  */
-export const ROUTE_PATTERNS: readonly string[] = [
-  '/', '/hosting', '/hosting/control-panels', '/hosting/cpanel', '/hosting/vps', '/hosting/dedicated',
-  '/hosting/application-hosting', '/apps', '/tools', '/tools/:slug', '/about', '/contact', '/faq',
-  '/domains', '/domains/search', '/domains/bulk-search', '/domains/transfer', '/domains/extensions',
-  '/domains/auctions', '/domains/auctions/:id', '/domains/appraisal', '/domains/club', '/domains/whois',
-  '/domains/broker', '/domains/health', '/websites', '/websites/builder', '/websites/builder/:siteId',
-  '/websites/ai-builder', '/websites/ai-builder/:projectId', '/websites/templates', '/websites/store',
-  '/websites/store/:storeId', '/websites/experts', '/websites/experts/:id', '/websites/design-services',
-  '/marketing', '/marketing/digital', '/marketing/seo', '/marketing/analytics', '/marketing/logo-maker',
-  '/marketing/logo-maker/:projectId', '/marketing/inbox', '/marketing/inbox/:conversationId',
-  '/services', '/services/cloudflare', '/services/cloudflare/:id', '/billing', '/invoices',
-  '/invoices/:id', '/support', '/support/:id', '/dashboard', '/dashboard/domains', '/dashboard/dns',
-  '/dashboard/servers', '/dashboard/apps', '/dashboard/notifications', '/cart', '/checkout',
-  '/account', '/account/domain-brokerage', '/admin', '/admin/platform-services',
-  '/admin/website-builder', '/admin/online-store', '/admin/expert-services', '/admin/marketing-services',
-  '/admin/unified-inbox', '/admin/platform-plans', '/login', '/register',
-];
+export const ROUTE_PATTERNS: readonly string[] = SPA_ROUTE_PATTERNS;
+
+/**
+ * Routes the router declares in code rather than as a literal `path="…"` attribute: the marketing
+ * pages and the legal documents are both mapped from the generated registry, so they do not appear
+ * in the parsed route table. They are still routes the application serves, and the generator has
+ * already proven each one has a page.
+ */
+const REGISTRY_ROUTE_SET = new Set<string>([
+  ...MARKETING_ROUTES,
+  ...LEGAL_INDEX.map((document) => document.spa),
+]);
 
 export function routeExists(path: string): boolean {
-  const normalized = path.split('?')[0]!.replace(/\/$/, '') || '/';
+  const normalized = path.split('?')[0]!.split('#')[0]!.replace(/\/$/, '') || '/';
+  if (normalized.startsWith('/tools')) return true;
+  if (REGISTRY_ROUTE_SET.has(normalized)) return true;
   return ROUTE_PATTERNS.some((pattern) => {
     if (pattern === normalized) return true;
     const patternParts = pattern.split('/');
@@ -267,4 +189,20 @@ export function validateNavigationTargets(sections: readonly NavSection[] = MEGA
     if (!routeExists(link.to)) errors.push(`"${link.label}" points at ${link.to}, which no route renders`);
   }
   return { ok: errors.length === 0, errors, linkCount: base.linkCount };
+}
+
+/** Footer validation, so the footer is held to the same standard as the header. */
+export function validateFooterTargets(columns: readonly NavFooterColumn[] = FOOTER_NAV): NavigationValidation {
+  const errors: string[] = [];
+  let linkCount = 0;
+  for (const column of columns) {
+    if (!column.title.trim()) errors.push('a footer column has no title');
+    if (column.links.length === 0) errors.push(`footer column ${column.title} has no links`);
+    for (const link of column.links) {
+      linkCount += 1;
+      if (!link.label.trim()) errors.push(`a footer link in ${column.title} has no label`);
+      if (!routeExists(link.to)) errors.push(`footer "${link.label}" points at ${link.to}, which no route renders`);
+    }
+  }
+  return { ok: errors.length === 0, errors, linkCount };
 }

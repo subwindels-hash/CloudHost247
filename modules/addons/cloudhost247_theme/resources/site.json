@@ -3,98 +3,198 @@
     "web-hosting.php": {
       "title": "Web Hosting",
       "category": "Hosting",
-      "headline": "A home for your next big idea.",
+      "headline": "Web hosting that stays fast as your site grows",
       "summary": "Bring your website online with a hosting plan that fits your project. Compare the published resources and choose your next step with confidence.",
       "visual": "hosting/web-hosting",
       "features": [
         [
-          "Your website, your way",
-          "Publish your business website, portfolio or online project. Check each plan for supported software and resource limits."
+          "SSL as standard",
+          "Every domain you add to the account can be issued a certificate, so browsers treat it as secure from the first visit."
         ],
         [
-          "Room to grow",
-          "Compare storage, traffic and upgrade options before choosing your plan."
+          "Mailboxes on your domain",
+          "Create addresses at your own domain with spam filtering, and reach them from webmail or any mail client."
         ],
         [
-          "One customer workspace",
-          "Manage your services, invoices and support requests from your CloudHost247 account."
+          "Databases included",
+          "MySQL-compatible databases for the applications you install, managed alongside the site rather than separately."
+        ],
+        [
+          "Application installs",
+          "Common applications can be installed onto your account, and managed from the same place as the rest of your services."
+        ],
+        [
+          "Storage that is not fragile",
+          "Web content lives on storage with scheduled backups, so a mistake is recoverable rather than final."
+        ],
+        [
+          "Monitoring and alerts",
+          "We watch the service so that an outage is something we are already responding to, not something you discover."
         ]
       ],
       "uses": [
-        "Business websites",
-        "Personal portfolios",
-        "Growing online projects"
+        "Free SSL on every domain",
+        "Mailboxes and databases included",
+        "One-click application installs",
+        "Support from a real operator"
       ],
       "related": [
-        "domain.php",
+        "wordpress-hosting.php",
+        "business-hosting.php",
+        "email-hosting.php",
         "ssl-certificate.php",
-        "email-hosting.php"
+        "migration.php",
+        "backups.php"
       ],
-      "slug": "web-hosting"
+      "slug": "web-hosting",
+      "seo_description": "CloudHost247 web hosting runs your website on managed infrastructure with SSD-backed storage, free SSL, mailboxes, databases and 24/7 support.",
+      "faqs": [
+        {
+          "q": "Can I move my existing website to CloudHost247?",
+          "a": "Yes. We copy the site and mailboxes to the new hosting, verify it responds correctly, and schedule the DNS change with you. See the migration page for the exact sequence."
+        },
+        {
+          "q": "Is a control panel included?",
+          "a": "Plans are provisioned with a control panel where the plan supports it. The control panels page lists the panel families the platform is configured to provision, and your account shows the panel for the service you actually have."
+        },
+        {
+          "q": "What happens if I outgrow the plan?",
+          "a": "Hosting plans can be upgraded without rebuilding your website. Resources are reallocated on the same infrastructure the site already runs on."
+        },
+        {
+          "q": "Do you offer a money-back window?",
+          "a": "Refunds and cancellation windows are set out in the Refund and Cancellation Policy, which is the authoritative document for any claim about refunds."
+        }
+      ]
     },
     "wordpress-hosting.php": {
       "title": "WordPress Hosting",
       "category": "Hosting",
-      "headline": "Your content. A stronger foundation.",
+      "headline": "WordPress hosting without the maintenance chores",
       "summary": "Build your WordPress website on a plan suited to your publishing workflow. Review the available hosting options before you launch.",
       "visual": "hosting/wordpress-hosting",
       "features": [
         [
-          "Built around your content",
-          "Choose resources for your pages, media library and editorial workflow."
+          "Runtime tuned for WordPress",
+          "PHP versions and limits chosen for WordPress rather than left at a generic default that produces white screens on plugin-heavy sites."
         ],
         [
-          "Plan your launch",
-          "Confirm PHP, database and plugin requirements against the selected hosting plan."
+          "Caching that survives updates",
+          "Page caching that is invalidated properly when content changes, so the cache helps instead of showing visitors stale pages."
         ],
         [
-          "Keep ownership",
-          "Bring your existing domain and website, or start with a new project."
+          "HTTPS end to end",
+          "A certificate on every domain and subdomain in the account, renewed automatically."
+        ],
+        [
+          "Backups before you need them",
+          "Scheduled backups of the site and its database, with restore handled from your account."
+        ],
+        [
+          "Database access you can use",
+          "Reach the WordPress database directly for exports, migrations or debugging — no support ticket needed."
+        ],
+        [
+          "Hardened by default",
+          "Platform-level filtering, sensible file permissions and abuse monitoring that runs whether or not you installed a plugin for it."
         ]
       ],
       "uses": [
-        "Editorial websites",
-        "Business sites",
-        "WordPress projects"
+        "WordPress-ready runtime",
+        "HTTPS from the first visit",
+        "Scheduled backups",
+        "Staging-friendly workflow"
       ],
       "related": [
         "web-hosting.php",
-        "domain.php",
-        "website-design.php"
+        "ssl-certificate.php",
+        "backups.php",
+        "migration.php",
+        "security.php",
+        "applications.php"
       ],
-      "slug": "wordpress-hosting"
+      "slug": "wordpress-hosting",
+      "seo_description": "WordPress hosting on CloudHost247: managed runtime, HTTPS, scheduled backups, database access and the operational work handled for you.",
+      "faqs": [
+        {
+          "q": "Can I use my own WordPress plugins and themes?",
+          "a": "Yes. The hosting does not restrict which plugins or themes you install, subject to the Acceptable Use Policy."
+        },
+        {
+          "q": "Do you update WordPress for me?",
+          "a": "The platform keeps the underlying runtime patched. WordPress core, themes and plugins are updated from your own dashboard, because only you can know whether a specific update is safe for your plugins."
+        },
+        {
+          "q": "Can I stage a change before it goes live?",
+          "a": "You can keep a copy of the site and its database on the same account to test a change. If you want a formal staging workflow, talk to us about the plan you need."
+        },
+        {
+          "q": "Is WordPress migrations supported?",
+          "a": "Yes — the migration process copies both the WordPress files and the database, fixes the site URL, and only then switches DNS."
+        }
+      ]
     },
     "cpanel-hosting.php": {
       "title": "cPanel Hosting",
       "category": "Hosting",
-      "headline": "Familiar tools. A fresh start.",
+      "headline": "The hosting panel your team already knows",
       "summary": "Explore hosting options for a cPanel workflow. Compare the published plan details for account limits, storage and included tools.",
       "visual": "hosting/cpanel-hosting",
       "features": [
         [
-          "Start with the requirements",
-          "Define the software, capacity and access your project needs."
+          "Mailboxes and forwarders",
+          "Create addresses at your domain, set forwarders and autoresponders, and reach mail from webmail or a client."
         ],
         [
-          "Compare the details",
-          "Review the published specifications and service terms. Availability is confirmed through the product catalog."
+          "Databases",
+          "MySQL-compatible databases with their own users, created and revoked from the panel."
         ],
         [
-          "Keep everything connected",
-          "Access service management, billing and support from your customer account."
+          "Domains and subdomains",
+          "Add domains and subdomains to the account and manage their document roots."
+        ],
+        [
+          "Certificates",
+          "Issue and renew TLS for the domains in the account, with HTTPS enforced where you want it."
+        ],
+        [
+          "Application installs",
+          "Install common applications onto the account without setting up a database or a document root by hand."
+        ],
+        [
+          "Backups",
+          "Scheduled backups of the account with a run history and a restore from your CloudHost247 account."
         ]
       ],
       "uses": [
-        "Website management",
-        "PHP websites",
-        "Small business projects"
+        "One interface for the whole account",
+        "Mailboxes, databases and SSL",
+        "Application installs",
+        "Managed underneath"
       ],
       "related": [
         "cloudhost247-hosting.php",
-        "domain.php",
-        "help-center.php"
+        "web-hosting.php",
+        "migration.php",
+        "ssl-certificate.php",
+        "backups.php"
       ],
-      "slug": "cpanel-hosting"
+      "slug": "cpanel-hosting",
+      "seo_description": "cPanel-based hosting from CloudHost247: mailboxes, databases, subdomains, SSL and one-click application installs, managed from the panel your team already knows.",
+      "faqs": [
+        {
+          "q": "Is cPanel available on every plan?",
+          "a": "Panel availability depends on the plan and on the deployment's configuration. The control panels page lists what is provisioned here, and the service in your account shows its own panel."
+        },
+        {
+          "q": "Can I migrate an existing cPanel account?",
+          "a": "Yes. The migration process copies the account's files, databases and mail, and verifies it on the new infrastructure before DNS changes."
+        },
+        {
+          "q": "Do I get SSH access?",
+          "a": "Where the plan provides it, yes. Full administrative access is what a VPS or dedicated server is for, and those are separate products."
+        }
+      ]
     },
     "plesk-hosting.php": {
       "title": "Plesk Hosting",
@@ -131,322 +231,662 @@
     "windows-hosting.php": {
       "title": "Windows Hosting",
       "category": "Hosting",
-      "headline": "A foundation for your Windows workload.",
+      "headline": "Windows hosting for .NET and Microsoft stacks",
       "summary": "Discuss the runtime, licensing and resource requirements of your Windows application, then compare the currently published plans.",
       "visual": "hosting/windows-hosting",
       "features": [
         [
-          "Start with the requirements",
-          "Define the software, capacity and access your project needs."
+          "ASP.NET",
+          "Run ASP.NET applications in the version the application targets, without rebuilding it for another platform."
         ],
         [
-          "Compare the details",
-          "Review the published specifications and service terms. Availability is confirmed through the product catalog."
+          "IIS management",
+          "Bindings, application pools and site settings handled through a management interface rather than a ticket."
         ],
         [
-          "Keep everything connected",
-          "Access service management, billing and support from your customer account."
+          "MSSQL databases",
+          "Microsoft SQL databases alongside the site, with the connection details you need for your configuration files."
+        ],
+        [
+          "Certificates and HTTPS",
+          "Certificates issued and renewed for each binding so secure endpoints do not expire silently."
+        ],
+        [
+          "Backups",
+          "Scheduled backups of site files and databases, restorable from your account."
+        ],
+        [
+          "Monitoring",
+          "The service is watched so failed application pools and exhausted disks are noticed before your users notice."
         ]
       ],
       "uses": [
-        "Windows applications",
-        "Business workloads",
-        "Migration planning"
+        "ASP.NET runtime",
+        "IIS site configuration",
+        "MSSQL databases",
+        "Managed certificates"
       ],
       "related": [
-        "cloudhost247-hosting.php",
-        "domain.php",
-        "help-center.php"
+        "web-hosting.php",
+        "business-hosting.php",
+        "ssl-certificate.php",
+        "backups.php",
+        "cloudhost247-hosting.php"
       ],
-      "slug": "windows-hosting"
+      "slug": "windows-hosting",
+      "seo_description": "Windows hosting from CloudHost247 for ASP.NET and Windows-based stacks, with MSSQL databases, IIS configuration and managed certificates.",
+      "faqs": [
+        {
+          "q": "Can I use this for a classic ASP application?",
+          "a": "Yes, classic ASP can be enabled on supported plans. Tell us what the application needs before ordering so the environment can be matched to it."
+        },
+        {
+          "q": "Is MSSQL or MySQL available?",
+          "a": "Both are relevant to different applications — MSSQL for Microsoft stacks, MySQL for most PHP applications. Confirm the database flavour you need when ordering."
+        },
+        {
+          "q": "Can I reach the server over RDP?",
+          "a": "Shared Windows hosting is managed hosting, not a remote desktop session. If you need full administrative control, a Windows dedicated server or RDP service is the correct product."
+        }
+      ]
     },
     "vps-hosting.php": {
       "title": "VPS Hosting",
       "category": "VPS",
-      "headline": "Your own space to build more.",
+      "headline": "A real server, without a real server's commitment",
       "summary": "Choose a virtual server around your application, not the other way around. Review real configurations, available images and plan-specific limits before ordering.",
       "visual": "cloud/vps",
       "features": [
         [
-          "Start with the requirements",
-          "Define the software, capacity and access your project needs."
+          "Guaranteed resources",
+          "Your allocation of CPU, memory and storage is reserved for your server. A neighbour's traffic peak is not your performance problem."
         ],
         [
-          "Compare the details",
-          "Review the published specifications and service terms. Availability is confirmed through the product catalog."
+          "Administrator access",
+          "Root or administrator access, so you install the runtime, the extensions and the services the application actually requires."
         ],
         [
-          "Keep everything connected",
-          "Access service management, billing and support from your customer account."
+          "Your choice of operating system",
+          "Provision from the operating-system catalogue, and rebuild from a known-good image if a change goes wrong."
+        ],
+        [
+          "Network control",
+          "Firewall rules attached to the server, applied in a defined order, with the effective ruleset visible in your account."
+        ],
+        [
+          "Backups",
+          "Scheduled backup jobs against the server, with a run history and a restore performed from your account."
+        ],
+        [
+          "Monitoring",
+          "CPU, memory, storage and traffic recorded over time, so a capacity problem is a graph rather than a guess."
         ]
       ],
       "uses": [
-        "Application servers",
-        "Development environments",
-        "Independent websites"
+        "You own the operating system",
+        "Or hand it over",
+        "Not sure which size?",
+        "Guaranteed, not burstable",
+        "Full administrative access",
+        "Choose the operating system"
       ],
       "related": [
         "cloudhost247-hosting.php",
-        "domain.php",
-        "help-center.php"
+        "vps-publiccloud.php",
+        "operating-systems.php",
+        "firewall.php",
+        "backups.php",
+        "server-management.php"
       ],
-      "slug": "vps-hosting"
+      "slug": "vps-hosting",
+      "seo_description": "VPS hosting from CloudHost247: guaranteed virtual resources, full administrative access, a choice of operating system and live plan pricing from the catalogue.",
+      "faqs": [
+        {
+          "q": "What is the difference between VPS hosting and shared hosting?",
+          "a": "Shared hosting gives you an account inside a managed platform. A VPS gives you an operating system you administer, with resources reserved for you. Move to a VPS when you need software the shared platform cannot run, or when resources are the constraint."
+        },
+        {
+          "q": "Can I install any software?",
+          "a": "Yes, subject to the Acceptable Use Policy. Administrator access means the runtime, the extensions and the services are your choice."
+        },
+        {
+          "q": "Is a control panel included?",
+          "a": "Panel availability is configuration on this platform, not a fixed promise. The control panels page lists what this deployment is set up to provision, and the panel attached to your server is shown in your account."
+        },
+        {
+          "q": "Can I upgrade a VPS later?",
+          "a": "Yes, where the plan allows a resize. Where it does not, the server can be rebuilt at a larger size from the same image with data restored from backup."
+        }
+      ]
     },
     "vps-privatecloud.php": {
       "title": "Private Cloud",
       "category": "Cloud",
-      "headline": "Infrastructure shaped around your business.",
+      "headline": "Capacity that belongs to one tenant only",
       "summary": "Plan a private-cloud environment around your isolation, capacity and operational requirements. Contact the team to confirm available configurations.",
       "visual": "cloud/private-cloud",
       "features": [
         [
-          "Start with the requirements",
-          "Define the software, capacity and access your project needs."
+          "No noisy neighbours",
+          "Performance is not affected by another tenant's load, because there is no other tenant on the same resources."
         ],
         [
-          "Compare the details",
-          "Review the published specifications and service terms. Availability is confirmed through the product catalog."
+          "A smaller blast radius",
+          "Isolation is a security property as well as a performance one: there is no shared host to be reached through."
         ],
         [
-          "Keep everything connected",
-          "Access service management, billing and support from your customer account."
+          "Easier to explain",
+          "A defined boundary is far easier to describe in a compliance or customer questionnaire than shared hosting is."
+        ],
+        [
+          "Your stack",
+          "Choose the operating system and configuration the workload needs, rather than working around a fixed image."
+        ],
+        [
+          "Network under your control",
+          "Addressing, firewall rules and connectivity designed around the application."
+        ],
+        [
+          "Managed if you want it",
+          "Operate it yourself, or have the CloudHost247 team run the platform layer for you."
         ]
       ],
       "uses": [
-        "Isolated workloads",
-        "Business infrastructure",
-        "Capacity planning"
+        "Reserved, not shared",
+        "Defined tenant boundary",
+        "Your choice of OS",
+        "Backed by dedicated hardware"
       ],
       "related": [
         "cloudhost247-hosting.php",
-        "domain.php",
-        "help-center.php"
+        "vps-publiccloud.php",
+        "dedicated-server.php",
+        "enterprise-servers.php",
+        "infrastructure.php"
       ],
-      "slug": "vps-privatecloud"
+      "slug": "vps-privatecloud",
+      "seo_description": "Private cloud from CloudHost247: isolated compute capacity reserved for one tenant, for workloads that cannot share hardware with anyone else.",
+      "faqs": [
+        {
+          "q": "How is this different from a dedicated server?",
+          "a": "A dedicated server gives you one physical machine. Private cloud gives you reserved capacity that can be split across instances, with the boundary defined around your organisation."
+        },
+        {
+          "q": "Can I connect it to my office network?",
+          "a": "Connectivity options depend on the facility and the provider configured for the region. Raise the requirement with sales and the available options are confirmed in writing."
+        },
+        {
+          "q": "Is it multi-tenant under the hood?",
+          "a": "It is designed so that your workloads do not share resources with another customer's. The exact architecture depends on the provider and facility involved, and is documented for you before you commit."
+        }
+      ]
     },
     "vps-publiccloud.php": {
       "title": "Public Cloud",
       "category": "Cloud",
-      "headline": "Make room for what comes next.",
+      "headline": "Compute that changes size when your traffic does",
       "summary": "Explore cloud resources for your online services. Availability, locations and scaling options are determined by the selected product and provider.",
       "visual": "cloud/public-cloud",
       "features": [
         [
-          "Start with the requirements",
-          "Define the software, capacity and access your project needs."
+          "Resize without rebuilding",
+          "Move to a larger or smaller instance shape as the workload changes, rather than migrating to a new product."
         ],
         [
-          "Compare the details",
-          "Review the published specifications and service terms. Availability is confirmed through the product catalog."
+          "Fast provisioning",
+          "Instances are created from a configured image, so a working server exists in minutes rather than days."
         ],
         [
-          "Keep everything connected",
-          "Access service management, billing and support from your customer account."
+          "Your choice of operating system",
+          "Provision from the catalogue of operating systems the platform holds images for."
+        ],
+        [
+          "Network control",
+          "Firewall rules and private addressing so the instance is only reachable where it should be."
+        ],
+        [
+          "Persistence",
+          "Attached storage survives a rebuild of the instance, which is what makes resizing safe."
+        ],
+        [
+          "Monitoring built in",
+          "Resource telemetry is collected so capacity decisions are made from data rather than from an alert at 03:00."
         ]
       ],
       "uses": [
-        "Web applications",
-        "Variable workloads",
-        "Online services"
+        "Resizable resources",
+        "Wide OS catalogue",
+        "Network and firewall controls",
+        "Monitored host"
       ],
       "related": [
         "cloudhost247-hosting.php",
-        "domain.php",
-        "help-center.php"
+        "vps-privatecloud.php",
+        "vps-hosting.php",
+        "infrastructure.php",
+        "monitoring.php"
       ],
-      "slug": "vps-publiccloud"
+      "slug": "vps-publiccloud",
+      "seo_description": "Elastic public cloud instances from CloudHost247: resize compute as demand changes, with the OS catalogue, network controls and monitoring included.",
+      "faqs": [
+        {
+          "q": "Is public cloud the same as a VPS?",
+          "a": "They overlap. The practical difference is elasticity: a VPS is a fixed allocation, while public cloud instances are designed to be resized as demand changes."
+        },
+        {
+          "q": "Can I control the network at the instance level?",
+          "a": "Yes. Firewall rules apply per server, and the platform records the addresses assigned to your service."
+        },
+        {
+          "q": "Can I run more than one instance?",
+          "a": "Yes. Multiple servers can be provisioned and managed from the same account, each with its own operating system and configuration."
+        }
+      ]
     },
     "dedicated-server.php": {
       "title": "Dedicated Servers",
       "category": "Dedicated",
-      "headline": "Dedicated resources. Focused possibilities.",
+      "headline": "The whole machine, nobody else on it",
       "summary": "Match your workload to a dedicated server configuration. Compare published hardware, network allowances and management options.",
       "visual": "servers/dedicated-servers",
       "features": [
         [
-          "Start with the requirements",
-          "Define the software, capacity and access your project needs."
+          "Undivided performance",
+          "Disk throughput, memory bandwidth and core count belong to your workload alone. That is what database and virtualisation hosts actually need."
         ],
         [
-          "Compare the details",
-          "Review the published specifications and service terms. Availability is confirmed through the product catalog."
+          "A physical boundary",
+          "Isolation is a property of the hardware rather than of a hypervisor configuration, which is far easier to state in a compliance answer."
         ],
         [
-          "Keep everything connected",
-          "Access service management, billing and support from your customer account."
+          "Sized to the workload",
+          "Configurations are chosen around measured requirements — cores, memory, storage and throughput — not a fixed tier list."
+        ],
+        [
+          "Full control",
+          "Administrator access to the whole machine: the operating system, the partitioning and every service on it."
+        ],
+        [
+          "Managed if you want",
+          "Patching, hardening, monitoring response and administration available as part of the service."
+        ],
+        [
+          "Backups and recovery",
+          "Backup jobs sized to the data, with a restore plan agreed before it is needed."
         ]
       ],
       "uses": [
-        "Resource-intensive applications",
-        "Large websites",
-        "Custom environments"
+        "Whole-machine resources",
+        "Hardware isolation",
+        "Full administrative control",
+        "Managed operations optional"
       ],
       "related": [
         "cloudhost247-hosting.php",
-        "domain.php",
-        "help-center.php"
+        "enterprise-servers.php",
+        "vps-privatecloud.php",
+        "server-management.php",
+        "data-centers.php"
       ],
-      "slug": "dedicated-server"
+      "slug": "dedicated-server",
+      "seo_description": "Dedicated servers from CloudHost247: an entire physical machine, full administrative control, hardware-level isolation and options for redundancy.",
+      "faqs": [
+        {
+          "q": "How long does a dedicated server take to provision?",
+          "a": "Hardware availability depends on the provider and region. For standard configurations it is typically fast; for custom requirements the lead time is confirmed with the quote."
+        },
+        {
+          "q": "Can I get additional IP addresses?",
+          "a": "Yes, subject to the region and provider, and assessed against real need. Addresses are assigned to the server and visible in your account."
+        },
+        {
+          "q": "Do you offer redundant power and networking?",
+          "a": "Where the facility provides it. Facility-level redundancy is confirmed for your configuration, because it is not something that can be claimed across every region."
+        },
+        {
+          "q": "Can I run virtualisation on it?",
+          "a": "Yes. A dedicated server is the right product when a host needs to run virtual machines or containers of its own."
+        }
+      ]
     },
     "enterprise-servers.php": {
       "title": "Enterprise Servers",
       "category": "Dedicated",
-      "headline": "Plan for your most important workloads.",
+      "headline": "When a standard server is not enough",
       "summary": "Start with your operational requirements. Our team can help you review available server configurations, capacity and service scope.",
       "visual": "servers/enterprise-servers",
       "features": [
         [
-          "Start with the requirements",
-          "Define the software, capacity and access your project needs."
+          "Sized to the workload",
+          "Configurations are chosen around measured requirements — core count, memory, storage throughput — rather than a fixed tier."
         ],
         [
-          "Compare the details",
-          "Review the published specifications and service terms. Availability is confirmed through the product catalog."
+          "Built for data-heavy services",
+          "The configuration that makes a database host viable: fast storage, memory for working sets, and cores for concurrency."
         ],
         [
-          "Keep everything connected",
-          "Access service management, billing and support from your customer account."
+          "A platform under other services",
+          "When a host runs virtualisation or containers, its failure footprint is larger — so resilience is designed in."
+        ],
+        [
+          "Monitored as critical",
+          "Telemetry, alerting and capacity tracking so limits are seen before they become incidents."
+        ],
+        [
+          "Managed operations",
+          "Patch management, hardening and hands-on administration available as part of the service."
+        ],
+        [
+          "Backups and recovery",
+          "Backup jobs sized to the data volume, with a restore plan that has been agreed rather than improvised."
         ]
       ],
       "uses": [
-        "Business systems",
-        "Capacity planning",
-        "Custom infrastructure"
+        "High core counts",
+        "Large memory footprints",
+        "Redundancy options",
+        "Managed operations available"
       ],
       "related": [
         "cloudhost247-hosting.php",
-        "domain.php",
-        "help-center.php"
+        "dedicated-server.php",
+        "vps-privatecloud.php",
+        "server-management.php",
+        "monitoring.php"
       ],
-      "slug": "enterprise-servers"
+      "slug": "enterprise-servers",
+      "seo_description": "Enterprise-grade server configurations from CloudHost247 for high-capacity workloads, with redundancy options, managed operations and provider-backed hardware.",
+      "faqs": [
+        {
+          "q": "Do you offer redundant power and networking?",
+          "a": "Facility-level redundancy depends on the provider and region. The available options are confirmed per configuration before ordering."
+        },
+        {
+          "q": "Can you monitor a cluster rather than one server?",
+          "a": "Yes. Multiple servers can be monitored from the same account, and the platform records telemetry per service."
+        },
+        {
+          "q": "Is there a managed option?",
+          "a": "Yes. Managed services cover the platform layer — patching, hardening, monitoring response and administration — alongside the server itself."
+        }
+      ]
     },
     "game-servers.php": {
       "title": "Game Servers",
       "category": "Dedicated",
-      "headline": "Give your community a place to play.",
+      "headline": "Low latency, high uptime, full access",
       "summary": "Find a server configuration for your game and community. Confirm supported software, regional availability and resource requirements before ordering.",
       "visual": "servers/game-servers",
       "features": [
         [
-          "Start with the requirements",
-          "Define the software, capacity and access your project needs."
+          "Latency first",
+          "Placement and network path matter more than raw clock speed. The region is chosen to sit near the players."
         ],
         [
-          "Compare the details",
-          "Review the published specifications and service terms. Availability is confirmed through the product catalog."
+          "Protection against floods",
+          "Game servers are a favourite target for traffic floods. Network-level filtering is part of the service, not an upsell."
         ],
         [
-          "Keep everything connected",
-          "Access service management, billing and support from your customer account."
+          "Full access",
+          "Root or administrator access, so you install and configure the game stack the way the community expects."
+        ],
+        [
+          "Compute that holds a population",
+          "Player counts, plugins and world size drive requirements. Configurations are sized for the community you actually run."
+        ],
+        [
+          "World data protected",
+          "Scheduled backups of the game data, because a corrupted world file is an unrecoverable community."
+        ],
+        [
+          "Monitored",
+          "Telemetry on CPU, memory and network so a growth problem shows up before players notice it."
         ]
       ],
       "uses": [
-        "Community servers",
-        "Private game worlds",
-        "Multiplayer projects"
+        "Full administrative access",
+        "Network-level protection",
+        "Choose your own game stack",
+        "Backups for world data"
       ],
       "related": [
         "cloudhost247-hosting.php",
-        "domain.php",
-        "help-center.php"
+        "vps-hosting.php",
+        "dedicated-server.php",
+        "firewall.php",
+        "backups.php"
       ],
-      "slug": "game-servers"
+      "slug": "game-servers",
+      "seo_description": "Low-latency game server hosting from CloudHost247 with the compute to hold a community, DDoS-path filtering and full administrative access.",
+      "faqs": [
+        {
+          "q": "Do you offer a one-click game panel?",
+          "a": "The platform provisions servers with the operating system and access you need. Where a specific game panel or a set of preconfigured game templates is not configured in your deployment, that is stated rather than implied."
+        },
+        {
+          "q": "Which games are supported?",
+          "a": "The server is general compute with full access, so it is not limited to a whitelist of games. What matters is the resources the game server needs — tell us and we size for it."
+        },
+        {
+          "q": "Is DDoS protection included?",
+          "a": "Network-level filtering and abuse mitigation are part of the platform. The specific capacity of that mitigation depends on the region and provider."
+        }
+      ]
     },
     "developer-friendly.php": {
       "title": "Developer Hosting",
       "category": "Developer",
-      "headline": "From your first commit to what\u2019s next.",
+      "headline": "Hosting shaped around your code",
       "summary": "Choose infrastructure for your code and workflow. Review runtime support, access options and resource limits for the selected service.",
       "visual": "deployment/developer-hosting",
       "features": [
         [
-          "Start with the requirements",
-          "Define the software, capacity and access your project needs."
+          "Shell access",
+          "SSH into the environment to install dependencies and run the commands your workflow needs."
         ],
         [
-          "Compare the details",
-          "Review the published specifications and service terms. Availability is confirmed through the product catalog."
+          "Deploy from Git",
+          "Connect a repository and let the platform build and release it, with the build output kept on the deployment record."
         ],
         [
-          "Keep everything connected",
-          "Access service management, billing and support from your customer account."
+          "Environment configuration",
+          "Set variables per application so configuration lives outside the code and can differ per environment."
+        ],
+        [
+          "Logs you can read",
+          "Application and build logs are available on the deployment itself, rather than only in a support reply."
+        ],
+        [
+          "APIs for automation",
+          "Manage services, domains and deployments through HTTP APIs so provisioning can live in your pipeline."
+        ],
+        [
+          "Telemetry",
+          "Resource use and availability are recorded, so a regression is visible as a graph rather than a hunch."
+        ],
+        [
+          "Node.js",
+          "Long-running Node services with managed process supervision."
+        ],
+        [
+          "PHP",
+          "From a single script to a full framework, on a maintained runtime."
+        ],
+        [
+          "Python",
+          "WSGI and ASGI applications with virtual environments."
         ]
       ],
       "uses": [
-        "Web applications",
-        "Development environments",
-        "API projects"
+        "Node.js, PHP, Python",
+        "SSH and Git access",
+        "Environment variables",
+        "Deployment logs"
       ],
       "related": [
-        "cloudhost247-hosting.php",
-        "domain.php",
-        "help-center.php"
+        "developer-friendly.php",
+        "deployments.php",
+        "api-hosting.php",
+        "applications.php",
+        "operating-systems.php",
+        "documentation.php"
       ],
-      "slug": "developer-friendly"
+      "slug": "developer-friendly",
+      "seo_description": "Developer hosting from CloudHost247: runtimes, SSH, Git-based deployment, environment variables, logs and APIs, without a control panel in the way.",
+      "faqs": [
+        {
+          "q": "Can I run a background worker or queue?",
+          "a": "Yes — long-running processes are supported on the runtimes that need them, and the process is supervised so it comes back after a failure."
+        },
+        {
+          "q": "Is root access included?",
+          "a": "Not on shared developer hosting. Full administrative access is what a VPS or a dedicated server provides, and those are separate products."
+        },
+        {
+          "q": "Can I deploy with CI/CD?",
+          "a": "Deployments are driven by the platform's deployment records, and the HTTP APIs let an existing pipeline trigger them. Whether to build a full pipeline is your choice."
+        },
+        {
+          "q": "Where do secrets live?",
+          "a": "In per-application environment configuration, not in the repository. Secrets set on an application are not echoed back once saved."
+        }
+      ]
     },
     "ssl-certificate.php": {
       "title": "SSL Certificates",
       "category": "Product",
-      "headline": "Make secure connections part of your foundation.",
+      "headline": "Every domain encrypted, every renewal handled",
       "summary": "Explore certificates for your website and domain. Compare validation requirements, domain coverage and renewal terms in the available products.",
       "visual": "security/ssl",
       "features": [
         [
-          "Start with the requirements",
-          "Define the software, capacity and access your project needs."
+          "Issuance on demand",
+          "Request a certificate for a hostname and it is validated and installed without you touching a CSR."
         ],
         [
-          "Compare the details",
-          "Review the published specifications and service terms. Availability is confirmed through the product catalog."
+          "Renewal before expiry",
+          "Renewals run ahead of expiry, so the browser warning that costs you a customer never appears."
         ],
         [
-          "Keep everything connected",
-          "Access service management, billing and support from your customer account."
+          "Right hostnames, right coverage",
+          "A certificate covers exactly the domains it is issued for — including www and subdomains where you need them."
+        ],
+        [
+          "HTTPS enforced",
+          "Optionally redirect all plain HTTP traffic, so a link that was written as http:// still lands on the encrypted site."
+        ],
+        [
+          "Expiry visibility",
+          "Every certificate in the account shows its status and expiry date, so nothing depends on someone remembering."
+        ],
+        [
+          "Certificates per service",
+          "Certificates attach at the service level, so a server, an application and a website each manage their own."
         ]
       ],
       "uses": [
-        "Business websites",
-        "Domain protection",
-        "Encrypted connections"
+        "Automatic issuance",
+        "Automatic renewal",
+        "Subdomain coverage",
+        "Forced HTTPS option"
       ],
       "related": [
-        "cloudhost247-hosting.php",
-        "domain.php",
-        "help-center.php"
+        "security.php",
+        "web-hosting.php",
+        "firewall.php",
+        "acceptable-use-policy.php"
       ],
-      "slug": "ssl-certificate"
+      "slug": "ssl-certificate",
+      "seo_description": "Issue and renew SSL/TLS certificates for every domain you host with CloudHost247, with automated renewal, forced HTTPS and coverage for subdomains.",
+      "faqs": [
+        {
+          "q": "Do I pay separately for a certificate?",
+          "a": "Domain-validated certificates are issued as part of the services that include them. Commercial certificate products are listed in the catalogue at their own prices when configured."
+        },
+        {
+          "q": "What happens if a certificate fails to renew?",
+          "a": "The failure is recorded against the certificate in your account and retried. Because the certificate status is visible, a failure is something you can see and raise, not something you discover from a browser warning."
+        },
+        {
+          "q": "Can I use my own certificate?",
+          "a": "Yes. An externally issued certificate and key can be supplied where the service supports importing them."
+        }
+      ]
     },
     "website-design.php": {
       "title": "Website Design",
       "category": "Business",
-      "headline": "Turn your idea into a considered website.",
+      "headline": "Four ways to get a website",
       "summary": "Discuss your goals, content and project requirements with CloudHost247. Confirm scope, deliverables and timing before a project begins.",
       "visual": "hosting/website-design",
       "features": [
         [
-          "Start with the requirements",
-          "Define the software, capacity and access your project needs."
+          "Website Builder",
+          "Pages, sections, media and publishing — with a real preview and a publish step, not a mock-up."
         ],
         [
-          "Compare the details",
-          "Review the published specifications and service terms. Availability is confirmed through the product catalog."
+          "AI Website Builder",
+          "Write a description of the site you need and get real pages, copy and SEO to edit."
         ],
         [
-          "Keep everything connected",
-          "Access service management, billing and support from your customer account."
+          "Website Templates",
+          "Start from a layout that is already structured for publishing instead of a blank page."
+        ],
+        [
+          "Online Store",
+          "Sell physical, digital and service products from the same platform that hosts the site."
+        ],
+        [
+          "Website Design Services",
+          "Scoped, quoted and delivered by the CloudHost247 team — brief, design, build, handover."
+        ],
+        [
+          "Hire an Expert",
+          "Request a specialist for design, development, migration or ongoing maintenance."
+        ],
+        [
+          "Website Migration",
+          "Move an existing site onto CloudHost247 infrastructure with a verified cutover."
+        ],
+        [
+          "Digital Marketing",
+          "Campaigns, search visibility and a unified inbox for the enquiries the site produces."
         ]
       ],
       "uses": [
-        "New business websites",
-        "Website refreshes",
-        "Launch planning"
+        "HTTPS from the first visitor",
+        "Backups you can restore",
+        "Hosting that keeps up",
+        "A domain that belongs to you",
+        "Browser-based builder",
+        "AI-generated first draft"
       ],
       "related": [
-        "cloudhost247-hosting.php",
-        "domain.php",
-        "help-center.php"
+        "web-hosting.php",
+        "migration.php",
+        "ssl-certificate.php",
+        "website-design.php"
       ],
-      "slug": "website-design"
+      "slug": "website-design",
+      "seo_description": "Build a website on CloudHost247 with the website builder or the AI website builder, start from a template, launch a store, or have our designers do it for you.",
+      "faqs": [
+        {
+          "q": "Do I need hosting to use the website builder?",
+          "a": "The builder publishes to CloudHost247 hosting. If you already have hosting with us it is already available in your account."
+        },
+        {
+          "q": "Is the AI builder a real feature?",
+          "a": "Yes — it generates draft pages, copy and SEO metadata into the builder, where you edit and publish them. It is not a mock-up or a screenshot."
+        },
+        {
+          "q": "Can you design the site for me?",
+          "a": "Yes. Design services are scoped and quoted before work starts, and delivered through the expert services workflow."
+        },
+        {
+          "q": "Do you offer a CDN product?",
+          "a": "No CDN product is claimed here. Where a deployment integrates a provider's services, they appear in your account as the services you actually have."
+        }
+      ]
     },
     "domain.php": {
       "title": "Domains",
@@ -483,51 +923,260 @@
     "cloudhost247-hosting.php": {
       "title": "Cloud Hosting Plans",
       "category": "Cloud",
-      "headline": "The right resources for your next step.",
+      "headline": "Hosting for the site you actually run",
       "summary": "Compare verified hosting, VPS and dedicated server products. Specifications and pricing come from the configured catalog.",
       "visual": "cloud/cloud-hosting",
-      "features": [],
-      "uses": [],
-      "related": [],
-      "slug": "cloudhost247-hosting"
+      "features": [
+        [
+          "Web Hosting",
+          "Shared hosting for websites that need to be fast, secure and always up."
+        ],
+        [
+          "Business Hosting",
+          "More resources, stronger isolation and priority support handling for company sites."
+        ],
+        [
+          "WordPress Hosting",
+          "A WordPress-tuned runtime with caching, HTTPS and scheduled backups."
+        ],
+        [
+          "Reseller Hosting",
+          "Run your own hosting brand on infrastructure you do not have to operate."
+        ],
+        [
+          "Windows Hosting",
+          "ASP.NET, IIS and MSSQL for stacks that genuinely require Windows."
+        ],
+        [
+          "Email Hosting",
+          "Professional mailboxes on your own domain, with filtering and TLS."
+        ],
+        [
+          "SSL certificates",
+          "Issued and renewed automatically for every domain on the account."
+        ],
+        [
+          "Backups",
+          "Scheduled jobs with a visible run history and a restore from your account."
+        ],
+        [
+          "Databases",
+          "MySQL-compatible databases alongside the site, managed in the same place."
+        ]
+      ],
+      "uses": [
+        "Live catalogue pricing",
+        "SSL, mail and databases included",
+        "Backups with a restore path",
+        "Support staffed by operators"
+      ],
+      "related": [
+        "web-hosting.php",
+        "wordpress-hosting.php",
+        "email-hosting.php",
+        "migration.php",
+        "cloudhost247-hosting.php",
+        "domain.php"
+      ],
+      "slug": "cloudhost247-hosting",
+      "seo_description": "Compare CloudHost247 hosting: web, business, WordPress, reseller, Windows and email hosting — with free SSL, backups, mailboxes, databases and 24/7 support.",
+      "faqs": [
+        {
+          "q": "Which hosting should I choose for a single business website?",
+          "a": "Web hosting covers a normal brochure or content site. Move to business hosting when the website is a revenue channel, when mail runs on the same domain, or when several applications share the account."
+        },
+        {
+          "q": "Can I change hosting plan later?",
+          "a": "Yes. Plans can be upgraded or downgraded without rebuilding the site, and the change is prorated according to the billing configuration."
+        },
+        {
+          "q": "Is email included with web hosting?",
+          "a": "Mailboxes are part of the hosting services where the plan includes them, and business email hosting is a product in its own right when you need more mailboxes or stricter requirements."
+        },
+        {
+          "q": "Do you offer a money-back guarantee?",
+          "a": "Refund eligibility and cancellation windows are set out in the Refund and Cancellation Policy, which is the authoritative document for any refund claim."
+        }
+      ]
     },
     "email-hosting.php": {
       "title": "Email Hosting",
       "category": "Email",
-      "headline": "Business communication, under your own name.",
+      "headline": "Business email on your own domain",
       "summary": "Compare the email plans and provider options currently configured for CloudHost247. Connect your domain and choose the right mailbox capacity.",
       "visual": "hosting/email-hosting",
-      "features": [],
-      "uses": [],
-      "related": [],
-      "slug": "email-hosting"
+      "features": [
+        [
+          "Mailboxes on your domain",
+          "Create, rename and remove addresses as your team changes, including aliases and forwarding."
+        ],
+        [
+          "Filtering before delivery",
+          "Spam and malware filtering applied ahead of the mailbox so your team is not the filter."
+        ],
+        [
+          "TLS on the wire",
+          "Encrypted connections for mail clients and webmail, so credentials and messages are not sent in the clear."
+        ],
+        [
+          "SPF, DKIM and DMARC",
+          "The DNS records that prove your mail is genuinely from your domain — published for you when DNS is managed here."
+        ],
+        [
+          "Any mail client",
+          "Standard IMAP, POP and SMTP, so Outlook, Apple Mail, Thunderbird and mobile clients all work."
+        ],
+        [
+          "Deliverability watched",
+          "Queue and delivery problems are monitored, because mail that silently stops arriving is the worst kind of outage."
+        ]
+      ],
+      "uses": [
+        "Your own domain",
+        "Spam and malware filtering",
+        "Webmail and mobile clients",
+        "SPF, DKIM and DMARC ready"
+      ],
+      "related": [
+        "web-hosting.php",
+        "business-hosting.php",
+        "security.php",
+        "dns-management.php",
+        "acceptable-use-policy.php"
+      ],
+      "slug": "email-hosting",
+      "seo_description": "Email hosting from CloudHost247: professional mailboxes on your domain with spam filtering, TLS, IMAP/POP/SMTP and webmail access.",
+      "faqs": [
+        {
+          "q": "Can I keep my existing mailboxes when I move?",
+          "a": "Yes. The migration process copies existing messages before DNS changes, so mailboxes arrive populated."
+        },
+        {
+          "q": "Does email hosting include Office or Google Workspace?",
+          "a": "No. Those are separate Microsoft and Google subscriptions. CloudHost247 can provision Microsoft 365 and Google Workspace plans through the platform, and this page describes the mailboxes hosted directly on your account."
+        },
+        {
+          "q": "Can I send marketing email from these mailboxes?",
+          "a": "Transactional mail from your application is fine. Bulk or unsolicited marketing is governed by the Fair Usage and Acceptable Use policies, and volume sending needs a dedicated service rather than a shared mailbox."
+        },
+        {
+          "q": "How many addresses can I create?",
+          "a": "Each plan states its own mailbox and alias limits on the order page, and your account shows the allocation you have."
+        }
+      ]
     },
     "aboutus.php": {
       "title": "About CloudHost247",
       "category": "Company",
-      "headline": "One platform. Your next chapter.",
+      "headline": "One platform for everything after the idea",
       "summary": "CloudHost247 brings hosting, domains and digital infrastructure into one customer experience for businesses, developers and organizations.",
       "visual": "hero/infrastructure",
-      "features": [],
-      "uses": [],
-      "related": [],
-      "slug": "aboutus"
+      "features": [
+        [
+          "Say what is true",
+          "No invented uptime figures, no certifications we do not hold, no data centre pins on a decorative map. Where something is not available, the product page says so."
+        ],
+        [
+          "Show, do not imply",
+          "Prices come from the catalogue, locations come from configuration, and a service status page reports only checks the platform can actually run."
+        ],
+        [
+          "Operate what we sell",
+          "Provisioning, monitoring, DNS, certificates, backups and reconciliation are platform features, not arrangements with somebody else."
+        ],
+        [
+          "One relationship",
+          "A domain problem, a server problem and a billing problem are the same support conversation rather than three vendors pointing at each other."
+        ],
+        [
+          "Open about the seams",
+          "Documentation describes what is finished and what is not, so nobody builds on a feature that exists only in a roadmap."
+        ],
+        [
+          "Protect the boring things",
+          "Strong credentials, encryption everywhere, least-privilege administration and logs that answer questions after the fact."
+        ],
+        [
+          "Domains",
+          "Search, registration, transfer, DNS and the registrar toolkit."
+        ],
+        [
+          "Hosting",
+          "Web, business, WordPress, reseller and Windows hosting."
+        ],
+        [
+          "Cloud & servers",
+          "VPS, cloud, dedicated and enterprise servers with operations."
+        ]
+      ],
+      "uses": [
+        "Domains, hosting and cloud",
+        "Applications and deployment",
+        "Websites and stores",
+        "Tools and developer APIs"
+      ],
+      "related": [
+        "infrastructure.php",
+        "security.php",
+        "legal.php",
+        "blog.php",
+        "reseller-hosting.php"
+      ],
+      "slug": "aboutus",
+      "seo_description": "CloudHost247 Isc. builds and operates hosting, cloud, domain, application, website and developer platforms for businesses and developers worldwide.",
+      "faqs": [
+        {
+          "q": "Where is CloudHost247 based?",
+          "a": "CloudHost247 Isc. operates the platform, with services delivered from the regions configured for each deployment. Published contact and address details for this deployment are on the contact page, from operator configuration."
+        },
+        {
+          "q": "Do you offer dedicated account management?",
+          "a": "Business and enterprise arrangements are discussed with sales. The scope of what is included is agreed in writing rather than implied on a page."
+        },
+        {
+          "q": "Can I resell CloudHost247 services?",
+          "a": "Yes, through reseller hosting and the automation platform. White-labelling and the commercial terms are described on the reseller page."
+        }
+      ]
     },
     "offers.php": {
       "title": "Offers",
       "category": "Marketing",
-      "headline": "Find the right plan. Not just a headline.",
+      "headline": "The catalogue, not a price list someone typed",
       "summary": "Explore the currently available products and confirm any eligible offer in checkout. Promotions apply only when explicitly shown for your order.",
       "visual": "cloud/cloud-hosting",
       "features": [],
-      "uses": [],
-      "related": [],
-      "slug": "offers"
+      "uses": [
+        "Live catalogue prices",
+        "Real billing cycles",
+        "No invented discounts"
+      ],
+      "related": [
+        "cloudhost247-hosting.php",
+        "domain.php",
+        "refund-policy.php"
+      ],
+      "slug": "offers",
+      "seo_description": "Current CloudHost247 pricing, rendered live from the configured product catalogue — plans, prices and billing cycles exactly as configured.",
+      "faqs": [
+        {
+          "q": "Why can the price differ from another site?",
+          "a": "Prices shown here come from this deployment's catalogue. Where a different CloudHost247 deployment has a different catalogue, that is a configuration difference rather than a better deal."
+        },
+        {
+          "q": "Do prices include tax?",
+          "a": "Tax treatment depends on your location and the configured billing settings, and is shown on the order form and invoice."
+        },
+        {
+          "q": "Which currencies are supported?",
+          "a": "The currencies configured in the billing platform. The currency selector on the order flow shows what is available."
+        }
+      ]
     },
     "help-center.php": {
       "title": "Help Center",
       "category": "Support",
-      "headline": "Let\u2019s find your next step.",
+      "headline": "Let’s find your next step.",
       "summary": "Browse the knowledgebase, review your services or open a support ticket from your CloudHost247 account.",
       "visual": "management/support",
       "features": [],
@@ -538,13 +1187,32 @@
     "blog.php": {
       "title": "Blog",
       "category": "Marketing",
-      "headline": "Ideas for what you\u2019re building.",
+      "headline": "What shipped, and what it does not do",
       "summary": "Read published CloudHost247 updates and explore the knowledgebase for product guidance.",
       "visual": "blog/insights",
       "features": [],
-      "uses": [],
-      "related": [],
-      "slug": "blog"
+      "uses": [
+        "Release notes",
+        "Product changes",
+        "Stated limitations"
+      ],
+      "related": [
+        "documentation.php",
+        "aboutus.php",
+        "legal.php"
+      ],
+      "slug": "blog",
+      "seo_description": "Platform releases and product notes from CloudHost247 — what shipped, what it replaces, and what it deliberately does not do yet.",
+      "faqs": [
+        {
+          "q": "Do you publish a changelog?",
+          "a": "The release notes on this page are the changelog. They are written from the platform's own documentation rather than generated."
+        },
+        {
+          "q": "Can I subscribe to updates?",
+          "a": "Account announcements are delivered to signed-in customers through the notification system. There is no third-party newsletter tracker on this site."
+        }
+      ]
     },
     "faqs.php": {
       "title": "Frequently Asked Questions",
@@ -560,57 +1228,318 @@
     "applications.php": {
       "title": "Applications",
       "category": "Applications",
-      "headline": "Start with the software that fits.",
+      "headline": "One application, one managed environment",
       "summary": "Explore configured applications in the connected CloudHost247 platform. A software name alone does not guarantee an available deployment.",
       "visual": "applications/application-stack",
-      "features": [],
-      "uses": [],
-      "related": [],
-      "slug": "applications"
+      "features": [
+        [
+          "Its own environment",
+          "Dependencies and runtime for one application do not collide with another's, which removes an entire class of upgrade problem."
+        ],
+        [
+          "Configuration",
+          "Environment variables and settings are held per application, so the same image can run in more than one place with different values."
+        ],
+        [
+          "Persistent volumes",
+          "Data that must outlive a container or a rebuild is attached to a volume rather than left in the filesystem."
+        ],
+        [
+          "Domain and certificate",
+          "Attach a domain to the application and have a certificate issued for it."
+        ],
+        [
+          "Logs",
+          "Application output is captured per environment, so an error can be investigated where it happened."
+        ],
+        [
+          "Backups",
+          "Backup jobs can be scheduled against the application and its volumes."
+        ]
+      ],
+      "uses": [
+        "Isolated per application",
+        "Configuration per environment",
+        "Logs and backups attached",
+        "Upgrade on your schedule"
+      ],
+      "related": [
+        "applications.php",
+        "docker-hosting.php",
+        "paas.php",
+        "backups.php",
+        "developer-friendly.php"
+      ],
+      "slug": "applications",
+      "seo_description": "Managed application hosting from CloudHost247: an isolated environment per application, with logs, backups and configuration managed from your account.",
+      "faqs": [
+        {
+          "q": "Can I run several instances of the same application?",
+          "a": "Yes. Each installation is its own environment, so a staging copy and a production copy can coexist with different configuration."
+        },
+        {
+          "q": "Do updates happen automatically?",
+          "a": "No. Automatic application upgrades are how a working site breaks at an inconvenient hour. Upgrades are applied when you choose, after a backup."
+        },
+        {
+          "q": "Where does the application data live?",
+          "a": "On attached volumes for anything that must persist, plus the database service you connect it to — both visible per service in your account."
+        }
+      ]
     },
     "deployments.php": {
       "title": "Deployment Platform",
       "category": "Deployment/PaaS",
-      "headline": "A clear path from code to infrastructure.",
+      "headline": "A deployment you can describe afterwards",
       "summary": "Use the connected CloudHost247 platform for supported application deployments. Deployment controls stay in the authenticated platform.",
       "visual": "deployment/deployment-pipeline",
-      "features": [],
-      "uses": [],
-      "related": [],
-      "slug": "deployments"
+      "features": [
+        [
+          "It is recorded",
+          "The deployment exists as a durable record with its status, its source revision and its logs — not as a transient terminal session."
+        ],
+        [
+          "It is repeatable",
+          "Because the build starts from a revision, running it again produces the same result rather than depending on machine state."
+        ],
+        [
+          "Secrets stay out of the build",
+          "Environment configuration is applied at release rather than committed, so a repository can be shared without leaking credentials."
+        ],
+        [
+          "Failure is visible",
+          "A failed build is a failed deployment with its output kept, not a silence followed by an unchanged website."
+        ],
+        [
+          "Scoped per application",
+          "Deployments belong to an application, so releasing one does not touch another."
+        ],
+        [
+          "Tracked over time",
+          "The deployment history shows what changed and when, which is the first thing anyone needs during an incident."
+        ]
+      ],
+      "uses": [
+        "Builds from a repository",
+        "Release records",
+        "Build and runtime logs",
+        "Rollback path"
+      ],
+      "related": [
+        "deployments.php",
+        "paas.php",
+        "developer-friendly.php",
+        "docker-hosting.php",
+        "documentation.php"
+      ],
+      "slug": "deployments",
+      "seo_description": "Deploy from Git on CloudHost247: builds from your repository, releases with environment configuration, build and runtime logs, and recorded rollbacks.",
+      "faqs": [
+        {
+          "q": "Can I deploy on every commit?",
+          "a": "Yes, by triggering a deployment from your pipeline. The platform records each one, so automatic deployment does not mean invisible deployment."
+        },
+        {
+          "q": "What happens if a deployment fails?",
+          "a": "The previous release keeps running and the failed deployment is recorded with its build output, so the application is not left half-updated."
+        },
+        {
+          "q": "Are the logs kept after a deployment finishes?",
+          "a": "Yes. Build and runtime logs are attached to the deployment and the service."
+        },
+        {
+          "q": "Can I deploy the same repository twice?",
+          "a": "Yes — that is how you run separate staging and production environments from one codebase, with different configuration and domains."
+        }
+      ]
     },
     "operating-systems.php": {
       "title": "Operating Systems",
       "category": "Operating Systems",
-      "headline": "The right foundation for your server.",
+      "headline": "Choose the base your service runs on",
       "summary": "Select from provider-mapped images in the connected platform. Image availability depends on the provider, region and server configuration.",
       "visual": "operating-systems/os-catalog",
-      "features": [],
-      "uses": [],
-      "related": [],
-      "slug": "operating-systems"
+      "features": [
+        [
+          "Families and versions",
+          "Each entry is a specific family, version and architecture rather than a vague name."
+        ],
+        [
+          "Lifecycle status",
+          "End-of-life operating systems are marked, because a server installed today should not be unsupported next year."
+        ],
+        [
+          "Provider image availability",
+          "An operating system is only selectable where the provider in that region actually offers an image for it."
+        ],
+        [
+          "Control panels",
+          "Where a panel is configured to be provisioned on top of an operating system, that mapping is explicit."
+        ],
+        [
+          "Administerable",
+          "Versions, images and availability are configuration, maintained by administrators rather than hardcoded in the application."
+        ],
+        [
+          "Supported means patched",
+          "Operating systems with active vendor security support are the ones worth provisioning; the catalogue shows which those are."
+        ]
+      ],
+      "uses": [
+        "Version and architecture recorded",
+        "Lifecycle status shown",
+        "Per-provider availability",
+        "Control panels where supported"
+      ],
+      "related": [
+        "cloudhost247-hosting.php",
+        "server-management.php",
+        "documentation.php"
+      ],
+      "slug": "operating-systems",
+      "seo_description": "The operating system catalogue available when provisioning a server on CloudHost247, including version lifecycles and provider image availability.",
+      "faqs": [
+        {
+          "q": "Can I install a custom ISO?",
+          "a": "Where the provider and region support custom images, yes. Availability depends on the underlying infrastructure provider."
+        },
+        {
+          "q": "Do you offer Windows Server?",
+          "a": "Windows-based services are available as products, and Windows images appear in the catalogue where licensing and the region allow."
+        },
+        {
+          "q": "How are end-of-life systems handled?",
+          "a": "They are marked in the catalogue so you can make an informed choice, and support will tell you if the version you are running has reached end of life."
+        }
+      ]
     },
     "server-management.php": {
       "title": "Server Management",
       "category": "Server Management",
-      "headline": "Your infrastructure. A clearer view.",
+      "headline": "The work between a server and a reliable service",
       "summary": "Open your service details to see the controls available for your server. Operations are shown only when supported by that service and your permissions.",
       "visual": "management/server-control",
-      "features": [],
-      "uses": [],
-      "related": [],
-      "slug": "server-management"
+      "features": [
+        [
+          "Provisioning and rebuilds",
+          "Create servers from a catalogue image, rebuild them from a known-good state, and record which image each server runs."
+        ],
+        [
+          "Access management",
+          "Administrative access is issued and rotated through the platform, and server credentials are stored encrypted rather than pasted into tickets."
+        ],
+        [
+          "Monitoring and alerting",
+          "Resource telemetry collected per server, with alerting so a saturation event is noticed while it is still an event."
+        ],
+        [
+          "Firewall control",
+          "Rules attached to the server, applied in a defined order, with the effective ruleset visible."
+        ],
+        [
+          "Backups",
+          "Scheduled jobs with a run history and a restore path from your account."
+        ],
+        [
+          "Reconciliation and logs",
+          "The platform compares desired state with provider reality and records every infrastructure operation for audit."
+        ]
+      ],
+      "uses": [
+        "Patching and hardening",
+        "Monitoring response",
+        "Incident handling",
+        "Change management",
+        "Provisioning and lifecycle",
+        "Monitoring and alerting"
+      ],
+      "related": [
+        "monitoring.php",
+        "backups.php",
+        "firewall.php",
+        "cloudhost247-hosting.php",
+        "operating-systems.php"
+      ],
+      "slug": "server-management",
+      "seo_description": "Server management from CloudHost247: provisioning, operating-system lifecycle, monitoring, firewall control, backups, patching and hands-on administration.",
+      "faqs": [
+        {
+          "q": "Can you manage a server you did not provision?",
+          "a": "That depends on the provider and the access you can grant. Bring the details and we will confirm what is possible."
+        },
+        {
+          "q": "What counts as managed?",
+          "a": "The platform layer: operating system, runtime, monitoring, backups, firewall and response. Application-level administration and code changes are a separate engagement."
+        },
+        {
+          "q": "Do you support panels like cPanel or Plesk?",
+          "a": "Panels are provisioned where the platform is configured to install them, and the control panels page lists what is available rather than what is theoretically possible."
+        }
+      ]
     },
     "infrastructure.php": {
       "title": "Infrastructure",
       "category": "Cloud",
-      "headline": "Connected by design. Grounded in detail.",
+      "headline": "The platform under the products",
       "summary": "Explore CloudHost247 infrastructure products and verify the provider, location and network specifications of each available configuration.",
       "visual": "hero/global-network",
-      "features": [],
-      "uses": [],
-      "related": [],
-      "slug": "infrastructure"
+      "features": [
+        [
+          "Facilities and providers",
+          "Compute and network are delivered from data centres operated by infrastructure providers, chosen per region and recorded in the platform."
+        ],
+        [
+          "Network",
+          "Public addressing, firewalling and private networking sit between the facility and your service, configured per server."
+        ],
+        [
+          "Control layer",
+          "Provisioning, operating-system images, DNS, certificates, backups and monitoring are owned by the platform rather than by hand."
+        ],
+        [
+          "Reconciliation",
+          "The platform continuously compares what it believes is provisioned against what the provider reports, so drift is detected rather than discovered."
+        ],
+        [
+          "Observability",
+          "Server telemetry, service state and operation logs feed the same account view you use."
+        ],
+        [
+          "Isolation",
+          "Services are separated at the platform layer, and access to provider credentials is restricted and audited."
+        ]
+      ],
+      "uses": [
+        "A list of cities",
+        "An uptime percentage",
+        "Certifications we do not hold",
+        "Provider-backed facilities",
+        "Explicit region configuration",
+        "Platform control layer"
+      ],
+      "related": [
+        "data-centers.php",
+        "network.php",
+        "cloudhost247-hosting.php",
+        "security.php",
+        "aboutus.php"
+      ],
+      "slug": "infrastructure",
+      "seo_description": "How CloudHost247 infrastructure is organised: providers, regions, network, storage and the operational layer that runs customer services.",
+      "faqs": [
+        {
+          "q": "Where are CloudHost247 servers located?",
+          "a": "In the regions configured for your deployment of the platform, which are listed on the data centres page. That list is generated from configuration, so it cannot drift from reality."
+        },
+        {
+          "q": "Who operates the data centres?",
+          "a": "The facilities are operated by infrastructure providers. CloudHost247 operates the platform layer: provisioning, network configuration, monitoring, security response and support."
+        },
+        {
+          "q": "Can I choose a specific region?",
+          "a": "Where more than one region is configured, yes — region is a selection at provisioning time and is recorded on the service."
+        }
+      ]
     },
     "acceptable-use-policy.php": {
       "title": "Acceptable Use Policy",
@@ -824,482 +1753,941 @@
     "business-hosting.php": {
       "title": "Business Hosting",
       "category": "Hosting",
-      "headline": "A calmer home for a business website.",
+      "headline": "Hosting sized for a business, not a hobby site",
       "summary": "Compare hosting for a company site, with room for email and a domain you already own.",
       "visual": "hosting/business-hosting",
       "features": [
         [
-          "Confirm the plan",
-          "Published specifications are the source of truth for resources and software."
+          "Headroom, not a ceiling",
+          "Higher CPU, memory and process limits so a busy day does not turn into a 503 for your customers."
         ],
         [
-          "Keep ownership",
-          "Bring a domain you already control, or register one in the same account."
+          "Stronger isolation",
+          "Business hosting is placed to reduce the blast radius of anything else on the platform, which matters when the site handles customer data."
         ],
         [
-          "Ask before you migrate",
-          "The team can scope a move when you share the source and the target plan."
+          "Priority support handling",
+          "Business accounts are queued ahead of standard requests, reflecting what a business-hours outage actually costs."
+        ],
+        [
+          "Business email alongside the site",
+          "Company mailboxes live with the website, so a DNS change never silently breaks your email."
+        ],
+        [
+          "Backups and recovery",
+          "Scheduled backups with a restorable history, and a documented restore path rather than a promise."
+        ],
+        [
+          "Monitored service",
+          "Availability and resource use are watched by the platform so degradation is caught before it becomes an outage."
         ]
       ],
       "uses": [
-        "New projects",
-        "Migrations",
-        "Teams standardizing on one provider"
+        "The website is a revenue channel",
+        "Mail runs on the same domain",
+        "Several applications share the account",
+        "You need someone to answer quickly",
+        "Higher resource allocation",
+        "Stronger tenant isolation"
       ],
       "related": [
         "web-hosting.php",
         "email-hosting.php",
-        "domain.php"
+        "ssl-certificate.php",
+        "backups.php",
+        "server-management.php",
+        "refund-policy.php"
       ],
-      "slug": "business-hosting"
+      "slug": "business-hosting",
+      "seo_description": "Business hosting from CloudHost247 gives company sites more resources, stronger isolation, priority support and the headroom to run mail, apps and databases.",
+      "faqs": [
+        {
+          "q": "How is business hosting different from standard web hosting?",
+          "a": "Chiefly resources and isolation: a higher allocation of CPU, memory and concurrent processes, placed to limit the effect of other tenants, with priority handling in support queues."
+        },
+        {
+          "q": "Can I run email marketing or bulk mail from business hosting?",
+          "a": "Hosting is not a bulk-mail service. Volume sending is governed by the Fair Usage and Acceptable Use policies, and persistent bulk sending from shared infrastructure is restricted regardless of plan."
+        },
+        {
+          "q": "Do you provide an SLA?",
+          "a": "Any availability commitment is contractual and must come from the agreement attached to your account rather than a marketing page. If an SLA is part of what you need, raise it with sales before ordering."
+        }
+      ]
     },
     "reseller-hosting.php": {
       "title": "Reseller Hosting",
       "category": "Hosting",
-      "headline": "Infrastructure for teams who host more than one site.",
+      "headline": "Sell hosting under your own brand",
       "summary": "Review reseller-style hosting only against the plans currently published in the catalog.",
       "visual": "hosting/reseller-hosting",
       "features": [
         [
-          "Confirm the plan",
-          "Published specifications are the source of truth for resources and software."
+          "Customer accounts",
+          "Create, suspend and remove client hosting accounts yourself, without waiting on a support queue."
         ],
         [
-          "Keep ownership",
-          "Bring a domain you already control, or register one in the same account."
+          "Your own nameservers",
+          "Brand the DNS so clients see your infrastructure, not ours, in their domain settings."
         ],
         [
-          "Ask before you migrate",
-          "The team can scope a move when you share the source and the target plan."
+          "Your brand throughout",
+          "The client experience carries your identity. The platform is meant to disappear behind your business."
+        ],
+        [
+          "Billing platform compatible",
+          "A WHMCS-compatible automation layer is supported, so orders and provisioning can be automated rather than handled by hand."
+        ],
+        [
+          "Infrastructure you do not operate",
+          "Hardware, network, patching and abuse handling are ours. Your obligation is your clients."
+        ],
+        [
+          "Escalation path",
+          "When something is genuinely infrastructure-level, there is a route to our engineers instead of a dead end."
         ]
       ],
       "uses": [
-        "New projects",
-        "Migrations",
-        "Teams standardizing on one provider"
+        "You support your own clients",
+        "You own your commercial terms",
+        "You are accountable for content",
+        "You can grow a plan at a time",
+        "Isolated customer accounts",
+        "Your own nameservers"
       ],
       "related": [
         "web-hosting.php",
-        "cpanel-hosting.php",
-        "cloudhost247-hosting.php"
+        "business-hosting.php",
+        "cloudhost247-hosting.php",
+        "domain.php",
+        "acceptable-use-policy.php"
       ],
-      "slug": "reseller-hosting"
+      "slug": "reseller-hosting",
+      "seo_description": "Reseller hosting from CloudHost247: separate accounts, your own branding, WHMCS-compatible billing and the infrastructure operated for you.",
+      "faqs": [
+        {
+          "q": "Can I set my own prices?",
+          "a": "Yes. You buy capacity from us and set your own commercial terms with your customers."
+        },
+        {
+          "q": "Do clients see CloudHost247 branding?",
+          "a": "Client accounts, nameservers and the product experience are yours to brand. Domain registration and some infrastructure services necessarily involve named providers, which is disclosed in the relevant policy documents."
+        },
+        {
+          "q": "What happens if one of my clients abuses the platform?",
+          "a": "Abuse handling follows the Acceptable Use and Fair Usage policies. Enforcement is against the account that holds the service — yours — so you need a way to reach your clients quickly."
+        }
+      ]
     },
     "nodejs-hosting.php": {
       "title": "Node.js Hosting",
       "category": "Developers",
-      "headline": "A place to run the Node.js version your app requires.",
+      "headline": "Node.js as a long-running service, not a script",
       "summary": "Confirm the runtime, process manager and resources on the plan before you deploy.",
       "visual": "deployment/nodejs",
       "features": [
         [
-          "Confirm the plan",
-          "Published specifications are the source of truth for resources and software."
+          "Supervision",
+          "The process is managed and restarted after a crash, which is what turns a successful test into a running service."
         ],
         [
-          "Keep ownership",
-          "Bring a domain you already control, or register one in the same account."
+          "Configuration",
+          "Ports, connection strings and flags supplied as environment variables rather than edited into the source."
         ],
         [
-          "Ask before you migrate",
-          "The team can scope a move when you share the source and the target plan."
+          "Logs",
+          "Standard output and error are captured per application so an unhandled rejection is findable."
+        ],
+        [
+          "Deployment",
+          "Build from a repository, apply configuration, release — with the build output kept for the record."
+        ],
+        [
+          "Data services",
+          "Managed MySQL-compatible, PostgreSQL, MongoDB and Redis services your application connects to."
+        ],
+        [
+          "Domains and certificates",
+          "Attach the hostname the service answers on, and let the certificate be issued for it."
         ]
       ],
       "uses": [
-        "New projects",
-        "Migrations",
-        "Teams standardizing on one provider"
+        "Process supervision",
+        "Environment configuration",
+        "Logs and telemetry",
+        "DNS and TLS in front"
       ],
       "related": [
-        "developer-friendly.php",
-        "paas.php",
-        "vps-hosting.php"
+        "deployments.php",
+        "docker-hosting.php",
+        "applications.php",
+        "api-hosting.php",
+        "developer-friendly.php"
       ],
-      "slug": "nodejs-hosting"
+      "slug": "nodejs-hosting",
+      "seo_description": "Host Node.js applications on CloudHost247: managed process supervision, environment configuration, WebSocket-capable routing, logs and deployment from Git.",
+      "faqs": [
+        {
+          "q": "Are WebSockets supported?",
+          "a": "WebSocket connections terminate at the application, and the platform routes the domain to it. If your application upgrades connections, that works at the application layer."
+        },
+        {
+          "q": "Can I run a worker alongside the web process?",
+          "a": "Yes. A worker is another process on the same environment, or its own application if you prefer to scale it separately."
+        },
+        {
+          "q": "Which Node versions are available?",
+          "a": "The versions the platform is configured to provide. If you need a specific release for a dependency reason, confirm it before committing to a migration."
+        }
+      ]
     },
     "php-hosting.php": {
       "title": "PHP Hosting",
       "category": "Developers",
-      "headline": "PHP hosting with the version your application documents.",
+      "headline": "PHP that is patched, tuned and yours",
       "summary": "Match the PHP version, extensions and database to the application you are moving.",
       "visual": "deployment/php",
       "features": [
         [
-          "Confirm the plan",
-          "Published specifications are the source of truth for resources and software."
+          "Maintained PHP",
+          "Runtimes that receive security updates, so an old version is a choice rather than an inheritance."
         ],
         [
-          "Keep ownership",
-          "Bring a domain you already control, or register one in the same account."
+          "Extensions and Composer",
+          "The extension set applications declare, and Composer to resolve dependencies from the lock file."
         ],
         [
-          "Ask before you migrate",
-          "The team can scope a move when you share the source and the target plan."
+          "Scheduled tasks",
+          "Cron entries for queues, imports and housekeeping, so the scheduled work a framework needs actually runs."
+        ],
+        [
+          "OPcache",
+          "Bytecode caching configured on, because it is the single cheapest performance win in PHP."
+        ],
+        [
+          "Databases",
+          "MySQL-compatible, MariaDB and PostgreSQL services alongside the application."
+        ],
+        [
+          "Deployment",
+          "Deploy from a repository instead of uploading changed files over FTP."
         ]
       ],
       "uses": [
-        "New projects",
-        "Migrations",
-        "Teams standardizing on one provider"
+        "Keep the framework current",
+        "Vet what you install",
+        "Use the lock file",
+        "Maintained runtime",
+        "Composer available",
+        "Cron scheduling"
       ],
       "related": [
+        "laravel-hosting.php",
         "web-hosting.php",
-        "cpanel-hosting.php",
+        "applications.php",
+        "deployments.php",
+        "operating-systems.php",
         "developer-friendly.php"
       ],
-      "slug": "php-hosting"
+      "slug": "php-hosting",
+      "seo_description": "Host PHP applications on CloudHost247: maintained PHP runtimes, Composer, databases, cron jobs, OPcache and deployment from Git.",
+      "faqs": [
+        {
+          "q": "Can I choose the PHP version?",
+          "a": "Where the platform is configured to offer more than one version, version is a per-application setting. The available versions are listed in the application environment rather than promised here."
+        },
+        {
+          "q": "Are extensions included?",
+          "a": "Common extensions are pre-installed. If an application declares an extension that is not present, that is a deployment question to raise before you migrate."
+        },
+        {
+          "q": "Can I run a queue worker?",
+          "a": "Yes — workers are long-running processes managed alongside the application, with cron available for scheduled work."
+        }
+      ]
     },
     "python-hosting.php": {
       "title": "Python Hosting",
       "category": "Developers",
-      "headline": "Python workloads on a plan that states its runtime.",
+      "headline": "Python applications, properly hosted",
       "summary": "Check the interpreter version and process model in the published plan, not in a slogan.",
       "visual": "deployment/python",
       "features": [
         [
-          "Confirm the plan",
-          "Published specifications are the source of truth for resources and software."
+          "Isolated environments",
+          "Dependencies installed per application, so two applications that disagree about a library version can coexist."
         ],
         [
-          "Keep ownership",
-          "Bring a domain you already control, or register one in the same account."
+          "WSGI and ASGI",
+          "Serve synchronous frameworks and asynchronous ones, with TLS and routing in front of the application."
         ],
         [
-          "Ask before you migrate",
-          "The team can scope a move when you share the source and the target plan."
+          "Workers",
+          "Long-running processes for queues and background work, supervised and restarted on failure."
+        ],
+        [
+          "Scheduled jobs",
+          "Cron for periodic work like synchronisation, reporting and cleanup, rather than a process that sleeps."
+        ],
+        [
+          "Data services",
+          "PostgreSQL, MySQL-compatible, MongoDB and Redis services your application connects to."
+        ],
+        [
+          "Logs and telemetry",
+          "Application output and resource use captured per service, so a slow query or a memory leak is visible."
         ]
       ],
       "uses": [
-        "New projects",
-        "Migrations",
-        "Teams standardizing on one provider"
+        "Virtual environments",
+        "WSGI / ASGI",
+        "Background workers",
+        "Scheduled tasks"
       ],
       "related": [
-        "developer-friendly.php",
-        "vps-hosting.php",
-        "paas.php"
+        "deployments.php",
+        "applications.php",
+        "api-hosting.php",
+        "developer-friendly.php"
       ],
-      "slug": "python-hosting"
+      "slug": "python-hosting",
+      "seo_description": "Host Python applications on CloudHost247: virtual environments, WSGI and ASGI applications, background workers, scheduled jobs and managed data services.",
+      "faqs": [
+        {
+          "q": "Can I use a virtual environment I control?",
+          "a": "Yes. Dependencies are installed into the application's own environment from its declared requirements."
+        },
+        {
+          "q": "Do you support Celery or similar workers?",
+          "a": "Background workers are supported as processes on the application or as a separate application, with Redis or another broker available as a managed service."
+        },
+        {
+          "q": "Which Python versions are available?",
+          "a": "The versions the platform is configured to provide. Confirm the version your application targets before migrating."
+        }
+      ]
     },
     "docker-hosting.php": {
       "title": "Docker Hosting",
       "category": "Developers",
-      "headline": "Containers when the selected platform actually offers them.",
+      "headline": "Bring the image you already build",
       "summary": "Deployment availability comes from the connected catalog. This page does not invent images.",
       "visual": "deployment/docker",
       "features": [
         [
-          "Confirm the plan",
-          "Published specifications are the source of truth for resources and software."
+          "Images",
+          "Deploy from an image reference the platform can pull, so the artefact you tested is the artefact that runs."
         ],
         [
-          "Keep ownership",
-          "Bring a domain you already control, or register one in the same account."
+          "Volumes",
+          "State lives on volumes declared by the application, so replacing a container does not destroy its data."
         ],
         [
-          "Ask before you migrate",
-          "The team can scope a move when you share the source and the target plan."
+          "Environment configuration",
+          "Configuration injected as environment variables, which is what makes one image runnable in several environments."
+        ],
+        [
+          "Routing and TLS",
+          "Attach a domain to the container and certificates are issued for it."
+        ],
+        [
+          "Logs",
+          "Container output captured per application, so debugging does not require shell access to a host."
+        ],
+        [
+          "Resource visibility",
+          "CPU, memory and traffic recorded, so a container that is quietly restarting becomes visible."
         ]
       ],
       "uses": [
-        "New projects",
-        "Migrations",
-        "Teams standardizing on one provider"
+        "Run your own images",
+        "Persistent volumes",
+        "Environment configuration",
+        "Domain and TLS in front"
       ],
       "related": [
+        "docker-hosting.php",
         "paas.php",
+        "applications.php",
         "deployments.php",
-        "vps-hosting.php"
+        "firewall.php"
       ],
-      "slug": "docker-hosting"
+      "slug": "docker-hosting",
+      "seo_description": "Run containerised applications on CloudHost247 with Docker images, persistent volumes, environment configuration and per-application domains.",
+      "faqs": [
+        {
+          "q": "Can I run a private registry image?",
+          "a": "Yes — registry credentials can be supplied to the application so the platform can pull a private image."
+        },
+        {
+          "q": "How many containers can I run?",
+          "a": "As many as your account has capacity for. Each one is a service, with its own configuration, volumes and logs."
+        },
+        {
+          "q": "Can containers talk to each other?",
+          "a": "Applications on the same account can be connected where the platform's networking allows it, and databases are reachable as services rather than by raw host address."
+        }
+      ]
     },
     "laravel-hosting.php": {
       "title": "Laravel Hosting",
       "category": "Developers",
-      "headline": "Hosting considerations for a Laravel application.",
+      "headline": "Laravel with the parts that usually get forgotten",
       "summary": "Confirm PHP, queue, scheduler and database requirements against the plan you select.",
       "visual": "deployment/laravel",
       "features": [
         [
-          "Confirm the plan",
-          "Published specifications are the source of truth for resources and software."
+          "Queue workers",
+          "Supervised worker processes so queued jobs are processed and re-started after a deployment or a failure."
         ],
         [
-          "Keep ownership",
-          "Bring a domain you already control, or register one in the same account."
+          "The scheduler",
+          "A single cron entry running Laravel's scheduler, so you do not have to remember which tasks need which timing."
         ],
         [
-          "Ask before you migrate",
-          "The team can scope a move when you share the source and the target plan."
+          "Writable storage",
+          "Persistent volumes for uploads and framework storage, so a redeploy does not erase user files."
+        ],
+        [
+          "Migrations",
+          "A database that can be dumped, restored and migrated with a backup taken before the change."
+        ],
+        [
+          "Environment configuration",
+          "The values in .env supplied per environment instead of living in the repository."
+        ],
+        [
+          "Logs",
+          "Application and queue output captured per service, which is where a failing job is actually visible."
         ]
       ],
       "uses": [
-        "New projects",
-        "Migrations",
-        "Teams standardizing on one provider"
+        "Queue workers",
+        "Scheduler cron",
+        "Persistent storage",
+        "MySQL or PostgreSQL"
       ],
       "related": [
         "php-hosting.php",
-        "developer-friendly.php",
-        "web-hosting.php"
+        "applications.php",
+        "deployments.php",
+        "backups.php",
+        "developer-friendly.php"
       ],
-      "slug": "laravel-hosting"
+      "slug": "laravel-hosting",
+      "seo_description": "Host Laravel on CloudHost247 with the pieces a Laravel application actually needs: queue workers, scheduler cron, storage, databases and Git deployment.",
+      "faqs": [
+        {
+          "q": "Is Redis available for queues?",
+          "a": "Redis is available as a managed service, and the database driver can also be used. Choose according to the load you expect."
+        },
+        {
+          "q": "Can I run Horizon?",
+          "a": "Horizon is a Laravel process like any other worker; run it as the worker command where the plan's resources allow."
+        },
+        {
+          "q": "How are uploads handled?",
+          "a": "Attach a volume for the storage path, or use an object storage service. Leaving uploads inside a replaceable container is how user files disappear."
+        }
+      ]
     },
     "api-hosting.php": {
       "title": "API Hosting",
       "category": "Developers",
-      "headline": "A foundation for HTTP APIs you operate.",
+      "headline": "Host the API your product depends on",
       "summary": "Choose compute and a hostname, then confirm TLS and rate limits for your own API.",
       "visual": "deployment/api",
       "features": [
         [
-          "Confirm the plan",
-          "Published specifications are the source of truth for resources and software."
+          "TLS everywhere",
+          "Certificates issued and renewed automatically, with the option to force HTTPS so a token is never sent in the clear."
         ],
         [
-          "Keep ownership",
-          "Bring a domain you already control, or register one in the same account."
+          "Secrets outside the code",
+          "Keys and connection strings are set as environment configuration per application, and are not returned once saved."
         ],
         [
-          "Ask before you migrate",
-          "The team can scope a move when you share the source and the target plan."
+          "Rate limiting",
+          "Request limiting protects the service from a runaway client — and from a bill caused by one."
+        ],
+        [
+          "Real logs",
+          "Request and error logs available on the deployment, so a 500 can be diagnosed without guesswork."
+        ],
+        [
+          "Custom domains and certificates",
+          "Attach the domain that belongs on the endpoint, including subdomains, with a certificate per hostname."
+        ],
+        [
+          "Uptime and latency signals",
+          "The service is watched, so a regression shows up as a measurement rather than as a customer complaint."
         ]
       ],
       "uses": [
-        "New projects",
-        "Migrations",
-        "Teams standardizing on one provider"
+        "HTTPS endpoints",
+        "Environment-based secrets",
+        "Rate limiting",
+        "Request and error logs"
       ],
       "related": [
         "developer-friendly.php",
-        "vps-hosting.php",
-        "ssl-certificate.php"
+        "deployments.php",
+        "firewall.php",
+        "monitoring.php",
+        "documentation.php"
       ],
-      "slug": "api-hosting"
+      "slug": "api-hosting",
+      "seo_description": "Host an HTTP API on CloudHost247 with TLS, environment-based secrets, rate limiting, logs and monitoring — on the same platform as your applications.",
+      "faqs": [
+        {
+          "q": "Which languages can I write the API in?",
+          "a": "Whichever of the supported runtimes suits you — Node.js, PHP and Python are the documented runtimes, and containerised deployments cover most other stacks."
+        },
+        {
+          "q": "Can I restrict who can call the API?",
+          "a": "Yes, at the application layer and at the network layer. Firewall rules can restrict the network path, and your own code enforces authentication."
+        },
+        {
+          "q": "Do you offer a managed API gateway?",
+          "a": "No. The platform provides hosting, TLS, DNS, rate limiting and monitoring around your API. A productised gateway is a different product and is not claimed here."
+        }
+      ]
     },
     "paas.php": {
       "title": "PaaS",
       "category": "Developers",
-      "headline": "Application deployment when the platform catalog is connected.",
+      "headline": "Push code, get a running application",
       "summary": "The deployment pipeline is described honestly: queue, worker, domains and environment variables where implemented.",
       "visual": "deployment/paas",
       "features": [
         [
-          "Confirm the plan",
-          "Published specifications are the source of truth for resources and software."
+          "Build from source",
+          "The build runs from the repository, so the deployed artefact is derived from a commit you can name."
         ],
         [
-          "Keep ownership",
-          "Bring a domain you already control, or register one in the same account."
+          "Release",
+          "A build that succeeds becomes a release tied to the deployment record, with its environment configuration."
         ],
         [
-          "Ask before you migrate",
-          "The team can scope a move when you share the source and the target plan."
+          "Roll back",
+          "Because releases are recorded, returning to a previous state is a decision rather than a rebuild from memory."
+        ],
+        [
+          "Configuration per environment",
+          "Variables and secrets live with the application, not in the repository."
+        ],
+        [
+          "Routing",
+          "Domains map to applications, with certificates issued per hostname."
+        ],
+        [
+          "Logs",
+          "Build output and runtime output are both kept, which is the difference between guessing and knowing."
         ]
       ],
       "uses": [
-        "New projects",
-        "Migrations",
-        "Teams standardizing on one provider"
+        "Build from a repository",
+        "Release and roll back",
+        "Environment configuration",
+        "Per-application domain"
       ],
       "related": [
         "deployments.php",
         "developer-friendly.php",
-        "applications.php"
+        "docker-hosting.php",
+        "documentation.php"
       ],
-      "slug": "paas"
+      "slug": "paas",
+      "seo_description": "CloudHost247 PaaS: connect a repository, build it, release it, and route a domain to it — with build logs, environment configuration and rollbacks.",
+      "faqs": [
+        {
+          "q": "Which buildpacks or stacks are supported?",
+          "a": "The supported runtimes are Node.js, PHP, Python and Laravel, plus container deployments for anything else. Rather than listing buildpacks that may not be configured, the platform shows what a deployment supports."
+        },
+        {
+          "q": "Can I run the same application in two environments?",
+          "a": "Yes. Two applications can be created from the same repository with different configuration and different domains."
+        },
+        {
+          "q": "Does this replace my CI pipeline?",
+          "a": "No. It replaces deployment, not continuous integration. The platform's APIs let an existing pipeline trigger a deployment."
+        }
+      ]
     },
     "data-centers.php": {
       "title": "Data Centers",
       "category": "Infrastructure",
-      "headline": "Locations only when a product configuration names them.",
+      "headline": "Regions we can actually deploy into",
       "summary": "This page does not publish a city list. Available locations are the ones attached to a plan.",
       "visual": "cloud/data-centers",
       "features": [
         [
-          "Confirm the plan",
-          "Published specifications are the source of truth for resources and software."
+          "Latency to your users",
+          "The physical distance between the facility and the people using the service is the single largest factor in response time."
         ],
         [
-          "Keep ownership",
-          "Bring a domain you already control, or register one in the same account."
+          "Data residency",
+          "Where data is stored is a legal question as well as a technical one. Region selection is how you answer it."
         ],
         [
-          "Ask before you migrate",
-          "The team can scope a move when you share the source and the target plan."
+          "The provider operating the facility",
+          "Each region names the provider that runs the physical site."
+        ],
+        [
+          "Addressing and connectivity",
+          "IP ranges and the network path are determined by the region the service is deployed into."
         ]
       ],
       "uses": [
-        "New projects",
-        "Migrations",
-        "Teams standardizing on one provider"
+        "Generated from configuration",
+        "Provider named per region",
+        "Region selected at provisioning",
+        "Status shown per service"
       ],
       "related": [
         "infrastructure.php",
-        "vps-hosting.php",
-        "dedicated-server.php"
+        "network.php",
+        "cloudhost247-hosting.php",
+        "aboutus.php"
       ],
-      "slug": "data-centers"
+      "slug": "data-centers",
+      "seo_description": "The data centre regions CloudHost247 is configured to deploy into, listed from live configuration rather than a marketing map.",
+      "faqs": [
+        {
+          "q": "Why are some regions missing?",
+          "a": "Because the platform is not configured to deploy there. Adding a region is an administrative configuration change, and it appears on this page as soon as it is configured."
+        },
+        {
+          "q": "Does CloudHost247 own the data centres?",
+          "a": "No. The facilities are operated by infrastructure providers. CloudHost247 operates the platform and the services that run on the hardware."
+        },
+        {
+          "q": "Can I deploy across more than one region?",
+          "a": "Yes, where more than one is configured. Multi-region architecture is designed per requirement — talk to us about what you are trying to achieve."
+        }
+      ]
     },
     "network.php": {
       "title": "Network",
       "category": "Infrastructure",
-      "headline": "How to read the network details a plan actually publishes.",
+      "headline": "The path between your users and your service",
       "summary": "Transit, bandwidth and addresses are plan fields, not a global claim on this page.",
       "visual": "cloud/network",
       "features": [
         [
-          "Confirm the plan",
-          "Published specifications are the source of truth for resources and software."
+          "IP addressing",
+          "Public addresses assigned to your service, managed in your account, with the option to move a floating address between servers."
         ],
         [
-          "Keep ownership",
-          "Bring a domain you already control, or register one in the same account."
+          "Reverse DNS",
+          "PTR records set correctly, which matters for mail deliverability and for anything that logs connections."
         ],
         [
-          "Ask before you migrate",
-          "The team can scope a move when you share the source and the target plan."
+          "Firewall filtering",
+          "Rules applied in order to allow, deny or rate-limit traffic to a server, with the order visible."
+        ],
+        [
+          "Flood mitigation",
+          "Known-abusive traffic patterns are filtered at the network edge rather than reaching the application."
+        ],
+        [
+          "Traffic telemetry",
+          "Throughput and packet-level signals recorded per service so a change in behaviour is visible as a graph."
+        ],
+        [
+          "IPv6",
+          "Dual-stack addressing where the region and provider support it."
         ]
       ],
       "uses": [
-        "New projects",
-        "Migrations",
-        "Teams standardizing on one provider"
+        "Public and private addressing",
+        "Rule-based filtering",
+        "Reverse DNS control",
+        "Traffic telemetry"
       ],
       "related": [
+        "firewall.php",
+        "ip-management.php",
+        "monitoring.php",
         "infrastructure.php",
-        "vps-hosting.php",
-        "firewall.php"
+        "fair-usage-policy.php"
       ],
-      "slug": "network"
+      "slug": "network",
+      "seo_description": "The CloudHost247 network layer: public and private addressing, firewall filtering, reverse DNS, floating IPs and the observability that sits on top.",
+      "faqs": [
+        {
+          "q": "Can I get additional IP addresses?",
+          "a": "Yes, subject to the region and provider. Addresses are assigned to the service and are visible in your account."
+        },
+        {
+          "q": "Do you support private networking between servers?",
+          "a": "Where the provider and region support private networks, servers can be given private addressing that is not reachable from the internet."
+        },
+        {
+          "q": "Is there a bandwidth limit?",
+          "a": "The limit is the one stated on the product you bought. Anything described as unmetered still operates under the Fair Usage Policy."
+        }
+      ]
     },
     "security.php": {
       "title": "Security",
       "category": "Infrastructure",
-      "headline": "Security controls you can verify from your account and our policies.",
+      "headline": "Security that is operational, not a badge",
       "summary": "TLS, access and abuse handling are documented. Certifications are listed only when published.",
       "visual": "security/platform-security",
       "features": [
         [
-          "Confirm the plan",
-          "Published specifications are the source of truth for resources and software."
+          "Isolation between tenants",
+          "Accounts are separated at the service level so one compromised site is not a route into another customer's data."
         ],
         [
-          "Keep ownership",
-          "Bring a domain you already control, or register one in the same account."
+          "Platform patch management",
+          "The operating systems, runtime versions and platform components we control are patched on a schedule, not when someone complains."
         ],
         [
-          "Ask before you migrate",
-          "The team can scope a move when you share the source and the target plan."
+          "Filtering before your site",
+          "Known-malicious traffic patterns and abusive request rates are filtered at the platform edge, ahead of the application."
+        ],
+        [
+          "Access control",
+          "Account access uses strong credentials, session controls and multi-factor authentication, including passkeys."
+        ],
+        [
+          "Encryption in transit",
+          "TLS on every web endpoint and mail transport, with automated certificate renewal."
+        ],
+        [
+          "Recovery and review",
+          "Security-relevant events are logged, and the incident path is documented so a response does not start from zero."
         ]
       ],
       "uses": [
-        "New projects",
-        "Migrations",
-        "Teams standardizing on one provider"
+        "Your application's code",
+        "Your credentials",
+        "What you publish",
+        "Your data handling",
+        "Tenant isolation",
+        "Platform patching"
       ],
       "related": [
-        "ssl-certificate.php",
-        "web-hosting.php",
-        "help-center.php"
+        "security.php",
+        "firewall.php",
+        "acceptable-use-policy.php",
+        "cybercrime-policy.php",
+        "ssl-certificate.php"
       ],
-      "slug": "security"
+      "slug": "security",
+      "seo_description": "How CloudHost247 protects hosting: tenant isolation, platform patching, malware and abuse filtering, access control, certificates and monitored recovery.",
+      "faqs": [
+        {
+          "q": "Do you scan for malware?",
+          "a": "The platform filters known-malicious behaviour and monitors for abuse signals. That is detection and mitigation, not a guarantee of cleanliness — an application you control still needs its own updates."
+        },
+        {
+          "q": "Do you offer a web application firewall as a product?",
+          "a": "Network-level firewall rules are a real, configurable feature on servers. A separate productised WAF tier is not claimed here; if it is not in your catalogue, it is not available to buy."
+        },
+        {
+          "q": "How do you handle abuse reports?",
+          "a": "Reports go to the abuse contact published in the legal and policy documents, and handling follows the Acceptable Use and Cybercrime policies."
+        },
+        {
+          "q": "Can I get a security questionnaire completed?",
+          "a": "Yes — send the questionnaire through the contact route and the relevant answers are provided. We do not publish certifications we do not hold."
+        }
+      ]
     },
     "monitoring.php": {
       "title": "Monitoring",
       "category": "Infrastructure",
-      "headline": "Service status and the checks your plan exposes.",
+      "headline": "Know before your customers do",
       "summary": "Public status is the status page. Per-server graphs appear in the client area when the product provides them.",
       "visual": "management/monitoring",
       "features": [
         [
-          "Confirm the plan",
-          "Published specifications are the source of truth for resources and software."
+          "Compute pressure",
+          "CPU and memory over time, so the difference between a busy day and a capacity problem is visible."
         ],
         [
-          "Keep ownership",
-          "Bring a domain you already control, or register one in the same account."
+          "Storage growth",
+          "Disk consumption trending, because a full disk takes a service down quietly and completely."
         ],
         [
-          "Ask before you migrate",
-          "The team can scope a move when you share the source and the target plan."
+          "Traffic",
+          "Throughput in and out, which is where a traffic spike or a leak is first detectable."
+        ],
+        [
+          "Service state",
+          "Whether each service is reachable and answering, recorded as state rather than as a promise."
+        ],
+        [
+          "Alerts that mean something",
+          "Notifications tied to a threshold rather than to every fluctuation, so an alert is worth reading."
+        ],
+        [
+          "History",
+          "Retained telemetry you can go back through when working out when a problem actually started."
         ]
       ],
       "uses": [
-        "New projects",
-        "Migrations",
-        "Teams standardizing on one provider"
+        "Resource telemetry",
+        "Historical trend",
+        "Per-service scope",
+        "Status page driven by real checks"
       ],
       "related": [
         "server-management.php",
-        "vps-hosting.php",
-        "help-center.php"
+        "firewall.php",
+        "backups.php",
+        "cloudhost247-hosting.php"
       ],
-      "slug": "monitoring"
+      "slug": "monitoring",
+      "seo_description": "Resource monitoring and service telemetry for CloudHost247 servers, applications and hosting, with historical data and alerting you can act on.",
+      "faqs": [
+        {
+          "q": "Can I see monitoring for a service I have?",
+          "a": "Yes — telemetry is attached to the service in your account, so the graphs for a given server appear with that server."
+        },
+        {
+          "q": "Do you alert me or fix it yourself?",
+          "a": "Both are possible. Standard monitoring notifies; managed services mean the alert is acted on by us as well."
+        },
+        {
+          "q": "Can I monitor something outside CloudHost247?",
+          "a": "The Tools Center includes network and DNS diagnostics that can check external endpoints from the platform."
+        }
+      ]
     },
     "backups.php": {
       "title": "Backups",
       "category": "Infrastructure",
-      "headline": "Backup options depend on the product you buy.",
+      "headline": "A backup is only real if you can restore it",
       "summary": "Read the backup policy and the plan description. This page does not promise a retention period the catalog does not state.",
       "visual": "management/backups",
       "features": [
         [
-          "Confirm the plan",
-          "Published specifications are the source of truth for resources and software."
+          "Scheduled, not manual",
+          "Backup jobs run on a schedule you can see, so protection does not depend on someone remembering to click a button."
         ],
         [
-          "Keep ownership",
-          "Bring a domain you already control, or register one in the same account."
+          "What gets captured",
+          "Files, databases and application data are captured according to the service, and each backup records what it contains."
         ],
         [
-          "Ask before you migrate",
-          "The team can scope a move when you share the source and the target plan."
+          "A job history",
+          "Every run is recorded with its status and size, so a silently failing job is visible rather than assumed to be working."
+        ],
+        [
+          "Restore from your account",
+          "Restores are performed against the service they belong to, with the backup that will be used identified before it runs."
+        ],
+        [
+          "Per-service scope",
+          "Each hosting account, server and application has its own backup record, so restoring one thing does not touch another."
+        ],
+        [
+          "Stored separately",
+          "Backups are stored on storage separate from the live service, so losing the service does not lose the backup."
         ]
       ],
       "uses": [
-        "New projects",
-        "Migrations",
-        "Teams standardizing on one provider"
+        "Your own copy of critical data",
+        "A tested recovery plan",
+        "A version control system for code",
+        "Scheduled jobs",
+        "Visible job history",
+        "Per-service restore"
       ],
       "related": [
         "backup-policy.php",
+        "backups.php",
         "server-management.php",
-        "web-hosting.php"
+        "web-hosting.php",
+        "monitoring.php",
+        "data-deletion.php"
       ],
-      "slug": "backups"
+      "slug": "backups",
+      "seo_description": "Scheduled backups for CloudHost247 hosting, servers and applications, with visible job history and a documented restore path.",
+      "faqs": [
+        {
+          "q": "How long are backups kept?",
+          "a": "Retention is set per service and stated in the Backup Policy. The policy is the authoritative source, not this page."
+        },
+        {
+          "q": "Can I restore a single file?",
+          "a": "Where file-level restore is supported for the service, yes. Otherwise the backup restores the service data as a set."
+        },
+        {
+          "q": "Are backups encrypted?",
+          "a": "Backup storage is access-controlled and separate from the live service. The specific controls are described in the Backup Policy and the platform's security documentation."
+        },
+        {
+          "q": "Can I trigger a backup before a big change?",
+          "a": "Yes. A manual backup can be taken before a migration, an upgrade or a plugin batch, and it appears in the same job history."
+        }
+      ]
     },
     "firewall.php": {
       "title": "Firewall",
       "category": "Infrastructure",
-      "headline": "Firewall controls when the server product includes them.",
+      "headline": "Close everything you do not need",
       "summary": "Open the service in your account to see which rules you can change. Marketing pages do not toggle live firewalls.",
       "visual": "management/firewall",
       "features": [
         [
-          "Confirm the plan",
-          "Published specifications are the source of truth for resources and software."
+          "Ordered evaluation",
+          "Rules are applied in sequence and the order is shown, because order is what determines the outcome."
         ],
         [
-          "Keep ownership",
-          "Bring a domain you already control, or register one in the same account."
+          "Default deny",
+          "A policy of closing everything and opening what the service needs is the one that ages well."
         ],
         [
-          "Ask before you migrate",
-          "The team can scope a move when you share the source and the target plan."
+          "Rate limiting",
+          "Limit connections from a source so a brute-force attempt or a runaway client cannot consume the service."
+        ],
+        [
+          "Source restrictions",
+          "Restrict administrative ports to known addresses so SSH is not reachable from the whole internet."
+        ],
+        [
+          "Per-service rules",
+          "Rules are attached to a specific server, so a change is scoped to the thing it was meant for."
+        ],
+        [
+          "Auditable changes",
+          "Rule changes are recorded against your account, which makes an incident review possible."
         ]
       ],
       "uses": [
-        "New projects",
-        "Migrations",
-        "Teams standardizing on one provider"
+        "Ordered rules",
+        "Allow, deny and rate-limit",
+        "Per-server scope",
+        "Effective ruleset visible"
       ],
       "related": [
-        "server-management.php",
         "security.php",
-        "vps-hosting.php"
+        "network.php",
+        "server-management.php",
+        "ip-management.php",
+        "acceptable-use-policy.php"
       ],
-      "slug": "firewall"
+      "slug": "firewall",
+      "seo_description": "Rule-based firewall control for CloudHost247 servers: ordered allow, deny and rate-limit rules applied at the network layer, with the effective ruleset visible.",
+      "faqs": [
+        {
+          "q": "Can I lock myself out?",
+          "a": "Yes — that is a real risk with any firewall. Platform-level console access exists for the servers that support it, and support can help recover access."
+        },
+        {
+          "q": "Is the firewall in front of the server or on it?",
+          "a": "Rules are applied at the network layer for the service, ahead of the application, and are managed from the platform rather than requiring you to edit rules on the host."
+        },
+        {
+          "q": "Does it protect against volumetric attacks?",
+          "a": "Network-level flood mitigation is part of the platform, but the capacity available depends on the region and provider. A firewall is a policy control, not a substitute for mitigation capacity."
+        }
+      ]
     },
     "dns-management.php": {
       "title": "DNS Management",
@@ -1368,39 +2756,69 @@
     "ip-management.php": {
       "title": "IP Management",
       "category": "Infrastructure",
-      "headline": "Addresses assigned to a service are listed on that service.",
+      "headline": "Know which address belongs to what",
       "summary": "Additional addresses, if offered, are part of the product configuration rather than a public claim.",
       "visual": "management/ip-management",
       "features": [
         [
-          "Confirm the plan",
-          "Published specifications are the source of truth for resources and software."
+          "See the assignment",
+          "Every address shows the service it belongs to, so an audit does not require a spreadsheet."
         ],
         [
-          "Keep ownership",
-          "Bring a domain you already control, or register one in the same account."
+          "Set reverse DNS",
+          "PTR records for your addresses, which mail servers and log correlation both depend on."
         ],
         [
-          "Ask before you migrate",
-          "The team can scope a move when you share the source and the target plan."
+          "Move an address",
+          "A floating address can be reassigned to another server, which is what makes failover practical."
+        ],
+        [
+          "IPv6 where available",
+          "Dual-stack assignment where the region and provider support it."
+        ],
+        [
+          "Justification for more",
+          "Additional address requests are assessed against real need, which is what keeps the pool usable for everyone."
+        ],
+        [
+          "Abuse handling",
+          "Addresses reported for abuse are handled under the Acceptable Use Policy, whichever service holds them."
         ]
       ],
       "uses": [
-        "New projects",
-        "Migrations",
-        "Teams standardizing on one provider"
+        "Assigned and available addresses",
+        "Reverse DNS control",
+        "Floating addresses",
+        "Addresses tied to services"
       ],
       "related": [
+        "network.php",
+        "firewall.php",
         "server-management.php",
-        "vps-hosting.php",
-        "dedicated-server.php"
+        "email-hosting.php",
+        "acceptable-use-policy.php"
       ],
-      "slug": "ip-management"
+      "slug": "ip-management",
+      "seo_description": "Manage the IP addresses assigned to your CloudHost247 services: public addressing, floating IPs, reverse DNS and the records that tie them to your services.",
+      "faqs": [
+        {
+          "q": "Can I get a dedicated IP for a website?",
+          "a": "Where the product supports it and the region has addresses available. Raise the requirement and the option is confirmed with the service."
+        },
+        {
+          "q": "Why does reverse DNS matter?",
+          "a": "A PTR record that matches the sending hostname is a deliverability signal for mail, and it makes connection logs meaningful for everything else."
+        },
+        {
+          "q": "Do addresses transfer if I move servers?",
+          "a": "A floating address can be reassigned within the same region. A change of region means a new address."
+        }
+      ]
     },
     "migration.php": {
       "title": "Migration",
       "category": "Infrastructure",
-      "headline": "Plan a move with the team before you change nameservers.",
+      "headline": "Move your site without holding your breath",
       "summary": "Migrations are scoped per project. Contact the team with the source panel and the target plan.",
       "visual": "management/migration",
       "features": [
@@ -1418,16 +2836,38 @@
         ]
       ],
       "uses": [
-        "New projects",
-        "Migrations",
-        "Teams standardizing on one provider"
+        "We copy the files",
+        "We copy the databases",
+        "We verify before cutover",
+        "You choose when DNS changes"
       ],
       "related": [
         "web-hosting.php",
-        "help-center.php",
-        "aboutus.php"
+        "email-hosting.php",
+        "wordpress-hosting.php",
+        "backups.php",
+        "refund-policy.php"
       ],
-      "slug": "migration"
+      "slug": "migration",
+      "seo_description": "Move your website and email to CloudHost247 with a planned cutover: copy, verify on the new infrastructure, then switch DNS at your discretion.",
+      "faqs": [
+        {
+          "q": "How long does a migration take?",
+          "a": "It depends on the size of the data and how the current host allows access. The copy and verification happen before any customer-visible change, and the DNS switch itself is decided by you."
+        },
+        {
+          "q": "Will my site be down during the move?",
+          "a": "The intent of the sequence is no downtime: the site is verified on the new infrastructure while the old one still serves, and DNS is the only change that customers can observe."
+        },
+        {
+          "q": "Can you migrate email as well as the website?",
+          "a": "Yes. Mailboxes and their contents are part of the inventory, and the MX records change at the same carefully chosen moment as the web records."
+        },
+        {
+          "q": "What if the migration does not work?",
+          "a": "Verification happens before the switch, so a failed migration is caught while the original site is still live. If the new platform cannot run the application, you keep the old host and we say so."
+        }
+      ]
     },
     "managed-services.php": {
       "title": "Managed Services",
@@ -1464,7 +2904,7 @@
     "documentation.php": {
       "title": "Documentation",
       "category": "Resources",
-      "headline": "Product guidance lives in the knowledgebase and the help center.",
+      "headline": "Documentation for the platform as it is",
       "summary": "Search published articles, then open a ticket if the article does not cover your service.",
       "visual": "blog/documentation",
       "features": [
@@ -1482,123 +2922,122 @@
         ]
       ],
       "uses": [
-        "New projects",
-        "Migrations",
-        "Teams standardizing on one provider"
+        "API contracts",
+        "Provisioning and infrastructure",
+        "Deployment and environments",
+        "Operations and security"
       ],
       "related": [
-        "help-center.php",
-        "faqs.php",
-        "blog.php"
+        "developer-friendly.php",
+        "api-hosting.php"
       ],
-      "slug": "documentation"
+      "slug": "documentation",
+      "seo_description": "CloudHost247 platform documentation: API references, provisioning, deployment, domain services, billing, tools and operations guides.",
+      "faqs": [
+        {
+          "q": "Is there a public API reference?",
+          "a": "Yes — the API documentation covers authentication, catalog, commerce, domains, deployments, infrastructure and billing endpoints."
+        },
+        {
+          "q": "Does the documentation describe unfinished work?",
+          "a": "Yes, deliberately. Documents that describe incomplete or frozen work exist so that nobody builds against a feature believing it is finished."
+        },
+        {
+          "q": "Can I contribute a fix to the documentation?",
+          "a": "Documentation lives with the platform source. Raise it through support and it goes to the team that owns the relevant area."
+        }
+      ]
     }
   },
   "navigation": [
     {
       "title": "Hosting",
-      "description": "Give your website a place to grow.",
+      "description": "Website, application and email hosting with a live product catalogue behind every plan page.",
       "groups": [
         {
-          "title": "Web hosting",
+          "title": "Website hosting",
           "links": [
             {
               "label": "Web Hosting",
               "url": "web-hosting.php"
             },
             {
-              "label": "WordPress",
-              "url": "wordpress-hosting.php"
-            },
-            {
-              "label": "Business",
+              "label": "Business Hosting",
               "url": "business-hosting.php"
             },
             {
-              "label": "cPanel",
+              "label": "cPanel Hosting",
               "url": "cpanel-hosting.php"
             },
             {
-              "label": "Plesk",
-              "url": "plesk-hosting.php"
+              "label": "WordPress Hosting",
+              "url": "wordpress-hosting.php"
             },
             {
-              "label": "Windows",
+              "label": "Reseller Hosting",
+              "url": "reseller-hosting.php"
+            },
+            {
+              "label": "Windows Hosting",
               "url": "windows-hosting.php"
             },
             {
-              "label": "Email",
-              "url": "email-hosting.php"
-            },
-            {
-              "label": "Reseller",
-              "url": "reseller-hosting.php"
-            }
-          ]
-        },
-        {
-          "title": "Cloud",
-          "links": [
-            {
-              "label": "Cloud Hosting",
+              "label": "Website Hosting Overview",
               "url": "cloudhost247-hosting.php"
-            },
-            {
-              "label": "Public Cloud",
-              "url": "vps-publiccloud.php"
-            },
-            {
-              "label": "Private Cloud",
-              "url": "vps-privatecloud.php"
-            },
-            {
-              "label": "VPS",
-              "url": "vps-hosting.php"
-            },
-            {
-              "label": "Dedicated",
-              "url": "dedicated-server.php"
-            },
-            {
-              "label": "Enterprise",
-              "url": "enterprise-servers.php"
             }
           ]
         },
         {
-          "title": "Developer",
+          "title": "Applications & platform hosting",
           "links": [
             {
-              "label": "Node.js",
-              "url": "nodejs-hosting.php"
+              "label": "Application Hosting",
+              "url": "applications.php"
             },
             {
-              "label": "PHP",
-              "url": "php-hosting.php"
+              "label": "Developer Hosting",
+              "url": "developer-friendly.php"
             },
             {
-              "label": "Python",
-              "url": "python-hosting.php"
-            },
-            {
-              "label": "Docker",
-              "url": "docker-hosting.php"
-            },
-            {
-              "label": "Laravel",
-              "url": "laravel-hosting.php"
-            },
-            {
-              "label": "APIs",
+              "label": "API Hosting",
               "url": "api-hosting.php"
             },
             {
-              "label": "PaaS",
-              "url": "paas.php"
+              "label": "Email Hosting",
+              "url": "email-hosting.php"
             },
             {
-              "label": "Deployment",
-              "url": "deployments.php"
+              "label": "Control Panels",
+              "url": "cloudhost247-hosting.php"
+            }
+          ]
+        },
+        {
+          "title": "Managed for you",
+          "links": [
+            {
+              "label": "Website Migration",
+              "url": "migration.php"
+            },
+            {
+              "label": "Managed Services",
+              "url": "managed-services.php"
+            },
+            {
+              "label": "Website Design",
+              "url": "website-design.php"
+            },
+            {
+              "label": "SSL Certificates",
+              "url": "ssl-certificate.php"
+            },
+            {
+              "label": "Backups",
+              "url": "backups.php"
+            },
+            {
+              "label": "Security",
+              "url": "security.php"
             }
           ]
         }
@@ -1606,14 +3045,18 @@
     },
     {
       "title": "Cloud & Servers",
-      "description": "Build on the right foundation.",
+      "description": "Virtual servers, cloud platforms and the infrastructure operations layer behind them.",
       "groups": [
         {
           "title": "Servers",
           "links": [
             {
-              "label": "VPS",
+              "label": "VPS Hosting",
               "url": "vps-hosting.php"
+            },
+            {
+              "label": "Dedicated Servers",
+              "url": "dedicated-server.php"
             },
             {
               "label": "Public Cloud",
@@ -1624,11 +3067,7 @@
               "url": "vps-privatecloud.php"
             },
             {
-              "label": "Dedicated",
-              "url": "dedicated-server.php"
-            },
-            {
-              "label": "Enterprise",
+              "label": "Enterprise Servers",
               "url": "enterprise-servers.php"
             },
             {
@@ -1638,65 +3077,32 @@
           ]
         },
         {
-          "title": "Operating systems",
+          "title": "Infrastructure",
           "links": [
             {
-              "label": "OS catalog",
+              "label": "Infrastructure",
+              "url": "infrastructure.php"
+            },
+            {
+              "label": "Data Centers",
+              "url": "data-centers.php"
+            },
+            {
+              "label": "Network",
+              "url": "network.php"
+            },
+            {
+              "label": "Operating Systems",
               "url": "operating-systems.php"
             },
             {
-              "label": "Ubuntu",
-              "url": "operating-systems.php#ubuntu"
-            },
-            {
-              "label": "Debian",
-              "url": "operating-systems.php#debian"
-            },
-            {
-              "label": "AlmaLinux",
-              "url": "operating-systems.php#almalinux"
-            },
-            {
-              "label": "Rocky Linux",
-              "url": "operating-systems.php#rocky"
-            },
-            {
-              "label": "Windows Server",
-              "url": "operating-systems.php#windows"
+              "label": "Server Management",
+              "url": "server-management.php"
             }
           ]
         },
         {
-          "title": "Images",
-          "links": [
-            {
-              "label": "WordPress",
-              "url": "operating-systems.php#wordpress"
-            },
-            {
-              "label": "Docker",
-              "url": "operating-systems.php#docker"
-            },
-            {
-              "label": "LAMP",
-              "url": "operating-systems.php#lamp"
-            },
-            {
-              "label": "LEMP",
-              "url": "operating-systems.php#lemp"
-            },
-            {
-              "label": "cPanel",
-              "url": "operating-systems.php#cpanel"
-            },
-            {
-              "label": "Plesk",
-              "url": "operating-systems.php#plesk"
-            }
-          ]
-        },
-        {
-          "title": "Management",
+          "title": "Operations & protection",
           "links": [
             {
               "label": "Monitoring",
@@ -1707,40 +3113,16 @@
               "url": "backups.php"
             },
             {
+              "label": "Firewalls",
+              "url": "firewall.php"
+            },
+            {
               "label": "Security",
               "url": "security.php"
             },
             {
-              "label": "Firewall",
-              "url": "firewall.php"
-            },
-            {
-              "label": "DNS",
-              "url": "dns-management.php"
-            },
-            {
-              "label": "SSL",
-              "url": "ssl-certificate.php"
-            },
-            {
               "label": "IP Management",
               "url": "ip-management.php"
-            },
-            {
-              "label": "Server control",
-              "url": "clientarea.php?action=services"
-            },
-            {
-              "label": "Status",
-              "url": "serverstatus.php"
-            },
-            {
-              "label": "Migration",
-              "url": "migration.php"
-            },
-            {
-              "label": "Managed Services",
-              "url": "managed-services.php"
             }
           ]
         }
@@ -1748,133 +3130,149 @@
     },
     {
       "title": "Domains",
-      "description": "Make a name for your next idea.",
+      "description": "Search, register, transfer and manage domain names — with the full registrar toolkit.",
       "groups": [
         {
-          "title": "Find a domain",
+          "title": "Get a domain",
           "links": [
             {
-              "label": "Domain Search",
-              "url": "domain.php"
-            },
-            {
-              "label": "Registration",
+              "label": "Search Domains",
               "url": "cart.php?a=add&domain=register"
             },
             {
-              "label": "Transfer",
+              "label": "Domain Transfer",
               "url": "cart.php?a=add&domain=transfer"
             },
             {
-              "label": "Pricing",
-              "url": "index.php?rp=/domain/pricing"
+              "label": "Domain Extensions",
+              "url": "domain.php#pricing"
+            },
+            {
+              "label": "Bulk Domain Search",
+              "url": "domain.php#search"
+            },
+            {
+              "label": "Domain Registration",
+              "url": "cart.php?a=add&domain=register"
             }
           ]
         },
         {
-          "title": "Management",
+          "title": "Domain management",
           "links": [
             {
-              "label": "Domain Management",
+              "label": "DNS Management",
+              "url": "dns-management.php"
+            },
+            {
+              "label": "WHOIS / RDAP Lookup",
+              "url": "domain.php#whois"
+            },
+            {
+              "label": "My Domains",
               "url": "clientarea.php?action=domains"
-            },
-            {
-              "label": "DNS",
-              "url": "domain-dns.php"
-            },
-            {
-              "label": "Renewal Policy",
-              "url": "domain-renewal-policy.php"
-            },
-            {
-              "label": "Brokerage Terms",
-              "url": "domain-brokerage-terms.php"
             }
           ]
         },
         {
-          "title": "Diagnostics",
+          "title": "Domains as an asset",
           "links": [
             {
-              "label": "DNS Checker",
-              "url": "tools/dns-checker"
+              "label": "Domain Auctions",
+              "url": "domain.php#auctions"
             },
             {
-              "label": "DNS Lookup",
-              "url": "tools/dns-lookup"
+              "label": "Domain Appraisal",
+              "url": "domain.php#appraisal"
             },
             {
-              "label": "Domain WHOIS",
-              "url": "tools/domain-whois"
+              "label": "Domain Broker",
+              "url": "domain.php#broker"
+            },
+            {
+              "label": "Domain Club",
+              "url": "domain.php#club"
+            },
+            {
+              "label": "Domain Services Overview",
+              "url": "domain.php"
             }
           ]
         }
       ]
     },
     {
-      "title": "Applications",
-      "description": "Software the catalog can actually deploy.",
+      "title": "Platforms",
+      "description": "Applications, databases, containers and the deployment platform that runs them.",
       "groups": [
         {
-          "title": "CMS",
+          "title": "Applications",
           "links": [
             {
-              "label": "Application catalog",
+              "label": "Application Marketplace",
               "url": "applications.php"
             },
             {
-              "label": "WordPress",
-              "url": "wordpress-hosting.php"
-            },
-            {
-              "label": "Ghost",
-              "url": "applications.php#ghost"
-            }
-          ]
-        },
-        {
-          "title": "Ecommerce",
-          "links": [
-            {
-              "label": "PrestaShop",
-              "url": "applications.php#prestashop"
-            },
-            {
-              "label": "All applications",
+              "label": "Application Hosting",
               "url": "applications.php"
-            }
-          ]
-        },
-        {
-          "title": "Developer",
-          "links": [
-            {
-              "label": "Node.js",
-              "url": "nodejs-hosting.php"
             },
             {
-              "label": "PHP",
-              "url": "php-hosting.php"
+              "label": "Databases",
+              "url": "applications.php#databases"
             },
             {
-              "label": "Python",
-              "url": "python-hosting.php"
-            },
-            {
-              "label": "Laravel",
-              "url": "laravel-hosting.php"
-            },
-            {
-              "label": "Docker",
+              "label": "Containers & Docker",
               "url": "docker-hosting.php"
+            },
+            {
+              "label": "PaaS",
+              "url": "paas.php"
+            }
+          ]
+        },
+        {
+          "title": "Deployment platform",
+          "links": [
+            {
+              "label": "Deployment",
+              "url": "deployments.php"
+            },
+            {
+              "label": "Application Environments",
+              "url": "deployments.php#environments"
+            },
+            {
+              "label": "My Applications",
+              "url": "clientarea.php?action=services"
+            }
+          ]
+        },
+        {
+          "title": "Developer platform",
+          "links": [
+            {
+              "label": "Developer Platform",
+              "url": "developer-friendly.php"
+            },
+            {
+              "label": "APIs",
+              "url": "api-hosting.php"
+            },
+            {
+              "label": "Control Panels",
+              "url": "cloudhost247-hosting.php"
+            },
+            {
+              "label": "Documentation",
+              "url": "documentation.php"
             }
           ]
         }
       ]
     },
     {
-      "title": "Developers",
-      "description": "A foundation for whatever you build next.",
+      "title": "Developer / Deployment",
+      "description": "Runtimes, Git-based deployment, environments and APIs — the parts you actually build on.",
       "groups": [
         {
           "title": "Runtimes",
@@ -1892,30 +3290,30 @@
               "url": "python-hosting.php"
             },
             {
-              "label": "Docker",
-              "url": "docker-hosting.php"
-            },
-            {
               "label": "Laravel",
               "url": "laravel-hosting.php"
             },
             {
-              "label": "APIs",
-              "url": "api-hosting.php"
+              "label": "Docker",
+              "url": "docker-hosting.php"
+            }
+          ]
+        },
+        {
+          "title": "Deploy & operate",
+          "links": [
+            {
+              "label": "Deployment Platform",
+              "url": "deployments.php"
             },
             {
               "label": "PaaS",
               "url": "paas.php"
             },
             {
-              "label": "Deployment",
-              "url": "deployments.php"
-            }
-          ]
-        },
-        {
-          "title": "Operate",
-          "links": [
+              "label": "Application Environments",
+              "url": "deployments.php#environments"
+            },
             {
               "label": "Server Management",
               "url": "server-management.php"
@@ -1923,27 +3321,100 @@
             {
               "label": "Operating Systems",
               "url": "operating-systems.php"
-            },
-            {
-              "label": "VPS",
-              "url": "vps-hosting.php"
             }
           ]
         },
         {
-          "title": "Reference",
+          "title": "Build with CloudHost247",
           "links": [
+            {
+              "label": "API Hosting",
+              "url": "api-hosting.php"
+            },
+            {
+              "label": "Developer Hosting",
+              "url": "developer-friendly.php"
+            },
+            {
+              "label": "DNS for Developers",
+              "url": "dns-management.php"
+            },
             {
               "label": "Documentation",
               "url": "documentation.php"
             },
             {
-              "label": "Knowledgebase",
-              "url": "knowledgebase.php"
+              "label": "Developer Tools",
+              "url": "tools/category/developer"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Websites",
+      "description": "Build a website, launch a store, or have a specialist design and run it for you.",
+      "groups": [
+        {
+          "title": "Build it",
+          "links": [
+            {
+              "label": "Website Builder",
+              "url": "website-design.php"
             },
             {
-              "label": "Tools",
-              "url": "tools"
+              "label": "AI Website Builder",
+              "url": "website-design.php"
+            },
+            {
+              "label": "Website Templates",
+              "url": "website-design.php"
+            },
+            {
+              "label": "E-commerce & Stores",
+              "url": "website-design.php"
+            },
+            {
+              "label": "Website Design",
+              "url": "website-design.php"
+            }
+          ]
+        },
+        {
+          "title": "Have it built for you",
+          "links": [
+            {
+              "label": "Website Migration",
+              "url": "migration.php"
+            },
+            {
+              "label": "Website Management",
+              "url": "managed-services.php"
+            },
+            {
+              "label": "Talk to a specialist",
+              "url": "contact.php"
+            }
+          ]
+        },
+        {
+          "title": "Run it safely",
+          "links": [
+            {
+              "label": "SSL Certificates",
+              "url": "ssl-certificate.php"
+            },
+            {
+              "label": "Backups",
+              "url": "backups.php"
+            },
+            {
+              "label": "Website Hosting",
+              "url": "web-hosting.php"
+            },
+            {
+              "label": "Domain & DNS",
+              "url": "domain.php"
             }
           ]
         }
@@ -1951,538 +3422,39 @@
     },
     {
       "title": "Tools",
-      "description": "Free professional tools for DNS, networking, developers, security and webmasters.",
-      "groups": [
-        {
-          "title": "Featured",
-          "links": [
-            {
-              "label": "DNS Checker",
-              "url": "tools/dns-checker"
-            },
-            {
-              "label": "DNS Propagation",
-              "url": "tools/dns-propagation"
-            },
-            {
-              "label": "DNS Lookup",
-              "url": "tools/dns-lookup"
-            },
-            {
-              "label": "MX Lookup",
-              "url": "tools/mx-lookup"
-            },
-            {
-              "label": "What Is My IP",
-              "url": "tools/what-is-my-ip"
-            },
-            {
-              "label": "IP Location Lookup",
-              "url": "tools/ip-location-lookup"
-            },
-            {
-              "label": "IP WHOIS",
-              "url": "tools/ip-whois"
-            },
-            {
-              "label": "IP Subnet Calculator",
-              "url": "tools/ip-subnet-calculator"
-            },
-            {
-              "label": "MRZ Generator / MRZ Tools",
-              "url": "tools/mrz-generator"
-            },
-            {
-              "label": "JSON Beautifier",
-              "url": "tools/json-beautifier"
-            },
-            {
-              "label": "Port Checker",
-              "url": "tools/port-checker"
-            },
-            {
-              "label": "SSL Certificate Checker",
-              "url": "tools/ssl-certificate-checker"
-            },
-            {
-              "label": "QR Code Generator",
-              "url": "tools/qr-code-generator"
-            },
-            {
-              "label": "Internet Speed Test",
-              "url": "tools/internet-speed-test"
-            },
-            {
-              "label": "Domain WHOIS",
-              "url": "tools/domain-whois"
-            }
-          ]
-        },
-        {
-          "title": "DNS",
-          "links": [
-            {
-              "label": "DNS Checker",
-              "url": "tools/dns-checker"
-            },
-            {
-              "label": "DNS Propagation",
-              "url": "tools/dns-propagation"
-            },
-            {
-              "label": "Domain DNS Validation",
-              "url": "tools/domain-dns-validation"
-            },
-            {
-              "label": "Reverse IP Lookup",
-              "url": "tools/reverse-ip-lookup"
-            },
-            {
-              "label": "DNS Lookup",
-              "url": "tools/dns-lookup"
-            },
-            {
-              "label": "CNAME Lookup",
-              "url": "tools/cname-lookup"
-            },
-            {
-              "label": "NS Lookup",
-              "url": "tools/ns-lookup"
-            },
-            {
-              "label": "MX Lookup",
-              "url": "tools/mx-lookup"
-            },
-            {
-              "label": "SPF Record Checker",
-              "url": "tools/spf-record-checker"
-            },
-            {
-              "label": "DMARC Checker",
-              "url": "tools/dmarc-checker"
-            },
-            {
-              "label": "Domain DNS Health Checker",
-              "url": "tools/domain-dns-health"
-            },
-            {
-              "label": "DMARC Record Generator",
-              "url": "tools/dmarc-record-generator"
-            },
-            {
-              "label": "DNSKEY Lookup",
-              "url": "tools/dnskey-lookup"
-            },
-            {
-              "label": "DS Lookup",
-              "url": "tools/ds-lookup"
-            },
-            {
-              "label": "DKIM Checker",
-              "url": "tools/dkim-checker"
-            }
-          ]
-        },
-        {
-          "title": "IP",
-          "links": [
-            {
-              "label": "Ping IPv4",
-              "url": "tools/ping-ipv4"
-            },
-            {
-              "label": "Ping IPv6",
-              "url": "tools/ping-ipv6"
-            },
-            {
-              "label": "What Is My IP",
-              "url": "tools/what-is-my-ip"
-            },
-            {
-              "label": "Traceroute",
-              "url": "tools/traceroute"
-            },
-            {
-              "label": "IP Location Lookup",
-              "url": "tools/ip-location-lookup"
-            },
-            {
-              "label": "Trace Email",
-              "url": "tools/trace-email"
-            },
-            {
-              "label": "IP Blacklist Checker",
-              "url": "tools/ip-blacklist-checker"
-            },
-            {
-              "label": "Email Blacklist Checker",
-              "url": "tools/email-blacklist-checker"
-            },
-            {
-              "label": "IP to Decimal",
-              "url": "tools/ip-to-decimal"
-            },
-            {
-              "label": "IP to Hostname",
-              "url": "tools/ip-to-hostname"
-            },
-            {
-              "label": "IP WHOIS",
-              "url": "tools/ip-whois"
-            },
-            {
-              "label": "IPv6 WHOIS",
-              "url": "tools/ipv6-whois"
-            },
-            {
-              "label": "IPv4 to IPv6",
-              "url": "tools/ipv4-to-ipv6"
-            },
-            {
-              "label": "Local IPv6 Address Generator",
-              "url": "tools/local-ipv6-generator"
-            },
-            {
-              "label": "IPv6 CIDR to Range",
-              "url": "tools/ipv6-cidr-to-range"
-            },
-            {
-              "label": "IPv6 Range to CIDR",
-              "url": "tools/ipv6-range-to-cidr"
-            },
-            {
-              "label": "IPv6 Compression",
-              "url": "tools/ipv6-compression"
-            },
-            {
-              "label": "IPv6 Expand",
-              "url": "tools/ipv6-expand"
-            },
-            {
-              "label": "IP Subnet Calculator",
-              "url": "tools/ip-subnet-calculator"
-            },
-            {
-              "label": "IPv6 to IPv4",
-              "url": "tools/ipv6-to-ipv4"
-            },
-            {
-              "label": "IPv6 Compatibility Checker",
-              "url": "tools/ipv6-compatibility-checker"
-            },
-            {
-              "label": "What Is My ISP",
-              "url": "tools/what-is-my-isp"
-            },
-            {
-              "label": "Domain to IP",
-              "url": "tools/domain-to-ip"
-            }
-          ]
-        },
-        {
-          "title": "Developer",
-          "links": [
-            {
-              "label": "HTTP Headers Checker",
-              "url": "tools/http-headers-checker"
-            },
-            {
-              "label": "Website Operating System Checker",
-              "url": "tools/website-os-checker"
-            },
-            {
-              "label": "MD5 Generator",
-              "url": "tools/md5-generator"
-            },
-            {
-              "label": "Base64 Generator",
-              "url": "tools/base64-generator"
-            },
-            {
-              "label": "Multi URL Opener",
-              "url": "tools/multi-url-opener"
-            },
-            {
-              "label": "MRZ Generator / MRZ Tools",
-              "url": "tools/mrz-generator"
-            },
-            {
-              "label": "SMTP Test",
-              "url": "tools/smtp-test"
-            },
-            {
-              "label": ".htaccess Redirect Generator",
-              "url": "tools/htaccess-redirect-generator"
-            },
-            {
-              "label": "URL Rewrite Generator",
-              "url": "tools/url-rewrite-generator"
-            },
-            {
-              "label": "Broken Link Checker",
-              "url": "tools/broken-link-checker"
-            },
-            {
-              "label": "Open Graph Checker",
-              "url": "tools/open-graph-checker"
-            },
-            {
-              "label": "RAID Calculator",
-              "url": "tools/raid-calculator"
-            },
-            {
-              "label": "Binary Translator",
-              "url": "tools/binary-translator"
-            },
-            {
-              "label": "Text to Binary",
-              "url": "tools/text-to-binary"
-            },
-            {
-              "label": "JSON Viewer",
-              "url": "tools/json-viewer"
-            },
-            {
-              "label": "JSON Beautifier",
-              "url": "tools/json-beautifier"
-            },
-            {
-              "label": "JSON Minifier",
-              "url": "tools/json-minifier"
-            },
-            {
-              "label": "Email Verifier",
-              "url": "tools/email-verifier"
-            }
-          ]
-        },
-        {
-          "title": "Designer",
-          "links": [
-            {
-              "label": "RGB to Colortone",
-              "url": "tools/rgb-to-colortone"
-            },
-            {
-              "label": "HEX to Colortone",
-              "url": "tools/hex-to-colortone"
-            },
-            {
-              "label": "CMYK to Colortone",
-              "url": "tools/cmyk-to-colortone"
-            },
-            {
-              "label": "HSV to Colortone",
-              "url": "tools/hsv-to-colortone"
-            }
-          ]
-        },
-        {
-          "title": "Webmaster",
-          "links": [
-            {
-              "label": "Website Link Analyzer",
-              "url": "tools/website-link-analyzer"
-            },
-            {
-              "label": "User Agent Checker",
-              "url": "tools/user-agent-checker"
-            },
-            {
-              "label": "Google Page Rank Checker",
-              "url": "tools/pagerank-checker"
-            },
-            {
-              "label": "Punycode Converter",
-              "url": "tools/punycode-converter"
-            },
-            {
-              "label": "Google SERP Simulator",
-              "url": "tools/serp-simulator"
-            },
-            {
-              "label": "Robots.txt Generator",
-              "url": "tools/robots-txt-generator"
-            }
-          ]
-        },
-        {
-          "title": "Network",
-          "links": [
-            {
-              "label": "Port Checker",
-              "url": "tools/port-checker"
-            },
-            {
-              "label": "MAC Address Lookup",
-              "url": "tools/mac-address-lookup"
-            },
-            {
-              "label": "MAC Address Generator",
-              "url": "tools/mac-address-generator"
-            },
-            {
-              "label": "ASN WHOIS Lookup",
-              "url": "tools/asn-whois-lookup"
-            }
-          ]
-        },
-        {
-          "title": "Cybersecurity",
-          "links": [
-            {
-              "label": "SSL Certificate Checker",
-              "url": "tools/ssl-certificate-checker"
-            },
-            {
-              "label": "Password Encryption",
-              "url": "tools/password-encryption"
-            },
-            {
-              "label": "Random Password Generator",
-              "url": "tools/random-password-generator"
-            },
-            {
-              "label": "Password Strength Checker",
-              "url": "tools/password-strength-checker"
-            }
-          ]
-        },
-        {
-          "title": "Productivity",
-          "links": [
-            {
-              "label": "QR Code Generator",
-              "url": "tools/qr-code-generator"
-            },
-            {
-              "label": "QR Scanner",
-              "url": "tools/qr-scanner"
-            },
-            {
-              "label": "Lorem Ipsum Generator",
-              "url": "tools/lorem-ipsum-generator"
-            },
-            {
-              "label": "Time Card Calculator",
-              "url": "tools/time-card-calculator"
-            },
-            {
-              "label": "BIN Checker",
-              "url": "tools/bin-checker"
-            },
-            {
-              "label": "Credit Card Checker",
-              "url": "tools/credit-card-checker"
-            },
-            {
-              "label": "Reverse Image Search",
-              "url": "tools/reverse-image-search"
-            },
-            {
-              "label": "Name Checker",
-              "url": "tools/name-checker"
-            },
-            {
-              "label": "Online Notepad",
-              "url": "tools/online-notepad"
-            },
-            {
-              "label": "Small Text Generator",
-              "url": "tools/small-text-generator"
-            },
-            {
-              "label": "Word Counter",
-              "url": "tools/word-counter"
-            },
-            {
-              "label": "Domain Name Search",
-              "url": "tools/domain-name-search"
-            },
-            {
-              "label": "ROT13 Encoder/Decoder",
-              "url": "tools/rot13"
-            },
-            {
-              "label": "Morse Code Translator",
-              "url": "tools/morse-code-translator"
-            },
-            {
-              "label": "BIMI Checker & Generator",
-              "url": "tools/bimi-checker-generator"
-            },
-            {
-              "label": "Image to Text",
-              "url": "tools/image-to-text"
-            },
-            {
-              "label": "Runic Translator",
-              "url": "tools/runic-translator"
-            },
-            {
-              "label": "Invisible Character Generator",
-              "url": "tools/invisible-character-generator"
-            },
-            {
-              "label": "Internet Speed Test",
-              "url": "tools/internet-speed-test"
-            },
-            {
-              "label": "WiFi QR Scanner",
-              "url": "tools/wifi-qr-scanner"
-            }
-          ]
-        },
-        {
-          "title": "Gaming",
-          "links": [
-            {
-              "label": "Minecraft Color Codes",
-              "url": "tools/minecraft-color-codes"
-            }
-          ]
-        }
-      ]
+      "description": "Inspect, troubleshoot and build — with tools that explain their results instead of showing invented data.",
+      "groups": []
     },
     {
       "title": "Resources",
-      "description": "Find answers. Keep moving forward.",
+      "description": "Guides, documentation, service status and the policies that govern the platform.",
       "groups": [
         {
           "title": "Learn",
           "links": [
             {
-              "label": "Knowledgebase",
-              "url": "knowledgebase.php"
+              "label": "Documentation",
+              "url": "documentation.php"
+            },
+            {
+              "label": "Knowledge Base",
+              "url": "help-center.php"
             },
             {
               "label": "Blog",
               "url": "blog.php"
             },
             {
-              "label": "FAQs",
+              "label": "FAQ",
               "url": "faqs.php"
-            },
-            {
-              "label": "Documentation",
-              "url": "documentation.php"
             }
           ]
         },
         {
-          "title": "Support",
+          "title": "Stay informed",
           "links": [
             {
-              "label": "Help Center",
-              "url": "help-center.php"
-            },
-            {
-              "label": "Submit Ticket",
-              "url": "submitticket.php"
-            },
-            {
-              "label": "System Status",
+              "label": "Service Status",
               "url": "serverstatus.php"
             },
             {
@@ -2495,20 +3467,93 @@
           "title": "Company",
           "links": [
             {
-              "label": "About",
+              "label": "About CloudHost247",
               "url": "aboutus.php"
             },
             {
-              "label": "Contact",
-              "url": "contact.php"
+              "label": "Security & Compliance",
+              "url": "security.php"
             },
             {
               "label": "Infrastructure",
               "url": "infrastructure.php"
             },
             {
-              "label": "Legal",
+              "label": "Contact",
+              "url": "contact.php"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Support",
+      "description": "Get help from the knowledge base, open a ticket, or check what is happening right now.",
+      "groups": [
+        {
+          "title": "Get help",
+          "links": [
+            {
+              "label": "Help Center",
+              "url": "help-center.php"
+            },
+            {
+              "label": "Knowledge Base",
+              "url": "knowledgebase.php"
+            },
+            {
+              "label": "Open a Ticket",
+              "url": "submitticket.php"
+            },
+            {
+              "label": "FAQ",
+              "url": "faqs.php"
+            },
+            {
+              "label": "Contact",
+              "url": "contact.php"
+            }
+          ]
+        },
+        {
+          "title": "Your account",
+          "links": [
+            {
+              "label": "Client Area",
+              "url": "clientarea.php"
+            },
+            {
+              "label": "Billing & Invoices",
+              "url": "clientarea.php?action=invoices"
+            },
+            {
+              "label": "My Services",
+              "url": "clientarea.php?action=services"
+            },
+            {
+              "label": "Service Status",
+              "url": "serverstatus.php"
+            }
+          ]
+        },
+        {
+          "title": "Policies & help",
+          "links": [
+            {
+              "label": "Legal & Policy Center",
               "url": "legal.php"
+            },
+            {
+              "label": "Acceptable Use",
+              "url": "acceptable-use-policy.php"
+            },
+            {
+              "label": "Refund Policy",
+              "url": "refund-policy.php"
+            },
+            {
+              "label": "Cookie Policy",
+              "url": "cookie-policy.php"
             }
           ]
         }
@@ -2524,100 +3569,69 @@
           "url": "web-hosting.php"
         },
         {
+          "label": "Business Hosting",
+          "url": "business-hosting.php"
+        },
+        {
           "label": "WordPress Hosting",
           "url": "wordpress-hosting.php"
         },
         {
-          "label": "Cloud Hosting Plans",
-          "url": "cloudhost247-hosting.php"
+          "label": "Reseller Hosting",
+          "url": "reseller-hosting.php"
         },
         {
           "label": "VPS Hosting",
           "url": "vps-hosting.php"
         },
         {
+          "label": "Cloud Hosting",
+          "url": "cloudhost247-hosting.php"
+        },
+        {
           "label": "Dedicated Servers",
           "url": "dedicated-server.php"
         },
         {
-          "label": "Enterprise Servers",
-          "url": "enterprise-servers.php"
+          "label": "Windows Hosting",
+          "url": "windows-hosting.php"
         },
         {
           "label": "Email Hosting",
           "url": "email-hosting.php"
+        },
+        {
+          "label": "SSL Certificates",
+          "url": "ssl-certificate.php"
+        },
+        {
+          "label": "Backups",
+          "url": "backups.php"
+        },
+        {
+          "label": "Website Migration",
+          "url": "migration.php"
         }
       ]
     },
     {
-      "title": "Find a domain",
+      "title": "Cloud & Infrastructure",
       "links": [
         {
-          "label": "Search Domains",
-          "url": "domain.php"
+          "label": "Public Cloud",
+          "url": "vps-publiccloud.php"
         },
         {
-          "label": "Register Domain",
-          "url": "cart.php?a=add&domain=register"
+          "label": "Private Cloud",
+          "url": "vps-privatecloud.php"
         },
-        {
-          "label": "Transfer Domain",
-          "url": "cart.php?a=add&domain=transfer"
-        },
-        {
-          "label": "Domain Pricing",
-          "url": "index.php?rp=/domain/pricing"
-        }
-      ]
-    },
-    {
-      "title": "Developers",
-      "links": [
-        {
-          "label": "Developer Hosting",
-          "url": "developer-friendly.php"
-        },
-        {
-          "label": "Applications",
-          "url": "applications.php"
-        },
-        {
-          "label": "Deployment Platform",
-          "url": "deployments.php"
-        },
-        {
-          "label": "Operating Systems",
-          "url": "operating-systems.php"
-        }
-      ]
-    },
-    {
-      "title": "Applications",
-      "links": [
-        {
-          "label": "Application Catalog",
-          "url": "applications.php"
-        },
-        {
-          "label": "WordPress Hosting",
-          "url": "wordpress-hosting.php"
-        },
-        {
-          "label": "Operating Systems",
-          "url": "operating-systems.php"
-        }
-      ]
-    },
-    {
-      "title": "Servers",
-      "links": [
         {
           "label": "VPS Hosting",
           "url": "vps-hosting.php"
         },
         {
-          "label": "Dedicated Servers",
-          "url": "dedicated-server.php"
+          "label": "Enterprise Servers",
+          "url": "enterprise-servers.php"
         },
         {
           "label": "Game Servers",
@@ -2628,127 +3642,126 @@
           "url": "server-management.php"
         },
         {
-          "label": "Backup Policy",
-          "url": "backup-policy.php"
+          "label": "Data Centers",
+          "url": "data-centers.php"
+        },
+        {
+          "label": "Network",
+          "url": "network.php"
+        },
+        {
+          "label": "Operating Systems",
+          "url": "operating-systems.php"
+        },
+        {
+          "label": "Control Panels",
+          "url": "cloudhost247-hosting.php"
+        },
+        {
+          "label": "Monitoring",
+          "url": "monitoring.php"
+        },
+        {
+          "label": "Firewalls",
+          "url": "firewall.php"
         }
       ]
     },
     {
-      "title": "Support",
+      "title": "Domains",
       "links": [
         {
-          "label": "Help Center",
-          "url": "help-center.php"
+          "label": "Domain Search",
+          "url": "cart.php?a=add&domain=register"
         },
         {
-          "label": "Submit Ticket",
-          "url": "submitticket.php"
+          "label": "Register a Domain",
+          "url": "cart.php?a=add&domain=register"
         },
         {
-          "label": "System Status",
-          "url": "serverstatus.php"
+          "label": "Transfer a Domain",
+          "url": "cart.php?a=add&domain=transfer"
         },
         {
-          "label": "Service Alerts",
-          "url": "announcements.php"
+          "label": "Domain Extensions",
+          "url": "domain.php#pricing"
+        },
+        {
+          "label": "WHOIS / RDAP",
+          "url": "domain.php#whois"
+        },
+        {
+          "label": "DNS Management",
+          "url": "dns-management.php"
+        },
+        {
+          "label": "Bulk Domain Search",
+          "url": "domain.php#search"
+        },
+        {
+          "label": "Domain Auctions",
+          "url": "domain.php#auctions"
+        },
+        {
+          "label": "Domain Appraisal",
+          "url": "domain.php#appraisal"
+        },
+        {
+          "label": "Domain Broker",
+          "url": "domain.php#broker"
+        },
+        {
+          "label": "Domain Club",
+          "url": "domain.php#club"
         }
       ]
     },
     {
-      "title": "Company",
+      "title": "Platforms & Developers",
       "links": [
         {
-          "label": "About CloudHost247",
-          "url": "aboutus.php"
+          "label": "Application Marketplace",
+          "url": "applications.php"
         },
         {
-          "label": "Contact",
-          "url": "contact.php"
+          "label": "Databases",
+          "url": "applications.php#databases"
         },
         {
-          "label": "Infrastructure",
-          "url": "infrastructure.php"
+          "label": "Containers & Docker",
+          "url": "docker-hosting.php"
         },
         {
-          "label": "Legal & Policies",
-          "url": "legal.php"
-        }
-      ]
-    },
-    {
-      "title": "Legal",
-      "links": [
-        {
-          "label": "Acceptable Use Policy",
-          "url": "acceptable-use-policy.php"
+          "label": "PaaS",
+          "url": "paas.php"
         },
         {
-          "label": "Backup Policy",
-          "url": "backup-policy.php"
+          "label": "Deployment",
+          "url": "deployments.php"
         },
         {
-          "label": "Cookie Policy",
-          "url": "cookie-policy.php"
+          "label": "Developer Platform",
+          "url": "developer-friendly.php"
         },
         {
-          "label": "Cybercrime Policy",
-          "url": "cybercrime-policy.php"
+          "label": "API Hosting",
+          "url": "api-hosting.php"
         },
         {
-          "label": "Data Deletion Instructions",
-          "url": "data-deletion.php"
+          "label": "Node.js",
+          "url": "nodejs-hosting.php"
         },
         {
-          "label": "Data Privacy Notice and Consent Form",
-          "url": "data-privacy-notice-and-consent-form.php"
+          "label": "PHP",
+          "url": "php-hosting.php"
         },
         {
-          "label": "Data Protection Standards",
-          "url": "data-protection-standards.php"
+          "label": "Python",
+          "url": "python-hosting.php"
         },
         {
-          "label": "Domain Agreement",
-          "url": "domain-agreement.php"
-        },
-        {
-          "label": "Domain Brokerage Terms",
-          "url": "domain-brokerage-terms.php"
-        },
-        {
-          "label": "Domain Renewal Policy",
-          "url": "domain-renewal-policy.php"
-        },
-        {
-          "label": "Domain Registration Addendum",
-          "url": "domainregistrationaddendum.php"
-        },
-        {
-          "label": "Fair Usage Policy",
-          "url": "fair-usage-policy.php"
-        },
-        {
-          "label": "Legal Notice",
-          "url": "legal-notice.php"
-        },
-        {
-          "label": "Privacy Policy",
-          "url": "privacy-policy.php"
-        },
-        {
-          "label": "Refund and Cancellation Policy",
-          "url": "refund-and-cancellation-policy.php"
-        },
-        {
-          "label": "Refund Policy",
-          "url": "refund-policy.php"
-        },
-        {
-          "label": "Terms of Service",
-          "url": "terms-of-service.php"
-        },
-        {
-          "label": "Trademark Policy",
-          "url": "trademark-policy.php"
+          "label": "Laravel",
+          "url": "laravel-hosting.php"
         }
       ]
     },
@@ -2784,7 +3797,7 @@
           "url": "tools/category/network"
         },
         {
-          "label": "Cybersecurity Tools",
+          "label": "Security Tools",
           "url": "tools/category/cybersecurity"
         },
         {
@@ -2794,44 +3807,228 @@
         {
           "label": "Gaming Tools",
           "url": "tools/category/gaming"
-        },
-        {
-          "label": "DNS Checker",
-          "url": "tools/dns-checker"
-        },
-        {
-          "label": "DNS Lookup",
-          "url": "tools/dns-lookup"
-        },
-        {
-          "label": "IP WHOIS",
-          "url": "tools/ip-whois"
-        },
-        {
-          "label": "SSL Checker",
-          "url": "tools/ssl-certificate-checker"
-        },
-        {
-          "label": "Port Checker",
-          "url": "tools/port-checker"
-        },
-        {
-          "label": "JSON Beautifier",
-          "url": "tools/json-beautifier"
-        },
-        {
-          "label": "QR Generator",
-          "url": "tools/qr-code-generator"
-        },
-        {
-          "label": "MRZ Generator / MRZ Tools",
-          "url": "tools/mrz-generator"
-        },
-        {
-          "label": "Speed Test",
-          "url": "tools/internet-speed-test"
         }
       ]
+    },
+    {
+      "title": "Websites",
+      "links": [
+        {
+          "label": "Website Builder",
+          "url": "website-design.php"
+        },
+        {
+          "label": "AI Website Builder",
+          "url": "website-design.php"
+        },
+        {
+          "label": "Website Templates",
+          "url": "website-design.php"
+        },
+        {
+          "label": "E-commerce & Stores",
+          "url": "website-design.php"
+        },
+        {
+          "label": "Website Design",
+          "url": "website-design.php"
+        }
+      ]
+    },
+    {
+      "title": "Company",
+      "links": [
+        {
+          "label": "About CloudHost247",
+          "url": "aboutus.php"
+        },
+        {
+          "label": "Contact",
+          "url": "contact.php"
+        },
+        {
+          "label": "Blog",
+          "url": "blog.php"
+        },
+        {
+          "label": "Security & Compliance",
+          "url": "security.php"
+        },
+        {
+          "label": "Infrastructure",
+          "url": "infrastructure.php"
+        },
+        {
+          "label": "Offers",
+          "url": "offers.php"
+        }
+      ]
+    },
+    {
+      "title": "Support",
+      "links": [
+        {
+          "label": "Help Center",
+          "url": "help-center.php"
+        },
+        {
+          "label": "Knowledge Base",
+          "url": "knowledgebase.php"
+        },
+        {
+          "label": "FAQ",
+          "url": "faqs.php"
+        },
+        {
+          "label": "Open a Ticket",
+          "url": "submitticket.php"
+        },
+        {
+          "label": "Service Status",
+          "url": "serverstatus.php"
+        },
+        {
+          "label": "Client Area",
+          "url": "clientarea.php"
+        },
+        {
+          "label": "Billing & Invoices",
+          "url": "clientarea.php?action=invoices"
+        },
+        {
+          "label": "Documentation",
+          "url": "documentation.php"
+        }
+      ]
+    },
+    {
+      "title": "Legal",
+      "links": [
+        {
+          "label": "Legal & Policy Center",
+          "url": "legal.php"
+        },
+        {
+          "label": "Terms of Service",
+          "url": "terms-of-service.php"
+        },
+        {
+          "label": "Privacy Policy",
+          "url": "privacy-policy.php"
+        },
+        {
+          "label": "Cookie Policy",
+          "url": "cookie-policy.php"
+        },
+        {
+          "label": "Acceptable Use Policy",
+          "url": "acceptable-use-policy.php"
+        },
+        {
+          "label": "Refund Policy",
+          "url": "refund-policy.php"
+        },
+        {
+          "label": "Backup Policy",
+          "url": "backup-policy.php"
+        },
+        {
+          "label": "Fair Usage Policy",
+          "url": "fair-usage-policy.php"
+        },
+        {
+          "label": "Trademark Policy",
+          "url": "trademark-policy.php"
+        },
+        {
+          "label": "Domain Registration Agreement",
+          "url": "domain-agreement.php"
+        },
+        {
+          "label": "Domain Brokerage Terms",
+          "url": "domain-brokerage-terms.php"
+        },
+        {
+          "label": "Domain Renewal Policy",
+          "url": "domain-renewal-policy.php"
+        },
+        {
+          "label": "Cybercrime & Abuse Policy",
+          "url": "cybercrime-policy.php"
+        },
+        {
+          "label": "Data Deletion",
+          "url": "data-deletion.php"
+        },
+        {
+          "label": "Data Protection Standards",
+          "url": "data-protection-standards.php"
+        },
+        {
+          "label": "Privacy Notice & Consent",
+          "url": "data-privacy-notice-and-consent-form.php"
+        },
+        {
+          "label": "Domain Registration Addendum",
+          "url": "domainregistrationaddendum.php"
+        },
+        {
+          "label": "Legal Notice",
+          "url": "legal-notice.php"
+        }
+      ]
+    }
+  ],
+  "toolCategories": [
+    {
+      "label": "DNS",
+      "desc": "Lookups, propagation and zone diagnostics.",
+      "url": "tools/category/dns"
+    },
+    {
+      "label": "IP",
+      "desc": "Address, subnet and geolocation utilities.",
+      "url": "tools/category/ip"
+    },
+    {
+      "label": "Developer",
+      "desc": "Encoding, conversion and inspection tools.",
+      "url": "tools/category/developer"
+    },
+    {
+      "label": "Designer",
+      "desc": "Colour, image and layout helpers.",
+      "url": "tools/category/designer"
+    },
+    {
+      "label": "Webmaster",
+      "desc": "SEO, headers and site checks.",
+      "url": "tools/category/webmaster"
+    },
+    {
+      "label": "Network",
+      "desc": "Reachability, ports and routing checks.",
+      "url": "tools/category/network"
+    },
+    {
+      "label": "Cyber Security",
+      "desc": "Hashing, verification and safe inspection.",
+      "url": "tools/category/cybersecurity"
+    },
+    {
+      "label": "Productivity",
+      "desc": "Everyday generators and converters.",
+      "url": "tools/category/productivity"
+    },
+    {
+      "label": "Gaming",
+      "desc": "Server names and community utilities.",
+      "url": "tools/category/gaming"
+    },
+    {
+      "label": "Document",
+      "desc": "Document and travel-document utilities.",
+      "url": "tools/category/document"
     }
   ]
 }

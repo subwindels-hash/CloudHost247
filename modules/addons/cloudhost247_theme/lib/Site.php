@@ -26,6 +26,7 @@ final class Site
         $platform = isset($settings['platform_base_path']) ? self::platformPath($settings['platform_base_path']) : '';
         $result = array(
             'navigation' => $catalog['navigation'], 'footer' => $catalog['footer'],
+            'toolCategories' => isset($catalog['toolCategories']) && is_array($catalog['toolCategories']) ? $catalog['toolCategories'] : array(),
             'pages' => $catalog['pages'], 'page' => $page, 'home' => $home,
             'public' => $home || $page !== null || in_array($script, array('notfound.php', 'site-search.php', 'service-error.php'), true),
             'path' => $script, 'base' => $base, 'platform' => $platform,

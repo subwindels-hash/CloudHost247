@@ -1,0 +1,60 @@
+{
+  "family": "news",
+  "entries": [
+    {
+      "id": "website-platform-2026",
+      "label": "Platform",
+      "title": "The public website now runs on one navigation registry",
+      "summary": "The header, mega menus, mobile drawer, footer, sitemap and both the PHP and application surfaces are generated from a single definition — so a menu can no longer advertise a page that does not exist.",
+      "body": [
+        "Every public route, mega menu, footer column and tool category now comes from one file. The generator validates each destination against the routes that actually exist before it writes anything, which turns 'no dead navigation links' from a review checklist into a build step.",
+        "Two navigation sources existed before this change and had already drifted apart. That is the failure mode the registry removes: not a bad link, but two systems that disagree about what the product is."
+      ],
+      "limits": "The registry describes routes; it does not verify that a page's content is good, only that it exists and is reachable."
+    },
+    {
+      "id": "legal-documents-published",
+      "label": "Compliance",
+      "title": "Policies are now published as documents, not placeholders",
+      "summary": "Seventeen legal documents — Terms, Privacy, Acceptable Use, Refund, Backup, Domain agreements, Data Protection and the rest — are extracted from the authoritative sources and rendered on both websites.",
+      "body": [
+        "Policy PDFs and theme documents are extracted into a single content source, so the two websites cannot publish different versions of a binding document.",
+        "Where a document is maintained as a PDF, the extracted text is committed and reviewable in a diff. Where it is maintained as a theme include, that file remains the source."
+      ],
+      "limits": "Extraction preserves wording but does not reproduce the PDF's exact typography. The PDFs remain the signed artefacts."
+    },
+    {
+      "id": "locations-honest",
+      "label": "Infrastructure",
+      "title": "The locations page reads configuration, not a map",
+      "summary": "Regions shown on the website are the ones this deployment is configured to deploy into, joined to an active provider. A deployment with nothing configured shows an explicit empty state.",
+      "body": [
+        "A data-centre page is the easiest place on a hosting site to publish something untrue. This one is generated from the regions and providers that are actually active in the platform.",
+        "The same principle applies to the status page: it reports only the checks the platform can run against itself, and marks everything else as not monitored rather than operational."
+      ],
+      "limits": "Facility-level detail such as capacity, redundancy and certifications is not published, because it is not configured in the platform."
+    },
+    {
+      "id": "tools-catalogue",
+      "label": "Tools",
+      "title": "The tools catalogue is indexed for website search",
+      "summary": "Tool names, paths and summaries are read from the catalogue the server executes, so the site search can only find tools that exist.",
+      "body": [
+        "The catalogue is the single source for the Tools Center, the Tools mega menu, the footer categories and the website search index.",
+        "Tools that require an account are indexed by name but are not presented as something a visitor can run anonymously."
+      ],
+      "limits": "A tool appears in search whether or not its upstream provider is reachable; availability is reported when the tool runs."
+    },
+    {
+      "id": "documentation-published",
+      "label": "Documentation",
+      "title": "Platform documentation is published on the website",
+      "summary": "API, service and operations documentation is served from the repository's own documentation files, including the parts that describe unfinished work.",
+      "body": [
+        "Documents that describe the platform as a product are published to a reader on the website. Internal audits, scope proposals and incomplete-work registers are not.",
+        "The documentation includes known gaps on purpose: building against a feature that only exists in a plan is worse than knowing it does not exist yet."
+      ],
+      "limits": "Published documentation is a snapshot taken at build time; it changes when the site is regenerated, not the moment a source file is edited."
+    }
+  ]
+}

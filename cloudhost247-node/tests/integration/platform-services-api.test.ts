@@ -113,12 +113,17 @@ describe('CLOUDHOST247 platform services', () => {
       validation: { ok: boolean; errors: string[] };
     };
 
-    expect(body.sections.map((section) => section.id)).toEqual(['domains', 'websites', 'marketing', 'hosting']);
+    // The menu is generated from shared/site/registry.json. This asserts the *contract* — one
+    // definition, the published families, and every link reachable — rather than pinning the list,
+    // so adding a product family is a registry change rather than a test edit.
+    expect(body.sections.map((section) => section.id)).toEqual([
+      'hosting', 'cloud', 'domains', 'platforms', 'developers', 'websites', 'tools', 'resources', 'support',
+    ]);
     expect(body.validation.ok).toBe(true);
     expect(body.validation.errors).toEqual([]);
 
     const links = body.sections.flatMap((section) => section.groups.flatMap((group) => group.links));
-    expect(links.length).toBeGreaterThan(20);
+    expect(links.length).toBeGreaterThan(100);
     for (const link of links) {
       // A menu link that the SPA cannot render is a dead link — this is the check that prevents it.
       expect(routeExists(link.to), `${link.label} → ${link.to}`).toBe(true);

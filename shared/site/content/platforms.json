@@ -1,0 +1,246 @@
+{
+  "family": "platforms",
+  "pages": [
+    {
+      "route": "/platforms",
+      "title": "Platforms",
+      "category": "Platform",
+      "seoTitle": "Application Platform, Databases, Containers & PaaS | CloudHost247",
+      "description": "The CloudHost247 application platform: an installable application catalogue, managed databases, containers and Docker, and a push-to-deploy PaaS layer.",
+      "visual": "applications/application-stack",
+      "hero": {
+        "kicker": "Platforms",
+        "heading": "Run applications without running the plumbing",
+        "lede": "Install a known application from a catalogue the platform can actually deploy, bring your own container, or push code and let the platform release it.",
+        "ctas": [
+          { "label": "Browse applications", "to": "/apps", "variant": "primary" },
+          { "label": "See deployment", "to": "/developers/deployment", "variant": "ghost" }
+        ],
+        "points": ["Installable application catalogue", "Managed databases", "Containers and volumes", "Push-to-deploy PaaS"]
+      },
+      "sections": [
+        {
+          "type": "cards",
+          "kicker": "Choose your layer",
+          "heading": "How much plumbing do you want to own?",
+          "items": [
+            { "icon": "app", "title": "Application Marketplace", "body": "Install a catalogue application with its dependencies configured for you.", "to": "/apps" },
+            { "icon": "layers", "title": "Application Hosting", "body": "A managed environment around one application, with logs and backups.", "to": "/platforms/applications" },
+            { "icon": "database", "title": "Databases", "body": "MySQL, PostgreSQL, MariaDB, MongoDB and Redis as managed services.", "to": "/platforms/databases" },
+            { "icon": "box", "title": "Containers & Docker", "body": "Run a container image you built, with persistent volumes attached.", "to": "/platforms/containers" },
+            { "icon": "rocket", "title": "PaaS", "body": "Push an application to a repository and let the platform build and release it.", "to": "/platforms/paas" },
+            { "icon": "git-branch", "title": "Deployment Platform", "body": "Build logs, releases, rollbacks and per-application configuration.", "to": "/developers/deployment" }
+          ]
+        },
+        {
+          "type": "split",
+          "kicker": "What is installed, not what is listed",
+          "heading": "A catalogue that reflects real deployments",
+          "body": [
+            "The marketplace is generated from application manifests, each of which describes the image, the ports, the volumes and the configuration an application needs. An application appears because the platform can deploy it, not because a logo was uploaded.",
+            "That means the catalogue is honest about what it supports: if a manifest is not present, the application is not offered."
+          ],
+          "points": ["Manifest-defined applications", "Declared ports, volumes and configuration", "Install and manage from your account"],
+          "visual": "applications/application-stack",
+          "link": { "label": "Browse the catalogue", "to": "/apps" }
+        }
+      ],
+      "faqs": [
+        { "q": "Which applications can I install?", "a": "The marketplace lists exactly what the platform holds a deployment manifest for. That catalogue is the source of truth — including what is not in it." },
+        { "q": "Can I install an application that is not in the catalogue?", "a": "Yes, by deploying it yourself: bring a container image or a repository and run it on your own infrastructure." },
+        { "q": "Do you support Kubernetes?", "a": "No. Kubernetes is not part of what this platform provisions, and claiming it would be misleading. Containers and Docker are supported as described here." }
+      ],
+      "related": ["/apps", "/platforms/databases", "/platforms/containers", "/platforms/paas", "/developers", "/cloud"]
+    },
+
+    {
+      "route": "/platforms/applications",
+      "title": "Application Hosting",
+      "category": "Platform",
+      "seoTitle": "Managed Application Hosting | CloudHost247",
+      "description": "Managed application hosting from CloudHost247: an isolated environment per application, with logs, backups and configuration managed from your account.",
+      "visual": "applications/application-stack",
+      "hero": {
+        "kicker": "Platform",
+        "heading": "One application, one managed environment",
+        "lede": "Instead of sharing one runtime between everything you run, each application gets its own environment with its own configuration, logs and backups.",
+        "ctas": [
+          { "label": "Browse applications", "to": "/apps", "variant": "primary" },
+          { "label": "See containers", "to": "/platforms/containers", "variant": "ghost" }
+        ],
+        "points": ["Isolated per application", "Configuration per environment", "Logs and backups attached", "Upgrade on your schedule"]
+      },
+      "sections": [
+        {
+          "type": "features",
+          "kicker": "What you get",
+          "heading": "The pieces an application needs",
+          "items": [
+            { "icon": "layers", "title": "Its own environment", "body": "Dependencies and runtime for one application do not collide with another's, which removes an entire class of upgrade problem." },
+            { "icon": "settings", "title": "Configuration", "body": "Environment variables and settings are held per application, so the same image can run in more than one place with different values." },
+            { "icon": "hard-drive", "title": "Persistent volumes", "body": "Data that must outlive a container or a rebuild is attached to a volume rather than left in the filesystem." },
+            { "icon": "globe", "title": "Domain and certificate", "body": "Attach a domain to the application and have a certificate issued for it." },
+            { "icon": "file-text", "title": "Logs", "body": "Application output is captured per environment, so an error can be investigated where it happened." },
+            { "icon": "hard-drive", "title": "Backups", "body": "Backup jobs can be scheduled against the application and its volumes." }
+          ]
+        },
+        {
+          "type": "steps",
+          "kicker": "Lifecycle",
+          "heading": "Install, configure, upgrade",
+          "items": [
+            { "title": "Install", "body": "Choose the application from the marketplace. The platform provisions the resources the manifest declares." },
+            { "title": "Configure", "body": "Set the application's own settings, attach the domain, and connect any database it needs." },
+            { "title": "Operate", "body": "Watch it, back it up, and upgrade it when you decide to — not when the platform decides to." }
+          ]
+        }
+      ],
+      "faqs": [
+        { "q": "Can I run several instances of the same application?", "a": "Yes. Each installation is its own environment, so a staging copy and a production copy can coexist with different configuration." },
+        { "q": "Do updates happen automatically?", "a": "No. Automatic application upgrades are how a working site breaks at an inconvenient hour. Upgrades are applied when you choose, after a backup." },
+        { "q": "Where does the application data live?", "a": "On attached volumes for anything that must persist, plus the database service you connect it to — both visible per service in your account." }
+      ],
+      "related": ["/apps", "/platforms/databases", "/platforms/containers", "/platforms/paas", "/hosting/backups", "/developers"]
+    },
+
+    {
+      "route": "/platforms/databases",
+      "title": "Managed Databases",
+      "category": "Data",
+      "seoTitle": "Managed MySQL, PostgreSQL, MariaDB, MongoDB & Redis | CloudHost247",
+      "description": "Managed database services on CloudHost247: MySQL-compatible, PostgreSQL, MariaDB, MongoDB and Redis, deployed with backups and access control.",
+      "visual": "applications/application-stack",
+      "hero": {
+        "kicker": "Data",
+        "heading": "Databases as a service, not an afterthought",
+        "lede": "The database engines applications actually ask for, deployed as services that can be backed up, monitored and reached from the applications that use them.",
+        "ctas": [
+          { "label": "Browse applications", "to": "/apps", "variant": "primary" },
+          { "label": "See data backup", "to": "/cloud/backups", "variant": "ghost" }
+        ],
+        "points": ["Relational and document engines", "Key-value caching", "Backups against the data", "Access control per service"]
+      },
+      "sections": [
+        {
+          "type": "features",
+          "kicker": "Engines",
+          "heading": "What the platform deploys",
+          "items": [
+            { "icon": "database", "title": "MySQL-compatible", "body": "The default for most web applications and content management systems, and the engine most hosting features assume." },
+            { "icon": "database", "title": "MariaDB", "body": "A MySQL-compatible engine where an application prefers or requires it." },
+            { "icon": "database", "title": "PostgreSQL", "body": "For applications that want stricter SQL semantics, richer indexing or extensions." },
+            { "icon": "database", "title": "MongoDB", "body": "Document storage for applications that model data as documents." },
+            { "icon": "zap", "title": "Redis", "body": "In-memory key-value storage for caching, sessions and queues." },
+            { "icon": "hard-drive", "title": "Backups", "body": "Backup jobs scoped to the database service, so a restore brings back the data rather than the whole machine." }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "Managed means operated — it does not mean clustered",
+          "body": "The platform deploys and can back up and monitor a database service. Automatic multi-node failover and read replicas are not claimed here; where a workload needs them, that is a design conversation about the infrastructure it runs on."
+        }
+      ],
+      "faqs": [
+        { "q": "Can I connect from outside the platform?", "a": "Database services are intended for the applications that run alongside them. Where external access is allowed, it should be restricted by firewall rule rather than left open." },
+        { "q": "How do I take a copy of my data?", "a": "A backup can be scheduled against the service, and a manual run can be taken before a migration or an upgrade." },
+        { "q": "Which engine should I choose?", "a": "Match the engine to what the application expects. Most content management systems expect MySQL-compatible; choose PostgreSQL or MongoDB where the application is built for them." }
+      ],
+      "related": ["/apps", "/platforms/applications", "/cloud/backups", "/platforms/containers", "/developers/deployment", "/legal/backup-policy"]
+    },
+
+    {
+      "route": "/platforms/containers",
+      "title": "Containers & Docker",
+      "category": "Platform",
+      "seoTitle": "Docker & Container Hosting | CloudHost247",
+      "description": "Run containerised applications on CloudHost247 with Docker images, persistent volumes, environment configuration and per-application domains.",
+      "visual": "deployment/docker",
+      "hero": {
+        "kicker": "Platform",
+        "heading": "Bring the image you already build",
+        "lede": "If your application is already a container, it does not need rewriting to run here: run the image, attach the volumes it needs, configure it with environment variables, put a domain in front of it.",
+        "ctas": [
+          { "label": "See deployment", "to": "/developers/deployment", "variant": "primary" },
+          { "label": "See the Docker guide", "to": "/developers/docker", "variant": "ghost" }
+        ],
+        "points": ["Run your own images", "Persistent volumes", "Environment configuration", "Domain and TLS in front"]
+      },
+      "sections": [
+        {
+          "type": "features",
+          "kicker": "Containers here",
+          "heading": "How it works in practice",
+          "items": [
+            { "icon": "docker", "title": "Images", "body": "Deploy from an image reference the platform can pull, so the artefact you tested is the artefact that runs." },
+            { "icon": "hard-drive", "title": "Volumes", "body": "State lives on volumes declared by the application, so replacing a container does not destroy its data." },
+            { "icon": "settings", "title": "Environment configuration", "body": "Configuration injected as environment variables, which is what makes one image runnable in several environments." },
+            { "icon": "globe", "title": "Routing and TLS", "body": "Attach a domain to the container and certificates are issued for it." },
+            { "icon": "file-text", "title": "Logs", "body": "Container output captured per application, so debugging does not require shell access to a host." },
+            { "icon": "activity", "title": "Resource visibility", "body": "CPU, memory and traffic recorded, so a container that is quietly restarting becomes visible." }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "What is not offered",
+          "body": "There is no managed Kubernetes control plane on this platform, and no claim of cluster orchestration. Containers run as services attached to your account. If your architecture genuinely requires an orchestrator, that is a conversation about architecture rather than a checkbox."
+        }
+      ],
+      "faqs": [
+        { "q": "Can I run a private registry image?", "a": "Yes — registry credentials can be supplied to the application so the platform can pull a private image." },
+        { "q": "How many containers can I run?", "a": "As many as your account has capacity for. Each one is a service, with its own configuration, volumes and logs." },
+        { "q": "Can containers talk to each other?", "a": "Applications on the same account can be connected where the platform's networking allows it, and databases are reachable as services rather than by raw host address." }
+      ],
+      "related": ["/developers/docker", "/platforms/paas", "/platforms/databases", "/developers/deployment", "/cloud/firewall", "/apps"]
+    },
+
+    {
+      "route": "/platforms/paas",
+      "title": "PaaS",
+      "category": "Platform",
+      "seoTitle": "Push-to-Deploy PaaS Platform | CloudHost247",
+      "description": "CloudHost247 PaaS: connect a repository, build it, release it, and route a domain to it — with build logs, environment configuration and rollbacks.",
+      "visual": "deployment/paas",
+      "hero": {
+        "kicker": "Platform",
+        "heading": "Push code, get a running application",
+        "lede": "The platform builds from your repository, releases the result, and keeps the record of what was built and when — so a bad release has a place to roll back to.",
+        "ctas": [
+          { "label": "See deployment", "to": "/developers/deployment", "variant": "primary" },
+          { "label": "See runtimes", "to": "/developers", "variant": "ghost" }
+        ],
+        "points": ["Build from a repository", "Release and roll back", "Environment configuration", "Per-application domain"]
+      },
+      "sections": [
+        {
+          "type": "features",
+          "kicker": "The platform layer",
+          "heading": "What the PaaS handles for you",
+          "items": [
+            { "icon": "git-branch", "title": "Build from source", "body": "The build runs from the repository, so the deployed artefact is derived from a commit you can name." },
+            { "icon": "rocket", "title": "Release", "body": "A build that succeeds becomes a release tied to the deployment record, with its environment configuration." },
+            { "icon": "refresh", "title": "Roll back", "body": "Because releases are recorded, returning to a previous state is a decision rather than a rebuild from memory." },
+            { "icon": "settings", "title": "Configuration per environment", "body": "Variables and secrets live with the application, not in the repository." },
+            { "icon": "globe", "title": "Routing", "body": "Domains map to applications, with certificates issued per hostname." },
+            { "icon": "file-text", "title": "Logs", "body": "Build output and runtime output are both kept, which is the difference between guessing and knowing." }
+          ]
+        },
+        {
+          "type": "steps",
+          "kicker": "Adopting it",
+          "heading": "Three things to have ready",
+          "items": [
+            { "title": "A repository", "body": "Your source, with whatever build configuration your stack needs — a dependency manifest, a build command." },
+            { "title": "The environment values", "body": "Connection strings, keys and flags the application expects, ready to set as configuration." },
+            { "title": "A domain", "body": "Either registered with us or pointing at us, so the released application has an address." }
+          ]
+        }
+      ],
+      "faqs": [
+        { "q": "Which buildpacks or stacks are supported?", "a": "The supported runtimes are Node.js, PHP, Python and Laravel, plus container deployments for anything else. Rather than listing buildpacks that may not be configured, the platform shows what a deployment supports." },
+        { "q": "Can I run the same application in two environments?", "a": "Yes. Two applications can be created from the same repository with different configuration and different domains." },
+        { "q": "Does this replace my CI pipeline?", "a": "No. It replaces deployment, not continuous integration. The platform's APIs let an existing pipeline trigger a deployment." }
+      ],
+      "related": ["/developers/deployment", "/developers", "/platforms/containers", "/developers/environments", "/hosting/developer", "/docs"]
+    }
+  ]
+}

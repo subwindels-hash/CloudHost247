@@ -1,0 +1,404 @@
+{
+  "family": "resources",
+  "pages": [
+    {
+      "route": "/websites",
+      "title": "Websites",
+      "category": "Websites",
+      "seoTitle": "Website Builder, Templates, Stores & Design Services | CloudHost247",
+      "description": "Build a website on CloudHost247 with the website builder or the AI website builder, start from a template, launch a store, or have our designers do it for you.",
+      "visual": "hosting/website-design",
+      "hero": {
+        "kicker": "Websites",
+        "heading": "Four ways to get a website",
+        "lede": "Build it yourself in the browser, describe it and let the AI builder draft it, start from a template, or hire a CloudHost247 designer to deliver it. All four land on the same hosting.",
+        "ctas": [
+          { "label": "Open the website builder", "to": "/websites/builder", "variant": "primary" },
+          { "label": "Hire a designer", "to": "/websites/experts", "variant": "ghost" }
+        ],
+        "points": ["Browser-based builder", "AI-generated first draft", "Templates that publish", "Design services on request"]
+      },
+      "sections": [
+        {
+          "type": "cards",
+          "kicker": "The builder",
+          "heading": "Build it yourself",
+          "items": [
+            { "icon": "layout", "title": "Website Builder", "body": "Pages, sections, media and publishing — with a real preview and a publish step, not a mock-up.", "to": "/websites/builder", "anchorId": "builder" },
+            { "icon": "sparkle", "title": "AI Website Builder", "body": "Write a description of the site you need and get real pages, copy and SEO to edit.", "to": "/websites/ai-builder", "anchorId": "ai" },
+            { "icon": "grid", "title": "Website Templates", "body": "Start from a layout that is already structured for publishing instead of a blank page.", "to": "/websites/templates", "anchorId": "templates" },
+            { "icon": "cart", "title": "Online Store", "body": "Sell physical, digital and service products from the same platform that hosts the site.", "to": "/websites/store", "anchorId": "store" }
+          ]
+        },
+        {
+          "type": "cards",
+          "kicker": "Have it done for you",
+          "heading": "Or have it delivered",
+          "items": [
+            { "icon": "pen", "title": "Website Design Services", "body": "Scoped, quoted and delivered by the CloudHost247 team — brief, design, build, handover.", "to": "/websites/design-services", "anchorId": "design" },
+            { "icon": "users", "title": "Hire an Expert", "body": "Request a specialist for design, development, migration or ongoing maintenance.", "to": "/websites/experts" },
+            { "icon": "transfer", "title": "Website Migration", "body": "Move an existing site onto CloudHost247 infrastructure with a verified cutover.", "to": "/hosting/migration" },
+            { "icon": "mail", "title": "Digital Marketing", "body": "Campaigns, search visibility and a unified inbox for the enquiries the site produces.", "to": "/marketing" }
+          ]
+        },
+        {
+          "type": "checks",
+          "kicker": "Run it properly",
+          "heading": "A website is not finished when it launches",
+          "items": [
+            { "label": "HTTPS from the first visitor", "body": "A certificate is issued for the domain you publish on, and renewed without anyone remembering to.", "link": { "label": "SSL certificates", "to": "/hosting/ssl" } },
+            { "label": "Backups you can restore", "body": "Scheduled backup jobs with a visible run history, so a mistake is recoverable.", "link": { "label": "Backups", "to": "/hosting/backups" } },
+            { "label": "Hosting that keeps up", "body": "The site runs on hosting that can be upgraded without rebuilding the site.", "link": { "label": "Web hosting", "to": "/hosting/web-hosting" } },
+            { "label": "A domain that belongs to you", "body": "Register it with us or bring the one you own, and manage DNS from the same account.", "link": { "label": "Domains", "to": "/domains" } }
+          ]
+        }
+      ],
+      "faqs": [
+        { "q": "Do I need hosting to use the website builder?", "a": "The builder publishes to CloudHost247 hosting. If you already have hosting with us it is already available in your account." },
+        { "q": "Is the AI builder a real feature?", "a": "Yes — it generates draft pages, copy and SEO metadata into the builder, where you edit and publish them. It is not a mock-up or a screenshot." },
+        { "q": "Can you design the site for me?", "a": "Yes. Design services are scoped and quoted before work starts, and delivered through the expert services workflow." },
+        { "q": "Do you offer a CDN product?", "a": "No CDN product is claimed here. Where a deployment integrates a provider's services, they appear in your account as the services you actually have." }
+      ],
+      "related": ["/hosting/web-hosting", "/hosting/migration", "/hosting/ssl", "/marketing", "/websites/builder", "/contact"]
+    },
+
+    {
+      "route": "/help",
+      "title": "Help Center",
+      "category": "Support",
+      "seoTitle": "Help Center & Support | CloudHost247",
+      "description": "CloudHost247 support: search the knowledge base and documentation, run a diagnostic tool, open a ticket with the team, or check what is happening right now.",
+      "visual": "management/support",
+      "hero": {
+        "kicker": "Support",
+        "heading": "How to get an answer quickly",
+        "lede": "Most questions fall into one of four places: the documentation, a diagnostic tool, the knowledge base, or a ticket to the team. This page routes you to the right one.",
+        "ctas": [
+          { "label": "Open a ticket", "to": "/support", "variant": "primary" },
+          { "label": "Search the site", "to": "/search", "variant": "ghost" }
+        ],
+        "points": ["Documentation", "Diagnostic tools", "Knowledge base", "Ticket support"]
+      },
+      "sections": [
+        {
+          "type": "cards",
+          "kicker": "Start here",
+          "heading": "Four routes to an answer",
+          "items": [
+            { "icon": "book", "title": "Documentation", "body": "Platform references: APIs, deployment, environments, provisioning and operations.", "to": "/docs" },
+            { "icon": "tools", "title": "Diagnostic Tools", "body": "Check DNS, propagation, IPs, headers and more — and see the result rather than a description of it.", "to": "/tools" },
+            { "icon": "book-open", "title": "Knowledge Base", "body": "Task-oriented guides for hosting, domains, email, servers and billing.", "to": "/docs" },
+            { "icon": "ticket", "title": "Open a Ticket", "body": "Reach the support team from your account, with your services already attached to the request.", "to": "/support" }
+          ]
+        },
+        {
+          "type": "checks",
+          "kicker": "Before you open a ticket",
+          "heading": "Four things that make a ticket solvable in one reply",
+          "items": [
+            { "label": "The service or domain involved", "body": "A ticket opening with the affected service is already in the right queue. The subject line is what gets it there." },
+            { "label": "What you expected and what happened", "body": "Two sentences describing the difference resolves more tickets than any amount of log pasting." },
+            { "label": "What changed just before", "body": "A deployment, an update, a DNS change, a new plugin. Most incidents have a preceding change." },
+            { "label": "Any error message, verbatim", "body": "The exact text, copied rather than summarised. Paraphrased errors cost a round trip every time." }
+          ]
+        }
+      ],
+      "faqs": [
+        { "q": "What are your support hours?", "a": "Support is staffed around the clock for service-affecting issues. Business-hour enquiries are handled in business hours, and the published contact details for your deployment are on the contact page." },
+        { "q": "Do you offer phone support?", "a": "Where a support phone number is configured for the deployment it is published on the contact page. If no number is published, none is available." },
+        { "q": "Can I check whether an issue is mine or the platform's?", "a": "Yes — the service status page reports what the platform can verify about itself, and the diagnostic tools check DNS, connectivity and protocol behaviour from the platform's side." }
+      ],
+      "related": ["/docs", "/tools", "/status", "/support", "/contact", "/faq"]
+    },
+
+    {
+      "route": "/docs",
+      "title": "Documentation",
+      "category": "Resources",
+      "seoTitle": "Platform Documentation & Guides | CloudHost247",
+      "description": "CloudHost247 platform documentation: API references, provisioning, deployment, domain services, billing, tools and operations guides.",
+      "visual": "blog/documentation",
+      "hero": {
+        "kicker": "Resources",
+        "heading": "Documentation for the platform as it is",
+        "lede": "References and guides covering APIs, provisioning, deployment, domain services, payments, billing and operations — written from the implementation, including what is not finished.",
+        "ctas": [
+          { "label": "Search the site", "to": "/search", "variant": "primary" },
+          { "label": "Open a ticket", "to": "/support", "variant": "ghost" }
+        ],
+        "points": ["API contracts", "Provisioning and infrastructure", "Deployment and environments", "Operations and security"]
+      },
+      "sections": [
+        {
+          "type": "doc-index",
+          "kicker": "Documentation index",
+          "heading": "Guides in this repository",
+          "emptyMessage": "No documentation files were found in this deployment."
+        }
+      ],
+      "faqs": [
+        { "q": "Is there a public API reference?", "a": "Yes — the API documentation covers authentication, catalog, commerce, domains, deployments, infrastructure and billing endpoints." },
+        { "q": "Does the documentation describe unfinished work?", "a": "Yes, deliberately. Documents that describe incomplete or frozen work exist so that nobody builds against a feature believing it is finished." },
+        { "q": "Can I contribute a fix to the documentation?", "a": "Documentation lives with the platform source. Raise it through support and it goes to the team that owns the relevant area." }
+      ],
+      "related": ["/help", "/developers", "/hosting/api", "/status", "/search", "/contact"]
+    },
+
+    {
+      "route": "/search",
+      "title": "Search",
+      "category": "Utilities",
+      "seoTitle": "Search CloudHost247",
+      "description": "Search across CloudHost247 services, tools, documentation and policies.",
+      "visual": "hero/global-network",
+      "noindex": true,
+      "hero": {
+        "kicker": "Utilities",
+        "heading": "Search CloudHost247",
+        "lede": "Services, tools, documentation and policies — searched in the browser, with no query sent anywhere.",
+        "ctas": []
+      },
+      "sections": [
+        { "type": "site-search", "kicker": "Search", "heading": "Find a service, tool or document" }
+      ],
+      "faqs": [],
+      "related": ["/help", "/tools", "/docs", "/domains", "/hosting", "/cloud"]
+    },
+
+    {
+      "route": "/status",
+      "title": "Service Status",
+      "category": "Support",
+      "seoTitle": "CloudHost247 Service Status",
+      "description": "Live service status for CloudHost247: the checks the platform can verify itself, reported honestly — including what is not monitored.",
+      "visual": "management/monitoring",
+      "hero": {
+        "kicker": "Support",
+        "heading": "What the platform can verify, right now",
+        "lede": "This page runs real checks against this deployment and reports the result. Anything the platform cannot verify is labelled as not monitored rather than shown as operational.",
+        "ctas": [
+          { "label": "Open a ticket", "to": "/support", "variant": "primary" },
+          { "label": "See monitoring", "to": "/cloud/monitoring", "variant": "ghost" }
+        ],
+        "points": ["Checks run live", "No invented uptime figure", "Unmonitored components stated"]
+      },
+      "sections": [
+        { "type": "live-status", "kicker": "Current state", "heading": "Checks performed on page load" },
+        {
+          "type": "note",
+          "heading": "Why there is no historical uptime percentage",
+          "body": "An uptime figure is only meaningful when it comes from continuous, independent, long-term measurement. Publishing a percentage derived from anything else would be a made-up number with a decimal point, which is worse than publishing none."
+        }
+      ],
+      "faqs": [
+        { "q": "Is this page updated in real time?", "a": "The checks run when you load the page, so what you see is the state at that moment rather than a cached status." },
+        { "q": "What does 'not monitored' mean?", "a": "It means the platform has no health check for that component. It is neither confirmed working nor claimed broken — it is simply not measured." },
+        { "q": "Where do I report an outage?", "a": "Open a ticket, including the service affected and the exact error you see." }
+      ],
+      "related": ["/cloud/monitoring", "/help", "/support", "/contact", "/cloud/infrastructure", "/legal/backup-policy"]
+    },
+
+    {
+      "route": "/offers",
+      "title": "Offers & Pricing",
+      "category": "Marketing",
+      "seoTitle": "Current Offers & Live Pricing | CloudHost247",
+      "description": "Current CloudHost247 pricing, rendered live from the configured product catalogue — plans, prices and billing cycles exactly as configured.",
+      "visual": "cloud/cloud-hosting",
+      "hero": {
+        "kicker": "Pricing",
+        "heading": "The catalogue, not a price list someone typed",
+        "lede": "Every price on this page comes from the live product catalogue, so what you see is what the order form will charge. When a catalogue is empty, this page says so.",
+        "ctas": [
+          { "label": "See hosting plans", "to": "/hosting", "variant": "primary" },
+          { "label": "Configure a server", "to": "/servers/new", "variant": "ghost" }
+        ],
+        "points": ["Live catalogue prices", "Real billing cycles", "No invented discounts"]
+      },
+      "sections": [
+        { "type": "catalog", "kicker": "Live catalogue", "heading": "Products and plans currently configured" },
+        {
+          "type": "note",
+          "heading": "No countdown timers, no invented discounts",
+          "body": "A discount that appears to expire but never does is a dark pattern, and a percentage invented for a landing page is a lie with a font. What is on offer here is the catalogue: the plans that exist, at the prices configured."
+        }
+      ],
+      "faqs": [
+        { "q": "Why can the price differ from another site?", "a": "Prices shown here come from this deployment's catalogue. Where a different CloudHost247 deployment has a different catalogue, that is a configuration difference rather than a better deal." },
+        { "q": "Do prices include tax?", "a": "Tax treatment depends on your location and the configured billing settings, and is shown on the order form and invoice." },
+        { "q": "Which currencies are supported?", "a": "The currencies configured in the billing platform. The currency selector on the order flow shows what is available." }
+      ],
+      "related": ["/hosting", "/cloud", "/domains", "/pricing", "/contact", "/legal/refund-policy"]
+    },
+
+    {
+      "route": "/pricing",
+      "title": "Pricing",
+      "category": "Marketing",
+      "seoTitle": "Hosting & Cloud Pricing | CloudHost247",
+      "description": "CloudHost247 pricing rendered from the live catalogue: hosting, cloud, domains and services at the prices actually configured.",
+      "visual": "cloud/performance",
+      "hero": {
+        "kicker": "Pricing",
+        "heading": "Pricing straight from the catalogue",
+        "lede": "Plans, resources and billing cycles as configured in this deployment — with an explicit empty state rather than a placeholder price when a catalogue has not been populated.",
+        "ctas": [
+          { "label": "See hosting plans", "to": "/hosting", "variant": "primary" },
+          { "label": "See domain pricing", "to": "/domains/extensions", "variant": "ghost" }
+        ],
+        "points": ["Live catalogue", "Per-cycle pricing", "Domain pricing from the registrar catalogue"]
+      },
+      "sections": [
+        { "type": "catalog", "kicker": "Products", "heading": "Configured products and plans" }
+      ],
+      "faqs": [
+        { "q": "How are renewals priced?", "a": "Renewal pricing is whatever the catalogue holds for that product and cycle. Where a promotional price exists it is stated with its term, and the renewal price is the one on the product page." },
+        { "q": "Can I change plan later?", "a": "Yes, subject to the product. Upgrades and downgrades are handled from your account and prorated according to the billing configuration." }
+      ],
+      "related": ["/offers", "/hosting", "/cloud", "/domains/extensions", "/contact", "/legal/refund-policy"]
+    },
+
+    {
+      "route": "/security",
+      "title": "Security & Compliance",
+      "category": "Company",
+      "seoTitle": "Security, Privacy & Responsible Disclosure | CloudHost247",
+      "description": "How CloudHost247 secures its platform and customer data: authentication, access control, encryption, isolation, logging and responsible disclosure.",
+      "visual": "security/platform-security",
+      "hero": {
+        "kicker": "Company",
+        "heading": "Security stated as practice, not as decoration",
+        "lede": "What we actually do to protect accounts, data and infrastructure — and what we deliberately do not claim, because a badge is not a control.",
+        "ctas": [
+          { "label": "Report a vulnerability", "to": "/contact", "variant": "primary" },
+          { "label": "Read the policies", "to": "/legal", "variant": "ghost" }
+        ],
+        "points": ["Strong authentication", "Least-privilege access", "Encryption in transit and at rest", "Audited operations"]
+      },
+      "sections": [
+        {
+          "type": "features",
+          "kicker": "Controls",
+          "heading": "What is implemented",
+          "items": [
+            { "icon": "key", "title": "Authentication", "body": "Password hashing with a memory-hard algorithm, multi-factor authentication by TOTP, and passkey (WebAuthn) sign-in as a phishing-resistant option." },
+            { "icon": "users", "title": "Least privilege", "body": "Role-based access for administrative functions, re-verified server-side on every request rather than trusted from the interface." },
+            { "icon": "lock", "title": "Encryption", "body": "TLS for every public endpoint and mail transport, with certificates issued and renewed automatically; sensitive values encrypted at rest." },
+            { "icon": "layers", "title": "Isolation", "body": "Customer services are separated, and provider credentials are held encrypted and used only by platform operations." },
+            { "icon": "file-text", "title": "Logging and audit", "body": "Authentication events, administrative actions and infrastructure operations are recorded, giving an answer to who did what and when." },
+            { "icon": "alert", "title": "Response", "body": "A defined incident path: detection, containment, notification and review — documented before it is needed." }
+          ]
+        },
+        {
+          "type": "checks",
+          "kicker": "Disclosure",
+          "heading": "If you find a vulnerability",
+          "items": [
+            { "label": "Tell us, privately", "body": "Report through the contact route with enough detail to reproduce it. Do not test against another customer's service or data." },
+            { "label": "We will acknowledge and investigate", "body": "Reports are triaged, and you get a response from a person who can act on it rather than an automated reply." },
+            { "label": "Do not access data that is not yours", "body": "Proof of concept that stops at the boundary of your own account is welcome. Going further is not authorised, whatever the intention." }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "Certifications we do not claim",
+          "body": "Where a compliance framework matters to you — ISO 27001, SOC 2, PCI DSS, HIPAA — ask, and you will get an accurate answer including 'not certified'. Publishing a certification we do not hold would be the single most damaging thing this page could do."
+        }
+      ],
+      "faqs": [
+        { "q": "Do you support two-factor authentication?", "a": "Yes — TOTP-based multi-factor authentication and WebAuthn passkeys are both supported on accounts." },
+        { "q": "How is customer data protected?", "a": "Data is isolated per service, encrypted in transit, and access is role-restricted and logged. The Data Protection Standards document describes the controls in more detail." },
+        { "q": "Where is data stored?", "a": "In the regions configured for the services you use. The data centres page lists the regions this deployment can actually deploy into." },
+        { "q": "Can you complete a security questionnaire?", "a": "Yes. Send it through the contact route and you will get answers to the questions that can be answered, and a clear 'not applicable' or 'not held' where that is the truth." }
+      ],
+      "related": ["/legal/data-protection-standards", "/legal/privacy-policy", "/cloud/security", "/hosting/security", "/legal/cybercrime-policy", "/contact"]
+    },
+
+    {
+      "route": "/about",
+      "title": "About CloudHost247",
+      "category": "Company",
+      "seoTitle": "About CloudHost247 — Hosting, Cloud, Domains & Platforms",
+      "description": "CloudHost247 Isc. builds and operates hosting, cloud, domain, application, website and developer platforms for businesses and developers worldwide.",
+      "visual": "hero/infrastructure",
+      "hero": {
+        "kicker": "Company",
+        "heading": "One platform for everything after the idea",
+        "lede": "CloudHost247 exists to remove the gap between having an idea and running it: register the domain, host the site, deploy the application, run the server, connect the API — in one account, with one support relationship.",
+        "ctas": [
+          { "label": "See the platform", "to": "/cloud/infrastructure", "variant": "primary" },
+          { "label": "Contact us", "to": "/contact", "variant": "ghost" }
+        ],
+        "points": ["Domains, hosting and cloud", "Applications and deployment", "Websites and stores", "Tools and developer APIs"]
+      },
+      "sections": [
+        {
+          "type": "features",
+          "kicker": "How we work",
+          "heading": "Principles we hold to",
+          "items": [
+            { "icon": "scale", "title": "Say what is true", "body": "No invented uptime figures, no certifications we do not hold, no data centre pins on a decorative map. Where something is not available, the product page says so." },
+            { "icon": "eye", "title": "Show, do not imply", "body": "Prices come from the catalogue, locations come from configuration, and a service status page reports only checks the platform can actually run." },
+            { "icon": "wrench", "title": "Operate what we sell", "body": "Provisioning, monitoring, DNS, certificates, backups and reconciliation are platform features, not arrangements with somebody else." },
+            { "icon": "users", "title": "One relationship", "body": "A domain problem, a server problem and a billing problem are the same support conversation rather than three vendors pointing at each other." },
+            { "icon": "code", "title": "Open about the seams", "body": "Documentation describes what is finished and what is not, so nobody builds on a feature that exists only in a roadmap." },
+            { "icon": "shield", "title": "Protect the boring things", "body": "Strong credentials, encryption everywhere, least-privilege administration and logs that answer questions after the fact." }
+          ]
+        },
+        {
+          "type": "cards",
+          "kicker": "The platform",
+          "heading": "What CloudHost247 covers",
+          "items": [
+            { "icon": "domain", "title": "Domains", "body": "Search, registration, transfer, DNS and the registrar toolkit.", "to": "/domains" },
+            { "icon": "globe", "title": "Hosting", "body": "Web, business, WordPress, reseller and Windows hosting.", "to": "/hosting" },
+            { "icon": "server", "title": "Cloud & servers", "body": "VPS, cloud, dedicated and enterprise servers with operations.", "to": "/cloud" },
+            { "icon": "app", "title": "Platforms", "body": "Applications, databases, containers and PaaS.", "to": "/platforms" },
+            { "icon": "code", "title": "Developers", "body": "Runtimes, Git deployment, environments and APIs.", "to": "/developers" },
+            { "icon": "layout", "title": "Websites", "body": "Builder, AI builder, stores and design services.", "to": "/websites" },
+            { "icon": "tools", "title": "Tools", "body": "DNS, IP, network, security, developer and webmaster tools.", "to": "/tools" },
+            { "icon": "headset", "title": "Support", "body": "Documentation, diagnostics, knowledge base and tickets.", "to": "/help" }
+          ]
+        },
+        {
+          "type": "note",
+          "heading": "CloudHost247 Isc.",
+          "body": "CloudHost247 Isc. is the legal entity behind this platform. Contractual terms, policies and the agreements that govern a service are published in the Legal & Policy Center, which is the authoritative source for any of them."
+        }
+      ],
+      "faqs": [
+        { "q": "Where is CloudHost247 based?", "a": "CloudHost247 Isc. operates the platform, with services delivered from the regions configured for each deployment. Published contact and address details for this deployment are on the contact page, from operator configuration." },
+        { "q": "Do you offer dedicated account management?", "a": "Business and enterprise arrangements are discussed with sales. The scope of what is included is agreed in writing rather than implied on a page." },
+        { "q": "Can I resell CloudHost247 services?", "a": "Yes, through reseller hosting and the automation platform. White-labelling and the commercial terms are described on the reseller page." }
+      ],
+      "related": ["/contact", "/cloud/infrastructure", "/security", "/legal", "/blog", "/hosting/reseller"]
+    },
+
+    {
+      "route": "/blog",
+      "title": "News & Updates",
+      "category": "Company",
+      "seoTitle": "CloudHost247 News, Releases & Platform Updates",
+      "description": "Platform releases and product notes from CloudHost247 — what shipped, what it replaces, and what it deliberately does not do yet.",
+      "visual": "blog/insights",
+      "hero": {
+        "kicker": "Company",
+        "heading": "What shipped, and what it does not do",
+        "lede": "Release notes for the CloudHost247 platform: the capability, the part of the product it changes, and the limitations that come with it.",
+        "ctas": [
+          { "label": "Read the documentation", "to": "/docs", "variant": "primary" },
+          { "label": "See service status", "to": "/status", "variant": "ghost" }
+        ],
+        "points": ["Release notes", "Product changes", "Stated limitations"]
+      },
+      "sections": [
+        { "type": "news", "kicker": "Release notes", "heading": "Platform releases" }
+      ],
+      "faqs": [
+        { "q": "Do you publish a changelog?", "a": "The release notes on this page are the changelog. They are written from the platform's own documentation rather than generated." },
+        { "q": "Can I subscribe to updates?", "a": "Account announcements are delivered to signed-in customers through the notification system. There is no third-party newsletter tracker on this site." }
+      ],
+      "related": ["/docs", "/status", "/about", "/help", "/contact", "/legal"]
+    }
+  ]
+}

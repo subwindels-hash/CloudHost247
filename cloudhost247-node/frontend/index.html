@@ -3,16 +3,65 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Public Tools metadata is also rendered by the Node fallback before React mounts. -->
-    <title>CloudHost247 — Cloud hosting, built for your next idea</title>
+
+    <!--
+      Static document shell.
+
+      This is what a crawler that does not execute JavaScript sees, and what a visitor sees for the
+      few milliseconds before the bundle boots, so it carries real CloudHost247 metadata rather than
+      a placeholder line. Per-route metadata (title, description, canonical, Open Graph, JSON-LD) is
+      applied by `usePageMeta` once a route mounts, and the server-rendered `/sitemap.xml` plus the
+      navigation registry are what make each public route discoverable without depending on
+      JavaScript at all.
+
+      The values below must stay consistent with `BRAND` in shared/site/registry.json.
+    -->
+    <title>CloudHost247 — Hosting, Cloud, Domains &amp; Developer Platform</title>
     <meta
       name="description"
-      content="CloudHost247 provides cloud hosting with fast provisioning, straightforward billing, and support whenever you need it."
+      content="CloudHost247 gives businesses, developers and organizations the infrastructure they need to build and operate online — from domains and websites to cloud servers, applications and deployment platforms."
     />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#0a1620" />
+    <meta name="color-scheme" content="light" />
+
+    <link rel="canonical" href="/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="CloudHost247" />
+    <meta property="og:title" content="CloudHost247 — Hosting, Cloud, Domains &amp; Developer Platform" />
+    <meta
+      property="og:description"
+      content="Domains, hosting, cloud servers, applications and developer tooling in one account, with live catalogue pricing."
+    />
+    <meta property="og:image" content="/media/cloudhost247/social/cloudhost247-social.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="/media/cloudhost247/social/cloudhost247-social.png" />
+
+    <link rel="icon" href="/media/cloudhost247/favicon/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/svg+xml" href="/media/cloudhost247/brand/icon-mark.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/media/cloudhost247/favicon/apple-touch-icon.png" />
+    <link rel="manifest" href="/media/cloudhost247/favicon/site.webmanifest" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "CloudHost247 Isc.",
+        "alternateName": "CloudHost247",
+        "slogan": "Build. Host. Deploy. Scale.",
+        "description": "Hosting, cloud, domains, infrastructure, developer platforms and digital services."
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <p>
+        CloudHost247 needs JavaScript for the interactive parts of this site — the client area,
+        the product catalogue and the online tools. The pages themselves, the
+        <a href="/sitemap">sitemap</a>, the <a href="/legal">legal &amp; policy center</a> and the
+        <a href="/docs">documentation</a> are all browsable without it.
+      </p>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

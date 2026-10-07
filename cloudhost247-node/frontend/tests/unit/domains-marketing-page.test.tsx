@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import App from '../../src/App';
@@ -28,21 +28,29 @@ describe('/domains Domain Services hub', () => {
       </MemoryRouter>
     );
 
+    // Scoped to the page body: the footer links to the same destinations with the same labels,
+    // so an unscoped query is ambiguous by design rather than by accident.
+    const page = within(await screen.findByRole('main'));
+
     // The three groups from the reference layout.
-    expect(await screen.findByText('Find a Domain')).toBeTruthy();
-    expect(await screen.findByText('Domain Investing')).toBeTruthy();
-    expect(await screen.findByText('Domain Tools and Services')).toBeTruthy();
+    expect(await page.findByText('Find a Domain')).toBeTruthy();
+    expect(await page.findByText('Domain Investing')).toBeTruthy();
+    expect(await page.findByText('Domain Tools and Services')).toBeTruthy();
 
     // The nine services.
-    expect(await screen.findByText('Search for Domain Names')).toBeTruthy();
-    expect(await screen.findByText('Transfer Domain Names')).toBeTruthy();
-    expect(await screen.findByText('gTLD Domain Extensions')).toBeTruthy();
-    expect(await screen.findByText('Auctions for Domain Names')).toBeTruthy();
-    expect(await screen.findByText('Appraise Domain Name Value')).toBeTruthy();
-    expect(await screen.findByText('Discount Domain Club')).toBeTruthy();
-    expect(await screen.findByText('Find a Domain Owner (WHOIS/RDAP)')).toBeTruthy();
-    expect(await screen.findByText('Bulk Domain Search')).toBeTruthy();
-    expect(await screen.findByText('Domain Broker Service')).toBeTruthy();
+    for (const service of [
+      'Search for Domain Names',
+      'Transfer Domain Names',
+      'gTLD Domain Extensions',
+      'Auctions for Domain Names',
+      'Appraise Domain Name Value',
+      'Discount Domain Club',
+      'Find a Domain Owner (WHOIS/RDAP)',
+      'Bulk Domain Search',
+      'Domain Broker Service',
+    ]) {
+      expect(await page.findByText(service), `missing service card: ${service}`).toBeTruthy();
+    }
   });
 
   it('performs a real provider-backed search and renders live availability + prices', async () => {

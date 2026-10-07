@@ -45,3 +45,16 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{DOCUMENT_ROOT}/platform/public%{REQUEST_URI} -f
 RewriteRule ^ platform/public%{REQUEST_URI} [L]
+
+# 7) Serve robots.txt dynamically so its Sitemap directives are absolute.
+#
+#    The robots.txt specification requires an absolute URL in a Sitemap directive, and the static
+#    robots.txt cannot contain one (it does not know which domain the site is served on). robots.php
+#    generates the file from the configured WHMCS SystemURL, which makes the sitemaps discoverable
+#    on every deployment without editing a file per environment.
+#
+#    This rule is optional: without it the static robots.txt is served and nothing breaks.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^robots\.txt$ robots.php [L]
+</IfModule>

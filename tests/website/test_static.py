@@ -29,4 +29,37 @@ class WebsiteTests(unittest.TestCase):
  def test_legal_text_has_its_own_layout(self):
   for path in (ROOT/'templates/cloudhost247/includes/legal').glob('*.tpl'):
    text=path.read_text();self.assertNotIn('<style',text,str(path));self.assertNotIn('<script',text,str(path))
+ def test_design_system_is_loaded_after_the_theme_stylesheet(self):
+  # The theme and the application share one design system. Both stylesheets style the same `ch-*`
+  # class names, so load order is behaviour: site.css first, design-system.css second. Reversing
+  # them silently reverts the whole WHMCS site to the old palette.
+  head=(ROOT/'templates/cloudhost247/includes/site-head.tpl').read_text()
+  self.assertIn('design-system.css',head)
+  self.assertLess(head.index('site.css'),head.index('design-system.css'),'design-system.css must load after site.css')
+
+ def test_generated_design_system_matches_its_source(self):
+  source=(ROOT/'shared/site/design-system.css').read_text().strip()
+  copy=(ROOT/'templates/cloudhost247/css/design-system.css').read_text()
+  self.assertIn('GENERATED COPY of shared/site/design-system.css',copy)
+  self.assertEqual(copy[copy.index('*/')+2:].strip(),source)
+
+ def test_theme_navigation_and_footer_come_from_the_registry(self):
+  catalog=json.loads((ROOT/'modules/addons/cloudhost247_theme/resources/site.json').read_text())
+  self.assertTrue(catalog.get('navigation'),'navigation is generated from shared/site/registry.json')
+  self.assertTrue(catalog.get('footer'),'footer is generated from shared/site/registry.json')
+  self.assertGreaterEqual(len(catalog['navigation']),9)
+  self.assertGreaterEqual(len(catalog['footer']),9)
+  # The Tools menu's entries are live data (the tool catalogue), so the registry deliberately has
+  # no static columns for it; the template renders categories from `toolCategories` and site.js
+  # enriches them. Every other menu must carry its own groups.
+  self.assertTrue(catalog.get('toolCategories'),'tools categories are generated for the PHP menu')
+  nav=(ROOT/'templates/cloudhost247/includes/site-nav.tpl').read_text()
+  self.assertIn('ch247Site.toolCategories',nav)
+  for menu in catalog['navigation']:
+   if menu['title'] == 'Tools': continue
+   self.assertTrue(menu['groups'],menu['title'])
+  # Product pages inherit their copy from the same content the application renders.
+  enriched=[p for p in catalog['pages'].values() if p.get('headline') and p.get('features')]
+  self.assertGreaterEqual(len(enriched),30,'expected the shared content to enrich the PHP product pages')
+
 if __name__=='__main__':unittest.main()

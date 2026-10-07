@@ -1,6 +1,7 @@
 import { lazy } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import Layout from './layout/Layout';
+import { LEGAL_INDEX, MARKETING_ROUTES } from './navigation/registry.generated';
 import RequireAuth from './components/RequireAuth';
 import RequireRole from './components/RequireRole';
 
@@ -23,17 +24,24 @@ import RequireRole from './components/RequireRole';
  */
 
 const HomePage = lazy(() => import('./pages/HomePage'));
+// Marketing, documentation, legal and sitemap surfaces. Paths come from the generated content
+// registry, so a route cannot be added here without a matching page definition and vice versa.
+const SiteMarketingPage = lazy(() => import('./pages/marketing/MarketingPage'));
+const LegalIndexPage = lazy(() => import('./pages/marketing/LegalPages').then((m) => ({ default: m.LegalIndexPage })));
+const LegalDocumentPage = lazy(() => import('./pages/marketing/LegalPages').then((m) => ({ default: m.LegalDocumentPage })));
+const DocsIndexPage = lazy(() => import('./pages/marketing/DocsPages').then((m) => ({ default: m.DocsIndexPage })));
+const DocPage = lazy(() => import('./pages/marketing/DocsPages').then((m) => ({ default: m.DocPage })));
+const SitemapPage = lazy(() => import('./pages/marketing/SitemapPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
-const HostingPage = lazy(() => import('./pages/HostingPage'));
-const HostingCpanelPage = lazy(() => import('./pages/HostingCpanelPage'));
-const HostingVpsPage = lazy(() => import('./pages/HostingVpsPage'));
-const HostingDedicatedPage = lazy(() => import('./pages/HostingDedicatedPage'));
-const HostingApplicationHostingPage = lazy(() => import('./pages/HostingApplicationHostingPage'));
+// Superseded by content pages under pages/marketing/ (see shared/site/content/products.json):
+// /hosting, /hosting/cpanel, /hosting/vps, /hosting/dedicated and /hosting/application-hosting now
+// render the marketing shell plus the same live ProductPlansSection. The modules are kept because
+// their test suites pin the catalogue honesty contract; nothing routes to them.
 const DomainsMarketingPage = lazy(() => import('./pages/DomainsMarketingPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
 const FaqPage = lazy(() => import('./pages/FaqPage'));
-const LegalIndexPage = lazy(() => import('./pages/LegalIndexPage'));
-const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'));
+// Superseded by pages/marketing/LegalPages.tsx, which renders the real extracted policies.
+// The module is kept because its own test suite pins the previous behaviour; nothing routes to it.
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
@@ -187,14 +195,22 @@ export default function App() {
   return (
     <Routes>
       <Route element={<Layout />}>
-        {/* Public marketing pages */}
+        {/* Public marketing pages. Every route below is generated from shared/site/content/*.json
+            by `node scripts/site/generate.mjs`, which also refuses to write a route the router does
+            not declare — so this list and the navigation can never disagree. */}
         <Route path="/" element={<HomePage />} />
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="/hosting" element={<HostingPage />} />
-        <Route path="/hosting/cpanel" element={<HostingCpanelPage />} />
-        <Route path="/hosting/vps" element={<HostingVpsPage />} />
-        <Route path="/hosting/dedicated" element={<HostingDedicatedPage />} />
-        <Route path="/hosting/application-hosting" element={<HostingApplicationHostingPage />} />
+        <Route path="/sitemap" element={<SitemapPage />} />
+        {MARKETING_ROUTES.map((route) => (
+          <Route key={route} path={route} element={<SiteMarketingPage />} />
+        ))}
+        <Route path="/legal" element={<LegalIndexPage />} />
+        {LEGAL_INDEX.map((document) => (
+          <Route key={document.spa} path={document.spa} element={<LegalDocumentPage />} />
+        ))}
+        <Route path="/docs" element={<DocsIndexPage />} />
+        <Route path="/docs/:slug" element={<DocPage />} />
+        {/* /hosting/control-panels is a live, admin-configurable catalogue of the panels this
+            deployment is actually set up to provision, so it stays a dedicated page. */}
         <Route path="/hosting/control-panels" element={<ControlPanelsPage />} />
         <Route path="/hosting/control-panels/:slug" element={<ControlPanelDetailPage />} />
         <Route path="/domains" element={<DomainsMarketingPage />} />
@@ -245,7 +261,6 @@ export default function App() {
         <Route path="/tools/document/mrz-parser" element={<MrzToolPage defaultTab="parser" />} />
 
         <Route path="/legal" element={<LegalIndexPage />} />
-        <Route path="/legal/privacy-policy" element={<PrivacyPolicyPage />} />
 
         {/* Auth */}
         <Route path="/login" element={<LoginPage />} />
