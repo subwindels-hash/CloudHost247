@@ -122,4 +122,62 @@ describe('SPA fallback routing (Apache/cPanel refresh safety)', () => {
     expect(res.headers['content-type']).toMatch(/json/);
     await app.close();
   });
+
+  /**
+   * The failure these pin: an API path that no route matches must never be answered with the SPA
+   * shell. It is indistinguishable from success to the caller (200 OK), so the browser fetches it,
+   * hands `index.html` to `res.json()`, and the visitor is shown
+   * `Unexpected token '<', "<!doctype "... is not valid JSON` — a parser complaint that names
+   * neither the URL nor the cause. Every shape below has produced exactly that in a real
+   * deployment, so each is asserted separately rather than through one representative case.
+   */
+  it.each([
+    '/api/tools/nope',
+    '/api/tools/nope?domain=example.com',
+    '/api/v1/tools/nope',
+    '/api',
+    '/api/',
+  ])('GET %s answers JSON 404, never the SPA shell', async (route) => {
+    const app = buildApp(env, { serveFrontend: true, publicDir });
+    const res = await app.inject({ method: 'GET', url: route });
+    expect(res.statusCode).toBe(404);
+    expect(res.headers['content-type']).toMatch(/json/);
+    expect(res.body).not.toContain('SPA shell');
+    await app.close();
+  });
+
+  it('POST to an unmatched API path answers JSON 404, never the SPA shell', async () => {
+    const app = buildApp(env, { serveFrontend: true, publicDir });
+    const res = await app.inject({ method: 'POST', url: '/api/tools/nope', payload: {} });
+    expect(res.statusCode).toBe(404);
+    expect(res.headers['content-type']).toMatch(/json/);
+    expect(res.body).not.toContain('SPA shell');
+    await app.close();
+  });
+
+  /**
+   * A deployment mounted under a path prefix (Passenger BaseURI, a proxied sub-path) receives
+   * every URL with that prefix attached, including the API's. Stripping it before the API test is
+   * what keeps `/app/api/...` from looking like an unknown *page* and being answered with HTML.
+   */
+  it('answers JSON 404 for API paths under a mount prefix, and the SPA shell for pages', async () => {
+    const mounted = loadEnv({
+      NODE_ENV: 'test',
+      DATABASE_URL: 'postgresql://user:pass@localhost:5432/cloudhost247',
+      JWT_SECRET: 'e'.repeat(32),
+      APP_URL: 'http://localhost:3000/app',
+    } as NodeJS.ProcessEnv);
+    const app = buildApp(mounted, { serveFrontend: true, publicDir });
+
+    const api = await app.inject({ method: 'GET', url: '/app/api/tools/catalog' });
+    expect(api.statusCode).toBe(404);
+    expect(api.headers['content-type']).toMatch(/json/);
+    expect(api.body).not.toContain('SPA shell');
+
+    const page = await app.inject({ method: 'GET', url: '/app/tools' });
+    expect(page.statusCode).toBe(200);
+    expect(page.body).toContain('SPA shell');
+
+    await app.close();
+  });
 });

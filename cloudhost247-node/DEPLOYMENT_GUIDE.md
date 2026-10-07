@@ -210,6 +210,33 @@ For cPanel shared hosting, configure a cron job for the worker:
 3. Check browser console for errors
 4. Ensure no Apache rewrite rules conflict with Node.js routing
 
+### A page loads but its API calls come back as HTML
+
+The symptom is a page that renders and then reports that a URL "did not answer with JSON" (older
+builds of this app surfaced the browser's own message instead:
+`Unexpected token '<', "<!doctype "... is not valid JSON`). It always means the same thing: the
+browser asked the application for `/api/...` and something **other than the application** answered,
+with the site's own `index.html`. The request was never a request the application could fail — so
+nothing on the page is broken, and retrying will not change it.
+
+Work through it in this order:
+
+1. **Open the API URL directly** in a browser tab (the Tools Center offers a link for exactly this).
+   It must print JSON. If it prints the site's HTML shell, the request is not reaching Node.
+2. **Compare `public/` with `dist/`.** Uploading one without the other produces a page that is newer
+   than the code behind it — the classic cause. Both must come from the same build.
+3. **Restart the application** in *Setup Node.js App*. Passenger keeps the running code in memory
+   until it is restarted, so new files on disk change nothing on their own.
+4. **Check for a rewrite rule in front of the app** (a `.htaccess` in the document root, or an
+   Apache `ProxyPass` that forwards `/` but not `/api`). Anything that rewrites unknown paths to
+   `index.php`/`index.html` will answer every API call with HTML.
+5. **Purge the CDN**, if one is in front. A cached `index.html` served for an `/api` path looks
+   identical to the above.
+
+The application guarantees its own half of this: any unmatched `/api`, `/health` or `/ready` path
+is answered with a JSON 404, never with the SPA shell — including when the app is mounted under a
+path prefix. That contract is pinned by `tests/unit/spa-routing.test.ts`.
+
 ## Update Procedure
 
 ### Source-Only Updates
