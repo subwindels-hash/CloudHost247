@@ -79,6 +79,26 @@ A pre-built package for checkout `283b2f0` was produced while writing this docum
 `release/` is git-ignored by design; the artifact stays a local build output. Regenerate it at any
 time with the command above.
 
+**Verify the package before uploading it** — a package is identified by the bytes inside it, not by
+its filename or its date:
+
+```bash
+bash scripts/verify-cpanel-package.sh            # newest package in release/
+# or: bash scripts/verify-cpanel-package.sh release/cloudhost247-cpanel-<sha>.zip
+```
+
+It opens the archive and fails loudly on the pre-rebuild shell
+(`the package is PRE-REBUILD (its shell reads "CloudHost247 — Cloud hosting, built for your next
+idea") — do not upload it`), on a shell whose entry bundle is missing, on any bundle still carrying
+the deleted `Not yet built on this platform` copy, on a missing media tree, and on fewer migrations
+than the source tree. `scripts/package-cpanel.sh` runs it automatically against its own output, so a
+fresh build cannot hand you a stale archive silently.
+
+**No local Node?** The same build runs in GitHub: **Actions → "Build deployment package" → Run
+workflow**. It builds from the selected commit, verifies the package with the same script, and
+publishes `cloudhost247-cpanel-package` as a downloadable artifact with its SHA-256 in the run
+summary. Download that artifact and upload *those* bytes.
+
 ### 3.2 Upload it
 
 In cPanel → **File Manager**:

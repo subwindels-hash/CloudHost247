@@ -69,10 +69,14 @@ bash scripts/package-cpanel.sh
 Before uploading, confirm the package is the rebuild and not a stale build:
 
 ```bash
-unzip -p release/cloudhost247-cpanel-<git-sha>.zip '*/public/index.html' | grep -o '<title>[^<]*</title>'
-# rebuilt:     CloudHost247 — Hosting, Cloud, Domains & Developer Platform
-# pre-rebuild: CloudHost247 — Cloud hosting, built for your next idea   <- do not deploy this
+bash scripts/verify-cpanel-package.sh
+# checks the shell inside the archive, the entry bundle, the media tree, the migration count and
+# that no pre-rebuild copy is still shipped; exits non-zero and says "do not upload it" otherwise.
 ```
+
+`package-cpanel.sh` runs this check on its own output automatically. If you have no local Node,
+build and download the same verified package from GitHub: **Actions → Build deployment package →
+Run workflow**.
 
 ### Step 2: Upload to cPanel
 

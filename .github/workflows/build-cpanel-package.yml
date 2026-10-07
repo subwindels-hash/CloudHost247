@@ -1,0 +1,60 @@
+name: Build deployment package
+
+# Builds the cPanel package for the Node platform (the live website at https://rent.windelsai.com/)
+# and publishes it as a downloadable artifact, so the uploaded bytes can come from GitHub instead of
+# a local machine. The package is verified before it is published: an archive that carries the
+# pre-rebuild shell fails the build instead of being handed over for upload — which is how the live
+# site ended up three merges behind (docs/website-rebuild/LIVE-SITE-DEPLOYMENT.md).
+#
+# The artifact is not committed to the repository; `release/` stays git-ignored and every package is
+# rebuilt from the commit it names.
+on:
+  workflow_dispatch:
+    inputs:
+      node:
+        description: 'Node version used to build the package'
+        required: false
+        default: '22.12.0'
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    name: Build and verify cPanel package
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cloudhost247-node
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node }}
+          cache: 'npm'
+          cache-dependency-path: cloudhost247-node/package-lock.json
+
+      # Installs from the lockfile, builds the server and frontend, stages the runtime files, zips
+      # the package, and runs scripts/verify-cpanel-package.sh against its own output.
+      - name: Build the package
+        run: bash scripts/package-cpanel.sh
+
+      - name: Record the artifact checksum
+        run: |
+          set -euo pipefail
+          ZIP="$(ls -t release/cloudhost247-cpanel-*.zip | head -1)"
+          echo "package: $(basename "$ZIP")" | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "sha256:  $(sha256sum "$ZIP" | cut -d' ' -f1)" | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "files:   $(unzip -l "$ZIP" | tail -1 | awk '{print $2}')" | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "commit:  ${GITHUB_SHA}" | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "$(sha256sum "$ZIP" | cut -d' ' -f1)  $(basename "$ZIP")" > release/SHA256SUMS.txt
+
+      - name: Upload the package
+        uses: actions/upload-artifact@v4
+        with:
+          name: cloudhost247-cpanel-package
+          path: |
+            cloudhost247-node/release/cloudhost247-cpanel-*.zip
+            cloudhost247-node/release/SHA256SUMS.txt
+          retention-days: 30

@@ -45,5 +45,9 @@ mkdir -p "${OUT_DIR}"
 rm -f "${OUT_DIR}/${NAME}.zip"
 ( cd "$(dirname "${STAGE}")" && zip -qr "${OUT_DIR}/${NAME}.zip" "${NAME}" )
 
+# Every build is verified as a package before it is announced as done: the live site once sat three
+# merges behind because a stale archive was uploaded and nothing checked the bytes inside it.
+bash "${APP_DIR}/scripts/verify-cpanel-package.sh" "${OUT_DIR}/${NAME}.zip"
+
 echo "==> Done: release/${NAME}.zip ($(du -h "${OUT_DIR}/${NAME}.zip" | cut -f1))"
 echo "    Upload it to cPanel, extract, and move the contents of ${NAME}/ into your app root."

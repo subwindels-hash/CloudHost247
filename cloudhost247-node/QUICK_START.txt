@@ -17,9 +17,11 @@ DEPLOYMENT ZIP
   scripts/verify-live-site.py --base https://rent.windelsai.com/ .
 
   CHECK THE PACKAGE BEFORE UPLOADING
-      unzip -p release/cloudhost247-cpanel-<sha>.zip '*/public/index.html' | grep -o '<title>[^<]*</title>'
-      rebuilt:     CloudHost247 — Hosting, Cloud, Domains & Developer Platform
-      pre-rebuild: CloudHost247 — Cloud hosting, built for your next idea  <- do not deploy
+      bash scripts/verify-cpanel-package.sh
+      Verifies the shell inside the archive (rebuilt vs pre-rebuild), the entry bundle, the media
+      tree, the migration count and the absence of the deleted pre-rebuild copy. package-cpanel.sh
+      runs it automatically. No local Node? Actions -> "Build deployment package" -> Run workflow
+      builds the same verified package and publishes it as a downloadable artifact.
 
 FULL ENVIRONMENT FILE
   File: cloudhost247-node/.env
