@@ -90,7 +90,7 @@ This one domain answers tool URLs from two applications, and no single upload fi
 | URL | What answered | Fixed by |
 |---|---|---|
 | `/tools` | the Node platform application (React — the page contains "Search tools" / "No tool matches …", strings that exist only in `frontend/src/pages/ToolsCenterPage.tsx`) | `release/cloudhost247-cpanel-<sha>.zip` |
-| `/tools/dns-lookup`, `/tools/<slug>` | the PHP/WHMCS theme (`tools/index.php` → `tools/lib/View.php`, `templates/cloudhost247/js/tools.js`) | `release/cloudhost247-tools-only-<sha>.zip` |
+| `/tools/dns-lookup`, `/tools/<slug>` | the PHP/WHMCS theme (`tools/index.php` → `tools/lib/View.php`, `templates/cloudhost247/js/tools.js`) | `cloudhost247-node/release/cloudhost247-tools-only-<sha>.zip` |
 | `/tools/api/tools/catalog` (any unknown path under `/tools/`) | the PHP shell, which answers **HTTP 200 with an HTML page** — "Tool not found" | nothing to fix; this is the response a wrong API base produces, and it is why a JSON parse can fail |
 | `/api/tools/catalog`, `/api/v1/navigation` | the Node platform application (JSON) | same package as `/tools` |
 | `/assets/cloudhost247-tools/tools.js` | 404 — the shared bundle is not deployed on this host | nothing (it is not served here) |
@@ -195,7 +195,7 @@ how a fix can be tested, verified and then not deployed.
 cannot hand you a stale archive silently.
 
 **Does the tools-fix-only archive cover the tool pages?** Partly, and it is worth being exact about
-which part. `bash scripts/package-tools-only.sh` packages the five files that the PHP/WHMCS tool
+which part. `bash scripts/package-tools-only.sh` (writes `cloudhost247-node/release/cloudhost247-tools-only-<sha>.zip`) packages the five files that the PHP/WHMCS tool
 pages load (`templates/cloudhost247/js/tools.js` with the JSON guard, the theme template and
 `tools/lib/View.php` that reference it with a new `?v=`, and the shared bundles). It fixes
 `/tools/<slug>`. It does **not** fix `/tools`, the homepage or the catalogue — those are the Node

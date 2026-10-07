@@ -24,8 +24,9 @@ ROOT="$(pwd)"
 APP_DIR="$ROOT/cloudhost247-node"
 
 SHA="$(git rev-parse --short HEAD 2>/dev/null || echo nogit)"
-ZIP="release/cloudhost247-tools-only-${SHA}.zip"
-mkdir -p release
+OUT="$APP_DIR/release"
+ZIP="$OUT/cloudhost247-tools-only-${SHA}.zip"
+mkdir -p "$OUT"
 
 FILES=(
   "templates/cloudhost247/js/tools.js"
@@ -77,8 +78,9 @@ sentence, the browser is serving a cached copy: hard-reload once (Ctrl/Cmd+Shift
 TXT
 
 rm -f "$ZIP"
-( cd "$STAGE" && zip -q "$ROOT/$ZIP" PACKAGE-README.txt )
+( cd "$STAGE" && zip -q "$ZIP" PACKAGE-README.txt )
 zip -q "$ZIP" "${FILES[@]}"
 
 echo "Wrote $ZIP"
+echo "(the cPanel package lives in the same directory: cloudhost247-node/release/)"
 unzip -l "$ZIP" | sed -n '3,12p'
