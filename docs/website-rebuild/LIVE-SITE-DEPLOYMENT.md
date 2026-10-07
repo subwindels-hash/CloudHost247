@@ -82,6 +82,30 @@ dead end. Nothing above requires a migration to have run.
 warns, without changing the deployment verdict, when it comes back as a degraded JSON catalogue
 because the database is still down.
 
+### 0.2 The tool pages are served by two different deployments
+
+This one domain answers tool URLs from two applications, and no single upload fixes both. Probed
+2026-10-07:
+
+| URL | What answered | Fixed by |
+|---|---|---|
+| `/tools` | the Node platform application (React — the page contains "Search tools" / "No tool matches …", strings that exist only in `frontend/src/pages/ToolsCenterPage.tsx`) | `release/cloudhost247-cpanel-<sha>.zip` |
+| `/tools/dns-lookup`, `/tools/<slug>` | the PHP/WHMCS theme (`tools/index.php` → `tools/lib/View.php`, `templates/cloudhost247/js/tools.js`) | `release/cloudhost247-tools-only-<sha>.zip` |
+| `/tools/api/tools/catalog` (any unknown path under `/tools/`) | the PHP shell, which answers **HTTP 200 with an HTML page** — "Tool not found" | nothing to fix; this is the response a wrong API base produces, and it is why a JSON parse can fail |
+| `/api/tools/catalog`, `/api/v1/navigation` | the Node platform application (JSON) | same package as `/tools` |
+| `/assets/cloudhost247-tools/tools.js` | 404 — the shared bundle is not deployed on this host | nothing (it is not served here) |
+
+Two consequences worth remembering:
+
+* **Uploading the Node package does not change `/tools/<slug>`.** Those pages never touch `dist/`
+  or `public/`. They read `templates/cloudhost247/**`, `tools/**` and `assets/cloudhost247-tools/**`,
+  which are a separate upload (`bash scripts/package-tools-only.sh`).
+* **A 200 HTML body is the signature to look for.** The pre-fix bundles ran
+  `await response.json()` unguarded, so any HTML answer — this PHP shell, a login redirect, a
+  web-server error page — surfaced to the visitor as
+  `Unexpected token '<', "<!doctype "... is not valid JSON`. That is a parser complaint about a
+  document that was never the API, which is why the message was the same on every tool page.
+
 ## 1. What the live host is actually running
 
 The live host is the **Node/TypeScript platform** (`cloudhost247-node/`), not the WHMCS/PHP site.
@@ -169,6 +193,13 @@ one matters: a package one commit behind passes every "is this a rebuild?" check
 how a fix can be tested, verified and then not deployed.
 `scripts/package-cpanel.sh` runs the verifier automatically against its own output, so a fresh build
 cannot hand you a stale archive silently.
+
+**Does the tools-fix-only archive cover the tool pages?** Partly, and it is worth being exact about
+which part. `bash scripts/package-tools-only.sh` packages the five files that the PHP/WHMCS tool
+pages load (`templates/cloudhost247/js/tools.js` with the JSON guard, the theme template and
+`tools/lib/View.php` that reference it with a new `?v=`, and the shared bundles). It fixes
+`/tools/<slug>`. It does **not** fix `/tools`, the homepage or the catalogue — those are the Node
+application, and only the full cPanel package changes them. See §0.2.
 
 **No local Node?** The same build runs in GitHub: **Actions → "Build deployment package" → Run
 workflow**. It builds from the selected commit, verifies the package with the same script, and

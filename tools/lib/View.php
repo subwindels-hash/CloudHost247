@@ -195,7 +195,7 @@ final class View
 
     private static function shellClose($base)
     {
-        return '<footer class="ch-footer"><div class="ch-wrap"><p>© ' . gmdate('Y') . ' CloudHost247 Isc.</p><p><a href="' . self::e($base . '/tools') . '">All tools</a></p></div></footer><script type="module" src="' . self::e($base) . '/templates/cloudhost247/js/tools.js?v=20261007"></script>';
+        return '<footer class="ch-footer"><div class="ch-wrap"><p>© ' . gmdate('Y') . ' CloudHost247 Isc.</p><p><a href="' . self::e($base . '/tools') . '">All tools</a></p></div></footer><script type="module" src="' . self::e($base) . '/templates/cloudhost247/js/tools.js?v=20261008"></script>';
     }
 
     public static function resultHtml(array $result)
