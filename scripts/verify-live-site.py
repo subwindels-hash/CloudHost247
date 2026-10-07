@@ -13,6 +13,16 @@ Every check below is a property the rebuilt site has and the pre-rebuild build (
 `cloudhost247-cpanel-b7a2af3` package, and every build before PR #61) did not. Running this after
 an upload answers one question: *is the live host serving this repository's website yet?*
 
+Two results are deliberately reported separately from that verdict, because they are real problems
+that are nonetheless not "the deployment did not land":
+
+  * `WARN database-reachable` -- the app is up but cannot reach PostgreSQL. Marketing pages render
+    without a database, so the rebuild can be live while this is still broken; migrations cannot run
+    until it is fixed. Diagnose with `npm run db:doctor` (see LIVE-SITE-DEPLOYMENT.md §0).
+  * `WARN no-stale-build-copy` -- the rebuild is live but the *pre-rebuild* entry chunk is still
+    being served, which means a stale copy of the old SPA exists in the domain's document root or in
+    a CDN cache (LIVE-SITE-DEPLOYMENT.md §3.7, item 2).
+
 It is read-only: GET requests to public URLs. It never authenticates and never mutates anything.
 
 Usage
@@ -42,6 +52,11 @@ STALE_TITLES = {
 }
 # The rebuilt shell, committed in cloudhost247-node/frontend/index.html.
 EXPECTED_TITLE = 'CloudHost247 — Hosting, Cloud, Domains & Developer Platform'
+# The entry chunk of the pre-rebuild build (release/cloudhost247-cpanel-b7a2af3.zip, 2026-10-04).
+# Once the Node application is replaced, that file cannot be served by the application any more --
+# so if the rebuilt build IS live and this file still answers 200, something else is serving it:
+# a stale copy of the old SPA in the domain's document root, or a CDN cache.
+STALE_ENTRY = '/assets/index-Ti2UwGlH.js'
 
 UA = {'User-Agent': 'CloudHost247-deployment-verifier/1.0 (+scripts/verify-live-site.py)'}
 
@@ -130,6 +145,17 @@ def main():
     if live_entry:
         status, _, _ = fetch(base + live_entry.lstrip('/'))
         add('entry-bundle-is-served', status == 200, f'GET {live_entry} -> {status}')
+
+    # 3b. Only meaningful once the rebuild is live: if the *old* entry chunk is still served, a
+    #     stale copy of the pre-rebuild SPA exists outside the Node application. That is the one
+    #     failure that survives a correct upload -- route through LIVE-SITE-DEPLOYMENT.md §3.7.
+    if live_entry == expected_entry:
+        status, _, _ = fetch(base + STALE_ENTRY.lstrip('/'))
+        add('no-stale-build-copy', status != 200,
+            f'GET {STALE_ENTRY} -> {status}'
+            + ('' if status != 200 else '  <-- the pre-rebuild bundle is still served; a stale copy '
+                                        'of the old site exists in the document root or a CDN'),
+            warn=(status == 200))
 
     # 4. The registry-driven navigation API -- added by the rebuild, absent before it.
     status, body, _ = fetch(base + 'api/v1/navigation')

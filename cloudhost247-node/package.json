@@ -29,6 +29,7 @@
     "migrate:verify": "node dist/database/migrate.js verify",
     "migrate:create": "node dist/database/migrate.js create",
     "env:check": "node dist/src/config/check-env.js",
+    "db:doctor": "node dist/src/config/db-doctor.js",
     "catalog:validate": "tsx scripts/validate-catalog.ts",
     "catalog:docs": "tsx scripts/generate-tools-catalog-doc.ts",
     "catalog:import": "tsx scripts/import-catalog.ts",

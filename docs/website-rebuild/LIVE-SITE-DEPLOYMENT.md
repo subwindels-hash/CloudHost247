@@ -33,6 +33,19 @@ alternatives are a database that was never created, wrong credentials, or `DATAB
 `DATABASE_SSL_REJECT_UNAUTHORIZED` not matching the provider's requirements (see
 `docs/CPANEL_DEPLOYMENT.md` §0.3 and §4).
 
+**Diagnose it on the server in one command:**
+
+```bash
+npm run db:doctor          # or: node dist/src/config/db-doctor.js
+```
+
+It prints the target it read from `DATABASE_URL` (never the password), names the actual cause in
+plain language — DNS failure, nothing listening, firewall/allowlist timeout, TLS trust, wrong
+credentials, missing database, permission denied — and gives the specific fix. When the connection
+works it reports the migration state, including which pending migrations are under the standing
+production quarantine and the exact authorization command. `npm run env:check` cannot do any of this
+by design: it validates the *shape* of the environment and never touches the network.
+
 **What this does and does not affect:**
 
 * The **design change does not depend on the database.** Every marketing page renders from the
@@ -161,13 +174,15 @@ npm ci --omit=dev
 
 ### 3.4 Fix the database, then apply the 12 new migrations
 
-**First: nothing in this step can run until the database connection works** (§0). Confirm it with
-`GET /ready` returning `{"status":"ok","checks":{"database":"ok"}}` — every catalogue endpoint
-answering `INTERNAL_ERROR` is the same root cause. Typical fixes, in order of likelihood: replace the
-placeholder `DATABASE_URL` in `.env` with the real connection string from the hosting provider
-(cPanel → *PostgreSQL Databases*); confirm the database and user actually exist; set `DATABASE_SSL`
-and, only for providers whose certificate cannot be validated, `DATABASE_SSL_REJECT_UNAUTHORIZED`
-(`docs/CPANEL_DEPLOYMENT.md` §4). Preserve `CREDENTIAL_ENCRYPTION_KEY` when editing `.env`.
+**First: nothing in this step can run until the database connection works** (§0). Run
+`npm run db:doctor` — it names the cause and the fix; `GET /ready` returning
+`{"status":"ok","checks":{"database":"ok"}}` is the confirmation that it is resolved. Typical fixes,
+in order of likelihood: replace the placeholder `DATABASE_URL` in `.env` with the real connection
+string from the hosting provider (cPanel → *PostgreSQL Databases*); confirm the database and user
+actually exist; set `DATABASE_SSL` and, only for providers whose certificate cannot be validated,
+`DATABASE_SSL_REJECT_UNAUTHORIZED` (`docs/CPANEL_DEPLOYMENT.md` §4). Preserve
+`CREDENTIAL_ENCRYPTION_KEY` when editing `.env`, and **Restart** the application after changing it —
+Passenger does not re-read the environment by itself.
 
 Then: the deployed build knows about 70 migrations; this build ships **82** (`0071`–`0082`: service
 cart items/platform plans, Website Builder, AI Website Builder, Online Store, Experts, Marketing

@@ -45,10 +45,15 @@ DEPLOY
   3. Configure the active variables from .env in cPanel's Environment Variables UI
      (recommended), or upload the customized .env with mode 600.
   4. In the cPanel virtual-environment terminal, run: npm ci --omit=dev
-  5. Run: npm run env:check
+  5. Run: npm run env:check      (validates the environment's shape; does not connect)
+  5b. Run: npm run db:doctor     (connects and diagnoses the database in plain language: DNS,
+      firewall/allowlist, TLS, credentials, missing database; then reports migration state.
+      The public /ready endpoint shows only "database: error" — this says why.)
   6. Review migration status, back up the database, then follow docs/CPANEL_DEPLOYMENT.md
      §0a/§6. Migrations 0023, 0024, 0025, and 0041 are quarantined in production and
-     require explicit owner authorization before applying.
+     require explicit owner authorization before applying. On a fresh/empty database a
+     production run refuses until they are authorized for that run:
+       CONFIRM_MIGRATION=yes AUTHORIZED_MIGRATIONS=0023,0024,0025,0041 node dist/database/migrate.js up
   7. Restart the app; verify /health, /ready, and the final application URL.
   8. Schedule the worker as a one-shot cron job using the actual cPanel paths:
      * * * * * cd <APP_ROOT> && <NODE_PATH> dist/src/worker/main.js --once
