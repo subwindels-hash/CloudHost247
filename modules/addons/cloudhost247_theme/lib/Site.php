@@ -43,10 +43,19 @@ final class Site
         }
         if (!empty($vars['cloudhost247ToolsPage']['path'])) {
             $toolPage = $vars['cloudhost247ToolsPage'];
-            $result['public'] = true;
             $result['title'] = $toolPage['name'];
             $result['description'] = $toolPage['summary'];
-            $result['canonical'] = $system ? $system . $toolPage['path'] : '';
+            if (empty($toolPage['unserved'])) {
+                $result['public'] = true;
+                $result['canonical'] = $system ? $system . $toolPage['path'] : '';
+            } else {
+                // The capability lives in the platform application; this PHP route only explains
+                // where to find it. It is a signpost, not a published page, so it gets no canonical
+                // and the head marks it `noindex` — a thin duplicate of a working tool page is
+                // exactly what a crawler should not be handed.
+                $result['public'] = false;
+                $result['canonical'] = '';
+            }
         }
         if (!empty($vars['cloudhost247Page']['seo_description'])) { $result['description'] = $vars['cloudhost247Page']['seo_description']; }
         $result['schema_json'] = '';

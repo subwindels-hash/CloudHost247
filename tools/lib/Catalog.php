@@ -27,6 +27,92 @@ final class Catalog
         return self::data()['categories'];
     }
 
+    /**
+     * Canonical discovery taxonomy — the nine categories navigation, the Tools mega menu and the
+     * sitemaps publish. It is read from the shared registry projection (`site.json`, written by
+     * `scripts/site/generate.mjs` from `shared/site/registry.json`) so the PHP surface and the app
+     * publish the same taxonomy; the fallback is the same list compiled, and the generator and
+     * `tests/tools/site-integration.php` both fail if the two ever drift.
+     */
+    const FALLBACK_DISCOVERY = array(
+        'dns-domains' => 'DNS & Domains',
+        'ip-network' => 'IP & Network',
+        'security' => 'Security',
+        'ssl' => 'SSL',
+        'email' => 'Email',
+        'website' => 'Website',
+        'developer' => 'Developer',
+        'calculators' => 'Calculators',
+        'utilities' => 'Utilities',
+    );
+
+    public static function discovery()
+    {
+        static $discovery;
+        if ($discovery === null) {
+            $discovery = array();
+            $registry = CH247_TOOLS_ROOT . '/modules/addons/cloudhost247_theme/resources/site.json';
+            $catalog = is_file($registry) ? json_decode((string) file_get_contents($registry), true) : null;
+            foreach (is_array($catalog) && isset($catalog['toolCategories']) ? $catalog['toolCategories'] : array() as $category) {
+                if (!is_array($category) || !isset($category['label'])) { continue; }
+                $slug = isset($category['slug']) ? (string) $category['slug'] : '';
+                if ($slug === '' && isset($category['url'])) {
+                    // Older projections carried only the URL; derive the slug so a stale resource
+                    // degrades to the same taxonomy instead of to the compiled fallback.
+                    $path = preg_split('~[?#]~', (string) $category['url']);
+                    $slug = substr($path[0], strrpos($path[0], '/') + 1);
+                }
+                if ($slug !== '') { $discovery[$slug] = (string) $category['label']; }
+            }
+            if (!$discovery) { $discovery = self::FALLBACK_DISCOVERY; }
+        }
+        return $discovery;
+    }
+
+    /**
+     * The discovery categories a tool belongs to. The first entry is the primary one, used for the
+     * breadcrumb, and the rest are cross-listings. The rules mirror the app catalogue
+     * (`cloudhost247-node/src/tools/catalog.ts`): one engine→discovery mapping plus curated
+     * cross-listing for the families that belong in more than one place.
+     */
+    public static function discoveryCategories(array $tool)
+    {
+        $slug = isset($tool['slug']) ? (string) $tool['slug'] : '';
+        $engine = isset($tool['category']) ? (string) $tool['category'] : '';
+        $map = array(
+            'dns' => 'dns-domains', 'domain' => 'dns-domains',
+            'ip' => 'ip-network', 'network' => 'ip-network',
+            'webmaster' => 'website', 'productivity' => 'utilities', 'diagnostics' => 'utilities',
+            'security' => 'security', 'developer' => 'developer', 'designer' => 'website',
+            'cybersecurity' => 'security', 'gaming' => 'utilities',
+        );
+        $categories = array(isset($map[$engine]) ? $map[$engine] : 'utilities');
+        $extra = array(
+            'email' => array('mx-lookup', 'spf-record-checker', 'spf-record-generator', 'dkim-checker', 'dmarc-checker', 'dmarc-record-generator', 'bimi-checker-generator', 'smtp-test', 'trace-email', 'email-verifier'),
+            'ssl' => array('ssl-certificate-checker'),
+            'website' => array('http-headers-checker', 'website-os-checker', 'broken-link-checker', 'open-graph-checker', 'website-link-analyzer', 'pagerank-checker', 'serp-simulator', 'robots-txt-generator', 'punycode-converter', 'user-agent-checker', 'htaccess-redirect-generator', 'url-rewrite-generator'),
+            'calculators' => array('ip-subnet-calculator', 'ip-to-decimal', 'ipv4-to-ipv6', 'ipv6-cidr-to-range', 'ipv6-range-to-cidr', 'time-card-calculator', 'raid-calculator', 'rgb-to-colortone', 'hex-to-colortone', 'cmyk-to-colortone', 'hsv-to-colortone'),
+            'utilities' => array('qr-code-generator', 'qr-scanner', 'wifi-qr-scanner', 'lorem-ipsum-generator', 'word-counter', 'online-notepad', 'small-text-generator', 'rot13', 'morse-code-translator', 'runic-translator', 'invisible-character-generator', 'reverse-image-search', 'image-to-text', 'internet-speed-test', 'name-checker', 'bin-checker', 'credit-card-checker', 'minecraft-color-codes', 'multi-url-opener', 'binary-translator', 'text-to-binary', 'md5-generator', 'base64-generator', 'password-encryption', 'random-password-generator', 'password-strength-checker'),
+        );
+        foreach ($extra as $category => $slugs) {
+            if (in_array($slug, $slugs, true) && !in_array($category, $categories, true)) { $categories[] = $category; }
+        }
+        $published = self::discovery();
+        return array_values(array_filter($categories, function ($category) use ($published) {
+            return isset($published[$category]);
+        }));
+    }
+
+    /** Every enabled tool published under a discovery category, in catalogue order. */
+    public static function toolsInDiscovery($category)
+    {
+        $published = self::discovery();
+        if (!isset($published[$category])) { return null; }
+        return array_values(array_filter(self::enabledTools(), function ($tool) use ($category) {
+            return in_array($category, self::discoveryCategories($tool), true);
+        }));
+    }
+
     public static function find($slug)
     {
         foreach (self::tools() as $tool) {
@@ -48,6 +134,18 @@ final class Catalog
             return array('kind' => 'hub', 'path' => '/tools', 'name' => 'CloudHost247 Online Tools', 'summary' => 'Free professional tools for DNS, networking, developers, security, webmasters and digital professionals.', 'slug' => '');
         }
         if (preg_match('#^/tools/category/([a-z0-9-]+)$#', $path, $match)) {
+            // Published category URLs use the discovery taxonomy; the catalogue's engine grouping
+            // is accepted as well so the older URLs keep resolving instead of turning into 404s.
+            $discovery = self::discovery();
+            if (isset($discovery[$match[1]])) {
+                return array(
+                    'kind' => 'category',
+                    'path' => $path,
+                    'slug' => $match[1],
+                    'name' => $discovery[$match[1]] . ' Tools',
+                    'summary' => 'CloudHost247 ' . $discovery[$match[1]] . ' tools, each with its own page and an explicit limitation.',
+                );
+            }
             $categories = self::categories();
             if (!isset($categories[$match[1]])) {
                 return null;

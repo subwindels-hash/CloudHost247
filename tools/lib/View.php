@@ -36,9 +36,18 @@ final class View
     private static function hub(array $page, $query, $base)
     {
         $category = isset($page['slug']) ? $page['slug'] : '';
-        $tools = $category === '' ? Catalog::search($query) : array_values(array_filter(Catalog::enabledTools(), function ($tool) use ($category) {
-            return $tool['category'] === $category;
-        }));
+        $published = Catalog::toolsInDiscovery($category);
+        if ($published !== null) {
+            // A published discovery category: the same taxonomy the menus and sitemaps use.
+            $tools = $published;
+        } elseif ($category === '') {
+            $tools = Catalog::search($query);
+        } else {
+            // The catalogue's engine grouping, kept resolvable for older category URLs.
+            $tools = array_values(array_filter(Catalog::enabledTools(), function ($tool) use ($category) {
+                return $tool['category'] === $category;
+            }));
+        }
         if ($query !== '' && $category !== '') {
             $tools = array_values(array_filter($tools, function ($tool) use ($query) {
                 return stripos($tool['name'] . $tool['summary'] . implode(' ', $tool['keywords']), $query) !== false;
@@ -49,7 +58,7 @@ final class View
             . '<div class="ch-hero-visual"><img src="' . self::e($base) . '/assets/images/cloudhost247/tools/hero.svg" width="660" height="560" alt="Conceptual CloudHost247 network of diagnostic tools"></div></div></section>';
         $html .= '<nav class="ch-tool-cats" aria-label="Tool categories"><div class="ch-wrap">';
         $html .= '<a class="' . ($category === '' && $query === '' ? 'is-active' : '') . '" href="' . self::e($base . '/tools') . '">All Tools</a>';
-        foreach (Catalog::categories() as $slug => $label) {
+        foreach (Catalog::discovery() as $slug => $label) {
             $html .= '<a class="' . ($category === $slug ? 'is-active' : '') . '" href="' . self::e($base . '/tools/category/' . $slug) . '">' . self::e($label) . '</a>';
         }
         $html .= '</div></nav><section class="ch-section"><div class="ch-wrap">';
@@ -73,7 +82,14 @@ final class View
     private static function tool(array $tool, $base)
     {
         $html = '<main id="ch-tools-content" class="ch-tools"><div class="ch-wrap ch-tool-page">';
-        $html .= '<nav class="ch-tool-crumb" aria-label="Breadcrumb"><a href="' . self::e($base . '/tools') . '">Tools</a><span aria-hidden="true">/</span><a href="' . self::e($base . '/tools/category/' . $tool['category']) . '">' . self::e($tool['categoryLabel']) . '</a><span aria-hidden="true">/</span><span>' . self::e($tool['name']) . '</span></nav>';
+        $discovery = Catalog::discoveryCategories($tool);
+        $primary = $discovery ? $discovery[0] : '';
+        $labels = Catalog::discovery();
+        $html .= '<nav class="ch-tool-crumb" aria-label="Breadcrumb"><a href="' . self::e($base . '/tools') . '">Tools</a>';
+        if ($primary !== '') {
+            $html .= '<span aria-hidden="true">/</span><a href="' . self::e($base . '/tools/category/' . $primary) . '">' . self::e($labels[$primary]) . '</a>';
+        }
+        $html .= '<span aria-hidden="true">/</span><span>' . self::e($tool['name']) . '</span></nav>';
         $html .= '<header class="ch-tool-head"><p class="ch-kicker">' . self::e($tool['categoryLabel']) . ' <span class="ch-badge">' . self::e($tool['badge']) . '</span></p><h1>' . self::e($tool['name']) . '</h1><p class="ch-lead">' . self::e($tool['description']) . '</p></header>';
         if (empty($tool['enabled'])) {
             $html .= '<div class="ch-notice" role="status"><h2>This tool is disabled.</h2><p>An administrator has turned it off. No check will run.</p></div>';

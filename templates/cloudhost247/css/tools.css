@@ -19,10 +19,17 @@
 .ch-tool-crumb{display:flex;flex-wrap:wrap;gap:8px;font-size:13px;color:var(--ch-muted);margin-bottom:24px}
 .ch-tool-crumb a{color:#196947}
 .ch-tool-head h1{font-size:clamp(2rem,4vw,3.4rem)}
+.ch-tool-explain{margin:28px 0;padding:24px;border-left:3px solid var(--ch-mint-strong);border-radius:8px;background:#f7faf8}
+.ch-tool-explain h2{font-size:1.15rem;margin-bottom:8px}
+.ch-tool-explain p{margin:0;line-height:1.7;color:var(--ch-muted)}
 .ch-tool-form{display:grid;gap:10px;padding:24px;border:1px solid var(--ch-line);border-radius:16px;background:#f7faf8;margin:28px 0}
 .ch-tool-form label{font-size:13px;font-weight:700}
 .ch-req{color:#8a4b32;font-weight:600}
 .ch-tool-form input,.ch-tool-form select,.ch-tool-form textarea{width:100%;border:1px solid #8aa097;border-radius:8px;padding:12px 14px;background:#fff;color:#102332}
+.ch-tool-result{margin-top:18px}
+.ch-tool-result:empty{display:none}
+.ch-tool-result :is(h3,h4){margin-top:0}
+.ch-tool-result p:last-child{margin-bottom:0}
 .ch-tool-state{font-size:14px;color:var(--ch-muted);margin:8px 0 0}
 .ch-tool-state[data-state="loading"]{color:#196947}
 .ch-tool-state[data-state="error"]{color:#8d2f24}
@@ -43,3 +50,4 @@
 @media(max-width:900px){.ch-tool-grid{grid-template-columns:1fr 1fr}.ch-mega-tools{grid-template-columns:1fr 1fr}}
 @media(max-width:640px){.ch-tool-grid,.ch-tools-search div{grid-template-columns:1fr;display:flex;flex-direction:column}.ch-tool-page{padding-top:24px}}
 @media(max-width:1199px){.ch-nav-search{display:block;padding:12px 0}.ch-nav-search input{width:100%;border:1px solid var(--ch-line);border-radius:8px;padding:12px}}
+@media(prefers-reduced-motion:reduce){.ch-tool-card,.ch-tool-card-top img{transition:none!important;animation:none!important}}

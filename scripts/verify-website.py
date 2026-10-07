@@ -7,12 +7,16 @@ CATALOG=ROOT/'modules/addons/cloudhost247_theme/resources/site.json'
 # Licensed WHMCS entry points, deliberately not vendored. HTTP mode verifies their deployment.
 WHMCS={'index.php','cart.php','clientarea.php','register.php','logout.php','pwreset.php','contact.php','knowledgebase.php','submitticket.php','serverstatus.php','announcements.php','supporttickets.php','viewticket.php','domainchecker.php'}
 def tool_routes():
+ # `tools.json` is the projection the PHP theme runtime resolves against (ToolsSite::catalog());
+ # `tools-public.json` is the older engine export and is kept as a second accepted source, so the
+ # gate matches what the deployed surface can actually answer instead of one file's opinion.
  routes={'tools'}
- catalog=ROOT/'modules/addons/cloudhost247_theme/resources/tools-public.json'
- if catalog.is_file():
+ for name in ('tools.json','tools-public.json'):
+  catalog=ROOT/'modules/addons/cloudhost247_theme/resources'/name
+  if not catalog.is_file():continue
   data=json.loads(catalog.read_text())
   for tool in data.get('tools',[]):
-   routes.add(tool['path'].lstrip('/'))
+   if isinstance(tool.get('path'),str):routes.add(tool['path'].lstrip('/'))
    for legacy in tool.get('legacyPaths',[]):
     if isinstance(legacy,str) and legacy.startswith('/tools/'):routes.add(legacy.lstrip('/'))
   for slug in data.get('categories',{}):routes.add('tools/category/'+slug)

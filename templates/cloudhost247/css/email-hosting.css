@@ -37,6 +37,9 @@
 
 .ch247-email-hero__inner { align-items: center; }
 
+.ch247-email-hero__visual { text-align: center; }
+.ch247-email-hero__visual img { max-width: 100%; height: auto; }
+
 .ch247-email-eyebrow {
     text-transform: uppercase;
     letter-spacing: .12em;

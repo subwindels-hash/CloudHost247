@@ -1,13 +1,13 @@
 {
   "$schema": "./registry.schema.json",
   "version": "2.0.0",
-  "generatedNotice": "SOURCE OF TRUTH — edit this file, then run `node scripts/site/generate.mjs`. Do not edit modules/addons/cloudhost247_theme/resources/site.json's navigation/footer by hand, and do not edit cloudhost247-node/frontend/src/navigation/registry.generated.ts at all.",
+  "generatedNotice": "SOURCE OF TRUTH \u2014 edit this file, then run `node scripts/site/generate.mjs`. Do not edit modules/addons/cloudhost247_theme/resources/site.json's navigation/footer by hand, and do not edit cloudhost247-node/frontend/src/navigation/registry.generated.ts at all.",
   "brand": {
     "name": "CloudHost247",
     "legalName": "CloudHost247 Isc.",
     "shortName": "CH247",
     "tagline": "Build. Host. Deploy. Scale.",
-    "description": "CloudHost247 gives businesses, developers and organizations the infrastructure they need to build and operate online — from domains and websites to cloud servers, applications and deployment platforms."
+    "description": "CloudHost247 gives businesses, developers and organizations the infrastructure they need to build and operate online \u2014 from domains and websites to cloud servers, applications and deployment platforms."
   },
   "surfaces": {
     "spa": {
@@ -74,12 +74,21 @@
             {
               "label": "Web Hosting",
               "icon": "globe",
-              "desc": "Shared hosting for sites that need to be fast and reliable.",
+              "desc": "Web hosting plans for websites, with current products shown in the live catalogue.",
               "href": {
                 "spa": "/hosting/web-hosting",
                 "php": "web-hosting.php"
               },
               "badge": "POPULAR"
+            },
+            {
+              "label": "Shared Hosting",
+              "icon": "globe",
+              "desc": "Shared web hosting plans shown in the live product catalogue.",
+              "href": {
+                "spa": "/hosting/web-hosting",
+                "php": "web-hosting.php"
+              }
             },
             {
               "label": "Business Hosting",
@@ -254,17 +263,16 @@
       "blurb": "Virtual servers, cloud platforms and the infrastructure operations layer behind them.",
       "href": {
         "spa": "/cloud",
-        "php": "vps-hosting.php"
+        "php": "cloudhost247-hosting.php"
       },
       "featured": {
-        "title": "Deploy a server",
-        "body": "Choose an operating system, size and region, and provision a server you can reach over SSH or RDP.",
+        "title": "Cloud hosting plans",
+        "body": "Review the cloud server options currently published to the live product catalogue.",
         "href": {
-          "spa": "/servers/new",
-          "php": "cart.php?a=add",
-          "phpLabel": "Order a server"
+          "spa": "/cloud",
+          "php": "cloudhost247-hosting.php"
         },
-        "cta": "Configure a server"
+        "cta": "View cloud plans"
       },
       "columns": [
         {
@@ -279,6 +287,15 @@
                 "php": "vps-hosting.php"
               },
               "badge": "POPULAR"
+            },
+            {
+              "label": "Cloud Hosting",
+              "icon": "cloud",
+              "desc": "Browse published cloud hosting products and their current plan details.",
+              "href": {
+                "spa": "/cloud",
+                "php": "cloudhost247-hosting.php"
+              }
             },
             {
               "label": "Dedicated Servers",
@@ -342,7 +359,7 @@
             {
               "label": "Data Centers",
               "icon": "data-center",
-              "desc": "The facilities our servers are deployed in — when configured.",
+              "desc": "The facilities our servers are deployed in \u2014 when configured.",
               "href": {
                 "spa": "/cloud/data-centers",
                 "php": "data-centers.php"
@@ -432,7 +449,7 @@
     {
       "id": "domains",
       "label": "Domains",
-      "blurb": "Search, register, transfer and manage domain names — with the full registrar toolkit.",
+      "blurb": "Search, register, transfer and manage domain names \u2014 with the full registrar toolkit.",
       "href": {
         "spa": "/domains",
         "php": "domain.php"
@@ -475,7 +492,7 @@
               "desc": "The full TLD catalogue with register and renewal prices.",
               "href": {
                 "spa": "/domains/extensions",
-                "php": "domain.php#pricing"
+                "php": "domain.php"
               }
             },
             {
@@ -484,7 +501,7 @@
               "desc": "Check a whole list of candidate names at once.",
               "href": {
                 "spa": "/domains/bulk-search",
-                "php": "domain.php#search"
+                "php": "domain.php"
               }
             },
             {
@@ -516,7 +533,7 @@
               "desc": "Public registration data, with privacy respected.",
               "href": {
                 "spa": "/domains/whois",
-                "php": "domain.php#whois"
+                "php": "tools/domain-whois"
               }
             },
             {
@@ -539,17 +556,17 @@
               "desc": "Bid on listed names with a recorded auction ledger.",
               "href": {
                 "spa": "/domains/auctions",
-                "php": "domain.php#auctions"
+                "php": "domain.php"
               },
               "badge": "NEW"
             },
             {
               "label": "Domain Appraisal",
               "icon": "chart",
-              "desc": "An estimated market value — never a guaranteed price.",
+              "desc": "An estimated market value \u2014 never a guaranteed price.",
               "href": {
                 "spa": "/domains/appraisal",
-                "php": "domain.php#appraisal"
+                "php": "domain.php"
               }
             },
             {
@@ -558,7 +575,7 @@
               "desc": "We approach the owner of a name you want to acquire.",
               "href": {
                 "spa": "/domains/broker",
-                "php": "domain.php#broker"
+                "php": "domain.php"
               }
             },
             {
@@ -567,7 +584,7 @@
               "desc": "Membership pricing on eligible registrations and renewals.",
               "href": {
                 "spa": "/domains/club",
-                "php": "domain.php#club"
+                "php": "domain.php"
               }
             },
             {
@@ -586,7 +603,7 @@
     {
       "id": "platforms",
       "label": "Platforms",
-      "blurb": "Applications, databases, containers and the deployment platform that runs them.",
+      "blurb": "Applications, databases, containers and deployment workflows configured for CloudHost247 services.",
       "href": {
         "spa": "/platforms",
         "php": "applications.php"
@@ -644,7 +661,7 @@
             {
               "label": "PaaS",
               "icon": "rocket",
-              "desc": "Push an application and let the platform run it.",
+              "desc": "Application deployment and environment management; source builds depend on an enabled panel integration.",
               "href": {
                 "spa": "/platforms/paas",
                 "php": "paas.php"
@@ -658,7 +675,7 @@
             {
               "label": "Deployment",
               "icon": "git-branch",
-              "desc": "Build, release and roll back deployments with a real log.",
+              "desc": "Track supported application installs and updates, including recorded status and deployment steps.",
               "href": {
                 "spa": "/developers/deployment",
                 "php": "deployments.php"
@@ -730,19 +747,19 @@
     {
       "id": "developers",
       "label": "Developer / Deployment",
-      "blurb": "Runtimes, Git-based deployment, environments and APIs — the parts you actually build on.",
+      "blurb": "Runtimes, application deployments, environments and APIs \u2014 with availability shown by the live catalogue.",
       "href": {
         "spa": "/developers",
         "php": "developer-friendly.php"
       },
       "featured": {
-        "title": "Deploy from Git",
-        "body": "Connect a repository, let the platform build it and release it, with the build log kept on the deployment record.",
+        "title": "Application deployments",
+        "body": "Track supported application installs and updates, their recorded steps, and environment configuration. Git-based builds depend on a separately configured control panel.",
         "href": {
           "spa": "/developers/deployment",
           "php": "deployments.php"
         },
-        "cta": "See how deployment works"
+        "cta": "See deployment options"
       },
       "columns": [
         {
@@ -799,9 +816,9 @@
           "title": "Deploy & operate",
           "items": [
             {
-              "label": "Deployment Platform",
+              "label": "Application Deployments",
               "icon": "git-branch",
-              "desc": "Git-driven builds, releases and rollbacks.",
+              "desc": "Track supported application installs, updates, status and step logs.",
               "href": {
                 "spa": "/developers/deployment",
                 "php": "deployments.php"
@@ -811,7 +828,7 @@
             {
               "label": "PaaS",
               "icon": "rocket",
-              "desc": "A push-to-deploy platform with managed routing.",
+              "desc": "Managed application deployment workflows; Git builds require an enabled control-panel integration.",
               "href": {
                 "spa": "/platforms/paas",
                 "php": "paas.php"
@@ -908,7 +925,7 @@
       },
       "featured": {
         "title": "Website Builder",
-        "body": "Pages, sections, media and publishing — with templates you can start from and edit in the browser.",
+        "body": "Pages, sections, media and publishing \u2014 with templates you can start from and edit in the browser.",
         "href": {
           "spa": "/websites/builder",
           "php": "website-design.php"
@@ -924,7 +941,7 @@
               "icon": "layout",
               "desc": "Templates, pages, sections, media and publishing.",
               "href": {
-                "spa": "/websites",
+                "spa": "/websites/builder",
                 "php": "website-design.php"
               },
               "badge": "INCLUDED"
@@ -934,7 +951,7 @@
               "icon": "sparkle",
               "desc": "Describe a site and get real pages you can edit.",
               "href": {
-                "spa": "/websites",
+                "spa": "/websites/ai-builder",
                 "php": "website-design.php"
               },
               "badge": "NEW"
@@ -944,7 +961,7 @@
               "icon": "grid",
               "desc": "Start from a layout that is already publishable.",
               "href": {
-                "spa": "/websites",
+                "spa": "/websites/templates",
                 "php": "website-design.php"
               }
             },
@@ -953,7 +970,7 @@
               "icon": "cart",
               "desc": "Sell physical, digital and service products online.",
               "href": {
-                "spa": "/websites",
+                "spa": "/websites/store",
                 "php": "website-design.php"
               }
             },
@@ -962,7 +979,7 @@
               "icon": "pen",
               "desc": "Scoped design and build by the CloudHost247 team.",
               "href": {
-                "spa": "/websites",
+                "spa": "/websites/design-services",
                 "php": "website-design.php"
               }
             }
@@ -974,7 +991,7 @@
             {
               "label": "Website Migration",
               "icon": "transfer",
-              "desc": "Bring an existing site across without downtime.",
+              "desc": "Plan a site transfer and its cutover with the CloudHost247 team.",
               "href": {
                 "spa": "/hosting/migration",
                 "php": "migration.php"
@@ -983,7 +1000,7 @@
             {
               "label": "Website Management",
               "icon": "wrench",
-              "desc": "Updates, backups and monitoring handled for you.",
+              "desc": "Explore available website operations, maintenance and support options.",
               "href": {
                 "spa": "/cloud/server-management",
                 "php": "managed-services.php"
@@ -1006,7 +1023,7 @@
             {
               "label": "SSL Certificates",
               "icon": "lock",
-              "desc": "Every site encrypted, with automatic renewal.",
+              "desc": "Review the TLS options available for the hosting service you select.",
               "href": {
                 "spa": "/hosting/ssl",
                 "php": "ssl-certificate.php"
@@ -1046,7 +1063,7 @@
     {
       "id": "tools",
       "label": "Tools",
-      "blurb": "Inspect, troubleshoot and build — with tools that explain their results instead of showing invented data.",
+      "blurb": "Inspect, troubleshoot and build \u2014 with tools that explain their results instead of showing invented data.",
       "href": {
         "spa": "/tools",
         "php": "tools"
@@ -1325,6 +1342,13 @@
           }
         },
         {
+          "label": "Shared Hosting",
+          "href": {
+            "spa": "/hosting/web-hosting",
+            "php": "web-hosting.php"
+          }
+        },
+        {
           "label": "Business Hosting",
           "href": {
             "spa": "/hosting/business",
@@ -1520,14 +1544,14 @@
           "label": "Domain Extensions",
           "href": {
             "spa": "/domains/extensions",
-            "php": "domain.php#pricing"
+            "php": "domain.php"
           }
         },
         {
           "label": "WHOIS / RDAP",
           "href": {
             "spa": "/domains/whois",
-            "php": "domain.php#whois"
+            "php": "tools/domain-whois"
           }
         },
         {
@@ -1541,35 +1565,35 @@
           "label": "Bulk Domain Search",
           "href": {
             "spa": "/domains/bulk-search",
-            "php": "domain.php#search"
+            "php": "domain.php"
           }
         },
         {
           "label": "Domain Auctions",
           "href": {
             "spa": "/domains/auctions",
-            "php": "domain.php#auctions"
+            "php": "domain.php"
           }
         },
         {
           "label": "Domain Appraisal",
           "href": {
             "spa": "/domains/appraisal",
-            "php": "domain.php#appraisal"
+            "php": "domain.php"
           }
         },
         {
           "label": "Domain Broker",
           "href": {
             "spa": "/domains/broker",
-            "php": "domain.php#broker"
+            "php": "domain.php"
           }
         },
         {
           "label": "Domain Club",
           "href": {
             "spa": "/domains/club",
-            "php": "domain.php#club"
+            "php": "domain.php"
           }
         }
       ]
@@ -1668,17 +1692,45 @@
           }
         },
         {
-          "label": "DNS Tools",
+          "label": "DNS & Domains Tools",
           "href": {
-            "spa": "/tools/category/dns",
-            "php": "tools/category/dns"
+            "spa": "/tools/category/dns-domains",
+            "php": "tools/category/dns-domains"
           }
         },
         {
-          "label": "IP Tools",
+          "label": "IP & Network Tools",
           "href": {
-            "spa": "/tools/category/ip",
-            "php": "tools/category/ip"
+            "spa": "/tools/category/ip-network",
+            "php": "tools/category/ip-network"
+          }
+        },
+        {
+          "label": "Security Tools",
+          "href": {
+            "spa": "/tools/category/security",
+            "php": "tools/category/security"
+          }
+        },
+        {
+          "label": "SSL Tools",
+          "href": {
+            "spa": "/tools/category/ssl",
+            "php": "tools/category/ssl"
+          }
+        },
+        {
+          "label": "Email Tools",
+          "href": {
+            "spa": "/tools/category/email",
+            "php": "tools/category/email"
+          }
+        },
+        {
+          "label": "Website Tools",
+          "href": {
+            "spa": "/tools/category/website",
+            "php": "tools/category/website"
           }
         },
         {
@@ -1689,45 +1741,24 @@
           }
         },
         {
-          "label": "Designer Tools",
+          "label": "Calculators Tools",
           "href": {
-            "spa": "/tools/category/designer",
-            "php": "tools/category/designer"
+            "spa": "/tools/category/calculators",
+            "php": "tools/category/calculators"
           }
         },
         {
-          "label": "Webmaster Tools",
+          "label": "Utilities Tools",
           "href": {
-            "spa": "/tools/category/webmaster",
-            "php": "tools/category/webmaster"
+            "spa": "/tools/category/utilities",
+            "php": "tools/category/utilities"
           }
         },
         {
-          "label": "Network Tools",
+          "label": "MRZ Generator / MRZ Tools",
           "href": {
-            "spa": "/tools/category/network",
-            "php": "tools/category/network"
-          }
-        },
-        {
-          "label": "Security Tools",
-          "href": {
-            "spa": "/tools/category/cybersecurity",
-            "php": "tools/category/cybersecurity"
-          }
-        },
-        {
-          "label": "Productivity Tools",
-          "href": {
-            "spa": "/tools/category/productivity",
-            "php": "tools/category/productivity"
-          }
-        },
-        {
-          "label": "Gaming Tools",
-          "href": {
-            "spa": "/tools/category/gaming",
-            "php": "tools/category/gaming"
+            "spa": "/tools/mrz-generator",
+            "php": "tools/mrz-generator"
           }
         }
       ]
@@ -1738,35 +1769,35 @@
         {
           "label": "Website Builder",
           "href": {
-            "spa": "/websites",
+            "spa": "/websites/builder",
             "php": "website-design.php"
           }
         },
         {
           "label": "AI Website Builder",
           "href": {
-            "spa": "/websites",
+            "spa": "/websites/ai-builder",
             "php": "website-design.php"
           }
         },
         {
           "label": "Website Templates",
           "href": {
-            "spa": "/websites",
+            "spa": "/websites/templates",
             "php": "website-design.php"
           }
         },
         {
           "label": "E-commerce & Stores",
           "href": {
-            "spa": "/websites",
+            "spa": "/websites/store",
             "php": "website-design.php"
           }
         },
         {
           "label": "Website Design",
           "href": {
-            "spa": "/websites",
+            "spa": "/websites/design-services",
             "php": "website-design.php"
           }
         }
@@ -1815,6 +1846,13 @@
           "href": {
             "spa": "/offers",
             "php": "offers.php"
+          }
+        },
+        {
+          "label": "Sitemap",
+          "href": {
+            "spa": "/sitemap",
+            "php": "cloudhost247-sitemap.php"
           }
         }
       ]
@@ -2135,16 +2173,40 @@
   ],
   "toolsCategories": [
     {
-      "slug": "dns",
-      "label": "DNS",
+      "slug": "dns-domains",
+      "label": "DNS & Domains",
       "icon": "dns",
       "desc": "Lookups, propagation and zone diagnostics."
     },
     {
-      "slug": "ip",
-      "label": "IP",
-      "icon": "ip",
-      "desc": "Address, subnet and geolocation utilities."
+      "slug": "ip-network",
+      "label": "IP & Network",
+      "icon": "network",
+      "desc": "Addresses, subnets, reachability and routing checks."
+    },
+    {
+      "slug": "security",
+      "label": "Security",
+      "icon": "shield",
+      "desc": "Hashing, verification and safe inspection."
+    },
+    {
+      "slug": "ssl",
+      "label": "SSL",
+      "icon": "lock",
+      "desc": "Certificate, chain and TLS inspection."
+    },
+    {
+      "slug": "email",
+      "label": "Email",
+      "icon": "mail",
+      "desc": "MX, SPF, DKIM and DMARC checks."
+    },
+    {
+      "slug": "website",
+      "label": "Website",
+      "icon": "globe",
+      "desc": "Headers, redirects, links and page checks."
     },
     {
       "slug": "developer",
@@ -2153,46 +2215,16 @@
       "desc": "Encoding, conversion and inspection tools."
     },
     {
-      "slug": "designer",
-      "label": "Designer",
-      "icon": "pen",
-      "desc": "Colour, image and layout helpers."
+      "slug": "calculators",
+      "label": "Calculators",
+      "icon": "chart",
+      "desc": "Subnet, time and conversion calculators."
     },
     {
-      "slug": "webmaster",
-      "label": "Webmaster",
-      "icon": "globe",
-      "desc": "SEO, headers and site checks."
-    },
-    {
-      "slug": "network",
-      "label": "Network",
-      "icon": "network",
-      "desc": "Reachability, ports and routing checks."
-    },
-    {
-      "slug": "cybersecurity",
-      "label": "Cyber Security",
-      "icon": "shield",
-      "desc": "Hashing, verification and safe inspection."
-    },
-    {
-      "slug": "productivity",
-      "label": "Productivity",
-      "icon": "zap",
+      "slug": "utilities",
+      "label": "Utilities",
+      "icon": "wrench",
       "desc": "Everyday generators and converters."
-    },
-    {
-      "slug": "gaming",
-      "label": "Gaming",
-      "icon": "gamepad",
-      "desc": "Server names and community utilities."
-    },
-    {
-      "slug": "document",
-      "label": "Document",
-      "icon": "file-text",
-      "desc": "Document and travel-document utilities."
     }
   ],
   "sitemap": {
@@ -2210,7 +2242,47 @@
       "/cart",
       "/checkout",
       "/inbox",
-      "/search"
+      "/search",
+      "/api/",
+      "/support",
+      "/services",
+      "/marketing",
+      "/servers/new",
+      "/websites/builder",
+      "/websites/ai-builder",
+      "/websites/store",
+      "/websites/experts",
+      "/websites/templates",
+      "/websites/design-services",
+      "/tools/history",
+      "/tools/favorites",
+      "/tools/reports",
+      "/tools/monitors"
+    ],
+    "excludePhp": [
+      "admin/",
+      "modules/",
+      "crons/",
+      "errors/",
+      "cart.php",
+      "clientarea.php",
+      "register.php",
+      "pwreset.php",
+      "logout.php",
+      "submitticket.php",
+      "supporttickets.php",
+      "viewticket.php",
+      "site-search.php",
+      "service-error.php",
+      "cloudhost247-marketing-track.php",
+      "cloudhost247-sample.php",
+      "cloudhost247-vps-sample.php",
+      "all-element-cloudhost247.php",
+      "future-element.php",
+      "tables.php",
+      "tools/data/",
+      "tools/admin/",
+      "tools/api.php"
     ],
     "priorities": {
       "/": 1.0,

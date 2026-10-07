@@ -9,7 +9,7 @@ import { AppCard } from '../components/AppTile';
  * rails, all served from the real /api/v1/apps catalog — never a hardcoded app list.
  */
 export default function MarketplacePage() {
-  usePageMeta('App Marketplace', 'One-click install 50+ open-source applications on CloudHost247 hosting.');
+  usePageMeta('App Marketplace', 'Browse the live CloudHost247 application catalogue, available versions and deployment requirements before installing.');
   const [search, setSearch] = useState('');
   const [debounced, setDebounced] = useState('');
   const [category, setCategory] = useState('');

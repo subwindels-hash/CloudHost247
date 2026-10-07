@@ -33,8 +33,7 @@ export class ApiRequestError extends Error {
   }
 }
 
-export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const token = toolsHost().embedded ? null : localStorage.getItem('ch247_token');
+export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {  const token = toolsHost().embedded ? null : localStorage.getItem('ch247_token');
   const res = await fetch(toolsApiPath(path), {
     ...init,
     headers: {
@@ -55,6 +54,35 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
     if (res.status === 401 && token) {
       clearSession();
     }
+    throw new ApiRequestError(res.status, body.error || body.code || 'UNKNOWN', body.message || 'Request failed', body.retryable);
+  }
+
+  if (res.status === 204) {
+    return undefined as T;
+  }
+
+  return (await res.json()) as T;
+}
+
+/**
+ * Anonymous read for endpoints that are public by design (`/api/tools/navigation`, the marketing
+ * catalogue, published documentation indexes).
+ *
+ * It is never used for a session-gated call, and — unlike `apiFetch` — it deliberately does not
+ * read or clear the stored session: a public GET is not evidence that a token is still valid, so
+ * a rate-limited or failing public request must never sign a customer out.
+ */
+export async function publicFetch<T>(path: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(toolsApiPath(path), {
+    ...init,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(init?.headers ?? {}),
+    },
+  });
+
+  if (!res.ok) {
+    const body = (await res.json().catch(() => ({ error: 'UNKNOWN', message: res.statusText }))) as ApiError;
     throw new ApiRequestError(res.status, body.error || body.code || 'UNKNOWN', body.message || 'Request failed', body.retryable);
   }
 

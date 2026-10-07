@@ -15,7 +15,9 @@ $smarty->setCompileDir($out . '/compiled');
 $smarty->error_reporting = E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED;
 $smarty->registerPlugin('function', 'lang', function ($params) { return htmlspecialchars(isset($params['key']) ? $params['key'] : '', ENT_QUOTES, 'UTF-8'); });
 $catalog = \CloudHost247\Theme\Site::catalog();
-$pages = array('index.php' => 'homepage.tpl', 'notfound.php' => 'cloudhost247-page.tpl');
+// `cloudhost247-page.php` is the editorial route; an unpublished or unknown slug is the one route
+// that legitimately renders `PublicPage::missing()` and is marked noindex.
+$pages = array('index.php' => 'homepage.tpl', 'notfound.php' => 'cloudhost247-page.tpl', 'cloudhost247-page.php' => 'cloudhost247-page.tpl');
 foreach ($catalog['pages'] as $path => $page) {
     $pages[$path] = 'cloudhost247-page.tpl';
 }
@@ -31,19 +33,131 @@ foreach (array('site-search.php', 'site-search-unavailable.php', 'site-search-em
 require $root . '/modules/addons/cloudhost247_theme/lib/ToolsSite.php';
 $pages['tools'] = 'cloudhost247-tools.tpl';
 foreach (\CloudHost247\Theme\ToolsSite::catalog()['tools'] as $entry) { $pages[ltrim($entry['path'],'/')] = 'cloudhost247-tools.tpl'; }
+// The PHP tools front controller resolves the native catalogue first and only then the theme
+// projection, so its surface is wider than `tools.json`: without this the harness would never
+// render the tools that only the native catalogue knows (DNS Checker, SSL Checker, JSON
+// Beautifier — the ones the homepage links to).
+$nativeTools = array();
+if (is_file($root . '/tools/lib/bootstrap.php')) {
+    require_once $root . '/tools/lib/bootstrap.php';
+    foreach (\CloudHost247\Tools\Catalog::enabledTools() as $entry) {
+        $nativeTools['/' . ltrim($entry['path'], '/')] = $entry;
+    }
+    foreach (\CloudHost247\Tools\Catalog::discovery() as $slug => $label) {
+        $pages['tools/category/' . $slug] = 'cloudhost247-tools.tpl';
+        $nativeTools['/tools/category/' . $slug] = null;
+    }
+    foreach ($nativeTools as $path => $entry) {
+        if (\CloudHost247\Theme\ToolsSite::resolve($path) === null) { $pages[ltrim($path, '/')] = 'cloudhost247-tools.tpl'; }
+    }
+}
+// Legal documents whose text is assigned by their own root PHP page (which needs init.php and a
+// database). The fixture supplies the same array shape with a two-section sample, so the templates
+// are checked as hero + sections + anchors + contact instead of rendering as an empty shell.
+$legalFixtureDocuments = array(
+    'backup-policy.php' => array('backupData', 'Backup Policy'),
+    'cybercrime-policy.php' => array('cybercrimeData', 'Cybercrime Policy'),
+    'refund-policy.php' => array('refundData', 'Refund Policy'),
+    'trademark-policy.php' => array('trademarkData', 'Trademark Policy'),
+);
+$legalFixtureTerms = array(
+    'domain-brokerage-terms.php' => array('brokerageTerms', 'Domain Brokerage Terms'),
+);
+$legalFixtureData = array();
+foreach (array_merge($legalFixtureDocuments, $legalFixtureTerms) as $legalPath => $legalPage) {
+    $legalFixtureData[$legalPath] = array(
+        'hero' => array('title' => $legalPage[1], 'subtitle' => 'Last Updated: fixture date'),
+        'introduction' => array('content' => 'Fixture introduction. The live page supplies the published policy text; this text exists only so the template is rendered whole.'),
+        'sections' => array(
+            array('id' => 'fixture-section-one', 'title' => '1. Fixture Section One', 'content' => 'Fixture section copy.', 'items' => array('Fixture list item one', 'Fixture list item two')),
+            array('id' => 'fixture-section-two', 'title' => '2. Fixture Section Two', 'content' => 'Fixture section copy.'),
+        ),
+        'contact' => array('title' => 'Contact Us', 'content' => 'Fixture contact copy.', 'email' => 'support@example.test', 'website' => 'www.example.test', 'portal' => 'support portal'),
+    );
+}
+// `legal.php` publishes its own document list; these are its real entries.
+$legalFixtureSections = array(
+    array('id' => 'terms-of-service', 'title' => 'Terms of Service', 'desc' => 'The terms and conditions that govern your use of our platform, services, and products.', 'link' => 'terms-of-service.php', 'icon' => 'fa-file-contract'),
+    array('id' => 'privacy-policy', 'title' => 'Privacy Policy', 'desc' => 'Learn how we collect, store, protect, and process your personal data.', 'link' => 'privacy-policy.php', 'icon' => 'fa-user-shield'),
+    array('id' => 'acceptable-use-policy', 'title' => 'Acceptable Use Policy', 'desc' => 'The rules that apply to the content and activity hosted on our platform.', 'link' => 'acceptable-use-policy.php', 'icon' => 'fa-shield'),
+);
+$pages['legal.php'] = 'legal.tpl';
 $pages['privacy-policy.php'] = 'privacypolicy.tpl';
 $pages['cookie-policy.php'] = 'cookiepolicy.tpl';
 $pages['acceptable-use-policy.php'] = 'acceptableusepolicy.tpl';
 foreach ($pages as $path => $template) {
+    unset($toolTitle);
     $_SERVER['SCRIPT_NAME'] = '/' . $path;
-    $site = \CloudHost247\Theme\Site::context(array('WEB_ROOT' => '', 'systemurl' => 'https://example.test', 'templatefile' => $path === 'index.php' ? 'homepage' : ''), array('platform_base_path'=>'/platform'));
-    $page = isset($catalog['pages'][$path]) ? \CloudHost247\Theme\Site::editorial($catalog['pages'][$path]['slug']) : null;
-    if ($page === null) { $page = array('title' => isset($catalog['pages'][$path]) ? $catalog['pages'][$path]['title'] : "We couldn't find that page.", 'summary' => '', 'body' => '', 'missing' => true); }
-    $smarty->clearAllAssign();
-    $smarty->assign(array('WEB_ROOT'=>'','template'=>'cloudhost247','pagetitle'=>$site['title'],'ch247Site'=>$site,'cloudhost247Page'=>$page,'cloudhost247'=>array('settings'=>array(),'sections'=>array()),'date_year'=>'2026','loggedin'=>false,'languagechangeenabled'=>false,'currencies'=>array()));
+
+    // Resolve the tool first: the tools front controller assigns `cloudhost247ToolsPage` before the
+    // ClientAreaPage hook runs, which is why `Site::context` can build the tool title, summary and
+    // canonical. Building `ch247Site` without it would mark every tool page noindex in the fixtures
+    // and produce SEO evidence for pages the site does not actually ship that way.
+    $tool = null;
     if ($template === 'cloudhost247-tools.tpl') {
         $tool = \CloudHost247\Theme\ToolsSite::resolve('/' . $path);
-        $smarty->assign(array('cloudhost247ToolsPage'=>$tool,'chToolsReady'=>true,'chToolsPlatform'=>'/platform','chToolsBase'=>''));
+        if ($tool === null && isset($nativeTools['/' . $path])) { $tool = $nativeTools['/' . $path]; }
+        if ($tool !== null && !isset($tool['kind'])) {
+            // The theme projection carries no `kind`; the renderer needs one to pick the layout.
+            $tool['kind'] = $path === 'tools' ? 'hub' : (strpos($path, 'tools/category/') === 0 ? 'category' : 'tool');
+        }
+        if ($tool !== null && $tool['kind'] === 'category' && !isset($tool['slug'])) {
+            $tool['slug'] = substr($path, strlen('tools/category/'));
+        }
+    }
+
+    // Only the editorial route assigns `cloudhost247Page` (`PublicPage::respond`), and only a
+    // published slug can be indexable. A synthetic "missing" page on every WHMCS-managed route would
+    // mark the homepage noindex and give seventy unrelated pages the same 'Client Area' title.
+    $page = isset($catalog['pages'][$path]) ? \CloudHost247\Theme\Site::editorial($catalog['pages'][$path]['slug']) : null;
+    if ($page === null && $path === 'cloudhost247-page.php') {
+        require_once $root . '/modules/addons/cloudhost247_theme/lib/PublicPage.php';
+        $page = \CloudHost247\Theme\PublicPage::missing("We couldn't find that page.");
+    }
+
+    if (isset($legalFixtureData[$path])) {
+        $legalDocument = $legalFixtureData[$path];
+        if (isset($legalFixtureTerms[$path])) {
+            // The brokerage document is all sections plus a contact block: no hero, no introduction.
+            $smarty->assign($legalFixtureTerms[$path][0], array('sections' => $legalDocument['sections'], 'contact' => $legalDocument['contact']));
+        } else {
+            $smarty->assign($legalFixtureDocuments[$path][0], $legalDocument);
+        }
+    } elseif ($path === 'legal.php') {
+        $smarty->assign('legalSections', $legalFixtureSections);
+    }
+    $vars = array('WEB_ROOT' => '', 'systemurl' => 'https://example.test', 'templatefile' => $path === 'index.php' ? 'homepage' : '');
+    if ($page !== null) { $vars['cloudhost247Page'] = $page; }
+    if ($tool !== null) {
+        // `tools/index.php` serves the native catalogue and treats every route that only the shared
+        // registry knows as a signpost: no implementation here, no canonical, no index. The harness
+        // has to make the same distinction or it would check thirty thin tool pages the site does
+        // not publish (and report their duplicate titles as a defect).
+        $nativeServed = isset($nativeTools['/' . $path]) && $nativeTools['/' . $path] !== null;
+        $unserved = isset($tool['kind']) && $tool['kind'] === 'tool' && !$nativeServed;
+        $vars['cloudhost247ToolsPage'] = array(
+            'path' => '/' . $path,
+            'name' => isset($tool['name']) ? $tool['name'] : 'CloudHost247 Tools',
+            'summary' => isset($tool['summary']) ? $tool['summary'] : '',
+            'slug' => isset($tool['slug']) ? $tool['slug'] : '',
+            'unserved' => $unserved,
+        );
+    }
+    $site = \CloudHost247\Theme\Site::context($vars, array('platform_base_path'=>'/platform'));
+
+    $smarty->clearAllAssign();
+    $smarty->assign(array('WEB_ROOT'=>'','template'=>'cloudhost247','pagetitle'=>$site['title'],'ch247Site'=>$site,'cloudhost247'=>array('settings'=>array(),'sections'=>array()),'date_year'=>'2026','loggedin'=>false,'languagechangeenabled'=>false,'currencies'=>array(),'ch247Builder'=>false));
+    if ($page !== null) { $smarty->assign('cloudhost247Page', $page); }
+    if ($template === 'cloudhost247-tools.tpl') {
+        $smarty->assign(array('cloudhost247ToolsPage'=>$vars['cloudhost247ToolsPage'],'chToolsReady'=>false,'chToolsPlatform'=>'/platform','chToolsBase'=>''));
+        if (!empty($vars['cloudhost247ToolsPage']['unserved'])) { $smarty->assign('chToolsPlatformUrl', '/tools/' . rawurlencode($vars['cloudhost247ToolsPage']['slug'])); }
+        // The real route server-renders the tool body (`View::fragment`) and sets the tool title; the
+        // fixture has to do the same or a tool page would be checked as header + footer only, and a
+        // heading, form or icon that only exists inside the body would never be looked at.
+        if ($tool !== null && ($tool['kind'] !== 'tool' || isset($tool['handler']))) {
+            $smarty->assign('chToolsHtml', \CloudHost247\Tools\View::fragment($tool, '', ''));
+            $toolTitle = isset($tool['name']) ? $tool['name'] : $site['title'];
+        }
     }
     if ($path === 'email-hosting.php') {
         require_once $root . '/modules/servers/cloudhost247_email_hosting/lib/Repository/ContentRepository.php';
@@ -61,7 +175,13 @@ foreach ($pages as $path => $template) {
         ));
     }
     $smarty->assign(array('ch247Products'=>array(),'ch247CatalogError'=>''));
-    $html = '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' . htmlspecialchars($site['title'], ENT_QUOTES, 'UTF-8') . ' | CloudHost247</title><link rel="stylesheet" href="/templates/cloudhost247/css/custom.css"><link rel="stylesheet" href="/templates/cloudhost247/css/site.css"><script src="/templates/cloudhost247/js/site.js" defer></script></head><body class="ch-site ch-public">';
+    $pageTitle = isset($toolTitle) ? $toolTitle : $site['title'];
+    $smarty->assign('pagetitle', $pageTitle);
+    // The head comes from the theme itself, not from a hand-written copy: stylesheet order
+    // (site.css then design-system.css), favicons, canonical, Open Graph, JSON-LD and the
+    // conditional `noindex` are all part of what a visitor and a crawler receive, so the fixtures
+    // have to render the shipped partial or the QA would be checking a page nobody gets.
+    $html = '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' . htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8') . ' | CloudHost247</title>' . $smarty->fetch('cloudhost247/includes/site-head.tpl') . '</head><body class="ch-site ch-public">';
     $html .= $smarty->fetch('cloudhost247/includes/site-nav.tpl') . '<div id="ch-main" tabindex="-1"></div>' . $smarty->fetch('cloudhost247/' . $template) . $smarty->fetch('cloudhost247/includes/site-footer.tpl');
     $html .= '</body></html>';
     if (!is_dir(dirname($out . '/' . $path . '.html'))) { mkdir(dirname($out . '/' . $path . '.html'), 0777, true); }

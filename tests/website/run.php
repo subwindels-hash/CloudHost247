@@ -3,9 +3,11 @@ require dirname(__DIR__) . '/theme/fakes.php';
 require dirname(__DIR__, 2) . '/modules/addons/cloudhost247_theme/lib/Site.php';
 require dirname(__DIR__, 2) . '/modules/addons/cloudhost247_theme/lib/PublicPage.php';
 require dirname(__DIR__, 2) . '/modules/addons/cloudhost247_theme/lib/PublicDiscovery.php';
+require dirname(__DIR__, 2) . '/modules/addons/cloudhost247_theme/lib/CrawlPolicy.php';
 use CloudHost247\Theme\Site;
 use CloudHost247\Theme\PublicPage;
 use CloudHost247\Theme\PublicDiscovery;
+use CloudHost247\Theme\CrawlPolicy;
 ch247_theme_fresh();
 $tests = array();
 $tests['known editorial route resolves without invented product rows'] = PublicPage::resolve('web-hosting')['editorial_default'] === true && !isset(PublicPage::resolve('web-hosting')['product_component']);
@@ -30,7 +32,22 @@ $repository->publishContent(1);
 $tests['reviewed draft publishes without changing its body'] = PublicPage::resolve('web-hosting')['body'] === 'NEVER PUBLIC';
 try { $repository->publishContent(9999); $missingRejected = false; } catch (\InvalidArgumentException $e) { $missingRejected = true; }
 $tests['publishing a missing record is refused'] = $missingRejected;
-$tests['registry has all seven mega menu categories'] = count(Site::catalog()['navigation']) === 7;
+// The PHP theme registry and the SPA both render `shared/site/registry.json`, so the published
+// product families are asserted by id — the same contract the navigation API test pins — rather
+// than by a count that silently drifts every time a family is added.
+$families = array_map(function ($menu) { return isset($menu['id']) ? $menu['id'] : null; }, Site::catalog()['navigation']);
+$tests['registry publishes every mega menu family'] = $families === array(
+    'hosting', 'cloud', 'domains', 'platforms', 'developers', 'websites', 'tools', 'resources', 'support',
+);
+$tests['every mega menu family has a title and description'] = count(array_filter(Site::catalog()['navigation'], function ($menu) {
+    return trim((string) $menu['title']) === '' || trim((string) $menu['description']) === '';
+})) === 0;
+$tests['only the tools menu may be groups-free'] = count(array_filter(Site::catalog()['navigation'], function ($menu) {
+    return count($menu['groups']) === 0 && $menu['id'] !== 'tools';
+})) === 0;
+$tests['footer columns are all populated'] = count(array_filter(Site::catalog()['footer'], function ($column) {
+    return count($column['links']) === 0;
+})) === 0;
 // Exercise actual repository reads, including localization and a failed database.
 ch247_theme_fresh();
 $pages = PublicDiscovery::pages($repository);
@@ -93,6 +110,223 @@ for ($i = 100; $i < 150; $i++) {
     ch247_theme_seed_content($i, 'page', 'bounded-' . $i, 'Boundedneedle ' . $i, 0, true);
 }
 $tests['search returns at most forty results'] = count(PublicDiscovery::search(PublicDiscovery::pages($repository), 'Boundedneedle')) === 40;
+// ---------------------------------------------------------------------------
+// Crawl policy: one registry policy, four surfaces (Node robots/sitemap, the generated
+// static robots.txt, robots.php and the PHP sitemaps). These assertions are the PHP half of
+// that contract; cloudhost247-node/tests/integration/seo-routes.test.ts is the app half, and
+// scripts/site/generate.mjs fails the build if the registry and the projections drift.
+// ---------------------------------------------------------------------------
+$registry = json_decode((string) file_get_contents(dirname(__DIR__, 2) . '/shared/site/registry.json'), true);
+$expectedExclusions = array();
+foreach (array_merge($registry['sitemap']['exclude'], $registry['sitemap']['excludePhp']) as $entry) {
+    $path = '/' . preg_replace('~^\.?/+~', '', (string) $entry);
+    if ($path !== '/') { $expectedExclusions[$path] = true; }
+}
+$expectedExclusions = array_keys($expectedExclusions);
+sort($expectedExclusions);
+$tests['crawl policy reads the registry exclusions'] = CrawlPolicy::exclusions() === $expectedExclusions;
+$phpFallback = CrawlPolicy::FALLBACK_PHP_EXCLUSIONS;
+sort($phpFallback);
+$registryPhp = $registry['sitemap']['excludePhp'];
+sort($registryPhp);
+$tests['compiled PHP exclusion fallback matches the registry'] = $phpFallback === $registryPhp;
+$spaFallback = CrawlPolicy::FALLBACK_SPA_EXCLUSIONS;
+sort($spaFallback);
+$registrySpa = $registry['sitemap']['exclude'];
+sort($registrySpa);
+$tests['compiled SPA exclusion fallback matches the registry'] = $spaFallback === $registrySpa;
+$tests['homepage is never excluded'] = CrawlPolicy::isPublic('') && CrawlPolicy::isPublic('/');
+$tests['marketing routes stay indexable'] = CrawlPolicy::isPublic('web-hosting.php') && CrawlPolicy::isPublic('/hosting/web-hosting');
+foreach (array('dashboard', 'login', 'cart') as $spaPath) {
+    $tests['gated app route excluded: /' . $spaPath] = !CrawlPolicy::isPublic('/' . $spaPath);
+}
+foreach (array('cart.php', 'clientarea.php', 'register.php', 'pwreset.php', 'logout.php', 'submitticket.php',
+    'supporttickets.php', 'viewticket.php', 'site-search.php', 'service-error.php', 'tables.php',
+    'tools/api.php', 'cloudhost247-sample.php') as $phpPath) {
+    $tests['private PHP route excluded: ' . $phpPath] = !CrawlPolicy::isPublic($phpPath);
+}
+foreach (array('admin/', 'modules/', 'crons/', 'errors/', 'tools/data/', 'tools/admin/') as $directory) {
+    $tests['private directory excluded: ' . $directory] = !CrawlPolicy::isPublic($directory) && !CrawlPolicy::isPublic($directory . 'index.php');
+}
+// A disallowed sitemap cannot be fetched, which silently voids the Sitemap: directive.
+foreach (CrawlPolicy::SITEMAP_ENDPOINTS as $endpoint) {
+    $tests['sitemap endpoint stays fetchable: ' . $endpoint] = CrawlPolicy::isPublic($endpoint);
+}
+// Every page the PHP theme publishes must be indexable, or the sitemap and robots.txt contradict.
+$registeredPages = array_keys(Site::catalog()['pages']);
+$privateRegistered = array_values(array_filter($registeredPages, function ($page) { return !CrawlPolicy::isPublic($page); }));
+$tests['every registered public page is indexable'] = $privateRegistered === array();
+$categorySlugs = array();
+foreach (Site::catalog()['toolCategories'] as $category) {
+    if (isset($category['slug'])) { $categorySlugs[] = $category['slug']; }
+}
+$tests['the registry publishes nine tool categories'] = count($categorySlugs) === 9;
+$privateCategories = array_values(array_filter($categorySlugs, function ($slug) { return !CrawlPolicy::isPublic('/tools/category/' . $slug); }));
+$tests['every published tool category is indexable'] = $privateCategories === array();
+$tests['sitemap filter drops excluded paths only'] = CrawlPolicy::filter(array('web-hosting.php', 'cart.php', 'clientarea.php', 'tools/category/dns-domains'))
+    === array('web-hosting.php', 'tools/category/dns-domains');
+$tests['sitemap page URL is indexable'] = CrawlPolicy::isPublic('cloudhost247-page.php?slug=launch-event');
+$root = dirname(__DIR__, 2);
+foreach (array('cloudhost247-sitemap.php', 'tools-sitemap.php', 'builder-sitemap.php') as $sitemap) {
+    $source = (string) file_get_contents($root . '/' . $sitemap);
+    $tests['sitemap is marked noindex rather than blocked: ' . $sitemap] = strpos($source, "'X-Robots-Tag: noindex'") !== false;
+}
+$tests['theme sitemap applies the crawl policy'] = strpos((string) file_get_contents($root . '/cloudhost247-sitemap.php'), 'CrawlPolicy::filter') !== false;
+$tests['robots.php applies the crawl policy'] = strpos((string) file_get_contents($root . '/robots.php'), 'CrawlPolicy::exclusions') !== false;
+// ---------------------------------------------------------------------------
+// Registry-driven page sections. `site.json` carries the application's narrative
+// for every product page; scripts/site/generate.mjs projects and validates it, and
+// these assertions pin what a stale or hand-edited registry would silently break.
+// ---------------------------------------------------------------------------
+$sectionTypes = array('features', 'cards', 'steps', 'checks', 'split', 'note');
+$template = (string) file_get_contents(dirname(__DIR__, 2) . '/templates/cloudhost247/includes/product-sections.tpl');
+foreach ($sectionTypes as $type) {
+    $tests['section template renders ' . $type] = strpos($template, "'" . $type . "'") !== false || in_array($type, array('features', 'cards'), true);
+}
+$tests['product page uses the section renderer'] = strpos((string) file_get_contents(dirname(__DIR__, 2) . '/templates/cloudhost247/cloudhost247-page.tpl'), 'product-sections.tpl') !== false;
+$tests['platform page uses the section renderer'] = strpos((string) file_get_contents(dirname(__DIR__, 2) . '/templates/cloudhost247/cloudhost247-platform.tpl'), 'product-sections.tpl') !== false;
+
+// The section renderer may only use classes the site actually ships. `site-head.tpl` loads
+// site.css and then design-system.css, and the design system wins every name the two share, so a
+// class invented here that lives in neither file styles nothing at all — and one redefined here is
+// silently overridden. Both mistakes were made once; this is the assertion that catches them.
+$sectionClasses = array();
+if (preg_match_all('/class="([^"]*)"/', $template, $matches)) {
+    foreach ($matches[1] as $attribute) {
+        foreach (preg_split('/\s+/', (string) preg_replace('/\{[^}]*\}/', ' ', $attribute)) as $class) {
+            if ($class !== '' && strpos($class, 'ch') === 0) { $sectionClasses[$class] = true; }
+        }
+    }
+}
+$shippedCss = '';
+foreach (array('site.css', 'design-system.css', 'custom.css', 'tools.css') as $sheet) {
+    $file = dirname(__DIR__, 2) . '/templates/cloudhost247/css/' . $sheet;
+    if (is_file($file)) { $shippedCss .= (string) file_get_contents($file); }
+}
+$undefinedClasses = array();
+foreach (array_keys($sectionClasses) as $class) {
+    if (preg_match('/\.' . preg_quote($class, '/') . '(?![\w-])/', $shippedCss) !== 1) { $undefinedClasses[] = $class; }
+}
+$tests['section renderer defines ' . count($sectionClasses) . ' classes and all of them ship'] = $undefinedClasses === array();
+if ($undefinedClasses) { fwrite(STDERR, 'undefined classes: ' . implode(', ', $undefinedClasses) . "\n"); }
+
+// The design system is the layer that wins, so the shared component names must come from it.
+$designSystem = (string) file_get_contents(dirname(__DIR__, 2) . '/shared/site/design-system.css');
+foreach (array('ch-card', 'ch-card__icon', 'ch-card__foot', 'ch-step', 'ch-step__index', 'ch-check-list', 'ch-note', 'ch-grid--3', 'ch-split', 'ch-section', 'ch-wrap') as $class) {
+    if (in_array($class, array_keys($sectionClasses), true)) {
+        $tests['section renderer uses the design system for ' . $class] = preg_match('/\.' . preg_quote($class, '/') . '(?![\w-])/', $designSystem) === 1;
+    }
+}
+
+$sectionsSeen = array();
+$sectionPages = 0;
+foreach (Site::catalog()['pages'] as $path => $page) {
+    if (!isset($page['sections'])) { continue; }
+    if ($page['sections']) { $sectionPages++; }
+    foreach ($page['sections'] as $section) {
+        $sectionsSeen[$section['type']] = true;
+        $tests['section has a heading: ' . $path] = trim((string) $section['heading']) !== '';
+        $tests['section type is renderable: ' . $path] = in_array($section['type'], $sectionTypes, true);
+        if (!empty($section['visual'])) {
+            $tests['section illustration exists: ' . $section['visual']] = is_file(dirname(__DIR__, 2) . '/assets/images/cloudhost247/' . $section['visual'] . '.svg');
+        }
+        if ($section['type'] === 'split') {
+            $tests['split section has an illustration: ' . $path] = !empty($section['visual']);
+            $tests['split section has body copy: ' . $path] = !empty($section['body']);
+        }
+        foreach (isset($section['items']) ? $section['items'] : array() as $item) {
+            $tests['section card has a title: ' . $path] = trim((string) $item['title']) !== '';
+            if (!empty($item['url'])) {
+                // A card links to a shipped page, a licensed WHMCS entry point or the tools surface;
+                // anything else would be a dead link. `check-links.mjs` enforces the same rule for
+                // the published navigation.
+                $whmcsEntries = array('index.php', 'cart.php', 'clientarea.php', 'register.php', 'logout.php',
+                    'pwreset.php', 'contact.php', 'knowledgebase.php', 'submitticket.php', 'serverstatus.php',
+                    'announcements.php', 'supporttickets.php', 'viewticket.php', 'domainchecker.php');
+                $destination = (string) $item['url'];
+                $tests['section card destination is a shipped page: ' . $destination] = is_file(dirname(__DIR__, 2) . '/' . $destination)
+                    || in_array($destination, $whmcsEntries, true)
+                    || $destination === 'tools' || strpos($destination, 'tools/') === 0;
+            }
+            if (!empty($item['icon'])) {
+                $tests['section card icon exists: ' . $item['icon']] = is_file(dirname(__DIR__, 2) . '/assets/images/cloudhost247/' . $item['icon']);
+            }
+        }
+    }
+}
+$tests['sections reach a substantial share of product pages'] = $sectionPages >= 30;
+$tests['sections cover every renderable type'] = count($sectionsSeen) >= 5;
+
+// ---------------------------------------------------------------------------
+// Fragment promises. The navigation publishes destinations such as
+// `deployments.php#environments`; the page has to render that anchor, otherwise
+// the link lands at the top of the page. scripts/site/generate.mjs fails the
+// build on a dangling fragment; this is the same contract from the PHP side, and
+// it also covers anchors that only the templates declare.
+// ---------------------------------------------------------------------------
+$anchors = array();
+function collect_anchors($name, $root, &$anchors, &$seen)
+{
+    if (isset($seen[$name])) { return; }
+    $seen[$name] = true;
+    $file = $root . '/templates/cloudhost247/' . $name . '.tpl';
+    if (!is_file($file)) { return; }
+    $source = (string) file_get_contents($file);
+    if (preg_match_all('/id="([A-Za-z][\w-]*)"/', $source, $matches)) {
+        foreach ($matches[1] as $anchor) { $anchors[$anchor] = true; }
+    }
+    if (preg_match_all('/\{include file="cloudhost247\/([^"]+)\.tpl"\}/', $source, $matches)) {
+        foreach ($matches[1] as $include) { collect_anchors($include, $root, $anchors, $seen); }
+    }
+}
+$anchorRoot = dirname(__DIR__, 2);
+$knownAnchors = array();
+$seenTemplates = array();
+foreach (glob($anchorRoot . '/templates/cloudhost247/*.tpl') as $templateFile) {
+    collect_anchors(basename($templateFile, '.tpl'), $anchorRoot, $knownAnchors, $seenTemplates);
+}
+foreach (Site::catalog()['pages'] as $page) {
+    foreach (isset($page['sections']) ? $page['sections'] : array() as $section) {
+        if (!empty($section['anchor'])) { $knownAnchors[$section['anchor']] = true; }
+    }
+}
+$dangling = array();
+foreach ($registry['menus'] as $menu) {
+    $hrefs = array($menu['href']);
+    foreach ($menu['columns'] as $column) {
+        foreach ($column['items'] as $item) { $hrefs[] = $item['href']; }
+    }
+    foreach ($hrefs as $href) {
+        $php = isset($href['php']) ? (string) $href['php'] : '';
+        if (strpos($php, '#') === false) { continue; }
+        list($file, $fragment) = explode('#', $php, 2);
+        if (!isset($knownAnchors[$fragment])) { $dangling[] = $php; }
+    }
+}
+$tests['navigation publishes no fragment the page does not render'] = $dangling === array();
+// The surviving fragments are section-backed: they exist because the registry content for the
+// paired app route is folded into that PHP page under the fragment as its anchor. If the fold
+// stopped working, the anchors would disappear and the navigation would be promising dead
+// fragments again — so the two lists must agree exactly.
+$sectionAnchors = array();
+foreach (Site::catalog()['pages'] as $page) {
+    foreach (isset($page['sections']) ? $page['sections'] : array() as $section) {
+        if (!empty($section['anchor'])) { $sectionAnchors[$section['anchor']] = true; }
+    }
+}
+$fragmentDestinations = array();
+foreach ($registry['menus'] as $menu) {
+    $hrefs = array($menu['href']);
+    foreach ($menu['columns'] as $column) {
+        foreach ($column['items'] as $item) { $hrefs[] = $item['href']; }
+    }
+    foreach ($hrefs as $href) {
+        $php = isset($href['php']) ? (string) $href['php'] : '';
+        if (strpos($php, '#') !== false) { $fragmentDestinations[explode('#', $php, 2)[1]] = true; }
+    }
+}
+$tests['every published fragment is backed by a registry section'] = count(array_diff_key($fragmentDestinations, $sectionAnchors)) === 0;
+
 $failed=0;
 foreach ($tests as $name=>$ok) { echo ($ok ? 'ok' : 'not ok') . ' - ' . $name . "\n"; if (!$ok) { $failed++; } }
 echo '# ' . count($tests) . ' assertions, ' . $failed . " failed\n";

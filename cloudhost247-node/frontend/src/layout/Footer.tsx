@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { FOOTER_COLUMNS, BRAND, TOOLS_CATEGORIES, UTILITY } from '../navigation/registry.generated';
+import { FOOTER_COLUMNS, BRAND, UTILITY } from '../navigation/registry.generated';
 
 /**
  * The global CloudHost247 footer.
@@ -10,9 +10,8 @@ import { FOOTER_COLUMNS, BRAND, TOOLS_CATEGORIES, UTILITY } from '../navigation/
  * is validated against the router at build time, "no dead footer links" is a build guarantee rather
  * than a promise.
  *
- * The Tools column is deliberately capped: the full catalogue is 100+ tools, and a footer that
- * lists them all is a footer nobody reads. It links the ten discovery categories instead, which is
- * where a visitor should start, plus the complete index.
+ * The Tools column comes from the same registry as the header and sitemap. It links the current
+ * discovery categories and the complete index rather than duplicating a second category list here.
  */
 export default function Footer() {
   const year = new Date().getFullYear();
@@ -56,22 +55,6 @@ export default function Footer() {
                 </ul>
               </div>
             ))}
-
-            {/* Kept out of the registry loop on purpose: these are tool *categories*, generated
-                from the same list the Tools Center and the Tools mega menu use. */}
-            <div className="ch247-footer__tools">
-              <h2>Tool categories</h2>
-              <ul>
-                {TOOLS_CATEGORIES.map((category) => (
-                  <li key={category.slug}>
-                    <Link to={`/tools/category/${category.slug}`}>{category.label}</Link>
-                  </li>
-                ))}
-                <li>
-                  <Link to="/tools">All tools</Link>
-                </li>
-              </ul>
-            </div>
           </nav>
         </div>
 

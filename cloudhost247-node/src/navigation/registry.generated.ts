@@ -92,9 +92,15 @@ export const NAV_SECTIONS: RegistrySection[] = [
           {
             "label": "Web Hosting",
             "to": "/hosting/web-hosting",
-            "description": "Shared hosting for sites that need to be fast and reliable.",
+            "description": "Web hosting plans for websites, with current products shown in the live catalogue.",
             "icon": "globe",
             "badge": "POPULAR"
+          },
+          {
+            "label": "Shared Hosting",
+            "to": "/hosting/web-hosting",
+            "description": "Shared web hosting plans shown in the live product catalogue.",
+            "icon": "globe"
           },
           {
             "label": "Business Hosting",
@@ -219,10 +225,10 @@ export const NAV_SECTIONS: RegistrySection[] = [
     "to": "/cloud",
     "toolsDriven": false,
     "featured": {
-      "title": "Deploy a server",
-      "body": "Choose an operating system, size and region, and provision a server you can reach over SSH or RDP.",
-      "to": "/servers/new",
-      "ctaLabel": "Configure a server"
+      "title": "Cloud hosting plans",
+      "body": "Review the cloud server options currently published to the live product catalogue.",
+      "to": "/cloud",
+      "ctaLabel": "View cloud plans"
     },
     "groups": [
       {
@@ -234,6 +240,12 @@ export const NAV_SECTIONS: RegistrySection[] = [
             "description": "Virtual private servers with dedicated, guaranteed resources.",
             "icon": "server",
             "badge": "POPULAR"
+          },
+          {
+            "label": "Cloud Hosting",
+            "to": "/cloud",
+            "description": "Browse published cloud hosting products and their current plan details.",
+            "icon": "cloud"
           },
           {
             "label": "Dedicated Servers",
@@ -452,7 +464,7 @@ export const NAV_SECTIONS: RegistrySection[] = [
   {
     "id": "platforms",
     "label": "Platforms",
-    "blurb": "Applications, databases, containers and the deployment platform that runs them.",
+    "blurb": "Applications, databases, containers and deployment workflows configured for CloudHost247 services.",
     "to": "/platforms",
     "toolsDriven": false,
     "featured": {
@@ -493,7 +505,7 @@ export const NAV_SECTIONS: RegistrySection[] = [
           {
             "label": "PaaS",
             "to": "/platforms/paas",
-            "description": "Push an application and let the platform run it.",
+            "description": "Application deployment and environment management; source builds depend on an enabled panel integration.",
             "icon": "rocket"
           }
         ]
@@ -504,7 +516,7 @@ export const NAV_SECTIONS: RegistrySection[] = [
           {
             "label": "Deployment",
             "to": "/developers/deployment",
-            "description": "Build, release and roll back deployments with a real log.",
+            "description": "Track supported application installs and updates, including recorded status and deployment steps.",
             "icon": "git-branch"
           },
           {
@@ -555,14 +567,14 @@ export const NAV_SECTIONS: RegistrySection[] = [
   {
     "id": "developers",
     "label": "Developer / Deployment",
-    "blurb": "Runtimes, Git-based deployment, environments and APIs — the parts you actually build on.",
+    "blurb": "Runtimes, application deployments, environments and APIs — with availability shown by the live catalogue.",
     "to": "/developers",
     "toolsDriven": false,
     "featured": {
-      "title": "Deploy from Git",
-      "body": "Connect a repository, let the platform build it and release it, with the build log kept on the deployment record.",
+      "title": "Application deployments",
+      "body": "Track supported application installs and updates, their recorded steps, and environment configuration. Git-based builds depend on a separately configured control panel.",
       "to": "/developers/deployment",
-      "ctaLabel": "See how deployment works"
+      "ctaLabel": "See deployment options"
     },
     "groups": [
       {
@@ -604,16 +616,16 @@ export const NAV_SECTIONS: RegistrySection[] = [
         "title": "Deploy & operate",
         "links": [
           {
-            "label": "Deployment Platform",
+            "label": "Application Deployments",
             "to": "/developers/deployment",
-            "description": "Git-driven builds, releases and rollbacks.",
+            "description": "Track supported application installs, updates, status and step logs.",
             "icon": "git-branch",
             "badge": "POPULAR"
           },
           {
             "label": "PaaS",
             "to": "/platforms/paas",
-            "description": "A push-to-deploy platform with managed routing.",
+            "description": "Managed application deployment workflows; Git builds require an enabled control-panel integration.",
             "icon": "rocket"
           },
           {
@@ -691,33 +703,33 @@ export const NAV_SECTIONS: RegistrySection[] = [
         "links": [
           {
             "label": "Website Builder",
-            "to": "/websites",
+            "to": "/websites/builder",
             "description": "Templates, pages, sections, media and publishing.",
             "icon": "layout",
             "badge": "INCLUDED"
           },
           {
             "label": "AI Website Builder",
-            "to": "/websites",
+            "to": "/websites/ai-builder",
             "description": "Describe a site and get real pages you can edit.",
             "icon": "sparkle",
             "badge": "NEW"
           },
           {
             "label": "Website Templates",
-            "to": "/websites",
+            "to": "/websites/templates",
             "description": "Start from a layout that is already publishable.",
             "icon": "grid"
           },
           {
             "label": "E-commerce & Stores",
-            "to": "/websites",
+            "to": "/websites/store",
             "description": "Sell physical, digital and service products online.",
             "icon": "cart"
           },
           {
             "label": "Website Design",
-            "to": "/websites",
+            "to": "/websites/design-services",
             "description": "Scoped design and build by the CloudHost247 team.",
             "icon": "pen"
           }
@@ -729,13 +741,13 @@ export const NAV_SECTIONS: RegistrySection[] = [
           {
             "label": "Website Migration",
             "to": "/hosting/migration",
-            "description": "Bring an existing site across without downtime.",
+            "description": "Plan a site transfer and its cutover with the CloudHost247 team.",
             "icon": "transfer"
           },
           {
             "label": "Website Management",
             "to": "/cloud/server-management",
-            "description": "Updates, backups and monitoring handled for you.",
+            "description": "Explore available website operations, maintenance and support options.",
             "icon": "wrench"
           },
           {
@@ -752,7 +764,7 @@ export const NAV_SECTIONS: RegistrySection[] = [
           {
             "label": "SSL Certificates",
             "to": "/hosting/ssl",
-            "description": "Every site encrypted, with automatic renewal.",
+            "description": "Review the TLS options available for the hosting service you select.",
             "icon": "lock"
           },
           {
@@ -983,6 +995,10 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
         "to": "/hosting/web-hosting"
       },
       {
+        "label": "Shared Hosting",
+        "to": "/hosting/web-hosting"
+      },
+      {
         "label": "Business Hosting",
         "to": "/hosting/business"
       },
@@ -1191,40 +1207,44 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
         "to": "/tools"
       },
       {
-        "label": "DNS Tools",
-        "to": "/tools/category/dns"
+        "label": "DNS & Domains Tools",
+        "to": "/tools/category/dns-domains"
       },
       {
-        "label": "IP Tools",
-        "to": "/tools/category/ip"
+        "label": "IP & Network Tools",
+        "to": "/tools/category/ip-network"
+      },
+      {
+        "label": "Security Tools",
+        "to": "/tools/category/security"
+      },
+      {
+        "label": "SSL Tools",
+        "to": "/tools/category/ssl"
+      },
+      {
+        "label": "Email Tools",
+        "to": "/tools/category/email"
+      },
+      {
+        "label": "Website Tools",
+        "to": "/tools/category/website"
       },
       {
         "label": "Developer Tools",
         "to": "/tools/category/developer"
       },
       {
-        "label": "Designer Tools",
-        "to": "/tools/category/designer"
+        "label": "Calculators Tools",
+        "to": "/tools/category/calculators"
       },
       {
-        "label": "Webmaster Tools",
-        "to": "/tools/category/webmaster"
+        "label": "Utilities Tools",
+        "to": "/tools/category/utilities"
       },
       {
-        "label": "Network Tools",
-        "to": "/tools/category/network"
-      },
-      {
-        "label": "Security Tools",
-        "to": "/tools/category/cybersecurity"
-      },
-      {
-        "label": "Productivity Tools",
-        "to": "/tools/category/productivity"
-      },
-      {
-        "label": "Gaming Tools",
-        "to": "/tools/category/gaming"
+        "label": "MRZ Generator / MRZ Tools",
+        "to": "/tools/mrz-generator"
       }
     ]
   },
@@ -1234,23 +1254,23 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
     "links": [
       {
         "label": "Website Builder",
-        "to": "/websites"
+        "to": "/websites/builder"
       },
       {
         "label": "AI Website Builder",
-        "to": "/websites"
+        "to": "/websites/ai-builder"
       },
       {
         "label": "Website Templates",
-        "to": "/websites"
+        "to": "/websites/templates"
       },
       {
         "label": "E-commerce & Stores",
-        "to": "/websites"
+        "to": "/websites/store"
       },
       {
         "label": "Website Design",
-        "to": "/websites"
+        "to": "/websites/design-services"
       }
     ]
   },
@@ -1281,6 +1301,10 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
       {
         "label": "Offers",
         "to": "/offers"
+      },
+      {
+        "label": "Sitemap",
+        "to": "/sitemap"
       }
     ]
   },
@@ -1404,16 +1428,40 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
 
 export const TOOLS_CATEGORIES = [
   {
-    "slug": "dns",
-    "label": "DNS",
+    "slug": "dns-domains",
+    "label": "DNS & Domains",
     "icon": "dns",
     "desc": "Lookups, propagation and zone diagnostics."
   },
   {
-    "slug": "ip",
-    "label": "IP",
-    "icon": "ip",
-    "desc": "Address, subnet and geolocation utilities."
+    "slug": "ip-network",
+    "label": "IP & Network",
+    "icon": "network",
+    "desc": "Addresses, subnets, reachability and routing checks."
+  },
+  {
+    "slug": "security",
+    "label": "Security",
+    "icon": "shield",
+    "desc": "Hashing, verification and safe inspection."
+  },
+  {
+    "slug": "ssl",
+    "label": "SSL",
+    "icon": "lock",
+    "desc": "Certificate, chain and TLS inspection."
+  },
+  {
+    "slug": "email",
+    "label": "Email",
+    "icon": "mail",
+    "desc": "MX, SPF, DKIM and DMARC checks."
+  },
+  {
+    "slug": "website",
+    "label": "Website",
+    "icon": "globe",
+    "desc": "Headers, redirects, links and page checks."
   },
   {
     "slug": "developer",
@@ -1422,46 +1470,16 @@ export const TOOLS_CATEGORIES = [
     "desc": "Encoding, conversion and inspection tools."
   },
   {
-    "slug": "designer",
-    "label": "Designer",
-    "icon": "pen",
-    "desc": "Colour, image and layout helpers."
+    "slug": "calculators",
+    "label": "Calculators",
+    "icon": "chart",
+    "desc": "Subnet, time and conversion calculators."
   },
   {
-    "slug": "webmaster",
-    "label": "Webmaster",
-    "icon": "globe",
-    "desc": "SEO, headers and site checks."
-  },
-  {
-    "slug": "network",
-    "label": "Network",
-    "icon": "network",
-    "desc": "Reachability, ports and routing checks."
-  },
-  {
-    "slug": "cybersecurity",
-    "label": "Cyber Security",
-    "icon": "shield",
-    "desc": "Hashing, verification and safe inspection."
-  },
-  {
-    "slug": "productivity",
-    "label": "Productivity",
-    "icon": "zap",
+    "slug": "utilities",
+    "label": "Utilities",
+    "icon": "wrench",
     "desc": "Everyday generators and converters."
-  },
-  {
-    "slug": "gaming",
-    "label": "Gaming",
-    "icon": "gamepad",
-    "desc": "Server names and community utilities."
-  },
-  {
-    "slug": "document",
-    "label": "Document",
-    "icon": "file-text",
-    "desc": "Document and travel-document utilities."
   }
 ];
 
@@ -1602,7 +1620,47 @@ export const SITEMAP_POLICY = {
     "/cart",
     "/checkout",
     "/inbox",
-    "/search"
+    "/search",
+    "/api/",
+    "/support",
+    "/services",
+    "/marketing",
+    "/servers/new",
+    "/websites/builder",
+    "/websites/ai-builder",
+    "/websites/store",
+    "/websites/experts",
+    "/websites/templates",
+    "/websites/design-services",
+    "/tools/history",
+    "/tools/favorites",
+    "/tools/reports",
+    "/tools/monitors"
+  ],
+  "excludePhp": [
+    "admin/",
+    "modules/",
+    "crons/",
+    "errors/",
+    "cart.php",
+    "clientarea.php",
+    "register.php",
+    "pwreset.php",
+    "logout.php",
+    "submitticket.php",
+    "supporttickets.php",
+    "viewticket.php",
+    "site-search.php",
+    "service-error.php",
+    "cloudhost247-marketing-track.php",
+    "cloudhost247-sample.php",
+    "cloudhost247-vps-sample.php",
+    "all-element-cloudhost247.php",
+    "future-element.php",
+    "tables.php",
+    "tools/data/",
+    "tools/admin/",
+    "tools/api.php"
   ],
   "priorities": {
     "/": 1,
@@ -1865,6 +1923,79 @@ export const MARKETING_ROUTES: string[] = [
   "/websites"
 ];
 
+/** Public documentation routes built from the same published-doc list as the Docs index. */
+export const PUBLIC_DOC_ROUTES: string[] = [
+  "/docs/api-billing",
+  "/docs/api-catalog",
+  "/docs/api-commerce",
+  "/docs/api-customer-app",
+  "/docs/api-payments",
+  "/docs/cpanel-deployment",
+  "/docs/domain-brokerage",
+  "/docs/domain-services-architecture",
+  "/docs/mrz-developer-tool",
+  "/docs/passkey",
+  "/docs/platform-services-architecture",
+  "/docs/server-agent",
+  "/docs/server-provisioning"
+];
+
+/** Public tool routes taken from the live tool catalogue; account-only tools are excluded. */
+export const PUBLIC_TOOL_ROUTES: string[] = [
+  "/tools/developer/email-header",
+  "/tools/developer/encoding",
+  "/tools/developer/http-headers",
+  "/tools/developer/json",
+  "/tools/developer/server-os",
+  "/tools/developer/url",
+  "/tools/developer/user-agent",
+  "/tools/dns/bimi",
+  "/tools/dns/dkim",
+  "/tools/dns/dmarc",
+  "/tools/dns/dmarc-generator",
+  "/tools/dns/dnskey",
+  "/tools/dns/ds",
+  "/tools/dns/health",
+  "/tools/dns/lookup",
+  "/tools/dns/mx",
+  "/tools/dns/propagation",
+  "/tools/dns/reverse",
+  "/tools/dns/spf",
+  "/tools/domain/punycode",
+  "/tools/domain/search",
+  "/tools/ip/converters",
+  "/tools/ip/domain-to-ip",
+  "/tools/ip/ip-to-hostname",
+  "/tools/ip/isp",
+  "/tools/ip/lookup",
+  "/tools/ip/my-ip",
+  "/tools/ip/whois",
+  "/tools/mrz-generator",
+  "/tools/network/asn",
+  "/tools/network/mac-generator",
+  "/tools/network/mac-lookup",
+  "/tools/network/speed-test",
+  "/tools/network/subnet-calculator",
+  "/tools/productivity/colors",
+  "/tools/productivity/invisible-character",
+  "/tools/productivity/lorem-ipsum",
+  "/tools/productivity/notepad",
+  "/tools/productivity/qr",
+  "/tools/productivity/qr-scanner",
+  "/tools/productivity/reverse-image",
+  "/tools/productivity/runic",
+  "/tools/productivity/small-text",
+  "/tools/productivity/time-card",
+  "/tools/productivity/wifi-qr",
+  "/tools/productivity/word-counter",
+  "/tools/security/ip-blacklist",
+  "/tools/security/password",
+  "/tools/security/ssl",
+  "/tools/webmaster/open-graph",
+  "/tools/webmaster/robots-generator",
+  "/tools/webmaster/serp-simulator"
+];
+
 /** Every route the registry publishes, in menu order — the sitemap and audits read this. */
 export const REGISTRY_ROUTES: string[] = [
   "/",
@@ -1896,6 +2027,7 @@ export const REGISTRY_ROUTES: string[] = [
   "/hosting/backups",
   "/hosting/security",
   "/hosting/vps",
+  "/cloud",
   "/hosting/dedicated",
   "/cloud/public",
   "/cloud/private",
@@ -1937,6 +2069,11 @@ export const REGISTRY_ROUTES: string[] = [
   "/developers/laravel",
   "/developers/docker",
   "/tools/category/developer",
+  "/websites/builder",
+  "/websites/ai-builder",
+  "/websites/templates",
+  "/websites/store",
+  "/websites/design-services",
   "/contact",
   "/help",
   "/blog",

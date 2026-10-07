@@ -117,15 +117,6 @@
       "summary": "This document covers deploying, updating, and operating the new independent Node.js/TypeScript platform (cloudhost247-node/) on cPanel shared hosting only, using cPanel's Application Manager (Passenge",
       "source": "docs/CPANEL_DEPLOYMENT.md",
       "bytes": 37540
-    },
-    {
-      "slug": "node-platform-status",
-      "href": "/docs/node-platform-status",
-      "section": "Operations",
-      "title": "Platform status and known gaps",
-      "summary": "Single source of truth for \"what has actually been verified\" vs. \"what has only been built and locally/CI tested.\" Update this file at the end of every phase. Do not describe any phase as \"cPanel-read",
-      "source": "docs/NODE_PLATFORM_STATUS.md",
-      "bytes": 169682
     }
   ]
 }

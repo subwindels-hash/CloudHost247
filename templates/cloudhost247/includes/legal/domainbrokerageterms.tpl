@@ -7,8 +7,15 @@
 <h2 id="contact">{$brokerageTerms.contact.title|escape}</h2>
 <p>{$brokerageTerms.contact.content|escape}</p>
 <ul>
-<li><strong>Email:</strong> <a href="mailto:{$brokerageTerms.contact.email|escape:'html'}">{$brokerageTerms.contact.email|escape}</a></li>
-<li><strong>Website:</strong> <a href="{$WEB_ROOT}/index.php" target="_blank" rel="noopener">{$brokerageTerms.contact.website|escape}</a></li>
-<li><strong>Support:</strong> Open a ticket through our client <a href="{$WEB_ROOT}/submitticket.php">support portal</a>.</li>
-</ul>
-{/if}
+  <li>
+    <strong>Email:</strong>
+    <a href="mailto:{$brokerageTerms.contact.email|escape:'html'}">{$brokerageTerms.contact.email|escape}</a>
+  </li>
+  <li>
+    <strong>Website:</strong>
+    <a href="{$WEB_ROOT}/index.php" target="_blank" rel="noopener">{$brokerageTerms.contact.website|escape}</a>
+  </li>
+  <li>
+    <strong>Support:</strong> Open a ticket through our client <a href="{$WEB_ROOT}/submitticket.php">support portal</a>.</li>
+  </ul>
+  {/if}

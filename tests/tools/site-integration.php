@@ -29,6 +29,76 @@ foreach (ToolsSite::catalog()['tools'] as $tool) {
     }
 }
 foreach (ToolsSite::catalog()['categories'] as $slug=>$label) { check(ToolsSite::resolve('/tools/category/'.$slug)['name']===$label.' Tools', 'category'); }
+
+// --- One URL per capability. The native catalogue serves the interactive page; the shared registry
+// describes the same tools for the app, the navigation and the sitemaps. When the two disagree on a
+// path the capability is published twice: two indexable pages with one title, and the second one
+// has no implementation behind it. Names are compared, not slugs, because the registries slug the
+// same tool differently on purpose. The old registry paths stay declared as aliases, so the route
+// still resolves and can redirect instead of turning into a 404.
+$nativePathByName = array();
+$normalise = function ($name) {
+    // Compare by words, not by punctuation: `IP → Hostname` in the registry and `IP to Hostname`
+    // in the native catalogue are one capability, and a character-level strip turns them into two
+    // keys (`iphostname` / `iptohostname`) — which is how this pair stayed unnoticed.
+    $words = preg_split('/[^a-z0-9]+/', strtolower((string) $name), -1, PREG_SPLIT_NO_EMPTY);
+    $words = array_diff($words, array('to', 'my', 'the', 'a', 'an', 'of'));
+    return implode('', $words);
+};
+foreach (Catalog::tools() as $native) {
+    $nativePathByName[$normalise($native['name'])] = '/tools/' . $native['slug'];
+}
+$registryPaths = array();
+$registryKnownNative = 0;
+foreach (ToolsSite::catalog()['tools'] as $tool) {
+    $registryPaths[] = $tool['path'];
+    $key = $normalise($tool['name']);
+    if (isset($nativePathByName[$key])) {
+        $registryKnownNative++;
+        check($tool['path'] === $nativePathByName[$key], 'one published path for ' . $tool['name'] . ': ' . $tool['path']);
+    }
+}
+check($registryKnownNative >= 30, 'the registry is compared against the served catalogue, not vacuously (' . $registryKnownNative . ' capabilities matched)');
+check(count($registryPaths) === count(array_unique($registryPaths)), 'the shared registry publishes each tool path once');
+
+// --- The registry never re-labels a path the PHP catalogue already serves. When it does, one
+// capability is published twice: the app and the sitemaps link the projection's path, which this
+// surface can only answer with a noindex signpost, while the interactive page sits at the native
+// path. Comparing names cannot see it (the two registries name and slug tools differently), so the
+// check runs on the URLs the front controller resolves.
+$relabelled = array();
+$registryResolved = 0;
+foreach (Catalog::enabledTools() as $native) {
+    $path = '/' . ltrim((string) $native['path'], '/');
+    $registry = ToolsSite::resolve($path);
+    if ($registry === null) { continue; }
+    $registryResolved++;
+    if ((string) $registry['path'] !== $path) {
+        $relabelled[] = $path . ' -> ' . $registry['path'];
+    }
+}
+check($registryResolved >= 30, 'the served paths are actually matched against the registry (' . $registryResolved . ' resolved)');
+check($relabelled === array(), 'no served tool path is re-labelled by the registry (' . implode(', ', $relabelled) . ')');
+
+// --- One tool taxonomy: the categories the navigation publishes are the categories the PHP
+// engine serves. A published category that only the theme fallback can resolve means a visitor
+// who clicks "DNS & Domains" and a visitor who opens /tools are looking at different catalogues,
+// and a published category with no tools behind it is a dead-end page for people and crawlers.
+check(array_keys(Catalog::discovery()) === array('dns-domains','ip-network','security','ssl','email','website','developer','calculators','utilities'), 'discovery taxonomy is the published nine categories');
+foreach (Site::catalog()['toolCategories'] as $category) {
+    $slug = (string) $category['slug'];
+    $resolved = Catalog::resolve('/tools/category/' . $slug);
+    check($resolved !== null && $resolved['kind'] === 'category', 'published category resolves in the PHP tool catalogue: ' . $slug);
+    check(isset(Catalog::discovery()[$slug]) && Catalog::discovery()[$slug] === $category['label'], 'published category label matches the discovery taxonomy: ' . $slug);
+    $published = Catalog::toolsInDiscovery($slug);
+    check(is_array($published) && count($published) > 0, 'published category lists at least one tool: ' . $slug);
+}
+// Tool cards and the hub hero point at real files: a missing icon is a broken image on 105 pages.
+$assetRoot = dirname(__DIR__, 2) . '/assets/images/cloudhost247/tools/';
+check(is_file($assetRoot . 'hero.svg'), 'tools hub hero illustration exists');
+foreach (Catalog::enabledTools() as $tool) {
+    check(is_file($assetRoot . $tool['category'] . '.svg'), 'tool card icon exists for category ' . $tool['category']);
+}
 foreach (array('/tools/no-such-tool', '/tools/../../config.php', '/tools/%2e%2e/config.php') as $path) { check(ToolsSite::resolve($path)===null,'unknown/unsafe route'); }
 
 // --- The MRZ tool is a first-class, reachable route in both registries --------------------------
@@ -49,7 +119,17 @@ foreach ($catalog['navigation'] as $menu) {
     $toolsGroup = $menu;
 }
 check($toolsGroup !== null, 'permanent Tools mega menu');
+// The Tools panel is the one menu whose entries are partly live data, so the server-rendered
+// floor is the registry's tool categories (`toolCategories`, rendered by site-nav.tpl) *plus* any
+// statically declared groups. Both are published destinations and both are validated here; the
+// live tools `site.js` appends from /api/tools/navigation are covered by the Node suite.
 $menuLinks = array();
+foreach ($catalog['toolCategories'] as $category) {
+    $menuLinks[] = array(
+        'label' => $category['label'] . ' Tools',
+        'url' => ltrim((string) $category['url'], '/'),
+    );
+}
 foreach ($toolsGroup['groups'] as $group) {
     foreach ($group['links'] as $link) { $menuLinks[] = $link; }
 }
@@ -78,12 +158,16 @@ foreach ($published as $surface => $links) {
         check(!preg_match('~P<[A-Z]{3}[A-Z<]{5,}~', $url), $surface . ' link carries no machine-readable zone: ' . $label);
         if ($url === 'tools' || $url === 'tools/') { continue; }
         if (strpos($url, 'tools/category/') === 0) {
-            // The published footer categories come from the PHP catalogue; the React shell groups by
-            // the node discovery categories. A category link is valid when either registry owns it.
+            // A published category must resolve on the surface a visitor lands on: the theme runtime
+            // (`tools.json`, which the React Tools Center also discovers), or the PHP tools engine.
             $slug = substr($url, strlen('tools/category/'));
             $discovery = ToolsSite::catalog()['categories'];
             $engine = Catalog::categories();
             check(isset($discovery[$slug]) || isset($engine[$slug]), $surface . ' category link resolves: ' . $label);
+            // The theme runtime must own it too, because that is what renders the page a visitor
+            // reaches from the header and the footer. A link only the legacy engine knows would be
+            // a dead end.
+            check(isset($discovery[$slug]), $surface . ' category is served by the theme runtime: ' . $label);
             continue;
         }
         if (strpos($url, 'tools/') === 0) {
@@ -103,11 +187,23 @@ foreach ($footerLinks as $link) {
 }
 check($mrzFooter !== null, 'MRZ tool is published in the footer Tools column');
 check($mrzFooter['label'] === 'MRZ Generator / MRZ Tools', 'MRZ footer link uses the agreed public label');
-$mrzMenu = null;
-foreach ($menuLinks as $link) {
-    if (($link['url'] ?? '') === $mrzUrl) { $mrzMenu = $link; }
+// The Tools panel is catalogue-driven: it publishes category floors server-side and appends the
+// live catalogue (which includes MRZ, keyed by its category) when JavaScript runs. So the check
+// that matters statically is that the menu publishes the category that owns MRZ — a visitor who
+// opens Tools can reach it — while the direct link is pinned on the footer, which is static.
+$mrzTool = null;
+foreach (ToolsSite::catalog()['tools'] as $tool) {
+    if ($tool['slug'] === 'mrz-generator') { $mrzTool = $tool; }
 }
-check($mrzMenu !== null, 'MRZ tool is published in the Tools mega menu');
+check($mrzTool !== null, 'MRZ tool is in the published Tools catalogue');
+check($mrzTool['visibility'] === 'public' && $mrzTool['authRequired'] === false, 'MRZ tool is public and needs no account');
+$mrzMenuReach = false;
+foreach ($menuLinks as $link) {
+    $url = (string) ($link['url'] ?? '');
+    if ($url === $mrzUrl) { $mrzMenuReach = true; }
+    if ($url === 'tools/category/' . $mrzTool['category']) { $mrzMenuReach = true; }
+}
+check($mrzMenuReach, 'MRZ tool is reachable from the Tools mega menu (its category is published)');
 // The published URL must be the clean route: no document number, date of birth or query string.
 check(preg_match('~^tools/mrz-generator$~', $mrzFooter['url']) === 1, 'MRZ footer URL is the clean canonical route');
 
@@ -135,6 +231,26 @@ check(count($locations[1]) > 0, 'sitemap publishes locations');
 foreach ($locations[1] as $location) {
     check(strpos($location, '?') === false && strpos($location, '#') === false, 'sitemap entry is a clean URL: ' . $location);
 }
+// The sitemap must publish the URLs the front controller serves - every one of them and nothing
+// else. Publishing a route only the registry knows hands crawlers a noindex signpost, which is how
+// the tool duplication in this pass stayed invisible; missing a served route hides a real page.
+$published = array_map(function ($location) { return (string) preg_replace('~^https?://[^/]+~', '', $location); }, $locations[1]);
+$published = array_map(function ($path) { return $path === '' ? '/' : $path; }, $published);
+$servedPaths = array();
+foreach (Catalog::enabledTools() as $tool) {
+    $servedPaths[] = rtrim((string) $tool['path'], '/');
+    check(in_array(rtrim((string) $tool['path'], '/'), $published, true), 'sitemap publishes the served tool path: ' . $tool['path']);
+}
+check(count($servedPaths) >= 100, 'the served catalogue is actually compared with the sitemap (' . count($servedPaths) . ' paths)');
+foreach ($published as $path) {
+    $resolved = Catalog::resolve($path);
+    check($resolved !== null && !empty($resolved['kind']), 'sitemap entry is a route this shell serves: ' . $path);
+}
+foreach (array('/tools/color-tools', '/tools/favorites', '/tools/ping', '/tools/history') as $signpost) {
+    check(!in_array($signpost, $published, true), 'sitemap does not advertise a route this shell cannot serve: ' . $signpost);
+}
+check(in_array('/tools/category/dns-domains', $published, true), 'sitemap publishes the discovery categories');
+check(count($published) === count(array_unique($published)), 'sitemap publishes each URL once');
 
 $context=Site::context(array('WEB_ROOT'=>'/billing', 'systemurl'=>'https://example.test/billing', 'cloudhost247ToolsPage'=>ToolsSite::resolve('/tools/dns-lookup')));
 check($context['public']===true,'native public shell');

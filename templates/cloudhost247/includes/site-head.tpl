@@ -23,6 +23,6 @@
 {if $ch247Site.canonical}<meta property="og:url" content="{$ch247Site.canonical|escape}">{/if}
 {if $ch247Site.schema_json}<script type="application/ld+json">{$ch247Site.schema_json nofilter}</script>{/if}
 <meta name="twitter:card" content="summary_large_image">
-{if !$ch247Site.public || $cloudhost247Page.missing || $ch247Site.path == 'site-search.php' || $ch247Site.path == 'service-error.php'}<meta name="robots" content="noindex,follow">{/if}
+{if !$ch247Site.public || $cloudhost247Page.missing || $ch247Site.path == 'notfound.php' || $ch247Site.path == 'site-search.php' || $ch247Site.path == 'service-error.php'}<meta name="robots" content="noindex,follow">{/if}
 {/if}
 <script src="{$WEB_ROOT}/templates/cloudhost247/js/site.js?v=20261006" defer></script>

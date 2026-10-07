@@ -22,7 +22,7 @@
  *   node scripts/site/generate.mjs           # validate + write
  *   node scripts/site/generate.mjs --check   # validate only, write nothing (CI)
  */
-import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, copyFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, copyFileSync, rmSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -55,6 +55,12 @@ const ASSET_PUBLIC = join(ROOT, 'cloudhost247-node', 'frontend', 'public', 'medi
 const DESIGN_SYSTEM = join(ROOT, 'shared', 'site', 'design-system.css');
 const DESIGN_SYSTEM_COPY = join(ROOT, 'templates', 'cloudhost247', 'css', 'design-system.css');
 const REPORT_OUT = join(ROOT, 'shared', 'site', 'generated', 'route-report.json');
+/**
+ * The PHP/WHMCS document root's crawl guidance. Generated from the same registry policy as the
+ * Node platform's `/robots.txt` so the two surfaces cannot give a crawler contradictory advice —
+ * and so a path added to the policy appears in both without anybody remembering to edit a file.
+ */
+const ROBOTS_TXT = join(ROOT, 'robots.txt');
 
 /**
  * Documents published to the website reader. Only documents that describe the platform as a
@@ -75,7 +81,10 @@ export const PUBLISHED_DOCS = [
   { file: 'PASSKEY.md', section: 'Accounts', title: 'Passkeys and WebAuthn' },
   { file: 'MRZ_DEVELOPER_TOOL.md', section: 'Accounts', title: 'Document tools (MRZ)' },
   { file: 'CPANEL_DEPLOYMENT.md', section: 'Operations', title: 'cPanel deployment' },
-  { file: 'NODE_PLATFORM_STATUS.md', section: 'Operations', title: 'Platform status and known gaps' },
+  // docs/NODE_PLATFORM_STATUS.md is deliberately NOT published: it is the internal phase-acceptance
+  // ledger and references branch names, pull requests, commit hashes and unexecuted migrations.
+  // It stays in the repository for engineers; a public reader has no use for it and a customer
+  // cannot act on it.
   { file: 'webhooks/README.md', section: 'Operations', title: 'Webhook pipeline', optional: true }
 ];
 
@@ -93,6 +102,16 @@ const KNOWN_ICONS = new Set([
 ]);
 
 /** WHMCS entry points that live in the licensed core, not in this repository. */
+/**
+ * Paths a licensed WHMCS installation always has, but this repository does not track: the admin
+ * directory is renamed during installation, so it cannot be probed on disk. They stay excludable by
+ * name, and the release gate re-checks that they are still excluded.
+ */
+const WHMCS_MANAGED_PATHS = new Set(['admin/']);
+
+/** The PHP theme's projection of the app catalogue; the tools taxonomy is checked against both. */
+const PHP_TOOLS_JSON = join(ROOT, 'modules', 'addons', 'cloudhost247_theme', 'resources', 'tools.json');
+
 const WHMCS_ENTRY_POINTS = new Set([
   'index.php', 'cart.php', 'clientarea.php', 'register.php', 'logout.php', 'pwreset.php',
   'contact.php', 'knowledgebase.php', 'submitticket.php', 'serverstatus.php',
@@ -250,7 +269,7 @@ function tsString(value) {
   return `'${String(value).replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
 }
 
-function emitRegistryTs(registry, spaRoutePatterns, marketingRoutes) {
+function emitRegistryTs(registry, spaRoutePatterns, marketingRoutes, publicDocRoutes, publicToolRoutes) {
   const banner = `/**
  * GENERATED FILE — do not edit.
  *
@@ -364,6 +383,12 @@ export const SPA_ROUTE_PATTERNS: string[] = ${json(spaRoutePatterns)};
  */
 export const MARKETING_ROUTES: string[] = ${json(marketingRoutes)};
 
+/** Public documentation routes built from the same published-doc list as the Docs index. */
+export const PUBLIC_DOC_ROUTES: string[] = ${json(publicDocRoutes)};
+
+/** Public tool routes taken from the live tool catalogue; account-only tools are excluded. */
+export const PUBLIC_TOOL_ROUTES: string[] = ${json(publicToolRoutes)};
+
 /** Every route the registry publishes, in menu order — the sitemap and audits read this. */
 export const REGISTRY_ROUTES: string[] = ${json([
     '/',
@@ -406,16 +431,216 @@ function phpRouteMap(registry) {
  * Only the PHP pages that exist are touched, and only additive keys plus the SEO description. The
  * page's own `visual`, `slug` and `category` stay as the theme registry defined them.
  */
+/**
+ * Section types the PHP surface renders statically. The others in the content model need live data
+ * the PHP page does not have (a product catalogue, the documentation index, DNS status, news), so
+ * they are deliberately not projected: publishing a heading with nothing under it would be worse
+ * than omitting the section.
+ */
+const PHP_SECTION_TYPES = new Set(['features', 'cards', 'steps', 'checks', 'split', 'note']);
+
+/** Icon assets a projected card may reference, keyed by the content model's icon name. */
+function contentIconAssets() {
+  if (contentIconAssets.cache) return contentIconAssets.cache;
+  const families = readdirSync(ASSET_SOURCE).filter((entry) => existsSync(join(ASSET_SOURCE, entry, `${entry}.svg`)) === false);
+  const index = new Map();
+  for (const family of families) {
+    const dir = join(ASSET_SOURCE, family);
+    if (!statSync(dir).isDirectory()) continue;
+    for (const file of readdirSync(dir)) {
+      if (!file.endsWith('.svg')) continue;
+      const name = file.slice(0, -4);
+      // `icons/cloud.svg` wins over `cloud/cloud.svg`: the icon family is the one drawn for cards.
+      if (!index.has(name) || family === 'icons') index.set(name, `${family}/${name}.svg`);
+    }
+  }
+  contentIconAssets.cache = index;
+  return index;
+}
+
+/**
+ * Every registry destination that pairs an app route with a PHP file, including the fragment the
+ * PHP URL promises (`deployments.php#environments`). Menu order is preserved because it is also
+ * the order the navigation presents the destinations in.
+ */
+function phpRoutePairs(registry) {
+  const pairs = [];
+  const seen = new Set();
+  const visit = (href) => {
+    if (!href?.spa || !href?.php) return;
+    const [file, fragment = ''] = href.php.replace(/^\.?\//, '').split('#');
+    if (!file || file.includes('?')) return;
+    const key = `${href.spa}->${file}#${fragment}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    pairs.push({ spa: href.spa, file, fragment });
+  };
+  for (const menu of registry.menus) {
+    visit(menu.href);
+    visit(menu.featured?.href);
+    for (const column of menu.columns ?? []) for (const item of column.items ?? []) visit(item.href);
+  }
+  for (const column of registry.footer) for (const item of column.items) visit(item.href);
+  for (const value of Object.values(registry.utility ?? {})) visit(value);
+  return pairs;
+}
+
+/** `id="…"` values a template declares, following its one level of theme includes. */
+function templateAnchors(name, seen = new Set()) {
+  const anchors = new Set();
+  if (seen.has(name)) return anchors;
+  seen.add(name);
+  const file = join(ROOT, 'templates', 'cloudhost247', `${name}.tpl`);
+  if (!existsSync(file)) return anchors;
+  const source = readFileSync(file, 'utf8');
+  for (const match of source.matchAll(/id="([A-Za-z][\w-]*)"/g)) anchors.add(match[1]);
+  for (const match of source.matchAll(/\{include file="cloudhost247\/([^"]+)\.tpl"\}/g)) {
+    for (const anchor of templateAnchors(match[1], seen)) anchors.add(anchor);
+  }
+  return anchors;
+}
+
+/** The Smarty template a root PHP page renders, read from its own `setTemplate()` call. */
+function pageTemplate(file) {
+  const path = join(ROOT, file);
+  if (!existsSync(path)) return '';
+  const match = readFileSync(path, 'utf8').match(/setTemplate\(\s*'([^']+)'\s*\)/);
+  return match ? match[1] : '';
+}
+
+/**
+ * A fragment is a promise: `deployments.php#environments` says the page has an environments
+ * section. Nothing verified those promises, and nine of them were empty — the visitor landed at
+ * the top of the page. This check resolves the page's template (and the anchors its folded
+ * registry sections declare) and fails on a fragment with no target.
+ */
+function validateFragments(pairs, pages) {
+  const checked = new Map();
+  for (const pair of pairs) {
+    if (!pair.fragment) continue;
+    const key = `${pair.file}#${pair.fragment}`;
+    if (checked.has(key)) continue;
+    let targets = new Set();
+    const template = pageTemplate(pair.file);
+    if (template) targets = templateAnchors(template);
+    for (const section of pages[pair.file]?.sections ?? []) {
+      if (section.anchor) targets.add(section.anchor);
+    }
+    if (!targets.has(pair.fragment)) {
+      fail(`${key} is published by the navigation (via ${pair.spa}) but ${pair.file} has no "${pair.fragment}" anchor.`);
+    }
+    checked.set(key, true);
+  }
+}
+
+/**
+ * The ordered narrative of a content page, filtered to what a server-rendered page can show and
+ * validated so a projection can never publish half a section.
+ *
+ * Types that need live data the PHP page does not have (a product catalogue, DNS status, the
+ * documentation index, news) are deliberately absent: a heading with nothing under it is worse than
+ * no section at all. Card links are resolved to the PHP surface or dropped, and card icons are
+ * resolved to real asset files or dropped, so the rendered grid can contain neither a dead link nor
+ * a broken image.
+ */
+function projectSections(content, file, routeMap) {
+  const where = file;
+  const phpTarget = (route) => {
+    if (!route || typeof route !== 'string') return '';
+    const mapped = routeMap.get(route);
+    if (mapped) return mapped;
+    const candidate = `${route.split('/').filter(Boolean).slice(-1)[0] ?? ''}.php`;
+    return existsSync(join(ROOT, candidate)) ? candidate : '';
+  };
+  const sections = [];
+  for (const section of content.sections ?? []) {
+    if (!PHP_SECTION_TYPES.has(section.type)) continue;
+    const heading = clean(section.heading);
+    if (!heading) {
+      fail(`${where}: a ${section.type} section has no heading.`);
+      continue;
+    }
+    const projected = { type: section.type, heading };
+    if (section.kicker) projected.kicker = clean(section.kicker);
+    if (section.lede) projected.lede = clean(section.lede);
+
+    if (section.type === 'split') {
+      const paragraphs = (Array.isArray(section.body) ? section.body : [section.body]).map(clean).filter(Boolean);
+      if (paragraphs.length === 0) {
+        fail(`${where}: the split section "${heading}" has no body.`);
+        continue;
+      }
+      projected.body = paragraphs;
+      projected.points = (section.points ?? []).map(clean).filter(Boolean).slice(0, 5);
+      if (section.visual) {
+        if (!existsSync(join(ASSET_SOURCE, `${section.visual}.svg`))) {
+          fail(`${where}: split section illustration assets/images/cloudhost247/${section.visual}.svg does not exist.`);
+          continue;
+        }
+        projected.visual = section.visual;
+      }
+      const url = phpTarget(section.link?.to);
+      if (url && section.link?.label) projected.link = { label: clean(section.link.label), url };
+      else if (section.link?.to) warn(`${where}: the split link "${section.link.to}" has no PHP destination and was dropped.`);
+    } else if (section.type === 'note') {
+      const note = clean(section.body);
+      if (!note) {
+        fail(`${where}: the note section "${heading}" has no body.`);
+        continue;
+      }
+      projected.body = [note];
+    } else {
+      const items = [];
+      for (const item of section.items ?? []) {
+        const title = clean(item.label ?? item.title);
+        if (!title) continue;
+        const entry = { title };
+        const body = clean(item.body);
+        if (body) entry.body = body;
+        const url = phpTarget(item.to);
+        if (url) entry.url = url;
+        const icon = item.icon ? contentIconAssets().get(item.icon) : '';
+        if (icon) entry.icon = icon;
+        items.push(entry);
+        if (section.type !== 'checks' && items.length >= 9) break;
+      }
+      if (items.length === 0) {
+        warn(`${where}: the ${section.type} section "${heading}" projected no cards.`);
+        continue;
+      }
+      projected.items = items;
+    }
+    sections.push(projected);
+  }
+  return sections;
+}
+
 function decoratePhpPages(previous, contentPages, registry) {
   const byRoute = new Map(contentPages.map((page) => [page.route, page]));
+  const icons = contentIconAssets();
   const routeMap = phpRouteMap(registry);
   const matched = new Set();
 
+  /**
+   * Several app routes can share one PHP page — `/domains/club` and `/domains/auctions` both land on
+   * `domain.php`, `/developers/deployment` and `/developers/environments` both land on
+   * `deployments.php`. The page therefore renders the union of their sections, in registry order,
+   * and the destination's fragment becomes the anchor that group is reachable at.
+   */
+  const pairsByFile = new Map();
+  for (const pair of phpRoutePairs(registry)) {
+    if (!pairsByFile.has(pair.file)) pairsByFile.set(pair.file, []);
+    pairsByFile.get(pair.file).push(pair);
+  }
+
   const pages = {};
   for (const [file, existing] of Object.entries(previous.pages ?? {})) {
-    // Find the content page for this PHP file: through the registry's paired links first, then by
+    // Find the content pages for this PHP file: through the registry's paired links first, then by
     // slug, because some PHP pages are named after the product rather than the route.
-    let content = [...routeMap.entries()].filter(([, php]) => php === file).map(([spa]) => byRoute.get(spa)).find(Boolean);
+    let group = (pairsByFile.get(file) ?? [])
+      .map((pair) => ({ pair, content: byRoute.get(pair.spa) }))
+      .filter((entry) => entry.content);
+    let content = group[0]?.content;
     if (!content) {
       content = contentPages.find((page) => {
         const last = page.route.split('/').filter(Boolean).slice(-1)[0] ?? '';
@@ -423,6 +648,7 @@ function decoratePhpPages(previous, contentPages, registry) {
           || existing.slug === `${last}-hosting`
           || page.route === `/${existing.slug}`;
       });
+      group = content ? [{ pair: { spa: content.route, file, fragment: '' }, content }] : [];
     }
     if (!content) {
       pages[file] = existing;
@@ -447,8 +673,36 @@ function decoratePhpPages(previous, contentPages, registry) {
     const related = (content.related ?? [])
       .map((route) => routeMap.get(route) ?? `${route.split('/').filter(Boolean).slice(-1)[0]}.php`)
       .filter((php) => php && Object.prototype.hasOwnProperty.call(previous.pages, php));
-    for (const phrase of content.hero.points ?? []) {
-      if (uses.length < 6 && !uses.includes(phrase)) uses.push(phrase);
+
+    // Internal destinations are resolved to the PHP surface or dropped: a card link that only
+    // works inside the single-page app would be a dead link on the page that renders it.
+    const phpTarget = (route) => {
+      if (!route || typeof route !== 'string') return '';
+      const mapped = routeMap.get(route);
+      if (mapped) return mapped;
+      const file = `${route.split('/').filter(Boolean).slice(-1)[0] ?? ''}.php`;
+      return Object.prototype.hasOwnProperty.call(previous.pages, file) ? file : '';
+    };
+
+    const sections = [];
+    const seenHeads = new Set();
+    for (const { pair, content: source } of group) {
+      let anchor = pair.fragment;
+      for (const section of projectSections(source, file, routeMap)) {
+        const key = `${section.type}|${section.heading}`;
+        if (seenHeads.has(key)) continue;
+        seenHeads.add(key);
+        if (anchor) {
+          // Exactly one element carries the id the navigation promises; it is the first section of
+          // the group that the fragment belongs to.
+          section.anchor = anchor;
+          anchor = '';
+        }
+        sections.push(section);
+      }
+      if (anchor && pair.fragment) {
+        warn(`${file}: the "${pair.fragment}" anchor has no content to attach to (${pair.spa}).`);
+      }
     }
 
     pages[file] = {
@@ -459,6 +713,10 @@ function decoratePhpPages(previous, contentPages, registry) {
       uses: uses.length ? uses.slice(0, 6) : existing.uses,
       faqs: (content.faqs ?? []).map((faq) => ({ q: faq.q, a: faq.a })),
       related: related.length ? [...new Set(related)] : existing.related,
+      // The ordered narrative the application renders, filtered to what a server-rendered page can
+      // show without live data. Legacy `features`/`uses` stay for compatibility and as the fallback
+      // when a page has no sections.
+      sections,
     };
   }
   return { pages, matched: matched.size };
@@ -466,6 +724,9 @@ function decoratePhpPages(previous, contentPages, registry) {
 
 function emitPhpSiteJson(registry, previous, contentPages) {
   const navigation = registry.menus.map((menu) => ({
+    // `id` is carried through so the PHP surface can assert the same published families the SPA
+    // asserts, instead of guessing from a translated title.
+    id: menu.id,
     title: menu.label,
     description: menu.blurb,
     groups: (menu.columns ?? []).map((column) => ({
@@ -490,11 +751,14 @@ function emitPhpSiteJson(registry, previous, contentPages) {
   // runs. `site.js` still enriches it from the live catalogue when it can; this is the floor, not
   // the ceiling — a menu that is empty with JavaScript disabled is a broken menu.
   const toolCategories = registry.toolsCategories.map((category) => ({
+    slug: category.slug,
     label: category.label,
     desc: category.desc,
     url: `tools/category/${category.slug}`,
   }));
-  return { payload: { ...previous, navigation, footer, pages, toolCategories }, matched };
+  // The crawl policy is projected so the PHP sitemaps, robots.php and the tools shell all read
+  // the same rules the Node platform reads, instead of each keeping its own list.
+  return { payload: { ...previous, navigation, footer, pages, toolCategories, sitemap: registry.sitemap }, matched };
 }
 
 /* ------------------------------------------------------------------ */
@@ -599,8 +863,182 @@ function validatePages(pages, spaRouteSet, tools, registryRoutes, legalSlugs) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Documentation index                                                  */
+/* Crawl policy                                                         */
 /* ------------------------------------------------------------------ */
+
+/** Normalises a registry policy entry or destination to a comparable path. */
+function policyPath(value) {
+  const path = String(value ?? '').trim().split(/[?#]/, 1)[0];
+  if (!path) return '';
+  return path.startsWith('/') ? path : `/${path}`;
+}
+
+/**
+ * The PHP-surface counterpart of the SPA exclusion policy. Both lists live in the registry
+ * because they describe the same product decision — what a crawler should not index — even
+ * though the two surfaces name different files for it.
+ */
+function phpExclusions(registry, pages) {
+  const excluded = (registry.sitemap?.excludePhp ?? []).map((entry) => String(entry).replace(/^\.?\/+/, ''));
+  if (excluded.length === 0) fail('sitemap.excludePhp is empty — the PHP surface would advertise every internal path.');
+
+  for (const entry of excluded) {
+    const probe = entry.replace(/\/$/, '');
+    const isDirectory = entry.endsWith('/') && existsSync(join(ROOT, probe));
+    const isFile = existsSync(join(ROOT, probe));
+    const isWhmcs = WHMCS_ENTRY_POINTS.has(probe);
+    const isManaged = WHMCS_MANAGED_PATHS.has(entry) || WHMCS_MANAGED_PATHS.has(probe);
+    if (!isDirectory && !isFile && !isWhmcs && !isManaged) {
+      fail(`sitemap.excludePhp lists "${entry}", which is neither a file, a directory, nor a licensed WHMCS path.`);
+    }
+  }
+  return excluded;
+}
+
+/** A registry destination is private when the policy covers it, on either surface. */
+function isPrivatePath(path, registry) {
+  const candidate = policyPath(path);
+  if (candidate === '') return false; // the homepage is never private
+  if (!candidate) return true;
+  const rules = [...(registry.sitemap?.exclude ?? []), ...(registry.sitemap?.excludePhp ?? []).map((entry) => `/${String(entry).replace(/^\.?\/+/, '')}`)];
+  return rules.map(policyPath).some((rule) => {
+    if (!rule) return false;
+    const bare = rule.endsWith('/') ? rule.slice(0, -1) : rule;
+    return candidate === bare || candidate === `${bare}/` || candidate.startsWith(`${bare}/`) || rule.endsWith('/') && candidate.startsWith(rule);
+  });
+}
+
+/**
+ * Every PHP URL the deployment publishes to a crawler: the homepage, every registered public page,
+ * and every registry destination that lands on the PHP surface. Computed here so the generator can
+ * prove that the policy and the sitemap agree instead of trusting that they do.
+ */
+function publicPhpPaths(registry, pages) {
+  const paths = new Set(['', ...Object.keys(pages ?? {})]);
+  const visit = (href) => {
+    if (!href?.php) return;
+    const path = href.php.replace(/^\.?\/+/, '');
+    if (path) paths.add(path);
+  };
+  for (const menu of registry.menus) {
+    visit(menu.href);
+    visit(menu.featured?.href);
+    for (const column of menu.columns ?? []) for (const item of column.items ?? []) visit(item.href);
+  }
+  for (const column of registry.footer) for (const item of column.items ?? []) visit(item.href);
+  for (const [key, value] of Object.entries(registry.utility ?? {})) visit(value);
+  return [...paths].filter((path) => !isPrivatePath(path, registry));
+}
+
+/**
+ * `robots.txt` for a PHP/WHMCS deployment. It is a fallback: when the Node platform owns the
+ * domain root it answers `/robots.txt` itself from `SITEMAP_POLICY.exclude`, and `robots.php`
+ * generates an equivalent file with absolute sitemap URLs. All four sources read this one policy.
+ */
+function renderRobotsTxt(registry) {
+  const disallow = [
+    ...(registry.sitemap?.exclude ?? []),
+    ...(registry.sitemap?.excludePhp ?? []).map((entry) => `/${String(entry).replace(/^\.?\/+/, '')}`),
+  ];
+  const lines = [
+    '# CloudHost247 — generated crawl guidance. Do not edit by hand.',
+    '# Source: shared/site/registry.json (sitemap.exclude / sitemap.excludePhp).',
+    '# Regenerate: node scripts/site/generate.mjs',
+    '#',
+    '# This static file is the FALLBACK. When the CloudHost247 Node platform owns the domain root',
+    '# it answers /robots.txt itself; otherwise route robots.txt to robots.php with one rewrite rule',
+    '# (infrastructure/litespeed/webroot-hardening.htaccess) to get absolute Sitemap URLs. The',
+    '# specification ignores a relative Sitemap directive, so this file states none rather than',
+    '# publishing a line that does nothing.',
+    '#',
+    '# Crawl guidance only — never an authorization mechanism. Private areas are protected by',
+    '# authentication, not by this file.',
+    '',
+    'User-agent: *',
+    ...[...new Set(disallow)].sort().map((path) => `Disallow: ${path}`),
+    '',
+    '# Sitemap generators on this deployment (submit their absolute URLs in your search console,',
+    '# or serve robots.php so they are advertised automatically):',
+    '#   /sitemap.xml              — the Node platform, from this same navigation registry',
+    '#   /cloudhost247-sitemap.php — published pages and articles',
+    '#   /tools-sitemap.php        — published tools',
+    '#   /builder-sitemap.php      — customer sites published through the website builder',
+    '',
+  ];
+  return lines.join('\n');
+}
+
+/**
+ * Sitemap endpoints must stay fetchable. A `Disallow` covering a sitemap silently voids the
+ * `Sitemap:` directive, so the policy is checked against this list on every build; the endpoints
+ * carry `X-Robots-Tag: noindex` instead of being blocked.
+ */
+/** Trims a content string to a single-line, non-empty value (or ''). */
+function clean(value) {
+  return typeof value === 'string' ? value.replace(/\s+/g, ' ').trim() : '';
+}
+
+const SITEMAP_ENDPOINTS = ['sitemap.xml', 'cloudhost247-sitemap.php', 'tools-sitemap.php', 'builder-sitemap.php'];
+
+/** The canonical discovery taxonomy, parsed from the app catalogue that publishes the tool pages. */
+function discoveryTaxonomy() {
+  const source = readFileSync(TOOLS_CATALOG, 'utf8');
+  const match = source.match(/export const DISCOVERY_CATEGORIES[^=]*=\s*\{([\s\S]*?)\};/);
+  if (!match) {
+    fail('cloudhost247-node/src/tools/catalog.ts no longer exports DISCOVERY_CATEGORIES; the tools taxonomy cannot be verified.');
+    return {};
+  }
+  const taxonomy = {};
+  for (const entry of match[1].matchAll(/(?:'([^']+)'|([A-Za-z][\w-]*))\s*:\s*'([^']*)'/g)) {
+    taxonomy[entry[1] ?? entry[2]] = entry[3];
+  }
+  return taxonomy;
+}
+
+/**
+ * One taxonomy for tool discovery. The registry is what the mega menu, the footer, the PHP theme
+ * and the sitemaps read; the app catalogue is what the tool pages group by; `tools.json` is the
+ * projection the PHP theme renders. If any of the three drifts, a category link published by the
+ * navigation stops matching the page it opens, so this fails the build instead.
+ */
+function validateToolsTaxonomy(registry) {
+  const app = discoveryTaxonomy();
+  const published = registry.toolsCategories ?? [];
+  const themeCatalogue = JSON.parse(readFileSync(PHP_TOOLS_JSON, 'utf8'));
+  const themeCategories = Object.keys(themeCatalogue.categories ?? {});
+
+  const registrySlugs = published.map((category) => category.slug);
+  const appSlugs = Object.keys(app);
+  const missingFromApp = registrySlugs.filter((slug) => !appSlugs.includes(slug));
+  const missingFromRegistry = appSlugs.filter((slug) => !registrySlugs.includes(slug));
+  if (missingFromApp.length || missingFromRegistry.length) {
+    fail(
+      `tools category taxonomy drifted: registry ${missingFromApp.length ? `publishes ${missingFromApp.join(', ')} which the app catalogue does not define` : 'is complete'}; ` +
+        `app catalogue defines ${missingFromRegistry.length ? `${missingFromRegistry.join(', ')} which the registry does not publish` : 'nothing extra'}.`
+    );
+  }
+  for (const category of published) {
+    if (app[category.slug] && app[category.slug] !== category.label) {
+      fail(`tools category "${category.slug}" is labelled "${category.label}" in the registry and "${app[category.slug]}" in the app catalogue.`);
+    }
+  }
+  for (const slug of themeCategories) {
+    if (!registrySlugs.includes(slug)) fail(`tools.json publishes the category "${slug}", which the registry does not.`);
+  }
+  for (const slug of registrySlugs) {
+    if (!themeCategories.includes(slug)) fail(`the registry publishes the category "${slug}", which tools.json cannot render.`);
+  }
+
+  // A published category with no tools behind it is a dead-end page for a visitor and a crawler.
+  const counts = {};
+  for (const tool of themeCatalogue.tools ?? []) {
+    for (const slug of tool.discoveryCategories ?? []) counts[slug] = (counts[slug] ?? 0) + 1;
+  }
+  for (const slug of registrySlugs) {
+    if (!counts[slug]) fail(`the registry publishes the tools category "${slug}", but no published tool belongs to it.`);
+  }
+  return counts;
+}
 
 function firstHeading(markdown) {
   const match = markdown.match(/^#\s+(.+)$/m);
@@ -654,10 +1092,25 @@ function main() {
   const tools = toolPaths();
   const pages = phpPages();
   const phpToolRoutes = new Set(['tools']);
-  const toolsPublic = join(ROOT, 'modules', 'addons', 'cloudhost247_theme', 'resources', 'tools-public.json');
-  if (existsSync(toolsPublic)) {
-    const data = JSON.parse(readFileSync(toolsPublic, 'utf8'));
-    for (const tool of data.tools ?? []) phpToolRoutes.add(String(tool.path).replace(/^\//, ''));
+  /**
+   * The routes the PHP Tools surface actually resolves. `tools.json` is the projection the theme
+   * runtime reads (`ToolsSite::catalog()`), and it is the file whose categories the React Tools
+   * Center also discovers, so it is the primary source; `tools-public.json` is the older
+   * PHP-engine export and is still accepted so a retained link cannot fail the gate spuriously.
+   * Validating against only one of them is how a menu ends up linking a category the runtime
+   * cannot resolve.
+   */
+  const phpToolCatalogs = [
+    join(ROOT, 'modules', 'addons', 'cloudhost247_theme', 'resources', 'tools.json'),
+    join(ROOT, 'modules', 'addons', 'cloudhost247_theme', 'resources', 'tools-public.json'),
+  ];
+  for (const file of phpToolCatalogs) {
+    if (!existsSync(file)) continue;
+    const data = JSON.parse(readFileSync(file, 'utf8'));
+    for (const tool of data.tools ?? []) {
+      const path = String(tool.path ?? '').replace(/^\//, '');
+      if (path) phpToolRoutes.add(path);
+    }
     for (const slug of Object.keys(data.categories ?? {})) phpToolRoutes.add(`tools/category/${slug}`);
   }
 
@@ -725,6 +1178,37 @@ function main() {
   const contentPages = validatePages(rawPages, routes, tools, registryRoutes, legalSlugs);
   const docs = buildDocsIndex();
 
+  /**
+   * Crawl-policy validation. The PHP exclusion list is authored in the registry, so the two ways
+   * it can be wrong are both checked here: an entry that matches nothing (a typo that silently
+   * stops excluding something) and an entry that covers a page the deployment publishes as public
+   * marketing content — the contradiction that produced a robots.txt forbidding a URL the sitemap
+   * listed.
+   */
+  const previousSiteJson = JSON.parse(readFileSync(PHP_SITE_JSON, 'utf8'));
+  const excludePhp = phpExclusions(registry, previousSiteJson.pages);
+  // A destination may only promise a fragment the page it lands on actually renders. The anchors a
+  // folded registry section declares count as targets, so this runs against the freshly projected
+  // pages rather than the previous build's.
+  validateFragments(phpRoutePairs(registry), previousSiteJson.pages ?? {});
+  for (const page of Object.keys(previousSiteJson.pages ?? {})) {
+    if (isPrivatePath(page, registry)) {
+      fail(`sitemap policy excludes "${page}", but it is a registered public marketing page.`);
+    }
+  }
+  const publishedPhpPaths = publicPhpPaths(registry, previousSiteJson.pages);
+  for (const category of registry.toolsCategories ?? []) {
+    const path = `tools/category/${category.slug}`;
+    if (isPrivatePath(path, registry)) fail(`sitemap policy excludes the published tools category "${path}".`);
+  }
+  // Sitemaps must stay crawlable: the policy is not allowed to block its own discovery surface.
+  for (const endpoint of SITEMAP_ENDPOINTS) {
+    if (isPrivatePath(endpoint, registry)) {
+      fail(`sitemap policy excludes "${endpoint}"; a blocked sitemap cannot be fetched and the Sitemap: directive would be ignored.`);
+    }
+  }
+  const toolsPerCategory = validateToolsTaxonomy(registry);
+
   const report = {
     registryVersion: registry.version,
     generatedAtSource: 'shared/site/registry.json',
@@ -746,6 +1230,9 @@ function main() {
     documentationBytes: docs.copied.reduce((total, doc) => total + doc.markdown.length, 0),
     assetsCopied: 0, // filled in by the write phase, once the illustration copy has run
     phpPagesEnriched: 0,
+    phpSitemapPaths: publishedPhpPaths.length,
+    phpCrawlExclusions: excludePhp.length,
+    toolsCategoryToolCounts: toolsPerCategory,
     errors,
     warnings,
   };
@@ -764,7 +1251,9 @@ function main() {
   const emitted = emitRegistryTs(
     registry,
     [...routes].filter((route) => !route.startsWith('PREFIX:') && !route.startsWith('PATTERN:')).sort(),
-    contentPages.map((page) => page.route).sort()
+    contentPages.map((page) => page.route).sort(),
+    docs.index.map((document) => document.href).sort(),
+    publicTools().filter((tool) => tool.visibility === 'public').map((tool) => tool.path).sort()
   );
   for (const target of TS_OUT) {
     mkdirSync(dirname(target), { recursive: true });
@@ -784,8 +1273,17 @@ function main() {
   }
 
   mkdirSync(DOCS_PUBLIC, { recursive: true });
+  const publishedSlugs = new Set(docs.copied.map((doc) => `${doc.slug}.md`));
   for (const doc of docs.copied) {
     writeFileSync(join(DOCS_PUBLIC, `${doc.slug}.md`), doc.markdown);
+  }
+  // De-publishing a document must remove it from the build, not just from the index: a leftover
+  // file is still served at /docs/<slug>.md and is still crawled.
+  for (const stale of readdirSync(DOCS_PUBLIC)) {
+    if (stale.endsWith('.md') && !publishedSlugs.has(stale)) {
+      rmSync(join(DOCS_PUBLIC, stale));
+      warn(`removed de-published documentation file frontend/public/docs/${stale}`);
+    }
   }
 
   // One design system, two delivery surfaces. The WHMCS theme gets a copy so its document root
@@ -817,13 +1315,16 @@ function main() {
   copyAssets(ASSET_SOURCE, ASSET_PUBLIC);
   report.assetsCopied = assetCount;
 
-  const previousSiteJson = JSON.parse(readFileSync(PHP_SITE_JSON, 'utf8'));
   const { payload: nextSiteJson, matched: phpPagesEnriched } = emitPhpSiteJson(registry, previousSiteJson, contentPages);
   report.phpPagesEnriched = phpPagesEnriched;
   writeFileSync(PHP_SITE_JSON, `${json(nextSiteJson)}\n`);
 
   mkdirSync(dirname(REPORT_OUT), { recursive: true });
   writeFileSync(REPORT_OUT, `${json(report)}\n`);
+
+  // One policy, four crawl surfaces: the Node platform's dynamic /robots.txt, this static
+  // fallback, robots.php and the sitemaps all derive from `registry.sitemap`.
+  writeFileSync(ROBOTS_TXT, renderRobotsTxt(registry));
 
   process.stdout.write(
     `✓ registry v${registry.version} → ${registry.menus.length} mega menus, ${registry.footer.length} footer columns, `
@@ -835,6 +1336,7 @@ function main() {
     + `${docs.index.length} published documents (${Math.round(report.documentationBytes / 1024)} KB)\n`
   );
   process.stdout.write(`✓ PHP theme → navigation, footer and ${phpPagesEnriched} product pages enriched from the shared content\n`);
+  process.stdout.write(`✓ crawl policy → ${excludePhp.length} PHP exclusions, ${publishedPhpPaths.length} public PHP paths, robots.txt and site.json policy refreshed\n`);
   for (const warning of warnings) process.stderr.write(`  ! ${warning}\n`);
 }
 

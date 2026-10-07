@@ -8,6 +8,30 @@ original_manifest='docs/independent-rebuild/original-file-manifest.sha256'
 # Some language overrides are intentionally CRLF; ignore only the carriage return in a CRLF line ending.
 git -c core.whitespace=cr-at-eol diff --check
 
+# --- Generated public-site surfaces --------------------------------------------------------------
+# The registry feed, the PHP theme registry, robots.txt, the published documentation and the route
+# report are all produced by scripts/site/generate.mjs from shared/site/registry.json. Nothing in
+# this gate regenerated them, so a hand-edit of a generated file, or a content change that was never
+# projected, could ship while every other check stayed green. Regenerating and diffing the tracked
+# outputs against the working tree turns "generated" into an enforced property.
+node scripts/site/generate.mjs > /tmp/ch247-generate.log 2>&1 || {
+  cat /tmp/ch247-generate.log >&2
+  echo 'Release-candidate FAILED: the site generator rejected the registry above.' >&2
+  exit 1
+}
+cat /tmp/ch247-generate.log
+if ! git diff --exit-code --quiet -- \
+    shared/site/generated/route-report.json \
+    modules/addons/cloudhost247_theme/resources/site.json \
+    cloudhost247-node/src/navigation/registry.generated.ts \
+    cloudhost247-node/frontend/src/navigation/registry.generated.ts \
+    cloudhost247-node/frontend/src/content \
+    cloudhost247-node/frontend/public/docs \
+    robots.txt; then
+  echo 'Release-candidate FAILED: generated site surfaces are stale (run node scripts/site/generate.mjs and commit).' >&2
+  exit 1
+fi
+
 # --- PHP syntax check -------------------------------------------------------------------------
 # Every PHP file this repository owns is linted, plus the addon templates that are really PHP
 # (modules/*/templates/**/*.tpl carrying a <?php tag are executed by WHMCS). The target list is

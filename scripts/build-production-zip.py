@@ -29,6 +29,7 @@ import os
 import re
 import shutil
 import subprocess
+import json
 import sys
 import tempfile
 import zipfile
@@ -178,12 +179,39 @@ def verify(archive_path: Path, log) -> int:
         else:
             failures.append('the built website has no media asset directory')
 
-        # The public documentation the reader fetches must be present.
+        # The public documentation the reader fetches must be present, and must be *exactly* the
+        # published set. A stale build directory is how an internal document stays downloadable
+        # after it is unpublished, so the packaged files are compared against the generated index
+        # (which is itself part of the archive) instead of only being counted.
         docs = destination / 'cloudhost247-node' / 'public' / 'docs'
         md_count = len(list(docs.glob('*.md'))) if docs.is_dir() else 0
         if md_count < 5:
             failures.append(f'only {md_count} documentation files were packaged')
         log(f'published documentation files: {md_count}')
+
+        index_path = destination / 'cloudhost247-node' / 'frontend' / 'src' / 'content' / 'docs.generated.json'
+        if index_path.is_file():
+            try:
+                index = json.loads(index_path.read_text())
+                documents = index.get('documents') if isinstance(index, dict) else index
+                published = {f"{entry['slug']}.md" for entry in documents if isinstance(entry, dict)}
+            except (OSError, ValueError, KeyError, TypeError):
+                published = set()
+                failures.append('the generated documentation index could not be read from the archive')
+            if published:
+                for directory in (
+                    destination / 'cloudhost247-node' / 'public' / 'docs',
+                    destination / 'assets' / 'cloudhost247-tools' / 'docs',
+                ):
+                    if not directory.is_dir():
+                        continue
+                    packaged = {path.name for path in directory.glob('*.md')}
+                    stale = sorted(packaged - published)
+                    missing = sorted(published - packaged)
+                    if stale:
+                        failures.append(f'de-published documentation left in {directory.relative_to(destination)}: ' + ', '.join(stale))
+                    if missing:
+                        failures.append(f'published documentation missing from {directory.relative_to(destination)}: ' + ', '.join(missing))
 
         # No secret material anywhere in the archive.
         for name in names:
