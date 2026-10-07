@@ -148,7 +148,7 @@
         "/cloud/monitoring",
         "/cloud/firewall"
       ],
-      "visual3d": "cloud/vps-3d"
+      "visual3d": "cloud/cloud-hosting-3d"
     },
     {
       "route": "/cloud/public",
@@ -246,7 +246,7 @@
         "/cloud/monitoring",
         "/servers/new"
       ],
-      "visual3d": "cloud/vps-3d"
+      "visual3d": "cloud/public-cloud-3d"
     },
     {
       "route": "/cloud/private",
@@ -344,7 +344,7 @@
         "/cloud/infrastructure",
         "/contact"
       ],
-      "visual3d": "cloud/vps-3d"
+      "visual3d": "cloud/private-cloud-3d"
     },
     {
       "route": "/cloud/enterprise-servers",
@@ -442,7 +442,7 @@
         "/cloud/monitoring",
         "/contact"
       ],
-      "visual3d": "servers/dedicated-servers-3d"
+      "visual3d": "servers/enterprise-servers-3d"
     },
     {
       "route": "/cloud/game-servers",
@@ -1146,7 +1146,7 @@
         "/cloud",
         "/tools/category/network"
       ],
-      "visual3d": "servers/dedicated-servers-3d"
+      "visual3d": "management/monitoring-3d"
     },
     {
       "route": "/cloud/backups",
@@ -1444,7 +1444,7 @@
         "/legal/data-protection-standards",
         "/cloud/server-management"
       ],
-      "visual3d": "hero/infrastructure-3d"
+      "visual3d": "security/security-3d"
     },
     {
       "route": "/cloud/ip-management",
@@ -2885,7 +2885,7 @@
         "/cloud/server-management",
         "/legal/refund-policy"
       ],
-      "visual3d": "hosting/web-hosting-3d"
+      "visual3d": "hosting/business-hosting-3d"
     },
     {
       "route": "/hosting/wordpress",
@@ -3337,7 +3337,7 @@
         "/legal/acceptable-use",
         "/contact"
       ],
-      "visual3d": "hosting/web-hosting-3d"
+      "visual3d": "hosting/email-hosting-3d"
     },
     {
       "route": "/hosting/developer",
@@ -4691,7 +4691,7 @@
             "label": "Compare cloud and dedicated",
             "to": "/cloud"
           },
-          "visual3d": "cloud/vps-3d"
+          "visual3d": "cloud/public-cloud-3d"
         }
       ],
       "faqs": [
@@ -4932,7 +4932,7 @@
         "/hosting/ssl",
         "/hosting/backups"
       ],
-      "visual3d": "hosting/web-hosting-3d"
+      "visual3d": "hosting/cpanel-hosting-3d"
     },
     {
       "route": "/websites",
@@ -5367,7 +5367,7 @@
         "/cloud/infrastructure",
         "/legal/backup-policy"
       ],
-      "visual3d": "servers/dedicated-servers-3d"
+      "visual3d": "management/monitoring-3d"
     },
     {
       "route": "/offers",
@@ -5432,7 +5432,7 @@
         "/contact",
         "/legal/refund-policy"
       ],
-      "visual3d": "cloud/vps-3d"
+      "visual3d": "cloud/cloud-hosting-3d"
     },
     {
       "route": "/pricing",
