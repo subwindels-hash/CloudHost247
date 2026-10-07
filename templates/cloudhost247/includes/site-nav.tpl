@@ -18,7 +18,7 @@
       </div>
       <div class="ch-account">
       {if $loggedin}<a href="{$WEB_ROOT}/clientarea.php">Dashboard</a><a href="{$WEB_ROOT}/clientarea.php?action=details">Account</a><a href="{$WEB_ROOT}/logout.php">Log Out</a>
-      {else}<a href="{$WEB_ROOT}/help-center.php">Support</a><a href="{$WEB_ROOT}/clientarea.php">Login</a><a class="ch-mobile-only" href="{$WEB_ROOT}/register.php">Create Account</a><a href="{$WEB_ROOT}/clientarea.php">Client Area</a><a class="ch-btn ch-btn-small" href="{$WEB_ROOT}/cloudhost247-hosting.php">Get Started <span aria-hidden="true">↗</span></a>{/if}
+      {else}<a href="{$WEB_ROOT}/clientarea.php">Sign In</a><a class="ch-btn ch-btn-small" href="{$WEB_ROOT}/register.php">Create Account</a>{/if}
       </div>
     </nav>
   </div>

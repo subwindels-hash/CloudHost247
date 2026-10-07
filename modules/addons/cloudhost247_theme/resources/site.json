@@ -135,12 +135,14 @@
             "Verification on the new infrastructure first"
           ],
           "visual": "management/migration",
+          "visual3d": "servers/dedicated-servers-3d",
           "link": {
             "label": "See how migration works",
             "url": "migration.php"
           }
         }
-      ]
+      ],
+      "visual3d": "hosting/web-hosting-3d"
     },
     "wordpress-hosting.php": {
       "title": "WordPress Hosting",
@@ -268,7 +270,8 @@
             "A plugin you install runs with the same privileges as the rest of the site. We keep the platform patched, filter abuse and back the site up; the plugin supply chain, its licence and its updates remain the site owner's responsibility. That is true on any host, and we would rather say it plainly."
           ]
         }
-      ]
+      ],
+      "visual3d": "hosting/wordpress-hosting-3d"
     },
     "cpanel-hosting.php": {
       "title": "cPanel Hosting",
@@ -372,7 +375,8 @@
             "Panels are provisioned where this deployment is configured to provision them. The control panels page lists what is genuinely available, and the panel attached to a service is shown in your account. We would rather show a short list than advertise an interface a particular server does not have."
           ]
         }
-      ]
+      ],
+      "visual3d": "hosting/web-hosting-3d"
     },
     "plesk-hosting.php": {
       "title": "Plesk Hosting",
@@ -404,7 +408,8 @@
         "domain.php",
         "help-center.php"
       ],
-      "slug": "plesk-hosting"
+      "slug": "plesk-hosting",
+      "visual3d": "hosting/web-hosting-3d"
     },
     "windows-hosting.php": {
       "title": "Windows Hosting",
@@ -507,7 +512,8 @@
             "Windows hosting plans include the operating-system licensing required to run the service. You are responsible for licensing any commercial application or component you deploy on top of it."
           ]
         }
-      ]
+      ],
+      "visual3d": "hosting/web-hosting-3d"
     },
     "vps-hosting.php": {
       "title": "VPS Hosting",
@@ -641,12 +647,14 @@
             "Dedicated: the entire physical machine"
           ],
           "visual": "cloud/public-cloud",
+          "visual3d": "cloud/vps-3d",
           "link": {
             "label": "Compare cloud and dedicated",
             "url": "cloudhost247-hosting.php"
           }
         }
-      ]
+      ],
+      "visual3d": "cloud/vps-3d"
     },
     "vps-privatecloud.php": {
       "title": "Private Cloud",
@@ -750,7 +758,8 @@
             "Because the boundary has to be designed — capacity, region, network and operating system — private cloud is quoted against your requirement rather than sold from a fixed price list. The order flow starts with a conversation."
           ]
         }
-      ]
+      ],
+      "visual3d": "cloud/vps-3d"
     },
     "vps-publiccloud.php": {
       "title": "Public Cloud",
@@ -853,7 +862,8 @@
             "A public cloud instance can only be created where the platform has a provider configured for it. The regions list on this deployment shows what is genuinely available; where it is empty, no region is configured and no instance can be promised."
           ]
         }
-      ]
+      ],
+      "visual3d": "cloud/vps-3d"
     },
     "dedicated-server.php": {
       "title": "Dedicated Servers",
@@ -960,7 +970,8 @@
             "Redundancy (power, networking, disks), facility and region all depend on the provider configured for the region you choose. Those options are confirmed in writing for your configuration rather than asserted on a marketing page — and if a specific requirement cannot be met, that is said before you order rather than after."
           ]
         }
-      ]
+      ],
+      "visual3d": "servers/dedicated-servers-3d"
     },
     "enterprise-servers.php": {
       "title": "Enterprise Servers",
@@ -1062,7 +1073,8 @@
             "Enterprise configurations depend on hardware availability, redundancy choices and region. Rather than publishing a price that cannot be honoured, enterprise servers are quoted against the requirement you describe."
           ]
         }
-      ]
+      ],
+      "visual3d": "servers/dedicated-servers-3d"
     },
     "game-servers.php": {
       "title": "Game Servers",
@@ -1158,7 +1170,8 @@
             }
           ]
         }
-      ]
+      ],
+      "visual3d": "servers/dedicated-servers-3d"
     },
     "developer-friendly.php": {
       "title": "Developer Hosting",
@@ -1418,12 +1431,14 @@
             "Operational limits and known gaps"
           ],
           "visual": "blog/documentation",
+          "visual3d": "hero/infrastructure-3d",
           "link": {
             "label": "Open the documentation",
             "url": "documentation.php"
           }
         }
-      ]
+      ],
+      "visual3d": "deployment/deployment-pipeline-3d"
     },
     "ssl-certificate.php": {
       "title": "SSL Certificates",
@@ -1525,7 +1540,8 @@
             "Domain-validated certificates are issued automatically. Organisation-validated and extended-validation certificates require a real identity vetting process with a certificate authority, which is a different purchase with its own lead time. If your requirement is contractual — a specific CA, a specific validation level, a minimum key size — raise it with sales before you assume it is available."
           ]
         }
-      ]
+      ],
+      "visual3d": "hero/infrastructure-3d"
     },
     "website-design.php": {
       "title": "Website Design",
@@ -1676,7 +1692,8 @@
             }
           ]
         }
-      ]
+      ],
+      "visual3d": "hosting/web-hosting-3d"
     },
     "domain.php": {
       "title": "Domains",
@@ -1708,7 +1725,8 @@
         "ssl-certificate.php",
         "email-hosting.php"
       ],
-      "slug": "domain"
+      "slug": "domain",
+      "visual3d": "domains/domain-network-3d"
     },
     "cloudhost247-hosting.php": {
       "title": "Cloud Hosting Plans",
@@ -1963,7 +1981,8 @@
             "Regions, operating system versions, control panels and machine sizes are configuration, not marketing copy. The platform lists exactly what a given deployment is configured to offer, and a service that is not configured is shown as unavailable rather than sold and then apologised for."
           ]
         }
-      ]
+      ],
+      "visual3d": "cloud/vps-3d"
     },
     "email-hosting.php": {
       "title": "Email Hosting",
@@ -2078,12 +2097,14 @@
             "DMARC tells receivers what to do with failures"
           ],
           "visual": "security/ssl",
+          "visual3d": "hero/infrastructure-3d",
           "link": {
             "label": "See DNS management",
             "url": "dns-management.php"
           }
         }
-      ]
+      ],
+      "visual3d": "hosting/web-hosting-3d"
     },
     "aboutus.php": {
       "title": "About CloudHost247",
@@ -2250,7 +2271,8 @@
             "CloudHost247 Isc. is the legal entity behind this platform. Contractual terms, policies and the agreements that govern a service are published in the Legal & Policy Center, which is the authoritative source for any of them."
           ]
         }
-      ]
+      ],
+      "visual3d": "hero/infrastructure-3d"
     },
     "offers.php": {
       "title": "Offers",
@@ -2293,7 +2315,8 @@
             "A discount that appears to expire but never does is a dark pattern, and a percentage invented for a landing page is a lie with a font. What is on offer here is the catalogue: the plans that exist, at the prices configured."
           ]
         }
-      ]
+      ],
+      "visual3d": "cloud/vps-3d"
     },
     "help-center.php": {
       "title": "Help Center",
@@ -2396,7 +2419,8 @@
             }
           ]
         }
-      ]
+      ],
+      "visual3d": "servers/dedicated-servers-3d"
     },
     "blog.php": {
       "title": "Blog",
@@ -2427,7 +2451,8 @@
           "a": "Account announcements are delivered to signed-in customers through the notification system. There is no third-party newsletter tracker on this site."
         }
       ],
-      "sections": []
+      "sections": [],
+      "visual3d": "hero/infrastructure-3d"
     },
     "faqs.php": {
       "title": "Frequently Asked Questions",
@@ -2438,7 +2463,8 @@
       "features": [],
       "uses": [],
       "related": [],
-      "slug": "faqs"
+      "slug": "faqs",
+      "visual3d": "servers/dedicated-servers-3d"
     },
     "applications.php": {
       "title": "Applications",
@@ -2604,6 +2630,7 @@
             "Install and manage from your account"
           ],
           "visual": "applications/application-stack",
+          "visual3d": "applications/application-stack-3d",
           "link": {
             "label": "Browse the catalogue",
             "url": "applications.php"
@@ -2648,7 +2675,8 @@
             "The platform deploys and can back up and monitor a database service. Automatic multi-node failover and read replicas are not claimed here; where a workload needs them, that is a design conversation about the infrastructure it runs on."
           ]
         }
-      ]
+      ],
+      "visual3d": "applications/application-stack-3d"
     },
     "deployments.php": {
       "title": "Deployment Platform",
@@ -2828,7 +2856,8 @@
             }
           ]
         }
-      ]
+      ],
+      "visual3d": "deployment/deployment-pipeline-3d"
     },
     "operating-systems.php": {
       "title": "Operating Systems",
@@ -2931,7 +2960,8 @@
             "This catalogue reflects what the platform is configured and able to install. A version that is not listed has no image configured for the selected region — we would rather show a shorter list than accept an order we cannot provision."
           ]
         }
-      ]
+      ],
+      "visual3d": "cloud/vps-3d"
     },
     "server-management.php": {
       "title": "Server Management",
@@ -3051,7 +3081,8 @@
             }
           ]
         }
-      ]
+      ],
+      "visual3d": "servers/dedicated-servers-3d"
     },
     "infrastructure.php": {
       "title": "Infrastructure",
@@ -3167,7 +3198,8 @@
             }
           ]
         }
-      ]
+      ],
+      "visual3d": "hero/global-network-3d"
     },
     "acceptable-use-policy.php": {
       "title": "Acceptable Use Policy",
@@ -3178,7 +3210,8 @@
       "features": [],
       "uses": [],
       "related": [],
-      "slug": "acceptable-use-policy"
+      "slug": "acceptable-use-policy",
+      "visual3d": "hero/infrastructure-3d"
     },
     "backup-policy.php": {
       "title": "Backup Policy",
@@ -3189,7 +3222,8 @@
       "features": [],
       "uses": [],
       "related": [],
-      "slug": "backup-policy"
+      "slug": "backup-policy",
+      "visual3d": "hero/infrastructure-3d"
     },
     "cookie-policy.php": {
       "title": "Cookie Policy",
@@ -3200,7 +3234,8 @@
       "features": [],
       "uses": [],
       "related": [],
-      "slug": "cookie-policy"
+      "slug": "cookie-policy",
+      "visual3d": "hero/infrastructure-3d"
     },
     "cybercrime-policy.php": {
       "title": "Cybercrime Policy",
@@ -3211,7 +3246,8 @@
       "features": [],
       "uses": [],
       "related": [],
-      "slug": "cybercrime-policy"
+      "slug": "cybercrime-policy",
+      "visual3d": "hero/infrastructure-3d"
     },
     "data-deletion.php": {
       "title": "Data Deletion Instructions",
@@ -3222,7 +3258,8 @@
       "features": [],
       "uses": [],
       "related": [],
-      "slug": "data-deletion"
+      "slug": "data-deletion",
+      "visual3d": "hero/infrastructure-3d"
     },
     "data-privacy-notice-and-consent-form.php": {
       "title": "Data Privacy Notice and Consent Form",
@@ -3233,7 +3270,8 @@
       "features": [],
       "uses": [],
       "related": [],
-      "slug": "data-privacy-notice-and-consent-form"
+      "slug": "data-privacy-notice-and-consent-form",
+      "visual3d": "hero/infrastructure-3d"
     },
     "data-protection-standards.php": {
       "title": "Data Protection Standards",
@@ -3244,7 +3282,8 @@
       "features": [],
       "uses": [],
       "related": [],
-      "slug": "data-protection-standards"
+      "slug": "data-protection-standards",
+      "visual3d": "hero/infrastructure-3d"
     },
     "domain-agreement.php": {
       "title": "Domain Agreement",
@@ -3255,7 +3294,8 @@
       "features": [],
       "uses": [],
       "related": [],
-      "slug": "domain-agreement"
+      "slug": "domain-agreement",
+      "visual3d": "hero/infrastructure-3d"
     },
     "domain-brokerage-terms.php": {
       "title": "Domain Brokerage Terms",
@@ -3266,7 +3306,8 @@
       "features": [],
       "uses": [],
       "related": [],
-      "slug": "domain-brokerage-terms"
+      "slug": "domain-brokerage-terms",
+      "visual3d": "hero/infrastructure-3d"
     },
     "domain-renewal-policy.php": {
       "title": "Domain Renewal Policy",
@@ -3277,7 +3318,8 @@
       "features": [],
       "uses": [],
       "related": [],
-      "slug": "domain-renewal-policy"
+      "slug": "domain-renewal-policy",
+      "visual3d": "hero/infrastructure-3d"
     },
     "domainregistrationaddendum.php": {
       "title": "Domain Registration Addendum",
@@ -3288,7 +3330,8 @@
       "features": [],
       "uses": [],
       "related": [],
-      "slug": "domainregistrationaddendum"
+      "slug": "domainregistrationaddendum",
+      "visual3d": "hero/infrastructure-3d"
     },
     "fair-usage-policy.php": {
       "title": "Fair Usage Policy",
@@ -3299,7 +3342,8 @@
       "features": [],
       "uses": [],
       "related": [],
-      "slug": "fair-usage-policy"
+      "slug": "fair-usage-policy",
+      "visual3d": "hero/infrastructure-3d"
     },
     "legal-notice.php": {
       "title": "Legal Notice",
@@ -3310,7 +3354,8 @@
       "features": [],
       "uses": [],
       "related": [],
-      "slug": "legal-notice"
+      "slug": "legal-notice",
+      "visual3d": "hero/infrastructure-3d"
     },
     "legal.php": {
       "title": "Legal & Policy Center",
@@ -3321,7 +3366,8 @@
       "features": [],
       "uses": [],
       "related": [],
-      "slug": "legal"
+      "slug": "legal",
+      "visual3d": "hero/infrastructure-3d"
     },
     "privacy-policy.php": {
       "title": "Privacy Policy",
@@ -3332,7 +3378,8 @@
       "features": [],
       "uses": [],
       "related": [],
-      "slug": "privacy-policy"
+      "slug": "privacy-policy",
+      "visual3d": "hero/infrastructure-3d"
     },
     "refund-and-cancellation-policy.php": {
       "title": "Refund and Cancellation Policy",
@@ -3343,7 +3390,8 @@
       "features": [],
       "uses": [],
       "related": [],
-      "slug": "refund-and-cancellation-policy"
+      "slug": "refund-and-cancellation-policy",
+      "visual3d": "hero/infrastructure-3d"
     },
     "refund-policy.php": {
       "title": "Refund Policy",
@@ -3354,7 +3402,8 @@
       "features": [],
       "uses": [],
       "related": [],
-      "slug": "refund-policy"
+      "slug": "refund-policy",
+      "visual3d": "hero/infrastructure-3d"
     },
     "terms-of-service.php": {
       "title": "Terms of Service",
@@ -3365,7 +3414,8 @@
       "features": [],
       "uses": [],
       "related": [],
-      "slug": "terms-of-service"
+      "slug": "terms-of-service",
+      "visual3d": "hero/infrastructure-3d"
     },
     "trademark-policy.php": {
       "title": "Trademark Policy",
@@ -3376,7 +3426,8 @@
       "features": [],
       "uses": [],
       "related": [],
-      "slug": "trademark-policy"
+      "slug": "trademark-policy",
+      "visual3d": "hero/infrastructure-3d"
     },
     "business-hosting.php": {
       "title": "Business Hosting",
@@ -3504,7 +3555,8 @@
             "Resource allocations change as the platform is upgraded. Rather than publishing numbers here that go stale, every plan's actual CPU, memory, storage and mailbox limits are shown on its order page and in your account — and support can confirm anything before you buy."
           ]
         }
-      ]
+      ],
+      "visual3d": "hosting/web-hosting-3d"
     },
     "reseller-hosting.php": {
       "title": "Reseller Hosting",
@@ -3622,7 +3674,8 @@
             }
           ]
         }
-      ]
+      ],
+      "visual3d": "hosting/web-hosting-3d"
     },
     "nodejs-hosting.php": {
       "title": "Node.js Hosting",
@@ -3724,7 +3777,8 @@
             "The platform supplies the process management, isolation and observability. Dependency pinning, lockfiles, dependency audits and choosing a supported Node release remain the application's responsibility — and the ones that go wrong in production are almost always there."
           ]
         }
-      ]
+      ],
+      "visual3d": "deployment/deployment-pipeline-3d"
     },
     "php-hosting.php": {
       "title": "PHP Hosting",
@@ -3839,7 +3893,8 @@
             }
           ]
         }
-      ]
+      ],
+      "visual3d": "deployment/deployment-pipeline-3d"
     },
     "python-hosting.php": {
       "title": "Python Hosting",
@@ -3934,7 +3989,8 @@
             }
           ]
         }
-      ]
+      ],
+      "visual3d": "deployment/deployment-pipeline-3d"
     },
     "docker-hosting.php": {
       "title": "Docker Hosting",
@@ -4092,7 +4148,8 @@
             }
           ]
         }
-      ]
+      ],
+      "visual3d": "deployment/deployment-pipeline-3d"
     },
     "laravel-hosting.php": {
       "title": "Laravel Hosting",
@@ -4206,7 +4263,8 @@
             }
           ]
         }
-      ]
+      ],
+      "visual3d": "deployment/deployment-pipeline-3d"
     },
     "api-hosting.php": {
       "title": "API Hosting",
@@ -4328,7 +4386,8 @@
             "CloudHost247 provides the transport, isolation, TLS and observability. The authentication and authorisation model inside your API is your design decision: token format, scopes, rotation and revocation are yours to implement."
           ]
         }
-      ]
+      ],
+      "visual3d": "deployment/deployment-pipeline-3d"
     },
     "paas.php": {
       "title": "PaaS",
@@ -4446,7 +4505,8 @@
             }
           ]
         }
-      ]
+      ],
+      "visual3d": "deployment/deployment-pipeline-3d"
     },
     "data-centers.php": {
       "title": "Data Centers",
@@ -4525,7 +4585,8 @@
             }
           ]
         }
-      ]
+      ],
+      "visual3d": "cloud/vps-3d"
     },
     "network.php": {
       "title": "Network",
@@ -4631,7 +4692,8 @@
             "Whether a service is unmetered, capped or burstable depends on the product you have, and the number that matters is the one on the plan you bought — not a figure on a marketing page. Where a fair-use expectation applies, it is written down in the Fair Usage Policy."
           ]
         }
-      ]
+      ],
+      "visual3d": "cloud/vps-3d"
     },
     "security.php": {
       "title": "Security",
@@ -4861,7 +4923,8 @@
             "Where a compliance framework matters to you — ISO 27001, SOC 2, PCI DSS, HIPAA — ask, and you will get an accurate answer including 'not certified'. Publishing a certification we do not hold would be the single most damaging thing this page could do."
           ]
         }
-      ]
+      ],
+      "visual3d": "hero/infrastructure-3d"
     },
     "monitoring.php": {
       "title": "Monitoring",
@@ -4965,7 +5028,8 @@
             "A meaningful uptime number has to come from independent, continuous, customer-visible measurement over a defined period. Anything else is a claim. The service status page reports the checks this platform can genuinely perform right now, and says plainly when something is not being monitored."
           ]
         }
-      ]
+      ],
+      "visual3d": "servers/dedicated-servers-3d"
     },
     "backups.php": {
       "title": "Backups",
@@ -5115,7 +5179,8 @@
             }
           ]
         }
-      ]
+      ],
+      "visual3d": "servers/dedicated-servers-3d"
     },
     "firewall.php": {
       "title": "Firewall",
@@ -5213,7 +5278,8 @@
             }
           ]
         }
-      ]
+      ],
+      "visual3d": "servers/dedicated-servers-3d"
     },
     "dns-management.php": {
       "title": "DNS Management",
@@ -5245,7 +5311,8 @@
         "domain-dns.php",
         "web-hosting.php"
       ],
-      "slug": "dns-management"
+      "slug": "dns-management",
+      "visual3d": "domains/domain-network-3d"
     },
     "domain-dns.php": {
       "title": "Domain DNS",
@@ -5277,7 +5344,8 @@
         "dns-management.php",
         "web-hosting.php"
       ],
-      "slug": "domain-dns"
+      "slug": "domain-dns",
+      "visual3d": "domains/domain-network-3d"
     },
     "ip-management.php": {
       "title": "IP Management",
@@ -5375,7 +5443,8 @@
             }
           ]
         }
-      ]
+      ],
+      "visual3d": "servers/dedicated-servers-3d"
     },
     "migration.php": {
       "title": "Migration",
@@ -5469,7 +5538,8 @@
             "Access to the current host, the domain's DNS control, and a list of anything the site depends on that is not obvious from the files — third-party APIs, scheduled jobs, unusual mail routing. Migrations go wrong when a dependency is discovered afterwards."
           ]
         }
-      ]
+      ],
+      "visual3d": "servers/dedicated-servers-3d"
     },
     "managed-services.php": {
       "title": "Managed Services",
@@ -5589,7 +5659,8 @@
             }
           ]
         }
-      ]
+      ],
+      "visual3d": "servers/dedicated-servers-3d"
     },
     "documentation.php": {
       "title": "Documentation",
@@ -5637,7 +5708,8 @@
           "a": "Documentation lives with the platform source. Raise it through support and it goes to the team that owns the relevant area."
         }
       ],
-      "sections": []
+      "sections": [],
+      "visual3d": "hero/infrastructure-3d"
     }
   },
   "navigation": [

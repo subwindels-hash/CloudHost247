@@ -1,5 +1,7 @@
-import { Link } from 'react-router-dom';
+import { FormEvent, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Icon, CheckIcon, ArrowIcon } from '../components/ui/Icon';
+import { Illustration } from '../components/marketing/Illustration';
 import { usePageMeta } from '../lib/usePageMeta';
 import { NAV_SECTIONS, TOOLS_CATEGORIES, BRAND } from '../navigation/registry.generated';
 
@@ -17,6 +19,37 @@ import { NAV_SECTIONS, TOOLS_CATEGORIES, BRAND } from '../navigation/registry.ge
  */
 
 const FAMILIES = NAV_SECTIONS.filter((section) => section.id !== 'resources' && section.id !== 'support');
+
+const SPOTLIGHTS = [
+  {
+    to: '/hosting/web-hosting',
+    title: 'Web Hosting',
+    body: 'Shared and business hosting with live catalogue plans, mailboxes and certificates.',
+    visual: 'hosting/web-hosting',
+    visual3d: 'hosting/web-hosting-3d',
+  },
+  {
+    to: '/hosting/vps',
+    title: 'VPS & Cloud',
+    body: 'Virtual servers with the provider, region and resources the catalogue actually lists.',
+    visual: 'cloud/vps',
+    visual3d: 'cloud/vps-3d',
+  },
+  {
+    to: '/domains',
+    title: 'Domains',
+    body: 'Search, register, transfer and manage DNS from the same account as the site they serve.',
+    visual: 'domains/domain-network',
+    visual3d: 'domains/domain-network-3d',
+  },
+  {
+    to: '/platforms/applications',
+    title: 'Applications',
+    body: 'Supported application versions, not a wall of invented logos.',
+    visual: 'applications/application-stack',
+    visual3d: 'applications/application-stack-3d',
+  },
+];
 
 const PILLARS = [
   {
@@ -53,6 +86,9 @@ const AUDIENCES = [
 ];
 
 export default function HomePage() {
+  const navigate = useNavigate();
+  const [domainQuery, setDomainQuery] = useState('');
+
   usePageMeta(
     'CloudHost247 — Hosting, Cloud, Domains & Developer Platform',
     BRAND.description,
@@ -78,6 +114,12 @@ export default function HomePage() {
     }
   );
 
+  function onDomainSearch(event: FormEvent) {
+    event.preventDefault();
+    const trimmed = domainQuery.trim();
+    navigate(trimmed ? `/domains?q=${encodeURIComponent(trimmed)}` : '/domains');
+  }
+
   return (
     <div className="ch-ds">
       <section className="ch-hero">
@@ -93,6 +135,27 @@ export default function HomePage() {
                 connect the API — with one account, one catalogue and one support relationship
                 instead of five vendors pointing at each other.
               </p>
+              <form className="ch-domain-search" onSubmit={onDomainSearch} role="search">
+                <label className="ch-visually-hidden" htmlFor="ch-home-domain">
+                  Search for a domain name
+                </label>
+                <div className="ch-domain-search__field">
+                  <input
+                    id="ch-home-domain"
+                    className="ch-domain-search__input"
+                    type="search"
+                    name="q"
+                    value={domainQuery}
+                    onChange={(event) => setDomainQuery(event.target.value)}
+                    placeholder="Search a domain, e.g. example.com"
+                    maxLength={253}
+                    autoComplete="off"
+                  />
+                  <button className="ch-btn ch-btn--mint" type="submit">
+                    Search domains
+                  </button>
+                </div>
+              </form>
               <div className="ch-hero__ctas">
                 <Link className="ch-btn ch-btn--mint ch-btn--lg" to="/register">
                   Create an account
@@ -108,18 +171,13 @@ export default function HomePage() {
               </ul>
             </div>
 
-            <figure className="ch-visual" style={{ margin: 0 }}>
-              <img
-                src="/media/cloudhost247/hero/global-network.svg"
-                alt="CloudHost247 platform: domains, hosting, cloud compute, applications and developer tooling connected to one control layer"
-                width={660}
-                height={520}
-              />
-              <figcaption className="ch-visual__caption">
-                <span>CloudHost247 platform</span>
-                <span>Control layer</span>
-              </figcaption>
-            </figure>
+            <Illustration
+              visual="hero/infrastructure"
+              visual3d="hero/infrastructure-3d"
+              alt="CloudHost247 platform: a 3D view of servers, cloud compute and a control layer"
+              caption={{ left: 'CloudHost247 platform', right: 'Infrastructure' }}
+              eager
+            />
           </div>
         </div>
       </section>
@@ -144,6 +202,35 @@ export default function HomePage() {
       </section>
 
       <section className="ch-section">
+        <div className="ch-wrap">
+          <div className="ch-section__head">
+            <div>
+              <p className="ch-kicker">Start here</p>
+              <h2>Hosting, cloud, domains and applications</h2>
+            </div>
+            <p className="ch-lede">
+              Four doors into the platform. Each one opens a real product page, not a placeholder.
+            </p>
+          </div>
+          <div className="ch-grid ch-grid--4">
+            {SPOTLIGHTS.map((item) => (
+              <Link className="ch-card" to={item.to} key={item.to}>
+                <Illustration visual={item.visual} visual3d={item.visual3d} alt="" />
+                <h3>{item.title}</h3>
+                <p>{item.body}</p>
+                <span className="ch-card__foot">
+                  <span className="ch-link">
+                    Explore
+                    <span className="ch-link__arrow" aria-hidden><ArrowIcon /></span>
+                  </span>
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="ch-section ch-section--soft">
         <div className="ch-wrap">
           <div className="ch-section__head">
             <div>
@@ -183,7 +270,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="ch-section ch-section--soft">
+      <section className="ch-section">
         <div className="ch-wrap">
           <div className="ch-split">
             <div>
@@ -208,14 +295,37 @@ export default function HomePage() {
                 ))}
               </ul>
             </div>
-            <div className="ch-visual" style={{ background: 'var(--ch-soft)', borderColor: 'var(--ch-line)' }}>
-              <img
-                src="/media/cloudhost247/hero/infrastructure.svg"
-                alt="Isometric view of CloudHost247 hosting, cloud and application layers"
-                width={660}
-                height={520}
-                loading="lazy"
-              />
+            <Illustration
+              visual="hero/global-network"
+              visual3d="hero/global-network-3d"
+              alt="Conceptual global connectivity — not a map of CloudHost247 data-center locations"
+              caption={{ left: 'Conceptual network', right: 'Not a location map' }}
+            />
+          </div>
+        </div>
+      </section>
+
+      <section className="ch-section ch-section--soft">
+        <div className="ch-wrap">
+          <div className="ch-split">
+            <Illustration
+              visual="deployment/deployment-pipeline"
+              visual3d="deployment/deployment-pipeline-3d"
+              alt="Conceptual application deployment pipeline"
+              caption={{ left: 'Developers', right: 'Deploy & operate' }}
+            />
+            <div>
+              <p className="ch-kicker">Developer platform</p>
+              <h2>From repository to running service</h2>
+              <p className="ch-lede">
+                Node.js, PHP, Python, Laravel and Docker environments, with a deployment record you
+                can inspect. The catalogue decides what is actually provisionable on this
+                deployment — this page does not invent runtimes.
+              </p>
+              <div className="ch-hero__ctas">
+                <Link className="ch-btn" to="/developers/deployment">Application deployment</Link>
+                <Link className="ch-link" to="/developers">Developer platform →</Link>
+              </div>
             </div>
           </div>
         </div>

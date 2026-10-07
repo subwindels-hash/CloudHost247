@@ -1,5 +1,5 @@
 {
-  "version": "2.0.0",
+  "version": "2.1.0",
   "pages": [
     {
       "route": "/cloud",
@@ -147,7 +147,8 @@
         "/cloud/server-management",
         "/cloud/monitoring",
         "/cloud/firewall"
-      ]
+      ],
+      "visual3d": "cloud/vps-3d"
     },
     {
       "route": "/cloud/public",
@@ -244,7 +245,8 @@
         "/cloud/infrastructure",
         "/cloud/monitoring",
         "/servers/new"
-      ]
+      ],
+      "visual3d": "cloud/vps-3d"
     },
     {
       "route": "/cloud/private",
@@ -341,7 +343,8 @@
         "/cloud/enterprise-servers",
         "/cloud/infrastructure",
         "/contact"
-      ]
+      ],
+      "visual3d": "cloud/vps-3d"
     },
     {
       "route": "/cloud/enterprise-servers",
@@ -438,7 +441,8 @@
         "/cloud/server-management",
         "/cloud/monitoring",
         "/contact"
-      ]
+      ],
+      "visual3d": "servers/dedicated-servers-3d"
     },
     {
       "route": "/cloud/game-servers",
@@ -530,7 +534,8 @@
         "/cloud/firewall",
         "/cloud/backups",
         "/contact"
-      ]
+      ],
+      "visual3d": "servers/dedicated-servers-3d"
     },
     {
       "route": "/cloud/infrastructure",
@@ -641,7 +646,8 @@
         "/security",
         "/status",
         "/about"
-      ]
+      ],
+      "visual3d": "hero/global-network-3d"
     },
     {
       "route": "/cloud/data-centers",
@@ -729,7 +735,8 @@
         "/status",
         "/contact",
         "/about"
-      ]
+      ],
+      "visual3d": "cloud/vps-3d"
     },
     {
       "route": "/cloud/network",
@@ -826,7 +833,8 @@
         "/cloud/infrastructure",
         "/legal/fair-usage",
         "/status"
-      ]
+      ],
+      "visual3d": "cloud/vps-3d"
     },
     {
       "route": "/cloud/operating-systems",
@@ -923,7 +931,8 @@
         "/servers/new",
         "/docs",
         "/status"
-      ]
+      ],
+      "visual3d": "cloud/vps-3d"
     },
     {
       "route": "/cloud/server-management",
@@ -1038,7 +1047,8 @@
         "/hosting/control-panels",
         "/cloud/operating-systems",
         "/contact"
-      ]
+      ],
+      "visual3d": "servers/dedicated-servers-3d"
     },
     {
       "route": "/cloud/monitoring",
@@ -1135,7 +1145,8 @@
         "/cloud/backups",
         "/cloud",
         "/tools/category/network"
-      ]
+      ],
+      "visual3d": "servers/dedicated-servers-3d"
     },
     {
       "route": "/cloud/backups",
@@ -1227,7 +1238,8 @@
         "/cloud/monitoring",
         "/cloud",
         "/legal/data-deletion"
-      ]
+      ],
+      "visual3d": "servers/dedicated-servers-3d"
     },
     {
       "route": "/cloud/firewall",
@@ -1319,7 +1331,8 @@
         "/cloud/ip-management",
         "/hosting/security",
         "/legal/acceptable-use"
-      ]
+      ],
+      "visual3d": "servers/dedicated-servers-3d"
     },
     {
       "route": "/cloud/security",
@@ -1430,7 +1443,8 @@
         "/legal/cybercrime-policy",
         "/legal/data-protection-standards",
         "/cloud/server-management"
-      ]
+      ],
+      "visual3d": "hero/infrastructure-3d"
     },
     {
       "route": "/cloud/ip-management",
@@ -1522,7 +1536,8 @@
         "/hosting/email",
         "/dashboard/servers",
         "/legal/acceptable-use"
-      ]
+      ],
+      "visual3d": "servers/dedicated-servers-3d"
     },
     {
       "route": "/developers",
@@ -1658,7 +1673,8 @@
           "link": {
             "label": "Open the documentation",
             "to": "/docs"
-          }
+          },
+          "visual3d": "hero/infrastructure-3d"
         }
       ],
       "faqs": [
@@ -1682,7 +1698,8 @@
         "/hosting/developer",
         "/platforms",
         "/docs"
-      ]
+      ],
+      "visual3d": "deployment/deployment-pipeline-3d"
     },
     {
       "route": "/developers/deployment",
@@ -1806,7 +1823,8 @@
         "/platforms/containers",
         "/hosting/developer",
         "/docs"
-      ]
+      ],
+      "visual3d": "deployment/deployment-pipeline-3d"
     },
     {
       "route": "/developers/environments",
@@ -1917,7 +1935,8 @@
         "/developers",
         "/hosting/api",
         "/docs"
-      ]
+      ],
+      "visual3d": "deployment/deployment-pipeline-3d"
     },
     {
       "route": "/developers/nodejs",
@@ -2014,7 +2033,8 @@
         "/platforms/databases",
         "/hosting/api",
         "/developers"
-      ]
+      ],
+      "visual3d": "deployment/deployment-pipeline-3d"
     },
     {
       "route": "/developers/php",
@@ -2125,7 +2145,8 @@
         "/developers/deployment",
         "/cloud/operating-systems",
         "/developers"
-      ]
+      ],
+      "visual3d": "deployment/deployment-pipeline-3d"
     },
     {
       "route": "/developers/python",
@@ -2217,7 +2238,8 @@
         "/hosting/api",
         "/hosting/developer",
         "/developers"
-      ]
+      ],
+      "visual3d": "deployment/deployment-pipeline-3d"
     },
     {
       "route": "/developers/laravel",
@@ -2328,7 +2350,8 @@
         "/developers/environments",
         "/hosting/backups",
         "/developers"
-      ]
+      ],
+      "visual3d": "deployment/deployment-pipeline-3d"
     },
     {
       "route": "/developers/docker",
@@ -2443,7 +2466,8 @@
         "/platforms/databases",
         "/cloud/firewall",
         "/developers"
-      ]
+      ],
+      "visual3d": "deployment/deployment-pipeline-3d"
     },
     {
       "route": "/hosting",
@@ -2600,7 +2624,8 @@
         "/hosting/migration",
         "/cloud",
         "/domains"
-      ]
+      ],
+      "visual3d": "hosting/web-hosting-3d"
     },
     {
       "route": "/hosting/web-hosting",
@@ -2709,7 +2734,8 @@
           "link": {
             "label": "See how migration works",
             "to": "/hosting/migration"
-          }
+          },
+          "visual3d": "servers/dedicated-servers-3d"
         }
       ],
       "faqs": [
@@ -2737,7 +2763,8 @@
         "/hosting/ssl",
         "/hosting/migration",
         "/hosting/backups"
-      ]
+      ],
+      "visual3d": "hosting/web-hosting-3d"
     },
     {
       "route": "/hosting/business",
@@ -2857,7 +2884,8 @@
         "/hosting/backups",
         "/cloud/server-management",
         "/legal/refund-policy"
-      ]
+      ],
+      "visual3d": "hosting/web-hosting-3d"
     },
     {
       "route": "/hosting/wordpress",
@@ -2977,7 +3005,8 @@
         "/hosting/migration",
         "/hosting/security",
         "/apps"
-      ]
+      ],
+      "visual3d": "hosting/wordpress-hosting-3d"
     },
     {
       "route": "/hosting/reseller",
@@ -3092,7 +3121,8 @@
         "/domains",
         "/legal/acceptable-use",
         "/contact"
-      ]
+      ],
+      "visual3d": "hosting/web-hosting-3d"
     },
     {
       "route": "/hosting/windows",
@@ -3189,7 +3219,8 @@
         "/hosting/backups",
         "/hosting/control-panels",
         "/contact"
-      ]
+      ],
+      "visual3d": "hosting/web-hosting-3d"
     },
     {
       "route": "/hosting/email",
@@ -3276,7 +3307,8 @@
           "link": {
             "label": "See DNS management",
             "to": "/dashboard/dns"
-          }
+          },
+          "visual3d": "hero/infrastructure-3d"
         }
       ],
       "faqs": [
@@ -3304,7 +3336,8 @@
         "/dashboard/dns",
         "/legal/acceptable-use",
         "/contact"
-      ]
+      ],
+      "visual3d": "hosting/web-hosting-3d"
     },
     {
       "route": "/hosting/developer",
@@ -3449,7 +3482,8 @@
         "/platforms",
         "/cloud/operating-systems",
         "/docs"
-      ]
+      ],
+      "visual3d": "deployment/deployment-pipeline-3d"
     },
     {
       "route": "/hosting/api",
@@ -3565,7 +3599,8 @@
         "/cloud/firewall",
         "/cloud/monitoring",
         "/docs"
-      ]
+      ],
+      "visual3d": "deployment/deployment-pipeline-3d"
     },
     {
       "route": "/hosting/ssl",
@@ -3662,7 +3697,8 @@
         "/hosting/security",
         "/cloud/firewall",
         "/legal/acceptable-use"
-      ]
+      ],
+      "visual3d": "hero/infrastructure-3d"
     },
     {
       "route": "/hosting/backups",
@@ -3777,7 +3813,8 @@
         "/hosting/web-hosting",
         "/cloud/monitoring",
         "/legal/data-deletion"
-      ]
+      ],
+      "visual3d": "servers/dedicated-servers-3d"
     },
     {
       "route": "/hosting/migration",
@@ -3872,7 +3909,8 @@
         "/hosting/backups",
         "/contact",
         "/legal/refund-policy"
-      ]
+      ],
+      "visual3d": "servers/dedicated-servers-3d"
     },
     {
       "route": "/hosting/security",
@@ -3991,7 +4029,8 @@
         "/legal/acceptable-use",
         "/legal/cybercrime-policy",
         "/hosting/ssl"
-      ]
+      ],
+      "visual3d": "hero/infrastructure-3d"
     },
     {
       "route": "/platforms",
@@ -4084,7 +4123,8 @@
           "link": {
             "label": "Browse the catalogue",
             "to": "/apps"
-          }
+          },
+          "visual3d": "applications/application-stack-3d"
         }
       ],
       "faqs": [
@@ -4108,7 +4148,8 @@
         "/platforms/paas",
         "/developers",
         "/cloud"
-      ]
+      ],
+      "visual3d": "applications/application-stack-3d"
     },
     {
       "route": "/platforms/applications",
@@ -4219,7 +4260,8 @@
         "/platforms/paas",
         "/hosting/backups",
         "/developers"
-      ]
+      ],
+      "visual3d": "applications/application-stack-3d"
     },
     {
       "route": "/platforms/databases",
@@ -4316,7 +4358,8 @@
         "/platforms/containers",
         "/developers/deployment",
         "/legal/backup-policy"
-      ]
+      ],
+      "visual3d": "applications/application-stack-3d"
     },
     {
       "route": "/platforms/containers",
@@ -4413,7 +4456,8 @@
         "/developers/deployment",
         "/cloud/firewall",
         "/apps"
-      ]
+      ],
+      "visual3d": "deployment/deployment-pipeline-3d"
     },
     {
       "route": "/platforms/paas",
@@ -4528,7 +4572,8 @@
         "/developers/environments",
         "/hosting/developer",
         "/docs"
-      ]
+      ],
+      "visual3d": "deployment/deployment-pipeline-3d"
     },
     {
       "route": "/hosting/vps",
@@ -4645,7 +4690,8 @@
           "link": {
             "label": "Compare cloud and dedicated",
             "to": "/cloud"
-          }
+          },
+          "visual3d": "cloud/vps-3d"
         }
       ],
       "faqs": [
@@ -4673,7 +4719,8 @@
         "/cloud/firewall",
         "/cloud/backups",
         "/cloud/server-management"
-      ]
+      ],
+      "visual3d": "cloud/vps-3d"
     },
     {
       "route": "/hosting/dedicated",
@@ -4780,7 +4827,8 @@
         "/cloud/server-management",
         "/cloud/data-centers",
         "/contact"
-      ]
+      ],
+      "visual3d": "servers/dedicated-servers-3d"
     },
     {
       "route": "/hosting/cpanel",
@@ -4883,7 +4931,8 @@
         "/hosting/migration",
         "/hosting/ssl",
         "/hosting/backups"
-      ]
+      ],
+      "visual3d": "hosting/web-hosting-3d"
     },
     {
       "route": "/websites",
@@ -5048,7 +5097,8 @@
         "/marketing",
         "/websites/builder",
         "/contact"
-      ]
+      ],
+      "visual3d": "hosting/web-hosting-3d"
     },
     {
       "route": "/help",
@@ -5157,7 +5207,8 @@
         "/support",
         "/contact",
         "/faq"
-      ]
+      ],
+      "visual3d": "servers/dedicated-servers-3d"
     },
     {
       "route": "/docs",
@@ -5218,7 +5269,8 @@
         "/status",
         "/search",
         "/contact"
-      ]
+      ],
+      "visual3d": "hero/infrastructure-3d"
     },
     {
       "route": "/search",
@@ -5249,7 +5301,8 @@
         "/domains",
         "/hosting",
         "/cloud"
-      ]
+      ],
+      "visual3d": "hero/global-network-3d"
     },
     {
       "route": "/status",
@@ -5313,7 +5366,8 @@
         "/contact",
         "/cloud/infrastructure",
         "/legal/backup-policy"
-      ]
+      ],
+      "visual3d": "servers/dedicated-servers-3d"
     },
     {
       "route": "/offers",
@@ -5377,7 +5431,8 @@
         "/pricing",
         "/contact",
         "/legal/refund-policy"
-      ]
+      ],
+      "visual3d": "cloud/vps-3d"
     },
     {
       "route": "/pricing",
@@ -5432,7 +5487,8 @@
         "/domains/extensions",
         "/contact",
         "/legal/refund-policy"
-      ]
+      ],
+      "visual3d": "cloud/vps-3d"
     },
     {
       "route": "/security",
@@ -5552,7 +5608,8 @@
         "/hosting/security",
         "/legal/cybercrime-policy",
         "/contact"
-      ]
+      ],
+      "visual3d": "hero/infrastructure-3d"
     },
     {
       "route": "/about",
@@ -5704,7 +5761,8 @@
         "/legal",
         "/blog",
         "/hosting/reseller"
-      ]
+      ],
+      "visual3d": "hero/infrastructure-3d"
     },
     {
       "route": "/blog",
@@ -5759,7 +5817,8 @@
         "/help",
         "/contact",
         "/legal"
-      ]
+      ],
+      "visual3d": "hero/infrastructure-3d"
     }
   ]
 }

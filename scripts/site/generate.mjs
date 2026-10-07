@@ -52,6 +52,53 @@ const LEGAL_GENERATED = join(ROOT, 'shared', 'site', 'content', 'legal.generated
 const LEGAL_OUT = join(ROOT, 'cloudhost247-node', 'frontend', 'src', 'content', 'legal.generated.json');
 const ASSET_SOURCE = join(ROOT, 'assets', 'images', 'cloudhost247');
 const ASSET_PUBLIC = join(ROOT, 'cloudhost247-node', 'frontend', 'public', 'media', 'cloudhost247');
+
+/**
+ * 3D raster illustrations sit next to the SVG diagrams (`family/name-3d.jpg`). A page prefers
+ * an exact match, then a family fallback, then the homepage infrastructure scene. Missing files
+ * are never published: `resolveVisual3d` returns an empty string and the template falls back to SVG.
+ */
+const FAMILY_3D = {
+  hosting: 'hosting/web-hosting-3d',
+  cloud: 'cloud/vps-3d',
+  servers: 'servers/dedicated-servers-3d',
+  domains: 'domains/domain-network-3d',
+  applications: 'applications/application-stack-3d',
+  deployment: 'deployment/deployment-pipeline-3d',
+  tools: 'tools/hero-3d',
+  security: 'hero/infrastructure-3d',
+  management: 'servers/dedicated-servers-3d',
+  'operating-systems': 'cloud/vps-3d',
+  blog: 'hero/infrastructure-3d',
+  hero: 'hero/infrastructure-3d',
+};
+
+function has3dAsset(key) {
+  return ['.jpg', '.jpeg', '.webp', '.png'].some((ext) => existsSync(join(ASSET_SOURCE, `${key}${ext}`)));
+}
+
+export function resolveVisual3d(visual) {
+  if (!visual || typeof visual !== 'string') return '';
+  const exact = `${visual}-3d`;
+  if (has3dAsset(exact)) return exact;
+  const family = visual.split('/')[0];
+  const fallback = FAMILY_3D[family];
+  if (fallback && has3dAsset(fallback)) return fallback;
+  if (has3dAsset('hero/infrastructure-3d')) return 'hero/infrastructure-3d';
+  return '';
+}
+
+function attachVisual3d(pages) {
+  for (const page of pages) {
+    const visual3d = resolveVisual3d(page.visual);
+    if (visual3d) page.visual3d = visual3d;
+    for (const section of page.sections ?? []) {
+      if (!section.visual) continue;
+      const section3d = resolveVisual3d(section.visual);
+      if (section3d) section.visual3d = section3d;
+    }
+  }
+}
 const DESIGN_SYSTEM = join(ROOT, 'shared', 'site', 'design-system.css');
 const DESIGN_SYSTEM_COPY = join(ROOT, 'templates', 'cloudhost247', 'css', 'design-system.css');
 const REPORT_OUT = join(ROOT, 'shared', 'site', 'generated', 'route-report.json');
@@ -578,6 +625,8 @@ function projectSections(content, file, routeMap) {
           continue;
         }
         projected.visual = section.visual;
+        const visual3d = resolveVisual3d(section.visual);
+        if (visual3d) projected.visual3d = visual3d;
       }
       const url = phpTarget(section.link?.to);
       if (url && section.link?.label) projected.link = { label: clean(section.link.label), url };
@@ -651,7 +700,8 @@ function decoratePhpPages(previous, contentPages, registry) {
       group = content ? [{ pair: { spa: content.route, file, fragment: '' }, content }] : [];
     }
     if (!content) {
-      pages[file] = existing;
+      const visual3d = resolveVisual3d(existing.visual);
+      pages[file] = visual3d ? { ...existing, visual3d } : existing;
       continue;
     }
     matched.add(file);
@@ -707,6 +757,7 @@ function decoratePhpPages(previous, contentPages, registry) {
 
     pages[file] = {
       ...existing,
+      visual3d: resolveVisual3d(existing.visual) || existing.visual3d,
       headline: content.hero.heading,
       seo_description: content.description,
       features: features.length ? features : existing.features,
@@ -1176,6 +1227,7 @@ function main() {
   ].filter(Boolean);
 
   const contentPages = validatePages(rawPages, routes, tools, registryRoutes, legalSlugs);
+  attachVisual3d(contentPages);
   const docs = buildDocsIndex();
 
   /**
@@ -1306,7 +1358,7 @@ function main() {
       const source = join(from, entry.name);
       const target = join(to, entry.name);
       if (entry.isDirectory()) copyAssets(source, target);
-      else if (/\.(svg|webp|png|ico|webmanifest)$/i.test(entry.name)) {
+      else if (/\.(svg|webp|png|jpe?g|ico|webmanifest)$/i.test(entry.name)) {
         writeFileSync(target, readFileSync(source));
         assetCount += 1;
       }

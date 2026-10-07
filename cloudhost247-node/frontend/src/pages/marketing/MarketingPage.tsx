@@ -7,6 +7,7 @@ import { ProductPlansSection } from '../../components/ProductPlansSection';
 import type { CatalogListResponse, ProductPlansResponse, PublicPlan } from '../../lib/catalog-types';
 import { usePageMeta } from '../../lib/usePageMeta';
 import { findPage, type MarketingItem, type MarketingPage, type MarketingSection } from '../../content/registry';
+import { Illustration } from '../../components/marketing/Illustration';
 
 /**
  * The marketing page renderer.
@@ -29,20 +30,13 @@ const ART = '/media/cloudhost247';
 
 function Visual({ page }: { page: MarketingPage }) {
   return (
-    <figure className="ch-visual" style={{ margin: 0 }}>
-      <img
-        src={`${ART}/${page.visual}.svg`}
-        alt={`CloudHost247 ${page.title} — infrastructure illustration`}
-        width={660}
-        height={520}
-        loading="eager"
-        decoding="async"
-      />
-      <figcaption className="ch-visual__caption">
-        <span>CloudHost247</span>
-        <span>{page.category}</span>
-      </figcaption>
-    </figure>
+    <Illustration
+      visual={page.visual}
+      visual3d={page.visual3d}
+      alt={`CloudHost247 ${page.title} — infrastructure illustration`}
+      caption={{ left: 'CloudHost247', right: page.category }}
+      eager
+    />
   );
 }
 
@@ -182,16 +176,12 @@ function Split({ section }: { section: MarketingSection }) {
           : null}
       </div>
       <div>
-        <div className="ch-visual" style={{ background: 'var(--ch-soft)', borderColor: 'var(--ch-line)' }}>
-          <img
-            src={`${ART}/${(section as { visual?: string }).visual ?? 'hero/infrastructure'}.svg`}
-            alt=""
-            width={660}
-            height={520}
-            loading="lazy"
-            decoding="async"
-          />
-        </div>
+        <Illustration
+          visual={(section as { visual?: string }).visual ?? 'hero/infrastructure'}
+          visual3d={(section as { visual3d?: string }).visual3d}
+          alt=""
+          light
+        />
       </div>
     </div>
   );

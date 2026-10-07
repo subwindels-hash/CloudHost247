@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { usePageMeta } from '../lib/usePageMeta';
 import { getToken } from '../lib/auth';
 import { searchDomains, type SearchResponse } from '../lib/domain-services-api';
@@ -48,13 +48,36 @@ function ServiceCard({ to, icon, title, text, linkLabel, accent, external }: Ser
 export default function DomainsMarketingPage() {
   usePageMeta('Domain Services', 'Search, register, transfer and invest in domain names at CloudHost247.');
   const token = getToken();
-  const [query, setQuery] = useState('');
+  const [params] = useSearchParams();
+  const [query, setQuery] = useState(params.get('q') ?? '');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [search, setSearch] = useState<SearchResponse | null>(null);
 
   // Clean up a stale search result if the user signs out/in mid-session.
   useEffect(() => () => setSearch(null), []);
+
+  // Honour `?q=` from the homepage domain search so the visitor does not have to type twice.
+  useEffect(() => {
+    const incoming = (params.get('q') ?? '').trim();
+    if (!incoming) return undefined;
+    let cancelled = false;
+    setBusy(true);
+    setError('');
+    searchDomains(incoming)
+      .then((response) => {
+        if (!cancelled) setSearch(response);
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err instanceof Error ? err.message : 'The search could not be completed right now.');
+      })
+      .finally(() => {
+        if (!cancelled) setBusy(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [params]);
 
   async function onSearch(event: React.FormEvent) {
     event.preventDefault();
