@@ -22,6 +22,12 @@ that are nonetheless not "the deployment did not land":
   * `WARN no-stale-build-copy` -- the rebuild is live but the *pre-rebuild* entry chunk is still
     being served, which means a stale copy of the old SPA exists in the domain's document root or in
     a CDN cache (LIVE-SITE-DEPLOYMENT.md §3.7, item 2).
+  * `WARN tool-catalogue-answers` -- the catalogue endpoint answers JSON and reports itself
+    degraded, i.e. the database is still unreachable. The catalogue is static and stays usable, so
+    this is a database problem, not a deployment problem. If the endpoint answers with HTML instead,
+    that is a FAIL: something other than the API is answering that path, which is exactly the state
+    that produced "Tools are temporarily unavailable. Unexpected token '<' ..." on every tool page
+    (LIVE-SITE-DEPLOYMENT.md §0.1).
 
 It is read-only: GET requests to public URLs. It never authenticates and never mutates anything.
 
@@ -188,6 +194,36 @@ def main():
         f'GET /ready -> {status} {body.strip()[:90]}'
         + ('' if db_ok else '  <-- catalogue/account pages will show error states and migrations cannot run'),
         warn=True)
+
+    # 9. The tool catalogue answers with JSON. This is the check for the report that every Tool
+    #    Center page said "Tools are temporarily unavailable. Unexpected token '<', "<!doctype "...
+    #    is not valid JSON": that message can only come from a body that is HTML, i.e. the API path
+    #    was answered by something that is not the API (a static copy of the SPA falling back to
+    #    index.html with HTTP 200, which `res.ok` cannot see). The catalogue is a static document
+    #    compiled into the app, so it must answer JSON even when the database is down -- in that
+    #    case with `"degraded": true` and the reason, which is reported as a WARN, not a FAIL.
+    status, body, headers = fetch(base + 'api/tools/catalog')
+    content_type = next((v for k, v in headers.items() if k.lower() == 'content-type'), '')
+    is_json = False
+    try:
+        payload = json.loads(body)
+        is_json = isinstance(payload, dict) and payload.get('success') is True and 'tools' in payload
+    except (ValueError, TypeError):
+        payload = None
+    looks_html = body.lstrip()[:15].lower().startswith(('<!doctype', '<html'))
+    if not is_json:
+        add('tool-catalogue-answers', False,
+            f'GET /api/tools/catalog -> {status} {content_type or "?"}; '
+            + ('an HTML page came back, so something other than the API answered that path '
+               '(tool pages will show a parser error)' if looks_html
+               else f'not the expected JSON: {body.strip()[:80]}'))
+    else:
+        degraded = bool(payload.get('degraded'))
+        reason = (payload.get('degradedReason') or '').strip()
+        add('tool-catalogue-answers', not degraded,
+            f'GET /api/tools/catalog -> {status}, {len(payload.get("tools") or [])} tools'
+            + (f', degraded: {reason[:100]}' if degraded else ''),
+            warn=degraded)
 
     failed = [c for c in checks if not c['ok'] and not c['warn']]
     warnings = [c for c in checks if not c['ok'] and c['warn']]

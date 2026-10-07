@@ -77,6 +77,11 @@ The middle row is the one to expect immediately after the upload if §0's databa
 unresolved: the tools are listed and the reason is stated, which is the honest answer, not a
 dead end. Nothing above requires a migration to have run.
 
+`scripts/verify-live-site.py` checks this directly. `tool-catalogue-answers` fails if
+`GET /api/tools/catalog` comes back as HTML rather than JSON — that is the parser-error state — and
+warns, without changing the deployment verdict, when it comes back as a degraded JSON catalogue
+because the database is still down.
+
 ## 1. What the live host is actually running
 
 The live host is the **Node/TypeScript platform** (`cloudhost247-node/`), not the WHMCS/PHP site.
