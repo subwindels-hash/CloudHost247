@@ -1692,17 +1692,45 @@
           }
         },
         {
-          "label": "DNS Tools",
+          "label": "DNS & Domains Tools",
           "href": {
-            "spa": "/tools/category/dns",
-            "php": "tools/category/dns"
+            "spa": "/tools/category/dns-domains",
+            "php": "tools/category/dns-domains"
           }
         },
         {
-          "label": "IP Tools",
+          "label": "IP & Network Tools",
           "href": {
-            "spa": "/tools/category/ip",
-            "php": "tools/category/ip"
+            "spa": "/tools/category/ip-network",
+            "php": "tools/category/ip-network"
+          }
+        },
+        {
+          "label": "Security Tools",
+          "href": {
+            "spa": "/tools/category/security",
+            "php": "tools/category/security"
+          }
+        },
+        {
+          "label": "SSL Tools",
+          "href": {
+            "spa": "/tools/category/ssl",
+            "php": "tools/category/ssl"
+          }
+        },
+        {
+          "label": "Email Tools",
+          "href": {
+            "spa": "/tools/category/email",
+            "php": "tools/category/email"
+          }
+        },
+        {
+          "label": "Website Tools",
+          "href": {
+            "spa": "/tools/category/website",
+            "php": "tools/category/website"
           }
         },
         {
@@ -1713,45 +1741,24 @@
           }
         },
         {
-          "label": "Designer Tools",
+          "label": "Calculators Tools",
           "href": {
-            "spa": "/tools/category/designer",
-            "php": "tools/category/designer"
+            "spa": "/tools/category/calculators",
+            "php": "tools/category/calculators"
           }
         },
         {
-          "label": "Webmaster Tools",
+          "label": "Utilities Tools",
           "href": {
-            "spa": "/tools/category/webmaster",
-            "php": "tools/category/webmaster"
+            "spa": "/tools/category/utilities",
+            "php": "tools/category/utilities"
           }
         },
         {
-          "label": "Network Tools",
+          "label": "MRZ Generator / MRZ Tools",
           "href": {
-            "spa": "/tools/category/network",
-            "php": "tools/category/network"
-          }
-        },
-        {
-          "label": "Security Tools",
-          "href": {
-            "spa": "/tools/category/cybersecurity",
-            "php": "tools/category/cybersecurity"
-          }
-        },
-        {
-          "label": "Productivity Tools",
-          "href": {
-            "spa": "/tools/category/productivity",
-            "php": "tools/category/productivity"
-          }
-        },
-        {
-          "label": "Gaming Tools",
-          "href": {
-            "spa": "/tools/category/gaming",
-            "php": "tools/category/gaming"
+            "spa": "/tools/mrz-generator",
+            "php": "tools/mrz-generator"
           }
         }
       ]
@@ -1839,6 +1846,13 @@
           "href": {
             "spa": "/offers",
             "php": "offers.php"
+          }
+        },
+        {
+          "label": "Sitemap",
+          "href": {
+            "spa": "/sitemap",
+            "php": "cloudhost247-sitemap.php"
           }
         }
       ]
@@ -2159,16 +2173,40 @@
   ],
   "toolsCategories": [
     {
-      "slug": "dns",
-      "label": "DNS",
+      "slug": "dns-domains",
+      "label": "DNS & Domains",
       "icon": "dns",
       "desc": "Lookups, propagation and zone diagnostics."
     },
     {
-      "slug": "ip",
-      "label": "IP",
-      "icon": "ip",
-      "desc": "Address, subnet and geolocation utilities."
+      "slug": "ip-network",
+      "label": "IP & Network",
+      "icon": "network",
+      "desc": "Addresses, subnets, reachability and routing checks."
+    },
+    {
+      "slug": "security",
+      "label": "Security",
+      "icon": "shield",
+      "desc": "Hashing, verification and safe inspection."
+    },
+    {
+      "slug": "ssl",
+      "label": "SSL",
+      "icon": "lock",
+      "desc": "Certificate, chain and TLS inspection."
+    },
+    {
+      "slug": "email",
+      "label": "Email",
+      "icon": "mail",
+      "desc": "MX, SPF, DKIM and DMARC checks."
+    },
+    {
+      "slug": "website",
+      "label": "Website",
+      "icon": "globe",
+      "desc": "Headers, redirects, links and page checks."
     },
     {
       "slug": "developer",
@@ -2177,46 +2215,16 @@
       "desc": "Encoding, conversion and inspection tools."
     },
     {
-      "slug": "designer",
-      "label": "Designer",
-      "icon": "pen",
-      "desc": "Colour, image and layout helpers."
+      "slug": "calculators",
+      "label": "Calculators",
+      "icon": "chart",
+      "desc": "Subnet, time and conversion calculators."
     },
     {
-      "slug": "webmaster",
-      "label": "Webmaster",
-      "icon": "globe",
-      "desc": "SEO, headers and site checks."
-    },
-    {
-      "slug": "network",
-      "label": "Network",
-      "icon": "network",
-      "desc": "Reachability, ports and routing checks."
-    },
-    {
-      "slug": "cybersecurity",
-      "label": "Cyber Security",
-      "icon": "shield",
-      "desc": "Hashing, verification and safe inspection."
-    },
-    {
-      "slug": "productivity",
-      "label": "Productivity",
-      "icon": "zap",
+      "slug": "utilities",
+      "label": "Utilities",
+      "icon": "wrench",
       "desc": "Everyday generators and converters."
-    },
-    {
-      "slug": "gaming",
-      "label": "Gaming",
-      "icon": "gamepad",
-      "desc": "Server names and community utilities."
-    },
-    {
-      "slug": "document",
-      "label": "Document",
-      "icon": "file-text",
-      "desc": "Document and travel-document utilities."
     }
   ],
   "sitemap": {

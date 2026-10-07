@@ -49,7 +49,17 @@ foreach ($catalog['navigation'] as $menu) {
     $toolsGroup = $menu;
 }
 check($toolsGroup !== null, 'permanent Tools mega menu');
+// The Tools panel is the one menu whose entries are partly live data, so the server-rendered
+// floor is the registry's tool categories (`toolCategories`, rendered by site-nav.tpl) *plus* any
+// statically declared groups. Both are published destinations and both are validated here; the
+// live tools `site.js` appends from /api/tools/navigation are covered by the Node suite.
 $menuLinks = array();
+foreach ($catalog['toolCategories'] as $category) {
+    $menuLinks[] = array(
+        'label' => $category['label'] . ' Tools',
+        'url' => ltrim((string) $category['url'], '/'),
+    );
+}
 foreach ($toolsGroup['groups'] as $group) {
     foreach ($group['links'] as $link) { $menuLinks[] = $link; }
 }
@@ -78,12 +88,16 @@ foreach ($published as $surface => $links) {
         check(!preg_match('~P<[A-Z]{3}[A-Z<]{5,}~', $url), $surface . ' link carries no machine-readable zone: ' . $label);
         if ($url === 'tools' || $url === 'tools/') { continue; }
         if (strpos($url, 'tools/category/') === 0) {
-            // The published footer categories come from the PHP catalogue; the React shell groups by
-            // the node discovery categories. A category link is valid when either registry owns it.
+            // A published category must resolve on the surface a visitor lands on: the theme runtime
+            // (`tools.json`, which the React Tools Center also discovers), or the PHP tools engine.
             $slug = substr($url, strlen('tools/category/'));
             $discovery = ToolsSite::catalog()['categories'];
             $engine = Catalog::categories();
             check(isset($discovery[$slug]) || isset($engine[$slug]), $surface . ' category link resolves: ' . $label);
+            // The theme runtime must own it too, because that is what renders the page a visitor
+            // reaches from the header and the footer. A link only the legacy engine knows would be
+            // a dead end.
+            check(isset($discovery[$slug]), $surface . ' category is served by the theme runtime: ' . $label);
             continue;
         }
         if (strpos($url, 'tools/') === 0) {
@@ -103,11 +117,23 @@ foreach ($footerLinks as $link) {
 }
 check($mrzFooter !== null, 'MRZ tool is published in the footer Tools column');
 check($mrzFooter['label'] === 'MRZ Generator / MRZ Tools', 'MRZ footer link uses the agreed public label');
-$mrzMenu = null;
-foreach ($menuLinks as $link) {
-    if (($link['url'] ?? '') === $mrzUrl) { $mrzMenu = $link; }
+// The Tools panel is catalogue-driven: it publishes category floors server-side and appends the
+// live catalogue (which includes MRZ, keyed by its category) when JavaScript runs. So the check
+// that matters statically is that the menu publishes the category that owns MRZ — a visitor who
+// opens Tools can reach it — while the direct link is pinned on the footer, which is static.
+$mrzTool = null;
+foreach (ToolsSite::catalog()['tools'] as $tool) {
+    if ($tool['slug'] === 'mrz-generator') { $mrzTool = $tool; }
 }
-check($mrzMenu !== null, 'MRZ tool is published in the Tools mega menu');
+check($mrzTool !== null, 'MRZ tool is in the published Tools catalogue');
+check($mrzTool['visibility'] === 'public' && $mrzTool['authRequired'] === false, 'MRZ tool is public and needs no account');
+$mrzMenuReach = false;
+foreach ($menuLinks as $link) {
+    $url = (string) ($link['url'] ?? '');
+    if ($url === $mrzUrl) { $mrzMenuReach = true; }
+    if ($url === 'tools/category/' . $mrzTool['category']) { $mrzMenuReach = true; }
+}
+check($mrzMenuReach, 'MRZ tool is reachable from the Tools mega menu (its category is published)');
 // The published URL must be the clean route: no document number, date of birth or query string.
 check(preg_match('~^tools/mrz-generator$~', $mrzFooter['url']) === 1, 'MRZ footer URL is the clean canonical route');
 

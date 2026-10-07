@@ -8,9 +8,9 @@
  * route sources are their owning database tables, included only when the content is published:
  *
  *   - applications require a published app and published version;
- *   - builder sites appear once `status = 'published'`;
+ *   - builder sites have a published snapshot and `status = 'published'`;
  *   - online stores appear once `status = 'active'`;
- *   - auction details are listed only while an auction is scheduled or live.
+ *   - auctions appear only while scheduled, live or ending soon.
  *
  * Absolute URLs are built from the request's own scheme/host (honouring `X-Forwarded-*`), falling
  * back to the configured `APP_URL`, so the deployed domain is always the one the crawler sees.
@@ -24,6 +24,8 @@ import {
   LEGAL_INDEX,
   MARKETING_ROUTES,
   PUBLIC_DOC_ROUTES,
+  PUBLIC_TOOL_ROUTES,
+  routeExists,
   SITEMAP_POLICY,
 } from '../navigation/mega-menu';
 
@@ -73,16 +75,70 @@ interface SitemapEntry {
  * Entries a crawler may index. Private areas (dashboard, cart, checkout, admin, inbox) are
  * deliberately absent: they require a session, so publishing them would only produce soft-404s.
  */
-async function collectEntries(pool: Queryable | undefined): Promise<SitemapEntry[]> {
-  const staticEntries: SitemapEntry[] = [{ path: '/' }];
-  for (const link of allNavLinks()) {
-    staticEntries.push({ path: link.to });
-  }
+function normalizePath(value: string): string | null {
+  const path = value.trim().split(/[?#]/, 1)[0] ?? '';
+  if (!path.startsWith('/') || path.startsWith('//') || path.includes('://')) return null;
+  const segments = path.split('/').filter(Boolean);
+  if (segments.some((segment) => segment === '.' || segment === '..')) return null;
+  return segments.length ? `/${segments.join('/')}` : '/';
+}
 
+/** Paths denied indexing by the central site registry are never emitted in a sitemap. */
+export function isSitemapPathAllowed(path: string): boolean {
+  const candidate = normalizePath(path);
+  if (!candidate) return false;
+  return !SITEMAP_POLICY.exclude.some((rule) => {
+    const prefix = normalizePath(rule);
+    if (!prefix) return false;
+    return candidate === prefix || candidate.startsWith(`${prefix}/`);
+  });
+}
+
+function publicEntry(path: string, lastModified?: Date | string | null): SitemapEntry | null {
+  const normalized = normalizePath(path);
+  if (!normalized || !isSitemapPathAllowed(normalized) || !routeExists(normalized)) return null;
+  return { path: normalized, lastModified: asIso(lastModified) };
+}
+
+/**
+ * Entries a crawler may index. Static paths come only from generated public registries; dynamic
+ * paths come only from records whose publication state makes their detail route public.
+ */
+async function collectEntries(pool: Queryable | undefined): Promise<SitemapEntry[]> {
+  const staticPaths = [
+    '/',
+    ...MARKETING_ROUTES,
+    ...LEGAL_INDEX.map((document) => document.spa),
+    ...PUBLIC_DOC_ROUTES,
+    ...PUBLIC_TOOL_ROUTES,
+    ...allNavLinks().map((link) => link.to),
+    ...allFooterLinks().map((link) => link.to),
+  ];
+  const staticEntries = staticPaths
+    .map((path) => publicEntry(path))
+    .filter((entry): entry is SitemapEntry => entry !== null);
+
+  const applications = pool ? await safeRows(() =>
+    pool.query<{ slug: string; updated_at: Date | string | null }>(
+      `SELECT a.slug, a.updated_at
+         FROM applications a
+        WHERE a.status = 'published'
+          AND a.slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$'
+          AND EXISTS (
+            SELECT 1
+              FROM application_versions v
+             WHERE v.application_id = a.id AND v.status = 'published'
+          )
+        ORDER BY a.featured DESC, a.popularity DESC, a.name ASC
+        LIMIT ${MAX_DYNAMIC_URLS}`
+    ).then((result) => result.rows)
+  ) : [];
   const sites = pool ? await safeRows(() =>
     pool.query<{ slug: string; updated_at: Date | string | null }>(
       `SELECT slug, updated_at FROM builder_sites
         WHERE status = 'published'
+          AND published_publication_id IS NOT NULL
+          AND slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$'
         ORDER BY updated_at DESC NULLS LAST
         LIMIT ${MAX_DYNAMIC_URLS}`
     ).then((result) => result.rows)
@@ -91,16 +147,28 @@ async function collectEntries(pool: Queryable | undefined): Promise<SitemapEntry
     pool.query<{ slug: string; updated_at: Date | string | null }>(
       `SELECT slug, updated_at FROM store_stores
         WHERE status = 'active'
+          AND slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$'
         ORDER BY updated_at DESC NULLS LAST
         LIMIT ${MAX_DYNAMIC_URLS}`
     ).then((result) => result.rows)
   ) : [];
+  const auctions = pool ? await safeRows(() =>
+    pool.query<{ id: string; updated_at: Date | string | null }>(
+      `SELECT id::text AS id, updated_at FROM domain_auctions
+        WHERE status IN ('scheduled', 'live', 'ending_soon')
+        ORDER BY ends_at ASC
+        LIMIT ${MAX_DYNAMIC_URLS}`
+    ).then((result) => result.rows)
+  ) : [];
 
-  return [
-    ...staticEntries,
-    ...sites.map((row) => ({ path: `/sites/${encodeSegment(row.slug)}`, lastModified: asIso(row.updated_at) })),
-    ...stores.map((row) => ({ path: `/store/${encodeSegment(row.slug)}`, lastModified: asIso(row.updated_at) })),
-  ];
+  const dynamicEntries = [
+    ...applications.map((row) => publicEntry(`/apps/${encodeSegment(row.slug)}`, row.updated_at)),
+    ...sites.map((row) => publicEntry(`/sites/${encodeSegment(row.slug)}`, row.updated_at)),
+    ...stores.map((row) => publicEntry(`/store/${encodeSegment(row.slug)}`, row.updated_at)),
+    ...auctions.map((row) => publicEntry(`/domains/auctions/${encodeSegment(row.id)}`, row.updated_at)),
+  ].filter((entry): entry is SitemapEntry => entry !== null);
+
+  return [...staticEntries, ...dynamicEntries];
 }
 
 function asIso(value: Date | string | null | undefined): string | null {
@@ -125,32 +193,10 @@ function renderSitemap(origin: string, entries: SitemapEntry[]): string {
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>\n`;
 }
 
-/**
- * Private paths, by prefix. These are the routes that either require a session (and therefore
- * answer a redirect or 401 to an anonymous crawler) or exist only as authenticated APIs.
- */
-const DISALLOWED_PREFIXES = [
-  '/api/',
-  '/admin',
-  '/dashboard',
-  '/cart',
-  '/checkout',
-  '/billing',
-  '/invoices',
-  '/account',
-  '/inbox',
-  '/login',
-  '/register',
-  '/forgot-password',
-  '/reset-password',
-  '/verify',
-  '/auth/',
-];
-
 function renderRobots(origin: string): string {
-  const lines = ['User-agent: *', 'Allow: /'];
-  for (const prefix of DISALLOWED_PREFIXES) lines.push(`Disallow: ${prefix}`);
-  lines.push('', '# Absolute URLs, generated from the live navigation and published content');
+  const rules = [...new Set(SITEMAP_POLICY.exclude.filter((rule) => normalizePath(rule)))].sort();
+  const lines = ['User-agent: *', 'Allow: /', ...rules.map((rule) => `Disallow: ${rule}`)];
+  lines.push('', '# Sitemap generated from the public site registries and published records');
   lines.push(`Sitemap: ${origin}/sitemap.xml`, '');
   return lines.join('\n');
 }

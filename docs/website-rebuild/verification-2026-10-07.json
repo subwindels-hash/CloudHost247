@@ -1,0 +1,120 @@
+{
+  "date": "2026-10-07",
+  "branch": "arena/3fdb12d4-cloudhost247",
+  "pull_request": 62,
+  "scope": "Registry-driven sitemap/robots, navigation validation coverage, public (anonymous) tools navigation fetch, canonical tool-category contract across both tool surfaces, published-family assertions, refreshed generated output and inventories.",
+  "registry": {
+    "version": "2.0.0",
+    "mega_menus": 9,
+    "footer_columns": 9,
+    "links_validated": 227,
+    "spa_destinations": 227,
+    "php_destinations": 227,
+    "marketing_pages": 54,
+    "marketing_sections": 116,
+    "faqs": 170,
+    "published_documents": 14,
+    "documentation_bytes": 382000,
+    "tool_categories": 9,
+    "public_tool_routes": 52,
+    "php_theme_pages": 67,
+    "php_theme_pages_enriched": 41,
+    "php_tool_categories_served": 9
+  },
+  "checks": [
+    {
+      "name": "site generator (validation + emit)",
+      "command": "node scripts/site/generate.mjs",
+      "result": "passed",
+      "evidence": "9 mega menus, 9 footer columns, 227 links validated; 54 marketing pages; 14 published documents; generated registry, site.json and route-report.json refreshed"
+    },
+    {
+      "name": "link integrity",
+      "command": "node scripts/site/check-links.mjs",
+      "result": "passed",
+      "evidence": "2175 surfaces, 954 internal, 439 PHP, 5 external, 17 in-page anchors; 0 broken/placeholder/dangling links; 5 informational notes about third-party legal URLs"
+    },
+    {
+      "name": "source navigation/asset gate",
+      "command": "python3 scripts/verify-website.py",
+      "result": "passed",
+      "evidence": "registry_pages=67, navigation_destinations=94, source_errors=[]; HTTP leg not run (WHMCS staging required)"
+    },
+    {
+      "name": "retired-brand audit",
+      "command": "python3 scripts/branding-audit.py",
+      "result": "passed",
+      "evidence": "6913 text files scanned, 0 retired-brand matches, 0 unregistered matches"
+    },
+    {
+      "name": "server typecheck",
+      "command": "npm run typecheck (cloudhost247-node)",
+      "result": "passed"
+    },
+    {
+      "name": "frontend typecheck",
+      "command": "npx tsc -p frontend/tsconfig.json --noEmit",
+      "result": "passed"
+    },
+    {
+      "name": "build (server + frontend + tools)",
+      "command": "npm run build (cloudhost247-node)",
+      "result": "passed",
+      "evidence": "Vite production build for the SPA, the platform server and the tools bundle"
+    },
+    {
+      "name": "node test suite",
+      "command": "npm test (cloudhost247-node)",
+      "result": "passed",
+      "evidence": "136 test files, 1634 tests, 0 failures, 1024s (re-run after the tool-category fix)"
+    },
+    {
+      "name": "php website suite (WASM PHP 8.2)",
+      "command": "scripts/php-wasm/php tests/website/run.php",
+      "result": "passed",
+      "evidence": "56 assertions, 0 failed"
+    },
+    {
+      "name": "php theme suite (WASM PHP 8.2)",
+      "command": "scripts/php-wasm/php -d display_errors=1 tests/theme/run.php",
+      "result": "passed",
+      "evidence": "60 assertions, 0 failed"
+    },
+    {
+      "name": "php syntax check (tokenizer gate)",
+      "command": "node scripts/php-syntax-check.cjs <changed php + theme lib>",
+      "result": "passed"
+    },
+    {
+      "name": "production archive",
+      "command": "python3 scripts/build-production-zip.py --skip-build --verify",
+      "result": "passed",
+      "evidence": "CloudHost247-release/CloudHost247-production-1.0.0.zip, 7888 members, 58020100 bytes, 161 media assets, 14 published documents, 0 secret matches; extraction verified"
+    },
+    {
+      "name": "release-candidate gate (full source verification)",
+      "command": "PATH=<php-wasm shim>:$PATH PHP_LINT_JOBS=4 bash scripts/release-candidate-check.sh",
+      "result": "passed",
+      "evidence": "git diff --check clean; every first-party PHP target linted with PHP 8.2 (WASM); 18 PHP behavioural suites; server-agent Node suite; 22 python static suites; retired-brand audit; vendor integrity baseline; tools projection, tools build and the website gates. Output: \"Release-candidate source verification passed.\""
+    }
+  ],
+  "not_run": [
+    "WHMCS staging HTTP verification of the root PHP routes (licensed runtime and production database absent)",
+    "Browser-level responsive and accessibility QA (no browser binary in this environment)",
+    "Visual review of the PHP page templates rebuilt on the earlier branch"
+  ],
+  "open_items": [
+    "docs/website-rebuild/verification-summary.json is historical evidence from arena/ad9fd719-cloudhost247 and must not be read as current-branch evidence.",
+    "The published documentation set includes docs/NODE_PLATFORM_STATUS.md, which references internal pull-request state; decide whether it stays public.",
+    "The PHP sitemap entry points (cloudhost247-sitemap.php, tools-sitemap.php, builder-sitemap.php) still build their own lists; they have not yet been pointed at the registry policy the Node sitemap now enforces.",
+    "scripts/generate-global-platform.py still maintains the legacy tools-public.json category set; it is accepted as a secondary source but should be retired once nothing reads it.",
+    "The far larger rebuild brief (per-page PHP visual regeneration, the 3D illustration system, browser-level responsive/a11y QA) is not part of this changeset."
+  ],
+  "findings_fixed": [
+    "Nine of the ten tool-category links published by the header and footer pointed at slugs no engine could resolve (the registry carried the legacy PHP engine's slugs, while the theme runtime and the React Tools Center both serve the discovery categories). The registry now publishes dns-domains, ip-network, security, ssl, email, website, developer, calculators and utilities, and a new Node test pins every published category to a non-empty catalogue category.",
+    "The Tools mega menu published zero links on the PHP surface (empty groups) and the PHP integration suite failed on it; the menu now publishes the nine server-rendered category floors, and the suite validates all of them.",
+    "The MRZ tool - a registered, public, browser-only tool - was missing from the PHP footer Tools column. It is now published with the agreed label.",
+    "The generator and scripts/verify-website.py validated PHP tool destinations against the legacy tools-public.json only; both now accept the authoritative theme projection tools.json (the file the PHP runtime reads) as well.",
+    "The PHP website suite asserted 'all seven mega menu categories'; it now pins the nine published families by id, matching the SPA."
+  ]
+}

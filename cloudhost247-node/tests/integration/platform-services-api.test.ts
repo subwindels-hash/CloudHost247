@@ -7,7 +7,8 @@ import { PgliteClient } from '../../database/db-client';
 import { migrateUp } from '../../database/migrate';
 import { signAuthToken } from '../../src/lib/jwt';
 import { hashPassword } from '../../src/lib/password';
-import { routeExists } from '../../src/navigation/mega-menu';
+import { routeExists, TOOLS_CATEGORIES } from '../../src/navigation/mega-menu';
+import { DISCOVERY_CATEGORIES, TOOL_CATALOG } from '../../src/tools/catalog';
 import { withTransaction } from '../../src/db/transaction';
 import { findOrderById } from '../../src/db/orders';
 import { provisionPaidOrder } from '../../src/services/provisioning-service';
@@ -132,6 +133,27 @@ describe('CLOUDHOST247 platform services', () => {
     for (const section of body.sections) {
       const badges = section.groups.flatMap((group) => group.links).filter((link) => link.badge);
       expect(badges.length).toBeLessThanOrEqual(2);
+    }
+  });
+
+  /**
+   * The registry's tool categories are published as the Tools mega menu and the footer's Tools
+   * column. Before this was pinned, the registry carried the *legacy* PHP engine's category slugs:
+   * nine of the ten links pointed at `/tools/category/…` routes the Tools Center cannot resolve, so
+   * every one of them landed on an empty catalogue. The contract below is what makes the one
+   * registry/one route set claim true for tools as well.
+   */
+  it('publishes only tool categories the Tools Center can actually serve', async () => {
+    expect(TOOLS_CATEGORIES.length).toBeGreaterThan(0);
+    const slugs = TOOLS_CATEGORIES.map((category) => category.slug);
+    expect(new Set(slugs).size).toBe(slugs.length); // no duplicate destination
+
+    for (const category of TOOLS_CATEGORIES) {
+      expect(Object.keys(DISCOVERY_CATEGORIES), category.slug).toContain(category.slug);
+      // A category page with no tools is an empty page; the catalogue must own at least one entry.
+      const entries = TOOL_CATALOG.filter((tool) => tool.discoveryCategories?.includes(category.slug));
+      expect(entries.length, `${category.slug} has no tools`).toBeGreaterThan(0);
+      expect(routeExists(`/tools/category/${category.slug}`), category.slug).toBe(true);
     }
   });
 

@@ -30,7 +30,22 @@ $repository->publishContent(1);
 $tests['reviewed draft publishes without changing its body'] = PublicPage::resolve('web-hosting')['body'] === 'NEVER PUBLIC';
 try { $repository->publishContent(9999); $missingRejected = false; } catch (\InvalidArgumentException $e) { $missingRejected = true; }
 $tests['publishing a missing record is refused'] = $missingRejected;
-$tests['registry has all seven mega menu categories'] = count(Site::catalog()['navigation']) === 7;
+// The PHP theme registry and the SPA both render `shared/site/registry.json`, so the published
+// product families are asserted by id — the same contract the navigation API test pins — rather
+// than by a count that silently drifts every time a family is added.
+$families = array_map(function ($menu) { return isset($menu['id']) ? $menu['id'] : null; }, Site::catalog()['navigation']);
+$tests['registry publishes every mega menu family'] = $families === array(
+    'hosting', 'cloud', 'domains', 'platforms', 'developers', 'websites', 'tools', 'resources', 'support',
+);
+$tests['every mega menu family has a title and description'] = count(array_filter(Site::catalog()['navigation'], function ($menu) {
+    return trim((string) $menu['title']) === '' || trim((string) $menu['description']) === '';
+})) === 0;
+$tests['only the tools menu may be groups-free'] = count(array_filter(Site::catalog()['navigation'], function ($menu) {
+    return count($menu['groups']) === 0 && $menu['id'] !== 'tools';
+})) === 0;
+$tests['footer columns are all populated'] = count(array_filter(Site::catalog()['footer'], function ($column) {
+    return count($column['links']) === 0;
+})) === 0;
 // Exercise actual repository reads, including localization and a failed database.
 ch247_theme_fresh();
 $pages = PublicDiscovery::pages($repository);

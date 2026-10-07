@@ -1528,13 +1528,13 @@
       "route": "/developers",
       "title": "Developer Platform",
       "category": "Developers",
-      "seoTitle": "CloudHost247 Developer Platform — Runtimes, Deployment, APIs",
-      "description": "Build on CloudHost247: supported runtimes, Git-based deployment, per-application environments, APIs, DNS and the observability to run it in production.",
+      "seoTitle": "Developer Platform — Applications, APIs & Deployment | CloudHost247",
+      "description": "Developer services on CloudHost247: supported runtimes, deployment records, per-app settings, APIs and docs. Availability follows the live catalogue.",
       "visual": "deployment/developer-hosting",
       "hero": {
         "kicker": "Developers",
         "heading": "Infrastructure that gets out of the way",
-        "lede": "Runtimes that match the code you already write, deployment driven from Git, configuration held outside the repository, and logs where you expect them.",
+        "lede": "Build around the services CloudHost247 actually operates: supported application deployments, per-app configuration and documented APIs. Runtime, panel and source-build availability depends on the selected product.",
         "ctas": [
           {
             "label": "See deployment",
@@ -1548,10 +1548,10 @@
           }
         ],
         "points": [
-          "Node.js, PHP, Python, Laravel",
-          "Deploy from Git",
-          "Environments and secrets",
-          "APIs for automation"
+          "Supported runtimes and services",
+          "Recorded application deployments",
+          "Environment configuration",
+          "Documented APIs"
         ]
       },
       "sections": [
@@ -1606,7 +1606,7 @@
             {
               "icon": "git-branch",
               "title": "Deployment",
-              "body": "Builds, releases, rollbacks and records.",
+              "body": "Supported application installs and updates, with recorded status, steps and available recovery.",
               "to": "/developers/deployment"
             },
             {
@@ -1686,19 +1686,19 @@
     },
     {
       "route": "/developers/deployment",
-      "title": "Deployment",
+      "title": "Application Deployment",
       "category": "Developers",
-      "seoTitle": "Git-Based Deployment Platform | CloudHost247",
-      "description": "Deploy from Git on CloudHost247: builds from your repository, releases with environment configuration, build and runtime logs, and recorded rollbacks.",
+      "seoTitle": "Application Deployment & Operations | CloudHost247",
+      "description": "Operate supported CloudHost247 application installs and updates with deployment status, step events, per-application configuration and recovery where supported.",
       "visual": "deployment/deployment-pipeline",
       "hero": {
         "kicker": "Developers",
-        "heading": "A deployment you can describe afterwards",
-        "lede": "Every deployment is a record: which repository, which revision, what the build produced, and whether it succeeded — so a regression has a starting point instead of a story.",
+        "heading": "A deployment you can inspect afterwards",
+        "lede": "CloudHost247 records supported application installs and updates against the services they change. Follow the deployment status and step events, then inspect the application configuration and recovery options available for that operation.",
         "ctas": [
           {
-            "label": "Open deployments",
-            "to": "/dashboard/apps",
+            "label": "Browse applications",
+            "to": "/apps",
             "variant": "primary"
           },
           {
@@ -1708,95 +1708,95 @@
           }
         ],
         "points": [
-          "Builds from a repository",
-          "Release records",
-          "Build and runtime logs",
-          "Rollback path"
+          "Published application versions",
+          "Recorded status and deployment steps",
+          "Configuration per application",
+          "Recovery where supported"
         ]
       },
       "sections": [
         {
           "type": "steps",
-          "kicker": "The pipeline",
-          "heading": "What happens on a deployment",
+          "kicker": "The deployment flow",
+          "heading": "What happens to a supported application",
           "items": [
             {
-              "title": "Source",
-              "body": "A deployment names the repository and the revision it builds. Nothing is deployed from a file someone edited on the server."
+              "title": "Choose a published application",
+              "body": "Select an application and version that the live marketplace marks as published. The native deployment flow uses that version’s stored manifest."
             },
             {
-              "title": "Build",
-              "body": "Dependencies are installed and the build command runs in an isolated step, and its output is kept against the deployment."
+              "title": "Validate the target",
+              "body": "The worker checks the application version, target server, supported hosting type and available capacity before provisioning."
             },
             {
-              "title": "Release",
-              "body": "A successful build becomes the running release, with the application's environment configuration applied."
+              "title": "Provision and record",
+              "body": "The deployment uses the configured image and resources, then records the operation status, step state and events against the installation."
             },
             {
-              "title": "Observe",
-              "body": "Runtime logs and resource telemetry attach to the same service, so whether a change fixed anything is a question with an answer."
+              "title": "Review the outcome",
+              "body": "Inspect the deployment record and application logs. If a supported infrastructure step fails, the worker attempts to reverse completed steps and records the result."
             }
           ]
         },
         {
           "type": "features",
           "kicker": "Properties worth having",
-          "heading": "What the platform guarantees about a deployment",
+          "heading": "What the deployment workflow records",
           "items": [
             {
               "icon": "file-text",
               "title": "It is recorded",
-              "body": "The deployment exists as a durable record with its status, its source revision and its logs — not as a transient terminal session."
+              "body": "Each operation has a durable status, step states and event history rather than disappearing with a terminal session."
             },
             {
               "icon": "refresh",
-              "title": "It is repeatable",
-              "body": "Because the build starts from a revision, running it again produces the same result rather than depending on machine state."
+              "title": "Versions are explicit",
+              "body": "Native deployments use a published application version and its stored manifest; an arbitrary repository commit is not implied."
             },
             {
               "icon": "key",
-              "title": "Secrets stay out of the build",
-              "body": "Environment configuration is applied at release rather than committed, so a repository can be shared without leaking credentials."
+              "title": "Configuration is separate",
+              "body": "Application environment values are managed per installation; sensitive values are encrypted in storage and omitted from API responses."
             },
             {
               "icon": "activity",
               "title": "Failure is visible",
-              "body": "A failed build is a failed deployment with its output kept, not a silence followed by an unchanged website."
+              "body": "A failed operation is recorded with its error and event history. The worker attempts to reverse completed infrastructure steps where it can."
             },
             {
               "icon": "layers",
               "title": "Scoped per application",
-              "body": "Deployments belong to an application, so releasing one does not touch another."
+              "body": "Installations and deployment records are linked to the application and server they operate on."
             },
             {
               "icon": "clock",
               "title": "Tracked over time",
-              "body": "The deployment history shows what changed and when, which is the first thing anyone needs during an incident."
+              "body": "The deployment history shows which supported operation ran and when."
             }
           ]
         },
         {
           "type": "note",
-          "heading": "Continuous integration is not bundled",
-          "body": "The platform deploys; it does not run your test suite. Run tests in your own pipeline and let it trigger a deployment through the API — that keeps the check that matters (your tests) where you can see it."
+          "heading": "Git builds and CI are separate capabilities",
+          "body": "The core application deployment queue does not clone arbitrary Git repositories, run build commands or execute test suites. It deploys published application versions and their configured images. Git-based builds depend on a control-panel integration that is enabled for the selected service; check the live panel catalogue before ordering. Run tests in your own CI system."
         }
       ],
       "faqs": [
         {
           "q": "Can I deploy on every commit?",
-          "a": "Yes, by triggering a deployment from your pipeline. The platform records each one, so automatic deployment does not mean invisible deployment."
+          "a": "Not through the core deployment queue: it does not watch Git repositories or run CI. A configured Git-enabled control panel may provide commit-triggered deployments; otherwise use your own CI and the supported platform API where available."
         },
         {
           "q": "What happens if a deployment fails?",
-          "a": "The previous release keeps running and the failed deployment is recorded with its build output, so the application is not left half-updated."
+          "a": "The operation is recorded. The worker attempts to reverse completed infrastructure steps, but recovery of a previous application version depends on the operation and provider."
         },
         {
-          "q": "Are the logs kept after a deployment finishes?",
-          "a": "Yes. Build and runtime logs are attached to the deployment and the service."
+          "q": "Are deployment logs kept?",
+          "a": "The deployment record keeps status, step states and event history. Source-build logs are available only if the selected Git-enabled panel provides them."
         },
         {
-          "q": "Can I deploy the same repository twice?",
-          "a": "Yes — that is how you run separate staging and production environments from one codebase, with different configuration and domains."
+          "q": "Can I use the same application in staging and production?",
+          "a": "You can create separate application installations with distinct configuration and domains, subject to the services and capacity available in your account."
         }
       ],
       "related": [
@@ -1924,7 +1924,7 @@
       "title": "Node.js Hosting",
       "category": "Developers",
       "seoTitle": "Node.js Application Hosting | CloudHost247",
-      "description": "Host Node.js applications on CloudHost247: managed process supervision, environment configuration, WebSocket-capable routing, logs and deployment from Git.",
+      "description": "Node.js hosting on CloudHost247: review available runtimes and product integrations for process supervision, environment configuration, application logs and domains.",
       "visual": "deployment/nodejs",
       "hero": {
         "kicker": "Runtime",
@@ -1932,7 +1932,7 @@
         "lede": "A Node application is a process that has to stay up. The platform supervises it, restarts it when it fails, keeps its logs and routes a domain to it.",
         "ctas": [
           {
-            "label": "Deploy from Git",
+            "label": "View deployment options",
             "to": "/developers/deployment",
             "variant": "primary"
           },
@@ -1973,7 +1973,7 @@
             {
               "icon": "git-branch",
               "title": "Deployment",
-              "body": "Build from a repository, apply configuration, release — with the build output kept for the record."
+              "body": "Native application deployments install published versions and configured images. Git source builds depend on an enabled control-panel integration."
             },
             {
               "icon": "database",
@@ -2021,7 +2021,7 @@
       "title": "PHP Hosting",
       "category": "Developers",
       "seoTitle": "PHP Hosting & Application Runtime | CloudHost247",
-      "description": "Host PHP applications on CloudHost247: maintained PHP runtimes, Composer, databases, cron jobs, OPcache and deployment from Git.",
+      "description": "PHP hosting on CloudHost247: review available runtime versions, Composer, databases and scheduled-task support in the selected hosting product.",
       "visual": "deployment/php",
       "hero": {
         "kicker": "Runtime",
@@ -2080,7 +2080,7 @@
             {
               "icon": "git-branch",
               "title": "Deployment",
-              "body": "Deploy from a repository instead of uploading changed files over FTP."
+              "body": "Use the deployment method available on the selected hosting plan. Native application deployments install published images; source builds depend on a configured control-panel integration."
             }
           ]
         },
@@ -2224,7 +2224,7 @@
       "title": "Laravel Hosting",
       "category": "Developers",
       "seoTitle": "Laravel Hosting — Queues, Scheduler, Storage | CloudHost247",
-      "description": "Host Laravel on CloudHost247 with the pieces a Laravel application actually needs: queue workers, scheduler cron, storage, databases and Git deployment.",
+      "description": "Laravel hosting on CloudHost247 with the application services a Laravel site may need: queue workers, scheduler jobs, storage and database options.",
       "visual": "deployment/laravel",
       "hero": {
         "kicker": "Runtime",
@@ -2429,7 +2429,7 @@
         },
         {
           "q": "Is image building supported?",
-          "a": "Building from a repository is supported through the deployment platform; otherwise build the image in your own pipeline and deploy the resulting tag."
+          "a": "The core deployment flow installs published application versions from configured images; it does not build arbitrary repositories. A Git-enabled control panel may support source builds when that integration is configured for your service."
         },
         {
           "q": "Do you provide a container registry?",
@@ -3310,13 +3310,13 @@
       "route": "/hosting/developer",
       "title": "Developer Hosting",
       "category": "Hosting",
-      "seoTitle": "Developer Hosting — Runtimes, Git and APIs | CloudHost247",
-      "description": "Developer hosting from CloudHost247: runtimes, SSH, Git-based deployment, environment variables, logs and APIs, without a control panel in the way.",
+      "seoTitle": "Developer Hosting & Runtime Options | CloudHost247",
+      "description": "Developer hosting from CloudHost247: check available runtimes, SSH, configuration and logs in the product catalogue. Git support depends on the selected panel.",
       "visual": "deployment/developer-hosting",
       "hero": {
         "kicker": "Developers",
         "heading": "Hosting shaped around your code",
-        "lede": "Runtimes, shell access, deployment from Git, environment configuration and real logs — the parts developers actually use, rather than a button that overwrites your application.",
+        "lede": "Choose a published hosting or deployment product. Runtime versions, SSH access and repository integrations vary by service; check the live catalogue and selected product details.",
         "ctas": [
           {
             "label": "See the deployment platform",
@@ -3330,10 +3330,10 @@
           }
         ],
         "points": [
-          "Node.js, PHP, Python",
-          "SSH and Git access",
-          "Environment variables",
-          "Deployment logs"
+          "Runtimes listed in the catalogue",
+          "SSH where the plan allows",
+          "Configuration options per service",
+          "Deployment records and logs"
         ]
       },
       "sections": [
@@ -3345,12 +3345,12 @@
             {
               "icon": "terminal",
               "title": "Shell access",
-              "body": "SSH into the environment to install dependencies and run the commands your workflow needs."
+              "body": "SSH access is available on hosting products that include it; the selected plan and its access policy determine the scope."
             },
             {
               "icon": "git-branch",
-              "title": "Deploy from Git",
-              "body": "Connect a repository and let the platform build and release it, with the build output kept on the deployment record."
+              "title": "Deployment options",
+              "body": "The core platform deploys published application versions and configured images. Git-based source builds require an enabled control-panel integration."
             },
             {
               "icon": "settings",
@@ -3360,12 +3360,12 @@
             {
               "icon": "file-text",
               "title": "Logs you can read",
-              "body": "Application and build logs are available on the deployment itself, rather than only in a support reply."
+              "body": "Application logs are available through the service interfaces that expose them; source-build output depends on the selected deployment integration."
             },
             {
               "icon": "api",
               "title": "APIs for automation",
-              "body": "Manage services, domains and deployments through HTTP APIs so provisioning can live in your pipeline."
+              "body": "Authenticated APIs support selected service and deployment operations; consult the published API documentation for each endpoint."
             },
             {
               "icon": "activity",
@@ -3435,7 +3435,7 @@
         },
         {
           "q": "Can I deploy with CI/CD?",
-          "a": "Deployments are driven by the platform's deployment records, and the HTTP APIs let an existing pipeline trigger them. Whether to build a full pipeline is your choice."
+          "a": "The core deployment service does not run CI or watch Git repositories. APIs can trigger supported operations; Git-based commit triggers depend on an enabled control-panel integration."
         },
         {
           "q": "Where do secrets live?",
@@ -3456,12 +3456,12 @@
       "title": "API Hosting",
       "category": "Hosting",
       "seoTitle": "API Hosting — HTTPS APIs, Rate Control, Monitoring | CloudHost247",
-      "description": "Host an HTTP API on CloudHost247 with TLS, environment-based secrets, rate limiting, logs and monitoring — on the same platform as your applications.",
+      "description": "Host HTTP APIs on CloudHost247 using an available runtime or container product; confirm TLS, network controls, logs and monitoring in the selected service catalogue.",
       "visual": "deployment/api",
       "hero": {
         "kicker": "Developers",
         "heading": "Host the API your product depends on",
-        "lede": "An HTTP API needs four things to be taken seriously: TLS, secrets that are not in the code, limits that protect it, and visibility when it misbehaves. All four are part of the platform.",
+        "lede": "Choose a hosting or application service that matches your API runtime. TLS, secrets, network controls and monitoring depend on the published plan and its configured integrations.",
         "ctas": [
           {
             "label": "Deploy an API",
@@ -3490,7 +3490,7 @@
             {
               "icon": "lock",
               "title": "TLS everywhere",
-              "body": "Certificates issued and renewed automatically, with the option to force HTTPS so a token is never sent in the clear."
+              "body": "TLS is available on services and domains where the selected hosting product is configured to issue or accept certificates."
             },
             {
               "icon": "key",
@@ -3500,7 +3500,7 @@
             {
               "icon": "gauge",
               "title": "Rate limiting",
-              "body": "Request limiting protects the service from a runaway client — and from a bill caused by one."
+              "body": "Network and application rate controls depend on the selected product and its configured integrations; review the service details before designing around them."
             },
             {
               "icon": "file-text",
@@ -3515,7 +3515,7 @@
             {
               "icon": "activity",
               "title": "Uptime and latency signals",
-              "body": "The service is watched, so a regression shows up as a measurement rather than as a customer complaint."
+              "body": "Monitoring coverage varies by service. The platform status and product pages identify the checks the current deployment can genuinely perform."
             }
           ]
         },
@@ -3525,8 +3525,8 @@
           "heading": "Get an endpoint live",
           "items": [
             {
-              "title": "Connect the repository",
-              "body": "Point the platform at the code that implements the API. The build runs from the repository, not from a file you uploaded by hand."
+              "title": "Choose a deployment method",
+              "body": "The core deployment queue uses published application versions and configured images. Git source builds require a selected control-panel integration that explicitly supports them."
             },
             {
               "title": "Configure the environment",
@@ -3547,7 +3547,7 @@
       "faqs": [
         {
           "q": "Which languages can I write the API in?",
-          "a": "Whichever of the supported runtimes suits you — Node.js, PHP and Python are the documented runtimes, and containerised deployments cover most other stacks."
+          "a": "Use a runtime or container product that is currently published and configured for the application you plan to run; check its service details before committing to a migration."
         },
         {
           "q": "Can I restrict who can call the API?",
@@ -3997,13 +3997,13 @@
       "route": "/platforms",
       "title": "Platforms",
       "category": "Platform",
-      "seoTitle": "Application Platform, Databases, Containers & PaaS | CloudHost247",
-      "description": "The CloudHost247 application platform: an installable application catalogue, managed databases, containers and Docker, and a push-to-deploy PaaS layer.",
+      "seoTitle": "Application Platform, Databases, Containers & Deployment | CloudHost247",
+      "description": "Published apps, managed databases, containers and deployment records on CloudHost247. Git source builds depend on a configured control-panel integration.",
       "visual": "applications/application-stack",
       "hero": {
         "kicker": "Platforms",
         "heading": "Run applications without running the plumbing",
-        "lede": "Install a known application from a catalogue the platform can actually deploy, bring your own container, or push code and let the platform release it.",
+        "lede": "Install a published application version or use a supported container workflow. Source builds, Git triggers and orchestration depend on the deployment product configured for your service.",
         "ctas": [
           {
             "label": "Browse applications",
@@ -4017,10 +4017,10 @@
           }
         ],
         "points": [
-          "Installable application catalogue",
+          "Published application catalogue",
           "Managed databases",
           "Containers and volumes",
-          "Push-to-deploy PaaS"
+          "Recorded deployment operations"
         ]
       },
       "sections": [
@@ -4056,13 +4056,13 @@
             {
               "icon": "rocket",
               "title": "PaaS",
-              "body": "Push an application to a repository and let the platform build and release it.",
+              "body": "Manage supported application deployments, environment settings and recorded outcomes; Git source builds depend on an enabled panel integration.",
               "to": "/platforms/paas"
             },
             {
               "icon": "git-branch",
               "title": "Deployment Platform",
-              "body": "Build logs, releases, rollbacks and per-application configuration.",
+              "body": "Track supported installs and updates with deployment status, step events and available recovery.",
               "to": "/developers/deployment"
             }
           ]
@@ -4094,11 +4094,11 @@
         },
         {
           "q": "Can I install an application that is not in the catalogue?",
-          "a": "Yes, by deploying it yourself: bring a container image or a repository and run it on your own infrastructure."
+          "a": "The native deployment flow requires an application version published in the marketplace. A custom image or Git repository is available only through a configured product integration that explicitly supports it; check the live control-panel catalogue."
         },
         {
           "q": "Do you support Kubernetes?",
-          "a": "No. Kubernetes is not part of what this platform provisions, and claiming it would be misleading. Containers and Docker are supported as described here."
+          "a": "Kubernetes adapter code exists, but production cluster configuration has not been verified. Kubernetes is not advertised as an orderable product; check the live catalogue for services actually configured."
         }
       ],
       "related": [
@@ -4417,15 +4417,15 @@
     },
     {
       "route": "/platforms/paas",
-      "title": "PaaS",
+      "title": "PaaS & Deployment Workflows",
       "category": "Platform",
-      "seoTitle": "Push-to-Deploy PaaS Platform | CloudHost247",
-      "description": "CloudHost247 PaaS: connect a repository, build it, release it, and route a domain to it — with build logs, environment configuration and rollbacks.",
+      "seoTitle": "Application Deployment Workflows | CloudHost247",
+      "description": "Manage supported application deployments with recorded steps and per-app settings. Git source builds require an enabled control-panel integration.",
       "visual": "deployment/paas",
       "hero": {
         "kicker": "Platform",
-        "heading": "Push code, get a running application",
-        "lede": "The platform builds from your repository, releases the result, and keeps the record of what was built and when — so a bad release has a place to roll back to.",
+        "heading": "A managed path from published app to service",
+        "lede": "The native deployment worker validates a published application version and its target, provisions the configured image and records the operation. It does not clone arbitrary Git repositories or run build commands.",
         "ctas": [
           {
             "label": "See deployment",
@@ -4439,82 +4439,86 @@
           }
         ],
         "points": [
-          "Build from a repository",
-          "Release and roll back",
-          "Environment configuration",
-          "Per-application domain"
+          "Published application versions",
+          "Recorded install and update steps",
+          "Configuration per application",
+          "Git support only through enabled panels"
         ]
       },
       "sections": [
         {
           "type": "features",
           "kicker": "The platform layer",
-          "heading": "What the PaaS handles for you",
+          "heading": "What the native deployment flow handles",
           "items": [
             {
-              "icon": "git-branch",
-              "title": "Build from source",
-              "body": "The build runs from the repository, so the deployed artefact is derived from a commit you can name."
+              "icon": "app",
+              "title": "Published application versions",
+              "body": "The marketplace exposes versions that have been published with a validated deployment manifest and configured image."
             },
             {
-              "icon": "rocket",
-              "title": "Release",
-              "body": "A build that succeeds becomes a release tied to the deployment record, with its environment configuration."
+              "icon": "file-text",
+              "title": "Deployment records",
+              "body": "Installs and updates produce a durable record with status, step states and event history."
             },
             {
               "icon": "refresh",
-              "title": "Roll back",
-              "body": "Because releases are recorded, returning to a previous state is a decision rather than a rebuild from memory."
+              "title": "Failure handling",
+              "body": "When an infrastructure step fails, the worker attempts to reverse completed steps and records whether recovery succeeded."
             },
             {
               "icon": "settings",
-              "title": "Configuration per environment",
-              "body": "Variables and secrets live with the application, not in the repository."
+              "title": "Configuration per application",
+              "body": "Environment values and secrets are managed per installation, separately from the published application manifest."
             },
             {
               "icon": "globe",
               "title": "Routing",
-              "body": "Domains map to applications, with certificates issued per hostname."
+              "body": "Domains and certificates can be attached where the selected service and provider support them."
             },
             {
               "icon": "file-text",
               "title": "Logs",
-              "body": "Build output and runtime output are both kept, which is the difference between guessing and knowing."
+              "body": "Deployment events and application logs are available through their respective service records; source-build output depends on a Git-enabled panel."
             }
           ]
         },
         {
           "type": "steps",
           "kicker": "Adopting it",
-          "heading": "Three things to have ready",
+          "heading": "Use the published deployment path",
           "items": [
             {
-              "title": "A repository",
-              "body": "Your source, with whatever build configuration your stack needs — a dependency manifest, a build command."
+              "title": "Select a published application",
+              "body": "Choose an application version the live catalogue makes available for deployment."
             },
             {
-              "title": "The environment values",
-              "body": "Connection strings, keys and flags the application expects, ready to set as configuration."
+              "title": "Validate the target",
+              "body": "The platform checks the selected server, supported hosting type and capacity before it changes infrastructure."
             },
             {
-              "title": "A domain",
-              "body": "Either registered with us or pointing at us, so the released application has an address."
+              "title": "Provision the configured image",
+              "body": "The worker deploys the image and resources described by that application version’s manifest."
+            },
+            {
+              "title": "Inspect the record",
+              "body": "Review status, step states, event history and any recovery result in the deployment record."
             }
           ]
         }
       ],
       "faqs": [
         {
-          "q": "Which buildpacks or stacks are supported?",
-          "a": "The supported runtimes are Node.js, PHP, Python and Laravel, plus container deployments for anything else. Rather than listing buildpacks that may not be configured, the platform shows what a deployment supports."
+          "q": "Which applications can this workflow deploy?",
+          "a": "The native workflow deploys only application versions published in the live marketplace with a valid manifest and configured image."
         },
         {
-          "q": "Can I run the same application in two environments?",
-          "a": "Yes. Two applications can be created from the same repository with different configuration and different domains."
+          "q": "Can I deploy a new Git commit directly?",
+          "a": "Not through the native deployment queue. It does not clone repositories or build arbitrary source. Git workflows are available only through a configured control-panel integration that lists that capability."
         },
         {
           "q": "Does this replace my CI pipeline?",
-          "a": "No. It replaces deployment, not continuous integration. The platform's APIs let an existing pipeline trigger a deployment."
+          "a": "No. The native flow does not run test suites or provide continuous integration. Use your own CI and, where supported, a configured integration to trigger deployment."
         }
       ],
       "related": [

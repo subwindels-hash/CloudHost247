@@ -250,7 +250,7 @@ function tsString(value) {
   return `'${String(value).replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
 }
 
-function emitRegistryTs(registry, spaRoutePatterns, marketingRoutes, publicDocRoutes) {
+function emitRegistryTs(registry, spaRoutePatterns, marketingRoutes, publicDocRoutes, publicToolRoutes) {
   const banner = `/**
  * GENERATED FILE — do not edit.
  *
@@ -367,6 +367,9 @@ export const MARKETING_ROUTES: string[] = ${json(marketingRoutes)};
 /** Public documentation routes built from the same published-doc list as the Docs index. */
 export const PUBLIC_DOC_ROUTES: string[] = ${json(publicDocRoutes)};
 
+/** Public tool routes taken from the live tool catalogue; account-only tools are excluded. */
+export const PUBLIC_TOOL_ROUTES: string[] = ${json(publicToolRoutes)};
+
 /** Every route the registry publishes, in menu order — the sitemap and audits read this. */
 export const REGISTRY_ROUTES: string[] = ${json([
     '/',
@@ -469,6 +472,9 @@ function decoratePhpPages(previous, contentPages, registry) {
 
 function emitPhpSiteJson(registry, previous, contentPages) {
   const navigation = registry.menus.map((menu) => ({
+    // `id` is carried through so the PHP surface can assert the same published families the SPA
+    // asserts, instead of guessing from a translated title.
+    id: menu.id,
     title: menu.label,
     description: menu.blurb,
     groups: (menu.columns ?? []).map((column) => ({
@@ -657,10 +663,25 @@ function main() {
   const tools = toolPaths();
   const pages = phpPages();
   const phpToolRoutes = new Set(['tools']);
-  const toolsPublic = join(ROOT, 'modules', 'addons', 'cloudhost247_theme', 'resources', 'tools-public.json');
-  if (existsSync(toolsPublic)) {
-    const data = JSON.parse(readFileSync(toolsPublic, 'utf8'));
-    for (const tool of data.tools ?? []) phpToolRoutes.add(String(tool.path).replace(/^\//, ''));
+  /**
+   * The routes the PHP Tools surface actually resolves. `tools.json` is the projection the theme
+   * runtime reads (`ToolsSite::catalog()`), and it is the file whose categories the React Tools
+   * Center also discovers, so it is the primary source; `tools-public.json` is the older
+   * PHP-engine export and is still accepted so a retained link cannot fail the gate spuriously.
+   * Validating against only one of them is how a menu ends up linking a category the runtime
+   * cannot resolve.
+   */
+  const phpToolCatalogs = [
+    join(ROOT, 'modules', 'addons', 'cloudhost247_theme', 'resources', 'tools.json'),
+    join(ROOT, 'modules', 'addons', 'cloudhost247_theme', 'resources', 'tools-public.json'),
+  ];
+  for (const file of phpToolCatalogs) {
+    if (!existsSync(file)) continue;
+    const data = JSON.parse(readFileSync(file, 'utf8'));
+    for (const tool of data.tools ?? []) {
+      const path = String(tool.path ?? '').replace(/^\//, '');
+      if (path) phpToolRoutes.add(path);
+    }
     for (const slug of Object.keys(data.categories ?? {})) phpToolRoutes.add(`tools/category/${slug}`);
   }
 
@@ -768,7 +789,8 @@ function main() {
     registry,
     [...routes].filter((route) => !route.startsWith('PREFIX:') && !route.startsWith('PATTERN:')).sort(),
     contentPages.map((page) => page.route).sort(),
-    docs.index.map((document) => document.href).sort()
+    docs.index.map((document) => document.href).sort(),
+    publicTools().filter((tool) => tool.visibility === 'public').map((tool) => tool.path).sort()
   );
   for (const target of TS_OUT) {
     mkdirSync(dirname(target), { recursive: true });

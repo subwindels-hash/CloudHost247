@@ -27,6 +27,7 @@ import {
   MARKETING_ROUTES,
   NAV_SECTIONS,
   PUBLIC_DOC_ROUTES,
+  PUBLIC_TOOL_ROUTES,
   REGISTRY_ROUTES,
   REGISTRY_VERSION,
   SITEMAP_POLICY,
@@ -70,7 +71,18 @@ export interface NavFooterColumn {
   links: Array<{ label: string; to: string }>;
 }
 
-export { BRAND, REGISTRY_VERSION, UTILITY, TOOLS_CATEGORIES, SITEMAP_POLICY, REGISTRY_ROUTES, LEGAL_INDEX, PUBLIC_DOC_ROUTES };
+export {
+  BRAND,
+  REGISTRY_VERSION,
+  UTILITY,
+  TOOLS_CATEGORIES,
+  SITEMAP_POLICY,
+  REGISTRY_ROUTES,
+  LEGAL_INDEX,
+  MARKETING_ROUTES,
+  PUBLIC_DOC_ROUTES,
+  PUBLIC_TOOL_ROUTES,
+};
 
 /** The mega-menu definition, as the API serves it and every navigation surface renders it. */
 export const MEGA_MENU: readonly NavSection[] = NAV_SECTIONS.map((section) => ({
@@ -165,34 +177,43 @@ export function validateNavigation(sections: readonly NavSection[] = MEGA_MENU):
 export const ROUTE_PATTERNS: readonly string[] = SPA_ROUTE_PATTERNS;
 
 /**
- * Routes the router declares in code rather than as a literal `path="…"` attribute: the marketing
- * pages and the legal documents are both mapped from the generated registry, so they do not appear
- * in the parsed route table. They are still routes the application serves, and the generator has
- * already proven each one has a page.
+ * Registry-backed pages do not appear as literal route declarations: marketing and legal pages are
+ * mapped from generated content, while public docs are mapped from the generated Docs index.
  */
 const REGISTRY_ROUTE_SET = new Set<string>([
   ...MARKETING_ROUTES,
   ...LEGAL_INDEX.map((document) => document.spa),
+  ...PUBLIC_DOC_ROUTES,
 ]);
+
+function matchesRoutePattern(pattern: string, path: string): boolean {
+  const patternParts = pattern.split('/').filter(Boolean);
+  const pathParts = path.split('/').filter(Boolean);
+  const hasCatchAll = patternParts[patternParts.length - 1] === '*';
+  const requiredParts = hasCatchAll ? patternParts.length - 1 : patternParts.length;
+  if (hasCatchAll ? pathParts.length < requiredParts : pathParts.length !== requiredParts) return false;
+  return patternParts.slice(0, requiredParts).every((part, index) => {
+    return part.startsWith(':') ? Boolean(pathParts[index]) : part === pathParts[index];
+  });
+}
 
 export function routeExists(path: string): boolean {
   const normalized = path.split('?')[0]!.split('#')[0]!.replace(/\/$/, '') || '/';
   if (normalized.startsWith('/tools')) return true;
   if (REGISTRY_ROUTE_SET.has(normalized)) return true;
-  return ROUTE_PATTERNS.some((pattern) => {
-    if (pattern === normalized) return true;
-    const patternParts = pattern.split('/');
-    const pathParts = normalized.split('/');
-    if (patternParts.length !== pathParts.length) return false;
-    return patternParts.every((part, index) => part.startsWith(':') || part === pathParts[index]);
-  });
+  return ROUTE_PATTERNS.some((pattern) => matchesRoutePattern(pattern, normalized));
 }
 
-/** Every menu link must resolve to a route the app actually serves. Used by the navigation test. */
+/** Every menu destination — section roots, featured cards and grouped links — must resolve. */
 export function validateNavigationTargets(sections: readonly NavSection[] = MEGA_MENU): NavigationValidation {
   const base = validateNavigation(sections);
   const errors = [...base.errors];
-  for (const link of sections.flatMap((section) => section.groups.flatMap((group) => group.links))) {
+  const targets = sections.flatMap((section) => [
+    { label: section.label, to: section.to },
+    ...(section.featured ? [{ label: section.featured.title, to: section.featured.to }] : []),
+    ...section.groups.flatMap((group) => group.links),
+  ]);
+  for (const link of targets) {
     if (!routeExists(link.to)) errors.push(`"${link.label}" points at ${link.to}, which no route renders`);
   }
   return { ok: errors.length === 0, errors, linkCount: base.linkCount };

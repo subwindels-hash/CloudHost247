@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Icon } from '../ui/Icon';
-import { apiFetch } from '../../lib/api';
+import { publicFetch } from '../../lib/api';
 import { NAV_SECTIONS, TOOLS_CATEGORIES } from '../../navigation/registry.generated';
 
 /**
@@ -45,7 +45,7 @@ function useCatalogueTools(enabled: boolean) {
     // page view would cost a request for the majority of visitors who never open this menu.
     if (!enabled) return undefined;
     let active = true;
-    apiFetch<{ tools: CatalogueTool[] }>('/api/tools/navigation')
+    publicFetch<{ tools: CatalogueTool[] }>('/api/tools/navigation')
       .then((result) => {
         if (active && Array.isArray(result.tools)) setTools(result.tools);
       })

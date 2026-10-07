@@ -682,11 +682,11 @@
       "features": [
         [
           "Shell access",
-          "SSH into the environment to install dependencies and run the commands your workflow needs."
+          "SSH access is available on hosting products that include it; the selected plan and its access policy determine the scope."
         ],
         [
-          "Deploy from Git",
-          "Connect a repository and let the platform build and release it, with the build output kept on the deployment record."
+          "Deployment options",
+          "The core platform deploys published application versions and configured images. Git-based source builds require an enabled control-panel integration."
         ],
         [
           "Environment configuration",
@@ -694,11 +694,11 @@
         ],
         [
           "Logs you can read",
-          "Application and build logs are available on the deployment itself, rather than only in a support reply."
+          "Application logs are available through the service interfaces that expose them; source-build output depends on the selected deployment integration."
         ],
         [
           "APIs for automation",
-          "Manage services, domains and deployments through HTTP APIs so provisioning can live in your pipeline."
+          "Authenticated APIs support selected service and deployment operations; consult the published API documentation for each endpoint."
         ],
         [
           "Telemetry",
@@ -718,10 +718,10 @@
         ]
       ],
       "uses": [
-        "Node.js, PHP, Python",
-        "SSH and Git access",
-        "Environment variables",
-        "Deployment logs"
+        "Runtimes listed in the catalogue",
+        "SSH where the plan allows",
+        "Configuration options per service",
+        "Deployment records and logs"
       ],
       "related": [
         "developer-friendly.php",
@@ -732,7 +732,7 @@
         "documentation.php"
       ],
       "slug": "developer-friendly",
-      "seo_description": "Developer hosting from CloudHost247: runtimes, SSH, Git-based deployment, environment variables, logs and APIs, without a control panel in the way.",
+      "seo_description": "Developer hosting from CloudHost247: check available runtimes, SSH, configuration and logs in the product catalogue. Git support depends on the selected panel.",
       "faqs": [
         {
           "q": "Can I run a background worker or queue?",
@@ -744,7 +744,7 @@
         },
         {
           "q": "Can I deploy with CI/CD?",
-          "a": "Deployments are driven by the platform's deployment records, and the HTTP APIs let an existing pipeline trigger them. Whether to build a full pipeline is your choice."
+          "a": "The core deployment service does not run CI or watch Git repositories. APIs can trigger supported operations; Git-based commit triggers depend on an enabled control-panel integration."
         },
         {
           "q": "Where do secrets live?",
@@ -1290,40 +1290,40 @@
     "deployments.php": {
       "title": "Deployment Platform",
       "category": "Deployment/PaaS",
-      "headline": "A deployment you can describe afterwards",
+      "headline": "A deployment you can inspect afterwards",
       "summary": "Use the connected CloudHost247 platform for supported application deployments. Deployment controls stay in the authenticated platform.",
       "visual": "deployment/deployment-pipeline",
       "features": [
         [
           "It is recorded",
-          "The deployment exists as a durable record with its status, its source revision and its logs — not as a transient terminal session."
+          "Each operation has a durable status, step states and event history rather than disappearing with a terminal session."
         ],
         [
-          "It is repeatable",
-          "Because the build starts from a revision, running it again produces the same result rather than depending on machine state."
+          "Versions are explicit",
+          "Native deployments use a published application version and its stored manifest; an arbitrary repository commit is not implied."
         ],
         [
-          "Secrets stay out of the build",
-          "Environment configuration is applied at release rather than committed, so a repository can be shared without leaking credentials."
+          "Configuration is separate",
+          "Application environment values are managed per installation; sensitive values are encrypted in storage and omitted from API responses."
         ],
         [
           "Failure is visible",
-          "A failed build is a failed deployment with its output kept, not a silence followed by an unchanged website."
+          "A failed operation is recorded with its error and event history. The worker attempts to reverse completed infrastructure steps where it can."
         ],
         [
           "Scoped per application",
-          "Deployments belong to an application, so releasing one does not touch another."
+          "Installations and deployment records are linked to the application and server they operate on."
         ],
         [
           "Tracked over time",
-          "The deployment history shows what changed and when, which is the first thing anyone needs during an incident."
+          "The deployment history shows which supported operation ran and when."
         ]
       ],
       "uses": [
-        "Builds from a repository",
-        "Release records",
-        "Build and runtime logs",
-        "Rollback path"
+        "Published application versions",
+        "Recorded status and deployment steps",
+        "Configuration per application",
+        "Recovery where supported"
       ],
       "related": [
         "deployments.php",
@@ -1333,23 +1333,23 @@
         "documentation.php"
       ],
       "slug": "deployments",
-      "seo_description": "Deploy from Git on CloudHost247: builds from your repository, releases with environment configuration, build and runtime logs, and recorded rollbacks.",
+      "seo_description": "Operate supported CloudHost247 application installs and updates with deployment status, step events, per-application configuration and recovery where supported.",
       "faqs": [
         {
           "q": "Can I deploy on every commit?",
-          "a": "Yes, by triggering a deployment from your pipeline. The platform records each one, so automatic deployment does not mean invisible deployment."
+          "a": "Not through the core deployment queue: it does not watch Git repositories or run CI. A configured Git-enabled control panel may provide commit-triggered deployments; otherwise use your own CI and the supported platform API where available."
         },
         {
           "q": "What happens if a deployment fails?",
-          "a": "The previous release keeps running and the failed deployment is recorded with its build output, so the application is not left half-updated."
+          "a": "The operation is recorded. The worker attempts to reverse completed infrastructure steps, but recovery of a previous application version depends on the operation and provider."
         },
         {
-          "q": "Are the logs kept after a deployment finishes?",
-          "a": "Yes. Build and runtime logs are attached to the deployment and the service."
+          "q": "Are deployment logs kept?",
+          "a": "The deployment record keeps status, step states and event history. Source-build logs are available only if the selected Git-enabled panel provides them."
         },
         {
-          "q": "Can I deploy the same repository twice?",
-          "a": "Yes — that is how you run separate staging and production environments from one codebase, with different configuration and domains."
+          "q": "Can I use the same application in staging and production?",
+          "a": "You can create separate application installations with distinct configuration and domains, subject to the services and capacity available in your account."
         }
       ]
     },
@@ -1900,7 +1900,7 @@
         ],
         [
           "Deployment",
-          "Build from a repository, apply configuration, release — with the build output kept for the record."
+          "Native application deployments install published versions and configured images. Git source builds depend on an enabled control-panel integration."
         ],
         [
           "Data services",
@@ -1925,7 +1925,7 @@
         "developer-friendly.php"
       ],
       "slug": "nodejs-hosting",
-      "seo_description": "Host Node.js applications on CloudHost247: managed process supervision, environment configuration, WebSocket-capable routing, logs and deployment from Git.",
+      "seo_description": "Node.js hosting on CloudHost247: review available runtimes and product integrations for process supervision, environment configuration, application logs and domains.",
       "faqs": [
         {
           "q": "Are WebSockets supported?",
@@ -1970,7 +1970,7 @@
         ],
         [
           "Deployment",
-          "Deploy from a repository instead of uploading changed files over FTP."
+          "Use the deployment method available on the selected hosting plan. Native application deployments install published images; source builds depend on a configured control-panel integration."
         ]
       ],
       "uses": [
@@ -1990,7 +1990,7 @@
         "developer-friendly.php"
       ],
       "slug": "php-hosting",
-      "seo_description": "Host PHP applications on CloudHost247: maintained PHP runtimes, Composer, databases, cron jobs, OPcache and deployment from Git.",
+      "seo_description": "PHP hosting on CloudHost247: review available runtime versions, Composer, databases and scheduled-task support in the selected hosting product.",
       "faqs": [
         {
           "q": "Can I choose the PHP version?",
@@ -2175,7 +2175,7 @@
         "developer-friendly.php"
       ],
       "slug": "laravel-hosting",
-      "seo_description": "Host Laravel on CloudHost247 with the pieces a Laravel application actually needs: queue workers, scheduler cron, storage, databases and Git deployment.",
+      "seo_description": "Laravel hosting on CloudHost247 with the application services a Laravel site may need: queue workers, scheduler jobs, storage and database options.",
       "faqs": [
         {
           "q": "Is Redis available for queues?",
@@ -2200,7 +2200,7 @@
       "features": [
         [
           "TLS everywhere",
-          "Certificates issued and renewed automatically, with the option to force HTTPS so a token is never sent in the clear."
+          "TLS is available on services and domains where the selected hosting product is configured to issue or accept certificates."
         ],
         [
           "Secrets outside the code",
@@ -2208,7 +2208,7 @@
         ],
         [
           "Rate limiting",
-          "Request limiting protects the service from a runaway client — and from a bill caused by one."
+          "Network and application rate controls depend on the selected product and its configured integrations; review the service details before designing around them."
         ],
         [
           "Real logs",
@@ -2220,7 +2220,7 @@
         ],
         [
           "Uptime and latency signals",
-          "The service is watched, so a regression shows up as a measurement rather than as a customer complaint."
+          "Monitoring coverage varies by service. The platform status and product pages identify the checks the current deployment can genuinely perform."
         ]
       ],
       "uses": [
@@ -2237,11 +2237,11 @@
         "documentation.php"
       ],
       "slug": "api-hosting",
-      "seo_description": "Host an HTTP API on CloudHost247 with TLS, environment-based secrets, rate limiting, logs and monitoring — on the same platform as your applications.",
+      "seo_description": "Host HTTP APIs on CloudHost247 using an available runtime or container product; confirm TLS, network controls, logs and monitoring in the selected service catalogue.",
       "faqs": [
         {
           "q": "Which languages can I write the API in?",
-          "a": "Whichever of the supported runtimes suits you — Node.js, PHP and Python are the documented runtimes, and containerised deployments cover most other stacks."
+          "a": "Use a runtime or container product that is currently published and configured for the application you plan to run; check its service details before committing to a migration."
         },
         {
           "q": "Can I restrict who can call the API?",
@@ -2256,40 +2256,40 @@
     "paas.php": {
       "title": "PaaS",
       "category": "Developers",
-      "headline": "Push code, get a running application",
+      "headline": "A managed path from published app to service",
       "summary": "The deployment pipeline is described honestly: queue, worker, domains and environment variables where implemented.",
       "visual": "deployment/paas",
       "features": [
         [
-          "Build from source",
-          "The build runs from the repository, so the deployed artefact is derived from a commit you can name."
+          "Published application versions",
+          "The marketplace exposes versions that have been published with a validated deployment manifest and configured image."
         ],
         [
-          "Release",
-          "A build that succeeds becomes a release tied to the deployment record, with its environment configuration."
+          "Deployment records",
+          "Installs and updates produce a durable record with status, step states and event history."
         ],
         [
-          "Roll back",
-          "Because releases are recorded, returning to a previous state is a decision rather than a rebuild from memory."
+          "Failure handling",
+          "When an infrastructure step fails, the worker attempts to reverse completed steps and records whether recovery succeeded."
         ],
         [
-          "Configuration per environment",
-          "Variables and secrets live with the application, not in the repository."
+          "Configuration per application",
+          "Environment values and secrets are managed per installation, separately from the published application manifest."
         ],
         [
           "Routing",
-          "Domains map to applications, with certificates issued per hostname."
+          "Domains and certificates can be attached where the selected service and provider support them."
         ],
         [
           "Logs",
-          "Build output and runtime output are both kept, which is the difference between guessing and knowing."
+          "Deployment events and application logs are available through their respective service records; source-build output depends on a Git-enabled panel."
         ]
       ],
       "uses": [
-        "Build from a repository",
-        "Release and roll back",
-        "Environment configuration",
-        "Per-application domain"
+        "Published application versions",
+        "Recorded install and update steps",
+        "Configuration per application",
+        "Git support only through enabled panels"
       ],
       "related": [
         "deployments.php",
@@ -2298,19 +2298,19 @@
         "documentation.php"
       ],
       "slug": "paas",
-      "seo_description": "CloudHost247 PaaS: connect a repository, build it, release it, and route a domain to it — with build logs, environment configuration and rollbacks.",
+      "seo_description": "Manage supported application deployments with recorded steps and per-app settings. Git source builds require an enabled control-panel integration.",
       "faqs": [
         {
-          "q": "Which buildpacks or stacks are supported?",
-          "a": "The supported runtimes are Node.js, PHP, Python and Laravel, plus container deployments for anything else. Rather than listing buildpacks that may not be configured, the platform shows what a deployment supports."
+          "q": "Which applications can this workflow deploy?",
+          "a": "The native workflow deploys only application versions published in the live marketplace with a valid manifest and configured image."
         },
         {
-          "q": "Can I run the same application in two environments?",
-          "a": "Yes. Two applications can be created from the same repository with different configuration and different domains."
+          "q": "Can I deploy a new Git commit directly?",
+          "a": "Not through the native deployment queue. It does not clone repositories or build arbitrary source. Git workflows are available only through a configured control-panel integration that lists that capability."
         },
         {
           "q": "Does this replace my CI pipeline?",
-          "a": "No. It replaces deployment, not continuous integration. The platform's APIs let an existing pipeline trigger a deployment."
+          "a": "No. The native flow does not run test suites or provide continuous integration. Use your own CI and, where supported, a configured integration to trigger deployment."
         }
       ]
     },
@@ -2539,7 +2539,8 @@
         "server-management.php",
         "firewall.php",
         "backups.php",
-        "cloudhost247-hosting.php"
+        "cloudhost247-hosting.php",
+        "network.php"
       ],
       "slug": "monitoring",
       "seo_description": "Resource monitoring and service telemetry for CloudHost247 servers, applications and hosting, with historical data and alerting you can act on.",
@@ -2951,6 +2952,7 @@
   },
   "navigation": [
     {
+      "id": "hosting",
       "title": "Hosting",
       "description": "Website, application and email hosting with a live product catalogue behind every plan page.",
       "groups": [
@@ -2959,6 +2961,10 @@
           "links": [
             {
               "label": "Web Hosting",
+              "url": "web-hosting.php"
+            },
+            {
+              "label": "Shared Hosting",
               "url": "web-hosting.php"
             },
             {
@@ -3044,6 +3050,7 @@
       ]
     },
     {
+      "id": "cloud",
       "title": "Cloud & Servers",
       "description": "Virtual servers, cloud platforms and the infrastructure operations layer behind them.",
       "groups": [
@@ -3053,6 +3060,10 @@
             {
               "label": "VPS Hosting",
               "url": "vps-hosting.php"
+            },
+            {
+              "label": "Cloud Hosting",
+              "url": "cloudhost247-hosting.php"
             },
             {
               "label": "Dedicated Servers",
@@ -3129,6 +3140,7 @@
       ]
     },
     {
+      "id": "domains",
       "title": "Domains",
       "description": "Search, register, transfer and manage domain names — with the full registrar toolkit.",
       "groups": [
@@ -3202,8 +3214,9 @@
       ]
     },
     {
+      "id": "platforms",
       "title": "Platforms",
-      "description": "Applications, databases, containers and the deployment platform that runs them.",
+      "description": "Applications, databases, containers and deployment workflows configured for CloudHost247 services.",
       "groups": [
         {
           "title": "Applications",
@@ -3271,8 +3284,9 @@
       ]
     },
     {
+      "id": "developers",
       "title": "Developer / Deployment",
-      "description": "Runtimes, Git-based deployment, environments and APIs — the parts you actually build on.",
+      "description": "Runtimes, application deployments, environments and APIs — with availability shown by the live catalogue.",
       "groups": [
         {
           "title": "Runtimes",
@@ -3303,7 +3317,7 @@
           "title": "Deploy & operate",
           "links": [
             {
-              "label": "Deployment Platform",
+              "label": "Application Deployments",
               "url": "deployments.php"
             },
             {
@@ -3352,6 +3366,7 @@
       ]
     },
     {
+      "id": "websites",
       "title": "Websites",
       "description": "Build a website, launch a store, or have a specialist design and run it for you.",
       "groups": [
@@ -3421,11 +3436,13 @@
       ]
     },
     {
+      "id": "tools",
       "title": "Tools",
       "description": "Inspect, troubleshoot and build — with tools that explain their results instead of showing invented data.",
       "groups": []
     },
     {
+      "id": "resources",
       "title": "Resources",
       "description": "Guides, documentation, service status and the policies that govern the platform.",
       "groups": [
@@ -3487,6 +3504,7 @@
       ]
     },
     {
+      "id": "support",
       "title": "Support",
       "description": "Get help from the knowledge base, open a ticket, or check what is happening right now.",
       "groups": [
@@ -3566,6 +3584,10 @@
       "links": [
         {
           "label": "Web Hosting",
+          "url": "web-hosting.php"
+        },
+        {
+          "label": "Shared Hosting",
           "url": "web-hosting.php"
         },
         {
@@ -3773,40 +3795,44 @@
           "url": "tools"
         },
         {
-          "label": "DNS Tools",
-          "url": "tools/category/dns"
+          "label": "DNS & Domains Tools",
+          "url": "tools/category/dns-domains"
         },
         {
-          "label": "IP Tools",
-          "url": "tools/category/ip"
+          "label": "IP & Network Tools",
+          "url": "tools/category/ip-network"
+        },
+        {
+          "label": "Security Tools",
+          "url": "tools/category/security"
+        },
+        {
+          "label": "SSL Tools",
+          "url": "tools/category/ssl"
+        },
+        {
+          "label": "Email Tools",
+          "url": "tools/category/email"
+        },
+        {
+          "label": "Website Tools",
+          "url": "tools/category/website"
         },
         {
           "label": "Developer Tools",
           "url": "tools/category/developer"
         },
         {
-          "label": "Designer Tools",
-          "url": "tools/category/designer"
+          "label": "Calculators Tools",
+          "url": "tools/category/calculators"
         },
         {
-          "label": "Webmaster Tools",
-          "url": "tools/category/webmaster"
+          "label": "Utilities Tools",
+          "url": "tools/category/utilities"
         },
         {
-          "label": "Network Tools",
-          "url": "tools/category/network"
-        },
-        {
-          "label": "Security Tools",
-          "url": "tools/category/cybersecurity"
-        },
-        {
-          "label": "Productivity Tools",
-          "url": "tools/category/productivity"
-        },
-        {
-          "label": "Gaming Tools",
-          "url": "tools/category/gaming"
+          "label": "MRZ Generator / MRZ Tools",
+          "url": "tools/mrz-generator"
         }
       ]
     },
@@ -3861,6 +3887,10 @@
         {
           "label": "Offers",
           "url": "offers.php"
+        },
+        {
+          "label": "Sitemap",
+          "url": "cloudhost247-sitemap.php"
         }
       ]
     },
@@ -3981,14 +4011,34 @@
   ],
   "toolCategories": [
     {
-      "label": "DNS",
+      "label": "DNS & Domains",
       "desc": "Lookups, propagation and zone diagnostics.",
-      "url": "tools/category/dns"
+      "url": "tools/category/dns-domains"
     },
     {
-      "label": "IP",
-      "desc": "Address, subnet and geolocation utilities.",
-      "url": "tools/category/ip"
+      "label": "IP & Network",
+      "desc": "Addresses, subnets, reachability and routing checks.",
+      "url": "tools/category/ip-network"
+    },
+    {
+      "label": "Security",
+      "desc": "Hashing, verification and safe inspection.",
+      "url": "tools/category/security"
+    },
+    {
+      "label": "SSL",
+      "desc": "Certificate, chain and TLS inspection.",
+      "url": "tools/category/ssl"
+    },
+    {
+      "label": "Email",
+      "desc": "MX, SPF, DKIM and DMARC checks.",
+      "url": "tools/category/email"
+    },
+    {
+      "label": "Website",
+      "desc": "Headers, redirects, links and page checks.",
+      "url": "tools/category/website"
     },
     {
       "label": "Developer",
@@ -3996,39 +4046,14 @@
       "url": "tools/category/developer"
     },
     {
-      "label": "Designer",
-      "desc": "Colour, image and layout helpers.",
-      "url": "tools/category/designer"
+      "label": "Calculators",
+      "desc": "Subnet, time and conversion calculators.",
+      "url": "tools/category/calculators"
     },
     {
-      "label": "Webmaster",
-      "desc": "SEO, headers and site checks.",
-      "url": "tools/category/webmaster"
-    },
-    {
-      "label": "Network",
-      "desc": "Reachability, ports and routing checks.",
-      "url": "tools/category/network"
-    },
-    {
-      "label": "Cyber Security",
-      "desc": "Hashing, verification and safe inspection.",
-      "url": "tools/category/cybersecurity"
-    },
-    {
-      "label": "Productivity",
+      "label": "Utilities",
       "desc": "Everyday generators and converters.",
-      "url": "tools/category/productivity"
-    },
-    {
-      "label": "Gaming",
-      "desc": "Server names and community utilities.",
-      "url": "tools/category/gaming"
-    },
-    {
-      "label": "Document",
-      "desc": "Document and travel-document utilities.",
-      "url": "tools/category/document"
+      "url": "tools/category/utilities"
     }
   ]
 }
