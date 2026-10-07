@@ -1,13 +1,25 @@
 CloudHost247 Node Platform — Deployment Quick Start
-Generated: 2026-10-04
+Generated: 2026-10-04 (artifact references corrected 2026-10-07)
 
 DEPLOYMENT ZIP
-  File:   cloudhost247-node/release/cloudhost247-cpanel-b54b047.zip
-  Size:   2.3 MB
-  SHA-256: d2321760556f36cc68e05c9f7dac1691db248b08003fc5820ea1fb6384888236
-  Includes: pre-built server + frontend, 70 migrations, manifests, .env.example
+  There is no committed ZIP. Build the package from the checkout you are deploying:
+      cd cloudhost247-node && npm ci && bash scripts/package-cpanel.sh
+      -> release/cloudhost247-cpanel-<git-sha>.zip
+  Includes: pre-built server + frontend, migrations, manifests, .env.example
   Excludes: .env, real secrets, node_modules
   Note: ZIP and .env are git-ignored local outputs; neither is included in the PR.
+
+  WHICH WEBSITE THIS IS
+  This package IS the live website at https://rent.windelsai.com/. The WHMCS/PHP site
+  (root *.php + templates/cloudhost247/) is a different website with a different deploy;
+  changing it never changes that host. If the live site still looks old after uploading,
+  read ../docs/website-rebuild/LIVE-SITE-DEPLOYMENT.md and run
+  scripts/verify-live-site.py --base https://rent.windelsai.com/ .
+
+  CHECK THE PACKAGE BEFORE UPLOADING
+      unzip -p release/cloudhost247-cpanel-<sha>.zip '*/public/index.html' | grep -o '<title>[^<]*</title>'
+      rebuilt:     CloudHost247 — Hosting, Cloud, Domains & Developer Platform
+      pre-rebuild: CloudHost247 — Cloud hosting, built for your next idea  <- do not deploy
 
 FULL ENVIRONMENT FILE
   File: cloudhost247-node/.env
@@ -24,7 +36,8 @@ BEFORE YOU DEPLOY
 
 DEPLOY
   1. Upload the ZIP to cPanel File Manager, extract it, and move the contents of
-     cloudhost247-cpanel-b54b047/ into your application root.
+     cloudhost247-cpanel-<git-sha>/ into your application root, overwriting dist/,
+     public/, manifests/, database/migrations/ and server.js. Never overwrite .env.
   2. Create a Production Node.js app with startup file server.js. Passenger supplies PORT;
      do not configure PORT yourself.
   3. Configure the active variables from .env in cPanel's Environment Variables UI

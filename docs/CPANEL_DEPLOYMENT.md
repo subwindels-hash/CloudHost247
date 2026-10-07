@@ -73,6 +73,16 @@ any of these from this document, from prior hosts, or from local development:
 
 ## 0a. Pre-built package (recommended for shared hosting)
 
+> **Updating the live website?** The public site at `https://rent.windelsai.com/` is *this*
+> application. If a merged change is not visible there, the cause is almost always that the built
+> package below was never uploaded over the running app — not browser caching, and never the
+> WHMCS/PHP theme, which this host does not serve. `docs/website-rebuild/LIVE-SITE-DEPLOYMENT.md`
+> records the live evidence for that conclusion, the exact upload/restart/migration procedure, and
+> `scripts/verify-live-site.py` (or the *Verify live deployment* GitHub workflow) proves afterwards
+> which build is actually being served. Note that a merely committed `release/*.zip` is a build
+> output: regenerate it from the checkout you are deploying, because a stale package deploys a stale
+> site even when every file upload succeeds.
+
 Shared hosting accounts usually run under CloudLinux LVE memory/process limits, which commonly kill
 `npm run build` (TypeScript + Vite) part-way through. To avoid building on the server, build the
 upload package on any machine with Node 22+ (your laptop, or CI):

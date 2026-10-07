@@ -1,14 +1,31 @@
 # CloudHost247 Node Platform — Deployment Artifacts
 
-Generated on **2026-10-04** from checkout `b54b047`.
+Originally generated on **2026-10-04** from checkout `b54b047`; the artifact references were
+corrected on **2026-10-07** after production was found still serving that package (see
+`../docs/website-rebuild/LIVE-SITE-DEPLOYMENT.md`).
 
 ## Deployment ZIP
 
-- **File:** `cloudhost247-node/release/cloudhost247-cpanel-b54b047.zip`
-- **Size:** 2.3 MB
-- **Files:** 1,138
-- **Database migrations:** 70 (0001–0070)
-- **SHA-256:** `d2321760556f36cc68e05c9f7dac1691db248b08003fc5820ea1fb6384888236`
+The ZIP is a build output, not a repository file — `release/` is git-ignored. Build the package from
+the checkout you are deploying:
+
+```bash
+cd cloudhost247-node && npm ci && bash scripts/package-cpanel.sh
+# -> release/cloudhost247-cpanel-<git-sha>.zip
+```
+
+For the 2026-10-07 rebuild (checkout `283b2f0`):
+
+- **File:** `cloudhost247-node/release/cloudhost247-cpanel-283b2f0.zip`
+- **Size:** 6.7 MB (14.2 MB unpacked)
+- **Files:** 1,458
+- **Database migrations:** 82 (0001–0082)
+- **SPA bundle:** `public/assets/index-Dnn-r-Du.js`; 181 media assets under `public/media/`
+
+Any package whose `public/index.html` title is
+`CloudHost247 — Cloud hosting, built for your next idea` is the **pre-rebuild** build: uploading it
+reproduces the old design exactly. The rebuilt shell is
+`CloudHost247 — Hosting, Cloud, Domains & Developer Platform`.
 
 The ZIP contains the Passenger startup file, package manifests/lockfile, compiled server and frontend assets, database migrations, application manifests, and `.env.example`. It excludes `node_modules`, tests, and all real environment files/secrets. The archive passed `unzip -t`. The `release/` output is git-ignored, so the ZIP is local to this workspace and not included in this PR; regenerate it with `bash scripts/package-cpanel.sh`.
 
@@ -29,7 +46,7 @@ The package was built with `bash scripts/package-cpanel.sh`, which installed fro
 ## cPanel deployment outline
 
 1. Confirm that the hosting account provides **Setup Node.js App/Passenger**, Node.js **20.9.0+**, terminal or equivalent package-install access, and a PostgreSQL database (local or managed).
-2. Upload the ZIP to cPanel File Manager, extract it, and move the contents of `cloudhost247-cpanel-b54b047/` into the chosen application root.
+2. Upload the ZIP to cPanel File Manager, extract it, and move the contents of `cloudhost247-cpanel-<git-sha>/` into the chosen application root, overwriting the existing `dist/`, `public/`, `manifests/`, `database/migrations/` and `server.js` — but never `.env`.
 3. Create a Node.js application in Production mode, choose the application URL/root, and set `server.js` as the startup file.
 4. Configure the active variables from `.env` through cPanel's Environment Variables UI (recommended), or upload the customized file with mode `0600`. Replace `DATABASE_URL`, confirm `APP_URL`, and configure only the integrations you intend to use. **Do not set `PORT`; Passenger supplies it.**
 5. In the cPanel virtual-environment terminal, install runtime packages:

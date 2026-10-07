@@ -1,0 +1,40 @@
+name: Verify live deployment
+
+# Answers one question from the GitHub UI, without any local tooling: is the public host serving
+# this repository's website, or a build older than it? Run it after an upload to the cPanel Node
+# application. A red run means the deployment did not land -- the log names the exact check that
+# failed and the remediation steps.
+#
+# Deliberately manual (workflow_dispatch): until the cPanel upload is done the answer is "not yet",
+# and a scheduled red run would only train everyone to ignore the signal. See
+# docs/website-rebuild/LIVE-SITE-DEPLOYMENT.md.
+#
+# It is read-only: public GET requests, no secrets, no authentication, no mutations.
+on:
+  workflow_dispatch:
+    inputs:
+      base:
+        description: 'Base URL of the deployed site'
+        required: false
+        default: 'https://rent.windelsai.com/'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Live site serves this build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check whether the live host serves the rebuilt website
+        run: python3 scripts/verify-live-site.py --base "${{ inputs.base }}" --json live-report.json
+
+      - name: Upload the report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-deployment-report
+          path: live-report.json
+          if-no-files-found: warn

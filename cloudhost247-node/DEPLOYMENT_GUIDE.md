@@ -1,5 +1,12 @@
 # CloudHost247 Node Platform - Deployment Guide
 
+> **This application *is* the public website at `https://rent.windelsai.com/`.** It is not the
+> WHMCS/PHP site in this repository's root (`*.php`, `templates/cloudhost247/`), which is a separate
+> website with a separate deployment. Editing or uploading the PHP theme — including its `?v=` asset
+> versions — cannot change what that host renders. If the live site still looks old after an update,
+> read `../docs/website-rebuild/LIVE-SITE-DEPLOYMENT.md`: it shows, with live evidence, which build
+> the host is serving and the exact upload/restart/migration procedure that replaces it.
+
 ## Overview
 
 This guide provides step-by-step instructions for deploying the CloudHost247 Node.js platform to a cPanel shared hosting environment using Passenger (Application Manager).
@@ -16,12 +23,27 @@ This guide provides step-by-step instructions for deploying the CloudHost247 Nod
 
 3. **SSL Certificate** installed for your domain
 
-## Generated Artifacts (2026-10-04)
+## Generated Artifacts
 
-- **Deployment ZIP:** `release/cloudhost247-cpanel-b54b047.zip` (2.3 MB; 1,138 files; 70 migrations)
+- **Deployment ZIP:** build it from the checkout you intend to deploy — the artifact is a build
+  output, not a repository file (`release/` is git-ignored, and a committed package is a package
+  that goes stale):
+  ```bash
+  cd cloudhost247-node && npm ci && bash scripts/package-cpanel.sh
+  # -> release/cloudhost247-cpanel-<git-sha>.zip
+  ```
   - Includes compiled server/frontend, production package metadata, migrations, manifests, and `.env.example`.
-  - SHA-256: `d2321760556f36cc68e05c9f7dac1691db248b08003fc5820ea1fb6384888236`.
-  - The archive passed `unzip -t`; it does **not** contain `.env`, real credentials, or `node_modules`.
+  - Does **not** contain `.env`, real credentials, or `node_modules`; confirm with `unzip -t <zip>`.
+  - For the 2026-10-07 rebuild (checkout `283b2f0`): 6.7 MB, 1,458 files, 82 migrations, SPA bundle
+    `public/assets/index-Dnn-r-Du.js`, 181 media assets. Any package whose `public/index.html` reads
+    `CloudHost247 — Cloud hosting, built for your next idea` is **pre-rebuild** and will reproduce
+    the old design byte-for-byte; the rebuilt shell reads
+    `CloudHost247 — Hosting, Cloud, Domains & Developer Platform`.
+  - Earlier revisions of this guide named `release/cloudhost247-cpanel-b54b047.zip`, which has never
+    existed in this repository, and the repository separately carried a committed pre-rebuild
+    package (`cloudhost247-cpanel-b7a2af3.zip`) that has since been removed. Deploying what the docs
+    named, or what the repository held, is how production ended up serving the old site for three
+    merges. Check the file you actually upload.
 - **Full environment file:** `cloudhost247-node/.env` (mode `0600`, git-ignored, not included in the ZIP).
   - App-local secrets were generated with Node's cryptographic random generator.
   - `DATABASE_URL` is deliberately a placeholder, and provider/email credentials are unset. Replace these and verify `APP_URL`/database TLS settings before deploying.
@@ -33,11 +55,23 @@ The ZIP and `.env` are local generated outputs, ignored by Git, and are not incl
 
 ## Quick Start Deployment
 
-### Step 1: Download the Deployment Package
+### Step 1: Build (or obtain) the Deployment Package
 
-The deployment zip file is:
+No package is committed to this repository — build it from the code you are deploying:
+
+```bash
+cd cloudhost247-node
+npm ci
+bash scripts/package-cpanel.sh
+# -> release/cloudhost247-cpanel-<git-sha>.zip
 ```
-cloudhost247-node/release/cloudhost247-cpanel-b54b047.zip
+
+Before uploading, confirm the package is the rebuild and not a stale build:
+
+```bash
+unzip -p release/cloudhost247-cpanel-<git-sha>.zip '*/public/index.html' | grep -o '<title>[^<]*</title>'
+# rebuilt:     CloudHost247 — Hosting, Cloud, Domains & Developer Platform
+# pre-rebuild: CloudHost247 — Cloud hosting, built for your next idea   <- do not deploy this
 ```
 
 ### Step 2: Upload to cPanel
@@ -46,7 +80,8 @@ cloudhost247-node/release/cloudhost247-cpanel-b54b047.zip
 2. Navigate to **File Manager**
 3. Upload the zip file to your home directory
 4. Extract the zip file
-5. Move the contents of `cloudhost247-cpanel-b54b047/` to your desired application root (e.g., `cloudhost247`)
+5. Move the contents of `cloudhost247-cpanel-<git-sha>/` to your desired application root (e.g., `cloudhost247`), overwriting the existing `dist/`, `public/`, `manifests/`, `database/migrations/` and `server.js`
+6. **Do not overwrite `.env`** — it is not in the zip, so a normal extract-and-overwrite leaves it intact
 
 ### Step 3: Create the Node.js Application
 
@@ -235,7 +270,7 @@ For cPanel shared hosting, configure a cron job for the worker:
 
 ## Generated Files
 
-- `release/cloudhost247-cpanel-b54b047.zip` - Pre-built deployment package (2.3 MB; SHA-256 is listed above)
+- `release/cloudhost247-cpanel-<git-sha>.zip` - Deployment package, built by `scripts/package-cpanel.sh`; git-ignored, never committed
 - `.env` - Full private environment file; update the database URL and deployment-specific values before use. It is git-ignored and excluded from the ZIP.
 - `DEPLOYMENT_GUIDE.md` - This guide
 

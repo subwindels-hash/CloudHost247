@@ -1,5 +1,12 @@
 # Deployment and acceptance runbook
 
+> This runbook deploys the **WHMCS/PHP** website (this repository's root `*.php` +
+> `templates/cloudhost247/`). It is not the website served at `https://rent.windelsai.com/`, which is
+> the Node platform in `cloudhost247-node/`. Selecting this theme, clearing WHMCS's template cache or
+> bumping its `?v=` asset versions changes the PHP site only — see
+> [`LIVE-SITE-DEPLOYMENT.md`](LIVE-SITE-DEPLOYMENT.md) before concluding that a change to this theme
+> "did not reach production".
+
 ## Scope and prerequisites
 
 This is a WHMCS **child-theme rebuild**, not a replacement billing application.
