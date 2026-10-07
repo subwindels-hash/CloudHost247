@@ -65,6 +65,17 @@ the one it was authored for. `spaRoutesKnown = 134`, `toolPathsKnown = 67`, `php
 not only grouped links. The generator now validates every one against the router, the tool
 catalogue, the legal index and the shipped PHP files, on both surfaces.
 
+**A sitemap exclusion is not a link prohibition.** 454 destinations are published by the menus,
+footer and utility bar; 44 of them (26 distinct paths) sit under a path `sitemap.exclude` /
+`sitemap.excludePhp` covers — `/login`, `/register`, `/cart`, `/search`, `/dashboard/*`,
+`/invoices`, `/services`, `/support`, the four `/websites/*` app routes, and the licensed WHMCS
+entry points `cart.php?a=…`, `clientarea.php`, `register.php`, `submitticket.php`,
+`site-search.php`. They are linked deliberately: they are the account, cart and support doorways,
+and a crawler policy that keeps them out of `sitemap.xml` and `robots.txt` says "do not index",
+never "do not link". Each one is *verified to exist*, not assumed: `check-links.mjs` resolves every
+SPA destination against the router's own `<Route path=…>` declarations and every PHP destination
+against a shipped file or a licensed WHMCS entry point — 0 broken, 0 dangling.
+
 ## 5. Footer links audited
 
 9 footer columns plus the tools column, all generated from the same registry. Every item resolves;
@@ -150,7 +161,7 @@ Now:
 * the generator asserts registry ↔ app catalogue ↔ theme projection taxonomy parity and that every
   published category has at least one tool;
 * the PHP tools suite asserts the native resolution and the icon asset for every tool card
-  (650 assertions).
+  (655 assertions).
 
 ### One URL per tool capability
 
@@ -173,6 +184,24 @@ as working tool pages. They send `X-Robots-Tag: noindex`, publish no canonical, 
 tool runs in the connected platform, and link to it. They were orphan routes — no PHP page linked
 them, because the hub and the category pages publish the 105 native tools — so this removes thin,
 indexable, unreachable pages instead of a navigation path a visitor could follow.
+
+A second, harder-to-see instance of the same defect remained: `/tools/ip-to-hostname`. The registry
+published it as `/tools/ip-to-domain`, a URL the PHP shell can only answer with a signpost, while
+the interactive handler, the PHP sitemap and the native catalogue all use `/tools/ip-to-hostname` —
+two published URLs for one capability, and the app linked the one with no implementation. The
+registry now publishes the served path and `/tools/ip-to-domain` became an alias. The existing
+name-based comparison had missed it because the two registries name the tool differently (`IP →
+Hostname` against `IP to Hostname`) and a character-level key turned one capability into two keys;
+the comparison now normalises words, and a second assertion runs on URLs instead of names — for
+every path the native catalogue serves, the registry must not re-label it — with an anti-vacuity
+guard that fails if fewer than thirty served paths resolve. Re-introducing the drift makes the suite
+fail with `one published path for IP → Hostname: /tools/ip-to-domain`.
+
+The rendered tool surface is now classified rather than assumed: of the 143 tool routes the fixtures
+render, **105 are native tool pages** the PHP shell serves, **9 are discovery category pages** and
+**29 are noindex signposts** — and **none** would be answered with a redirect or a 404 if it were
+requested. The 105 published native paths each have a page, and every capability now has exactly one
+published URL.
 
 ## 10. Remaining legacy branding
 
@@ -244,11 +273,15 @@ specific sentences that were rewritten for this reason.
 * `:focus-visible` outlines defined globally, with a high-contrast variant on dark surfaces.
 * `prefers-reduced-motion` honoured in the design system and every component stylesheet, including
   `css/tools.css`, which was the last one without it.
-* every `ch-`/`ch247-` class the fixtures render (116 distinct) is defined by a stylesheet the
-  repository ships — asserted, so markup cannot drift back into unstyled boxes. The registry section
-  renderer is stricter still: its 24 classes must all exist, and its card, step, check-list, note,
-  grid and split classes must come from the design system, because that layer loads last and wins
-  every name the two share.
+* every `ch-`/`ch247-` class the fixtures render (133 distinct) is defined by a stylesheet the
+  repository ships — asserted, so markup cannot drift back into unstyled boxes. The pattern covers
+  BEM elements and modifiers as well as plain names (`ch-card__icon`, `ch-grid--3`,
+  `ch247-email-hero__visual`), because an underscore-blind matcher exempts exactly the classes a
+  partial rename leaves behind. Widening it took the audited set from 116 to 133 names, all of them
+  styled; three injections of unstyled names (`--`, `__` and prefix-only shapes) each fail the
+  check, so the assertion is not vacuous. The registry section renderer is stricter still: its 24
+  classes must all exist, and its card, step, check-list, note, grid and split classes must come
+  from the design system, because that layer loads last and wins every name the two share.
 * responsive breakpoints at 1199 / 767 / 479 px, `overflow-x: clip` on the shell, fluid `clamp()`
   typography, no fixed-width element in the audited templates.
 * **Not verified in a browser** — no browser binary is available in this environment. Responsive and
@@ -263,9 +296,9 @@ specific sentences that were rewritten for this reason.
 | Registry generator | `node scripts/site/generate.mjs` and `--check` | passed — 227 links, 0 errors, 54 marketing pages, 116 sections, 13 published documents, 43 enriched product pages, crawl policy 23 exclusions / 86 public PHP paths |
 | Release-candidate gate | `bash scripts/release-candidate-check.sh` (WASM PHP 8.2) | **passed** — every first-party PHP target linted, 18 PHP behavioural suites, server-agent suite, 22 python static suites, retired-brand audit, vendor baseline, tools projection + build, website gates |
 | PHP website suite | `scripts/php-wasm/php tests/website/run.php` | 315 assertions, 0 failed (section rendering, fragments, crawl policy, tool taxonomy, design-system class contract) |
-| PHP tools suite | `scripts/php-wasm/php tests/tools/site-integration.php` | 650 assertions, 0 failed (adds one published path per tool capability) |
+| PHP tools suite | `scripts/php-wasm/php tests/tools/site-integration.php` | 882 assertions, 0 failed (one published path per tool capability, no served path re-labelled by the registry, and the XML sitemap actually executed: every served tool path published, every published URL resolvable in the catalogue, the nine signposts absent) |
 | Static website tests | `python3 -m unittest discover -s tests/website -p 'test_*.py'` | 13 tests, OK (generator/template type parity, registry link and asset integrity) |
-| Rendered-page fixture QA | `CH247_FIXTURE_DIR=… python3 tests/website/check-fixtures.py` | 218 pages, 815 images, 2,492 asset references, 53,799 links, 116 classes, 182 indexable / 36 noindex, heading outlines without a skipped level, legal documents rendering with content — **0 problems** |
+| Rendered-page fixture QA | `CH247_FIXTURE_DIR=… python3 tests/website/check-fixtures.py` | 218 pages, 815 images, 2,492 asset references, 53,798 links, 57,140 interactive controls, 133 classes, 183 indexable / 35 noindex, heading outlines without a skipped level, legal documents rendering with content — **0 problems** |
 | Legal copy preservation | visible-text diff of both fixture sets | 214 of 218 pages identical; the four differences are the duplicate titles that were removed |
 | Node SEO suite | `npx vitest run tests/integration/seo-routes.test.ts` | 6 tests passed (2 new: one-policy robots contract, sitemap/registry policy agreement) |
 | Link integrity | `node scripts/site/check-links.mjs` | 2,176 surfaces, 0 broken |
@@ -277,19 +310,28 @@ specific sentences that were rewritten for this reason.
 ## 14. Build and production archive
 
 ```
+python3 scripts/build-production-zip.py
+running npm run build:server
+running npm run build:frontend
+wrote /home/user/CloudHost247-release/CloudHost247-production-1.0.0.zip files=7890 bytes=57910595 secret_skipped=0
+
 python3 scripts/build-production-zip.py --skip-build --verify
-wrote /home/user/CloudHost247-release/CloudHost247-production-1.0.0.zip files=7888 bytes=57870228 secret_skipped=0
 media assets present: 161
 published documentation files: 13
-archive members: 7888 · archive size: 55.2 MB
+archive members: 7890
+archive size: 55.2 MB
 ✓ production archive verified: deployable, complete, no secret material
 ```
 
-The archive is verified by extracting it: required entry points present, the 161 media assets the
-website references are inside it, the packaged documentation set equals the published set exactly
-(13 documents — de-published and missing files both fail the archive), and no file matches the
-secret scanner. `node_modules`, `.git`, `dist`, build caches and development artefacts are excluded
-by the packer's own allow-list.
+The packer builds the platform and the SPA itself (no `--skip-build`), then verification extracts the
+finished archive into a clean temporary directory and checks that it describes a complete
+deployment: the required entry points and configuration templates are present, the 161 media assets
+the website references are inside it, the packaged documentation set equals the published set
+exactly (13 documents — de-published and missing files both fail the archive), and no file matches
+the secret scanner. `node_modules`, `.git`, `dist`, build caches and development artefacts are
+excluded by the packer's own allow-list. Independently: the zip passes a member-level integrity
+check (7,890 members, 55.2 MB, `testzip()` clean) with `index.php`, the theme templates, the theme
+addon hooks and `tools/index.php` all inside.
 
 ## 15. Commit and pull request
 
@@ -297,8 +339,14 @@ by the packer's own allow-list.
   (draft, base `main`).
 * `84e519b` — audit public site content and navigation claims.
 * `a329775` — make sitemap, robots and tool navigation registry-driven and verified.
-* This pass adds the crawl-policy unification, the tool-taxonomy reconciliation, the new tests and
-  the regenerated outputs; commit hash recorded in the PR timeline.
+* `81ff50a` — unify the crawl policy and the tool taxonomy across both surfaces.
+* `2eabe04` — verify the packaged documentation set against the published index.
+* `e6271f1` — record the final verification evidence.
+* `550f762` — render registry sections on design-system primitives, publish one URL per tool.
+* `c50317a` — rebuild the legal documents on the design system, with the copy verified.
+* `963d41f` — publish one path per tool from the catalogue source, not the projection.
+* This pass adds the class-coverage hardening, the served-path reconciliation and the sitemap
+  assertions above; the commit hash is recorded in the PR timeline.
 
 ## 16. Blockers, not verified, and next steps
 
@@ -309,20 +357,29 @@ by the packer's own allow-list.
    evidence tools are ready for that environment; nothing in this pass was deployed.
 2. **No browser binary**, so responsive layout, focus order and contrast are asserted from source,
    not observed. A browser pass remains outstanding acceptance evidence.
-3. `.php` execution of the *full* sitemap chain (`cloudhost247-sitemap.php` inside WHMCS) is
-   source-verified; the policy class itself is exercised directly by the PHP suite.
+3. `cloudhost247-sitemap.php` inside WHMCS is source-verified; the tools sitemap is now
+   *executed* by the PHP suite (it includes the file, captures the XML, and checks every `<loc>`),
+   and the policy class itself is exercised directly.
 
 **Deliberately out of scope for this pass** (still open on the brief):
 
 * the legal documents' *copy* still needs an editorial pass: it contains "CloudHost247 Isc." (a
   rename artefact for "Inc.") and "Powered by WHMCompleteSolution" appears at the end of the privacy
   document. Both are text the owner should approve changing, so neither was touched;
-* the same five classes the legal pages used (`container`, `row`, `col-*`, `lead`, `text-muted`)
-  still appear inside three vendor `modules/` templates that this pass does not own;
+* the addons' own admin and client-area templates (`modules/addons/*/templates/**`) still use
+  Bootstrap's `container`/`row`/`col-*`/`btn` classes. They are third-party surfaces, several are
+  pinned by the vendor integrity manifest (`docs/independent-rebuild/original-file-manifest.sha256`),
+  and editing them would fail the release gate — so they are recorded, not restyled. No template the
+  public site renders still carries them;
 * per-page PHP visual regeneration beyond the registry-driven illustrations and card grids;
 * the illustration expansion (new artwork families) — the existing 161 assets are validated and
   organised, but no new art was commissioned;
 * browser-level responsive/accessibility QA (see blocker 2);
-* retiring `scripts/generate-global-platform.py`'s legacy `tools-public.json` export: it is now a
-  secondary source (the PHP sitemap reads the registry, and the generator validates against the
-  theme projection), but nothing has been deleted.
+* retiring `scripts/generate-global-platform.py`'s legacy `tools-public.json` export: the tools
+  sitemap now reads the **native catalogue** (`tools/lib/Catalog`) and keeps the export only as a
+  fallback for a deployment that ships the sitemap without the tools tree, so nothing has been
+  deleted;
+* whether the two served tools the shared registry labels `customer`/`auth-required` should be gated
+  or relabelled: `/tools/broken-link-checker` and `/tools/reverse-ip-lookup` are published as public
+  pages and listed in the sitemap, and the PHP shell has no entitlement check to enforce. That is an
+  owner decision (gate them, or correct the registry), not something this pass invents.

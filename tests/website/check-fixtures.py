@@ -66,7 +66,10 @@ STYLESHEET_RE = re.compile(r'<link\s+rel="stylesheet"\s+href="([^"]*)"', re.I)
 # React side of the platform styles some of the same names from `cloudhost247-node/frontend`.
 CSS_GLOBS = ('templates/**/*.css', 'assets/**/*.css', 'shared/site/*.css', 'cloudhost247-node/frontend/src/**/*.css')
 STYLE_SEARCH_DIRS = ('templates', 'assets', 'cloudhost247-node/frontend/src', 'shared/site')
-CLASS_NAME_RE = re.compile(r'^ch(247)?-[a-z0-9-]+$')
+# BEM elements and modifiers (`ch-card__icon`, `ch-grid--3`, `ch247-email-hero__visual`) are checked
+# too: an underscore-blind pattern silently exempts the exact classes a partial rename leaves behind,
+# so a name like `ch-tool-card__body` would render unstyled in every page and still pass.
+CLASS_NAME_RE = re.compile(r'^ch(247)?-[a-z0-9_-]+$')
 
 
 def shipped_styles() -> str:

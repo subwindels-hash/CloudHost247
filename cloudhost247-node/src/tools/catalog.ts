@@ -1396,12 +1396,18 @@ export const TOOL_CATALOG: readonly ToolCatalogEntry[] = allTools.map(tool => {
     'invisible-character': 'invisible-character-generator', 'qr-generator': 'qr-code-generator',
     'time-card': 'time-card-calculator', 'whois': 'domain-whois',
   } as Record<string,string>);
-  const canonical = ({ 'my-ip': 'what-is-my-ip', 'ip-to-hostname': 'ip-to-domain', 'asn-whois': 'asn-lookup' } as Record<string,string>)[tool.slug] ?? SERVED_PATH_SLUGS[tool.slug] ?? tool.slug;
+  // `ip-to-hostname` publishes the path the PHP catalogue serves it at: the PHP surface owns the
+  // interactive handler, its sitemap lists `/tools/ip-to-hostname`, and the app used to link
+  // `/tools/ip-to-domain` — a URL only the shared registry knows, which the PHP shell answers with
+  // a noindex signpost. Two published URLs for one capability is the drift this file exists to
+  // prevent, so the app now links the served path and `/tools/ip-to-domain` is an alias.
+  const canonical = ({ 'my-ip': 'what-is-my-ip', 'asn-whois': 'asn-lookup' } as Record<string,string>)[tool.slug] ?? SERVED_PATH_SLUGS[tool.slug] ?? tool.slug;
   const path = tool.slug.startsWith('tool-') ? tool.path : `/tools/${canonical}`;
   const aliases: Record<string,string[]> = {
     'dns-lookup': ['/tools/dns-record-lookup'], 'http-headers': ['/tools/redirect-checker','/tools/website-response'],
     'ssl-checker': ['/tools/ssl-certificate-information'], 'ip-lookup': ['/tools/ip-location'],
     'password-tools': ['/tools/password-generator'], 'whois': ['/tools/domain-information'],
+    'ip-to-hostname': ['/tools/ip-to-domain'],
     // Retained MRZ URLs from the Document Tools section. They keep working and forward to the
     // canonical /tools/mrz-generator route registered in the Tools Center catalogue.
     'mrz-generator': ['/tools/document/mrz', '/tools/document/mrz-parser', '/tools/mrz-parser'],

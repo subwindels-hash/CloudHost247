@@ -52,13 +52,31 @@ $paths = array('/tools');
 foreach (array_keys($categories) as $slug) {
     $paths[] = '/tools/category/' . $slug;
 }
-if (is_array($data)) {
-    foreach (isset($data['tools']) ? $data['tools'] : array() as $tool) {
-        if (!empty($tool['enabled']) && !empty($tool['path'])) {
-            $paths[] = $tool['path'];
+// Publish the paths the front controller actually serves. The native catalogue is the source of
+// truth for that: it is what `tools/index.php` resolves first, so the sitemap, the menus and the
+// page a visitor lands on cannot disagree about which URLs exist. The older projection export is
+// only a fallback for a deployment that ships the sitemap without the tools tree.
+$served = array();
+if (is_file(__DIR__ . '/tools/lib/bootstrap.php')) {
+    require_once __DIR__ . '/tools/lib/bootstrap.php';
+    if (class_exists('\CloudHost247\Tools\Catalog')) {
+        try {
+            foreach (\CloudHost247\Tools\Catalog::enabledTools() as $tool) {
+                if (!empty($tool['path'])) { $served[] = (string) $tool['path']; }
+            }
+        } catch (\Throwable $unavailable) {
+            $served = array();
         }
     }
 }
+if (!$served && is_array($data)) {
+    foreach (isset($data['tools']) ? $data['tools'] : array() as $tool) {
+        if (!empty($tool['enabled']) && !empty($tool['path'])) {
+            $served[] = (string) $tool['path'];
+        }
+    }
+}
+$paths = array_merge($paths, $served);
 if (class_exists('\CloudHost247\Theme\CrawlPolicy')) {
     $paths = \CloudHost247\Theme\CrawlPolicy::filter($paths);
 }

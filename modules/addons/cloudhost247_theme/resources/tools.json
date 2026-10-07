@@ -470,13 +470,13 @@
       "summary": "Reverse DNS for an address, with FCRDNS confirmation.",
       "description": "Performs the PTR lookup for an address and confirms each hostname resolves back to it.",
       "icon": "arrow-left-right",
-      "path": "/tools/ip-to-domain",
+      "path": "/tools/ip-to-hostname",
       "apiPath": "/api/tools/ip-to-hostname",
       "authRequired": false,
       "visibility": "public",
       "legacyPaths": [
         "/tools/ip/ip-to-hostname",
-        "/tools/ip-to-hostname"
+        "/tools/ip-to-domain"
       ],
       "discoveryCategories": [
         "ip-network"

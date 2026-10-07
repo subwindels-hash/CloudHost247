@@ -37,18 +37,48 @@ foreach (ToolsSite::catalog()['categories'] as $slug=>$label) { check(ToolsSite:
 // same tool differently on purpose. The old registry paths stay declared as aliases, so the route
 // still resolves and can redirect instead of turning into a 404.
 $nativePathByName = array();
+$normalise = function ($name) {
+    // Compare by words, not by punctuation: `IP → Hostname` in the registry and `IP to Hostname`
+    // in the native catalogue are one capability, and a character-level strip turns them into two
+    // keys (`iphostname` / `iptohostname`) — which is how this pair stayed unnoticed.
+    $words = preg_split('/[^a-z0-9]+/', strtolower((string) $name), -1, PREG_SPLIT_NO_EMPTY);
+    $words = array_diff($words, array('to', 'my', 'the', 'a', 'an', 'of'));
+    return implode('', $words);
+};
 foreach (Catalog::tools() as $native) {
-    $nativePathByName[preg_replace('/[^a-z0-9]+/', '', strtolower((string) $native['name']))] = '/tools/' . $native['slug'];
+    $nativePathByName[$normalise($native['name'])] = '/tools/' . $native['slug'];
 }
 $registryPaths = array();
+$registryKnownNative = 0;
 foreach (ToolsSite::catalog()['tools'] as $tool) {
     $registryPaths[] = $tool['path'];
-    $key = preg_replace('/[^a-z0-9]+/', '', strtolower((string) $tool['name']));
+    $key = $normalise($tool['name']);
     if (isset($nativePathByName[$key])) {
+        $registryKnownNative++;
         check($tool['path'] === $nativePathByName[$key], 'one published path for ' . $tool['name'] . ': ' . $tool['path']);
     }
 }
+check($registryKnownNative >= 30, 'the registry is compared against the served catalogue, not vacuously (' . $registryKnownNative . ' capabilities matched)');
 check(count($registryPaths) === count(array_unique($registryPaths)), 'the shared registry publishes each tool path once');
+
+// --- The registry never re-labels a path the PHP catalogue already serves. When it does, one
+// capability is published twice: the app and the sitemaps link the projection's path, which this
+// surface can only answer with a noindex signpost, while the interactive page sits at the native
+// path. Comparing names cannot see it (the two registries name and slug tools differently), so the
+// check runs on the URLs the front controller resolves.
+$relabelled = array();
+$registryResolved = 0;
+foreach (Catalog::enabledTools() as $native) {
+    $path = '/' . ltrim((string) $native['path'], '/');
+    $registry = ToolsSite::resolve($path);
+    if ($registry === null) { continue; }
+    $registryResolved++;
+    if ((string) $registry['path'] !== $path) {
+        $relabelled[] = $path . ' -> ' . $registry['path'];
+    }
+}
+check($registryResolved >= 30, 'the served paths are actually matched against the registry (' . $registryResolved . ' resolved)');
+check($relabelled === array(), 'no served tool path is re-labelled by the registry (' . implode(', ', $relabelled) . ')');
 
 // --- One tool taxonomy: the categories the navigation publishes are the categories the PHP
 // engine serves. A published category that only the theme fallback can resolve means a visitor
@@ -201,6 +231,26 @@ check(count($locations[1]) > 0, 'sitemap publishes locations');
 foreach ($locations[1] as $location) {
     check(strpos($location, '?') === false && strpos($location, '#') === false, 'sitemap entry is a clean URL: ' . $location);
 }
+// The sitemap must publish the URLs the front controller serves - every one of them and nothing
+// else. Publishing a route only the registry knows hands crawlers a noindex signpost, which is how
+// the tool duplication in this pass stayed invisible; missing a served route hides a real page.
+$published = array_map(function ($location) { return (string) preg_replace('~^https?://[^/]+~', '', $location); }, $locations[1]);
+$published = array_map(function ($path) { return $path === '' ? '/' : $path; }, $published);
+$servedPaths = array();
+foreach (Catalog::enabledTools() as $tool) {
+    $servedPaths[] = rtrim((string) $tool['path'], '/');
+    check(in_array(rtrim((string) $tool['path'], '/'), $published, true), 'sitemap publishes the served tool path: ' . $tool['path']);
+}
+check(count($servedPaths) >= 100, 'the served catalogue is actually compared with the sitemap (' . count($servedPaths) . ' paths)');
+foreach ($published as $path) {
+    $resolved = Catalog::resolve($path);
+    check($resolved !== null && !empty($resolved['kind']), 'sitemap entry is a route this shell serves: ' . $path);
+}
+foreach (array('/tools/color-tools', '/tools/favorites', '/tools/ping', '/tools/history') as $signpost) {
+    check(!in_array($signpost, $published, true), 'sitemap does not advertise a route this shell cannot serve: ' . $signpost);
+}
+check(in_array('/tools/category/dns-domains', $published, true), 'sitemap publishes the discovery categories');
+check(count($published) === count(array_unique($published)), 'sitemap publishes each URL once');
 
 $context=Site::context(array('WEB_ROOT'=>'/billing', 'systemurl'=>'https://example.test/billing', 'cloudhost247ToolsPage'=>ToolsSite::resolve('/tools/dns-lookup')));
 check($context['public']===true,'native public shell');
