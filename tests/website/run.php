@@ -3,9 +3,11 @@ require dirname(__DIR__) . '/theme/fakes.php';
 require dirname(__DIR__, 2) . '/modules/addons/cloudhost247_theme/lib/Site.php';
 require dirname(__DIR__, 2) . '/modules/addons/cloudhost247_theme/lib/PublicPage.php';
 require dirname(__DIR__, 2) . '/modules/addons/cloudhost247_theme/lib/PublicDiscovery.php';
+require dirname(__DIR__, 2) . '/modules/addons/cloudhost247_theme/lib/CrawlPolicy.php';
 use CloudHost247\Theme\Site;
 use CloudHost247\Theme\PublicPage;
 use CloudHost247\Theme\PublicDiscovery;
+use CloudHost247\Theme\CrawlPolicy;
 ch247_theme_fresh();
 $tests = array();
 $tests['known editorial route resolves without invented product rows'] = PublicPage::resolve('web-hosting')['editorial_default'] === true && !isset(PublicPage::resolve('web-hosting')['product_component']);
@@ -108,6 +110,69 @@ for ($i = 100; $i < 150; $i++) {
     ch247_theme_seed_content($i, 'page', 'bounded-' . $i, 'Boundedneedle ' . $i, 0, true);
 }
 $tests['search returns at most forty results'] = count(PublicDiscovery::search(PublicDiscovery::pages($repository), 'Boundedneedle')) === 40;
+// ---------------------------------------------------------------------------
+// Crawl policy: one registry policy, four surfaces (Node robots/sitemap, the generated
+// static robots.txt, robots.php and the PHP sitemaps). These assertions are the PHP half of
+// that contract; cloudhost247-node/tests/integration/seo-routes.test.ts is the app half, and
+// scripts/site/generate.mjs fails the build if the registry and the projections drift.
+// ---------------------------------------------------------------------------
+$registry = json_decode((string) file_get_contents(dirname(__DIR__, 2) . '/shared/site/registry.json'), true);
+$expectedExclusions = array();
+foreach (array_merge($registry['sitemap']['exclude'], $registry['sitemap']['excludePhp']) as $entry) {
+    $path = '/' . preg_replace('~^\.?/+~', '', (string) $entry);
+    if ($path !== '/') { $expectedExclusions[$path] = true; }
+}
+$expectedExclusions = array_keys($expectedExclusions);
+sort($expectedExclusions);
+$tests['crawl policy reads the registry exclusions'] = CrawlPolicy::exclusions() === $expectedExclusions;
+$phpFallback = CrawlPolicy::FALLBACK_PHP_EXCLUSIONS;
+sort($phpFallback);
+$registryPhp = $registry['sitemap']['excludePhp'];
+sort($registryPhp);
+$tests['compiled PHP exclusion fallback matches the registry'] = $phpFallback === $registryPhp;
+$spaFallback = CrawlPolicy::FALLBACK_SPA_EXCLUSIONS;
+sort($spaFallback);
+$registrySpa = $registry['sitemap']['exclude'];
+sort($registrySpa);
+$tests['compiled SPA exclusion fallback matches the registry'] = $spaFallback === $registrySpa;
+$tests['homepage is never excluded'] = CrawlPolicy::isPublic('') && CrawlPolicy::isPublic('/');
+$tests['marketing routes stay indexable'] = CrawlPolicy::isPublic('web-hosting.php') && CrawlPolicy::isPublic('/hosting/web-hosting');
+foreach (array('dashboard', 'login', 'cart') as $spaPath) {
+    $tests['gated app route excluded: /' . $spaPath] = !CrawlPolicy::isPublic('/' . $spaPath);
+}
+foreach (array('cart.php', 'clientarea.php', 'register.php', 'pwreset.php', 'logout.php', 'submitticket.php',
+    'supporttickets.php', 'viewticket.php', 'site-search.php', 'service-error.php', 'tables.php',
+    'tools/api.php', 'cloudhost247-sample.php') as $phpPath) {
+    $tests['private PHP route excluded: ' . $phpPath] = !CrawlPolicy::isPublic($phpPath);
+}
+foreach (array('admin/', 'modules/', 'crons/', 'errors/', 'tools/data/', 'tools/admin/') as $directory) {
+    $tests['private directory excluded: ' . $directory] = !CrawlPolicy::isPublic($directory) && !CrawlPolicy::isPublic($directory . 'index.php');
+}
+// A disallowed sitemap cannot be fetched, which silently voids the Sitemap: directive.
+foreach (CrawlPolicy::SITEMAP_ENDPOINTS as $endpoint) {
+    $tests['sitemap endpoint stays fetchable: ' . $endpoint] = CrawlPolicy::isPublic($endpoint);
+}
+// Every page the PHP theme publishes must be indexable, or the sitemap and robots.txt contradict.
+$registeredPages = array_keys(Site::catalog()['pages']);
+$privateRegistered = array_values(array_filter($registeredPages, function ($page) { return !CrawlPolicy::isPublic($page); }));
+$tests['every registered public page is indexable'] = $privateRegistered === array();
+$categorySlugs = array();
+foreach (Site::catalog()['toolCategories'] as $category) {
+    if (isset($category['slug'])) { $categorySlugs[] = $category['slug']; }
+}
+$tests['the registry publishes nine tool categories'] = count($categorySlugs) === 9;
+$privateCategories = array_values(array_filter($categorySlugs, function ($slug) { return !CrawlPolicy::isPublic('/tools/category/' . $slug); }));
+$tests['every published tool category is indexable'] = $privateCategories === array();
+$tests['sitemap filter drops excluded paths only'] = CrawlPolicy::filter(array('web-hosting.php', 'cart.php', 'clientarea.php', 'tools/category/dns-domains'))
+    === array('web-hosting.php', 'tools/category/dns-domains');
+$tests['sitemap page URL is indexable'] = CrawlPolicy::isPublic('cloudhost247-page.php?slug=launch-event');
+$root = dirname(__DIR__, 2);
+foreach (array('cloudhost247-sitemap.php', 'tools-sitemap.php', 'builder-sitemap.php') as $sitemap) {
+    $source = (string) file_get_contents($root . '/' . $sitemap);
+    $tests['sitemap is marked noindex rather than blocked: ' . $sitemap] = strpos($source, "'X-Robots-Tag: noindex'") !== false;
+}
+$tests['theme sitemap applies the crawl policy'] = strpos((string) file_get_contents($root . '/cloudhost247-sitemap.php'), 'CrawlPolicy::filter') !== false;
+$tests['robots.php applies the crawl policy'] = strpos((string) file_get_contents($root . '/robots.php'), 'CrawlPolicy::exclusions') !== false;
 $failed=0;
 foreach ($tests as $name=>$ok) { echo ($ok ? 'ok' : 'not ok') . ' - ' . $name . "\n"; if (!$ok) { $failed++; } }
 echo '# ' . count($tests) . ' assertions, ' . $failed . " failed\n";

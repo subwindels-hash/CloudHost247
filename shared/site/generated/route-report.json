@@ -15,10 +15,23 @@
   "marketingSections": 116,
   "faqs": 170,
   "toolsIndexed": null,
-  "documentationFiles": 14,
-  "documentationBytes": 390787,
+  "documentationFiles": 13,
+  "documentationBytes": 221105,
   "assetsCopied": 161,
   "phpPagesEnriched": 41,
+  "phpSitemapPaths": 92,
+  "phpCrawlExclusions": 23,
+  "toolsCategoryToolCounts": {
+    "dns-domains": 18,
+    "email": 8,
+    "ip-network": 15,
+    "calculators": 3,
+    "developer": 10,
+    "website": 6,
+    "security": 4,
+    "ssl": 1,
+    "utilities": 18
+  },
   "errors": [],
   "warnings": []
 }

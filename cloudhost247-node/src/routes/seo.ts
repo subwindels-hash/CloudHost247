@@ -193,8 +193,26 @@ function renderSitemap(origin: string, entries: SitemapEntry[]): string {
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>\n`;
 }
 
+/**
+ * robots.txt for whichever host answers `/robots.txt`.
+ *
+ * Both halves of the registry policy are published: the single-page-app exclusions and the
+ * PHP/WHMCS ones. The platform is mounted under the same domain as the PHP deployment, so a rule
+ * that names `cart.php` or `tools/api.php` is meaningful here too — and publishing only half the
+ * policy is how a crawl rule ends up contradicting the surface that enforces it. Sitemap endpoints
+ * are never disallowed: a blocked sitemap cannot be fetched, which voids the `Sitemap:` line below.
+ */
 function renderRobots(origin: string): string {
-  const rules = [...new Set(SITEMAP_POLICY.exclude.filter((rule) => normalizePath(rule)))].sort();
+  // Root-relative, as the specification requires, but otherwise left exactly as authored: a
+  // directory rule stays `admin/` so it cannot widen into a prefix match on `/administrators`.
+  const rules = [
+    ...new Set(
+      [...SITEMAP_POLICY.exclude, ...SITEMAP_POLICY.excludePhp]
+        .map((rule) => rule.trim().split(/[?#]/, 1)[0] ?? '')
+        .filter((rule) => rule && !rule.startsWith('//') && !rule.includes('://'))
+        .map((rule) => (rule.startsWith('/') ? rule : `/${rule.replace(/^\.?\/+/, '')}`))
+    ),
+  ].sort();
   const lines = ['User-agent: *', 'Allow: /', ...rules.map((rule) => `Disallow: ${rule}`)];
   lines.push('', '# Sitemap generated from the public site registries and published records');
   lines.push(`Sitemap: ${origin}/sitemap.xml`, '');

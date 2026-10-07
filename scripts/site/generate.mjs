@@ -22,7 +22,7 @@
  *   node scripts/site/generate.mjs           # validate + write
  *   node scripts/site/generate.mjs --check   # validate only, write nothing (CI)
  */
-import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, copyFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, copyFileSync, rmSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -55,6 +55,12 @@ const ASSET_PUBLIC = join(ROOT, 'cloudhost247-node', 'frontend', 'public', 'medi
 const DESIGN_SYSTEM = join(ROOT, 'shared', 'site', 'design-system.css');
 const DESIGN_SYSTEM_COPY = join(ROOT, 'templates', 'cloudhost247', 'css', 'design-system.css');
 const REPORT_OUT = join(ROOT, 'shared', 'site', 'generated', 'route-report.json');
+/**
+ * The PHP/WHMCS document root's crawl guidance. Generated from the same registry policy as the
+ * Node platform's `/robots.txt` so the two surfaces cannot give a crawler contradictory advice —
+ * and so a path added to the policy appears in both without anybody remembering to edit a file.
+ */
+const ROBOTS_TXT = join(ROOT, 'robots.txt');
 
 /**
  * Documents published to the website reader. Only documents that describe the platform as a
@@ -75,7 +81,10 @@ export const PUBLISHED_DOCS = [
   { file: 'PASSKEY.md', section: 'Accounts', title: 'Passkeys and WebAuthn' },
   { file: 'MRZ_DEVELOPER_TOOL.md', section: 'Accounts', title: 'Document tools (MRZ)' },
   { file: 'CPANEL_DEPLOYMENT.md', section: 'Operations', title: 'cPanel deployment' },
-  { file: 'NODE_PLATFORM_STATUS.md', section: 'Operations', title: 'Platform status and known gaps' },
+  // docs/NODE_PLATFORM_STATUS.md is deliberately NOT published: it is the internal phase-acceptance
+  // ledger and references branch names, pull requests, commit hashes and unexecuted migrations.
+  // It stays in the repository for engineers; a public reader has no use for it and a customer
+  // cannot act on it.
   { file: 'webhooks/README.md', section: 'Operations', title: 'Webhook pipeline', optional: true }
 ];
 
@@ -93,6 +102,16 @@ const KNOWN_ICONS = new Set([
 ]);
 
 /** WHMCS entry points that live in the licensed core, not in this repository. */
+/**
+ * Paths a licensed WHMCS installation always has, but this repository does not track: the admin
+ * directory is renamed during installation, so it cannot be probed on disk. They stay excludable by
+ * name, and the release gate re-checks that they are still excluded.
+ */
+const WHMCS_MANAGED_PATHS = new Set(['admin/']);
+
+/** The PHP theme's projection of the app catalogue; the tools taxonomy is checked against both. */
+const PHP_TOOLS_JSON = join(ROOT, 'modules', 'addons', 'cloudhost247_theme', 'resources', 'tools.json');
+
 const WHMCS_ENTRY_POINTS = new Set([
   'index.php', 'cart.php', 'clientarea.php', 'register.php', 'logout.php', 'pwreset.php',
   'contact.php', 'knowledgebase.php', 'submitticket.php', 'serverstatus.php',
@@ -499,11 +518,14 @@ function emitPhpSiteJson(registry, previous, contentPages) {
   // runs. `site.js` still enriches it from the live catalogue when it can; this is the floor, not
   // the ceiling — a menu that is empty with JavaScript disabled is a broken menu.
   const toolCategories = registry.toolsCategories.map((category) => ({
+    slug: category.slug,
     label: category.label,
     desc: category.desc,
     url: `tools/category/${category.slug}`,
   }));
-  return { payload: { ...previous, navigation, footer, pages, toolCategories }, matched };
+  // The crawl policy is projected so the PHP sitemaps, robots.php and the tools shell all read
+  // the same rules the Node platform reads, instead of each keeping its own list.
+  return { payload: { ...previous, navigation, footer, pages, toolCategories, sitemap: registry.sitemap }, matched };
 }
 
 /* ------------------------------------------------------------------ */
@@ -608,8 +630,177 @@ function validatePages(pages, spaRouteSet, tools, registryRoutes, legalSlugs) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Documentation index                                                  */
+/* Crawl policy                                                         */
 /* ------------------------------------------------------------------ */
+
+/** Normalises a registry policy entry or destination to a comparable path. */
+function policyPath(value) {
+  const path = String(value ?? '').trim().split(/[?#]/, 1)[0];
+  if (!path) return '';
+  return path.startsWith('/') ? path : `/${path}`;
+}
+
+/**
+ * The PHP-surface counterpart of the SPA exclusion policy. Both lists live in the registry
+ * because they describe the same product decision — what a crawler should not index — even
+ * though the two surfaces name different files for it.
+ */
+function phpExclusions(registry, pages) {
+  const excluded = (registry.sitemap?.excludePhp ?? []).map((entry) => String(entry).replace(/^\.?\/+/, ''));
+  if (excluded.length === 0) fail('sitemap.excludePhp is empty — the PHP surface would advertise every internal path.');
+
+  for (const entry of excluded) {
+    const probe = entry.replace(/\/$/, '');
+    const isDirectory = entry.endsWith('/') && existsSync(join(ROOT, probe));
+    const isFile = existsSync(join(ROOT, probe));
+    const isWhmcs = WHMCS_ENTRY_POINTS.has(probe);
+    const isManaged = WHMCS_MANAGED_PATHS.has(entry) || WHMCS_MANAGED_PATHS.has(probe);
+    if (!isDirectory && !isFile && !isWhmcs && !isManaged) {
+      fail(`sitemap.excludePhp lists "${entry}", which is neither a file, a directory, nor a licensed WHMCS path.`);
+    }
+  }
+  return excluded;
+}
+
+/** A registry destination is private when the policy covers it, on either surface. */
+function isPrivatePath(path, registry) {
+  const candidate = policyPath(path);
+  if (candidate === '') return false; // the homepage is never private
+  if (!candidate) return true;
+  const rules = [...(registry.sitemap?.exclude ?? []), ...(registry.sitemap?.excludePhp ?? []).map((entry) => `/${String(entry).replace(/^\.?\/+/, '')}`)];
+  return rules.map(policyPath).some((rule) => {
+    if (!rule) return false;
+    const bare = rule.endsWith('/') ? rule.slice(0, -1) : rule;
+    return candidate === bare || candidate === `${bare}/` || candidate.startsWith(`${bare}/`) || rule.endsWith('/') && candidate.startsWith(rule);
+  });
+}
+
+/**
+ * Every PHP URL the deployment publishes to a crawler: the homepage, every registered public page,
+ * and every registry destination that lands on the PHP surface. Computed here so the generator can
+ * prove that the policy and the sitemap agree instead of trusting that they do.
+ */
+function publicPhpPaths(registry, pages) {
+  const paths = new Set(['', ...Object.keys(pages ?? {})]);
+  const visit = (href) => {
+    if (!href?.php) return;
+    const path = href.php.replace(/^\.?\/+/, '');
+    if (path) paths.add(path);
+  };
+  for (const menu of registry.menus) {
+    visit(menu.href);
+    visit(menu.featured?.href);
+    for (const column of menu.columns ?? []) for (const item of column.items ?? []) visit(item.href);
+  }
+  for (const column of registry.footer) for (const item of column.items ?? []) visit(item.href);
+  for (const [key, value] of Object.entries(registry.utility ?? {})) visit(value);
+  return [...paths].filter((path) => !isPrivatePath(path, registry));
+}
+
+/**
+ * `robots.txt` for a PHP/WHMCS deployment. It is a fallback: when the Node platform owns the
+ * domain root it answers `/robots.txt` itself from `SITEMAP_POLICY.exclude`, and `robots.php`
+ * generates an equivalent file with absolute sitemap URLs. All four sources read this one policy.
+ */
+function renderRobotsTxt(registry) {
+  const disallow = [
+    ...(registry.sitemap?.exclude ?? []),
+    ...(registry.sitemap?.excludePhp ?? []).map((entry) => `/${String(entry).replace(/^\.?\/+/, '')}`),
+  ];
+  const lines = [
+    '# CloudHost247 — generated crawl guidance. Do not edit by hand.',
+    '# Source: shared/site/registry.json (sitemap.exclude / sitemap.excludePhp).',
+    '# Regenerate: node scripts/site/generate.mjs',
+    '#',
+    '# This static file is the FALLBACK. When the CloudHost247 Node platform owns the domain root',
+    '# it answers /robots.txt itself; otherwise route robots.txt to robots.php with one rewrite rule',
+    '# (infrastructure/litespeed/webroot-hardening.htaccess) to get absolute Sitemap URLs. The',
+    '# specification ignores a relative Sitemap directive, so this file states none rather than',
+    '# publishing a line that does nothing.',
+    '#',
+    '# Crawl guidance only — never an authorization mechanism. Private areas are protected by',
+    '# authentication, not by this file.',
+    '',
+    'User-agent: *',
+    ...[...new Set(disallow)].sort().map((path) => `Disallow: ${path}`),
+    '',
+    '# Sitemap generators on this deployment (submit their absolute URLs in your search console,',
+    '# or serve robots.php so they are advertised automatically):',
+    '#   /sitemap.xml              — the Node platform, from this same navigation registry',
+    '#   /cloudhost247-sitemap.php — published pages and articles',
+    '#   /tools-sitemap.php        — published tools',
+    '#   /builder-sitemap.php      — customer sites published through the website builder',
+    '',
+  ];
+  return lines.join('\n');
+}
+
+/**
+ * Sitemap endpoints must stay fetchable. A `Disallow` covering a sitemap silently voids the
+ * `Sitemap:` directive, so the policy is checked against this list on every build; the endpoints
+ * carry `X-Robots-Tag: noindex` instead of being blocked.
+ */
+const SITEMAP_ENDPOINTS = ['sitemap.xml', 'cloudhost247-sitemap.php', 'tools-sitemap.php', 'builder-sitemap.php'];
+
+/** The canonical discovery taxonomy, parsed from the app catalogue that publishes the tool pages. */
+function discoveryTaxonomy() {
+  const source = readFileSync(TOOLS_CATALOG, 'utf8');
+  const match = source.match(/export const DISCOVERY_CATEGORIES[^=]*=\s*\{([\s\S]*?)\};/);
+  if (!match) {
+    fail('cloudhost247-node/src/tools/catalog.ts no longer exports DISCOVERY_CATEGORIES; the tools taxonomy cannot be verified.');
+    return {};
+  }
+  const taxonomy = {};
+  for (const entry of match[1].matchAll(/(?:'([^']+)'|([A-Za-z][\w-]*))\s*:\s*'([^']*)'/g)) {
+    taxonomy[entry[1] ?? entry[2]] = entry[3];
+  }
+  return taxonomy;
+}
+
+/**
+ * One taxonomy for tool discovery. The registry is what the mega menu, the footer, the PHP theme
+ * and the sitemaps read; the app catalogue is what the tool pages group by; `tools.json` is the
+ * projection the PHP theme renders. If any of the three drifts, a category link published by the
+ * navigation stops matching the page it opens, so this fails the build instead.
+ */
+function validateToolsTaxonomy(registry) {
+  const app = discoveryTaxonomy();
+  const published = registry.toolsCategories ?? [];
+  const themeCatalogue = JSON.parse(readFileSync(PHP_TOOLS_JSON, 'utf8'));
+  const themeCategories = Object.keys(themeCatalogue.categories ?? {});
+
+  const registrySlugs = published.map((category) => category.slug);
+  const appSlugs = Object.keys(app);
+  const missingFromApp = registrySlugs.filter((slug) => !appSlugs.includes(slug));
+  const missingFromRegistry = appSlugs.filter((slug) => !registrySlugs.includes(slug));
+  if (missingFromApp.length || missingFromRegistry.length) {
+    fail(
+      `tools category taxonomy drifted: registry ${missingFromApp.length ? `publishes ${missingFromApp.join(', ')} which the app catalogue does not define` : 'is complete'}; ` +
+        `app catalogue defines ${missingFromRegistry.length ? `${missingFromRegistry.join(', ')} which the registry does not publish` : 'nothing extra'}.`
+    );
+  }
+  for (const category of published) {
+    if (app[category.slug] && app[category.slug] !== category.label) {
+      fail(`tools category "${category.slug}" is labelled "${category.label}" in the registry and "${app[category.slug]}" in the app catalogue.`);
+    }
+  }
+  for (const slug of themeCategories) {
+    if (!registrySlugs.includes(slug)) fail(`tools.json publishes the category "${slug}", which the registry does not.`);
+  }
+  for (const slug of registrySlugs) {
+    if (!themeCategories.includes(slug)) fail(`the registry publishes the category "${slug}", which tools.json cannot render.`);
+  }
+
+  // A published category with no tools behind it is a dead-end page for a visitor and a crawler.
+  const counts = {};
+  for (const tool of themeCatalogue.tools ?? []) {
+    for (const slug of tool.discoveryCategories ?? []) counts[slug] = (counts[slug] ?? 0) + 1;
+  }
+  for (const slug of registrySlugs) {
+    if (!counts[slug]) fail(`the registry publishes the tools category "${slug}", but no published tool belongs to it.`);
+  }
+  return counts;
+}
 
 function firstHeading(markdown) {
   const match = markdown.match(/^#\s+(.+)$/m);
@@ -749,6 +940,33 @@ function main() {
   const contentPages = validatePages(rawPages, routes, tools, registryRoutes, legalSlugs);
   const docs = buildDocsIndex();
 
+  /**
+   * Crawl-policy validation. The PHP exclusion list is authored in the registry, so the two ways
+   * it can be wrong are both checked here: an entry that matches nothing (a typo that silently
+   * stops excluding something) and an entry that covers a page the deployment publishes as public
+   * marketing content — the contradiction that produced a robots.txt forbidding a URL the sitemap
+   * listed.
+   */
+  const previousSiteJson = JSON.parse(readFileSync(PHP_SITE_JSON, 'utf8'));
+  const excludePhp = phpExclusions(registry, previousSiteJson.pages);
+  for (const page of Object.keys(previousSiteJson.pages ?? {})) {
+    if (isPrivatePath(page, registry)) {
+      fail(`sitemap policy excludes "${page}", but it is a registered public marketing page.`);
+    }
+  }
+  const publishedPhpPaths = publicPhpPaths(registry, previousSiteJson.pages);
+  for (const category of registry.toolsCategories ?? []) {
+    const path = `tools/category/${category.slug}`;
+    if (isPrivatePath(path, registry)) fail(`sitemap policy excludes the published tools category "${path}".`);
+  }
+  // Sitemaps must stay crawlable: the policy is not allowed to block its own discovery surface.
+  for (const endpoint of SITEMAP_ENDPOINTS) {
+    if (isPrivatePath(endpoint, registry)) {
+      fail(`sitemap policy excludes "${endpoint}"; a blocked sitemap cannot be fetched and the Sitemap: directive would be ignored.`);
+    }
+  }
+  const toolsPerCategory = validateToolsTaxonomy(registry);
+
   const report = {
     registryVersion: registry.version,
     generatedAtSource: 'shared/site/registry.json',
@@ -770,6 +988,9 @@ function main() {
     documentationBytes: docs.copied.reduce((total, doc) => total + doc.markdown.length, 0),
     assetsCopied: 0, // filled in by the write phase, once the illustration copy has run
     phpPagesEnriched: 0,
+    phpSitemapPaths: publishedPhpPaths.length,
+    phpCrawlExclusions: excludePhp.length,
+    toolsCategoryToolCounts: toolsPerCategory,
     errors,
     warnings,
   };
@@ -810,8 +1031,17 @@ function main() {
   }
 
   mkdirSync(DOCS_PUBLIC, { recursive: true });
+  const publishedSlugs = new Set(docs.copied.map((doc) => `${doc.slug}.md`));
   for (const doc of docs.copied) {
     writeFileSync(join(DOCS_PUBLIC, `${doc.slug}.md`), doc.markdown);
+  }
+  // De-publishing a document must remove it from the build, not just from the index: a leftover
+  // file is still served at /docs/<slug>.md and is still crawled.
+  for (const stale of readdirSync(DOCS_PUBLIC)) {
+    if (stale.endsWith('.md') && !publishedSlugs.has(stale)) {
+      rmSync(join(DOCS_PUBLIC, stale));
+      warn(`removed de-published documentation file frontend/public/docs/${stale}`);
+    }
   }
 
   // One design system, two delivery surfaces. The WHMCS theme gets a copy so its document root
@@ -843,13 +1073,16 @@ function main() {
   copyAssets(ASSET_SOURCE, ASSET_PUBLIC);
   report.assetsCopied = assetCount;
 
-  const previousSiteJson = JSON.parse(readFileSync(PHP_SITE_JSON, 'utf8'));
   const { payload: nextSiteJson, matched: phpPagesEnriched } = emitPhpSiteJson(registry, previousSiteJson, contentPages);
   report.phpPagesEnriched = phpPagesEnriched;
   writeFileSync(PHP_SITE_JSON, `${json(nextSiteJson)}\n`);
 
   mkdirSync(dirname(REPORT_OUT), { recursive: true });
   writeFileSync(REPORT_OUT, `${json(report)}\n`);
+
+  // One policy, four crawl surfaces: the Node platform's dynamic /robots.txt, this static
+  // fallback, robots.php and the sitemaps all derive from `registry.sitemap`.
+  writeFileSync(ROBOTS_TXT, renderRobotsTxt(registry));
 
   process.stdout.write(
     `✓ registry v${registry.version} → ${registry.menus.length} mega menus, ${registry.footer.length} footer columns, `
@@ -861,6 +1094,7 @@ function main() {
     + `${docs.index.length} published documents (${Math.round(report.documentationBytes / 1024)} KB)\n`
   );
   process.stdout.write(`✓ PHP theme → navigation, footer and ${phpPagesEnriched} product pages enriched from the shared content\n`);
+  process.stdout.write(`✓ crawl policy → ${excludePhp.length} PHP exclusions, ${publishedPhpPaths.length} public PHP paths, robots.txt and site.json policy refreshed\n`);
   for (const warning of warnings) process.stderr.write(`  ! ${warning}\n`);
 }
 

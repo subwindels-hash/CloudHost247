@@ -4011,49 +4011,127 @@
   ],
   "toolCategories": [
     {
+      "slug": "dns-domains",
       "label": "DNS & Domains",
       "desc": "Lookups, propagation and zone diagnostics.",
       "url": "tools/category/dns-domains"
     },
     {
+      "slug": "ip-network",
       "label": "IP & Network",
       "desc": "Addresses, subnets, reachability and routing checks.",
       "url": "tools/category/ip-network"
     },
     {
+      "slug": "security",
       "label": "Security",
       "desc": "Hashing, verification and safe inspection.",
       "url": "tools/category/security"
     },
     {
+      "slug": "ssl",
       "label": "SSL",
       "desc": "Certificate, chain and TLS inspection.",
       "url": "tools/category/ssl"
     },
     {
+      "slug": "email",
       "label": "Email",
       "desc": "MX, SPF, DKIM and DMARC checks.",
       "url": "tools/category/email"
     },
     {
+      "slug": "website",
       "label": "Website",
       "desc": "Headers, redirects, links and page checks.",
       "url": "tools/category/website"
     },
     {
+      "slug": "developer",
       "label": "Developer",
       "desc": "Encoding, conversion and inspection tools.",
       "url": "tools/category/developer"
     },
     {
+      "slug": "calculators",
       "label": "Calculators",
       "desc": "Subnet, time and conversion calculators.",
       "url": "tools/category/calculators"
     },
     {
+      "slug": "utilities",
       "label": "Utilities",
       "desc": "Everyday generators and converters.",
       "url": "tools/category/utilities"
     }
-  ]
+  ],
+  "sitemap": {
+    "exclude": [
+      "/login",
+      "/register",
+      "/forgot-password",
+      "/reset-password",
+      "/verify-email",
+      "/dashboard",
+      "/admin",
+      "/account",
+      "/billing",
+      "/invoices",
+      "/cart",
+      "/checkout",
+      "/inbox",
+      "/search",
+      "/api/",
+      "/support",
+      "/services",
+      "/marketing",
+      "/servers/new",
+      "/websites/builder",
+      "/websites/ai-builder",
+      "/websites/store",
+      "/websites/experts",
+      "/websites/templates",
+      "/websites/design-services",
+      "/tools/history",
+      "/tools/favorites",
+      "/tools/reports",
+      "/tools/monitors"
+    ],
+    "excludePhp": [
+      "admin/",
+      "modules/",
+      "crons/",
+      "errors/",
+      "cart.php",
+      "clientarea.php",
+      "register.php",
+      "pwreset.php",
+      "logout.php",
+      "submitticket.php",
+      "supporttickets.php",
+      "viewticket.php",
+      "site-search.php",
+      "service-error.php",
+      "cloudhost247-marketing-track.php",
+      "cloudhost247-sample.php",
+      "cloudhost247-vps-sample.php",
+      "all-element-cloudhost247.php",
+      "future-element.php",
+      "tables.php",
+      "tools/data/",
+      "tools/admin/",
+      "tools/api.php"
+    ],
+    "priorities": {
+      "/": 1,
+      "/hosting": 0.9,
+      "/cloud": 0.9,
+      "/domains": 0.9,
+      "/platforms": 0.8,
+      "/developers": 0.8,
+      "/websites": 0.8,
+      "/tools": 0.8
+    },
+    "defaultPriority": 0.6
+  }
 }

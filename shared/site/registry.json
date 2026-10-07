@@ -1,13 +1,13 @@
 {
   "$schema": "./registry.schema.json",
   "version": "2.0.0",
-  "generatedNotice": "SOURCE OF TRUTH — edit this file, then run `node scripts/site/generate.mjs`. Do not edit modules/addons/cloudhost247_theme/resources/site.json's navigation/footer by hand, and do not edit cloudhost247-node/frontend/src/navigation/registry.generated.ts at all.",
+  "generatedNotice": "SOURCE OF TRUTH \u2014 edit this file, then run `node scripts/site/generate.mjs`. Do not edit modules/addons/cloudhost247_theme/resources/site.json's navigation/footer by hand, and do not edit cloudhost247-node/frontend/src/navigation/registry.generated.ts at all.",
   "brand": {
     "name": "CloudHost247",
     "legalName": "CloudHost247 Isc.",
     "shortName": "CH247",
     "tagline": "Build. Host. Deploy. Scale.",
-    "description": "CloudHost247 gives businesses, developers and organizations the infrastructure they need to build and operate online — from domains and websites to cloud servers, applications and deployment platforms."
+    "description": "CloudHost247 gives businesses, developers and organizations the infrastructure they need to build and operate online \u2014 from domains and websites to cloud servers, applications and deployment platforms."
   },
   "surfaces": {
     "spa": {
@@ -359,7 +359,7 @@
             {
               "label": "Data Centers",
               "icon": "data-center",
-              "desc": "The facilities our servers are deployed in — when configured.",
+              "desc": "The facilities our servers are deployed in \u2014 when configured.",
               "href": {
                 "spa": "/cloud/data-centers",
                 "php": "data-centers.php"
@@ -449,7 +449,7 @@
     {
       "id": "domains",
       "label": "Domains",
-      "blurb": "Search, register, transfer and manage domain names — with the full registrar toolkit.",
+      "blurb": "Search, register, transfer and manage domain names \u2014 with the full registrar toolkit.",
       "href": {
         "spa": "/domains",
         "php": "domain.php"
@@ -563,7 +563,7 @@
             {
               "label": "Domain Appraisal",
               "icon": "chart",
-              "desc": "An estimated market value — never a guaranteed price.",
+              "desc": "An estimated market value \u2014 never a guaranteed price.",
               "href": {
                 "spa": "/domains/appraisal",
                 "php": "domain.php#appraisal"
@@ -747,7 +747,7 @@
     {
       "id": "developers",
       "label": "Developer / Deployment",
-      "blurb": "Runtimes, application deployments, environments and APIs — with availability shown by the live catalogue.",
+      "blurb": "Runtimes, application deployments, environments and APIs \u2014 with availability shown by the live catalogue.",
       "href": {
         "spa": "/developers",
         "php": "developer-friendly.php"
@@ -925,7 +925,7 @@
       },
       "featured": {
         "title": "Website Builder",
-        "body": "Pages, sections, media and publishing — with templates you can start from and edit in the browser.",
+        "body": "Pages, sections, media and publishing \u2014 with templates you can start from and edit in the browser.",
         "href": {
           "spa": "/websites/builder",
           "php": "website-design.php"
@@ -1063,7 +1063,7 @@
     {
       "id": "tools",
       "label": "Tools",
-      "blurb": "Inspect, troubleshoot and build — with tools that explain their results instead of showing invented data.",
+      "blurb": "Inspect, troubleshoot and build \u2014 with tools that explain their results instead of showing invented data.",
       "href": {
         "spa": "/tools",
         "php": "tools"
@@ -2258,6 +2258,31 @@
       "/tools/favorites",
       "/tools/reports",
       "/tools/monitors"
+    ],
+    "excludePhp": [
+      "admin/",
+      "modules/",
+      "crons/",
+      "errors/",
+      "cart.php",
+      "clientarea.php",
+      "register.php",
+      "pwreset.php",
+      "logout.php",
+      "submitticket.php",
+      "supporttickets.php",
+      "viewticket.php",
+      "site-search.php",
+      "service-error.php",
+      "cloudhost247-marketing-track.php",
+      "cloudhost247-sample.php",
+      "cloudhost247-vps-sample.php",
+      "all-element-cloudhost247.php",
+      "future-element.php",
+      "tables.php",
+      "tools/data/",
+      "tools/admin/",
+      "tools/api.php"
     ],
     "priorities": {
       "/": 1.0,

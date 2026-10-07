@@ -199,6 +199,45 @@ describe('CLOUDHOST247 public SEO surface', () => {
     expect(response.body).not.toMatch(/[Dd]isallow: \/$/m);
   });
 
+  it('publishes one crawl policy: both registry halves, and no sitemap endpoint blocked', async () => {
+    const app = buildTestApp();
+    const response = await app.inject({ method: 'GET', url: '/robots.txt' });
+    expect(response.statusCode).toBe(200);
+
+    // The PHP/WHMCS half of the policy is served by the same host, so it must be published here
+    // too — otherwise the file that answers /robots.txt contradicts the one the PHP sitemaps obey.
+    for (const exclusion of SITEMAP_POLICY.excludePhp) {
+      expect(response.body).toContain(`Disallow: /${exclusion}`);
+    }
+    expect(response.body).toContain('Disallow: /cart.php');
+    expect(response.body).toContain('Disallow: /clientarea.php');
+    expect(response.body).toContain('Disallow: /tools/api.php');
+
+    // A disallowed sitemap cannot be fetched, which voids the Sitemap: line above it.
+    const disallowed = response.body
+      .split('\n')
+      .filter((line) => line.startsWith('Disallow: '))
+      .map((line) => line.slice('Disallow: '.length).replace(/\/$/, ''));
+    for (const endpoint of ['/sitemap.xml', '/cloudhost247-sitemap.php', '/tools-sitemap.php', '/builder-sitemap.php']) {
+      expect(disallowed).not.toContain(endpoint);
+    }
+  });
+
+  it('never advertises a policy-excluded destination in the sitemap', async () => {
+    const app = buildTestApp();
+    const sitemap = await app.inject({
+      method: 'GET',
+      url: '/sitemap.xml',
+      headers: { 'x-forwarded-proto': 'https', 'x-forwarded-host': 'shop.example.com' },
+    });
+    expect(sitemap.statusCode).toBe(200);
+    const locations = [...sitemap.body.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => new URL(match[1]).pathname);
+    expect(locations.length).toBeGreaterThan(0);
+    for (const location of locations) {
+      expect(isSitemapPathAllowed(location), `${location} is excluded by the registry policy`).toBe(true);
+    }
+  });
+
   it('never publishes any brand name other than CLOUDHOST247', async () => {
     const app = buildTestApp();
     const [sitemap, robots] = await Promise.all([

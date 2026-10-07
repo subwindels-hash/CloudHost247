@@ -29,6 +29,26 @@ foreach (ToolsSite::catalog()['tools'] as $tool) {
     }
 }
 foreach (ToolsSite::catalog()['categories'] as $slug=>$label) { check(ToolsSite::resolve('/tools/category/'.$slug)['name']===$label.' Tools', 'category'); }
+
+// --- One tool taxonomy: the categories the navigation publishes are the categories the PHP
+// engine serves. A published category that only the theme fallback can resolve means a visitor
+// who clicks "DNS & Domains" and a visitor who opens /tools are looking at different catalogues,
+// and a published category with no tools behind it is a dead-end page for people and crawlers.
+check(array_keys(Catalog::discovery()) === array('dns-domains','ip-network','security','ssl','email','website','developer','calculators','utilities'), 'discovery taxonomy is the published nine categories');
+foreach (Site::catalog()['toolCategories'] as $category) {
+    $slug = (string) $category['slug'];
+    $resolved = Catalog::resolve('/tools/category/' . $slug);
+    check($resolved !== null && $resolved['kind'] === 'category', 'published category resolves in the PHP tool catalogue: ' . $slug);
+    check(isset(Catalog::discovery()[$slug]) && Catalog::discovery()[$slug] === $category['label'], 'published category label matches the discovery taxonomy: ' . $slug);
+    $published = Catalog::toolsInDiscovery($slug);
+    check(is_array($published) && count($published) > 0, 'published category lists at least one tool: ' . $slug);
+}
+// Tool cards and the hub hero point at real files: a missing icon is a broken image on 105 pages.
+$assetRoot = dirname(__DIR__, 2) . '/assets/images/cloudhost247/tools/';
+check(is_file($assetRoot . 'hero.svg'), 'tools hub hero illustration exists');
+foreach (Catalog::enabledTools() as $tool) {
+    check(is_file($assetRoot . $tool['category'] . '.svg'), 'tool card icon exists for category ' . $tool['category']);
+}
 foreach (array('/tools/no-such-tool', '/tools/../../config.php', '/tools/%2e%2e/config.php') as $path) { check(ToolsSite::resolve($path)===null,'unknown/unsafe route'); }
 
 // --- The MRZ tool is a first-class, reachable route in both registries --------------------------
