@@ -85,7 +85,7 @@ describe('every production tools route', () => {
     reject(new Error('Network unavailable'));
     await screen.findByRole('heading', {
       level: 1,
-      name: 'Tools temporarily unavailable',
+      name: 'The tool catalogue could not be loaded',
     });
     expect(screen.getByRole('alert').textContent).toContain(
       'Network unavailable'

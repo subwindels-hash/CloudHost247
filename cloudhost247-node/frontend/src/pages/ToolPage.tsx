@@ -236,7 +236,9 @@ export default function ToolPage() {
   if (!catalogLoading && !tool) {
     return (
       <div className="tools-center">
-        <h1>{error ? 'Tools temporarily unavailable' : 'Tool not found'}</h1>
+        <h1>
+          {error ? 'The tool catalogue could not be loaded' : 'Tool not found'}
+        </h1>
         {error && <p role="alert">{error}</p>}
         <p>
           There is no tool registered under “{location.pathname}”.{' '}

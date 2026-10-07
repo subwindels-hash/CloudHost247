@@ -459,20 +459,25 @@
 .ch-split > .ch-visual { margin: 0; }
 
 /* Domain search — homepage and any marketing hero that offers a live search. */
-.ch-domain-search { margin: var(--ch-space-6) 0 0; max-width: 36rem; }
+/* A search field, not a hero banner: it sits under the lede and must read as the ordinary
+   control it is. The 40px control height and 30rem width are the same proportions used by the
+   domain search on /domains, so the homepage version does not look like a different product. */
+.ch-domain-search { margin: var(--ch-space-6) 0 0; max-width: 30rem; }
 .ch-domain-search__field {
-  display: flex; flex-wrap: wrap; gap: var(--ch-space-2);
-  padding: 6px; border-radius: var(--ch-radius); background: rgba(255, 255, 255, 0.06);
+  display: flex; flex-wrap: wrap; gap: 6px;
+  padding: 5px; border-radius: 12px; background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.16);
 }
 .ch-domain-search__input {
-  flex: 1 1 12rem; min-width: 0; min-height: 46px; padding: 0 14px;
-  border: 0; border-radius: var(--ch-radius-sm); background: rgba(7, 17, 25, 0.55);
-  color: #fff; font: inherit;
+  flex: 1 1 11rem; min-width: 0; min-height: 40px; padding: 0 12px;
+  border: 0; border-radius: 9px; background: rgba(7, 17, 25, 0.55);
+  color: #fff; font: inherit; font-size: 0.95rem;
 }
 .ch-domain-search__input::placeholder { color: var(--ch-on-dark-muted); }
 .ch-domain-search__input:focus { outline: 2px solid var(--ch-mint); outline-offset: 0; }
-.ch-domain-search .ch-btn { flex: 0 0 auto; }
+/* Scoped so the field keeps one control height: the base .ch-btn is 46px, which made the search
+   read as a call-to-action row rather than an input. */
+.ch-domain-search .ch-btn { flex: 0 0 auto; min-height: 40px; padding: 0 var(--ch-space-4); font-size: 0.88rem; }
 .ch-visual__caption {
   display: flex; justify-content: space-between; gap: var(--ch-space-3);
   padding: 10px var(--ch-space-4); border-top: 1px solid rgba(255, 255, 255, 0.12);

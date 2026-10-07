@@ -36,6 +36,7 @@
     "verify:authorization": "tsx tools/verify-payment-authorization.ts",
     "tools:catalog": "tsx scripts/export-tools-site.ts",
     "tools:catalog:check": "tsx scripts/export-tools-site.ts --check",
+    "tools:preview": "tsx scripts/tools-demo-preview.ts",
     "build:tools": "vite build --config frontend/vite.tools.config.ts"
   },
   "dependencies": {

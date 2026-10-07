@@ -8,6 +8,7 @@ import {
 } from '../lib/tools-api';
 import { toolsHost } from '../lib/tools-runtime';
 import ToolSeo from '../components/tools/ToolSeo';
+import { ApiRequestError } from '../lib/api';
 
 const LABELS: Record<string, string> = {
   ACTIVE: 'Available',
@@ -35,7 +36,16 @@ export default function ToolsCenterPage() {
   >([]);
   const [dashboard, setDashboard] = useState<ToolsDashboard | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  /**
+   * `apiPath` is set only when the answer was not JSON at all — the one failure that is worth
+   * offering the visitor a direct look at, because opening the URL settles in a second whether the
+   * application is being reached. See describeNonJsonResponse in lib/api.ts.
+   */
+  const [failure, setFailure] = useState<{
+    message: string;
+    retryable: boolean;
+    apiPath: string | null;
+  } | null>(null);
   const [showUnavailable, setShowUnavailable] = useState(false);
   const [revision, setRevision] = useState(0);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
@@ -50,7 +60,7 @@ export default function ToolsCenterPage() {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    setError(null);
+    setFailure(null);
     Promise.all([toolsApi.catalog(), toolsApi.dashboard().catch(() => null)])
       .then(([catalog, board]) => {
         if (cancelled) return;
@@ -61,7 +71,15 @@ export default function ToolsCenterPage() {
       })
       .catch((reason: Error) => {
         if (!cancelled) {
-          setError(reason.message);
+          const apiFailure = reason instanceof ApiRequestError;
+          setFailure({
+            message: reason.message,
+            retryable: apiFailure ? reason.retryable !== false : true,
+            apiPath:
+              apiFailure && reason.code === 'NON_JSON_RESPONSE'
+                ? '/api/tools/catalog'
+                : null,
+          });
           setTools([]);
         }
       })
@@ -268,31 +286,48 @@ export default function ToolsCenterPage() {
             Loading the tool catalogue…
           </p>
         )}
-        {error && (
+        {failure && (
           <div role="alert" className="tools-notice tools-notice--error">
-            <p>Tools are temporarily unavailable. {error}</p>
-            <button
-              type="button"
-              onClick={() => setRevision((value) => value + 1)}
-            >
-              Try again
-            </button>
+            <p>
+              {failure.retryable
+                ? 'The tool catalogue could not be loaded.'
+                : 'The tool catalogue is not reachable from this page.'}
+            </p>
+            <p>{failure.message}</p>
+            <div className="tools-runner__actions">
+              <button
+                type="button"
+                onClick={() => setRevision((value) => value + 1)}
+              >
+                Try again
+              </button>
+              {failure.apiPath ? (
+                <a
+                  className="ch247-button ch247-button--ghost"
+                  href={failure.apiPath}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Open {failure.apiPath} in a new tab
+                </a>
+              ) : null}
+            </div>
           </div>
         )}
-        {!loading && !error && (
+        {!loading && !failure && (
           <p role="status" className="tools-muted">
             {filtered.length} matching{' '}
             {filtered.length === 1 ? 'tool' : 'tools'}
           </p>
         )}
-        {!loading && !error && filtered.length === 0 && (
+        {!loading && !failure && filtered.length === 0 && (
           <p className="tools-empty">
             No tool matches “{search}”. Try a different word or category.
           </p>
         )}
         <div className="tools-grid">
           {!loading &&
-            !error &&
+            !failure &&
             filtered.map((tool) => (
               <article
                 key={tool.slug}

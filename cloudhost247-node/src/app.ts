@@ -146,6 +146,13 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     reply.code(500).send({ error: 'INTERNAL_ERROR', message: 'An unexpected error occurred' });
   });
 
+  // The path prefix this application is served under, when APP_URL carries a pathname (a
+  // Passenger BaseURI / sub-path deployment). Request URLs arrive with that prefix intact, so it
+  // has to come off before anything tests for `/api`. Without this, `/myapp/api/tools/catalog`
+  // looks like a page, gets answered with the SPA shell, and the visitor is shown a JSON parser
+  // error instead of the tool.
+  const mount = new URL(env.APP_URL).pathname.replace(/\/+$/, '');
+
   // Security plugins + API routes are registered inside a *single* avvio plugin/context, in
   // strict sequence.
   app.register(async (instance) => {
@@ -248,22 +255,28 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     // @fastify/rate-limit attaches per-route (onRoute), so the not-found handler — which serves
     // every SPA page — needs the limiter wired in explicitly.
     instance.setNotFoundHandler({ preHandler: instance.rateLimit() }, (request, reply) => {
+      const rawUrl = request.raw.url ?? '/';
+      const pathname = rawUrl.split(/[?#]/)[0] || '/';
+      const mounted = mount && (pathname === mount || pathname.startsWith(`${mount}/`));
+      const route = mounted ? pathname.slice(mount.length) || '/' : pathname;
+      // Any path that addresses the API must be answered by the API, in JSON, even when no route
+      // matches. Serving the SPA shell for one is the single most misleading thing this handler
+      // could do: the page loads, the fetch succeeds with 200 OK, and the failure surfaces as a
+      // JSON parser complaint about `<!doctype html` with nothing to point at the real cause.
       const isApiRoute =
-        request.raw.url?.startsWith('/api') || request.raw.url === '/health' || request.raw.url === '/ready';
+        route.startsWith('/api') || route === '/health' || route === '/ready';
       if (!serveFrontend || isApiRoute || request.method !== 'GET') {
         reply.code(404).send({ error: 'NOT_FOUND', message: 'Resource not found' });
         return;
       }
-      const pathname = ((request.raw.url ?? '/').split('?')[0] ?? '/');
-      if (pathname === '/tools' || pathname.startsWith('/tools/')) {
-        const page = resolveToolPage(pathname);
-        if (page && page.path !== pathname) {
-          const mount = new URL(env.APP_URL).pathname.replace(/\/$/,'');
+      if (route === '/tools' || route.startsWith('/tools/')) {
+        const page = resolveToolPage(route);
+        if (page && page.path !== route) {
           return reply.redirect(mount + page.path, 301);
         }
         if (page) return reply.type('text/html').send(toolPageHtml(readFileSync(path.join(publicDir,'index.html'),'utf8'), page, env.APP_URL));
         // The independent Document Tools module retains its existing routes and authorization.
-        if (!['/tools/document','/tools/document/mrz','/tools/document/mrz-parser'].includes(pathname)) reply.code(404).header('X-Robots-Tag','noindex');
+        if (!['/tools/document','/tools/document/mrz','/tools/document/mrz-parser'].includes(route)) reply.code(404).header('X-Robots-Tag','noindex');
       }
       reply.type('text/html').sendFile('index.html');
     });
