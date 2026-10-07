@@ -193,8 +193,8 @@
       "authRequired": false,
       "visibility": "public",
       "legacyPaths": [
-        "/tools/dmarc-generator",
-        "/tools/dns/dmarc-generator"
+        "/tools/dns/dmarc-generator",
+        "/tools/dmarc-generator"
       ],
       "discoveryCategories": [
         "dns-domains",
@@ -347,8 +347,8 @@
       "authRequired": true,
       "visibility": "customer",
       "legacyPaths": [
-        "/tools/reverse-ip",
-        "/tools/dns/reverse-ip"
+        "/tools/dns/reverse-ip",
+        "/tools/reverse-ip"
       ],
       "discoveryCategories": [
         "dns-domains"
@@ -653,8 +653,8 @@
       "authRequired": false,
       "visibility": "public",
       "legacyPaths": [
-        "/tools/mac-lookup",
-        "/tools/network/mac-lookup"
+        "/tools/network/mac-lookup",
+        "/tools/mac-lookup"
       ],
       "discoveryCategories": [
         "ip-network"
@@ -679,8 +679,8 @@
       "authRequired": false,
       "visibility": "public",
       "legacyPaths": [
-        "/tools/mac-generator",
-        "/tools/network/mac-generator"
+        "/tools/network/mac-generator",
+        "/tools/mac-generator"
       ],
       "discoveryCategories": [
         "ip-network"
@@ -731,8 +731,8 @@
       "authRequired": false,
       "visibility": "public",
       "legacyPaths": [
-        "/tools/speed-test",
-        "/tools/network/speed-test"
+        "/tools/network/speed-test",
+        "/tools/speed-test"
       ],
       "discoveryCategories": [
         "ip-network"
@@ -757,8 +757,8 @@
       "authRequired": false,
       "visibility": "public",
       "legacyPaths": [
-        "/tools/http-headers",
         "/tools/developer/http-headers",
+        "/tools/http-headers",
         "/tools/redirect-checker",
         "/tools/website-response"
       ],
@@ -964,8 +964,8 @@
       "authRequired": true,
       "visibility": "customer",
       "legacyPaths": [
-        "/tools/broken-links",
-        "/tools/webmaster/broken-links"
+        "/tools/webmaster/broken-links",
+        "/tools/broken-links"
       ],
       "discoveryCategories": [
         "website"
@@ -990,8 +990,8 @@
       "authRequired": false,
       "visibility": "public",
       "legacyPaths": [
-        "/tools/open-graph",
-        "/tools/webmaster/open-graph"
+        "/tools/webmaster/open-graph",
+        "/tools/open-graph"
       ],
       "discoveryCategories": [
         "website"
@@ -1016,8 +1016,8 @@
       "authRequired": false,
       "visibility": "public",
       "legacyPaths": [
-        "/tools/robots-generator",
-        "/tools/webmaster/robots-generator"
+        "/tools/webmaster/robots-generator",
+        "/tools/robots-generator"
       ],
       "discoveryCategories": [
         "website"
@@ -1067,8 +1067,8 @@
       "authRequired": false,
       "visibility": "public",
       "legacyPaths": [
-        "/tools/ssl-checker",
         "/tools/security/ssl",
+        "/tools/ssl-checker",
         "/tools/ssl-certificate-information"
       ],
       "discoveryCategories": [
@@ -1095,8 +1095,8 @@
       "authRequired": false,
       "visibility": "public",
       "legacyPaths": [
-        "/tools/ip-blacklist",
-        "/tools/security/ip-blacklist"
+        "/tools/security/ip-blacklist",
+        "/tools/ip-blacklist"
       ],
       "discoveryCategories": [
         "security"
@@ -1291,8 +1291,8 @@
       "authRequired": false,
       "visibility": "public",
       "legacyPaths": [
-        "/tools/lorem-ipsum",
-        "/tools/productivity/lorem-ipsum"
+        "/tools/productivity/lorem-ipsum",
+        "/tools/lorem-ipsum"
       ],
       "discoveryCategories": [
         "utilities"
@@ -1317,8 +1317,8 @@
       "authRequired": false,
       "visibility": "public",
       "legacyPaths": [
-        "/tools/notepad",
-        "/tools/productivity/notepad"
+        "/tools/productivity/notepad",
+        "/tools/notepad"
       ],
       "discoveryCategories": [
         "utilities"
@@ -1343,8 +1343,8 @@
       "authRequired": false,
       "visibility": "public",
       "legacyPaths": [
-        "/tools/small-text",
-        "/tools/productivity/small-text"
+        "/tools/productivity/small-text",
+        "/tools/small-text"
       ],
       "discoveryCategories": [
         "utilities"
@@ -1369,8 +1369,8 @@
       "authRequired": false,
       "visibility": "public",
       "legacyPaths": [
-        "/tools/invisible-character",
-        "/tools/productivity/invisible-character"
+        "/tools/productivity/invisible-character",
+        "/tools/invisible-character"
       ],
       "discoveryCategories": [
         "utilities"
@@ -1420,8 +1420,8 @@
       "authRequired": false,
       "visibility": "public",
       "legacyPaths": [
-        "/tools/qr-generator",
-        "/tools/productivity/qr"
+        "/tools/productivity/qr",
+        "/tools/qr-generator"
       ],
       "discoveryCategories": [
         "utilities"
@@ -1496,8 +1496,8 @@
       "authRequired": false,
       "visibility": "public",
       "legacyPaths": [
-        "/tools/time-card",
-        "/tools/productivity/time-card"
+        "/tools/productivity/time-card",
+        "/tools/time-card"
       ],
       "discoveryCategories": [
         "utilities",

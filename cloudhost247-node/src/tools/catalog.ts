@@ -1381,7 +1381,22 @@ export const DISCOVERY_CATEGORIES: Record<string, string> = {
 };
 const allTools = [...BASE_TOOL_CATALOG, ...newTools];
 export const TOOL_CATALOG: readonly ToolCatalogEntry[] = allTools.map(tool => {
-  const canonical = ({ 'my-ip': 'what-is-my-ip', 'ip-to-hostname': 'ip-to-domain', 'asn-whois': 'asn-lookup' } as Record<string,string>)[tool.slug] ?? tool.slug;
+  // One published path per capability. The PHP tools shell serves the native catalogue
+  // (`config/tools.php`), which slugs eighteen of these tools differently; publishing both paths
+  // gave crawlers two pages with one title, the second without an implementation behind it. The
+  // registry path stays in `legacyPaths` below, so the old URL still resolves and forwards.
+  const SERVED_PATH_SLUGS = ({
+    'dmarc-generator': 'dmarc-record-generator', 'reverse-ip': 'reverse-ip-lookup',
+    'mac-lookup': 'mac-address-lookup', 'mac-generator': 'mac-address-generator',
+    'speed-test': 'internet-speed-test', 'http-headers': 'http-headers-checker',
+    'broken-links': 'broken-link-checker', 'open-graph': 'open-graph-checker',
+    'robots-generator': 'robots-txt-generator', 'ssl-checker': 'ssl-certificate-checker',
+    'ip-blacklist': 'ip-blacklist-checker', 'lorem-ipsum': 'lorem-ipsum-generator',
+    'notepad': 'online-notepad', 'small-text': 'small-text-generator',
+    'invisible-character': 'invisible-character-generator', 'qr-generator': 'qr-code-generator',
+    'time-card': 'time-card-calculator', 'whois': 'domain-whois',
+  } as Record<string,string>);
+  const canonical = ({ 'my-ip': 'what-is-my-ip', 'ip-to-hostname': 'ip-to-domain', 'asn-whois': 'asn-lookup' } as Record<string,string>)[tool.slug] ?? SERVED_PATH_SLUGS[tool.slug] ?? tool.slug;
   const path = tool.slug.startsWith('tool-') ? tool.path : `/tools/${canonical}`;
   const aliases: Record<string,string[]> = {
     'dns-lookup': ['/tools/dns-record-lookup'], 'http-headers': ['/tools/redirect-checker','/tools/website-response'],

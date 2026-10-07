@@ -140,7 +140,7 @@
       "name": "tool capability reconciliation",
       "command": "scripts/php-wasm/php tests/tools/site-integration.php",
       "result": "passed",
-      "evidence": "18 duplicate capabilities (two published URLs, one title, one with no implementation) reconciled onto the served path with the previous path declared as an alias; 30 registry-only routes now send X-Robots-Tag: noindex, publish no canonical and signpost the platform route; 650 assertions including one published path per tool"
+      "evidence": "18 duplicate capabilities (two published URLs, one title, one with no implementation) reconciled in the catalogue source `src/tools/catalog.ts`; the regenerated `tools.json` projection publishes the served path and keeps the previous one as an alias, which both the PHP front controller and the React ToolPage redirect; 30 registry-only routes now send X-Robots-Tag: noindex, publish no canonical and signpost the platform route; 650 assertions including one published path per tool"
     },
     {
       "name": "per-page crawler contract",

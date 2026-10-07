@@ -52,9 +52,11 @@ not ship or one that does not belong to the design system, and the fixture QA fa
 **One URL per tool capability.** The shared registry and the native catalogue slugged the same tools
 differently, so 18 capabilities were published twice — two indexable pages with one title, the
 second rendered by the theme fallback with no implementation behind it (`/tools/whois` +
-`/tools/domain-whois`, `/tools/ssl-checker` + `/tools/ssl-certificate-checker`, …). The registry
-entries now carry the served path with the previous path kept as an alias, so the existing redirect
-resolves one URL per capability; the tools suite fails if that ever drifts again. The 30 routes only
+`/tools/domain-whois`, `/tools/ssl-checker` + `/tools/ssl-certificate-checker`, …). The
+catalogue source (`cloudhost247-node/src/tools/catalog.ts`, which `tools.json` projects and the
+release gate re-checks) now publishes the served path, with the previous path kept in `legacyPaths`
+so the redirect both surfaces already perform resolves one URL per capability; the tools suite fails
+if that ever drifts again. The 30 routes only
 the platform application implements are no longer presented as working tool pages: they send
 `X-Robots-Tag: noindex`, publish no canonical and link to the platform route they describe.
 

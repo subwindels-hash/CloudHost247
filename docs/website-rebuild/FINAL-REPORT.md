@@ -160,9 +160,12 @@ and the second URL rendered by the theme fallback with no implementation behind 
 and `/tools/domain-whois`, `/tools/ssl-checker` and `/tools/ssl-certificate-checker`,
 `/tools/speed-test` and `/tools/internet-speed-test`, and fifteen more.
 
-Fixed in data rather than with new routes: each of the 18 registry entries now carries the served
-(native) path and declares its previous path in `legacyPaths`, which the tools front controller
-already redirects. `tests/tools/site-integration.php` fails if a capability is ever published under
+Fixed in data rather than with new routes: the canonical-slug map in
+`cloudhost247-node/src/tools/catalog.ts` (the source; `tools.json` is its projection and
+`tools-public.json` a second, older export) now publishes the served path for each of the 18, and the
+projection keeps the previous path in `legacyPaths`, which both the PHP front controller and the
+React `ToolPage` already redirect. The projection is regenerated with `npm run tools:catalog`, and
+the release gate fails if it is stale. `tests/tools/site-integration.php` fails if a capability is ever published under
 two paths again, and the fixture QA fails on two indexable pages sharing a title.
 
 The 30 registry entries that only the platform application implements no longer present themselves
