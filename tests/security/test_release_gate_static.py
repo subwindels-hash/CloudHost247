@@ -55,6 +55,18 @@ INVENTORY = ROOT / 'docs/UNFINISHED-MODULES.md'
 THIS_SUITE = Path(__file__).resolve().relative_to(ROOT).as_posix()
 EMPTY_SHA256 = hashlib.sha256(b'').hexdigest()
 
+
+def repository_text(path):
+    """Text of repository-only metadata, or a visible skip in an exported package.
+
+    `.github/` and `.gitignore` describe how the repository is wired, and the production archive
+    excludes them on purpose. A suite that asserts the wiring therefore has nothing to assert
+    outside the repository; skipping keeps that honest instead of reporting a broken package.
+    """
+    if not path.is_file():
+        raise unittest.SkipTest(f'repository only: {path.relative_to(ROOT)} is not in an exported package')
+    return path.read_text()
+
 # Directories that are not part of the PHP application at all.
 NON_TREE_PARTS = frozenset({'.git', 'vendor', 'node_modules', 'cloudhost247-node'})
 # The two exclusions the target script names explicitly. The third (the vendor baseline) is read
@@ -176,7 +188,7 @@ class ReleaseGateCoverageTests(unittest.TestCase):
         for gate in (SCRIPT, WORKFLOW):
             self.assertIn('scripts/php-lint-targets.sh', gate.read_text(),
                           f'{gate.name} must ask the shared script for its lint targets')
-        workflow = WORKFLOW.read_text()
+        workflow = repository_text(WORKFLOW)
         lint_step = [line for line in workflow.splitlines() if 'php-lint-targets.sh' in line]
         self.assertEqual(1, len(lint_step), 'the workflow should lint once, through the shared script')
         # No hand-kept file list may survive in either gate: that is what drifted.
@@ -348,7 +360,7 @@ class CleanCloneTests(unittest.TestCase):
 
     def test_no_suite_requires_an_undistributed_archive_without_skipping(self):
         gitignore = ROOT / '.gitignore'
-        ignored = {line.strip() for line in gitignore.read_text().splitlines()
+        ignored = {line.strip() for line in repository_text(gitignore).splitlines()
                    if line.strip() and not line.startswith('#')} if gitignore.is_file() else set()
         self.assertIn('*.zip', ignored, 'this guard assumes *.zip stays ignored')
         for suite in wired_suites('tests/**/test_*.py'):
@@ -368,7 +380,7 @@ class CleanCloneTests(unittest.TestCase):
         self.assertIn('set -euo pipefail', TARGETS_SCRIPT.read_text())
         for path in (SCRIPT, TARGETS_SCRIPT):
             self.assertTrue(os.access(path, os.X_OK), f'{path} must stay executable')
-        self.assertIn('bash scripts/release-candidate-check.sh', WORKFLOW.read_text(),
+        self.assertIn('bash scripts/release-candidate-check.sh', repository_text(WORKFLOW),
                       'CI must run the same gate a release candidate runs locally')
 
 

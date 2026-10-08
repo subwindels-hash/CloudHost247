@@ -501,7 +501,10 @@ class WebsiteBuilderStaticTests(unittest.TestCase):
         self.assertIn('tests/builder/test_static.py', check)
         self.assertIn('scripts/php-lint-targets.sh', check)
 
-        workflow = (ROOT / '.github/workflows/independent-foundation.yml').read_text()
+        workflow_path = ROOT / '.github/workflows/independent-foundation.yml'
+        if not workflow_path.is_file():
+            self.skipTest('repository only: the exported deployment package ships no CI workflow')
+        workflow = workflow_path.read_text()
         self.assertIn('tests/builder/run.php', workflow)
         self.assertIn('scripts/php-lint-targets.sh', workflow)
 
