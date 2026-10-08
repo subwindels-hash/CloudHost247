@@ -9,8 +9,10 @@ customer logos, awards or location assertions. The mint / ink palette matches
 - `hero/`: six-part infrastructure ecosystem and conceptual world connectivity.
   **The world illustration is not a data-center location map.**
   Pair files named `*-3d.jpg` are original 3D raster scenes in the same ink/mint art
-  direction. Templates prefer the JPEG via `<picture>` and keep the SVG as the
-  fallback, so a missing raster never becomes a broken image.
+  direction. Each one ships with `-640`, `-960` and `-1280` AVIF and WebP siblings (see
+  the raster ladder below); templates offer AVIF → WebP → JPEG → SVG, so a browser
+  takes the smallest file that covers the box it is about to paint and a missing raster
+  never becomes a broken image.
 - `panels/`: one neutral mark per control-panel adapter that ships a working install
   path, plus a catalogue hub illustration. The catalogue is published by the platform
   (`cloudhost247-node/src/control-panels/adapters/*.ts`), **not** by this directory: a
@@ -68,6 +70,45 @@ skin, not part of the public website. The exemption is written into the test's
 `VENDOR_EXEMPT` tuple rather than assumed, so the scope of the policy is visible
 where the policy is checked.
 
+### The raster ladder
+
+The `*-3d.jpg` scenes are the only rasters the site serves, and they are wide — 1280 or
+1376 px against a CSS box that caps at 660 px. Left alone, a phone downloads a 325 KB
+`public-cloud-3d.jpg` to paint a 390 px column. `python3 scripts/generate-raster-formats.py`
+writes `-640`, `-960` and `-1280` encodings in AVIF and WebP next to every scene
+(ImageMagick, which is already present — no Python wheels, `convert -list format` shows
+both codecs). The same scene then costs a 1× phone 56 KB and a 2× phone 172 KB, or 12 KB
+for the homepage scene.
+
+`templates/cloudhost247/includes/visual.tpl` and the SPA's
+`frontend/src/components/marketing/Illustration.tsx` are the only two places that build a
+`<picture>`; both name the three widths literally and pass `sizes`. **Change the ladder in
+all three places or the srcset advertises a file that does not exist** — a `<source>` whose
+URL 404s does not fall through to the next one, so that is a broken image, not a slow one.
+The script enforces the other half of the contract: it refuses to write a scene narrower
+than the largest step, and `--check` exits non-zero if any step is missing.
+
+| flag | effect |
+| --- | --- |
+| *(none)* | write only the variants that are missing |
+| `--force` | re-encode every variant (use after replacing a scene) |
+| `--check` | write nothing; fail if a step is missing. Runs in `scripts/release-candidate-check.sh` |
+| `--emit-served` | also refresh the platform's copy, below |
+
+### The platform's copy of the raster library
+
+The platform does not read this directory. It serves the illustrations at
+`/media/cloudhost247/...` from `cloudhost247-node/public/media/cloudhost247`, and
+`public/*` is a git-ignored build output, so that tree is a **copy** of this one and
+nothing in the repository regenerated it. A build that was one generation behind still had
+a media directory and still passed a file count; it was simply missing the artwork, which
+is exactly how a product page ships with a broken image.
+
+`--emit-served` refreshes it from here, byte for byte, and prunes whatever this directory no
+longer defines — the two trees are an exact mirror apart from this README and
+`catalogue-marks.json`, which are not served. `scripts/build-production-zip.py --verify`
+independently resolves every visual the theme registry names against the archived copy.
+
 ## Regeneration
 
 `python3 scripts/generate-catalog-assets.py` writes **only** the `panels/` and
@@ -90,9 +131,12 @@ half-consistent family.
 deterministically. Note that several product illustrations were hand-tuned after the
 last full run, so re-running it will replace those with the generic composition —
 review the diff before committing.
-Raster generation needs Pillow and a resvg adapter. Set `CH247_RASTER_SCRIPT` to a
-Node script accepting `input.svg output.png width` and rendering with
-`@resvg/resvg-js`; the adapter below documents the complete contract:
+Rasterising the vectors — the PNG logo exports, the favicons and the social card — needs
+Pillow and a resvg adapter. Set `CH247_RASTER_SCRIPT` to a Node script accepting
+`input.svg output.png width` and rendering with `@resvg/resvg-js`; the adapter below
+documents the complete contract. (This is not how the `*-3d.jpg` scenes are made. Those are
+authored artwork; `generate-raster-formats.py` re-encodes them for delivery and never draws
+them.)
 
 ```js
 const fs = require('fs');

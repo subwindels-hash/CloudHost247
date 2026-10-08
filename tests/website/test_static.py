@@ -139,6 +139,44 @@ class WebsiteTests(unittest.TestCase):
   for key in keys:
    self.assertTrue((ROOT/'assets/images/cloudhost247'/(key+'.jpg')).is_file(), key)
 
+ def test_raster_ladder_is_advertised_and_present(self):
+  # One scene, one ladder, three places that have to agree: the generator that writes
+  # `-640/-960/-1280` in AVIF and WebP, the PHP template that builds the `<picture>`, and the
+  # SPA component that builds the same `<picture>`. None of them reads the others, and the
+  # failure mode is silent — a `<source>` whose URL 404s does not fall through to the next one,
+  # so a stale width is a blank illustration on a published page, not a slow one. Each place is
+  # read here and compared against the files on disk.
+  widths,formats=(640,960,1280),('avif','webp')
+  tpl=(ROOT/'templates/cloudhost247/includes/visual.tpl').read_text()
+  tsx=(ROOT/'cloudhost247-node/frontend/src/components/marketing/Illustration.tsx').read_text()
+  self.assertEqual({(int(w),f) for w,f in re.findall(r'-(\d+)\.(avif|webp)',tpl)},
+   {(w,f) for w in widths for f in formats},'visual.tpl advertises a different ladder')
+  self.assertEqual({int(n) for n in re.search(r'LADDER\s*=\s*\[([^\]]*)\]',tsx).group(1).split(',')},set(widths),
+   'Illustration.tsx advertises a different ladder')
+  for name,text in (('visual.tpl',tpl),('Illustration.tsx',tsx)):
+   self.assertEqual(set(re.findall(r'type="image/(avif|webp)"',text)),set(formats),f'{name} advertises a different format set')
+  catalog=json.loads((ROOT/'modules/addons/cloudhost247_theme/resources/site.json').read_text())
+  scenes={page['visual3d'] for page in catalog['pages'].values() if page.get('visual3d')}
+  scenes|={section['visual3d'] for page in catalog['pages'].values() for section in page.get('sections') or [] if section.get('visual3d')}
+  # The theme serves its own copy and the platform serves a second one out of Vite's public
+  # directory. That second copy is the one that matters: `vite build` empties `cloudhost247-node/
+  # public` (`emptyOutDir: true`) and copies the public directory into it, so a build output that
+  # happens to hold the ladder proves nothing, while a public directory that does not hold it means
+  # every SPA page shows a blank illustration. It is tracked, so it must always be complete — this
+  # used to check the build output instead, which is git-ignored, and therefore skipped silently on
+  # a clean checkout.
+  canonical=ROOT/'assets/images/cloudhost247'
+  mirror=ROOT/'cloudhost247-node/frontend/public/media/cloudhost247'
+  self.assertTrue(mirror.is_dir(),'the platform media mirror is missing: '+str(mirror.relative_to(ROOT)))
+  missing=[f'{library.relative_to(ROOT)}/{scene}-{w}.{f}' for library in (canonical,mirror) for scene in sorted(scenes)
+   for w in widths for f in formats if not (library/f'{scene}-{w}.{f}').is_file()]
+  self.assertEqual(missing,[],'3D scenes advertised with no file behind them: '+'; '.join(missing[:5]))
+  # Same bytes, both copies: a variant that was re-encoded on one side only is a different picture
+  # under the same name, which is worse than a missing one because nothing looks broken.
+  drifted=[f'{scene}-{w}.{f}' for scene in sorted(scenes) for w in widths for f in formats
+   if (mirror/f'{scene}-{w}.{f}').is_file() and (canonical/f'{scene}-{w}.{f}').read_bytes()!=(mirror/f'{scene}-{w}.{f}').read_bytes()]
+  self.assertEqual(drifted,[],'the platform serves different bytes than the theme library: '+'; '.join(drifted[:5]))
+
  def test_catalogue_marks_are_first_party_and_distinct(self):
   # The platform serves its control-panel and operating-system logos from
   # frontend/public/{panel-logos,os-logos}. Those directories shipped genuine vendor artwork —

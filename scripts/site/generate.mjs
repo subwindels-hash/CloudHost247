@@ -821,6 +821,19 @@ function decoratePhpPages(previous, contentPages, registry) {
     };
   }
   /*
+   * The policy documents are authored once, in the registry's legal index, because that index is
+   * what both surfaces publish: the SPA renders its document list from `LEGAL_INDEX`, and the theme
+   * serves one PHP page per document. Without this projection those pages had no description of
+   * their own and fell back to their `summary`, which was the same formulaic sentence for nineteen
+   * policies — nineteen near-identical meta descriptions, which is the case a search engine treats
+   * as one page repeated. The description is now authored per document and unique.
+   */
+  for (const entry of registry.legal ?? []) {
+    const page = pages[entry.php];
+    if (page && entry.description) page.seo_description = entry.description;
+  }
+
+  /*
    * Duplicated metadata is invisible in a single page and obvious to a search engine, which is why
    * the acceptance criteria name it explicitly. Two pages sharing a title make a result list look
    * like the same page twice; two sharing a description make the CMS-worthless case worse. The

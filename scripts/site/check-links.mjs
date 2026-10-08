@@ -171,6 +171,13 @@ function routeOk(path) {
   const clean = path.split('#')[0].split('?')[0].replace(/\/$/, '') || '/';
   if (SERVER_PATHS.has(clean)) return true;
   if (SERVER_PREFIXES.some((prefix) => clean.startsWith(prefix))) return true;
+  /*
+   * A document-root path with a file extension is served by the web server as a static file, not by
+   * the router — the theme's own `<link href="/templates/…/site.css">` and every image URL come
+   * through here. It resolves only if the file is actually in the repository, so a renamed or
+   * mistyped asset fails the audit instead of passing as an unknown-but-plausible route.
+   */
+  if (/\.[a-z0-9]{2,5}$/i.test(clean) && existsSync(join(ROOT, clean))) return true;
   if (SPA_ROUTES.has(clean) || CONTENT_ROUTES.has(clean) || TOOL_PATHS.has(clean)) return true;
   if (LEGAL.some((document) => document.spa === clean)) return true;
   if (DOCS.some((document) => document.href === clean)) return true;
@@ -268,8 +275,22 @@ for (const menu of registry.menus) {
     }
   }
   for (const column of menu.columns ?? []) {
+    // A mega-menu column is a curated list of places, so listing one place twice under two
+    // names is a defect even though both links resolve: "Help Center" and "Knowledge Base"
+    // both pointed at `/help`, which reads as two destinations and delivers one. Only the
+    // *same column* is checked — the same product appearing under Hosting and under Platforms,
+    // or again in the footer, is the intended structure.
+    const destinations = new Map();
     for (const item of column.items ?? []) {
       const where = `${surface}/${column.title}`;
+      const destination = item.href.spa ?? item.href.php ?? '';
+      if (destination) {
+        if (destinations.has(destination)) {
+          add(where, `${item.label} and ${destinations.get(destination)} both go to ${destination}; a column lists each destination once`);
+        } else {
+          destinations.set(destination, item.label);
+        }
+      }
       if (item.href.spa) checkHref(where, item.href.spa, 'href.spa');
       if (item.href.php) {
         counts.phpLinks += 1;
@@ -347,13 +368,29 @@ for (const root of templateRoots) {
     const surface = `php:${relative(ROOT, file)}`;
     counts.surfaces += 1;
     for (const match of source.matchAll(/href=["']([^"']+)["']/g)) {
-      const value = match[1];
-      if (value.includes('{') || value.includes('$')) continue; // Smarty expression: resolved at render
+      const raw = match[1];
+      /*
+       * `{$WEB_ROOT}/page.php` is the dominant link form in this theme, and the literal part after
+       * the document root is a real destination a visitor can click — so it is checked, not
+       * skipped. Skipping every value that merely *contains* a Smarty tag is how a theme-wide
+       * broken link stayed invisible: the check saw `{$WEB_ROOT}/…` and moved on.
+       */
+      const rooted = /\{\$WEB_?ROOT\}/i.test(raw) ? raw.replace(/\{\$WEB_?ROOT\}/gi, '') : null;
+      if (rooted !== null) {
+        if (rooted.includes('{') || rooted.includes('$')) continue; // rest is built at render
+        if (excluded) {
+          vendorFindings += 1;
+          continue;
+        }
+        checkHref(surface, rooted === '' ? '/' : rooted, 'href');
+        continue;
+      }
+      if (raw.includes('{') || raw.includes('$')) continue; // Smarty expression: resolved at render
       if (excluded) {
         vendorFindings += 1;
         continue;
       }
-      checkHref(surface, value, 'href');
+      checkHref(surface, raw, 'href');
     }
   });
 }

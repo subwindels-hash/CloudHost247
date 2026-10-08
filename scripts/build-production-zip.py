@@ -195,12 +195,24 @@ def verify(archive_path: Path, log) -> int:
                 pages = {}
                 failures.append('the PHP theme registry in the archive is not readable JSON')
             wanted = set()
+            # The 3D scenes are the other half of the illustration contract. A page names the
+            # scene and the template turns it into a srcset, so a scene that is present as a
+            # JPEG but missing an encoding is a broken image rather than a slow one: a <source>
+            # whose URL 404s does not fall through to the next source. `visual.tpl` and
+            # `Illustration.tsx` advertise these three widths literally and
+            # `scripts/generate-raster-formats.py` writes them; the names are repeated here so
+            # this check is an independent reading of the archive rather than a shared constant.
+            scenes = set()
             for page in pages.values():
                 if page.get('visual'):
                     wanted.add(page['visual'])
+                if page.get('visual3d'):
+                    scenes.add(page['visual3d'])
                 for section in page.get('sections', []) or []:
                     if section.get('visual'):
                         wanted.add(section['visual'])
+                    if section.get('visual3d'):
+                        scenes.add(section['visual3d'])
             roots = [
                 ('built SPA', media),
                 ('PHP theme', destination / 'assets' / 'images' / 'cloudhost247'),
@@ -215,7 +227,19 @@ def verify(archive_path: Path, log) -> int:
                         f'{len(absent)} illustration(s) referenced by the theme registry are missing from the '
                         f'{label} library: ' + ', '.join(absent[:8]) + (' …' if len(absent) > 8 else '')
                     )
-            log(f'theme illustrations resolved: {len(wanted)}')
+                unencodable = sorted(
+                    f'{scene}{suffix}'
+                    for scene in scenes
+                    for suffix in ['.jpg', *[f'-{width}.{fmt}' for width in (640, 960, 1280)
+                                             for fmt in ('avif', 'webp')]]
+                    if not (root / f'{scene}{suffix}').is_file()
+                )
+                if unencodable:
+                    failures.append(
+                        f'{len(unencodable)} 3D scene encoding(s) missing from the {label} library: '
+                        + ', '.join(unencodable[:8]) + (' …' if len(unencodable) > 8 else '')
+                    )
+            log(f'theme illustrations resolved: {len(wanted)} · 3D scenes: {len(scenes)}')
 
         # The public documentation the reader fetches must be present, and must be *exactly* the
         # published set. A stale build directory is how an internal document stays downloadable

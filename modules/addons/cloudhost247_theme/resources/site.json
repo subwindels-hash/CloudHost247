@@ -383,6 +383,7 @@
       "category": "Hosting",
       "headline": "Take control of your web projects.",
       "summary": "Find a hosting configuration for your Plesk-based workflow. Panel licensing and platform support depend on the selected plan.",
+      "seo_description": "Hosting configurations for Plesk-based workflows, and what panel licensing and platform support each option includes.",
       "visual": "hosting/plesk-hosting",
       "features": [
         [
@@ -1591,6 +1592,7 @@
       "category": "Domains",
       "headline": "Every great idea starts with a name.",
       "summary": "Find your next domain, transfer an existing name, or manage your domain portfolio through your CloudHost247 account.",
+      "seo_description": "Register a new domain, transfer a name you already own, or manage your existing portfolio through your CloudHost247 account.",
       "visual": "domains/domain-network",
       "features": [
         [
@@ -2348,6 +2350,7 @@
       "category": "Support",
       "headline": "Good questions. Clear next steps.",
       "summary": "Find answers about choosing a plan, managing your account and getting support.",
+      "seo_description": "Answers to common questions about CloudHost247 services, plans, domains, accounts and policies, and where to look when the answer is not here.",
       "visual": "management/support",
       "features": [],
       "uses": [],
@@ -2953,7 +2956,8 @@
       "uses": [],
       "related": [],
       "slug": "acceptable-use-policy",
-      "visual3d": "security/security-3d"
+      "visual3d": "security/security-3d",
+      "seo_description": "The rules for using CloudHost247 systems and network: what may be hosted, what is prohibited, and how breaches of the policy are enforced."
     },
     "backup-policy.php": {
       "title": "Backup Policy",
@@ -2965,7 +2969,8 @@
       "uses": [],
       "related": [],
       "slug": "backup-policy",
-      "visual3d": "security/security-3d"
+      "visual3d": "security/security-3d",
+      "seo_description": "What CloudHost247 backs up, how long copies are retained, and how customers restore website files, databases, configurations and email."
     },
     "cookie-policy.php": {
       "title": "Cookie Policy",
@@ -2977,7 +2982,8 @@
       "uses": [],
       "related": [],
       "slug": "cookie-policy",
-      "visual3d": "security/security-3d"
+      "visual3d": "security/security-3d",
+      "seo_description": "How CloudHost247 Isc uses cookies and similar tracking technologies, which categories are set, and how to control them in your browser."
     },
     "cybercrime-policy.php": {
       "title": "Cybercrime Policy",
@@ -2989,7 +2995,8 @@
       "uses": [],
       "related": [],
       "slug": "cybercrime-policy",
-      "visual3d": "security/security-3d"
+      "visual3d": "security/security-3d",
+      "seo_description": "The measures CloudHost247 Isc uses to detect and respond when a domain registered or hosted here is used for illegal or malicious activity."
     },
     "data-deletion.php": {
       "title": "Data Deletion Instructions",
@@ -3001,7 +3008,8 @@
       "uses": [],
       "related": [],
       "slug": "data-deletion",
-      "visual3d": "security/security-3d"
+      "visual3d": "security/security-3d",
+      "seo_description": "Step-by-step instructions for requesting deletion of your personal data from CloudHost247 Isc, and the retention duties that still apply."
     },
     "data-privacy-notice-and-consent-form.php": {
       "title": "Data Privacy Notice and Consent Form",
@@ -3013,7 +3021,8 @@
       "uses": [],
       "related": [],
       "slug": "data-privacy-notice-and-consent-form",
-      "visual3d": "security/security-3d"
+      "visual3d": "security/security-3d",
+      "seo_description": "The privacy notice and consent form CloudHost247 Isc uses for prospective employees under the Nigeria Data Protection Act 2023."
     },
     "data-protection-standards.php": {
       "title": "Data Protection Standards",
@@ -3025,7 +3034,8 @@
       "uses": [],
       "related": [],
       "slug": "data-protection-standards",
-      "visual3d": "security/security-3d"
+      "visual3d": "security/security-3d",
+      "seo_description": "The principles, technical measures and internal responsibilities CloudHost247 Isc follows to protect customer, partner and employee data."
     },
     "domain-agreement.php": {
       "title": "Domain Agreement",
@@ -3037,7 +3047,8 @@
       "uses": [],
       "related": [],
       "slug": "domain-agreement",
-      "visual3d": "security/security-3d"
+      "visual3d": "security/security-3d",
+      "seo_description": "The agreement between you and CloudHost247 ISC as the sponsoring registrar or reseller for every domain name registered through us."
     },
     "domain-brokerage-terms.php": {
       "title": "Domain Brokerage Terms",
@@ -3049,7 +3060,8 @@
       "uses": [],
       "related": [],
       "slug": "domain-brokerage-terms",
-      "visual3d": "security/security-3d"
+      "visual3d": "security/security-3d",
+      "seo_description": "What a CloudHost247 domain brokerage engagement covers: acquisition attempts, confidentiality, and what happens when a domain cannot be acquired."
     },
     "domain-renewal-policy.php": {
       "title": "Domain Renewal Policy",
@@ -3061,7 +3073,8 @@
       "uses": [],
       "related": [],
       "slug": "domain-renewal-policy",
-      "visual3d": "security/security-3d"
+      "visual3d": "security/security-3d",
+      "seo_description": "How domain auto-renewal works, when a domain is deleted for non-payment, and the grace and redemption periods that follow deletion."
     },
     "domainregistrationaddendum.php": {
       "title": "Domain Registration Addendum",
@@ -3073,7 +3086,8 @@
       "uses": [],
       "related": [],
       "slug": "domainregistrationaddendum",
-      "visual3d": "security/security-3d"
+      "visual3d": "security/security-3d",
+      "seo_description": "TLD-specific terms that apply on top of the main Domain Registration Agreement, for each registry CloudHost247 Isc registers through."
     },
     "fair-usage-policy.php": {
       "title": "Fair Usage Policy",
@@ -3085,7 +3099,8 @@
       "uses": [],
       "related": [],
       "slug": "fair-usage-policy",
-      "visual3d": "security/security-3d"
+      "visual3d": "security/security-3d",
+      "seo_description": "How fair usage applies to shared, reseller and WordPress hosting, including plans advertised with unlimited disk space or bandwidth."
     },
     "legal-notice.php": {
       "title": "Legal Notice",
@@ -3097,13 +3112,15 @@
       "uses": [],
       "related": [],
       "slug": "legal-notice",
-      "visual3d": "security/security-3d"
+      "visual3d": "security/security-3d",
+      "seo_description": "The rights, obligations and restrictions that apply when you access CloudHost247 Isc websites, services and associated platforms."
     },
     "legal.php": {
       "title": "Legal & Policy Center",
       "category": "Legal",
       "headline": "Legal & Policy Center",
       "summary": "Review the legal & policy center for CloudHost247 services, including the terms and responsibilities that apply to your account.",
+      "seo_description": "Every legal, privacy and policy document that governs CloudHost247 Isc services, gathered in one place with its effective date.",
       "visual": "security/security",
       "features": [],
       "uses": [],
@@ -3121,13 +3138,15 @@
       "uses": [],
       "related": [],
       "slug": "privacy-policy",
-      "visual3d": "security/security-3d"
+      "visual3d": "security/security-3d",
+      "seo_description": "How CloudHost247 Isc collects, uses, shares and protects personal information, how long it is kept, and the rights you have over your own data."
     },
     "refund-and-cancellation-policy.php": {
       "title": "Refund and Cancellation Policy",
       "category": "Legal",
       "headline": "Refund and Cancellation Policy",
       "summary": "Review the refund and cancellation policy for CloudHost247 services, including the terms and responsibilities that apply to your account.",
+      "seo_description": "How to cancel a CloudHost247 service, where the refund terms that apply are published, and where to manage the service in your account.",
       "visual": "security/security",
       "features": [],
       "uses": [],
@@ -3145,7 +3164,8 @@
       "uses": [],
       "related": [],
       "slug": "refund-policy",
-      "visual3d": "security/security-3d"
+      "visual3d": "security/security-3d",
+      "seo_description": "When refunds are issued, how cancellations are processed, and the timelines that apply to CloudHost247 hosting, domain and related services."
     },
     "terms-of-service.php": {
       "title": "Terms of Service",
@@ -3157,7 +3177,8 @@
       "uses": [],
       "related": [],
       "slug": "terms-of-service",
-      "visual3d": "security/security-3d"
+      "visual3d": "security/security-3d",
+      "seo_description": "The Terms & Conditions that govern access to and use of CloudHost247 websites, products and services, and your responsibilities as an account holder."
     },
     "trademark-policy.php": {
       "title": "Trademark Policy",
@@ -3169,7 +3190,8 @@
       "uses": [],
       "related": [],
       "slug": "trademark-policy",
-      "visual3d": "security/security-3d"
+      "visual3d": "security/security-3d",
+      "seo_description": "How CloudHost247 Isc reviews trademark and copyright infringement claims, and how domain name disputes are handled alongside them."
     },
     "business-hosting.php": {
       "title": "Business Hosting",
@@ -4804,6 +4826,7 @@
       "category": "Domains",
       "headline": "Manage DNS for domains in your account, and diagnose any name with the tools.",
       "summary": "Authoritative edits happen in the client area. The tools are read-only diagnostics.",
+      "seo_description": "Where authoritative DNS records for CloudHost247-hosted domains are edited, and what the read-only diagnostic tools can and cannot tell you.",
       "visual": "domains/dns-management",
       "features": [
         [
@@ -4837,6 +4860,7 @@
       "category": "Domains",
       "headline": "DNS for the domains you register or transfer to CloudHost247.",
       "summary": "Nameserver and record changes are available from the domain management screen after registration.",
+      "seo_description": "Where nameserver and DNS record changes are made for a registered domain, and what can be checked without editing the zone.",
       "visual": "domains/domain-dns",
       "features": [
         [

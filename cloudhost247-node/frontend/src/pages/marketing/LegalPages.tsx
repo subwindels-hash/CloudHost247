@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Icon } from '../../components/ui/Icon';
 import { usePageMeta } from '../../lib/usePageMeta';
 import { LEGAL_DOCUMENTS, findLegal } from '../../content/legal';
+import { LEGAL_INDEX } from '../../navigation/registry.generated';
 
 /**
  * Legal & Policy Center.
@@ -126,9 +127,21 @@ export function LegalDocumentPage() {
   const location = useLocation();
   const document = findLegal(location.pathname);
 
+  /*
+   * The description comes from the registry's legal index, not from the document text.
+   *
+   * `legal.generated.json` carries a `meta.description` lifted verbatim from the head of each
+   * policy, which reads as a run-on ("CloudHost247 Isc: Cookie Policy Effective Date: August 14,
+   * 2025 This Cookie Policy explains how…"). The same document is served by the PHP theme, and a
+   * search result for one policy should not read differently depending on which surface answered
+   * it, so both surfaces publish the description authored once in `shared/site/registry.json`.
+   * The extracted text stays as the fallback for anything the index does not carry.
+   */
+  const authored = LEGAL_INDEX.find((entry) => entry.slug === document?.slug)?.description;
+
   usePageMeta(
     document?.title ?? 'Legal document',
-    document?.meta.description ?? 'CloudHost247 legal documents.',
+    authored ?? document?.meta.description ?? 'CloudHost247 legal documents.',
     { canonical: location.pathname, noIndex: !document }
   );
 
