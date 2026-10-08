@@ -2,7 +2,7 @@
 
 Branch `arena/4c00ccfe-cloudhost247` · Base `main` · **not deployed** — production release stays gated on WHMCS staging verification.
 
-Report: `docs/website-rebuild/PASS-2026-10-08.md` (§1.8, §1.9) · Archive: `CloudHost247-production-2.1.0.zip` (8,601 members, 99.0 MB, extracted and re-tested)
+Report: `docs/website-rebuild/PASS-2026-10-08.md` (§1.8, §1.9, §1.10) · Archive: `CloudHost247-production-2.1.0.zip` (8,602 members, 99.0 MB, extracted and re-tested)
 
 Follow-up to #68, which merged at the raster-encoder commit. Everything below was committed after that
 merge and is not in `main` yet. Presentation layer only — no WHMCS core, provisioning, billing,
