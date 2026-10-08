@@ -1,6 +1,1 @@
-<svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Alpine Linux">
-  <circle cx="36" cy="36" r="29.5" fill="#0D597F"/>
-  <path d="M30.5 22.5 46.5 49.5H14.5L30.5 22.5Z" fill="#FFFFFF"/>
-  <path d="M44.2 31.5 57.5 49.5H37.6l6.3-10.6-4.1-6.3 4.4-1.1Z" fill="#CFE8F3"/>
-  <path d="M43.9 31.4 39.2 39l-3.4-5.7 4.6-7.4 3.5 5.5Z" fill="#FFFFFF"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" role="img"><title>Alpine Linux</title><g fill="none" stroke="#196947" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="16.6"/><path d="M16.5 18.6h6.4M16.5 24h11M16.5 29.4h7.6"/></g></svg>

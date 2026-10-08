@@ -15,10 +15,28 @@ customer logos, awards or location assertions. The mint / ink palette matches
   path, plus a catalogue hub illustration. The catalogue is published by the platform
   (`cloudhost247-node/src/control-panels/adapters/*.ts`), **not** by this directory: a
   mark existing here is presentation only and is not a claim that a panel is
-  provisionable. No vendor logo is drawn or traced.
+  provisionable. No vendor logo is drawn or traced. Every panel shares the rack
+  silhouette and differs by the glyph in its lower bay, so eighteen rows stay
+  glanceable at 28 px without reproducing anyone's trademark.
 - `operating-systems/`: the catalogue hub plus one neutral mark per distribution
   seeded in migration 0041. `Unknown` is an internal placeholder for pre-existing
-  servers and deliberately has no public mark.
+  servers and deliberately has no public mark. Each distribution has its own prompt
+  glyph and its own display name, because `slug.replace('-',' ').title()` renders
+  "Nixos" and "Opensuse" for two projects that spell themselves NixOS and openSUSE.
+- `catalogue-marks.json`: generated index of the marks above and the platform paths
+  they are served from. `tests/website/test_static.py` reads it.
+
+### These two families are also served by the platform
+
+The platform's catalogue stores one logo URL per row, so the marks are served from
+`cloudhost247-node/frontend/public/{panel-logos,os-logos}` as well — the paths its
+seed data and its tests reference. Those two directories previously held **genuine
+vendor artwork**: the Ubuntu roundel, the cPanel wordmark, Debian's `#A80030`,
+openSUSE's `#73BA25`. That contradicted the policy in the paragraph below and, on a
+catalogue whose rows are mostly `DISABLED`, implied an endorsement no vendor gave.
+Both directories now hold copies of the first-party marks defined here, byte-identical
+to the canonical files, and `scripts/generate-catalog-assets.py --emit-served` is what
+writes them. A test fails the build if a vendor brand hex or a mismatched copy returns.
 - `website/`, `platforms/`, `backgrounds/`, `network/`: reserved families for future
   artwork. Product pages currently fall back to the closest existing family
   illustration rather than inventing unsupported panels or locations.
@@ -43,6 +61,17 @@ asset directory, determines what may be shown in the catalog.
 `operating-systems/` mark families. It is additive and idempotent: it never rewrites a
 file it did not create, so it cannot flatten hand-tuned artwork. Use it when a control
 panel or distribution is added to the platform catalogue.
+
+Two flags opt into rewriting, and neither touches any other family:
+
+| flag | effect |
+| --- | --- |
+| `--refresh-marks` | rewrite the panel and distribution marks this script owns. This is how the original four-glyph banks — which made five distributions render the same icon — became one distinct glyph per catalogue entry. |
+| `--emit-served` | also write the copies the platform serves under `cloudhost247-node/frontend/public/{panel-logos,os-logos}`, from the same definition, and refresh `catalogue-marks.json`. |
+
+A glyph bank smaller than the catalogue it covers, a duplicated glyph, or a colour
+outside the mint/ink palette makes the script exit non-zero rather than emit a
+half-consistent family.
 
 `python3 scripts/generate-website-assets.py` generates the rest of the vectors
 deterministically. Note that several product illustrations were hand-tuned after the

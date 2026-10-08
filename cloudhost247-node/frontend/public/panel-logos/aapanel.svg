@@ -1,11 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
-  <defs>
-    <linearGradient id="g_aa" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#10B981" />
-      <stop offset="100%" stop-color="#0f172a" stop-opacity="0.9" />
-    </linearGradient>
-  </defs>
-  <rect width="120" height="120" rx="24" fill="url(#g_aa)" />
-  <circle cx="60" cy="60" r="46" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="2" />
-  <text x="60" y="68" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="36" fill="#ffffff" text-anchor="middle">aa</text>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" role="img"><title>aaPanel</title><g fill="none" stroke="#196947" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="6.5" y="7.5" width="35" height="33" rx="5.5"/><path d="M6.5 19h35"/><path d="M12.5 13.2h4.2M20.3 13.2h2.4M30.5 13.2h3"/><g transform="translate(0,0)"><circle cx="24" cy="30.2" r="4.6"/></g></g></svg>

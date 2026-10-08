@@ -139,4 +139,48 @@ class WebsiteTests(unittest.TestCase):
   for key in keys:
    self.assertTrue((ROOT/'assets/images/cloudhost247'/(key+'.jpg')).is_file(), key)
 
+ def test_catalogue_marks_are_first_party_and_distinct(self):
+  # The platform serves its control-panel and operating-system logos from
+  # frontend/public/{panel-logos,os-logos}. Those directories shipped genuine vendor artwork —
+  # the Ubuntu roundel, the cPanel wordmark, Debian's #A80030 — which contradicts this repo's
+  # own published policy (assets/images/cloudhost247/README.md: "no vendor logo is drawn or
+  # traced ... no third-party logos are fabricated, bundled without a license, or used to imply
+  # affiliation") and, for a catalogue whose rows are mostly DISABLED, implies an endorsement
+  # no vendor gave. The marks are now CloudHost247's own line art. These assertions are what
+  # stops the vendor files coming back.
+  generator=(ROOT/'scripts/generate-catalog-assets.py').read_text()
+  allowed={c.lower() for c in re.findall(r"'(#[0-9a-fA-F]{6})'",generator)}
+  self.assertGreaterEqual(len(allowed),10,'the palette guard should read the generator allow-list')
+  index=json.loads((ROOT/'assets/images/cloudhost247/catalogue-marks.json').read_text())
+  marks=index['marks']
+  self.assertGreaterEqual(len(marks),30,'every catalogue entry needs a mark')
+
+  adapter_dir=ROOT/'cloudhost247-node/src/control-panels/adapters'
+  self.assertEqual({p.stem for p in adapter_dir.glob('*.ts')}-{'base'},
+                   {m['slug'] for m in marks if m['family']=='control-panel'},
+                   'the shipped adapters and the served panel marks must be the same set')
+  migration=''.join(p.read_text() for p in
+                    sorted((ROOT/'cloudhost247-node/database/migrations').glob('*0041*.sql')))
+  referenced=set(re.findall(r"'(/os-logos/[a-z-]+\.svg)'",migration))
+  self.assertGreaterEqual(len(referenced),6,'migration 0041 names the OS logos it seeds')
+  served={m['served'] for m in marks}
+  self.assertTrue(referenced<=served,f'seeded OS logos with no mark: {sorted(referenced-served)}')
+
+  glyphs={}
+  for mark in marks:
+   canonical=ROOT/mark['canonical']
+   served_path=ROOT/'cloudhost247-node/frontend/public'/mark['served'].lstrip('/')
+   self.assertTrue(canonical.is_file(),mark['canonical'])
+   self.assertTrue(served_path.is_file(),mark['served'])
+   body=canonical.read_text()
+   # One definition, two copies: the theme and the platform cannot show different artwork.
+   self.assertEqual(body,served_path.read_text(),mark['served'])
+   self.assertIn(f"<title>{mark['title']}</title>",body,mark['served'])
+   for colour in re.findall(r'#[0-9a-fA-F]{6}',body):
+    # A vendor brand hex here is the finding this test exists for.
+    self.assertIn(colour.lower(),allowed,f"{mark['served']} uses {colour}")
+   key=re.sub(r'<title>[^<]*</title>','',body)
+   self.assertNotIn(key,glyphs,f"{mark['served']} renders the same glyph as {glyphs.get(key)}")
+   glyphs[key]=mark['served']
+
 if __name__=='__main__':unittest.main()
