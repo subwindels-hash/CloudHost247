@@ -14,6 +14,7 @@ grouped by *why* it is unfinished. What each one is missing lives in the two sou
 | Closed | Module(s) | Evidence |
 |---|---|---|
 | 2026-10-08 | §1.1 rows 1–2 — `platform/src/domains/cloudflare.js` + `admin-cloudflare.js` (live Cloudflare egress) | `platform/src/lib/cloudflare-client.js` (live API v4 client, 37 unit/wire tests), `cloudflare-service.js`, `cloudflare-sync.js`, `cloudflare-fulfilment.js`; `platform/tests/cloudflare-client.test.js` + `platform/tests/cloudflare-egress.test.js` (34 route tests over the real app against a fake Cloudflare at `platform/tests/fixtures/fake-cloudflare.js`). Full suite: **742 pass / 0 fail**. No real Cloudflare account was reachable from this environment — every provider claim is verified against the loopback fake, never against api.cloudflare.com. |
+| 2026-10-08 | §1.1 row 3 — `platform/src/domains/domain-services.js` (availability / WHOIS-RDAP / appraisal connector) | `platform/src/lib/domain-providers/` (`types`, `http`, `registry`, `register-builtins`, `adapters/rdap`, `adapters/govalue`) + `lib/domain-provider-service.js` + `lib/domain-name.js`; `platform/tests/domain-providers.test.js` (26) + `platform/tests/domain-services-egress.test.js` (27) over the real app against `platform/tests/fixtures/fake-registry.js`. Full suite: **795 pass / 0 fail**. The regex availability guess is gone: with no connected provider the routes return `available: null`, not a verdict. No real registrar/RDAP account was reachable here — the RDAP and GoValue wire contracts are verified against the loopback fake only. |
 
 ---
 
@@ -29,8 +30,8 @@ Cloudflare inside the request and refuse with a named reason when they cannot:
 |---|---|---|---|
 | 1 | `platform/src/domains/cloudflare.js` | Live Cloudflare HTTP client, live record write, live purge (writes go to the synchronized cache; purge queues a durable job) | **closed 2026-10-08** |
 | 2 | `platform/src/domains/admin-cloudflare.js` | Live Cloudflare egress — "Test Connection" never fakes success | **closed 2026-10-08** |
-| 3 | `platform/src/domains/domain-services.js` | Availability / WHOIS-RDAP lookup / appraisal provider connector (returns `provider_unavailable`) | open |
-| 4 | `platform/src/domains/admin-domain-services.js` | Registrar transfer refresh poll (returns `status: 'deferred'`) | open |
+| 3 | `platform/src/domains/domain-services.js` | Availability / WHOIS-RDAP lookup / appraisal provider connector (returns `provider_unavailable`) | **closed 2026-10-08** |
+| 4 | `platform/src/domains/admin-domain-services.js` | Registrar transfer refresh poll (returns `status: 'deferred'`); extension catalogue sync; registrar adapters (`namecheap`, `godaddy`) unported. Its **Test Connection is now real** (it is the gate the domain connector reads) and its installed-adapter list is derived from the compiled registry. | partially closed |
 | 5 | `platform/src/domains/ai-os.js` | Model adapter — Copilot inference (prompt is recorded, no reply is produced) | open |
 | 6 | `platform/src/domains/ai-support.js` | LLM inference (human agents reply manually) | open |
 
@@ -174,13 +175,23 @@ visual/browser tests — *NOT PERFORMED*. Production database is read-only from 
   fakes cannot settle — Cloudflare's real pagination caps, per-plan setting availability, live rate
   limits, and whether a real account's token carries every permission the client assumes — is
   unverified until someone runs the client against a staging account.
+- `platform/domain-services`: the RDAP connector has **never queried the real IANA bootstrap file or a
+  real registry** from this environment. `platform/tests/fixtures/fake-registry.js` reproduces the
+  bootstrap format, the RFC 9082/9083 domain projection, RFC-conformant 404s and the port-43 referral
+  chain, but the fakes cannot settle: whether `data.iana.org` is reachable from the production host at
+  all, whether real registries agree with the fake about field casing and redaction wording, the real
+  port-43 behaviour of registries that block WHOIS by source address, and GoValue's real response
+  shape under its own rate limits. Run one real search and one real WHOIS through a staging deployment
+  before trusting the projections in production.
 
 ---
 
 ## Quick copy/paste name list
 
-**Platform — deferred egress:** `domain-services` · `admin-domain-services` · `ai-os` · `ai-support`
-*(`cloudflare` and `admin-cloudflare` were closed 2026-10-08 — see the completion log)*
+**Platform — deferred egress:** `ai-os` · `ai-support`
+*(`cloudflare`, `admin-cloudflare` and the `domain-services` connector were closed 2026-10-08 — see
+the completion log. `admin-domain-services` still owes the registrar transfer refresh, the extension
+catalogue sync and the `namecheap`/`godaddy` adapters.)*
 
 **Platform — partial:** `platform/spa` (17 page modules ported, ~35 admin groups + DNS/Cloudflare/
 marketplace/server-detail/mobile shell missing) · `platform/mobile` (no app code)

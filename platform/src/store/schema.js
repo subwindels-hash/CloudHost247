@@ -1345,9 +1345,18 @@ const TABLES = {
     columns: {
       id: pk(),
       user_id: uuid({ nullable: true }),
+      // Which provider row answered, and whether the search completed or failed. A search whose
+      // provider was unreachable is stored as `provider_error` with the code, so the history cannot
+      // read as a successful lookup that returned nothing.
+      provider_id: uuid({ nullable: true }),
+      status: text({ default: 'pending' }),   // 'pending' | 'completed' | 'provider_error'
+      error_code: text({ nullable: true }),
+      error_message: text({ nullable: true }),
       query: text({ required: true }),
       kind: text({ default: 'single' }),
+      // The availability rows, as returned. `available: null` means no answer was established.
       results: jsonb({ default: [] }),
+      completed_at: { type: 'timestamptz', nullable: true },
       created_at: ts(),
     },
   },
@@ -1448,13 +1457,21 @@ const TABLES = {
     columns: {
       id: pk(),
       user_id: uuid({ required: true }),
+      provider_id: uuid({ nullable: true }),
+      provider_reference: text({ nullable: true }),
       domain: text({ required: true }),
-      status: text({ default: 'pending' }),
+      status: text({ default: 'pending' }),   // 'pending' | 'completed' | 'provider_error' | 'provider_not_configured'
       estimated_value: num({ nullable: true }),
       currency: text({ default: 'USD' }),
-      confidence: num({ nullable: true }),
+      // 'low' | 'medium' | 'high' | null. Null is the honest value when the provider publishes no
+      // confidence band — GoValue does not, and inventing one would be a fabricated certainty.
+      confidence: text({ nullable: true }),
+      // The provider's own valuation document (range, sale probability, comparables) plus the
+      // disclaimer. Stored whole so a customer can see why the number is what it is.
+      valuation: jsonb({ default: {} }),
       provider: text({ nullable: true }),
       error_code: text({ nullable: true }),
+      error_message: text({ nullable: true }),
       completed_at: { type: 'timestamptz', nullable: true },
       created_at: ts(),
       updated_at: ts(),
@@ -1465,12 +1482,20 @@ const TABLES = {
     columns: {
       id: pk(),
       user_id: uuid({ nullable: true }),
+      provider_id: uuid({ nullable: true }),
+      provider_reference: text({ nullable: true }),
       domain: text({ required: true }),
+      // 'completed' | 'not_found' | 'provider_not_configured' | 'provider_error' | 'rate_limited'
       status: text({ default: 'unknown' }),
       source: text({ nullable: true }),
       privacy_protected: bool({ default: false }),
       registrar: text({ nullable: true }),
+      // The *public projection* only — registrar, dates, statuses, nameservers, registry. Raw
+      // registrant records are never requested, never parsed into a field and never stored here.
       raw: jsonb(),
+      error_code: text({ nullable: true }),
+      error_message: text({ nullable: true }),
+      completed_at: { type: 'timestamptz', nullable: true },
       created_at: ts(),
     },
     indexes: [{ name: 'domain_whois_user_idx', columns: ['user_id'] }],

@@ -187,16 +187,24 @@ test('site: status endpoint never overclaims', async () => {
   await close();
 });
 
-test('site: domain search is public and labeled as an estimate', async () => {
+test('site: domain search is public and never guesses availability', async (t) => {
   const { base, close } = await startServer();
+  // Registered before the assertions, not after them: a failed assertion used to skip `close()` and
+  // leave the server listening, which hangs the whole suite rather than failing one test.
+  t.after(() => close());
+
   const res = await jsonFetch(base, {
     path: '/api/v1/domain-services/search',
     method: 'POST',
     body: { query: 'acme-works.com' },
   });
   assert.strictEqual(res.status, 200);
-  assert.strictEqual(res.data.estimate, true, 'no registrar connector: results must stay estimates');
+  assert.strictEqual(res.data.estimate, false, 'nothing here is an estimate: it is either a registry fact or a refusal');
   assert.ok(Array.isArray(res.data.results) && res.data.results.length > 0);
-  assert.ok(res.data.results.every((r) => typeof r.domain === 'string' && typeof r.available === 'boolean'));
-  await close();
+  // With no RDAP provider connected, there is no answer to give — and `null` is the only honest
+  // value. The old behaviour returned a regex verdict (`available: true|false`) labelled an estimate.
+  assert.ok(res.data.results.every((r) => typeof r.domain === 'string' && r.available === null));
+  assert.ok(res.data.results.every((r) => r.status === 'unknown'));
+  assert.strictEqual(res.data.status, 'provider_unavailable');
+  assert.strictEqual(res.data.failure.code, 'PROVIDER_NOT_CONFIGURED');
 });

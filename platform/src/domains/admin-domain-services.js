@@ -5,12 +5,16 @@
  *   - Read views require staff; provider/credential/plan mutations require super_admin.
  *   - Credentials are WRITE-ONLY: accepted once, encrypted (AES-256-GCM, key derived from
  *     JWT_SECRET), and never returned by any endpoint — not in full, not masked, not in audit.
- *   - "Test Connection" never fakes success. With no live provider egress wired in this build it
- *     reports `unavailable` (or `not_configured` when no secret is stored) and records that on the
- *     row; `status: 'connected'` is only ever set by a real successful test.
+ *   - "Test Connection" never fakes success, and now performs a **real** authenticated call through
+ *     `lib/domain-providers/` — for RDAP that means fetching the IANA bootstrap registry, for the
+ *     GoValue appraisal API a genuine appraisal request. `status: 'connected'` is only ever set by a
+ *     test that actually succeeded, and it is the gate the customer-facing connector reads.
+ *   - The installed-adapter list is the compiled registry's own answer, so this API cannot offer an
+ *     adapter that would refuse every call.
  *
- * Provider-backed operations (extension sync, transfer refresh, connection test) are honest about
- * being deferred rather than fabricating a result.
+ * Still deferred in this module, and reported as such: the registrar transfer refresh poll and the
+ * extension catalogue sync. No registrar adapter (`namecheap`, `godaddy`) is ported yet, so both
+ * refuse with a named reason instead of fabricating a status.
  */
 'use strict';
 
@@ -19,12 +23,19 @@ const { v } = require('../core/validate');
 const { NotFoundError, ValidationError } = require('../core/errors');
 const { uuidv7 } = require('../lib/ids');
 const { asAdmin, asStaff, asSuperAdmin } = require('../lib/auth');
+const { decryptSecret, PURPOSES } = require('../lib/secret-box');
+const { createDomainProviderAdapter, registeredDomainProviderAdapters } = require('../lib/domain-providers/registry');
+const { registerBuiltInDomainProviderAdapters } = require('../lib/domain-providers/register-builtins');
+const { DomainProviderError } = require('../lib/domain-providers/types');
 
 const name = 'admin-domain-services';
 
-// Adapter keys this build recognises. No live egress is wired, so a stored provider can be
-// configured and credentialled but a connection test reports `unavailable` honestly.
-const INSTALLED_ADAPTERS = ['namecheap', 'godaddy', 'rdap', 'govalue', 'generic'];
+// The adapter keys this build can actually construct — the registry's own answer, not a hand-kept
+// menu. `namecheap` and `godaddy` are therefore *absent* until their adapters are ported: offering
+// them here would let an operator create a provider row that every call refuses, and the list the
+// API returns is the same list `createDomainProviderAdapter` enforces.
+registerBuiltInDomainProviderAdapters();
+const installedAdapters = () => registeredDomainProviderAdapters();
 const LIMITS = { bulkSearchMaxDomains: 500, bulkSearchMaxPerHour: 30, whoisLookupsPerHour: 60 };
 const money = () => v.string().regex(/^\d{1,10}(\.\d{1,2})?$/, 'must be a decimal amount, e.g. 20.00');
 
@@ -40,6 +51,34 @@ function encryptCreds(secret, obj) {
 }
 function hasCreds(row) {
   return Boolean(row && row.credentials_encrypted);
+}
+
+/**
+ * The stored credentials as a plain object, for constructing an adapter.
+ *
+ * Read through `lib/secret-box.js`, whose domain-provider salt is byte-identical to `credKey`
+ * above — so ciphertext written by `encryptCreds` (including everything written before secret-box
+ * existed) opens here, and no credential has to be re-entered to become usable. The return value is
+ * never logged, never serialised into a response, and never attached to an error.
+ */
+function credentialsForProvider(row, secret) {
+  if (!hasCreds(row)) {
+    if (row?.adapter_key === 'rdap') return {}; // public registry service: no credentials exist
+    throw new Error('No credentials are stored for this provider');
+  }
+  // The envelope holds JSON; `decryptSecret` returns the plaintext string, so it must be parsed.
+  const plaintext = decryptSecret(secret, PURPOSES.domainProvider, row.credentials_encrypted);
+  if (plaintext === null) throw new Error('The stored credentials could not be decrypted with this deployment key');
+  let decoded;
+  try {
+    decoded = JSON.parse(plaintext);
+  } catch {
+    throw new Error('The stored credentials are not a readable key/value object');
+  }
+  if (!decoded || typeof decoded !== 'object' || Array.isArray(decoded)) {
+    throw new Error('The stored credentials are not a key/value object');
+  }
+  return decoded;
 }
 
 function providerDto(p) {
@@ -74,7 +113,7 @@ function register(router, deps) {
   router.get('/api/v1/admin/domain-services/providers', async (ctx) => {
     await asStaff(ctx, deps);
     const rows = await store.table('domain_service_providers').all();
-    ctx.json({ providers: rows.map(providerDto), installedAdapters: INSTALLED_ADAPTERS });
+    ctx.json({ providers: rows.map(providerDto), installedAdapters: installedAdapters() });
   });
 
   router.post('/api/v1/admin/domain-services/providers', async (ctx) => {
@@ -89,8 +128,8 @@ function register(router, deps) {
       capabilities: v.object({}).passthrough().optional(),
       configuration: v.object({}).passthrough().optional(),
     }));
-    if (!INSTALLED_ADAPTERS.includes(input.adapterKey)) {
-      throw new ValidationError(`Adapter '${input.adapterKey}' is not installed in this build. Installed adapters: ${INSTALLED_ADAPTERS.join(', ')}`);
+    if (!installedAdapters().includes(input.adapterKey)) {
+      throw new ValidationError(`Adapter '${input.adapterKey}' is not installed in this build. Installed adapters: ${installedAdapters().join(', ') || 'none'}`);
     }
     const existing = await store.table('domain_service_providers').findOne({ provider_key: input.providerKey });
     if (existing) throw new ValidationError('A provider with that key already exists');
@@ -143,24 +182,92 @@ function register(router, deps) {
     ctx.json({ provider: providerDto(updated) });
   });
 
+  /**
+   * Test Connection — a real authenticated call against the provider's own API.
+   *
+   * This route is the *gate* to the domain-provider connector: `lib/domain-provider-service.js`
+   * will only use a row whose status is `connected`, and nothing else in the platform can set that
+   * status. An operator asking "does this provider work?" therefore always gets an answer grounded
+   * in a request that actually happened — including `not_configured` and `auth_failed`, which are
+   * verdicts *about the configuration* and are returned without pretending an outage occurred.
+   *
+   * The verdict never carries the provider's raw error text to the browser; the row's `last_error`
+   * (staff-visible, not customer-visible) carries the bounded reason for an operator to act on.
+   */
   router.post('/api/v1/admin/domain-services/providers/:id/test', async (ctx) => {
     await asSuperAdmin(ctx, deps);
     const id = ctx.params.id;
     const provider = await store.table('domain_service_providers').findById(id);
     if (!provider) throw new NotFoundError('No provider was found with that id');
 
-    // No live provider egress is wired in this build, so a real authenticated test cannot run.
-    // Report honestly and record the outcome; never fabricate `connected`.
-    const result = hasCreds(provider)
-      ? { status: 'unavailable', message: 'Provider egress is not available in this deployment; the connection could not be tested.', capabilities: {} }
-      : { status: 'not_configured', message: 'No credentials are stored for this provider' };
+    let result;
+    if (!installedAdapters().includes(String(provider.adapter_key ?? '').toLowerCase())) {
+      // A configuration answer, and no request is made.
+      result = {
+        status: 'not_configured',
+        message: `Adapter '${provider.adapter_key}' is not installed in this build. Installed adapters: ${installedAdapters().join(', ') || 'none'}`,
+        capabilities: {},
+      };
+    } else {
+      let credentials = null;
+      try {
+        credentials = credentialsForProvider(provider, secret);
+      } catch (error) {
+        // Both cases are configuration answers, not outages, but they need different fixes: one
+        // asks the operator to enter a credential, the other to re-enter one that no longer opens.
+        result = {
+          status: 'not_configured',
+          message: hasCreds(provider)
+            ? 'The stored credentials could not be read with this deployment key — re-enter them to rotate the encryption.'
+            : error.message,
+          capabilities: {},
+        };
+      }
+      if (!result) {
+        try {
+          const adapter = createDomainProviderAdapter({
+            id: provider.id, key: provider.provider_key, name: provider.name,
+            adapterKey: provider.adapter_key, type: provider.provider_type,
+            environment: provider.environment === 'sandbox' ? 'sandbox' : 'production',
+            apiBaseUrl: provider.api_base_url ?? null,
+            capabilities: provider.capabilities ?? {},
+            configuration: provider.configuration ?? {},
+            credentials,
+          }, {
+            // Same rule the seam applies when it builds a client for a customer call: only a
+            // `sandbox` provider may point at loopback. If the two disagreed, a provider could pass
+            // its connection test and then fail every real call (or vice versa) — which is exactly
+            // the kind of gap this route exists to close.
+            allowLoopback: provider.environment === 'sandbox',
+          });
+          result = await adapter.testConnection();
+        } catch (error) {
+          result = {
+            status: 'unavailable',
+            message: error instanceof DomainProviderError ? error.message : 'The provider could not be tested',
+            capabilities: {},
+          };
+        }
+      }
+    }
 
+    const rowStatus = ['connected', 'auth_failed', 'unavailable', 'not_configured'].includes(result.status)
+      ? result.status
+      : 'unavailable';
     const updated = await store.table('domain_service_providers').updateById(id, {
-      status: result.status, connection_tested: true, connection_succeeded: false,
-      last_error: result.status === 'connected' ? null : result.message.slice(0, 500),
+      status: rowStatus,
+      connection_tested: true,
+      connection_succeeded: rowStatus === 'connected',
+      last_error: rowStatus === 'connected' ? null : String(result.message ?? '').slice(0, 500),
     });
-    await audit(ctx, 'admin.domain_provider_connection_tested', 'domain_service_provider', id, { status: result.status });
-    ctx.json({ provider: providerDto(updated), result });
+    await audit(ctx, 'admin.domain_provider_connection_tested', 'domain_service_provider', id, {
+      status: rowStatus,
+      capabilities: result.capabilities ?? {},
+    });
+    ctx.json({
+      provider: providerDto(updated),
+      result: { status: rowStatus, message: result.message ?? null, capabilities: result.capabilities ?? {} },
+    });
   });
 
   // ===================== Extensions =====================
