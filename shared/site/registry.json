@@ -216,7 +216,7 @@
               "icon": "shield-check",
               "desc": "We operate the platform so your team ships instead of patching.",
               "href": {
-                "spa": "/cloud/server-management",
+                "spa": "/cloud/managed-services",
                 "php": "managed-services.php"
               }
             },

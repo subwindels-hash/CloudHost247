@@ -5060,119 +5060,146 @@
     "managed-services.php": {
       "title": "Managed Services",
       "category": "Infrastructure",
-      "headline": "The work between a server and a reliable service",
+      "headline": "The parts of running a server you would rather not do yourself",
       "summary": "Managed options are confirmed in a proposal or plan feature, not assumed for every server.",
       "visual": "management/managed-services",
       "features": [
         [
-          "Provisioning and rebuilds",
-          "Create servers from a catalogue image, rebuild them from a known-good state, and record which image each server runs."
+          "Operating-system patching",
+          "Security updates applied on a schedule for the operating systems we support, with the maintenance window agreed rather than guessed."
         ],
         [
-          "Access management",
-          "Administrative access is issued and rotated through the platform, and server credentials are stored encrypted rather than pasted into tickets."
+          "Monitoring response",
+          "Alerts that are not just sent but read: when a service you have management on goes down, the alert becomes somebody's job."
         ],
         [
-          "Monitoring and alerting",
-          "Resource telemetry collected per server, with alerting so a saturation event is noticed while it is still an event."
+          "Backup verification",
+          "Backup jobs watched and restores tested where the product supports them, because a backup nobody has restored is only a hope."
         ],
         [
-          "Firewall control",
-          "Rules attached to the server, applied in a defined order, with the effective ruleset visible."
+          "Firewall and access changes",
+          "Rule changes and access troubleshooting carried out through the platform, so the effective ruleset stays reviewable."
         ],
         [
-          "Backups",
-          "Scheduled jobs with a run history and a restore path from your account."
+          "Hands-on administration",
+          "Service configuration, package installation from supported sources and the routine tasks a hosting panel exposes."
         ],
         [
-          "Reconciliation and logs",
-          "The platform compares desired state with provider reality and records every infrastructure operation for audit."
+          "A record you can read",
+          "Work is recorded against the service it changed, so you can see what was done and when without asking for a summary."
         ]
       ],
       "uses": [
-        "Patching and hardening",
-        "Monitoring response",
-        "Incident handling",
-        "Change management"
+        "Which operating systems are supported",
+        "What the maintenance window is",
+        "Whether restores are performed for you",
+        "What response times your plan publishes",
+        "Which applications are in scope"
       ],
       "related": [
+        "server-management.php",
         "monitoring.php",
         "backups.php",
         "firewall.php",
-        "cloudhost247-hosting.php",
-        "operating-systems.php"
+        "enterprise-servers.php"
       ],
       "slug": "managed-services",
       "visual3d": "servers/dedicated-servers-3d",
-      "seo_description": "Server management from CloudHost247: provisioning, operating-system lifecycle, monitoring, firewall control, backups, patching and hands-on administration.",
+      "seo_description": "Managed services from CloudHost247: patching, monitoring response, backup verification, firewall changes and hands-on administration, confirmed per plan.",
       "faqs": [
         {
-          "q": "Can you manage a server you did not provision?",
-          "a": "That depends on the provider and the access you can grant. Bring the details and we will confirm what is possible."
+          "q": "Is management included with every server?",
+          "a": "No. Some plans include a defined level of management and others do not include any. Your plan or proposal states the scope; nothing on these pages adds to it."
         },
         {
-          "q": "What counts as managed?",
-          "a": "The platform layer: operating system, runtime, monitoring, backups, firewall and response. Application-level administration and code changes are a separate engagement."
+          "q": "Can I take management on an existing server?",
+          "a": "Usually yes, if the operating system and application are ones we support. The team reviews the service first, because taking over a server nobody has documented is its own project."
         },
         {
-          "q": "Do you support panels like cPanel or Plesk?",
-          "a": "Panels are provisioned where the platform is configured to install them, and the control panels page lists what is available rather than what is theoretically possible."
+          "q": "Who is responsible when something breaks?",
+          "a": "We are responsible for the work in the agreed scope, and we will tell you plainly when a fault sits in your application rather than in the managed service."
+        },
+        {
+          "q": "Do you manage the application I installed myself?",
+          "a": "Only if it is named in the scope. Applications installed outside the supported catalogue are yours to patch and upgrade, though we can look at them under a separate arrangement."
         }
       ],
       "sections": [
         {
           "type": "features",
-          "heading": "What the platform does for you",
-          "kicker": "Available today",
+          "heading": "Work we take over when it is in your plan",
+          "kicker": "What management covers",
           "items": [
             {
-              "title": "Provisioning and rebuilds",
-              "body": "Create servers from a catalogue image, rebuild them from a known-good state, and record which image each server runs.",
-              "icon": "icons/control.svg"
+              "title": "Operating-system patching",
+              "body": "Security updates applied on a schedule for the operating systems we support, with the maintenance window agreed rather than guessed."
             },
             {
-              "title": "Access management",
-              "body": "Administrative access is issued and rotated through the platform, and server credentials are stored encrypted rather than pasted into tickets."
+              "title": "Monitoring response",
+              "body": "Alerts that are not just sent but read: when a service you have management on goes down, the alert becomes somebody's job."
             },
             {
-              "title": "Monitoring and alerting",
-              "body": "Resource telemetry collected per server, with alerting so a saturation event is noticed while it is still an event."
+              "title": "Backup verification",
+              "body": "Backup jobs watched and restores tested where the product supports them, because a backup nobody has restored is only a hope."
             },
             {
-              "title": "Firewall control",
-              "body": "Rules attached to the server, applied in a defined order, with the effective ruleset visible.",
+              "title": "Firewall and access changes",
+              "body": "Rule changes and access troubleshooting carried out through the platform, so the effective ruleset stays reviewable.",
               "icon": "management/firewall.svg"
             },
             {
-              "title": "Backups",
-              "body": "Scheduled jobs with a run history and a restore path from your account."
+              "title": "Hands-on administration",
+              "body": "Service configuration, package installation from supported sources and the routine tasks a hosting panel exposes."
             },
             {
-              "title": "Reconciliation and logs",
-              "body": "The platform compares desired state with provider reality and records every infrastructure operation for audit."
+              "title": "A record you can read",
+              "body": "Work is recorded against the service it changed, so you can see what was done and when without asking for a summary."
             }
           ]
         },
         {
+          "type": "note",
+          "heading": "What management is not",
+          "body": [
+            "Management does not include application development, custom code fixes, or 24/7 telephone response unless your plan publishes that. It does not cover third-party applications we do not operate, and it cannot promise that a service will never fail. Where a plan is silent on a task, the task is yours — and we will say so rather than let you assume it is included."
+          ]
+        },
+        {
           "type": "checks",
-          "heading": "Hand the platform layer to us",
-          "kicker": "Managed services",
+          "heading": "Confirm before you buy",
           "items": [
             {
-              "title": "Patching and hardening",
-              "body": "Operating system and platform components patched on a schedule, with the changes recorded."
+              "title": "Which operating systems are supported"
             },
             {
-              "title": "Monitoring response",
-              "body": "Alerts are acted on rather than merely delivered — the difference between monitoring and management."
+              "title": "What the maintenance window is"
             },
             {
-              "title": "Incident handling",
-              "body": "A named path for an incident: who is looking, what is being tried, and what customers are told."
+              "title": "Whether restores are performed for you"
             },
             {
-              "title": "Change management",
-              "body": "Changes made deliberately, with a way back, instead of directly on production at 17:55 on a Friday."
+              "title": "What response times your plan publishes"
+            },
+            {
+              "title": "Which applications are in scope"
+            }
+          ]
+        },
+        {
+          "type": "steps",
+          "heading": "How it starts",
+          "items": [
+            {
+              "title": "Tell us about the service",
+              "body": "The plan, the operating system and what the service has to do — a short description is enough to scope it."
+            },
+            {
+              "title": "We confirm the scope in writing",
+              "body": "What is covered, what is not, and the response expectation. This is the same scope a plan feature or proposal states."
+            },
+            {
+              "title": "It becomes part of the service",
+              "body": "Ongoing work is recorded against the service, and changes that need your consent are put to you before they happen."
             }
           ]
         }

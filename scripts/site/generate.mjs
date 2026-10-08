@@ -681,6 +681,8 @@ function decoratePhpPages(previous, contentPages, registry) {
   const icons = contentIconAssets();
   const routeMap = phpRouteMap(registry);
   const matched = new Set();
+  /** Primary content route -> the PHP file that renders it. See the guard in the loop below. */
+  const primaryRouteOwners = new Map();
 
   /**
    * Several app routes can share one PHP page — `/domains/club` and `/domains/auctions` both land on
@@ -717,6 +719,30 @@ function decoratePhpPages(previous, contentPages, registry) {
       continue;
     }
     matched.add(file);
+
+    /*
+     * One content route may not be projected onto two PHP pages.
+     *
+     * The reverse is expected and supported: several app routes share one PHP page
+     * (`/domains/club` and `/domains/auctions` both land on `domain.php`), because the page renders
+     * the union of their sections. The other direction is never intentional. When it happens the two
+     * PHP pages get the same title, the same `seo_description` and the same hero from one source —
+     * so a visitor who reaches both sees one page twice, and a crawler sees duplicated metadata.
+     * That is how `managed-services.php` came to publish the Server Management description: the
+     * registry pointed its menu item at `/cloud/server-management` while naming `managed-services.php`
+     * as its page, so both files were decorated from the same content page.
+     */
+    const primaryRoute = group[0]?.pair?.spa;
+    if (primaryRoute) {
+      if (primaryRouteOwners.has(primaryRoute)) {
+        fail(
+          `${file}: the content route ${primaryRoute} is already projected onto ${primaryRouteOwners.get(primaryRoute)}. ` +
+          `Two PHP pages rendering one route duplicate its title, description and hero; ` +
+          `give this page its own route in shared/site/content/ and point the registry at it.`
+        );
+      }
+      primaryRouteOwners.set(primaryRoute, file);
+    }
 
     const features = [];
     for (const section of content.sections) {
@@ -793,6 +819,36 @@ function decoratePhpPages(previous, contentPages, registry) {
       // when a page has no sections.
       sections,
     };
+  }
+  /*
+   * Duplicated metadata is invisible in a single page and obvious to a search engine, which is why
+   * the acceptance criteria name it explicitly. Two pages sharing a title make a result list look
+   * like the same page twice; two sharing a description make the CMS-worthless case worse. The
+   * projection is the right place to check it: this is the last point before the text is written to
+   * the theme registry, after title, description and summary have all been resolved.
+   */
+  const seenTitles = new Map();
+  const seenDescriptions = new Map();
+  for (const [file, page] of Object.entries(pages)) {
+    for (const [field, seen] of [
+      ['title', seenTitles],
+      ['seo_description', seenDescriptions],
+      ['summary', seenDescriptions],
+    ]) {
+      const value = page[field];
+      if (!value || typeof value !== 'string') continue;
+      if (seen.has(value)) {
+        const previousFile = seen.get(value);
+        if (previousFile !== file) {
+          fail(
+            `${file}: the ${field} is identical to ${previousFile}'s. Every published page needs its ` +
+            `own metadata; if two pages describe the same thing, one of them is not a page.`
+          );
+        }
+      } else {
+        seen.set(value, file);
+      }
+    }
   }
   return { pages, matched: matched.size };
 }
@@ -1459,6 +1515,18 @@ function main() {
     warnings,
   };
 
+  /*
+   * The PHP projection runs *before* the error gate, not after it.
+   *
+   * This function is pure — it returns the payload that is written further down — but its
+   * validation reports through `fail()`, which appends to `errors`. When it ran after the gate,
+   * every check inside it was unreachable: a projection that duplicated a page, dropped an anchor
+   * or emitted a heading-less section would report nothing and write the file anyway. Hoisting the
+   * call is what makes those checks real; nothing is written until they pass.
+   */
+  const { payload: nextSiteJson, matched: phpPagesEnriched } = emitPhpSiteJson(registry, previousSiteJson, contentPages);
+  report.phpPagesEnriched = phpPagesEnriched;
+
   if (errors.length) {
     process.stderr.write(`\n✖ registry validation failed (${errors.length}):\n`);
     for (const error of errors) process.stderr.write(`  - ${error}\n`);
@@ -1537,8 +1605,6 @@ function main() {
   copyAssets(ASSET_SOURCE, ASSET_PUBLIC);
   report.assetsCopied = assetCount;
 
-  const { payload: nextSiteJson, matched: phpPagesEnriched } = emitPhpSiteJson(registry, previousSiteJson, contentPages);
-  report.phpPagesEnriched = phpPagesEnriched;
   writeFileSync(PHP_SITE_JSON, `${json(nextSiteJson)}\n`);
 
   mkdirSync(dirname(REPORT_OUT), { recursive: true });

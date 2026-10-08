@@ -181,7 +181,7 @@ export const NAV_SECTIONS: RegistrySection[] = [
           },
           {
             "label": "Managed Services",
-            "to": "/cloud/server-management",
+            "to": "/cloud/managed-services",
             "description": "We operate the platform so your team ships instead of patching.",
             "icon": "shield-check"
           },
@@ -1461,6 +1461,7 @@ export const MARKETING_ROUTES: string[] = [
   "/cloud/game-servers",
   "/cloud/infrastructure",
   "/cloud/ip-management",
+  "/cloud/managed-services",
   "/cloud/monitoring",
   "/cloud/network",
   "/cloud/operating-systems",
@@ -1604,7 +1605,7 @@ export const REGISTRY_ROUTES: string[] = [
   "/hosting/developer",
   "/developers/docker",
   "/cloud/game-servers",
-  "/cloud/server-management",
+  "/cloud/managed-services",
   "/websites",
   "/hosting/ssl",
   "/cloud/public",
@@ -1613,6 +1614,7 @@ export const REGISTRY_ROUTES: string[] = [
   "/cloud/enterprise-servers",
   "/hosting/dedicated",
   "/hosting/vps",
+  "/cloud/server-management",
   "/cloud/data-centers",
   "/cloud/network",
   "/cloud/firewall",
