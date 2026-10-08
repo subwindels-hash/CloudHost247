@@ -1068,7 +1068,7 @@ export const LEGAL_INDEX = [
     "php": "terms-of-service.php",
     "title": "Terms of Service",
     "source": "docs/policies/Terms & Conditions.pdf",
-    "description": "The Terms & Conditions that govern access to and use of CloudHost247 websites, products and services, and your responsibilities as an account holder."
+    "description": "The Terms & Conditions governing use of CloudHost247 websites, products and services, and the obligations that come with an account."
   },
   {
     "slug": "privacy-policy",
@@ -1076,7 +1076,7 @@ export const LEGAL_INDEX = [
     "php": "privacy-policy.php",
     "title": "Privacy Policy",
     "source": "docs/policies/Privacy Policy.pdf",
-    "description": "How CloudHost247 Isc collects, uses, shares and protects personal information, how long it is kept, and the rights you have over your own data."
+    "description": "How CloudHost247 Isc collects, uses and shares personal information, how long it is kept, and what you can ask us to do with it."
   },
   {
     "slug": "cookies",
@@ -1092,7 +1092,7 @@ export const LEGAL_INDEX = [
     "php": "acceptable-use-policy.php",
     "title": "Acceptable Use Policy",
     "source": "templates/cloudhost247/includes/legal/acceptableusepolicy.tpl",
-    "description": "The rules for using CloudHost247 systems and network: what may be hosted, what is prohibited, and how breaches of the policy are enforced."
+    "description": "The rules for using CloudHost247 services, systems and network: what is permitted, what counts as abuse, and how reports are handled."
   },
   {
     "slug": "refund-policy",
@@ -1100,7 +1100,7 @@ export const LEGAL_INDEX = [
     "php": "refund-policy.php",
     "title": "Refund & Cancellation Policy",
     "source": "docs/policies/Refund Policy.pdf",
-    "description": "When refunds are issued, how cancellations are processed, and the timelines that apply to CloudHost247 hosting, domain and related services."
+    "description": "The terms under which refunds may be granted for CloudHost247 hosting, domain and related services, and how to request one."
   },
   {
     "slug": "backup-policy",
@@ -1108,7 +1108,7 @@ export const LEGAL_INDEX = [
     "php": "backup-policy.php",
     "title": "Backup Policy",
     "source": "docs/policies/Backup Policy.pdf",
-    "description": "What CloudHost247 backs up, how long copies are retained, and how customers restore website files, databases, configurations and email."
+    "description": "What is backed up for websites, databases, email and configurations, how long copies are kept, and how restores are requested."
   },
   {
     "slug": "fair-usage",
@@ -1116,7 +1116,7 @@ export const LEGAL_INDEX = [
     "php": "fair-usage-policy.php",
     "title": "Fair Usage Policy",
     "source": "docs/policies/Fair Usage Policy.pdf",
-    "description": "How fair usage applies to shared, reseller and WordPress hosting, including plans advertised with unlimited disk space or bandwidth."
+    "description": "How the fair usage policy applies to shared, reseller and WordPress hosting, including plans advertised with unlimited resources."
   },
   {
     "slug": "trademark",
@@ -1124,7 +1124,7 @@ export const LEGAL_INDEX = [
     "php": "trademark-policy.php",
     "title": "Trademark & Copyright Policy",
     "source": "docs/policies/Trademark & Copyright Infringement Policy.pdf",
-    "description": "How CloudHost247 Isc reviews trademark and copyright infringement claims, and how domain name disputes are handled alongside them."
+    "description": "How CloudHost247 Isc reviews claims of trademark and copyright infringement, and how domain name disputes are handled alongside them."
   },
   {
     "slug": "domain-agreement",
@@ -1132,7 +1132,7 @@ export const LEGAL_INDEX = [
     "php": "domain-agreement.php",
     "title": "Domain Registration Agreement",
     "source": "docs/policies/Domain Name Registration Agreement.pdf",
-    "description": "The agreement between you and CloudHost247 ISC as the sponsoring registrar or reseller for every domain name registered through us."
+    "description": "The agreement between you and CloudHost247 ISC as sponsoring registrar or reseller for the domain names you register through us."
   },
   {
     "slug": "domain-brokerage-terms",
@@ -1148,7 +1148,7 @@ export const LEGAL_INDEX = [
     "php": "domain-renewal-policy.php",
     "title": "Domain Renewal & Deletion Policy",
     "source": "docs/policies/Domain Name Auto-Renewal and Deletion Policy.pdf",
-    "description": "How domain auto-renewal works, when a domain is deleted for non-payment, and the grace and redemption periods that follow deletion."
+    "description": "How domain auto-renewal works, when a domain is deleted for non-payment, and the grace and redemption periods that follow."
   },
   {
     "slug": "domain-registration-addendum",
@@ -1164,7 +1164,7 @@ export const LEGAL_INDEX = [
     "php": "cybercrime-policy.php",
     "title": "Cybercrime & Abuse Policy",
     "source": "docs/policies/Cybercrime Detection Policy.pdf",
-    "description": "The measures CloudHost247 Isc uses to detect and respond when a domain registered or hosted here is used for illegal or malicious activity."
+    "description": "The preventive and detection measures CloudHost247 Isc uses when a domain registered or hosted on the platform is used for abuse."
   },
   {
     "slug": "data-deletion",
@@ -1172,7 +1172,7 @@ export const LEGAL_INDEX = [
     "php": "data-deletion.php",
     "title": "Data Deletion Policy",
     "source": "docs/policies/Data Deletion Instructions.pdf",
-    "description": "Step-by-step instructions for requesting deletion of your personal data from CloudHost247 Isc, and the retention duties that still apply."
+    "description": "Step-by-step instructions for requesting deletion of your personal data, and how the request is verified and actioned."
   },
   {
     "slug": "data-protection-standards",
@@ -1180,7 +1180,7 @@ export const LEGAL_INDEX = [
     "php": "data-protection-standards.php",
     "title": "Data Protection Standards",
     "source": "docs/policies/Data Protection Standards.pdf",
-    "description": "The principles, technical measures and internal responsibilities CloudHost247 Isc follows to protect customer, partner and employee data."
+    "description": "The principles, measures and responsibilities CloudHost247 Isc follows to protect customer, partner and employee data."
   },
   {
     "slug": "privacy-notice-and-consent",
@@ -1188,7 +1188,7 @@ export const LEGAL_INDEX = [
     "php": "data-privacy-notice-and-consent-form.php",
     "title": "Data Privacy Notice & Consent",
     "source": "docs/policies/Data Privacy Notice and Consent Form.pdf",
-    "description": "The privacy notice and consent form CloudHost247 Isc uses for prospective employees under the Nigeria Data Protection Act 2023."
+    "description": "The privacy notice and consent form used for prospective employees, published under the Nigeria Data Protection Act 2023."
   },
   {
     "slug": "legal-notice",
@@ -1196,7 +1196,7 @@ export const LEGAL_INDEX = [
     "php": "legal-notice.php",
     "title": "Legal Notice",
     "source": "docs/policies/Legal Notice.pdf",
-    "description": "The rights, obligations and restrictions that apply when you access CloudHost247 Isc websites, services and associated platforms."
+    "description": "The rights, obligations and restrictions that apply to CloudHost247 Isc services, website and associated platforms, and the company details."
   }
 ];
 
