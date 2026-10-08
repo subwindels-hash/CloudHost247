@@ -24,9 +24,9 @@ grouped by *why* it is unfinished. What each one is missing lives in the two sou
 ### 1.1 `platform/` — live provider egress still deferred (2 modules remain of 6)
 
 The domain modules in `platform/` that still carry a `deferred` marker for live integration
-(`ls platform/src/domains` = 45 modules). **Rows 1–4 are now closed** — the Cloudflare modules reach
-Cloudflare inside the request, the domain connector reaches a registry or a registrar, and both
-refuse with a named reason when they cannot:
+(`ls platform/src/domains` = 45 modules). **Rows 1–5 are now closed** — the Cloudflare modules reach
+Cloudflare inside the request, the domain connector reaches a registry or a registrar, the Copilot
+answers from the platform's own tables, and each one refuses with a named reason when it cannot:
 
 | # | Module | Deferred capability | State |
 |---|---|---|---|
@@ -34,7 +34,7 @@ refuse with a named reason when they cannot:
 | 2 | `platform/src/domains/admin-cloudflare.js` | Live Cloudflare egress — "Test Connection" never fakes success | **closed 2026-10-08** |
 | 3 | `platform/src/domains/domain-services.js` | Availability / WHOIS-RDAP lookup / appraisal provider connector (returns `provider_unavailable`) | **closed 2026-10-08** |
 | 4 | `platform/src/domains/admin-domain-services.js` | Registrar transfer refresh poll; extension catalogue sync; registrar adapters (`namecheap`, `godaddy`). **All closed** — Test Connection is a real provider call, the installed-adapter list is the compiled registry's own answer, the refresh polls the registrar that holds the transfer, and the sync pulls the registrar's real TLD catalogue. | **closed 2026-10-08** |
-| 5 | `platform/src/domains/ai-os.js` | Model adapter — Copilot inference (prompt is recorded, no reply is produced) | open |
+| 5 | `platform/src/domains/ai-os.js` | Model adapter — Copilot inference (prompt is recorded, no reply is produced). **Closed** — `POST /admin/ai/copilot` and `POST /account/ai/assistant` now answer from the platform's own tables through `platform/src/lib/ai-copilot.js` (deterministic intent router, 14 admin + 9 customer commands) and `platform/src/lib/ai-copilot-data.js` (19 real queries). There is no model in the path and no model was needed: a match renders `evidence` naming the query and row count behind every answer, an empty table reads "None found (real query, zero rows)", a failed query reports the real error and adds "Nothing was fabricated", and an unrouted prompt returns `confidence:'none'` with the supported-command list ("I will not guess"). The customer scope is forced to `auth.id`, so one account cannot read another's invoices, and the only write the assistant can perform is a ticket on the customer's own explicit `open ticket: …` request. 6 tests in `platform/tests/ai-copilot.test.js`. Inference *by an external model* remains out of scope here — that was never the deferred capability, and it is not faked. | **closed 2026-10-08** |
 | 6 | `platform/src/domains/ai-support.js` | LLM inference (human agents reply manually) | open |
 
 Supporting library files that still carry the marker with them (not modules, listed for completeness):
@@ -210,10 +210,10 @@ visual/browser tests — *NOT PERFORMED*. Production database is read-only from 
 
 ## Quick copy/paste name list
 
-**Platform — deferred egress:** `ai-os` · `ai-support`
-*(`cloudflare`, `admin-cloudflare`, the `domain-services` connector and the `admin-domain-services`
-registrar work — transfer refresh, extension sync, `namecheap`/`godaddy` adapters — were all closed
-2026-10-08; see the completion log.)*
+**Platform — deferred egress:** `ai-support`
+*(`cloudflare`, `admin-cloudflare`, the `domain-services` connector, the `admin-domain-services`
+registrar work — transfer refresh, extension sync, `namecheap`/`godaddy` adapters — and the `ai-os`
+Copilot were all closed 2026-10-08; see the completion log and §1.1.)*
 
 **Platform — partial:** `platform/spa` (17 page modules ported, ~35 admin groups + DNS/Cloudflare/
 marketplace/server-detail/mobile shell missing) · `platform/mobile` (no app code)

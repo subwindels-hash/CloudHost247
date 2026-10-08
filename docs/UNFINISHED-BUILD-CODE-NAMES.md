@@ -76,7 +76,7 @@ one.
 | `platform/src/domains/cloudflare.js`, `admin-cloudflare.js` | Live Cloudflare client, "Test Connection", live purge |
 | `platform/src/domains/domain-services.js` | Availability / WHOIS-RDAP / appraisal provider connector |
 | `platform/src/domains/admin-domain-services.js` | Registrar transfer refresh poll |
-| `platform/src/domains/ai-os.js` | Model adapter — Copilot inference (prompt is recorded, no reply) |
+| `platform/src/domains/ai-os.js` | **Closed 2026-10-08** — Copilot completed as a deterministic intent router over real rows: `platform/src/lib/ai-copilot.js` (14 admin + 9 customer commands) and `platform/src/lib/ai-copilot-data.js` (19 queries), wired to `POST /admin/ai/copilot` and `POST /account/ai/assistant`. Answers carry `evidence` (query + row count); unmatched prompts return the supported list with `confidence:'none'`; failures say what failed and state that nothing was fabricated. No model adapter is required and none is simulated. 6 tests in `platform/tests/ai-copilot.test.js` |
 | `platform/src/domains/ai-support.js` | LLM inference (human agents only) |
 | `platform/src/domains/tools.js` | **Closed 2026-10-06 — Live DNS resolver & HTTP monitor probe connectors completed** (`platform/src/lib/tools-connectors.js`). Real DNS queries executed via `node:dns/promises` across 9 record types; outbound HTTP monitor probes execute real GET/HEAD requests with latency timing, status code capture, and SSRF protection (private IP / blocked hostnames). 6 tests in `platform/tests/tools-connectors.test.js` |
 
