@@ -76,10 +76,13 @@ page in this environment.
 
 ### 1.5 `cloudhost247-node` — route surface deferred to later phases
 
-| # | Module | Deferred |
-|---|---|---|
-| 1 | `src/routes/billing.ts` | Admin/staff invoice-viewing routes — deferred to Phase 5F |
-| 2 | `src/routes/commerce.ts` | Admin/staff order-viewing and management routes — deferred to Phase 5F |
+Both rows are about the audited TS build's own route surface. The `platform/` port is the tree that
+runs, so each row was settled by checking what that port actually serves.
+
+| # | Module | Deferred | State |
+|---|---|---|---|
+| 1 | `src/routes/billing.ts` | Admin/staff invoice-viewing routes — deferred to Phase 5F | **closed by the port** — `platform/src/domains/admin-billing.js` serves `GET /api/v1/admin/invoices` (status filter, pagination, 500-row cap) and `GET /api/v1/admin/invoices/:id` (line items, ledger entries, payment attempts, customer, linked order), plus ledger, reconciliation, refund and cancel. The guard is `asAdmin` by choice, not by omission: refunds and cancellations move money, and staff reach the same invoice numbers/statuses through the order routes below. |
+| 2 | `src/routes/commerce.ts` | Admin/staff order-viewing and management routes — deferred to Phase 5F | **closed 2026-10-08** — `platform/src/domains/commerce.js` now serves `GET /api/v1/admin/orders` (filters: status, userId, reference, date window; pagination with a filtered `total`; customer email, item count, invoice number/status, payment status), `GET /api/v1/admin/orders/:id` (line items with resolved product/plan names, customer, every invoice with its ledger + payment attempts, and the fulfilment the order produced — installations, their deployments, services, provisioning jobs), and `POST /api/v1/admin/orders/:id/cancel` (admin-only, mandatory reason). Reading is `asStaff`; cancelling is `asAdmin`. The detail view reports its own cancellation guards up front, and a settled order is **refused with the refund route named** rather than quietly marked cancelled. 4 tests in `platform/tests/admin-orders.test.js`; found and fixed while wiring it: `customer_services.order_id` did not exist, so `lib/order-provisioning.js`'s service join could never match — the column is now in the schema. |
 
 ### 1.6 `server-agent/` — runtime verification unfinished
 
@@ -226,7 +229,9 @@ marketplace/server-detail/mobile shell missing) · `platform/mobile` (no app cod
 `cpanel-adapter` (restartApplication, applicationLogs) · `kubernetes-adapter` (backup/restore, hosting
 provisioning) · `docker-adapter` (hosting ops)
 
-**Node routes deferred:** `billing.ts` (admin invoice views → 5F) · `commerce.ts` (admin order views → 5F)
+**Node routes deferred:** ~~`billing.ts` (admin invoice views → 5F)~~ · ~~`commerce.ts` (admin order views → 5F)~~
+*(both settled against the port — the invoice console already existed as `admin-billing.js`, and the
+order surface landed 2026-10-08 in `commerce.js`; see §1.5)*
 
 **Frozen:** webhook pipeline (`routes/webhooks.ts`, `services/webhook-service.ts`,
 `payments/{stripe,paypal,paystack,sandbox}-gateway.ts`) · migrations `0023` · `0024` · `0025` · `0041` ·

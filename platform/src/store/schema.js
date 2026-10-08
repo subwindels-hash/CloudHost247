@@ -500,6 +500,11 @@ const TABLES = {
       id: pk(),
       user_id: uuid({ required: true }),
       customer_id: uuid({ nullable: true }),
+      // The order a service was bought on. `lib/order-provisioning.js` has always joined on this
+      // column to activate a paid order's services, but the column did not exist, so the write was
+      // dropped and the join could never match on either backend. Added here so the link the
+      // provisioner and the admin order view both rely on actually persists.
+      order_id: uuid({ nullable: true }),
       product_id: uuid({ nullable: true }),
       plan_id: uuid({ nullable: true }),
       control_panel_id: uuid({ nullable: true }),
