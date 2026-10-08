@@ -26,12 +26,13 @@ import AdminTicketDetailPage from './src/pages/AdminTicketDetailPage.jsx';
 import AdminCatalogPage from './src/pages/AdminCatalogPage.jsx';
 import AdminServersPage from './src/pages/AdminServersPage.jsx';
 import AdminInfrastructurePage from './src/pages/AdminInfrastructurePage.jsx';
+import AdminCloudflarePage from './src/pages/AdminCloudflarePage.jsx';
 import AdminUsersPage from './src/pages/AdminUsersPage.jsx';
 
 const pages = {
   DashboardPage, CatalogPage, CartPage, BillingPage, InvoiceDetailPage, ServicesPage, SecurityPage, SupportPage,
   AdminLayout, AdminDashboardPage, AdminCustomersPage, AdminCustomerDetailPage,
-  AdminTicketsPage, AdminTicketDetailPage, AdminUsersPage, AdminCatalogPage, AdminServersPage, AdminInfrastructurePage,
+  AdminTicketsPage, AdminTicketDetailPage, AdminUsersPage, AdminCatalogPage, AdminServersPage, AdminInfrastructurePage, AdminCloudflarePage,
 };
 const results = {};
 for (const [name, Page] of Object.entries(pages)) {

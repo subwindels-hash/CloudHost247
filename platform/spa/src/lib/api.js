@@ -296,6 +296,10 @@ export const adminApi = {
   createRegion: (payload) => api('/api/v1/admin/regions', { method: 'POST', body: payload }),
   serverPlans: () => api('/api/v1/admin/server-plans'),
   createServerPlan: (payload) => api('/api/v1/admin/server-plans', { method: 'POST', body: payload }),
+  cloudflareOverview: () => api('/api/v1/admin/cloudflare'),
+  cloudflareServices: () => api('/api/v1/admin/cloudflare/services'),
+  createCloudflareAccount: (payload) => api('/api/v1/admin/cloudflare/accounts', { method: 'POST', body: payload }),
+  testCloudflareAccount: (id) => api(`/api/v1/admin/cloudflare/accounts/${encodeURIComponent(id)}/test`, { method: 'POST', body: {} }),
 };
 
 /** Human-readable rendering of an ApiError for form alerts. */

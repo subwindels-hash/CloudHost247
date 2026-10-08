@@ -21,6 +21,7 @@ import AdminSiteSettingsPage from './pages/AdminSiteSettingsPage.jsx';
 import AdminCatalogPage from './pages/AdminCatalogPage.jsx';
 import AdminServersPage from './pages/AdminServersPage.jsx';
 import AdminInfrastructurePage from './pages/AdminInfrastructurePage.jsx';
+import AdminCloudflarePage from './pages/AdminCloudflarePage.jsx';
 import { read as readSupportSession, finish as finishSupportSession } from './lib/support-session.js';
 
 function Gate({ children }) {
@@ -131,6 +132,7 @@ export default function App() {
           <Route path="catalog" element={<AdminCatalogPage />} />
           <Route path="servers" element={<AdminServersPage />} />
           <Route path="infrastructure" element={<AdminInfrastructurePage />} />
+          <Route path="cloudflare" element={<AdminCloudflarePage />} />
         </Route>
         <Route path="*" element={<Navigate to="/account" replace />} />
       </Routes>
