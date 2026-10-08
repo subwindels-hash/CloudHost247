@@ -331,16 +331,25 @@ function emitRegistryTs(registry, spaRoutePatterns, marketingRoutes, publicDocRo
 `;
 
   const sections = registry.menus.map((menu) => {
-    const columns = (menu.columns ?? []).map((column) => ({
-      title: column.title,
-      links: (column.items ?? []).map((item) => ({
-        label: item.label,
-        to: item.href.spa ?? item.href.php ?? '#',
-        description: item.desc ?? '',
-        icon: item.icon ?? 'wrench',
-        ...(item.badge ? { badge: item.badge } : {}),
-      })),
-    }));
+    // Mirror of the PHP projection below: an item declares the surfaces it exists on, so this
+    // projection only ever emits destinations the SPA actually serves. Falling back to `href.php`
+    // here would fabricate a router path out of a PHP script name — a nav link the SPA cannot
+    // render. Columns left empty by that filter are dropped, which is also what keeps a
+    // tools-driven menu free of static groups: the SPA fills that panel from the live catalogue.
+    const columns = (menu.columns ?? [])
+      .map((column) => ({
+        title: column.title,
+        links: (column.items ?? [])
+          .filter((item) => item.href.spa)
+          .map((item) => ({
+            label: item.label,
+            to: item.href.spa,
+            description: item.desc ?? '',
+            icon: item.icon ?? 'wrench',
+            ...(item.badge ? { badge: item.badge } : {}),
+          })),
+      }))
+      .filter((column) => column.links.length > 0);
     return {
       id: menu.id,
       label: menu.label,
@@ -364,10 +373,13 @@ function emitRegistryTs(registry, spaRoutePatterns, marketingRoutes, publicDocRo
   const footer = registry.footer.map((column) => ({
     title: column.title,
     toolsDriven: Boolean(column.toolsDriven),
-    links: (column.items ?? []).map((item) => ({
-      label: item.label,
-      to: item.href.spa ?? item.href.php ?? '#',
-    })),
+    // Same rule as the menus: the SPA footer only carries destinations the SPA router serves.
+    links: (column.items ?? [])
+      .filter((item) => item.href.spa)
+      .map((item) => ({
+        label: item.label,
+        to: item.href.spa,
+      })),
   }));
 
   const utility = Object.fromEntries(

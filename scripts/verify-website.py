@@ -20,6 +20,11 @@ def tool_routes():
    for legacy in tool.get('legacyPaths',[]):
     if isinstance(legacy,str) and legacy.startswith('/tools/'):routes.add(legacy.lstrip('/'))
   for slug in data.get('categories',{}):routes.add('tools/category/'+slug)
+  # Curated collections (e.g. Compliance & Document Tools) are hub pages the PHP tools front
+  # controller serves alongside the per-tool routes, so the nav may link one exactly as it links a
+  # tool. scripts/site/generate.mjs applies the same rule when it validates the registry.
+  for collection in data.get('collections',[]):
+   if isinstance(collection.get('path'),str):routes.add(collection['path'].lstrip('/'))
  return routes
 def route_exists(path):
  if path in WHMCS or path in tool_routes():return True

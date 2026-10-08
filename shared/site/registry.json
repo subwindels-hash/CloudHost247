@@ -1782,6 +1782,7 @@
         {
           "label": "MRZ Generator",
           "href": {
+            "spa": "/tools/mrz-generator",
             "php": "tools/mrz-generator"
           }
         }
