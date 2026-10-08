@@ -289,6 +289,13 @@ export const adminApi = {
   servers: () => api('/api/v1/admin/servers'),
   createServer: (payload) => api('/api/v1/admin/servers', { method: 'POST', body: payload }),
   updateServer: (id, patch) => api(`/api/v1/admin/servers/${encodeURIComponent(id)}`, { method: 'PATCH', body: patch }),
+  providers: () => api('/api/v1/admin/providers'),
+  createProvider: (payload) => api('/api/v1/admin/providers', { method: 'POST', body: payload }),
+  updateProvider: (id, patch) => api(`/api/v1/admin/providers/${encodeURIComponent(id)}`, { method: 'PATCH', body: patch }),
+  regions: () => api('/api/v1/admin/regions'),
+  createRegion: (payload) => api('/api/v1/admin/regions', { method: 'POST', body: payload }),
+  serverPlans: () => api('/api/v1/admin/server-plans'),
+  createServerPlan: (payload) => api('/api/v1/admin/server-plans', { method: 'POST', body: payload }),
 };
 
 /** Human-readable rendering of an ApiError for form alerts. */
