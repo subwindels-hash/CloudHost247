@@ -280,6 +280,12 @@ export const adminApi = {
   users: () => api('/api/v1/admin/users'),
   catalogProducts: () => api('/api/v1/admin/catalog/products'),
   catalogProduct: (id) => api(`/api/v1/admin/catalog/products/${encodeURIComponent(id)}`),
+  createCatalogProduct: (payload) => api('/api/v1/admin/catalog/products', { method: 'POST', body: payload }),
+  updateCatalogProduct: (id, payload) => api(`/api/v1/admin/catalog/products/${encodeURIComponent(id)}`, { method: 'PATCH', body: payload }),
+  createCatalogPlan: (productId, payload) => api(`/api/v1/admin/catalog/products/${encodeURIComponent(productId)}/plans`, { method: 'POST', body: payload }),
+  updateCatalogPlan: (id, payload) => api(`/api/v1/admin/catalog/plans/${encodeURIComponent(id)}`, { method: 'PATCH', body: payload }),
+  createCatalogPricing: (planId, payload) => api(`/api/v1/admin/catalog/plans/${encodeURIComponent(planId)}/pricing`, { method: 'POST', body: payload }),
+  replaceCatalogFeatures: (planId, features) => api(`/api/v1/admin/catalog/plans/${encodeURIComponent(planId)}/features`, { method: 'PUT', body: { features } }),
 };
 
 /** Human-readable rendering of an ApiError for form alerts. */

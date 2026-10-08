@@ -125,6 +125,7 @@ export default function App() {
           <Route path="users" element={<AdminUsersPage />} />
           <Route path="content" element={<AdminContentPage />} />
           <Route path="site-settings" element={<AdminSiteSettingsPage />} />
+          <Route path="catalog" element={<AdminCatalogPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/account" replace />} />
       </Routes>
