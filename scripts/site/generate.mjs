@@ -681,6 +681,8 @@ function decoratePhpPages(previous, contentPages, registry) {
   const icons = contentIconAssets();
   const routeMap = phpRouteMap(registry);
   const matched = new Set();
+  /** Primary content route -> the PHP file that renders it. See the guard in the loop below. */
+  const primaryRouteOwners = new Map();
 
   /**
    * Several app routes can share one PHP page — `/domains/club` and `/domains/auctions` both land on
@@ -718,6 +720,30 @@ function decoratePhpPages(previous, contentPages, registry) {
     }
     matched.add(file);
 
+    /*
+     * One content route may not be projected onto two PHP pages.
+     *
+     * The reverse is expected and supported: several app routes share one PHP page
+     * (`/domains/club` and `/domains/auctions` both land on `domain.php`), because the page renders
+     * the union of their sections. The other direction is never intentional. When it happens the two
+     * PHP pages get the same title, the same `seo_description` and the same hero from one source —
+     * so a visitor who reaches both sees one page twice, and a crawler sees duplicated metadata.
+     * That is how `managed-services.php` came to publish the Server Management description: the
+     * registry pointed its menu item at `/cloud/server-management` while naming `managed-services.php`
+     * as its page, so both files were decorated from the same content page.
+     */
+    const primaryRoute = group[0]?.pair?.spa;
+    if (primaryRoute) {
+      if (primaryRouteOwners.has(primaryRoute)) {
+        fail(
+          `${file}: the content route ${primaryRoute} is already projected onto ${primaryRouteOwners.get(primaryRoute)}. ` +
+          `Two PHP pages rendering one route duplicate its title, description and hero; ` +
+          `give this page its own route in shared/site/content/ and point the registry at it.`
+        );
+      }
+      primaryRouteOwners.set(primaryRoute, file);
+    }
+
     const features = [];
     for (const section of content.sections) {
       if (section.type !== 'features' && section.type !== 'cards') continue;
@@ -732,9 +758,18 @@ function decoratePhpPages(previous, contentPages, registry) {
         if ((item.label || item.title) && uses.length < 6) uses.push(item.label ?? item.title);
       }
     }
+    /*
+     * Related services, projected from SPA routes onto the PHP surface.
+     *
+     * Two routes can name the same PHP file — `/cloud/backups` and `/hosting/backups` both render
+     * `backups.php` — so an honestly authored "related" list can still project onto the page
+     * itself. That is not a self-link the author wrote, but it is one the visitor would see, so the
+     * projection drops it here. `validatePages` fails on the authored form, which is the mistake a
+     * person can actually make and fix.
+     */
     const related = (content.related ?? [])
       .map((route) => routeMap.get(route) ?? `${route.split('/').filter(Boolean).slice(-1)[0]}.php`)
-      .filter((php) => php && Object.prototype.hasOwnProperty.call(previous.pages, php));
+      .filter((php) => php && php !== file && Object.prototype.hasOwnProperty.call(previous.pages, php));
 
     // Internal destinations are resolved to the PHP surface or dropped: a card link that only
     // works inside the single-page app would be a dead link on the page that renders it.
@@ -775,12 +810,58 @@ function decoratePhpPages(previous, contentPages, registry) {
       features: features.length ? features : existing.features,
       uses: uses.length ? uses.slice(0, 6) : existing.uses,
       faqs: (content.faqs ?? []).map((faq) => ({ q: faq.q, a: faq.a })),
-      related: related.length ? [...new Set(related)] : existing.related,
+      // The recorded fallback is filtered too: a previously stored self-reference must not survive
+      // a regeneration, or the defect outlives the fix that removed it from the source.
+      related: (related.length ? [...new Set(related)] : (existing.related ?? []))
+        .filter((php) => php && php !== file),
       // The ordered narrative the application renders, filtered to what a server-rendered page can
       // show without live data. Legacy `features`/`uses` stay for compatibility and as the fallback
       // when a page has no sections.
       sections,
     };
+  }
+  /*
+   * The policy documents are authored once, in the registry's legal index, because that index is
+   * what both surfaces publish: the SPA renders its document list from `LEGAL_INDEX`, and the theme
+   * serves one PHP page per document. Without this projection those pages had no description of
+   * their own and fell back to their `summary`, which was the same formulaic sentence for nineteen
+   * policies — nineteen near-identical meta descriptions, which is the case a search engine treats
+   * as one page repeated. The description is now authored per document and unique.
+   */
+  for (const entry of registry.legal ?? []) {
+    const page = pages[entry.php];
+    if (page && entry.description) page.seo_description = entry.description;
+  }
+
+  /*
+   * Duplicated metadata is invisible in a single page and obvious to a search engine, which is why
+   * the acceptance criteria name it explicitly. Two pages sharing a title make a result list look
+   * like the same page twice; two sharing a description make the CMS-worthless case worse. The
+   * projection is the right place to check it: this is the last point before the text is written to
+   * the theme registry, after title, description and summary have all been resolved.
+   */
+  const seenTitles = new Map();
+  const seenDescriptions = new Map();
+  for (const [file, page] of Object.entries(pages)) {
+    for (const [field, seen] of [
+      ['title', seenTitles],
+      ['seo_description', seenDescriptions],
+      ['summary', seenDescriptions],
+    ]) {
+      const value = page[field];
+      if (!value || typeof value !== 'string') continue;
+      if (seen.has(value)) {
+        const previousFile = seen.get(value);
+        if (previousFile !== file) {
+          fail(
+            `${file}: the ${field} is identical to ${previousFile}'s. Every published page needs its ` +
+            `own metadata; if two pages describe the same thing, one of them is not a page.`
+          );
+        }
+      } else {
+        seen.set(value, file);
+      }
+    }
   }
   return { pages, matched: matched.size };
 }
@@ -878,6 +959,16 @@ function validatePages(pages, spaRouteSet, tools, registryRoutes, legalSlugs) {
     for (const related of page.related ?? []) {
       if (!spaTargetExists(related, spaRouteSet, tools, legalSlugs, relatedTargets)) {
         fail(`${where}: related "${related}" is not a route this app serves.`);
+      }
+      /*
+       * A page listing itself under "Related services" is a dead end dressed up as a suggestion:
+       * the reader is already there and the card does nothing. The authored form is refused here.
+       * The *projected* form — two SPA routes resolving to one PHP file — is dropped when the PHP
+       * page is emitted instead, because that one is an artefact of the mapping rather than a
+       * mistake anybody typed.
+       */
+      if (related === page.route) {
+        fail(`${where}: related lists the page's own route (${related}); a page cannot be related to itself.`);
       }
     }
     if (page.visual && !existsSync(join(ASSET_SOURCE, `${page.visual}.svg`))) {
@@ -1228,12 +1319,141 @@ function main() {
     if (!column.items?.length) fail(`footer:${column.title} has no links.`);
   }
 
-  // Duplicate detection across the whole menu+footer surface: the same label pointing at the same
-  // route twice is a menu that has grown by accretion, which is exactly what this rebuild removes.
-  const occurrences = new Map();
-  for (const { href, label } of [...walkMenus(registry), ...walkFooter(registry)]) {
-    const key = `${href.spa ?? ''}|${label}`;
-    occurrences.set(key, (occurrences.get(key) ?? 0) + 1);
+  /*
+   * Duplicate detection across the whole menu+footer surface.
+   *
+   * Three rules, each a hard failure, because each is what a navigation grown by accretion looks
+   * like to a visitor:
+   *
+   *   1. The same label pointing at the same destination twice inside one menu. A panel that
+   *      offers "Web Hosting" and then "Web Hosting" again is not offering two things.
+   *   2. The same destination reached under two different labels inside one footer column. That is
+   *      the same defect wearing a disguise, and it doubles the crawl surface for one page.
+   *   3. The same label pointing at the same destination twice inside one footer column.
+   *
+   * Cross-menu repeats stay allowed (Developer Hosting is a hosting product *and* a platform
+   * capability, and the brief asks for it in both places), as do cross-column repeats in the
+   * footer (Network and Data Centers are asked for under both "Cloud & Servers" and "Resources").
+   * The featured panel is a promotional block, not a list, so it is exempt from rule 1 — it exists
+   * precisely to point at the section the column then enumerates.
+   */
+  const menuEntries = [];
+  for (const menu of registry.menus) {
+    if (menu.href) menuEntries.push({ menu: menu.id, where: `menu:${menu.id}`, href: menu.href, label: menu.label, list: false });
+    for (const column of menu.columns ?? []) {
+      for (const item of column.items ?? []) {
+        menuEntries.push({ menu: menu.id, where: `menu:${menu.id}/${column.title}`, href: item.href, label: item.label, list: true });
+      }
+    }
+  }
+  const perMenu = new Map();
+  for (const { menu, where, href, label } of menuEntries) {
+    if (!href) continue;
+    const destination = href.spa ?? href.php ?? '';
+    if (!destination) continue;
+    const key = `${menu}|${destination}|${label}`;
+    if (perMenu.has(key)) {
+      fail(`duplicate navigation link: "${label}" → ${destination} appears in ${perMenu.get(key)} and ${where}.`);
+    } else {
+      perMenu.set(key, where);
+    }
+  }
+
+  const perFooterColumn = new Map();
+  for (const column of registry.footer) {
+    const seenDestination = new Map();
+    for (const item of column.items ?? []) {
+      const destination = item.href?.spa ?? item.href?.php ?? '';
+      if (!destination) continue;
+      const key = `${column.title}|${destination}`;
+      if (seenDestination.has(key)) {
+        fail(
+          `footer column "${column.title}" links ${destination} twice: ` +
+            `"${seenDestination.get(key)}" and "${item.label}" are the same page.`
+        );
+      } else {
+        seenDestination.set(key, item.label);
+      }
+      const labelKey = `${column.title}|${destination}|${item.label}`;
+      if (perFooterColumn.has(labelKey)) {
+        fail(`duplicate footer link: "${item.label}" → ${destination} appears twice in "${column.title}".`);
+      } else {
+        perFooterColumn.set(labelKey, column.title);
+      }
+    }
+  }
+
+  /*
+   * Placeholder and malformed destinations. `walkMenus`/`walkFooter` already reject a missing
+   * `href`; these rules catch the destination that exists but goes nowhere a visitor can use —
+   * the `#`, the empty string, the `javascript:` call, the scheme-relative URL, and the trailing
+   * `/` that quietly makes a different URL out of the same page.
+   */
+  for (const { where, href, label } of [...walkMenus(registry), ...walkFooter(registry), ...walkUtility(registry)]) {
+    for (const [surfaceName, value] of [['spa', href.spa], ['php', href.php]]) {
+      if (value === undefined || value === null) continue;
+      const destination = String(value);
+      if (destination.trim() === '') {
+        fail(`${where}: "${label}" has an empty ${surfaceName} destination.`);
+      } else if (destination === '#') {
+        fail(`${where}: "${label}" points at "#"; a destination must resolve to a page.`);
+      } else if (/^javascript:/i.test(destination)) {
+        fail(`${where}: "${label}" uses a javascript: destination.`);
+      } else if (/^\/\//.test(destination)) {
+        fail(`${where}: "${label}" uses a scheme-relative destination (${destination}); it inherits the request scheme and is not a first-party path.`);
+      } else if (destination.length > 1 && destination.endsWith('/') && !destination.includes('?')) {
+        fail(`${where}: "${label}" → ${destination} has a trailing slash; the canonical form drops it.`);
+      }
+    }
+  }
+
+  /*
+   * Obsolete destinations. Each entry is a route that was superseded during the rebuild and still
+   * resolves on some deployments, so a link to it would not 404 — it would quietly serve the old
+   * page. The canonical replacement is named so the fix is unambiguous.
+   */
+  const OBSOLETE_DESTINATIONS = new Map([
+    ['dedeicated-server.php', 'dedicated-server.php'],
+    ['vps-private-cloud.php', 'vps-privatecloud.php'],
+    ['vps-public-cloud.php', 'vps-publiccloud.php'],
+  ]);
+  for (const { where, href, label } of [...walkMenus(registry), ...walkFooter(registry), ...walkUtility(registry)]) {
+    for (const value of [href.spa, href.php]) {
+      if (typeof value !== 'string') continue;
+      for (const [obsolete, replacement] of OBSOLETE_DESTINATIONS) {
+        if (value.includes(obsolete)) {
+          fail(`${where}: "${label}" uses the obsolete destination ${value}; use ${replacement}.`);
+        }
+      }
+    }
+  }
+
+  /*
+   * Casing. Paths are case-sensitive on the production filesystem, so a link whose casing differs
+   * from the file it names works in development on macOS and 404s in production on Linux. Every
+   * first-party PHP destination must match a real file's name exactly, and every SPA path must be
+   * lower-case, which is what the router publishes.
+   *
+   * Licensed WHMCS entry points are skipped: the platform depends on those files but does not ship
+   * them, so there is no local filename to compare against — the staging check owns that instead.
+   */
+  for (const { where, href, label } of [...walkMenus(registry), ...walkFooter(registry), ...walkUtility(registry)]) {
+    if (typeof href.php === 'string') {
+      const file = href.php.split('?')[0].split('#')[0];
+      if (!file.includes('/') && /\.php$/.test(file) && !WHMCS_ENTRY_POINTS.has(file) && !pages.has(file)) {
+        const suggestion = [...pages].find((name) => name.toLowerCase() === file.toLowerCase());
+        fail(
+          `${where}: "${label}" → ${file} does not match any file's casing` +
+            (suggestion ? `; did you mean ${suggestion}?` : '.')
+        );
+      }
+    }
+    if (typeof href.spa === 'string' && href.spa !== '/' && !href.spa.startsWith('#')) {
+      const path = href.spa.split(/[?#]/)[0].replace(/^\//, '');
+      if (path && path !== path.toLowerCase()) {
+        fail(`${where}: "${label}" → ${href.spa} is not lower-case; router paths are case-sensitive.`);
+      }
+    }
   }
 
   const registryRoutes = [
@@ -1307,6 +1527,18 @@ function main() {
     errors,
     warnings,
   };
+
+  /*
+   * The PHP projection runs *before* the error gate, not after it.
+   *
+   * This function is pure — it returns the payload that is written further down — but its
+   * validation reports through `fail()`, which appends to `errors`. When it ran after the gate,
+   * every check inside it was unreachable: a projection that duplicated a page, dropped an anchor
+   * or emitted a heading-less section would report nothing and write the file anyway. Hoisting the
+   * call is what makes those checks real; nothing is written until they pass.
+   */
+  const { payload: nextSiteJson, matched: phpPagesEnriched } = emitPhpSiteJson(registry, previousSiteJson, contentPages);
+  report.phpPagesEnriched = phpPagesEnriched;
 
   if (errors.length) {
     process.stderr.write(`\n✖ registry validation failed (${errors.length}):\n`);
@@ -1386,8 +1618,6 @@ function main() {
   copyAssets(ASSET_SOURCE, ASSET_PUBLIC);
   report.assetsCopied = assetCount;
 
-  const { payload: nextSiteJson, matched: phpPagesEnriched } = emitPhpSiteJson(registry, previousSiteJson, contentPages);
-  report.phpPagesEnriched = phpPagesEnriched;
   writeFileSync(PHP_SITE_JSON, `${json(nextSiteJson)}\n`);
 
   mkdirSync(dirname(REPORT_OUT), { recursive: true });

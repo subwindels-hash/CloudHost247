@@ -173,11 +173,73 @@ def verify(archive_path: Path, log) -> int:
                 failures.append(f'missing required file: {required}')
 
         # Every illustration the website references must be inside the archive.
+        #
+        # Counting files is not the same check. A build whose `public/media` is one generation
+        # behind still has a media directory and still passes a count — it is simply missing the
+        # pages' artwork, which is exactly how a product page ships with a broken image. So each
+        # visual the theme registry names is resolved by name, against both the built SPA tree and
+        # the PHP theme's own copy of the library.
         media = destination / 'cloudhost247-node' / 'public' / 'media' / 'cloudhost247'
         if media.is_dir():
             log(f'media assets present: {sum(1 for _ in media.rglob("*") if _.is_file())}')
         else:
             failures.append('the built website has no media asset directory')
+
+        theme_registry = destination / 'modules' / 'addons' / 'cloudhost247_theme' / 'resources' / 'site.json'
+        if not theme_registry.is_file():
+            failures.append('the PHP theme registry is not in the archive; the website cannot be served')
+        else:
+            try:
+                pages = json.loads(theme_registry.read_text()).get('pages', {})
+            except (OSError, ValueError):
+                pages = {}
+                failures.append('the PHP theme registry in the archive is not readable JSON')
+            wanted = set()
+            # The 3D scenes are the other half of the illustration contract. A page names the
+            # scene and the template turns it into a srcset, so a scene that is present as a
+            # JPEG but missing an encoding is a broken image rather than a slow one: a <source>
+            # whose URL 404s does not fall through to the next source. `visual.tpl` and
+            # `Illustration.tsx` advertise these three widths literally and
+            # `scripts/generate-raster-formats.py` writes them; the names are repeated here so
+            # this check is an independent reading of the archive rather than a shared constant.
+            scenes = set()
+            for page in pages.values():
+                if page.get('visual'):
+                    wanted.add(page['visual'])
+                if page.get('visual3d'):
+                    scenes.add(page['visual3d'])
+                for section in page.get('sections', []) or []:
+                    if section.get('visual'):
+                        wanted.add(section['visual'])
+                    if section.get('visual3d'):
+                        scenes.add(section['visual3d'])
+            roots = [
+                ('built SPA', media),
+                ('PHP theme', destination / 'assets' / 'images' / 'cloudhost247'),
+            ]
+            for label, root in roots:
+                if not root.is_dir():
+                    failures.append(f'the {label} illustration library is missing from the archive')
+                    continue
+                absent = sorted(visual for visual in wanted if not (root / f'{visual}.svg').is_file())
+                if absent:
+                    failures.append(
+                        f'{len(absent)} illustration(s) referenced by the theme registry are missing from the '
+                        f'{label} library: ' + ', '.join(absent[:8]) + (' …' if len(absent) > 8 else '')
+                    )
+                unencodable = sorted(
+                    f'{scene}{suffix}'
+                    for scene in scenes
+                    for suffix in ['.jpg', *[f'-{width}.{fmt}' for width in (640, 960, 1280)
+                                             for fmt in ('avif', 'webp')]]
+                    if not (root / f'{scene}{suffix}').is_file()
+                )
+                if unencodable:
+                    failures.append(
+                        f'{len(unencodable)} 3D scene encoding(s) missing from the {label} library: '
+                        + ', '.join(unencodable[:8]) + (' …' if len(unencodable) > 8 else '')
+                    )
+            log(f'theme illustrations resolved: {len(wanted)} · 3D scenes: {len(scenes)}')
 
         # The public documentation the reader fetches must be present, and must be *exactly* the
         # published set. A stale build directory is how an internal document stays downloadable

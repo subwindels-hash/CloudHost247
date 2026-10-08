@@ -7,13 +7,16 @@
  */
 
 .ch247-email {
-    --ch247-email-ink: #16202f;
-    --ch247-email-muted: #66748a;
-    --ch247-email-line: #e3e8ef;
-    --ch247-email-accent: #1c64f2;
-    --ch247-email-accent-dark: #1749b8;
-    --ch247-email-surface: #ffffff;
-    --ch247-email-surface-alt: #f6f8fb;
+    /* The page keeps its own short names so the rules below stay readable, but every value points
+       at the shared design token. It used to carry a private blue palette (#1c64f2 accent), which
+       made this the one public page whose accents disagreed with the rest of the site. */
+    --ch247-email-ink: var(--ch-ink);
+    --ch247-email-muted: var(--ch-muted);
+    --ch247-email-line: var(--ch-line);
+    --ch247-email-accent: var(--ch-green);
+    --ch247-email-accent-dark: var(--ch-green-dark);
+    --ch247-email-surface: var(--ch-paper);
+    --ch247-email-surface-alt: var(--ch-soft);
     color: var(--ch247-email-ink);
 }
 
@@ -30,7 +33,7 @@
 /* ------------------------------------------------------------------ hero */
 
 .ch247-email-hero {
-    background: linear-gradient(160deg, #f4f7fd 0%, #ffffff 65%);
+    background: linear-gradient(160deg, var(--ch-soft) 0%, var(--ch-paper) 65%);
     border-bottom: 1px solid var(--ch247-email-line);
     padding: 48px 0 40px;
 }
@@ -110,7 +113,7 @@
 
 .ch247-btn--ghost {
     background: transparent;
-    border-color: #c8d3e4;
+    border-color: var(--ch-line-strong);
     color: var(--ch247-email-ink);
 }
 
@@ -137,7 +140,7 @@
 
 .ch247-mailcard__bar { display: flex; gap: 6px; margin-bottom: 16px; }
 .ch247-mailcard__bar span {
-    width: 10px; height: 10px; border-radius: 50%; background: #dbe2ec;
+    width: 10px; height: 10px; border-radius: 50%; background: var(--ch-line-strong);
 }
 
 .ch247-mailcard__row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
@@ -155,7 +158,7 @@
 
 .ch247-mailcard i {
     display: block; height: 8px; border-radius: 4px;
-    background: #e8edf5; margin-bottom: 7px;
+    background: var(--ch-soft-2); margin-bottom: 7px;
 }
 
 .ch247-mailcard i.w40 { width: 40%; }
@@ -168,13 +171,13 @@
     position: absolute;
     right: 14px;
     bottom: -14px;
-    background: #0f2744;
-    color: #fff;
+    background: var(--ch-navy);
+    color: var(--ch-on-dark);
     font-size: 12px;
     font-weight: 600;
     padding: 7px 14px;
     border-radius: 999px;
-    box-shadow: 0 8px 18px rgba(15, 39, 68, .25);
+    box-shadow: var(--ch-shadow-2);
 }
 
 /* --------------------------------------------------------------- sections */
@@ -317,12 +320,12 @@
     border-radius: 999px;
 }
 
-.ch247-pill--ok { background: #e6f6ed; color: #1a7f45; }
-.ch247-pill--off { background: #fdecec; color: #b42318; }
+.ch247-pill--ok { background: var(--ch-ok-soft); color: var(--ch-green); }
+.ch247-pill--off { background: var(--ch-danger-soft); color: var(--ch-danger); }
 
 .ch247-email-empty {
     background: var(--ch247-email-surface);
-    border: 1px dashed #c8d3e4;
+    border: 1px dashed var(--ch-line-strong);
     border-radius: 12px;
     padding: 28px;
     text-align: center;
@@ -334,7 +337,7 @@
 .ch247-compare th, .ch247-compare td { vertical-align: middle !important; font-size: 14px; }
 .ch247-compare thead th { border-bottom: 2px solid var(--ch247-email-line); }
 .ch247-compare tbody th { font-weight: 600; width: 26%; }
-.ch247-compare tbody tr:nth-child(odd) { background: #fbfcfe; }
+.ch247-compare tbody tr:nth-child(odd) { background: var(--ch-soft); }
 
 /* ------------------------------------------------------------------- DNS */
 
@@ -367,8 +370,8 @@
     display: inline-block;
     min-width: 84px;
     text-align: center;
-    background: #eef3fd;
-    color: var(--ch247-email-accent-dark);
+    background: var(--ch-soft-2);
+    color: var(--ch-green-dark);
     font-family: SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 11px;
     font-weight: 700;

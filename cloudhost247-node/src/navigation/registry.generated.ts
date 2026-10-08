@@ -76,7 +76,7 @@ export const NAV_SECTIONS: RegistrySection[] = [
   {
     "id": "hosting",
     "label": "Hosting",
-    "blurb": "Website, application and email hosting with a live product catalogue behind every plan page.",
+    "blurb": "Website, application and email hosting — every plan page backed by the live product catalogue.",
     "to": "/hosting",
     "toolsDriven": false,
     "featured": {
@@ -87,20 +87,14 @@ export const NAV_SECTIONS: RegistrySection[] = [
     },
     "groups": [
       {
-        "title": "Website hosting",
+        "title": "Web hosting",
         "links": [
           {
             "label": "Web Hosting",
             "to": "/hosting/web-hosting",
-            "description": "Web hosting plans for websites, with current products shown in the live catalogue.",
+            "description": "Hosting plans for websites, priced from the live catalogue.",
             "icon": "globe",
             "badge": "POPULAR"
-          },
-          {
-            "label": "Shared Hosting",
-            "to": "/hosting/web-hosting",
-            "description": "Shared web hosting plans shown in the live product catalogue.",
-            "icon": "globe"
           },
           {
             "label": "Business Hosting",
@@ -109,22 +103,40 @@ export const NAV_SECTIONS: RegistrySection[] = [
             "icon": "briefcase"
           },
           {
-            "label": "cPanel Hosting",
-            "to": "/hosting/cpanel",
-            "description": "Mailboxes, databases and installs from the panel your team knows.",
-            "icon": "control"
-          },
-          {
             "label": "WordPress Hosting",
             "to": "/hosting/wordpress",
             "description": "WordPress with a managed runtime, cache and staging path.",
             "icon": "wordpress"
           },
           {
-            "label": "Reseller Hosting",
-            "to": "/hosting/reseller",
-            "description": "Run your own hosting brand on our infrastructure.",
-            "icon": "users"
+            "label": "cPanel Hosting",
+            "to": "/hosting/cpanel",
+            "description": "Mailboxes, databases and installs from the panel your team knows.",
+            "icon": "control"
+          },
+          {
+            "label": "PHP Hosting",
+            "to": "/developers/php",
+            "description": "Tuned PHP runtimes with the extensions your application needs.",
+            "icon": "code"
+          },
+          {
+            "label": "Python Hosting",
+            "to": "/developers/python",
+            "description": "Python application hosting with virtual environments.",
+            "icon": "code"
+          },
+          {
+            "label": "Node.js Hosting",
+            "to": "/developers/nodejs",
+            "description": "Node.js services with process management and zero-downtime restarts.",
+            "icon": "code"
+          },
+          {
+            "label": "Laravel Hosting",
+            "to": "/developers/laravel",
+            "description": "Laravel hosting with queues, scheduler and release-based deploys.",
+            "icon": "code"
           },
           {
             "label": "Windows Hosting",
@@ -133,85 +145,56 @@ export const NAV_SECTIONS: RegistrySection[] = [
             "icon": "windows"
           },
           {
-            "label": "Website Hosting Overview",
-            "to": "/hosting",
-            "description": "Every hosting line in one comparison of features.",
-            "icon": "layers"
+            "label": "Reseller Hosting",
+            "to": "/hosting/reseller",
+            "description": "Run your own hosting brand on our infrastructure.",
+            "icon": "users"
           }
         ]
       },
       {
-        "title": "Applications & platform hosting",
+        "title": "Specialized hosting",
         "links": [
           {
-            "label": "Application Hosting",
-            "to": "/platforms/applications",
-            "description": "Deploy a managed application on its own isolated stack.",
-            "icon": "app"
+            "label": "Email Hosting",
+            "to": "/hosting/email",
+            "description": "Mailboxes on your own domain, with spam filtering and webmail.",
+            "icon": "mail"
           },
           {
             "label": "Developer Hosting",
             "to": "/hosting/developer",
-            "description": "Runtime-focused hosting built for shipping code.",
+            "description": "Git, staging and application tooling alongside the runtime.",
             "icon": "code"
           },
           {
-            "label": "API Hosting",
-            "to": "/hosting/api",
-            "description": "Host and expose HTTP APIs with TLS and monitoring.",
-            "icon": "api"
+            "label": "Docker Hosting",
+            "to": "/developers/docker",
+            "description": "Run containers and compose stacks on managed compute.",
+            "icon": "container"
           },
           {
-            "label": "Email Hosting",
-            "to": "/hosting/email",
-            "description": "Mailboxes on your own domain, with spam and TLS.",
-            "icon": "mail"
-          },
-          {
-            "label": "Control Panels",
-            "to": "/hosting/control-panels",
-            "description": "The panels we actually provision, and how to reach them.",
-            "icon": "control"
-          }
-        ]
-      },
-      {
-        "title": "Managed for you",
-        "links": [
-          {
-            "label": "Website Migration",
-            "to": "/hosting/migration",
-            "description": "Move an existing site in with a checked, staged cutover.",
-            "icon": "transfer"
+            "label": "Game Servers",
+            "to": "/cloud/game-servers",
+            "description": "Low-latency game server hosting with your choice of control panel.",
+            "icon": "gamepad"
           },
           {
             "label": "Managed Services",
-            "to": "/cloud/server-management",
-            "description": "We operate, patch and monitor the stack for you.",
-            "icon": "wrench"
+            "to": "/cloud/managed-services",
+            "description": "We operate the platform so your team ships instead of patching.",
+            "icon": "shield-check"
           },
           {
             "label": "Website Design",
             "to": "/websites",
-            "description": "Design and build delivered by the CloudHost247 team.",
-            "icon": "pen"
+            "description": "Launch a new site or have one built and run for you.",
+            "icon": "palette"
           },
           {
             "label": "SSL Certificates",
             "to": "/hosting/ssl",
-            "description": "Encrypt every domain you host, including free DV options.",
-            "icon": "lock"
-          },
-          {
-            "label": "Backups",
-            "to": "/hosting/backups",
-            "description": "Scheduled backup jobs with a real, restorable history.",
-            "icon": "hard-drive"
-          },
-          {
-            "label": "Security",
-            "to": "/hosting/security",
-            "description": "Isolation, hardening, patching and abuse control.",
+            "description": "Certificates issued and renewed automatically for every domain you host.",
             "icon": "shield"
           }
         ]
@@ -225,57 +208,372 @@ export const NAV_SECTIONS: RegistrySection[] = [
     "to": "/cloud",
     "toolsDriven": false,
     "featured": {
-      "title": "Cloud hosting plans",
-      "body": "Review the cloud server options currently published to the live product catalogue.",
-      "to": "/cloud",
-      "ctaLabel": "View cloud plans"
+      "title": "VPS & cloud servers",
+      "body": "Provision compute in minutes, choose your operating system, and manage it from the client area.",
+      "to": "/hosting/vps",
+      "ctaLabel": "Explore cloud and servers"
     },
     "groups": [
       {
-        "title": "Servers",
+        "title": "Cloud",
         "links": [
-          {
-            "label": "VPS Hosting",
-            "to": "/hosting/vps",
-            "description": "Virtual private servers with dedicated, guaranteed resources.",
-            "icon": "server",
-            "badge": "POPULAR"
-          },
-          {
-            "label": "Cloud Hosting",
-            "to": "/cloud",
-            "description": "Browse published cloud hosting products and their current plan details.",
-            "icon": "cloud"
-          },
-          {
-            "label": "Dedicated Servers",
-            "to": "/hosting/dedicated",
-            "description": "Single-tenant hardware with full root access.",
-            "icon": "server-rack"
-          },
           {
             "label": "Public Cloud",
             "to": "/cloud/public",
-            "description": "Elastic compute you can resize as demand changes.",
+            "description": "Elastic compute from a shared public cloud footprint.",
             "icon": "cloud"
           },
           {
             "label": "Private Cloud",
             "to": "/cloud/private",
-            "description": "Isolated cloud capacity reserved for one tenant.",
-            "icon": "cloud-lock"
+            "description": "Dedicated resources isolated to your organisation.",
+            "icon": "shield"
+          },
+          {
+            "label": "Cloud Hosting",
+            "to": "/cloud",
+            "description": "Cloud hosting overview with the live product catalogue.",
+            "icon": "cloud"
           },
           {
             "label": "Enterprise Servers",
             "to": "/cloud/enterprise-servers",
-            "description": "High-capacity configurations for larger workloads.",
+            "description": "High-specification servers with contractual service levels.",
+            "icon": "building"
+          }
+        ]
+      },
+      {
+        "title": "Servers",
+        "links": [
+          {
+            "label": "Dedicated Servers",
+            "to": "/hosting/dedicated",
+            "description": "Bare metal servers, provisioned and managed end to end.",
+            "icon": "server"
+          },
+          {
+            "label": "VPS Hosting",
+            "to": "/hosting/vps",
+            "description": "Virtual servers with a choice of operating system and panel.",
+            "icon": "server"
+          },
+          {
+            "label": "Server Management",
+            "to": "/cloud/server-management",
+            "description": "Patching, hardening and day-to-day server operations.",
+            "icon": "settings"
+          },
+          {
+            "label": "Data Centers",
+            "to": "/cloud/data-centers",
+            "description": "The facilities our compute runs in and what they provide.",
             "icon": "building"
           },
           {
-            "label": "Game Servers",
-            "to": "/cloud/game-servers",
-            "description": "Low-latency hosting for multiplayer game servers.",
-            "icon": "gamepad"
+            "label": "Network",
+            "to": "/cloud/network",
+            "description": "Transit, peering and the addressing behind our services.",
+            "icon": "network"
+          },
+          {
+            "label": "Firewall",
+            "to": "/cloud/firewall",
+            "description": "Network filtering and firewall management for your servers.",
+            "icon": "shield"
+          },
+          {
+            "label": "Monitoring",
+            "to": "/cloud/monitoring",
+            "description": "Availability and resource monitoring with alerting.",
+            "icon": "activity"
+          },
+          {
+            "label": "Backups",
+            "to": "/cloud/backups",
+            "description": "Scheduled backups with restore points you control.",
+            "icon": "storage"
+          },
+          {
+            "label": "Migration",
+            "to": "/hosting/migration",
+            "description": "We move your existing websites, mail and data across.",
+            "icon": "transfer"
+          },
+          {
+            "label": "IP Management",
+            "to": "/cloud/ip-management",
+            "description": "Reverse DNS, IP allocation and address planning for your servers.",
+            "icon": "network"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "domains",
+    "label": "Domains",
+    "blurb": "Search, register, transfer and manage domain names — with the full registrar and DNS toolkit.",
+    "to": "/domains",
+    "toolsDriven": false,
+    "featured": {
+      "title": "Find your domain",
+      "body": "Check availability across every extension we carry and register it in the same checkout as your hosting.",
+      "to": "/domains/search",
+      "ctaLabel": "Search domains"
+    },
+    "groups": [
+      {
+        "title": "Domains",
+        "links": [
+          {
+            "label": "Domain Registration",
+            "to": "/domains/search",
+            "description": "Register a new domain name and manage it from the client area.",
+            "icon": "search",
+            "badge": "POPULAR"
+          },
+          {
+            "label": "Domain Search",
+            "to": "/domains/bulk-search",
+            "description": "Check availability for one name or a whole list at once.",
+            "icon": "search"
+          },
+          {
+            "label": "Domain Management",
+            "to": "/dashboard/domains",
+            "description": "Nameservers, contacts, renewal dates and auto-renew settings.",
+            "icon": "settings"
+          },
+          {
+            "label": "DNS Management",
+            "to": "/dashboard/dns",
+            "description": "Edit zone records, TTLs and DNSSEC from one screen.",
+            "icon": "dns"
+          },
+          {
+            "label": "Domain Renewal",
+            "to": "/legal/domain-renewal-policy",
+            "description": "How renewal, auto-renew and deletion windows work.",
+            "icon": "refresh"
+          }
+        ]
+      },
+      {
+        "title": "DNS",
+        "links": [
+          {
+            "label": "DNS Lookup",
+            "to": "/tools/dns-lookup",
+            "description": "Query A, AAAA, CNAME, MX, NS, TXT, SOA, SRV and CAA records.",
+            "icon": "search"
+          },
+          {
+            "label": "DNS Propagation",
+            "to": "/tools/dns-propagation",
+            "description": "Ask the same question of many public resolvers at once.",
+            "icon": "globe"
+          },
+          {
+            "label": "DNS Health",
+            "to": "/tools/dns-health",
+            "description": "Delegation, mail authentication and DNSSEC checks in one report.",
+            "icon": "activity"
+          },
+          {
+            "label": "DNS Security",
+            "to": "/tools/category/security",
+            "description": "DNS and domain security tools from the CloudHost247 catalogue.",
+            "icon": "shield"
+          },
+          {
+            "label": "DNSSEC",
+            "to": "/tools/dnskey-lookup",
+            "description": "Inspect DNSKEY and DS records for a signed zone.",
+            "icon": "key"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "platforms",
+    "label": "Platforms",
+    "blurb": "Applications, containers, runtimes, control panels and operating systems — all configured for CloudHost247 servers.",
+    "to": "/platforms",
+    "toolsDriven": false,
+    "featured": {
+      "title": "Application platform",
+      "body": "Deploy common applications, databases and containers without building the runtime yourself.",
+      "to": "/apps",
+      "ctaLabel": "Browse applications"
+    },
+    "groups": [
+      {
+        "title": "Application platforms",
+        "links": [
+          {
+            "label": "Applications",
+            "to": "/apps",
+            "description": "Deploy supported applications from a maintained catalogue.",
+            "icon": "app"
+          },
+          {
+            "label": "Deployment",
+            "to": "/developers/deployment",
+            "description": "Release applications with environments and rollback.",
+            "icon": "rocket"
+          },
+          {
+            "label": "PaaS",
+            "to": "/platforms/paas",
+            "description": "Push code and let the platform build and run it.",
+            "icon": "layers"
+          },
+          {
+            "label": "Docker",
+            "to": "/developers/docker",
+            "description": "Containers, images and compose stacks on managed compute.",
+            "icon": "container"
+          },
+          {
+            "label": "Node.js",
+            "to": "/developers/nodejs",
+            "description": "Node.js runtimes with process management and restarts.",
+            "icon": "code"
+          },
+          {
+            "label": "PHP",
+            "to": "/developers/php",
+            "description": "PHP runtimes with per-site version and extension control.",
+            "icon": "code"
+          },
+          {
+            "label": "Python",
+            "to": "/developers/python",
+            "description": "Python applications with virtual environments and workers.",
+            "icon": "code"
+          },
+          {
+            "label": "Laravel",
+            "to": "/developers/laravel",
+            "description": "Laravel with queues, scheduler and release deploys.",
+            "icon": "code"
+          },
+          {
+            "label": "Developer Hosting",
+            "to": "/hosting/developer",
+            "description": "Git, staging and CI-friendly hosting for development teams.",
+            "icon": "terminal"
+          },
+          {
+            "label": "API Hosting",
+            "to": "/hosting/api",
+            "description": "Run HTTP APIs with managed runtimes, TLS and request logging.",
+            "icon": "terminal"
+          }
+        ]
+      },
+      {
+        "title": "Control panels",
+        "links": [
+          {
+            "label": "Control Panels",
+            "to": "/hosting/control-panels",
+            "description": "Install a supported panel on your server during provisioning.",
+            "icon": "control"
+          },
+          {
+            "label": "cPanel & WHM",
+            "to": "/hosting/cpanel",
+            "description": "The industry-standard hosting panel, licensed and managed.",
+            "icon": "control"
+          }
+        ]
+      },
+      {
+        "title": "Operating systems",
+        "links": [
+          {
+            "label": "Operating Systems",
+            "to": "/cloud/operating-systems",
+            "description": "Every Linux image we provision, with version and lifecycle status.",
+            "icon": "os"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "tools",
+    "label": "Tools",
+    "blurb": "Inspect, troubleshoot and build — every result reports what was actually queried and what it cannot tell you.",
+    "to": "/tools",
+    "toolsDriven": true,
+    "groups": []
+  },
+  {
+    "id": "resources",
+    "label": "Resources",
+    "blurb": "Guides, documentation, service status and the knowledge you need to run on CloudHost247.",
+    "to": "/docs",
+    "toolsDriven": false,
+    "featured": {
+      "title": "Documentation",
+      "body": "Setup guides, API references and operational how-tos for every CloudHost247 service.",
+      "to": "/docs",
+      "ctaLabel": "Read the documentation"
+    },
+    "groups": [
+      {
+        "title": "Documentation & help",
+        "links": [
+          {
+            "label": "Documentation",
+            "to": "/docs",
+            "description": "Setup guides and references for every service we run.",
+            "icon": "book"
+          },
+          {
+            "label": "Help Center",
+            "to": "/help",
+            "description": "Start here when something is not working as expected.",
+            "icon": "help"
+          },
+          {
+            "label": "FAQs",
+            "to": "/faq",
+            "description": "The questions we are asked most, answered plainly.",
+            "icon": "help"
+          },
+          {
+            "label": "Open a Ticket",
+            "to": "/support",
+            "description": "Reach a human. Tickets are answered by the team that runs the platform.",
+            "icon": "mail"
+          }
+        ]
+      },
+      {
+        "title": "Stay informed",
+        "links": [
+          {
+            "label": "Blog",
+            "to": "/blog",
+            "description": "Product news, engineering notes and platform changes.",
+            "icon": "news"
+          },
+          {
+            "label": "Status",
+            "to": "/status",
+            "description": "Live service status and incident history.",
+            "icon": "activity"
+          },
+          {
+            "label": "Offers",
+            "to": "/offers",
+            "description": "Current promotions and discounted plans.",
+            "icon": "tag"
           }
         ]
       },
@@ -285,699 +583,105 @@ export const NAV_SECTIONS: RegistrySection[] = [
           {
             "label": "Infrastructure",
             "to": "/cloud/infrastructure",
-            "description": "How the CloudHost247 network and regions fit together.",
+            "description": "How the CloudHost247 platform is put together.",
+            "icon": "building"
+          },
+          {
+            "label": "Network",
+            "to": "/cloud/network",
+            "description": "Transit, peering and addressing.",
             "icon": "network"
           },
           {
             "label": "Data Centers",
             "to": "/cloud/data-centers",
-            "description": "The facilities our servers are deployed in — when configured.",
-            "icon": "data-center"
-          },
-          {
-            "label": "Network",
-            "to": "/cloud/network",
-            "description": "Routing, addressing and uptime of the delivery network.",
-            "icon": "globe"
+            "description": "Where our compute physically runs.",
+            "icon": "building"
           },
           {
             "label": "Operating Systems",
             "to": "/cloud/operating-systems",
-            "description": "The OS catalogue available at provisioning time.",
-            "icon": "os"
-          },
-          {
-            "label": "Server Management",
-            "to": "/cloud/server-management",
-            "description": "Monitoring, access control, patching and operations.",
-            "icon": "wrench"
-          }
-        ]
-      },
-      {
-        "title": "Operations & protection",
-        "links": [
-          {
-            "label": "Monitoring",
-            "to": "/cloud/monitoring",
-            "description": "Telemetry and alerts for the resources you run with us.",
-            "icon": "activity"
-          },
-          {
-            "label": "Backups",
-            "to": "/cloud/backups",
-            "description": "Backup jobs, retention and restore from your account.",
-            "icon": "hard-drive"
-          },
-          {
-            "label": "Firewalls",
-            "to": "/cloud/firewall",
-            "description": "Rule-based network filtering attached to your servers.",
-            "icon": "firewall"
-          },
-          {
-            "label": "Security",
-            "to": "/cloud/security",
-            "description": "Platform hardening, isolation and abuse response.",
-            "icon": "shield"
-          },
-          {
-            "label": "IP Management",
-            "to": "/cloud/ip-management",
-            "description": "Reverse DNS, floating addresses and IP assignment.",
-            "icon": "ip"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "domains",
-    "label": "Domains",
-    "blurb": "Search, register, transfer and manage domain names — with the full registrar toolkit.",
-    "to": "/domains",
-    "toolsDriven": false,
-    "featured": {
-      "title": "Find your domain",
-      "body": "Check availability and pricing across every configured extension, then register it in the same account you host with.",
-      "to": "/domains/search",
-      "ctaLabel": "Search domains"
-    },
-    "groups": [
-      {
-        "title": "Get a domain",
-        "links": [
-          {
-            "label": "Search Domains",
-            "to": "/domains/search",
-            "description": "Check a name across every configured extension.",
-            "icon": "search",
-            "badge": "POPULAR"
-          },
-          {
-            "label": "Domain Transfer",
-            "to": "/domains/transfer",
-            "description": "Move a domain in with an EPP code and status tracking.",
-            "icon": "transfer"
-          },
-          {
-            "label": "Domain Extensions",
-            "to": "/domains/extensions",
-            "description": "The full TLD catalogue with register and renewal prices.",
-            "icon": "globe"
-          },
-          {
-            "label": "Bulk Domain Search",
-            "to": "/domains/bulk-search",
-            "description": "Check a whole list of candidate names at once.",
-            "icon": "list"
-          },
-          {
-            "label": "Domain Registration",
-            "to": "/domains/search",
-            "description": "Register a new name and manage it from day one.",
-            "icon": "cart"
-          }
-        ]
-      },
-      {
-        "title": "Domain management",
-        "links": [
-          {
-            "label": "DNS Management",
-            "to": "/dashboard/dns",
-            "description": "Zones and records for the domains you host here.",
-            "icon": "dns"
-          },
-          {
-            "label": "WHOIS / RDAP Lookup",
-            "to": "/domains/whois",
-            "description": "Public registration data, with privacy respected.",
-            "icon": "user"
-          },
-          {
-            "label": "My Domains",
-            "to": "/dashboard/domains",
-            "description": "Renewals, auto-renew, locks, contacts and nameservers.",
-            "icon": "folder"
-          }
-        ]
-      },
-      {
-        "title": "Domains as an asset",
-        "links": [
-          {
-            "label": "Domain Auctions",
-            "to": "/domains/auctions",
-            "description": "Bid on listed names with a recorded auction ledger.",
-            "icon": "gavel",
-            "badge": "NEW"
-          },
-          {
-            "label": "Domain Appraisal",
-            "to": "/domains/appraisal",
-            "description": "An estimated market value — never a guaranteed price.",
-            "icon": "chart"
-          },
-          {
-            "label": "Domain Broker",
-            "to": "/domains/broker",
-            "description": "We approach the owner of a name you want to acquire.",
-            "icon": "handshake"
-          },
-          {
-            "label": "Domain Club",
-            "to": "/domains/club",
-            "description": "Membership pricing on eligible registrations and renewals.",
-            "icon": "star"
-          },
-          {
-            "label": "Domain Services Overview",
-            "to": "/domains",
-            "description": "Everything available around a domain name.",
-            "icon": "layers"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "platforms",
-    "label": "Platforms",
-    "blurb": "Applications, databases, containers and deployment workflows configured for CloudHost247 services.",
-    "to": "/platforms",
-    "toolsDriven": false,
-    "featured": {
-      "title": "Application marketplace",
-      "body": "Browse the applications the platform can actually deploy, then install one onto infrastructure you control.",
-      "to": "/apps",
-      "ctaLabel": "Browse applications"
-    },
-    "groups": [
-      {
-        "title": "Applications",
-        "links": [
-          {
-            "label": "Application Marketplace",
-            "to": "/apps",
-            "description": "Every application the platform can install for you.",
-            "icon": "app",
-            "badge": "POPULAR"
-          },
-          {
-            "label": "Application Hosting",
-            "to": "/platforms/applications",
-            "description": "Managed hosting around a specific application.",
-            "icon": "layers"
-          },
-          {
-            "label": "Databases",
-            "to": "/platforms/databases",
-            "description": "MySQL, PostgreSQL, MariaDB, MongoDB and Redis.",
-            "icon": "database"
-          },
-          {
-            "label": "Containers & Docker",
-            "to": "/platforms/containers",
-            "description": "Run containerised applications with persistent volumes.",
-            "icon": "box"
-          },
-          {
-            "label": "PaaS",
-            "to": "/platforms/paas",
-            "description": "Application deployment and environment management; source builds depend on an enabled panel integration.",
-            "icon": "rocket"
-          }
-        ]
-      },
-      {
-        "title": "Deployment platform",
-        "links": [
-          {
-            "label": "Deployment",
-            "to": "/developers/deployment",
-            "description": "Track supported application installs and updates, including recorded status and deployment steps.",
-            "icon": "git-branch"
-          },
-          {
-            "label": "Application Environments",
-            "to": "/developers/environments",
-            "description": "Environment variables, volumes and per-app domains.",
-            "icon": "terminal"
-          },
-          {
-            "label": "My Applications",
-            "to": "/dashboard/apps",
-            "description": "Applications you have installed, with logs and backups.",
-            "icon": "grid"
-          }
-        ]
-      },
-      {
-        "title": "Developer platform",
-        "links": [
-          {
-            "label": "Developer Platform",
-            "to": "/developers",
-            "description": "Runtimes, APIs and tooling for building on CloudHost247.",
-            "icon": "code"
-          },
-          {
-            "label": "APIs",
-            "to": "/hosting/api",
-            "description": "HTTP APIs to automate provisioning and management.",
-            "icon": "api"
-          },
-          {
-            "label": "Control Panels",
-            "to": "/hosting/control-panels",
-            "description": "The panels available on the servers we provision.",
-            "icon": "control"
-          },
-          {
-            "label": "Documentation",
-            "to": "/docs",
-            "description": "Guides, references and how-tos for the platform.",
-            "icon": "book"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "developers",
-    "label": "Developer / Deployment",
-    "blurb": "Runtimes, application deployments, environments and APIs — with availability shown by the live catalogue.",
-    "to": "/developers",
-    "toolsDriven": false,
-    "featured": {
-      "title": "Application deployments",
-      "body": "Track supported application installs and updates, their recorded steps, and environment configuration. Git-based builds depend on a separately configured control panel.",
-      "to": "/developers/deployment",
-      "ctaLabel": "See deployment options"
-    },
-    "groups": [
-      {
-        "title": "Runtimes",
-        "links": [
-          {
-            "label": "Node.js",
-            "to": "/developers/nodejs",
-            "description": "Node.js applications with managed process supervision.",
-            "icon": "nodejs"
-          },
-          {
-            "label": "PHP",
-            "to": "/developers/php",
-            "description": "PHP applications, from single files to full frameworks.",
-            "icon": "php"
-          },
-          {
-            "label": "Python",
-            "to": "/developers/python",
-            "description": "Python services and web applications, WSGI or ASGI.",
-            "icon": "python"
-          },
-          {
-            "label": "Laravel",
-            "to": "/developers/laravel",
-            "description": "Laravel deployments with queues, scheduler and storage.",
-            "icon": "laravel"
-          },
-          {
-            "label": "Docker",
-            "to": "/developers/docker",
-            "description": "Build and run container images with managed volumes.",
-            "icon": "docker"
-          }
-        ]
-      },
-      {
-        "title": "Deploy & operate",
-        "links": [
-          {
-            "label": "Application Deployments",
-            "to": "/developers/deployment",
-            "description": "Track supported application installs, updates, status and step logs.",
-            "icon": "git-branch",
-            "badge": "POPULAR"
-          },
-          {
-            "label": "PaaS",
-            "to": "/platforms/paas",
-            "description": "Managed application deployment workflows; Git builds require an enabled control-panel integration.",
-            "icon": "rocket"
-          },
-          {
-            "label": "Application Environments",
-            "to": "/developers/environments",
-            "description": "Variables, secrets, volumes and per-app domains.",
-            "icon": "terminal"
-          },
-          {
-            "label": "Server Management",
-            "to": "/cloud/server-management",
-            "description": "Operate the servers your code runs on.",
-            "icon": "wrench"
-          },
-          {
-            "label": "Operating Systems",
-            "to": "/cloud/operating-systems",
-            "description": "Pick the base image your runtime is built on.",
+            "description": "Supported images, versions and lifecycle status.",
             "icon": "os"
           }
         ]
-      },
-      {
-        "title": "Build with CloudHost247",
-        "links": [
-          {
-            "label": "API Hosting",
-            "to": "/hosting/api",
-            "description": "Host HTTP APIs with TLS, auth and rate control.",
-            "icon": "api"
-          },
-          {
-            "label": "Developer Hosting",
-            "to": "/hosting/developer",
-            "description": "Hosting shaped around runtimes rather than panels.",
-            "icon": "code"
-          },
-          {
-            "label": "DNS for Developers",
-            "to": "/dashboard/dns",
-            "description": "Zone management and record types for your services.",
-            "icon": "dns"
-          },
-          {
-            "label": "Documentation",
-            "to": "/docs",
-            "description": "Platform references and integration guides.",
-            "icon": "book"
-          },
-          {
-            "label": "Developer Tools",
-            "to": "/tools/category/developer",
-            "description": "Utilities for encoding, conversion and inspection.",
-            "icon": "tools"
-          }
-        ]
       }
     ]
   },
   {
-    "id": "websites",
-    "label": "Websites",
-    "blurb": "Build a website, launch a store, or have a specialist design and run it for you.",
-    "to": "/websites",
+    "id": "company",
+    "label": "Company",
+    "blurb": "Who runs CloudHost247, how we secure the platform, and the terms we operate under.",
+    "to": "/about",
     "toolsDriven": false,
     "featured": {
-      "title": "Website Builder",
-      "body": "Pages, sections, media and publishing — with templates you can start from and edit in the browser.",
-      "to": "/websites/builder",
-      "ctaLabel": "Open the builder"
+      "title": "Talk to CloudHost247",
+      "body": "Sales, migrations, partnerships and technical questions — reach the team directly.",
+      "to": "/contact",
+      "ctaLabel": "Contact us"
     },
     "groups": [
-      {
-        "title": "Build it",
-        "links": [
-          {
-            "label": "Website Builder",
-            "to": "/websites/builder",
-            "description": "Templates, pages, sections, media and publishing.",
-            "icon": "layout",
-            "badge": "INCLUDED"
-          },
-          {
-            "label": "AI Website Builder",
-            "to": "/websites/ai-builder",
-            "description": "Describe a site and get real pages you can edit.",
-            "icon": "sparkle",
-            "badge": "NEW"
-          },
-          {
-            "label": "Website Templates",
-            "to": "/websites/templates",
-            "description": "Start from a layout that is already publishable.",
-            "icon": "grid"
-          },
-          {
-            "label": "E-commerce & Stores",
-            "to": "/websites/store",
-            "description": "Sell physical, digital and service products online.",
-            "icon": "cart"
-          },
-          {
-            "label": "Website Design",
-            "to": "/websites/design-services",
-            "description": "Scoped design and build by the CloudHost247 team.",
-            "icon": "pen"
-          }
-        ]
-      },
-      {
-        "title": "Have it built for you",
-        "links": [
-          {
-            "label": "Website Migration",
-            "to": "/hosting/migration",
-            "description": "Plan a site transfer and its cutover with the CloudHost247 team.",
-            "icon": "transfer"
-          },
-          {
-            "label": "Website Management",
-            "to": "/cloud/server-management",
-            "description": "Explore available website operations, maintenance and support options.",
-            "icon": "wrench"
-          },
-          {
-            "label": "Talk to a specialist",
-            "to": "/contact",
-            "description": "Describe the project and get a scoped proposal.",
-            "icon": "headset"
-          }
-        ]
-      },
-      {
-        "title": "Run it safely",
-        "links": [
-          {
-            "label": "SSL Certificates",
-            "to": "/hosting/ssl",
-            "description": "Review the TLS options available for the hosting service you select.",
-            "icon": "lock"
-          },
-          {
-            "label": "Backups",
-            "to": "/hosting/backups",
-            "description": "Scheduled backups with a restorable history.",
-            "icon": "hard-drive"
-          },
-          {
-            "label": "Website Hosting",
-            "to": "/hosting/web-hosting",
-            "description": "The hosting your website actually runs on.",
-            "icon": "globe"
-          },
-          {
-            "label": "Domain & DNS",
-            "to": "/domains",
-            "description": "Connect the domain to the site you just built.",
-            "icon": "dns"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "tools",
-    "label": "Tools",
-    "blurb": "Inspect, troubleshoot and build — with tools that explain their results instead of showing invented data.",
-    "to": "/tools",
-    "toolsDriven": true,
-    "groups": []
-  },
-  {
-    "id": "resources",
-    "label": "Resources",
-    "blurb": "Guides, documentation, service status and the policies that govern the platform.",
-    "to": "/help",
-    "toolsDriven": false,
-    "groups": [
-      {
-        "title": "Learn",
-        "links": [
-          {
-            "label": "Documentation",
-            "to": "/docs",
-            "description": "Platform references, integration and deployment guides.",
-            "icon": "book"
-          },
-          {
-            "label": "Knowledge Base",
-            "to": "/help",
-            "description": "Step-by-step answers to common questions.",
-            "icon": "book-open"
-          },
-          {
-            "label": "Blog",
-            "to": "/blog",
-            "description": "Product notes, engineering posts and announcements.",
-            "icon": "news"
-          },
-          {
-            "label": "FAQ",
-            "to": "/faq",
-            "description": "The questions customers ask before and after signing up.",
-            "icon": "help"
-          }
-        ]
-      },
-      {
-        "title": "Stay informed",
-        "links": [
-          {
-            "label": "Service Status",
-            "to": "/status",
-            "description": "What the platform can verify about itself right now.",
-            "icon": "pulse"
-          },
-          {
-            "label": "Offers",
-            "to": "/offers",
-            "description": "Current catalogue pricing and promotions.",
-            "icon": "tag"
-          }
-        ]
-      },
       {
         "title": "Company",
         "links": [
           {
-            "label": "About CloudHost247",
+            "label": "About",
             "to": "/about",
             "description": "Who we are and how we operate the platform.",
-            "icon": "building"
+            "icon": "users"
           },
           {
-            "label": "Security & Compliance",
+            "label": "Contact",
+            "to": "/contact",
+            "description": "Sales, support and partnership enquiries.",
+            "icon": "mail"
+          },
+          {
+            "label": "Security",
             "to": "/security",
-            "description": "How we protect customer data and infrastructure.",
+            "description": "How we secure the platform and handle security reports.",
             "icon": "shield"
           },
           {
-            "label": "Infrastructure",
-            "to": "/cloud/infrastructure",
-            "description": "Regions, facilities and network topology.",
-            "icon": "network"
-          },
-          {
-            "label": "Contact",
-            "to": "/contact",
-            "description": "Sales, support, billing and abuse contacts.",
-            "icon": "mail"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "support",
-    "label": "Support",
-    "blurb": "Get help from the knowledge base, open a ticket, or check what is happening right now.",
-    "to": "/help",
-    "toolsDriven": false,
-    "groups": [
-      {
-        "title": "Get help",
-        "links": [
-          {
-            "label": "Help Center",
-            "to": "/help",
-            "description": "Support channels and the fastest route to an answer.",
-            "icon": "life-buoy"
-          },
-          {
-            "label": "Knowledge Base",
-            "to": "/help",
-            "description": "Searchable guides for hosting, domains and servers.",
-            "icon": "book-open"
-          },
-          {
-            "label": "Open a Ticket",
-            "to": "/support",
-            "description": "Reach the support team from your account.",
-            "icon": "ticket"
-          },
-          {
-            "label": "FAQ",
-            "to": "/faq",
-            "description": "Billing, renewal and technical questions answered.",
-            "icon": "help"
-          },
-          {
-            "label": "Contact",
-            "to": "/contact",
-            "description": "Sales, billing, abuse and general enquiries.",
-            "icon": "mail"
+            "label": "Compliance",
+            "to": "/legal/data-protection-standards",
+            "description": "Our data protection standards and compliance position.",
+            "icon": "check"
           }
         ]
       },
       {
-        "title": "Your account",
-        "links": [
-          {
-            "label": "Client Area",
-            "to": "/dashboard",
-            "description": "Services, domains, billing and support in one place.",
-            "icon": "user"
-          },
-          {
-            "label": "Billing & Invoices",
-            "to": "/invoices",
-            "description": "Invoices, payment methods and account credit.",
-            "icon": "invoice"
-          },
-          {
-            "label": "My Services",
-            "to": "/services",
-            "description": "Everything you have active with CloudHost247.",
-            "icon": "grid"
-          },
-          {
-            "label": "Service Status",
-            "to": "/status",
-            "description": "Live checks the platform performs on itself.",
-            "icon": "pulse"
-          }
-        ]
-      },
-      {
-        "title": "Policies & help",
+        "title": "Legal & trust",
         "links": [
           {
             "label": "Legal & Policy Center",
             "to": "/legal",
-            "description": "Every agreement and policy in one index.",
-            "icon": "scale"
+            "description": "Every policy, agreement and notice in one place.",
+            "icon": "file"
           },
           {
-            "label": "Acceptable Use",
-            "to": "/legal/acceptable-use",
-            "description": "What may and may not be hosted on the platform.",
+            "label": "Terms of Service",
+            "to": "/legal/terms",
+            "description": "The terms that govern your use of our services.",
+            "icon": "file"
+          },
+          {
+            "label": "Privacy Policy",
+            "to": "/legal/privacy-policy",
+            "description": "What we collect, why, and how long we keep it.",
             "icon": "shield"
-          },
-          {
-            "label": "Refund Policy",
-            "to": "/legal/refund-policy",
-            "description": "Cancellation windows and refund eligibility.",
-            "icon": "invoice"
           },
           {
             "label": "Cookie Policy",
             "to": "/legal/cookies",
-            "description": "The cookies this website sets and why.",
+            "description": "Cookies we set, what they do and how to control them.",
             "icon": "cookie"
+          },
+          {
+            "label": "Trademark Policy",
+            "to": "/legal/trademark",
+            "description": "Brand, copyright and takedown procedures.",
+            "icon": "file"
           }
         ]
       }
@@ -995,10 +699,6 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
         "to": "/hosting/web-hosting"
       },
       {
-        "label": "Shared Hosting",
-        "to": "/hosting/web-hosting"
-      },
-      {
         "label": "Business Hosting",
         "to": "/hosting/business"
       },
@@ -1007,45 +707,29 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
         "to": "/hosting/wordpress"
       },
       {
-        "label": "Reseller Hosting",
-        "to": "/hosting/reseller"
-      },
-      {
         "label": "VPS Hosting",
         "to": "/hosting/vps"
-      },
-      {
-        "label": "Cloud Hosting",
-        "to": "/cloud"
       },
       {
         "label": "Dedicated Servers",
         "to": "/hosting/dedicated"
       },
       {
-        "label": "Windows Hosting",
-        "to": "/hosting/windows"
+        "label": "Cloud Hosting",
+        "to": "/cloud"
       },
       {
         "label": "Email Hosting",
         "to": "/hosting/email"
       },
       {
-        "label": "SSL Certificates",
-        "to": "/hosting/ssl"
-      },
-      {
-        "label": "Backups",
-        "to": "/hosting/backups"
-      },
-      {
-        "label": "Website Migration",
-        "to": "/hosting/migration"
+        "label": "Domain Registration",
+        "to": "/domains/search"
       }
     ]
   },
   {
-    "title": "Cloud & Infrastructure",
+    "title": "Cloud & Servers",
     "toolsDriven": false,
     "links": [
       {
@@ -1057,16 +741,12 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
         "to": "/cloud/private"
       },
       {
-        "label": "VPS Hosting",
+        "label": "VPS",
         "to": "/hosting/vps"
       },
       {
         "label": "Enterprise Servers",
         "to": "/cloud/enterprise-servers"
-      },
-      {
-        "label": "Game Servers",
-        "to": "/cloud/game-servers"
       },
       {
         "label": "Server Management",
@@ -1081,20 +761,16 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
         "to": "/cloud/network"
       },
       {
-        "label": "Operating Systems",
-        "to": "/cloud/operating-systems"
-      },
-      {
-        "label": "Control Panels",
-        "to": "/hosting/control-panels"
+        "label": "Firewall",
+        "to": "/cloud/firewall"
       },
       {
         "label": "Monitoring",
         "to": "/cloud/monitoring"
       },
       {
-        "label": "Firewalls",
-        "to": "/cloud/firewall"
+        "label": "Backups",
+        "to": "/cloud/backups"
       }
     ]
   },
@@ -1104,81 +780,45 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
     "links": [
       {
         "label": "Domain Search",
+        "to": "/domains/bulk-search"
+      },
+      {
+        "label": "Domain Registration",
         "to": "/domains/search"
-      },
-      {
-        "label": "Register a Domain",
-        "to": "/domains/search"
-      },
-      {
-        "label": "Transfer a Domain",
-        "to": "/domains/transfer"
-      },
-      {
-        "label": "Domain Extensions",
-        "to": "/domains/extensions"
-      },
-      {
-        "label": "WHOIS / RDAP",
-        "to": "/domains/whois"
       },
       {
         "label": "DNS Management",
         "to": "/dashboard/dns"
       },
       {
-        "label": "Bulk Domain Search",
-        "to": "/domains/bulk-search"
-      },
-      {
-        "label": "Domain Auctions",
-        "to": "/domains/auctions"
-      },
-      {
-        "label": "Domain Appraisal",
-        "to": "/domains/appraisal"
-      },
-      {
-        "label": "Domain Broker",
-        "to": "/domains/broker"
-      },
-      {
-        "label": "Domain Club",
-        "to": "/domains/club"
+        "label": "Domain Renewal",
+        "to": "/legal/domain-renewal-policy"
       }
     ]
   },
   {
-    "title": "Platforms & Developers",
+    "title": "Developers",
     "toolsDriven": false,
     "links": [
       {
-        "label": "Application Marketplace",
+        "label": "Developer Hosting",
+        "to": "/hosting/developer"
+      },
+      {
+        "label": "Applications",
         "to": "/apps"
-      },
-      {
-        "label": "Databases",
-        "to": "/platforms/databases"
-      },
-      {
-        "label": "Containers & Docker",
-        "to": "/platforms/containers"
-      },
-      {
-        "label": "PaaS",
-        "to": "/platforms/paas"
       },
       {
         "label": "Deployment",
         "to": "/developers/deployment"
       },
       {
-        "label": "Developer Platform",
-        "to": "/developers"
+        "label": "PaaS",
+        "to": "/platforms/paas"
       },
       {
-        "label": "API Hosting",
-        "to": "/hosting/api"
+        "label": "Docker",
+        "to": "/developers/docker"
       },
       {
         "label": "Node.js",
@@ -1195,6 +835,10 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
       {
         "label": "Laravel",
         "to": "/developers/laravel"
+      },
+      {
+        "label": "API Hosting",
+        "to": "/hosting/api"
       }
     ]
   },
@@ -1203,15 +847,11 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
     "toolsDriven": true,
     "links": [
       {
-        "label": "All Tools",
-        "to": "/tools"
-      },
-      {
-        "label": "DNS & Domains Tools",
+        "label": "DNS Tools",
         "to": "/tools/category/dns-domains"
       },
       {
-        "label": "IP & Network Tools",
+        "label": "IP Tools",
         "to": "/tools/category/ip-network"
       },
       {
@@ -1227,20 +867,28 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
         "to": "/tools/category/email"
       },
       {
-        "label": "Website Tools",
-        "to": "/tools/category/website"
-      },
-      {
         "label": "Developer Tools",
         "to": "/tools/category/developer"
       },
       {
-        "label": "Calculators Tools",
+        "label": "Website Tools",
+        "to": "/tools/category/website"
+      },
+      {
+        "label": "Calculators",
         "to": "/tools/category/calculators"
       },
       {
-        "label": "Utilities Tools",
+        "label": "Utilities",
         "to": "/tools/category/utilities"
+      },
+      {
+        "label": "All Tools",
+        "to": "/tools"
+      },
+      {
+        "label": "Compliance & Document Tools",
+        "to": "/tools/compliance-documents"
       },
       {
         "label": "MRZ Generator",
@@ -1249,28 +897,36 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
     ]
   },
   {
-    "title": "Websites",
+    "title": "Resources",
     "toolsDriven": false,
     "links": [
       {
-        "label": "Website Builder",
-        "to": "/websites/builder"
+        "label": "Documentation",
+        "to": "/docs"
       },
       {
-        "label": "AI Website Builder",
-        "to": "/websites/ai-builder"
+        "label": "Help Center",
+        "to": "/help"
       },
       {
-        "label": "Website Templates",
-        "to": "/websites/templates"
+        "label": "FAQs",
+        "to": "/faq"
       },
       {
-        "label": "E-commerce & Stores",
-        "to": "/websites/store"
+        "label": "Blog",
+        "to": "/blog"
       },
       {
-        "label": "Website Design",
-        "to": "/websites/design-services"
+        "label": "Network",
+        "to": "/cloud/network"
+      },
+      {
+        "label": "Data Centers",
+        "to": "/cloud/data-centers"
+      },
+      {
+        "label": "Status",
+        "to": "/status"
       }
     ]
   },
@@ -1279,7 +935,7 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
     "toolsDriven": false,
     "links": [
       {
-        "label": "About CloudHost247",
+        "label": "About",
         "to": "/about"
       },
       {
@@ -1287,62 +943,12 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
         "to": "/contact"
       },
       {
-        "label": "Blog",
-        "to": "/blog"
-      },
-      {
-        "label": "Security & Compliance",
+        "label": "Security",
         "to": "/security"
       },
       {
-        "label": "Infrastructure",
-        "to": "/cloud/infrastructure"
-      },
-      {
-        "label": "Offers",
-        "to": "/offers"
-      },
-      {
-        "label": "Sitemap",
-        "to": "/sitemap"
-      }
-    ]
-  },
-  {
-    "title": "Support",
-    "toolsDriven": false,
-    "links": [
-      {
-        "label": "Help Center",
-        "to": "/help"
-      },
-      {
-        "label": "Knowledge Base",
-        "to": "/help"
-      },
-      {
-        "label": "FAQ",
-        "to": "/faq"
-      },
-      {
-        "label": "Open a Ticket",
-        "to": "/support"
-      },
-      {
-        "label": "Service Status",
-        "to": "/status"
-      },
-      {
-        "label": "Client Area",
-        "to": "/dashboard"
-      },
-      {
-        "label": "Billing & Invoices",
-        "to": "/invoices"
-      },
-      {
-        "label": "Documentation",
-        "to": "/docs"
+        "label": "Compliance",
+        "to": "/legal/data-protection-standards"
       }
     ]
   },
@@ -1350,10 +956,6 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
     "title": "Legal",
     "toolsDriven": false,
     "links": [
-      {
-        "label": "Legal & Policy Center",
-        "to": "/legal"
-      },
       {
         "label": "Terms of Service",
         "to": "/legal/terms"
@@ -1367,7 +969,7 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
         "to": "/legal/cookies"
       },
       {
-        "label": "Acceptable Use Policy",
+        "label": "Acceptable Use",
         "to": "/legal/acceptable-use"
       },
       {
@@ -1375,52 +977,28 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
         "to": "/legal/refund-policy"
       },
       {
-        "label": "Backup Policy",
-        "to": "/legal/backup-policy"
+        "label": "Domain Agreement",
+        "to": "/legal/domain-agreement"
       },
       {
-        "label": "Fair Usage Policy",
-        "to": "/legal/fair-usage"
+        "label": "Domain Brokerage",
+        "to": "/legal/domain-brokerage-terms"
+      },
+      {
+        "label": "Data Protection",
+        "to": "/legal/data-protection-standards"
+      },
+      {
+        "label": "Legal Notice",
+        "to": "/legal/legal-notice"
       },
       {
         "label": "Trademark Policy",
         "to": "/legal/trademark"
       },
       {
-        "label": "Domain Registration Agreement",
-        "to": "/legal/domain-agreement"
-      },
-      {
-        "label": "Domain Brokerage Terms",
-        "to": "/legal/domain-brokerage-terms"
-      },
-      {
-        "label": "Domain Renewal Policy",
-        "to": "/legal/domain-renewal-policy"
-      },
-      {
-        "label": "Cybercrime & Abuse Policy",
-        "to": "/legal/cybercrime-policy"
-      },
-      {
-        "label": "Data Deletion",
-        "to": "/legal/data-deletion"
-      },
-      {
-        "label": "Data Protection Standards",
-        "to": "/legal/data-protection-standards"
-      },
-      {
-        "label": "Privacy Notice & Consent",
-        "to": "/legal/privacy-notice-and-consent"
-      },
-      {
-        "label": "Domain Registration Addendum",
-        "to": "/legal/domain-registration-addendum"
-      },
-      {
-        "label": "Legal Notice",
-        "to": "/legal/legal-notice"
+        "label": "All Policies",
+        "to": "/legal"
       }
     ]
   }
@@ -1489,119 +1067,136 @@ export const LEGAL_INDEX = [
     "spa": "/legal/terms",
     "php": "terms-of-service.php",
     "title": "Terms of Service",
-    "source": "docs/policies/Terms & Conditions.pdf"
+    "source": "docs/policies/Terms & Conditions.pdf",
+    "description": "The Terms & Conditions governing use of CloudHost247 websites, products and services, and the obligations that come with an account."
   },
   {
     "slug": "privacy-policy",
     "spa": "/legal/privacy-policy",
     "php": "privacy-policy.php",
     "title": "Privacy Policy",
-    "source": "docs/policies/Privacy Policy.pdf"
+    "source": "docs/policies/Privacy Policy.pdf",
+    "description": "How CloudHost247 Isc collects, uses and shares personal information, how long it is kept, and what you can ask us to do with it."
   },
   {
     "slug": "cookies",
     "spa": "/legal/cookies",
     "php": "cookie-policy.php",
     "title": "Cookie Policy",
-    "source": "docs/policies/Cookie Policy.pdf"
+    "source": "docs/policies/Cookie Policy.pdf",
+    "description": "How CloudHost247 Isc uses cookies and similar tracking technologies, which categories are set, and how to control them in your browser."
   },
   {
     "slug": "acceptable-use",
     "spa": "/legal/acceptable-use",
     "php": "acceptable-use-policy.php",
     "title": "Acceptable Use Policy",
-    "source": "templates/cloudhost247/includes/legal/acceptableusepolicy.tpl"
+    "source": "templates/cloudhost247/includes/legal/acceptableusepolicy.tpl",
+    "description": "The rules for using CloudHost247 services, systems and network: what is permitted, what counts as abuse, and how reports are handled."
   },
   {
     "slug": "refund-policy",
     "spa": "/legal/refund-policy",
     "php": "refund-policy.php",
     "title": "Refund & Cancellation Policy",
-    "source": "docs/policies/Refund Policy.pdf"
+    "source": "docs/policies/Refund Policy.pdf",
+    "description": "The terms under which refunds may be granted for CloudHost247 hosting, domain and related services, and how to request one."
   },
   {
     "slug": "backup-policy",
     "spa": "/legal/backup-policy",
     "php": "backup-policy.php",
     "title": "Backup Policy",
-    "source": "docs/policies/Backup Policy.pdf"
+    "source": "docs/policies/Backup Policy.pdf",
+    "description": "What is backed up for websites, databases, email and configurations, how long copies are kept, and how restores are requested."
   },
   {
     "slug": "fair-usage",
     "spa": "/legal/fair-usage",
     "php": "fair-usage-policy.php",
     "title": "Fair Usage Policy",
-    "source": "docs/policies/Fair Usage Policy.pdf"
+    "source": "docs/policies/Fair Usage Policy.pdf",
+    "description": "How the fair usage policy applies to shared, reseller and WordPress hosting, including plans advertised with unlimited resources."
   },
   {
     "slug": "trademark",
     "spa": "/legal/trademark",
     "php": "trademark-policy.php",
     "title": "Trademark & Copyright Policy",
-    "source": "docs/policies/Trademark & Copyright Infringement Policy.pdf"
+    "source": "docs/policies/Trademark & Copyright Infringement Policy.pdf",
+    "description": "How CloudHost247 Isc reviews claims of trademark and copyright infringement, and how domain name disputes are handled alongside them."
   },
   {
     "slug": "domain-agreement",
     "spa": "/legal/domain-agreement",
     "php": "domain-agreement.php",
     "title": "Domain Registration Agreement",
-    "source": "docs/policies/Domain Name Registration Agreement.pdf"
+    "source": "docs/policies/Domain Name Registration Agreement.pdf",
+    "description": "The agreement between you and CloudHost247 ISC as sponsoring registrar or reseller for the domain names you register through us."
   },
   {
     "slug": "domain-brokerage-terms",
     "spa": "/legal/domain-brokerage-terms",
     "php": "domain-brokerage-terms.php",
     "title": "Domain Brokerage Terms",
-    "source": "domain-brokerage-terms.php"
+    "source": "domain-brokerage-terms.php",
+    "description": "What a CloudHost247 domain brokerage engagement covers: acquisition attempts, confidentiality, and what happens when a domain cannot be acquired."
   },
   {
     "slug": "domain-renewal-policy",
     "spa": "/legal/domain-renewal-policy",
     "php": "domain-renewal-policy.php",
     "title": "Domain Renewal & Deletion Policy",
-    "source": "docs/policies/Domain Name Auto-Renewal and Deletion Policy.pdf"
+    "source": "docs/policies/Domain Name Auto-Renewal and Deletion Policy.pdf",
+    "description": "How domain auto-renewal works, when a domain is deleted for non-payment, and the grace and redemption periods that follow."
   },
   {
     "slug": "domain-registration-addendum",
     "spa": "/legal/domain-registration-addendum",
     "php": "domainregistrationaddendum.php",
     "title": "Domain Registration Addendum",
-    "source": "docs/policies/Domain Registration Addendum.pdf"
+    "source": "docs/policies/Domain Registration Addendum.pdf",
+    "description": "TLD-specific terms that apply on top of the main Domain Registration Agreement, for each registry CloudHost247 Isc registers through."
   },
   {
     "slug": "cybercrime-policy",
     "spa": "/legal/cybercrime-policy",
     "php": "cybercrime-policy.php",
     "title": "Cybercrime & Abuse Policy",
-    "source": "docs/policies/Cybercrime Detection Policy.pdf"
+    "source": "docs/policies/Cybercrime Detection Policy.pdf",
+    "description": "The preventive and detection measures CloudHost247 Isc uses when a domain registered or hosted on the platform is used for abuse."
   },
   {
     "slug": "data-deletion",
     "spa": "/legal/data-deletion",
     "php": "data-deletion.php",
     "title": "Data Deletion Policy",
-    "source": "docs/policies/Data Deletion Instructions.pdf"
+    "source": "docs/policies/Data Deletion Instructions.pdf",
+    "description": "Step-by-step instructions for requesting deletion of your personal data, and how the request is verified and actioned."
   },
   {
     "slug": "data-protection-standards",
     "spa": "/legal/data-protection-standards",
     "php": "data-protection-standards.php",
     "title": "Data Protection Standards",
-    "source": "docs/policies/Data Protection Standards.pdf"
+    "source": "docs/policies/Data Protection Standards.pdf",
+    "description": "The principles, measures and responsibilities CloudHost247 Isc follows to protect customer, partner and employee data."
   },
   {
     "slug": "privacy-notice-and-consent",
     "spa": "/legal/privacy-notice-and-consent",
     "php": "data-privacy-notice-and-consent-form.php",
     "title": "Data Privacy Notice & Consent",
-    "source": "docs/policies/Data Privacy Notice and Consent Form.pdf"
+    "source": "docs/policies/Data Privacy Notice and Consent Form.pdf",
+    "description": "The privacy notice and consent form used for prospective employees, published under the Nigeria Data Protection Act 2023."
   },
   {
     "slug": "legal-notice",
     "spa": "/legal/legal-notice",
     "php": "legal-notice.php",
     "title": "Legal Notice",
-    "source": "docs/policies/Legal Notice.pdf"
+    "source": "docs/policies/Legal Notice.pdf",
+    "description": "The rights, obligations and restrictions that apply to CloudHost247 Isc services, website and associated platforms, and the company details."
   }
 ];
 
@@ -1877,6 +1472,7 @@ export const MARKETING_ROUTES: string[] = [
   "/cloud/game-servers",
   "/cloud/infrastructure",
   "/cloud/ip-management",
+  "/cloud/managed-services",
   "/cloud/monitoring",
   "/cloud/network",
   "/cloud/operating-systems",
@@ -2003,91 +1599,71 @@ export const REGISTRY_ROUTES: string[] = [
   "/cloud",
   "/domains",
   "/platforms",
-  "/developers",
-  "/websites",
   "/tools",
-  "/help",
-  "/help",
+  "/docs",
+  "/about",
   "/hosting/web-hosting",
   "/hosting/business",
-  "/hosting/cpanel",
   "/hosting/wordpress",
-  "/hosting/reseller",
-  "/hosting/windows",
-  "/hosting",
-  "/platforms/applications",
-  "/hosting/developer",
-  "/hosting/api",
-  "/hosting/email",
-  "/hosting/control-panels",
-  "/hosting/migration",
-  "/cloud/server-management",
-  "/websites",
-  "/hosting/ssl",
-  "/hosting/backups",
-  "/hosting/security",
-  "/hosting/vps",
-  "/cloud",
-  "/hosting/dedicated",
-  "/cloud/public",
-  "/cloud/private",
-  "/cloud/enterprise-servers",
-  "/cloud/game-servers",
-  "/cloud/infrastructure",
-  "/cloud/data-centers",
-  "/cloud/network",
-  "/cloud/operating-systems",
-  "/cloud/monitoring",
-  "/cloud/backups",
-  "/cloud/firewall",
-  "/cloud/security",
-  "/cloud/ip-management",
-  "/domains/search",
-  "/domains/transfer",
-  "/domains/extensions",
-  "/domains/bulk-search",
-  "/dashboard/dns",
-  "/domains/whois",
-  "/dashboard/domains",
-  "/domains/auctions",
-  "/domains/appraisal",
-  "/domains/broker",
-  "/domains/club",
-  "/domains",
-  "/apps",
-  "/platforms/databases",
-  "/platforms/containers",
-  "/platforms/paas",
-  "/developers/deployment",
-  "/developers/environments",
-  "/dashboard/apps",
-  "/developers",
-  "/docs",
-  "/developers/nodejs",
+  "/hosting/cpanel",
   "/developers/php",
   "/developers/python",
+  "/developers/nodejs",
   "/developers/laravel",
+  "/hosting/windows",
+  "/hosting/reseller",
+  "/hosting/email",
+  "/hosting/developer",
   "/developers/docker",
-  "/tools/category/developer",
-  "/websites/builder",
-  "/websites/ai-builder",
-  "/websites/templates",
-  "/websites/store",
-  "/websites/design-services",
-  "/contact",
+  "/cloud/game-servers",
+  "/cloud/managed-services",
+  "/websites",
+  "/hosting/ssl",
+  "/cloud/public",
+  "/cloud/private",
+  "/cloud",
+  "/cloud/enterprise-servers",
+  "/hosting/dedicated",
+  "/hosting/vps",
+  "/cloud/server-management",
+  "/cloud/data-centers",
+  "/cloud/network",
+  "/cloud/firewall",
+  "/cloud/monitoring",
+  "/cloud/backups",
+  "/hosting/migration",
+  "/cloud/ip-management",
+  "/domains/search",
+  "/domains/bulk-search",
+  "/dashboard/domains",
+  "/dashboard/dns",
+  "/legal/domain-renewal-policy",
+  "/tools/dns-lookup",
+  "/tools/dns-propagation",
+  "/tools/dns-health",
+  "/tools/category/security",
+  "/tools/dnskey-lookup",
+  "/apps",
+  "/developers/deployment",
+  "/platforms/paas",
+  "/hosting/api",
+  "/hosting/control-panels",
+  "/cloud/operating-systems",
+  "/docs",
   "/help",
-  "/blog",
   "/faq",
+  "/support",
+  "/blog",
   "/status",
   "/offers",
+  "/cloud/infrastructure",
   "/about",
+  "/contact",
   "/security",
-  "/support",
-  "/dashboard",
-  "/invoices",
-  "/services",
+  "/legal/data-protection-standards",
   "/legal",
-  "/legal/acceptable-use",
-  "/legal/refund-policy",
-  "/legal/cookies"
+  "/legal/terms",
+  "/legal/privacy-policy",
+  "/legal/cookies",
+  "/legal/trademark"
 ];

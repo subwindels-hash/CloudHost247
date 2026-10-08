@@ -154,10 +154,30 @@ const TOOLS = JSON.parse(readFileSync(join(ROOT, 'cloudhost247-node', 'frontend'
 
 const TOOL_PATHS = new Set(TOOLS.map((tool) => tool.path));
 
+/**
+ * Every legal policy the registry publishes, as PHP filenames.
+ *
+ * Derived from `shared/site/registry.json` rather than listed here, so adding a policy to the
+ * registry automatically adds it to the Legal & Policy Center reachability check below — the
+ * failure mode being guarded against is a new policy shipping that nothing links to.
+ */
+const POLICY_FILES = new Set(
+  JSON.parse(readFileSync(join(ROOT, 'shared', 'site', 'registry.json'), 'utf8'))
+    .legal.map((entry) => entry.php)
+    .filter(Boolean)
+);
+
 function routeOk(path) {
   const clean = path.split('#')[0].split('?')[0].replace(/\/$/, '') || '/';
   if (SERVER_PATHS.has(clean)) return true;
   if (SERVER_PREFIXES.some((prefix) => clean.startsWith(prefix))) return true;
+  /*
+   * A document-root path with a file extension is served by the web server as a static file, not by
+   * the router — the theme's own `<link href="/templates/…/site.css">` and every image URL come
+   * through here. It resolves only if the file is actually in the repository, so a renamed or
+   * mistyped asset fails the audit instead of passing as an unknown-but-plausible route.
+   */
+  if (/\.[a-z0-9]{2,5}$/i.test(clean) && existsSync(join(ROOT, clean))) return true;
   if (SPA_ROUTES.has(clean) || CONTENT_ROUTES.has(clean) || TOOL_PATHS.has(clean)) return true;
   if (LEGAL.some((document) => document.spa === clean)) return true;
   if (DOCS.some((document) => document.href === clean)) return true;
@@ -255,8 +275,22 @@ for (const menu of registry.menus) {
     }
   }
   for (const column of menu.columns ?? []) {
+    // A mega-menu column is a curated list of places, so listing one place twice under two
+    // names is a defect even though both links resolve: "Help Center" and "Knowledge Base"
+    // both pointed at `/help`, which reads as two destinations and delivers one. Only the
+    // *same column* is checked — the same product appearing under Hosting and under Platforms,
+    // or again in the footer, is the intended structure.
+    const destinations = new Map();
     for (const item of column.items ?? []) {
       const where = `${surface}/${column.title}`;
+      const destination = item.href.spa ?? item.href.php ?? '';
+      if (destination) {
+        if (destinations.has(destination)) {
+          add(where, `${item.label} and ${destinations.get(destination)} both go to ${destination}; a column lists each destination once`);
+        } else {
+          destinations.set(destination, item.label);
+        }
+      }
       if (item.href.spa) checkHref(where, item.href.spa, 'href.spa');
       if (item.href.php) {
         counts.phpLinks += 1;
@@ -334,13 +368,29 @@ for (const root of templateRoots) {
     const surface = `php:${relative(ROOT, file)}`;
     counts.surfaces += 1;
     for (const match of source.matchAll(/href=["']([^"']+)["']/g)) {
-      const value = match[1];
-      if (value.includes('{') || value.includes('$')) continue; // Smarty expression: resolved at render
+      const raw = match[1];
+      /*
+       * `{$WEB_ROOT}/page.php` is the dominant link form in this theme, and the literal part after
+       * the document root is a real destination a visitor can click — so it is checked, not
+       * skipped. Skipping every value that merely *contains* a Smarty tag is how a theme-wide
+       * broken link stayed invisible: the check saw `{$WEB_ROOT}/…` and moved on.
+       */
+      const rooted = /\{\$WEB_?ROOT\}/i.test(raw) ? raw.replace(/\{\$WEB_?ROOT\}/gi, '') : null;
+      if (rooted !== null) {
+        if (rooted.includes('{') || rooted.includes('$')) continue; // rest is built at render
+        if (excluded) {
+          vendorFindings += 1;
+          continue;
+        }
+        checkHref(surface, rooted === '' ? '/' : rooted, 'href');
+        continue;
+      }
+      if (raw.includes('{') || raw.includes('$')) continue; // Smarty expression: resolved at render
       if (excluded) {
         vendorFindings += 1;
         continue;
       }
-      checkHref(surface, value, 'href');
+      checkHref(surface, raw, 'href');
     }
   });
 }
@@ -361,6 +411,44 @@ for (const file of PHP_FILES) {
       continue;
     }
     checkHref(`php:${file}`, value, 'href');
+  }
+
+  /*
+   * Links a page declares as data rather than as markup.
+   *
+   * This is the hole that let three dead links ship on the Legal & Policy Center: the page builds
+   * its cards from a PHP array (`'link' => 'disclaimer.php'`) and the template renders
+   * `<a href="{$section.link}">`, so the literal-string scan above saw `$section.link`, skipped it
+   * as a Smarty/PHP expression, and never resolved the destination. Two of the three named
+   * documents that do not exist; the third was a stale filename for a policy that does.
+   *
+   * An array entry whose value is a bare `*.php` filename is unambiguously a destination — a
+   * visitor-facing link the page will render — so it is resolved exactly like an `href`. Values
+   * containing a variable are still skipped, because their target is not knowable statically.
+   */
+  for (const match of source.matchAll(/'(?:link|url|href|page|path)'\s*=>\s*'([^']+)'/g)) {
+    const value = match[1];
+    if (value.includes('$') || value.includes('{')) continue;
+    if (!/\.php($|\?)/.test(value)) continue;
+    if (/^https?:/i.test(value)) continue;
+    if (excluded) {
+      vendorFindings += 1;
+      continue;
+    }
+    checkHref(`php:${file}`, value, 'declared link');
+  }
+
+  /*
+   * Legal-policy discovery. `legal.php` is the policy index: it is how a visitor reaches the
+   * policies that are deliberately absent from the footer. A policy file that the index does not
+   * list is a page with no inbound link from anywhere, which is an orphan even though it resolves.
+   */
+  if (file === 'legal.php') {
+    const declared = new Set([...source.matchAll(/'(?:link|url)'\s*=>\s*'([^']+\.php)'/g)].map((match) => match[1]));
+    const policies = [...POLICY_FILES].filter((name) => !declared.has(name));
+    for (const orphan of policies) {
+      add('php:legal.php', `the Legal & Policy Center does not list ${orphan}; a policy no page links to is unreachable`);
+    }
   }
 }
 

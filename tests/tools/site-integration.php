@@ -31,6 +31,38 @@ foreach (ToolsSite::catalog()['tools'] as $tool) {
 }
 foreach (ToolsSite::catalog()['categories'] as $slug=>$label) { check(ToolsSite::resolve('/tools/category/'.$slug)['name']===$label.' Tools', 'category'); }
 
+// --- No catalogue entry may exist without a page -------------------------------------------------
+// "A catalogue tool without a usable page" is an acceptance failure, and it is not detectable by
+// resolving the route: `Catalog::resolve()` reads the same array the catalogue does, so a tool that
+// was added to `config/tools.php` but never renderable resolves perfectly happily. The page is
+// therefore *rendered* here, exactly as the WHMCS shell renders it, and the result is inspected. A
+// missing renderer, a broken template or an undefined field surfaces as a fatal, a warning or an
+// empty document rather than as a 404.
+$pageFailures = array();
+foreach (Catalog::enabledTools() as $renderTool) {
+    $resolvedTool = Catalog::resolve('/tools/' . $renderTool['slug']);
+    $html = '';
+    try {
+        ob_start();
+        $html = View::document($resolvedTool, '', '');
+        ob_end_clean();
+    } catch (\Throwable $error) {
+        if (ob_get_level() > 0) { ob_end_clean(); }
+        $pageFailures[] = $renderTool['slug'] . ' threw ' . get_class($error) . ': ' . $error->getMessage();
+        continue;
+    }
+    if (stripos($html, '<h1') === false) { $pageFailures[] = $renderTool['slug'] . ' rendered no heading'; }
+    if (preg_match('~Fatal error|Warning:|Notice:|Undefined (index|array key)~i', $html) === 1) {
+        $pageFailures[] = $renderTool['slug'] . ' rendered a PHP diagnostic';
+    }
+}
+check($pageFailures === array(), 'every enabled tool renders a page (' . count(Catalog::enabledTools()) . ' rendered): ' . implode(' | ', array_slice($pageFailures, 0, 4)));
+check(count(Catalog::enabledTools()) >= 100, 'every catalogue tool is rendered, not vacuously passing');
+// Categories are pages too, and a category with no tools behind it renders an empty catalogue.
+foreach (array_keys(Catalog::categories()) as $nativeCategory) {
+    check(Catalog::resolve('/tools/category/' . $nativeCategory) !== null, 'native category has a page: ' . $nativeCategory);
+}
+
 // --- One URL per capability. The native catalogue serves the interactive page; the shared registry
 // describes the same tools for the app, the navigation and the sitemaps. When the two disagree on a
 // path the capability is published twice: two indexable pages with one title, and the second one
@@ -296,4 +328,30 @@ check($mrzContext['canonical']==='https://example.test/billing/tools/mrz-generat
 check($mrzContext['title']==='MRZ Generator','MRZ page metadata');
 check(in_array('Tools',array_column(Site::catalog()['navigation'],'title'),true),'permanent Tools menu');
 check(in_array('Tools',array_column(Site::catalog()['footer'],'title'),true),'permanent Tools footer');
+// The standalone shell (no WHMCS theme around the tools tree) must not promise pages that only the
+// full website serves: `web-hosting.php` and `contact.php` are the site's, and in a tools-only
+// deployment there is nothing behind them. Every destination it does publish is checked here, and
+// the deployment base has to be honoured, because a subpath mount would otherwise point at the
+// domain root.
+$shellHtml = View::document(Catalog::resolve('/tools'), '', '');
+preg_match_all('/href="([^"]+)"/', $shellHtml, $shellLinks);
+foreach (array_unique($shellLinks[1]) as $shellHref) {
+    if ($shellHref === '' || $shellHref[0] === '#') {
+        check($shellHref !== '', 'the standalone shell links nothing empty');
+        continue;
+    }
+    if (strpos($shellHref, '/assets/') === 0 || strpos($shellHref, '/templates/') === 0) {
+        continue; // Stylesheets, icons and the tools script are static files, not routes.
+    }
+    check(Catalog::resolve($shellHref) !== null || ToolsSite::resolve($shellHref) !== null,
+        'the standalone shell only links routes this deployment serves: ' . $shellHref);
+}
+check(strpos($shellHtml, '/web-hosting.php') === false && strpos($shellHtml, 'contact.php') === false,
+    'the standalone shell links no page that needs the rest of the website');
+check(in_array('/tools', $shellLinks[1], true), 'the standalone shell reaches the tools hub');
+$subShell = View::document(Catalog::resolve('/tools'), '', '/billing');
+check(strpos($subShell, 'href="/billing/tools"') !== false, 'the standalone shell honours a subpath mount');
+check(strpos($subShell, '/billing/assets/images/cloudhost247/brand/') !== false, 'the shell brand asset follows the mount');
+check(strpos($subShell, 'href="/billing/web-hosting.php"') === false, 'a subpath mount does not invent site pages');
+
 echo "$count Tools shell, menu and footer assertions passed (PHP CLI; no licensed WHMCS runtime).\n";

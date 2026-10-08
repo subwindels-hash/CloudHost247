@@ -241,7 +241,10 @@ class IntegrationsStaticTests(unittest.TestCase):
             self.assertIsNone(bad.search(path.read_text(errors='ignore')), str(path))
 
     def test_secrets_are_excluded_from_version_control(self):
-        ignore = (ROOT / '.gitignore').read_text()
+        ignore_path = ROOT / '.gitignore'
+        if not ignore_path.is_file():
+            self.skipTest('repository only: the exported deployment package ships no .gitignore')
+        ignore = ignore_path.read_text()
         for pattern in ('.env', '*.pem', '*.key', 'configuration.php'):
             self.assertIn(pattern, ignore)
 

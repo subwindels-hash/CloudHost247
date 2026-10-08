@@ -118,4 +118,8 @@ node tests/tools/local.test.mjs
 php tests/website/run.php
 python3 -m unittest -v tests/website/test_static.py
 python3 scripts/verify-website.py
+# Every 3D scene must have the full AVIF/WebP width ladder the templates advertise. A <source>
+# whose URL 404s does not fall through to the next source, so a missing encoding is a broken
+# image on a published page, not a slower one.
+python3 scripts/generate-raster-formats.py --check
 echo 'Release-candidate source verification passed.'

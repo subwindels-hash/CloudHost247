@@ -22,7 +22,7 @@ final class View
         $title = isset($page['seoTitle']) ? $page['seoTitle'] : ($page['name'] . ' | CloudHost247');
         $description = isset($page['seoDescription']) ? $page['seoDescription'] : $page['summary'];
         $canonical = $base . $page['path'];
-        $body = self::shellOpen() . self::fragment($page, $query, $base) . self::shellClose($base);
+        $body = self::shellOpen($base) . self::fragment($page, $query, $base) . self::shellClose($base);
         return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
             . '<title>' . self::e($title) . '</title>'
             . '<meta name="description" content="' . self::e($description) . '">'
@@ -366,9 +366,19 @@ final class View
         return isset($maps[$name]) ? $maps[$name] : array('yes' => 'Yes', 'no' => 'No');
     }
 
-    private static function shellOpen()
+    /**
+     * Minimal shell for the deployment that has no WHMCS theme around it.
+     *
+     * This path is only reached when the tools tree is served on its own (`init.php` absent), which
+     * is also the only case where the site's own pages are not there to link to. It therefore links
+     * nothing but the tools routes, and builds them from the deployment base the way `shellClose`
+     * already did — the absolute `/tools` and `/web-hosting.php` it used to hardcode point outside a
+     * deployment mounted under a subpath, and at pages that do not exist in a tools-only tree.
+     */
+    private static function shellOpen($base)
     {
-        return '<a class="ch-skip" href="#ch-tools-content">Skip to main content</a><header class="ch-header"><div class="ch-nav ch-wrap"><a class="ch-brand" href="/"><img src="/assets/images/cloudhost247/brand/logo-horizontal-dark.svg" width="190" height="36" alt="CloudHost247"></a><nav aria-label="Main"><a href="/tools">Tools</a> <a href="/web-hosting.php">Hosting</a> <a href="/contact.php">Support</a></nav></div></header>';
+        $base = self::e(rtrim((string) $base, '/'));
+        return '<a class="ch-skip" href="#ch-tools-content">Skip to main content</a><header class="ch-header"><div class="ch-nav ch-wrap"><a class="ch-brand" href="' . $base . '/"><img src="' . $base . '/assets/images/cloudhost247/brand/logo-horizontal-dark.svg" width="190" height="36" alt="CloudHost247"></a><nav aria-label="Main"><a href="' . $base . '/tools">All tools</a></nav></div></header>';
     }
 
     private static function shellClose($base)

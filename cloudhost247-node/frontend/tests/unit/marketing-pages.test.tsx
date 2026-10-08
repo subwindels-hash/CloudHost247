@@ -128,8 +128,13 @@ describe('public marketing pages', () => {
 });
 
 describe('navigation registry', () => {
-  it('publishes nine mega menus with labels, blurbs and links', () => {
-    expect(NAV_SECTIONS.length).toBe(9);
+  it('publishes seven mega menus with labels, blurbs and links', () => {
+    // The global header the brief specifies: Hosting, Cloud & Servers, Domains, Platforms, Tools,
+    // Resources, Company.
+    expect(NAV_SECTIONS.length).toBe(7);
+    expect(NAV_SECTIONS.map((section) => section.id)).toEqual([
+      'hosting', 'cloud', 'domains', 'platforms', 'tools', 'resources', 'company',
+    ]);
     for (const section of NAV_SECTIONS) {
       expect(section.label.length).toBeGreaterThan(2);
       expect(section.blurb.length).toBeGreaterThan(20);
@@ -144,7 +149,12 @@ describe('navigation registry', () => {
   });
 
   it('publishes footer columns that all have destinations', () => {
-    expect(FOOTER_COLUMNS.length).toBe(9);
+    // Eight columns: Products, Cloud & Servers, Domains, Developers, Tools, Resources, Company,
+    // Legal — the footer the brief specifies, with no label pointing at a page twice.
+    expect(FOOTER_COLUMNS.length).toBe(8);
+    expect(FOOTER_COLUMNS.map((column) => column.title)).toEqual([
+      'Products', 'Cloud & Servers', 'Domains', 'Developers', 'Tools', 'Resources', 'Company', 'Legal',
+    ]);
     for (const column of FOOTER_COLUMNS) {
       expect(column.links.length).toBeGreaterThan(0);
       for (const link of column.links) expect(link.to.startsWith('/')).toBe(true);

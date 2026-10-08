@@ -1,13 +1,13 @@
 {
   "$schema": "./registry.schema.json",
   "version": "2.1.0",
-  "generatedNotice": "SOURCE OF TRUTH \u2014 edit this file, then run `node scripts/site/generate.mjs`. Do not edit modules/addons/cloudhost247_theme/resources/site.json's navigation/footer by hand, and do not edit cloudhost247-node/frontend/src/navigation/registry.generated.ts at all.",
+  "generatedNotice": "SOURCE OF TRUTH — edit this file, then run `node scripts/site/generate.mjs`. Do not edit modules/addons/cloudhost247_theme/resources/site.json's navigation/footer by hand, and do not edit cloudhost247-node/frontend/src/navigation/registry.generated.ts at all.",
   "brand": {
     "name": "CloudHost247",
     "legalName": "CloudHost247 Isc.",
     "shortName": "CH247",
     "tagline": "Build. Host. Deploy. Scale.",
-    "description": "CloudHost247 gives businesses, developers and organizations the infrastructure they need to build and operate online \u2014 from domains and websites to cloud servers, applications and deployment platforms."
+    "description": "CloudHost247 gives businesses, developers and organizations the infrastructure they need to build and operate online — from domains and websites to cloud servers, applications and deployment platforms."
   },
   "surfaces": {
     "spa": {
@@ -53,7 +53,7 @@
     {
       "id": "hosting",
       "label": "Hosting",
-      "blurb": "Website, application and email hosting with a live product catalogue behind every plan page.",
+      "blurb": "Website, application and email hosting — every plan page backed by the live product catalogue.",
       "href": {
         "spa": "/hosting",
         "php": "cloudhost247-hosting.php"
@@ -69,26 +69,17 @@
       },
       "columns": [
         {
-          "title": "Website hosting",
+          "title": "Web hosting",
           "items": [
             {
               "label": "Web Hosting",
               "icon": "globe",
-              "desc": "Web hosting plans for websites, with current products shown in the live catalogue.",
+              "desc": "Hosting plans for websites, priced from the live catalogue.",
               "href": {
                 "spa": "/hosting/web-hosting",
                 "php": "web-hosting.php"
               },
               "badge": "POPULAR"
-            },
-            {
-              "label": "Shared Hosting",
-              "icon": "globe",
-              "desc": "Shared web hosting plans shown in the live product catalogue.",
-              "href": {
-                "spa": "/hosting/web-hosting",
-                "php": "web-hosting.php"
-              }
             },
             {
               "label": "Business Hosting",
@@ -97,15 +88,6 @@
               "href": {
                 "spa": "/hosting/business",
                 "php": "business-hosting.php"
-              }
-            },
-            {
-              "label": "cPanel Hosting",
-              "icon": "control",
-              "desc": "Mailboxes, databases and installs from the panel your team knows.",
-              "href": {
-                "spa": "/hosting/cpanel",
-                "php": "cpanel-hosting.php"
               }
             },
             {
@@ -118,12 +100,56 @@
               }
             },
             {
-              "label": "Reseller Hosting",
-              "icon": "users",
-              "desc": "Run your own hosting brand on our infrastructure.",
+              "label": "cPanel Hosting",
+              "icon": "control",
+              "desc": "Mailboxes, databases and installs from the panel your team knows.",
               "href": {
-                "spa": "/hosting/reseller",
-                "php": "reseller-hosting.php"
+                "spa": "/hosting/cpanel",
+                "php": "cpanel-hosting.php"
+              }
+            },
+            {
+              "label": "Plesk Hosting",
+              "icon": "control",
+              "desc": "Windows and Linux hosting managed from Plesk Obsidian.",
+              "href": {
+                "php": "plesk-hosting.php"
+              }
+            },
+            {
+              "label": "PHP Hosting",
+              "icon": "code",
+              "desc": "Tuned PHP runtimes with the extensions your application needs.",
+              "href": {
+                "spa": "/developers/php",
+                "php": "php-hosting.php"
+              }
+            },
+            {
+              "label": "Python Hosting",
+              "icon": "code",
+              "desc": "Python application hosting with virtual environments.",
+              "href": {
+                "spa": "/developers/python",
+                "php": "python-hosting.php"
+              }
+            },
+            {
+              "label": "Node.js Hosting",
+              "icon": "code",
+              "desc": "Node.js services with process management and zero-downtime restarts.",
+              "href": {
+                "spa": "/developers/nodejs",
+                "php": "nodejs-hosting.php"
+              }
+            },
+            {
+              "label": "Laravel Hosting",
+              "icon": "code",
+              "desc": "Laravel hosting with queues, scheduler and release-based deploys.",
+              "href": {
+                "spa": "/developers/laravel",
+                "php": "laravel-hosting.php"
               }
             },
             {
@@ -136,91 +162,68 @@
               }
             },
             {
-              "label": "Website Hosting Overview",
-              "icon": "layers",
-              "desc": "Every hosting line in one comparison of features.",
+              "label": "Reseller Hosting",
+              "icon": "users",
+              "desc": "Run your own hosting brand on our infrastructure.",
               "href": {
-                "spa": "/hosting",
-                "php": "cloudhost247-hosting.php"
+                "spa": "/hosting/reseller",
+                "php": "reseller-hosting.php"
               }
             }
           ]
         },
         {
-          "title": "Applications & platform hosting",
+          "title": "Specialized hosting",
           "items": [
-            {
-              "label": "Application Hosting",
-              "icon": "app",
-              "desc": "Deploy a managed application on its own isolated stack.",
-              "href": {
-                "spa": "/platforms/applications",
-                "php": "applications.php"
-              }
-            },
-            {
-              "label": "Developer Hosting",
-              "icon": "code",
-              "desc": "Runtime-focused hosting built for shipping code.",
-              "href": {
-                "spa": "/hosting/developer",
-                "php": "developer-friendly.php"
-              }
-            },
-            {
-              "label": "API Hosting",
-              "icon": "api",
-              "desc": "Host and expose HTTP APIs with TLS and monitoring.",
-              "href": {
-                "spa": "/hosting/api",
-                "php": "api-hosting.php"
-              }
-            },
             {
               "label": "Email Hosting",
               "icon": "mail",
-              "desc": "Mailboxes on your own domain, with spam and TLS.",
+              "desc": "Mailboxes on your own domain, with spam filtering and webmail.",
               "href": {
                 "spa": "/hosting/email",
                 "php": "email-hosting.php"
               }
             },
             {
-              "label": "Control Panels",
-              "icon": "control",
-              "desc": "The panels we actually provision, and how to reach them.",
+              "label": "Developer Hosting",
+              "icon": "code",
+              "desc": "Git, staging and application tooling alongside the runtime.",
               "href": {
-                "spa": "/hosting/control-panels",
-                "php": "cloudhost247-hosting.php"
+                "spa": "/hosting/developer",
+                "php": "developer-friendly.php"
               }
-            }
-          ]
-        },
-        {
-          "title": "Managed for you",
-          "items": [
+            },
             {
-              "label": "Website Migration",
-              "icon": "transfer",
-              "desc": "Move an existing site in with a checked, staged cutover.",
+              "label": "Docker Hosting",
+              "icon": "container",
+              "desc": "Run containers and compose stacks on managed compute.",
               "href": {
-                "spa": "/hosting/migration",
-                "php": "migration.php"
+                "spa": "/developers/docker",
+                "php": "docker-hosting.php"
+              }
+            },
+            {
+              "label": "Game Servers",
+              "icon": "gamepad",
+              "desc": "Low-latency game server hosting with your choice of control panel.",
+              "href": {
+                "spa": "/cloud/game-servers",
+                "php": "game-servers.php"
               }
             },
             {
               "label": "Managed Services",
-              "icon": "wrench",
-              "desc": "We operate, patch and monitor the stack for you.",
+              "icon": "shield-check",
+              "desc": "We operate the platform so your team ships instead of patching.",
               "href": {
-                "spa": "/cloud/server-management",
+                "spa": "/cloud/managed-services",
                 "php": "managed-services.php"
               }
             },
             {
               "label": "Website Design",
-              "icon": "pen",
-              "desc": "Design and build delivered by the CloudHost247 team.",
+              "icon": "palette",
+              "desc": "Launch a new site or have one built and run for you.",
               "href": {
                 "spa": "/websites",
                 "php": "website-design.php"
@@ -228,29 +231,11 @@
             },
             {
               "label": "SSL Certificates",
-              "icon": "lock",
-              "desc": "Encrypt every domain you host, including free DV options.",
+              "icon": "shield",
+              "desc": "Certificates issued and renewed automatically for every domain you host.",
               "href": {
                 "spa": "/hosting/ssl",
                 "php": "ssl-certificate.php"
-              }
-            },
-            {
-              "label": "Backups",
-              "icon": "hard-drive",
-              "desc": "Scheduled backup jobs with a real, restorable history.",
-              "href": {
-                "spa": "/hosting/backups",
-                "php": "backups.php"
-              }
-            },
-            {
-              "label": "Security",
-              "icon": "shield",
-              "desc": "Isolation, hardening, patching and abuse control.",
-              "href": {
-                "spa": "/hosting/security",
-                "php": "security.php"
               }
             }
           ]
@@ -266,50 +251,22 @@
         "php": "cloudhost247-hosting.php"
       },
       "featured": {
-        "title": "Cloud hosting plans",
-        "body": "Review the cloud server options currently published to the live product catalogue.",
+        "title": "VPS & cloud servers",
+        "body": "Provision compute in minutes, choose your operating system, and manage it from the client area.",
         "href": {
-          "spa": "/cloud",
-          "php": "cloudhost247-hosting.php"
+          "spa": "/hosting/vps",
+          "php": "vps-hosting.php"
         },
-        "cta": "View cloud plans"
+        "cta": "Explore cloud and servers"
       },
       "columns": [
         {
-          "title": "Servers",
+          "title": "Cloud",
           "items": [
-            {
-              "label": "VPS Hosting",
-              "icon": "server",
-              "desc": "Virtual private servers with dedicated, guaranteed resources.",
-              "href": {
-                "spa": "/hosting/vps",
-                "php": "vps-hosting.php"
-              },
-              "badge": "POPULAR"
-            },
-            {
-              "label": "Cloud Hosting",
-              "icon": "cloud",
-              "desc": "Browse published cloud hosting products and their current plan details.",
-              "href": {
-                "spa": "/cloud",
-                "php": "cloudhost247-hosting.php"
-              }
-            },
-            {
-              "label": "Dedicated Servers",
-              "icon": "server-rack",
-              "desc": "Single-tenant hardware with full root access.",
-              "href": {
-                "spa": "/hosting/dedicated",
-                "php": "dedicated-server.php"
-              }
-            },
             {
               "label": "Public Cloud",
               "icon": "cloud",
-              "desc": "Elastic compute you can resize as demand changes.",
+              "desc": "Elastic compute from a shared public cloud footprint.",
               "href": {
                 "spa": "/cloud/public",
                 "php": "vps-publiccloud.php"
@@ -317,49 +274,67 @@
             },
             {
               "label": "Private Cloud",
-              "icon": "cloud-lock",
-              "desc": "Isolated cloud capacity reserved for one tenant.",
+              "icon": "shield",
+              "desc": "Dedicated resources isolated to your organisation.",
               "href": {
                 "spa": "/cloud/private",
                 "php": "vps-privatecloud.php"
               }
             },
             {
-              "label": "Enterprise Servers",
-              "icon": "building",
-              "desc": "High-capacity configurations for larger workloads.",
+              "label": "Cloud Hosting",
+              "icon": "cloud",
+              "desc": "Cloud hosting overview with the live product catalogue.",
               "href": {
-                "spa": "/cloud/enterprise-servers",
-                "php": "enterprise-servers.php"
+                "spa": "/cloud",
+                "php": "cloudhost247-hosting.php"
               }
             },
             {
-              "label": "Game Servers",
-              "icon": "gamepad",
-              "desc": "Low-latency hosting for multiplayer game servers.",
+              "label": "Enterprise Servers",
+              "icon": "building",
+              "desc": "High-specification servers with contractual service levels.",
               "href": {
-                "spa": "/cloud/game-servers",
-                "php": "game-servers.php"
+                "spa": "/cloud/enterprise-servers",
+                "php": "enterprise-servers.php"
               }
             }
           ]
         },
         {
-          "title": "Infrastructure",
+          "title": "Servers",
           "items": [
             {
-              "label": "Infrastructure",
-              "icon": "network",
-              "desc": "How the CloudHost247 network and regions fit together.",
+              "label": "Dedicated Servers",
+              "icon": "server",
+              "desc": "Bare metal servers, provisioned and managed end to end.",
               "href": {
-                "spa": "/cloud/infrastructure",
-                "php": "infrastructure.php"
+                "spa": "/hosting/dedicated",
+                "php": "dedicated-server.php"
+              }
+            },
+            {
+              "label": "VPS Hosting",
+              "icon": "server",
+              "desc": "Virtual servers with a choice of operating system and panel.",
+              "href": {
+                "spa": "/hosting/vps",
+                "php": "vps-hosting.php"
+              }
+            },
+            {
+              "label": "Server Management",
+              "icon": "settings",
+              "desc": "Patching, hardening and day-to-day server operations.",
+              "href": {
+                "spa": "/cloud/server-management",
+                "php": "server-management.php"
               }
             },
             {
               "label": "Data Centers",
-              "icon": "data-center",
-              "desc": "The facilities our servers are deployed in \u2014 when configured.",
+              "icon": "building",
+              "desc": "The facilities our compute runs in and what they provide.",
               "href": {
                 "spa": "/cloud/data-centers",
                 "php": "data-centers.php"
@@ -367,40 +342,26 @@
             },
             {
               "label": "Network",
-              "icon": "globe",
-              "desc": "Routing, addressing and uptime of the delivery network.",
+              "icon": "network",
+              "desc": "Transit, peering and the addressing behind our services.",
               "href": {
                 "spa": "/cloud/network",
                 "php": "network.php"
               }
             },
             {
-              "label": "Operating Systems",
-              "icon": "os",
-              "desc": "The OS catalogue available at provisioning time.",
+              "label": "Firewall",
+              "icon": "shield",
+              "desc": "Network filtering and firewall management for your servers.",
               "href": {
-                "spa": "/cloud/operating-systems",
-                "php": "operating-systems.php"
+                "spa": "/cloud/firewall",
+                "php": "firewall.php"
               }
             },
             {
-              "label": "Server Management",
-              "icon": "wrench",
-              "desc": "Monitoring, access control, patching and operations.",
-              "href": {
-                "spa": "/cloud/server-management",
-                "php": "server-management.php"
-              }
-            }
-          ]
-        },
-        {
-          "title": "Operations & protection",
-          "items": [
-            {
               "label": "Monitoring",
               "icon": "activity",
-              "desc": "Telemetry and alerts for the resources you run with us.",
+              "desc": "Availability and resource monitoring with alerting.",
               "href": {
                 "spa": "/cloud/monitoring",
                 "php": "monitoring.php"
@@ -408,35 +369,26 @@
             },
             {
               "label": "Backups",
-              "icon": "hard-drive",
-              "desc": "Backup jobs, retention and restore from your account.",
+              "icon": "storage",
+              "desc": "Scheduled backups with restore points you control.",
               "href": {
                 "spa": "/cloud/backups",
                 "php": "backups.php"
               }
             },
             {
-              "label": "Firewalls",
-              "icon": "firewall",
-              "desc": "Rule-based network filtering attached to your servers.",
+              "label": "Migration",
+              "icon": "transfer",
+              "desc": "We move your existing websites, mail and data across.",
               "href": {
-                "spa": "/cloud/firewall",
-                "php": "firewall.php"
-              }
-            },
-            {
-              "label": "Security",
-              "icon": "shield",
-              "desc": "Platform hardening, isolation and abuse response.",
-              "href": {
-                "spa": "/cloud/security",
-                "php": "security.php"
+                "spa": "/hosting/migration",
+                "php": "migration.php"
               }
             },
             {
               "label": "IP Management",
-              "icon": "ip",
-              "desc": "Reverse DNS, floating addresses and IP assignment.",
+              "icon": "network",
+              "desc": "Reverse DNS, IP allocation and address planning for your servers.",
               "href": {
                 "spa": "/cloud/ip-management",
                 "php": "ip-management.php"
@@ -449,14 +401,14 @@
     {
       "id": "domains",
       "label": "Domains",
-      "blurb": "Search, register, transfer and manage domain names \u2014 with the full registrar toolkit.",
+      "blurb": "Search, register, transfer and manage domain names — with the full registrar and DNS toolkit.",
       "href": {
         "spa": "/domains",
         "php": "domain.php"
       },
       "featured": {
         "title": "Find your domain",
-        "body": "Check availability and pricing across every configured extension, then register it in the same account you host with.",
+        "body": "Check availability across every extension we carry and register it in the same checkout as your hosting.",
         "href": {
           "spa": "/domains/search",
           "php": "cart.php?a=add&domain=register"
@@ -465,12 +417,12 @@
       },
       "columns": [
         {
-          "title": "Get a domain",
+          "title": "Domains",
           "items": [
             {
-              "label": "Search Domains",
+              "label": "Domain Registration",
               "icon": "search",
-              "desc": "Check a name across every configured extension.",
+              "desc": "Register a new domain name and manage it from the client area.",
               "href": {
                 "spa": "/domains/search",
                 "php": "cart.php?a=add&domain=register"
@@ -478,122 +430,97 @@
               "badge": "POPULAR"
             },
             {
-              "label": "Domain Transfer",
-              "icon": "transfer",
-              "desc": "Move a domain in with an EPP code and status tracking.",
-              "href": {
-                "spa": "/domains/transfer",
-                "php": "cart.php?a=add&domain=transfer"
-              }
-            },
-            {
-              "label": "Domain Extensions",
-              "icon": "globe",
-              "desc": "The full TLD catalogue with register and renewal prices.",
-              "href": {
-                "spa": "/domains/extensions",
-                "php": "domain.php"
-              }
-            },
-            {
-              "label": "Bulk Domain Search",
-              "icon": "list",
-              "desc": "Check a whole list of candidate names at once.",
+              "label": "Domain Search",
+              "icon": "search",
+              "desc": "Check availability for one name or a whole list at once.",
               "href": {
                 "spa": "/domains/bulk-search",
                 "php": "domain.php"
               }
             },
             {
-              "label": "Domain Registration",
-              "icon": "cart",
-              "desc": "Register a new name and manage it from day one.",
+              "label": "Domain Management",
+              "icon": "settings",
+              "desc": "Nameservers, contacts, renewal dates and auto-renew settings.",
               "href": {
-                "spa": "/domains/search",
-                "php": "cart.php?a=add&domain=register"
+                "spa": "/dashboard/domains",
+                "php": "clientarea.php?action=domains"
               }
-            }
-          ]
-        },
-        {
-          "title": "Domain management",
-          "items": [
+            },
+            {
+              "label": "Domain DNS",
+              "icon": "dns",
+              "desc": "Point a domain at CloudHost247 hosting or your own nameservers.",
+              "href": {
+                "php": "domain-dns.php"
+              }
+            },
             {
               "label": "DNS Management",
               "icon": "dns",
-              "desc": "Zones and records for the domains you host here.",
+              "desc": "Edit zone records, TTLs and DNSSEC from one screen.",
               "href": {
                 "spa": "/dashboard/dns",
                 "php": "dns-management.php"
               }
             },
             {
-              "label": "WHOIS / RDAP Lookup",
-              "icon": "user",
-              "desc": "Public registration data, with privacy respected.",
+              "label": "Domain Renewal",
+              "icon": "refresh",
+              "desc": "How renewal, auto-renew and deletion windows work.",
               "href": {
-                "spa": "/domains/whois",
-                "php": "tools/domain-whois"
-              }
-            },
-            {
-              "label": "My Domains",
-              "icon": "folder",
-              "desc": "Renewals, auto-renew, locks, contacts and nameservers.",
-              "href": {
-                "spa": "/dashboard/domains",
-                "php": "clientarea.php?action=domains"
+                "spa": "/legal/domain-renewal-policy",
+                "php": "domain-renewal-policy.php"
               }
             }
           ]
         },
         {
-          "title": "Domains as an asset",
+          "title": "DNS",
           "items": [
             {
-              "label": "Domain Auctions",
-              "icon": "gavel",
-              "desc": "Bid on listed names with a recorded auction ledger.",
+              "label": "DNS Lookup",
+              "icon": "search",
+              "desc": "Query A, AAAA, CNAME, MX, NS, TXT, SOA, SRV and CAA records.",
               "href": {
-                "spa": "/domains/auctions",
-                "php": "domain.php"
-              },
-              "badge": "NEW"
-            },
-            {
-              "label": "Domain Appraisal",
-              "icon": "chart",
-              "desc": "An estimated market value \u2014 never a guaranteed price.",
-              "href": {
-                "spa": "/domains/appraisal",
-                "php": "domain.php"
+                "spa": "/tools/dns-lookup",
+                "php": "tools/dns-lookup"
               }
             },
             {
-              "label": "Domain Broker",
-              "icon": "handshake",
-              "desc": "We approach the owner of a name you want to acquire.",
+              "label": "DNS Propagation",
+              "icon": "globe",
+              "desc": "Ask the same question of many public resolvers at once.",
               "href": {
-                "spa": "/domains/broker",
-                "php": "domain.php"
+                "spa": "/tools/dns-propagation",
+                "php": "tools/dns-propagation"
               }
             },
             {
-              "label": "Domain Club",
-              "icon": "star",
-              "desc": "Membership pricing on eligible registrations and renewals.",
+              "label": "DNS Health",
+              "icon": "activity",
+              "desc": "Delegation, mail authentication and DNSSEC checks in one report.",
               "href": {
-                "spa": "/domains/club",
-                "php": "domain.php"
+                "spa": "/tools/dns-health",
+                "php": "tools/dns-health"
               }
             },
             {
-              "label": "Domain Services Overview",
-              "icon": "layers",
-              "desc": "Everything available around a domain name.",
+              "label": "DNS Security",
+              "icon": "shield",
+              "desc": "DNS and domain security tools from the CloudHost247 catalogue.",
               "href": {
-                "spa": "/domains",
-                "php": "domain.php"
+                "spa": "/tools/category/security",
+                "php": "tools/category/security"
+              }
+            },
+            {
+              "label": "DNSSEC",
+              "icon": "key",
+              "desc": "Inspect DNSKEY and DS records for a signed zone.",
+              "href": {
+                "spa": "/tools/dnskey-lookup",
+                "php": "tools/dnskey-lookup"
               }
             }
           ]
@@ -603,14 +530,14 @@
     {
       "id": "platforms",
       "label": "Platforms",
-      "blurb": "Applications, databases, containers and deployment workflows configured for CloudHost247 services.",
+      "blurb": "Applications, containers, runtimes, control panels and operating systems — all configured for CloudHost247 servers.",
       "href": {
         "spa": "/platforms",
         "php": "applications.php"
       },
       "featured": {
-        "title": "Application marketplace",
-        "body": "Browse the applications the platform can actually deploy, then install one onto infrastructure you control.",
+        "title": "Application platform",
+        "body": "Deploy common applications, databases and containers without building the runtime yourself.",
         "href": {
           "spa": "/apps",
           "php": "applications.php"
@@ -619,156 +546,48 @@
       },
       "columns": [
         {
-          "title": "Applications",
+          "title": "Application platforms",
           "items": [
             {
-              "label": "Application Marketplace",
+              "label": "Applications",
               "icon": "app",
-              "desc": "Every application the platform can install for you.",
+              "desc": "Deploy supported applications from a maintained catalogue.",
               "href": {
                 "spa": "/apps",
                 "php": "applications.php"
-              },
-              "badge": "POPULAR"
-            },
-            {
-              "label": "Application Hosting",
-              "icon": "layers",
-              "desc": "Managed hosting around a specific application.",
-              "href": {
-                "spa": "/platforms/applications",
-                "php": "applications.php"
               }
             },
-            {
-              "label": "Databases",
-              "icon": "database",
-              "desc": "MySQL, PostgreSQL, MariaDB, MongoDB and Redis.",
-              "href": {
-                "spa": "/platforms/databases",
-                "php": "applications.php#databases"
-              }
-            },
-            {
-              "label": "Containers & Docker",
-              "icon": "box",
-              "desc": "Run containerised applications with persistent volumes.",
-              "href": {
-                "spa": "/platforms/containers",
-                "php": "docker-hosting.php"
-              }
-            },
-            {
-              "label": "PaaS",
-              "icon": "rocket",
-              "desc": "Application deployment and environment management; source builds depend on an enabled panel integration.",
-              "href": {
-                "spa": "/platforms/paas",
-                "php": "paas.php"
-              }
-            }
-          ]
-        },
-        {
-          "title": "Deployment platform",
-          "items": [
             {
               "label": "Deployment",
-              "icon": "git-branch",
-              "desc": "Track supported application installs and updates, including recorded status and deployment steps.",
+              "icon": "rocket",
+              "desc": "Release applications with environments and rollback.",
               "href": {
                 "spa": "/developers/deployment",
                 "php": "deployments.php"
               }
             },
             {
-              "label": "Application Environments",
-              "icon": "terminal",
-              "desc": "Environment variables, volumes and per-app domains.",
+              "label": "PaaS",
+              "icon": "layers",
+              "desc": "Push code and let the platform build and run it.",
               "href": {
-                "spa": "/developers/environments",
-                "php": "deployments.php#environments"
+                "spa": "/platforms/paas",
+                "php": "paas.php"
               }
             },
             {
-              "label": "My Applications",
-              "icon": "grid",
-              "desc": "Applications you have installed, with logs and backups.",
+              "label": "Docker",
+              "icon": "container",
+              "desc": "Containers, images and compose stacks on managed compute.",
               "href": {
-                "spa": "/dashboard/apps",
-                "php": "clientarea.php?action=services"
-              }
-            }
-          ]
-        },
-        {
-          "title": "Developer platform",
-          "items": [
-            {
-              "label": "Developer Platform",
-              "icon": "code",
-              "desc": "Runtimes, APIs and tooling for building on CloudHost247.",
-              "href": {
-                "spa": "/developers",
-                "php": "developer-friendly.php"
+                "spa": "/developers/docker",
+                "php": "docker-hosting.php"
               }
             },
-            {
-              "label": "APIs",
-              "icon": "api",
-              "desc": "HTTP APIs to automate provisioning and management.",
-              "href": {
-                "spa": "/hosting/api",
-                "php": "api-hosting.php"
-              }
-            },
-            {
-              "label": "Control Panels",
-              "icon": "control",
-              "desc": "The panels available on the servers we provision.",
-              "href": {
-                "spa": "/hosting/control-panels",
-                "php": "cloudhost247-hosting.php"
-              }
-            },
-            {
-              "label": "Documentation",
-              "icon": "book",
-              "desc": "Guides, references and how-tos for the platform.",
-              "href": {
-                "spa": "/docs",
-                "php": "documentation.php"
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "developers",
-      "label": "Developer / Deployment",
-      "blurb": "Runtimes, application deployments, environments and APIs \u2014 with availability shown by the live catalogue.",
-      "href": {
-        "spa": "/developers",
-        "php": "developer-friendly.php"
-      },
-      "featured": {
-        "title": "Application deployments",
-        "body": "Track supported application installs and updates, their recorded steps, and environment configuration. Git-based builds depend on a separately configured control panel.",
-        "href": {
-          "spa": "/developers/deployment",
-          "php": "deployments.php"
-        },
-        "cta": "See deployment options"
-      },
-      "columns": [
-        {
-          "title": "Runtimes",
-          "items": [
             {
               "label": "Node.js",
-              "icon": "nodejs",
-              "desc": "Node.js applications with managed process supervision.",
+              "icon": "code",
+              "desc": "Node.js runtimes with process management and restarts.",
               "href": {
                 "spa": "/developers/nodejs",
                 "php": "nodejs-hosting.php"
@@ -776,8 +595,8 @@
             },
             {
               "label": "PHP",
-              "icon": "php",
-              "desc": "PHP applications, from single files to full frameworks.",
+              "icon": "code",
+              "desc": "PHP runtimes with per-site version and extension control.",
               "href": {
                 "spa": "/developers/php",
                 "php": "php-hosting.php"
@@ -785,8 +604,8 @@
             },
             {
               "label": "Python",
-              "icon": "python",
-              "desc": "Python services and web applications, WSGI or ASGI.",
+              "icon": "code",
+              "desc": "Python applications with virtual environments and workers.",
               "href": {
                 "spa": "/developers/python",
                 "php": "python-hosting.php"
@@ -794,266 +613,74 @@
             },
             {
               "label": "Laravel",
-              "icon": "laravel",
-              "desc": "Laravel deployments with queues, scheduler and storage.",
+              "icon": "code",
+              "desc": "Laravel with queues, scheduler and release deploys.",
               "href": {
                 "spa": "/developers/laravel",
                 "php": "laravel-hosting.php"
               }
             },
             {
-              "label": "Docker",
-              "icon": "docker",
-              "desc": "Build and run container images with managed volumes.",
-              "href": {
-                "spa": "/developers/docker",
-                "php": "docker-hosting.php"
-              }
-            }
-          ]
-        },
-        {
-          "title": "Deploy & operate",
-          "items": [
-            {
-              "label": "Application Deployments",
-              "icon": "git-branch",
-              "desc": "Track supported application installs, updates, status and step logs.",
-              "href": {
-                "spa": "/developers/deployment",
-                "php": "deployments.php"
-              },
-              "badge": "POPULAR"
-            },
-            {
-              "label": "PaaS",
-              "icon": "rocket",
-              "desc": "Managed application deployment workflows; Git builds require an enabled control-panel integration.",
-              "href": {
-                "spa": "/platforms/paas",
-                "php": "paas.php"
-              }
-            },
-            {
-              "label": "Application Environments",
-              "icon": "terminal",
-              "desc": "Variables, secrets, volumes and per-app domains.",
-              "href": {
-                "spa": "/developers/environments",
-                "php": "deployments.php#environments"
-              }
-            },
-            {
-              "label": "Server Management",
-              "icon": "wrench",
-              "desc": "Operate the servers your code runs on.",
-              "href": {
-                "spa": "/cloud/server-management",
-                "php": "server-management.php"
-              }
-            },
-            {
-              "label": "Operating Systems",
-              "icon": "os",
-              "desc": "Pick the base image your runtime is built on.",
-              "href": {
-                "spa": "/cloud/operating-systems",
-                "php": "operating-systems.php"
-              }
-            }
-          ]
-        },
-        {
-          "title": "Build with CloudHost247",
-          "items": [
-            {
-              "label": "API Hosting",
-              "icon": "api",
-              "desc": "Host HTTP APIs with TLS, auth and rate control.",
-              "href": {
-                "spa": "/hosting/api",
-                "php": "api-hosting.php"
-              }
-            },
-            {
               "label": "Developer Hosting",
-              "icon": "code",
-              "desc": "Hosting shaped around runtimes rather than panels.",
+              "icon": "terminal",
+              "desc": "Git, staging and CI-friendly hosting for development teams.",
               "href": {
                 "spa": "/hosting/developer",
                 "php": "developer-friendly.php"
               }
             },
             {
-              "label": "DNS for Developers",
-              "icon": "dns",
-              "desc": "Zone management and record types for your services.",
+              "label": "API Hosting",
+              "icon": "terminal",
+              "desc": "Run HTTP APIs with managed runtimes, TLS and request logging.",
               "href": {
-                "spa": "/dashboard/dns",
-                "php": "dns-management.php"
-              }
-            },
-            {
-              "label": "Documentation",
-              "icon": "book",
-              "desc": "Platform references and integration guides.",
-              "href": {
-                "spa": "/docs",
-                "php": "documentation.php"
-              }
-            },
-            {
-              "label": "Developer Tools",
-              "icon": "tools",
-              "desc": "Utilities for encoding, conversion and inspection.",
-              "href": {
-                "spa": "/tools/category/developer",
-                "php": "tools/category/developer"
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "websites",
-      "label": "Websites",
-      "blurb": "Build a website, launch a store, or have a specialist design and run it for you.",
-      "href": {
-        "spa": "/websites",
-        "php": "website-design.php"
-      },
-      "featured": {
-        "title": "Website Builder",
-        "body": "Pages, sections, media and publishing \u2014 with templates you can start from and edit in the browser.",
-        "href": {
-          "spa": "/websites/builder",
-          "php": "website-design.php"
-        },
-        "cta": "Open the builder"
-      },
-      "columns": [
-        {
-          "title": "Build it",
-          "items": [
-            {
-              "label": "Website Builder",
-              "icon": "layout",
-              "desc": "Templates, pages, sections, media and publishing.",
-              "href": {
-                "spa": "/websites/builder",
-                "php": "website-design.php"
-              },
-              "badge": "INCLUDED"
-            },
-            {
-              "label": "AI Website Builder",
-              "icon": "sparkle",
-              "desc": "Describe a site and get real pages you can edit.",
-              "href": {
-                "spa": "/websites/ai-builder",
-                "php": "website-design.php"
-              },
-              "badge": "NEW"
-            },
-            {
-              "label": "Website Templates",
-              "icon": "grid",
-              "desc": "Start from a layout that is already publishable.",
-              "href": {
-                "spa": "/websites/templates",
-                "php": "website-design.php"
-              }
-            },
-            {
-              "label": "E-commerce & Stores",
-              "icon": "cart",
-              "desc": "Sell physical, digital and service products online.",
-              "href": {
-                "spa": "/websites/store",
-                "php": "website-design.php"
-              }
-            },
-            {
-              "label": "Website Design",
-              "icon": "pen",
-              "desc": "Scoped design and build by the CloudHost247 team.",
-              "href": {
-                "spa": "/websites/design-services",
-                "php": "website-design.php"
+                "spa": "/hosting/api",
+                "php": "api-hosting.php"
               }
             }
           ]
         },
         {
-          "title": "Have it built for you",
+          "title": "Control panels",
           "items": [
             {
-              "label": "Website Migration",
-              "icon": "transfer",
-              "desc": "Plan a site transfer and its cutover with the CloudHost247 team.",
+              "label": "Control Panels",
+              "icon": "control",
+              "desc": "Install a supported panel on your server during provisioning.",
               "href": {
-                "spa": "/hosting/migration",
-                "php": "migration.php"
+                "spa": "/hosting/control-panels",
+                "php": "cloudhost247-hosting.php"
               }
             },
             {
-              "label": "Website Management",
-              "icon": "wrench",
-              "desc": "Explore available website operations, maintenance and support options.",
+              "label": "cPanel & WHM",
+              "icon": "control",
+              "desc": "The industry-standard hosting panel, licensed and managed.",
               "href": {
-                "spa": "/cloud/server-management",
-                "php": "managed-services.php"
+                "spa": "/hosting/cpanel",
+                "php": "cpanel-hosting.php"
               }
             },
             {
-              "label": "Talk to a specialist",
-              "icon": "headset",
-              "desc": "Describe the project and get a scoped proposal.",
+              "label": "Plesk",
+              "icon": "control",
+              "desc": "Plesk Obsidian for Linux and Windows servers.",
               "href": {
-                "spa": "/contact",
-                "php": "contact.php"
+                "php": "plesk-hosting.php"
               }
             }
           ]
         },
         {
-          "title": "Run it safely",
+          "title": "Operating systems",
           "items": [
             {
-              "label": "SSL Certificates",
-              "icon": "lock",
-              "desc": "Review the TLS options available for the hosting service you select.",
+              "label": "Operating Systems",
+              "icon": "os",
+              "desc": "Every Linux image we provision, with version and lifecycle status.",
               "href": {
-                "spa": "/hosting/ssl",
-                "php": "ssl-certificate.php"
-              }
-            },
-            {
-              "label": "Backups",
-              "icon": "hard-drive",
-              "desc": "Scheduled backups with a restorable history.",
-              "href": {
-                "spa": "/hosting/backups",
-                "php": "backups.php"
-              }
-            },
-            {
-              "label": "Website Hosting",
-              "icon": "globe",
-              "desc": "The hosting your website actually runs on.",
-              "href": {
-                "spa": "/hosting/web-hosting",
-                "php": "web-hosting.php"
-              }
-            },
-            {
-              "label": "Domain & DNS",
-              "icon": "dns",
-              "desc": "Connect the domain to the site you just built.",
-              "href": {
-                "spa": "/domains",
-                "php": "domain.php"
+                "spa": "/cloud/operating-systems",
+                "php": "operating-systems.php"
               }
             }
           ]
@@ -1063,7 +690,7 @@
     {
       "id": "tools",
       "label": "Tools",
-      "blurb": "Inspect, troubleshoot and build \u2014 with tools that explain their results instead of showing invented data.",
+      "blurb": "Inspect, troubleshoot and build — every result reports what was actually queried and what it cannot tell you.",
       "href": {
         "spa": "/tools",
         "php": "tools"
@@ -1071,16 +698,28 @@
       "toolsDriven": true,
       "columns": [
         {
-          "title": "Compliance & Document",
+          "title": "Curated collections",
           "items": [
             {
+              "label": "All Tools",
+              "icon": "wrench",
+              "desc": "The complete CloudHost247 tools catalogue, grouped by category.",
+              "href": {
+                "php": "tools"
+              }
+            },
+            {
               "label": "Compliance & Document Tools",
+              "icon": "file",
+              "desc": "Calculators and generators for compliance paperwork and documents.",
               "href": {
                 "php": "tools/compliance-documents"
               }
             },
             {
               "label": "MRZ Generator",
+              "icon": "file",
+              "desc": "Build a machine-readable zone for travel and identity documents.",
               "href": {
                 "php": "tools/mrz-generator"
               }
@@ -1092,49 +731,66 @@
     {
       "id": "resources",
       "label": "Resources",
-      "blurb": "Guides, documentation, service status and the policies that govern the platform.",
+      "blurb": "Guides, documentation, service status and the knowledge you need to run on CloudHost247.",
       "href": {
-        "spa": "/help",
-        "php": "help-center.php"
+        "spa": "/docs",
+        "php": "documentation.php"
+      },
+      "featured": {
+        "title": "Documentation",
+        "body": "Setup guides, API references and operational how-tos for every CloudHost247 service.",
+        "href": {
+          "spa": "/docs",
+          "php": "documentation.php"
+        },
+        "cta": "Read the documentation"
       },
       "columns": [
         {
-          "title": "Learn",
+          "title": "Documentation & help",
           "items": [
             {
               "label": "Documentation",
               "icon": "book",
-              "desc": "Platform references, integration and deployment guides.",
+              "desc": "Setup guides and references for every service we run.",
               "href": {
                 "spa": "/docs",
                 "php": "documentation.php"
               }
             },
             {
-              "label": "Knowledge Base",
-              "icon": "book-open",
-              "desc": "Step-by-step answers to common questions.",
+              "label": "Help Center",
+              "icon": "help",
+              "desc": "Start here when something is not working as expected.",
               "href": {
                 "spa": "/help",
                 "php": "help-center.php"
               }
             },
             {
-              "label": "Blog",
-              "icon": "news",
-              "desc": "Product notes, engineering posts and announcements.",
+              "label": "Knowledge Base",
+              "icon": "book",
+              "desc": "Articles maintained by our support team.",
               "href": {
-                "spa": "/blog",
-                "php": "blog.php"
+                "php": "knowledgebase.php"
               }
             },
             {
-              "label": "FAQ",
+              "label": "FAQs",
               "icon": "help",
-              "desc": "The questions customers ask before and after signing up.",
+              "desc": "The questions we are asked most, answered plainly.",
               "href": {
                 "spa": "/faq",
                 "php": "faqs.php"
+              }
+            },
+            {
+              "label": "Open a Ticket",
+              "icon": "mail",
+              "desc": "Reach a human. Tickets are answered by the team that runs the platform.",
+              "href": {
+                "spa": "/support",
+                "php": "submitticket.php"
               }
             }
           ]
@@ -1143,9 +799,18 @@
           "title": "Stay informed",
           "items": [
             {
-              "label": "Service Status",
-              "icon": "pulse",
-              "desc": "What the platform can verify about itself right now.",
+              "label": "Blog",
+              "icon": "news",
+              "desc": "Product news, engineering notes and platform changes.",
+              "href": {
+                "spa": "/blog",
+                "php": "blog.php"
+              }
+            },
+            {
+              "label": "Status",
+              "icon": "activity",
+              "desc": "Live service status and incident history.",
               "href": {
                 "spa": "/status",
                 "php": "serverstatus.php"
@@ -1154,51 +819,59 @@
             {
               "label": "Offers",
               "icon": "tag",
-              "desc": "Current catalogue pricing and promotions.",
+              "desc": "Current promotions and discounted plans.",
               "href": {
                 "spa": "/offers",
                 "php": "offers.php"
+              }
+            },
+            {
+              "label": "Announcements",
+              "icon": "megaphone",
+              "desc": "Scheduled maintenance and platform announcements.",
+              "href": {
+                "php": "announcements.php"
               }
             }
           ]
         },
         {
-          "title": "Company",
+          "title": "Infrastructure",
           "items": [
             {
-              "label": "About CloudHost247",
-              "icon": "building",
-              "desc": "Who we are and how we operate the platform.",
-              "href": {
-                "spa": "/about",
-                "php": "aboutus.php"
-              }
-            },
-            {
-              "label": "Security & Compliance",
-              "icon": "shield",
-              "desc": "How we protect customer data and infrastructure.",
-              "href": {
-                "spa": "/security",
-                "php": "security.php"
-              }
-            },
-            {
               "label": "Infrastructure",
-              "icon": "network",
-              "desc": "Regions, facilities and network topology.",
+              "icon": "building",
+              "desc": "How the CloudHost247 platform is put together.",
               "href": {
                 "spa": "/cloud/infrastructure",
                 "php": "infrastructure.php"
               }
             },
             {
-              "label": "Contact",
-              "icon": "mail",
-              "desc": "Sales, support, billing and abuse contacts.",
+              "label": "Network",
+              "icon": "network",
+              "desc": "Transit, peering and addressing.",
               "href": {
-                "spa": "/contact",
-                "php": "contact.php"
+                "spa": "/cloud/network",
+                "php": "network.php"
+              }
+            },
+            {
+              "label": "Data Centers",
+              "icon": "building",
+              "desc": "Where our compute physically runs.",
+              "href": {
+                "spa": "/cloud/data-centers",
+                "php": "data-centers.php"
+              }
+            },
+            {
+              "label": "Operating Systems",
+              "icon": "os",
+              "desc": "Supported images, versions and lifecycle status.",
+              "href": {
+                "spa": "/cloud/operating-systems",
+                "php": "operating-systems.php"
               }
             }
           ]
@@ -1206,142 +879,110 @@
       ]
     },
     {
-      "id": "support",
-      "label": "Support",
-      "blurb": "Get help from the knowledge base, open a ticket, or check what is happening right now.",
+      "id": "company",
+      "label": "Company",
+      "blurb": "Who runs CloudHost247, how we secure the platform, and the terms we operate under.",
       "href": {
-        "spa": "/help",
-        "php": "help-center.php"
+        "spa": "/about",
+        "php": "aboutus.php"
+      },
+      "featured": {
+        "title": "Talk to CloudHost247",
+        "body": "Sales, migrations, partnerships and technical questions — reach the team directly.",
+        "href": {
+          "spa": "/contact",
+          "php": "contact.php"
+        },
+        "cta": "Contact us"
       },
       "columns": [
         {
-          "title": "Get help",
+          "title": "Company",
           "items": [
             {
-              "label": "Help Center",
-              "icon": "life-buoy",
-              "desc": "Support channels and the fastest route to an answer.",
+              "label": "About",
+              "icon": "users",
+              "desc": "Who we are and how we operate the platform.",
               "href": {
-                "spa": "/help",
-                "php": "help-center.php"
-              }
-            },
-            {
-              "label": "Knowledge Base",
-              "icon": "book-open",
-              "desc": "Searchable guides for hosting, domains and servers.",
-              "href": {
-                "spa": "/help",
-                "php": "knowledgebase.php"
-              }
-            },
-            {
-              "label": "Open a Ticket",
-              "icon": "ticket",
-              "desc": "Reach the support team from your account.",
-              "href": {
-                "spa": "/support",
-                "php": "submitticket.php"
-              }
-            },
-            {
-              "label": "FAQ",
-              "icon": "help",
-              "desc": "Billing, renewal and technical questions answered.",
-              "href": {
-                "spa": "/faq",
-                "php": "faqs.php"
+                "spa": "/about",
+                "php": "aboutus.php"
               }
             },
             {
               "label": "Contact",
               "icon": "mail",
-              "desc": "Sales, billing, abuse and general enquiries.",
+              "desc": "Sales, support and partnership enquiries.",
               "href": {
                 "spa": "/contact",
                 "php": "contact.php"
               }
-            }
-          ]
-        },
-        {
-          "title": "Your account",
-          "items": [
+            },
             {
-              "label": "Client Area",
-              "icon": "user",
-              "desc": "Services, domains, billing and support in one place.",
+              "label": "Security",
+              "icon": "shield",
+              "desc": "How we secure the platform and handle security reports.",
               "href": {
-                "spa": "/dashboard",
-                "php": "clientarea.php"
+                "spa": "/security",
+                "php": "security.php"
               }
             },
             {
-              "label": "Billing & Invoices",
-              "icon": "invoice",
-              "desc": "Invoices, payment methods and account credit.",
+              "label": "Compliance",
+              "icon": "check",
+              "desc": "Our data protection standards and compliance position.",
               "href": {
-                "spa": "/invoices",
-                "php": "clientarea.php?action=invoices"
-              }
-            },
-            {
-              "label": "My Services",
-              "icon": "grid",
-              "desc": "Everything you have active with CloudHost247.",
-              "href": {
-                "spa": "/services",
-                "php": "clientarea.php?action=services"
-              }
-            },
-            {
-              "label": "Service Status",
-              "icon": "pulse",
-              "desc": "Live checks the platform performs on itself.",
-              "href": {
-                "spa": "/status",
-                "php": "serverstatus.php"
+                "spa": "/legal/data-protection-standards",
+                "php": "data-protection-standards.php"
               }
             }
           ]
         },
         {
-          "title": "Policies & help",
+          "title": "Legal & trust",
           "items": [
             {
               "label": "Legal & Policy Center",
-              "icon": "scale",
-              "desc": "Every agreement and policy in one index.",
+              "icon": "file",
+              "desc": "Every policy, agreement and notice in one place.",
               "href": {
                 "spa": "/legal",
                 "php": "legal.php"
               }
             },
             {
-              "label": "Acceptable Use",
-              "icon": "shield",
-              "desc": "What may and may not be hosted on the platform.",
+              "label": "Terms of Service",
+              "icon": "file",
+              "desc": "The terms that govern your use of our services.",
               "href": {
-                "spa": "/legal/acceptable-use",
-                "php": "acceptable-use-policy.php"
+                "spa": "/legal/terms",
+                "php": "terms-of-service.php"
               }
             },
             {
-              "label": "Refund Policy",
-              "icon": "invoice",
-              "desc": "Cancellation windows and refund eligibility.",
+              "label": "Privacy Policy",
+              "icon": "shield",
+              "desc": "What we collect, why, and how long we keep it.",
               "href": {
-                "spa": "/legal/refund-policy",
-                "php": "refund-policy.php"
+                "spa": "/legal/privacy-policy",
+                "php": "privacy-policy.php"
               }
             },
             {
               "label": "Cookie Policy",
               "icon": "cookie",
-              "desc": "The cookies this website sets and why.",
+              "desc": "Cookies we set, what they do and how to control them.",
               "href": {
                 "spa": "/legal/cookies",
                 "php": "cookie-policy.php"
+              }
+            },
+            {
+              "label": "Trademark Policy",
+              "icon": "file",
+              "desc": "Brand, copyright and takedown procedures.",
+              "href": {
+                "spa": "/legal/trademark",
+                "php": "trademark-policy.php"
               }
             }
           ]
@@ -1355,13 +996,6 @@
       "items": [
         {
           "label": "Web Hosting",
-          "href": {
-            "spa": "/hosting/web-hosting",
-            "php": "web-hosting.php"
-          }
-        },
-        {
-          "label": "Shared Hosting",
           "href": {
             "spa": "/hosting/web-hosting",
             "php": "web-hosting.php"
@@ -1382,24 +1016,10 @@
           }
         },
         {
-          "label": "Reseller Hosting",
-          "href": {
-            "spa": "/hosting/reseller",
-            "php": "reseller-hosting.php"
-          }
-        },
-        {
           "label": "VPS Hosting",
           "href": {
             "spa": "/hosting/vps",
             "php": "vps-hosting.php"
-          }
-        },
-        {
-          "label": "Cloud Hosting",
-          "href": {
-            "spa": "/cloud",
-            "php": "cloudhost247-hosting.php"
           }
         },
         {
@@ -1410,10 +1030,10 @@
           }
         },
         {
-          "label": "Windows Hosting",
+          "label": "Cloud Hosting",
           "href": {
-            "spa": "/hosting/windows",
-            "php": "windows-hosting.php"
+            "spa": "/cloud",
+            "php": "cloudhost247-hosting.php"
           }
         },
         {
@@ -1424,30 +1044,16 @@
           }
         },
         {
-          "label": "SSL Certificates",
+          "label": "Domain Registration",
           "href": {
-            "spa": "/hosting/ssl",
-            "php": "ssl-certificate.php"
-          }
-        },
-        {
-          "label": "Backups",
-          "href": {
-            "spa": "/hosting/backups",
-            "php": "backups.php"
-          }
-        },
-        {
-          "label": "Website Migration",
-          "href": {
-            "spa": "/hosting/migration",
-            "php": "migration.php"
+            "spa": "/domains/search",
+            "php": "cart.php?a=add&domain=register"
           }
         }
       ]
     },
     {
-      "title": "Cloud & Infrastructure",
+      "title": "Cloud & Servers",
       "items": [
         {
           "label": "Public Cloud",
@@ -1464,7 +1070,7 @@
           }
         },
         {
-          "label": "VPS Hosting",
+          "label": "VPS",
           "href": {
             "spa": "/hosting/vps",
             "php": "vps-hosting.php"
@@ -1475,13 +1081,6 @@
           "href": {
             "spa": "/cloud/enterprise-servers",
             "php": "enterprise-servers.php"
-          }
-        },
-        {
-          "label": "Game Servers",
-          "href": {
-            "spa": "/cloud/game-servers",
-            "php": "game-servers.php"
           }
         },
         {
@@ -1506,17 +1105,10 @@
           }
         },
         {
-          "label": "Operating Systems",
+          "label": "Firewall",
           "href": {
-            "spa": "/cloud/operating-systems",
-            "php": "operating-systems.php"
-          }
-        },
-        {
-          "label": "Control Panels",
-          "href": {
-            "spa": "/hosting/control-panels",
-            "php": "cloudhost247-hosting.php"
+            "spa": "/cloud/firewall",
+            "php": "firewall.php"
           }
         },
         {
@@ -1527,10 +1119,10 @@
           }
         },
         {
-          "label": "Firewalls",
+          "label": "Backups",
           "href": {
-            "spa": "/cloud/firewall",
-            "php": "firewall.php"
+            "spa": "/cloud/backups",
+            "php": "backups.php"
           }
         }
       ]
@@ -1541,36 +1133,15 @@
         {
           "label": "Domain Search",
           "href": {
-            "spa": "/domains/search",
-            "php": "cart.php?a=add&domain=register"
-          }
-        },
-        {
-          "label": "Register a Domain",
-          "href": {
-            "spa": "/domains/search",
-            "php": "cart.php?a=add&domain=register"
-          }
-        },
-        {
-          "label": "Transfer a Domain",
-          "href": {
-            "spa": "/domains/transfer",
-            "php": "cart.php?a=add&domain=transfer"
-          }
-        },
-        {
-          "label": "Domain Extensions",
-          "href": {
-            "spa": "/domains/extensions",
+            "spa": "/domains/bulk-search",
             "php": "domain.php"
           }
         },
         {
-          "label": "WHOIS / RDAP",
+          "label": "Domain Registration",
           "href": {
-            "spa": "/domains/whois",
-            "php": "tools/domain-whois"
+            "spa": "/domains/search",
+            "php": "cart.php?a=add&domain=register"
           }
         },
         {
@@ -1581,71 +1152,35 @@
           }
         },
         {
-          "label": "Bulk Domain Search",
+          "label": "Domain DNS",
           "href": {
-            "spa": "/domains/bulk-search",
-            "php": "domain.php"
+            "php": "domain-dns.php"
           }
         },
         {
-          "label": "Domain Auctions",
+          "label": "Domain Renewal",
           "href": {
-            "spa": "/domains/auctions",
-            "php": "domain.php"
-          }
-        },
-        {
-          "label": "Domain Appraisal",
-          "href": {
-            "spa": "/domains/appraisal",
-            "php": "domain.php"
-          }
-        },
-        {
-          "label": "Domain Broker",
-          "href": {
-            "spa": "/domains/broker",
-            "php": "domain.php"
-          }
-        },
-        {
-          "label": "Domain Club",
-          "href": {
-            "spa": "/domains/club",
-            "php": "domain.php"
+            "spa": "/legal/domain-renewal-policy",
+            "php": "domain-renewal-policy.php"
           }
         }
       ]
     },
     {
-      "title": "Platforms & Developers",
+      "title": "Developers",
       "items": [
         {
-          "label": "Application Marketplace",
+          "label": "Developer Hosting",
+          "href": {
+            "spa": "/hosting/developer",
+            "php": "developer-friendly.php"
+          }
+        },
+        {
+          "label": "Applications",
           "href": {
             "spa": "/apps",
             "php": "applications.php"
-          }
-        },
-        {
-          "label": "Databases",
-          "href": {
-            "spa": "/platforms/databases",
-            "php": "applications.php#databases"
-          }
-        },
-        {
-          "label": "Containers & Docker",
-          "href": {
-            "spa": "/platforms/containers",
-            "php": "docker-hosting.php"
-          }
-        },
-        {
-          "label": "PaaS",
-          "href": {
-            "spa": "/platforms/paas",
-            "php": "paas.php"
           }
         },
         {
@@ -1656,17 +1191,17 @@
           }
         },
         {
-          "label": "Developer Platform",
+          "label": "PaaS",
           "href": {
-            "spa": "/developers",
-            "php": "developer-friendly.php"
+            "spa": "/platforms/paas",
+            "php": "paas.php"
           }
         },
         {
-          "label": "API Hosting",
+          "label": "Docker",
           "href": {
-            "spa": "/hosting/api",
-            "php": "api-hosting.php"
+            "spa": "/developers/docker",
+            "php": "docker-hosting.php"
           }
         },
         {
@@ -1696,6 +1231,13 @@
             "spa": "/developers/laravel",
             "php": "laravel-hosting.php"
           }
+        },
+        {
+          "label": "API Hosting",
+          "href": {
+            "spa": "/hosting/api",
+            "php": "api-hosting.php"
+          }
         }
       ]
     },
@@ -1704,21 +1246,14 @@
       "toolsDriven": true,
       "items": [
         {
-          "label": "All Tools",
-          "href": {
-            "spa": "/tools",
-            "php": "tools"
-          }
-        },
-        {
-          "label": "DNS & Domains Tools",
+          "label": "DNS Tools",
           "href": {
             "spa": "/tools/category/dns-domains",
             "php": "tools/category/dns-domains"
           }
         },
         {
-          "label": "IP & Network Tools",
+          "label": "IP Tools",
           "href": {
             "spa": "/tools/category/ip-network",
             "php": "tools/category/ip-network"
@@ -1746,13 +1281,6 @@
           }
         },
         {
-          "label": "Website Tools",
-          "href": {
-            "spa": "/tools/category/website",
-            "php": "tools/category/website"
-          }
-        },
-        {
           "label": "Developer Tools",
           "href": {
             "spa": "/tools/category/developer",
@@ -1760,22 +1288,37 @@
           }
         },
         {
-          "label": "Calculators Tools",
+          "label": "Website Tools",
+          "href": {
+            "spa": "/tools/category/website",
+            "php": "tools/category/website"
+          }
+        },
+        {
+          "label": "Calculators",
           "href": {
             "spa": "/tools/category/calculators",
             "php": "tools/category/calculators"
           }
         },
         {
-          "label": "Utilities Tools",
+          "label": "Utilities",
           "href": {
             "spa": "/tools/category/utilities",
             "php": "tools/category/utilities"
           }
         },
         {
+          "label": "All Tools",
+          "href": {
+            "spa": "/tools",
+            "php": "tools"
+          }
+        },
+        {
           "label": "Compliance & Document Tools",
           "href": {
+            "spa": "/tools/compliance-documents",
             "php": "tools/compliance-documents"
           }
         },
@@ -1789,41 +1332,55 @@
       ]
     },
     {
-      "title": "Websites",
+      "title": "Resources",
       "items": [
         {
-          "label": "Website Builder",
+          "label": "Documentation",
           "href": {
-            "spa": "/websites/builder",
-            "php": "website-design.php"
+            "spa": "/docs",
+            "php": "documentation.php"
           }
         },
         {
-          "label": "AI Website Builder",
+          "label": "Help Center",
           "href": {
-            "spa": "/websites/ai-builder",
-            "php": "website-design.php"
+            "spa": "/help",
+            "php": "help-center.php"
           }
         },
         {
-          "label": "Website Templates",
+          "label": "FAQs",
           "href": {
-            "spa": "/websites/templates",
-            "php": "website-design.php"
+            "spa": "/faq",
+            "php": "faqs.php"
           }
         },
         {
-          "label": "E-commerce & Stores",
+          "label": "Blog",
           "href": {
-            "spa": "/websites/store",
-            "php": "website-design.php"
+            "spa": "/blog",
+            "php": "blog.php"
           }
         },
         {
-          "label": "Website Design",
+          "label": "Network",
           "href": {
-            "spa": "/websites/design-services",
-            "php": "website-design.php"
+            "spa": "/cloud/network",
+            "php": "network.php"
+          }
+        },
+        {
+          "label": "Data Centers",
+          "href": {
+            "spa": "/cloud/data-centers",
+            "php": "data-centers.php"
+          }
+        },
+        {
+          "label": "Status",
+          "href": {
+            "spa": "/status",
+            "php": "serverstatus.php"
           }
         }
       ]
@@ -1832,7 +1389,7 @@
       "title": "Company",
       "items": [
         {
-          "label": "About CloudHost247",
+          "label": "About",
           "href": {
             "spa": "/about",
             "php": "aboutus.php"
@@ -1846,99 +1403,17 @@
           }
         },
         {
-          "label": "Blog",
-          "href": {
-            "spa": "/blog",
-            "php": "blog.php"
-          }
-        },
-        {
-          "label": "Security & Compliance",
+          "label": "Security",
           "href": {
             "spa": "/security",
             "php": "security.php"
           }
         },
         {
-          "label": "Infrastructure",
+          "label": "Compliance",
           "href": {
-            "spa": "/cloud/infrastructure",
-            "php": "infrastructure.php"
-          }
-        },
-        {
-          "label": "Offers",
-          "href": {
-            "spa": "/offers",
-            "php": "offers.php"
-          }
-        },
-        {
-          "label": "Sitemap",
-          "href": {
-            "spa": "/sitemap",
-            "php": "cloudhost247-sitemap.php"
-          }
-        }
-      ]
-    },
-    {
-      "title": "Support",
-      "items": [
-        {
-          "label": "Help Center",
-          "href": {
-            "spa": "/help",
-            "php": "help-center.php"
-          }
-        },
-        {
-          "label": "Knowledge Base",
-          "href": {
-            "spa": "/help",
-            "php": "knowledgebase.php"
-          }
-        },
-        {
-          "label": "FAQ",
-          "href": {
-            "spa": "/faq",
-            "php": "faqs.php"
-          }
-        },
-        {
-          "label": "Open a Ticket",
-          "href": {
-            "spa": "/support",
-            "php": "submitticket.php"
-          }
-        },
-        {
-          "label": "Service Status",
-          "href": {
-            "spa": "/status",
-            "php": "serverstatus.php"
-          }
-        },
-        {
-          "label": "Client Area",
-          "href": {
-            "spa": "/dashboard",
-            "php": "clientarea.php"
-          }
-        },
-        {
-          "label": "Billing & Invoices",
-          "href": {
-            "spa": "/invoices",
-            "php": "clientarea.php?action=invoices"
-          }
-        },
-        {
-          "label": "Documentation",
-          "href": {
-            "spa": "/docs",
-            "php": "documentation.php"
+            "spa": "/legal/data-protection-standards",
+            "php": "data-protection-standards.php"
           }
         }
       ]
@@ -1946,13 +1421,6 @@
     {
       "title": "Legal",
       "items": [
-        {
-          "label": "Legal & Policy Center",
-          "href": {
-            "spa": "/legal",
-            "php": "legal.php"
-          }
-        },
         {
           "label": "Terms of Service",
           "href": {
@@ -1975,7 +1443,7 @@
           }
         },
         {
-          "label": "Acceptable Use Policy",
+          "label": "Acceptable Use",
           "href": {
             "spa": "/legal/acceptable-use",
             "php": "acceptable-use-policy.php"
@@ -1989,17 +1457,31 @@
           }
         },
         {
-          "label": "Backup Policy",
+          "label": "Domain Agreement",
           "href": {
-            "spa": "/legal/backup-policy",
-            "php": "backup-policy.php"
+            "spa": "/legal/domain-agreement",
+            "php": "domain-agreement.php"
           }
         },
         {
-          "label": "Fair Usage Policy",
+          "label": "Domain Brokerage",
           "href": {
-            "spa": "/legal/fair-usage",
-            "php": "fair-usage-policy.php"
+            "spa": "/legal/domain-brokerage-terms",
+            "php": "domain-brokerage-terms.php"
+          }
+        },
+        {
+          "label": "Data Protection",
+          "href": {
+            "spa": "/legal/data-protection-standards",
+            "php": "data-protection-standards.php"
+          }
+        },
+        {
+          "label": "Legal Notice",
+          "href": {
+            "spa": "/legal/legal-notice",
+            "php": "legal-notice.php"
           }
         },
         {
@@ -2010,66 +1492,10 @@
           }
         },
         {
-          "label": "Domain Registration Agreement",
+          "label": "All Policies",
           "href": {
-            "spa": "/legal/domain-agreement",
-            "php": "domain-agreement.php"
-          }
-        },
-        {
-          "label": "Domain Brokerage Terms",
-          "href": {
-            "spa": "/legal/domain-brokerage-terms",
-            "php": "domain-brokerage-terms.php"
-          }
-        },
-        {
-          "label": "Domain Renewal Policy",
-          "href": {
-            "spa": "/legal/domain-renewal-policy",
-            "php": "domain-renewal-policy.php"
-          }
-        },
-        {
-          "label": "Cybercrime & Abuse Policy",
-          "href": {
-            "spa": "/legal/cybercrime-policy",
-            "php": "cybercrime-policy.php"
-          }
-        },
-        {
-          "label": "Data Deletion",
-          "href": {
-            "spa": "/legal/data-deletion",
-            "php": "data-deletion.php"
-          }
-        },
-        {
-          "label": "Data Protection Standards",
-          "href": {
-            "spa": "/legal/data-protection-standards",
-            "php": "data-protection-standards.php"
-          }
-        },
-        {
-          "label": "Privacy Notice & Consent",
-          "href": {
-            "spa": "/legal/privacy-notice-and-consent",
-            "php": "data-privacy-notice-and-consent-form.php"
-          }
-        },
-        {
-          "label": "Domain Registration Addendum",
-          "href": {
-            "spa": "/legal/domain-registration-addendum",
-            "php": "domainregistrationaddendum.php"
-          }
-        },
-        {
-          "label": "Legal Notice",
-          "href": {
-            "spa": "/legal/legal-notice",
-            "php": "legal-notice.php"
+            "spa": "/legal",
+            "php": "legal.php"
           }
         }
       ]
@@ -2081,119 +1507,136 @@
       "spa": "/legal/terms",
       "php": "terms-of-service.php",
       "title": "Terms of Service",
-      "source": "docs/policies/Terms & Conditions.pdf"
+      "source": "docs/policies/Terms & Conditions.pdf",
+      "description": "The Terms & Conditions governing use of CloudHost247 websites, products and services, and the obligations that come with an account."
     },
     {
       "slug": "privacy-policy",
       "spa": "/legal/privacy-policy",
       "php": "privacy-policy.php",
       "title": "Privacy Policy",
-      "source": "docs/policies/Privacy Policy.pdf"
+      "source": "docs/policies/Privacy Policy.pdf",
+      "description": "How CloudHost247 Isc collects, uses and shares personal information, how long it is kept, and what you can ask us to do with it."
     },
     {
       "slug": "cookies",
       "spa": "/legal/cookies",
       "php": "cookie-policy.php",
       "title": "Cookie Policy",
-      "source": "docs/policies/Cookie Policy.pdf"
+      "source": "docs/policies/Cookie Policy.pdf",
+      "description": "How CloudHost247 Isc uses cookies and similar tracking technologies, which categories are set, and how to control them in your browser."
     },
     {
       "slug": "acceptable-use",
       "spa": "/legal/acceptable-use",
       "php": "acceptable-use-policy.php",
       "title": "Acceptable Use Policy",
-      "source": "templates/cloudhost247/includes/legal/acceptableusepolicy.tpl"
+      "source": "templates/cloudhost247/includes/legal/acceptableusepolicy.tpl",
+      "description": "The rules for using CloudHost247 services, systems and network: what is permitted, what counts as abuse, and how reports are handled."
     },
     {
       "slug": "refund-policy",
       "spa": "/legal/refund-policy",
       "php": "refund-policy.php",
       "title": "Refund & Cancellation Policy",
-      "source": "docs/policies/Refund Policy.pdf"
+      "source": "docs/policies/Refund Policy.pdf",
+      "description": "The terms under which refunds may be granted for CloudHost247 hosting, domain and related services, and how to request one."
     },
     {
       "slug": "backup-policy",
       "spa": "/legal/backup-policy",
       "php": "backup-policy.php",
       "title": "Backup Policy",
-      "source": "docs/policies/Backup Policy.pdf"
+      "source": "docs/policies/Backup Policy.pdf",
+      "description": "What is backed up for websites, databases, email and configurations, how long copies are kept, and how restores are requested."
     },
     {
       "slug": "fair-usage",
       "spa": "/legal/fair-usage",
       "php": "fair-usage-policy.php",
       "title": "Fair Usage Policy",
-      "source": "docs/policies/Fair Usage Policy.pdf"
+      "source": "docs/policies/Fair Usage Policy.pdf",
+      "description": "How the fair usage policy applies to shared, reseller and WordPress hosting, including plans advertised with unlimited resources."
     },
     {
       "slug": "trademark",
       "spa": "/legal/trademark",
       "php": "trademark-policy.php",
       "title": "Trademark & Copyright Policy",
-      "source": "docs/policies/Trademark & Copyright Infringement Policy.pdf"
+      "source": "docs/policies/Trademark & Copyright Infringement Policy.pdf",
+      "description": "How CloudHost247 Isc reviews claims of trademark and copyright infringement, and how domain name disputes are handled alongside them."
     },
     {
       "slug": "domain-agreement",
       "spa": "/legal/domain-agreement",
       "php": "domain-agreement.php",
       "title": "Domain Registration Agreement",
-      "source": "docs/policies/Domain Name Registration Agreement.pdf"
+      "source": "docs/policies/Domain Name Registration Agreement.pdf",
+      "description": "The agreement between you and CloudHost247 ISC as sponsoring registrar or reseller for the domain names you register through us."
     },
     {
       "slug": "domain-brokerage-terms",
       "spa": "/legal/domain-brokerage-terms",
       "php": "domain-brokerage-terms.php",
       "title": "Domain Brokerage Terms",
-      "source": "domain-brokerage-terms.php"
+      "source": "domain-brokerage-terms.php",
+      "description": "What a CloudHost247 domain brokerage engagement covers: acquisition attempts, confidentiality, and what happens when a domain cannot be acquired."
     },
     {
       "slug": "domain-renewal-policy",
       "spa": "/legal/domain-renewal-policy",
       "php": "domain-renewal-policy.php",
       "title": "Domain Renewal & Deletion Policy",
-      "source": "docs/policies/Domain Name Auto-Renewal and Deletion Policy.pdf"
+      "source": "docs/policies/Domain Name Auto-Renewal and Deletion Policy.pdf",
+      "description": "How domain auto-renewal works, when a domain is deleted for non-payment, and the grace and redemption periods that follow."
     },
     {
       "slug": "domain-registration-addendum",
       "spa": "/legal/domain-registration-addendum",
       "php": "domainregistrationaddendum.php",
       "title": "Domain Registration Addendum",
-      "source": "docs/policies/Domain Registration Addendum.pdf"
+      "source": "docs/policies/Domain Registration Addendum.pdf",
+      "description": "TLD-specific terms that apply on top of the main Domain Registration Agreement, for each registry CloudHost247 Isc registers through."
     },
     {
       "slug": "cybercrime-policy",
       "spa": "/legal/cybercrime-policy",
       "php": "cybercrime-policy.php",
       "title": "Cybercrime & Abuse Policy",
-      "source": "docs/policies/Cybercrime Detection Policy.pdf"
+      "source": "docs/policies/Cybercrime Detection Policy.pdf",
+      "description": "The preventive and detection measures CloudHost247 Isc uses when a domain registered or hosted on the platform is used for abuse."
     },
     {
       "slug": "data-deletion",
       "spa": "/legal/data-deletion",
       "php": "data-deletion.php",
       "title": "Data Deletion Policy",
-      "source": "docs/policies/Data Deletion Instructions.pdf"
+      "source": "docs/policies/Data Deletion Instructions.pdf",
+      "description": "Step-by-step instructions for requesting deletion of your personal data, and how the request is verified and actioned."
     },
     {
       "slug": "data-protection-standards",
       "spa": "/legal/data-protection-standards",
       "php": "data-protection-standards.php",
       "title": "Data Protection Standards",
-      "source": "docs/policies/Data Protection Standards.pdf"
+      "source": "docs/policies/Data Protection Standards.pdf",
+      "description": "The principles, measures and responsibilities CloudHost247 Isc follows to protect customer, partner and employee data."
     },
     {
       "slug": "privacy-notice-and-consent",
       "spa": "/legal/privacy-notice-and-consent",
       "php": "data-privacy-notice-and-consent-form.php",
       "title": "Data Privacy Notice & Consent",
-      "source": "docs/policies/Data Privacy Notice and Consent Form.pdf"
+      "source": "docs/policies/Data Privacy Notice and Consent Form.pdf",
+      "description": "The privacy notice and consent form used for prospective employees, published under the Nigeria Data Protection Act 2023."
     },
     {
       "slug": "legal-notice",
       "spa": "/legal/legal-notice",
       "php": "legal-notice.php",
       "title": "Legal Notice",
-      "source": "docs/policies/Legal Notice.pdf"
+      "source": "docs/policies/Legal Notice.pdf",
+      "description": "The rights, obligations and restrictions that apply to CloudHost247 Isc services, website and associated platforms, and the company details."
     }
   ],
   "toolsCategories": [

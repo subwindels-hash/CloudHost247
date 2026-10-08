@@ -110,25 +110,82 @@ describe('CLOUDHOST247 platform services', () => {
     const response = await app.inject({ method: 'GET', url: '/api/v1/navigation' });
     expect(response.statusCode).toBe(200);
     const body = response.json() as {
-      sections: Array<{ id: string; groups: Array<{ links: Array<{ to: string; label: string; badge?: string }> }> }>;
+      sections: Array<{
+        id: string;
+        label: string;
+        to: string;
+        groups: Array<{ links: Array<{ to: string; label: string; badge?: string }> }>;
+        featured?: { title: string; to: string };
+        toolsDriven?: boolean;
+      }>;
+      linkCount: number;
       validation: { ok: boolean; errors: string[] };
     };
 
     // The menu is generated from shared/site/registry.json. This asserts the *contract* — one
     // definition, the published families, and every link reachable — rather than pinning the list,
     // so adding a product family is a registry change rather than a test edit.
+    //
+    // Seven families, matching the global header: `developers` and `websites` were folded into
+    // `platforms` and `hosting` so no destination is published by two top-level panels.
     expect(body.sections.map((section) => section.id)).toEqual([
-      'hosting', 'cloud', 'domains', 'platforms', 'developers', 'websites', 'tools', 'resources', 'support',
+      'hosting', 'cloud', 'domains', 'platforms', 'tools', 'resources', 'company',
     ]);
     expect(body.validation.ok).toBe(true);
     expect(body.validation.errors).toEqual([]);
 
     const links = body.sections.flatMap((section) => section.groups.flatMap((group) => group.links));
-    expect(links.length).toBeGreaterThan(100);
-    for (const link of links) {
+    // Section heads and featured panels are navigation too: a header whose own "View all" link is
+    // dead is as broken as a dead group link, so they resolve under the same check.
+    const served = [
+      ...links,
+      ...body.sections.map((section) => ({ label: section.label, to: section.to })),
+      ...body.sections.flatMap((section) =>
+        section.featured ? [{ label: section.featured.title, to: section.featured.to }] : [],
+      ),
+    ];
+    for (const link of served) {
       // A menu link that the SPA cannot render is a dead link — this is the check that prevents it.
       expect(routeExists(link.to), `${link.label} → ${link.to}`).toBe(true);
     }
+    // The count the header advertises must be the count it serves. Computed from the response, so
+    // it fails if a section, a featured panel or a group link stops being counted.
+    const counted = body.sections.reduce(
+      (total, section) => total + 1 + (section.featured ? 1 : 0) + section.groups.reduce((inner, group) => inner + group.links.length, 0),
+      0,
+    );
+    expect(body.linkCount).toBe(counted);
+
+    // The families above are the header's *shape*; this is the product surface it must keep
+    // publishing. A served-vs-declared comparison would be a tautology — the API and the test read
+    // the same generated module, so deleting a destination from the registry moved both sides and
+    // the test passed (verified by mutation). These destinations are therefore pinned explicitly:
+    // dropping Web Hosting, VPS or the domain search from the header has to fail here.
+    const required: Record<string, string[]> = {
+      hosting: ['/hosting/web-hosting', '/hosting/business', '/hosting/wordpress', '/hosting/email', '/hosting/reseller', '/hosting/ssl'],
+      cloud: ['/hosting/vps', '/hosting/dedicated', '/cloud/public', '/cloud/private', '/cloud/server-management', '/cloud/backups', '/cloud/firewall'],
+      domains: ['/domains/search', '/domains/bulk-search'],
+      platforms: ['/apps', '/hosting/control-panels', '/cloud/operating-systems', '/developers/deployment', '/hosting/api'],
+      resources: ['/docs', '/help', '/blog', '/status'],
+      company: ['/about', '/contact', '/legal'],
+    };
+    for (const [id, destinations] of Object.entries(required)) {
+      const section = body.sections.find((candidate) => candidate.id === id);
+      expect(section, id).toBeDefined();
+      const published = new Set([
+        section!.to,
+        ...(section!.featured ? [section!.featured.to] : []),
+        ...section!.groups.flatMap((group) => group.links.map((link) => link.to)),
+      ]);
+      for (const destination of destinations) {
+        expect(published, `${id} must publish ${destination}`).toContain(destination);
+      }
+    }
+    // The Tools panel is the one family that carries no static links: its entries are live data
+    // from the Tools Center, so a hardcoded one would be a second source of truth.
+    const tools = body.sections.find((section) => section.id === 'tools');
+    expect(tools?.toolsDriven).toBe(true);
+    expect(tools?.groups).toEqual([]);
     // Badges must stay meaningful: at most two per section.
     for (const section of body.sections) {
       const badges = section.groups.flatMap((group) => group.links).filter((link) => link.badge);

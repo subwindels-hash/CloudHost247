@@ -231,7 +231,10 @@ class ModuleManagerStaticTests(unittest.TestCase):
         gate = (ROOT / 'scripts/release-candidate-check.sh').read_text()
         self.assertIn('tests/modules/run.php', gate)
         self.assertIn('tests/modules/test_static.py', gate)
-        workflow = (ROOT / '.github/workflows/independent-foundation.yml').read_text()
+        workflow_path = ROOT / '.github/workflows/independent-foundation.yml'
+        if not workflow_path.is_file():
+            self.skipTest('repository only: the exported deployment package ships no CI workflow')
+        workflow = workflow_path.read_text()
         self.assertIn('tests/modules/run.php', workflow)
 
     # ------------------------------------------------- configuration safety
@@ -329,7 +332,10 @@ class ModuleManagerStaticTests(unittest.TestCase):
             self.assertEqual(urls.findall(path.read_text()), [], str(path))
 
     def test_packages_are_not_committed(self):
-        ignore = (ROOT / '.gitignore').read_text()
+        ignore_path = ROOT / '.gitignore'
+        if not ignore_path.is_file():
+            self.skipTest('repository only: the exported deployment package ships no .gitignore')
+        ignore = ignore_path.read_text()
         self.assertIn('*.zip', ignore)
 
     def test_documentation_describes_the_workflow(self):

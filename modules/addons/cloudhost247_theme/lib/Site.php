@@ -24,6 +24,21 @@ final class Site
         $system = isset($vars['systemurl']) ? rtrim((string) $vars['systemurl'], '/') : '';
         if (!preg_match('~^https?://[^/]+~', $system)) { $system = ''; }
         $platform = isset($settings['platform_base_path']) ? self::platformPath($settings['platform_base_path']) : '';
+        /*
+         * A page's meta description is the description authored for it, falling back to its summary.
+         *
+         * The two are separate fields because they answer to different readers: `summary` is the
+         * one-line blurb a card shows, `seo_description` is what a search result shows. Nineteen
+         * policy pages only ever had the summary, which was the same formulaic sentence with the
+         * title substituted — nineteen near-identical descriptions, the case a search engine treats
+         * as one page repeated. `shared/site/registry.json` now authors one per policy document and
+         * the generator projects them into the theme registry, so the fallback is only a safety net.
+         */
+        $description = $home
+            ? 'CloudHost247 gives businesses, developers and organizations the infrastructure they need to build and operate online — from domains and websites to cloud servers, applications and deployment platforms.'
+            : ($page
+                ? (isset($page['seo_description']) && trim((string) $page['seo_description']) !== '' ? $page['seo_description'] : $page['summary'])
+                : 'Access your CloudHost247 account, services, billing and support.');
         $result = array(
             'navigation' => $catalog['navigation'], 'footer' => $catalog['footer'],
             'toolCategories' => isset($catalog['toolCategories']) && is_array($catalog['toolCategories']) ? $catalog['toolCategories'] : array(),
@@ -31,7 +46,7 @@ final class Site
             'public' => $home || $page !== null || in_array($script, array('notfound.php', 'site-search.php', 'service-error.php'), true),
             'path' => $script, 'base' => $base, 'platform' => $platform,
             'title' => $home ? 'Build. Host. Deploy. Scale.' : ($page ? $page['title'] : (isset($vars['pagetitle']) ? strip_tags($vars['pagetitle']) : 'Client Area')),
-            'description' => $home ? 'CloudHost247 gives businesses, developers and organizations the infrastructure they need to build and operate online — from domains and websites to cloud servers, applications and deployment platforms.' : ($page ? $page['summary'] : 'Access your CloudHost247 account, services, billing and support.'),
+            'description' => $description,
             'canonical' => $system && ($home || $page) ? $system . '/' . ($home ? '' : $script) : '',
             'social' => ($system ?: $base) . '/assets/images/cloudhost247/social/cloudhost247-social.png',
         );

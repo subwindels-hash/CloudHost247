@@ -71,7 +71,9 @@ class ArchiveIntegrationTests(unittest.TestCase):
   if not archive.is_file():
    # Pin the reason for the absence instead of tolerating an unexplained one: the archive
    # is excluded by an ignore rule, and the review record still names the expected hash.
-   self.assertIn('*.zip',(ROOT/'.gitignore').read_text(),'.gitignore must exclude *.zip for this skip to be legitimate')
+   if not (ROOT/'.gitignore').is_file():
+    self.skipTest('repository only: the exported deployment package ships no .gitignore')
+   self.assertIn('*.zip',(ROOT/'.gitignore').read_text(),'.gitignore must exclude *.zip for this test to be legitimate')
    self.assertIn(RDP_ARCHIVE_SHA256,Path(__file__).read_text())
    self.skipTest('RDP.zip was extracted into modules/servers/RDP/ and removed from the tree (*.zip is ignored); the byte-for-byte check runs on a host that holds the original archive')
   self.assertEqual(hashlib.sha256(archive.read_bytes()).hexdigest(),RDP_ARCHIVE_SHA256,'vendor RDP archive was modified')
