@@ -501,17 +501,17 @@
               "icon": "activity",
               "desc": "Delegation, mail authentication and DNSSEC checks in one report.",
               "href": {
-                "spa": "/tools/dns-health",
-                "php": "tools/dns-health"
+                "spa": "/tools/domain-dns-health",
+                "php": "tools/domain-dns-health"
               }
             },
             {
-              "label": "DNS Security",
+              "label": "All DNS Tools",
               "icon": "shield",
-              "desc": "DNS and domain security tools from the CloudHost247 catalogue.",
+              "desc": "Every DNS and domain tool: lookups, propagation, zone diagnostics and DNSSEC.",
               "href": {
-                "spa": "/tools/category/security",
-                "php": "tools/category/security"
+                "spa": "/tools/category/dns-domains",
+                "php": "tools/category/dns-domains"
               }
             },
             {

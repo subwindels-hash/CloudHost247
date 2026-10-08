@@ -31,6 +31,54 @@ foreach (ToolsSite::catalog()['tools'] as $tool) {
 }
 foreach (ToolsSite::catalog()['categories'] as $slug=>$label) { check(ToolsSite::resolve('/tools/category/'.$slug)['name']===$label.' Tools', 'category'); }
 
+// --- Every tools route the navigation publishes must resolve on *this* surface ---------------
+// The registry is one source of truth for two catalogues: the native PHP one (`config/tools.php`,
+// served by this shell) and the app one (`cloudhost247-node/src/tools/catalog.ts`). They slug a few
+// of the same capabilities differently, and the Domain menu published `/tools/dns-health` — a path
+// only the app catalogue knew, so a visitor arriving from the mega menu on the PHP surface got a page
+// this shell cannot serve. Resolution alone cannot see that drift, so the links are walked here.
+$navTools = array();
+$walkMenus = function ($items) use (&$walkMenus, &$navTools) {
+    foreach ((array) $items as $value) {
+        if (!is_array($value)) { continue; }
+        if (isset($value['url']) && is_string($value['url'])) {
+            $path = '/' . ltrim((string) preg_replace('~^https?://[^/]+~', '', $value['url']), '/');
+            if (preg_match('~^/tools(/|$)~', $path) === 1) { $navTools[$path] = true; }
+        }
+        $walkMenus($value);
+    }
+};
+$catalog = Site::catalog();
+foreach (array('navigation', 'footer') as $region) {
+    if (isset($catalog[$region])) { $walkMenus($catalog[$region]); }
+}
+check(count($navTools) >= 10, 'the navigation publishes tools routes to check (' . count($navTools) . ' found)');
+// Strictly the native catalogue: `ToolsSite` resolves the app projection's paths and legacy aliases as
+// well, and *this* deployment is the tools tree on its own — a path only the app answers is a page
+// this shell cannot serve.
+foreach (array_keys($navTools) as $navPath) {
+    check(Catalog::resolve($navPath) !== null,
+        'the navigation publishes a tools route this shell serves: ' . $navPath);
+}
+
+// --- The export the site generator reads must be this catalogue ----------------------------------
+// `scripts/site/generate.mjs` validates every PHP tools destination against `tools-public.json`,
+// because that file is the JavaScript-readable export of this catalogue. An export that drifts from
+// `config/tools.php` would make that gate answer for a shell it no longer describes, so the two are
+// compared here: same tool paths, same categories.
+$exportPath = dirname(__DIR__, 2) . '/modules/addons/cloudhost247_theme/resources/tools-public.json';
+$export = json_decode((string) file_get_contents($exportPath), true);
+check(is_array($export), 'the native catalogue export exists and parses');
+$exportPaths = array();
+foreach ($export['tools'] as $exportTool) { $exportPaths[] = (string) $exportTool['path']; }
+sort($exportPaths);
+$nativePaths = array();
+foreach (Catalog::tools() as $nativeTool) { $nativePaths[] = '/tools/' . $nativeTool['slug']; }
+sort($nativePaths);
+$drift = array_merge(array_diff($nativePaths, $exportPaths), array_diff($exportPaths, $nativePaths));
+check($drift === array(), 'the native catalogue export lists the same tool paths as config/tools.php: ' . implode(', ', array_slice($drift, 0, 3)));
+check(count($nativePaths) >= 100, 'that comparison covers the whole catalogue (' . count($nativePaths) . ' native tool paths)');
+
 // --- No catalogue entry may exist without a page -------------------------------------------------
 // "A catalogue tool without a usable page" is an acceptance failure, and it is not detectable by
 // resolving the route: `Catalog::resolve()` reads the same array the catalogue does, so a tool that

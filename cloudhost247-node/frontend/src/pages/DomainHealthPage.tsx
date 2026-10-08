@@ -52,7 +52,9 @@ export default function DomainHealthPage() {
         <h1>{domain} — health center</h1>
         <div className="tools-runner__actions">
           <button type="button" className="ch247-button" onClick={load}>Re-check</button>
-          <Link className="ch247-button ch247-button--ghost" to={`/tools/dns-health`}>Detailed DNS health</Link>
+          {/* The published path is the one the PHP tools shell serves too; /tools/dns-health is a
+              retained alias, and linking an alias publishes a second URL for one page. */}
+          <Link className="ch247-button ch247-button--ghost" to={`/tools/domain-dns-health`}>Detailed DNS health</Link>
         </div>
       </div>
 
