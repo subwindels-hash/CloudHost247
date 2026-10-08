@@ -267,6 +267,10 @@ a { color: var(--blue-dark); }
 .inline-form { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
 .inline-form input, .inline-form select { min-width: 120px; }
 .nested-form { margin-top: 20px; }
+.detail-list { display: grid; grid-template-columns: 160px 1fr; gap: 10px 16px; }
+.detail-list dt { color: var(--muted); font-weight: 600; }
+.detail-list dd { margin: 0; }
+@media (max-width: 760px) { .detail-list { grid-template-columns: 1fr; gap: 4px; } }
 @media (max-width: 760px) { .admin-catalog-grid { grid-template-columns: 1fr; } .catalog-plan-head { display: block; } }
 .admin-role {
   margin-left: auto; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em;

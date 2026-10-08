@@ -18,6 +18,8 @@ import AdminTicketDetailPage from './pages/AdminTicketDetailPage.jsx';
 import AdminUsersPage from './pages/AdminUsersPage.jsx';
 import AdminContentPage from './pages/AdminContentPage.jsx';
 import AdminSiteSettingsPage from './pages/AdminSiteSettingsPage.jsx';
+import AdminCatalogPage from './pages/AdminCatalogPage.jsx';
+import AdminServersPage from './pages/AdminServersPage.jsx';
 import { read as readSupportSession, finish as finishSupportSession } from './lib/support-session.js';
 
 function Gate({ children }) {
@@ -126,6 +128,7 @@ export default function App() {
           <Route path="content" element={<AdminContentPage />} />
           <Route path="site-settings" element={<AdminSiteSettingsPage />} />
           <Route path="catalog" element={<AdminCatalogPage />} />
+          <Route path="servers" element={<AdminServersPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/account" replace />} />
       </Routes>

@@ -286,6 +286,9 @@ export const adminApi = {
   updateCatalogPlan: (id, payload) => api(`/api/v1/admin/catalog/plans/${encodeURIComponent(id)}`, { method: 'PATCH', body: payload }),
   createCatalogPricing: (planId, payload) => api(`/api/v1/admin/catalog/plans/${encodeURIComponent(planId)}/pricing`, { method: 'POST', body: payload }),
   replaceCatalogFeatures: (planId, features) => api(`/api/v1/admin/catalog/plans/${encodeURIComponent(planId)}/features`, { method: 'PUT', body: { features } }),
+  servers: () => api('/api/v1/admin/servers'),
+  createServer: (payload) => api('/api/v1/admin/servers', { method: 'POST', body: payload }),
+  updateServer: (id, patch) => api(`/api/v1/admin/servers/${encodeURIComponent(id)}`, { method: 'PATCH', body: patch }),
 };
 
 /** Human-readable rendering of an ApiError for form alerts. */
