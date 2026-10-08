@@ -5488,11 +5488,11 @@
             },
             {
               "label": "DNS Health",
-              "url": "tools/dns-health"
+              "url": "tools/domain-dns-health"
             },
             {
-              "label": "DNS Security",
-              "url": "tools/category/security"
+              "label": "All DNS Tools",
+              "url": "tools/category/dns-domains"
             },
             {
               "label": "DNSSEC",

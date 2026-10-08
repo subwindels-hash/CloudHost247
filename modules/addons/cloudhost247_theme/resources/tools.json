@@ -85,12 +85,13 @@
       "summary": "Run every DNS, delegation, email-authentication and DNSSEC check for a domain.",
       "description": "Runs a battery of independent checks against the domain's authoritative servers and public resolvers: NS delegation consistency, A/AAAA/CNAME, MX, SPF, DKIM, DMARC, BIMI, CAA, SOA, TTL consistency, DNSSEC and resolution failures. Each check reports PASS, WARNING, ERROR, NOT_CHECKED or UNKNOWN with its own explanation.",
       "icon": "activity",
-      "path": "/tools/dns-health",
+      "path": "/tools/domain-dns-health",
       "apiPath": "/api/tools/dns-health",
       "authRequired": false,
       "visibility": "public",
       "legacyPaths": [
-        "/tools/dns/health"
+        "/tools/dns/health",
+        "/tools/dns-health"
       ],
       "discoveryCategories": [
         "dns-domains"

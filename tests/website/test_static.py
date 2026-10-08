@@ -244,4 +244,41 @@ class WebsiteTests(unittest.TestCase):
    self.assertNotIn(key,glyphs,f"{mark['served']} renders the same glyph as {glyphs.get(key)}")
    glyphs[key]=mark['served']
 
+ def test_every_theme_include_resolves_or_is_a_declared_parent_template(self):
+  # The theme is a child of twenty-one and ships only what it restyles, so some includes are the
+  # parent's on purpose. Everything else has to exist: an include that resolves to nothing renders a
+  # hole, not a style defect. The gate distinguishes the two and fails on a stale exemption.
+  errors,audited=verify.include_errors()
+  self.assertEqual(errors,[])
+  self.assertGreater(audited,50,'include audit covered too few includes to be meaningful')
+  themes={directory:parent for directory,parent,_ in verify.theme_templates()}
+  self.assertEqual(themes.get('templates/cloudhost247'),'twenty-one')
+  self.assertFalse([d for d in themes if d.endswith('_legacy')],'legacy order-form tree is out of scope')
+ def test_theme_include_that_resolves_nowhere_fails(self):
+  # A partial that was removed, or a path someone mistyped, is the defect this gate exists for.
+  for source in ('{include file="$template/includes/removed-partial.tpl"}',
+                 '{include file="cloudhost247/includes/removed-partial.tpl"}',
+                 "{include file='$template/includes/removed-partial.tpl'}"):
+   errors,_=verify.include_errors([('templates/cloudhost247','twenty-one',{'header.tpl':source})])
+   self.assertTrue(any('removed-partial.tpl' in e for e in errors),source)
+ def test_theme_include_of_a_declared_parent_template_is_allowed_and_then_staleness_is_caught(self):
+  source='{include file="$template/includes/head.tpl"}'
+  errors,_=verify.include_errors([('templates/cloudhost247','twenty-one',{'header.tpl':source})])
+  # Scoped to this include: a synthetic one-template theme cannot satisfy the exemptions the real
+  # theme uses, so the other errors here are the fixture's, not the include's.
+  self.assertFalse([e for e in errors if 'header.tpl' in e],errors)
+  # Once the theme ships the template itself, the exemption is no longer true and must be dropped.
+  errors,_=verify.include_errors([('templates/cloudhost247','twenty-one',
+   {'header.tpl':source,'includes/head.tpl':'<head></head>'} )])
+  self.assertTrue(any('stale - the theme now ships it' in e for e in errors),errors)
+  # And if nothing includes it any more, the exemption is dead weight that hides the next typo.
+  errors,_=verify.include_errors([('templates/cloudhost247','twenty-one',{'header.tpl':'<head></head>'} )])
+  self.assertTrue(any('nothing includes it any more' in e for e in errors),errors)
+ def test_theme_that_declares_no_parent_must_ship_its_includes(self):
+  errors,_=verify.include_errors([('templates/cloudhost247','',{'header.tpl':'{include file="$template/includes/head.tpl"}'})])
+  self.assertTrue(any('declares no parent' in e for e in errors),errors)
+ def test_dynamic_includes_are_skipped_rather_than_guessed(self):
+  self.assertEqual(verify.include_targets('{include file=$legalTemplate}'),['$legalTemplate'])
+  self.assertEqual(verify.include_targets('{include file="orderforms/{$carttpl}/common.tpl"}'),[])
+
 if __name__=='__main__':unittest.main()

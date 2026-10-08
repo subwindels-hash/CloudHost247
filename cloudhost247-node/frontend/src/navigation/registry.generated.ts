@@ -376,14 +376,14 @@ export const NAV_SECTIONS: RegistrySection[] = [
           },
           {
             "label": "DNS Health",
-            "to": "/tools/dns-health",
+            "to": "/tools/domain-dns-health",
             "description": "Delegation, mail authentication and DNSSEC checks in one report.",
             "icon": "activity"
           },
           {
-            "label": "DNS Security",
-            "to": "/tools/category/security",
-            "description": "DNS and domain security tools from the CloudHost247 catalogue.",
+            "label": "All DNS Tools",
+            "to": "/tools/category/dns-domains",
+            "description": "Every DNS and domain tool: lookups, propagation, zone diagnostics and DNSSEC.",
             "icon": "shield"
           },
           {
@@ -1640,8 +1640,8 @@ export const REGISTRY_ROUTES: string[] = [
   "/legal/domain-renewal-policy",
   "/tools/dns-lookup",
   "/tools/dns-propagation",
-  "/tools/dns-health",
-  "/tools/category/security",
+  "/tools/domain-dns-health",
+  "/tools/category/dns-domains",
   "/tools/dnskey-lookup",
   "/apps",
   "/developers/deployment",

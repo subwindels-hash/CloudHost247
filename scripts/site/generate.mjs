@@ -1247,23 +1247,33 @@ function main() {
   const pages = phpPages();
   const phpToolRoutes = new Set(['tools']);
   /**
-   * The routes the PHP Tools surface actually resolves. `tools.json` is the projection the theme
-   * runtime reads (`ToolsSite::catalog()`), and it is the file whose categories the React Tools
-   * Center also discovers, so it is the primary source; `tools-public.json` is the older
-   * PHP-engine export and is still accepted so a retained link cannot fail the gate spuriously.
-   * Validating against only one of them is how a menu ends up linking a category the runtime
-   * cannot resolve.
+   * The routes the PHP Tools surface actually resolves — which is the *native* catalogue, not the app
+   * one. `config/tools.php` is what `tools/lib/Catalog.php` resolves against, and `tools-public.json`
+   * is its export for the tooling here; `tools.json` is the projection of the app catalogue
+   * (`cloudhost247-node/src/tools/catalog.ts`), which publishes its own paths for the same
+   * capabilities and forwards the PHP slugs it does not own.
+   *
+   * Validating PHP destinations against `tools.json` is how the Domain menu published
+   * `tools/dns-health` — a path only the app catalogue knew. The SPA answered it; the tools shell
+   * answered 404, and the gate passed because it was reading the wrong catalogue.
+   *
+   * `tools.json` still contributes its categories and collections: both surfaces publish the same
+   * discovery taxonomy (asserted in `validateToolsTaxonomy`) and the same collection hubs.
    */
   const phpToolCatalogs = [
-    join(ROOT, 'modules', 'addons', 'cloudhost247_theme', 'resources', 'tools.json'),
-    join(ROOT, 'modules', 'addons', 'cloudhost247_theme', 'resources', 'tools-public.json'),
+    { file: join(ROOT, 'modules', 'addons', 'cloudhost247_theme', 'resources', 'tools-public.json'),
+      toolPaths: true },
+    { file: join(ROOT, 'modules', 'addons', 'cloudhost247_theme', 'resources', 'tools.json'),
+      toolPaths: false },
   ];
-  for (const file of phpToolCatalogs) {
+  for (const { file, toolPaths } of phpToolCatalogs) {
     if (!existsSync(file)) continue;
     const data = JSON.parse(readFileSync(file, 'utf8'));
-    for (const tool of data.tools ?? []) {
-      const path = String(tool.path ?? '').replace(/^\//, '');
-      if (path) phpToolRoutes.add(path);
+    if (toolPaths) {
+      for (const tool of data.tools ?? []) {
+        const path = String(tool.path ?? '').replace(/^\//, '');
+        if (path) phpToolRoutes.add(path);
+      }
     }
     for (const slug of Object.keys(data.categories ?? {})) phpToolRoutes.add(`tools/category/${slug}`);
     // Curated collections (e.g. Compliance & Document Tools) are hub pages the PHP tools front

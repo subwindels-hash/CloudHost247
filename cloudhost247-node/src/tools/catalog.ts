@@ -1382,7 +1382,7 @@ export const DISCOVERY_CATEGORIES: Record<string, string> = {
 const allTools = [...BASE_TOOL_CATALOG, ...newTools];
 export const TOOL_CATALOG: readonly ToolCatalogEntry[] = allTools.map(tool => {
   // One published path per capability. The PHP tools shell serves the native catalogue
-  // (`config/tools.php`), which slugs eighteen of these tools differently; publishing both paths
+  // (`config/tools.php`), which slugs nineteen of these tools differently; publishing both paths
   // gave crawlers two pages with one title, the second without an implementation behind it. The
   // registry path stays in `legacyPaths` below, so the old URL still resolves and forwards.
   const SERVED_PATH_SLUGS = ({
@@ -1395,6 +1395,10 @@ export const TOOL_CATALOG: readonly ToolCatalogEntry[] = allTools.map(tool => {
     'notepad': 'online-notepad', 'small-text': 'small-text-generator',
     'invisible-character': 'invisible-character-generator', 'qr-generator': 'qr-code-generator',
     'time-card': 'time-card-calculator', 'whois': 'domain-whois',
+    // The PHP catalogue serves this one as `domain-dns-health` and the Domain menu published
+    // `/tools/dns-health`, which only the app could answer. Both surfaces serve the `domain-`
+    // prefixed DNS tools, so the app now publishes that path and the short slug forwards.
+    'dns-health': 'domain-dns-health',
   } as Record<string,string>);
   // `ip-to-hostname` publishes the path the PHP catalogue serves it at: the PHP surface owns the
   // interactive handler, its sitemap lists `/tools/ip-to-hostname`, and the app used to link

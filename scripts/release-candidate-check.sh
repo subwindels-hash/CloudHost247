@@ -122,4 +122,8 @@ python3 scripts/verify-website.py
 # whose URL 404s does not fall through to the next source, so a missing encoding is a broken
 # image on a published page, not a slower one.
 python3 scripts/generate-raster-formats.py --check
+# The Builder renders its own markup in PHP, so the theme class audit never sees it. This checks the
+# widget classes against the sheet the Builder serves, and fails on an unstyled one or on a hook
+# exemption that no longer matches anything.
+python3 scripts/audit-builder-widget-classes.py
 echo 'Release-candidate source verification passed.'
