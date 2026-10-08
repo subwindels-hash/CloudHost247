@@ -71,11 +71,15 @@ test('domain provider registry fails closed on an adapter this build does not co
   const installed = registeredDomainProviderAdapters();
   assert.ok(installed.includes('rdap'));
   assert.ok(installed.includes('govalue'));
-  assert.ok(!installed.includes('namecheap'), 'a registrar adapter is not ported yet and must not be advertised');
+  // The registrar adapters are ported now: the registry advertises exactly what it can construct,
+  // so a configure-a-registrar workflow can actually reach one.
+  assert.ok(installed.includes('namecheap'), 'the Namecheap registrar adapter is compiled');
+  assert.ok(installed.includes('godaddy'), 'the GoDaddy registrar adapter is compiled');
+  assert.ok(!installed.includes('enom'), 'a registrar adapter this build does not compile is not advertised');
   assert.ok(!installed.includes('generic'), 'there is deliberately no generic registrar fallback');
 
   let error = null;
-  try { createDomainProviderAdapter({ adapterKey: 'namecheap' }); } catch (err) { error = err; }
+  try { createDomainProviderAdapter({ adapterKey: 'enom' }); } catch (err) { error = err; }
   assert.ok(error instanceof DomainProviderError, 'a non-installed adapter must refuse');
   assert.strictEqual(error.code, 'ADAPTER_NOT_INSTALLED');
   assert.match(error.message, /Installed adapters: .*rdap/);
@@ -530,7 +534,7 @@ test('a database status never overrules the credential invariant', async () => {
 
   // An adapter this build does not compile outranks the credential question: no credential could
   // ever make it work, so that is what the refusal must say.
-  await seedProvider(store, { id: 'provider-nc', providerKey: 'nc', adapterKey: 'namecheap', providerType: 'registrar', status: 'connected' });
+  await seedProvider(store, { id: 'provider-nc', providerKey: 'nc', adapterKey: 'enom', providerType: 'registrar', status: 'connected' });
   await assert.rejects(
     () => resolveConnectedDomainProvider(store, 'registrar', { secret: MASTER_SECRET }),
     (err) => err.code === 'ADAPTER_NOT_INSTALLED',
@@ -587,7 +591,7 @@ test('readiness reflects the rows that exist, not a hardcoded false block', asyn
   assert.strictEqual(readiness.registrar.configured, false);
 
   // A connected row whose adapter is not compiled is configured-but-unusable, and readiness says so.
-  await seedProvider(store, { id: 'p3', providerKey: 'nc', adapterKey: 'namecheap', providerType: 'registrar', status: 'connected' });
+  await seedProvider(store, { id: 'p3', providerKey: 'nc', adapterKey: 'enom', providerType: 'registrar', status: 'connected' });
   readiness = await domainProviderReadiness(store, { secret: MASTER_SECRET });
   assert.strictEqual(readiness.registrar.configured, true);
   assert.strictEqual(readiness.registrar.adapterInstalled, false);

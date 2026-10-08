@@ -128,6 +128,27 @@ function credentialsForOptional(row, secret) {
 }
 
 /**
+ * Build the adapter for **one specific provider row**, whatever else is connected.
+ *
+ * `resolveConnectedDomainProvider` picks "the connected provider of this type", which is right for a
+ * new lookup and wrong for anything bound to a provider already — a queued transfer must be polled
+ * through the registrar that holds it, even if a second registrar was connected afterwards. This is
+ * that path, and it keeps every invariant of the resolver: not-installed adapters are refused before
+ * credentials are read, credentials must decrypt, and loopback is only reachable from `sandbox`.
+ */
+async function createAdapterForProvider(store, row, options = {}) {
+  if (!row) throw new ValidationError('No domain provider row was supplied');
+  const secret = options.secret ?? 'ephemeral';
+  assertDomainProviderAdapterInstalled(row.adapter_key);
+  const credentials = row.adapter_key === 'rdap' ? credentialsForOptional(row, secret) : credentialsFor(row, secret);
+  const adapter = createDomainProviderAdapter(configFrom(row, credentials), {
+    ...(options.adapterOptions ?? {}),
+    allowLoopback: row.environment === 'sandbox',
+  });
+  return adapter;
+}
+
+/**
  * Public-safe readiness for the Domain Services UI.
  *
  * This is what replaces a hardcoded `configured: false` block: the answer now comes from the rows an
@@ -240,6 +261,7 @@ async function withDomainProvider(deps, providerType, fn, options = {}) {
 module.exports = {
   PROVIDER_TYPES,
   resolveConnectedDomainProvider,
+  createAdapterForProvider,
   domainProviderReadiness,
   assertCapabilitySupported,
   domainProviderErrorToHttpError,

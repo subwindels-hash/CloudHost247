@@ -1394,6 +1394,10 @@ const TABLES = {
       domain: text({ nullable: true }),
       auth_code: text({ nullable: true }),
       current_registrar: text({ nullable: true }),
+      // Which registrar row is handling this transfer. The refresh poll reads it: polling "whatever
+      // registrar is connected now" would ask the wrong account about a domain it may not hold, and
+      // a second provider being configured later would silently move the poll.
+      provider_id: uuid({ nullable: true }),
       status: text({ default: 'pending' }),
       provider_status: text({ nullable: true }),
       provider_reference: text({ nullable: true }),
@@ -1531,10 +1535,42 @@ const TABLES = {
     },
     indexes: [{ name: 'domain_club_memberships_user_idx', columns: ['user_id'] }],
   },
+  /**
+   * What the *provider* quoted, per registrar, kept deliberately apart from what this platform
+   * charges (`domain_extensions.register_price_cents`). A catalogue sync that wrote provider prices
+   * into the selling price column would silently reprice the storefront every time a registrar ran
+   * a promotion; an operator reviews a difference and decides, not a sync job.
+   */
+  domain_provider_extension_offerings: {
+    columns: {
+      id: pk(),
+      provider_id: uuid({ required: true }),
+      extension_id: uuid({ nullable: true }),
+      extension: text({ required: true }),         // bare label, e.g. 'com'
+      provider_tld: text({ nullable: true }),      // as the provider spells it
+      registration_price: num({ nullable: true }),
+      renewal_price: num({ nullable: true }),
+      transfer_price: num({ nullable: true }),
+      currency: text({ default: 'USD' }),
+      premium_supported: bool({ default: false }),
+      status: text({ default: 'enabled' }),        // 'enabled' | 'disabled' | 'unavailable'
+      provider_metadata: jsonb({ default: {} }),
+      sourced_at: { type: 'timestamptz', nullable: true },
+      created_at: ts(),
+      updated_at: ts(),
+    },
+    indexes: [
+      { name: 'domain_provider_offerings_unique', columns: ['provider_id', 'extension'], unique: true },
+      { name: 'domain_provider_offerings_extension_idx', columns: ['extension'] },
+    ],
+  },
+
   domain_extensions: {
     columns: {
       id: pk(),
       tld: text({ required: true }),
+      // The platform's *selling* price in cents. 0 means "not priced for sale yet" — the quote route
+      // refuses rather than quoting nothing, so a synced-but-unpriced extension cannot be sold free.
       register_price_cents: int({ default: 0 }),
       renew_price_cents: int({ default: 0 }),
       is_trending: bool({ default: false }),

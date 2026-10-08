@@ -34,6 +34,7 @@ const {
   assertCapabilitySupported,
   domainFailure,
 } = require('../lib/domain-provider-service');
+const { lookupAvailability } = require('../lib/domain-availability');
 const { DomainProviderError, CUSTOMER_MESSAGES, FALLBACK_MESSAGE } = require('../lib/domain-providers/types');
 const { isValidDomainName, normalizeDomainName } = require('../lib/domain-name');
 
@@ -61,24 +62,54 @@ const SEARCH_VARIANTS = [
 ];
 
 /**
- * Turn one registry-presence fact into the customer-facing availability row.
+ * Turn one provider fact into the customer-facing availability row.
  *
- * The distinction that matters is between a *fact* and a *guess*: `registered` is what the registry
- * says, `no_registry_record` is what the registry says (nothing), and `unknown` is the platform
- * admitting it has no answer. There is no fourth case, and none of the three is invented.
+ * The distinction that matters is between a *fact* and a *guess*: `registered` is what a provider
+ * says, a registrar's `available` is what the seller says (with the price it quoted), the registry's
+ * `no_registry_record` is public evidence that nothing is registered, and `unknown` is the platform
+ * admitting it has no answer. There is no fifth case, and none of them is invented.
+ *
+ * Rows carry where the answer came from (`source`), because a registrar's offer and a registry's
+ * record are not the same claim, and carry it at the *confidence it deserves*: a registrar that
+ * answers definitively has settled the question, while a registry with no record — or a registrar
+ * that told us its answer is not definitive — has not.
  */
 function availabilityRow(domain, presence) {
+  const source = presence.source === 'registrar' ? 'registrar' : presence.source === 'rdap' ? 'rdap' : null;
+
   if (presence.status === 'registered') {
     return {
       domain,
       status: 'registered',
       available: false,
       confidence: 'confirmed',
-      source: 'rdap',
+      source,
       reason: null,
       registryStatuses: presence.registryStatuses ?? [],
     };
   }
+
+  if (presence.status === 'available') {
+    // The registrar answered the question it sells the answer to.
+    return {
+      domain,
+      status: 'available',
+      available: true,
+      // `confirmed` only when the registrar said its answer is definitive. GoDaddy's FAST check can
+      // answer optimistically, and that is carried through rather than smoothed over.
+      confidence: presence.definitive === false ? 'indicative' : 'confirmed',
+      source,
+      reason: null,
+      ...(presence.premium ? { premium: true } : {}),
+      // The registrar's quote, under a name that cannot be mistaken for this platform's selling price.
+      ...(presence.providerQuote ? { providerQuote: presence.providerQuote } : {}),
+      ...(presence.checkedAt ? { checkedAt: presence.checkedAt } : {}),
+      ...(presence.definitive === false
+        ? { caveat: 'The registrar answered without a definitive check. Final availability is confirmed at registration.' }
+        : {}),
+    };
+  }
+
   if (presence.status === 'no_registry_record') {
     return {
       domain,
@@ -92,12 +123,16 @@ function availabilityRow(domain, presence) {
       caveat: 'No registry record exists for this name. Final availability and pricing are confirmed at registration.',
     };
   }
+
   return {
     domain,
     status: 'unknown',
     available: null,
     confidence: null,
-    source: presence.reason === 'NO_RDAP_SERVICE_FOR_TLD' ? null : 'rdap',
+    // The source is honoured, never defaulted: a row says 'rdap' only when the registry answered,
+    // 'registrar' when the registrar did, and `null` when nobody did. (`NO_RDAP_SERVICE_FOR_TLD`
+    // means there is no registry to ask for this TLD at all, so nothing is named there either.)
+    source: presence.reason === 'NO_RDAP_SERVICE_FOR_TLD' ? null : source,
     reason: presence.reason ?? 'PROVIDER_ERROR',
   };
 }
@@ -180,19 +215,17 @@ function register(router, deps) {
     const candidates = SEARCH_VARIANTS.map((variant) => variant(term));
     const searchId = uuidv7();
 
-    let rows;
-    let provider = null;
-    let failure = null;
-    try {
-      const resolved = await resolveConnectedDomainProvider(store, 'rdap', { secret: deps.config?.JWT_SECRET || 'ephemeral' });
-      provider = resolved.provider;
-      const presence = await resolved.adapter.lookupRegistryPresence(candidates);
-      rows = candidates.map((domain, index) => availabilityRow(domain, presence[index] ?? { status: 'unknown', reason: 'PROVIDER_ERROR' }));
-    } catch (error) {
-      // No answer beats a guessed answer. Every row says `unknown` and the body carries the reason.
-      failure = domainFailure(error);
-      rows = candidates.map((domain) => availabilityRow(domain, { status: 'unknown', reason: failure.code }));
-    }
+    // A connected registrar answers authoritatively (and quotes a price); without one, the registry
+    // lookup of module 2 answers. Either way the row says which of the two spoke.
+    const lookup = await lookupAvailability(store, {
+      secret: deps.config?.JWT_SECRET || 'ephemeral', names: candidates, logger: deps.logger,
+    });
+    const provider = lookup.provider;
+    const failure = lookup.failure;
+    const rows = candidates.map((domain, index) => availabilityRow(
+      domain,
+      lookup.presences[index] ?? { status: 'unknown', reason: 'PROVIDER_ERROR', source: lookup.source },
+    ));
 
     const outcome = searchOutcome(rows, failure);
     if (userId) {
@@ -208,6 +241,7 @@ function register(router, deps) {
         searchId: userId ? searchId : null,
         query: term,
         providerKey: provider?.provider_key ?? null,
+        answerSource: lookup.source,
         message: failure?.message ?? null,
       }),
       ...(failure ? { status: 'provider_unavailable', failure } : {}),
@@ -223,20 +257,17 @@ function register(router, deps) {
     const rejectedCount = tokens.length - valid.length;
     const searchId = uuidv7();
 
-    let rows;
-    let provider = null;
-    let failure = null;
-    try {
-      const resolved = await resolveConnectedDomainProvider(store, 'rdap', { secret: deps.config?.JWT_SECRET || 'ephemeral' });
-      provider = resolved.provider;
-      // Bounded inside the adapter (five in flight), and never thrown per-domain: one unreachable
-      // TLD must not discard the answers for the other names in the batch.
-      const presence = await resolved.adapter.lookupRegistryPresence(terms);
-      rows = terms.map((domain, index) => availabilityRow(domain, presence[index] ?? { status: 'unknown', reason: 'PROVIDER_ERROR' }));
-    } catch (error) {
-      failure = domainFailure(error);
-      rows = terms.map((domain) => availabilityRow(domain, { status: 'unknown', reason: failure.code }));
-    }
+    // Same evidence order as the single search, over a larger batch. Both adapters bound their own
+    // request concurrency and batch size, and one unanswered name never discards the rest.
+    const lookup = await lookupAvailability(store, {
+      secret: deps.config?.JWT_SECRET || 'ephemeral', names: terms, logger: deps.logger,
+    });
+    const provider = lookup.provider;
+    const failure = lookup.failure;
+    const rows = terms.map((domain, index) => availabilityRow(
+      domain,
+      lookup.presences[index] ?? { status: 'unknown', reason: 'PROVIDER_ERROR', source: lookup.source },
+    ));
 
     const outcome = searchOutcome(rows, failure);
     await store.table('domain_searches').insert({
@@ -250,6 +281,7 @@ function register(router, deps) {
         acceptedCount: terms.length,
         rejectedCount,
         providerKey: provider?.provider_key ?? null,
+        answerSource: lookup.source,
         message: failure?.message ?? null,
       }),
       ...(failure ? { status: 'provider_unavailable', failure } : {}),

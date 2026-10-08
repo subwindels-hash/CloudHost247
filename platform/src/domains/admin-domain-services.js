@@ -12,42 +12,52 @@
  *   - The installed-adapter list is the compiled registry's own answer, so this API cannot offer an
  *     adapter that would refuse every call.
  *
- * Still deferred in this module, and reported as such: the registrar transfer refresh poll and the
- * extension catalogue sync. No registrar adapter (`namecheap`, `godaddy`) is ported yet, so both
- * refuse with a named reason instead of fabricating a status.
+ * The registrar transfer refresh poll and the extension catalogue sync are live: both call the
+ * connected registrar's real API through the ported adapters (`lib/domain-transfer-service.js`,
+ * `lib/domain-extension-sync.js`), and a poll that cannot run refuses with the reason instead of
+ * reporting a transfer as merely still in progress.
  */
 'use strict';
 
-const crypto = require('node:crypto');
 const { v } = require('../core/validate');
 const { NotFoundError, ValidationError } = require('../core/errors');
 const { uuidv7 } = require('../lib/ids');
 const { asAdmin, asStaff, asSuperAdmin } = require('../lib/auth');
-const { decryptSecret, PURPOSES } = require('../lib/secret-box');
+const { encryptSecret, decryptSecret, PURPOSES } = require('../lib/secret-box');
 const { createDomainProviderAdapter, registeredDomainProviderAdapters } = require('../lib/domain-providers/registry');
 const { registerBuiltInDomainProviderAdapters } = require('../lib/domain-providers/register-builtins');
 const { DomainProviderError } = require('../lib/domain-providers/types');
+const { syncExtensionsFromProvider } = require('../lib/domain-extension-sync');
+const { refreshTransfer } = require('../lib/domain-transfer-service');
 
 const name = 'admin-domain-services';
 
 // The adapter keys this build can actually construct — the registry's own answer, not a hand-kept
-// menu. `namecheap` and `godaddy` are therefore *absent* until their adapters are ported: offering
-// them here would let an operator create a provider row that every call refuses, and the list the
-// API returns is the same list `createDomainProviderAdapter` enforces.
+// menu. It now includes the registrar adapters (`namecheap`, `godaddy`), so an operator can
+// configure a registrar account and the transfer/extension routes above have something real to call.
+// The list the API returns is the same list `createDomainProviderAdapter` enforces.
 registerBuiltInDomainProviderAdapters();
 const installedAdapters = () => registeredDomainProviderAdapters();
 const LIMITS = { bulkSearchMaxDomains: 500, bulkSearchMaxPerHour: 30, whoisLookupsPerHour: 60 };
 const money = () => v.string().regex(/^\d{1,10}(\.\d{1,2})?$/, 'must be a decimal amount, e.g. 20.00');
 
-// ---- write-only credential encryption (AES-256-GCM, key from JWT_SECRET) ----
-function credKey(secret) {
-  return crypto.scryptSync(String(secret), 'cloudhost247-domain-providers', 32);
-}
+/**
+ * Write-only credential encryption, delegated to `lib/secret-box.js`.
+ *
+ * This used to be a second, byte-identical AES-256-GCM implementation living here (same
+ * `cloudhost247-domain-providers` salt, same scrypt parameters, same `v1:iv:tag:ct` envelope). Two
+ * implementations of one envelope format is one too many: a change to either — a different salt, a
+ * different tag length — would have left the other unable to read what this one wrote, and the
+ * operators' stored credentials are the thing that would have broken. The reader has been
+ * secret-box's since the provider seam was built; now the writer is too, so there is exactly one
+ * place that defines the format.
+ *
+ * Ciphertext written by the old copy still opens, because the format did not change — that
+ * compatibility is asserted by `tests/domain-providers.test.js` ("credentials written before
+ * secret-box existed still open") against an independently reproduced legacy envelope.
+ */
 function encryptCreds(secret, obj) {
-  const iv = crypto.randomBytes(12);
-  const cipher = crypto.createCipheriv('aes-256-gcm', credKey(secret), iv);
-  const enc = Buffer.concat([cipher.update(JSON.stringify(obj), 'utf8'), cipher.final()]);
-  return `v1:${iv.toString('base64')}:${cipher.getAuthTag().toString('base64')}:${enc.toString('base64')}`;
+  return encryptSecret(secret, PURPOSES.domainProvider, JSON.stringify(obj));
 }
 function hasCreds(row) {
   return Boolean(row && row.credentials_encrypted);
@@ -283,9 +293,14 @@ function register(router, deps) {
 
   router.post('/api/v1/admin/domain-services/extensions/sync', async (ctx) => {
     const auth = await asSuperAdmin(ctx, deps);
-    // No registrar connector is configured, so there is nothing to sync from. Honest empty report.
-    const report = { synced: 0, created: 0, updated: 0, providerName: null, message: 'No registrar connector is configured; nothing to sync.' };
-    await audit(ctx, 'admin.domain_extensions_synced', 'domain_extension_catalog', null, { synced: 0, created: 0, updated: 0 });
+    // Reads the connected registrar's real TLD catalogue. A registrar that publishes none, or none
+    // that is connected, is a refusal naming the fix — not an empty "nothing to sync" report, which
+    // reads as success and leaves an operator with no catalogue and no error.
+    const report = await syncExtensionsFromProvider(store, deps);
+    await audit(ctx, 'admin.domain_extensions_synced', 'domain_extension_catalog', null, {
+      synced: report.synced, created: report.created, updated: report.updated,
+      providerKey: report.providerKey, actorId: auth?.id ?? null,
+    });
     ctx.json(report);
   });
 
@@ -360,9 +375,14 @@ function register(router, deps) {
     const id = ctx.params.id;
     const t = await store.table('domain_transfers').findById(id);
     if (!t) throw new NotFoundError('No transfer was found with that id');
-    // Provider poll is deferred (no registrar egress). Report honestly; leave status untouched.
-    const result = { status: 'deferred', message: 'Transfer refresh requires a registrar connector (deferred).', currentStatus: t.status };
-    await audit(ctx, 'admin.domain_transfer_refreshed', 'domain_transfer', id, { status: 'deferred' });
+    // Polls the registrar that holds this transfer and writes what it says. A completed transfer is
+    // linked to the customer in the same step; a poll that cannot run throws with the reason rather
+    // than reporting the transfer as merely still in progress.
+    const result = await refreshTransfer(store, t, deps);
+    await audit(ctx, 'admin.domain_transfer_refreshed', 'domain_transfer', id, {
+      status: result.status, providerStatus: result.providerStatus, completed: result.completed,
+      adoptedProvider: result.adopted ?? false,
+    });
     ctx.json(result);
   });
 

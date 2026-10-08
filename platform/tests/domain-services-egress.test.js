@@ -67,8 +67,8 @@ test('domain services: readiness and the installed-adapter list tell the truth',
   assert.strictEqual(res.data.rdap.configured, false, 'nothing is configured in a fresh deployment');
   assert.strictEqual(res.data.auctions.configured, true, 'the internal marketplace needs no provider');
   // The installed set is the registry's own answer: the registrar adapters are honestly absent.
-  assert.deepStrictEqual(res.data.installedAdapters, ['godaddy-govalue', 'govalue', 'rdap']);
-  assert.ok(!res.data.installedAdapters.includes('namecheap'));
+  assert.deepStrictEqual(res.data.installedAdapters, ['godaddy', 'godaddy-govalue', 'govalue', 'namecheap', 'rdap']);
+  assert.ok(res.data.installedAdapters.includes('namecheap'), 'the ported registrar adapter is advertised');
 });
 
 test('domain services: with no provider configured, search refuses to guess', async (t) => {
@@ -478,16 +478,27 @@ test('domain services: the admin door refuses an adapter this build does not com
 
   const admin = await adminToken(base, app, 'ds-admin2@example.com');
   const list = await jsonFetch(base, { path: '/api/v1/admin/domain-services/providers' }, admin);
-  assert.deepStrictEqual(list.data.installedAdapters, ['godaddy-govalue', 'govalue', 'rdap']);
+  assert.deepStrictEqual(list.data.installedAdapters, ['godaddy', 'godaddy-govalue', 'govalue', 'namecheap', 'rdap']);
 
   const res = await jsonFetch(base, {
     path: '/api/v1/admin/domain-services/providers', method: 'POST',
-    body: { providerKey: 'namecheap', name: 'Namecheap', adapterKey: 'namecheap', providerType: 'registrar' },
+    body: { providerKey: 'enom', name: 'Enom', adapterKey: 'enom', providerType: 'registrar' },
   }, admin);
   assert.strictEqual(res.status, 400, JSON.stringify(res.data));
   assert.match(res.data.message, /not installed in this build/);
-  assert.match(res.data.message, /rdap/);
+  assert.match(res.data.message, /namecheap/);
 
   // Nothing was created, so no row can sit there refusing every call later.
   assert.strictEqual((await app.store.table('domain_service_providers').all()).length, 0);
+
+  // ...and the ported registrar adapter is accepted, because it can actually be called.
+  const accepted = await jsonFetch(base, {
+    path: '/api/v1/admin/domain-services/providers', method: 'POST',
+    body: { providerKey: 'namecheap', name: 'Namecheap', adapterKey: 'namecheap', providerType: 'registrar', environment: 'sandbox' },
+  }, admin);
+  assert.strictEqual(accepted.status, 201, JSON.stringify(accepted.data));
+  assert.strictEqual(accepted.data.provider.adapterKey, 'namecheap');
+  // Created without credentials, so it is honestly `not_configured` and carries no capability to be
+  // used until an operator enters the API key/username/IP and the connection test passes.
+  assert.strictEqual(accepted.data.provider.status, 'not_configured');
 });

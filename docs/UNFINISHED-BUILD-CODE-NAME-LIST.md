@@ -14,24 +14,26 @@ grouped by *why* it is unfinished. What each one is missing lives in the two sou
 | Closed | Module(s) | Evidence |
 |---|---|---|
 | 2026-10-08 | §1.1 rows 1–2 — `platform/src/domains/cloudflare.js` + `admin-cloudflare.js` (live Cloudflare egress) | `platform/src/lib/cloudflare-client.js` (live API v4 client, 37 unit/wire tests), `cloudflare-service.js`, `cloudflare-sync.js`, `cloudflare-fulfilment.js`; `platform/tests/cloudflare-client.test.js` + `platform/tests/cloudflare-egress.test.js` (34 route tests over the real app against a fake Cloudflare at `platform/tests/fixtures/fake-cloudflare.js`). Full suite: **742 pass / 0 fail**. No real Cloudflare account was reachable from this environment — every provider claim is verified against the loopback fake, never against api.cloudflare.com. |
+| 2026-10-08 | §1.1 row 4 — `platform/src/domains/admin-domain-services.js` (registrar connector: transfer refresh poll, extension catalogue sync, `namecheap` + `godaddy` adapters) | `platform/src/lib/domain-providers/adapters/namecheap.js` (401 lines, full XML API: availability with premium pricing in 50-name batches, TLD catalogue, registration, transfer, live domain status) + `.../godaddy.js` (sso-key REST: availability with the documented two price-unit shapes, purchase with consent, transfer, live status, both unit bugs asserted) + `.../xml.js` (hardened reader, DOCTYPE/entity refused outright) + `lib/domain-transfer-service.js` (poll + completion as one transaction, completion **labelled by evidence**) + `lib/domain-extension-sync.js` (provider quotes recorded against the provider; the platform's selling prices untouched) + `lib/domain-availability.js` (the customer search now prefers a connected registrar's authoritative answer and falls back to RDAP, labelling which spoke). `platform/tests/fixtures/fake-registrar.js` (Namecheap XML **and** GoDaddy JSON) + `platform/tests/domain-registrar-adapters.test.js` (28 tests over real HTTP). The deferred markers are gone: `/transfers/:id/refresh` no longer returns `status: 'deferred'`, `/extensions/sync` no longer returns a hardcoded `{synced: 0}`. Inline `encryptCreds` reconciled onto `lib/secret-box.js` (one envelope implementation, legacy ciphertext still opens). Full suite: **823 pass / 0 fail**. No registrar account exists in this environment — both wire contracts are verified against the loopback fake only. |
 | 2026-10-08 | §1.1 row 3 — `platform/src/domains/domain-services.js` (availability / WHOIS-RDAP / appraisal connector) | `platform/src/lib/domain-providers/` (`types`, `http`, `registry`, `register-builtins`, `adapters/rdap`, `adapters/govalue`) + `lib/domain-provider-service.js` + `lib/domain-name.js`; `platform/tests/domain-providers.test.js` (26) + `platform/tests/domain-services-egress.test.js` (27) over the real app against `platform/tests/fixtures/fake-registry.js`. Full suite: **795 pass / 0 fail**. The regex availability guess is gone: with no connected provider the routes return `available: null`, not a verdict. No real registrar/RDAP account was reachable here — the RDAP and GoValue wire contracts are verified against the loopback fake only. |
 
 ---
 
 ## 1. In-build — code exists, features explicitly missing
 
-### 1.1 `platform/` — live provider egress still deferred (4 modules remain of 6)
+### 1.1 `platform/` — live provider egress still deferred (2 modules remain of 6)
 
 The domain modules in `platform/` that still carry a `deferred` marker for live integration
-(`ls platform/src/domains` = 45 modules). **Rows 1–2 are now closed** — both Cloudflare modules reach
-Cloudflare inside the request and refuse with a named reason when they cannot:
+(`ls platform/src/domains` = 45 modules). **Rows 1–4 are now closed** — the Cloudflare modules reach
+Cloudflare inside the request, the domain connector reaches a registry or a registrar, and both
+refuse with a named reason when they cannot:
 
 | # | Module | Deferred capability | State |
 |---|---|---|---|
 | 1 | `platform/src/domains/cloudflare.js` | Live Cloudflare HTTP client, live record write, live purge (writes go to the synchronized cache; purge queues a durable job) | **closed 2026-10-08** |
 | 2 | `platform/src/domains/admin-cloudflare.js` | Live Cloudflare egress — "Test Connection" never fakes success | **closed 2026-10-08** |
 | 3 | `platform/src/domains/domain-services.js` | Availability / WHOIS-RDAP lookup / appraisal provider connector (returns `provider_unavailable`) | **closed 2026-10-08** |
-| 4 | `platform/src/domains/admin-domain-services.js` | Registrar transfer refresh poll (returns `status: 'deferred'`); extension catalogue sync; registrar adapters (`namecheap`, `godaddy`) unported. Its **Test Connection is now real** (it is the gate the domain connector reads) and its installed-adapter list is derived from the compiled registry. | partially closed |
+| 4 | `platform/src/domains/admin-domain-services.js` | Registrar transfer refresh poll; extension catalogue sync; registrar adapters (`namecheap`, `godaddy`). **All closed** — Test Connection is a real provider call, the installed-adapter list is the compiled registry's own answer, the refresh polls the registrar that holds the transfer, and the sync pulls the registrar's real TLD catalogue. | **closed 2026-10-08** |
 | 5 | `platform/src/domains/ai-os.js` | Model adapter — Copilot inference (prompt is recorded, no reply is produced) | open |
 | 6 | `platform/src/domains/ai-support.js` | LLM inference (human agents reply manually) | open |
 
@@ -175,6 +177,26 @@ visual/browser tests — *NOT PERFORMED*. Production database is read-only from 
   fakes cannot settle — Cloudflare's real pagination caps, per-plan setting availability, live rate
   limits, and whether a real account's token carries every permission the client assumes — is
   unverified until someone runs the client against a staging account.
+- `platform/domain-services/registrar`: the Namecheap XML API and the GoDaddy REST API are implemented
+  against their published documentation and verified end-to-end against `platform/tests/fixtures/
+  fake-registrar.js` over real HTTP — but **no registrar account has ever been called from this
+  environment, and none exists to call**. What the fake cannot settle: whether Namecheap's real
+  `getInfo` returns a `TransferStatus` element at all (the adapter reads one when present and stays
+  silent when absent, so a transfer completes there only via the labelled registration-status
+  fallback), whether real GoDaddy availability answers carry `prices[]` or the legacy `price` field,
+  the real shopper/consent requirements on a live account, and whether a live key passes the IP
+  allowlist. One further gap that is scheduling, not code: transfers are polled when an operator
+  refreshes one (Admin → Domain Services → Refresh) or when anything calls
+  `lib/domain-transfer-service.js#refreshTransfer`. **No scheduler calls it on a timer yet** — the
+  audited Node build had `worker/domain-services-sweep.ts` for that, and a platform equivalent still
+  has to be wired to whatever runs `crons/`. Until it is, a transfer advances only on operator action.
+  Run one real availability check, one real catalogue sync and one real transfer refresh through a
+  staging deployment before trusting them in production.
+- `platform/domain-services` pricing: a registrar's quote is recorded in
+  `domain_provider_extension_offerings` and surfaced on a search row as `providerQuote`; it is **not**
+  the platform's selling price. Nothing has ever set a selling price automatically — a synced
+  extension starts at `register_price_cents: 0`, which the quote route refuses to price rather than
+  sell for nothing. That is deliberate, and it means a fresh catalogue needs an operator to price it.
 - `platform/domain-services`: the RDAP connector has **never queried the real IANA bootstrap file or a
   real registry** from this environment. `platform/tests/fixtures/fake-registry.js` reproduces the
   bootstrap format, the RFC 9082/9083 domain projection, RFC-conformant 404s and the port-43 referral
@@ -189,9 +211,9 @@ visual/browser tests — *NOT PERFORMED*. Production database is read-only from 
 ## Quick copy/paste name list
 
 **Platform — deferred egress:** `ai-os` · `ai-support`
-*(`cloudflare`, `admin-cloudflare` and the `domain-services` connector were closed 2026-10-08 — see
-the completion log. `admin-domain-services` still owes the registrar transfer refresh, the extension
-catalogue sync and the `namecheap`/`godaddy` adapters.)*
+*(`cloudflare`, `admin-cloudflare`, the `domain-services` connector and the `admin-domain-services`
+registrar work — transfer refresh, extension sync, `namecheap`/`godaddy` adapters — were all closed
+2026-10-08; see the completion log.)*
 
 **Platform — partial:** `platform/spa` (17 page modules ported, ~35 admin groups + DNS/Cloudflare/
 marketplace/server-detail/mobile shell missing) · `platform/mobile` (no app code)
