@@ -11,6 +11,80 @@
     "productivity": "Productivity",
     "gaming": "Gaming"
   },
+  "collections": [
+    {
+      "slug": "compliance-documents",
+      "name": "Compliance & Document Tools",
+      "path": "/tools/compliance-documents",
+      "summary": "Professional utilities for identity-document formatting, validation, security, developer workflows and infrastructure configuration.",
+      "description": "A working set of calculators and generators for identity-document formatting, secret generation, developer data handling and infrastructure configuration. Every tool runs in your browser tab: passwords, tokens, hashes and document fields are never uploaded, logged or stored by CloudHost247. Each tool states what it actually verifies \u2014 generation, validation or configuration assistance \u2014 and none of them claim to authenticate a document, certify a compliance programme or prove that a system is secure.",
+      "seoTitle": "Compliance & Document Tools \u2014 MRZ, Security & Developer Utilities | CloudHost247",
+      "seoDescription": "Professional utilities for identity-document formatting, validation, security, developer workflows and infrastructure configuration. Five calculators and twelve generators, all processed in your browser.",
+      "keywords": [
+        "compliance tools",
+        "document tools",
+        "mrz",
+        "generators",
+        "calculators",
+        "identity document",
+        "security"
+      ],
+      "groups": [
+        {
+          "slug": "identity",
+          "label": "Identity & Document",
+          "blurb": "Machine-readable document formatting and the date arithmetic identity checks depend on.",
+          "tools": [
+            "mrz-generator",
+            "age-date-calculator",
+            "date-duration-calculator"
+          ]
+        },
+        {
+          "slug": "security",
+          "label": "Security & Secrets",
+          "blurb": "Random material, digests and written policy \u2014 generated locally, never uploaded.",
+          "tools": [
+            "random-password-generator",
+            "api-key-generator",
+            "password-policy-generator",
+            "http-security-headers-generator",
+            "checksum-hash-generator"
+          ]
+        },
+        {
+          "slug": "developer",
+          "label": "Developer",
+          "blurb": "Identifiers, encodings and structured data for build and debug workflows.",
+          "tools": [
+            "uuid-generator",
+            "base64-generator",
+            "json-formatter",
+            "qr-code-generator"
+          ]
+        },
+        {
+          "slug": "calculators",
+          "label": "Calculators & Conversion",
+          "blurb": "Exact arithmetic for percentages, data units and machine time.",
+          "tools": [
+            "percentage-calculator",
+            "unit-data-converter",
+            "unix-timestamp-calculator"
+          ]
+        },
+        {
+          "slug": "infrastructure",
+          "label": "Infrastructure & Domains",
+          "blurb": "Configuration output for DNS zones and crawler directives.",
+          "tools": [
+            "dns-record-generator",
+            "robots-txt-generator"
+          ]
+        }
+      ]
+    }
+  ],
   "tools": [
     {
       "slug": "dns-checker",
@@ -92,6 +166,7 @@
       "badge": "Live check",
       "featured": true,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -179,6 +254,7 @@
       "badge": "Live check",
       "featured": true,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -259,6 +335,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -340,6 +417,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -432,6 +510,7 @@
       "badge": "Live check",
       "featured": true,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -514,6 +593,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -596,6 +676,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -679,6 +760,7 @@
       "badge": "Live check",
       "featured": true,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -760,6 +842,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -840,6 +923,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -920,6 +1004,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -1014,6 +1099,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -1096,6 +1182,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -1178,6 +1265,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -1265,6 +1353,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -1343,6 +1432,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -1421,6 +1511,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -1489,6 +1580,7 @@
       "badge": "Live check",
       "featured": true,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -1565,6 +1657,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -1641,6 +1734,7 @@
       "badge": "Live check",
       "featured": true,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -1717,6 +1811,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": true,
+      "collection": "",
       "enabled": true
     },
     {
@@ -1793,6 +1888,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -1869,6 +1965,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -1945,6 +2042,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -2021,6 +2119,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -2097,6 +2196,7 @@
       "badge": "Live check",
       "featured": true,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -2175,6 +2275,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -2251,6 +2352,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -2319,6 +2421,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -2395,6 +2498,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -2478,6 +2582,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -2553,6 +2658,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -2628,6 +2734,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -2705,6 +2812,7 @@
       "badge": "Browser-only",
       "featured": true,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -2781,6 +2889,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -2857,6 +2966,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -2925,6 +3035,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -3001,6 +3112,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -3081,6 +3193,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -3161,6 +3274,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -3241,25 +3355,29 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
       "slug": "base64-generator",
-      "name": "Base64 Generator",
+      "name": "Base64 Encoder / Decoder",
       "category": "developer",
       "categoryLabel": "Developer",
       "icon": "developer",
-      "summary": "Encode or decode Base64 in your browser. Input is not uploaded.",
-      "description": "Encode or decode Base64 in your browser. Input is not uploaded. CloudHost247 labels estimates, missing data and unavailable probes instead of filling them in.",
-      "seoTitle": "Base64 Generator \u2014 Free Developer Tool | CloudHost247",
-      "seoDescription": "Encode or decode Base64 in your browser. Input is not uploaded. Free CloudHost247 tool for administrators, developers and website owners.",
+      "summary": "Encode or decode Base64 with UTF-8 handling, strict validation and a URL-safe variant. Input is not uploaded.",
+      "description": "Encodes text to Base64 and decodes Base64 back to text, treating the payload as UTF-8 in both directions so multi-byte characters survive the round trip. Decoding is strict: characters outside the chosen alphabet, a bad padding length or a truncated final quantum are reported as an error with the offending position, instead of being silently skipped the way a permissive decoder would. A URL-safe alphabet (- and _, no padding) is available for tokens that travel in a path or query string. Everything happens in your browser tab.",
+      "seoTitle": "Base64 Encoder / Decoder \u2014 Free Developer Tool | CloudHost247",
+      "seoDescription": "Encode or decode Base64 with UTF-8 handling, strict validation and a URL-safe variant. Input is not uploaded. Free CloudHost247 tool for administrators, developers and website owners.",
       "keywords": [
         "base64",
         "encode",
         "decode",
+        "utf-8",
+        "url-safe",
+        "base64url",
         "base64-generator",
         "developer",
-        "base64 generator"
+        "base64 encoder / decoder"
       ],
       "aliases": [],
       "path": "/tools/base64-generator",
@@ -3269,17 +3387,32 @@
       "options": {},
       "inputs": [
         {
-          "name": "text",
-          "label": "Text",
-          "type": "textarea",
-          "placeholder": "Text or Base64",
-          "required": true
-        },
-        {
           "name": "op",
           "label": "Operation",
           "type": "select",
           "placeholder": "encode",
+          "required": true,
+          "choices": {
+            "encode": "Encode text \u2192 Base64",
+            "decode": "Decode Base64 \u2192 text"
+          }
+        },
+        {
+          "name": "variant",
+          "label": "Alphabet",
+          "type": "select",
+          "placeholder": "standard",
+          "required": true,
+          "choices": {
+            "standard": "Standard (+ / with = padding)",
+            "urlsafe": "URL-safe (- _ without padding)"
+          }
+        },
+        {
+          "name": "text",
+          "label": "Text or Base64",
+          "type": "textarea",
+          "placeholder": "Text to encode, or Base64 to decode",
           "required": true
         }
       ],
@@ -3313,8 +3446,8 @@
       ],
       "faq": [
         {
-          "q": "What does Base64 Generator actually check?",
-          "a": "Encode or decode Base64 in your browser. Input is not uploaded. Each result names its source."
+          "q": "What does Base64 Encoder / Decoder actually check?",
+          "a": "Encode or decode Base64 with UTF-8 handling, strict validation and a URL-safe variant. Input is not uploaded. Each result names its source."
         },
         {
           "q": "Is my input stored?",
@@ -3328,6 +3461,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "compliance-documents",
       "enabled": true
     },
     {
@@ -3408,32 +3542,36 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
       "slug": "mrz-generator",
-      "name": "MRZ Generator / MRZ Tools",
+      "name": "MRZ Generator",
       "category": "developer",
       "categoryLabel": "Developer",
       "icon": "developer",
-      "summary": "Generate, validate and parse ICAO Doc 9303 TD3 passport machine-readable zones.",
-      "description": "Builds the two 44-character lines of a TD3 (passport-size) machine-readable zone from the document fields you enter, validates the structure and the 7-3-1 check digits of an existing zone, and parses a supplied zone back into labelled fields. Names are transliterated to the ICAO Latin character set, and an unsupported character is reported instead of being silently removed or guessed. Privacy: the calculation runs in this browser tab, so the values you type are not uploaded, logged or stored by CloudHost247. Scope: machine-readable text only \u2014 check digits prove the string is well formed, they do not prove that a physical or electronic document is genuine, and this page does not create passport artwork or travel documents.",
-      "seoTitle": "MRZ Generator / MRZ Tools \u2014 Free Developer Tool | CloudHost247",
-      "seoDescription": "Generate, validate and parse ICAO Doc 9303 TD3 passport machine-readable zones. Free CloudHost247 tool for administrators, developers and website owners.",
+      "summary": "Generate, validate and parse ICAO Doc 9303 machine-readable zones for TD1, TD2 and TD3 documents.",
+      "description": "Builds machine-readable zones for the three ICAO Doc 9303 layouts \u2014 TD1 (3 lines of 30 characters), TD2 (2 lines of 36) and TD3 (2 lines of 44) \u2014 from the document fields you enter, validates the structure and the 7-3-1 check digits of an existing zone, and parses a supplied zone back into labelled fields. Field widths are enforced per format: a value that cannot fit the layout you selected is rejected with a message that names the field and the limit, never silently truncated. Names are transliterated to the ICAO Latin character set, and an unsupported character is reported instead of being removed or guessed. Privacy: the calculation runs in this browser tab, so the values you type are not uploaded, logged or stored by CloudHost247. Scope: machine-readable text only \u2014 a correct format and check digits prove the string is internally consistent, they do not prove that a physical or electronic document is genuine, and this page does not create passport artwork or travel documents.",
+      "seoTitle": "MRZ Generator \u2014 Free Developer Tool | CloudHost247",
+      "seoDescription": "Generate, validate and parse ICAO Doc 9303 machine-readable zones for TD1, TD2 and TD3 documents. Free CloudHost247 tool for administrators, developers and website owners.",
       "keywords": [
         "mrz",
         "machine readable zone",
         "passport",
         "icao 9303",
+        "td1",
+        "td2",
         "td3",
         "check digit",
+        "composite check digit",
         "ocr",
-        "document",
+        "identity document",
         "parser",
         "validator",
         "mrz-generator",
         "developer",
-        "mrz generator / mrz tools"
+        "mrz generator"
       ],
       "aliases": [],
       "path": "/tools/mrz-generator",
@@ -3447,14 +3585,40 @@
           "label": "Action",
           "type": "select",
           "placeholder": "generate",
-          "required": true
+          "required": true,
+          "choices": {
+            "generate": "Generate an MRZ",
+            "validate": "Validate an MRZ",
+            "parse": "Parse an MRZ"
+          }
+        },
+        {
+          "name": "format",
+          "label": "Document format",
+          "type": "select",
+          "placeholder": "TD3",
+          "required": true,
+          "choices": {
+            "TD3": "TD3 \u2014 passport / 2 lines \u00d7 44 characters",
+            "TD2": "TD2 \u2014 ID card / 2 lines \u00d7 36 characters",
+            "TD1": "TD1 \u2014 ID card / 3 lines \u00d7 30 characters"
+          },
+          "hint": "Determines the field widths, the check digits and the composite check digit."
         },
         {
           "name": "mrz",
-          "label": "Existing MRZ, two lines (validate or parse)",
+          "label": "Existing MRZ (validate or parse)",
           "type": "textarea",
-          "placeholder": "Paste the two 44-character lines here",
+          "placeholder": "Paste the machine-readable lines here",
           "required": false
+        },
+        {
+          "name": "documentCode",
+          "label": "Document code",
+          "type": "text",
+          "placeholder": "P",
+          "required": false,
+          "hint": "P for passport. TD1/TD2 accept I, A, C, V and similar codes."
         },
         {
           "name": "issuingState",
@@ -3503,7 +3667,12 @@
           "label": "Sex",
           "type": "select",
           "placeholder": "F",
-          "required": false
+          "required": false,
+          "choices": {
+            "F": "F \u2014 female",
+            "M": "M \u2014 male",
+            "<": "< \u2014 unspecified"
+          }
         },
         {
           "name": "expiryDate",
@@ -3514,9 +3683,17 @@
         },
         {
           "name": "optionalData",
-          "label": "Optional data",
+          "label": "Optional / personal number",
           "type": "text",
           "placeholder": "OPTIONAL",
+          "required": false,
+          "hint": "TD3 allows 14 characters, TD2 28, TD1 15 plus a separate 15-character second optional field."
+        },
+        {
+          "name": "optionalData2",
+          "label": "Optional data 2 (TD1 only)",
+          "type": "text",
+          "placeholder": "OPTIONAL2",
           "required": false
         }
       ],
@@ -3550,8 +3727,8 @@
       ],
       "faq": [
         {
-          "q": "What does MRZ Generator / MRZ Tools actually do?",
-          "a": "It generates the TD3 machine-readable zone for the fields you supply, verifies the check digits of an existing zone, and reports the parsed fields. Results describe exactly the string you entered \u2014 nothing is inferred about a person or a document."
+          "q": "Which document formats does this generate?",
+          "a": "TD1 (ID card, three lines of 30 characters), TD2 (ID card, two lines of 36) and TD3 (passport, two lines of 44). The page states which layout you are building, and the field widths, check digits and composite check digit follow that layout."
         },
         {
           "q": "Is my input stored?",
@@ -3559,7 +3736,11 @@
         },
         {
           "q": "Does a valid check digit prove a passport is genuine?",
-          "a": "No. Check digits only prove the zone is internally consistent. Authenticity requires the document itself, the issuing authority and cryptographic verification (ICAO PKD / passive authentication), which this tool does not perform."
+          "a": "No. This is syntactic validation: structure, field widths, character set and check digits. Authenticity requires the document itself, the issuing authority and cryptographic verification (ICAO PKD / passive authentication), which this tool does not perform."
+        },
+        {
+          "q": "What happens if a field is too long?",
+          "a": "Generation stops and the error names the field, the layout and the character limit. Fields are never truncated for you, because a truncated name field would produce a syntactically valid zone that misstates the document."
         },
         {
           "q": "Can I use a real passport here?",
@@ -3569,6 +3750,1442 @@
       "badge": "Browser-only",
       "featured": true,
       "sensitive": true,
+      "collection": "compliance-documents",
+      "enabled": true
+    },
+    {
+      "slug": "age-date-calculator",
+      "name": "Age & Date Calculator",
+      "category": "productivity",
+      "categoryLabel": "Productivity",
+      "icon": "productivity",
+      "summary": "Exact age in years, months and days between a date of birth and a reference date, with the day-count behind it.",
+      "description": "Computes the exact age between a date of birth and a reference date in completed years, months and days, plus the total days, weeks, months and the next birthday. Calendar arithmetic is exact: leap days, month lengths and end-of-month boundaries are handled by counting whole months first and the remaining days second, so 31 January plus one month is reported rather than guessed. Useful in identity and document workflows where an age has to be stated precisely on a given date. The reference date defaults to today in your own time zone; nothing is sent to CloudHost247.",
+      "seoTitle": "Age & Date Calculator \u2014 Free Productivity Tool | CloudHost247",
+      "seoDescription": "Exact age in years, months and days between a date of birth and a reference date, with the day-count behind it. Free CloudHost247 tool for administrators, developers and website owners.",
+      "keywords": [
+        "age",
+        "date of birth",
+        "birthday",
+        "years months days",
+        "document verification",
+        "calculator",
+        "age-date-calculator",
+        "productivity",
+        "age & date calculator"
+      ],
+      "aliases": [],
+      "path": "/tools/age-date-calculator",
+      "legacyPaths": [],
+      "mode": "local",
+      "handler": "age_date",
+      "options": {},
+      "inputs": [
+        {
+          "name": "dateOfBirth",
+          "label": "Date of birth",
+          "type": "text",
+          "placeholder": "1990-04-23",
+          "required": true,
+          "hint": "ISO 8601 (YYYY-MM-DD) or DD/MM/YYYY."
+        },
+        {
+          "name": "referenceDate",
+          "label": "Reference date",
+          "type": "text",
+          "placeholder": "",
+          "required": false,
+          "hint": "Defaults to today in your browser's time zone."
+        }
+      ],
+      "relatedTools": [
+        "date-duration-calculator",
+        "percentage-calculator",
+        "qr-code-generator",
+        "qr-scanner"
+      ],
+      "services": [
+        {
+          "label": "Web hosting",
+          "url": "web-hosting.php"
+        },
+        {
+          "label": "Domains",
+          "url": "domain.php"
+        },
+        {
+          "label": "Help center",
+          "url": "help-center.php"
+        }
+      ],
+      "faq": [
+        {
+          "q": "How is the age calculated?",
+          "a": "Whole years first, then whole months, then the remaining days \u2014 the same way a person states an age. Totals in days, weeks and months are computed separately from the day difference, so they are consistent with the calendar result."
+        },
+        {
+          "q": "Are leap years handled?",
+          "a": "Yes. February 29 birthdays and 366-day years are counted by real calendar arithmetic, not by a fixed 365-day year."
+        },
+        {
+          "q": "Is the date of birth uploaded?",
+          "a": "No. The calculation runs in your browser tab and the date is not stored, logged or sent anywhere."
+        }
+      ],
+      "badge": "Browser-only",
+      "featured": false,
+      "sensitive": true,
+      "collection": "compliance-documents",
+      "enabled": true
+    },
+    {
+      "slug": "date-duration-calculator",
+      "name": "Date & Duration Calculator",
+      "category": "productivity",
+      "categoryLabel": "Productivity",
+      "icon": "productivity",
+      "summary": "Add or subtract days, weeks, months and years from a date, or measure the exact duration between two dates.",
+      "description": "Add or subtract days, weeks, months and years from a date, or measure the exact duration between two dates. CloudHost247 labels estimates, missing data and unavailable probes instead of filling them in.",
+      "seoTitle": "Date & Duration Calculator \u2014 Free Productivity Tool | CloudHost247",
+      "seoDescription": "Add or subtract days, weeks, months and years from a date, or measure the exact duration between two dates. Free CloudHost247 tool for administrators, developers and website owners.",
+      "keywords": [
+        "date",
+        "duration",
+        "add days",
+        "date difference",
+        "leap year",
+        "calculator",
+        "date-duration-calculator",
+        "productivity",
+        "date & duration calculator"
+      ],
+      "aliases": [],
+      "path": "/tools/date-duration-calculator",
+      "legacyPaths": [],
+      "mode": "local",
+      "handler": "date_duration",
+      "options": {},
+      "inputs": [
+        {
+          "name": "action",
+          "label": "Calculation",
+          "type": "select",
+          "placeholder": "difference",
+          "required": true,
+          "choices": {
+            "difference": "Duration between two dates",
+            "add": "Add to a date",
+            "subtract": "Subtract from a date"
+          }
+        },
+        {
+          "name": "startDate",
+          "label": "Start date",
+          "type": "text",
+          "placeholder": "2026-01-31",
+          "required": true,
+          "hint": "ISO 8601 (YYYY-MM-DD) or DD/MM/YYYY."
+        },
+        {
+          "name": "endDate",
+          "label": "End date",
+          "type": "text",
+          "placeholder": "2026-12-31",
+          "required": false,
+          "hint": "Used for the duration between two dates."
+        },
+        {
+          "name": "amount",
+          "label": "Amount",
+          "type": "number",
+          "placeholder": "30",
+          "required": false,
+          "hint": "Used when adding or subtracting."
+        },
+        {
+          "name": "unit",
+          "label": "Unit",
+          "type": "select",
+          "placeholder": "days",
+          "required": true,
+          "choices": {
+            "days": "Days",
+            "weeks": "Weeks",
+            "months": "Months",
+            "years": "Years"
+          }
+        }
+      ],
+      "relatedTools": [
+        "age-date-calculator",
+        "percentage-calculator",
+        "qr-code-generator",
+        "qr-scanner"
+      ],
+      "services": [
+        {
+          "label": "Web hosting",
+          "url": "web-hosting.php"
+        },
+        {
+          "label": "Domains",
+          "url": "domain.php"
+        },
+        {
+          "label": "Help center",
+          "url": "help-center.php"
+        }
+      ],
+      "faq": [
+        {
+          "q": "What does Date & Duration Calculator actually check?",
+          "a": "Add or subtract days, weeks, months and years from a date, or measure the exact duration between two dates. Each result names its source."
+        },
+        {
+          "q": "Is my input stored?",
+          "a": "Processing happens in your browser and is not uploaded. Sensitive values are not written to logs."
+        },
+        {
+          "q": "Does a result guarantee the rest of the internet sees the same thing?",
+          "a": "No. A result describes this check at this time. DNS and geolocation answers can differ by resolver and provider."
+        }
+      ],
+      "badge": "Browser-only",
+      "featured": false,
+      "sensitive": false,
+      "collection": "compliance-documents",
+      "enabled": true
+    },
+    {
+      "slug": "percentage-calculator",
+      "name": "Percentage & Rate Calculator",
+      "category": "productivity",
+      "categoryLabel": "Productivity",
+      "icon": "productivity",
+      "summary": "Percentage increase or decrease, percentage difference, reverse percentage and rate calculations.",
+      "description": "Percentage increase or decrease, percentage difference, reverse percentage and rate calculations. CloudHost247 labels estimates, missing data and unavailable probes instead of filling them in.",
+      "seoTitle": "Percentage & Rate Calculator \u2014 Free Productivity Tool | CloudHost247",
+      "seoDescription": "Percentage increase or decrease, percentage difference, reverse percentage and rate calculations. Free CloudHost247 tool for administrators, developers and website owners.",
+      "keywords": [
+        "percentage",
+        "percent",
+        "increase",
+        "decrease",
+        "reverse percentage",
+        "rate",
+        "calculator",
+        "percentage-calculator",
+        "productivity",
+        "percentage & rate calculator"
+      ],
+      "aliases": [],
+      "path": "/tools/percentage-calculator",
+      "legacyPaths": [],
+      "mode": "local",
+      "handler": "percentage",
+      "options": {},
+      "inputs": [
+        {
+          "name": "action",
+          "label": "Calculation",
+          "type": "select",
+          "placeholder": "change",
+          "required": true,
+          "choices": {
+            "change": "Percentage increase / decrease",
+            "of": "What is X% of Y",
+            "isWhat": "X is what % of Y",
+            "reverse": "Reverse percentage (find the original)",
+            "difference": "Percentage difference"
+          }
+        },
+        {
+          "name": "from",
+          "label": "From / original value",
+          "type": "text",
+          "placeholder": "1200",
+          "required": true
+        },
+        {
+          "name": "to",
+          "label": "To / new value",
+          "type": "text",
+          "placeholder": "1500",
+          "required": false
+        },
+        {
+          "name": "percent",
+          "label": "Percentage (%)",
+          "type": "text",
+          "placeholder": "15",
+          "required": false
+        },
+        {
+          "name": "value",
+          "label": "Value",
+          "type": "text",
+          "placeholder": "250",
+          "required": false
+        }
+      ],
+      "relatedTools": [
+        "age-date-calculator",
+        "date-duration-calculator",
+        "qr-code-generator",
+        "qr-scanner"
+      ],
+      "services": [
+        {
+          "label": "Web hosting",
+          "url": "web-hosting.php"
+        },
+        {
+          "label": "Domains",
+          "url": "domain.php"
+        },
+        {
+          "label": "Help center",
+          "url": "help-center.php"
+        }
+      ],
+      "faq": [
+        {
+          "q": "What does Percentage & Rate Calculator actually check?",
+          "a": "Percentage increase or decrease, percentage difference, reverse percentage and rate calculations. Each result names its source."
+        },
+        {
+          "q": "Is my input stored?",
+          "a": "Processing happens in your browser and is not uploaded. Sensitive values are not written to logs."
+        },
+        {
+          "q": "Does a result guarantee the rest of the internet sees the same thing?",
+          "a": "No. A result describes this check at this time. DNS and geolocation answers can differ by resolver and provider."
+        }
+      ],
+      "badge": "Browser-only",
+      "featured": false,
+      "sensitive": false,
+      "collection": "compliance-documents",
+      "enabled": true
+    },
+    {
+      "slug": "unit-data-converter",
+      "name": "Unit & Data Conversion Calculator",
+      "category": "developer",
+      "categoryLabel": "Developer",
+      "icon": "developer",
+      "summary": "Convert storage and data units between binary (KiB, MiB, GiB) and decimal (KB, MB, GB) systems.",
+      "description": "Converts data and storage quantities between the binary units a kernel reports (KiB, MiB, GiB, TiB, PiB \u2014 powers of 1024) and the decimal units a vendor labels a drive with (kB, MB, GB, TB, PB \u2014 powers of 1000), plus bits and bytes. Every conversion is done in exact integer-byte arithmetic where the value allows, so a 4 TiB volume and a 4 TB drive show the 10% difference that is actually there instead of being rounded away. The result names both systems so an infrastructure figure cannot be misread.",
+      "seoTitle": "Unit & Data Conversion Calculator \u2014 Free Developer Tool | CloudHost247",
+      "seoDescription": "Convert storage and data units between binary (KiB, MiB, GiB) and decimal (KB, MB, GB) systems. Free CloudHost247 tool for administrators, developers and website owners.",
+      "keywords": [
+        "unit",
+        "converter",
+        "bytes",
+        "kibibyte",
+        "mebibyte",
+        "gibibyte",
+        "storage",
+        "data",
+        "binary",
+        "decimal",
+        "unit-data-converter",
+        "developer",
+        "unit & data conversion calculator"
+      ],
+      "aliases": [],
+      "path": "/tools/unit-data-converter",
+      "legacyPaths": [],
+      "mode": "local",
+      "handler": "unit_data",
+      "options": {},
+      "inputs": [
+        {
+          "name": "amount",
+          "label": "Amount",
+          "type": "text",
+          "placeholder": "1",
+          "required": true
+        },
+        {
+          "name": "fromUnit",
+          "label": "From unit",
+          "type": "select",
+          "placeholder": "GiB",
+          "required": true,
+          "choices": {
+            "bit": "bit",
+            "B": "B (byte)",
+            "kB": "kB (1000 B)",
+            "MB": "MB (1000 kB)",
+            "GB": "GB (1000 MB)",
+            "TB": "TB (1000 GB)",
+            "PB": "PB (1000 TB)",
+            "KiB": "KiB (1024 B)",
+            "MiB": "MiB (1024 KiB)",
+            "GiB": "GiB (1024 MiB)",
+            "TiB": "TiB (1024 GiB)",
+            "PiB": "PiB (1024 TiB)"
+          }
+        },
+        {
+          "name": "toUnit",
+          "label": "To unit",
+          "type": "select",
+          "placeholder": "GB",
+          "required": true,
+          "choices": {
+            "bit": "bit",
+            "B": "B (byte)",
+            "kB": "kB (1000 B)",
+            "MB": "MB (1000 kB)",
+            "GB": "GB (1000 MB)",
+            "TB": "TB (1000 GB)",
+            "PB": "PB (1000 TB)",
+            "KiB": "KiB (1024 B)",
+            "MiB": "MiB (1024 KiB)",
+            "GiB": "GiB (1024 MiB)",
+            "TiB": "TiB (1024 GiB)",
+            "PiB": "PiB (1024 TiB)"
+          }
+        },
+        {
+          "name": "precision",
+          "label": "Decimal places",
+          "type": "number",
+          "placeholder": "6",
+          "required": false,
+          "hint": "0 to 15. Defaults to 6."
+        }
+      ],
+      "relatedTools": [
+        "http-headers-checker",
+        "website-os-checker",
+        "md5-generator",
+        "base64-generator"
+      ],
+      "services": [
+        {
+          "label": "Developer hosting",
+          "url": "developer-friendly.php"
+        },
+        {
+          "label": "PaaS",
+          "url": "paas.php"
+        },
+        {
+          "label": "Node.js",
+          "url": "nodejs-hosting.php"
+        },
+        {
+          "label": "Docker",
+          "url": "docker-hosting.php"
+        },
+        {
+          "label": "VPS",
+          "url": "vps-hosting.php"
+        }
+      ],
+      "faq": [
+        {
+          "q": "What does Unit & Data Conversion Calculator actually check?",
+          "a": "Convert storage and data units between binary (KiB, MiB, GiB) and decimal (KB, MB, GB) systems. Each result names its source."
+        },
+        {
+          "q": "Is my input stored?",
+          "a": "Processing happens in your browser and is not uploaded. Sensitive values are not written to logs."
+        },
+        {
+          "q": "Does a result guarantee the rest of the internet sees the same thing?",
+          "a": "No. A result describes this check at this time. DNS and geolocation answers can differ by resolver and provider."
+        }
+      ],
+      "badge": "Browser-only",
+      "featured": false,
+      "sensitive": false,
+      "collection": "compliance-documents",
+      "enabled": true
+    },
+    {
+      "slug": "unix-timestamp-calculator",
+      "name": "Timestamp / Unix Time Calculator",
+      "category": "developer",
+      "categoryLabel": "Developer",
+      "icon": "developer",
+      "summary": "Convert Unix timestamps to and from human-readable dates in seconds or milliseconds, with UTC and ISO 8601.",
+      "description": "Convert Unix timestamps to and from human-readable dates in seconds or milliseconds, with UTC and ISO 8601. CloudHost247 labels estimates, missing data and unavailable probes instead of filling them in.",
+      "seoTitle": "Timestamp / Unix Time Calculator \u2014 Free Developer Tool | CloudHost247",
+      "seoDescription": "Convert Unix timestamps to and from human-readable dates in seconds or milliseconds, with UTC and ISO 8601. Free CloudHost247 tool for administrators, developers and website owners.",
+      "keywords": [
+        "unix",
+        "timestamp",
+        "epoch",
+        "iso 8601",
+        "utc",
+        "timezone",
+        "converter",
+        "calculator",
+        "unix-timestamp-calculator",
+        "developer",
+        "timestamp / unix time calculator"
+      ],
+      "aliases": [],
+      "path": "/tools/unix-timestamp-calculator",
+      "legacyPaths": [],
+      "mode": "local",
+      "handler": "unix_timestamp",
+      "options": {},
+      "inputs": [
+        {
+          "name": "action",
+          "label": "Direction",
+          "type": "select",
+          "placeholder": "decode",
+          "required": true,
+          "choices": {
+            "decode": "Timestamp \u2192 date/time",
+            "encode": "Date/time \u2192 timestamp",
+            "now": "Current timestamp"
+          }
+        },
+        {
+          "name": "timestamp",
+          "label": "Unix timestamp",
+          "type": "text",
+          "placeholder": "1767225600",
+          "required": false,
+          "hint": "Seconds or milliseconds \u2014 the tool detects which."
+        },
+        {
+          "name": "datetime",
+          "label": "Date and time",
+          "type": "text",
+          "placeholder": "2026-01-01T00:00:00Z",
+          "required": false,
+          "hint": "ISO 8601, or YYYY-MM-DD HH:MM:SS."
+        },
+        {
+          "name": "zone",
+          "label": "Time zone",
+          "type": "select",
+          "placeholder": "utc",
+          "required": true,
+          "choices": {
+            "utc": "UTC",
+            "local": "My local time zone"
+          }
+        }
+      ],
+      "relatedTools": [
+        "http-headers-checker",
+        "website-os-checker",
+        "md5-generator",
+        "base64-generator"
+      ],
+      "services": [
+        {
+          "label": "Developer hosting",
+          "url": "developer-friendly.php"
+        },
+        {
+          "label": "PaaS",
+          "url": "paas.php"
+        },
+        {
+          "label": "Node.js",
+          "url": "nodejs-hosting.php"
+        },
+        {
+          "label": "Docker",
+          "url": "docker-hosting.php"
+        },
+        {
+          "label": "VPS",
+          "url": "vps-hosting.php"
+        }
+      ],
+      "faq": [
+        {
+          "q": "What does Timestamp / Unix Time Calculator actually check?",
+          "a": "Convert Unix timestamps to and from human-readable dates in seconds or milliseconds, with UTC and ISO 8601. Each result names its source."
+        },
+        {
+          "q": "Is my input stored?",
+          "a": "Processing happens in your browser and is not uploaded. Sensitive values are not written to logs."
+        },
+        {
+          "q": "Does a result guarantee the rest of the internet sees the same thing?",
+          "a": "No. A result describes this check at this time. DNS and geolocation answers can differ by resolver and provider."
+        }
+      ],
+      "badge": "Browser-only",
+      "featured": false,
+      "sensitive": false,
+      "collection": "compliance-documents",
+      "enabled": true
+    },
+    {
+      "slug": "api-key-generator",
+      "name": "API Key / Token Generator",
+      "category": "cybersecurity",
+      "categoryLabel": "Cybersecurity",
+      "icon": "cybersecurity",
+      "summary": "Cryptographically secure API keys and bearer tokens with a prefix, a chosen alphabet and bulk output.",
+      "description": "Generates secrets from the browser's cryptographic random source (window.crypto) \u2014 never Math.random \u2014 with rejection sampling so every character in the chosen alphabet is equally likely and no modulo bias is introduced. Choose a prefix, a length and a character set, and generate one key or a batch. The estimated entropy in bits is reported so a weak choice is visible before you deploy it. Privacy: keys are created in your browser tab, are not sent to CloudHost247, are not written to logs or analytics, are not placed in a URL and are not persisted \u2014 closing the tab discards them. Scope: this generates random material. It does not register, validate or rotate a key in any service.",
+      "seoTitle": "API Key / Token Generator \u2014 Free Cybersecurity Tool | CloudHost247",
+      "seoDescription": "Cryptographically secure API keys and bearer tokens with a prefix, a chosen alphabet and bulk output. Free CloudHost247 tool for administrators, developers and website owners.",
+      "keywords": [
+        "api key",
+        "token",
+        "bearer",
+        "secret",
+        "random",
+        "generator",
+        "cryptography",
+        "api-key-generator",
+        "cybersecurity",
+        "api key / token generator"
+      ],
+      "aliases": [],
+      "path": "/tools/api-key-generator",
+      "legacyPaths": [],
+      "mode": "local",
+      "handler": "api_key_generate",
+      "options": {},
+      "inputs": [
+        {
+          "name": "prefix",
+          "label": "Prefix",
+          "type": "text",
+          "placeholder": "ch247",
+          "required": false,
+          "hint": "Optional. Separated from the secret with an underscore."
+        },
+        {
+          "name": "length",
+          "label": "Secret length",
+          "type": "number",
+          "placeholder": "40",
+          "required": true,
+          "hint": "16 to 256 characters of secret, excluding the prefix."
+        },
+        {
+          "name": "alphabet",
+          "label": "Character set",
+          "type": "select",
+          "placeholder": "base62",
+          "required": true,
+          "choices": {
+            "base62": "A\u2013Z a\u2013z 0\u20139 (URL-safe)",
+            "hex": "0\u20139 a\u2013f (hex)",
+            "base32": "A\u2013Z 2\u20137 (Crockford-safe)",
+            "urlsafe": "A\u2013Z a\u2013z 0\u20139 - _ (base64url)",
+            "digits": "0\u20139 only"
+          }
+        },
+        {
+          "name": "count",
+          "label": "How many",
+          "type": "number",
+          "placeholder": "1",
+          "required": true,
+          "hint": "1 to 100."
+        }
+      ],
+      "relatedTools": [
+        "checksum-hash-generator",
+        "http-security-headers-generator",
+        "password-policy-generator",
+        "ssl-certificate-checker"
+      ],
+      "services": [
+        {
+          "label": "SSL certificates",
+          "url": "ssl-certificate.php"
+        },
+        {
+          "label": "Web hosting",
+          "url": "web-hosting.php"
+        },
+        {
+          "label": "Security",
+          "url": "security.php"
+        },
+        {
+          "label": "VPS",
+          "url": "vps-hosting.php"
+        }
+      ],
+      "faq": [
+        {
+          "q": "Is the randomness suitable for secrets?",
+          "a": "It uses window.crypto.getRandomValues, the browser's CSPRNG, with rejection sampling to avoid modulo bias. If your browser has no CSPRNG the tool refuses to run rather than falling back to Math.random."
+        },
+        {
+          "q": "Are the keys stored anywhere?",
+          "a": "No. They exist in this tab only, are not uploaded, not logged, not added to a URL and not written to local storage. Copy them now; refreshing discards them."
+        },
+        {
+          "q": "Does this make my API secure?",
+          "a": "No. It produces random material. Transport security, storage at rest, rotation, scoping and revocation are your service's responsibility."
+        }
+      ],
+      "badge": "Browser-only",
+      "featured": false,
+      "sensitive": true,
+      "collection": "compliance-documents",
+      "enabled": true
+    },
+    {
+      "slug": "checksum-hash-generator",
+      "name": "Checksum / Hash Generator",
+      "category": "cybersecurity",
+      "categoryLabel": "Cybersecurity",
+      "icon": "cybersecurity",
+      "summary": "SHA-256, SHA-384, SHA-512, SHA-1 and MD5 digests of text or a file, computed in your browser.",
+      "description": "Computes cryptographic digests with the Web Crypto API in your browser tab. SHA-256, SHA-384 and SHA-512 are the recommended choices. SHA-1 is offered only for compatibility with systems that still publish SHA-1 fingerprints, and is labelled as such. MD5 is offered strictly as a legacy checksum for file identity against an older manifest: it is broken for collision resistance and must not be used for signatures, certificates or passwords. Output is hex and Base64. Files are read locally and are never uploaded.",
+      "seoTitle": "Checksum / Hash Generator \u2014 Free Cybersecurity Tool | CloudHost247",
+      "seoDescription": "SHA-256, SHA-384, SHA-512, SHA-1 and MD5 digests of text or a file, computed in your browser. Free CloudHost247 tool for administrators, developers and website owners.",
+      "keywords": [
+        "hash",
+        "checksum",
+        "sha256",
+        "sha384",
+        "sha512",
+        "sha1",
+        "md5",
+        "digest",
+        "integrity",
+        "generator",
+        "checksum-hash-generator",
+        "cybersecurity",
+        "checksum / hash generator"
+      ],
+      "aliases": [],
+      "path": "/tools/checksum-hash-generator",
+      "legacyPaths": [],
+      "mode": "local",
+      "handler": "checksum_hash",
+      "options": {},
+      "inputs": [
+        {
+          "name": "source",
+          "label": "Input",
+          "type": "select",
+          "placeholder": "text",
+          "required": true,
+          "choices": {
+            "text": "Text",
+            "file": "File"
+          }
+        },
+        {
+          "name": "text",
+          "label": "Text to hash",
+          "type": "textarea",
+          "placeholder": "Text to hash",
+          "required": false
+        },
+        {
+          "name": "file",
+          "label": "File to hash",
+          "type": "file",
+          "placeholder": "",
+          "required": false,
+          "hint": "Read in this browser tab; never uploaded."
+        },
+        {
+          "name": "algorithm",
+          "label": "Algorithm",
+          "type": "select",
+          "placeholder": "sha256",
+          "required": true,
+          "choices": {
+            "sha256": "SHA-256 (recommended)",
+            "sha384": "SHA-384",
+            "sha512": "SHA-512",
+            "sha1": "SHA-1 (compatibility only)",
+            "md5": "MD5 (legacy checksum only)"
+          }
+        }
+      ],
+      "relatedTools": [
+        "api-key-generator",
+        "http-security-headers-generator",
+        "password-policy-generator",
+        "ssl-certificate-checker"
+      ],
+      "services": [
+        {
+          "label": "SSL certificates",
+          "url": "ssl-certificate.php"
+        },
+        {
+          "label": "Web hosting",
+          "url": "web-hosting.php"
+        },
+        {
+          "label": "Security",
+          "url": "security.php"
+        },
+        {
+          "label": "VPS",
+          "url": "vps-hosting.php"
+        }
+      ],
+      "faq": [
+        {
+          "q": "Where is the file read?",
+          "a": "In your browser tab, through the File API. It is streamed into the Web Crypto digest and never leaves your machine."
+        },
+        {
+          "q": "Can I use MD5 for security?",
+          "a": "No. MD5 collisions are practical. Use it only to compare against an older manifest that publishes MD5, and treat a match as weak evidence."
+        },
+        {
+          "q": "Does a matching checksum prove a file is safe?",
+          "a": "No. A digest proves the bytes are the same as the bytes that produced the reference digest. It says nothing about whether those bytes are trustworthy \u2014 that depends on where the reference digest came from."
+        }
+      ],
+      "badge": "Browser-only",
+      "featured": false,
+      "sensitive": false,
+      "collection": "compliance-documents",
+      "enabled": true
+    },
+    {
+      "slug": "json-formatter",
+      "name": "JSON Formatter / Generator",
+      "category": "developer",
+      "categoryLabel": "Developer",
+      "icon": "developer",
+      "summary": "Format, minify and validate JSON with precise syntax error positions. Nothing is uploaded.",
+      "description": "Parses JSON in your browser tab and re-emits it formatted, minified or simply validated. Invalid input produces the parser's message together with the line, the column and the offending fragment, so a syntax error can be found without counting braces by hand. Formatting preserves key order and value types; numbers that the parser would lose precision on (beyond 2^53) are reported rather than silently rewritten. The result can be copied or downloaded, and nothing is sent to CloudHost247.",
+      "seoTitle": "JSON Formatter / Generator \u2014 Free Developer Tool | CloudHost247",
+      "seoDescription": "Format, minify and validate JSON with precise syntax error positions. Nothing is uploaded. Free CloudHost247 tool for administrators, developers and website owners.",
+      "keywords": [
+        "json",
+        "formatter",
+        "beautify",
+        "minify",
+        "validate",
+        "syntax error",
+        "generator",
+        "json-formatter",
+        "developer",
+        "json formatter / generator"
+      ],
+      "aliases": [],
+      "path": "/tools/json-formatter",
+      "legacyPaths": [],
+      "mode": "local",
+      "handler": "json_format",
+      "options": {},
+      "inputs": [
+        {
+          "name": "action",
+          "label": "Action",
+          "type": "select",
+          "placeholder": "format",
+          "required": true,
+          "choices": {
+            "format": "Format (pretty-print)",
+            "minify": "Minify",
+            "validate": "Validate only"
+          }
+        },
+        {
+          "name": "text",
+          "label": "JSON",
+          "type": "textarea",
+          "placeholder": "{\"service\":\"example\",\"enabled\":true}",
+          "required": true
+        },
+        {
+          "name": "indent",
+          "label": "Indent",
+          "type": "select",
+          "placeholder": "2",
+          "required": true,
+          "choices": {
+            "2": "2 spaces",
+            "4": "4 spaces",
+            "tab": "Tab"
+          }
+        }
+      ],
+      "relatedTools": [
+        "http-headers-checker",
+        "website-os-checker",
+        "md5-generator",
+        "base64-generator"
+      ],
+      "services": [
+        {
+          "label": "Developer hosting",
+          "url": "developer-friendly.php"
+        },
+        {
+          "label": "PaaS",
+          "url": "paas.php"
+        },
+        {
+          "label": "Node.js",
+          "url": "nodejs-hosting.php"
+        },
+        {
+          "label": "Docker",
+          "url": "docker-hosting.php"
+        },
+        {
+          "label": "VPS",
+          "url": "vps-hosting.php"
+        }
+      ],
+      "faq": [
+        {
+          "q": "What does JSON Formatter / Generator actually check?",
+          "a": "Format, minify and validate JSON with precise syntax error positions. Nothing is uploaded. Each result names its source."
+        },
+        {
+          "q": "Is my input stored?",
+          "a": "Processing happens in your browser and is not uploaded. Sensitive values are not written to logs."
+        },
+        {
+          "q": "Does a result guarantee the rest of the internet sees the same thing?",
+          "a": "No. A result describes this check at this time. DNS and geolocation answers can differ by resolver and provider."
+        }
+      ],
+      "badge": "Browser-only",
+      "featured": false,
+      "sensitive": false,
+      "collection": "compliance-documents",
+      "enabled": true
+    },
+    {
+      "slug": "http-security-headers-generator",
+      "name": "HTTP Security Headers Generator",
+      "category": "cybersecurity",
+      "categoryLabel": "Cybersecurity",
+      "icon": "cybersecurity",
+      "summary": "Build a reviewed set of HTTP security headers and export it for nginx, Apache, .htaccess or Cloudflare.",
+      "description": "Assembles a coherent set of response headers \u2014 Content-Security-Policy, Strict-Transport-Security, X-Content-Type-Options, Referrer-Policy, Permissions-Policy and frame protection \u2014 and emits them in the syntax the chosen server actually accepts. The choices are deliberately narrow: a strict CSP that will work on a site with no inline script, a balanced one for a site that still has inline styles, or none. The tool is configuration assistance. It does not scan your site, does not test the policy and does not tell you whether your application is secure; deploy the output to a staging host first and watch the console for violations.",
+      "seoTitle": "HTTP Security Headers Generator \u2014 Free Cybersecurity Tool | CloudHost247",
+      "seoDescription": "Build a reviewed set of HTTP security headers and export it for nginx, Apache, .htaccess or Cloudflare. Free CloudHost247 tool for administrators, developers and website owners.",
+      "keywords": [
+        "security headers",
+        "csp",
+        "hsts",
+        "x-frame-options",
+        "referrer-policy",
+        "permissions-policy",
+        "nginx",
+        "apache",
+        "generator",
+        "http-security-headers-generator",
+        "cybersecurity",
+        "http security headers generator"
+      ],
+      "aliases": [],
+      "path": "/tools/http-security-headers-generator",
+      "legacyPaths": [],
+      "mode": "local",
+      "handler": "http_security_headers",
+      "options": {},
+      "inputs": [
+        {
+          "name": "server",
+          "label": "Output format",
+          "type": "select",
+          "placeholder": "nginx",
+          "required": true,
+          "choices": {
+            "nginx": "nginx",
+            "apache": "Apache (.htaccess)",
+            "caddy": "Caddy",
+            "cloudflare": "Cloudflare Transform Rules",
+            "raw": "Plain header list"
+          }
+        },
+        {
+          "name": "csp",
+          "label": "Content-Security-Policy",
+          "type": "select",
+          "placeholder": "strict",
+          "required": true,
+          "choices": {
+            "strict": "Strict \u2014 self only, no inline",
+            "balanced": "Balanced \u2014 self plus inline styles",
+            "off": "Omit the header"
+          }
+        },
+        {
+          "name": "hsts",
+          "label": "Strict-Transport-Security",
+          "type": "select",
+          "placeholder": "oneyear",
+          "required": true,
+          "choices": {
+            "oneyear": "1 year + includeSubDomains + preload",
+            "sixmonths": "180 days + includeSubDomains",
+            "off": "Omit"
+          }
+        },
+        {
+          "name": "frame",
+          "label": "Frame / embedding protection",
+          "type": "select",
+          "placeholder": "deny",
+          "required": true,
+          "choices": {
+            "deny": "Deny all framing",
+            "sameorigin": "Same origin only",
+            "off": "Omit"
+          }
+        },
+        {
+          "name": "referrerpolicy",
+          "label": "Referrer-Policy",
+          "type": "select",
+          "placeholder": "strict-origin-when-cross-origin",
+          "required": true,
+          "choices": {
+            "no-referrer": "no-referrer",
+            "strict-origin-when-cross-origin": "strict-origin-when-cross-origin",
+            "same-origin": "same-origin"
+          }
+        },
+        {
+          "name": "permissions",
+          "label": "Permissions-Policy",
+          "type": "select",
+          "placeholder": "restrictive",
+          "required": true,
+          "choices": {
+            "restrictive": "Restrict camera, microphone, geolocation, payment, usb",
+            "off": "Omit"
+          }
+        },
+        {
+          "name": "cookies",
+          "label": "Assume cookies with SameSite + Secure",
+          "type": "select",
+          "placeholder": "yes",
+          "required": true,
+          "choices": {
+            "yes": "Yes",
+            "no": "No"
+          }
+        },
+        {
+          "name": "domain",
+          "label": "Site domain",
+          "type": "text",
+          "placeholder": "example.com",
+          "required": false,
+          "hint": "Optional. Used for the HSTS preload note only."
+        }
+      ],
+      "relatedTools": [
+        "api-key-generator",
+        "checksum-hash-generator",
+        "password-policy-generator",
+        "ssl-certificate-checker"
+      ],
+      "services": [
+        {
+          "label": "SSL certificates",
+          "url": "ssl-certificate.php"
+        },
+        {
+          "label": "Web hosting",
+          "url": "web-hosting.php"
+        },
+        {
+          "label": "Security",
+          "url": "security.php"
+        },
+        {
+          "label": "VPS",
+          "url": "vps-hosting.php"
+        }
+      ],
+      "faq": [
+        {
+          "q": "Will a strict CSP break my site?",
+          "a": "It can. A self-only policy with no unsafe-inline blocks inline script and style attributes. Test on staging, or start with Content-Security-Policy-Report-Only and read the violation reports before enforcing."
+        },
+        {
+          "q": "Does this verify my headers?",
+          "a": "No. It generates configuration. To verify what a host actually sends, use the HTTP Headers Checker tool in this catalogue."
+        },
+        {
+          "q": "Should I enable HSTS preload immediately?",
+          "a": "Only when every host and subdomain serves valid HTTPS and will do so permanently. Preload submission is effectively irreversible for months."
+        }
+      ],
+      "badge": "Browser-only",
+      "featured": false,
+      "sensitive": false,
+      "collection": "compliance-documents",
+      "enabled": true
+    },
+    {
+      "slug": "password-policy-generator",
+      "name": "Password Policy Generator",
+      "category": "cybersecurity",
+      "categoryLabel": "Cybersecurity",
+      "icon": "cybersecurity",
+      "summary": "Produce a documented password and authentication policy from the controls you select, ready to publish.",
+      "description": "Turns the controls you select into a plain-language policy document you can hand to an auditor, publish in a wiki or attach to an onboarding pack: minimum length, composition, multi-factor scope, lockout and rate limiting, password history, maximum age, session timeout, storage algorithm and the review cadence that follows from those choices. Each section states what the control does and what it does not do. The guidance is aligned with NIST SP 800-63B and OWASP ASVS reasoning rather than legacy complexity rules, and the output says so. This is policy authoring \u2014 it does not configure an identity provider and it does not verify that your systems enforce what the document says.",
+      "seoTitle": "Password Policy Generator \u2014 Free Cybersecurity Tool | CloudHost247",
+      "seoDescription": "Produce a documented password and authentication policy from the controls you select, ready to publish. Free CloudHost247 tool for administrators, developers and website owners.",
+      "keywords": [
+        "password policy",
+        "mfa",
+        "lockout",
+        "password history",
+        "session",
+        "compliance",
+        "documentation",
+        "generator",
+        "password-policy-generator",
+        "cybersecurity",
+        "password policy generator"
+      ],
+      "aliases": [],
+      "path": "/tools/password-policy-generator",
+      "legacyPaths": [],
+      "mode": "local",
+      "handler": "password_policy",
+      "options": {},
+      "inputs": [
+        {
+          "name": "minLength",
+          "label": "Minimum length",
+          "type": "number",
+          "placeholder": "14",
+          "required": true,
+          "hint": "6 to 128."
+        },
+        {
+          "name": "mfa",
+          "label": "Multi-factor authentication",
+          "type": "select",
+          "placeholder": "required",
+          "required": true,
+          "choices": {
+            "required": "Required for every account",
+            "privileged": "Required for privileged accounts only",
+            "optional": "Recommended, not enforced"
+          }
+        },
+        {
+          "name": "lockoutThreshold",
+          "label": "Failed attempts before lockout",
+          "type": "number",
+          "placeholder": "5",
+          "required": true,
+          "hint": "0 disables lockout."
+        },
+        {
+          "name": "lockoutMinutes",
+          "label": "Lockout duration (minutes)",
+          "type": "number",
+          "placeholder": "15",
+          "required": true
+        },
+        {
+          "name": "history",
+          "label": "Remembered previous passwords",
+          "type": "number",
+          "placeholder": "5",
+          "required": true,
+          "hint": "0 to 24."
+        },
+        {
+          "name": "maxAgeDays",
+          "label": "Maximum password age (days)",
+          "type": "number",
+          "placeholder": "0",
+          "required": true,
+          "hint": "0 means no scheduled expiry."
+        },
+        {
+          "name": "sessionMinutes",
+          "label": "Idle session timeout (minutes)",
+          "type": "number",
+          "placeholder": "30",
+          "required": true
+        },
+        {
+          "name": "breachCheck",
+          "label": "Screen new passwords against breached-password lists",
+          "type": "select",
+          "placeholder": "yes",
+          "required": true,
+          "choices": {
+            "yes": "Yes",
+            "no": "No"
+          }
+        },
+        {
+          "name": "complexity",
+          "label": "Composition rules",
+          "type": "select",
+          "placeholder": "length",
+          "required": true,
+          "choices": {
+            "length": "Length only \u2014 NIST SP 800-63B aligned",
+            "classes": "Require upper, lower, digit and symbol"
+          }
+        },
+        {
+          "name": "storage",
+          "label": "Password storage",
+          "type": "select",
+          "placeholder": "argon2",
+          "required": true,
+          "choices": {
+            "argon2": "Argon2id",
+            "scrypt": "scrypt",
+            "pbkdf2": "PBKDF2-SHA-256 (high iteration count)"
+          }
+        }
+      ],
+      "relatedTools": [
+        "api-key-generator",
+        "checksum-hash-generator",
+        "http-security-headers-generator",
+        "ssl-certificate-checker"
+      ],
+      "services": [
+        {
+          "label": "SSL certificates",
+          "url": "ssl-certificate.php"
+        },
+        {
+          "label": "Web hosting",
+          "url": "web-hosting.php"
+        },
+        {
+          "label": "Security",
+          "url": "security.php"
+        },
+        {
+          "label": "VPS",
+          "url": "vps-hosting.php"
+        }
+      ],
+      "faq": [
+        {
+          "q": "Does this certify my compliance?",
+          "a": "No. It writes down the controls you chose in a form an auditor can read. Certification requires your systems to enforce them and evidence that they do."
+        },
+        {
+          "q": "Why is complexity optional?",
+          "a": "NIST SP 800-63B recommends length and breach screening over forced character classes, which push people towards predictable substitutions. The generator offers both and states the trade-off in the document it produces."
+        }
+      ],
+      "badge": "Browser-only",
+      "featured": false,
+      "sensitive": false,
+      "collection": "compliance-documents",
+      "enabled": true
+    },
+    {
+      "slug": "dns-record-generator",
+      "name": "DNS / Domain Configuration Generator",
+      "category": "dns",
+      "categoryLabel": "DNS",
+      "icon": "dns",
+      "summary": "Build A, AAAA, CNAME, MX, TXT, SPF, DMARC and DKIM records from the values you supply, with format validation.",
+      "description": "Assembles a DNS configuration from values you supply and refuses to invent any of them. Every record is validated before output: IPv4 and IPv6 literals are parsed properly, a CNAME target must be a hostname and cannot coexist with another record at the same name, an MX host must not be an address literal, SPF is checked against the 10-DNS-lookup limit for the mechanisms you list, DMARC is checked for the required v=DMARC1 and p= tags, and a DKIM record is emitted only when both a selector and a public key are present. Nothing is published: the output is a BIND zone fragment, structured JSON or a Cloudflare import CSV for you to review and apply.",
+      "seoTitle": "DNS / Domain Configuration Generator \u2014 Free DNS Tool | CloudHost247",
+      "seoDescription": "Build A, AAAA, CNAME, MX, TXT, SPF, DMARC and DKIM records from the values you supply, with format validation. Free CloudHost247 tool for administrators, developers and website owners.",
+      "keywords": [
+        "dns",
+        "records",
+        "zone file",
+        "a",
+        "aaaa",
+        "cname",
+        "mx",
+        "txt",
+        "spf",
+        "dmarc",
+        "dkim",
+        "generator",
+        "dns-record-generator",
+        "dns",
+        "dns / domain configuration generator"
+      ],
+      "aliases": [],
+      "path": "/tools/dns-record-generator",
+      "legacyPaths": [],
+      "mode": "local",
+      "handler": "dns_record_generate",
+      "options": {},
+      "inputs": [
+        {
+          "name": "domain",
+          "label": "Domain",
+          "type": "text",
+          "placeholder": "example.com",
+          "required": true
+        },
+        {
+          "name": "defaultTtl",
+          "label": "Default TTL (seconds)",
+          "type": "number",
+          "placeholder": "3600",
+          "required": true,
+          "hint": "60 to 86400."
+        },
+        {
+          "name": "aRecords",
+          "label": "A records (name = IPv4, one per line)",
+          "type": "textarea",
+          "placeholder": "@ = 203.0.113.10",
+          "required": false
+        },
+        {
+          "name": "aaaaRecords",
+          "label": "AAAA records (name = IPv6, one per line)",
+          "type": "textarea",
+          "placeholder": "",
+          "required": false
+        },
+        {
+          "name": "cnameRecords",
+          "label": "CNAME records (name = target, one per line)",
+          "type": "textarea",
+          "placeholder": "www = example.com.",
+          "required": false
+        },
+        {
+          "name": "mxRecords",
+          "label": "MX records (priority host, one per line)",
+          "type": "textarea",
+          "placeholder": "10 mail.example.com.",
+          "required": false
+        },
+        {
+          "name": "txtRecords",
+          "label": "TXT records (name = value, one per line)",
+          "type": "textarea",
+          "placeholder": "",
+          "required": false
+        },
+        {
+          "name": "spfIncludes",
+          "label": "SPF include hosts",
+          "type": "text",
+          "placeholder": "_spf.example.net",
+          "required": false,
+          "hint": "Space or comma separated."
+        },
+        {
+          "name": "spfPolicy",
+          "label": "SPF terminal policy",
+          "type": "select",
+          "placeholder": "-all",
+          "required": true,
+          "choices": {
+            "-all": "-all (hard fail)",
+            "~all": "~all (soft fail)",
+            "?all": "?all (neutral)"
+          }
+        },
+        {
+          "name": "dmarcPolicy",
+          "label": "DMARC policy",
+          "type": "select",
+          "placeholder": "none",
+          "required": true,
+          "choices": {
+            "none": "none",
+            "quarantine": "quarantine",
+            "reject": "reject"
+          }
+        },
+        {
+          "name": "dmarcRua",
+          "label": "DMARC aggregate report address",
+          "type": "text",
+          "placeholder": "dmarc@example.com",
+          "required": false
+        },
+        {
+          "name": "dkimSelector",
+          "label": "DKIM selector",
+          "type": "text",
+          "placeholder": "",
+          "required": false,
+          "hint": "Only used if you also supply the public key."
+        },
+        {
+          "name": "dkimPublicKey",
+          "label": "DKIM public key (base64, p= value)",
+          "type": "textarea",
+          "placeholder": "",
+          "required": false
+        },
+        {
+          "name": "format",
+          "label": "Output format",
+          "type": "select",
+          "placeholder": "zone",
+          "required": true,
+          "choices": {
+            "zone": "BIND zone file",
+            "json": "Structured JSON",
+            "cloudflare": "Cloudflare import CSV"
+          }
+        }
+      ],
+      "relatedTools": [
+        "dns-checker",
+        "dns-propagation",
+        "domain-dns-validation",
+        "reverse-ip-lookup"
+      ],
+      "services": [
+        {
+          "label": "Domain registration",
+          "url": "domain.php"
+        },
+        {
+          "label": "DNS management",
+          "url": "dns-management.php"
+        },
+        {
+          "label": "Web hosting",
+          "url": "web-hosting.php"
+        },
+        {
+          "label": "VPS",
+          "url": "vps-hosting.php"
+        },
+        {
+          "label": "Cloud hosting",
+          "url": "cloudhost247-hosting.php"
+        }
+      ],
+      "faq": [
+        {
+          "q": "Does this change my DNS?",
+          "a": "No. It produces text for you to review and publish. No request is made to any registrar, DNS provider or resolver."
+        },
+        {
+          "q": "Will it fill in values I leave out?",
+          "a": "No. An empty field produces no record. DKIM in particular is emitted only when you supply both the selector and the public key, because a guessed key would be worse than none."
+        }
+      ],
+      "badge": "Browser-only",
+      "featured": false,
+      "sensitive": false,
+      "collection": "compliance-documents",
       "enabled": true
     },
     {
@@ -3656,6 +5273,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -3750,6 +5368,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -3837,6 +5456,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -3917,6 +5537,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -3997,6 +5618,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -4091,6 +5713,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -4171,6 +5794,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -4251,6 +5875,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -4331,6 +5956,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -4411,6 +6037,7 @@
       "badge": "Browser-only",
       "featured": true,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -4490,6 +6117,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -4570,6 +6198,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -4655,6 +6284,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -4726,6 +6356,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -4818,6 +6449,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -4903,6 +6535,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -4979,6 +6612,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -5046,6 +6680,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -5122,6 +6757,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -5198,6 +6834,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -5288,6 +6925,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -5296,13 +6934,18 @@
       "category": "webmaster",
       "categoryLabel": "Webmaster",
       "icon": "webmaster",
-      "summary": "Build a robots.txt draft from the paths and agents you enter.",
-      "description": "Build a robots.txt draft from the paths and agents you enter. CloudHost247 labels estimates, missing data and unavailable probes instead of filling them in.",
+      "summary": "Build a valid robots.txt from your user-agent rules, allow and disallow paths, crawl-delay and sitemap URLs.",
+      "description": "Assembles a robots.txt file from the rules you enter and validates them as it goes: each Disallow and Allow path must start with a forward slash, a sitemap must be an absolute http(s) URL, and a crawl-delay must be a positive number of seconds. Multiple user-agents share one rule block, which is what the specification expects. The preview is the exact file text you can download and publish. Scope: this writes crawl guidance for cooperating crawlers. It is not an access control, it does not hide anything from a client that ignores it, and it does not verify how a search engine currently treats your site.",
       "seoTitle": "Robots.txt Generator \u2014 Free Webmaster Tool | CloudHost247",
-      "seoDescription": "Build a robots.txt draft from the paths and agents you enter. Free CloudHost247 tool for administrators, developers and website owners.",
+      "seoDescription": "Build a valid robots.txt from your user-agent rules, allow and disallow paths, crawl-delay and sitemap URLs. Free CloudHost247 tool for administrators, developers and website owners.",
       "keywords": [
         "robots",
+        "robots.txt",
         "seo",
+        "crawler",
+        "user-agent",
+        "sitemap",
+        "crawl-delay",
         "generator",
         "robots-txt-generator",
         "webmaster",
@@ -5317,24 +6960,52 @@
       "inputs": [
         {
           "name": "agent",
-          "label": "User-agent",
-          "type": "text",
+          "label": "User-agent (one per line)",
+          "type": "textarea",
           "placeholder": "*",
-          "required": true
+          "required": true,
+          "hint": "Use * for every crawler, or one token per line, e.g. Googlebot, Bingbot."
         },
         {
           "name": "disallow",
-          "label": "Disallow paths",
+          "label": "Disallow paths (one per line)",
           "type": "textarea",
           "placeholder": "/admin/",
           "required": false
         },
         {
+          "name": "allow",
+          "label": "Allow paths (one per line)",
+          "type": "textarea",
+          "placeholder": "",
+          "required": false,
+          "hint": "An Allow inside a Disallowed directory re-opens that path. Most crawlers honour it."
+        },
+        {
+          "name": "crawlDelay",
+          "label": "Crawl-delay (seconds)",
+          "type": "number",
+          "placeholder": "",
+          "required": false,
+          "hint": "Optional. Googlebot ignores this directive; Bing and Yandex honour it."
+        },
+        {
           "name": "sitemap",
-          "label": "Sitemap URL",
-          "type": "url",
+          "label": "Sitemap URLs (one per line)",
+          "type": "textarea",
           "placeholder": "https://example.com/sitemap.xml",
           "required": false
+        },
+        {
+          "name": "noindexNote",
+          "label": "Warn about noindex in robots.txt",
+          "type": "select",
+          "placeholder": "yes",
+          "required": true,
+          "choices": {
+            "yes": "Yes",
+            "no": "No"
+          }
         }
       ],
       "relatedTools": [
@@ -5363,21 +7034,18 @@
       ],
       "faq": [
         {
-          "q": "What does Robots.txt Generator actually check?",
-          "a": "Build a robots.txt draft from the paths and agents you enter. Each result names its source."
+          "q": "Does robots.txt keep a page private?",
+          "a": "No. It is a request that cooperating crawlers honour, and it is public. Anything that must stay private needs authentication. A Disallow can also keep a page out of your own view of the index while other sites still link to it."
         },
         {
-          "q": "Is my input stored?",
-          "a": "Processing happens in your browser and is not uploaded. Sensitive values are not written to logs."
-        },
-        {
-          "q": "Does a result guarantee the rest of the internet sees the same thing?",
-          "a": "No. A result describes this check at this time. DNS and geolocation answers can differ by resolver and provider."
+          "q": "Does every crawler support crawl-delay?",
+          "a": "No. Googlebot ignores it; Bing and Yandex honour it. The generator notes this next to the value."
         }
       ],
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "compliance-documents",
       "enabled": true
     },
     {
@@ -5460,6 +7128,7 @@
       "badge": "Live check",
       "featured": true,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -5535,6 +7204,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -5601,6 +7271,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -5676,6 +7347,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -5712,9 +7384,10 @@
         }
       ],
       "relatedTools": [
-        "password-encryption",
-        "random-password-generator",
-        "password-strength-checker"
+        "api-key-generator",
+        "checksum-hash-generator",
+        "http-security-headers-generator",
+        "password-policy-generator"
       ],
       "services": [
         {
@@ -5751,6 +7424,7 @@
       "badge": "Live check",
       "featured": true,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -5794,9 +7468,10 @@
         }
       ],
       "relatedTools": [
-        "ssl-certificate-checker",
-        "random-password-generator",
-        "password-strength-checker"
+        "api-key-generator",
+        "checksum-hash-generator",
+        "http-security-headers-generator",
+        "password-policy-generator"
       ],
       "services": [
         {
@@ -5833,6 +7508,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": true,
+      "collection": "",
       "enabled": true
     },
     {
@@ -5841,14 +7517,17 @@
       "category": "cybersecurity",
       "categoryLabel": "Cybersecurity",
       "icon": "cybersecurity",
-      "summary": "Generate a password with the Web Crypto random source. It stays in your browser.",
-      "description": "Generate a password with the Web Crypto random source. It stays in your browser. CloudHost247 labels estimates, missing data and unavailable probes instead of filling them in.",
+      "summary": "Generate a password or passphrase with the Web Crypto random source, with an entropy estimate. It stays in your browser.",
+      "description": "Builds passwords and passphrases from window.crypto.getRandomValues with rejection sampling, so every character in the enabled sets is equally likely and no modulo bias is introduced. Choose the character classes, optionally drop look-alike characters (I, l, 1, O, 0), or switch to a passphrase of words from a built-in list. The estimated entropy in bits is reported against the actual alphabet used, so a weak configuration is visible before you rely on it. Privacy: values are generated in your browser tab, are not uploaded, logged, placed in a URL or persisted, and are discarded when you leave the page.",
       "seoTitle": "Random Password Generator \u2014 Free Cybersecurity Tool | CloudHost247",
-      "seoDescription": "Generate a password with the Web Crypto random source. It stays in your browser. Free CloudHost247 tool for administrators, developers and website owners.",
+      "seoDescription": "Generate a password or passphrase with the Web Crypto random source, with an entropy estimate. It stays in your browser. Free CloudHost247 tool for administrators, developers and website owners.",
       "keywords": [
         "password",
         "generator",
         "random",
+        "passphrase",
+        "entropy",
+        "secure",
         "random-password-generator",
         "cybersecurity",
         "random password generator"
@@ -5861,24 +7540,85 @@
       "options": {},
       "inputs": [
         {
+          "name": "kind",
+          "label": "Type",
+          "type": "select",
+          "placeholder": "password",
+          "required": true,
+          "choices": {
+            "password": "Random password",
+            "passphrase": "Random passphrase (diceware-style words)"
+          }
+        },
+        {
           "name": "length",
-          "label": "Length",
+          "label": "Length / words",
           "type": "number",
           "placeholder": "20",
-          "required": true
+          "required": true,
+          "hint": "Password: 8 to 128 characters. Passphrase: 3 to 12 words."
+        },
+        {
+          "name": "uppercase",
+          "label": "Uppercase A\u2013Z",
+          "type": "select",
+          "placeholder": "yes",
+          "required": true,
+          "choices": {
+            "yes": "Yes",
+            "no": "No"
+          }
+        },
+        {
+          "name": "lowercase",
+          "label": "Lowercase a\u2013z",
+          "type": "select",
+          "placeholder": "yes",
+          "required": true,
+          "choices": {
+            "yes": "Yes",
+            "no": "No"
+          }
+        },
+        {
+          "name": "numbers",
+          "label": "Digits 0\u20139",
+          "type": "select",
+          "placeholder": "yes",
+          "required": true,
+          "choices": {
+            "yes": "Yes",
+            "no": "No"
+          }
         },
         {
           "name": "symbols",
-          "label": "Include symbols",
+          "label": "Symbols",
           "type": "select",
           "placeholder": "yes",
-          "required": true
+          "required": true,
+          "choices": {
+            "yes": "Yes",
+            "no": "No"
+          }
+        },
+        {
+          "name": "unambiguous",
+          "label": "Exclude look-alike characters (I l 1 O 0)",
+          "type": "select",
+          "placeholder": "no",
+          "required": true,
+          "choices": {
+            "yes": "Yes \u2014 drop I l 1 O 0",
+            "no": "No \u2014 use the full alphabet"
+          }
         }
       ],
       "relatedTools": [
-        "ssl-certificate-checker",
-        "password-encryption",
-        "password-strength-checker"
+        "api-key-generator",
+        "checksum-hash-generator",
+        "http-security-headers-generator",
+        "password-policy-generator"
       ],
       "services": [
         {
@@ -5900,21 +7640,22 @@
       ],
       "faq": [
         {
-          "q": "What does Random Password Generator actually check?",
-          "a": "Generate a password with the Web Crypto random source. It stays in your browser. Each result names its source."
+          "q": "Is the randomness cryptographically secure?",
+          "a": "Yes. It uses the browser CSPRNG with rejection sampling. If the browser exposes no CSPRNG the tool refuses to run instead of falling back to a predictable source."
         },
         {
-          "q": "Is my input stored?",
-          "a": "Processing happens in your browser and is not uploaded. Sensitive values are not written to logs."
+          "q": "Are passwords ever sent to CloudHost247?",
+          "a": "No. There is no network request in this handler. Nothing is written to logs, analytics, local storage or a URL."
         },
         {
-          "q": "Does a result guarantee the rest of the internet sees the same thing?",
-          "a": "No. A result describes this check at this time. DNS and geolocation answers can differ by resolver and provider."
+          "q": "Is a passphrase weaker than a password?",
+          "a": "Not necessarily, and the tool tells you rather than guessing: it reports the entropy of exactly what it produced. Each word is drawn from a built-in 368-word list, which is about 8.5 bits per word, so seven words is roughly 60 bits and five words is about 43. The estimate assumes the list is public, because it is."
         }
       ],
       "badge": "Browser-only",
       "featured": false,
       "sensitive": true,
+      "collection": "compliance-documents",
       "enabled": true
     },
     {
@@ -5950,9 +7691,10 @@
         }
       ],
       "relatedTools": [
-        "ssl-certificate-checker",
-        "password-encryption",
-        "random-password-generator"
+        "api-key-generator",
+        "checksum-hash-generator",
+        "http-security-headers-generator",
+        "password-policy-generator"
       ],
       "services": [
         {
@@ -5989,6 +7731,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": true,
+      "collection": "",
       "enabled": true
     },
     {
@@ -5997,13 +7740,17 @@
       "category": "productivity",
       "categoryLabel": "Productivity",
       "icon": "productivity",
-      "summary": "Create a QR code in your browser and download the image. The text is not stored.",
-      "description": "Create a QR code in your browser and download the image. The text is not stored. CloudHost247 labels estimates, missing data and unavailable probes instead of filling them in.",
+      "summary": "Encode text or a URL into a QR code in your browser, with an error-correction level and a PNG or SVG download.",
+      "description": "Encodes the text or URL you enter into a QR symbol with a real Reed\u2013Solomon encoder in your browser tab \u2014 no image is requested from a third party and the content is never uploaded. Choose the error-correction level (L, M, Q or H) to trade density against damage resistance, choose a pixel size, and download the result as PNG or SVG. The symbol version and module count reported come from the encoder itself, so you can see whether the payload actually fits.",
       "seoTitle": "QR Code Generator \u2014 Free Productivity Tool | CloudHost247",
-      "seoDescription": "Create a QR code in your browser and download the image. The text is not stored. Free CloudHost247 tool for administrators, developers and website owners.",
+      "seoDescription": "Encode text or a URL into a QR code in your browser, with an error-correction level and a PNG or SVG download. Free CloudHost247 tool for administrators, developers and website owners.",
       "keywords": [
         "qr",
         "generator",
+        "barcode",
+        "error correction",
+        "png",
+        "svg",
         "qr-code-generator",
         "productivity",
         "qr code generator"
@@ -6021,13 +7768,46 @@
           "type": "textarea",
           "placeholder": "https://example.com",
           "required": true
+        },
+        {
+          "name": "ecl",
+          "label": "Error correction",
+          "type": "select",
+          "placeholder": "M",
+          "required": true,
+          "choices": {
+            "L": "L \u2014 about 7% recovery",
+            "M": "M \u2014 about 15% recovery",
+            "Q": "Q \u2014 about 25% recovery",
+            "H": "H \u2014 about 30% recovery"
+          },
+          "hint": "Higher levels survive more damage and leave room for a centre logo, at the cost of density."
+        },
+        {
+          "name": "size",
+          "label": "Image size (px)",
+          "type": "number",
+          "placeholder": "320",
+          "required": false,
+          "hint": "128 to 1024. Defaults to 320."
+        },
+        {
+          "name": "output",
+          "label": "Output",
+          "type": "select",
+          "placeholder": "png",
+          "required": true,
+          "choices": {
+            "png": "PNG image",
+            "svg": "SVG vector"
+          }
         }
       ],
       "relatedTools": [
-        "qr-scanner",
-        "lorem-ipsum-generator",
-        "time-card-calculator",
-        "bin-checker"
+        "age-date-calculator",
+        "date-duration-calculator",
+        "percentage-calculator",
+        "qr-scanner"
       ],
       "services": [
         {
@@ -6046,7 +7826,7 @@
       "faq": [
         {
           "q": "What does QR Code Generator actually check?",
-          "a": "Create a QR code in your browser and download the image. The text is not stored. Each result names its source."
+          "a": "Encode text or a URL into a QR code in your browser, with an error-correction level and a PNG or SVG download. Each result names its source."
         },
         {
           "q": "Is my input stored?",
@@ -6060,6 +7840,7 @@
       "badge": "Browser-only",
       "featured": true,
       "sensitive": false,
+      "collection": "compliance-documents",
       "enabled": true
     },
     {
@@ -6091,14 +7872,16 @@
           "label": "QR image",
           "type": "file",
           "placeholder": "",
-          "required": true
+          "required": true,
+          "hint": "Read and decoded in this browser; the image is not uploaded.",
+          "accept": "image/*"
         }
       ],
       "relatedTools": [
-        "qr-code-generator",
-        "lorem-ipsum-generator",
-        "time-card-calculator",
-        "bin-checker"
+        "age-date-calculator",
+        "date-duration-calculator",
+        "percentage-calculator",
+        "qr-code-generator"
       ],
       "services": [
         {
@@ -6131,6 +7914,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -6166,10 +7950,10 @@
         }
       ],
       "relatedTools": [
-        "qr-code-generator",
-        "qr-scanner",
-        "time-card-calculator",
-        "bin-checker"
+        "age-date-calculator",
+        "date-duration-calculator",
+        "percentage-calculator",
+        "qr-code-generator"
       ],
       "services": [
         {
@@ -6202,6 +7986,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -6238,10 +8023,10 @@
         }
       ],
       "relatedTools": [
-        "qr-code-generator",
-        "qr-scanner",
-        "lorem-ipsum-generator",
-        "bin-checker"
+        "age-date-calculator",
+        "date-duration-calculator",
+        "percentage-calculator",
+        "qr-code-generator"
       ],
       "services": [
         {
@@ -6274,6 +8059,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -6310,10 +8096,10 @@
         }
       ],
       "relatedTools": [
-        "qr-code-generator",
-        "qr-scanner",
-        "lorem-ipsum-generator",
-        "time-card-calculator"
+        "age-date-calculator",
+        "date-duration-calculator",
+        "percentage-calculator",
+        "qr-code-generator"
       ],
       "services": [
         {
@@ -6346,6 +8132,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": true,
+      "collection": "",
       "enabled": true
     },
     {
@@ -6382,10 +8169,10 @@
         }
       ],
       "relatedTools": [
-        "qr-code-generator",
-        "qr-scanner",
-        "lorem-ipsum-generator",
-        "time-card-calculator"
+        "age-date-calculator",
+        "date-duration-calculator",
+        "percentage-calculator",
+        "qr-code-generator"
       ],
       "services": [
         {
@@ -6418,6 +8205,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": true,
+      "collection": "",
       "enabled": true
     },
     {
@@ -6454,10 +8242,10 @@
         }
       ],
       "relatedTools": [
-        "qr-code-generator",
-        "qr-scanner",
-        "lorem-ipsum-generator",
-        "time-card-calculator"
+        "age-date-calculator",
+        "date-duration-calculator",
+        "percentage-calculator",
+        "qr-code-generator"
       ],
       "services": [
         {
@@ -6490,6 +8278,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -6526,10 +8315,10 @@
         }
       ],
       "relatedTools": [
-        "qr-code-generator",
-        "qr-scanner",
-        "lorem-ipsum-generator",
-        "time-card-calculator"
+        "age-date-calculator",
+        "date-duration-calculator",
+        "percentage-calculator",
+        "qr-code-generator"
       ],
       "services": [
         {
@@ -6562,6 +8351,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -6597,10 +8387,10 @@
         }
       ],
       "relatedTools": [
-        "qr-code-generator",
-        "qr-scanner",
-        "lorem-ipsum-generator",
-        "time-card-calculator"
+        "age-date-calculator",
+        "date-duration-calculator",
+        "percentage-calculator",
+        "qr-code-generator"
       ],
       "services": [
         {
@@ -6633,6 +8423,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -6669,10 +8460,10 @@
         }
       ],
       "relatedTools": [
-        "qr-code-generator",
-        "qr-scanner",
-        "lorem-ipsum-generator",
-        "time-card-calculator"
+        "age-date-calculator",
+        "date-duration-calculator",
+        "percentage-calculator",
+        "qr-code-generator"
       ],
       "services": [
         {
@@ -6705,6 +8496,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -6741,10 +8533,10 @@
         }
       ],
       "relatedTools": [
-        "qr-code-generator",
-        "qr-scanner",
-        "lorem-ipsum-generator",
-        "time-card-calculator"
+        "age-date-calculator",
+        "date-duration-calculator",
+        "percentage-calculator",
+        "qr-code-generator"
       ],
       "services": [
         {
@@ -6777,6 +8569,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -6813,10 +8606,10 @@
         }
       ],
       "relatedTools": [
-        "qr-code-generator",
-        "qr-scanner",
-        "lorem-ipsum-generator",
-        "time-card-calculator"
+        "age-date-calculator",
+        "date-duration-calculator",
+        "percentage-calculator",
+        "qr-code-generator"
       ],
       "services": [
         {
@@ -6849,6 +8642,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -6884,10 +8678,10 @@
         }
       ],
       "relatedTools": [
-        "qr-code-generator",
-        "qr-scanner",
-        "lorem-ipsum-generator",
-        "time-card-calculator"
+        "age-date-calculator",
+        "date-duration-calculator",
+        "percentage-calculator",
+        "qr-code-generator"
       ],
       "services": [
         {
@@ -6920,6 +8714,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -6955,10 +8750,10 @@
         }
       ],
       "relatedTools": [
-        "qr-code-generator",
-        "qr-scanner",
-        "lorem-ipsum-generator",
-        "time-card-calculator"
+        "age-date-calculator",
+        "date-duration-calculator",
+        "percentage-calculator",
+        "qr-code-generator"
       ],
       "services": [
         {
@@ -6991,6 +8786,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -7041,10 +8837,10 @@
         }
       ],
       "relatedTools": [
-        "qr-code-generator",
-        "qr-scanner",
-        "lorem-ipsum-generator",
-        "time-card-calculator"
+        "age-date-calculator",
+        "date-duration-calculator",
+        "percentage-calculator",
+        "qr-code-generator"
       ],
       "services": [
         {
@@ -7077,6 +8873,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -7113,10 +8910,10 @@
         }
       ],
       "relatedTools": [
-        "qr-code-generator",
-        "qr-scanner",
-        "lorem-ipsum-generator",
-        "time-card-calculator"
+        "age-date-calculator",
+        "date-duration-calculator",
+        "percentage-calculator",
+        "qr-code-generator"
       ],
       "services": [
         {
@@ -7149,6 +8946,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -7184,10 +8982,10 @@
         }
       ],
       "relatedTools": [
-        "qr-code-generator",
-        "qr-scanner",
-        "lorem-ipsum-generator",
-        "time-card-calculator"
+        "age-date-calculator",
+        "date-duration-calculator",
+        "percentage-calculator",
+        "qr-code-generator"
       ],
       "services": [
         {
@@ -7220,6 +9018,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -7255,10 +9054,10 @@
         }
       ],
       "relatedTools": [
-        "qr-code-generator",
-        "qr-scanner",
-        "lorem-ipsum-generator",
-        "time-card-calculator"
+        "age-date-calculator",
+        "date-duration-calculator",
+        "percentage-calculator",
+        "qr-code-generator"
       ],
       "services": [
         {
@@ -7291,6 +9090,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -7319,10 +9119,10 @@
       "options": {},
       "inputs": [],
       "relatedTools": [
-        "qr-code-generator",
-        "qr-scanner",
-        "lorem-ipsum-generator",
-        "time-card-calculator"
+        "age-date-calculator",
+        "date-duration-calculator",
+        "percentage-calculator",
+        "qr-code-generator"
       ],
       "services": [
         {
@@ -7355,6 +9155,7 @@
       "badge": "Live check",
       "featured": true,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -7391,10 +9192,10 @@
         }
       ],
       "relatedTools": [
-        "qr-code-generator",
-        "qr-scanner",
-        "lorem-ipsum-generator",
-        "time-card-calculator"
+        "age-date-calculator",
+        "date-duration-calculator",
+        "percentage-calculator",
+        "qr-code-generator"
       ],
       "services": [
         {
@@ -7427,6 +9228,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": true,
+      "collection": "",
       "enabled": true
     },
     {
@@ -7494,6 +9296,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -7575,6 +9378,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -7656,6 +9460,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -7738,6 +9543,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -7819,6 +9625,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -7899,6 +9706,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -7981,6 +9789,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -8063,6 +9872,7 @@
       "badge": "Live check",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -8071,13 +9881,17 @@
       "category": "developer",
       "categoryLabel": "Developer",
       "icon": "developer",
-      "summary": "Generate version-4 UUIDs with the cryptographic random source in your browser.",
-      "description": "Generate version-4 UUIDs with the cryptographic random source in your browser. CloudHost247 labels estimates, missing data and unavailable probes instead of filling them in.",
+      "summary": "Generate UUIDv4, time-ordered UUIDv7 or nil UUIDs in bulk from the browser's cryptographic random source.",
+      "description": "Generates UUIDs from window.crypto \u2014 never Math.random \u2014 with the version and variant bits set correctly for the layout you choose. v4 carries 122 bits of randomness. v7 places a 48-bit Unix millisecond timestamp in the high bits so identifiers sort by creation time, which matters for database primary keys and log correlation. Generate one or a thousand, then copy or download the list. Nothing is uploaded and nothing is stored.",
       "seoTitle": "UUID Generator \u2014 Free Developer Tool | CloudHost247",
-      "seoDescription": "Generate version-4 UUIDs with the cryptographic random source in your browser. Free CloudHost247 tool for administrators, developers and website owners.",
+      "seoDescription": "Generate UUIDv4, time-ordered UUIDv7 or nil UUIDs in bulk from the browser's cryptographic random source. Free CloudHost247 tool for administrators, developers and website owners.",
       "keywords": [
         "uuid",
         "generator",
+        "uuidv4",
+        "uuidv7",
+        "guid",
+        "bulk",
         "uuid-generator",
         "developer",
         "uuid generator"
@@ -8090,11 +9904,39 @@
       "options": {},
       "inputs": [
         {
+          "name": "version",
+          "label": "Version",
+          "type": "select",
+          "placeholder": "v4",
+          "required": true,
+          "choices": {
+            "v4": "v4 \u2014 random",
+            "v7": "v7 \u2014 time-ordered (sortable)",
+            "nil": "Nil UUID (all zeros)"
+          },
+          "hint": "v7 embeds a 48-bit Unix millisecond timestamp, so identifiers sort by creation time."
+        },
+        {
           "name": "count",
           "label": "How many",
           "type": "number",
           "placeholder": "1",
-          "required": true
+          "required": true,
+          "hint": "1 to 1000."
+        },
+        {
+          "name": "format",
+          "label": "Format",
+          "type": "select",
+          "placeholder": "standard",
+          "required": true,
+          "choices": {
+            "standard": "8-4-4-4-12 hyphenated",
+            "hex": "Hex, no hyphens",
+            "braces": "{8-4-4-4-12}",
+            "urn": "urn:uuid:8-4-4-4-12",
+            "upper": "Uppercase hyphenated"
+          }
         }
       ],
       "relatedTools": [
@@ -8128,7 +9970,7 @@
       "faq": [
         {
           "q": "What does UUID Generator actually check?",
-          "a": "Generate version-4 UUIDs with the cryptographic random source in your browser. Each result names its source."
+          "a": "Generate UUIDv4, time-ordered UUIDv7 or nil UUIDs in bulk from the browser's cryptographic random source. Each result names its source."
         },
         {
           "q": "Is my input stored?",
@@ -8142,6 +9984,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "compliance-documents",
       "enabled": true
     },
     {
@@ -8222,6 +10065,7 @@
       "badge": "Live check",
       "featured": true,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     },
     {
@@ -8308,6 +10152,7 @@
       "badge": "Browser-only",
       "featured": false,
       "sensitive": false,
+      "collection": "",
       "enabled": true
     }
   ]

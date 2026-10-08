@@ -3476,6 +3476,7 @@
         "refund-policy.php"
       ],
       "slug": "business-hosting",
+      "visual3d": "hosting/business-hosting-3d",
       "seo_description": "Business hosting from CloudHost247 gives company sites more resources, stronger isolation, priority support and the headroom to run mail, apps and databases.",
       "faqs": [
         {
@@ -3555,8 +3556,7 @@
             "Resource allocations change as the platform is upgraded. Rather than publishing numbers here that go stale, every plan's actual CPU, memory, storage and mailbox limits are shown on its order page and in your account — and support can confirm anything before you buy."
           ]
         }
-      ],
-      "visual3d": "hosting/business-hosting-3d"
+      ]
     },
     "reseller-hosting.php": {
       "title": "Reseller Hosting",
@@ -3604,6 +3604,7 @@
         "acceptable-use-policy.php"
       ],
       "slug": "reseller-hosting",
+      "visual3d": "hosting/web-hosting-3d",
       "seo_description": "Reseller hosting from CloudHost247: separate accounts, your own branding, WHMCS-compatible billing and the infrastructure operated for you.",
       "faqs": [
         {
@@ -3674,8 +3675,7 @@
             }
           ]
         }
-      ],
-      "visual3d": "hosting/web-hosting-3d"
+      ]
     },
     "nodejs-hosting.php": {
       "title": "Node.js Hosting",
@@ -3710,10 +3710,9 @@
         ]
       ],
       "uses": [
-        "Process supervision",
-        "Environment configuration",
-        "Logs and telemetry",
-        "DNS and TLS in front"
+        "New projects",
+        "Migrations",
+        "Teams standardizing on one provider"
       ],
       "related": [
         "deployments.php",
@@ -3723,6 +3722,7 @@
         "developer-friendly.php"
       ],
       "slug": "nodejs-hosting",
+      "visual3d": "deployment/deployment-pipeline-3d",
       "seo_description": "Node.js hosting on CloudHost247: review available runtimes and product integrations for process supervision, environment configuration, application logs and domains.",
       "faqs": [
         {
@@ -3777,8 +3777,7 @@
             "The platform supplies the process management, isolation and observability. Dependency pinning, lockfiles, dependency audits and choosing a supported Node release remain the application's responsibility — and the ones that go wrong in production are almost always there."
           ]
         }
-      ],
-      "visual3d": "deployment/deployment-pipeline-3d"
+      ]
     },
     "php-hosting.php": {
       "title": "PHP Hosting",
@@ -3826,6 +3825,7 @@
         "developer-friendly.php"
       ],
       "slug": "php-hosting",
+      "visual3d": "deployment/deployment-pipeline-3d",
       "seo_description": "PHP hosting on CloudHost247: review available runtime versions, Composer, databases and scheduled-task support in the selected hosting product.",
       "faqs": [
         {
@@ -3893,8 +3893,7 @@
             }
           ]
         }
-      ],
-      "visual3d": "deployment/deployment-pipeline-3d"
+      ]
     },
     "python-hosting.php": {
       "title": "Python Hosting",
@@ -3929,10 +3928,9 @@
         ]
       ],
       "uses": [
-        "Virtual environments",
-        "WSGI / ASGI",
-        "Background workers",
-        "Scheduled tasks"
+        "New projects",
+        "Migrations",
+        "Teams standardizing on one provider"
       ],
       "related": [
         "deployments.php",
@@ -3941,6 +3939,7 @@
         "developer-friendly.php"
       ],
       "slug": "python-hosting",
+      "visual3d": "deployment/deployment-pipeline-3d",
       "seo_description": "Host Python applications on CloudHost247: virtual environments, WSGI and ASGI applications, background workers, scheduled jobs and managed data services.",
       "faqs": [
         {
@@ -3989,8 +3988,7 @@
             }
           ]
         }
-      ],
-      "visual3d": "deployment/deployment-pipeline-3d"
+      ]
     },
     "docker-hosting.php": {
       "title": "Docker Hosting",
@@ -4025,10 +4023,9 @@
         ]
       ],
       "uses": [
-        "Run your own images",
-        "Persistent volumes",
-        "Environment configuration",
-        "Domain and TLS in front"
+        "New projects",
+        "Migrations",
+        "Teams standardizing on one provider"
       ],
       "related": [
         "docker-hosting.php",
@@ -4038,6 +4035,7 @@
         "firewall.php"
       ],
       "slug": "docker-hosting",
+      "visual3d": "deployment/deployment-pipeline-3d",
       "seo_description": "Run containerised applications on CloudHost247 with Docker images, persistent volumes, environment configuration and per-application domains.",
       "faqs": [
         {
@@ -4148,8 +4146,7 @@
             }
           ]
         }
-      ],
-      "visual3d": "deployment/deployment-pipeline-3d"
+      ]
     },
     "laravel-hosting.php": {
       "title": "Laravel Hosting",
@@ -4184,10 +4181,9 @@
         ]
       ],
       "uses": [
-        "Queue workers",
-        "Scheduler cron",
-        "Persistent storage",
-        "MySQL or PostgreSQL"
+        "New projects",
+        "Migrations",
+        "Teams standardizing on one provider"
       ],
       "related": [
         "php-hosting.php",
@@ -4197,6 +4193,7 @@
         "developer-friendly.php"
       ],
       "slug": "laravel-hosting",
+      "visual3d": "deployment/deployment-pipeline-3d",
       "seo_description": "Laravel hosting on CloudHost247 with the application services a Laravel site may need: queue workers, scheduler jobs, storage and database options.",
       "faqs": [
         {
@@ -4263,8 +4260,7 @@
             }
           ]
         }
-      ],
-      "visual3d": "deployment/deployment-pipeline-3d"
+      ]
     },
     "api-hosting.php": {
       "title": "API Hosting",
@@ -4299,10 +4295,9 @@
         ]
       ],
       "uses": [
-        "HTTPS endpoints",
-        "Environment-based secrets",
-        "Rate limiting",
-        "Request and error logs"
+        "New projects",
+        "Migrations",
+        "Teams standardizing on one provider"
       ],
       "related": [
         "developer-friendly.php",
@@ -4312,6 +4307,7 @@
         "documentation.php"
       ],
       "slug": "api-hosting",
+      "visual3d": "deployment/deployment-pipeline-3d",
       "seo_description": "Host HTTP APIs on CloudHost247 using an available runtime or container product; confirm TLS, network controls, logs and monitoring in the selected service catalogue.",
       "faqs": [
         {
@@ -4386,8 +4382,7 @@
             "CloudHost247 provides the transport, isolation, TLS and observability. The authentication and authorisation model inside your API is your design decision: token format, scopes, rotation and revocation are yours to implement."
           ]
         }
-      ],
-      "visual3d": "deployment/deployment-pipeline-3d"
+      ]
     },
     "paas.php": {
       "title": "PaaS",
@@ -4422,10 +4417,9 @@
         ]
       ],
       "uses": [
-        "Published application versions",
-        "Recorded install and update steps",
-        "Configuration per application",
-        "Git support only through enabled panels"
+        "New projects",
+        "Migrations",
+        "Teams standardizing on one provider"
       ],
       "related": [
         "deployments.php",
@@ -4434,6 +4428,7 @@
         "documentation.php"
       ],
       "slug": "paas",
+      "visual3d": "deployment/deployment-pipeline-3d",
       "seo_description": "Manage supported application deployments with recorded steps and per-app settings. Git source builds require an enabled control-panel integration.",
       "faqs": [
         {
@@ -4505,8 +4500,7 @@
             }
           ]
         }
-      ],
-      "visual3d": "deployment/deployment-pipeline-3d"
+      ]
     },
     "data-centers.php": {
       "title": "Data Centers",
@@ -4533,10 +4527,9 @@
         ]
       ],
       "uses": [
-        "Generated from configuration",
-        "Provider named per region",
-        "Region selected at provisioning",
-        "Status shown per service"
+        "New projects",
+        "Migrations",
+        "Teams standardizing on one provider"
       ],
       "related": [
         "infrastructure.php",
@@ -4545,6 +4538,7 @@
         "aboutus.php"
       ],
       "slug": "data-centers",
+      "visual3d": "cloud/vps-3d",
       "seo_description": "The data centre regions CloudHost247 is configured to deploy into, listed from live configuration rather than a marketing map.",
       "faqs": [
         {
@@ -4585,8 +4579,7 @@
             }
           ]
         }
-      ],
-      "visual3d": "cloud/vps-3d"
+      ]
     },
     "network.php": {
       "title": "Network",
@@ -4621,10 +4614,9 @@
         ]
       ],
       "uses": [
-        "Public and private addressing",
-        "Rule-based filtering",
-        "Reverse DNS control",
-        "Traffic telemetry"
+        "New projects",
+        "Migrations",
+        "Teams standardizing on one provider"
       ],
       "related": [
         "firewall.php",
@@ -4634,6 +4626,7 @@
         "fair-usage-policy.php"
       ],
       "slug": "network",
+      "visual3d": "cloud/vps-3d",
       "seo_description": "The CloudHost247 network layer: public and private addressing, firewall filtering, reverse DNS, floating IPs and the observability that sits on top.",
       "faqs": [
         {
@@ -4692,8 +4685,7 @@
             "Whether a service is unmetered, capped or burstable depends on the product you have, and the number that matters is the one on the plan you bought — not a figure on a marketing page. Where a fair-use expectation applies, it is written down in the Fair Usage Policy."
           ]
         }
-      ],
-      "visual3d": "cloud/vps-3d"
+      ]
     },
     "security.php": {
       "title": "Security",
@@ -4741,6 +4733,7 @@
         "ssl-certificate.php"
       ],
       "slug": "security",
+      "visual3d": "hero/infrastructure-3d",
       "seo_description": "How CloudHost247 protects hosting: tenant isolation, platform patching, malware and abuse filtering, access control, certificates and monitored recovery.",
       "faqs": [
         {
@@ -4923,8 +4916,7 @@
             "Where a compliance framework matters to you — ISO 27001, SOC 2, PCI DSS, HIPAA — ask, and you will get an accurate answer including 'not certified'. Publishing a certification we do not hold would be the single most damaging thing this page could do."
           ]
         }
-      ],
-      "visual3d": "hero/infrastructure-3d"
+      ]
     },
     "monitoring.php": {
       "title": "Monitoring",
@@ -4959,10 +4951,9 @@
         ]
       ],
       "uses": [
-        "Resource telemetry",
-        "Historical trend",
-        "Per-service scope",
-        "Status page driven by real checks"
+        "New projects",
+        "Migrations",
+        "Teams standardizing on one provider"
       ],
       "related": [
         "server-management.php",
@@ -4972,6 +4963,7 @@
         "network.php"
       ],
       "slug": "monitoring",
+      "visual3d": "management/monitoring-3d",
       "seo_description": "Resource monitoring and service telemetry for CloudHost247 servers, applications and hosting, with historical data and alerting you can act on.",
       "faqs": [
         {
@@ -5028,8 +5020,7 @@
             "A meaningful uptime number has to come from independent, continuous, customer-visible measurement over a defined period. Anything else is a claim. The service status page reports the checks this platform can genuinely perform right now, and says plainly when something is not being monitored."
           ]
         }
-      ],
-      "visual3d": "management/monitoring-3d"
+      ]
     },
     "backups.php": {
       "title": "Backups",
@@ -5077,6 +5068,7 @@
         "data-deletion.php"
       ],
       "slug": "backups",
+      "visual3d": "servers/dedicated-servers-3d",
       "seo_description": "Scheduled backups for CloudHost247 hosting, servers and applications, with visible job history and a documented restore path.",
       "faqs": [
         {
@@ -5179,8 +5171,7 @@
             }
           ]
         }
-      ],
-      "visual3d": "servers/dedicated-servers-3d"
+      ]
     },
     "firewall.php": {
       "title": "Firewall",
@@ -5215,10 +5206,9 @@
         ]
       ],
       "uses": [
-        "Ordered rules",
-        "Allow, deny and rate-limit",
-        "Per-server scope",
-        "Effective ruleset visible"
+        "New projects",
+        "Migrations",
+        "Teams standardizing on one provider"
       ],
       "related": [
         "security.php",
@@ -5228,6 +5218,7 @@
         "acceptable-use-policy.php"
       ],
       "slug": "firewall",
+      "visual3d": "servers/dedicated-servers-3d",
       "seo_description": "Rule-based firewall control for CloudHost247 servers: ordered allow, deny and rate-limit rules applied at the network layer, with the effective ruleset visible.",
       "faqs": [
         {
@@ -5278,8 +5269,7 @@
             }
           ]
         }
-      ],
-      "visual3d": "servers/dedicated-servers-3d"
+      ]
     },
     "dns-management.php": {
       "title": "DNS Management",
@@ -5380,10 +5370,9 @@
         ]
       ],
       "uses": [
-        "Assigned and available addresses",
-        "Reverse DNS control",
-        "Floating addresses",
-        "Addresses tied to services"
+        "New projects",
+        "Migrations",
+        "Teams standardizing on one provider"
       ],
       "related": [
         "network.php",
@@ -5393,6 +5382,7 @@
         "acceptable-use-policy.php"
       ],
       "slug": "ip-management",
+      "visual3d": "servers/dedicated-servers-3d",
       "seo_description": "Manage the IP addresses assigned to your CloudHost247 services: public addressing, floating IPs, reverse DNS and the records that tie them to your services.",
       "faqs": [
         {
@@ -5443,8 +5433,7 @@
             }
           ]
         }
-      ],
-      "visual3d": "servers/dedicated-servers-3d"
+      ]
     },
     "migration.php": {
       "title": "Migration",
@@ -5467,10 +5456,9 @@
         ]
       ],
       "uses": [
-        "We copy the files",
-        "We copy the databases",
-        "We verify before cutover",
-        "You choose when DNS changes"
+        "New projects",
+        "Migrations",
+        "Teams standardizing on one provider"
       ],
       "related": [
         "web-hosting.php",
@@ -5480,6 +5468,7 @@
         "refund-policy.php"
       ],
       "slug": "migration",
+      "visual3d": "servers/dedicated-servers-3d",
       "seo_description": "Move your website and email to CloudHost247 with a planned cutover: copy, verify on the new infrastructure, then switch DNS at your discretion.",
       "faqs": [
         {
@@ -5538,8 +5527,7 @@
             "Access to the current host, the domain's DNS control, and a list of anything the site depends on that is not obvious from the files — third-party APIs, scheduled jobs, unusual mail routing. Migrations go wrong when a dependency is discovered afterwards."
           ]
         }
-      ],
-      "visual3d": "servers/dedicated-servers-3d"
+      ]
     },
     "managed-services.php": {
       "title": "Managed Services",
@@ -5587,6 +5575,7 @@
         "operating-systems.php"
       ],
       "slug": "managed-services",
+      "visual3d": "servers/dedicated-servers-3d",
       "seo_description": "Server management from CloudHost247: provisioning, operating-system lifecycle, monitoring, firewall control, backups, patching and hands-on administration.",
       "faqs": [
         {
@@ -5659,8 +5648,7 @@
             }
           ]
         }
-      ],
-      "visual3d": "servers/dedicated-servers-3d"
+      ]
     },
     "documentation.php": {
       "title": "Documentation",
@@ -5683,16 +5671,16 @@
         ]
       ],
       "uses": [
-        "API contracts",
-        "Provisioning and infrastructure",
-        "Deployment and environments",
-        "Operations and security"
+        "New projects",
+        "Migrations",
+        "Teams standardizing on one provider"
       ],
       "related": [
         "developer-friendly.php",
         "api-hosting.php"
       ],
       "slug": "documentation",
+      "visual3d": "hero/infrastructure-3d",
       "seo_description": "CloudHost247 platform documentation: API references, provisioning, deployment, domain services, billing, tools and operations guides.",
       "faqs": [
         {
@@ -5708,8 +5696,7 @@
           "a": "Documentation lives with the platform source. Raise it through support and it goes to the team that owns the relevant area."
         }
       ],
-      "sections": [],
-      "visual3d": "hero/infrastructure-3d"
+      "sections": []
     }
   },
   "navigation": [
@@ -6201,7 +6188,21 @@
       "id": "tools",
       "title": "Tools",
       "description": "Inspect, troubleshoot and build — with tools that explain their results instead of showing invented data.",
-      "groups": []
+      "groups": [
+        {
+          "title": "Compliance & Document",
+          "links": [
+            {
+              "label": "Compliance & Document Tools",
+              "url": "tools/compliance-documents"
+            },
+            {
+              "label": "MRZ Generator",
+              "url": "tools/mrz-generator"
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "resources",
@@ -6593,7 +6594,11 @@
           "url": "tools/category/utilities"
         },
         {
-          "label": "MRZ Generator / MRZ Tools",
+          "label": "Compliance & Document Tools",
+          "url": "tools/compliance-documents"
+        },
+        {
+          "label": "MRZ Generator",
           "url": "tools/mrz-generator"
         }
       ]

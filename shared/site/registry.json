@@ -1068,7 +1068,26 @@
         "spa": "/tools",
         "php": "tools"
       },
-      "toolsDriven": true
+      "toolsDriven": true,
+      "columns": [
+        {
+          "title": "Compliance & Document",
+          "items": [
+            {
+              "label": "Compliance & Document Tools",
+              "href": {
+                "php": "tools/compliance-documents"
+              }
+            },
+            {
+              "label": "MRZ Generator",
+              "href": {
+                "php": "tools/mrz-generator"
+              }
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "resources",
@@ -1755,9 +1774,14 @@
           }
         },
         {
-          "label": "MRZ Generator / MRZ Tools",
+          "label": "Compliance & Document Tools",
           "href": {
-            "spa": "/tools/mrz-generator",
+            "php": "tools/compliance-documents"
+          }
+        },
+        {
+          "label": "MRZ Generator",
+          "href": {
             "php": "tools/mrz-generator"
           }
         }

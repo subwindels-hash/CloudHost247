@@ -32,7 +32,7 @@ type ToolTab = 'calculator' | 'validator' | 'parser';
  * must match it — a link that promises one page and lands on a differently named one is a broken
  * link as far as a visitor is concerned.
  */
-export const MRZ_TOOL_NAME = 'MRZ Generator / MRZ Tools';
+export const MRZ_TOOL_NAME = 'MRZ Generator';
 
 export interface MrzToolPageProps {
   defaultTab?: ToolTab;
@@ -360,7 +360,7 @@ export default function MrzToolPage({ defaultTab }: MrzToolPageProps) {
               </div>
               <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                 <Link className="ch247-button ch247-button--ghost" to="/tools/mrz-generator">
-                  MRZ Generator / MRZ Tools
+                  MRZ Generator
                 </Link>
                 <Link className="ch247-button ch247-button--ghost" to="/tools/mrz-parser">
                   MRZ Parser

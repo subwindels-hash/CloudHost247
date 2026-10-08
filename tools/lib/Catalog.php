@@ -91,7 +91,10 @@ final class Catalog
             'email' => array('mx-lookup', 'spf-record-checker', 'spf-record-generator', 'dkim-checker', 'dmarc-checker', 'dmarc-record-generator', 'bimi-checker-generator', 'smtp-test', 'trace-email', 'email-verifier'),
             'ssl' => array('ssl-certificate-checker'),
             'website' => array('http-headers-checker', 'website-os-checker', 'broken-link-checker', 'open-graph-checker', 'website-link-analyzer', 'pagerank-checker', 'serp-simulator', 'robots-txt-generator', 'punycode-converter', 'user-agent-checker', 'htaccess-redirect-generator', 'url-rewrite-generator'),
-            'calculators' => array('ip-subnet-calculator', 'ip-to-decimal', 'ipv4-to-ipv6', 'ipv6-cidr-to-range', 'ipv6-range-to-cidr', 'time-card-calculator', 'raid-calculator', 'rgb-to-colortone', 'hex-to-colortone', 'cmyk-to-colortone', 'hsv-to-colortone'),
+            'calculators' => array('ip-subnet-calculator', 'ip-to-decimal', 'ipv4-to-ipv6', 'ipv6-cidr-to-range', 'ipv6-range-to-cidr', 'time-card-calculator', 'raid-calculator', 'rgb-to-colortone', 'hex-to-colortone', 'cmyk-to-colortone', 'hsv-to-colortone', 'age-date-calculator', 'date-duration-calculator', 'percentage-calculator', 'unit-data-converter', 'unix-timestamp-calculator'),
+            'security' => array('api-key-generator', 'checksum-hash-generator', 'http-security-headers-generator', 'password-policy-generator'),
+            'developer' => array('json-formatter'),
+            'dns-domains' => array('dns-record-generator'),
             'utilities' => array('qr-code-generator', 'qr-scanner', 'wifi-qr-scanner', 'lorem-ipsum-generator', 'word-counter', 'online-notepad', 'small-text-generator', 'rot13', 'morse-code-translator', 'runic-translator', 'invisible-character-generator', 'reverse-image-search', 'image-to-text', 'internet-speed-test', 'name-checker', 'bin-checker', 'credit-card-checker', 'minecraft-color-codes', 'multi-url-opener', 'binary-translator', 'text-to-binary', 'md5-generator', 'base64-generator', 'password-encryption', 'random-password-generator', 'password-strength-checker'),
         );
         foreach ($extra as $category => $slugs) {
@@ -113,6 +116,68 @@ final class Catalog
         }));
     }
 
+    /**
+     * Curated tool collections. A collection is a hub page that groups existing tools under a
+     * working theme — it never invents a tool, and a slug it names that is not in the catalogue is
+     * dropped rather than rendered as a dead card.
+     */
+    public static function collections()
+    {
+        $data = self::data();
+        return isset($data['collections']) && is_array($data['collections']) ? $data['collections'] : array();
+    }
+
+    public static function collection($slug)
+    {
+        foreach (self::collections() as $collection) {
+            if (isset($collection['slug']) && $collection['slug'] === $slug) {
+                return $collection;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * The collection's groups with each slug resolved to a live, enabled tool. Disabled tools and
+     * slugs the catalogue does not know are dropped, so a card can never point at a tool page that
+     * answers "disabled" or 404.
+     */
+    public static function collectionGroups(array $collection)
+    {
+        $groups = array();
+        foreach (isset($collection['groups']) && is_array($collection['groups']) ? $collection['groups'] : array() as $group) {
+            $tools = array();
+            foreach (isset($group['tools']) && is_array($group['tools']) ? $group['tools'] : array() as $slug) {
+                $tool = self::find((string) $slug);
+                if ($tool && !empty($tool['enabled'])) {
+                    $tools[] = $tool;
+                }
+            }
+            if (!$tools) {
+                continue;
+            }
+            $groups[] = array(
+                'slug' => isset($group['slug']) ? (string) $group['slug'] : '',
+                'label' => isset($group['label']) ? (string) $group['label'] : 'Tools',
+                'blurb' => isset($group['blurb']) ? (string) $group['blurb'] : '',
+                'tools' => $tools,
+            );
+        }
+        return $groups;
+    }
+
+    /** Every enabled tool in a collection, flattened in group order. */
+    public static function collectionTools(array $collection)
+    {
+        $out = array();
+        foreach (self::collectionGroups($collection) as $group) {
+            foreach ($group['tools'] as $tool) {
+                $out[] = $tool;
+            }
+        }
+        return $out;
+    }
+
     public static function find($slug)
     {
         foreach (self::tools() as $tool) {
@@ -132,6 +197,15 @@ final class Catalog
         $path = self::normalise($path);
         if ($path === '/tools') {
             return array('kind' => 'hub', 'path' => '/tools', 'name' => 'CloudHost247 Online Tools', 'summary' => 'Free professional tools for DNS, networking, developers, security, webmasters and digital professionals.', 'slug' => '');
+        }
+        // Curated collection hubs (e.g. Compliance & Document Tools). Resolved before the tool
+        // pattern so a collection slug can never be shadowed by a tool of the same name.
+        if (preg_match('#^/tools/([a-z0-9-]+)$#', $path, $collectionMatch)) {
+            $collection = self::collection($collectionMatch[1]);
+            if ($collection) {
+                $collection['kind'] = 'collection';
+                return $collection;
+            }
         }
         if (preg_match('#^/tools/category/([a-z0-9-]+)$#', $path, $match)) {
             // Published category URLs use the discovery taxonomy; the catalogue's engine grouping

@@ -61,6 +61,11 @@ if (is_file(__DIR__ . '/tools/lib/bootstrap.php')) {
     require_once __DIR__ . '/tools/lib/bootstrap.php';
     if (class_exists('\CloudHost247\Tools\Catalog')) {
         try {
+            // Curated collection hubs (Compliance & Document Tools) are served by the same front
+            // controller as the tool pages, so they are published the same way.
+            foreach (\CloudHost247\Tools\Catalog::collections() as $collection) {
+                if (!empty($collection['path'])) { $served[] = (string) $collection['path']; }
+            }
             foreach (\CloudHost247\Tools\Catalog::enabledTools() as $tool) {
                 if (!empty($tool['path'])) { $served[] = (string) $tool['path']; }
             }

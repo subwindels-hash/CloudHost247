@@ -22,8 +22,8 @@ The **CloudHost247 ePassport Machine Readable Zone (MRZ) Developer Tool** provid
 
 | Surface | Route / Navigation Path | Description |
 | --- | --- | --- |
-| **Canonical tool page** | `/tools/mrz-generator` (`Tools → Featured → MRZ Generator / MRZ Tools`, `Tools → Developer → MRZ Generator / MRZ Tools`, footer Tools column) | The public tool: TD3 generator, character-normalisation inspector, check-digit calculator, structural validator and field parser in one page |
-| **Tools Directory** | `/tools` (Tool card in the Developer category, and `/tools/document` for the Document Tools hub) | Entry point listing the MRZ Generator / MRZ Tools |
+| **Canonical tool page** | `/tools/mrz-generator` (`Tools → Compliance & Document → MRZ Generator`, `Tools → Developer → MRZ Generator`, footer Tools column) | The public tool: TD3 generator, character-normalisation inspector, check-digit calculator, structural validator and field parser in one page |
+| **Tools Directory** | `/tools` (Tool card in the Developer category), `/tools/document` for the Document Tools hub and `/tools/compliance-documents` for the Compliance & Document Tools collection | Entry points listing the MRZ Generator |
 | **Retained URLs** | `/tools/document/mrz`, `/tools/document/mrz-parser`, `/tools/mrz-parser` | The pre-catalogue URLs. They render the same tool (and resolve through the PHP shell's `ToolsSite`), so existing links and documentation keep working |
 | **Super Admin Settings** | `/admin/settings/tools/mrz` (`Super Admin → Settings → Tools → MRZ`) | Runtime feature toggles, rate limits, operational log levels, and availability controls |
 
@@ -36,8 +36,8 @@ slug `mrz-generator`), which is the single source of truth for every discovery s
 | --- | --- |
 | Tools mega menu | `Featured` group and the `Developer` category group (also injected at runtime from `/api/tools/navigation`) |
 | Tools directory + category navigation | The Developer category, with the usual card, badges and related tools |
-| Site search | Matched by name, summary and keywords (`mrz`, `machine readable zone`, `passport`, `icao 9303`, `td3`, `check digit`, `ocr`, `document`, `parser`, `validator`) |
-| Footer (Tools column) | Link labelled **MRZ Generator / MRZ Tools** pointing at `/tools/mrz-generator` without any query string or personal parameter |
+| Site search | Matched by name, summary and keywords (`mrz`, `machine readable zone`, `passport`, `icao 9303`, `td1`, `td2`, `td3`, `check digit`, `composite check digit`, `ocr`, `identity document`, `parser`, `validator`) |
+| Footer (Tools column) | Link labelled **MRZ Generator** pointing at `/tools/mrz-generator` without any query string or personal parameter |
 | XML sitemap | `tools-sitemap.php` lists the catalogue path; the API responses stay `noindex` |
 | Retained-URL aliases | Declared in the catalogue's `legacyPaths` so the PHP shell redirects them to the canonical route |
 

@@ -1163,6 +1163,13 @@ function main() {
       if (path) phpToolRoutes.add(path);
     }
     for (const slug of Object.keys(data.categories ?? {})) phpToolRoutes.add(`tools/category/${slug}`);
+    // Curated collections (e.g. Compliance & Document Tools) are hub pages the PHP tools front
+    // controller serves alongside the per-tool routes, so a menu may link them exactly as it links
+    // a tool. They are generated into the catalogue by scripts/generate-global-platform.py.
+    for (const collection of data.collections ?? []) {
+      const path = String(collection.path ?? '').replace(/^\//, '');
+      if (path) phpToolRoutes.add(path);
+    }
   }
 
   // Content is loaded first: a navigation link is allowed to point at a marketing page that the

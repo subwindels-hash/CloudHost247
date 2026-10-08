@@ -20,6 +20,10 @@ $required = array(
     'ssl-certificate-checker','password-encryption','random-password-generator','password-strength-checker',
     'qr-code-generator','qr-scanner','lorem-ipsum-generator','time-card-calculator','bin-checker','credit-card-checker','reverse-image-search','name-checker','online-notepad','small-text-generator','word-counter','domain-name-search','rot13','morse-code-translator','bimi-checker-generator','image-to-text','runic-translator','invisible-character-generator','internet-speed-test','wifi-qr-scanner',
     'minecraft-color-codes',
+    // Compliance & Document Tools: 5 calculators + the 6 generators that are new pages.
+    'age-date-calculator', 'date-duration-calculator', 'percentage-calculator', 'unit-data-converter',
+    'unix-timestamp-calculator', 'api-key-generator', 'checksum-hash-generator', 'json-formatter',
+    'http-security-headers-generator', 'password-policy-generator', 'dns-record-generator',
 );
 
 $failures = array();
@@ -31,9 +35,9 @@ function expect($condition, $message)
     }
 }
 
-expect(count($required) === 95, 'Required slug list must stay at 95');
+expect(count($required) === 106, 'Required slug list must stay at 106');
 $tools = Catalog::tools();
-expect(count($tools) >= 104, 'Catalogue has ' . count($tools) . ' tools');
+expect(count($tools) >= 115, 'Catalogue has ' . count($tools) . ' tools');
 $bySlug = array();
 foreach ($tools as $tool) {
     $bySlug[$tool['slug']] = $tool;
@@ -111,4 +115,4 @@ if ($failures) {
     echo count($failures) . " failed\n";
     exit(1);
 }
-echo "catalogue ok tools=" . count($tools) . " required=95\n";
+echo "catalogue ok tools=" . count($tools) . " required=" . count($required) . "\n";

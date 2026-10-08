@@ -795,7 +795,25 @@ export const NAV_SECTIONS: RegistrySection[] = [
     "blurb": "Inspect, troubleshoot and build — with tools that explain their results instead of showing invented data.",
     "to": "/tools",
     "toolsDriven": true,
-    "groups": []
+    "groups": [
+      {
+        "title": "Compliance & Document",
+        "links": [
+          {
+            "label": "Compliance & Document Tools",
+            "to": "tools/compliance-documents",
+            "description": "",
+            "icon": "wrench"
+          },
+          {
+            "label": "MRZ Generator",
+            "to": "tools/mrz-generator",
+            "description": "",
+            "icon": "wrench"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": "resources",
@@ -1243,8 +1261,12 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
         "to": "/tools/category/utilities"
       },
       {
-        "label": "MRZ Generator / MRZ Tools",
-        "to": "/tools/mrz-generator"
+        "label": "Compliance & Document Tools",
+        "to": "tools/compliance-documents"
+      },
+      {
+        "label": "MRZ Generator",
+        "to": "tools/mrz-generator"
       }
     ]
   },
