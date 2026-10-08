@@ -1,6 +1,6 @@
 /**
  * Strict inbound provider-webhook receiver for the real payment gateways (stripe / paypal /
- * paystack).
+ * paystack / blockonomics).
  *
  * Ported from cloudhost247-node/src/services/webhook-service.ts, which is the security-critical half
  * of the Phase 5D pipeline: it decides whether a delivery from the internet is allowed to move money.
@@ -33,17 +33,21 @@ const { uuidv7 } = require('../lib/ids');
 const { sha256Hex } = require('../lib/webhook-signing');
 const { getWebhookGateway } = require('../lib/gateways');
 const { applySuccessfulPayment } = require('../lib/billing-apply');
+const { exceedsLedgerPrecision, minorUnitScale, LEDGER_SCALE, toMinorUnits } = require('../lib/money');
 
 /** How long a claimed event may sit unfinished before another delivery takes it over. */
 const CLAIM_LEASE_MS = 60 * 1000;
 
 const TERMINAL_STATUSES = new Set(['ignored', 'failed', 'rejected']);
 
-/** Decimal currency amount → integer minor units. Never applied to a value already in minor units. */
-const cents = (amount) => Math.round(Number(amount ?? 0) * 100);
-
-/** A gateway's `amountCents` is already integer minor units; normalise defensively, do not re-scale. */
+/**
+ * A gateway's `amountCents` is already integer minor units (satoshi for a BTC gateway); normalise
+ * defensively, do not re-scale.
+ */
 const minorUnits = (amount) => Math.round(Number(amount ?? 0));
+
+// The precision refusal now lives in `checkInvariants`, where it can name the currency and the
+// exact number that would have been stored.
 
 function isDuplicateError(err) {
   return err instanceof ConflictError || err?.statusCode === 409 || err?.code === '23505';
@@ -126,10 +130,24 @@ async function findPayment(store, event) {
 async function checkInvariants(store, payment, event) {
   if (payment.status === 'succeeded') return { ok: true };
 
-  if (minorUnits(event.amountCents) !== cents(payment.amount)) {
+  // The ledger cannot hold this currency at all. Money columns are NUMERIC(16,2) and the JSON
+  // backend rounds numeric writes to match, so a Bitcoin amount would be stored as 0 — the payment
+  // would be marked succeeded and the invoice credited nothing. Refusing names the real reason
+  // instead of reporting a misleading amount mismatch, and it holds for any currency finer than the
+  // ledger (three-decimal dinars, other crypto), not just for Bitcoin.
+  if (exceedsLedgerPrecision(event.currency)) {
+    const value = Number(event.amountCents ?? 0) / 10 ** minorUnitScale(event.currency);
+    const stored = value.toFixed(LEDGER_SCALE);
     return {
       ok: false,
-      reason: `Webhook amount ${minorUnits(event.amountCents)} does not match the pending payment amount ${cents(payment.amount)}`,
+      reason: `A ${event.currency} delivery cannot be credited: this build's money columns hold ${LEDGER_SCALE} decimal places (NUMERIC(16,2)), so ${value} ${event.currency} (${Number(event.amountCents ?? 0)} minor units) would be stored as ${stored} and the invoice would be marked paid for nothing. The delivery is recorded for audit; settlement of ${event.currency} needs a minor-unit ledger column, and until then it stays on the staff-confirmed manual gateway`,
+    };
+  }
+
+  if (minorUnits(event.amountCents) !== toMinorUnits(payment.amount, payment.currency)) {
+    return {
+      ok: false,
+      reason: `Webhook amount ${minorUnits(event.amountCents)} does not match the pending payment amount ${toMinorUnits(payment.amount, payment.currency)} (minor units of ${payment.currency})`,
     };
   }
   if (payment.currency !== event.currency) {
@@ -159,10 +177,10 @@ async function checkInvariants(store, payment, event) {
   // local `applySuccessfulPayment` marks the parent order paid on any applied payment, so honouring
   // an underpayment here would hand over goods that were not paid for. Partial/card-installment
   // arrangements stay on the staff-confirmed manual gateway.
-  if (minorUnits(event.amountCents) !== cents(invoice.total)) {
+  if (minorUnits(event.amountCents) !== toMinorUnits(invoice.total, invoice.currency)) {
     return {
       ok: false,
-      reason: `Webhook amount ${minorUnits(event.amountCents)} does not match invoice total ${cents(invoice.total)}`,
+      reason: `Webhook amount ${minorUnits(event.amountCents)} does not match invoice total ${toMinorUnits(invoice.total, invoice.currency)} (minor units of ${invoice.currency})`,
     };
   }
 
@@ -182,9 +200,11 @@ async function checkInvariants(store, payment, event) {
 }
 
 /**
+ * @param {object} [context] request context — `{ query }` for gateways whose provider reports state
+ *   in the query string (Blockonomics) rather than in a signed body.
  * @returns {Promise<{received: true, status: string, applied: boolean}>}
  */
-async function processProviderWebhook(store, config, providerId, rawBody, headers) {
+async function processProviderWebhook(store, config, providerId, rawBody, headers, context = {}) {
   const gateway = getWebhookGateway(providerId);
   if (!gateway) throw new NotFoundError(`Unknown webhook gateway: ${providerId}`);
 
@@ -194,17 +214,23 @@ async function processProviderWebhook(store, config, providerId, rawBody, header
     );
   }
 
+  const hasBody = Buffer.isBuffer(rawBody) && rawBody.length > 0;
+  if (!hasBody && gateway.queryCallback !== true) {
+    throw new ValidationError('Missing raw request body for webhook processing');
+  }
+
   // 1. Signature first — before parsing, and before touching the database.
-  const valid = await gateway.verify(rawBody, headers, config);
+  const valid = await gateway.verify(rawBody, headers, config, context);
   if (!valid) throw new UnauthorizedError('Invalid or unverified webhook signature');
 
-  // 2. Hash and parse.
-  const payloadHash = sha256Hex(rawBody);
+  // 2. Hash and parse. A query callback has no body to hash, so its raw material is the query
+  //    string itself; the hash still records exactly what was received.
+  const payloadHash = sha256Hex(hasBody ? rawBody : JSON.stringify(context.query ?? {}));
   let event;
   let providerPayload;
   try {
-    providerPayload = JSON.parse(rawBody.toString('utf8'));
-    event = gateway.parseEvent(rawBody, headers, payloadHash);
+    providerPayload = hasBody ? JSON.parse(rawBody.toString('utf8')) : { ...(context.query ?? {}) };
+    event = gateway.parseEvent(rawBody, headers, payloadHash, { ...context, config });
   } catch (err) {
     throw new ValidationError(`Malformed webhook payload: ${err.message}`);
   }

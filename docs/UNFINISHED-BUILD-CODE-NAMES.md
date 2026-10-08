@@ -139,8 +139,17 @@ one.
   amount/currency/owner/invoice-total invariants, and settlement through the shared
   `applySuccessfulPayment`. 40 tests in `platform/tests/gateways.test.js`; whole suite 357 green.
   Still open, and refused with that reason: **initiating** a real-provider checkout (needs live
-  provider egress + PSP credentials), and the Blockonomics (Bitcoin/USDT) gateway used by the WHMCS
-  build, which has no `platform/` equivalent at all.
+  provider egress + PSP credentials).
+  **Blockonomics (Bitcoin) — closed 2026-10-08** as far as this build can carry it:
+  `platform/src/lib/gateways/blockonomics.js` ports the WHMCS callback contract (timing-safe
+  `secret` query parameter, shape gate, confirmation threshold from configuration,
+  `addr:txid:confirmations` de-duplication, audit record), reached through a new GET webhook route
+  that only a gateway declaring `queryCallback` may use. 7 tests in
+  `platform/tests/blockonomics-gateway.test.js`. Initiation stays refused by name (the
+  address-issuance API and a recorded BTC quote do not exist here) and so does settlement:
+  `NUMERIC(16,2)` money columns cannot hold a Bitcoin amount, so a confirmed delivery is recorded
+  and refused with that reason instead of being credited as `0`. USDT/BCH are refused by name. A
+  minor-unit ledger column is the follow-up that would make crypto settlement real.
 - **SPA dashboard (`platform/spa/`)** — **15 page modules of ~84 ported** (8 customer pages + 7 admin
   modules, the shell included): `DashboardPage` (overview), `CatalogPage` (with add-to-cart and a
   billing-cycle picker), `CartPage` (quantity, remove, checkout), `BillingPage`

@@ -14,12 +14,13 @@
 const stripe = require('./stripe');
 const paypal = require('./paypal');
 const paystack = require('./paystack');
+const blockonomics = require('./blockonomics');
 
 /** Webhook-capable gateways, keyed by the provider id used in the URL and the payments row. */
-const WEBHOOK_GATEWAYS = { stripe, paypal, paystack };
+const WEBHOOK_GATEWAYS = { stripe, paypal, paystack, blockonomics };
 
 /** Everything the initiation API accepts, including the self-contained local gateways. */
-const INITIATION_GATEWAYS = ['sandbox', 'manual', 'stripe', 'paypal', 'paystack'];
+const INITIATION_GATEWAYS = ['sandbox', 'manual', 'stripe', 'paypal', 'paystack', 'blockonomics'];
 
 /** Human labels for the non-webhook (local) gateways. */
 const LOCAL_GATEWAY_LABELS = {
@@ -67,6 +68,15 @@ function initiationStatus(gatewayId, config) {
     return {
       available: false,
       reason: `${gateway.label} is not configured for this deployment (${gateway.configKey} is unset)`,
+    };
+  }
+
+  if (gateway.id === blockonomics.id) {
+    return {
+      available: false,
+      // Naming all three, because the first two are credentials and the third is the platform: even
+      // with an API key and a quote, `NUMERIC(16,2)` money columns cannot hold a Bitcoin amount.
+      reason: `${gateway.label} checkout needs three things this build does not have: the Blockonomics address-issuance call (an API key plus provider egress), a recorded BTC quote for the invoice (BTC amount + rate + quoted-at), and a ledger that can hold a Bitcoin amount (money columns are two-decimal). Incoming callbacks are verified and recorded; initiation is refused rather than handing a customer an address nobody is watching`,
     };
   }
 

@@ -150,11 +150,16 @@ test('spa client: the whole purchase journey works through the client the pages 
       const methods = await client.billingApi.paymentMethods(invoiceId);
       assert.strictEqual(methods.balanceDue, 5.98);
       const ids = methods.gateways.map((g) => g.id);
-      assert.deepStrictEqual(ids, ['sandbox', 'manual', 'stripe', 'paypal', 'paystack']);
+      assert.deepStrictEqual(ids, ['sandbox', 'manual', 'stripe', 'paypal', 'paystack', 'blockonomics']);
       assert.strictEqual(methods.gateways.find((g) => g.id === 'sandbox').available, true);
       const stripe = methods.gateways.find((g) => g.id === 'stripe');
       assert.strictEqual(stripe.available, false, 'no credentials in this environment');
       assert.match(stripe.reason, /STRIPE_WEBHOOK_SECRET|egress/, 'the refusal names its reason');
+      // Bitcoin is offered as a *callback* only: starting one would need the provider's
+      // address-issuance call and a recorded BTC quote, and the customer sees that reason.
+      const bitcoin = methods.gateways.find((g) => g.id === 'blockonomics');
+      assert.strictEqual(bitcoin.available, false);
+      assert.match(bitcoin.reason, /address-issuance|BLOCKONOMICS_CALLBACK_SECRET/);
     });
 
     await t.test('the manual gateway answers with instructions instead of a redirect', async () => {

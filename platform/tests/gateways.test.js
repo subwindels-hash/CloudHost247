@@ -608,6 +608,7 @@ test('integration: the zero-trust refusals', async (t) => {
 test('integration: gateway availability is reported honestly and initiation is refused with the reason', async (t) => {
   const { base, app, close } = await startServer({
     STRIPE_WEBHOOK_SECRET: STRIPE_SECRET,
+    BLOCKONOMICS_CALLBACK_SECRET: 'blockonomics-callback-secret-40chars-abcd',
     SANDBOX_GATEWAY_WEBHOOK_SECRET: 'sandbox-secret-for-this-suite-03',
     SANDBOX_PAYMENTS: 'true',
   });
@@ -620,7 +621,7 @@ test('integration: gateway availability is reported honestly and initiation is r
       assert.strictEqual(res.status, 200);
 
       const byId = Object.fromEntries(res.data.gateways.map((g) => [g.id, g]));
-      assert.deepStrictEqual(Object.keys(byId).sort(), ['manual', 'paypal', 'paystack', 'sandbox', 'stripe']);
+      assert.deepStrictEqual(Object.keys(byId).sort(), ['blockonomics', 'manual', 'paypal', 'paystack', 'sandbox', 'stripe']);
 
       assert.strictEqual(byId.sandbox.available, true);
       assert.strictEqual(byId.manual.available, true);
@@ -633,6 +634,12 @@ test('integration: gateway availability is reported honestly and initiation is r
       assert.match(byId.paypal.reason, /PAYPAL_WEBHOOK_ID/);
       assert.strictEqual(byId.paystack.available, false);
       assert.match(byId.paystack.reason, /PAYSTACK_SECRET_KEY/);
+
+      // Bitcoin is configured for callbacks and still not offered as a checkout: starting one needs
+      // the address-issuance call and a recorded BTC quote, and the reason says exactly that.
+      assert.strictEqual(byId.blockonomics.available, false);
+      assert.match(byId.blockonomics.reason, /address-issuance/i);
+      assert.match(byId.blockonomics.reason, /recorded BTC quote/i);
     });
 
     await t.test('initiating a real-provider payment is refused with the reason, not a fabricated reference', async () => {

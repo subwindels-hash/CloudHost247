@@ -114,6 +114,11 @@ const envSchema = v.object({
   STRIPE_WEBHOOK_SECRET: v.string().min(16).optional(),
   PAYPAL_WEBHOOK_ID: v.string().min(10).optional(),
   PAYSTACK_SECRET_KEY: v.string().min(16).optional(),
+  // Blockonomics does not sign its callback: the URL it calls carries this secret as a query
+  // parameter (the WHMCS plugin's CallbackSecret). It is compared in constant time.
+  BLOCKONOMICS_CALLBACK_SECRET: v.string().min(16).optional(),
+  // Confirmations required before a BTC payment settles. Operator setting, never the callback's.
+  BLOCKONOMICS_CONFIRMATIONS: v.coerce.number().int().min(0).max(6).default(2),
   // When true, the sandbox gateway can be charged/completed without a live PSP. Refused in
   // production so a misconfigured prod host cannot mint "paid" invoices.
   SANDBOX_PAYMENTS: boolSchema.default('true'),

@@ -102,23 +102,47 @@ function register(router, deps) {
     });
   }));
 
+  /**
+   * The money position, per currency.
+   *
+   * The headline figures are the platform's unit of account (USD). Entries in any other currency are
+   * totalled separately rather than added into the dollar numbers — a BTC ledger row is 0.00042, and
+   * a summary that folded it into "charges" would report a position that is not true in any
+   * currency. (The ledger's two-decimal money columns are why a BTC row loses that precision long
+   * before this endpoint sees it; see `src/lib/money.js`.)
+   */
   router.get('/api/v1/admin/billing/reconciliation', admin(async (ctx) => {
-    const { rows } = await store.table('billing_ledger').find({});
-    const sum = (type) => round2(rows.filter((r) => r.entry_type === type).reduce((s, r) => s + r.amount, 0));
+    const rows = (await store.table('billing_ledger').find({})).rows;
+    const codeOf = (row) => String(row.currency ?? 'USD').toUpperCase();
+    const totalsFor = (entries) => {
+      // Summed as stored. `amount` is already what the money column holds (two decimals, the ledger's
+      // precision); re-rounding it to the currency's own scale here would only hide the difference.
+      const sum = (type) => {
+        const list = entries.filter((r) => r.entry_type === type);
+        return list.reduce((s, r) => s + Number(r.amount ?? 0), 0);
+      };
+      const charges = sum('charge');
+      const payments = sum('payment');
+      const refunds = sum('refund');
+      const credits = sum('credit');
+      return {
+        charges, payments, refunds, credits,
+        outstanding: round2(charges - payments - refunds - credits),
+        entries: entries.length,
+      };
+    };
 
-    const charges = sum('charge');
-    const payments = sum('payment');
-    const refunds = sum('refund');
-    const credits = sum('credit');
+    const usd = totalsFor(rows.filter((row) => codeOf(row) === 'USD'));
+    const byCurrency = {};
+    for (const currency of [...new Set(rows.map(codeOf))].filter((code) => code !== 'USD').sort()) {
+      byCurrency[currency] = totalsFor(rows.filter((row) => codeOf(row) === currency));
+    }
 
     ctx.json({
       currency: 'USD',
-      charges,
-      payments,
-      refunds,
-      credits,
-      outstanding: round2(charges - payments - refunds - credits),
-      entries: rows.length,
+      ...usd,
+      otherCurrencies: byCurrency, // reported as stored: the ledger's precision, not a currency's ideal
+      note: 'USD totals only. Entries in other currencies are reported under otherCurrencies; they are never added into these figures.',
     });
   }));
 

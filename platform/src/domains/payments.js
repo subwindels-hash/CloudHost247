@@ -8,9 +8,10 @@
  * gateway never fabricates bank details — with no configured instructions it returns an honest
  * "contact support" message.
  *
- * The real providers (stripe / paypal / paystack) are recognized here so the customer-facing
- * gateway list and the initiation guards can name them, but initiation is refused with the exact
- * reason: creating a provider-side checkout needs live provider egress this build does not have.
+ * The real providers (stripe / paypal / paystack / blockonomics) are recognized here so the
+ * customer-facing gateway list and the initiation guards can name them, but initiation is refused
+ * with the exact reason: creating a provider-side checkout needs live provider egress this build
+ * does not have (and for Bitcoin, the provider's address-issuance call plus a recorded quote).
  * Their *inbound* webhooks are fully implemented in src/lib/provider-webhook-service.js.
  */
 'use strict';
@@ -204,10 +205,15 @@ function register(router, deps) {
  *  - **sandbox** — the self-contained test rig. It emits its own HMAC-SHA256-signed deliveries and
  *    verifies them with the same secret, and a failed attempt is recorded on the event row for
  *    audit (the integration suite pins that).
- *  - **stripe / paypal / paystack** — real providers, handled by the strict receiver in
- *    src/lib/provider-webhook-service.js: signature verified before any database access, canonical
- *    event parsing, unique-index claiming with lease takeover, zero-trust amount/currency/owner
- *    invariants, and settlement through the same `applySuccessfulPayment` the other paths use.
+ *  - **stripe / paypal / paystack / blockonomics** — real providers, handled by the strict receiver
+ *    in src/lib/provider-webhook-service.js: the delivery is verified before any database access
+ *    (a signature over the raw bytes, or Blockonomics' query-string secret), parsed into a canonical
+ *    event, claimed through a unique index with lease takeover, checked against zero-trust
+ *    amount/currency/owner invariants, and settled through the same `applySuccessfulPayment` the
+ *    other paths use.
+ *
+ * `context` carries what a query-parameter callback needs (`ctx.query`); gateways that sign a body
+ * ignore it.
  *
  * An unknown provider is a 404 rather than falling back to the sandbox secret: a caller must never
  * be able to pick which verification scheme applies to them.
@@ -216,12 +222,12 @@ function register(router, deps) {
  * `signature` is kept for the sandbox path's backwards-compatible call shape; the real gateways read
  * their own headers from `headers`.
  */
-async function handleProviderWebhook(store, config, provider, rawBody, signature, headers = {}) {
+async function handleProviderWebhook(store, config, provider, rawBody, signature, headers = {}, context = {}) {
   const rawBuffer = Buffer.isBuffer(rawBody) ? rawBody : Buffer.from(String(rawBody ?? ''), 'utf8');
   const rawText = rawBuffer.toString('utf8');
 
   if (isWebhookGateway(provider)) {
-    return processProviderWebhook(store, config, provider, rawBuffer, headers);
+    return processProviderWebhook(store, config, provider, rawBuffer, headers, context);
   }
 
   if (provider !== 'sandbox') {
