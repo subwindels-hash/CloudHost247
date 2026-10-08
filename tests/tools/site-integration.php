@@ -328,4 +328,30 @@ check($mrzContext['canonical']==='https://example.test/billing/tools/mrz-generat
 check($mrzContext['title']==='MRZ Generator','MRZ page metadata');
 check(in_array('Tools',array_column(Site::catalog()['navigation'],'title'),true),'permanent Tools menu');
 check(in_array('Tools',array_column(Site::catalog()['footer'],'title'),true),'permanent Tools footer');
+// The standalone shell (no WHMCS theme around the tools tree) must not promise pages that only the
+// full website serves: `web-hosting.php` and `contact.php` are the site's, and in a tools-only
+// deployment there is nothing behind them. Every destination it does publish is checked here, and
+// the deployment base has to be honoured, because a subpath mount would otherwise point at the
+// domain root.
+$shellHtml = View::document(Catalog::resolve('/tools'), '', '');
+preg_match_all('/href="([^"]+)"/', $shellHtml, $shellLinks);
+foreach (array_unique($shellLinks[1]) as $shellHref) {
+    if ($shellHref === '' || $shellHref[0] === '#') {
+        check($shellHref !== '', 'the standalone shell links nothing empty');
+        continue;
+    }
+    if (strpos($shellHref, '/assets/') === 0 || strpos($shellHref, '/templates/') === 0) {
+        continue; // Stylesheets, icons and the tools script are static files, not routes.
+    }
+    check(Catalog::resolve($shellHref) !== null || ToolsSite::resolve($shellHref) !== null,
+        'the standalone shell only links routes this deployment serves: ' . $shellHref);
+}
+check(strpos($shellHtml, '/web-hosting.php') === false && strpos($shellHtml, 'contact.php') === false,
+    'the standalone shell links no page that needs the rest of the website');
+check(in_array('/tools', $shellLinks[1], true), 'the standalone shell reaches the tools hub');
+$subShell = View::document(Catalog::resolve('/tools'), '', '/billing');
+check(strpos($subShell, 'href="/billing/tools"') !== false, 'the standalone shell honours a subpath mount');
+check(strpos($subShell, '/billing/assets/images/cloudhost247/brand/') !== false, 'the shell brand asset follows the mount');
+check(strpos($subShell, 'href="/billing/web-hosting.php"') === false, 'a subpath mount does not invent site pages');
+
 echo "$count Tools shell, menu and footer assertions passed (PHP CLI; no licensed WHMCS runtime).\n";

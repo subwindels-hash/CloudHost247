@@ -58,6 +58,41 @@ class WebsiteBuilderStaticTests(unittest.TestCase):
         self.assertTrue((ROOT / 'crons/cloudhost247_builder.php').is_file())
         self.assertTrue((ROOT / 'templates/cloudhost247/cloudhost247-builder-page.tpl').is_file())
 
+    def test_public_page_keeps_the_runtime_scope_and_the_site_chrome(self):
+        """
+        The builder's own runtime.css styles everything through `.ch247-root …`, and the public page
+        renders server-side markup through `nofilter`. Both facts are load-bearing:
+
+        * dropping `ch247-root` from the wrapper silently unstyled the entire builder page — the
+          headings, the widgets, the spacing — while every PHP assertion still passed, so it is pinned
+          here by name;
+        * the surrounding banner, form result and fallback come from the site design system
+          (`ch-note`, `ch-btn`, `ch-wrap`), and the two builder blocks are the *only* unescaped
+          output on the page. Every other value must be escaped, so an edit that unescapes one of
+          them has to fail here rather than ship.
+        """
+        text = (ROOT / 'templates/cloudhost247/cloudhost247-builder-page.tpl').read_text()
+        self.assertIn('class="ch247-root"', text)
+        for scope in ('ch247-root h1', 'ch247-root img', 'ch247-root iframe'):
+            self.assertNotIn(scope, text)  # the scope is a wrapper class, not a selector list
+        runtime = (ROOT / 'modules/addons/cloudhost247_builder/assets/css/runtime.css').read_text()
+        for selector in ('.ch247-root h1', '.ch247-root img', '.ch247-root iframe'):
+            self.assertIn(selector, runtime)
+        for chrome in ('ch-note', 'ch-note--warn', 'ch-btn', 'ch-wrap--prose'):
+            self.assertIn(chrome, text)
+            self.assertTrue(chrome in runtime or chrome in (ROOT / 'templates/cloudhost247/css/design-system.css').read_text(), chrome)
+        self.assertEqual(text.count(' nofilter}'), 3, 'only the three builder blocks are unescaped')
+        # The `nofilter` blocks are the builder's own server-rendered, already-sanitised markup. Every
+        # other value on this page is interpolated from a variable, and every one of them must carry
+        # `|escape` — a title, a reason or a login URL that loses its filter is an XSS route.
+        unescaped = [
+            value for value in re.findall(r'\{\$[^}]*\}', text)
+            if ' nofilter}' not in value and '|escape' not in value
+        ]
+        self.assertEqual(unescaped, [], 'these interpolations are not escaped: ' + ', '.join(unescaped))
+        self.assertNotIn('ch247-preview-banner', text)
+        self.assertNotIn('ch247-form-result', text)
+
     def test_every_source_is_namespaced_and_guarded(self):
         for path in PHP_SOURCES:
             text = path.read_text()
