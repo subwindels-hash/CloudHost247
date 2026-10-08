@@ -1,5 +1,6 @@
 from pathlib import Path
 import subprocess
+import sys
 import json
 import re
 import unittest
@@ -565,3 +566,48 @@ class WebsiteBuilderStaticTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class WidgetClassAuditTests(unittest.TestCase):
+    """Every class the widget renderer emits must be styled by a sheet the Builder serves.
+
+    The renderer builds its markup in PHP, so the theme class audit in `scripts/verify-website.py`
+    never sees it — which is how the cart, the brokerage panels and their rows shipped with class
+    names that no stylesheet defined. This runs the audit that does see them.
+    """
+
+    def test_no_widget_class_is_left_unstyled(self):
+        result = subprocess.run(
+            [sys.executable, str(ROOT / 'scripts/audit-builder-widget-classes.py')],
+            capture_output=True, text=True,
+        )
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertIn('documented hooks', result.stdout)
+
+    def test_the_audit_is_wired_into_the_release_gate(self):
+        gate = (ROOT / 'scripts/release-candidate-check.sh').read_text()
+        self.assertIn('scripts/audit-builder-widget-classes.py', gate)
+
+    def test_the_widget_styles_use_the_design_tokens(self):
+        """The Builder is a template surface too: its colours come from the same tokens as the theme."""
+        css = (ROOT / 'modules/addons/cloudhost247_builder/assets/css/runtime.css').read_text()
+        for token in ('--ch247-color-primary', '--ch247-color-border', '--ch247-color-muted',
+                      '--ch247-color-heading', '--ch247-radius'):
+            self.assertIn(f'var({token}', css)
+        # A literal colour that is not a token fallback does not follow a client's palette. The three
+        # survivors are the soft result/unavailable palettes, which have no token of their own: the
+        # Builder's token set carries no "soft success" family, so naming them here is the honest
+        # option — inventing tokens would change what the style compiler emits for every client.
+        named_literals = {
+            '.ch247-form-result--ok', '.ch247-form-result--error', '.ch247-preview-banner',
+        }
+        offenders = []
+        selector = ''
+        for line in css.splitlines():
+            stripped = line.strip()
+            if stripped and not stripped.startswith(('*', '/*', '}', '@')) and '{' in stripped:
+                selector = stripped.split('{')[0].strip().split()[0]
+            if '#' in line and 'var(--ch247' not in line and not stripped.startswith('*'):
+                if selector not in named_literals:
+                    offenders.append(f'{selector}: {stripped}')
+        self.assertEqual([], offenders, 'these colours use no token and are not named: ' + repr(offenders))

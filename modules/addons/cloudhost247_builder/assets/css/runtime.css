@@ -98,7 +98,8 @@
 
 /* Cards and plans */
 .ch247-plans, .ch247-reviews, .ch247-gallery { display: grid; gap: 24px; width: 100%; }
-.ch247-plan, .ch247-pricing {
+.ch247-plan, .ch247-pricing, .ch247-cart, .ch247-broker-cta, .ch247-broker-status,
+.ch247-broker-cases, .ch247-broker-pricing {
     display: flex; flex-direction: column; gap: 12px; padding: 26px;
     background: var(--ch247-color-surface, #fff);
     border: 1px solid var(--ch247-color-border, #e2e8f0);
@@ -170,7 +171,7 @@
     padding: 11px 14px; font: inherit; width: 100%;
     border: 1px solid var(--ch247-color-border, #e2e8f0);
     border-radius: var(--ch247-radius, 10px);
-    background: #fff; color: inherit;
+    background: var(--ch247-color-surface, #fff); color: inherit;
 }
 .ch247-input:focus { outline: 2px solid var(--ch247-color-primary, #0756d8); outline-offset: 1px; }
 .ch247-req { color: var(--ch247-color-danger, #e03131); }
@@ -191,7 +192,7 @@
 .ch247-testimonial__author { display: flex; align-items: center; gap: 12px; }
 .ch247-testimonial__author img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
 .ch247-testimonial__author small { display: block; color: var(--ch247-color-muted, #64748b); }
-.ch247-testimonial__rating { display: flex; gap: 2px; color: #f59f00; }
+.ch247-testimonial__rating { display: flex; gap: 2px; color: var(--ch247-color-warning, #f59f00); }
 
 .ch247-counter { text-align: center; }
 .ch247-counter__value { margin: 0; font-size: 2.6rem; font-weight: 700; color: var(--ch247-color-heading, #0f172a); }
@@ -265,6 +266,55 @@
 .ch247-status__row.is-warn .ch247-status__dot { background: var(--ch247-color-warning, #f59f00); }
 .ch247-status__row.is-down .ch247-status__dot { background: var(--ch247-color-danger, #e03131); }
 .ch247-status__state, .ch247-status__time, .ch247-status__note { color: var(--ch247-color-muted, #64748b); font-size: .88rem; }
+/* The label takes the slack so the state and the timestamp line up on the right edge. */
+.ch247-status__label { flex: 1 1 auto; min-width: 0; }
+
+/* Cart, brokerage and image panels.
+ * These render inside the same cards as the plans, so they reuse the surface, border and spacing
+ * tokens above; the rows are the parts that need their own layout. */
+.ch247-cart__count {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 22px; height: 22px; padding: 0 6px; border-radius: 999px;
+    background: var(--ch247-color-primary, #0756d8); color: var(--ch247-color-surface, #fff);
+    font-size: .75rem; font-weight: 700; line-height: 1;
+}
+.ch247-cart__empty, .ch247-broker-cases__empty, .ch247-broker-status__empty,
+.ch247-broker-pricing__note, .ch247-broker-pricing__text, .ch247-broker-cta__text,
+.ch247-cta__text, .ch247-form__description { color: var(--ch247-color-muted, #64748b); font-size: .92rem; }
+
+.ch247-broker-cta__row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.ch247-broker-cta__input {
+    flex: 1 1 220px; min-width: 0; padding: 11px 14px; font: inherit;
+    border: 1px solid var(--ch247-color-border, #e2e8f0);
+    border-radius: var(--ch247-radius, 10px);
+    background: var(--ch247-color-surface, #fff); color: inherit;
+}
+.ch247-broker-cta__input:focus { outline: 2px solid var(--ch247-color-primary, #0756d8); outline-offset: 1px; }
+
+.ch247-broker-status__case { margin: 0; font-weight: 600; color: var(--ch247-color-heading, #0f172a); }
+.ch247-broker-status__state { margin: 0; color: var(--ch247-color-muted, #64748b); font-size: .9rem; }
+
+.ch247-broker-cases__list, .ch247-broker-pricing__list {
+    list-style: none; margin: 0; padding: 0;
+    display: flex; flex-direction: column; gap: 4px;
+}
+.ch247-broker-cases__row {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+    padding: 10px 0; border-bottom: 1px solid var(--ch247-color-border, #e2e8f0);
+}
+.ch247-broker-cases__number { font-weight: 600; font-variant-numeric: tabular-nums; }
+.ch247-broker-cases__domain { flex: 1 1 160px; min-width: 0; overflow-wrap: anywhere; }
+.ch247-broker-cases__state { color: var(--ch247-color-muted, #64748b); font-size: .88rem; }
+.ch247-broker-pricing__row {
+    display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 16px;
+    padding: 10px 0; border-bottom: 1px solid var(--ch247-color-border, #e2e8f0);
+}
+.ch247-broker-pricing__name { min-width: 0; overflow-wrap: anywhere; }
+.ch247-broker-pricing__amount {
+    font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ch247-color-heading, #0f172a);
+}
+
+.ch247-image__img { width: 100%; border-radius: var(--ch247-radius, 10px); }
 
 /* Header, nav, footer */
 .ch247-logo { display: inline-flex; align-items: center; text-decoration: none; }
