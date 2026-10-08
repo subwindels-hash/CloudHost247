@@ -1243,7 +1243,7 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
         "to": "/tools/category/utilities"
       },
       {
-        "label": "MRZ Generator / MRZ Tools",
+        "label": "MRZ Generator",
         "to": "/tools/mrz-generator"
       }
     ]

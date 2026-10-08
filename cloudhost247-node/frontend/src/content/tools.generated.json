@@ -355,10 +355,10 @@
     },
     {
       "slug": "mrz-generator",
-      "name": "MRZ Generator / MRZ Tools",
+      "name": "MRZ Generator",
       "path": "/tools/mrz-generator",
       "category": "developer",
-      "description": "Generate, validate and parse ICAO Doc 9303 TD3 passport machine-readable zones.",
+      "description": "Generate, validate and parse ICAO Doc 9303 machine-readable zones, with per-layout field-width and check-digit validation.",
       "visibility": "public"
     },
     {

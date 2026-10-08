@@ -967,11 +967,11 @@ const BASE_TOOL_CATALOG: readonly ToolCatalogEntry[] = [
   // ------------------------------------------------------------------ Document
   {
     slug: 'mrz-generator',
-    name: 'MRZ Generator / MRZ Tools',
+    name: 'MRZ Generator',
     category: 'developer',
-    summary: 'Generate, validate and parse ICAO Doc 9303 TD3 passport machine-readable zones.',
+    summary: 'Generate, validate and parse ICAO Doc 9303 machine-readable zones, with per-layout field-width and check-digit validation.',
     description:
-      'Builds the two 44-character lines of a TD3 (passport-size) machine-readable zone from the document fields you enter, validates the structure and the 7-3-1 check digits of an existing MRZ, and parses a supplied MRZ back into labelled fields. Names are transliterated to the ICAO Latin character set and an unsupported character is reported instead of being silently removed. The page runs the calculation in your browser by default; the documented API path exists for integration testing and never caches, logs or persists the submitted values. This tool works on machine-readable text only — it does not produce passport artwork and does not verify that a physical or electronic document is genuine.',
+      'Builds ICAO Doc 9303 machine-readable zones from the document fields you enter, validates the structure and the 7-3-1 check digits of an existing zone, and parses a supplied zone back into labelled fields. The page states which layout it is producing and enforces that layout\u2019s field widths: a value that cannot fit is rejected with a message naming the field and its limit rather than being truncated. Names are transliterated to the ICAO Latin character set and an unsupported character is reported instead of being silently removed. Validation is syntactic — structure, widths, character set and check digits — and a zone that passes it is still not evidence that a physical or electronic document is genuine. Generation and validation run in your browser; the documented API path exists for integration testing and never caches, logs or persists the values you submit. This tool works on machine-readable text only and does not produce passport artwork.',
     icon: 'scan-text',
     path: '/tools/mrz-generator',
     apiPath: '/api/tools/mrz-generator',
@@ -981,7 +981,7 @@ const BASE_TOOL_CATALOG: readonly ToolCatalogEntry[] = [
     rateLimitProfile: 'light',
     cacheSeconds: 0,
     timeoutMs: 5_000,
-    keywords: ['mrz', 'machine readable zone', 'passport', 'icao 9303', 'td3', 'check digit', 'ocr', 'document', 'parser', 'validator'],
+    keywords: ['mrz', 'machine readable zone', 'passport', 'icao 9303', 'td1', 'td2', 'td3', 'check digit', 'composite check digit', 'ocr', 'identity document', 'parser', 'validator'],
     notes: [
       'Privacy: the values you submit are processed in memory for this one request. There is no cache, no history target and no request-body logging for this tool.',
       'Check digits prove the string is well formed. They do not prove a passport is genuine — use a document reader and the ICAO PKD for authenticity.',

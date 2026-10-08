@@ -46,7 +46,7 @@ export default function ToolsHubPage() {
                 </p>
                 <p style={{ marginBottom: 0 }}>
                   <Link className="ch247-button" to="/tools/mrz-generator">
-                    Open MRZ Generator / MRZ Tools →
+                    Open MRZ Generator →
                   </Link>
                 </p>
                 <p className="ch247-page__hint" style={{ margin: '0.5rem 0 0' }}>

@@ -19,6 +19,7 @@ require dirname(__DIR__, 2) . '/tools/lib/bootstrap.php';
 use CloudHost247\Theme\ToolsSite;
 use CloudHost247\Theme\Site;
 use CloudHost247\Tools\Catalog;
+use CloudHost247\Tools\View;
 
 $count = 0;
 function check($ok, $name) { global $count; $count++; if (!$ok) { fwrite(STDERR, "FAIL: $name\n"); exit(1); } }
@@ -186,7 +187,41 @@ foreach ($footerLinks as $link) {
     if (($link['url'] ?? '') === $mrzUrl) { $mrzFooter = $link; }
 }
 check($mrzFooter !== null, 'MRZ tool is published in the footer Tools column');
-check($mrzFooter['label'] === 'MRZ Generator / MRZ Tools', 'MRZ footer link uses the agreed public label');
+check($mrzFooter['label'] === 'MRZ Generator', 'MRZ footer link uses the agreed public label');
+// The renamed section: the MRZ page became "Compliance & Document Tools", a real hub page, and MRZ
+// stayed reachable directly beside it. Both surfaces have to publish both, with the hub first.
+$collectionUrl = 'tools/compliance-documents';
+$collectionFooter = null;
+foreach ($footerLinks as $link) {
+    if (($link['url'] ?? '') === $collectionUrl) { $collectionFooter = $link; }
+}
+check($collectionFooter !== null, 'Compliance & Document Tools hub is published in the footer Tools column');
+check($collectionFooter['label'] === 'Compliance & Document Tools', 'Compliance & Document hub uses the agreed public label');
+$collectionMenu = false;
+foreach ($menuLinks as $link) {
+    if (($link['url'] ?? '') === $collectionUrl) { $collectionMenu = true; }
+}
+check($collectionMenu, 'Compliance & Document Tools hub is reachable from the Tools mega menu');
+check(Catalog::resolve('/' . $collectionUrl)['kind'] === 'collection', 'the tools shell serves the collection hub route');
+$collection = Catalog::collection('compliance-documents');
+check($collection !== null && $collection['name'] === 'Compliance & Document Tools', 'the catalogue defines the collection');
+$collectionGroups = Catalog::collectionGroups($collection);
+$collectionToolCount = 0;
+foreach ($collectionGroups as $group) {
+    check($group['label'] !== '' && $group['tools'], 'collection group has a label and tools: ' . $group['slug']);
+    foreach ($group['tools'] as $tool) {
+        $collectionToolCount++;
+        check(Catalog::resolve($tool['path'])['slug'] === $tool['slug'], 'collection card resolves: ' . $tool['slug']);
+    }
+}
+check($collectionToolCount === 17, 'the collection publishes 17 tools (5 calculators + 12 generators), found ' . $collectionToolCount);
+$collectionHtml = View::document($collection + array('kind' => 'collection'), '', '');
+check(substr_count($collectionHtml, 'ch-tool-card') >= 17, 'the hub page renders a card for every tool');
+check(strpos($collectionHtml, '<h1>Compliance &amp; Document Tools</h1>') !== false, 'the hub has its own h1');
+check(strpos($collectionHtml, 'application/ld+json') !== false, 'the hub publishes structured data');
+check(strpos($collectionHtml, 'rel="canonical"') !== false, 'the hub publishes a canonical URL');
+check(strpos($collectionHtml, 'og:url') !== false, 'the hub publishes Open Graph metadata');
+check(substr_count($collectionHtml, 'ch-collection-group') >= 5, 'the hub is organised into groups');
 // The Tools panel is catalogue-driven: it publishes category floors server-side and appends the
 // live catalogue (which includes MRZ, keyed by its category) when JavaScript runs. So the check
 // that matters statically is that the menu publishes the category that owns MRZ — a visitor who
@@ -258,7 +293,7 @@ check($context['canonical']==='https://example.test/billing/tools/dns-lookup','s
 check($context['title']==='DNS Lookup','specific metadata');
 $mrzContext=Site::context(array('WEB_ROOT'=>'/billing', 'systemurl'=>'https://example.test/billing', 'cloudhost247ToolsPage'=>ToolsSite::resolve('/tools/mrz-generator')));
 check($mrzContext['canonical']==='https://example.test/billing/tools/mrz-generator','MRZ canonical URL');
-check($mrzContext['title']==='MRZ Generator / MRZ Tools','MRZ page metadata');
+check($mrzContext['title']==='MRZ Generator','MRZ page metadata');
 check(in_array('Tools',array_column(Site::catalog()['navigation'],'title'),true),'permanent Tools menu');
 check(in_array('Tools',array_column(Site::catalog()['footer'],'title'),true),'permanent Tools footer');
 echo "$count Tools shell, menu and footer assertions passed (PHP CLI; no licensed WHMCS runtime).\n";

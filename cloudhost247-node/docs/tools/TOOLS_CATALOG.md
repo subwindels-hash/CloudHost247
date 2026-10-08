@@ -62,7 +62,7 @@ Columns:
 | **Encoding Tools** | `/tools/encoding-tools` | `/api/tools/encoding-tools` | no | — | Base64, MD5, binary ↔ text, ROT13 and Morse code. |
 | **HTTP Headers Checker** | `/tools/http-headers` | `/api/tools/http-headers` | no | — | Status, headers, redirect chain, cache and security-header analysis. |
 | **JSON Tools** | `/tools/json-tools` | `/api/tools/json-tools` | no | — | Viewer, formatter, beautifier, minifier and validator. |
-| **MRZ Generator / MRZ Tools** | `/tools/mrz-generator` | `/api/tools/mrz-generator` | no | — | Generate, validate and parse ICAO Doc 9303 TD3 passport machine-readable zones. |
+| **MRZ Generator** | `/tools/mrz-generator` | `/api/tools/mrz-generator` | no | — | Generate, validate and parse ICAO Doc 9303 machine-readable zones, with per-layout field-width and check-digit validation. |
 | **SMTP Tester** | `/tools/smtp-tester` | `/api/tools/smtp-tester` | yes | — | Test an SMTP server's reachability, TLS and (optionally) authentication. |
 | **URL Tools** | `/tools/url-tools` | `/api/tools/url-tools` | no | — | Multi-URL opener, rewrite-rule and .htaccess generators. |
 | **User Agent Tool** | `/tools/user-agent` | `/api/tools/user-agent` | no | — | Show the user-agent and headers your browser actually sent. |

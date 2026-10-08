@@ -93,7 +93,7 @@ describe('ePassport MRZ Calculator, Validator, Parser & Admin UI', () => {
     // The heading must be the exact name the footer link and the catalogue entry publish, otherwise
     // the footer link would land on a differently named page.
     expect(
-      await screen.findByRole('heading', { level: 1, name: 'MRZ Generator / MRZ Tools' })
+      await screen.findByRole('heading', { level: 1, name: 'MRZ Generator' })
     ).toBeTruthy();
     const breadcrumb = screen.getByRole('navigation', { name: 'Breadcrumb' });
     expect(breadcrumb.querySelector('a[href="/tools"]')).toBeTruthy();

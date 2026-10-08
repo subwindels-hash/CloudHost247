@@ -107,7 +107,7 @@
       "title": "Document tools (MRZ)",
       "summary": "The CloudHost247 ePassport Machine Readable Zone (MRZ) Developer Tool provides a native, privacy-first utility for:",
       "source": "docs/MRZ_DEVELOPER_TOOL.md",
-      "bytes": 15621
+      "bytes": 15712
     },
     {
       "slug": "cpanel-deployment",

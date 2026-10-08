@@ -10,7 +10,7 @@
  *   2. the generated theme projection (the file the WHMCS/PHP shell and the React footer read) lists
  *      the tool and resolves *every* footer slug to a catalogue entry with an implementation;
  *   3. the SPA declares the canonical route, and the page it renders uses the catalogue's own name
- *      (a link that promises "MRZ Generator / MRZ Tools" must not land on a differently named page);
+ *      (a link that promises "MRZ Generator" must not land on a differently named page);
  *   4. `/api/tools/navigation` — the single source for both shells’ menus and footer — publishes it;
  *   5. the executor never persists what the tool processed: no cache row, no PII in the execution
  *      log summary or target, no PII in customer history, and reports/tickets are refused outright.
@@ -71,7 +71,7 @@ describe('MRZ tool — catalogue, footer and route wiring', () => {
   it('registers one public MRZ tool with an implementation, no cache and retained URLs', () => {
     const entry = catalogEntry('mrz-generator');
     expect(entry).toBeDefined();
-    expect(entry!.name).toBe('MRZ Generator / MRZ Tools');
+    expect(entry!.name).toBe('MRZ Generator');
     expect(entry!.path).toBe('/tools/mrz-generator');
     expect(entry!.authRequired).toBe(false);
     expect(entry!.visibility).toBe('public');
@@ -241,7 +241,7 @@ describe('MRZ tool — execution, navigation and privacy through the real API', 
     const mrz = body.tools.find((tool: { slug: string }) => tool.slug === 'mrz-generator');
     expect(mrz).toBeDefined();
     expect(mrz.path).toBe('/tools/mrz-generator');
-    expect(mrz.name).toBe('MRZ Generator / MRZ Tools');
+    expect(mrz.name).toBe('MRZ Generator');
     expect(body.footer).toContain('mrz-generator');
     expect(body.categories.developer).toBe('Developer');
 

@@ -6,9 +6,18 @@ assert.equal(empty.rows[0].MD5, 'd41d8cd98f00b204e9800998ecf8427e');
 const abc = await runLocal('md5', { text: 'abc' });
 assert.equal(abc.rows[0].MD5, '900150983cd24fb0d6963f7d28e17f72');
 
+// Measure/Value rows are the shared result shape, so a small reader keeps these assertions honest
+// about which row they are reading rather than which index happens to be first.
+const row = (result, name) => {
+  const found = result.rows.find((item) => item.Measure === name || item.Field === name);
+  if (!found) throw new assert.AssertionError({ message: 'No "' + name + '" row in ' + JSON.stringify(result.rows.map((r) => r.Measure || r.Field)) });
+  return found.Value;
+};
+
 const encoded = await runLocal('base64', { text: 'CloudHost247' });
-const decoded = await runLocal('base64', { text: encoded.rows[0].Base64, op: 'decode' });
-assert.equal(decoded.rows[0].Text, 'CloudHost247');
+assert.equal(row(encoded, 'Base64'), 'Q2xvdWRIb3N0MjQ3');
+const decoded = await runLocal('base64', { text: row(encoded, 'Base64'), op: 'decode' });
+assert.equal(row(decoded, 'Text'), 'CloudHost247');
 
 const puny = await runLocal('punycode', { text: 'münchen.de' });
 assert.equal(puny.rows[0].Punycode, 'xn--mnchen-3ya.de');
@@ -50,6 +59,7 @@ const specimen = {
 };
 const mrzGenerated = await runLocal('mrz_generate', specimen);
 assert.equal(mrzGenerated.ok, true);
+assert.equal(mrzGenerated.rows[0].Field, 'Line 1 (44 characters)');
 assert.equal(mrzGenerated.rows[0].Value, 'P<UTOERIKSSON<<ANNA<MARIA<<<<<<<<<<<<<<<<<<<');
 assert.equal(mrzGenerated.rows[1].Value, 'L898902C36UTO7408122F1204159ZE184226B<<<<<10');
 assert.equal(mrzGenerated.copyText, mrzGenerated.rows[0].Value + '\n' + mrzGenerated.rows[1].Value);
@@ -58,20 +68,26 @@ assert.ok(mrzGenerated.notes.some((note) => /nothing was uploaded/i.test(note)))
 
 const mrzValidated = await runLocal('mrz_generate', { mode: 'validate', mrz: mrzGenerated.copyText });
 assert.equal(mrzValidated.ok, true);
-assert.equal(mrzValidated.summary, 'MRZ structure is valid.');
+assert.match(mrzValidated.summary, /^TD3 zone is structurally valid and every check digit matches\.$/);
 assert.ok(mrzValidated.rows.every((row) => row.Result === 'PASS'));
 
 const mrzTampered = await runLocal('mrz_generate', {
   mode: 'validate', mrz: mrzGenerated.copyText.replace('L898902C3', 'L898902C4'),
 });
-assert.equal(mrzTampered.summary, 'MRZ validation failed.');
+// A wrong check digit is the answer, so it is reported as a failure rather than a green result.
+assert.equal(mrzTampered.ok, false);
+assert.equal(mrzTampered.summary, 'Validation failed');
+assert.match(mrzTampered.error, /failed validation/);
 assert.ok(mrzTampered.rows.some((row) => row.Result === 'FAIL'));
 
 const mrzParsed = await runLocal('mrz_generate', { mode: 'parse', mrz: mrzGenerated.copyText });
-assert.match(mrzParsed.summary, /Successfully parsed/i);
-assert.equal(mrzParsed.rows.find((row) => row.Field === 'Surname').Value, 'ERIKSSON');
-assert.equal(mrzParsed.rows.find((row) => row.Field === 'Given names').Value, 'ANNA MARIA');
-assert.equal(mrzParsed.rows.find((row) => row.Field === 'Document number').Value, 'L898902C3');
+assert.match(mrzParsed.summary, /^Parsed TD3/);
+// The parse table repeats some names as validation checks, so select the rows that carry a value.
+const mrzField = (name) => mrzParsed.rows.find((row) => row.Field === name && 'Value' in row).Value;
+assert.equal(mrzField('Surname'), 'ERIKSSON');
+assert.equal(mrzField('Given names'), 'ANNA MARIA');
+assert.equal(mrzField('Document number'), 'L898902C3');
+assert.equal(mrzField('Nationality'), 'UTO');
 
 const mrzTransliterated = await runLocal('mrz_generate', { ...specimen, surname: 'Öztürk', givenNames: 'Ayşe' });
 assert.ok(mrzTransliterated.rows[0].Value.startsWith('P<UTOOEZTUERK<<AYSE'), 'ICAO transliteration must be applied');

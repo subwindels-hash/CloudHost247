@@ -188,52 +188,359 @@ add("website-os-checker", "Website Operating System Checker", "developer", "serv
 add("md5-generator", "MD5 Generator", "developer", "local", "md5",
     "Compute an MD5 checksum in your browser. MD5 is not suitable for password storage.",
     ["md5", "hash", "checksum"], TXT("Text", "Text to hash"))
-add("base64-generator", "Base64 Generator", "developer", "local", "base64",
-    "Encode or decode Base64 in your browser. Input is not uploaded.",
-    ["base64", "encode", "decode"], TXT("Text", "Text or Base64") + [("op", "Operation", "select", "encode", True)])
+add("base64-generator", "Base64 Encoder / Decoder", "developer", "local", "base64",
+    "Encode or decode Base64 with UTF-8 handling, strict validation and a URL-safe variant. Input is not uploaded.",
+    ["base64", "encode", "decode", "utf-8", "url-safe", "base64url"],
+    [("op", "Operation", "select", "encode", True,
+      {"encode": "Encode text → Base64", "decode": "Decode Base64 → text"}),
+     ("variant", "Alphabet", "select", "standard", True,
+      {"standard": "Standard (+ / with = padding)", "urlsafe": "URL-safe (- _ without padding)"}),
+     ("text", "Text or Base64", "textarea", "Text to encode, or Base64 to decode", True)],
+    description=(
+        "Encodes text to Base64 and decodes Base64 back to text, treating the payload as UTF-8 in "
+        "both directions so multi-byte characters survive the round trip. Decoding is strict: "
+        "characters outside the chosen alphabet, a bad padding length or a truncated final quantum "
+        "are reported as an error with the offending position, instead of being silently skipped the "
+        "way a permissive decoder would. A URL-safe alphabet (- and _, no padding) is available for "
+        "tokens that travel in a path or query string. Everything happens in your browser tab."
+    ))
 add("multi-url-opener", "Multi URL Opener", "developer", "local", "multi_url",
     "Open up to eight http(s) URLs in new tabs after you confirm. Other schemes are rejected.",
     ["url", "opener", "tabs"], TXT("URLs", "https://example.com"))
 MRZ = [
-    ("mode", "Action", "select", "generate", True),
-    ("mrz", "Existing MRZ, two lines (validate or parse)", "textarea", "Paste the two 44-character lines here", False),
+    ("mode", "Action", "select", "generate", True,
+     {"generate": "Generate an MRZ", "validate": "Validate an MRZ", "parse": "Parse an MRZ"}),
+    ("format", "Document format", "select", "TD3", True,
+     {"TD3": "TD3 — passport / 2 lines × 44 characters",
+      "TD2": "TD2 — ID card / 2 lines × 36 characters",
+      "TD1": "TD1 — ID card / 3 lines × 30 characters"},
+     "Determines the field widths, the check digits and the composite check digit."),
+    ("mrz", "Existing MRZ (validate or parse)", "textarea", "Paste the machine-readable lines here", False),
     # Placeholders state the expected shape only. The ready-made ICAO specimen is offered by the
     # page's own "Generate test data" button inside the visitor's browser, so no specimen document
     # number, date of birth or name is ever written into a shipped config, template or page.
+    ("documentCode", "Document code", "text", "P", False,
+     None, "P for passport. TD1/TD2 accept I, A, C, V and similar codes."),
     ("issuingState", "Issuing state (3 letters)", "text", "UTO", False),
     ("surname", "Surname (as printed)", "text", "SURNAME", False),
     ("givenNames", "Given names (as printed)", "text", "GIVEN NAMES", False),
     ("nationality", "Nationality (3 letters)", "text", "UTO", False),
     ("documentNumber", "Document number", "text", "AB1234567", False),
     ("dateOfBirth", "Date of birth (YYMMDD)", "text", "YYMMDD", False),
-    ("sex", "Sex", "select", "F", False),
+    ("sex", "Sex", "select", "F", False, {"F": "F — female", "M": "M — male", "<": "< — unspecified"}),
     ("expiryDate", "Expiry date (YYMMDD)", "text", "YYMMDD", False),
-    ("optionalData", "Optional data", "text", "OPTIONAL", False),
+    ("optionalData", "Optional / personal number", "text", "OPTIONAL", False,
+     None, "TD3 allows 14 characters, TD2 28, TD1 15 plus a separate 15-character second optional field."),
+    ("optionalData2", "Optional data 2 (TD1 only)", "text", "OPTIONAL2", False),
 ]
-add("mrz-generator", "MRZ Generator / MRZ Tools", "developer", "local", "mrz_generate",
-    "Generate, validate and parse ICAO Doc 9303 TD3 passport machine-readable zones.",
-    ["mrz", "machine readable zone", "passport", "icao 9303", "td3", "check digit", "ocr", "document", "parser", "validator"],
+add("mrz-generator", "MRZ Generator", "developer", "local", "mrz_generate",
+    "Generate, validate and parse ICAO Doc 9303 machine-readable zones for TD1, TD2 and TD3 documents.",
+    ["mrz", "machine readable zone", "passport", "icao 9303", "td1", "td2", "td3", "check digit", "composite check digit", "ocr", "identity document", "parser", "validator"],
     MRZ, featured=True, sensitive=True,
     description=(
-        "Builds the two 44-character lines of a TD3 (passport-size) machine-readable zone from the document "
-        "fields you enter, validates the structure and the 7-3-1 check digits of an existing zone, and parses a "
-        "supplied zone back into labelled fields. Names are transliterated to the ICAO Latin character set, and an "
-        "unsupported character is reported instead of being silently removed or guessed. Privacy: the calculation "
-        "runs in this browser tab, so the values you type are not uploaded, logged or stored by CloudHost247. Scope: "
-        "machine-readable text only \u2014 check digits prove the string is well formed, they do not prove that a "
-        "physical or electronic document is genuine, and this page does not create passport artwork or travel "
-        "documents."
+        "Builds machine-readable zones for the three ICAO Doc 9303 layouts — TD1 (3 lines of 30 "
+        "characters), TD2 (2 lines of 36) and TD3 (2 lines of 44) — from the document fields you enter, "
+        "validates the structure and the 7-3-1 check digits of an existing zone, and parses a supplied "
+        "zone back into labelled fields. Field widths are enforced per format: a value that cannot fit "
+        "the layout you selected is rejected with a message that names the field and the limit, never "
+        "silently truncated. Names are transliterated to the ICAO Latin character set, and an "
+        "unsupported character is reported instead of being removed or guessed. Privacy: the "
+        "calculation runs in this browser tab, so the values you type are not uploaded, logged or "
+        "stored by CloudHost247. Scope: machine-readable text only — a correct format and check digits "
+        "prove the string is internally consistent, they do not prove that a physical or electronic "
+        "document is genuine, and this page does not create passport artwork or travel documents."
     ),
     faq_items=[
-        {"q": "What does MRZ Generator / MRZ Tools actually do?",
-         "a": "It generates the TD3 machine-readable zone for the fields you supply, verifies the check digits of an existing zone, and reports the parsed fields. Results describe exactly the string you entered \u2014 nothing is inferred about a person or a document."},
+        {"q": "Which document formats does this generate?",
+         "a": "TD1 (ID card, three lines of 30 characters), TD2 (ID card, two lines of 36) and TD3 (passport, two lines of 44). The page states which layout you are building, and the field widths, check digits and composite check digit follow that layout."},
         {"q": "Is my input stored?",
          "a": "No. Everything is calculated in this browser tab. The values are not uploaded, not logged and not written to a database, and no MRZ string, document number or date of birth is sent to analytics or added to any URL."},
         {"q": "Does a valid check digit prove a passport is genuine?",
-         "a": "No. Check digits only prove the zone is internally consistent. Authenticity requires the document itself, the issuing authority and cryptographic verification (ICAO PKD / passive authentication), which this tool does not perform."},
+         "a": "No. This is syntactic validation: structure, field widths, character set and check digits. Authenticity requires the document itself, the issuing authority and cryptographic verification (ICAO PKD / passive authentication), which this tool does not perform."},
+        {"q": "What happens if a field is too long?",
+         "a": "Generation stops and the error names the field, the layout and the character limit. Fields are never truncated for you, because a truncated name field would produce a syntactically valid zone that misstates the document."},
         {"q": "Can I use a real passport here?",
          "a": "Use synthetic test data. The built-in specimen uses the reserved ICAO test codes UTO and XXA, which belong to no real person or state."},
     ])
+
+# --- Compliance & Document Tools ---------------------------------------------------------------
+# Five calculators and twelve generators, collected on one hub page (/tools/compliance-documents).
+# Every one of them is a `local` tool: the arithmetic, the random bytes and the digests all happen
+# in the visitor's browser tab, so passwords, tokens and document fields never reach a server.
+add("age-date-calculator", "Age & Date Calculator", "productivity", "local", "age_date",
+    "Exact age in years, months and days between a date of birth and a reference date, with the day-count behind it.",
+    ["age", "date of birth", "birthday", "years months days", "document verification", "calculator"],
+    [("dateOfBirth", "Date of birth", "text", "1990-04-23", True, None, "ISO 8601 (YYYY-MM-DD) or DD/MM/YYYY."),
+     ("referenceDate", "Reference date", "text", "", False, None, "Defaults to today in your browser's time zone.")],
+    sensitive=True,
+    description=(
+        "Computes the exact age between a date of birth and a reference date in completed years, "
+        "months and days, plus the total days, weeks, months and the next birthday. Calendar "
+        "arithmetic is exact: leap days, month lengths and end-of-month boundaries are handled by "
+        "counting whole months first and the remaining days second, so 31 January plus one month is "
+        "reported rather than guessed. Useful in identity and document workflows where an age has to "
+        "be stated precisely on a given date. The reference date defaults to today in your own time "
+        "zone; nothing is sent to CloudHost247."
+    ),
+    faq_items=[
+        {"q": "How is the age calculated?", "a": "Whole years first, then whole months, then the remaining days — the same way a person states an age. Totals in days, weeks and months are computed separately from the day difference, so they are consistent with the calendar result."},
+        {"q": "Are leap years handled?", "a": "Yes. February 29 birthdays and 366-day years are counted by real calendar arithmetic, not by a fixed 365-day year."},
+        {"q": "Is the date of birth uploaded?", "a": "No. The calculation runs in your browser tab and the date is not stored, logged or sent anywhere."},
+    ])
+add("date-duration-calculator", "Date & Duration Calculator", "productivity", "local", "date_duration",
+    "Add or subtract days, weeks, months and years from a date, or measure the exact duration between two dates.",
+    ["date", "duration", "add days", "date difference", "leap year", "calculator"],
+    [("action", "Calculation", "select", "difference", True,
+      {"difference": "Duration between two dates", "add": "Add to a date", "subtract": "Subtract from a date"}),
+     ("startDate", "Start date", "text", "2026-01-31", True, None, "ISO 8601 (YYYY-MM-DD) or DD/MM/YYYY."),
+     ("endDate", "End date", "text", "2026-12-31", False, None, "Used for the duration between two dates."),
+     ("amount", "Amount", "number", "30", False, None, "Used when adding or subtracting."),
+     ("unit", "Unit", "select", "days", True,
+      {"days": "Days", "weeks": "Weeks", "months": "Months", "years": "Years"})])
+add("percentage-calculator", "Percentage & Rate Calculator", "productivity", "local", "percentage",
+    "Percentage increase or decrease, percentage difference, reverse percentage and rate calculations.",
+    ["percentage", "percent", "increase", "decrease", "reverse percentage", "rate", "calculator"],
+    [("action", "Calculation", "select", "change", True,
+      {"change": "Percentage increase / decrease", "of": "What is X% of Y", "isWhat": "X is what % of Y",
+       "reverse": "Reverse percentage (find the original)", "difference": "Percentage difference"}),
+     ("from", "From / original value", "text", "1200", True),
+     ("to", "To / new value", "text", "1500", False),
+     ("percent", "Percentage (%)", "text", "15", False),
+     ("value", "Value", "text", "250", False)])
+DATA_UNIT_CHOICES = {
+    "bit": "bit", "B": "B (byte)",
+    "kB": "kB (1000 B)", "MB": "MB (1000 kB)", "GB": "GB (1000 MB)", "TB": "TB (1000 GB)", "PB": "PB (1000 TB)",
+    "KiB": "KiB (1024 B)", "MiB": "MiB (1024 KiB)", "GiB": "GiB (1024 MiB)",
+    "TiB": "TiB (1024 GiB)", "PiB": "PiB (1024 TiB)",
+}
+
+add("unit-data-converter", "Unit & Data Conversion Calculator", "developer", "local", "unit_data",
+    "Convert storage and data units between binary (KiB, MiB, GiB) and decimal (KB, MB, GB) systems.",
+    ["unit", "converter", "bytes", "kibibyte", "mebibyte", "gibibyte", "storage", "data", "binary", "decimal"],
+    [("amount", "Amount", "text", "1", True),
+     ("fromUnit", "From unit", "select", "GiB", True, DATA_UNIT_CHOICES),
+     ("toUnit", "To unit", "select", "GB", True, DATA_UNIT_CHOICES),
+     ("precision", "Decimal places", "number", "6", False, None, "0 to 15. Defaults to 6.")],
+    description=(
+        "Converts data and storage quantities between the binary units a kernel reports (KiB, MiB, "
+        "GiB, TiB, PiB — powers of 1024) and the decimal units a vendor labels a drive with (kB, MB, "
+        "GB, TB, PB — powers of 1000), plus bits and bytes. Every conversion is done in exact "
+        "integer-byte arithmetic where the value allows, so a 4 TiB volume and a 4 TB drive show the "
+        "10% difference that is actually there instead of being rounded away. The result names both "
+        "systems so an infrastructure figure cannot be misread."
+    ))
+add("unix-timestamp-calculator", "Timestamp / Unix Time Calculator", "developer", "local", "unix_timestamp",
+    "Convert Unix timestamps to and from human-readable dates in seconds or milliseconds, with UTC and ISO 8601.",
+    ["unix", "timestamp", "epoch", "iso 8601", "utc", "timezone", "converter", "calculator"],
+    [("action", "Direction", "select", "decode", True,
+      {"decode": "Timestamp → date/time", "encode": "Date/time → timestamp", "now": "Current timestamp"}),
+     ("timestamp", "Unix timestamp", "text", "1767225600", False, None, "Seconds or milliseconds — the tool detects which."),
+     ("datetime", "Date and time", "text", "2026-01-01T00:00:00Z", False, None, "ISO 8601, or YYYY-MM-DD HH:MM:SS."),
+     ("zone", "Time zone", "select", "utc", True, {"utc": "UTC", "local": "My local time zone"})])
+
+add("api-key-generator", "API Key / Token Generator", "cybersecurity", "local", "api_key_generate",
+    "Cryptographically secure API keys and bearer tokens with a prefix, a chosen alphabet and bulk output.",
+    ["api key", "token", "bearer", "secret", "random", "generator", "cryptography"],
+    [("prefix", "Prefix", "text", "ch247", False, None, "Optional. Separated from the secret with an underscore."),
+     ("length", "Secret length", "number", "40", True, None, "16 to 256 characters of secret, excluding the prefix."),
+     ("alphabet", "Character set", "select", "base62", True,
+      {"base62": "A–Z a–z 0–9 (URL-safe)", "hex": "0–9 a–f (hex)", "base32": "A–Z 2–7 (Crockford-safe)",
+       "urlsafe": "A–Z a–z 0–9 - _ (base64url)", "digits": "0–9 only"}),
+     ("count", "How many", "number", "1", True, None, "1 to 100.")],
+    sensitive=True,
+    description=(
+        "Generates secrets from the browser's cryptographic random source (window.crypto) — never "
+        "Math.random — with rejection sampling so every character in the chosen alphabet is equally "
+        "likely and no modulo bias is introduced. Choose a prefix, a length and a character set, and "
+        "generate one key or a batch. The estimated entropy in bits is reported so a weak choice is "
+        "visible before you deploy it. Privacy: keys are created in your browser tab, are not sent to "
+        "CloudHost247, are not written to logs or analytics, are not placed in a URL and are not "
+        "persisted — closing the tab discards them. Scope: this generates random material. It does "
+        "not register, validate or rotate a key in any service."
+    ),
+    faq_items=[
+        {"q": "Is the randomness suitable for secrets?", "a": "It uses window.crypto.getRandomValues, the browser's CSPRNG, with rejection sampling to avoid modulo bias. If your browser has no CSPRNG the tool refuses to run rather than falling back to Math.random."},
+        {"q": "Are the keys stored anywhere?", "a": "No. They exist in this tab only, are not uploaded, not logged, not added to a URL and not written to local storage. Copy them now; refreshing discards them."},
+        {"q": "Does this make my API secure?", "a": "No. It produces random material. Transport security, storage at rest, rotation, scoping and revocation are your service's responsibility."},
+    ])
+add("checksum-hash-generator", "Checksum / Hash Generator", "cybersecurity", "local", "checksum_hash",
+    "SHA-256, SHA-384, SHA-512, SHA-1 and MD5 digests of text or a file, computed in your browser.",
+    ["hash", "checksum", "sha256", "sha384", "sha512", "sha1", "md5", "digest", "integrity", "generator"],
+    [("source", "Input", "select", "text", True, {"text": "Text", "file": "File"}),
+     ("text", "Text to hash", "textarea", "Text to hash", False),
+     ("file", "File to hash", "file", "", False, None, "Read in this browser tab; never uploaded."),
+     ("algorithm", "Algorithm", "select", "sha256", True,
+      {"sha256": "SHA-256 (recommended)", "sha384": "SHA-384", "sha512": "SHA-512",
+       "sha1": "SHA-1 (compatibility only)", "md5": "MD5 (legacy checksum only)"})],
+    description=(
+        "Computes cryptographic digests with the Web Crypto API in your browser tab. SHA-256, SHA-384 "
+        "and SHA-512 are the recommended choices. SHA-1 is offered only for compatibility with systems "
+        "that still publish SHA-1 fingerprints, and is labelled as such. MD5 is offered strictly as a "
+        "legacy checksum for file identity against an older manifest: it is broken for collision "
+        "resistance and must not be used for signatures, certificates or passwords. Output is hex and "
+        "Base64. Files are read locally and are never uploaded."
+    ),
+    faq_items=[
+        {"q": "Where is the file read?", "a": "In your browser tab, through the File API. It is streamed into the Web Crypto digest and never leaves your machine."},
+        {"q": "Can I use MD5 for security?", "a": "No. MD5 collisions are practical. Use it only to compare against an older manifest that publishes MD5, and treat a match as weak evidence."},
+        {"q": "Does a matching checksum prove a file is safe?", "a": "No. A digest proves the bytes are the same as the bytes that produced the reference digest. It says nothing about whether those bytes are trustworthy — that depends on where the reference digest came from."},
+    ])
+add("json-formatter", "JSON Formatter / Generator", "developer", "local", "json_format",
+    "Format, minify and validate JSON with precise syntax error positions. Nothing is uploaded.",
+    ["json", "formatter", "beautify", "minify", "validate", "syntax error", "generator"],
+    [("action", "Action", "select", "format", True,
+      {"format": "Format (pretty-print)", "minify": "Minify", "validate": "Validate only"}),
+     ("text", "JSON", "textarea", '{"service":"example","enabled":true}', True),
+     ("indent", "Indent", "select", "2", True, {"2": "2 spaces", "4": "4 spaces", "tab": "Tab"})],
+    description=(
+        "Parses JSON in your browser tab and re-emits it formatted, minified or simply validated. "
+        "Invalid input produces the parser's message together with the line, the column and the "
+        "offending fragment, so a syntax error can be found without counting braces by hand. "
+        "Formatting preserves key order and value types; numbers that the parser would lose precision "
+        "on (beyond 2^53) are reported rather than silently rewritten. The result can be copied or "
+        "downloaded, and nothing is sent to CloudHost247."
+    ))
+add("http-security-headers-generator", "HTTP Security Headers Generator", "cybersecurity", "local", "http_security_headers",
+    "Build a reviewed set of HTTP security headers and export it for nginx, Apache, .htaccess or Cloudflare.",
+    ["security headers", "csp", "hsts", "x-frame-options", "referrer-policy", "permissions-policy", "nginx", "apache", "generator"],
+    [("server", "Output format", "select", "nginx", True,
+      {"nginx": "nginx", "apache": "Apache (.htaccess)", "caddy": "Caddy", "cloudflare": "Cloudflare Transform Rules", "raw": "Plain header list"}),
+     ("csp", "Content-Security-Policy", "select", "strict", True,
+      {"strict": "Strict — self only, no inline", "balanced": "Balanced — self plus inline styles",
+       "off": "Omit the header"}),
+     ("hsts", "Strict-Transport-Security", "select", "oneyear", True,
+      {"oneyear": "1 year + includeSubDomains + preload", "sixmonths": "180 days + includeSubDomains", "off": "Omit"}),
+     ("frame", "Frame / embedding protection", "select", "deny", True,
+      {"deny": "Deny all framing", "sameorigin": "Same origin only", "off": "Omit"}),
+     ("referrerpolicy", "Referrer-Policy", "select", "strict-origin-when-cross-origin", True,
+      {"no-referrer": "no-referrer", "strict-origin-when-cross-origin": "strict-origin-when-cross-origin",
+       "same-origin": "same-origin"}),
+     ("permissions", "Permissions-Policy", "select", "restrictive", True,
+      {"restrictive": "Restrict camera, microphone, geolocation, payment, usb", "off": "Omit"}),
+     ("cookies", "Assume cookies with SameSite + Secure", "select", "yes", True, {"yes": "Yes", "no": "No"}),
+     ("domain", "Site domain", "text", "example.com", False, None, "Optional. Used for the HSTS preload note only.")],
+    description=(
+        "Assembles a coherent set of response headers — Content-Security-Policy, "
+        "Strict-Transport-Security, X-Content-Type-Options, Referrer-Policy, Permissions-Policy and "
+        "frame protection — and emits them in the syntax the chosen server actually accepts. The "
+        "choices are deliberately narrow: a strict CSP that will work on a site with no inline script, "
+        "a balanced one for a site that still has inline styles, or none. The tool is configuration "
+        "assistance. It does not scan your site, does not test the policy and does not tell you "
+        "whether your application is secure; deploy the output to a staging host first and watch the "
+        "console for violations."
+    ),
+    faq_items=[
+        {"q": "Will a strict CSP break my site?", "a": "It can. A self-only policy with no unsafe-inline blocks inline script and style attributes. Test on staging, or start with Content-Security-Policy-Report-Only and read the violation reports before enforcing."},
+        {"q": "Does this verify my headers?", "a": "No. It generates configuration. To verify what a host actually sends, use the HTTP Headers Checker tool in this catalogue."},
+        {"q": "Should I enable HSTS preload immediately?", "a": "Only when every host and subdomain serves valid HTTPS and will do so permanently. Preload submission is effectively irreversible for months."},
+    ])
+add("password-policy-generator", "Password Policy Generator", "cybersecurity", "local", "password_policy",
+    "Produce a documented password and authentication policy from the controls you select, ready to publish.",
+    ["password policy", "mfa", "lockout", "password history", "session", "compliance", "documentation", "generator"],
+    [("minLength", "Minimum length", "number", "14", True, None, "6 to 128."),
+     ("mfa", "Multi-factor authentication", "select", "required", True,
+      {"required": "Required for every account", "privileged": "Required for privileged accounts only", "optional": "Recommended, not enforced"}),
+     ("lockoutThreshold", "Failed attempts before lockout", "number", "5", True, None, "0 disables lockout."),
+     ("lockoutMinutes", "Lockout duration (minutes)", "number", "15", True),
+     ("history", "Remembered previous passwords", "number", "5", True, None, "0 to 24."),
+     ("maxAgeDays", "Maximum password age (days)", "number", "0", True, None, "0 means no scheduled expiry."),
+     ("sessionMinutes", "Idle session timeout (minutes)", "number", "30", True),
+     ("breachCheck", "Screen new passwords against breached-password lists", "select", "yes", True, {"yes": "Yes", "no": "No"}),
+     ("complexity", "Composition rules", "select", "length", True,
+      {"length": "Length only — NIST SP 800-63B aligned", "classes": "Require upper, lower, digit and symbol"}),
+     ("storage", "Password storage", "select", "argon2", True,
+      {"argon2": "Argon2id", "scrypt": "scrypt", "pbkdf2": "PBKDF2-SHA-256 (high iteration count)"})],
+    description=(
+        "Turns the controls you select into a plain-language policy document you can hand to an "
+        "auditor, publish in a wiki or attach to an onboarding pack: minimum length, composition, "
+        "multi-factor scope, lockout and rate limiting, password history, maximum age, session "
+        "timeout, storage algorithm and the review cadence that follows from those choices. Each "
+        "section states what the control does and what it does not do. The guidance is aligned with "
+        "NIST SP 800-63B and OWASP ASVS reasoning rather than legacy complexity rules, and the output "
+        "says so. This is policy authoring — it does not configure an identity provider and it does "
+        "not verify that your systems enforce what the document says."
+    ),
+    faq_items=[
+        {"q": "Does this certify my compliance?", "a": "No. It writes down the controls you chose in a form an auditor can read. Certification requires your systems to enforce them and evidence that they do."},
+        {"q": "Why is complexity optional?", "a": "NIST SP 800-63B recommends length and breach screening over forced character classes, which push people towards predictable substitutions. The generator offers both and states the trade-off in the document it produces."},
+    ])
+add("dns-record-generator", "DNS / Domain Configuration Generator", "dns", "local", "dns_record_generate",
+    "Build A, AAAA, CNAME, MX, TXT, SPF, DMARC and DKIM records from the values you supply, with format validation.",
+    ["dns", "records", "zone file", "a", "aaaa", "cname", "mx", "txt", "spf", "dmarc", "dkim", "generator"],
+    [("domain", "Domain", "text", "example.com", True),
+     ("defaultTtl", "Default TTL (seconds)", "number", "3600", True, None, "60 to 86400."),
+     ("aRecords", "A records (name = IPv4, one per line)", "textarea", "@ = 203.0.113.10", False),
+     ("aaaaRecords", "AAAA records (name = IPv6, one per line)", "textarea", "", False),
+     ("cnameRecords", "CNAME records (name = target, one per line)", "textarea", "www = example.com.", False),
+     ("mxRecords", "MX records (priority host, one per line)", "textarea", "10 mail.example.com.", False),
+     ("txtRecords", "TXT records (name = value, one per line)", "textarea", "", False),
+     ("spfIncludes", "SPF include hosts", "text", "_spf.example.net", False, None, "Space or comma separated."),
+     ("spfPolicy", "SPF terminal policy", "select", "-all", True, {"-all": "-all (hard fail)", "~all": "~all (soft fail)", "?all": "?all (neutral)"}),
+     ("dmarcPolicy", "DMARC policy", "select", "none", True, {"none": "none", "quarantine": "quarantine", "reject": "reject"}),
+     ("dmarcRua", "DMARC aggregate report address", "text", "dmarc@example.com", False),
+     ("dkimSelector", "DKIM selector", "text", "", False, None, "Only used if you also supply the public key."),
+     ("dkimPublicKey", "DKIM public key (base64, p= value)", "textarea", "", False),
+     ("format", "Output format", "select", "zone", True,
+      {"zone": "BIND zone file", "json": "Structured JSON", "cloudflare": "Cloudflare import CSV"})],
+    description=(
+        "Assembles a DNS configuration from values you supply and refuses to invent any of them. "
+        "Every record is validated before output: IPv4 and IPv6 literals are parsed properly, a "
+        "CNAME target must be a hostname and cannot coexist with another record at the same name, an "
+        "MX host must not be an address literal, SPF is checked against the 10-DNS-lookup limit for "
+        "the mechanisms you list, DMARC is checked for the required v=DMARC1 and p= tags, and a DKIM "
+        "record is emitted only when both a selector and a public key are present. Nothing is "
+        "published: the output is a BIND zone fragment, structured JSON or a Cloudflare import CSV "
+        "for you to review and apply."
+    ),
+    faq_items=[
+        {"q": "Does this change my DNS?", "a": "No. It produces text for you to review and publish. No request is made to any registrar, DNS provider or resolver."},
+        {"q": "Will it fill in values I leave out?", "a": "No. An empty field produces no record. DKIM in particular is emitted only when you supply both the selector and the public key, because a guessed key would be worse than none."},
+    ])
+
+COLLECTIONS = [
+    {
+        "slug": "compliance-documents",
+        "name": "Compliance & Document Tools",
+        "path": "/tools/compliance-documents",
+        "summary": "Professional utilities for identity-document formatting, validation, security, developer workflows and infrastructure configuration.",
+        "description": (
+            "A working set of calculators and generators for identity-document formatting, secret "
+            "generation, developer data handling and infrastructure configuration. Every tool runs in "
+            "your browser tab: passwords, tokens, hashes and document fields are never uploaded, "
+            "logged or stored by CloudHost247. Each tool states what it actually verifies — generation, "
+            "validation or configuration assistance — and none of them claim to authenticate a "
+            "document, certify a compliance programme or prove that a system is secure."
+        ),
+        "seoTitle": "Compliance & Document Tools — MRZ, Security & Developer Utilities | CloudHost247",
+        "seoDescription": (
+            "Professional utilities for identity-document formatting, validation, security, developer "
+            "workflows and infrastructure configuration. Five calculators and twelve generators, all "
+            "processed in your browser."
+        ),
+        "keywords": ["compliance tools", "document tools", "mrz", "generators", "calculators", "identity document", "security"],
+        "groups": [
+            {"slug": "identity", "label": "Identity & Document",
+             "blurb": "Machine-readable document formatting and the date arithmetic identity checks depend on.",
+             "tools": ["mrz-generator", "age-date-calculator", "date-duration-calculator"]},
+            {"slug": "security", "label": "Security & Secrets",
+             "blurb": "Random material, digests and written policy — generated locally, never uploaded.",
+             "tools": ["random-password-generator", "api-key-generator", "password-policy-generator",
+                        "http-security-headers-generator", "checksum-hash-generator"]},
+            {"slug": "developer", "label": "Developer",
+             "blurb": "Identifiers, encodings and structured data for build and debug workflows.",
+             "tools": ["uuid-generator", "base64-generator", "json-formatter", "qr-code-generator"]},
+            {"slug": "calculators", "label": "Calculators & Conversion",
+             "blurb": "Exact arithmetic for percentages, data units and machine time.",
+             "tools": ["percentage-calculator", "unit-data-converter", "unix-timestamp-calculator"]},
+            {"slug": "infrastructure", "label": "Infrastructure & Domains",
+             "blurb": "Configuration output for DNS zones and crawler directives.",
+             "tools": ["dns-record-generator", "robots-txt-generator"]},
+        ],
+    },
+]
+COLLECTION_BY_TOOL = {slug: c["slug"] for c in COLLECTIONS for g in c["groups"] for slug in g["tools"]}
+
+
 add("smtp-test", "SMTP Test", "developer", "server", "smtp",
     "Connect to a public mail server, read the banner and send EHLO. Passwords are not accepted.",
     ["smtp", "email", "banner"], [("host", "Mail host", "text", "mail.example.com", True), ("port", "Port", "select", "25", True)])
@@ -298,8 +605,30 @@ add("serp-simulator", "Google SERP Simulator", "webmaster", "local", "serp",
     "Preview how a title and description may truncate. This is not a ranking prediction.",
     ["serp", "seo", "preview"], [("title", "Title", "text", "Example page title", True), ("url", "URL", "url", "https://example.com/page", True), ("description", "Description", "textarea", "A short description.", True)])
 add("robots-txt-generator", "Robots.txt Generator", "webmaster", "local", "robots",
-    "Build a robots.txt draft from the paths and agents you enter.",
-    ["robots", "seo", "generator"], [("agent", "User-agent", "text", "*", True), ("disallow", "Disallow paths", "textarea", "/admin/", False), ("sitemap", "Sitemap URL", "url", "https://example.com/sitemap.xml", False)])
+    "Build a valid robots.txt from your user-agent rules, allow and disallow paths, crawl-delay and sitemap URLs.",
+    ["robots", "robots.txt", "seo", "crawler", "user-agent", "sitemap", "crawl-delay", "generator"],
+    [("agent", "User-agent (one per line)", "textarea", "*", True,
+     None, "Use * for every crawler, or one token per line, e.g. Googlebot, Bingbot."),
+     ("disallow", "Disallow paths (one per line)", "textarea", "/admin/", False),
+     ("allow", "Allow paths (one per line)", "textarea", "", False,
+     None, "An Allow inside a Disallowed directory re-opens that path. Most crawlers honour it."),
+     ("crawlDelay", "Crawl-delay (seconds)", "number", "", False, None,
+      "Optional. Googlebot ignores this directive; Bing and Yandex honour it."),
+     ("sitemap", "Sitemap URLs (one per line)", "textarea", "https://example.com/sitemap.xml", False),
+     ("noindexNote", "Warn about noindex in robots.txt", "select", "yes", True, {"yes": "Yes", "no": "No"})],
+    description=(
+        "Assembles a robots.txt file from the rules you enter and validates them as it goes: each "
+        "Disallow and Allow path must start with a forward slash, a sitemap must be an absolute "
+        "http(s) URL, and a crawl-delay must be a positive number of seconds. Multiple user-agents "
+        "share one rule block, which is what the specification expects. The preview is the exact file "
+        "text you can download and publish. Scope: this writes crawl guidance for cooperating "
+        "crawlers. It is not an access control, it does not hide anything from a client that ignores "
+        "it, and it does not verify how a search engine currently treats your site."
+    ),
+    faq_items=[
+        {"q": "Does robots.txt keep a page private?", "a": "No. It is a request that cooperating crawlers honour, and it is public. Anything that must stay private needs authentication. A Disallow can also keep a page out of your own view of the index while other sites still link to it."},
+        {"q": "Does every crawler support crawl-delay?", "a": "No. Googlebot ignores it; Bing and Yandex honour it. The generator notes this next to the value."},
+    ])
 add("port-checker", "Port Checker", "network", "server", "port",
     "Test one TCP port on a public host. Private and metadata addresses are refused.",
     ["port", "tcp", "network"], [("host", "Public host or IP", "text", "example.com", True), ("port", "Port", "number", "443", True)], featured=True)
@@ -319,17 +648,57 @@ add("password-encryption", "Password Encryption", "cybersecurity", "local", "pas
     "Derive a hash in your browser with SHA-256 or PBKDF2. The value is never uploaded or stored.",
     ["password", "hash", "pbkdf2"], [("password", "Password", "password", "", True), ("algo", "Algorithm", "select", "pbkdf2", True)], sensitive=True)
 add("random-password-generator", "Random Password Generator", "cybersecurity", "local", "password_generate",
-    "Generate a password with the Web Crypto random source. It stays in your browser.",
-    ["password", "generator", "random"], [("length", "Length", "number", "20", True), ("symbols", "Include symbols", "select", "yes", True)], sensitive=True)
+    "Generate a password or passphrase with the Web Crypto random source, with an entropy estimate. It stays in your browser.",
+    ["password", "generator", "random", "passphrase", "entropy", "secure"],
+    [("kind", "Type", "select", "password", True,
+      {"password": "Random password", "passphrase": "Random passphrase (diceware-style words)"}),
+     ("length", "Length / words", "number", "20", True, None,
+      "Password: 8 to 128 characters. Passphrase: 3 to 12 words."),
+     ("uppercase", "Uppercase A–Z", "select", "yes", True, {"yes": "Yes", "no": "No"}),
+     ("lowercase", "Lowercase a–z", "select", "yes", True, {"yes": "Yes", "no": "No"}),
+     ("numbers", "Digits 0–9", "select", "yes", True, {"yes": "Yes", "no": "No"}),
+     ("symbols", "Symbols", "select", "yes", True, {"yes": "Yes", "no": "No"}),
+     ("unambiguous", "Exclude look-alike characters (I l 1 O 0)", "select", "no", True, {"yes": "Yes — drop I l 1 O 0", "no": "No — use the full alphabet"}),
+     ], sensitive=True,
+    description=(
+        "Builds passwords and passphrases from window.crypto.getRandomValues with rejection sampling, "
+        "so every character in the enabled sets is equally likely and no modulo bias is introduced. "
+        "Choose the character classes, optionally drop look-alike characters (I, l, 1, O, 0), or "
+        "switch to a passphrase of words from a built-in list. The estimated entropy in bits is "
+        "reported against the actual alphabet used, so a weak configuration is visible before you "
+        "rely on it. Privacy: values are generated in your browser tab, are not uploaded, logged, "
+        "placed in a URL or persisted, and are discarded when you leave the page."
+    ),
+    faq_items=[
+        {"q": "Is the randomness cryptographically secure?", "a": "Yes. It uses the browser CSPRNG with rejection sampling. If the browser exposes no CSPRNG the tool refuses to run instead of falling back to a predictable source."},
+        {"q": "Are passwords ever sent to CloudHost247?", "a": "No. There is no network request in this handler. Nothing is written to logs, analytics, local storage or a URL."},
+        {"q": "Is a passphrase weaker than a password?", "a": "Not necessarily, and the tool tells you rather than guessing: it reports the entropy of exactly what it produced. Each word is drawn from a built-in 368-word list, which is about 8.5 bits per word, so seven words is roughly 60 bits and five words is about 43. The estimate assumes the list is public, because it is."},
+    ])
 add("password-strength-checker", "Password Strength Checker", "cybersecurity", "local", "password_strength",
     "Score a password locally for length and character variety. It is not checked against breach lists.",
     ["password", "strength"], [("password", "Password", "password", "", True)], sensitive=True)
 add("qr-code-generator", "QR Code Generator", "productivity", "local", "qr_generate",
-    "Create a QR code in your browser and download the image. The text is not stored.",
-    ["qr", "generator"], TXT("Content", "https://example.com"), featured=True)
+    "Encode text or a URL into a QR code in your browser, with an error-correction level and a PNG or SVG download.",
+    ["qr", "generator", "barcode", "error correction", "png", "svg"],
+    TXT("Content", "https://example.com") + [
+        ("ecl", "Error correction", "select", "M", True,
+         {"L": "L — about 7% recovery", "M": "M — about 15% recovery",
+          "Q": "Q — about 25% recovery", "H": "H — about 30% recovery"},
+         "Higher levels survive more damage and leave room for a centre logo, at the cost of density."),
+        ("size", "Image size (px)", "number", "320", False, None, "128 to 1024. Defaults to 320."),
+        ("output", "Output", "select", "png", True, {"png": "PNG image", "svg": "SVG vector"}),
+    ], featured=True,
+    description=(
+        "Encodes the text or URL you enter into a QR symbol with a real Reed\u2013Solomon encoder in "
+        "your browser tab \u2014 no image is requested from a third party and the content is never "
+        "uploaded. Choose the error-correction level (L, M, Q or H) to trade density against damage "
+        "resistance, choose a pixel size, and download the result as PNG or SVG. The symbol version "
+        "and module count reported come from the encoder itself, so you can see whether the payload "
+        "actually fits."
+    ))
 add("qr-scanner", "QR Scanner", "productivity", "local", "qr_scan",
     "Decode a QR image locally. Decoded links are shown as text and are not opened automatically.",
-    ["qr", "scanner"], [("file", "QR image", "file", "", True)])
+    ["qr", "scanner"], [("file", "QR image", "file", "", True, None, "Read and decoded in this browser; the image is not uploaded.", "image/*")])
 add("lorem-ipsum-generator", "Lorem Ipsum Generator", "productivity", "local", "lorem",
     "Generate placeholder paragraphs. The text is filler, not product copy.",
     ["lorem", "placeholder"], [("paragraphs", "Paragraphs", "number", "3", True)])
@@ -396,7 +765,23 @@ add("srv-lookup", "SRV Lookup", "dns", "server", "dns_lookup", "Look up SRV serv
 add("ptr-lookup", "PTR Lookup", "dns", "server", "ip_hostname", "Look up the reverse DNS pointer for an IP address.", ["ptr", "dns", "reverse"], IP)
 add("a-record-lookup", "A Record Lookup", "dns", "server", "dns_lookup", "Look up IPv4 address records for a hostname.", ["a", "dns", "ipv4"], D, {"type": "A"})
 add("aaaa-lookup", "AAAA Lookup", "dns", "server", "dns_lookup", "Look up IPv6 address records for a hostname.", ["aaaa", "dns", "ipv6"], D, {"type": "AAAA"})
-add("uuid-generator", "UUID Generator", "developer", "local", "uuid", "Generate version-4 UUIDs with the cryptographic random source in your browser.", ["uuid", "generator"], [("count", "How many", "number", "1", True)])
+add("uuid-generator", "UUID Generator", "developer", "local", "uuid",
+    "Generate UUIDv4, time-ordered UUIDv7 or nil UUIDs in bulk from the browser's cryptographic random source.",
+    ["uuid", "generator", "uuidv4", "uuidv7", "guid", "bulk"],
+    [("version", "Version", "select", "v4", True,
+      {"v4": "v4 — random", "v7": "v7 — time-ordered (sortable)", "nil": "Nil UUID (all zeros)"},
+      "v7 embeds a 48-bit Unix millisecond timestamp, so identifiers sort by creation time."),
+     ("count", "How many", "number", "1", True, None, "1 to 1000."),
+     ("format", "Format", "select", "standard", True,
+      {"standard": "8-4-4-4-12 hyphenated", "hex": "Hex, no hyphens", "braces": "{8-4-4-4-12}",
+       "urn": "urn:uuid:8-4-4-4-12", "upper": "Uppercase hyphenated"})],
+    description=(
+        "Generates UUIDs from window.crypto \u2014 never Math.random \u2014 with the version and variant "
+        "bits set correctly for the layout you choose. v4 carries 122 bits of randomness. v7 places a "
+        "48-bit Unix millisecond timestamp in the high bits so identifiers sort by creation time, "
+        "which matters for database primary keys and log correlation. Generate one or a thousand, "
+        "then copy or download the list. Nothing is uploaded and nothing is stored."
+    ))
 add("domain-whois", "Domain WHOIS", "dns", "server", "domain_whois", "Look up domain registration data through RDAP and label the source.", ["whois", "rdap", "domain"], D, featured=True)
 add("spf-record-generator", "SPF Record Generator", "dns", "local", "spf_generate", "Draft an SPF TXT value from the mechanisms you choose. It is not published automatically.", ["spf", "generator"], [("includes", "Include hosts", "text", "_spf.example.com", False), ("policy", "Terminal policy", "select", "-all", True)])
 
@@ -415,6 +800,27 @@ def faq(tool):
         {"q": "Is my input stored?", "a": f"Processing happens {where}. Sensitive values are not written to logs."},
         {"q": "Does a result guarantee the rest of the internet sees the same thing?", "a": "No. A result describes this check at this time. DNS and geolocation answers can differ by resolver and provider."},
     ]
+
+
+def build_input(spec):
+    """(name, label, type, placeholder, required[, choices[, hint]]) → catalogue input.
+
+    `choices` makes a select self-describing: the options live with the field that uses them
+    instead of in a name-keyed table in the view, so two tools can both have a `mode` select
+    without one inheriting the other's options. `hint` is rendered next to the control.
+    """
+    name, label, kind, placeholder, required = spec[:5]
+    choices = spec[5] if len(spec) > 5 else None
+    hint = spec[6] if len(spec) > 6 else None
+    accept = spec[7] if len(spec) > 7 else None
+    field = {"name": name, "label": label, "type": kind, "placeholder": placeholder, "required": required}
+    if choices:
+        field["choices"] = dict(choices)
+    if hint:
+        field["hint"] = hint
+    if accept:
+        field["accept"] = accept
+    return field
 
 
 def build_tools():
@@ -438,16 +844,14 @@ def build_tools():
             "mode": tool["mode"],
             "handler": tool["handler"],
             "options": tool["options"],
-            "inputs": [
-                {"name": n, "label": label, "type": kind, "placeholder": ph, "required": req}
-                for n, label, kind, ph, req in tool["inputs"]
-            ],
+            "inputs": [build_input(spec) for spec in tool["inputs"]],
             "relatedTools": [],
             "services": [{"label": label, "url": url} for label, url in SERVICES[cat]],
             "faq": tool["faq"] or faq(tool),
             "badge": "Browser-only" if tool["mode"] == "local" else "Live check",
             "featured": tool["featured"],
             "sensitive": tool["sensitive"],
+            "collection": COLLECTION_BY_TOOL.get(tool["slug"], ""),
             "enabled": True,
         }
         tools.append(item)
@@ -529,6 +933,22 @@ def write_pages(site):
             "related": related,
             "slug": slug,
         }
+
+
+def collection_nav_links():
+    """Tools-menu entries for the curated collections: the hub page, then its flagship tool."""
+    pairs = []
+    for collection in COLLECTIONS:
+        pairs.append((collection["name"], collection["path"].lstrip("/")))
+        for group in collection["groups"]:
+            for slug in group["tools"]:
+                if slug == "mrz-generator":
+                    pairs.append(("MRZ Generator", "tools/mrz-generator"))
+                    break
+            else:
+                continue
+            break
+    return pairs
 
 
 def navigation(tools):
@@ -616,6 +1036,7 @@ def navigation(tools):
             ])},
         ]},
         {"title": "Tools", "description": "Free professional tools for DNS, networking, developers, security and webmasters.", "groups": [
+            {"title": "Compliance & Document", "links": links(collection_nav_links())},
             {"title": "Featured", "links": links(featured)},
             *groups,
         ]},
@@ -634,10 +1055,12 @@ def navigation(tools):
 
 
 def footer(existing, tools):
-    featured = [("DNS Checker", "tools/dns-checker"), ("DNS Lookup", "tools/dns-lookup"), ("IP WHOIS", "tools/ip-whois"),
+    featured = [("Compliance & Document Tools", "tools/compliance-documents"),
+                ("MRZ Generator", "tools/mrz-generator"),
+                ("DNS Checker", "tools/dns-checker"), ("DNS Lookup", "tools/dns-lookup"), ("IP WHOIS", "tools/ip-whois"),
                 ("SSL Checker", "tools/ssl-certificate-checker"), ("Port Checker", "tools/port-checker"),
                 ("JSON Beautifier", "tools/json-beautifier"), ("QR Generator", "tools/qr-code-generator"),
-                ("MRZ Generator / MRZ Tools", "tools/mrz-generator"), ("Speed Test", "tools/internet-speed-test")]
+                ("Speed Test", "tools/internet-speed-test")]
     tool_links = [{"label": "All Tools", "url": "tools"}]
     for slug, label in CATEGORIES.items():
         tool_links.append({"label": label + " Tools", "url": "tools/category/" + slug})
@@ -657,7 +1080,8 @@ def footer(existing, tools):
 
 def main():
     tools = build_tools()
-    public = {"generatedFrom": "scripts/generate-global-platform.py", "categories": CATEGORIES, "tools": tools}
+    public = {"generatedFrom": "scripts/generate-global-platform.py", "categories": CATEGORIES,
+              "collections": COLLECTIONS, "tools": tools}
     PUBLIC.write_text(json.dumps(public, indent=2) + "\n")
     INDEX.parent.mkdir(parents=True, exist_ok=True)
     INDEX.write_text(json.dumps({"count": len(tools), "required": REQUIRED_SLUGS, "slugs": [t["slug"] for t in tools]}, indent=2) + "\n")
