@@ -76,7 +76,7 @@ tables.php,,,,internal,,,n/a,n/a,,,False
 terms-of-service.php,/terms-of-service.php,Terms of Service,Legal,published,cloudhost247-page,security/security,present,no seo_description,company / Legal & trust | legal / Legal & Policy Center,Legal,True
 tools-sitemap.php,,,,internal,,,n/a,n/a,,,False
 trademark-policy.php,/trademark-policy.php,Trademark Policy,Legal,published,cloudhost247-page,security/security,present,no seo_description,company / Legal & trust | legal / Legal & Policy Center,Legal,True
-vps-hosting.php,/vps-hosting.php,VPS Hosting,VPS,published,cloudhost247-page,cloud/vps,present,ok,cloud / Cloud | cloud / Servers,Cloud & Servers | Products,True
+vps-hosting.php,/vps-hosting.php,VPS Hosting,VPS,published,cloudhost247-page,cloud/vps,present,ok,cloud / Servers,Cloud & Servers | Products,True
 vps-privatecloud.php,/vps-privatecloud.php,Private Cloud,Cloud,published,cloudhost247-page,cloud/private-cloud,present,ok,cloud / Cloud,Cloud & Servers,True
 vps-publiccloud.php,/vps-publiccloud.php,Public Cloud,Cloud,published,cloudhost247-page,cloud/public-cloud,present,ok,cloud / Cloud,Cloud & Servers,True
 web-hosting.php,/web-hosting.php,Web Hosting,Hosting,published,cloudhost247-page,hosting/web-hosting,present,ok,hosting / Web hosting,Products,True

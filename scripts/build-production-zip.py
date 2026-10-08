@@ -173,11 +173,49 @@ def verify(archive_path: Path, log) -> int:
                 failures.append(f'missing required file: {required}')
 
         # Every illustration the website references must be inside the archive.
+        #
+        # Counting files is not the same check. A build whose `public/media` is one generation
+        # behind still has a media directory and still passes a count — it is simply missing the
+        # pages' artwork, which is exactly how a product page ships with a broken image. So each
+        # visual the theme registry names is resolved by name, against both the built SPA tree and
+        # the PHP theme's own copy of the library.
         media = destination / 'cloudhost247-node' / 'public' / 'media' / 'cloudhost247'
         if media.is_dir():
             log(f'media assets present: {sum(1 for _ in media.rglob("*") if _.is_file())}')
         else:
             failures.append('the built website has no media asset directory')
+
+        theme_registry = destination / 'modules' / 'addons' / 'cloudhost247_theme' / 'resources' / 'site.json'
+        if not theme_registry.is_file():
+            failures.append('the PHP theme registry is not in the archive; the website cannot be served')
+        else:
+            try:
+                pages = json.loads(theme_registry.read_text()).get('pages', {})
+            except (OSError, ValueError):
+                pages = {}
+                failures.append('the PHP theme registry in the archive is not readable JSON')
+            wanted = set()
+            for page in pages.values():
+                if page.get('visual'):
+                    wanted.add(page['visual'])
+                for section in page.get('sections', []) or []:
+                    if section.get('visual'):
+                        wanted.add(section['visual'])
+            roots = [
+                ('built SPA', media),
+                ('PHP theme', destination / 'assets' / 'images' / 'cloudhost247'),
+            ]
+            for label, root in roots:
+                if not root.is_dir():
+                    failures.append(f'the {label} illustration library is missing from the archive')
+                    continue
+                absent = sorted(visual for visual in wanted if not (root / f'{visual}.svg').is_file())
+                if absent:
+                    failures.append(
+                        f'{len(absent)} illustration(s) referenced by the theme registry are missing from the '
+                        f'{label} library: ' + ', '.join(absent[:8]) + (' …' if len(absent) > 8 else '')
+                    )
+            log(f'theme illustrations resolved: {len(wanted)}')
 
         # The public documentation the reader fetches must be present, and must be *exactly* the
         # published set. A stale build directory is how an internal document stays downloadable

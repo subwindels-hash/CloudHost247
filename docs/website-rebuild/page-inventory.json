@@ -3,7 +3,7 @@
   "totals": {
     "root_php_pages": 84,
     "registered_public_pages": 67,
-    "navigation_destinations": 90,
+    "navigation_destinations": 89,
     "footer_destinations": 67,
     "mega_menus": 7,
     "footer_columns": 8
@@ -1103,7 +1103,7 @@
       "visual": "cloud/vps",
       "image_status": "present",
       "seo_status": "ok",
-      "navigation_placement": "cloud / Cloud | cloud / Servers",
+      "navigation_placement": "cloud / Servers",
       "footer_placement": "Cloud & Servers | Products",
       "reachable": true
     },
