@@ -732,9 +732,18 @@ function decoratePhpPages(previous, contentPages, registry) {
         if ((item.label || item.title) && uses.length < 6) uses.push(item.label ?? item.title);
       }
     }
+    /*
+     * Related services, projected from SPA routes onto the PHP surface.
+     *
+     * Two routes can name the same PHP file — `/cloud/backups` and `/hosting/backups` both render
+     * `backups.php` — so an honestly authored "related" list can still project onto the page
+     * itself. That is not a self-link the author wrote, but it is one the visitor would see, so the
+     * projection drops it here. `validatePages` fails on the authored form, which is the mistake a
+     * person can actually make and fix.
+     */
     const related = (content.related ?? [])
       .map((route) => routeMap.get(route) ?? `${route.split('/').filter(Boolean).slice(-1)[0]}.php`)
-      .filter((php) => php && Object.prototype.hasOwnProperty.call(previous.pages, php));
+      .filter((php) => php && php !== file && Object.prototype.hasOwnProperty.call(previous.pages, php));
 
     // Internal destinations are resolved to the PHP surface or dropped: a card link that only
     // works inside the single-page app would be a dead link on the page that renders it.
@@ -775,7 +784,10 @@ function decoratePhpPages(previous, contentPages, registry) {
       features: features.length ? features : existing.features,
       uses: uses.length ? uses.slice(0, 6) : existing.uses,
       faqs: (content.faqs ?? []).map((faq) => ({ q: faq.q, a: faq.a })),
-      related: related.length ? [...new Set(related)] : existing.related,
+      // The recorded fallback is filtered too: a previously stored self-reference must not survive
+      // a regeneration, or the defect outlives the fix that removed it from the source.
+      related: (related.length ? [...new Set(related)] : (existing.related ?? []))
+        .filter((php) => php && php !== file),
       // The ordered narrative the application renders, filtered to what a server-rendered page can
       // show without live data. Legacy `features`/`uses` stay for compatibility and as the fallback
       // when a page has no sections.
@@ -878,6 +890,16 @@ function validatePages(pages, spaRouteSet, tools, registryRoutes, legalSlugs) {
     for (const related of page.related ?? []) {
       if (!spaTargetExists(related, spaRouteSet, tools, legalSlugs, relatedTargets)) {
         fail(`${where}: related "${related}" is not a route this app serves.`);
+      }
+      /*
+       * A page listing itself under "Related services" is a dead end dressed up as a suggestion:
+       * the reader is already there and the card does nothing. The authored form is refused here.
+       * The *projected* form — two SPA routes resolving to one PHP file — is dropped when the PHP
+       * page is emitted instead, because that one is an artefact of the mapping rather than a
+       * mistake anybody typed.
+       */
+      if (related === page.route) {
+        fail(`${where}: related lists the page's own route (${related}); a page cannot be related to itself.`);
       }
     }
     if (page.visual && !existsSync(join(ASSET_SOURCE, `${page.visual}.svg`))) {
@@ -1228,12 +1250,141 @@ function main() {
     if (!column.items?.length) fail(`footer:${column.title} has no links.`);
   }
 
-  // Duplicate detection across the whole menu+footer surface: the same label pointing at the same
-  // route twice is a menu that has grown by accretion, which is exactly what this rebuild removes.
-  const occurrences = new Map();
-  for (const { href, label } of [...walkMenus(registry), ...walkFooter(registry)]) {
-    const key = `${href.spa ?? ''}|${label}`;
-    occurrences.set(key, (occurrences.get(key) ?? 0) + 1);
+  /*
+   * Duplicate detection across the whole menu+footer surface.
+   *
+   * Three rules, each a hard failure, because each is what a navigation grown by accretion looks
+   * like to a visitor:
+   *
+   *   1. The same label pointing at the same destination twice inside one menu. A panel that
+   *      offers "Web Hosting" and then "Web Hosting" again is not offering two things.
+   *   2. The same destination reached under two different labels inside one footer column. That is
+   *      the same defect wearing a disguise, and it doubles the crawl surface for one page.
+   *   3. The same label pointing at the same destination twice inside one footer column.
+   *
+   * Cross-menu repeats stay allowed (Developer Hosting is a hosting product *and* a platform
+   * capability, and the brief asks for it in both places), as do cross-column repeats in the
+   * footer (Network and Data Centers are asked for under both "Cloud & Servers" and "Resources").
+   * The featured panel is a promotional block, not a list, so it is exempt from rule 1 — it exists
+   * precisely to point at the section the column then enumerates.
+   */
+  const menuEntries = [];
+  for (const menu of registry.menus) {
+    if (menu.href) menuEntries.push({ menu: menu.id, where: `menu:${menu.id}`, href: menu.href, label: menu.label, list: false });
+    for (const column of menu.columns ?? []) {
+      for (const item of column.items ?? []) {
+        menuEntries.push({ menu: menu.id, where: `menu:${menu.id}/${column.title}`, href: item.href, label: item.label, list: true });
+      }
+    }
+  }
+  const perMenu = new Map();
+  for (const { menu, where, href, label } of menuEntries) {
+    if (!href) continue;
+    const destination = href.spa ?? href.php ?? '';
+    if (!destination) continue;
+    const key = `${menu}|${destination}|${label}`;
+    if (perMenu.has(key)) {
+      fail(`duplicate navigation link: "${label}" → ${destination} appears in ${perMenu.get(key)} and ${where}.`);
+    } else {
+      perMenu.set(key, where);
+    }
+  }
+
+  const perFooterColumn = new Map();
+  for (const column of registry.footer) {
+    const seenDestination = new Map();
+    for (const item of column.items ?? []) {
+      const destination = item.href?.spa ?? item.href?.php ?? '';
+      if (!destination) continue;
+      const key = `${column.title}|${destination}`;
+      if (seenDestination.has(key)) {
+        fail(
+          `footer column "${column.title}" links ${destination} twice: ` +
+            `"${seenDestination.get(key)}" and "${item.label}" are the same page.`
+        );
+      } else {
+        seenDestination.set(key, item.label);
+      }
+      const labelKey = `${column.title}|${destination}|${item.label}`;
+      if (perFooterColumn.has(labelKey)) {
+        fail(`duplicate footer link: "${item.label}" → ${destination} appears twice in "${column.title}".`);
+      } else {
+        perFooterColumn.set(labelKey, column.title);
+      }
+    }
+  }
+
+  /*
+   * Placeholder and malformed destinations. `walkMenus`/`walkFooter` already reject a missing
+   * `href`; these rules catch the destination that exists but goes nowhere a visitor can use —
+   * the `#`, the empty string, the `javascript:` call, the scheme-relative URL, and the trailing
+   * `/` that quietly makes a different URL out of the same page.
+   */
+  for (const { where, href, label } of [...walkMenus(registry), ...walkFooter(registry), ...walkUtility(registry)]) {
+    for (const [surfaceName, value] of [['spa', href.spa], ['php', href.php]]) {
+      if (value === undefined || value === null) continue;
+      const destination = String(value);
+      if (destination.trim() === '') {
+        fail(`${where}: "${label}" has an empty ${surfaceName} destination.`);
+      } else if (destination === '#') {
+        fail(`${where}: "${label}" points at "#"; a destination must resolve to a page.`);
+      } else if (/^javascript:/i.test(destination)) {
+        fail(`${where}: "${label}" uses a javascript: destination.`);
+      } else if (/^\/\//.test(destination)) {
+        fail(`${where}: "${label}" uses a scheme-relative destination (${destination}); it inherits the request scheme and is not a first-party path.`);
+      } else if (destination.length > 1 && destination.endsWith('/') && !destination.includes('?')) {
+        fail(`${where}: "${label}" → ${destination} has a trailing slash; the canonical form drops it.`);
+      }
+    }
+  }
+
+  /*
+   * Obsolete destinations. Each entry is a route that was superseded during the rebuild and still
+   * resolves on some deployments, so a link to it would not 404 — it would quietly serve the old
+   * page. The canonical replacement is named so the fix is unambiguous.
+   */
+  const OBSOLETE_DESTINATIONS = new Map([
+    ['dedeicated-server.php', 'dedicated-server.php'],
+    ['vps-private-cloud.php', 'vps-privatecloud.php'],
+    ['vps-public-cloud.php', 'vps-publiccloud.php'],
+  ]);
+  for (const { where, href, label } of [...walkMenus(registry), ...walkFooter(registry), ...walkUtility(registry)]) {
+    for (const value of [href.spa, href.php]) {
+      if (typeof value !== 'string') continue;
+      for (const [obsolete, replacement] of OBSOLETE_DESTINATIONS) {
+        if (value.includes(obsolete)) {
+          fail(`${where}: "${label}" uses the obsolete destination ${value}; use ${replacement}.`);
+        }
+      }
+    }
+  }
+
+  /*
+   * Casing. Paths are case-sensitive on the production filesystem, so a link whose casing differs
+   * from the file it names works in development on macOS and 404s in production on Linux. Every
+   * first-party PHP destination must match a real file's name exactly, and every SPA path must be
+   * lower-case, which is what the router publishes.
+   *
+   * Licensed WHMCS entry points are skipped: the platform depends on those files but does not ship
+   * them, so there is no local filename to compare against — the staging check owns that instead.
+   */
+  for (const { where, href, label } of [...walkMenus(registry), ...walkFooter(registry), ...walkUtility(registry)]) {
+    if (typeof href.php === 'string') {
+      const file = href.php.split('?')[0].split('#')[0];
+      if (!file.includes('/') && /\.php$/.test(file) && !WHMCS_ENTRY_POINTS.has(file) && !pages.has(file)) {
+        const suggestion = [...pages].find((name) => name.toLowerCase() === file.toLowerCase());
+        fail(
+          `${where}: "${label}" → ${file} does not match any file's casing` +
+            (suggestion ? `; did you mean ${suggestion}?` : '.')
+        );
+      }
+    }
+    if (typeof href.spa === 'string' && href.spa !== '/' && !href.spa.startsWith('#')) {
+      const path = href.spa.split(/[?#]/)[0].replace(/^\//, '');
+      if (path && path !== path.toLowerCase()) {
+        fail(`${where}: "${label}" → ${href.spa} is not lower-case; router paths are case-sensitive.`);
+      }
+    }
   }
 
   const registryRoutes = [

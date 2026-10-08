@@ -154,6 +154,19 @@ const TOOLS = JSON.parse(readFileSync(join(ROOT, 'cloudhost247-node', 'frontend'
 
 const TOOL_PATHS = new Set(TOOLS.map((tool) => tool.path));
 
+/**
+ * Every legal policy the registry publishes, as PHP filenames.
+ *
+ * Derived from `shared/site/registry.json` rather than listed here, so adding a policy to the
+ * registry automatically adds it to the Legal & Policy Center reachability check below — the
+ * failure mode being guarded against is a new policy shipping that nothing links to.
+ */
+const POLICY_FILES = new Set(
+  JSON.parse(readFileSync(join(ROOT, 'shared', 'site', 'registry.json'), 'utf8'))
+    .legal.map((entry) => entry.php)
+    .filter(Boolean)
+);
+
 function routeOk(path) {
   const clean = path.split('#')[0].split('?')[0].replace(/\/$/, '') || '/';
   if (SERVER_PATHS.has(clean)) return true;
@@ -361,6 +374,44 @@ for (const file of PHP_FILES) {
       continue;
     }
     checkHref(`php:${file}`, value, 'href');
+  }
+
+  /*
+   * Links a page declares as data rather than as markup.
+   *
+   * This is the hole that let three dead links ship on the Legal & Policy Center: the page builds
+   * its cards from a PHP array (`'link' => 'disclaimer.php'`) and the template renders
+   * `<a href="{$section.link}">`, so the literal-string scan above saw `$section.link`, skipped it
+   * as a Smarty/PHP expression, and never resolved the destination. Two of the three named
+   * documents that do not exist; the third was a stale filename for a policy that does.
+   *
+   * An array entry whose value is a bare `*.php` filename is unambiguously a destination — a
+   * visitor-facing link the page will render — so it is resolved exactly like an `href`. Values
+   * containing a variable are still skipped, because their target is not knowable statically.
+   */
+  for (const match of source.matchAll(/'(?:link|url|href|page|path)'\s*=>\s*'([^']+)'/g)) {
+    const value = match[1];
+    if (value.includes('$') || value.includes('{')) continue;
+    if (!/\.php($|\?)/.test(value)) continue;
+    if (/^https?:/i.test(value)) continue;
+    if (excluded) {
+      vendorFindings += 1;
+      continue;
+    }
+    checkHref(`php:${file}`, value, 'declared link');
+  }
+
+  /*
+   * Legal-policy discovery. `legal.php` is the policy index: it is how a visitor reaches the
+   * policies that are deliberately absent from the footer. A policy file that the index does not
+   * list is a page with no inbound link from anywhere, which is an orphan even though it resolves.
+   */
+  if (file === 'legal.php') {
+    const declared = new Set([...source.matchAll(/'(?:link|url)'\s*=>\s*'([^']+\.php)'/g)].map((match) => match[1]));
+    const policies = [...POLICY_FILES].filter((name) => !declared.has(name));
+    for (const orphan of policies) {
+      add('php:legal.php', `the Legal & Policy Center does not list ${orphan}; a policy no page links to is unreachable`);
+    }
   }
 }
 

@@ -11,9 +11,17 @@ customer logos, awards or location assertions. The mint / ink palette matches
   Pair files named `*-3d.jpg` are original 3D raster scenes in the same ink/mint art
   direction. Templates prefer the JPEG via `<picture>` and keep the SVG as the
   fallback, so a missing raster never becomes a broken image.
-- `website/`, `panels/`, `platforms/`, `backgrounds/`, `network/`: reserved families
-  for future artwork. Product pages currently fall back to the closest existing
-  family illustration rather than inventing unsupported panels or locations.
+- `panels/`: one neutral mark per control-panel adapter that ships a working install
+  path, plus a catalogue hub illustration. The catalogue is published by the platform
+  (`cloudhost247-node/src/control-panels/adapters/*.ts`), **not** by this directory: a
+  mark existing here is presentation only and is not a claim that a panel is
+  provisionable. No vendor logo is drawn or traced.
+- `operating-systems/`: the catalogue hub plus one neutral mark per distribution
+  seeded in migration 0041. `Unknown` is an internal placeholder for pre-existing
+  servers and deliberately has no public mark.
+- `website/`, `platforms/`, `backgrounds/`, `network/`: reserved families for future
+  artwork. Product pages currently fall back to the closest existing family
+  illustration rather than inventing unsupported panels or locations.
 - `hosting/`, `cloud/`, `servers/`, `domains/`: labeled, product-specific diagrams.
 - `applications/`, `deployment/`, `operating-systems/`: platform/catalog diagrams,
   not a claim that any particular runtime or image is provisionable.
@@ -31,7 +39,15 @@ asset directory, determines what may be shown in the catalog.
 
 ## Regeneration
 
-`python3 scripts/generate-website-assets.py` generates vectors deterministically.
+`python3 scripts/generate-catalog-assets.py` writes **only** the `panels/` and
+`operating-systems/` mark families. It is additive and idempotent: it never rewrites a
+file it did not create, so it cannot flatten hand-tuned artwork. Use it when a control
+panel or distribution is added to the platform catalogue.
+
+`python3 scripts/generate-website-assets.py` generates the rest of the vectors
+deterministically. Note that several product illustrations were hand-tuned after the
+last full run, so re-running it will replace those with the generic composition —
+review the diff before committing.
 Raster generation needs Pillow and a resvg adapter. Set `CH247_RASTER_SCRIPT` to a
 Node script accepting `input.svg output.png width` and rendering with
 `@resvg/resvg-js`; the adapter below documents the complete contract:

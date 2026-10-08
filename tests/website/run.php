@@ -36,8 +36,12 @@ $tests['publishing a missing record is refused'] = $missingRejected;
 // product families are asserted by id — the same contract the navigation API test pins — rather
 // than by a count that silently drifts every time a family is added.
 $families = array_map(function ($menu) { return isset($menu['id']) ? $menu['id'] : null; }, Site::catalog()['navigation']);
+// The published families are the seven the global header exposes. `developers` and `websites` were
+// folded into `platforms` and `hosting` — the brief asks for one header with seven product
+// families, and keeping a ninth menu whose every destination also appeared in another panel is
+// what makes a mega menu feel accreted rather than designed.
 $tests['registry publishes every mega menu family'] = $families === array(
-    'hosting', 'cloud', 'domains', 'platforms', 'developers', 'websites', 'tools', 'resources', 'support',
+    'hosting', 'cloud', 'domains', 'platforms', 'tools', 'resources', 'company',
 );
 $tests['every mega menu family has a title and description'] = count(array_filter(Site::catalog()['navigation'], function ($menu) {
     return trim((string) $menu['title']) === '' || trim((string) $menu['description']) === '';

@@ -117,8 +117,11 @@ describe('CLOUDHOST247 platform services', () => {
     // The menu is generated from shared/site/registry.json. This asserts the *contract* — one
     // definition, the published families, and every link reachable — rather than pinning the list,
     // so adding a product family is a registry change rather than a test edit.
+    //
+    // Seven families, matching the global header: `developers` and `websites` were folded into
+    // `platforms` and `hosting` so no destination is published by two top-level panels.
     expect(body.sections.map((section) => section.id)).toEqual([
-      'hosting', 'cloud', 'domains', 'platforms', 'developers', 'websites', 'tools', 'resources', 'support',
+      'hosting', 'cloud', 'domains', 'platforms', 'tools', 'resources', 'company',
     ]);
     expect(body.validation.ok).toBe(true);
     expect(body.validation.errors).toEqual([]);
