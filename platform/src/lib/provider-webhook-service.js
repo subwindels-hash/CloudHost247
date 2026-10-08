@@ -272,6 +272,8 @@ async function processProviderWebhook(store, config, providerId, rawBody, header
     const result = await applySuccessfulPayment(tx, {
       paymentId: payment.id,
       gatewayReference: event.providerPaymentReference || undefined,
+      // `store` + `config` is everything a queued provider action needs; this module has no logger.
+      deps: { store, config, logger: undefined },
     });
     applied = result.applied;
   });

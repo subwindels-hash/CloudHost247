@@ -128,6 +128,14 @@ const envSchema = v.object({
   // --- agent (optional) ---
   // Shared secret the on-server agent presents. Absent disables the agent endpoints.
   AGENT_TOKEN: v.string().min(16).optional(),
+
+  // --- Cloudflare egress (optional) ---
+  // Deployment-wide default only. Each cloudflare_accounts row may override it with its own
+  // api_base_url, which is what a test or a staging account pointed at a local fake uses.
+  // The client refuses a non-HTTPS base URL unless it is loopback, so this cannot be used to send
+  // an API token in plaintext across a network.
+  CLOUDFLARE_API_BASE_URL: v.string().min(1).optional(),
+  CLOUDFLARE_API_TIMEOUT_MS: v.coerce.number().int().positive().max(120000).default(20000),
 }).passthrough();
 
 /** Parse "12h", "30d", "90s", "500ms" into milliseconds. */

@@ -275,6 +275,9 @@ async function handleProviderWebhook(store, config, provider, rawBody, signature
       const result = await applySuccessfulPayment(tx, {
         paymentId: payload.payment_id,
         gatewayReference: payload.gateway_reference,
+        // This handler is module-scope (it is called directly by tests and by the router), so the
+        // deps a queued provider action needs are rebuilt from what it already holds.
+        deps: { store, config, logger: undefined },
       });
       applied = result.applied;
     });

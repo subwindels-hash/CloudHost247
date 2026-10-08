@@ -130,7 +130,7 @@ function register(router, deps) {
 
     await store.transaction(async (tx) => {
       await tx.table('payments').updateById(payment.id, { confirmed_by: ctx.user.id });
-      await applySuccessfulPayment(tx, { paymentId: payment.id });
+      await applySuccessfulPayment(tx, { paymentId: payment.id, deps });
     });
     await audit(deps, ctx, 'manual_payment_confirmed', { type: 'payment', id: payment.id });
     ctx.json({ ok: true });
@@ -288,7 +288,7 @@ function register(router, deps) {
         confirmed_by: ctx.user.id,
         confirmed_at: new Date().toISOString(),
       });
-      await applySuccessfulPayment(tx, { paymentId: payment.id });
+      await applySuccessfulPayment(tx, { paymentId: payment.id, deps });
     });
     await audit(deps, ctx, 'manual_payment_confirmed', { type: 'payment', id: payment.id });
     ctx.json({ payment: paymentDto(await store.table('payments').findById(payment.id)) });

@@ -10,6 +10,7 @@
 
 const { uuidv7 } = require('./ids');
 const { provisionPaidOrder } = require('./order-provisioning');
+const { fulfillPendingCloudflareActions } = require('./cloudflare-fulfilment');
 
 const round2 = (n) => Math.round(n * 100) / 100;
 
@@ -18,9 +19,12 @@ const round2 = (n) => Math.round(n * 100) / 100;
  * @param {object} args
  * @param {string} args.paymentId
  * @param {string} [args.gatewayReference]
+ * @param {object} [args.deps] `{ config, logger, store }` — what settling the payment's *provider-side*
+ *   consequences needs (today: a Cloudflare action queued with `awaiting_payment`). Optional so a
+ *   caller that only wants the ledger effect is unaffected; the domain call sites pass it.
  * @returns {Promise<{ applied: boolean }>}
  */
-async function applySuccessfulPayment(tx, { paymentId, gatewayReference }) {
+async function applySuccessfulPayment(tx, { paymentId, gatewayReference, deps }) {
   const payment = await tx.table('payments').findById(paymentId);
   if (!payment) return { applied: false };
   if (payment.status === 'succeeded') return { applied: false }; // idempotent
@@ -54,6 +58,22 @@ async function applySuccessfulPayment(tx, { paymentId, gatewayReference }) {
         await tx.table('orders').updateById(invoice.order_id, { status: 'paid' });
         await provisionPaidOrder(tx, invoice.order_id);
       }
+    }
+  }
+
+  // Provider-side actions the customer was promised at checkout and that were deliberately parked
+  // until the money arrived (`cloudflare_jobs.status = 'awaiting_payment'`). Until this call existed,
+  // "the service will be provisioned automatically after payment is confirmed" was a sentence with
+  // nothing behind it. A failure here never fails the payment — the job records the failure and an
+  // operator retries it — because failing the payment would be the worse lie.
+  if (deps) {
+    try {
+      const outcome = await fulfillPendingCloudflareActions(tx, deps);
+      if (outcome.failed.length > 0) {
+        deps.logger?.warn?.({ failed: outcome.failed }, 'pending provider actions failed after payment');
+      }
+    } catch (error) {
+      deps.logger?.warn?.({ reason: error.message }, 'post-payment provider fulfilment could not run');
     }
   }
 
