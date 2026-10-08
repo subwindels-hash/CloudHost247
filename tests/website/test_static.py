@@ -47,8 +47,14 @@ class WebsiteTests(unittest.TestCase):
   catalog=json.loads((ROOT/'modules/addons/cloudhost247_theme/resources/site.json').read_text())
   self.assertTrue(catalog.get('navigation'),'navigation is generated from shared/site/registry.json')
   self.assertTrue(catalog.get('footer'),'footer is generated from shared/site/registry.json')
-  self.assertGreaterEqual(len(catalog['navigation']),9)
-  self.assertGreaterEqual(len(catalog['footer']),9)
+  # The global header is exactly the seven families the brief specifies, asserted by id so the
+  # check cannot drift every time a family is added or renamed. `developers` and `websites` were
+  # folded into `platforms` and `hosting` rather than kept as separate panels publishing the same
+  # destinations twice.
+  self.assertEqual([m['id'] for m in catalog['navigation']],
+                   ['hosting','cloud','domains','platforms','tools','resources','company'])
+  self.assertEqual([c['title'] for c in catalog['footer']],
+                   ['Products','Cloud & Servers','Domains','Developers','Tools','Resources','Company','Legal'])
   # The Tools menu's entries are live data (the tool catalogue), so the registry deliberately has
   # no static columns for it; the template renders categories from `toolCategories` and site.js
   # enriches them. Every other menu must carry its own groups.
