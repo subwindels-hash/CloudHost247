@@ -114,6 +114,11 @@ const envSchema = v.object({
   STRIPE_WEBHOOK_SECRET: v.string().min(16).optional(),
   PAYPAL_WEBHOOK_ID: v.string().min(10).optional(),
   PAYSTACK_SECRET_KEY: v.string().min(16).optional(),
+  // Blockonomics does not sign its callback: the URL it calls carries this secret as a query
+  // parameter (the WHMCS plugin's CallbackSecret). It is compared in constant time.
+  BLOCKONOMICS_CALLBACK_SECRET: v.string().min(16).optional(),
+  // Confirmations required before a BTC payment settles. Operator setting, never the callback's.
+  BLOCKONOMICS_CONFIRMATIONS: v.coerce.number().int().min(0).max(6).default(2),
   // When true, the sandbox gateway can be charged/completed without a live PSP. Refused in
   // production so a misconfigured prod host cannot mint "paid" invoices.
   SANDBOX_PAYMENTS: boolSchema.default('true'),
@@ -128,6 +133,14 @@ const envSchema = v.object({
   // --- agent (optional) ---
   // Shared secret the on-server agent presents. Absent disables the agent endpoints.
   AGENT_TOKEN: v.string().min(16).optional(),
+
+  // --- Cloudflare egress (optional) ---
+  // Deployment-wide default only. Each cloudflare_accounts row may override it with its own
+  // api_base_url, which is what a test or a staging account pointed at a local fake uses.
+  // The client refuses a non-HTTPS base URL unless it is loopback, so this cannot be used to send
+  // an API token in plaintext across a network.
+  CLOUDFLARE_API_BASE_URL: v.string().min(1).optional(),
+  CLOUDFLARE_API_TIMEOUT_MS: v.coerce.number().int().positive().max(120000).default(20000),
 }).passthrough();
 
 /** Parse "12h", "30d", "90s", "500ms" into milliseconds. */

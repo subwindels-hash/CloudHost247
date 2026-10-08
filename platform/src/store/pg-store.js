@@ -201,21 +201,46 @@ class PgStore {
     }
   }
 
-  /** CREATE TABLE / CREATE INDEX for every table in the schema registry (idempotent). */
+  /**
+   * Bring the database up to `schema.js`: create missing tables/indexes **and add columns that the
+   * registry gained after the table was first created** (idempotent).
+   *
+   * The second half matters. `CREATE TABLE IF NOT EXISTS` alone silently skips an existing table,
+   * so a column added to `schema.js` later would exist for a fresh install and be missing on every
+   * deployment that had already migrated — and the write that used it would fail at runtime with
+   * `column "x" does not exist` rather than at migration time. `ADD COLUMN IF NOT EXISTS` converges
+   * the two, and because it is emitted for every non-primary-key column it needs no separate list of
+   * "new" columns to keep in sync.
+   *
+   * Deliberately additive only: a column that changed *type* is not altered, because doing so
+   * automatically could destroy data. Type changes stay a hand-written migration.
+   */
+  columnDefinition(column, def, { forCreate = false } = {}) {
+    const parts = [q(column), TYPES[def.type] ?? 'TEXT'];
+    if (forCreate) {
+      if (def.primaryKey) parts.push('PRIMARY KEY');
+      if (def.required) parts.push('NOT NULL');
+    }
+    if (def.default !== undefined && def.default !== 'uuidv7' && def.default !== 'now') {
+      parts.push(`DEFAULT ${typeof def.default === 'string' ? `'${def.default}'` : JSON.stringify(def.default)}`);
+    }
+    if (def.default === 'now') parts.push('DEFAULT now()');
+    return parts.join(' ');
+  }
+
   async migrate() {
     const statements = [];
     for (const [name, table] of Object.entries(require('./schema').TABLES)) {
-      const columns = Object.entries(table.columns).map(([column, def]) => {
-        const parts = [q(column), TYPES[def.type] ?? 'TEXT'];
-        if (def.primaryKey) parts.push('PRIMARY KEY');
-        if (def.required) parts.push('NOT NULL');
-        if (def.default !== undefined && def.default !== 'uuidv7' && def.default !== 'now') {
-          parts.push(`DEFAULT ${typeof def.default === 'string' ? `'${def.default}'` : JSON.stringify(def.default)}`);
-        }
-        if (def.default === 'now') parts.push('DEFAULT now()');
-        return parts.join(' ');
-      });
+      const columns = Object.entries(table.columns).map(([column, def]) => this.columnDefinition(column, def, { forCreate: true }));
       statements.push(`CREATE TABLE IF NOT EXISTS ${q(name)} (${columns.join(', ')})`);
+
+      // Catch-up for columns added to the registry after this table was created. NOT NULL is
+      // omitted on purpose: adding a NOT NULL column to a table that already has rows fails unless a
+      // default fills them, and a half-applied migration is worse than a nullable column.
+      for (const [column, def] of Object.entries(table.columns)) {
+        if (def.primaryKey) continue;
+        statements.push(`ALTER TABLE ${q(name)} ADD COLUMN IF NOT EXISTS ${this.columnDefinition(column, def)}`);
+      }
 
       for (const index of table.indexes ?? []) {
         if (index.expression) continue; // expression indexes are declared in SQL migrations

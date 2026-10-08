@@ -500,6 +500,11 @@ const TABLES = {
       id: pk(),
       user_id: uuid({ required: true }),
       customer_id: uuid({ nullable: true }),
+      // The order a service was bought on. `lib/order-provisioning.js` has always joined on this
+      // column to activate a paid order's services, but the column did not exist, so the write was
+      // dropped and the join could never match on either backend. Added here so the link the
+      // provisioner and the admin order view both rely on actually persists.
+      order_id: uuid({ nullable: true }),
       product_id: uuid({ nullable: true }),
       plan_id: uuid({ nullable: true }),
       control_panel_id: uuid({ nullable: true }),
@@ -1345,9 +1350,18 @@ const TABLES = {
     columns: {
       id: pk(),
       user_id: uuid({ nullable: true }),
+      // Which provider row answered, and whether the search completed or failed. A search whose
+      // provider was unreachable is stored as `provider_error` with the code, so the history cannot
+      // read as a successful lookup that returned nothing.
+      provider_id: uuid({ nullable: true }),
+      status: text({ default: 'pending' }),   // 'pending' | 'completed' | 'provider_error'
+      error_code: text({ nullable: true }),
+      error_message: text({ nullable: true }),
       query: text({ required: true }),
       kind: text({ default: 'single' }),
+      // The availability rows, as returned. `available: null` means no answer was established.
       results: jsonb({ default: [] }),
+      completed_at: { type: 'timestamptz', nullable: true },
       created_at: ts(),
     },
   },
@@ -1385,6 +1399,10 @@ const TABLES = {
       domain: text({ nullable: true }),
       auth_code: text({ nullable: true }),
       current_registrar: text({ nullable: true }),
+      // Which registrar row is handling this transfer. The refresh poll reads it: polling "whatever
+      // registrar is connected now" would ask the wrong account about a domain it may not hold, and
+      // a second provider being configured later would silently move the poll.
+      provider_id: uuid({ nullable: true }),
       status: text({ default: 'pending' }),
       provider_status: text({ nullable: true }),
       provider_reference: text({ nullable: true }),
@@ -1448,13 +1466,21 @@ const TABLES = {
     columns: {
       id: pk(),
       user_id: uuid({ required: true }),
+      provider_id: uuid({ nullable: true }),
+      provider_reference: text({ nullable: true }),
       domain: text({ required: true }),
-      status: text({ default: 'pending' }),
+      status: text({ default: 'pending' }),   // 'pending' | 'completed' | 'provider_error' | 'provider_not_configured'
       estimated_value: num({ nullable: true }),
       currency: text({ default: 'USD' }),
-      confidence: num({ nullable: true }),
+      // 'low' | 'medium' | 'high' | null. Null is the honest value when the provider publishes no
+      // confidence band — GoValue does not, and inventing one would be a fabricated certainty.
+      confidence: text({ nullable: true }),
+      // The provider's own valuation document (range, sale probability, comparables) plus the
+      // disclaimer. Stored whole so a customer can see why the number is what it is.
+      valuation: jsonb({ default: {} }),
       provider: text({ nullable: true }),
       error_code: text({ nullable: true }),
+      error_message: text({ nullable: true }),
       completed_at: { type: 'timestamptz', nullable: true },
       created_at: ts(),
       updated_at: ts(),
@@ -1465,12 +1491,20 @@ const TABLES = {
     columns: {
       id: pk(),
       user_id: uuid({ nullable: true }),
+      provider_id: uuid({ nullable: true }),
+      provider_reference: text({ nullable: true }),
       domain: text({ required: true }),
+      // 'completed' | 'not_found' | 'provider_not_configured' | 'provider_error' | 'rate_limited'
       status: text({ default: 'unknown' }),
       source: text({ nullable: true }),
       privacy_protected: bool({ default: false }),
       registrar: text({ nullable: true }),
+      // The *public projection* only — registrar, dates, statuses, nameservers, registry. Raw
+      // registrant records are never requested, never parsed into a field and never stored here.
       raw: jsonb(),
+      error_code: text({ nullable: true }),
+      error_message: text({ nullable: true }),
+      completed_at: { type: 'timestamptz', nullable: true },
       created_at: ts(),
     },
     indexes: [{ name: 'domain_whois_user_idx', columns: ['user_id'] }],
@@ -1506,10 +1540,42 @@ const TABLES = {
     },
     indexes: [{ name: 'domain_club_memberships_user_idx', columns: ['user_id'] }],
   },
+  /**
+   * What the *provider* quoted, per registrar, kept deliberately apart from what this platform
+   * charges (`domain_extensions.register_price_cents`). A catalogue sync that wrote provider prices
+   * into the selling price column would silently reprice the storefront every time a registrar ran
+   * a promotion; an operator reviews a difference and decides, not a sync job.
+   */
+  domain_provider_extension_offerings: {
+    columns: {
+      id: pk(),
+      provider_id: uuid({ required: true }),
+      extension_id: uuid({ nullable: true }),
+      extension: text({ required: true }),         // bare label, e.g. 'com'
+      provider_tld: text({ nullable: true }),      // as the provider spells it
+      registration_price: num({ nullable: true }),
+      renewal_price: num({ nullable: true }),
+      transfer_price: num({ nullable: true }),
+      currency: text({ default: 'USD' }),
+      premium_supported: bool({ default: false }),
+      status: text({ default: 'enabled' }),        // 'enabled' | 'disabled' | 'unavailable'
+      provider_metadata: jsonb({ default: {} }),
+      sourced_at: { type: 'timestamptz', nullable: true },
+      created_at: ts(),
+      updated_at: ts(),
+    },
+    indexes: [
+      { name: 'domain_provider_offerings_unique', columns: ['provider_id', 'extension'], unique: true },
+      { name: 'domain_provider_offerings_extension_idx', columns: ['extension'] },
+    ],
+  },
+
   domain_extensions: {
     columns: {
       id: pk(),
       tld: text({ required: true }),
+      // The platform's *selling* price in cents. 0 means "not priced for sale yet" — the quote route
+      // refuses rather than quoting nothing, so a synced-but-unpriced extension cannot be sold free.
       register_price_cents: int({ default: 0 }),
       renew_price_cents: int({ default: 0 }),
       is_trending: bool({ default: false }),
@@ -2029,6 +2095,11 @@ const TABLES = {
       conversation_id: uuid({ required: true }),
       role: text({ default: 'user' }),
       content: text({ required: true }),
+      // Why the assistant said what it said: the matched intent, the retrieval confidence and the
+      // sources it cited. Null means a person wrote the message — not that the reasoning is unknown.
+      intent: text({ nullable: true }),
+      confidence: { type: 'numeric', nullable: true },
+      knowledge_sources: { type: 'jsonb', nullable: true },
       created_at: ts(),
     },
     indexes: [{ name: 'ai_messages_conversation_idx', columns: ['conversation_id'] }],

@@ -2,10 +2,17 @@
  * AI OS — the admin control plane for agents, models, tasks, incidents, knowledge and the
  * customer-facing assistant.
  *
- * Ported from cloudhost247-node/src/ai-os/. The live agent runtime / LLM inference is an external
- * adapter and is deferred; this module is the registry + workflow surface. Entities are stored in
- * the generic ai_registry table (kind + metadata) so the whole subsystem persists on both backends
- * without bespoke tables. Admin base: /api/v1/admin/ai. Customer base: /api/v1/account/ai.
+ * Ported from cloudhost247-node/src/ai-os/. Entities are stored in the generic ai_registry table
+ * (kind + metadata) so the whole subsystem persists on both backends without bespoke tables.
+ * Admin base: /api/v1/admin/ai. Customer base: /api/v1/account/ai.
+ *
+ * The Copilot is live, and it is **deterministic**: `lib/ai-copilot.js` matches the prompt to a
+ * registered intent, the intent reads real rows through `lib/ai-copilot-data.js`, and the answer is
+ * rendered from those rows. There is no language model in the path — so every sentence the assistant
+ * can produce is traceable to a row, a prompt that matches nothing returns the supported-command
+ * list instead of an improvisation, and a query that fails says so rather than filling the gap.
+ * (The audited build's Copilot worked the same way; this module's "requires a model adapter"
+ * deferral conflated answering with inference, and the ported router is what actually shipped.)
  */
 'use strict';
 
@@ -13,6 +20,7 @@ const { v } = require('../core/validate');
 const { NotFoundError } = require('../core/errors');
 const { uuidv7 } = require('../lib/ids');
 const { authenticate, asAdmin, asStaff } = require('../lib/auth');
+const { resolveAdminCommand, resolveCustomerMessage } = require('../lib/ai-copilot');
 
 const name = 'ai-os';
 
@@ -250,22 +258,75 @@ function register(router, deps) {
     ctx.json({ results: rows.filter((k) => k.title.toLowerCase().includes(q) || k.body.toLowerCase().includes(q)).map((k) => ({ id: k.id, title: k.title })) });
   });
 
+  /**
+   * Admin Copilot — a real answer from real data, or an honest refusal naming what it can do.
+   *
+   * The interaction is recorded as an `event` entity either way, including when the prompt matched
+   * nothing: an unsupported command is a gap in the vocabulary, and it should be visible to whoever
+   * maintains it rather than vanishing.
+   */
   router.post(`${ADMIN}/copilot`, async (ctx) => {
-    await asStaff(ctx, deps);
+    const auth = await asStaff(ctx, deps);
     const body = await ctx.validate(v.object({ prompt: v.string().trim().min(1).max(4000) }));
-    ctx.json({ reply: 'Copilot inference requires a model adapter (deferred). Prompt recorded.', echo: body.prompt.slice(0, 200) });
+
+    const result = await resolveAdminCommand(store, body.prompt);
+    // The slug is derived from the row id, not a timestamp: two answers in the same millisecond must
+    // still be two rows, or a recorded interaction would silently overwrite the one before it.
+    const eventId = uuidv7();
+    const event = await store.table('ai_registry').insert({
+      id: eventId,
+      slug: `copilot-${eventId}`,
+      name: `Copilot: ${result.intent}`,
+      kind: 'event',
+      status: result.confidence === 'exact' ? 'answered' : 'unsupported',
+      metadata: {
+        prompt: body.prompt.slice(0, 500),
+        intent: result.intent,
+        confidence: result.confidence,
+        actorId: auth.id ?? null,
+        evidence: result.evidence,
+      },
+    });
+
+    ctx.json({
+      reply: result.answer,
+      intent: result.intent,
+      confidence: result.confidence,
+      ...(result.supported ? { supported: result.supported } : {}),
+      evidence: result.evidence,
+      eventId: event.id,
+    });
   });
 
   // ---- customer -----------------------------------------------------------
+  /**
+   * Customer Cloud Assistant — the same deterministic router, scoped to the asking customer.
+   *
+   * Every read is filtered by `auth.id` inside the data layer, so one customer's invoices cannot
+   * appear in another's answer even if an intent is misworded. The one mutation it can perform is
+   * opening a ticket on the customer's own explicit request.
+   */
   router.post(`${CUSTOMER}/assistant`, async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const body = await ctx.validate(v.object({ message: v.string().trim().min(1).max(4000) }));
-    const knowledge = await store.table('ai_support_knowledge').all();
-    const q = body.message.toLowerCase();
-    const hit = knowledge.find((k) => q.includes(k.title.toLowerCase()));
-    const reply = hit ? hit.body : "I've noted your question; a teammate will follow up shortly.";
-    await store.table('ai_registry').insert({ id: uuidv7(), slug: `assistant-${Date.now()}`, name: 'Assistant interaction', kind: 'event', status: 'recorded', metadata: { userId: auth.id } });
-    ctx.json({ reply });
+
+    const result = await resolveCustomerMessage(store, { userId: auth.id, message: body.message });
+    const eventId = uuidv7();
+    await store.table('ai_registry').insert({
+      id: eventId,
+      slug: `assistant-${eventId}`,
+      name: `Assistant: ${result.intent}`,
+      kind: 'event',
+      status: result.confidence === 'exact' ? 'answered' : 'unsupported',
+      metadata: { userId: auth.id, intent: result.intent, confidence: result.confidence, evidence: result.evidence },
+    });
+
+    ctx.json({
+      reply: result.answer,
+      intent: result.intent,
+      confidence: result.confidence,
+      ...(result.supported ? { supported: result.supported } : {}),
+    });
   });
 
   router.get(`${CUSTOMER}/activity`, async (ctx) => {

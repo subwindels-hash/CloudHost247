@@ -11,11 +11,39 @@
 const { v } = require('../core/validate');
 const { NotFoundError, ValidationError, ConflictError } = require('../core/errors');
 const { uuidv7, randomToken } = require('../lib/ids');
-const { authenticate } = require('../lib/auth');
+const { authenticate, asAdmin, asStaff } = require('../lib/auth');
+const { paymentDto } = require('../lib/payments-dto');
 
 const name = 'commerce';
 
 const round2 = (n) => Math.round(n * 100) / 100;
+
+/**
+ * The order lifecycle as the rest of the platform actually writes it: `pending` at checkout,
+ * `paid` when the invoice settles (`lib/billing-apply.js`), and `cancelled` when an admin voids the
+ * invoice. The admin surface validates against this list rather than accepting any status string.
+ */
+const ORDER_STATUSES = ['pending', 'paid', 'cancelled', 'refunded'];
+
+/** Resolve an order's line items into the snapshot names both the customer and staff views show. */
+async function orderItemDtos(store, order, items) {
+  const resolved = [];
+  for (const item of items) {
+    const plan = item.plan_id ? await store.table('catalog_product_plans').findById(item.plan_id) : null;
+    const product = plan?.product_id ? await store.table('catalog_products').findById(plan.product_id) : null;
+    resolved.push({
+      id: item.id,
+      productName: product?.name ?? item.description ?? null,
+      planName: plan?.name ?? item.description ?? null,
+      billingPeriod: item.billing_cycle,
+      quantity: item.quantity,
+      unitPriceAmount: item.unit_price,
+      lineTotalAmount: item.line_total,
+      currency: order.currency,
+    });
+  }
+  return resolved;
+}
 
 // MAX_CART_ITEM_QUANTITY in the original (src/config/billing.ts).
 const MAX_CART_ITEM_QUANTITY = 20;
@@ -314,24 +342,263 @@ function register(router, deps) {
       : await store.table('invoices').findOne({ order_id: order.id });
 
     // order_items stores a plan_id, so resolve the snapshot names the DTO exposes.
-    const resolved = [];
-    for (const item of items) {
-      const plan = item.plan_id ? await store.table('catalog_product_plans').findById(item.plan_id) : null;
-      const product = plan?.product_id ? await store.table('catalog_products').findById(plan.product_id) : null;
-      resolved.push({
-        id: item.id,
-        productName: product?.name ?? item.description ?? null,
-        planName: plan?.name ?? item.description ?? null,
-        billingPeriod: item.billing_cycle,
-        quantity: item.quantity,
-        unitPriceAmount: item.unit_price,
-        lineTotalAmount: item.line_total,
-        currency: order.currency,
+    const resolved = await orderItemDtos(store, order, items);
+    ctx.json({ order: { ...orderSummaryDto(order, invoice), items: resolved } });
+  });
+
+  // ===========================================================================
+  // Admin / staff order surface.
+  //
+  // commerce.ts deferred these to Phase 5F and the port inherited the gap: staff could see an
+  // invoice and its order number, but not the order itself, its line items, or what the order turned
+  // into. Reading is `asStaff` (the same guard the rest of the staff console uses); the single
+  // mutation is `asAdmin`, because cancelling an order moves money.
+  // ===========================================================================
+  const staff = (handler) => async (ctx) => {
+    await asStaff(ctx, deps);
+    return handler(ctx);
+  };
+
+  router.get('/api/v1/admin/orders', staff(async (ctx) => {
+    const query = await ctx.validateQuery(v.object({
+      status: v.enum(ORDER_STATUSES).optional(),
+      userId: v.string().trim().optional(),
+      reference: v.string().trim().max(120).optional(),
+      from: v.string().trim().optional(),
+      to: v.string().trim().optional(),
+      limit: v.coerce.number().int().min(1).max(500).default(50),
+      offset: v.coerce.number().int().min(0).default(0),
+    }));
+
+    const predicate = {};
+    if (query.status) predicate.status = query.status;
+    if (query.userId) predicate.user_id = query.userId;
+    // Both stores support the same operator set, so the reference search and the date window are
+    // applied by the store rather than by fetching everything and filtering in memory.
+    if (query.reference) predicate.reference = { $like: `%${query.reference}%` };
+    if (query.from || query.to) {
+      predicate.created_at = {};
+      if (query.from) predicate.created_at.$gte = query.from;
+      if (query.to) predicate.created_at.$lte = query.to;
+    }
+
+    const { rows, total } = await store.table('orders').find(predicate, {
+      orderBy: '-created_at', limit: query.limit, offset: query.offset,
+    });
+
+    const customers = new Map((await store.table('users').all()).map((u) => [u.id, u]));
+    const invoices = await store.table('invoices').all();
+    const payments = await store.table('payments').all();
+    const items = await store.table('order_items').all();
+
+    ctx.json({
+      orders: rows.map((order) => {
+        const customer = customers.get(order.user_id);
+        const invoice = invoices.find((i) => i.order_id === order.id) ?? null;
+        const orderPayments = payments.filter((p) => p.order_id === order.id || (invoice && p.invoice_id === invoice.id));
+        return {
+          id: order.id,
+          reference: order.reference,
+          status: order.status,
+          currency: order.currency,
+          subtotal: order.subtotal,
+          taxTotal: order.tax_total ?? 0,
+          discountTotal: order.discount_total ?? 0,
+          total: order.total,
+          createdAt: order.created_at,
+          updatedAt: order.updated_at,
+          userId: order.user_id,
+          userEmail: customer?.email ?? null,
+          userFullName: customer?.full_name ?? null,
+          itemCount: items.filter((i) => i.order_id === order.id).length,
+          invoiceId: invoice?.id ?? null,
+          invoiceNumber: invoice?.number ?? null,
+          invoiceStatus: invoice?.status ?? null,
+          paymentStatus: orderPayments.some((p) => p.status === 'succeeded') ? 'paid'
+            : orderPayments.some((p) => p.status === 'pending') ? 'pending'
+              : orderPayments.length > 0 ? 'failed' : 'none',
+        };
+      }),
+      total,
+      limit: query.limit,
+      offset: query.offset,
+      filters: {
+        status: query.status ?? null, userId: query.userId ?? null, reference: query.reference ?? null,
+        from: query.from ?? null, to: query.to ?? null,
+      },
+    });
+  }));
+
+  /** Everything the platform actually knows about one order, from the rows it created for it. */
+  router.get('/api/v1/admin/orders/:id', staff(async (ctx) => {
+    if (!UUID_RE.test(String(ctx.params.id ?? ''))) throw new ValidationError('id must be a valid UUID');
+    const order = await store.table('orders').findById(ctx.params.id);
+    if (!order) throw new NotFoundError('No order was found with that id');
+
+    const customer = order.user_id ? await store.table('users').findById(order.user_id) : null;
+    const { rows: items } = await store.table('order_items').find({ order_id: order.id });
+    const { rows: invoices } = await store.table('invoices').find({ order_id: order.id }, { orderBy: '-created_at' });
+
+    const billing = [];
+    for (const invoice of invoices) {
+      const [{ rows: ledger }, { rows: payments }] = await Promise.all([
+        store.table('billing_ledger').find({ invoice_id: invoice.id }, { orderBy: 'created_at' }),
+        store.table('payments').find({ invoice_id: invoice.id }, { orderBy: 'created_at' }),
+      ]);
+      billing.push({
+        invoice: {
+          id: invoice.id, number: invoice.number, status: invoice.status, currency: invoice.currency,
+          subtotalAmount: invoice.subtotal, discountAmount: invoice.discount_total ?? 0, taxAmount: invoice.tax_total ?? 0,
+          totalAmount: invoice.total, amountPaid: invoice.amount_paid, dueDate: invoice.due_at,
+          issuedAt: invoice.issued_at, paidAt: invoice.paid_at ?? null,
+        },
+        ledger: ledger.map((l) => ({
+          id: l.id, entryType: l.entry_type, amount: l.amount, currency: l.currency,
+          description: l.description, createdAt: l.created_at,
+        })),
+        payments: payments.map(paymentDto),
       });
     }
 
-    ctx.json({ order: { ...orderSummaryDto(order, invoice), items: resolved } });
-  });
+    // What the order turned into. Installations carry a real `order_id`; services are matched on the
+    // same link `lib/order-provisioning.js` uses, so this is the same join the provisioner performs.
+    const installations = (await store.table('application_installations').all()).filter((row) => row.order_id === order.id);
+    const services = (await store.table('customer_services').all()).filter((row) => row.order_id === order.id);
+    const serviceIds = new Set(services.map((row) => row.id));
+    const jobs = (await store.table('provisioning_jobs').all())
+      .filter((row) => (row.resource_type === 'order' && row.resource_id === order.id) || serviceIds.has(row.service_id));
+    const deployments = (await store.table('deployments').all())
+      .filter((row) => installations.some((inst) => inst.id === row.installation_id));
+
+    const orderPayments = await store.table('payments').find({ order_id: order.id });
+    const settled = orderPayments.rows.some((p) => p.status === 'succeeded');
+    // The invoice a refund would run through, when the order has one that is refundable at all.
+    const refundInvoice = invoices.find((i) => ['paid', 'unpaid'].includes(i.status)) ?? null;
+
+    ctx.json({
+      order: {
+        id: order.id,
+        reference: order.reference,
+        status: order.status,
+        currency: order.currency,
+        subtotal: order.subtotal,
+        taxTotal: order.tax_total ?? 0,
+        discountTotal: order.discount_total ?? 0,
+        total: order.total,
+        cartId: order.cart_id ?? null,
+        createdAt: order.created_at,
+        updatedAt: order.updated_at,
+        customer: {
+          id: order.user_id ?? null,
+          email: customer?.email ?? null,
+          fullName: customer?.full_name ?? null,
+          status: customer?.status ?? null,
+        },
+        items: await orderItemDtos(store, order, items),
+        billing,
+        fulfilment: {
+          installations: installations.map((row) => ({
+            id: row.id, name: row.name, status: row.status, domain: row.domain ?? null,
+            healthStatus: row.health_status ?? null, serverId: row.server_id ?? null,
+            deployments: deployments.filter((d) => d.installation_id === row.id).map((d) => ({
+              id: d.id, action: d.action, status: d.status, errorCode: d.error_code ?? null, createdAt: d.created_at,
+            })),
+          })),
+          services: services.map((row) => ({
+            id: row.id, label: row.label ?? null, status: row.status, domain: row.domain ?? null, serverId: row.server_id ?? null,
+          })),
+          provisioningJobs: jobs.map((row) => ({
+            id: row.id, kind: row.kind, status: row.status, attempts: row.attempts,
+            error: row.error ?? null, createdAt: row.created_at, finishedAt: row.finished_at ?? null,
+          })),
+        },
+        // The guards the cancel route enforces, reported up front so staff tooling does not have to
+        // discover them by trying: only a pending order that never settled can be cancelled, and when
+        // money has moved the honest next step is named rather than implied.
+        cancellation: {
+          cancellable: order.status === 'pending' && !settled,
+          reason: order.status === 'pending' && !settled
+            ? null
+            : settled
+              ? 'This order has a settled payment; refund its invoice instead.'
+              : `Order status is '${order.status}'; only pending orders can be cancelled.`,
+          refundPath: refundInvoice ? `/api/v1/admin/invoices/${refundInvoice.id}/refund` : null,
+        },
+      },
+    });
+  }));
+
+  /**
+   * Cancel a pending order.
+   *
+   * Refused with a named reason when money has already moved: a paid order is not cancellable here,
+   * because "cancelled" would hide a settled payment — the refund route is the honest path and the
+   * refusal says so. Cancelling voids the order's unpaid invoice, fails its pending payment attempts
+   * with the reason attached, and records who did it and why.
+   */
+  const admin = (handler) => async (ctx) => {
+    await asAdmin(ctx, deps);
+    return handler(ctx);
+  };
+
+  router.post('/api/v1/admin/orders/:id/cancel', admin(async (ctx) => {
+    if (!UUID_RE.test(String(ctx.params.id ?? ''))) throw new ValidationError('id must be a valid UUID');
+    const body = await ctx.validate(v.object({ reason: v.string().trim().min(1).max(2000) }));
+
+    const order = await store.table('orders').findById(ctx.params.id);
+    if (!order) throw new NotFoundError('No order was found with that id');
+    if (order.status !== 'pending') {
+      throw new ValidationError(`Cannot cancel an order with status '${order.status}' — a settled order is refunded instead (POST /api/v1/admin/invoices/:id/refund)`);
+    }
+
+    const { rows: orderPayments } = await store.table('payments').find({ order_id: order.id });
+    if (orderPayments.some((p) => p.status === 'succeeded')) {
+      throw new ValidationError('This order has a settled payment — refund the invoice instead of cancelling the order');
+    }
+
+    const { rows: invoices } = await store.table('invoices').find({ order_id: order.id });
+    await store.transaction(async (tx) => {
+      for (const invoice of invoices) {
+        const { rows: pending } = await tx.table('payments').find({ invoice_id: invoice.id, status: 'pending' });
+        for (const payment of pending) {
+          await tx.table('payments').updateById(payment.id, {
+            status: 'failed',
+            rejection_reason: `Order cancelled: ${body.reason}`,
+            confirmed_by: ctx.user.id,
+          });
+        }
+        if (invoice.status === 'unpaid') await tx.table('invoices').updateById(invoice.id, { status: 'void' });
+      }
+      await tx.table('orders').updateById(order.id, { status: 'cancelled', updated_at: new Date().toISOString() });
+    });
+
+    await store.table('audit_logs').insert({
+      id: uuidv7(),
+      actor_id: ctx.user.id,
+      actor_role: ctx.user.role,
+      action: 'admin_order_cancelled',
+      entity_type: 'order',
+      entity_id: order.id,
+      ip_address: ctx.ip,
+      user_agent: ctx.userAgent,
+      after: {
+        orderId: order.id, orderNumber: order.reference, customerId: order.user_id,
+        total: order.total, currency: order.currency,
+        voidedInvoices: invoices.filter((i) => i.status === 'unpaid').map((i) => i.number),
+        reason: body.reason,
+      },
+    });
+
+    const updated = await store.table('orders').findById(order.id);
+    const { rows: after } = await store.table('invoices').find({ order_id: order.id });
+    ctx.json({
+      order: {
+        id: updated.id, reference: updated.reference, status: updated.status,
+        currency: updated.currency, total: updated.total, updatedAt: updated.updated_at,
+      },
+      voidedInvoices: after.filter((i) => i.status === 'void').map((i) => ({ id: i.id, number: i.number })),
+    });
+  }));
 }
 
 module.exports = { name, register };

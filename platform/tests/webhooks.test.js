@@ -158,9 +158,16 @@ test('integration: inbound provider webhooks', async (t) => {
       assert.match(data.message, /raw request body/i);
     });
 
-    await t.test('GET on a webhook path is not allowed', async () => {
+    // The GET route exists for providers that call back with query parameters (Blockonomics), so the
+    // guard moved to the gateway: a signature-based gateway gets a 400 for the missing signed body,
+    // and — the part that matters — nothing is written.
+    await t.test('a GET cannot deliver a webhook to a signature-based gateway', async () => {
+      const before = await app.store.table('webhook_events').count({});
       const response = await fetch(`${base}/api/v1/webhooks/sandbox`);
-      assert.ok([404, 405].includes(response.status), `got ${response.status}`);
+      assert.strictEqual(response.status, 400);
+      const data = await response.json();
+      assert.match(data.message, /raw request body/i);
+      assert.strictEqual(await app.store.table('webhook_events').count({}), before, 'no event row for an unsigned GET');
     });
 
     // ---- unrecognised events are accepted but not applied -------------------

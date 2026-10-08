@@ -76,8 +76,8 @@ one.
 | `platform/src/domains/cloudflare.js`, `admin-cloudflare.js` | Live Cloudflare client, "Test Connection", live purge |
 | `platform/src/domains/domain-services.js` | Availability / WHOIS-RDAP / appraisal provider connector |
 | `platform/src/domains/admin-domain-services.js` | Registrar transfer refresh poll |
-| `platform/src/domains/ai-os.js` | Model adapter — Copilot inference (prompt is recorded, no reply) |
-| `platform/src/domains/ai-support.js` | LLM inference (human agents only) |
+| `platform/src/domains/ai-os.js` | **Closed 2026-10-08** — Copilot completed as a deterministic intent router over real rows: `platform/src/lib/ai-copilot.js` (14 admin + 9 customer commands) and `platform/src/lib/ai-copilot-data.js` (19 queries), wired to `POST /admin/ai/copilot` and `POST /account/ai/assistant`. Answers carry `evidence` (query + row count); unmatched prompts return the supported list with `confidence:'none'`; failures say what failed and state that nothing was fabricated. No model adapter is required and none is simulated. 6 tests in `platform/tests/ai-copilot.test.js` |
+| `platform/src/domains/ai-support.js` | **Closed 2026-10-08** — the support assistant is a deterministic operator (`platform/src/lib/support-operator.js`, ported from the audited build's `ai/knowledge.ts` + `ai-support-operator.ts`): 17 reviewed catalogue answers with keyword retrieval, published prices read from real catalog rows, a newsletter form request, and escalation for everything else. Escalation writes a real `support_tickets` row for a signed-in customer, assigns/notifies an available agent, and sets priority + department from the reason; assistant messages record `intent`/`confidence`/`knowledge_sources`. No model is simulated — every answer is labelled `engine: 'deterministic-retrieval'`. 6 tests in `platform/tests/support-operator.test.js` |
 | `platform/src/domains/tools.js` | **Closed 2026-10-06 — Live DNS resolver & HTTP monitor probe connectors completed** (`platform/src/lib/tools-connectors.js`). Real DNS queries executed via `node:dns/promises` across 9 record types; outbound HTTP monitor probes execute real GET/HEAD requests with latency timing, status code capture, and SSRF protection (private IP / blocked hostnames). 6 tests in `platform/tests/tools-connectors.test.js` |
 
 ### 1b. Named but absent features
@@ -139,8 +139,17 @@ one.
   amount/currency/owner/invoice-total invariants, and settlement through the shared
   `applySuccessfulPayment`. 40 tests in `platform/tests/gateways.test.js`; whole suite 357 green.
   Still open, and refused with that reason: **initiating** a real-provider checkout (needs live
-  provider egress + PSP credentials), and the Blockonomics (Bitcoin/USDT) gateway used by the WHMCS
-  build, which has no `platform/` equivalent at all.
+  provider egress + PSP credentials).
+  **Blockonomics (Bitcoin) — closed 2026-10-08** as far as this build can carry it:
+  `platform/src/lib/gateways/blockonomics.js` ports the WHMCS callback contract (timing-safe
+  `secret` query parameter, shape gate, confirmation threshold from configuration,
+  `addr:txid:confirmations` de-duplication, audit record), reached through a new GET webhook route
+  that only a gateway declaring `queryCallback` may use. 7 tests in
+  `platform/tests/blockonomics-gateway.test.js`. Initiation stays refused by name (the
+  address-issuance API and a recorded BTC quote do not exist here) and so does settlement:
+  `NUMERIC(16,2)` money columns cannot hold a Bitcoin amount, so a confirmed delivery is recorded
+  and refused with that reason instead of being credited as `0`. USDT/BCH are refused by name. A
+  minor-unit ledger column is the follow-up that would make crypto settlement real.
 - **SPA dashboard (`platform/spa/`)** — **15 page modules of ~84 ported** (8 customer pages + 7 admin
   modules, the shell included): `DashboardPage` (overview), `CatalogPage` (with add-to-cart and a
   billing-cycle picker), `CartPage` (quantity, remove, checkout), `BillingPage`
