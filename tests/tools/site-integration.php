@@ -31,6 +31,38 @@ foreach (ToolsSite::catalog()['tools'] as $tool) {
 }
 foreach (ToolsSite::catalog()['categories'] as $slug=>$label) { check(ToolsSite::resolve('/tools/category/'.$slug)['name']===$label.' Tools', 'category'); }
 
+// --- No catalogue entry may exist without a page -------------------------------------------------
+// "A catalogue tool without a usable page" is an acceptance failure, and it is not detectable by
+// resolving the route: `Catalog::resolve()` reads the same array the catalogue does, so a tool that
+// was added to `config/tools.php` but never renderable resolves perfectly happily. The page is
+// therefore *rendered* here, exactly as the WHMCS shell renders it, and the result is inspected. A
+// missing renderer, a broken template or an undefined field surfaces as a fatal, a warning or an
+// empty document rather than as a 404.
+$pageFailures = array();
+foreach (Catalog::enabledTools() as $renderTool) {
+    $resolvedTool = Catalog::resolve('/tools/' . $renderTool['slug']);
+    $html = '';
+    try {
+        ob_start();
+        $html = View::document($resolvedTool, '', '');
+        ob_end_clean();
+    } catch (\Throwable $error) {
+        if (ob_get_level() > 0) { ob_end_clean(); }
+        $pageFailures[] = $renderTool['slug'] . ' threw ' . get_class($error) . ': ' . $error->getMessage();
+        continue;
+    }
+    if (stripos($html, '<h1') === false) { $pageFailures[] = $renderTool['slug'] . ' rendered no heading'; }
+    if (preg_match('~Fatal error|Warning:|Notice:|Undefined (index|array key)~i', $html) === 1) {
+        $pageFailures[] = $renderTool['slug'] . ' rendered a PHP diagnostic';
+    }
+}
+check($pageFailures === array(), 'every enabled tool renders a page (' . count(Catalog::enabledTools()) . ' rendered): ' . implode(' | ', array_slice($pageFailures, 0, 4)));
+check(count(Catalog::enabledTools()) >= 100, 'every catalogue tool is rendered, not vacuously passing');
+// Categories are pages too, and a category with no tools behind it renders an empty catalogue.
+foreach (array_keys(Catalog::categories()) as $nativeCategory) {
+    check(Catalog::resolve('/tools/category/' . $nativeCategory) !== null, 'native category has a page: ' . $nativeCategory);
+}
+
 // --- One URL per capability. The native catalogue serves the interactive page; the shared registry
 // describes the same tools for the app, the navigation and the sitemaps. When the two disagree on a
 // path the capability is published twice: two indexable pages with one title, and the second one
