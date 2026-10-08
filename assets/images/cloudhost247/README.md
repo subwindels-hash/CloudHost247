@@ -55,6 +55,19 @@ and `includes/application-logo.tpl`. No third-party logos are fabricated, bundle
 without a license, or used to imply affiliation. The public platform API, not this
 asset directory, determines what may be shown in the catalog.
 
+`tests/website/test_static.py` enforces this over every tree the project serves —
+this directory, `assets/cloudhost247-tools/` and the platform's two logo
+directories — by rejecting the vendors' own brand colours.
+
+**One exemption, and it is not ours to change:** `templates/orderforms/ovh_cart/`
+is a vendor order-form skin that ships its own distribution icons. It is listed in
+`docs/independent-rebuild/original-file-manifest.sha256`, which the release gate
+verifies with a strict `sha256sum --check` and no exemptions, so "tidying" those
+files would modify a third-party surface *and* fail the build. It is a checkout
+skin, not part of the public website. The exemption is written into the test's
+`VENDOR_EXEMPT` tuple rather than assumed, so the scope of the policy is visible
+where the policy is checked.
+
 ## Regeneration
 
 `python3 scripts/generate-catalog-assets.py` writes **only** the `panels/` and

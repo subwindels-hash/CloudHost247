@@ -166,6 +166,29 @@ class WebsiteTests(unittest.TestCase):
   served={m['served'] for m in marks}
   self.assertTrue(referenced<=served,f'seeded OS logos with no mark: {sorted(referenced-served)}')
 
+  # --- the same policy, swept across every tree this project serves -------------------------
+  # The mark families above are checked by identity; this is the catch-all. `templates/orderforms/
+  # ovh_cart/` is deliberately exempt: it is a vendor order-form skin shipped in the strict
+  # integrity baseline, and rewriting its artwork would both modify somebody else's surface and
+  # fail `sha256sum --check docs/independent-rebuild/original-file-manifest.sha256`.
+  VENDOR_EXEMPT = ('templates/orderforms/ovh_cart/',)
+  vendor_hexes = {'dd4814', 'ff6c2c', 'a80030', '5277c3', '1793d1', '73ba25', '0d597f',
+                  '932279', '262577', 'e65100', '0073aa', '0c2554', '072b61', '00b0d8'}
+  sweeps = list((ROOT/'assets/images/cloudhost247').rglob('*.svg')) + \
+           list((ROOT/'assets/cloudhost247-tools').rglob('*.svg')) + \
+           list((ROOT/'cloudhost247-node/frontend/public/panel-logos').glob('*.svg')) + \
+           list((ROOT/'cloudhost247-node/frontend/public/os-logos').glob('*.svg'))
+  self.assertGreaterEqual(len(sweeps), 150, 'the sweep should cover the served illustration library')
+  offenders = []
+  for path in sweeps:
+   relative = str(path.relative_to(ROOT))
+   if relative.startswith(VENDOR_EXEMPT):
+    continue
+   for colour in re.findall(r'#[0-9a-fA-F]{6}', path.read_text()):
+    if colour[1:].lower() in vendor_hexes:
+     offenders.append(f'{relative} uses vendor brand hex {colour}')
+  self.assertEqual(offenders, [], 'vendor brand colour found in a first-party asset: ' + '; '.join(offenders[:5]))
+
   glyphs={}
   for mark in marks:
    canonical=ROOT/mark['canonical']
