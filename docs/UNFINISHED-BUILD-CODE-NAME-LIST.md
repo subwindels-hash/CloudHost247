@@ -24,9 +24,11 @@ grouped by *why* it is unfinished. What each one is missing lives in the two sou
 ### 1.1 `platform/` — live provider egress still deferred (2 modules remain of 6)
 
 The domain modules in `platform/` that still carry a `deferred` marker for live integration
-(`ls platform/src/domains` = 45 modules). **Rows 1–5 are now closed** — the Cloudflare modules reach
-Cloudflare inside the request, the domain connector reaches a registry or a registrar, the Copilot
-answers from the platform's own tables, and each one refuses with a named reason when it cannot:
+(`ls platform/src/domains` = 45 modules). **All six rows are now closed** — the Cloudflare modules
+reach Cloudflare inside the request, the domain connector reaches a registry or a registrar, the
+Copilot answers from the platform's own tables, the support assistant answers from a reviewed
+catalogue and escalates everything else into a real ticket, and each one refuses with a named reason
+when it cannot:
 
 | # | Module | Deferred capability | State |
 |---|---|---|---|
@@ -35,7 +37,7 @@ answers from the platform's own tables, and each one refuses with a named reason
 | 3 | `platform/src/domains/domain-services.js` | Availability / WHOIS-RDAP lookup / appraisal provider connector (returns `provider_unavailable`) | **closed 2026-10-08** |
 | 4 | `platform/src/domains/admin-domain-services.js` | Registrar transfer refresh poll; extension catalogue sync; registrar adapters (`namecheap`, `godaddy`). **All closed** — Test Connection is a real provider call, the installed-adapter list is the compiled registry's own answer, the refresh polls the registrar that holds the transfer, and the sync pulls the registrar's real TLD catalogue. | **closed 2026-10-08** |
 | 5 | `platform/src/domains/ai-os.js` | Model adapter — Copilot inference (prompt is recorded, no reply is produced). **Closed** — `POST /admin/ai/copilot` and `POST /account/ai/assistant` now answer from the platform's own tables through `platform/src/lib/ai-copilot.js` (deterministic intent router, 14 admin + 9 customer commands) and `platform/src/lib/ai-copilot-data.js` (19 real queries). There is no model in the path and no model was needed: a match renders `evidence` naming the query and row count behind every answer, an empty table reads "None found (real query, zero rows)", a failed query reports the real error and adds "Nothing was fabricated", and an unrouted prompt returns `confidence:'none'` with the supported-command list ("I will not guess"). The customer scope is forced to `auth.id`, so one account cannot read another's invoices, and the only write the assistant can perform is a ticket on the customer's own explicit `open ticket: …` request. 6 tests in `platform/tests/ai-copilot.test.js`. Inference *by an external model* remains out of scope here — that was never the deferred capability, and it is not faked. | **closed 2026-10-08** |
-| 6 | `platform/src/domains/ai-support.js` | LLM inference (human agents reply manually) | open |
+| 6 | `platform/src/domains/ai-support.js` | LLM inference (human agents reply manually). **Closed** — the assistant is now `platform/src/lib/support-operator.js`, ported from `cloudhost247-node/src/ai/knowledge.ts` + `services/ai-support-operator.ts`: a reviewed, code-owned catalogue of 17 CloudHost247 answers with deterministic keyword retrieval, published prices read from the real `catalog_*` rows, and a newsletter **form request** rather than a claim. Everything it cannot verify is escalated: refunds, security reports, complaints, explicit human requests, account-specific questions and server-down reports are checked *before* retrieval, so no keyword overlap can route them into a documentation answer. The escalation is real — an available agent is assigned and notified, the reason sets the priority and the department, a signed-in customer gets a `support_tickets` row carrying their own first message, and the reply says a representative has it **only when one does**. Assistant messages store `intent`/`confidence`/`knowledge_sources` so an agent inheriting the conversation can see why it answered. External *model* inference is still not enabled on this deployment — it was never the observable capability, and nothing fakes it; the engine label on every answer is `deterministic-retrieval`. 6 tests in `platform/tests/support-operator.test.js`. | **closed 2026-10-08** |
 
 Supporting library files that still carry the marker with them (not modules, listed for completeness):
 `platform/src/lib/provider-adapters.js`, `platform/src/lib/provider-egress.js`, `platform/src/store/schema.js`.
@@ -210,10 +212,10 @@ visual/browser tests — *NOT PERFORMED*. Production database is read-only from 
 
 ## Quick copy/paste name list
 
-**Platform — deferred egress:** `ai-support`
-*(`cloudflare`, `admin-cloudflare`, the `domain-services` connector, the `admin-domain-services`
-registrar work — transfer refresh, extension sync, `namecheap`/`godaddy` adapters — and the `ai-os`
-Copilot were all closed 2026-10-08; see the completion log and §1.1.)*
+**Platform — deferred egress:** *(none left in §1.1)*
+*(All six rows — `cloudflare`, `admin-cloudflare`, the `domain-services` connector, the
+`admin-domain-services` registrar work (transfer refresh, extension sync, `namecheap`/`godaddy`
+adapters), the `ai-os` Copilot and the `ai-support` operator — were closed 2026-10-08; see §1.1.)*
 
 **Platform — partial:** `platform/spa` (17 page modules ported, ~35 admin groups + DNS/Cloudflare/
 marketplace/server-detail/mobile shell missing) · `platform/mobile` (no app code)

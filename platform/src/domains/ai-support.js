@@ -1,9 +1,18 @@
 /**
- * AI support — agents, conversations, messages and the knowledge base.
+ * AI support — agents, conversations, messages and the reviewed knowledge catalogue.
  *
- * Ported from cloudhost247-node/src/routes/ai-support.ts. The LLM inference itself is an external
- * adapter (deferred); this module stores agents, conversations, messages and knowledge entries and
- * returns a deterministic canned reply so the workflow is testable without a model.
+ * Ported from cloudhost247-node/src/routes/ai-support.ts, and the assistant in it is now completed
+ * rather than deferred: `lib/support-operator.js` decides what happens to each customer message — a
+ * reviewed catalogue answer, a published price read from the live catalog, the newsletter form, or an
+ * escalation to the human queue. That decision layer is deterministic on purpose. The audited build
+ * runs no language model on this path either, so nothing here is simulated: every answer is traceable
+ * to a catalogue entry or a catalog row, and every question this platform cannot verify — anything
+ * account-specific, anything outside the catalogue — is escalated with the transcript instead of
+ * being answered.
+ *
+ * An escalation is not a dead end. It creates a real `support_tickets` row for a signed-in customer,
+ * assigns an available agent when one exists, sets the priority from the reason, and notifies both
+ * sides, so "a human will follow up" is a statement about rows that now exist.
  */
 'use strict';
 
@@ -11,29 +20,49 @@ const { v } = require('../core/validate');
 const { NotFoundError, ValidationError } = require('../core/errors');
 const { uuidv7 } = require('../lib/ids');
 const { authenticate, asAdmin, asStaff } = require('../lib/auth');
+const {
+  decideSupportResponse, listSupportKnowledge, supportAvailability, HIGH_PRIORITY_REASONS, ENGINE,
+} = require('../lib/support-operator');
 
 const name = 'ai-support';
 
 const CONVERSATION_STATUSES = ['AI_ACTIVE', 'WAITING_FOR_HUMAN', 'ASSIGNED', 'IN_PROGRESS', 'WAITING_FOR_CUSTOMER', 'RESOLVED', 'CLOSED'];
 
-// Static support knowledge base (the original listSupportKnowledge() returns a fixed catalogue).
-const SUPPORT_KNOWLEDGE = [
-  { id: 'kb-billing', topic: 'Billing & invoices', summary: 'How to read invoices, update payment methods and request refunds.' },
-  { id: 'kb-domains', topic: 'Domains & DNS', summary: 'Registering, transferring and pointing domains; nameserver and DNS record help.' },
-  { id: 'kb-hosting', topic: 'Hosting & servers', summary: 'Provisioning, resource limits, backups and server lifecycle questions.' },
-  { id: 'kb-cloudflare', topic: 'Cloudflare integration', summary: 'Connecting Cloudflare, plans, SSL modes and cache purges.' },
-  { id: 'kb-account', topic: 'Account & security', summary: 'Passwords, two-factor authentication and account recovery.' },
-];
+/**
+ * Statuses in which the assistant may answer. `AI_ACTIVE` is the registry default; `open` is what the
+ * customer-facing create route writes, and the two must mean the same thing here or a new
+ * conversation would silently get no assistant at all.
+ */
+const ASSISTANT_STATUSES = ['AI_ACTIVE', 'open'];
+
+/** Terminal statuses — a message into one of these is refused rather than answered. */
+const TERMINAL_STATUSES = ['RESOLVED', 'CLOSED'];
+
+/** Which queue a reason belongs in, and how urgent it is. */
+const REASON_DEPARTMENT = {
+  BILLING_SUPPORT_REQUIRED: 'billing',
+  SECURITY_RELATED: 'abuse',
+  REFUND_REQUEST: 'billing',
+  COMPLAINT: 'abuse',
+  SERVER_SUPPORT_REQUIRED: 'technical',
+  TECHNICAL_SUPPORT_REQUIRED: 'technical',
+};
 
 function publicConversation(row) {
   return { id: row.id, agentId: row.agent_id, subject: row.subject, status: row.status, createdAt: row.created_at };
 }
 
-function cannedReply(knowledge, text) {
-  const q = String(text).toLowerCase();
-  const hit = knowledge.find((k) => q.includes(String(k.trigger || '').toLowerCase()) && k.trigger);
-  if (hit) return hit.body;
-  return "Thanks for reaching out. I've logged your question and a member of our support team will follow up shortly.";
+/** Public DTO for a stored message, including the assistant's reasoning when it has any. */
+function publicMessage(row) {
+  return {
+    id: row.id,
+    role: row.role,
+    content: row.content,
+    createdAt: row.created_at,
+    ...(row.intent ? { intent: row.intent } : {}),
+    ...(row.confidence === null || row.confidence === undefined ? {} : { confidence: Number(row.confidence) }),
+    ...(Array.isArray(row.knowledge_sources) && row.knowledge_sources.length > 0 ? { sources: row.knowledge_sources } : {}),
+  };
 }
 
 function register(router, deps) {
@@ -45,33 +74,10 @@ function register(router, deps) {
    * present but at capacity, otherwise OFFLINE.
    */
   router.get('/api/v1/ai-support/availability', async (ctx) => {
-    const [users, presence, conversations] = await Promise.all([
-      store.table('users').all(),
-      store.table('support_agent_presence').all(),
-      store.table('ai_support_conversations').all(),
-    ]);
-
-    const eligible = new Set(
-      users.filter((u) => u.status === 'active' && ['staff', 'admin', 'super_admin'].includes(u.role)).map((u) => u.id),
-    );
-
-    let available = 0;
-    let online = 0;
-    let busy = 0;
-    for (const p of presence) {
-      if (!eligible.has(p.user_id)) continue;
-      if (p.status === 'ONLINE') {
-        online += 1;
-        const load = conversations.filter(
-          (c) => c.assigned_agent_id === p.user_id && ['ASSIGNED', 'IN_PROGRESS'].includes(c.status),
-        ).length;
-        if (load < (p.capacity ?? 3)) available += 1;
-      } else if (p.status === 'BUSY') {
-        busy += 1;
-      }
-    }
-
-    ctx.json({ status: available > 0 ? 'ONLINE' : (online > 0 || busy > 0) ? 'BUSY' : 'OFFLINE' });
+    // One definition of "a human is reachable", shared with the escalation path: the widget and the
+    // transfer decision can never disagree about it.
+    const availability = await supportAvailability(store);
+    ctx.json({ status: availability.status });
   });
 
   router.get('/api/v1/ai-support/agents', async (ctx) => {
@@ -107,24 +113,82 @@ function register(router, deps) {
     const conv = await store.table('ai_support_conversations').findOne({ id: ctx.params.id, user_id: auth.id });
     if (!conv) throw new NotFoundError('Conversation not found');
     const { rows } = await store.table('ai_support_messages').find({ conversation_id: conv.id }, { orderBy: 'created_at' });
-    ctx.json({ conversation: publicConversation(conv), messages: rows.map((m) => ({ id: m.id, role: m.role, content: m.content, createdAt: m.created_at })) });
+    ctx.json({ conversation: publicConversation(conv), messages: rows.map(publicMessage) });
   });
 
+  /**
+   * Send a message to the support assistant.
+   *
+   * Three outcomes, all of them honest:
+   *  · the assistant answers from the reviewed catalogue, the live catalog, or the newsletter form;
+   *  · it escalates, which writes a real ticket for a signed-in customer and hands the conversation
+   *    to the queue;
+   *  · a conversation already with a human stays with the human — the message is stored and the queue
+   *    is told, and no assistant reply is invented for it.
+   */
   router.post('/api/v1/ai-support/conversations/:id/messages', async (ctx) => {
     const auth = await authenticate(ctx, deps);
     const conv = await store.table('ai_support_conversations').findOne({ id: ctx.params.id, user_id: auth.id });
     if (!conv) throw new NotFoundError('Conversation not found');
     const body = await ctx.validate(v.object({ content: v.string().trim().min(1).max(8000) }));
+    const now = () => new Date().toISOString();
 
-    const knowledge = await store.table('ai_support_knowledge').all();
-    const reply = cannedReply(knowledge, body.content);
+    if (TERMINAL_STATUSES.includes(conv.status)) throw new ValidationError('This conversation is closed');
 
-    let userMsg; let botMsg;
-    await store.transaction(async (tx) => {
-      userMsg = await tx.table('ai_support_messages').insert({ id: uuidv7(), conversation_id: conv.id, role: 'user', content: body.content });
-      botMsg = await tx.table('ai_support_messages').insert({ id: uuidv7(), conversation_id: conv.id, role: 'assistant', content: reply });
+    // A conversation that is with the human queue does not get assistant answers.
+    if (!ASSISTANT_STATUSES.includes(conv.status)) {
+      const userMessage = await store.table('ai_support_messages').insert({ id: uuidv7(), conversation_id: conv.id, role: 'user', content: body.content });
+      await store.table('ai_support_conversations').updateById(conv.id, {
+        status: conv.assigned_agent_id ? 'IN_PROGRESS' : 'WAITING_FOR_HUMAN',
+        last_message_at: now(), updated_at: now(),
+      });
+      ctx.code(201).json({
+        accepted: true, humanActive: true,
+        userMessage: publicMessage(userMessage),
+      });
+      return;
+    }
+
+    const previous = (await store.table('ai_support_messages').find({ conversation_id: conv.id }, { orderBy: '-created_at', limit: 8 })).rows;
+    const userMessage = await store.table('ai_support_messages').insert({ id: uuidv7(), conversation_id: conv.id, role: 'user', content: body.content });
+    const decision = await decideSupportResponse(store, body.content, { previousMessages: previous });
+
+    if (decision.kind === 'ESCALATE' && decision.reason === 'USER_REQUESTED_HUMAN') {
+      await store.table('audit_logs').insert({
+        id: uuidv7(), actor_id: auth.id, actor_role: auth.role, action: 'HUMAN_TRANSFER_REQUESTED',
+        entity_type: 'ai_support_conversation', entity_id: conv.id, ip_address: ctx.ip, user_agent: ctx.userAgent, after: null,
+      });
+    }
+
+    // Escalation runs first: it decides whether a human is actually there, and the reply the customer
+    // receives has to say which of the two happened.
+    const transfer = decision.kind === 'ESCALATE' ? await escalate(ctx, conv, decision.reason ?? 'OTHER') : null;
+    // Both halves are true and the customer needs both: why it could not be answered here, and what
+    // actually happened instead. Dropping the first would hide the reason for the escalation.
+    const content = transfer ? `${decision.body}\n\n${transfer.body}` : decision.body;
+    const reply = await store.table('ai_support_messages').insert({
+      id: uuidv7(), conversation_id: conv.id, role: 'assistant', content,
+      intent: decision.intent, confidence: decision.confidence, knowledge_sources: decision.sources,
     });
-    ctx.code(201).json({ userMessage: userMsg, reply: { id: botMsg.id, role: 'assistant', content: reply } });
+    await store.table('ai_support_conversations').updateById(conv.id, { last_message_at: now(), updated_at: now() });
+    await store.table('audit_logs').insert({
+      id: uuidv7(), actor_id: auth.id, actor_role: auth.role,
+      action: decision.kind === 'ESCALATE' ? 'AI_ESCALATION_TRIGGERED' : decision.kind === 'NEWSLETTER' ? 'NEWSLETTER_SUBSCRIPTION_REQUESTED' : 'AI_RESPONSE_GENERATED',
+      entity_type: 'ai_support_conversation', entity_id: conv.id, ip_address: ctx.ip, user_agent: ctx.userAgent,
+      after: { intent: decision.intent, engine: decision.engine ?? ENGINE, confidence: decision.confidence, reason: decision.reason ?? null, sources: decision.sources },
+    });
+
+    ctx.code(201).json({
+      userMessage: publicMessage(userMessage),
+      reply: publicMessage(reply),
+      decision: {
+        kind: decision.kind, intent: decision.intent, confidence: decision.confidence,
+        ...(decision.reason ? { reason: decision.reason } : {}),
+        ...(decision.sources.length > 0 ? { sources: decision.sources } : {}),
+        engine: decision.engine ?? ENGINE,
+      },
+      ...(transfer ? { transfer } : {}),
+    });
   });
 
   // Newsletter sign-up captured from inside a support conversation. Idempotent on email: an
@@ -200,7 +264,8 @@ function register(router, deps) {
 
   // ===========================================================================
   // Admin / staff support console (spec: ai-support admin). All routes require
-  // staff/admin/super_admin. LLM inference is deferred; human agents reply directly.
+  // staff/admin/super_admin. The assistant answers from the reviewed catalogue and
+  // escalates the rest; a human agent replies directly through the routes below.
   // ===========================================================================
 
   async function audit(ctx, action, resourceType, resourceId, metadata) {
@@ -215,6 +280,74 @@ function register(router, deps) {
     await store.table('ai_support_conversations').updateById(conversationId, { last_message_at: new Date().toISOString() });
     return { id: msg.id, conversationId, senderType: role, message: content, senderId: senderId ?? null, createdAt: msg.created_at };
   }
+
+  /**
+   * Hand a conversation to the human queue.
+   *
+   * The escalation is only allowed to say "a human will follow up" because it makes that true: an
+   * available agent is assigned when one exists, the reason is recorded on the conversation, and for
+   * a signed-in customer a real `support_tickets` row is created carrying the customer's own first
+   * message into the queue that already exists. When nobody is available the conversation waits in
+   * the queue and the reply says so, rather than promising an agent who is not there.
+   */
+  async function escalate(ctx, conversation, reason) {
+    const availability = await supportAvailability(store);
+    const assignedAgentId = conversation.assigned_agent_id ?? availability.availableAgentIds[0] ?? null;
+    const priority = HIGH_PRIORITY_REASONS.includes(reason) ? 'high' : 'normal';
+    const now = () => new Date().toISOString();
+    let ticketId = conversation.support_ticket_id ?? null;
+
+    if (assignedAgentId && assignedAgentId !== conversation.assigned_agent_id) {
+      await store.table('notifications').insert({
+        id: uuidv7(), user_id: assignedAgentId,
+        title: 'New AI support escalation',
+        body: `A support conversation was escalated to you (${reason.replaceAll('_', ' ').toLowerCase()}).`,
+      });
+    }
+
+    if (!ticketId && conversation.user_id) {
+      const first = (await store.table('ai_support_messages')
+        .find({ conversation_id: conversation.id, role: 'user' }, { orderBy: 'created_at', limit: 1 })).rows[0];
+      const reference = `TCK-${String(Date.now()).slice(-6)}${Math.floor(Math.random() * 90 + 10)}`;
+      const ticket = await store.table('support_tickets').insert({
+        id: uuidv7(), reference, user_id: conversation.user_id,
+        subject: `AI support escalation: ${reason.replaceAll('_', ' ').toLowerCase()}`.slice(0, 200),
+        department: REASON_DEPARTMENT[reason] ?? 'general', priority, status: 'open',
+      });
+      await store.table('support_ticket_messages').insert({
+        id: uuidv7(), ticket_id: ticket.id, author_id: conversation.user_id, author_role: 'customer',
+        body: `Transferred from the CloudHost247 support assistant (reason: ${reason}).\n\n${first?.content ?? 'Please review the attached support conversation.'}`,
+      });
+      await store.table('support_tickets').updateById(ticket.id, { last_reply_at: now() });
+      ticketId = ticket.id;
+    }
+
+    const status = assignedAgentId ? 'ASSIGNED' : 'WAITING_FOR_HUMAN';
+    // The sentence the customer reads depends on which of those two is true. "A representative will
+    // follow up" is only allowed to be said when a representative actually has it.
+    const body = assignedAgentId
+      ? 'I have transferred this conversation to CloudHost247 Support — a representative has been assigned and can see the full transcript, so you do not need to repeat anything.'
+      : 'CloudHost247 Support is not available right now, so I have left this conversation in the support queue rather than claim someone is on it. The transcript is saved and the team will follow up.';
+    await store.table('ai_support_conversations').updateById(conversation.id, {
+      status,
+      escalation_reason: reason,
+      last_message_at: now(),
+      escalation_note: assignedAgentId
+        ? 'Assigned to the available CloudHost247 support queue.'
+        : 'Waiting for the CloudHost247 support queue.',
+      assigned_agent_id: assignedAgentId,
+      support_ticket_id: ticketId,
+      priority,
+      updated_at: now(),
+    });
+
+    return {
+      status, assignedAgentId, ticketId, priority, body,
+      availability: availability.status,
+      // Nobody to reach the visitor at — the widget asks for a name and email instead of assuming.
+      requiresContact: !conversation.user_id && !conversation.visitor_email,
+    };
+  }
   const userName = (u) => u?.full_name ?? null;
 
   router.get('/api/v1/admin/ai-support/agents', async (ctx) => {
@@ -226,9 +359,20 @@ function register(router, deps) {
     ctx.json({ agents: users.map((u) => ({ id: u.id, fullName: u.full_name ?? null, email: u.email, role: u.role, presenceStatus: byUser.get(u.id)?.status ?? 'OFFLINE', capacity: byUser.get(u.id)?.capacity ?? 3 })) });
   });
 
+  // The reviewed catalogue itself — code-owned. The admin surface can read it; nothing here can edit
+  // it, so a support answer cannot be changed without a code review.
   router.get('/api/v1/admin/ai-support/knowledge', async (ctx) => {
     await asStaff(ctx, deps);
-    ctx.json({ knowledge: SUPPORT_KNOWLEDGE });
+    const knowledge = listSupportKnowledge();
+    ctx.json({
+      knowledge: knowledge.map((entry) => ({
+        id: entry.id, intent: entry.intent, title: entry.title, topic: entry.title,
+        keywords: [...entry.keywords], summary: entry.answer, answer: entry.answer,
+        source: entry.source, weight: entry.weight ?? 0,
+      })),
+      editable: false,
+      note: 'Reviewed in code. Answers are retrieved verbatim from this catalogue; the assistant escalates instead of composing anything of its own.',
+    });
   });
 
   router.get('/api/v1/admin/ai-support/conversations', async (ctx) => {
@@ -265,7 +409,13 @@ function register(router, deps) {
     const messages = await store.table('ai_support_messages').find({ conversation_id: c.id }, { orderBy: 'created_at' }).then((r) => r.rows);
     ctx.json({
       conversation: { ...c, customerAccountName: userName(cust), customerAccountEmail: cust?.email ?? null, assignedAgentName: userName(agent), assignedAgentEmail: agent?.email ?? null },
-      messages: messages.map((m) => ({ id: m.id, senderType: m.role, message: m.content, createdAt: m.created_at })),
+      messages: messages.map((m) => ({
+        id: m.id, senderType: m.role, message: m.content, createdAt: m.created_at,
+        // Why the assistant said it: visible to the agent who inherits the conversation.
+        intent: m.intent ?? null,
+        confidence: m.confidence === null || m.confidence === undefined ? null : Number(m.confidence),
+        sources: Array.isArray(m.knowledge_sources) ? m.knowledge_sources : [],
+      })),
     });
   });
 

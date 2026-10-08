@@ -2090,6 +2090,11 @@ const TABLES = {
       conversation_id: uuid({ required: true }),
       role: text({ default: 'user' }),
       content: text({ required: true }),
+      // Why the assistant said what it said: the matched intent, the retrieval confidence and the
+      // sources it cited. Null means a person wrote the message — not that the reasoning is unknown.
+      intent: text({ nullable: true }),
+      confidence: { type: 'numeric', nullable: true },
+      knowledge_sources: { type: 'jsonb', nullable: true },
       created_at: ts(),
     },
     indexes: [{ name: 'ai_messages_conversation_idx', columns: ['conversation_id'] }],
