@@ -77,7 +77,12 @@ fill a footer column.
 
 - `python3 scripts/inventory-website.py`: current Git-visible source inventory.
 - `python3 scripts/verify-website.py`: fail on invalid critical navigation URLs,
-  deleted baseline routes, unresolved registered page images and literal assets.
+  deleted baseline routes, unresolved registered page images and literal assets, missing or
+  duplicated per-page titles and descriptions, unsafe links in the shell, product illustrations
+  that do not exist, a template rendering a class no stylesheet it loads defines, and a page
+  stylesheet that invents its own `accent`/`primary`/`brand` colour. It also audits the Builder's
+  widget classes (`scripts/audit-builder-widget-classes.py`, same gate) and the raster ladder
+  (`scripts/generate-raster-formats.py --check`). Optional read-only staging check: `--base <url>`.
 - `php tests/website/run.php`: editorial/draft precedence, unsafe mount rejection,
   safe JSON-LD, fail-closed DB behavior, explicit draft publication, canonical
   discovery, published custom pages/landings, translation visibility, slug

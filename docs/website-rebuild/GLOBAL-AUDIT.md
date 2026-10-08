@@ -8,6 +8,13 @@ This is the inventory the rebuild was planned from, and the record of what was d
 public surface in the repository. Numbers are produced by
 `node scripts/site/generate.mjs` and `node scripts/site/check-links.mjs`, not counted by hand.
 
+> **Superseded for the link audit (2026-10-08).** The figures in this document are the ones this audit
+> produced on its own branch, and they are kept as such. `check-links.mjs` has since been fixed to
+> resolve `{$WEB_ROOT}/…` destinations — the theme's commonest link form, which it used to skip — and
+> to accept first-party static files, so its coverage is now **2,183 surfaces · 908 internal · 899 PHP
+> · 5 external · 18 anchors**, still with 0 broken links. The 437 PHP links recorded below were the
+> blind spot, not the total. Current figures: `docs/website-rebuild/PASS-2026-10-08.md`.
+
 ---
 
 ## 1. Surfaces found in the repository
@@ -186,7 +193,8 @@ be done at consistent quality without a design review I cannot perform here.
 ## 4. Broken links found and fixed
 
 Produced by `node scripts/site/check-links.mjs` (2,171 surfaces scanned; 931 internal, 437 PHP,
-5 external, 17 in-page anchors).
+5 external, 17 in-page anchors). *The PHP figure is the old scope: the audit now resolves the 899
+`{$WEB_ROOT}/…` destinations it used to skip. See the note at the top.*
 
 | Finding | Count | Resolution |
 |---|---|---|
@@ -249,7 +257,7 @@ deployment gets broken. What it does instead:
 | Check | Command | Result |
 |---|---|---|
 | Registry + content generation | `node scripts/site/generate.mjs` | 9 menus, 9 footer columns, **222 links validated**, 54 pages, 116 sections, 170 FAQs; 41 PHP product pages enriched |
-| Link integrity | `node scripts/site/check-links.mjs` | **0 broken links** across 2,171 surfaces |
+| Link integrity | `node scripts/site/check-links.mjs` | **0 broken links** across 2,171 surfaces (scope since widened to 2,183 — see the note above) |
 | PHP contract | `python3 scripts/verify-website.py` | passed — 67 registry pages, 92 navigation destinations |
 | PHP syntax sanity | `node scripts/php-syntax-check.cjs $(git ls-files '*.php')` | 1,737 files, all parse-balanced |
 | TypeScript (server) | `npx tsc -p tsconfig.json --noEmit` | clean |

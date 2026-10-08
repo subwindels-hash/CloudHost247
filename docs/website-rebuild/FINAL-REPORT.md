@@ -5,6 +5,13 @@
 **Pull request:** https://github.com/subwindels-hash/CloudHost247/pull/62 (draft, base `main`)
 **Evidence:** `docs/website-rebuild/verification-2026-10-07.json`
 **Supersedes for this branch:** `docs/website-rebuild/REBUILD-REPORT.md` (PR #61, branch `arena/0ab788d1-cloudhost247`)
+> **Superseded for the link audit (2026-10-08).** The link figures below are this pass's own evidence
+> and are kept unchanged. `check-links.mjs` has since been fixed to resolve `{$WEB_ROOT}/…`
+> destinations — the theme's commonest link form, which it used to skip — so its coverage is now
+> **2,183 surfaces · 908 internal · 899 PHP · 5 external · 18 anchors**, still 0 broken. The 437 PHP
+> links recorded here were the blind spot, not the total. Current report:
+> `docs/website-rebuild/PASS-2026-10-08.md`.
+
 **Deployment state:** **not deployed.** Production release is gated on WHMCS staging verification, which
 cannot run in this environment (no licensed WHMCS runtime, no production database, no browser binary).
 
@@ -25,7 +32,7 @@ surface and tool taxonomy registry-driven and verified (`a329775`, plus the chan
 | Legal documents | 17 | `registry.legal`, rendered by both surfaces |
 | Tool paths in the published catalogue | 67 | theme projection `tools.json` |
 | Tool paths in the PHP engine catalogue | 105 | `config/tools.php` (native engine, standalone-capable) |
-| Link-checked surfaces | 2,176 | `scripts/site/check-links.mjs` |
+| Link-checked surfaces | 2,176 | `scripts/site/check-links.mjs` (scope since widened to 2,183 — see the note at the top) |
 | WHMCS theme templates (`templates/cloudhost247`) | 86 | `current-templates.csv` baseline |
 | Legacy vendor theme (`templates/cloudhost247_legacy`) | ~130 | reported, not rewritten (vendor baseline) |
 
@@ -308,7 +315,7 @@ specific sentences that were rewritten for this reason.
 | Rendered-page fixture QA | `CH247_FIXTURE_DIR=… python3 tests/website/check-fixtures.py` | 218 pages, 815 images, 2,492 asset references, 53,798 links, 57,140 interactive controls, 133 classes, 183 indexable / 35 noindex, heading outlines without a skipped level, legal documents rendering with content — **0 problems** |
 | Legal copy preservation | visible-text diff of both fixture sets | 214 of 218 pages identical; the four differences are the duplicate titles that were removed |
 | Node SEO suite | `npx vitest run tests/integration/seo-routes.test.ts` | 6 tests passed (2 new: one-policy robots contract, sitemap/registry policy agreement) |
-| Link integrity | `node scripts/site/check-links.mjs` | 2,176 surfaces, 0 broken |
+| Link integrity | `node scripts/site/check-links.mjs` | 2,176 surfaces, 0 broken (scope since widened to 2,183 — see the note at the top) |
 | Website source gate | `python3 scripts/verify-website.py` | `registry_pages 67`, `navigation_destinations 95`, `source_errors []`, `passed true` |
 | Retired-brand audit | `python3 scripts/branding-audit.py --quiet` | 0 matches |
 | Node platform suite | `npm test` (cloudhost247-node) | **136 test files, 1,636 tests, 0 failures, exit 0** (1542.67s, run against revision `81e6d47`) |
