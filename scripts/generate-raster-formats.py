@@ -21,7 +21,9 @@ encoding ever costs *more* bytes than the file it is meant to replace it is repo
 than quietly shipped.
 
 ImageMagick is the converter because it is already present, `convert -list format` shows
-both codecs, and it needs no Python wheels.
+both codecs, and it needs no Python wheels. It is only needed to *write* variants: `--check` reads
+the frame size out of each JPEG header itself, because the release gate runs it on a machine that
+has no ImageMagick installed.
 
 The platform serves the same library a second time, from
 `cloudhost247-node/frontend/public/media/cloudhost247`. That is Vite's public directory: a build
@@ -78,17 +80,38 @@ def require_imagemagick() -> str:
     return convert
 
 
+# Start-of-frame markers carry the frame size. The arithmetic-coding and Huffman-table markers
+# share the 0xC0..0xCF range but are not frame headers, so they are excluded.
+SOF_MARKERS = frozenset(set(range(0xC0, 0xD0)) - {0xC4, 0xC8, 0xCC})
+
+
 def native_width(jpeg: Path) -> int:
-    identify = shutil.which('identify')
-    if not identify:
-        sys.exit('ImageMagick `identify` is not on PATH; cannot measure the rasters.')
-    result = subprocess.run(
-        [identify, '-format', '%w', str(jpeg)],
-        capture_output=True, text=True,
-    )
-    if result.returncode != 0 or not result.stdout.strip().isdigit():
-        sys.exit(f'cannot read the pixel width of {jpeg.relative_to(ROOT)}: {result.stderr.strip()}')
-    return int(result.stdout.strip())
+    """Pixel width of a JPEG, read from its own start-of-frame header.
+
+    Verification must not need the encoder. `--check` is the last step of the release gate and runs
+    on a machine that has no ImageMagick at all — the runner installs neither `convert` nor
+    `identify` — and a gate that cannot run where the code runs is not a gate. The frame size is a
+    field in the file, so the ladder can be verified from the bytes alone.
+    """
+    data = jpeg.read_bytes()
+    if data[:2] != b'\xff\xd8':
+        sys.exit(f'{jpeg.relative_to(ROOT)} is not a JPEG: no start-of-image marker.')
+    index = 2
+    while index + 9 < len(data):
+        if data[index] != 0xFF:
+            index += 1
+            continue
+        marker = data[index + 1]
+        if marker in (0xD8, 0x01) or 0xD0 <= marker <= 0xD7:
+            index += 2
+            continue
+        if marker == 0xDA:
+            break  # Start of scan: nothing after this describes the frame.
+        length = int.from_bytes(data[index + 2:index + 4], 'big')
+        if marker in SOF_MARKERS and length >= 7:
+            return int.from_bytes(data[index + 7:index + 9], 'big')
+        index += 2 + length
+    sys.exit(f'cannot read the frame size of {jpeg.relative_to(ROOT)}.')
 
 
 def widths_for(width: int, source: Path) -> list[int]:
@@ -160,7 +183,8 @@ def main() -> int:
                         help="also refresh the platform's frontend/public/media/cloudhost247")
     args = parser.parse_args()
 
-    convert = require_imagemagick()
+    # Only the writing path needs the converter; `--check` is pure Python so it runs in CI.
+    convert = None if args.check else require_imagemagick()
     jpegs = sorted(LIBRARY.rglob('*.jpg'))
     if not jpegs:
         sys.exit(f'no rasters found under {LIBRARY.relative_to(ROOT)}')
