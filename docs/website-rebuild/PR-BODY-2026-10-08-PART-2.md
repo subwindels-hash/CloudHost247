@@ -44,6 +44,14 @@ brokerage, cart and status widgets rendered unstyled. `runtime.css` gained the c
 are documented element-level hooks, not gaps: `ch247-star` is an `Icons::svg()` modifier,
 `ch247-autoplay` a `data-` attribute, `ch247-nav`/`ch247-status`/`ch247-video` child-laid-out wrappers.
 
+**Eight `{include}` statements pointed at files that do not exist, and that was correct.** The theme
+is a child of `twenty-one`, so the platform's own `head.tpl`, `navbar.tpl`, `sidebar.tpl`,
+`breadcrumb.tpl`, password modal and network notice arrive from the parent at render time and are
+absent from this repository by design — but nothing said so, which made a deliberate absence
+indistinguishable from a partial the rebuild deleted. `PARENT_TEMPLATES` in
+`scripts/verify-website.py` now declares each one with its parent, and the `orderforms/ovh_cart`
+child theme's `standard_cart` references alongside them.
+
 ## Gates added
 
 - **`tests/tools/site-integration.php`** walks every `tools*` destination the *published* navigation
@@ -53,6 +61,11 @@ are documented element-level hooks, not gaps: `ch247-star` is an `Icons::svg()` 
   expression the assertion cannot fail, which is how the dead link survived a green suite. The same
   file now pins `tools-public.json`'s tool paths to `config/tools.php`, so the export the generator
   reads cannot go stale. 1,154 assertions.
+- **`scripts/verify-website.py`** (`include_errors`) fails on an include no theme ships and no
+  `parent:` declaration covers, a first-party include that no longer exists, and an exemption that
+  has gone stale — the theme now ships the template, or nothing includes it any more. Dynamic
+  includes are skipped rather than guessed. Mutation-proofed: a bogus partial, a shadowed parent
+  template and a dropped include each fail it, by name.
 - **`scripts/audit-builder-widget-classes.py`** compares what the renderer emits against what
   `runtime.css` defines, per widget, with 20 named exemptions that fail the audit if they go stale.
   Wired into `scripts/release-candidate-check.sh` after the raster check.
@@ -64,7 +77,7 @@ drifted → `FAIL: the native catalogue export lists the same tool paths as conf
 ## How it was verified
 
 On the fixed tree: theme 60/0 · website 310/0 · tools 85/0 · builder 353 · modules 237/0 ·
-tools site-integration 1,154 · `verify-website.py passed: true` · `check-links.mjs` ✓ (2,183 surfaces) ·
+tools site-integration 1,154 · `verify-website.py passed: true` (469 classes, 79 includes) · `check-links.mjs` ✓ (2,183 surfaces) ·
 navigation inventory 0 defects · 97 Python unit tests OK · `npx tsc --noEmit` clean ·
 `scripts/release-candidate-check.sh` → 0.
 
