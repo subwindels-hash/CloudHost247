@@ -873,6 +873,7 @@ function emitPhpSiteJson(registry, previous, contentPages) {
     id: menu.id,
     title: menu.label,
     description: menu.blurb,
+    url: menu.href?.php ?? 'cloudhost247-hosting.php',
     groups: (menu.columns ?? []).map((column) => ({
       title: column.title,
       links: (column.items ?? [])

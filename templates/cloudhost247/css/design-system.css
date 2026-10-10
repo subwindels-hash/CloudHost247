@@ -1008,3 +1008,16 @@ html, body { max-width: 100%; overflow-x: clip; }
   .ch-site .ch-footer-grid { gap: 28px 20px; }
   .ch-site .ch-faq summary { font-size: 0.98rem; }
 }
+
+/* Cross-runtime catalogue and dark-section contracts. */
+.ch-site .ch-dark h2, .ch-site .ch-dark h3 { color: var(--ch-on-dark); }
+.ch-site .ch-catalog-controls { display: flex; flex-wrap: wrap; gap: 20px; margin-block: 24px; }
+.ch-site .ch-catalog-controls label { display: grid; gap: 8px; flex: 1 1 220px; }
+.ch-site .ch-catalog-controls input, .ch-site .ch-catalog-controls select { width: 100%; min-height: 48px; padding: 12px; border: 1px solid var(--ch-line-strong); border-radius: var(--ch-radius-sm); }
+.ch-site [data-manifest-card][hidden] { display: none; }
+.ch-site [data-manifest-card] { overflow-wrap: anywhere; }
+.ch-site [data-manifest-card] dt { font-weight: 600; }
+.ch-site [data-manifest-card] dd { margin: 0 0 12px; color: var(--ch-muted); }
+.ch247-brand img { display: block; width: 204px; max-width: 100%; height: auto; }
+.ch-site .ch-cta .ch-kicker, .ch-site .ch-cta .ch-text-link { color: var(--ch-ink); }
+.ch-site .ch-footer-bottom a { color: var(--ch-on-dark-muted); }

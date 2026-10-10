@@ -21,7 +21,15 @@
       "title": "About CloudHost247",
       "category": "Company",
       "status": "published",
-      "template": "cloudhost247-page",
+      "template": "aboutus",
+      "seo_metadata": {
+        "title": "About CloudHost247",
+        "description": "CloudHost247 Isc. builds and operates hosting, cloud, domain, application, website and developer platforms for businesses and developers worldwide."
+      },
+      "hero_artwork": {
+        "svg": "hero/infrastructure.svg",
+        "scene": "hero/infrastructure-3d"
+      },
       "visual": "hero/infrastructure",
       "image_status": "present",
       "seo_status": "ok",
@@ -35,7 +43,15 @@
       "title": "Acceptable Use Policy",
       "category": "Legal",
       "status": "published",
-      "template": "cloudhost247-page",
+      "template": "acceptableusepolicy",
+      "seo_metadata": {
+        "title": "Acceptable Use Policy",
+        "description": "The rules for using CloudHost247 services, systems and network: what is permitted, what counts as abuse, and how reports are handled."
+      },
+      "hero_artwork": {
+        "svg": "security/security.svg",
+        "scene": "security/security-3d"
+      },
       "visual": "security/security",
       "image_status": "present",
       "seo_status": "ok",
@@ -50,6 +66,14 @@
       "category": "",
       "status": "internal",
       "template": "",
+      "seo_metadata": {
+        "title": "",
+        "description": ""
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
       "visual": "",
       "image_status": "n/a",
       "seo_status": "n/a",
@@ -64,6 +88,14 @@
       "category": "Developers",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "API Hosting",
+        "description": "Host HTTP APIs on CloudHost247 using an available runtime or container product; confirm TLS, network controls, logs and monitoring in the selected service catalogue."
+      },
+      "hero_artwork": {
+        "svg": "deployment/api.svg",
+        "scene": "deployment/deployment-pipeline-3d"
+      },
       "visual": "deployment/api",
       "image_status": "present",
       "seo_status": "ok",
@@ -77,7 +109,15 @@
       "title": "Applications",
       "category": "Applications",
       "status": "published",
-      "template": "cloudhost247-page",
+      "template": "cloudhost247-platform",
+      "seo_metadata": {
+        "title": "Applications",
+        "description": "Published apps, managed databases, containers and deployment records on CloudHost247. Git source builds depend on a configured control-panel integration."
+      },
+      "hero_artwork": {
+        "svg": "applications/application-stack.svg",
+        "scene": "applications/application-stack-3d"
+      },
       "visual": "applications/application-stack",
       "image_status": "present",
       "seo_status": "ok",
@@ -91,7 +131,15 @@
       "title": "Backup Policy",
       "category": "Legal",
       "status": "published",
-      "template": "cloudhost247-page",
+      "template": "backuppolicy",
+      "seo_metadata": {
+        "title": "Backup Policy",
+        "description": "What is backed up for websites, databases, email and configurations, how long copies are kept, and how restores are requested."
+      },
+      "hero_artwork": {
+        "svg": "security/security.svg",
+        "scene": "security/security-3d"
+      },
       "visual": "security/security",
       "image_status": "present",
       "seo_status": "ok",
@@ -106,6 +154,14 @@
       "category": "Infrastructure",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "Backups",
+        "description": "Backup jobs for CloudHost247 servers and applications: scheduled runs, visible history, defined retention and restores performed from your account."
+      },
+      "hero_artwork": {
+        "svg": "management/backups.svg",
+        "scene": "servers/dedicated-servers-3d"
+      },
       "visual": "management/backups",
       "image_status": "present",
       "seo_status": "ok",
@@ -120,6 +176,14 @@
       "category": "Marketing",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "Blog",
+        "description": "Platform releases and product notes from CloudHost247 \u2014 what shipped, what it replaces, and what it deliberately does not do yet."
+      },
+      "hero_artwork": {
+        "svg": "blog/insights.svg",
+        "scene": "hero/infrastructure-3d"
+      },
       "visual": "blog/insights",
       "image_status": "present",
       "seo_status": "ok",
@@ -134,6 +198,14 @@
       "category": "",
       "status": "internal",
       "template": "",
+      "seo_metadata": {
+        "title": "",
+        "description": ""
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
       "visual": "",
       "image_status": "n/a",
       "seo_status": "n/a",
@@ -148,6 +220,14 @@
       "category": "",
       "status": "internal",
       "template": "",
+      "seo_metadata": {
+        "title": "",
+        "description": ""
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
       "visual": "",
       "image_status": "n/a",
       "seo_status": "n/a",
@@ -162,6 +242,14 @@
       "category": "Hosting",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "Business Hosting",
+        "description": "Business hosting from CloudHost247 gives company sites more resources, stronger isolation, priority support and the headroom to run mail, apps and databases."
+      },
+      "hero_artwork": {
+        "svg": "hosting/business-hosting.svg",
+        "scene": "hosting/business-hosting-3d"
+      },
       "visual": "hosting/business-hosting",
       "image_status": "present",
       "seo_status": "ok",
@@ -175,7 +263,15 @@
       "title": "Cloud Hosting Plans",
       "category": "Cloud",
       "status": "published",
-      "template": "cloudhost247-page",
+      "template": "cloudhost247-product-catalog",
+      "seo_metadata": {
+        "title": "Cloud Hosting Plans",
+        "description": "Compare CloudHost247 hosting: web, business, WordPress, reseller, Windows and email hosting \u2014 with free SSL, backups, mailboxes, databases and 24/7 support."
+      },
+      "hero_artwork": {
+        "svg": "cloud/cloud-hosting.svg",
+        "scene": "cloud/cloud-hosting-3d"
+      },
       "visual": "cloud/cloud-hosting",
       "image_status": "present",
       "seo_status": "ok",
@@ -190,6 +286,14 @@
       "category": "",
       "status": "internal",
       "template": "",
+      "seo_metadata": {
+        "title": "",
+        "description": ""
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
       "visual": "",
       "image_status": "n/a",
       "seo_status": "n/a",
@@ -204,6 +308,14 @@
       "category": "",
       "status": "internal",
       "template": "",
+      "seo_metadata": {
+        "title": "",
+        "description": ""
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
       "visual": "",
       "image_status": "n/a",
       "seo_status": "n/a",
@@ -218,6 +330,14 @@
       "category": "",
       "status": "internal",
       "template": "",
+      "seo_metadata": {
+        "title": "",
+        "description": ""
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
       "visual": "",
       "image_status": "n/a",
       "seo_status": "n/a",
@@ -232,6 +352,14 @@
       "category": "",
       "status": "internal",
       "template": "",
+      "seo_metadata": {
+        "title": "",
+        "description": ""
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
       "visual": "",
       "image_status": "n/a",
       "seo_status": "n/a",
@@ -246,6 +374,14 @@
       "category": "",
       "status": "internal",
       "template": "",
+      "seo_metadata": {
+        "title": "",
+        "description": ""
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
       "visual": "",
       "image_status": "n/a",
       "seo_status": "n/a",
@@ -260,6 +396,14 @@
       "category": "",
       "status": "internal",
       "template": "",
+      "seo_metadata": {
+        "title": "",
+        "description": ""
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
       "visual": "",
       "image_status": "n/a",
       "seo_status": "n/a",
@@ -273,7 +417,15 @@
       "title": "Cookie Policy",
       "category": "Legal",
       "status": "published",
-      "template": "cloudhost247-page",
+      "template": "cookiepolicy",
+      "seo_metadata": {
+        "title": "Cookie Policy",
+        "description": "How CloudHost247 Isc uses cookies and similar tracking technologies, which categories are set, and how to control them in your browser."
+      },
+      "hero_artwork": {
+        "svg": "security/security.svg",
+        "scene": "security/security-3d"
+      },
       "visual": "security/security",
       "image_status": "present",
       "seo_status": "ok",
@@ -288,6 +440,14 @@
       "category": "Hosting",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "cPanel Hosting",
+        "description": "cPanel-based hosting from CloudHost247: mailboxes, databases, subdomains, SSL and one-click application installs, managed from the panel your team already knows."
+      },
+      "hero_artwork": {
+        "svg": "hosting/cpanel-hosting.svg",
+        "scene": "hosting/cpanel-hosting-3d"
+      },
       "visual": "hosting/cpanel-hosting",
       "image_status": "present",
       "seo_status": "ok",
@@ -301,7 +461,15 @@
       "title": "Cybercrime Policy",
       "category": "Legal",
       "status": "published",
-      "template": "cloudhost247-page",
+      "template": "cybercrimepolicy",
+      "seo_metadata": {
+        "title": "Cybercrime Policy",
+        "description": "The preventive and detection measures CloudHost247 Isc uses when a domain registered or hosted on the platform is used for abuse."
+      },
+      "hero_artwork": {
+        "svg": "security/security.svg",
+        "scene": "security/security-3d"
+      },
       "visual": "security/security",
       "image_status": "present",
       "seo_status": "ok",
@@ -316,6 +484,14 @@
       "category": "Infrastructure",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "Data Centers",
+        "description": "The data centre regions CloudHost247 is configured to deploy into, listed from live configuration rather than a marketing map."
+      },
+      "hero_artwork": {
+        "svg": "cloud/data-centers.svg",
+        "scene": "cloud/vps-3d"
+      },
       "visual": "cloud/data-centers",
       "image_status": "present",
       "seo_status": "ok",
@@ -329,7 +505,15 @@
       "title": "Data Deletion Instructions",
       "category": "Legal",
       "status": "published",
-      "template": "cloudhost247-page",
+      "template": "datadeletion",
+      "seo_metadata": {
+        "title": "Data Deletion Instructions",
+        "description": "Step-by-step instructions for requesting deletion of your personal data, and how the request is verified and actioned."
+      },
+      "hero_artwork": {
+        "svg": "security/security.svg",
+        "scene": "security/security-3d"
+      },
       "visual": "security/security",
       "image_status": "present",
       "seo_status": "ok",
@@ -343,7 +527,15 @@
       "title": "Data Privacy Notice and Consent Form",
       "category": "Legal",
       "status": "published",
-      "template": "cloudhost247-page",
+      "template": "dataprivacynoticeandconsentform",
+      "seo_metadata": {
+        "title": "Data Privacy Notice and Consent Form",
+        "description": "The privacy notice and consent form used for prospective employees, published under the Nigeria Data Protection Act 2023."
+      },
+      "hero_artwork": {
+        "svg": "security/security.svg",
+        "scene": "security/security-3d"
+      },
       "visual": "security/security",
       "image_status": "present",
       "seo_status": "ok",
@@ -358,6 +550,14 @@
       "category": "Legal",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "Data Protection Standards",
+        "description": "The principles, measures and responsibilities CloudHost247 Isc follows to protect customer, partner and employee data."
+      },
+      "hero_artwork": {
+        "svg": "security/security.svg",
+        "scene": "security/security-3d"
+      },
       "visual": "security/security",
       "image_status": "present",
       "seo_status": "ok",
@@ -372,6 +572,14 @@
       "category": "",
       "status": "internal",
       "template": "",
+      "seo_metadata": {
+        "title": "",
+        "description": ""
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
       "visual": "",
       "image_status": "n/a",
       "seo_status": "n/a",
@@ -386,6 +594,14 @@
       "category": "Dedicated",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "Dedicated Servers",
+        "description": "Dedicated servers from CloudHost247: an entire physical machine, full administrative control, hardware-level isolation and options for redundancy."
+      },
+      "hero_artwork": {
+        "svg": "servers/dedicated-servers.svg",
+        "scene": "servers/dedicated-servers-3d"
+      },
       "visual": "servers/dedicated-servers",
       "image_status": "present",
       "seo_status": "ok",
@@ -399,7 +615,15 @@
       "title": "Deployment Platform",
       "category": "Deployment/PaaS",
       "status": "published",
-      "template": "cloudhost247-page",
+      "template": "cloudhost247-platform",
+      "seo_metadata": {
+        "title": "Deployment Platform",
+        "description": "Operate supported CloudHost247 application installs and updates with deployment status, step events, per-application configuration and recovery where supported."
+      },
+      "hero_artwork": {
+        "svg": "deployment/deployment-pipeline.svg",
+        "scene": "deployment/deployment-pipeline-3d"
+      },
       "visual": "deployment/deployment-pipeline",
       "image_status": "present",
       "seo_status": "ok",
@@ -414,6 +638,14 @@
       "category": "Developer",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "Developer Hosting",
+        "description": "Developer hosting from CloudHost247: check available runtimes, SSH, configuration and logs in the product catalogue. Git support depends on the selected panel."
+      },
+      "hero_artwork": {
+        "svg": "deployment/developer-hosting.svg",
+        "scene": "deployment/deployment-pipeline-3d"
+      },
       "visual": "deployment/developer-hosting",
       "image_status": "present",
       "seo_status": "ok",
@@ -428,6 +660,14 @@
       "category": "Domains",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "DNS Management",
+        "description": "Where authoritative DNS records for CloudHost247-hosted domains are edited, and what the read-only diagnostic tools can and cannot tell you."
+      },
+      "hero_artwork": {
+        "svg": "domains/dns-management.svg",
+        "scene": "domains/dns-management-3d"
+      },
       "visual": "domains/dns-management",
       "image_status": "present",
       "seo_status": "ok",
@@ -442,6 +682,14 @@
       "category": "Developers",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "Docker Hosting",
+        "description": "Run Docker containers on CloudHost247: pull from public or private registries, attach persistent volumes, inject configuration and route a domain with TLS."
+      },
+      "hero_artwork": {
+        "svg": "deployment/docker.svg",
+        "scene": "deployment/deployment-pipeline-3d"
+      },
       "visual": "deployment/docker",
       "image_status": "present",
       "seo_status": "ok",
@@ -456,6 +704,14 @@
       "category": "Resources",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "Documentation",
+        "description": "CloudHost247 platform documentation: API references, provisioning, deployment, domain services, billing, tools and operations guides."
+      },
+      "hero_artwork": {
+        "svg": "blog/documentation.svg",
+        "scene": "hero/infrastructure-3d"
+      },
       "visual": "blog/documentation",
       "image_status": "present",
       "seo_status": "ok",
@@ -469,7 +725,15 @@
       "title": "Domain Agreement",
       "category": "Legal",
       "status": "published",
-      "template": "cloudhost247-page",
+      "template": "domainagreement",
+      "seo_metadata": {
+        "title": "Domain Agreement",
+        "description": "The agreement between you and CloudHost247 ISC as sponsoring registrar or reseller for the domain names you register through us."
+      },
+      "hero_artwork": {
+        "svg": "security/security.svg",
+        "scene": "security/security-3d"
+      },
       "visual": "security/security",
       "image_status": "present",
       "seo_status": "ok",
@@ -483,7 +747,15 @@
       "title": "Domain Brokerage Terms",
       "category": "Legal",
       "status": "published",
-      "template": "cloudhost247-page",
+      "template": "domainbrokerageterms",
+      "seo_metadata": {
+        "title": "Domain Brokerage Terms",
+        "description": "What a CloudHost247 domain brokerage engagement covers: acquisition attempts, confidentiality, and what happens when a domain cannot be acquired."
+      },
+      "hero_artwork": {
+        "svg": "security/security.svg",
+        "scene": "security/security-3d"
+      },
       "visual": "security/security",
       "image_status": "present",
       "seo_status": "ok",
@@ -498,6 +770,14 @@
       "category": "Domains",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "Domain DNS",
+        "description": "Where nameserver and DNS record changes are made for a registered domain, and what can be checked without editing the zone."
+      },
+      "hero_artwork": {
+        "svg": "domains/domain-dns.svg",
+        "scene": "domains/domain-network-3d"
+      },
       "visual": "domains/domain-dns",
       "image_status": "present",
       "seo_status": "ok",
@@ -511,7 +791,15 @@
       "title": "Domain Renewal Policy",
       "category": "Legal",
       "status": "published",
-      "template": "cloudhost247-page",
+      "template": "domainrenewalpolicy",
+      "seo_metadata": {
+        "title": "Domain Renewal Policy",
+        "description": "How domain auto-renewal works, when a domain is deleted for non-payment, and the grace and redemption periods that follow."
+      },
+      "hero_artwork": {
+        "svg": "security/security.svg",
+        "scene": "security/security-3d"
+      },
       "visual": "security/security",
       "image_status": "present",
       "seo_status": "ok",
@@ -526,6 +814,14 @@
       "category": "Domains",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "Domains",
+        "description": "Register a new domain, transfer a name you already own, or manage your existing portfolio through your CloudHost247 account."
+      },
+      "hero_artwork": {
+        "svg": "domains/domain-network.svg",
+        "scene": "domains/domain-network-3d"
+      },
       "visual": "domains/domain-network",
       "image_status": "present",
       "seo_status": "ok",
@@ -539,7 +835,15 @@
       "title": "Domain Registration Addendum",
       "category": "Legal",
       "status": "published",
-      "template": "cloudhost247-page",
+      "template": "domainregistrationaddendum",
+      "seo_metadata": {
+        "title": "Domain Registration Addendum",
+        "description": "TLD-specific terms that apply on top of the main Domain Registration Agreement, for each registry CloudHost247 Isc registers through."
+      },
+      "hero_artwork": {
+        "svg": "security/security.svg",
+        "scene": "security/security-3d"
+      },
       "visual": "security/security",
       "image_status": "present",
       "seo_status": "ok",
@@ -553,7 +857,15 @@
       "title": "Email Hosting",
       "category": "Email",
       "status": "published",
-      "template": "cloudhost247-page",
+      "template": "cloudhost247-email-hosting",
+      "seo_metadata": {
+        "title": "Email Hosting",
+        "description": "Email hosting from CloudHost247: professional mailboxes on your domain with spam filtering, TLS, IMAP/POP/SMTP and webmail access."
+      },
+      "hero_artwork": {
+        "svg": "hosting/email-hosting.svg",
+        "scene": "hosting/email-hosting-3d"
+      },
       "visual": "hosting/email-hosting",
       "image_status": "present",
       "seo_status": "ok",
@@ -568,6 +880,14 @@
       "category": "Dedicated",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "Enterprise Servers",
+        "description": "Enterprise-grade server configurations from CloudHost247 for high-capacity workloads, with redundancy options, managed operations and provider-backed hardware."
+      },
+      "hero_artwork": {
+        "svg": "servers/enterprise-servers.svg",
+        "scene": "servers/enterprise-servers-3d"
+      },
       "visual": "servers/enterprise-servers",
       "image_status": "present",
       "seo_status": "ok",
@@ -581,7 +901,15 @@
       "title": "Fair Usage Policy",
       "category": "Legal",
       "status": "published",
-      "template": "cloudhost247-page",
+      "template": "fairusagepolicy",
+      "seo_metadata": {
+        "title": "Fair Usage Policy",
+        "description": "How the fair usage policy applies to shared, reseller and WordPress hosting, including plans advertised with unlimited resources."
+      },
+      "hero_artwork": {
+        "svg": "security/security.svg",
+        "scene": "security/security-3d"
+      },
       "visual": "security/security",
       "image_status": "present",
       "seo_status": "ok",
@@ -595,7 +923,15 @@
       "title": "Frequently Asked Questions",
       "category": "Support",
       "status": "published",
-      "template": "cloudhost247-page",
+      "template": "faqs",
+      "seo_metadata": {
+        "title": "Frequently Asked Questions",
+        "description": "Answers to common questions about CloudHost247 services, plans, domains, accounts and policies, and where to look when the answer is not here."
+      },
+      "hero_artwork": {
+        "svg": "management/support.svg",
+        "scene": "servers/dedicated-servers-3d"
+      },
       "visual": "management/support",
       "image_status": "present",
       "seo_status": "ok",
@@ -610,6 +946,14 @@
       "category": "Infrastructure",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "Firewall",
+        "description": "Rule-based firewall control for CloudHost247 servers: ordered allow, deny and rate-limit rules applied at the network layer, with the effective ruleset visible."
+      },
+      "hero_artwork": {
+        "svg": "management/firewall.svg",
+        "scene": "servers/dedicated-servers-3d"
+      },
       "visual": "management/firewall",
       "image_status": "present",
       "seo_status": "ok",
@@ -624,6 +968,14 @@
       "category": "",
       "status": "internal",
       "template": "",
+      "seo_metadata": {
+        "title": "",
+        "description": ""
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
       "visual": "",
       "image_status": "n/a",
       "seo_status": "n/a",
@@ -638,6 +990,14 @@
       "category": "Dedicated",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "Game Servers",
+        "description": "Low-latency game server hosting from CloudHost247 with the compute to hold a community, DDoS-path filtering and full administrative access."
+      },
+      "hero_artwork": {
+        "svg": "servers/game-servers.svg",
+        "scene": "servers/dedicated-servers-3d"
+      },
       "visual": "servers/game-servers",
       "image_status": "present",
       "seo_status": "ok",
@@ -652,6 +1012,14 @@
       "category": "Support",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "Help Center",
+        "description": "CloudHost247 support: search the knowledge base and documentation, run a diagnostic tool, open a ticket with the team, or check what is happening right now."
+      },
+      "hero_artwork": {
+        "svg": "management/support.svg",
+        "scene": "servers/dedicated-servers-3d"
+      },
       "visual": "management/support",
       "image_status": "present",
       "seo_status": "ok",
@@ -665,7 +1033,15 @@
       "title": "Infrastructure",
       "category": "Cloud",
       "status": "published",
-      "template": "cloudhost247-page",
+      "template": "cloudhost247-infrastructure",
+      "seo_metadata": {
+        "title": "Infrastructure",
+        "description": "How CloudHost247 infrastructure is organised: providers, regions, network, storage and the operational layer that runs customer services."
+      },
+      "hero_artwork": {
+        "svg": "hero/global-network.svg",
+        "scene": "hero/global-network-3d"
+      },
       "visual": "hero/global-network",
       "image_status": "present",
       "seo_status": "ok",
@@ -680,6 +1056,14 @@
       "category": "Infrastructure",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "IP Management",
+        "description": "Manage the IP addresses assigned to your CloudHost247 services: public addressing, floating IPs, reverse DNS and the records that tie them to your services."
+      },
+      "hero_artwork": {
+        "svg": "management/ip-management.svg",
+        "scene": "servers/dedicated-servers-3d"
+      },
       "visual": "management/ip-management",
       "image_status": "present",
       "seo_status": "ok",
@@ -694,6 +1078,14 @@
       "category": "Developers",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "Laravel Hosting",
+        "description": "Laravel hosting on CloudHost247 with the application services a Laravel site may need: queue workers, scheduler jobs, storage and database options."
+      },
+      "hero_artwork": {
+        "svg": "deployment/laravel.svg",
+        "scene": "deployment/deployment-pipeline-3d"
+      },
       "visual": "deployment/laravel",
       "image_status": "present",
       "seo_status": "ok",
@@ -708,6 +1100,14 @@
       "category": "Legal",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "Legal Notice",
+        "description": "The rights, obligations and restrictions that apply to CloudHost247 Isc services, website and associated platforms, and the company details."
+      },
+      "hero_artwork": {
+        "svg": "security/security.svg",
+        "scene": "security/security-3d"
+      },
       "visual": "security/security",
       "image_status": "present",
       "seo_status": "ok",
@@ -721,7 +1121,15 @@
       "title": "Legal & Policy Center",
       "category": "Legal",
       "status": "published",
-      "template": "cloudhost247-page",
+      "template": "legal",
+      "seo_metadata": {
+        "title": "Legal & Policy Center",
+        "description": "Every legal, privacy and policy document that governs CloudHost247 Isc services, gathered in one place with its effective date."
+      },
+      "hero_artwork": {
+        "svg": "security/security.svg",
+        "scene": "security/security-3d"
+      },
       "visual": "security/security",
       "image_status": "present",
       "seo_status": "ok",
@@ -736,6 +1144,14 @@
       "category": "Infrastructure",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "Managed Services",
+        "description": "Managed services from CloudHost247: patching, monitoring response, backup verification, firewall changes and hands-on administration, confirmed per plan."
+      },
+      "hero_artwork": {
+        "svg": "management/managed-services.svg",
+        "scene": "servers/dedicated-servers-3d"
+      },
       "visual": "management/managed-services",
       "image_status": "present",
       "seo_status": "ok",
@@ -750,6 +1166,14 @@
       "category": "Infrastructure",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "Migration",
+        "description": "Move your website and email to CloudHost247 with a planned cutover: copy, verify on the new infrastructure, then switch DNS at your discretion."
+      },
+      "hero_artwork": {
+        "svg": "management/migration.svg",
+        "scene": "servers/dedicated-servers-3d"
+      },
       "visual": "management/migration",
       "image_status": "present",
       "seo_status": "ok",
@@ -764,6 +1188,14 @@
       "category": "Infrastructure",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "Monitoring",
+        "description": "Resource monitoring and service telemetry for CloudHost247 servers, applications and hosting, with historical data and alerting you can act on."
+      },
+      "hero_artwork": {
+        "svg": "management/monitoring.svg",
+        "scene": "management/monitoring-3d"
+      },
       "visual": "management/monitoring",
       "image_status": "present",
       "seo_status": "ok",
@@ -778,6 +1210,14 @@
       "category": "Infrastructure",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "Network",
+        "description": "The CloudHost247 network layer: public and private addressing, firewall filtering, reverse DNS, floating IPs and the observability that sits on top."
+      },
+      "hero_artwork": {
+        "svg": "cloud/network.svg",
+        "scene": "cloud/vps-3d"
+      },
       "visual": "cloud/network",
       "image_status": "present",
       "seo_status": "ok",
@@ -792,6 +1232,14 @@
       "category": "Developers",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "Node.js Hosting",
+        "description": "Node.js hosting on CloudHost247: review available runtimes and product integrations for process supervision, environment configuration, application logs and domains."
+      },
+      "hero_artwork": {
+        "svg": "deployment/nodejs.svg",
+        "scene": "deployment/deployment-pipeline-3d"
+      },
       "visual": "deployment/nodejs",
       "image_status": "present",
       "seo_status": "ok",
@@ -806,6 +1254,14 @@
       "category": "",
       "status": "internal",
       "template": "",
+      "seo_metadata": {
+        "title": "",
+        "description": ""
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
       "visual": "",
       "image_status": "n/a",
       "seo_status": "n/a",
@@ -820,6 +1276,14 @@
       "category": "Marketing",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "Offers",
+        "description": "Current CloudHost247 pricing, rendered live from the configured product catalogue \u2014 plans, prices and billing cycles exactly as configured."
+      },
+      "hero_artwork": {
+        "svg": "cloud/cloud-hosting.svg",
+        "scene": "cloud/cloud-hosting-3d"
+      },
       "visual": "cloud/cloud-hosting",
       "image_status": "present",
       "seo_status": "ok",
@@ -833,7 +1297,15 @@
       "title": "Operating Systems",
       "category": "Operating Systems",
       "status": "published",
-      "template": "cloudhost247-page",
+      "template": "cloudhost247-platform",
+      "seo_metadata": {
+        "title": "Operating Systems",
+        "description": "The operating system catalogue available when provisioning a server on CloudHost247, including version lifecycles and provider image availability."
+      },
+      "hero_artwork": {
+        "svg": "operating-systems/os-catalog.svg",
+        "scene": "cloud/vps-3d"
+      },
       "visual": "operating-systems/os-catalog",
       "image_status": "present",
       "seo_status": "ok",
@@ -848,6 +1320,14 @@
       "category": "Developers",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "PaaS",
+        "description": "Manage supported application deployments with recorded steps and per-app settings. Git source builds require an enabled control-panel integration."
+      },
+      "hero_artwork": {
+        "svg": "deployment/paas.svg",
+        "scene": "deployment/deployment-pipeline-3d"
+      },
       "visual": "deployment/paas",
       "image_status": "present",
       "seo_status": "ok",
@@ -862,6 +1342,14 @@
       "category": "Developers",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "PHP Hosting",
+        "description": "PHP hosting on CloudHost247: review available runtime versions, Composer, databases and scheduled-task support in the selected hosting product."
+      },
+      "hero_artwork": {
+        "svg": "deployment/php.svg",
+        "scene": "deployment/deployment-pipeline-3d"
+      },
       "visual": "deployment/php",
       "image_status": "present",
       "seo_status": "ok",
@@ -876,6 +1364,14 @@
       "category": "Hosting",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "Plesk Hosting",
+        "description": "Hosting configurations for Plesk-based workflows, and what panel licensing and platform support each option includes."
+      },
+      "hero_artwork": {
+        "svg": "hosting/plesk-hosting.svg",
+        "scene": "hosting/web-hosting-3d"
+      },
       "visual": "hosting/plesk-hosting",
       "image_status": "present",
       "seo_status": "ok",
@@ -889,7 +1385,15 @@
       "title": "Privacy Policy",
       "category": "Legal",
       "status": "published",
-      "template": "cloudhost247-page",
+      "template": "privacypolicy",
+      "seo_metadata": {
+        "title": "Privacy Policy",
+        "description": "How CloudHost247 Isc collects, uses and shares personal information, how long it is kept, and what you can ask us to do with it."
+      },
+      "hero_artwork": {
+        "svg": "security/security.svg",
+        "scene": "security/security-3d"
+      },
       "visual": "security/security",
       "image_status": "present",
       "seo_status": "ok",
@@ -904,6 +1408,14 @@
       "category": "Developers",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "Python Hosting",
+        "description": "Host Python applications on CloudHost247: virtual environments, WSGI and ASGI applications, background workers, scheduled jobs and managed data services."
+      },
+      "hero_artwork": {
+        "svg": "deployment/python.svg",
+        "scene": "deployment/deployment-pipeline-3d"
+      },
       "visual": "deployment/python",
       "image_status": "present",
       "seo_status": "ok",
@@ -917,7 +1429,15 @@
       "title": "Refund and Cancellation Policy",
       "category": "Legal",
       "status": "published",
-      "template": "cloudhost247-page",
+      "template": "refund-and-vancellation-policy",
+      "seo_metadata": {
+        "title": "Refund and Cancellation Policy",
+        "description": "How to cancel a CloudHost247 service, where the refund terms that apply are published, and where to manage the service in your account."
+      },
+      "hero_artwork": {
+        "svg": "security/security.svg",
+        "scene": "security/security-3d"
+      },
       "visual": "security/security",
       "image_status": "present",
       "seo_status": "ok",
@@ -931,7 +1451,15 @@
       "title": "Refund Policy",
       "category": "Legal",
       "status": "published",
-      "template": "cloudhost247-page",
+      "template": "refundpolicy",
+      "seo_metadata": {
+        "title": "Refund Policy",
+        "description": "The terms under which refunds may be granted for CloudHost247 hosting, domain and related services, and how to request one."
+      },
+      "hero_artwork": {
+        "svg": "security/security.svg",
+        "scene": "security/security-3d"
+      },
       "visual": "security/security",
       "image_status": "present",
       "seo_status": "ok",
@@ -946,6 +1474,14 @@
       "category": "Hosting",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "Reseller Hosting",
+        "description": "Reseller hosting from CloudHost247: separate accounts, your own branding, WHMCS-compatible billing and the infrastructure operated for you."
+      },
+      "hero_artwork": {
+        "svg": "hosting/reseller-hosting.svg",
+        "scene": "hosting/web-hosting-3d"
+      },
       "visual": "hosting/reseller-hosting",
       "image_status": "present",
       "seo_status": "ok",
@@ -960,6 +1496,14 @@
       "category": "",
       "status": "internal",
       "template": "",
+      "seo_metadata": {
+        "title": "",
+        "description": ""
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
       "visual": "",
       "image_status": "n/a",
       "seo_status": "n/a",
@@ -974,6 +1518,14 @@
       "category": "Infrastructure",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "Security",
+        "description": "How CloudHost247 secures its platform and customer data: authentication, access control, encryption, isolation, logging and responsible disclosure."
+      },
+      "hero_artwork": {
+        "svg": "security/platform-security.svg",
+        "scene": "hero/infrastructure-3d"
+      },
       "visual": "security/platform-security",
       "image_status": "present",
       "seo_status": "ok",
@@ -987,7 +1539,15 @@
       "title": "Server Management",
       "category": "Server Management",
       "status": "published",
-      "template": "cloudhost247-page",
+      "template": "cloudhost247-platform",
+      "seo_metadata": {
+        "title": "Server Management",
+        "description": "Server management from CloudHost247: provisioning, operating-system lifecycle, monitoring, firewall control, backups, patching and hands-on administration."
+      },
+      "hero_artwork": {
+        "svg": "management/server-control.svg",
+        "scene": "servers/dedicated-servers-3d"
+      },
       "visual": "management/server-control",
       "image_status": "present",
       "seo_status": "ok",
@@ -1002,6 +1562,14 @@
       "category": "",
       "status": "internal",
       "template": "",
+      "seo_metadata": {
+        "title": "",
+        "description": ""
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
       "visual": "",
       "image_status": "n/a",
       "seo_status": "n/a",
@@ -1016,6 +1584,14 @@
       "category": "",
       "status": "internal",
       "template": "",
+      "seo_metadata": {
+        "title": "",
+        "description": ""
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
       "visual": "",
       "image_status": "n/a",
       "seo_status": "n/a",
@@ -1030,6 +1606,14 @@
       "category": "Product",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "SSL Certificates",
+        "description": "Issue and renew SSL/TLS certificates for every domain you host with CloudHost247, with automated renewal, forced HTTPS and coverage for subdomains."
+      },
+      "hero_artwork": {
+        "svg": "security/ssl.svg",
+        "scene": "hero/infrastructure-3d"
+      },
       "visual": "security/ssl",
       "image_status": "present",
       "seo_status": "ok",
@@ -1044,6 +1628,14 @@
       "category": "",
       "status": "internal",
       "template": "",
+      "seo_metadata": {
+        "title": "",
+        "description": ""
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
       "visual": "",
       "image_status": "n/a",
       "seo_status": "n/a",
@@ -1058,6 +1650,14 @@
       "category": "Legal",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "Terms of Service",
+        "description": "The Terms & Conditions governing use of CloudHost247 websites, products and services, and the obligations that come with an account."
+      },
+      "hero_artwork": {
+        "svg": "security/security.svg",
+        "scene": "security/security-3d"
+      },
       "visual": "security/security",
       "image_status": "present",
       "seo_status": "ok",
@@ -1072,6 +1672,14 @@
       "category": "",
       "status": "internal",
       "template": "",
+      "seo_metadata": {
+        "title": "",
+        "description": ""
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
       "visual": "",
       "image_status": "n/a",
       "seo_status": "n/a",
@@ -1085,7 +1693,15 @@
       "title": "Trademark Policy",
       "category": "Legal",
       "status": "published",
-      "template": "cloudhost247-page",
+      "template": "trademarkpolicy",
+      "seo_metadata": {
+        "title": "Trademark Policy",
+        "description": "How CloudHost247 Isc reviews claims of trademark and copyright infringement, and how domain name disputes are handled alongside them."
+      },
+      "hero_artwork": {
+        "svg": "security/security.svg",
+        "scene": "security/security-3d"
+      },
       "visual": "security/security",
       "image_status": "present",
       "seo_status": "ok",
@@ -1100,6 +1716,14 @@
       "category": "VPS",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "VPS Hosting",
+        "description": "VPS hosting from CloudHost247: guaranteed virtual resources, full administrative access, a choice of operating system and live plan pricing from the catalogue."
+      },
+      "hero_artwork": {
+        "svg": "cloud/vps.svg",
+        "scene": "cloud/vps-3d"
+      },
       "visual": "cloud/vps",
       "image_status": "present",
       "seo_status": "ok",
@@ -1114,6 +1738,14 @@
       "category": "Cloud",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "Private Cloud",
+        "description": "Private cloud from CloudHost247: isolated compute capacity reserved for one tenant, for workloads that cannot share hardware with anyone else."
+      },
+      "hero_artwork": {
+        "svg": "cloud/private-cloud.svg",
+        "scene": "cloud/private-cloud-3d"
+      },
       "visual": "cloud/private-cloud",
       "image_status": "present",
       "seo_status": "ok",
@@ -1128,6 +1760,14 @@
       "category": "Cloud",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "Public Cloud",
+        "description": "Elastic public cloud instances from CloudHost247: resize compute as demand changes, with the OS catalogue, network controls and monitoring included."
+      },
+      "hero_artwork": {
+        "svg": "cloud/public-cloud.svg",
+        "scene": "cloud/public-cloud-3d"
+      },
       "visual": "cloud/public-cloud",
       "image_status": "present",
       "seo_status": "ok",
@@ -1142,6 +1782,14 @@
       "category": "Hosting",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "Web Hosting",
+        "description": "CloudHost247 web hosting runs your website on managed infrastructure with SSD-backed storage, free SSL, mailboxes, databases and 24/7 support."
+      },
+      "hero_artwork": {
+        "svg": "hosting/web-hosting.svg",
+        "scene": "hosting/web-hosting-3d"
+      },
       "visual": "hosting/web-hosting",
       "image_status": "present",
       "seo_status": "ok",
@@ -1156,6 +1804,14 @@
       "category": "Business",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "Website Design",
+        "description": "Build a website on CloudHost247 with the website builder or the AI website builder, start from a template, launch a store, or have our designers do it for you."
+      },
+      "hero_artwork": {
+        "svg": "hosting/website-design.svg",
+        "scene": "hosting/web-hosting-3d"
+      },
       "visual": "hosting/website-design",
       "image_status": "present",
       "seo_status": "ok",
@@ -1170,6 +1826,14 @@
       "category": "Hosting",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "Windows Hosting",
+        "description": "Windows hosting from CloudHost247 for ASP.NET and Windows-based stacks, with MSSQL databases, IIS configuration and managed certificates."
+      },
+      "hero_artwork": {
+        "svg": "hosting/windows-hosting.svg",
+        "scene": "hosting/web-hosting-3d"
+      },
       "visual": "hosting/windows-hosting",
       "image_status": "present",
       "seo_status": "ok",
@@ -1184,6 +1848,14 @@
       "category": "Hosting",
       "status": "published",
       "template": "cloudhost247-page",
+      "seo_metadata": {
+        "title": "WordPress Hosting",
+        "description": "WordPress hosting on CloudHost247: managed runtime, HTTPS, scheduled backups, database access and the operational work handled for you."
+      },
+      "hero_artwork": {
+        "svg": "hosting/wordpress-hosting.svg",
+        "scene": "hosting/wordpress-hosting-3d"
+      },
       "visual": "hosting/wordpress-hosting",
       "image_status": "present",
       "seo_status": "ok",

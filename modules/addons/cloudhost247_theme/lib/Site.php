@@ -41,6 +41,7 @@ final class Site
                 : 'Access your CloudHost247 account, services, billing and support.');
         $result = array(
             'navigation' => $catalog['navigation'], 'footer' => $catalog['footer'],
+            'applicationManifests' => $script === 'applications.php' ? json_decode(file_get_contents(dirname(__DIR__) . '/resources/applications.json'), true)['apps'] : array(),
             'toolCategories' => isset($catalog['toolCategories']) && is_array($catalog['toolCategories']) ? $catalog['toolCategories'] : array(),
             'pages' => $catalog['pages'], 'page' => $page, 'home' => $home,
             'public' => $home || $page !== null || in_array($script, array('notfound.php', 'site-search.php', 'service-error.php'), true),

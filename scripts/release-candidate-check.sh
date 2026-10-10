@@ -116,7 +116,7 @@ php tests/tools/site-integration.php
 # Browser tools (MRZ among them) are pure modules; run them on Node so a broken handler fails here.
 node tests/tools/local.test.mjs
 php tests/website/run.php
-python3 -m unittest -v tests/website/test_static.py
+python3 -m unittest -v tests/website/test_static.py tests/website/test_manifest_visuals.py
 python3 scripts/verify-website.py
 # Every 3D scene must have the full AVIF/WebP width ladder the templates advertise. A <source>
 # whose URL 404s does not fall through to the next source, so a missing encoding is a broken

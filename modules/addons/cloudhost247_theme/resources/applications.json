@@ -1,0 +1,1473 @@
+{
+  "source": "cloudhost247-node/manifests/*/manifest.yaml",
+  "availability": "Documentation only; query the live platform for deployment eligibility",
+  "apps": [
+    {
+      "slug": "adguard-home",
+      "name": "AdGuard Home",
+      "category": "networking",
+      "description": "Network-wide ad and tracker blocking with DHCP and encrypted DNS support.",
+      "versions": [
+        "0.107.54"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 1,
+        "memory": 512,
+        "storage": 5120,
+        "recommended": {
+          "cpu": 1,
+          "memory": 1024,
+          "storage": 10240
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://github.com/AdguardTeam/AdGuardHome/wiki",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/adguard-home.svg"
+    },
+    {
+      "slug": "adminer",
+      "name": "Adminer",
+      "category": "database",
+      "description": "Lightweight database management UI for MySQL, PostgreSQL, SQLite, and MongoDB.",
+      "versions": [
+        "4.8.1"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 1,
+        "memory": 256,
+        "storage": 2560,
+        "recommended": {
+          "cpu": 1,
+          "memory": 512,
+          "storage": 5120
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://adminer.org",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/adminer.svg"
+    },
+    {
+      "slug": "akaunting",
+      "name": "Akaunting",
+      "category": "finance",
+      "description": "Free and online accounting software for small businesses and freelancers.",
+      "versions": [
+        "3.1"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 1,
+        "memory": 1024,
+        "storage": 20480,
+        "recommended": {
+          "cpu": 2,
+          "memory": 2048,
+          "storage": 40960
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://akaunting.com/docs",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/akaunting.svg"
+    },
+    {
+      "slug": "bookstack",
+      "name": "BookStack",
+      "category": "documents",
+      "description": "Platform for organising and storing information in books, chapters, and pages.",
+      "versions": [
+        "24.12"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 1,
+        "memory": 1024,
+        "storage": 20480,
+        "recommended": {
+          "cpu": 1,
+          "memory": 2048,
+          "storage": 40960
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://www.bookstackapp.com/docs",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/bookstack.svg"
+    },
+    {
+      "slug": "code-server",
+      "name": "code-server",
+      "category": "developer-tools",
+      "description": "VS Code in the browser, running on your own server with your own hardware.",
+      "versions": [
+        "4.95.0"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 2,
+        "memory": 2048,
+        "storage": 20480,
+        "recommended": {
+          "cpu": 4,
+          "memory": 8192,
+          "storage": 81920
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://coder.com/docs/code-server/latest",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/code-server.svg"
+    },
+    {
+      "slug": "docker-registry",
+      "name": "Docker Registry",
+      "category": "infrastructure",
+      "description": "Private OCI/Docker image registry for your own builds and deployments.",
+      "versions": [
+        "2.8.3"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 1,
+        "memory": 512,
+        "storage": 102400,
+        "recommended": {
+          "cpu": 1,
+          "memory": 1024,
+          "storage": 512000
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://distribution.github.io/distribution/about",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/docker-registry.svg"
+    },
+    {
+      "slug": "dockge",
+      "name": "Dockge",
+      "category": "system-administration",
+      "description": "Fancy, easy-to-use docker compose stack management with a live log view.",
+      "versions": [
+        "1.4.2"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 1,
+        "memory": 512,
+        "storage": 10240,
+        "recommended": {
+          "cpu": 1,
+          "memory": 1024,
+          "storage": 20480
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://github.com/louislam/dockge/wiki",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/dockge.svg"
+    },
+    {
+      "slug": "espocrm",
+      "name": "EspoCRM",
+      "category": "crm",
+      "description": "Open-source CRM with a clean interface, workflows, and full data ownership.",
+      "versions": [
+        "9.0"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 1,
+        "memory": 1024,
+        "storage": 20480,
+        "recommended": {
+          "cpu": 2,
+          "memory": 2048,
+          "storage": 40960
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://docs.espocrm.com",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/espocrm.svg"
+    },
+    {
+      "slug": "filebrowser",
+      "name": "File Browser",
+      "category": "storage",
+      "description": "Web file manager providing a clean UI over your files on any volume.",
+      "versions": [
+        "2.32.0"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 1,
+        "memory": 256,
+        "storage": 10240,
+        "recommended": {
+          "cpu": 1,
+          "memory": 512,
+          "storage": 51200
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://filebrowser.org",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/filebrowser.svg"
+    },
+    {
+      "slug": "firefly-iii",
+      "name": "Firefly III",
+      "category": "finance",
+      "description": "A free and open-source personal finance manager with budgets and reports.",
+      "versions": [
+        "6.1.24"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 1,
+        "memory": 1024,
+        "storage": 10240,
+        "recommended": {
+          "cpu": 1,
+          "memory": 2048,
+          "storage": 20480
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://docs.firefly-iii.org",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/firefly-iii.svg"
+    },
+    {
+      "slug": "focalboard",
+      "name": "Focalboard",
+      "category": "productivity",
+      "description": "Open-source project management tool that mirrors Trello and Notion workflows.",
+      "versions": [
+        "7.11"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 1,
+        "memory": 1024,
+        "storage": 10240,
+        "recommended": {
+          "cpu": 1,
+          "memory": 2048,
+          "storage": 20480
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://www.focalboard.com/docs",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/focalboard.svg"
+    },
+    {
+      "slug": "ghost",
+      "name": "Ghost",
+      "category": "cms",
+      "description": "Modern publishing platform for professional blogs and newsletters with built-in memberships.",
+      "versions": [
+        "5.104"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 1,
+        "memory": 1024,
+        "storage": 10240,
+        "recommended": {
+          "cpu": 2,
+          "memory": 2048,
+          "storage": 20480
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://ghost.org/docs",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/ghost.svg"
+    },
+    {
+      "slug": "gitea",
+      "name": "Gitea",
+      "category": "developer-tools",
+      "description": "Painless self-hosted Git service with issues, pull requests, and built-in CI.",
+      "versions": [
+        "1.24.0"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 1,
+        "memory": 1024,
+        "storage": 20480,
+        "recommended": {
+          "cpu": 2,
+          "memory": 2048,
+          "storage": 102400
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated",
+        "kubernetes"
+      ],
+      "documentation": "https://docs.gitea.com",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/gitea.svg"
+    },
+    {
+      "slug": "grafana",
+      "name": "Grafana",
+      "category": "monitoring",
+      "description": "The open observability platform for dashboards, alerting, and analytics.",
+      "versions": [
+        "11.5.0"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 1,
+        "memory": 1024,
+        "storage": 10240,
+        "recommended": {
+          "cpu": 2,
+          "memory": 2048,
+          "storage": 20480
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated",
+        "kubernetes"
+      ],
+      "documentation": "https://grafana.com/docs/grafana/latest",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/grafana.svg"
+    },
+    {
+      "slug": "home-assistant",
+      "name": "Home Assistant",
+      "category": "home-automation",
+      "description": "Open-source home automation hub that puts local control and privacy first.",
+      "versions": [
+        "2025.1"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 2,
+        "memory": 2048,
+        "storage": 20480,
+        "recommended": {
+          "cpu": 2,
+          "memory": 4096,
+          "storage": 40960
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://www.home-assistant.io/docs",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/home-assistant.svg"
+    },
+    {
+      "slug": "immich",
+      "name": "Immich",
+      "category": "media",
+      "description": "High-performance self-hosted photo and video backup solution with mobile apps.",
+      "versions": [
+        "1.124.0"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 2,
+        "memory": 4096,
+        "storage": 102400,
+        "recommended": {
+          "cpu": 4,
+          "memory": 8192,
+          "storage": 512000
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://immich.app/docs/overview/introduction",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/immich.svg"
+    },
+    {
+      "slug": "jellyfin",
+      "name": "Jellyfin",
+      "category": "media",
+      "description": "Free software media system that puts you in control of your media library.",
+      "versions": [
+        "10.10.0"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 2,
+        "memory": 2048,
+        "storage": 102400,
+        "recommended": {
+          "cpu": 4,
+          "memory": 8192,
+          "storage": 512000
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://jellyfin.org/docs",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/jellyfin.svg"
+    },
+    {
+      "slug": "keycloak",
+      "name": "Keycloak",
+      "category": "security",
+      "description": "Open-source identity and access management with SSO, SAML, and social login.",
+      "versions": [
+        "26.1"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 2,
+        "memory": 2048,
+        "storage": 20480,
+        "recommended": {
+          "cpu": 2,
+          "memory": 4096,
+          "storage": 40960
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated",
+        "kubernetes"
+      ],
+      "documentation": "https://www.keycloak.org/documentation",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/keycloak.svg"
+    },
+    {
+      "slug": "mariadb",
+      "name": "MariaDB",
+      "category": "database",
+      "description": "Enhanced, community-developed drop-in replacement for MySQL.",
+      "versions": [
+        "11.7"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 1,
+        "memory": 1024,
+        "storage": 20480,
+        "recommended": {
+          "cpu": 2,
+          "memory": 4096,
+          "storage": 102400
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://mariadb.com/kb/en/documentation",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/mariadb.svg"
+    },
+    {
+      "slug": "matomo",
+      "name": "Matomo",
+      "category": "analytics",
+      "description": "Google Analytics alternative that gives you full data ownership and privacy compliance.",
+      "versions": [
+        "5.2.0"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 1,
+        "memory": 1024,
+        "storage": 10240,
+        "recommended": {
+          "cpu": 2,
+          "memory": 2048,
+          "storage": 20480
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://matomo.org/docs",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/matomo.svg"
+    },
+    {
+      "slug": "minio",
+      "name": "MinIO",
+      "category": "storage",
+      "description": "S3-compatible high-performance object storage for your own private cloud.",
+      "versions": [
+        "2025.1"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 1,
+        "memory": 1024,
+        "storage": 102400,
+        "recommended": {
+          "cpu": 2,
+          "memory": 4096,
+          "storage": 512000
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated",
+        "kubernetes"
+      ],
+      "documentation": "https://min.io/docs/minio/container/index.html",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/minio.svg"
+    },
+    {
+      "slug": "mongodb",
+      "name": "MongoDB",
+      "category": "database",
+      "description": "Document database built for modern applications with flexible schemas and scaling.",
+      "versions": [
+        "8.0"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 1,
+        "memory": 2048,
+        "storage": 20480,
+        "recommended": {
+          "cpu": 2,
+          "memory": 4096,
+          "storage": 102400
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://www.mongodb.com/docs",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/mongodb.svg"
+    },
+    {
+      "slug": "moodle",
+      "name": "Moodle",
+      "category": "education",
+      "description": "The world’s most popular learning management system for online courses.",
+      "versions": [
+        "4.5"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 2,
+        "memory": 2048,
+        "storage": 40960,
+        "recommended": {
+          "cpu": 2,
+          "memory": 4096,
+          "storage": 81920
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://docs.moodle.org",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/moodle.svg"
+    },
+    {
+      "slug": "mysql",
+      "name": "MySQL",
+      "category": "database",
+      "description": "The world’s most popular open-source database, trusted for web applications of every scale.",
+      "versions": [
+        "8.4"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 1,
+        "memory": 1024,
+        "storage": 20480,
+        "recommended": {
+          "cpu": 2,
+          "memory": 4096,
+          "storage": 102400
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://dev.mysql.com/doc",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/mysql.svg"
+    },
+    {
+      "slug": "n8n",
+      "name": "n8n",
+      "category": "automation",
+      "description": "Fair-code workflow automation with 400+ integrations and native AI capabilities.",
+      "versions": [
+        "1.98.0"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 2,
+        "memory": 4096,
+        "storage": 20480,
+        "recommended": {
+          "cpu": 2,
+          "memory": 4096,
+          "storage": 40960
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated",
+        "kubernetes"
+      ],
+      "documentation": "https://docs.n8n.io",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/n8n.svg"
+    },
+    {
+      "slug": "navidrome",
+      "name": "Navidrome",
+      "category": "media",
+      "description": "Modern music collection server and streamer with Subsonic API compatibility.",
+      "versions": [
+        "0.54.0"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 1,
+        "memory": 512,
+        "storage": 51200,
+        "recommended": {
+          "cpu": 1,
+          "memory": 1024,
+          "storage": 256000
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://www.navidrome.org/docs",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/navidrome.svg"
+    },
+    {
+      "slug": "netdata",
+      "name": "Netdata",
+      "category": "monitoring",
+      "description": "Real-time, per-second infrastructure monitoring with zero configuration.",
+      "versions": [
+        "2.2"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 1,
+        "memory": 1024,
+        "storage": 20480,
+        "recommended": {
+          "cpu": 1,
+          "memory": 2048,
+          "storage": 40960
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://learn.netdata.cloud",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/netdata.svg"
+    },
+    {
+      "slug": "nextcloud",
+      "name": "Nextcloud",
+      "category": "storage",
+      "description": "Self-hosted file sync and share platform with calendars, contacts, and collaboration.",
+      "versions": [
+        "31.0"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 2,
+        "memory": 2048,
+        "storage": 102400,
+        "recommended": {
+          "cpu": 2,
+          "memory": 4096,
+          "storage": 512000
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://docs.nextcloud.com",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/nextcloud.svg"
+    },
+    {
+      "slug": "node-red",
+      "name": "Node-RED",
+      "category": "automation",
+      "description": "Low-code programming for event-driven applications, built on Node.js.",
+      "versions": [
+        "4.1.0"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 1,
+        "memory": 1024,
+        "storage": 10240,
+        "recommended": {
+          "cpu": 1,
+          "memory": 2048,
+          "storage": 20480
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://nodered.org/docs",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/node-red.svg"
+    },
+    {
+      "slug": "odoo",
+      "name": "Odoo",
+      "category": "business",
+      "description": "All-in-one business software: CRM, accounting, inventory, manufacturing, and e-commerce.",
+      "versions": [
+        "18.0"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 2,
+        "memory": 4096,
+        "storage": 51200,
+        "recommended": {
+          "cpu": 4,
+          "memory": 8192,
+          "storage": 102400
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://www.odoo.com/documentation",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/odoo.svg"
+    },
+    {
+      "slug": "ollama",
+      "name": "Ollama",
+      "category": "ai",
+      "description": "Run large language models like Llama, Mistral, and Gemma locally on your own GPU.",
+      "versions": [
+        "0.5.7"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 4,
+        "memory": 8192,
+        "storage": 102400,
+        "recommended": {
+          "cpu": 8,
+          "memory": 32768,
+          "storage": 204800
+        },
+        "gpu": true
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://github.com/ollama/ollama/blob/main/docs/api.md",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/ollama.svg"
+    },
+    {
+      "slug": "open-webui",
+      "name": "Open WebUI",
+      "category": "ai",
+      "description": "Self-hosted AI interface for Ollama and OpenAI-compatible APIs with users and RBAC.",
+      "versions": [
+        "0.5.12"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 2,
+        "memory": 2048,
+        "storage": 10240,
+        "recommended": {
+          "cpu": 2,
+          "memory": 4096,
+          "storage": 20480
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://docs.openwebui.com",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/open-webui.svg"
+    },
+    {
+      "slug": "openproject",
+      "name": "OpenProject",
+      "category": "project-management",
+      "description": "Leading open-source project management software with agile and classic teams in mind.",
+      "versions": [
+        "15.0"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 2,
+        "memory": 4096,
+        "storage": 30720,
+        "recommended": {
+          "cpu": 2,
+          "memory": 8192,
+          "storage": 61440
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://www.openproject.org/docs",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/openproject.svg"
+    },
+    {
+      "slug": "paperless-ngx",
+      "name": "Paperless-ngx",
+      "category": "documents",
+      "description": "Scan, OCR, index, and archive all your physical documents, fully searchable.",
+      "versions": [
+        "2.14.0"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 2,
+        "memory": 2048,
+        "storage": 51200,
+        "recommended": {
+          "cpu": 2,
+          "memory": 4096,
+          "storage": 102400
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://docs.paperless-ngx.com",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/paperless-ngx.svg"
+    },
+    {
+      "slug": "photoprism",
+      "name": "PhotoPrism",
+      "category": "media",
+      "description": "AI-powered photos app for the decentralized web — browse, organize, and share.",
+      "versions": [
+        "241128"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 2,
+        "memory": 4096,
+        "storage": 102400,
+        "recommended": {
+          "cpu": 4,
+          "memory": 8192,
+          "storage": 512000
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://docs.photoprism.app",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/photoprism.svg"
+    },
+    {
+      "slug": "phpmyadmin",
+      "name": "phpMyAdmin",
+      "category": "database",
+      "description": "Classic web interface for MySQL and MariaDB administration.",
+      "versions": [
+        "5.2.1"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 1,
+        "memory": 256,
+        "storage": 2560,
+        "recommended": {
+          "cpu": 1,
+          "memory": 512,
+          "storage": 5120
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://docs.phpmyadmin.net",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/phpmyadmin.svg"
+    },
+    {
+      "slug": "pi-hole",
+      "name": "Pi-hole",
+      "category": "networking",
+      "description": "Network-level ad and tracker blocking DNS server for your whole network.",
+      "versions": [
+        "2024.07"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 1,
+        "memory": 512,
+        "storage": 5120,
+        "recommended": {
+          "cpu": 1,
+          "memory": 1024,
+          "storage": 10240
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://docs.pi-hole.net",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/pi-hole.svg"
+    },
+    {
+      "slug": "plausible",
+      "name": "Plausible Analytics",
+      "category": "analytics",
+      "description": "Lightweight and open-source web analytics, cookie-free and GDPR compliant.",
+      "versions": [
+        "2.1.5"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 2,
+        "memory": 2048,
+        "storage": 20480,
+        "recommended": {
+          "cpu": 2,
+          "memory": 4096,
+          "storage": 40960
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://plausible.io/docs/self-hosting",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/plausible.svg"
+    },
+    {
+      "slug": "portainer",
+      "name": "Portainer",
+      "category": "system-administration",
+      "description": "Lightweight container management UI for Docker environments.",
+      "versions": [
+        "2.21.0"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 1,
+        "memory": 512,
+        "storage": 5120,
+        "recommended": {
+          "cpu": 1,
+          "memory": 1024,
+          "storage": 10240
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://docs.portainer.io",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/portainer.svg"
+    },
+    {
+      "slug": "postgresql",
+      "name": "PostgreSQL",
+      "category": "database",
+      "description": "The world’s most advanced open-source relational database, as a dedicated instance.",
+      "versions": [
+        "17",
+        "16"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 1,
+        "memory": 1024,
+        "storage": 20480,
+        "recommended": {
+          "cpu": 2,
+          "memory": 4096,
+          "storage": 102400
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://www.postgresql.org/docs",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/postgresql.svg"
+    },
+    {
+      "slug": "prestashop",
+      "name": "PrestaShop",
+      "category": "e-commerce",
+      "description": "Open-source e-commerce platform with 300+ features and a thriving module ecosystem.",
+      "versions": [
+        "9.0"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 2,
+        "memory": 2048,
+        "storage": 30720,
+        "recommended": {
+          "cpu": 2,
+          "memory": 4096,
+          "storage": 81920
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://devdocs.prestashop-project.org",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/prestashop.svg"
+    },
+    {
+      "slug": "prometheus",
+      "name": "Prometheus",
+      "category": "monitoring",
+      "description": "Open-source systems monitoring and alerting toolkit with a powerful query language.",
+      "versions": [
+        "3.1.0"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 1,
+        "memory": 2048,
+        "storage": 51200,
+        "recommended": {
+          "cpu": 2,
+          "memory": 4096,
+          "storage": 102400
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated",
+        "kubernetes"
+      ],
+      "documentation": "https://prometheus.io/docs",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/prometheus.svg"
+    },
+    {
+      "slug": "redis",
+      "name": "Redis",
+      "category": "database",
+      "description": "In-memory data store for caching, queues, session storage, and pub/sub.",
+      "versions": [
+        "7.4"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 1,
+        "memory": 1024,
+        "storage": 10240,
+        "recommended": {
+          "cpu": 1,
+          "memory": 2048,
+          "storage": 20480
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://redis.io/docs/latest",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/redis.svg"
+    },
+    {
+      "slug": "rocketchat",
+      "name": "Rocket.Chat",
+      "category": "communication",
+      "description": "Open-source team chat with channels, video calls, and unlimited message history.",
+      "versions": [
+        "7.2.0"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 2,
+        "memory": 4096,
+        "storage": 30720,
+        "recommended": {
+          "cpu": 4,
+          "memory": 8192,
+          "storage": 61440
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://rocket.chat/docs",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/rocketchat.svg"
+    },
+    {
+      "slug": "roundcube",
+      "name": "Roundcube",
+      "category": "communication",
+      "description": "Browser-based multilingual IMAP webmail client with full MIME and LDAP support.",
+      "versions": [
+        "1.6.9"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 1,
+        "memory": 512,
+        "storage": 10240,
+        "recommended": {
+          "cpu": 1,
+          "memory": 1024,
+          "storage": 20480
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://roundcube.net/download",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/roundcube.svg"
+    },
+    {
+      "slug": "traefik",
+      "name": "Traefik",
+      "category": "infrastructure",
+      "description": "Cloud-native reverse proxy and load balancer — the platform’s routing layer.",
+      "versions": [
+        "3.3"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 1,
+        "memory": 512,
+        "storage": 5120,
+        "recommended": {
+          "cpu": 1,
+          "memory": 1024,
+          "storage": 10240
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated",
+        "kubernetes"
+      ],
+      "documentation": "https://doc.traefik.io/traefik",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/traefik.svg"
+    },
+    {
+      "slug": "umami",
+      "name": "Umami",
+      "category": "analytics",
+      "description": "Simple, fast, privacy-focused web analytics without cookies or personal data collection.",
+      "versions": [
+        "2.15.1"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 1,
+        "memory": 1024,
+        "storage": 10240,
+        "recommended": {
+          "cpu": 1,
+          "memory": 2048,
+          "storage": 20480
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://umami.is/docs",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/umami.svg"
+    },
+    {
+      "slug": "uptime-kuma",
+      "name": "Uptime Kuma",
+      "category": "monitoring",
+      "description": "Fancy self-hosted monitoring tool with status pages and 90+ notification providers.",
+      "versions": [
+        "1.23.15"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 1,
+        "memory": 512,
+        "storage": 5120,
+        "recommended": {
+          "cpu": 1,
+          "memory": 1024,
+          "storage": 20480
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://github.com/louislam/uptime-kuma/wiki",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/uptime-kuma.svg"
+    },
+    {
+      "slug": "vaultwarden",
+      "name": "Vaultwarden",
+      "category": "security",
+      "description": "Unofficial Bitwarden-compatible server — password manager for your whole team.",
+      "versions": [
+        "1.33.0"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 1,
+        "memory": 256,
+        "storage": 2560,
+        "recommended": {
+          "cpu": 1,
+          "memory": 512,
+          "storage": 10240
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://github.com/dani-garcia/vaultwarden/wiki",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/vaultwarden.svg"
+    },
+    {
+      "slug": "vikunja",
+      "name": "Vikunja",
+      "category": "project-management",
+      "description": "The to-do app to organize your life — lists, kanban, gantt, and teams.",
+      "versions": [
+        "0.24.0"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 1,
+        "memory": 512,
+        "storage": 10240,
+        "recommended": {
+          "cpu": 1,
+          "memory": 1024,
+          "storage": 20480
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://vikunja.io/docs",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/vikunja.svg"
+    },
+    {
+      "slug": "wireguard-easy",
+      "name": "WireGuard Easy",
+      "category": "networking",
+      "description": "The easiest way to install and manage WireGuard VPN on your server.",
+      "versions": [
+        "14"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 1,
+        "memory": 512,
+        "storage": 5120,
+        "recommended": {
+          "cpu": 1,
+          "memory": 1024,
+          "storage": 10240
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated"
+      ],
+      "documentation": "https://github.com/wg-easy/wg-easy",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/wireguard-easy.svg"
+    },
+    {
+      "slug": "wordpress",
+      "name": "WordPress",
+      "category": "cms",
+      "description": "The world’s most popular publishing platform — deploy on Docker or cPanel hosting.",
+      "versions": [
+        "6.7"
+      ],
+      "deployment": "docker-compose",
+      "requirements": {
+        "cpu": 1,
+        "memory": 1024,
+        "storage": 10240,
+        "recommended": {
+          "cpu": 2,
+          "memory": 2048,
+          "storage": 40960
+        }
+      },
+      "relatedHosting": [
+        "docker",
+        "vps",
+        "dedicated",
+        "cpanel",
+        "kubernetes"
+      ],
+      "documentation": "https://wordpress.org/documentation",
+      "status": "Manifest available; deployment requires an eligible configured service",
+      "mark": "applications/marks/wordpress.svg"
+    }
+  ]
+}

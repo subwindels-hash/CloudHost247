@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { MarketplaceApp } from '../lib/marketplace-api';
 
 /**
@@ -6,9 +7,12 @@ import type { MarketplaceApp } from '../lib/marketplace-api';
  * brand-colored tile derived from its slug. Admins can set a real logo_url later; this tile is
  * the honest, self-contained default.
  */
-const PALETTE = ['#0756d8', '#0b7285', '#5f3dc4', '#c2255c', '#e8590c', '#2b8a3e', '#862e9c', '#1971c2'];
+const PALETTE = ['#101e2c', '#196947', '#183646', '#28483f'];
+const MARKS = new Set(Object.keys(import.meta.glob('../../../../manifests/*/manifest.yaml', { query: '?raw', import: 'default' })).map(path => path.split('/').slice(-2)[0]));
 
 export default function AppTile({ name, slug, size = 44 }: { name: string; slug: string; size?: number }) {
+  const [failed, setFailed] = useState(false);
+  if (MARKS.has(slug) && !failed) return <img src={`/media/cloudhost247/applications/marks/${encodeURIComponent(slug)}.svg`} width={size} height={size} alt="" loading="lazy" onError={() => setFailed(true)} />;
   const colorIndex = [...slug].reduce((acc, char) => acc + char.charCodeAt(0), 0) % PALETTE.length;
   const initials = name
     .replace(/[^a-zA-Z0-9 ]/g, '')
