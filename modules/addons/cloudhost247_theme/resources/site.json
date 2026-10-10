@@ -5283,6 +5283,7 @@
       "id": "hosting",
       "title": "Hosting",
       "description": "Website, application and email hosting — every plan page backed by the live product catalogue.",
+      "url": "cloudhost247-hosting.php",
       "groups": [
         {
           "title": "Web hosting",
@@ -5372,6 +5373,7 @@
       "id": "cloud",
       "title": "Cloud & Servers",
       "description": "Virtual servers, cloud platforms and the infrastructure operations layer behind them.",
+      "url": "cloudhost247-hosting.php",
       "groups": [
         {
           "title": "Cloud",
@@ -5445,6 +5447,7 @@
       "id": "domains",
       "title": "Domains",
       "description": "Search, register, transfer and manage domain names — with the full registrar and DNS toolkit.",
+      "url": "domain.php",
       "groups": [
         {
           "title": "Domains",
@@ -5506,6 +5509,7 @@
       "id": "platforms",
       "title": "Platforms",
       "description": "Applications, containers, runtimes, control panels and operating systems — all configured for CloudHost247 servers.",
+      "url": "applications.php",
       "groups": [
         {
           "title": "Application platforms",
@@ -5584,6 +5588,7 @@
       "id": "tools",
       "title": "Tools",
       "description": "Inspect, troubleshoot and build — every result reports what was actually queried and what it cannot tell you.",
+      "url": "tools",
       "groups": [
         {
           "title": "Curated collections",
@@ -5608,6 +5613,7 @@
       "id": "resources",
       "title": "Resources",
       "description": "Guides, documentation, service status and the knowledge you need to run on CloudHost247.",
+      "url": "documentation.php",
       "groups": [
         {
           "title": "Documentation & help",
@@ -5682,6 +5688,7 @@
       "id": "company",
       "title": "Company",
       "description": "Who runs CloudHost247, how we secure the platform, and the terms we operate under.",
+      "url": "aboutus.php",
       "groups": [
         {
           "title": "Company",

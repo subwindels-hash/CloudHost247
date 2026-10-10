@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { usePageMeta } from '../lib/usePageMeta';
 import { fetchMarketplaceApps, fetchMarketplaceCategories, type MarketplaceApp, type MarketplaceCategory } from '../lib/marketplace-api';
 import { CatalogErrorBanner, CatalogLoadingBanner } from '../components/CatalogStateBanner';
+import { Illustration } from '../components/marketing/Illustration';
 import { AppCard } from '../components/AppTile';
 
 /**
@@ -26,6 +27,8 @@ export default function MarketplacePage() {
 
   useEffect(() => {
     let cancelled = false;
+    setApps(null);
+    setError('');
     fetchMarketplaceApps({ category, search: debounced, sort })
       .then((result) => {
         if (!cancelled) {
@@ -52,12 +55,11 @@ export default function MarketplacePage() {
 
   return (
     <div className="ch247-stack">
+      <section className="ch-hero"><div className="ch-wrap ch-hero__inner"><div><p className="ch-kicker">Applications · CloudHost247</p><h1>Build on the right application.</h1><p className="ch-lede">Explore the published catalogue, compare requirements and choose a supported version. Deployment depends on your eligible service and configured platform.</p></div><Illustration visual="applications/application-stack" visual3d="applications/application-stack-3d" alt="Conceptual application container infrastructure" eager /></div></section>
       <div className="ch247-card">
-        <h1>App Marketplace</h1>
+        <h2>App Marketplace</h2>
         <p className="ch247-page__hint">
-          Deploy open-source applications to your CloudHost247 hosting in a few clicks — the
-          platform handles the server, Docker networking, SSL, and backups. Every installation is
-          isolated from every other customer.
+          Review supported versions, hosting compatibility and resource requirements before installing. SSL and backups depend on the application manifest and your configured service.
         </p>
 
         <div className="ch247-market-controls">

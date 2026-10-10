@@ -23,6 +23,20 @@
     document.addEventListener('click', event => { if (!nav.contains(event.target)) closeMenus(); });
     document.addEventListener('focusin', event => { if (!nav.contains(event.target)) closeMenus(); });
   }
+  document.querySelectorAll('[data-ch-manifests]').forEach(directory => {
+    const cards = Array.from(directory.querySelectorAll('[data-manifest-card]'));
+    const search = directory.querySelector('[data-manifest-search]');
+    const category = directory.querySelector('[data-manifest-category]');
+    [...new Set(cards.map(card => card.dataset.category))].sort().forEach(name => {
+      const option = document.createElement('option'); option.value = name; option.textContent = name; category.append(option);
+    });
+    const filter = () => {
+      let count = 0; const query = search.value.trim().toLowerCase();
+      cards.forEach(card => { card.hidden = !card.textContent.toLowerCase().includes(query) || (category.value !== '' && card.dataset.category !== category.value); if (!card.hidden) count++; });
+      directory.querySelector('[data-manifest-status]').textContent = count ? count + ' manifests match. Deployment eligibility is checked separately.' : 'No matching applications. Try a different search or category.';
+    };
+    search.addEventListener('input', filter); category.addEventListener('change', filter); filter();
+  });
   // Public, read-only Node APIs only. Credentials and mutation controls remain in the platform.
   document.querySelectorAll('[data-ch-catalog]').forEach(async container => {
     const platform = container.dataset.platform;
@@ -33,7 +47,7 @@
     const abort = new AbortController();
     const timeout = setTimeout(() => abort.abort(), 10000);
     try {
-      const response = await fetch(platform + '/api/v1/' + (os ? 'operating-systems' : 'apps?limit=24'), { signal: abort.signal, credentials: 'omit', headers: {Accept: 'application/json'} });
+      const response = await fetch(platform + '/api/v1/' + (os ? 'operating-systems' : 'apps?limit=100'), { signal: abort.signal, credentials: 'omit', headers: {Accept: 'application/json'} });
       if (!response.ok) throw new Error('unavailable');
       const data = await response.json();
       const rows = os ? data.operatingSystems : data.apps;

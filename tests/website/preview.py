@@ -27,7 +27,7 @@ class Handler(BaseHTTPRequestHandler):
   if fixture.is_relative_to(FIXTURES) and fixture.is_file():file=fixture
   elif path.startswith(('assets/images/cloudhost247/','assets/cloudhost247-tools/','templates/cloudhost247/css/','templates/cloudhost247/js/')):
    candidate=(ROOT/path).resolve()
-   if candidate.is_relative_to(ROOT) and candidate.suffix in ('.svg','.png','.webp','.jpg','.jpeg','.ico','.css','.js','.webmanifest') and candidate.is_file():file=candidate
+   if candidate.is_relative_to(ROOT) and candidate.suffix in ('.svg','.avif','.png','.webp','.jpg','.jpeg','.ico','.css','.js','.webmanifest') and candidate.is_file():file=candidate
   if not file:self.send_error(404,'Unavailable in the template fixture harness');return
   self.send_response(200);self.send_header('Content-Type',mimetypes.guess_type(file)[0] or 'application/octet-stream');self.send_header('X-Content-Type-Options','nosniff');self.end_headers();self.wfile.write(file.read_bytes())
  def log_message(self,*args):pass

@@ -117,16 +117,7 @@ function ToolsGroups({ limit, active = true }: { limit: number; active?: boolean
 export function Brand({ className }: { className?: string }) {
   return (
     <Link to="/" className={className ? `ch247-brand ${className}` : 'ch247-brand'} aria-label="CloudHost247 — home">
-      <span className="ch247-brand__mark">
-        <svg viewBox="0 0 24 24" aria-hidden focusable="false">
-          <path d="M12 2.5 21 7.5v9L12 21.5 3 16.5v-9L12 2.5Z" fill="none" stroke="#7ff0b4" strokeWidth="1.5" strokeLinejoin="round" />
-          <path d="M3 7.5 12 13l9-5.5M12 13v8.5" fill="none" stroke="#7ff0b4" strokeWidth="1" opacity="0.7" />
-          <circle cx="12" cy="13" r="1.7" fill="#7ff0b4" />
-        </svg>
-      </span>
-      <span>
-        CloudHost<span className="ch247-brand__suffix">247</span>
-      </span>
+      <img src={`/media/cloudhost247/brand/logo-horizontal-${className?.includes('footer') ? 'white' : 'dark'}.svg`} width={204} height={39} alt="CloudHost247" />
     </Link>
   );
 }

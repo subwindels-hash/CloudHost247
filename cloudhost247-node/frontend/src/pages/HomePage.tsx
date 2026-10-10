@@ -45,7 +45,7 @@ const SPOTLIGHTS = [
   {
     to: '/platforms/applications',
     title: 'Applications',
-    body: 'Supported application versions, not a wall of invented logos.',
+    body: 'Explore application requirements, supported versions and deployment options.',
     visual: 'applications/application-stack',
     visual3d: 'applications/application-stack-3d',
   },
@@ -128,7 +128,7 @@ export default function HomePage() {
             <div>
               <p className="ch-kicker">Domains · Hosting · Cloud · Platforms · Tools</p>
               <h1>
-                Everything after the idea, <em>in one platform</em>
+                Build. Host.<br />Deploy. <em>Scale.</em>
               </h1>
               <p className="ch-lede">
                 Register the domain, host the website, deploy the application, run the server and
@@ -209,7 +209,7 @@ export default function HomePage() {
               <h2>Hosting, cloud, domains and applications</h2>
             </div>
             <p className="ch-lede">
-              Four doors into the platform. Each one opens a real product page, not a placeholder.
+              Choose your starting point. Explore the specifications and options for your next project.
             </p>
           </div>
           <div className="ch-grid ch-grid--4">
