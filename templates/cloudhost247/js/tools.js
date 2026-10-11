@@ -1,4 +1,4 @@
-import { runLocal, isSecretCell } from './tools-local.js';
+import { runLocal, isSecretCell, scanFrame } from './tools-local.js';
 
 /**
  * Tools front-end.
@@ -122,6 +122,124 @@ document.querySelectorAll('.ch-tool-form').forEach((form) => {
     result.replaceChildren();
   });
 });
+
+// --- QR scanner: camera capture ------------------------------------------------------------------
+//
+// The brief asks the QR reader to use a real camera, with permission handling. Both this and the
+// upload path end in the same decoder (`scanFrame`), so a symbol read off the camera and one read
+// out of a photograph cannot disagree. The camera is strictly optional: every browser that has no
+// camera, that is not on a secure origin, or where the visitor refuses permission keeps the upload
+// path, which is why the button is only added once a media device interface exists.
+
+function cameraErrorText(error) {
+  const name = error && error.name ? error.name : '';
+  if (name === 'NotAllowedError' || name === 'SecurityError') {
+    return 'Camera access was refused. Allow the camera for this site in your browser settings, then try again — or upload a photo of the code instead.';
+  }
+  if (name === 'NotFoundError' || name === 'OverconstrainedError') {
+    return 'No camera was found on this device. Upload a photo of the code instead.';
+  }
+  if (name === 'NotReadableError') {
+    return 'The camera is already in use by another application. Close it and try again, or upload a photo of the code.';
+  }
+  return error && error.message
+    ? 'The camera could not be started: ' + error.message
+    : 'The camera could not be started. Upload a photo of the code instead.';
+}
+
+function enhanceQrScanner(form) {
+  const media = navigator.mediaDevices;
+  if (!media || typeof media.getUserMedia !== 'function') return;
+  const actions = form.querySelector('.ch-actions');
+  const state = form.querySelector('.ch-tool-state');
+  const result = form.querySelector('.ch-tool-result');
+  if (!actions || !state || !result) return;
+
+  const button = el('button', 'ch-btn ch-btn-dark', 'Scan with the camera');
+  button.type = 'button';
+  button.setAttribute('aria-expanded', 'false');
+  actions.append(button);
+
+  const panel = el('div', 'ch-camera');
+  panel.hidden = true;
+  const video = document.createElement('video');
+  video.playsInline = true;
+  video.muted = true;
+  video.setAttribute('aria-label', 'Camera viewfinder');
+  const preview = document.createElement('canvas');
+  preview.className = 'ch-camera-preview';
+  preview.hidden = true;
+  const status = el('p', 'ch-hint', '');
+  panel.append(video, preview, status);
+  result.parentNode.insertBefore(panel, result);
+
+  let stream = null;
+  let timer = null;
+  const frameCanvas = document.createElement('canvas');
+
+  function stop() {
+    if (timer) { clearInterval(timer); timer = null; }
+    if (stream) { stream.getTracks().forEach((track) => track.stop()); stream = null; }
+    video.srcObject = null;
+    panel.hidden = true;
+    button.textContent = 'Scan with the camera';
+    button.setAttribute('aria-expanded', 'false');
+  }
+
+  async function start() {
+    panel.hidden = false;
+    button.disabled = true;
+    button.textContent = 'Starting the camera…';
+    try {
+      stream = await media.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+    } catch (error) {
+      stop();
+      button.disabled = false;
+      state.dataset.state = 'error';
+      state.textContent = cameraErrorText(error);
+      render(result, { ok: false, error: state.textContent }, state);
+      return;
+    }
+    button.disabled = false;
+    button.textContent = 'Stop the camera';
+    button.setAttribute('aria-expanded', 'true');
+    video.srcObject = stream;
+    try { await video.play(); } catch { /* autoplay is permitted for a muted stream; if not, the frame loop still reads */ }
+    status.textContent = 'Point the camera at the code. Nothing is uploaded — each frame is decoded in this page.';
+    const track = stream.getVideoTracks()[0];
+    if (track && track.getSettings) {
+      const settings = track.getSettings();
+      if (settings.width) status.textContent += ' Camera: ' + settings.width + '×' + settings.height + '.';
+    }
+    timer = setInterval(async () => {
+      if (!stream || video.readyState < 2) return;
+      frameCanvas.width = video.videoWidth;
+      frameCanvas.height = video.videoHeight;
+      if (!frameCanvas.width || !frameCanvas.height) return;
+      const ctx = frameCanvas.getContext('2d', { willReadFrequently: true });
+      if (!ctx) return;
+      ctx.drawImage(video, 0, 0);
+      let payload = null;
+      try {
+        payload = await scanFrame(frameCanvas, form.dataset.handler === 'wifi_qr');
+      } catch (error) {
+        // A frame that cannot be decoded is not a failure of the tool; keep looking and keep quiet.
+        return;
+      }
+      if (!payload) return;
+      stop();
+      render(result, payload, state);
+    }, 400);
+  }
+
+  button.addEventListener('click', () => {
+    if (stream) stop(); else start();
+  });
+  form.addEventListener('reset', stop);
+  window.addEventListener('pagehide', stop);
+}
+
+document.querySelectorAll('.ch-tool-form[data-handler="qr_scan"], .ch-tool-form[data-handler="wifi_qr"]').forEach(enhanceQrScanner);
 
 function validate(form, data, state) {
   for (const field of form.querySelectorAll('[required]')) {

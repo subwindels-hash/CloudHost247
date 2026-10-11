@@ -58,6 +58,9 @@ import {
   parseAmountLines,
   parsePipeRecords,
 } from '../../src/tools/business/generators';
+import { buildCardLayout, buildSpec, type CardFace, type CardFormState } from '../../src/tools/business/id-card';
+import { formStateFromInput } from '../../src/tools/business/id-card/tool';
+import { renderFaceToRgba } from '../../src/tools/business/id-card/raster';
 import {
   buildOrgChart,
   buildEmployeeId,
@@ -98,6 +101,72 @@ function resultOf(outcome: { ok: boolean; result?: BusinessToolResult; error?: {
 function errorMessage(outcome: { ok: boolean; error?: { message: string } }): string {
   if (outcome.ok) throw new Error('Expected a failure but the tool succeeded.');
   return outcome.error ? outcome.error.message : '';
+}
+
+/**
+ * Decode the QR symbol off a rendered card face — the same round trip a phone camera performs on the
+ * printed badge.
+ *
+ * The Employee ID Card Generator now lays its faces out as vector operations and rasterises them
+ * with its own renderer, so the strongest available check is to render the face and hand the pixels
+ * to the same jsQR decoder the Tools Center scanner uses. Parsing the SVG would test the markup; this
+ * tests the picture a camera would see, including the quiet zone and the light plate under the
+ * symbol.
+ */
+/**
+ * The codes table row, wherever the engine placed it.
+ *
+ * The badge engine keeps its card fields, its machine-readable codes and its design settings in
+ * three tables, and the codes table has a content column before the status column.
+ */
+function codesRow(result: { tables?: Array<{ rows: Array<{ label: string; cells: string[] }> }> }, label: string): string {
+  for (const table of result.tables ?? []) {
+    const row = table.rows.find((entry) => entry.label === label);
+    if (row) return row.cells[row.cells.length - 1] ?? '';
+  }
+  return '';
+}
+
+/**
+ * Rebuild the two faces for a set of historical inputs, through the same adapter the tool uses.
+ *
+ * The QR assertions decode pixels rather than markup, so they need the layout the tool produced.
+ * Going back through `formStateFromInput` + `buildSpec` + `buildCardLayout` keeps the test honest:
+ * if the adapter stopped honouring a legacy field name, the layout would change and the decode would
+ * fail here first.
+ */
+function layoutForInput(input: Record<string, unknown>): { front: CardFace; back: CardFace } {
+  const state: CardFormState = formStateFromInput(input as Parameters<typeof formStateFromInput>[0]);
+  return buildCardLayout(buildSpec(state).spec);
+}
+
+function decodeQrFromFace(face: CardFace): string | null {
+  const qr = face.ops.find((op) => op.kind === 'qr');
+  if (!qr || qr.kind !== 'qr') return null;
+  /* The face is rendered at twice its card size and the symbol's own box is cropped out of it. The
+     crop is taken from the *layout*, not from a hard-coded corner, so a symbol that moved — or one
+     that grew over the text beside it — still has to decode from where the layout put it. */
+  const scale = 2;
+  const raster = renderFaceToRgba(face, { scale });
+  const x0 = Math.max(0, Math.round(qr.x * scale));
+  const y0 = Math.max(0, Math.round(qr.y * scale));
+  const size = Math.round(qr.size * scale);
+  const data = new Uint8ClampedArray(size * size * 4).fill(255);
+  for (let y = 0; y < size; y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      const sx = x0 + x;
+      const sy = y0 + y;
+      if (sx >= raster.width || sy >= raster.height) continue;
+      const source = (sy * raster.width + sx) * 4;
+      const target = (y * size + x) * 4;
+      data[target] = raster.data[source] ?? 255;
+      data[target + 1] = raster.data[source + 1] ?? 255;
+      data[target + 2] = raster.data[source + 2] ?? 255;
+      data[target + 3] = 255;
+    }
+  }
+  const decoded = jsQR(data, size, size, { inversionAttempts: 'dontInvert' });
+  return decoded?.data ?? null;
 }
 
 /**
@@ -620,7 +689,7 @@ describe('Calculator 5 — EWA ROI', () => {
 
   it('reports a negative net benefit as a legitimate result, not an error', () => {
     const result = resultOf(computeEwaRoiCalculator({ ...referenceInputs, annualProgrammeCost: 10_000_000 }));
-    expect(result.metrics.find((metric) => metric.label === 'Net annual benefit')?.value).toBe('₦-5,248,000.00');
+    expect(result.metrics.find((metric) => metric.label === 'Net benefit, annual')?.value).toBe('₦-5,248,000.00');
     expect(result.warnings?.some((warning) => /costs more than it saves/i.test(warning))).toBe(true);
   });
 
@@ -636,6 +705,98 @@ describe('Calculator 5 — EWA ROI', () => {
     expect(errorMessage(computeEwaRoiCalculator({ ...referenceInputs, turnoverRatePct: 120 }))).toMatch(/between 0% and 100%/);
     expect(errorMessage(computeEwaRoiCalculator({ ...referenceInputs, replacementCostPct: 900 }))).toMatch(/between 0% and 500%/);
     expect(errorMessage(computeEwaRoiCalculator({ ...referenceInputs, turnoverReductionPct: -5 }))).toMatch(/between 0% and 100%/);
+  });
+
+  it('scales the retention effect by adoption and says so', () => {
+    /* Half the workforce using the advance with a 20% expected reduction is a 10% reduction across
+       the whole workforce: 20 resignations × (1 − 10%) = 18, i.e. two retained employees, not four.
+       Hand-calculated: 100 × 20% = 20 resignations; 20% × 50% adoption = 10%; ending turnover 18%;
+       18 × ₦1,188,000 = ₦21,384,000 against ₦23,760,000 before; saving ₦2,376,000. */
+    const roi = computeEwaRoi({ ...referenceInputs, adoptionPct: 50 });
+    expect(roi.effectiveTurnoverReductionPct).toBe(10);
+    expect(roi.projectedTurnoverRatePct).toBe(18);
+    expect(roi.projectedResignationsPerYear).toBe(18);
+    expect(roi.projectedAttritionCost).toBe(21_384_000);
+    expect(roi.retainedStaffPerYear).toBe(2);
+    expect(roi.annualSavings).toBe(2_376_000);
+
+    const result = resultOf(computeEwaRoiCalculator({ ...referenceInputs, adoptionPct: 50 }));
+    expect(result.warnings?.some((warning) => /workforce-wide reduction is 10\.00% rather than 20\.00%/i.test(warning))).toBe(true);
+    expect(result.explanation?.some((line) => /20\.00% expected reduction × 50\.00% adoption = 10\.00%/i.test(line))).toBe(true);
+  });
+
+  it('reports adoption of zero as no retention at all', () => {
+    const roi = computeEwaRoi({ ...referenceInputs, adoptionPct: 0, annualProgrammeCost: 500_000 });
+    expect(roi.effectiveTurnoverReductionPct).toBe(0);
+    expect(roi.annualSavings).toBe(0);
+    expect(roi.paybackMonths).toBeNull();
+    const result = resultOf(computeEwaRoiCalculator({ ...referenceInputs, adoptionPct: 0, annualProgrammeCost: 500_000 }));
+    expect(result.warnings?.some((warning) => /at 0% adoption nobody uses the advance/i.test(warning))).toBe(true);
+  });
+
+  it('reports savings, cost, net benefit and ROI over the chosen evaluation period', () => {
+    /* 24 months double every period figure: savings 2 × ₦4,752,000 = ₦9,504,000; cost
+       2 × ₦1,000,000 = ₦2,000,000; net ₦7,504,000; ROI 7,504,000 ÷ 2,000,000 = 375.2% — the same
+       ratio as the annual view, which is what stops a longer period from flattering the return. */
+    const roi = computeEwaRoi({ ...referenceInputs, annualProgrammeCost: 1_000_000, evaluationMonths: 24 });
+    expect(roi.periodSavings).toBe(9_504_000);
+    expect(roi.periodCost).toBe(2_000_000);
+    expect(roi.netBenefit).toBe(7_504_000);
+    expect(roi.roiPercent).toBe(375.2);
+
+    const result = resultOf(computeEwaRoiCalculator({ ...referenceInputs, annualProgrammeCost: 1_000_000, evaluationMonths: 24 }));
+    expect(result.metrics.find((metric) => metric.label === 'Projected savings over the evaluation period')?.value).toBe('₦9,504,000.00');
+    expect(result.metrics.find((metric) => metric.label === 'Net benefit, 24-month')?.value).toBe('₦7,504,000.00');
+    expect(result.tables?.[0]?.caption).toContain('24 months');
+  });
+
+  it('reports the payback period in months and whether it lands inside the evaluation period', () => {
+    /* ₦1,000,000 annual cost against ₦4,752,000 annual savings: 1,000,000 ÷ (4,752,000 ÷ 12) =
+       2.5 months, comfortably inside a 12-month window. */
+    const roi = computeEwaRoi({ ...referenceInputs, annualProgrammeCost: 1_000_000 });
+    expect(roi.paybackMonths).toBe(2.5);
+    expect(roi.paybackWithinPeriod).toBe(true);
+    const result = resultOf(computeEwaRoiCalculator({ ...referenceInputs, annualProgrammeCost: 1_000_000 }));
+    expect(result.metrics.find((metric) => metric.label === 'Payback period')?.value).toBe('2.5 months');
+    expect(result.explanation?.some((line) => /Payback = ₦1,000,000\.00 annual cost ÷ \(₦4,752,000\.00 annual savings ÷ 12\) = 2\.5 months/.test(line))).toBe(true);
+
+    /* A cost large enough that payback runs past a six-month evaluation window is still reported —
+       the tool does not hide an unpopular answer — and the warning says which side of the line it
+       landed on. 4,000,000 ÷ (4,752,000 ÷ 12) = 10.1 months > 6. */
+    const slow = computeEwaRoi({ ...referenceInputs, annualProgrammeCost: 4_000_000, evaluationMonths: 6 });
+    expect(slow.paybackMonths).toBe(10.1);
+    expect(slow.paybackWithinPeriod).toBe(false);
+    const slowResult = resultOf(computeEwaRoiCalculator({ ...referenceInputs, annualProgrammeCost: 4_000_000, evaluationMonths: 6 }));
+    expect(slowResult.warnings?.some((warning) => /recovered after 10\.1 months, which is beyond the 6-month evaluation period/i.test(warning))).toBe(true);
+  });
+
+  it('does not invent a payback period when there is nothing to pay back or nothing to save', () => {
+    expect(computeEwaRoi(referenceInputs).paybackMonths).toBeNull();
+    const freeResult = resultOf(computeEwaRoiCalculator(referenceInputs));
+    expect(freeResult.metrics.find((metric) => metric.label === 'Payback period')?.value).toBe('No cost to recover');
+
+    const noSaving = computeEwaRoi({ ...referenceInputs, turnoverRatePct: 0, annualProgrammeCost: 900_000 });
+    expect(noSaving.paybackMonths).toBeNull();
+    expect(resultOf(computeEwaRoiCalculator({ ...referenceInputs, turnoverRatePct: 0, annualProgrammeCost: 900_000 })).metrics.find((metric) => metric.label === 'Payback period')?.value).toBe('Not recovered');
+  });
+
+  it('exports the new assumptions and period figures in the CSV report', () => {
+    const result = resultOf(computeEwaRoiCalculator({ ...referenceInputs, adoptionPct: 80, annualProgrammeCost: 1_200_000, evaluationMonths: 6 }));
+    const csv = result.document?.content ?? '';
+    expect(csv).toContain('Programme adoption %,80.00');
+    expect(csv).toContain('Workforce-wide turnover reduction %,16.00');
+    expect(csv).toContain('Evaluation period months,6');
+    expect(csv).toContain('Programme cost over period NGN,600000.00');
+    // 100 × 20% = 20 resignations; 20% × 80% adoption = 16% → 16.8 resignations, 3.2 retained;
+// 3.2 × ₦1,188,000 = ₦3,801,600 a year, halved by the six-month period = ₦1,900,800.
+    expect(csv).toContain('Savings over period NGN,1900800.00');
+    expect(csv).toMatch(/Payback months,\d/);
+  });
+
+  it('rejects out-of-range adoption and evaluation periods', () => {
+    expect(errorMessage(computeEwaRoiCalculator({ ...referenceInputs, adoptionPct: 140 }))).toMatch(/adoption must be between 0% and 100%/);
+    expect(errorMessage(computeEwaRoiCalculator({ ...referenceInputs, evaluationMonths: 0 }))).toMatch(/between 1 and 60 months/);
+    expect(errorMessage(computeEwaRoiCalculator({ ...referenceInputs, evaluationMonths: 90 }))).toMatch(/between 1 and 60 months/);
   });
 
   it('handles a zero turnover rate without dividing by zero', () => {
@@ -1192,6 +1353,10 @@ describe('Generator 9 — Employee ID', () => {
 });
 
 describe('Generator 10 — Employee ID Card', () => {
+  /* The generator was rebuilt around the twelve-template badge engine, so the figures below are the
+     new contract: an ISO/IEC 7810 ID-1 card rasterised at 300 dpi (638 × 1011 px portrait,
+     1011 × 638 px landscape), two faces, and the machine-readable codes printed on the back. The
+     historical field names in the fixture still work — they are the published API. */
   const base = {
     companyName: 'CloudHost247', employeeName: 'Ada Obi', employeeId: 'CH247-OPS-2026-0001-8',
     designation: 'Payroll Officer', department: 'Finance', bloodGroup: 'O+',
@@ -1203,13 +1368,24 @@ describe('Generator 10 — Employee ID Card', () => {
     const result = resultOf(computeEmployeeIdCard(base));
     const content = result.document?.content ?? '';
     expect(result.document?.format).toBe('svg');
-    expect(content).toContain('width="600" height="1050"');
-    expect(content).toContain('EMPLOYEE IDENTIFICATION CARD');
+    expect(content).toContain('width="638" height="1011"');
     expect(content).toContain('Ada Obi');
     expect(content).toContain('CH247-OPS-2026-0001-8');
     expect(content).toContain('O+');
     expect(content).toContain('31 December 2027');
     expect(result.metrics.find((metric) => metric.label === 'Check digit')?.value).toBe('Valid (Luhn)');
+    expect(result.metrics.find((metric) => metric.label === 'Card size')?.value).toContain('638 × 1011 px');
+  });
+
+  it('returns both faces plus the print sheet, all of them ID-1 sized', () => {
+    const result = resultOf(computeEmployeeIdCard(base));
+    expect(result.extraDocuments?.map((document) => document.filename)).toEqual([
+      'id-card-ch247-ops-2026-0001-8-front.svg',
+      'id-card-ch247-ops-2026-0001-8-back.svg',
+    ]);
+    /* The print sheet stacks the two faces with a cut gap between them, so it is taller than the card
+       and slightly wider (the gap is on both sides). 638 × 1011 portrait → 686 × 2094. */
+    expect(result.document?.content).toContain('width="686" height="2094"');
   });
 
   it('verifies the employee ID against its check digit and warns on a mistyped one', () => {
@@ -1218,24 +1394,36 @@ describe('Generator 10 — Employee ID Card', () => {
     expect(bad.warnings?.some((warning) => /fails Luhn check-digit verification/i.test(warning))).toBe(true);
   });
 
-  it('validates the blood group and the expiry date', () => {
-    expect(resultOf(computeEmployeeIdCard({ ...base, bloodGroup: 'Z+' })).warnings?.some((warning) => /not a recognised blood group/i.test(warning))).toBe(true);
-    expect(resultOf(computeEmployeeIdCard({ ...base, expiryDate: '2025-01-01' })).warnings?.some((warning) => /not after the issue date/i.test(warning))).toBe(true);
+  it('refuses a blood group it cannot vouch for, and warns about a card that expires before it is issued', () => {
+    /* An unrecognised blood group is now a blocking error rather than an advisory: a badge that says
+       "Z+" is printed next to somebody's photograph on the strength of a typo, and a first-aider may
+       act on it. Refusing to draw it is the safe answer. */
+    const bloodError = errorMessage(computeEmployeeIdCard({ ...base, bloodGroup: 'Z+' }));
+    expect(bloodError).toMatch(/blood group must be one of/i);
+    // The summary names the field rather than only counting the problems, so an API client that
+    // renders nothing but `message` still learns what to fix.
+    expect(bloodError).toMatch(/could not be generated: 1 field needs attention/i);
+    const expired = resultOf(computeEmployeeIdCard({ ...base, expiryDate: '2025-01-01' }));
+    expect(expired.warnings?.some((warning) => /not after the issue date/i.test(warning))).toBe(true);
   });
 
   it('embeds a real, decodable QR of the employee ID, and none when the option is off', () => {
     const withQr = resultOf(computeEmployeeIdCard({ ...base, includeQr: true }));
-    expect(decodeQrFromSvg(withQr.document?.content ?? '')).toBe('CH247-OPS-2026-0001-8');
-    expect(withQr.tables?.[0]?.rows.find((row) => row.label === 'QR code')?.cells[0]).toMatch(/scannable QR/i);
+    expect(decodeQrFromFace(layoutForInput({ ...base, includeQr: true }).back)).toBe('CH247-OPS-2026-0001-8');
+    expect(codesRow(withQr, 'QR code')).toMatch(/scannable QR/i);
+  });
 
+  it('omits the QR symbol entirely when the option is off', () => {
     const withoutQr = resultOf(computeEmployeeIdCard(base));
-    expect(withoutQr.document?.content).not.toContain('bt247-qr');
-    expect(withoutQr.tables?.[0]?.rows.find((row) => row.label === 'QR code')?.cells[0]).toBe('Omitted');
+    expect(decodeQrFromFace(layoutForInput(base).back)).toBeNull();
+    expect(codesRow(withoutQr, 'QR code')).toBe('Omitted');
   });
 
   it('encodes the employee name when no ID was supplied', () => {
-    const result = resultOf(computeEmployeeIdCard({ ...base, includeQr: true, employeeId: '' }));
-    expect(decodeQrFromSvg(result.document?.content ?? '')).toBe('NAME:Ada Obi');
+    // Without an ID there is nothing to key a badge on, so the engine reports the gap rather than
+    // printing an anonymous card — and the payload it would carry is the name.
+    expect(errorMessage(computeEmployeeIdCard({ ...base, includeQr: true, employeeId: '' }))).toMatch(/An employee ID is required/i);
+    expect(decodeQrFromFace(layoutForInput({ ...base, includeQr: true, employeeId: '' }).back)).toBe('NAME:Ada Obi');
   });
 
   it('always states that the tool verifies nothing about the holder', () => {
@@ -1245,7 +1433,11 @@ describe('Generator 10 — Employee ID Card', () => {
 
   it('generates a landscape badge', () => {
     const result = resultOf(computeEmployeeIdCard({ ...base, orientation: 'landscape' }));
-    expect(result.document?.content).toContain('width="1050" height="600"');
+    // 1011 × 638 landscape → 1059 × 1348 on the print sheet.
+    expect(result.document?.content).toContain('width="1059" height="1348"');
+    const layout = layoutForInput({ ...base, orientation: 'landscape' });
+    expect(layout.front.width).toBe(1011);
+    expect(layout.front.height).toBe(638);
   });
 });
 

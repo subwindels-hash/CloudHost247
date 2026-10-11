@@ -190,7 +190,9 @@ const AdminToolsPage = lazy(() => import('./pages/AdminToolsPage'));
 const SslManagementPage = lazy(() => import('./pages/SslManagementPage'));
 const ToolsHubPage = lazy(() => import('./pages/tools/ToolsHubPage'));
 const MrzToolPage = lazy(() => import('./pages/tools/MrzToolPage'));
+const ComplianceDocumentsPage = lazy(() => import('./pages/tools/ComplianceDocumentsPage'));
 const BusinessToolsPage = lazy(() => import('./pages/tools/BusinessToolsPage'));
+const IdCardGeneratorPage = lazy(() => import('./pages/tools/IdCardGeneratorPage'));
 const BusinessToolWorkspacePage = lazy(() => import('./pages/tools/BusinessToolWorkspacePage'));
 const AdminMrzSettingsPage = lazy(() => import('./pages/AdminMrzSettingsPage'));
 export default function App() {
@@ -248,6 +250,10 @@ export default function App() {
         <Route path="/tools/monitors" element={<ToolsMonitorsPage />} />
         {/* Tool pages use the catalogue's own nested paths (e.g. /tools/dns/propagation), so the
             whole /tools/* branch is handled by one page that resolves the path back to a tool. */}
+        {/* The registry footer links this collection hub; without its own route it fell through
+            to the /tools/* catalogue lookup and rendered "Tool not found". Registered before the
+            catch-all so it wins. */}
+        <Route path="/tools/compliance-documents" element={<ComplianceDocumentsPage />} />
         <Route path="/tools/*" element={<ToolPage />} />
 
         {/* Developer / Document Tools — ePassport MRZ Calculator, Validator & Parser. This is the
@@ -270,6 +276,10 @@ export default function App() {
             /tools/mrz-generator and /tools/mrz-parser routes below stay as they were. */}
         <Route path="/tools/business-tools/mrz-generator" element={<MrzToolPage defaultTab="calculator" />} />
         <Route path="/tools/business-tools/mrz-parser" element={<MrzToolPage defaultTab="parser" />} />
+        {/* The Employee ID Card Generator has its own page because it is not a form-and-table tool:
+            it is a canvas workspace with uploads, a live front-and-back preview, four export formats
+            and a bulk importer. The other eleven generators render through the generic workspace. */}
+        <Route path="/tools/business-tools/employee-id-card-generator" element={<IdCardGeneratorPage />} />
         <Route path="/tools/business-tools/:tool" element={<BusinessToolWorkspacePage />} />
 
         <Route path="/tools/document" element={<ToolsHubPage />} />
