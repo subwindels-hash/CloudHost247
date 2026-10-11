@@ -203,7 +203,7 @@ not just stated:
 |---|---|---|
 | `cloudhost247-node/tests/unit/employee-id-card.test.ts` | 72 | Twelve templates and their geometry, the colour system and injection safety, QR encoding and decoding off rendered pixels, Code 128 encode/decode including corruption detection, SVG/PDF/ZIP structure, validation, bulk import (CSV, quoted CSV, semicolon CSV, XLSX, BOM, duplicates, missing columns, photo URLs), fitting and overprint |
 | `cloudhost247-node/frontend/tests/unit/id-card-generator-page.test.tsx` | 13 | The workspace: twelve templates, eight presets, four custom pickers, locked-until-valid downloads, QR payload disclosure, reset, palette switching, storage consent, clear, restore, bulk panel, the stated limits |
-| `cloudhost247-node/tests/unit/business-tools-engines.test.ts` | 189 (whole section) | Included in the section suite: the generator's legacy field names, the two faces, the print sheet, the Luhn verdict, the refusal of an unknown blood group, and a QR decoded off the rendered back face |
+| `cloudhost247-node/tests/unit/business-tools-engines.test.ts` | 196 (whole 21-tool suite) | Included in the section suite: the generator's legacy field names, the two faces, the print sheet, the Luhn verdict, the refusal of an unknown blood group, and a QR decoded off the rendered back face |
 
 Notable mechanisms, because they are the difference between a test that passes and a test that
 proves something:
