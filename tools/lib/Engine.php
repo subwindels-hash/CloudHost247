@@ -975,9 +975,34 @@ final class Engine
         return $origin . $path . $relative;
     }
 
+    /**
+     * Requests per minute per client IP, for tools whose catalogue entry sets no explicit limit.
+     *
+     * Two tiers, because the cost of a request is not the same everywhere:
+     *
+     *   - Eight a minute: handlers that open sockets or a TLS session against a third-party host, or
+     *     that cost that host a burst of queries (a propagation sweep is five resolvers, a blacklist
+     *     check is dozens of DNSBLs, a broken-link crawl fetches every link on a page). These are the
+     *     handlers where one abusive client is visible to somebody else — usually to the resolver or
+     *     mail server being probed. A person filling in a form once per tool never notices.
+     *   - Thirty a minute: everything else, including the pure-computation tools.
+     *
+     * The limit is a floor of protection, not a billing control: it is per IP, and a client that
+     * needs a higher ceiling should be given a catalogue `ratePerMinute` entry rather than have this
+     * table raised. `tools/api.php` meters its own non-tool operations on the same counter store.
+     */
     private static function defaultLimit($handler)
     {
-        $heavy = array('dns_checker', 'dns_propagation', 'dns_health', 'broken_links', 'link_analyzer', 'ip_blacklist', 'email_blacklist', 'ipv6_compat');
+        $heavy = array(
+            // Resolver sweeps.
+            'dns_checker', 'dns_propagation', 'dns_health', 'ipv6_compat',
+            // DNSBL: each request queries many separate lists.
+            'ip_blacklist', 'email_blacklist',
+            // Outbound HTTP fetches that follow every link found.
+            'broken_links', 'link_analyzer',
+            // Tools that open a raw socket or a TLS session to a host the visitor names.
+            'ping', 'traceroute', 'port', 'smtp', 'ssl',
+        );
         return in_array($handler, $heavy, true) ? 8 : 30;
     }
 

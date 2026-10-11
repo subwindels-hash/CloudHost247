@@ -4,6 +4,9 @@ namespace CloudHost247\Tools;
 /** Outbound network helpers. TLS is verified. Destinations are pinned to public addresses. */
 final class Net
 {
+    /** Shown whenever a socket helper is pointed at a non-public address. */
+    const PRIVATE_TARGET = 'Only public destinations are allowed. Private, loopback, link-local and reserved addresses are refused.';
+
     public static function doh($name, $type, $resolver = null)
     {
         $type = strtoupper($type);
@@ -90,6 +93,9 @@ final class Net
 
     public static function tcp($ip, $port, $timeout)
     {
+        if (!self::publicTarget($ip, 'tcp')) {
+            return array('ok' => false, 'error' => self::PRIVATE_TARGET, 'elapsedMs' => 0, 'errno' => 0);
+        }
         $started = microtime(true);
         $errno = 0;
         $errstr = '';
@@ -104,6 +110,9 @@ final class Net
 
     public static function readBanner($ip, $port, $hello, $timeout)
     {
+        if (!self::publicTarget($ip, 'banner')) {
+            return array('ok' => false, 'error' => self::PRIVATE_TARGET);
+        }
         $errno = 0;
         $errstr = '';
         $socket = @fsockopen($ip, (int) $port, $errno, $errstr, $timeout);
@@ -131,6 +140,9 @@ final class Net
 
     public static function certificate($host, $ip)
     {
+        if (!self::publicTarget($ip, 'tls')) {
+            return array('ok' => false, 'error' => self::PRIVATE_TARGET);
+        }
         $context = stream_context_create(array(
             'ssl' => array(
                 'capture_peer_cert' => true,
@@ -169,6 +181,25 @@ final class Net
             'names' => $names,
             'expired' => isset($parsed['validTo_time_t']) ? $parsed['validTo_time_t'] < time() : null,
         );
+    }
+
+    /**
+     * Refuse a destination that is not a public address.
+     *
+     * Every caller is expected to have resolved the host through Guard::resolvePublic() first. This
+     * is the second lock on the same door: these three helpers are public static methods that open
+     * sockets, and a future caller that forgets the resolution step would otherwise hand them
+     * whatever it was given — `127.0.0.1`, `169.254.169.254`, `::1`, a private LAN address. The
+     * classic outcome of that mistake is the tool being used to probe the host's own network, so the
+     * check lives next to the socket() call rather than trusting the caller.
+     */
+    private static function publicTarget($ip, $via)
+    {
+        if (Guard::isPublicIp($ip)) {
+            return true;
+        }
+        Guard::log('ssrf-block', $via . ' target ' . (is_string($ip) ? $ip : gettype($ip)));
+        return false;
     }
 
     private static function dohUrl($provider, $name, $type)

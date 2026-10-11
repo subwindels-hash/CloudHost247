@@ -24,6 +24,27 @@ header('Referrer-Policy: no-referrer');
 header('Cache-Control: no-store');
 
 $op = isset($_GET['op']) ? $_GET['op'] : '';
+
+/**
+ * These three operations never reach Engine::run(), which is where every tool call takes its turn
+ * against the per-IP limiter. Without this they were the only unmetered way to spend this server's
+ * bandwidth and disk: `speed` will stream two megabytes of fresh random bytes per request and
+ * `upload` will read two megabytes off the wire, so a loop of either costs the host real capacity
+ * while every individual tool stayed politely rate-limited. The limits are deliberately loose for a
+ * browser that is being honest — a page load asks for the catalogue once — and tight enough that a
+ * script cannot sit on them.
+ */
+$metered = array('catalog' => 60, 'speed' => 12, 'upload' => 12);
+if (isset($metered[$op])) {
+    if (!Guard::rateLimit(Guard::clientIp(), 'api-' . $op, $metered[$op])) {
+        http_response_code(429);
+        header('Content-Type: application/json');
+        header('Retry-After: 60');
+        echo json_encode(array('ok' => false, 'error' => 'Rate limit reached. Wait a minute and try again.'));
+        exit;
+    }
+}
+
 if ($op === 'catalog') {
     header('Content-Type: application/json; charset=UTF-8');
     $tools = array();

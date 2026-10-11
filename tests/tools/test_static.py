@@ -249,5 +249,112 @@ class ToolsPlatformStaticTests(unittest.TestCase):
         self.assertIn("'cloudhost247_tools'", migrations)
 
 
+
+class ToolsEngineHardeningStaticTests(unittest.TestCase):
+    """Static verification for the first-party tools/ engine (tools/lib/*, tools/api.php).
+
+    These are the guarantees that cannot be seen from a rendered page: a tool page can look perfect
+    while the server behind it will happily open a socket to 127.0.0.1 or spend two megabytes of
+    bandwidth per request for anybody who asks. The behaviour suites that need a PHP runtime and a
+    live host belong to CI; the invariants below are enforced here so a later edit cannot quietly
+    remove them without a failing test.
+    """
+
+    ENGINE = "tools"
+
+    def engine_path(self, *parts):
+        return os.path.join(ROOT, self.ENGINE, *parts)
+
+    @staticmethod
+    def function_body(source, name):
+        """Return the body of a PHP function, from its declaration to the closing brace."""
+        start = source.find("function %s(" % (name,))
+        if start == -1:
+            return ""
+        depth = 0
+        body = []
+        for char in source[start:]:
+            body.append(char)
+            if char == "{":
+                depth += 1
+            elif char == "}":
+                depth -= 1
+                if depth == 0:
+                    break
+        return "".join(body)
+
+    def test_socket_helpers_refuse_non_public_targets(self):
+        net = read(self.engine_path("lib", "Net.php"))
+        guard = self.function_body(net, "publicTarget")
+        self.assertIn("Guard::isPublicIp", guard,
+                      "Net::publicTarget must ask Guard::isPublicIp before any socket is opened")
+        self.assertIn("ssrf-block", guard, "a refused target must be logged")
+        for name, op in (("tcp", "fsockopen"), ("readBanner", "fsockopen"), ("certificate", "stream_socket_client")):
+            body = self.function_body(net, name)
+            self.assertTrue(body, "Net::%s is missing" % (name,))
+            check = body.find("publicTarget(")
+            call = body.find(op + "(")
+            self.assertNotEqual(check, -1,
+                                "Net::%s must call publicTarget() before opening a socket" % (name,))
+            self.assertLess(check, call,
+                            "Net::%s must refuse a non-public address before %s runs" % (name, op))
+
+    def test_public_target_helper_reports_a_reason(self):
+        net = read(self.engine_path("lib", "Net.php"))
+        self.assertIn("const PRIVATE_TARGET", net)
+        self.assertIn("Private, loopback, link-local and reserved addresses are refused", net)
+
+    def test_the_bulk_operations_of_the_public_api_are_metered(self):
+        api = read(self.engine_path("api.php"))
+        self.assertIn("Guard::rateLimit(Guard::clientIp()", api,
+                      "tools/api.php must meter operations that never reach Engine::run()")
+        self.assertIn("$metered", api)
+        for op in ("catalog", "speed", "upload"):
+            self.assertIn("'%s' =>" % (op,), api,
+                          "the %r operation must carry an explicit per-minute limit" % (op,))
+        self.assertIn("429", api, "a metered operation must answer 429 when the limit is reached")
+        self.assertIn("Retry-After", api)
+
+    def test_every_server_tool_passes_the_limiter_before_dispatch(self):
+        engine = read(self.engine_path("lib", "Engine.php"))
+        run = self.function_body(engine, "run")
+        self.assertLess(run.find("Guard::rateLimit("), run.find("self::dispatch("),
+                        "Engine::run must rate-limit before dispatching a handler")
+        self.assertIn("429", run)
+
+    def test_socket_and_crawler_handlers_are_in_the_low_rate_tier(self):
+        engine = read(self.engine_path("lib", "Engine.php"))
+        limits = self.function_body(engine, "defaultLimit")
+        self.assertTrue(limits, "Engine::defaultLimit is missing")
+        for handler in ("ping", "traceroute", "port", "smtp", "ssl",
+                        "dns_checker", "dns_propagation", "broken_links"):
+            self.assertIn("'%s'" % (handler,), limits,
+                          "the %r handler opens sockets or fetches third-party hosts and must not "
+                          "sit in the default rate tier" % (handler,))
+        self.assertIn("? 8 : 30", limits, "the two tiers must stay explicit")
+
+    def test_server_tool_handlers_cannot_be_reached_off_the_meter(self):
+        """Only Engine::run() may reach the dispatcher.
+
+        The rate limiter, the maintenance switch, the "browser-only tools are refused" rule and the
+        error trap all live in Engine::run(). A second caller of Engine::dispatch() would bypass
+        every one of them at once, so the dispatcher stays private and this test keeps it that way.
+        """
+        offenders = []
+        engine = os.path.relpath(self.engine_path("lib", "Engine.php"), ROOT)
+        for base, _dirs, files in os.walk(os.path.join(ROOT, "tools")):
+            for name in files:
+                if not name.endswith(".php"):
+                    continue
+                path = os.path.join(base, name)
+                if os.path.relpath(path, ROOT) == engine:
+                    continue
+                source = read(path)
+                for pattern in ("self::dispatch(", "Engine::dispatch("):
+                    if pattern in source:
+                        offenders.append("%s uses %s" % (os.path.relpath(path, ROOT), pattern))
+        self.assertEqual([], offenders,
+                         "the dispatcher must only be reachable through Engine::run(): %r" % (offenders,))
+
 if __name__ == "__main__":
     unittest.main()

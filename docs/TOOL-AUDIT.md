@@ -208,10 +208,27 @@ Dependency and abuse posture read from the code, not assumed:
   disables redirect following, restricts protocols to HTTP/HTTPS and caps the body at 512 KB;
   TLS verification is on and host verification is `2`.
 - `Guard::rateLimit()` is per client IP and per slug, 30/minute by default and 8/minute for the
-  heavy handlers (DNS checker, propagation, DNS health, broken links, link analyser, IP and email
-  blacklists, IPv6 compatibility), returning HTTP 429 with a plain message.
+  expensive handlers — the resolver sweeps (DNS checker, propagation, DNS health, IPv6
+  compatibility), the many-query blacklist checks (IP and email), the crawlers that fetch every link
+  on a page (broken links, link analyser) and, since this pass, every handler that opens a raw socket
+  or a TLS session to a host the visitor names (ping, traceroute, port, SMTP, SSL). It returns HTTP
+  429 with a plain message and a `Retry-After` header.
+- Every server tool passes that limiter because it passes `Engine::run()`, and `Engine::dispatch()`
+  is private: a new test fails if any file under `tools/` reaches the dispatcher another way.
+- `tools/api.php` now meters its own three bulk operations (`catalog`, `speed`, `upload`) on the same
+  counter store. They never reach `Engine::run()` — `speed` streams two megabytes of fresh random
+  bytes and `upload` reads two megabytes off the wire per request — so before this they were the only
+  unmetered way to spend the host's bandwidth.
+- `Net::tcp()`, `Net::readBanner()` and `Net::certificate()` refuse a non-public address themselves
+  and log `ssrf-block`, instead of trusting the caller to have resolved the name through
+  `Guard::resolvePublic()` first. Every current call site does resolve first; this is the second lock
+  on the same door, next to the `socket()` call, so a future caller cannot reopen it by omission.
 - Port probing is limited to one public address and one port per request, with the public-address
   rule enforced first; SMTP is limited to ports 25, 465 and 587 and sends no credentials.
+- Correction to an earlier note in this audit: `Engine::ssl`, `Engine::port` and `Engine::smtp` were
+  described here as missing a rate limit. They were not — the limiter sits in `Engine::run()`, above
+  the dispatcher, and always covered them. What was wrong was their *tier*: opening a socket to a
+  third-party host cost the same 30/minute as a pure calculation. That is what this pass changed.
 
 ---
 
@@ -230,6 +247,7 @@ Every item below was found by reading or running the code, not by looking at a p
 | 7 | EWA ROI did not expose adoption, evaluation period or payback | Three of the brief's required assumptions and one required output were missing | Added, with the arithmetic printed and warnings when a result is unfavourable | 7 new assertions |
 | 8 | No test asserted that navigation links resolve | Dead links could ship unnoticed (and one did) | Link-integrity test over the whole registry projection | `navigation-links.test.ts` |
 | 9 | **All twenty-one business tools and the compliance hub were served with HTTP 404** (`X-Robots-Tag: noindex`, SPA shell inside) | The pages rendered perfectly in a browser while every crawler, uptime check and link checker was told the URL did not exist — invisible in a renderer test, and exactly the kind of "the page loads so the route is fine" assumption the brief warns about | `resolveToolPage()` now resolves the business-tool paths and the collection hub, so the not-found handler serves them with 200 and their own titles; a genuinely unknown `/tools/...` URL still 404s and an API path still answers JSON | `tool-page-status.test.ts` — asks the built app over HTTP for the catalogue, the categories, the hub, all twenty-one business tools, a bogus tools URL and a bogus API path |
+| 10 | The three bulk operations of `tools/api.php` were unmetered, and `Engine`'s socket-opening handlers shared the cheap tier with pure calculators | A loop against `?op=speed` could pull ~2 MB of fresh random bytes per request with nothing counting, and probing a third party's port cost the same allowance as a base64 conversion | The three operations carry explicit per-minute limits (catalogue 60, speed 12, upload 12) answered with 429 + `Retry-After`; ping, traceroute, port, SMTP and SSL moved to the 8/minute tier; `Net`'s socket helpers refuse non-public targets themselves | `tests/tools/test_static.py` `ToolsEngineHardeningStaticTests` (6 tests, and each one was checked to fail when its guard is removed) |
 
 ### Earlier work in this branch that this audit relies on
 
@@ -250,6 +268,7 @@ a QR containing a URL is a link and not a verification service.
 | Employee ID Card engine + page | `npx vitest run tests/unit/employee-id-card.test.ts frontend/tests/unit/id-card-generator-page.test.tsx` | **72 + 13 passed** |
 | Navigation link integrity | `npx vitest run tests/integration/navigation-links.test.ts` | **5 passed** |
 | Tool page HTTP status | `npx vitest run tests/integration/tool-page-status.test.ts` | **6 passed** (and re-checked against the running preview server: 200 with the right titles) |
+| Tools engine hardening | `python3 -m unittest tests.tools.test_static` | **26 passed** (20 pre-existing + 6 new hardening invariants) |
 | Whole Vitest suite | `npm test` | **143 files, 1 999 assertions, 0 failed, exit 0** — 29.6 minutes, on the tree that carries the ID-card rebuild, the EWA assumptions, the QR camera and the navigation work; the four commits after it touch only the tests and routes listed in the rows above, which were re-run individually (404 + 5 + 5 assertions) |
 | Browser-only PHP tools | `node --test tests/tools/local.test.mjs` | **1 passed** (all assertions, incl. the QR frame decoder) |
 | Compliance wording | `node --test tests/tools/compliance-tools.test.mjs` | **72 passed** |
