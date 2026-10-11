@@ -234,11 +234,24 @@ starts throwing, or that stays silently on its empty state after being asked to 
 
 ## Known limitations, disclosed
 
-- **Not fetched page by page:** the reference site's `expense-tool-comparison` page and the twelve
-  individual generator pages were not retrieved. The expense dataset and the twelve generator field
-  sets were designed from each tool's stated purpose and from the retrieved
-  `accounting-tool-comparison` pattern. The five calculators and the other three comparisons *were*
-  retrieved, and their published worked examples are reproduced exactly in tests.
+- **Reference pages retrieved:** two audit passes. The first pass (same day) retrieved the
+  reference's tools directory and the five calculator pages plus the accounting, HMO and PFA
+  comparison pages, and reproduced their published worked examples exactly in tests. The second
+  pass (same day) additionally retrieved the reference's **full sitemap** — confirming the 1:1
+  inventory: the sitemap's five calculator slugs, twelve generator slugs and four comparison
+  slugs map exactly onto this section's registry, with the remaining 28 sitemap entries being the
+  guides and articles the brief excludes — and the `official-payslip-generator`,
+  `job-offer-letter-generator` and `expense-tool-comparison` pages. Field-by-field, the
+  implementations match the reference's substantive inputs (the payslip form: salary structure,
+  statutory pension/NHF/NHIS overrides, reliefs, exemptions, company/employee/bank details; the
+  offer letter: candidate, terms, salary with frequency, probation, offer expiry, signatory) and
+  add terms the reference omits (employment type, work mode, notice period, bonus, benefits).
+  Two deliberate differences, both privacy-driven: no corporate-logo upload and no e-mail/PDF
+  dispatch to a server — documents are produced in the browser and leave via copy, download or
+  the browser's own print dialog, because a free tool has no business receiving payroll files.
+  Still not retrieved page by page: the remaining ten individual generator pages; their field
+  sets were designed from each tool's stated purpose in the directory listing and its sitemap
+  entry, and are covered by the same engine-level tests.
 - **QR codes are placeholders.** The business card and ID card render a labelled, non-scannable QR
   block. Generating a real QR symbol would need an encoder dependency this repository does not carry,
   and drawing a decorative square that looked scannable would be worse than saying so.
@@ -254,3 +267,37 @@ starts throwing, or that stays silently on its empty state after being asked to 
 - **`window.print()` prints the whole document**; `business-tools.css` hides the input panel, the
   controls and the export buttons under `@media print` rather than cloning the result into a second
   DOM tree that would have to be kept in step by hand.
+
+## Re-verification (second session, 2026-10-11)
+
+The merged implementation was re-audited from a clean checkout at the merge commit of the first
+session's pull request and re-verified end to end. No defect was found; every check below was
+re-run in this session, not quoted from the first session's notes.
+
+| Check | Command | Result |
+| --- | --- | --- |
+| Engine tests | `npx vitest run tests/unit/business-tools-engines.test.ts` | **185 / 185 passed** |
+| Page, workspace, routing, navigation tests | `npx vitest run frontend/tests/unit/business-tools-page.test.tsx` | **55 / 55 passed** |
+| **Full suite** | `npm test` | **141 files, 1903 tests, 0 failures** |
+| Backend lint / typecheck | `npm run lint` | clean |
+| Frontend typecheck | `npx tsc -p frontend/tsconfig.json --noEmit` | clean |
+| Registry + link integrity | `node scripts/site/generate.mjs` | 169 links validated, 0 errors; regenerated tree is byte-identical (`git status` clean) |
+| Production build | `npm run build` | success (catalogue check, server, frontend, tools) |
+
+Live checks against the booted application (`scripts/tools-demo-preview.ts`, the real Fastify app
+on an embedded Postgres engine):
+
+- `GET /tools/business-tools` → 200, `<title>Business Tools | CloudHost247</title>`.
+- `GET /tools/mrz-generator` → 200, `<title>MRZ Generator | CloudHost247</title>` (preserved).
+- `GET /tools/document/mrz` → 301 to `/tools/mrz-generator`.
+- `GET /api/tools/business-tools` → `total: 21`; category counts **Calculators 5, Generators 12, Comparisons 4**.
+- `POST /api/tools/business-tools/nigeria-vat-calculator/run` `{amount: 100, rate: 7.5, mode: "add"}` →
+  VAT ₦7.50, gross ₦107.50 — the published worked example, over HTTP.
+- `POST /api/tools/business-tools/nigeria-pension-calculator/run` with a 9% employer rate → **422 rejected**
+  with the PenCom-minimum message; at 10% → employee ₦14,400 / employer ₦18,000 on a ₦180,000 base.
+- `POST /api/tools/business-tools/nigeria-paye-net-salary-calculator/run` ₦500,000 gross, 40/30/20/10 →
+  PAYE ₦61,970, **net ₦379,530** — the published worked example, over HTTP.
+- `POST /api/tools/business-tools/official-payslip-generator/run` → payslip computes gross, statutory
+  deductions and net, and offers its downloadable documents.
+- Malformed submissions (wrong field names, nested envelopes) are rejected with field-level errors,
+  never silently coerced.
