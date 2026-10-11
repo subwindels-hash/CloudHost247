@@ -333,6 +333,7 @@ These are stated plainly because the alternative — marking them green — is w
 | 3 | Full Vitest suite result on the final commit | The audit must reflect the shipped tree | `npm test` in CI |
 | 4 | Production build | The SPA must build with the new page and route | `npm run build` (run here; see §7) |
 | 5 | Manual device pass for the ID card and the QR camera | Camera permission flows and printed output cannot be asserted in a headless runner | A device pass with the checklist in `docs/independent-rebuild/EMPLOYEE-ID-CARD-GENERATOR.md` §10 |
+| 6 | Browser QA pass (widths 320–1440, axe accessibility, overflow) | The repository already ships the harness — `tests/tools/browser.cjs` drives Chromium over the built site at eight widths and runs axe; it is not wired into CI and no browser is installed here. `docs/website-rebuild/PASS-2026-10-08.md` §5 already lists it as gated on staging | Run `node tests/tools/browser.cjs` against the staging build (it needs Playwright, `@axe-core/playwright` and `CH247_QA_URL`), then the same for `tests/website/browser.cjs` |
 
 Until those five are cleared, the honest status of this branch is: **the Node platform and the SPA
 are verified; the PHP shell is verified structurally and by its existing suites but not executed
