@@ -1,0 +1,607 @@
+/**
+ * Business Tools — section styles.
+ *
+ * Everything here is additive: the base component classes (ch247-hero, ch247-card, ch247-button,
+ * ch247-table, ch247-field) come from styles.css and the shared design system, and this file only
+ * adds the layout the Business Tools directory and workspace need. Colours and spacing use the
+ * existing custom properties so the section cannot drift from the rest of the site's palette.
+ *
+ * Two rules in here are load-bearing for the "no horizontal overflow at any breakpoint"
+ * requirement, and both are easy to lose in a refactor:
+ *   - every grid collapses to one column below its breakpoint instead of shrinking its tracks;
+ *   - wide result tables scroll inside their own wrapper (`.bt247-table-wrap`) rather than
+ *     pushing the page wider than the viewport.
+ */
+
+.bt247-hero__counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9rem;
+}
+
+.bt247-hero__counts li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+
+.bt247-hero__counts strong {
+  font-size: 1.15rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Search + category filter bar ---------- */
+
+.bt247-controls {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.bt247-search {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.bt247-search input[type='search'] {
+  flex: 1 1 16rem;
+  min-width: 0; /* lets the input shrink inside a flex row instead of forcing overflow */
+}
+
+.bt247-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.bt247-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.85rem;
+  border: 1px solid var(--ch247-border, #d7dee8);
+  border-radius: 999px;
+  background: #fff;
+  color: inherit;
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.bt247-filter:hover {
+  border-color: var(--ch247-accent, #1f7ae0);
+}
+
+.bt247-filter:focus-visible {
+  outline: 2px solid var(--ch247-accent, #1f7ae0);
+  outline-offset: 2px;
+}
+
+.bt247-filter[aria-pressed='true'],
+.bt247-filter[aria-current='true'] {
+  background: var(--ch247-accent, #1f7ae0);
+  border-color: var(--ch247-accent, #1f7ae0);
+  color: #fff;
+}
+
+.bt247-filter__count {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.78rem;
+  opacity: 0.85;
+}
+
+.bt247-result-count {
+  margin: 0 0 0.75rem;
+  font-size: 0.875rem;
+  opacity: 0.85;
+}
+
+/* ---------- Tool cards ---------- */
+
+.bt247-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+  gap: 1rem;
+}
+
+.bt247-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.1rem 1.15rem;
+  border: 1px solid var(--ch247-border, #d7dee8);
+  border-radius: 12px;
+  background: #fff;
+  min-width: 0;
+}
+
+.bt247-card__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
+.bt247-card__icon {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--ch247-accent, #1f7ae0) 12%, #fff);
+  font-size: 1.1rem;
+}
+
+.bt247-card__title {
+  margin: 0;
+  font-size: 1.02rem;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.bt247-card__category {
+  margin: 0.15rem 0 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.bt247-card__summary {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  flex: 1 1 auto;
+}
+
+.bt247-card__foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.35rem;
+}
+
+.bt247-card__units {
+  font-size: 0.75rem;
+  opacity: 0.75;
+  overflow-wrap: anywhere;
+}
+
+/* ---------- Workspace ---------- */
+
+.bt247-breadcrumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+  margin: 0 0 0.5rem;
+  padding: 0;
+  list-style: none;
+  font-size: 0.82rem;
+}
+
+.bt247-breadcrumbs li + li::before {
+  content: '/';
+  margin-right: 0.35rem;
+  opacity: 0.5;
+}
+
+.bt247-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+@media (min-width: 60rem) {
+  .bt247-workspace {
+    grid-template-columns: minmax(0, 26rem) minmax(0, 1fr);
+  }
+}
+
+.bt247-panel {
+  border: 1px solid var(--ch247-border, #d7dee8);
+  border-radius: 12px;
+  background: #fff;
+  padding: 1.1rem 1.15rem;
+  min-width: 0;
+}
+
+.bt247-panel + .bt247-panel {
+  margin-top: 1rem;
+}
+
+.bt247-panel__title {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+}
+
+.bt247-fieldset {
+  border: 0;
+  margin: 0 0 1rem;
+  padding: 0;
+}
+
+.bt247-fieldset > legend {
+  padding: 0 0 0.4rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.bt247-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem;
+}
+
+.bt247-field {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.bt247-field__label {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.bt247-field__required {
+  color: #b42318;
+  margin-left: 0.15rem;
+}
+
+.bt247-field__input {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.bt247-field__input input,
+.bt247-field__input select,
+.bt247-field__input textarea {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+}
+
+.bt247-field__affix {
+  flex: 0 0 auto;
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.bt247-field__help,
+.bt247-field__note {
+  font-size: 0.78rem;
+  line-height: 1.45;
+  opacity: 0.78;
+}
+
+.bt247-field__error {
+  font-size: 0.8rem;
+  color: #b42318;
+}
+
+.bt247-field--checkbox {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 0.5rem;
+}
+
+.bt247-field--checkbox input {
+  margin-top: 0.2rem;
+}
+
+.bt247-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+/* ---------- Results ---------- */
+
+.bt247-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.bt247-metric {
+  border: 1px solid var(--ch247-border, #d7dee8);
+  border-radius: 10px;
+  padding: 0.75rem 0.85rem;
+  background: #fff;
+  min-width: 0;
+}
+
+.bt247-metric--primary {
+  border-color: var(--ch247-accent, #1f7ae0);
+  background: color-mix(in srgb, var(--ch247-accent, #1f7ae0) 6%, #fff);
+}
+
+.bt247-metric__label {
+  margin: 0 0 0.25rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.bt247-metric__value {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.bt247-metric--muted .bt247-metric__value {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.bt247-metric__hint {
+  margin: 0.25rem 0 0;
+  font-size: 0.76rem;
+  line-height: 1.4;
+  opacity: 0.75;
+}
+
+.bt247-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 1rem;
+}
+
+.bt247-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  min-width: 32rem; /* below this the wrapper scrolls instead of crushing the columns */
+}
+
+.bt247-table caption {
+  caption-side: bottom;
+  text-align: left;
+  padding-top: 0.5rem;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  opacity: 0.78;
+}
+
+.bt247-table th,
+.bt247-table td {
+  padding: 0.5rem 0.65rem;
+  border-bottom: 1px solid var(--ch247-border, #e4e9f0);
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+.bt247-table thead th {
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  opacity: 0.8;
+  white-space: nowrap;
+}
+
+.bt247-table tbody tr.bt247-row--total {
+  font-weight: 700;
+  background: color-mix(in srgb, var(--ch247-accent, #1f7ae0) 5%, #fff);
+}
+
+.bt247-table tbody tr.bt247-row--muted {
+  opacity: 0.75;
+}
+
+.bt247-table td[data-col='value'],
+.bt247-table td.bt247-num {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.bt247-row__hint {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 400;
+  opacity: 0.72;
+  margin-top: 0.15rem;
+}
+
+.bt247-notes {
+  margin: 0 0 1rem;
+  padding: 0 0 0 1.1rem;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.bt247-advisories {
+  margin: 0 0 1rem;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.bt247-advisory {
+  border-left: 3px solid #b54708;
+  background: #fffaeb;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0 8px 8px 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.bt247-provenance {
+  border: 1px solid var(--ch247-border, #d7dee8);
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  background: #f8fafc;
+  font-size: 0.83rem;
+  line-height: 1.55;
+}
+
+.bt247-provenance dt {
+  font-weight: 700;
+  margin-top: 0.5rem;
+}
+
+.bt247-provenance dt:first-child {
+  margin-top: 0;
+}
+
+.bt247-provenance dd {
+  margin: 0.1rem 0 0;
+}
+
+.bt247-provenance__disclaimer {
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--ch247-border, #e4e9f0);
+}
+
+.bt247-document {
+  border: 1px solid var(--ch247-border, #d7dee8);
+  border-radius: 10px;
+  background: #fff;
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+
+.bt247-document__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0.85rem;
+  border-bottom: 1px solid var(--ch247-border, #e4e9f0);
+  background: #f8fafc;
+}
+
+.bt247-document__label {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.bt247-document__body {
+  margin: 0;
+  padding: 0.85rem;
+  max-height: 26rem;
+  overflow: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  tab-size: 2;
+}
+
+.bt247-document__body--svg {
+  white-space: normal;
+  display: grid;
+  place-items: center;
+  background: repeating-conic-gradient(#f1f5f9 0% 25%, #fff 0% 50%) 50% / 1.25rem 1.25rem;
+}
+
+.bt247-document__body--svg svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.bt247-export {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.6rem 0.85rem;
+  border-top: 1px solid var(--ch247-border, #e4e9f0);
+}
+
+.bt247-state {
+  border: 1px dashed var(--ch247-border, #cdd6e2);
+  border-radius: 10px;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.bt247-state__title {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+}
+
+.bt247-state--error {
+  border-style: solid;
+  border-color: #fda29b;
+  background: #fef3f2;
+  text-align: left;
+}
+
+.bt247-state--error .bt247-state__title {
+  color: #b42318;
+}
+
+.bt247-state__fields {
+  margin: 0.5rem 0 0;
+  padding: 0 0 0 1.1rem;
+  font-size: 0.85rem;
+  text-align: left;
+}
+
+.bt247-flash {
+  font-size: 0.82rem;
+  color: #067647;
+  margin: 0;
+}
+
+.bt247-related {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+/* Print: only the result panel, so "Print result" produces something worth printing. */
+@media print {
+  .bt247-panel--inputs,
+  .bt247-controls,
+  .bt247-export,
+  .bt247-actions,
+  .bt247-breadcrumbs {
+    display: none !important;
+  }
+
+  .bt247-workspace {
+    display: block;
+  }
+
+  .bt247-table-wrap {
+    overflow: visible;
+  }
+
+  .bt247-table {
+    min-width: 0;
+  }
+
+  .bt247-document__body {
+    max-height: none;
+    overflow: visible;
+  }
+}

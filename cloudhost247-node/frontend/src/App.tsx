@@ -190,6 +190,8 @@ const AdminToolsPage = lazy(() => import('./pages/AdminToolsPage'));
 const SslManagementPage = lazy(() => import('./pages/SslManagementPage'));
 const ToolsHubPage = lazy(() => import('./pages/tools/ToolsHubPage'));
 const MrzToolPage = lazy(() => import('./pages/tools/MrzToolPage'));
+const BusinessToolsPage = lazy(() => import('./pages/tools/BusinessToolsPage'));
+const BusinessToolWorkspacePage = lazy(() => import('./pages/tools/BusinessToolWorkspacePage'));
 const AdminMrzSettingsPage = lazy(() => import('./pages/AdminMrzSettingsPage'));
 export default function App() {
   return (
@@ -254,6 +256,22 @@ export default function App() {
             /tools/mrz-generator is the canonical public route registered in the Tools Center
             catalogue (it is the link the site footer, the Tools mega menu and search all use).
             The original /tools/document/mrz* URLs are retained and render the same tool. */}
+        {/* Business Tools — the renamed and expanded section that the MRZ Generator used to be the
+            entry point for. /tools/business-tools is the directory (5 calculators, 12 generators,
+            4 comparisons) and /tools/business-tools/:tool is the workspace for each of them, both
+            driven by one registry in cloudhost247-node/src/tools/business/registry.ts.
+
+            These static and parameterised paths are declared ABOVE the /tools/* catch-all so the
+            Tools Center's generic page never claims them; React Router ranks them above /tools/*
+            regardless of declaration order, but keeping them adjacent to the other Document Tools
+            routes is what makes the precedence legible to a reader. */}
+        <Route path="/tools/business-tools" element={<BusinessToolsPage />} />
+        {/* The MRZ tools live inside the section too, so it owns every tool it advertises. The
+            /tools/mrz-generator and /tools/mrz-parser routes below stay as they were. */}
+        <Route path="/tools/business-tools/mrz-generator" element={<MrzToolPage defaultTab="calculator" />} />
+        <Route path="/tools/business-tools/mrz-parser" element={<MrzToolPage defaultTab="parser" />} />
+        <Route path="/tools/business-tools/:tool" element={<BusinessToolWorkspacePage />} />
+
         <Route path="/tools/document" element={<ToolsHubPage />} />
         <Route path="/tools/mrz-generator" element={<MrzToolPage defaultTab="calculator" />} />
         <Route path="/tools/mrz-parser" element={<MrzToolPage defaultTab="parser" />} />

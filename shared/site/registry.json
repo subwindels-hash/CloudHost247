@@ -695,6 +695,14 @@
         "spa": "/tools",
         "php": "tools"
       },
+      "featured": {
+        "title": "Business Tools",
+        "body": "Payroll, tax, contract and document tools: 5 calculators, 12 generators and 4 provider comparisons, all running in your browser.",
+        "href": {
+          "spa": "/tools/business-tools"
+        },
+        "cta": "Open Business Tools"
+      },
       "toolsDriven": true,
       "columns": [
         {
@@ -1320,6 +1328,12 @@
           "href": {
             "spa": "/tools/compliance-documents",
             "php": "tools/compliance-documents"
+          }
+        },
+        {
+          "label": "Business Tools",
+          "href": {
+            "spa": "/tools/business-tools"
           }
         },
         {

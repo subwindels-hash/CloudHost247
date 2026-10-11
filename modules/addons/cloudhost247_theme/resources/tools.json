@@ -1162,6 +1162,30 @@
       "resultMode": "lookup"
     },
     {
+      "slug": "business-tools",
+      "name": "Business Tools",
+      "category": "productivity",
+      "summary": "Twenty-one payroll, tax, document and provider-comparison tools that run entirely in your browser.",
+      "description": "The Business Tools directory: 5 calculators (PAYE and net salary under the Nigeria Tax Act 2025, PenCom pension, VAT at 7.5%, total employer cost, and Earned Wage Access ROI), 12 generators (job descriptions, offer letters, payslips, NDAs, employment contracts, CVs, invoices, business cards, employee identifiers, ID badges, organization charts and LinkedIn comment drafts) and 4 comparisons (accounting systems, expense platforms, NHIA-accredited HMOs and PenCom-licensed PFAs). Every calculation runs client-side: salary figures, employee names, contract terms and client details are never uploaded, logged or stored. Each tool that applies a statutory rate names its jurisdiction, source and effective date, and each planning estimate is labelled as one. These tools produce figures and drafts for you to check — they are not tax, legal or financial advice.",
+      "icon": "briefcase",
+      "path": "/tools/business-tools",
+      "apiPath": "/api/tools/business-tools",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [],
+      "discoveryCategories": [
+        "utilities",
+        "calculators"
+      ],
+      "seoTitle": "Business Tools | CloudHost247",
+      "relatedTools": [
+        "word-counter",
+        "lorem-ipsum",
+        "notepad"
+      ],
+      "resultMode": "calculated"
+    },
+    {
       "slug": "mrz-generator",
       "name": "MRZ Generator",
       "category": "developer",
@@ -1274,9 +1298,9 @@
       ],
       "seoTitle": "Word & Text Counter | CloudHost247",
       "relatedTools": [
+        "business-tools",
         "lorem-ipsum",
-        "notepad",
-        "small-text"
+        "notepad"
       ],
       "resultMode": "calculated"
     },
@@ -1300,9 +1324,9 @@
       ],
       "seoTitle": "Lorem Ipsum Generator | CloudHost247",
       "relatedTools": [
+        "business-tools",
         "word-counter",
-        "notepad",
-        "small-text"
+        "notepad"
       ],
       "resultMode": "calculated"
     },
@@ -1326,9 +1350,9 @@
       ],
       "seoTitle": "Online Notepad | CloudHost247",
       "relatedTools": [
+        "business-tools",
         "word-counter",
-        "lorem-ipsum",
-        "small-text"
+        "lorem-ipsum"
       ],
       "resultMode": "calculated"
     },
@@ -1352,9 +1376,9 @@
       ],
       "seoTitle": "Small Text Generator | CloudHost247",
       "relatedTools": [
+        "business-tools",
         "word-counter",
-        "lorem-ipsum",
-        "notepad"
+        "lorem-ipsum"
       ],
       "resultMode": "calculated"
     },
@@ -1378,9 +1402,9 @@
       ],
       "seoTitle": "Invisible Character Generator | CloudHost247",
       "relatedTools": [
+        "business-tools",
         "word-counter",
-        "lorem-ipsum",
-        "notepad"
+        "lorem-ipsum"
       ],
       "resultMode": "calculated"
     },
@@ -1403,9 +1427,9 @@
       ],
       "seoTitle": "Runic Translator | CloudHost247",
       "relatedTools": [
+        "business-tools",
         "word-counter",
-        "lorem-ipsum",
-        "notepad"
+        "lorem-ipsum"
       ],
       "resultMode": "calculated"
     },
@@ -1429,9 +1453,9 @@
       ],
       "seoTitle": "QR Code Generator | CloudHost247",
       "relatedTools": [
+        "business-tools",
         "word-counter",
-        "lorem-ipsum",
-        "notepad"
+        "lorem-ipsum"
       ],
       "resultMode": "calculated"
     },
@@ -1454,9 +1478,9 @@
       ],
       "seoTitle": "QR Scanner | CloudHost247",
       "relatedTools": [
+        "business-tools",
         "word-counter",
-        "lorem-ipsum",
-        "notepad"
+        "lorem-ipsum"
       ],
       "resultMode": "calculated"
     },
@@ -1479,9 +1503,9 @@
       ],
       "seoTitle": "WiFi QR Tool | CloudHost247",
       "relatedTools": [
+        "business-tools",
         "word-counter",
-        "lorem-ipsum",
-        "notepad"
+        "lorem-ipsum"
       ],
       "resultMode": "calculated"
     },
@@ -1506,9 +1530,9 @@
       ],
       "seoTitle": "Time Card Calculator | CloudHost247",
       "relatedTools": [
+        "business-tools",
         "word-counter",
-        "lorem-ipsum",
-        "notepad"
+        "lorem-ipsum"
       ],
       "resultMode": "calculated"
     },
@@ -1531,9 +1555,9 @@
       ],
       "seoTitle": "Designer Colour Tools | CloudHost247",
       "relatedTools": [
+        "business-tools",
         "word-counter",
-        "lorem-ipsum",
-        "notepad"
+        "lorem-ipsum"
       ],
       "resultMode": "calculated"
     },
@@ -1556,9 +1580,9 @@
       ],
       "seoTitle": "Reverse Image Search | CloudHost247",
       "relatedTools": [
+        "business-tools",
         "word-counter",
-        "lorem-ipsum",
-        "notepad"
+        "lorem-ipsum"
       ],
       "resultMode": "static"
     },
@@ -1581,9 +1605,9 @@
       ],
       "seoTitle": "Image → Text (OCR) | CloudHost247",
       "relatedTools": [
+        "business-tools",
         "word-counter",
-        "lorem-ipsum",
-        "notepad"
+        "lorem-ipsum"
       ],
       "resultMode": "lookup"
     },

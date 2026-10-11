@@ -964,6 +964,31 @@ const BASE_TOOL_CATALOG: readonly ToolCatalogEntry[] = [
     keywords: ['bin', 'iin', 'card', 'issuer', 'bank'],
   },
 
+  // ------------------------------------------------------------------ Business Tools
+  {
+    slug: 'business-tools',
+    name: 'Business Tools',
+    category: 'productivity',
+    summary: 'Twenty-one payroll, tax, document and provider-comparison tools that run entirely in your browser.',
+    description:
+      'The Business Tools directory: 5 calculators (PAYE and net salary under the Nigeria Tax Act 2025, PenCom pension, VAT at 7.5%, total employer cost, and Earned Wage Access ROI), 12 generators (job descriptions, offer letters, payslips, NDAs, employment contracts, CVs, invoices, business cards, employee identifiers, ID badges, organization charts and LinkedIn comment drafts) and 4 comparisons (accounting systems, expense platforms, NHIA-accredited HMOs and PenCom-licensed PFAs). Every calculation runs client-side: salary figures, employee names, contract terms and client details are never uploaded, logged or stored. Each tool that applies a statutory rate names its jurisdiction, source and effective date, and each planning estimate is labelled as one. These tools produce figures and drafts for you to check — they are not tax, legal or financial advice.',
+    icon: 'briefcase',
+    path: '/tools/business-tools',
+    apiPath: '/api/tools/business-tools',
+    methods: ['GET'],
+    authRequired: false,
+    visibility: 'public',
+    rateLimitProfile: 'light',
+    cacheSeconds: 0,
+    timeoutMs: 10_000,
+    keywords: ['business tools', 'payroll', 'paye', 'pension', 'pencom', 'vat', 'employer cost', 'nda', 'employment contract', 'payslip', 'invoice', 'cv', 'job description', 'offer letter', 'employee id', 'org chart', 'hmo', 'pfa', 'comparison', 'calculator', 'generator'],
+    notes: [
+      'A directory and workspace surface: the individual tools are registered in cloudhost247-node/src/tools/business/registry.ts and executed by /api/tools/business-tools/:slug/run.',
+      'Privacy: nothing submitted to these tools is persisted. There is no cache, no history target and no request-body logging.',
+      'Estimates are labelled as estimates. No tool here gives tax, legal or financial advice.',
+    ],
+  },
+
   // ------------------------------------------------------------------ Document
   {
     slug: 'mrz-generator',
@@ -1421,6 +1446,9 @@ export const TOOL_CATALOG: readonly ToolCatalogEntry[] = allTools.map(tool => {
   if (tool.slug === 'ssl-checker') categories.push('ssl');
   if (['http-headers','server-os','broken-links','open-graph'].includes(tool.slug)) categories.push('website');
   if (['subnet-calculator','ip-converters','time-card'].includes(tool.slug)) categories.push('calculators');
+  // Business Tools spans calculators, generators and comparisons, so it is filed under both of the
+  // discovery groups a visitor would look in rather than only the one its category maps to.
+  if (tool.slug === 'business-tools') categories.push('calculators');
   // Curated cross-links where the category sibling list would not be the most useful next step.
   const relatedOverride: Record<string, string[]> = {
     'mrz-generator': ['encoding-tools', 'json-tools', 'password-tools'],
@@ -1454,6 +1482,8 @@ export function catalogEntry(slug: string): ToolCatalogEntry | undefined {
  * them.
  */
 export const NON_RUNNABLE_TOOL_SLUGS = new Set([
+  // A directory: its own tools are executed at /api/tools/business-tools/:slug/run, not here.
+  'business-tools',
   'tool-history',
   'tool-favorites',
   'tool-reports',
@@ -1474,4 +1504,11 @@ export const NON_PERSISTABLE_TOOL_SLUGS = new Set(['mrz-generator']);
 /** Public marketing-safe tool list used by tests to assert the catalogue is coherent. */
 export const TOOL_SLUGS: readonly string[] = TOOL_CATALOG.map((entry) => entry.slug);
 
+/**
+ * The Tools Center's own quick-launch strip. Every slug here must be *runnable*: the projection is
+ * asserted against `handlerFor()` in tests/integration/mrz-tools-catalogue.test.ts, and the SPA
+ * renders a slug only if `/api/tools/navigation` served it — which it does for runnable public tools
+ * alone. Directory surfaces (`business-tools`) are therefore published through the site footer and
+ * the Tools mega menu's featured card in shared/site/registry.json instead, not through this list.
+ */
 export const TOOLS_FOOTER = ['dns-lookup','dns-propagation','whois','ip-lookup','my-ip','ssl-checker','mx-lookup','spf-checker','dmarc-checker','subnet-calculator','json-tools','uuid-generator','mrz-generator'];

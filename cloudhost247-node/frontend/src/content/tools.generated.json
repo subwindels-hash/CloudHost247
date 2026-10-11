@@ -354,6 +354,14 @@
       "visibility": "customer"
     },
     {
+      "slug": "business-tools",
+      "name": "Business Tools",
+      "path": "/tools/business-tools",
+      "category": "productivity",
+      "description": "Twenty-one payroll, tax, document and provider-comparison tools that run entirely in your browser.",
+      "visibility": "public"
+    },
+    {
       "slug": "mrz-generator",
       "name": "MRZ Generator",
       "path": "/tools/mrz-generator",

@@ -51,6 +51,7 @@ import { registerAiSupportRoutes } from './routes/ai-support';
 import { registerAiControlPlaneRoutes } from './ai-os/controllers/routes';
 import { registerToolsRoutes } from './tools/routes';
 import { registerMrzToolRoutes } from './routes/mrz-tools';
+import { registerBusinessToolsRoutes } from './routes/business-tools';
 import { registerNavigationRoutes } from './routes/navigation';
 import { registerSeoRoutes } from './routes/seo';
 import { registerBuilderRoutes } from './routes/builder';
@@ -222,6 +223,12 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
 
     // Native Developer / Document Tools — ePassport MRZ Calculator, Validator, Parser & Super Admin settings.
     await registerMrzToolRoutes(instance, env, pool);
+
+    // Business Tools — the 21-tool payroll, tax, document and comparison section that the MRZ
+    // Generator page became. Its /api/tools/business-tools/* paths are static segments, so they win
+    // over the generic /api/tools/:slug executor regardless of registration order; the ordering here
+    // only keeps the trace readable. Nothing is persisted: see the module's privacy note.
+    await registerBusinessToolsRoutes(instance, env, pool);
 
     // CLOUDHOST247 global platform — the mega navigation definition every menu, drawer, footer and
     // sitemap renders; the Website Builder + AI Website Builder; the Online Store; the Logo Maker;
