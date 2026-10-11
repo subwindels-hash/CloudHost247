@@ -43,6 +43,7 @@ import {
 } from './format';
 import { computeVat, NIGERIA_STANDARD_VAT_RATE } from './calculators';
 import { failure, fieldFailure } from './validate';
+import { buildVCard, qrSvgFragment } from './qr-svg';
 import type {
   BusinessToolInput,
   BusinessToolOutcome,
@@ -499,7 +500,7 @@ export function readableTextColor(background: string): '#ffffff' | '#111111' {
 export const CARD_LANDSCAPE = { width: 1050, height: 600 } as const;
 export const CARD_PORTRAIT = { width: 600, height: 1050 } as const;
 
-export function buildBusinessCardSvg(values: BusinessToolInput): { svg: string; warnings: string[] } {
+export function buildBusinessCardSvg(values: BusinessToolInput): { svg: string; warnings: string[]; vcardPayload: string | null } {
   const fullName = toText(values['fullName']).trim() || 'Your Name';
   const jobTitle = toText(values['jobTitle']).trim();
   const companyName = toText(values['companyName']).trim();
@@ -514,6 +515,9 @@ export function buildBusinessCardSvg(values: BusinessToolInput): { svg: string; 
   const brandColor = sanitizeColor(values['brandColor'], '#0f2b46');
   const accentColor = sanitizeColor(values['accentColor'], '#1f7ae0');
   const textColor = readableTextColor(brandColor);
+  // The vCard QR defaults on: a contact code is the point of a printed card. An omitted field
+  // (an API caller that does not send defaults) is treated as the registry default, not as "off".
+  const includeQr = values['includeQr'] === undefined ? true : toBoolean(values['includeQr']);
 
   const dimensions = orientation === 'portrait' ? CARD_PORTRAIT : CARD_LANDSCAPE;
   const { width, height } = dimensions;
@@ -522,17 +526,22 @@ export function buildBusinessCardSvg(values: BusinessToolInput): { svg: string; 
   const margin = Math.round(width * 0.06);
   const isSplit = layout === 'split';
   const panelWidth = isSplit ? Math.round(width * 0.36) : 0;
+  // Reserved bottom-right corner for the QR symbol; the text column is clamped to whatever
+  // width is left so a long line can never run underneath the code.
+  const qrBox = includeQr ? Math.round(Math.min(width, height) * 0.32) : 0;
+  const reservedRight = qrBox > 0 ? qrBox + Math.round(margin * 0.5) : 0;
 
   const bodyX = isSplit ? panelWidth + margin : margin;
-  const bodyWidth = width - bodyX - margin;
+  const bodyWidth = width - bodyX - margin - reservedRight;
   let cursorY = Math.round(height * 0.22);
 
   const textElements: string[] = [];
   const push = (text: string, fontSize: number, weight: string, color: string, dy: number, x = bodyX): void => {
     if (text === '') return;
     cursorY += dy;
+    const maxChars = Math.max(18, Math.floor(bodyWidth / (fontSize * 0.52)));
     textElements.push(
-      `<text x="${x}" y="${cursorY}" font-family="Helvetica, Arial, sans-serif" font-size="${fontSize}" font-weight="${weight}" fill="${color}">${escapeXml(clampText(text, 58))}</text>`
+      `<text x="${x}" y="${cursorY}" font-family="Helvetica, Arial, sans-serif" font-size="${fontSize}" font-weight="${weight}" fill="${color}">${escapeXml(clampText(text, maxChars))}</text>`
     );
   };
 
@@ -602,16 +611,46 @@ export function buildBusinessCardSvg(values: BusinessToolInput): { svg: string; 
     );
   }
 
+  // The vCard QR sits in the reserved right-hand column, whose width the text lines were clamped
+  // to, so no detail line can run underneath the symbol. A canvas too small to carry a symbol
+  // that would still scan (≥120 px) skips the code with a warning instead of drawing a dud.
+  let qrSvg = '';
+  let vcardPayload: string | null = null;
+  if (qrBox >= 120) {
+    vcardPayload = buildVCard({
+      fullName,
+      company: clampText(companyName, 60),
+      title: clampText(jobTitle, 60),
+      phone: clampText(phone, 30),
+      email: clampText(email, 80),
+      website: clampText(website, 80),
+      address: clampText(address, 90),
+    });
+    const qr = qrSvgFragment(vcardPayload, {
+      x: width - margin - qrBox,
+      y: height - Math.round(margin * 0.9) - qrBox,
+      boxPx: qrBox,
+      dark: '#111111',
+      light: '#ffffff',
+      ecc: 'M',
+      ariaLabel: 'QR code encoding this card as a vCard contact',
+    });
+    qrSvg = qr.svg;
+  } else if (qrBox > 0) {
+    warnings.push('This canvas is too small for a scannable vCard QR code, so none was drawn.');
+  }
+
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="Business card for ${escapeXml(fullName)}">` +
     textElements.join('') +
+    qrSvg +
     '</svg>';
 
-  return { svg, warnings };
+  return { svg, warnings, vcardPayload };
 }
 
 export function computeBusinessCard(values: BusinessToolInput): BusinessToolOutcome {
-  const { svg, warnings } = buildBusinessCardSvg(values);
+  const { svg, warnings, vcardPayload } = buildBusinessCardSvg(values);
   const orientation = toText(values['orientation']) === 'portrait' ? 'portrait' : 'landscape';
   const dimensions = orientation === 'portrait' ? CARD_PORTRAIT : CARD_LANDSCAPE;
   const brandColor = sanitizeColor(values['brandColor'], '#0f2b46');
@@ -652,6 +691,7 @@ export function computeBusinessCard(values: BusinessToolInput): BusinessToolOutc
             { label: 'Website', cells: [toText(values['website']).trim() || '—'] },
             { label: 'Address', cells: [toText(values['address']).trim() || '—'] },
             { label: 'Social handles', cells: [toList(values['socials']).join(', ') || '—'] },
+            { label: 'vCard QR', cells: [vcardPayload ? 'Included — scannable (vCard 3.0 with the contact details above)' : 'Omitted'] },
             { label: 'Layout', cells: [titleCase(toText(values['layout']) || 'classic')] },
             { label: 'Brand colour', cells: [brandColor] },
             { label: 'Text colour (auto-selected)', cells: [`${textColor} — chosen for the higher of black/white contrast`], emphasis: 'muted' },
@@ -949,17 +989,22 @@ export function buildEmployeeIdCardSvg(values: BusinessToolInput): { svg: string
     const qrSize = Math.round(width * 0.16);
     const qrX = width - margin - qrSize;
     const qrY = height - Math.round(margin * 1.2) - qrSize;
-    // A deterministic finder-pattern placeholder: it marks where a real QR payload belongs and shows
-    // the payload text, rather than pretending to encode a scannable code.
+    // A real QR symbol encoding the employee identifier (or the name when no ID was supplied),
+    // produced by the same verified encoder the Tools Center QR tool uses; the engine tests
+    // decode the generated SVG back with jsqr, so a symbol that does not scan fails the build.
+    const qrPayload = employeeId !== '' ? employeeId : `NAME:${employeeName}`;
+    const qr = qrSvgFragment(qrPayload, {
+      x: qrX,
+      y: qrY,
+      boxPx: qrSize,
+      dark: '#111111',
+      light: '#ffffff',
+      ecc: 'L',
+      ariaLabel: `QR code encoding ${qrPayload}`,
+    });
     elements.push(
-      `<rect x="${qrX}" y="${qrY}" width="${qrSize}" height="${qrSize}" fill="#ffffff" stroke="#111111" stroke-width="3"/>`,
-      `<rect x="${qrX + 6}" y="${qrY + 6}" width="${Math.round(qrSize * 0.22)}" height="${Math.round(qrSize * 0.22)}" fill="#111111"/>`,
-      `<rect x="${qrX + qrSize - 6 - Math.round(qrSize * 0.22)}" y="${qrY + 6}" width="${Math.round(qrSize * 0.22)}" height="${Math.round(qrSize * 0.22)}" fill="#111111"/>`,
-      `<rect x="${qrX + 6}" y="${qrY + qrSize - 6 - Math.round(qrSize * 0.22)}" width="${Math.round(qrSize * 0.22)}" height="${Math.round(qrSize * 0.22)}" fill="#111111"/>`,
+      qr.svg,
       `<text x="${qrX + Math.round(qrSize / 2)}" y="${qrY + qrSize + Math.round(detailSize * 0.9)}" text-anchor="middle" font-family="monospace" font-size="${Math.round(detailSize * 0.6)}" fill="#475569">${escapeXml(clampText(employeeId || employeeName, 28))}</text>`
-    );
-    warnings.push(
-      'The QR block is a printed placeholder showing the payload text, not a scannable code — encoding a real QR symbol needs a barcode library, and this tool will not claim to produce a code it cannot verify. Use the CloudHost247 QR Code Generator with the payload printed under the block.'
     );
   }
 
@@ -1023,7 +1068,14 @@ export function computeEmployeeIdCard(values: BusinessToolInput): BusinessToolOu
             { label: 'Issue date', cells: [toText(values['issueDate']).trim() ? formatLongDate(values['issueDate']) : '—'] },
             { label: 'Expiry date', cells: [toText(values['expiryDate']).trim() ? formatLongDate(values['expiryDate']) : '—'] },
             { label: 'Photo placeholder', cells: [toBoolean(values['includePhoto']) ? 'Included' : 'Omitted'] },
-            { label: 'QR payload block', cells: [toBoolean(values['includeQr']) ? 'Included (placeholder, not scannable)' : 'Omitted'] },
+            {
+              label: 'QR code',
+              cells: [
+                toBoolean(values['includeQr'])
+                  ? `Included — scannable QR (ECC L), encoding ${employeeId !== '' ? 'the employee ID' : 'the employee name'}`
+                  : 'Omitted',
+              ],
+            },
           ],
         },
       ],

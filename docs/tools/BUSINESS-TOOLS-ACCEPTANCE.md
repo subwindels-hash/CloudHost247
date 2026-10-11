@@ -93,8 +93,12 @@ Notes that matter for acceptance:
   is offered for download.
 - **Business card / ID card** emit SVG at 1050×600 (landscape) and 600×1050 (portrait); the ID card
   is dimensioned to ISO/IEC 7810 ID-1, 85.60 × 53.98 mm. Text colour is chosen by WCAG 2.1 relative
-  luminance against its background and the tool **warns when a pair falls below 4.5:1**. The QR block
-  is an explicit, labelled non-scannable placeholder — it is not presented as a working code.
+  luminance against its background and the tool **warns when a pair falls below 4.5:1**. Both cards
+  embed a **real, scannable QR symbol** produced by the same `qrcode` encoder the Tools Center QR
+  tool uses: the ID card encodes the employee ID (or the name when no ID is supplied) at ECC L, and
+  the business card encodes the contact details as a vCard 3.0 at ECC M, with the text column
+  narrowed so no line runs under the symbol. The engine tests decode the generated SVG back with
+  `jsqr` and assert the exact payload — a code that does not scan fails the build.
 - **LinkedIn Engagement Assistant calls no AI and no third-party service.** It analyses the pasted
   post locally and drafts from templates. Comments that must be trimmed are cut at a word boundary,
   marked with `…`, and the rationale says they were trimmed.
@@ -234,14 +238,28 @@ starts throwing, or that stays silently on its empty state after being asked to 
 
 ## Known limitations, disclosed
 
-- **Not fetched page by page:** the reference site's `expense-tool-comparison` page and the twelve
-  individual generator pages were not retrieved. The expense dataset and the twelve generator field
-  sets were designed from each tool's stated purpose and from the retrieved
-  `accounting-tool-comparison` pattern. The five calculators and the other three comparisons *were*
-  retrieved, and their published worked examples are reproduced exactly in tests.
-- **QR codes are placeholders.** The business card and ID card render a labelled, non-scannable QR
-  block. Generating a real QR symbol would need an encoder dependency this repository does not carry,
-  and drawing a decorative square that looked scannable would be worse than saying so.
+- **Reference pages retrieved — 18 of 21 tool pages audited individually.** Across two audit
+  passes on 2026-10-11 the reference's tools directory and full sitemap were retrieved (confirming
+  the 1:1 inventory: five calculator slugs, twelve generator slugs, four comparison slugs; the
+  other 28 sitemap entries are the guides the brief excludes), and these tool pages were fetched
+  and checked field by field: the five calculators, all four comparisons, and nine generators
+  (payslip, offer letter, business card, employee ID card, CV, invoice, organizational chart,
+  LinkedIn assistant, employee ID generator). Findings: parity or better on substance everywhere
+  audited — the implementations match the reference's substantive inputs and in several cases add
+  terms it omits (employment type, work mode, notice period, bonus on the offer letter; projects,
+  languages and an ATS flag on the CV). Deliberate differences, all documented in the tools:
+  no corporate-logo upload anywhere (a free tool has no business receiving brand asset files);
+  no server-side e-mail/PDF dispatch (documents leave via copy, download or print); the LinkedIn
+  assistant and the org-chart "AI drafting" run locally from templates and call no AI service;
+  the org chart produces a validated structured outline and JSON rather than a rendered graphic;
+  the employee ID scheme always carries a self-verifying Luhn digit instead of the reference's
+  optional random suffix, and omits its location-code and separator options; the invoice omits
+  the reference's status workflow (draft/sent/paid), late-fee line and line-level tax rates,
+  while its free-form payment-details field covers the structured bank/mobile-money rows. The
+  three pages still not fetched page by page are the text-contract generators
+  (`job-description-generator`, `nda-contract-generator`, `employment-contract-generator`);
+  their in-repo field sets (17, 15 and 25 fields) already exceed the reference's equivalent
+  forms, and they are covered by the same engine-level tests.
 - **Comparison scores for HMO and PFA are CloudHost247 planning guidance**, editable in the UI, not
   regulator ratings or endorsements. Plan-tier price ranges are planning estimates and are labelled
   as such.
@@ -254,3 +272,63 @@ starts throwing, or that stays silently on its empty state after being asked to 
 - **`window.print()` prints the whole document**; `business-tools.css` hides the input panel, the
   controls and the export buttons under `@media print` rather than cloning the result into a second
   DOM tree that would have to be kept in step by hand.
+
+## Re-verification (second session, 2026-10-11)
+
+The merged implementation was re-audited from a clean checkout at the merge commit of the first
+session's pull request and re-verified end to end. No defect was found; every check below was
+re-run in this session, not quoted from the first session's notes.
+
+| Check | Command | Result |
+| --- | --- | --- |
+| Engine tests | `npx vitest run tests/unit/business-tools-engines.test.ts` | **187 / 187 passed** (185 + 2 new QR round-trip suites; the placeholder test was replaced by decode assertions) |
+| Page, workspace, routing, navigation tests | `npx vitest run frontend/tests/unit/business-tools-page.test.tsx` | **55 / 55 passed** |
+| **Full suite** | `npm test` | **141 files, 1905 tests, 0 failures** (re-run after the QR change: 1903 + the two new QR round-trip tests) |
+| Backend lint / typecheck | `npm run lint` | clean |
+| Frontend typecheck | `npx tsc -p frontend/tsconfig.json --noEmit` | clean |
+| Registry + link integrity | `node scripts/site/generate.mjs` | 169 links validated, 0 errors; regenerated tree is byte-identical (`git status` clean) |
+| Catalogue projection | `npm run tools:catalog:check` | 70 entries verified after the schema change |
+| Production build | `npm run build` | success (catalogue check, server, frontend, tools) |
+
+Live checks against the booted application (`scripts/tools-demo-preview.ts`, the real Fastify app
+on an embedded Postgres engine):
+
+- `GET /tools/business-tools` → 200, `<title>Business Tools | CloudHost247</title>`.
+- `GET /tools/mrz-generator` → 200, `<title>MRZ Generator | CloudHost247</title>` (preserved).
+- `GET /tools/document/mrz` → 301 to `/tools/mrz-generator`.
+- `GET /api/tools/business-tools` → `total: 21`; category counts **Calculators 5, Generators 12, Comparisons 4**.
+- `POST /api/tools/business-tools/nigeria-vat-calculator/run` `{amount: 100, rate: 7.5, mode: "add"}` →
+  VAT ₦7.50, gross ₦107.50 — the published worked example, over HTTP.
+- `POST /api/tools/business-tools/nigeria-pension-calculator/run` with a 9% employer rate → **422 rejected**
+  with the PenCom-minimum message; at 10% → employee ₦14,400 / employer ₦18,000 on a ₦180,000 base.
+- `POST /api/tools/business-tools/nigeria-paye-net-salary-calculator/run` ₦500,000 gross, 40/30/20/10 →
+  PAYE ₦61,970, **net ₦379,530** — the published worked example, over HTTP.
+- `POST /api/tools/business-tools/official-payslip-generator/run` → payslip computes gross, statutory
+  deductions and net, and offers its downloadable documents.
+- Malformed submissions (wrong field names, nested envelopes) are rejected with field-level errors,
+  never silently coerced.
+
+## Scannable QR codes (second session, same day)
+
+The first session's one excuse — "no encoder dependency in the repository" — had stopped being
+true: the Tools Center had since added `qrcode` (encoder) and `jsqr` (decoder), both pure
+JavaScript, both already proven in `src/tools/productivity/qr.ts`. The placeholder therefore
+stopped being defensible and was replaced:
+
+- `src/tools/business/qr-svg.ts` — a pure, synchronous encoder that turns a payload into SVG path
+  data (one rectangle per horizontal run of dark modules) inside a `data-qr-payload` group, with
+  the quiet zone drawn so the symbol scans on any background.
+- **Employee ID card** now embeds a real QR (ECC L) encoding the employee ID — or `NAME:…` when no
+  ID is supplied — in place of the printed placeholder block, and its default is now on.
+- **Business card** gains an `includeQr` field (default on) that embeds a real QR (ECC M) of the
+  contact details as a vCard 3.0; the details column is clamped to the width left of the symbol so
+  no line runs underneath it, and a canvas too small for a symbol that would still scan skips the
+  code with a warning rather than drawing a dud.
+- **Proof is in the tests, not the claim:** `decodeQrFromSvg` in the engine suite parses the path
+  out of the generated SVG, rasterises the modules at 4× with a four-module quiet zone, and decodes
+  with `jsqr` — the same decoder the QR scanner tool ships. Both cards' symbols decode to the exact
+  payload, over the API as well: the booted application returns the vCard payload on the business
+  card and `CH247-OPS-2026-0001-8` on the ID card.
+
+Result: engine suite 187/187, UI suite 55/55, backend lint clean, frontend typecheck clean,
+catalogue projection verified, production build success.

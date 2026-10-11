@@ -357,6 +357,7 @@ const BUSINESS_CARD_FIELDS: BusinessField[] = [
   ] },
   { key: 'brandColor', label: 'Brand colour', type: 'text', default: '#0f2b46', maxLength: 7, section: 'Design', help: 'Six-digit hex. Text colour is chosen automatically for contrast.' },
   { key: 'accentColor', label: 'Accent colour', type: 'text', default: '#1f7ae0', maxLength: 7, section: 'Design' },
+  { key: 'includeQr', label: 'Include a vCard QR code', type: 'boolean', default: true, section: 'Design', help: 'A real, scannable QR (ECC M) encoding the contact details as a vCard 3.0 that phones can file into contacts. The details column narrows so no line runs under the code.' },
 ];
 
 const EMPLOYEE_ID_FIELDS: BusinessField[] = [
@@ -665,7 +666,7 @@ const GENERATORS: BusinessTool[] = [
     category: 'generators',
     summary: 'A print-resolution business card as downloadable SVG, with automatic contrast-checked text colour.',
     description:
-      'Generates a business card as SVG at ISO/IEC 7810 ID-1 proportions — 85.60 × 53.98 mm, the standard card size — in landscape or portrait, in a classic banded layout or a split layout with a brand panel. Because the output is SVG rather than a raster image, it is produced entirely in your browser with no image service and no font download, and it stays crisp at print resolution. Text colour is not a choice you make: the tool computes WCAG 2.1 relative luminance for your brand colour and picks black or white for the higher contrast, then reports the ratio and warns if it falls below 4.5:1. Malformed email addresses and domains are flagged, because a card is printed once and handed out many times.',
+      'Generates a business card as SVG at ISO/IEC 7810 ID-1 proportions — 85.60 × 53.98 mm, the standard card size — in landscape or portrait, in a classic banded layout or a split layout with a brand panel. Because the output is SVG rather than a raster image, it is produced entirely in your browser with no image service and no font download, and it stays crisp at print resolution. Text colour is not a choice you make: the tool computes WCAG 2.1 relative luminance for your brand colour and picks black or white for the higher contrast, then reports the ratio and warns if it falls below 4.5:1. It also embeds a real, scannable QR code of your contact details as a vCard 3.0 (the details column narrows so no line runs under the symbol, and the code is skipped with a warning rather than drawn badly when there is no room). Malformed email addresses and domains are flagged, because a card is printed once and handed out many times.',
     icon: 'layout',
     path: `${BUSINESS_TOOLS_ROOT}/business-card-generator`,
     keywords: ['business card', 'card design', 'svg', 'print', 'branding', 'contact card'],
