@@ -85,7 +85,49 @@ curl -s -X POST localhost:3000/api/tools/mrz-generator \
   -H 'Content-Type: application/json' -d '{"issuingState":"UTO","surname":"ERIKSSON","givenNames":"ANNA MARIA","nationality":"UTO","documentNumber":"L898902C3","dateOfBirth":"740812","sex":"F","expiryDate":"120415","optionalData":"ZE184226B"}'
 ```
 
-## 5. What this document does not prove
+## 5. The twenty-one business tools, verified live over the running API
+
+The SalarioPay-named suite is served by `POST /api/tools/business-tools/:slug/run`. The catalogue
+endpoint reports the section as it is built — **21 tools: 5 calculators, 12 generators, 4
+comparisons** — and states the privacy position it enforces structurally, not by promise
+(`computesClientSide: true`, `persistsInput: false`, `persistsResult: false`,
+`transmitsToThirdParties: false`; the route module is registered without a database handle, so a
+submission has nowhere to go).
+
+Every figure below came back from the running server, and every one of them is reproduced by a unit
+test with an independently calculated reference case
+(`tests/unit/business-tools-engines.test.ts`, 196 assertions).
+
+| Tool | Input | Result returned |
+|---|---|---|
+| PAYE & Net Salary | ₦500,000/month | PAYE ₦61,970 · net ₦379,530 · effective rate 12.39% · total deductions ₦120,470 — with the annual band table (0% on the first ₦800,000, 15% to ₦3 m, 18% to ₦12 m, 21%, 23%, 25%) and ₦743,640 annual tax, which equals 0 + 330,000 + 413,640 |
+| Pension | basic ₦300,000 + housing ₦100,000 + transport ₦50,000, 8%/10% | Employee ₦36,000 · employer ₦45,000 · total remittance ₦81,000 on a ₦450,000 pensionable base |
+| VAT | ₦250,000 + 7.5% | VAT ₦18,750 · gross ₦268,750 · 93.02% net / 6.98% VAT |
+| Employer Cost | gross ₦450,000/month | True annual cost ₦6,075,000 · overhead multiplier 1.13× · ₦675,000 overhead, across 23 cost lines |
+| EWA ROI | 100 staff, ₦3.6 m average, 20% turnover cut by 20%, 80% adoption, 6 months, ₦1 m programme cost | Savings ₦1,900,800 · net benefit ₦1,400,800 · ROI 280.16% · payback 3.2 months · current attrition cost ₦23,760,000 |
+
+The four comparisons answer with real criteria rather than prose: accounting tools (6 options, 10
+criteria, 0 unassessed cells), expense tools (8 × 9), Nigerian HMOs (indicative annual budget
+₦2 m–₦4.5 m per 20–100 employees, 10 tiers/questions) and Nigerian PFAs (15 licensed PFAs, 8
+criteria). Each returns a weighted ranking, a score breakdown by criterion and a capability table.
+The generators build their documents in the browser from these engines; the ID card's own evidence
+is in [`EMPLOYEE-ID-CARD-GENERATOR.md`](EMPLOYEE-ID-CARD-GENERATOR.md).
+
+**What the 422s are worth recording for.** Three of the calculators refused the first payload I sent
+— they need the pension percentages, the gross amount and the turnover assumptions respectively, and
+the response names the missing field rather than inventing a default:
+
+```json
+{"ok":false,"tool":"nigeria-pension-calculator",
+ "error":"Employee contribution percentage is required.",
+ "fieldErrors":[{"key":"employeePct","message":"Employee contribution percentage is required."}, …]}
+```
+
+The browser form pre-fills those values from the field metadata (8%, 10%, 100% adoption, 12 months),
+so a person never sees this; an API caller who omits an assumption is told which one is missing
+instead of being handed a result computed on a guess.
+
+## 6. What this document does not prove
 
 - It does not prove the tools work against a **configured** platform: WHOIS, and any tool whose
   provider is optional, needs its integration connected first.

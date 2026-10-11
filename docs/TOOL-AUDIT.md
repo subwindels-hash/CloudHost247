@@ -315,6 +315,13 @@ These are stated plainly because the alternative — marking them green — is w
 | Source and tests | this branch, commits listed by `git log --oneline` |
 | Branch state | The branch already carried one earlier commit (`d2badaa`, an ID-card snapshot from 13:48 on the same base) whose tree names the page `EmployeeIdCardPage.tsx` and the engine test `id-card-engine.test.ts`. This session's tree names them `IdCardGeneratorPage.tsx` and `employee-id-card.test.ts` and is the state that has been type-checked, built and run through the suites. The two were **not** content-merged — that would have put two ID-card pages and two engine test files in one tree — so the earlier commit is kept in history by an `ours` merge and the tested tree is what the branch serves. Nothing was deleted from history. |
 
+### Deployment prerequisites that are not code
+
+| Prerequisite | Why | What to do |
+|---|---|---|
+| `Permissions-Policy` must allow the camera on the tools pages | The QR scanner calls `getUserMedia`. Nothing in this repository emits a `Permissions-Policy` header — there is no document-root `.htaccess` and no PHP header injection — so the browser default applies and the scanner works. If the hosting layer (or a CDN/WAF rule) sets a deny-all policy for the site, the camera path fails while everything else keeps working | Either leave the header unset, or set `Permissions-Policy: camera=(self)` for `/tools/*`. Do **not** set `camera=()`. Either way the failure is honest: `tools.js` reports that the camera was refused and the image-upload path stays available |
+| A sending mail host and connected providers, if WHOIS/blacklist tools are to answer | `api/tools/whois` needs an RDAP provider (else `503 CONFIGURATION_REQUIRED`) and the DNS tools need egress to their resolvers | Configure the provider or leave the tools as they are — they report the missing dependency rather than guessing |
+
 ### External dependencies and their limits
 
 | Dependency | Used by | Behaviour when unavailable |

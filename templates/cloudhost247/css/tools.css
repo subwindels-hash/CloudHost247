@@ -81,5 +81,3 @@
 .ch-camera{margin-top:12px;display:grid;gap:10px;justify-items:start}
 .ch-camera[hidden]{display:none}
 .ch-camera video{width:100%;max-width:420px;aspect-ratio:4/3;object-fit:cover;background:#0d1a24;border:1px solid var(--ch-line);border-radius:var(--ch-radius-sm)}
-.ch-camera-preview{max-width:100%;background:#fff;border:1px solid var(--ch-line);border-radius:var(--ch-radius-sm)}
-.ch-camera-preview[hidden]{display:none}

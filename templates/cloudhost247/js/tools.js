@@ -166,11 +166,8 @@ function enhanceQrScanner(form) {
   video.playsInline = true;
   video.muted = true;
   video.setAttribute('aria-label', 'Camera viewfinder');
-  const preview = document.createElement('canvas');
-  preview.className = 'ch-camera-preview';
-  preview.hidden = true;
   const status = el('p', 'ch-hint', '');
-  panel.append(video, preview, status);
+  panel.append(video, status);
   result.parentNode.insertBefore(panel, result);
 
   let stream = null;
