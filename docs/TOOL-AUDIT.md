@@ -248,13 +248,18 @@ a QR containing a URL is a link and not a verification service.
 | Business tools engines (21 tools) | `cd cloudhost247-node && npx vitest run tests/unit/business-tools-engines.test.ts` | **196 passed** |
 | Employee ID Card engine + page | `npx vitest run tests/unit/employee-id-card.test.ts frontend/tests/unit/id-card-generator-page.test.tsx` | **72 + 13 passed** |
 | Navigation link integrity | `npx vitest run tests/integration/navigation-links.test.ts` | **5 passed** |
-| Whole Vitest suite | `npm test` | see §7 (long-running; result recorded in the staging log) |
+| Whole Vitest suite | `npm test` | long-running; see §7 for exactly what was and was not covered |
 | Browser-only PHP tools | `node --test tests/tools/local.test.mjs` | **1 passed** (all assertions, incl. the QR frame decoder) |
 | Compliance wording | `node --test tests/tools/compliance-tools.test.mjs` | **72 passed** |
 | MRZ cross-check | `python3 tests/tools/mrz-crosscheck.py` | **all specimens verified** |
 | PHP shell (catalogue, engine, DNS wire client, security) | `php tests/tools/run.php` | **not run here — no PHP binary in this environment**; runs in CI and in staging |
 | Type check | `npx tsc -p tsconfig.json --noEmit` | clean |
-| Production build | `npm run build` | see §7 |
+| Production build | `npm run build` | **exit 0** — `tools:catalog:check`, `tsc`, the SPA bundle and the embeddable tools library all built |
+| Branding audit | `python3 scripts/branding-audit.py` | **PASSED** — 7 440 text files scanned, 0 retired-brand matches |
+| Release-candidate gate | `bash scripts/release-candidate-check.sh` | registry, content, PHP theme and crawl policy **pass**; stops at `php: No such file or directory` (§7) |
+| DNS tool set | `npx vitest run tests/integration/dns-api.test.ts dns-propagation.test.ts tools-api.test.ts` | **52 passed** |
+| MRZ tool set | `npx vitest run tests/integration/mrz-tools-api.test.ts mrz-tools-catalogue.test.ts` | **13 passed** (the remaining MRZ coverage is in the SPA-routing and engine suites) |
+| Live platform smoke | `npx tsx scripts/tools-preview-server.ts 3000` + the calls in [LIVE-TOOL-VERIFICATION.md](independent-rebuild/LIVE-TOOL-VERIFICATION.md) | **70/70 tools answered in a typed way**; twelve computed verified results; four reported honest dependency failures |
 
 TypeScript type-checking is clean across the whole Node project, including the new page, the
 expanded calculator and the new test.
@@ -269,7 +274,7 @@ These are stated plainly because the alternative — marking them green — is w
 |---|---|---|
 | Any PHP execution (the 116-tool shell, `tests/tools/run.php`, PHP lint) | No PHP binary is installed in this sandbox and the package mirrors are not reachable from it | `independent-foundation.yml` runs PHP 7.4 and 8.2 with the full PHP behaviour suites; the staging host runs the same |
 | DNS/IP/WHOIS tools against live resolvers | Sandbox egress: TLS to all resolvers except `dns.google` is reset before the handshake | Staging — the DoH provider loop, the SSRF guard and the rate limiter are all exercised there |
-| Full Vitest suite | Started on this branch and still running when this document was written; the result is appended to the staging log rather than guessed at | `npm test` in CI |
+| Full Vitest suite, final commit | The suite takes over twenty minutes and was run against the tree from before the last three commits; the suites those commits touch (navigation links, the compliance hub, marketing pages, the header, type check, production build) were re-run individually afterwards and pass. A single full run on the final commit belongs in CI | `npm test` in CI |
 | Real camera capture | The sandbox has no camera; the decoder is tested with real QR pixels instead | Manual pass on a device — the permission-refusal, no-camera and camera-busy paths are all reachable by denying the prompt |
 | Physical scanner hardware | Outside what a test runner can assert | The Downloads section of the ID-card page states the print scale; the decode is verified against `jsqr` |
 
@@ -283,6 +288,7 @@ These are stated plainly because the alternative — marking them green — is w
 | Employee ID Card audit and completion record | `docs/independent-rebuild/EMPLOYEE-ID-CARD-GENERATOR.md` |
 | Reference-site inventory (SalarioPay 21 tools) | `docs/independent-rebuild/SALARIOPAY-INVENTORY.md` |
 | DNS reference inventory and gap analysis | `docs/independent-rebuild/DNS-TOOL-COLLECTION.md` |
+| Live tool verification transcript (real API responses) | `docs/independent-rebuild/LIVE-TOOL-VERIFICATION.md` |
 | Tool inventory tables (shell, app, addon) | §1 and §4 of this document; the app's catalogue also publishes `/api/tools/catalog` |
 | Contact sheets (every ID-card template rendered) | `docs/id-card/template-contact-sheet.png`, `…-portrait.png`, `…-landscape.png` |
 | Source and tests | this branch, commits listed by `git log --oneline` |
