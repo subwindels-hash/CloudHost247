@@ -14,7 +14,9 @@ open work, not hidden defects.
 | `npm ci` (Node 22.22.3, lockfile) | Pass | |
 | `npm run typecheck` (server) | Pass | |
 | `tsc -p frontend/tsconfig.json --noEmit` | Pass | |
-| `npx vitest run` (full suite) | **Pass** — 145 files passed, 1 skipped; 2,009 tests passed, 6 skipped; exit 0 | Takes about 20 minutes on this runner |
+| `npx vitest run` (full suite), before this change | **Pass** — 145 files passed, 1 skipped; 2,009 tests passed, 6 skipped; exit 0 | Takes about 20 minutes on this runner |
+| `npx vitest run` (full suite), after the four new tools | **Pass** — 147 files, 2,056 tests, none skipped; exit 0 | The previously skipped tool-page HTTP status test runs once the production build has created the SPA shell |
+| `tests/unit/gap-tools.test.ts` | Pass — 37 tests | Minecraft codes, RAID layouts and invalid input, RFC 4193 layout, IPv6 classification, resolver failure propagation, catalogue wiring |
 | `npm run build` (catalogue check, server, frontend, tools bundle) | Pass | |
 | `npm audit --omit=dev --audit-level=high` | Pass — 0 vulnerabilities | |
 | PHP suites (`tests/**/run.php`, `php -l`) | **Not run** | PHP is not installed in this sandbox. CI runs them. |
@@ -102,21 +104,20 @@ Gaps found by comparison with the reference:
 
 | Reference tool | Status | Reason / action |
 |---|---|---|
-| Minecraft Color Codes (Gaming) | **Missing** | Static reference data. Add a catalogue entry and handler. |
-| RAID Calculator (Productivity) | **Missing** | Pure arithmetic (RAID 0/1/5/6/10 capacity and fault tolerance). Add. |
-| Local IPv6 Address Generator (IP) | **Missing** | RFC 4193 ULA generation with `crypto.randomBytes`. Add. |
-| IPv6 Compatibility Checker (IP) | **Missing** | Needs AAAA lookups through the existing DNS resolver layer. Add. |
+| Minecraft Color Codes (Gaming) | **Implemented** (`minecraft-color-codes`) | Full standard code table with colour values; `&`↔`§` conversion and stripping, counting the codes changed. Filed under Productivity because the catalogue has no gaming category. |
+| RAID Calculator (Productivity) | **Implemented** (`raid-calculator`) | RAID 0/1/5/6/10 usable and raw capacity, overhead, guaranteed and best-case failures, decimal TB and binary TiB. Metadata, filesystem overhead and hot spares are not modelled. |
+| Local IPv6 Address Generator (IP) | **Implemented** (`ipv6-address-generator`) | RFC 4193 ULA prefix, /64 subnet and sample address from `crypto.randomBytes`. |
+| IPv6 Compatibility Checker (DNS) | **Implemented** (`ipv6-compatibility-checker`) | AAAA and A lookups through the resolver layer, with resolver evidence. Reports DNS publication only, not reachability. |
 | Name Checker (Productivity) | **Missing** | Requires per-platform username probes. Needs a source decision and rate limits before implementation. |
 | Google PageRank | **Not implementable** | Google discontinued public PageRank data. Document as unavailable; do not fake results. |
 | Credit Card Checker | **Deliberately excluded** | The repository's BIN checker explicitly refuses full card numbers. Keep this boundary; do not add Luhn validation of full PANs. |
 | HTACCESS / URL rewrite generator | Covered | Inside `url-tools` (Multi-URL opener, rewrite and .htaccess generators). |
 | Email Verifier | **Missing** | No catalogue entry. `email-header` (header analysis) and `smtp-tester` (SMTP test) do not verify mailbox addresses. Add as a separate tool with an honest-dependency statement. |
 
-Why the four "Missing" IP/DNS items were not implemented in this pass: adding a catalogue entry
-regenerates `modules/addons/cloudhost247_theme/resources/tools.json`, changes the tool count
-asserted by `tests/integration/tools-api.test.ts`, and affects PHP catalogue tests
-(`tests/tools/catalogue.php`) that cannot run in this sandbox. These should be added in one
-reviewed change with the PHP suite run in CI.
+The four implemented tools added catalogue entries, so `modules/addons/cloudhost247_theme/resources/tools.json`
+was regenerated with `npm run tools:catalog` (74 entries; `--check` verified). The PHP catalogue
+tests (`tests/tools/catalogue.php`, `tests/tools/site-integration.php`) could not be run here because
+PHP is not installed; they run in CI and must pass before merge.
 
 ### 3.4 MRZ tools (`/tools/mrz-generator`, `/tools/mrz-parser`)
 
@@ -141,11 +142,11 @@ Page and test exist (`frontend/src/pages/tools/ComplianceDocumentsPage.tsx`,
 ## 4. Missing or unverified items, by priority
 
 1. Capture the full live SalarioPay directory and confirm the 12 generators and 4 comparisons.
-2. Add the four missing DNS Checker tools (Minecraft codes, RAID, local IPv6, IPv6 compatibility)
-   in one change, with the PHP catalogue suite run in CI.
+2. Run the PHP catalogue suite in CI for the four new tools (done in code; PHP not run locally).
+   Email Verifier and Name Checker remain open.
 3. Add browser end-to-end tests (Playwright) for the ID-card flow, the business tools and MRZ.
 4. Add TD1 and TD2 MRZ support, or document TD3-only as the supported scope in the UI.
-5. Name Checker: decide the data source and rate-limit policy, or document it as unavailable.
+5. Name Checker and Email Verifier: decide the data source and rate-limit policy, or document as unavailable.
 6. Staging deployment of the production build and screenshots of the principal flows.
 7. PHP suites: run in CI on this branch (not available in this sandbox).
 
