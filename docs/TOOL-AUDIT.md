@@ -292,6 +292,7 @@ These are stated plainly because the alternative — marking them green — is w
 | Tool inventory tables (shell, app, addon) | §1 and §4 of this document; the app's catalogue also publishes `/api/tools/catalog` |
 | Contact sheets (every ID-card template rendered) | `docs/id-card/template-contact-sheet.png`, `…-portrait.png`, `…-landscape.png` |
 | Source and tests | this branch, commits listed by `git log --oneline` |
+| Branch state | The branch already carried one earlier commit (`d2badaa`, an ID-card snapshot from 13:48 on the same base) whose tree names the page `EmployeeIdCardPage.tsx` and the engine test `id-card-engine.test.ts`. This session's tree names them `IdCardGeneratorPage.tsx` and `employee-id-card.test.ts` and is the state that has been type-checked, built and run through the suites. The two were **not** content-merged — that would have put two ID-card pages and two engine test files in one tree — so the earlier commit is kept in history by an `ours` merge and the tested tree is what the branch serves. Nothing was deleted from history. |
 
 ### External dependencies and their limits
 
