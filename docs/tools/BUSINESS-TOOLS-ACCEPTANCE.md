@@ -283,7 +283,7 @@ re-run in this session, not quoted from the first session's notes.
 | --- | --- | --- |
 | Engine tests | `npx vitest run tests/unit/business-tools-engines.test.ts` | **187 / 187 passed** (185 + 2 new QR round-trip suites; the placeholder test was replaced by decode assertions) |
 | Page, workspace, routing, navigation tests | `npx vitest run frontend/tests/unit/business-tools-page.test.tsx` | **55 / 55 passed** |
-| **Full suite** | `npm test` | 141 files, 1903 tests, 0 failures (before the QR change); re-run after — see the QR paragraph below |
+| **Full suite** | `npm test` | **141 files, 1905 tests, 0 failures** (re-run after the QR change: 1903 + the two new QR round-trip tests) |
 | Backend lint / typecheck | `npm run lint` | clean |
 | Frontend typecheck | `npx tsc -p frontend/tsconfig.json --noEmit` | clean |
 | Registry + link integrity | `node scripts/site/generate.mjs` | 169 links validated, 0 errors; regenerated tree is byte-identical (`git status` clean) |
