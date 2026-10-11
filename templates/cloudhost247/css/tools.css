@@ -74,3 +74,12 @@
 .ch-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
 @media(max-width:900px){.ch-tool-grid-compact{grid-template-columns:1fr 1fr}}
 @media(max-width:640px){.ch-tool-grid-compact{grid-template-columns:1fr}.ch-block{font-size:12px;padding:12px}}
+
+/* QR scanner: the camera panel. The viewfinder is capped so a wide webcam frame cannot push the
+   result off the screen on a phone, and the preview canvas never receives a black background from
+   the theme (a transparent canvas over a dark surface reads as an empty result). */
+.ch-camera{margin-top:12px;display:grid;gap:10px;justify-items:start}
+.ch-camera[hidden]{display:none}
+.ch-camera video{width:100%;max-width:420px;aspect-ratio:4/3;object-fit:cover;background:#0d1a24;border:1px solid var(--ch-line);border-radius:var(--ch-radius-sm)}
+.ch-camera-preview{max-width:100%;background:#fff;border:1px solid var(--ch-line);border-radius:var(--ch-radius-sm)}
+.ch-camera-preview[hidden]{display:none}

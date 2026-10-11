@@ -119,7 +119,7 @@ export const EWA_ROI_NOTE: JurisdictionNote = {
   effectiveDate: '2026-10-10',
   estimate: true,
   disclaimer:
-    'Planning estimate. The retention improvement from an Earned Wage Access programme is not a regulated or guaranteed figure — it is an assumption you enter, and the reference material published alongside this model cites a reduction of up to 20%. Programme cost defaults to ₦0 because several providers charge the employee rather than the employer; if yours charges the employer, enter it, because a zero-cost assumption is what turns a finite ROI into an unbounded one.',
+    'Planning estimate built from four assumptions you control — expected turnover reduction (the reference material published alongside this model cites up to 20%), programme adoption across the workforce, the annual programme cost charged to the employer, and the evaluation period. None of them is a regulated or guaranteed figure. Programme cost defaults to ₦0 because several providers charge the employee rather than the employer; if yours charges the employer, enter it, because a zero-cost assumption is what turns a finite ROI into an unbounded one. Savings are counted only on the share of resignations the programme actually reaches.',
 };
 
 /** Rent relief: 20% of annual rent, capped at ₦500,000 (Nigeria Tax Act 2025). */
@@ -1226,6 +1226,11 @@ export function computeEmployerCostCalculator(values: BusinessToolInput): Busine
 /* ------------------------------------------------------------------ */
 
 export const EWA_DEFAULT_TURNOVER_REDUCTION_PCT = 20;
+/** Share of the workforce expected to use the advance. 100% keeps the model at full coverage. */
+export const EWA_DEFAULT_ADOPTION_PCT = 100;
+/** Evaluation period in months. Savings, cost and net benefit are reported over this window. */
+export const EWA_DEFAULT_EVALUATION_MONTHS = 12;
+export const EWA_EVALUATION_PERIODS = [6, 12, 24, 36];
 
 export interface EwaRoiBreakdown {
   employees: number;
@@ -1233,18 +1238,27 @@ export interface EwaRoiBreakdown {
   turnoverRatePct: number;
   replacementCostPct: number;
   turnoverReductionPct: number;
+  adoptionPct: number;
+  evaluationMonths: number;
   annualProgrammeCost: number;
   resignationsPerYear: number;
   averageReplacementCost: number;
   currentAttritionCost: number;
+  /** The reduction actually achieved once adoption is taken into account. */
+  effectiveTurnoverReductionPct: number;
   projectedTurnoverRatePct: number;
   projectedResignationsPerYear: number;
   projectedAttritionCost: number;
   retainedStaffPerYear: number;
+  /** Programme cost over the evaluation period. */
+  periodCost: number;
+  /** Savings over the evaluation period. */
+  periodSavings: number;
   annualSavings: number;
   netBenefit: number;
   roiPercent: number | null;
   paybackMonths: number | null;
+  paybackWithinPeriod: boolean;
 }
 
 export function computeEwaRoi(values: BusinessToolInput): EwaRoiBreakdown {
@@ -1259,19 +1273,38 @@ export function computeEwaRoi(values: BusinessToolInput): EwaRoiBreakdown {
   const turnoverRatePct = num('turnoverRatePct', 20);
   const replacementCostPct = num('replacementCostPct', 33);
   const turnoverReductionPct = num('turnoverReductionPct', EWA_DEFAULT_TURNOVER_REDUCTION_PCT);
+  const adoptionPct = num('adoptionPct', EWA_DEFAULT_ADOPTION_PCT);
   const annualProgrammeCost = num('annualProgrammeCost', 0);
+  const evaluationMonths = num('evaluationMonths', EWA_DEFAULT_EVALUATION_MONTHS);
 
   const resignations = (employees * turnoverRatePct) / 100;
   const replacementCost = (averageAnnualSalary * replacementCostPct) / 100;
   const currentCost = resignations * replacementCost;
 
+  /* The retention effect only reaches the staff who actually use the advance, so the reduction the
+     whole workforce sees is the entered reduction scaled by adoption. At the default 100% adoption
+     this is the entered reduction itself. */
   const cappedReduction = Math.min(100, turnoverReductionPct);
-  const projectedTurnoverRatePct = turnoverRatePct * (1 - cappedReduction / 100);
+  const cappedAdoption = Math.min(100, adoptionPct);
+  const effectiveReduction = (cappedReduction * cappedAdoption) / 100;
+  const projectedTurnoverRatePct = turnoverRatePct * (1 - effectiveReduction / 100);
   const projectedResignations = (employees * projectedTurnoverRatePct) / 100;
   const projectedCost = projectedResignations * replacementCost;
 
   const savings = currentCost - projectedCost;
-  const netBenefit = savings - annualProgrammeCost;
+
+  /* Every headline figure is reported over the evaluation period the user chose. Twelve months is
+     the default, so the annual view is the period view until the period changes. */
+  const periodFraction = evaluationMonths / 12;
+  const periodSavings = savings * periodFraction;
+  const periodCost = annualProgrammeCost * periodFraction;
+  const netBenefit = periodSavings - periodCost;
+
+  /* Months of savings needed to cover a year of programme cost. Undefined when the programme saves
+     nothing, and undefined when it costs nothing (there is nothing to pay back). */
+  const paybackMonths = annualProgrammeCost > 0 && savings > 0
+    ? round(annualProgrammeCost / (savings / 12), 1)
+    : null;
 
   return {
     employees: round(employees, 2),
@@ -1279,22 +1312,26 @@ export function computeEwaRoi(values: BusinessToolInput): EwaRoiBreakdown {
     turnoverRatePct: round(turnoverRatePct, 2),
     replacementCostPct: round(replacementCostPct, 2),
     turnoverReductionPct: round(cappedReduction, 2),
+    adoptionPct: round(cappedAdoption, 2),
+    evaluationMonths: round(evaluationMonths, 2),
     annualProgrammeCost: round(annualProgrammeCost, 2),
     resignationsPerYear: round(resignations, 2),
     averageReplacementCost: round(replacementCost, 2),
     currentAttritionCost: round(currentCost, 2),
+    effectiveTurnoverReductionPct: round(effectiveReduction, 2),
     projectedTurnoverRatePct: round(projectedTurnoverRatePct, 2),
     projectedResignationsPerYear: round(projectedResignations, 2),
     projectedAttritionCost: round(projectedCost, 2),
     retainedStaffPerYear: round(resignations - projectedResignations, 2),
+    periodCost: round(periodCost, 2),
+    periodSavings: round(periodSavings, 2),
     annualSavings: round(savings, 2),
     netBenefit: round(netBenefit, 2),
     // A zero-cost programme has an undefined ratio: dividing by zero is not "infinite return",
     // it is a question the model cannot answer. Reported as null and explained in the UI.
-    roiPercent: annualProgrammeCost > 0 ? round((netBenefit / annualProgrammeCost) * 100, 2) : null,
-    paybackMonths: netBenefit > 0 && annualProgrammeCost > 0
-      ? round((annualProgrammeCost / (netBenefit + annualProgrammeCost)) * 12, 1)
-      : null,
+    roiPercent: periodCost > 0 ? round((netBenefit / periodCost) * 100, 2) : null,
+    paybackMonths,
+    paybackWithinPeriod: paybackMonths !== null && paybackMonths <= evaluationMonths,
   };
 }
 
@@ -1304,6 +1341,8 @@ export function computeEwaRoiCalculator(values: BusinessToolInput): BusinessTool
   const turnover = toNumber(values['turnoverRatePct']);
   const replacement = toNumber(values['replacementCostPct']);
   const reduction = toNumber(values['turnoverReductionPct']);
+  const adoption = toNumber(values['adoptionPct']) ?? EWA_DEFAULT_ADOPTION_PCT;
+  const months = toNumber(values['evaluationMonths']) ?? EWA_DEFAULT_EVALUATION_MONTHS;
 
   const fieldErrors: Array<{ key: string; message: string }> = [];
   if (employees === null) fieldErrors.push({ key: 'totalEmployees', message: 'Total employees is required.' });
@@ -1320,6 +1359,8 @@ export function computeEwaRoiCalculator(values: BusinessToolInput): BusinessTool
   const t = turnover as number;
   const rp = replacement as number;
   const rd = reduction as number;
+  const ad = adoption as number;
+  const mo = months as number;
 
   if (e <= 0) {
     return { ok: false, error: failure('Headcount must be at least 1.', [{ key: 'totalEmployees', message: 'Must be 1 or more.' }]) };
@@ -1341,6 +1382,12 @@ export function computeEwaRoiCalculator(values: BusinessToolInput): BusinessTool
   if (rd < 0 || rd > 100) {
     return { ok: false, error: failure('Expected turnover reduction must be between 0% and 100%.', [{ key: 'turnoverReductionPct', message: 'Must be between 0 and 100.' }]) };
   }
+  if (ad < 0 || ad > 100) {
+    return { ok: false, error: failure('Programme adoption must be between 0% and 100%.', [{ key: 'adoptionPct', message: 'Must be between 0 and 100.' }]) };
+  }
+  if (mo < 1 || mo > 60) {
+    return { ok: false, error: failure('The evaluation period must be between 1 and 60 months.', [{ key: 'evaluationMonths', message: 'Must be between 1 and 60 months.' }]) };
+  }
 
   const roi = computeEwaRoi(values);
   const warnings: string[] = [];
@@ -1349,6 +1396,18 @@ export function computeEwaRoiCalculator(values: BusinessToolInput): BusinessTool
   }
   if (rd === 0) {
     warnings.push('A 0% expected turnover reduction produces zero savings. Enter the improvement you actually expect.');
+  }
+  if (ad === 0) {
+    warnings.push('At 0% adoption nobody uses the advance, so the programme retains nobody however large the expected reduction is.');
+  } else if (ad < 100) {
+    warnings.push(
+      `Only the ${formatPercent(ad)} of the workforce that adopts the advance is credited with the retention effect, so the workforce-wide reduction is ${formatPercent(roi.effectiveTurnoverReductionPct)} rather than ${formatPercent(roi.turnoverReductionPct)}.`
+    );
+  }
+  if (roi.paybackMonths !== null && !roi.paybackWithinPeriod) {
+    warnings.push(
+      `Programme cost is recovered after ${roi.paybackMonths} months, which is beyond the ${roi.evaluationMonths}-month evaluation period. Extend the period or reduce the cost if payback inside the period is the test.`
+    );
   }
   if (roi.annualProgrammeCost === 0) {
     warnings.push(
@@ -1365,12 +1424,13 @@ export function computeEwaRoiCalculator(values: BusinessToolInput): BusinessTool
     );
   }
 
+  const periodLabel = roi.evaluationMonths === 12 ? 'annual' : `${formatInteger(roi.evaluationMonths)}-month`;
   const metrics: ResultMetric[] = [
     {
-      label: 'Projected annual savings',
-      value: formatMoney(roi.annualSavings),
+      label: 'Projected savings over the evaluation period',
+      value: formatMoney(roi.periodSavings),
       emphasis: 'primary',
-      hint: `Retained staff: +${formatHeadcount(roi.retainedStaffPerYear)} employees/year`,
+      hint: `Retained staff: +${formatHeadcount(roi.retainedStaffPerYear)} employees/year · ${formatInteger(roi.evaluationMonths)} months`,
     },
     {
       label: 'Net return on investment',
@@ -1378,9 +1438,19 @@ export function computeEwaRoiCalculator(values: BusinessToolInput): BusinessTool
       emphasis: 'primary',
       hint: roi.roiPercent === null
         ? 'Enter an annual programme cost to compute a ratio'
-        : `(savings − cost) ÷ cost`,
+        : `(savings − cost) ÷ cost, over ${formatInteger(roi.evaluationMonths)} months`,
     },
-    { label: 'Net annual benefit', value: formatMoney(roi.netBenefit), emphasis: 'secondary', hint: 'Savings less programme cost' },
+    {
+      label: 'Payback period',
+      value: roi.paybackMonths === null
+        ? (roi.annualProgrammeCost === 0 ? 'No cost to recover' : 'Not recovered')
+        : `${roi.paybackMonths} months`,
+      emphasis: 'secondary',
+      hint: roi.paybackMonths === null
+        ? (roi.annualProgrammeCost === 0 ? 'Programme cost is ₦0' : 'At these inputs the savings never cover the cost')
+        : (roi.paybackWithinPeriod ? `Inside the ${formatInteger(roi.evaluationMonths)}-month evaluation period` : `After the ${formatInteger(roi.evaluationMonths)}-month evaluation period`),
+    },
+    { label: `Net benefit, ${periodLabel}`, value: formatMoney(roi.netBenefit), emphasis: 'secondary', hint: 'Savings less programme cost' },
     { label: 'Current annual attrition cost', value: formatMoney(roi.currentAttritionCost), emphasis: 'muted' },
   ];
 
@@ -1393,10 +1463,12 @@ export function computeEwaRoiCalculator(values: BusinessToolInput): BusinessTool
         { label: 'Resignations per year', cells: [formatHeadcount(roi.resignationsPerYear), formatHeadcount(roi.projectedResignationsPerYear)] },
         { label: 'Average replacement cost', cells: [formatAmount(roi.averageReplacementCost), formatAmount(roi.averageReplacementCost)], hint: `${formatPercent(roi.replacementCostPct)} of average annual salary` },
         { label: 'Annual attrition cost', cells: [formatAmount(roi.currentAttritionCost), formatAmount(roi.projectedAttritionCost)], emphasis: 'total' },
-        { label: 'Annual programme cost', cells: ['—', formatAmount(roi.annualProgrammeCost)] },
-        { label: 'Annual savings', cells: ['—', formatAmount(roi.annualSavings)], emphasis: 'total' },
+        { label: 'Programme adoption', cells: ['—', formatPercent(roi.adoptionPct)], hint: `Workforce-wide reduction ${formatPercent(roi.effectiveTurnoverReductionPct)}` },
+        { label: `Programme cost, ${formatInteger(roi.evaluationMonths)} months`, cells: ['—', formatAmount(roi.periodCost)] },
+        { label: `Savings, ${formatInteger(roi.evaluationMonths)} months`, cells: ['—', formatAmount(roi.periodSavings)], emphasis: 'total' },
+        { label: 'Net benefit', cells: ['—', formatAmount(roi.netBenefit)], emphasis: 'total' },
       ],
-      caption: `Modelled on ${formatInteger(roi.employees)} employees at an average annual salary of ${formatMoney(roi.averageAnnualSalary)}.`,
+      caption: `Modelled on ${formatInteger(roi.employees)} employees at an average annual salary of ${formatMoney(roi.averageAnnualSalary)}, evaluated over ${formatInteger(roi.evaluationMonths)} months.`,
     },
   ];
 
@@ -1409,11 +1481,18 @@ export function computeEwaRoiCalculator(values: BusinessToolInput): BusinessTool
         `Resignations per year = ${formatInteger(roi.employees)} employees × ${formatPercent(roi.turnoverRatePct)} = ${formatHeadcount(roi.resignationsPerYear)}.`,
         `Average replacement cost = ${formatMoney(roi.averageAnnualSalary)} × ${formatPercent(roi.replacementCostPct)} = ${formatMoney(roi.averageReplacementCost)}.`,
         `Current annual attrition cost = ${formatHeadcount(roi.resignationsPerYear)} × ${formatMoney(roi.averageReplacementCost)} = ${formatMoney(roi.currentAttritionCost)}.`,
-        `Projected turnover = ${formatPercent(roi.turnoverRatePct)} × (1 − ${formatPercent(roi.turnoverReductionPct)}) = ${formatPercent(roi.projectedTurnoverRatePct)}, i.e. ${formatHeadcount(roi.projectedResignationsPerYear)} resignations and ${formatMoney(roi.projectedAttritionCost)}.`,
-        `Projected annual savings = ${formatMoney(roi.currentAttritionCost)} − ${formatMoney(roi.projectedAttritionCost)} = ${formatMoney(roi.annualSavings)}.`,
+        `Effect on the whole workforce = ${formatPercent(roi.turnoverReductionPct)} expected reduction × ${formatPercent(roi.adoptionPct)} adoption = ${formatPercent(roi.effectiveTurnoverReductionPct)}, so projected turnover = ${formatPercent(roi.turnoverRatePct)} × (1 − ${formatPercent(roi.effectiveTurnoverReductionPct)}) = ${formatPercent(roi.projectedTurnoverRatePct)}, i.e. ${formatHeadcount(roi.projectedResignationsPerYear)} resignations and ${formatMoney(roi.projectedAttritionCost)}.`,
+        `Annual savings = ${formatMoney(roi.currentAttritionCost)} − ${formatMoney(roi.projectedAttritionCost)} = ${formatMoney(roi.annualSavings)}, which is ${formatHeadcount(roi.retainedStaffPerYear)} retained employees × ${formatMoney(roi.averageReplacementCost)}.`,
+        `Over the ${formatInteger(roi.evaluationMonths)}-month evaluation period: savings = ${formatMoney(roi.annualSavings)} × ${(roi.evaluationMonths / 12).toFixed(2)} = ${formatMoney(roi.periodSavings)}; programme cost = ${formatMoney(roi.annualProgrammeCost)} × ${(roi.evaluationMonths / 12).toFixed(2)} = ${formatMoney(roi.periodCost)}; net benefit = ${formatMoney(roi.netBenefit)}.`,
+        roi.paybackMonths === null
+          ? 'Payback is not defined here: '
+            + (roi.annualProgrammeCost === 0
+              ? 'with a ₦0 programme cost there is nothing to recover.'
+              : 'at these inputs the annual savings never cover the annual programme cost.')
+          : `Payback = ${formatMoney(roi.annualProgrammeCost)} annual cost ÷ (${formatMoney(roi.annualSavings)} annual savings ÷ 12) = ${roi.paybackMonths} months${roi.paybackWithinPeriod ? '' : `, which is after the ${formatInteger(roi.evaluationMonths)}-month evaluation period`}.`,
         roi.roiPercent === null
           ? 'ROI is undefined at a ₦0 programme cost: the ratio divides net benefit by cost, and division by zero has no value.'
-          : `ROI = (${formatMoney(roi.annualSavings)} − ${formatMoney(roi.annualProgrammeCost)}) ÷ ${formatMoney(roi.annualProgrammeCost)} = ${formatPercent(roi.roiPercent)}.`,
+          : `ROI = ${formatMoney(roi.netBenefit)} net benefit ÷ ${formatMoney(roi.periodCost)} programme cost = ${formatPercent(roi.roiPercent)} over ${formatInteger(roi.evaluationMonths)} months.`,
       ],
       warnings,
       jurisdiction: EWA_ROI_NOTE,
@@ -1428,6 +1507,9 @@ export function computeEwaRoiCalculator(values: BusinessToolInput): BusinessTool
           `Turnover rate %,${roi.turnoverRatePct.toFixed(2)}\r\n` +
           `Replacement cost % of salary,${roi.replacementCostPct.toFixed(2)}\r\n` +
           `Expected turnover reduction %,${roi.turnoverReductionPct.toFixed(2)}\r\n` +
+          `Programme adoption %,${roi.adoptionPct.toFixed(2)}\r\n` +
+          `Workforce-wide turnover reduction %,${roi.effectiveTurnoverReductionPct.toFixed(2)}\r\n` +
+          `Evaluation period months,${roi.evaluationMonths.toFixed(0)}\r\n` +
           `Resignations per year (before),${roi.resignationsPerYear.toFixed(2)}\r\n` +
           `Average replacement cost NGN,${roi.averageReplacementCost.toFixed(2)}\r\n` +
           `Annual attrition cost before NGN,${roi.currentAttritionCost.toFixed(2)}\r\n` +
@@ -1436,8 +1518,11 @@ export function computeEwaRoiCalculator(values: BusinessToolInput): BusinessTool
           `Annual attrition cost with EWA NGN,${roi.projectedAttritionCost.toFixed(2)}\r\n` +
           `Retained staff per year,${roi.retainedStaffPerYear.toFixed(2)}\r\n` +
           `Annual programme cost NGN,${roi.annualProgrammeCost.toFixed(2)}\r\n` +
-          `Projected annual savings NGN,${roi.annualSavings.toFixed(2)}\r\n` +
-          `Net annual benefit NGN,${roi.netBenefit.toFixed(2)}\r\n` +
+          `Programme cost over period NGN,${roi.periodCost.toFixed(2)}\r\n` +
+          `Annual savings NGN,${roi.annualSavings.toFixed(2)}\r\n` +
+          `Savings over period NGN,${roi.periodSavings.toFixed(2)}\r\n` +
+          `Net benefit over period NGN,${roi.netBenefit.toFixed(2)}\r\n` +
+          `Payback months,${roi.paybackMonths === null ? 'undefined' : roi.paybackMonths.toFixed(1)}\r\n` +
           `ROI %,${roi.roiPercent === null ? 'undefined (zero cost)' : roi.roiPercent.toFixed(2)}\r\n`,
       },
     },

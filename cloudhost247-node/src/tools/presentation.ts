@@ -1,5 +1,38 @@
 import { DISCOVERY_CATEGORIES, TOOL_CATALOG } from './catalog';
+import { BUSINESS_TOOLS, BUSINESS_TOOLS_ROOT } from './business';
+
+/**
+ * Resolve a `/tools/...` URL to the page that answers it.
+ *
+ * The not-found handler uses this to decide whether a URL under /tools is a real page or a 404, so
+ * anything missing here is served with HTTP 404 and `X-Robots-Tag: noindex` even though the single
+ * page app renders it. That is how all twenty-one business tools and the compliance collection hub
+ * were being served: the app drew them, and every crawler, uptime check and link checker saw a 404.
+ *
+ * The order matters — the collection hub is a page like the catalogue entries, not a tool.
+ */
 export function resolveToolPage(path: string) {
+  if (path === '/tools/compliance-documents')
+    return {
+      path,
+      name: 'Compliance & Document Tools',
+      summary:
+        'Identity-document, secret, encoding and infrastructure utilities, each stating what it verifies.',
+    };
+  if (path === BUSINESS_TOOLS_ROOT || path === `${BUSINESS_TOOLS_ROOT}/`) {
+    const catalogued = TOOL_CATALOG.find((tool) => tool.path === path);
+    if (catalogued) return catalogued;
+    return {
+      path: BUSINESS_TOOLS_ROOT,
+      name: 'Business Tools',
+      summary:
+        'Payroll, HR and finance calculators, generators and comparisons for Nigerian businesses.',
+    };
+  }
+  if (path.startsWith(`${BUSINESS_TOOLS_ROOT}/`)) {
+    const business = BUSINESS_TOOLS.find((tool) => tool.path === path);
+    if (business) return { path, name: business.name, summary: business.summary };
+  }
   if (path === '/tools' || path === '/tools/')
     return {
       path: '/tools',

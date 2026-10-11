@@ -1119,22 +1119,97 @@ function depuny(input) {
   try { return new URL('http://' + 'xn--' + input).hostname.replace(/^xn--/, ''); }
   catch { return input; }
 }
-async function scan(input, wifi) {
-  const file = input.file;
-  if (!file) throw new Error('Choose a QR image.');
-  const bitmap = await createImageBitmap(file);
+/**
+ * Turn decoded symbol text into the tool's result shape.
+ *
+ * Pure on purpose: the file upload, the camera and the acceptance suite all funnel the decoded
+ * string through this one function, so a payload that is described as a Wi-Fi setup code on one
+ * path cannot be described as plain text on another.
+ */
+export function qrResultFromData(data, wifi) {
+  const value = data === null || data === undefined ? '' : String(data);
+  if (wifi) {
+    const match = value.match(/^WIFI:S:([^;]*);T:([^;]*);P:([^;]*);/i);
+    if (!match) throw new Error('The QR code is not a Wi-Fi setup code.');
+    return ok('Wi-Fi details decoded locally', [{ SSID: match[1], Security: match[2], Passphrase: match[3] }], [
+      'The network was not joined and the passphrase was not stored.',
+    ]);
+  }
+  return ok('QR decoded', [{ Text: value }], ['The link was not opened.']);
+}
+
+/** One canvas read, shared by the upload path and the camera path. */
+function pixelsFrom(source) {
+  const width = source.width || source.naturalWidth || 0;
+  const height = source.height || source.naturalHeight || 0;
+  if (!width || !height) throw new Error('The image has no pixels to read.');
   const canvas = document.createElement('canvas');
-  canvas.width = bitmap.width; canvas.height = bitmap.height;
+  canvas.width = width;
+  canvas.height = height;
   const ctx = canvas.getContext('2d', { willReadFrequently: true });
-  ctx.drawImage(bitmap, 0, 0);
-  const image = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  if (!ctx) throw new Error('This browser did not provide a 2D drawing context, so the image cannot be read.');
+  ctx.drawImage(source, 0, 0, width, height);
+  return ctx.getImageData(0, 0, width, height);
+}
+
+function loadImage(src, revoke) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => {
+      if (revoke) URL.revokeObjectURL(src);
+      resolve(image);
+    };
+    image.onerror = () => {
+      if (revoke) URL.revokeObjectURL(src);
+      reject(new Error('That file is not an image this browser can read.'));
+    };
+    image.src = src;
+  });
+}
+
+/**
+ * Get pixels out of whatever the caller has: an uploaded file, or an image data URL (which is what
+ * a camera frame becomes). Nothing here touches the network — a data URL is decoded in the page,
+ * and an object URL is revoked as soon as the image has loaded.
+ */
+async function sourceFrom(input) {
+  if (input.file) {
+    if (typeof createImageBitmap === 'function') return createImageBitmap(input.file);
+    return loadImage(URL.createObjectURL(input.file), true);
+  }
+  if (input.image) {
+    if (!/^data:image\//i.test(String(input.image))) throw new Error('Paste an image data URL (data:image/…).');
+    return loadImage(String(input.image), false);
+  }
+  throw new Error('Choose a QR image, or scan one with the camera.');
+}
+
+async function decodePixels(image) {
   const jsQR = (await import('./vendor/jsQR.mjs')).default;
-  const code = jsQR(image.data, image.width, image.height);
+  try {
+    return jsQR(image.data, image.width, image.height);
+  } catch (error) {
+    throw new Error('The image could not be decoded: ' + (error && error.message ? error.message : 'unreadable pixels'));
+  }
+}
+
+async function scan(input, wifi) {
+  const image = pixelsFrom(await sourceFrom(input || {}));
+  const code = await decodePixels(image);
   if (!code) return fail('No QR code was found in that image.');
-  if (!wifi) return ok('QR decoded', [{ Text: code.data }], ['The link was not opened.']);
-  const match = code.data.match(/^WIFI:S:([^;]*);T:([^;]*);P:([^;]*);/i);
-  if (!match) return fail('The QR code is not a Wi-Fi setup code.');
-  return ok('Wi-Fi details decoded locally', [{ SSID: match[1], Security: match[2], Passphrase: match[3] }], ['The network was not joined and the passphrase was not stored.']);
+  return qrResultFromData(code.data, wifi);
+}
+
+/**
+ * Decode one camera frame. Returns `null` when the frame simply has no symbol in it — that is the
+ * normal state of a viewfinder between reads and must not be reported as an error. Exported so the
+ * page's camera loop and the acceptance suite call the same decoder.
+ */
+export async function scanFrame(source, wifi) {
+  const image = pixelsFrom(source);
+  const code = await decodePixels(image);
+  if (!code) return null;
+  return qrResultFromData(code.data, wifi);
 }
 
 function md5(value) { return hex(md5Bytes(new TextEncoder().encode(value))); }

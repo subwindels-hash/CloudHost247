@@ -145,7 +145,12 @@ const EWA_FIELDS: BusinessField[] = [
   { key: 'turnoverRatePct', label: 'Annual employee turnover rate', type: 'percent', default: 20, min: 0, max: 100, suffix: '%', section: 'Attrition' },
   { key: 'replacementCostPct', label: 'Cost to replace an employee', type: 'percent', default: 33, min: 0, max: 500, suffix: '%', section: 'Attrition', help: 'As a percentage of annual salary. Recruitment, onboarding, lost productivity and ramp-up.' },
   { key: 'turnoverReductionPct', label: 'Expected turnover reduction from EWA', type: 'percent', default: 20, min: 0, max: 100, suffix: '%', section: 'Programme', help: 'An assumption you enter, not a guaranteed or regulated figure. Published research for this model cites up to 20%.' },
-  { key: 'annualProgrammeCost', label: 'Annual programme cost to the employer', type: 'money', default: 0, min: 0, prefix: '₦', section: 'Programme', help: 'Setup plus annual fees. At ₦0 a return-on-investment ratio cannot be computed.' },
+  { key: 'adoptionPct', label: 'Programme adoption across the workforce', type: 'percent', default: 100, min: 0, max: 100, suffix: '%', section: 'Programme', help: 'The share of employees who actually use the advance. Savings are credited only to this share, so the workforce-wide reduction is your expected reduction scaled by adoption.' },
+  { key: 'evaluationMonths', label: 'Evaluation period', type: 'select', default: '12', section: 'Programme', options: [
+    { value: '6', label: '6 months' }, { value: '12', label: '12 months (1 year)' },
+    { value: '24', label: '24 months (2 years)' }, { value: '36', label: '36 months (3 years)' },
+  ], help: 'Savings, programme cost, net benefit and ROI are all reported over this window. Payback is reported in months so it can be compared against it.' },
+  { key: 'annualProgrammeCost', label: 'Annual programme cost to the employer', type: 'money', default: 0, min: 0, prefix: '₦', section: 'Programme', help: 'Setup plus annual fees. At ₦0 a return-on-investment ratio cannot be computed and there is nothing to pay back.' },
 ];
 
 /* ================================================================== */
@@ -530,13 +535,13 @@ const CALCULATORS: BusinessTool[] = [
     slug: 'earned-wage-access-roi-calculator',
     name: 'EWA ROI Calculator',
     category: 'calculators',
-    summary: 'Return on investment and annual savings from offering Earned Wage Access, modelled on replacement cost avoided.',
+    summary: 'Return on investment, savings, programme cost and payback from offering Earned Wage Access, modelled on the replacement cost of the resignations it prevents.',
     description:
-      'Models the retention case for on-demand pay: annual attrition cost equals headcount multiplied by turnover rate multiplied by the cost of replacing one employee, and an Earned Wage Access programme reduces the turnover rate by an expected percentage. The tool reports the resignations avoided, the projected annual saving, the net benefit after programme cost, and the return on investment. The turnover reduction is an input rather than a built-in constant, because it is not a regulated or guaranteed figure — and at a ₦0 programme cost the tool reports that an ROI ratio cannot be computed rather than claiming an infinite return.',
+      'Models the retention case for on-demand pay: annual attrition cost equals headcount multiplied by turnover rate multiplied by the cost of replacing one employee, and an Earned Wage Access programme reduces the turnover rate by an expected percentage across the share of the workforce that adopts it. Every assumption is adjustable — workforce size, average salary, turnover rate, replacement cost, expected turnover reduction, adoption, annual programme cost and the evaluation period. The tool reports the resignations avoided, the savings, the programme cost, the net benefit, the payback period in months and the return on investment, all over the chosen evaluation period. The turnover reduction is an input rather than a built-in constant, because it is not a regulated or guaranteed figure — and at a ₦0 programme cost the tool reports that an ROI ratio cannot be computed rather than claiming an infinite return.',
     icon: 'activity',
     path: `${BUSINESS_TOOLS_ROOT}/earned-wage-access-roi-calculator`,
     keywords: ['ewa', 'earned wage access', 'on-demand pay', 'roi', 'retention', 'turnover', 'attrition cost', 'replacement cost'],
-    units: 'Currency of your choice (₦ by default) per year; turnover and reduction rates in percent; headcount in whole employees',
+    units: 'Currency of your choice (₦ by default); rates and adoption in percent; headcount in whole employees; the evaluation period in months',
     jurisdiction: EWA_ROI_NOTE,
     printable: true,
     fields: EWA_FIELDS,

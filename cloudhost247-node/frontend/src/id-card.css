@@ -1,0 +1,469 @@
+/**
+ * Employee ID Card Generator — styles.
+ *
+ * Additive to the shared design system: colours and spacing come from the existing custom
+ * properties, and the component classes (ch247-button, bt247-field, bt247-table) are reused so the
+ * page cannot drift from the rest of CloudHost247. Only the badge workspace is defined here.
+ *
+ * The one rule worth stating: the template swatches are drawn with CSS gradients rather than images,
+ * so the picker costs nothing to download and cannot show a stale screenshot of a layout that has
+ * since changed.
+ */
+
+.idc-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 1000px) {
+  .idc-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.idc-form {
+  display: grid;
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+.idc-preview-col {
+  display: grid;
+  gap: 0.85rem;
+  min-width: 0;
+  position: sticky;
+  top: 1rem;
+}
+
+@media (max-width: 1000px) {
+  .idc-preview-col {
+    position: static;
+  }
+}
+
+/* ---------- Preview ---------- */
+
+.idc-preview {
+  display: grid;
+  gap: 0.5rem;
+  padding: 1rem;
+  border: 1px solid var(--ch-border, #e2e8f0);
+  border-radius: 14px;
+  background: var(--ch-surface, #ffffff);
+}
+
+.idc-preview__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.idc-preview__title {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.idc-preview__switch {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.idc-preview__meta {
+  margin: 0;
+  font-size: 0.8rem;
+  opacity: 0.75;
+}
+
+.idc-preview__stage {
+  position: relative;
+  width: 100%;
+  transition: max-width 0.2s ease;
+}
+
+.idc-preview__host {
+  position: relative;
+  width: 100%;
+}
+
+.idc-preview__canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 6px 24px rgba(15, 23, 42, 0.16);
+  background: #ffffff;
+}
+
+.idc-preview__overlay {
+  position: absolute;
+  inset: auto 0 0;
+  margin: 0;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.8rem;
+  text-align: center;
+  color: #475569;
+}
+
+.idc-zoom {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.idc-zoom span[aria-live] {
+  font-variant-numeric: tabular-nums;
+  min-width: 4.5rem;
+  text-align: center;
+}
+
+/* ---------- Templates ---------- */
+
+.idc-templates {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
+}
+
+.idc-template {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.5rem;
+  border: 1px solid var(--ch-border, #e2e8f0);
+  border-radius: 10px;
+  background: var(--ch-surface, #fff);
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+.idc-template[aria-checked='true'] {
+  border-color: var(--ch-primary, #155eef);
+  box-shadow: 0 0 0 2px rgba(21, 94, 239, 0.25);
+}
+
+.idc-template__swatch {
+  display: block;
+  height: 3.4rem;
+  border-radius: 6px;
+  background: #e2e8f0;
+}
+
+/* Each swatch sketches its template's structure, so the picker is a preview, not a list of names. */
+.idc-template__swatch[data-template='corporate-split'] {
+  background: linear-gradient(90deg, #155eef 0 34%, #ffffff 34% 100%);
+}
+.idc-template__swatch[data-template='modern-badge'] {
+  background: linear-gradient(180deg, #18bf63 0 12%, #111d19 12% 100%);
+}
+.idc-template__swatch[data-template='minimal-centre'] {
+  background: radial-gradient(circle at 50% 40%, #cbd5e1 0 18%, #ffffff 18% 100%);
+  border: 1px solid #e2e8f0;
+}
+.idc-template__swatch[data-template='signature-wave'] {
+  background: linear-gradient(160deg, #ffffff 0 45%, #155eef 45% 55%, #8ab4ff 55% 100%);
+}
+.idc-template__swatch[data-template='creative-panel'] {
+  background: linear-gradient(80deg, #ffffff 0 62%, #6d28d9 62% 100%);
+}
+.idc-template__swatch[data-template='startup-frame'] {
+  background: #ffffff;
+  box-shadow: inset 0 0 0 3px #0f172a;
+}
+.idc-template__swatch[data-template='gradient-edge'] {
+  background: linear-gradient(180deg, #0e7490, #22d3ee);
+}
+.idc-template__swatch[data-template='portrait-pass'] {
+  background: linear-gradient(90deg, #f8fafc 0 64%, #c81e3a 64% 100%);
+}
+.idc-template__swatch[data-template='tech-diagonal'] {
+  background: linear-gradient(135deg, #ffffff 0 50%, #155eef 50% 75%, #0b3ba8 75% 100%);
+}
+.idc-template__swatch[data-template='mono-stripe'] {
+  background: repeating-linear-gradient(90deg, #0f172a 0 6px, #334155 6px 10px, #ffffff 10px 22px);
+}
+.idc-template__swatch[data-template='executive-ribbon'] {
+  background: linear-gradient(135deg, #ffffff 0 62%, #334155 62% 82%, #155eef 82% 100%);
+}
+.idc-template__swatch[data-template='soft-geometry'] {
+  background: radial-gradient(circle at 82% 18%, #bfdbfe 0 26%, transparent 27%), radial-gradient(circle at 12% 92%, #bbf7d0 0 24%, transparent 25%), #f8fafc;
+}
+
+.idc-template__name {
+  font-weight: 600;
+  font-size: 0.86rem;
+}
+
+.idc-template__blurb {
+  font-size: 0.75rem;
+  opacity: 0.75;
+  line-height: 1.35;
+}
+
+/* ---------- Colour ---------- */
+
+.idc-presets {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.idc-preset {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.55rem;
+  border: 1px solid var(--ch-border, #e2e8f0);
+  border-radius: 8px;
+  background: var(--ch-surface, #fff);
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+}
+
+.idc-preset[aria-checked='true'] {
+  border-color: var(--ch-primary, #155eef);
+  box-shadow: 0 0 0 2px rgba(21, 94, 239, 0.25);
+}
+
+.idc-preset__chip {
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.2);
+}
+
+.idc-preset__label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.idc-preset__hex {
+  margin-left: auto;
+  font-size: 0.7rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  opacity: 0.65;
+}
+
+.idc-colors {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+  gap: 0.9rem;
+}
+
+.idc-color__row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.idc-color__row input[type='color'] {
+  width: 2.8rem;
+  height: 2.3rem;
+  padding: 0;
+  border: 1px solid var(--ch-border, #e2e8f0);
+  border-radius: 8px;
+  background: none;
+}
+
+.idc-color__hex {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  text-transform: lowercase;
+}
+
+/* ---------- Uploads ---------- */
+
+.idc-image__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.idc-image__thumb {
+  width: 3.2rem;
+  height: 3.2rem;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid var(--ch-border, #e2e8f0);
+  background: #f1f5f9;
+}
+
+.idc-image__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.idc-image__actions {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.idc-image__actions input[type='file'] {
+  max-width: 100%;
+  font-size: 0.8rem;
+}
+
+/* ---------- Messages ---------- */
+
+.idc-flash {
+  margin: 0;
+  padding: 0.6rem 0.8rem;
+  border-radius: 10px;
+  border: 1px solid var(--ch-border, #e2e8f0);
+  background: #f8fafc;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.idc-flash--ok {
+  border-color: #86efac;
+  background: #f0fdf4;
+  color: #14532d;
+}
+
+.idc-flash--warn {
+  border-color: #fcd34d;
+  background: #fffbeb;
+  color: #78350f;
+}
+
+.idc-flash--error {
+  border-color: #fca5a5;
+  background: #fef2f2;
+  color: #7f1d1d;
+}
+
+.idc-flash ul {
+  margin: 0.4rem 0 0;
+  padding-left: 1.1rem;
+}
+
+.idc-check {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.idc-check input {
+  margin-top: 0.2rem;
+}
+
+/* ---------- Tabs and panels ---------- */
+
+.idc-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.5rem 0 1rem;
+}
+
+.idc-tabpanels {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.idc-panel {
+  display: grid;
+  gap: 0.6rem;
+  padding: 1.1rem;
+  border: 1px solid var(--ch-border, #e2e8f0);
+  border-radius: 14px;
+  background: var(--ch-surface, #ffffff);
+}
+
+.idc-export__group {
+  display: grid;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--ch-border, #e2e8f0);
+}
+
+.idc-export__group h4,
+.idc-privacy h4,
+.idc-bulk__subtitle {
+  margin: 0;
+  font-size: 0.92rem;
+}
+
+.idc-radio-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  font-size: 0.88rem;
+}
+
+.idc-radio-row label {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.idc-privacy {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--ch-border, #e2e8f0);
+}
+
+.idc-privacy p {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.55;
+}
+
+/* ---------- Bulk ---------- */
+
+.idc-steps {
+  margin: 0;
+  padding-left: 1.25rem;
+  display: grid;
+  gap: 0.85rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.idc-file {
+  margin-top: 0.5rem;
+}
+
+.idc-file input[type='file'] {
+  max-width: 100%;
+}
+
+.idc-bulk__report {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.idc-bulk__summary {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.idc-bulk__progress {
+  margin: 0;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}

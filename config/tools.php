@@ -8009,8 +8009,8 @@ return array(
             'category' => 'productivity',
             'categoryLabel' => 'Productivity',
             'icon' => 'productivity',
-            'summary' => 'Decode a QR image locally. Decoded links are shown as text and are not opened automatically.',
-            'description' => 'Decode a QR image locally. Decoded links are shown as text and are not opened automatically. CloudHost247 labels estimates, missing data and unavailable probes instead of filling them in.',
+            'summary' => 'Decode a QR code with the camera or from an image file. Everything is read in the browser and decoded links are shown as text, never opened automatically.',
+            'description' => 'Decode a QR code with the device camera or from an uploaded image. The camera is optional: it is offered only where the browser exposes one, it asks for permission before it starts, and every frame is decoded on this page — no photograph, video frame or decoded value leaves the browser. Wi-Fi setup codes are split into SSID, security and passphrase; every other payload is shown as text. A decoded link is never opened automatically. CloudHost247 labels estimates, missing data and unavailable probes instead of filling them in.',
             'seoTitle' => 'QR Scanner — Free Productivity Tool | CloudHost247',
             'seoDescription' => 'Decode a QR image locally. Decoded links are shown as text and are not opened automatically. Free CloudHost247 tool for administrators, developers and website owners.',
             'keywords' => array(
@@ -8035,7 +8035,7 @@ return array(
                     'type' => 'file',
                     'placeholder' => '',
                     'required' => true,
-                    'hint' => 'Read and decoded in this browser; the image is not uploaded.',
+                    'hint' => 'Read and decoded in this browser; the image is not uploaded. The camera button appears when this browser offers one — the upload works on its own.',
                     'accept' => 'image/*'
                 )
             ),
@@ -9361,8 +9361,8 @@ return array(
             'category' => 'productivity',
             'categoryLabel' => 'Productivity',
             'icon' => 'productivity',
-            'summary' => 'Decode a Wi-Fi QR code locally. The network is not joined and the passphrase is not stored.',
-            'description' => 'Decode a Wi-Fi QR code locally. The network is not joined and the passphrase is not stored. CloudHost247 labels estimates, missing data and unavailable probes instead of filling them in.',
+            'summary' => 'Decode a Wi-Fi QR code with the camera or from an image file. The network is not joined and the passphrase is not stored.',
+            'description' => 'Decode a Wi-Fi setup QR code with the device camera or from an uploaded image and read the SSID, security type and passphrase before you join. The camera is optional and asks for permission first; the frame is decoded on this page. The network is never joined, the passphrase is never stored, and the tool refuses a code that is not a Wi-Fi setup code rather than showing its contents as though it were one. CloudHost247 labels estimates, missing data and unavailable probes instead of filling them in.',
             'seoTitle' => 'WiFi QR Scanner — Free Productivity Tool | CloudHost247',
             'seoDescription' => 'Decode a Wi-Fi QR code locally. The network is not joined and the passphrase is not stored. Free CloudHost247 tool for administrators, developers and website owners.',
             'keywords' => array(
