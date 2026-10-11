@@ -36,8 +36,10 @@ import {
   generateTd3Mrz,
   MRZ_AUTHENTICITY_NOTICE,
   parseTd3Mrz,
+  splitMrzLines,
   validateTd3Mrz,
 } from '../tools/mrz/mrz-engine';
+import { detectTdFormat, generateTdMrz, validateTdMrz } from '../tools/mrz/td-formats';
 
 export type MrzLoggingLevel = 'none' | 'errors_only' | 'minimal_operational';
 export type MrzAvailability = 'public' | 'authenticated' | 'admin_only';
@@ -279,6 +281,7 @@ export async function registerMrzToolRoutes(
       documentNumber: z.string().max(20),
       expiryDate: z.string().max(16),
       optionalData: z.string().max(30).optional(),
+      format: z.enum(['TD1', 'TD2', 'TD3']).optional(),
     })
     .strict();
 
@@ -323,7 +326,31 @@ export async function registerMrzToolRoutes(
       );
     }
 
-    const outcome = generateTd3Mrz(parsedBody.data);
+    const { format = 'TD3', ...details } = parsedBody.data;
+
+    if (format !== 'TD3') {
+      const td = generateTdMrz(format, details);
+      await recordPrivacySafeMrzAudit(request, settings, actorId, {
+        tool: 'mrz_calculator',
+        operation: 'generate',
+        success: td.ok,
+        errorCategory: td.ok ? null : 'VALIDATION_ERROR',
+      });
+      if (!td.ok) {
+        reply.code(400);
+        return { success: false, error: 'VALIDATION_ERROR', message: td.message, errors: td.errors };
+      }
+      return {
+        success: true,
+        format: td.format,
+        lines: td.lines,
+        mrz: td.mrz,
+        validation: td.validation,
+        authenticityNotice: td.validation.authenticityNotice,
+      };
+    }
+
+    const outcome = generateTd3Mrz(details);
     if (!outcome.success) {
       await recordPrivacySafeMrzAudit(request, settings, actorId, {
         tool: 'mrz_calculator',
@@ -367,6 +394,7 @@ export async function registerMrzToolRoutes(
       mrz: z.string().min(1).max(256).optional(),
       line1: z.string().min(1).max(128).optional(),
       line2: z.string().min(1).max(128).optional(),
+      line3: z.string().min(1).max(128).optional(),
     })
     .strict()
     .refine(
@@ -375,6 +403,26 @@ export async function registerMrzToolRoutes(
         (typeof data.line1 === 'string' && typeof data.line2 === 'string'),
       { message: 'Provide either "mrz" (two lines) or both "line1" and "line2".' }
     );
+
+  /**
+   * Returns the TD1 or TD2 lines when the input is one of those layouts, otherwise null so the
+   * caller keeps the TD3 path and its existing error messages.
+   */
+  function selectTdLines(data: {
+    mrz?: string;
+    line1?: string;
+    line2?: string;
+    line3?: string;
+  }): { format: 'TD1' | 'TD2'; lines: string[] } | null {
+    const lines =
+      data.mrz !== undefined
+        ? splitMrzLines(data.mrz)
+        : [data.line1 ?? '', data.line2 ?? '', ...(data.line3 !== undefined ? [data.line3] : [])].map(
+            (line) => line.trim()
+          );
+    const format = detectTdFormat(lines);
+    return format === 'TD1' || format === 'TD2' ? { format, lines } : null;
+  }
 
   const validateHandler = async (request: FastifyRequest, reply: FastifyReply) => {
     setPrivacyHeaders(reply);
@@ -419,6 +467,18 @@ export async function registerMrzToolRoutes(
       parsedBody.data.mrz !== undefined
         ? parsedBody.data.mrz
         : { line1: parsedBody.data.line1!, line2: parsedBody.data.line2! };
+    const td = selectTdLines(parsedBody.data);
+
+    if (td) {
+      const validation = validateTdMrz(td.format, td.lines);
+      await recordPrivacySafeMrzAudit(request, settings, actorId, {
+        tool: 'mrz_validator',
+        operation: 'validate',
+        success: validation.valid,
+        errorCategory: validation.valid ? null : 'MRZ_INVALID',
+      });
+      return { success: true, ...validation };
+    }
 
     const validation = validateTd3Mrz(target);
 
@@ -431,6 +491,7 @@ export async function registerMrzToolRoutes(
 
     return {
       success: true,
+      format: 'TD3',
       ...validation,
     };
   };
@@ -482,6 +543,20 @@ export async function registerMrzToolRoutes(
       parsedBody.data.mrz !== undefined
         ? parsedBody.data.mrz
         : { line1: parsedBody.data.line1!, line2: parsedBody.data.line2! };
+
+    const td = selectTdLines(parsedBody.data);
+    if (td) {
+      const validation = validateTdMrz(td.format, td.lines);
+      const parsedTd = validation.fields !== null;
+      await recordPrivacySafeMrzAudit(request, settings, actorId, {
+        tool: 'mrz_parser',
+        operation: 'parse',
+        success: parsedTd,
+        errorCategory: parsedTd ? null : 'PARSE_FAILED',
+      });
+      if (!parsedTd) reply.code(400);
+      return { success: parsedTd, ...validation };
+    }
 
     const parsed = parseTd3Mrz(target);
 

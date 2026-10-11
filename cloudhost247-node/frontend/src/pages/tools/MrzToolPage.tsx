@@ -8,6 +8,7 @@ import {
   generateTd3Mrz,
   MRZ_AUTHENTICITY_NOTICE,
   parseTd3Mrz,
+  splitMrzLines,
   validateTd3Mrz,
   type MrzAiExplanationResult,
   type MrzFieldError,
@@ -15,6 +16,14 @@ import {
   type MrzParseResult,
   type MrzValidationResult,
 } from '../../lib/mrz-engine';
+import {
+  detectTdFormat,
+  generateTdMrz,
+  validateTdMrz,
+  type TdGenerateSuccess,
+  type TdValidationResult,
+} from '../../../../src/tools/mrz/td-formats';
+import { TdResultCard } from '../../components/tools/TdResultCard';
 
 interface MrzToolConfigResponse {
   calculatorEnabled: boolean;
@@ -124,6 +133,13 @@ export default function MrzToolPage({ defaultTab }: MrzToolPageProps) {
   // CloudHost247 AI Explanation state
   const [aiExplanation, setAiExplanation] = useState<MrzAiExplanationResult | null>(null);
 
+  // TD1 (ID card) and TD2 (2×36) are generated and checked in the browser by the shared module.
+  // TD3 keeps the server-engine path above. Only one format's result is shown at a time.
+  const [mrzFormat, setMrzFormat] = useState<'TD1' | 'TD2' | 'TD3'>('TD3');
+  const [tdGenerated, setTdGenerated] = useState<TdGenerateSuccess | null>(null);
+  const [tdValidation, setTdValidation] = useState<TdValidationResult | null>(null);
+  const [tdParse, setTdParse] = useState<TdValidationResult | null>(null);
+
   function handleGenerateMrz(event: FormEvent) {
     event.preventDefault();
     setCopyFeedback('');
@@ -141,6 +157,33 @@ export default function MrzToolPage({ defaultTab }: MrzToolPageProps) {
       return;
     }
 
+    if (mrzFormat !== 'TD3') {
+      setGeneratedResult(null);
+      const td = generateTdMrz(mrzFormat, {
+        documentType,
+        issuingState,
+        surname,
+        givenNames,
+        nationality,
+        dateOfBirth,
+        sex,
+        documentNumber,
+        expiryDate,
+        optionalData,
+      });
+      if (!td.ok) {
+        setTdGenerated(null);
+        setCalculatorErrors(
+          td.errors.map((e) => ({ field: e.field, code: 'VALIDATION_ERROR', message: e.message }))
+        );
+        return;
+      }
+      setCalculatorErrors([]);
+      setTdGenerated(td);
+      return;
+    }
+
+    setTdGenerated(null);
     const outcome = generateTd3Mrz({
       documentType,
       issuingState,
@@ -182,6 +225,13 @@ export default function MrzToolPage({ defaultTab }: MrzToolPageProps) {
     setCalculatorErrors([]);
     setCopyFeedback('');
 
+    if (mrzFormat !== 'TD3') {
+      // The specimen generator builds TD3 only. Fill the form and let the user generate TD1/TD2.
+      setGeneratedResult(null);
+      setTdGenerated(null);
+      return;
+    }
+
     const outcome = generateTd3Mrz({
       documentType: specimen.fields.documentType,
       issuingState: specimen.fields.issuingState,
@@ -217,6 +267,31 @@ export default function MrzToolPage({ defaultTab }: MrzToolPageProps) {
     setInlineValidation(null);
     setCopyFeedback('');
     setAiExplanation(null);
+    setTdGenerated(null);
+  }
+
+  async function handleCopyTd(lines: string[]) {
+    const text = lines.join('\n');
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+      }
+      setCopyFeedback('Copied MRZ to clipboard.');
+    } catch {
+      setCopyFeedback('Copy ready.');
+    }
+  }
+
+  function handleDownloadTd(format: 'TD1' | 'TD2', lines: string[]) {
+    const blob = new Blob([`${lines.join('\n')}\n`], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `mrz-${format.toLowerCase()}-test.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 
   async function handleCopyMrz(line1: string, line2: string) {
@@ -254,6 +329,14 @@ export default function MrzToolPage({ defaultTab }: MrzToolPageProps) {
 
   function handleValidateMrzSubmit(event: FormEvent) {
     event.preventDefault();
+    const lines = splitMrzLines(validatorInput);
+    const format = detectTdFormat(lines);
+    if (format === 'TD1' || format === 'TD2') {
+      setValidationResult(null);
+      setTdValidation(validateTdMrz(format, lines));
+      return;
+    }
+    setTdValidation(null);
     const res = validateTd3Mrz(validatorInput);
     setValidationResult(res);
   }
@@ -261,6 +344,14 @@ export default function MrzToolPage({ defaultTab }: MrzToolPageProps) {
   function handleParseMrzSubmit(event: FormEvent) {
     event.preventDefault();
     if (!config.parserEnabled) return;
+    const lines = splitMrzLines(parserInput);
+    const format = detectTdFormat(lines);
+    if (format === 'TD1' || format === 'TD2') {
+      setParseResult(null);
+      setTdParse(validateTdMrz(format, lines));
+      return;
+    }
+    setTdParse(null);
     const res = parseTd3Mrz(parserInput);
     setParseResult(res);
   }
@@ -454,6 +545,30 @@ export default function MrzToolPage({ defaultTab }: MrzToolPageProps) {
                 )}
 
                 <form onSubmit={handleGenerateMrz} noValidate>
+                  <div style={{ marginBottom: '1rem' }}>
+                    <label htmlFor="mrz-format" style={{ display: 'block', fontWeight: 600, marginBottom: '0.35rem' }}>
+                      MRZ format
+                    </label>
+                    <select
+                      id="mrz-format"
+                      value={mrzFormat}
+                      onChange={(e) => {
+                        const next = e.target.value as 'TD1' | 'TD2' | 'TD3';
+                        setMrzFormat(next);
+                        setGeneratedResult(null);
+                        setTdGenerated(null);
+                        setCalculatorErrors([]);
+                        if (next === 'TD3' && (documentType === 'I<' || documentType === 'V<')) {
+                          setDocumentType('P<');
+                        }
+                      }}
+                      style={{ width: '100%', maxWidth: 420, padding: '0.55rem 0.7rem', border: '1px solid #cfd8e6', borderRadius: 6 }}
+                    >
+                      <option value="TD3">TD3 — passport (2 lines × 44)</option>
+                      <option value="TD1">TD1 — ID card (3 lines × 30)</option>
+                      <option value="TD2">TD2 — travel or visa document (2 lines × 36)</option>
+                    </select>
+                  </div>
                   <div
                     style={{
                       display: 'grid',
@@ -471,7 +586,13 @@ export default function MrzToolPage({ defaultTab }: MrzToolPageProps) {
                         onChange={(e) => setDocumentType(e.target.value)}
                         style={{ width: '100%', padding: '0.55rem 0.7rem', border: '1px solid #cfd8e6', borderRadius: 6 }}
                       >
-                        <option value="P<">TD3 Passport (P&lt;)</option>
+                        <option value="P<">Passport (P&lt;)</option>
+                        {mrzFormat !== 'TD3' && (
+                          <>
+                            <option value="I<">ID card (I&lt;)</option>
+                            <option value="V<">Visa (V&lt;)</option>
+                          </>
+                        )}
                         <option value="PO">Official / Service Passport (PO)</option>
                         <option value="PD">Diplomatic Passport (PD)</option>
                         <option value="PS">Stateless / Service (PS)</option>
@@ -650,6 +771,48 @@ export default function MrzToolPage({ defaultTab }: MrzToolPageProps) {
                   </div>
                 </form>
 
+                {/* TD1 / TD2 Generated MRZ Output */}
+                {tdGenerated && (
+                  <div style={{ marginTop: '1.5rem', borderTop: '1px solid var(--ch247-border)', paddingTop: '1.25rem' }}>
+                    <h3 style={{ marginTop: 0 }}>Generated {tdGenerated.format} MRZ</h3>
+                    <div
+                      aria-label="Generated MRZ Output"
+                      style={{
+                        background: '#0f172a',
+                        color: '#f8fafc',
+                        padding: '1rem 1.25rem',
+                        borderRadius: 8,
+                        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+                        fontSize: '0.98rem',
+                        letterSpacing: '0.08em',
+                        overflowX: 'auto',
+                      }}
+                    >
+                      <div style={{ color: '#94a3b8', fontSize: '0.78rem', marginBottom: '0.5rem' }}>
+                        {tdGenerated.format} — {tdGenerated.lines.length} lines × {tdGenerated.lines[0]?.length} characters — for software testing only
+                      </div>
+                      {tdGenerated.lines.map((line, index) => (
+                        <div key={index} data-testid={`mrz-td-line-${index + 1}`} style={{ fontWeight: 700, marginBottom: '0.4rem' }}>
+                          {line}
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', marginTop: '0.9rem' }}>
+                      <button type="button" className="ch247-button" onClick={() => handleCopyTd(tdGenerated.lines)}>
+                        Copy
+                      </button>
+                      <button
+                        type="button"
+                        className="ch247-button ch247-button--ghost"
+                        onClick={() => handleDownloadTd(tdGenerated.format, tdGenerated.lines)}
+                      >
+                        Download .txt
+                      </button>
+                    </div>
+                    <TdResultCard result={tdGenerated.validation} />
+                  </div>
+                )}
+
                 {/* Generated MRZ Output */}
                 {generatedResult && (
                   <div style={{ marginTop: '1.5rem', borderTop: '1px solid var(--ch247-border)', paddingTop: '1.25rem' }}>
@@ -790,7 +953,7 @@ export default function MrzToolPage({ defaultTab }: MrzToolPageProps) {
                   <div>
                     <h2 style={{ margin: 0 }}>MRZ Validator</h2>
                     <p className="ch247-page__hint" style={{ margin: '0.25rem 0 0' }}>
-                      Verify line count, 44-character line lengths, allowed characters, dates, and 7-3-1 check digits.
+                      Verify line count, line lengths, allowed characters, dates, and 7-3-1 check digits. TD3 (2 × 44), TD1 (3 × 30) and TD2 (2 × 36) are detected from the input.
                     </p>
                   </div>
                   {config.testDataEnabled && (
@@ -838,6 +1001,12 @@ export default function MrzToolPage({ defaultTab }: MrzToolPageProps) {
                     </button>
                   </div>
                 </form>
+
+                {tdValidation && (
+                  <div style={{ marginTop: '1.25rem' }}>
+                    <TdResultCard result={tdValidation} showFields={false} />
+                  </div>
+                )}
 
                 {validationResult && (
                   <div style={{ marginTop: '1.25rem' }}>
@@ -907,6 +1076,12 @@ export default function MrzToolPage({ defaultTab }: MrzToolPageProps) {
                       </button>
                     </div>
                   </form>
+                )}
+
+                {tdParse && (
+                  <div style={{ marginTop: '1.25rem' }}>
+                    <TdResultCard result={tdParse} />
+                  </div>
                 )}
 
                 {parseResult && (

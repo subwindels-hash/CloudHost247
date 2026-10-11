@@ -130,10 +130,33 @@ Verified:
 * Routes are registered (`src/routes/mrz-tools.ts`); catalogue and API tests exist
   (`tests/integration/mrz-tools-api.test.ts`, `tests/unit/mrz-tools-catalogue.test.ts`).
 
+Added (TD1/TD2, ICAO Doc 9303 Part 5):
+* `src/tools/mrz/td-formats.ts` is a pure module. One table of field positions per format drives
+  validation, field extraction and generation. Formats: TD1 (ID card, 3×30) and TD2 (2×36).
+* Check digits use the same 7-3-1 function as TD3. The composite covers the ICAO character ranges.
+  Impossible dates are rejected even when the check digit matches.
+* Name handling: diacritics are transliterated, spaces and hyphens become `<`, and names that do
+  not fit the format are refused rather than truncated.
+* Generation validates its own output before returning it. If that validation fails, the response
+  is an error, not a partial MRZ.
+* Routes: `/api/tools/mrz/generate` accepts `format` (TD1, TD2, TD3; TD3 default). `validate` and
+  `parse` detect the layout from the lines and accept `line3`. TD3 keeps its existing response shape.
+  TD1/TD2 responses include `format`.
+* Frontend: `MrzToolPage.tsx` has an MRZ format selector and a shared `TdResultCard`. The page
+  imports the TD1/TD2 module from `src/tools`, the same pattern as the ID-card page.
+* Tests: `tests/unit/td-formats.test.ts` (ICAO TD1 and TD2 specimens, corrupted check digits,
+  name handling, generation round-trip) and `tests/integration/mrz-td-formats-api.test.ts`.
+
+Limits:
+* A passing MRZ check shows internal consistency only. Every TD1/TD2 result carries the
+  `MRZ_AUTHENTICITY_NOTICE`. The output does not verify that a document is genuine.
+* Not implemented: MRZ-OCR, and TD1 generation of optional data on line 2. Generation writes
+  TD1 optional data (15 characters) to line 1 and fills line 2's optional field with `<`.
+  Parsing and validation read both optional fields.
+* Browser-level testing of the MRZ page controls has not been run in this pass.
+
 Gaps:
-* **Only TD3 (passport, 2×44) is implemented.** TD1 (ID cards, 3×30) and TD2 (2×36) are not
-  supported. The brief requires supported formats to be stated; the tool currently states TD3 only.
-* Visible controls in the MRZ page were not individually exercised in a browser.
+* Visible MRZ page controls were not individually exercised in a browser.
 
 ### 3.5 Compliance Tools (`/tools/compliance-documents`)
 
@@ -146,7 +169,7 @@ Page and test exist (`frontend/src/pages/tools/ComplianceDocumentsPage.tsx`,
 2. Run the PHP catalogue suite in CI for the four new tools (done in code; PHP not run locally).
    Name Checker remains open.
 3. Add browser end-to-end tests (Playwright) for the ID-card flow, the business tools and MRZ.
-4. Add TD1 and TD2 MRZ support, or document TD3-only as the supported scope in the UI.
+4. (Done) TD1 and TD2 MRZ support. Browser-test the MRZ page controls in the E2E pass.
 5. Name Checker: decide the data source and rate-limit policy, or document as unavailable.
 6. Staging deployment of the production build and screenshots of the principal flows.
 7. PHP suites: run in CI on this branch (not available in this sandbox).
