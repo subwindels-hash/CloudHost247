@@ -510,6 +510,12 @@ export const NAV_SECTIONS: RegistrySection[] = [
     "blurb": "Inspect, troubleshoot and build — every result reports what was actually queried and what it cannot tell you.",
     "to": "/tools",
     "toolsDriven": true,
+    "featured": {
+      "title": "Business Tools",
+      "body": "Payroll, tax, contract and document tools: 5 calculators, 12 generators and 4 provider comparisons, all running in your browser.",
+      "to": "/tools/business-tools",
+      "ctaLabel": "Open Business Tools"
+    },
     "groups": []
   },
   {
@@ -889,6 +895,10 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
       {
         "label": "Compliance & Document Tools",
         "to": "/tools/compliance-documents"
+      },
+      {
+        "label": "Business Tools",
+        "to": "/tools/business-tools"
       },
       {
         "label": "MRZ Generator",
@@ -1431,6 +1441,10 @@ export const SPA_ROUTE_PATTERNS: string[] = [
   "/support/:id",
   "/tools",
   "/tools/*",
+  "/tools/business-tools",
+  "/tools/business-tools/:tool",
+  "/tools/business-tools/mrz-generator",
+  "/tools/business-tools/mrz-parser",
   "/tools/category/:category",
   "/tools/document",
   "/tools/document/mrz",
@@ -1538,6 +1552,7 @@ export const PUBLIC_DOC_ROUTES: string[] = [
 
 /** Public tool routes taken from the live tool catalogue; account-only tools are excluded. */
 export const PUBLIC_TOOL_ROUTES: string[] = [
+  "/tools/business-tools",
   "/tools/developer/email-header",
   "/tools/developer/encoding",
   "/tools/developer/http-headers",
