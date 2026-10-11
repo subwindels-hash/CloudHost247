@@ -21,6 +21,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import jsQR from 'jsqr';
 import {
   BUSINESS_TOOLS,
   BUSINESS_TOOL_COUNTS,
@@ -97,6 +98,51 @@ function resultOf(outcome: { ok: boolean; result?: BusinessToolResult; error?: {
 function errorMessage(outcome: { ok: boolean; error?: { message: string } }): string {
   if (outcome.ok) throw new Error('Expected a failure but the tool succeeded.');
   return outcome.error ? outcome.error.message : '';
+}
+
+/**
+ * Decode the QR symbol embedded in a generated card SVG — the same round trip a phone camera
+ * performs on the printed badge. Parses the row-run path the encoder emitted, renders the dark
+ * modules into a bitmap with a four-module quiet zone, and hands it to the jsqr decoder used by
+ * the Tools Center QR scanner. Returns null when the SVG carries no QR symbol.
+ */
+function decodeQrFromSvg(svg: string): string | null {
+  const payloadMatch = svg.match(/data-qr-payload="([^"]*)"/);
+  const pathMatch = svg.match(/<g class="bt247-qr"[\s\S]*?<path d="([^"]+)"/);
+  if (!payloadMatch || !pathMatch) return null;
+  const payload = payloadMatch[1]
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&amp;/g, '&');
+  let size = 0;
+  const runs: Array<{ x: number; y: number; w: number }> = [];
+  for (const m of pathMatch[1].matchAll(/M(\d+) (\d+)h(\d+)v1h-\d+z/g)) {
+    const x = Number(m[1]);
+    const y = Number(m[2]);
+    const w = Number(m[3]);
+    runs.push({ x, y, w });
+    size = Math.max(size, x + w, y + 1);
+  }
+  if (size === 0) return null;
+  const quiet = 4;
+  const scale = 4;
+  const dim = (size + quiet * 2) * scale;
+  const bitmap = new Uint8ClampedArray(dim * dim * 4).fill(255);
+  for (const { x, y, w } of runs) {
+    for (let dy = 0; dy < scale; dy += 1) {
+      for (let dx = 0; dx < w * scale; dx += 1) {
+        const offset = (((y * scale + dy) + quiet * scale) * dim + (x * scale + dx) + quiet * scale) * 4;
+        bitmap[offset] = 0;
+        bitmap[offset + 1] = 0;
+        bitmap[offset + 2] = 0;
+        bitmap[offset + 3] = 255;
+      }
+    }
+  }
+  const decoded = jsQR(bitmap, dim, dim);
+  return decoded ? decoded.data : null;
 }
 
 describe('Business Tools — inventory', () => {
@@ -1080,6 +1126,25 @@ describe('Generator 8 — Business Card', () => {
     expect(result.document?.content).toContain('Hosting that answers');
     expect(result.tables?.[0]?.rows.find((row) => row.label === 'Layout')?.cells[0]).toBe('Split');
   });
+
+  it('embeds a real, decodable vCard QR by default and omits it when turned off', () => {
+    const card = resultOf(computeBusinessCard({
+      fullName: 'Ada Obi', jobTitle: 'Payroll Lead', companyName: 'CloudHost247',
+      email: 'ada@cloudhost247.test', phone: '+2348012345678', website: 'cloudhost247.test',
+      address: '1 Marina, Lagos',
+    }));
+    const decoded = decodeQrFromSvg(card.document?.content ?? '');
+    expect(decoded).toContain('BEGIN:VCARD');
+    expect(decoded).toContain('VERSION:3.0');
+    expect(decoded).toContain('FN:Ada Obi');
+    expect(decoded).toContain('ORG:CloudHost247');
+    expect(decoded).toContain('EMAIL;TYPE=WORK:ada@cloudhost247.test');
+    expect(card.tables?.[0]?.rows.find((row) => row.label === 'vCard QR')?.cells[0]).toMatch(/Included/);
+
+    const plain = resultOf(computeBusinessCard({ fullName: 'Ada Obi', includeQr: false }));
+    expect(plain.document?.content).not.toContain('bt247-qr');
+    expect(plain.tables?.[0]?.rows.find((row) => row.label === 'vCard QR')?.cells[0]).toBe('Omitted');
+  });
 });
 
 describe('Generator 9 — Employee ID', () => {
@@ -1158,10 +1223,19 @@ describe('Generator 10 — Employee ID Card', () => {
     expect(resultOf(computeEmployeeIdCard({ ...base, expiryDate: '2025-01-01' })).warnings?.some((warning) => /not after the issue date/i.test(warning))).toBe(true);
   });
 
-  it('marks the QR block as a placeholder rather than claiming a scannable code', () => {
-    const result = resultOf(computeEmployeeIdCard({ ...base, includeQr: true }));
-    expect(result.warnings?.some((warning) => /not a scannable code/i.test(warning))).toBe(true);
-    expect(result.tables?.[0]?.rows.find((row) => row.label === 'QR payload block')?.cells[0]).toMatch(/placeholder, not scannable/i);
+  it('embeds a real, decodable QR of the employee ID, and none when the option is off', () => {
+    const withQr = resultOf(computeEmployeeIdCard({ ...base, includeQr: true }));
+    expect(decodeQrFromSvg(withQr.document?.content ?? '')).toBe('CH247-OPS-2026-0001-8');
+    expect(withQr.tables?.[0]?.rows.find((row) => row.label === 'QR code')?.cells[0]).toMatch(/scannable QR/i);
+
+    const withoutQr = resultOf(computeEmployeeIdCard(base));
+    expect(withoutQr.document?.content).not.toContain('bt247-qr');
+    expect(withoutQr.tables?.[0]?.rows.find((row) => row.label === 'QR code')?.cells[0]).toBe('Omitted');
+  });
+
+  it('encodes the employee name when no ID was supplied', () => {
+    const result = resultOf(computeEmployeeIdCard({ ...base, includeQr: true, employeeId: '' }));
+    expect(decodeQrFromSvg(result.document?.content ?? '')).toBe('NAME:Ada Obi');
   });
 
   it('always states that the tool verifies nothing about the holder', () => {
