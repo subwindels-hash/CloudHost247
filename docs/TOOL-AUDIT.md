@@ -229,6 +229,7 @@ Every item below was found by reading or running the code, not by looking at a p
 | 6 | The QR scanner could only read an uploaded image | The brief's camera requirement was unmet | Camera capture with permission handling, one shared decoder, honest refusal states | local.test.mjs frame decoder driven with real QR pixels |
 | 7 | EWA ROI did not expose adoption, evaluation period or payback | Three of the brief's required assumptions and one required output were missing | Added, with the arithmetic printed and warnings when a result is unfavourable | 7 new assertions |
 | 8 | No test asserted that navigation links resolve | Dead links could ship unnoticed (and one did) | Link-integrity test over the whole registry projection | `navigation-links.test.ts` |
+| 9 | **All twenty-one business tools and the compliance hub were served with HTTP 404** (`X-Robots-Tag: noindex`, SPA shell inside) | The pages rendered perfectly in a browser while every crawler, uptime check and link checker was told the URL did not exist — invisible in a renderer test, and exactly the kind of "the page loads so the route is fine" assumption the brief warns about | `resolveToolPage()` now resolves the business-tool paths and the collection hub, so the not-found handler serves them with 200 and their own titles; a genuinely unknown `/tools/...` URL still 404s and an API path still answers JSON | `tool-page-status.test.ts` — asks the built app over HTTP for the catalogue, the categories, the hub, all twenty-one business tools, a bogus tools URL and a bogus API path |
 
 ### Earlier work in this branch that this audit relies on
 
@@ -248,6 +249,7 @@ a QR containing a URL is a link and not a verification service.
 | Business tools engines (21 tools) | `cd cloudhost247-node && npx vitest run tests/unit/business-tools-engines.test.ts` | **196 passed** |
 | Employee ID Card engine + page | `npx vitest run tests/unit/employee-id-card.test.ts frontend/tests/unit/id-card-generator-page.test.tsx` | **72 + 13 passed** |
 | Navigation link integrity | `npx vitest run tests/integration/navigation-links.test.ts` | **5 passed** |
+| Tool page HTTP status | `npx vitest run tests/integration/tool-page-status.test.ts` | **6 passed** (and re-checked against the running preview server: 200 with the right titles) |
 | Whole Vitest suite | `npm test` | **143 files, 1 999 assertions, 0 failed, exit 0** — 29.6 minutes, on the tree that carries the ID-card rebuild, the EWA assumptions, the QR camera and the navigation work; the four commits after it touch only the tests and routes listed in the rows above, which were re-run individually (404 + 5 + 5 assertions) |
 | Browser-only PHP tools | `node --test tests/tools/local.test.mjs` | **1 passed** (all assertions, incl. the QR frame decoder) |
 | Compliance wording | `node --test tests/tools/compliance-tools.test.mjs` | **72 passed** |
