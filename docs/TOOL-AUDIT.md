@@ -248,7 +248,7 @@ a QR containing a URL is a link and not a verification service.
 | Business tools engines (21 tools) | `cd cloudhost247-node && npx vitest run tests/unit/business-tools-engines.test.ts` | **196 passed** |
 | Employee ID Card engine + page | `npx vitest run tests/unit/employee-id-card.test.ts frontend/tests/unit/id-card-generator-page.test.tsx` | **72 + 13 passed** |
 | Navigation link integrity | `npx vitest run tests/integration/navigation-links.test.ts` | **5 passed** |
-| Whole Vitest suite | `npm test` | long-running; see §7 for exactly what was and was not covered |
+| Whole Vitest suite | `npm test` | **143 files, 1 999 assertions, 0 failed, exit 0** — 29.6 minutes, on the tree that carries the ID-card rebuild, the EWA assumptions, the QR camera and the navigation work; the four commits after it touch only the tests and routes listed in the rows above, which were re-run individually (404 + 5 + 5 assertions) |
 | Browser-only PHP tools | `node --test tests/tools/local.test.mjs` | **1 passed** (all assertions, incl. the QR frame decoder) |
 | Compliance wording | `node --test tests/tools/compliance-tools.test.mjs` | **72 passed** |
 | MRZ cross-check | `python3 tests/tools/mrz-crosscheck.py` | **all specimens verified** |
@@ -274,7 +274,7 @@ These are stated plainly because the alternative — marking them green — is w
 |---|---|---|
 | Any PHP execution (the 116-tool shell, `tests/tools/run.php`, PHP lint) | No PHP binary is installed in this sandbox and the package mirrors are not reachable from it | `independent-foundation.yml` runs PHP 7.4 and 8.2 with the full PHP behaviour suites; the staging host runs the same |
 | DNS/IP/WHOIS tools against live resolvers | Sandbox egress: TLS to all resolvers except `dns.google` is reset before the handshake | Staging — the DoH provider loop, the SSRF guard and the rate limiter are all exercised there |
-| Full Vitest suite, final commit | The suite takes over twenty minutes and was run against the tree from before the last three commits; the suites those commits touch (navigation links, the compliance hub, marketing pages, the header, type check, production build) were re-run individually afterwards and pass. A single full run on the final commit belongs in CI | `npm test` in CI |
+| Full Vitest suite, exact final commit | The full run in §6 finished green (1 999 assertions, 29.6 minutes) on a tree four commits behind the branch tip. Those four commits add two test files, one page, one route and regenerated navigation data; each affected suite was re-run individually and passes, but a single full run naming the tip commit belongs in CI | `npm test` in CI, and `/tmp/full-final.log` in this session |
 | Real camera capture | The sandbox has no camera; the decoder is tested with real QR pixels instead | Manual pass on a device — the permission-refusal, no-camera and camera-busy paths are all reachable by denying the prompt |
 | Physical scanner hardware | Outside what a test runner can assert | The Downloads section of the ID-card page states the print scale; the decode is verified against `jsqr` |
 
