@@ -269,7 +269,12 @@ a QR containing a URL is a link and not a verification service.
 | Navigation link integrity | `npx vitest run tests/integration/navigation-links.test.ts` | **5 passed** |
 | Tool page HTTP status | `npx vitest run tests/integration/tool-page-status.test.ts` | **6 passed** (and re-checked against the running preview server: 200 with the right titles) |
 | Tools engine hardening | `python3 -m unittest tests.tools.test_static` | **26 passed** (20 pre-existing + 6 new hardening invariants) |
-| Whole Vitest suite | `npm test` | **143 files, 1 999 assertions, 0 failed, exit 0** — 29.6 minutes, on the tree that carries the ID-card rebuild, the EWA assumptions, the QR camera and the navigation work; the four commits after it touch only the tests and routes listed in the rows above, which were re-run individually (404 + 5 + 5 assertions) |
+| Production build | `cd cloudhost247-node && npm run build` | **exit 0** — catalogue check, `tsc -p tsconfig.json`, the frontend bundle and the tools bundle all built (`/tmp/build-final.log`) |
+| Type check (= `npm run lint`) | `npx tsc -p tsconfig.json --noEmit` | clean |
+| Tool manifest validation | `npm run catalog:validate` | 52 manifests, **0 invalid**, 23 categories |
+| Retired-brand audit (repository-wide) | `python3 scripts/branding-audit.py` | **PASSED**, 7 440 text files, 0 matches |
+| Generated-surface gate | `bash scripts/release-candidate-check.sh` | whitespace, site generation and the stale-surface diff pass; stops at `xargs: php: No such file or directory` (no PHP binary here) |
+| Whole Vitest suite | `npm test` | **146 files, 2 015 assertions, 0 failed, exit 0** — 30.4 minutes, run after the last source change on this branch (log: `/tmp/full-tip.log` in the session; the earlier intermediate run on the same tree reported 143 files / 1 999 assertions, also green) |
 | Browser-only PHP tools | `node --test tests/tools/local.test.mjs` | **1 passed** (all assertions, incl. the QR frame decoder) |
 | Compliance wording | `node --test tests/tools/compliance-tools.test.mjs` | **72 passed** |
 | MRZ cross-check | `python3 tests/tools/mrz-crosscheck.py` | **all specimens verified** |
@@ -295,9 +300,10 @@ These are stated plainly because the alternative — marking them green — is w
 |---|---|---|
 | Any PHP execution (the 116-tool shell, `tests/tools/run.php`, PHP lint) | No PHP binary is installed in this sandbox and the package mirrors are not reachable from it | `independent-foundation.yml` runs PHP 7.4 and 8.2 with the full PHP behaviour suites; the staging host runs the same |
 | DNS/IP/WHOIS tools against live resolvers | Sandbox egress: TLS to all resolvers except `dns.google` is reset before the handshake | Staging — the DoH provider loop, the SSRF guard and the rate limiter are all exercised there |
-| Full Vitest suite, exact final commit | The full run in §6 finished green (1 999 assertions, 29.6 minutes) on a tree four commits behind the branch tip. Those four commits add two test files, one page, one route and regenerated navigation data; each affected suite was re-run individually and passes, but a single full run naming the tip commit belongs in CI | `npm test` in CI, and `/tmp/full-final.log` in this session |
+| Platform financial and authorization invariant scripts (`npm run verify:financial`, `npm run verify:authorization`) | Both need a PostgreSQL at `127.0.0.1:55432`; no database is running in this sandbox, so they stop with `ECONNREFUSED` before exercising anything | Staging, against the staging database |
 | Real camera capture | The sandbox has no camera; the decoder is tested with real QR pixels instead | Manual pass on a device — the permission-refusal, no-camera and camera-busy paths are all reachable by denying the prompt |
 | Physical scanner hardware | Outside what a test runner can assert | The Downloads section of the ID-card page states the print scale; the decode is verified against `jsqr` |
+| Screenshots and screen recordings of the principal flows | No browser binary is installed here, and Playwright's browser downloads are not reachable from this sandbox (only npm, PyPI and GitHub are). `tests/tools/browser.cjs` already drives Chromium over the built site and captures at eight widths — it simply has nothing to drive | Staging: `CH247_QA_URL=<staging> node tests/tools/browser.cjs`, plus a device recording of the ID-card flow. The rendered evidence that *does* exist in this branch is the contact sheets below — every ID-card template, rendered by the real engine |
 
 ---
 
@@ -312,6 +318,7 @@ These are stated plainly because the alternative — marking them green — is w
 | Live tool verification transcript (real API responses) | `docs/independent-rebuild/LIVE-TOOL-VERIFICATION.md` |
 | Tool inventory tables (shell, app, addon) | §1 and §4 of this document; the app's catalogue also publishes `/api/tools/catalog` |
 | Contact sheets (every ID-card template rendered) | `docs/id-card/template-contact-sheet.png`, `…-portrait.png`, `…-landscape.png` |
+| Screenshots and recordings of the principal flows | **not produced here** — no browser binary and no camera; see §7. The contact sheets above are real renders of the engine's output, and the harness that captures the browser evidence is committed |
 | Source and tests | this branch, commits listed by `git log --oneline` |
 | Branch state | The branch already carried one earlier commit (`d2badaa`, an ID-card snapshot from 13:48 on the same base) whose tree names the page `EmployeeIdCardPage.tsx` and the engine test `id-card-engine.test.ts`. This session's tree names them `IdCardGeneratorPage.tsx` and `employee-id-card.test.ts` and is the state that has been type-checked, built and run through the suites. The two were **not** content-merged — that would have put two ID-card pages and two engine test files in one tree — so the earlier commit is kept in history by an `ours` merge and the tested tree is what the branch serves. Nothing was deleted from history. |
 
@@ -359,14 +366,12 @@ These are stated plainly because the alternative — marking them green — is w
 |---:|---|---|---|
 | 1 | PHP behaviour suites have not been run against this branch | The 116-tool shell is the largest surface and its tests need PHP | Run `php tests/tools/run.php` and the other PHP suites in CI or staging |
 | 2 | Live DNS/IP verification | The brief explicitly forbids reporting simulated results as live measurements | Run the DNS/IP tools from staging against real resolvers |
-| 3 | Full Vitest suite result on the final commit | The audit must reflect the shipped tree | `npm test` in CI |
-| 4 | Production build | The SPA must build with the new page and route | `npm run build` (run here; see §7) |
-| 5 | Manual device pass for the ID card and the QR camera | Camera permission flows and printed output cannot be asserted in a headless runner | A device pass with the checklist in `docs/independent-rebuild/EMPLOYEE-ID-CARD-GENERATOR.md` §10 |
-| 6 | Browser QA pass (widths 320–1440, axe accessibility, overflow) | The repository already ships the harness — `tests/tools/browser.cjs` drives Chromium over the built site at eight widths and runs axe; it is not wired into CI and no browser is installed here. `docs/website-rebuild/PASS-2026-10-08.md` §5 already lists it as gated on staging | Run `node tests/tools/browser.cjs` against the staging build (it needs Playwright, `@axe-core/playwright` and `CH247_QA_URL`), then the same for `tests/website/browser.cjs` |
+| 3 | Manual device pass for the ID card and the QR camera | Camera permission flows and printed output cannot be asserted in a headless runner | A device pass with the checklist in `docs/independent-rebuild/EMPLOYEE-ID-CARD-GENERATOR.md` §10 |
+| 4 | Browser QA pass (widths 320–1440, axe accessibility, overflow) | The repository already ships the harness — `tests/tools/browser.cjs` drives Chromium over the built site at eight widths and runs axe; it is not wired into CI and no browser is installed here. `docs/website-rebuild/PASS-2026-10-08.md` §5 already lists it as gated on staging | Run `node tests/tools/browser.cjs` against the staging build (it needs Playwright, `@axe-core/playwright` and `CH247_QA_URL`), then the same for `tests/website/browser.cjs` |
 
-Until those five are cleared, the honest status of this branch is: **the Node platform and the SPA
-are verified; the PHP shell is verified structurally and by its existing suites but not executed
-here; nothing is deployed to production.**
+Two rows that used to sit in this table are now cleared and are recorded in §6: the production build exits 0 on this tree, and the full Vitest suite passes on it (146 files, 2 015 assertions, exit 0).
+
+Until the four that remain are cleared, the honest status of this branch is: **the Node platform, the SPA and the first-party PHP engine are verified as far as this environment allows — the PHP suites have not been executed here, live resolvers other than Google's DoH are unreachable from this sandbox, the financial-invariant scripts need a database, and no device or browser pass has been run; nothing is deployed to production.**
 
 ---
 
