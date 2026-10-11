@@ -1424,6 +1424,15 @@ const newTools: ToolCatalogEntry[] = [
     keywords: ['ipv6', 'ula', 'unique local', 'rfc 4193', 'private', 'generator'],
   },
   {
+    slug: 'email-verifier', name: 'Email Verifier', category: 'dns',
+    summary: 'Check an address’s syntax and whether its domain accepts mail, using DNS only.',
+    description: 'Validates the syntax of an email address, then queries the domain’s MX records (including null MX and the implicit address fallback) and checks that the mail hosts resolve. It does not contact the recipient’s mail server, so it cannot confirm that a mailbox exists.',
+    icon: 'mail', path: '/tools/dns/email-verifier', apiPath: '/api/tools/email-verifier',
+    methods: ['POST'], authRequired: false, visibility: 'public', rateLimitProfile: 'standard', cacheSeconds: 0, timeoutMs: 15_000,
+    notes: ['Mailbox existence is not checked. Probing a recipient server (RCPT TO) is unreliable, often blocked, and can be used to harvest addresses, so it is not offered.'],
+    keywords: ['email verifier', 'email validation', 'mx', 'mail routing', 'syntax', 'deliverability'],
+  },
+  {
     slug: 'ipv6-compatibility-checker', name: 'IPv6 Compatibility Checker', category: 'dns',
     summary: 'Check whether a domain publishes IPv6 (AAAA) addresses.',
     description: 'Queries AAAA and A records for a domain through the configured resolver and reports whether IPv6 addresses are published. An AAAA record confirms the DNS publication only; it does not prove that the server accepts IPv6 connections.',
@@ -1474,7 +1483,7 @@ export const TOOL_CATALOG: readonly ToolCatalogEntry[] = allTools.map(tool => {
     'mrz-generator': ['/tools/document/mrz', '/tools/document/mrz-parser', '/tools/mrz-parser'],
   };
   const categories = [({ dns: 'dns-domains', domain: 'dns-domains', ip: 'ip-network', network: 'ip-network', webmaster: 'website', productivity: 'utilities', diagnostics: 'utilities' } as Record<string,string>)[tool.category] ?? tool.category];
-  if (['mx-lookup','spf-checker','dkim-checker','dmarc-checker','dmarc-generator','bimi-checker','smtp-tester','email-header'].includes(tool.slug)) categories.push('email');
+  if (['mx-lookup','spf-checker','dkim-checker','dmarc-checker','dmarc-generator','bimi-checker','smtp-tester','email-header','email-verifier'].includes(tool.slug)) categories.push('email');
   if (tool.slug === 'ssl-checker') categories.push('ssl');
   if (['http-headers','server-os','broken-links','open-graph'].includes(tool.slug)) categories.push('website');
   if (['subnet-calculator','ip-converters','time-card'].includes(tool.slug)) categories.push('calculators');

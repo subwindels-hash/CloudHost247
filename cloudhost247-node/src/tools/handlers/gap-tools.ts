@@ -10,6 +10,8 @@ import { dnsLookup } from '../dns/lookup';
 import { convertMinecraftCodes, MINECRAFT_CODES, type MinecraftMode } from '../gaming/minecraft';
 import { computeRaid, RAID_LEVELS, RaidInputError, type RaidLevel } from '../productivity/raid';
 import { classifyIpv6, generateUla } from '../ip/ipv6-tools';
+import { classifyEmailRouting, MAILBOX_NOT_VERIFIED, validateEmailSyntax } from '../email/verify';
+import { mxLookup } from '../dns/lookup';
 import type { ToolHandler } from './kit';
 import { maybeStr, num, oneOf, str, targetLabel } from './kit';
 
@@ -63,6 +65,34 @@ export const gapHandlers: Record<string, ToolHandler> = {
       ...classification,
       aaaaQuery: { rcode: aaaa.rcode, resolver: aaaa.resolver, durationMs: aaaa.durationMs, warnings: aaaa.warnings },
       aQuery: { rcode: a.rcode, resolver: a.resolver, durationMs: a.durationMs, warnings: a.warnings },
+    };
+  },
+};
+
+export const emailGapHandlers: Record<string, ToolHandler> = {
+  'email-verifier': async (input, context) => {
+    const email = str(input, 'email', { required: true, max: 320 });
+    const syntax = validateEmailSyntax(email);
+    if (!syntax.ok) {
+      return { email, syntax, verdict: 'INVALID_SYNTAX', routing: null, mailboxVerified: false, note: MAILBOX_NOT_VERIFIED };
+    }
+    const resolverId = maybeStr(input, 'resolverId');
+    const mx = await mxLookup(context.db, { domain: syntax.domain, resolverId, checkPort25: false });
+    const classification = classifyEmailRouting(mx);
+    return {
+      email,
+      syntax,
+      verdict: classification.verdict,
+      routing: {
+        explanation: classification.explanation,
+        records: mx.records,
+        implicitMx: mx.implicitMx,
+        hosts: mx.hosts.map((host) => ({ host: host.host, priority: host.priority, addresses: host.addresses, provider: host.provider })),
+        resolver: mx.resolver,
+        warnings: mx.warnings,
+      },
+      mailboxVerified: false,
+      note: MAILBOX_NOT_VERIFIED,
     };
   },
 };

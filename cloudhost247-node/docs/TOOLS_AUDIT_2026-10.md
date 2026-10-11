@@ -15,7 +15,8 @@ open work, not hidden defects.
 | `npm run typecheck` (server) | Pass | |
 | `tsc -p frontend/tsconfig.json --noEmit` | Pass | |
 | `npx vitest run` (full suite), before this change | **Pass** — 145 files passed, 1 skipped; 2,009 tests passed, 6 skipped; exit 0 | Takes about 20 minutes on this runner |
-| `npx vitest run` (full suite), after the four new tools | **Pass** — 147 files, 2,056 tests, none skipped; exit 0 | The previously skipped tool-page HTTP status test runs once the production build has created the SPA shell |
+| `npx vitest run` (full suite), after the four new tools | **Pass** — 147 files, 2,056 tests, none skipped; exit 0 |
+| `npx vitest run` (full suite), after Email Verifier | **Pass** — 148 files, 2,086 tests; exit 0 | Includes `tests/unit/email-verifier.test.ts` (syntax, routing verdicts, handler) | The previously skipped tool-page HTTP status test runs once the production build has created the SPA shell |
 | `tests/unit/gap-tools.test.ts` | Pass — 37 tests | Minecraft codes, RAID layouts and invalid input, RFC 4193 layout, IPv6 classification, resolver failure propagation, catalogue wiring |
 | `npm run build` (catalogue check, server, frontend, tools bundle) | Pass | |
 | `npm audit --omit=dev --audit-level=high` | Pass — 0 vulnerabilities | |
@@ -112,7 +113,7 @@ Gaps found by comparison with the reference:
 | Google PageRank | **Not implementable** | Google discontinued public PageRank data. Document as unavailable; do not fake results. |
 | Credit Card Checker | **Deliberately excluded** | The repository's BIN checker explicitly refuses full card numbers. Keep this boundary; do not add Luhn validation of full PANs. |
 | HTACCESS / URL rewrite generator | Covered | Inside `url-tools` (Multi-URL opener, rewrite and .htaccess generators). |
-| Email Verifier | **Missing** | No catalogue entry. `email-header` (header analysis) and `smtp-tester` (SMTP test) do not verify mailbox addresses. Add as a separate tool with an honest-dependency statement. |
+| Email Verifier | **Implemented, DNS-only** (`email-verifier`) | Syntax rules (RFC 5321/5322 dot-atom; quoted local parts reported as unsupported), then MX routing: accepts mail, null MX (RFC 7505), implicit MX fallback, unresolvable MX. **Mailbox existence is not checked** — that needs an SMTP RCPT probe, which is unreliable, often blocked and abusable, so it is not offered. Every result says so. |
 
 The four implemented tools added catalogue entries, so `modules/addons/cloudhost247_theme/resources/tools.json`
 was regenerated with `npm run tools:catalog` (74 entries; `--check` verified). The PHP catalogue
@@ -143,10 +144,10 @@ Page and test exist (`frontend/src/pages/tools/ComplianceDocumentsPage.tsx`,
 
 1. Capture the full live SalarioPay directory and confirm the 12 generators and 4 comparisons.
 2. Run the PHP catalogue suite in CI for the four new tools (done in code; PHP not run locally).
-   Email Verifier and Name Checker remain open.
+   Name Checker remains open.
 3. Add browser end-to-end tests (Playwright) for the ID-card flow, the business tools and MRZ.
 4. Add TD1 and TD2 MRZ support, or document TD3-only as the supported scope in the UI.
-5. Name Checker and Email Verifier: decide the data source and rate-limit policy, or document as unavailable.
+5. Name Checker: decide the data source and rate-limit policy, or document as unavailable.
 6. Staging deployment of the production build and screenshots of the principal flows.
 7. PHP suites: run in CI on this branch (not available in this sandbox).
 

@@ -157,6 +157,9 @@ export const TOOL_FORMS: Record<string, ToolForm> = {
   'ipv6-address-generator': { method: 'POST', intro: 'Generates a random RFC 4193 unique local address prefix for private networks. These addresses are not routed on the public internet.', fields: [
     { name: 'subnetId', label: 'Subnet ID (hex, optional)', type: 'text', placeholder: '0000', help: '1 to 4 hexadecimal digits.' },
   ] },
+  'email-verifier': { method: 'POST', intro: 'Checks an address’s syntax and whether its domain publishes mail routing. It does not contact the recipient’s mail server, so it cannot confirm that the mailbox exists.', fields: [
+    { name: 'email', label: 'Email address', type: 'text', required: true, placeholder: 'name@example.com' },
+  ] },
   'ipv6-compatibility-checker': { method: 'POST', intro: 'Checks whether a domain publishes IPv6 (AAAA) addresses. This confirms DNS publication only, not that the server answers over IPv6.', fields: [
     { name: 'domain', label: 'Domain', type: 'text', required: true, placeholder: 'example.com' },
   ] },

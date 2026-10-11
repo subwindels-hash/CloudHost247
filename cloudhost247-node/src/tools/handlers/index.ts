@@ -12,7 +12,7 @@ import { developerWebmasterHandlers, developerWebmasterTargets } from './develop
 import { securityDomainHandlers, securityDomainTargets } from './security-domain';
 import { productivityHandlers, productivityTargets } from './productivity';
 import { documentHandlers, documentTargets } from './document';
-import { gapHandlers, gapTargets } from './gap-tools';
+import { emailGapHandlers, gapHandlers, gapTargets } from './gap-tools';
 import type { ToolHandler } from './kit';
 
 export * from './kit';
@@ -25,6 +25,7 @@ export const TOOL_HANDLERS: Record<string, ToolHandler> = {
   ...productivityHandlers,
   ...documentHandlers,
   ...gapHandlers,
+  ...emailGapHandlers,
 };
 
 /** Safe target labels for history/audit rows; tools without a natural target return null. */

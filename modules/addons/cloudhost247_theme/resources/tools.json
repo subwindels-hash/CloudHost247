@@ -1873,6 +1873,32 @@
       "resultMode": "calculated"
     },
     {
+      "slug": "email-verifier",
+      "name": "Email Verifier",
+      "category": "dns",
+      "summary": "Check an address’s syntax and whether its domain accepts mail, using DNS only.",
+      "description": "Validates the syntax of an email address, then queries the domain’s MX records (including null MX and the implicit address fallback) and checks that the mail hosts resolve. It does not contact the recipient’s mail server, so it cannot confirm that a mailbox exists.",
+      "icon": "mail",
+      "path": "/tools/email-verifier",
+      "apiPath": "/api/tools/email-verifier",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/dns/email-verifier"
+      ],
+      "discoveryCategories": [
+        "dns-domains",
+        "email"
+      ],
+      "seoTitle": "Email Verifier | CloudHost247",
+      "relatedTools": [
+        "dns-propagation",
+        "dns-lookup",
+        "dns-health"
+      ],
+      "resultMode": "calculated"
+    },
+    {
       "slug": "ipv6-compatibility-checker",
       "name": "IPv6 Compatibility Checker",
       "category": "dns",
