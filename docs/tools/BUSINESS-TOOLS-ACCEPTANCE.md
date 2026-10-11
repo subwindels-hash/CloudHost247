@@ -17,6 +17,11 @@ Availability of each tool comes from the registry at
 
 ## Where the code lives
 
+> The Employee ID Card Generator was rebuilt in a third session; its engine tree, page and tests are
+> listed under [Third session](#third-session-same-day--employee-id-card-generator-rebuilt) at the
+> end of this document. The table below still describes the rest of the section.
+
+
 | Concern | Path |
 | --- | --- |
 | Tool registry (21 entries, field schemas, search) | `cloudhost247-node/src/tools/business/registry.ts` |
@@ -24,7 +29,7 @@ Availability of each tool comes from the registry at
 | Deterministic money, percent, date, CSV, XML formatting | `cloudhost247-node/src/tools/business/format.ts` |
 | Input validation and field-level failure reporting | `cloudhost247-node/src/tools/business/validate.ts` |
 | 5 calculator engines | `cloudhost247-node/src/tools/business/calculators.ts` |
-| 12 generator engines (1–6 documents, 7–12 assets) | `cloudhost247-node/src/tools/business/generators.ts`, `generators-assets.ts` |
+| 12 generator engines (1–6 documents, 7–12 assets) | `cloudhost247-node/src/tools/business/generators.ts`, `generators-assets.ts` (the ID card engine lives in its own tree, `src/tools/business/id-card/`) |
 | 4 comparison engines and datasets | `cloudhost247-node/src/tools/business/comparisons.ts` |
 | API routes (`GET /api/tools/business-tools[/:slug]`, `POST …/:slug/run`) | `cloudhost247-node/src/routes/business-tools.ts` |
 | Directory page | `cloudhost247-node/frontend/src/pages/tools/BusinessToolsPage.tsx` |
@@ -81,7 +86,7 @@ Worked examples asserted in tests, reproduced to the kobo:
 | 12 | Business Invoice Generator | `business-invoice-generator` | TXT + CSV | Implemented, tested |
 | 13 | Business Card Generator | `business-card-generator` | SVG (print-ready) | Implemented, tested |
 | 14 | Employee ID Generator | `employee-id-generator` | Identifier + CSV | Implemented, tested |
-| 15 | Employee ID Card Generator | `employee-id-card-generator` | SVG (ISO/IEC 7810 ID-1) | Implemented, tested |
+| 15 | Employee ID Card Generator | `employee-id-card-generator` | SVG + PNG/JPG/PDF (ISO/IEC 7810 ID-1, 300 dpi) — **dedicated page and engine, see "Third session" below** | Implemented, tested |
 | 16 | Organizational Chart Generator | `organizational-chart-generator` | Text outline + JSON | Implemented, tested |
 | 17 | LinkedIn Engagement Assistant | `linkedin-engagement-assistant` | Comment drafts | Implemented, tested |
 
@@ -91,13 +96,14 @@ Notes that matter for acceptance:
   digit is computed over **every** digit in the identifier including the company prefix
   (`employeeIdNumericCore`), so each issued ID is self-verifying; every ID is re-verified before it
   is offered for download.
-- **Business card / ID card** emit SVG at 1050×600 (landscape) and 600×1050 (portrait); the ID card
-  is dimensioned to ISO/IEC 7810 ID-1, 85.60 × 53.98 mm. Text colour is chosen by WCAG 2.1 relative
-  luminance against its background and the tool **warns when a pair falls below 4.5:1**. Both cards
-  embed a **real, scannable QR symbol** produced by the same `qrcode` encoder the Tools Center QR
-  tool uses: the ID card encodes the employee ID (or the name when no ID is supplied) at ECC L, and
-  the business card encodes the contact details as a vCard 3.0 at ECC M, with the text column
-  narrowed so no line runs under the symbol. The engine tests decode the generated SVG back with
+- **Business card** emits SVG at 1050×600 (landscape) and 600×1050 (portrait). **Employee ID card**
+  was rebuilt in the third session into a twelve-template badge maker with its own engine and page
+  (see below): it renders ID-1 at 300 dpi (1011 × 638 px landscape, 638 × 1011 portrait) and
+  exports PNG, JPG, PDF and SVG. Text colour is chosen by WCAG 2.1 relative luminance against its
+  background and the tool **warns when a pair falls below 4.5:1**. Both cards embed a **real,
+  scannable QR symbol**; the business card encodes the contact details as a vCard 3.0 at ECC M with
+  the text column narrowed so no line runs under the symbol, and the badge encodes the employee ID
+  (or `NAME:…` when no ID is supplied) at ECC M. The engine tests decode the generated SVG back with
   `jsqr` and assert the exact payload — a code that does not scan fails the build.
 - **LinkedIn Engagement Assistant calls no AI and no third-party service.** It analyses the pasted
   post locally and drafts from templates. Comments that must be trimmed are cut at a word boundary,
@@ -318,8 +324,10 @@ stopped being defensible and was replaced:
 - `src/tools/business/qr-svg.ts` — a pure, synchronous encoder that turns a payload into SVG path
   data (one rectangle per horizontal run of dark modules) inside a `data-qr-payload` group, with
   the quiet zone drawn so the symbol scans on any background.
-- **Employee ID card** now embeds a real QR (ECC L) encoding the employee ID — or `NAME:…` when no
-  ID is supplied — in place of the printed placeholder block, and its default is now on.
+- **Employee ID card** embeds a real QR encoding the employee ID — or `NAME:…` when no ID is supplied
+  — in place of the printed placeholder block. (Third session: the badge engine draws the symbol
+  itself at ECC M and publishes the payload in the group it draws, so the symbol and the value it
+  carries can both be read out of the file.)
 - **Business card** gains an `includeQr` field (default on) that embeds a real QR (ECC M) of the
   contact details as a vCard 3.0; the details column is clamped to the width left of the symbol so
   no line runs underneath it, and a canvas too small for a symbol that would still scan skips the
@@ -332,3 +340,123 @@ stopped being defensible and was replaced:
 
 Result: engine suite 187/187, UI suite 55/55, backend lint clean, frontend typecheck clean,
 catalogue projection verified, production build success.
+
+## Third session (same day) — Employee ID Card Generator rebuilt
+
+The first two sessions shipped the ID card as one more schema-driven tool inside the shared
+workspace: a form, an SVG result and a placeholder-free card. That was honest but it was not a badge
+maker. A badge maker is a *design* tool — it needs a live two-sided preview, a template gallery,
+colour controls, image uploads, print arrangements and a bulk path for an HR team with three hundred
+employees. This session rebuilt it as one, without touching the other twenty tools.
+
+### Engine — `cloudhost247-node/src/tools/business/id-card/` (16 modules, 4,424 lines)
+
+| Module | Responsibility |
+| --- | --- |
+| `types.ts` | `CardSpec`, the 12 template ids and the 8 presets, ID-1 dimensions, `cardPixelSize` |
+| `model.ts` | `CardFormState` (form state), `buildSpec` validation and defaults, blood groups, palette |
+| `colors.ts` | Colour parsing, WCAG 2.1 relative luminance / contrast, palette mixing |
+| `text.ts` | Measurement, fitting, tracking, wrapping, title-casing, date formatting |
+| `code128.ts` | Code 128 sets B and C, modulo-103 check symbol, encoder **and** structural decoder |
+| `qr.ts` | QR encoder (module matrix) plus verification-URL validation |
+| `templates.ts` | The 12 layouts, in one drawing-op language (`CardFace` → ordered ops) |
+| `expand.ts` | Turns QR and barcode ops into rectangles; enforces the minimum barcode X-dimension |
+| `svg.ts` | Both faces as SVG, and the two-page print sheet |
+| `raster.ts` | Pure rasteriser: faces → RGBA, plus row scanning and barcode readback |
+| `pdf.ts` | Minimal PDF writer: one page per side, or both sides on one sheet, JPEG embedded |
+| `zip.ts` | Store-only ZIP writer and reader with CRC-32 |
+| `images.ts` | Upload rules: content sniffing, size and dimension limits, data-URL validation |
+| `batch.ts` | CSV and XLSX readers, column mapping, row validation, report generation |
+| `tool.ts` | API adapter — legacy field aliases, result tables, metrics, warnings |
+| `index.ts` | Public surface, re-exported into `generators-assets.ts` so the registry and API are unchanged |
+
+The tree is isomorphic and DOM-free: the API process, the browser bundle, the test suite and the
+rasteriser all import the same modules. The browser half (`FileReader`, `Image`, `canvas`) lives in
+`frontend/src/lib/id-card/{canvas,read-image}.ts`, which is what let the server keep
+`noUncheckedIndexedAccess` on with zero errors.
+
+### What the tool now does
+
+- **12 templates**, each a genuinely different layout rather than a recoloured one: Corporate Split,
+  Modern Badge, Minimal Centre, Signature Wave, Creative Panel, Startup Frame, Gradient Edge,
+  Portrait Pass, Tech Diagonal, Mono Stripe, Executive Ribbon, Soft Geometry. A test renders all
+  twelve with identical data and asserts that the drawing-op fingerprints differ; another renders
+  them with deliberately overlong content and asserts that no *element* leaves the card (decoration
+  that is meant to bleed off the edge is marked `bleed` and excluded).
+- **8 colour presets** (Salario Green, Corporate Blue, Midnight, Royal Purple, Bright Orange,
+  Crimson, Elegant Teal, Charcoal) **plus 4 custom pickers** — primary accent, card background, text
+  colour, detail accent — each with a hex field beside the swatch. **Reset form** restores the
+  documented defaults; that is asserted, not assumed.
+- **Live front/back preview at ID-1** (85.60 × 53.98 mm): 1011 × 638 px landscape at 300 dpi, or the
+  same card rotated to 638 × 1011 for portrait. The preview and every download are the *same*
+  canvas, so a card that looks right on screen is the file that lands on the printer.
+- **Real QR and Code 128, both tested by decode.** The QR is encoded at ECC M and drawn as a module
+  group that publishes its own payload; the tests decode it with `jsqr` both from the encoder matrix
+  and from a rasterisation of the finished card face. The barcode is Code 128 (set C for long digit
+  runs), and the same rasteriser reads it back off the rendered face — which is how the minimum
+  X-dimension rule below was found and fixed.
+- **A barcode is refused rather than faked when it could not scan.** ISO/IEC 15417 wants a narrowest
+  bar of at least 0.19 mm ≈ 2.2 px at 300 dpi. The layout computes the module width from the symbol
+  it is about to draw and, when a template's slot is too narrow for the requested value, draws
+  nothing and says exactly why instead of printing a symbol that fails at the turnstile.
+- **Downloads: PNG (either side), JPG (both sides, quality 95 %), two PDF arrangements** — one side
+  per page, or both sides stacked on one page with a cut gap for a card printer — **and SVG** for a
+  print bureau. Every message names the resolution, the quality, the page size or the cut instruction
+  that applies, and every download is the file the preview shows.
+- **Bulk generation from CSV or XLSX**: a downloadable template whose header row the importer maps
+  back without help, column aliases (`dept`, `staff id`, `expiry date`, …), per-row validation with
+  **no silent discards**, duplicate employee IDs rejected on *every* affected row (nobody can tell
+  which of two identical identifiers is the real one), insecure or malformed photo URLs listed with
+  the https rule stated, a preview table, a rejected-rows CSV that can be handed back to HR, and a
+  single ZIP containing a PNG front and back per accepted employee plus a manifest. XLSX support is
+  real: shared strings, inline strings and numeric cells, read through the browser's own
+  `DecompressionStream` — no spreadsheet library and no server round trip.
+- **Privacy is a feature, not a footnote.** Details are held in this browser's local storage; large
+  photographs may exceed the storage budget and are then kept only in memory, which the page says.
+  Nothing is uploaded. Photographs referenced by URL in a bulk import are fetched by the visitor's own
+  browser (so the image host sees their IP address — stated on the page), and one button erases
+  everything stored.
+- **Honest about what a QR means here.** The card carries a real, scannable symbol, but the page says
+  in the field hint and in every result that *nothing is looked up when it is scanned and the card
+  proves nothing about the holder*. A QR carrying `javascript:`/`data:`/`file:` content is refused
+  outright — a phone that scanned it would run whatever the address contained.
+
+### Page and route
+
+The tool keeps its registry entry, slug and API route (`POST /api/tools/business-tools/employee-id-card-generator/run`)
+and gains a dedicated page at `/tools/business-tools/employee-id-card-generator`
+(`frontend/src/pages/tools/EmployeeIdCardPage.tsx`, 954 lines + `employee-id-card.css`). It is a
+static route declared above `/tools/business-tools/:tool`, so the directory card, the search index,
+the footer and the API all keep working and every one of them now lands on the badge maker. The other
+twenty tools are untouched and still use the shared workspace.
+
+### Tests
+
+| Check | Command | Result |
+| --- | --- | --- |
+| Badge engine (56 specs) | `npx vitest run tests/unit/id-card-engine.test.ts` | **57 passed / 57** |
+| Business Tools engines, incl. the rewritten legacy-contract suite | `npx vitest run tests/unit/business-tools-engines.test.ts` | **189 passed / 189** |
+| Badge maker page (uploads, preview, exports, reset, storage, bulk) | `npx vitest run frontend/tests/unit/employee-id-card-page.test.tsx` | **13 passed / 13** |
+| Backend typecheck | `npx tsc -p tsconfig.json --noEmit` | clean (0 errors) |
+| Frontend typecheck | `npx tsc -p frontend/tsconfig.json --noEmit` | clean (0 errors) |
+| Registry + link integrity | `node scripts/site/generate.mjs` | 169 links validated, 0 errors |
+
+The page tests run in jsdom, which has no drawing engine, so they install a recording 2D canvas
+context and assert on what the page asks the canvas to draw and export — including that a rejected
+upload shows the *specific* rule it broke and that the bulk ZIP is built from the accepted rows only.
+
+### Known limitations, disclosed
+
+- **The browser needs a 2D canvas.** Every export path goes through it. A browser that refuses a
+  drawing context gets a named error, not a blank file.
+- **JPG is lossy by design** (quality 95 %) and is offered for email and chat; PNG and PDF are the
+  print formats and are stated as such.
+- **A photograph hosted elsewhere must allow cross-site use.** A bulk `photoUrl` that cannot be
+  fetched reports the row and the reason, and that employee's badge is generated without the
+  photograph rather than failing the batch.
+- **Local storage is small** (about 5 MB per origin). Details and any images that fit are kept for a
+  refresh; images that do not fit are kept for the session only, and the page says so.
+- **Employee data never leaves the browser** except for the image hosts a bulk import points at. No
+  analytics event carries card data, and clearing stored data is one button.
+- **The card verifies nothing.** No employment-verification service exists behind this tool, so the
+  page never implies one; a QR is a real symbol carrying whatever URL or text the user supplied.

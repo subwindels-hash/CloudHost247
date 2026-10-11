@@ -1443,6 +1443,7 @@ export const SPA_ROUTE_PATTERNS: string[] = [
   "/tools/*",
   "/tools/business-tools",
   "/tools/business-tools/:tool",
+  "/tools/business-tools/employee-id-card-generator",
   "/tools/business-tools/mrz-generator",
   "/tools/business-tools/mrz-parser",
   "/tools/category/:category",

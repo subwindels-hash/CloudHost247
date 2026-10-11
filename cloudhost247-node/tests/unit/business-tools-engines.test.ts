@@ -102,42 +102,78 @@ function errorMessage(outcome: { ok: boolean; error?: { message: string } }): st
 
 /**
  * Decode the QR symbol embedded in a generated card SVG — the same round trip a phone camera
- * performs on the printed badge. Parses the row-run path the encoder emitted, renders the dark
- * modules into a bitmap with a four-module quiet zone, and hands it to the jsqr decoder used by
- * the Tools Center QR scanner. Returns null when the SVG carries no QR symbol.
+ * performs on the printed badge.
+ *
+ * The badge engine draws the symbol as `<g class="bt247-qr" data-qr-payload="…">` with one
+ * `<rect>` per dark module inside a four-module quiet zone, so this reader recovers the module
+ * grid from the rectangles, paints it at 4× and hands it to the same `jsqr` decoder the Tools
+ * Center QR scanner uses. Returns null when the SVG carries no QR symbol.
  */
 function decodeQrFromSvg(svg: string): string | null {
-  const payloadMatch = svg.match(/data-qr-payload="([^"]*)"/);
-  const pathMatch = svg.match(/<g class="bt247-qr"[\s\S]*?<path d="([^"]+)"/);
-  if (!payloadMatch || !pathMatch) return null;
-  const payload = payloadMatch[1]
+  const group = /<g class="bt247-qr"[^>]*data-qr-payload="([^"]*)"[^>]*>([\s\S]*?)<\/g>/.exec(svg);
+  if (!group) return null;
+  const payload = (group[1] ?? '')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
     .replace(/&apos;/g, "'")
     .replace(/&amp;/g, '&');
-  let size = 0;
+  // Two renderers publish QR groups: the shared fragment (`<path>` runs of one module) and the
+  // badge engine (one `<rect>` per dark module). Both are read here.
+  const columns = new Map<number, Set<number>>();
   const runs: Array<{ x: number; y: number; w: number }> = [];
-  for (const m of pathMatch[1].matchAll(/M(\d+) (\d+)h(\d+)v1h-\d+z/g)) {
-    const x = Number(m[1]);
-    const y = Number(m[2]);
-    const w = Number(m[3]);
-    runs.push({ x, y, w });
-    size = Math.max(size, x + w, y + 1);
+  for (const match of (group[2] ?? '').matchAll(/M(\d+) (\d+)h(\d+)v1h-\d+z/g)) {
+    runs.push({ x: Number(match[1]), y: Number(match[2]), w: Number(match[3]) });
   }
-  if (size === 0) return null;
+  if (runs.length > 0) {
+    for (const run of runs) {
+      for (let offset = 0; offset < run.w; offset += 1) {
+        if (!columns.has(run.x + offset)) columns.set(run.x + offset, new Set());
+        columns.get(run.x + offset)?.add(run.y);
+      }
+    }
+  } else {
+    const rects: Array<{ x: number; y: number }> = [];
+    for (const match of (group[2] ?? '').matchAll(/<rect x="([\d.]+)" y="([\d.]+)" width="/g)) {
+      rects.push({ x: Number(match[1]), y: Number(match[2]) });
+    }
+    if (rects.length === 0) return null;
+    // The module pitch is the smallest positive gap between the distinct x positions of the modules.
+    const xs = [...new Set(rects.map((rect) => Math.round(rect.x * 100) / 100))].sort((left, right) => left - right);
+    let module = Number.POSITIVE_INFINITY;
+    for (let index = 1; index < xs.length; index += 1) {
+      const gap = (xs[index] ?? 0) - (xs[index - 1] ?? 0);
+      if (gap > 0.01) module = Math.min(module, gap);
+    }
+    if (!Number.isFinite(module) || module <= 0) return null;
+    const originX = Math.min(...rects.map((rect) => rect.x));
+    const originY = Math.min(...rects.map((rect) => rect.y));
+    for (const rect of rects) {
+      const column = Math.round((rect.x - originX) / module);
+      const row = Math.round((rect.y - originY) / module);
+      if (!columns.has(column)) columns.set(column, new Set());
+      columns.get(column)?.add(row);
+    }
+  }
+  // The quiet zone is four modules: the symbol starts four pitches before its first dark module.
   const quiet = 4;
+  const maxIndex = Math.max(...[...columns.values()].flatMap((rows) => [...rows]));
+  const grid = maxIndex + 1 + quiet * 2;
   const scale = 4;
-  const dim = (size + quiet * 2) * scale;
+  const dim = grid * scale;
   const bitmap = new Uint8ClampedArray(dim * dim * 4).fill(255);
-  for (const { x, y, w } of runs) {
-    for (let dy = 0; dy < scale; dy += 1) {
-      for (let dx = 0; dx < w * scale; dx += 1) {
-        const offset = (((y * scale + dy) + quiet * scale) * dim + (x * scale + dx) + quiet * scale) * 4;
-        bitmap[offset] = 0;
-        bitmap[offset + 1] = 0;
-        bitmap[offset + 2] = 0;
-        bitmap[offset + 3] = 255;
+  for (const [column, rows] of columns) {
+    for (const row of rows) {
+      for (let dy = 0; dy < scale; dy += 1) {
+        for (let dx = 0; dx < scale; dx += 1) {
+          const x = (column + quiet) * scale + dx;
+          const y = (row + quiet) * scale + dy;
+          const offset = (y * dim + x) * 4;
+          bitmap[offset] = 0;
+          bitmap[offset + 1] = 0;
+          bitmap[offset + 2] = 0;
+          bitmap[offset + 3] = 255;
+        }
       }
     }
   }
@@ -230,7 +266,7 @@ describe('Business Tools — every tool runs from its declared defaults', () => 
     'business-invoice-generator': { businessName: 'CloudHost247 Ltd', clientName: 'Northwind Ltd', invoiceNumber: 'INV-2026-001', lineItems: 'Managed VPS hosting, 3, 45000' },
     'business-card-generator': { fullName: 'Ada Obi' },
     'employee-id-generator': { companyPrefix: 'CH247', departmentCode: 'OPS', year: '2026' },
-    'employee-id-card-generator': { companyName: 'CloudHost247 Ltd', employeeName: 'Ada Obi' },
+    'employee-id-card-generator': { companyName: 'CloudHost247 Ltd', employeeName: 'Ada Obi', employeeId: 'CH247-OPS-2026-0001-8' },
     'organizational-chart-generator': { people: 'Ada Obi | Chief Executive |\nChidi Eze | Head of Engineering | Ada Obi' },
     'linkedin-engagement-assistant': { postText: 'We rebuilt our payroll run around earned wage access and turnover fell by a fifth within two quarters.' },
     'nigeria-paye-net-salary-calculator': { monthlyAmount: '500000' },
@@ -1195,21 +1231,23 @@ describe('Generator 10 — Employee ID Card', () => {
   const base = {
     companyName: 'CloudHost247', employeeName: 'Ada Obi', employeeId: 'CH247-OPS-2026-0001-8',
     designation: 'Payroll Officer', department: 'Finance', bloodGroup: 'O+',
-    issueDate: '2026-01-01', expiryDate: '2027-12-31', orientation: 'portrait',
+    issueDate: '2026-01-01', expiryDate: '2027-12-31', orientation: 'landscape',
     themeColor: '#0f2b46', includePhoto: true, includeQr: false,
   };
 
-  it('generates a portrait badge carrying every supplied field', () => {
+  it('generates an ID-1 badge carrying every supplied field, with the back as a second artefact', () => {
     const result = resultOf(computeEmployeeIdCard(base));
     const content = result.document?.content ?? '';
     expect(result.document?.format).toBe('svg');
-    expect(content).toContain('width="600" height="1050"');
-    expect(content).toContain('EMPLOYEE IDENTIFICATION CARD');
+    // The print sheet holds both faces; each face is the card at 300 dpi (ISO/IEC 7810 ID-1).
+    expect(content).toContain('width="1011" height="638"');
     expect(content).toContain('Ada Obi');
     expect(content).toContain('CH247-OPS-2026-0001-8');
     expect(content).toContain('O+');
-    expect(content).toContain('31 December 2027');
+    expect(content).toContain('31 Dec 2027');
+    expect(result.extraDocuments?.map((document) => document.label)).toEqual(['Front (SVG)', 'Back (SVG)']);
     expect(result.metrics.find((metric) => metric.label === 'Check digit')?.value).toBe('Valid (Luhn)');
+    expect(result.metrics.find((metric) => metric.label === 'Template')?.value).toBe('Corporate Split');
   });
 
   it('verifies the employee ID against its check digit and warns on a mistyped one', () => {
@@ -1218,24 +1256,43 @@ describe('Generator 10 — Employee ID Card', () => {
     expect(bad.warnings?.some((warning) => /fails Luhn check-digit verification/i.test(warning))).toBe(true);
   });
 
-  it('validates the blood group and the expiry date', () => {
-    expect(resultOf(computeEmployeeIdCard({ ...base, bloodGroup: 'Z+' })).warnings?.some((warning) => /not a recognised blood group/i.test(warning))).toBe(true);
-    expect(resultOf(computeEmployeeIdCard({ ...base, expiryDate: '2025-01-01' })).warnings?.some((warning) => /not after the issue date/i.test(warning))).toBe(true);
+  it('rejects an unrecognised blood group rather than printing it', () => {
+    const outcome = computeEmployeeIdCard({ ...base, bloodGroup: 'Z+' });
+    expect(outcome.ok).toBe(false);
+    if (outcome.ok) return;
+    expect(outcome.error.fieldErrors?.some((error) => error.key === 'bloodGroup')).toBe(true);
+  });
+
+  it('rejects an issue date that is not a real date and warns when the card expires first', () => {
+    const badDate = computeEmployeeIdCard({ ...base, issueDate: '2026-02-30' });
+    expect(badDate.ok).toBe(false);
+    const backwards = resultOf(computeEmployeeIdCard({ ...base, issueDate: '2026-09-01', expiryDate: '2026-01-01' }));
+    expect(backwards.warnings?.some((warning) => /not after the issue date/i.test(warning))).toBe(true);
   });
 
   it('embeds a real, decodable QR of the employee ID, and none when the option is off', () => {
     const withQr = resultOf(computeEmployeeIdCard({ ...base, includeQr: true }));
     expect(decodeQrFromSvg(withQr.document?.content ?? '')).toBe('CH247-OPS-2026-0001-8');
-    expect(withQr.tables?.[0]?.rows.find((row) => row.label === 'QR code')?.cells[0]).toMatch(/scannable QR/i);
+    expect(withQr.tables?.[1]?.rows[0]?.cells[1]).toMatch(/scannable QR/i);
 
     const withoutQr = resultOf(computeEmployeeIdCard(base));
-    expect(withoutQr.document?.content).not.toContain('bt247-qr');
-    expect(withoutQr.tables?.[0]?.rows.find((row) => row.label === 'QR code')?.cells[0]).toBe('Omitted');
+    expect(decodeQrFromSvg(withoutQr.document?.content ?? '')).toBeNull();
+    expect(withoutQr.tables?.[1]?.rows[0]?.cells[1]).toBe('Omitted');
   });
 
   it('encodes the employee name when no ID was supplied', () => {
     const result = resultOf(computeEmployeeIdCard({ ...base, includeQr: true, employeeId: '' }));
     expect(decodeQrFromSvg(result.document?.content ?? '')).toBe('NAME:Ada Obi');
+    // A missing identifier is an advisory here, not a refusal: the published API has always
+    // accepted a card without one, and the QR falls back to the name.
+    expect(result.warnings?.some((warning) => /employee ID is required/i.test(warning))).toBe(true);
+  });
+
+  it('draws a Code 128 barcode of the identifier, and reports it when switched off', () => {
+    const withBarcode = resultOf(computeEmployeeIdCard(base));
+    expect(withBarcode.tables?.[1]?.rows[1]?.cells[1]).toMatch(/Code 128 with modulo-103 check symbol/i);
+    const without = resultOf(computeEmployeeIdCard({ ...base, includeBarcode: false }));
+    expect(without.tables?.[1]?.rows[1]?.cells[1]).toBe('Omitted');
   });
 
   it('always states that the tool verifies nothing about the holder', () => {
@@ -1243,9 +1300,9 @@ describe('Generator 10 — Employee ID Card', () => {
     expect(result.warnings?.some((warning) => /may constitute fraud/i.test(warning))).toBe(true);
   });
 
-  it('generates a landscape badge', () => {
-    const result = resultOf(computeEmployeeIdCard({ ...base, orientation: 'landscape' }));
-    expect(result.document?.content).toContain('width="1050" height="600"');
+  it('renders a portrait card at the ID-1 ratio rotated', () => {
+    const result = resultOf(computeEmployeeIdCard({ ...base, orientation: 'portrait' }));
+    expect(result.document?.content).toContain('width="638" height="1011"');
   });
 });
 

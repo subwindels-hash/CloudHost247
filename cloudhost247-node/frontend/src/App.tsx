@@ -192,6 +192,10 @@ const ToolsHubPage = lazy(() => import('./pages/tools/ToolsHubPage'));
 const MrzToolPage = lazy(() => import('./pages/tools/MrzToolPage'));
 const BusinessToolsPage = lazy(() => import('./pages/tools/BusinessToolsPage'));
 const BusinessToolWorkspacePage = lazy(() => import('./pages/tools/BusinessToolWorkspacePage'));
+// The Employee ID Card Generator is a design tool, not a form-and-result tool: its own page owns
+// the live canvas preview, template gallery, colour pickers and bulk importer. The registry entry
+// stays, so the directory, the API and the search index all still point at this path.
+const EmployeeIdCardPage = lazy(() => import('./pages/tools/EmployeeIdCardPage'));
 const AdminMrzSettingsPage = lazy(() => import('./pages/AdminMrzSettingsPage'));
 export default function App() {
   return (
@@ -270,6 +274,7 @@ export default function App() {
             /tools/mrz-generator and /tools/mrz-parser routes below stay as they were. */}
         <Route path="/tools/business-tools/mrz-generator" element={<MrzToolPage defaultTab="calculator" />} />
         <Route path="/tools/business-tools/mrz-parser" element={<MrzToolPage defaultTab="parser" />} />
+        <Route path="/tools/business-tools/employee-id-card-generator" element={<EmployeeIdCardPage />} />
         <Route path="/tools/business-tools/:tool" element={<BusinessToolWorkspacePage />} />
 
         <Route path="/tools/document" element={<ToolsHubPage />} />
