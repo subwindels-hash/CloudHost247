@@ -113,6 +113,13 @@ fill a footer column.
   so a softened disclaimer or a fabricated price cannot pass quietly. The template source, a
   repository-wide sweep of every root page and active-theme template, and the rendered pages are
   all checked, so the guard still runs in the release gate where no fixtures exist.
+- `python3 -m unittest tests.security.test_domain_data_provenance.py`: the domain platform's
+  numbers must come from the connected provider. The checks are that no first-party source ties
+  a TLD to a price literal, no migration or seed writes the extension or offering tables, the
+  only writer of provider offerings is the sync service that reads the provider's own
+  `getExtensions()`, the extension directory keeps telling visitors where its catalogue comes
+  from, and search/WHOIS/appraisal keep the `provider_not_configured` outcome instead of
+  guessing. Fourteen cases, each rule with a negative case that mutates a copy.
 - `node scripts/check-workflow-yaml.mjs`: every `.github/workflows/*.yml` parses, declares
   jobs and has steps that carry `run` or `uses`. A workflow that does not parse is not a
   red check — GitHub creates no jobs at all, so the run ends in zero seconds with nothing

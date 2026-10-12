@@ -233,6 +233,7 @@ assumed, because a marketing site is exactly where a plausible-looking price tab
 | Search, WHOIS, appraisal, quote and order fail closed | `search-service.ts`, `whois-service.ts`, `appraisal-service.ts` return the `provider_not_configured` outcome; `provider-service.ts` refuses a configured-but-untested account | no availability, valuation or order is produced without a connection-tested provider |
 | Only compiled, real provider adapters can run | `providers/register-builtins.ts` + `providers/registry.ts` | Namecheap and GoDaddy (registration/search), RDAP (availability), GoValue (appraisal); an unknown adapter key fails closed rather than falling back |
 | The honest behaviour is enforced, not merely intended | `cloudhost247-node/tests/integration/domain-services-api.test.ts` — 16 cases against embedded Postgres | includes "reports honest readiness: nothing configured until a provider passes a real connection test", "search returns the honest not-configured outcome with zero fabricated results" (`results: []`, `Service Provider Not Configured`) and a taken label that is never fabricated as available |
+| The rules above are now checks, not prose | `python3 -m unittest tests.security.test_domain_data_provenance` — 14 cases, wired into the release gate | no TLD/price literal in any first-party source, no migration or seed writing either catalogue table, a single provider-reading writer for offerings, the directory's own explanation of where its catalogue comes from, and the `provider_not_configured` outcome in search/WHOIS/appraisal — each with a negative case that mutates a copy and requires the rule to fire |
 
 **Not tested here:** calls to a real registrar, RDAP or appraisal provider. No provider is connected in
 this environment and none is configured with credentials, so the *live* availability, premium-price,
@@ -340,7 +341,8 @@ wasm shim, `PHP_LINT_JOBS=8`). Its steps, in order:
 5. server-agent Node suite;
 6. static verification bundle (unittests, website suites — including the **catalogue-honesty**
    guard — tools tests, site verifier, **accessibility contract (new)**, release-workflow
-   document checks, raster ladder, Builder widget-class audit, vendor manifest);
+   document checks, **domain data-provenance checks (new)**, raster ladder, Builder widget-class
+   audit, vendor manifest);
 7. vendor integrity baseline.
 
 Also verified in this pass:
@@ -450,6 +452,7 @@ non-asset changes are:
 | `docs/ACCEPTANCE-CRITERIA.md` | **new** — every acceptance criterion with the command that decides it and a strict status (COMPLETE / PARTIAL / BLOCKED / NOT TESTED) |
 | `tests/website/test_catalogue_honesty.py` | **new** — 21 tests at three levels (template source, a repository-wide promise sweep, and the rendered pages when fixtures exist): the application directory and the OS families must label themselves as catalogues, name the platform as the source of availability, carry no fabricated price and promise no provisioning workflow. Every rule has a negative case that mutates a copy and requires the rule to fire |
 | `scripts/release-candidate-check.sh` | also runs the catalogue-honesty and release-workflow-document suites |
+| `tests/security/test_domain_data_provenance.py` | **new** — 14 tests holding the domain platform to its data provenance (§3.9): no TLD/price literal anywhere in first-party source, no seeded catalogue, one provider-reading writer, an honest empty state and the fail-closed services, every rule with a negative case |
 | `tests/security/test_release_workflow_docs.py` | **new** — 9 tests holding those two documents to their claims: thirteen numbered steps in order, step 13 is the approval gate, every named repository path exists, only the four status words are used, and each criterion names a deciding command |
 | `docs/README.md` | indexes the two new documents |
 | `docs/website-rebuild/AUDIT-AND-READINESS-2026-10-12.md` | **this report** |
