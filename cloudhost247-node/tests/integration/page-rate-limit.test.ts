@@ -51,3 +51,36 @@ describe('rate limits: SPA page loads versus API routes', () => {
     await app.close();
   });
 });
+
+describe('rate limits: static bundles', () => {
+  let db: PGlite;
+  process.env.DATABASE_URL ??= 'postgresql://user:pass@localhost:5432/cloudhost247';
+  process.env.JWT_SECRET ??= 'g'.repeat(32);
+  process.env.CREDENTIAL_ENCRYPTION_KEY ??= 'a'.repeat(64);
+  const env = loadEnv({
+    NODE_ENV: 'test',
+    DATABASE_URL: process.env.DATABASE_URL,
+    JWT_SECRET: process.env.JWT_SECRET,
+    CREDENTIAL_ENCRYPTION_KEY: process.env.CREDENTIAL_ENCRYPTION_KEY,
+  } as NodeJS.ProcessEnv);
+
+  beforeEach(async () => {
+    db = new PGlite();
+    await migrateUp(new PgliteClient(db), { isProduction: false });
+  });
+
+  afterEach(async () => {
+    await db.close();
+  });
+
+  it('does not count static bundle requests against the API ceiling', async () => {
+    const app = buildApp(env, { serveFrontend: false, pool: db });
+    let limited = 0;
+    for (let i = 0; i < 320; i++) {
+      const res = await app.inject({ method: 'GET', url: `/assets/app-${i % 5}.js` });
+      if (res.statusCode === 429) limited++;
+    }
+    expect(limited).toBe(0);
+    await app.close();
+  });
+});

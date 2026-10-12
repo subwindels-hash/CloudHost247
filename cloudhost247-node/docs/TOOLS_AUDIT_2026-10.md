@@ -110,7 +110,7 @@ Gaps found by comparison with the reference:
 | RAID Calculator (Productivity) | **Implemented** (`raid-calculator`) | RAID 0/1/5/6/10 usable and raw capacity, overhead, guaranteed and best-case failures, decimal TB and binary TiB. Metadata, filesystem overhead and hot spares are not modelled. |
 | Local IPv6 Address Generator (IP) | **Implemented** (`ipv6-address-generator`) | RFC 4193 ULA prefix, /64 subnet and sample address from `crypto.randomBytes`. |
 | IPv6 Compatibility Checker (DNS) | **Implemented** (`ipv6-compatibility-checker`) | AAAA and A lookups through the resolver layer, with resolver evidence. Reports DNS publication only, not reachability. |
-| Name Checker (Productivity) | **Missing** | Requires per-platform username probes. Needs a source decision and rate limits before implementation. |
+| Name Checker (Productivity) | **Implemented (RDAP, domain names only)** | Checks `.com`, `.net`, `.org` through RDAP, the registry-reported source. Outcomes: Registered (200 with a record), No registry record (404; never a guarantee the name can be registered), Unknown (lookup failed; all three unknown returns 503). No social-handle or username checks, no API key. Live RDAP is not verifiable from this sandbox. Covered by `tests/tools/catalogue.php`. |
 | Google PageRank | **Not implementable** | Google discontinued public PageRank data. Document as unavailable; do not fake results. |
 | Credit Card Checker | **Deliberately excluded** | The repository's BIN checker explicitly refuses full card numbers. Keep this boundary; do not add Luhn validation of full PANs. |
 | HTACCESS / URL rewrite generator | Covered | Inside `url-tools` (Multi-URL opener, rewrite and .htaccess generators). |
@@ -169,10 +169,10 @@ Page and test exist (`frontend/src/pages/tools/ComplianceDocumentsPage.tsx`,
 
 1. Partly done: all 21 tool names and URLs match `salariopay.com/sitemap.xml`. The full live directory (49 entries) is still not captured in a browser, so only the sitemap names are confirmed.
 2. Run the PHP catalogue suite in CI for the four new tools (done in code; PHP not run locally).
-   Name Checker remains open.
+   Name Checker is covered by the same suite.
 3. (Done) Browser end-to-end tests (Playwright) for the ID-card flow, the business tools and MRZ. All pass locally: business 52/52, ID card 10/10, MRZ 5/5.
 4. (Done) TD1 and TD2 MRZ support. MRZ page controls are browser-tested (`e2e/mrz.spec.ts`, config route stubbed).
-5. Name Checker: decide the data source and rate-limit policy, or document as unavailable.
+5. Name Checker: done on RDAP (domain names). Live RDAP still needs verification with outbound network.
 6. Staging deployment of the production build and screenshots of the principal flows.
 7. PHP suites: run in CI on this branch (not available in this sandbox).
 
@@ -221,12 +221,17 @@ a hosted staging environment: no real customer data, no outbound resolver access
 | Browser E2E against the staging server, serial, after the sandbox reset | 66 of 70 passed. The 4 failures show the rate-limit signature (see the finding below). Compliance Tools hub: 3 of 3 (`e2e/compliance.spec.ts`), every hub link opens a rendered tool page. |
 | Screenshots | `docs/staging-screenshots/` (ID card, MRZ, Local IPv6, Compliance Tools) |
 
-Finding: the global rate limit (`src/plugins/security.ts`: 300 requests per minute per IP,
-also applied to SPA page loads) returns 429 to a browser that makes many requests from one IP.
-The E2E suite runs from one IP, so intermittent blank pages occur. Probing showed each failed
-load coincided with a 429. Isolated runs of the same tests pass. Production limit kept as is.
-Decision for the owner: raise the per-IP limit for the SPA shell, or give the E2E run an
-allow-listed test client. Both need a decision; neither was changed here.
+Finding and decisions on rate limiting (`src/plugins/security.ts`, `src/app.ts`):
+* Root cause of the intermittent blank pages: the global limit (300 requests per minute per IP)
+  also counted static bundles under `/assets/`. A tool page loads about twenty of them, so after
+  roughly fifteen loads in a minute the JavaScript itself returned 429 and the page rendered
+  blank. Probing showed every 429 on `/assets/*`, none on API routes in that probe.
+* Decision (approved by the owner): SPA page loads get their own ceiling of 1200 per minute per IP
+  (not-found handler in `src/app.ts`). Static bundles are exempt from the global API limit
+  (`allowList` in `security.ts`). API and auth routes keep 300 per minute. No other limit changed.
+* Verification: `tests/integration/page-rate-limit.test.ts` (350 page loads and 320 bundle requests
+  with no 429; 310 API requests still produce a 429). Serial and parallel browser E2E against
+  staging: 71 of 71 passed in each run. The earlier run had 66 of 70.
 
 Defects found and fixed in this pass:
 * Duplicate capability: the Local IPv6 Address Generator was published at a second path
@@ -239,4 +244,4 @@ Defects found and fixed in this pass:
   the "MRZ Parser" tab.
 
 Not verified: PHP suites run only through the WebAssembly shim, not a native PHP install.
-The shim is not CI evidence; CI remains the authority. Name Checker is still undecided.
+The shim is not CI evidence; CI remains the authority.
