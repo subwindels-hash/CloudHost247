@@ -483,7 +483,20 @@ snapshot or a commit — and is reproducible with the command above.
    deleted from the Actions tab by a repository administrator, or the token given `workflow` scope;
    do not re-diagnose this as a stale-file problem, the files really are gone and every workflow run
    is generated from a file that exists.
-5. **Unfinished modules** recorded in `docs/UNFINISHED-MODULES.md` and
+5. **One published PHP page has no platform counterpart, by design rather than by oversight.**
+   `refund-and-cancellation-policy.php` is published, indexable and linked from the PHP Legal &
+   Policy Center (`legal.php`, entry `refund-and-cancellation`), but it is not in `registry.legal`,
+   so it is not among the 18 documents of `legal.generated.json` and the platform app's `/legal`
+   index does not list it. The reason is in its template: it carries no policy text of its own — it
+   is a signpost that sends the reader to `refund-policy.php` (which *is* in the registry, at
+   `/legal/refund-policy`), to the client area's service list and to a support ticket. Writing a
+   cancellation policy so the SPA has something to render is a product decision, not this pass's, so
+   the asymmetry is recorded instead: either a real cancellation document is added to
+   `registry.legal` with its source, or the page stays PHP-only as the signpost it is. It is not
+   among the 23 `excludePhp` entries, so it is in the sitemap on either reading. This is also why
+   the hero checks classify legal pages from two sources (§3.10): 19 pages carry the category
+   `Legal`, 17 of them are registry documents.
+6. **Unfinished modules** recorded in `docs/UNFINISHED-MODULES.md` and
    `docs/UNFINISHED-BUILD-CODE-NAME-LIST.md` are unchanged by this pass and remain unfinished.
 
 ## 12. Files changed in this pass
