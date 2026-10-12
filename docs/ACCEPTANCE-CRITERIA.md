@@ -48,6 +48,7 @@ existing, or a page rendering, is not evidence.
 | C3 | Every viewport the browser matrix tests is covered by at least one media query | `python3 scripts/check-accessibility-contract.py` | **COMPLETE** — 320/360/375/390/414/768/1024/1280/1440/1920 |
 | C4 | Real-browser behaviour: no horizontal overflow, no broken images, no page errors, menu open/Escape/focus, axe WCAG A/AA | `node tests/website/browser.cjs` (needs Chromium) | **PARTIAL** — a 520-case sweep is recorded in `docs/website-rebuild/browser-verification.json`, but it predates this pass; it could not be re-run because no browser binary exists in this environment |
 | C5 | The recorded a11y result is proven to fail when it should | `python3 -m unittest tests.website.test_accessibility_contract` | **COMPLETE** — 14 negative cases |
+| C6 | A catalogue entry never implies deployability the backend has not verified | `python3 -m unittest tests.website.test_catalogue_honesty` | **COMPLETE** — 21 cases across template source, a repository-wide promise sweep and the rendered pages; every rule has a negative case, and the rules hold with or without a fixture tree |
 
 ## Behaviour and integration
 
@@ -55,7 +56,7 @@ existing, or a page rendering, is not evidence.
 |---|---|---|---|
 | D1 | WHMCS billing, auth, provisioning and tools behaviour is preserved | the 18 PHP behaviour suites + `tests/security/*` | **COMPLETE** — gate green; no core file modified |
 | D2 | Vendor-derived files are byte-identical to the recorded baseline | `sha256sum --check --strict` in the gate | **COMPLETE** |
-| D3 | Catalogue pages distinguish catalogue / configured / provisionable / coming-soon and never imply unverified infrastructure | `php tests/ovh/...`, `python3 tests/website/test_manifest_visuals.py`, and the pages' own stated availability | **PARTIAL** — the states are rendered from manifests and live reads, and an absent live catalogue states so; a live provider-backed "provisionable" state cannot be exercised without staging |
+| D3 | Catalogue pages distinguish catalogue / configured / provisionable / coming-soon and never imply unverified infrastructure | `python3 -m unittest tests.website.test_catalogue_honesty` (negative cases prove each rule), `tests/website/test_manifest_visuals.py`, `php tests/ovh/...` | **PARTIAL** — the source claim is verified complete: the pages label themselves a catalogue, say the list is not stock, name the platform as the source of availability, carry no price and promise no provisioning workflow, all enforced with negative cases. Rendering the live *provisionable* state still needs the staging install |
 | D4 | Tool results are real, with SSRF protection, validation and rate limits | `php tests/tools/run.php`, `node tests/tools/*.mjs` | **COMPLETE** |
 | D5 | A visitor's address may suggest, never decide, a display currency; billing currency is untouched | `node/vitest` — `tests/integration/currency-geo-hint.test.ts`, `frontend/tests/unit/currency-geo-fallback.test.tsx` | **COMPLETE** |
 | D6 | The currency hint is never publicly cacheable and never echoes an address | `cloudhost247-node/tests/integration/currency-geo-hint.test.ts` | **COMPLETE** |

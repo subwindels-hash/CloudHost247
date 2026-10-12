@@ -142,7 +142,7 @@ php tests/tools/site-integration.php
 # Browser tools (MRZ among them) are pure modules; run them on Node so a broken handler fails here.
 node tests/tools/local.test.mjs
 php tests/website/run.php
-python3 -m unittest -v tests/website/test_static.py tests/website/test_manifest_visuals.py tests/website/test_accessibility_contract.py tests/website/test_fixture_checks.py
+python3 -m unittest -v tests/website/test_static.py tests/website/test_manifest_visuals.py tests/website/test_accessibility_contract.py tests/website/test_fixture_checks.py tests/website/test_catalogue_honesty.py
 python3 scripts/verify-website.py
 # Accessibility and responsive contract: viewport, document language, skip link, menu state, control
 # names, image text, touch-target sizes, focus visibility, reduced motion and a media query for every

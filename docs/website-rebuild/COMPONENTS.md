@@ -104,6 +104,15 @@ fill a footer column.
   inspected implausibly little, so a green run cannot mean "it read nothing".
 - `python3 -m unittest tests/website/test_static.py`: link mutation tests, parent
   hook contracts, Builder precedence and read-only API use.
+- `python3 -m unittest tests.website.test_catalogue_honesty.py`: the catalogue pages must stay
+  honest — the application directory states it is not a claim of deployment availability and
+  sends each card to the live platform for eligibility, the operating-system families are
+  labelled catalogue names whose availability comes only from the connected platform, no
+  catalogue page carries a price (pricing is WHMCS's) and none promises a provisioning
+  workflow. Every rule has a negative case that mutates a copy and requires the rule to fire,
+  so a softened disclaimer or a fabricated price cannot pass quietly. The template source, a
+  repository-wide sweep of every root page and active-theme template, and the rendered pages are
+  all checked, so the guard still runs in the release gate where no fixtures exist.
 - `node scripts/check-workflow-yaml.mjs`: every `.github/workflows/*.yml` parses, declares
   jobs and has steps that carry `run` or `uses`. A workflow that does not parse is not a
   red check — GitHub creates no jobs at all, so the run ends in zero seconds with nothing

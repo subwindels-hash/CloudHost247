@@ -414,6 +414,8 @@ non-asset changes are:
 | `cloudhost247-node/frontend/tests/unit/currency-geo-fallback.test.tsx` | **new** — 8 tests pinning the currency signal ordering (hint suggests, never decides) |
 | `docs/RELEASE-WORKFLOW.md` | **new** — the staging-only release workflow: thirteen steps, each with its command, evidence and stop condition, ending at the explicit production-approval gate |
 | `docs/ACCEPTANCE-CRITERIA.md` | **new** — every acceptance criterion with the command that decides it and a strict status (COMPLETE / PARTIAL / BLOCKED / NOT TESTED) |
+| `tests/website/test_catalogue_honesty.py` | **new** — 21 tests at three levels (template source, a repository-wide promise sweep, and the rendered pages when fixtures exist): the application directory and the OS families must label themselves as catalogues, name the platform as the source of availability, carry no fabricated price and promise no provisioning workflow. Every rule has a negative case that mutates a copy and requires the rule to fire |
+| `scripts/release-candidate-check.sh` | also runs the catalogue-honesty and release-workflow-document suites |
 | `tests/security/test_release_workflow_docs.py` | **new** — 9 tests holding those two documents to their claims: thirteen numbered steps in order, step 13 is the approval gate, every named repository path exists, only the four status words are used, and each criterion names a deciding command |
 | `docs/README.md` | indexes the two new documents |
 | `docs/website-rebuild/AUDIT-AND-READINESS-2026-10-12.md` | **this report** |
@@ -445,6 +447,8 @@ four statuses. It records what is genuinely done and what is not: C4 (the real-b
 **PARTIAL** because the recorded 520-case run predates this pass and no browser binary exists here;
 D3 (live catalogue states) is **PARTIAL** pending staging; E2–E4 are **BLOCKED** on the licensed
 staging installation; E5 (production approval) is **NOT TESTED**, by design.
+
+A third check closes the honesty gap those criteria flagged: **`tests/website/test_catalogue_honesty.py`**. The applications directory and the operating-system families are where a hosting site most naturally over-claims, so the rendered pages are held to their own wording — the manifest list states it is *not* a claim of deployment availability, each card sends the reader to the live platform, the OS families are labelled catalogue names whose availability comes only from the connected platform, no page carries a price (pricing is WHMCS's) and none promises a provisioning workflow. The check runs at three levels so it bites wherever the claim could appear: the template source (wording and live-catalogue hooks), a repository-wide sweep of every root page and active-theme template for phrases that promise provisioning, and the rendered pages themselves when a fixture tree is present. Every rule has a negative case that mutates a copy and requires the rule to fire — softening the disclaimer, dropping the per-card note, inventing a price, promising "available now", claiming stock, or deleting a live-catalogue hook are each reported, and the disclaimer's own negation is asserted *not* to trip the stock rule.
 
 **`tests/security/test_release_workflow_docs.py`** treats both documents as claims and checks them —
 thirteen steps in order, the last one being the approval gate, every repository path the workflow
