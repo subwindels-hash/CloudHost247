@@ -102,6 +102,15 @@ fill a footer column.
   indicator, `prefers-reduced-motion`, clipped horizontal overflow, and a media query
   that applies at every viewport the browser QA matrix tests. It fails loudly if it
   inspected implausibly little, so a green run cannot mean "it read nothing".
+- `python3 -m unittest tests/foundation/test_static.py`: the addon-module contracts, plus the
+  rule that no first-party class implementing `ArrayAccess`, `Countable`, `IteratorAggregate`
+  or `Iterator` declares one of those methods without the return type PHP 8 wants. PHP reports
+  a tentative return type at class-declaration time — before a suite installs its own error
+  handler — so the three test fakes that were untyped printed 20 deprecations and still passed.
+  `offsetGet` is exempt and uses `#[\ReturnTypeWillChange]` instead, because the type PHP wants
+  there is `mixed` and the PHP 7.4 leg this repository still runs cannot parse it. The scan is
+  per class: a fake file declares a `Countable` collection *and* a query builder whose `count()`
+  is an illuminate-style API method, not an interface implementation.
 - `python3 -m unittest tests/website/test_static.py`: link mutation tests, parent
   hook contracts, Builder precedence and read-only API use, and the rule that no two
   published pages share a hero (`test_published_pages_do_not_share_a_hero`, plus a

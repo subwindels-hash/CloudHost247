@@ -82,8 +82,8 @@ final class CH247MarketingFakeCollection implements \IteratorAggregate, \Countab
     {
         private $rows;
         public function __construct(array $rows) { $this->rows = $rows; }
-        public function getIterator() { return new \ArrayIterator(array_map(function ($r) { return (object) $r; }, $this->rows)); }
-        public function count() { return count($this->rows); }
+        public function getIterator(): \Traversable { return new \ArrayIterator(array_map(function ($r) { return (object) $r; }, $this->rows)); }
+        public function count(): int { return count($this->rows); }
         public function all() { return array_map(function ($r) { return (object) $r; }, $this->rows); }
         public function isEmpty() { return count($this->rows) === 0; }
     }

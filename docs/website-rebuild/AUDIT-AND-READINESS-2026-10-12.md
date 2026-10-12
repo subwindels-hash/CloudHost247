@@ -356,9 +356,9 @@ checkout copy. That needs the licensed staging install and is recorded in §11.
 | Suite | Result |
 |---|---|
 | `php -l` over every lint target (`scripts/php-lint-targets.sh`) | **837 targets, 0 syntax errors** (PHP 8.2.33) |
-| 18 PHP behavioural suites (`tests/*/run.php`) | all pass — foundation, theme, currency, smm, tools, ovh, rdp, integrations, modules, builder, broker, marketing, cart_recovery, passkey, phoneservices, customaffiliate, cloudhost247_email, payments |
+| 18 PHP behavioural suites (`tests/*/run.php`) | all pass — foundation, theme, currency, smm, tools, ovh, rdp, integrations, modules, builder, broker, marketing, cart_recovery, passkey, phoneservices, customaffiliate, cloudhost247_email, payments — with **0 deprecation notices on either PHP leg** (8.2.33 and 7.4.33) since the test fakes declared their interface return types (§11.3) |
 | Tools platform | 85 tests / 0 failures · 1 171 shell/menu/footer assertions · 26 static tests · browser-tool module tests pass |
-| Static + security suites | 457 tests OK (2 skipped with recorded reasons) |
+| Static + security suites | **459 tests OK** (2 skipped with recorded reasons) |
 | Website suites | **78 tests OK** in the release gate (8 skipped there by design — the rendered-page cases need a fixture tree, which the gate does not build), including the catalogue-honesty guard and the hero-distinctness guard (§3.10) |
 | Node platform suite (`npm test`) | **161 test files / 2 242 tests passed**, exit 0 (Vitest, ~30 min; runs the migrations against the in-process Postgres engine) |
 | Node currency/i18n suites | the two new suites pass (6 + 8 tests) alongside the existing currency, i18n and switcher suites; `npm run typecheck` and the frontend `tsc --noEmit` exit 0 |
@@ -412,11 +412,12 @@ snapshot or a commit — and is reproducible with the command above.
   on the hosted runners passed on the resulting commit as well. A further run after the
   catalogue-honesty guard was added also passed end to end (443 security/static tests plus the
   67 website tests), and again after the domain data-provenance checks were added (457 + 67).
-- The latest run, after the two shared heroes were given artwork of their own (§3.10), passed end to
-  end with the rendered-hero check enabled: 457 static/security tests, **78 website tests**, 3
-  workflow files parsing, a 50-scene ladder with the served mirror in sync, inventory 67 exact /
-  0 fallback / **49 distinct**, and 48 distinct hero artworks across the rendered fixtures with none
-  shared. It also failed twice on the way and was fixed rather than loosened: once on unstaged
+- The latest run, after the two shared heroes were given artwork of their own (§3.10) and the test
+  fakes declared their interface return types (§11.3), passed end to end with the rendered-hero check
+  enabled: **459 static/security tests**, **78 website tests**, 3 workflow files parsing, a 50-scene
+  ladder with the served mirror in sync, inventory 67 exact / 0 fallback / **49 distinct**, 48
+  distinct hero artworks across the rendered fixtures with none shared, and **0 deprecation notices**
+  in the whole log where the previous run carried 20. It also failed twice on the way and was fixed rather than loosened: once on unstaged
   regenerated surfaces (the freshness check compares the worktree with the index) and once on a
   missing `cloudhost247-node/node_modules` (`tsx: not found`, exit 127) — a clean-checkout
   prerequisite, resolved by `npm ci`.
@@ -453,9 +454,18 @@ snapshot or a commit — and is reproducible with the command above.
    would be decoration. If the brief is read as requiring one per policy document, that is the
    remaining illustration work — it is not a hero-coverage gap, and the two pairs that were
    (`offers.php` with `cloudhost247-hosting.php`, `help-center.php` with `faqs.php`) are closed.
-3. **PHP 8.2 deprecation notices** are emitted by the OVH / broker / marketing *test fakes* (missing
-   `#[\ReturnTypeWillChange]` on `ArrayAccess`/`Countable`/`IteratorAggregate` implementations).
-   Pre-existing, test-only, non-blocking.
+3. **PHP 8.2 deprecation notices — closed in this pass.** The OVH, broker and marketing *test fakes*
+   emitted 20 tentative-return-type notices, and they survived because PHP reports them at
+   class-declaration time: before a suite installs its own error handler, so the notices printed and
+   the suite still passed. The methods now declare the type PHP wants — `getIterator(): \Traversable`,
+   `count(): int`, `offsetExists(): bool`, `offsetSet()/offsetUnset(): void` — except `offsetGet`,
+   where the type PHP wants is `mixed` and `mixed` is a parse error on the PHP 7.4 leg this
+   repository still runs; it carries `#[\ReturnTypeWillChange]` instead, which 7.4 parses as a
+   comment. Both legs were re-run: 8.2.33 and 7.4.33, all three suites pass, zero notices.
+   `tests/foundation/test_static.py` now fails on an untyped interface method in any first-party
+   class that implements one (459 static/security tests, with a negative case that strips a type and
+   requires the rule to fire, and an explicit assertion that a same-named method on a class
+   implementing none of them is *not* flagged).
 4. **Three stale workflow entries** — `rc-debug.yml`, `smm-debug.yml` and `tools-debug.yml` are still
    listed as *active* by the GitHub Actions API although the files have been deleted from every
    branch, `main` included. Nothing runs from them and nothing in the repository references them,
@@ -486,6 +496,8 @@ non-asset changes are:
 | `scripts/audit-navigation-inventory.py` | reports hero-scene coverage (exact vs family fallback, shared-with list) |
 | `scripts/check-hero-render.py` | **new** — the hero each *rendered* page paints must be the one the inventory resolves, must exist, and must not be another page's; exits 2 rather than passing when no fixtures exist |
 | `tests/website/test_static.py` | adds `test_published_pages_do_not_share_a_hero` and its negative case (21 → 23 tests) |
+| `tests/ovh/fakes.php`, `tests/broker/fakes.php`, `tests/marketing/fakes.php` | interface return types declared (20 PHP 8 deprecations removed; both PHP legs re-run clean) |
+| `tests/foundation/test_static.py` | adds the tentative-return-type guard and its negative case (11 → 13 tests) |
 | `shared/site/content/resources.json`, `modules/addons/cloudhost247_theme/resources/site.json` | `/help` and `/offers` get their own visual keys (`management/help-center`, `cloud/offers`) instead of borrowing another page's |
 | `assets/images/cloudhost247/cloud/offers.svg`, `assets/images/cloudhost247/management/help-center.svg` | **new** — the two vector diagrams those keys name, drawn in the library's own house style |
 | `docs/website-rebuild/page-inventory.json` / `.csv` | regenerated: footer destinations 67 → 68, hero-scene coverage added |
