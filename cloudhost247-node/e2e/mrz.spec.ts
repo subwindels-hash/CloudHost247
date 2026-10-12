@@ -8,7 +8,6 @@ import { expect, test, type Page } from '@playwright/test';
  * other request, and all MRZ logic, runs for real in the browser.
  */
 const CALCULATOR = '/tools/document/mrz';
-const PARSER = '/tools/mrz-parser';
 
 const TD1 = [
   'I<UTOD231458907<<<<<<<<<<<<<<<',
@@ -84,7 +83,9 @@ test('the validator reports a corrupted check digit by rule name', async ({ page
 });
 
 test('the parser decodes a TD2 into its named fields', async ({ page }) => {
-  await page.goto(PARSER);
+  // /tools/mrz-parser is a legacy URL that redirects to the generator page; the parser is a tab there.
+  await page.goto('/tools/mrz-generator');
+  await page.getByRole('tab', { name: 'MRZ Parser' }).click();
   await page.locator('textarea').first().fill(TD2.join('\n'));
   await page.getByRole('button', { name: 'Parse MRZ' }).click();
 
