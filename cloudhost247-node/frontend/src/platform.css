@@ -28,6 +28,42 @@
   position: static;
 }
 
+/* The bar's last item holds the language and display-currency controls (Header passes them in as
+   `trailing`). They are separated from the nav sections by a hairline so the bar still reads as
+   "where you can go" followed by "how the site is shown" — a choice, not a destination. */
+.ch247-platform-nav__controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-inline-start: 4px;
+  padding-inline-start: 12px;
+  border-inline-start: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+/* The drawer's copy of the same controls, shown only below the mega-bar breakpoint (its host is
+   `display: none` on desktop). Full-width row, wrapped, with the same hairline treatment. */
+.ch247-mobile-locale {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+@media (max-width: 480px) {
+  /* A long native name ("中文 (简体)") plus a currency plus the drawer's own padding must not push
+     a control past the viewport edge on the narrowest phones. */
+  .ch247-mobile-locale {
+    gap: 8px;
+  }
+
+  .ch247-mobile-locale .ch247-locale {
+    max-width: 100%;
+  }
+}
+
 .ch247-platform-nav__trigger {
   display: inline-flex;
   align-items: center;

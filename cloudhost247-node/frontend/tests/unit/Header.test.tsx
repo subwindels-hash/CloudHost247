@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -78,5 +78,74 @@ describe('Header: authentication-aware navigation', () => {
       '/api/auth/logout',
       expect.objectContaining({ method: 'POST' })
     );
+  });
+});
+
+/**
+ * Placement of the presentation controls: the language and display-currency switchers live in the
+ * primary menu bar, as the bar's last item, not in the utility cluster with Sign In / Create
+ * Account. They are choices about how the site is shown; the cluster is where actions live.
+ */
+describe('Header: the language and currency controls live in the menu bar', () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  afterEach(() => {
+    cleanup();
+    localStorage.clear();
+  });
+
+  it('renders both controls inside the Primary navigation bar', () => {
+    render(
+      <MemoryRouter>
+        <Header />
+      </MemoryRouter>
+    );
+
+    const menuBar = screen.getByRole('navigation', { name: 'Primary' });
+    expect(within(menuBar).getByRole('button', { name: /Language: English/ })).toBeTruthy();
+    expect(within(menuBar).getByRole('button', { name: /Display currency/ })).toBeTruthy();
+
+    // …and the bar is the last thing the controls were rendered in, so they read as its final item.
+    const bar = menuBar.querySelector('.ch247-platform-nav__bar');
+    const controls = bar?.lastElementChild;
+    expect(controls?.className).toContain('ch247-platform-nav__controls');
+    expect(controls?.contains(within(menuBar).getByRole('button', { name: /Language: English/ }))).toBe(true);
+    expect(controls?.contains(within(menuBar).getByRole('button', { name: /Display currency/ }))).toBe(true);
+  });
+
+  it('keeps the account actions out of the menu bar', () => {
+    render(
+      <MemoryRouter>
+        <Header />
+      </MemoryRouter>
+    );
+
+    const menuBar = screen.getByRole('navigation', { name: 'Primary' });
+    expect(within(menuBar).queryByRole('link', { name: 'Sign In' })).toBeNull();
+    expect(within(menuBar).queryByRole('link', { name: 'Create Account' })).toBeNull();
+    expect(
+      within(menuBar).queryByRole('link', { name: 'Search CloudHost247' })
+    ).toBeNull();
+  });
+
+  it('offers the same two controls in the mobile drawer, which replaces the bar below 1024px', () => {
+    render(
+      <MemoryRouter>
+        <Header />
+      </MemoryRouter>
+    );
+
+    // The drawer host is display: none on desktop but must still be rendered for phones, so both
+    // placements exist in the DOM and each carries one copy of each control.
+    const drawer = screen.getByRole('navigation', { name: 'Mobile' });
+    const drawerControls = drawer.parentElement?.querySelector('.ch247-mobile-locale');
+    expect(drawerControls).not.toBeNull();
+    expect(within(drawerControls as HTMLElement).getByRole('button', { name: /Language: English/ })).toBeTruthy();
+    expect(within(drawerControls as HTMLElement).getByRole('button', { name: /Display currency/ })).toBeTruthy();
+
+    expect(screen.getAllByRole('button', { name: /Language: English/ })).toHaveLength(2);
+    expect(screen.getAllByRole('button', { name: /Display currency/ })).toHaveLength(2);
   });
 });

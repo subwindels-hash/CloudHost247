@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Icon } from '../ui/Icon';
 import { publicFetch } from '../../lib/api';
@@ -126,7 +126,14 @@ function Badge({ kind }: { kind: string }) {
   return <span className={`ch247-nav-badge ch247-nav-badge--${kind.toLowerCase()}`}>{kind}</span>;
 }
 
-export function PlatformMegaMenu() {
+/**
+ * `trailing` renders inside the menu bar itself, after the last nav section, as the bar's final
+ * item. The header uses it for the language and display-currency controls, so those choices belong
+ * to the menu rather than sitting in the utility cluster with Sign In / Create Account. It is a
+ * prop, not a hard-coded import, so the bar stays free of i18n concerns and can be rendered without
+ * them (sitemap tooling, tests).
+ */
+export function PlatformMegaMenu({ trailing }: { trailing?: ReactNode }) {
   const [openId, setOpenId] = useState<string | null>(null);
   const navRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
@@ -248,6 +255,7 @@ export function PlatformMegaMenu() {
               </li>
             );
           })}
+          {trailing ? <li className="ch247-platform-nav__item ch247-platform-nav__controls">{trailing}</li> : null}
         </ul>
       </nav>
     </div>

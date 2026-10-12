@@ -13,15 +13,27 @@ import { useAuthState } from './useAuthState';
 /**
  * The universal CloudHost247 header.
  *
- * Structure: brand · mega navigation · search · Sign In / Create Account (or the account
- * controls once signed in). The mega menus come from the shared registry, so this header, the
- * mobile drawer, the footer and the sitemap cannot disagree about what exists.
+ * Structure: brand · mega navigation (with the language and display-currency controls as its last
+ * item) · search · Sign In / Create Account (or the account controls once signed in). The mega menus
+ * come from the shared registry, so this header, the mobile drawer, the footer and the sitemap
+ * cannot disagree about what exists.
  *
  * Signed-in state adds a second, quieter row for account areas (services, domains, billing,
  * support) plus the role-gated staff links. Those links are a convenience only — every one of
  * them re-verifies the caller's role server-side (see components/RequireRole.tsx), so hiding or
  * showing them changes nothing about what an account is allowed to do.
  */
+
+/** The two presentation controls, kept together so every placement renders the same pair in the
+ *  same order: language first, then display currency. */
+function LocaleControls() {
+  return (
+    <>
+      <LanguageSwitcher />
+      <CurrencySwitcher />
+    </>
+  );
+}
 
 const ACCOUNT_LINKS = [
   { to: '/dashboard', label: 'Overview' },
@@ -97,15 +109,22 @@ export default function Header() {
         </button>
 
         <div id="ch247-primary-nav" className={`ch247-header__collapsible${menuOpen ? ' is-open' : ''}`}>
-          <PlatformMegaMenu />
+          {/* The language and display-currency controls are the menu bar's last item: they change
+              how the whole site is presented, so they belong with the navigation rather than in the
+              utility cluster next to Sign In / Create Account. */}
+          <PlatformMegaMenu trailing={<LocaleControls />} />
 
           <div className="ch247-mobile-nav-host">
             <PlatformMobileNav onNavigate={closeMenu} />
+            {/* The desktop bar is hidden below 1024px (platform.css), taking its copy of the
+                controls with it, so the drawer carries its own. That host is `display: none` on
+                desktop, which keeps the duplicate out of the way without a second breakpoint. */}
+            <div className="ch247-mobile-locale">
+              <LocaleControls />
+            </div>
           </div>
 
           <div className="ch247-header__actions">
-            <LanguageSwitcher />
-            <CurrencySwitcher />
             <NavLink className="ch247-header__search" to="/search" aria-label={t('header.search.label')} onClick={closeMenu}>
               <Icon name="search" size={18} />
             </NavLink>
