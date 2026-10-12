@@ -290,6 +290,18 @@ artwork each registry page names; and the production archive independently re-re
 the theme registry references in **both** the PHP library and the built SPA library, including every
 3D encoding.
 
+One gap was found and closed here. The platform's copy of the library
+(`cloudhost247-node/frontend/public/media/cloudhost247`, 581 files, 21 MB) is a *second* copy that
+Vite's build treats as its public directory, and nothing verified it against `assets/images/cloudhost247`
+— `generate-raster-formats.py --check` only counted the ladder. Adding a scene and skipping
+`--emit-served` would therefore have shipped a `<picture>` whose `-960.avif` does not exist, which a
+browser does not fall back from. `--check` now compares both trees (missing file, differing bytes,
+and stale files the library no longer defines) and fails with the names.
+`tests/website/test_media_library_parity.py` (9 cases) holds the rule, and the rule was falsified by
+hand before it was trusted: deleting one served file, flipping one byte in another, and dropping a
+stale file each made the check exit 1 and name the file, and the unmodified tree exits 0 with
+`✓ served mirror in sync with assets/images/cloudhost247`.
+
 ## 7. Internationalisation and currency
 
 The rebuild integrates with the platform's existing localisation instead of creating a parallel
@@ -452,6 +464,8 @@ non-asset changes are:
 | `docs/ACCEPTANCE-CRITERIA.md` | **new** — every acceptance criterion with the command that decides it and a strict status (COMPLETE / PARTIAL / BLOCKED / NOT TESTED) |
 | `tests/website/test_catalogue_honesty.py` | **new** — 21 tests at three levels (template source, a repository-wide promise sweep, and the rendered pages when fixtures exist): the application directory and the OS families must label themselves as catalogues, name the platform as the source of availability, carry no fabricated price and promise no provisioning workflow. Every rule has a negative case that mutates a copy and requires the rule to fire |
 | `scripts/release-candidate-check.sh` | also runs the catalogue-honesty and release-workflow-document suites |
+| `tests/website/test_media_library_parity.py` | **new** — 9 tests holding the platform's copy of the media library to the library it mirrors: in-sync, missing, differing, stale and missing-directory cases, plus a subprocess run of `--check` against the real tree |
+| `scripts/generate-raster-formats.py` | `--check` now verifies the served mirror as well as the ladder, and names what drifted |
 | `tests/security/test_domain_data_provenance.py` | **new** — 14 tests holding the domain platform to its data provenance (§3.9): no TLD/price literal anywhere in first-party source, no seeded catalogue, one provider-reading writer, an honest empty state and the fail-closed services, every rule with a negative case |
 | `tests/security/test_release_workflow_docs.py` | **new** — 9 tests holding those two documents to their claims: thirteen numbered steps in order, step 13 is the approval gate, every named repository path exists, only the four status words are used, and each criterion names a deciding command |
 | `docs/README.md` | indexes the two new documents |

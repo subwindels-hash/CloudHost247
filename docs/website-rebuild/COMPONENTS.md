@@ -113,6 +113,11 @@ fill a footer column.
   so a softened disclaimer or a fabricated price cannot pass quietly. The template source, a
   repository-wide sweep of every root page and active-theme template, and the rendered pages are
   all checked, so the guard still runs in the release gate where no fixtures exist.
+- `python3 -m unittest tests.website.test_media_library_parity.py`: the platform's copy of the
+  media library (`cloudhost247-node/frontend/public/media/cloudhost247`) is Vite's public directory
+  and a second copy of `assets/images/cloudhost247`. `generate-raster-formats.py --check` compares
+  both trees — missing files, differing bytes and stale files — because a `<picture>` advertising a
+  variant that is not there shows nothing, and the tests prove each case is reported.
 - `python3 -m unittest tests.security.test_domain_data_provenance.py`: the domain platform's
   numbers must come from the connected provider. The checks are that no first-party source ties
   a TLD to a price literal, no migration or seed writes the extension or offering tables, the

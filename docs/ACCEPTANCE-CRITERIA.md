@@ -35,7 +35,7 @@ existing, or a page rendering, is not evidence.
 | B1 | One registry drives PHP nav/footer, the SPA nav/footer, the sitemap and the route audit | `node scripts/site/generate.mjs` + the gate's staleness diff | **COMPLETE** — 7 mega menus, 8 footer columns, 169 validated links |
 | B2 | Seven primary categories, eight footer columns, every link route-backed | the gate + `check-links.mjs` | **COMPLETE** |
 | B3 | A distinct hero visual on every registered page | `page-inventory.json` → `hero_scenes_exact` | **COMPLETE** — 67 of 67 on their own 3D scene; 47 distinct scenes; 0 family fallbacks |
-| B4 | The full asset library exists (brand, logos, favicons, social, app icons, OS, panels) | `python3 scripts/generate-raster-formats.py --check` + the archive verifier | **COMPLETE** — 48 scenes × 2 formats; every registry visual resolved in both libraries |
+| B4 | The full asset library exists (brand, logos, favicons, social, app icons, OS, panels) | `python3 scripts/generate-raster-formats.py --check` + `python3 -m unittest tests.website.test_media_library_parity` + the archive verifier | **COMPLETE** — 48 scenes × 2 formats; every registry visual resolved in both libraries; and the platform's second copy of the library is now verified against the library it mirrors instead of assumed |
 | B5 | No malformed-bullet, replacement-character or orphan-PUA artifact in rendered pages | `node scripts/check-malformed-bullets.mjs`; the PUA scan in the audit report §3.7 | **COMPLETE** — 0 findings in 6 657 text files; 0 in all 229 rendered pages |
 | B6 | No retired-brand text anywhere | `python3 scripts/branding-audit.py` | **COMPLETE** — 5 956 files scanned, 0 matches |
 

@@ -34,9 +34,14 @@ directory is the copy that has to be right and the build output is not a place t
 built SPA cannot be one generation behind the theme — a `<picture>` that advertises a missing
 `-960.avif` does not fall back, it shows nothing.
 
+`--check` verifies both sides without writing: the ladder next to every JPEG, and the platform's
+copy against the library — a missing file, a file whose bytes differ, or a stale file the library no
+longer defines are each reported. That is what makes "run `--emit-served` after adding a scene" a
+rule rather than a note: forgetting it fails the release gate instead of shipping broken srcsets.
+
     python3 scripts/generate-raster-formats.py                      # write what is missing
     python3 scripts/generate-raster-formats.py --force              # rewrite every variant
-    python3 scripts/generate-raster-formats.py --check              # fail if the ladder is incomplete
+    python3 scripts/generate-raster-formats.py --check              # fail if the ladder or the platform's copy is incomplete
     python3 scripts/generate-raster-formats.py --emit-served        # + sync the platform's copy
 """
 
@@ -167,6 +172,54 @@ def emit_served() -> int:
     return 0
 
 
+def served_parity() -> tuple[list[str], list[str], list[str]]:
+    """(missing, differing, extra) between the library and the platform's copy of it.
+
+    Pure Python and read-only, so `--check` can run it in a gate with no ImageMagick and no build.
+    ``emit_served`` prunes extras when it runs; here they are reported, because a stale file is the
+    signature of someone having added a scene and skipped the sync.
+    """
+    missing: list[str] = []
+    differing: list[str] = []
+    if not SERVED.is_dir():
+        return ([str(SERVED.relative_to(ROOT))], [], [])
+
+    wanted: set[Path] = set()
+    for source in sorted(LIBRARY.rglob('*')):
+        if not source.is_file() or source.name in NOT_SERVED:
+            continue
+        relative = source.relative_to(LIBRARY)
+        wanted.add(relative)
+        target = SERVED / relative
+        if not target.is_file():
+            missing.append(f'{relative.as_posix()} (expected at {SERVED.relative_to(ROOT)})')
+        elif target.read_bytes() != source.read_bytes():
+            differing.append(relative.as_posix())
+
+    extra = sorted(
+        entry.relative_to(SERVED).as_posix()
+        for entry in SERVED.rglob('*')
+        if entry.is_file() and entry.relative_to(SERVED) not in wanted
+    )
+    return (missing, differing, extra)
+
+
+def parity_problems() -> list[str]:
+    """Everything wrong with the platform's copy, as printable lines (empty list means in sync)."""
+    missing, differing, extra = served_parity()
+    problems: list[str] = []
+    if missing:
+        problems.append(f'{len(missing)} file(s) missing from the served mirror:')
+        problems += [f'  - {name}' for name in missing[:10]]
+    if differing:
+        problems.append(f'{len(differing)} file(s) differ from the library:')
+        problems += [f'  - {name}' for name in differing[:10]]
+    if extra:
+        problems.append(f'{len(extra)} stale file(s) the library no longer defines:')
+        problems += [f'  - {name}' for name in extra[:10]]
+    return problems
+
+
 def encode(convert: str, source: Path, target: Path, width: int, options: list[str]) -> None:
     command = [convert, str(source), '-resize', f'{width}x>', *options, str(target)]
     result = subprocess.run(command, capture_output=True, text=True)
@@ -178,7 +231,8 @@ def encode(convert: str, source: Path, target: Path, width: int, options: list[s
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--force', action='store_true', help='rewrite variants that already exist')
-    parser.add_argument('--check', action='store_true', help='write nothing; fail if a variant is missing')
+    parser.add_argument('--check', action='store_true',
+                        help='write nothing; fail if a variant is missing or the served mirror has drifted')
     parser.add_argument('--emit-served', action='store_true',
                         help="also refresh the platform's frontend/public/media/cloudhost247")
     args = parser.parse_args()
@@ -229,12 +283,25 @@ def main() -> int:
         ]
 
     if args.check:
+        failed = False
         if missing:
+            failed = True
             sys.stderr.write(f'✖ {len(missing)} raster variant(s) missing:\n')
             for name in missing[:10]:
                 sys.stderr.write(f'  - {name}\n')
+        problems = parity_problems()
+        if problems:
+            failed = True
+            sys.stderr.write(
+                '✖ the platform\'s copy of the media library is out of date '
+                '(run this script with --emit-served and commit the result):\n'
+            )
+            for line in problems:
+                sys.stderr.write(f'{line}\n')
+        if failed:
             return 1
         print(f'✓ raster ladder complete: {len(jpegs)} scenes × {len(FORMATS)} formats')
+        print(f'✓ served mirror in sync with {LIBRARY.relative_to(ROOT)}')
         return 0
 
     if orphaned:
