@@ -305,7 +305,15 @@ snapshot or a commit — and is reproducible with the command above.
 
 ## 10. Staging verification status
 
-- The release gate passed here with PHP 8.2.33 via the wasm shim.
+- The release gate passed here with PHP 8.2.33 via the wasm shim, and it also passes on the hosted
+  runners: `Independent foundation` — the same gate on **PHP 7.4 and 8.2** — completed successfully
+  on this branch after each push, so the changes are not an artefact of this sandbox's PHP shim.
+- `Content hygiene` now **runs and passes** (18–19 s per run) where it previously failed in zero
+  seconds without creating a job (§3.6): the repo-wide malformed-text scan and the legal-JSON byte
+  comparison are enforced again.
+- `CloudHost247 Node platform` (Node 22.12 and 24.8, with the migrations run against embedded
+  Postgres) was still running when this report was written; the identical suite passes locally
+  (161 files / 2 242 tests) and the two suites added in this pass pass on their own.
 - **Not performed:** deployment to the staging host, live WHMCS functional QA (registration, login,
   client area, cart and checkout, payments, provisioning, domain registration, tickets), and the
   browser/axe pass across the recorded viewport widths.
