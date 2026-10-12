@@ -157,7 +157,8 @@ Limits:
 * Browser-level testing of the MRZ page controls has not been run in this pass.
 
 Gaps:
-* Visible MRZ page controls were not individually exercised in a browser.
+* MRZ page controls are now exercised in a browser (`e2e/mrz.spec.ts`, 5/5).
+* TD1 generation writes the user's optional data into line 1 only. TD1 line 2 optional positions (19–29) are filled with `<`. This is valid per ICAO Doc 9303 Part 5 because optional data may be empty, but it is a deliberate limitation.
 
 ### 3.5 Compliance Tools (`/tools/compliance-documents`)
 
