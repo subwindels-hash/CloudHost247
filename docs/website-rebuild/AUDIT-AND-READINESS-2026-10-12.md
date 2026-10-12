@@ -327,7 +327,7 @@ Also verified in this pass:
 | Node platform `npm ci` + `npm run typecheck` + frontend `tsc --noEmit` | 264 top-level packages installed; both typechecks exit 0 |
 | Node platform `npm test` | 161 files / 2 242 tests passed, exit 0 |
 | `node scripts/check-workflow-yaml.mjs` | 3 workflow files parse, each with jobs and steps (added to the gate and to `content-hygiene.yml`) |
-| `python3 scripts/build-production-zip.py --verify` | **verified** — 9 577 members, 128 087 329 bytes (122.2 MiB), `secret_skipped=0`, 525 media assets, 47 theme illustrations and **39** referenced 3D scenes resolved in both libraries, 13 published documents; this build's digest was `431b8e4778b4e99af04692850a6827f606fbc8c6b557c5753c2b78f16a6b99fc` (a build output, not content-addressed) |
+| `python3 scripts/build-production-zip.py --verify` | **verified** — 9 801 members, 136 220 691 bytes (129.9 MiB), `secret_skipped=0`, 581 media assets, 47 theme illustrations and **47** referenced 3D scenes resolved in both libraries, 13 published documents; this build's digest was `4bbaa0576f95c88a5345cce00a3bf4f668953556873f567919168a8400669742` — a build output, not content-addressed, so the command above is the authoritative check, not the digest |
 
 The archive is deliberately not kept in the workspace — a 101 MiB build artefact does not belong in a
 snapshot or a commit — and is reproducible with the command above.
@@ -341,7 +341,7 @@ snapshot or a commit — and is reproducible with the command above.
   seconds without creating a job (§3.6): the repo-wide malformed-text scan and the legal-JSON byte
   comparison are enforced again.
 - The release gate was re-run after the hero artwork was regenerated and again passed end to end
-  (40-scene ladder, inventory 58 exact / 9 fallback / 39 distinct), and `Independent foundation`
+  (48-scene ladder, inventory 67 exact / 0 fallback / 47 distinct), and `Independent foundation`
   on the hosted runners passed on the resulting commit as well.
 - `CloudHost247 Node platform` (Node 22.12 and 24.8, with the migrations run against embedded
   Postgres) was still running when this report was written; the identical suite passes locally
