@@ -38,9 +38,10 @@ The brief's 21 tools are the 5 + 12 + 4.
 
 * Live-verified: the first directory entries (PAYE & Net Salary, Pension, VAT, Employer Cost,
   EWA ROI, Job Description Generator) match the registry.
-* **Not verified:** the directory only exposes the first six entries to this tool; pagination
-  parameters returned the same page. The remaining 11 generator names and the 4 comparison names
-  could not be confirmed live. The registry's list is the working assumption:
+* **Partly verified (2026-10-12):** the directory page exposes only its first six entries to this
+  tool, so the rest of the list cannot be read there. The sitemap (`salariopay.com/sitemap.xml`)
+  lists the 21 tool URLs, and all 21 slugs match the registry. The directory's total of 49 is
+  5 + 12 + 4 + 28 guides, which agrees with that split. The registry's list:
 
 | Category | Registered tools (`src/tools/business/registry.ts`) |
 |---|---|
@@ -67,8 +68,8 @@ The catalogue (`src/tools/catalog.ts`, 68 entries) covers almost all of them. Th
 | VAT | same | 7.5% standard rate, add/remove modes | Correct. |
 | Employer Cost | same | Pension, NSITF, group life, ITF, HMO, workspace, one-offs | Rates are user-adjustable estimates, labelled as such. |
 | EWA ROI | same | Workforce, adoption, turnover, replacement cost, evaluation period | Assumptions are user inputs, shown in the output. |
-| 12 generators | same | Each has a pure compute function and a form schema | Covered by the registry test. Output quality per generator not reviewed in this pass. |
-| 4 comparisons | same | Criteria, weights and scores templates | Covered by the registry test. Live comparison data sources not reviewed in this pass. |
+| 12 generators | same | Each has a pure compute function and a form schema | Covered by the engine tests and the browser spec (52/52 on staging). Output read end to end on 2026-10-12. Fixed: LinkedIn comment drafts opened sentences in lower case and claimed personal experience the writer had not supplied. Other generators' wording checked; each carries a draft / not-legal-advice notice. |
+| 4 comparisons | same | Criteria, weights and scores templates | Engine tests pass. Each comparison carries a provenance note and disclaimer that its scores are CloudHost247 planning guidance, not ratings. **Open:** see the PFA code and source-date findings below. |
 
 ### 3.2 Employee ID Card Generator (`/tools/business-tools/employee-id-card-generator`)
 
@@ -201,6 +202,16 @@ Limits of the E2E suite:
 * The Compliance Tools page (`/tools/compliance-documents`) has no E2E test yet.
 * Chromium comes from the sandbox, because `npx playwright install` cannot reach the CDN from here. CI must install the browser normally.
 * PHP catalogue suites were not run locally (PHP is not installed in this sandbox).
+
+### 3.7 SalarioPay tools 7–21 — verification findings (2026-10-12)
+
+* The 12 generator and 4 comparison slugs all match the sitemap, so the names and routes are confirmed.
+* **Open, PFA codes:** the comparison lists PenCom PFA codes at three digits (for example Stanbic
+  IBTC as `021`). A Stanbic IBTC document from the PFA shows the PenCom code as `0021`. The other
+  14 codes are not confirmed. Verify all of them against the PenCom register before the next release.
+* **Open, provenance dates:** the accounting comparison note says every fact was "checked against
+  published material on 2026-10-10". No record of that check exists in this repository, and it
+  could not be re-run from this sandbox. Treat that date as unverified until a check is recorded.
 
 ## 4. Staging verification (production build, this session)
 

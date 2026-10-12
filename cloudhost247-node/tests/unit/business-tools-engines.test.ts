@@ -1964,3 +1964,47 @@ describe('Business Tools — search and category filtering', () => {
     expect(findBusinessTool('')).toBeUndefined();
   });
 });
+
+describe('Generator 12 — LinkedIn comment drafts: no invented experience, sentence case', () => {
+  const tool = findBusinessTool('linkedin-engagement-assistant')!;
+  const post = 'We rebuilt our payroll run around earned wage access and turnover fell by a fifth within two quarters.';
+  const drafts = (extra: Record<string, string | boolean> = {}): string[] => {
+    const outcome = tool.compute({ ...defaultInputFor(tool), postText: post, ...extra });
+    if (!outcome.ok) throw new Error(outcome.error.message);
+    const content = (outcome.result.document as { content: string }).content;
+    return content.split('\n').filter((line) => line.length > 40 && !line.startsWith('_') && !line.startsWith('#'));
+  };
+
+  it('never claims personal experience the writer did not supply', () => {
+    const text = drafts().join(' ');
+    expect(text).not.toMatch(/what I have seen|In my experience|someone working in the same space|From where I sit/);
+  });
+
+  it('uses the perspective only when the writer typed one', () => {
+    const text = drafts({ perspective: 'a payroll manager' }).join(' ');
+    expect(text).toContain('As a payroll manager');
+  });
+
+  it('starts every draft with a capital letter when no author name is given', () => {
+    for (const line of drafts()) {
+      const first = line.replace(/^[^A-Za-z]*/, '').charAt(0);
+      if (first) expect(first).toBe(first.toUpperCase());
+    }
+  });
+
+  it('keeps the author-name address form lower-case after the comma', () => {
+    const text = drafts({ authorName: 'Ada' }).join(' ');
+    expect(text).toMatch(/Ada, (this|the|genuinely|well|taking)/);
+  });
+});
+
+describe('Generator 12 — LinkedIn drafts: every sentence opens with a capital', () => {
+  const tool = findBusinessTool('linkedin-engagement-assistant')!;
+  it('capitalises the first word after each full stop when no perspective is given', () => {
+    const outcome = tool.compute({ ...defaultInputFor(tool), postText: 'We rebuilt our payroll run around earned wage access and turnover fell by a fifth within two quarters.' });
+    if (!outcome.ok) throw new Error(outcome.error.message);
+    const content = (outcome.result.document as { content: string }).content;
+    const lowerAfterStop = content.match(/[.!?] [a-z]/g) ?? [];
+    expect(lowerAfterStop).toEqual([]);
+  });
+});
