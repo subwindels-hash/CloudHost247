@@ -201,3 +201,42 @@ Limits of the E2E suite:
 * The Compliance Tools page (`/tools/compliance-documents`) has no E2E test yet.
 * Chromium comes from the sandbox, because `npx playwright install` cannot reach the CDN from here. CI must install the browser normally.
 * PHP catalogue suites were not run locally (PHP is not installed in this sandbox).
+
+## 4. Staging verification (production build, this session)
+
+Environment: `npm run build` (production bundle); `node server.js` with `NODE_ENV=production` on
+0.0.0.0:3000; PostgreSQL 18 from the `@embedded-postgres` npm package on 127.0.0.1:5433. Not
+a hosted staging environment: no real customer data, no outbound resolver access from the sandbox.
+
+| Check | Result |
+|---|---|
+| Release-candidate gate (`scripts/release-candidate-check.sh`), PHP 8.2 via `scripts/php-wasm` | Pass (exit 0) |
+| Same gate, PHP 7.4 via `scripts/php-wasm` (`PHP_WASM_VERSION=7.4`) | Pass (exit 0) |
+| Migrations: 82 applied, `verify` reports no checksum drift | Pass |
+| `/api/tools/mrz/config` advertises TD1, TD2, TD3 | Pass (fixed in 3a16f0d) |
+| `/api/tools/dns-lookup` with an unreachable resolver | Honest `TIMEOUT` (504, `retryable: true`, names the resolver). Sandbox has no outbound DNS. |
+| `/api/tools/dns-lookup` with `127.0.0.1` or `localhost` | `INVALID_INPUT` (400). Input validation rejects non-public names. |
+| `/api/tools/ipv6-address-generator` | Pass (ACTIVE, RFC 4193 ULA output) |
+| Old IPv6 URL `/tools/ip/ipv6-address-generator` | 301 to `/tools/local-ipv6-generator` |
+| Browser E2E against the staging server | 66 of 67 passed in the last serial run (see below) |
+| Screenshots | `docs/staging-screenshots/` (ID card, MRZ, Local IPv6, Compliance Tools) |
+
+Finding: the global rate limit (`src/plugins/security.ts`: 300 requests per minute per IP,
+also applied to SPA page loads) returns 429 to a browser that makes many requests from one IP.
+The E2E suite runs from one IP, so intermittent blank pages occur. Probing showed each failed
+load coincided with a 429. Isolated runs of the same tests pass. Production limit kept as is.
+Decision for the owner: raise the per-IP limit for the SPA shell, or give the E2E run an
+allow-listed test client. Both need a decision; neither was changed here.
+
+Defects found and fixed in this pass:
+* Duplicate capability: the Local IPv6 Address Generator was published at a second path
+  (`/tools/ip/ipv6-address-generator`) that failed the one-path-per-capability gate. It now
+  publishes `/tools/local-ipv6-generator`, with the old path kept as a legacy redirect.
+* Stale generated report (`shared/site/generated/route-report.json`) failed the generated-surface
+  gate in CI. Regenerated.
+* MRZ config under-reported supported formats (TD3 only).
+* MRZ parser E2E test used the legacy URL, which redirects to the generator page. It now selects
+  the "MRZ Parser" tab.
+
+Not verified: PHP suites run only through the WebAssembly shim, not a native PHP install.
+The shim is not CI evidence; CI remains the authority. Name Checker is still undecided.
