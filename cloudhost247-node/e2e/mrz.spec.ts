@@ -94,3 +94,35 @@ test('the parser decodes a TD2 into its named fields', async ({ page }) => {
   await expect(result.getByText('ERIKSSON')).toBeVisible();
   await expect(result.getByText('ANNA MARIA')).toBeVisible();
 });
+
+test('generates a two-line TD2 MRZ from the form, with the same person and check digits as the fixture', async ({ page }) => {
+  await page.goto(CALCULATOR);
+  await page.getByLabel('MRZ format').selectOption('TD2');
+  await page.getByLabel('Document Type').selectOption('I<');
+  await page.getByLabel('Issuing State').fill('UTO');
+  await page.getByLabel('Surname').fill('Eriksson');
+  await page.getByLabel('Given Names').fill('Anna Maria');
+  await page.getByLabel('Nationality').fill('UTO');
+  await page.getByLabel('Date of Birth (YYMMDD)').fill('740812');
+  await page.getByLabel('Sex').selectOption('F');
+  await page.getByLabel('Document Number').fill('D23145890');
+  await page.getByLabel('Expiry Date (YYMMDD)').fill('120415');
+  await page.getByRole('button', { name: 'Generate MRZ' }).click();
+
+  await expect(page.getByTestId('mrz-td-line-1')).toHaveText(TD2[0]!);
+  await expect(page.getByTestId('mrz-td-line-2')).toHaveText(TD2[1]!);
+  await expect(page.getByTestId('mrz-td-line-3')).toHaveCount(0);
+  await expect(page.getByText(/does NOT verify/).first()).toBeVisible();
+});
+
+test('the validator accepts a two-line TD2 and names its composite check', async ({ page }) => {
+  await page.goto(CALCULATOR);
+  await page.getByRole('tab', { name: 'MRZ Validator' }).click();
+  await page.locator('textarea').first().fill(TD2.join('\n'));
+  await page.getByRole('button', { name: 'Validate MRZ' }).click();
+
+  const result = page.getByTestId('td-result');
+  await expect(result.getByText(/TD2 passes every structural check/)).toBeVisible();
+  await expect(result.getByText('Document number check digit')).toBeVisible();
+  await expect(result.getByText('Composite check digit')).toBeVisible();
+});
