@@ -103,7 +103,16 @@ fill a footer column.
   that applies at every viewport the browser QA matrix tests. It fails loudly if it
   inspected implausibly little, so a green run cannot mean "it read nothing".
 - `python3 -m unittest tests/website/test_static.py`: link mutation tests, parent
-  hook contracts, Builder precedence and read-only API use.
+  hook contracts, Builder precedence and read-only API use, and the rule that no two
+  published pages share a hero (`test_published_pages_do_not_share_a_hero`, plus a
+  negative case that duplicates a page's artwork and requires the rule to fire while
+  the legal-document family stays exempt).
+- `python3 scripts/check-hero-render.py`: the same rule against the *rendered* pages —
+  the artwork each fixture actually paints must be the scene the inventory says the
+  page resolves to, must exist, and must not be the artwork another non-legal page
+  paints. Needs a fixture directory (`$CH247_FIXTURE_DIR`, produced by
+  `tests/website/render-fixtures.php`), so the release gate runs it when fixtures
+  exist and says so when they do not; exits 2 rather than passing when it cannot run.
 - `python3 -m unittest tests.website.test_catalogue_honesty.py`: the catalogue pages must stay
   honest — the application directory states it is not a claim of deployment availability and
   sends each card to the live platform for eligibility, the operating-system families are

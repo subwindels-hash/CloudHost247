@@ -153,6 +153,17 @@ python3 scripts/check-accessibility-contract.py
 # whose URL 404s does not fall through to the next source, so a missing encoding is a broken
 # image on a published page, not a slower one.
 python3 scripts/generate-raster-formats.py --check
+# Hero artwork as *rendered*, not as declared: every published page must render its own hero, and
+# no two of them the same one. The catalogue side of that rule runs unconditionally in
+# tests/website/test_static.py; this reads the rendered fixtures, which is the only place the HTML
+# can be asked, and needs Smarty — which is deliberately not part of this gate's toolchain. It
+# therefore runs wherever fixtures have been rendered, and says so when they have not.
+if [ -n "${CH247_FIXTURE_DIR:-}" ] && [ -d "${CH247_FIXTURE_DIR:-}" ]; then
+  python3 scripts/check-hero-render.py
+else
+  echo 'note: CH247_FIXTURE_DIR is not set, so the rendered-hero check did not run here.'
+  echo '      render fixtures (tests/website/render-fixtures.php) to run it.'
+fi
 # The Builder renders its own markup in PHP, so the theme class audit never sees it. This checks the
 # widget classes against the sheet the Builder serves, and fails on an unstyled one or on a hook
 # exemption that no longer matches anything.

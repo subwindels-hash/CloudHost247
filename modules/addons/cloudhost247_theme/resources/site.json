@@ -2169,7 +2169,7 @@
       "category": "Marketing",
       "headline": "The catalogue, not a price list someone typed",
       "summary": "Explore the currently available products and confirm any eligible offer in checkout. Promotions apply only when explicitly shown for your order.",
-      "visual": "cloud/cloud-hosting",
+      "visual": "cloud/offers",
       "features": [],
       "uses": [
         "Live catalogue prices",
@@ -2206,14 +2206,14 @@
           ]
         }
       ],
-      "visual3d": "cloud/cloud-hosting-3d"
+      "visual3d": "cloud/offers-3d"
     },
     "help-center.php": {
       "title": "Help Center",
       "category": "Support",
       "headline": "How to get an answer quickly",
       "summary": "Browse the knowledgebase, review your services or open a support ticket from your CloudHost247 account.",
-      "visual": "management/support",
+      "visual": "management/help-center",
       "features": [
         [
           "Documentation",
@@ -2310,7 +2310,7 @@
           ]
         }
       ],
-      "visual3d": "management/support-3d"
+      "visual3d": "management/help-center-3d"
     },
     "blog.php": {
       "title": "Blog",

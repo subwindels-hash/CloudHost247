@@ -9,7 +9,7 @@
     "footer_columns": 8,
     "hero_scenes_exact": 67,
     "hero_scenes_from_family_fallback": 0,
-    "distinct_hero_scenes": 47
+    "distinct_hero_scenes": 49
   },
   "defects": {
     "orphaned_pages": [],
@@ -1020,10 +1020,10 @@
         "description": "CloudHost247 support: search the knowledge base and documentation, run a diagnostic tool, open a ticket with the team, or check what is happening right now."
       },
       "hero_artwork": {
-        "svg": "management/support.svg",
-        "scene": "management/support-3d"
+        "svg": "management/help-center.svg",
+        "scene": "management/help-center-3d"
       },
-      "visual": "management/support",
+      "visual": "management/help-center",
       "image_status": "present",
       "seo_status": "ok",
       "navigation_placement": "resources / Documentation & help",
@@ -1284,10 +1284,10 @@
         "description": "Current CloudHost247 pricing, rendered live from the configured product catalogue \u2014 plans, prices and billing cycles exactly as configured."
       },
       "hero_artwork": {
-        "svg": "cloud/cloud-hosting.svg",
-        "scene": "cloud/cloud-hosting-3d"
+        "svg": "cloud/offers.svg",
+        "scene": "cloud/offers-3d"
       },
-      "visual": "cloud/cloud-hosting",
+      "visual": "cloud/offers",
       "image_status": "present",
       "seo_status": "ok",
       "navigation_placement": "resources / Stay informed",

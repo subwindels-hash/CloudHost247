@@ -108,13 +108,16 @@ measured by the inventory audit:
 |---|---|---|
 | Pages on their own scene | 38 | **67 of 67** |
 | Pages on a family fallback | 29 | **0** |
-| Distinct hero scenes in use | 19 | **47** |
+| Distinct hero scenes in use | 19 | **49** |
 
 The audit reports this on every run (`totals.hero_scenes_exact`,
 `totals.hero_scenes_from_family_fallback`, `totals.distinct_hero_scenes`, plus a `hero_fallbacks`
 list naming what each page shares its scene with), so coverage is measured rather than asserted —
 and because the release gate diffs the committed inventory, a future page that quietly falls back to
 a family scene shows up as an inventory change under review.
+
+That metric answers "does the scene this page's visual names exist?". It does not answer "is this
+page's hero its own?", which two pages declaring the *same* visual both satisfy — see §3.10.
 
 ### 3.5 The currency hint endpoint was publicly cacheable and echoed the caller's address
 
@@ -239,6 +242,31 @@ assumed, because a marketing site is exactly where a plausible-looking price tab
 this environment and none is configured with credentials, so the *live* availability, premium-price,
 transfer and appraisal paths remain staging work (E2), exactly as the criteria record.
 
+### 3.10 Two pages shared a hero while every coverage number read 67 of 67
+
+`hero_scenes_exact` counts a page as covered when the scene its visual key names exists. Two pages
+declaring the *same* key both satisfy that, so the inventory reported 67 of 67 pages on their own
+scene while `offers.php` painted the same hero as `cloudhost247-hosting.php` (`cloud/cloud-hosting`)
+and `help-center.php` the same one as `faqs.php` (`management/support`). §11 of this report recorded
+both pairs as acceptable — "the two hosting pages are the same product described twice" — and that
+reading does not survive contact with the pages: Offers renders live catalogue pricing and the Help
+Center is the support entry point, and neither is the page it was borrowing artwork from.
+
+Two scenes and two vector diagrams were produced for them (`cloud/offers`, `management/help-center`),
+encoded to the same 640/960/1280 AVIF + WebP ladder and mirrored into the platform's served library.
+The rule is now enforced in two places, because the catalogue and the HTML can disagree:
+
+| Where | What it checks | Result |
+|---|---|---|
+| `tests/website/test_static.py::test_published_pages_do_not_share_a_hero` (in the gate, always) | no two published non-legal pages resolve to the same hero artwork; a negative case duplicates a page's artwork and requires the rule to fire | 23 tests OK, and falsified by hand: reverting `offers.php` to the shared key fails the test, restoring its own key passes |
+| `scripts/check-hero-render.py` (in the gate when fixtures have been rendered) | the artwork each *rendered* page paints is the scene the inventory resolves for it, that artwork exists, and no other non-legal page paints it | 48 distinct hero artworks, 0 shared — 47 pages on the 3D ladder, `email-hosting.php` on its own flat illustration, 19 legal documents text-only |
+
+The legal and policy family is exempt from the distinctness rule, and the exemption is measured
+rather than assumed: those templates render the document as text with no hero at all, which the
+rendered check confirms for all 19, so a shared hero cannot hide behind a policy page. The gate runs
+the rendered check only where fixtures exist — Smarty is deliberately not part of its toolchain — and
+prints a note saying so when they do not, rather than passing silently.
+
 ## 4. Page inventory: what a visitor and a crawler can reach
 
 `python3 scripts/audit-navigation-inventory.py` (re-run in this pass, and now a gate step):
@@ -277,8 +305,8 @@ SPA navigation through a generated adapter, so the two front ends cannot drift.
 
 | Family | Contents |
 |---|---|
-| Illustrations | 219 SVGs in the library; the 67 registry pages reference 47 distinct diagrams (three keys shared — see §11) |
-| 3D scenes | 48, each with 640/960/1280 in **AVIF and WebP** plus the JPEG master (`generate-raster-formats.py --check` → 48 scenes × 2 formats ✓); 28 were added in this pass |
+| Illustrations | 221 SVGs in the library; the 67 registry pages reference 49 distinct diagrams (one key shared, by the 19-page policy family — see §11) |
+| 3D scenes | 50, each with 640/960/1280 in **AVIF and WebP** plus the JPEG master (`generate-raster-formats.py --check` → 50 scenes × 2 formats ✓); 30 were added in this pass |
 | Brand | 24 files: horizontal / compact / primary / icon-mark × dark, white and mono, in SVG + PNG + WebP |
 | Favicons | `favicon.ico` + 16/32/48/192/512 PNG, Apple touch icon, `site.webmanifest` |
 | Social | preview artwork in PNG, SVG and WebP |
@@ -291,7 +319,7 @@ the theme registry references in **both** the PHP library and the built SPA libr
 3D encoding.
 
 One gap was found and closed here. The platform's copy of the library
-(`cloudhost247-node/frontend/public/media/cloudhost247`, 581 files, 21 MB) is a *second* copy that
+(`cloudhost247-node/frontend/public/media/cloudhost247`, 597 files, 21 MB) is a *second* copy that
 Vite's build treats as its public directory, and nothing verified it against `assets/images/cloudhost247`
 — `generate-raster-formats.py --check` only counted the ladder. Adding a scene and skipping
 `--emit-served` would therefore have shipped a `<picture>` whose `-960.avif` does not exist, which a
@@ -331,7 +359,7 @@ checkout copy. That needs the licensed staging install and is recorded in §11.
 | 18 PHP behavioural suites (`tests/*/run.php`) | all pass — foundation, theme, currency, smm, tools, ovh, rdp, integrations, modules, builder, broker, marketing, cart_recovery, passkey, phoneservices, customaffiliate, cloudhost247_email, payments |
 | Tools platform | 85 tests / 0 failures · 1 171 shell/menu/footer assertions · 26 static tests · browser-tool module tests pass |
 | Static + security suites | 457 tests OK (2 skipped with recorded reasons) |
-| Website suites | 67 tests OK in the release gate (8 skipped there by design — the rendered-page cases need a fixture tree, which the gate does not build), including the catalogue-honesty guard |
+| Website suites | **78 tests OK** in the release gate (8 skipped there by design — the rendered-page cases need a fixture tree, which the gate does not build), including the catalogue-honesty guard and the hero-distinctness guard (§3.10) |
 | Node platform suite (`npm test`) | **161 test files / 2 242 tests passed**, exit 0 (Vitest, ~30 min; runs the migrations against the in-process Postgres engine) |
 | Node currency/i18n suites | the two new suites pass (6 + 8 tests) alongside the existing currency, i18n and switcher suites; `npm run typecheck` and the frontend `tsc --noEmit` exit 0 |
 | Server-agent authentication | 71/71 |
@@ -352,9 +380,10 @@ wasm shim, `PHP_LINT_JOBS=8`). Its steps, in order:
 4. 18 module behavioural suites;
 5. server-agent Node suite;
 6. static verification bundle (unittests, website suites — including the **catalogue-honesty**
-   guard — tools tests, site verifier, **accessibility contract (new)**, release-workflow
-   document checks, **domain data-provenance checks (new)**, raster ladder, Builder widget-class
-   audit, vendor manifest);
+   and **hero-distinctness** guards — tools tests, site verifier, **accessibility contract (new)**,
+   release-workflow document checks, **domain data-provenance checks (new)**, raster ladder and
+   served-mirror parity, **rendered-hero check (new, runs when fixtures exist)**, Builder
+   widget-class audit, vendor manifest);
 7. vendor integrity baseline.
 
 Also verified in this pass:
@@ -365,7 +394,7 @@ Also verified in this pass:
 | Node platform `npm ci` + `npm run typecheck` + frontend `tsc --noEmit` | 264 top-level packages installed; both typechecks exit 0 |
 | Node platform `npm test` | 161 files / 2 242 tests passed, exit 0 |
 | `node scripts/check-workflow-yaml.mjs` | 3 workflow files parse, each with jobs and steps (added to the gate and to `content-hygiene.yml`) |
-| `python3 scripts/build-production-zip.py --verify` | **verified** — 9 801 members, 136 220 691 bytes (129.9 MiB), `secret_skipped=0`, 581 media assets, 47 theme illustrations and **47** referenced 3D scenes resolved in both libraries, 13 published documents; this build's digest was `4bbaa0576f95c88a5345cce00a3bf4f668953556873f567919168a8400669742` — a build output, not content-addressed, so the command above is the authoritative check, not the digest |
+| `python3 scripts/build-production-zip.py --verify` | **verified** — 9 872 members, 138 237 977 bytes (131.8 MiB), `secret_skipped=0`, 597 media assets, 49 theme illustrations and **49** referenced 3D scenes resolved in both libraries, 13 published documents; this build's digest was `2d54749a5f011a6904ddd53b250c904c8695824df194bfe768ab5a24d273aca2` — a build output, not content-addressed, so the command above is the authoritative check, not the digest |
 
 The archive is deliberately not kept in the workspace — a 101 MiB build artefact does not belong in a
 snapshot or a commit — and is reproducible with the command above.
@@ -383,6 +412,14 @@ snapshot or a commit — and is reproducible with the command above.
   on the hosted runners passed on the resulting commit as well. A further run after the
   catalogue-honesty guard was added also passed end to end (443 security/static tests plus the
   67 website tests), and again after the domain data-provenance checks were added (457 + 67).
+- The latest run, after the two shared heroes were given artwork of their own (§3.10), passed end to
+  end with the rendered-hero check enabled: 457 static/security tests, **78 website tests**, 3
+  workflow files parsing, a 50-scene ladder with the served mirror in sync, inventory 67 exact /
+  0 fallback / **49 distinct**, and 48 distinct hero artworks across the rendered fixtures with none
+  shared. It also failed twice on the way and was fixed rather than loosened: once on unstaged
+  regenerated surfaces (the freshness check compares the worktree with the index) and once on a
+  missing `cloudhost247-node/node_modules` (`tsx: not found`, exit 127) — a clean-checkout
+  prerequisite, resolved by `npm ci`.
 - `CloudHost247 Node platform` (Node 22.12 and 24.8, with the migrations run against embedded
   Postgres) was still running when this report was written; the identical suite passes locally
   (161 files / 2 242 tests) and the two suites added in this pass pass on their own.
@@ -406,18 +443,16 @@ snapshot or a commit — and is reproducible with the command above.
    contract covers structure, names, target sizes and the responsive ladder, but it cannot measure
    real overflow or real focus behaviour. `tests/website/browser.cjs` must be re-run where a
    Chromium binary exists.
-2. **Three illustration keys are still shared.** Every page now renders its own 3D scene, and the
-   audit measures the vector keys too: 47 distinct diagrams serve 67 pages, and exactly three keys
-   are used by more than one page —
-   - `security/security` by **19 legal and policy pages** (acceptable-use, backup, cookie,
-     cybercrime, data-deletion, privacy, refund, terms and the rest of that family);
-   - `cloud/cloud-hosting` by `cloudhost247-hosting.php` and `offers.php`;
-   - `management/support` by `faqs.php` and `help-center.php`.
-
-   The 19-page policy family is a deliberate house treatment (a policy page gets the security
-   diagram, not a bespoke one), and the two hosting pages are the same product described twice. If
-   the brief is read as requiring a bespoke vector for each of those 19 pages, that is the remaining
-   illustration work; the *hero scene* requirement is met for all 67.
+2. **One illustration key is still shared, deliberately.** Every published page now renders its own
+   hero artwork — 48 distinct heroes across 48 pages, none shared, measured on the rendered fixtures
+   (§3.10) — and the vector keys are measured the same way: 49 distinct diagrams serve 67 pages, and
+   the only key used by more than one page is `security/security`, declared by the **19 legal and
+   policy documents** (acceptable-use, backup, cookie, cybercrime, data-deletion, privacy, refund,
+   terms and the rest of that family). Those templates render the document as text and no hero at
+   all, so the key is metadata they do not consume; a bespoke diagram behind each refund policy
+   would be decoration. If the brief is read as requiring one per policy document, that is the
+   remaining illustration work — it is not a hero-coverage gap, and the two pairs that were
+   (`offers.php` with `cloudhost247-hosting.php`, `help-center.php` with `faqs.php`) are closed.
 3. **PHP 8.2 deprecation notices** are emitted by the OVH / broker / marketing *test fakes* (missing
    `#[\ReturnTypeWillChange]` on `ArrayAccess`/`Countable`/`IteratorAggregate` implementations).
    Pre-existing, test-only, non-blocking.
@@ -436,7 +471,7 @@ snapshot or a commit — and is reproducible with the command above.
 
 ## 12. Files changed in this pass
 
-Beyond this report, the pass changes code, gates, documentation and 70 asset files. The
+Beyond this report, the pass changes code, gates, documentation and 424 asset files. The
 non-asset changes are:
 
 | File | Change |
@@ -449,10 +484,14 @@ non-asset changes are:
 | `tests/website/test_fixture_checks.py` | **new** — 8 tests for srcset parsing and the end-to-end fixture pass/fail |
 | `scripts/release-candidate-check.sh` | inventory-freshness gate, accessibility-contract step, the two new suites |
 | `scripts/audit-navigation-inventory.py` | reports hero-scene coverage (exact vs family fallback, shared-with list) |
+| `scripts/check-hero-render.py` | **new** — the hero each *rendered* page paints must be the one the inventory resolves, must exist, and must not be another page's; exits 2 rather than passing when no fixtures exist |
+| `tests/website/test_static.py` | adds `test_published_pages_do_not_share_a_hero` and its negative case (21 → 23 tests) |
+| `shared/site/content/resources.json`, `modules/addons/cloudhost247_theme/resources/site.json` | `/help` and `/offers` get their own visual keys (`management/help-center`, `cloud/offers`) instead of borrowing another page's |
+| `assets/images/cloudhost247/cloud/offers.svg`, `assets/images/cloudhost247/management/help-center.svg` | **new** — the two vector diagrams those keys name, drawn in the library's own house style |
 | `docs/website-rebuild/page-inventory.json` / `.csv` | regenerated: footer destinations 67 → 68, hero-scene coverage added |
 | `docs/website-rebuild/COMPONENTS.md` | documents the inventory audit, the accessibility contract and the two new suites; registry counts corrected (67 pages, 7 menus, 8 columns) |
 | `docs/website-rebuild/DEPLOYMENT.md` | registry-first navigation wording; Node suite figure corrected to the measured 2,242 tests |
-| `assets/images/cloudhost247/**` + `cloudhost247-node/frontend/public/media/cloudhost247/**` | **196 files**: 28 new 3D scenes × (JPEG + 640/960/1280 AVIF + WebP), mirrored into the served library |
+| `assets/images/cloudhost247/**` + `cloudhost247-node/frontend/public/media/cloudhost247/**` | **424 files** (212 per tree): 30 new 3D scenes × (JPEG + 640/960/1280 AVIF + WebP) and 2 new vector diagrams, mirrored into the served library |
 | `modules/addons/cloudhost247_theme/resources/site.json`, `shared/site/generated/route-report.json`, `cloudhost247-node/frontend/src/content/pages.generated.json` | regenerated from the registry (the new scenes change the resolved `visual3d`) |
 | `.github/workflows/content-hygiene.yml` | the unparseable step name that stopped the workflow from ever starting is quoted; the workflow also runs the new checker |
 | `scripts/check-workflow-yaml.mjs` | **new** — fails when any `.github/workflows/*.yml` would not start, with the file and line |
