@@ -40,8 +40,15 @@ Both directories now hold copies of the first-party marks defined here, byte-ide
 to the canonical files, and `scripts/generate-catalog-assets.py --emit-served` is what
 writes them. A test fails the build if a vendor brand hex or a mismatched copy returns.
 - `website/`, `platforms/`, `backgrounds/`, `network/`: reserved families for future
-  artwork. Product pages currently fall back to the closest existing family
-  illustration rather than inventing unsupported panels or locations.
+  artwork. No page falls back to them, and none falls back to a sibling's artwork
+  either: every registered page resolves its own illustration key and its own
+  `*-3d.jpg` scene (`page-inventory.json` → `hero_scenes_from_family_fallback: 0`).
+  Two checks hold that, because the catalogue and the HTML can disagree —
+  `tests/website/test_static.py` fails when two published pages resolve the same
+  hero, and `scripts/check-hero-render.py` fails when a rendered page's hero is not
+  the one the inventory resolved for it. Neither check invents artwork: a page with
+  no scene of its own is a failure, not a fallback, and no unsupported panel or
+  location is drawn to make one pass.
 - `hosting/`, `cloud/`, `servers/`, `domains/`: labeled, product-specific diagrams.
 - `applications/`, `deployment/`, `operating-systems/`: platform/catalog diagrams,
   not a claim that any particular runtime or image is provisionable.
@@ -131,6 +138,16 @@ half-consistent family.
 deterministically. Note that several product illustrations were hand-tuned after the
 last full run, so re-running it will replace those with the generic composition —
 review the diff before committing.
+
+Two diagrams are hand-authored rather than generated: `cloud/offers.svg` and
+`management/help-center.svg`. The generator writes no `cloud/` or `management/` path at
+all, so a re-run leaves both alone — which also means it cannot recreate them if they are
+deleted. They are drawn to this library's own conventions so they can be rebuilt by hand:
+660 × 560 viewBox, the `#266758` → `#101e2c` radial glow, nine `#365264` grid strokes at
+`.23` opacity, dashed `#79bda1` connectors, and three isometric plates (`#132b37` /
+`#1b3444` bodies, `#436272` edges, the middle one active in `#28483f` / `#68b996`) with
+`#b4f2cd` glyphs, a `#b2c8d2` plate label and the `CH247 / <PAGE>` caption — the same
+geometry `plate()` emits, differing only in glyph and label.
 Rasterising the vectors — the PNG logo exports, the favicons and the social card — needs
 Pillow and a resvg adapter. Set `CH247_RASTER_SCRIPT` to a Node script accepting
 `input.svg output.png width` and rendering with `@resvg/resvg-js`; the adapter below
