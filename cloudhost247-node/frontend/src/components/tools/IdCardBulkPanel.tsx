@@ -127,7 +127,7 @@ export default function IdCardBulkPanel({ base }: { base: CardFormState }) {
         </li>
         <li>
           <strong>Fill it in.</strong> Name and Employee ID are required; every other column is optional.
-          Photo URLs must be <code>https://</code> links, because the browser fetches them to draw the card.
+          Photos are embedded as data URLs, or left blank. This tool does not fetch remote photo URLs, so a URL produces a card without its photograph.
         </li>
         <li>
           <strong>Upload the CSV or <code>.xlsx</code>.</strong>
@@ -258,6 +258,12 @@ export default function IdCardBulkPanel({ base }: { base: CardFormState }) {
 
           <div className="idc-export__group">
             <h4>Generate the batch</h4>
+            {report.accepted.some((entry) => entry.photoUrl) ? (
+              <p className="ch247-page__hint">
+                {report.accepted.filter((entry) => entry.photoUrl).length} row(s) give a photo URL. This tool does not
+                fetch remote photos, so those cards are produced without a photograph and the manifest says so.
+              </p>
+            ) : null}
             <div className="idc-radio-row">
               <label>
                 <input type="radio" name="idc-bulk-format" checked={format === 'png'} onChange={() => setFormat('png')} /> PNG
@@ -275,7 +281,7 @@ export default function IdCardBulkPanel({ base }: { base: CardFormState }) {
                 disabled={busy || report.accepted.length === 0}
                 onClick={() => void generate()}
               >
-                {busy ? 'Generating…' : `Generate ${Math.min(report.accepted.length, BULK_MAX_ROWS)} cards`}
+                {busy ? 'Generating…' : generateLabel(Math.min(report.accepted.length, BULK_MAX_ROWS))}
               </button>
             </div>
             {progress ? (
@@ -303,4 +309,9 @@ export default function IdCardBulkPanel({ base }: { base: CardFormState }) {
       ) : null}
     </section>
   );
+}
+
+/** “Generate 1 card” / “Generate 2 cards”, so the button reads correctly for a single row. */
+function generateLabel(count: number): string {
+  return `Generate ${count} ${count === 1 ? 'card' : 'cards'}`;
 }

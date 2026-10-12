@@ -1368,14 +1368,16 @@ export function draftLinkedInComments(
   const anchor = sentences[0] ?? postText.trim().slice(0, 120);
   const anchorShort = clampText(anchor, 90);
   const addressed = authorName ? `${authorName}, ` : '';
-  const viewpoint = perspective ? perspective : 'someone working in the same space';
+  // The viewpoint is only ever what the writer typed. Inventing one would put experience in their mouth.
+  const asPerspective = perspective ? `As ${perspective}, ` : '';
+  const fromPerspective = perspective ? `From where I sit as ${perspective}, ` : '';
 
   const drafts: Array<{ tone: string; template: string; rationale: string }> = [
     {
       tone: 'Supportive',
       template:
         `${addressed}this is a useful framing of ${primaryTopic}. The part that stood out to me: "${anchorShort}". ` +
-        `From where I sit as ${viewpoint}, that matches what I have seen — and it is the kind of detail people skip past when they are in a hurry. Thanks for writing it down.` +
+        `${perspective ? `${fromPerspective}that` : 'That'} is the kind of detail people skip past when they are in a hurry. Thanks for writing it down.` +
         (keyPoint ? ` One thing I would add: ${keyPoint}.` : ''),
       rationale: 'Names a specific line from the post, which is what separates a comment that was read from one that was not.',
     },
@@ -1383,7 +1385,7 @@ export function draftLinkedInComments(
       tone: 'Insightful',
       template:
         `${addressed}the point about ${primaryTopic} raises a second-order question. "${anchorShort}" — if that holds, then the constraint is usually not the decision itself but who has to carry it. ` +
-        `In my experience as ${viewpoint}, the teams that get this right decide it explicitly rather than letting it default.` +
+        `${perspective ? `${asPerspective}the` : 'The'} teams that get this right tend to decide it explicitly rather than let it default.` +
         (keyPoint ? ` ${keyPoint}.` : ''),
       rationale: 'Extends the argument instead of restating it, which is the highest-value thing a comment can do.',
     },
@@ -1392,7 +1394,7 @@ export function draftLinkedInComments(
       template:
         `${addressed}genuinely curious about ${primaryTopic} here. You wrote: "${anchorShort}". ` +
         `How much of that do you think is context-specific, and how much travels to a smaller team or a different market? ` +
-        (keyPoint ? `I ask because ${keyPoint}.` : `I ask because the answer changes what I would advise as ${viewpoint}.`),
+        (keyPoint ? `I ask because ${keyPoint}.` : 'I ask because the answer changes how I would read the result.'),
       rationale: 'A real question invites a reply, which is where an actual conversation starts.',
     },
     {
@@ -1408,7 +1410,7 @@ export function draftLinkedInComments(
       template:
         `${addressed}taking "${anchorShort}" at face value, the interesting variable is the denominator. ` +
         `${analysis.mentionsNumbers ? 'The figures you cite give something to check against, which is rarer than it should be.' : 'There are no figures here, so the claim is directional — worth stating the base it was measured against.'} ` +
-        `As ${viewpoint}, I would want to see how it holds across a full cycle rather than one period.` +
+        `${perspective ? `As ${perspective}, I` : 'I'} would want to see how it holds across a full cycle rather than one period.` +
         (keyPoint ? ` ${keyPoint}.` : ''),
       rationale: 'Tests the claim against its evidence base without being dismissive of it.',
     },
@@ -1428,7 +1430,9 @@ export function draftLinkedInComments(
       })();
 
   return selected.map((draft) => {
-    const collapsed = draft.template.replace(/\s+/g, ' ').trim();
+    // Without an author name the comment opens a sentence, so its first letter must be capitalised.
+    const normalised = draft.template.replace(/\s+/g, ' ').trim();
+    const collapsed = authorName ? normalised : normalised.charAt(0).toUpperCase() + normalised.slice(1);
     let comment = collapsed;
     let trimmed = false;
     if (collapsed.length > maxLength) {

@@ -87,8 +87,10 @@
 
 .bt247-filter[aria-pressed='true'],
 .bt247-filter[aria-current='true'] {
-  background: var(--ch247-accent, #1f7ae0);
-  border-color: var(--ch247-accent, #1f7ae0);
+  /* White text needs 4.5:1 against the fill (WCAG 2.1 AA). #1f7ae0 gives only 4.27:1, so the
+     selected state uses a deeper blue, which gives 5.75:1. */
+  background: var(--ch247-accent-strong, #1565c0);
+  border-color: var(--ch247-accent-strong, #1565c0);
   color: #fff;
 }
 

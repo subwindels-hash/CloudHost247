@@ -1796,6 +1796,133 @@
         "smtp-tester"
       ],
       "resultMode": "calculated"
+    },
+    {
+      "slug": "minecraft-color-codes",
+      "name": "Minecraft Color Codes",
+      "category": "productivity",
+      "summary": "Minecraft colour and format code reference, with &-to-§ conversion.",
+      "description": "Lists every standard Minecraft colour and format code with its colour value, and converts text between the ampersand (&a) and section-sign (§a) notations or strips the codes. Only codes in the standard set are converted.",
+      "icon": "text",
+      "path": "/tools/minecraft-color-codes",
+      "apiPath": "/api/tools/minecraft-color-codes",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/productivity/minecraft-color-codes"
+      ],
+      "discoveryCategories": [
+        "utilities"
+      ],
+      "seoTitle": "Minecraft Color Codes | CloudHost247",
+      "relatedTools": [
+        "business-tools",
+        "word-counter",
+        "lorem-ipsum"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "raid-calculator",
+      "name": "RAID Calculator",
+      "category": "productivity",
+      "summary": "Usable capacity and fault tolerance for RAID 0, 1, 5, 6 and 10.",
+      "description": "Calculates usable and raw capacity, parity or mirror overhead and the number of drive failures each RAID level survives, from the drive count and size you enter. Results are arithmetic from the standard layouts; metadata, formatting and hot spares are not modelled.",
+      "icon": "calculator",
+      "path": "/tools/raid-calculator",
+      "apiPath": "/api/tools/raid-calculator",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/productivity/raid-calculator"
+      ],
+      "discoveryCategories": [
+        "utilities"
+      ],
+      "seoTitle": "RAID Calculator | CloudHost247",
+      "relatedTools": [
+        "business-tools",
+        "word-counter",
+        "lorem-ipsum"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "ipv6-address-generator",
+      "name": "Local IPv6 Address Generator",
+      "category": "ip",
+      "summary": "Generate a random RFC 4193 unique-local IPv6 prefix for private networks.",
+      "description": "Generates a random fd00::/8-based unique local address (ULA) prefix, a /64 subnet and a sample address, following RFC 4193. ULA addresses are for private use and are not routed on the public internet.",
+      "icon": "network",
+      "path": "/tools/local-ipv6-generator",
+      "apiPath": "/api/tools/ipv6-address-generator",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/ip/ipv6-address-generator",
+        "/tools/ipv6-address-generator"
+      ],
+      "discoveryCategories": [
+        "ip-network"
+      ],
+      "seoTitle": "Local IPv6 Address Generator | CloudHost247",
+      "relatedTools": [
+        "ip-lookup",
+        "my-ip",
+        "ip-whois"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "email-verifier",
+      "name": "Email Verifier",
+      "category": "dns",
+      "summary": "Check an address’s syntax and whether its domain accepts mail, using DNS only.",
+      "description": "Validates the syntax of an email address, then queries the domain’s MX records (including null MX and the implicit address fallback) and checks that the mail hosts resolve. It does not contact the recipient’s mail server, so it cannot confirm that a mailbox exists.",
+      "icon": "mail",
+      "path": "/tools/email-verifier",
+      "apiPath": "/api/tools/email-verifier",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/dns/email-verifier"
+      ],
+      "discoveryCategories": [
+        "dns-domains",
+        "email"
+      ],
+      "seoTitle": "Email Verifier | CloudHost247",
+      "relatedTools": [
+        "dns-propagation",
+        "dns-lookup",
+        "dns-health"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "ipv6-compatibility-checker",
+      "name": "IPv6 Compatibility Checker",
+      "category": "dns",
+      "summary": "Check whether a domain publishes IPv6 (AAAA) addresses.",
+      "description": "Queries AAAA and A records for a domain through the configured resolver and reports whether IPv6 addresses are published. An AAAA record confirms the DNS publication only; it does not prove that the server accepts IPv6 connections.",
+      "icon": "dns",
+      "path": "/tools/ipv6-compatibility-checker",
+      "apiPath": "/api/tools/ipv6-compatibility-checker",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/dns/ipv6-compatibility-checker"
+      ],
+      "discoveryCategories": [
+        "dns-domains"
+      ],
+      "seoTitle": "IPv6 Compatibility Checker | CloudHost247",
+      "relatedTools": [
+        "dns-propagation",
+        "dns-lookup",
+        "dns-health"
+      ],
+      "resultMode": "calculated"
     }
   ]
 }

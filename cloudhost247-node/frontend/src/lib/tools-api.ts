@@ -145,6 +145,24 @@ export const TOOL_FORMS: Record<string, ToolForm> = {
   'ip-to-hostname': { method: 'GET', fields: [ { name: 'address', label: 'IP address', type: 'text', required: true } ] },
   'isp-lookup': { method: 'GET', fields: [ { name: 'address', label: 'IP address', type: 'text', required: true } ] },
   'ip-converters': { method: 'POST', fields: [ select('mode', 'Conversion', ['ipv4-to-decimal', 'decimal-to-ipv4', 'ipv6-to-decimal', 'decimal-to-ipv6', 'ipv4-to-ipv6', 'ipv6-to-ipv4', 'expand-ipv6', 'compress-ipv6', 'cidr-to-range', 'range-to-cidr'], { required: true, defaultValue: 'ipv4-to-decimal' }), { name: 'value', label: 'Value', type: 'text', required: true, help: 'For range-to-cidr, enter "start end".' } ] },
+  'minecraft-color-codes': { method: 'POST', intro: 'Reference for the standard Minecraft colour and format codes. Enter text to convert it; leave the text blank to see the table only.', fields: [
+    { name: 'text', label: 'Text to convert (optional)', type: 'textarea', placeholder: 'Welcome &ato &lCloudHost247', help: 'Up to 5,000 characters.' },
+    select('mode', 'Conversion', ['ampersand-to-section', 'section-to-ampersand', 'strip'], { defaultValue: 'ampersand-to-section' }),
+  ] },
+  'raid-calculator': { method: 'POST', intro: 'Capacity and fault tolerance for RAID 0, 1, 5, 6 and 10. Metadata, filesystem overhead and hot spares are not modelled.', fields: [
+    select('level', 'RAID level', ['0', '1', '5', '6', '10'], { required: true, defaultValue: '5' }),
+    { name: 'drives', label: 'Number of drives', type: 'number', required: true, min: 1, max: 1000, defaultValue: 4 },
+    { name: 'driveSizeTb', label: 'Size per drive (TB)', type: 'number', required: true, min: 0.001, max: 100000, defaultValue: 4, help: 'Decimal terabytes, as the drive is labelled.' },
+  ] },
+  'ipv6-address-generator': { method: 'POST', intro: 'Generates a random RFC 4193 unique local address prefix for private networks. These addresses are not routed on the public internet.', fields: [
+    { name: 'subnetId', label: 'Subnet ID (hex, optional)', type: 'text', placeholder: '0000', help: '1 to 4 hexadecimal digits.' },
+  ] },
+  'email-verifier': { method: 'POST', intro: 'Checks an address’s syntax and whether its domain publishes mail routing. It does not contact the recipient’s mail server, so it cannot confirm that the mailbox exists.', fields: [
+    { name: 'email', label: 'Email address', type: 'text', required: true, placeholder: 'name@example.com' },
+  ] },
+  'ipv6-compatibility-checker': { method: 'POST', intro: 'Checks whether a domain publishes IPv6 (AAAA) addresses. This confirms DNS publication only, not that the server answers over IPv6.', fields: [
+    { name: 'domain', label: 'Domain', type: 'text', required: true, placeholder: 'example.com' },
+  ] },
 
   'subnet-calculator': { method: 'POST', fields: [ { name: 'cidr', label: 'Subnet (address/prefix)', type: 'text', required: true, placeholder: '192.168.1.0/24' }, { name: 'newPrefixLength', label: 'Split into /prefix (optional)', type: 'number', min: 1, max: 128 } ] },
   ping: { method: 'POST', fields: [ { name: 'target', label: 'Hostname or IP', type: 'text', required: true }, { name: 'count', label: 'Probes', type: 'number', min: 1, max: 10, defaultValue: 4 }, { name: 'forceTcp', label: 'Force TCP mode', type: 'checkbox', help: 'ICMP is used when the deployment allows it; TCP timing is always available.' } ] },

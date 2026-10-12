@@ -952,7 +952,7 @@ function pfaOption(
       'Typical segment': segment,
     },
     scores,
-    note: 'Licensing status and fund performance must be verified with PenCom. Codes are from the published PenCom register.',
+    note: 'Licensing status and fund performance must be verified with PenCom. The four-digit code matches the PFA code table used for pension remittance (checked 2026-10-12); confirm it on the PenCom register before a remittance is made.',
   };
 }
 
@@ -971,30 +971,30 @@ export const PFA_COMPARISON: ComparisonDataset = {
     { key: 'self-service', label: 'Self-service features', description: 'Online management of biodata, beneficiaries and contact details.', weight: 3 },
   ],
   options: [
-    pfaOption('access-arm', 'Access ARM Pensions', '024', 'Large employers and individuals', 'National, multi-segment', { 'rsa-registration': 5, 'digital-portal': 5, 'employer-support': 5, 'customer-service': 5, 'fund-performance': 4, 'branch-network': 5, 'rsa-transfer': 4, 'self-service': 5 }),
-    pfaOption('stanbic-ibtc', 'Stanbic IBTC Pension Managers', '021', 'Corporate organisations', 'Corporate', { 'rsa-registration': 5, 'digital-portal': 5, 'employer-support': 5, 'customer-service': 4, 'fund-performance': 4, 'branch-network': 5, 'rsa-transfer': 4, 'self-service': 4 }),
-    pfaOption('premium-pension', 'Premium Pension', '022', 'Federal government and private sector', 'Public and private', { 'rsa-registration': 4, 'digital-portal': 4, 'employer-support': 5, 'customer-service': 4, 'fund-performance': 4, 'branch-network': 4, 'rsa-transfer': 4, 'self-service': 4 }),
-    pfaOption('fcmb-pensions', 'FCMB Pensions', '030', 'SMEs and retail customers', 'SME and retail', { 'rsa-registration': 4, 'digital-portal': 4, 'employer-support': 4, 'customer-service': 4, 'fund-performance': 3, 'branch-network': 4, 'rsa-transfer': 4, 'self-service': 4 }),
-    pfaOption('leadway-pfa', 'Leadway PFA', '023', 'SMEs and corporate teams', 'SME and corporate', { 'rsa-registration': 4, 'digital-portal': 4, 'employer-support': 4, 'customer-service': 4, 'fund-performance': 3, 'branch-network': 3, 'rsa-transfer': 4, 'self-service': 4 }),
-    pfaOption('gt-pension-managers', 'Guaranty Trust Pension Managers', '040', 'GTBank customers and digital users', 'Digital', { 'rsa-registration': 4, 'digital-portal': 5, 'employer-support': 4, 'customer-service': 4, 'fund-performance': 3, 'branch-network': 4, 'rsa-transfer': 4, 'self-service': 4 }),
-    pfaOption('fidelity-pension', 'Fidelity Pension Managers', '043', 'Individuals and SMEs', 'Retail and SME', { 'rsa-registration': 4, 'digital-portal': 4, 'employer-support': 3, 'customer-service': 4, 'fund-performance': 3, 'branch-network': 3, 'rsa-transfer': 4, 'self-service': 4 }),
-    pfaOption('trustfund', 'Trustfund Pensions', '028', 'Public and private sector employees', 'Public and private', { 'rsa-registration': 4, 'digital-portal': 3, 'employer-support': 4, 'customer-service': 4, 'fund-performance': 3, 'branch-network': 3, 'rsa-transfer': 4, 'self-service': 3 }),
-    pfaOption('crusader-sterling', 'Crusader Sterling Pensions', '032', 'Small and medium-sized businesses', 'SME', { 'rsa-registration': 4, 'digital-portal': 3, 'employer-support': 4, 'customer-service': 4, 'fund-performance': 3, 'branch-network': 3, 'rsa-transfer': 4, 'self-service': 3 }),
-    pfaOption('cardinalstone', 'CardinalStone Pensions', '046', 'Investment-focused clients', 'Investment-led', { 'rsa-registration': 4, 'digital-portal': 4, 'employer-support': 3, 'customer-service': 4, 'fund-performance': 4, 'branch-network': 2, 'rsa-transfer': 4, 'self-service': 4 }),
-    pfaOption('norrenberger', 'Norrenberger Pensions', '036', 'Modern digital users', 'Digital', { 'rsa-registration': 4, 'digital-portal': 4, 'employer-support': 3, 'customer-service': 4, 'fund-performance': 3, 'branch-network': 2, 'rsa-transfer': 4, 'self-service': 4 }),
-    pfaOption('citizens-pensions', 'Citizens Pensions', '050', 'Retail customers', 'Retail', { 'rsa-registration': 4, 'digital-portal': 4, 'employer-support': 3, 'customer-service': 3, 'fund-performance': 3, 'branch-network': 3, 'rsa-transfer': 4, 'self-service': 4 }),
-    pfaOption('nlpc-pfa', 'NLPC Pension Fund Administrators', '031', 'Small and medium-sized businesses', 'SME', { 'rsa-registration': 3, 'digital-portal': 3, 'employer-support': 4, 'customer-service': 4, 'fund-performance': 3, 'branch-network': 3, 'rsa-transfer': 3, 'self-service': 3 }),
-    pfaOption('nupemco', 'NUPEMCO', '049', 'Nigerian university employees', 'Specialised (universities)', { 'rsa-registration': 4, 'digital-portal': 3, 'employer-support': 4, 'customer-service': 4, 'fund-performance': 3, 'branch-network': 2, 'rsa-transfer': 3, 'self-service': 3 }),
-    pfaOption('parthian', 'Parthian Pensions', '051', 'Customers considering a newer market entrant', 'Newer entrant', { 'rsa-registration': 4, 'digital-portal': 4, 'employer-support': 3, 'customer-service': 3, 'fund-performance': 3, 'branch-network': 2, 'rsa-transfer': 4, 'self-service': 4 }),
+    pfaOption('access-arm', 'Access ARM Pensions', '0024', 'Large employers and individuals', 'National, multi-segment', { 'rsa-registration': 5, 'digital-portal': 5, 'employer-support': 5, 'customer-service': 5, 'fund-performance': 4, 'branch-network': 5, 'rsa-transfer': 4, 'self-service': 5 }),
+    pfaOption('stanbic-ibtc', 'Stanbic IBTC Pension Managers', '0021', 'Corporate organisations', 'Corporate', { 'rsa-registration': 5, 'digital-portal': 5, 'employer-support': 5, 'customer-service': 4, 'fund-performance': 4, 'branch-network': 5, 'rsa-transfer': 4, 'self-service': 4 }),
+    pfaOption('premium-pension', 'Premium Pension', '0022', 'Federal government and private sector', 'Public and private', { 'rsa-registration': 4, 'digital-portal': 4, 'employer-support': 5, 'customer-service': 4, 'fund-performance': 4, 'branch-network': 4, 'rsa-transfer': 4, 'self-service': 4 }),
+    pfaOption('fcmb-pensions', 'FCMB Pensions', '0030', 'SMEs and retail customers', 'SME and retail', { 'rsa-registration': 4, 'digital-portal': 4, 'employer-support': 4, 'customer-service': 4, 'fund-performance': 3, 'branch-network': 4, 'rsa-transfer': 4, 'self-service': 4 }),
+    pfaOption('leadway-pfa', 'Leadway PFA', '0023', 'SMEs and corporate teams', 'SME and corporate', { 'rsa-registration': 4, 'digital-portal': 4, 'employer-support': 4, 'customer-service': 4, 'fund-performance': 3, 'branch-network': 3, 'rsa-transfer': 4, 'self-service': 4 }),
+    pfaOption('gt-pension-managers', 'Guaranty Trust Pension Managers', '0040', 'GTBank customers and digital users', 'Digital', { 'rsa-registration': 4, 'digital-portal': 5, 'employer-support': 4, 'customer-service': 4, 'fund-performance': 3, 'branch-network': 4, 'rsa-transfer': 4, 'self-service': 4 }),
+    pfaOption('fidelity-pension', 'Fidelity Pension Managers', '0043', 'Individuals and SMEs', 'Retail and SME', { 'rsa-registration': 4, 'digital-portal': 4, 'employer-support': 3, 'customer-service': 4, 'fund-performance': 3, 'branch-network': 3, 'rsa-transfer': 4, 'self-service': 4 }),
+    pfaOption('trustfund', 'Trustfund Pensions', '0028', 'Public and private sector employees', 'Public and private', { 'rsa-registration': 4, 'digital-portal': 3, 'employer-support': 4, 'customer-service': 4, 'fund-performance': 3, 'branch-network': 3, 'rsa-transfer': 4, 'self-service': 3 }),
+    pfaOption('crusader-sterling', 'Crusader Sterling Pensions', '0032', 'Small and medium-sized businesses', 'SME', { 'rsa-registration': 4, 'digital-portal': 3, 'employer-support': 4, 'customer-service': 4, 'fund-performance': 3, 'branch-network': 3, 'rsa-transfer': 4, 'self-service': 3 }),
+    pfaOption('cardinalstone', 'CardinalStone Pensions', '0046', 'Investment-focused clients', 'Investment-led', { 'rsa-registration': 4, 'digital-portal': 4, 'employer-support': 3, 'customer-service': 4, 'fund-performance': 4, 'branch-network': 2, 'rsa-transfer': 4, 'self-service': 4 }),
+    pfaOption('norrenberger', 'Norrenberger Pensions', '0036', 'Modern digital users', 'Digital', { 'rsa-registration': 4, 'digital-portal': 4, 'employer-support': 3, 'customer-service': 4, 'fund-performance': 3, 'branch-network': 2, 'rsa-transfer': 4, 'self-service': 4 }),
+    pfaOption('citizens-pensions', 'Citizens Pensions', '0050', 'Retail customers', 'Retail', { 'rsa-registration': 4, 'digital-portal': 4, 'employer-support': 3, 'customer-service': 3, 'fund-performance': 3, 'branch-network': 3, 'rsa-transfer': 4, 'self-service': 4 }),
+    pfaOption('nlpc-pfa', 'NLPC Pension Fund Administrators', '0031', 'Small and medium-sized businesses', 'SME', { 'rsa-registration': 3, 'digital-portal': 3, 'employer-support': 4, 'customer-service': 4, 'fund-performance': 3, 'branch-network': 3, 'rsa-transfer': 3, 'self-service': 3 }),
+    pfaOption('nupemco', 'NUPEMCO', '0049', 'Nigerian university employees', 'Specialised (universities)', { 'rsa-registration': 4, 'digital-portal': 3, 'employer-support': 4, 'customer-service': 4, 'fund-performance': 3, 'branch-network': 2, 'rsa-transfer': 3, 'self-service': 3 }),
+    pfaOption('parthian', 'Parthian Pensions', '0051', 'Customers considering a newer market entrant', 'Newer entrant', { 'rsa-registration': 4, 'digital-portal': 4, 'employer-support': 3, 'customer-service': 3, 'fund-performance': 3, 'branch-network': 2, 'rsa-transfer': 4, 'self-service': 4 }),
   ],
   note: {
     jurisdiction: 'Nigeria (federal)',
     source:
-      'Provider names and PFA codes taken from the National Pension Commission (PenCom) register of licensed Pension Fund Administrators. Contribution rules from the Pension Reform Act 2014.',
+      'PFA names and four-digit codes checked against the PFA code table used for pension remittance (Remita) and against PFA-published PenCom code documents, on 2026-10-12. The PenCom site could not be reached for this check. Contribution rules from the Pension Reform Act 2014.',
     effectiveDate: '2026-10-10',
     estimate: true,
     disclaimer:
-      'The register changes as licences are granted, merged or withdrawn — ARM Pensions and Access Pensions now operate as Access ARM Pensions Limited, shown here as one administrator. Verify current licensing and published fund performance with PenCom. The criterion scores are CloudHost247 planning guidance derived from each administrator\u2019s published market positioning; they are not PenCom ratings, not performance measurements and not endorsements. Under the Contributory Pension Scheme the employee chooses the PFA, not the employer.',
+      'This directory lists only some licensed PFAs, so it is not the full register. The register changes as licences are granted, merged or withdrawn — ARM Pensions and Access Pensions now operate as Access ARM Pensions Limited, shown here as one administrator. Verify current licensing and published fund performance with PenCom. The criterion scores are CloudHost247 planning guidance derived from each administrator\u2019s published market positioning; they are not PenCom ratings, not performance measurements and not endorsements. Under the Contributory Pension Scheme the employee chooses the PFA, not the employer.',
   },
 };
 
@@ -1131,7 +1131,7 @@ export function computePfaComparison(values: BusinessToolInput): BusinessToolOut
   const grandTotal = round(rows.reduce((total, row) => total + row.totalRemittance, 0), 2);
 
   const metrics: ResultMetric[] = [
-    { label: 'Licensed PFAs listed', value: formatInteger(PFA_COMPARISON.options.length), emphasis: 'primary', hint: 'From the published PenCom register' },
+    { label: 'PFAs in this directory', value: formatInteger(PFA_COMPARISON.options.length), emphasis: 'primary', hint: 'A subset of licensed PFAs, not the full register' },
     { label: 'Criteria compared', value: formatInteger(PFA_COMPARISON.criteria.length), emphasis: 'secondary' },
     rows.length > 0
       ? { label: 'Remittance schedule', value: `${formatInteger(rows.length)} employee${rows.length === 1 ? '' : 's'} across ${formatInteger(byPfa.length)} PFA${byPfa.length === 1 ? '' : 's'}`, emphasis: 'primary' }

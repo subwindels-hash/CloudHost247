@@ -1,0 +1,290 @@
+# CloudHost247 Tools — Audit Report (2026-10-11)
+
+Scope: the implementation brief covering the SalarioPay business tools, the Employee ID Card
+Generator, the DNS Checker tool inventory, the MRZ tools and the Compliance Tools.
+
+This report records what was **checked**, what was **verified**, and what is **still missing**.
+It does not claim completion of the whole brief. Items marked *Not verified* or *Missing* are
+open work, not hidden defects.
+
+## 1. Method and evidence
+
+| Check | Result | Notes |
+|---|---|---|
+| `npm ci` (Node 22.22.3, lockfile) | Pass | |
+| `npm run typecheck` (server) | Pass | |
+| `tsc -p frontend/tsconfig.json --noEmit` | Pass | |
+| `npx vitest run` (full suite), before this change | **Pass** — 145 files passed, 1 skipped; 2,009 tests passed, 6 skipped; exit 0 | Takes about 20 minutes on this runner |
+| `npx vitest run` (full suite), after the four new tools | **Pass** — 147 files, 2,056 tests, none skipped; exit 0 |
+| `npx vitest run` (full suite), after Email Verifier | **Pass** — 148 files, 2,086 tests; exit 0 | Includes `tests/unit/email-verifier.test.ts` (syntax, routing verdicts, handler) | The previously skipped tool-page HTTP status test runs once the production build has created the SPA shell |
+| `tests/unit/gap-tools.test.ts` | Pass — 37 tests | Minecraft codes, RAID layouts and invalid input, RFC 4193 layout, IPv6 classification, resolver failure propagation, catalogue wiring |
+| `npm run build` (catalogue check, server, frontend, tools bundle) | Pass | |
+| `npm audit --omit=dev --audit-level=high` | Pass — 0 vulnerabilities | |
+| PHP suites (`tests/**/run.php`, `php -l`) | **Not run** | PHP is not installed in this sandbox. CI runs them. |
+| Browser / end-to-end tests | **Present (Playwright, 67 tests)** | `e2e/business-tools.spec.ts` (52), `e2e/id-card.spec.ts` (10), `e2e/mrz.spec.ts` (5). Run with `npm run e2e`. See section 3.6 for scope and limits. |
+| Production build served in staging | **Not done** | Requires a staging environment. |
+| Live reference comparison | Partial | See §2. |
+
+The repository is the CloudHost247 WHMCS customisation set plus the independent
+`cloudhost247-node/` platform. The business, ID-card, DNS and MRZ tools all live in
+`cloudhost247-node/`.
+
+## 2. Reference inventories compared
+
+### SalarioPay (`https://www.salariopay.com/tools`)
+
+The live directory reports **49 tools: 5 calculators, 12 generators, 4 comparisons, 28 guides**.
+The brief's 21 tools are the 5 + 12 + 4.
+
+* Live-verified: the first directory entries (PAYE & Net Salary, Pension, VAT, Employer Cost,
+  EWA ROI, Job Description Generator) match the registry.
+* **Partly verified (2026-10-12):** the directory page exposes only its first six entries to this
+  tool, so the rest of the list cannot be read there. The sitemap (`salariopay.com/sitemap.xml`)
+  lists the 21 tool URLs, and all 21 slugs match the registry. The directory's total of 49 is
+  5 + 12 + 4 + 28 guides, which agrees with that split. The registry's list:
+
+| Category | Registered tools (`src/tools/business/registry.ts`) |
+|---|---|
+| Calculators (5) | PAYE & Net Salary; Pension; VAT; Employer Cost; EWA ROI |
+| Generators (12) | Job Description; Job Offer Letter; Official Payslip; NDA Contract; Employment Contract; CV; Business Invoice; Business Card; Employee ID; **Employee ID Card**; Organizational Chart; LinkedIn Engagement Assistant |
+| Comparisons (4) | Accounting Tool; Expense Tool; HMO (Nigeria); PFA (Nigeria) |
+
+Action: capture the full live list (browser, or a directory page that exposes all 49) and diff it
+against the registry before calling the 21 tools verified against the reference.
+
+### DNS Checker (`https://dnschecker.org/all-tools.php`)
+
+Categories: DNS, IP, Dev, Designer, Webmaster, Network, Cyber Security, Productivity, Gaming.
+The catalogue (`src/tools/catalog.ts`, 68 entries) covers almost all of them. The gaps are below.
+
+## 3. Tool-by-tool status
+
+### 3.1 Business Tools (5 calculators, 12 generators, 4 comparisons)
+
+| Tool | Route | Existing | Status |
+|---|---|---|---|
+| PAYE & Net Salary | `/tools/business-tools/…` | NTA 2025 bands (0/15/18/21/23/25%, ₦800k zero band, effective 1 Jan 2026), reliefs, pension, NHF, NHIS, gross↔net solver | **Band table verified** against five published sources. Calculation, reset and export behaviour covered by `business-tools-engines.test.ts`. |
+| Pension | same | 8% employee / 10% employer, PRA 2014 floor checks | Rules correct for the statute; reference-case tests exist. |
+| VAT | same | 7.5% standard rate, add/remove modes | Correct. |
+| Employer Cost | same | Pension, NSITF, group life, ITF, HMO, workspace, one-offs | Rates are user-adjustable estimates, labelled as such. |
+| EWA ROI | same | Workforce, adoption, turnover, replacement cost, evaluation period | Assumptions are user inputs, shown in the output. |
+| 12 generators | same | Each has a pure compute function and a form schema | Covered by the engine tests and the browser spec (52/52 on staging). Output read end to end on 2026-10-12. Fixed: LinkedIn comment drafts opened sentences in lower case and claimed personal experience the writer had not supplied. Other generators' wording checked; each carries a draft / not-legal-advice notice. |
+| 4 comparisons | same | Criteria, weights and scores templates | Engine tests pass. Each comparison carries a provenance note and disclaimer that its scores are CloudHost247 planning guidance, not ratings. **Open:** see the PFA code and source-date findings below. |
+
+### 3.2 Employee ID Card Generator (`/tools/business-tools/employee-id-card-generator`)
+
+Verified by reading the code and the 59 unit tests in `tests/unit/employee-id-card.test.ts`
+(not by a browser run):
+
+| Requirement | Status |
+|---|---|
+| 12 templates, each a distinct layout program, fingerprint-tested | Implemented |
+| 8 colour presets (Salario Green … Charcoal) | Implemented (`id-card/types.ts`) |
+| Four custom colour controls (accent, background, text, detail) | Implemented (`id-card/colors.ts`) |
+| QR code (validated URL) and Code128 barcode, with toggles | Implemented; Code128 round-trip is tested by a raster decoder |
+| Front/back preview, ID-1 proportions | Implemented |
+| Photo / logo / signature validation (type, size, dimensions, corrupt data) | Implemented (`images.ts`) |
+| PDF, PNG and JPG export; SVG export | Implemented (`frontend/src/lib/id-card/export.ts`, `pdf.ts`) |
+| Bulk import: CSV and XLSX parsing, column mapping, validation, duplicate IDs rejected in both directions, rejected-row report, batch ZIP with manifest | Implemented (`batch.ts`, `zip.ts`) |
+| Photo URLs in bulk import (https only; fetched in the browser only at generation time) | Implemented |
+| Local-only storage, image consent, clear-local-data | Implemented in `frontend/src/lib/id-card/storage.ts` (`localStorage` only) |
+
+Browser end-to-end flow is now covered (`e2e/id-card.spec.ts`, 10/10): templates and presets, custom hex validation, canvas preview change, reset, photo rejection and acceptance, PNG/JPG/PDF exports, bulk duplicate-ID rejection with a rejected-row report, ZIP download, and clear-local-data.
+
+Gaps not verified in this pass: real printed-card scan tests (requires physical scanners), and a pixel-level check of every template at export resolution. The QR and Code128 payloads are checked by unit tests, not by a scanner.
+
+### 3.3 DNS Checker inventory
+
+Covered by catalogue entries, handlers and tests (examples: `dns-lookup`, `mx-lookup`,
+`spf-checker`, `dmarc-checker`, `dmarc-generator`, `dkim-checker`, `dnskey-lookup`, `ds-lookup`,
+`reverse-dns`, `ip-lookup`, `ip-whois`, `ip-blacklist`, `ssl-checker`, `port-checker`,
+`mac-lookup`, `mac-generator`, `asn-whois`, `http-headers`, `smtp-tester`, `email-header`,
+`qr-generator`, `qr-scanner`, `morse` and `ROT13` in `encoding-tools`, `color-tools`,
+`word-counter`, `notepad`, `password-tools`, `robots-generator`, `serp-simulator`,
+`open-graph`, `broken-links`, `punycode`, `time-card`, `speed-test`, `ping`, `traceroute`).
+
+Gaps found by comparison with the reference:
+
+| Reference tool | Status | Reason / action |
+|---|---|---|
+| Minecraft Color Codes (Gaming) | **Implemented** (`minecraft-color-codes`) | Full standard code table with colour values; `&`↔`§` conversion and stripping, counting the codes changed. Filed under Productivity because the catalogue has no gaming category. |
+| RAID Calculator (Productivity) | **Implemented** (`raid-calculator`) | RAID 0/1/5/6/10 usable and raw capacity, overhead, guaranteed and best-case failures, decimal TB and binary TiB. Metadata, filesystem overhead and hot spares are not modelled. |
+| Local IPv6 Address Generator (IP) | **Implemented** (`ipv6-address-generator`) | RFC 4193 ULA prefix, /64 subnet and sample address from `crypto.randomBytes`. |
+| IPv6 Compatibility Checker (DNS) | **Implemented** (`ipv6-compatibility-checker`) | AAAA and A lookups through the resolver layer, with resolver evidence. Reports DNS publication only, not reachability. |
+| Name Checker (Productivity) | **Implemented (RDAP, domain names only)** | Checks `.com`, `.net`, `.org` through RDAP, the registry-reported source. Outcomes: Registered (200 with a record), No registry record (404; never a guarantee the name can be registered), Unknown (lookup failed; all three unknown returns 503). No social-handle or username checks, no API key. Live RDAP is not verifiable from this sandbox. Covered by `tests/tools/catalogue.php`. |
+| Google PageRank | **Not implementable** | Google discontinued public PageRank data. Document as unavailable; do not fake results. |
+| Credit Card Checker | **Deliberately excluded** | The repository's BIN checker explicitly refuses full card numbers. Keep this boundary; do not add Luhn validation of full PANs. |
+| HTACCESS / URL rewrite generator | Covered | Inside `url-tools` (Multi-URL opener, rewrite and .htaccess generators). |
+| Email Verifier | **Implemented, DNS-only** (`email-verifier`) | Syntax rules (RFC 5321/5322 dot-atom; quoted local parts reported as unsupported), then MX routing: accepts mail, null MX (RFC 7505), implicit MX fallback, unresolvable MX. **Mailbox existence is not checked** — that needs an SMTP RCPT probe, which is unreliable, often blocked and abusable, so it is not offered. Every result says so. |
+
+The four implemented tools added catalogue entries, so `modules/addons/cloudhost247_theme/resources/tools.json`
+was regenerated with `npm run tools:catalog` (74 entries; `--check` verified). The PHP catalogue
+tests (`tests/tools/catalogue.php`, `tests/tools/site-integration.php`) could not be run here because
+PHP is not installed; they run in CI and must pass before merge.
+
+### 3.4 MRZ tools (`/tools/mrz-generator`, `/tools/mrz-parser`)
+
+Verified:
+* ICAO Doc 9303 check digits with weights 7, 3, 1 (`MRZ_WEIGHTS`), tested in
+  `tests/unit/mrz-engine.test.ts` with valid and corrupted check digits.
+* Parsing reports `checkDigitStatus` pass/fail and states that a valid MRZ does not prove a
+  document is genuine.
+* Routes are registered (`src/routes/mrz-tools.ts`); catalogue and API tests exist
+  (`tests/integration/mrz-tools-api.test.ts`, `tests/unit/mrz-tools-catalogue.test.ts`).
+
+Added (TD1/TD2, ICAO Doc 9303 Part 5):
+* `src/tools/mrz/td-formats.ts` is a pure module. One table of field positions per format drives
+  validation, field extraction and generation. Formats: TD1 (ID card, 3×30) and TD2 (2×36).
+* Check digits use the same 7-3-1 function as TD3. The composite covers the ICAO character ranges.
+  Impossible dates are rejected even when the check digit matches.
+* Name handling: diacritics are transliterated, spaces and hyphens become `<`, and names that do
+  not fit the format are refused rather than truncated.
+* Generation validates its own output before returning it. If that validation fails, the response
+  is an error, not a partial MRZ.
+* Routes: `/api/tools/mrz/generate` accepts `format` (TD1, TD2, TD3; TD3 default). `validate` and
+  `parse` detect the layout from the lines and accept `line3`. TD3 keeps its existing response shape.
+  TD1/TD2 responses include `format`.
+* Frontend: `MrzToolPage.tsx` has an MRZ format selector and a shared `TdResultCard`. The page
+  imports the TD1/TD2 module from `src/tools`, the same pattern as the ID-card page.
+* Tests: `tests/unit/td-formats.test.ts` (ICAO TD1 and TD2 specimens, corrupted check digits,
+  name handling, generation round-trip) and `tests/integration/mrz-td-formats-api.test.ts`.
+
+Limits:
+* A passing MRZ check shows internal consistency only. Every TD1/TD2 result carries the
+  `MRZ_AUTHENTICITY_NOTICE`. The output does not verify that a document is genuine.
+* Not implemented: MRZ-OCR, and TD1 generation of optional data on line 2. Generation writes
+  TD1 optional data (15 characters) to line 1 and fills line 2's optional field with `<`.
+  Parsing and validation read both optional fields.
+* Browser-level testing of the MRZ page controls has not been run in this pass.
+
+Gaps:
+* MRZ page controls are now exercised in a browser (`e2e/mrz.spec.ts`, 5/5).
+* TD1 generation writes the user's optional data into line 1 only. TD1 line 2 optional positions (19–29) are filled with `<`. This is valid per ICAO Doc 9303 Part 5 because optional data may be empty, but it is a deliberate limitation.
+
+### 3.2a ID card privacy check (2026-10-12)
+
+* No employee detail, photograph, signature or contact field is sent to any CloudHost247 route.
+  The only network call in the ID card code was a browser fetch of remote photo URLs in bulk
+  import. Its request carried the URL itself and the browser's address to the image host, and
+  the page's Content-Security-Policy (`connect-src 'self'`) blocked it. So the feature never
+  worked in production.
+* Decision: remote photo URLs are no longer fetched. Widening `connect-src` for the whole site
+  to allow one feature would weaken the policy on every page. A bulk row with a photo URL still
+  produces a card, and its manifest entry says the photograph was not loaded. Embedded data URLs
+  work as before.
+* Tests: `e2e/id-card.spec.ts` (11/11 on staging) asserts that a roster with a photo URL makes no
+  request to that host. `tests/unit/employee-id-card.test.ts` (72/72).
+
+### 3.5 Compliance Tools (`/tools/compliance-documents`)
+
+Page and test exist (`frontend/src/pages/tools/ComplianceDocumentsPage.tsx`,
+`frontend/tests/unit/compliance-documents-page.test.tsx`). Controls were not reviewed in this pass.
+
+## 4. Missing or unverified items, by priority
+
+1. Partly done: all 21 tool names and URLs match `salariopay.com/sitemap.xml`. The full live directory (49 entries) is still not captured in a browser, so only the sitemap names are confirmed.
+2. Run the PHP catalogue suite in CI for the four new tools (done in code; PHP not run locally).
+   Name Checker is covered by the same suite.
+3. (Done) Browser end-to-end tests (Playwright) for the ID-card flow, the business tools and MRZ. All pass locally: business 52/52, ID card 10/10, MRZ 5/5.
+4. (Done) TD1 and TD2 MRZ support. MRZ page controls are browser-tested (`e2e/mrz.spec.ts`, config route stubbed).
+5. Name Checker: done on RDAP (domain names). Live RDAP still needs verification with outbound network.
+6. Staging deployment of the production build and screenshots of the principal flows.
+7. PHP suites: run in CI on this branch (not available in this sandbox).
+
+## 5. External dependencies
+
+* DNS and IP lookups use the platform's resolver and RDAP / WHOIS integrations, which need
+  outbound network access in production.
+* BIN checker: a configured provider; the tool refuses full card numbers.
+* Image OCR and reverse image search: operator-configured providers.
+* ID-card photo URLs in bulk import: fetched by the user's browser, not the server.
+* No employee photos, signatures or contact details are sent to a server by the ID-card generator.
+
+### 3.6 End-to-end test suite (Playwright)
+
+Run: `npm run e2e` (uses `playwright.config.ts`; serves the built frontend with `vite preview` on port 4173). Results: `e2e-results/` and `e2e-report/` are generated and git-ignored.
+
+| Spec | Tests | Result (local, this session) | Scope |
+|---|---|---|---|
+| `e2e/business-tools.spec.ts` (+ `business-fixtures.ts`) | 52 | 52 passed (run 4) | Every form tool: fixtures per slug, generate, output shown, download contents. |
+| `e2e/id-card.spec.ts` | 10 | 10 passed | ID card editor, uploads, exports, bulk import. |
+| `e2e/mrz.spec.ts` | 5 | 5 passed | MRZ generator, validator and parser pages; `/api/tools/mrz/config` is stubbed. |
+
+Limits of the E2E suite:
+* DNS and IP tools and the Email Verifier are covered by unit and integration tests only. They need the API server with PostgreSQL, which is not part of the E2E run.
+* The MRZ config endpoint is stubbed in the browser test. The backend route is covered by the integration tests.
+* The Compliance Tools page (`/tools/compliance-documents`) has no E2E test yet.
+* Chromium comes from the sandbox, because `npx playwright install` cannot reach the CDN from here. CI must install the browser normally.
+* PHP catalogue suites were not run locally (PHP is not installed in this sandbox).
+
+### 3.7 SalarioPay tools 7–21 — verification findings (2026-10-12)
+
+* The 12 generator and 4 comparison slugs all match the sitemap, so the names and routes are confirmed.
+* **PFA codes (resolved 2026-10-12, with a source limit):** the comparison showed three-digit codes
+  (`021`). PenCom's four-digit form is `0021`. All 15 codes now use the four-digit form and match the
+  PFA code table used for pension remittance (Remita). Stanbic IBTC (`0021`), Guaranty Trust (`0040`)
+  and Leadway (`0023`) also match their own PFA-published documents. A test pins all 15 codes.
+  The PenCom site was unreachable from this sandbox, so the codes are not confirmed against the
+  register itself. The directory lists 15 PFAs, which is a subset of the licensed PFAs (the Remita
+  table alone lists 22 codes, including NPF Pensions `0047`, Pensions Alliance `0025`, OAK `0034`,
+  Tangerine `0037` and Veritas Glanvills `0042`). The page now says so. Remaining step: confirm on the PenCom register.
+* **Open, provenance dates:** the accounting comparison note says every fact was "checked against
+  published material on 2026-10-10". No record of that check exists in this repository, and it
+  could not be re-run from this sandbox. Treat that date as unverified until a check is recorded.
+
+### 3.8 Verification run, 2026-10-12 (second pass)
+
+| Check | Result |
+|---|---|
+| `npm audit` before | 2 vulnerabilities, both dev-only: `shell-quote` (critical), `source-map-js` (high). None in production dependencies. |
+| `npm audit fix` (non-breaking, lockfile only) | 0 vulnerabilities. `package.json` unchanged. |
+| Full unit and integration suite (`npx vitest run`) | 152 files, 2123 tests, all pass. The run takes about 20 minutes. |
+| Accessibility, ID card page (axe, WCAG 2.1 A and AA, `e2e/a11y-id-card.spec.ts`) | Pass. Fixed a serious contrast failure on the selected Front/Back toggle and filter buttons. Moderate and minor issues are reported in the scan but do not fail the test. |
+| MRZ browser spec (`e2e/mrz.spec.ts`) | 7/7. Added TD2 generation (matches the ICAO-style fixture) and TD2 validation. |
+| ID card privacy | Remote photo URLs are no longer fetched. See 3.2a. |
+
+Still open: moderate and minor accessibility findings on the business-tool pages (not gated yet), and a native PHP run of the catalogue suite.
+
+## 4. Staging verification (production build, this session)
+
+Environment: `npm run build` (production bundle); `node server.js` with `NODE_ENV=production` on
+0.0.0.0:3000; PostgreSQL 18 from the `@embedded-postgres` npm package on 127.0.0.1:5433. Not
+a hosted staging environment: no real customer data, no outbound resolver access from the sandbox.
+
+| Check | Result |
+|---|---|
+| Release-candidate gate (`scripts/release-candidate-check.sh`), PHP 8.2 via `scripts/php-wasm` | Pass (exit 0) |
+| Same gate, PHP 7.4 via `scripts/php-wasm` (`PHP_WASM_VERSION=7.4`) | Pass (exit 0) |
+| Migrations: 82 applied, `verify` reports no checksum drift | Pass |
+| `/api/tools/mrz/config` advertises TD1, TD2, TD3 | Pass (fixed in 3a16f0d) |
+| `/api/tools/dns-lookup` with an unreachable resolver | Honest `TIMEOUT` (504, `retryable: true`, names the resolver). Sandbox has no outbound DNS. |
+| `/api/tools/dns-lookup` with `127.0.0.1` or `localhost` | `INVALID_INPUT` (400). Input validation rejects non-public names. |
+| `/api/tools/ipv6-address-generator` | Pass (ACTIVE, RFC 4193 ULA output) |
+| Old IPv6 URL `/tools/ip/ipv6-address-generator` | 301 to `/tools/local-ipv6-generator` |
+| Browser E2E against the staging server, serial, after the sandbox reset | 66 of 70 passed. The 4 failures show the rate-limit signature (see the finding below). Compliance Tools hub: 3 of 3 (`e2e/compliance.spec.ts`), every hub link opens a rendered tool page. |
+| Screenshots | `docs/staging-screenshots/` (ID card, MRZ, Local IPv6, Compliance Tools) |
+
+Finding and decisions on rate limiting (`src/plugins/security.ts`, `src/app.ts`):
+* Root cause of the intermittent blank pages: the global limit (300 requests per minute per IP)
+  also counted static bundles under `/assets/`. A tool page loads about twenty of them, so after
+  roughly fifteen loads in a minute the JavaScript itself returned 429 and the page rendered
+  blank. Probing showed every 429 on `/assets/*`, none on API routes in that probe.
+* Decision (approved by the owner): SPA page loads get their own ceiling of 1200 per minute per IP
+  (not-found handler in `src/app.ts`). Static bundles are exempt from the global API limit
+  (`allowList` in `security.ts`). API and auth routes keep 300 per minute. No other limit changed.
+* Verification: `tests/integration/page-rate-limit.test.ts` (350 page loads and 320 bundle requests
+  with no 429; 310 API requests still produce a 429). Serial and parallel browser E2E against
+  staging: 71 of 71 passed in each run. The earlier run had 66 of 70.
+
+Defects found and fixed in this pass:
+* Duplicate capability: the Local IPv6 Address Generator was published at a second path
+  (`/tools/ip/ipv6-address-generator`) that failed the one-path-per-capability gate. It now
+  publishes `/tools/local-ipv6-generator`, with the old path kept as a legacy redirect.
+* Stale generated report (`shared/site/generated/route-report.json`) failed the generated-surface
+  gate in CI. Regenerated.
+* MRZ config under-reported supported formats (TD3 only).
+* MRZ parser E2E test used the legacy URL, which redirects to the generator page. It now selects
+  the "MRZ Parser" tab.
+
+Not verified: PHP suites run only through the WebAssembly shim, not a native PHP install.
+The shim is not CI evidence; CI remains the authority.

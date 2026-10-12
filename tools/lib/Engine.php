@@ -780,18 +780,73 @@ final class Engine
         ), array('The certificate was retrieved from ' . $ips[0] . ' with name verification.'));
     }
 
+    /**
+     * Name Checker: validates the label, then asks each registry (RDAP) whether a domain record
+     * exists for the name under the common TLDs. The three outcomes are kept apart:
+     *   - registered: the registry returned a record (HTTP 200);
+     *   - no registry record: the registry answered 404 (the name may still be reserved, pending
+     *     deletion or registered without a public record, so this is never a guarantee);
+     *   - unknown: the lookup failed, timed out or returned something unexpected.
+     * Social accounts are not queried. Nothing here is a purchase or registration promise.
+     */
     private static function nameCheck(array $input)
     {
         $name = strtolower(trim(isset($input['name']) ? $input['name'] : ''));
-        if (!preg_match('/^[a-z0-9][a-z0-9-]{1,40}$/', $name)) {
-            return self::fail('Use 2–41 letters, numbers or hyphens.');
+        if (!preg_match('/^[a-z0-9]([a-z0-9-]{0,39}[a-z0-9])$/', $name)) {
+            return self::fail('Use 2–41 letters, numbers or hyphens. The name cannot start or end with a hyphen.');
         }
         $rows = array(array('Check' => 'Format', 'Status' => 'Accepted', 'Detail' => $name));
+        $unknown = 0;
         foreach (array('com', 'net', 'org') as $tld) {
-            $query = Net::doh($name . '.' . $tld, 'NS');
-            $rows[] = array('Check' => $name . '.' . $tld, 'Status' => !empty($query['answers']) ? 'Resolves' : 'No NS data', 'Detail' => !empty($query['answers']) ? $query['answers'][0]['value'] : 'Not proof of availability');
+            $domain = $name . '.' . $tld;
+            $probe = self::rdapRecordProbe('domain/' . rawurlencode($domain));
+            if ($probe['state'] === 'registered') {
+                $rows[] = array('Check' => $domain, 'Status' => 'Registered', 'Detail' => 'The registry returned a domain record.');
+            } elseif ($probe['state'] === 'no_record') {
+                $rows[] = array('Check' => $domain, 'Status' => 'No registry record', 'Detail' => 'The registry answered 404. Reserved or pending-delete names can still be unavailable.');
+            } else {
+                $unknown++;
+                $rows[] = array('Check' => $domain, 'Status' => 'Unknown', 'Detail' => $probe['error']);
+            }
         }
-        return self::ok('Name format accepted', $rows, array('Social networks were not queried. Domain resolution is not a registration guarantee.'));
+        if ($unknown === 3) {
+            return self::fail('None of the registry lookups completed, so availability is unknown. Try again later.', 503);
+        }
+        $notes = array(
+            'Registry answers can change between checks. A “No registry record” result is not a registration guarantee.',
+            'Social networks and trademarks were not queried.',
+        );
+        if ($unknown > 0) {
+            $notes[] = $unknown . ' of 3 lookups failed and are shown as Unknown. Those results must not be read as available.';
+        }
+        return self::ok('Registry lookups finished', $rows, $notes);
+    }
+
+    /**
+     * RDAP probe that keeps "no record" (HTTP 404) apart from failures. rdap() collapses both into
+     * one error, which is why it cannot answer an availability question on its own.
+     */
+    private static function rdapRecordProbe($path)
+    {
+        $base = 'https://rdap.org/';
+        $data = Catalog::data();
+        if (!empty($data['providers']['rdap']) && is_string($data['providers']['rdap']) && strpos($data['providers']['rdap'], 'https://') === 0) {
+            $base = rtrim($data['providers']['rdap'], '/') . '/';
+        }
+        $response = Net::request($base . ltrim($path, '/'), array('Accept: application/rdap+json, application/json'), 10, null);
+        $status = isset($response['status']) ? (int) $response['status'] : 0;
+        if ($status === 404) {
+            return array('state' => 'no_record', 'error' => '');
+        }
+        if ($status === 200) {
+            $json = json_decode($response['body'], true);
+            if (is_array($json)) {
+                return array('state' => 'registered', 'error' => '');
+            }
+            return array('state' => 'unknown', 'error' => 'The registry returned a response that was not JSON.');
+        }
+        $reason = !empty($response['error']) ? $response['error'] : 'HTTP ' . $status;
+        return array('state' => 'unknown', 'error' => 'Lookup failed: ' . $reason . '.');
     }
 
     private static function domainSearch(array $input)

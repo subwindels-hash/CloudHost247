@@ -1399,6 +1399,47 @@ const newTools: ToolCatalogEntry[] = [
     description: 'Generate up to 50 UUID v4 identifiers using the server’s cryptographic random source. Results are never cached.',
     keywords: ['uuid','identifier','random','generator','developer'],
   },
+  {
+    slug: 'minecraft-color-codes', name: 'Minecraft Color Codes', category: 'productivity',
+    summary: 'Minecraft colour and format code reference, with &-to-§ conversion.',
+    description: 'Lists every standard Minecraft colour and format code with its colour value, and converts text between the ampersand (&a) and section-sign (§a) notations or strips the codes. Only codes in the standard set are converted.',
+    icon: 'text', path: '/tools/productivity/minecraft-color-codes', apiPath: '/api/tools/minecraft-color-codes',
+    methods: ['POST'], authRequired: false, visibility: 'public', rateLimitProfile: 'light', cacheSeconds: 0, timeoutMs: 5_000,
+    keywords: ['minecraft', 'color codes', 'colour codes', 'formatting codes', 'section sign', 'gaming'],
+  },
+  {
+    slug: 'raid-calculator', name: 'RAID Calculator', category: 'productivity',
+    summary: 'Usable capacity and fault tolerance for RAID 0, 1, 5, 6 and 10.',
+    description: 'Calculates usable and raw capacity, parity or mirror overhead and the number of drive failures each RAID level survives, from the drive count and size you enter. Results are arithmetic from the standard layouts; metadata, formatting and hot spares are not modelled.',
+    icon: 'calculator', path: '/tools/productivity/raid-calculator', apiPath: '/api/tools/raid-calculator',
+    methods: ['POST'], authRequired: false, visibility: 'public', rateLimitProfile: 'light', cacheSeconds: 0, timeoutMs: 5_000,
+    keywords: ['raid', 'raid calculator', 'storage', 'capacity', 'parity', 'mirror', 'hdd', 'ssd'],
+  },
+  {
+    slug: 'ipv6-address-generator', name: 'Local IPv6 Address Generator', category: 'ip',
+    summary: 'Generate a random RFC 4193 unique-local IPv6 prefix for private networks.',
+    description: 'Generates a random fd00::/8-based unique local address (ULA) prefix, a /64 subnet and a sample address, following RFC 4193. ULA addresses are for private use and are not routed on the public internet.',
+    icon: 'network', path: '/tools/ip/ipv6-address-generator', apiPath: '/api/tools/ipv6-address-generator',
+    methods: ['POST'], authRequired: false, visibility: 'public', rateLimitProfile: 'light', cacheSeconds: 0, timeoutMs: 5_000,
+    keywords: ['ipv6', 'ula', 'unique local', 'rfc 4193', 'private', 'generator'],
+  },
+  {
+    slug: 'email-verifier', name: 'Email Verifier', category: 'dns',
+    summary: 'Check an address’s syntax and whether its domain accepts mail, using DNS only.',
+    description: 'Validates the syntax of an email address, then queries the domain’s MX records (including null MX and the implicit address fallback) and checks that the mail hosts resolve. It does not contact the recipient’s mail server, so it cannot confirm that a mailbox exists.',
+    icon: 'mail', path: '/tools/dns/email-verifier', apiPath: '/api/tools/email-verifier',
+    methods: ['POST'], authRequired: false, visibility: 'public', rateLimitProfile: 'standard', cacheSeconds: 0, timeoutMs: 15_000,
+    notes: ['Mailbox existence is not checked. Probing a recipient server (RCPT TO) is unreliable, often blocked, and can be used to harvest addresses, so it is not offered.'],
+    keywords: ['email verifier', 'email validation', 'mx', 'mail routing', 'syntax', 'deliverability'],
+  },
+  {
+    slug: 'ipv6-compatibility-checker', name: 'IPv6 Compatibility Checker', category: 'dns',
+    summary: 'Check whether a domain publishes IPv6 (AAAA) addresses.',
+    description: 'Queries AAAA and A records for a domain through the configured resolver and reports whether IPv6 addresses are published. An AAAA record confirms the DNS publication only; it does not prove that the server accepts IPv6 connections.',
+    icon: 'dns', path: '/tools/dns/ipv6-compatibility-checker', apiPath: '/api/tools/ipv6-compatibility-checker',
+    methods: ['POST'], authRequired: false, visibility: 'public', rateLimitProfile: 'standard', cacheSeconds: 0, timeoutMs: 15_000,
+    keywords: ['ipv6', 'aaaa', 'compatibility', 'dual stack', 'ipv4', 'dns'],
+  },
 ];
 export const DISCOVERY_CATEGORIES: Record<string, string> = {
   'dns-domains': 'DNS & Domains', 'ip-network': 'IP & Network', security: 'Security', ssl: 'SSL',
@@ -1424,6 +1465,10 @@ export const TOOL_CATALOG: readonly ToolCatalogEntry[] = allTools.map(tool => {
     // `/tools/dns-health`, which only the app could answer. Both surfaces serve the `domain-`
     // prefixed DNS tools, so the app now publishes that path and the short slug forwards.
     'dns-health': 'domain-dns-health',
+    // The PHP catalogue serves the Local IPv6 Address Generator as `local-ipv6-generator`. This entry
+    // is the same capability, so it publishes that path; `/tools/ip/ipv6-address-generator` stays
+    // in legacyPaths and forwards.
+    'ipv6-address-generator': 'local-ipv6-generator',
   } as Record<string,string>);
   // `ip-to-hostname` publishes the path the PHP catalogue serves it at: the PHP surface owns the
   // interactive handler, its sitemap lists `/tools/ip-to-hostname`, and the app used to link
@@ -1442,7 +1487,7 @@ export const TOOL_CATALOG: readonly ToolCatalogEntry[] = allTools.map(tool => {
     'mrz-generator': ['/tools/document/mrz', '/tools/document/mrz-parser', '/tools/mrz-parser'],
   };
   const categories = [({ dns: 'dns-domains', domain: 'dns-domains', ip: 'ip-network', network: 'ip-network', webmaster: 'website', productivity: 'utilities', diagnostics: 'utilities' } as Record<string,string>)[tool.category] ?? tool.category];
-  if (['mx-lookup','spf-checker','dkim-checker','dmarc-checker','dmarc-generator','bimi-checker','smtp-tester','email-header'].includes(tool.slug)) categories.push('email');
+  if (['mx-lookup','spf-checker','dkim-checker','dmarc-checker','dmarc-generator','bimi-checker','smtp-tester','email-header','email-verifier'].includes(tool.slug)) categories.push('email');
   if (tool.slug === 'ssl-checker') categories.push('ssl');
   if (['http-headers','server-os','broken-links','open-graph'].includes(tool.slug)) categories.push('website');
   if (['subnet-calculator','ip-converters','time-card'].includes(tool.slug)) categories.push('calculators');

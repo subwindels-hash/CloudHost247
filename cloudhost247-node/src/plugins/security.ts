@@ -35,5 +35,9 @@ export async function registerSecurityPlugins(app: FastifyInstance, env: Env) {
     global: true,
     max: 300,
     timeWindow: '1 minute',
+    // Content-hashed static bundles are not API traffic. A tool page pulls around twenty of them,
+    // so counting them against the API ceiling made a single browser session fail mid-load: once the
+    // minute's budget was spent, the JavaScript itself was refused and the page rendered blank.
+    allowList: (request) => ((request.url ?? '').split(/[?#]/)[0] ?? '').startsWith('/assets/'),
   });
 }

@@ -8287,10 +8287,10 @@
       "category": "productivity",
       "categoryLabel": "Productivity",
       "icon": "productivity",
-      "summary": "Check a name for format issues and whether matching domains resolve. Social accounts are not scraped.",
-      "description": "Check a name for format issues and whether matching domains resolve. Social accounts are not scraped. CloudHost247 labels estimates, missing data and unavailable probes instead of filling them in.",
+      "summary": "Check a name’s format, then ask the registry whether .com, .net and .org domain records exist. Social accounts are not checked.",
+      "description": "Check a name’s format, then ask the registry whether .com, .net and .org domain records exist. Social accounts are not checked. CloudHost247 labels estimates, missing data and unavailable probes instead of filling them in.",
       "seoTitle": "Name Checker \u2014 Free Productivity Tool | CloudHost247",
-      "seoDescription": "Check a name for format issues and whether matching domains resolve. Social accounts are not scraped. Free CloudHost247 tool for administrators, developers and website owners.",
+      "seoDescription": "Check a name’s format, then ask the registry whether .com, .net and .org domain records exist. Social accounts are not checked. Free CloudHost247 tool for administrators, developers and website owners.",
       "keywords": [
         "name",
         "username",
@@ -8337,7 +8337,7 @@
       "faq": [
         {
           "q": "What does Name Checker actually check?",
-          "a": "Check a name for format issues and whether matching domains resolve. Social accounts are not scraped. Each result names its source."
+          "a": "Check a name’s format, then ask the registry whether .com, .net and .org domain records exist. Social accounts are not checked. Each result names its source."
         },
         {
           "q": "Is my input stored?",

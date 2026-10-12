@@ -258,16 +258,31 @@ describe('customer identity, security number and support mode', () => {
       headers: { authorization: `Bearer ${admin.token}` },
     });
     expect(res.statusCode).toBe(200);
-    expect(res.body).not.toContain(securityNumber.value);
     expect(res.body).not.toContain('hash');
-    expect(res.json().securityNumber.initialized).toBe(true);
+    const metadata = res.json().securityNumber;
+    expect(metadata.initialized).toBe(true);
+    // Exact key set: no value, hash or other secret-bearing field may appear.
+    expect(Object.keys(metadata).sort()).toEqual([
+      'createdAt',
+      'expired',
+      'expiresAt',
+      'initialized',
+      'rotationHours',
+      'secondsUntilExpiry',
+      'version',
+    ]);
+    // Check string fields only: a numeric field such as secondsUntilExpiry can contain
+    // the four digits by chance and is not a leak.
+    const stringFields = JSON.stringify(Object.values(metadata).filter((v) => typeof v === 'string'));
+    expect(stringFields).not.toContain(securityNumber.value);
 
     const detail = await app().inject({
       method: 'GET',
       url: `/api/v1/admin/users/${user.id}`,
       headers: { authorization: `Bearer ${admin.token}` },
     });
-    expect(detail.body).not.toContain(securityNumber.value);
+    // A leaked value would appear as a whole JSON string, not as a substring of a number.
+    expect(detail.body).not.toContain(`"${securityNumber.value}"`);
     expect(detail.body).not.toContain('passwordHash');
     expect(detail.json().user.customerId).toMatch(/^[0-9]{6}$/);
   });

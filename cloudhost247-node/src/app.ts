@@ -261,7 +261,12 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
 
     // @fastify/rate-limit attaches per-route (onRoute), so the not-found handler — which serves
     // every SPA page — needs the limiter wired in explicitly.
-    instance.setNotFoundHandler({ preHandler: instance.rateLimit() }, (request, reply) => {
+    // SPA page loads share the not-found handler. They get their own, higher ceiling: one shared
+    // 300/min bucket meant a single browser session (or one NAT) that loaded a few tool pages was
+    // answered with 429 and a blank page. API and auth routes keep their stricter limits.
+    instance.setNotFoundHandler(
+      { preHandler: instance.rateLimit({ max: 1200, timeWindow: '1 minute' }) },
+      (request, reply) => {
       const rawUrl = request.raw.url ?? '/';
       const pathname = rawUrl.split(/[?#]/)[0] || '/';
       const mounted = mount && (pathname === mount || pathname.startsWith(`${mount}/`));
@@ -286,7 +291,8 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
         if (!['/tools/document','/tools/document/mrz','/tools/document/mrz-parser'].includes(route)) reply.code(404).header('X-Robots-Tag','noindex');
       }
       reply.type('text/html').sendFile('index.html');
-    });
+      },
+    );
   });
 
   return app;

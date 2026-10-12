@@ -7,7 +7,7 @@
   "spaLinks": 160,
   "phpLinks": 167,
   "spaRoutesKnown": 139,
-  "toolPathsKnown": 68,
+  "toolPathsKnown": 73,
   "phpPagesKnown": 84,
   "legalDocuments": 17,
   "toolsCategories": 9,
@@ -22,15 +22,15 @@
   "phpSitemapPaths": 88,
   "phpCrawlExclusions": 23,
   "toolsCategoryToolCounts": {
-    "dns-domains": 18,
-    "email": 8,
-    "ip-network": 15,
+    "dns-domains": 20,
+    "email": 9,
+    "ip-network": 16,
     "calculators": 4,
     "developer": 10,
     "website": 6,
     "security": 4,
     "ssl": 1,
-    "utilities": 19
+    "utilities": 21
   },
   "errors": [],
   "warnings": []

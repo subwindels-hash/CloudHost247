@@ -228,15 +228,11 @@ export async function exportBulk(options: {
       const name = spec.employee.fullName || `row-${entry.rowNumber}`;
       onProgress?.({ done: index, total: entries.length, current: name });
       try {
-        // A `photoUrl` row needs its photograph fetched here; a failure is a warning on that card,
-        // not a lost row.
+        // Remote photo URLs are not fetched. A browser request to an arbitrary host would need a
+        // connect-src relaxation for the whole site, and the photo is not essential to the card.
+        // The card is still produced, and the manifest records that its photograph is missing.
         if (entry.photoUrl) {
-          const loaded = await fetchPhoto(entry.photoUrl);
-          if ('reason' in loaded) {
-            entry.warnings.push(`Photograph not used: ${loaded.reason}`);
-          } else {
-            spec.images.photo = loaded.dataUrl;
-          }
+          entry.warnings.push('Photograph not loaded: this tool does not fetch remote photo URLs. Use a data URL in the file, or add the photograph to the card.');
         }
         const layout = layoutFor(spec);
         const front = await renderFace(layout.front);
@@ -320,36 +316,6 @@ export async function exportBulk(options: {
   }
 }
 
-/**
- * Fetch a photograph supplied as a URL.
- *
- * Bulk photo URLs are the one thing that leaves the browser during a batch, so it is explicit: only
- * https, only an image content type, with a timeout and a size cap, and a failure is reported as a
- * missing photograph rather than a broken card.
- */
-export async function fetchPhoto(url: string, timeoutMs = 8000): Promise<{ dataUrl: string } | { reason: string }> {
-  if (!/^https:\/\//i.test(url)) return { reason: 'only https:// image URLs are fetched' };
-  try {
-    const controller = new AbortController();
-    const timer = window.setTimeout(() => controller.abort(), timeoutMs);
-    const response = await fetch(url, { signal: controller.signal, mode: 'cors', credentials: 'omit', redirect: 'follow' });
-    window.clearTimeout(timer);
-    if (!response.ok) return { reason: `the server answered ${response.status}` };
-    const type = (response.headers.get('content-type') ?? '').split(';')[0]?.trim() ?? '';
-    if (!['image/png', 'image/jpeg', 'image/webp'].includes(type)) return { reason: `the server returned ${type || 'an unknown type'} rather than an image` };
-    const blob = await response.blob();
-    if (blob.size > 6 * 1024 * 1024) return { reason: 'the image is larger than 6 MB' };
-    const dataUrl = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(typeof reader.result === 'string' ? reader.result : '');
-      reader.onerror = () => reject(new Error('read failed'));
-      reader.readAsDataURL(blob);
-    });
-    return { dataUrl };
-  } catch (error) {
-    return { reason: error instanceof Error && error.name === 'AbortError' ? 'the request timed out' : 'the image could not be loaded (it may not allow cross-origin use)' };
-  }
-}
 
 /* Re-exported so the page imports one module for rendering and one for the engine. */
 export { faceToSvg };

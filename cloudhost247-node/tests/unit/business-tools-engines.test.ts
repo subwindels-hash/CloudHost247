@@ -1819,12 +1819,12 @@ describe('Comparison 3 — HMO (Nigeria)', () => {
 });
 
 describe('Comparison 4 — PFA (Nigeria)', () => {
-  it('lists fifteen PenCom-licensed administrators with their PFA codes', () => {
+  it('lists fifteen PFAs with their PFA codes (a subset of licensed PFAs)', () => {
     expect(PFA_COMPARISON.options).toHaveLength(15);
     const codes = PFA_COMPARISON.options.map((option) => option.reference);
     expect(new Set(codes).size).toBe(15);
-    expect(codes).toContain('024');
-    expect(PFA_COMPARISON.options.find((option) => option.id === 'stanbic-ibtc')?.reference).toBe('021');
+    expect(codes).toContain('0024');
+    expect(PFA_COMPARISON.options.find((option) => option.id === 'stanbic-ibtc')?.reference).toBe('0021');
     expect(PFA_COMPARISON.options.find((option) => option.id === 'nupemco')?.bestFor).toMatch(/university/i);
     for (const option of PFA_COMPARISON.options) {
       expect(option.facts['Licensed by']).toBe('PenCom');
@@ -1854,11 +1854,11 @@ describe('Comparison 4 — PFA (Nigeria)', () => {
       expect(schedule.rows[0]?.employeeContribution).toBe(32_000);
       expect(schedule.rows[0]?.employerContribution).toBe(40_000);
       expect(schedule.rows[0]?.totalRemittance).toBe(72_000);
-      const arm = schedule.byPfa.find((group) => group.pfaCode === '024');
+      const arm = schedule.byPfa.find((group) => group.pfaCode === '0024');
       expect(arm?.employees).toBe(2);
       // Chidi: base 300,000 → 24,000 + 30,000 = 54,000; group total 126,000
       expect(arm?.grandTotal).toBe(126_000);
-      expect(schedule.byPfa.find((group) => group.pfaCode === '021')?.grandTotal).toBe(36_000);
+      expect(schedule.byPfa.find((group) => group.pfaCode === '0021')?.grandTotal).toBe(36_000);
     }
   });
 
@@ -1962,5 +1962,76 @@ describe('Business Tools — search and category filtering', () => {
     expect(findBusinessTool('nigeria-vat-calculator')?.name).toBe('VAT Calculator');
     expect(findBusinessTool('mrz-generator')).toBeUndefined();
     expect(findBusinessTool('')).toBeUndefined();
+  });
+});
+
+describe('Generator 12 — LinkedIn comment drafts: no invented experience, sentence case', () => {
+  const tool = findBusinessTool('linkedin-engagement-assistant')!;
+  const post = 'We rebuilt our payroll run around earned wage access and turnover fell by a fifth within two quarters.';
+  const drafts = (extra: Record<string, string | boolean> = {}): string[] => {
+    const outcome = tool.compute({ ...defaultInputFor(tool), postText: post, ...extra });
+    if (!outcome.ok) throw new Error(outcome.error.message);
+    const content = (outcome.result.document as { content: string }).content;
+    return content.split('\n').filter((line) => line.length > 40 && !line.startsWith('_') && !line.startsWith('#'));
+  };
+
+  it('never claims personal experience the writer did not supply', () => {
+    const text = drafts().join(' ');
+    expect(text).not.toMatch(/what I have seen|In my experience|someone working in the same space|From where I sit/);
+  });
+
+  it('uses the perspective only when the writer typed one', () => {
+    const text = drafts({ perspective: 'a payroll manager' }).join(' ');
+    expect(text).toContain('As a payroll manager');
+  });
+
+  it('starts every draft with a capital letter when no author name is given', () => {
+    for (const line of drafts()) {
+      const first = line.replace(/^[^A-Za-z]*/, '').charAt(0);
+      if (first) expect(first).toBe(first.toUpperCase());
+    }
+  });
+
+  it('keeps the author-name address form lower-case after the comma', () => {
+    const text = drafts({ authorName: 'Ada' }).join(' ');
+    expect(text).toMatch(/Ada, (this|the|genuinely|well|taking)/);
+  });
+});
+
+describe('Generator 12 — LinkedIn drafts: every sentence opens with a capital', () => {
+  const tool = findBusinessTool('linkedin-engagement-assistant')!;
+  it('capitalises the first word after each full stop when no perspective is given', () => {
+    const outcome = tool.compute({ ...defaultInputFor(tool), postText: 'We rebuilt our payroll run around earned wage access and turnover fell by a fifth within two quarters.' });
+    if (!outcome.ok) throw new Error(outcome.error.message);
+    const content = (outcome.result.document as { content: string }).content;
+    const lowerAfterStop = content.match(/[.!?] [a-z]/g) ?? [];
+    expect(lowerAfterStop).toEqual([]);
+  });
+});
+
+describe('PFA comparison — codes match the verified PFA code table', () => {
+  // Source: the PFA code table used for pension remittance (Remita), cross-checked on 2026-10-12
+  // against the Guaranty Trust Pension Managers and Stanbic IBTC PFA code documents.
+  const VERIFIED: Record<string, string> = {
+    'access-arm': '0024',
+    'stanbic-ibtc': '0021',
+    'premium-pension': '0022',
+    'fcmb-pensions': '0030',
+    'leadway-pfa': '0023',
+    'gt-pension-managers': '0040',
+    'fidelity-pension': '0043',
+    'trustfund': '0028',
+    'crusader-sterling': '0032',
+    'cardinalstone': '0046',
+    'norrenberger': '0036',
+    'citizens-pensions': '0050',
+    'nlpc-pfa': '0031',
+    'nupemco': '0049',
+    'parthian': '0051',
+  };
+
+  it('lists the 15 PFAs with the verified four-digit codes', () => {
+    const options = PFA_COMPARISON.options.map((option) => [option.id, option.reference]);
+    expect(Object.fromEntries(options)).toEqual(VERIFIED);
   });
 });

@@ -249,6 +249,12 @@
   text-align: left;
 }
 
+/* The panel sets display:grid, which would override the hidden attribute and leave every
+ * closed menu drawn as an empty white band under the header. */
+.ch247-mega-panel[hidden] {
+  display: none;
+}
+
 .ch247-mobile-nav__panel {
   padding: 0 0 12px 4px;
 }
