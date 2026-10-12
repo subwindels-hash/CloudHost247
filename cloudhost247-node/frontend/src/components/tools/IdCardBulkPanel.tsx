@@ -275,7 +275,7 @@ export default function IdCardBulkPanel({ base }: { base: CardFormState }) {
                 disabled={busy || report.accepted.length === 0}
                 onClick={() => void generate()}
               >
-                {busy ? 'Generating…' : `Generate ${Math.min(report.accepted.length, BULK_MAX_ROWS)} cards`}
+                {busy ? 'Generating…' : generateLabel(Math.min(report.accepted.length, BULK_MAX_ROWS))}
               </button>
             </div>
             {progress ? (
@@ -303,4 +303,9 @@ export default function IdCardBulkPanel({ base }: { base: CardFormState }) {
       ) : null}
     </section>
   );
+}
+
+/** “Generate 1 card” / “Generate 2 cards”, so the button reads correctly for a single row. */
+function generateLabel(count: number): string {
+  return `Generate ${count} ${count === 1 ? 'card' : 'cards'}`;
 }

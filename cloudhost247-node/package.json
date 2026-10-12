@@ -37,7 +37,8 @@
     "tools:catalog": "tsx scripts/export-tools-site.ts",
     "tools:catalog:check": "tsx scripts/export-tools-site.ts --check",
     "tools:preview": "tsx scripts/tools-demo-preview.ts",
-    "build:tools": "vite build --config frontend/vite.tools.config.ts"
+    "build:tools": "vite build --config frontend/vite.tools.config.ts",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "@aws-sdk/client-cloudwatch": "3.1144.0",
@@ -65,6 +66,7 @@
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.2.7",
+    "@playwright/test": "^1.64.0",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.7",
     "@types/bcryptjs": "^2.4.6",

@@ -22,3 +22,8 @@ coverage/
 # TypeScript incremental build info
 tsconfig.tsbuildinfo
 release/
+
+# Playwright E2E output (generated, never committed)
+e2e-results/
+e2e-report/
+test-results/

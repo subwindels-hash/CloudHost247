@@ -21,7 +21,7 @@ open work, not hidden defects.
 | `npm run build` (catalogue check, server, frontend, tools bundle) | Pass | |
 | `npm audit --omit=dev --audit-level=high` | Pass — 0 vulnerabilities | |
 | PHP suites (`tests/**/run.php`, `php -l`) | **Not run** | PHP is not installed in this sandbox. CI runs them. |
-| Browser / end-to-end tests | **Not present** | No Playwright or Cypress setup exists in the repository. |
+| Browser / end-to-end tests | **Present (Playwright, 67 tests)** | `e2e/business-tools.spec.ts` (52), `e2e/id-card.spec.ts` (10), `e2e/mrz.spec.ts` (5). Run with `npm run e2e`. See section 3.6 for scope and limits. |
 | Production build served in staging | **Not done** | Requires a staging environment. |
 | Live reference comparison | Partial | See §2. |
 
@@ -88,8 +88,9 @@ Verified by reading the code and the 59 unit tests in `tests/unit/employee-id-ca
 | Photo URLs in bulk import (https only; fetched in the browser only at generation time) | Implemented |
 | Local-only storage, image consent, clear-local-data | Implemented in `frontend/src/lib/id-card/storage.ts` (`localStorage` only) |
 
-Gaps not verified in this pass: real printed-card scan tests (requires physical scanners),
-browser rendering of every template at export resolution, and a browser end-to-end flow.
+Browser end-to-end flow is now covered (`e2e/id-card.spec.ts`, 10/10): templates and presets, custom hex validation, canvas preview change, reset, photo rejection and acceptance, PNG/JPG/PDF exports, bulk duplicate-ID rejection with a rejected-row report, ZIP download, and clear-local-data.
+
+Gaps not verified in this pass: real printed-card scan tests (requires physical scanners), and a pixel-level check of every template at export resolution. The QR and Code128 payloads are checked by unit tests, not by a scanner.
 
 ### 3.3 DNS Checker inventory
 
@@ -165,11 +166,11 @@ Page and test exist (`frontend/src/pages/tools/ComplianceDocumentsPage.tsx`,
 
 ## 4. Missing or unverified items, by priority
 
-1. Capture the full live SalarioPay directory and confirm the 12 generators and 4 comparisons.
+1. Partly done: all 21 tool names and URLs match `salariopay.com/sitemap.xml`. The full live directory (49 entries) is still not captured in a browser, so only the sitemap names are confirmed.
 2. Run the PHP catalogue suite in CI for the four new tools (done in code; PHP not run locally).
    Name Checker remains open.
-3. Add browser end-to-end tests (Playwright) for the ID-card flow, the business tools and MRZ.
-4. (Done) TD1 and TD2 MRZ support. Browser-test the MRZ page controls in the E2E pass.
+3. (Done) Browser end-to-end tests (Playwright) for the ID-card flow, the business tools and MRZ. All pass locally: business 52/52, ID card 10/10, MRZ 5/5.
+4. (Done) TD1 and TD2 MRZ support. MRZ page controls are browser-tested (`e2e/mrz.spec.ts`, config route stubbed).
 5. Name Checker: decide the data source and rate-limit policy, or document as unavailable.
 6. Staging deployment of the production build and screenshots of the principal flows.
 7. PHP suites: run in CI on this branch (not available in this sandbox).
@@ -182,3 +183,20 @@ Page and test exist (`frontend/src/pages/tools/ComplianceDocumentsPage.tsx`,
 * Image OCR and reverse image search: operator-configured providers.
 * ID-card photo URLs in bulk import: fetched by the user's browser, not the server.
 * No employee photos, signatures or contact details are sent to a server by the ID-card generator.
+
+### 3.6 End-to-end test suite (Playwright)
+
+Run: `npm run e2e` (uses `playwright.config.ts`; serves the built frontend with `vite preview` on port 4173). Results: `e2e-results/` and `e2e-report/` are generated and git-ignored.
+
+| Spec | Tests | Result (local, this session) | Scope |
+|---|---|---|---|
+| `e2e/business-tools.spec.ts` (+ `business-fixtures.ts`) | 52 | 52 passed (run 4) | Every form tool: fixtures per slug, generate, output shown, download contents. |
+| `e2e/id-card.spec.ts` | 10 | 10 passed | ID card editor, uploads, exports, bulk import. |
+| `e2e/mrz.spec.ts` | 5 | 5 passed | MRZ generator, validator and parser pages; `/api/tools/mrz/config` is stubbed. |
+
+Limits of the E2E suite:
+* DNS and IP tools and the Email Verifier are covered by unit and integration tests only. They need the API server with PostgreSQL, which is not part of the E2E run.
+* The MRZ config endpoint is stubbed in the browser test. The backend route is covered by the integration tests.
+* The Compliance Tools page (`/tools/compliance-documents`) has no E2E test yet.
+* Chromium comes from the sandbox, because `npx playwright install` cannot reach the CDN from here. CI must install the browser normally.
+* PHP catalogue suites were not run locally (PHP is not installed in this sandbox).
