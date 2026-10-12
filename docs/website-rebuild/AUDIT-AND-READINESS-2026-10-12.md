@@ -299,7 +299,7 @@ Also verified in this pass:
 | Node platform `npm ci` + `npm run typecheck` + frontend `tsc --noEmit` | 264 top-level packages installed; both typechecks exit 0 |
 | Node platform `npm test` | 161 files / 2 242 tests passed, exit 0 |
 | `node scripts/check-workflow-yaml.mjs` | 3 workflow files parse, each with jobs and steps (added to the gate and to `content-hygiene.yml`) |
-| `python3 scripts/build-production-zip.py --verify` | **verified** — 9 294 members, 118 132 325 bytes (112.7 MiB), `secret_skipped=0`, 455 media assets, 47 theme illustrations and **29** referenced 3D scenes resolved in both libraries, 13 published documents; this build's digest was `9ae13c9bd189b0c2199417d4e2544c59aefd1dd65ae070f812d1053b7ed36e38` (a build output, not content-addressed) |
+| `python3 scripts/build-production-zip.py --verify` | **verified** — 9 577 members, 128 087 329 bytes (122.2 MiB), `secret_skipped=0`, 525 media assets, 47 theme illustrations and **39** referenced 3D scenes resolved in both libraries, 13 published documents; this build's digest was `431b8e4778b4e99af04692850a6827f606fbc8c6b557c5753c2b78f16a6b99fc` (a build output, not content-addressed) |
 
 The archive is deliberately not kept in the workspace — a 101 MiB build artefact does not belong in a
 snapshot or a commit — and is reproducible with the command above.
@@ -312,6 +312,9 @@ snapshot or a commit — and is reproducible with the command above.
 - `Content hygiene` now **runs and passes** (18–19 s per run) where it previously failed in zero
   seconds without creating a job (§3.6): the repo-wide malformed-text scan and the legal-JSON byte
   comparison are enforced again.
+- The release gate was re-run after the hero artwork was regenerated and again passed end to end
+  (40-scene ladder, inventory 58 exact / 9 fallback / 39 distinct), and `Independent foundation`
+  on the hosted runners passed on the resulting commit as well.
 - `CloudHost247 Node platform` (Node 22.12 and 24.8, with the migrations run against embedded
   Postgres) was still running when this report was written; the identical suite passes locally
   (161 files / 2 242 tests) and the two suites added in this pass pass on their own.
