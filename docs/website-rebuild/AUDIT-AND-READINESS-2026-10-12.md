@@ -318,7 +318,7 @@ checkout copy. That needs the licensed staging install and is recorded in §11.
 | `php -l` over every lint target (`scripts/php-lint-targets.sh`) | **837 targets, 0 syntax errors** (PHP 8.2.33) |
 | 18 PHP behavioural suites (`tests/*/run.php`) | all pass — foundation, theme, currency, smm, tools, ovh, rdp, integrations, modules, builder, broker, marketing, cart_recovery, passkey, phoneservices, customaffiliate, cloudhost247_email, payments |
 | Tools platform | 85 tests / 0 failures · 1 171 shell/menu/footer assertions · 26 static tests · browser-tool module tests pass |
-| Static + security suites | 443 tests OK (2 skipped with recorded reasons) |
+| Static + security suites | 457 tests OK (2 skipped with recorded reasons) |
 | Website suites | 67 tests OK in the release gate (8 skipped there by design — the rendered-page cases need a fixture tree, which the gate does not build), including the catalogue-honesty guard |
 | Node platform suite (`npm test`) | **161 test files / 2 242 tests passed**, exit 0 (Vitest, ~30 min; runs the migrations against the in-process Postgres engine) |
 | Node currency/i18n suites | the two new suites pass (6 + 8 tests) alongside the existing currency, i18n and switcher suites; `npm run typecheck` and the frontend `tsc --noEmit` exit 0 |
@@ -370,7 +370,7 @@ snapshot or a commit — and is reproducible with the command above.
   (48-scene ladder, inventory 67 exact / 0 fallback / 47 distinct), and `Independent foundation`
   on the hosted runners passed on the resulting commit as well. A further run after the
   catalogue-honesty guard was added also passed end to end (443 security/static tests plus the
-  67 website tests).
+  67 website tests), and again after the domain data-provenance checks were added (457 + 67).
 - `CloudHost247 Node platform` (Node 22.12 and 24.8, with the migrations run against embedded
   Postgres) was still running when this report was written; the identical suite passes locally
   (161 files / 2 242 tests) and the two suites added in this pass pass on their own.
