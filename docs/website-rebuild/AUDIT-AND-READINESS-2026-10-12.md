@@ -174,7 +174,7 @@ case was verified: reintroducing the unquoted colon on a copy of the tree is rep
 `content-hygiene.yml:23 plain value contains ": "`.
 
 Both hygiene checks were then run locally to prove restoring the workflow does not immediately fail
-it: `node scripts/check-malformed-bullets.mjs` → 6 657 text files scanned, 0 findings; the two legal
+it: `node scripts/check-malformed-bullets.mjs` → 6 673 text files scanned, 0 findings; the two legal
 JSON copies are byte-identical.
 
 ### 3.7 Verified clean, and now measurable: the Wingdings / orphan-PUA artifacts
@@ -196,7 +196,7 @@ to contain the three bytes — including one of the 3D scenes produced in this p
 of a server hall and contains no text — and (b) one PNG in the retired legacy theme, which the active
 theme never serves and which this pass deliberately leaves alone. The repository's own
 `scripts/check-malformed-bullets.mjs` is the standing guard for this class and reports 0 findings
-across 6 657 text files.
+across 6 673 text files.
 
 One note for whoever repeats the check: a character class such as `[\xef\x83\x98]` matches the
 individual *bytes*, so it flags every file containing `·` (U+00B7 is `C2 B7`) and every compressed
@@ -363,7 +363,7 @@ checkout copy. That needs the licensed staging install and is recorded in §11.
 | Node platform suite (`npm test`) | **161 test files / 2 242 tests passed**, exit 0 (Vitest, ~30 min; runs the migrations against the in-process Postgres engine) |
 | Node currency/i18n suites | the two new suites pass (6 + 8 tests) alongside the existing currency, i18n and switcher suites; `npm run typecheck` and the frontend `tsc --noEmit` exit 0 |
 | Server-agent authentication | 71/71 |
-| Retired-brand audit | 5 956 text files scanned, **0 matches** (ionCube bytecode checked by name only) |
+| Retired-brand audit | 7 532 text files scanned, **0 matches** (2 728 binary and 18 ionCube files checked by name only) |
 | Vendor integrity | `sha256sum --check --strict` against the recorded manifest passes — no vendor-derived file was edited |
 
 Existing controls were not weakened to make anything pass; this pass only adds checks.
