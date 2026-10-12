@@ -26,6 +26,18 @@ export const LOCALE_STORAGE_KEY = 'ch247.locale';
 
 export const LOCALES: readonly LocaleInfo[] = [
   { code: 'en', englishName: 'English', nativeName: 'English', dir: 'ltr' },
+  { code: 'fr', englishName: 'French', nativeName: 'Français', dir: 'ltr' },
+  { code: 'de', englishName: 'German', nativeName: 'Deutsch', dir: 'ltr' },
+  { code: 'es', englishName: 'Spanish', nativeName: 'Español', dir: 'ltr' },
+  { code: 'pt', englishName: 'Portuguese', nativeName: 'Português', dir: 'ltr' },
+  { code: 'it', englishName: 'Italian', nativeName: 'Italiano', dir: 'ltr' },
+  { code: 'nl', englishName: 'Dutch', nativeName: 'Nederlands', dir: 'ltr' },
+  { code: 'pl', englishName: 'Polish', nativeName: 'Polski', dir: 'ltr' },
+  { code: 'ru', englishName: 'Russian', nativeName: 'Русский', dir: 'ltr' },
+  { code: 'ar', englishName: 'Arabic', nativeName: 'العربية', dir: 'rtl' },
+  { code: 'zh', englishName: 'Chinese (Simplified)', nativeName: '中文 (简体)', dir: 'ltr' },
+  { code: 'ja', englishName: 'Japanese', nativeName: '日本語', dir: 'ltr' },
+  { code: 'ko', englishName: 'Korean', nativeName: '한국어', dir: 'ltr' },
 ];
 
 function normalise(code: string): string {

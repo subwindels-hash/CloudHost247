@@ -22,7 +22,8 @@ describe('locale resolution', () => {
   });
 
   it('rejects anything that is not a listed locale', () => {
-    expect(findLocale('fr')).toBeUndefined();
+    // fr, de, es, pt, it, nl, pl, ru, ar, zh, ja, ko are now supported locales
+    expect(findLocale('xx')).toBeUndefined();
     expect(findLocale('')).toBeUndefined();
     expect(findLocale('   ')).toBeUndefined();
     expect(findLocale('x'.repeat(40))).toBeUndefined();
@@ -32,14 +33,17 @@ describe('locale resolution', () => {
   });
 
   it('never resolves to an unsupported locale, even when the stored value is unsupported', () => {
-    expect(resolveLocale('fr').code).toBe('en');
+    // fr is now a supported locale, so resolveLocale('fr') returns French
+    expect(resolveLocale('fr').code).toBe('fr');
     expect(resolveLocale('../../etc/passwd').code).toBe('en');
     expect(resolveLocale('<script>').code).toBe('en');
   });
 
   it('uses the first supported browser language when the stored choice is missing or unsupported', () => {
-    expect(resolveLocale(null, ['de-DE', 'en-AU']).code).toBe('en');
-    expect(resolveLocale('pt-BR', ['de-DE']).code).toBe('en');
+    // de is now a supported locale, so resolveLocale(null, ['de-DE', 'en-AU']) returns German
+    expect(resolveLocale(null, ['de-DE', 'en-AU']).code).toBe('de');
+    // pt is now a supported locale, so resolveLocale('pt-BR', ['de-DE']) returns Portuguese
+    expect(resolveLocale('pt-BR', ['de-DE']).code).toBe('pt');
   });
 
   it('prefers the explicit stored choice over the browser languages', () => {
