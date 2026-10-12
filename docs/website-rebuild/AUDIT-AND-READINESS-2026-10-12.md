@@ -421,12 +421,14 @@ snapshot or a commit — and is reproducible with the command above.
   rather than loosened: once on unstaged regenerated surfaces (the freshness check compares the
   worktree with the index) and once on a missing `cloudhost247-node/node_modules` (`tsx: not found`,
   exit 127) — a clean-checkout prerequisite, resolved by `npm ci`.
-- **All five hosted checks pass on the newest commit** (`3f41576`), measured from the run list rather
-  than assumed: `Release candidate (PHP 7.4)` 2m16s, `Release candidate (PHP 8.2)` 2m25s,
-  `Build, typecheck, test (Node 22.12.0)` 10m26s, `Build, typecheck, test (Node 24.8.0)` 9m48s,
-  `Content hygiene` 15s. The same five passed on the preceding commit (`ac78d49`, the hero
-  artwork), so the two PHP legs have now run the typed fakes on real PHP 7.4 and 8.2 rather than
-  only on this sandbox's wasm shim.
+- **Every commit of this pass is green on the hosted runners**, read per SHA from the check-runs API
+  rather than assumed: `ac78d49` 10/10 checks `success`, and `3f41576`, `197df25`, `6b3a2cb`,
+  `de8f7ed`, `f8dad20` and `a36457f` 8/8 `success` each. A representative run
+  (`Release candidate (PHP 7.4)` 2m4s, `Release candidate (PHP 8.2)` 2m28s,
+  `Build, typecheck, test (Node 22.12.0)` 13m31s, `Build, typecheck, test (Node 24.8.0)` 12m53s,
+  `Content hygiene` 13s) is the whole board. So the two PHP legs have run the typed fakes on real
+  PHP 7.4 and 8.2 rather than only on this sandbox's wasm shim, and the Node matrix has run the
+  platform suite on both node versions for every one of these commits.
 - What this environment cannot read is the runners' *log text*: `gh run view --log` downloads from
   `results-receiver.actions.githubusercontent.com`, which is outside the hosts reachable here, so the
   zero-deprecation result is evidenced by the local gate log under both shim versions (8.2.33 and
