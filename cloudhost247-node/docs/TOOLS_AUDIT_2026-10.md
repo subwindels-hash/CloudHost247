@@ -232,6 +232,19 @@ Limits of the E2E suite:
   published material on 2026-10-10". No record of that check exists in this repository, and it
   could not be re-run from this sandbox. Treat that date as unverified until a check is recorded.
 
+### 3.8 Verification run, 2026-10-12 (second pass)
+
+| Check | Result |
+|---|---|
+| `npm audit` before | 2 vulnerabilities, both dev-only: `shell-quote` (critical), `source-map-js` (high). None in production dependencies. |
+| `npm audit fix` (non-breaking, lockfile only) | 0 vulnerabilities. `package.json` unchanged. |
+| Full unit and integration suite (`npx vitest run`) | 152 files, 2123 tests, all pass. The run takes about 20 minutes. |
+| Accessibility, ID card page (axe, WCAG 2.1 A and AA, `e2e/a11y-id-card.spec.ts`) | Pass. Fixed a serious contrast failure on the selected Front/Back toggle and filter buttons. Moderate and minor issues are reported in the scan but do not fail the test. |
+| MRZ browser spec (`e2e/mrz.spec.ts`) | 7/7. Added TD2 generation (matches the ICAO-style fixture) and TD2 validation. |
+| ID card privacy | Remote photo URLs are no longer fetched. See 3.2a. |
+
+Still open: moderate and minor accessibility findings on the business-tool pages (not gated yet), and a native PHP run of the catalogue suite.
+
 ## 4. Staging verification (production build, this session)
 
 Environment: `npm run build` (production bundle); `node server.js` with `NODE_ENV=production` on
