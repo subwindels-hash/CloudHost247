@@ -216,6 +216,28 @@ rule still fails on the thing it guards. Wired into `scripts/release-candidate-c
 Current result — 63 markup files, 15 visible controls, 16 images, 1 020 CSS rules, 15 media widths,
 0 problems.
 
+### 3.9 The domain platform: every number comes from the connected registrar
+
+The brief's domain requirement is a data-provenance requirement — the domain surface may present real
+registrar, TLD and pricing data, and must not present invented data. This was audited rather than
+assumed, because a marketing site is exactly where a plausible-looking price table tends to appear.
+
+| Claim | How it was checked | Result |
+|---|---|---|
+| The public Domains page has no pricing of its own | rendered fixture `/domains` (26 KB, `domain.php` via the Theme content store) reduced to visible text | the page describes search, transfer and portfolio management and links out; it shows no TLD table and no amount |
+| The navigation sends domain work to the live platform | the domain menu and footer rows in `shared/site/registry.json` resolve to `cart.php?a=add&domain=register`, `clientarea.php?action=domains`, `domain.php`, `dns-management.php`, `domain-dns.php` and the five `tools/*dns*` checks | every one is a WHMCS runtime route, a published page, or a tool route that exists; the link checker verifies them all (A3) |
+| Extension prices come only from the connected registrar | `cloudhost247-node/src/domain-services/extensions-service.ts` header, and the only writer of `domain_provider_extension_offerings` is `syncExtensionsFromProvider()`, which reads the provider's own `getExtensions()` | prices, currency and premium support are provider rows copied on sync; the admin may edit presentation copy and the trending flag only — the file says the trending flag is "never provider-sourced, never hard-coded for any TLD" |
+| Nothing seeded a fabricated catalogue | `grep -rn "INSERT INTO domain_extensions" cloudhost247-node/` → one hit, the Super Admin create path in that service; **no `.sql` file inserts an extension or a price** | a fresh install has an empty directory, not a stocked one |
+| A price-like literal does not exist anywhere in first-party source | `grep -rnE '\.(com\|net\|org\|io\|ai\|dev)"?[,:]?\s*\$[0-9]'` across the Node platform, the theme, the registry and the content store | 0 hits |
+| An unconnected registrar produces an honest page, not a guess | `frontend/src/pages/domains/ExtensionsPage.tsx` empty state; the directory query joins on `o.status = 'enabled' AND p.status = 'connected'` | the page says the catalogue is synchronized from the connected registrar and that "there are no provider-confirmed extensions or prices to show — and none are invented here" |
+| Search, WHOIS, appraisal, quote and order fail closed | `search-service.ts`, `whois-service.ts`, `appraisal-service.ts` return the `provider_not_configured` outcome; `provider-service.ts` refuses a configured-but-untested account | no availability, valuation or order is produced without a connection-tested provider |
+| Only compiled, real provider adapters can run | `providers/register-builtins.ts` + `providers/registry.ts` | Namecheap and GoDaddy (registration/search), RDAP (availability), GoValue (appraisal); an unknown adapter key fails closed rather than falling back |
+| The honest behaviour is enforced, not merely intended | `cloudhost247-node/tests/integration/domain-services-api.test.ts` — 16 cases against embedded Postgres | includes "reports honest readiness: nothing configured until a provider passes a real connection test", "search returns the honest not-configured outcome with zero fabricated results" (`results: []`, `Service Provider Not Configured`) and a taken label that is never fabricated as available |
+
+**Not tested here:** calls to a real registrar, RDAP or appraisal provider. No provider is connected in
+this environment and none is configured with credentials, so the *live* availability, premium-price,
+transfer and appraisal paths remain staging work (E2), exactly as the criteria record.
+
 ## 4. Page inventory: what a visitor and a crawler can reach
 
 `python3 scripts/audit-navigation-inventory.py` (re-run in this pass, and now a gate step):
@@ -351,8 +373,10 @@ snapshot or a commit — and is reproducible with the command above.
   Postgres) was still running when this report was written; the identical suite passes locally
   (161 files / 2 242 tests) and the two suites added in this pass pass on their own.
 - **Not performed:** deployment to the staging host, live WHMCS functional QA (registration, login,
-  client area, cart and checkout, payments, provisioning, domain registration, tickets), and the
-  browser/axe pass across the recorded viewport widths.
+  client area, cart and checkout, payments, provisioning, domain registration, tickets), the live
+  registrar/RDAP/appraisal provider calls behind the domain platform (§3.9 — no provider is
+  connected here, so availability, premium pricing and valuation are exercised only against the
+  recorded mock registrar), and the browser/axe pass across the recorded viewport widths.
 - **Blocked in this environment:** every Chromium-based check (no browser binary) and anything that
   needs the licensed WHMCS installation, its database or its credentials.
 - Consequence: this branch is **ready to be put on staging**, not ready to be promoted to production.
@@ -451,12 +475,15 @@ its opening lines that **nothing in the repository deploys to production**. Step
 approval gate: it requires a named approver, the candidate SHA, the evidence paths and a *tested*
 rollback, and it ends the workflow.
 
-**`docs/ACCEPTANCE-CRITERIA.md`** lists 30 criteria (source and build, design and content,
+**`docs/ACCEPTANCE-CRITERIA.md`** lists 32 criteria (source and build, design and content,
 accessibility, behaviour and integration, release), each with the command that decides it and one of
 four statuses. It records what is genuinely done and what is not: C4 (the real-browser sweep) is
 **PARTIAL** because the recorded 520-case run predates this pass and no browser binary exists here;
 D3 (live catalogue states) is **PARTIAL** pending staging; E2–E4 are **BLOCKED** on the licensed
-staging installation; E5 (production approval) is **NOT TESTED**, by design.
+staging installation; E5 (production approval) is **NOT TESTED**, by design. C6 (a catalogue entry
+never implies deployability the backend has not verified) and D7 (the domain platform's numbers come
+from the connected provider, never from the repository) were added when those claims were made
+checkable — see §3.9 for the domain provenance audit.
 
 A third check closes the honesty gap those criteria flagged: **`tests/website/test_catalogue_honesty.py`**. The applications directory and the operating-system families are where a hosting site most naturally over-claims, so the rendered pages are held to their own wording — the manifest list states it is *not* a claim of deployment availability, each card sends the reader to the live platform, the OS families are labelled catalogue names whose availability comes only from the connected platform, no page carries a price (pricing is WHMCS's) and none promises a provisioning workflow. The check runs at three levels so it bites wherever the claim could appear: the template source (wording and live-catalogue hooks), a repository-wide sweep of every root page and active-theme template for phrases that promise provisioning, and the rendered pages themselves when a fixture tree is present. Every rule has a negative case that mutates a copy and requires the rule to fire — softening the disclaimer, dropping the per-card note, inventing a price, promising "available now", claiming stock, or deleting a live-catalogue hook are each reported, and the disclaimer's own negation is asserted *not* to trip the stock rule.
 
