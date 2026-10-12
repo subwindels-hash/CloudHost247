@@ -65,6 +65,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@electric-sql/pglite": "^0.2.7",
     "@playwright/test": "^1.64.0",
     "@testing-library/react": "^16.3.3",
