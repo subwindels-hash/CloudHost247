@@ -263,6 +263,16 @@ The rule is now enforced in two places, because the catalogue and the HTML can d
 | `tests/website/test_static.py::test_published_pages_do_not_share_a_hero` (in the gate, always) | no two published non-legal pages resolve to the same hero artwork; a negative case duplicates a page's artwork and requires the rule to fire | 23 tests OK, and falsified by hand: reverting `offers.php` to the shared key fails the test, restoring its own key passes |
 | `scripts/check-hero-render.py` (in the gate when fixtures have been rendered) | the artwork each *rendered* page paints is the scene the inventory resolves for it, that artwork exists, and no other non-legal page paints it | 48 distinct hero artworks, 0 shared — 47 pages on the 3D ladder, `email-hosting.php` on its own flat illustration, 19 legal documents text-only |
 
+Two counts appear in this section and in §6, and they differ for a reason worth stating rather than
+leaving to be reconciled: the inventory reports **49 distinct declared scenes**, the rendered check
+reports **48 distinct hero artworks**. The 49 counts every scene the catalogue resolves for a
+published page; the 48 counts what the fixtures actually paint — 47 scenes plus the one flat
+illustration. Two declared scenes are never painted: `hosting/email-hosting-3d`, because
+`email-hosting.php` renders its own flat `hosting/email-hosting.svg` through a bespoke template, and
+`security/security-3d`, because the 19 legal documents render no hero at all. Neither is a broken
+image — both are artwork a template chose not to use — and no page paints artwork another page also
+paints, which is the requirement.
+
 The legal and policy family is exempt from the distinctness rule, and the exemption is measured
 rather than assumed: those templates render the document as text with no hero at all, which the
 rendered check confirms for all 19, so a shared hero cannot hide behind a policy page. The gate runs
