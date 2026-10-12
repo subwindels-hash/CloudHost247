@@ -1465,6 +1465,10 @@ export const TOOL_CATALOG: readonly ToolCatalogEntry[] = allTools.map(tool => {
     // `/tools/dns-health`, which only the app could answer. Both surfaces serve the `domain-`
     // prefixed DNS tools, so the app now publishes that path and the short slug forwards.
     'dns-health': 'domain-dns-health',
+    // The PHP catalogue serves the Local IPv6 Address Generator as `local-ipv6-generator`. This entry
+    // is the same capability, so it publishes that path; `/tools/ip/ipv6-address-generator` stays
+    // in legacyPaths and forwards.
+    'ipv6-address-generator': 'local-ipv6-generator',
   } as Record<string,string>);
   // `ip-to-hostname` publishes the path the PHP catalogue serves it at: the PHP surface owns the
   // interactive handler, its sitemap lists `/tools/ip-to-hostname`, and the app used to link

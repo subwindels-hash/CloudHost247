@@ -1854,12 +1854,13 @@
       "summary": "Generate a random RFC 4193 unique-local IPv6 prefix for private networks.",
       "description": "Generates a random fd00::/8-based unique local address (ULA) prefix, a /64 subnet and a sample address, following RFC 4193. ULA addresses are for private use and are not routed on the public internet.",
       "icon": "network",
-      "path": "/tools/ipv6-address-generator",
+      "path": "/tools/local-ipv6-generator",
       "apiPath": "/api/tools/ipv6-address-generator",
       "authRequired": false,
       "visibility": "public",
       "legacyPaths": [
-        "/tools/ip/ipv6-address-generator"
+        "/tools/ip/ipv6-address-generator",
+        "/tools/ipv6-address-generator"
       ],
       "discoveryCategories": [
         "ip-network"
