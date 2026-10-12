@@ -259,7 +259,7 @@ export async function registerMrzToolRoutes(
       parserEnabled: settings.parserEnabled,
       testDataEnabled: settings.testDataEnabled,
       availability: settings.availability,
-      supportedFormats: ['TD3'],
+      supportedFormats: ['TD1', 'TD2', 'TD3'],
       privacyFirst: true,
       persistSubmittedData: false,
     };

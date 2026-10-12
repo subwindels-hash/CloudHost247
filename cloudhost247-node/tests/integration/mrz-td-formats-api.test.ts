@@ -40,6 +40,14 @@ describe('MRZ TD1/TD2 API routes', () => {
 
   const buildTestApp = () => buildApp(env, { serveFrontend: false, pool: db });
 
+  it('advertises TD1, TD2 and TD3 from the public config endpoint', async () => {
+    const app = buildTestApp();
+    const res = await app.inject({ method: 'GET', url: '/api/tools/mrz/config' });
+    expect(res.statusCode).toBe(200);
+    expect(res.json().supportedFormats).toEqual(['TD1', 'TD2', 'TD3']);
+    await app.close();
+  });
+
   it('generates a TD1 MRZ, returns three lines, and marks it as not officially valid', async () => {
     const app = buildTestApp();
     const res = await app.inject({
