@@ -46,10 +46,77 @@ export function createTranslator(locale: string, catalogue: Catalogue, fallback:
   return translate;
 }
 
-/** Keys that the English source defines but a catalogue lacks, and keys a catalogue defines that English does not. */
-export function compareWithEnglish(catalogue: Catalogue): { missing: string[]; extra: string[] } {
-  return {
-    missing: Object.keys(en).filter((key) => catalogue[key] === undefined),
-    extra: Object.keys(catalogue).filter((key) => !(key in en)),
+/**
+ * The plural categories a locale can select, e.g. `['one', 'other']` for English and German,
+ * `['one', 'few', 'many', 'other']` for Russian, and `['other']` alone for Japanese. CLDR always
+ * includes `other`. A malformed tag falls back to English's categories rather than throwing.
+ */
+export function pluralCategories(locale: string): readonly string[] {
+  try {
+    return new Intl.PluralRules(locale).resolvedOptions().pluralCategories;
+  } catch {
+    return new Intl.PluralRules('en').resolvedOptions().pluralCategories;
+  }
+}
+
+/** Splits `base.one`, `base.other`, `base.few`, … into a base and a CLDR plural category. */
+function pluralForm(key: string): { base: string; category: string } | null {
+  const match = /^(.+)\.(zero|one|two|few|many|other)$/.exec(key);
+  if (!match) return null;
+  return { base: match[1] as string, category: match[2] as string };
+}
+
+/**
+ * Keys that the English source defines but a catalogue lacks, and keys a catalogue defines that
+ * English does not — plural-aware.
+ *
+ * Plurals are compared against the categories the target locale can actually select, not against
+ * English's two forms. A German catalogue must define `one` and `other`; a Russian catalogue must
+ * additionally define `few` and `many` (and is not faulted for them); a Japanese catalogue must
+ * define `other` only. English's own key set is unchanged by this rule. Every key that is not part
+ * of a plural family — that is, every key that is not `<base>.one`/`.other` in the English source —
+ * is still compared literally, and any key that English does not define is reported as `extra`.
+ */
+export function compareWithEnglish(catalogue: Catalogue, locale = 'en'): { missing: string[]; extra: string[] } {
+  const categories = new Set(pluralCategories(locale));
+
+  // A base is treated as a plural family only when the English source defines `other` plus at least
+  // one further form, which is what makes an ordinary key ending in e.g. `.other` safe.
+  const families = new Map<string, Set<string>>();
+  for (const key of Object.keys(en)) {
+    const form = pluralForm(key);
+    if (!form) continue;
+    const seen = families.get(form.base) ?? new Set<string>();
+    seen.add(form.category);
+    families.set(form.base, seen);
+  }
+  for (const [base, seen] of [...families]) {
+    if (!seen.has('other') || seen.size < 2) families.delete(base);
+  }
+
+  const inFamily = (key: string): boolean => {
+    const form = pluralForm(key);
+    return form !== null && families.has(form.base);
   };
+
+  const requiredPlurals = [...families.keys()].flatMap((base) =>
+    [...categories].map((category) => `${base}.${category}`),
+  );
+
+  const missing = [
+    ...Object.keys(en).filter((key) => !inFamily(key) && catalogue[key] === undefined),
+    ...requiredPlurals.filter((key) => catalogue[key] === undefined),
+  ].sort();
+
+  const extra = Object.keys(catalogue)
+    .filter((key) => {
+      const form = pluralForm(key);
+      // A form of a known plural family is allowed exactly when the locale selects that category —
+      // an unused `one` form in a language that never selects it is dead weight, not a translation.
+      if (form !== null && families.has(form.base)) return !categories.has(form.category);
+      return !(key in en);
+    })
+    .sort();
+
+  return { missing, extra };
 }

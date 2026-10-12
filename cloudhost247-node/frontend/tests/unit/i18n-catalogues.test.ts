@@ -16,9 +16,26 @@ describe('translation catalogues', () => {
   });
 
   it.each(LOCALES.map((locale) => [locale.code]))('%s defines every English key and nothing else', (code) => {
-    const result = compareWithEnglish(CATALOGUES[code] ?? {});
+    const result = compareWithEnglish(CATALOGUES[code] ?? {}, code);
     expect(result.missing).toEqual([]);
     expect(result.extra).toEqual([]);
+  });
+
+  it('requires the plural forms a locale selects, and permits only those', () => {
+    // Russian selects one/few/many/other, so `few` and `many` are required, not "extra" keys.
+    const russian = { ...en, 'language.switcher.count.few': 'доступно языков: {count}', 'language.switcher.count.many': 'доступно языков: {count}' };
+    expect(compareWithEnglish(russian, 'ru')).toEqual({ missing: [], extra: [] });
+
+    // Japanese selects `other` only, so carrying an English `one` form is what would be wrong.
+    const japanese = { ...en } as Record<string, string>;
+    delete japanese['language.switcher.count.one'];
+    expect(compareWithEnglish(japanese, 'ja')).toEqual({ missing: [], extra: [] });
+    expect(compareWithEnglish({ ...japanese, 'language.switcher.count.one': 'x' }, 'ja').extra).toEqual([
+      'language.switcher.count.one',
+    ]);
+
+    // A locale-aware catalogue is still faulted for a key English does not define at all.
+    expect(compareWithEnglish({ ...en, 'footer.nav.careers': 'Careers' }, 'de').extra).toEqual(['footer.nav.careers']);
   });
 
   it('has no empty or whitespace-only strings in any catalogue', () => {

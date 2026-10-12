@@ -12,6 +12,7 @@
 | `independent-rebuild/MODULE-MANAGER-COMPLIANCE.md` | **Module Manager traceability matrix** — every specification clause mapped to the code that implements it and the named test assertion that proves it |
 | `independent-rebuild/API-INVENTORY-AUDIT.md` | Repository-wide audit of every outbound API, hard-coded credential findings and their remediation status |
 | `build-notes/` | Build/install provenance notes per module (cloudhost247-tools-platform, cloudhost247-domain-lookup, dnschecker, customaffiliate, digitalproducts, cloudhost247-email, phoneservices, smm) |
+| `cloudhost247-node/docs/I18N.md` | **Language gate** — the Node platform's localisation contract (one reviewed catalogue per offered language), the enforced completeness/placeholder/plural rules, and the steps to add a language |
 
 Module-specific README/INSTALL files live with their modules:
 - `modules/addons/tools_center/` (README.md, INSTALL.md, API.md)

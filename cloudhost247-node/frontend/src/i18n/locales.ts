@@ -6,6 +6,18 @@
  * `messages/en.ts` defines, (2) a reviewed translation sign-off in the pull request, and (3) an entry
  * below. Until then the language does not exist for the visitor: it is not offered in the switcher,
  * and a stored or browser preference for it falls back to English.
+ *
+ * The gate is enforced, not just documented: `i18n-catalogues.test.ts` requires a catalogue for
+ * every listed locale and no catalogue for an unlisted one, and `language-switcher.test.tsx`
+ * requires the switcher to report the number of languages it can actually offer.
+ *
+ * English is therefore the only entry today. Other languages are deliberately NOT listed while they
+ * have no translated catalogue: a listed locale with nothing behind it offers the visitor a choice
+ * that renders English (or raw keys), which is the failure this gate exists to prevent. The
+ * switcher's note states the reason to visitors — "More languages are added once their translations
+ * have been checked." — and `docs/I18N.md` records the process for adding one. Nothing else has to
+ * change when a catalogue lands: `dir` already carries right-to-left, and region tags such as
+ * `pt-BR` resolve to the base language in `findLocale`.
  */
 export type TextDirection = 'ltr' | 'rtl';
 
@@ -26,18 +38,6 @@ export const LOCALE_STORAGE_KEY = 'ch247.locale';
 
 export const LOCALES: readonly LocaleInfo[] = [
   { code: 'en', englishName: 'English', nativeName: 'English', dir: 'ltr' },
-  { code: 'fr', englishName: 'French', nativeName: 'Français', dir: 'ltr' },
-  { code: 'de', englishName: 'German', nativeName: 'Deutsch', dir: 'ltr' },
-  { code: 'es', englishName: 'Spanish', nativeName: 'Español', dir: 'ltr' },
-  { code: 'pt', englishName: 'Portuguese', nativeName: 'Português', dir: 'ltr' },
-  { code: 'it', englishName: 'Italian', nativeName: 'Italiano', dir: 'ltr' },
-  { code: 'nl', englishName: 'Dutch', nativeName: 'Nederlands', dir: 'ltr' },
-  { code: 'pl', englishName: 'Polish', nativeName: 'Polski', dir: 'ltr' },
-  { code: 'ru', englishName: 'Russian', nativeName: 'Русский', dir: 'ltr' },
-  { code: 'ar', englishName: 'Arabic', nativeName: 'العربية', dir: 'rtl' },
-  { code: 'zh', englishName: 'Chinese (Simplified)', nativeName: '中文 (简体)', dir: 'ltr' },
-  { code: 'ja', englishName: 'Japanese', nativeName: '日本語', dir: 'ltr' },
-  { code: 'ko', englishName: 'Korean', nativeName: '한국어', dir: 'ltr' },
 ];
 
 function normalise(code: string): string {

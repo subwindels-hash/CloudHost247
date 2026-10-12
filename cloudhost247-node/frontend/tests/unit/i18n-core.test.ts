@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { compareWithEnglish, createTranslator, interpolate } from '../../src/i18n/catalogue';
 import { en } from '../../src/i18n/messages/en';
-import { DEFAULT_LOCALE, findLocale, getDefaultLocale, resolveLocale } from '../../src/i18n/locales';
+import { DEFAULT_LOCALE, LOCALES, findLocale, getDefaultLocale, resolveLocale } from '../../src/i18n/locales';
 
 /**
  * The translation core. These are the rules every language depends on: an unsupported tag never
@@ -22,7 +22,6 @@ describe('locale resolution', () => {
   });
 
   it('rejects anything that is not a listed locale', () => {
-    // fr, de, es, pt, it, nl, pl, ru, ar, zh, ja, ko are now supported locales
     expect(findLocale('xx')).toBeUndefined();
     expect(findLocale('')).toBeUndefined();
     expect(findLocale('   ')).toBeUndefined();
@@ -32,18 +31,22 @@ describe('locale resolution', () => {
     expect(findLocale({ code: 'en' })).toBeUndefined();
   });
 
-  it('never resolves to an unsupported locale, even when the stored value is unsupported', () => {
-    // fr is now a supported locale, so resolveLocale('fr') returns French
-    expect(resolveLocale('fr').code).toBe('fr');
+  it('never resolves to a locale the switcher does not offer', () => {
+    // The gate: a tag resolves only when its catalogue is listed in LOCALES, so an unlisted
+    // language falls back to English instead of rendering half-translated. This holds today, when
+    // English is the only listed language, and after a reviewed catalogue is listed.
+    const listed = LOCALES.map((locale) => locale.code);
+    expect(listed).toContain(resolveLocale('fr').code);
     expect(resolveLocale('../../etc/passwd').code).toBe('en');
     expect(resolveLocale('<script>').code).toBe('en');
   });
 
-  it('uses the first supported browser language when the stored choice is missing or unsupported', () => {
-    // de is now a supported locale, so resolveLocale(null, ['de-DE', 'en-AU']) returns German
-    expect(resolveLocale(null, ['de-DE', 'en-AU']).code).toBe('de');
-    // pt is now a supported locale, so resolveLocale('pt-BR', ['de-DE']) returns Portuguese
-    expect(resolveLocale('pt-BR', ['de-DE']).code).toBe('pt');
+  it('uses the first browser language it supports, and English when it supports none', () => {
+    const listed = LOCALES.map((locale) => locale.code);
+    const firstListed = (...codes: string[]) => codes.find((code) => listed.includes(code)) ?? 'en';
+    expect(resolveLocale(null, ['de-DE', 'en-AU']).code).toBe(firstListed('de', 'en'));
+    expect(resolveLocale('pt-BR', ['de-DE']).code).toBe(firstListed('pt', 'de'));
+    expect(resolveLocale(null, ['xx-YY', 'zz']).code).toBe('en');
   });
 
   it('prefers the explicit stored choice over the browser languages', () => {
