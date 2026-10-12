@@ -112,7 +112,34 @@ The audit now reports this (`totals.hero_scenes_exact`,
 list naming what each remaining page shares its scene with), so the gap is measured rather than
 asserted. The 19 remaining pages are listed in §11.
 
-### 3.5 There was no accessibility or responsive gate that could run without a browser
+### 3.5 The currency hint endpoint was publicly cacheable and echoed the caller's address
+
+`GET /api/v1/currency/geo-country` is the display-currency *hint* — the third of four signals, after
+an explicit choice and the authenticated account's preference. It answered every call with
+`Cache-Control: public, max-age=60` **and** included the caller's IP address in the JSON body.
+
+Two consequences, both invisible to a caller:
+
+1. A response that varies by visitor was marked safe for *shared* caches. A CDN or reverse-proxy
+   cache is entitled to store it and replay it to the next visitor for a minute — which is how an
+   advisory hint becomes an authoritative inference, and the wrong one, from a stranger's address.
+2. The address was echoed into a response that passes through caches, logs and error reporters, and
+   nothing consumed it: the frontend reads `country` only.
+
+Fixed in `cloudhost247-node/src/routes/currency.ts`: the address is no longer in the body, and the
+response is `Cache-Control: private, max-age=60` with
+`Vary: CF-Connecting-IP, X-Forwarded-For` so a real resolver stays correct behind a trusted proxy.
+The endpoint had **no test at all**; `cloudhost247-node/tests/integration/currency-geo-hint.test.ts`
+(6 tests) now pins the contract, including that a spoofed `X-Forwarded-For` is neither trusted nor
+reflected, and that the hint needs no rate snapshot and no database.
+
+The ordering itself — that the hint may suggest but never decide — is pinned by
+`cloudhost247-node/frontend/tests/unit/currency-geo-fallback.test.tsx` (8 tests): the hint applies
+only when no preference exists, is not even requested once a preference does exist, never overrides
+an explicit or authenticated choice, and falls back to USD for an unmapped, unknown, unpublished or
+unavailable value.
+
+### 3.6 There was no accessibility or responsive gate that could run without a browser
 
 The only accessibility evidence in the repository is a browser run (`tests/website/browser.cjs`,
 Chromium + axe) that cannot execute in this environment. Added
@@ -192,6 +219,12 @@ switching enabled or more than one currency, and the Node frontend ships
 switchers. Billing prices remain the WHMCS prices in the customer's billing currency; no display-only
 conversion was introduced.
 
+A visitor's address is the *third* of four signals for a **display** currency only — after an
+explicit choice and the authenticated account's preference, and before the USD default — and the
+switcher states in text that charges are in USD and converted amounts are estimates. That ordering
+and the endpoint that supplies the hint are now pinned by tests (§3.5): the hint may suggest, it
+never decides, and it is never taken from a shared cache.
+
 **Not tested:** switcher behaviour against a live WHMCS session, multi-currency carts, and localised
 checkout copy. That needs the licensed staging install and is recorded in §11.
 
@@ -204,6 +237,7 @@ checkout copy. That needs the licensed staging install and is recorded in §11.
 | Tools platform | 85 tests / 0 failures · 1 171 shell/menu/footer assertions · 26 static tests · browser-tool module tests pass |
 | Static + security suites | 434 tests OK (2 skipped with recorded reasons) |
 | Node platform suite (`npm test`) | **161 test files / 2 242 tests passed**, exit 0 (Vitest, ~30 min; runs the migrations against the in-process Postgres engine) |
+| Node currency/i18n suites | the two new suites pass (6 + 8 tests) alongside the existing currency, i18n and switcher suites; `npm run typecheck` and the frontend `tsc --noEmit` exit 0 |
 | Server-agent authentication | 71/71 |
 | Retired-brand audit | 5 956 text files scanned, **0 matches** (ionCube bytecode checked by name only) |
 | Vendor integrity | `sha256sum --check --strict` against the recorded manifest passes — no vendor-derived file was edited |
@@ -293,6 +327,9 @@ non-asset changes are:
 | `docs/website-rebuild/DEPLOYMENT.md` | registry-first navigation wording; Node suite figure corrected to the measured 2,242 tests |
 | `assets/images/cloudhost247/**` + `cloudhost247-node/frontend/public/media/cloudhost247/**` | **70 files**: 10 new 3D scenes × (JPEG + 640/960/1280 AVIF + WebP), mirrored into the served library |
 | `modules/addons/cloudhost247_theme/resources/site.json`, `shared/site/generated/route-report.json`, `cloudhost247-node/frontend/src/content/pages.generated.json` | regenerated from the registry (the new scenes change the resolved `visual3d`) |
+| `cloudhost247-node/src/routes/currency.ts` | the geo hint is no longer publicly cacheable and no longer echoes the caller's address |
+| `cloudhost247-node/tests/integration/currency-geo-hint.test.ts` | **new** — 6 tests pinning the hint's cache contract and address handling |
+| `cloudhost247-node/frontend/tests/unit/currency-geo-fallback.test.tsx` | **new** — 8 tests pinning the currency signal ordering (hint suggests, never decides) |
 | `docs/website-rebuild/AUDIT-AND-READINESS-2026-10-12.md` | **this report** |
 
 No WHMCS core file, payment path, provisioning module, migration, authentication control or vendor
