@@ -96,13 +96,15 @@ same pipeline scene, the four management pages shared the dedicated-server scene
 `/hosting/windows-hosting`, `/hosting/plesk-hosting` and `/hosting/reseller-hosting` shared the
 web-hosting scene.
 
-Twenty-eight scenes were produced in this pass and wired end to end (`plesk-hosting`,
+Twenty-eight scenes were produced for these pages and wired end to end (`plesk-hosting`,
 `windows-hosting`, `reseller-hosting`, `game-servers`, `backups`, `firewall`, `ip-management`,
 `migration`, `data-centers`, `docker`, `php`, `laravel`, `nodejs`, `python`, `developer-hosting`,
 `api`, `paas`, `os-catalog`, `platform-security`, `ssl`, `insights`, `documentation`, `domain-dns`,
 `support`, `managed-services`, `network`, `server-control`, `website-design`), each encoded to the
-same 640/960/1280 AVIF + WebP ladder and mirrored into the platform's served library. Coverage
-measured by the inventory audit:
+same 640/960/1280 AVIF + WebP ladder and mirrored into the platform's served library. Two more —
+`offers` and `help-center` — were produced for the separate defect in §3.10, which this metric did
+not catch, bringing the pass to 30 scenes and the library to 50. Coverage measured by the inventory
+audit:
 
 | | Before | After |
 |---|---|---|
