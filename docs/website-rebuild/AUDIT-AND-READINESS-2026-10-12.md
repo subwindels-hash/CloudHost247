@@ -435,7 +435,10 @@ snapshot or a commit — and is reproducible with the command above.
   exit 127) — a clean-checkout prerequisite, resolved by `npm ci`.
 - **Every commit of this pass is green on the hosted runners**, read per SHA from the check-runs API
   rather than assumed: `ac78d49` 10/10 checks `success`, and `3f41576`, `197df25`, `6b3a2cb`,
-  `de8f7ed`, `f8dad20` and `a36457f` 8/8 `success` each. A representative run
+  `de8f7ed`, `f8dad20`, `a36457f`, `c2dadc5`, `f969d33` and `5f15a59` 8/8 `success` each. Any
+  commit after the last one listed is documentation-only and inherits this evidence: nothing in a
+  report sentence can change what a runner executes, and this record is itself such a commit. A
+  representative run
   (`Release candidate (PHP 7.4)` 2m4s, `Release candidate (PHP 8.2)` 2m28s,
   `Build, typecheck, test (Node 22.12.0)` 13m31s, `Build, typecheck, test (Node 24.8.0)` 12m53s,
   `Content hygiene` 13s) is the whole board. So the two PHP legs have run the typed fakes on real
