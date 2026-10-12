@@ -4,9 +4,12 @@
     "root_php_pages": 84,
     "registered_public_pages": 67,
     "navigation_destinations": 89,
-    "footer_destinations": 67,
+    "footer_destinations": 68,
     "mega_menus": 7,
-    "footer_columns": 8
+    "footer_columns": 8,
+    "hero_scenes_exact": 48,
+    "hero_scenes_from_family_fallback": 19,
+    "distinct_hero_scenes": 29
   },
   "defects": {
     "orphaned_pages": [],
@@ -160,7 +163,7 @@
       },
       "hero_artwork": {
         "svg": "management/backups.svg",
-        "scene": "servers/dedicated-servers-3d"
+        "scene": "management/backups-3d"
       },
       "visual": "management/backups",
       "image_status": "present",
@@ -490,7 +493,7 @@
       },
       "hero_artwork": {
         "svg": "cloud/data-centers.svg",
-        "scene": "cloud/vps-3d"
+        "scene": "cloud/data-centers-3d"
       },
       "visual": "cloud/data-centers",
       "image_status": "present",
@@ -688,7 +691,7 @@
       },
       "hero_artwork": {
         "svg": "deployment/docker.svg",
-        "scene": "deployment/deployment-pipeline-3d"
+        "scene": "deployment/docker-3d"
       },
       "visual": "deployment/docker",
       "image_status": "present",
@@ -952,7 +955,7 @@
       },
       "hero_artwork": {
         "svg": "management/firewall.svg",
-        "scene": "servers/dedicated-servers-3d"
+        "scene": "management/firewall-3d"
       },
       "visual": "management/firewall",
       "image_status": "present",
@@ -996,7 +999,7 @@
       },
       "hero_artwork": {
         "svg": "servers/game-servers.svg",
-        "scene": "servers/dedicated-servers-3d"
+        "scene": "servers/game-servers-3d"
       },
       "visual": "servers/game-servers",
       "image_status": "present",
@@ -1062,7 +1065,7 @@
       },
       "hero_artwork": {
         "svg": "management/ip-management.svg",
-        "scene": "servers/dedicated-servers-3d"
+        "scene": "management/ip-management-3d"
       },
       "visual": "management/ip-management",
       "image_status": "present",
@@ -1172,7 +1175,7 @@
       },
       "hero_artwork": {
         "svg": "management/migration.svg",
-        "scene": "servers/dedicated-servers-3d"
+        "scene": "management/migration-3d"
       },
       "visual": "management/migration",
       "image_status": "present",
@@ -1370,7 +1373,7 @@
       },
       "hero_artwork": {
         "svg": "hosting/plesk-hosting.svg",
-        "scene": "hosting/web-hosting-3d"
+        "scene": "hosting/plesk-hosting-3d"
       },
       "visual": "hosting/plesk-hosting",
       "image_status": "present",
@@ -1480,7 +1483,7 @@
       },
       "hero_artwork": {
         "svg": "hosting/reseller-hosting.svg",
-        "scene": "hosting/web-hosting-3d"
+        "scene": "hosting/reseller-hosting-3d"
       },
       "visual": "hosting/reseller-hosting",
       "image_status": "present",
@@ -1832,7 +1835,7 @@
       },
       "hero_artwork": {
         "svg": "hosting/windows-hosting.svg",
-        "scene": "hosting/web-hosting-3d"
+        "scene": "hosting/windows-hosting-3d"
       },
       "visual": "hosting/windows-hosting",
       "image_status": "present",
@@ -1862,6 +1865,122 @@
       "navigation_placement": "hosting / Web hosting",
       "footer_placement": "Products",
       "reachable": true
+    }
+  ],
+  "hero_fallbacks": [
+    {
+      "php_page": "api-hosting.php",
+      "visual": "deployment/api",
+      "scene": "deployment/deployment-pipeline-3d",
+      "shared_with": "developer-friendly.php, laravel-hosting.php, nodejs-hosting.php, paas.php, php-hosting.php, python-hosting.php"
+    },
+    {
+      "php_page": "blog.php",
+      "visual": "blog/insights",
+      "scene": "hero/infrastructure-3d",
+      "shared_with": "documentation.php, security.php, ssl-certificate.php"
+    },
+    {
+      "php_page": "developer-friendly.php",
+      "visual": "deployment/developer-hosting",
+      "scene": "deployment/deployment-pipeline-3d",
+      "shared_with": "api-hosting.php, laravel-hosting.php, nodejs-hosting.php, paas.php, php-hosting.php, python-hosting.php"
+    },
+    {
+      "php_page": "documentation.php",
+      "visual": "blog/documentation",
+      "scene": "hero/infrastructure-3d",
+      "shared_with": "blog.php, security.php, ssl-certificate.php"
+    },
+    {
+      "php_page": "domain-dns.php",
+      "visual": "domains/domain-dns",
+      "scene": "domains/domain-network-3d",
+      "shared_with": ""
+    },
+    {
+      "php_page": "faqs.php",
+      "visual": "management/support",
+      "scene": "servers/dedicated-servers-3d",
+      "shared_with": "help-center.php, managed-services.php, server-management.php"
+    },
+    {
+      "php_page": "help-center.php",
+      "visual": "management/support",
+      "scene": "servers/dedicated-servers-3d",
+      "shared_with": "faqs.php, managed-services.php, server-management.php"
+    },
+    {
+      "php_page": "laravel-hosting.php",
+      "visual": "deployment/laravel",
+      "scene": "deployment/deployment-pipeline-3d",
+      "shared_with": "api-hosting.php, developer-friendly.php, nodejs-hosting.php, paas.php, php-hosting.php, python-hosting.php"
+    },
+    {
+      "php_page": "managed-services.php",
+      "visual": "management/managed-services",
+      "scene": "servers/dedicated-servers-3d",
+      "shared_with": "faqs.php, help-center.php, server-management.php"
+    },
+    {
+      "php_page": "network.php",
+      "visual": "cloud/network",
+      "scene": "cloud/vps-3d",
+      "shared_with": "operating-systems.php"
+    },
+    {
+      "php_page": "nodejs-hosting.php",
+      "visual": "deployment/nodejs",
+      "scene": "deployment/deployment-pipeline-3d",
+      "shared_with": "api-hosting.php, developer-friendly.php, laravel-hosting.php, paas.php, php-hosting.php, python-hosting.php"
+    },
+    {
+      "php_page": "operating-systems.php",
+      "visual": "operating-systems/os-catalog",
+      "scene": "cloud/vps-3d",
+      "shared_with": "network.php"
+    },
+    {
+      "php_page": "paas.php",
+      "visual": "deployment/paas",
+      "scene": "deployment/deployment-pipeline-3d",
+      "shared_with": "api-hosting.php, developer-friendly.php, laravel-hosting.php, nodejs-hosting.php, php-hosting.php, python-hosting.php"
+    },
+    {
+      "php_page": "php-hosting.php",
+      "visual": "deployment/php",
+      "scene": "deployment/deployment-pipeline-3d",
+      "shared_with": "api-hosting.php, developer-friendly.php, laravel-hosting.php, nodejs-hosting.php, paas.php, python-hosting.php"
+    },
+    {
+      "php_page": "python-hosting.php",
+      "visual": "deployment/python",
+      "scene": "deployment/deployment-pipeline-3d",
+      "shared_with": "api-hosting.php, developer-friendly.php, laravel-hosting.php, nodejs-hosting.php, paas.php, php-hosting.php"
+    },
+    {
+      "php_page": "security.php",
+      "visual": "security/platform-security",
+      "scene": "hero/infrastructure-3d",
+      "shared_with": "blog.php, documentation.php, ssl-certificate.php"
+    },
+    {
+      "php_page": "server-management.php",
+      "visual": "management/server-control",
+      "scene": "servers/dedicated-servers-3d",
+      "shared_with": "faqs.php, help-center.php, managed-services.php"
+    },
+    {
+      "php_page": "ssl-certificate.php",
+      "visual": "security/ssl",
+      "scene": "hero/infrastructure-3d",
+      "shared_with": "blog.php, documentation.php, security.php"
+    },
+    {
+      "php_page": "website-design.php",
+      "visual": "hosting/website-design",
+      "scene": "hosting/web-hosting-3d",
+      "shared_with": ""
     }
   ]
 }

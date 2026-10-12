@@ -535,7 +535,7 @@
         "/cloud/backups",
         "/contact"
       ],
-      "visual3d": "servers/dedicated-servers-3d"
+      "visual3d": "servers/game-servers-3d"
     },
     {
       "route": "/cloud/infrastructure",
@@ -736,7 +736,7 @@
         "/contact",
         "/about"
       ],
-      "visual3d": "cloud/vps-3d"
+      "visual3d": "cloud/data-centers-3d"
     },
     {
       "route": "/cloud/network",
@@ -1332,7 +1332,7 @@
         "/hosting/security",
         "/legal/acceptable-use"
       ],
-      "visual3d": "servers/dedicated-servers-3d"
+      "visual3d": "management/firewall-3d"
     },
     {
       "route": "/cloud/security",
@@ -1537,7 +1537,7 @@
         "/dashboard/servers",
         "/legal/acceptable-use"
       ],
-      "visual3d": "servers/dedicated-servers-3d"
+      "visual3d": "management/ip-management-3d"
     },
     {
       "route": "/cloud/managed-services",
@@ -2608,7 +2608,7 @@
         "/cloud/firewall",
         "/developers"
       ],
-      "visual3d": "deployment/deployment-pipeline-3d"
+      "visual3d": "deployment/docker-3d"
     },
     {
       "route": "/hosting",
@@ -2876,7 +2876,7 @@
             "label": "See how migration works",
             "to": "/hosting/migration"
           },
-          "visual3d": "servers/dedicated-servers-3d"
+          "visual3d": "management/migration-3d"
         }
       ],
       "faqs": [
@@ -3263,7 +3263,7 @@
         "/legal/acceptable-use",
         "/contact"
       ],
-      "visual3d": "hosting/web-hosting-3d"
+      "visual3d": "hosting/reseller-hosting-3d"
     },
     {
       "route": "/hosting/windows",
@@ -3361,7 +3361,7 @@
         "/hosting/control-panels",
         "/contact"
       ],
-      "visual3d": "hosting/web-hosting-3d"
+      "visual3d": "hosting/windows-hosting-3d"
     },
     {
       "route": "/hosting/email",
@@ -3955,7 +3955,7 @@
         "/cloud/monitoring",
         "/legal/data-deletion"
       ],
-      "visual3d": "servers/dedicated-servers-3d"
+      "visual3d": "management/backups-3d"
     },
     {
       "route": "/hosting/migration",
@@ -4051,7 +4051,7 @@
         "/contact",
         "/legal/refund-policy"
       ],
-      "visual3d": "servers/dedicated-servers-3d"
+      "visual3d": "management/migration-3d"
     },
     {
       "route": "/hosting/security",
@@ -4598,7 +4598,7 @@
         "/cloud/firewall",
         "/apps"
       ],
-      "visual3d": "deployment/deployment-pipeline-3d"
+      "visual3d": "deployment/docker-3d"
     },
     {
       "route": "/platforms/paas",

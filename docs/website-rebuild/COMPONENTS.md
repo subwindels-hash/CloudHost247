@@ -19,7 +19,7 @@ WHMCS still owns authentication, billing, checkout and service authorization.
 
 | Component | Source / behavior |
 |---|---|
-| Registry | `modules/addons/cloudhost247_theme/resources/site.json`: 46 editorial page definitions, six mega menus, grouped footer; no prices or provider IDs |
+| Registry | `modules/addons/cloudhost247_theme/resources/site.json`: 67 editorial page definitions, seven mega menus, eight-column grouped footer; no prices or provider IDs |
 | Context / publication | `lib/Site.php`, `lib/PublicPage.php`, existing `ThemeRepository`; published overrides, explicit unpublished states, neutral absent-record editorial fallback |
 | Header | `templates/cloudhost247/header.tpl`; retains captcha, head/body hook outputs, account notifications, switching, masquerading, sidebars, verification notices |
 | Navigation | `includes/site-nav.tpl`; native disclosures, mobile toggle, escaped data, actual account destinations |
@@ -87,8 +87,32 @@ fill a footer column.
   safe JSON-LD, fail-closed DB behavior, explicit draft publication, canonical
   discovery, published custom pages/landings, translation visibility, slug
   collisions, sitemap opt-out, missing optional fields and the 40-result limit.
+- `python3 scripts/audit-navigation-inventory.py`: the reviewed page inventory
+  (`page-inventory.json`/`.csv`) — route, canonical URL, title, category, publication
+  status, template, navigation and footer placement, hero artwork, SEO status and
+  reachability. The release gate regenerates it and fails when the committed copy is
+  stale, because a stale inventory is reviewed as if it described the site.
+- `python3 scripts/check-accessibility-contract.py`: the accessibility and
+  responsive properties that are decidable without a browser — document viewport and
+  language, a skip link whose target exists, `aria-expanded`/`aria-controls` on the
+  navigation toggle pointing at a real element, native `<details>` mega menus, a name
+  on every visible form control (explicit, implicit or ARIA), `alt` and declared
+  dimensions on first-party images, a declared hit area of at least 24px (44px for the
+  mobile toggle) on the controls a thumb actually hits, a visible `:focus-visible`
+  indicator, `prefers-reduced-motion`, clipped horizontal overflow, and a media query
+  that applies at every viewport the browser QA matrix tests. It fails loudly if it
+  inspected implausibly little, so a green run cannot mean "it read nothing".
 - `python3 -m unittest tests/website/test_static.py`: link mutation tests, parent
   hook contracts, Builder precedence and read-only API use.
+- `python3 -m unittest tests/website/test_accessibility_contract.py`: negative cases
+  for the contract above (an unlabelled control, an undersized target, a missing skip
+  target, a stylesheet regression and a vacuous scan are each required to fail).
+- `python3 -m unittest tests/website/test_fixture_checks.py`: the rendered-fixture
+  checker's `srcset` parsing. It previously read a whole candidate list
+  (`scene-640.avif 640w, scene-960.avif 960w`) as one path and reported 122 false
+  "missing asset" failures; each candidate is now checked individually, a width
+  descriptor must match the width in the filename, and the tests pin both the pass and
+  the failure on a genuinely missing rung.
 - `tests/website/render-fixtures.php`: real Smarty rendering of shipped templates
   with honest empty/no-runtime states; not a production WHMCS emulator.
 - `tests/website/render-shell.php`: guest/authenticated shell contract rendering
@@ -96,7 +120,7 @@ fill a footer column.
   authentication is not exercised. Generic Smarty 4 reports expected deprecations
   for framework-provided functions; WHMCS supplies their production integration.
 - `tests/website/browser.cjs`: actual Chromium rendering, 10 widths, menu/Escape,
-  image/H1/shell/overflow assertions, all six menus at every width, search-state
+  image/H1/shell/overflow assertions, every mega menu at every width, search-state
   and long-query regressions, selected axe WCAG A/AA checks.
 
 Fixture tools use environment paths for Smarty, a disposable output directory,

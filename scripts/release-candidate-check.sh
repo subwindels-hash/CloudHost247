@@ -32,6 +32,23 @@ if ! git diff --exit-code --quiet -- \
   exit 1
 fi
 
+# The reviewed page inventory is an artefact, not a snapshot: `page-inventory.json` is the table the
+# rebuild is assessed against (route, canonical URL, navigation and footer placement, hero artwork, SEO
+# status). It had drifted from the registry it is generated from before this gate existed — the committed
+# copy claimed 67 footer destinations while the registry serves 68 — so a stale inventory could be
+# reviewed as if it described the site. Regenerate it and refuse to continue if the committed copy
+# disagrees, exactly as the generated site surfaces above are treated.
+python3 scripts/audit-navigation-inventory.py > /tmp/ch247-inventory.log 2>&1 || {
+  cat /tmp/ch247-inventory.log >&2
+  echo 'Release-candidate FAILED: the page inventory could not be rebuilt.' >&2
+  exit 1
+}
+cat /tmp/ch247-inventory.log
+if ! git diff --exit-code --quiet -- docs/website-rebuild/page-inventory.json docs/website-rebuild/page-inventory.csv; then
+  echo 'Release-candidate FAILED: the page inventory is stale (run python3 scripts/audit-navigation-inventory.py and commit).' >&2
+  exit 1
+fi
+
 # --- PHP syntax check -------------------------------------------------------------------------
 # Every PHP file this repository owns is linted, plus the addon templates that are really PHP
 # (modules/*/templates/**/*.tpl carrying a <?php tag are executed by WHMCS). The target list is
@@ -116,8 +133,13 @@ php tests/tools/site-integration.php
 # Browser tools (MRZ among them) are pure modules; run them on Node so a broken handler fails here.
 node tests/tools/local.test.mjs
 php tests/website/run.php
-python3 -m unittest -v tests/website/test_static.py tests/website/test_manifest_visuals.py
+python3 -m unittest -v tests/website/test_static.py tests/website/test_manifest_visuals.py tests/website/test_accessibility_contract.py tests/website/test_fixture_checks.py
 python3 scripts/verify-website.py
+# Accessibility and responsive contract: viewport, document language, skip link, menu state, control
+# names, image text, touch-target sizes, focus visibility, reduced motion and a media query for every
+# viewport the browser QA matrix tests. `tests/website/browser.cjs` measures the same properties in a
+# real browser where one exists; this is the part that can run anywhere Python can.
+python3 scripts/check-accessibility-contract.py
 # Every 3D scene must have the full AVIF/WebP width ladder the templates advertise. A <source>
 # whose URL 404s does not fall through to the next source, so a missing encoding is a broken
 # image on a published page, not a slower one.

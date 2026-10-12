@@ -149,6 +149,18 @@ final class View
             $html .= '<a class="' . ($category === $slug ? 'is-active' : '') . '" href="' . self::e($base . '/tools/category/' . $slug) . '">' . self::e($label) . '</a>';
         }
         $html .= '</div></nav><section class="ch-section"><div class="ch-wrap">';
+        // The hero carries the only `<h1>` on the page; every card below it is an `<h3>`, so without a
+        // level-2 heading between them the outline jumped h1 → h3 on all ten hub and category routes.
+        // The label is for the accessibility tree rather than the layout — the visible count line under
+        // it already tells a sighted visitor what the list is, and the design does not need a second
+        // visible title under the hero.
+        $labels = Catalog::discovery();
+        if ($category === '') {
+            $listLabel = 'Tool catalogue';
+        } else {
+            $listLabel = (isset($labels[$category]) ? $labels[$category] : $page['name']) . ' tools';
+        }
+        $html .= '<h2 class="ch-visually-hidden">' . self::e($listLabel) . '</h2>';
         $html .= '<p class="ch-kicker" role="status">' . count($tools) . ' tools</p>';
         if (!$tools) {
             $html .= '<div class="ch-notice"><h2>No tools match that search.</h2><p>Try a category, or search for dns, ip or json.</p></div>';

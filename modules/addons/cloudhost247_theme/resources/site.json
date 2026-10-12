@@ -135,7 +135,7 @@
             "Verification on the new infrastructure first"
           ],
           "visual": "management/migration",
-          "visual3d": "servers/dedicated-servers-3d",
+          "visual3d": "management/migration-3d",
           "link": {
             "label": "See how migration works",
             "url": "migration.php"
@@ -410,7 +410,7 @@
         "help-center.php"
       ],
       "slug": "plesk-hosting",
-      "visual3d": "hosting/web-hosting-3d"
+      "visual3d": "hosting/plesk-hosting-3d"
     },
     "windows-hosting.php": {
       "title": "Windows Hosting",
@@ -514,7 +514,7 @@
           ]
         }
       ],
-      "visual3d": "hosting/web-hosting-3d"
+      "visual3d": "hosting/windows-hosting-3d"
     },
     "vps-hosting.php": {
       "title": "VPS Hosting",
@@ -1172,7 +1172,7 @@
           ]
         }
       ],
-      "visual3d": "servers/dedicated-servers-3d"
+      "visual3d": "servers/game-servers-3d"
     },
     "developer-friendly.php": {
       "title": "Developer Hosting",
@@ -3368,7 +3368,7 @@
         "acceptable-use-policy.php"
       ],
       "slug": "reseller-hosting",
-      "visual3d": "hosting/web-hosting-3d",
+      "visual3d": "hosting/reseller-hosting-3d",
       "seo_description": "Reseller hosting from CloudHost247: separate accounts, your own branding, WHMCS-compatible billing and the infrastructure operated for you.",
       "faqs": [
         {
@@ -3792,7 +3792,7 @@
         "firewall.php"
       ],
       "slug": "docker-hosting",
-      "visual3d": "deployment/deployment-pipeline-3d",
+      "visual3d": "deployment/docker-3d",
       "seo_description": "Run Docker containers on CloudHost247: pull from public or private registries, attach persistent volumes, inject configuration and route a domain with TLS.",
       "faqs": [
         {
@@ -4253,7 +4253,7 @@
         "aboutus.php"
       ],
       "slug": "data-centers",
-      "visual3d": "cloud/vps-3d",
+      "visual3d": "cloud/data-centers-3d",
       "seo_description": "The data centre regions CloudHost247 is configured to deploy into, listed from live configuration rather than a marketing map.",
       "faqs": [
         {
@@ -4673,7 +4673,7 @@
         "data-deletion.php"
       ],
       "slug": "backups",
-      "visual3d": "servers/dedicated-servers-3d",
+      "visual3d": "management/backups-3d",
       "seo_description": "Backup jobs for CloudHost247 servers and applications: scheduled runs, visible history, defined retention and restores performed from your account.",
       "faqs": [
         {
@@ -4768,7 +4768,7 @@
         "acceptable-use-policy.php"
       ],
       "slug": "firewall",
-      "visual3d": "servers/dedicated-servers-3d",
+      "visual3d": "management/firewall-3d",
       "seo_description": "Rule-based firewall control for CloudHost247 servers: ordered allow, deny and rate-limit rules applied at the network layer, with the effective ruleset visible.",
       "faqs": [
         {
@@ -4934,7 +4934,7 @@
         "acceptable-use-policy.php"
       ],
       "slug": "ip-management",
-      "visual3d": "servers/dedicated-servers-3d",
+      "visual3d": "management/ip-management-3d",
       "seo_description": "Manage the IP addresses assigned to your CloudHost247 services: public addressing, floating IPs, reverse DNS and the records that tie them to your services.",
       "faqs": [
         {
@@ -5020,7 +5020,7 @@
         "refund-policy.php"
       ],
       "slug": "migration",
-      "visual3d": "servers/dedicated-servers-3d",
+      "visual3d": "management/migration-3d",
       "seo_description": "Move your website and email to CloudHost247 with a planned cutover: copy, verify on the new infrastructure, then switch DNS at your discretion.",
       "faqs": [
         {
