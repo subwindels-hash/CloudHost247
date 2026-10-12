@@ -96,21 +96,22 @@ same pipeline scene, the four management pages shared the dedicated-server scene
 `/hosting/windows-hosting`, `/hosting/plesk-hosting` and `/hosting/reseller-hosting` shared the
 web-hosting scene.
 
-Ten scenes were produced in this pass and wired end to end (`plesk-hosting`, `windows-hosting`,
+Twenty scenes were produced in this pass and wired end to end (`plesk-hosting`, `windows-hosting`,
 `reseller-hosting`, `game-servers`, `backups`, `firewall`, `ip-management`, `migration`,
-`data-centers`, `docker`), each encoded to the same 640/960/1280 AVIF + WebP ladder and mirrored
-into the platform's served library. Coverage measured by the inventory audit:
+`data-centers`, `docker`, `php`, `laravel`, `nodejs`, `python`, `developer-hosting`, `api`, `paas`,
+`os-catalog`, `platform-security`, `ssl`), each encoded to the same 640/960/1280 AVIF + WebP ladder
+and mirrored into the platform's served library. Coverage measured by the inventory audit:
 
 | | Before | After |
 |---|---|---|
-| Product pages on their own scene | 38 | **48** |
-| Product pages on a family fallback | 29 | **19** |
-| Distinct hero scenes in use | 19 | **29** |
+| Product pages on their own scene | 38 | **58** |
+| Product pages on a family fallback | 29 | **9** |
+| Distinct hero scenes in use | 19 | **39** |
 
 The audit now reports this (`totals.hero_scenes_exact`,
 `totals.hero_scenes_from_family_fallback`, `totals.distinct_hero_scenes`, plus a `hero_fallbacks`
 list naming what each remaining page shares its scene with), so the gap is measured rather than
-asserted. The 19 remaining pages are listed in §11.
+asserted. The 9 remaining pages are listed in §11.
 
 ### 3.5 The currency hint endpoint was publicly cacheable and echoed the caller's address
 
@@ -226,7 +227,7 @@ SPA navigation through a generated adapter, so the two front ends cannot drift.
 | Family | Contents |
 |---|---|
 | Illustrations | 219 SVGs in the library; the 67 registry pages reference 47 distinct diagrams |
-| 3D scenes | 30, each with 640/960/1280 in **AVIF and WebP** plus the JPEG master (`generate-raster-formats.py --check` → 30 scenes × 2 formats ✓); 10 were added in this pass |
+| 3D scenes | 40, each with 640/960/1280 in **AVIF and WebP** plus the JPEG master (`generate-raster-formats.py --check` → 40 scenes × 2 formats ✓); 20 were added in this pass |
 | Brand | 24 files: horizontal / compact / primary / icon-mark × dark, white and mono, in SVG + PNG + WebP |
 | Favicons | `favicon.ico` + 16/32/48/192/512 PNG, Apple touch icon, `site.webmanifest` |
 | Social | preview artwork in PNG, SVG and WebP |
@@ -332,15 +333,15 @@ snapshot or a commit — and is reproducible with the command above.
    contract covers structure, names, target sizes and the responsive ladder, but it cannot measure
    real overflow or real focus behaviour. `tests/website/browser.cjs` must be re-run where a
    Chromium binary exists.
-2. **Nineteen product pages still share a family hero scene.** §5 of the brief asks each product
-   page to have a distinct relevant hero; 48 of 67 pages are on their own scene and 19 are on the
-   one their family shares (`deployment/*` ×7 on the pipeline scene, `management/*` ×5 on the
-   server scene, `cloud/network` and `operating-systems/os-catalog` on the cloud scene,
-   `security.php` and `ssl-certificate.php` on the infrastructure scene, `blog.php` and
-   `documentation.php` on the infrastructure scene, `domains/domain-dns`,
-   `hosting/website-design`, and `faqs.php`/`help-center.php` which share one visual key with each
-   other). `hero_fallbacks` in `page-inventory.json` names each one and what it shares with.
-   Nineteen scenes remain to be produced; ten were produced in this pass.
+2. **Nine pages still share a family hero scene.** §5 of the brief asks each product page to have
+   a distinct relevant hero; 58 of 67 pages are on their own scene and 9 are on the one their family
+   shares — `blog.php` and `documentation.php` (infrastructure scene), `domain-dns.php`,
+   `managed-services.php` and `server-management.php` (server scene), `network.php` (cloud scene),
+   `website-design.php` (web-hosting scene), and `faqs.php`/`help-center.php` (one visual key
+   between them). `hero_fallbacks` in `page-inventory.json` names each one and what it shares with.
+   Every `/deployment/*`, `/security/*`, `/operating-systems/*`, `/management/{backups,firewall,
+   ip-management,migration}` and `/hosting/{plesk,windows,reseller}-hosting` page now has its own
+   scene. Nine scenes remain to be produced; twenty were produced in this pass.
 3. **PHP 8.2 deprecation notices** are emitted by the OVH / broker / marketing *test fakes* (missing
    `#[\ReturnTypeWillChange]` on `ArrayAccess`/`Countable`/`IteratorAggregate` implementations).
    Pre-existing, test-only, non-blocking.
@@ -365,7 +366,7 @@ non-asset changes are:
 | `docs/website-rebuild/page-inventory.json` / `.csv` | regenerated: footer destinations 67 → 68, hero-scene coverage added |
 | `docs/website-rebuild/COMPONENTS.md` | documents the inventory audit, the accessibility contract and the two new suites; registry counts corrected (67 pages, 7 menus, 8 columns) |
 | `docs/website-rebuild/DEPLOYMENT.md` | registry-first navigation wording; Node suite figure corrected to the measured 2,242 tests |
-| `assets/images/cloudhost247/**` + `cloudhost247-node/frontend/public/media/cloudhost247/**` | **70 files**: 10 new 3D scenes × (JPEG + 640/960/1280 AVIF + WebP), mirrored into the served library |
+| `assets/images/cloudhost247/**` + `cloudhost247-node/frontend/public/media/cloudhost247/**` | **140 files**: 20 new 3D scenes × (JPEG + 640/960/1280 AVIF + WebP), mirrored into the served library |
 | `modules/addons/cloudhost247_theme/resources/site.json`, `shared/site/generated/route-report.json`, `cloudhost247-node/frontend/src/content/pages.generated.json` | regenerated from the registry (the new scenes change the resolved `visual3d`) |
 | `.github/workflows/content-hygiene.yml` | the unparseable step name that stopped the workflow from ever starting is quoted; the workflow also runs the new checker |
 | `scripts/check-workflow-yaml.mjs` | **new** — fails when any `.github/workflows/*.yml` would not start, with the file and line |

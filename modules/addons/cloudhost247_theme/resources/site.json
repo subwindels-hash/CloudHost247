@@ -1336,7 +1336,7 @@
           ]
         }
       ],
-      "visual3d": "deployment/deployment-pipeline-3d"
+      "visual3d": "deployment/developer-hosting-3d"
     },
     "ssl-certificate.php": {
       "title": "SSL Certificates",
@@ -1439,7 +1439,7 @@
           ]
         }
       ],
-      "visual3d": "hero/infrastructure-3d"
+      "visual3d": "security/ssl-3d"
     },
     "website-design.php": {
       "title": "Website Design",
@@ -1988,7 +1988,7 @@
             "DMARC tells receivers what to do with failures"
           ],
           "visual": "security/ssl",
-          "visual3d": "hero/infrastructure-3d",
+          "visual3d": "security/ssl-3d",
           "link": {
             "label": "See DNS management",
             "url": "dns-management.php"
@@ -2706,7 +2706,7 @@
           ]
         }
       ],
-      "visual3d": "cloud/vps-3d"
+      "visual3d": "operating-systems/os-catalog-3d"
     },
     "server-management.php": {
       "title": "Server Management",
@@ -3484,7 +3484,7 @@
         "api-hosting.php"
       ],
       "slug": "nodejs-hosting",
-      "visual3d": "deployment/deployment-pipeline-3d",
+      "visual3d": "deployment/nodejs-3d",
       "seo_description": "Node.js hosting on CloudHost247: review available runtimes and product integrations for process supervision, environment configuration, application logs and domains.",
       "faqs": [
         {
@@ -3585,7 +3585,7 @@
         "operating-systems.php"
       ],
       "slug": "php-hosting",
-      "visual3d": "deployment/deployment-pipeline-3d",
+      "visual3d": "deployment/php-3d",
       "seo_description": "PHP hosting on CloudHost247: review available runtime versions, Composer, databases and scheduled-task support in the selected hosting product.",
       "faqs": [
         {
@@ -3698,7 +3698,7 @@
         "developer-friendly.php"
       ],
       "slug": "python-hosting",
-      "visual3d": "deployment/deployment-pipeline-3d",
+      "visual3d": "deployment/python-3d",
       "seo_description": "Host Python applications on CloudHost247: virtual environments, WSGI and ASGI applications, background workers, scheduled jobs and managed data services.",
       "faqs": [
         {
@@ -3909,7 +3909,7 @@
         "backups.php"
       ],
       "slug": "laravel-hosting",
-      "visual3d": "deployment/deployment-pipeline-3d",
+      "visual3d": "deployment/laravel-3d",
       "seo_description": "Laravel hosting on CloudHost247 with the application services a Laravel site may need: queue workers, scheduler jobs, storage and database options.",
       "faqs": [
         {
@@ -4023,7 +4023,7 @@
         "documentation.php"
       ],
       "slug": "api-hosting",
-      "visual3d": "deployment/deployment-pipeline-3d",
+      "visual3d": "deployment/api-3d",
       "seo_description": "Host HTTP APIs on CloudHost247 using an available runtime or container product; confirm TLS, network controls, logs and monitoring in the selected service catalogue.",
       "faqs": [
         {
@@ -4143,7 +4143,7 @@
         "documentation.php"
       ],
       "slug": "paas",
-      "visual3d": "deployment/deployment-pipeline-3d",
+      "visual3d": "deployment/paas-3d",
       "seo_description": "Manage supported application deployments with recorded steps and per-app settings. Git source builds require an enabled control-panel integration.",
       "faqs": [
         {
@@ -4444,7 +4444,7 @@
         "cybercrime-policy.php"
       ],
       "slug": "security",
-      "visual3d": "hero/infrastructure-3d",
+      "visual3d": "security/platform-security-3d",
       "seo_description": "How CloudHost247 secures its platform and customer data: authentication, access control, encryption, isolation, logging and responsible disclosure.",
       "faqs": [
         {
