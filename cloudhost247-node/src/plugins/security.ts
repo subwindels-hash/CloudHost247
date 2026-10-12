@@ -9,7 +9,15 @@ import type { Env } from '../config/env';
  * Passenger manages — no reliance on Nginx/Apache-level modules, so it must be correct here.
  */
 export async function registerSecurityPlugins(app: FastifyInstance, env: Env) {
+  // The development preview harnesses (`scripts/*-demo-preview.ts`) run the real app inside an
+  // editor/IDE preview iframe whose parent page is a different origin, so clickjacking protection
+  // has to permit that framing while they run. `test` and `production` are untouched: helmet's
+  // SAMEORIGIN default and `frame-ancestors 'self'` stay exactly as they are, which is what
+  // tests/unit/spa-security-headers.test.ts pins.
+  const allowPreviewFraming = env.NODE_ENV === 'development';
+
   await app.register(helmet, {
+    ...(allowPreviewFraming ? { frameguard: false as const } : {}),
     // The SPA is served by this same app, so keep CSP permissive enough for same-origin assets
     // while still removing the most common risky defaults. Tightened further in later phases
     // once the frontend's asset hashing strategy is finalized.
@@ -20,6 +28,7 @@ export async function registerSecurityPlugins(app: FastifyInstance, env: Env) {
         styleSrc: ["'self'", "'unsafe-inline'"],
         scriptSrc: ["'self'"],
         connectSrc: ["'self'"],
+        ...(allowPreviewFraming ? { frameAncestors: ['*'] } : {}),
       },
     },
   });

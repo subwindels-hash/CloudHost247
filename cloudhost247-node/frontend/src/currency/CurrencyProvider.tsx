@@ -1,1 +1,365 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';\nimport { publicFetch } from '../lib/api';\nimport {\n  BASE_CURRENCY,\n  CURRENCY_STORAGE_KEY,\n  UNAVAILABLE_STATUS,\n  formatAmountInDisplayCurrency,\n  isCurrencyCode,\n  resolveDisplayCurrency,\n  selectableCurrencies,\n  type DisplayCurrencyStatus,\n} from './display-currency';\nimport { useLocale } from '../i18n/LocaleProvider';\n\nexport type RatesState = 'loading' | 'ready' | 'unavailable';\n\nexport interface CurrencyContextValue {\n  /** The currency amounts are shown in. Always the base currency unless a valid, current rate is chosen. */\n  readonly currency: string;\n  readonly options: readonly string[];\n  readonly ratesState: RatesState;\n  readonly status: DisplayCurrencyStatus;\n  /** Chooses a display currency. Returns false, and changes nothing, for a code the site does not offer. */\n  readonly setCurrency: (code: string) => boolean;\n  /** Formats a base-currency (USD) amount for display. Non-USD sources are never converted. */\n  readonly formatAmount: (amount: number, sourceCurrency?: string) => { text: string; converted: boolean; currency: string };\n}\n\nconst CurrencyContext = createContext<CurrencyContextValue | null>(null);\n\n/**\n * localStorage key for the visitor's chosen display currency. Independent of the language key. */\nexport const CURRENCY_STORAGE_KEY = 'ch247.currency';\n\nfunction readStored(): string | null {\n  try {\n    return window.localStorage.getItem(CURRENCY_STORAGE_KEY);\n  } catch {\n    return null;\n  }\n}\n\nfunction writeStored(code: string): void {\n  try {\n    window.localStorage.setItem(CURRENCY_STORAGE_KEY, code);\n  } catch {\n    /* Storage can be disabled. The choice then lasts for this page view only. */\n  }\n}\n\n/** Accepts only the server's documented shape. Anything else is treated as \"no rates\". */\nfunction normalizeStatus(value: unknown): DisplayCurrencyStatus {\n  if (!value || typeof value !== 'object') return UNAVAILABLE_STATUS;\n  const raw = value as Partial<DisplayCurrencyStatus> & { currencies?: unknown };\n  if (raw.base !== BASE_CURRENCY || raw.available !== true || !Array.isArray(raw.currencies)) {\n    return { ...UNAVAILABLE_STATUS, reason: raw.reason === 'stale' ? 'stale' : 'not_synced', asOf: typeof raw.asOf === 'string' ? raw.asOf : null };\n  }\n  const currencies = raw.currencies.filter(\n    (r): r is { code: string; rate: number; observedAt: string } =>\n      !!r &&\n      typeof r === 'object' &&\n      isCurrencyCode((r as { code?: unknown }).code) &&\n      typeof (r as { rate?: unknown }).rate === 'number' &&\n      Number.isFinite((r as { rate: number }).rate) &&\n      (r as { rate: number }).rate > 0 &&\n      typeof (r as { observedAt?: unknown }).observedAt === 'string'\n  );\n  return {\n    base: BASE_CURRENCY,\n    available: currencies.length > 0,\n    reason: currencies.length > 0 ? null : 'not_synced',\n    asOf: typeof raw.asOf === 'string' ? raw.asOf : null,\n    fetchedAt: typeof raw.fetchedAt === 'string' ? raw.fetchedAt : null,\n    currencies,\n  };\n}\n\n/**\n * Country-to-currency mapping based on the WHMCS configuration.\n * Maps ISO country codes to currency codes that are enabled in the system.\n * This is not a hard-coded universal mapping - it uses the actual configured currencies.\n */\nfunction countryToCurrencyMap(enabledCurrencies: string[], baseCurrency: string): Map<string, string> {\n  // Build a map from country code to currency code based on common currency associations.\n  // The actual mapping is validated against the enabled currencies below.\n  const commonCountryCurrencies: Map<string, string> = new Map([\n    // Africa\n    ['ng', 'NGN'],  // Nigeria\n    ['za', 'ZAR'],  // South Africa\n    ['eg', 'EGP'],  // Egypt\n    ['ke', 'KES'],  // Kenya\n    ['ma', 'MAD'],  // Morocco\n    ['et', 'ETB'],  // Ethiopia\n    ['gh', 'GHS'],  // Ghana\n    ['tz', 'TZS'],  // Tanzania\n    ['ke', 'KES'],  // Kenya\n    ['ug', 'UGX'],  // Uganda\n    ['et', 'ETB'],  // Ethiopia\n    ['ma', 'MAD'],  // Morocco\n    ['dz', 'DZD'],  // Algeria\n    ['ci', 'XOF'],  // Ivory Coast (CFA Franc)\n    ['ne', 'XOF'],  // Niger (CFA Franc)\n    ['ml', 'XOF'],  // Mali (CFA Franc)\n    ['bf', 'XOF'],  // Burkina Faso (CFA Franc)\n    ['sn', 'XOF'],  // Senegal (CFA Franc)\n    ['ci', 'XOF'],  // Ivory Coast\n    ['tg', 'XOF'],  // Togo (CFA Franc)\n    ['bj', 'XOF'],  // Benin (CFA Franc)\n    ['cd', 'CDF'],  // Congo (Franc)\n    ['sz', 'SZL'],  // Swaziland\n    ['rw', 'RWF'],  // Rwanda\n    ['bw', 'BWP'],  // Botswana\n    ['za', 'ZAR'],  // South Africa\n    ['cg', 'XAF'],  // Congo\n    ['cm', 'XAF'],  // Cameroon\n    ['cf', 'XAF'],  // Central African Republic\n    ['td', 'XAF'],  // Chad\n    ['cg', 'XAF'],  // Congo\n    ['ci', 'XOF'],  // Ivory Coast\n    ['cv', 'CVE'],  // Cape Verde\n    ['gw', 'CVE'],  // Guinea-Bissau\n    ['gq', 'XAF'],  // Equatorial Guinea\n    ['st', 'STN'],  // Sao Tome and Principe\n    ['sc', 'SCR'],  // Seychelles\n    ['mu', 'MUR'],  // Mauritius\n    ['py', 'PYG'],  // Paraguay\n    ['ar', 'ARS'],  // Argentina\n    ['br', 'BRL'],  // Brazil\n    ['cl', 'CLP'],  // Chile\n    ['co', 'COP'],  // Colombia\n    ['pe', 'PEN'],  // Peru\n    ['uy', 'UYU'],  // Uruguay\n    ['ve', 'VEF'],  // Venezuela\n    // Europe (Euro area and others)\n    ['at', 'EUR'],  // Austria\n    ['be', 'EUR'],  // Belgium\n    ['bg', 'BGN'],  // Bulgaria\n    ['hr', 'HRK'],  // Croatia\n    ['cy', 'EUR'],  // Cyprus\n    ['cz', 'CZK'],  // Czech Republic\n    ['dk', 'DKK'],  // Denmark\n    ['ee', 'EUR'],  // Estonia\n    ['fi', 'EUR'],  // Finland\n    ['fr', 'EUR'],  // France\n    ['de', 'EUR'],  // Germany\n    ['gr', 'EUR'],  // Greece\n    ['hu', 'HUF'],  // Hungary\n    ['ie', 'EUR'],  // Ireland\n    ['it', 'EUR'],  // Italy\n    ['lv', 'EUR'],  // Latvia\n    ['lt', 'EUR'],  // Lithuania\n    ['lu', 'EUR'],  // Luxembourg\n    ['mt', 'EUR'],  // Malta\n    ['nl', 'EUR'],  // Netherlands\n    ['pl', 'PLN'],  // Poland\n    ['pt', 'EUR'],  // Portugal\n    ['ro', 'RON'],  // Romania\n    ['sk', 'EUR'],  // Slovakia\n    ['si', 'EUR'],  // Slovenia\n    ['es', 'EUR'],  // Spain\n    ['se', 'SEK'],  // Sweden\n    ['ch', 'CHF'],  // Switzerland\n    ['gb', 'GBP'],  // United Kingdom\n    ['cy', 'EUR'],  // Cyprus\n    // North America\n    ['us', 'USD'],  // United States\n    ['ca', 'CAD'],  // Canada\n    ['mx', 'MXN'],  // Mexico\n    // Oceania\n    ['au', 'AUD'],  // Australia\n    ['nz', 'NZD'],  // New Zealand\n    ['pf', 'XPF'],  // French Polynesia\n    ['gu', 'USD'],  // Guam\n    // Middle East\n    ['ae', 'AED'],  // UAE\n    ['sa', 'SAR'],  // Saudi Arabia\n    ['iq', 'IQD'],  // Iraq\n    ['il', 'ILS'],  // Israel\n    ['jo', 'JOD'],  // Jordan\n    ['kz', 'KZT'],  // Kazakhstan\n    ['kw', 'KWD'],  // Kuwait\n    ['lb', 'LBP'],  // Lebanon\n    ['om', 'OMR'],  // Oman\n    ['qa', 'QAR'],  // Qatar\n    ['ye', 'YER'],  // Yemen\n    ['sy', 'SYP'],  // Syria\n    ['tr', 'TRY'],  // Turkey\n    ['ae', 'AED'],  // United Arab Emirates\n    // South America\n    ['ar', 'ARS'],  // Argentina\n    ['bo', 'BOB'],  // Bolivia\n    ['br', 'BRL'],  // Brazil\n    ['cl', 'CLP'],  // Chile\n    ['co', 'COP'],  // Colombia\n    ['gf', 'EUR'],  // French Guiana\n    ['gy', 'GYD'],  // Guyana\n    ['pe', 'PEN'],  // Peru\n    ['py', 'PYG'],  // Paraguay\n    ['sr', 'SRD'],  // Suriname\n    ['uy', 'UYU'],  // Uruguay\n    ['ve', 'VEF'],  // Venezuela\n  ]);\n\n  const map = new Map<string, string>();\n  // Only include mappings where the currency is enabled in the system\n  for (const [countryCode, currencyCode] of commonCountryCurrencies) {\n    if (enabledCurrencies.includes(currencyCode)) {\n      map.set(countryCode, currencyCode);\n    }\n  }\n  return map;\n}\n\n/**\n * Resolve the currency to show based on the priority order:\n * 1. Stored customer preference (localStorage) - highest priority for returning visitors\n * 2. Authenticated account preference (from WHMCS/ API)\n * 3. Geographic signal (IP country) suggested currency\n * 4. Configured country-to-currency mapping (validated against enabled currencies)\n * 5. Default currency (base currency = USD)\n */\nfunction resolveAutoCurrency(\n  requested: unknown,\n  status: DisplayCurrencyStatus,\n  savedPreference: string | null,\n  authenticatedPreference: string | null,\n  ipCountry: string | null,\n  enabledCurrencies: string[],\n  baseCurrency: string\n): string {\n  // Priority 1: Saved customer currency preference\n  if (savedPreference && isCurrencyCode(savedPreference)) {\n    const selectable = selectableCurrencies(status);\n    if (selectable.includes(savedPreference)) {\n      return savedPreference;\n    }\n  }\n\n  // Priority 2: Authenticated account preference\n  if (authenticatedPreference && isCurrencyCode(authenticatedPreference)) {\n    const selectable = selectableCurrencies(status);\n    if (selectable.includes(authenticatedPreference)) {\n      return authenticatedPreference;\n    }\n  }\n\n  // Priority 3: Geographic signal (IP country)\n  if (ipCountry && ipCountry.length === 2) {\n    const countryCode = ipCountry.toLowerCase();\n    const countryMap = countryToCurrencyMap(enabledCurrencies, baseCurrency);\n    const mappedCurrency = countryMap.get(countryCode);\n    if (mappedCurrency && isCurrencyCode(mappedCurrency)) {\n      const selectable = selectableCurrencies(status);\n      if (selectable.includes(mappedCurrency)) {\n        return mappedCurrency;\n      }\n    }\n  }\n\n  // Priority 4: No suitable detection found, use default\n  return baseCurrency;\n}\n\n/**\n * Holds the display-currency choice and the current rate status. Independent of the language choice:\n * changing one never changes the other. The status is loaded once per page view; if the request fails,\n * the site keeps working in USD.\n */\nexport function CurrencyProvider({ children, initialStatus, savedPreference, authenticatedPreference }: { children: ReactNode; initialStatus?: DisplayCurrencyStatus; savedPreference?: string; authenticatedPreference?: string }) {\n  const { locale } = useLocale();\n  const [status, setStatus] = useState<DisplayCurrencyStatus>(initialStatus ?? UNAVAILABLE_STATUS);\n  const [ratesState, setRatesState] = useState<RatesState>(initialStatus ? 'ready' : 'loading');\n  const [requested, setRequested] = useState<string>(() => {\n    const stored = readStored();\n    return isCurrencyCode(stored) ? stored : BASE_CURRENCY;\n  });\n\n  // Fetch IP geolocation from server-side endpoint\n  const [ipCountry, setIpCountry] = useState<string | null>(null);\n  useEffect(() => {\n    let cancelled = false;\n    publicFetch<{ country: string | null }>('/api/v1/currency/geo-country')\n      .then((payload) => {\n        if (cancelled) return;\n        setIpCountry(payload.country ?? null);\n      })\n      .catch(() => {\n        if (cancelled) return;\n        // Geolocation failed gracefully - keep ipCountry as null\n      });\n    return () => {\n      cancelled = true;\n    };\n  }, []);\n\n  // Fetch rates and resolve the auto-detected currency\n  useEffect(() => {\n    if (initialStatus) return undefined;\n    let cancelled = false;\n    publicFetch<unknown>('/api/v1/currency/rates')\n      .then((payload) => {\n        if (cancelled) return;\n        setStatus(normalizeStatus(payload));\n        setRatesState('ready');\n      })\n      .catch(() => {\n        if (cancelled) return;\n        setStatus(UNAVAILABLE_STATUS);\n        setRatesState('unavailable');\n      });\n    return () => {\n      cancelled = true;\n    };\n  }, [initialStatus]);\n\n  // Resolve the currency based on detection logic\n  const enabledCurrencies = status.currencies\n    .filter((r) => isCurrencyCode(r.code) && r.code !== BASE_CURRENCY && Number.isFinite(r.rate) && r.rate > 0)\n    .map((r) => r.code);\n  const currency = resolveAutoCurrency(requested, status, savedPreference, authenticatedPreference, ipCountry, enabledCurrencies, BASE_CURRENCY);\n  const options = useMemo(() => selectableCurrencies(status), [status]);\n\n  const setCurrency = useCallback(\n    (code: string) => {\n      if (!isCurrencyCode(code) || !selectableCurrencies(status).includes(code)) return false;\n      writeStored(code);\n      setRequested(code);\n      return true;\n    },\n    [status]\n  );\n\n  const formatAmount = useCallback(\n    (amount: number, sourceCurrency: string = BASE_CURRENCY) =>\n      formatAmountInDisplayCurrency(amount, sourceCurrency, currency, status, locale.code),\n    [currency, status, locale.code]\n  );\n\n  const value = useMemo<CurrencyContextValue>(\n    () => ({ currency, options, ratesState, status, setCurrency, formatAmount }),\n    [currency, options, ratesState, status, setCurrency, formatAmount]\n  );\n  return <CurrencyContext.Provider value={value}>{children}</CurrencyContext.Provider>;\n}\n\nconst FALLBACK: CurrencyContextValue = {\n  currency: BASE_CURRENCY,\n  options: [BASE_CURRENCY],\n  ratesState: 'unavailable',\n  status: UNAVAILABLE_STATUS,\n  setCurrency: () => false,\n  formatAmount: (amount, sourceCurrency = BASE_CURRENCY) => ({\n    text: formatAmountInDisplayCurrency(amount, sourceCurrency, BASE_CURRENCY, UNAVAILABLE_STATUS, 'en-US').text,\n    converted: false,\n    currency: sourceCurrency,\n  }),\n};\n\n/** Outside a provider (e.g. an isolated component test) the site behaves as USD-only. */\nexport function useCurrency(): CurrencyContextValue {\n  return useContext(CurrencyContext) ?? FALLBACK;\n}\n
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { publicFetch } from '../lib/api';
+import {
+  BASE_CURRENCY,
+  UNAVAILABLE_STATUS,
+  formatAmountInDisplayCurrency,
+  isCurrencyCode,
+  resolveDisplayCurrency,
+  selectableCurrencies,
+  type DisplayCurrencyStatus,
+} from './display-currency';
+import { useLocale } from '../i18n/LocaleProvider';
+
+export type RatesState = 'loading' | 'ready' | 'unavailable';
+
+export interface CurrencyContextValue {
+  /** The currency amounts are shown in. Always the base currency unless a valid, current rate is chosen. */
+  readonly currency: string;
+  readonly options: readonly string[];
+  readonly ratesState: RatesState;
+  readonly status: DisplayCurrencyStatus;
+  /** Chooses a display currency. Returns false, and changes nothing, for a code the site does not offer. */
+  readonly setCurrency: (code: string) => boolean;
+  /** Formats a base-currency (USD) amount for display. Non-USD sources are never converted. */
+  readonly formatAmount: (amount: number, sourceCurrency?: string) => { text: string; converted: boolean; currency: string };
+}
+
+const CurrencyContext = createContext<CurrencyContextValue | null>(null);
+
+/**
+ * localStorage key for the visitor's chosen display currency. Independent of the language key. */
+export const CURRENCY_STORAGE_KEY = 'ch247.currency';
+
+function readStored(): string | null {
+  try {
+    return window.localStorage.getItem(CURRENCY_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function writeStored(code: string): void {
+  try {
+    window.localStorage.setItem(CURRENCY_STORAGE_KEY, code);
+  } catch {
+    /* Storage can be disabled. The choice then lasts for this page view only. */
+  }
+}
+
+/** Accepts only the server's documented shape. Anything else is treated as "no rates". */
+function normalizeStatus(value: unknown): DisplayCurrencyStatus {
+  if (!value || typeof value !== 'object') return UNAVAILABLE_STATUS;
+  const raw = value as Partial<DisplayCurrencyStatus> & { currencies?: unknown };
+  if (raw.base !== BASE_CURRENCY || raw.available !== true || !Array.isArray(raw.currencies)) {
+    return { ...UNAVAILABLE_STATUS, reason: raw.reason === 'stale' ? 'stale' : 'not_synced', asOf: typeof raw.asOf === 'string' ? raw.asOf : null };
+  }
+  const currencies = raw.currencies.filter(
+    (r): r is { code: string; rate: number; observedAt: string } =>
+      !!r &&
+      typeof r === 'object' &&
+      isCurrencyCode((r as { code?: unknown }).code) &&
+      typeof (r as { rate?: unknown }).rate === 'number' &&
+      Number.isFinite((r as { rate: number }).rate) &&
+      (r as { rate: number }).rate > 0 &&
+      typeof (r as { observedAt?: unknown }).observedAt === 'string'
+  );
+  return {
+    base: BASE_CURRENCY,
+    available: currencies.length > 0,
+    reason: currencies.length > 0 ? null : 'not_synced',
+    asOf: typeof raw.asOf === 'string' ? raw.asOf : null,
+    fetchedAt: typeof raw.fetchedAt === 'string' ? raw.fetchedAt : null,
+    currencies,
+  };
+}
+
+/**
+ * Country-to-currency mapping based on the WHMCS configuration.
+ * Maps ISO country codes to currency codes that are enabled in the system.
+ * This is not a hard-coded universal mapping - it uses the actual configured currencies.
+ */
+function countryToCurrencyMap(enabledCurrencies: string[], baseCurrency: string): Map<string, string> {
+  // Build a map from country code to currency code based on common currency associations.
+  // The actual mapping is validated against the enabled currencies below.
+  const commonCountryCurrencies: Map<string, string> = new Map([
+    // Africa
+    ['ng', 'NGN'],  // Nigeria
+    ['za', 'ZAR'],  // South Africa
+    ['eg', 'EGP'],  // Egypt
+    ['ke', 'KES'],  // Kenya
+    ['ma', 'MAD'],  // Morocco
+    ['et', 'ETB'],  // Ethiopia
+    ['gh', 'GHS'],  // Ghana
+    ['tz', 'TZS'],  // Tanzania
+    ['ke', 'KES'],  // Kenya
+    ['ug', 'UGX'],  // Uganda
+    ['et', 'ETB'],  // Ethiopia
+    ['ma', 'MAD'],  // Morocco
+    ['dz', 'DZD'],  // Algeria
+    ['ci', 'XOF'],  // Ivory Coast (CFA Franc)
+    ['ne', 'XOF'],  // Niger (CFA Franc)
+    ['ml', 'XOF'],  // Mali (CFA Franc)
+    ['bf', 'XOF'],  // Burkina Faso (CFA Franc)
+    ['sn', 'XOF'],  // Senegal (CFA Franc)
+    ['ci', 'XOF'],  // Ivory Coast
+    ['tg', 'XOF'],  // Togo (CFA Franc)
+    ['bj', 'XOF'],  // Benin (CFA Franc)
+    ['cd', 'CDF'],  // Congo (Franc)
+    ['sz', 'SZL'],  // Swaziland
+    ['rw', 'RWF'],  // Rwanda
+    ['bw', 'BWP'],  // Botswana
+    ['za', 'ZAR'],  // South Africa
+    ['cg', 'XAF'],  // Congo
+    ['cm', 'XAF'],  // Cameroon
+    ['cf', 'XAF'],  // Central African Republic
+    ['td', 'XAF'],  // Chad
+    ['cg', 'XAF'],  // Congo
+    ['ci', 'XOF'],  // Ivory Coast
+    ['cv', 'CVE'],  // Cape Verde
+    ['gw', 'CVE'],  // Guinea-Bissau
+    ['gq', 'XAF'],  // Equatorial Guinea
+    ['st', 'STN'],  // Sao Tome and Principe
+    ['sc', 'SCR'],  // Seychelles
+    ['mu', 'MUR'],  // Mauritius
+    ['py', 'PYG'],  // Paraguay
+    ['ar', 'ARS'],  // Argentina
+    ['br', 'BRL'],  // Brazil
+    ['cl', 'CLP'],  // Chile
+    ['co', 'COP'],  // Colombia
+    ['pe', 'PEN'],  // Peru
+    ['uy', 'UYU'],  // Uruguay
+    ['ve', 'VEF'],  // Venezuela
+    // Europe (Euro area and others)
+    ['at', 'EUR'],  // Austria
+    ['be', 'EUR'],  // Belgium
+    ['bg', 'BGN'],  // Bulgaria
+    ['hr', 'HRK'],  // Croatia
+    ['cy', 'EUR'],  // Cyprus
+    ['cz', 'CZK'],  // Czech Republic
+    ['dk', 'DKK'],  // Denmark
+    ['ee', 'EUR'],  // Estonia
+    ['fi', 'EUR'],  // Finland
+    ['fr', 'EUR'],  // France
+    ['de', 'EUR'],  // Germany
+    ['gr', 'EUR'],  // Greece
+    ['hu', 'HUF'],  // Hungary
+    ['ie', 'EUR'],  // Ireland
+    ['it', 'EUR'],  // Italy
+    ['lv', 'EUR'],  // Latvia
+    ['lt', 'EUR'],  // Lithuania
+    ['lu', 'EUR'],  // Luxembourg
+    ['mt', 'EUR'],  // Malta
+    ['nl', 'EUR'],  // Netherlands
+    ['pl', 'PLN'],  // Poland
+    ['pt', 'EUR'],  // Portugal
+    ['ro', 'RON'],  // Romania
+    ['sk', 'EUR'],  // Slovakia
+    ['si', 'EUR'],  // Slovenia
+    ['es', 'EUR'],  // Spain
+    ['se', 'SEK'],  // Sweden
+    ['ch', 'CHF'],  // Switzerland
+    ['gb', 'GBP'],  // United Kingdom
+    ['cy', 'EUR'],  // Cyprus
+    // North America
+    ['us', 'USD'],  // United States
+    ['ca', 'CAD'],  // Canada
+    ['mx', 'MXN'],  // Mexico
+    // Oceania
+    ['au', 'AUD'],  // Australia
+    ['nz', 'NZD'],  // New Zealand
+    ['pf', 'XPF'],  // French Polynesia
+    ['gu', 'USD'],  // Guam
+    // Middle East
+    ['ae', 'AED'],  // UAE
+    ['sa', 'SAR'],  // Saudi Arabia
+    ['iq', 'IQD'],  // Iraq
+    ['il', 'ILS'],  // Israel
+    ['jo', 'JOD'],  // Jordan
+    ['kz', 'KZT'],  // Kazakhstan
+    ['kw', 'KWD'],  // Kuwait
+    ['lb', 'LBP'],  // Lebanon
+    ['om', 'OMR'],  // Oman
+    ['qa', 'QAR'],  // Qatar
+    ['ye', 'YER'],  // Yemen
+    ['sy', 'SYP'],  // Syria
+    ['tr', 'TRY'],  // Turkey
+    ['ae', 'AED'],  // United Arab Emirates
+    // South America
+    ['ar', 'ARS'],  // Argentina
+    ['bo', 'BOB'],  // Bolivia
+    ['br', 'BRL'],  // Brazil
+    ['cl', 'CLP'],  // Chile
+    ['co', 'COP'],  // Colombia
+    ['gf', 'EUR'],  // French Guiana
+    ['gy', 'GYD'],  // Guyana
+    ['pe', 'PEN'],  // Peru
+    ['py', 'PYG'],  // Paraguay
+    ['sr', 'SRD'],  // Suriname
+    ['uy', 'UYU'],  // Uruguay
+    ['ve', 'VEF'],  // Venezuela
+  ]);
+
+  const map = new Map<string, string>();
+  // Only include mappings where the currency is enabled in the system
+  for (const [countryCode, currencyCode] of commonCountryCurrencies) {
+    if (enabledCurrencies.includes(currencyCode)) {
+      map.set(countryCode, currencyCode);
+    }
+  }
+  return map;
+}
+
+/**
+ * Resolve the currency to show based on the priority order:
+ * 1. Stored customer preference (localStorage) - highest priority for returning visitors
+ * 2. Authenticated account preference (from WHMCS/ API)
+ * 3. Geographic signal (IP country) suggested currency
+ * 4. Configured country-to-currency mapping (validated against enabled currencies)
+ * 5. Default currency (base currency = USD)
+ */
+function resolveAutoCurrency(
+  storedChoice: unknown,
+  status: DisplayCurrencyStatus,
+  savedPreference: string | null,
+  authenticatedPreference: string | null,
+  ipCountry: string | null,
+  enabledCurrencies: string[],
+  baseCurrency: string
+): string {
+  const selectable = selectableCurrencies(status);
+
+  // Priority 1: The visitor's own choice — chosen with the switcher this page view, or restored
+  // from localStorage on a return visit. A choice that is no longer offered is ignored here and
+  // falls through to the suggestions below rather than being shown as a stale currency.
+  if (isCurrencyCode(storedChoice) && selectable.includes(storedChoice)) {
+    return storedChoice;
+  }
+
+  // Priority 2: Saved customer currency preference supplied by the server
+  if (savedPreference && isCurrencyCode(savedPreference)) {
+    if (selectable.includes(savedPreference)) {
+      return savedPreference;
+    }
+  }
+
+  // Priority 3: Authenticated account preference
+  if (authenticatedPreference && isCurrencyCode(authenticatedPreference)) {
+    if (selectable.includes(authenticatedPreference)) {
+      return authenticatedPreference;
+    }
+  }
+
+  // Priority 4: Geographic signal (IP country)
+  if (ipCountry && ipCountry.length === 2) {
+    const countryCode = ipCountry.toLowerCase();
+    const countryMap = countryToCurrencyMap(enabledCurrencies, baseCurrency);
+    const mappedCurrency = countryMap.get(countryCode);
+    if (mappedCurrency && isCurrencyCode(mappedCurrency) && selectable.includes(mappedCurrency)) {
+      return mappedCurrency;
+    }
+  }
+
+  // Priority 5: No suitable detection found, use default
+  return baseCurrency;
+}
+
+/**
+ * Holds the display-currency choice and the current rate status. Independent of the language choice:
+ * changing one never changes the other. The status is loaded once per page view; if the request fails,
+ * the site keeps working in USD.
+ */
+export function CurrencyProvider({ children, initialStatus, savedPreference = null, authenticatedPreference = null }: { children: ReactNode; initialStatus?: DisplayCurrencyStatus; savedPreference?: string | null; authenticatedPreference?: string | null }) {
+  const { locale } = useLocale();
+  const [status, setStatus] = useState<DisplayCurrencyStatus>(initialStatus ?? UNAVAILABLE_STATUS);
+  const [ratesState, setRatesState] = useState<RatesState>(initialStatus ? 'ready' : 'loading');
+  const [requested, setRequested] = useState<string | null>(() => {
+    const stored = readStored();
+    return isCurrencyCode(stored) ? stored : null;
+  });
+
+  // Fetch IP geolocation from server-side endpoint
+  const [ipCountry, setIpCountry] = useState<string | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    publicFetch<{ country: string | null }>('/api/v1/currency/geo-country')
+      .then((payload) => {
+        if (cancelled) return;
+        setIpCountry(payload.country ?? null);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        // Geolocation failed gracefully - keep ipCountry as null
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Fetch rates and resolve the auto-detected currency
+  useEffect(() => {
+    if (initialStatus) return undefined;
+    let cancelled = false;
+    publicFetch<unknown>('/api/v1/currency/rates')
+      .then((payload) => {
+        if (cancelled) return;
+        setStatus(normalizeStatus(payload));
+        setRatesState('ready');
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setStatus(UNAVAILABLE_STATUS);
+        setRatesState('unavailable');
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [initialStatus]);
+
+  // Resolve the currency based on detection logic
+  const enabledCurrencies = status.currencies
+    .filter((r) => isCurrencyCode(r.code) && r.code !== BASE_CURRENCY && Number.isFinite(r.rate) && r.rate > 0)
+    .map((r) => r.code);
+  const currency = resolveAutoCurrency(requested, status, savedPreference, authenticatedPreference, ipCountry, enabledCurrencies, BASE_CURRENCY);
+  const options = useMemo(() => selectableCurrencies(status), [status]);
+
+  const setCurrency = useCallback(
+    (code: string) => {
+      if (!isCurrencyCode(code) || !selectableCurrencies(status).includes(code)) return false;
+      writeStored(code);
+      setRequested(code);
+      return true;
+    },
+    [status]
+  );
+
+  const formatAmount = useCallback(
+    (amount: number, sourceCurrency: string = BASE_CURRENCY) =>
+      formatAmountInDisplayCurrency(amount, sourceCurrency, currency, status, locale.code),
+    [currency, status, locale.code]
+  );
+
+  const value = useMemo<CurrencyContextValue>(
+    () => ({ currency, options, ratesState, status, setCurrency, formatAmount }),
+    [currency, options, ratesState, status, setCurrency, formatAmount]
+  );
+  return <CurrencyContext.Provider value={value}>{children}</CurrencyContext.Provider>;
+}
+
+const FALLBACK: CurrencyContextValue = {
+  currency: BASE_CURRENCY,
+  options: [BASE_CURRENCY],
+  ratesState: 'unavailable',
+  status: UNAVAILABLE_STATUS,
+  setCurrency: () => false,
+  formatAmount: (amount, sourceCurrency = BASE_CURRENCY) => ({
+    text: formatAmountInDisplayCurrency(amount, sourceCurrency, BASE_CURRENCY, UNAVAILABLE_STATUS, 'en-US').text,
+    converted: false,
+    currency: sourceCurrency,
+  }),
+};
+
+/** Outside a provider (e.g. an isolated component test) the site behaves as USD-only. */
+export function useCurrency(): CurrencyContextValue {
+  return useContext(CurrencyContext) ?? FALLBACK;
+}

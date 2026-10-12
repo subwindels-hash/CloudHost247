@@ -171,7 +171,9 @@ describe('CurrencyProvider rate loading', () => {
   });
 
   it('accepts a well-formed feed and drops malformed entries', async () => {
-    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+    // The provider reads two endpoints (rates and the IP-country hint), so each request needs its own
+    // response body — a real network call does, and a shared Response can only be read once.
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async () =>
       new Response(
         JSON.stringify({
           ...LIVE,
