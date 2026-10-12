@@ -241,7 +241,7 @@ $_ADDONLANG['status_descrition']='Beschrijving';
 $_ADDONLANG['snapshotMsg']='Momentopname bericht';
 $_ADDONLANG['snapshotBtn']='Bestel momentopname';
 $_ADDONLANG['snapshotCreateBtn']='Maak een momentopname';
-$_ADDONLANG['snapshotCreateMsg']='Uw bestelling is verwerkt!<br> Klik op de onderstaande knop om een momentopname te maken.';
+$_ADDONLANG['snapshotCreateMsg']='Uw bestelling is verwerkt!<br> Klik op de onderstaande knop om een ​​momentopname te maken.';
 
 $_ADDONLANG['snapshotDesc']='Voer een beschrijving in';
 $_ADDONLANG['snapshoteditDesc']='Beschrijving van momentopname bewerken';

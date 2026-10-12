@@ -46,7 +46,13 @@ const VENDOR_RELAXED_PREFIXES = [
   'modules/servers/Smtphosting/templates/assets/tpl/ProxmoxVPS/xterm/',
   'modules/gateways/blockonomics/assets/js/vendors/',
 ];
-/** Vendored files additionally exempt from the Private Use Area rule only (icon-font code points). */
+/**
+ * Vendored files whose ORIGINAL bytes (as pinned in docs/independent-rebuild/original-file-manifest.sha256)
+ * contain a single Private Use Area glyph. The release gate hashes these files byte-for-byte, so they
+ * cannot be edited to remove it. Exempt from the Private Use Area rule only; every other rule still applies.
+ *   - soyoustart/lang/french.php: "L'Europe" followed by a symbol-font glyph (U+F0D7).
+ */
+const VENDOR_PUA_EXEMPT_FILES = new Set(['modules/addons/soyoustart/lang/french.php']);
 
 /**
  * Extensions that are binary, and therefore never inspected as text. Known exception: the legacy
@@ -118,7 +124,10 @@ export function scanRepository(root = ROOT) {
     filesScanned += 1;
     const vendorRelaxed = VENDOR_RELAXED_PREFIXES.some((prefix) => rel === prefix || rel.startsWith(prefix));
     const findings = scanText(buffer.toString('utf8'), { vendorRelaxed });
-    for (const finding of findings) results.push({ file: rel, ...finding });
+    for (const finding of findings) {
+      if (finding.rule === 'private-use-glyph' && VENDOR_PUA_EXEMPT_FILES.has(rel)) continue;
+      results.push({ file: rel, ...finding });
+    }
   }
   return { filesScanned, findings: results };
 }
