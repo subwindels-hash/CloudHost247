@@ -114,6 +114,15 @@ python3 scripts/validate-migrations.py
 # brand fails the release candidate outright.
 python3 scripts/branding-audit.py --quiet
 
+# --- GitHub workflow files ----------------------------------------------------------------------
+# A workflow that does not parse does not fail with a red check: GitHub cannot create a single job
+# for it, so the run ends as a zero-second failure with no jobs and no annotation, and every check
+# inside it quietly stops existing. `content-hygiene.yml` was in that state — a step name containing
+# ": " made it unparseable — so the repo-wide malformed-bullet scan and the legal-JSON byte
+# comparison had not run at all. The checker runs here as well as inside that workflow, because a
+# workflow cannot report the failure of its own file.
+node scripts/check-workflow-yaml.mjs
+
 # --- Vendor integrity baseline ------------------------------------------------------------------
 # Strict and total: no path is exempted, so any edit to a vendor-derived file fails here. The
 # baseline records the rebranded state and is re-cut deliberately (with a dated reason in the

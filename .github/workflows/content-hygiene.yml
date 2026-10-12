@@ -16,11 +16,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22.12.0'
+      - name: Every workflow file must be parseable
+        # This file itself was unparseable for hours — a step name containing ": " made GitHub
+        # refuse to create any job, so this workflow (and everything in it) silently stopped
+        # existing. The release gate runs the same checker, because this one cannot report a
+        # failure of its own file.
+        run: node scripts/check-workflow-yaml.mjs
       - name: Scan every text file in the repository
         # The script exits 1 and lists file:line:column for each finding. Exclusions and their
         # reasons are documented at the top of scripts/check-malformed-bullets.mjs.
         run: node scripts/check-malformed-bullets.mjs
-      - name: Legal text: regenerated JSON matches the committed sources
+      - name: "Legal text: regenerated JSON matches the committed sources"
         # The frontend copy of the legal JSON must be byte-identical to the shared copy, because
         # scripts/site/generate.mjs copies it and the application imports its own copy.
         run: cmp shared/site/content/legal.generated.json cloudhost247-node/frontend/src/content/legal.generated.json

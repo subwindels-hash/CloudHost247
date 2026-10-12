@@ -104,6 +104,17 @@ fill a footer column.
   inspected implausibly little, so a green run cannot mean "it read nothing".
 - `python3 -m unittest tests/website/test_static.py`: link mutation tests, parent
   hook contracts, Builder precedence and read-only API use.
+- `node scripts/check-workflow-yaml.mjs`: every `.github/workflows/*.yml` parses, declares
+  jobs and has steps that carry `run` or `uses`. A workflow that does not parse is not a
+  red check — GitHub creates no jobs at all, so the run ends in zero seconds with nothing
+  to read and every check inside it silently stops existing. `content-hygiene.yml` sat in
+  that state (a step name containing `": "`), so the repo-wide malformed-bullet scan and the
+  legal-JSON byte comparison had not run; the checker is called by the release gate as well
+  as by that workflow, because a workflow cannot report the failure of its own file.
+- `node scripts/check-malformed-bullets.mjs` and the
+  `cmp shared/site/content/legal.generated.json cloudhost247-node/frontend/src/content/legal.generated.json`
+  step: the two checks the content-hygiene workflow runs once it can start. Both pass
+  locally (6 657 text files scanned, 0 findings; the JSON copies are byte-identical).
 - `python3 -m unittest tests/website/test_accessibility_contract.py`: negative cases
   for the contract above (an unlabelled control, an undersized target, a missing skip
   target, a stylesheet regression and a vacuous scan are each required to fail).

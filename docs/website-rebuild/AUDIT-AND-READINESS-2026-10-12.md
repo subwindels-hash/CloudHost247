@@ -139,7 +139,38 @@ only when no preference exists, is not even requested once a preference does exi
 an explicit or authenticated choice, and falls back to USD for an unmapped, unknown, unpublished or
 unavailable value.
 
-### 3.6 There was no accessibility or responsive gate that could run without a browser
+### 3.6 The repository's content-hygiene workflow had never run
+
+`Content hygiene` (`.github/workflows/content-hygiene.yml`) — the repo-wide scan for malformed
+bullets, replacement characters and mojibake, plus the byte comparison between
+`shared/site/content/legal.generated.json` and the frontend's copy — was **not running**. Every run
+on every branch, including `main`, ended as a zero-second failure with **no jobs**, no logs and no
+annotation on the commit. Nothing in the repository could notice, because the only thing that could
+have noticed was the workflow that could not start.
+
+Cause: the file was not parseable YAML. One step name contained a second `: ` —
+
+```yaml
+- name: Legal text: regenerated JSON matches the committed sources
+```
+
+— which turns the step name into a nested mapping. GitHub therefore refuses to create a single job
+for the workflow: the checks silently stop existing while the branch merely looks blocked on CI.
+
+Fixed (the name is quoted), and the failure mode is now guarded from **outside** the file:
+`scripts/check-workflow-yaml.mjs` parses every file in `.github/workflows/` with the `yaml` package
+the Node platform already declares (falling back to a narrow structural rule that catches this class
+when dependencies are not installed), and fails on a file that does not parse, declares no jobs, or
+has a step with neither `run` nor `uses`. It is called by the release gate — which is not
+path-filtered, so it runs for any change — and by the content-hygiene workflow itself. Its negative
+case was verified: reintroducing the unquoted colon on a copy of the tree is reported as
+`content-hygiene.yml:23 plain value contains ": "`.
+
+Both hygiene checks were then run locally to prove restoring the workflow does not immediately fail
+it: `node scripts/check-malformed-bullets.mjs` → 6 657 text files scanned, 0 findings; the two legal
+JSON copies are byte-identical.
+
+### 3.7 There was no accessibility or responsive gate that could run without a browser
 
 The only accessibility evidence in the repository is a browser run (`tests/website/browser.cjs`,
 Chromium + axe) that cannot execute in this environment. Added
@@ -266,6 +297,7 @@ Also verified in this pass:
 | `node scripts/site/generate.mjs` | 7 menus / 8 columns / 169 links; 55 marketing pages, 120 sections, 174 FAQs, 13 published documents (216 KB) |
 | Node platform `npm ci` + `npm run typecheck` + frontend `tsc --noEmit` | 264 top-level packages installed; both typechecks exit 0 |
 | Node platform `npm test` | 161 files / 2 242 tests passed, exit 0 |
+| `node scripts/check-workflow-yaml.mjs` | 3 workflow files parse, each with jobs and steps (added to the gate and to `content-hygiene.yml`) |
 | `python3 scripts/build-production-zip.py --verify` | **verified** — 9 294 members, 118 132 325 bytes (112.7 MiB), `secret_skipped=0`, 455 media assets, 47 theme illustrations and **29** referenced 3D scenes resolved in both libraries, 13 published documents; this build's digest was `9ae13c9bd189b0c2199417d4e2544c59aefd1dd65ae070f812d1053b7ed36e38` (a build output, not content-addressed) |
 
 The archive is deliberately not kept in the workspace — a 101 MiB build artefact does not belong in a
@@ -327,6 +359,9 @@ non-asset changes are:
 | `docs/website-rebuild/DEPLOYMENT.md` | registry-first navigation wording; Node suite figure corrected to the measured 2,242 tests |
 | `assets/images/cloudhost247/**` + `cloudhost247-node/frontend/public/media/cloudhost247/**` | **70 files**: 10 new 3D scenes × (JPEG + 640/960/1280 AVIF + WebP), mirrored into the served library |
 | `modules/addons/cloudhost247_theme/resources/site.json`, `shared/site/generated/route-report.json`, `cloudhost247-node/frontend/src/content/pages.generated.json` | regenerated from the registry (the new scenes change the resolved `visual3d`) |
+| `.github/workflows/content-hygiene.yml` | the unparseable step name that stopped the workflow from ever starting is quoted; the workflow also runs the new checker |
+| `scripts/check-workflow-yaml.mjs` | **new** — fails when any `.github/workflows/*.yml` would not start, with the file and line |
+| `scripts/release-candidate-check.sh` | also runs the workflow-file checker (this gate is not path-filtered) |
 | `cloudhost247-node/src/routes/currency.ts` | the geo hint is no longer publicly cacheable and no longer echoes the caller's address |
 | `cloudhost247-node/tests/integration/currency-geo-hint.test.ts` | **new** — 6 tests pinning the hint's cache contract and address handling |
 | `cloudhost247-node/frontend/tests/unit/currency-geo-fallback.test.tsx` | **new** — 8 tests pinning the currency signal ordering (hint suggests, never decides) |
