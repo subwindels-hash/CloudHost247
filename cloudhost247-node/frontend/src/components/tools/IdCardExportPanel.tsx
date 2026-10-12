@@ -147,9 +147,8 @@ export default function IdCardExportPanel({
         <p>
           The card is composed in this browser tab. Employee names, identifiers, contact details,
           photographs and signatures are never uploaded to CloudHost247 or to any third party, and
-          nothing is written to disk on our side. The only time any data leaves the browser is if you
-          import a roster that references <code>https://</code> photo URLs: those images are fetched
-          by your browser so they can be drawn on the card.
+          nothing is written to disk on our side. No request is made to any server, including for
+          photo URLs in a bulk import, which are recorded but not fetched.
         </p>
         <label className="idc-check">
           <input

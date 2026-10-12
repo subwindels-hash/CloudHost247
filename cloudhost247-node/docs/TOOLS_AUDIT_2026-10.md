@@ -161,6 +161,20 @@ Gaps:
 * MRZ page controls are now exercised in a browser (`e2e/mrz.spec.ts`, 5/5).
 * TD1 generation writes the user's optional data into line 1 only. TD1 line 2 optional positions (19–29) are filled with `<`. This is valid per ICAO Doc 9303 Part 5 because optional data may be empty, but it is a deliberate limitation.
 
+### 3.2a ID card privacy check (2026-10-12)
+
+* No employee detail, photograph, signature or contact field is sent to any CloudHost247 route.
+  The only network call in the ID card code was a browser fetch of remote photo URLs in bulk
+  import. Its request carried the URL itself and the browser's address to the image host, and
+  the page's Content-Security-Policy (`connect-src 'self'`) blocked it. So the feature never
+  worked in production.
+* Decision: remote photo URLs are no longer fetched. Widening `connect-src` for the whole site
+  to allow one feature would weaken the policy on every page. A bulk row with a photo URL still
+  produces a card, and its manifest entry says the photograph was not loaded. Embedded data URLs
+  work as before.
+* Tests: `e2e/id-card.spec.ts` (11/11 on staging) asserts that a roster with a photo URL makes no
+  request to that host. `tests/unit/employee-id-card.test.ts` (72/72).
+
 ### 3.5 Compliance Tools (`/tools/compliance-documents`)
 
 Page and test exist (`frontend/src/pages/tools/ComplianceDocumentsPage.tsx`,

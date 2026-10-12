@@ -156,6 +156,38 @@ test.describe('Employee ID Card Generator', () => {
     expect(zip.includes(Buffer.from('manifest.csv'))).toBe(true);
   });
 
+  test('bulk photo URLs are recorded but never requested, and the batch still produces the card', async ({ page }, testInfo) => {
+    // Any request to the photo host is recorded. The tool must make none.
+    const photoRequests: string[] = [];
+    await page.route('https://photos.example.test/**', async (route) => {
+      photoRequests.push(route.request().url());
+      await route.abort();
+    });
+
+    await page.goto(URL);
+    await page.locator('#idc-field-companyName').fill('Acme Ltd');
+    await page.getByRole('tab', { name: 'Bulk generation' }).click();
+
+    const csvPath = testInfo.outputPath('roster-photos.csv');
+    const { writeFile } = await import('node:fs/promises');
+    await writeFile(
+      csvPath,
+      ['Full name,Employee ID,Photo URL', 'Ada Okafor,CH-2001,https://photos.example.test/ada.png'].join('\n'),
+      'utf8'
+    );
+    await page.locator('#idc-bulk-file').setInputFiles(csvPath);
+
+    // No consent control for remote fetching exists, because the fetch itself is not made. The
+    // notice says what happens to the row instead.
+    await expect(page.getByRole('checkbox', { name: /fetch the photo URLs/i })).toHaveCount(0);
+    await expect(page.getByText('does not fetch remote photos', { exact: false }).first()).toBeVisible();
+
+    const zipDownload = page.waitForEvent('download', { timeout: 120_000 });
+    await page.getByRole('button', { name: 'Generate 1 card', exact: true }).click();
+    await zipDownload;
+    expect(photoRequests).toEqual([]);
+  });
+
   test('clear stored data confirms what was removed', async ({ page }) => {
     await page.goto(URL);
     await page.getByRole('tab', { name: 'Download & print' }).click();

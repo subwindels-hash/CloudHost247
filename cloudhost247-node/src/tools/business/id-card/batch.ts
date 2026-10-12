@@ -37,7 +37,7 @@ export const BULK_COLUMNS: readonly BulkColumn[] = [
   { key: 'bloodGroup', header: 'Blood group', required: false, help: 'One of A+, A-, B+, B-, AB+, AB-, O+, O-.', aliases: ['blood group', 'blood', 'bloodgroup'] },
   { key: 'dateOfJoining', header: 'Date of joining', required: false, help: 'YYYY-MM-DD.', aliases: ['joined', 'start date', 'date of joining', 'doj', 'joining date'] },
   { key: 'emergencyContact', header: 'Emergency contact', required: false, help: 'Name and number, printed on the back.', aliases: ['emergency contact', 'emergency', 'next of kin'] },
-  { key: 'photoUrl', header: 'Photo URL', required: false, help: 'Public https URL of a PNG/JPEG portrait, or a data URL. Fetched in your browser only when you generate the card.', aliases: ['photo', 'photo url', 'photograph', 'image', 'image url', 'picture'] },
+  { key: 'photoUrl', header: 'Photo URL', required: false, help: 'A data URL (embedded in the file, no network), or a public https URL. This tool does not fetch remote photos, so a cell holding a URL produces a card without its photograph, with a warning.', aliases: ['photo', 'photo url', 'photograph', 'image', 'image url', 'picture'] },
 ] as const;
 
 export interface BulkRow {
@@ -317,8 +317,6 @@ export function mapColumns(header: string[]): { mapping: Map<number, string>; un
 
 export interface ValidateOptions {
   base: CardFormState;
-  /** Photos must be fetched from the network; the caller decides whether to attempt it. */
-  fetchPhotos?: boolean;
 }
 
 /**
