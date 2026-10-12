@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+import CurrencySwitcher from '../components/CurrencySwitcher';
 import { useLocale } from '../i18n/LocaleProvider';
 import { FOOTER_COLUMNS, BRAND, UTILITY } from '../navigation/registry.generated';
 
@@ -75,6 +76,7 @@ export default function Footer() {
             <Link to="/contact">{t('footer.nav.contact')}</Link>
           </nav>
           <LanguageSwitcher />
+          <CurrencySwitcher />
         </div>
       </div>
     </footer>

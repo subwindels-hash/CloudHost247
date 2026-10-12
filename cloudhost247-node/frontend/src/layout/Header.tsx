@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { PlatformMegaMenu, PlatformMobileNav, Brand } from '../components/navigation/PlatformMegaMenu';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+import CurrencySwitcher from '../components/CurrencySwitcher';
 import { Icon } from '../components/ui/Icon';
 import { useLocale } from '../i18n/LocaleProvider';
 import { apiFetch } from '../lib/api';
@@ -104,6 +105,7 @@ export default function Header() {
 
           <div className="ch247-header__actions">
             <LanguageSwitcher />
+            <CurrencySwitcher />
             <NavLink className="ch247-header__search" to="/search" aria-label={t('header.search.label')} onClick={closeMenu}>
               <Icon name="search" size={18} />
             </NavLink>

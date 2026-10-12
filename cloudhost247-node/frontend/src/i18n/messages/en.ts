@@ -29,6 +29,12 @@ export const en = {
   'language.switcher.count.one': '{count} language available',
   'language.switcher.count.other': '{count} languages available',
   'language.switcher.note': 'More languages are added once their translations have been checked.',
+  'currency.switcher.label': 'Display currency',
+  'currency.switcher.listLabel': 'Choose a display currency',
+  'currency.switcher.note': 'You are charged in USD. Converted amounts are estimates, may differ from your card issuer\u2019s rate, and are not used for billing.',
+  'currency.switcher.asOf': 'Rates observed {time}.',
+  'currency.switcher.unavailable': 'Other currencies are unavailable right now. Prices are shown in USD.',
+  'currency.switcher.approx': 'About {amount}. Charged in USD.',
 } as const;
 
 export type MessageKey = keyof typeof en;

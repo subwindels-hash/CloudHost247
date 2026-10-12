@@ -58,6 +58,13 @@ const envSchema = z.object({
   // do not need another env-schema migration; unused until those routes exist.
   CRON_JOB_TOKEN: z.string().min(16).optional(),
 
+  // Display-only currency conversion. The rate feed is the WHMCS currency addon's read-only endpoint
+  // (modules/addons/cloudhost247_currency/display-feed.php). Both values must be set for the worker to
+  // sync rates; with either unset, the site shows USD only. Rates older than FX_MAX_AGE_HOURS are not offered.
+  FX_FEED_URL: z.string().url().optional(),
+  FX_FEED_TOKEN: z.string().min(16).optional(),
+  FX_MAX_AGE_HOURS: z.coerce.number().int().min(1).max(720).default(48),
+
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
 
   // --- Phase 5C: payment gateways (src/payments/*) -------------------------------------------

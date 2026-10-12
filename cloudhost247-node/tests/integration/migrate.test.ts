@@ -119,6 +119,7 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0081_extend_inbox_delivery_status.sql',
     // Delivery outcome for an online-store order's digital download links (sent | manual | failed).
     '0082_record_digital_delivery.sql',
+    '0083_create_display_fx_rates.sql',
   ];
 
   it('finds the committed migration files in order', () => {
