@@ -223,19 +223,26 @@
 .ch247-header {
   position: sticky; top: 0; z-index: 900;
   background: rgba(255, 255, 255, 0.92);
+  color: var(--ch-ink);
   backdrop-filter: saturate(160%) blur(14px);
   border-bottom: 1px solid var(--ch-line);
 }
 .ch247-header__inner {
   width: min(var(--ch-width-wide), calc(100% - 40px));
+  max-width: none;
   margin-inline: auto;
-  display: flex; align-items: center; gap: var(--ch-space-5);
+  padding: 0;
+  display: flex; align-items: center; gap: var(--ch-space-3);
   min-height: var(--ch-header-h);
 }
 .ch247-brand {
   display: inline-flex; align-items: center; gap: 10px;
   font-weight: 700; font-size: 1.06rem; letter-spacing: -0.035em;
   color: var(--ch-ink) !important; text-decoration: none; flex-shrink: 0;
+}
+.ch247-header .ch247-brand img {
+  width: clamp(136px, 10.5vw, 168px);
+  height: auto;
 }
 .ch247-brand__mark {
   width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0;
@@ -248,12 +255,13 @@
 .ch247-brand--footer .ch247-brand__suffix { color: var(--ch-mint); }
 
 .ch247-header__collapsible {
-  display: flex; align-items: center; gap: var(--ch-space-5);
+  display: flex; align-items: center; gap: var(--ch-space-3);
   flex: 1; min-width: 0; justify-content: space-between;
+  flex-wrap: nowrap;
 }
 .ch247-header__nav-slot { display: flex; align-items: center; gap: 2px; min-width: 0; }
 .ch247-header__actions {
-  display: flex; align-items: center; gap: var(--ch-space-3); flex-shrink: 0;
+  display: flex; align-items: center; gap: var(--ch-space-2); flex-shrink: 0;
 }
 .ch247-header__search {
   display: inline-grid; place-items: center; width: 40px; height: 40px;
@@ -277,14 +285,14 @@
    5. Mega menu
    -------------------------------------------------------------------------- */
 .ch247-platform-nav { display: flex; min-width: 0; }
-.ch247-platform-nav__bar { display: flex; align-items: center; gap: 2px; list-style: none; margin: 0; padding: 0; min-width: 0; }
+.ch247-platform-nav__bar { display: flex; align-items: center; gap: 1px; list-style: none; margin: 0; padding: 0; min-width: 0; }
 .ch247-platform-nav__item { position: static; }
 .ch247-platform-nav__trigger,
 .ch247-nav-link {
-  display: inline-flex; align-items: center; gap: 6px;
-  min-height: 40px; padding: 0 12px; border: 0; background: transparent;
+  display: inline-flex; align-items: center; gap: 4px;
+  min-height: 40px; padding: 0 clamp(6px, 0.55vw, 10px); border: 0; background: transparent;
   border-radius: var(--ch-radius-sm); cursor: pointer; white-space: nowrap;
-  font-size: 0.88rem; font-weight: 550; letter-spacing: -0.005em;
+  font-size: clamp(0.8rem, 0.82vw, 0.86rem); font-weight: 550; letter-spacing: -0.005em;
   color: var(--ch-ink); text-decoration: none;
 }
 .ch247-platform-nav__trigger:hover,

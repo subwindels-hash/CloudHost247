@@ -4,7 +4,7 @@ Status: implemented on branch `arena/b502d9d7-cloudhost247`. Not yet deployed to
 
 ## What it does
 
-Visitors can choose a **display currency** in the header (desktop and mobile drawer), the footer, the
+Visitors can choose a **display currency** in the header menu bar (desktop and mobile drawer), the
 catalogue and the cart. Converted amounts appear as an estimate under the USD amount. The choice is
 stored in the browser under `ch247.currency`, separate from the language choice.
 

@@ -4,7 +4,7 @@ import { LOCALES } from '../i18n/locales';
 import '../i18n/language-switcher.css';
 
 /**
- * Language switcher, used in the global header (desktop and the mobile drawer) and the footer.
+ * Language switcher, used in the global header menu bar (desktop and the mobile drawer).
  *
  * It is a disclosure: a button with `aria-expanded` that reveals a list of buttons. Keyboard users
  * open it with Enter or Space, move through the options with the arrow keys (Home and End jump to

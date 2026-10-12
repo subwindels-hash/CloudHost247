@@ -66,7 +66,7 @@ describe('LanguageSwitcher', () => {
     const list = screen.getByRole('list', { name: 'Choose a language' });
     const current = within(list).getByRole('button', { name: /English/ });
     expect(current.getAttribute('aria-current')).toBe('true');
-    expect(screen.getByText('1 language available')).toBeTruthy();
+    expect(screen.getByText('13 languages available')).toBeTruthy();
   });
 
   it('opens from the keyboard with Enter, and closes with Escape returning focus to the trigger', async () => {
@@ -97,8 +97,12 @@ describe('LanguageSwitcher', () => {
 
     options[0]?.focus();
     await userEvent.keyboard('{ArrowDown}');
+    expect(document.activeElement).toBe(options[1]);
+    await userEvent.keyboard('{ArrowUp}');
     expect(document.activeElement).toBe(options[0]);
     await userEvent.keyboard('{ArrowUp}');
+    expect(document.activeElement).toBe(options[options.length - 1]);
+    await userEvent.keyboard('{ArrowDown}');
     expect(document.activeElement).toBe(options[0]);
   });
 
@@ -115,7 +119,7 @@ describe('LanguageSwitcher', () => {
   });
 
   it('ignores a stored choice that is not a listed language and uses the default', () => {
-    localStorage.setItem(LOCALE_STORAGE_KEY, 'fr');
+    localStorage.setItem(LOCALE_STORAGE_KEY, 'sv');
     renderSwitcher();
     expect(screen.getByRole('button', { name: 'Language: English' })).toBeTruthy();
     expect(document.documentElement.lang).toBe('en');

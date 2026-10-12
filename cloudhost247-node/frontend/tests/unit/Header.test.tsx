@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import Footer from '../../src/layout/Footer';
 import Header from '../../src/layout/Header';
 import { clearSession, getToken, setSession } from '../../src/lib/auth';
 
@@ -78,5 +79,24 @@ describe('Header: authentication-aware navigation', () => {
       '/api/auth/logout',
       expect.objectContaining({ method: 'POST' })
     );
+  });
+
+  it('places the Language and Currency switchers in the header menu bar and not in the footer', () => {
+    const { container } = render(
+      <MemoryRouter>
+        <Header />
+        <Footer />
+      </MemoryRouter>
+    );
+
+    const menuBar = container.querySelector<HTMLElement>('#ch247-primary-nav');
+    expect(menuBar).toBeTruthy();
+    expect(within(menuBar!).getByRole('button', { name: 'Language: English' })).toBeTruthy();
+    expect(within(menuBar!).getByRole('button', { name: /^Display currency: USD/ })).toBeTruthy();
+
+    const footer = container.querySelector<HTMLElement>('footer.ch247-footer');
+    expect(footer).toBeTruthy();
+    expect(within(footer!).queryByRole('button', { name: /Language:/i })).toBeNull();
+    expect(within(footer!).queryByRole('button', { name: /Display currency:/i })).toBeNull();
   });
 });

@@ -55,17 +55,17 @@ a {
 /* --- Header / shared app shell nav ------------------------------------------------------- */
 
 .ch247-header {
-  background: #071b3d;
-  color: #fff;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ch-ink, #0b1426);
 }
 
 .ch247-header__inner {
-  max-width: var(--ch247-width);
+  width: min(var(--ch-width-wide, 1380px), calc(100% - 40px));
   margin: 0 auto;
   display: flex;
   align-items: center;
-  gap: 1.5rem;
-  padding: 0.9rem 1.5rem;
+  gap: 0.75rem;
+  padding: 0;
 }
 
 .sr-only {
@@ -110,9 +110,10 @@ a {
 .ch247-header__collapsible {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 0.75rem;
   flex: 1;
-  flex-wrap: wrap;
+  min-width: 0;
+  flex-wrap: nowrap;
 }
 
 .ch247-brand {
