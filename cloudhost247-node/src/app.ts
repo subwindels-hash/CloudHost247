@@ -8,6 +8,7 @@ import { registerSecurityPlugins } from './plugins/security';
 import { registerHealthRoutes } from './routes/health';
 import { registerAuthRoutes } from './routes/auth';
 import { registerPublicCatalogRoutes } from './routes/catalog-public';
+import { registerCurrencyRoutes } from './routes/currency';
 import { registerCatalogAdminRoutes } from './routes/catalog-admin';
 import { registerAccountRoutes } from './routes/account';
 import { registerAdminCustomerRoutes } from './routes/admin-customers';
@@ -161,6 +162,7 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     await registerHealthRoutes(instance, env);
     await registerAuthRoutes(instance, env, pool);
     await registerPublicCatalogRoutes(instance, env, pool);
+    await registerCurrencyRoutes(instance, env, pool);
     await registerCatalogAdminRoutes(instance, env, pool);
     await registerAccountRoutes(instance, env, pool);
     await registerAccountIdentityRoutes(instance, env, pool);

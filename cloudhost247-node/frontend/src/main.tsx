@@ -2,6 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
+import { LocaleProvider } from './i18n/LocaleProvider';
+import { CurrencyProvider } from './currency/CurrencyProvider';
 // Load order matters and is deliberate: the application stylesheets come first and the shared
 // design system last, so the design system's tokens and component rules win where the two
 // overlap. That is what unifies the dashboard, the marketing site and the WHMCS theme on one
@@ -24,7 +26,11 @@ if (!rootEl) {
 ReactDOM.createRoot(rootEl).render(
   <React.StrictMode>
     <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/,'') || '/'}>
-      <App />
+      <LocaleProvider>
+        <CurrencyProvider>
+          <App />
+        </CurrencyProvider>
+      </LocaleProvider>
     </BrowserRouter>
   </React.StrictMode>
 );

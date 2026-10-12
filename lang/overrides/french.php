@@ -601,7 +601,7 @@ Lorsqu'ils arriveront sur votre site Web en utilisant ce lien d'affiliation, WHM
 $_LANG['dedicatedSideBarRegions'] = "Toutes les régions";
 $_LANG['dedicatedSideBarRegionsMenu'] = "Toutes les régions";
 $_LANG['dedicatedSideBarServices'] = "PRESTATIONS DE SERVICE";
-$_LANG['dedicatedSideBarPriceRange'] = "Prix ​​en";
+$_LANG['dedicatedSideBarPriceRange'] = "Prix en";
 $_LANG['dedicatedSideBarRam'] = "RAM:";
 $_LANG['dedicatedSideBarDisk'] = "Disques:";
 /* for v2.2.0 */
@@ -626,7 +626,7 @@ $_LANG['affilatedescription'] = "Par défaut, WHMCS a fourni son propre lien d'a
 $_LANG['dedicatedSideBarRegions'] = "Toutes les régions";
 $_LANG['dedicatedSideBarRegionsMenu'] = "Toutes les régions";
 $_LANG['dedicatedSideBarServices'] = "PRESTATIONS DE SERVICE";
-$_LANG['dedicatedSideBarPriceRange'] = "Prix ​​en";
+$_LANG['dedicatedSideBarPriceRange'] = "Prix en";
 $_LANG['dedicatedSideBarRam'] = "RAM:";
 $_LANG['dedicatedSideBarDisk'] = "Disques:";
 $_LANG['dedicatetabcontent'] = "Hébergement cloud ultra rapide";

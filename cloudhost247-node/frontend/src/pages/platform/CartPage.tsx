@@ -5,6 +5,7 @@ import { getToken } from '../../lib/auth';
 import { usePageMeta } from '../../lib/usePageMeta';
 import { CatalogErrorBanner, CatalogLoadingBanner } from '../../components/CatalogStateBanner';
 import { Feedback, useAction } from '../../components/platform/ui';
+import { ApproxAmount } from '../../components/ApproxAmount';
 import { fetchPublishedPlans, money, type CartSummary, type OrderSummary } from '../../lib/platform-api';
 
 /**
@@ -195,7 +196,10 @@ export default function CartPage() {
                         style={{ width: '5rem' }}
                       />
                     </td>
-                    <td>{money(line.lineTotalAmount ?? line.unitPriceAmount, line.currency)}</td>
+                    <td>
+                      {money(line.lineTotalAmount ?? line.unitPriceAmount, line.currency)}
+                      <ApproxAmount amount={line.lineTotalAmount ?? line.unitPriceAmount} currency={line.currency} />
+                    </td>
                     <td>
                       <button type="button" className="ch247-button ch247-button--ghost ch247-button--small" onClick={() => void remove('item', line.id)}>
                         Remove
@@ -221,7 +225,10 @@ export default function CartPage() {
                         style={{ width: '5rem' }}
                       />
                     </td>
-                    <td>{money(line.lineTotalAmount ?? line.unitPriceAmount, line.currency)}</td>
+                    <td>
+                      {money(line.lineTotalAmount ?? line.unitPriceAmount, line.currency)}
+                      <ApproxAmount amount={line.lineTotalAmount ?? line.unitPriceAmount} currency={line.currency} />
+                    </td>
                     <td>
                       <button type="button" className="ch247-button ch247-button--ghost ch247-button--small" onClick={() => void remove('service', line.id)}>
                         Remove
@@ -236,7 +243,10 @@ export default function CartPage() {
           <div className="ch247-card">
             <div className="ch247-kv">
               <span>Subtotal</span>
-              <span>{money(cart.subtotalAmount, cart.currency)}</span>
+              <span>
+                {money(cart.subtotalAmount, cart.currency)}
+                <ApproxAmount amount={cart.subtotalAmount} currency={cart.currency} />
+              </span>
             </div>
             <div className="ch247-kv">
               <span>Items</span>

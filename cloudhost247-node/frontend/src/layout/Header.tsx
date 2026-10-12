@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { PlatformMegaMenu, PlatformMobileNav, Brand } from '../components/navigation/PlatformMegaMenu';
+import LanguageSwitcher from '../components/LanguageSwitcher';
+import CurrencySwitcher from '../components/CurrencySwitcher';
 import { Icon } from '../components/ui/Icon';
+import { useLocale } from '../i18n/LocaleProvider';
 import { apiFetch } from '../lib/api';
 import { clearSession } from '../lib/auth';
 import { UTILITY } from '../navigation/registry.generated';
@@ -38,6 +41,7 @@ const SUPPORT_ROLES = ['staff', 'admin', 'super_admin'];
 
 export default function Header() {
   const { token, user } = useAuthState();
+  const { t } = useLocale();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
@@ -84,7 +88,7 @@ export default function Header() {
           className="ch247-menu-toggle"
           aria-expanded={menuOpen}
           aria-controls="ch247-primary-nav"
-          aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+          aria-label={menuOpen ? t('header.menu.close') : t('header.menu.open')}
           onClick={() => setMenuOpen((open) => !open)}
         >
           <span className="ch247-menu-toggle__bar" />
@@ -100,19 +104,21 @@ export default function Header() {
           </div>
 
           <div className="ch247-header__actions">
-            <NavLink className="ch247-header__search" to="/search" aria-label="Search CloudHost247" onClick={closeMenu}>
+            <LanguageSwitcher />
+            <CurrencySwitcher />
+            <NavLink className="ch247-header__search" to="/search" aria-label={t('header.search.label')} onClick={closeMenu}>
               <Icon name="search" size={18} />
             </NavLink>
             {token ? (
               <>
                 <NavLink className="ch-btn ch-btn--outline ch-btn--sm" to="/dashboard" onClick={closeMenu}>
-                  Dashboard
+                  {t('header.account.dashboard')}
                 </NavLink>
                 <NavLink className="ch-btn ch-btn--sm" to="/account" onClick={closeMenu}>
-                  {user?.fullName?.split(' ')[0] ?? 'Account'}
+                  {user?.fullName?.split(' ')[0] ?? t('header.account.fallback')}
                 </NavLink>
                 <button type="button" className="ch-btn ch-btn--outline ch-btn--sm" onClick={handleLogout}>
-                  Log out
+                  {t('header.account.logout')}
                 </button>
               </>
             ) : (
@@ -131,7 +137,7 @@ export default function Header() {
 
       {token ? (
         <div className="ch247-subnav">
-          <nav className="ch-wrap--wide" aria-label="Account">
+          <nav className="ch-wrap--wide" aria-label={t('header.account.navLabel')}>
             {ACCOUNT_LINKS.map((link) => (
               <NavLink key={link.to} to={link.to} onClick={closeMenu} end={link.to === '/dashboard'}>
                 {link.label}

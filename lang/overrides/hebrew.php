@@ -298,7 +298,7 @@ $_LANG = json_decode('{
   "vpsintegratedcpanel": "קופסא משולבת",
   "vpsintegratedcpaneltext": "VPS שלך (שרת וירטואלי פרטי) מגיע עם cPanel מותקן מראש, אשר מסייע לך לנהל את הסביבה אירוח ביעילות.",
   "vpsintegratedcpaneltext2": "בעזרת Softaculous Auto-installer בתוך cPanel, אתה יכול להתקין וורדפרס, ג \'ומלה, דרופל, Magento ועוד הרבה תוך דקה.",
-  "vpsinstantprovision": "אספקה ​​מיידית",
+  "vpsinstantprovision": "אספקה מיידית",
   "vpsinstantprovisiontext": "VPS שלך (שרת וירטואלי פרטי) מגיע עם cPanel מותקן מראש, אשר מסייע לך לנהל את הסביבה אירוח ביעילות",
   "vpsinstantprovisiontext2": "בעוד כמה ספקי שירות לקחת שעות או ימים כדי לקבל את השרת שלך ולהפעלתו. שרתי VPS שלנו נועדו להיות הקצאה בתוך דקות! <br> שלא כמו רבים VPS ספקי שירות אירוח בהודו, אנחנו לא גובים כל דמי ההתקנה",
   "vpssearchvps": "עדיין מחפש את שרת ה- VPS הטוב ביותר </b> <br> עבור עם ענן Linux",

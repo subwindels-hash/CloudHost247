@@ -59,16 +59,44 @@ export function textToHtml(raw, title) {
 
   for (const block of blocks) {
     const lines = block.split('\n').map((line) => line.trim()).filter(Boolean);
-    for (const line of lines) {
-      if (line === title) continue;
-      if (/^cloudhost247 isc:?\s/i.test(line) && line.length < title.length + 24) continue;
+    let inList = false;
+
+    for (let index = 0; index < lines.length; index += 1) {
+      const line = lines[index];
+      const isItem = line.startsWith('- ');
+      if (!isItem && line === title) continue;
+      if (!isItem && /^cloudhost247 isc:?\s/i.test(line) && line.length < title.length + 24) continue;
+
+      // Bullet items come from the list markers in the committed text (see
+      // shared/site/content/legal/README.md). Consecutive items form one semantic list.
+      if (isItem) {
+        if (!inList) {
+          html.push('<ul>');
+          inList = true;
+        }
+        html.push(`<li>${escapeHtml(line.slice(2).trim())}</li>`);
+        seenBody = true;
+        continue;
+      }
+      if (inList) {
+        html.push('</ul>');
+        inList = false;
+      }
 
       const effective = /^effective date:?/i.test(line);
       if (effective) {
         html.push(`<p class="ch-policy-effective"><strong>${escapeHtml(line)}</strong></p>`);
         continue;
       }
-      if (/^(\d{1,2}\.)\s+[A-Z]/.test(line) && line.length <= 90) {
+      // A short label that introduces a list ("Restoration Policy", "Common Issues & Solutions")
+      // is a sub-heading, not a sentence.
+      const introducesList = lines[index + 1]?.startsWith('- ') ?? false;
+      if (introducesList && line.length <= 70 && !/[.!?:;,]$/.test(line) && !/^\d/.test(line)) {
+        html.push(`<h3>${escapeHtml(line)}</h3>`);
+        seenBody = true;
+        continue;
+      }
+      if (/^(\d{1,2}\.)\s+\.?[A-Z]/.test(line) && line.length <= 90) {
         html.push(`<h3>${escapeHtml(line)}</h3>`);
         seenBody = true;
         continue;
@@ -80,6 +108,7 @@ export function textToHtml(raw, title) {
       html.push(`<p>${escapeHtml(line)}</p>`);
       seenBody = true;
     }
+    if (inList) html.push('</ul>');
   }
   return html.join('\n');
 }

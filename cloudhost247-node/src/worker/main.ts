@@ -17,6 +17,7 @@ import { reconcileServerState } from '../services/infrastructure-reconciliation-
 import { revalidateProviderImages } from '../services/os-image-revalidation-service';
 import { runRevenueGuardianCycle } from '../revenue-guardian/jobs/scheduler';
 import { sweepCloudflareJobs } from './cloudflare-sweep';
+import { syncDisplayRates, FxFeedError } from '../services/fx-service';
 import { sweepDomainServices, DOMAIN_SERVICES_SWEEP_INTERVAL_MS } from './domain-services-sweep';
 import { runAiSweep, AI_SWEEP_INTERVAL_MS } from '../ai-os/jobs/sweep';
 import { monitorSweep, providerHealthSweep, resolverHealthSweep } from '../tools/worker/sweep';
@@ -54,6 +55,8 @@ const CLOUDFLARE_SWEEP_INTERVAL_MS = 60_000;
 // cadence than the monitor sweep, which is due-driven and cheap when nothing is stale.
 const TOOLS_HEALTH_SWEEP_INTERVAL_MS = 15 * 60_000;
 const TOOLS_MONITOR_SWEEP_INTERVAL_MS = 5 * 60_000;
+/** Display-currency rates are refreshed from the WHMCS addon feed; the addon itself updates on its own schedule. */
+const FX_SYNC_INTERVAL_MS = 30 * 60_000;
 
 interface WorkerLogger {
   log(message: string): void;
@@ -75,6 +78,7 @@ interface WorkerSchedule {
   lastAiControlPlaneSweep: number;
   lastToolsHealthSweep: number;
   lastToolsMonitorSweep: number;
+  lastFxSync: number;
 }
 
 function createWorkerSchedule(): WorkerSchedule {
@@ -93,6 +97,7 @@ function createWorkerSchedule(): WorkerSchedule {
     lastAiControlPlaneSweep: 0,
     lastToolsHealthSweep: 0,
     lastToolsMonitorSweep: 0,
+    lastFxSync: 0,
   };
 }
 
@@ -111,7 +116,7 @@ async function runWorkerCycle(
   schedule: WorkerSchedule,
   logger: WorkerLogger,
   concurrency: number,
-  authEmailEnv: Pick<ReturnType<typeof loadEnv>, 'APP_URL' | 'JWT_SECRET'>
+  authEmailEnv: Pick<ReturnType<typeof loadEnv>, 'APP_URL' | 'JWT_SECRET' | 'NODE_ENV' | 'FX_FEED_URL' | 'FX_FEED_TOKEN'>
 ): Promise<WorkerCycleOutcome> {
   let didWork = false;
   const recovered = await recoverOrphanedJobs(ctx);
@@ -236,6 +241,24 @@ async function runWorkerCycle(
       logger.log(
         `[worker:${ctx.workerId}] tools center: ${providers.checked} provider(s) probed (${providers.failing} failing), ${resolvers.checked} resolver(s) probed (${resolvers.down} down, ${resolvers.degraded} degraded)`
       );
+    }
+  }
+  if (authEmailEnv.FX_FEED_URL && authEmailEnv.FX_FEED_TOKEN && now - schedule.lastFxSync >= FX_SYNC_INTERVAL_MS) {
+    schedule.lastFxSync = now;
+    try {
+      const fx = await syncDisplayRates(ctx.db, {
+        url: authEmailEnv.FX_FEED_URL,
+        token: authEmailEnv.FX_FEED_TOKEN,
+        allowInsecureHttp: authEmailEnv.NODE_ENV !== 'production',
+      });
+      if (fx.status === 'stored') {
+        logger.log(`[worker:${ctx.workerId}] display rates: stored ${fx.count} rate(s) from WHMCS run ${fx.runId}`);
+        didWork = true;
+      }
+    } catch (error) {
+      // Display rates are optional. A failed sync leaves the last good snapshot in place until it ages out.
+      const message = error instanceof FxFeedError ? error.message : 'unexpected error';
+      logger.error(`[worker:${ctx.workerId}] display rates sync failed: ${message}`);
     }
   }
   if (now - schedule.lastToolsMonitorSweep >= TOOLS_MONITOR_SWEEP_INTERVAL_MS) {

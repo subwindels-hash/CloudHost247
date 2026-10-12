@@ -1,0 +1,102 @@
+/* Language switcher. Colours come from the shared design tokens; the fallbacks keep the control
+   legible if a token is ever missing. Every interactive target is at least 44px high. */
+
+.ch247-locale {
+  position: relative;
+  display: inline-flex;
+}
+
+.ch247-locale__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.ch247-locale__trigger svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  flex: none;
+}
+
+.ch247-locale__menu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  z-index: 60;
+  width: max-content;
+  min-width: 15rem;
+  max-width: calc(100vw - 2rem);
+  margin: 0;
+  padding: 0.5rem;
+  list-style: none;
+  border-radius: 12px;
+  background: var(--ch-navy, #0b1426);
+  color: var(--ch-on-dark, #ffffff);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+}
+
+.ch247-locale__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ch247-locale__option {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 44px;
+  padding: 0.5rem 0.75rem;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ch247-locale__option:hover {
+  background: rgba(127, 240, 180, 0.12);
+}
+
+.ch247-locale__option[aria-current='true'] {
+  font-weight: 600;
+}
+
+.ch247-locale__trigger:focus-visible,
+.ch247-locale__option:focus-visible {
+  outline: 3px solid #7ff0b4;
+  outline-offset: 2px;
+}
+
+.ch247-locale__english,
+.ch247-locale__count,
+.ch247-locale__note {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+.ch247-locale__count,
+.ch247-locale__note {
+  margin: 0.5rem 0.75rem 0.25rem;
+}
+
+@media (max-width: 720px) {
+  .ch247-locale__menu {
+    left: 0;
+    right: auto;
+  }
+}

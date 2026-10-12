@@ -1,6 +1,7 @@
 import { useApiResource } from '../lib/useApiResource';
 import { formatPrice, type ProductPlansResponse } from '../lib/catalog-types';
 import { CatalogErrorBanner, CatalogLoadingBanner } from './CatalogStateBanner';
+import { ApproxAmount } from './ApproxAmount';
 
 /**
  * Live plan/pricing block shared by the cPanel Hosting and VPS Hosting pages, backed by
@@ -63,6 +64,7 @@ export function ProductPlansSection({ slug }: { slug: string }) {
               {plan.pricing.map((price) => (
                 <div key={price.billingPeriod}>
                   {formatPrice(price)}
+                  <ApproxAmount amount={price.amount} currency={price.currency} />
                   {price.setupFee ? ` (+ setup fee)` : ''}
                 </div>
               ))}

@@ -1,4 +1,7 @@
 import { Link } from 'react-router-dom';
+import LanguageSwitcher from '../components/LanguageSwitcher';
+import CurrencySwitcher from '../components/CurrencySwitcher';
+import { useLocale } from '../i18n/LocaleProvider';
 import { FOOTER_COLUMNS, BRAND, UTILITY } from '../navigation/registry.generated';
 
 /**
@@ -15,6 +18,7 @@ import { FOOTER_COLUMNS, BRAND, UTILITY } from '../navigation/registry.generated
  */
 export default function Footer() {
   const year = new Date().getFullYear();
+  const { t } = useLocale();
 
   return (
     <footer className="ch247-footer">
@@ -60,17 +64,19 @@ export default function Footer() {
 
         <div className="ch247-footer__bottom">
           <p style={{ margin: 0 }}>
-            © {year} {BRAND.legalName} All rights reserved.
+            {t('footer.copyright', { year, legalName: BRAND.legalName })}
           </p>
-          <nav aria-label="Legal and account">
-            <Link to="/legal">Legal &amp; Policy Center</Link>
-            <Link to="/legal/privacy-policy">Privacy</Link>
-            <Link to="/legal/cookies">Cookies</Link>
-            <Link to="/legal/terms">Terms</Link>
-            <Link to="/status">Status</Link>
-            <Link to="/help">Help</Link>
-            <Link to="/contact">Contact</Link>
+          <nav aria-label={t('footer.legalAndAccount')}>
+            <Link to="/legal">{t('footer.nav.legalCenter')}</Link>
+            <Link to="/legal/privacy-policy">{t('footer.nav.privacy')}</Link>
+            <Link to="/legal/cookies">{t('footer.nav.cookies')}</Link>
+            <Link to="/legal/terms">{t('footer.nav.terms')}</Link>
+            <Link to="/status">{t('footer.nav.status')}</Link>
+            <Link to="/help">{t('footer.nav.help')}</Link>
+            <Link to="/contact">{t('footer.nav.contact')}</Link>
           </nav>
+          <LanguageSwitcher />
+          <CurrencySwitcher />
         </div>
       </div>
     </footer>
