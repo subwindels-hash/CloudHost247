@@ -218,7 +218,7 @@ a hosted staging environment: no real customer data, no outbound resolver access
 | `/api/tools/dns-lookup` with `127.0.0.1` or `localhost` | `INVALID_INPUT` (400). Input validation rejects non-public names. |
 | `/api/tools/ipv6-address-generator` | Pass (ACTIVE, RFC 4193 ULA output) |
 | Old IPv6 URL `/tools/ip/ipv6-address-generator` | 301 to `/tools/local-ipv6-generator` |
-| Browser E2E against the staging server | 66 of 67 passed in the last serial run (see below) |
+| Browser E2E against the staging server, serial, after the sandbox reset | 66 of 70 passed. The 4 failures show the rate-limit signature (see the finding below). Compliance Tools hub: 3 of 3 (`e2e/compliance.spec.ts`), every hub link opens a rendered tool page. |
 | Screenshots | `docs/staging-screenshots/` (ID card, MRZ, Local IPv6, Compliance Tools) |
 
 Finding: the global rate limit (`src/plugins/security.ts`: 300 requests per minute per IP,
