@@ -206,9 +206,14 @@ Limits of the E2E suite:
 ### 3.7 SalarioPay tools 7–21 — verification findings (2026-10-12)
 
 * The 12 generator and 4 comparison slugs all match the sitemap, so the names and routes are confirmed.
-* **Open, PFA codes:** the comparison lists PenCom PFA codes at three digits (for example Stanbic
-  IBTC as `021`). A Stanbic IBTC document from the PFA shows the PenCom code as `0021`. The other
-  14 codes are not confirmed. Verify all of them against the PenCom register before the next release.
+* **PFA codes (resolved 2026-10-12, with a source limit):** the comparison showed three-digit codes
+  (`021`). PenCom's four-digit form is `0021`. All 15 codes now use the four-digit form and match the
+  PFA code table used for pension remittance (Remita). Stanbic IBTC (`0021`), Guaranty Trust (`0040`)
+  and Leadway (`0023`) also match their own PFA-published documents. A test pins all 15 codes.
+  The PenCom site was unreachable from this sandbox, so the codes are not confirmed against the
+  register itself. The directory lists 15 PFAs, which is a subset of the licensed PFAs (the Remita
+  table alone lists 22 codes, including NPF Pensions `0047`, Pensions Alliance `0025`, OAK `0034`,
+  Tangerine `0037` and Veritas Glanvills `0042`). The page now says so. Remaining step: confirm on the PenCom register.
 * **Open, provenance dates:** the accounting comparison note says every fact was "checked against
   published material on 2026-10-10". No record of that check exists in this repository, and it
   could not be re-run from this sandbox. Treat that date as unverified until a check is recorded.
