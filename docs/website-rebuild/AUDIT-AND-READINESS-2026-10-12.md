@@ -386,7 +386,13 @@ snapshot or a commit — and is reproducible with the command above.
 4. **Three stale workflow entries** — `rc-debug.yml`, `smm-debug.yml` and `tools-debug.yml` are still
    listed as *active* by the GitHub Actions API although the files have been deleted from every
    branch, `main` included. Nothing runs from them and nothing in the repository references them,
-   so the only effect is confusion in the Actions tab; they can be removed there.
+   so the only effect is confusion in the Actions tab. **Attempted from this session and refused:**
+   `gh api -X DELETE repos/{owner}/{repo}/actions/workflows/{369122443,369009771,369041201}` answers
+   `404 Not Found` for all three, which is how the API reports a token without the `workflow` scope —
+   the token here can read *and* push code but cannot administer workflow entries. They must be
+   deleted from the Actions tab by a repository administrator, or the token given `workflow` scope;
+   do not re-diagnose this as a stale-file problem, the files really are gone and every workflow run
+   is generated from a file that exists.
 5. **Unfinished modules** recorded in `docs/UNFINISHED-MODULES.md` and
    `docs/UNFINISHED-BUILD-CODE-NAME-LIST.md` are unchanged by this pass and remain unfinished.
 
