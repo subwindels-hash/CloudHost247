@@ -1,0 +1,26 @@
+name: Content hygiene
+
+# Repository-wide text checks. Deliberately NOT path-filtered: a stray PDF bullet glyph, a replacement
+# character or a mojibake sequence can be introduced in any directory (policy text, the PHP theme,
+# translation catalogues, documentation), so every push and pull request scans the whole tree.
+on:
+  push:
+  pull_request:
+
+jobs:
+  malformed-text:
+    name: No malformed bullets, replacement characters or mojibake
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+      - name: Scan every text file in the repository
+        # The script exits 1 and lists file:line:column for each finding. Exclusions and their
+        # reasons are documented at the top of scripts/check-malformed-bullets.mjs.
+        run: node scripts/check-malformed-bullets.mjs
+      - name: Legal text: regenerated JSON matches the committed sources
+        # The frontend copy of the legal JSON must be byte-identical to the shared copy, because
+        # scripts/site/generate.mjs copies it and the application imports its own copy.
+        run: cmp shared/site/content/legal.generated.json cloudhost247-node/frontend/src/content/legal.generated.json

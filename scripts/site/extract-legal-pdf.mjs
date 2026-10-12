@@ -75,6 +75,10 @@ function reflow(pageTexts) {
     // pictographs from these documents). They carry no meaning in the text, so they are dropped
     // rather than published as mojibake in a binding policy.
     .replace(/[\u{1F300}-\u{1FAFF}\u{2190}-\u{21FF}\u{2600}-\u{27BF}\uFFFD]/gu, '')
+    // Bullet glyphs from the policy PDFs' symbol font (U+F0B7) become list markers. A glyph is never
+    // a character a reader should see; the markers are rendered as a real <ul> by extract-legal.mjs.
+    // Re-extraction still needs a human check of where each list ends (see legal/README.md).
+    .replace(/[ \t]*\uF0B7[ \t]*/g, '\n- ')
     .replace(/\s+([.,;:])/g, '$1')
     .replace(/ {2,}/g, ' ')
     .trim();

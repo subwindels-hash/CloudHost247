@@ -315,7 +315,7 @@ if (!defined("WHMCS")) die("This file cannot be accessed directly");
   "vpsprivateserver": "PRIVATE MANCRAFT SERVER",
   "vpsprivateservertext": "Du kan skabe næsten alt, hvad du ønsker med vores cloud VPS hosting servere",
   "vpshighcloudserver": "HIGH END CLOUD SERVER",
-  "vpshighcloudservertext": "Cloud-baseret infrastruktur kombineret med vores <br> high-end virtuelle servere er svaret på nogen af ​​dine webhosting spørgsmål",
+  "vpshighcloudservertext": "Cloud-baseret infrastruktur kombineret med vores <br> high-end virtuelle servere er svaret på nogen af dine webhosting spørgsmål",
   "vpsguarantee": "RISK-GRATIS PRØVPROGRAM. 30-Dages NO-RISK GARANTI",
   "vpsguaranteetext": "Prøv os i 30 dage helt uden risiko! Du er fuldstændig beskyttet af vores garantigarantiprogram. Hvis du på nogen måde beslutter at annullere din konto i løbet af de næste 30 dage, modtager du en øjeblikkelig refusion, ingen spørgsmål stillet",
   "vpstechnicalspeci": "Tekniske specifikationer",
@@ -329,10 +329,10 @@ if (!defined("WHMCS")) die("This file cannot be accessed directly");
   "vpstopnetworktext": "Vores netværk er designet med flere anerkendte internetudbydere for at sikre høj stabilitet, eliminere et enkelt fejlfelt med en integreret DDoS-beskyttelse, uden ekstra omkostninger!",
   "vpsaskque": "SPØRG SPØRGSMÅL, FÅ SVAR!",
   "vpspcbannerhead": "VPS <span> Privat Cloud </ span>",
-  "vpspcbannerhead2": "Bringer dig en VPS præstation med tilgængeligheden af ​​Cloud Native High Availability og Windows-indstillingen",
+  "vpspcbannerhead2": "Bringer dig en VPS præstation med tilgængeligheden af Cloud Native High Availability og Windows-indstillingen",
   "vpspcbannertext": "Høj ydeevne professionelle servere, der er specielt designet til CRM-værktøjsopsætning",
   "vpsplcbannerhead": "VPS <span> Offentlig skyer </ span>",
-  "vpsplcbannerhead2": "Bringer dig en VPS præstation med tilgængeligheden af ​​Cloud Native High Availability og Windows-indstillingen",
+  "vpsplcbannerhead2": "Bringer dig en VPS præstation med tilgængeligheden af Cloud Native High Availability og Windows-indstillingen",
   "vpsplcbannertext": "Høj ydeevne professionelle servere, der er specielt designet til CRM-værktøjsopsætning.",
   "dedicatedgmbannerhd": "<span> spil </ span> servere",
   "dedicatedgmbannerhd2": "Den bedste præstation for online spil",
@@ -363,7 +363,7 @@ if (!defined("WHMCS")) die("This file cannot be accessed directly");
   "dedicatesupport": "Assistance 24/7",
   "dedicatesupporttext": "Vores tekniske assistance er tilgængelig 24 timer i døgnet, 7 dage om ugen med billet og telefon på fransk, engelsk og tysk.",
   "dedicatecertifiedcenter": "Certificeret Datacenter",
-  "dedicatecertifiedcentertext": "Lav aldrig kompromiser om holdbarheden af ​​din infrastruktur.",
+  "dedicatecertifiedcentertext": "Lav aldrig kompromiser om holdbarheden af din infrastruktur.",
   "dedicatedpremiumnetwork": "Premium netværk",
   "dedicatedpremiumnetworktext": "Vi opererer et simpelt, ultra hurtigt og pålideligt netværk. Vores AS12876 netværk har stor kapacitet med mange transitter og udvekslingspunkter.",
   "dedicatedmonitroing": "Managment & Monitroing",
@@ -560,7 +560,7 @@ duration.";
 $_LANG['contactuspagemainhead'] = "Kontakt os";
 $_LANG['contactuspagemainsubhead'] = "for mere information";
 $_LANG['contactuscompanyname'] = "CloudHost247 Isc.";
-$_LANG['contactusaddress'] = "abcdd, fase 123, IND-området - I nærheden af ​​Hotel Abcd, <br> XYZ, XYZ, XYZ 123456";
+$_LANG['contactusaddress'] = "abcdd, fase 123, IND-området - I nærheden af Hotel Abcd, <br> XYZ, XYZ, XYZ 123456";
 $_LANG['contactushotlinesale'] = "<b> Hotline: </b> +91 8360944358";
 $_LANG['contactusbusinesshoursale'] = "<b> Service </b> Timer: 9:00 - 18:00 (man - lør)";
 $_LANG['contactusemailssale'] = "<b> E-mail: </b> info@gmail.com";

@@ -50,7 +50,7 @@ if (!defined("WHMCS")) die("This file cannot be accessed directly");
   "headercom": "com",
   "headercomtext": "Hangi <b> domeen </b>, mis <b> kunagi </b> läheb stiilist välja.",
   "headerregister": "Registreeri",
-  "headerdomaintext": "Otsige uusi domeene ja registreerige oma nimi enne, kui keegi teine ​​teeb. .COMi domeenid on vaid 9,95 dollarit aastas ja sisaldavad tasuta privaatset registreerimist, 400+ tippdomeeni nii ainulaadseks kui teie äri",
+  "headerdomaintext": "Otsige uusi domeene ja registreerige oma nimi enne, kui keegi teine teeb. .COMi domeenid on vaid 9,95 dollarit aastas ja sisaldavad tasuta privaatset registreerimist, 400+ tippdomeeni nii ainulaadseks kui teie äri",
   "headerlearnmore": "Lisateave",
   "headerdedicatedservers": "Pühendatud serverid",
   "headervpsservers": "VPS-serverid",
