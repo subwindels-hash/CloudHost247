@@ -348,7 +348,11 @@ snapshot or a commit — and is reproducible with the command above.
 3. **PHP 8.2 deprecation notices** are emitted by the OVH / broker / marketing *test fakes* (missing
    `#[\ReturnTypeWillChange]` on `ArrayAccess`/`Countable`/`IteratorAggregate` implementations).
    Pre-existing, test-only, non-blocking.
-4. **Unfinished modules** recorded in `docs/UNFINISHED-MODULES.md` and
+4. **Three stale workflow entries** — `rc-debug.yml`, `smm-debug.yml` and `tools-debug.yml` are still
+   listed as *active* by the GitHub Actions API although the files have been deleted from every
+   branch, `main` included. Nothing runs from them and nothing in the repository references them,
+   so the only effect is confusion in the Actions tab; they can be removed there.
+5. **Unfinished modules** recorded in `docs/UNFINISHED-MODULES.md` and
    `docs/UNFINISHED-BUILD-CODE-NAME-LIST.md` are unchanged by this pass and remain unfinished.
 
 ## 12. Files changed in this pass
