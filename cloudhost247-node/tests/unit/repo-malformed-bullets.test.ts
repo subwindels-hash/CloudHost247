@@ -37,6 +37,11 @@ describe('repository text hygiene', () => {
     expect(scanText('caf\u00C3\u00A9').map((f: { rule: string }) => f.rule)).toEqual(['mojibake']);
   });
 
+  it('detects a Private Use Area symbol-font glyph in translated text', () => {
+    const findings = scanText('L\'Europe \uF0D7');
+    expect(findings.map((f: { rule: string }) => f.rule)).toEqual(['private-use-glyph']);
+  });
+
   it('reports the line number of each finding', () => {
     const findings = scanText('ok\nok\nbad\uF0B7');
     expect(findings[0]?.line).toBe(3);

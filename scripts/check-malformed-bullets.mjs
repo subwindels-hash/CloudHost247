@@ -7,6 +7,8 @@
  *     box or as a stray character in web pages, so list bullets must be real list markup instead.
  *   - U+FFFD — the Unicode replacement character, the sign that text was decoded with the wrong
  *     encoding at some point.
+ *   - Any other Private Use Area character (U+E000–U+F8FF, except U+F0B7 which has its own rule). Symbol-font glyphs from Word and PDF
+ *     exports land here, so a visible symbol can be copied into text that should only contain letters.
  *   - Common UTF-8-read-as-Windows-1252 mojibake sequences (for example the two code points U+00C3
  *     U+00A9, which is how "é" looks after being decoded the wrong way).
  *
@@ -29,15 +31,22 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const SKIP_DIRS = new Set(['.git', 'node_modules', 'dist', 'build', 'coverage', '.cache', '.next', '.turbo']);
 
 /**
- * Path prefixes (relative to the repo root, using "/") that are third-party code we do not own.
- * Only the U+FFFD and mojibake rules are relaxed here; the U+F0B7 rule still applies everywhere,
- * because nothing in vendored code uses that glyph.
- *   - Smtphosting/…/layers-ui.js: vendored UI library that contains U+FFFD and a mojibake literal.
+ * Third-party code we do not own, and the rules relaxed for it. The U+F0B7 bullet rule is never
+ * relaxed: nothing in vendored code uses that glyph (verified by a repository-wide byte search).
+ *   - Smtphosting/…/layers-ui.js (JS and CSS): a vendored UI library. Its JS contains a U+FFFD and a
+ *     mojibake literal; its CSS uses Private Use Area code points for its own icon font.
+ *   - Smtphosting/templates/assets/tpl/ProxmoxVPS/xterm: the vendored xterm.js terminal library.
+ *   - blockonomics/assets/js/vendors: vendored minified browser libraries.
  */
 const VENDOR_RELAXED_PREFIXES = [
   'modules/servers/Smtphosting/templates/admin/assets/js/layers-ui.js',
   'modules/servers/Smtphosting/templates/client/default/assets/js/layers-ui.js',
+  'modules/servers/Smtphosting/templates/admin/assets/css/layers-ui.css',
+  'modules/servers/Smtphosting/templates/client/default/assets/css/layers-ui.css',
+  'modules/servers/Smtphosting/templates/assets/tpl/ProxmoxVPS/xterm/',
+  'modules/gateways/blockonomics/assets/js/vendors/',
 ];
+/** Vendored files additionally exempt from the Private Use Area rule only (icon-font code points). */
 
 /**
  * Extensions that are binary, and therefore never inspected as text. Known exception: the legacy
@@ -51,6 +60,7 @@ const BINARY_EXTENSIONS = new Set([
 
 const RULES = [
   { id: 'malformed-bullet', description: 'U+F0B7 (PDF symbol-font bullet)', pattern: /\uF0B7/u, relaxedForVendor: false },
+  { id: 'private-use-glyph', description: 'Private Use Area character (symbol-font glyph)', pattern: /[\uE000-\uF0B6\uF0B8-\uF8FF]/u, relaxedForVendor: true },
   { id: 'replacement-character', description: 'U+FFFD replacement character', pattern: /\uFFFD/u, relaxedForVendor: true },
   {
     id: 'mojibake',
@@ -106,7 +116,7 @@ export function scanRepository(root = ROOT) {
     const buffer = readFileSync(full);
     if (isBinary(buffer, rel)) continue;
     filesScanned += 1;
-    const vendorRelaxed = VENDOR_RELAXED_PREFIXES.some((prefix) => rel === prefix || rel.startsWith(`${prefix}/`));
+    const vendorRelaxed = VENDOR_RELAXED_PREFIXES.some((prefix) => rel === prefix || rel.startsWith(prefix));
     const findings = scanText(buffer.toString('utf8'), { vendorRelaxed });
     for (const finding of findings) results.push({ file: rel, ...finding });
   }
