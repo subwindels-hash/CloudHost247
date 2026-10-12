@@ -412,7 +412,42 @@ non-asset changes are:
 | `cloudhost247-node/src/routes/currency.ts` | the geo hint is no longer publicly cacheable and no longer echoes the caller's address |
 | `cloudhost247-node/tests/integration/currency-geo-hint.test.ts` | **new** — 6 tests pinning the hint's cache contract and address handling |
 | `cloudhost247-node/frontend/tests/unit/currency-geo-fallback.test.tsx` | **new** — 8 tests pinning the currency signal ordering (hint suggests, never decides) |
+| `docs/RELEASE-WORKFLOW.md` | **new** — the staging-only release workflow: thirteen steps, each with its command, evidence and stop condition, ending at the explicit production-approval gate |
+| `docs/ACCEPTANCE-CRITERIA.md` | **new** — every acceptance criterion with the command that decides it and a strict status (COMPLETE / PARTIAL / BLOCKED / NOT TESTED) |
+| `tests/security/test_release_workflow_docs.py` | **new** — 9 tests holding those two documents to their claims: thirteen numbered steps in order, step 13 is the approval gate, every named repository path exists, only the four status words are used, and each criterion names a deciding command |
+| `docs/README.md` | indexes the two new documents |
 | `docs/website-rebuild/AUDIT-AND-READINESS-2026-10-12.md` | **this report** |
 
 No WHMCS core file, payment path, provisioning module, migration, authentication control or vendor
 tree was modified. No page was deleted, no route was removed, and no backend integration was replaced.
+
+## 13. Release workflow and acceptance criteria
+
+Two documents the brief asks for did not exist in the repository: a single staging-only release
+workflow of thirteen steps ending at an explicit production approval, and a consolidated acceptance
+criteria list. The material was spread across `docs/independent-rebuild/STAGING-DEPLOYMENT.md`, the
+website runbook and the staging reports, so a release had no single ordered sequence to follow and no
+single place where "done" was defined.
+
+**`docs/RELEASE-WORKFLOW.md`** is that sequence: thirteen numbered steps, each naming its command,
+the evidence it must leave behind and its stop condition, with the WHMCS-touching steps marked
+*staging host*. It is built only from commands that already exist (`release-candidate-check.sh`,
+`staging-preflight.php`, `staging-backup-verify.php`, `staging-baseline-evidence.php`,
+`staging-financial-snapshot.php`, `compare-financial-evidence.py`, `validate-migrations.py`,
+`build-production-zip.py --verify`, `browser.cjs`, `generate-staging-report.py`), and it states in
+its opening lines that **nothing in the repository deploys to production**. Step 13 is the human
+approval gate: it requires a named approver, the candidate SHA, the evidence paths and a *tested*
+rollback, and it ends the workflow.
+
+**`docs/ACCEPTANCE-CRITERIA.md`** lists 30 criteria (source and build, design and content,
+accessibility, behaviour and integration, release), each with the command that decides it and one of
+four statuses. It records what is genuinely done and what is not: C4 (the real-browser sweep) is
+**PARTIAL** because the recorded 520-case run predates this pass and no browser binary exists here;
+D3 (live catalogue states) is **PARTIAL** pending staging; E2–E4 are **BLOCKED** on the licensed
+staging installation; E5 (production approval) is **NOT TESTED**, by design.
+
+**`tests/security/test_release_workflow_docs.py`** treats both documents as claims and checks them —
+thirteen steps in order, the last one being the approval gate, every repository path the workflow
+names actually existing, only the four status words appearing in the criteria table, and every
+criterion naming a deciding command. It is wired into the release gate, so a renamed script or a
+deleted step fails the build rather than being discovered on a staging host mid-release.
