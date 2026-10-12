@@ -110,6 +110,24 @@ expect(Guard::isPublicIp('1.1.1.1') === true, '1.1.1.1 should be public');
 expect(Guard::isPublicIp('169.254.169.254') === false, 'Metadata address must be blocked');
 expect(Guard::isPublicIp('172.29.1.0') === false, 'RFC1918 must be blocked');
 
+// --- Name Checker: validation, and an honest result contract (network-independent) ---
+$ncIp = array('ip' => '203.0.113.10');
+expect(Engine::run('name-checker', array('name' => '-bad-'), $ncIp)['ok'] === false, 'A leading hyphen must be refused');
+expect(Engine::run('name-checker', array('name' => 'bad-'), $ncIp)['ok'] === false, 'A trailing hyphen must be refused');
+expect(Engine::run('name-checker', array('name' => 'a'), $ncIp)['ok'] === false, 'A one-character name must be refused');
+expect(Engine::run('name-checker', array('name' => 'ab_c'), $ncIp)['ok'] === false, 'Underscores must be refused');
+$ncResult = Engine::run('name-checker', array('name' => 'cloudhost247-namecheck'), $ncIp);
+$allowedNcStatus = array('Accepted', 'Registered', 'No registry record', 'Unknown');
+if ($ncResult['ok']) {
+    expect(count($ncResult['rows']) === 4, 'Name Checker must report the format row and three TLD rows');
+    foreach ($ncResult['rows'] as $ncRow) {
+        expect(in_array($ncRow['Status'], $allowedNcStatus, true), 'Name Checker row has an undefined status: ' . $ncRow['Status']);
+        expect(stripos($ncRow['Status'], 'available') === false, 'Name Checker must never claim a name is available');
+    }
+} else {
+    expect(in_array($ncResult['status'], array(400, 503), true), 'Name Checker failure must be a client or availability error, not success');
+}
+
 if ($failures) {
     fwrite(STDERR, implode("\n", $failures) . "\n");
     echo count($failures) . " failed\n";

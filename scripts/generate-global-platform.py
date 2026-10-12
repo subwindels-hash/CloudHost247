@@ -715,7 +715,7 @@ add("reverse-image-search", "Reverse Image Search", "productivity", "local", "re
     "Build links to public image-search engines. CloudHost247 does not keep an image index.",
     ["image", "search", "reverse"], [("url", "Image URL", "url", "https://example.com/photo.jpg", False)])
 add("name-checker", "Name Checker", "productivity", "server", "name_check",
-    "Check a name for format issues and whether matching domains resolve. Social accounts are not scraped.",
+    "Check a name’s format, then ask the registry whether .com, .net and .org domain records exist. Social accounts are not checked.",
     ["name", "username", "domain"], [("name", "Name", "text", "cloudhost", True)])
 add("online-notepad", "Online Notepad", "productivity", "local", "notepad",
     "A private notepad that stays in this tab unless you choose to keep it in this browser.",
