@@ -60,13 +60,33 @@ async function main() {
   await mkUser('root@demo.cloudhost247.test', 'super_admin', 'Root Admin (demo)');
   await mkUser('amaka@demo-customer.test', 'customer', 'Amaka Demo (customer)');
 
+  const nowIso = new Date().toISOString();
+  const demoRates: Array<[string, string]> = [
+    ['EUR', '0.92'],
+    ['GBP', '0.79'],
+    ['CAD', '1.37'],
+    ['AUD', '1.52'],
+    ['NGN', '1600.00'],
+    ['JPY', '149.50'],
+    ['CHF', '0.88'],
+    ['INR', '83.50'],
+    ['BRL', '5.15'],
+  ];
+  for (const [code, rate] of demoRates) {
+    await db.query(
+      `INSERT INTO display_fx_rates (source_run_id, base_currency, currency_code, rate, observed_at)
+       VALUES (1, 'USD', $1, $2, $3)`,
+      [code, rate, nowIso],
+    );
+  }
+
   const app = buildApp(env, {
     serveFrontend: true,
     publicDir: path.join(process.cwd(), 'public'),
     pool: db as never,
   });
 
-  await app.listen({ port: env.PORT, host: '0.0.0.0' });
+  await app.listen({ port: env.PORT, host: process.env.HOST ?? '0.0.0.0' });
 
   const count = await app.inject({ method: 'GET', url: '/api/tools/catalog' });
   const catalog = count.json() as { count: number; tools: Array<{ path: string }> };

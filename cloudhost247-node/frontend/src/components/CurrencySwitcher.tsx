@@ -13,7 +13,7 @@ function currencyName(code: string, locale: string): string {
 }
 
 /**
- * Display-currency switcher, used in the header (desktop and the mobile drawer), the footer, the
+ * Display-currency switcher, used in the header menu bar (desktop and the mobile drawer), the
  * catalogue and the cart. It is independent of the language switcher: each control changes only its
  * own setting.
  *

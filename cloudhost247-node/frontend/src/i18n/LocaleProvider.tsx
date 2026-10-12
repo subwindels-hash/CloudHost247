@@ -2,12 +2,27 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { createTranslator, type Translator } from './catalogue';
 import { LOCALE_STORAGE_KEY, findLocale, getDefaultLocale, resolveLocale, type LocaleInfo } from './locales';
 import { en, type Catalogue } from './messages/en';
+import { fr, de, es, pt, it, nl, pl, ru, ar, zh, ja, ko } from './messages/translations';
 
 /**
  * Catalogues by locale code. Only locales listed in `locales.ts` may appear here, and each must
  * define every key that `messages/en.ts` defines (enforced by `i18n-catalogues.test.ts`).
  */
-export const CATALOGUES: Readonly<Record<string, Catalogue>> = { en };
+export const CATALOGUES: Readonly<Record<string, Catalogue>> = {
+  en,
+  fr,
+  de,
+  es,
+  pt,
+  it,
+  nl,
+  pl,
+  ru,
+  ar,
+  zh,
+  ja,
+  ko,
+};
 
 export interface LocaleContextValue {
   readonly locale: LocaleInfo;
