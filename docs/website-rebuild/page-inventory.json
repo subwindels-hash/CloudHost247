@@ -7,9 +7,9 @@
     "footer_destinations": 68,
     "mega_menus": 7,
     "footer_columns": 8,
-    "hero_scenes_exact": 58,
-    "hero_scenes_from_family_fallback": 9,
-    "distinct_hero_scenes": 39
+    "hero_scenes_exact": 67,
+    "hero_scenes_from_family_fallback": 0,
+    "distinct_hero_scenes": 47
   },
   "defects": {
     "orphaned_pages": [],
@@ -185,7 +185,7 @@
       },
       "hero_artwork": {
         "svg": "blog/insights.svg",
-        "scene": "hero/infrastructure-3d"
+        "scene": "blog/insights-3d"
       },
       "visual": "blog/insights",
       "image_status": "present",
@@ -713,7 +713,7 @@
       },
       "hero_artwork": {
         "svg": "blog/documentation.svg",
-        "scene": "hero/infrastructure-3d"
+        "scene": "blog/documentation-3d"
       },
       "visual": "blog/documentation",
       "image_status": "present",
@@ -779,7 +779,7 @@
       },
       "hero_artwork": {
         "svg": "domains/domain-dns.svg",
-        "scene": "domains/domain-network-3d"
+        "scene": "domains/domain-dns-3d"
       },
       "visual": "domains/domain-dns",
       "image_status": "present",
@@ -933,7 +933,7 @@
       },
       "hero_artwork": {
         "svg": "management/support.svg",
-        "scene": "servers/dedicated-servers-3d"
+        "scene": "management/support-3d"
       },
       "visual": "management/support",
       "image_status": "present",
@@ -1021,7 +1021,7 @@
       },
       "hero_artwork": {
         "svg": "management/support.svg",
-        "scene": "servers/dedicated-servers-3d"
+        "scene": "management/support-3d"
       },
       "visual": "management/support",
       "image_status": "present",
@@ -1153,7 +1153,7 @@
       },
       "hero_artwork": {
         "svg": "management/managed-services.svg",
-        "scene": "servers/dedicated-servers-3d"
+        "scene": "management/managed-services-3d"
       },
       "visual": "management/managed-services",
       "image_status": "present",
@@ -1219,7 +1219,7 @@
       },
       "hero_artwork": {
         "svg": "cloud/network.svg",
-        "scene": "cloud/vps-3d"
+        "scene": "cloud/network-3d"
       },
       "visual": "cloud/network",
       "image_status": "present",
@@ -1549,7 +1549,7 @@
       },
       "hero_artwork": {
         "svg": "management/server-control.svg",
-        "scene": "servers/dedicated-servers-3d"
+        "scene": "management/server-control-3d"
       },
       "visual": "management/server-control",
       "image_status": "present",
@@ -1813,7 +1813,7 @@
       },
       "hero_artwork": {
         "svg": "hosting/website-design.svg",
-        "scene": "hosting/web-hosting-3d"
+        "scene": "hosting/website-design-3d"
       },
       "visual": "hosting/website-design",
       "image_status": "present",
@@ -1867,60 +1867,5 @@
       "reachable": true
     }
   ],
-  "hero_fallbacks": [
-    {
-      "php_page": "blog.php",
-      "visual": "blog/insights",
-      "scene": "hero/infrastructure-3d",
-      "shared_with": "documentation.php"
-    },
-    {
-      "php_page": "documentation.php",
-      "visual": "blog/documentation",
-      "scene": "hero/infrastructure-3d",
-      "shared_with": "blog.php"
-    },
-    {
-      "php_page": "domain-dns.php",
-      "visual": "domains/domain-dns",
-      "scene": "domains/domain-network-3d",
-      "shared_with": ""
-    },
-    {
-      "php_page": "faqs.php",
-      "visual": "management/support",
-      "scene": "servers/dedicated-servers-3d",
-      "shared_with": "help-center.php, managed-services.php, server-management.php"
-    },
-    {
-      "php_page": "help-center.php",
-      "visual": "management/support",
-      "scene": "servers/dedicated-servers-3d",
-      "shared_with": "faqs.php, managed-services.php, server-management.php"
-    },
-    {
-      "php_page": "managed-services.php",
-      "visual": "management/managed-services",
-      "scene": "servers/dedicated-servers-3d",
-      "shared_with": "faqs.php, help-center.php, server-management.php"
-    },
-    {
-      "php_page": "network.php",
-      "visual": "cloud/network",
-      "scene": "cloud/vps-3d",
-      "shared_with": ""
-    },
-    {
-      "php_page": "server-management.php",
-      "visual": "management/server-control",
-      "scene": "servers/dedicated-servers-3d",
-      "shared_with": "faqs.php, help-center.php, managed-services.php"
-    },
-    {
-      "php_page": "website-design.php",
-      "visual": "hosting/website-design",
-      "scene": "hosting/web-hosting-3d",
-      "shared_with": ""
-    }
-  ]
+  "hero_fallbacks": []
 }

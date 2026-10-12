@@ -834,7 +834,7 @@
         "/legal/fair-usage",
         "/status"
       ],
-      "visual3d": "cloud/vps-3d"
+      "visual3d": "cloud/network-3d"
     },
     {
       "route": "/cloud/operating-systems",
@@ -1048,7 +1048,7 @@
         "/cloud/operating-systems",
         "/contact"
       ],
-      "visual3d": "servers/dedicated-servers-3d"
+      "visual3d": "management/server-control-3d"
     },
     {
       "route": "/cloud/monitoring",
@@ -1678,7 +1678,7 @@
         "/cloud/enterprise-servers",
         "/contact"
       ],
-      "visual3d": "servers/dedicated-servers-3d"
+      "visual3d": "management/managed-services-3d"
     },
     {
       "route": "/developers",
@@ -1815,7 +1815,7 @@
             "label": "Open the documentation",
             "to": "/docs"
           },
-          "visual3d": "hero/infrastructure-3d"
+          "visual3d": "blog/documentation-3d"
         }
       ],
       "faqs": [
@@ -5239,7 +5239,7 @@
         "/websites/builder",
         "/contact"
       ],
-      "visual3d": "hosting/web-hosting-3d"
+      "visual3d": "hosting/website-design-3d"
     },
     {
       "route": "/help",
@@ -5349,7 +5349,7 @@
         "/contact",
         "/faq"
       ],
-      "visual3d": "servers/dedicated-servers-3d"
+      "visual3d": "management/support-3d"
     },
     {
       "route": "/docs",
@@ -5411,7 +5411,7 @@
         "/search",
         "/contact"
       ],
-      "visual3d": "hero/infrastructure-3d"
+      "visual3d": "blog/documentation-3d"
     },
     {
       "route": "/search",
@@ -5959,7 +5959,7 @@
         "/contact",
         "/legal"
       ],
-      "visual3d": "hero/infrastructure-3d"
+      "visual3d": "blog/insights-3d"
     }
   ]
 }

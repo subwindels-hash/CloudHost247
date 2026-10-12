@@ -1585,7 +1585,7 @@
           ]
         }
       ],
-      "visual3d": "hosting/web-hosting-3d"
+      "visual3d": "hosting/website-design-3d"
     },
     "domain.php": {
       "title": "Domains",
@@ -2310,7 +2310,7 @@
           ]
         }
       ],
-      "visual3d": "servers/dedicated-servers-3d"
+      "visual3d": "management/support-3d"
     },
     "blog.php": {
       "title": "Blog",
@@ -2343,7 +2343,7 @@
         }
       ],
       "sections": [],
-      "visual3d": "hero/infrastructure-3d"
+      "visual3d": "blog/insights-3d"
     },
     "faqs.php": {
       "title": "Frequently Asked Questions",
@@ -2356,7 +2356,7 @@
       "uses": [],
       "related": [],
       "slug": "faqs",
-      "visual3d": "servers/dedicated-servers-3d"
+      "visual3d": "management/support-3d"
     },
     "applications.php": {
       "title": "Applications",
@@ -2827,7 +2827,7 @@
           ]
         }
       ],
-      "visual3d": "servers/dedicated-servers-3d"
+      "visual3d": "management/server-control-3d"
     },
     "infrastructure.php": {
       "title": "Infrastructure",
@@ -4340,7 +4340,7 @@
         "infrastructure.php"
       ],
       "slug": "network",
-      "visual3d": "cloud/vps-3d",
+      "visual3d": "cloud/network-3d",
       "seo_description": "The CloudHost247 network layer: public and private addressing, firewall filtering, reverse DNS, floating IPs and the observability that sits on top.",
       "faqs": [
         {
@@ -4887,7 +4887,7 @@
         "web-hosting.php"
       ],
       "slug": "domain-dns",
-      "visual3d": "domains/domain-network-3d"
+      "visual3d": "domains/domain-dns-3d"
     },
     "ip-management.php": {
       "title": "IP Management",
@@ -5128,7 +5128,7 @@
         "enterprise-servers.php"
       ],
       "slug": "managed-services",
-      "visual3d": "servers/dedicated-servers-3d",
+      "visual3d": "management/managed-services-3d",
       "seo_description": "Managed services from CloudHost247: patching, monitoring response, backup verification, firewall changes and hands-on administration, confirmed per plan.",
       "faqs": [
         {
@@ -5259,7 +5259,7 @@
         "api-hosting.php"
       ],
       "slug": "documentation",
-      "visual3d": "hero/infrastructure-3d",
+      "visual3d": "blog/documentation-3d",
       "seo_description": "CloudHost247 platform documentation: API references, provisioning, deployment, domain services, billing, tools and operations guides.",
       "faqs": [
         {

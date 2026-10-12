@@ -85,33 +85,36 @@ Fixed in `templates/cloudhost247/css/site.css`: the menu toggle is 44×44 and ce
 utility-bar links and the switcher are at least 24px tall, the account links are 24px, and the
 footer links carry vertical padding. No layout width, colour or typography changed.
 
-### 3.4 Nineteen product pages had no hero of their own
+### 3.4 Twenty-nine product pages had no hero of their own
 
 The brief asks for a distinct, relevant hero visual on each product page. The registry names one
 per page, but the artwork a page actually renders is the *resolved 3D scene*: the generator
 upgrades `<visual>-3d` when that scene exists and otherwise falls back to the scene its family
-shares (`FAMILY_3D` in `scripts/site/generate.mjs`). Nineteen product pages were on a family
+shares (`FAMILY_3D` in `scripts/site/generate.mjs`). Twenty-nine pages were on a family
 fallback, so e.g. `/deployment/api`, `/deployment/php` and `/deployment/laravel` all rendered the
 same pipeline scene, the four management pages shared the dedicated-server scene, and
 `/hosting/windows-hosting`, `/hosting/plesk-hosting` and `/hosting/reseller-hosting` shared the
 web-hosting scene.
 
-Twenty scenes were produced in this pass and wired end to end (`plesk-hosting`, `windows-hosting`,
-`reseller-hosting`, `game-servers`, `backups`, `firewall`, `ip-management`, `migration`,
-`data-centers`, `docker`, `php`, `laravel`, `nodejs`, `python`, `developer-hosting`, `api`, `paas`,
-`os-catalog`, `platform-security`, `ssl`), each encoded to the same 640/960/1280 AVIF + WebP ladder
-and mirrored into the platform's served library. Coverage measured by the inventory audit:
+Twenty-eight scenes were produced in this pass and wired end to end (`plesk-hosting`,
+`windows-hosting`, `reseller-hosting`, `game-servers`, `backups`, `firewall`, `ip-management`,
+`migration`, `data-centers`, `docker`, `php`, `laravel`, `nodejs`, `python`, `developer-hosting`,
+`api`, `paas`, `os-catalog`, `platform-security`, `ssl`, `insights`, `documentation`, `domain-dns`,
+`support`, `managed-services`, `network`, `server-control`, `website-design`), each encoded to the
+same 640/960/1280 AVIF + WebP ladder and mirrored into the platform's served library. Coverage
+measured by the inventory audit:
 
 | | Before | After |
 |---|---|---|
-| Product pages on their own scene | 38 | **58** |
-| Product pages on a family fallback | 29 | **9** |
-| Distinct hero scenes in use | 19 | **39** |
+| Pages on their own scene | 38 | **67 of 67** |
+| Pages on a family fallback | 29 | **0** |
+| Distinct hero scenes in use | 19 | **47** |
 
-The audit now reports this (`totals.hero_scenes_exact`,
+The audit reports this on every run (`totals.hero_scenes_exact`,
 `totals.hero_scenes_from_family_fallback`, `totals.distinct_hero_scenes`, plus a `hero_fallbacks`
-list naming what each remaining page shares its scene with), so the gap is measured rather than
-asserted. The 9 remaining pages are listed in §11.
+list naming what each page shares its scene with), so coverage is measured rather than asserted —
+and because the release gate diffs the committed inventory, a future page that quietly falls back to
+a family scene shows up as an inventory change under review.
 
 ### 3.5 The currency hint endpoint was publicly cacheable and echoed the caller's address
 
@@ -171,7 +174,32 @@ Both hygiene checks were then run locally to prove restoring the workflow does n
 it: `node scripts/check-malformed-bullets.mjs` → 6 657 text files scanned, 0 findings; the two legal
 JSON copies are byte-identical.
 
-### 3.7 There was no accessibility or responsive gate that could run without a browser
+### 3.7 Verified clean, and now measurable: the Wingdings / orphan-PUA artifacts
+
+The brief singles out the `\uf0d8`-style Wingdings orphan that ends up in rendered pages when a list
+bullet is authored in a symbol font and the font is not applied. It is checked rather than assumed:
+
+```
+$ grep -rlP '(?:\xef\x83\x98|\xef\x82\xb7)' /tmp/ch247-fixtures | wc -l     # U+F0D8, U+F0B7
+0
+$ grep -rlP '(?:\xef\x83\x98|\xef\x82\xb7)' --include=*.php --include=*.tpl --include=*.json \
+      --include=*.css --include=*.js --include=*.mjs --include=*.md --include=*.ts --include=*.tsx .
+(nothing)
+```
+
+**Zero** occurrences in all 229 rendered pages and zero in any first-party text source. The only
+files in the tree containing those byte sequences at all are (a) compressed image data that happens
+to contain the three bytes — including one of the 3D scenes produced in this pass, which is a picture
+of a server hall and contains no text — and (b) one PNG in the retired legacy theme, which the active
+theme never serves and which this pass deliberately leaves alone. The repository's own
+`scripts/check-malformed-bullets.mjs` is the standing guard for this class and reports 0 findings
+across 6 657 text files.
+
+One note for whoever repeats the check: a character class such as `[\xef\x83\x98]` matches the
+individual *bytes*, so it flags every file containing `·` (U+00B7 is `C2 B7`) and every compressed
+binary. The sequences have to be alternated as whole three-byte units, as above.
+
+### 3.8 There was no accessibility or responsive gate that could run without a browser
 
 The only accessibility evidence in the repository is a browser run (`tests/website/browser.cjs`,
 Chromium + axe) that cannot execute in this environment. Added
@@ -226,8 +254,8 @@ SPA navigation through a generated adapter, so the two front ends cannot drift.
 
 | Family | Contents |
 |---|---|
-| Illustrations | 219 SVGs in the library; the 67 registry pages reference 47 distinct diagrams |
-| 3D scenes | 40, each with 640/960/1280 in **AVIF and WebP** plus the JPEG master (`generate-raster-formats.py --check` → 40 scenes × 2 formats ✓); 20 were added in this pass |
+| Illustrations | 219 SVGs in the library; the 67 registry pages reference 47 distinct diagrams (three keys shared — see §11) |
+| 3D scenes | 48, each with 640/960/1280 in **AVIF and WebP** plus the JPEG master (`generate-raster-formats.py --check` → 48 scenes × 2 formats ✓); 28 were added in this pass |
 | Brand | 24 files: horizontal / compact / primary / icon-mark × dark, white and mono, in SVG + PNG + WebP |
 | Favicons | `favicon.ico` + 16/32/48/192/512 PNG, Apple touch icon, `site.webmanifest` |
 | Social | preview artwork in PNG, SVG and WebP |
@@ -336,15 +364,18 @@ snapshot or a commit — and is reproducible with the command above.
    contract covers structure, names, target sizes and the responsive ladder, but it cannot measure
    real overflow or real focus behaviour. `tests/website/browser.cjs` must be re-run where a
    Chromium binary exists.
-2. **Nine pages still share a family hero scene.** §5 of the brief asks each product page to have
-   a distinct relevant hero; 58 of 67 pages are on their own scene and 9 are on the one their family
-   shares — `blog.php` and `documentation.php` (infrastructure scene), `domain-dns.php`,
-   `managed-services.php` and `server-management.php` (server scene), `network.php` (cloud scene),
-   `website-design.php` (web-hosting scene), and `faqs.php`/`help-center.php` (one visual key
-   between them). `hero_fallbacks` in `page-inventory.json` names each one and what it shares with.
-   Every `/deployment/*`, `/security/*`, `/operating-systems/*`, `/management/{backups,firewall,
-   ip-management,migration}` and `/hosting/{plesk,windows,reseller}-hosting` page now has its own
-   scene. Nine scenes remain to be produced; twenty were produced in this pass.
+2. **Three illustration keys are still shared.** Every page now renders its own 3D scene, and the
+   audit measures the vector keys too: 47 distinct diagrams serve 67 pages, and exactly three keys
+   are used by more than one page —
+   - `security/security` by **19 legal and policy pages** (acceptable-use, backup, cookie,
+     cybercrime, data-deletion, privacy, refund, terms and the rest of that family);
+   - `cloud/cloud-hosting` by `cloudhost247-hosting.php` and `offers.php`;
+   - `management/support` by `faqs.php` and `help-center.php`.
+
+   The 19-page policy family is a deliberate house treatment (a policy page gets the security
+   diagram, not a bespoke one), and the two hosting pages are the same product described twice. If
+   the brief is read as requiring a bespoke vector for each of those 19 pages, that is the remaining
+   illustration work; the *hero scene* requirement is met for all 67.
 3. **PHP 8.2 deprecation notices** are emitted by the OVH / broker / marketing *test fakes* (missing
    `#[\ReturnTypeWillChange]` on `ArrayAccess`/`Countable`/`IteratorAggregate` implementations).
    Pre-existing, test-only, non-blocking.
@@ -373,7 +404,7 @@ non-asset changes are:
 | `docs/website-rebuild/page-inventory.json` / `.csv` | regenerated: footer destinations 67 → 68, hero-scene coverage added |
 | `docs/website-rebuild/COMPONENTS.md` | documents the inventory audit, the accessibility contract and the two new suites; registry counts corrected (67 pages, 7 menus, 8 columns) |
 | `docs/website-rebuild/DEPLOYMENT.md` | registry-first navigation wording; Node suite figure corrected to the measured 2,242 tests |
-| `assets/images/cloudhost247/**` + `cloudhost247-node/frontend/public/media/cloudhost247/**` | **140 files**: 20 new 3D scenes × (JPEG + 640/960/1280 AVIF + WebP), mirrored into the served library |
+| `assets/images/cloudhost247/**` + `cloudhost247-node/frontend/public/media/cloudhost247/**` | **196 files**: 28 new 3D scenes × (JPEG + 640/960/1280 AVIF + WebP), mirrored into the served library |
 | `modules/addons/cloudhost247_theme/resources/site.json`, `shared/site/generated/route-report.json`, `cloudhost247-node/frontend/src/content/pages.generated.json` | regenerated from the registry (the new scenes change the resolved `visual3d`) |
 | `.github/workflows/content-hygiene.yml` | the unparseable step name that stopped the workflow from ever starting is quoted; the workflow also runs the new checker |
 | `scripts/check-workflow-yaml.mjs` | **new** — fails when any `.github/workflows/*.yml` would not start, with the file and line |
