@@ -55,11 +55,13 @@ interface LocaleProviderProps {
   children: ReactNode;
   /** Overrides the stored and browser preference. Used by tests and by any server-rendered entry point. */
   initialLocale?: string;
+  /** Hints from the server about the customer's saved preference (e.g. from a cookie or session). */
+  savedLocaleHint?: string;
 }
 
-export function LocaleProvider({ children, initialLocale }: LocaleProviderProps) {
+export function LocaleProvider({ children, initialLocale, savedLocaleHint }: LocaleProviderProps) {
   const [locale, setLocaleState] = useState<LocaleInfo>(() =>
-    resolveLocale(initialLocale ?? readStoredLocale(), browserLanguages()),
+    resolveLocale(savedLocaleHint ?? initialLocale ?? readStoredLocale(), browserLanguages()),
   );
 
   useEffect(() => {
