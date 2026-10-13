@@ -334,6 +334,21 @@ and in the sitemap; `/tools/business-tools` is a route in `App.tsx`), neither fo
 or `#` href, and the audit now enforces both sides rather than trusting the count. Each entry declares
 the surfaces it exists on, which is what keeps the two front ends from disagreeing.
 
+An orphaned deciding command is a class of defect, not an incident, so all 32 criteria were swept for
+it rather than stopping at the one that turned up. The sweep strips comments from the gate before
+matching — otherwise a script *named in a comment* reads as invoked, which is exactly how
+`tests/website/browser.cjs` first appeared to be automated — and it reads only the `run:` lines of the
+three workflows. Test files named by a criterion but never named by a command are matched against the
+vitest `include` globs in `cloudhost247-node/vitest.config.ts` (`tests/**/*.test.ts`,
+`frontend/tests/**/*.test.{ts,tsx}`), each path checked individually, because `npm test` runs them
+without ever printing their names.
+
+Result: **two** criteria have a deciding command that no automation runs, and both are deliberate.
+**A6** (`build-production-zip.py --verify`) is release-workflow step 5 — it builds a 131.8 MiB
+package, so it runs when a candidate is frozen, not on every push. **C4** (`browser.cjs`) needs
+Chromium, which is why C4 is PARTIAL. Every other criterion, including all 26 marked COMPLETE, is
+decided by something the gate or a workflow actually executes.
+
 ## 4. Page inventory: what a visitor and a crawler can reach
 
 `python3 scripts/audit-navigation-inventory.py` (re-run in this pass, and now a gate step):
