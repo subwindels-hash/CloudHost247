@@ -675,9 +675,26 @@ snapshot or a commit — and is reproducible with the command above.
   exit 127) — a clean-checkout prerequisite, resolved by `npm ci`.
 - **Every commit of this pass is green on the hosted runners**, read per SHA from the check-runs API
   rather than assumed: `ac78d49` 10/10 checks `success`, and `3f41576`, `197df25`, `6b3a2cb`,
-  `de8f7ed`, `f8dad20`, `a36457f`, `c2dadc5`, `f969d33` and `5f15a59` 8/8 `success` each. Any
-  commit after the last one listed is documentation-only and inherits this evidence: nothing in a
-  report sentence can change what a runner executes, and this record is itself such a commit. A
+  `de8f7ed`, `f8dad20`, `a36457f`, `c2dadc5`, `f969d33`, `5f15a59`, `8245335`, `f934097`,
+  `141411e`, `078dc14`, `9001b94`, `b7b26e3`, `828486b`, `631ab41` and `49186c5` 8/8 `success` each
+  — the whole branch, every commit read individually rather than the newest nine inferred from the
+  oldest.
+
+  That enumeration replaces a claim this report used to make and should not have. An earlier
+  revision stopped at `5f15a59` and asserted that "any commit after the last one listed is
+  documentation-only and inherits this evidence: nothing in a report sentence can change what a
+  runner executes." The premise was false. Four of the ten commits after `5f15a59` changed code, not
+  prose: `078dc14` made the published-link audit a gate step and narrowed its exemption, `828486b`
+  and `631ab41` changed the scope logic of two repository-wide checks (§3.12–§3.14), and `49186c5`
+  added comments to both. A runner executes code, so a green parent says nothing about a child that
+  altered any — the sentence was true of the commits it happened to cover and would have concealed
+  exactly the regressions this record exists to catch. Each of the ten was therefore read from the
+  check-runs API in its own right, and all ten are 8/8 `success`.
+
+  The self-reference is handled the same way instead of being asserted. This commit changes only this
+  report (`git show --stat HEAD` lists one file), and rather than claim it inherits the record, here
+  is the command that decides it, the same one used for every row above:
+  `gh api repos/subwindels-hash/CloudHost247/commits/$(git rev-parse HEAD)/check-runs`. A
   representative run
   (`Release candidate (PHP 7.4)` 2m4s, `Release candidate (PHP 8.2)` 2m28s,
   `Build, typecheck, test (Node 22.12.0)` 13m31s, `Build, typecheck, test (Node 24.8.0)` 12m53s,
