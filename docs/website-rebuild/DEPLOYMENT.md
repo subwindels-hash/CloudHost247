@@ -144,7 +144,7 @@ sidebar/navigation hooks and responsive tables. Verify any Builder override,
 custom navbar item, database-authored media/URL, and multi-language/RTL content.
 
 The fixture preview is intentionally not a live WHMCS site. It cannot certify
-these workflows. The full local Node suite now passes — 2,242 tests across 161 files on Node
+these workflows. The full local Node suite now passes — 2,256 tests across 163 files on Node
 22.22.3 (an earlier report quoted 1,158 tests from a smaller suite); reproduce with
 `cd cloudhost247-node && npm test`.
 The required GitHub Node matrix must also pass before merging. Passing tests with

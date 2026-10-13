@@ -344,7 +344,7 @@ vitest `include` globs in `cloudhost247-node/vitest.config.ts` (`tests/**/*.test
 without ever printing their names.
 
 Result: **two** criteria have a deciding command that no automation runs, and both are deliberate.
-**A6** (`build-production-zip.py --verify`) is release-workflow step 5 — it builds a 131.8 MiB
+**A6** (`build-production-zip.py --verify`) is release-workflow step 5 — it builds a ~132 MiB
 package, so it runs when a candidate is frozen, not on every push. **C4** (`browser.cjs`) needs
 Chromium, which is why C4 is PARTIAL. Every other criterion, including all 26 marked COMPLETE, is
 decided by something the gate or a workflow actually executes.
@@ -611,7 +611,7 @@ checkout copy. That needs the licensed staging install and is recorded in §11.
 | Tools platform | 85 tests / 0 failures · 1 171 shell/menu/footer assertions · 26 static tests · browser-tool module tests pass |
 | Static + security suites | **459 tests OK** (2 skipped with recorded reasons) |
 | Website suites | **78 tests OK** in the release gate (8 skipped there by design — the rendered-page cases need a fixture tree, which the gate does not build), including the catalogue-honesty guard and the hero-distinctness guard (§3.10) |
-| Node platform suite (`npm test`) | **161 test files / 2 242 tests passed**, exit 0 (Vitest, ~30 min; runs the migrations against the in-process Postgres engine) |
+| Node platform suite (`npm test`) | **163 test files / 2 256 tests passed**, exit 0 (Vitest, 1 472 s measured; runs the migrations against the in-process Postgres engine) |
 | Node currency/i18n suites | the two new suites pass (6 + 8 tests) alongside the existing currency, i18n and switcher suites; `npm run typecheck` and the frontend `tsc --noEmit` exit 0 |
 | Server-agent authentication | 71/71 |
 | Retired-brand audit | 5 974 text files scanned, **0 matches** (1 978 binary and 18 ionCube files checked by name only) |
@@ -643,12 +643,12 @@ Also verified in this pass:
 | Step | Result |
 |---|---|
 | `node scripts/site/generate.mjs` | 7 menus / 8 columns / 169 links; 55 marketing pages, 120 sections, 174 FAQs, 13 published documents (216 KB) |
-| Node platform `npm ci` + `npm run typecheck` + frontend `tsc --noEmit` | 264 top-level packages installed; both typechecks exit 0 |
-| Node platform `npm test` | 161 files / 2 242 tests passed, exit 0 |
+| Node platform `npm ci` + `npm run typecheck` + frontend `tsc --noEmit` | 45 direct dependencies (22 runtime, 23 dev); `npm ci` installs 386 packages; both typechecks exit 0 |
+| Node platform `npm test` | 163 files / 2 256 tests passed, exit 0 |
 | `node scripts/check-workflow-yaml.mjs` | 3 workflow files parse, each with jobs and steps (added to the gate and to `content-hygiene.yml`) |
 | `python3 scripts/build-production-zip.py --verify` | **verified** — `✓ production archive verified: deployable, complete, no secret material`, exit 0, re-run at `631ab41` — named by SHA because "the tip of this branch" is a moving target, and a claim no reader can check is worse than a dated one. Structural counts: **9 872 members**, `secret_skipped=0`, **597** media assets, **49** theme illustrations and **49** referenced 3D scenes resolved in both libraries, **13** published documents. The digest is **not** an integrity claim and must not be compared across environments: the writer uses `archive.write(path, rel)` with no `ZipInfo`/`date_time` normalisation, so every member carries its on-disk mtime and a fresh checkout of identical bytes hashes differently. Measured directly rather than assumed — one file, same content, two mtimes, two digests (`71b0a893…` vs `edda2011…`). It also moves with content because `docs/` is inside the walk, and unlike the digest the size *is* reproducible for identical content: 138 237 977 bytes at `de8f7ed`, 138 243 211 at the tip when §3.11 was written, and **138 264 628** re-measured at `631ab41`. The counts and the exit status are the evidence; the command is the check, not the digest |
 
-The archive is deliberately not kept in the workspace — a 101 MiB build artefact does not belong in a
+The archive is deliberately not kept in the workspace — a ~132 MiB build artefact does not belong in a
 snapshot or a commit — and is reproducible with the command above.
 
 ## 10. Staging verification status
@@ -796,7 +796,7 @@ non-asset changes are:
 | `assets/images/cloudhost247/cloud/offers.svg`, `assets/images/cloudhost247/management/help-center.svg` | **new** — the two vector diagrams those keys name, drawn in the library's own house style |
 | `docs/website-rebuild/page-inventory.json` / `.csv` | regenerated: footer destinations 67 → 68, hero-scene coverage added |
 | `docs/website-rebuild/COMPONENTS.md` | documents the inventory audit, the accessibility contract and the two new suites; registry counts corrected (67 pages, 7 menus, 8 columns) |
-| `docs/website-rebuild/DEPLOYMENT.md` | registry-first navigation wording; Node suite figure corrected to the measured 2,242 tests |
+| `docs/website-rebuild/DEPLOYMENT.md` | registry-first navigation wording; Node suite figure corrected to the measured 2 256 tests across 163 files |
 | `assets/images/cloudhost247/**` + `cloudhost247-node/frontend/public/media/cloudhost247/**` | **424 files** (212 per tree): 30 new 3D scenes × (JPEG + 640/960/1280 AVIF + WebP) and 2 new vector diagrams, mirrored into the served library |
 | `modules/addons/cloudhost247_theme/resources/site.json`, `shared/site/generated/route-report.json`, `cloudhost247-node/frontend/src/content/pages.generated.json` | regenerated from the registry (the new scenes change the resolved `visual3d`) |
 | `.github/workflows/content-hygiene.yml` | the unparseable step name that stopped the workflow from ever starting is quoted; the workflow also runs the new checker |
