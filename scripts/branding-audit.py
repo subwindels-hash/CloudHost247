@@ -17,8 +17,9 @@ A match that is not covered by a rule in that register is a release-blocking
 violation. A rule that no longer matches anything is reported as stale, so the
 register cannot quietly rot into a blanket exemption.
 
-Git-ignored directories (.git, __pycache__, node_modules, templates_c, .venv)
-are skipped so the report is deterministic.
+Everything git ignores is skipped so the report is deterministic -- see
+git_ignored_paths() for why that is asked of git rather than of a hand-kept list
+of directory names.
 
 Binary files are not decoded. Image/audio assets are therefore only checked by
 *name*; verifying that a logo's pixels do not spell the old brand is a design
@@ -38,6 +39,7 @@ import argparse
 import json
 import os
 import re
+import subprocess
 import sys
 from collections import Counter
 
@@ -64,9 +66,48 @@ REASON_CODES = {
     'BASELINE', 'RECORD', 'ASSERTION', 'REGISTER',
 }
 
-# Directories that are not part of the repository (all git-ignored) or that hold
-# compiled caches. Scanning them would make the report non-deterministic.
+# Directory *names* that never hold authored content: version control, installed
+# dependencies and compiled caches. Cheap to match and correct without git, so
+# they stay a name check; everything else generated is handled by
+# git_ignored_paths() below.
 SKIP_DIRS = {'.git', '__pycache__', 'node_modules', 'templates_c', '.venv'}
+
+
+def git_ignored_paths(root: str) -> set[str]:
+    """Paths git ignores, relative to `root`, as POSIX strings.
+
+    The audit's contract is that its report is deterministic. A hand-kept list of
+    directory *names* cannot deliver that here, and the gap is not hypothetical:
+    `cloudhost247-node/public/` is vite's `outDir` and `cloudhost247-node/dist/`
+    is the compiled server, both ignored by `cloudhost247-node/.gitignore` as
+    "generated, not source", and neither name was in SKIP_DIRS. Whether they were
+    walked therefore depended on whether a build had been run in that working
+    copy -- the same commit reported 7 532 text files where a clean checkout
+    reports 6 243, so the figure this audit published reproduced only on a
+    machine that had built the frontend.
+
+    Asking git removes the guesswork, because `.gitignore` is where this
+    repository already records what is generated. Git also guarantees the
+    property a name list cannot: an ignored path is by definition untracked, so
+    no authored file can be skipped by this rule. That matters because the naive
+    fix -- adding `public` to SKIP_DIRS -- would have been worse than the defect.
+    `cloudhost247-node/frontend/public/` is 641 *tracked* source files including
+    the media library this project ships, and a basename match would have dropped
+    all of them from a release-blocking brand audit while still printing PASSED.
+
+    Without git (a tarball, a sandbox with no repository) this returns an empty
+    set and SKIP_DIRS alone applies, so the audit degrades to its previous
+    behaviour rather than failing closed on a release gate.
+    """
+    try:
+        completed = subprocess.run(
+            ['git', 'ls-files', '--others', '--ignored', '--exclude-standard',
+             '--directory'],
+            cwd=root, capture_output=True, text=True, check=True,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return set()
+    return {line.rstrip('/') for line in completed.stdout.splitlines() if line}
 
 
 def glob_to_regex(pattern: str) -> re.Pattern:
@@ -228,11 +269,19 @@ def audit():
     scanned_files = 0
     named_assets = []
 
+    ignored = git_ignored_paths(REPO_ROOT)
     for root, dirs, files in os.walk(REPO_ROOT):
-        dirs[:] = sorted(d for d in dirs if d not in SKIP_DIRS)
+        dirs[:] = sorted(
+            d for d in dirs
+            if d not in SKIP_DIRS
+            and os.path.relpath(os.path.join(root, d),
+                                REPO_ROOT).replace(os.sep, '/') not in ignored
+        )
         for name in sorted(files):
             absolute = os.path.join(root, name)
             rel = os.path.relpath(absolute, REPO_ROOT).replace(os.sep, '/')
+            if rel in ignored:
+                continue
 
             # --- file / directory names -----------------------------------
             if TOKEN.search(rel):

@@ -5738,7 +5738,7 @@ robots.txt,Administrative/internal,2458
 scripts/audit-builder-widget-classes.py,Administrative/internal,8690
 scripts/audit-legacy-branding-in-database.sql,Administrative/internal,12351
 scripts/audit-navigation-inventory.py,Administrative/internal,14582
-scripts/branding-audit.py,Administrative/internal,15325
+scripts/branding-audit.py,Administrative/internal,17791
 scripts/build-production-zip.py,Administrative/internal,17043
 scripts/check-accessibility-contract.py,Administrative/internal,17389
 scripts/check-hero-render.py,Administrative/internal,8016

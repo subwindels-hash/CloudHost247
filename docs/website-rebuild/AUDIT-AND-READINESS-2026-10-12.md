@@ -443,6 +443,64 @@ reported 0 findings, so this changed what the check *covers*, not what it found.
 because a coverage defect in a hygiene check is a defect, and because the scan count is the evidence
 that the coverage is real.
 
+### 3.14 The same defect in a release-blocking audit, and a sweep that closed the class
+
+§3.13 was not one script's quirk. The pattern — a repository-wide walk whose scope comes from a
+hand-kept list of directory *names*, so the reported count depends on what has been built in that
+working copy — was then swept across every script that walks the filesystem: **15 of them**.
+
+One more was exposed, and it matters more than the hygiene scanner because it is a **gate step**
+(`scripts/branding-audit.py --quiet`), a **CI step** in its own right, and the deciding command for
+criterion B6. Its docstring already promised the property its code did not deliver:
+
+> Git-ignored directories (.git, __pycache__, node_modules, templates_c, .venv) are skipped so the
+> report is deterministic.
+
+The list was simply incomplete. `assets/cloudhost247-tools/` — 643 files, the `npm run build:tools`
+output that `.gitignore:35` ignores and `docs/tools/TOOLS-ARCHITECTURE.md:84` documents as generated
+— was walked whenever it existed, as were `cloudhost247-node/public/` and `cloudhost247-node/dist/`.
+Measured: **6 243** text files with build output present, **5 974** on a clean checkout. The figure
+published in this report and in criterion B6 was **7 532** — a *third* number matching neither,
+because it had been measured with more build output on disk still. Three values for one commit is
+the clearest possible evidence that the count was measuring the working copy rather than the
+repository.
+
+The fix is the one from §3.13, for the same reason: scope now comes from git's ignore rules, so it
+cannot disagree with the tree, and the docstring describes that mechanism instead of reciting a list
+that had already drifted. `SKIP_DIRS` remains for the names that are correct without git
+(`node_modules`, `__pycache__`, `templates_c`, `.venv`, `.git`), so the audit degrades to its
+previous behaviour rather than failing closed on a release gate where git is absent.
+
+Three properties were verified rather than assumed, because this audit blocks releases:
+
+| Property | Test | Result |
+|---|---|---|
+| No authored file loses coverage | Enumerated all 24 git-ignored entries (29 453 files) and intersected with `git ls-files --cached` | **0 tracked files** would be skipped |
+| The count is now deterministic | Ran the audit with `assets/cloudhost247-tools/` moved out of the tree, then restored | **identical both ways**: 5 974 text / 1 978 binary / 18 ionCube / 0 matches / PASSED |
+| Excluding the bundle hides nothing | Applied the audit's own brand and abbreviation patterns to the bundle's text files | **268 text files inspected, 0 matches** |
+
+The third is the one that justifies the scope change rather than merely excusing it. The generated
+bundle is built from `cloudhost247-node/frontend/src/**`, which is tracked and still scanned, and
+from `node_modules`, which was already excluded by name before this change — so a retired-brand token
+could only reach the bundle from source the audit still reads. Coverage is preserved transitively,
+and measured at 0 matches today.
+
+The remaining twelve walkers are **not** exposed, and that was tested the same way instead of being
+inferred from their code: with the generated bundle present and then absent, `check-links.mjs`
+reported **2 208 surfaces / 926 internal / 899 PHP / 5 external / 17 anchors**, the accessibility
+contract **63 markup files / 15 controls / 16 images / 1 020 CSS rules / 15 media widths**, and
+`verify-website.py` **79 includes, passed** — byte-identical figures in both states, because they
+walk `templates/`, `tools/` and the registry rather than the whole tree. `build-production-zip.py`
+also includes generated output, but deliberately: it runs the builds itself and lists
+`cloudhost247-node/public/index.html` and `dist/src/app.js` among its required members, so shipping
+them is the point of a deployment archive, not a scope defect. The hygiene scanner re-measured
+**5 983** with the bundle present, confirming §3.13's fix holds under the same condition.
+
+Both stale `7 532 / 2 728` references — the §9 gate table here and criterion B6 in
+`docs/ACCEPTANCE-CRITERIA.md` — are corrected to **5 974 / 1 978**, which is what a clean checkout
+reports and what CI therefore verifies. The verdict never changed: 0 retired-brand matches in every
+measurement, before and after.
+
 ## 4. Page inventory: what a visitor and a crawler can reach
 
 `python3 scripts/audit-navigation-inventory.py` (re-run in this pass, and now a gate step):
@@ -539,7 +597,7 @@ checkout copy. That needs the licensed staging install and is recorded in §11.
 | Node platform suite (`npm test`) | **161 test files / 2 242 tests passed**, exit 0 (Vitest, ~30 min; runs the migrations against the in-process Postgres engine) |
 | Node currency/i18n suites | the two new suites pass (6 + 8 tests) alongside the existing currency, i18n and switcher suites; `npm run typecheck` and the frontend `tsc --noEmit` exit 0 |
 | Server-agent authentication | 71/71 |
-| Retired-brand audit | 7 532 text files scanned, **0 matches** (2 728 binary and 18 ionCube files checked by name only) |
+| Retired-brand audit | 5 974 text files scanned, **0 matches** (1 978 binary and 18 ionCube files checked by name only) |
 | Vendor integrity | `sha256sum --check --strict` against the recorded manifest passes — no vendor-derived file was edited |
 
 Existing controls were not weakened to make anything pass; this pass only adds checks.

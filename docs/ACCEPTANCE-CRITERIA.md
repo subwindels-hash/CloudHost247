@@ -37,7 +37,7 @@ existing, or a page rendering, is not evidence.
 | B3 | A distinct hero visual on every registered page | `page-inventory.json` → `hero_scenes_exact`, `python3 -m unittest tests.website.test_static` (`test_published_pages_do_not_share_a_hero`) and `python3 scripts/check-hero-render.py` against the rendered fixtures | **COMPLETE** — 67 of 67 on their own scene, 49 distinct scenes, 0 family fallbacks; and no two pages share one: 48 distinct hero artworks across the 48 pages that render a hero, 19 legal documents text-only by design |
 | B4 | The full asset library exists (brand, logos, favicons, social, app icons, OS, panels) | `python3 scripts/generate-raster-formats.py --check` + `python3 -m unittest tests.website.test_media_library_parity` + the archive verifier | **COMPLETE** — 50 scenes × 2 formats, served mirror in sync (597 files); every registry visual resolved in both libraries; and the platform's second copy of the library is now verified against the library it mirrors instead of assumed |
 | B5 | No malformed-bullet, replacement-character or orphan-PUA artifact in rendered pages | `node scripts/check-malformed-bullets.mjs`; the PUA scan in the audit report §3.7 | **COMPLETE** — 0 findings in 5 983 text files; 0 in all 229 rendered pages |
-| B6 | No retired-brand text anywhere | `python3 scripts/branding-audit.py` | **COMPLETE** — 7 532 text files scanned, 0 matches (2 728 binary and 18 ionCube files checked by name only) |
+| B6 | No retired-brand text anywhere | `python3 scripts/branding-audit.py` | **COMPLETE** — 5 974 text files scanned, 0 matches (1 978 binary and 18 ionCube files checked by name only) |
 
 ## Accessibility and responsiveness
 
