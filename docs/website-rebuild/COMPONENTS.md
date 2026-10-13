@@ -19,7 +19,7 @@ WHMCS still owns authentication, billing, checkout and service authorization.
 
 | Component | Source / behavior |
 |---|---|
-| Registry | `modules/addons/cloudhost247_theme/resources/site.json`: 46 editorial page definitions, six mega menus, grouped footer; no prices or provider IDs |
+| Registry | `modules/addons/cloudhost247_theme/resources/site.json`: 67 editorial page definitions, seven mega menus, eight-column grouped footer; no prices or provider IDs |
 | Context / publication | `lib/Site.php`, `lib/PublicPage.php`, existing `ThemeRepository`; published overrides, explicit unpublished states, neutral absent-record editorial fallback |
 | Header | `templates/cloudhost247/header.tpl`; retains captcha, head/body hook outputs, account notifications, switching, masquerading, sidebars, verification notices |
 | Navigation | `includes/site-nav.tpl`; native disclosures, mobile toggle, escaped data, actual account destinations |
@@ -87,8 +87,82 @@ fill a footer column.
   safe JSON-LD, fail-closed DB behavior, explicit draft publication, canonical
   discovery, published custom pages/landings, translation visibility, slug
   collisions, sitemap opt-out, missing optional fields and the 40-result limit.
+- `python3 scripts/audit-navigation-inventory.py`: the reviewed page inventory
+  (`page-inventory.json`/`.csv`) — route, canonical URL, title, category, publication
+  status, template, navigation and footer placement, hero artwork, SEO status and
+  reachability. The release gate regenerates it and fails when the committed copy is
+  stale, because a stale inventory is reviewed as if it described the site.
+- `python3 scripts/check-accessibility-contract.py`: the accessibility and
+  responsive properties that are decidable without a browser — document viewport and
+  language, a skip link whose target exists, `aria-expanded`/`aria-controls` on the
+  navigation toggle pointing at a real element, native `<details>` mega menus, a name
+  on every visible form control (explicit, implicit or ARIA), `alt` and declared
+  dimensions on first-party images, a declared hit area of at least 24px (44px for the
+  mobile toggle) on the controls a thumb actually hits, a visible `:focus-visible`
+  indicator, `prefers-reduced-motion`, clipped horizontal overflow, and a media query
+  that applies at every viewport the browser QA matrix tests. It fails loudly if it
+  inspected implausibly little, so a green run cannot mean "it read nothing".
+- `python3 -m unittest tests/foundation/test_static.py`: the addon-module contracts, plus the
+  rule that no first-party class implementing `ArrayAccess`, `Countable`, `IteratorAggregate`
+  or `Iterator` declares one of those methods without the return type PHP 8 wants. PHP reports
+  a tentative return type at class-declaration time — before a suite installs its own error
+  handler — so the three test fakes that were untyped printed 20 deprecations and still passed.
+  `offsetGet` is exempt and uses `#[\ReturnTypeWillChange]` instead, because the type PHP wants
+  there is `mixed` and the PHP 7.4 leg this repository still runs cannot parse it. The scan is
+  per class: a fake file declares a `Countable` collection *and* a query builder whose `count()`
+  is an illuminate-style API method, not an interface implementation.
 - `python3 -m unittest tests/website/test_static.py`: link mutation tests, parent
-  hook contracts, Builder precedence and read-only API use.
+  hook contracts, Builder precedence and read-only API use, and the rule that no two
+  published pages share a hero (`test_published_pages_do_not_share_a_hero`, plus a
+  negative case that duplicates a page's artwork and requires the rule to fire while
+  the legal-document family stays exempt).
+- `python3 scripts/check-hero-render.py`: the same rule against the *rendered* pages —
+  the artwork each fixture actually paints must be the scene the inventory says the
+  page resolves to, must exist, and must not be the artwork another non-legal page
+  paints. Needs a fixture directory (`$CH247_FIXTURE_DIR`, produced by
+  `tests/website/render-fixtures.php`), so the release gate runs it when fixtures
+  exist and says so when they do not; exits 2 rather than passing when it cannot run.
+- `python3 -m unittest tests.website.test_catalogue_honesty.py`: the catalogue pages must stay
+  honest — the application directory states it is not a claim of deployment availability and
+  sends each card to the live platform for eligibility, the operating-system families are
+  labelled catalogue names whose availability comes only from the connected platform, no
+  catalogue page carries a price (pricing is WHMCS's) and none promises a provisioning
+  workflow. Every rule has a negative case that mutates a copy and requires the rule to fire,
+  so a softened disclaimer or a fabricated price cannot pass quietly. The template source, a
+  repository-wide sweep of every root page and active-theme template, and the rendered pages are
+  all checked, so the guard still runs in the release gate where no fixtures exist.
+- `python3 -m unittest tests.website.test_media_library_parity.py`: the platform's copy of the
+  media library (`cloudhost247-node/frontend/public/media/cloudhost247`) is Vite's public directory
+  and a second copy of `assets/images/cloudhost247`. `generate-raster-formats.py --check` compares
+  both trees — missing files, differing bytes and stale files — because a `<picture>` advertising a
+  variant that is not there shows nothing, and the tests prove each case is reported.
+- `python3 -m unittest tests.security.test_domain_data_provenance.py`: the domain platform's
+  numbers must come from the connected provider. The checks are that no first-party source ties
+  a TLD to a price literal, no migration or seed writes the extension or offering tables, the
+  only writer of provider offerings is the sync service that reads the provider's own
+  `getExtensions()`, the extension directory keeps telling visitors where its catalogue comes
+  from, and search/WHOIS/appraisal keep the `provider_not_configured` outcome instead of
+  guessing. Fourteen cases, each rule with a negative case that mutates a copy.
+- `node scripts/check-workflow-yaml.mjs`: every `.github/workflows/*.yml` parses, declares
+  jobs and has steps that carry `run` or `uses`. A workflow that does not parse is not a
+  red check — GitHub creates no jobs at all, so the run ends in zero seconds with nothing
+  to read and every check inside it silently stops existing. `content-hygiene.yml` sat in
+  that state (a step name containing `": "`), so the repo-wide malformed-bullet scan and the
+  legal-JSON byte comparison had not run; the checker is called by the release gate as well
+  as by that workflow, because a workflow cannot report the failure of its own file.
+- `node scripts/check-malformed-bullets.mjs` and the
+  `cmp shared/site/content/legal.generated.json cloudhost247-node/frontend/src/content/legal.generated.json`
+  step: the two checks the content-hygiene workflow runs once it can start. Both pass
+  locally (5 983 text files scanned, 0 findings; the JSON copies are byte-identical).
+- `python3 -m unittest tests/website/test_accessibility_contract.py`: negative cases
+  for the contract above (an unlabelled control, an undersized target, a missing skip
+  target, a stylesheet regression and a vacuous scan are each required to fail).
+- `python3 -m unittest tests/website/test_fixture_checks.py`: the rendered-fixture
+  checker's `srcset` parsing. It previously read a whole candidate list
+  (`scene-640.avif 640w, scene-960.avif 960w`) as one path and reported 122 false
+  "missing asset" failures; each candidate is now checked individually, a width
+  descriptor must match the width in the filename, and the tests pin both the pass and
+  the failure on a genuinely missing rung.
 - `tests/website/render-fixtures.php`: real Smarty rendering of shipped templates
   with honest empty/no-runtime states; not a production WHMCS emulator.
 - `tests/website/render-shell.php`: guest/authenticated shell contract rendering
@@ -96,7 +170,7 @@ fill a footer column.
   authentication is not exercised. Generic Smarty 4 reports expected deprecations
   for framework-provided functions; WHMCS supplies their production integration.
 - `tests/website/browser.cjs`: actual Chromium rendering, 10 widths, menu/Escape,
-  image/H1/shell/overflow assertions, all six menus at every width, search-state
+  image/H1/shell/overflow assertions, every mega menu at every width, search-state
   and long-query regressions, selected axe WCAG A/AA checks.
 
 Fixture tools use environment paths for Smarty, a disposable output directory,

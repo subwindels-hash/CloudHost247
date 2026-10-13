@@ -3,6 +3,24 @@ from pathlib import Path
 import json
 ROOT=Path(__file__).resolve().parents[2]
 spec=importlib.util.spec_from_file_location('verify',ROOT/'scripts/verify-website.py');verify=importlib.util.module_from_spec(spec);spec.loader.exec_module(verify)
+def hero_artwork_by_page(catalog,registry):
+ """Group the public pages by the hero artwork they render, keyed by artwork.
+
+ Legal and policy documents are left out: their templates render the document as text with no
+ hero at all, so they cannot share one. Two sources decide that, because they do not agree —
+ `registry.legal` lists the documents the footer and the SPA legal routes serve, while the theme
+ catalogue also carries `legal.php` (the Legal & Policy Center hub) and
+ `refund-and-cancellation-policy.php`, both categorised Legal and both text-only.
+ """
+ legal={entry['php'] for entry in registry.get('legal',[]) if entry.get('php')}
+ legal|={name for name,page in catalog['pages'].items() if page.get('category','').lower()=='legal'}
+ groups={}
+ for name,page in catalog['pages'].items():
+  if name in legal or not page.get('visual'):continue
+  artwork=page.get('visual3d') or page['visual']+'.svg'
+  groups.setdefault(artwork,[]).append(name)
+ return {artwork:sorted(pages) for artwork,pages in groups.items() if len(pages)>1}
+
 class WebsiteTests(unittest.TestCase):
  def setUp(self):self.data=json.loads(verify.CATALOG.read_text())
  def test_registry_links_and_assets(self):self.assertEqual(verify.validate(self.data)[0],[])
@@ -138,6 +156,44 @@ class WebsiteTests(unittest.TestCase):
   self.assertGreaterEqual(len(keys), 8, 'the 3D raster set should cover the product families')
   for key in keys:
    self.assertTrue((ROOT/'assets/images/cloudhost247'/(key+'.jpg')).is_file(), key)
+
+ def test_published_pages_do_not_share_a_hero(self):
+  # "A distinct hero visual per product page" is a requirement, and the inventory reports coverage
+  # as `hero_scenes_exact` — but that counts a page as exact when the scene its own visual names
+  # exists, which two pages declaring the *same* visual both satisfy. `offers.php` shared
+  # `cloud/cloud-hosting` with `cloudhost247-hosting.php` and `help-center.php` shared
+  # `management/support` with `faqs.php` while every coverage number read 67 of 67. This holds the
+  # catalogue side of the rule to account; `scripts/check-hero-render.py` confirms the same rule
+  # against rendered fixtures wherever they exist, which is the only place the HTML can be asked.
+  catalog=json.loads((ROOT/'modules/addons/cloudhost247_theme/resources/site.json').read_text())
+  registry=json.loads((ROOT/'shared/site/registry.json').read_text())
+  shared=hero_artwork_by_page(catalog,registry)
+  self.assertEqual(shared,{},'pages sharing one hero: '+json.dumps(shared))
+  distinct={page.get('visual3d') or page['visual']+'.svg'
+            for page in catalog['pages'].values() if page.get('visual')}
+  self.assertGreaterEqual(len(distinct),40,'the guard should be reading the whole catalogue')
+
+ def test_shared_hero_is_reported_and_a_legal_pair_is_not(self):
+  # The rule has to fail on the defect it names, and has to keep exempting the documents that
+  # legitimately render no hero — otherwise "no sharing" passes by exempting everything.
+  catalog=json.loads((ROOT/'modules/addons/cloudhost247_theme/resources/site.json').read_text())
+  registry=json.loads((ROOT/'shared/site/registry.json').read_text())
+  doctored=copy.deepcopy(catalog)
+  pages=dict(doctored['pages'])
+  victim=next(name for name in sorted(pages)
+              if name not in {e['php'] for e in registry.get('legal',[])}
+              and pages[name].get('category','').lower()!='legal')
+  pages['duplicate-hero.php']=dict(pages[victim],title='Duplicate')
+  doctored['pages']=pages
+  expected={(pages[victim].get('visual3d') or pages[victim]['visual']+'.svg'):
+            sorted(['duplicate-hero.php',victim])}
+  self.assertEqual(hero_artwork_by_page(doctored,registry),expected)
+  # Every legal document may declare the same visual: none of them renders one.
+  for name in [e['php'] for e in registry['legal'] if e.get('php')]:
+   doctored['pages'][name]=dict(doctored['pages'][name],visual='security/security',
+                                visual3d='security/security-3d')
+  self.assertEqual(hero_artwork_by_page(doctored,registry),expected,
+                   'legal documents were not exempted from the sharing rule')
 
  def test_raster_ladder_is_advertised_and_present(self):
   # One scene, one ladder, three places that have to agree: the generator that writes

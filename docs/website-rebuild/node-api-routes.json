@@ -1470,6 +1470,18 @@
     "category": "Developer"
   },
   {
+    "source": "cloudhost247-node/src/routes/currency.ts",
+    "method": "GET",
+    "path": "/api/v1/currency/rates",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/currency.ts",
+    "method": "GET",
+    "path": "/api/v1/currency/geo-country",
+    "category": "Developer"
+  },
+  {
     "source": "cloudhost247-node/src/routes/deployments.ts",
     "method": "GET",
     "path": "/api/v1/deployments",

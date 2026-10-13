@@ -2,6 +2,8 @@
 
 | Path | Contents |
 |---|---|
+| `RELEASE-WORKFLOW.md` | **Release workflow (staging only)** — thirteen steps from the source gate to the explicit production-approval gate, each with its command, the evidence it must leave behind and its stop condition. Ends at the human approval; nothing in the repository deploys to production. |
+| `ACCEPTANCE-CRITERIA.md` | **Acceptance criteria** — every criterion with the command that decides it and a strict status (COMPLETE / PARTIAL / BLOCKED / NOT TESTED). |
 | `RESTRUCTURING.md` | Complete old→new mapping, removals, fixes, and verification record of the repository restructuring |
 | `pre-restructuring-audit.md` | Package-by-package audit inventory taken before any changes |
 | `policies/` | Source PDFs of the 19 CloudHost247 legal policies + original installation notes |

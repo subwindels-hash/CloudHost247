@@ -22,6 +22,7 @@
  *   node scripts/check-malformed-bullets.mjs --json   # machine-readable output
  */
 import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -29,6 +30,40 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
 /** Directories never scanned. Generated or installed output is not authored content. */
 const SKIP_DIRS = new Set(['.git', 'node_modules', 'dist', 'build', 'coverage', '.cache', '.next', '.turbo']);
+
+/**
+ * Paths git ignores, as POSIX paths relative to the repository root — the authoritative version of
+ * the rule above, because `.gitignore` is where this repository already records what is generated.
+ *
+ * Deriving it from git instead of from directory *names* is the whole point. The built SPA lands in
+ * `cloudhost247-node/public/` (vite's `outDir`, ignored by `cloudhost247-node/.gitignore`), while
+ * `cloudhost247-node/frontend/public/` is **tracked source** — 641 files, including the media library
+ * this project ships. A name-based `SKIP_DIRS.add('public')` would have dropped that source from the
+ * hygiene scan and still printed a success line, which is a check that scans less while looking
+ * green. Skipping by name also made the reported count depend on whether a build had been run: the
+ * same commit reported 6 673 files after `npm run build:frontend` and 5 983 on the clean checkout CI
+ * actually scans, so the figure quoted in the documentation reproduced on nobody's machine but mine.
+ *
+ * Without git (a tarball, a sandbox with no repository) this returns an empty set and `SKIP_DIRS`
+ * alone still applies, so the scan degrades to its previous behaviour rather than failing.
+ */
+function gitIgnoredPaths(root) {
+  try {
+    const out = execFileSync(
+      'git',
+      ['ls-files', '--others', '--ignored', '--exclude-standard', '--directory'],
+      { cwd: root, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 }
+    );
+    // The trailing-slash strip is load-bearing, not cosmetic. `.gitignore` says `public/*` — it
+    // matches the *contents* — so `git check-ignore cloudhost247-node/public` reports not-ignored
+    // while `.../public/index.html` reports ignored. `--directory` still collapses the whole tree to
+    // `cloudhost247-node/public/`, and only after stripping that slash does the walk's `rel` compare
+    // equal and prune it. Drop the strip and generated output is scanned again.
+    return new Set(out.split('\n').filter(Boolean).map((entry) => toPosix(entry).replace(/\/+$/, '')));
+  } catch {
+    return new Set();
+  }
+}
 
 /**
  * Third-party code we do not own, and the rules relaxed for it. The U+F0B7 bullet rule is never
@@ -80,12 +115,14 @@ function toPosix(path) {
   return path.split(sep).join('/');
 }
 
-function* walk(dir) {
+function* walk(dir, root, ignored) {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     if (SKIP_DIRS.has(entry.name)) continue;
     const full = join(dir, entry.name);
+    const rel = toPosix(relative(root, full));
+    if (ignored.has(rel)) continue;
     if (entry.isDirectory()) {
-      yield* walk(full);
+      yield* walk(full, root, ignored);
     } else if (entry.isFile()) {
       yield full;
     }
@@ -117,7 +154,8 @@ export function scanText(text, { vendorRelaxed = false } = {}) {
 export function scanRepository(root = ROOT) {
   const results = [];
   let filesScanned = 0;
-  for (const full of walk(root)) {
+  const ignored = gitIgnoredPaths(root);
+  for (const full of walk(root, root, ignored)) {
     const rel = toPosix(relative(root, full));
     const buffer = readFileSync(full);
     if (isBinary(buffer, rel)) continue;

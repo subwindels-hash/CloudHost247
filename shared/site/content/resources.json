@@ -68,7 +68,7 @@
       "category": "Support",
       "seoTitle": "Help Center & Support | CloudHost247",
       "description": "CloudHost247 support: search the knowledge base and documentation, run a diagnostic tool, open a ticket with the team, or check what is happening right now.",
-      "visual": "management/support",
+      "visual": "management/help-center",
       "hero": {
         "kicker": "Support",
         "heading": "How to get an answer quickly",
@@ -204,7 +204,7 @@
       "category": "Marketing",
       "seoTitle": "Current Offers & Live Pricing | CloudHost247",
       "description": "Current CloudHost247 pricing, rendered live from the configured product catalogue — plans, prices and billing cycles exactly as configured.",
-      "visual": "cloud/cloud-hosting",
+      "visual": "cloud/offers",
       "hero": {
         "kicker": "Pricing",
         "heading": "The catalogue, not a price list someone typed",

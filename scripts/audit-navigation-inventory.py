@@ -208,6 +208,41 @@ def main() -> int:
             continue
         menu_links_without_pages.append({'where': f'footer / {column}', 'label': label, 'php': target})
 
+    # ------------------------------------------------------------------ hero artwork
+    # "A distinct hero visual per product page" is a requirement, and the artwork a page actually
+    # renders is the resolved 3D scene, not the key its author typed: `scripts/site/generate.mjs`
+    # upgrades `<visual>-3d` when that scene exists and otherwise falls back to the family's scene
+    # (`FAMILY_3D`). Reading only the registry would therefore report a coverage the site does not
+    # have. Comparing the two names is what tells an exact scene from a family fallback, and a page
+    # on a fallback shares its artwork with every other page in that family — so this is reported
+    # rather than hidden. It is deliberately NOT a defect: a family fallback is a real scene chosen
+    # on purpose, while a missing scene would be a broken image, which `image_status` already
+    # covers.
+    hero_exact, hero_fallback = [], []
+    for row in rows:
+        if row['status'] != 'published':
+            continue
+        visual = row['visual']
+        scene = row['hero_artwork']['scene']
+        if not visual:
+            continue
+        if scene == f'{visual}-3d':
+            hero_exact.append(row['php_page'])
+        elif scene:
+            hero_fallback.append({
+                'php_page': row['php_page'],
+                'visual': visual,
+                'scene': scene,
+                'shared_with': '',
+            })
+    shared = {}
+    for entry in hero_fallback:
+        shared.setdefault(entry['scene'], []).append(entry['php_page'])
+    for entry in hero_fallback:
+        entry['shared_with'] = ', '.join(
+            page for page in shared[entry['scene']] if page != entry['php_page']
+        )
+
     orphaned = [
         row for row in rows
         if row['status'] == 'published' and not row['reachable']
@@ -230,6 +265,9 @@ def main() -> int:
             'footer_destinations': sum(1 for _ in walk_footer(reg)),
             'mega_menus': len(reg['menus']),
             'footer_columns': len(reg['footer']),
+            'hero_scenes_exact': len(hero_exact),
+            'hero_scenes_from_family_fallback': len(hero_fallback),
+            'distinct_hero_scenes': len({row['hero_artwork']['scene'] for row in rows if row['hero_artwork']['scene']}),
         },
         'defects': {
             'orphaned_pages': orphaned,
@@ -238,6 +276,7 @@ def main() -> int:
             'unregistered_public_pages': unregistered_public,
         },
         'pages': rows,
+        'hero_fallbacks': hero_fallback,
     }
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -254,6 +293,9 @@ def main() -> int:
     print(f"mega menus / footer cols  : {totals['mega_menus']} / {totals['footer_columns']}")
     print(f"navigation destinations   : {totals['navigation_destinations']}")
     print(f"footer destinations       : {totals['footer_destinations']}")
+    print(f"distinct hero 3D scenes   : {totals['distinct_hero_scenes']}")
+    print(f"hero scenes exact match   : {totals['hero_scenes_exact']}")
+    print(f"hero scenes family fallback: {totals['hero_scenes_from_family_fallback']}")
     print()
     print(f"ORPHANED PAGES            : {len(orphaned)}")
     for row in orphaned:

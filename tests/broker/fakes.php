@@ -57,20 +57,21 @@ class CH247BrokerFakeCollection implements \IteratorAggregate, \Countable, \Arra
         return null;
     }
 
-    public function getIterator() { return new \ArrayIterator($this->items); }
+    public function getIterator(): \Traversable { return new \ArrayIterator($this->items); }
 
-    public function count() { return count($this->items); }
+    public function count(): int { return count($this->items); }
 
-    public function offsetExists($offset) { return isset($this->items[$offset]); }
+    public function offsetExists($offset): bool { return isset($this->items[$offset]); }
 
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset) { return $this->items[$offset]; }
 
-    public function offsetSet($offset, $value)
+    public function offsetSet($offset, $value): void
     {
         if ($offset === null) { $this->items[] = $value; } else { $this->items[$offset] = $value; }
     }
 
-    public function offsetUnset($offset) { unset($this->items[$offset]); }
+    public function offsetUnset($offset): void { unset($this->items[$offset]); }
 
     public function toArray() { return $this->items; }
 }

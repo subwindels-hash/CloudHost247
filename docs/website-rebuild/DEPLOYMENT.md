@@ -55,7 +55,9 @@ pages, with no second standard header/footer appended. Existing Builder form
 processing, visibility rules, preview tokens, live data and compiled styles are
 unchanged. All other pages use the shared first-party shell.
 
-The new six mega menus and footer are maintained in `resources/site.json`. Run
+The navigation and footer are maintained in the shared registry
+(`shared/site/registry.json`) and projected into `resources/site.json` by
+`node scripts/site/generate.mjs`; never hand-edit the generated copy. Run
 `python3 scripts/verify-website.py` after edits. Theme Manager's existing custom
 WHMCS navbar entries remain in the authenticated/workspace navbar; reconcile any
 site-specific public navigation with the new registry before switching themes.
@@ -142,8 +144,9 @@ sidebar/navigation hooks and responsive tables. Verify any Builder override,
 custom navbar item, database-authored media/URL, and multi-language/RTL content.
 
 The fixture preview is intentionally not a live WHMCS site. It cannot certify
-these workflows. The full local Node suite now passes (1,158 tests on Node
-22.22.3); reproduce with `cd cloudhost247-node && npm test -- --maxWorkers=2`.
+these workflows. The full local Node suite now passes — 2,256 tests across 163 files on Node
+22.22.3 (an earlier report quoted 1,158 tests from a smaller suite); reproduce with
+`cd cloudhost247-node && npm test`.
 The required GitHub Node matrix must also pass before merging. Passing tests with
 embedded Postgres and provider doubles does not certify live providers or the
 optional subpath mount.

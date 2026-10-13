@@ -32,6 +32,23 @@ if ! git diff --exit-code --quiet -- \
   exit 1
 fi
 
+# The reviewed page inventory is an artefact, not a snapshot: `page-inventory.json` is the table the
+# rebuild is assessed against (route, canonical URL, navigation and footer placement, hero artwork, SEO
+# status). It had drifted from the registry it is generated from before this gate existed — the committed
+# copy claimed 67 footer destinations while the registry serves 68 — so a stale inventory could be
+# reviewed as if it described the site. Regenerate it and refuse to continue if the committed copy
+# disagrees, exactly as the generated site surfaces above are treated.
+python3 scripts/audit-navigation-inventory.py > /tmp/ch247-inventory.log 2>&1 || {
+  cat /tmp/ch247-inventory.log >&2
+  echo 'Release-candidate FAILED: the page inventory could not be rebuilt.' >&2
+  exit 1
+}
+cat /tmp/ch247-inventory.log
+if ! git diff --exit-code --quiet -- docs/website-rebuild/page-inventory.json docs/website-rebuild/page-inventory.csv; then
+  echo 'Release-candidate FAILED: the page inventory is stale (run python3 scripts/audit-navigation-inventory.py and commit).' >&2
+  exit 1
+fi
+
 # --- PHP syntax check -------------------------------------------------------------------------
 # Every PHP file this repository owns is linted, plus the addon templates that are really PHP
 # (modules/*/templates/**/*.tpl carrying a <?php tag are executed by WHMCS). The target list is
@@ -88,7 +105,7 @@ fi
 node --test server-agent/tests/*.test.js
 
 # --- Static verification (runs without PHP or WHMCS) -------------------------------------------
-python3 -m unittest -v tests/foundation/test_static.py tests/theme/test_static.py tests/currency/test_static.py tests/marketing/test_static.py tests/ovh/test_static.py tests/ovh/test_product_services_static.py tests/ovh/test_public_catalog_static.py tests/rdp/test_static.py tests/integrations/test_static.py tests/modules/test_static.py tests/builder/test_static.py tests/smm/test_static.py tests/tools/test_static.py tests/broker/test_static.py tests/cart_recovery/test_static.py tests/passkey/test_static.py tests/digitalproducts/test_static.py tests/payments/test_static.py tests/security/test_security.py tests/security/test_archive_integration.py tests/security/test_release_gate_static.py
+python3 -m unittest -v tests/foundation/test_static.py tests/theme/test_static.py tests/currency/test_static.py tests/marketing/test_static.py tests/ovh/test_static.py tests/ovh/test_product_services_static.py tests/ovh/test_public_catalog_static.py tests/rdp/test_static.py tests/integrations/test_static.py tests/modules/test_static.py tests/builder/test_static.py tests/smm/test_static.py tests/tools/test_static.py tests/broker/test_static.py tests/cart_recovery/test_static.py tests/passkey/test_static.py tests/digitalproducts/test_static.py tests/payments/test_static.py tests/security/test_security.py tests/security/test_archive_integration.py tests/security/test_release_workflow_docs.py tests/security/test_release_gate_static.py tests/security/test_domain_data_provenance.py
 python3 -m unittest -v tests/staging/test_staging_tools.py
 python3 -m py_compile scripts/validate-migrations.py scripts/compare-financial-evidence.py scripts/generate-staging-report.py scripts/branding-audit.py
 python3 scripts/validate-migrations.py
@@ -96,6 +113,15 @@ python3 scripts/validate-migrations.py
 # retired, so the tolerated count is zero: any new occurrence of the retired
 # brand fails the release candidate outright.
 python3 scripts/branding-audit.py --quiet
+
+# --- GitHub workflow files ----------------------------------------------------------------------
+# A workflow that does not parse does not fail with a red check: GitHub cannot create a single job
+# for it, so the run ends as a zero-second failure with no jobs and no annotation, and every check
+# inside it quietly stops existing. `content-hygiene.yml` was in that state — a step name containing
+# ": " made it unparseable — so the repo-wide malformed-bullet scan and the legal-JSON byte
+# comparison had not run at all. The checker runs here as well as inside that workflow, because a
+# workflow cannot report the failure of its own file.
+node scripts/check-workflow-yaml.mjs
 
 # --- Vendor integrity baseline ------------------------------------------------------------------
 # Strict and total: no path is exempted, so any edit to a vendor-derived file fails here. The
@@ -116,12 +142,36 @@ php tests/tools/site-integration.php
 # Browser tools (MRZ among them) are pure modules; run them on Node so a broken handler fails here.
 node tests/tools/local.test.mjs
 php tests/website/run.php
-python3 -m unittest -v tests/website/test_static.py tests/website/test_manifest_visuals.py
+python3 -m unittest -v tests/website/test_static.py tests/website/test_manifest_visuals.py tests/website/test_accessibility_contract.py tests/website/test_fixture_checks.py tests/website/test_catalogue_honesty.py tests/website/test_media_library_parity.py
 python3 scripts/verify-website.py
+# Published-link integrity across every surface: the registry's menus and footer columns, the SPA
+# router and content JSON, the PHP theme templates and page controllers, and the tools tree. This is
+# the deciding command for acceptance criteria A3 and B2, and until now nothing ran it — the gate
+# checked that generated surfaces were fresh and that the theme rendered, but a footer entry renamed
+# to a page that does not exist would have shipped with every check green. It reads only committed
+# source (no build output, no network), so it costs under a second and belongs here rather than in
+# somebody's memory to run by hand.
+node scripts/site/check-links.mjs
+# Accessibility and responsive contract: viewport, document language, skip link, menu state, control
+# names, image text, touch-target sizes, focus visibility, reduced motion and a media query for every
+# viewport the browser QA matrix tests. `tests/website/browser.cjs` measures the same properties in a
+# real browser where one exists; this is the part that can run anywhere Python can.
+python3 scripts/check-accessibility-contract.py
 # Every 3D scene must have the full AVIF/WebP width ladder the templates advertise. A <source>
 # whose URL 404s does not fall through to the next source, so a missing encoding is a broken
 # image on a published page, not a slower one.
 python3 scripts/generate-raster-formats.py --check
+# Hero artwork as *rendered*, not as declared: every published page must render its own hero, and
+# no two of them the same one. The catalogue side of that rule runs unconditionally in
+# tests/website/test_static.py; this reads the rendered fixtures, which is the only place the HTML
+# can be asked, and needs Smarty — which is deliberately not part of this gate's toolchain. It
+# therefore runs wherever fixtures have been rendered, and says so when they have not.
+if [ -n "${CH247_FIXTURE_DIR:-}" ] && [ -d "${CH247_FIXTURE_DIR:-}" ]; then
+  python3 scripts/check-hero-render.py
+else
+  echo 'note: CH247_FIXTURE_DIR is not set, so the rendered-hero check did not run here.'
+  echo '      render fixtures (tests/website/render-fixtures.php) to run it.'
+fi
 # The Builder renders its own markup in PHP, so the theme class audit never sees it. This checks the
 # widget classes against the sheet the Builder serves, and fails on an unstyled one or on a hook
 # exemption that no longer matches anything.

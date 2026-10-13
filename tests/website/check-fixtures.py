@@ -7,7 +7,9 @@ that do not need one — the ones that catch a broken build rather than a broken
 
   * exactly one `<h1>` per page, and one header, main and footer landmark;
   * no duplicate `id` (an anchor jump that lands on the wrong element);
-  * every referenced asset exists on disk (a broken image is invisible until someone looks);
+  * every referenced asset exists on disk (a broken image is invisible until someone looks) — for a
+    `<picture>` that means every `srcset` candidate individually, with its width descriptor held to
+    the width in the filename (`scene-960.avif 640w` makes the browser pick the wrong rung);
   * every `alt` present, so a decorative image is explicit rather than forgotten;
   * every internal link resolves to a rendered fixture, a licensed WHMCS entry point or a tool route;
   * every published navigation fragment lands on an element with that id;
@@ -52,7 +54,7 @@ IMG_RE = re.compile(r'<img\b[^>]*>', re.I)
 ID_RE = re.compile(r'\bid="([^"]+)"')
 ATTR_RE = re.compile(r'([a-zA-Z-]+)="([^"]*)"')
 LINK_RE = re.compile(r'<a\b[^>]*\bhref="([^"]*)"', re.I)
-ASSET_RE = re.compile(r'(?:src|href|srcset)="(/?(?:assets|templates)/[^"]+)"', re.I)
+ASSET_ATTR_RE = re.compile(r'\b(src|href|srcset)="([^"]*)"', re.I)
 CONTROL_RE = re.compile(r'<(a|button|input|select|textarea|summary)\b', re.I)
 CLASS_RE = re.compile(r'class="([^"]*)"', re.I)
 TITLE_RE = re.compile(r'<title>(.*?)</title>', re.I | re.S)
@@ -87,6 +89,63 @@ def attribute(tag: str, name: str) -> str | None:
         if key.lower() == name:
             return value
     return None
+
+
+def srcset_candidates(value: str) -> list[tuple[str, str]]:
+    """The `(url, descriptor)` pairs one `srcset` attribute advertises.
+
+    A `srcset` is a comma-separated candidate list — `scene-640.avif 640w, scene-960.avif 960w` — not
+    one URL. Reading the whole attribute as a single path made every `<picture>` in the theme report a
+    missing asset (`scene-640.avif 640w, …`), so the list is parsed rather than guessed. A candidate
+    without a descriptor keeps an empty descriptor.
+    """
+    candidates: list[tuple[str, str]] = []
+    for entry in value.split(','):
+        parts = entry.split()
+        if not parts:
+            continue
+        url = parts[0].strip()
+        descriptor = parts[1].strip() if len(parts) > 1 else ''
+        if url:
+            candidates.append((url, descriptor))
+    return candidates
+
+
+def asset_references(markup: str) -> list[tuple[str, str]]:
+    """Every repository-relative asset URL a rendered page references, with its descriptor.
+
+    `src` and `href` name one URL; `srcset` names a candidate list. Both are returned in the same
+    shape so the caller checks each file that will actually be requested, including every rung of a
+    `<picture>` ladder, instead of one attribute string that can never exist on disk.
+    """
+    references: list[tuple[str, str]] = []
+    for kind, value in ASSET_ATTR_RE.findall(markup):
+        value = html.unescape(value).strip()
+        if kind.lower() == 'srcset':
+            references += [
+                (url, descriptor)
+                for url, descriptor in srcset_candidates(value)
+                if re.match(r'^/?(?:assets|templates)/', url)
+            ]
+        elif re.match(r'^/?(?:assets|templates)/', value):
+            references.append((value, ''))
+    return references
+
+
+def descriptor_problem(url: str, descriptor: str) -> str | None:
+    """A width descriptor that disagrees with the file it names, or `None` when it matches.
+
+    `scene-960.avif 640w` is worse than a missing file: the browser believes the descriptor and picks
+    the wrong rung of the ladder, so the page silently loads the wrong pixels. Anything that is not a
+    `NNNw` width descriptor (a density descriptor such as `2x`, or no descriptor at all) is left
+    alone — the candidate is still checked for existence.
+    """
+    match = re.fullmatch(r'(\d+)w', descriptor.strip())
+    if not match:
+        return None
+    if re.search(r'-' + match.group(1) + r'\.', url):
+        return None
+    return f'width descriptor {descriptor} does not match {url}'
 
 
 def fixture_files() -> list[Path]:
@@ -204,12 +263,14 @@ def main() -> int:
             markup = tag.group(0)
             check(failures, 'alt=' in markup, f'{route}: <img> without alt: {markup[:90]}')
 
-        for match in ASSET_RE.finditer(source):
+        for url, descriptor in asset_references(source):
             counters['assets'] += 1
-            target = match.group(1).lstrip('/')
+            target = url.lstrip('/')
             if target.startswith('assets/cloudhost247-tools/') or target.startswith('templates/'):
                 continue  # built bundles and stylesheets are produced by the build, not committed
             check(failures, (ROOT / target).is_file(), f'{route}: missing asset {target}')
+            mismatch = descriptor_problem(url, descriptor)
+            check(failures, mismatch is None, f'{route}: {mismatch}')
 
         for match in LINK_RE.finditer(source):
             href = html.unescape(match.group(1)).strip()

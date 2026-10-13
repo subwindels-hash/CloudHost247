@@ -22,27 +22,31 @@ export async function registerCurrencyRoutes(app: FastifyInstance, env: Env, ove
   /**
    * IP geolocation hint. Returns the ISO 3166-1 alpha-2 country code for the visitor's IP
    * address, respecting trusted proxy headers when configured. This is used by the frontend to
-   * suggest a suitable display currency. The result is advisory only - the customer can always
-   * override via the switcher.
+   * suggest a suitable display currency — the third of four signals, after an explicit choice and
+   * the authenticated account's preference. The result is advisory only: the customer can always
+   * override it, and it never affects billing.
    *
-   * Trusted proxies are those configured in the reverse proxy (e.g. Cloudflare, NGINX) in front
-   * of this application. The app should NOT trust X-Forwarded-For or similar headers from untrusted
-   * sources. When no trusted proxy is configured, the visitor's direct IP is used.
+   * Two properties are deliberate and must survive any real geolocation being wired in:
    *
-   * NOTE: This is a stub endpoint. In production, when a trusted reverse proxy is configured
-   * (e.g. Cloudflare, NGINX), the proxy should set the real client IP and the app should validate
-   * it against the trusted proxy list. Until then, this returns null to indicate geolocation is
-   * not configured, and the frontend falls back to the default currency.
+   *   1. The response is per-visitor, so it is marked `private` and never `public`. A public cache
+   *      directive on a response that varies by caller is how one visitor's country ends up served
+   *      to everyone else for a minute — which would turn an advisory hint into an authoritative
+   *      (and wrong) inference. `Vary` names the headers a trusted proxy would vary on.
+   *   2. The visitor's address is not echoed back. The caller is not the only reader of this
+   *      response — it passes through caches and logs — and nothing consumes the value; the
+   *      frontend reads `country` only.
+   *
+   * NOTE: geolocation is not configured in this deployment, so `country` is always null and the
+   * frontend keeps its default currency. When a trusted reverse proxy (Cloudflare, NGINX) is
+   * configured, the proxy sets the real client IP and this handler must validate it against the
+   * trusted proxy list before resolving a country.
    */
   app.get('/api/v1/currency/geo-country', async (_request, reply) => {
-    // When running behind a trusted reverse proxy, the proxy should set the real IP via
-    // X-Forwarded-For or similar headers. We trust these only when the proxy is trusted.
-    // For now, we use the direct connection IP and return null to indicate geolocation is
-    // not configured.
-    // TODO: When a trusted proxy is configured, parse X-Forwarded-For and validate the first
-    // IP against the trusted proxy list.
-    const visitorIp = _request.ip ?? 'unknown';
-    reply.header('Cache-Control', 'public, max-age=60');
-    return { country: null, ip: visitorIp, note: 'IP geolocation is advisory; configure a trusted proxy or geolocation service for currency detection.' };
+    reply.header('Cache-Control', 'private, max-age=60');
+    reply.header('Vary', 'CF-Connecting-IP, X-Forwarded-For');
+    return {
+      country: null,
+      note: 'IP geolocation is advisory; configure a trusted proxy or geolocation service for currency detection.',
+    };
   });
 }
