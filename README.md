@@ -1,15 +1,18 @@
 # CloudHost247 — WHMCS Platform Customizations
 
-This repository contains the **complete set of customizations for the CloudHost247
-WHMCS installation** (https://www.cloudhost247.com), organized in the exact
-directory layout a WHMCS 8.x document root expects. Deploy by copying the contents
-of this repository **into** an existing WHMCS installation root (cPanel
-`public_html`), then activating the modules in WHMCS admin.
+This repository contains the CloudHost247 WHMCS customizations **and** a separate
+Node.js platform. WHMCS core (`init.php`, `includes/`, `vendor/`, licence and database)
+is not included. Do **not** copy the whole checkout or production ZIP directly into
+`public_html`: the archive also contains Node files, internal documentation, tests and
+release scripts. Follow [`docs/DEPLOYMENT-GUIDE.md`](docs/DEPLOYMENT-GUIDE.md) for the
+staging-first package procedure and file-selection rules, then [`docs/INSTALLATION-GUIDE.md`](docs/INSTALLATION-GUIDE.md)
+for WHMCS activation/configuration. Deploy the Node platform separately using
+[`docs/CPANEL_DEPLOYMENT.md`](docs/CPANEL_DEPLOYMENT.md).
 
-> WHMCS core itself (init.php, index.php, includes/, assets/, vendor/, …) is **not**
-> part of this repository — only the site's theme, pages, modules, language
-> overrides and cron scripts. See `docs/RESTRUCTURING.md` for the complete
-> history of how this repository was reorganized.
+The site customizations are arranged to match WHMCS paths, but every overlay must be
+reviewed against the target's existing files and operator-owned content. WHMCS core
+remains supplied by the licensed WHMCS installation. See `docs/RESTRUCTURING.md` for
+the history of the repository reorganization.
 
 ## Directory structure
 
@@ -139,7 +142,7 @@ under `docs/independent-rebuild/` and covered by the release gate
 | CloudHost247 Currency | addon | `modules/addons/cloudhost247_currency/` |
 | CloudHost247 OVH | addon / server | `modules/addons/cloudhost247_ovh/`, `modules/servers/cloudhost247_ovh/` |
 | CloudHost247 Theme | addon | `modules/addons/cloudhost247_theme/` |
-| Secure RDP provisioning | server | `modules/servers/RDP/` |
+| RDP provisioning | server | `modules/servers/RDP/` (**blocked**: current active entry point is the vendor implementation; restore/verify the secure rebuild before packaging or activation — see `docs/independent-rebuild/RDP-SECURE-REBUILD-WORK-ITEM.md`) |
 
 ### API & Integrations centre
 

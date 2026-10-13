@@ -1,6 +1,6 @@
 # Independent rebuild installation and upgrade (project plan)
 
-> The independent modules are not implemented yet. Do not use this document as a production cutover claim.
+> **Operator entry point:** use [`../INSTALLATION-GUIDE.md`](../INSTALLATION-GUIDE.md) for the current staging installation sequence. This file preserves project/module-specific implementation notes; source code and mock tests do not prove a successful WHMCS installation. Staging runtime acceptance is still pending, and this document is not a production cutover approval.
 
 ## Licence and authentication boundary
 

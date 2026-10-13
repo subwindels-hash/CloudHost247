@@ -8,6 +8,11 @@ The rule that shapes the whole document: **a step is finished when its evidence 
 when the command exited 0. Each step names the artifact it must leave behind, so the next step (and a
 reviewer) can tell "done" from "ran".
 
+For package scope, the reviewed WHMCS file overlay and deployment commands, see
+[`docs/DEPLOYMENT-GUIDE.md`](DEPLOYMENT-GUIDE.md); for module activation/configuration, see
+[`docs/INSTALLATION-GUIDE.md`](INSTALLATION-GUIDE.md). Do not treat a successful ZIP integrity check
+as security or staging approval; the current known RDP blocker is documented there.
+
 | Step | Purpose | Evidence produced |
 |---|---|---|
 | 1 | Freeze the candidate and prove the source is green | gate log, CI run, commit SHA |
@@ -19,7 +24,7 @@ reviewer) can tell "done" from "ran".
 | 7 | Activate addons in order; apply only versioned migrations | `migrations.json`, schema comparison |
 | 8 | Configure capabilities, currencies and providers with staging credentials | redacted settings record |
 | 9 | Clear caches and confirm runtime health | health-check record |
-| 10 | Run the staging test matrix, including the browser sweep | matrix evidence, `browser-verification.json` |
+| 10 | Run the staging test matrix and real staging browser checks | matrix evidence, read-only HTTP report, human browser evidence |
 | 11 | Prove financial and data integrity | `financial-comparison.json` |
 | 12 | Generate the acceptance artifact — it refuses without runtime evidence | `acceptance.json` / `acceptance.md` |
 | 13 | **Explicit production approval** (or stop) | signed approval record |
@@ -32,10 +37,13 @@ Record the exact commit under test; everything after this point must refer to th
 fix means a new candidate and a new run from step 1.
 
 ```bash
-git fetch origin && git rev-parse HEAD            # record this SHA
+git fetch origin
+CANDIDATE_SHA="$(git rev-parse HEAD)"
+printf 'Candidate: %s\n' "$CANDIDATE_SHA"  # record the full SHA
 bash scripts/release-candidate-check.sh           # source gate (PHP 8.2; CI also runs 7.4)
 git status --short                                # must be empty: the gate diffs generated surfaces
-gh run list --branch <branch> --limit 5           # CI green on this SHA, not on an ancestor
+gh run list --limit 20 --json headSha,workflowName,status,conclusion,url
+# Verify each required run has headSha exactly equal to $CANDIDATE_SHA.
 ```
 
 Stop if: the source gate fails, the tree is dirty, or CI is red on this SHA. A green CI on a
@@ -53,6 +61,7 @@ export CH247_STAGING_ID='approved-staging-ticket-or-name'
 export CH247_EXPECTED_STAGING_URL='https://exact-staging-host.example'
 export CH247_STAGING_HOST_ALLOWLIST='exact-staging-host.example'
 export CH247_STAGING_DB_MARKER='staging'
+export CH247_BUILD_COMMIT="$CANDIDATE_SHA"
 export CH247_PREFLIGHT_MODE=baseline
 php scripts/staging-preflight.php /srv/whmcs-staging /secure/evidence/baseline-preflight.json
 ```
@@ -94,33 +103,55 @@ staging into maintenance mode with cron paused for the duration of the change.
 ## 5. Build and verify the deployable archive
 
 ```bash
-python3 scripts/build-production-zip.py --verify
+(cd cloudhost247-node && npm ci)
+ARTIFACT_DIR='/secure/release'
+VERSION='1.0.0'
+ZIP="$ARTIFACT_DIR/CloudHost247-production-$VERSION.zip"
+install -d -m 700 "$ARTIFACT_DIR"
+python3 scripts/build-production-zip.py --version "$VERSION" --out "$ZIP" --verify
+(cd "$ARTIFACT_DIR" && sha256sum "$(basename "$ZIP")" > "$(basename "$ZIP").sha256" && sha256sum -c "$(basename "$ZIP").sha256")
 ```
 
-The verifier checks the entry points, the configuration templates, that every illustration the theme
-registry names exists in **both** the PHP and the built SPA library (including every 3D encoding),
-that the published documentation is present, and that no secret material is in the archive. It also
-builds the Node platform (`npm run build:server`, `npm run build:frontend`).
+The verifier checks required entry points, configuration templates, referenced PHP/SPA assets,
+published documentation, ZIP integrity and known secret patterns. The package script builds the Node
+platform (`npm run build:server`, `npm run build:frontend`). **It does not start either application,
+validate every module's security, or accept a staging runtime.** Read `PRODUCTION-MANIFEST.txt` as an
+inventory, not a copy-all instruction. The current package is blocked by the active vendor RDP module described
+in `docs/DEPLOYMENT-GUIDE.md`; do not proceed to step 6 until that blocker is fixed and a new
+candidate/archive has passed its gates.
 
-Stop if: verification fails. The archive is an input to step 6, and a bad input is not fixed later.
+Stop if: verification fails or any known security blocker remains. The archive is an input to step 6,
+and a bad input is not fixed later.
 
 ## 6. Deploy without destroying operator state
 
-*staging host.* Use an explicit include list. **Never** `--delete` against a WHMCS root: operator
-content, uploads, attachments and the installed application are not ours to remove.
+*staging host.* Verify the ZIP digest, extract it into a private release directory outside the public
+webroot, and prepare a **release-specific, reviewed** list of WHMCS runtime paths. There is no
+target-independent `deploy/include-list.txt` in this repository; see `docs/DEPLOYMENT-GUIDE.md` for
+why the target-specific list is required. **Never** `--delete` against a WHMCS root: operator
+content, uploads, attachments and the installed application are not ours to remove. Never copy the
+whole ZIP into the WHMCS document root; it also contains a separate Node app and internal files.
 
 ```bash
+CANDIDATE_SHA='paste-the-full-SHA-from-step-1'
+VERSION='1.0.0'
+ZIP="/secure/release/CloudHost247-production-$VERSION.zip"
+RELEASE_DIR="/srv/ch247-release/$CANDIDATE_SHA"
+(cd /secure/release && sha256sum -c "CloudHost247-production-$VERSION.zip.sha256")
+install -d -m 700 "$RELEASE_DIR"
+unzip -q "$ZIP" -d "$RELEASE_DIR"
 rsync --archive --checksum --itemize-changes --dry-run \
-  --include-from=deploy/include-list.txt --exclude='*' \
-  /path/to/checkout/ /srv/whmcs-staging/
+  --files-from=/secure/evidence/whmcs-deploy-files.txt \
+  "$RELEASE_DIR/" /srv/whmcs-staging/
 # review the itemised list, then repeat without --dry-run
 ```
 
-Do not copy `.git`, `tests/`, `docs/`, backups, credentials or CI files into the public document
+Do not copy `.git`, `tests/`, `docs/`, backups, credentials, CI files, `cloudhost247-node/`,
+`configuration.php`, WHMCS core, template cache, uploads or operator content into the public document
 root. Do not overwrite the protected legacy theme or re-cut its integrity baseline.
 
-Stop if: the itemised list contains a deletion, a file outside the include list, or anything under
-the operator's content directories.
+Stop if: the itemised list contains a deletion, an unapproved overwrite, a file outside the reviewed
+list, or anything under operator-managed content.
 
 ## 7. Activate addons in order and apply only versioned migrations
 
@@ -128,14 +159,17 @@ the operator's content directories.
 production, and no ad-hoc SQL.
 
 ```bash
+export CH247_BUILD_COMMIT="$CANDIDATE_SHA"
+export CH247_PREFLIGHT_MODE=release-candidate
+php scripts/staging-preflight.php /srv/whmcs-staging /secure/evidence/rc-preflight.json
 python3 scripts/validate-migrations.py --json-output /secure/evidence/migrations.json
 # Then, in WHMCS admin → Addon Modules, activate in this order:
 #   CloudHost247 Foundation → Theme Manager → Currency → OVH
 ```
 
-Set capability/role access **before** other administrators enter the modules. Capture the
-post-migration schema and compare the protected WHMCS tables against step 4 row counts. Re-running
-activation must be a no-op: prove it once.
+Set capability/role access **before** other administrators enter the modules. Do not activate RDP or
+any module outside the approved staging scope. Capture the post-migration schema and compare the
+protected WHMCS tables against step 4 row counts. Re-running activation must be a no-op: prove it once.
 
 Stop if: a migration runs that is not in the versioned set, a protected-table row count changes
 without an approved reason, or activation is not idempotent.
@@ -161,7 +195,7 @@ checks green, migration versions each present once, original checksum manifest v
 vendor modules inactive, and the CloudHost247 theme and cart resolving with no legacy-vendor include
 or licence request.
 
-## 10. Run the staging test matrix, including the browser sweep
+## 10. Run the staging test matrix and real-browser checks
 
 *staging host.* Run every row of `docs/independent-rebuild/STAGING-TEST-MATRIX.md` and store the evidence outside the
 web root. The functional half needs a real session and is *not* satisfied by the fixture harness:
@@ -169,18 +203,18 @@ login, registration, password reset, MFA/passkeys, account switching, language a
 selection, support, invoices, domain search/registration/transfer/renewal, cart configuration, tax,
 checkout and callbacks — with test gateways and approved test accounts.
 
-The presentation half can be run against the real staging URL as well:
+Use the read-only HTTP check against the exact real staging URL:
 
 ```bash
-python3 tests/website/preview.py &                       # fixture server (optional, 0.0.0.0:8080)
-CH247_QA_URL=http://127.0.0.1:8080 CH247_FIXTURE_DIR=/tmp/ch247-fixtures \
-  node tests/website/browser.cjs                          # Chromium + axe, 10 widths
-python3 scripts/verify-website.py --base https://YOUR-STAGING-WHMCS/ --output staging-web.json
+python3 scripts/verify-website.py --base "https://exact-staging-host.example/" --output "/secure/evidence/staging-web.json"
 ```
 
-`browser.cjs` needs a Chromium binary (`CH247_CHROMIUM` may point at one). The recorded artifact is
-`docs/website-rebuild/browser-verification.json`: 52 routes × 10 widths, zero horizontal overflow,
-zero broken images, zero page errors, menu open/Escape/focus and axe WCAG A/AA checks.
+The `tests/website/browser.cjs` runner is a **fixture-only** visual harness: it requires
+`CH247_FIXTURE_DIR` and explicitly reports that it does not exercise WHMCS core, sessions, database,
+checkout or authentication. It may be used as supplemental source QA, but a fixture report is never
+staging acceptance. Record real browser/device workflows and screenshots in the test matrix; the
+fixture harness is not an automated WHMCS browser sweep. Store all real-host evidence outside the
+public webroot.
 
 Stop if: any row fails, any check is skipped without a recorded reason, or the sweep runs against the
 fixtures and is reported as if it had run against WHMCS.
