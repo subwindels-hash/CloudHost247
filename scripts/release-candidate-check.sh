@@ -144,6 +144,14 @@ node tests/tools/local.test.mjs
 php tests/website/run.php
 python3 -m unittest -v tests/website/test_static.py tests/website/test_manifest_visuals.py tests/website/test_accessibility_contract.py tests/website/test_fixture_checks.py tests/website/test_catalogue_honesty.py tests/website/test_media_library_parity.py
 python3 scripts/verify-website.py
+# Published-link integrity across every surface: the registry's menus and footer columns, the SPA
+# router and content JSON, the PHP theme templates and page controllers, and the tools tree. This is
+# the deciding command for acceptance criteria A3 and B2, and until now nothing ran it — the gate
+# checked that generated surfaces were fresh and that the theme rendered, but a footer entry renamed
+# to a page that does not exist would have shipped with every check green. It reads only committed
+# source (no build output, no network), so it costs under a second and belongs here rather than in
+# somebody's memory to run by hand.
+node scripts/site/check-links.mjs
 # Accessibility and responsive contract: viewport, document language, skip link, menu state, control
 # names, image text, touch-target sizes, focus visibility, reduced motion and a media query for every
 # viewport the browser QA matrix tests. `tests/website/browser.cjs` measures the same properties in a

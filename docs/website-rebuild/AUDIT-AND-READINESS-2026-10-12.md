@@ -279,6 +279,61 @@ rendered check confirms for all 19, so a shared hero cannot hide behind a policy
 the rendered check only where fixtures exist — Smarty is deliberately not part of its toolchain — and
 prints a note saying so when they do not, rather than passing silently.
 
+### 3.11 The link audit that decides two acceptance criteria was not run by anything
+
+`docs/ACCEPTANCE-CRITERIA.md` names `node scripts/site/check-links.mjs` as the command that decides
+**A3** (public links resolve, with no `#`, empty or dev-only destinations) and part of **B2** (every
+footer link route-backed). It passes, and it is the most thorough link check in the repository —
+2 208 surfaces, the registry's menus and footer columns, the SPA router and content JSON, the theme
+templates and every root page controller.
+
+Nothing ran it. Every reference to `check-links` in the tree was enumerated rather than assumed:
+its own usage comment, `build-production-zip.py` listing it as a file the archive must *contain*,
+the archive manifest telling a deployer to run it by hand, prose in the dated reports, and one
+comment in `tests/website/run.php`. It is not a step in `scripts/release-candidate-check.sh`, not a
+job or step in any of the three workflows, and not an npm script. So the audit that two criteria
+rest on was a thing somebody had to remember to type, and a footer entry renamed to a page that
+does not exist would have shipped with all five CI checks green.
+
+It is now a gate step, immediately after `verify-website.py`. It reads only committed source — no
+build output, no network — so it costs under a second and needs nothing the runners do not already
+have.
+
+Fixing that surfaced a second problem in the audit itself. Its `EXCLUDED_FROM_ENFORCEMENT` list
+carried `tools/` under the reason "`tests/`, `docs/` and `tools/` are development material, not
+published pages." Two of those three are development material. `tools/` is not: `tools/index.php`
+is the public front controller behind `/tools`, `/tools/category/*` and every individual tool route,
+and the footer's Tools column links twelve of those destinations. The tree's two genuinely
+non-public files are `tools/admin/index.php`, which answers 503 until `CH247_TOOLS_ADMIN_TOKEN` is
+set, and `tools/preview-router.php`, which exists only for PHP's built-in dev server. Excluding the
+whole directory suppressed four real hrefs on the strength of a comment true of two files in it.
+
+The exclusion is now those two paths. Four hrefs moved from recorded-only to enforced and all four
+resolve, so the audit still reports **0 broken, 0 placeholder, 0 dangling**:
+
+| Measure | Before | After |
+|---|---|---|
+| Internal links enforced | 923 | **926** |
+| In-page anchors enforced | 16 | **17** |
+| hrefs recorded but not enforced | 726 | **722** |
+| Problems | 0 | **0** |
+
+The four are `tools/api.php`'s two stylesheet links and its `/tools/` link, and `tools/lib/View.php`'s
+`#ch-tools-content` skip anchor — small, but they are published markup that no check had ever read.
+The comment above the list now states which parts of `tools/` are public and why the other two are
+not, so the next reader does not have to re-derive it.
+
+Reading the audit's output against the registry also settles a number that looks like a discrepancy.
+The registry declares **68** footer destinations; each surface renders **67**. They are not the same
+67. `Domain DNS` declares only `{"php": "domain-dns.php"}`, so the SPA projection drops it — there is
+no router path to send it to, and the generator's own rule is that falling back to `href.php` would
+fabricate a route out of a script name. `Business Tools` declares only
+`{"spa": "/tools/business-tools"}`, so the PHP projection drops it — no `business-tools.php` exists.
+Both destinations are real on the surface that carries them (`domain-dns.php` is published, indexable
+and in the sitemap; `/tools/business-tools` is a route in `App.tsx`), neither footer contains an empty
+or `#` href, and the audit now enforces both sides rather than trusting the count. Each entry declares
+the surfaces it exists on, which is what keeps the two front ends from disagreeing.
+
 ## 4. Page inventory: what a visitor and a crawler can reach
 
 `python3 scripts/audit-navigation-inventory.py` (re-run in this pass, and now a gate step):
@@ -305,7 +360,7 @@ The machine-readable table is `docs/website-rebuild/page-inventory.json` (+ `.cs
 | Check | Result |
 |---|---|
 | `node scripts/site/generate.mjs` | 7 mega menus, 8 footer columns, **169 links validated** (160 app / 167 PHP) — every destination resolved against the routes that exist |
-| `node scripts/site/check-links.mjs` | 2 208 surfaces · 923 internal · 899 PHP · 5 external · 16 in-page anchors — **0 broken, 0 placeholder**; 5 informational notes (external legal citations to ICANN, Google, Mozilla, Apple and WHMCS) |
+| `node scripts/site/check-links.mjs` | 2 208 surfaces · 926 internal · 899 PHP · 5 external · 17 in-page anchors — **0 broken, 0 placeholder**; 5 informational notes (external legal citations to ICANN, Google, Mozilla, Apple and WHMCS); 722 hrefs inside vendor/dev surfaces recorded but not enforced |
 | `python3 scripts/verify-website.py` | 67 registry pages · 83 navigation destinations · 475 first-party classes · 79 includes · **0 source errors**; per-page title and description uniqueness enforced; `#`/empty/external hrefs rejected |
 | Regeneration | idempotent — re-running the generator leaves the tracked outputs byte-identical |
 
@@ -392,7 +447,8 @@ wasm shim, `PHP_LINT_JOBS=8`). Its steps, in order:
 4. 18 module behavioural suites;
 5. server-agent Node suite;
 6. static verification bundle (unittests, website suites — including the **catalogue-honesty**
-   and **hero-distinctness** guards — tools tests, site verifier, **accessibility contract (new)**,
+   and **hero-distinctness** guards — tools tests, site verifier, **published-link audit (new,
+   §3.11)**, **accessibility contract (new)**,
    release-workflow document checks, **domain data-provenance checks (new)**, raster ladder and
    served-mirror parity, **rendered-hero check (new, runs when fixtures exist)**, Builder
    widget-class audit, vendor manifest);
@@ -552,6 +608,8 @@ non-asset changes are:
 | `docs/ACCEPTANCE-CRITERIA.md` | **new** — every acceptance criterion with the command that decides it and a strict status (COMPLETE / PARTIAL / BLOCKED / NOT TESTED) |
 | `tests/website/test_catalogue_honesty.py` | **new** — 21 tests at three levels (template source, a repository-wide promise sweep, and the rendered pages when fixtures exist): the application directory and the OS families must label themselves as catalogues, name the platform as the source of availability, carry no fabricated price and promise no provisioning workflow. Every rule has a negative case that mutates a copy and requires the rule to fire |
 | `scripts/release-candidate-check.sh` | also runs the catalogue-honesty and release-workflow-document suites |
+| `scripts/release-candidate-check.sh` | also runs `scripts/site/check-links.mjs` — the audit that decides A3 and part of B2 was previously invoked by nothing (§3.11) |
+| `scripts/site/check-links.mjs` | enforcement narrowed from `tools/` to `tools/admin/` + `tools/preview-router.php`, so the published tools front controller is audited; the exclusion comment now says which parts of the tree are public |
 | `tests/website/test_media_library_parity.py` | **new** — 9 tests holding the platform's copy of the media library to the library it mirrors: in-sync, missing, differing, stale and missing-directory cases, plus a subprocess run of `--check` against the real tree |
 | `scripts/generate-raster-formats.py` | `--check` now verifies the served mirror as well as the ladder, and names what drifted |
 | `tests/security/test_domain_data_provenance.py` | **new** — 14 tests holding the domain platform to its data provenance (§3.9): no TLD/price literal anywhere in first-party source, no seeded catalogue, one provider-reading writer, an honest empty state and the fail-closed services, every rule with a negative case |

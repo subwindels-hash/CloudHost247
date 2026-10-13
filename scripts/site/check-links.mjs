@@ -68,7 +68,15 @@ const SERVER_PREFIXES = ['/api/', '/docs/', '/media/', '/assets/', '/icons/'];
  *   - `cloudhost247_legacy` and `templates/orderforms` are third-party vendor themes. They stay
  *     installed so the WHMCS installation keeps working, they are not the active public theme, and
  *     rewriting a vendor's marketplace templates would break the licence and the upgrade path.
- *   - `tests/`, `docs/` and `tools/` are development material, not published pages.
+ *   - `tests/` and `docs/` are development material, not published pages.
+ *   - `tools/admin/` and `tools/preview-router.php` are the two parts of the tools tree that are
+ *     not public: the admin page answers 503 until `CH247_TOOLS_ADMIN_TOKEN` is set, and the
+ *     preview router exists only for PHP's built-in dev server. The rest of `tools/` **is**
+ *     published — `tools/index.php` is the public front controller behind `/tools`,
+ *     `/tools/category/*` and every individual tool route, and the footer's Tools column links
+ *     twelve of those destinations — so it is enforced like any other public surface. Excluding
+ *     the whole tree suppressed four real hrefs, including the tools stylesheet links and the
+ *     skip-link anchor, on the strength of a comment that was only true of two files in it.
  */
 const EXCLUDED_FROM_ENFORCEMENT = [
   'templates/cloudhost247_legacy',
@@ -76,7 +84,8 @@ const EXCLUDED_FROM_ENFORCEMENT = [
   'modules/',
   'tests/',
   'docs/',
-  'tools/',
+  'tools/admin/',
+  'tools/preview-router.php',
 ];
 
 /**
