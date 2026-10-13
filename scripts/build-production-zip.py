@@ -71,6 +71,8 @@ SECRET = re.compile(
 # Paths that must exist for the archive to be deployable at all.
 REQUIRED = [
     'README.md',
+    'docs/DEPLOYMENT-GUIDE.md',
+    'docs/INSTALLATION-GUIDE.md',
     'web-hosting.php',
     'cloudhost247-node/package.json',
     'cloudhost247-node/server.js',
@@ -129,9 +131,11 @@ Files:     {count}
 Contents
 --------
 * WHMCS deployment      root *.php pages, templates/, modules/, crons/, lang/, config/
-  -> Deploy by copying this archive's contents into an existing WHMCS document root.
-     WHMCS core (init.php, includes/, vendor/, assets/) is NOT included: this repository
-     contains the customisations only, exactly as the README describes.
+  -> Inventory only: do NOT copy the whole archive into a WHMCS document root. Extract it
+     into a private review area and deploy only the approved WHMCS runtime file list using
+     docs/DEPLOYMENT-GUIDE.md; use docs/INSTALLATION-GUIDE.md for WHMCS module setup.
+     The package also contains the separate Node app and internal docs/tests/scripts. WHMCS core
+     (init.php, includes/, vendor/, assets/) is NOT included.
 
 * CloudHost247 platform cloudhost247-node/  (compiled dist/, database/, manifests/, scripts/)
   -> Deploy per cloudhost247-node/DEPLOYMENT_GUIDE.md. Copy .env.example to .env and fill it in;
