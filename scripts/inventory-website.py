@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Rebuild current inventories from Git-visible files; never guess routes from documentation."""
-import csv,json,re,subprocess
+import csv,json,re,subprocess,sys
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1];OUT=ROOT/'docs/website-rebuild'
 CATEGORIES=['Marketing','Product','Hosting','Cloud','VPS','Dedicated','Domains','Email','Developer','Applications','Deployment/PaaS','Operating Systems','Server Management','Business','Support','Legal','Client Area','Authentication','Checkout','Administrative/internal']
@@ -11,7 +11,10 @@ def category(path):
  for group,pattern in [('Legal','policy|privacy|legal|terms|agreement|addendum|consent|data-deletion|data-protection'),('Authentication','login|register|pwreset|password|auth|passkey|oauth'),('Checkout','orderform|cart|checkout|payment|invoice|quote'),('Client Area','clientarea|client-area|account|clientregister'),('Domains','domain|whois|dns|nameserver'),('Email','email|smtp|mail'),('Deployment/PaaS','deploy|paas|pipeline'),('Operating Systems','operating.system|os.image'),('Server Management','monitor|firewall|server.control|backup|server-management'),('Dedicated','dedicated|dedeicated|enterprise-server|game-server'),('VPS','vps'),('Cloud','cloud|infrastructure'),('Developer','developer|api|tools'),('Applications','application|wordpress|docker|laravel'),('Hosting','hosting|cpanel|plesk'),('Support','help|support|ticket|faq|knowledge|status|contact'),('Business','affiliate|business|website-design'),('Marketing','about|blog|homepage|offers|announcement|comingsoon|notfound|search')]:
   if re.search(pattern,s):return group
  return 'Administrative/internal'
-paths=sorted(set(subprocess.check_output(['git','ls-files','--cached','--others','--exclude-standard'],cwd=ROOT,text=True).splitlines()))
+# Tracked files only. `--others` used to be included here, which let an uncommitted scratch file
+# appear in a *committed* inventory: the artifact then described a path that does not exist for
+# anybody who clones the repository. A snapshot of the repository lists what the repository has.
+paths=sorted(set(subprocess.check_output(['git','ls-files','--cached'],cwd=ROOT,text=True).splitlines()))
 paths=[p for p in paths if (ROOT/p).is_file() and not p.startswith('docs/website-rebuild/')]
 with (OUT/'current-files.csv').open('w') as f:
  w=csv.writer(f,lineterminator='\n');w.writerow(['path','category','bytes'])

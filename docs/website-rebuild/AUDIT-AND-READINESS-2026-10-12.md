@@ -176,7 +176,7 @@ case was verified: reintroducing the unquoted colon on a copy of the tree is rep
 `content-hygiene.yml:23 plain value contains ": "`.
 
 Both hygiene checks were then run locally to prove restoring the workflow does not immediately fail
-it: `node scripts/check-malformed-bullets.mjs` → 6 673 text files scanned, 0 findings; the two legal
+it: `node scripts/check-malformed-bullets.mjs` → 5 983 text files scanned, 0 findings; the two legal
 JSON copies are byte-identical.
 
 ### 3.7 Verified clean, and now measurable: the Wingdings / orphan-PUA artifacts
@@ -198,7 +198,7 @@ to contain the three bytes — including one of the 3D scenes produced in this p
 of a server hall and contains no text — and (b) one PNG in the retired legacy theme, which the active
 theme never serves and which this pass deliberately leaves alone. The repository's own
 `scripts/check-malformed-bullets.mjs` is the standing guard for this class and reports 0 findings
-across 6 673 text files.
+across 5 983 text files.
 
 One note for whoever repeats the check: a character class such as `[\xef\x83\x98]` matches the
 individual *bytes*, so it flags every file containing `·` (U+00B7 is `C2 B7`) and every compressed
@@ -348,6 +348,100 @@ Result: **two** criteria have a deciding command that no automation runs, and bo
 package, so it runs when a candidate is frozen, not on every push. **C4** (`browser.cjs`) needs
 Chromium, which is why C4 is PARTIAL. Every other criterion, including all 26 marked COMPLETE, is
 decided by something the gate or a workflow actually executes.
+
+### 3.12 A committed inventory listed a file the repository does not contain
+
+`scripts/inventory-website.py` rebuilds four committed inventories under `docs/website-rebuild/` —
+`current-files.csv`, `current-routes.json`, `node-api-routes.json` and the re-categorised baseline
+copies. Nothing invoked it: not the gate, not a workflow, not a test. It is the same class of defect
+as §3.11, found by sweeping `scripts/` for generators and checkers that no automation runs rather
+than by waiting for one to matter.
+
+Running it against this branch's tip produced two findings.
+
+**The generator could put an uncommitted file into a committed artifact.** Its file list came from
+`git ls-files --cached --others --exclude-standard`, and `--others` means *untracked*. Verified
+directly rather than read off the flag: a scratch file `zz-untracked-scratch.php`, never added to
+git, appeared as a row in `current-files.csv` — an inventory that is itself committed, so it would
+have described to any reviewer, and to anybody cloning the repository, a path that does not exist
+for them. That is the failure mode this whole report is written to avoid: an artifact asserting
+something the tree does not contain. The flag is now `--cached` only, and the regression was
+re-tested: the same scratch file produces **0** rows.
+
+**Two of the four inventories had drifted.** `current-files.csv` listed 6 875 files where the
+repository has 7 939 — 1 065 rows missing, every one of them a tracked file this pass created (the
+30 new 3D scenes and their ladder encodings, the two hand-authored vector diagrams, the new suites
+and checkers), plus one row for `cloudhost247-node/frontend/public/docs/node-platform-status.md`,
+which no longer exists on any branch. `node-api-routes.json` was missing
+`GET /api/v1/currency/rates` and `GET /api/v1/currency/geo-country` — the second being the very
+endpoint §3.5 fixed, so the inventory predated the fix it should have reflected. Both are
+regenerated and committed here. `current-routes.json` and the two baseline CSVs were already in
+sync, which is itself evidence the drift was recency rather than a broken generator.
+
+The regenerated CSV was then checked against the tree instead of being trusted: **7 939 rows, 0
+listed-but-untracked, 0 tracked-but-unlisted** (outside the generator's own `docs/website-rebuild/`
+skip rule), and **0 rows whose recorded byte size disagrees with the file on disk**.
+
+These inventories are deliberately **not** gate-freshness-checked, unlike `page-inventory.json`, and
+the reason is measured rather than assumed. Every one of the 7 939 rows carries a byte count, so any
+edit to any file in the repository changes this CSV; a strict freshness gate would force a full
+regeneration on essentially every commit, and a check that fails constantly gets disabled. Its
+history bears that out — one commit ever touched it, against five for the registry-derived
+`page-inventory.json`, which changes only when the registry does and is therefore cheap to hold
+fresh. The distinction is between an artifact that describes *the registry* and one that describes
+*every file*: the first can be gated, the second is a snapshot, and it is labelled as one.
+
+### 3.13 The hygiene scan's scope depended on whether a build had been run
+
+`scripts/check-malformed-bullets.mjs` is the standing guard for the malformed-bullet,
+replacement-character and orphan-PUA classes (criterion B5). It reported **6 673 text files** — a
+figure quoted in four places across three documents. Re-running it after the recovery in §3.12
+reported **5 983**. The same commit, two different counts, and neither machine was wrong.
+
+The difference is `cloudhost247-node/public/`: vite's `outDir` (`frontend/vite.config.ts:66`),
+produced by `npm run build:frontend` and ignored by `cloudhost247-node/.gitignore:8`, which
+annotates it as "Built frontend static assets … generated, not source". The scanner decided what to
+skip from directory *names* (`SKIP_DIRS` — `.git`, `node_modules`, `dist`, `build`, `coverage`,
+`.cache`, `.next`, `.turbo`), and `public` is not in that list, so whether 690 generated files were
+walked depended on whether a build had been run in that working copy. My sandbox had built the
+frontend for the archive in step 5; CI checks out clean and never does. **The documented figure
+therefore reproduced only on a machine that had run a build** — it was not what CI scanned, and not
+what a reviewer cloning the repository would get. A number that only one person can reproduce is not
+evidence, which is the standard this report holds itself to.
+
+The obvious fix is wrong, and worth recording because it would have passed every test in the
+repository. Adding `public` to `SKIP_DIRS` cannot work: that set is matched against `entry.name`, the
+*basename*, and `cloudhost247-node/frontend/public/` is **tracked source** — 641 files including the
+media library this project ships. Skipping by that name would have silently removed 641 authored
+files from the hygiene scan while the script still printed `0 finding(s)` and exited 0. That is the
+worst available outcome: a check that scans less and reports green. Two directories, same basename,
+opposite status — one generated, one authored — is exactly the case a name-based rule cannot
+express.
+
+The scope is now derived from git's own ignore rules
+(`git ls-files --others --ignored --exclude-standard --directory`), which is where this repository
+already records what is generated, so the rule cannot disagree with the tree. Git guarantees the
+property the name-based rule could not: an ignored path is by definition untracked, so no authored
+file can be skipped by it. Measured before relying on it — of the ignored paths in this tree, **0 are
+also tracked** and **0 fall under `frontend/public/`**. Where git is unavailable (a tarball, a sandbox
+with no repository) the call fails closed to an empty set and `SKIP_DIRS` alone applies, degrading to
+the previous behaviour rather than aborting the check.
+
+Both directions were then falsified rather than assumed, with probes removed afterwards and the tree
+confirmed clean:
+
+| Probe | Expected | Observed |
+|---|---|---|
+| 4 ignored files under `cloudhost247-node/public/`, one containing U+FFFD that would be a finding if scanned | count unchanged, exit 0 | **5 983 files, 0 findings, exit 0** |
+| U+FFFD planted in `cloudhost247-node/frontend/public/__probe_fffd.md` (tracked source tree) | finding caught, exit 1 | **1 finding, exit 1** |
+
+The first proves generated output is no longer walked; the second proves no authored file was lost to
+achieve it. The count is now stable at **5 983** regardless of build state, and the four stale
+`6 673` references — `COMPONENTS.md`, §3.6 and §3.7 of this report, and criterion B5 in
+`docs/ACCEPTANCE-CRITERIA.md` — are corrected to it. The verdict was never in doubt: both counts
+reported 0 findings, so this changed what the check *covers*, not what it found. It is recorded here
+because a coverage defect in a hygiene check is a defect, and because the scan count is the evidence
+that the coverage is real.
 
 ## 4. Page inventory: what a visitor and a crawler can reach
 

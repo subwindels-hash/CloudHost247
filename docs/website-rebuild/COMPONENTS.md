@@ -153,7 +153,7 @@ fill a footer column.
 - `node scripts/check-malformed-bullets.mjs` and the
   `cmp shared/site/content/legal.generated.json cloudhost247-node/frontend/src/content/legal.generated.json`
   step: the two checks the content-hygiene workflow runs once it can start. Both pass
-  locally (6 673 text files scanned, 0 findings; the JSON copies are byte-identical).
+  locally (5 983 text files scanned, 0 findings; the JSON copies are byte-identical).
 - `python3 -m unittest tests/website/test_accessibility_contract.py`: negative cases
   for the contract above (an unlabelled control, an undersized target, a missing skip
   target, a stylesheet regression and a vacuous scan are each required to fail).
