@@ -5738,11 +5738,11 @@ robots.txt,Administrative/internal,2458
 scripts/audit-builder-widget-classes.py,Administrative/internal,8690
 scripts/audit-legacy-branding-in-database.sql,Administrative/internal,12351
 scripts/audit-navigation-inventory.py,Administrative/internal,14582
-scripts/branding-audit.py,Administrative/internal,17791
+scripts/branding-audit.py,Administrative/internal,18171
 scripts/build-production-zip.py,Administrative/internal,17043
 scripts/check-accessibility-contract.py,Administrative/internal,17389
 scripts/check-hero-render.py,Administrative/internal,8016
-scripts/check-malformed-bullets.mjs,Administrative/internal,8764
+scripts/check-malformed-bullets.mjs,Administrative/internal,9249
 scripts/check-workflow-yaml.mjs,Administrative/internal,6146
 scripts/compare-financial-evidence.py,Administrative/internal,1978
 scripts/generate-catalog-assets.py,Administrative/internal,16513

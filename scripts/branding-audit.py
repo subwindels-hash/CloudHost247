@@ -107,6 +107,10 @@ def git_ignored_paths(root: str) -> set[str]:
         )
     except (OSError, subprocess.CalledProcessError):
         return set()
+    # `--directory` reports a collapsed tree with a trailing slash, and `.gitignore` rules such as
+    # `public/*` match contents rather than the directory itself -- so `check-ignore` on
+    # `cloudhost247-node/public` says not-ignored while the walk still has to prune it. Stripping the
+    # slash is what makes the relpath comparison equal; it is load-bearing, not cosmetic.
     return {line.rstrip('/') for line in completed.stdout.splitlines() if line}
 
 

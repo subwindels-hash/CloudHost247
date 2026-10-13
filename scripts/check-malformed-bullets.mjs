@@ -54,6 +54,11 @@ function gitIgnoredPaths(root) {
       ['ls-files', '--others', '--ignored', '--exclude-standard', '--directory'],
       { cwd: root, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 }
     );
+    // The trailing-slash strip is load-bearing, not cosmetic. `.gitignore` says `public/*` — it
+    // matches the *contents* — so `git check-ignore cloudhost247-node/public` reports not-ignored
+    // while `.../public/index.html` reports ignored. `--directory` still collapses the whole tree to
+    // `cloudhost247-node/public/`, and only after stripping that slash does the walk's `rel` compare
+    // equal and prune it. Drop the strip and generated output is scanned again.
     return new Set(out.split('\n').filter(Boolean).map((entry) => toPosix(entry).replace(/\/+$/, '')));
   } catch {
     return new Set();

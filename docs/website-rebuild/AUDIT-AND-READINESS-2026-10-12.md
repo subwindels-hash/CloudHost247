@@ -501,6 +501,23 @@ Both stale `7 532 / 2 728` references — the §9 gate table here and criterion 
 reports and what CI therefore verifies. The verdict never changed: 0 retired-brand matches in every
 measurement, before and after.
 
+Both fixes were then re-validated under the **real** condition rather than the synthetic probes
+above, because release step 5 happens to produce exactly it: `build-production-zip.py --verify` runs
+`npm run build:server` and `npm run build:frontend`, so afterwards the tree held **796** files under
+`cloudhost247-node/public/` (**421** of them text), **868** under `cloudhost247-node/dist/` and
+**643** under `assets/cloudhost247-tools/`. With all of it present, the hygiene scan reported
+**5 983** text files and the brand audit **5 974** — unchanged from the clean checkout. Before these
+fixes the same tree would have reported roughly **6 404** and **6 243** respectively. That is the
+original defect reproducing and then not reproducing, on real vite and tsc output rather than on
+files created to order.
+
+One implementation detail is worth recording because it is easy to "simplify" and break: `.gitignore`
+says `public/*`, which matches the *contents*, so `git check-ignore cloudhost247-node/public` reports
+**not-ignored** while `cloudhost247-node/public/index.html` reports **ignored**. `git ls-files
+--directory` nevertheless collapses the whole tree to `cloudhost247-node/public/`, and only after the
+trailing slash is stripped does the walk's relative-path comparison match and prune it. Both scripts
+now carry a comment saying the strip is load-bearing.
+
 ## 4. Page inventory: what a visitor and a crawler can reach
 
 `python3 scripts/audit-navigation-inventory.py` (re-run in this pass, and now a gate step):
@@ -629,7 +646,7 @@ Also verified in this pass:
 | Node platform `npm ci` + `npm run typecheck` + frontend `tsc --noEmit` | 264 top-level packages installed; both typechecks exit 0 |
 | Node platform `npm test` | 161 files / 2 242 tests passed, exit 0 |
 | `node scripts/check-workflow-yaml.mjs` | 3 workflow files parse, each with jobs and steps (added to the gate and to `content-hygiene.yml`) |
-| `python3 scripts/build-production-zip.py --verify` | **verified** — `✓ production archive verified: deployable, complete, no secret material`, exit 0, re-run at the tip of this branch. Structural counts: **9 872 members**, `secret_skipped=0`, **597** media assets, **49** theme illustrations and **49** referenced 3D scenes resolved in both libraries, **13** published documents. The digest is **not** an integrity claim and must not be compared across environments: the writer uses `archive.write(path, rel)` with no `ZipInfo`/`date_time` normalisation, so every member carries its on-disk mtime and a fresh checkout of identical bytes hashes differently. Measured directly rather than assumed — one file, same content, two mtimes, two digests (`71b0a893…` vs `edda2011…`). It also moves with content because `docs/` is inside the walk: 138 243 211 bytes here against 138 237 977 at `de8f7ed`. The counts and the exit status are the evidence; the command is the check, not the digest |
+| `python3 scripts/build-production-zip.py --verify` | **verified** — `✓ production archive verified: deployable, complete, no secret material`, exit 0, re-run at the tip of this branch. Structural counts: **9 872 members**, `secret_skipped=0`, **597** media assets, **49** theme illustrations and **49** referenced 3D scenes resolved in both libraries, **13** published documents. The digest is **not** an integrity claim and must not be compared across environments: the writer uses `archive.write(path, rel)` with no `ZipInfo`/`date_time` normalisation, so every member carries its on-disk mtime and a fresh checkout of identical bytes hashes differently. Measured directly rather than assumed — one file, same content, two mtimes, two digests (`71b0a893…` vs `edda2011…`). It also moves with content because `docs/` is inside the walk, and unlike the digest the size *is* reproducible for identical content: 138 237 977 bytes at `de8f7ed`, 138 243 211 at the tip when §3.11 was written, and **138 264 628** re-measured at `631ab41`. The counts and the exit status are the evidence; the command is the check, not the digest |
 
 The archive is deliberately not kept in the workspace — a 101 MiB build artefact does not belong in a
 snapshot or a commit — and is reproducible with the command above.
