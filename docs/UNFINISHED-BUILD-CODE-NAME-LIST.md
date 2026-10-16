@@ -60,14 +60,25 @@ Supporting library files that still carry the marker with them (not modules, lis
 **Closed 2026-10-16 (progress rows 16–19, commit `e5fd4ffe`): the customer-facing DNS,
 Cloudflare, marketplace and server-detail screens. Closed 2026-10-16 (progress rows 20–22,
 commit `12c1a417`): the admin billing, orders and domain-services consoles.** Each screen has a
-screen-contract test. **Still missing: the remaining admin groups** (marketplace/app catalogue
-admin, provisioning jobs, monitoring, deployments, OS images/versions/availability, AI/tools,
-security-number policy, audit log, …) and the **mobile shell**. No browser has rendered any ported
-page in this environment.
+screen-contract test. **Closed 2026-10-16 (rows 23–31, commits `7af86abe` … `27e279ef`): the
+remaining admin groups** — marketplace/app catalogue admin, provisioning jobs, monitoring,
+deployments, OS images/versions/availability, AI/tools, security-number policy and the audit log —
+**and the platform scheduler wiring. Closed 2026-10-16 (row 32, commit `1f537e18`): the mobile
+shell** (§1.3). No browser has rendered any ported page in this environment.
 
-### 1.3 `platform/mobile/` — no app code
+### 1.3 `platform/mobile/` — mobile shell (closed 2026-10-16, row 32)
 
-`capacitor.config.json`, `package.json`, `resources/icon.png`, `resources/splash.png` only.
+**CLOSED 2026-10-16 — commit `1f537e18`.** The shell is the same SPA bundle (`webDir` →
+`../spa/dist`) plus real app code in `src/` (`mobile-boot.js`, `index.js`): API-origin contract for
+local-assets shells (`plugins.CloudHost247.apiOrigin` in `capacitor.config.json` →
+`window.__CH247_API_ORIGIN__` → the shared client's `resolveApiOrigin`/`apiUrl`, with invalid
+origins refused), splash/status-bar wiring, Android back-button handling, platform marker, and a
+platform-aware router swap (HashRouter natively, `BrowserRouter` `/app` on the web) with the
+service worker gated off the native shell. `platform/tests/mobile-shell.test.js` (5 tests) covers
+the resolver and every guarded native behaviour against injected fakes. `android/` and `ios/` stay
+generated locally via `npx cap add` (gitignored by design — `platform/.gitignore`). **Not verified
+here:** `cap add`/`cap sync`, Gradle/Xcode builds, on-device behaviour — no Android SDK or Xcode in
+this environment; see `platform/mobile/README.md`.
 
 ### 1.4 `cloudhost247-node` — capability refusals that remain in adapter profiles
 
@@ -234,10 +245,9 @@ visual/browser tests — *NOT PERFORMED*. Production database is read-only from 
 `admin-domain-services` registrar work (transfer refresh, extension sync, `namecheap`/`godaddy`
 adapters), the `ai-os` Copilot and the `ai-support` operator — were closed 2026-10-08; see §1.1.)*
 
-**Platform — partial:** `platform/spa` (34 page modules as of 2026-10-16 — customer screens +
-admin billing/orders/domain-services closed in rows 16–22; marketplace admin, provisioning,
-monitoring, deployments, OS images, AI/tools and the mobile shell still missing) ·
-`platform/mobile` (no app code)
+**Platform — closed for authored code:** `platform/spa` (page modules + screen-contract tests;
+customer screens rows 16–19, admin consoles rows 20–30, scheduler wiring row 31) ·
+`platform/mobile` (shell app code in `src/` — row 32; native trees generated locally via `cap add`)
 
 **Node adapters — refused capabilities:** `aws` (rescue; reinstall gated) · `digitalocean`
 (console, rescue) · `contabo` (resize, console, metrics) · `proxmox` (rescue) · `virtualizor` (rescue) ·
