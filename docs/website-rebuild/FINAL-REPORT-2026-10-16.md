@@ -6,8 +6,10 @@
 **Deployment state:** **not deployed.** Nothing in this branch has been pushed to a server, and no
 production or staging install was touched. §24's "staging-only" requirement is met by the branch and
 the PR; a deployable archive exists and verifies (§9) but has not been uploaded anywhere.
-**Evidence:** `bash scripts/release-candidate-check.sh` → **exit 0**, 591 passing checks, log kept out
-of the repository. Every number below comes from that run or from the command named beside it.
+**Evidence:** `bash scripts/release-candidate-check.sh` → **exit 0**, with every test case it runs
+reporting `ok` (598 in the run behind this report), and the same script green in CI on both PHP legs. Every number below comes from that run or from the
+command named beside it; the inventory figures were re-derived from `page-inventory.json` rather than
+transcribed.
 
 This report covers the work on this branch. The repository-wide audit, the design system, the
 homepage, the mega menu, the footer, the page standardisation, the asset library, the catalogues, the
@@ -67,8 +69,10 @@ Measured on the rendered tree: **194 canonical addresses, all unique, all resolv
 tools surface and the routes the licensed platform serves were in the navigation and in the sitemaps
 and in no row at all.
 
-**Fixed.** 255 rows carrying the fields the brief asks for, with `route_owner` and `test_status`
-recording which runtime serves each route and which check covers it:
+**Fixed.** 356 rows carrying the fields the brief asks for, with `route_owner` and `test_status`
+recording which runtime serves each route and which check covers it. The rows are 67 published pages,
+135 published tool routes, 101 redirect aliases, 29 signpost routes, 17 internal files and 7 platform
+entry points:
 
 | field | meaning |
 |---|---|
@@ -155,7 +159,7 @@ Every rule has a negative case, and the suites were run in isolation as well as 
 | rendered site | 229 pages, 907 images, 3,063 asset references, 42,393 links, 45,510 controls, 194 indexable / 35 noindex, 194 canonical addresses, 0 problems |
 | hero artwork as rendered | 47 pages on a 3D scene, 1 flat, 19 legal documents text-only, 48 distinct artworks |
 | tool surface | 257 derivable / 265 published — both directions empty |
-| page inventory | 255 rows, 6 defect classes all 0 |
+| page inventory | 356 rows (67 pages · 135 tool routes · 101 aliases · 29 signposts · 17 internal · 7 entry points), 6 defect classes all 0 |
 | Python unit suites | 81 OK (website + security), plus `tests/website/run.php` 310 assertions / 0 failed |
 | PHP tools shell | 1,171 assertions passed (PHP CLI, no licensed WHMCS runtime) |
 | accessibility contract | viewport, lang, skip link, menu state, control names, image text, target sizes, focus, reduced motion, responsive ladder — all hold |
@@ -236,7 +240,7 @@ emit an empty href. Inventing the missing routes would be inventing capability, 
 ```
 .github/workflows/independent-foundation.yml        Smarty tarball cache + rendered-site audit step
 docs/ACCEPTANCE-CRITERIA.md                         B2, B3 and C4 corrected against measurement
-docs/website-rebuild/page-inventory.{json,csv}      84 → 255 rows, corrected taxonomy
+docs/website-rebuild/page-inventory.{json,csv}      84 → 356 rows, corrected taxonomy
 modules/addons/cloudhost247_theme/lib/Site.php      publishes the tool measurement, not the 9 KB list
 modules/addons/cloudhost247_theme/lib/ThemeRepository.php   documents the legacy template default
 modules/addons/cloudhost247_theme/resources/site.json       regenerated (toolsServed = 265)
@@ -257,3 +261,33 @@ tests/website/test_tools_surface.py                 rewritten for the corrected 
 **No WHMCS core file, payment path, provisioning module, database migration or vendor tree was
 modified.** No credential, secret or private key was added, moved or exposed; the archive reports
 `secret_skipped=0` because nothing matched the secret patterns in the first place.
+
+---
+
+## 13. Verified figures, in machine-readable form
+
+`tests/website/test_report_figures.py` recomputes every value below from the artefact that owns it and
+fails if this report disagrees with the tree. It was added because the first revision of this report
+transcribed an inventory row count from the previous pass instead of deriving it, and published `255`
+where the tree says `356` — a number no check could contradict. It now can.
+
+<!-- verified-figures -->
+```json
+{
+  "inventory_rows": 356,
+  "pages_published": 67,
+  "root_php_pages": 84,
+  "files_internal": 17,
+  "routes_tool_native": 135,
+  "routes_tool_signpost": 29,
+  "routes_tool_redirect_alias": 101,
+  "routes_platform_entry_point": 7,
+  "defect_classes_empty": 6,
+  "tools_served_projection": 265,
+  "registry_links": 169,
+  "registry_spa_links": 160,
+  "registry_php_links": 167,
+  "mega_menus": 7,
+  "footer_columns": 8
+}
+```
