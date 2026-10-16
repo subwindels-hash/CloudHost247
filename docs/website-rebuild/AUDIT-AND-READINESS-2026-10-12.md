@@ -334,6 +334,18 @@ and in the sitemap; `/tools/business-tools` is a route in `App.tsx`), neither fo
 or `#` href, and the audit now enforces both sides rather than trusting the count. Each entry declares
 the surfaces it exists on, which is what keeps the two front ends from disagreeing.
 
+> **Corrected 2026-10-16, on the measurement.** "No `business-tools.php` exists" is true of the file,
+> and the static PHP footer still omits the destination for that reason — but it is not true that PHP
+> cannot answer `/tools/business-tools`. `tools/index.php` resolves through two catalogues: when the
+> native one returns nothing it falls through to `Theme\ToolsSite::resolve()` over
+> `modules/addons/cloudhost247_theme/resources/tools.json`, which renders an honest noindex signpost
+> page for that route and answers a `legacyPaths` alias with a 301. All 265 published tool paths
+> answer, measured by `tests/website/check-tools-resolution.php`. A later pass read this sentence the
+> narrower way — as "the PHP shell cannot serve it" — projected the served paths from the native
+> catalogue alone, and had the menu script withhold the links outside that projection, which silently
+> removed 24 working menu links and 4 footer links from every page. See
+> `docs/website-rebuild/FINAL-REPORT-2026-10-16.md` §5.
+
 An orphaned deciding command is a class of defect, not an incident, so all 32 criteria were swept for
 it rather than stopping at the one that turned up. The sweep strips comments from the gate before
 matching — otherwise a script *named in a comment* reads as invoked, which is exactly how
