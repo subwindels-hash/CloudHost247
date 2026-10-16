@@ -401,6 +401,58 @@ export const adminApi = {
   cloudflareServices: () => api('/api/v1/admin/cloudflare/services'),
   createCloudflareAccount: (payload) => api('/api/v1/admin/cloudflare/accounts', { method: 'POST', body: payload }),
   testCloudflareAccount: (id) => api(`/api/v1/admin/cloudflare/accounts/${encodeURIComponent(id)}/test`, { method: 'POST', body: {} }),
+  adminInvoices: (params = {}) => api(`/api/v1/admin/invoices${queryString(params)}`),
+  adminInvoice: (id) => api(`/api/v1/admin/invoices/${encodeURIComponent(id)}`),
+  adminCancelInvoice: (id, reason) =>
+    api(`/api/v1/admin/invoices/${encodeURIComponent(id)}/cancel`, { method: 'POST', body: { reason } }),
+  adminRefundInvoice: (id) =>
+    api(`/api/v1/admin/invoices/${encodeURIComponent(id)}/refund`, { method: 'POST', body: {} }),
+  adminLedger: () => api('/api/v1/admin/billing/ledger'),
+  adminReconciliation: () => api('/api/v1/admin/billing/reconciliation'),
+  confirmPayment: (id) => api(`/api/v1/admin/payments/${encodeURIComponent(id)}/confirm`, { method: 'POST', body: {} }),
+  rejectPayment: (id, reason) =>
+    api(`/api/v1/admin/payments/${encodeURIComponent(id)}/reject`, { method: 'POST', body: { reason } }),
+  confirmManualPayment: (id) =>
+    api(`/api/v1/admin/payments/${encodeURIComponent(id)}/confirm-manual`, { method: 'POST', body: {} }),
+  rejectManualPayment: (id, reason) =>
+    api(`/api/v1/admin/payments/${encodeURIComponent(id)}/reject-manual`, { method: 'POST', body: { reason } }),
+  adminOrders: (params = {}) => api(`/api/v1/admin/orders${queryString(params)}`),
+  adminOrder: (id) => api(`/api/v1/admin/orders/${encodeURIComponent(id)}`),
+  adminCancelOrder: (id, reason) =>
+    api(`/api/v1/admin/orders/${encodeURIComponent(id)}/cancel`, { method: 'POST', body: { reason } }),
+  dsOverview: () => api('/api/v1/admin/domain-services/overview'),
+  dsProviders: () => api('/api/v1/admin/domain-services/providers'),
+  dsCreateProvider: (payload) => api('/api/v1/admin/domain-services/providers', { method: 'POST', body: payload }),
+  dsUpdateProvider: (id, patch) =>
+    api(`/api/v1/admin/domain-services/providers/${encodeURIComponent(id)}`, { method: 'PATCH', body: patch }),
+  dsSetProviderCredentials: (id, credentials) =>
+    api(`/api/v1/admin/domain-services/providers/${encodeURIComponent(id)}/credentials`, { method: 'PUT', body: { credentials } }),
+  dsTestProvider: (id) =>
+    api(`/api/v1/admin/domain-services/providers/${encodeURIComponent(id)}/test`, { method: 'POST', body: {} }),
+  dsExtensions: () => api('/api/v1/admin/domain-services/extensions'),
+  dsSyncExtensions: () => api('/api/v1/admin/domain-services/extensions/sync', { method: 'POST', body: {} }),
+  dsUpdateExtension: (id, patch) =>
+    api(`/api/v1/admin/domain-services/extensions/${encodeURIComponent(id)}`, { method: 'PATCH', body: patch }),
+  dsRegistrations: (params = {}) => api(`/api/v1/admin/domain-services/registrations${queryString(params)}`),
+  dsTransfers: (params = {}) => api(`/api/v1/admin/domain-services/transfers${queryString(params)}`),
+  dsRefreshTransfer: (id) =>
+    api(`/api/v1/admin/domain-services/transfers/${encodeURIComponent(id)}/refresh`, { method: 'POST', body: {} }),
+  dsUpdateTransfer: (id, patch) =>
+    api(`/api/v1/admin/domain-services/transfers/${encodeURIComponent(id)}`, { method: 'PATCH', body: patch }),
+  dsAuctions: () => api('/api/v1/admin/domain-services/auctions'),
+  dsAuction: (id) => api(`/api/v1/admin/domain-services/auctions/${encodeURIComponent(id)}`),
+  dsCreateAuction: (payload) => api('/api/v1/admin/domain-services/auctions', { method: 'POST', body: payload }),
+  dsUpdateAuction: (id, patch) =>
+    api(`/api/v1/admin/domain-services/auctions/${encodeURIComponent(id)}`, { method: 'PATCH', body: patch }),
+  dsAuctionAction: (id, action) =>
+    api(`/api/v1/admin/domain-services/auctions/${encodeURIComponent(id)}/${encodeURIComponent(action)}`, { method: 'POST', body: {} }),
+  dsClubPlans: () => api('/api/v1/admin/domain-services/club/plans'),
+  dsCreateClubPlan: (payload) => api('/api/v1/admin/domain-services/club/plans', { method: 'POST', body: payload }),
+  dsUpdateClubPlan: (id, patch) =>
+    api(`/api/v1/admin/domain-services/club/plans/${encodeURIComponent(id)}`, { method: 'PATCH', body: patch }),
+  dsAppraisals: () => api('/api/v1/admin/domain-services/appraisals'),
+  dsWhoisLookups: () => api('/api/v1/admin/domain-services/whois-lookups'),
+  dsTransactions: () => api('/api/v1/admin/domain-services/transactions'),
 };
 
 /** Human-readable rendering of an ApiError for form alerts. */

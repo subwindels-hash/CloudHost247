@@ -29,6 +29,12 @@ import AdminCatalogPage from './pages/AdminCatalogPage.jsx';
 import AdminServersPage from './pages/AdminServersPage.jsx';
 import AdminInfrastructurePage from './pages/AdminInfrastructurePage.jsx';
 import AdminCloudflarePage from './pages/AdminCloudflarePage.jsx';
+import AdminBillingPage from './pages/AdminBillingPage.jsx';
+import AdminInvoiceDetailPage from './pages/AdminInvoiceDetailPage.jsx';
+import AdminLedgerPage from './pages/AdminLedgerPage.jsx';
+import AdminOrdersPage from './pages/AdminOrdersPage.jsx';
+import AdminOrderDetailPage from './pages/AdminOrderDetailPage.jsx';
+import AdminDomainServicesPage from './pages/AdminDomainServicesPage.jsx';
 import { read as readSupportSession, finish as finishSupportSession } from './lib/support-session.js';
 
 function Gate({ children }) {
@@ -152,6 +158,12 @@ export default function App() {
           <Route path="servers" element={<AdminServersPage />} />
           <Route path="infrastructure" element={<AdminInfrastructurePage />} />
           <Route path="cloudflare" element={<AdminCloudflarePage />} />
+          <Route path="billing" element={<AdminBillingPage />} />
+          <Route path="billing/ledger" element={<AdminLedgerPage />} />
+          <Route path="billing/invoices/:id" element={<AdminInvoiceDetailPage />} />
+          <Route path="orders" element={<AdminOrdersPage />} />
+          <Route path="orders/:id" element={<AdminOrderDetailPage />} />
+          <Route path="domain-services" element={<AdminDomainServicesPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/account" replace />} />
       </Routes>
