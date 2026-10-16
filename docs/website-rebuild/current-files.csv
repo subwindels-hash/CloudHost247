@@ -5,7 +5,7 @@ path,category,bytes
 .github/workflows/node-platform.yml,Administrative/internal,2799
 .gitignore,Administrative/internal,1009
 PHASE_5_CHECKPOINT_REPORT.md,Administrative/internal,64070
-README.md,Administrative/internal,18059
+README.md,Administrative/internal,18578
 aboutus.php,Marketing,397
 acceptable-use-policy.php,Legal,382
 all-element-cloudhost247.php,Administrative/internal,666
@@ -2328,8 +2328,10 @@ docs/BRANDING-COMPATIBILITY.md,Administrative/internal,15332
 docs/CLOUDHOST247-PLATFORM-FINAL-REPORT.md,Administrative/internal,19125
 docs/CPANEL_DEPLOYMENT.md,Deployment/PaaS,37744
 docs/CURRENCY_DISPLAY.md,Administrative/internal,3976
+docs/DEPLOYMENT-GUIDE.md,Deployment/PaaS,18716
 docs/DOMAIN_BROKERAGE.md,Domains,2989
 docs/DOMAIN_SERVICES_ARCHITECTURE.md,Domains,15361
+docs/INSTALLATION-GUIDE.md,Administrative/internal,12486
 docs/MRZ_DEVELOPER_TOOL.md,Developer,15916
 docs/NODE_PLATFORM_STATUS.md,Support,170655
 docs/PASSKEY.md,Authentication,11153
@@ -2339,8 +2341,8 @@ docs/PROPOSED_SCOPE_PHASE_5E_BILLING_PORTAL.md,Administrative/internal,10454
 docs/PROPOSED_SCOPE_PHASE_5F_ADMIN_BILLING.md,Administrative/internal,10643
 docs/PROPOSED_SCOPE_PHASE_5G_RECONCILIATION.md,Administrative/internal,6581
 docs/PROPOSED_SCOPE_WEBHOOK_PIPELINE.md,Deployment/PaaS,28199
-docs/README.md,Administrative/internal,2990
-docs/RELEASE-WORKFLOW.md,Administrative/internal,12742
+docs/README.md,Administrative/internal,3549
+docs/RELEASE-WORKFLOW.md,Administrative/internal,14963
 docs/RESTRUCTURING.md,Administrative/internal,15971
 docs/SERVER_AGENT.md,Administrative/internal,11445
 docs/SERVER_PROVISIONING.md,Administrative/internal,55826
@@ -2389,7 +2391,7 @@ docs/independent-rebuild/DOMAIN-BROKER.md,Domains,15512
 docs/independent-rebuild/EMAIL-MARKETING-AUDIT.md,Email,25057
 docs/independent-rebuild/EMAIL-MARKETING.md,Email,36246
 docs/independent-rebuild/EMPLOYEE-ID-CARD-GENERATOR.md,Administrative/internal,17490
-docs/independent-rebuild/INSTALLATION-AND-UPGRADE.md,Administrative/internal,22845
+docs/independent-rebuild/INSTALLATION-AND-UPGRADE.md,Administrative/internal,23112
 docs/independent-rebuild/LIVE-TOOL-VERIFICATION.md,Administrative/internal,6605
 docs/independent-rebuild/MODULE-MANAGER-COMPLIANCE.md,Administrative/internal,22283
 docs/independent-rebuild/MODULE-MANAGER.md,Administrative/internal,19224
@@ -5739,7 +5741,7 @@ scripts/audit-builder-widget-classes.py,Administrative/internal,8690
 scripts/audit-legacy-branding-in-database.sql,Administrative/internal,12351
 scripts/audit-navigation-inventory.py,Administrative/internal,14582
 scripts/branding-audit.py,Administrative/internal,18171
-scripts/build-production-zip.py,Administrative/internal,17043
+scripts/build-production-zip.py,Administrative/internal,17289
 scripts/check-accessibility-contract.py,Administrative/internal,17389
 scripts/check-hero-render.py,Administrative/internal,8016
 scripts/check-malformed-bullets.mjs,Administrative/internal,9249

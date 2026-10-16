@@ -665,7 +665,7 @@
       "template": "cloudhost247-page",
       "seo_metadata": {
         "title": "DNS Management",
-        "description": "Where authoritative DNS records for CloudHost247-hosted domains are edited, and what the read-only diagnostic tools can and cannot tell you."
+        "description": "Authoritative edits happen in the client area. The tools are read-only diagnostics."
       },
       "hero_artwork": {
         "svg": "domains/dns-management.svg",
@@ -673,7 +673,7 @@
       },
       "visual": "domains/dns-management",
       "image_status": "present",
-      "seo_status": "ok",
+      "seo_status": "no seo_description",
       "navigation_placement": "domains / Domains",
       "footer_placement": "Domains",
       "reachable": true
@@ -775,7 +775,7 @@
       "template": "cloudhost247-page",
       "seo_metadata": {
         "title": "Domain DNS",
-        "description": "Where nameserver and DNS record changes are made for a registered domain, and what can be checked without editing the zone."
+        "description": "Nameserver and record changes are available from the domain management screen after registration."
       },
       "hero_artwork": {
         "svg": "domains/domain-dns.svg",
@@ -783,7 +783,7 @@
       },
       "visual": "domains/domain-dns",
       "image_status": "present",
-      "seo_status": "ok",
+      "seo_status": "no seo_description",
       "navigation_placement": "domains / Domains",
       "footer_placement": "Domains",
       "reachable": true
