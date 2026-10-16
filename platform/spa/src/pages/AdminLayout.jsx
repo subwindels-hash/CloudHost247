@@ -102,6 +102,10 @@ export default function AdminLayout() {
         {isAdmin && <NavLink to="/admin/billing" className={({ isActive }) => (isActive ? 'active' : '')}>Billing</NavLink>}
         {isAdmin && <NavLink to="/admin/orders" className={({ isActive }) => (isActive ? 'active' : '')}>Orders</NavLink>}
         {isAdmin && <NavLink to="/admin/domain-services" className={({ isActive }) => (isActive ? 'active' : '')}>Domains</NavLink>}
+        {isAdmin && <NavLink to="/admin/marketplace" className={({ isActive }) => (isActive ? 'active' : '')}>Marketplace</NavLink>}
+        {isAdmin && <NavLink to="/admin/provisioning" className={({ isActive }) => (isActive ? 'active' : '')}>Provisioning</NavLink>}
+        {isAdmin && <NavLink to="/admin/monitoring" className={({ isActive }) => (isActive ? 'active' : '')}>Monitoring</NavLink>}
+        {isAdmin && <NavLink to="/admin/deployments" className={({ isActive }) => (isActive ? 'active' : '')}>Deployments</NavLink>}
         <span className="admin-role">{user.role}</span>
       </nav>
       <Outlet />

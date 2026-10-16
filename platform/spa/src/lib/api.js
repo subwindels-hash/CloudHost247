@@ -453,6 +453,49 @@ export const adminApi = {
   dsAppraisals: () => api('/api/v1/admin/domain-services/appraisals'),
   dsWhoisLookups: () => api('/api/v1/admin/domain-services/whois-lookups'),
   dsTransactions: () => api('/api/v1/admin/domain-services/transactions'),
+  adminAppCategories: () => api('/api/v1/admin/app-categories'),
+  adminCreateAppCategory: (payload) => api('/api/v1/admin/app-categories', { method: 'POST', body: payload }),
+  adminUpdateAppCategory: (id, patch) =>
+    api(`/api/v1/admin/app-categories/${encodeURIComponent(id)}`, { method: 'PATCH', body: patch }),
+  adminApps: (params = {}) => api(`/api/v1/admin/apps${queryString(params)}`),
+  adminCreateApp: (payload) => api('/api/v1/admin/apps', { method: 'POST', body: payload }),
+  adminApp: (id) => api(`/api/v1/admin/apps/${encodeURIComponent(id)}`),
+  adminUpdateApp: (id, patch) => api(`/api/v1/admin/apps/${encodeURIComponent(id)}`, { method: 'PATCH', body: patch }),
+  adminAppStatus: (id, status) =>
+    api(`/api/v1/admin/apps/${encodeURIComponent(id)}/status`, { method: 'POST', body: { status } }),
+  adminAppVersion: (appId, versionId, patch) =>
+    api(`/api/v1/admin/apps/${encodeURIComponent(appId)}/versions/${encodeURIComponent(versionId)}`, { method: 'PATCH', body: patch }),
+  adminDeleteApp: (id) => api(`/api/v1/admin/apps/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  adminMarketplaceApps: () => api('/api/v1/admin/marketplace/apps'),
+  adminCreateMarketplaceApp: (payload) => api('/api/v1/admin/marketplace/apps', { method: 'POST', body: payload }),
+  adminUpdateMarketplaceApp: (id, patch) =>
+    api(`/api/v1/admin/marketplace/apps/${encodeURIComponent(id)}`, { method: 'PATCH', body: patch }),
+  adminDeleteMarketplaceApp: (id) =>
+    api(`/api/v1/admin/marketplace/apps/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  adminValidateManifest: (manifestYaml) =>
+    api('/api/v1/admin/manifests/validate', { method: 'POST', body: { manifestYaml } }),
+  adminImportManifests: () => api('/api/v1/admin/manifests/import', { method: 'POST', body: {} }),
+  adminSeedCategories: () => api('/api/v1/admin/manifests/seed-categories', { method: 'POST', body: {} }),
+  provisioningJobs: (params = {}) => api(`/api/v1/admin/provisioning/jobs${queryString(params)}`),
+  provisioningJob: (id) => api(`/api/v1/admin/provisioning-jobs/${encodeURIComponent(id)}`),
+  provisioningMetrics: () => api('/api/v1/admin/provisioning/metrics'),
+  runProvisioningWorker: (limit) =>
+    api('/api/v1/admin/provisioning/worker/run', { method: 'POST', body: limit ? { limit } : {} }),
+  reconcileProvisioning: () => api('/api/v1/admin/provisioning/reconcile', { method: 'POST', body: {} }),
+  retryProvisioningJob: (id) =>
+    api(`/api/v1/admin/provisioning-jobs/${encodeURIComponent(id)}/retry`, { method: 'POST', body: {} }),
+  cancelProvisioningJob: (id) =>
+    api(`/api/v1/admin/provisioning-jobs/${encodeURIComponent(id)}/cancel`, { method: 'POST', body: {} }),
+  cancelAnyProvisioningJob: (id) =>
+    api(`/api/v1/admin/provisioning/jobs/${encodeURIComponent(id)}/cancel`, { method: 'POST', body: {} }),
+  adminServerHealth: () => api('/api/v1/admin/monitoring/server-health'),
+  serverMonitoring: (id) => api(`/api/v1/monitoring/servers/${encodeURIComponent(id)}`),
+  deployments: (params = {}) => api(`/api/v1/deployments${queryString(params)}`),
+  deployment: (id) => api(`/api/v1/deployments/${encodeURIComponent(id)}`),
+  deploymentLogs: (id) => api(`/api/v1/deployments/${encodeURIComponent(id)}/logs`),
+  executeDeployment: (id) => api(`/api/v1/deployments/${encodeURIComponent(id)}/execute`, { method: 'POST', body: {} }),
+  cancelDeployment: (id) => api(`/api/v1/deployments/${encodeURIComponent(id)}/cancel`, { method: 'POST', body: {} }),
+  sweepDeployments: () => api('/api/v1/admin/deployments/sweep', { method: 'POST', body: {} }),
 };
 
 /** Human-readable rendering of an ApiError for form alerts. */
