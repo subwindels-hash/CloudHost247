@@ -1,11 +1,16 @@
 path,category,bytes
 .gitattributes,Administrative/internal,1920
 .github/workflows/content-hygiene.yml,Administrative/internal,1680
-.github/workflows/independent-foundation.yml,Administrative/internal,2496
+.github/workflows/independent-foundation.yml,Administrative/internal,3681
 .github/workflows/node-platform.yml,Administrative/internal,2799
 .gitignore,Administrative/internal,1009
+CHANGES-SUMMARY.md,Administrative/internal,7430
+FIX-503-ERROR.md,Administrative/internal,6528
+IMPLEMENTATION-SUMMARY.md,Administrative/internal,12511
 PHASE_5_CHECKPOINT_REPORT.md,Administrative/internal,64070
+PRODUCTION-READINESS-REPORT.md,Administrative/internal,23128
 README.md,Administrative/internal,18578
+REPOSITORY-AUDIT-REPORT.md,Administrative/internal,16715
 aboutus.php,Marketing,397
 acceptable-use-policy.php,Legal,382
 all-element-cloudhost247.php,Administrative/internal,666
@@ -408,7 +413,6 @@ assets/images/cloudhost247/icons/email-hosting.svg,Email,363
 assets/images/cloudhost247/icons/enterprise-servers.svg,Dedicated,430
 assets/images/cloudhost247/icons/fair-usage-policy.svg,Legal,376
 assets/images/cloudhost247/icons/faqs.svg,Support,523
-assets/images/cloudhost247/icons/firewall.svg,Server Management,505
 assets/images/cloudhost247/icons/game-servers.svg,Dedicated,424
 assets/images/cloudhost247/icons/help-center.svg,Support,508
 assets/images/cloudhost247/icons/infrastructure.svg,Cloud,388
@@ -420,7 +424,6 @@ assets/images/cloudhost247/icons/mail.svg,Email,301
 assets/images/cloudhost247/icons/managed-services.svg,Administrative/internal,513
 assets/images/cloudhost247/icons/migration.svg,Administrative/internal,506
 assets/images/cloudhost247/icons/monitoring.svg,Server Management,507
-assets/images/cloudhost247/icons/network.svg,Administrative/internal,381
 assets/images/cloudhost247/icons/nodejs-hosting.svg,Hosting,342
 assets/images/cloudhost247/icons/offers.svg,Marketing,380
 assets/images/cloudhost247/icons/operating-systems.svg,Operating Systems,466
@@ -1167,7 +1170,6 @@ cloudhost247-node/frontend/public/media/cloudhost247/icons/email-hosting.svg,Ema
 cloudhost247-node/frontend/public/media/cloudhost247/icons/enterprise-servers.svg,Dedicated,430
 cloudhost247-node/frontend/public/media/cloudhost247/icons/fair-usage-policy.svg,Legal,376
 cloudhost247-node/frontend/public/media/cloudhost247/icons/faqs.svg,Support,523
-cloudhost247-node/frontend/public/media/cloudhost247/icons/firewall.svg,Server Management,505
 cloudhost247-node/frontend/public/media/cloudhost247/icons/game-servers.svg,Dedicated,424
 cloudhost247-node/frontend/public/media/cloudhost247/icons/help-center.svg,Support,508
 cloudhost247-node/frontend/public/media/cloudhost247/icons/infrastructure.svg,Cloud,388
@@ -1179,7 +1181,6 @@ cloudhost247-node/frontend/public/media/cloudhost247/icons/mail.svg,Email,301
 cloudhost247-node/frontend/public/media/cloudhost247/icons/managed-services.svg,Administrative/internal,513
 cloudhost247-node/frontend/public/media/cloudhost247/icons/migration.svg,Administrative/internal,506
 cloudhost247-node/frontend/public/media/cloudhost247/icons/monitoring.svg,Server Management,507
-cloudhost247-node/frontend/public/media/cloudhost247/icons/network.svg,Administrative/internal,381
 cloudhost247-node/frontend/public/media/cloudhost247/icons/nodejs-hosting.svg,Hosting,342
 cloudhost247-node/frontend/public/media/cloudhost247/icons/offers.svg,Marketing,380
 cloudhost247-node/frontend/public/media/cloudhost247/icons/operating-systems.svg,Operating Systems,466
@@ -2360,7 +2361,7 @@ deployments.php,Deployment/PaaS,328
 developer-friendly.php,Developer,690
 dns-management.php,Domains,487
 docker-hosting.php,Applications,487
-docs/ACCEPTANCE-CRITERIA.md,Administrative/internal,11090
+docs/ACCEPTANCE-CRITERIA.md,Administrative/internal,11665
 docs/API_BILLING.md,Developer,11085
 docs/API_CATALOG.md,Developer,13155
 docs/API_COMMERCE.md,Developer,11835
@@ -2979,8 +2980,8 @@ modules/addons/cloudhost247_theme/lib/Content/ProductComponents.php,Administrati
 modules/addons/cloudhost247_theme/lib/CrawlPolicy.php,Administrative/internal,6168
 modules/addons/cloudhost247_theme/lib/PublicDiscovery.php,Administrative/internal,3483
 modules/addons/cloudhost247_theme/lib/PublicPage.php,Administrative/internal,7526
-modules/addons/cloudhost247_theme/lib/Site.php,Administrative/internal,8506
-modules/addons/cloudhost247_theme/lib/ThemeRepository.php,Administrative/internal,29016
+modules/addons/cloudhost247_theme/lib/Site.php,Administrative/internal,9365
+modules/addons/cloudhost247_theme/lib/ThemeRepository.php,Administrative/internal,29842
 modules/addons/cloudhost247_theme/lib/ToolsSite.php,Administrative/internal,1378
 modules/addons/cloudhost247_theme/lib/View/AdminPanels.php,Administrative/internal,5107
 modules/addons/cloudhost247_theme/lib/View/PreviewRenderer.php,Administrative/internal,9171
@@ -2988,7 +2989,7 @@ modules/addons/cloudhost247_theme/migrations/V100.php,Administrative/internal,12
 modules/addons/cloudhost247_theme/migrations/V110.php,Administrative/internal,969
 modules/addons/cloudhost247_theme/migrations/V120.php,Administrative/internal,2539
 modules/addons/cloudhost247_theme/resources/applications.json,Applications,40749
-modules/addons/cloudhost247_theme/resources/site.json,Administrative/internal,253527
+modules/addons/cloudhost247_theme/resources/site.json,Administrative/internal,261734
 modules/addons/cloudhost247_theme/resources/tools-public.json,Developer,341905
 modules/addons/cloudhost247_theme/resources/tools.json,Developer,71593
 modules/addons/cloudhost247_tools/README.md,Developer,5272
@@ -5383,10 +5384,12 @@ offers.php,Marketing,642
 operating-systems.php,Operating Systems,330
 paas.php,Deployment/PaaS,457
 php-hosting.php,Hosting,478
-platform/.env.example,Administrative/internal,3506
+platform/.env.example,Administrative/internal,3799
 platform/.gitignore,Administrative/internal,185
+platform/.htaccess,Administrative/internal,2206
 platform/MIGRATION.md,Administrative/internal,15025
 platform/README.md,Administrative/internal,12392
+platform/TROUBLESHOOTING-503.md,Administrative/internal,6230
 platform/docs/WEBSITE-REBUILD-VERIFICATION.md,Administrative/internal,19884
 platform/dump-routes.cjs,Administrative/internal,790
 platform/manifests/adguard-home/manifest.yaml,Administrative/internal,1044
@@ -5494,7 +5497,7 @@ platform/public/icons/icon-192.png,Administrative/internal,785
 platform/public/icons/icon-512.png,Administrative/internal,3053
 platform/public/icons/icon-maskable-192.png,Administrative/internal,738
 platform/public/icons/icon-maskable-512.png,Administrative/internal,2781
-platform/public/index.html,Administrative/internal,33872
+platform/public/index.html,Administrative/internal,34083
 platform/public/infrastructure.html,Cloud,16131
 platform/public/knowledgebase.html,Support,14946
 platform/public/legal/acceptable-use.html,Legal,14801
@@ -5519,12 +5522,13 @@ platform/public/sw.js,Administrative/internal,4093
 platform/public/vps-hosting.html,VPS,288
 platform/public/web-hosting.html,Hosting,320
 platform/scripts/app-catalog.json,Administrative/internal,14754
-platform/scripts/build-site.cjs,Administrative/internal,108439
+platform/scripts/build-site.cjs,Administrative/internal,108650
 platform/scripts/gen-control-panel-seed.cjs,Administrative/internal,1251
 platform/scripts/generate-icons.js,Administrative/internal,7440
 platform/scripts/migrate.js,Administrative/internal,1634
 platform/scripts/rehash-passwords.js,Administrative/internal,11702
 platform/scripts/seed.js,Administrative/internal,18039
+platform/scripts/verify-deployment.sh,Administrative/internal,5151
 platform/server.js,Administrative/internal,6389
 platform/spa/index.html,Administrative/internal,593
 platform/spa/package-lock.json,Administrative/internal,62184
@@ -5559,15 +5563,15 @@ platform/spa/src/pages/SupportPage.jsx,Support,4652
 platform/spa/src/styles.css,Administrative/internal,11525
 platform/spa/ssr-smoke.jsx,Administrative/internal,2674
 platform/spa/vite.config.js,Administrative/internal,963
-platform/src/app.js,Administrative/internal,9890
-platform/src/core/config.js,Administrative/internal,9854
+platform/src/app.js,Administrative/internal,9941
+platform/src/core/config.js,Administrative/internal,10225
 platform/src/core/cors.js,Administrative/internal,2113
 platform/src/core/errors.js,Administrative/internal,2667
 platform/src/core/http.js,Administrative/internal,12320
 platform/src/core/logger.js,Administrative/internal,3289
 platform/src/core/ratelimit.js,Administrative/internal,3545
 platform/src/core/router.js,Administrative/internal,7736
-platform/src/core/security.js,Administrative/internal,1967
+platform/src/core/security.js,Administrative/internal,3163
 platform/src/core/static.js,Administrative/internal,8773
 platform/src/core/validate.js,Administrative/internal,15372
 platform/src/domains/account-identity.js,Client Area,9811
@@ -5781,7 +5785,7 @@ robots.php,Administrative/internal,3812
 robots.txt,Administrative/internal,2458
 scripts/audit-builder-widget-classes.py,Administrative/internal,8690
 scripts/audit-legacy-branding-in-database.sql,Administrative/internal,12351
-scripts/audit-navigation-inventory.py,Administrative/internal,14582
+scripts/audit-navigation-inventory.py,Administrative/internal,31373
 scripts/branding-audit.py,Administrative/internal,18171
 scripts/build-production-zip.py,Administrative/internal,17289
 scripts/check-accessibility-contract.py,Administrative/internal,17389
@@ -5806,18 +5810,19 @@ scripts/php-wasm/package.json,Administrative/internal,293
 scripts/php-wasm/php,Administrative/internal,2913
 scripts/php-wasm/shim.mjs,Administrative/internal,3047
 scripts/regen-php-pages.cjs,Administrative/internal,30476
-scripts/release-candidate-check.sh,Administrative/internal,12177
+scripts/release-candidate-check.sh,Administrative/internal,13018
 scripts/site/catalogue-visuals.mjs,Administrative/internal,2819
 scripts/site/check-links.mjs,Administrative/internal,23279
 scripts/site/extract-legal-pdf.mjs,Administrative/internal,5386
 scripts/site/extract-legal.mjs,Administrative/internal,11040
-scripts/site/generate.mjs,Administrative/internal,76251
+scripts/site/generate.mjs,Administrative/internal,79429
 scripts/staging-backup-verify.php,Administrative/internal,2010
 scripts/staging-baseline-evidence.php,Administrative/internal,3738
 scripts/staging-financial-snapshot.php,Administrative/internal,2421
 scripts/staging-preflight.php,Administrative/internal,5191
 scripts/tools-preview-server.mjs,Administrative/internal,3943
 scripts/validate-migrations.py,Administrative/internal,3136
+scripts/verify-rendered-site.sh,Administrative/internal,5156
 scripts/verify-website.py,Administrative/internal,19553
 security.php,Administrative/internal,469
 server-agent/README.md,Administrative/internal,4995
@@ -5939,11 +5944,11 @@ templates/cloudhost247/includes/product-plans.tpl,Administrative/internal,1501
 templates/cloudhost247/includes/product-sections.tpl,Administrative/internal,5498
 templates/cloudhost247/includes/search-form.tpl,Marketing,374
 templates/cloudhost247/includes/site-cta.tpl,Administrative/internal,430
-templates/cloudhost247/includes/site-footer.tpl,Administrative/internal,1133
+templates/cloudhost247/includes/site-footer.tpl,Administrative/internal,1170
 templates/cloudhost247/includes/site-head.tpl,Administrative/internal,2183
 templates/cloudhost247/includes/site-nav.tpl,Administrative/internal,3758
 templates/cloudhost247/includes/visual.tpl,Administrative/internal,2106
-templates/cloudhost247/js/site.js,Administrative/internal,8665
+templates/cloudhost247/js/site.js,Administrative/internal,9139
 templates/cloudhost247/js/tools-local.js,Developer,149919
 templates/cloudhost247/js/tools.js,Developer,19447
 templates/cloudhost247/js/vendor/JSQR-LICENSE,Administrative/internal,11358
@@ -7914,7 +7919,7 @@ tests/rdp/run.php,Administrative/internal,6328
 tests/rdp/test_static.py,Administrative/internal,9059
 tests/security/test_archive_integration.py,Administrative/internal,8737
 tests/security/test_domain_data_provenance.py,Administrative/internal,13016
-tests/security/test_release_gate_static.py,Administrative/internal,23069
+tests/security/test_release_gate_static.py,Administrative/internal,28313
 tests/security/test_release_workflow_docs.py,Administrative/internal,7368
 tests/security/test_security.py,Administrative/internal,12151
 tests/smm/fakes.php,Administrative/internal,16458
@@ -7948,17 +7953,21 @@ tests/tools/run.php,Administrative/internal,53663
 tests/tools/site-integration.php,Administrative/internal,26745
 tests/tools/test_static.py,Administrative/internal,19140
 tests/website/browser.cjs,Administrative/internal,6254
-tests/website/check-fixtures.py,Administrative/internal,17379
+tests/website/check-fixtures.py,Administrative/internal,22835
+tests/website/check-tools-resolution.php,Administrative/internal,5777
 tests/website/preview.py,Administrative/internal,2545
 tests/website/render-fixtures.php,Administrative/internal,13677
 tests/website/render-shell.php,Administrative/internal,2928
 tests/website/run.php,Administrative/internal,24291
 tests/website/test_accessibility_contract.py,Administrative/internal,9045
 tests/website/test_catalogue_honesty.py,Administrative/internal,15446
-tests/website/test_fixture_checks.py,Administrative/internal,5577
+tests/website/test_fixture_checks.py,Administrative/internal,11569
 tests/website/test_manifest_visuals.py,Administrative/internal,1067
 tests/website/test_media_library_parity.py,Administrative/internal,6190
+tests/website/test_page_inventory.py,Administrative/internal,14303
+tests/website/test_report_figures.py,Administrative/internal,8293
 tests/website/test_static.py,Administrative/internal,23317
+tests/website/test_tools_surface.py,Administrative/internal,14948
 tools-sitemap.php,Administrative/internal,4489
 tools/.htaccess,Developer,300
 tools/admin/index.php,Administrative/internal,6119
