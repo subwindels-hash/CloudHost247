@@ -440,6 +440,20 @@ class RenderedSiteGateTests(unittest.TestCase):
         self.assertIn('tests/website/check-fixtures.py', body)
         self.assertIn('scripts/check-hero-render.py', body)
 
+    def test_the_render_script_resolves_the_published_tool_surface(self):
+        # The Tools menu and footer are enriched at runtime from the platform's catalogue, and
+        # `site.js` resolves every anchor it appends against this origin, so the paths the theme
+        # claims to serve are a claim about the PHP resolver. Nothing static can check that: the
+        # anchors do not exist until the browser makes them.
+        self.assertIn('tests/website/check-tools-resolution.php', self.RENDER_SCRIPT.read_text())
+        probe = (ROOT / 'tests' / 'website' / 'check-tools-resolution.php').read_text()
+        # It resolves through the two resolvers the front controller uses, and reports both
+        # directions — a path published but unanswered, and an answered path withheld.
+        self.assertIn('Catalog::resolve', probe)
+        self.assertIn('ToolsSite::resolve', probe)
+        self.assertIn('$missing', probe)
+        self.assertIn('$withheld', probe)
+
     def test_the_render_script_is_portable_and_never_touches_a_database(self):
         body = self.RENDER_SCRIPT.read_text()
         self.assertEqual('#!/usr/bin/env bash', body.splitlines()[0])

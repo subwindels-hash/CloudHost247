@@ -101,5 +101,13 @@ CH247_FIXTURE_DIR="$FIXTURE_DIR" python3 tests/website/check-fixtures.py
 echo
 CH247_FIXTURE_DIR="$FIXTURE_DIR" python3 scripts/check-hero-render.py
 
+# The Tools menu and footer are enriched at runtime from the platform's catalogue, and site.js
+# resolves every anchor it appends against this origin. `site.json` publishes the paths the theme
+# believes this shell answers; this asks the shell. Both directions matter and neither is visible to
+# a static audit, because the anchors do not exist until the browser makes them.
+echo
+echo '== resolving the published tool surface =='
+"$PHP_BIN" tests/website/check-tools-resolution.php
+
 echo
 echo "verify-rendered-site: rendered-site audit passed (fixtures in $FIXTURE_DIR)."

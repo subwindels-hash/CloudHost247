@@ -8,10 +8,13 @@ about it were worth pinning before trusting a number in it:
    (`cart.php`, `clientarea.php`, `knowledgebase.php`, …) were in the navigation and in the sitemaps
    but in no row of the inventory, so a count of "pages" counted 84 files and none of them.
 2. **A row said the page existed; nothing said which runtime serves it.** The tools catalogue the
-   *platform* publishes is wider than the catalogue the *PHP* shell serves — `/tools/business-tools`
-   is in the platform's footer and has no PHP route behind it. Both facts are true and only one of
-   them belongs in a column called "exists", so `route_owner` and `implementation_status` are now
-   separate fields and `canonical_url` is empty for anything this site does not serve.
+   *platform* publishes is wider than the catalogue the *PHP* shell implements, and the first version
+   of this suite read that difference the obvious way: routes only the platform lists were recorded
+   as `platform-app`, `reachable: false`, no canonical. That was wrong. `tools/index.php` resolves
+   through *two* catalogues — the native one and the theme projection it falls through to — and
+   answers the second with an honest noindex signpost page, so about two dozen routes were marked
+   unreachable while a visitor could reach every one of them. The split that measurement supports is
+   working page / signpost / 301 alias, and the rows now say which.
 
 The rules below are checked against a real run of the script, plus unit-level cases for the two
 derivations a reader cannot see from the JSON alone.
@@ -40,12 +43,11 @@ REQUIRED_FIELDS = (
     'template', 'navigation_location', 'footer_location', 'hero_asset', 'seo_status', 'test_status',
 )
 ROUTE_OWNERS = {
-    'cloudhost247-theme', 'whmcs-core', 'tools-front-controller', 'platform-app',
-    'internal', 'unregistered',
+    'cloudhost247-theme', 'whmcs-core', 'tools-front-controller', 'internal', 'unregistered',
 }
 IMPLEMENTATION_STATUSES = {
-    'published', 'published tool route', 'platform-only tool route', 'platform entry point',
-    'internal', 'unregistered',
+    'published', 'published tool route', 'platform signpost route', 'redirect alias',
+    'platform entry point', 'internal', 'unregistered',
 }
 
 
@@ -101,16 +103,35 @@ class PageInventoryTests(unittest.TestCase):
     def test_an_unserved_route_never_claims_a_canonical_address(self):
         # "Not served by this site" and "not reachable" are different facts. A WHMCS entry point
         # such as `announcements.php` is linked from the Resources menu and served by the licensed
-        # platform, so it is reachable and still has no canonical address here; a platform-only tool
-        # route is neither served by the PHP shell nor linked from the PHP navigation.
+        # platform, so it is reachable and still has no canonical address here.
         for row in self.rows:
             if row['implementation_status'] == 'platform entry point':
                 self.assertEqual('', row['canonical_url'],
                                  f"{row['php_page']} claims an address this site does not serve")
-            if row['route_owner'] == 'platform-app':
-                self.assertEqual('', row['canonical_url'], row['php_page'])
-                self.assertFalse(row['reachable'], row['php_page'])
-                self.assertIn('blocked', row['test_status'], row['php_page'])
+
+    def test_a_redirect_alias_canonicalises_to_its_target(self):
+        # A 301 alias is a public URL, not a page: its canonical address is the tool's, and the tool
+        # it points at has to be a page this inventory also lists, or the redirect lands on a 404.
+        aliases = self.rows_where(implementation_status='redirect alias')
+        self.assertTrue(aliases, 'no redirect alias rows: the front controller answers legacyPaths')
+        paths = {row['path'] for row in self.rows}
+        for row in aliases:
+            self.assertNotEqual(row['path'], row['canonical_url'], row['php_page'])
+            self.assertIn(row['canonical_url'], paths, f"{row['path']} → {row['canonical_url']}")
+            self.assertEqual('redirects (301)', row['seo_status'], row['php_page'])
+            self.assertTrue(row['reachable'], row['php_page'])
+
+    def test_a_signpost_route_says_it_is_a_signpost(self):
+        # The tool routes the PHP shell answers from the theme projection render a noindex page that
+        # hands over to the platform. Recording them as ordinary published tools would overstate what
+        # a visitor gets; recording them as unreachable, which this suite used to do, understates it.
+        signposts = self.rows_where(implementation_status='platform signpost route')
+        self.assertTrue(signposts, 'no signpost rows: the shell falls through to the theme catalogue')
+        for row in signposts:
+            self.assertEqual('tools-front-controller', row['route_owner'], row['php_page'])
+            self.assertEqual('noindex signpost', row['seo_status'], row['php_page'])
+            self.assertTrue(row['reachable'], row['php_page'])
+            self.assertEqual(f"/{row['path'].lstrip('/')}", row['canonical_url'], row['php_page'])
 
     def test_a_blocked_check_is_named_as_blocked(self):
         # A green local run must not be readable as a green release: the two checks that need a
@@ -148,6 +169,12 @@ class PageInventoryTests(unittest.TestCase):
                     continue
                 self.assertIn(name, legend, f'{name} is cited as a check but has no command')
 
+    def test_dangling_redirects_and_duplicate_canonicals_are_reported(self):
+        # Both are silent index failures: a 301 that lands on a 404 loses the visitor, and two pages
+        # naming one canonical address drops one of them from the index with no error anywhere.
+        self.assertEqual([], self.report['defects']['dangling_redirect_targets'])
+        self.assertEqual([], self.report['defects']['duplicate_canonical_addresses'])
+
     def test_the_gate_regenerates_and_compares_the_inventory(self):
         gate = GATE.read_text()
         self.assertIn('scripts/audit-navigation-inventory.py', gate)
@@ -177,20 +204,31 @@ class RouteOwnerTests(unittest.TestCase):
                       'hero-render', 'accessibility-contract'):
             self.assertIn(check, status)
 
-    def test_the_php_served_tools_match_the_catalogue_the_shell_reads(self):
-        served, platform_only = inventory.tool_entries()
-        # 135 is what `Catalog::resolve()` answers for when asked for the same candidates; the two
-        # lists are compared end to end wherever PHP is available (see the audit report). What is
-        # pinned here is the shape: the two sets are disjoint, and every served route is a path.
-        self.assertGreater(len(served), 100)
-        self.assertTrue(set(served).isdisjoint(platform_only), sorted(set(served) & set(platform_only)))
-        for route in list(served) + list(platform_only):
+    def test_every_tool_route_is_classified_by_the_catalogue_that_answers_it(self):
+        entries = inventory.tool_entries()
+        # 265 routes: 135 from the native catalogue plus the 130 the theme projection adds. The set is
+        # compared against what the front controller actually answers wherever PHP is available
+        # (`scripts/verify-rendered-site.sh`), so what is pinned here is the shape of the derivation.
+        self.assertGreater(len(entries), 200)
+        for route, entry in entries.items():
             self.assertTrue(route == 'tools' or route.startswith('tools/'), route)
+            self.assertIn(entry['surface'], {'native', 'signpost', 'redirect'}, route)
+            if entry['surface'] == 'redirect':
+                self.assertEqual('/' + entry['redirect_to'].lstrip('/'), entry['redirect_to'], route)
+                self.assertNotEqual(entry['redirect_to'], '/' + route, route)
 
-    def test_the_platform_only_routes_are_the_ones_the_php_shell_cannot_serve(self):
-        _, platform_only = inventory.tool_entries()
-        self.assertIn('tools/business-tools', platform_only,
-                      'the platform publishes /tools/business-tools and the PHP shell does not')
+    def test_a_route_only_the_theme_projection_knows_is_a_signpost_not_a_404(self):
+        # The defect this case exists for: `/tools/business-tools` is in the shared registry's Tools
+        # menu and footer, the platform routes it, and `Catalog::resolve()` returns null for it. It
+        # was recorded here as unreachable. It is answered by `Theme\ToolsSite::resolve()`, and the
+        # front controller renders the signpost page for it rather than a 404.
+        entries = inventory.tool_entries()
+        self.assertIn('tools/business-tools', entries)
+        self.assertEqual('signpost', entries['tools/business-tools']['surface'])
+        for route in ('tools/ip-lookup', 'tools/spf-checker', 'tools/subnet-calculator',
+                      'tools/json-tools'):
+            self.assertIn(route, entries, route)
+            self.assertIn(entries[route]['surface'], {'native', 'signpost'}, route)
 
     def test_strict_mode_fails_only_when_a_structural_defect_exists(self):
         result = subprocess.run([sys.executable, str(SCRIPT), '--strict',

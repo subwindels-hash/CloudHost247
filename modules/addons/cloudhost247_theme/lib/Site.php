@@ -44,25 +44,16 @@ final class Site
             'applicationManifests' => $script === 'applications.php' ? json_decode(file_get_contents(dirname(__DIR__) . '/resources/applications.json'), true)['apps'] : array(),
             'toolCategories' => isset($catalog['toolCategories']) && is_array($catalog['toolCategories']) ? $catalog['toolCategories'] : array(),
             /*
-             * The `/tools/...` paths this PHP installation serves, as a JSON array for the browser.
+             * The `/tools/...` paths this PHP installation answers, from the theme registry.
              *
-             * The Tools menu and footer are enriched at runtime from the platform's live catalogue,
-             * and that catalogue is wider than this shell's — it publishes `/tools/business-tools`,
-             * `/tools/ip-lookup`, `/tools/spf-checker`, `/tools/subnet-calculator` and
-             * `/tools/json-tools`, none of which `tools/index.php` resolves. The script resolves the
-             * links it appends against *this* origin, so without this list every page's footer gains
-             * a handful of 404s a second after load. No static link audit can see that: the links do
-             * not exist until the script creates them.
-             *
-             * Generated into the registry by `scripts/site/generate.mjs` from the same catalogue the
-             * shell reads, and freshness-checked by the release candidate, so it cannot drift from
-             * what the shell actually resolves.
+             * This is the measurement `tests/website/check-tools-resolution.php` checks the shell
+             * against, and the smoke test for rendered pages asserts its size. It is deliberately
+             * *not* published to the browser: at 265 entries it cost 9 KB of the rendered homepage
+             * (44% of the page's compressed transfer size) to guard a redirect the theme's footer
+             * links already avoid, so the invariant is enforced in the gate rather than shipped to
+             * every visitor. `tests/website/test_tools_surface.py` pins that decision.
              */
             'toolsServed' => isset($catalog['toolsServed']) && is_array($catalog['toolsServed']) ? $catalog['toolsServed'] : array(),
-            'toolsServedJson' => json_encode(
-                isset($catalog['toolsServed']) && is_array($catalog['toolsServed']) ? array_values($catalog['toolsServed']) : array(),
-                JSON_UNESCAPED_SLASHES
-            ),
             'pages' => $catalog['pages'], 'page' => $page, 'home' => $home,
             'public' => $home || $page !== null || in_array($script, array('notfound.php', 'site-search.php', 'service-error.php'), true),
             'path' => $script, 'base' => $base, 'platform' => $platform,

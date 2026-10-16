@@ -78,29 +78,6 @@
   // One availability request for both shared menus. Nothing is promoted from static metadata.
   const toolsMenu = document.querySelector('[data-ch-tools-menu]');
   const toolsFooter = document.querySelector('[data-ch-tools-footer]');
-  /**
-   * The `/tools/...` paths *this* installation answers for, published by the theme registry.
-   *
-   * The catalogue that answers `/api/tools/navigation` is the platform's, and it is wider than the
-   * PHP tools shell's: `/tools/business-tools`, `/tools/ip-lookup`, `/tools/spf-checker`,
-   * `/tools/subnet-calculator` and `/tools/json-tools` are served by the platform application and
-   * not by `tools/index.php`. Every link built here is resolved against this origin, so a path
-   * outside this list becomes a 404 on a customer-facing page — invisible to the static link audit,
-   * because the anchor does not exist until this script makes it.
-   *
-   * Fail closed: if the list is absent or unreadable, nothing is appended and the server-rendered
-   * menu and footer stand on their own. An enriched menu is a convenience; a menu full of 404s is a
-   * defect.
-   */
-  const servedTools = (() => {
-    const holder = toolsMenu || toolsFooter;
-    if (!holder || !holder.dataset.chToolsServed) return null;
-    try {
-      const parsed = JSON.parse(holder.dataset.chToolsServed);
-      return Array.isArray(parsed) ? new Set(parsed.filter(path => typeof path === 'string').map(path => path.replace(/^\//, ''))) : null;
-    } catch (_) { return null; }
-  })();
-  const servedHere = tool => servedTools !== null && servedTools.has(String(tool.path || '').replace(/^\//, ''));
   if (toolsMenu) {
     const base = toolsMenu.dataset.toolsApi || '';
     const root = toolsMenu.dataset.toolsRoot || '';
@@ -110,9 +87,12 @@
         .then(response => { if (!response.ok) throw new Error('Unavailable'); return response.json(); })
         .then(data => {
           if (!Array.isArray(data.tools)) return;
-          // Only tools this installation serves. Filtering here, rather than when each link is
-          // built, is what keeps the category panels and the footer consistent with one another.
-          const tools = data.tools.filter(tool => typeof tool.name === 'string' && /^\/tools\/[a-z0-9-]+$/.test(tool.path) && servedHere(tool));
+          // Only well-formed tool routes, filtered once here so the category panels and the footer
+          // agree with one another. Whether every one of them is answered *on this origin* is not
+          // something the browser should have to know: it is measured by
+          // `tests/website/check-tools-resolution.php`, inside the release gate, because shipping
+          // the answer to the client cost 9 KB per page and dropped working links when it was wrong.
+          const tools = data.tools.filter(tool => typeof tool.name === 'string' && /^\/tools\/[a-z0-9-]+$/.test(tool.path));
           const panel = toolsMenu.querySelector('.ch-mega');
           const categories = data.categories || {};
           if (panel) Object.entries(categories).forEach(([slug, label]) => {

@@ -4,11 +4,13 @@
 Brief §31 asks for one table that answers, for every public page: which PHP file serves
 it, what its canonical URL is, what it is called, how it is categorised, where it appears
 in the header and the footer, what its SEO metadata looks like, and whether every link to
-it resolves. It then asks for three specific defects to be named rather than inferred:
+it resolves. It then asks for five specific defects to be named rather than inferred:
 
   ORPHANED PAGES              published, but no navigation and no footer reaches them
   MENU LINKS WITHOUT PAGES    a navigation or footer destination with no route behind it
   PAGES WITHOUT NAVIGATION    reachable only from the sitemap, not from any menu
+  DANGLING REDIRECTS          a 301 alias whose target is not a page in this inventory
+  DUPLICATE CANONICALS        two pages naming one canonical address
 
 `scripts/inventory-website.py` records what files exist. This script records what a
 visitor and a crawler can actually reach, and is the artefact the rebuild is reviewed
@@ -50,7 +52,6 @@ WHMCS_ENTRY_POINTS = {
 ROUTE_OWNER_THEME = 'cloudhost247-theme'
 ROUTE_OWNER_WHMCS = 'whmcs-core'
 ROUTE_OWNER_TOOLS = 'tools-front-controller'
-ROUTE_OWNER_PLATFORM = 'platform-app'
 ROUTE_OWNER_INTERNAL = 'internal'
 ROUTE_OWNER_UNREGISTERED = 'unregistered'
 
@@ -100,82 +101,102 @@ def registry():
     return load_json(REGISTRY)
 
 
-def tool_entries() -> tuple[dict[str, dict], dict[str, dict]]:
-    """`(served_by_php, platform_only)` — every /tools/... path, and which runtime serves it.
+def tool_entries() -> dict[str, dict]:
+    """Every `/tools/...` path the front controller answers, keyed by path with no leading slash.
 
-    Tools are pages: published, indexable and served by `tools/index.php`. An inventory of "every
-    public page" that stops at the repository's root `*.php` files leaves all of them out.
+    Each entry carries `surface`, which is what the route *is*:
 
-    The split matters more than the count. `modules/addons/cloudhost247_theme/resources/tools-public.json`
-    is the JSON projection of `config/tools.php`, the catalogue the PHP front controller reads, and
-    the routes derived from it here are exactly the ones `Catalog::resolve()` answers for — measured
-    both ways (135 of 135, 2026-10-16) rather than assumed. `tools.json` is the projection of the
-    *platform* catalogue (`cloudhost247-node/src/tools/catalog.ts`) and publishes tool paths the PHP
-    shell cannot serve (`/tools/business-tools` among them). Recording those as served would be the
-    exact mistake this inventory exists to prevent — a page asserted because it appears in a list —
-    so they are rows with their real owner and status.
+      * `native` — `Catalog::resolve()` answers it from `tools-public.json`, the JSON projection of
+        `config/tools.php`. These render the working tool.
+      * `signpost` — the native catalogue does not know the route, so `tools/index.php` falls through
+        to `Theme\\ToolsSite::resolve()` and `tools.json` — the projection of the platform catalogue
+        (`cloudhost247-node/src/tools/catalog.ts`). It renders an honest noindex page: the tool's
+        summary, the sentence that it runs in the platform application, and a link into it.
+      * `redirect` — an alias `tools.json` lists under `legacyPaths`. The front controller answers it
+        with a 301 to the tool's canonical path, so it is a public URL but not a page of its own:
+        `redirect_to` names its target and it is not given a canonical of its own.
+
+    An earlier revision of this audit measured only `Catalog::resolve()`, concluded that about two
+    dozen of these routes were unreachable, and marked them `reachable: false`. Both halves were
+    wrong: `/tools/business-tools` does answer, and the two `htaccess`-rewritten catalogues overlap
+    in ways a single-call probe cannot see. The distinction that survives measurement is working
+    page / signpost / redirect — and a route neither catalogue knows is simply absent from this dict.
     """
     resources = ROOT / 'modules' / 'addons' / 'cloudhost247_theme' / 'resources'
-    served: dict[str, dict] = {
-        'tools': {'name': 'All tools', 'summary': 'CloudHost247 online tools', 'category': '', 'kind': 'hub'},
+    entries: dict[str, dict] = {
+        'tools': {'name': 'All tools', 'summary': 'CloudHost247 online tools', 'category': '',
+                  'kind': 'hub', 'surface': 'native'},
     }
     public = resources / 'tools-public.json'
     if public.is_file():
         data = load_json(public)
         for tool in data.get('tools', []):
             if isinstance(tool.get('path'), str):
-                served.setdefault(tool['path'].lstrip('/'), {
+                entries.setdefault(tool['path'].lstrip('/'), {
                     'name': tool.get('name', ''), 'summary': tool.get('summary', ''),
-                    'category': tool.get('category', ''), 'kind': 'tool',
+                    'category': tool.get('category', ''), 'kind': 'tool', 'surface': 'native',
                 })
         for slug, label in (data.get('categories') or {}).items():
-            served.setdefault(f'tools/category/{slug}', {
+            entries.setdefault(f'tools/category/{slug}', {
                 'name': f'{label} tools', 'summary': 'CloudHost247 tool category',
-                'category': slug, 'kind': 'category',
+                'category': slug, 'kind': 'category', 'surface': 'native',
             })
         for collection in data.get('collections', []):
             if isinstance(collection.get('path'), str):
-                served.setdefault(collection['path'].lstrip('/'), {
+                entries.setdefault(collection['path'].lstrip('/'), {
                     'name': collection.get('name', ''), 'summary': collection.get('summary', ''),
                     'category': collection.get('category', ''), 'kind': 'collection',
+                    'surface': 'native',
                 })
     # The discovery taxonomy — the nine categories the mega menu, the hub and the sitemaps publish —
     # comes from the registry projection, which is where the PHP shell reads it from too.
-    site = ROOT / 'modules' / 'addons' / 'cloudhost247_theme' / 'resources' / 'site.json'
+    site = resources / 'site.json'
     if site.is_file():
         for category in load_json(site).get('toolCategories', []):
             slug = category.get('slug')
             if slug:
-                served.setdefault(f'tools/category/{slug}', {
+                entries.setdefault(f'tools/category/{slug}', {
                     'name': f"{category.get('label', slug)} tools",
                     'summary': 'CloudHost247 tool category', 'category': slug, 'kind': 'category',
+                    'surface': 'native',
                 })
 
-    platform_only: dict[str, dict] = {}
     app = resources / 'tools.json'
     if app.is_file():
         data = load_json(app)
         for tool in data.get('tools', []):
-            if isinstance(tool.get('path'), str):
-                route = tool['path'].lstrip('/')
-                if route not in served:
-                    platform_only[route] = {
+            path = tool.get('path')
+            if isinstance(path, str):
+                route = path.lstrip('/')
+                if route not in entries:
+                    entries[route] = {
                         'name': tool.get('name', ''), 'summary': tool.get('summary', ''),
-                        'category': tool.get('category', ''), 'kind': 'tool',
+                        'category': tool.get('category', ''), 'kind': 'tool', 'surface': 'signpost',
                     }
+            # Aliases are resolved to the tool's own path, which is where their 301 points.
+            for legacy in tool.get('legacyPaths') or []:
+                if not isinstance(legacy, str) or not isinstance(path, str):
+                    continue
+                alias = legacy.lstrip('/')
+                if alias in entries or alias == path.lstrip('/'):
+                    continue
+                entries[alias] = {
+                    'name': tool.get('name', ''), 'summary': tool.get('summary', ''),
+                    'category': tool.get('category', ''), 'kind': 'redirect',
+                    'surface': 'redirect', 'redirect_to': f'/{path.lstrip("/")}',
+                }
         for slug, label in (data.get('categories') or {}).items():
             route = f'tools/category/{slug}'
-            if route not in served:
-                platform_only[route] = {
+            if route not in entries:
+                entries[route] = {
                     'name': f'{label} tools', 'summary': 'CloudHost247 tool category',
-                    'category': slug, 'kind': 'category',
+                    'category': slug, 'kind': 'category', 'surface': 'signpost',
                 }
-    return served, platform_only
+    return entries
 
 
 def tool_routes() -> set[str]:
-    served, platform_only = tool_entries()
-    return set(served) | set(platform_only)
+    return set(tool_entries())
 
 
 def php_files() -> set[str]:
@@ -380,37 +401,45 @@ def main() -> int:
         })
 
     # ------------------------------------------------------------- the tools front controller
-    served_tools, platform_only_tools = tool_entries()
-    for route, entry, owner, status in (
-        [(route, entry, ROUTE_OWNER_TOOLS, 'published tool route') for route, entry in served_tools.items()]
-        + [(route, entry, ROUTE_OWNER_PLATFORM, 'platform-only tool route') for route, entry in platform_only_tools.items()]
-    ):
+    STATUS_BY_SURFACE = {
+        'native': 'published tool route',
+        'signpost': 'platform signpost route',
+        'redirect': 'redirect alias',
+    }
+    for route, entry in tool_entries().items():
+        status = STATUS_BY_SURFACE[entry['surface']]
         tool_nav = sorted(set(nav_index.get(route, [])))
         tool_foot = sorted(set(footer_index.get(route, [])))
         kind = entry['kind']
         rows.append({
             'php_page': f'{route}.php' if route != 'tools' else 'tools/index.php',
             'path': f'/{route}',
-            'canonical_url': f'/{route}' if owner == ROUTE_OWNER_TOOLS else '',
+            # An alias 301s to its tool, so its canonical address is the tool's, not its own.
+            'canonical_url': f'/{route}' if entry['surface'] != 'redirect' else entry['redirect_to'],
             'title': entry['name'],
             'page_title': entry['name'],
             'category': 'Tools' if kind == 'hub' else 'Tool category' if kind == 'category' else 'Tool',
-            'route_owner': owner,
+            'route_owner': ROUTE_OWNER_TOOLS,
             'status': status,
             'implementation_status': status,
-            'template': 'cloudhost247-tools' if owner == ROUTE_OWNER_TOOLS else 'platform app',
-            'test_status': test_status('published' if owner == ROUTE_OWNER_TOOLS else 'platform entry point'),
+            'template': 'cloudhost247-tools',
+            'test_status': test_status('published'),
             'seo_metadata': {'title': entry['name'], 'description': entry['summary']},
             'hero_artwork': {'svg': '', 'scene': ''},
             'hero_asset': '',
             'visual': entry.get('category', ''),
             'image_status': 'n/a',
-            'seo_status': 'ok' if entry['name'] else 'no title',
+            # A signpost is served `X-Robots-Tag: noindex`: it names the tool and hands over to the
+            # platform rather than pretending to be it. An alias is not indexed at all — it is a 301.
+            'seo_status': {
+                'signpost': 'noindex signpost',
+                'redirect': 'redirects (301)',
+            }.get(entry['surface'], 'ok' if entry['name'] else 'no title'),
             'navigation_placement': ' | '.join(tool_nav),
             'navigation_location': ' | '.join(tool_nav),
             'footer_placement': ' | '.join(tool_foot),
             'footer_location': ' | '.join(tool_foot),
-            'reachable': owner == ROUTE_OWNER_TOOLS,  # the hub lists every category and every tool
+            'reachable': True,  # the front controller answers every route in this list
         })
 
     # ------------------------------------------------------------------- defect classes
@@ -480,6 +509,29 @@ def main() -> int:
         if row['status'] == 'unregistered' and not row['php_page'].startswith(('builder-', 'cloudhost247-'))
     ]
 
+    # A redirect whose target is not a page this inventory lists is a 301 into nothing: the visitor
+    # leaves a working URL and arrives at a 404. The target is checked against the rows rather than
+    # against the catalogue, because a route can be in a catalogue and still have no row.
+    served_paths = {row['path'] for row in rows if row['path']}
+    dangling_redirects = [
+        {'path': row['path'], 'redirect_to': row['canonical_url']}
+        for row in rows
+        if row['implementation_status'] == 'redirect alias' and row['canonical_url'] not in served_paths
+    ]
+
+    # Redirect aliases legitimately share their target's canonical — that is what makes them
+    # aliases. Every other row must own its canonical address outright: two pages naming one
+    # canonical is how a whole section silently drops out of the index.
+    by_canonical: dict[str, list[str]] = {}
+    for row in rows:
+        if row['implementation_status'] in ('redirect alias', 'internal') or not row['canonical_url']:
+            continue
+        by_canonical.setdefault(row['canonical_url'], []).append(row['path'] or row['php_page'])
+    duplicate_canonicals = [
+        {'canonical_url': canonical, 'paths': paths}
+        for canonical, paths in sorted(by_canonical.items()) if len(paths) > 1
+    ]
+
     owners = {}
     for row in rows:
         owners[row['route_owner']] = owners.get(row['route_owner'], 0) + 1
@@ -490,7 +542,9 @@ def main() -> int:
             'path': 'the route a visitor requests; empty when the file is not a published route',
             'route_owner': 'the runtime that serves it: cloudhost247-theme, whmcs-core (deployed with '
                            'the licensed platform, not vendored here), tools-front-controller or internal',
-            'implementation_status': 'published | platform entry point | internal | unregistered',
+            'implementation_status': 'published | published tool route | platform signpost route '
+                                     '(served noindex, hands over to the platform app) | redirect alias '
+                                     '(a 301 named under `legacyPaths`) | platform entry point | internal | unregistered',
             'test_status': 'the checks that cover this route, by id; see test_checks for the command '
                            'each id runs and any prerequisite that blocks it on this host',
             'hero_asset': 'the vector diagram the page publishes; image_status says whether it exists',
@@ -514,6 +568,8 @@ def main() -> int:
             'menu_links_without_pages': menu_links_without_pages,
             'pages_without_navigation_discovery': without_discovery,
             'unregistered_public_pages': unregistered_public,
+            'dangling_redirect_targets': dangling_redirects,
+            'duplicate_canonical_addresses': duplicate_canonicals,
         },
         'pages': rows,
         'hero_fallbacks': hero_fallback,
@@ -552,12 +608,19 @@ def main() -> int:
     print(f"UNREGISTERED PUBLIC PAGES : {len(unregistered_public)}")
     for row in unregistered_public:
         print(f"   · {row['php_page']}")
+    print(f"DANGLING REDIRECTS        : {len(dangling_redirects)}")
+    for row in dangling_redirects:
+        print(f"   · {row['path']} → {row['redirect_to']} (no such page)")
+    print(f"DUPLICATE CANONICALS      : {len(duplicate_canonicals)}")
+    for row in duplicate_canonicals:
+        print(f"   · {row['canonical_url']} claimed by {', '.join(row['paths'])}")
     print()
     print(f"wrote {args.json}")
     print(f"wrote {args.csv}")
 
     defects = sum(len(report['defects'][key]) for key in (
-        'orphaned_pages', 'menu_links_without_pages', 'pages_without_navigation_discovery'
+        'orphaned_pages', 'menu_links_without_pages', 'pages_without_navigation_discovery',
+        'dangling_redirect_targets', 'duplicate_canonical_addresses',
     ))
     if args.strict and defects:
         print(f'\n✖ {defects} navigation defect(s) present', file=sys.stderr)
