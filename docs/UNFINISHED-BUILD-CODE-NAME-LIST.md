@@ -203,9 +203,12 @@ visual/browser tests — *NOT PERFORMED*. Production database is read-only from 
   the real shopper/consent requirements on a live account, and whether a live key passes the IP
   allowlist. One further gap that is scheduling, not code: transfers are polled when an operator
   refreshes one (Admin → Domain Services → Refresh) or when anything calls
-  `lib/domain-transfer-service.js#refreshTransfer`. **No scheduler calls it on a timer yet** — the
-  audited Node build had `worker/domain-services-sweep.ts` for that, and a platform equivalent still
-  has to be wired to whatever runs `crons/`. Until it is, a transfer advances only on operator action.
+  `lib/domain-transfer-service.js#refreshTransfer`. ~~No scheduler calls it on a timer yet~~ —
+  **closed 2026-10-16 (commit `27e279ef`):** `platform/src/lib/scheduler.js` runs one tick of
+  every timer-driven cycle (provisioning worker, deployment cycle, paid-order sweep and the
+  transfer-refresh poll over all in-flight transfers), and `platform/src/worker/cron.js`
+  (`npm run cron`) is the crontab entry point — a transfer now advances on the timer as well as
+  on operator action. The remaining part of this gap is live verification, not wiring.
   Run one real availability check, one real catalogue sync and one real transfer refresh through a
   staging deployment before trusting them in production.
 - `platform/domain-services` pricing: a registrar's quote is recorded in
