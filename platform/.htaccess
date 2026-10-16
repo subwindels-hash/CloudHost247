@@ -1,0 +1,68 @@
+# CloudHost247 Platform — cPanel/Passenger deployment configuration
+#
+# This file is automatically read by cPanel's Application Manager (Passenger)
+# when the Node.js application is configured. If you're seeing a 503 error,
+# ensure the Node.js application is created and running in cPanel.
+#
+# Required cPanel setup:
+# 1. cPanel → Software → Setup Node.js App → Create Application
+# 2. Node.js version: 22.x or newer
+# 3. Application mode: Production
+# 4. Application root: platform (or your deployment path)
+# 5. Application URL: your domain (e.g., try.vortexprecisionit.com)
+# 6. Application startup file: server.js
+# 7. Set environment variables in the application settings:
+#    - NODE_ENV=production
+#    - APP_URL=https://your-domain.com
+#    - JWT_SECRET=<generate with: node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))">
+#    - DATABASE_URL=postgresql://... (optional, uses JSON store if not set)
+
+# Passenger/Node.js application directives
+# These are read by cPanel's Application Manager
+PassengerEnabled on
+PassengerAppRoot /home/YOUR_CPANEL_USER/platform
+PassengerBaseURI /
+PassengerNodejs /home/YOUR_CPANEL_USER/nodevenv/platform/22/bin/node
+PassengerAppType node
+PassengerStartupFile server.js
+
+# Security headers
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "DENY"
+  Header always set X-XSS-Protection "1; mode=block"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Disable directory browsing
+Options -Indexes
+
+# Block access to sensitive files
+<FilesMatch "^\.(env|git|gitignore)">
+  Require all denied
+</FilesMatch>
+
+<FilesMatch "\.(log|md|json|lock)$">
+  Require all denied
+</FilesMatch>
+
+# Allow access to public assets
+<Directory "public">
+  Require all granted
+</Directory>
+
+# Rewrite rules for SPA routing
+RewriteEngine On
+RewriteBase /
+
+# Don't rewrite files or directories that exist
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Rewrite everything else to the Node.js application
+RewriteRule ^(.*)$ http://127.0.0.1:3000/$1 [P,L]
+
+# Health check endpoint
+<Location /health>
+  Require all granted
+</Location>

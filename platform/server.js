@@ -35,8 +35,10 @@ function checkNodeVersion() {
 
   if (!ok || tooNew) {
     process.stderr.write(
-      `[server] Node.js ${MIN_NODE.join('.')} or newer (but below 25) is required; `
-      + `this process is running ${process.versions.node}.\n`
+      `[server] FATAL: Node.js ${MIN_NODE.join('.')} or newer (but below 25) is required.\n`
+      + `[server] Current version: ${process.versions.node}\n`
+      + `[server] If using cPanel, update the Node.js version in Setup Node.js App.\n`
+      + `[server] See: docs/CPANEL_DEPLOYMENT.md\n`
     );
     process.exit(1);
   }
