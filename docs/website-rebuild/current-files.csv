@@ -1,11 +1,16 @@
 path,category,bytes
 .gitattributes,Administrative/internal,1920
 .github/workflows/content-hygiene.yml,Administrative/internal,1680
-.github/workflows/independent-foundation.yml,Administrative/internal,2496
+.github/workflows/independent-foundation.yml,Administrative/internal,3681
 .github/workflows/node-platform.yml,Administrative/internal,2799
 .gitignore,Administrative/internal,1009
+CHANGES-SUMMARY.md,Administrative/internal,7430
+FIX-503-ERROR.md,Administrative/internal,6528
+IMPLEMENTATION-SUMMARY.md,Administrative/internal,12511
 PHASE_5_CHECKPOINT_REPORT.md,Administrative/internal,64070
+PRODUCTION-READINESS-REPORT.md,Administrative/internal,23128
 README.md,Administrative/internal,18578
+REPOSITORY-AUDIT-REPORT.md,Administrative/internal,16715
 aboutus.php,Marketing,397
 acceptable-use-policy.php,Legal,382
 all-element-cloudhost247.php,Administrative/internal,666
@@ -88,7 +93,7 @@ assets/images/cloudhost247/blog/documentation-3d-640.webp,Marketing,13892
 assets/images/cloudhost247/blog/documentation-3d-960.avif,Marketing,13663
 assets/images/cloudhost247/blog/documentation-3d-960.webp,Marketing,23752
 assets/images/cloudhost247/blog/documentation-3d.jpg,Marketing,85708
-assets/images/cloudhost247/blog/documentation.svg,Marketing,4184
+assets/images/cloudhost247/blog/documentation.svg,Marketing,1138
 assets/images/cloudhost247/blog/insights-3d-1280.avif,Marketing,20555
 assets/images/cloudhost247/blog/insights-3d-1280.webp,Marketing,35738
 assets/images/cloudhost247/blog/insights-3d-640.avif,Marketing,9176
@@ -137,7 +142,7 @@ assets/images/cloudhost247/cloud/data-centers-3d-640.webp,Cloud,19242
 assets/images/cloudhost247/cloud/data-centers-3d-960.avif,Cloud,26132
 assets/images/cloudhost247/cloud/data-centers-3d-960.webp,Cloud,37446
 assets/images/cloudhost247/cloud/data-centers-3d.jpg,Cloud,120638
-assets/images/cloudhost247/cloud/data-centers.svg,Cloud,4141
+assets/images/cloudhost247/cloud/data-centers.svg,Cloud,1136
 assets/images/cloudhost247/cloud/network-3d-1280.avif,Cloud,37045
 assets/images/cloudhost247/cloud/network-3d-1280.webp,Cloud,55694
 assets/images/cloudhost247/cloud/network-3d-640.avif,Cloud,14106
@@ -145,7 +150,7 @@ assets/images/cloudhost247/cloud/network-3d-640.webp,Cloud,19462
 assets/images/cloudhost247/cloud/network-3d-960.avif,Cloud,24669
 assets/images/cloudhost247/cloud/network-3d-960.webp,Cloud,35922
 assets/images/cloudhost247/cloud/network-3d.jpg,Cloud,121353
-assets/images/cloudhost247/cloud/network.svg,Cloud,4128
+assets/images/cloudhost247/cloud/network.svg,Cloud,1126
 assets/images/cloudhost247/cloud/offers-3d-1280.avif,Cloud,20654
 assets/images/cloudhost247/cloud/offers-3d-1280.webp,Cloud,35676
 assets/images/cloudhost247/cloud/offers-3d-640.avif,Cloud,9747
@@ -153,7 +158,7 @@ assets/images/cloudhost247/cloud/offers-3d-640.webp,Cloud,14442
 assets/images/cloudhost247/cloud/offers-3d-960.avif,Cloud,15181
 assets/images/cloudhost247/cloud/offers-3d-960.webp,Cloud,25288
 assets/images/cloudhost247/cloud/offers-3d.jpg,Cloud,83617
-assets/images/cloudhost247/cloud/offers.svg,Cloud,4127
+assets/images/cloudhost247/cloud/offers.svg,Cloud,4164
 assets/images/cloudhost247/cloud/performance.svg,Cloud,4137
 assets/images/cloudhost247/cloud/private-cloud-3d-1280.avif,Cloud,120337
 assets/images/cloudhost247/cloud/private-cloud-3d-1280.webp,Cloud,162604
@@ -187,7 +192,7 @@ assets/images/cloudhost247/deployment/api-3d-640.webp,Deployment/PaaS,21922
 assets/images/cloudhost247/deployment/api-3d-960.avif,Deployment/PaaS,25378
 assets/images/cloudhost247/deployment/api-3d-960.webp,Deployment/PaaS,36854
 assets/images/cloudhost247/deployment/api-3d.jpg,Deployment/PaaS,113744
-assets/images/cloudhost247/deployment/api.svg,Deployment/PaaS,4136
+assets/images/cloudhost247/deployment/api.svg,Deployment/PaaS,1134
 assets/images/cloudhost247/deployment/deployment-pipeline-3d-1280.avif,Deployment/PaaS,45540
 assets/images/cloudhost247/deployment/deployment-pipeline-3d-1280.webp,Deployment/PaaS,60558
 assets/images/cloudhost247/deployment/deployment-pipeline-3d-640.avif,Deployment/PaaS,14716
@@ -211,7 +216,7 @@ assets/images/cloudhost247/deployment/docker-3d-640.webp,Deployment/PaaS,20124
 assets/images/cloudhost247/deployment/docker-3d-960.avif,Deployment/PaaS,26325
 assets/images/cloudhost247/deployment/docker-3d-960.webp,Deployment/PaaS,37466
 assets/images/cloudhost247/deployment/docker-3d.jpg,Deployment/PaaS,124040
-assets/images/cloudhost247/deployment/docker.svg,Deployment/PaaS,4142
+assets/images/cloudhost247/deployment/docker.svg,Deployment/PaaS,1140
 assets/images/cloudhost247/deployment/laravel-3d-1280.avif,Deployment/PaaS,31337
 assets/images/cloudhost247/deployment/laravel-3d-1280.webp,Deployment/PaaS,49250
 assets/images/cloudhost247/deployment/laravel-3d-640.avif,Deployment/PaaS,13084
@@ -219,7 +224,7 @@ assets/images/cloudhost247/deployment/laravel-3d-640.webp,Deployment/PaaS,18516
 assets/images/cloudhost247/deployment/laravel-3d-960.avif,Deployment/PaaS,22053
 assets/images/cloudhost247/deployment/laravel-3d-960.webp,Deployment/PaaS,33106
 assets/images/cloudhost247/deployment/laravel-3d.jpg,Deployment/PaaS,112812
-assets/images/cloudhost247/deployment/laravel.svg,Deployment/PaaS,4144
+assets/images/cloudhost247/deployment/laravel.svg,Deployment/PaaS,1142
 assets/images/cloudhost247/deployment/nodejs-3d-1280.avif,Deployment/PaaS,21901
 assets/images/cloudhost247/deployment/nodejs-3d-1280.webp,Deployment/PaaS,34460
 assets/images/cloudhost247/deployment/nodejs-3d-640.avif,Deployment/PaaS,8873
@@ -227,7 +232,7 @@ assets/images/cloudhost247/deployment/nodejs-3d-640.webp,Deployment/PaaS,12644
 assets/images/cloudhost247/deployment/nodejs-3d-960.avif,Deployment/PaaS,15390
 assets/images/cloudhost247/deployment/nodejs-3d-960.webp,Deployment/PaaS,23338
 assets/images/cloudhost247/deployment/nodejs-3d.jpg,Deployment/PaaS,85455
-assets/images/cloudhost247/deployment/nodejs.svg,Deployment/PaaS,4146
+assets/images/cloudhost247/deployment/nodejs.svg,Deployment/PaaS,1142
 assets/images/cloudhost247/deployment/paas-3d-1280.avif,Deployment/PaaS,15405
 assets/images/cloudhost247/deployment/paas-3d-1280.webp,Deployment/PaaS,23240
 assets/images/cloudhost247/deployment/paas-3d-640.avif,Deployment/PaaS,6449
@@ -235,7 +240,7 @@ assets/images/cloudhost247/deployment/paas-3d-640.webp,Deployment/PaaS,8626
 assets/images/cloudhost247/deployment/paas-3d-960.avif,Deployment/PaaS,10831
 assets/images/cloudhost247/deployment/paas-3d-960.webp,Deployment/PaaS,15394
 assets/images/cloudhost247/deployment/paas-3d.jpg,Deployment/PaaS,60042
-assets/images/cloudhost247/deployment/paas.svg,Deployment/PaaS,4122
+assets/images/cloudhost247/deployment/paas.svg,Deployment/PaaS,1120
 assets/images/cloudhost247/deployment/php-3d-1280.avif,Deployment/PaaS,29839
 assets/images/cloudhost247/deployment/php-3d-1280.webp,Deployment/PaaS,44898
 assets/images/cloudhost247/deployment/php-3d-640.avif,Deployment/PaaS,11468
@@ -243,7 +248,7 @@ assets/images/cloudhost247/deployment/php-3d-640.webp,Deployment/PaaS,15454
 assets/images/cloudhost247/deployment/php-3d-960.avif,Deployment/PaaS,20282
 assets/images/cloudhost247/deployment/php-3d-960.webp,Deployment/PaaS,29472
 assets/images/cloudhost247/deployment/php-3d.jpg,Deployment/PaaS,100292
-assets/images/cloudhost247/deployment/php.svg,Deployment/PaaS,4135
+assets/images/cloudhost247/deployment/php.svg,Deployment/PaaS,1134
 assets/images/cloudhost247/deployment/python-3d-1280.avif,Deployment/PaaS,30001
 assets/images/cloudhost247/deployment/python-3d-1280.webp,Deployment/PaaS,45366
 assets/images/cloudhost247/deployment/python-3d-640.avif,Deployment/PaaS,13249
@@ -251,7 +256,7 @@ assets/images/cloudhost247/deployment/python-3d-640.webp,Deployment/PaaS,17822
 assets/images/cloudhost247/deployment/python-3d-960.avif,Deployment/PaaS,21455
 assets/images/cloudhost247/deployment/python-3d-960.webp,Deployment/PaaS,31142
 assets/images/cloudhost247/deployment/python-3d.jpg,Deployment/PaaS,100173
-assets/images/cloudhost247/deployment/python.svg,Deployment/PaaS,4141
+assets/images/cloudhost247/deployment/python.svg,Deployment/PaaS,1140
 assets/images/cloudhost247/domains/dns-management-3d-1280.avif,Domains,128684
 assets/images/cloudhost247/domains/dns-management-3d-1280.webp,Domains,159704
 assets/images/cloudhost247/domains/dns-management-3d-640.avif,Domains,47845
@@ -259,7 +264,7 @@ assets/images/cloudhost247/domains/dns-management-3d-640.webp,Domains,53792
 assets/images/cloudhost247/domains/dns-management-3d-960.avif,Domains,85724
 assets/images/cloudhost247/domains/dns-management-3d-960.webp,Domains,103254
 assets/images/cloudhost247/domains/dns-management-3d.jpg,Domains,271280
-assets/images/cloudhost247/domains/dns-management.svg,Domains,4189
+assets/images/cloudhost247/domains/dns-management.svg,Domains,1140
 assets/images/cloudhost247/domains/domain-dns-3d-1280.avif,Domains,24221
 assets/images/cloudhost247/domains/domain-dns-3d-1280.webp,Domains,40118
 assets/images/cloudhost247/domains/domain-dns-3d-640.avif,Domains,10726
@@ -267,7 +272,7 @@ assets/images/cloudhost247/domains/domain-dns-3d-640.webp,Domains,15676
 assets/images/cloudhost247/domains/domain-dns-3d-960.avif,Domains,17153
 assets/images/cloudhost247/domains/domain-dns-3d-960.webp,Domains,27274
 assets/images/cloudhost247/domains/domain-dns-3d.jpg,Domains,93977
-assets/images/cloudhost247/domains/domain-dns.svg,Domains,4182
+assets/images/cloudhost247/domains/domain-dns.svg,Domains,1132
 assets/images/cloudhost247/domains/domain-network-3d-1280.avif,Domains,87508
 assets/images/cloudhost247/domains/domain-network-3d-1280.webp,Domains,107028
 assets/images/cloudhost247/domains/domain-network-3d-640.avif,Domains,29256
@@ -307,7 +312,7 @@ assets/images/cloudhost247/hosting/business-hosting-3d-640.webp,Hosting,32584
 assets/images/cloudhost247/hosting/business-hosting-3d-960.avif,Hosting,46782
 assets/images/cloudhost247/hosting/business-hosting-3d-960.webp,Hosting,64492
 assets/images/cloudhost247/hosting/business-hosting-3d.jpg,Hosting,189329
-assets/images/cloudhost247/hosting/business-hosting.svg,Hosting,4120
+assets/images/cloudhost247/hosting/business-hosting.svg,Hosting,1144
 assets/images/cloudhost247/hosting/cpanel-hosting-3d-1280.avif,Hosting,117148
 assets/images/cloudhost247/hosting/cpanel-hosting-3d-1280.webp,Hosting,148006
 assets/images/cloudhost247/hosting/cpanel-hosting-3d-640.avif,Hosting,45035
@@ -457,7 +462,7 @@ assets/images/cloudhost247/management/backups-3d-640.webp,Server Management,2617
 assets/images/cloudhost247/management/backups-3d-960.avif,Server Management,31959
 assets/images/cloudhost247/management/backups-3d-960.webp,Server Management,46944
 assets/images/cloudhost247/management/backups-3d.jpg,Server Management,140904
-assets/images/cloudhost247/management/backups.svg,Server Management,4169
+assets/images/cloudhost247/management/backups.svg,Server Management,1126
 assets/images/cloudhost247/management/dns.svg,Domains,4289
 assets/images/cloudhost247/management/firewall-3d-1280.avif,Server Management,39251
 assets/images/cloudhost247/management/firewall-3d-1280.webp,Server Management,59764
@@ -474,7 +479,7 @@ assets/images/cloudhost247/management/help-center-3d-640.webp,Support,19960
 assets/images/cloudhost247/management/help-center-3d-960.avif,Support,21784
 assets/images/cloudhost247/management/help-center-3d-960.webp,Support,36018
 assets/images/cloudhost247/management/help-center-3d.jpg,Support,111723
-assets/images/cloudhost247/management/help-center.svg,Support,4305
+assets/images/cloudhost247/management/help-center.svg,Support,4074
 assets/images/cloudhost247/management/ip-management-3d-1280.avif,Administrative/internal,33113
 assets/images/cloudhost247/management/ip-management-3d-1280.webp,Administrative/internal,50406
 assets/images/cloudhost247/management/ip-management-3d-640.avif,Administrative/internal,13032
@@ -482,7 +487,7 @@ assets/images/cloudhost247/management/ip-management-3d-640.webp,Administrative/i
 assets/images/cloudhost247/management/ip-management-3d-960.avif,Administrative/internal,22611
 assets/images/cloudhost247/management/ip-management-3d-960.webp,Administrative/internal,33694
 assets/images/cloudhost247/management/ip-management-3d.jpg,Administrative/internal,104830
-assets/images/cloudhost247/management/ip-management.svg,Administrative/internal,4308
+assets/images/cloudhost247/management/ip-management.svg,Administrative/internal,1138
 assets/images/cloudhost247/management/managed-services-3d-1280.avif,Administrative/internal,35146
 assets/images/cloudhost247/management/managed-services-3d-1280.webp,Administrative/internal,53466
 assets/images/cloudhost247/management/managed-services-3d-640.avif,Administrative/internal,14790
@@ -490,7 +495,7 @@ assets/images/cloudhost247/management/managed-services-3d-640.webp,Administrativ
 assets/images/cloudhost247/management/managed-services-3d-960.avif,Administrative/internal,24369
 assets/images/cloudhost247/management/managed-services-3d-960.webp,Administrative/internal,36026
 assets/images/cloudhost247/management/managed-services-3d.jpg,Administrative/internal,114025
-assets/images/cloudhost247/management/managed-services.svg,Administrative/internal,4314
+assets/images/cloudhost247/management/managed-services.svg,Administrative/internal,1144
 assets/images/cloudhost247/management/migration-3d-1280.avif,Administrative/internal,29368
 assets/images/cloudhost247/management/migration-3d-1280.webp,Administrative/internal,44686
 assets/images/cloudhost247/management/migration-3d-640.avif,Administrative/internal,11268
@@ -570,7 +575,7 @@ assets/images/cloudhost247/security/platform-security-3d-640.webp,Administrative
 assets/images/cloudhost247/security/platform-security-3d-960.avif,Administrative/internal,20743
 assets/images/cloudhost247/security/platform-security-3d-960.webp,Administrative/internal,31444
 assets/images/cloudhost247/security/platform-security-3d.jpg,Administrative/internal,103585
-assets/images/cloudhost247/security/platform-security.svg,Administrative/internal,4161
+assets/images/cloudhost247/security/platform-security.svg,Administrative/internal,1128
 assets/images/cloudhost247/security/reliability.svg,Administrative/internal,4170
 assets/images/cloudhost247/security/security-3d-1280.avif,Administrative/internal,117988
 assets/images/cloudhost247/security/security-3d-1280.webp,Administrative/internal,155028
@@ -848,7 +853,7 @@ cloudhost247-node/frontend/public/media/cloudhost247/blog/documentation-3d-640.w
 cloudhost247-node/frontend/public/media/cloudhost247/blog/documentation-3d-960.avif,Marketing,13663
 cloudhost247-node/frontend/public/media/cloudhost247/blog/documentation-3d-960.webp,Marketing,23752
 cloudhost247-node/frontend/public/media/cloudhost247/blog/documentation-3d.jpg,Marketing,85708
-cloudhost247-node/frontend/public/media/cloudhost247/blog/documentation.svg,Marketing,4184
+cloudhost247-node/frontend/public/media/cloudhost247/blog/documentation.svg,Marketing,1138
 cloudhost247-node/frontend/public/media/cloudhost247/blog/insights-3d-1280.avif,Marketing,20555
 cloudhost247-node/frontend/public/media/cloudhost247/blog/insights-3d-1280.webp,Marketing,35738
 cloudhost247-node/frontend/public/media/cloudhost247/blog/insights-3d-640.avif,Marketing,9176
@@ -896,7 +901,7 @@ cloudhost247-node/frontend/public/media/cloudhost247/cloud/data-centers-3d-640.w
 cloudhost247-node/frontend/public/media/cloudhost247/cloud/data-centers-3d-960.avif,Cloud,26132
 cloudhost247-node/frontend/public/media/cloudhost247/cloud/data-centers-3d-960.webp,Cloud,37446
 cloudhost247-node/frontend/public/media/cloudhost247/cloud/data-centers-3d.jpg,Cloud,120638
-cloudhost247-node/frontend/public/media/cloudhost247/cloud/data-centers.svg,Cloud,4141
+cloudhost247-node/frontend/public/media/cloudhost247/cloud/data-centers.svg,Cloud,1136
 cloudhost247-node/frontend/public/media/cloudhost247/cloud/network-3d-1280.avif,Cloud,37045
 cloudhost247-node/frontend/public/media/cloudhost247/cloud/network-3d-1280.webp,Cloud,55694
 cloudhost247-node/frontend/public/media/cloudhost247/cloud/network-3d-640.avif,Cloud,14106
@@ -904,7 +909,7 @@ cloudhost247-node/frontend/public/media/cloudhost247/cloud/network-3d-640.webp,C
 cloudhost247-node/frontend/public/media/cloudhost247/cloud/network-3d-960.avif,Cloud,24669
 cloudhost247-node/frontend/public/media/cloudhost247/cloud/network-3d-960.webp,Cloud,35922
 cloudhost247-node/frontend/public/media/cloudhost247/cloud/network-3d.jpg,Cloud,121353
-cloudhost247-node/frontend/public/media/cloudhost247/cloud/network.svg,Cloud,4128
+cloudhost247-node/frontend/public/media/cloudhost247/cloud/network.svg,Cloud,1126
 cloudhost247-node/frontend/public/media/cloudhost247/cloud/offers-3d-1280.avif,Cloud,20654
 cloudhost247-node/frontend/public/media/cloudhost247/cloud/offers-3d-1280.webp,Cloud,35676
 cloudhost247-node/frontend/public/media/cloudhost247/cloud/offers-3d-640.avif,Cloud,9747
@@ -912,7 +917,7 @@ cloudhost247-node/frontend/public/media/cloudhost247/cloud/offers-3d-640.webp,Cl
 cloudhost247-node/frontend/public/media/cloudhost247/cloud/offers-3d-960.avif,Cloud,15181
 cloudhost247-node/frontend/public/media/cloudhost247/cloud/offers-3d-960.webp,Cloud,25288
 cloudhost247-node/frontend/public/media/cloudhost247/cloud/offers-3d.jpg,Cloud,83617
-cloudhost247-node/frontend/public/media/cloudhost247/cloud/offers.svg,Cloud,4127
+cloudhost247-node/frontend/public/media/cloudhost247/cloud/offers.svg,Cloud,4164
 cloudhost247-node/frontend/public/media/cloudhost247/cloud/performance.svg,Cloud,4137
 cloudhost247-node/frontend/public/media/cloudhost247/cloud/private-cloud-3d-1280.avif,Cloud,120337
 cloudhost247-node/frontend/public/media/cloudhost247/cloud/private-cloud-3d-1280.webp,Cloud,162604
@@ -946,7 +951,7 @@ cloudhost247-node/frontend/public/media/cloudhost247/deployment/api-3d-640.webp,
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/api-3d-960.avif,Deployment/PaaS,25378
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/api-3d-960.webp,Deployment/PaaS,36854
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/api-3d.jpg,Deployment/PaaS,113744
-cloudhost247-node/frontend/public/media/cloudhost247/deployment/api.svg,Deployment/PaaS,4136
+cloudhost247-node/frontend/public/media/cloudhost247/deployment/api.svg,Deployment/PaaS,1134
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/deployment-pipeline-3d-1280.avif,Deployment/PaaS,45540
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/deployment-pipeline-3d-1280.webp,Deployment/PaaS,60558
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/deployment-pipeline-3d-640.avif,Deployment/PaaS,14716
@@ -970,7 +975,7 @@ cloudhost247-node/frontend/public/media/cloudhost247/deployment/docker-3d-640.we
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/docker-3d-960.avif,Deployment/PaaS,26325
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/docker-3d-960.webp,Deployment/PaaS,37466
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/docker-3d.jpg,Deployment/PaaS,124040
-cloudhost247-node/frontend/public/media/cloudhost247/deployment/docker.svg,Deployment/PaaS,4142
+cloudhost247-node/frontend/public/media/cloudhost247/deployment/docker.svg,Deployment/PaaS,1140
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/laravel-3d-1280.avif,Deployment/PaaS,31337
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/laravel-3d-1280.webp,Deployment/PaaS,49250
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/laravel-3d-640.avif,Deployment/PaaS,13084
@@ -978,7 +983,7 @@ cloudhost247-node/frontend/public/media/cloudhost247/deployment/laravel-3d-640.w
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/laravel-3d-960.avif,Deployment/PaaS,22053
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/laravel-3d-960.webp,Deployment/PaaS,33106
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/laravel-3d.jpg,Deployment/PaaS,112812
-cloudhost247-node/frontend/public/media/cloudhost247/deployment/laravel.svg,Deployment/PaaS,4144
+cloudhost247-node/frontend/public/media/cloudhost247/deployment/laravel.svg,Deployment/PaaS,1142
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/nodejs-3d-1280.avif,Deployment/PaaS,21901
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/nodejs-3d-1280.webp,Deployment/PaaS,34460
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/nodejs-3d-640.avif,Deployment/PaaS,8873
@@ -986,7 +991,7 @@ cloudhost247-node/frontend/public/media/cloudhost247/deployment/nodejs-3d-640.we
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/nodejs-3d-960.avif,Deployment/PaaS,15390
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/nodejs-3d-960.webp,Deployment/PaaS,23338
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/nodejs-3d.jpg,Deployment/PaaS,85455
-cloudhost247-node/frontend/public/media/cloudhost247/deployment/nodejs.svg,Deployment/PaaS,4146
+cloudhost247-node/frontend/public/media/cloudhost247/deployment/nodejs.svg,Deployment/PaaS,1142
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/paas-3d-1280.avif,Deployment/PaaS,15405
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/paas-3d-1280.webp,Deployment/PaaS,23240
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/paas-3d-640.avif,Deployment/PaaS,6449
@@ -994,7 +999,7 @@ cloudhost247-node/frontend/public/media/cloudhost247/deployment/paas-3d-640.webp
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/paas-3d-960.avif,Deployment/PaaS,10831
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/paas-3d-960.webp,Deployment/PaaS,15394
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/paas-3d.jpg,Deployment/PaaS,60042
-cloudhost247-node/frontend/public/media/cloudhost247/deployment/paas.svg,Deployment/PaaS,4122
+cloudhost247-node/frontend/public/media/cloudhost247/deployment/paas.svg,Deployment/PaaS,1120
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/php-3d-1280.avif,Deployment/PaaS,29839
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/php-3d-1280.webp,Deployment/PaaS,44898
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/php-3d-640.avif,Deployment/PaaS,11468
@@ -1002,7 +1007,7 @@ cloudhost247-node/frontend/public/media/cloudhost247/deployment/php-3d-640.webp,
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/php-3d-960.avif,Deployment/PaaS,20282
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/php-3d-960.webp,Deployment/PaaS,29472
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/php-3d.jpg,Deployment/PaaS,100292
-cloudhost247-node/frontend/public/media/cloudhost247/deployment/php.svg,Deployment/PaaS,4135
+cloudhost247-node/frontend/public/media/cloudhost247/deployment/php.svg,Deployment/PaaS,1134
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/python-3d-1280.avif,Deployment/PaaS,30001
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/python-3d-1280.webp,Deployment/PaaS,45366
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/python-3d-640.avif,Deployment/PaaS,13249
@@ -1010,7 +1015,7 @@ cloudhost247-node/frontend/public/media/cloudhost247/deployment/python-3d-640.we
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/python-3d-960.avif,Deployment/PaaS,21455
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/python-3d-960.webp,Deployment/PaaS,31142
 cloudhost247-node/frontend/public/media/cloudhost247/deployment/python-3d.jpg,Deployment/PaaS,100173
-cloudhost247-node/frontend/public/media/cloudhost247/deployment/python.svg,Deployment/PaaS,4141
+cloudhost247-node/frontend/public/media/cloudhost247/deployment/python.svg,Deployment/PaaS,1140
 cloudhost247-node/frontend/public/media/cloudhost247/domains/dns-management-3d-1280.avif,Domains,128684
 cloudhost247-node/frontend/public/media/cloudhost247/domains/dns-management-3d-1280.webp,Domains,159704
 cloudhost247-node/frontend/public/media/cloudhost247/domains/dns-management-3d-640.avif,Domains,47845
@@ -1018,7 +1023,7 @@ cloudhost247-node/frontend/public/media/cloudhost247/domains/dns-management-3d-6
 cloudhost247-node/frontend/public/media/cloudhost247/domains/dns-management-3d-960.avif,Domains,85724
 cloudhost247-node/frontend/public/media/cloudhost247/domains/dns-management-3d-960.webp,Domains,103254
 cloudhost247-node/frontend/public/media/cloudhost247/domains/dns-management-3d.jpg,Domains,271280
-cloudhost247-node/frontend/public/media/cloudhost247/domains/dns-management.svg,Domains,4189
+cloudhost247-node/frontend/public/media/cloudhost247/domains/dns-management.svg,Domains,1140
 cloudhost247-node/frontend/public/media/cloudhost247/domains/domain-dns-3d-1280.avif,Domains,24221
 cloudhost247-node/frontend/public/media/cloudhost247/domains/domain-dns-3d-1280.webp,Domains,40118
 cloudhost247-node/frontend/public/media/cloudhost247/domains/domain-dns-3d-640.avif,Domains,10726
@@ -1026,7 +1031,7 @@ cloudhost247-node/frontend/public/media/cloudhost247/domains/domain-dns-3d-640.w
 cloudhost247-node/frontend/public/media/cloudhost247/domains/domain-dns-3d-960.avif,Domains,17153
 cloudhost247-node/frontend/public/media/cloudhost247/domains/domain-dns-3d-960.webp,Domains,27274
 cloudhost247-node/frontend/public/media/cloudhost247/domains/domain-dns-3d.jpg,Domains,93977
-cloudhost247-node/frontend/public/media/cloudhost247/domains/domain-dns.svg,Domains,4182
+cloudhost247-node/frontend/public/media/cloudhost247/domains/domain-dns.svg,Domains,1132
 cloudhost247-node/frontend/public/media/cloudhost247/domains/domain-network-3d-1280.avif,Domains,87508
 cloudhost247-node/frontend/public/media/cloudhost247/domains/domain-network-3d-1280.webp,Domains,107028
 cloudhost247-node/frontend/public/media/cloudhost247/domains/domain-network-3d-640.avif,Domains,29256
@@ -1066,7 +1071,7 @@ cloudhost247-node/frontend/public/media/cloudhost247/hosting/business-hosting-3d
 cloudhost247-node/frontend/public/media/cloudhost247/hosting/business-hosting-3d-960.avif,Hosting,46782
 cloudhost247-node/frontend/public/media/cloudhost247/hosting/business-hosting-3d-960.webp,Hosting,64492
 cloudhost247-node/frontend/public/media/cloudhost247/hosting/business-hosting-3d.jpg,Hosting,189329
-cloudhost247-node/frontend/public/media/cloudhost247/hosting/business-hosting.svg,Hosting,4120
+cloudhost247-node/frontend/public/media/cloudhost247/hosting/business-hosting.svg,Hosting,1144
 cloudhost247-node/frontend/public/media/cloudhost247/hosting/cpanel-hosting-3d-1280.avif,Hosting,117148
 cloudhost247-node/frontend/public/media/cloudhost247/hosting/cpanel-hosting-3d-1280.webp,Hosting,148006
 cloudhost247-node/frontend/public/media/cloudhost247/hosting/cpanel-hosting-3d-640.avif,Hosting,45035
@@ -1216,7 +1221,7 @@ cloudhost247-node/frontend/public/media/cloudhost247/management/backups-3d-640.w
 cloudhost247-node/frontend/public/media/cloudhost247/management/backups-3d-960.avif,Server Management,31959
 cloudhost247-node/frontend/public/media/cloudhost247/management/backups-3d-960.webp,Server Management,46944
 cloudhost247-node/frontend/public/media/cloudhost247/management/backups-3d.jpg,Server Management,140904
-cloudhost247-node/frontend/public/media/cloudhost247/management/backups.svg,Server Management,4169
+cloudhost247-node/frontend/public/media/cloudhost247/management/backups.svg,Server Management,1126
 cloudhost247-node/frontend/public/media/cloudhost247/management/dns.svg,Domains,4289
 cloudhost247-node/frontend/public/media/cloudhost247/management/firewall-3d-1280.avif,Server Management,39251
 cloudhost247-node/frontend/public/media/cloudhost247/management/firewall-3d-1280.webp,Server Management,59764
@@ -1233,7 +1238,7 @@ cloudhost247-node/frontend/public/media/cloudhost247/management/help-center-3d-6
 cloudhost247-node/frontend/public/media/cloudhost247/management/help-center-3d-960.avif,Support,21784
 cloudhost247-node/frontend/public/media/cloudhost247/management/help-center-3d-960.webp,Support,36018
 cloudhost247-node/frontend/public/media/cloudhost247/management/help-center-3d.jpg,Support,111723
-cloudhost247-node/frontend/public/media/cloudhost247/management/help-center.svg,Support,4305
+cloudhost247-node/frontend/public/media/cloudhost247/management/help-center.svg,Support,4074
 cloudhost247-node/frontend/public/media/cloudhost247/management/ip-management-3d-1280.avif,Administrative/internal,33113
 cloudhost247-node/frontend/public/media/cloudhost247/management/ip-management-3d-1280.webp,Administrative/internal,50406
 cloudhost247-node/frontend/public/media/cloudhost247/management/ip-management-3d-640.avif,Administrative/internal,13032
@@ -1241,7 +1246,7 @@ cloudhost247-node/frontend/public/media/cloudhost247/management/ip-management-3d
 cloudhost247-node/frontend/public/media/cloudhost247/management/ip-management-3d-960.avif,Administrative/internal,22611
 cloudhost247-node/frontend/public/media/cloudhost247/management/ip-management-3d-960.webp,Administrative/internal,33694
 cloudhost247-node/frontend/public/media/cloudhost247/management/ip-management-3d.jpg,Administrative/internal,104830
-cloudhost247-node/frontend/public/media/cloudhost247/management/ip-management.svg,Administrative/internal,4308
+cloudhost247-node/frontend/public/media/cloudhost247/management/ip-management.svg,Administrative/internal,1138
 cloudhost247-node/frontend/public/media/cloudhost247/management/managed-services-3d-1280.avif,Administrative/internal,35146
 cloudhost247-node/frontend/public/media/cloudhost247/management/managed-services-3d-1280.webp,Administrative/internal,53466
 cloudhost247-node/frontend/public/media/cloudhost247/management/managed-services-3d-640.avif,Administrative/internal,14790
@@ -1249,7 +1254,7 @@ cloudhost247-node/frontend/public/media/cloudhost247/management/managed-services
 cloudhost247-node/frontend/public/media/cloudhost247/management/managed-services-3d-960.avif,Administrative/internal,24369
 cloudhost247-node/frontend/public/media/cloudhost247/management/managed-services-3d-960.webp,Administrative/internal,36026
 cloudhost247-node/frontend/public/media/cloudhost247/management/managed-services-3d.jpg,Administrative/internal,114025
-cloudhost247-node/frontend/public/media/cloudhost247/management/managed-services.svg,Administrative/internal,4314
+cloudhost247-node/frontend/public/media/cloudhost247/management/managed-services.svg,Administrative/internal,1144
 cloudhost247-node/frontend/public/media/cloudhost247/management/migration-3d-1280.avif,Administrative/internal,29368
 cloudhost247-node/frontend/public/media/cloudhost247/management/migration-3d-1280.webp,Administrative/internal,44686
 cloudhost247-node/frontend/public/media/cloudhost247/management/migration-3d-640.avif,Administrative/internal,11268
@@ -1329,7 +1334,7 @@ cloudhost247-node/frontend/public/media/cloudhost247/security/platform-security-
 cloudhost247-node/frontend/public/media/cloudhost247/security/platform-security-3d-960.avif,Administrative/internal,20743
 cloudhost247-node/frontend/public/media/cloudhost247/security/platform-security-3d-960.webp,Administrative/internal,31444
 cloudhost247-node/frontend/public/media/cloudhost247/security/platform-security-3d.jpg,Administrative/internal,103585
-cloudhost247-node/frontend/public/media/cloudhost247/security/platform-security.svg,Administrative/internal,4161
+cloudhost247-node/frontend/public/media/cloudhost247/security/platform-security.svg,Administrative/internal,1128
 cloudhost247-node/frontend/public/media/cloudhost247/security/reliability.svg,Administrative/internal,4170
 cloudhost247-node/frontend/public/media/cloudhost247/security/security-3d-1280.avif,Administrative/internal,117988
 cloudhost247-node/frontend/public/media/cloudhost247/security/security-3d-1280.webp,Administrative/internal,155028
@@ -2360,7 +2365,7 @@ deployments.php,Deployment/PaaS,328
 developer-friendly.php,Developer,690
 dns-management.php,Domains,487
 docker-hosting.php,Applications,487
-docs/ACCEPTANCE-CRITERIA.md,Administrative/internal,11090
+docs/ACCEPTANCE-CRITERIA.md,Administrative/internal,11665
 docs/API_BILLING.md,Developer,11085
 docs/API_CATALOG.md,Developer,13155
 docs/API_COMMERCE.md,Developer,11835
@@ -2979,8 +2984,8 @@ modules/addons/cloudhost247_theme/lib/Content/ProductComponents.php,Administrati
 modules/addons/cloudhost247_theme/lib/CrawlPolicy.php,Administrative/internal,6168
 modules/addons/cloudhost247_theme/lib/PublicDiscovery.php,Administrative/internal,3483
 modules/addons/cloudhost247_theme/lib/PublicPage.php,Administrative/internal,7526
-modules/addons/cloudhost247_theme/lib/Site.php,Administrative/internal,8506
-modules/addons/cloudhost247_theme/lib/ThemeRepository.php,Administrative/internal,29016
+modules/addons/cloudhost247_theme/lib/Site.php,Administrative/internal,9365
+modules/addons/cloudhost247_theme/lib/ThemeRepository.php,Administrative/internal,29842
 modules/addons/cloudhost247_theme/lib/ToolsSite.php,Administrative/internal,1378
 modules/addons/cloudhost247_theme/lib/View/AdminPanels.php,Administrative/internal,5107
 modules/addons/cloudhost247_theme/lib/View/PreviewRenderer.php,Administrative/internal,9171
@@ -2988,7 +2993,7 @@ modules/addons/cloudhost247_theme/migrations/V100.php,Administrative/internal,12
 modules/addons/cloudhost247_theme/migrations/V110.php,Administrative/internal,969
 modules/addons/cloudhost247_theme/migrations/V120.php,Administrative/internal,2539
 modules/addons/cloudhost247_theme/resources/applications.json,Applications,40749
-modules/addons/cloudhost247_theme/resources/site.json,Administrative/internal,253527
+modules/addons/cloudhost247_theme/resources/site.json,Administrative/internal,261699
 modules/addons/cloudhost247_theme/resources/tools-public.json,Developer,341905
 modules/addons/cloudhost247_theme/resources/tools.json,Developer,71593
 modules/addons/cloudhost247_tools/README.md,Developer,5272
@@ -5385,8 +5390,10 @@ paas.php,Deployment/PaaS,457
 php-hosting.php,Hosting,478
 platform/.env.example,Administrative/internal,3506
 platform/.gitignore,Administrative/internal,185
+platform/.htaccess,Administrative/internal,2206
 platform/MIGRATION.md,Administrative/internal,15025
 platform/README.md,Administrative/internal,12392
+platform/TROUBLESHOOTING-503.md,Administrative/internal,6230
 platform/docs/WEBSITE-REBUILD-VERIFICATION.md,Administrative/internal,19884
 platform/dump-routes.cjs,Administrative/internal,790
 platform/manifests/adguard-home/manifest.yaml,Administrative/internal,1044
@@ -5525,6 +5532,7 @@ platform/scripts/generate-icons.js,Administrative/internal,7440
 platform/scripts/migrate.js,Administrative/internal,1634
 platform/scripts/rehash-passwords.js,Administrative/internal,11702
 platform/scripts/seed.js,Administrative/internal,18039
+platform/scripts/verify-deployment.sh,Administrative/internal,5151
 platform/server.js,Administrative/internal,6389
 platform/spa/index.html,Administrative/internal,593
 platform/spa/package-lock.json,Administrative/internal,62184
@@ -5781,7 +5789,7 @@ robots.php,Administrative/internal,3812
 robots.txt,Administrative/internal,2458
 scripts/audit-builder-widget-classes.py,Administrative/internal,8690
 scripts/audit-legacy-branding-in-database.sql,Administrative/internal,12351
-scripts/audit-navigation-inventory.py,Administrative/internal,14582
+scripts/audit-navigation-inventory.py,Administrative/internal,31373
 scripts/branding-audit.py,Administrative/internal,18171
 scripts/build-production-zip.py,Administrative/internal,17289
 scripts/check-accessibility-contract.py,Administrative/internal,17389
@@ -5793,7 +5801,7 @@ scripts/generate-catalog-assets.py,Administrative/internal,16513
 scripts/generate-global-platform.py,Administrative/internal,90494
 scripts/generate-raster-formats.py,Administrative/internal,15407
 scripts/generate-staging-report.py,Administrative/internal,2823
-scripts/generate-website-assets.py,Administrative/internal,11898
+scripts/generate-website-assets.py,Administrative/internal,12553
 scripts/inventory-website.py,Administrative/internal,5365
 scripts/lib/staging-common.php,Administrative/internal,2362
 scripts/migrate-legacy-names-to-cloudhost247.sql,Administrative/internal,15033
@@ -5806,18 +5814,19 @@ scripts/php-wasm/package.json,Administrative/internal,293
 scripts/php-wasm/php,Administrative/internal,2913
 scripts/php-wasm/shim.mjs,Administrative/internal,3047
 scripts/regen-php-pages.cjs,Administrative/internal,30476
-scripts/release-candidate-check.sh,Administrative/internal,12177
+scripts/release-candidate-check.sh,Administrative/internal,12977
 scripts/site/catalogue-visuals.mjs,Administrative/internal,2819
 scripts/site/check-links.mjs,Administrative/internal,23279
 scripts/site/extract-legal-pdf.mjs,Administrative/internal,5386
 scripts/site/extract-legal.mjs,Administrative/internal,11040
-scripts/site/generate.mjs,Administrative/internal,76251
+scripts/site/generate.mjs,Administrative/internal,79429
 scripts/staging-backup-verify.php,Administrative/internal,2010
 scripts/staging-baseline-evidence.php,Administrative/internal,3738
 scripts/staging-financial-snapshot.php,Administrative/internal,2421
 scripts/staging-preflight.php,Administrative/internal,5191
 scripts/tools-preview-server.mjs,Administrative/internal,3943
 scripts/validate-migrations.py,Administrative/internal,3136
+scripts/verify-rendered-site.sh,Administrative/internal,5156
 scripts/verify-website.py,Administrative/internal,19553
 security.php,Administrative/internal,469
 server-agent/README.md,Administrative/internal,4995
@@ -5939,11 +5948,11 @@ templates/cloudhost247/includes/product-plans.tpl,Administrative/internal,1501
 templates/cloudhost247/includes/product-sections.tpl,Administrative/internal,5498
 templates/cloudhost247/includes/search-form.tpl,Marketing,374
 templates/cloudhost247/includes/site-cta.tpl,Administrative/internal,430
-templates/cloudhost247/includes/site-footer.tpl,Administrative/internal,1133
+templates/cloudhost247/includes/site-footer.tpl,Administrative/internal,1170
 templates/cloudhost247/includes/site-head.tpl,Administrative/internal,2183
 templates/cloudhost247/includes/site-nav.tpl,Administrative/internal,3758
 templates/cloudhost247/includes/visual.tpl,Administrative/internal,2106
-templates/cloudhost247/js/site.js,Administrative/internal,8665
+templates/cloudhost247/js/site.js,Administrative/internal,9139
 templates/cloudhost247/js/tools-local.js,Developer,149919
 templates/cloudhost247/js/tools.js,Developer,19447
 templates/cloudhost247/js/vendor/JSQR-LICENSE,Administrative/internal,11358
@@ -7914,7 +7923,7 @@ tests/rdp/run.php,Administrative/internal,6328
 tests/rdp/test_static.py,Administrative/internal,9059
 tests/security/test_archive_integration.py,Administrative/internal,8737
 tests/security/test_domain_data_provenance.py,Administrative/internal,13016
-tests/security/test_release_gate_static.py,Administrative/internal,23069
+tests/security/test_release_gate_static.py,Administrative/internal,28313
 tests/security/test_release_workflow_docs.py,Administrative/internal,7368
 tests/security/test_security.py,Administrative/internal,12151
 tests/smm/fakes.php,Administrative/internal,16458
@@ -7948,17 +7957,21 @@ tests/tools/run.php,Administrative/internal,53663
 tests/tools/site-integration.php,Administrative/internal,26745
 tests/tools/test_static.py,Administrative/internal,19140
 tests/website/browser.cjs,Administrative/internal,6254
-tests/website/check-fixtures.py,Administrative/internal,17379
+tests/website/check-fixtures.py,Administrative/internal,22835
+tests/website/check-tools-resolution.php,Administrative/internal,5777
 tests/website/preview.py,Administrative/internal,2545
 tests/website/render-fixtures.php,Administrative/internal,13677
 tests/website/render-shell.php,Administrative/internal,2928
 tests/website/run.php,Administrative/internal,24291
 tests/website/test_accessibility_contract.py,Administrative/internal,9045
 tests/website/test_catalogue_honesty.py,Administrative/internal,15446
-tests/website/test_fixture_checks.py,Administrative/internal,5577
+tests/website/test_fixture_checks.py,Administrative/internal,11569
 tests/website/test_manifest_visuals.py,Administrative/internal,1067
 tests/website/test_media_library_parity.py,Administrative/internal,6190
+tests/website/test_page_inventory.py,Administrative/internal,14303
+tests/website/test_report_figures.py,Administrative/internal,8293
 tests/website/test_static.py,Administrative/internal,23317
+tests/website/test_tools_surface.py,Administrative/internal,14948
 tools-sitemap.php,Administrative/internal,4489
 tools/.htaccess,Developer,300
 tools/admin/index.php,Administrative/internal,6119
