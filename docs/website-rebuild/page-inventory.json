@@ -932,7 +932,7 @@
       "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
       "seo_metadata": {
         "title": "DNS Management",
-        "description": "Authoritative edits happen in the client area. The tools are read-only diagnostics."
+        "description": "Where authoritative DNS records for CloudHost247-hosted domains are edited, and what the read-only diagnostic tools can and cannot tell you."
       },
       "hero_artwork": {
         "svg": "domains/dns-management.svg",
@@ -941,7 +941,7 @@
       "hero_asset": "domains/dns-management.svg",
       "visual": "domains/dns-management",
       "image_status": "present",
-      "seo_status": "no seo_description",
+      "seo_status": "ok",
       "navigation_placement": "domains / Domains",
       "navigation_location": "domains / Domains",
       "footer_placement": "Domains",
@@ -1082,7 +1082,7 @@
       "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
       "seo_metadata": {
         "title": "Domain DNS",
-        "description": "Nameserver and record changes are available from the domain management screen after registration."
+        "description": "Where nameserver and DNS record changes are made for a registered domain, and what can be checked without editing the zone."
       },
       "hero_artwork": {
         "svg": "domains/domain-dns.svg",
@@ -1091,7 +1091,7 @@
       "hero_asset": "domains/domain-dns.svg",
       "visual": "domains/domain-dns",
       "image_status": "present",
-      "seo_status": "no seo_description",
+      "seo_status": "ok",
       "navigation_placement": "domains / Domains",
       "navigation_location": "domains / Domains",
       "footer_placement": "Domains",

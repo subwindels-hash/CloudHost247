@@ -603,7 +603,7 @@
             {
               "title": "Network control",
               "body": "Firewall rules attached to the server, applied in a defined order, with the effective ruleset visible in your account.",
-              "icon": "icons/firewall.svg"
+              "icon": "management/firewall.svg"
             },
             {
               "title": "Backups",
@@ -744,7 +744,7 @@
             {
               "title": "Network under your control",
               "body": "Addressing, firewall rules and connectivity designed around the application.",
-              "icon": "icons/network.svg"
+              "icon": "cloud/network.svg"
             },
             {
               "title": "Managed if you want it",
@@ -844,7 +844,7 @@
             {
               "title": "Network control",
               "body": "Firewall rules and private addressing so the instance is only reachable where it should be.",
-              "icon": "icons/firewall.svg"
+              "icon": "management/firewall.svg"
             },
             {
               "title": "Persistence",
@@ -1839,7 +1839,7 @@
               "title": "Infrastructure",
               "body": "Regions, facilities and how the network fits together.",
               "url": "infrastructure.php",
-              "icon": "icons/network.svg"
+              "icon": "cloud/network.svg"
             },
             {
               "title": "Monitoring",
@@ -1850,7 +1850,7 @@
               "title": "Firewalls",
               "body": "Rule-based network filtering per server.",
               "url": "firewall.php",
-              "icon": "icons/firewall.svg"
+              "icon": "management/firewall.svg"
             },
             {
               "title": "Backups",
@@ -2791,7 +2791,7 @@
             {
               "title": "Firewall control",
               "body": "Rules attached to the server, applied in a defined order, with the effective ruleset visible.",
-              "icon": "icons/firewall.svg"
+              "icon": "management/firewall.svg"
             },
             {
               "title": "Backups",
@@ -2902,7 +2902,7 @@
             {
               "title": "Network",
               "body": "Public addressing, firewalling and private networking sit between the facility and your service, configured per server.",
-              "icon": "icons/network.svg"
+              "icon": "cloud/network.svg"
             },
             {
               "title": "Control layer",
@@ -4290,7 +4290,7 @@
             {
               "title": "Addressing and connectivity",
               "body": "IP ranges and the network path are determined by the region the service is deployed into.",
-              "icon": "icons/network.svg"
+              "icon": "cloud/network.svg"
             }
           ]
         }
@@ -4375,7 +4375,7 @@
             {
               "title": "Firewall filtering",
               "body": "Rules applied in order to allow, deny or rate-limit traffic to a server, with the order visible.",
-              "icon": "icons/firewall.svg"
+              "icon": "management/firewall.svg"
             },
             {
               "title": "Flood mitigation",
@@ -4602,7 +4602,7 @@
             {
               "title": "Traffic",
               "body": "Throughput in and out, which is where a traffic spike or a leak is first detectable.",
-              "icon": "icons/network.svg"
+              "icon": "cloud/network.svg"
             },
             {
               "title": "Service state",
@@ -4661,9 +4661,9 @@
         ]
       ],
       "uses": [
-        "New projects",
-        "Migrations",
-        "Teams standardizing on one provider"
+        "Your own copy of critical data",
+        "A tested recovery plan",
+        "A version control system for code"
       ],
       "related": [
         "backup-policy.php",
@@ -4793,7 +4793,7 @@
             {
               "title": "Ordered evaluation",
               "body": "Rules are applied in sequence and the order is shown, because order is what determines the outcome.",
-              "icon": "icons/firewall.svg"
+              "icon": "management/firewall.svg"
             },
             {
               "title": "Default deny",
@@ -4852,7 +4852,8 @@
         "web-hosting.php"
       ],
       "slug": "dns-management",
-      "visual3d": "domains/dns-management-3d"
+      "visual3d": "domains/dns-management-3d",
+      "seo_description": "Where authoritative DNS records for CloudHost247-hosted domains are edited, and what the read-only diagnostic tools can and cannot tell you."
     },
     "domain-dns.php": {
       "title": "Domain DNS",
@@ -4885,7 +4886,8 @@
         "web-hosting.php"
       ],
       "slug": "domain-dns",
-      "visual3d": "domains/domain-dns-3d"
+      "visual3d": "domains/domain-dns-3d",
+      "seo_description": "Where nameserver and DNS record changes are made for a registered domain, and what can be checked without editing the zone."
     },
     "ip-management.php": {
       "title": "IP Management",
@@ -5167,7 +5169,7 @@
             {
               "title": "Firewall and access changes",
               "body": "Rule changes and access troubleshooting carried out through the platform, so the effective ruleset stays reviewable.",
-              "icon": "icons/firewall.svg"
+              "icon": "management/firewall.svg"
             },
             {
               "title": "Hands-on administration",
