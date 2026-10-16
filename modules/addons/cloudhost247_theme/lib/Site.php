@@ -43,6 +43,17 @@ final class Site
             'navigation' => $catalog['navigation'], 'footer' => $catalog['footer'],
             'applicationManifests' => $script === 'applications.php' ? json_decode(file_get_contents(dirname(__DIR__) . '/resources/applications.json'), true)['apps'] : array(),
             'toolCategories' => isset($catalog['toolCategories']) && is_array($catalog['toolCategories']) ? $catalog['toolCategories'] : array(),
+            /*
+             * The `/tools/...` paths this PHP installation answers, from the theme registry.
+             *
+             * This is the measurement `tests/website/check-tools-resolution.php` checks the shell
+             * against, and the smoke test for rendered pages asserts its size. It is deliberately
+             * *not* published to the browser: at 265 entries it cost 9 KB of the rendered homepage
+             * (44% of the page's compressed transfer size) to guard a redirect the theme's footer
+             * links already avoid, so the invariant is enforced in the gate rather than shipped to
+             * every visitor. `tests/website/test_tools_surface.py` pins that decision.
+             */
+            'toolsServed' => isset($catalog['toolsServed']) && is_array($catalog['toolsServed']) ? $catalog['toolsServed'] : array(),
             'pages' => $catalog['pages'], 'page' => $page, 'home' => $home,
             'public' => $home || $page !== null || in_array($script, array('notfound.php', 'site-search.php', 'service-error.php'), true),
             'path' => $script, 'base' => $base, 'platform' => $platform,

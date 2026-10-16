@@ -97,6 +97,17 @@ final class ThemeRepository
         'policy_link' => '',
         'policy_link_text' => '',
         'social_site_share' => '1',
+        /*
+         * WHMCS convention variable: the theme directory name a template builds its own asset paths
+         * from. Its only readers are the preserved legacy theme and legacy order form
+         * (`templates/cloudhost247_legacy/clientareahome.tpl`,
+         * `templates/orderforms/cloudhost247_legacy/checkout.tpl`), which is why the default is the
+         * legacy name and not the active one — for the templates that read it, that is the correct
+         * value. No template in the active `cloudhost247` theme reads it, so leaving it alone cannot
+         * misdirect a page the site ships today. Recorded here because the name reads like a defect
+         * to an auditor working from the active theme: it is not one, and changing it would break
+         * the legacy surfaces it exists for.
+         */
         'template_name_custom' => 'cloudhost247_legacy',
         'twitter_handle_code' => '',
         'yandex_verification_code' => '',

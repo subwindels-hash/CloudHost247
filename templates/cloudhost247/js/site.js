@@ -87,6 +87,11 @@
         .then(response => { if (!response.ok) throw new Error('Unavailable'); return response.json(); })
         .then(data => {
           if (!Array.isArray(data.tools)) return;
+          // Only well-formed tool routes, filtered once here so the category panels and the footer
+          // agree with one another. Whether every one of them is answered *on this origin* is not
+          // something the browser should have to know: it is measured by
+          // `tests/website/check-tools-resolution.php`, inside the release gate, because shipping
+          // the answer to the client cost 9 KB per page and dropped working links when it was wrong.
           const tools = data.tools.filter(tool => typeof tool.name === 'string' && /^\/tools\/[a-z0-9-]+$/.test(tool.path));
           const panel = toolsMenu.querySelector('.ch-mega');
           const categories = data.categories || {};
