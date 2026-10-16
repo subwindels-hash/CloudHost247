@@ -1,5 +1,14 @@
 #!/usr/bin/env python3
-"""Reproducible original Orbit geometry. Raster conversion requires Pillow and a resvg Node adapter (CH247_RASTER_SCRIPT)."""
+"""Reproducible original Orbit geometry. Raster conversion requires Pillow and a resvg Node adapter (CH247_RASTER_SCRIPT).
+
+CAUTION — one-shot bootstrap tool, not a regenerator. The scene loop below rewrites every page's
+`visual` SVG from one template. After this script first ran (2026-10-05), later passes replaced
+several of those scenes with richer, page-specific artwork that pairs with each page's `*-3d.jpg`
+hero (see the asset library README). Re-running this script over that tree flattens the page
+artwork back into one generic scene — exactly the visual regression the 2026-10-16 preservation
+pass restored (19 scenes in both asset trees). Nothing in the release gate runs this script; if
+you must run it, restore the scene SVGs from version control afterwards.
+"""
 from pathlib import Path
 import json, html, hashlib
 ROOT=Path(__file__).resolve().parents[1]
