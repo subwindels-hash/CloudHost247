@@ -39,6 +39,9 @@ import AdminMarketplacePage from './pages/AdminMarketplacePage.jsx';
 import AdminProvisioningPage from './pages/AdminProvisioningPage.jsx';
 import AdminMonitoringPage from './pages/AdminMonitoringPage.jsx';
 import AdminDeploymentsPage from './pages/AdminDeploymentsPage.jsx';
+import AdminOsVersionsPage from './pages/AdminOsVersionsPage.jsx';
+import AdminOsImagesPage from './pages/AdminOsImagesPage.jsx';
+import AdminAvailabilityPage from './pages/AdminAvailabilityPage.jsx';
 import { read as readSupportSession, finish as finishSupportSession } from './lib/support-session.js';
 
 function Gate({ children }) {
@@ -172,6 +175,9 @@ export default function App() {
           <Route path="provisioning" element={<AdminProvisioningPage />} />
           <Route path="monitoring" element={<AdminMonitoringPage />} />
           <Route path="deployments" element={<AdminDeploymentsPage />} />
+          <Route path="os-versions" element={<AdminOsVersionsPage />} />
+          <Route path="os-images" element={<AdminOsImagesPage />} />
+          <Route path="availability" element={<AdminAvailabilityPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/account" replace />} />
       </Routes>

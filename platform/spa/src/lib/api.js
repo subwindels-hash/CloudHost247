@@ -496,6 +496,37 @@ export const adminApi = {
   executeDeployment: (id) => api(`/api/v1/deployments/${encodeURIComponent(id)}/execute`, { method: 'POST', body: {} }),
   cancelDeployment: (id) => api(`/api/v1/deployments/${encodeURIComponent(id)}/cancel`, { method: 'POST', body: {} }),
   sweepDeployments: () => api('/api/v1/admin/deployments/sweep', { method: 'POST', body: {} }),
+  // --- OS registry, provider image mappings and deployable templates ---
+  adminOperatingSystems: () => api('/api/v1/admin/operating-systems'),
+  createOperatingSystem: (payload) => api('/api/v1/admin/operating-systems', { method: 'POST', body: payload }),
+  updateOperatingSystem: (id, patch) =>
+    api(`/api/v1/admin/operating-systems/${encodeURIComponent(id)}`, { method: 'PATCH', body: patch }),
+  deleteOperatingSystem: (id) =>
+    api(`/api/v1/admin/operating-systems/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  osVersions: (osId) => api(`/api/v1/admin/operating-systems/${encodeURIComponent(osId)}/versions`),
+  createOsVersion: (osId, payload) =>
+    api(`/api/v1/admin/operating-systems/${encodeURIComponent(osId)}/versions`, { method: 'POST', body: payload }),
+  updateOsVersion: (id, patch) =>
+    api(`/api/v1/admin/operating-system-versions/${encodeURIComponent(id)}`, { method: 'PATCH', body: patch }),
+  adminOsImages: () => api('/api/v1/admin/os-images'),
+  createOsImage: (payload) => api('/api/v1/admin/os-images', { method: 'POST', body: payload }),
+  updateOsImage: (id, patch) =>
+    api(`/api/v1/admin/os-images/${encodeURIComponent(id)}`, { method: 'PATCH', body: patch }),
+  testOsImage: (id) =>
+    api(`/api/v1/admin/os-images/${encodeURIComponent(id)}/test`, { method: 'POST', body: {} }),
+  deleteOsImage: (id) =>
+    api(`/api/v1/admin/os-images/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  osImageVerifications: (params = {}) =>
+    api(`/api/v1/admin/os-image-verifications${queryString(params)}`),
+  revalidateOsImages: (payload) =>
+    api('/api/v1/admin/os-images/revalidate', { method: 'POST', body: payload }),
+  adminConfigurations: (params = {}) =>
+    api(`/api/v1/admin/server-product-configurations${queryString(params)}`),
+  createConfiguration: (payload) =>
+    api('/api/v1/admin/server-product-configurations', { method: 'POST', body: payload }),
+  updateConfiguration: (id, patch) =>
+    api(`/api/v1/admin/server-product-configurations/${encodeURIComponent(id)}`, { method: 'PATCH', body: patch }),
+  providerAdapters: () => api('/api/v1/admin/provider-adapters'),
 };
 
 /** Human-readable rendering of an ApiError for form alerts. */

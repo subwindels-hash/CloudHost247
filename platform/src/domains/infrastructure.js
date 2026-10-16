@@ -445,10 +445,18 @@ function register(router, deps) {
   });
 
   // ---- os images ----------------------------------------------------------
+  // Image DTO with the verification metadata the admin surface exposes.
+  const imageDto = (i) => ({
+    id: i.id, osId: i.os_id, providerImageId: i.provider_image_id, regionId: i.region_id ?? null,
+    version: i.version ?? null, arch: i.arch ?? null, status: i.status, active: i.active,
+    verifiedAt: i.verified_at ?? null, verifiedBy: i.verified_by ?? null,
+    verificationError: i.verification_error ?? null, createdAt: i.created_at,
+  });
+
   router.get('/api/v1/admin/os-images', async (ctx) => {
     await asAdmin(ctx, deps);
     const rows = await store.table('os_images').all();
-    ctx.json({ images: rows.map((i) => ({ id: i.id, osId: i.os_id, providerImageId: i.provider_image_id, active: i.active })) });
+    ctx.json({ images: rows.map(imageDto) });
   });
   router.post('/api/v1/admin/os-images', async (ctx) => {
     await asAdmin(ctx, deps);
@@ -456,15 +464,7 @@ function register(router, deps) {
       osId: v.string().min(1), providerImageId: v.string().trim().min(1).max(120), regionId: v.string().optional(),
     }));
     const row = await store.table('os_images').insert({ id: uuidv7(), os_id: body.osId, provider_image_id: body.providerImageId, region_id: body.regionId ?? null, active: true });
-    ctx.code(201).json({ image: { id: row.id } });
-  });
-
-  // Image DTO with the verification metadata the admin surface exposes.
-  const imageDto = (i) => ({
-    id: i.id, osId: i.os_id, providerImageId: i.provider_image_id, regionId: i.region_id ?? null,
-    version: i.version ?? null, arch: i.arch ?? null, status: i.status, active: i.active,
-    verifiedAt: i.verified_at ?? null, verifiedBy: i.verified_by ?? null,
-    verificationError: i.verification_error ?? null, createdAt: i.created_at,
+    ctx.code(201).json({ image: imageDto(row) });
   });
 
   router.patch('/api/v1/admin/os-images/:id', async (ctx) => {
