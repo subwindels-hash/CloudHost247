@@ -19,7 +19,11 @@ that do not need one — the ones that catch a broken build rather than a broken
     harness must supply the array their root PHP page publishes) rather than as empty shells;
   * the head a crawler receives: stylesheet order, one title, a description, and the rule that a
     page is either indexable with a canonical and JSON-LD or explicitly `noindex` — never indexed
-    twice under the same title, never canonical without being indexable.
+    twice under the same title, never canonical without being indexable;
+  * the *value* of the canonical address, not merely its presence: one canonical per page, one
+    origin across the site, an absolute URL with no fragment and no trailing slash, a destination
+    the site actually renders, a destination the PHP crawl policy does not disallow, `og:url` and
+    the JSON-LD `url` agreeing with it, and no two indexable pages claiming the same canonical.
 
 Usage:
     CH247_FIXTURE_DIR=/path/to/fixtures python3 tests/website/check-fixtures.py
@@ -60,9 +64,11 @@ CLASS_RE = re.compile(r'class="([^"]*)"', re.I)
 TITLE_RE = re.compile(r'<title>(.*?)</title>', re.I | re.S)
 DESCRIPTION_RE = re.compile(r'<meta\s+name="description"\s+content="([^"]*)"', re.I)
 CANONICAL_RE = re.compile(r'<link\s+rel="canonical"\s+href="([^"]*)"', re.I)
+OG_URL_RE = re.compile(r'<meta\s+property="og:url"\s+content="([^"]*)"', re.I)
 ROBOTS_NOINDEX_RE = re.compile(r'<meta\s+name="robots"\s+content="[^"]*noindex', re.I)
 LDJSON_RE = re.compile(r'<script type="application/ld\+json">(.*?)</script>', re.I | re.S)
 STYLESHEET_RE = re.compile(r'<link\s+rel="stylesheet"\s+href="([^"]*)"', re.I)
+ABSOLUTE_URL_RE = re.compile(r'^(https?)://([^/]+)(/.*)?$')
 
 # Components are allowed to be described by the application bundle as well as by template CSS: the
 # React side of the platform styles some of the same names from `cloudhost247-node/frontend`.
@@ -152,6 +158,75 @@ def fixture_files() -> list[Path]:
     return sorted(FIXTURES.rglob('*.html'))
 
 
+def canonical_target_exists(canonical_path: str) -> bool:
+    """Is the page a canonical URL points at actually rendered by this site?
+
+    A canonical address naming a page nobody serves is worse than a missing one: a crawler is told
+    to consolidate onto a 404, and the ranking signal for the real page is discarded. The mapping is
+    the harness's own: a route is rendered as `<route>.html`, and the site root is `index.php`.
+    """
+    path = canonical_path.lstrip('/')
+    if path == '' or canonical_path.endswith('/'):
+        path += 'index.php'
+    return (FIXTURES / f'{path}.html').is_file()
+
+
+def crawl_policy_blocks(canonical_path: str, exclude_php: list[str]) -> str | None:
+    """The `excludePhp` entry that disallows this canonical path, or `None`.
+
+    Advertising a canonical URL that `robots.txt` disallows is the classic self-inflicted
+    Search Console error: the crawler is told both "this is the address of record" and "do not
+    fetch it". The policy is read from the registry rather than restated, so the check cannot
+    drift from the file `robots.txt` and the sitemap are generated from.
+    """
+    relative = canonical_path.lstrip('/')
+    for entry in exclude_php:
+        if relative == entry or relative.startswith(entry):
+            return entry
+    return None
+
+
+def audit_canonical_urls(records: list[tuple[str, str]], exclude_php: list[str]) -> list[str]:
+    """Validate the canonical address of every indexable page. Each rule is named in the failure.
+
+    `records` is `(route, canonical)` for each page that published a canonical. The rules are the
+    ones a search engine acts on, so a breach is a real defect rather than a style preference.
+    """
+    failures: list[str] = []
+    origins: dict[str, list[str]] = {}
+    claimed: dict[str, list[str]] = {}
+    for route, canonical in records:
+        match = ABSOLUTE_URL_RE.match(canonical)
+        if match is None:
+            failures.append(f'C2 {route}: canonical {canonical!r} is not an absolute http(s) URL')
+            continue
+        origin, path = f'{match.group(1)}://{match.group(2)}', match.group(3) or '/'
+        origins.setdefault(origin, []).append(route)
+        claimed.setdefault(canonical, []).append(route)
+        if '#' in path:
+            failures.append(f'C3 {route}: canonical {canonical!r} carries a fragment')
+        if len(path) > 1 and path.endswith('/'):
+            failures.append(f'C3 {route}: canonical {canonical!r} has a trailing slash (the canonical form drops it)')
+        if not canonical_target_exists(path):
+            failures.append(f'C4 {route}: canonical {canonical!r} names a page this site does not render')
+        blocked = crawl_policy_blocks(path, exclude_php)
+        if blocked is not None:
+            failures.append(
+                f'C5 {route}: canonical {canonical!r} is disallowed by the crawl policy entry {blocked!r}'
+            )
+    if len(origins) > 1:
+        failures.append(
+            f'C2 the site publishes canonicals on {len(origins)} origins: '
+            f'{sorted(f"{origin} ({len(routes)} pages)" for origin, routes in origins.items())}'
+        )
+    for canonical, routes in sorted(claimed.items()):
+        if len(routes) > 1:
+            failures.append(
+                f'C8 {len(routes)} indexable pages claim the canonical {canonical!r}: {sorted(routes)[:4]}'
+            )
+    return failures
+
+
 def check(failures: list[str], condition: bool, message: str) -> None:
     if not condition:
         failures.append(message)
@@ -187,11 +262,12 @@ def main() -> int:
 
     failures: list[str] = []
     counters = {'pages': 0, 'images': 0, 'links': 0, 'assets': 0, 'controls': 0, 'classes': 0,
-                'indexable': 0, 'noindex': 0}
+                'indexable': 0, 'noindex': 0, 'canonicals': 0}
     legal_documents = ('backup-policy.php', 'cybercrime-policy.php', 'refund-policy.php',
                        'trademark-policy.php', 'domain-brokerage-terms.php')
     classes_seen: dict[str, set[str]] = {}
     titles: dict[str, list[str]] = {}
+    canonicals: list[tuple[str, str]] = []
 
     for path in files:
         route = path.relative_to(FIXTURES).as_posix()[: -len('.html')]
@@ -243,8 +319,20 @@ def main() -> int:
             if title:
                 titles.setdefault(title, []).append(route)
             check(failures, bool(canonical), f'{route}: an indexable page needs a canonical URL')
+            check(failures, len(canonical) == 1, f'{route}: {len(canonical)} <link rel="canonical"> elements')
             check(failures, len(scripts) >= 1, f'{route}: an indexable page needs JSON-LD')
             check(failures, description and len(html.unescape(description[0])) >= 40, f'{route}: an indexable page needs a real description')
+            if len(canonical) == 1:
+                canonicals.append((route, html.unescape(canonical[0]).strip()))
+                # The canonical address is the page's own address of record. Open Graph and the
+                # structured-data URL are the same claim made to two other consumers, so a page
+                # whose three disagree is telling a crawler and a social card different stories.
+                og_url = OG_URL_RE.findall(head)
+                check(
+                    failures,
+                    len(og_url) == 1 and html.unescape(og_url[0]).strip() == html.unescape(canonical[0]).strip(),
+                    f'{route}: og:url {og_url[:1] or "missing"} does not match the canonical {canonical[0]!r}',
+                )
         for block in scripts:
             try:
                 data = json.loads(block)
@@ -254,6 +342,12 @@ def main() -> int:
             check(failures, isinstance(data, dict) and data.get('@context') and data.get('@type'), f'{route}: JSON-LD without @context/@type')
             check(failures, bool(str(data.get('name', '')).strip()), f'{route}: JSON-LD without a name')
             check(failures, bool(str(data.get('url', '')).strip()), f'{route}: JSON-LD without a url')
+            if not noindex and len(canonical) == 1 and isinstance(data, dict):
+                check(
+                    failures,
+                    str(data.get('url', '')) == html.unescape(canonical[0]).strip(),
+                    f'{route}: JSON-LD url {data.get("url")!r} does not match the canonical {canonical[0]!r}',
+                )
 
         for anchor in published_fragments.get(route, set()):
             check(failures, anchor in ids or anchor in section_anchors, f'{route}: published fragment #{anchor} has no target')
@@ -322,10 +416,14 @@ def main() -> int:
     for name, routes in sorted(undefined.items()):
         failures.append(f'class {name} is rendered but no shipped stylesheet defines it ({routes})')
 
+    counters['canonicals'] = len(canonicals)
+    failures += audit_canonical_urls(canonicals, registry['sitemap']['excludePhp'])
+
     print(f'fixture QA: {counters["pages"]} pages, {counters["images"]} images, {counters["assets"]} asset references, '
           f'{counters["links"]} links, {counters["controls"]} interactive controls, '
           f'{counters["classes"]} distinct ch- classes, '
-          f'{counters["indexable"]} indexable / {counters["noindex"]} noindex')
+          f'{counters["indexable"]} indexable / {counters["noindex"]} noindex, '
+          f'{counters["canonicals"]} canonical addresses')
     if failures:
         print(f'\n{len(failures)} problem(s):', file=sys.stderr)
         for failure in failures[:60]:
@@ -333,7 +431,8 @@ def main() -> int:
         if len(failures) > 60:
             print(f'  … and {len(failures) - 60} more', file=sys.stderr)
         return 1
-    print('✓ every rendered fixture is well-formed, fully referenced, fully styled and free of dead internal links')
+    print('✓ every rendered fixture is well-formed, fully referenced, fully styled and free of dead')
+    print('  internal links, and every canonical address resolves to a page this site serves')
     return 0
 
 

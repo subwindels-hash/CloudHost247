@@ -25,6 +25,21 @@ jobs:
       - name: Build shared Tools adapter before PHP source and asset gates
         working-directory: cloudhost247-node
         run: npm ci && npm run tools:catalog:check && npm run build:tools
+      - uses: actions/cache@v4
+        with:
+          # The pinned Smarty tarball, so the rendered-site audit below does not depend on a fresh
+          # download from codeload.github.com on every run. Keyed on the digest the render script
+          # verifies, so a changed pin is a changed cache entry rather than a stale library.
+          path: .cache/smarty-4.5.6.tar.gz
+          key: ch247-smarty-4.5.6-f617b86983b3c7115222c44d63d874630f9d4b4bd88cf1ef603b3ab138c67079
+      - name: Rendered-site audit (every published page, rendered and inspected)
+        # Renders all 229 published pages through the shipped Smarty components, then checks the HTML
+        # a visitor and a crawler receive: heading outline, duplicate ids, one title, the AVIF/WebP
+        # width ladders, every dead internal link, and the canonical address of every indexable page.
+        # None of it is visible in template source, and before this step the checker was invoked by
+        # nothing at all. Smarty is pinned and digest-verified by the script; it is not a repository
+        # dependency (the WHMCS install supplies the real one).
+        run: bash scripts/verify-rendered-site.sh --fetch
       - name: PHP syntax diagnostics (every PHP file this repository owns)
         # pipefail so a php -l failure cannot hide behind a successful xargs
         run: set -o pipefail; bash scripts/php-lint-targets.sh | xargs -r -n1 php -l

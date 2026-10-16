@@ -395,5 +395,75 @@ class CleanCloneTests(unittest.TestCase):
                       'CI must run the same gate a release candidate runs locally')
 
 
+class RenderedSiteGateTests(unittest.TestCase):
+    """The rendered site is inside the gate, and "Smarty is missing" can never read as a pass.
+
+    `tests/website/check-fixtures.py` audits the HTML a visitor and a crawler receive — heading
+    outline, duplicate ids, image ladders, dead internal links and the canonical address of every
+    indexable page. It reads rendered fixtures, and until 2026-10-16 no gate rendered them: the
+    checker was invoked by nothing at all, and `scripts/check-hero-render.py` ran only when an
+    operator had already rendered fixtures by hand, with a bare note printed when nobody had. A
+    check that is skipped is not a check, so what is pinned here is the wiring that makes the skip
+    explicit and the audit automatic where Smarty exists.
+    """
+
+    RENDER_SCRIPT = ROOT / 'scripts/verify-rendered-site.sh'
+
+    def test_the_gate_runs_the_rendered_site_audit(self):
+        self.assertIn('scripts/verify-rendered-site.sh', SCRIPT.read_text())
+
+    def test_an_unavailable_smarty_is_a_named_skip_not_a_pass(self):
+        script = SCRIPT.read_text()
+        block = script.split('scripts/verify-rendered-site.sh', 1)[1].split('\n\n', 1)[0]
+        # The status has to be captured and branched on. `|| true`, or calling the script bare under
+        # `set -e`, would either hide a real defect or abort the gate on a missing dev dependency.
+        self.assertIn('rendered_site_status=$?', block)
+        self.assertIn('2)', block, 'exit 2 means "no Smarty", and it must have its own branch')
+        self.assertIn('*)\n    echo \'Release-candidate FAILED', script,
+                      'every other exit status must fail the gate')
+        self.assertNotIn('|| true', block)
+
+    def test_the_render_script_pins_and_verifies_the_vendored_smarty(self):
+        body = self.RENDER_SCRIPT.read_text()
+        self.assertRegex(body, r"SMARTY_VERSION='\d+\.\d+\.\d+'")
+        self.assertRegex(body, r"SMARTY_SHA256='[0-9a-f]{64}'")
+        self.assertIn('sha256sum', body)
+        self.assertIn('digest mismatch', body)
+        # A mismatch must be fatal: verifying a download and then extracting it anyway would be
+        # worse than not verifying it, because the gate would report provenance it does not have.
+        mismatch = body.split('digest mismatch', 1)[1].split('fi', 1)[0]
+        self.assertIn('exit 2', mismatch)
+
+    def test_the_render_script_runs_both_audits(self):
+        body = self.RENDER_SCRIPT.read_text()
+        self.assertIn('tests/website/render-fixtures.php', body)
+        self.assertIn('tests/website/check-fixtures.py', body)
+        self.assertIn('scripts/check-hero-render.py', body)
+
+    def test_the_render_script_is_portable_and_never_touches_a_database(self):
+        body = self.RENDER_SCRIPT.read_text()
+        self.assertEqual('#!/usr/bin/env bash', body.splitlines()[0])
+        self.assertIn('set -euo pipefail', body)
+        self.assertTrue(os.access(self.RENDER_SCRIPT, os.X_OK), 'the render script must be executable')
+        # It falls back to the repository's WebAssembly PHP, which needs only Node.
+        self.assertIn('scripts/php-wasm/php', body)
+        for forbidden in ('mysql', 'mariadb', 'configuration.php', 'init.php'):
+            self.assertNotIn(forbidden, body.replace('WHMCS', '').replace('whmcs', ''),
+                             f'the fixture harness must not reach {forbidden}')
+
+    def test_the_cached_smarty_and_fixtures_are_not_committed(self):
+        ignore = (ROOT / '.gitignore').read_text()
+        self.assertIn('/.cache/', ignore)
+        status = subprocess.run(['git', 'check-ignore', '-q', '.cache/fixtures'], cwd=ROOT,
+                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        self.assertEqual(0, status.returncode, '.cache/ must be git-ignored, not committed')
+
+    def test_the_repository_has_no_vendored_smarty(self):
+        # The theme is rendered by the WHMCS installation's Smarty. Vendoring a copy here would add a
+        # second, silently-diverging template engine to a tree that already has one.
+        self.assertFalse((ROOT / 'vendor').is_dir(), 'vendor/ must not be committed')
+        self.assertFalse((ROOT / 'composer.json').is_file(), 'this repository is not a composer package')
+
+
 if __name__ == '__main__':
     unittest.main()

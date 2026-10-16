@@ -142,7 +142,7 @@ php tests/tools/site-integration.php
 # Browser tools (MRZ among them) are pure modules; run them on Node so a broken handler fails here.
 node tests/tools/local.test.mjs
 php tests/website/run.php
-python3 -m unittest -v tests/website/test_static.py tests/website/test_manifest_visuals.py tests/website/test_accessibility_contract.py tests/website/test_fixture_checks.py tests/website/test_catalogue_honesty.py tests/website/test_media_library_parity.py
+python3 -m unittest -v tests/website/test_static.py tests/website/test_manifest_visuals.py tests/website/test_accessibility_contract.py tests/website/test_fixture_checks.py tests/website/test_catalogue_honesty.py tests/website/test_media_library_parity.py tests/website/test_page_inventory.py tests/website/test_tools_surface.py
 python3 scripts/verify-website.py
 # Published-link integrity across every surface: the registry's menus and footer columns, the SPA
 # router and content JSON, the PHP theme templates and page controllers, and the tools tree. This is
@@ -161,17 +161,34 @@ python3 scripts/check-accessibility-contract.py
 # whose URL 404s does not fall through to the next source, so a missing encoding is a broken
 # image on a published page, not a slower one.
 python3 scripts/generate-raster-formats.py --check
-# Hero artwork as *rendered*, not as declared: every published page must render its own hero, and
-# no two of them the same one. The catalogue side of that rule runs unconditionally in
-# tests/website/test_static.py; this reads the rendered fixtures, which is the only place the HTML
-# can be asked, and needs Smarty — which is deliberately not part of this gate's toolchain. It
-# therefore runs wherever fixtures have been rendered, and says so when they have not.
-if [ -n "${CH247_FIXTURE_DIR:-}" ] && [ -d "${CH247_FIXTURE_DIR:-}" ]; then
-  python3 scripts/check-hero-render.py
+# The rendered site: every published page rendered through the shipped Smarty components, then the
+# HTML a visitor and a crawler actually receive is audited — heading outline, duplicate ids, one
+# title, the image ladders, every dead internal link, and the canonical address of every indexable
+# page (one per page, one origin, resolvable, not disallowed by the crawl policy, agreeing with
+# og:url and the structured-data url, and never shared between two pages). None of that can be read
+# from template source, and until this step existed nothing rendered the fixtures in this gate:
+# `check-fixtures.py` was invoked by no gate and `check-hero-render.py` ran only if an operator had
+# already rendered them by hand.
+#
+# Smarty is deliberately not a repository dependency (it is vendor code the WHMCS install supplies),
+# so this step is skipped with an instruction rather than a silent pass when it is absent. One
+# command makes it run here:  bash scripts/verify-rendered-site.sh --fetch
+if bash scripts/verify-rendered-site.sh; then
+  rendered_site_status=0
 else
-  echo 'note: CH247_FIXTURE_DIR is not set, so the rendered-hero check did not run here.'
-  echo '      render fixtures (tests/website/render-fixtures.php) to run it.'
+  rendered_site_status=$?
 fi
+case "$rendered_site_status" in
+  0) ;;
+  2)
+    echo 'note: Smarty is not installed, so the rendered-site audit did not run in this gate.'
+    echo '      run it once with:  bash scripts/verify-rendered-site.sh --fetch'
+    ;;
+  *)
+    echo 'Release-candidate FAILED: the rendered-site audit found a defect (see above).' >&2
+    exit 1
+    ;;
+esac
 # The Builder renders its own markup in PHP, so the theme class audit never sees it. This checks the
 # widget classes against the sheet the Builder serves, and fails on an unstyled one or on a hook
 # exemption that no longer matches anything.

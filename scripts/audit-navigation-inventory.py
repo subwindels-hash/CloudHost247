@@ -44,6 +44,43 @@ WHMCS_ENTRY_POINTS = {
     'downloads.php', 'upgrade.php', 'affiliates.php', 'account.php',
 }
 
+# Which runtime serves each route. This is the field that stops "the page exists" from being read as
+# "this repository ships the page": a WHMCS entry point is deployed with the licensed platform and is
+# deliberately not vendored here, while a theme page is a file in this tree.
+ROUTE_OWNER_THEME = 'cloudhost247-theme'
+ROUTE_OWNER_WHMCS = 'whmcs-core'
+ROUTE_OWNER_TOOLS = 'tools-front-controller'
+ROUTE_OWNER_PLATFORM = 'platform-app'
+ROUTE_OWNER_INTERNAL = 'internal'
+ROUTE_OWNER_UNREGISTERED = 'unregistered'
+
+# The checks that cover a route, each run by `scripts/release-candidate-check.sh`, with the command
+# that decides it. Named here rather than asserted per row so the report can state *what* was run
+# and a reviewer can re-run the same command; a row's `test_status` is then the subset that applies.
+TEST_CHECKS = {
+    'php-syntax': 'bash scripts/php-lint-targets.sh | xargs -n1 php -l',
+    'php-behaviour': 'php tests/website/run.php (and the module suites)',
+    'link-integrity': 'node scripts/site/check-links.mjs',
+    'website-static': 'python3 -m unittest tests.website.test_static',
+    'rendered-fixtures': 'bash scripts/verify-rendered-site.sh',
+    'hero-render': 'bash scripts/verify-rendered-site.sh',
+    'accessibility-contract': 'python3 scripts/check-accessibility-contract.py',
+    'browser-qa': 'node tests/website/browser.cjs (needs a Chromium binary)',
+    'staging-functional': 'docs/staging/STAGING_ACCEPTANCE_REPORT.md (needs a licensed WHMCS install)',
+}
+# Checks that cannot be decided on a machine without the listed prerequisite. Recorded so a green
+# local run is never mistaken for a green release.
+TEST_CHECK_BLOCKERS = {
+    'browser-qa': 'no browser binary in the audit host',
+    'staging-functional': 'licensed WHMCS staging installation',
+}
+# Checks that need neither WHMCS nor a database, so a published theme page is covered by all of them
+# the moment the gate runs.
+THEME_PAGE_CHECKS = (
+    'php-syntax', 'php-behaviour', 'link-integrity', 'website-static',
+    'rendered-fixtures', 'hero-render', 'accessibility-contract',
+)
+
 # Routes that are intentionally private: not published, not advertised, not crawled.
 INTERNAL_SUFFIXES = ('-sample.php',)
 INTERNAL_FILES = {
@@ -63,27 +100,128 @@ def registry():
     return load_json(REGISTRY)
 
 
-def tool_routes() -> set[str]:
-    """Every /tools/... path the PHP tools shell can resolve."""
-    routes = {'tools'}
-    for name in ('tools.json', 'tools-public.json'):
-        path = ROOT / 'modules' / 'addons' / 'cloudhost247_theme' / 'resources' / name
-        if not path.is_file():
-            continue
-        data = load_json(path)
+def tool_entries() -> tuple[dict[str, dict], dict[str, dict]]:
+    """`(served_by_php, platform_only)` — every /tools/... path, and which runtime serves it.
+
+    Tools are pages: published, indexable and served by `tools/index.php`. An inventory of "every
+    public page" that stops at the repository's root `*.php` files leaves all of them out.
+
+    The split matters more than the count. `modules/addons/cloudhost247_theme/resources/tools-public.json`
+    is the JSON projection of `config/tools.php`, the catalogue the PHP front controller reads, and
+    the routes derived from it here are exactly the ones `Catalog::resolve()` answers for — measured
+    both ways (135 of 135, 2026-10-16) rather than assumed. `tools.json` is the projection of the
+    *platform* catalogue (`cloudhost247-node/src/tools/catalog.ts`) and publishes tool paths the PHP
+    shell cannot serve (`/tools/business-tools` among them). Recording those as served would be the
+    exact mistake this inventory exists to prevent — a page asserted because it appears in a list —
+    so they are rows with their real owner and status.
+    """
+    resources = ROOT / 'modules' / 'addons' / 'cloudhost247_theme' / 'resources'
+    served: dict[str, dict] = {
+        'tools': {'name': 'All tools', 'summary': 'CloudHost247 online tools', 'category': '', 'kind': 'hub'},
+    }
+    public = resources / 'tools-public.json'
+    if public.is_file():
+        data = load_json(public)
         for tool in data.get('tools', []):
             if isinstance(tool.get('path'), str):
-                routes.add(tool['path'].lstrip('/'))
-        for slug in data.get('categories', {}):
-            routes.add(f'tools/category/{slug}')
+                served.setdefault(tool['path'].lstrip('/'), {
+                    'name': tool.get('name', ''), 'summary': tool.get('summary', ''),
+                    'category': tool.get('category', ''), 'kind': 'tool',
+                })
+        for slug, label in (data.get('categories') or {}).items():
+            served.setdefault(f'tools/category/{slug}', {
+                'name': f'{label} tools', 'summary': 'CloudHost247 tool category',
+                'category': slug, 'kind': 'category',
+            })
         for collection in data.get('collections', []):
             if isinstance(collection.get('path'), str):
-                routes.add(collection['path'].lstrip('/'))
-    return routes
+                served.setdefault(collection['path'].lstrip('/'), {
+                    'name': collection.get('name', ''), 'summary': collection.get('summary', ''),
+                    'category': collection.get('category', ''), 'kind': 'collection',
+                })
+    # The discovery taxonomy — the nine categories the mega menu, the hub and the sitemaps publish —
+    # comes from the registry projection, which is where the PHP shell reads it from too.
+    site = ROOT / 'modules' / 'addons' / 'cloudhost247_theme' / 'resources' / 'site.json'
+    if site.is_file():
+        for category in load_json(site).get('toolCategories', []):
+            slug = category.get('slug')
+            if slug:
+                served.setdefault(f'tools/category/{slug}', {
+                    'name': f"{category.get('label', slug)} tools",
+                    'summary': 'CloudHost247 tool category', 'category': slug, 'kind': 'category',
+                })
+
+    platform_only: dict[str, dict] = {}
+    app = resources / 'tools.json'
+    if app.is_file():
+        data = load_json(app)
+        for tool in data.get('tools', []):
+            if isinstance(tool.get('path'), str):
+                route = tool['path'].lstrip('/')
+                if route not in served:
+                    platform_only[route] = {
+                        'name': tool.get('name', ''), 'summary': tool.get('summary', ''),
+                        'category': tool.get('category', ''), 'kind': 'tool',
+                    }
+        for slug, label in (data.get('categories') or {}).items():
+            route = f'tools/category/{slug}'
+            if route not in served:
+                platform_only[route] = {
+                    'name': f'{label} tools', 'summary': 'CloudHost247 tool category',
+                    'category': slug, 'kind': 'category',
+                }
+    return served, platform_only
+
+
+def tool_routes() -> set[str]:
+    served, platform_only = tool_entries()
+    return set(served) | set(platform_only)
 
 
 def php_files() -> set[str]:
     return {entry.name for entry in ROOT.iterdir() if entry.is_file() and entry.suffix == '.php'}
+
+
+def route_owner(php_route: str, status: str, template: str) -> str:
+    """The runtime a route is served by, from the file's own evidence rather than a hand-kept list.
+
+    A template assignment means the CloudHost247 theme renders it. A licensed WHMCS entry point
+    (`cart.php`, `clientarea.php`) is deployed with the platform and is not a file this repository
+    ships — a distinction that matters when a report counts "pages" and a reader assumes all of them
+    are in the archive. The tools front controller owns the `/tools` tree.
+    """
+    if php_route.startswith('tools/'):
+        return ROUTE_OWNER_TOOLS
+    if status == 'platform entry point':
+        return ROUTE_OWNER_WHMCS
+    if template:
+        return ROUTE_OWNER_THEME
+    if status == 'internal':
+        return ROUTE_OWNER_INTERNAL
+    if status == 'published':
+        # A published page with no `setTemplate` call is rendered by the editorial route
+        # (`cloudhost247-page.php`), which is still this theme.
+        return ROUTE_OWNER_THEME
+    return ROUTE_OWNER_UNREGISTERED
+
+
+def test_status(status: str) -> str:
+    """The checks that cover this route, named so the report can be audited command by command.
+
+    Deliberately not a boolean: `passed` would be a claim about tests this script did not run. A
+    published theme page is exercised by every check that needs no WHMCS and no database; a licensed
+    entry point and an unregistered file are covered by syntax alone, and the two checks that need a
+    prerequisite this repository cannot supply (a browser, a licensed install) are recorded as
+    blocked rather than omitted.
+    """
+    if status == 'published':
+        checks = list(THEME_PAGE_CHECKS)
+    elif status == 'platform entry point':
+        checks = ['staging-functional']
+    else:
+        checks = ['php-syntax']
+    blocked = [f'{name} (blocked: {TEST_CHECK_BLOCKERS[name]})' for name in TEST_CHECK_BLOCKERS]
+    return '; '.join(checks + blocked)
 
 
 def walk_navigation(reg):
@@ -172,21 +310,107 @@ def main() -> int:
             image_status = 'present' if asset.is_file() else 'MISSING'
 
         reachable = bool(nav or foot)
+        template = (' | '.join(re.findall(r"setTemplate\('([^']+)'\)", (ROOT / php_route).read_text())) or 'cloudhost247-page') if published else ''
+        hero_asset = f'{visual}.svg' if visual else ''
         rows.append({
             'php_page': php_route,
+            'path': f'/{php_route}' if published else '',
             'canonical_url': f'/{php_route}' if published else '',
             'title': meta.get('title', ''),
+            'page_title': meta.get('title', ''),
             'category': meta.get('category', ''),
+            'route_owner': route_owner(php_route, status, template),
             'status': status,
-            'template': (' | '.join(re.findall(r"setTemplate\('([^']+)'\)", (ROOT / php_route).read_text())) or 'cloudhost247-page') if published else '',
+            'implementation_status': status,
+            'template': template,
+            'test_status': test_status(status),
             'seo_metadata': {'title': meta.get('title', ''), 'description': meta.get('seo_description',meta.get('summary',''))},
-            'hero_artwork': {'svg': visual + '.svg' if visual else '', 'scene': meta.get('visual3d','')},
+            'hero_artwork': {'svg': hero_asset, 'scene': meta.get('visual3d','')},
+            'hero_asset': hero_asset,
             'visual': visual,
             'image_status': image_status,
             'seo_status': seo_status,
             'navigation_placement': ' | '.join(nav),
+            'navigation_location': ' | '.join(nav),
             'footer_placement': ' | '.join(foot),
+            'footer_location': ' | '.join(foot),
             'reachable': reachable,
+        })
+
+    # --------------------------------------------- routes the licensed platform serves
+    # `cart.php`, `clientarea.php`, `knowledgebase.php` and the rest are navigation destinations
+    # with no file in this tree: they ship with the WHMCS install. They belong in the inventory
+    # because a visitor reaches them from the menus, and they are marked as platform entry points
+    # rather than published theme pages so nobody counts them as parity work on this repository.
+    platforms = set()
+    for href, _menu, _group, _label in walk_navigation(reg):
+        if href.get('php'):
+            platforms.add(href['php'].split('?')[0])
+    for href, _column, _label in walk_footer(reg):
+        if href.get('php'):
+            platforms.add(href['php'].split('?')[0])
+    for entry in sorted(platforms):
+        if entry in files or entry == 'tools' or entry.startswith('tools/'):
+            continue
+        if entry not in WHMCS_ENTRY_POINTS:
+            continue
+        rows.append({
+            'php_page': entry,
+            'path': '',
+            'canonical_url': '',
+            'title': '',
+            'page_title': '',
+            'category': 'Platform',
+            'route_owner': ROUTE_OWNER_WHMCS,
+            'status': 'platform entry point',
+            'implementation_status': 'platform entry point',
+            'template': '',
+            'test_status': test_status('platform entry point'),
+            'seo_metadata': {'title': '', 'description': ''},
+            'hero_artwork': {'svg': '', 'scene': ''},
+            'hero_asset': '',
+            'visual': '',
+            'image_status': 'n/a',
+            'seo_status': 'n/a',
+            'navigation_placement': ' | '.join(sorted(set(nav_index.get(entry, [])))),
+            'navigation_location': ' | '.join(sorted(set(nav_index.get(entry, [])))),
+            'footer_placement': ' | '.join(sorted(set(footer_index.get(entry, [])))),
+            'footer_location': ' | '.join(sorted(set(footer_index.get(entry, [])))),
+            'reachable': bool(nav_index.get(entry) or footer_index.get(entry)),
+        })
+
+    # ------------------------------------------------------------- the tools front controller
+    served_tools, platform_only_tools = tool_entries()
+    for route, entry, owner, status in (
+        [(route, entry, ROUTE_OWNER_TOOLS, 'published tool route') for route, entry in served_tools.items()]
+        + [(route, entry, ROUTE_OWNER_PLATFORM, 'platform-only tool route') for route, entry in platform_only_tools.items()]
+    ):
+        tool_nav = sorted(set(nav_index.get(route, [])))
+        tool_foot = sorted(set(footer_index.get(route, [])))
+        kind = entry['kind']
+        rows.append({
+            'php_page': f'{route}.php' if route != 'tools' else 'tools/index.php',
+            'path': f'/{route}',
+            'canonical_url': f'/{route}' if owner == ROUTE_OWNER_TOOLS else '',
+            'title': entry['name'],
+            'page_title': entry['name'],
+            'category': 'Tools' if kind == 'hub' else 'Tool category' if kind == 'category' else 'Tool',
+            'route_owner': owner,
+            'status': status,
+            'implementation_status': status,
+            'template': 'cloudhost247-tools' if owner == ROUTE_OWNER_TOOLS else 'platform app',
+            'test_status': test_status('published' if owner == ROUTE_OWNER_TOOLS else 'platform entry point'),
+            'seo_metadata': {'title': entry['name'], 'description': entry['summary']},
+            'hero_artwork': {'svg': '', 'scene': ''},
+            'hero_asset': '',
+            'visual': entry.get('category', ''),
+            'image_status': 'n/a',
+            'seo_status': 'ok' if entry['name'] else 'no title',
+            'navigation_placement': ' | '.join(tool_nav),
+            'navigation_location': ' | '.join(tool_nav),
+            'footer_placement': ' | '.join(tool_foot),
+            'footer_location': ' | '.join(tool_foot),
+            'reachable': owner == ROUTE_OWNER_TOOLS,  # the hub lists every category and every tool
         })
 
     # ------------------------------------------------------------------- defect classes
@@ -256,8 +480,23 @@ def main() -> int:
         if row['status'] == 'unregistered' and not row['php_page'].startswith(('builder-', 'cloudhost247-'))
     ]
 
+    owners = {}
+    for row in rows:
+        owners[row['route_owner']] = owners.get(row['route_owner'], 0) + 1
+
     report = {
         'source': 'shared/site/registry.json',
+        'field_notes': {
+            'path': 'the route a visitor requests; empty when the file is not a published route',
+            'route_owner': 'the runtime that serves it: cloudhost247-theme, whmcs-core (deployed with '
+                           'the licensed platform, not vendored here), tools-front-controller or internal',
+            'implementation_status': 'published | platform entry point | internal | unregistered',
+            'test_status': 'the checks that cover this route, by id; see test_checks for the command '
+                           'each id runs and any prerequisite that blocks it on this host',
+            'hero_asset': 'the vector diagram the page publishes; image_status says whether it exists',
+        },
+        'test_checks': TEST_CHECKS,
+        'test_check_blockers': TEST_CHECK_BLOCKERS,
         'totals': {
             'root_php_pages': len(files),
             'registered_public_pages': len(pages),
@@ -268,6 +507,7 @@ def main() -> int:
             'hero_scenes_exact': len(hero_exact),
             'hero_scenes_from_family_fallback': len(hero_fallback),
             'distinct_hero_scenes': len({row['hero_artwork']['scene'] for row in rows if row['hero_artwork']['scene']}),
+            'pages_by_route_owner': dict(sorted(owners.items())),
         },
         'defects': {
             'orphaned_pages': orphaned,
@@ -296,6 +536,9 @@ def main() -> int:
     print(f"distinct hero 3D scenes   : {totals['distinct_hero_scenes']}")
     print(f"hero scenes exact match   : {totals['hero_scenes_exact']}")
     print(f"hero scenes family fallback: {totals['hero_scenes_from_family_fallback']}")
+    print('route owners              : ' + ', '.join(
+        f'{owner} {count}' for owner, count in totals['pages_by_route_owner'].items()
+    ))
     print()
     print(f"ORPHANED PAGES            : {len(orphaned)}")
     for row in orphaned:

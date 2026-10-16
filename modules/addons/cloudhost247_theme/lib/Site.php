@@ -43,6 +43,26 @@ final class Site
             'navigation' => $catalog['navigation'], 'footer' => $catalog['footer'],
             'applicationManifests' => $script === 'applications.php' ? json_decode(file_get_contents(dirname(__DIR__) . '/resources/applications.json'), true)['apps'] : array(),
             'toolCategories' => isset($catalog['toolCategories']) && is_array($catalog['toolCategories']) ? $catalog['toolCategories'] : array(),
+            /*
+             * The `/tools/...` paths this PHP installation serves, as a JSON array for the browser.
+             *
+             * The Tools menu and footer are enriched at runtime from the platform's live catalogue,
+             * and that catalogue is wider than this shell's — it publishes `/tools/business-tools`,
+             * `/tools/ip-lookup`, `/tools/spf-checker`, `/tools/subnet-calculator` and
+             * `/tools/json-tools`, none of which `tools/index.php` resolves. The script resolves the
+             * links it appends against *this* origin, so without this list every page's footer gains
+             * a handful of 404s a second after load. No static link audit can see that: the links do
+             * not exist until the script creates them.
+             *
+             * Generated into the registry by `scripts/site/generate.mjs` from the same catalogue the
+             * shell reads, and freshness-checked by the release candidate, so it cannot drift from
+             * what the shell actually resolves.
+             */
+            'toolsServed' => isset($catalog['toolsServed']) && is_array($catalog['toolsServed']) ? $catalog['toolsServed'] : array(),
+            'toolsServedJson' => json_encode(
+                isset($catalog['toolsServed']) && is_array($catalog['toolsServed']) ? array_values($catalog['toolsServed']) : array(),
+                JSON_UNESCAPED_SLASHES
+            ),
             'pages' => $catalog['pages'], 'page' => $page, 'home' => $home,
             'public' => $home || $page !== null || in_array($script, array('notfound.php', 'site-search.php', 'service-error.php'), true),
             'path' => $script, 'base' => $base, 'platform' => $platform,
