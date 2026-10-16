@@ -15,6 +15,7 @@ import {
  */
 export default function BillingPage() {
   const [invoices, setInvoices] = useState(null);
+  const [statusFilter, setStatusFilter] = useState('all');
   const [subscriptions, setSubscriptions] = useState(null);
   const [ledger, setLedger] = useState(null);
   const [plans, setPlans] = useState([]);
@@ -83,6 +84,10 @@ export default function BillingPage() {
     }
   };
 
+  const shownInvoices = (invoices ?? []).filter(
+    (invoice) => statusFilter === 'all' || invoice.status === statusFilter,
+  );
+
   return (
     <div className="page">
       <div className="page-head">
@@ -100,21 +105,35 @@ export default function BillingPage() {
         {invoices === null ? <p className="muted">Loading invoices…</p> : invoices.length === 0 ? (
           <p className="muted">No invoices yet. Anything you order will show up here.</p>
         ) : (
-          <div className="table-wrap">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th scope="col">Invoice</th>
-                  <th scope="col">Issued</th>
-                  <th scope="col">Due</th>
-                  <th scope="col">Total</th>
-                  <th scope="col">Balance</th>
-                  <th scope="col">Status</th>
-                  <th scope="col"><span className="sr-only">Actions</span></th>
-                </tr>
-              </thead>
-              <tbody>
-                {invoices.map((invoice) => {
+          <>
+            <div className="actions">
+              <label htmlFor="invoice-status-filter">Status</label>
+              <select
+                id="invoice-status-filter"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
+                <option value="all">All</option>
+                {[...new Set(invoices.map((invoice) => invoice.status))].map((status) => (
+                  <option key={status} value={status}>{humanizeStatus(status)}</option>
+                ))}
+              </select>
+            </div>
+            <div className="table-wrap">
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th scope="col">Invoice</th>
+                    <th scope="col">Issued</th>
+                    <th scope="col">Due</th>
+                    <th scope="col">Total</th>
+                    <th scope="col">Balance</th>
+                    <th scope="col">Status</th>
+                    <th scope="col"><span className="sr-only">Actions</span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {shownInvoices.map((invoice) => {
                   const balance = invoiceBalance(invoice);
                   return (
                     <tr key={invoice.id}>
@@ -131,9 +150,13 @@ export default function BillingPage() {
                     </tr>
                   );
                 })}
-              </tbody>
-            </table>
-          </div>
+                  {shownInvoices.length === 0 && (
+                    <tr><td colSpan="7" className="muted">No invoices with that status.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </section>
 

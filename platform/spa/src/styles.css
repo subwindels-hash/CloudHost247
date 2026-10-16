@@ -293,3 +293,17 @@ a { color: var(--blue-dark); }
 
 .messages li p { margin: 4px 0 0; white-space: pre-wrap; }
 .messages li.is-own { background: #f2f7ff; }
+
+/* ── Print & accounting ─────────────────────────────────────────────────────
+   Invoice views print as formal receipts: no navigation chrome, no action
+   buttons or forms — the data and money columns only, on paper-colored pages. */
+@media print {
+  body { background: #fff; color: #111; }
+  .app-header, .app-nav, footer, nav, form, .btn, .actions, .alert, .linklike, .tabs {
+    display: none !important;
+  }
+  .page { padding: 0; }
+  .card { border: 1px solid #ccc; box-shadow: none; break-inside: avoid; }
+  .table th, .table td, a { color: #111; }
+  a { text-decoration: none; }
+}

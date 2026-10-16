@@ -35,6 +35,29 @@ export default function InvoiceDetailPage() {
 
   useEffect(() => { load(); }, [load]);
 
+  /**
+   * Webhook resolution check: real gateways settle the invoice from their own callback, so the
+   * page polls the genuine payment record — it never assumes success. Bounded to a minute; if the
+   * provider is slower the payment stays honestly "pending" and the customer can reload later.
+   */
+  const pollPayment = async (paymentId) => {
+    for (let attempt = 0; attempt < 20; attempt += 1) {
+      await new Promise((resolve) => { setTimeout(resolve, 3000); });
+      let payment = null;
+      try { payment = (await billingApi.payment(paymentId)).payment; } catch { break; }
+      if (payment && payment.status !== 'pending') {
+        setMessage(payment.status === 'succeeded'
+          ? 'Payment confirmed — the invoice is settled.'
+          : `Payment ${humanizeStatus(payment.status)} — no longer waiting on the provider.`);
+        await load();
+        return;
+      }
+    }
+    setMessage('The provider has not confirmed the payment yet. It stays pending until it does — reload to re-check.');
+  };
+
+  const printReceipt = () => { window.print(); };
+
   const pay = async (gateway) => {
     setError('');
     setMessage('');
@@ -48,7 +71,8 @@ export default function InvoiceDetailPage() {
         setSandbox({ paymentId: res.paymentId, sandboxToken: res.sandboxToken });
         setMessage('Sandbox payment created. Simulate the provider result below to settle the invoice.');
       } else {
-        setMessage('Payment started. Complete it with the provider.');
+        setMessage('Payment started. Checking the provider for a result…');
+        pollPayment(res.paymentId).catch(() => {});
       }
       await load();
     } catch (err) {
@@ -96,7 +120,10 @@ export default function InvoiceDetailPage() {
           <h1>Invoice {invoice.number}</h1>
           <p className="muted">Issued {formatDate(invoice.issuedAt)} · due {formatDate(invoice.dueAt)}</p>
         </div>
-        <span className={statusClass(invoice.status)}>{humanizeStatus(invoice.status)}</span>
+        <div className="actions">
+          <button type="button" className="btn" onClick={printReceipt}>Print receipt</button>
+          <span className={statusClass(invoice.status)}>{humanizeStatus(invoice.status)}</span>
+        </div>
       </div>
 
       {error && <div className="alert alert-error" role="alert">{error}</div>}
