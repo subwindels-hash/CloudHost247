@@ -228,6 +228,107 @@ const queryString = (params) => {
   return qs ? `?${qs}` : '';
 };
 
+export const dnsApi = {
+  zones: () => api('/api/v1/dns/zones'),
+  zone: (id) => api(`/api/v1/dns/zones/${encodeURIComponent(id)}`),
+  createZone: (domain) => api('/api/v1/dns/zones', { method: 'POST', body: { domain } }),
+  deleteZone: (id) => api(`/api/v1/dns/zones/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  records: (zoneId) => api(`/api/v1/dns/zones/${encodeURIComponent(zoneId)}/records`),
+  createRecord: (zoneId, payload) =>
+    api(`/api/v1/dns/zones/${encodeURIComponent(zoneId)}/records`, { method: 'POST', body: payload }),
+  updateRecord: (zoneId, recordId, patch) =>
+    api(`/api/v1/dns/zones/${encodeURIComponent(zoneId)}/records/${encodeURIComponent(recordId)}`, { method: 'PATCH', body: patch }),
+  deleteRecord: (zoneId, recordId) =>
+    api(`/api/v1/dns/zones/${encodeURIComponent(zoneId)}/records/${encodeURIComponent(recordId)}`, { method: 'DELETE' }),
+  exportZone: (zoneId) => api(`/api/v1/dns/zones/${encodeURIComponent(zoneId)}/export`),
+  checkRecord: (zoneId, recordId) =>
+    api(`/api/v1/dns/zones/${encodeURIComponent(zoneId)}/records/${encodeURIComponent(recordId)}/check`, { method: 'POST' }),
+};
+
+export const cloudflareApi = {
+  services: () => api('/api/v1/cloudflare/services'),
+  service: (id) => api(`/api/v1/cloudflare/services/${encodeURIComponent(id)}`),
+  sync: (id) => api(`/api/v1/cloudflare/services/${encodeURIComponent(id)}/sync`, { method: 'POST' }),
+  activity: (id) => api(`/api/v1/cloudflare/services/${encodeURIComponent(id)}/activity`),
+  dns: (id) => api(`/api/v1/cloudflare/services/${encodeURIComponent(id)}/dns`),
+  createDns: (id, payload) =>
+    api(`/api/v1/cloudflare/services/${encodeURIComponent(id)}/dns`, { method: 'POST', body: payload }),
+  updateDns: (id, recordId, patch) =>
+    api(`/api/v1/cloudflare/services/${encodeURIComponent(id)}/dns/${encodeURIComponent(recordId)}`, { method: 'PATCH', body: patch }),
+  deleteDns: (id, recordId) =>
+    api(`/api/v1/cloudflare/services/${encodeURIComponent(id)}/dns/${encodeURIComponent(recordId)}`, { method: 'DELETE' }),
+  dnssec: (id) => api(`/api/v1/cloudflare/services/${encodeURIComponent(id)}/dnssec`),
+  dnssecAction: (id, action) =>
+    api(`/api/v1/cloudflare/services/${encodeURIComponent(id)}/dnssec/${encodeURIComponent(action)}`, { method: 'POST' }),
+  analytics: (id, range = 7) =>
+    api(`/api/v1/cloudflare/services/${encodeURIComponent(id)}/analytics?range=${encodeURIComponent(range)}`),
+  settings: (id, tab) => api(`/api/v1/cloudflare/services/${encodeURIComponent(id)}/${encodeURIComponent(tab)}`),
+  updateSettings: (id, tab, patch) =>
+    api(`/api/v1/cloudflare/services/${encodeURIComponent(id)}/${encodeURIComponent(tab)}`, { method: 'PATCH', body: patch }),
+  createFirewallRule: (id, payload) =>
+    api(`/api/v1/cloudflare/services/${encodeURIComponent(id)}/firewall/rules`, { method: 'POST', body: payload }),
+  updateFirewallRule: (id, ruleId, patch) =>
+    api(`/api/v1/cloudflare/services/${encodeURIComponent(id)}/firewall/rules/${encodeURIComponent(ruleId)}`, { method: 'PATCH', body: patch }),
+  deleteFirewallRule: (id, ruleId) =>
+    api(`/api/v1/cloudflare/services/${encodeURIComponent(id)}/firewall/rules/${encodeURIComponent(ruleId)}`, { method: 'DELETE' }),
+  purge: (id, payload) =>
+    api(`/api/v1/cloudflare/services/${encodeURIComponent(id)}/caching/purge`, { method: 'POST', body: payload }),
+  plan: (id) => api(`/api/v1/cloudflare/services/${encodeURIComponent(id)}/plan`),
+  changePlan: (id, payload) =>
+    api(`/api/v1/cloudflare/services/${encodeURIComponent(id)}/plan/change`, { method: 'POST', body: payload }),
+};
+
+export const marketplaceApi = {
+  categories: () => api('/api/v1/marketplace/categories'),
+  apps: ({ search, category } = {}) => {
+    const params = new URLSearchParams();
+    if (search) params.set('search', search);
+    if (category) params.set('category', category);
+    const qs = params.toString();
+    return api(`/api/v1/marketplace/apps${qs ? `?${qs}` : ''}`);
+  },
+  app: (id) => api(`/api/v1/marketplace/apps/${encodeURIComponent(id)}`),
+};
+
+export const appsApi = {
+  installations: () => api('/api/v1/app-installations'),
+  summary: () => api('/api/v1/app-installations/summary'),
+  installation: (id) => api(`/api/v1/app-installations/${encodeURIComponent(id)}`),
+  install: (payload) => api('/api/v1/app-installations', { method: 'POST', body: payload }),
+  action: (id, action, body) =>
+    api(`/api/v1/app-installations/${encodeURIComponent(id)}/${encodeURIComponent(action)}`, { method: 'POST', body: body ?? {} }),
+  remove: (id) => api(`/api/v1/app-installations/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+};
+
+export const serversApi = {
+  list: () => api('/api/v1/servers'),
+  server: (id) => api(`/api/v1/servers/${encodeURIComponent(id)}`),
+  create: (payload) => api('/api/v1/servers', { method: 'POST', body: payload }),
+  update: (id, patch) => api(`/api/v1/servers/${encodeURIComponent(id)}`, { method: 'PATCH', body: patch }),
+  remove: (id) => api(`/api/v1/servers/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  power: (id, action) => api(`/api/v1/servers/${encodeURIComponent(id)}/${encodeURIComponent(action)}`, { method: 'POST' }),
+  resizeOptions: (id) => api(`/api/v1/servers/${encodeURIComponent(id)}/resize-options`),
+  resize: (id, payload) => api(`/api/v1/servers/${encodeURIComponent(id)}/resize`, { method: 'POST', body: payload }),
+  snapshots: (id) => api(`/api/v1/servers/${encodeURIComponent(id)}/snapshots`),
+  createSnapshot: (id, description) =>
+    api(`/api/v1/servers/${encodeURIComponent(id)}/snapshots`, { method: 'POST', body: { description } }),
+  deleteSnapshot: (id, snapshotId) =>
+    api(`/api/v1/servers/${encodeURIComponent(id)}/snapshots/${encodeURIComponent(snapshotId)}`, { method: 'DELETE' }),
+  restoreSnapshot: (id, snapshotId) =>
+    api(`/api/v1/servers/${encodeURIComponent(id)}/snapshots/${encodeURIComponent(snapshotId)}/restore`, { method: 'POST' }),
+  reinstall: (id, osId) => api(`/api/v1/servers/${encodeURIComponent(id)}/reinstall`, { method: 'POST', body: osId ? { osId } : {} }),
+  status: (id) => api(`/api/v1/servers/${encodeURIComponent(id)}/status`),
+  provisioningStatus: (id) => api(`/api/v1/servers/${encodeURIComponent(id)}/provisioning-status`),
+  logs: (id) => api(`/api/v1/servers/${encodeURIComponent(id)}/logs`),
+  cancel: (id, reason) => api(`/api/v1/servers/${encodeURIComponent(id)}/cancel`, { method: 'POST', body: { reason } }),
+  uncancel: (id) => api(`/api/v1/servers/${encodeURIComponent(id)}/cancel`, { method: 'DELETE' }),
+  console: (id) => api(`/api/v1/servers/${encodeURIComponent(id)}/console`, { method: 'POST' }),
+  rescueOn: (id) => api(`/api/v1/servers/${encodeURIComponent(id)}/rescue`, { method: 'POST' }),
+  rescueOff: (id) => api(`/api/v1/servers/${encodeURIComponent(id)}/rescue`, { method: 'DELETE' }),
+  metrics: (id, limit = 60) => api(`/api/v1/servers/${encodeURIComponent(id)}/metrics?limit=${encodeURIComponent(limit)}`),
+  health: (id) => api(`/api/v1/servers/${encodeURIComponent(id)}/health`),
+};
+
 export const adminApi = {
   // --- customer directory (staff+) ---
   customers: (params = {}) => api(`/api/v1/admin/customers${queryString(params)}`),

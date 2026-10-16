@@ -15,6 +15,13 @@ import CartPage from './src/pages/CartPage.jsx';
 import BillingPage from './src/pages/BillingPage.jsx';
 import InvoiceDetailPage from './src/pages/InvoiceDetailPage.jsx';
 import ServicesPage from './src/pages/ServicesPage.jsx';
+import DnsPage from './src/pages/DnsPage.jsx';
+import CloudflareServicesPage from './src/pages/CloudflareServicesPage.jsx';
+import CloudflareServicePage from './src/pages/CloudflareServicePage.jsx';
+import MarketplacePage from './src/pages/MarketplacePage.jsx';
+import MyAppsPage from './src/pages/MyAppsPage.jsx';
+import ServersPage from './src/pages/ServersPage.jsx';
+import ServerDetailPage from './src/pages/ServerDetailPage.jsx';
 import SecurityPage from './src/pages/SecurityPage.jsx';
 import SupportPage from './src/pages/SupportPage.jsx';
 import AdminLayout from './src/pages/AdminLayout.jsx';
@@ -28,11 +35,15 @@ import AdminServersPage from './src/pages/AdminServersPage.jsx';
 import AdminInfrastructurePage from './src/pages/AdminInfrastructurePage.jsx';
 import AdminCloudflarePage from './src/pages/AdminCloudflarePage.jsx';
 import AdminUsersPage from './src/pages/AdminUsersPage.jsx';
+import AdminContentPage from './src/pages/AdminContentPage.jsx';
+import AdminSiteSettingsPage from './src/pages/AdminSiteSettingsPage.jsx';
 
 const pages = {
-  DashboardPage, CatalogPage, CartPage, BillingPage, InvoiceDetailPage, ServicesPage, SecurityPage, SupportPage,
+  DashboardPage, CatalogPage, CartPage, BillingPage, InvoiceDetailPage, ServicesPage, DnsPage, SecurityPage, SupportPage,
+  CloudflareServicesPage, CloudflareServicePage, MarketplacePage, MyAppsPage, ServersPage, ServerDetailPage,
   AdminLayout, AdminDashboardPage, AdminCustomersPage, AdminCustomerDetailPage,
-  AdminTicketsPage, AdminTicketDetailPage, AdminUsersPage, AdminCatalogPage, AdminServersPage, AdminInfrastructurePage, AdminCloudflarePage,
+  AdminTicketsPage, AdminTicketDetailPage, AdminUsersPage, AdminContentPage, AdminSiteSettingsPage,
+  AdminCatalogPage, AdminServersPage, AdminInfrastructurePage, AdminCloudflarePage,
 };
 const results = {};
 for (const [name, Page] of Object.entries(pages)) {
