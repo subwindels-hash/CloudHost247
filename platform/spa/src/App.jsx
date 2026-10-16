@@ -42,6 +42,8 @@ import AdminDeploymentsPage from './pages/AdminDeploymentsPage.jsx';
 import AdminOsVersionsPage from './pages/AdminOsVersionsPage.jsx';
 import AdminOsImagesPage from './pages/AdminOsImagesPage.jsx';
 import AdminAvailabilityPage from './pages/AdminAvailabilityPage.jsx';
+import AdminAiSupportPage from './pages/AdminAiSupportPage.jsx';
+import AdminToolsPage from './pages/AdminToolsPage.jsx';
 import { read as readSupportSession, finish as finishSupportSession } from './lib/support-session.js';
 
 function Gate({ children }) {
@@ -178,6 +180,8 @@ export default function App() {
           <Route path="os-versions" element={<AdminOsVersionsPage />} />
           <Route path="os-images" element={<AdminOsImagesPage />} />
           <Route path="availability" element={<AdminAvailabilityPage />} />
+          <Route path="ai-support" element={<AdminAiSupportPage />} />
+          <Route path="tools" element={<AdminToolsPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/account" replace />} />
       </Routes>

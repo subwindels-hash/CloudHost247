@@ -50,6 +50,8 @@ import AdminDeploymentsPage from './src/pages/AdminDeploymentsPage.jsx';
 import AdminOsVersionsPage from './src/pages/AdminOsVersionsPage.jsx';
 import AdminOsImagesPage from './src/pages/AdminOsImagesPage.jsx';
 import AdminAvailabilityPage from './src/pages/AdminAvailabilityPage.jsx';
+import AdminAiSupportPage from './src/pages/AdminAiSupportPage.jsx';
+import AdminToolsPage from './src/pages/AdminToolsPage.jsx';
 
 const pages = {
   DashboardPage, CatalogPage, CartPage, BillingPage, InvoiceDetailPage, ServicesPage, DnsPage, SecurityPage, SupportPage,
@@ -61,6 +63,7 @@ const pages = {
   AdminDomainServicesPage, AdminMarketplacePage, AdminProvisioningPage,
   AdminMonitoringPage, AdminDeploymentsPage,
   AdminOsVersionsPage, AdminOsImagesPage, AdminAvailabilityPage,
+  AdminAiSupportPage, AdminToolsPage,
 };
 const results = {};
 for (const [name, Page] of Object.entries(pages)) {

@@ -527,6 +527,25 @@ export const adminApi = {
   updateConfiguration: (id, patch) =>
     api(`/api/v1/admin/server-product-configurations/${encodeURIComponent(id)}`, { method: 'PATCH', body: patch }),
   providerAdapters: () => api('/api/v1/admin/provider-adapters'),
+  // --- AI support + free-tools admin ---
+  aiOverview: () => api('/api/v1/admin/ai-support/overview'),
+  aiAgents: () => api('/api/v1/admin/ai-support/agents'),
+  aiKnowledge: () => api('/api/v1/admin/ai-support/knowledge'),
+  aiConversations: (params = {}) =>
+    api(`/api/v1/admin/ai-support/conversations${queryString(params)}`),
+  aiConversation: (id) => api(`/api/v1/admin/ai-support/conversations/${encodeURIComponent(id)}`),
+  aiReply: (id, message) =>
+    api(`/api/v1/admin/ai-support/conversations/${encodeURIComponent(id)}/reply`, { method: 'POST', body: { message } }),
+  updateAiConversation: (id, patch) =>
+    api(`/api/v1/admin/ai-support/conversations/${encodeURIComponent(id)}`, { method: 'PATCH', body: patch }),
+  setAgentPresence: (payload) => api('/api/v1/admin/ai-support/presence', { method: 'PUT', body: payload }),
+  newsletterSubscriptions: () => api('/api/v1/admin/newsletter-subscriptions'),
+  adminToolReports: () => api('/api/v1/admin/tools/reports'),
+  adminToolMonitors: () => api('/api/v1/admin/tools/monitors'),
+  deleteToolReport: (id) =>
+    api(`/api/v1/admin/tools/reports/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  mrzSettings: () => api('/api/v1/admin/tools/mrz/settings'),
+  updateMrzSettings: (patch) => api('/api/v1/admin/tools/mrz/settings', { method: 'PUT', body: patch }),
 };
 
 /** Human-readable rendering of an ApiError for form alerts. */

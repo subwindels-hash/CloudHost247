@@ -109,6 +109,8 @@ export default function AdminLayout() {
         {isAdmin && <NavLink to="/admin/os-versions" className={({ isActive }) => (isActive ? 'active' : '')}>Operating systems</NavLink>}
         {isAdmin && <NavLink to="/admin/os-images" className={({ isActive }) => (isActive ? 'active' : '')}>OS images</NavLink>}
         {isAdmin && <NavLink to="/admin/availability" className={({ isActive }) => (isActive ? 'active' : '')}>Templates</NavLink>}
+        {isAdmin && <NavLink to="/admin/ai-support" className={({ isActive }) => (isActive ? 'active' : '')}>AI support</NavLink>}
+        {isAdmin && <NavLink to="/admin/tools" className={({ isActive }) => (isActive ? 'active' : '')}>Tools</NavLink>}
         <span className="admin-role">{user.role}</span>
       </nav>
       <Outlet />
