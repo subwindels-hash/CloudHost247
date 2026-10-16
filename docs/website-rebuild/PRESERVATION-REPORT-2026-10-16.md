@@ -294,3 +294,58 @@ the evidence above reproducible by re-running the commands in §7.
 - [x] Git diff contains only justified changes, each explained in §3
 - [x] No production deployment without approval
 - [x] Approved enhancement implemented additively (homepage headline, per your decision)
+
+---
+
+## 11. Addendum — the branch was merged forward, and PR #87 landed meanwhile
+
+While this branch was being prepared, `main` moved: **PR #87**, "Restore the website appearance
+changed by the 503-fix and asset-sync passes", merged at 12:35 today — a second, independent
+restoration pass over the same incidents this report describes. `main` was merged into this branch
+(commit `ca158131`) so the changes here are reviewed against the current base rather than the commit
+they forked from. Nothing in §1–§10 changed; what follows is what the second pass did and did not do.
+
+**Where the two passes agree.** #87 restored the same three pieces of authored copy this branch
+restores — the `backups.php` list and the two DNS descriptions — with identical values, so the two
+workstreams do not disagree about the copy.
+
+**What #87 did not fix.** The twelve card slots were still wrong on `main` when it was merged: those
+pages resolved to `icons/firewall.svg` and `icons/network.svg`, the `icons/` tie-break in
+`generate.mjs` was untouched, both shadowing files were still present, and regenerating `main`
+reproduced the broken slots. The artwork half of this report is therefore still required rather than
+superseded.
+
+**One deliberate divergence: the homepage headline.** #87 reverted the hero inside the generated
+`platform/public/index.html`, which put that file back in agreement with its generator. This branch
+instead keeps "Build. Host. Deploy. Scale." and moves it *into* the generator (`fd74ef9`), per the
+owner's decision taken while preparing this branch. After the merge the only difference from `main`
+in that page is the hero block — headline, lede and the three CTAs — and the build is idempotent.
+Reverting that one commit defers to #87's copy instead; it is a single-commit decision, not a
+rewrite.
+
+**One thing left alone deliberately.** #87 redrew roughly forty illustration SVGs more simply — for
+example `cloud/network.svg`, whose 660×560 transparent isometric scene with COMPUTE/STORAGE/NETWORK
+pods became a single pod on an opaque background. That is a redesign rather than a restoration, it
+sits outside what this branch was asked to do, and it is left exactly as `main` has it. The
+consequence worth stating: five of the twelve restored slots now render #87's redrawn artwork rather
+than the original scene, so the four pages that were unaffected still render the original drawings
+and the five that were affected render the new ones. That inconsistency is a decision for the owner,
+not something to settle silently inside a preservation patch.
+
+**Merge mechanics, for the record.** One textual conflict, in the generated
+`docs/website-rebuild/current-files.csv` (regenerated rather than hand-merged). Git's auto-merge of
+the theme registry inserted the same `seo_description` key twice inside one page object — a duplicate
+JSON key that still parses, and the reason a plain regeneration appeared to drop the two
+descriptions; regeneration collapses the duplicate and keeps the value once, which is why the
+post-merge registry still carries all 67 descriptions, the twelve reviewed slots and the
+`backups.php` list. The site build was re-run so the served page and its generator agree.
+
+**Re-verified on the merged tree** (this supersedes the same rows in §7):
+
+| check | result |
+|---|---|
+| `bash scripts/release-candidate-check.sh` | **exit 0** |
+| website suite | 141 tests **ok**, 8 skipped |
+| platform `npm test` | **876 tests, 876 pass, 0 fail** (30 tests main added; the same two `x-frame-options` assertions fail locally only when the sandbox `.env` sets `FRAME_ANCESTORS`) |
+| `python3 scripts/audit-navigation-inventory.py` | rebuilt, six defect classes at 0 |
+| rendered-site audit | 229 pages, all checks green |
