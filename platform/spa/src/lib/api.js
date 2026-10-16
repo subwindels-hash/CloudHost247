@@ -555,6 +555,9 @@ export const adminApi = {
     api(`/api/v1/admin/users/${encodeURIComponent(userId)}/security-number/rotate`, { method: 'POST', body: {} }),
   requireSnReinitialization: (userId) =>
     api(`/api/v1/admin/users/${encodeURIComponent(userId)}/security-number/require-reinitialization`, { method: 'POST', body: {} }),
+  // --- audit log (append-only; this client only reads) ---
+  auditLogs: (params = {}) => api(`/api/v1/audit-logs${queryString(params)}`),
+  adminAuditLogs: (params = {}) => api(`/api/v1/admin/audit-logs${queryString(params)}`),
 };
 
 /** Human-readable rendering of an ApiError for form alerts. */

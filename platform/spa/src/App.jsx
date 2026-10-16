@@ -45,6 +45,7 @@ import AdminAvailabilityPage from './pages/AdminAvailabilityPage.jsx';
 import AdminAiSupportPage from './pages/AdminAiSupportPage.jsx';
 import AdminToolsPage from './pages/AdminToolsPage.jsx';
 import AdminSecurityNumberPage from './pages/AdminSecurityNumberPage.jsx';
+import AdminAuditLogPage from './pages/AdminAuditLogPage.jsx';
 import { read as readSupportSession, finish as finishSupportSession } from './lib/support-session.js';
 
 function Gate({ children }) {
@@ -184,6 +185,7 @@ export default function App() {
           <Route path="ai-support" element={<AdminAiSupportPage />} />
           <Route path="tools" element={<AdminToolsPage />} />
           <Route path="security-number" element={<AdminSecurityNumberPage />} />
+          <Route path="audit-log" element={<AdminAuditLogPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/account" replace />} />
       </Routes>

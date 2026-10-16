@@ -53,6 +53,7 @@ import AdminAvailabilityPage from './src/pages/AdminAvailabilityPage.jsx';
 import AdminAiSupportPage from './src/pages/AdminAiSupportPage.jsx';
 import AdminToolsPage from './src/pages/AdminToolsPage.jsx';
 import AdminSecurityNumberPage from './src/pages/AdminSecurityNumberPage.jsx';
+import AdminAuditLogPage from './src/pages/AdminAuditLogPage.jsx';
 
 const pages = {
   DashboardPage, CatalogPage, CartPage, BillingPage, InvoiceDetailPage, ServicesPage, DnsPage, SecurityPage, SupportPage,
@@ -65,6 +66,7 @@ const pages = {
   AdminMonitoringPage, AdminDeploymentsPage,
   AdminOsVersionsPage, AdminOsImagesPage, AdminAvailabilityPage,
   AdminAiSupportPage, AdminToolsPage, AdminSecurityNumberPage,
+  AdminAuditLogPage,
 };
 const results = {};
 for (const [name, Page] of Object.entries(pages)) {
