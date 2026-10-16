@@ -546,6 +546,15 @@ export const adminApi = {
     api(`/api/v1/admin/tools/reports/${encodeURIComponent(id)}`, { method: 'DELETE' }),
   mrzSettings: () => api('/api/v1/admin/tools/mrz/settings'),
   updateMrzSettings: (patch) => api('/api/v1/admin/tools/mrz/settings', { method: 'PUT', body: patch }),
+  // --- security-number policy + per-user oversight (lifecycle metadata only) ---
+  snPolicy: () => api('/api/v1/admin/security-number/policy'),
+  updateSnPolicy: (patch) => api('/api/v1/admin/security-number/policy', { method: 'PUT', body: patch }),
+  userSecurityNumber: (userId) =>
+    api(`/api/v1/admin/users/${encodeURIComponent(userId)}/security-number`),
+  rotateUserSecurityNumber: (userId) =>
+    api(`/api/v1/admin/users/${encodeURIComponent(userId)}/security-number/rotate`, { method: 'POST', body: {} }),
+  requireSnReinitialization: (userId) =>
+    api(`/api/v1/admin/users/${encodeURIComponent(userId)}/security-number/require-reinitialization`, { method: 'POST', body: {} }),
 };
 
 /** Human-readable rendering of an ApiError for form alerts. */
