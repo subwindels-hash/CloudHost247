@@ -362,11 +362,12 @@ const home = `    <section class="hero">
       <div class="container">
         <div class="hero-inner">
           <span class="eyebrow" style="color:#7fb2ff">Professional Cloud Hosting &amp; Digital Infrastructure</span>
-          <h1>Power Your Digital World With CloudHost247</h1>
-          <p class="lede">Fast, secure and scalable hosting infrastructure built for websites, businesses, developers and growing digital companies worldwide.</p>
+          <h1>Build. Host. Deploy.<br><em style="font-style:normal;color:#7fb2ff">Scale.</em></h1>
+          <p class="lede">CloudHost247 gives businesses, developers and organizations the infrastructure they need to build and operate online — from domains and websites to cloud servers, applications and deployment platforms.</p>
           <div class="hero-ctas">
-            <a class="btn btn--primary btn--lg" href="/app/catalog">Get Started</a>
-            <a class="btn btn--navy-outline btn--lg" href="/hosting">Explore Hosting</a>
+            <a class="btn btn--primary btn--lg" href="/hosting">Explore Hosting</a>
+            <a class="btn btn--navy-outline btn--lg" href="/hosting/vps">Explore Cloud &amp; Servers</a>
+            <a class="btn btn--navy-outline btn--lg" href="/domains">Find a Domain</a>
           </div>
         </div>
         <div class="hero-visual" role="img" aria-label="Illustration of CloudHost247 infrastructure nodes and network health">

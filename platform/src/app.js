@@ -152,6 +152,7 @@ class App {
   _registerPipeline() {
     const applySecurity = securityHeaders({
       enforceCsp: this.config.NODE_ENV === 'production',
+      frameAncestors: this.config.FRAME_ANCESTORS,
     });
 
     const cors = corsMiddleware({

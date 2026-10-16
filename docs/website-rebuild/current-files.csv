@@ -413,7 +413,6 @@ assets/images/cloudhost247/icons/email-hosting.svg,Email,363
 assets/images/cloudhost247/icons/enterprise-servers.svg,Dedicated,430
 assets/images/cloudhost247/icons/fair-usage-policy.svg,Legal,376
 assets/images/cloudhost247/icons/faqs.svg,Support,523
-assets/images/cloudhost247/icons/firewall.svg,Server Management,505
 assets/images/cloudhost247/icons/game-servers.svg,Dedicated,424
 assets/images/cloudhost247/icons/help-center.svg,Support,508
 assets/images/cloudhost247/icons/infrastructure.svg,Cloud,388
@@ -425,7 +424,6 @@ assets/images/cloudhost247/icons/mail.svg,Email,301
 assets/images/cloudhost247/icons/managed-services.svg,Administrative/internal,513
 assets/images/cloudhost247/icons/migration.svg,Administrative/internal,506
 assets/images/cloudhost247/icons/monitoring.svg,Server Management,507
-assets/images/cloudhost247/icons/network.svg,Administrative/internal,381
 assets/images/cloudhost247/icons/nodejs-hosting.svg,Hosting,342
 assets/images/cloudhost247/icons/offers.svg,Marketing,380
 assets/images/cloudhost247/icons/operating-systems.svg,Operating Systems,466
@@ -1172,7 +1170,6 @@ cloudhost247-node/frontend/public/media/cloudhost247/icons/email-hosting.svg,Ema
 cloudhost247-node/frontend/public/media/cloudhost247/icons/enterprise-servers.svg,Dedicated,430
 cloudhost247-node/frontend/public/media/cloudhost247/icons/fair-usage-policy.svg,Legal,376
 cloudhost247-node/frontend/public/media/cloudhost247/icons/faqs.svg,Support,523
-cloudhost247-node/frontend/public/media/cloudhost247/icons/firewall.svg,Server Management,505
 cloudhost247-node/frontend/public/media/cloudhost247/icons/game-servers.svg,Dedicated,424
 cloudhost247-node/frontend/public/media/cloudhost247/icons/help-center.svg,Support,508
 cloudhost247-node/frontend/public/media/cloudhost247/icons/infrastructure.svg,Cloud,388
@@ -1184,7 +1181,6 @@ cloudhost247-node/frontend/public/media/cloudhost247/icons/mail.svg,Email,301
 cloudhost247-node/frontend/public/media/cloudhost247/icons/managed-services.svg,Administrative/internal,513
 cloudhost247-node/frontend/public/media/cloudhost247/icons/migration.svg,Administrative/internal,506
 cloudhost247-node/frontend/public/media/cloudhost247/icons/monitoring.svg,Server Management,507
-cloudhost247-node/frontend/public/media/cloudhost247/icons/network.svg,Administrative/internal,381
 cloudhost247-node/frontend/public/media/cloudhost247/icons/nodejs-hosting.svg,Hosting,342
 cloudhost247-node/frontend/public/media/cloudhost247/icons/offers.svg,Marketing,380
 cloudhost247-node/frontend/public/media/cloudhost247/icons/operating-systems.svg,Operating Systems,466
@@ -2394,8 +2390,8 @@ docs/RESTRUCTURING.md,Administrative/internal,15971
 docs/SERVER_AGENT.md,Administrative/internal,11445
 docs/SERVER_PROVISIONING.md,Administrative/internal,55826
 docs/TOOL-AUDIT.md,Administrative/internal,45756
-docs/UNFINISHED-BUILD-CODE-NAME-LIST.md,Administrative/internal,27305
-docs/UNFINISHED-BUILD-CODE-NAMES.md,Administrative/internal,38821
+docs/UNFINISHED-BUILD-CODE-NAME-LIST.md,Administrative/internal,30855
+docs/UNFINISHED-BUILD-CODE-NAMES.md,Administrative/internal,59110
 docs/UNFINISHED-MODULES.md,Administrative/internal,116261
 docs/VULTR_CONSOLE_BACKFILL_RUNBOOK.md,Administrative/internal,4914
 docs/WEBHOOK_PIPELINE_UNFREEZE_RUNBOOK.md,Deployment/PaaS,9943
@@ -2993,7 +2989,7 @@ modules/addons/cloudhost247_theme/migrations/V100.php,Administrative/internal,12
 modules/addons/cloudhost247_theme/migrations/V110.php,Administrative/internal,969
 modules/addons/cloudhost247_theme/migrations/V120.php,Administrative/internal,2539
 modules/addons/cloudhost247_theme/resources/applications.json,Applications,40749
-modules/addons/cloudhost247_theme/resources/site.json,Administrative/internal,261699
+modules/addons/cloudhost247_theme/resources/site.json,Administrative/internal,261734
 modules/addons/cloudhost247_theme/resources/tools-public.json,Developer,341905
 modules/addons/cloudhost247_theme/resources/tools.json,Developer,71593
 modules/addons/cloudhost247_tools/README.md,Developer,5272
@@ -5388,7 +5384,7 @@ offers.php,Marketing,642
 operating-systems.php,Operating Systems,330
 paas.php,Deployment/PaaS,457
 php-hosting.php,Hosting,478
-platform/.env.example,Administrative/internal,3506
+platform/.env.example,Administrative/internal,3799
 platform/.gitignore,Administrative/internal,185
 platform/.htaccess,Administrative/internal,2206
 platform/MIGRATION.md,Administrative/internal,15025
@@ -5448,12 +5444,15 @@ platform/manifests/vaultwarden/manifest.yaml,Administrative/internal,1522
 platform/manifests/vikunja/manifest.yaml,Administrative/internal,1272
 platform/manifests/wireguard-easy/manifest.yaml,Administrative/internal,1057
 platform/manifests/wordpress/manifest.yaml,Applications,1743
-platform/mobile/capacitor.config.json,Administrative/internal,634
+platform/mobile/README.md,Administrative/internal,3565
+platform/mobile/capacitor.config.json,Administrative/internal,685
 platform/mobile/package.json,Administrative/internal,681
 platform/mobile/resources/icon.png,Administrative/internal,8718
 platform/mobile/resources/splash.png,Administrative/internal,12255
+platform/mobile/src/index.js,Administrative/internal,412
+platform/mobile/src/mobile-boot.js,Administrative/internal,5628
 platform/package-lock.json,Administrative/internal,5742
-platform/package.json,Administrative/internal,1438
+platform/package.json,Administrative/internal,1477
 platform/public/404.html,Administrative/internal,13865
 platform/public/about.html,Marketing,16572
 platform/public/app-deployment.html,Deployment/PaaS,16770
@@ -5501,7 +5500,7 @@ platform/public/icons/icon-192.png,Administrative/internal,785
 platform/public/icons/icon-512.png,Administrative/internal,3053
 platform/public/icons/icon-maskable-192.png,Administrative/internal,738
 platform/public/icons/icon-maskable-512.png,Administrative/internal,2781
-platform/public/index.html,Administrative/internal,33872
+platform/public/index.html,Administrative/internal,34083
 platform/public/infrastructure.html,Cloud,16131
 platform/public/knowledgebase.html,Support,14946
 platform/public/legal/acceptable-use.html,Legal,14801
@@ -5526,7 +5525,7 @@ platform/public/sw.js,Administrative/internal,4093
 platform/public/vps-hosting.html,VPS,288
 platform/public/web-hosting.html,Hosting,320
 platform/scripts/app-catalog.json,Administrative/internal,14754
-platform/scripts/build-site.cjs,Administrative/internal,108439
+platform/scripts/build-site.cjs,Administrative/internal,108650
 platform/scripts/gen-control-panel-seed.cjs,Administrative/internal,1251
 platform/scripts/generate-icons.js,Administrative/internal,7440
 platform/scripts/migrate.js,Administrative/internal,1634
@@ -5537,50 +5536,75 @@ platform/server.js,Administrative/internal,6389
 platform/spa/index.html,Administrative/internal,593
 platform/spa/package-lock.json,Administrative/internal,62184
 platform/spa/package.json,Administrative/internal,597
-platform/spa/src/App.jsx,Administrative/internal,6470
-platform/spa/src/lib/api.js,Administrative/internal,16061
+platform/spa/src/App.jsx,Administrative/internal,10348
+platform/spa/src/components/AdminRefundModal.jsx,Administrative/internal,3314
+platform/spa/src/lib/api.js,Administrative/internal,37609
 platform/spa/src/lib/format.js,Administrative/internal,2968
 platform/spa/src/lib/support-session.js,Administrative/internal,3108
 platform/spa/src/lib/useAuth.jsx,Administrative/internal,1436
-platform/spa/src/main.jsx,Administrative/internal,762
+platform/spa/src/main.jsx,Administrative/internal,1665
+platform/spa/src/pages/AdminAiSupportPage.jsx,Support,13952
+platform/spa/src/pages/AdminAuditLogPage.jsx,Administrative/internal,5477
+platform/spa/src/pages/AdminAvailabilityPage.jsx,Administrative/internal,11880
+platform/spa/src/pages/AdminBillingPage.jsx,Administrative/internal,5219
 platform/spa/src/pages/AdminCatalogPage.jsx,Administrative/internal,12254
 platform/spa/src/pages/AdminCloudflarePage.jsx,Cloud,4172
 platform/spa/src/pages/AdminContentPage.jsx,Administrative/internal,8115
 platform/spa/src/pages/AdminCustomerDetailPage.jsx,Administrative/internal,15964
 platform/spa/src/pages/AdminCustomersPage.jsx,Administrative/internal,5087
 platform/spa/src/pages/AdminDashboardPage.jsx,Administrative/internal,5766
+platform/spa/src/pages/AdminDeploymentsPage.jsx,Deployment/PaaS,7160
+platform/spa/src/pages/AdminDomainServicesPage.jsx,Domains,31063
 platform/spa/src/pages/AdminInfrastructurePage.jsx,Cloud,6870
-platform/spa/src/pages/AdminLayout.jsx,Administrative/internal,4775
+platform/spa/src/pages/AdminInvoiceDetailPage.jsx,Checkout,10586
+platform/spa/src/pages/AdminLayout.jsx,Administrative/internal,6611
+platform/spa/src/pages/AdminLedgerPage.jsx,Administrative/internal,6195
+platform/spa/src/pages/AdminMarketplacePage.jsx,Administrative/internal,24296
+platform/spa/src/pages/AdminMonitoringPage.jsx,Server Management,4766
+platform/spa/src/pages/AdminOrderDetailPage.jsx,Administrative/internal,9176
+platform/spa/src/pages/AdminOrdersPage.jsx,Administrative/internal,4353
+platform/spa/src/pages/AdminOsImagesPage.jsx,Administrative/internal,9655
+platform/spa/src/pages/AdminOsVersionsPage.jsx,Administrative/internal,13951
+platform/spa/src/pages/AdminProvisioningPage.jsx,Administrative/internal,8977
+platform/spa/src/pages/AdminSecurityNumberPage.jsx,Administrative/internal,6953
 platform/spa/src/pages/AdminServersPage.jsx,Administrative/internal,6671
 platform/spa/src/pages/AdminSiteSettingsPage.jsx,Administrative/internal,5004
 platform/spa/src/pages/AdminTicketDetailPage.jsx,Support,5919
 platform/spa/src/pages/AdminTicketsPage.jsx,Support,4538
+platform/spa/src/pages/AdminToolsPage.jsx,Developer,7414
 platform/spa/src/pages/AdminUsersPage.jsx,Administrative/internal,3147
-platform/spa/src/pages/BillingPage.jsx,Administrative/internal,8777
+platform/spa/src/pages/BillingPage.jsx,Administrative/internal,9786
 platform/spa/src/pages/CartPage.jsx,Checkout,6403
 platform/spa/src/pages/CatalogPage.jsx,Administrative/internal,5686
+platform/spa/src/pages/CloudflareServicePage.jsx,Cloud,30411
+platform/spa/src/pages/CloudflareServicesPage.jsx,Cloud,2709
 platform/spa/src/pages/DashboardPage.jsx,Administrative/internal,7626
-platform/spa/src/pages/InvoiceDetailPage.jsx,Checkout,7228
+platform/spa/src/pages/DnsPage.jsx,Domains,14587
+platform/spa/src/pages/InvoiceDetailPage.jsx,Checkout,8513
+platform/spa/src/pages/MarketplacePage.jsx,Administrative/internal,6531
+platform/spa/src/pages/MyAppsPage.jsx,Administrative/internal,5452
 platform/spa/src/pages/SecurityPage.jsx,Administrative/internal,11499
+platform/spa/src/pages/ServerDetailPage.jsx,Administrative/internal,12952
+platform/spa/src/pages/ServersPage.jsx,Administrative/internal,6008
 platform/spa/src/pages/ServicesPage.jsx,Administrative/internal,4157
 platform/spa/src/pages/SupportPage.jsx,Support,4652
-platform/spa/src/styles.css,Administrative/internal,11525
-platform/spa/ssr-smoke.jsx,Administrative/internal,2674
+platform/spa/src/styles.css,Administrative/internal,12227
+platform/spa/ssr-smoke.jsx,Administrative/internal,4977
 platform/spa/vite.config.js,Administrative/internal,963
-platform/src/app.js,Administrative/internal,9890
-platform/src/core/config.js,Administrative/internal,9854
+platform/src/app.js,Administrative/internal,9941
+platform/src/core/config.js,Administrative/internal,10225
 platform/src/core/cors.js,Administrative/internal,2113
 platform/src/core/errors.js,Administrative/internal,2667
 platform/src/core/http.js,Administrative/internal,12320
 platform/src/core/logger.js,Administrative/internal,3289
 platform/src/core/ratelimit.js,Administrative/internal,3545
 platform/src/core/router.js,Administrative/internal,7736
-platform/src/core/security.js,Administrative/internal,1967
+platform/src/core/security.js,Administrative/internal,3163
 platform/src/core/static.js,Administrative/internal,8773
 platform/src/core/validate.js,Administrative/internal,15372
 platform/src/domains/account-identity.js,Client Area,9811
 platform/src/domains/account.js,Client Area,10695
-platform/src/domains/admin-billing.js,Domains,14042
+platform/src/domains/admin-billing.js,Domains,19023
 platform/src/domains/admin-cloudflare.js,Domains,31477
 platform/src/domains/admin-customers.js,Domains,14665
 platform/src/domains/admin-domain-services.js,Domains,35500
@@ -5606,7 +5630,7 @@ platform/src/domains/domain-services.js,Domains,38993
 platform/src/domains/domains.js,Domains,8622
 platform/src/domains/firewall.js,Domains,2244
 platform/src/domains/health.js,Domains,1928
-platform/src/domains/infrastructure.js,Domains,78407
+platform/src/domains/infrastructure.js,Domains,78322
 platform/src/domains/licenses.js,Domains,5680
 platform/src/domains/marketplace-admin.js,Domains,21133
 platform/src/domains/marketplace.js,Domains,2552
@@ -5695,6 +5719,7 @@ platform/src/lib/providers/sanitize.js,Administrative/internal,2272
 platform/src/lib/providers/types.js,Administrative/internal,3427
 platform/src/lib/provisioning-worker.js,Administrative/internal,20135
 platform/src/lib/qr.js,Administrative/internal,24557
+platform/src/lib/scheduler.js,Administrative/internal,3847
 platform/src/lib/secret-box.js,Administrative/internal,5800
 platform/src/lib/subscription-dto.js,Administrative/internal,1239
 platform/src/lib/support-operator.js,Administrative/internal,27455
@@ -5712,6 +5737,7 @@ platform/src/store/json-store.js,Administrative/internal,15976
 platform/src/store/pg-store.js,Administrative/internal,16224
 platform/src/store/schema.js,Administrative/internal,80301
 platform/src/store/seed-data/control-panels.js,Administrative/internal,29417
+platform/src/worker/cron.js,Administrative/internal,1373
 platform/tests/admin-billing.test.js,Administrative/internal,11341
 platform/tests/admin-orders.test.js,Administrative/internal,15902
 platform/tests/admin-platform.test.js,Administrative/internal,12825
@@ -5748,6 +5774,7 @@ platform/tests/infrastructure-provider-egress.test.js,Administrative/internal,16
 platform/tests/legacy-prefix.test.js,Administrative/internal,6425
 platform/tests/manifests.test.js,Administrative/internal,13621
 platform/tests/marketplace-admin.test.js,Administrative/internal,6446
+platform/tests/mobile-shell.test.js,Administrative/internal,11641
 platform/tests/monitoring-telemetry.test.js,Administrative/internal,9740
 platform/tests/mrz-tools.test.js,Administrative/internal,15584
 platform/tests/os-availability.test.js,Administrative/internal,12390
@@ -5758,14 +5785,31 @@ platform/tests/provisioning-worker.test.js,Administrative/internal,23104
 platform/tests/qr.test.js,Administrative/internal,26495
 platform/tests/rehash-passwords.test.js,Administrative/internal,14378
 platform/tests/router.test.js,Administrative/internal,4014
+platform/tests/scheduler.test.js,Administrative/internal,9907
 platform/tests/servers-provider-actions.test.js,Administrative/internal,14276
 platform/tests/servers.test.js,Administrative/internal,8183
 platform/tests/site-footer-links.test.js,Administrative/internal,5247
 platform/tests/site.test.js,Administrative/internal,10088
 platform/tests/small-modules.test.js,Administrative/internal,10388
+platform/tests/spa-admin-ai-tools-screen.test.js,Administrative/internal,12101
+platform/tests/spa-admin-audit-log-screen.test.js,Administrative/internal,6749
+platform/tests/spa-admin-billing-screen.test.js,Administrative/internal,14126
+platform/tests/spa-admin-deployments-screen.test.js,Administrative/internal,6649
+platform/tests/spa-admin-ds-screen.test.js,Administrative/internal,11281
+platform/tests/spa-admin-marketplace-screen.test.js,Administrative/internal,10173
+platform/tests/spa-admin-monitoring-screen.test.js,Administrative/internal,4071
+platform/tests/spa-admin-orders-screen.test.js,Administrative/internal,7600
+platform/tests/spa-admin-os-screens.test.js,Administrative/internal,16130
+platform/tests/spa-admin-provisioning-screen.test.js,Administrative/internal,6389
+platform/tests/spa-admin-security-number-screen.test.js,Administrative/internal,6006
 platform/tests/spa-admin.test.js,Administrative/internal,20433
+platform/tests/spa-billing-screens.test.js,Administrative/internal,8739
+platform/tests/spa-cloudflare-screen.test.js,Administrative/internal,11660
 platform/tests/spa-commerce.test.js,Administrative/internal,16464
+platform/tests/spa-dns-screen.test.js,Administrative/internal,7206
 platform/tests/spa-format.test.js,Administrative/internal,3843
+platform/tests/spa-marketplace-screen.test.js,Administrative/internal,7027
+platform/tests/spa-servers-screen.test.js,Administrative/internal,7481
 platform/tests/ssl.test.js,Administrative/internal,7160
 platform/tests/store.test.js,Administrative/internal,4120
 platform/tests/support-operator.test.js,Administrative/internal,21283
@@ -5814,7 +5858,7 @@ scripts/php-wasm/package.json,Administrative/internal,293
 scripts/php-wasm/php,Administrative/internal,2913
 scripts/php-wasm/shim.mjs,Administrative/internal,3047
 scripts/regen-php-pages.cjs,Administrative/internal,30476
-scripts/release-candidate-check.sh,Administrative/internal,12977
+scripts/release-candidate-check.sh,Administrative/internal,13018
 scripts/site/catalogue-visuals.mjs,Administrative/internal,2819
 scripts/site/check-links.mjs,Administrative/internal,23279
 scripts/site/extract-legal-pdf.mjs,Administrative/internal,5386
@@ -7972,6 +8016,7 @@ tests/website/test_page_inventory.py,Administrative/internal,14303
 tests/website/test_report_figures.py,Administrative/internal,8293
 tests/website/test_static.py,Administrative/internal,23317
 tests/website/test_tools_surface.py,Administrative/internal,14948
+tests/website/test_visual_regressions.py,Administrative/internal,12132
 tools-sitemap.php,Administrative/internal,4489
 tools/.htaccess,Developer,300
 tools/admin/index.php,Administrative/internal,6119

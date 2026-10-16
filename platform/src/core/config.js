@@ -104,6 +104,12 @@ const envSchema = v.object({
   RATE_LIMIT_MAX: v.coerce.number().int().positive().default(300),
   RATE_LIMIT_AUTH_MAX: v.coerce.number().int().positive().default(20),
 
+  // --- framing (sandbox/preview hosts only) ---
+  // Space-separated CSP sources allowed to embed the app in an iframe, e.g.
+  // `https://*.example.com`. Unset means X-Frame-Options: DENY, the production default: every
+  // other environment here is a host that frames this app for review, which DENY cannot allow.
+  FRAME_ANCESTORS: v.string().max(1000).optional(),
+
   // --- payments (optional) ---
   MANUAL_PAYMENT_INSTRUCTIONS: v.string().max(2000).optional(),
   SANDBOX_GATEWAY_WEBHOOK_SECRET: v.string().min(16).optional(),
