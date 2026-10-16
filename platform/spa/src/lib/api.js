@@ -53,6 +53,55 @@ export class ApiError extends Error {
 }
 
 /**
+ * Where the platform API lives. The empty string (the default) means "same origin as the page" —
+ * the web deployment, where nothing changes. A Capacitor shell that serves the bundle from local
+ * assets is not on the platform's origin, so it must name one: the mobile bootstrap reads it from
+ * the Capacitor config (`plugins.CloudHost247.apiOrigin`) and assigns `window.__CH247_API_ORIGIN__`
+ * before the app renders; an operator can also override it via `localStorage['ch247.apiOrigin']`.
+ *
+ * Invalid origins are refused — a wrong base would half-work at best, so the resolver falls back to
+ * same-origin and the misconfiguration shows up immediately in testing instead of in production.
+ * https is required except for loopback (http://localhost and friends), mirroring the platform's
+ * own provider `apiBaseUrl` rule.
+ */
+export function resolveApiOrigin({ win, storage } = {}) {
+  const w = win ?? (typeof window !== 'undefined' ? window : undefined);
+  const s = storage ?? (typeof localStorage !== 'undefined' ? localStorage : undefined);
+  const candidates = [
+    w?.__CH247_API_ORIGIN__,
+    (() => { try { return s?.getItem?.('ch247.apiOrigin'); } catch { return null; } })(),
+  ];
+  for (const raw of candidates) {
+    const value = typeof raw === 'string' ? raw.trim() : '';
+    if (!value) continue;
+    try {
+      const parsed = new URL(value);
+      const loopback = ['localhost', '127.0.0.1', '[::1]', '::1'].includes(parsed.hostname);
+      if (parsed.protocol !== 'https:' && !(parsed.protocol === 'http:' && loopback)) continue;
+      return `${parsed.origin}${parsed.pathname === '/' ? '' : parsed.pathname.replace(/\/+$/, '')}`;
+    } catch {
+      // Not an absolute URL — refuse and keep looking.
+    }
+  }
+  return '';
+}
+
+/** Set (or clear, with a falsy value) the runtime API origin override. Returns what will be used. */
+export function configureApiOrigin(origin, { win } = {}) {
+  const w = win ?? (typeof window !== 'undefined' ? window : undefined);
+  if (w) {
+    if (origin) w.__CH247_API_ORIGIN__ = origin;
+    else delete w.__CH247_API_ORIGIN__;
+  }
+  return resolveApiOrigin({ win: w });
+}
+
+/** Absolute URL for an API path under the resolved origin ('' origin = today's same-origin fetch). */
+export function apiUrl(path, options) {
+  return `${resolveApiOrigin(options)}${path}`;
+}
+
+/**
  * Make a request to the platform API.
  *
  * On a 401 with a stored refresh token it attempts exactly one refresh and retries, so an expired
@@ -65,7 +114,7 @@ export async function api(path, options = {}) {
   if (body !== undefined) finalHeaders['Content-Type'] = 'application/json';
   if (auth && store.token) finalHeaders.Authorization = `Bearer ${store.token}`;
 
-  const response = await fetch(path, {
+  const response = await fetch(apiUrl(path), {
     method,
     headers: finalHeaders,
     body: body === undefined ? undefined : JSON.stringify(body),
@@ -88,7 +137,7 @@ export async function api(path, options = {}) {
 
 async function tryRefresh() {
   try {
-    const response = await fetch('/api/v1/auth/refresh', {
+    const response = await fetch(apiUrl('/api/v1/auth/refresh'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify({ refreshToken: store.refreshToken }),

@@ -8,6 +8,9 @@
     "allowNavigation": ["*.cloudhost247.example.com"]
   },
   "plugins": {
+    "CloudHost247": {
+      "apiOrigin": ""
+    },
     "SplashScreen": {
       "launchShowDuration": 1200,
       "backgroundColor": "#0756d8",
