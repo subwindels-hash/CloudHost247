@@ -3,7 +3,7 @@
 **Compiled:** 2026-10-08. **Verified against the working tree at `8369f7b`** (branch
 `arena/2dd66601-cloudhost247`), not copied from headers.
 **Sources consolidated:** `docs/UNFINISHED-MODULES.md` (the long-form audit, A1–A23 + B/C/D/E),
-`docs/UNFINISHED-BUILD-CODE-NAMES.md` (the progress-log roll-up, rows 1–15), `platform/MIGRATION.md`,
+`docs/UNFINISHED-BUILD-CODE-NAMES.md` (the progress-log roll-up, rows 1–22), `platform/MIGRATION.md`,
 `cloudhost247-node/docs/NODE_PLATFORM_STATUS.md`, and a fresh scan of the tree.
 
 This page is the **name index** — every module/build artifact whose code is not finished and verified,
@@ -13,6 +13,8 @@ grouped by *why* it is unfinished. What each one is missing lives in the two sou
 
 | Closed | Module(s) | Evidence |
 |---|---|---|
+| 2026-10-16 | §1.2 named admin screens — progress rows 20–22: `AdminBillingPage`/`AdminInvoiceDetailPage`/`AdminLedgerPage`; `AdminOrdersPage`/`AdminOrderDetailPage`; `AdminDomainServicesPage` | Commit `12c1a417` (6 page modules + `adminApi` billing/orders/domain-services methods + 3 screen-contract tests). Each test walks the screen's exact HTTP sequence over the real app (`spa-admin-ds-screen.test.js` against `fixtures/fake-registrar`, including the write-only credential assertion and the real Test Connection call). SSR smoke renders all 34 page modules; `vite build` green; full platform suite **854 pass / 0 fail**. No browser has rendered the pages in this environment. |
+| 2026-10-16 | §1.2 named customer screens — progress rows 16–19: `DnsPage` + `dnsApi`; `CloudflareServicesPage`/`CloudflareServicePage` + `cloudflareApi`; `MarketplacePage`/`MyAppsPage` + `marketplaceApi`/`appsApi`; `ServersPage`/`ServerDetailPage` + `serversApi` | Commit `e5fd4ffe` (7 page modules + 3 api-client namespaces + 4 screen-contract tests). Each test walks the screen's exact HTTP sequence over the real app (`spa-cloudflare-screen.test.js` against `fixtures/fake-cloudflare`), asserts every response key the screen renders, and pins the page sources to those keys. SSR smoke renders all 28 page modules; `vite build` green; full platform suite **851 pass / 0 fail**. No browser has rendered the pages in this environment. |
 | 2026-10-08 | §1.1 rows 1–2 — `platform/src/domains/cloudflare.js` + `admin-cloudflare.js` (live Cloudflare egress) | `platform/src/lib/cloudflare-client.js` (live API v4 client, 37 unit/wire tests), `cloudflare-service.js`, `cloudflare-sync.js`, `cloudflare-fulfilment.js`; `platform/tests/cloudflare-client.test.js` + `platform/tests/cloudflare-egress.test.js` (34 route tests over the real app against a fake Cloudflare at `platform/tests/fixtures/fake-cloudflare.js`). Full suite: **742 pass / 0 fail**. No real Cloudflare account was reachable from this environment — every provider claim is verified against the loopback fake, never against api.cloudflare.com. |
 | 2026-10-08 | §1.1 row 4 — `platform/src/domains/admin-domain-services.js` (registrar connector: transfer refresh poll, extension catalogue sync, `namecheap` + `godaddy` adapters) | `platform/src/lib/domain-providers/adapters/namecheap.js` (401 lines, full XML API: availability with premium pricing in 50-name batches, TLD catalogue, registration, transfer, live domain status) + `.../godaddy.js` (sso-key REST: availability with the documented two price-unit shapes, purchase with consent, transfer, live status, both unit bugs asserted) + `.../xml.js` (hardened reader, DOCTYPE/entity refused outright) + `lib/domain-transfer-service.js` (poll + completion as one transaction, completion **labelled by evidence**) + `lib/domain-extension-sync.js` (provider quotes recorded against the provider; the platform's selling prices untouched) + `lib/domain-availability.js` (the customer search now prefers a connected registrar's authoritative answer and falls back to RDAP, labelling which spoke). `platform/tests/fixtures/fake-registrar.js` (Namecheap XML **and** GoDaddy JSON) + `platform/tests/domain-registrar-adapters.test.js` (28 tests over real HTTP). The deferred markers are gone: `/transfers/:id/refresh` no longer returns `status: 'deferred'`, `/extensions/sync` no longer returns a hardcoded `{synced: 0}`. Inline `encryptCreds` reconciled onto `lib/secret-box.js` (one envelope implementation, legacy ciphertext still opens). Full suite: **823 pass / 0 fail**. No registrar account exists in this environment — both wire contracts are verified against the loopback fake only. |
 | 2026-10-08 | §2 row 6 — Blockonomics (Bitcoin) gateway ported to `platform/` | `platform/src/lib/gateways/blockonomics.js` (the callback contract of `modules/gateways/callback/blockonomics.php`: the query-string `secret` compared in constant time over digests, the field shape gate, the confirmation threshold taken from configuration and never from the caller, the `addr:txid:confirmations` de-duplication key, and an audit record that keeps the delivery as received) + a **GET** webhook route in `platform/src/domains/webhooks.js`, permitted only for a gateway that declares `queryCallback` + `platform/src/lib/money.js` (currency precision, and the ledger's own two-decimal limit in one place) + the receiver's named refusal for an amount the money columns cannot hold. 7 tests in `platform/tests/blockonomics-gateway.test.js`; full suite **846 pass / 0 fail**. Initiation and settlement stay refused with named reasons — the address-issuance API plus a recorded BTC quote do not exist here, and `NUMERIC(16,2)` money columns cannot store a Bitcoin amount. No live Blockonomics account was reachable from this environment; the callback contract is exercised through the real HTTP route, never against the provider. |
@@ -43,21 +45,40 @@ when it cannot:
 Supporting library files that still carry the marker with them (not modules, listed for completeness):
 `platform/src/lib/provider-adapters.js`, `platform/src/lib/provider-egress.js`, `platform/src/store/schema.js`.
 
-### 1.2 `platform/spa/` — customer + admin SPA, partially ported (17 page modules)
+### 1.2 `platform/spa/` — customer + admin SPA, partially ported (34 page modules as of 2026-10-16)
 
-`platform/spa/src/pages/`: `AdminContentPage` · `AdminCustomerDetailPage` · `AdminCustomersPage` ·
-`AdminDashboardPage` · `AdminLayout` · `AdminSiteSettingsPage` · `AdminTicketDetailPage` ·
-`AdminTicketsPage` · `AdminUsersPage` · `BillingPage` · `CartPage` · `CatalogPage` · `DashboardPage` ·
-`InvoiceDetailPage` · `SecurityPage` · `ServicesPage` · `SupportPage`
+`platform/spa/src/pages/` (34 modules): the customer screens (`CatalogPage`, `CartPage`,
+`BillingPage`, `InvoiceDetailPage`, `ServicesPage`, `DnsPage`, `CloudflareServicesPage`,
+`CloudflareServicePage`, `MarketplacePage`, `MyAppsPage`, `ServersPage`, `ServerDetailPage`,
+`DashboardPage`, `SecurityPage`, `SupportPage`) and the admin console (`AdminLayout`,
+`AdminDashboardPage`, `AdminCustomersPage`, `AdminCustomerDetailPage`, `AdminTicketsPage`,
+`AdminTicketDetailPage`, `AdminUsersPage`, `AdminContentPage`, `AdminSiteSettingsPage`,
+`AdminCatalogPage`, `AdminServersPage`, `AdminInfrastructurePage`, `AdminCloudflarePage`,
+`AdminBillingPage`, `AdminInvoiceDetailPage`, `AdminLedgerPage`, `AdminOrdersPage`,
+`AdminOrderDetailPage`, `AdminDomainServicesPage`).
 
-**Missing, by name: the remaining ~35 admin groups** (catalog authoring, servers, DNS, Cloudflare,
-marketplace, AI/tools, security-number policy, …), the customer-facing **DNS**, **Cloudflare** and
-**marketplace** screens, **server detail**, and the **mobile shell**. No browser has rendered any ported
-page in this environment.
+**Closed 2026-10-16 (progress rows 16–19, commit `e5fd4ffe`): the customer-facing DNS,
+Cloudflare, marketplace and server-detail screens. Closed 2026-10-16 (progress rows 20–22,
+commit `12c1a417`): the admin billing, orders and domain-services consoles.** Each screen has a
+screen-contract test. **Closed 2026-10-16 (rows 23–31, commits `7af86abe` … `27e279ef`): the
+remaining admin groups** — marketplace/app catalogue admin, provisioning jobs, monitoring,
+deployments, OS images/versions/availability, AI/tools, security-number policy and the audit log —
+**and the platform scheduler wiring. Closed 2026-10-16 (row 32, commit `1f537e18`): the mobile
+shell** (§1.3). No browser has rendered any ported page in this environment.
 
-### 1.3 `platform/mobile/` — no app code
+### 1.3 `platform/mobile/` — mobile shell (closed 2026-10-16, row 32)
 
-`capacitor.config.json`, `package.json`, `resources/icon.png`, `resources/splash.png` only.
+**CLOSED 2026-10-16 — commit `1f537e18`.** The shell is the same SPA bundle (`webDir` →
+`../spa/dist`) plus real app code in `src/` (`mobile-boot.js`, `index.js`): API-origin contract for
+local-assets shells (`plugins.CloudHost247.apiOrigin` in `capacitor.config.json` →
+`window.__CH247_API_ORIGIN__` → the shared client's `resolveApiOrigin`/`apiUrl`, with invalid
+origins refused), splash/status-bar wiring, Android back-button handling, platform marker, and a
+platform-aware router swap (HashRouter natively, `BrowserRouter` `/app` on the web) with the
+service worker gated off the native shell. `platform/tests/mobile-shell.test.js` (5 tests) covers
+the resolver and every guarded native behaviour against injected fakes. `android/` and `ios/` stay
+generated locally via `npx cap add` (gitignored by design — `platform/.gitignore`). **Not verified
+here:** `cap add`/`cap sync`, Gradle/Xcode builds, on-device behaviour — no Android SDK or Xcode in
+this environment; see `platform/mobile/README.md`.
 
 ### 1.4 `cloudhost247-node` — capability refusals that remain in adapter profiles
 
@@ -193,9 +214,12 @@ visual/browser tests — *NOT PERFORMED*. Production database is read-only from 
   the real shopper/consent requirements on a live account, and whether a live key passes the IP
   allowlist. One further gap that is scheduling, not code: transfers are polled when an operator
   refreshes one (Admin → Domain Services → Refresh) or when anything calls
-  `lib/domain-transfer-service.js#refreshTransfer`. **No scheduler calls it on a timer yet** — the
-  audited Node build had `worker/domain-services-sweep.ts` for that, and a platform equivalent still
-  has to be wired to whatever runs `crons/`. Until it is, a transfer advances only on operator action.
+  `lib/domain-transfer-service.js#refreshTransfer`. ~~No scheduler calls it on a timer yet~~ —
+  **closed 2026-10-16 (commit `27e279ef`):** `platform/src/lib/scheduler.js` runs one tick of
+  every timer-driven cycle (provisioning worker, deployment cycle, paid-order sweep and the
+  transfer-refresh poll over all in-flight transfers), and `platform/src/worker/cron.js`
+  (`npm run cron`) is the crontab entry point — a transfer now advances on the timer as well as
+  on operator action. The remaining part of this gap is live verification, not wiring.
   Run one real availability check, one real catalogue sync and one real transfer refresh through a
   staging deployment before trusting them in production.
 - `platform/domain-services` pricing: a registrar's quote is recorded in
@@ -221,8 +245,9 @@ visual/browser tests — *NOT PERFORMED*. Production database is read-only from 
 `admin-domain-services` registrar work (transfer refresh, extension sync, `namecheap`/`godaddy`
 adapters), the `ai-os` Copilot and the `ai-support` operator — were closed 2026-10-08; see §1.1.)*
 
-**Platform — partial:** `platform/spa` (17 page modules ported, ~35 admin groups + DNS/Cloudflare/
-marketplace/server-detail/mobile shell missing) · `platform/mobile` (no app code)
+**Platform — closed for authored code:** `platform/spa` (page modules + screen-contract tests;
+customer screens rows 16–19, admin consoles rows 20–30, scheduler wiring row 31) ·
+`platform/mobile` (shell app code in `src/` — row 32; native trees generated locally via `cap add`)
 
 **Node adapters — refused capabilities:** `aws` (rescue; reinstall gated) · `digitalocean`
 (console, rescue) · `contabo` (resize, console, metrics) · `proxmox` (rescue) · `virtualizor` (rescue) ·

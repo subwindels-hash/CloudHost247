@@ -53,6 +53,55 @@ export class ApiError extends Error {
 }
 
 /**
+ * Where the platform API lives. The empty string (the default) means "same origin as the page" —
+ * the web deployment, where nothing changes. A Capacitor shell that serves the bundle from local
+ * assets is not on the platform's origin, so it must name one: the mobile bootstrap reads it from
+ * the Capacitor config (`plugins.CloudHost247.apiOrigin`) and assigns `window.__CH247_API_ORIGIN__`
+ * before the app renders; an operator can also override it via `localStorage['ch247.apiOrigin']`.
+ *
+ * Invalid origins are refused — a wrong base would half-work at best, so the resolver falls back to
+ * same-origin and the misconfiguration shows up immediately in testing instead of in production.
+ * https is required except for loopback (http://localhost and friends), mirroring the platform's
+ * own provider `apiBaseUrl` rule.
+ */
+export function resolveApiOrigin({ win, storage } = {}) {
+  const w = win ?? (typeof window !== 'undefined' ? window : undefined);
+  const s = storage ?? (typeof localStorage !== 'undefined' ? localStorage : undefined);
+  const candidates = [
+    w?.__CH247_API_ORIGIN__,
+    (() => { try { return s?.getItem?.('ch247.apiOrigin'); } catch { return null; } })(),
+  ];
+  for (const raw of candidates) {
+    const value = typeof raw === 'string' ? raw.trim() : '';
+    if (!value) continue;
+    try {
+      const parsed = new URL(value);
+      const loopback = ['localhost', '127.0.0.1', '[::1]', '::1'].includes(parsed.hostname);
+      if (parsed.protocol !== 'https:' && !(parsed.protocol === 'http:' && loopback)) continue;
+      return `${parsed.origin}${parsed.pathname === '/' ? '' : parsed.pathname.replace(/\/+$/, '')}`;
+    } catch {
+      // Not an absolute URL — refuse and keep looking.
+    }
+  }
+  return '';
+}
+
+/** Set (or clear, with a falsy value) the runtime API origin override. Returns what will be used. */
+export function configureApiOrigin(origin, { win } = {}) {
+  const w = win ?? (typeof window !== 'undefined' ? window : undefined);
+  if (w) {
+    if (origin) w.__CH247_API_ORIGIN__ = origin;
+    else delete w.__CH247_API_ORIGIN__;
+  }
+  return resolveApiOrigin({ win: w });
+}
+
+/** Absolute URL for an API path under the resolved origin ('' origin = today's same-origin fetch). */
+export function apiUrl(path, options) {
+  return `${resolveApiOrigin(options)}${path}`;
+}
+
+/**
  * Make a request to the platform API.
  *
  * On a 401 with a stored refresh token it attempts exactly one refresh and retries, so an expired
@@ -65,7 +114,7 @@ export async function api(path, options = {}) {
   if (body !== undefined) finalHeaders['Content-Type'] = 'application/json';
   if (auth && store.token) finalHeaders.Authorization = `Bearer ${store.token}`;
 
-  const response = await fetch(path, {
+  const response = await fetch(apiUrl(path), {
     method,
     headers: finalHeaders,
     body: body === undefined ? undefined : JSON.stringify(body),
@@ -88,7 +137,7 @@ export async function api(path, options = {}) {
 
 async function tryRefresh() {
   try {
-    const response = await fetch('/api/v1/auth/refresh', {
+    const response = await fetch(apiUrl('/api/v1/auth/refresh'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify({ refreshToken: store.refreshToken }),
@@ -228,6 +277,107 @@ const queryString = (params) => {
   return qs ? `?${qs}` : '';
 };
 
+export const dnsApi = {
+  zones: () => api('/api/v1/dns/zones'),
+  zone: (id) => api(`/api/v1/dns/zones/${encodeURIComponent(id)}`),
+  createZone: (domain) => api('/api/v1/dns/zones', { method: 'POST', body: { domain } }),
+  deleteZone: (id) => api(`/api/v1/dns/zones/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  records: (zoneId) => api(`/api/v1/dns/zones/${encodeURIComponent(zoneId)}/records`),
+  createRecord: (zoneId, payload) =>
+    api(`/api/v1/dns/zones/${encodeURIComponent(zoneId)}/records`, { method: 'POST', body: payload }),
+  updateRecord: (zoneId, recordId, patch) =>
+    api(`/api/v1/dns/zones/${encodeURIComponent(zoneId)}/records/${encodeURIComponent(recordId)}`, { method: 'PATCH', body: patch }),
+  deleteRecord: (zoneId, recordId) =>
+    api(`/api/v1/dns/zones/${encodeURIComponent(zoneId)}/records/${encodeURIComponent(recordId)}`, { method: 'DELETE' }),
+  exportZone: (zoneId) => api(`/api/v1/dns/zones/${encodeURIComponent(zoneId)}/export`),
+  checkRecord: (zoneId, recordId) =>
+    api(`/api/v1/dns/zones/${encodeURIComponent(zoneId)}/records/${encodeURIComponent(recordId)}/check`, { method: 'POST' }),
+};
+
+export const cloudflareApi = {
+  services: () => api('/api/v1/cloudflare/services'),
+  service: (id) => api(`/api/v1/cloudflare/services/${encodeURIComponent(id)}`),
+  sync: (id) => api(`/api/v1/cloudflare/services/${encodeURIComponent(id)}/sync`, { method: 'POST' }),
+  activity: (id) => api(`/api/v1/cloudflare/services/${encodeURIComponent(id)}/activity`),
+  dns: (id) => api(`/api/v1/cloudflare/services/${encodeURIComponent(id)}/dns`),
+  createDns: (id, payload) =>
+    api(`/api/v1/cloudflare/services/${encodeURIComponent(id)}/dns`, { method: 'POST', body: payload }),
+  updateDns: (id, recordId, patch) =>
+    api(`/api/v1/cloudflare/services/${encodeURIComponent(id)}/dns/${encodeURIComponent(recordId)}`, { method: 'PATCH', body: patch }),
+  deleteDns: (id, recordId) =>
+    api(`/api/v1/cloudflare/services/${encodeURIComponent(id)}/dns/${encodeURIComponent(recordId)}`, { method: 'DELETE' }),
+  dnssec: (id) => api(`/api/v1/cloudflare/services/${encodeURIComponent(id)}/dnssec`),
+  dnssecAction: (id, action) =>
+    api(`/api/v1/cloudflare/services/${encodeURIComponent(id)}/dnssec/${encodeURIComponent(action)}`, { method: 'POST' }),
+  analytics: (id, range = 7) =>
+    api(`/api/v1/cloudflare/services/${encodeURIComponent(id)}/analytics?range=${encodeURIComponent(range)}`),
+  settings: (id, tab) => api(`/api/v1/cloudflare/services/${encodeURIComponent(id)}/${encodeURIComponent(tab)}`),
+  updateSettings: (id, tab, patch) =>
+    api(`/api/v1/cloudflare/services/${encodeURIComponent(id)}/${encodeURIComponent(tab)}`, { method: 'PATCH', body: patch }),
+  createFirewallRule: (id, payload) =>
+    api(`/api/v1/cloudflare/services/${encodeURIComponent(id)}/firewall/rules`, { method: 'POST', body: payload }),
+  updateFirewallRule: (id, ruleId, patch) =>
+    api(`/api/v1/cloudflare/services/${encodeURIComponent(id)}/firewall/rules/${encodeURIComponent(ruleId)}`, { method: 'PATCH', body: patch }),
+  deleteFirewallRule: (id, ruleId) =>
+    api(`/api/v1/cloudflare/services/${encodeURIComponent(id)}/firewall/rules/${encodeURIComponent(ruleId)}`, { method: 'DELETE' }),
+  purge: (id, payload) =>
+    api(`/api/v1/cloudflare/services/${encodeURIComponent(id)}/caching/purge`, { method: 'POST', body: payload }),
+  plan: (id) => api(`/api/v1/cloudflare/services/${encodeURIComponent(id)}/plan`),
+  changePlan: (id, payload) =>
+    api(`/api/v1/cloudflare/services/${encodeURIComponent(id)}/plan/change`, { method: 'POST', body: payload }),
+};
+
+export const marketplaceApi = {
+  categories: () => api('/api/v1/marketplace/categories'),
+  apps: ({ search, category } = {}) => {
+    const params = new URLSearchParams();
+    if (search) params.set('search', search);
+    if (category) params.set('category', category);
+    const qs = params.toString();
+    return api(`/api/v1/marketplace/apps${qs ? `?${qs}` : ''}`);
+  },
+  app: (id) => api(`/api/v1/marketplace/apps/${encodeURIComponent(id)}`),
+};
+
+export const appsApi = {
+  installations: () => api('/api/v1/app-installations'),
+  summary: () => api('/api/v1/app-installations/summary'),
+  installation: (id) => api(`/api/v1/app-installations/${encodeURIComponent(id)}`),
+  install: (payload) => api('/api/v1/app-installations', { method: 'POST', body: payload }),
+  action: (id, action, body) =>
+    api(`/api/v1/app-installations/${encodeURIComponent(id)}/${encodeURIComponent(action)}`, { method: 'POST', body: body ?? {} }),
+  remove: (id) => api(`/api/v1/app-installations/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+};
+
+export const serversApi = {
+  list: () => api('/api/v1/servers'),
+  server: (id) => api(`/api/v1/servers/${encodeURIComponent(id)}`),
+  create: (payload) => api('/api/v1/servers', { method: 'POST', body: payload }),
+  update: (id, patch) => api(`/api/v1/servers/${encodeURIComponent(id)}`, { method: 'PATCH', body: patch }),
+  remove: (id) => api(`/api/v1/servers/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  power: (id, action) => api(`/api/v1/servers/${encodeURIComponent(id)}/${encodeURIComponent(action)}`, { method: 'POST' }),
+  resizeOptions: (id) => api(`/api/v1/servers/${encodeURIComponent(id)}/resize-options`),
+  resize: (id, payload) => api(`/api/v1/servers/${encodeURIComponent(id)}/resize`, { method: 'POST', body: payload }),
+  snapshots: (id) => api(`/api/v1/servers/${encodeURIComponent(id)}/snapshots`),
+  createSnapshot: (id, description) =>
+    api(`/api/v1/servers/${encodeURIComponent(id)}/snapshots`, { method: 'POST', body: { description } }),
+  deleteSnapshot: (id, snapshotId) =>
+    api(`/api/v1/servers/${encodeURIComponent(id)}/snapshots/${encodeURIComponent(snapshotId)}`, { method: 'DELETE' }),
+  restoreSnapshot: (id, snapshotId) =>
+    api(`/api/v1/servers/${encodeURIComponent(id)}/snapshots/${encodeURIComponent(snapshotId)}/restore`, { method: 'POST' }),
+  reinstall: (id, osId) => api(`/api/v1/servers/${encodeURIComponent(id)}/reinstall`, { method: 'POST', body: osId ? { osId } : {} }),
+  status: (id) => api(`/api/v1/servers/${encodeURIComponent(id)}/status`),
+  provisioningStatus: (id) => api(`/api/v1/servers/${encodeURIComponent(id)}/provisioning-status`),
+  logs: (id) => api(`/api/v1/servers/${encodeURIComponent(id)}/logs`),
+  cancel: (id, reason) => api(`/api/v1/servers/${encodeURIComponent(id)}/cancel`, { method: 'POST', body: { reason } }),
+  uncancel: (id) => api(`/api/v1/servers/${encodeURIComponent(id)}/cancel`, { method: 'DELETE' }),
+  console: (id) => api(`/api/v1/servers/${encodeURIComponent(id)}/console`, { method: 'POST' }),
+  rescueOn: (id) => api(`/api/v1/servers/${encodeURIComponent(id)}/rescue`, { method: 'POST' }),
+  rescueOff: (id) => api(`/api/v1/servers/${encodeURIComponent(id)}/rescue`, { method: 'DELETE' }),
+  metrics: (id, limit = 60) => api(`/api/v1/servers/${encodeURIComponent(id)}/metrics?limit=${encodeURIComponent(limit)}`),
+  health: (id) => api(`/api/v1/servers/${encodeURIComponent(id)}/health`),
+};
+
 export const adminApi = {
   // --- customer directory (staff+) ---
   customers: (params = {}) => api(`/api/v1/admin/customers${queryString(params)}`),
@@ -300,6 +450,163 @@ export const adminApi = {
   cloudflareServices: () => api('/api/v1/admin/cloudflare/services'),
   createCloudflareAccount: (payload) => api('/api/v1/admin/cloudflare/accounts', { method: 'POST', body: payload }),
   testCloudflareAccount: (id) => api(`/api/v1/admin/cloudflare/accounts/${encodeURIComponent(id)}/test`, { method: 'POST', body: {} }),
+  adminInvoices: (params = {}) => api(`/api/v1/admin/invoices${queryString(params)}`),
+  adminInvoice: (id) => api(`/api/v1/admin/invoices/${encodeURIComponent(id)}`),
+  adminCancelInvoice: (id, reason) =>
+    api(`/api/v1/admin/invoices/${encodeURIComponent(id)}/cancel`, { method: 'POST', body: { reason } }),
+  adminRefundInvoice: (id, { amount, reason } = {}) =>
+    api(`/api/v1/admin/invoices/${encodeURIComponent(id)}/refund`, { method: 'POST', body: { amount, reason } }),
+  adminLedger: (params = {}) => api(`/api/v1/admin/billing/ledger${queryString(params)}`),
+  adminReconciliation: () => api('/api/v1/admin/billing/reconciliation'),
+  confirmPayment: (id) => api(`/api/v1/admin/payments/${encodeURIComponent(id)}/confirm`, { method: 'POST', body: {} }),
+  rejectPayment: (id, reason) =>
+    api(`/api/v1/admin/payments/${encodeURIComponent(id)}/reject`, { method: 'POST', body: { reason } }),
+  confirmManualPayment: (id) =>
+    api(`/api/v1/admin/payments/${encodeURIComponent(id)}/confirm-manual`, { method: 'POST', body: {} }),
+  rejectManualPayment: (id, reason) =>
+    api(`/api/v1/admin/payments/${encodeURIComponent(id)}/reject-manual`, { method: 'POST', body: { reason } }),
+  adminOrders: (params = {}) => api(`/api/v1/admin/orders${queryString(params)}`),
+  adminOrder: (id) => api(`/api/v1/admin/orders/${encodeURIComponent(id)}`),
+  adminCancelOrder: (id, reason) =>
+    api(`/api/v1/admin/orders/${encodeURIComponent(id)}/cancel`, { method: 'POST', body: { reason } }),
+  dsOverview: () => api('/api/v1/admin/domain-services/overview'),
+  dsProviders: () => api('/api/v1/admin/domain-services/providers'),
+  dsCreateProvider: (payload) => api('/api/v1/admin/domain-services/providers', { method: 'POST', body: payload }),
+  dsUpdateProvider: (id, patch) =>
+    api(`/api/v1/admin/domain-services/providers/${encodeURIComponent(id)}`, { method: 'PATCH', body: patch }),
+  dsSetProviderCredentials: (id, credentials) =>
+    api(`/api/v1/admin/domain-services/providers/${encodeURIComponent(id)}/credentials`, { method: 'PUT', body: { credentials } }),
+  dsTestProvider: (id) =>
+    api(`/api/v1/admin/domain-services/providers/${encodeURIComponent(id)}/test`, { method: 'POST', body: {} }),
+  dsExtensions: () => api('/api/v1/admin/domain-services/extensions'),
+  dsSyncExtensions: () => api('/api/v1/admin/domain-services/extensions/sync', { method: 'POST', body: {} }),
+  dsUpdateExtension: (id, patch) =>
+    api(`/api/v1/admin/domain-services/extensions/${encodeURIComponent(id)}`, { method: 'PATCH', body: patch }),
+  dsRegistrations: (params = {}) => api(`/api/v1/admin/domain-services/registrations${queryString(params)}`),
+  dsTransfers: (params = {}) => api(`/api/v1/admin/domain-services/transfers${queryString(params)}`),
+  dsRefreshTransfer: (id) =>
+    api(`/api/v1/admin/domain-services/transfers/${encodeURIComponent(id)}/refresh`, { method: 'POST', body: {} }),
+  dsUpdateTransfer: (id, patch) =>
+    api(`/api/v1/admin/domain-services/transfers/${encodeURIComponent(id)}`, { method: 'PATCH', body: patch }),
+  dsAuctions: () => api('/api/v1/admin/domain-services/auctions'),
+  dsAuction: (id) => api(`/api/v1/admin/domain-services/auctions/${encodeURIComponent(id)}`),
+  dsCreateAuction: (payload) => api('/api/v1/admin/domain-services/auctions', { method: 'POST', body: payload }),
+  dsUpdateAuction: (id, patch) =>
+    api(`/api/v1/admin/domain-services/auctions/${encodeURIComponent(id)}`, { method: 'PATCH', body: patch }),
+  dsAuctionAction: (id, action) =>
+    api(`/api/v1/admin/domain-services/auctions/${encodeURIComponent(id)}/${encodeURIComponent(action)}`, { method: 'POST', body: {} }),
+  dsClubPlans: () => api('/api/v1/admin/domain-services/club/plans'),
+  dsCreateClubPlan: (payload) => api('/api/v1/admin/domain-services/club/plans', { method: 'POST', body: payload }),
+  dsUpdateClubPlan: (id, patch) =>
+    api(`/api/v1/admin/domain-services/club/plans/${encodeURIComponent(id)}`, { method: 'PATCH', body: patch }),
+  dsAppraisals: () => api('/api/v1/admin/domain-services/appraisals'),
+  dsWhoisLookups: () => api('/api/v1/admin/domain-services/whois-lookups'),
+  dsTransactions: () => api('/api/v1/admin/domain-services/transactions'),
+  adminAppCategories: () => api('/api/v1/admin/app-categories'),
+  adminCreateAppCategory: (payload) => api('/api/v1/admin/app-categories', { method: 'POST', body: payload }),
+  adminUpdateAppCategory: (id, patch) =>
+    api(`/api/v1/admin/app-categories/${encodeURIComponent(id)}`, { method: 'PATCH', body: patch }),
+  adminApps: (params = {}) => api(`/api/v1/admin/apps${queryString(params)}`),
+  adminCreateApp: (payload) => api('/api/v1/admin/apps', { method: 'POST', body: payload }),
+  adminApp: (id) => api(`/api/v1/admin/apps/${encodeURIComponent(id)}`),
+  adminUpdateApp: (id, patch) => api(`/api/v1/admin/apps/${encodeURIComponent(id)}`, { method: 'PATCH', body: patch }),
+  adminAppStatus: (id, status) =>
+    api(`/api/v1/admin/apps/${encodeURIComponent(id)}/status`, { method: 'POST', body: { status } }),
+  adminAppVersion: (appId, versionId, patch) =>
+    api(`/api/v1/admin/apps/${encodeURIComponent(appId)}/versions/${encodeURIComponent(versionId)}`, { method: 'PATCH', body: patch }),
+  adminDeleteApp: (id) => api(`/api/v1/admin/apps/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  adminMarketplaceApps: () => api('/api/v1/admin/marketplace/apps'),
+  adminCreateMarketplaceApp: (payload) => api('/api/v1/admin/marketplace/apps', { method: 'POST', body: payload }),
+  adminUpdateMarketplaceApp: (id, patch) =>
+    api(`/api/v1/admin/marketplace/apps/${encodeURIComponent(id)}`, { method: 'PATCH', body: patch }),
+  adminDeleteMarketplaceApp: (id) =>
+    api(`/api/v1/admin/marketplace/apps/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  adminValidateManifest: (manifestYaml) =>
+    api('/api/v1/admin/manifests/validate', { method: 'POST', body: { manifestYaml } }),
+  adminImportManifests: () => api('/api/v1/admin/manifests/import', { method: 'POST', body: {} }),
+  adminSeedCategories: () => api('/api/v1/admin/manifests/seed-categories', { method: 'POST', body: {} }),
+  provisioningJobs: (params = {}) => api(`/api/v1/admin/provisioning/jobs${queryString(params)}`),
+  provisioningJob: (id) => api(`/api/v1/admin/provisioning-jobs/${encodeURIComponent(id)}`),
+  provisioningMetrics: () => api('/api/v1/admin/provisioning/metrics'),
+  runProvisioningWorker: (limit) =>
+    api('/api/v1/admin/provisioning/worker/run', { method: 'POST', body: limit ? { limit } : {} }),
+  reconcileProvisioning: () => api('/api/v1/admin/provisioning/reconcile', { method: 'POST', body: {} }),
+  retryProvisioningJob: (id) =>
+    api(`/api/v1/admin/provisioning-jobs/${encodeURIComponent(id)}/retry`, { method: 'POST', body: {} }),
+  cancelProvisioningJob: (id) =>
+    api(`/api/v1/admin/provisioning-jobs/${encodeURIComponent(id)}/cancel`, { method: 'POST', body: {} }),
+  cancelAnyProvisioningJob: (id) =>
+    api(`/api/v1/admin/provisioning/jobs/${encodeURIComponent(id)}/cancel`, { method: 'POST', body: {} }),
+  adminServerHealth: () => api('/api/v1/admin/monitoring/server-health'),
+  serverMonitoring: (id) => api(`/api/v1/monitoring/servers/${encodeURIComponent(id)}`),
+  deployments: (params = {}) => api(`/api/v1/deployments${queryString(params)}`),
+  deployment: (id) => api(`/api/v1/deployments/${encodeURIComponent(id)}`),
+  deploymentLogs: (id) => api(`/api/v1/deployments/${encodeURIComponent(id)}/logs`),
+  executeDeployment: (id) => api(`/api/v1/deployments/${encodeURIComponent(id)}/execute`, { method: 'POST', body: {} }),
+  cancelDeployment: (id) => api(`/api/v1/deployments/${encodeURIComponent(id)}/cancel`, { method: 'POST', body: {} }),
+  sweepDeployments: () => api('/api/v1/admin/deployments/sweep', { method: 'POST', body: {} }),
+  // --- OS registry, provider image mappings and deployable templates ---
+  adminOperatingSystems: () => api('/api/v1/admin/operating-systems'),
+  createOperatingSystem: (payload) => api('/api/v1/admin/operating-systems', { method: 'POST', body: payload }),
+  updateOperatingSystem: (id, patch) =>
+    api(`/api/v1/admin/operating-systems/${encodeURIComponent(id)}`, { method: 'PATCH', body: patch }),
+  deleteOperatingSystem: (id) =>
+    api(`/api/v1/admin/operating-systems/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  osVersions: (osId) => api(`/api/v1/admin/operating-systems/${encodeURIComponent(osId)}/versions`),
+  createOsVersion: (osId, payload) =>
+    api(`/api/v1/admin/operating-systems/${encodeURIComponent(osId)}/versions`, { method: 'POST', body: payload }),
+  updateOsVersion: (id, patch) =>
+    api(`/api/v1/admin/operating-system-versions/${encodeURIComponent(id)}`, { method: 'PATCH', body: patch }),
+  adminOsImages: () => api('/api/v1/admin/os-images'),
+  createOsImage: (payload) => api('/api/v1/admin/os-images', { method: 'POST', body: payload }),
+  updateOsImage: (id, patch) =>
+    api(`/api/v1/admin/os-images/${encodeURIComponent(id)}`, { method: 'PATCH', body: patch }),
+  testOsImage: (id) =>
+    api(`/api/v1/admin/os-images/${encodeURIComponent(id)}/test`, { method: 'POST', body: {} }),
+  deleteOsImage: (id) =>
+    api(`/api/v1/admin/os-images/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  osImageVerifications: (params = {}) =>
+    api(`/api/v1/admin/os-image-verifications${queryString(params)}`),
+  revalidateOsImages: (payload) =>
+    api('/api/v1/admin/os-images/revalidate', { method: 'POST', body: payload }),
+  adminConfigurations: (params = {}) =>
+    api(`/api/v1/admin/server-product-configurations${queryString(params)}`),
+  createConfiguration: (payload) =>
+    api('/api/v1/admin/server-product-configurations', { method: 'POST', body: payload }),
+  updateConfiguration: (id, patch) =>
+    api(`/api/v1/admin/server-product-configurations/${encodeURIComponent(id)}`, { method: 'PATCH', body: patch }),
+  providerAdapters: () => api('/api/v1/admin/provider-adapters'),
+  // --- AI support + free-tools admin ---
+  aiOverview: () => api('/api/v1/admin/ai-support/overview'),
+  aiAgents: () => api('/api/v1/admin/ai-support/agents'),
+  aiKnowledge: () => api('/api/v1/admin/ai-support/knowledge'),
+  aiConversations: (params = {}) =>
+    api(`/api/v1/admin/ai-support/conversations${queryString(params)}`),
+  aiConversation: (id) => api(`/api/v1/admin/ai-support/conversations/${encodeURIComponent(id)}`),
+  aiReply: (id, message) =>
+    api(`/api/v1/admin/ai-support/conversations/${encodeURIComponent(id)}/reply`, { method: 'POST', body: { message } }),
+  updateAiConversation: (id, patch) =>
+    api(`/api/v1/admin/ai-support/conversations/${encodeURIComponent(id)}`, { method: 'PATCH', body: patch }),
+  setAgentPresence: (payload) => api('/api/v1/admin/ai-support/presence', { method: 'PUT', body: payload }),
+  newsletterSubscriptions: () => api('/api/v1/admin/newsletter-subscriptions'),
+  adminToolReports: () => api('/api/v1/admin/tools/reports'),
+  adminToolMonitors: () => api('/api/v1/admin/tools/monitors'),
+  deleteToolReport: (id) =>
+    api(`/api/v1/admin/tools/reports/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  mrzSettings: () => api('/api/v1/admin/tools/mrz/settings'),
+  updateMrzSettings: (patch) => api('/api/v1/admin/tools/mrz/settings', { method: 'PUT', body: patch }),
+  // --- security-number policy + per-user oversight (lifecycle metadata only) ---
+  snPolicy: () => api('/api/v1/admin/security-number/policy'),
+  updateSnPolicy: (patch) => api('/api/v1/admin/security-number/policy', { method: 'PUT', body: patch }),
+  userSecurityNumber: (userId) =>
+    api(`/api/v1/admin/users/${encodeURIComponent(userId)}/security-number`),
+  rotateUserSecurityNumber: (userId) =>
+    api(`/api/v1/admin/users/${encodeURIComponent(userId)}/security-number/rotate`, { method: 'POST', body: {} }),
+  requireSnReinitialization: (userId) =>
+    api(`/api/v1/admin/users/${encodeURIComponent(userId)}/security-number/require-reinitialization`, { method: 'POST', body: {} }),
+  // --- audit log (append-only; this client only reads) ---
+  auditLogs: (params = {}) => api(`/api/v1/audit-logs${queryString(params)}`),
+  adminAuditLogs: (params = {}) => api(`/api/v1/admin/audit-logs${queryString(params)}`),
 };
 
 /** Human-readable rendering of an ApiError for form alerts. */

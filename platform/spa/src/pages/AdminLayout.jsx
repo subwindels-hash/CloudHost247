@@ -99,6 +99,20 @@ export default function AdminLayout() {
         {isAdmin && <NavLink to="/admin/servers" className={({ isActive }) => (isActive ? 'active' : '')}>Servers</NavLink>}
         {isAdmin && <NavLink to="/admin/infrastructure" className={({ isActive }) => (isActive ? 'active' : '')}>Infrastructure</NavLink>}
         {isAdmin && <NavLink to="/admin/cloudflare" className={({ isActive }) => (isActive ? 'active' : '')}>Cloudflare</NavLink>}
+        {isAdmin && <NavLink to="/admin/billing" className={({ isActive }) => (isActive ? 'active' : '')}>Billing</NavLink>}
+        {isAdmin && <NavLink to="/admin/orders" className={({ isActive }) => (isActive ? 'active' : '')}>Orders</NavLink>}
+        {isAdmin && <NavLink to="/admin/domain-services" className={({ isActive }) => (isActive ? 'active' : '')}>Domains</NavLink>}
+        {isAdmin && <NavLink to="/admin/marketplace" className={({ isActive }) => (isActive ? 'active' : '')}>Marketplace</NavLink>}
+        {isAdmin && <NavLink to="/admin/provisioning" className={({ isActive }) => (isActive ? 'active' : '')}>Provisioning</NavLink>}
+        {isAdmin && <NavLink to="/admin/monitoring" className={({ isActive }) => (isActive ? 'active' : '')}>Monitoring</NavLink>}
+        {isAdmin && <NavLink to="/admin/deployments" className={({ isActive }) => (isActive ? 'active' : '')}>Deployments</NavLink>}
+        {isAdmin && <NavLink to="/admin/os-versions" className={({ isActive }) => (isActive ? 'active' : '')}>Operating systems</NavLink>}
+        {isAdmin && <NavLink to="/admin/os-images" className={({ isActive }) => (isActive ? 'active' : '')}>OS images</NavLink>}
+        {isAdmin && <NavLink to="/admin/availability" className={({ isActive }) => (isActive ? 'active' : '')}>Templates</NavLink>}
+        {isAdmin && <NavLink to="/admin/ai-support" className={({ isActive }) => (isActive ? 'active' : '')}>AI support</NavLink>}
+        {isAdmin && <NavLink to="/admin/tools" className={({ isActive }) => (isActive ? 'active' : '')}>Tools</NavLink>}
+        {isAdmin && <NavLink to="/admin/security-number" className={({ isActive }) => (isActive ? 'active' : '')}>Security numbers</NavLink>}
+        {isAdmin && <NavLink to="/admin/audit-log" className={({ isActive }) => (isActive ? 'active' : '')}>Audit log</NavLink>}
         <span className="admin-role">{user.role}</span>
       </nav>
       <Outlet />

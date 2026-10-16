@@ -4826,6 +4826,7 @@
       "category": "Domains",
       "headline": "Manage DNS for domains in your account, and diagnose any name with the tools.",
       "summary": "Authoritative edits happen in the client area. The tools are read-only diagnostics.",
+      "seo_description": "Where authoritative DNS records for CloudHost247-hosted domains are edited, and what the read-only diagnostic tools can and cannot tell you.",
       "visual": "domains/dns-management",
       "features": [
         [
@@ -4852,14 +4853,14 @@
         "web-hosting.php"
       ],
       "slug": "dns-management",
-      "visual3d": "domains/dns-management-3d",
-      "seo_description": "Where authoritative DNS records for CloudHost247-hosted domains are edited, and what the read-only diagnostic tools can and cannot tell you."
+      "visual3d": "domains/dns-management-3d"
     },
     "domain-dns.php": {
       "title": "Domain DNS",
       "category": "Domains",
       "headline": "DNS for the domains you register or transfer to CloudHost247.",
       "summary": "Nameserver and record changes are available from the domain management screen after registration.",
+      "seo_description": "Where nameserver and DNS record changes are made for a registered domain, and what can be checked without editing the zone.",
       "visual": "domains/domain-dns",
       "features": [
         [
@@ -4886,8 +4887,7 @@
         "web-hosting.php"
       ],
       "slug": "domain-dns",
-      "visual3d": "domains/domain-dns-3d",
-      "seo_description": "Where nameserver and DNS record changes are made for a registered domain, and what can be checked without editing the zone."
+      "visual3d": "domains/domain-dns-3d"
     },
     "ip-management.php": {
       "title": "IP Management",
