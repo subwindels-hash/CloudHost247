@@ -3,7 +3,7 @@
 **Compiled:** 2026-10-08. **Verified against the working tree at `8369f7b`** (branch
 `arena/2dd66601-cloudhost247`), not copied from headers.
 **Sources consolidated:** `docs/UNFINISHED-MODULES.md` (the long-form audit, A1–A23 + B/C/D/E),
-`docs/UNFINISHED-BUILD-CODE-NAMES.md` (the progress-log roll-up, rows 1–15), `platform/MIGRATION.md`,
+`docs/UNFINISHED-BUILD-CODE-NAMES.md` (the progress-log roll-up, rows 1–19), `platform/MIGRATION.md`,
 `cloudhost247-node/docs/NODE_PLATFORM_STATUS.md`, and a fresh scan of the tree.
 
 This page is the **name index** — every module/build artifact whose code is not finished and verified,
@@ -13,6 +13,7 @@ grouped by *why* it is unfinished. What each one is missing lives in the two sou
 
 | Closed | Module(s) | Evidence |
 |---|---|---|
+| 2026-10-16 | §1.2 named customer screens — progress rows 16–19: `DnsPage` + `dnsApi`; `CloudflareServicesPage`/`CloudflareServicePage` + `cloudflareApi`; `MarketplacePage`/`MyAppsPage` + `marketplaceApi`/`appsApi`; `ServersPage`/`ServerDetailPage` + `serversApi` | Commit `e5fd4ffe` (7 page modules + 3 api-client namespaces + 4 screen-contract tests). Each test walks the screen's exact HTTP sequence over the real app (`spa-cloudflare-screen.test.js` against `fixtures/fake-cloudflare`), asserts every response key the screen renders, and pins the page sources to those keys. SSR smoke renders all 28 page modules; `vite build` green; full platform suite **851 pass / 0 fail**. No browser has rendered the pages in this environment. |
 | 2026-10-08 | §1.1 rows 1–2 — `platform/src/domains/cloudflare.js` + `admin-cloudflare.js` (live Cloudflare egress) | `platform/src/lib/cloudflare-client.js` (live API v4 client, 37 unit/wire tests), `cloudflare-service.js`, `cloudflare-sync.js`, `cloudflare-fulfilment.js`; `platform/tests/cloudflare-client.test.js` + `platform/tests/cloudflare-egress.test.js` (34 route tests over the real app against a fake Cloudflare at `platform/tests/fixtures/fake-cloudflare.js`). Full suite: **742 pass / 0 fail**. No real Cloudflare account was reachable from this environment — every provider claim is verified against the loopback fake, never against api.cloudflare.com. |
 | 2026-10-08 | §1.1 row 4 — `platform/src/domains/admin-domain-services.js` (registrar connector: transfer refresh poll, extension catalogue sync, `namecheap` + `godaddy` adapters) | `platform/src/lib/domain-providers/adapters/namecheap.js` (401 lines, full XML API: availability with premium pricing in 50-name batches, TLD catalogue, registration, transfer, live domain status) + `.../godaddy.js` (sso-key REST: availability with the documented two price-unit shapes, purchase with consent, transfer, live status, both unit bugs asserted) + `.../xml.js` (hardened reader, DOCTYPE/entity refused outright) + `lib/domain-transfer-service.js` (poll + completion as one transaction, completion **labelled by evidence**) + `lib/domain-extension-sync.js` (provider quotes recorded against the provider; the platform's selling prices untouched) + `lib/domain-availability.js` (the customer search now prefers a connected registrar's authoritative answer and falls back to RDAP, labelling which spoke). `platform/tests/fixtures/fake-registrar.js` (Namecheap XML **and** GoDaddy JSON) + `platform/tests/domain-registrar-adapters.test.js` (28 tests over real HTTP). The deferred markers are gone: `/transfers/:id/refresh` no longer returns `status: 'deferred'`, `/extensions/sync` no longer returns a hardcoded `{synced: 0}`. Inline `encryptCreds` reconciled onto `lib/secret-box.js` (one envelope implementation, legacy ciphertext still opens). Full suite: **823 pass / 0 fail**. No registrar account exists in this environment — both wire contracts are verified against the loopback fake only. |
 | 2026-10-08 | §2 row 6 — Blockonomics (Bitcoin) gateway ported to `platform/` | `platform/src/lib/gateways/blockonomics.js` (the callback contract of `modules/gateways/callback/blockonomics.php`: the query-string `secret` compared in constant time over digests, the field shape gate, the confirmation threshold taken from configuration and never from the caller, the `addr:txid:confirmations` de-duplication key, and an audit record that keeps the delivery as received) + a **GET** webhook route in `platform/src/domains/webhooks.js`, permitted only for a gateway that declares `queryCallback` + `platform/src/lib/money.js` (currency precision, and the ledger's own two-decimal limit in one place) + the receiver's named refusal for an amount the money columns cannot hold. 7 tests in `platform/tests/blockonomics-gateway.test.js`; full suite **846 pass / 0 fail**. Initiation and settlement stay refused with named reasons — the address-issuance API plus a recorded BTC quote do not exist here, and `NUMERIC(16,2)` money columns cannot store a Bitcoin amount. No live Blockonomics account was reachable from this environment; the callback contract is exercised through the real HTTP route, never against the provider. |
@@ -43,17 +44,23 @@ when it cannot:
 Supporting library files that still carry the marker with them (not modules, listed for completeness):
 `platform/src/lib/provider-adapters.js`, `platform/src/lib/provider-egress.js`, `platform/src/store/schema.js`.
 
-### 1.2 `platform/spa/` — customer + admin SPA, partially ported (17 page modules)
+### 1.2 `platform/spa/` — customer + admin SPA, partially ported (28 page modules as of 2026-10-16)
 
 `platform/spa/src/pages/`: `AdminContentPage` · `AdminCustomerDetailPage` · `AdminCustomersPage` ·
 `AdminDashboardPage` · `AdminLayout` · `AdminSiteSettingsPage` · `AdminTicketDetailPage` ·
-`AdminTicketsPage` · `AdminUsersPage` · `BillingPage` · `CartPage` · `CatalogPage` · `DashboardPage` ·
-`InvoiceDetailPage` · `SecurityPage` · `ServicesPage` · `SupportPage`
+`AdminTicketsPage` · `AdminUsersPage` · `BillingPage` · `CartPage` · `CatalogPage` ·
+`CloudflareServicePage` · `CloudflareServicesPage` · `DashboardPage` · `DnsPage` ·
+`InvoiceDetailPage` · `MarketplacePage` · `MyAppsPage` · `SecurityPage` · `ServerDetailPage` ·
+`ServersPage` · `ServicesPage` · `SupportPage` · `AdminCatalogPage` · `AdminCloudflarePage` ·
+`AdminInfrastructurePage` · `AdminServersPage`
 
-**Missing, by name: the remaining ~35 admin groups** (catalog authoring, servers, DNS, Cloudflare,
-marketplace, AI/tools, security-number policy, …), the customer-facing **DNS**, **Cloudflare** and
-**marketplace** screens, **server detail**, and the **mobile shell**. No browser has rendered any ported
-page in this environment.
+**Closed 2026-10-16 (progress rows 16–19, commit `e5fd4ffe`): the customer-facing DNS,
+Cloudflare, marketplace and server-detail screens** (`DnsPage`, `CloudflareServicesPage`,
+`CloudflareServicePage`, `MarketplacePage`, `MyAppsPage`, `ServersPage`, `ServerDetailPage`),
+each with a screen-contract test. **Still missing: the remaining ~30 admin groups** (DNS,
+marketplace, AI/tools, security-number policy, domain services, billing/ledger, orders,
+provisioning, monitoring, deployments, OS images, …) and the **mobile shell**. No browser has
+rendered any ported page in this environment.
 
 ### 1.3 `platform/mobile/` — no app code
 
@@ -221,8 +228,9 @@ visual/browser tests — *NOT PERFORMED*. Production database is read-only from 
 `admin-domain-services` registrar work (transfer refresh, extension sync, `namecheap`/`godaddy`
 adapters), the `ai-os` Copilot and the `ai-support` operator — were closed 2026-10-08; see §1.1.)*
 
-**Platform — partial:** `platform/spa` (17 page modules ported, ~35 admin groups + DNS/Cloudflare/
-marketplace/server-detail/mobile shell missing) · `platform/mobile` (no app code)
+**Platform — partial:** `platform/spa` (28 page modules as of 2026-10-16 — customer DNS/Cloudflare/
+marketplace/server screens closed in rows 16–19; ~30 admin groups still missing) ·
+`platform/mobile` (no app code)
 
 **Node adapters — refused capabilities:** `aws` (rescue; reinstall gated) · `digitalocean`
 (console, rescue) · `contabo` (resize, console, metrics) · `proxmox` (rescue) · `virtualizor` (rescue) ·
