@@ -15,14 +15,15 @@ export default function AdminBillingPage() {
   const [invoices, setInvoices] = useState(null);
   const [total, setTotal] = useState(0);
   const [status, setStatus] = useState('');
+  const [search, setSearch] = useState('');
   const [recon, setRecon] = useState(null);
   const [error, setError] = useState('');
 
-  const load = useCallback(async (statusFilter) => {
+  const load = useCallback(async (params = {}) => {
     setError('');
     try {
       const [list, rec] = await Promise.all([
-        adminApi.adminInvoices(statusFilter ? { status: statusFilter } : {}),
+        adminApi.adminInvoices(params),
         adminApi.adminReconciliation(),
       ]);
       setInvoices(list.invoices ?? []);
@@ -35,6 +36,11 @@ export default function AdminBillingPage() {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  const applyFilters = (nextStatus = status) => load({
+    ...(nextStatus ? { status: nextStatus } : {}),
+    ...(search.trim() ? { search: search.trim() } : {}),
+  });
 
   return (
     <div className="page">
@@ -70,10 +76,21 @@ export default function AdminBillingPage() {
           <h2>Invoices ({total})</h2>
           <div className="field" style={{ minWidth: 180 }}>
             <label htmlFor="inv-status">Status</label>
-            <select id="inv-status" value={status} onChange={(e) => { setStatus(e.target.value); load(e.target.value); }}>
+            <select id="inv-status" value={status} onChange={(e) => { setStatus(e.target.value); applyFilters(e.target.value); }}>
               {STATUSES.map((s) => <option key={s || 'all'} value={s}>{s || 'all'}</option>)}
             </select>
           </div>
+          <form className="field row" role="search" onSubmit={(e) => { e.preventDefault(); applyFilters(); }}>
+            <label htmlFor="inv-search">Search</label>
+            <input
+              id="inv-search"
+              type="search"
+              value={search}
+              placeholder="Invoice number or customer email"
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <button className="btn btn-ghost" type="submit">Search</button>
+          </form>
         </div>
         {invoices === null ? (
           <p className="muted">Loading invoices…</p>
@@ -97,7 +114,7 @@ export default function AdminBillingPage() {
                 {invoices.map((inv) => (
                   <tr key={inv.id}>
                     <td><strong>{inv.number}</strong></td>
-                    <td>{inv.userId}</td>
+                    <td>{inv.userEmail ?? inv.userId}</td>
                     <td>{formatMoney(inv.total, inv.currency)}</td>
                     <td>{formatMoney(inv.amountPaid ?? 0, inv.currency)}</td>
                     <td>{formatDate(inv.dueAt)}</td>

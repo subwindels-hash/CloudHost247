@@ -454,9 +454,9 @@ export const adminApi = {
   adminInvoice: (id) => api(`/api/v1/admin/invoices/${encodeURIComponent(id)}`),
   adminCancelInvoice: (id, reason) =>
     api(`/api/v1/admin/invoices/${encodeURIComponent(id)}/cancel`, { method: 'POST', body: { reason } }),
-  adminRefundInvoice: (id) =>
-    api(`/api/v1/admin/invoices/${encodeURIComponent(id)}/refund`, { method: 'POST', body: {} }),
-  adminLedger: () => api('/api/v1/admin/billing/ledger'),
+  adminRefundInvoice: (id, { amount, reason } = {}) =>
+    api(`/api/v1/admin/invoices/${encodeURIComponent(id)}/refund`, { method: 'POST', body: { amount, reason } }),
+  adminLedger: (params = {}) => api(`/api/v1/admin/billing/ledger${queryString(params)}`),
   adminReconciliation: () => api('/api/v1/admin/billing/reconciliation'),
   confirmPayment: (id) => api(`/api/v1/admin/payments/${encodeURIComponent(id)}/confirm`, { method: 'POST', body: {} }),
   rejectPayment: (id, reason) =>

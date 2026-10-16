@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { adminApi, describeError } from '../lib/api.js';
 import { formatMoney, formatDate, humanizeStatus, statusClass } from '../lib/format.js';
+import AdminRefundModal from '../components/AdminRefundModal.jsx';
 
 /**
  * Admin invoice detail: the summary, the order's line items, the ledger entries against it and
@@ -16,6 +17,7 @@ export default function AdminInvoiceDetailPage() {
   const [busy, setBusy] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
   const [rejectReason, setRejectReason] = useState('');
+  const [showRefund, setShowRefund] = useState(false);
 
   const load = useCallback(async () => {
     if (!id) return;
@@ -58,10 +60,9 @@ export default function AdminInvoiceDetailPage() {
   };
 
   const refund = () => {
-    if (!window.confirm(`Refund invoice ${invoice.invoiceNumber}? The captured payment is reversed in the ledger.`)) return;
-    return run(async () => {
-      await adminApi.adminRefundInvoice(invoice.id);
-    }, `Invoice ${invoice.invoiceNumber} refunded.`);
+    // The modal (not a bare confirm) shows paid / already refunded / maximum refundable and
+    // collects the mandatory reason the audit trail records.
+    setShowRefund(true);
   };
 
   const cancelInvoice = async (e) => {
@@ -114,6 +115,19 @@ export default function AdminInvoiceDetailPage() {
               )}
             </div>
           </section>
+
+          {showRefund && (
+            <AdminRefundModal
+              invoice={invoice}
+              onClose={() => setShowRefund(false)}
+              onDone={(res) => {
+                setShowRefund(false);
+                setError('');
+                setNotice(`Refund of ${formatMoney(res.refunded, invoice.currency)} recorded — invoice is ${humanizeStatus(res.status)}.`);
+                load();
+              }}
+            />
+          )}
 
           <section className="card">
             <h2>Line items</h2>

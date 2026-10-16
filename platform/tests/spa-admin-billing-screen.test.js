@@ -18,6 +18,7 @@ const { startServer, jsonFetch, register } = require('./helpers');
 const BILLING_SRC = fs.readFileSync(path.join(__dirname, '..', 'spa', 'src', 'pages', 'AdminBillingPage.jsx'), 'utf8');
 const DETAIL_SRC = fs.readFileSync(path.join(__dirname, '..', 'spa', 'src', 'pages', 'AdminInvoiceDetailPage.jsx'), 'utf8');
 const LEDGER_SRC = fs.readFileSync(path.join(__dirname, '..', 'spa', 'src', 'pages', 'AdminLedgerPage.jsx'), 'utf8');
+const REFUND_MODAL_SRC = fs.readFileSync(path.join(__dirname, '..', 'spa', 'src', 'components', 'AdminRefundModal.jsx'), 'utf8');
 const API_CLIENT_SRC = fs.readFileSync(path.join(__dirname, '..', 'spa', 'src', 'lib', 'api.js'), 'utf8');
 
 async function seedCatalog(store) {
@@ -133,14 +134,92 @@ test('admin billing screens: endpoint sequence and response contract', async (t)
     assert.strictEqual(voided.status, 200, JSON.stringify(voided.data));
     assert.strictEqual(voided.data.invoice.status, 'void', 'void result reads invoice.status');
 
-    // -- refund a captured payment (refund button; amount_paid set by a settled payment) --
+    // -- refund lifecycle (refund modal: mandatory reason, partial -> full, cap refuses over-refund) --
     await app.store.table('invoices').updateById(refundId, { amount_paid: 9.99, status: 'paid' });
-    const refunded = await jsonFetch(base, {
-      method: 'POST', path: `/api/v1/admin/invoices/${refundId}/refund`,
+    const noReason = await jsonFetch(base, {
+      method: 'POST', path: `/api/v1/admin/invoices/${refundId}/refund`, body: { amount: 5 },
     }, admin);
-    assert.strictEqual(refunded.status, 200, JSON.stringify(refunded.data));
+    assert.strictEqual(noReason.status, 400, 'the audit reason is mandatory');
+
+    const partial = await jsonFetch(base, {
+      method: 'POST', path: `/api/v1/admin/invoices/${refundId}/refund`,
+      body: { amount: 3.5, reason: 'partial goodwill' },
+    }, admin);
+    assert.strictEqual(partial.status, 200, JSON.stringify(partial.data));
+    assert.strictEqual(partial.data.refunded, 3.5, 'refund result reads the refunded amount');
+    assert.strictEqual(partial.data.status, 'partially_refunded', 'a partial refund says so');
+    const mid = await jsonFetch(base, { method: 'GET', path: `/api/v1/admin/invoices/${refundId}` }, admin);
+    assert.strictEqual(mid.data.invoice.status, 'partially_refunded');
+    assert.strictEqual(mid.data.invoice.refundedAmount, 3.5, 'detail reports the refunded total');
+
+    const over = await jsonFetch(base, {
+      method: 'POST', path: `/api/v1/admin/invoices/${refundId}/refund`,
+      body: { amount: 100, reason: 'way too much' },
+    }, admin);
+    assert.strictEqual(over.status, 400, 'over-refunding is refused');
+    assert.strictEqual(over.data.error, 'INVALID_REFUND_AMOUNT', 'refused by name');
+
+    const rest = await jsonFetch(base, {
+      method: 'POST', path: `/api/v1/admin/invoices/${refundId}/refund`, body: { reason: 'return the rest' },
+    }, admin);
+    assert.strictEqual(rest.status, 200, JSON.stringify(rest.data));
+    assert.strictEqual(rest.data.refunded, 6.49, 'an omitted amount refunds the remaining balance');
+    assert.strictEqual(rest.data.status, 'refunded');
     const after = await jsonFetch(base, { method: 'GET', path: `/api/v1/admin/invoices/${refundId}` }, admin);
     assert.strictEqual(after.data.invoice.status, 'refunded');
+
+    const again = await jsonFetch(base, {
+      method: 'POST', path: `/api/v1/admin/invoices/${refundId}/refund`, body: { reason: 'one more' },
+    }, admin);
+    assert.strictEqual(again.status, 400, 'a fully refunded invoice has nothing left to refund');
+
+    // -- invoices directory search: customer email or invoice number --
+    const byEmail = await jsonFetch(base, {
+      method: 'GET', path: '/api/v1/admin/invoices?search=bill-screen-cust',
+    }, admin);
+    assert.strictEqual(byEmail.status, 200, JSON.stringify(byEmail.data));
+    assert.ok(byEmail.data.invoices.length >= 3, 'email search finds the customer invoices');
+    for (const row of byEmail.data.invoices) {
+      assert.match(String(row.userEmail ?? ''), /bill-screen-cust/, 'rows join the customer email');
+    }
+    const numberTerm = after.data.invoice.invoiceNumber;
+    const byNumber = await jsonFetch(base, {
+      method: 'GET', path: `/api/v1/admin/invoices?search=${encodeURIComponent(numberTerm)}`,
+    }, admin);
+    assert.ok(
+      byNumber.data.invoices.some((row) => row.number === numberTerm),
+      'number search finds its invoice',
+    );
+    const noMatch = await jsonFetch(base, {
+      method: 'GET', path: '/api/v1/admin/invoices?search=nothing-matches-this',
+    }, admin);
+    assert.strictEqual(noMatch.data.invoices.length, 0, 'a miss returns an empty page');
+
+    // -- global ledger filters --
+    const refunds = await jsonFetch(base, {
+      method: 'GET', path: '/api/v1/admin/billing/ledger?entryType=refund',
+    }, admin);
+    assert.ok(refunds.data.ledger.length >= 2, 'the refund rows are in the ledger');
+    for (const row of refunds.data.ledger) {
+      assert.strictEqual(row.entryType, 'refund', 'the entry-type filter is exact');
+    }
+    const forInvoice = await jsonFetch(base, {
+      method: 'GET', path: `/api/v1/admin/billing/ledger?invoiceId=${refundId}`,
+    }, admin);
+    assert.ok(forInvoice.data.ledger.length >= 3, 'charge + refunds for the refunded invoice');
+    for (const row of forInvoice.data.ledger) {
+      assert.strictEqual(row.invoiceId, refundId, 'the invoice filter is exact');
+    }
+    const today = new Date().toISOString().slice(0, 10);
+    const dated = await jsonFetch(base, {
+      method: 'GET', path: `/api/v1/admin/billing/ledger?fromDate=${today}&toDate=${today}`,
+    }, admin);
+    assert.ok(dated.data.ledger.length > 0, 'today range includes today');
+    const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+    const future = await jsonFetch(base, {
+      method: 'GET', path: `/api/v1/admin/billing/ledger?fromDate=${tomorrow}&toDate=${tomorrow}`,
+    }, admin);
+    assert.strictEqual(future.data.ledger.length, 0, 'a future date range is empty');
 
     // -- staff gate: a customer cannot use any of it --
     const denied = await jsonFetch(base, { method: 'GET', path: '/api/v1/admin/billing/ledger' }, customer);
@@ -150,10 +229,21 @@ test('admin billing screens: endpoint sequence and response contract', async (t)
     for (const key of ['charges', 'outstanding', 'otherCurrencies']) {
       assert.ok(BILLING_SRC.includes(key), `AdminBillingPage renders response key '${key}'`);
     }
+    assert.ok(BILLING_SRC.includes('inv-search') && BILLING_SRC.includes('search'), 'AdminBillingPage carries the search bar');
+    assert.ok(BILLING_SRC.includes('userEmail'), 'AdminBillingPage renders the joined customer email');
     for (const key of ['invoiceNumber', 'subtotalAmount', 'payments']) {
       assert.ok(DETAIL_SRC.includes(key), `AdminInvoiceDetailPage renders response key '${key}'`);
     }
+    assert.ok(DETAIL_SRC.includes('AdminRefundModal'), 'the detail page opens the refund modal');
+    assert.ok(DETAIL_SRC.includes('amountPaid'), 'the detail page gates the refund button on the paid amount');
+    // The refund modal itself: the numbers the auditor needs and the mandatory reason.
+    for (const key of ['Maximum refundable', 'Already refunded', 'refundedAmount', 'adminApi.adminRefundInvoice', 'required']) {
+      assert.ok(REFUND_MODAL_SRC.includes(key), `AdminRefundModal shows/collects '${key}'`);
+    }
     assert.ok(LEDGER_SRC.includes('otherCurrencies') && LEDGER_SRC.includes('entryType'), 'AdminLedgerPage renders its keys');
+    for (const key of ['led-type', 'led-user', 'led-invoice', 'led-from', 'led-to']) {
+      assert.ok(LEDGER_SRC.includes(key), `AdminLedgerPage carries filter '${key}'`);
+    }
     assert.ok(API_CLIENT_SRC.includes('export const adminApi'), 'api client exports adminApi');
     for (const pathPart of ['/api/v1/admin/invoices', '/api/v1/admin/billing/ledger', '/api/v1/admin/billing/reconciliation', '/confirm-manual', '/reject-manual']) {
       assert.ok(API_CLIENT_SRC.includes(pathPart), `adminApi covers ${pathPart}`);

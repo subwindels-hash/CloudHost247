@@ -8,7 +8,7 @@
 'use strict';
 
 const { v } = require('../core/validate');
-const { NotFoundError, ValidationError, ConflictError } = require('../core/errors');
+const { HttpError, NotFoundError, ValidationError, ConflictError } = require('../core/errors');
 const { uuidv7 } = require('../lib/ids');
 const { asAdmin } = require('../lib/auth');
 const { applySuccessfulPayment, round2 } = require('../lib/billing-apply');
@@ -31,6 +31,7 @@ function invoiceSummaryDto(invoice, order) {
     discountAmount: invoice.discount_total ?? 0,
     taxAmount: invoice.tax_total ?? 0,
     totalAmount: invoice.total,
+    amountPaid: invoice.amount_paid ?? 0,
     dueDate: invoice.due_at,
     issuedAt: invoice.issued_at,
   };
@@ -74,28 +75,77 @@ function register(router, deps) {
     return payment;
   };
 
+  /**
+   * The invoices directory (spec: search + status filter + pagination, rows joined with the
+   * customer). `search` matches the invoice number or the customer's email, case-insensitively;
+   * `page` is accepted alongside `offset` — offset wins when both are sent.
+   */
   router.get('/api/v1/admin/invoices', admin(async (ctx) => {
     const limit = Math.min(Number(ctx.query.limit) || 100, 500);
-    const offset = Number(ctx.query.offset) || 0;
-    const predicate = {};
-    if (ctx.query.status) predicate.status = ctx.query.status;
+    const offset = Number(ctx.query.offset)
+      || Math.max(0, (Math.max(1, Number(ctx.query.page) || 1) - 1) * limit);
+    const search = String(ctx.query.search ?? '').trim().toLowerCase();
 
-    const { rows, total } = await store.table('invoices').find(predicate, { orderBy: '-created_at', limit, offset });
+    let match = (ctx.query.status ? { status: ctx.query.status } : {});
+    if (search) {
+      const { rows: users } = await store.table('users').find({});
+      const byEmail = new Set(
+        users
+          .filter((u) => String(u.email ?? '').toLowerCase().includes(search))
+          .map((u) => u.id),
+      );
+      const wantedStatus = ctx.query.status ?? null;
+      match = (row) => {
+        if (wantedStatus && row.status !== wantedStatus) return false;
+        return String(row.number ?? '').toLowerCase().includes(search) || byEmail.has(row.user_id);
+      };
+    }
+
+    const { rows, total } = await store.table('invoices').find(match, { orderBy: '-created_at', limit, offset });
+    const customers = new Map();
+    for (const row of rows) {
+      if (!customers.has(row.user_id)) {
+        customers.set(row.user_id, await store.table('users').findById(row.user_id));
+      }
+    }
     ctx.json({
-      invoices: rows.map((r) => ({
-        id: r.id, userId: r.user_id, number: r.number, status: r.status,
-        currency: r.currency, total: r.total, amountPaid: r.amount_paid,
-        dueAt: r.due_at, createdAt: r.created_at,
-      })),
+      invoices: rows.map((r) => {
+        const customer = customers.get(r.user_id);
+        return {
+          id: r.id, userId: r.user_id, number: r.number, status: r.status,
+          currency: r.currency, total: r.total, amountPaid: r.amount_paid,
+          dueAt: r.due_at, createdAt: r.created_at,
+          userEmail: customer?.email ?? null,
+          userFullName: customer?.full_name ?? null,
+        };
+      }),
       total,
     });
   }));
 
+  /**
+   * The global ledger (spec: queryable by userId, invoiceId, entryType, fromDate, toDate). The
+   * entry type vocabulary is the ledger's own: charge | payment | refund | credit. Dates compare on
+   * the UTC day and are inclusive at both ends.
+   */
   router.get('/api/v1/admin/billing/ledger', admin(async (ctx) => {
-    const { rows, total } = await store.table('billing_ledger').find({}, { orderBy: '-created_at', limit: 500 });
+    const { userId, invoiceId, entryType, fromDate, toDate } = ctx.query;
+    const from = String(fromDate ?? '').slice(0, 10);
+    const to = String(toDate ?? '').slice(0, 10);
+    const match = (row) => {
+      if (userId && row.user_id !== userId) return false;
+      if (invoiceId && row.invoice_id !== invoiceId) return false;
+      if (entryType && row.entry_type !== entryType) return false;
+      const day = String(row.created_at ?? '').slice(0, 10);
+      if (from && day < from) return false;
+      if (to && day > to) return false;
+      return true;
+    };
+    const { rows, total } = await store.table('billing_ledger').find(match, { orderBy: '-created_at', limit: 500 });
     ctx.json({
       ledger: rows.map((r) => ({
-        id: r.id, userId: r.user_id, entryType: r.entry_type, amount: r.amount,
+        id: r.id, userId: r.user_id, invoiceId: r.invoice_id ?? null, paymentId: r.payment_id ?? null,
+        entryType: r.entry_type, amount: r.amount,
         currency: r.currency, description: r.description, createdAt: r.created_at,
       })),
       total,
@@ -174,26 +224,85 @@ function register(router, deps) {
     ctx.json({ ok: true });
   }));
 
+  /**
+   * Refund a captured payment (spec: POST /admin/invoices/:id/refund). The reason is mandatory
+   * for audit compliance; the amount is optional and defaults to the whole refundable balance.
+   * Money is the platform's fixed-point major units (round2), consistent with every other amount
+   * on these routes.
+   *
+   * The cap invariant is the one that protects the money: SUM(refunds) + amount must not exceed
+   * the settled payments on the invoice (amount_paid). An over-refund is refused by name as
+   * INVALID_REFUND_AMOUNT before anything is written; refunds are append-only ledger rows, and the
+   * invoice walks paid -> partially_refunded -> refunded as the cumulative refund grows. (The
+   * spec's parent-order payment_status sync has no column to write here — orders carry no
+   * payment_status on this platform — so refund state lives on the invoice and the ledger.)
+   */
   router.post('/api/v1/admin/invoices/:id/refund', admin(async (ctx) => {
+    if (!UUID_RE.test(String(ctx.params.id ?? ''))) throw new ValidationError('id must be a valid UUID');
+    const body = await ctx.validate(v.object({
+      amount: v.number().optional(),
+      reason: v.string().trim().min(1).max(2000),
+    }));
+
     const invoice = await store.table('invoices').findById(ctx.params.id);
     if (!invoice) throw new NotFoundError('Invoice not found');
-    if ((invoice.amount_paid ?? 0) <= 0) throw new ValidationError('Invoice has no captured payment to refund');
+    if (!['paid', 'partially_refunded'].includes(invoice.status)) {
+      throw new ValidationError(`Cannot refund an invoice with status '${invoice.status}'`);
+    }
 
+    const { rows: prior } = await store.table('billing_ledger').find({
+      invoice_id: invoice.id,
+      entry_type: 'refund',
+    });
+    const alreadyRefunded = round2(prior.reduce((sum, r) => sum + Number(r.amount ?? 0), 0));
+    const refundable = round2((invoice.amount_paid ?? 0) - alreadyRefunded);
+    const amount = round2(body.amount ?? refundable);
+    if (!(amount > 0)) throw new ValidationError('Refund amount must be positive');
+    if (amount > refundable) {
+      throw new HttpError(
+        400,
+        `Refund of ${amount} ${invoice.currency} exceeds the refundable balance of ${refundable} ${invoice.currency}`,
+        'INVALID_REFUND_AMOUNT',
+      );
+    }
+
+    const cumulative = round2(alreadyRefunded + amount);
+    const nextStatus = cumulative >= round2(invoice.amount_paid ?? 0) ? 'refunded' : 'partially_refunded';
     await store.transaction(async (tx) => {
-      await tx.table('invoices').updateById(invoice.id, { status: 'refunded' });
       await tx.table('billing_ledger').insert({
         id: uuidv7(),
         user_id: invoice.user_id,
         invoice_id: invoice.id,
         entry_type: 'refund',
-        amount: invoice.amount_paid,
+        amount,
         currency: invoice.currency,
-        description: `Refund of ${invoice.number}`,
-        idempotency_key: `refund:${invoice.id}`,
+        description: `Refund of ${invoice.number}: ${body.reason}`,
+        idempotency_key: `refund:${invoice.id}:${uuidv7()}`,
       });
+      await tx.table('invoices').updateById(invoice.id, { status: nextStatus });
     });
-    await audit(deps, ctx, 'admin_invoice_refunded', { type: 'invoice', id: invoice.id });
-    ctx.json({ ok: true });
+
+    await deps.store.table('audit_logs').insert({
+      id: uuidv7(),
+      actor_id: ctx.user.id,
+      actor_role: ctx.user.role,
+      action: 'admin_invoice_refunded',
+      entity_type: 'invoice',
+      entity_id: invoice.id,
+      ip_address: ctx.ip,
+      user_agent: ctx.userAgent,
+      after: {
+        invoiceId: invoice.id,
+        invoiceNumber: invoice.number,
+        customerId: invoice.user_id,
+        amount,
+        currency: invoice.currency,
+        reason: body.reason,
+        status: nextStatus,
+      },
+    });
+
+    ctx.json({ ok: true, refunded: amount, status: nextStatus });
   }));
 
   /**
@@ -214,10 +323,14 @@ function register(router, deps) {
       store.table('orders').findById(invoice.order_id),
       store.table('users').findById(invoice.user_id),
     ]);
+    const refundedAmount = round2(
+      ledger.filter((l) => l.entry_type === 'refund').reduce((sum, l) => sum + Number(l.amount ?? 0), 0),
+    );
 
     ctx.json({
       invoice: {
         ...invoiceSummaryDto(invoice, order),
+        refundedAmount,
         userId: invoice.user_id,
         userEmail: customer?.email ?? null,
         userFullName: customer?.full_name ?? null,
