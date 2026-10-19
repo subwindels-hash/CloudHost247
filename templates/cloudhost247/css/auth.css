@@ -352,3 +352,18 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Secondary text action inside an auth form (cancel / start over). */
+.ch-auth__cancel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  font-size: 0.86rem;
+  color: var(--ch-muted, #56686f);
+  text-decoration: underline;
+}
+
+.ch-auth__cancel:hover {
+  color: var(--ch-ink, #0c1c26);
+}

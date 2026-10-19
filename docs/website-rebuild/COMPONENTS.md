@@ -38,7 +38,7 @@ WHMCS still owns authentication, billing, checkout and service authorization.
 | SEO | `includes/site-head.tpl`, Site context, canonical generic-route redirects, sitemap and robots; no invented review/offer structured data |
 | Builder | Existing published parts win on Builder pages; core schema, renderer, form processing and visibility unchanged |
 | Checkout | Existing `standard_cart` inheritance + child CSS; checkout form fields, tokens and processing not replaced |
-| Client / authentication | Log-in (`login.tpl`) and account registration (`clientregister.tpl`) are now shipped by the child theme on the CloudHost247 shell, tokens and `css/auth.css`; the platform's form contract is preserved field-for-field. Password reset, invoice and service templates still arrive from Twenty-One |
+| Client / authentication | Log-in (`login.tpl`), account registration (`clientregister.tpl`) and the password-recovery flow (`password-reset-container.tpl` + three prompt steps) are shipped by the child theme on the CloudHost247 shell, tokens and `css/auth.css`; the platform's form contract is preserved field-for-field. Invoice and service templates still arrive from Twenty-One |
 
 ## Account entry points
 
@@ -57,10 +57,16 @@ and they were the only two that still looked like the vendor theme. The decision
   browser validates the form, so the wizard could block its own submit. Registration is one
   labelled page with the same fields;
 * `includes/flashmessage.tpl` and `includes/captcha.tpl` are shipped by the theme so the account
-  pages do not depend on a partial that may or may not exist in the parent installation.
+  pages do not depend on a partial that may or may not exist in the parent installation;
+* `password-reset-container.tpl` and the `password-reset-{email,security,change}-prompt.tpl` steps
+  are shipped too, so recovery matches the log-in page instead of dropping back to the parent's
+  markup. The route names, the hidden `action` / `answer` fields and the `$innerTemplate` hand-off
+  are unchanged. The container's dynamic include is resolved by `scripts/verify-website.py` against
+  the prompt family the theme actually ships, so a missing step fails the gate instead of rendering
+  a blank panel.
 
 `css/auth.css` is scoped to `.ch-auth`, loaded after the design system, and is the only stylesheet
-the account pages add. Password reset, invoice and service templates remain the parent's.
+the account pages add. Invoice, checkout and service templates remain the parent's.
 
 ## Source provenance and compatibility
 

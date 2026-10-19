@@ -142,6 +142,10 @@ def include_targets(text):
  is a path this check can hold to account."""
  return [next(g for g in groups if g) for groups in re.findall(r'\{include\s+file=(?:"([^"]*)"|\'([^\']*)\'|([^}\s]+))',text)
          if not re.search(r'[{}]',''.join(groups))]
+# An include whose path carries one run-time segment: `password-reset-$innerTemplate.tpl`. The
+# segment is chosen by the platform from a closed set of step names, never by the visitor.
+DYNAMIC_INCLUDE=re.compile(r'\$\w+')
+
 def include_errors(themes=None):
  """Every template a first-party theme includes must be one it ships, or a declared parent's.
 
@@ -160,6 +164,20 @@ def include_errors(themes=None):
     if value.startswith('$template/'):
      target=value[len('$template/'):];key=(directory,target)
      if target in files:continue
+     # A loop include whose variable is chosen by the server (`$innerTemplate` selects one of the
+     # password-reset prompts) names no single file. It is resolved against the templates the theme
+     # actually ships for that family instead of being guessed: the platform only ever sends a step
+     # name, so a family with at least one shipped member is a real include, and one with none is a
+     # hole. Guessing the wildcard would either miss the hole or report a correct include as one.
+     if DYNAMIC_INCLUDE.search(target):
+      # `re.escape` the literal parts; the run-time segment matches one path component that must
+      # not contain a dot, so it cannot cross into the extension or another directory.
+      token=DYNAMIC_INCLUDE.search(target).group(0)
+      pattern=re.escape(target).replace(re.escape(token),'[^.]+')
+      # The including file itself would otherwise satisfy the pattern.
+      if not any(re.fullmatch(pattern,name) for name in files if name!=rel):
+       errors.append(where+': includes '+value+', but the theme ships no template for that family')
+      continue
      if key in PARENT_TEMPLATES:
       if not parent:errors.append(where+': includes '+value+', but the theme declares no parent to supply it')
       else:used.add(key)
