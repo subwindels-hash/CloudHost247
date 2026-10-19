@@ -9,8 +9,9 @@
   forms, modals and the mobile stacking of its Bootstrap layout - on the same presentation as the
   rest of the site.
 
-  The first block carries the same brand tokens as `design-system.css` - the platform loads this
-  sheet after the head, so a different value here would silently repaint the whole client area. Its
+  The first block carries the same brand tokens as `design-system.css`. This sheet is loaded by
+  WHMCS itself, not by `site-head.tpl`, so its position relative to the design system depends on
+  the parent theme's head; a brand value declared here may win on the pages that load it. Its
   classes are superseded for new markup. Do not add page styles here - a page that renders a class no
   loaded sheet defines renders unstyled, which is exactly how the product catalogue and the Builder
   page were broken. `scripts/verify-website.py` now fails when a template renders an undefined class

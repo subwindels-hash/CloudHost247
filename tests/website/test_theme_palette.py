@@ -9,8 +9,9 @@ The theme ships seven sheets, and they do not all arrive through `site-head.tpl`
 * `auth.css` loads on the account pages.
 
 `site.css`, `custom.css` and `announcementbar.css` each restate brand colours instead of reading
-the design system's tokens, and because of when they load, a stale value there wins. That is how
-the retired blue (`#0756d8`, `#071b3d`, `#12b886`) stayed live in the client area and in the
+the design system's tokens. The design system only overrides what it declares, and it cannot
+override a component rule that names its own gradient, shadow or border colour. That is how the
+retired blue (`#0756d8`, `#071b3d`, `#12b886`) stayed live in the client area and in the
 announcement bar long after the design system had moved to green, and how the older green
 (`#196947`, `#b4f2cd`) survived in the tools shell.
 
@@ -85,13 +86,15 @@ class SharedTokenTests(unittest.TestCase):
         self.assertEqual(
             mismatched, {},
             'site.css and design-system.css declare different values for the same token. The '
-            'design system loads second and wins, so site.css is describing a palette the browser '
-            'never paints; the two must move together.',
+            'design system loads second here and wins, so site.css would be describing a palette '
+            'the browser never paints; any other sheet that loads it first would paint the other '
+            'one. The two must move together.',
         )
 
     def test_the_client_area_sheet_carries_the_same_brand_tokens(self):
-        # WHMCS loads custom.css itself, after the head. A different value here does not sit
-        # behind the design system - it overrides it for every client-area page.
+        # WHMCS loads custom.css itself; the theme does not link it. A different value here can
+        # land on either side of the design system depending on the parent theme's head, so it
+        # must not be a second source of truth.
         custom = root_tokens('custom.css')
         design = root_tokens('design-system.css')
         for token in ('--ch247-primary', '--ch247-accent', '--ch247-width'):
