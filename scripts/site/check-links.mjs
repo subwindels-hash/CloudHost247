@@ -141,11 +141,24 @@ function contentRoutes() {
   return routes;
 }
 
+/**
+ * Directories that are never first-party source, so the PHP walk must not treat their contents as
+ * pages this repository ships.
+ *
+ * `.cache/` is the one that bit: it holds the downloaded Smarty runtime and the compiled templates
+ * `scripts/verify-rendered-site.sh` writes. Both are gitignored build inputs, but the walk used to
+ * descend into them, so after any rendered-site run this checker read Smarty's own sources and the
+ * fixture compile cache as PHP surfaces — and failed the gate on `href="<?php echo routePath(`,
+ * which is a line of generated PHP, not a link. Running the checks in a different order produced a
+ * different answer for the same tree.
+ */
+const UNSCANNED_DIRECTORIES = new Set(['node_modules', '.git', 'vendor', '.cache']);
+
 function phpFiles(directory = ROOT, prefix = '') {
   const found = new Set();
   for (const entry of readdirSync(directory, { withFileTypes: true })) {
     if (entry.isDirectory()) {
-      if (['node_modules', '.git', 'vendor'].includes(entry.name)) continue;
+      if (UNSCANNED_DIRECTORIES.has(entry.name)) continue;
       for (const nested of phpFiles(join(directory, entry.name), `${prefix}${entry.name}/`)) found.add(nested);
     } else if (entry.name.endsWith('.php')) {
       found.add(`${prefix}${entry.name}`);
