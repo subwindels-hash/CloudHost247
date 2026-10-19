@@ -16,22 +16,28 @@ use CloudHost247\Builder\Schema\StyleSchema;
  */
 final class StyleCompiler
 {
-    /** Palette and typography defaults, overridden by the global styles record. */
+    /**
+     * Palette and typography defaults, overridden by the global styles record.
+     *
+     * These are the brand tokens from shared/site/design-system.css, not the builder's own
+     * colours: a page compiled with no global styles is still a CloudHost247 page, and it
+     * must not open on a palette the rest of the site stopped using.
+     */
     const DEFAULT_VARIABLES = array(
-        'color-primary' => '#0756d8',
-        'color-primary-dark' => '#0442a8',
+        'color-primary' => '#16704b',
+        'color-primary-dark' => '#0f5338',
         'color-secondary' => '#0f172a',
-        'color-accent' => '#12b886',
+        'color-accent' => '#7ff0b4',
         'color-text' => '#1f2937',
         'color-heading' => '#0f172a',
-        'color-muted' => '#64748b',
+        'color-muted' => '#52646f',
         'color-surface' => '#ffffff',
-        'color-background' => '#f8fafc',
-        'color-border' => '#e2e8f0',
+        'color-background' => '#f3f7f8',
+        'color-border' => '#dbe5e8',
         'color-inverse' => '#ffffff',
-        'color-success' => '#12b886',
-        'color-warning' => '#f59f00',
-        'color-danger' => '#e03131',
+        'color-success' => '#16704b',
+        'color-warning' => '#b4581b',
+        'color-danger' => '#a32b2b',
         'font-body' => "Inter, system-ui, -apple-system, 'Segoe UI', sans-serif",
         'font-heading' => "Inter, system-ui, -apple-system, 'Segoe UI', sans-serif",
         'font-mono' => "ui-monospace, SFMono-Regular, Menlo, monospace",

@@ -4,7 +4,7 @@
  * Scoped under .ch247b so it cannot disturb the WHMCS admin theme around it.
  */
 
-.ch247b { --b: #e2e8f0; --muted: #64748b; --primary: #0756d8; --danger: #e03131; --ok: #12b886;
+.ch247b { --b: #e2e8f0; --muted: #64748b; --primary: #16704b; --danger: #a32b2b; --ok: #16704b;
     font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: #1f2937; }
 .ch247b * { box-sizing: border-box; }
 
@@ -44,7 +44,7 @@
 .ch247b-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px;
     border: 1px solid var(--b); background: #fff; color: #1f2937; font: inherit; font-weight: 600;
     cursor: pointer; text-decoration: none; }
-.ch247b-btn:hover { background: #f8fafc; }
+.ch247b-btn:hover { background: #f3f7f8; }
 .ch247b-btn--sm { padding: 5px 10px; font-size: .84rem; }
 .ch247b-btn--primary { background: var(--primary); border-color: var(--primary); color: #fff; }
 .ch247b-btn--go { background: var(--ok); border-color: var(--ok); color: #fff; }
@@ -70,7 +70,7 @@
 .ch247b-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 10px 0; }
 .ch247b-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
 .ch247b-code { width: 100%; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .86rem;
-    padding: 12px; border: 1px solid var(--b); border-radius: 8px; background: #f8fafc; }
+    padding: 12px; border: 1px solid var(--b); border-radius: 8px; background: #f3f7f8; }
 
 .ch247b-facts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .ch247b-facts li { display: grid; grid-template-columns: 220px auto; gap: 4px 14px; padding-bottom: 8px; border-bottom: 1px dashed var(--b); }
@@ -91,7 +91,7 @@
 .ch247b-status--published { background: #e7f8f1; border-color: #9fdcc6; color: #0b6b4f; }
 .ch247b-status--draft { background: #f1f5f9; border-color: var(--b); color: var(--muted); }
 .ch247b-status--scheduled { background: #fff8e6; border-color: #f3d38a; color: #92400e; }
-.ch247b-status--archived { background: #f8fafc; border-color: var(--b); color: #94a3b8; }
+.ch247b-status--archived { background: #f3f7f8; border-color: var(--b); color: #94a3b8; }
 
 .ch247b-tag { display: inline-block; padding: 2px 8px; border-radius: 999px; background: #eef4ff; color: #1e3a8a; font-size: .74rem; font-weight: 600; }
 .ch247b-tag--dim { background: #f1f5f9; color: var(--muted); }

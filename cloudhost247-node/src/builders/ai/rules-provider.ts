@@ -25,7 +25,7 @@ const PALETTES: Record<string, { primary: string; accent: string }> = {
   retail: { primary: '#b91c1c', accent: '#f59e0b' },
   creative: { primary: '#7c3aed', accent: '#f472b6' },
   education: { primary: '#1d4ed8', accent: '#facc15' },
-  default: { primary: '#0756d8', accent: '#12b886' },
+  default: { primary: '#16704b', accent: '#7ff0b4' },
 };
 
 function paletteFor(industry: string | undefined): { primary: string; accent: string } {

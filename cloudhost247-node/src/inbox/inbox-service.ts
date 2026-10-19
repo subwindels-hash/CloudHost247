@@ -646,7 +646,7 @@ export async function listLabels(db: Queryable) {
 export async function createLabel(db: Queryable, input: { name: string; color?: string; description?: string }) {
   const name = input.name.trim().slice(0, 60);
   if (!name) throw new ValidationError('A label needs a name');
-  const color = /^#[0-9a-fA-F]{6}$/.test(input.color ?? '') ? input.color! : '#0756d8';
+  const color = /^#[0-9a-fA-F]{6}$/.test(input.color ?? '') ? input.color! : '#16704b';
   const { rows } = await db.query<{ id: string; name: string; color: string; description: string }>(
     `INSERT INTO inbox_labels (id, name, color, description) VALUES ($1,$2,$3,$4)
      ON CONFLICT (lower(name)) DO UPDATE SET color = EXCLUDED.color
