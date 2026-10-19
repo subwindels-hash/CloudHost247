@@ -891,10 +891,6 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
         "to": "/hosting/migration"
       },
       {
-        "label": "Hosting Overview",
-        "to": "/hosting"
-      },
-      {
         "label": "SSL Certificates",
         "to": "/hosting/ssl"
       },
@@ -905,10 +901,6 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
       {
         "label": "Hosting Security",
         "to": "/hosting/security"
-      },
-      {
-        "label": "Offers",
-        "to": "/offers"
       }
     ]
   },
@@ -1005,14 +997,6 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
       {
         "label": "Domain Transfer",
         "to": "/domains/transfer"
-      },
-      {
-        "label": "WHOIS Lookup",
-        "to": "/domains/whois"
-      },
-      {
-        "label": "Domain Extensions",
-        "to": "/domains/extensions"
       }
     ]
   },
@@ -1061,28 +1045,8 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
         "to": "/hosting/api"
       },
       {
-        "label": "Developer Platform",
-        "to": "/developers"
-      },
-      {
-        "label": "Application Environments",
-        "to": "/developers/environments"
-      },
-      {
         "label": "Managed Databases",
         "to": "/platforms/databases"
-      },
-      {
-        "label": "Containers & Docker",
-        "to": "/platforms/containers"
-      },
-      {
-        "label": "Platforms Overview",
-        "to": "/platforms"
-      },
-      {
-        "label": "Application Hosting",
-        "to": "/platforms/applications"
       }
     ]
   },
@@ -1211,16 +1175,8 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
         "to": "/websites"
       },
       {
-        "label": "Pricing",
-        "to": "/pricing"
-      },
-      {
         "label": "Service Status",
         "to": "/status"
-      },
-      {
-        "label": "Sitemap",
-        "to": "/sitemap"
       }
     ]
   },

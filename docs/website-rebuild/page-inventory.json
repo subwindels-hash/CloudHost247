@@ -26,7 +26,7 @@
     "root_php_pages": 84,
     "registered_public_pages": 67,
     "navigation_destinations": 112,
-    "footer_destinations": 108,
+    "footer_destinations": 97,
     "mega_menus": 7,
     "footer_columns": 8,
     "hero_scenes_exact": 67,
@@ -524,8 +524,8 @@
       "seo_status": "n/a",
       "navigation_placement": "resources / Documentation & help",
       "navigation_location": "resources / Documentation & help",
-      "footer_placement": "Company | Resources",
-      "footer_location": "Company | Resources",
+      "footer_placement": "Resources",
+      "footer_location": "Resources",
       "reachable": true
     },
     {
@@ -1784,8 +1784,8 @@
       "seo_status": "ok",
       "navigation_placement": "hosting / Specialized hosting | resources / Stay informed",
       "navigation_location": "hosting / Specialized hosting | resources / Stay informed",
-      "footer_placement": "Company | Products",
-      "footer_location": "Company | Products",
+      "footer_placement": "Products",
+      "footer_location": "Products",
       "reachable": true
     },
     {

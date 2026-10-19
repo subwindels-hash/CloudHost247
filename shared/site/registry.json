@@ -1300,13 +1300,6 @@
           }
         },
         {
-          "label": "Hosting Overview",
-          "href": {
-            "spa": "/hosting",
-            "php": "cloudhost247-hosting.php"
-          }
-        },
-        {
           "label": "SSL Certificates",
           "href": {
             "spa": "/hosting/ssl",
@@ -1325,13 +1318,6 @@
           "href": {
             "spa": "/hosting/security",
             "php": "security.php"
-          }
-        },
-        {
-          "label": "Offers",
-          "href": {
-            "spa": "/offers",
-            "php": "offers.php"
           }
         }
       ]
@@ -1496,20 +1482,6 @@
             "spa": "/domains/transfer",
             "php": "cart.php?a=add&domain=transfer"
           }
-        },
-        {
-          "label": "WHOIS Lookup",
-          "href": {
-            "spa": "/domains/whois",
-            "php": "domain.php"
-          }
-        },
-        {
-          "label": "Domain Extensions",
-          "href": {
-            "spa": "/domains/extensions",
-            "php": "domain.php"
-          }
         }
       ]
     },
@@ -1587,44 +1559,9 @@
           }
         },
         {
-          "label": "Developer Platform",
-          "href": {
-            "spa": "/developers",
-            "php": "developer-friendly.php"
-          }
-        },
-        {
-          "label": "Application Environments",
-          "href": {
-            "spa": "/developers/environments",
-            "php": "deployments.php"
-          }
-        },
-        {
           "label": "Managed Databases",
           "href": {
             "spa": "/platforms/databases"
-          }
-        },
-        {
-          "label": "Containers & Docker",
-          "href": {
-            "spa": "/platforms/containers",
-            "php": "docker-hosting.php"
-          }
-        },
-        {
-          "label": "Platforms Overview",
-          "href": {
-            "spa": "/platforms",
-            "php": "applications.php"
-          }
-        },
-        {
-          "label": "Application Hosting",
-          "href": {
-            "spa": "/platforms/applications",
-            "php": "applications.php"
           }
         }
       ]
@@ -1844,24 +1781,10 @@
           }
         },
         {
-          "label": "Pricing",
-          "href": {
-            "spa": "/pricing",
-            "php": "offers.php"
-          }
-        },
-        {
           "label": "Service Status",
           "href": {
             "spa": "/status",
             "php": "serverstatus.php"
-          }
-        },
-        {
-          "label": "Sitemap",
-          "href": {
-            "spa": "/sitemap",
-            "php": "cloudhost247-sitemap.php"
           }
         }
       ]

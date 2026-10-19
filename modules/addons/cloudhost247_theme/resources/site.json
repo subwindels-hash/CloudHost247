@@ -6294,10 +6294,6 @@
           "url": "migration.php"
         },
         {
-          "label": "Hosting Overview",
-          "url": "cloudhost247-hosting.php"
-        },
-        {
           "label": "SSL Certificates",
           "url": "ssl-certificate.php"
         },
@@ -6308,10 +6304,6 @@
         {
           "label": "Hosting Security",
           "url": "security.php"
-        },
-        {
-          "label": "Offers",
-          "url": "offers.php"
         }
       ]
     },
@@ -6410,14 +6402,6 @@
         {
           "label": "Domain Transfer",
           "url": "cart.php?a=add&domain=transfer"
-        },
-        {
-          "label": "WHOIS Lookup",
-          "url": "domain.php"
-        },
-        {
-          "label": "Domain Extensions",
-          "url": "domain.php"
         }
       ]
     },
@@ -6463,26 +6447,6 @@
         {
           "label": "API Hosting",
           "url": "api-hosting.php"
-        },
-        {
-          "label": "Developer Platform",
-          "url": "developer-friendly.php"
-        },
-        {
-          "label": "Application Environments",
-          "url": "deployments.php"
-        },
-        {
-          "label": "Containers & Docker",
-          "url": "docker-hosting.php"
-        },
-        {
-          "label": "Platforms Overview",
-          "url": "applications.php"
-        },
-        {
-          "label": "Application Hosting",
-          "url": "applications.php"
         }
       ]
     },
@@ -6612,16 +6576,8 @@
           "url": "website-design.php"
         },
         {
-          "label": "Pricing",
-          "url": "offers.php"
-        },
-        {
           "label": "Service Status",
           "url": "serverstatus.php"
-        },
-        {
-          "label": "Sitemap",
-          "url": "cloudhost247-sitemap.php"
         }
       ]
     },
