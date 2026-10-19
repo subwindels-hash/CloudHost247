@@ -44,7 +44,7 @@
 
                 {if !$registrationDisabled}
                     <form method="post" class="ch-auth__form using-password-strength" action="{$smarty.server.PHP_SELF}"
-                          onsubmit="return registerForm();" role="form" name="orderfrm" id="frmCheckout">
+                          onsubmit="return typeof registerForm === 'function' ? registerForm() : true;" role="form" name="orderfrm" id="frmCheckout">
                         <input type="hidden" name="register" value="true"/>
 
                         <div class="ch-auth__section">
