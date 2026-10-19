@@ -58,7 +58,7 @@ function head({ title, description, canonical, jsonldExtra }) {
   <title>${title}</title>
   <meta name="description" content="${description}" />
   <link rel="canonical" href="${canonical}" />
-  <meta name="theme-color" content="#0a1730" />
+  <meta name="theme-color" content="#0a1620" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="CloudHost247" />
   <meta property="og:url" content="${canonical}" />

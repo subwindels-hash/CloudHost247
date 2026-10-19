@@ -112,7 +112,7 @@ test('mobile shell: native bootstrap configures, hides, wires — and never inve
     getConfig: () => ({
       plugins: {
         CloudHost247: { apiOrigin: 'https://api.example.com' },
-        StatusBar: { style: 'LIGHT', backgroundColor: '#0756d8' },
+        StatusBar: { style: 'LIGHT', backgroundColor: '#16704b' },
       },
     }),
     Plugins: {
@@ -144,7 +144,7 @@ test('mobile shell: native bootstrap configures, hides, wires — and never inve
   assert.strictEqual(win.__CH247_API_ORIGIN__, 'https://api.example.com', 'config beats an earlier runtime value');
   assert.strictEqual(report.splashHidden, true);
   assert.deepEqual(calls.statusStyle, [{ style: 'LIGHT' }], 'status bar style comes from the config');
-  assert.deepEqual(calls.statusColor, [{ color: '#0756d8' }], 'status bar colour comes from the config');
+  assert.deepEqual(calls.statusColor, [{ color: '#16704b' }], 'status bar colour comes from the config');
   assert.strictEqual(report.backButtonWired, true);
   assert.strictEqual(calls.listeners.length, 1);
   assert.strictEqual(calls.listeners[0].event, 'backButton');

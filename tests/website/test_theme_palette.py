@@ -144,5 +144,108 @@ class RetiredColourTests(unittest.TestCase):
                       tools)
 
 
+BRAND = ROOT / 'assets' / 'images' / 'cloudhost247' / 'brand'
+BRAND_MIRROR = ROOT / 'cloudhost247-node' / 'frontend' / 'public' / 'media' / 'cloudhost247' / 'brand'
+
+# The only colours a brand mark may contain. Dark uses the body ink, the icon tile uses the deep
+# navy, the compact lockup uses the brand green, and the mono/white variants are single-colour by
+# definition. Nothing else belongs in the mark.
+MARK_COLOURS = {'#0a1620', '#0c1c26', '#16704b', '#7ff0b4', '#ffffff', '#000000'}
+
+
+def hexes(text: str) -> set[str]:
+    return {value.lower() for value in re.findall(r'#[0-9a-fA-F]{6}\b', text)}
+
+
+class BrandMarkTests(unittest.TestCase):
+    """The logo and favicon are part of the palette too.
+
+    They are the first thing a visitor sees and the only brand asset a browser caches by name, so a
+    stale colour here outlives every stylesheet change. The raster ladder is generated from these
+    SVGs - if the SVG is right, re-running the generator is enough to make the PNG/WebP/ICO right as
+    well.
+    """
+
+    def test_every_mark_uses_only_brand_colours(self):
+        for svg in sorted(BRAND.glob('*.svg')):
+            with self.subTest(mark=svg.name):
+                found = hexes(svg.read_text(encoding='utf-8'))
+                self.assertEqual(found - MARK_COLOURS, set(),
+                                 f'{svg.name} still contains a retired or off-brand colour')
+
+    def test_the_icon_tile_is_the_deep_navy_and_the_glyph_is_mint(self):
+        mark = (BRAND / 'icon-mark.svg').read_text(encoding='utf-8')
+        self.assertIn('fill="#0a1620"', mark)
+        self.assertIn('stroke="#7ff0b4"', mark)
+
+    def test_the_compact_lockup_carries_the_brand_green(self):
+        compact = (BRAND / 'logo-compact.svg').read_text(encoding='utf-8')
+        self.assertIn('stroke="#16704b"', compact)
+
+    def test_the_platform_serves_the_same_marks(self):
+        # `scripts/generate-raster-formats.py --check` owns the full mirror; this is the fast
+        # assertion for the family most likely to be edited by hand.
+        for svg in sorted(BRAND.glob('*.svg')):
+            with self.subTest(mark=svg.name):
+                self.assertEqual((BRAND_MIRROR / svg.name).read_bytes(), svg.read_bytes(),
+                                 f'the platform copy of {svg.name} is out of date')
+
+    def test_the_installable_apps_are_on_the_same_theme_colour(self):
+        cases = {
+            'platform/mobile/capacitor.config.json': '"backgroundColor": "#16704b"',
+            'platform/public/manifest.webmanifest': '"theme_color": "#16704b"',
+            'platform/spa/index.html': '<meta name="theme-color" content="#16704b" />',
+        }
+        for relative, expected in cases.items():
+            with self.subTest(file=relative):
+                text = (ROOT / relative).read_text(encoding='utf-8')
+                self.assertIn(expected, text)
+                for colour in RETIRED:
+                    self.assertNotIn(colour, text,
+                                     f'{relative} still carries the retired brand colour {colour}')
+
+    def test_the_icon_generator_draws_the_brand_palette(self):
+        generator = (ROOT / 'platform' / 'scripts' / 'generate-icons.js').read_text(encoding='utf-8')
+        self.assertIn("hexToRgba('#16704b')", generator)
+        self.assertIn("hexToRgba('#7ff0b4')", generator)
+
+
+class PlatformSiteTests(unittest.TestCase):
+    """The platform's own static site and dashboard are CloudHost247 too.
+
+    `platform/` is a second application with its own CSS, and it had drifted further than the
+    theme: a blue brand token, a teal accent and a navy ramp that no other surface used. Nobody
+    reads one palette off two stylesheets, so its brand tokens are pinned to the design system's
+    values here.
+    """
+
+    SITE_CSS = ROOT / 'platform' / 'public' / 'assets' / 'css' / 'site.css'
+    SPA_CSS = ROOT / 'platform' / 'spa' / 'src' / 'styles.css'
+
+    def test_the_platform_site_uses_the_brand_tokens(self):
+        css = self.SITE_CSS.read_text(encoding='utf-8')
+        for declaration in ('--brand: #16704b;', '--brand-strong: #0f5338;',
+                            '--accent: #7ff0b4;', '--navy-900: #0a1620;',
+                            '--ink-900: #0c1c26;', '--bg-soft: #f3f7f8;'):
+            with self.subTest(declaration=declaration):
+                self.assertIn(declaration, css)
+        self.assertNotIn('#1a5fd0', css)
+        self.assertNotIn('#19b8a6', css)
+
+    def test_the_platform_dashboard_uses_the_brand_tokens(self):
+        css = self.SPA_CSS.read_text(encoding='utf-8')
+        for declaration in ('--blue: #16704b;', '--blue-dark: #0f5338;', '--navy: #0a1620;',
+                            '--ink: #0c1c26;', '--bg: #f3f7f8;'):
+            with self.subTest(declaration=declaration):
+                self.assertIn(declaration, css)
+
+    def test_the_platform_favicon_is_the_brand_mark(self):
+        favicon = (ROOT / 'platform' / 'public' / 'favicon.svg').read_text(encoding='utf-8')
+        self.assertIn('fill="#0a1620"', favicon)
+        self.assertIn('fill="#7ff0b4"', favicon)
+        for colour in RETIRED:
+            self.assertNotIn(colour, favicon)
+
+
 if __name__ == '__main__':  # pragma: no cover - manual runs
     unittest.main()

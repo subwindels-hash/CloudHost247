@@ -97,7 +97,7 @@ function over(bg, fg) {
 
 
 /**
- * Draw the CloudHost247 mark: a rounded blue tile, a white cloud, two green server legs.
+ * Draw the CloudHost247 mark: a rounded green tile, a white cloud, two mint server legs.
  * Coordinates are expressed in a 64x64 design space and scaled to `size`.
  *
  * @param {object} options
@@ -107,9 +107,9 @@ function renderLogo(size, options = {}) {
   const rgba = Buffer.alloc(size * size * 4);
   const scale = size / 64;
   const transparent = Boolean(options.transparent);
-  const background = hexToRgba('#0756d8');
+  const background = hexToRgba('#16704b');
   const white = [255, 255, 255, 255];
-  const green = hexToRgba('#12b886');
+  const green = hexToRgba('#7ff0b4');
 
   // Maskable icons need ~20% padding so a launcher can crop to a circle without clipping art.
   const pad = options.maskable ? 8 : 0;
