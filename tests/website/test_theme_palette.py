@@ -239,6 +239,14 @@ class PlatformSiteTests(unittest.TestCase):
             with self.subTest(declaration=declaration):
                 self.assertIn(declaration, css)
 
+    def test_neither_platform_stylesheet_names_a_retired_colour(self):
+        for css in (self.SITE_CSS, self.SPA_CSS):
+            with self.subTest(sheet=css.name):
+                text = css.read_text(encoding='utf-8').lower()
+                for colour in RETIRED + ('#1a5fd0', '#19b8a6', '#134aa5'):
+                    self.assertNotIn(colour, text,
+                                     f'{css.name} still carries {colour}')
+
     def test_the_platform_favicon_is_the_brand_mark(self):
         favicon = (ROOT / 'platform' / 'public' / 'favicon.svg').read_text(encoding='utf-8')
         self.assertIn('fill="#0a1620"', favicon)
