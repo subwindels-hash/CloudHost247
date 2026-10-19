@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
@@ -18,6 +18,8 @@ import { describe, expect, it } from 'vitest';
 const ROOT = join(__dirname, '..', '..', '..', '..');
 const DESIGN_SYSTEM = readFileSync(join(ROOT, 'shared', 'site', 'design-system.css'), 'utf8');
 const THEME_COPY = readFileSync(join(ROOT, 'templates', 'cloudhost247', 'css', 'design-system.css'), 'utf8');
+const SRC = join(__dirname, '..', '..', 'src');
+const APP_STYLES = readFileSync(join(SRC, 'styles.css'), 'utf8');
 
 describe('design system', () => {
   it('prevents horizontal overflow at the document level', () => {
@@ -54,6 +56,39 @@ describe('design system', () => {
     expect(DESIGN_SYSTEM).not.toContain('#0756d8');
     expect(DESIGN_SYSTEM).not.toContain('#071b3d');
     expect(DESIGN_SYSTEM).not.toContain('#0a1730');
+  });
+
+  it('keeps the application stylesheet on the same palette', () => {
+    // `styles.css` loads first and the design system overrides its tokens, but its own rules use
+    // literal colours too. Those literals were still the retired blue, so the dashboard's wizard,
+    // tabs, focus ring and footer painted a second palette whenever their rule outranked the
+    // bridge. Read the expected values from the design system rather than restating them here, so
+    // a future brand change moves both files or fails this test.
+    const declaration = (source: string, token: string) =>
+      new RegExp(`${token}\\s*:\\s*([^;]+);`).exec(source)?.[1]?.trim();
+    for (const token of ['--ch247-primary', '--ch247-accent', '--ch247-ink', '--ch247-bg', '--ch247-border']) {
+      const expected = declaration(DESIGN_SYSTEM, token);
+      expect(expected, `the design system does not declare ${token}`).toBeTruthy();
+      expect(declaration(APP_STYLES, token), `${token} in styles.css has drifted from the design system`).toBe(expected);
+    }
+    for (const retired of ['#0756d8', '#071b3d', '#0a1730', '#12b886']) {
+      expect(APP_STYLES, `styles.css still paints the retired palette colour ${retired}`).not.toContain(retired);
+    }
+  });
+
+  it('paints no retired colour in any application stylesheet', () => {
+    // The dashboard is not one sheet: eight are imported by main.tsx, plus page components with
+    // inline colours. Auditing only styles.css is how `infrastructure.css` and `platform.css` kept
+    // the blue (wizard steps, filter tabs, server cards, notification rails, focus rings) long
+    // after the tokens had moved to green.
+    const sheets = readdirSync(SRC).filter((name) => name.endsWith('.css')).sort();
+    expect(sheets.length).toBeGreaterThanOrEqual(8);
+    for (const sheet of sheets) {
+      const css = readFileSync(join(SRC, sheet), 'utf8').toLowerCase();
+      for (const retired of ['#0756d8', '#071b3d', '#0a1730', '#12b886', '#0442a8', '#0b7a58']) {
+        expect(css, `${sheet} still paints the retired brand colour ${retired}`).not.toContain(retired);
+      }
+    }
   });
 
   it('bridges the older application tokens onto the new palette', () => {

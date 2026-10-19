@@ -31,7 +31,7 @@ export const FIRST_PARTY_TEMPLATES: readonly FirstPartyTemplate[] = [
     name: 'Professional services',
     category: 'services',
     description: 'A credibility-first layout for consultancies, agencies and B2B service firms.',
-    palette: { primary: '#0756d8', accent: '#12b886' },
+    palette: { primary: '#16704b', accent: '#7ff0b4' },
     schema: [
       {
         type: 'hero',

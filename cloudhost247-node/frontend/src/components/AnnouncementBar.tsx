@@ -31,7 +31,7 @@ function StarSprite() {
           <stop offset="100%" stopColor="#2fd3a1" />
         </linearGradient>
         <linearGradient id="ch-announce-star-shade" x1="0.2" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#12b886" />
+          <stop offset="0%" stopColor="#7ff0b4" />
           <stop offset="100%" stopColor="#046b52" />
         </linearGradient>
         <symbol id="ch-announce-star" viewBox="0 0 24 25">

@@ -1,18 +1,19 @@
-/* CloudHost247 dashboard — React SPA styles. Mirrors the public site palette. */
+/* CloudHost247 dashboard — React SPA styles. Mirrors the public site palette, which is the
+   shared design system (shared/site/design-system.css). */
 
 :root {
   /* Aligned with the public-site design system (public/assets/css/site.css). */
-  --navy: #0a1c3f;
-  --blue: #1a5fd0;
-  --blue-dark: #134aa5;
-  --green: #0f8a4c;
-  --ink: #0c1526;
-  --muted: #52657c;
-  --line: #dde4ef;
-  --bg: #f5f7fb;
-  --danger: #c02626;
-  --danger-soft: #fdecec;
-  --green-soft: #e5f5ec;
+  --navy: #0a1620;
+  --blue: #16704b;
+  --blue-dark: #0f5338;
+  --green: #16704b;
+  --ink: #0c1c26;
+  --muted: #52646f;
+  --line: #dbe5e8;
+  --bg: #f3f7f8;
+  --danger: #a32b2b;
+  --danger-soft: #fdeeee;
+  --green-soft: #e9f7ef;
   --radius: 12px;
   --shadow: 0 1px 2px rgba(12, 21, 38, 0.06);
   --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -126,13 +127,13 @@ a { color: var(--blue-dark); }
 .list li:last-child { border-bottom: 0; }
 
 .status { font-size: 0.78rem; text-transform: capitalize; padding: 2px 10px; border-radius: 999px; background: var(--bg); color: var(--muted); }
-.status-active, .status-open, .status-paid { background: var(--green-soft); color: #0b6b4f; }
-.status-pending, .status-suspended, .status-customer_reply { background: #fff4e0; color: #8a5b00; }
-.status-closed, .status-terminated { background: var(--danger-soft); color: #8c2b2b; }
+.status-active, .status-open, .status-paid { background: var(--green-soft); color: #0f5338; }
+.status-pending, .status-suspended, .status-customer_reply { background: #fdf3e8; color: #8a5514; }
+.status-closed, .status-terminated { background: var(--danger-soft); color: #8f2626; }
 
 .pill { padding: 4px 12px; border-radius: 999px; font-size: 0.82rem; font-weight: 600; }
-.pill-ok { background: var(--green-soft); color: #0b6b4f; }
-.pill-warn { background: #fff4e0; color: #8a5b00; }
+.pill-ok { background: var(--green-soft); color: #0f5338; }
+.pill-warn { background: #fdf3e8; color: #8a5514; }
 
 .btn {
   display: inline-flex;
@@ -164,8 +165,8 @@ a { color: var(--blue-dark); }
 .field input:focus, .field textarea:focus, .field select:focus { outline: 2px solid var(--blue); }
 
 .alert { padding: 12px 14px; border-radius: 8px; margin-bottom: 16px; font-size: 0.92rem; }
-.alert-error { background: var(--danger-soft); color: #8c2b2b; }
-.alert-success { background: var(--green-soft); color: #0b6b4f; }
+.alert-error { background: var(--danger-soft); color: #8f2626; }
+.alert-success { background: var(--green-soft); color: #0f5338; }
 
 .linklike { background: none; border: none; color: var(--blue-dark); font: inherit; cursor: pointer; padding: 0; text-align: left; }
 .linklike:hover { text-decoration: underline; }
@@ -234,7 +235,7 @@ a { color: var(--blue-dark); }
 
 .code-inline { font-size: 0.82rem; }
 
-.pill-danger { background: var(--danger-soft); color: #8c2b2b; }
+.pill-danger { background: var(--danger-soft); color: #8f2626; }
 
 .sr-only {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
@@ -244,7 +245,7 @@ a { color: var(--blue-dark); }
 
 .support-banner {
   display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
-  background: #fff4e0; color: #6d4700; border-bottom: 1px solid #f0d9a8; padding: 10px 24px;
+  background: #fdf3e8; color: #6d4700; border-bottom: 1px solid #eed3ab; padding: 10px 24px;
   font-size: 0.9rem;
 }
 
@@ -260,7 +261,7 @@ a { color: var(--blue-dark); }
 .admin-subnav a.active { background: var(--blue); color: #fff; }
 .admin-catalog-grid { display: grid; grid-template-columns: minmax(220px, 0.7fr) minmax(0, 1.5fr); gap: 20px; }
 .catalog-list { display: grid; gap: 8px; }
-.catalog-list-item { display: grid; gap: 4px; width: 100%; text-align: left; padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); cursor: pointer; }
+.catalog-list-item { display: grid; gap: 4px; width: 100%; text-align: left; padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: #fff; cursor: pointer; }
 .catalog-list-item:hover, .catalog-list-item.selected { border-color: var(--blue); background: var(--bg); }
 .catalog-plan { border-top: 1px solid var(--line); padding: 18px 0; }
 .catalog-plan-head { display: flex; justify-content: space-between; gap: 16px; align-items: start; }
@@ -279,7 +280,7 @@ a { color: var(--blue-dark); }
 
 .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 16px; margin-bottom: 20px; }
 .stat { display: flex; flex-direction: column; gap: 2px; text-decoration: none; }
-.stat:hover { box-shadow: 0 4px 14px rgba(7, 27, 61, 0.12); }
+.stat:hover { box-shadow: 0 4px 14px rgba(12, 28, 38, 0.12); }
 .stat-value { font-size: 1.9rem; font-weight: 700; color: var(--navy); line-height: 1.1; }
 .stat-label { font-size: 0.86rem; color: var(--muted); }
 
@@ -292,7 +293,7 @@ a { color: var(--blue-dark); }
 .tabs button.active { background: var(--blue); border-color: var(--blue); color: #fff; }
 
 .messages li p { margin: 4px 0 0; white-space: pre-wrap; }
-.messages li.is-own { background: #f2f7ff; }
+.messages li.is-own { background: #f1f7f4; }
 
 /* ── Print & accounting ─────────────────────────────────────────────────────
    Invoice views print as formal receipts: no navigation chrome, no action

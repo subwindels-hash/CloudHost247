@@ -717,16 +717,16 @@
         doc.write('<!doctype html><html><head><meta charset="utf-8">'
             + '<link rel="stylesheet" href="' + canvasAsset('runtime.css') + '">'
             + '<style id="ch247-root-css"></style><style id="ch247-page-css"></style>'
-            + '<style>body{margin:0;background:var(--ch247-color-background,#f8fafc)}'
-            + '[data-ch247-id]{outline:1px dashed rgba(7,86,216,.18);outline-offset:-1px;min-height:12px}'
-            + '[data-ch247-id]:hover{outline:1px solid rgba(7,86,216,.5)}'
-            + '.ch247-selected{outline:2px solid #0756d8 !important;outline-offset:-2px}'
-            + '.ch247-drop-target{background:rgba(7,86,216,.08);outline:2px dashed #0756d8 !important}'
-            + '.ch247-dropzone{padding:24px;text-align:center;color:#64748b;border:1px dashed #cbd5f5;border-radius:8px;margin:8px}'
+            + '<style>body{margin:0;background:var(--ch247-color-background,#f3f7f8)}'
+            + '[data-ch247-id]{outline:1px dashed rgba(22,112,75,.18);outline-offset:-1px;min-height:12px}'
+            + '[data-ch247-id]:hover{outline:1px solid rgba(22,112,75,.5)}'
+            + '.ch247-selected{outline:2px solid #16704b !important;outline-offset:-2px}'
+            + '.ch247-drop-target{background:rgba(22,112,75,.08);outline:2px dashed #16704b !important}'
+            + '.ch247-dropzone{padding:24px;text-align:center;color:#64748b;border:1px dashed #dbe5e8;border-radius:8px;margin:8px}'
             + '.ch247-empty-page{padding:60px 20px;text-align:center;color:#64748b}'
             + '.ch247-unavailable{display:flex;gap:8px;align-items:center;padding:10px 12px;border:1px dashed #f59f00;'
             + 'background:#fff8e6;color:#92400e;border-radius:8px;font:500 13px/1.4 system-ui,sans-serif}'
-            + '[contenteditable="true"]:focus{outline:2px solid #12b886;outline-offset:2px}'
+            + '[contenteditable="true"]:focus{outline:2px solid #7ff0b4;outline-offset:2px}'
             + '</style></head><body><div class="ch247-root ch247-canvas"><div class="ch247-canvas__content"></div></div></body></html>');
         doc.close();
         doc.getElementById('ch247-root-css').textContent = rootCss || '';
@@ -923,7 +923,7 @@
                 control = el('input', 'ch247-einput');
                 control.type = 'text';
                 control.value = value === undefined || value === null ? '' : value;
-                control.placeholder = 'primary, #0756d8 or rgba(...)';
+                control.placeholder = 'primary, #16704b or rgba(...)';
                 control.addEventListener('change', function () { commit(node, field.key, control.value); });
                 break;
             default:

@@ -1,18 +1,19 @@
 /*
- * Design tokens below match the real CloudHost247 brand tokens defined in
- * modules/addons/cloudhost247_theme/lib/ThemeRepository.php (the independent-rebuild PHP theme's
- * settings defaults) so this new app and the existing WHMCS site present a consistent brand while
- * both stacks run side by side. Font is referenced by name only (no external/CDN font load) —
+ * Application tokens. They mirror the brand tokens in shared/site/design-system.css (ink #0c1c26,
+ * green #16704b, mint #7ff0b4, soft #f3f7f8, line #dbe5e8) and are restated here because this
+ * stylesheet loads before the design system, which then overrides the same names. Keeping the
+ * fallbacks on the same palette means a component that paints before the design system loads
+ * cannot flash the retired blue. Font is referenced by name only (no external/CDN font load) --
  * this keeps the app fully self-contained for cPanel shared hosting, with no dependency on
  * reaching an external font host at runtime.
  */
 :root {
   color-scheme: light;
-  --ch247-primary: #0756d8;
-  --ch247-accent: #12b886;
-  --ch247-ink: #16233a;
-  --ch247-bg: #f7f9fc;
-  --ch247-border: #e3e9f2;
+  --ch247-primary: #16704b;
+  --ch247-accent: #7ff0b4;
+  --ch247-ink: #0c1c26;
+  --ch247-bg: #f3f7f8;
+  --ch247-border: #dbe5e8;
   --ch247-width: 1180px;
   --ch247-font: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
@@ -180,7 +181,7 @@ a {
 .ch247-button {
   display: inline-block;
   background: var(--ch247-accent);
-  color: #071b3d !important;
+  color: #0a1620 !important;
   padding: 0.7rem 1.2rem;
   border: none;
   border-radius: 0.55rem;
@@ -543,7 +544,7 @@ form.ch247-form .ch247-button--outline:hover:not(:disabled) {
 /* --- Footer -------------------------------------------------------------------------------- */
 
 .ch247-footer {
-  background: #071b3d;
+  background: #0a1620;
   color: #dce7fa;
   margin-top: auto;
 }
@@ -806,6 +807,196 @@ form.ch247-form select {
   margin-bottom: 0.3rem;
 }
 
+/* --- Account pages: login, register and password recovery -------------------------------- */
+
+/* The four auth screens share one frame so they read as one product. The frame is wider than a
+   bare card because it carries supporting copy beside the form on desktop; on narrow screens the
+   notes drop below the form rather than squeezing it. */
+.ch247-auth {
+  width: 100%;
+  max-width: 1080px;
+  margin: 2rem auto;
+  padding-inline: 1rem;
+}
+
+.ch247-auth__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr);
+  gap: 2rem;
+  align-items: start;
+}
+
+.ch247-auth__form {
+  background: #fff;
+  border: 1px solid var(--ch247-border, #d8e0ea);
+  border-radius: 12px;
+  padding: clamp(1.25rem, 3vw, 2.25rem);
+  box-shadow: 0 1px 2px rgba(12, 28, 38, 0.05);
+}
+
+.ch247-auth__header {
+  margin-bottom: 1.25rem;
+}
+
+.ch247-auth__eyebrow {
+  margin: 0 0 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ch247-primary, #16704b);
+}
+
+.ch247-auth__header h1 {
+  margin: 0 0 0.5rem;
+  font-size: clamp(1.6rem, 2.4vw, 2.1rem);
+  letter-spacing: -0.03em;
+}
+
+.ch247-auth__lede {
+  margin: 0;
+  color: #47586a;
+  max-width: 52ch;
+}
+
+.ch247-auth__points {
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.88rem;
+  color: #47586a;
+}
+
+.ch247-auth__points li {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.ch247-auth__points li::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ch247-primary, #16704b);
+  transform: translateY(-1px);
+}
+
+/* The form inside the frame fills its column; the standalone 360px cap is for dashboard forms
+   where the surrounding card is already narrow. */
+form.ch247-form--auth {
+  max-width: none;
+  gap: 1rem;
+}
+
+form.ch247-form--auth input[type="email"],
+form.ch247-form--auth input[type="password"],
+form.ch247-form--auth input[type="text"],
+form.ch247-form--auth input:not([type]) {
+  width: 100%;
+  min-height: 46px;
+}
+
+form.ch247-form--auth button[type="submit"] {
+  min-height: 46px;
+  margin-top: 0.25rem;
+}
+
+.ch247-field {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.ch247-field-hint {
+  font-size: 0.8rem;
+  color: #5d6d7e;
+}
+
+.ch247-field-error {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #b42318;
+}
+
+.ch247-field--check {
+  gap: 0.4rem;
+}
+
+.ch247-check {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: #33465a;
+}
+
+.ch247-check input[type="checkbox"] {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  margin: 0.15rem 0 0;
+  accent-color: var(--ch247-primary, #16704b);
+}
+
+.ch247-auth__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  align-items: center;
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--ch247-border, #e3e9f0);
+  font-size: 0.88rem;
+}
+
+.ch247-auth__links a {
+  color: var(--ch247-primary, #16704b);
+  font-weight: 600;
+}
+
+.ch247-auth__aside {
+  border: 1px solid var(--ch247-border, #d8e0ea);
+  border-radius: 12px;
+  padding: 1.25rem 1.35rem;
+  background: #f6f9f7;
+}
+
+.ch247-auth__aside h2 {
+  margin: 0 0 1rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #40506b;
+}
+
+.ch247-auth__note + .ch247-auth__note {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(12, 28, 38, 0.08);
+}
+
+.ch247-auth__note h3 {
+  margin: 0 0 0.3rem;
+  font-size: 0.92rem;
+}
+
+.ch247-auth__note p {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: #47586a;
+}
+
+@media (max-width: 900px) {
+  .ch247-auth__body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 /* =============================================================================================
    Phase 6 — Marketplace, applications, deployments, admin operations
    ============================================================================================= */
@@ -897,8 +1088,8 @@ form.ch247-form select {
 }
 
 .ch247-market-cats button.is-active {
-  background: #0756d8;
-  border-color: #0756d8;
+  background: var(--ch247-primary, #16704b);
+  border-color: var(--ch247-primary, #16704b);
   color: #fff;
 }
 
@@ -951,8 +1142,8 @@ form.ch247-form select {
 }
 
 .ch247-wizard__steps li.is-active {
-  color: #0756d8;
-  border-bottom-color: #0756d8;
+  color: var(--ch247-primary, #16704b);
+  border-bottom-color: var(--ch247-primary, #16704b);
   font-weight: 600;
 }
 
@@ -987,8 +1178,8 @@ form.ch247-form select {
 }
 
 .ch247-serverlist__item.is-selected {
-  border-color: #0756d8;
-  background: rgba(7, 86, 216, 0.06);
+  border-color: var(--ch247-primary, #16704b);
+  background: rgba(22, 112, 75, 0.06);
 }
 
 .ch247-fieldset {
@@ -1024,7 +1215,7 @@ form.ch247-form select {
 }
 
 .ch247-instrow.is-focus {
-  outline: 2px solid #0756d8;
+  outline: 2px solid var(--ch247-primary, #16704b);
 }
 
 .ch247-instrow__main h2 {
@@ -1064,8 +1255,8 @@ form.ch247-form select {
 }
 
 .ch247-tabs button.is-active {
-  color: #0756d8;
-  border-bottom-color: #0756d8;
+  color: var(--ch247-primary, #16704b);
+  border-bottom-color: var(--ch247-primary, #16704b);
   font-weight: 600;
 }
 
@@ -1188,7 +1379,7 @@ form.ch247-form select {
 }
 
 .ch247-banner--info {
-  background: rgba(7, 86, 216, 0.08);
+  background: rgba(22, 112, 75, 0.08);
   color: #1e40af;
 }
 
@@ -1322,7 +1513,7 @@ form.ch247-form select {
 .ch247-dsvc-card:hover,
 .ch247-dsvc-card:focus-within {
   border-color: var(--ch247-primary);
-  box-shadow: 0 6px 18px rgba(7, 86, 216, 0.08);
+  box-shadow: 0 6px 18px rgba(22, 112, 75, 0.08);
   transform: translateY(-1px);
 }
 
@@ -1331,7 +1522,7 @@ form.ch247-form select {
   height: 46px;
   min-width: 46px;
   border-radius: 12px;
-  background: rgba(7, 86, 216, 0.08);
+  background: rgba(22, 112, 75, 0.08);
   color: var(--ch247-primary);
   display: flex;
   align-items: center;
@@ -1342,7 +1533,7 @@ form.ch247-form select {
 }
 
 .ch247-dsvc-card__icon--accent {
-  background: rgba(18, 184, 134, 0.12);
+  background: rgba(22, 112, 75, 0.12);
   color: #0b8c66;
 }
 
@@ -1426,26 +1617,26 @@ form.ch247-form select {
   white-space: nowrap;
 }
 
-.ch247-dsvc-status--available { background: rgba(18, 184, 134, 0.14); color: #0b7a58; }
+.ch247-dsvc-status--available { background: rgba(22, 112, 75, 0.12); color: var(--ch247-primary, #16704b); }
 .ch247-dsvc-status--premium { background: rgba(214, 158, 46, 0.16); color: #8a5a00; }
 .ch247-dsvc-status--registered,
 .ch247-dsvc-status--unavailable { background: rgba(100, 116, 139, 0.14); color: #475569; }
 .ch247-dsvc-status--unsupported { background: rgba(100, 116, 139, 0.10); color: #64748b; }
 .ch247-dsvc-status--provider_error { background: rgba(220, 38, 38, 0.12); color: #b91c1c; }
 .ch247-dsvc-status--pending,
-.ch247-dsvc-status--processing { background: rgba(7, 86, 216, 0.10); color: var(--ch247-primary); }
+.ch247-dsvc-status--processing { background: rgba(22, 112, 75, 0.10); color: var(--ch247-primary); }
 .ch247-dsvc-status--failed,
 .ch247-dsvc-status--cancelled { background: rgba(220, 38, 38, 0.12); color: #b91c1c; }
 .ch247-dsvc-status--completed,
-.ch247-dsvc-status--registered-ok { background: rgba(18, 184, 134, 0.14); color: #0b7a58; }
+.ch247-dsvc-status--registered-ok { background: rgba(22, 112, 75, 0.12); color: var(--ch247-primary, #16704b); }
 /* Auction lifecycle + provider/plan statuses rendered dynamically by StatusChip. */
 .ch247-dsvc-status--live,
 .ch247-dsvc-status--ending_soon,
 .ch247-dsvc-status--connected,
-.ch247-dsvc-status--published { background: rgba(18, 184, 134, 0.14); color: #0b7a58; }
+.ch247-dsvc-status--published { background: rgba(22, 112, 75, 0.12); color: var(--ch247-primary, #16704b); }
 .ch247-dsvc-status--scheduled,
 .ch247-dsvc-status--paused,
-.ch247-dsvc-status--configured { background: rgba(7, 86, 216, 0.10); color: var(--ch247-primary); }
+.ch247-dsvc-status--configured { background: rgba(22, 112, 75, 0.10); color: var(--ch247-primary); }
 .ch247-dsvc-status--not_configured,
 .ch247-dsvc-status--auth_failed { background: rgba(214, 158, 46, 0.16); color: #8a5a00; }
 .ch247-dsvc-status--draft,
@@ -1580,7 +1771,7 @@ form.ch247-form select {
   --ch-announce-gap: 2.5rem;
   position: relative;
   overflow: hidden;
-  background: linear-gradient(90deg, #071b3d 0%, #0756d8 50%, #071b3d 100%);
+  background: linear-gradient(90deg, #0a1620 0%, var(--ch247-primary, #16704b) 50%, #0a1620 100%);
   color: #fff;
   font-size: 0.85rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
@@ -1597,8 +1788,8 @@ form.ch247-form select {
   pointer-events: none;
   z-index: 2;
 }
-.ch-announce::before { left: 0; background: linear-gradient(90deg, #071b3d, rgba(7, 27, 61, 0)); }
-.ch-announce::after { right: 0; background: linear-gradient(270deg, #071b3d, rgba(7, 27, 61, 0)); }
+.ch-announce::before { left: 0; background: linear-gradient(90deg, #0a1620, rgba(10, 22, 32, 0)); }
+.ch-announce::after { right: 0; background: linear-gradient(270deg, #0a1620, rgba(10, 22, 32, 0)); }
 
 .ch-announce__viewport { overflow: hidden; }
 

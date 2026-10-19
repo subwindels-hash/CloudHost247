@@ -45,7 +45,7 @@ export interface LogoMarkStyle {
 }
 
 export const LOGO_PALETTES: readonly LogoPalette[] = [
-  { slug: 'ch247-blue', name: 'CloudHost247 blue', primary: '#0756d8', accent: '#12b886', background: '#ffffff', text: '#0b1c3d', mood: 'Dependable, technical' },
+  { slug: 'ch247-green', name: 'CloudHost247 green', primary: '#16704b', accent: '#7ff0b4', background: '#ffffff', text: '#0c1c26', mood: 'Dependable, technical' },
   { slug: 'midnight-teal', name: 'Midnight teal', primary: '#0f766e', accent: '#22d3ee', background: '#f8fafc', text: '#0f172a', mood: 'Calm, modern' },
   { slug: 'indigo-sunrise', name: 'Indigo sunrise', primary: '#4338ca', accent: '#f59e0b', background: '#ffffff', text: '#1e1b4b', mood: 'Optimistic, confident' },
   { slug: 'forest-clay', name: 'Forest clay', primary: '#2f6b3c', accent: '#c2703d', background: '#fbf8f3', text: '#1f2d20', mood: 'Organic, grounded' },
@@ -84,18 +84,22 @@ export const LOGO_MARK_STYLES: readonly LogoMarkStyle[] = [
 ];
 
 export const STYLE_TO_PALETTE: Record<string, string[]> = {
-  modern: ['ch247-blue', 'slate-sky', 'indigo-sunrise', 'midnight-teal'],
+  modern: ['ch247-green', 'slate-sky', 'indigo-sunrise', 'midnight-teal'],
   classic: ['navy-gold', 'forest-clay', 'slate-sky'],
   minimal: ['slate-sky', 'graphite-neon', 'midnight-teal'],
   bold: ['graphite-neon', 'indigo-sunrise', 'navy-gold'],
   playful: ['indigo-sunrise', 'rose-ink', 'forest-clay'],
   luxury: ['navy-gold', 'rose-ink', 'graphite-neon'],
-  tech: ['ch247-blue', 'graphite-neon', 'slate-sky', 'midnight-teal'],
+  tech: ['ch247-green', 'graphite-neon', 'slate-sky', 'midnight-teal'],
   organic: ['forest-clay', 'rose-ink', 'midnight-teal'],
 };
 
+/** Slugs that earlier revisions stored on `logo_projects`; they still resolve. */
+const LEGACY_PALETTE_SLUGS: Record<string, string> = { 'ch247-blue': 'ch247-green' };
+
 export function paletteBySlug(slug: string): LogoPalette | undefined {
-  return LOGO_PALETTES.find((palette) => palette.slug === slug);
+  const resolved = LEGACY_PALETTE_SLUGS[slug] ?? slug;
+  return LOGO_PALETTES.find((palette) => palette.slug === resolved);
 }
 
 export function fontBySlug(slug: string): LogoFontPreset | undefined {

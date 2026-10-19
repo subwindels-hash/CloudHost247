@@ -91,7 +91,10 @@ export async function createProject(
   if (companyName.length > 160) throw new ValidationError('The company name must be 160 characters or fewer');
   const style = (input.style ?? 'modern').toLowerCase();
   if (!STYLE_TO_PALETTE[style]) throw new ValidationError('Choose a supported brand style');
-  const palette = paletteBySlug(input.paletteSlug ?? '') ? input.paletteSlug! : STYLE_TO_PALETTE[style]![0]!;
+  // Normalise through the catalogue: a project saved under the pre-green slug is rewritten to
+  // the current one instead of storing an alias for the next reader to resolve.
+  const requestedPalette = input.paletteSlug ? paletteBySlug(input.paletteSlug) : undefined;
+  const palette = requestedPalette ? requestedPalette.slug : STYLE_TO_PALETTE[style]![0]!;
   const font = fontBySlug(input.fontSlug ?? '') ? input.fontSlug! : LOGO_FONT_PRESETS[0]!.slug;
 
   const { rows } = await db.query<ProjectRow>(
@@ -122,7 +125,8 @@ export async function updateProject(
   patch: { companyName?: string; tagline?: string | null; style?: string; paletteSlug?: string; fontSlug?: string; notes?: string | null }
 ): Promise<ProjectRow> {
   const project = await requireOwnedProject(db, userId, projectId);
-  if (patch.paletteSlug && !paletteBySlug(patch.paletteSlug)) throw new ValidationError('Unknown palette');
+  const patchPalette = patch.paletteSlug ? paletteBySlug(patch.paletteSlug) : undefined;
+  if (patch.paletteSlug && !patchPalette) throw new ValidationError('Unknown palette');
   if (patch.fontSlug && !fontBySlug(patch.fontSlug)) throw new ValidationError('Unknown typography preset');
   if (patch.style && !STYLE_TO_PALETTE[patch.style]) throw new ValidationError('Unknown brand style');
 
@@ -142,7 +146,7 @@ export async function updateProject(
       Object.prototype.hasOwnProperty.call(patch, 'tagline'),
       patch.tagline?.trim().slice(0, 200) ?? null,
       patch.style ?? null,
-      patch.paletteSlug ?? null,
+      patchPalette?.slug ?? null,
       patch.fontSlug ?? null,
       Object.prototype.hasOwnProperty.call(patch, 'notes'),
       patch.notes ?? null,
@@ -241,7 +245,8 @@ export async function editConcept(
 
   if (patch.layout && !LAYOUTS.includes(patch.layout as LogoLayout)) throw new ValidationError('Unknown layout');
   if (patch.markStyle && !markStyleBySlug(patch.markStyle)) throw new ValidationError('Unknown mark style');
-  if (patch.paletteSlug && !paletteBySlug(patch.paletteSlug)) throw new ValidationError('Unknown palette');
+  const patchPalette = patch.paletteSlug ? paletteBySlug(patch.paletteSlug) : undefined;
+  if (patch.paletteSlug && !patchPalette) throw new ValidationError('Unknown palette');
   if (patch.fontSlug && !fontBySlug(patch.fontSlug)) throw new ValidationError('Unknown typography preset');
   if (patch.primaryColor !== undefined && !isValidHex(patch.primaryColor)) throw new ValidationError('Primary colour must be a #rrggbb value');
   if (patch.accentColor !== undefined && !isValidHex(patch.accentColor)) throw new ValidationError('Accent colour must be a #rrggbb value');

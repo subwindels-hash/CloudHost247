@@ -122,7 +122,7 @@ curl http://localhost:3000/ | grep "Build. Host. Deploy"
 - ✅ 152 frontend routes
 - ✅ 7 mega menus with 89 destinations
 - ✅ 8 footer columns with 68 destinations
-- ✅ 169 validated navigation links
+- ✅ 221 validated navigation links
 - ✅ 0 broken links
 - ✅ 0 orphaned pages
 - ✅ 52 application logos (SVG)
@@ -209,10 +209,10 @@ python3 scripts/verify-website.py
 ✅ 67 registered pages, 0 source errors
 
 python3 scripts/inventory-website.py
-✅ 84 PHP pages, 89 nav destinations, 68 footer destinations, 0 defects
+✅ 84 PHP pages, 112 nav destinations, 97 footer destinations, 0 defects
 
 bash scripts/release-candidate-check.sh
-✅ Registry validated, 169 links checked, 0 orphaned pages
+✅ Registry validated, 221 links checked, 0 orphaned pages
 ```
 
 ---

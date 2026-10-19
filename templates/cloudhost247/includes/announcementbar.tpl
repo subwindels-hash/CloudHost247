@@ -46,9 +46,9 @@
         .ch247-announcebar {
             --ab-duration: 38s;
             --ab-gap: 3rem;
-            --ab-bg-start: #071b3d;
-            --ab-bg-mid: #0756d8;
-            --ab-accent: #12b886;
+            --ab-bg-start: var(--ch-navy, #0a1620);
+            --ab-bg-mid: var(--ch-green, #16704b);
+            --ab-accent: var(--ch-mint, #7ff0b4);
             position: relative;
             z-index: 1040; /* above the Bootstrap navbar (1030) */
             display: block;
@@ -78,11 +78,11 @@
         }
         .ch247-announcebar::before {
             left: 0;
-            background: linear-gradient(90deg, var(--ab-bg-start), rgba(7, 27, 61, 0));
+            background: linear-gradient(90deg, var(--ab-bg-start), rgba(10, 22, 32, 0));
         }
         .ch247-announcebar::after {
             right: 0;
-            background: linear-gradient(270deg, var(--ab-bg-start), rgba(7, 27, 61, 0));
+            background: linear-gradient(270deg, var(--ab-bg-start), rgba(10, 22, 32, 0));
         }
 
         /* Viewport clips the track; the track holds two identical groups */

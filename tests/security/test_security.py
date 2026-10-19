@@ -106,8 +106,15 @@ class RebuildSecurityReview(unittest.TestCase):
   s=(ROOT/'modules/addons/cloudhost247_ovh/lib/Operations/OperationsDashboard.php').read_text()
   for marker in ('ops_page','offset(','limit(','reconciliation_required'):self.assertIn(marker,s)
  def test_native_theme_has_focus_mobile_and_reduced_motion(self):
+  # Whitespace-insensitive: the property being pinned is that a 767px breakpoint, a focus
+  # indicator and a reduced-motion block exist, not how the author spaced the media query.
+  # Pinning the literal `@media(max-width:767px)` failed a correctly written skin that used
+  # `@media (max-width: 767px)`, which is the same rule.
   for p in (ROOT/'templates/cloudhost247/css/custom.css',ROOT/'templates/orderforms/cloudhost247/css/custom.css'):
-   s=p.read_text();self.assertIn('focus-visible',s);self.assertIn('@media(max-width:767px)',s);self.assertIn('prefers-reduced-motion',s)
+   s=p.read_text();compact=''.join(s.split())
+   self.assertIn('focus-visible',s)
+   self.assertIn('@media(max-width:767px)',compact)
+   self.assertIn('prefers-reduced-motion',s)
  def test_cms_open_graph_canonical_and_sitemap_controls(self):
   repo=(ROOT/'modules/addons/cloudhost247_theme/lib/ThemeRepository.php').read_text();hooks=(ROOT/'modules/addons/cloudhost247_theme/hooks.php').read_text();site=(ROOT/'cloudhost247-sitemap.php').read_text()
   for marker in ('og_title','og_description','canonical_url','sitemap'):self.assertIn(marker,repo)

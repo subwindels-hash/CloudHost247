@@ -142,7 +142,7 @@ php tests/tools/site-integration.php
 # Browser tools (MRZ among them) are pure modules; run them on Node so a broken handler fails here.
 node tests/tools/local.test.mjs
 php tests/website/run.php
-python3 -m unittest -v tests/website/test_static.py tests/website/test_manifest_visuals.py tests/website/test_accessibility_contract.py tests/website/test_fixture_checks.py tests/website/test_catalogue_honesty.py tests/website/test_media_library_parity.py tests/website/test_page_inventory.py tests/website/test_tools_surface.py tests/website/test_report_figures.py tests/website/test_visual_regressions.py
+python3 -m unittest -v tests/website/test_static.py tests/website/test_account_pages.py tests/website/test_cart_skin.py tests/website/test_theme_palette.py tests/website/test_brand_defaults.py tests/website/test_manifest_visuals.py tests/website/test_accessibility_contract.py tests/website/test_fixture_checks.py tests/website/test_catalogue_honesty.py tests/website/test_media_library_parity.py tests/website/test_page_inventory.py tests/website/test_tools_surface.py tests/website/test_report_figures.py tests/website/test_visual_regressions.py
 python3 scripts/verify-website.py
 # Published-link integrity across every surface: the registry's menus and footer columns, the SPA
 # router and content JSON, the PHP theme templates and page controllers, and the tools tree. This is

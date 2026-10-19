@@ -38,7 +38,35 @@ WHMCS still owns authentication, billing, checkout and service authorization.
 | SEO | `includes/site-head.tpl`, Site context, canonical generic-route redirects, sitemap and robots; no invented review/offer structured data |
 | Builder | Existing published parts win on Builder pages; core schema, renderer, form processing and visibility unchanged |
 | Checkout | Existing `standard_cart` inheritance + child CSS; checkout form fields, tokens and processing not replaced |
-| Client / authentication | Existing Twenty-One inheritance + global shell/tokens; authentication, registration, reset, invoice and service templates not rewritten into mockups |
+| Client / authentication | Log-in (`login.tpl`), account registration (`clientregister.tpl`) and the password-recovery flow (`password-reset-container.tpl` + three prompt steps) are shipped by the child theme on the CloudHost247 shell, tokens and `css/auth.css`; the platform's form contract is preserved field-for-field. Invoice and service templates still arrive from Twenty-One |
+
+## Account entry points
+
+The child theme originally inherited Twenty-One's log-in and registration pages. Both are now
+first-party templates, because they are the only two screens every customer has to pass through
+and they were the only two that still looked like the vendor theme. The decision is deliberate:
+
+* `login.tpl` posts to the named `login-validate` route with the platform's `username` /
+  `password` fields, keeps `rememberme`, the redirect field and the captcha partial, and renders
+  the captcha button class so an invisible provider still receives its callback;
+* `clientregister.tpl` keeps the vendor field names and ids (`frmCheckout`, `inputNewPassword1`,
+  `inputNewPassword2`, `registerbtn`, `state`), the hidden `register` flag, the custom fields,
+  currency and tax-id blocks, the security questions, the terms checkbox, the marketing opt-in
+  and the captcha, and still calls the platform's `registerForm()`;
+* the vendor two-tab wizard is gone. A required control on a hidden tab is not focusable when the
+  browser validates the form, so the wizard could block its own submit. Registration is one
+  labelled page with the same fields;
+* `includes/flashmessage.tpl` and `includes/captcha.tpl` are shipped by the theme so the account
+  pages do not depend on a partial that may or may not exist in the parent installation;
+* `password-reset-container.tpl` and the `password-reset-{email,security,change}-prompt.tpl` steps
+  are shipped too, so recovery matches the log-in page instead of dropping back to the parent's
+  markup. The route names, the hidden `action` / `answer` fields and the `$innerTemplate` hand-off
+  are unchanged. The container's dynamic include is resolved by `scripts/verify-website.py` against
+  the prompt family the theme actually ships, so a missing step fails the gate instead of rendering
+  a blank panel.
+
+`css/auth.css` is scoped to `.ch-auth`, loaded after the design system, and is the only stylesheet
+the account pages add. Invoice, checkout and service templates remain the parent's.
 
 ## Source provenance and compatibility
 

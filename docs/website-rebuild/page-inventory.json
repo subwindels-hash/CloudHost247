@@ -25,8 +25,8 @@
   "totals": {
     "root_php_pages": 84,
     "registered_public_pages": 67,
-    "navigation_destinations": 89,
-    "footer_destinations": 68,
+    "navigation_destinations": 112,
+    "footer_destinations": 97,
     "mega_menus": 7,
     "footer_columns": 8,
     "hero_scenes_exact": 67,
@@ -224,8 +224,8 @@
       "seo_status": "ok",
       "navigation_placement": "legal / Legal & Policy Center",
       "navigation_location": "legal / Legal & Policy Center",
-      "footer_placement": "",
-      "footer_location": "",
+      "footer_placement": "Legal",
+      "footer_location": "Legal",
       "reachable": true
     },
     {
@@ -242,7 +242,7 @@
       "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
       "seo_metadata": {
         "title": "Backups",
-        "description": "Backup jobs for CloudHost247 servers and applications: scheduled runs, visible history, defined retention and restores performed from your account."
+        "description": "Scheduled backups for CloudHost247 hosting, servers and applications, with visible job history and a documented restore path."
       },
       "hero_artwork": {
         "svg": "management/backups.svg",
@@ -252,10 +252,10 @@
       "visual": "management/backups",
       "image_status": "present",
       "seo_status": "ok",
-      "navigation_placement": "cloud / Servers",
-      "navigation_location": "cloud / Servers",
-      "footer_placement": "Cloud & Servers",
-      "footer_location": "Cloud & Servers",
+      "navigation_placement": "cloud / Servers | hosting / Specialized hosting",
+      "navigation_location": "cloud / Servers | hosting / Specialized hosting",
+      "footer_placement": "Cloud & Servers | Products",
+      "footer_location": "Cloud & Servers | Products",
       "reachable": true
     },
     {
@@ -522,11 +522,11 @@
       "visual": "",
       "image_status": "n/a",
       "seo_status": "n/a",
-      "navigation_placement": "",
-      "navigation_location": "",
-      "footer_placement": "",
-      "footer_location": "",
-      "reachable": false
+      "navigation_placement": "resources / Documentation & help",
+      "navigation_location": "resources / Documentation & help",
+      "footer_placement": "Resources",
+      "footer_location": "Resources",
+      "reachable": true
     },
     {
       "php_page": "cloudhost247-vps-sample.php",
@@ -644,8 +644,8 @@
       "seo_status": "ok",
       "navigation_placement": "hosting / Web hosting | platforms / Control panels",
       "navigation_location": "hosting / Web hosting | platforms / Control panels",
-      "footer_placement": "",
-      "footer_location": "",
+      "footer_placement": "Products",
+      "footer_location": "Products",
       "reachable": true
     },
     {
@@ -674,8 +674,8 @@
       "seo_status": "ok",
       "navigation_placement": "legal / Legal & Policy Center",
       "navigation_location": "legal / Legal & Policy Center",
-      "footer_placement": "",
-      "footer_location": "",
+      "footer_placement": "Legal",
+      "footer_location": "Legal",
       "reachable": true
     },
     {
@@ -734,8 +734,8 @@
       "seo_status": "ok",
       "navigation_placement": "legal / Legal & Policy Center",
       "navigation_location": "legal / Legal & Policy Center",
-      "footer_placement": "",
-      "footer_location": "",
+      "footer_placement": "Legal",
+      "footer_location": "Legal",
       "reachable": true
     },
     {
@@ -764,8 +764,8 @@
       "seo_status": "ok",
       "navigation_placement": "legal / Legal & Policy Center",
       "navigation_location": "legal / Legal & Policy Center",
-      "footer_placement": "",
-      "footer_location": "",
+      "footer_placement": "Legal",
+      "footer_location": "Legal",
       "reachable": true
     },
     {
@@ -1124,8 +1124,8 @@
       "seo_status": "ok",
       "navigation_placement": "domains / Domains | legal / Legal & Policy Center",
       "navigation_location": "domains / Domains | legal / Legal & Policy Center",
-      "footer_placement": "Domains",
-      "footer_location": "Domains",
+      "footer_placement": "Domains | Legal",
+      "footer_location": "Domains | Legal",
       "reachable": true
     },
     {
@@ -1184,8 +1184,8 @@
       "seo_status": "ok",
       "navigation_placement": "legal / Legal & Policy Center",
       "navigation_location": "legal / Legal & Policy Center",
-      "footer_placement": "",
-      "footer_location": "",
+      "footer_placement": "Legal",
+      "footer_location": "Legal",
       "reachable": true
     },
     {
@@ -1274,8 +1274,8 @@
       "seo_status": "ok",
       "navigation_placement": "legal / Legal & Policy Center",
       "navigation_location": "legal / Legal & Policy Center",
-      "footer_placement": "",
-      "footer_location": "",
+      "footer_placement": "Legal",
+      "footer_location": "Legal",
       "reachable": true
     },
     {
@@ -1392,10 +1392,10 @@
       "visual": "servers/game-servers",
       "image_status": "present",
       "seo_status": "ok",
-      "navigation_placement": "hosting / Specialized hosting",
-      "navigation_location": "hosting / Specialized hosting",
-      "footer_placement": "",
-      "footer_location": "",
+      "navigation_placement": "cloud / Servers | hosting / Specialized hosting",
+      "navigation_location": "cloud / Servers | hosting / Specialized hosting",
+      "footer_placement": "Cloud & Servers",
+      "footer_location": "Cloud & Servers",
       "reachable": true
     },
     {
@@ -1452,10 +1452,10 @@
       "visual": "hero/global-network",
       "image_status": "present",
       "seo_status": "ok",
-      "navigation_placement": "resources / Infrastructure",
-      "navigation_location": "resources / Infrastructure",
-      "footer_placement": "",
-      "footer_location": "",
+      "navigation_placement": "cloud / Cloud | resources / Infrastructure",
+      "navigation_location": "cloud / Cloud | resources / Infrastructure",
+      "footer_placement": "Cloud & Servers",
+      "footer_location": "Cloud & Servers",
       "reachable": true
     },
     {
@@ -1484,8 +1484,8 @@
       "seo_status": "ok",
       "navigation_placement": "cloud / Servers",
       "navigation_location": "cloud / Servers",
-      "footer_placement": "",
-      "footer_location": "",
+      "footer_placement": "Cloud & Servers",
+      "footer_location": "Cloud & Servers",
       "reachable": true
     },
     {
@@ -1602,10 +1602,10 @@
       "visual": "management/managed-services",
       "image_status": "present",
       "seo_status": "ok",
-      "navigation_placement": "hosting / Specialized hosting",
-      "navigation_location": "hosting / Specialized hosting",
-      "footer_placement": "",
-      "footer_location": "",
+      "navigation_placement": "cloud / Servers | hosting / Specialized hosting",
+      "navigation_location": "cloud / Servers | hosting / Specialized hosting",
+      "footer_placement": "Cloud & Servers",
+      "footer_location": "Cloud & Servers",
       "reachable": true
     },
     {
@@ -1632,10 +1632,10 @@
       "visual": "management/migration",
       "image_status": "present",
       "seo_status": "ok",
-      "navigation_placement": "cloud / Servers",
-      "navigation_location": "cloud / Servers",
-      "footer_placement": "",
-      "footer_location": "",
+      "navigation_placement": "cloud / Servers | hosting / Specialized hosting",
+      "navigation_location": "cloud / Servers | hosting / Specialized hosting",
+      "footer_placement": "Products",
+      "footer_location": "Products",
       "reachable": true
     },
     {
@@ -1772,7 +1772,7 @@
       "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
       "seo_metadata": {
         "title": "Offers",
-        "description": "Current CloudHost247 pricing, rendered live from the configured product catalogue \u2014 plans, prices and billing cycles exactly as configured."
+        "description": "CloudHost247 pricing rendered from the live catalogue: hosting, cloud, domains and services at the prices actually configured."
       },
       "hero_artwork": {
         "svg": "cloud/offers.svg",
@@ -1782,10 +1782,10 @@
       "visual": "cloud/offers",
       "image_status": "present",
       "seo_status": "ok",
-      "navigation_placement": "resources / Stay informed",
-      "navigation_location": "resources / Stay informed",
-      "footer_placement": "",
-      "footer_location": "",
+      "navigation_placement": "hosting / Specialized hosting | resources / Stay informed",
+      "navigation_location": "hosting / Specialized hosting | resources / Stay informed",
+      "footer_placement": "Products",
+      "footer_location": "Products",
       "reachable": true
     },
     {
@@ -1812,10 +1812,10 @@
       "visual": "operating-systems/os-catalog",
       "image_status": "present",
       "seo_status": "ok",
-      "navigation_placement": "platforms / Operating systems | resources / Infrastructure",
-      "navigation_location": "platforms / Operating systems | resources / Infrastructure",
-      "footer_placement": "",
-      "footer_location": "",
+      "navigation_placement": "cloud / Cloud | platforms / Operating systems | resources / Infrastructure",
+      "navigation_location": "cloud / Cloud | platforms / Operating systems | resources / Infrastructure",
+      "footer_placement": "Cloud & Servers",
+      "footer_location": "Cloud & Servers",
       "reachable": true
     },
     {
@@ -2054,8 +2054,8 @@
       "seo_status": "ok",
       "navigation_placement": "hosting / Web hosting",
       "navigation_location": "hosting / Web hosting",
-      "footer_placement": "",
-      "footer_location": "",
+      "footer_placement": "Products",
+      "footer_location": "Products",
       "reachable": true
     },
     {
@@ -2102,7 +2102,7 @@
       "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
       "seo_metadata": {
         "title": "Security",
-        "description": "How CloudHost247 secures its platform and customer data: authentication, access control, encryption, isolation, logging and responsible disclosure."
+        "description": "How CloudHost247 protects hosting: tenant isolation, platform patching, malware and abuse filtering, access control, certificates and monitored recovery."
       },
       "hero_artwork": {
         "svg": "security/platform-security.svg",
@@ -2112,10 +2112,10 @@
       "visual": "security/platform-security",
       "image_status": "present",
       "seo_status": "ok",
-      "navigation_placement": "company / Company",
-      "navigation_location": "company / Company",
-      "footer_placement": "Company",
-      "footer_location": "Company",
+      "navigation_placement": "cloud / Servers | company / Company | hosting / Specialized hosting",
+      "navigation_location": "cloud / Servers | company / Company | hosting / Specialized hosting",
+      "footer_placement": "Cloud & Servers | Company | Products",
+      "footer_location": "Cloud & Servers | Company | Products",
       "reachable": true
     },
     {
@@ -2202,11 +2202,11 @@
       "visual": "",
       "image_status": "n/a",
       "seo_status": "n/a",
-      "navigation_placement": "",
-      "navigation_location": "",
-      "footer_placement": "",
-      "footer_location": "",
-      "reachable": false
+      "navigation_placement": "resources / Documentation & help",
+      "navigation_location": "resources / Documentation & help",
+      "footer_placement": "Resources",
+      "footer_location": "Resources",
+      "reachable": true
     },
     {
       "php_page": "ssl-certificate.php",
@@ -2234,8 +2234,8 @@
       "seo_status": "ok",
       "navigation_placement": "hosting / Specialized hosting",
       "navigation_location": "hosting / Specialized hosting",
-      "footer_placement": "",
-      "footer_location": "",
+      "footer_placement": "Products",
+      "footer_location": "Products",
       "reachable": true
     },
     {
@@ -2502,10 +2502,10 @@
       "visual": "hosting/website-design",
       "image_status": "present",
       "seo_status": "ok",
-      "navigation_placement": "hosting / Specialized hosting",
-      "navigation_location": "hosting / Specialized hosting",
-      "footer_placement": "",
-      "footer_location": "",
+      "navigation_placement": "company / Company | hosting / Specialized hosting | resources / Stay informed",
+      "navigation_location": "company / Company | hosting / Specialized hosting | resources / Stay informed",
+      "footer_placement": "Company",
+      "footer_location": "Company",
       "reachable": true
     },
     {
@@ -2534,8 +2534,8 @@
       "seo_status": "ok",
       "navigation_placement": "hosting / Web hosting",
       "navigation_location": "hosting / Web hosting",
-      "footer_placement": "",
-      "footer_location": "",
+      "footer_placement": "Products",
+      "footer_location": "Products",
       "reachable": true
     },
     {
@@ -2594,8 +2594,8 @@
       "seo_status": "n/a",
       "navigation_placement": "resources / Stay informed",
       "navigation_location": "resources / Stay informed",
-      "footer_placement": "",
-      "footer_location": "",
+      "footer_placement": "Resources",
+      "footer_location": "Resources",
       "reachable": true
     },
     {
@@ -2714,8 +2714,8 @@
       "seo_status": "n/a",
       "navigation_placement": "resources / Documentation & help",
       "navigation_location": "resources / Documentation & help",
-      "footer_placement": "",
-      "footer_location": "",
+      "footer_placement": "Resources",
+      "footer_location": "Resources",
       "reachable": true
     },
     {
@@ -2742,10 +2742,10 @@
       "visual": "",
       "image_status": "n/a",
       "seo_status": "n/a",
-      "navigation_placement": "resources / Stay informed",
-      "navigation_location": "resources / Stay informed",
-      "footer_placement": "Resources",
-      "footer_location": "Resources",
+      "navigation_placement": "company / Company | resources / Stay informed",
+      "navigation_location": "company / Company | resources / Stay informed",
+      "footer_placement": "Company | Resources",
+      "footer_location": "Company | Resources",
       "reachable": true
     },
     {

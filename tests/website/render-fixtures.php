@@ -7,9 +7,26 @@ $out = getenv('CH247_FIXTURE_DIR');
 if (!$smartyPath || !$out) { fwrite(STDERR, "Set CH247_SMARTY_PATH and CH247_FIXTURE_DIR.\n"); exit(1); }
 require $smartyPath . '/libs/Smarty.class.php';
 require $root . '/modules/addons/cloudhost247_theme/lib/Site.php';
+/** The captcha surface the platform assigns; the harness never starts a captcha service. */
+final class CloudHost247FixtureCaptcha
+{
+    public function isEnabled() { return true; }
+    public function isEnabledForForm($form) { return true; }
+    public function getMarkup() { return ''; }
+    public function getButtonClass($form) { return ''; }
+}
 function routePath($name) { return '/knowledgebase.php'; }
+// `includes/flashmessage.tpl` calls the platform helper inside an `{if}` expression, which Smarty
+// resolves as a plain PHP function at compile time. WHMCS defines it; the harness has to, or the
+// log-in template cannot be rendered at all.
+if (!function_exists('get_flash_message')) {
+    function get_flash_message() { return null; }
+}
 $smarty = new Smarty();
 $smarty->registerPlugin('modifier', 'routePath', 'routePath');
+// The auth and contact templates call it as a function tag, which Smarty resolves through a
+// different plugin table than the modifier the editorial pages use.
+$smarty->registerPlugin('function', 'routePath', function ($params) { return '/knowledgebase.php'; });
 $smarty->setTemplateDir($root . '/templates');
 $smarty->setCompileDir($out . '/compiled');
 $smarty->error_reporting = E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED;
@@ -81,6 +98,17 @@ $legalFixtureSections = array(
     array('id' => 'privacy-policy', 'title' => 'Privacy Policy', 'desc' => 'Learn how we collect, store, protect, and process your personal data.', 'link' => 'privacy-policy.php', 'icon' => 'fa-user-shield'),
     array('id' => 'acceptable-use-policy', 'title' => 'Acceptable Use Policy', 'desc' => 'The rules that apply to the content and activity hosted on our platform.', 'link' => 'acceptable-use-policy.php', 'icon' => 'fa-shield'),
 );
+// Account entry points and the contact form ship with this theme and are rendered separately
+// below, with the arrays `login.php`/`register.php`/`pwreset.php`/`contact.php` publish.
+$pages['login.php'] = 'login.tpl';
+$pages['register.php'] = 'clientregister.tpl';
+$pages['pwreset.php'] = 'password-reset-container.tpl';
+// The same route at the other two steps of the flow. WHMCS answers `pwreset.php` and picks the
+// step from the request; the harness renders one fixture per step so each prompt is audited,
+// not just the one the first request happens to show.
+$pages['pwreset-security.php'] = 'password-reset-container.tpl';
+$pages['pwreset-change.php'] = 'password-reset-container.tpl';
+$pages['contact.php'] = 'contact.tpl';
 $pages['legal.php'] = 'legal.tpl';
 $pages['privacy-policy.php'] = 'privacypolicy.tpl';
 $pages['cookie-policy.php'] = 'cookiepolicy.tpl';
@@ -147,6 +175,48 @@ foreach ($pages as $path => $template) {
 
     $smarty->clearAllAssign();
     $smarty->assign(array('WEB_ROOT'=>'','template'=>'cloudhost247','pagetitle'=>$site['title'],'ch247Site'=>$site,'cloudhost247'=>array('settings'=>array(),'sections'=>array()),'date_year'=>'2026','loggedin'=>false,'languagechangeenabled'=>false,'currencies'=>array(),'ch247Builder'=>false));
+    if (in_array($template, array('login.tpl', 'clientregister.tpl', 'password-reset-container.tpl', 'contact.tpl'), true)) {
+        // The platform hands the theme a captcha object, never a boolean: the partials call
+        // isEnabled()/getMarkup() and the submit button asks for its class. The stub keeps the same
+        // surface so the templates are rendered the way the platform renders them.
+        $smarty->assign('captcha', new CloudHost247FixtureCaptcha());
+        $smarty->assign('captchaForm', $path === 'contact.php' ? 'contact' : ($path === 'register.php' ? 'register' : 'login'));
+        $smarty->assign('WEB_ROOT', '');
+        $smarty->assign('systemurl', 'https://example.test');
+    }
+    if ($template === 'clientregister.tpl') {
+        // Registration dereferences these directly; empty collections keep the optional groups out
+        // of the markup, and the required fields stay required.
+        $smarty->assign(array(
+            // A list of the field names the operator marked optional, which is what the template's
+            // in_array() calls read; the values themselves arrive as $clientaddress1 and friends.
+            'optionalFields' => array('companyname', 'address1', 'address2', 'state', 'postcode', 'phonenumber'),
+            'clientcountries' => array('NG' => 'Nigeria', 'GB' => 'United Kingdom'),
+            'defaultCountry' => 'NG', 'clientcountry' => 'NG',
+            'customfields' => array(), 'currencies' => array(),
+            // One security question so the optional answer field is rendered (and audited) rather than
+            // skipped: it is the only password-type input that is not a password.
+            'securityquestions' => array(array('id' => 1, 'question' => 'What was the name of your first school?')),
+            'accepttos' => true, 'tosurl' => '/terms-of-service.php',
+            'registrationDisabled' => false, 'remote_auth_prelinked' => false,
+        ));
+    }
+    if ($template === 'password-reset-container.tpl') {
+        $steps = array('pwreset.php' => 'email-prompt', 'pwreset-security.php' => 'security-prompt',
+            'pwreset-change.php' => 'change-prompt');
+        $smarty->assign(array(
+            'innerTemplate' => isset($steps[$path]) ? $steps[$path] : 'email-prompt',
+            'successMessage' => null, 'errorMessage' => null,
+            'securityQuestion' => 'What was the name of your first school?', 'securityAnswer' => 'fixture-answer',
+        ));
+    }
+    if ($template === 'contact.tpl') {
+        $smarty->assign(array(
+            'sent' => false, 'errormessage' => '', 'name' => '', 'email' => '',
+            'subject' => '', 'message' => '',
+            'cloudhost247' => array('settings' => array('phone' => '+234 700 000 0000', 'country_calling_code_phone' => '')),
+        ));
+    }
     if ($page !== null) { $smarty->assign('cloudhost247Page', $page); }
     if ($template === 'cloudhost247-tools.tpl') {
         $smarty->assign(array('cloudhost247ToolsPage'=>$vars['cloudhost247ToolsPage'],'chToolsReady'=>false,'chToolsPlatform'=>'/platform','chToolsBase'=>''));

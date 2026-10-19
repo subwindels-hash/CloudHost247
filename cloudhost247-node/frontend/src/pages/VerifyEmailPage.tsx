@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import AuthFrame from '../components/AuthFrame';
 import { apiFetch } from '../lib/api';
 import { usePageMeta } from '../lib/usePageMeta';
 
@@ -32,23 +33,41 @@ export default function VerifyEmailPage() {
 
   if (!token) {
     return (
-      <div className="ch247-card">
-        <h1>Verification link unavailable</h1>
-        <p className="ch247-status-error">This verification link is missing its token. Log in to request a new link.</p>
-        <Link to="/login">Go to login</Link>
-      </div>
+      <AuthFrame
+        title="Verification link unavailable"
+        lede="The link that brought you here has no verification token, so there is nothing to confirm."
+        points={['Verification links expire', 'A new link can be requested from the account page']}
+      >
+        <p className="ch247-status-error" role="alert">
+          This verification link is missing its token. Log in to request a new link.
+        </p>
+        <div className="ch247-auth__links">
+          <Link to="/login">Go to login</Link>
+        </div>
+      </AuthFrame>
     );
   }
 
   return (
-    <div className="ch247-card">
-      <h1>Verify your email address</h1>
-      <p>Confirm that you want to verify this email address for your CloudHost247 account.</p>
-      <button type="button" onClick={verify} disabled={submitting}>
+    <AuthFrame
+      title="Verify your email address"
+      lede="Confirm that you want to verify this email address for your CloudHost247 account."
+      points={['Confirming uses the link once', 'Nothing else on the account changes']}
+      asideTitle="Why we ask"
+      asideNotes={[
+        { title: 'Account recovery', body: 'A verified address is the one address we will use for password resets and service notices.' },
+        { title: 'No automatic opens', body: 'The link is only used when you press the button, so a mail scanner cannot use it for you.' },
+      ]}
+    >
+      {message && (
+        <p role="alert" className="ch247-status-error">{message.text}</p>
+      )}
+      <button type="button" className="ch247-auth__submit" onClick={verify} disabled={submitting}>
         {submitting ? 'Verifying…' : 'Verify email address'}
       </button>
-      {message && <p className={message.kind === 'ok' ? 'ch247-status-ok' : 'ch247-status-error'}>{message.text}</p>}
-      <p><Link to="/login">Back to login</Link></p>
-    </div>
+      <div className="ch247-auth__links">
+        <Link to="/login">Back to login</Link>
+      </div>
+    </AuthFrame>
   );
 }
