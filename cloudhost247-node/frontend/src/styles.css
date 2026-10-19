@@ -1088,8 +1088,8 @@ form.ch247-form--auth button[type="submit"] {
 }
 
 .ch247-market-cats button.is-active {
-  background: #16704b;
-  border-color: #16704b;
+  background: var(--ch247-primary, #16704b);
+  border-color: var(--ch247-primary, #16704b);
   color: #fff;
 }
 
@@ -1142,8 +1142,8 @@ form.ch247-form--auth button[type="submit"] {
 }
 
 .ch247-wizard__steps li.is-active {
-  color: #16704b;
-  border-bottom-color: #16704b;
+  color: var(--ch247-primary, #16704b);
+  border-bottom-color: var(--ch247-primary, #16704b);
   font-weight: 600;
 }
 
@@ -1178,7 +1178,7 @@ form.ch247-form--auth button[type="submit"] {
 }
 
 .ch247-serverlist__item.is-selected {
-  border-color: #16704b;
+  border-color: var(--ch247-primary, #16704b);
   background: rgba(22, 112, 75, 0.06);
 }
 
@@ -1215,7 +1215,7 @@ form.ch247-form--auth button[type="submit"] {
 }
 
 .ch247-instrow.is-focus {
-  outline: 2px solid #16704b;
+  outline: 2px solid var(--ch247-primary, #16704b);
 }
 
 .ch247-instrow__main h2 {
@@ -1255,8 +1255,8 @@ form.ch247-form--auth button[type="submit"] {
 }
 
 .ch247-tabs button.is-active {
-  color: #16704b;
-  border-bottom-color: #16704b;
+  color: var(--ch247-primary, #16704b);
+  border-bottom-color: var(--ch247-primary, #16704b);
   font-weight: 600;
 }
 
@@ -1617,7 +1617,7 @@ form.ch247-form--auth button[type="submit"] {
   white-space: nowrap;
 }
 
-.ch247-dsvc-status--available { background: rgba(22, 112, 75, 0.12); color: #16704b; }
+.ch247-dsvc-status--available { background: rgba(22, 112, 75, 0.12); color: var(--ch247-primary, #16704b); }
 .ch247-dsvc-status--premium { background: rgba(214, 158, 46, 0.16); color: #8a5a00; }
 .ch247-dsvc-status--registered,
 .ch247-dsvc-status--unavailable { background: rgba(100, 116, 139, 0.14); color: #475569; }
@@ -1628,12 +1628,12 @@ form.ch247-form--auth button[type="submit"] {
 .ch247-dsvc-status--failed,
 .ch247-dsvc-status--cancelled { background: rgba(220, 38, 38, 0.12); color: #b91c1c; }
 .ch247-dsvc-status--completed,
-.ch247-dsvc-status--registered-ok { background: rgba(22, 112, 75, 0.12); color: #16704b; }
+.ch247-dsvc-status--registered-ok { background: rgba(22, 112, 75, 0.12); color: var(--ch247-primary, #16704b); }
 /* Auction lifecycle + provider/plan statuses rendered dynamically by StatusChip. */
 .ch247-dsvc-status--live,
 .ch247-dsvc-status--ending_soon,
 .ch247-dsvc-status--connected,
-.ch247-dsvc-status--published { background: rgba(22, 112, 75, 0.12); color: #16704b; }
+.ch247-dsvc-status--published { background: rgba(22, 112, 75, 0.12); color: var(--ch247-primary, #16704b); }
 .ch247-dsvc-status--scheduled,
 .ch247-dsvc-status--paused,
 .ch247-dsvc-status--configured { background: rgba(22, 112, 75, 0.10); color: var(--ch247-primary); }
@@ -1771,7 +1771,7 @@ form.ch247-form--auth button[type="submit"] {
   --ch-announce-gap: 2.5rem;
   position: relative;
   overflow: hidden;
-  background: linear-gradient(90deg, #0a1620 0%, #16704b 50%, #0a1620 100%);
+  background: linear-gradient(90deg, #0a1620 0%, var(--ch247-primary, #16704b) 50%, #0a1620 100%);
   color: #fff;
   font-size: 0.85rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);

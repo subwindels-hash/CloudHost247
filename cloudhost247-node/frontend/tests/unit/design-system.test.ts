@@ -61,10 +61,15 @@ describe('design system', () => {
     // `styles.css` loads first and the design system overrides its tokens, but its own rules use
     // literal colours too. Those literals were still the retired blue, so the dashboard's wizard,
     // tabs, focus ring and footer painted a second palette whenever their rule outranked the
-    // bridge. The tokens below are the same values the design system declares.
-    expect(APP_STYLES).toContain('--ch247-primary: #16704b');
-    expect(APP_STYLES).toContain('--ch247-accent: #7ff0b4');
-    expect(APP_STYLES).toContain('--ch247-ink: #0c1c26');
+    // bridge. Read the expected values from the design system rather than restating them here, so
+    // a future brand change moves both files or fails this test.
+    const declaration = (source: string, token: string) =>
+      new RegExp(`${token}\\s*:\\s*([^;]+);`).exec(source)?.[1]?.trim();
+    for (const token of ['--ch247-primary', '--ch247-accent', '--ch247-ink', '--ch247-bg', '--ch247-border']) {
+      const expected = declaration(DESIGN_SYSTEM, token);
+      expect(expected, `the design system does not declare ${token}`).toBeTruthy();
+      expect(declaration(APP_STYLES, token), `${token} in styles.css has drifted from the design system`).toBe(expected);
+    }
     for (const retired of ['#0756d8', '#071b3d', '#0a1730', '#12b886']) {
       expect(APP_STYLES, `styles.css still paints the retired palette colour ${retired}`).not.toContain(retired);
     }
