@@ -196,6 +196,30 @@ export const NAV_SECTIONS: RegistrySection[] = [
             "to": "/hosting/ssl",
             "description": "Certificates issued and renewed automatically for every domain you host.",
             "icon": "shield"
+          },
+          {
+            "label": "Website Migration",
+            "to": "/hosting/migration",
+            "description": "Move an existing website, mailboxes and DNS with a planned cutover.",
+            "icon": "rocket"
+          },
+          {
+            "label": "Hosting Backups",
+            "to": "/hosting/backups",
+            "description": "Scheduled backups for hosting accounts, databases and mailboxes.",
+            "icon": "database"
+          },
+          {
+            "label": "Hosting Security",
+            "to": "/hosting/security",
+            "description": "Malware scanning, hardening guidance and account isolation.",
+            "icon": "shield"
+          },
+          {
+            "label": "Pricing & Plans",
+            "to": "/pricing",
+            "description": "Compare published hosting, cloud and domain pricing in one place.",
+            "icon": "tag"
           }
         ]
       }
@@ -240,6 +264,18 @@ export const NAV_SECTIONS: RegistrySection[] = [
             "to": "/cloud/enterprise-servers",
             "description": "High-specification servers with contractual service levels.",
             "icon": "building"
+          },
+          {
+            "label": "Infrastructure",
+            "to": "/cloud/infrastructure",
+            "description": "The compute, storage and network layer behind every service.",
+            "icon": "building"
+          },
+          {
+            "label": "Operating Systems",
+            "to": "/cloud/operating-systems",
+            "description": "Supported images, versions and lifecycle status.",
+            "icon": "os"
           }
         ]
       },
@@ -305,6 +341,24 @@ export const NAV_SECTIONS: RegistrySection[] = [
             "to": "/cloud/ip-management",
             "description": "Reverse DNS, IP allocation and address planning for your servers.",
             "icon": "network"
+          },
+          {
+            "label": "Cloud Security",
+            "to": "/cloud/security",
+            "description": "Platform security controls, isolation and incident response.",
+            "icon": "shield-check"
+          },
+          {
+            "label": "Managed Services",
+            "to": "/cloud/managed-services",
+            "description": "We run the platform, patching and monitoring for your team.",
+            "icon": "users"
+          },
+          {
+            "label": "Game Servers",
+            "to": "/cloud/game-servers",
+            "description": "Low-latency game hosting with a choice of control panel.",
+            "icon": "gamepad"
           }
         ]
       }
@@ -356,6 +410,24 @@ export const NAV_SECTIONS: RegistrySection[] = [
             "to": "/legal/domain-renewal-policy",
             "description": "How renewal, auto-renew and deletion windows work.",
             "icon": "refresh"
+          },
+          {
+            "label": "Domain Transfer",
+            "to": "/domains/transfer",
+            "description": "Transfer an existing domain with the auth code and no downtime.",
+            "icon": "globe"
+          },
+          {
+            "label": "WHOIS Lookup",
+            "to": "/domains/whois",
+            "description": "Check registration details and availability before you buy.",
+            "icon": "search"
+          },
+          {
+            "label": "Domain Extensions",
+            "to": "/domains/extensions",
+            "description": "Browse the extensions this platform can register and renew.",
+            "icon": "globe"
           }
         ]
       },
@@ -471,6 +543,36 @@ export const NAV_SECTIONS: RegistrySection[] = [
             "to": "/hosting/api",
             "description": "Run HTTP APIs with managed runtimes, TLS and request logging.",
             "icon": "terminal"
+          },
+          {
+            "label": "Application Hosting",
+            "to": "/platforms/applications",
+            "description": "A managed environment around one application, with logs and backups.",
+            "icon": "app"
+          },
+          {
+            "label": "Managed Databases",
+            "to": "/platforms/databases",
+            "description": "MySQL, PostgreSQL, MariaDB, MongoDB and Redis as managed services.",
+            "icon": "database"
+          },
+          {
+            "label": "Containers & Docker",
+            "to": "/platforms/containers",
+            "description": "Run a container image you built, with persistent volumes attached.",
+            "icon": "container"
+          },
+          {
+            "label": "Developer Platform",
+            "to": "/developers",
+            "description": "One platform for environments, releases, logs and rollbacks.",
+            "icon": "terminal"
+          },
+          {
+            "label": "Application Environments",
+            "to": "/developers/environments",
+            "description": "Staging and production environments with recorded releases.",
+            "icon": "layers"
           }
         ]
       },
@@ -557,6 +659,18 @@ export const NAV_SECTIONS: RegistrySection[] = [
             "to": "/support",
             "description": "Reach a human. Tickets are answered by the team that runs the platform.",
             "icon": "mail"
+          },
+          {
+            "label": "Search",
+            "to": "/search",
+            "description": "Search services, guides, tools and policies.",
+            "icon": "search"
+          },
+          {
+            "label": "Sitemap",
+            "to": "/sitemap",
+            "description": "Every published page, policy and tool in one index.",
+            "icon": "file"
           }
         ]
       },
@@ -579,6 +693,18 @@ export const NAV_SECTIONS: RegistrySection[] = [
             "label": "Offers",
             "to": "/offers",
             "description": "Current promotions and discounted plans.",
+            "icon": "tag"
+          },
+          {
+            "label": "Websites",
+            "to": "/websites",
+            "description": "Launch a new site or have one built and run for you.",
+            "icon": "palette"
+          },
+          {
+            "label": "Pricing",
+            "to": "/pricing",
+            "description": "Compare published hosting, cloud and domain pricing in one place.",
             "icon": "tag"
           }
         ]
@@ -653,6 +779,18 @@ export const NAV_SECTIONS: RegistrySection[] = [
             "to": "/legal/data-protection-standards",
             "description": "Our data protection standards and compliance position.",
             "icon": "check"
+          },
+          {
+            "label": "Websites",
+            "to": "/websites",
+            "description": "Websites, stores and design services from CloudHost247.",
+            "icon": "palette"
+          },
+          {
+            "label": "Service Status",
+            "to": "/status",
+            "description": "Live service status and incident history.",
+            "icon": "activity"
           }
         ]
       },
@@ -731,6 +869,46 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
       {
         "label": "Domain Registration",
         "to": "/domains/search"
+      },
+      {
+        "label": "cPanel Hosting",
+        "to": "/hosting/cpanel"
+      },
+      {
+        "label": "Reseller Hosting",
+        "to": "/hosting/reseller"
+      },
+      {
+        "label": "Windows Hosting",
+        "to": "/hosting/windows"
+      },
+      {
+        "label": "Pricing & Plans",
+        "to": "/pricing"
+      },
+      {
+        "label": "Website Migration",
+        "to": "/hosting/migration"
+      },
+      {
+        "label": "Hosting Overview",
+        "to": "/hosting"
+      },
+      {
+        "label": "SSL Certificates",
+        "to": "/hosting/ssl"
+      },
+      {
+        "label": "Hosting Backups",
+        "to": "/hosting/backups"
+      },
+      {
+        "label": "Hosting Security",
+        "to": "/hosting/security"
+      },
+      {
+        "label": "Offers",
+        "to": "/offers"
       }
     ]
   },
@@ -777,6 +955,30 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
       {
         "label": "Backups",
         "to": "/cloud/backups"
+      },
+      {
+        "label": "Cloud Security",
+        "to": "/cloud/security"
+      },
+      {
+        "label": "Managed Services",
+        "to": "/cloud/managed-services"
+      },
+      {
+        "label": "Game Servers",
+        "to": "/cloud/game-servers"
+      },
+      {
+        "label": "IP Management",
+        "to": "/cloud/ip-management"
+      },
+      {
+        "label": "Infrastructure",
+        "to": "/cloud/infrastructure"
+      },
+      {
+        "label": "Operating Systems",
+        "to": "/cloud/operating-systems"
       }
     ]
   },
@@ -799,6 +1001,18 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
       {
         "label": "Domain Renewal",
         "to": "/legal/domain-renewal-policy"
+      },
+      {
+        "label": "Domain Transfer",
+        "to": "/domains/transfer"
+      },
+      {
+        "label": "WHOIS Lookup",
+        "to": "/domains/whois"
+      },
+      {
+        "label": "Domain Extensions",
+        "to": "/domains/extensions"
       }
     ]
   },
@@ -845,6 +1059,30 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
       {
         "label": "API Hosting",
         "to": "/hosting/api"
+      },
+      {
+        "label": "Developer Platform",
+        "to": "/developers"
+      },
+      {
+        "label": "Application Environments",
+        "to": "/developers/environments"
+      },
+      {
+        "label": "Managed Databases",
+        "to": "/platforms/databases"
+      },
+      {
+        "label": "Containers & Docker",
+        "to": "/platforms/containers"
+      },
+      {
+        "label": "Platforms Overview",
+        "to": "/platforms"
+      },
+      {
+        "label": "Application Hosting",
+        "to": "/platforms/applications"
       }
     ]
   },
@@ -937,6 +1175,14 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
       {
         "label": "Status",
         "to": "/status"
+      },
+      {
+        "label": "Sitemap",
+        "to": "/sitemap"
+      },
+      {
+        "label": "Search",
+        "to": "/search"
       }
     ]
   },
@@ -959,6 +1205,22 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
       {
         "label": "Compliance",
         "to": "/legal/data-protection-standards"
+      },
+      {
+        "label": "Websites",
+        "to": "/websites"
+      },
+      {
+        "label": "Pricing",
+        "to": "/pricing"
+      },
+      {
+        "label": "Service Status",
+        "to": "/status"
+      },
+      {
+        "label": "Sitemap",
+        "to": "/sitemap"
       }
     ]
   },
@@ -1009,6 +1271,34 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
       {
         "label": "All Policies",
         "to": "/legal"
+      },
+      {
+        "label": "Backup Policy",
+        "to": "/legal/backup-policy"
+      },
+      {
+        "label": "Fair Usage",
+        "to": "/legal/fair-usage"
+      },
+      {
+        "label": "Domain Renewal",
+        "to": "/legal/domain-renewal-policy"
+      },
+      {
+        "label": "Domain Addendum",
+        "to": "/legal/domain-registration-addendum"
+      },
+      {
+        "label": "Cybercrime Policy",
+        "to": "/legal/cybercrime-policy"
+      },
+      {
+        "label": "Data Deletion",
+        "to": "/legal/data-deletion"
+      },
+      {
+        "label": "Privacy Notice & Consent",
+        "to": "/legal/privacy-notice-and-consent"
       }
     ]
   }
@@ -1636,10 +1926,16 @@ export const REGISTRY_ROUTES: string[] = [
   "/cloud/managed-services",
   "/websites",
   "/hosting/ssl",
+  "/hosting/migration",
+  "/hosting/backups",
+  "/hosting/security",
+  "/pricing",
   "/cloud/public",
   "/cloud/private",
   "/cloud",
   "/cloud/enterprise-servers",
+  "/cloud/infrastructure",
+  "/cloud/operating-systems",
   "/hosting/dedicated",
   "/hosting/vps",
   "/cloud/server-management",
@@ -1648,13 +1944,16 @@ export const REGISTRY_ROUTES: string[] = [
   "/cloud/firewall",
   "/cloud/monitoring",
   "/cloud/backups",
-  "/hosting/migration",
   "/cloud/ip-management",
+  "/cloud/security",
   "/domains/search",
   "/domains/bulk-search",
   "/dashboard/domains",
   "/dashboard/dns",
   "/legal/domain-renewal-policy",
+  "/domains/transfer",
+  "/domains/whois",
+  "/domains/extensions",
   "/tools/dns-lookup",
   "/tools/dns-propagation",
   "/tools/domain-dns-health",
@@ -1664,16 +1963,21 @@ export const REGISTRY_ROUTES: string[] = [
   "/developers/deployment",
   "/platforms/paas",
   "/hosting/api",
+  "/platforms/applications",
+  "/platforms/databases",
+  "/platforms/containers",
+  "/developers",
+  "/developers/environments",
   "/hosting/control-panels",
-  "/cloud/operating-systems",
   "/docs",
   "/help",
   "/faq",
   "/support",
+  "/search",
+  "/sitemap",
   "/blog",
   "/status",
   "/offers",
-  "/cloud/infrastructure",
   "/about",
   "/contact",
   "/security",

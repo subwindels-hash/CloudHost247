@@ -7,6 +7,7 @@
    Do not reorder these two lines. *}
 <link rel="stylesheet" href="{$WEB_ROOT}/templates/cloudhost247/css/site.css?v=20261016">
 <link rel="stylesheet" href="{$WEB_ROOT}/templates/cloudhost247/css/design-system.css?v=20261016">
+<link rel="stylesheet" href="{$WEB_ROOT}/templates/cloudhost247/css/auth.css?v=20261019">
 <link rel="icon" href="{$WEB_ROOT}/assets/images/cloudhost247/favicon/favicon.ico" sizes="any">
 <link rel="icon" type="image/svg+xml" href="{$WEB_ROOT}/assets/images/cloudhost247/brand/icon-mark.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="{$WEB_ROOT}/assets/images/cloudhost247/favicon/apple-touch-icon.png">

@@ -30,7 +30,9 @@ def route_exists(path):
  if path in WHMCS or path in tool_routes():return True
  return (ROOT/path).is_file()
 # Stylesheets every first-party page loads, in load order (templates/cloudhost247/includes/site-head.tpl).
-THEME_SHEETS=('css/site.css','css/design-system.css')
+# `css/auth.css` is loaded by the same site-head partial on every page (it is scoped to `.ch-auth`,
+# so only the account pages use it, but a template that renders after the head can rely on it).
+THEME_SHEETS=('css/site.css','css/design-system.css','css/auth.css')
 def _sheet_text(name):
  p=ROOT/'templates/cloudhost247'/name
  return p.read_text() if p.is_file() else ''

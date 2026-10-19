@@ -806,6 +806,196 @@ form.ch247-form select {
   margin-bottom: 0.3rem;
 }
 
+/* --- Account pages: login, register and password recovery -------------------------------- */
+
+/* The four auth screens share one frame so they read as one product. The frame is wider than a
+   bare card because it carries supporting copy beside the form on desktop; on narrow screens the
+   notes drop below the form rather than squeezing it. */
+.ch247-auth {
+  width: 100%;
+  max-width: 1080px;
+  margin: 2rem auto;
+  padding-inline: 1rem;
+}
+
+.ch247-auth__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr);
+  gap: 2rem;
+  align-items: start;
+}
+
+.ch247-auth__form {
+  background: #fff;
+  border: 1px solid var(--ch247-border, #d8e0ea);
+  border-radius: 12px;
+  padding: clamp(1.25rem, 3vw, 2.25rem);
+  box-shadow: 0 1px 2px rgba(12, 28, 38, 0.05);
+}
+
+.ch247-auth__header {
+  margin-bottom: 1.25rem;
+}
+
+.ch247-auth__eyebrow {
+  margin: 0 0 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ch247-primary, #16704b);
+}
+
+.ch247-auth__header h1 {
+  margin: 0 0 0.5rem;
+  font-size: clamp(1.6rem, 2.4vw, 2.1rem);
+  letter-spacing: -0.03em;
+}
+
+.ch247-auth__lede {
+  margin: 0;
+  color: #47586a;
+  max-width: 52ch;
+}
+
+.ch247-auth__points {
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.88rem;
+  color: #47586a;
+}
+
+.ch247-auth__points li {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.ch247-auth__points li::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ch247-primary, #16704b);
+  transform: translateY(-1px);
+}
+
+/* The form inside the frame fills its column; the standalone 360px cap is for dashboard forms
+   where the surrounding card is already narrow. */
+form.ch247-form--auth {
+  max-width: none;
+  gap: 1rem;
+}
+
+form.ch247-form--auth input[type="email"],
+form.ch247-form--auth input[type="password"],
+form.ch247-form--auth input[type="text"],
+form.ch247-form--auth input:not([type]) {
+  width: 100%;
+  min-height: 46px;
+}
+
+form.ch247-form--auth button[type="submit"] {
+  min-height: 46px;
+  margin-top: 0.25rem;
+}
+
+.ch247-field {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.ch247-field-hint {
+  font-size: 0.8rem;
+  color: #5d6d7e;
+}
+
+.ch247-field-error {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #b42318;
+}
+
+.ch247-field--check {
+  gap: 0.4rem;
+}
+
+.ch247-check {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: #33465a;
+}
+
+.ch247-check input[type="checkbox"] {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  margin: 0.15rem 0 0;
+  accent-color: var(--ch247-primary, #16704b);
+}
+
+.ch247-auth__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  align-items: center;
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--ch247-border, #e3e9f0);
+  font-size: 0.88rem;
+}
+
+.ch247-auth__links a {
+  color: var(--ch247-primary, #16704b);
+  font-weight: 600;
+}
+
+.ch247-auth__aside {
+  border: 1px solid var(--ch247-border, #d8e0ea);
+  border-radius: 12px;
+  padding: 1.25rem 1.35rem;
+  background: #f6f9f7;
+}
+
+.ch247-auth__aside h2 {
+  margin: 0 0 1rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #40506b;
+}
+
+.ch247-auth__note + .ch247-auth__note {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(12, 28, 38, 0.08);
+}
+
+.ch247-auth__note h3 {
+  margin: 0 0 0.3rem;
+  font-size: 0.92rem;
+}
+
+.ch247-auth__note p {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: #47586a;
+}
+
+@media (max-width: 900px) {
+  .ch247-auth__body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 /* =============================================================================================
    Phase 6 — Marketplace, applications, deployments, admin operations
    ============================================================================================= */

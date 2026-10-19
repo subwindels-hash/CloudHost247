@@ -1,6 +1,7 @@
 import { FormEvent, useState } from 'react';
 import { startAuthentication } from '@simplewebauthn/browser';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import AuthFrame from '../components/AuthFrame';
 import { apiFetch } from '../lib/api';
 import { setSession, type StoredUser } from '../lib/auth';
 import { usePageMeta } from '../lib/usePageMeta';
@@ -16,6 +17,12 @@ interface LocationState {
   from?: string;
   recoveryMessage?: string;
 }
+
+const SIGN_IN_NOTES = [
+  'Passwords are checked against the policy before the session is issued.',
+  'Multi-factor challenges expire quickly; a stale code has to be requested again.',
+  'Recovery links are single use and stop working once a new password is set.',
+];
 
 export default function LoginPage() {
   usePageMeta('Log in', 'Log in to your CloudHost247 account.');
@@ -92,21 +99,41 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="ch247-card">
-      <h1>Log in</h1>
-      <form className="ch247-form" onSubmit={onSubmit}>
+    <AuthFrame
+      title="Log in"
+      lede="Sign in to manage services, invoices, domains and support tickets in one place."
+      points={['Use the email address on the account', 'Recovery is available if you have lost the password']}
+      asideTitle="Signing in safely"
+      asideNotes={SIGN_IN_NOTES.map((note, index) => ({ title: `Step ${index + 1}`, body: note }))}
+    >
+      <form className="ch247-form ch247-form--auth" onSubmit={onSubmit} aria-describedby={message ? 'login-status' : undefined}>
+        {message && (
+          <p
+            id="login-status"
+            role={message.kind === 'error' ? 'alert' : 'status'}
+            aria-live={message.kind === 'error' ? 'assertive' : 'polite'}
+            className={message.kind === 'ok' ? 'ch247-status-ok' : 'ch247-status-error'}
+          >
+            {message.text}
+          </p>
+        )}
         {mfaToken ? (
           <>
             <p className="ch247-page__hint">Use the six-digit code from your authenticator, or one of your saved recovery codes.</p>
-            <input
-              aria-label="Multi-factor authentication code"
-              placeholder="Authenticator or recovery code"
-              value={mfaCode}
-              onChange={(e) => setMfaCode(e.target.value)}
-              autoComplete="one-time-code"
-              required
-              autoFocus
-            />
+            <div className="ch247-field">
+              <label className="ch247-field-label" htmlFor="login-mfa-code">Multi-factor authentication code</label>
+              <input
+                id="login-mfa-code"
+                aria-label="Multi-factor authentication code"
+                placeholder="Authenticator or recovery code"
+                value={mfaCode}
+                onChange={(e) => setMfaCode(e.target.value)}
+                autoComplete="one-time-code"
+                inputMode="numeric"
+                required
+                autoFocus
+              />
+            </div>
             <button type="submit" disabled={submitting}>
               {submitting ? 'Verifying…' : 'Verify and log in'}
             </button>
@@ -116,22 +143,34 @@ export default function LoginPage() {
           </>
         ) : (
           <>
-            <input
-              placeholder="Email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              autoComplete="email"
-              required
-            />
-            <input
-              placeholder="Password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="current-password"
-              required
-            />
+            <div className="ch247-field">
+              <label className="ch247-field-label" htmlFor="login-email">Email address</label>
+              <input
+                id="login-email"
+                name="email"
+                placeholder="Email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
+                autoCapitalize="none"
+                spellCheck={false}
+                required
+              />
+            </div>
+            <div className="ch247-field">
+              <label className="ch247-field-label" htmlFor="login-password">Password</label>
+              <input
+                id="login-password"
+                name="password"
+                placeholder="Password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
+                required
+              />
+            </div>
             <button type="submit" disabled={submitting}>
               {submitting ? 'Logging in…' : 'Login'}
             </button>
@@ -142,8 +181,11 @@ export default function LoginPage() {
           </>
         )}
       </form>
-      {message && <p className={message.kind === 'ok' ? 'ch247-status-ok' : 'ch247-status-error'}>{message.text}</p>}
-      <p><Link to="/forgot-password">Forgot your password?</Link></p>
-    </div>
+      <div className="ch247-auth__links">
+        <Link to="/forgot-password">Forgot your password?</Link>
+        <Link to="/register">Create an account</Link>
+        <Link to="/verify-email">Resend a verification email</Link>
+      </div>
+    </AuthFrame>
   );
 }

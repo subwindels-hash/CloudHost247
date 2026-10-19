@@ -237,6 +237,42 @@
                 "spa": "/hosting/ssl",
                 "php": "ssl-certificate.php"
               }
+            },
+            {
+              "label": "Website Migration",
+              "icon": "rocket",
+              "desc": "Move an existing website, mailboxes and DNS with a planned cutover.",
+              "href": {
+                "spa": "/hosting/migration",
+                "php": "migration.php"
+              }
+            },
+            {
+              "label": "Hosting Backups",
+              "icon": "database",
+              "desc": "Scheduled backups for hosting accounts, databases and mailboxes.",
+              "href": {
+                "spa": "/hosting/backups",
+                "php": "backups.php"
+              }
+            },
+            {
+              "label": "Hosting Security",
+              "icon": "shield",
+              "desc": "Malware scanning, hardening guidance and account isolation.",
+              "href": {
+                "spa": "/hosting/security",
+                "php": "security.php"
+              }
+            },
+            {
+              "label": "Pricing & Plans",
+              "icon": "tag",
+              "desc": "Compare published hosting, cloud and domain pricing in one place.",
+              "href": {
+                "spa": "/pricing",
+                "php": "offers.php"
+              }
             }
           ]
         }
@@ -297,6 +333,24 @@
               "href": {
                 "spa": "/cloud/enterprise-servers",
                 "php": "enterprise-servers.php"
+              }
+            },
+            {
+              "label": "Infrastructure",
+              "icon": "building",
+              "desc": "The compute, storage and network layer behind every service.",
+              "href": {
+                "spa": "/cloud/infrastructure",
+                "php": "infrastructure.php"
+              }
+            },
+            {
+              "label": "Operating Systems",
+              "icon": "os",
+              "desc": "Supported images, versions and lifecycle status.",
+              "href": {
+                "spa": "/cloud/operating-systems",
+                "php": "operating-systems.php"
               }
             }
           ]
@@ -393,6 +447,33 @@
                 "spa": "/cloud/ip-management",
                 "php": "ip-management.php"
               }
+            },
+            {
+              "label": "Cloud Security",
+              "icon": "shield-check",
+              "desc": "Platform security controls, isolation and incident response.",
+              "href": {
+                "spa": "/cloud/security",
+                "php": "security.php"
+              }
+            },
+            {
+              "label": "Managed Services",
+              "icon": "users",
+              "desc": "We run the platform, patching and monitoring for your team.",
+              "href": {
+                "spa": "/cloud/managed-services",
+                "php": "managed-services.php"
+              }
+            },
+            {
+              "label": "Game Servers",
+              "icon": "gamepad",
+              "desc": "Low-latency game hosting with a choice of control panel.",
+              "href": {
+                "spa": "/cloud/game-servers",
+                "php": "game-servers.php"
+              }
             }
           ]
         }
@@ -471,6 +552,33 @@
               "href": {
                 "spa": "/legal/domain-renewal-policy",
                 "php": "domain-renewal-policy.php"
+              }
+            },
+            {
+              "label": "Domain Transfer",
+              "icon": "globe",
+              "desc": "Transfer an existing domain with the auth code and no downtime.",
+              "href": {
+                "spa": "/domains/transfer",
+                "php": "cart.php?a=add&domain=transfer"
+              }
+            },
+            {
+              "label": "WHOIS Lookup",
+              "icon": "search",
+              "desc": "Check registration details and availability before you buy.",
+              "href": {
+                "spa": "/domains/whois",
+                "php": "domain.php"
+              }
+            },
+            {
+              "label": "Domain Extensions",
+              "icon": "globe",
+              "desc": "Browse the extensions this platform can register and renew.",
+              "href": {
+                "spa": "/domains/extensions",
+                "php": "domain.php"
               }
             }
           ]
@@ -637,6 +745,50 @@
                 "spa": "/hosting/api",
                 "php": "api-hosting.php"
               }
+            },
+            {
+              "label": "Application Hosting",
+              "icon": "app",
+              "desc": "A managed environment around one application, with logs and backups.",
+              "href": {
+                "spa": "/platforms/applications",
+                "php": "applications.php"
+              }
+            },
+            {
+              "label": "Managed Databases",
+              "icon": "database",
+              "desc": "MySQL, PostgreSQL, MariaDB, MongoDB and Redis as managed services.",
+              "href": {
+                "spa": "/platforms/databases"
+              }
+            },
+            {
+              "label": "Containers & Docker",
+              "icon": "container",
+              "desc": "Run a container image you built, with persistent volumes attached.",
+              "href": {
+                "spa": "/platforms/containers",
+                "php": "docker-hosting.php"
+              }
+            },
+            {
+              "label": "Developer Platform",
+              "icon": "terminal",
+              "desc": "One platform for environments, releases, logs and rollbacks.",
+              "href": {
+                "spa": "/developers",
+                "php": "developer-friendly.php"
+              }
+            },
+            {
+              "label": "Application Environments",
+              "icon": "layers",
+              "desc": "Staging and production environments with recorded releases.",
+              "href": {
+                "spa": "/developers/environments",
+                "php": "deployments.php"
+              }
             }
           ]
         },
@@ -800,6 +952,24 @@
                 "spa": "/support",
                 "php": "submitticket.php"
               }
+            },
+            {
+              "label": "Search",
+              "icon": "search",
+              "desc": "Search services, guides, tools and policies.",
+              "href": {
+                "spa": "/search",
+                "php": "site-search.php"
+              }
+            },
+            {
+              "label": "Sitemap",
+              "icon": "file",
+              "desc": "Every published page, policy and tool in one index.",
+              "href": {
+                "spa": "/sitemap",
+                "php": "cloudhost247-sitemap.php"
+              }
             }
           ]
         },
@@ -839,6 +1009,24 @@
               "desc": "Scheduled maintenance and platform announcements.",
               "href": {
                 "php": "announcements.php"
+              }
+            },
+            {
+              "label": "Websites",
+              "icon": "palette",
+              "desc": "Launch a new site or have one built and run for you.",
+              "href": {
+                "spa": "/websites",
+                "php": "website-design.php"
+              }
+            },
+            {
+              "label": "Pricing",
+              "icon": "tag",
+              "desc": "Compare published hosting, cloud and domain pricing in one place.",
+              "href": {
+                "spa": "/pricing",
+                "php": "offers.php"
               }
             }
           ]
@@ -941,6 +1129,24 @@
               "href": {
                 "spa": "/legal/data-protection-standards",
                 "php": "data-protection-standards.php"
+              }
+            },
+            {
+              "label": "Websites",
+              "icon": "palette",
+              "desc": "Websites, stores and design services from CloudHost247.",
+              "href": {
+                "spa": "/websites",
+                "php": "website-design.php"
+              }
+            },
+            {
+              "label": "Service Status",
+              "icon": "activity",
+              "desc": "Live service status and incident history.",
+              "href": {
+                "spa": "/status",
+                "php": "serverstatus.php"
               }
             }
           ]
@@ -1057,6 +1263,76 @@
             "spa": "/domains/search",
             "php": "cart.php?a=add&domain=register"
           }
+        },
+        {
+          "label": "cPanel Hosting",
+          "href": {
+            "spa": "/hosting/cpanel",
+            "php": "cpanel-hosting.php"
+          }
+        },
+        {
+          "label": "Reseller Hosting",
+          "href": {
+            "spa": "/hosting/reseller",
+            "php": "reseller-hosting.php"
+          }
+        },
+        {
+          "label": "Windows Hosting",
+          "href": {
+            "spa": "/hosting/windows",
+            "php": "windows-hosting.php"
+          }
+        },
+        {
+          "label": "Pricing & Plans",
+          "href": {
+            "spa": "/pricing",
+            "php": "offers.php"
+          }
+        },
+        {
+          "label": "Website Migration",
+          "href": {
+            "spa": "/hosting/migration",
+            "php": "migration.php"
+          }
+        },
+        {
+          "label": "Hosting Overview",
+          "href": {
+            "spa": "/hosting",
+            "php": "cloudhost247-hosting.php"
+          }
+        },
+        {
+          "label": "SSL Certificates",
+          "href": {
+            "spa": "/hosting/ssl",
+            "php": "ssl-certificate.php"
+          }
+        },
+        {
+          "label": "Hosting Backups",
+          "href": {
+            "spa": "/hosting/backups",
+            "php": "backups.php"
+          }
+        },
+        {
+          "label": "Hosting Security",
+          "href": {
+            "spa": "/hosting/security",
+            "php": "security.php"
+          }
+        },
+        {
+          "label": "Offers",
+          "href": {
+            "spa": "/offers",
+            "php": "offers.php"
+          }
         }
       ]
     },
@@ -1132,6 +1408,48 @@
             "spa": "/cloud/backups",
             "php": "backups.php"
           }
+        },
+        {
+          "label": "Cloud Security",
+          "href": {
+            "spa": "/cloud/security",
+            "php": "security.php"
+          }
+        },
+        {
+          "label": "Managed Services",
+          "href": {
+            "spa": "/cloud/managed-services",
+            "php": "managed-services.php"
+          }
+        },
+        {
+          "label": "Game Servers",
+          "href": {
+            "spa": "/cloud/game-servers",
+            "php": "game-servers.php"
+          }
+        },
+        {
+          "label": "IP Management",
+          "href": {
+            "spa": "/cloud/ip-management",
+            "php": "ip-management.php"
+          }
+        },
+        {
+          "label": "Infrastructure",
+          "href": {
+            "spa": "/cloud/infrastructure",
+            "php": "infrastructure.php"
+          }
+        },
+        {
+          "label": "Operating Systems",
+          "href": {
+            "spa": "/cloud/operating-systems",
+            "php": "operating-systems.php"
+          }
         }
       ]
     },
@@ -1170,6 +1488,27 @@
           "href": {
             "spa": "/legal/domain-renewal-policy",
             "php": "domain-renewal-policy.php"
+          }
+        },
+        {
+          "label": "Domain Transfer",
+          "href": {
+            "spa": "/domains/transfer",
+            "php": "cart.php?a=add&domain=transfer"
+          }
+        },
+        {
+          "label": "WHOIS Lookup",
+          "href": {
+            "spa": "/domains/whois",
+            "php": "domain.php"
+          }
+        },
+        {
+          "label": "Domain Extensions",
+          "href": {
+            "spa": "/domains/extensions",
+            "php": "domain.php"
           }
         }
       ]
@@ -1245,6 +1584,47 @@
           "href": {
             "spa": "/hosting/api",
             "php": "api-hosting.php"
+          }
+        },
+        {
+          "label": "Developer Platform",
+          "href": {
+            "spa": "/developers",
+            "php": "developer-friendly.php"
+          }
+        },
+        {
+          "label": "Application Environments",
+          "href": {
+            "spa": "/developers/environments",
+            "php": "deployments.php"
+          }
+        },
+        {
+          "label": "Managed Databases",
+          "href": {
+            "spa": "/platforms/databases"
+          }
+        },
+        {
+          "label": "Containers & Docker",
+          "href": {
+            "spa": "/platforms/containers",
+            "php": "docker-hosting.php"
+          }
+        },
+        {
+          "label": "Platforms Overview",
+          "href": {
+            "spa": "/platforms",
+            "php": "applications.php"
+          }
+        },
+        {
+          "label": "Application Hosting",
+          "href": {
+            "spa": "/platforms/applications",
+            "php": "applications.php"
           }
         }
       ]
@@ -1396,6 +1776,32 @@
             "spa": "/status",
             "php": "serverstatus.php"
           }
+        },
+        {
+          "label": "Knowledge Base",
+          "href": {
+            "php": "knowledgebase.php"
+          }
+        },
+        {
+          "label": "Announcements",
+          "href": {
+            "php": "announcements.php"
+          }
+        },
+        {
+          "label": "Sitemap",
+          "href": {
+            "spa": "/sitemap",
+            "php": "cloudhost247-sitemap.php"
+          }
+        },
+        {
+          "label": "Search",
+          "href": {
+            "spa": "/search",
+            "php": "site-search.php"
+          }
         }
       ]
     },
@@ -1428,6 +1834,34 @@
           "href": {
             "spa": "/legal/data-protection-standards",
             "php": "data-protection-standards.php"
+          }
+        },
+        {
+          "label": "Websites",
+          "href": {
+            "spa": "/websites",
+            "php": "website-design.php"
+          }
+        },
+        {
+          "label": "Pricing",
+          "href": {
+            "spa": "/pricing",
+            "php": "offers.php"
+          }
+        },
+        {
+          "label": "Service Status",
+          "href": {
+            "spa": "/status",
+            "php": "serverstatus.php"
+          }
+        },
+        {
+          "label": "Sitemap",
+          "href": {
+            "spa": "/sitemap",
+            "php": "cloudhost247-sitemap.php"
           }
         }
       ]
@@ -1510,6 +1944,55 @@
           "href": {
             "spa": "/legal",
             "php": "legal.php"
+          }
+        },
+        {
+          "label": "Backup Policy",
+          "href": {
+            "spa": "/legal/backup-policy",
+            "php": "backup-policy.php"
+          }
+        },
+        {
+          "label": "Fair Usage",
+          "href": {
+            "spa": "/legal/fair-usage",
+            "php": "fair-usage-policy.php"
+          }
+        },
+        {
+          "label": "Domain Renewal",
+          "href": {
+            "spa": "/legal/domain-renewal-policy",
+            "php": "domain-renewal-policy.php"
+          }
+        },
+        {
+          "label": "Domain Addendum",
+          "href": {
+            "spa": "/legal/domain-registration-addendum",
+            "php": "domainregistrationaddendum.php"
+          }
+        },
+        {
+          "label": "Cybercrime Policy",
+          "href": {
+            "spa": "/legal/cybercrime-policy",
+            "php": "cybercrime-policy.php"
+          }
+        },
+        {
+          "label": "Data Deletion",
+          "href": {
+            "spa": "/legal/data-deletion",
+            "php": "data-deletion.php"
+          }
+        },
+        {
+          "label": "Privacy Notice & Consent",
+          "href": {
+            "spa": "/legal/privacy-notice-and-consent",
+            "php": "data-privacy-notice-and-consent-form.php"
           }
         }
       ]

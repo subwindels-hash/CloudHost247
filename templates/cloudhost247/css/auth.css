@@ -1,0 +1,354 @@
+/* -----------------------------------------------------------------------------
+   Account pages: log in, create account and the password-reset screens.
+
+   Loaded after site.css and design-system.css, and scoped to `ch-auth` so it cannot
+   reach a marketing page. The palette comes from the shared design system tokens,
+   not from literal colours, so a token change reaches these pages too.
+
+   The layout is deliberately two columns on desktop and one on a phone: the form is
+   the primary action, and the supporting copy sits beside it instead of pushing it
+   below the fold. Nothing here is positioned absolutely except the strength meter,
+   which only needs its own row.
+   -------------------------------------------------------------------------- */
+
+.ch-auth {
+  padding: clamp(32px, 5vw, 64px) 0 clamp(40px, 6vw, 80px);
+}
+
+.ch-auth__inner {
+  width: min(1080px, calc(100% - 40px));
+  margin-inline: auto;
+}
+
+.ch-auth__card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.82fr);
+  gap: clamp(24px, 4vw, 48px);
+  align-items: start;
+  background: #fff;
+  border: 1px solid var(--ch-line, #dbe3e0);
+  border-radius: var(--ch-radius, 12px);
+  padding: clamp(24px, 4vw, 44px);
+  box-shadow: var(--ch-shadow-1, 0 1px 2px rgba(12, 28, 38, 0.05));
+}
+
+.ch-auth--wide .ch-auth__card {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 900px;
+  margin-inline: auto;
+}
+
+.ch-auth__eyebrow {
+  margin: 0 0 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ch-green, #16704b);
+}
+
+.ch-auth__card h1 {
+  font-size: clamp(1.9rem, 3vw, 2.6rem);
+  margin: 0 0 12px;
+  letter-spacing: -0.03em;
+}
+
+.ch-auth__lede {
+  margin: 0 0 18px;
+  color: var(--ch-muted, #56686f);
+  max-width: 54ch;
+}
+
+.ch-auth__points {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+  font-size: 0.88rem;
+  color: var(--ch-muted, #56686f);
+}
+
+.ch-auth__points li {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  margin: 0;
+}
+
+.ch-auth__points li::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ch-green, #16704b);
+  transform: translateY(-1px);
+}
+
+.ch-auth__panel {
+  min-width: 0;
+}
+
+.ch-auth__form {
+  display: grid;
+  gap: 16px;
+}
+
+.ch-auth__row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.ch-auth__field {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+}
+
+.ch-auth__field > label {
+  font-size: 0.85rem;
+  font-weight: 650;
+  color: var(--ch-ink, #0c1c26);
+  margin: 0;
+}
+
+.ch-auth__field .form-control {
+  min-height: 46px;
+  padding: 10px 12px;
+  border: 1px solid var(--ch-line-strong, #c3d0ca);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ch-ink, #0c1c26);
+  font-size: 0.95rem;
+  width: 100%;
+}
+
+.ch-auth__field select.form-control {
+  min-height: 46px;
+}
+
+.ch-auth__field .form-control:focus {
+  border-color: var(--ch-green, #16704b);
+  box-shadow: 0 0 0 3px rgba(22, 112, 75, 0.15);
+  outline: none;
+}
+
+.ch-auth__field textarea.form-control {
+  min-height: 96px;
+}
+
+.ch-auth__hint {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--ch-muted, #56686f);
+}
+
+.ch-auth__section {
+  border-top: 1px solid var(--ch-line, #e2e9e6);
+  padding-top: 18px;
+  margin-top: 4px;
+}
+
+.ch-auth__section:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+  margin-top: 0;
+}
+
+.ch-auth__section > h2 {
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  margin: 0 0 4px;
+}
+
+.ch-auth__section > p {
+  font-size: 0.84rem;
+  color: var(--ch-muted, #56686f);
+  margin: 0 0 14px;
+}
+
+.ch-auth__check {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 0.86rem;
+  line-height: 1.55;
+  color: var(--ch-ink, #0c1c26);
+  margin: 0;
+}
+
+.ch-auth__check input[type="checkbox"] {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  margin: 2px 0 0;
+  accent-color: var(--ch-green, #16704b);
+}
+
+.ch-auth__submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 22px;
+  border: 1px solid var(--ch-green, #16704b);
+  border-radius: 8px;
+  background: var(--ch-green, #16704b);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 650;
+  cursor: pointer;
+  width: 100%;
+}
+
+.ch-auth__submit:hover {
+  background: var(--ch-green-dark, #0f5537);
+  border-color: var(--ch-green-dark, #0f5537);
+}
+
+.ch-auth__submit:focus-visible {
+  outline: 3px solid var(--ch-mint-strong, #2fd58a);
+  outline-offset: 2px;
+}
+
+.ch-auth__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  align-items: center;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--ch-line, #e2e9e6);
+  font-size: 0.86rem;
+}
+
+.ch-auth__links a {
+  color: var(--ch-green, #16704b);
+  font-weight: 600;
+}
+
+.ch-auth__aside {
+  background: var(--ch-soft, #f4f8f6);
+  border: 1px solid var(--ch-line, #e2e9e6);
+  border-radius: var(--ch-radius-sm, 10px);
+  padding: 20px 22px;
+  align-self: start;
+}
+
+.ch-auth__aside h2 {
+  font-size: 0.74rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ch-muted-2, #6a7d84);
+  margin: 0 0 14px;
+}
+
+.ch-auth__note + .ch-auth__note {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(12, 28, 38, 0.08);
+}
+
+.ch-auth__note h3 {
+  font-size: 0.9rem;
+  margin: 0 0 4px;
+}
+
+.ch-auth__note p {
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--ch-muted, #56686f);
+  margin: 0;
+}
+
+/* Alert from the theme's includes/flashmessage.tpl, restated so it matches this card. */
+.ch-auth .alert {
+  border-radius: 8px;
+  border: 1px solid var(--ch-line, #e2e9e6);
+  background: var(--ch-soft, #f4f8f6);
+  color: var(--ch-ink, #0c1c26);
+  padding: 12px 14px;
+  font-size: 0.88rem;
+  margin-bottom: 16px;
+}
+
+.ch-auth .alert-danger {
+  background: var(--ch-danger-soft, #fdf0ef);
+  border-color: #efc9c5;
+  color: var(--ch-danger, #b42318);
+}
+
+.ch-auth .alert-success {
+  background: var(--ch-ok-soft, #eef8f2);
+  border-color: #c2e6d3;
+  color: var(--ch-green, #16704b);
+}
+
+/* Password strength meter, driven by the vendor PasswordStrength.js the form loads. */
+.ch-auth__meter {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--ch-line, #e2e9e6);
+  overflow: hidden;
+}
+
+.ch-auth__meter > div {
+  height: 100%;
+  width: 0;
+  background: var(--ch-green, #16704b);
+  transition: width 0.18s ease;
+}
+
+.ch-auth__meter-text {
+  font-size: 0.78rem;
+  color: var(--ch-muted, #56686f);
+}
+
+/* The register page is a single long form; two columns of fields read better than three at
+   this width, and the country/currency pair stays together. */
+.ch-auth--register .ch-auth__form {
+  gap: 18px;
+}
+
+.ch-auth__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.ch-auth__grid > .ch-auth__field--full {
+  grid-column: 1 / -1;
+}
+
+.ch-auth__captcha {
+  display: flex;
+  justify-content: center;
+}
+
+.ch-auth__captcha img {
+  max-width: 100%;
+  height: auto;
+}
+
+@media (max-width: 980px) {
+  .ch-auth__card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ch-auth__aside {
+    order: 2;
+  }
+}
+
+@media (max-width: 620px) {
+  .ch-auth__inner {
+    width: calc(100% - 24px);
+  }
+
+  .ch-auth__row,
+  .ch-auth__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
