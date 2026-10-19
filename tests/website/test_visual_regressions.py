@@ -76,13 +76,18 @@ REVIEWED_CARD_ARTWORK = {
 # the template moves with it; the test's failure message says which of the two is out of step.
 CACHE_BUSTING_STAMPS = {
     'templates/cloudhost247/css/site.css': (
-        '20261016', '06ef8331edaa8e3b42c2f79e883eaec0430b8c11a30644d24c698340bdffdb15'),
+        '20261019', 'fa282fb10dcffe4229266f80660d34e5c9891a1973233d974435c0616d81d3c2'),
     'templates/cloudhost247/css/design-system.css': (
         '20261016', 'b30a85ef92edc71c3d2e14fa5c8ef96aa929e1b870b578ae023b34d0b4637f4e'),
     'templates/cloudhost247/js/site.js': (
         '20261016', '4bf8557df4b9458075ee962bd7a3bb9272f6e5c2ea2b82ab5c5a755e8126237f'),
     'templates/cloudhost247/css/tools.css': (
-        '20261016', '5f059da0887918ba2038f5901b9a87ff421127450a36cbf2f77298fd3080e168'),
+        '20261019', '1ac4993a44953755165b69c6d7907fd789d675c857884464035103db6974763c'),
+    # The sign-in, registration and password-recovery sheet. Pinned too: it is the one file every
+    # account page depends on, so an edit that does not move its stamp is the failure this table
+    # exists to catch.
+    'templates/cloudhost247/css/auth.css': (
+        '20261019', 'a93eb017f76d88399e5945ef61cc647c258ba14bb0bb2291fb86bede357ac969'),
     'templates/cloudhost247/js/tools.js': (
         '20261016', 'c15666bec6bbf61b2f0317e69138c42cbe56992daaad9b767ff624c483544ee2'),
 }
