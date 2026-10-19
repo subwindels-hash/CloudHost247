@@ -1,18 +1,19 @@
 /*
- * Design tokens below match the real CloudHost247 brand tokens defined in
- * modules/addons/cloudhost247_theme/lib/ThemeRepository.php (the independent-rebuild PHP theme's
- * settings defaults) so this new app and the existing WHMCS site present a consistent brand while
- * both stacks run side by side. Font is referenced by name only (no external/CDN font load) —
+ * Application tokens. They mirror the brand tokens in shared/site/design-system.css (ink #0c1c26,
+ * green #16704b, mint #7ff0b4, soft #f3f7f8, line #dbe5e8) and are restated here because this
+ * stylesheet loads before the design system, which then overrides the same names. Keeping the
+ * fallbacks on the same palette means a component that paints before the design system loads
+ * cannot flash the retired blue. Font is referenced by name only (no external/CDN font load) --
  * this keeps the app fully self-contained for cPanel shared hosting, with no dependency on
  * reaching an external font host at runtime.
  */
 :root {
   color-scheme: light;
-  --ch247-primary: #0756d8;
-  --ch247-accent: #12b886;
-  --ch247-ink: #16233a;
-  --ch247-bg: #f7f9fc;
-  --ch247-border: #e3e9f2;
+  --ch247-primary: #16704b;
+  --ch247-accent: #7ff0b4;
+  --ch247-ink: #0c1c26;
+  --ch247-bg: #f3f7f8;
+  --ch247-border: #dbe5e8;
   --ch247-width: 1180px;
   --ch247-font: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
@@ -180,7 +181,7 @@ a {
 .ch247-button {
   display: inline-block;
   background: var(--ch247-accent);
-  color: #071b3d !important;
+  color: #0a1620 !important;
   padding: 0.7rem 1.2rem;
   border: none;
   border-radius: 0.55rem;
@@ -543,7 +544,7 @@ form.ch247-form .ch247-button--outline:hover:not(:disabled) {
 /* --- Footer -------------------------------------------------------------------------------- */
 
 .ch247-footer {
-  background: #071b3d;
+  background: #0a1620;
   color: #dce7fa;
   margin-top: auto;
 }
@@ -1087,8 +1088,8 @@ form.ch247-form--auth button[type="submit"] {
 }
 
 .ch247-market-cats button.is-active {
-  background: #0756d8;
-  border-color: #0756d8;
+  background: #16704b;
+  border-color: #16704b;
   color: #fff;
 }
 
@@ -1141,8 +1142,8 @@ form.ch247-form--auth button[type="submit"] {
 }
 
 .ch247-wizard__steps li.is-active {
-  color: #0756d8;
-  border-bottom-color: #0756d8;
+  color: #16704b;
+  border-bottom-color: #16704b;
   font-weight: 600;
 }
 
@@ -1177,8 +1178,8 @@ form.ch247-form--auth button[type="submit"] {
 }
 
 .ch247-serverlist__item.is-selected {
-  border-color: #0756d8;
-  background: rgba(7, 86, 216, 0.06);
+  border-color: #16704b;
+  background: rgba(22, 112, 75, 0.06);
 }
 
 .ch247-fieldset {
@@ -1214,7 +1215,7 @@ form.ch247-form--auth button[type="submit"] {
 }
 
 .ch247-instrow.is-focus {
-  outline: 2px solid #0756d8;
+  outline: 2px solid #16704b;
 }
 
 .ch247-instrow__main h2 {
@@ -1254,8 +1255,8 @@ form.ch247-form--auth button[type="submit"] {
 }
 
 .ch247-tabs button.is-active {
-  color: #0756d8;
-  border-bottom-color: #0756d8;
+  color: #16704b;
+  border-bottom-color: #16704b;
   font-weight: 600;
 }
 
@@ -1378,7 +1379,7 @@ form.ch247-form--auth button[type="submit"] {
 }
 
 .ch247-banner--info {
-  background: rgba(7, 86, 216, 0.08);
+  background: rgba(22, 112, 75, 0.08);
   color: #1e40af;
 }
 
@@ -1512,7 +1513,7 @@ form.ch247-form--auth button[type="submit"] {
 .ch247-dsvc-card:hover,
 .ch247-dsvc-card:focus-within {
   border-color: var(--ch247-primary);
-  box-shadow: 0 6px 18px rgba(7, 86, 216, 0.08);
+  box-shadow: 0 6px 18px rgba(22, 112, 75, 0.08);
   transform: translateY(-1px);
 }
 
@@ -1521,7 +1522,7 @@ form.ch247-form--auth button[type="submit"] {
   height: 46px;
   min-width: 46px;
   border-radius: 12px;
-  background: rgba(7, 86, 216, 0.08);
+  background: rgba(22, 112, 75, 0.08);
   color: var(--ch247-primary);
   display: flex;
   align-items: center;
@@ -1616,26 +1617,26 @@ form.ch247-form--auth button[type="submit"] {
   white-space: nowrap;
 }
 
-.ch247-dsvc-status--available { background: rgba(18, 184, 134, 0.14); color: #0b7a58; }
+.ch247-dsvc-status--available { background: rgba(22, 112, 75, 0.12); color: #16704b; }
 .ch247-dsvc-status--premium { background: rgba(214, 158, 46, 0.16); color: #8a5a00; }
 .ch247-dsvc-status--registered,
 .ch247-dsvc-status--unavailable { background: rgba(100, 116, 139, 0.14); color: #475569; }
 .ch247-dsvc-status--unsupported { background: rgba(100, 116, 139, 0.10); color: #64748b; }
 .ch247-dsvc-status--provider_error { background: rgba(220, 38, 38, 0.12); color: #b91c1c; }
 .ch247-dsvc-status--pending,
-.ch247-dsvc-status--processing { background: rgba(7, 86, 216, 0.10); color: var(--ch247-primary); }
+.ch247-dsvc-status--processing { background: rgba(22, 112, 75, 0.10); color: var(--ch247-primary); }
 .ch247-dsvc-status--failed,
 .ch247-dsvc-status--cancelled { background: rgba(220, 38, 38, 0.12); color: #b91c1c; }
 .ch247-dsvc-status--completed,
-.ch247-dsvc-status--registered-ok { background: rgba(18, 184, 134, 0.14); color: #0b7a58; }
+.ch247-dsvc-status--registered-ok { background: rgba(22, 112, 75, 0.12); color: #16704b; }
 /* Auction lifecycle + provider/plan statuses rendered dynamically by StatusChip. */
 .ch247-dsvc-status--live,
 .ch247-dsvc-status--ending_soon,
 .ch247-dsvc-status--connected,
-.ch247-dsvc-status--published { background: rgba(18, 184, 134, 0.14); color: #0b7a58; }
+.ch247-dsvc-status--published { background: rgba(22, 112, 75, 0.12); color: #16704b; }
 .ch247-dsvc-status--scheduled,
 .ch247-dsvc-status--paused,
-.ch247-dsvc-status--configured { background: rgba(7, 86, 216, 0.10); color: var(--ch247-primary); }
+.ch247-dsvc-status--configured { background: rgba(22, 112, 75, 0.10); color: var(--ch247-primary); }
 .ch247-dsvc-status--not_configured,
 .ch247-dsvc-status--auth_failed { background: rgba(214, 158, 46, 0.16); color: #8a5a00; }
 .ch247-dsvc-status--draft,
@@ -1770,7 +1771,7 @@ form.ch247-form--auth button[type="submit"] {
   --ch-announce-gap: 2.5rem;
   position: relative;
   overflow: hidden;
-  background: linear-gradient(90deg, #071b3d 0%, #0756d8 50%, #071b3d 100%);
+  background: linear-gradient(90deg, #0a1620 0%, #16704b 50%, #0a1620 100%);
   color: #fff;
   font-size: 0.85rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
@@ -1787,8 +1788,8 @@ form.ch247-form--auth button[type="submit"] {
   pointer-events: none;
   z-index: 2;
 }
-.ch-announce::before { left: 0; background: linear-gradient(90deg, #071b3d, rgba(7, 27, 61, 0)); }
-.ch-announce::after { right: 0; background: linear-gradient(270deg, #071b3d, rgba(7, 27, 61, 0)); }
+.ch-announce::before { left: 0; background: linear-gradient(90deg, #0a1620, rgba(10, 22, 32, 0)); }
+.ch-announce::after { right: 0; background: linear-gradient(270deg, #0a1620, rgba(10, 22, 32, 0)); }
 
 .ch-announce__viewport { overflow: hidden; }
 

@@ -18,6 +18,7 @@ import { describe, expect, it } from 'vitest';
 const ROOT = join(__dirname, '..', '..', '..', '..');
 const DESIGN_SYSTEM = readFileSync(join(ROOT, 'shared', 'site', 'design-system.css'), 'utf8');
 const THEME_COPY = readFileSync(join(ROOT, 'templates', 'cloudhost247', 'css', 'design-system.css'), 'utf8');
+const APP_STYLES = readFileSync(join(__dirname, '..', '..', 'src', 'styles.css'), 'utf8');
 
 describe('design system', () => {
   it('prevents horizontal overflow at the document level', () => {
@@ -54,6 +55,19 @@ describe('design system', () => {
     expect(DESIGN_SYSTEM).not.toContain('#0756d8');
     expect(DESIGN_SYSTEM).not.toContain('#071b3d');
     expect(DESIGN_SYSTEM).not.toContain('#0a1730');
+  });
+
+  it('keeps the application stylesheet on the same palette', () => {
+    // `styles.css` loads first and the design system overrides its tokens, but its own rules use
+    // literal colours too. Those literals were still the retired blue, so the dashboard's wizard,
+    // tabs, focus ring and footer painted a second palette whenever their rule outranked the
+    // bridge. The tokens below are the same values the design system declares.
+    expect(APP_STYLES).toContain('--ch247-primary: #16704b');
+    expect(APP_STYLES).toContain('--ch247-accent: #7ff0b4');
+    expect(APP_STYLES).toContain('--ch247-ink: #0c1c26');
+    for (const retired of ['#0756d8', '#071b3d', '#0a1730', '#12b886']) {
+      expect(APP_STYLES, `styles.css still paints the retired palette colour ${retired}`).not.toContain(retired);
+    }
   });
 
   it('bridges the older application tokens onto the new palette', () => {

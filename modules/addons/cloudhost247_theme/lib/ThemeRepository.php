@@ -14,8 +14,11 @@ final class ThemeRepository
     const TYPES = array('page', 'section', 'navigation', 'banner', 'testimonial', 'footer', 'landing', 'block');
     private $defaults = array(
         'platform_base_path' => '',
-        'brand_name' => 'CloudHost247', 'logo_url' => '', 'primary_color' => '#0756d8',
-        'accent_color' => '#12b886', 'font_family' => 'Inter, system-ui, sans-serif',
+        // Brand tokens, not vendor defaults: the site's design system publishes the same two
+        // colours (shared/site/design-system.css), and the theme manager preview and any theme
+        // that reads these settings must not paint a second, older palette.
+        'brand_name' => 'CloudHost247', 'logo_url' => '', 'primary_color' => '#16704b',
+        'accent_color' => '#7ff0b4', 'font_family' => 'Inter, system-ui, sans-serif',
         'footer_text' => 'Reliable cloud services, available around the clock.',
         'support_email' => '', 'hero_title' => 'Cloud infrastructure built for your next idea',
         'hero_text' => 'Fast hosting, straightforward billing, and support whenever you need it.',

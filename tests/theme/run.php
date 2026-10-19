@@ -172,7 +172,7 @@ $tests['a block with no page assignment renders everywhere'] = in_array('plain',
 /* --------------------------------------------------------------- preview */
 
 $visual = $repository->visualPreview($repository->settings(), $repository->all());
-$tests['the preview emits the live custom properties'] = strpos($visual['css'], '--ch247-primary:#0756d8') !== false && strpos($visual['css'], '--ch247-width:1180px') !== false;
+$tests['the preview emits the live custom properties'] = strpos($visual['css'], '--ch247-primary:#16704b') !== false && strpos($visual['css'], '--ch247-width:1180px') !== false;
 $tests['the preview renders the published sections'] = in_array('hero', $visual['sections']) && $visual['markup'] !== '' && strpos($visual['markup'], 'ch247-preview') !== false;
 
 $bad = $repository->visualPreview(array_merge($repository->settings(), array('primary_color' => 'red', 'layout_width' => '400')));
