@@ -28,7 +28,22 @@ const env = loadEnv({
 } as NodeJS.ProcessEnv);
 const TOKEN = 'feed-token-0123456789';
 
-function feedBody(runId: number | null, observedAt = '2026-10-12T06:00:00+00:00') {
+/**
+ * Anchor the feed's observation time to the run, not to a calendar date.
+ *
+ * The status route judges freshness against the wall clock with `FX_MAX_AGE_HOURS` (48, below), so a
+ * fixture pinned to a fixed date reports `stale` once that date is two days old — and this file
+ * started failing on 2026-10-14 against a tree nothing had changed. An observation one minute before
+ * the suite starts cannot expire; the tests that need age move the *clock*, not the feed.
+ */
+const OBSERVED_AT = new Date(Date.now() - 60_000);
+const OBSERVED_AT_ISO = OBSERVED_AT.toISOString();
+
+function clockAfterObservedMinutes(minutes: number): Date {
+  return new Date(OBSERVED_AT.getTime() + minutes * 60_000);
+}
+
+function feedBody(runId: number | null, observedAt = OBSERVED_AT_ISO) {
   return {
     base: 'USD',
     runId,
@@ -70,10 +85,10 @@ describe('display currency feed (WHMCS addon -> Node)', () => {
     expect(result).toEqual({ status: 'stored', runId: 101, count: 2 });
     expect(lastAuth).toBe(`Bearer ${TOKEN}`);
 
-    const status = buildDisplayCurrencyStatus(await loadLatestDisplaySnapshot(db), new Date('2026-10-12T07:00:00Z'), 48 * 3600_000);
+    const status = buildDisplayCurrencyStatus(await loadLatestDisplaySnapshot(db), clockAfterObservedMinutes(60), 48 * 3600_000);
     expect(status.available).toBe(true);
     expect(status.reason).toBeNull();
-    expect(status.asOf).toBe('2026-10-12T06:00:00.000Z');
+    expect(status.asOf).toBe(OBSERVED_AT_ISO);
     expect(status.currencies.map((c) => c.code)).toEqual(['EUR', 'GBP']);
     expect(status.currencies[0]?.rate).toBeCloseTo(0.9231, 10);
   });
@@ -100,7 +115,7 @@ describe('display currency feed (WHMCS addon -> Node)', () => {
     feedStatus = 200;
 
     const snapshot = await loadLatestDisplaySnapshot(db);
-    const status = buildDisplayCurrencyStatus(snapshot, new Date('2026-10-20T00:00:00Z'), 48 * 3600_000);
+    const status = buildDisplayCurrencyStatus(snapshot, clockAfterObservedMinutes(49 * 60), 48 * 3600_000);
     expect(status.available).toBe(false);
     expect(status.reason).toBe('stale');
     expect(status.currencies).toEqual([]);
