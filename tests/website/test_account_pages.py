@@ -182,5 +182,84 @@ class ParentInheritanceTests(unittest.TestCase):
                          'pwreset.tpl is superseded; the recoverable flow is the password-reset family')
 
 
+class AccountPageMarkupTests(unittest.TestCase):
+    """The markup a visitor gets is part of the contract too.
+
+    `check-fixtures.py` audits the rendered pages (one `<main>`, one `<h1>`, no duplicate id, every
+    class styled, every link live) but it only audits pages the fixture harness renders. These
+    assertions are the fast, static half: they fail at edit time, before anything is rendered, and
+    they cover the rule that is easiest to break by accident -- a page that opens a landmark and a
+    partial that opens a second one.
+    """
+
+    PAGES = ('login.tpl', 'clientregister.tpl', 'contact.tpl', 'password-reset-container.tpl')
+    STEPS = ('password-reset-email-prompt.tpl', 'password-reset-security-prompt.tpl',
+             'password-reset-change-prompt.tpl')
+
+    def test_every_account_page_owns_exactly_one_main_landmark(self):
+        for name in self.PAGES:
+            text = read(name)
+            self.assertEqual(text.count('<main'), 1, f'{name} must open exactly one landmark')
+            self.assertEqual(text.count('<main id="main-content">'), 1, f'{name} lost the shared landmark id')
+            self.assertEqual(text.count('</main>'), 1, f'{name} must close the landmark it opens')
+
+    def test_the_step_partials_do_not_open_a_second_landmark(self):
+        # The container renders them inside its own <main>; a nested landmark is invalid HTML and
+        # makes the step pages read as two documents to a screen reader.
+        for name in self.STEPS:
+            text = read(name)
+            self.assertNotIn('<main', text, f'{name} is included, so it must not open a landmark')
+            self.assertNotIn('</main>', text, f'{name} must not close the container\'s landmark')
+
+    def test_every_visible_input_is_labelled(self):
+        # Hidden fields, checkboxes and radios carry their own label in the markup (the checkbox is
+        # wrapped in the label), so the rule is about the fields a visitor types into.
+        skipped = {'hidden', 'checkbox', 'radio', 'submit', 'button', 'image', 'reset'}
+        for name in self.PAGES:
+            text = read(name)
+            labelled = set(re.findall(r'<label\b[^>]*\bfor="([^"]+)"', text))
+            for tag in re.finditer(r'<input\b[^>]*>', text):
+                markup = tag.group(0)
+                kind = re.search(r'type="([^"]*)"', markup)
+                if kind and kind.group(1).lower() in skipped:
+                    continue
+                identifier = re.search(r'id="([^"]+)"', markup)
+                self.assertTrue(
+                    'aria-label' in markup or (identifier and identifier.group(1) in labelled),
+                    f'{name}: an input has no label: {markup[:90]}',
+                )
+
+    def test_every_form_posts(self):
+        # A GET form here would put a password or a message body in the URL and the server would
+        # discard it; the search box in the site navigation is the only GET form on the site.
+        for name in self.PAGES:
+            for form in re.finditer(r'<form\b[^>]*>', read(name)):
+                self.assertIn('method="post"', form.group(0), f'{name}: a form is not a POST: {form.group(0)}')
+
+    def test_the_contact_page_posts_the_fields_the_handler_reads(self):
+        text = read('contact.tpl')
+        self.assertIn('action="{$WEB_ROOT}/contact.php"', text)
+        self.assertIn('name="action" value="send"', text)
+        for field in ('name', 'email', 'subject', 'message'):
+            self.assertRegex(text, rf'name="{field}"', f'the contact form lost {field}')
+        self.assertNotIn('type="subject"', text, 'the subject field was typed as a mailto subject again')
+        self.assertNotIn('href="#"', text, 'the contact page grew a dead link')
+        self.assertIn('{include file="$template/includes/captcha.tpl"}', text)
+
+    def test_the_account_pages_avoid_modifiers_smarty_5_removes(self):
+        # `{lang|addslashes}` is a bare PHP function used as a modifier; Smarty 4.5 deprecates it
+        # and Smarty 5 refuses it. `escape:'javascript'` is the supported way to put a translated
+        # string inside a script.
+        for name in self.PAGES + self.STEPS:
+            self.assertNotIn('|addslashes', read(name), f'{name} still uses a removed modifier')
+
+    def test_the_fixture_harness_renders_every_account_page(self):
+        # These pages are audited by check-fixtures.py only if the renderer is told about them.
+        harness = (ROOT / 'tests' / 'website' / 'render-fixtures.php').read_text()
+        for page, template in (('login.php', 'login.tpl'), ('register.php', 'clientregister.tpl'),
+                               ('pwreset.php', 'password-reset-container.tpl'), ('contact.php', 'contact.tpl')):
+            self.assertIn(f"$pages['{page}'] = '{template}';", harness,
+                          f'{page} is shipped but never rendered by the fixture harness')
+
 if __name__ == '__main__':
     unittest.main()

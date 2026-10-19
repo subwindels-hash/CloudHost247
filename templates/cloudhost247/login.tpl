@@ -5,6 +5,7 @@
    contract exactly: the POST target is the named `login-validate` route, the field
    names are `username` and `password`, `rememberme` is optional, and the captcha block
    is the shared partial. Only the presentation is CloudHost247's. *}
+<main id="main-content">
 <section class="ch-auth" aria-labelledby="ch-auth-title">
     <div class="ch-auth__inner">
         <div class="ch-auth__card">
@@ -65,3 +66,4 @@
         </div>
     </div>
 </section>
+</main>

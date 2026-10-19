@@ -9,6 +9,7 @@
    the vendor wizard, every input labelled, and errors shown next to the field the
    platform already flags. *}
 
+<main id="main-content">
 {if in_array('state', $optionalFields)}
     <script>
         var statesTab = 10;
@@ -18,11 +19,16 @@
 
 <script src="{$BASE_PATH_JS}/StatesDropdown.js"></script>
 <script src="{$BASE_PATH_JS}/PasswordStrength.js"></script>
+{capture assign='langPwStrength'}{lang key='pwstrength'}{/capture}
+{capture assign='langPwWeak'}{lang key='pwstrengthweak'}{/capture}
+{capture assign='langPwModerate'}{lang key='pwstrengthmoderate'}{/capture}
+{capture assign='langPwStrong'}{lang key='pwstrengthstrong'}{/capture}
+{capture assign='langPwEnter'}{lang key='pwstrengthenter'}{/capture}
 <script>
-    window.langPasswordStrength = "{lang|addslashes key='pwstrength'}";
-    window.langPasswordWeak = "{lang|addslashes key='pwstrengthweak'}";
-    window.langPasswordModerate = "{lang|addslashes key='pwstrengthmoderate'}";
-    window.langPasswordStrong = "{lang|addslashes key='pwstrengthstrong'}";
+    window.langPasswordStrength = "{$langPwStrength|escape:'javascript'}";
+    window.langPasswordWeak = "{$langPwWeak|escape:'javascript'}";
+    window.langPasswordModerate = "{$langPwModerate|escape:'javascript'}";
+    window.langPasswordStrong = "{$langPwStrong|escape:'javascript'}";
 </script>
 
 <section class="ch-auth ch-auth--wide ch-auth--register" aria-labelledby="ch-auth-title">
@@ -250,9 +256,10 @@
             // The vendor script updates the meter bar; this keeps the text next to it honest.
             first.addEventListener('input', function () {
                 label.textContent = first.value.length
-                    ? '{lang|addslashes key='pwstrength'}: ' + first.value.length + ' characters'
-                    : '{lang|addslashes key='pwstrength'}: {lang|addslashes key='pwstrengthenter'}';
+                    ? '{$langPwStrength|escape:'javascript'}: ' + first.value.length + ' characters'
+                    : '{$langPwStrength|escape:'javascript'}: {$langPwEnter|escape:'javascript'}';
             });
         }
     })();
 </script>
+</main>

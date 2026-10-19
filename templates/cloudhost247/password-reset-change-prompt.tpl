@@ -4,6 +4,7 @@
    The password strength meter is driven by the platform's PasswordStrength.js; the
    confirm-password comparison here only sets a native validity message, so the form still
    works if that script does not load. *}
+{capture assign='langPwStrength'}{lang key='pwstrength'}{/capture}
 <p class="ch-auth__hint">{lang key='pwresetenternewpw'}</p>
 <form class="ch-auth__form using-password-strength" method="post" action="{routePath('password-reset-change-perform')}">
     <input type="hidden" name="answer" id="answer" value="{$securityAnswer}" />
@@ -58,7 +59,7 @@
                 score = Math.min(100, score);
                 bar.style.width = score + '%';
                 bar.setAttribute('aria-valuenow', String(score));
-                label.textContent = '{lang|addslashes key='pwstrength'}: ' + value.length + ' characters';
+                label.textContent = '{$langPwStrength|escape:'javascript'}: ' + value.length + ' characters';
             });
         }
     })();

@@ -7,6 +7,7 @@
 
    `$innerTemplate` is a dynamic include: the value comes from the server, and the three
    prompt files this theme ships are the only values the platform sends for this flow. *}
+<main id="main-content">
 <section class="ch-auth ch-auth--wide" aria-labelledby="ch-auth-title">
     <div class="ch-auth__inner">
         <div class="ch-auth__card">
@@ -42,3 +43,4 @@
         </div>
     </div>
 </section>
+</main>
