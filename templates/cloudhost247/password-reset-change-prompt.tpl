@@ -12,17 +12,21 @@
     <div class="ch-auth__field">
         <label for="inputNewPassword1">{lang key='newpassword'}</label>
         <input type="password" name="newpw" id="inputNewPassword1" class="form-control"
-               autocomplete="new-password" minlength="8" required>
+               autocomplete="new-password" minlength="8"
+               aria-describedby="passwordRequirement passwordStrengthTextLabel" required>
         <div class="ch-auth__meter" aria-hidden="true">
             <div id="passwordStrengthMeterBar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
         </div>
-        <span class="ch-auth__hint" id="passwordStrengthTextLabel">{lang key='pwstrength'}: {lang key='pwstrengthenter'}</span>
+        {* The meter is decorative; the live text is what a screen reader hears when the score changes. *}
+        <span class="ch-auth__hint" id="passwordStrengthTextLabel" aria-live="polite">{lang key='pwstrength'}: {lang key='pwstrengthenter'}</span>
+        <p class="ch-auth__hint" id="passwordRequirement">At least 8 characters. The meter shows how strong the password is.</p>
     </div>
 
     <div class="ch-auth__field">
         <label for="inputNewPassword2">{lang key='confirmnewpassword'}</label>
         <input type="password" name="confirmpw" id="inputNewPassword2" class="form-control"
-               autocomplete="new-password" minlength="8" required>
+               autocomplete="new-password" minlength="8"
+               aria-describedby="passwordRequirement" required>
     </div>
 
     <button type="submit" name="submit" class="ch-auth__submit {$captcha->getButtonClass($captchaForm)}">

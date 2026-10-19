@@ -165,15 +165,20 @@
                                     <label for="inputNewPassword1">{lang key='clientareapassword'}</label>
                                     <input type="password" name="password" id="inputNewPassword1" class="form-control"
                                            data-error-threshold="{$pwStrengthErrorThreshold}" data-warning-threshold="{$pwStrengthWarningThreshold}"
-                                           autocomplete="new-password"{if $remote_auth_prelinked} value="{$password}"{/if} required>
+                                           autocomplete="new-password" aria-describedby="passwordStrengthTextLabel passwordRequirement"
+                                           {if $remote_auth_prelinked} value="{$password}"{/if} required>
                                     <div class="ch-auth__meter" aria-hidden="true">
                                         <div id="passwordStrengthMeterBar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                                     </div>
-                                    <span class="ch-auth__hint" id="passwordStrengthTextLabel">{lang key='pwstrength'}: {lang key='pwstrengthenter'}</span>
+                                    {* The meter is decorative; this text is what a screen reader hears, so it has to be
+                                       a live region and the input has to point at it. *}
+                                    <span class="ch-auth__hint" id="passwordStrengthTextLabel" aria-live="polite">{lang key='pwstrength'}: {lang key='pwstrengthenter'}</span>
+                                    <p class="ch-auth__hint" id="passwordRequirement">Use at least 8 characters. A mix of letters, numbers and symbols is stronger.</p>
                                 </div>
                                 <div class="ch-auth__field"{if $remote_auth_prelinked && !$securityquestions} style="display:none;"{/if}>
                                     <label for="inputNewPassword2">{lang key='clientareaconfirmpassword'}</label>
                                     <input type="password" name="password2" id="inputNewPassword2" class="form-control"
+                                           aria-describedby="passwordRequirement"
                                            autocomplete="new-password"{if $remote_auth_prelinked} value="{$password}"{/if} required>
                                     <span class="ch-auth__hint">Both passwords must match.</span>
                                 </div>
@@ -192,7 +197,9 @@
                                     <div class="ch-auth__field">
                                         <label for="inputSecurityQAns">{lang key='clientareasecurityanswer'}</label>
                                         <input type="password" name="securityqans" id="inputSecurityQAns" class="form-control"
-                                               placeholder="{lang key='clientareasecurityanswer'}" autocomplete="off">
+                                               placeholder="{lang key='clientareasecurityanswer'}" autocomplete="off"
+                                               aria-describedby="securityAnswerHint">
+                                        <p class="ch-auth__hint" id="securityAnswerHint">Asked when you reset your password or contact support. Hidden as you type.</p>
                                     </div>
                                 {/if}
                             </div>

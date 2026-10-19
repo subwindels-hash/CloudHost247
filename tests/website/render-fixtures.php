@@ -193,7 +193,10 @@ foreach ($pages as $path => $template) {
             'optionalFields' => array('companyname', 'address1', 'address2', 'state', 'postcode', 'phonenumber'),
             'clientcountries' => array('NG' => 'Nigeria', 'GB' => 'United Kingdom'),
             'defaultCountry' => 'NG', 'clientcountry' => 'NG',
-            'customfields' => array(), 'securityquestions' => array(), 'currencies' => array(),
+            'customfields' => array(), 'currencies' => array(),
+            // One security question so the optional answer field is rendered (and audited) rather than
+            // skipped: it is the only password-type input that is not a password.
+            'securityquestions' => array(array('id' => 1, 'question' => 'What was the name of your first school?')),
             'accepttos' => true, 'tosurl' => '/terms-of-service.php',
             'registrationDisabled' => false, 'remote_auth_prelinked' => false,
         ));

@@ -261,5 +261,65 @@ class AccountPageMarkupTests(unittest.TestCase):
             self.assertIn(f"$pages['{page}'] = '{template}';", harness,
                           f'{page} is shipped but never rendered by the fixture harness')
 
+class PasswordFieldAccessibilityTests(unittest.TestCase):
+    """A password field a screen reader cannot explain is a password field people abandon.
+
+    The strength meter is decorative (`aria-hidden`): the bar's width means nothing to a non-visual
+    user. What has to carry the information is the text next to it, announced as it changes, plus
+    the requirement stated before the form is submitted rather than discovered by rejection.
+    """
+
+    TEMPLATES = ('clientregister.tpl', 'password-reset-change-prompt.tpl')
+
+    @staticmethod
+    def tag_with_id(text: str, identifier: str) -> str:
+        match = re.search(r'<[a-z][^>]*\bid="' + re.escape(identifier) + r'"[^>]*>', text, re.S)
+        if match is None:
+            raise AssertionError(f'no element with id="{identifier}"')
+        return match.group(0)
+
+    @classmethod
+    def element_with_id(cls, text: str, identifier: str) -> str:
+        """The whole element, so its text content can be asserted, not just its attributes."""
+        match = re.search(
+            r'<([a-z][a-z0-9]*)[^>]*\bid="' + re.escape(identifier) + r'"[^>]*>(.*?)</\1>', text, re.S)
+        if match is None:
+            raise AssertionError(f'no closed element with id="{identifier}"')
+        return match.group(0)
+
+    def test_every_password_input_points_at_the_text_that_explains_it(self):
+        for name in self.TEMPLATES:
+            text = read(name)
+            ids = set(re.findall(r'\bid="([^"]+)"', text))
+            fields = [m.group(0) for m in re.finditer(r'<input[^>]*type="password"[^>]*>', text, re.S)]
+            self.assertGreaterEqual(len(fields), 2, f'{name} should have both password fields')
+            for field in fields:
+                described = re.search(r'aria-describedby="([^"]+)"', field)
+                self.assertIsNotNone(described, f'{name}: password input without aria-describedby: {field[:90]}')
+                for target in described.group(1).split():
+                    self.assertIn(target, ids, f'{name}: aria-describedby names the missing id {target}')
+
+    def test_the_strength_meter_is_decorative_and_its_text_is_a_live_region(self):
+        for name in self.TEMPLATES:
+            text = read(name)
+            bar = self.tag_with_id(text, 'passwordStrengthMeterBar')
+            self.assertIn('role="progressbar"', bar)
+            self.assertIn('aria-hidden="true"', text,
+                          f'{name}: the visual meter must stay hidden from assistive tech')
+            label = self.tag_with_id(text, 'passwordStrengthTextLabel')
+            self.assertIn('aria-live="polite"', label,
+                          f'{name}: strength updates are silent without a live region')
+
+    def test_the_requirement_is_stated_before_the_form_is_submitted(self):
+        for name in self.TEMPLATES:
+            text = read(name)
+            requirement = self.element_with_id(text, 'passwordRequirement')
+            self.assertIn('8', requirement, f'{name}: the stated requirement omits the enforced length')
+            if 'minlength="8"' in text:
+                # The hint and the constraint have to agree, or the browser rejects what the page said was fine.
+                self.assertIn('8 characters', requirement)
+            self.assertNotIn('aria-hidden', requirement)
+
+
 if __name__ == '__main__':
     unittest.main()
