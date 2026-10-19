@@ -1,4 +1,207 @@
-#order-standard_cart{--ch247-primary:#0756d8;--ch247-accent:#12b886}#order-standard_cart .btn-primary{background:var(--ch247-primary);border-color:var(--ch247-primary)}#order-standard_cart .panel-addon-selected{border-color:var(--ch247-accent)}#order-standard_cart .order-summary{border-radius:.75rem;box-shadow:0 8px 30px rgba(26,54,93,.1)}
-:where(a,button,input,select,textarea):focus-visible{outline:3px solid #12b886;outline-offset:2px}.product-info,.product-configurable-options,.view-cart-items,.checkout{max-width:100%;overflow-wrap:anywhere}.form-control{max-width:100%;min-height:42px}.table-responsive{overflow-x:auto}@media(max-width:767px){.row-product-selection>div,.field-container,.checkout-security-msg{width:100%;float:none}.btn,.form-control{max-width:100%}}@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
-/* Orbit design alignment. Inherit the WHMCS cart; never replace its forms or tokens. */
-#order-standard_cart .btn-primary{background:#196947;border-color:#196947}#order-standard_cart .panel,#order-standard_cart .product{border-radius:12px;border-color:#dce4e6}#order-standard_cart .order-summary{background:#101e2c}#order-standard_cart input:focus,#order-standard_cart select:focus{outline:2px solid #196947;outline-offset:2px}
+/* -----------------------------------------------------------------------------
+   CloudHost247 cart skin.
+
+   This order form is a child of WHMCS `standard_cart`: the parent owns the markup,
+   the field names, the tokens and the checkout processing, and this file only
+   restyles it. Nothing here may replace or hide a parent control.
+
+   Palette: the skin reads the tokens the site already publishes
+   (`shared/site/design-system.css`) and falls back to the same literals, so a
+   token change reaches checkout too and the cart cannot drift to a second brand
+   colour. The two literals that used to be here — a blue primary and a separate
+   green — are gone on purpose; checkout was the last surface still carrying them.
+   -------------------------------------------------------------------------- */
+
+#order-standard_cart {
+  --ch247-cart-primary: var(--ch247-primary, #16704b);
+  --ch247-cart-primary-dark: var(--ch-green-dark, #0f5537);
+  --ch247-cart-accent: var(--ch247-accent, #7ff0b4);
+  --ch247-cart-ink: var(--ch-ink, #0c1c26);
+  --ch247-cart-muted: var(--ch-muted, #56686f);
+  --ch247-cart-line: var(--ch-line, #dbe3e0);
+  --ch247-cart-soft: var(--ch-soft, #f4f8f6);
+  color: var(--ch247-cart-ink);
+}
+
+/* Buttons: the parent's primary action is the only filled control in the flow. */
+#order-standard_cart .btn-primary,
+#order-standard_cart .btn-success {
+  background: var(--ch247-cart-primary);
+  border-color: var(--ch247-cart-primary);
+  color: #fff;
+}
+
+#order-standard_cart .btn-primary:hover,
+#order-standard_cart .btn-primary:focus,
+#order-standard_cart .btn-success:hover,
+#order-standard_cart .btn-success:focus {
+  background: var(--ch247-cart-primary-dark);
+  border-color: var(--ch247-cart-primary-dark);
+  color: #fff;
+}
+
+#order-standard_cart .btn-link,
+#order-standard_cart a {
+  color: var(--ch247-cart-primary);
+}
+
+/* Product and panel surfaces: one radius, one border, one shadow. */
+#order-standard_cart .panel,
+#order-standard_cart .product,
+#order-standard_cart .panel-default {
+  border-radius: 12px;
+  border-color: var(--ch247-cart-line);
+  box-shadow: 0 1px 2px rgba(12, 28, 38, 0.05);
+}
+
+#order-standard_cart .product:hover,
+#order-standard_cart .product.selected {
+  border-color: var(--ch247-cart-primary);
+}
+
+#order-standard_cart .panel-heading {
+  background: var(--ch247-cart-soft);
+  border-color: var(--ch247-cart-line);
+  color: var(--ch247-cart-ink);
+  border-radius: 12px 12px 0 0;
+}
+
+#order-standard_cart .panel-addon-selected,
+#order-standard_cart .panel-addon:hover {
+  border-color: var(--ch247-cart-primary);
+}
+
+/* Order summary: a light card, not a dark panel.
+   The previous rule painted the summary `#101e2c` without setting a text colour, so
+   on a parent that renders dark text on a light default the totals were unreadable.
+   The child cannot see the parent's rules, so it states both halves. */
+#order-standard_cart .order-summary {
+  background: var(--ch247-cart-soft);
+  border: 1px solid var(--ch247-cart-line);
+  border-radius: 12px;
+  color: var(--ch247-cart-ink);
+}
+
+#order-standard_cart .order-summary .title,
+#order-standard_cart .order-summary h2,
+#order-standard_cart .order-summary h3,
+#order-standard_cart .order-summary strong {
+  color: var(--ch247-cart-ink);
+}
+
+#order-standard_cart .order-summary .total,
+#order-standard_cart .order-summary .amount {
+  color: var(--ch247-cart-primary);
+  font-weight: 650;
+}
+
+#order-standard_cart .order-summary a {
+  color: var(--ch247-cart-primary);
+}
+
+/* Forms: the site's field height and focus ring, without changing any field. */
+#order-standard_cart .form-control {
+  max-width: 100%;
+  min-height: 42px;
+  border-color: var(--ch247-cart-line);
+  border-radius: 8px;
+}
+
+#order-standard_cart .form-control:focus {
+  border-color: var(--ch247-cart-primary);
+  box-shadow: 0 0 0 3px rgba(22, 112, 75, 0.15);
+}
+
+#order-standard_cart .form-group label {
+  color: var(--ch247-cart-ink);
+  font-weight: 600;
+}
+
+#order-standard_cart .help-block,
+#order-standard_cart .text-muted {
+  color: var(--ch247-cart-muted);
+}
+
+/* Tabs: the parent's step navigation, restated on the brand colour. */
+#order-standard_cart .nav-tabs {
+  border-bottom-color: var(--ch247-cart-line);
+}
+
+#order-standard_cart .nav-tabs > li.active > a,
+#order-standard_cart .nav-tabs > li.active > a:hover,
+#order-standard_cart .nav-tabs > li.active > a:focus {
+  color: var(--ch247-cart-primary);
+  border-bottom: 2px solid var(--ch247-cart-primary);
+  background: transparent;
+}
+
+/* Tables (domain options, addons, review): readable at every width. */
+#order-standard_cart .table-responsive {
+  overflow-x: auto;
+}
+
+#order-standard_cart .table > thead > tr > th {
+  background: var(--ch247-cart-soft);
+  color: var(--ch247-cart-muted);
+  border-bottom-color: var(--ch247-cart-line);
+}
+
+#order-standard_cart .table > tbody > tr > td {
+  border-top-color: var(--ch247-cart-line);
+}
+
+/* Alerts carry the site's semantic colours, so a declined card reads like an error
+   everywhere else on the site. */
+#order-standard_cart .alert-success {
+  background: var(--ch-ok-soft, #eef8f2);
+  border-color: #c2e6d3;
+  color: var(--ch247-cart-primary);
+}
+
+#order-standard_cart .alert-danger {
+  background: var(--ch-danger-soft, #fdf0ef);
+  border-color: #efc9c5;
+  color: var(--ch-danger, #b42318);
+}
+
+/* Structure: nothing may overflow the viewport, and long product names wrap. */
+.product-info,
+.product-configurable-options,
+.view-cart-items,
+.checkout {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+/* Focus: the site's indicator, on every control the parent renders inside the cart. */
+#order-standard_cart :where(a, button, input, select, textarea):focus-visible {
+  outline: 3px solid var(--ch247-cart-primary, #16704b);
+  outline-offset: 2px;
+}
+
+@media (max-width: 767px) {
+  .row-product-selection > div,
+  .field-container,
+  .checkout-security-msg {
+    width: 100%;
+    float: none;
+  }
+
+  .btn,
+  .form-control {
+    max-width: 100%;
+  }
+
+  #order-standard_cart .order-summary {
+    margin-top: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *:before,
+  *:after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
