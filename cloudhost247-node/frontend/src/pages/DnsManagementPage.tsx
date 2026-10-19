@@ -213,7 +213,7 @@ export default function DnsManagementPage() {
                     border: '1px solid #e2e8f0',
                     borderRadius: 8,
                     marginBottom: '0.5rem',
-                    background: selectedZone?.id === zone.id ? '#e9f1ff' : '#fff',
+                    background: selectedZone?.id === zone.id ? '#e9f7ef' : '#fff',
                     cursor: 'pointer',
                   }}
                   onClick={() => loadZoneRecords(zone)}

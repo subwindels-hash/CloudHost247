@@ -29,7 +29,7 @@ export default function DashboardServersPage() {
       </div>
       <h2>{server.name}</h2>
       <p className="ch247-server-card__os">
-        {server.control_panel_name ? <strong style={{ color: '#0756d8' }}>{server.control_panel_name} · </strong> : null}
+        {server.control_panel_name ? <strong style={{ color: 'var(--ch247-primary, #16704b)' }}>{server.control_panel_name} · </strong> : null}
         {server.os_display_name??'Unknown operating system'} · {server.architecture??'—'} <OsLifecycleNotice compact status={server.os_version_status} displayName={server.os_display_name} endOfLifeDate={server.os_end_of_life_date}/>
       </p>
       <div className="ch247-server-card__ip"><small>PUBLIC IP</small><strong>{server.ip_address??(server.provisioning_status?.replace(/_/g,' ')??'Pending')}</strong></div>

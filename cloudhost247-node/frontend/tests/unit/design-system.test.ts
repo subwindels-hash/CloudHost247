@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
@@ -18,7 +18,8 @@ import { describe, expect, it } from 'vitest';
 const ROOT = join(__dirname, '..', '..', '..', '..');
 const DESIGN_SYSTEM = readFileSync(join(ROOT, 'shared', 'site', 'design-system.css'), 'utf8');
 const THEME_COPY = readFileSync(join(ROOT, 'templates', 'cloudhost247', 'css', 'design-system.css'), 'utf8');
-const APP_STYLES = readFileSync(join(__dirname, '..', '..', 'src', 'styles.css'), 'utf8');
+const SRC = join(__dirname, '..', '..', 'src');
+const APP_STYLES = readFileSync(join(SRC, 'styles.css'), 'utf8');
 
 describe('design system', () => {
   it('prevents horizontal overflow at the document level', () => {
@@ -72,6 +73,21 @@ describe('design system', () => {
     }
     for (const retired of ['#0756d8', '#071b3d', '#0a1730', '#12b886']) {
       expect(APP_STYLES, `styles.css still paints the retired palette colour ${retired}`).not.toContain(retired);
+    }
+  });
+
+  it('paints no retired colour in any application stylesheet', () => {
+    // The dashboard is not one sheet: eight are imported by main.tsx, plus page components with
+    // inline colours. Auditing only styles.css is how `infrastructure.css` and `platform.css` kept
+    // the blue (wizard steps, filter tabs, server cards, notification rails, focus rings) long
+    // after the tokens had moved to green.
+    const sheets = readdirSync(SRC).filter((name) => name.endsWith('.css')).sort();
+    expect(sheets.length).toBeGreaterThanOrEqual(8);
+    for (const sheet of sheets) {
+      const css = readFileSync(join(SRC, sheet), 'utf8').toLowerCase();
+      for (const retired of ['#0756d8', '#071b3d', '#0a1730', '#12b886', '#0442a8', '#0b7a58']) {
+        expect(css, `${sheet} still paints the retired brand colour ${retired}`).not.toContain(retired);
+      }
     }
   });
 

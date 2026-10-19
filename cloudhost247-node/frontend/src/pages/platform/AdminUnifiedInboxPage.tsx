@@ -55,7 +55,7 @@ export default function AdminUnifiedInboxPage() {
   const [reply, setReply] = useState({ body: '', visibility: 'public' as 'public' | 'internal' });
   const [staff, setStaff] = useState<Array<{ id: string; label: string }>>([]);
   const [channelDraft, setChannelDraft] = useState({ kind: '', name: '' });
-  const [labelDraft, setLabelDraft] = useState({ name: '', color: '#0756d8' });
+  const [labelDraft, setLabelDraft] = useState({ name: '', color: '#16704b' });
   const [error, setError] = useState('');
   const action = useAction();
 
