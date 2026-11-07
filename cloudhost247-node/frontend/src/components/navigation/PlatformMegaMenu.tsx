@@ -2,23 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { NAV_SECTIONS, TOOLS_CATEGORIES, type RegistryGroup, type RegistrySection } from '../../navigation/registry.generated';
 
-/**
- * CloudHost247 top-menu navigation.
- *
- * All seven registry sections stay visible as direct links beside the logo — nothing is hidden
- * behind a hamburger or a `+` accordion. Each one now also has its own dropdown arrow: clicking
- * the arrow opens a panel under the top menu with that section's real sub-links from the shared
- * registry. The label itself remains a normal link to the section landing page, so a visitor can
- * either go straight there or open the directory.
- *
- * Interaction is click-only (not hover) so pointer, touch and keyboard behave identically and a
- * click never toggles a hover-opened panel shut. The panel is a single region controlled by the
- * seven carets via `aria-expanded` / `aria-controls`; Escape closes and restores focus; an
- * outside click or a route change closes it. Only one section is open at a time.
- *
- * `useNavigationSections` is kept for the platform hub, `Brand` for the header and footer.
- */
-
 export function Brand({ className }: { className?: string }) {
   const onDark = Boolean(className?.includes('footer') || className?.includes('on-dark'));
   return (
@@ -60,6 +43,8 @@ function Chevron() {
 }
 
 export function PlatformMenu() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const mobileTriggerRef = useRef<HTMLButtonElement>(null);
   const [openId, setOpenId] = useState<string | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
@@ -69,17 +54,18 @@ export function PlatformMenu() {
 
   // Navigating closes the directory: a panel left hanging over the page the visitor asked for is
   // a bug, not a feature.
-  useEffect(() => { setOpenId(null); }, [location.pathname]);
+  useEffect(() => { setOpenId(null); setMobileOpen(false); }, [location.pathname, location.search, location.hash]);
 
   useEffect(() => {
-    if (!openId) return undefined;
+    if (!openId && !mobileOpen) return undefined;
     const onPointerDown = (event: PointerEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) setOpenId(null);
+      if (!rootRef.current?.contains(event.target as Node)) { setOpenId(null); setMobileOpen(false); }
     };
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setOpenId(null);
-        triggerRef.current?.focus();
+        if (openId) triggerRef.current?.focus();
+        else { setMobileOpen(false); mobileTriggerRef.current?.focus(); }
       }
     };
     document.addEventListener('pointerdown', onPointerDown);
@@ -88,7 +74,7 @@ export function PlatformMenu() {
       document.removeEventListener('pointerdown', onPointerDown);
       document.removeEventListener('keydown', onKeyDown);
     };
-  }, [openId]);
+  }, [openId, mobileOpen]);
 
   function toggle(section: RegistrySection, trigger: HTMLButtonElement) {
     triggerRef.current = trigger;
@@ -99,6 +85,10 @@ export function PlatformMenu() {
 
   return (
     <div className="hg-menu__root" ref={rootRef}>
+      <button ref={mobileTriggerRef} type="button" className="hg-menu__mobile-toggle" aria-expanded={mobileOpen} aria-controls="ch247-mobile-menu" onClick={() => { setMobileOpen((open) => !open); setOpenId(null); }}>
+        Menu <Chevron />
+      </button>
+      <div id="ch247-mobile-menu" className={`hg-menu__mobile-content${mobileOpen ? ' is-open' : ''}`}>
       <nav className="hg-menu" aria-label="Primary">
         <ul className="hg-menu__items">
           {NAV_SECTIONS.map((section) => {
@@ -170,6 +160,7 @@ export function PlatformMenu() {
             ) : null}
           </div>
         ) : null}
+      </div>
       </div>
     </div>
   );

@@ -9,24 +9,6 @@ import { clearSession } from '../lib/auth';
 import { UTILITY } from '../navigation/registry.generated';
 import { useAuthState } from './useAuthState';
 
-/**
- * The universal CloudHost247 header — one flat dark bar, no dropdowns.
- *
- * Directly beneath the site-wide announcement bar is a slim, single straight line holding the
- * utility/account controls: Pricing, Help, language, currency, Sign In and Create Account. Below
- * that sits the main bar with the white brand mark, all seven registry sections as direct links,
- * plus search and cart. The Create Account button is deliberately compact so the utility line
- * stays shallow.
- *
- * Everything is visible: no hamburger, no `+` accordion, no mega panel and no compact dropdown.
- * At narrower widths the rows wrap rather than collapsing into a drawer — links stay visible.
- *
- * The menu comes from the shared registry, so the header, the footer and the sitemap cannot
- * disagree about what exists. No link is invented. Signed-in state adds a quieter second row for
- * account areas plus the role-gated staff links; those links re-verify the caller's role
- * server-side (see components/RequireRole.tsx), so showing them changes nothing about access.
- */
-
 const ACCOUNT_LINKS = [
   { to: '/dashboard', label: 'Overview' },
   { to: '/services', label: 'Services' },
@@ -76,6 +58,16 @@ export default function Header() {
             <CurrencySwitcher />
           </div>
 
+          <div className="hg-bar__icons">
+            <NavLink className="hg-bar__icon" to={UTILITY.search.to} aria-label={t('header.search.label')}>
+              <Icon name="search" size={18} />
+            </NavLink>
+            <NavLink className="hg-bar__icon hg-bar__cart" to={UTILITY.cart.to} aria-label={UTILITY.cart.label}>
+              <Icon name="cart" size={19} />
+              <span className="hg-cart__dot" aria-hidden="true" />
+            </NavLink>
+          </div>
+
           <div className="hg-bar__actions">
             {token ? (
               <>
@@ -94,9 +86,6 @@ export default function Header() {
                 <NavLink className="hg-bar__text-link" to={UTILITY.signIn.to}>
                   {UTILITY.signIn.label}
                 </NavLink>
-                <NavLink className="hg-btn hg-btn--sm" to={UTILITY.createAccount.to}>
-                  {UTILITY.createAccount.label}
-                </NavLink>
               </>
             )}
           </div>
@@ -108,15 +97,7 @@ export default function Header() {
           <div className="hg-bar__body">
             <PlatformMenu />
 
-            <div className="hg-bar__icons">
-              <NavLink className="hg-bar__icon" to={UTILITY.search.to} aria-label={t('header.search.label')}>
-                <Icon name="search" size={18} />
-              </NavLink>
-              <NavLink className="hg-bar__icon hg-bar__cart" to={UTILITY.cart.to} aria-label={UTILITY.cart.label}>
-                <Icon name="cart" size={19} />
-                <span className="hg-cart__dot" aria-hidden="true" />
-              </NavLink>
-            </div>
+
           </div>
         </div>
       </div>

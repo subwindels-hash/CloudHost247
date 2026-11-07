@@ -380,7 +380,8 @@
   box-shadow: inset 0 1px 0 rgba(255, 246, 214, 0.8);
 }
 .hg-float--one { top: 0; right: -10px; }
-.hg-float--two { bottom: 0; left: -18px; }
+.hg-hero__frame .ch-photo-frame__label { bottom: 76px; }
+.hg-float--two { position: relative; display: inline-flex; margin: -56px 0 0 18px; vertical-align: top; }
 
 /* --- Capability / trust strip ----------------------------------------------- */
 .hg-proof { border-bottom: 1px solid var(--hg-line); background: #fff; padding: 26px 0; }
@@ -470,9 +471,9 @@
 
 /* --- AI builder section ----------------------------------------------------- */
 .hg-ai {
-  background:
-    radial-gradient(700px 340px at 82% 8%, rgba(230, 200, 117, 0.13), transparent 70%),
-    linear-gradient(160deg, #080b0e 0%, #1a1a17 52%, #2b2415 100%);
+  background: linear-gradient(90deg, rgba(8, 11, 14, 0.85), rgba(8, 11, 14, 0.73)),
+    url('/media/cloudhost247/ai-builder-background.jpg') center / cover no-repeat;
+  background-color: #080b0e;
   color: #fff; position: relative; overflow: hidden;
 }
 .hg-ai::before {
@@ -544,14 +545,17 @@
   display: flex; flex-direction: column; justify-content: flex-end;
   color: #fff;
   text-decoration: none;
-  background: linear-gradient(150deg, #3a2a06, #b8860b);
+  background-color: #24201a;
+  background-size: cover;
+  background-position: center;
 }
-.hg-usecase:nth-child(2) { background: linear-gradient(150deg, #2b2415, #8a6a18); }
-.hg-usecase:nth-child(3) { background: linear-gradient(150deg, #2b2415, #8a6a18); }
-.hg-usecase:nth-child(4) { background: linear-gradient(150deg, #33260a, #c9a227); }
+.hg-usecase--business { background-image: url('/media/cloudhost247/usecases/business.jpg'); }
+.hg-usecase--store { background-image: url('/media/cloudhost247/usecases/store.jpg'); }
+.hg-usecase--application { background-image: url('/media/cloudhost247/usecases/application.jpg'); }
+.hg-usecase--infrastructure { background-image: url('/media/cloudhost247/usecases/infrastructure.jpg'); }
 .hg-usecase::before {
   content: ''; position: absolute; inset: 0;
-  background: radial-gradient(280px 180px at 80% 0%, rgba(255, 255, 255, 0.24), transparent 70%);
+  background: linear-gradient(180deg, rgba(8, 12, 16, 0.35) 0%, rgba(8, 12, 16, 0.94) 100%);
 }
 .hg-usecase:hover { color: #fff; transform: translateY(-4px); }
 .hg-usecase b { position: relative; font-size: 1.12rem; font-weight: 800; letter-spacing: -0.02em; }
@@ -606,9 +610,9 @@
   position: relative;
   overflow: hidden;
   padding: 78px 0;
-  background:
-    linear-gradient(100deg, transparent 30%, rgba(230, 200, 117, 0.12) 48%, transparent 66%),
-    linear-gradient(120deg, #0d1116 0%, #33260a 58%, #6b4d0c 100%);
+  background: linear-gradient(90deg, rgba(9, 13, 18, 0.83), rgba(9, 13, 18, 0.72)),
+    url('/media/cloudhost247/cta-online.jpg') center / cover no-repeat;
+  background-color: #0d1116;
   color: #fff;
   text-align: center;
 }
@@ -780,7 +784,6 @@
   .hg-hero__grid { grid-template-columns: 1fr; }
   .hg-hero__visual { max-width: 620px; margin-inline: auto; padding: 20px 0; }
   .hg-float--one { right: 0; }
-  .hg-float--two { left: 0; }
   .hg-proof__grid { grid-template-columns: repeat(2, 1fr); }
   .hg-plans { grid-template-columns: 1fr; max-width: 520px; margin-inline: auto; }
   .hg-plan--featured { transform: none; }

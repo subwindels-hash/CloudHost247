@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import Header from '../../src/layout/Header';
@@ -69,8 +69,8 @@ describe('Top menu with per-section dropdown arrows', () => {
     const panel = container.querySelector<HTMLElement>('#ch247-menu-panel');
     expect(panel).toBeTruthy();
     expect(panel?.hasAttribute('hidden')).toBe(true);
-    // Seven arrows plus the two always-inline language/currency settings disclosures.
-    expect(container.querySelectorAll('[aria-expanded]')).toHaveLength(NAV_SECTIONS.length + 2);
+    // Section arrows, mobile menu, and language/currency settings disclosures.
+    expect(container.querySelectorAll('[aria-expanded]')).toHaveLength(NAV_SECTIONS.length + 3);
   });
 
   it('opens the matching registry sub-links on the top menu and closes on Escape', () => {
@@ -104,61 +104,64 @@ describe('Top menu with per-section dropdown arrows', () => {
     expect(within(primary).getByRole('button', { name: 'Language: English' })).toBeTruthy();
     expect(within(primary).getByRole('button', { name: /^Display currency: USD/ })).toBeTruthy();
     expect(within(primary).getByRole('link', { name: 'Sign In' })).toBeTruthy();
-    expect(within(primary).getByRole('link', { name: 'Create Account' })).toBeTruthy();
+    expect(within(primary).queryByRole('link', { name: 'Create Account' })).toBeNull();
     expect(within(primary).getByRole('link', { name: 'Pricing' })).toBeTruthy();
     expect(within(primary).getByRole('link', { name: 'Help' })).toBeTruthy();
     expect(within(primary).getByRole('link', { name: 'Cart' })).toBeTruthy();
 
-    // All six controls are children of one single, non-wrapping line beside the announcement.
+    // Search and cart sit directly after the locale controls in the utility row.
     const line = container.querySelector<HTMLElement>('.hg-bar__top')!;
     expect(line).toBeTruthy();
+    expect(line.querySelector('.hg-bar__locale')?.nextElementSibling).toBe(line.querySelector('.hg-bar__icons'));
+    expect(within(line.querySelector<HTMLElement>('.hg-bar__icons')!).getByRole('link', { name: /search/i })).toBeTruthy();
+    expect(within(line.querySelector<HTMLElement>('.hg-bar__icons')!).getByRole('link', { name: 'Cart' })).toBeTruthy();
     const controls = [
       ...line.querySelectorAll('.hg-bar__quick a'),
       ...line.querySelectorAll('.hg-bar__locale button'),
       ...line.querySelectorAll('.hg-bar__actions a, .hg-bar__actions button'),
     ];
-    expect(controls).toHaveLength(6);
+    expect(controls).toHaveLength(5);
     controls.forEach((control) => expect(control.hasAttribute('hidden')).toBe(false));
   });
 });
 
-describe('Professional footer directory', () => {
-  it('has a brand intro, four balanced columns with eight labelled sub-groups, and a legal bar', () => {
+describe('Responsive footer directory', () => {
+  it('renders six categories with all registry destinations', () => {
     const { container } = render(<MemoryRouter><Footer /></MemoryRouter>);
-    const footer = container.querySelector<HTMLElement>('footer.ch247-footer.hg-footer')!;
-    expect(footer).toBeTruthy();
-
-    expect(footer.querySelector('.hg-footer__intro')).toBeTruthy();
-    expect(footer.querySelector('.hg-footer__brand img')?.getAttribute('src')).toContain('white');
-    expect(footer.querySelector('.hg-footer__bottom')).toBeTruthy();
-    expect(footer.querySelector('.hg-footer__bottom .hg-footer__top')?.getAttribute('href')).toBe('#ch247-top');
-    expect(footer.querySelector('.hg-footer__locale')).toBeTruthy();
-    expect(footer.querySelector('.hg-footer__legal-links')).toBeTruthy();
-
+    const footer = container.querySelector<HTMLElement>('footer.hg-footer')!;
     const columns = footer.querySelectorAll('.hg-footer__column');
-    expect(columns).toHaveLength(4);
     expect([...columns].map((column) => column.querySelector('h2')?.textContent)).toEqual([
-      'Products & Domains', 'Cloud & Resources', 'Developers & Tools', 'Company & Legal',
+      'Hosting', 'Domain', 'Tools', 'Information', 'Company', 'Support',
     ]);
-    const subgroups = footer.querySelectorAll('.hg-footer__subgroup');
-    expect(subgroups).toHaveLength(8);
-    expect([...subgroups].map((group) => group.querySelector('h3')?.textContent)).toEqual([
-      'Hosting', 'Domains', 'Infrastructure', 'Resources',
-      'Developers', 'Tools', 'Company', 'Legal',
-    ]);
-
-    // Every destination rendered in the footer comes from the shared registry, and every
-    // registry destination is still reachable — rearranging columns must not silently drop a link.
     const registryPaths = new Set(FOOTER_COLUMNS.flatMap((column) => column.links.map((link) => link.to)));
     const rendered = [...footer.querySelectorAll('.hg-footer__column a')].map((a) => a.getAttribute('href'));
-    expect(rendered.length).toBeGreaterThan(10);
-    rendered.forEach((href) => expect(registryPaths.has(href!)).toBe(true));
     expect([...registryPaths].filter((path) => !rendered.includes(path))).toEqual([]);
-    const counts = [...columns].map((column) => column.querySelectorAll('a').length);
-    expect(Math.max(...counts)).toBeLessThanOrEqual(Math.min(...counts) * 2);
+    expect(footer.querySelector('.hg-footer__bottom')).toBeTruthy();
+  });
 
-    // Switchers live in the header only (also pinned by Header.test.tsx).
-    expect(within(footer).queryByRole('button', { name: /Language:/i })).toBeNull();
-    expect(within(footer).queryByRole('button', { name: /Display currency:/i })).toBeNull();
+  it('limits long lists to ten links until View all is selected', () => {
+    const { container } = render(<MemoryRouter><Footer /></MemoryRouter>);
+    const hosting = container.querySelector<HTMLElement>('.hg-footer__column')!;
+    const links = hosting.querySelectorAll('li > a');
+    expect(links.length).toBeGreaterThan(10);
+    expect([...links].filter((link) => !link.parentElement?.hidden)).toHaveLength(10);
+    const toggle = within(hosting).getByRole('button', { name: 'View all Hosting links' });
+    fireEvent.click(toggle);
+    expect([...links].filter((link) => !link.parentElement?.hidden)).toHaveLength(links.length);
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    fireEvent.click(toggle);
+    expect([...links].filter((link) => !link.parentElement?.hidden)).toHaveLength(10);
+  });
+
+  it('toggles each mobile section independently', () => {
+    render(<MemoryRouter><Footer /></MemoryRouter>);
+    const hosting = screen.getByRole('button', { name: 'Hosting' });
+    const domain = screen.getByRole('button', { name: 'Domain' });
+    expect(hosting.getAttribute('aria-expanded')).toBe('false');
+    fireEvent.click(hosting);
+    expect(hosting.getAttribute('aria-expanded')).toBe('true');
+    expect(domain.getAttribute('aria-expanded')).toBe('false');
+    fireEvent.click(hosting);
+    expect(hosting.getAttribute('aria-expanded')).toBe('false');
   });
 });

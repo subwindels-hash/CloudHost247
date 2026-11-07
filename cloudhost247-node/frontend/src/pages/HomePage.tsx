@@ -102,10 +102,10 @@ const SHOWCASE = [
 const AI_CHIPS = ['AI Website Builder', 'Cloud AI assistant', 'Logo Maker palettes', 'AI support answers'];
 
 const USE_CASES = [
-  { glyph: '▤', title: 'A business website', text: 'Domain, hosting, business email and HTTPS', to: '/hosting/business' },
-  { glyph: '▦', title: 'An online store', text: 'A storefront with products and orders', to: '/websites' },
-  { glyph: '⌘', title: 'An API or application', text: 'A supported runtime, a domain and a deployment', to: '/developers' },
-  { glyph: '▥', title: 'Infrastructure you run', text: 'VPS, cloud or dedicated servers with backups', to: '/cloud' },
+  { image: 'business', glyph: '▤', title: 'A business website', text: 'Domain, hosting, business email and HTTPS', to: '/hosting/business' },
+  { image: 'store', glyph: '▦', title: 'An online store', text: 'A storefront with products and orders', to: '/websites' },
+  { image: 'application', glyph: '⌘', title: 'An API or application', text: 'A supported runtime, a domain and a deployment', to: '/developers' },
+  { image: 'infrastructure', glyph: '▥', title: 'Infrastructure you run', text: 'VPS, cloud or dedicated servers with backups', to: '/cloud' },
 ];
 
 const MORE_POWER = [
@@ -323,7 +323,7 @@ function HeroVisual() {
         <figcaption className="ch-photo-frame__label">Enterprise infrastructure</figcaption>
       </figure>
       <div className="hg-float hg-float--one ch-float--ambient"><i>✓</i> One account for every service</div>
-      <div className="hg-float hg-float--two ch-float--ambient-slow"><i>↗</i> Live catalogue pricing</div>
+      <div className="hg-float hg-float--two"><i>↗</i> Live catalogue pricing</div>
     </div>
   );
 }
@@ -532,7 +532,7 @@ export default function HomePage() {
           </div>
           <div className="hg-cards hg-cards--4">
             {USE_CASES.map((item) => (
-              <Link className="hg-usecase" to={item.to} key={item.title}>
+              <Link className={`hg-usecase hg-usecase--${item.image}`} to={item.to} key={item.title}>
                 <span className="hg-usecase__glyph" aria-hidden="true">{item.glyph}</span>
                 <b>{item.title}</b>
                 <small>{item.text}</small>
