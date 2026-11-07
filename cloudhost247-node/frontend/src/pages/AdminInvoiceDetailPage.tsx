@@ -278,7 +278,7 @@ export function AdminInvoiceDetailPage() {
                   <td className="px-6 py-4">
                     <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase ${
                       l.entryType === 'charge' ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300' :
-                      l.entryType === 'payment' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300' :
+                      l.entryType === 'payment' ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300' :
                       l.entryType === 'refund' ? 'bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300' :
                       'bg-slate-100 text-slate-800'
                     }`}>

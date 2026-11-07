@@ -7,7 +7,7 @@ import type { MarketplaceApp } from '../lib/marketplace-api';
  * brand-colored tile derived from its slug. Admins can set a real logo_url later; this tile is
  * the honest, self-contained default.
  */
-const PALETTE = ['#101e2c', '#196947', '#183646', '#28483f'];
+const PALETTE = ['#101e2c', '#5f450a', '#183646', '#2b2415'];
 const MARKS = new Set(Object.keys(import.meta.glob('../../../../manifests/*/manifest.yaml', { query: '?raw', import: 'default' })).map(path => path.split('/').slice(-2)[0]));
 
 export default function AppTile({ name, slug, size = 44 }: { name: string; slug: string; size?: number }) {

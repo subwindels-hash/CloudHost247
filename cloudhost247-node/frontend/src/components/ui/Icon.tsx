@@ -167,8 +167,8 @@ export function BrandMark({ className }: { className?: string }) {
     <svg viewBox="0 0 32 32" className={className} aria-hidden focusable="false">
       <defs>
         <linearGradient id="ch-brand-a" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#7ff0b4" />
-          <stop offset="100%" stopColor="#2fd58a" />
+          <stop offset="0%" stopColor="#e6c875" />
+          <stop offset="100%" stopColor="#d4af37" />
         </linearGradient>
       </defs>
       <path d="M16 3.5 27 10v12L16 28.5 5 22V10L16 3.5Z" fill="none" stroke="url(#ch-brand-a)" strokeWidth="1.6" strokeLinejoin="round" />

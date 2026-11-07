@@ -13,9 +13,9 @@
 .ch247-announcebar {
     --ab-duration: 38s;
     --ab-gap: 3rem;
-    --ab-bg-start: var(--ch-navy, #0a1620);
-    --ab-bg-mid: var(--ch-green, #16704b);
-    --ab-accent: var(--ch-mint, #7ff0b4);
+    --ab-bg-start: var(--ch-navy, #0d1116);
+    --ab-bg-mid: var(--ch-green, #5f450a);
+    --ab-accent: var(--ch-mint, #e6c875);
     position: relative;
     z-index: 1040; /* above the Bootstrap navbar (1030) */
     display: block;
@@ -116,7 +116,7 @@
 .ch247-announcebar__badge {
     display: inline-block;
     background: var(--ab-accent);
-    color: #04231a;
+    color: #2b2415;
     font-size: .6875rem;
     font-weight: 700;
     letter-spacing: .06em;

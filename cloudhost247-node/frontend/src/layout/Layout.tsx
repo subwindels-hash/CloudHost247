@@ -1,5 +1,5 @@
 import { ToolsNavigationProvider } from '../components/tools/ToolsNavigation';
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { MARKETING_ROUTES } from '../navigation/registry.generated';
 import Header from './Header';
@@ -49,6 +49,18 @@ export function isMarketingSurface(pathname: string): boolean {
 export default function Layout() {
   const { pathname } = useLocation();
   const marketing = isMarketingSurface(pathname);
+
+  // A 320 ms opacity-only transition between routes. Opacity (not transform) is deliberate: it
+  // cannot shift layout or hurt CLS, and `metals.css` disables it under reduced motion. The
+  // attribute is removed and re-added so the animation restarts on every navigation; no page
+  // component is remounted and no route state is lost.
+  useEffect(() => {
+    const main = document.querySelector('.ch247-main');
+    if (!main) return;
+    main.removeAttribute('data-route-transition');
+    void (main as HTMLElement).offsetWidth;
+    main.setAttribute('data-route-transition', '');
+  }, [pathname]);
 
   return (
     <ToolsNavigationProvider><div className={`ch247-shell hg-theme ${marketing ? 'hg-shell' : 'hg-app'}`}>

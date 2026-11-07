@@ -25,7 +25,7 @@
 
 .ch247-header .ch247-locale__trigger {
   padding: 0.25rem 0.6rem;
-  border-color: var(--ch-line-strong, #c5d1cc);
+  border-color: var(--ch-line-strong, #c0c0c0);
   background: var(--ch-surface, #ffffff);
   color: var(--ch-ink, #0b1426);
   font-size: 0.84rem;
@@ -35,9 +35,9 @@
 
 .ch247-header .ch247-locale__trigger:hover,
 .ch247-header .ch247-locale__trigger[aria-expanded='true'] {
-  background: var(--ch-soft, #f2f5f3);
+  background: var(--ch-soft, #f5f5f3);
   border-color: var(--ch-ink, #0b1426);
-  color: var(--ch-green, #0f8a5f);
+  color: var(--ch-green, #b8860b);
 }
 
 .ch247-locale__trigger svg {
@@ -91,7 +91,7 @@
 }
 
 .ch247-locale__option:hover {
-  background: rgba(127, 240, 180, 0.12);
+  background: rgba(230, 200, 117, 0.12);
 }
 
 .ch247-locale__option[aria-current='true'] {
@@ -100,7 +100,7 @@
 
 .ch247-locale__trigger:focus-visible,
 .ch247-locale__option:focus-visible {
-  outline: 3px solid #7ff0b4;
+  outline: 3px solid #e6c875;
   outline-offset: 2px;
 }
 

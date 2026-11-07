@@ -257,7 +257,7 @@
   gap: 6px;
   margin-top: 22px;
   padding: 18px;
-  border: 1px solid #bfe9d5;
+  border: 1px solid #e6d9b3;
   border-radius: 14px;
   background: var(--hg-accent-soft);
   color: var(--hg-ink);
@@ -339,8 +339,8 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
-.hg-badge--sale { background: #fff0e6; color: #b4581b; }
-.hg-badge--new { background: #e6f8f0; color: #0b6b49; }
+.hg-badge--sale { background: #f7f1e0; color: #b4581b; }
+.hg-badge--new { background: #f7f1e0; color: #8a6410; }
 
 .hg-mega__foot {
   grid-column: 1 / -1;
@@ -449,7 +449,7 @@
    4. Footer
    -------------------------------------------------------------------------- */
 .hg-theme .hg-footer {
-  background: linear-gradient(160deg, var(--hg-accent-deep) 0%, #102a35 100%);
+  background: linear-gradient(160deg, var(--hg-accent-deep) 0%, #171d24 100%);
   color: #c9dbe0;
   margin-top: auto;
 }
@@ -467,7 +467,7 @@
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #7ff0b4;
+  color: #e6c875;
 }
 .hg-footer__cta h2 {
   margin: 0 0 10px;
@@ -476,7 +476,7 @@
   letter-spacing: -0.045em;
   color: #fff;
 }
-.hg-footer__cta p { margin: 0; max-width: 640px; font-size: 0.92rem; line-height: 1.65; color: #a8bfc9; }
+.hg-footer__cta p { margin: 0; max-width: 640px; font-size: 0.92rem; line-height: 1.65; color: #b6b9bd; }
 .hg-footer__cta .hg-btn { flex: 0 0 auto; }
 
 .hg-footer__main {
@@ -486,8 +486,8 @@
   padding: 48px 0;
 }
 .hg-footer__brand img { height: 34px; width: auto; }
-.hg-footer__brand p { margin: 18px 0 16px; font-size: 0.86rem; line-height: 1.7; color: #a8bfc9; }
-.hg-footer__brand .hg-link { color: #7ff0b4; font-size: 0.85rem; }
+.hg-footer__brand p { margin: 18px 0 16px; font-size: 0.86rem; line-height: 1.7; color: #b6b9bd; }
+.hg-footer__brand .hg-link { color: #e6c875; font-size: 0.85rem; }
 .hg-footer__brand .hg-link:hover { color: #fff; }
 
 .hg-footer__columns { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 26px; }
@@ -505,7 +505,7 @@
 .hg-footer__column--wide ul { display: block; columns: 2; column-gap: 22px; }
 .hg-footer__column--wide li { break-inside: avoid; margin-bottom: 9px; }
 .hg-footer__column a {
-  color: #a8bfc9;
+  color: #b6b9bd;
   text-decoration: none;
   font-size: 0.82rem;
   overflow-wrap: anywhere;
@@ -543,3 +543,26 @@
 @media (prefers-reduced-motion: reduce) {
   .hg-nav__trigger, .hg-mega__featured, .hg-mega__link { transition: none !important; transform: none !important; }
 }
+
+/* -----------------------------------------------------------------------------
+   Metallic finish on the shared chrome (canonical palette lives in hostinger.css).
+   These are restrained: a lit top edge, a silver mega panel, a gold footer rule.
+   -------------------------------------------------------------------------- */
+.hg-theme .hg-nav__bar {
+  box-shadow: 0 1px 0 rgba(212, 175, 55, 0.30), 0 8px 26px rgba(13, 17, 22, 0.05);
+}
+.hg-theme .hg-nav__trigger.is-open::after,
+.hg-theme .hg-nav__trigger:hover::after { background: var(--hg-metal-gold); }
+.hg-theme .hg-mega__panel {
+  background:
+    radial-gradient(700px 260px at 12% 0%, rgba(255, 255, 255, 0.95), transparent 70%),
+    linear-gradient(160deg, #ffffff 0%, #f2f2f0 62%, #e5e4e2 100%);
+  border-top: 2px solid #d4af37;
+}
+.hg-theme .hg-footer {
+  background:
+    linear-gradient(100deg, transparent 26%, rgba(230, 200, 117, 0.07) 48%, transparent 66%),
+    linear-gradient(160deg, #0d1116 0%, #1b242c 100%);
+  border-top: 1px solid rgba(212, 175, 55, 0.38);
+}
+.hg-theme .hg-footer__bottom { border-top-color: rgba(212, 175, 55, 0.22); }

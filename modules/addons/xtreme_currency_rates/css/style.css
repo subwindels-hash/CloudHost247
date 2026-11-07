@@ -107,7 +107,7 @@
     --tog-on:     #3e7cf5;
 
     /* semantic */
-    --green:      #16a34a;  --green-dk:  #15803d;  --green-lt:  rgba(22,163,74,.12);
+    --green:      #b8860b;  --green-dk:  #6b4d0c;  --green-lt:  rgba(22,163,74,.12);
     --amber:      #d97706;  --amber-dk:  #b45309;  --amber-lt:  rgba(217,119,6,.13);
     --red:        #dc2626;  --red-dk:    #b91c1c;  --red-lt:    rgba(220,38,38,.1);
     --cyan:       #0891b2;  --cyan-dk:   #0e7490;  --cyan-lt:   rgba(8,145,178,.1);
@@ -173,7 +173,7 @@
     --tog-off:    rgba(255,255,255,.18);
     --tog-on:     #5b9bf8;
 
-    --green:      #4ade80;  --green-dk:  #22c55e;  --green-lt:  rgba(74,222,128,.13);
+    --green:      #4ade80;  --green-dk:  #d4af37;  --green-lt:  rgba(74,222,128,.13);
     --amber:      #fbbf24;  --amber-dk:  #f59e0b;  --amber-lt:  rgba(251,191,36,.13);
     --red:        #f87171;  --red-dk:    #ef4444;  --red-lt:    rgba(248,113,113,.13);
     --cyan:       #22d3ee;  --cyan-dk:   #06b6d4;  --cyan-lt:   rgba(34,211,238,.13);
@@ -592,7 +592,7 @@
 }
 /* Success */
 #xcr_module_wrap .xcr-btn-success {
-    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%) !important;
+    background: linear-gradient(135deg, #b8860b 0%, #6b4d0c 100%) !important;
     color: #fff !important; box-shadow: 0 3px 10px rgba(22,163,74,.3) !important;
 }
 #xcr_module_wrap .xcr-btn-success:hover {
@@ -635,11 +635,11 @@
     box-shadow: 0 4px 12px rgba(217,119,6,.2) !important; transform:translateY(-1px) !important; text-decoration:none !important;
 }
 #xcr_module_wrap .xcr-btn-green-ghost {
-    background: rgba(22,163,74,.08) !important; color: #15803d !important;
+    background: rgba(22,163,74,.08) !important; color: #6b4d0c !important;
     border: 1px solid rgba(22,163,74,.35) !important;
 }
 #xcr_module_wrap .xcr-btn-green-ghost:hover {
-    background: rgba(22,163,74,.15) !important; color: #15803d !important;
+    background: rgba(22,163,74,.15) !important; color: #6b4d0c !important;
     box-shadow: 0 4px 12px rgba(22,163,74,.2) !important; transform:translateY(-1px) !important; text-decoration:none !important;
 }
 #xcr_module_wrap .xcr-btn-cyan-ghost {
@@ -776,7 +776,7 @@
     white-space: nowrap !important; line-height: 1.5 !important;
 }
 #xcr_module_wrap .xcr-badge-active,
-#xcr_module_wrap .xcr-badge-green  { background: rgba(22,163,74,.12)  !important; color: #15803d !important; border: 1px solid rgba(22,163,74,.22)  !important; }
+#xcr_module_wrap .xcr-badge-green  { background: rgba(22,163,74,.12)  !important; color: #6b4d0c !important; border: 1px solid rgba(22,163,74,.22)  !important; }
 #xcr_module_wrap .xcr-badge-locked,
 #xcr_module_wrap .xcr-badge-amber,
 #xcr_module_wrap .xcr-badge-warn   { background: rgba(217,119,6,.12)  !important; color: #b45309 !important; border: 1px solid rgba(217,119,6,.22)  !important; }
@@ -807,7 +807,7 @@
 #xcr_module_wrap .xcr-alert-info    { background: rgba(62,124,245,.09)  !important; color: #1d4ed8 !important; border-left-color: #3e7cf5 !important; }
 #xcr_module_wrap .xcr-alert-warn    { background: rgba(217,119,6,.09)   !important; color: #b45309 !important; border-left-color: #d97706 !important; }
 #xcr_module_wrap .xcr-alert-error   { background: rgba(220,38,38,.09)   !important; color: #b91c1c !important; border-left-color: #dc2626 !important; }
-#xcr_module_wrap .xcr-alert-success { background: rgba(22,163,74,.09)   !important; color: #15803d !important; border-left-color: #16a34a !important; }
+#xcr_module_wrap .xcr-alert-success { background: rgba(22,163,74,.09)   !important; color: #6b4d0c !important; border-left-color: #b8860b !important; }
 #xcr_module_wrap.xcr-dark .xcr-alert-info    { background: rgba(62,124,245,.14)  !important; color: #5b9bf8 !important; }
 #xcr_module_wrap.xcr-dark .xcr-alert-warn    { background: rgba(217,119,6,.14)   !important; color: #fbbf24 !important; }
 #xcr_module_wrap.xcr-dark .xcr-alert-error   { background: rgba(220,38,38,.14)   !important; color: #f87171 !important; }
@@ -836,7 +836,7 @@
 }
 #xcr_module_wrap .xcr-table tbody tr:last-child td { border-bottom: none !important; }
 #xcr_module_wrap .xcr-table tbody tr:hover td { background: var(--tbl-hv) !important; transition: background .15s !important; }
-#xcr_module_wrap .xcr-up   { color: #16a34a !important; font-weight: 700 !important; }
+#xcr_module_wrap .xcr-up   { color: #b8860b !important; font-weight: 700 !important; }
 #xcr_module_wrap .xcr-down { color: #dc2626 !important; font-weight: 700 !important; }
 #xcr_module_wrap .xcr-row-locked { opacity: .6 !important; }
 
@@ -913,7 +913,7 @@
 }
 .xcr-toast.xcr-toast-in  { opacity: 1 !important; transform: translateX(0) !important; }
 .xcr-toast.xcr-toast-out { opacity: 0 !important; transform: translateX(32px) !important; }
-.xcr-toast-success { border-left-color: #16a34a !important; }
+.xcr-toast-success { border-left-color: #b8860b !important; }
 .xcr-toast-error   { border-left-color: #dc2626 !important; }
 .xcr-toast-warn    { border-left-color: #d97706 !important; }
 .xcr-toast-icon {
@@ -923,7 +923,7 @@
     color: #fff !important; margin-top: 1px !important;
 }
 .xcr-toast-info    .xcr-toast-icon { background: #3e7cf5 !important; }
-.xcr-toast-success .xcr-toast-icon { background: #16a34a !important; }
+.xcr-toast-success .xcr-toast-icon { background: #b8860b !important; }
 .xcr-toast-error   .xcr-toast-icon { background: #dc2626 !important; }
 .xcr-toast-warn    .xcr-toast-icon { background: #d97706 !important; }
 .xcr-toast-msg   { flex: 1 !important; }
@@ -1157,7 +1157,7 @@
     gap: 3px !important; padding: 2px 8px !important;
     border-radius: 20px !important; font-size: 11px !important; font-weight: 800 !important;
 }
-#xcr_module_wrap .xcr-hist-up   { background: rgba(22,163,74,.1) !important;  color: #16a34a !important; }
+#xcr_module_wrap .xcr-hist-up   { background: rgba(22,163,74,.1) !important;  color: #b8860b !important; }
 #xcr_module_wrap .xcr-hist-down { background: rgba(220,38,38,.1) !important;  color: #dc2626 !important; }
 #xcr_module_wrap .xcr-hist-flat { background: rgba(99,102,241,.1) !important; color: #6366f1 !important; }
 #xcr_module_wrap.xcr-dark .xcr-hist-up   { color: #4ade80 !important; }

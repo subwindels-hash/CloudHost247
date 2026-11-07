@@ -6,6 +6,7 @@ import { formatPrice, type ProductPlansResponse, type PublicPlan } from '../lib/
 import { CatalogErrorBanner } from '../components/CatalogStateBanner';
 import { useCurrency } from '../currency/CurrencyProvider';
 import { BRAND, UTILITY, NAV_SECTIONS } from '../navigation/registry.generated';
+import { resolvePhoto } from '../components/marketing/photo-map.generated';
 
 /**
  * CloudHost247 public homepage — Hostinger-style page grammar.
@@ -207,7 +208,7 @@ function PricingSection() {
   return (
     <section className="hg-section hg-pricing" id="pricing">
       <div className="hg-wrap">
-        <div className="hg-section__head">
+        <div className="hg-section__head" data-reveal>
           <p className="hg-eyebrow">Plans &amp; prices</p>
           <h2 className="hg-h2">Choose the plan that fits what you are building</h2>
           <p className="hg-lede">
@@ -289,43 +290,39 @@ function PricingSection() {
   );
 }
 
-/** A CSS-only product screenshot: composition, not fabricated telemetry. */
+/**
+ * Hero visual — real, licensed enterprise data-centre photography in a metallic frame.
+ *
+ * Deliberately NOT a CSS-drawn "product screenshot": the old mock dashboard looked like a generic
+ * illustration and told the visitor nothing about the infrastructure behind the service. The photo
+ * comes from the same generated registry as every other marketing illustration, so the homepage
+ * and the WHMCS theme show the same scene. The frame tilts a few degrees with the pointer and the
+ * two capability chips float at a different depth; nothing else on the page moves.
+ */
 function HeroVisual() {
+  const photo = resolvePhoto('hero/infrastructure-3d');
+  const srcSet = (format: string) =>
+    [640, 960, 1280].map((width) => `/media/cloudhost247/${photo.key}-${width}.${format} ${width}w`).join(', ');
+
   return (
-    <div className="hg-hero__visual" aria-hidden="true">
-      <div className="hg-browser">
-        <div className="hg-browser__bar">
-          <span className="hg-browser__dots"><i /><i /><i /></span>
-          <span className="hg-browser__url">cloudhost247.com / dashboard</span>
-        </div>
-        <div className="hg-browser__body">
-          <div className="hg-browser__side">
-            <b>CloudHost247</b>
-            <span className="is-active">Overview</span>
-            <span>Services</span>
-            <span>Domains &amp; DNS</span>
-            <span>Deployments</span>
-            <span>Billing</span>
-            <span>Support</span>
-          </div>
-          <div className="hg-browser__content">
-            <h4>Good to see you</h4>
-            <p>Everything you run, in one place</p>
-            <div className="hg-browser__tiles">
-              <div className="hg-browser__tile"><i /><b>Hosting</b><small>Plans &amp; sites</small></div>
-              <div className="hg-browser__tile"><i /><b>Domains</b><small>DNS &amp; SSL</small></div>
-              <div className="hg-browser__tile"><i /><b>Servers</b><small>Backups</small></div>
-            </div>
-            <div className="hg-browser__rows">
-              <div className="hg-browser__row"><i /><span>Domain registration</span><span>Manage</span></div>
-              <div className="hg-browser__row"><i /><span>SSL certificates</span><span>Manage</span></div>
-              <div className="hg-browser__row"><i /><span>Application deployments</span><span>Manage</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="hg-float hg-float--one"><i>✓</i> One account for every service</div>
-      <div className="hg-float hg-float--two"><i>↗</i> Live catalogue pricing</div>
+    <div className="hg-hero__visual" data-tilt data-tilt-max="5">
+      <figure className="ch-photo-frame hg-hero__frame">
+        <picture>
+          <source type="image/avif" sizes="(max-width: 900px) 100vw, 620px" srcSet={srcSet('avif')} />
+          <source type="image/webp" sizes="(max-width: 900px) 100vw, 620px" srcSet={srcSet('webp')} />
+          <img
+            src={`/media/cloudhost247/${photo.key}.jpg`}
+            width={1280}
+            height={855}
+            alt={photo.alt}
+            fetchPriority="high"
+            decoding="async"
+          />
+        </picture>
+        <figcaption className="ch-photo-frame__label">Enterprise infrastructure</figcaption>
+      </figure>
+      <div className="hg-float hg-float--one ch-float--ambient"><i>✓</i> One account for every service</div>
+      <div className="hg-float hg-float--two ch-float--ambient-slow"><i>↗</i> Live catalogue pricing</div>
     </div>
   );
 }
@@ -372,6 +369,7 @@ export default function HomePage() {
     <div className="hg-page">
       {/* 1. Hero — big headline, domain search, primary CTA, product screenshot */}
       <section className="hg-hero">
+        <div className="hg-hero__glow" data-parallax="0.10" aria-hidden="true" />
         <div className="hg-wrap hg-hero__grid">
           <div>
             <p className="hg-hero__pill"><span>Platform</span> Domains · Hosting · Cloud · Apps · Tools</p>
@@ -430,7 +428,7 @@ export default function HomePage() {
       {/* 4. Explore more */}
       <section className="hg-section hg-section--soft">
         <div className="hg-wrap">
-          <div className="hg-section__head--split">
+          <div className="hg-section__head--split" data-reveal>
             <div>
               <p className="hg-eyebrow">Explore the platform</p>
               <h2 className="hg-h2">Everything you need before you go live</h2>
@@ -481,7 +479,7 @@ export default function HomePage() {
       {/* 6. Tabbed feature showcase */}
       <section className="hg-section hg-section--white">
         <div className="hg-wrap">
-          <div className="hg-section__head">
+          <div className="hg-section__head" data-reveal>
             <p className="hg-eyebrow">Tools for every online project</p>
             <h2 className="hg-h2">More control over what you build, without more complexity</h2>
             <p className="hg-lede">Build it, grow it, then run it — all from the same platform.</p>
@@ -523,7 +521,7 @@ export default function HomePage() {
              of inventing testimonials. */}
       <section className="hg-section hg-section--soft">
         <div className="hg-wrap">
-          <div className="hg-section__head">
+          <div className="hg-section__head" data-reveal>
             <p className="hg-eyebrow">What will you build?</p>
             <h2 className="hg-h2">Pick a starting point</h2>
             <p className="hg-lede">Every tile opens a product area that exists in this build.</p>
@@ -543,7 +541,7 @@ export default function HomePage() {
       {/* 8. "More power when you need it" link list, from the shared navigation registry */}
       <section className="hg-section hg-section--white">
         <div className="hg-wrap">
-          <div className="hg-section__head--split">
+          <div className="hg-section__head--split" data-reveal>
             <div>
               <p className="hg-eyebrow">More power when you need it</p>
               <h2 className="hg-h2">Scale on your own terms</h2>
@@ -564,7 +562,7 @@ export default function HomePage() {
       {/* 9. FAQ accordion */}
       <section className="hg-section hg-section--soft" id="faq">
         <div className="hg-wrap">
-          <div className="hg-section__head">
+          <div className="hg-section__head" data-reveal>
             <p className="hg-eyebrow">Platform FAQs</p>
             <h2 className="hg-h2">Questions, answered honestly</h2>
           </div>

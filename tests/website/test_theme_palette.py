@@ -13,7 +13,8 @@ the design system's tokens. The design system only overrides what it declares, a
 override a component rule that names its own gradient, shadow or border colour. That is how the
 retired blue (`#0756d8`, `#071b3d`, `#12b886`) stayed live in the client area and in the
 announcement bar long after the design system had moved to green, and how the older green
-(`#196947`, `#b4f2cd`) survived in the tools shell.
+(`#196947`, `#b4f2cd`) survived in the tools shell. The 2026-11 metallic
+redesign retired green entirely; `MetallicPaletteTests` now guards the active surfaces.
 
 These tests keep the palette single: shared tokens must agree, no sheet may paint a retired
 colour, and the components that used to carry a literal must read the token instead.
@@ -21,6 +22,7 @@ colour, and the components that used to carry a literal must read the token inst
 
 from __future__ import annotations
 
+import colorsys
 import re
 import unittest
 from pathlib import Path
@@ -119,7 +121,7 @@ class RetiredColourTests(unittest.TestCase):
         self.assertEqual(
             offenders, [],
             'A theme stylesheet still paints a retired brand colour. Read the token '
-            '(`var(--ch247-primary, #16704b)`) instead of copying the value; a literal here wins '
+            '(`var(--ch247-primary, #5f450a)`) instead of copying the value; a literal here wins '
             'whenever this sheet loads after the design system, which is always for custom.css.',
         )
 
@@ -128,19 +130,19 @@ class RetiredColourTests(unittest.TestCase):
         # visitor sees; it carried the blue gradient for as long as the rest of the site had left
         # it behind.
         markup = (THEME / 'includes' / 'announcementbar.tpl').read_text(encoding='utf-8')
-        self.assertIn('--ab-bg-start: var(--ch-navy, #0a1620)', markup)
-        self.assertIn('--ab-bg-mid: var(--ch-green, #16704b)', markup)
-        self.assertIn('--ab-accent: var(--ch-mint, #7ff0b4)', markup)
+        self.assertIn('--ab-bg-start: var(--ch-navy, #0d1116)', markup)
+        self.assertIn('--ab-bg-mid: var(--ch-green, #5f450a)', markup)
+        self.assertIn('--ab-accent: var(--ch-mint, #e6c875)', markup)
         for colour in RETIRED:
             self.assertNotIn(colour, markup.lower())
 
     def test_the_components_that_had_a_literal_read_the_token(self):
         site = (STYLES / 'site.css').read_text(encoding='utf-8')
         tools = (STYLES / 'tools.css').read_text(encoding='utf-8')
-        self.assertIn('--ch247-email-accent:var(--ch247-primary,#16704b)', site)
-        self.assertIn('.ch247-email-eyebrow{color:var(--ch247-accent,#7ff0b4)}', site)
+        self.assertIn('--ch247-email-accent:var(--ch247-primary,#5f450a)', site)
+        self.assertIn('.ch247-email-eyebrow{color:var(--ch247-accent,#e6c875)}', site)
         self.assertIn('.ch-badge{display:inline-flex;align-items:center;border-radius:999px;'
-                      'background:var(--ch-ok-soft,#e9f7ef);color:var(--ch247-primary,#16704b)',
+                      'background:var(--ch-ok-soft,#fbf5e4);color:var(--ch247-primary,#5f450a)',
                       tools)
 
 
@@ -148,9 +150,9 @@ BRAND = ROOT / 'assets' / 'images' / 'cloudhost247' / 'brand'
 BRAND_MIRROR = ROOT / 'cloudhost247-node' / 'frontend' / 'public' / 'media' / 'cloudhost247' / 'brand'
 
 # The only colours a brand mark may contain. Dark uses the body ink, the icon tile uses the deep
-# navy, the compact lockup uses the brand green, and the mono/white variants are single-colour by
-# definition. Nothing else belongs in the mark.
-MARK_COLOURS = {'#0a1620', '#0c1c26', '#16704b', '#7ff0b4', '#ffffff', '#000000'}
+# navy, the icon glyph is champagne gold and the compact lockup uses deep metallic gold; the
+# mono/white variants are single-colour by definition. Nothing else belongs in the mark.
+MARK_COLOURS = {'#0a1620', '#0c1c26', '#b8860b', '#e6c875', '#ffffff', '#000000'}
 
 
 def hexes(text: str) -> set[str]:
@@ -173,14 +175,14 @@ class BrandMarkTests(unittest.TestCase):
                 self.assertEqual(found - MARK_COLOURS, set(),
                                  f'{svg.name} still contains a retired or off-brand colour')
 
-    def test_the_icon_tile_is_the_deep_navy_and_the_glyph_is_mint(self):
+    def test_the_icon_tile_is_the_deep_navy_and_the_glyph_is_champagne_gold(self):
         mark = (BRAND / 'icon-mark.svg').read_text(encoding='utf-8')
         self.assertIn('fill="#0a1620"', mark)
-        self.assertIn('stroke="#7ff0b4"', mark)
+        self.assertIn('stroke="#e6c875"', mark)
 
-    def test_the_compact_lockup_carries_the_brand_green(self):
+    def test_the_compact_lockup_carries_the_brand_gold(self):
         compact = (BRAND / 'logo-compact.svg').read_text(encoding='utf-8')
-        self.assertIn('stroke="#16704b"', compact)
+        self.assertIn('stroke="#b8860b"', compact)
 
     def test_the_platform_serves_the_same_marks(self):
         # `scripts/generate-raster-formats.py --check` owns the full mirror; this is the fast
@@ -253,6 +255,81 @@ class PlatformSiteTests(unittest.TestCase):
         self.assertIn('fill="#7ff0b4"', favicon)
         for colour in RETIRED:
             self.assertNotIn(colour, favicon)
+
+
+
+class MetallicPaletteTests(unittest.TestCase):
+    """The 2026-11 redesign retires green from the brand entirely.
+
+    The earlier gates pin *specific* retired hexes. This one checks hue, so a new green introduced
+    under a name nobody thought to pin still fails. Scope is the surfaces the redesign actually
+    ships: the WHMCS theme, the canonical SPA, the shared design system, the cart skin and the
+    brand marks. The frozen `platform/` app, the legacy `cloudhost247_legacy` theme, third-party
+    WHMCS modules and colour-name data inside developer tools are deliberately out of scope.
+    """
+    SURFACES = (
+        'templates/cloudhost247',
+        'cloudhost247-node/frontend/src',
+        'shared/site',
+        'templates/orderforms/cloudhost247',
+        'assets/images/cloudhost247/brand',
+    )
+    EXTENSIONS = {'.css', '.tpl', '.tsx', '.ts', '.js', '.svg'}
+
+    @staticmethod
+    def is_green(hex_colour: str) -> bool:
+        r, g, b = (int(hex_colour[i:i + 2], 16) / 255 for i in (1, 3, 5))
+        hue, saturation, value = colorsys.rgb_to_hsv(r, g, b)
+        return 75 <= hue * 360 <= 175 and saturation > 0.25 and value > 0.20
+
+    def test_no_active_brand_surface_paints_a_green(self):
+        offenders = []
+        for surface in self.SURFACES:
+            for path in sorted((ROOT / surface).rglob('*')):
+                if not path.is_file() or path.suffix not in self.EXTENSIONS:
+                    continue
+                for colour in re.findall(r'#[0-9a-fA-F]{6}\b', path.read_text(encoding='utf-8', errors='ignore')):
+                    if self.is_green(colour):
+                        offenders.append(f'{path.relative_to(ROOT)}: {colour.lower()}')
+        self.assertEqual(
+            offenders, [],
+            'Green is retired from the CloudHost247 brand. Use the metallic gold/silver anchors '
+            'in shared/site/design-system.css instead.',
+        )
+
+    def test_the_metallic_anchors_are_declared_in_every_layer(self):
+        gold = ('#d4af37', '#b8860b', '#e6c875')
+        silver = ('#c0c0c0', '#e5e4e2', '#858585')
+        layers = (
+            'shared/site/design-system.css',
+            'shared/site/metals.css',
+            'templates/cloudhost247/css/design-system.css',
+            'templates/cloudhost247/css/metals.css',
+            'cloudhost247-node/frontend/src/hostinger.css',
+        )
+        for relative in layers:
+            with self.subTest(layer=relative):
+                text = (ROOT / relative).read_text(encoding='utf-8').lower()
+                self.assertTrue(any(a in text for a in gold), f'{relative} has no gold anchor')
+                self.assertTrue(any(a in text for a in silver), f'{relative} has no silver anchor')
+        # The canonical design system carries the whole ramp, not just one anchor.
+        canonical = (ROOT / 'shared/site/design-system.css').read_text(encoding='utf-8').lower()
+        for anchor in gold + silver:
+            with self.subTest(anchor=anchor):
+                self.assertIn(anchor, canonical)
+
+    def test_generated_theme_copies_match_the_shared_source(self):
+        for source, copy in (
+            ('shared/site/design-system.css', 'templates/cloudhost247/css/design-system.css'),
+            ('shared/site/metals.css', 'templates/cloudhost247/css/metals.css'),
+            ('shared/site/motion.js', 'templates/cloudhost247/js/motion.js'),
+        ):
+            with self.subTest(copy=copy):
+                a = (ROOT / source).read_text(encoding='utf-8')
+                b = (ROOT / copy).read_text(encoding='utf-8')
+                # The generator prepends a provenance header; the body must be identical.
+                self.assertTrue(b.endswith(a), f'{copy} drifted from {source}; re-run '
+                                               '`node scripts/site/generate.mjs`.')
 
 
 if __name__ == '__main__':  # pragma: no cover - manual runs

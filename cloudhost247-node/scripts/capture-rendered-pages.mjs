@@ -19,7 +19,10 @@ import { chromium } from 'playwright-core';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(HERE, '..', '..');
-const OUT_DIR = path.join(REPO_ROOT, 'docs', 'evidence', 'screenshots');
+const OUT_DIR = path.resolve(REPO_ROOT, process.env.EVIDENCE_DIR ?? 'docs/evidence/screenshots');
+const REPORT_FILE = process.env.EVIDENCE_DIR
+  ? path.join(OUT_DIR, 'render-report.json')
+  : path.join(REPO_ROOT, 'docs', 'evidence', 'render-report.json');
 const BASE_URL = process.env.BASE_URL ?? 'http://127.0.0.1:3000';
 
 const DEFAULT_ROUTES = ['/', '/pricing', '/hosting', '/domains', '/tools', '/about'];
@@ -113,9 +116,9 @@ async function main() {
   await ctx.close();
   await browser.close();
 
-  writeFileSync(path.join(REPO_ROOT, 'docs', 'evidence', 'render-report.json'), `${JSON.stringify(report, null, 2)}\n`);
+  writeFileSync(REPORT_FILE, `${JSON.stringify(report, null, 2)}\n`);
   const ok = report.screenshots.filter((s) => s.status === 200 && !s.error);
-  console.log(`\nCaptured ${ok.length}/${report.screenshots.length} successful renders → docs/evidence/screenshots/`);
+  console.log(`\nCaptured ${ok.length}/${report.screenshots.length} successful renders → ${OUT_DIR}`);
 }
 
 main().catch((error) => { console.error(error); process.exit(1); });

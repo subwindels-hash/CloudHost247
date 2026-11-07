@@ -140,12 +140,12 @@ export default function PaymentModal({
                 </div>
               </div>
             ) : (
-              <div className="rounded-xl border border-green-100 bg-green-50/50 p-4 dark:border-green-900/50 dark:bg-green-950/20">
-                <h4 className="font-semibold text-green-900 dark:text-green-300">Sandbox Payment Initiated</h4>
+              <div className="rounded-xl border border-amber-100 bg-amber-50/50 p-4 dark:border-amber-900/50 dark:bg-amber-950/20">
+                <h4 className="font-semibold text-amber-900 dark:text-amber-300">Sandbox Payment Initiated</h4>
                 <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
                   Provider Reference: <span className="font-mono">{activePayment.providerReference}</span>
                 </p>
-                <div className="mt-3 text-xs text-green-700 dark:text-green-400">
+                <div className="mt-3 text-xs text-amber-700 dark:text-amber-400">
                   Status: {activePayment.status.toUpperCase()}
                 </div>
               </div>

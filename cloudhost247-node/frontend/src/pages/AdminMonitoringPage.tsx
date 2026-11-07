@@ -90,7 +90,7 @@ export default function AdminMonitoringPage() {
           </article>
           <article>
             <small>Active &amp; Healthy</small>
-            <strong style={{ color: '#16a34a' }}>{counts.active}</strong>
+            <strong style={{ color: '#b8860b' }}>{counts.active}</strong>
           </article>
           <article>
             <small>Provisioning</small>
@@ -154,7 +154,7 @@ export default function AdminMonitoringPage() {
                       </td>
                       <td>
                         {server.agent_last_seen_at ? (
-                          <span style={{ color: agentRecent ? '#16a34a' : '#d97706', fontSize: '0.85rem' }}>
+                          <span style={{ color: agentRecent ? '#b8860b' : '#d97706', fontSize: '0.85rem' }}>
                             ● {agentRecent ? 'Reporting' : 'Stale'} ({new Date(server.agent_last_seen_at).toLocaleTimeString()})
                           </span>
                         ) : (

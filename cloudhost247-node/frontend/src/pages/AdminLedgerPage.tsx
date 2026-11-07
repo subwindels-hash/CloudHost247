@@ -135,7 +135,7 @@ export function AdminLedgerPage() {
                     <td className="whitespace-nowrap px-6 py-4">
                       <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase ${
                         entry.entryType === 'charge' ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300' :
-                        entry.entryType === 'payment' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300' :
+                        entry.entryType === 'payment' ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300' :
                         entry.entryType === 'refund' ? 'bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300' :
                         'bg-slate-100 text-slate-800'
                       }`}>

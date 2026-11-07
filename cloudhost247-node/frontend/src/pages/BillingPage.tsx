@@ -48,7 +48,7 @@ export default function BillingPage() {
       <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="text-xs font-semibold uppercase tracking-wider text-slate-400">Account Balance Due</div>
-          <div className={`mt-2 text-2xl font-bold ${parseFloat(outstandingBalance) > 0 ? 'text-amber-600' : 'text-green-600'}`}>
+          <div className={`mt-2 text-2xl font-bold ${parseFloat(outstandingBalance) > 0 ? 'text-amber-600' : 'text-amber-600'}`}>
             ${outstandingBalance}
           </div>
         </div>
@@ -133,7 +133,7 @@ export default function BillingPage() {
                       <td
                         className={`px-6 py-4 text-right font-mono font-semibold ${
                           entry.entryType === 'payment'
-                            ? 'text-green-600 dark:text-green-400'
+                            ? 'text-amber-600 dark:text-amber-400'
                             : 'text-slate-900 dark:text-white'
                         }`}
                       >

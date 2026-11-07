@@ -22,6 +22,12 @@ import './hostinger.css';
 // Shared chrome (menu, mega menu, footer) on every route. Loaded after hostinger.css because a
 // few of its rules intentionally override the marketing-layer treatment of the header/footer.
 import './hostinger-chrome.css';
+// Metallic finish + depth. Loaded LAST so it can restyle both the application and the marketing
+// chrome without being undone. The WHMCS theme loads the generated copy of the same file.
+import '../../../shared/site/metals.css';
+// One dependency-free motion controller for tilt, parallax and reveals. It self-guards for
+// reduced motion, coarse pointers and small screens; there is no idle animation loop.
+import '../../../shared/site/motion.js';
 
 const rootEl = document.getElementById('root');
 if (!rootEl) {
