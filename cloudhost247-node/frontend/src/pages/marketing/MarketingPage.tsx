@@ -760,7 +760,7 @@ export default function MarketingPage() {
         </section>
       ) : null}
 
-      <section className="ch-cta">
+      <section className="ch-cta ch-cta--account">
         <div className="ch-wrap">
           <div className="ch-cta__inner">
             <div>

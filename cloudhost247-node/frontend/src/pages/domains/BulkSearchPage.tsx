@@ -88,7 +88,7 @@ export default function BulkSearchPage() {
 
   return (
     <div>
-      <section className="ch247-hero ch247-hero--compact">
+      <section className="ch247-hero ch247-hero--compact ch247-hero--photo ch247-hero--domains">
         <div className="ch247-hero__inner">
           <h1>Bulk Domain Search</h1>
           <p>Check up to 200 domains at once. Lists are batched and rate-limited to protect provider availability.</p>

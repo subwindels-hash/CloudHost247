@@ -255,3 +255,19 @@
 .tools-center .ch247-button:not(:disabled):hover{color:#fff!important}
 
 .tools-qr{margin:0 0 24px}.tools-qr img{max-width:100%;height:auto}.tools-qr figcaption{font-size:13px;overflow-wrap:anywhere}
+
+/* Directory search: one calm, high-contrast control at desktop and mobile sizes. */
+.tools-center .tools-search { max-width: 740px; isolation: isolate; }
+.tools-center .tools-search svg { z-index: 1; left: 20px; width: 20px; height: 20px; color: #65717d; stroke: currentColor; pointer-events: none; }
+.tools-center .tools-search input[type='search'] {
+  appearance: none; min-height: 60px; padding: 15px 58px 15px 54px;
+  border: 1px solid #d3d9df; border-radius: 12px; background: #fff; color: #17212b;
+  font-size: 1rem; line-height: 1.4; box-shadow: 0 8px 28px rgba(0,0,0,.16);
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.tools-center .tools-search input::placeholder { color: #63707c; opacity: 1; }
+.tools-center .tools-search input:focus { outline: none; border-color: #a47b20; box-shadow: 0 0 0 3px rgba(230,200,117,.48), 0 8px 28px rgba(0,0,0,.16); }
+.tools-search input::-webkit-search-cancel-button { -webkit-appearance: none; }
+.tools-center .tools-search__clear { position: absolute; right: 10px; display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 0; border-radius: 8px; background: transparent; color: #4a5661; font-size: 1.5rem; line-height: 1; cursor: pointer; }
+.tools-center .tools-search__clear:hover { background: #eef1f3; color: #17212b; }
+@media (max-width: 600px) { .tools-center .tools-search input[type='search'] { min-height: 56px; font-size: 16px; padding-right: 52px; } }

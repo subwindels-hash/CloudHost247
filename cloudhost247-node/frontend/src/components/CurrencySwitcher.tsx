@@ -4,6 +4,21 @@ import { BASE_CURRENCY, formatRateTimestamp } from '../currency/display-currency
 import { useLocale } from '../i18n/LocaleProvider';
 import '../i18n/language-switcher.css';
 
+// These are examples, not exchange rates or a list of billable currencies. A code remains
+// disabled until the server publishes a current, validated rate for it.
+const COMMON_CURRENCIES = [
+  'NGN', 'GBP', 'EUR', 'CAD', 'AUD', 'GHS', 'KES', 'ZAR', 'INR', 'JPY', 'KRW',
+  'AED', 'SAR', 'EGP', 'MAD', 'TZS', 'UGX', 'RWF', 'XOF', 'XAF', 'CNY', 'HKD',
+  'SGD', 'MYR', 'IDR', 'PHP', 'PKR', 'BDT', 'NZD', 'CHF', 'SEK', 'NOK', 'DKK',
+  'PLN', 'TRY', 'MXN', 'BRL', 'ARS', 'CLP', 'COP',
+] as const;
+const UNAVAILABLE_LABEL: Record<string, string> = {
+  en: 'Rate unavailable', fr: 'Taux indisponible', de: 'Kurs nicht verfügbar',
+  es: 'Tasa no disponible', pt: 'Taxa indisponível', it: 'Tasso non disponibile',
+  nl: 'Koers niet beschikbaar', pl: 'Kurs niedostępny', ru: 'Курс недоступен',
+  ar: 'سعر الصرف غير متاح', zh: '汇率不可用', ja: '為替レートを利用できません', ko: '환율을 사용할 수 없음',
+};
+
 function currencyName(code: string, locale: string): string {
   try {
     return new Intl.DisplayNames([locale], { type: 'currency' }).of(code) ?? code;
@@ -60,7 +75,7 @@ export default function CurrencySwitcher() {
   }
 
   function onListKeyDown(event: KeyboardEvent<HTMLUListElement>) {
-    const items = Array.from(listRef.current?.querySelectorAll<HTMLButtonElement>('button') ?? []);
+    const items = Array.from(listRef.current?.querySelectorAll<HTMLButtonElement>('button:not(:disabled)') ?? []);
     if (items.length === 0) return;
     const current = items.indexOf(document.activeElement as HTMLButtonElement);
     let next: number | null = null;
@@ -76,6 +91,8 @@ export default function CurrencySwitcher() {
 
   const asOf = formatRateTimestamp(status.asOf, locale.code);
   const displayName = currencyName(currency, locale.code);
+  const visibleCurrencies = [...options, ...COMMON_CURRENCIES.filter((code) => !options.includes(code))];
+  const unavailableLabel = UNAVAILABLE_LABEL[locale.code] ?? UNAVAILABLE_LABEL.en;
 
   return (
     <div
@@ -102,18 +119,20 @@ export default function CurrencySwitcher() {
       {open ? (
         <div id={listId} className="ch247-locale__menu">
           <ul ref={listRef} className="ch247-locale__list" aria-label={t('currency.switcher.listLabel')} onKeyDown={onListKeyDown}>
-            {options.map((code) => {
+            {visibleCurrencies.map((code) => {
               const selected = code === currency;
+              const available = options.includes(code);
               return (
                 <li key={code}>
                   <button
                     type="button"
                     className="ch247-locale__option"
                     aria-current={selected ? 'true' : undefined}
+                    disabled={!available}
                     onClick={() => choose(code)}
                   >
                     <span>{code}</span>
-                    {code !== BASE_CURRENCY ? <span className="ch247-locale__english">{currencyName(code, locale.code)}</span> : null}
+                    <span className="ch247-locale__english">{code !== BASE_CURRENCY ? currencyName(code, locale.code) : ''}{!available ? ` · ${unavailableLabel}` : ''}</span>
                   </button>
                 </li>
               );

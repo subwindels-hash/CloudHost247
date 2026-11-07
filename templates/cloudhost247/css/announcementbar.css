@@ -190,3 +190,19 @@
 @media print {
     .ch247-announcebar { display: none; }
 }
+
+
+/* Solid black with an animated metallic border; static when reduced motion is requested. */
+@property --announcement-border-angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+@keyframes announcement-metal-border { to { --announcement-border-angle: 360deg; } }
+.ch247-announcebar {
+  box-sizing: border-box;
+  --ab-bg-start: #000;
+  border: 2px solid transparent;
+  background: linear-gradient(#000, #000) padding-box,
+    conic-gradient(from var(--announcement-border-angle, 0deg), #8c6511, #f9e8a4, #a87c1e, #f2f3f4, #8d949d, #f9fafb, #b3882e, #8c6511) border-box;
+  animation: announcement-metal-border 9s linear infinite;
+}
+.ch247-announcebar::before { background: linear-gradient(90deg, #000, transparent); }
+.ch247-announcebar::after { background: linear-gradient(270deg, #000, transparent); }
+@media (prefers-reduced-motion: reduce) { .ch247-announcebar { animation: none; } }

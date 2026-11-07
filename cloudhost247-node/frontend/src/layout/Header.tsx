@@ -1,3 +1,4 @@
+import VisitorPrivacy from '../components/VisitorPrivacy';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { PlatformMenu, Brand } from '../components/navigation/PlatformMegaMenu';
 import LanguageSwitcher from '../components/LanguageSwitcher';
@@ -48,6 +49,7 @@ export default function Header() {
           navigation landmark pinned by Header.test.tsx and the accessibility contract. */}
       <div id="ch247-primary-nav" className="hg-header__body">
         <div className="hg-bar__top">
+          <VisitorPrivacy />
           <nav className="hg-bar__quick" aria-label="Quick links">
             <NavLink to="/pricing">Pricing</NavLink>
             <NavLink to="/help">Help</NavLink>

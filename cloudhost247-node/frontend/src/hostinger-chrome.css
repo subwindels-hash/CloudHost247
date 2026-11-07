@@ -1686,3 +1686,45 @@
 .hg-footer__view-all:hover { text-decoration: underline; }
 .hg-footer__view-all:focus-visible { outline: 2px solid #8a6410; outline-offset: 3px; }
 @media (max-width: 767px) { .hg-footer__view-all { padding: 4px 0; font-size: .9rem; } }
+
+/* Official artwork uses a taller aspect ratio than the old wordmark. */
+.hg-theme .hg-nav__brand img { width: 135px; height: auto; max-width: none; }
+@media (max-width: 767px) { .hg-theme .hg-nav__brand img { width: 108px; } }
+
+/* Match the official logo's near-black backdrop across the menu and utility row. */
+.hg-theme .hg-header,
+.hg-theme .hg-header .hg-bar__top { background: #191617; }
+.hg-theme .hg-header .hg-menu__panel,
+.hg-theme .hg-header .hg-menu__mobile-content { background: #191617; }
+
+/* Private visitor status, in the utility row before Pricing. No personal data is part of the ticker. */
+.hg-theme .hg-bar__top > .ch247-visitor-privacy { display: flex; flex: 1 1 280px; min-width: 0; align-items: center; gap: 10px; overflow: hidden; }
+.ch247-visitor-privacy__location { display: inline-flex; align-items: center; gap: 3px; flex: 0 1 auto; min-width: 0; color: #e7e9ec; font-size: .72rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ch247-privacy-ticker { display: flex; align-items: center; gap: 7px; flex: 1 1 140px; min-width: 0; max-width: 370px; color: #cbd9e8; font-size: .72rem; }
+.ch247-privacy-ticker__dot { flex: 0 0 6px; width: 6px; height: 6px; border-radius: 50%; background: #75bfff; box-shadow: 0 0 8px rgba(89,181,255,.7); }
+.ch247-privacy-ticker__viewport { overflow: hidden; flex: 1 1 auto; min-width: 0; }
+.ch247-privacy-ticker__track { display: flex; width: max-content; min-width: 200%; animation: ch247-privacy-scroll 24s linear infinite; }
+.ch247-privacy-ticker__message { flex: 1 0 50%; box-sizing: border-box; padding-right: 3rem; white-space: nowrap; }
+@keyframes ch247-privacy-scroll { to { transform: translateX(-50%); } }
+@media (max-width: 900px) {
+  .hg-theme .hg-bar__top { flex-wrap: wrap; }
+  .hg-theme .hg-bar__top > .ch247-visitor-privacy { flex-basis: 100%; max-width: 100%; min-height: 28px; justify-content: center; }
+  .ch247-visitor-privacy__location { flex: 0 1 auto; }
+  .ch247-privacy-ticker { max-width: 340px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ch247-privacy-ticker__track { animation: none; width: auto; min-width: 0; }
+  .ch247-privacy-ticker__message { white-space: normal; padding-right: 0; }
+  .ch247-privacy-ticker__message[aria-hidden] { display: none; }
+  .hg-theme .hg-bar__top > .ch247-visitor-privacy { white-space: normal; }
+}
+@media (max-width: 500px) {
+  .hg-theme .hg-bar__top > .ch247-visitor-privacy { flex-wrap: wrap; justify-content: flex-start; gap: 3px 10px; padding-block: 4px; }
+  .ch247-visitor-privacy__location { overflow: visible; text-overflow: clip; white-space: normal; overflow-wrap: anywhere; }
+  .ch247-privacy-ticker { min-width: 120px; }
+}
+
+.hg-theme .hg-header .ch247-visitor-privacy .ch247-country__select { max-width: 115px; }
+@media (max-width: 500px) {
+  .hg-theme .hg-header .ch247-visitor-privacy .ch247-country__select { max-width: 90px; }
+}

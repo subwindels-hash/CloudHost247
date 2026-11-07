@@ -76,7 +76,7 @@ function UnknownTool({ slug }: { slug: string }) {
   });
   return (
     <div>
-      <section className="ch247-hero ch247-hero--compact">
+      <section className="ch247-hero ch247-hero--compact ch247-hero--photo ch247-hero--tools">
         <div className="ch247-hero__inner">
           <nav aria-label="Breadcrumb">
             <ol className="bt247-breadcrumbs">
@@ -242,7 +242,7 @@ function Workspace({ tool }: { tool: BusinessTool }) {
 
   return (
     <div>
-      <section className="ch247-hero ch247-hero--compact">
+      <section className="ch247-hero ch247-hero--compact ch247-hero--photo ch247-hero--tools">
         <div className="ch247-hero__inner">
           <nav aria-label="Breadcrumb">
             <ol className="bt247-breadcrumbs">

@@ -25,7 +25,7 @@ export default function HostingApplicationHostingPage() {
 
   return (
     <div>
-      <section className="ch247-hero ch247-hero--compact">
+      <section className="ch247-hero ch247-hero--compact ch247-hero--photo ch247-hero--developers">
         <div className="ch247-hero__inner">
           <h1>Application &amp; PaaS Hosting</h1>
           <p>

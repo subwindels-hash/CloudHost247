@@ -6,58 +6,63 @@ export interface Photo { key: string; alt: string; credit: string }
 export const PHOTO_LIBRARY: Record<string, Photo> = {
     "data-centre-aisle": {
       "key": "photography/data-centre-aisle",
-      "alt": "Network engineer walking between rows of server racks in a blue-lit data centre",
-      "credit": "Pexels 1181316 — pexels.com/photo/1181316"
+      "alt": "AI-generated illustration of a modern data centre aisle",
+      "credit": "AI-generated illustration; not an actual facility."
     },
     "server-racks-blue": {
       "key": "photography/server-racks-blue",
-      "alt": "Close-up of enterprise server bays with blue status indicators",
-      "credit": "Pexels 1148820 — pexels.com/photo/1148820"
+      "alt": "AI-generated illustration of modern server racks",
+      "credit": "AI-generated illustration; not an actual facility."
     },
     "server-hardware": {
       "key": "photography/server-hardware",
-      "alt": "Rack-mounted servers and network cabling along a data centre aisle",
-      "credit": "Pexels 6466141 — pexels.com/photo/server-racks-on-data-center-4508751"
+      "alt": "AI-generated illustration of rack-mounted server hardware",
+      "credit": "AI-generated illustration; not an actual facility."
     },
     "network-engineer": {
       "key": "photography/network-engineer",
-      "alt": "IT professional inspecting servers in a modern data centre",
-      "credit": "Pexels 1181335 — pexels.com/photo/1181335"
+      "alt": "AI-generated illustration of an engineer inspecting a server rack",
+      "credit": "AI-generated illustration; not an actual facility."
     },
     "fibre-patch-panel": {
       "key": "photography/fibre-patch-panel",
-      "alt": "Fibre-optic patch cables terminated in an optical distribution panel",
-      "credit": "Pexels 4486718 — pexels.com/photo/4486718"
+      "alt": "AI-generated illustration of a fibre-optic network panel",
+      "credit": "AI-generated illustration; not an actual facility."
     },
     "network-cables": {
       "key": "photography/network-cables",
-      "alt": "Network cables plugged into a switch in a server rack",
-      "credit": "Pexels 2881229 — pexels.com/photo/blue-wires-connected-to-server-4716292"
+      "alt": "AI-generated illustration of network cables and a switch",
+      "credit": "AI-generated illustration; not an actual facility."
     },
     "fibre-engineer": {
       "key": "photography/fibre-engineer",
-      "alt": "Engineer working on fibre-optic patch leads in a communications rack",
-      "credit": "Pexels 38246354 — pexels.com/photo/38246354"
+      "alt": "AI-generated illustration of an engineer maintaining fibre-optic equipment",
+      "credit": "AI-generated illustration; not an actual facility."
     },
     "operations-centre": {
       "key": "photography/operations-centre",
-      "alt": "Security operations team monitoring a video wall in a control room",
-      "credit": "Pexels 30481728 — pexels.com/photo/30481728"
+      "alt": "AI-generated illustration of a security operations centre",
+      "credit": "AI-generated illustration; not an actual facility."
     },
     "data-centre-workstation": {
       "key": "photography/data-centre-workstation",
-      "alt": "Administration workstation in front of rows of server racks",
-      "credit": "Pexels 5092815 — pexels.com/photo/modern-computer-placed-near-server-racks-5092815"
+      "alt": "AI-generated illustration of a workstation in a data centre",
+      "credit": "AI-generated illustration; not an actual facility."
     },
     "server-storage": {
       "key": "photography/server-storage",
-      "alt": "Hot-swap storage array in a blue-lit enterprise server rack",
-      "credit": "Pexels 17489150 — pexels.com/photo/17489150"
+      "alt": "AI-generated illustration of enterprise storage hardware",
+      "credit": "AI-generated illustration; not an actual facility."
     },
     "network-switch": {
       "key": "photography/network-switch",
-      "alt": "Blue Ethernet patch leads connected to a network switch",
-      "credit": "Pexels 4818711 — pexels.com/photo/4818711"
+      "alt": "AI-generated illustration of network cables and a switch",
+      "credit": "AI-generated illustration; not an actual facility."
+    },
+    "documentation-workspace": {
+      "key": "photography/documentation-workspace",
+      "alt": "AI-generated image of a developer reviewing technical documentation at a workstation",
+      "credit": "AI-generated illustration; not an actual facility."
     }
   };
 
@@ -81,7 +86,7 @@ export const PHOTO_BY_FAMILY: Record<string, string> = {
 
 export const PHOTO_BY_SCENE: Record<string, string> = {
     "applications/application-stack-3d": "server-hardware",
-    "blog/documentation-3d": "data-centre-workstation",
+    "blog/documentation-3d": "documentation-workspace",
     "blog/insights-3d": "network-cables",
     "cloud/cloud-hosting-3d": "server-racks-blue",
     "cloud/data-centers-3d": "fibre-patch-panel",

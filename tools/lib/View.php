@@ -390,7 +390,7 @@ final class View
     private static function shellOpen($base)
     {
         $base = self::e(rtrim((string) $base, '/'));
-        return '<a class="ch-skip" href="#ch-tools-content">Skip to main content</a><header class="ch-header"><div class="ch-nav ch-wrap"><a class="ch-brand" href="' . $base . '/"><img src="' . $base . '/assets/images/cloudhost247/brand/logo-horizontal-dark.svg" width="190" height="36" alt="CloudHost247"></a><nav aria-label="Main"><a href="' . $base . '/tools">All tools</a></nav></div></header>';
+        return '<a class="ch-skip" href="#ch-tools-content">Skip to main content</a><header class="ch-header"><div class="ch-nav ch-wrap"><a class="ch-brand" href="' . $base . '/"><img src="' . $base . '/assets/images/cloudhost247/brand/cloudhost247-official.webp" width="190" height="36" alt="CloudHost247"></a><nav aria-label="Main"><a href="' . $base . '/tools">All tools</a></nav></div></header>';
     }
 
     private static function shellClose($base)

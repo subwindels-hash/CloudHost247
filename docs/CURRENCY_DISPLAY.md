@@ -33,8 +33,8 @@ valid, current rate.
 
 ## Fallback rules
 
-- No successful sync yet, feed unreachable, feed invalid, or newest rate older than `FX_MAX_AGE_HOURS`
-  (default 48): only USD is offered. The switcher says other currencies are unavailable.
+- No successful sync yet, feed unreachable, feed invalid, or all rates older than `FX_MAX_AGE_HOURS`
+  (default 48): only USD is offered. Individual stale or future-dated rates are withheld even when other rates are current. The switcher says other currencies are unavailable.
 - A saved choice is honoured only while the current status still offers it. Otherwise USD is used.
 - A non-USD amount is never converted.
 - Plain-http feeds are refused in production.
@@ -53,11 +53,11 @@ WHMCS: add a row to `mod_cloudhost247_currency_settings` with `setting_key = 'di
 `setting_value` equal to `FX_FEED_TOKEN`. An empty value disables the feed (HTTP 503). Rotate the token
 in both places together.
 
-The worker process (`npm run worker`) must be running for rates to sync. Without it the site stays on USD.
+The worker process (`npm run worker`) must be running for rates to sync. Without it the site stays on USD. Open pages recheck the status every five minutes and fall back to USD if the refresh fails.
 
 ## Where conversion is shown
 
-- Catalogue plan prices (`ProductPlansSection`).
+- Homepage pricing cards and catalogue plan prices (`ProductPlansSection`).
 - Cart subtotal and line totals (`CartPage`).
 
 Not converted yet: invoices, the payment modal, the dashboard, admin screens, and checkout totals on the

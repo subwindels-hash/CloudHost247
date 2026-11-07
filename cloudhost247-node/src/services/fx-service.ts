@@ -210,8 +210,8 @@ export interface DisplayCurrencyStatus {
 }
 
 /**
- * Turns the latest snapshot into the public status. A snapshot older than `maxAgeMs` is withheld
- * entirely, so a stale rate is never shown as current.
+ * Turns the latest snapshot into the public status. Rates older than `maxAgeMs` are withheld
+ * individually, so a stale rate is never shown as current.
  */
 export function buildDisplayCurrencyStatus(
   snapshot: FxSnapshot | null,
@@ -221,7 +221,13 @@ export function buildDisplayCurrencyStatus(
   if (!snapshot || snapshot.rates.length === 0) {
     return { base: DEFAULT_CURRENCY, available: false, reason: 'not_synced', asOf: null, fetchedAt: null, currencies: [] };
   }
-  if (now.getTime() - snapshot.observedAt.getTime() > maxAgeMs) {
+  // Validate freshness per currency, not just the newest observation in the run. A run can
+  // contain rates observed at different times; one fresh rate must not revive stale ones.
+  const current = snapshot.rates.filter((rate) => {
+    const age = now.getTime() - rate.observedAt.getTime();
+    return Number.isFinite(age) && age >= 0 && age <= maxAgeMs && Number.isFinite(rate.rate) && rate.rate > 0;
+  });
+  if (current.length === 0) {
     return {
       base: DEFAULT_CURRENCY,
       available: false,
@@ -231,13 +237,15 @@ export function buildDisplayCurrencyStatus(
       currencies: [],
     };
   }
+  // Use the oldest included observation for the shared label, so it never overstates freshness.
+  const oldest = new Date(Math.min(...current.map((rate) => rate.observedAt.getTime())));
   return {
     base: DEFAULT_CURRENCY,
     available: true,
     reason: null,
-    asOf: snapshot.observedAt.toISOString(),
+    asOf: oldest.toISOString(),
     fetchedAt: snapshot.fetchedAt.toISOString(),
-    currencies: snapshot.rates
+    currencies: current
       .slice()
       .sort((a, b) => a.code.localeCompare(b.code))
       .map((r) => ({ code: r.code, rate: r.rate, observedAt: r.observedAt.toISOString() })),

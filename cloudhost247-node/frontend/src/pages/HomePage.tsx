@@ -2,11 +2,12 @@ import { FormEvent, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { usePageMeta } from '../lib/usePageMeta';
 import { useApiResource } from '../lib/useApiResource';
-import { formatPrice, type ProductPlansResponse, type PublicPlan } from '../lib/catalog-types';
+import { type ProductPlansResponse, type PublicPlan } from '../lib/catalog-types';
 import { CatalogErrorBanner } from '../components/CatalogStateBanner';
-import { useCurrency } from '../currency/CurrencyProvider';
+import { useLocale } from '../i18n/LocaleProvider';
+import { formatCurrency } from '../i18n/format';
+import { ApproxAmount } from '../components/ApproxAmount';
 import { BRAND, UTILITY, NAV_SECTIONS } from '../navigation/registry.generated';
-import { resolvePhoto } from '../components/marketing/photo-map.generated';
 import Experience3D from '../components/marketing/Experience3D';
 
 /**
@@ -171,8 +172,8 @@ function ToolCountProof() {
   );
 }
 
-function Price({ plan }: { plan: PublicPlan }) {
-  const { formatAmount } = useCurrency();
+export function Price({ plan }: { plan: PublicPlan }) {
+  const { locale } = useLocale();
   const price = plan.pricing.find((p) => p.billingPeriod === 'monthly') ?? plan.pricing[0];
   if (!price) {
     return (
@@ -182,17 +183,16 @@ function Price({ plan }: { plan: PublicPlan }) {
       </>
     );
   }
-  const formatted = formatAmount(price.amount, price.currency);
   return (
     <>
       <div className="hg-plan__price">
-        <strong>{formatted.text || formatPrice(price)}</strong>
-        <span>/mo</span>
+        <strong>{formatCurrency(price.amount, price.currency, locale.code)}</strong>
       </div>
       <p className="hg-plan__billing">
-        Billed {price.billingPeriod.replace(/_/g, ' ')} · {formatted.converted ? formatted.currency : price.currency}
+        Billed {price.billingPeriod.replace(/_/g, ' ')} · {price.currency}
         {price.setupFee ? ' · setup fee applies' : ''}
       </p>
+      <ApproxAmount amount={price.amount} currency={price.currency} />
     </>
   );
 }
@@ -292,16 +292,13 @@ function PricingSection() {
 }
 
 /**
- * Hero visual — real, licensed enterprise data-centre photography in a metallic frame.
+ * Hero visual — illustrative data-centre imagery in a metallic frame.
  *
- * Deliberately NOT a CSS-drawn "product screenshot": the old mock dashboard looked like a generic
- * illustration and told the visitor nothing about the infrastructure behind the service. The photo
- * comes from the same generated registry as every other marketing illustration, so the homepage
- * and the WHMCS theme show the same scene. The frame tilts a few degrees with the pointer and the
- * two capability chips float at a different depth; nothing else on the page moves.
+ * A homepage-specific AI-generated image keeps the requested engineer scene separate from the
+ * shared marketing image registry. Responsive variants are generated alongside the master.
  */
 function HeroVisual() {
-  const photo = resolvePhoto('hero/infrastructure-3d');
+  const photo = { key: 'photography/home-engineer', alt: 'Illustrative image of an engineer holding a laptop beside server racks' };
   const srcSet = (format: string) =>
     [640, 960, 1280].map((width) => `/media/cloudhost247/${photo.key}-${width}.${format} ${width}w`).join(', ');
 
@@ -313,8 +310,8 @@ function HeroVisual() {
           <source type="image/webp" sizes="(max-width: 900px) 100vw, 620px" srcSet={srcSet('webp')} />
           <img
             src={`/media/cloudhost247/${photo.key}.jpg`}
-            width={1280}
-            height={855}
+            width={1376}
+            height={768}
             alt={photo.alt}
             fetchPriority="high"
             decoding="async"

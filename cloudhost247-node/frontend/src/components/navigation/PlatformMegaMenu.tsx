@@ -3,10 +3,9 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { NAV_SECTIONS, TOOLS_CATEGORIES, type RegistryGroup, type RegistrySection } from '../../navigation/registry.generated';
 
 export function Brand({ className }: { className?: string }) {
-  const onDark = Boolean(className?.includes('footer') || className?.includes('on-dark'));
   return (
     <NavLink to="/" className={className ? `ch247-brand ${className}` : 'ch247-brand'} aria-label="CloudHost247 — home">
-      <img src={`/media/cloudhost247/brand/logo-horizontal-${onDark ? 'white' : 'dark'}.svg`} width={204} height={39} alt="CloudHost247" />
+      <img src="/media/cloudhost247/brand/cloudhost247-official.webp" width={1000} height={397} alt="CloudHost247" />
     </NavLink>
   );
 }

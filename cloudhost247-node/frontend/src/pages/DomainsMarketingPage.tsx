@@ -98,7 +98,7 @@ export default function DomainsMarketingPage() {
 
   return (
     <div>
-      <section className="ch247-hero ch247-hero--compact">
+      <section className="ch247-hero ch247-hero--compact ch247-hero--photo ch247-hero--domains">
         <div className="ch247-hero__inner">
           <h1>Domain Services</h1>
           <p>Find, register, transfer and invest in domain names — all in one place.</p>

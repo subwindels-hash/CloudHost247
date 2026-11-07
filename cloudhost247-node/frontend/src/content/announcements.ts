@@ -46,4 +46,62 @@ export const ANNOUNCEMENTS: Announcement[] = [
     text: 'Deployment and platform documentation, published from the same tree that serves it',
     url: '/docs',
   },
+  {
+    badge: 'Business tools',
+    text: 'Explore calculators and document generators for everyday business tasks',
+    url: '/tools/business-tools',
+  },
+  {
+    badge: 'Websites',
+    text: 'Explore website building, online stores and design services',
+    url: '/websites',
+  },
+  {
+    badge: 'Status',
+    text: 'Check the service status page for the latest available platform checks',
+    url: '/status',
+  },
+  {
+    text: 'Find answers about services, billing and support in the FAQ',
+    url: '/faq',
+  },
+  {
+    badge: 'Contact',
+    text: 'Have a question? Send a message to the right department',
+    url: '/contact',
+  },
+  {
+    text: 'Read about account security, privacy and platform safeguards',
+    url: '/security',
+  },
+  {
+    badge: 'Cloud',
+    text: 'Compare public cloud, private cloud and server options for your next project',
+    url: '/cloud',
+  },
+  {
+    badge: 'Developers',
+    text: 'Explore application hosting, deployment guides and supported development platforms',
+    url: '/developers',
+  },
+  {
+    badge: 'Backups',
+    text: 'Review backup options and restoration information before choosing a service',
+    url: '/cloud/backups',
+  },
+  {
+    badge: 'Pricing',
+    text: 'Browse plans and check the current catalogue for available pricing and billing cycles',
+    url: '/pricing',
+  },
+  {
+    badge: 'Help',
+    text: 'Visit the Help Center for documentation, diagnostics and support resources',
+    url: '/help',
+  },
+  {
+    badge: 'Privacy',
+    text: 'Read the privacy policy to learn how CloudHost247 handles personal data',
+    url: '/legal/privacy-policy',
+  },
 ];

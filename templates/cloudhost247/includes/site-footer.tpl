@@ -5,7 +5,7 @@
 <footer class="ch-footer">
  <div class="ch-footer__directory"><div class="ch-wrap">
   <div class="ch-footer__intro">
-   <a class="ch-footer__brand" href="{$WEB_ROOT}/index.php" aria-label="CloudHost247 home"><img src="{$WEB_ROOT}/assets/images/cloudhost247/brand/logo-horizontal-white.svg" width="204" height="36" alt="CloudHost247"></a>
+   <a class="ch-footer__brand" href="{$WEB_ROOT}/index.php" aria-label="CloudHost247 home"><img src="{$WEB_ROOT}/assets/images/cloudhost247/brand/cloudhost247-official.webp" width="204" height="36" alt="CloudHost247"></a>
    <p>Professional cloud hosting and digital infrastructure for businesses, developers and organizations worldwide.</p>
    <div class="ch-footer__intro-actions">
     <a href="{$WEB_ROOT}/serverstatus.php">Platform status <span aria-hidden="true">&rarr;</span></a>

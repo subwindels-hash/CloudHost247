@@ -90,7 +90,7 @@ export default function ComplianceDocumentsPage() {
 
   return (
     <div className="tools-center">
-      <section className="ch247-hero ch247-hero--compact">
+      <section className="ch247-hero ch247-hero--compact ch247-hero--photo ch247-hero--legal">
         <div className="ch247-hero__inner">
           <p style={{ margin: '0 0 0.35rem', fontSize: '0.85rem', opacity: 0.9 }}>Tools → Collections</p>
           <h1>Compliance &amp; Document Tools</h1>

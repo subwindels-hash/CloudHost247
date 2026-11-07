@@ -607,3 +607,17 @@
     overflow: visible;
   }
 }
+
+/* Match the main tools directory search without changing category filtering. */
+.bt247-search { display: grid; gap: 8px; align-items: stretch; }
+.bt247-search .ch247-field-label { margin: 0; color: #263442; font-weight: 700; }
+.bt247-search__field { position: relative; display: flex; align-items: center; width: 100%; max-width: 740px; }
+.bt247-search__field svg { position: absolute; left: 20px; width: 20px; height: 20px; fill: none; stroke: #65717d; stroke-width: 1.7; pointer-events: none; }
+.bt247-search .bt247-search__field input[type='search'] { width: 100%; min-width: 0; min-height: 60px; padding: 15px 58px 15px 54px; border: 1px solid #c8d0d8; border-radius: 12px; background: #fff; color: #17212b; font: inherit; box-shadow: 0 5px 18px rgba(13,23,37,.08); }
+.bt247-search__field input::placeholder { color: #63707c; opacity: 1; }
+.bt247-search__field input:focus { outline: none; border-color: #a47b20; box-shadow: 0 0 0 3px rgba(230,200,117,.48), 0 5px 18px rgba(13,23,37,.08); }
+.bt247-search__field input::-webkit-search-cancel-button { -webkit-appearance: none; }
+.bt247-search__clear { position: absolute; right: 10px; display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 0; border-radius: 8px; background: transparent; color: #4a5661; font-size: 1.5rem; line-height: 1; cursor: pointer; }
+.bt247-search__clear:hover { background: #eef1f3; color: #17212b; }
+.bt247-search__clear:focus-visible { outline: 2px solid #8a6410; outline-offset: 2px; }
+@media (max-width: 600px) { .bt247-search .bt247-search__field input[type='search'] { min-height: 56px; font-size: 16px; padding-right: 52px; } }

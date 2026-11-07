@@ -15,12 +15,34 @@ import { useLocale } from '../i18n/LocaleProvider';
 export { CURRENCY_STORAGE_KEY } from './display-currency';
 
 export type RatesState = 'loading' | 'ready' | 'unavailable';
+export const COUNTRY_STORAGE_KEY = 'ch247.country';
+export const COUNTRY_CODES = ['NG','GH','KE','ZA','EG','MA','TZ','UG','RW','US','CA','MX','GB','IE','FR','DE','ES','IT','NL','PT','BE','AT','FI','GR','PL','SE','CH','DK','NO','BR','AR','IN','PK','BD','CN','HK','JP','KR','SG','MY','ID','PH','AE','SA','TR','AU','NZ'] as const;
+function validCountry(value: unknown): value is string {
+  return typeof value === 'string' && COUNTRY_CODES.includes(value.toUpperCase() as typeof COUNTRY_CODES[number]);
+}
+function storedCountry(): string | null {
+  try { const country = localStorage.getItem(COUNTRY_STORAGE_KEY); return validCountry(country) ? country.toUpperCase() : null; } catch { return null; }
+}
+export function browserCountry(languages: readonly string[]): string | null {
+  for (const language of languages) {
+    try { const region = new Intl.Locale(language).region; if (validCountry(region)) return region.toUpperCase(); } catch { /* invalid browser locale */ }
+  }
+  return null;
+}
+function browserCountryHint(): string | null {
+  if (typeof navigator === 'undefined') return null;
+  return browserCountry([...Array.from(navigator.languages || []), navigator.language]);
+}
+
 
 export interface CurrencyContextValue {
   /** The currency amounts are shown in. Always the base currency unless a valid, current rate is chosen. */
   readonly currency: string;
   readonly options: readonly string[];
   readonly ratesState: RatesState;
+  readonly country: string | null;
+  readonly countrySource: 'selected' | 'detected' | 'unknown';
+  readonly setCountry: (country: string) => boolean;
   readonly status: DisplayCurrencyStatus;
   /** Chooses a display currency. Returns false, and changes nothing, for a code the site does not offer. */
   readonly setCurrency: (code: string) => boolean;
@@ -106,7 +128,7 @@ function countryToCurrencyMap(enabledCurrencies: string[], _baseCurrency: string
     ['cf', 'XAF'],
     ['td', 'XAF'],
     ['cv', 'CVE'],
-    ['gw', 'CVE'],
+    ['gw', 'XOF'],
     ['gq', 'XAF'],
     ['st', 'STN'],
     ['sc', 'SCR'],
@@ -114,8 +136,8 @@ function countryToCurrencyMap(enabledCurrencies: string[], _baseCurrency: string
     // Europe
     ['at', 'EUR'],
     ['be', 'EUR'],
-    ['bg', 'BGN'],
-    ['hr', 'HRK'],
+    ['bg', 'EUR'],
+    ['hr', 'EUR'],
     ['cy', 'EUR'],
     ['cz', 'CZK'],
     ['dk', 'DKK'],
@@ -138,7 +160,7 @@ function countryToCurrencyMap(enabledCurrencies: string[], _baseCurrency: string
     ['sk', 'EUR'],
     ['si', 'EUR'],
     ['es', 'EUR'],
-    ['se', 'SEK'],
+    ['se', 'SEK'], ['no', 'NOK'],
     ['ch', 'CHF'],
     ['gb', 'GBP'],
     // North America
@@ -150,6 +172,7 @@ function countryToCurrencyMap(enabledCurrencies: string[], _baseCurrency: string
     ['nz', 'NZD'],
     ['pf', 'XPF'],
     ['gu', 'USD'],
+    ['in', 'INR'], ['jp', 'JPY'], ['kr', 'KRW'], ['cn', 'CNY'], ['hk', 'HKD'], ['sg', 'SGD'], ['id', 'IDR'], ['my', 'MYR'], ['ph', 'PHP'], ['pk', 'PKR'], ['bd', 'BDT'],
     // Middle East
     ['ae', 'AED'],
     ['sa', 'SAR'],
@@ -176,7 +199,7 @@ function countryToCurrencyMap(enabledCurrencies: string[], _baseCurrency: string
     ['py', 'PYG'],
     ['sr', 'SRD'],
     ['uy', 'UYU'],
-    ['ve', 'VEF'],
+    ['ve', 'VES'],
   ];
 
   const map = new Map<string, string>();
@@ -233,7 +256,7 @@ function resolveAutoCurrency(
 
 /**
  * Holds the display-currency choice and the current rate status. Independent of the language choice:
- * changing one never changes the other. The status is loaded once per page view; if the request fails,
+ * changing one never changes the other. The status is refreshed periodically; if the request fails,
  * the site keeps working in USD.
  */
 export function CurrencyProvider({
@@ -247,7 +270,7 @@ export function CurrencyProvider({
   savedPreference?: string;
   authenticatedPreference?: string;
 }) {
-  const { locale } = useLocale();
+  const { locale, suggestCountryLocale } = useLocale();
   const [status, setStatus] = useState<DisplayCurrencyStatus>(initialStatus ?? UNAVAILABLE_STATUS);
   const [ratesState, setRatesState] = useState<RatesState>(initialStatus ? 'ready' : 'loading');
   const [requested, setRequested] = useState<string | null>(() => {
@@ -255,14 +278,15 @@ export function CurrencyProvider({
     return isCurrencyCode(stored) ? stored : null;
   });
 
-  const [ipCountry, setIpCountry] = useState<string | null>(null);
+  const [selectedCountry, setSelectedCountry] = useState<string | null>(storedCountry);
+  const [ipCountry, setIpCountry] = useState<string | null>(() => browserCountryHint());
   useEffect(() => {
-    if (initialStatus || requested || savedPreference || authenticatedPreference) return undefined;
+    if (initialStatus || selectedCountry || requested || savedPreference || authenticatedPreference) return undefined;
     let cancelled = false;
     publicFetch<{ country: string | null }>('/api/v1/currency/geo-country')
       .then((payload) => {
         if (cancelled) return;
-        setIpCountry(payload.country ?? null);
+        if (validCountry(payload.country)) setIpCountry(payload.country.toUpperCase());
       })
       .catch(() => {
         /* Geolocation failed gracefully — keep ipCountry as null */
@@ -270,24 +294,35 @@ export function CurrencyProvider({
     return () => {
       cancelled = true;
     };
-  }, [initialStatus, requested, savedPreference, authenticatedPreference]);
+  }, [initialStatus, selectedCountry, requested, savedPreference, authenticatedPreference]);
 
   useEffect(() => {
     if (initialStatus) return undefined;
     let cancelled = false;
-    publicFetch<unknown>('/api/v1/currency/rates')
-      .then((payload) => {
-        if (cancelled) return;
-        setStatus(normalizeStatus(payload));
-        setRatesState('ready');
-      })
-      .catch(() => {
-        if (cancelled) return;
-        setStatus(UNAVAILABLE_STATUS);
-        setRatesState('unavailable');
-      });
+    let inFlight = false;
+    const refresh = () => {
+      if (inFlight) return;
+      inFlight = true;
+      publicFetch<unknown>('/api/v1/currency/rates')
+        .then((payload) => {
+          if (cancelled) return;
+          setStatus(normalizeStatus(payload));
+          setRatesState('ready');
+        })
+        .catch(() => {
+          if (cancelled) return;
+          setStatus(UNAVAILABLE_STATUS);
+          setRatesState('unavailable');
+        })
+        .finally(() => { inFlight = false; });
+    };
+    refresh();
+    // Revalidate on long-lived pages as well as initial load. Never keep showing a rate after
+    // a failed refresh; a later successful refresh restores the visitor's saved preference.
+    const timer = window.setInterval(refresh, 5 * 60 * 1000);
     return () => {
       cancelled = true;
+      window.clearInterval(timer);
     };
   }, [initialStatus]);
 
@@ -304,7 +339,7 @@ export function CurrencyProvider({
     status,
     savedPreference,
     authenticatedPreference,
-    ipCountry,
+    selectedCountry ?? ipCountry,
     enabledCurrencies,
     BASE_CURRENCY
   );
@@ -320,6 +355,15 @@ export function CurrencyProvider({
     [status]
   );
 
+  const setCountry = useCallback((code: string) => {
+    if (!validCountry(code)) return false;
+    const next = code.toUpperCase();
+    try { localStorage.setItem(COUNTRY_STORAGE_KEY, next); } catch { /* applies for this page view */ }
+    setSelectedCountry(next);
+    suggestCountryLocale(next);
+    return true;
+  }, [suggestCountryLocale]);
+
   const formatAmount = useCallback(
     (amount: number, sourceCurrency: string = BASE_CURRENCY) =>
       formatAmountInDisplayCurrency(amount, sourceCurrency, currency, status, locale.code),
@@ -327,14 +371,17 @@ export function CurrencyProvider({
   );
 
   const value = useMemo<CurrencyContextValue>(
-    () => ({ currency, options, ratesState, status, setCurrency, formatAmount }),
-    [currency, options, ratesState, status, setCurrency, formatAmount]
+    () => ({ currency, options, ratesState, status, setCurrency, formatAmount, country: selectedCountry ?? ipCountry, countrySource: selectedCountry ? 'selected' : ipCountry ? 'detected' : 'unknown', setCountry }),
+    [currency, options, ratesState, status, setCurrency, formatAmount, selectedCountry, ipCountry, setCountry]
   );
   return <CurrencyContext.Provider value={value}>{children}</CurrencyContext.Provider>;
 }
 
 const FALLBACK: CurrencyContextValue = {
   currency: BASE_CURRENCY,
+  country: null,
+  countrySource: 'unknown',
+  setCountry: () => false,
   options: [BASE_CURRENCY],
   ratesState: 'unavailable',
   status: UNAVAILABLE_STATUS,

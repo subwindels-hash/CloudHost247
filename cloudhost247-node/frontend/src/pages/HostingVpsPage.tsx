@@ -34,7 +34,7 @@ export default function HostingVpsPage() {
 
   return (
     <div>
-      <section className="ch247-hero ch247-hero--compact">
+      <section className="ch247-hero ch247-hero--compact ch247-hero--photo ch247-hero--cloud">
         <div className="ch247-hero__inner">
           <h1>VPS Hosting</h1>
           <p>Root-access virtual private servers with cPanel included, for sites that have outgrown shared hosting.</p>

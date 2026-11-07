@@ -22,7 +22,7 @@ export default function HostingDedicatedPage() {
 
   return (
     <div>
-      <section className="ch247-hero ch247-hero--compact">
+      <section className="ch247-hero ch247-hero--compact ch247-hero--photo ch247-hero--servers">
         <div className="ch247-hero__inner">
           <h1>Dedicated Bare-Metal Servers</h1>
           <p>Enterprise physical servers engineered for uncompromising performance, isolation, and scale.</p>

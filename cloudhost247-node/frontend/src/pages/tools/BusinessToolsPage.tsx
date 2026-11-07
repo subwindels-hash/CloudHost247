@@ -108,7 +108,7 @@ export default function BusinessToolsPage() {
 
   return (
     <div>
-      <section className="ch247-hero ch247-hero--compact">
+      <section className="ch247-hero ch247-hero--compact ch247-hero--photo ch247-hero--tools">
         <div className="ch247-hero__inner">
           <nav aria-label="Breadcrumb">
             <ol className="bt247-breadcrumbs">
@@ -148,6 +148,8 @@ export default function BusinessToolsPage() {
               <label className="ch247-field-label" htmlFor="bt247-search-input">
                 Search all {counts.all} tools
               </label>
+              <div className="bt247-search__field" role="search">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6" /><path d="m15 15 6 6" /></svg>
               <input
                 id="bt247-search-input"
                 type="search"
@@ -156,6 +158,8 @@ export default function BusinessToolsPage() {
                 onChange={(event) => updateParams({ q: event.target.value })}
                 aria-describedby="bt247-search-help"
               />
+                {query && <button type="button" className="bt247-search__clear" aria-label="Clear business tools search" onClick={() => { updateParams({ q: '' }); document.getElementById('bt247-search-input')?.focus(); }}>×</button>}
+              </div>
             </div>
             <p className="ch247-page__hint" id="bt247-search-help" style={{ margin: 0 }}>
               Search matches tool names, descriptions and keywords. Every word you type must appear

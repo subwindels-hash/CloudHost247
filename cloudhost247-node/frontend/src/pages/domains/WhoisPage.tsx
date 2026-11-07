@@ -37,7 +37,7 @@ export default function WhoisPage() {
 
   return (
     <div>
-      <section className="ch247-hero ch247-hero--compact">
+      <section className="ch247-hero ch247-hero--compact ch247-hero--photo ch247-hero--domains">
         <div className="ch247-hero__inner">
           <h1>Find a Domain Owner</h1>
           <p>Public registration data via modern RDAP, with classic WHOIS where a registry has no RDAP service.</p>

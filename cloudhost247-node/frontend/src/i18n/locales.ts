@@ -67,12 +67,24 @@ export function getDefaultLocale(): LocaleInfo {
  * Resolves a stored or requested tag to a supported locale, in this order: the tag itself, then the
  * browser's preferred languages, then the default. It never returns an unsupported locale.
  */
-export function resolveLocale(requested: unknown, browserLanguages: readonly string[] = []): LocaleInfo {
+export function resolveLocale(requested: unknown, browserLanguages: readonly string[] = [], country?: string | null): LocaleInfo {
   const direct = findLocale(requested);
   if (direct) return direct;
   for (const language of browserLanguages) {
     const match = findLocale(language);
     if (match) return match;
   }
-  return getDefaultLocale();
+  return localeForCountry(country) ?? getDefaultLocale();
+}
+
+/** Advisory language defaults only for countries with an existing UI catalogue. */
+const COUNTRY_LANGUAGE: Readonly<Record<string, string>> = {
+  GB: 'en', US: 'en', NG: 'en', GH: 'en', KE: 'en', ZA: 'en', CA: 'en', AU: 'en', NZ: 'en', IN: 'en',
+  FR: 'fr', BE: 'fr', CI: 'fr', SN: 'fr', DE: 'de', AT: 'de', CH: 'de',
+  ES: 'es', MX: 'es', AR: 'es', CL: 'es', CO: 'es', PT: 'pt', BR: 'pt', IT: 'it', NL: 'nl', PL: 'pl',
+  RU: 'ru', EG: 'ar', MA: 'ar', AE: 'ar', SA: 'ar', CN: 'zh', HK: 'zh', JP: 'ja', KR: 'ko',
+};
+export function localeForCountry(country: unknown): LocaleInfo | undefined {
+  if (typeof country !== 'string') return undefined;
+  return findLocale(COUNTRY_LANGUAGE[country.toUpperCase()] ?? '');
 }

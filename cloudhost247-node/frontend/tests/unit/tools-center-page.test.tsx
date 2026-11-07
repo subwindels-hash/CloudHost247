@@ -110,6 +110,18 @@ describe('Tools Center', () => {
     expect(screen.getAllByText('Available').length).toBeGreaterThan(0);
   });
 
+  it('filters and clears the catalogue search', async () => {
+    vi.stubGlobal('fetch', mockApi([['/api/tools/catalog', CATALOG], ['/api/tools/dashboard', DASHBOARD]]));
+    render(<MemoryRouter initialEntries={['/tools']}><App /></MemoryRouter>);
+    await screen.findAllByText('DNS Lookup');
+    const input = screen.getByRole('searchbox', { name: 'Search tools' }) as HTMLInputElement;
+    fireEvent.change(input, { target: { value: 'no-such-tool' } });
+    expect(screen.getByText(/No tool matches/)).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Clear tools search' }));
+    expect(input.value).toBe('');
+    expect(document.activeElement).toBe(input);
+  });
+
   it('resolves a nested catalogue URL to the right tool page', async () => {
     vi.stubGlobal('fetch', mockApi([
       ['/api/tools/catalog', CATALOG],

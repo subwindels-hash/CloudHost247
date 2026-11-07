@@ -169,7 +169,7 @@ export default function FaqPage() {
 
   return (
     <div>
-      <section className="ch247-hero ch247-hero--compact">
+      <section className="ch247-hero ch247-hero--compact ch247-hero--photo ch247-hero--support">
         <div className="ch247-hero__inner">
           <h1>Frequently Asked Questions</h1>
           <p>Find answers to the most common questions about our services, policies, and processes.</p>

@@ -1,46 +1,54 @@
 {
   "data-centre-aisle": {
-    "source": "pexels-free-photo-cloud-computing-data-c-3.jpg",
-    "page": "pexels.com/photo/1181316"
+    "source": "AI-generated illustration",
+    "note": "Illustrative only; not a photograph of CloudHost247 facilities or staff."
   },
   "server-racks-blue": {
-    "source": "unsplash-com-photos-modern-data-center-s-1.jpg",
-    "page": "pexels.com/photo/1148820"
+    "source": "AI-generated illustration",
+    "note": "Illustrative only; not a photograph of CloudHost247 facilities or staff."
   },
   "server-hardware": {
-    "source": "pexels-com-photo-server-room-data-centre-4.jpg",
-    "page": "pexels.com/photo/6466141"
+    "source": "AI-generated illustration",
+    "note": "Illustrative only; not a photograph of CloudHost247 facilities or staff."
   },
   "network-engineer": {
-    "source": "pexels-com-photo-server-room-data-centre-2.jpg",
-    "page": "pexels.com/photo/1181335"
+    "source": "AI-generated illustration",
+    "note": "Illustrative only; not a photograph of CloudHost247 facilities or staff."
   },
   "fibre-patch-panel": {
-    "source": "pexels-fibre-optic-cables-data-center-ne-5.jpg",
-    "page": "pexels.com/photo/4486718"
+    "source": "AI-generated illustration",
+    "note": "Illustrative only; not a photograph of CloudHost247 facilities or staff."
   },
   "network-cables": {
-    "source": "pexels-com-photo-server-room-data-centre-3.jpg",
-    "page": "pexels.com/photo/2881229"
+    "source": "AI-generated illustration",
+    "note": "Illustrative only; not a photograph of CloudHost247 facilities or staff."
   },
   "fibre-engineer": {
-    "source": "pexels-fibre-optic-cables-data-center-ne-1.jpg",
-    "page": "pexels.com/photo/38246354"
+    "source": "AI-generated illustration",
+    "note": "Illustrative only; not a photograph of CloudHost247 facilities or staff."
   },
   "operations-centre": {
-    "source": "pexels-photo-security-operations-center--1.jpg",
-    "page": "pexels.com/photo/30481728"
+    "source": "AI-generated illustration",
+    "note": "Illustrative only; not a photograph of CloudHost247 facilities or staff."
   },
   "data-centre-workstation": {
-    "source": "pexels-free-photo-cloud-computing-data-c-4.jpg",
-    "page": "pexels.com/photo/5092815"
+    "source": "AI-generated illustration",
+    "note": "Illustrative only; not a photograph of CloudHost247 facilities or staff."
   },
   "server-storage": {
-    "source": "pexels-free-photo-server-hard-drives-sto-3.jpg",
-    "page": "pexels.com/photo/17489150"
+    "source": "AI-generated illustration",
+    "note": "Illustrative only; not a photograph of CloudHost247 facilities or staff."
   },
   "network-switch": {
-    "source": "pexels-free-photo-data-center-cooling-ai-4.jpg",
-    "page": "pexels.com/photo/4818711"
+    "source": "AI-generated illustration",
+    "note": "Illustrative only; not a photograph of CloudHost247 facilities or staff."
+  },
+  "documentation-workspace": {
+    "source": "AI-generated illustration",
+    "note": "Illustrative only; not a photograph of CloudHost247 facilities or staff."
+  },
+  "home-engineer": {
+    "source": "AI-generated illustration",
+    "note": "Homepage-specific illustrative scene; not an actual CloudHost247 employee or facility."
   }
 }

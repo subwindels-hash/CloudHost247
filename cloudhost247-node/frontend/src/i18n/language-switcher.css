@@ -122,3 +122,14 @@
     right: auto;
   }
 }
+
+/* Native country picker stays keyboard and screen-reader accessible. */
+.ch247-country { display: inline-flex; align-items: center; min-width: 0; }
+.ch247-country__label, .ch247-country__note { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+.hg-theme .hg-header .ch247-country__select { max-width: 115px; min-height: 34px; padding: 0 3px; border: 0; background: transparent; color: #d7dce1; font: inherit; font-size: .74rem; font-weight: 600; cursor: pointer; }
+.ch247-country__select option { color: #17212b; background: #fff; }
+.ch247-country__select:focus-visible { outline: 2px solid #e6c875; outline-offset: 2px; }
+@media (max-width: 600px) { .hg-theme .hg-header .ch247-country__select { max-width: 82px; min-height: 30px; font-size: .68rem; } }
+
+.ch247-currency .ch247-locale__option:disabled { opacity: .58; cursor: not-allowed; }
+.ch247-currency .ch247-locale__option:disabled:hover { background: transparent; }

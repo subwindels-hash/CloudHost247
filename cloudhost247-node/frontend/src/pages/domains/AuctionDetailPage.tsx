@@ -117,7 +117,7 @@ export default function AuctionDetailPage() {
 
   return (
     <div>
-      <section className="ch247-hero ch247-hero--compact">
+      <section className="ch247-hero ch247-hero--compact ch247-hero--photo ch247-hero--company">
         <div className="ch247-hero__inner">
           <h1 style={{ wordBreak: 'break-all' }}>{auction.domainName}</h1>
           <p>

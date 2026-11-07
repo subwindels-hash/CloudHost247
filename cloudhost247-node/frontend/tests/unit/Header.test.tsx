@@ -32,6 +32,8 @@ describe('Header: authentication-aware navigation', () => {
       </MemoryRouter>
     );
 
+    const logo = screen.getByRole('link', { name: 'CloudHost247 — home' }).querySelector('img');
+    expect(logo?.getAttribute('src')).toContain('cloudhost247-official.webp');
     expect(screen.getByRole('link', { name: 'Sign In' })).toBeTruthy();
     expect(screen.queryByRole('link', { name: 'Create Account' })).toBeNull();
     expect(screen.queryByRole('link', { name: 'Dashboard' })).toBeNull();

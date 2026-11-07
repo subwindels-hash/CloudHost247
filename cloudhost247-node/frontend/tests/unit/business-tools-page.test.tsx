@@ -252,6 +252,15 @@ describe('Business Tools — the directory page', () => {
     expect(toolCards().length).toBeLessThanOrEqual(names.length);
   });
 
+  it('clears the search field without resetting the selected category', async () => {
+    renderDirectory('?q=pension&category=calculators');
+    const input = screen.getByLabelText('Search all 21 tools') as HTMLInputElement;
+    fireEvent.click(screen.getByRole('button', { name: 'Clear business tools search' }));
+    await waitFor(() => expect(input.value).toBe(''));
+    expect(document.activeElement).toBe(input);
+    expect(screen.getByRole('button', { name: /Calculators \(5\)/ }).getAttribute('aria-pressed')).toBe('true');
+  });
+
   it('shows an empty state with a working clear action when nothing matches', async () => {
     renderDirectory('?q=zzz-not-a-tool');
     expect(await screen.findByRole('heading', { name: 'No tools match that search' })).toBeTruthy();
@@ -635,6 +644,7 @@ describe('Business Tools — routing, backwards compatibility and navigation', (
   it('renders the footer link on the page a visitor actually sees', async () => {
     renderAppAt(BUSINESS_TOOLS_ROOT);
     await screen.findByRole('heading', { level: 1, name: 'Business Tools' });
+    fireEvent.click(screen.getByRole('button', { name: 'View all Tools links' }));
     const footerLinks = screen.getAllByRole('link', { name: 'Business Tools' });
     expect(footerLinks.some((link) => link.getAttribute('href') === '/tools/business-tools')).toBe(true);
   });

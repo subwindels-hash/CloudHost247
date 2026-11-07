@@ -1,10 +1,10 @@
 /**
- * Shared CloudHost247 illustration frame — authentic infrastructure photography first.
+ * Shared CloudHost247 illustration frame — illustrative infrastructure imagery first.
  *
  * Every marketing surface (homepage, product pages, split sections) renders through this
- * component so a licensed photograph, a 3D scene and an SVG diagram stay paired. The `<img>`
+ * component so an AI-generated image, a 3D scene and an SVG diagram stay paired. The `<img>`
  * always points at the SVG — that is the file the generator and the page tests assert — and a
- * `<picture>` upgrades to real data-centre photography in AVIF / WebP / JPEG. The original 3D
+ * `<picture>` upgrades to AI-generated infrastructure imagery in AVIF / WebP / JPEG. The original 3D
  * ladder remains as a second fallback. Missing files therefore degrade to the diagram rather
  * than a broken image.
  *

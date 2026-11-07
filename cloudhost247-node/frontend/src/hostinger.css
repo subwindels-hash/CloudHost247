@@ -57,13 +57,19 @@
    1. Shared chrome: announcement marquee, header, mega menu, footer
    -------------------------------------------------------------------------- */
 
+/* A rotating gold and silver metallic edge around a solid black announcement bar. */
+@property --announcement-border-angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+@keyframes announcement-metal-border { to { --announcement-border-angle: 360deg; } }
 .hg-theme .ch-announce {
-  background:
-    linear-gradient(100deg, transparent 28%, rgba(230, 200, 117, 0.16) 46%, transparent 62%),
-    linear-gradient(95deg, #0d1116 0%, #2b2415 42%, #4a3608 72%, #6b4d0c 100%);
+  box-sizing: border-box;
+  border: 2px solid transparent;
+  background: linear-gradient(#000, #000) padding-box,
+    conic-gradient(from var(--announcement-border-angle, 0deg), #8c6511, #f9e8a4, #a87c1e, #f2f3f4, #8d949d, #f9fafb, #b3882e, #8c6511) border-box;
+  animation: announcement-metal-border 9s linear infinite;
 }
-.hg-theme .ch-announce::before { background: linear-gradient(90deg, var(--hg-accent-deep), rgba(10, 22, 32, 0)); }
-.hg-theme .ch-announce::after { background: linear-gradient(270deg, rgba(230, 200, 117, 0.22), rgba(230, 200, 117, 0)); }
+.hg-theme .ch-announce::before { background: linear-gradient(90deg, #000, transparent); }
+.hg-theme .ch-announce::after { background: linear-gradient(270deg, #000, transparent); }
+@media (prefers-reduced-motion: reduce) { .hg-theme .ch-announce { animation: none; } }
 .hg-theme .ch-announce__badge { background: rgba(255, 255, 255, 0.18); color: #fff; }
 .hg-theme .ch-announce__link:hover { border-bottom-color: #fff; }
 .hg-theme .ch-announce__star { filter: hue-rotate(225deg) saturate(1.4) brightness(1.4); }
@@ -816,4 +822,37 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .hg-theme .hg-btn, .hg-theme .hg-card, .hg-theme .hg-usecase, .hg-theme .hg-browser { transition: none !important; transform: none !important; }
+}
+
+/* Documentation gets its own photographic-style hero, without changing other resource pages. */
+.hg-theme .ch-ds .ch-docs-hero {
+  background: linear-gradient(90deg, rgba(7, 16, 27, .96) 0%, rgba(7, 16, 27, .82) 52%, rgba(7, 16, 27, .45) 100%),
+    url('/media/cloudhost247/hero-backgrounds/documentation-1280.webp') right center / cover no-repeat;
+  background-color: #0b1623;
+}
+.hg-theme .ch-ds .ch-docs-hero > .ch-wrap { position: relative; z-index: 1; padding-block: clamp(48px, 6vw, 80px); }
+.hg-theme .ch-ds .ch-docs-hero h1 { color: #fff; }
+.hg-theme .ch-ds .ch-docs-hero .ch-lede { color: #e1e6eb; }
+.hg-theme .ch-ds .ch-docs-hero .ch-kicker { color: #e6c875; }
+@media (max-width: 767px) {
+  .hg-theme .ch-ds .ch-docs-hero {
+    background: linear-gradient(90deg, rgba(7, 16, 27, .96), rgba(7, 16, 27, .72)),
+      url('/media/cloudhost247/hero-backgrounds/documentation-640.webp') 70% center / cover no-repeat;
+  }
+}
+
+/* Account CTA: blend the image into the full-width section and keep its copy legible. */
+.hg-theme .ch-ds .ch-cta--account {
+  background: linear-gradient(90deg, rgba(8, 16, 27, .96) 0%, rgba(8, 16, 27, .83) 58%, rgba(8, 16, 27, .57) 100%),
+    url('/media/cloudhost247/hero-backgrounds/account-cta-1280.webp') right center / cover no-repeat;
+  background-color: #0d1725;
+}
+.hg-theme .ch-ds .ch-cta--account .ch-cta__inner { background: transparent; }
+.hg-theme .ch-ds .ch-cta--account h2 { color: #fff; }
+.hg-theme .ch-ds .ch-cta--account p { color: #e5e8eb; }
+@media (max-width: 767px) {
+  .hg-theme .ch-ds .ch-cta--account {
+    background: linear-gradient(90deg, rgba(8, 16, 27, .96), rgba(8, 16, 27, .74)),
+      url('/media/cloudhost247/hero-backgrounds/account-cta-640.webp') 70% center / cover no-repeat;
+  }
 }
