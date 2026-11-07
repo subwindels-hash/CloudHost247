@@ -214,11 +214,11 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
       z.object({
         agentSlug: z.string().min(1).max(64),
         taskType: z.string().min(1).max(64),
-        input: z.record(z.unknown()).optional(),
+        input: z.record(z.string(), z.unknown()).optional(),
         subjectType: z.string().max(48).optional(),
         subjectId: z.string().uuid().optional(),
         customerId: z.string().uuid().optional(),
-        priority: z.enum(['low', 'normal', 'high', 'urgent']).optional(),
+        priority: z.enum(['low', 'normal', 'high', 'urgent'] as const).optional(),
       }),
       request.body
     );
@@ -270,7 +270,7 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
     const auth = await authorize(request, 'ai.approvals.manage');
     const { id } = parseOrThrow(idParam, request.params);
     const body = parseOrThrow(
-      z.object({ decision: z.enum(['approved', 'rejected']), note: z.string().max(2000).optional() }),
+      z.object({ decision: z.enum(['approved', 'rejected'] as const), note: z.string().max(2000).optional() }),
       request.body
     );
     const pool = db();
@@ -309,7 +309,7 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
   instance.post(`${ADMIN_BASE}/events`, async (request) => {
     const auth = await authorize(request, 'ai.workflows.manage');
     const body = parseOrThrow(
-      z.object({ eventType: z.enum(AI_EVENT_TYPES), payload: z.record(z.unknown()).optional(), processNow: z.boolean().optional() }),
+      z.object({ eventType: z.enum(AI_EVENT_TYPES), payload: z.record(z.string(), z.unknown()).optional(), processNow: z.boolean().optional() }),
       request.body
     );
     const pool = db();
@@ -370,7 +370,7 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
   instance.post(`${ADMIN_BASE}/findings/:id/status`, async (request) => {
     const auth = await authorize(request, 'ai.findings.manage');
     const { id } = parseOrThrow(idParam, request.params);
-    const body = parseOrThrow(z.object({ status: z.enum(['acknowledged', 'resolved', 'dismissed']) }), request.body);
+    const body = parseOrThrow(z.object({ status: z.enum(['acknowledged', 'resolved', 'dismissed'] as const) }), request.body);
     const finding = await updateFindingStatus(db(), id, body.status);
     if (!finding) throw new NotFoundError('Finding not found (or already in that status)');
     await recordAudit(
@@ -393,7 +393,7 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
     const body = parseOrThrow(
       z.object({
         title: z.string().min(3).max(255),
-        severity: z.enum(['low', 'medium', 'high', 'critical']),
+        severity: z.enum(['low', 'medium', 'high', 'critical'] as const),
         summary: z.string().max(10000).default(''),
       }),
       request.body
@@ -420,7 +420,7 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
     const auth = await authorize(request, 'ai.incidents.manage');
     const { id } = parseOrThrow(idParam, request.params);
     const body = parseOrThrow(
-      z.object({ note: z.string().min(1).max(5000), status: z.enum(['open', 'investigating', 'mitigated', 'resolved']).optional() }),
+      z.object({ note: z.string().min(1).max(5000), status: z.enum(['open', 'investigating', 'mitigated', 'resolved'] as const).optional() }),
       request.body
     );
     const incident = await appendIncidentTimeline(db(), id, body.note, `staff:${auth.userId}`, body.status);
@@ -486,7 +486,7 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
     const body = parseOrThrow(
       z.object({
         title: z.string().min(3).max(255),
-        sourceType: z.enum(['manual', 'doc', 'faq', 'policy', 'procedure', 'runbook', 'resolution']).default('doc'),
+        sourceType: z.enum(['manual', 'doc', 'faq', 'policy', 'procedure', 'runbook', 'resolution'] as const).default('doc'),
         uri: z.string().url().max(1000).optional(),
         version: z.string().max(32).optional(),
         content: z.string().min(10).max(20000),
@@ -565,7 +565,7 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
 
   instance.post(`${ADMIN_BASE}/board/briefings`, async (request) => {
     const auth = await authorize(request, 'ai.board.briefings');
-    const body = parseOrThrow(z.object({ type: z.enum(['daily', 'weekly', 'monthly']) }), request.body);
+    const body = parseOrThrow(z.object({ type: z.enum(['daily', 'weekly', 'monthly'] as const) }), request.body);
     const pool = db();
     const outcome = await generateExecutiveBriefing(pool, body.type, auth.userId, runTask);
     if (!outcome.report) {

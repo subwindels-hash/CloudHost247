@@ -105,7 +105,7 @@ export async function registerInboxRoutes(app: FastifyInstance, env: Env, overri
       z.object({
         kind: z.enum(CHANNEL_KINDS),
         name: z.string().min(1).max(120),
-        config: z.record(z.unknown()).optional(),
+        config: z.record(z.string(), z.unknown()).optional(),
       }),
       request.body
     );
@@ -163,8 +163,8 @@ export async function registerInboxRoutes(app: FastifyInstance, env: Env, overri
     const auth = await requireRole(request, env, pool, STAFF);
     const patch = parseOrThrow(
       z.object({
-        status: z.enum(['open', 'pending', 'snoozed', 'closed']).optional(),
-        priority: z.enum(['low', 'normal', 'high', 'urgent']).optional(),
+        status: z.enum(['open', 'pending', 'snoozed', 'closed'] as const).optional(),
+        priority: z.enum(['low', 'normal', 'high', 'urgent'] as const).optional(),
         isStarred: z.boolean().optional(),
         assigneeId: z.string().uuid().nullable().optional(),
         note: z.string().max(300).nullable().optional(),
@@ -184,7 +184,7 @@ export async function registerInboxRoutes(app: FastifyInstance, env: Env, overri
   app.post<{ Params: { id: string } }>('/api/v1/inbox/conversations/:id/messages', async (request, reply) => {
     const auth = await requireRole(request, env, pool, STAFF);
     const input = parseOrThrow(
-      z.object({ body: z.string().min(1).max(20000), visibility: z.enum(['public', 'internal']).optional() }),
+      z.object({ body: z.string().min(1).max(20000), visibility: z.enum(['public', 'internal'] as const).optional() }),
       request.body
     );
     const result = await replyToConversation(

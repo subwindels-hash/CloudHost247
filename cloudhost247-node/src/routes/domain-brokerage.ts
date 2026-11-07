@@ -19,10 +19,10 @@ const createSchema = z.object({
   message: z.string().max(5000).optional(), negotiationInstructions: z.string().max(5000).optional(),
   deadline: z.string().datetime().optional(), termsAccepted: z.literal(true), idempotencyKey: z.string().min(8).max(128).optional(),
 });
-const offerSchema = z.object({ amount: money, currency: z.string().length(3).regex(/^[a-z]{3}$/i), recipientType: z.enum(['customer','broker','seller','provider']), expiresAt: z.string().datetime().optional() });
-const messageSchema = z.object({ body: z.string().min(1).max(10000), visibility: z.enum(['customer','internal']).default('customer') });
+const offerSchema = z.object({ amount: money, currency: z.string().length(3).regex(/^[a-z]{3}$/i), recipientType: z.enum(['customer','broker','seller','provider'] as const), expiresAt: z.string().datetime().optional() });
+const messageSchema = z.object({ body: z.string().min(1).max(10000), visibility: z.enum(['customer','internal'] as const).default('customer') });
 const assignmentSchema = z.object({ brokerId: id });
-const providerSchema = z.object({ providerKey: z.string().min(1).max(80), name: z.string().min(1).max(160), providerType: z.enum(['marketplace','broker','registrar','manual']), capabilities: z.record(z.boolean()).default({}), environment: z.enum(['sandbox','production']).default('production') });
+const providerSchema = z.object({ providerKey: z.string().min(1).max(80), name: z.string().min(1).max(160), providerType: z.enum(['marketplace','broker','registrar','manual'] as const), capabilities: z.record(z.string(), z.boolean()).default({}), environment: z.enum(['sandbox','production'] as const).default('production') });
 function parse<T>(s: z.ZodType<T>, value: unknown): T { const r = s.safeParse(value); if (!r.success) throw new ValidationError(r.error.issues.map((i) => i.message).join(', ')); return r.data; }
 function nextNumber(): string { return `BRK-${new Date().getUTCFullYear()}-${randomUUID().replace(/-/g, '').slice(0, 6).toUpperCase()}`; }
 async function event(db: Queryable, caseId: string, actorId: string | null, type: string, metadata: Record<string, unknown> = {}) { await db.query('INSERT INTO domain_broker_events (id,case_id,actor_id,event_type,metadata,correlation_id) VALUES ($1,$2,$3,$4,$5,$6)', [randomUUID(), caseId, actorId, type, JSON.stringify(metadata), randomUUID()]); }
@@ -77,7 +77,7 @@ export async function registerDomainBrokerageRoutes(app: FastifyInstance, env: E
 
   app.post<{ Params: { id: string; offerId: string } }>('/api/v1/account/domain-brokerage/cases/:id/offers/:offerId/decision', async (req) => {
     const auth = await authenticate(req, env, db); const caseId = parse(id, req.params.id); const offerId = parse(id, req.params.offerId); await ownCase(db, auth.userId, caseId);
-    const decision = z.object({ action: z.enum(['accept','reject']) }); const input = parse(decision, req.body);
+    const decision = z.object({ action: z.enum(['accept','reject'] as const) }); const input = parse(decision, req.body);
     const offer = await db.query<any>("SELECT * FROM domain_broker_offers WHERE id=$1 AND case_id=$2 AND sender_type IN ('seller','provider') AND status='open'", [offerId, caseId]);
     if (!offer.rows[0]) throw new NotFoundError('No open seller offer was found');
     await db.query('UPDATE domain_broker_offers SET status=$1 WHERE id=$2 AND status=\'open\'', [input.action === 'accept' ? 'accepted' : 'rejected', offerId]);
@@ -133,7 +133,7 @@ export async function registerDomainBrokerageRoutes(app: FastifyInstance, env: E
 
   app.post<{ Params: { id: string } }>('/api/v1/admin/domain-brokerage/cases/:id/offers', async (req,reply) => {
     const auth=await requireRole(req,env,db,STAFF); const caseId=parse(id,req.params.id);
-    const input=parse(z.object({ amount:money, currency:z.string().length(3).regex(/^[a-z]{3}$/i), senderType:z.enum(['broker','seller','provider']), recipientType:z.enum(['customer','broker','seller','provider']).default('customer'), expiresAt:z.string().datetime().optional(), providerReference:z.string().max(255).optional() }),req.body);
+    const input=parse(z.object({ amount:money, currency:z.string().length(3).regex(/^[a-z]{3}$/i), senderType:z.enum(['broker','seller','provider'] as const), recipientType:z.enum(['customer','broker','seller','provider'] as const).default('customer'), expiresAt:z.string().datetime().optional(), providerReference:z.string().max(255).optional() }),req.body);
     const c=await db.query<any>('SELECT id,user_id,domain,brokerage_id,status FROM domain_broker_cases WHERE id=$1',[caseId]);
     if(!c.rows[0]) throw new NotFoundError('No brokerage case was found');
     if(['completed','rejected','cancelled'].includes(c.rows[0].status)) throw new ConflictError('Offers cannot be added to a closed case');
@@ -151,7 +151,7 @@ export async function registerDomainBrokerageRoutes(app: FastifyInstance, env: E
 
   app.post<{ Params: { id: string } }>('/api/v1/admin/domain-brokerage/cases/:id/messages', async (req,reply) => {
     const auth=await requireRole(req,env,db,STAFF); const caseId=parse(id,req.params.id);
-    const input=parse(z.object({ body:z.string().min(1).max(10000), visibility:z.enum(['customer','internal']).default('internal') }),req.body);
+    const input=parse(z.object({ body:z.string().min(1).max(10000), visibility:z.enum(['customer','internal'] as const).default('internal') }),req.body);
     const c=await db.query<any>('SELECT id,user_id,domain,brokerage_id FROM domain_broker_cases WHERE id=$1',[caseId]);
     if(!c.rows[0]) throw new NotFoundError('No brokerage case was found');
     const messageId=randomUUID();
@@ -161,7 +161,7 @@ export async function registerDomainBrokerageRoutes(app: FastifyInstance, env: E
     reply.code(201); return { message:r.rows[0] };
   });
 
-  const paymentBody=z.object({ acquisitionAmount:money, brokerageFee:z.number().min(0).finite().default(0), transferFee:z.number().min(0).finite().default(0), paymentFee:z.number().min(0).finite().default(0), currency:z.string().length(3).regex(/^[a-z]{3}$/i), status:z.enum(['pending','initiated','authorized','paid','failed','refunded','cancelled']) });
+  const paymentBody=z.object({ acquisitionAmount:money, brokerageFee:z.number().min(0).finite().default(0), transferFee:z.number().min(0).finite().default(0), paymentFee:z.number().min(0).finite().default(0), currency:z.string().length(3).regex(/^[a-z]{3}$/i), status:z.enum(['pending','initiated','authorized','paid','failed','refunded','cancelled'] as const) });
   app.put<{ Params: { id: string } }>('/api/v1/admin/domain-brokerage/cases/:id/payment', async (req) => {
     const auth=await requireRole(req,env,db,STAFF); const caseId=parse(id,req.params.id);
     const input=parse(paymentBody,req.body);
@@ -189,7 +189,7 @@ export async function registerDomainBrokerageRoutes(app: FastifyInstance, env: E
 
   app.put<{ Params: { id: string } }>('/api/v1/admin/domain-brokerage/cases/:id/transfer', async (req) => {
     const auth=await requireRole(req,env,db,STAFF); const caseId=parse(id,req.params.id);
-    const input=parse(z.object({ status:z.enum(['not_started','authorization_required','initiated','processing','verified','failed']), registrar:z.string().max(255).optional(), providerReference:z.string().max(255).optional(), failureReason:z.string().max(1000).optional() }),req.body);
+    const input=parse(z.object({ status:z.enum(['not_started','authorization_required','initiated','processing','verified','failed'] as const), registrar:z.string().max(255).optional(), providerReference:z.string().max(255).optional(), failureReason:z.string().max(1000).optional() }),req.body);
     const c=await db.query<any>('SELECT id,user_id,domain,brokerage_id,transfer_status FROM domain_broker_cases WHERE id=$1',[caseId]);
     if(!c.rows[0]) throw new NotFoundError('No brokerage case was found');
     const initiatedNow=input.status==='initiated'||input.status==='processing';

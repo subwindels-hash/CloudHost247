@@ -75,11 +75,11 @@ export async function registerAdminDomainServiceRoutes(app: FastifyInstance, env
         providerKey: z.string().min(2).max(80).regex(/^[a-z0-9][a-z0-9_-]*$/),
         name: z.string().min(2).max(160),
         adapterKey: z.string().min(2).max(80),
-        providerType: z.enum(['registrar', 'rdap', 'appraisal', 'auction']),
+        providerType: z.enum(['registrar', 'rdap', 'appraisal', 'auction'] as const),
         apiBaseUrl: z.string().url().max(500).nullable().optional(),
-        environment: z.enum(['sandbox', 'production']).default('production'),
-        capabilities: z.record(z.unknown()).optional(),
-        configuration: z.record(z.unknown()).optional(),
+        environment: z.enum(['sandbox', 'production'] as const).default('production'),
+        capabilities: z.record(z.string(), z.unknown()).optional(),
+        configuration: z.record(z.string(), z.unknown()).optional(),
       }),
       request.body
     );
@@ -108,9 +108,9 @@ export async function registerAdminDomainServiceRoutes(app: FastifyInstance, env
       z.object({
         name: z.string().min(2).max(160).optional(),
         apiBaseUrl: z.string().url().max(500).nullable().optional(),
-        environment: z.enum(['sandbox', 'production']).optional(),
-        status: z.enum(['not_configured', 'configured', 'connected', 'auth_failed', 'unavailable', 'disabled']).optional(),
-        configuration: z.record(z.unknown()).optional(),
+        environment: z.enum(['sandbox', 'production'] as const).optional(),
+        status: z.enum(['not_configured', 'configured', 'connected', 'auth_failed', 'unavailable', 'disabled'] as const).optional(),
+        configuration: z.record(z.string(), z.unknown()).optional(),
       }),
       request.body
     );
@@ -133,7 +133,7 @@ export async function registerAdminDomainServiceRoutes(app: FastifyInstance, env
     const auth = await requireRole(request, env, pool, SUPER_ADMIN);
     const id = parseOrThrow(uuidSchema, request.params.id);
     const input = parseOrThrow(
-      z.object({ credentials: z.record(z.string().min(1).max(20_000)) }),
+      z.object({ credentials: z.record(z.string(), z.string().min(1).max(20_000)) }),
       request.body
     );
     const provider = await findDomainServiceProviderById(pool, id);
@@ -263,7 +263,7 @@ export async function registerAdminDomainServiceRoutes(app: FastifyInstance, env
         description: z.string().max(2000).nullable().optional(),
         restrictions: z.string().max(2000).nullable().optional(),
         registrationRequirements: z.string().max(2000).nullable().optional(),
-        status: z.enum(['active', 'disabled', 'unavailable']).optional(),
+        status: z.enum(['active', 'disabled', 'unavailable'] as const).optional(),
       }),
       request.body
     );
@@ -364,7 +364,7 @@ export async function registerAdminDomainServiceRoutes(app: FastifyInstance, env
     const id = parseOrThrow(uuidSchema, request.params.id);
     const input = parseOrThrow(
       z.object({
-        status: z.enum(['pending', 'authorization_required', 'transfer_initiated', 'transfer_in_progress', 'pending_registry', 'completed', 'failed', 'cancelled']),
+        status: z.enum(['pending', 'authorization_required', 'transfer_initiated', 'transfer_in_progress', 'pending_registry', 'completed', 'failed', 'cancelled'] as const),
         note: z.string().max(500).optional(),
       }),
       request.body
@@ -450,7 +450,7 @@ export async function registerAdminDomainServiceRoutes(app: FastifyInstance, env
   app.post<{ Params: { id: string; action: string } }>('/api/v1/admin/domain-services/auctions/:id/:action', async (request) => {
     const auth = await requireRole(request, env, pool, STAFF);
     const id = parseOrThrow(uuidSchema, request.params.id);
-    const action = parseOrThrow(z.enum(['pause', 'resume', 'cancel', 'complete']), request.params.action);
+    const action = parseOrThrow(z.enum(['pause', 'resume', 'cancel', 'complete'] as const), request.params.action);
     const auction = await adminUpdateAuctionStatus(pool, id, action);
     await auditRequest(pool, request, auth.userId, {
       action: `admin.domain_auction_${action}d`,
@@ -475,13 +475,13 @@ export async function registerAdminDomainServiceRoutes(app: FastifyInstance, env
       z.object({
         name: z.string().min(2).max(120),
         description: z.string().max(2000).nullable().optional(),
-        billingPeriod: z.enum(['monthly', 'annually']),
+        billingPeriod: z.enum(['monthly', 'annually'] as const),
         priceAmount: z.string().regex(/^\d{1,10}(\.\d{1,2})?$/),
-        discountType: z.enum(['percentage', 'fixed']),
+        discountType: z.enum(['percentage', 'fixed'] as const),
         discountValue: z.string().regex(/^\d{1,10}(\.\d{1,2})?$/),
         eligibleExtensions: z.array(z.string().max(63)).optional(),
-        promotion: z.record(z.unknown()).optional(),
-        status: z.enum(['draft', 'published', 'disabled']).optional(),
+        promotion: z.record(z.string(), z.unknown()).optional(),
+        status: z.enum(['draft', 'published', 'disabled'] as const).optional(),
       }),
       request.body
     );
@@ -503,13 +503,13 @@ export async function registerAdminDomainServiceRoutes(app: FastifyInstance, env
       z.object({
         name: z.string().min(2).max(120).optional(),
         description: z.string().max(2000).nullable().optional(),
-        billingPeriod: z.enum(['monthly', 'annually']).optional(),
+        billingPeriod: z.enum(['monthly', 'annually'] as const).optional(),
         priceAmount: z.string().regex(/^\d{1,10}(\.\d{1,2})?$/).optional(),
-        discountType: z.enum(['percentage', 'fixed']).optional(),
+        discountType: z.enum(['percentage', 'fixed'] as const).optional(),
         discountValue: z.string().regex(/^\d{1,10}(\.\d{1,2})?$/).optional(),
         eligibleExtensions: z.array(z.string().max(63)).optional(),
-        promotion: z.record(z.unknown()).optional(),
-        status: z.enum(['draft', 'published', 'disabled']).optional(),
+        promotion: z.record(z.string(), z.unknown()).optional(),
+        status: z.enum(['draft', 'published', 'disabled'] as const).optional(),
       }),
       request.body
     );
