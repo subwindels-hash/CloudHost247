@@ -219,6 +219,13 @@
           ]
         },
         {
+          "type": "plans",
+          "kicker": "Live pricing",
+          "heading": "Public cloud instances on this deployment",
+          "lede": "Read from the product catalogue, so what you see here is what the order form charges.",
+          "productSlug": "public-cloud"
+        },
+        {
           "type": "note",
           "heading": "Region availability is configuration, not a claim",
           "body": "A public cloud instance can only be created where the platform has a provider configured for it. The regions list on this deployment shows what is genuinely available; where it is empty, no region is configured and no instance can be promised."
@@ -315,6 +322,13 @@
               "body": "Operate it yourself, or have the CloudHost247 team run the platform layer for you."
             }
           ]
+        },
+        {
+          "type": "plans",
+          "kicker": "Live pricing",
+          "heading": "Private cloud capacity on this deployment",
+          "lede": "Read from the product catalogue, so what you see here is what the order form charges.",
+          "productSlug": "private-cloud"
         },
         {
           "type": "note",
@@ -2859,6 +2873,13 @@
           ]
         },
         {
+          "type": "plans",
+          "kicker": "Live pricing",
+          "heading": "Web hosting plans on this deployment",
+          "lede": "Read from the product catalogue, so what you see here is what the order form charges.",
+          "productSlug": "web-hosting"
+        },
+        {
           "type": "split",
           "kicker": "Moving from another host",
           "heading": "Migrations handled as a process, not a gamble",
@@ -3002,6 +3023,13 @@
           "type": "note",
           "heading": "Exact specifications are on the plan, not on this page",
           "body": "Resource allocations change as the platform is upgraded. Rather than publishing numbers here that go stale, every plan's actual CPU, memory, storage and mailbox limits are shown on its order page and in your account — and support can confirm anything before you buy."
+        },
+        {
+          "type": "plans",
+          "kicker": "Live pricing",
+          "heading": "Business hosting plans on this deployment",
+          "lede": "Read from the product catalogue, so what you see here is what the order form charges.",
+          "productSlug": "business-hosting"
         }
       ],
       "faqs": [
@@ -3116,6 +3144,13 @@
           ]
         },
         {
+          "type": "plans",
+          "kicker": "Live pricing",
+          "heading": "WordPress hosting plans on this deployment",
+          "lede": "Read from the product catalogue, so what you see here is what the order form charges.",
+          "productSlug": "wordpress-hosting"
+        },
+        {
           "type": "note",
           "heading": "Plugins are yours to choose — and yours to keep safe",
           "body": "A plugin you install runs with the same privileges as the rest of the site. We keep the platform patched, filter abuse and back the site up; the plugin supply chain, its licence and its updates remain the site owner's responsibility. That is true on any host, and we would rather say it plainly."
@@ -3216,6 +3251,13 @@
               "body": "When something is genuinely infrastructure-level, there is a route to our engineers instead of a dead end."
             }
           ]
+        },
+        {
+          "type": "plans",
+          "kicker": "Live pricing",
+          "heading": "Reseller hosting plans on this deployment",
+          "lede": "Read from the product catalogue, so what you see here is what the order form charges.",
+          "productSlug": "reseller-hosting"
         },
         {
           "type": "checks",
