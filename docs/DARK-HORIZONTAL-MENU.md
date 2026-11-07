@@ -1,3 +1,7 @@
+> **Superseded.** The compact dropdowns described below were removed in the next iteration:
+> the menu is now a completely flat bar of direct links — see `docs/FLAT-MENU.md`. The dark
+> bar styling, WHMCS parity, footer and 3D Experience notes below otherwise still apply.
+
 # Dark single-row horizontal menu
 
 > **Request:** “make the menu show like this not the dropdown we have now” — with a reference

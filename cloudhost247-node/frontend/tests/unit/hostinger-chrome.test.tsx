@@ -1,24 +1,21 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { cleanup, render, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import Header from '../../src/layout/Header';
 import Footer from '../../src/layout/Footer';
-import { PlatformMobileNav } from '../../src/components/navigation/PlatformMegaMenu';
 import { FOOTER_COLUMNS, NAV_SECTIONS } from '../../src/navigation/registry.generated';
 
 /**
- * These tests pin the parts that are easy to lose in a refactor: every registry section shown as
- * an inline trigger in the dark single-row bar, a compact dropdown (not a full-width mega panel),
- * the mobile accordion, and the professional four-column dark footer. All content is asserted
- * against the generated registry, so a menu that drifts from the sitemap fails here rather than
- * in production.
+ * The header was flattened: every registry section is a direct, always-visible link beside the
+ * logo, with no trigger buttons, no aria-expanded disclosures, no mega panel, no compact
+ * dropdown, no hamburger and no `+` accordion. These tests pin that contract plus the
+ * professional four-column dark footer. All content is asserted against the generated registry,
+ * so a menu that drifts from the sitemap fails here rather than in production.
  */
 
 beforeEach(() => {
   localStorage.clear();
-  // jsdom has no matchMedia; the menu consults it to decide whether pointer-hover applies.
   vi.stubGlobal('matchMedia', vi.fn().mockImplementation((media: string) => ({
     matches: false,
     media,
@@ -37,74 +34,45 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe('Single-row dark menu and compact dropdown', () => {
-  it('renders one accessible inline trigger per registry section in the single-row bar', () => {
+describe('Flat single-row menu with no dropdowns', () => {
+  it('renders every registry section as a direct link in the bar', () => {
     const { container } = render(<MemoryRouter><Header /></MemoryRouter>);
-
     expect(container.querySelector('.hg-header .hg-nav__bar')).toBeTruthy();
-    const triggers = container.querySelectorAll('.hg-nav__trigger');
-    expect(triggers).toHaveLength(NAV_SECTIONS.length);
-    triggers.forEach((trigger) => {
-      expect(trigger.getAttribute('aria-expanded')).toBe('false');
-      expect(trigger.getAttribute('aria-controls')).toBeTruthy();
+
+    const links = container.querySelectorAll('.hg-menu__link');
+    expect(links).toHaveLength(NAV_SECTIONS.length);
+    [...links].forEach((link, index) => {
+      expect(link.textContent?.trim()).toBe(NAV_SECTIONS[index].label);
+      expect(link.getAttribute('href')).toBe(NAV_SECTIONS[index].to);
+      expect(link.tagName).toBe('A');
     });
 
-    // Utility controls stay inside #ch247-primary-nav (also pinned by Header.test.tsx).
+    // Nothing is hidden behind a disclosure any more.
+    expect(container.querySelectorAll('.hg-nav__trigger')).toHaveLength(0);
+    expect(container.querySelectorAll('.hg-mega')).toHaveLength(0);
+    expect(container.querySelectorAll('.hg-drawer__toggle')).toHaveLength(0);
+    expect(container.querySelectorAll('.hg-nav__toggle')).toHaveLength(0);
+    expect(container.querySelectorAll('[aria-expanded]')).toHaveLength(2); // the two locale settings only
+  });
+
+  it('keeps the settings and account controls inline in the menu area', () => {
+    const { container } = render(<MemoryRouter><Header /></MemoryRouter>);
     const primary = container.querySelector<HTMLElement>('#ch247-primary-nav')!;
+    expect(primary).toBeTruthy();
+
+    // Settings live in the bar, not the footer (also pinned by Header.test.tsx).
     expect(within(primary).getByRole('button', { name: 'Language: English' })).toBeTruthy();
     expect(within(primary).getByRole('button', { name: /^Display currency: USD/ })).toBeTruthy();
     expect(within(primary).getByRole('link', { name: 'Sign In' })).toBeTruthy();
     expect(within(primary).getByRole('link', { name: 'Create Account' })).toBeTruthy();
-  });
+    expect(within(primary).getByRole('link', { name: 'Pricing' })).toBeTruthy();
+    expect(within(primary).getByRole('link', { name: 'Help' })).toBeTruthy();
+    expect(within(primary).getByRole('link', { name: 'Cart' })).toBeTruthy();
 
-  it('opens a compact dropdown with grouped links and a see-all bar', async () => {
-    const { container } = render(<MemoryRouter><Header /></MemoryRouter>);
-    // The mobile drawer also has a "Hosting" button, so scope this to the desktop trigger list.
-    const trigger = within(container.querySelector<HTMLElement>('.hg-nav__list')!)
-      .getByRole('button', { name: /^Hosting/ });
-
-    await userEvent.click(trigger);
-    expect(trigger.getAttribute('aria-expanded')).toBe('true');
-
-    const panel = container.querySelector<HTMLElement>(`#${trigger.getAttribute('aria-controls')}`)!;
-    expect(panel.classList.contains('hg-mega')).toBe(true);
-    // The full-width mega panel was replaced by a narrow, item-anchored dropdown. The registry
-    // markup is unchanged, so all the links below are still present and testable.
-    expect(panel.classList.contains('hg-mega--compact')).toBe(true);
-    expect(panel.hidden).toBe(false);
-    expect(panel.querySelector('.hg-mega__intro h2')?.textContent).toBe('Hosting');
-    expect(panel.querySelector('.hg-mega__featured')).toBeTruthy();
-    expect(panel.querySelectorAll('.hg-mega__groups .hg-mega__group')).toHaveLength(
-      NAV_SECTIONS.find((section) => section.id === 'hosting')!.groups.length
-    );
-    expect(panel.querySelector('.hg-mega__link-icon')).toBeTruthy();
-    expect(within(panel).getByRole('link', { name: /All hosting/i })).toBeTruthy();
-
-    // Registry links are real, not placeholders: the featured card points to a registry route.
-    const featured = NAV_SECTIONS.find((section) => section.id === 'hosting')!.featured!;
-    expect(panel.querySelector('.hg-mega__featured')?.getAttribute('href')).toBe(featured.to);
-
-    // Escape closes and returns focus to the trigger, as a keyboard user expects.
-    await userEvent.keyboard('{Escape}');
-    expect(trigger.getAttribute('aria-expanded')).toBe('false');
-    expect(panel.hidden).toBe(true);
-    expect(document.activeElement).toBe(trigger);
-  });
-
-  it('turns the same registry into a tappable accordion in the mobile drawer', async () => {
-    const onNavigate = vi.fn();
-    const { container } = render(<MemoryRouter><PlatformMobileNav onNavigate={onNavigate} /></MemoryRouter>);
-
-    const toggles = container.querySelectorAll('.hg-drawer__toggle');
-    expect(toggles).toHaveLength(NAV_SECTIONS.length);
-    expect(toggles[0].getAttribute('aria-expanded')).toBe('false');
-
-    await userEvent.click(screen.getByRole('button', { name: /Hosting/ }));
-    expect(toggles[0].getAttribute('aria-expanded')).toBe('true');
-    const all = screen.getByRole('link', { name: /All hosting/i });
-    expect(all).toBeTruthy();
-    await userEvent.click(all);
-    expect(onNavigate).toHaveBeenCalled();
+    // Every section link is visible in the DOM — no panel is collapsed or hidden.
+    const links = [...primary.querySelectorAll('.hg-menu__link')];
+    expect(links.length).toBe(NAV_SECTIONS.length);
+    links.forEach((link) => expect(link.hasAttribute('hidden')).toBe(false));
   });
 });
 
@@ -126,7 +94,6 @@ describe('Professional footer directory', () => {
     expect([...columns].map((column) => column.querySelector('h2')?.textContent)).toEqual([
       'Products & Domains', 'Cloud & Resources', 'Developers & Tools', 'Company & Legal',
     ]);
-    // The rearrangement keeps all eight registry columns, each under a readable sub-heading.
     const subgroups = footer.querySelectorAll('.hg-footer__subgroup');
     expect(subgroups).toHaveLength(8);
     expect([...subgroups].map((group) => group.querySelector('h3')?.textContent)).toEqual([
@@ -141,7 +108,6 @@ describe('Professional footer directory', () => {
     expect(rendered.length).toBeGreaterThan(10);
     rendered.forEach((href) => expect(registryPaths.has(href!)).toBe(true));
     expect([...registryPaths].filter((path) => !rendered.includes(path))).toEqual([]);
-    // Balanced columns: no column is more than twice the size of the smallest one.
     const counts = [...columns].map((column) => column.querySelectorAll('a').length);
     expect(Math.max(...counts)).toBeLessThanOrEqual(Math.min(...counts) * 2);
 

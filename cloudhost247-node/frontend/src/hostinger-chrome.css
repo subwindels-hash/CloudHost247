@@ -1224,3 +1224,171 @@
   .hg-theme .hg-mega__link-desc { display: none; }
   .hg-theme .hg-mega__foot { background: transparent; padding: 8px 0; }
 }
+
+/* -----------------------------------------------------------------------------
+   8. Flat bar — every menu link visible beside the logo, no dropdowns at all
+   -----------------------------------------------------------------------------
+   Supersedes sections 1–3, 5–7 for the header. The menu is now a plain list of real links:
+   no trigger buttons, no aria-expanded disclosures, no mega panel, no compact dropdown, no
+   hamburger and no `+` accordion. Language/currency remain inline settings controls (they are
+   not menu links), and the seven registry sections are direct links to their landing pages.
+
+   At narrow widths the bar wraps onto extra rows instead of collapsing into a drawer, so every
+   destination stays visible. Dead rules from the earlier sections are left in place because other
+   pages still import some of the shared hg-mega_* helpers.
+   -------------------------------------------------------------------------- */
+
+.hg-theme .hg-nav__bar {
+  flex-wrap: wrap;
+  align-items: center;
+  row-gap: 4px;
+  padding-block: 8px;
+  min-height: 62px;
+}
+.hg-theme .hg-nav__brand { flex: 0 0 auto; }
+
+.hg-bar__body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px 12px;
+  min-width: 0;
+}
+.hg-menu { flex: 1 1 auto; min-width: 0; }
+.hg-menu__items {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 2px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.hg-menu__item { flex: 0 0 auto; }
+.hg-menu__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 8px 7px;
+  border-bottom: 2px solid transparent;
+  color: #f4f5f6;
+  font-size: 0.84rem;
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: color 0.16s ease, border-color 0.16s ease;
+}
+.hg-menu__link:hover,
+.hg-menu__link:focus-visible,
+.hg-menu__link.active { color: #e6c875; border-bottom-color: #d4af37; }
+
+.hg-bar__quick { display: flex; align-items: center; gap: 12px; flex: 0 0 auto; }
+.hg-bar__quick a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: #eef0f2;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.hg-bar__quick a:hover,
+.hg-bar__quick a.active { color: #e6c875; }
+
+.hg-bar__locale { display: flex; align-items: center; gap: 4px; flex: 0 0 auto; }
+/* Beats `.ch247-header .ch247-locale__trigger` from language-switcher.css (light pill). */
+.hg-theme .hg-header .hg-bar__locale .ch247-locale__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 5px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #d7dce1;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.hg-theme .hg-header .hg-bar__locale .ch247-locale__trigger:hover,
+.hg-theme .hg-header .hg-bar__locale .ch247-locale__trigger[aria-expanded='true'] {
+  background: transparent; color: #e6c875;
+}
+.hg-theme .hg-header .hg-bar__locale .ch247-locale__trigger svg { width: 15px; height: 15px; }
+
+.hg-bar__icon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: #f4f5f6;
+  text-decoration: none;
+}
+.hg-bar__icon:hover { color: #e6c875; }
+.hg-cart__dot {
+  position: absolute;
+  top: 9px;
+  right: 6px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #d4af37;
+  box-shadow: 0 0 0 2px #1b1d20;
+}
+
+.hg-bar__actions { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+.hg-bar__text-link {
+  padding: 8px 2px;
+  border: 0;
+  background: transparent;
+  color: #f4f5f6;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.hg-bar__text-link:hover { color: #e6c875; }
+.hg-bar__avatar {
+  padding: 8px 14px;
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  border-radius: 999px;
+  background: rgba(212, 175, 55, 0.16);
+  color: #e6c875;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.hg-theme .hg-menu__link:focus-visible,
+.hg-theme .hg-bar__quick a:focus-visible,
+.hg-theme .hg-bar__icon:focus-visible,
+.hg-theme .hg-bar__text-link:focus-visible,
+.hg-theme .hg-bar__locale .ch247-locale__trigger:focus-visible { outline: 2px solid #e6c875; outline-offset: -2px; }
+
+/* Keep the logo on the same line as the links from tablet up. Only the groups inside the body
+   wrap, so at 1280/1024 the seven sections still sit beside the brand rather than below it. */
+@media (min-width: 768px) {
+  .hg-theme .hg-nav__bar { flex-wrap: nowrap; }
+}
+@media (max-width: 900px) {
+  /* A wrapped bar is several rows tall; do not let it pin over the page. */
+  .hg-theme .hg-header { position: relative; }
+  .hg-bar__body { justify-content: flex-start; }
+  .hg-menu__link { font-size: 0.8rem; padding: 8px 6px; }
+}
+@media (max-width: 767px) {
+  .hg-theme .hg-nav__bar { flex-wrap: wrap; }
+  .hg-menu { flex-basis: 100%; }
+  .hg-menu__items { gap: 0 4px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hg-menu__link { transition: none !important; }
+}

@@ -1,12 +1,12 @@
 /**
- * Real-Chromium acceptance check for the single-row dark menu / professional footer chrome.
+ * Real-Chromium acceptance check for the flat, dropdown-free menu / professional footer chrome.
  *
  *   BASE_URL=http://127.0.0.1:3000 node scripts/check-chrome-benchmark.mjs
  *
- * CSS review alone cannot prove that every top-level section is visible inline, that the old
- * viewport-wide mega panel is gone, or that a 1280px laptop does not squeeze the right-hand
- * cluster into the nav. Every assertion below reads a computed style or a bounding box from a
- * real page, at desktop, laptop and phone widths.
+ * CSS review alone cannot prove that every registry section is a visible, directly clickable
+ * link beside the logo, that no disclosure/hamburger is hiding anything, or that a wrapped bar
+ * does not overlap or overflow at narrow widths. Every assertion below reads a computed style,
+ * an attribute or a bounding box from a real page at desktop, laptop, tablet and phone widths.
  */
 import { existsSync } from 'node:fs';
 import path from 'node:path';
@@ -46,7 +46,7 @@ function luminance(value) {
   return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
 }
 
-/** Shared measurements for the horizontal desktop bar. */
+/** Shared measurement of the flat menu bar at any width. */
 const BAR_PROBE = () => {
   const visible = (el) => {
     if (!el) return false;
@@ -58,31 +58,45 @@ const BAR_PROBE = () => {
     return { x: r.x, right: r.right, top: r.top, bottom: r.bottom, width: r.width };
   };
   const header = document.querySelector('header.hg-header');
+  const bar = document.querySelector('.hg-nav__bar');
+  const primary = document.querySelector('#ch247-primary-nav');
   const brand = document.querySelector('.hg-nav__brand img');
-  const strip = document.querySelector('.hg-utility');
-  const triggers = [...document.querySelectorAll('.hg-nav__trigger')].filter(visible);
-  const utility = [...document.querySelectorAll('.hg-nav__utility, .hg-nav__actions')].filter(visible);
-  const quick = document.querySelector('.hg-nav__quick');
+  const links = [...document.querySelectorAll('.hg-menu__link')].filter(visible);
+  const groups = [...document.querySelectorAll('.hg-bar__locale, .hg-bar__quick, .hg-bar__actions')].filter(visible);
   let overlap = 0;
-  for (const t of triggers) {
-    const tb = box(t);
-    for (const other of utility) {
-      const ob = box(other);
-      if (tb.top < ob.bottom && ob.top < tb.bottom) {
-        overlap = Math.max(overlap, Math.min(tb.right, ob.right) - Math.max(tb.x, ob.x));
+  for (const link of links) {
+    const lb = box(link);
+    for (const group of groups) {
+      const gb = box(group);
+      if (lb.top < gb.bottom && gb.top < lb.bottom) {
+        overlap = Math.max(overlap, Math.min(lb.right, gb.right) - Math.max(lb.x, gb.x));
       }
     }
+    if (bar) overlap = Math.max(overlap, Math.max(0, lb.right - box(bar).right));
   }
+  const linkInfo = [...document.querySelectorAll('.hg-menu__link')].map((a) => ({
+    label: a.textContent?.trim() ?? '',
+    href: a.getAttribute('href') ?? '',
+    tag: a.tagName,
+    hasCaret: !!a.querySelector('.hg-nav__caret, .hg-menu__caret'),
+    expanded: a.hasAttribute('aria-expanded'),
+  }));
   return {
     bg: header ? getComputedStyle(header).backgroundColor : null,
     sticky: header ? getComputedStyle(header).position : null,
     headerHeight: header ? Math.round(header.getBoundingClientRect().height) : 0,
-    stripHidden: !visible(strip),
     brandWhite: (brand?.getAttribute('src') ?? '').includes('white'),
-    triggerCount: triggers.length,
-    sameRow: triggers.length > 0 && triggers.every((t) => Math.abs(box(t).top - box(triggers[0]).top) <= 1),
-    carets: triggers.filter((t) => t.querySelector('.hg-nav__caret')).length,
-    quickLinks: visible(quick) ? quick.querySelectorAll('a').length : 0,
+    links: linkInfo,
+    visibleLinks: links.length,
+    dropdownTriggers: document.querySelectorAll('.hg-nav__trigger, .hg-mega, .hg-drawer__toggle, .hg-nav__toggle').length,
+    plusAccordions: document.querySelectorAll('.hg-drawer__toggle').length,
+    hiddenPanels: document.querySelectorAll('.hg-mega[hidden], .hg-nav__collapsible:not(.is-open)').length,
+    settings: {
+      english: [...(primary?.querySelectorAll('button') ?? [])].some((b) => /Language:/.test(b.getAttribute('aria-label') ?? '') && visible(b)),
+      usd: [...(primary?.querySelectorAll('button') ?? [])].some((b) => /Display currency:/.test(b.getAttribute('aria-label') ?? '') && visible(b)),
+      signIn: [...(primary?.querySelectorAll('a') ?? [])].some((a) => a.textContent?.trim() === 'Sign In' && visible(a)),
+      createAccount: [...(primary?.querySelectorAll('a') ?? [])].some((a) => a.textContent?.trim() === 'Create Account' && visible(a)),
+    },
     overlap: Math.round(overlap),
     overflow: document.documentElement.scrollWidth > window.innerWidth + 1,
     topAnchor: !!document.querySelector('#ch247-top'),
@@ -92,51 +106,26 @@ const BAR_PROBE = () => {
 async function main() {
   const browser = await launch();
 
-  // ---- Desktop (the width of the reference screenshot) ----
+  // ---- Desktop (the width of the original reference screenshot) ----
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
   await page.goto(`${BASE_URL}/`, { waitUntil: 'networkidle' });
   await page.waitForTimeout(300);
 
   const bar = await page.evaluate(BAR_PROBE);
-  check('dark single-row sticky header', luminance(bar.bg) < 0.2 && bar.sticky === 'sticky' && bar.stripHidden,
-    `background ${bar.bg}, ${bar.headerHeight}px tall`);
-  check('every top-level section is visible inline', bar.triggerCount >= 7 && bar.sameRow && bar.carets >= 7,
-    `${bar.triggerCount} triggers, ${bar.carets} carets, one row`);
-  check('white brand mark on the dark bar', bar.brandWhite);
-  check('quick utility links sit on the bar itself', bar.quickLinks >= 3, `${bar.quickLinks} links`);
+  check('dark sticky single bar', luminance(bar.bg) < 0.2 && bar.sticky === 'sticky', `background ${bar.bg}, ${bar.headerHeight}px tall`);
+  check('white brand mark beside the menu', bar.brandWhite);
+  check('every section is a direct link, not a trigger',
+    bar.links.length >= 7 && bar.links.every((l) => l.tag === 'A' && l.href.startsWith('/') && !l.hasCaret && !l.expanded),
+    `${bar.links.length} links: ${bar.links.map((l) => l.label).join(', ')}`);
+  check('no dropdowns, carets, hamburger or + accordions remain',
+    bar.dropdownTriggers === 0 && bar.plusAccordions === 0 && bar.hiddenPanels === 0,
+    `${bar.dropdownTriggers} disclosure remnants`);
+  const settings = bar.settings;
+  check('English, USD, Sign In and Create Account are all shown in the bar',
+    settings.english && settings.usd && settings.signIn && settings.createAccount,
+    JSON.stringify(settings));
   check('back-to-top anchor target exists', bar.topAnchor);
-  check('no header overlap at 1440px', bar.overlap === 0 && !bar.overflow, `${bar.overlap}px`);
-
-  const trigger = page.locator('.hg-nav__trigger').first();
-  // DOM click, not a pointer click: hover-open would otherwise race the toggle.
-  await trigger.evaluate((el) => el.click());
-  await page.waitForTimeout(200);
-  const mega = await page.evaluate(() => {
-    const el = document.querySelector('.hg-mega:not([hidden])');
-    if (!el) return { open: false };
-    const r = el.getBoundingClientRect();
-    const t = document.querySelector('.hg-nav__trigger')?.getBoundingClientRect();
-    const intro = el.querySelector('.hg-mega__intro');
-    return {
-      open: true,
-      bg: getComputedStyle(el).backgroundColor,
-      groups: el.querySelectorAll('.hg-mega__group').length,
-      width: Math.round(r.width),
-      left: Math.round(r.left),
-      triggerLeft: Math.round(t?.left ?? -1),
-      compact: el.classList.contains('hg-mega--compact'),
-      introHidden: intro ? getComputedStyle(intro).display === 'none' : false,
-      viewport: window.innerWidth,
-    };
-  });
-  // The old panel spanned the whole viewport and had a promo column. The replacement is a
-  // narrow, item-anchored dropdown; grouping and real links are preserved.
-  check('compact dropdown replaces the full-width mega panel',
-    mega.open && mega.compact && luminance(mega.bg) < 0.3 && mega.groups >= 2
-      && mega.width > 200 && mega.width < 400 && mega.width < mega.viewport / 3
-      && mega.introHidden && Math.abs(mega.left - mega.triggerLeft) <= 2,
-    `background ${mega.bg}, ${mega.groups} groups, ${mega.width}px wide at x=${mega.left}`);
-  await trigger.evaluate((el) => el.click());
+  check('no overlap or overflow at 1440px', bar.overlap === 0 && !bar.overflow, `${bar.overlap}px`);
 
   const footer = await page.evaluate(() => {
     const el = document.querySelector('footer.hg-footer');
@@ -147,8 +136,6 @@ async function main() {
       topText: top?.textContent?.trim(),
       topHref: top?.getAttribute('href'),
       // A flex item's computed display is blockified, so `inline-flex` reports as `flex`.
-      // Assert the things that actually distinguish an inline legal-bar link from the old
-      // full-width retail band: no min-height, no background, and a content-sized box.
       topInline: top ? (getComputedStyle(top).minHeight === '0px'
         && getComputedStyle(top).backgroundColor === 'rgba(0, 0, 0, 0)'
         && top.getBoundingClientRect().width < 300) : false,
@@ -162,7 +149,6 @@ async function main() {
       counts: columns.map((c) => c.querySelectorAll('a').length),
       retailPills: el?.querySelectorAll('.hg-footer__locale-pill').length ?? 0,
       height: Math.round(el?.getBoundingClientRect().height ?? 0),
-      overflow: document.documentElement.scrollWidth > window.innerWidth + 1,
     };
   });
   check('brand intro row above the directory', footer.intro);
@@ -179,41 +165,21 @@ async function main() {
   check('footer stays compact', footer.height > 0 && footer.height < 1300, `${footer.height}px`);
   await page.close();
 
-  // ---- Laptop: the horizontal bar must survive a narrower window ----
-  const laptop = await browser.newPage({ viewport: { width: 1280, height: 900 } });
-  await laptop.goto(`${BASE_URL}/`, { waitUntil: 'networkidle' });
-  await laptop.waitForTimeout(300);
-  const laptopBar = await laptop.evaluate(BAR_PROBE);
-  check('horizontal bar with all sections at 1280px',
-    laptopBar.triggerCount >= 7 && laptopBar.sameRow && laptopBar.overlap === 0 && !laptopBar.overflow,
-    `${laptopBar.triggerCount} triggers, ${laptopBar.overlap}px overlap`);
-  await laptop.close();
-
-  // ---- Phone ----
-  const phone = await browser.newPage({ viewport: { width: 390, height: 844 } });
-  await phone.goto(`${BASE_URL}/`, { waitUntil: 'networkidle' });
-  await phone.waitForTimeout(300);
-  const mobile = await phone.evaluate(() => {
-    const utility = document.querySelector('.hg-utility');
-    const toggle = document.querySelector('.hg-nav__toggle');
-    const footer = document.querySelector('footer.hg-footer');
-    return {
-      utilityHidden: utility ? getComputedStyle(utility).display === 'none' : true,
-      toggleVisible: toggle ? getComputedStyle(toggle).display !== 'none' : false,
-      columns: footer ? getComputedStyle(footer.querySelector('.hg-footer__columns')).gridTemplateColumns : '',
-      footerLinks: footer?.querySelectorAll('.hg-footer__column a').length ?? 0,
-      overflow: document.documentElement.scrollWidth > window.innerWidth + 1,
-    };
-  });
-  check('utility strip collapses, menu toggle remains on a phone', mobile.utilityHidden && mobile.toggleVisible);
-  check('footer keeps two columns and all links on a phone', mobile.columns.split(' ').length === 2 && mobile.footerLinks >= 90,
-    `${mobile.columns} / ${mobile.footerLinks} links`);
-  check('no horizontal overflow at 390px', !mobile.overflow);
-  await phone.close();
+  // ---- Narrower widths: the links must stay visible, never collapse into a drawer ----
+  for (const width of [1280, 1024, 834, 390]) {
+    const p = await browser.newPage({ viewport: { width, height: 900 } });
+    await p.goto(`${BASE_URL}/`, { waitUntil: 'networkidle' });
+    await p.waitForTimeout(250);
+    const r = await p.evaluate(BAR_PROBE);
+    check(`all ${r.links.length} section links stay visible at ${width}px`,
+      r.visibleLinks >= 7 && r.dropdownTriggers === 0 && r.overlap === 0 && !r.overflow,
+      `${r.visibleLinks} visible, ${r.overlap}px overlap, overflow=${r.overflow}`);
+    await p.close();
+  }
 
   await browser.close();
   const failed = results.filter((r) => !r.ok);
-  console.log(`\n${results.length - failed.length}/${results.length} menu/footer chrome checks passed`);
+  console.log(`\n${results.length - failed.length}/${results.length} flat menu/footer checks passed`);
   if (failed.length) process.exit(1);
 }
 

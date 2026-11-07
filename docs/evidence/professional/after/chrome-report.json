@@ -1,11 +1,11 @@
 {
-  "capturedAt": "2026-11-07T17:27:35.215Z",
+  "capturedAt": "2026-11-07T18:01:35.934Z",
   "baseUrl": "http://127.0.0.1:3000",
   "shots": [
     "header-desktop.png",
     "footer-desktop.png",
     "experience-3d-desktop.png",
-    "menu-open-desktop.png",
+    "menu-flat-desktop.png",
     "header-tablet.png",
     "footer-tablet.png",
     "header-mobile.png",
@@ -16,7 +16,8 @@
     "links": 102,
     "columns": 5
   },
-  "dropdownOpen": true,
+  "flatMenuLinks": 7,
+  "dropdownTriggers": 0,
   "footer-tablet": {
     "height": 1846,
     "links": 102,
