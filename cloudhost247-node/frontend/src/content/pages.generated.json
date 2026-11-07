@@ -3376,6 +3376,13 @@
           ]
         },
         {
+          "type": "plans",
+          "kicker": "Live pricing",
+          "heading": "Windows hosting plans on this deployment",
+          "lede": "Read from the product catalogue, so what you see here is what the order form charges.",
+          "productSlug": "windows-hosting"
+        },
+        {
           "type": "note",
           "heading": "Windows licensing is included, not passed to you",
           "body": "Windows hosting plans include the operating-system licensing required to run the service. You are responsible for licensing any commercial application or component you deploy on top of it."
@@ -3472,6 +3479,13 @@
               "body": "Queue and delivery problems are monitored, because mail that silently stops arriving is the worst kind of outage."
             }
           ]
+        },
+        {
+          "type": "plans",
+          "kicker": "Live pricing",
+          "heading": "Email hosting plans on this deployment",
+          "lede": "Read from the product catalogue, so what you see here is what the order form charges.",
+          "productSlug": "email-hosting"
         },
         {
           "type": "split",
@@ -3852,6 +3866,13 @@
               "body": "Certificates attach at the service level, so a server, an application and a website each manage their own."
             }
           ]
+        },
+        {
+          "type": "plans",
+          "kicker": "Live pricing",
+          "heading": "SSL certificate plans on this deployment",
+          "lede": "Read from the product catalogue, so what you see here is what the order form charges.",
+          "productSlug": "ssl-certificate"
         },
         {
           "type": "note",
