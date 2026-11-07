@@ -1,0 +1,51 @@
+/* Inner-page rhythm. Full-width backgrounds remain full-width; only their content is inset.
+   The homepage and shared header/footer intentionally do not use these rules. */
+.ch247-main--inner {
+  --inner-gutter: clamp(20px, 4vw, 48px);
+}
+
+.ch247-main--inner .ch-ds .ch-wrap,
+.ch247-main--inner .ch-ds .ch-wrap--wide,
+.ch247-main--inner .ch-ds .ch-wrap--prose {
+  width: min(var(--ch-width), calc(100% - 2 * var(--inner-gutter)));
+  margin-inline: auto;
+}
+.ch247-main--inner .ch-ds .ch-wrap--wide {
+  width: min(var(--ch-width-wide), calc(100% - 2 * var(--inner-gutter)));
+}
+.ch247-main--inner .ch-ds .ch-wrap--prose {
+  width: min(860px, calc(100% - 2 * var(--inner-gutter)));
+}
+
+/* Standalone cards and account stacks otherwise touch the viewport on small screens. */
+.ch247-main--inner > .ch247-card,
+.ch247-main--inner > form,
+.ch247-main--inner .ch247-stack {
+  width: calc(100% - 2 * var(--inner-gutter));
+  margin-inline: auto;
+}
+.ch247-main--inner .ch247-hero,
+.ch247-main--inner .ch247-section {
+  padding-inline: var(--inner-gutter);
+}
+.ch247-main--inner .tools-center {
+  padding-inline: var(--inner-gutter);
+}
+
+/* Readers get a clear navigation area and a comfortable, readable article column. */
+.ch247-main--inner .ch-doc-layout { gap: clamp(28px, 4vw, 56px); }
+.ch247-main--inner .ch-doc-nav {
+  padding: 20px;
+  background: var(--ch-soft);
+  border: 1px solid var(--ch-line);
+  border-radius: var(--ch-radius-sm);
+  min-width: 0;
+}
+.ch247-main--inner .ch-doc-nav a { overflow-wrap: anywhere; }
+.ch247-main--inner .ch-prose-doc { min-width: 0; line-height: 1.75; }
+.ch247-main--inner .ch-prose-doc .ch-breadcrumbs { margin-bottom: 24px; }
+.ch247-main--inner .ch-breadcrumbs ol { row-gap: 10px; overflow-wrap: anywhere; }
+
+@media (max-width: 1180px) {
+  .ch247-main--inner .ch-doc-nav { max-height: 300px; overflow: auto; }
+}

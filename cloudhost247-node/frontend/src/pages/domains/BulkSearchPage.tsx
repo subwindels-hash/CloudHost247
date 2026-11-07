@@ -1,3 +1,4 @@
+import ReturnToLogin from '../../components/ReturnToLogin';
 import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { usePageMeta } from '../../lib/usePageMeta';
@@ -99,7 +100,7 @@ export default function BulkSearchPage() {
         <div className="ch247-page">
           {!token && (
             <p>
-              <Link className="ch247-button" to="/login">Sign in to use bulk search</Link>
+              <ReturnToLogin className="ch247-button">Sign in to use bulk search</ReturnToLogin>
             </p>
           )}
 

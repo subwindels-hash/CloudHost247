@@ -72,7 +72,7 @@ export default function Layout() {
       <AnnouncementBar />
       <SupportModeBanner />
       <Header />
-      <main id="main-content" className="ch247-main">
+      <main id="main-content" className={`ch247-main${pathname === '/' ? '' : ' ch247-main--inner'}`}>
         {/* Route-level code splitting: the boundary lives here, around the routed outlet, so a
             lazily-loaded page only replaces the page body — the header, footer and support
             widget stay painted instead of being swapped out for a full-screen fallback. */}

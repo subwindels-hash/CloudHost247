@@ -1,6 +1,7 @@
 import { FormEvent, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { usePageMeta } from '../lib/usePageMeta';
+import { getToken } from '../lib/auth';
 import { useApiResource } from '../lib/useApiResource';
 import { formatPrice, type ProductPlansResponse, type PublicPlan } from '../lib/catalog-types';
 import { CatalogErrorBanner } from '../components/CatalogStateBanner';
@@ -363,7 +364,9 @@ export default function HomePage() {
 
   function onAiPrompt(event: FormEvent) {
     event.preventDefault();
-    navigate(aiPrompt.trim() ? `/register?idea=${encodeURIComponent(aiPrompt.trim())}` : UTILITY.createAccount.to);
+    const idea = aiPrompt.trim();
+    const target = idea ? `?idea=${encodeURIComponent(idea)}` : '';
+    navigate(getToken() ? `/websites/ai-builder${target}` : `/register${target}`);
   }
 
   return (

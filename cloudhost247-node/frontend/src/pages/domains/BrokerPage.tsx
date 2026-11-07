@@ -1,3 +1,4 @@
+import ReturnToLogin from '../../components/ReturnToLogin';
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { usePageMeta } from '../../lib/usePageMeta';
@@ -181,7 +182,7 @@ export default function BrokerPage() {
             uncover a protected owner.
           </p>
 
-          {!token && <p><Link className="ch247-button" to="/login">Sign in to request a broker</Link></p>}
+          {!token && <p><ReturnToLogin className="ch247-button">Sign in to request a broker</ReturnToLogin></p>}
 
           {token && (
             <>

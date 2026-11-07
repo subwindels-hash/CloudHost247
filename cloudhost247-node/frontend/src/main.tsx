@@ -25,6 +25,8 @@ import './hostinger-chrome.css';
 // Metallic finish + depth. Loaded LAST so it can restyle both the application and the marketing
 // chrome without being undone. The WHMCS theme loads the generated copy of the same file.
 import '../../../shared/site/metals.css';
+// Inner-page spacing is scoped to the routed content, leaving the homepage and chrome intact.
+import './inner-pages.css';
 // One dependency-free motion controller for tilt, parallax and reveals. It self-guards for
 // reduced motion, coarse pointers and small screens; there is no idle animation loop.
 import '../../../shared/site/motion.js';
