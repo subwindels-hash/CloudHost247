@@ -1,8 +1,17 @@
 # CloudHost247 Platform
 
-A full-stack, monolithic, dependency-free Node.js platform that replaces the Fastify/TypeScript
-`cloudhost247-node` stack, shipped together with a Vanilla-JS public site, a React + Vite SPA,
-PWA support, and Capacitor native-app shells.
+> **Status (2026-11-07): read-only / not canonical.** This tree is a substantial but **incomplete**
+> port of the Fastify/TypeScript application. An independent route-by-route comparison found 222
+> API endpoints, the whole builder / AI-builder / store / logo-maker / experts / marketing / inbox
+> surface, all AI/LLM integration, all 83 versioned SQL migrations and the WHMCS/PHP shared-generator
+> projection exist only in `cloudhost247-node/`. **`cloudhost247-node/` is the canonical Node backend**;
+> no new feature work happens here. Nothing is deleted. See `docs/CANONICAL-BACKEND-COMPARISON.md`
+> and `docs/ARCHITECTURE-DECISION-RECORD.md`. The sentence below describes the original intent of
+> this tree, not the current deployment decision.
+
+A full-stack, monolithic, dependency-free Node.js platform, originally intended to replace the
+Fastify/TypeScript `cloudhost247-node` stack, shipped together with a Vanilla-JS public site, a
+React + Vite SPA, PWA support, and Capacitor native-app shells.
 
 The monolith (`server.js`) uses **Node core modules only** — `http`, `fs`, `path`, `crypto` — plus
 **one** production dependency, `pg@8.16.3`, which is loaded lazily *and only* when `DATABASE_URL`
