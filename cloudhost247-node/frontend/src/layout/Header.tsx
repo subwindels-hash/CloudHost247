@@ -11,15 +11,16 @@ import { UTILITY } from '../navigation/registry.generated';
 import { useAuthState } from './useAuthState';
 
 /**
- * The universal CloudHost247 header — professional light two-tier menu.
+ * The universal CloudHost247 header — a single dark horizontal menu bar.
  *
- * Structure: a slim light utility strip (with cart) · brand (dark mark) · dropdown navigation ·
- * utility (language, currency, search) · Sign In / Create Account (or the account controls once
- * signed in) · mobile drawer. The mega menus come from the shared registry, so this header, the
- * drawer, the footer and the sitemap cannot disagree about what exists.
+ * Structure at desktop: white brand mark · every top-level registry section shown inline (each
+ * opens a compact dropdown, not a full-width mega panel) · language/currency · search · a short
+ * utility cluster (Pricing, Help, Cart) · Sign In / Create Account. Below 1200px the same links
+ * move into the slim utility strip and the mobile drawer.
  *
- * Only the chrome's appearance changes here: no link is invented (every utility destination
- * already exists in the registry), and the signed-in subnav and mobile drawer keep their behaviour.
+ * The menu contents come from the shared registry, so this header, the drawer, the footer and the
+ * sitemap cannot disagree about what exists. No link is invented, and the signed-in subnav and
+ * mobile drawer keep their behaviour.
  *
  * Signed-in state adds a second, quieter row for account areas (services, domains, billing,
  * support) plus the role-gated staff links. Those links are a convenience only — every one of
@@ -84,7 +85,8 @@ export default function Header() {
 
   return (
     <header className="ch247-header hg-header" id="ch247-top" ref={headerRef}>
-      {/* Slim utility strip above the product bar. Hidden below 768px by the chrome CSS. */}
+      {/* Slim utility strip for compact/drawer widths. The desktop bar folds these destinations
+          into its own right-hand cluster instead (see .hg-nav__quick). */}
       <div className="hg-utility">
         <div className="hg-utility__inner">
           <nav className="hg-utility__left" aria-label="Quick links">
@@ -101,7 +103,7 @@ export default function Header() {
       </div>
 
       <div className="hg-nav__bar">
-        <Brand className="hg-nav__brand" />
+        <Brand className="hg-nav__brand on-dark" />
 
         <button
           type="button"
@@ -125,9 +127,18 @@ export default function Header() {
             <NavLink className="hg-nav__icon" to="/search" aria-label={t('header.search.label')} onClick={closeMenu}>
               <Icon name="search" size={18} />
             </NavLink>
-            {/* Cart stays in the utility strip above: at 1440px a fourth icon here would push the
-                seven desktop triggers into the language/currency cluster (evidence:layout). */}
+            {/* Search stays a single icon. The cart, pricing and help links live in the short
+                utility cluster below so the seven desktop triggers keep their own flex track. */}
           </div>
+
+          <nav className="hg-nav__quick" aria-label="Quick links">
+            <NavLink to="/pricing" onClick={closeMenu}>Pricing</NavLink>
+            <NavLink to="/help" onClick={closeMenu}>Help</NavLink>
+            <NavLink className="hg-nav__cart" to={UTILITY.cart.to} aria-label={UTILITY.cart.label} onClick={closeMenu}>
+              <Icon name="cart" size={19} />
+              <span className="hg-cart__dot" aria-hidden="true" />
+            </NavLink>
+          </nav>
 
           <div className="hg-nav__actions">
             {token ? (

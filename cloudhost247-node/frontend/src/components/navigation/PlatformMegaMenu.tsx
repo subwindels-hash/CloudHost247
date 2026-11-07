@@ -5,19 +5,18 @@ import { publicFetch } from '../../lib/api';
 import { NAV_SECTIONS, TOOLS_CATEGORIES } from '../../navigation/registry.generated';
 
 /**
- * CloudHost247 navigation — professional menu / mega menu / mobile drawer.
+ * CloudHost247 navigation — single-row dark menu / compact dropdown / mobile drawer.
  *
  * The menu renders `NAV_SECTIONS` — imported straight from the generated registry, not fetched
  * over the network on mount. That is deliberate: a navigation that arrives late is a navigation
  * that flashes empty on a cold load, and a failed request would leave the header with nothing in
  * it. The definition is the same for every visitor, so it belongs in the bundle.
  *
- * Hostinger's pattern, reproduced here:
- *   • a compact, sticky top bar of dropdown triggers with active underlines;
- *   • a full-width white mega panel: a tinted "explore" column with a featured card on the
- *     left, three columns of icon links with descriptions and badges on the right, and a
- *     bottom "see all" bar;
- *   • a phone drawer that turns the same registry into a one-level accordion.
+ * The desktop bar shows every top-level section inline with a small caret. Each trigger opens a
+ * *compact* dropdown (see section 7 of hostinger-chrome.css): the panel is anchored to its own
+ * item, one column wide and scrollable, rather than a full-width mega panel with a promo card.
+ * The registry data is untouched, so every destination is still reachable from the header, the
+ * drawer, the footer and the sitemap.
  *
  * Interaction: pointer, click and keyboard open a panel; Escape closes and returns focus to the
  * trigger; outside click closes; navigating closes. `aria-expanded` / `aria-controls` are always
@@ -164,10 +163,10 @@ export function PlatformMegaMenu() {
             const open = openId === section.id;
             const panelId = `ch247-nav-panel-${section.id}`;
             const expand = () => {
-              if (window.matchMedia('(min-width: 1440px)').matches) setOpenId(section.id);
+              if (window.matchMedia('(min-width: 1200px)').matches) setOpenId(section.id);
             };
             const collapse = () => {
-              if (window.matchMedia('(min-width: 1440px)').matches) {
+              if (window.matchMedia('(min-width: 1200px)').matches) {
                 setOpenId((current) => (current === section.id ? null : current));
               }
             };
@@ -188,7 +187,7 @@ export function PlatformMegaMenu() {
                     contents are mounted only while it is open: rendering every menu's ~110 links
                     into the DOM of every page would cost parse time for content most visitors
                     never open. The same links are always available in the footer and the sitemap. */}
-                <div id={panelId} className="hg-mega" hidden={!open}>
+                <div id={panelId} className="hg-mega hg-mega--compact" hidden={!open}>
                   {open ? (
                     <div className="hg-mega__inner">
                       <aside className="hg-mega__intro">

@@ -1010,3 +1010,217 @@
 @media (prefers-reduced-motion: reduce) {
   .hg-footer__column a, .hg-nav__trigger, .hg-mega__link { transition: none !important; }
 }
+
+/* -----------------------------------------------------------------------------
+   7. Single-row dark horizontal menu (supersedes the light two-tier bar in section 6)
+   -----------------------------------------------------------------------------
+   The brief: show every top-level section inline in one near-black bar, as in the reference
+   screenshot, instead of hiding them behind a full-width dropdown panel. The footer from
+   section 6 is unaffected.
+
+   Same DOM, same registry data, same aria-expanded / Escape / outside-click / route-close
+   behaviour. What changes: the bar is one row; the utility strip folds into a short right-hand
+   cluster at desktop; and each trigger opens a compact, item-anchored dropdown instead of a
+   viewport-wide mega panel. The desktop bar is also available from 1200px up (it used to start
+   at 1440px), so a 1280/1366 laptop sees the horizontal menu rather than a hamburger.
+   -------------------------------------------------------------------------- */
+
+.hg-nav__quick { display: none; align-items: center; gap: 14px; flex: 0 0 auto; }
+
+.hg-theme .hg-header {
+  background: #1b1d20;
+  border-bottom: 1px solid #34383d;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.28);
+}
+.hg-utility { background: #16181b; border-bottom: 1px solid #2c3034; }
+.hg-utility a { color: #b9c0c8; font-size: 0.72rem; }
+.hg-utility a:hover, .hg-utility a:focus-visible { color: #e6c875; }
+
+.hg-theme .hg-nav__bar { min-height: 62px; gap: 12px; }
+.hg-theme .hg-nav__brand img { height: 32px; width: auto; }
+.hg-theme .hg-nav__trigger {
+  color: #f4f5f6;
+  font-size: 0.84rem;
+  font-weight: 600;
+  padding: 8px 7px;
+  border-radius: 0;
+  gap: 5px;
+}
+.hg-theme .hg-nav__trigger::after { left: 9px; right: 9px; bottom: 2px; background: #d4af37; }
+.hg-theme .hg-nav__trigger:hover,
+.hg-theme .hg-nav__trigger.is-open { background: transparent; color: #e6c875; }
+.hg-theme .hg-nav__caret { opacity: 0.75; font-size: 0.62rem; }
+.hg-theme .hg-nav__trigger:focus-visible,
+.hg-theme .hg-nav__icon:focus-visible,
+.hg-theme .hg-nav__text-link:focus-visible,
+.hg-theme .hg-nav__quick a:focus-visible,
+.hg-theme .hg-mega__link:focus-visible,
+.hg-theme .hg-drawer__toggle:focus-visible { outline: 2px solid #e6c875; outline-offset: -2px; }
+
+.hg-theme .hg-nav__utility .ch247-locale__trigger {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  min-width: 0;
+  padding: 0 4px;
+  color: #d7dce1;
+  font-size: 0.76rem;
+}
+.hg-theme .hg-nav__utility .ch247-locale__trigger:hover,
+.hg-theme .hg-nav__utility .ch247-locale__trigger[aria-expanded='true'] {
+  background: transparent; border-color: transparent; color: #e6c875;
+}
+.hg-theme .hg-nav__icon { color: #f4f5f6; width: 36px; height: 36px; }
+.hg-theme .hg-nav__icon:hover { background: rgba(230, 200, 117, 0.12); color: #e6c875; }
+
+.hg-nav__quick a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 2px;
+  color: #eef0f2;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.hg-nav__quick a:hover { color: #e6c875; }
+.hg-nav__cart { position: relative; }
+.hg-cart__dot {
+  position: absolute;
+  top: 8px;
+  right: -2px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #d4af37;
+  box-shadow: 0 0 0 2px #1b1d20;
+}
+
+.hg-theme .hg-nav__text-link { color: #f4f5f6; font-size: 0.82rem; }
+.hg-theme .hg-nav__text-link:hover { color: #e6c875; }
+.hg-theme .hg-nav__avatar { background: rgba(212, 175, 55, 0.16); border-color: rgba(212, 175, 55, 0.45); color: #e6c875; }
+
+/* ---- Compact, item-anchored dropdown (replaces the full-width mega panel) ---- */
+.hg-theme .hg-nav__item { position: relative; }
+.hg-theme .hg-mega {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: auto;
+  width: 292px;
+  max-width: calc(100vw - 32px);
+  max-height: min(72vh, 560px);
+  overflow-y: auto;
+  background: #23262b;
+  border: 1px solid #3a3f45;
+  border-top: 2px solid #d4af37;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
+}
+.hg-theme .hg-mega__inner { width: 100%; display: block; }
+.hg-theme .hg-mega__intro { display: none; }
+.hg-theme .hg-mega__groups { display: block; padding: 12px 14px 14px; }
+.hg-theme .hg-mega__group { margin: 0 0 14px; }
+.hg-theme .hg-mega__group h3 {
+  margin: 0 0 6px; padding-bottom: 5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+  color: #e6c875; font-size: 0.66rem; letter-spacing: 0.1em;
+}
+.hg-theme .hg-mega__group ul { gap: 0; }
+.hg-theme .hg-mega__link { padding: 5px 6px; border-radius: 4px; color: #e9edf1; }
+.hg-theme .hg-mega__link:hover { background: rgba(230, 200, 117, 0.10); }
+.hg-theme .hg-mega__link-icon,
+.hg-theme .hg-mega__link-desc { display: none; }
+.hg-theme .hg-mega__link-label { font-size: 0.8rem; font-weight: 600; line-height: 1.35; }
+.hg-theme .hg-badge { background: rgba(212, 175, 55, 0.18); color: #e6c875; font-size: 0.55rem; }
+.hg-theme .hg-mega__foot {
+  display: flex; align-items: center; justify-content: flex-start;
+  padding: 10px 14px; background: #1c1f23;
+  border-top: 1px solid #3a3f45; color: #98a4b0; font-size: 0.72rem;
+}
+.hg-theme .hg-mega__foot > span { display: none; }
+.hg-theme .hg-mega__foot .hg-link { color: #e6c875; font-size: 0.8rem; }
+
+.hg-theme .hg-subnav { background: #16181b; border-bottom: 1px solid #2c3034; box-shadow: none; }
+.hg-theme .hg-subnav a { color: #b9c0c8; }
+.hg-theme .hg-subnav a:hover,
+.hg-theme .hg-subnav a.active { color: #e6c875; border-bottom-color: #d4af37; }
+
+/* ---- Desktop: one bar, all sections inline ---- */
+/* At 1440px+ the whole right-hand cluster fits on the single bar, so the slim strip is folded
+   away entirely. Between 1200 and 1439 the bar still shows every section inline, but the quick
+   links drop back to the slim strip and the triggers tighten so nothing overlaps. */
+@media (min-width: 1440px) {
+  .hg-utility { display: none; }
+  .hg-nav__quick { display: flex; }
+  .hg-theme .hg-nav__utility .hg-nav__icon,
+  .hg-theme .hg-nav__utility .ch247-locale__trigger svg { display: none; }
+}
+
+/* Section 3 hides the trigger list below 1440px and shows the drawer. Restore the horizontal
+   bar for 1200–1439px so a normal laptop sees the inline menu. Later rules win at equal
+   specificity; .hg-theme-prefixed selectors also beat the section 5/6 overrides. */
+@media (min-width: 1200px) and (max-width: 1439px) {
+  .hg-nav, .hg-nav__list { display: block; }
+  .hg-nav { position: static; flex: 1; min-width: 0; }
+  .hg-nav__items { display: flex; }
+  .hg-theme .hg-nav__toggle { display: none; }
+  .hg-theme .hg-nav__collapsible {
+    display: flex;
+    position: static;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    padding: 0;
+    max-height: none;
+    overflow: visible;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+  }
+  .hg-theme .hg-nav__utility,
+  .hg-theme .hg-nav__actions { flex-wrap: nowrap; padding: 0; border-bottom: 0; }
+  .hg-nav__drawer { display: none; }
+  .hg-nav__quick { display: none; }
+  .hg-theme .hg-nav__utility .hg-nav__icon,
+  .hg-theme .hg-nav__utility .ch247-locale__trigger svg { display: none; }
+  .hg-theme .hg-nav__trigger { font-size: 0.78rem; padding: 8px 6px; gap: 4px; }
+  .hg-theme .hg-nav__trigger::after { left: 6px; right: 6px; }
+}
+
+/* ---- Compact/drawer widths keep the dark header family ---- */
+@media (max-width: 1199px) {
+  .hg-theme .hg-nav__toggle { background: #24272c; border-color: #3a3f45; }
+  .hg-theme .ch247-menu-toggle__bar { background: #f4f5f6 !important; }
+  .hg-theme .hg-nav__collapsible {
+    background: #1b1d20;
+    border-top: 1px solid #34383d;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
+  }
+  .hg-theme .hg-nav__utility,
+  .hg-theme .hg-nav__actions { border-bottom-color: #34383d; }
+  .hg-theme .hg-drawer__group { border-bottom-color: #34383d; }
+  .hg-theme .hg-drawer__toggle { color: #f4f5f6; }
+  .hg-theme .hg-drawer__subgroup h3 { color: #e6c875; }
+  .hg-theme .hg-drawer__link { color: #e9edf1; }
+  .hg-theme .hg-drawer__link:hover { background: rgba(230, 200, 117, 0.10); }
+  .hg-theme .hg-drawer__all { color: #e6c875; }
+  /* The drawer replaces desktop panels: keep them in the flow, never a floating overlay. */
+  .hg-theme .hg-mega {
+    position: static;
+    width: 100%;
+    max-width: 100%;
+    max-height: none;
+    border: 0;
+    border-top: 1px solid #3a3f45;
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+  }
+  .hg-theme .hg-mega__groups { padding: 0 0 8px; }
+  .hg-theme .hg-mega__link-icon,
+  .hg-theme .hg-mega__link-desc { display: none; }
+  .hg-theme .hg-mega__foot { background: transparent; padding: 8px 0; }
+}

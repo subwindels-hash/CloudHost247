@@ -9,11 +9,11 @@ import { PlatformMobileNav } from '../../src/components/navigation/PlatformMegaM
 import { FOOTER_COLUMNS, NAV_SECTIONS } from '../../src/navigation/registry.generated';
 
 /**
- * The shared chrome was rebuilt in the Hostinger shape. These tests pin the parts that are easy
- * to lose in a refactor: the compact trigger bar, the full-width mega panel (intro card + three
- * link columns + "see all" bar), the mobile accordion, and the professional four-column dark footer. All
- * content is asserted against the generated registry, so a menu that drifts from the sitemap
- * fails here rather than in production.
+ * These tests pin the parts that are easy to lose in a refactor: every registry section shown as
+ * an inline trigger in the dark single-row bar, a compact dropdown (not a full-width mega panel),
+ * the mobile accordion, and the professional four-column dark footer. All content is asserted
+ * against the generated registry, so a menu that drifts from the sitemap fails here rather than
+ * in production.
  */
 
 beforeEach(() => {
@@ -37,8 +37,8 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe('Hostinger-style menu and mega menu', () => {
-  it('renders one accessible dropdown trigger per registry section in a compact nav bar', () => {
+describe('Single-row dark menu and compact dropdown', () => {
+  it('renders one accessible inline trigger per registry section in the single-row bar', () => {
     const { container } = render(<MemoryRouter><Header /></MemoryRouter>);
 
     expect(container.querySelector('.hg-header .hg-nav__bar')).toBeTruthy();
@@ -57,7 +57,7 @@ describe('Hostinger-style menu and mega menu', () => {
     expect(within(primary).getByRole('link', { name: 'Create Account' })).toBeTruthy();
   });
 
-  it('opens a full-width mega panel with an intro card, icon link columns and a see-all bar', async () => {
+  it('opens a compact dropdown with grouped links and a see-all bar', async () => {
     const { container } = render(<MemoryRouter><Header /></MemoryRouter>);
     // The mobile drawer also has a "Hosting" button, so scope this to the desktop trigger list.
     const trigger = within(container.querySelector<HTMLElement>('.hg-nav__list')!)
@@ -68,6 +68,9 @@ describe('Hostinger-style menu and mega menu', () => {
 
     const panel = container.querySelector<HTMLElement>(`#${trigger.getAttribute('aria-controls')}`)!;
     expect(panel.classList.contains('hg-mega')).toBe(true);
+    // The full-width mega panel was replaced by a narrow, item-anchored dropdown. The registry
+    // markup is unchanged, so all the links below are still present and testable.
+    expect(panel.classList.contains('hg-mega--compact')).toBe(true);
     expect(panel.hidden).toBe(false);
     expect(panel.querySelector('.hg-mega__intro h2')?.textContent).toBe('Hosting');
     expect(panel.querySelector('.hg-mega__featured')).toBeTruthy();

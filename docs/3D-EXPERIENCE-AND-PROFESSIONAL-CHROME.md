@@ -1,3 +1,8 @@
+> **Menu superseded.** The light professional menu described below (and captured in the
+> `before` evidence) has since been replaced by a dark single-row horizontal bar with compact
+> dropdowns — see `docs/DARK-HORIZONTAL-MENU.md`. The 3D Experience, the rearranged footer and
+> all verification results for those parts still apply.
+
 # 3D Experience + professional menu/footer
 
 Two requests, implemented on both public surfaces:

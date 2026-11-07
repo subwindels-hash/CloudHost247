@@ -200,3 +200,78 @@
   .ch-footer__directory { padding: 36px 0 32px; }
   .ch-footer__legal-links { gap: 8px 12px; }
 }
+
+/* =============================================================================
+   Single-row dark horizontal menu — supersedes the light bar above
+   -----------------------------------------------------------------------------
+   Same templates, same <details>/<summary> disclosures, same registry-driven links. Every
+   top-level section stays inline; the viewport-wide mega panel becomes a narrow dropdown
+   anchored to its own item. The professional footer below is unchanged.
+   ========================================================================== */
+
+.ch-site .ch-header { background: #1b1d20; border-bottom: 1px solid #34383d; box-shadow: 0 6px 22px #00000047; }
+.ch-site .ch-top { background: #1b1d20; color: #b9c0c8; border-bottom: 0; }
+.ch-site .ch-top a, .ch-site .ch-top button { color: #b9c0c8; }
+.ch-site .ch-top a:hover, .ch-site .ch-top button:hover { color: #e6c875; }
+.ch-site .ch-nav { min-height: 62px; }
+.ch-site .ch-brand img { filter: brightness(0) invert(1); }
+.ch-site .ch-nav-item > summary { color: #f4f5f6; min-height: 62px; font-size: 13px; font-weight: 600; }
+.ch-site .ch-nav-item > summary > span { color: #b9c0c8; }
+.ch-site .ch-nav-item > summary:hover, .ch-site .ch-nav-item[open] > summary { color: #e6c875; }
+.ch-site .ch-account > a { color: #f4f5f6; }
+.ch-site .ch-account > a:hover { color: #e6c875; }
+.ch-site .ch-menu-toggle { background: #24272c; border-color: #3a3f45; color: #f4f5f6; }
+.ch-site .ch-header :focus-visible { outline-color: #e6c875; }
+
+/* Compact, item-anchored dropdown instead of a full-width mega panel. */
+.ch-site .ch-nav-item { position: relative; }
+.ch-site .ch-mega {
+  position: absolute; top: 100%; left: 0; right: auto; inset-inline: auto;
+  display: block; width: 292px; max-width: calc(100vw - 32px);
+  max-height: min(72vh, 560px); overflow: auto; gap: 0;
+  padding: 12px 14px;
+  background: #23262b; color: #e9edf1;
+  border: 1px solid #3a3f45; border-top: 2px solid #d4af37;
+  border-radius: 0 0 8px 8px; box-shadow: 0 24px 48px #00000080;
+}
+[data-ch-tools-menu] .ch-mega { display: block; grid-template-columns: none; }
+.ch-site .ch-mega-intro {
+  background: transparent; border-radius: 0; padding: 0 0 10px; margin: 0 0 10px;
+  border-bottom: 1px solid #ffffff17;
+}
+.ch-site .ch-mega-intro .ch-kicker,
+.ch-site .ch-mega-intro h2,
+.ch-site .ch-mega-intro p { display: none; }
+.ch-site .ch-mega-intro a { color: #e6c875; font-size: 13px; font-weight: 600; }
+.ch-site .ch-mega-group { margin: 0 0 12px; }
+.ch-site .ch-mega-group h3 {
+  margin: 0 0 6px; padding-bottom: 5px; border-bottom: 1px solid #ffffff17;
+  color: #e6c875; font-size: 11px; letter-spacing: .1em;
+}
+.ch-site .ch-mega-group ul { margin: 0; padding: 0; }
+.ch-site .ch-mega-group a {
+  padding: 5px 6px; font-size: 13px; color: #e9edf1; border-radius: 4px;
+}
+.ch-site .ch-mega-group a:hover, .ch-site .ch-mega-group a:focus-visible { background: #e6c8751a; color: #fff; }
+.ch-site .ch-mega-group a span { opacity: 0; }
+.ch-site .ch-mega :focus-visible { outline-color: #d4af37; }
+.ch-site .ch-nav-search input { background: #23262b; border-color: #3a3f45; color: #f4f5f6; }
+.ch-site .ch-nav-search input::placeholder { color: #98a4b0; }
+
+@media (min-width: 1200px) {
+  /* The top strip already carries Search; free the inline row from a second search field. */
+  .ch-site .ch-nav-search { display: none; }
+}
+@media (max-width: 1199px) {
+  /* The drawer puts panels back in the flow — never a floating overlay on a phone. */
+  .ch-site .ch-mega {
+    position: static; width: 100%; max-width: 100%; max-height: none; overflow: visible;
+    padding: 16px 0; background: transparent; border: 0; border-radius: 0; box-shadow: none;
+  }
+  .ch-site .ch-nav-search { display: block; }
+  .ch-site .ch-nav-item > summary { min-height: 49px; }
+}
+@media (max-width: 767px) {
+  .ch-site .ch-nav-item > summary { min-height: 44px; }
+  [data-ch-tools-menu] .ch-mega { grid-template-columns: 1fr; }
+}

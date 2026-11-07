@@ -89,7 +89,9 @@ async function main() {
   check('in-view sections reveal', revealTotal > 0 && revealed > 0, `${revealed}/${revealTotal} revealed`);
 
   // 2. Route transition restarts on client-side navigation without remounting the app.
-  await page.locator('a[href="/pricing"]').first().click();
+  // The desktop bar folds the slim utility strip away, so the first DOM match for /pricing can
+  // be hidden. Pick a rendered link instead of pinning the old strip's position.
+  await page.locator('a[href="/pricing"]:visible').first().click();
   await page.waitForTimeout(120);
   const transition = await page.evaluate(() => ({
     attr: document.querySelector('.ch247-main')?.hasAttribute('data-route-transition') ?? false,
@@ -144,4 +146,5 @@ async function main() {
   if (failed.length) process.exitCode = 1;
 }
 
-main().catch((error) => { console.error(error); process.exitCode = 2; });
+// Hard exit on failure: an open Chromium would otherwise keep the event loop alive.
+main().catch((error) => { console.error(error); process.exit(2); });

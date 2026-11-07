@@ -1,12 +1,12 @@
 /**
- * Capture the real rendered menu and footer for the Amazon/GoDaddy chrome benchmark.
+ * Capture the real rendered menu and footer chrome.
  *
- *   EVIDENCE_DIR=docs/evidence/chrome/before BASE_URL=http://127.0.0.1:3000 \
+ *   EVIDENCE_DIR=docs/evidence/professional/after BASE_URL=http://127.0.0.1:3000 \
  *     node scripts/capture-chrome-benchmark.mjs
  *
  * The ordinary page screenshots stop at the fold, so they cannot show either area this task
- * changes. This captures the header (including an opened mega panel), the full footer element and
- * a full-page desktop context shot at three breakpoints. Nothing is deployed or mutated.
+ * changes. This captures the header bar, the opened compact dropdown, the full footer element
+ * and the homepage 3D Experience at three breakpoints. Nothing is deployed or mutated.
  */
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -89,18 +89,24 @@ async function main() {
     }
 
     if (viewport.name === 'desktop') {
-      // An open mega panel is the second half of the "menu area" being benchmarked.
+      // An open dropdown is the second half of the "menu area" being benchmarked. Scroll back
+      // to the top first: the 3D element capture above scrolled down the page.
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(150);
       const trigger = page.locator('.hg-nav__trigger').first();
       if (await trigger.count()) {
-        await trigger.click();
+        // A DOM click (no pointer movement) keeps this deterministic: Playwright's mouse click
+        // fires mouseenter first, which opens the panel and makes the click toggle it shut.
+        await trigger.evaluate((el) => el.click());
         await page.waitForTimeout(250);
         await page.screenshot({
           path: path.join(OUT_DIR, 'menu-open-desktop.png'),
           clip: { x: 0, y: 0, width: viewport.width, height: 660 },
         });
         report.shots.push('menu-open-desktop.png');
-        report.megaPanelOpen = await page.locator('.hg-mega:not([hidden])').count() > 0;
-        await trigger.click();
+        report.dropdownOpen = await page.locator('.hg-mega:not([hidden])').count() > 0;
+        await trigger.evaluate((el) => el.click());
       }
     }
     await page.close();
@@ -109,7 +115,7 @@ async function main() {
   await browser.close();
   writeFileSync(path.join(OUT_DIR, 'chrome-report.json'), `${JSON.stringify(report, null, 2)}\n`);
   console.log(`captured ${report.shots.length} chrome views → ${OUT_DIR}`);
-  console.log(JSON.stringify({ desktop: report['footer-desktop'], mobile: report['footer-mobile'], megaPanelOpen: report.megaPanelOpen }));
+  console.log(JSON.stringify({ desktop: report['footer-desktop'], mobile: report['footer-mobile'], dropdownOpen: report.dropdownOpen }));
 }
 
 main().catch((error) => { console.error(error); process.exitCode = 2; });
