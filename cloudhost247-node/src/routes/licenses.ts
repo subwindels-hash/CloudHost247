@@ -29,9 +29,9 @@ const createLicenseSchema = z.object({
   licenseKey: z.string().min(1).max(512),
   licenseType: z.string().min(1).max(64).optional(),
   provider: z.string().min(1).max(64).optional(),
-  status: z.enum(['ACTIVE', 'PENDING', 'EXPIRED', 'SUSPENDED', 'CANCELLED', 'TERMINATED']).optional(),
+  status: z.enum(['ACTIVE', 'PENDING', 'EXPIRED', 'SUSPENDED', 'CANCELLED', 'TERMINATED'] as const).optional(),
   expiresAt: z.string().datetime().nullable().optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 const renewLicenseSchema = z.object({

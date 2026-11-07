@@ -44,8 +44,8 @@ const envSchema = z.object({
   // Set to true when the external provider requires SSL (most managed providers do) and the
   // provider uses a certificate that should still be validated. Set DATABASE_SSL_REJECT_UNAUTHORIZED
   // to false only for providers that require it (document why in ops notes) - never by default.
-  DATABASE_SSL: boolFromString.optional().default('false'),
-  DATABASE_SSL_REJECT_UNAUTHORIZED: boolFromString.optional().default('true'),
+  DATABASE_SSL: boolFromString.optional().default(false),
+  DATABASE_SSL_REJECT_UNAUTHORIZED: boolFromString.optional().default(true),
 
   DATABASE_POOL_MAX: z.coerce.number().int().positive().max(50).default(5),
 
@@ -108,7 +108,7 @@ const envSchema = z.object({
   // order → payment → deployment pipeline can be exercised in CI, staging, and demos WITHOUT
   // pretending a real deployment happened: installation rows are visibly marked
   // `simulated: true` in the API. Must never be enabled in production.
-  DEPLOYMENT_SIMULATION_MODE: boolFromString.optional().default('false'),
+  DEPLOYMENT_SIMULATION_MODE: boolFromString.optional().default(false),
 
   // --- Phase 6: Deployment worker -------------------------------------------------------------
   WORKER_ID: z.string().min(1).max(64).default(() => `worker-${process.pid}`),
@@ -120,7 +120,7 @@ const envSchema = z.object({
   // cPanel must invoke a bounded one-shot cycle from Cron rather than leave an SSH-launched
   // daemon running. `npm run worker:once` sets this through the CLI; this environment flag is
   // available for hosts whose scheduler cannot pass arguments.
-  WORKER_ONCE: boolFromString.optional().default('false'),
+  WORKER_ONCE: boolFromString.optional().default(false),
   // Cycle-wide Cron lease. It serialises periodic sweeps while per-deployment leases continue to
   // protect individual provider operations. It is renewed while a one-shot cycle is running.
   WORKER_ONCE_LEASE_MS: z.coerce.number().int().min(10_000).max(3_600_000).default(900_000),
@@ -139,7 +139,7 @@ const envSchema = z.object({
   // The Kubernetes adapter is optional and OFF by default (spec §39: not mandatory for the
   // first release). Cluster access configuration lives per-server in server_credentials
   // (kubernetes_kubeconfig); this flag only enables the adapter at all.
-  KUBERNETES_ADAPTER_ENABLED: boolFromString.optional().default('false'),
+  KUBERNETES_ADAPTER_ENABLED: boolFromString.optional().default(false),
 
   // --- Infrastructure providers / OS provisioning ------------------------------------------
   // Provider secrets are optional at process boot because each CloudHost247 deployment chooses
@@ -190,7 +190,7 @@ const envSchema = z.object({
   // Development-only opt-in for the mock infrastructure provider (spec §35). It is ignored in
   // production: the mock adapter refuses to run when NODE_ENV=production, and an administrator
   // must still register a provider whose adapter is literally `mock` for it to be reachable.
-  ALLOW_MOCK_PROVIDER: boolFromString.optional().default('false'),
+  ALLOW_MOCK_PROVIDER: boolFromString.optional().default(false),
   // URL of an operator-built, self-contained server-agent installer. Required before a real
   // provision/reinstall job can become READY; the worker refuses to skip monitoring attestation.
   SERVER_AGENT_INSTALL_URL: z.string().url().optional(),

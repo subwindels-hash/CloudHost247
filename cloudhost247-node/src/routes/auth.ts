@@ -71,12 +71,12 @@ const mfaEnrollSchema = z.object({ password: z.string().min(1) });
 const mfaDisableSchema = mfaCodeSchema.extend({ password: z.string().min(1) });
 const passkeyStartSchema = z.object({ password: z.string().min(1) });
 const passkeyFinishSchema = z.object({
-  challengeId: z.string().uuid(), name: z.string().trim().min(1).max(80), response: z.record(z.unknown()),
+  challengeId: z.string().uuid(), name: z.string().trim().min(1).max(80), response: z.record(z.string(), z.unknown()),
 });
 const passkeyRenameSchema = z.object({ name: z.string().trim().min(1).max(80) });
 const passkeyRemoveSchema = z.object({ password: z.string().min(1) });
 const passkeyLoginOptionsSchema = z.object({ email: z.string().email() });
-const passkeyLoginVerifySchema = z.object({ challengeId: z.string().uuid(), response: z.record(z.unknown()) });
+const passkeyLoginVerifySchema = z.object({ challengeId: z.string().uuid(), response: z.record(z.string(), z.unknown()) });
 
 function publicUser(user: {
   id: string;

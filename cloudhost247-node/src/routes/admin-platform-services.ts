@@ -124,8 +124,8 @@ export async function registerAdminPlatformServiceRoutes(app: FastifyInstance, e
         priceAmount: z.string().regex(/^\d+(\.\d{1,2})?$/, 'Enter a price like 19.00'),
         currency: z.string().length(3).optional(),
         features: z.array(z.string().max(200)).max(30).optional(),
-        limits: z.record(z.number().int().min(0)).optional(),
-        status: z.enum(['draft', 'published', 'archived']).optional(),
+        limits: z.record(z.string(), z.number().int().min(0)).optional(),
+        status: z.enum(['draft', 'published', 'archived'] as const).optional(),
         sortOrder: z.number().int().min(0).max(9999).optional(),
       }),
       request.body
@@ -149,8 +149,8 @@ export async function registerAdminPlatformServiceRoutes(app: FastifyInstance, e
         description: z.string().max(2000).nullable().optional(),
         priceAmount: z.string().regex(/^\d+(\.\d{1,2})?$/, 'Enter a price like 19.00').optional(),
         features: z.array(z.string().max(200)).max(30).optional(),
-        limits: z.record(z.number().int().min(0)).optional(),
-        status: z.enum(['draft', 'published', 'archived']).optional(),
+        limits: z.record(z.string(), z.number().int().min(0)).optional(),
+        status: z.enum(['draft', 'published', 'archived'] as const).optional(),
         sortOrder: z.number().int().min(0).max(9999).optional(),
       }),
       request.body
@@ -215,9 +215,9 @@ export async function registerAdminPlatformServiceRoutes(app: FastifyInstance, e
         description: z.string().max(6000).optional(),
         deliverables: z.array(z.string().max(200)).max(20).optional(),
         startingPriceAmount: z.number().min(0).nullable().optional(),
-        pricingModel: z.enum(['quoted', 'fixed']).optional(),
+        pricingModel: z.enum(['quoted', 'fixed'] as const).optional(),
         typicalDeliveryDays: z.number().int().min(1).max(365).nullable().optional(),
-        status: z.enum(['draft', 'published', 'archived']).optional(),
+        status: z.enum(['draft', 'published', 'archived'] as const).optional(),
         sortOrder: z.number().int().min(0).max(9999).optional(),
       }),
       request.body
@@ -279,7 +279,7 @@ export async function registerAdminPlatformServiceRoutes(app: FastifyInstance, e
           'failed',
         ]),
         note: z.string().max(500).nullable().optional(),
-        priority: z.enum(['low', 'normal', 'high', 'urgent']).optional(),
+        priority: z.enum(['low', 'normal', 'high', 'urgent'] as const).optional(),
       }),
       request.body
     );
@@ -322,7 +322,7 @@ export async function registerAdminPlatformServiceRoutes(app: FastifyInstance, e
   app.post<{ Params: { id: string } }>('/api/v1/admin/expert-services/requests/:id/messages', async (request, reply) => {
     const auth = await requireRole(request, env, pool, STAFF);
     const input = parseOrThrow(
-      z.object({ body: z.string().min(1).max(8000), visibility: z.enum(['customer', 'internal']) }),
+      z.object({ body: z.string().min(1).max(8000), visibility: z.enum(['customer', 'internal'] as const) }),
       request.body
     );
     const message = await addExpertStaffMessage(pool, auth.userId, request.params.id, input);
@@ -346,14 +346,14 @@ export async function registerAdminPlatformServiceRoutes(app: FastifyInstance, e
         id: z.string().uuid().optional(),
         code: z.string().max(64).optional(),
         name: z.string().min(2).max(160),
-        channel: z.enum(['seo', 'search_ads', 'social', 'email', 'advertising', 'analytics', 'content', 'conversion']),
+        channel: z.enum(['seo', 'search_ads', 'social', 'email', 'advertising', 'analytics', 'content', 'conversion'] as const),
         summary: z.string().max(500).optional(),
         description: z.string().max(6000).optional(),
         deliverables: z.array(z.string().max(200)).max(20).optional(),
         startingPriceAmount: z.number().min(0).nullable().optional(),
         billingPeriod: z.enum(BILLING_PERIODS).optional(),
         minTermMonths: z.number().int().min(1).max(36).optional(),
-        status: z.enum(['draft', 'published', 'archived']).optional(),
+        status: z.enum(['draft', 'published', 'archived'] as const).optional(),
         sortOrder: z.number().int().min(0).max(9999).optional(),
       }),
       request.body
@@ -384,7 +384,7 @@ export async function registerAdminPlatformServiceRoutes(app: FastifyInstance, e
     const auth = await requireRole(request, env, pool, ADMIN);
     const input = parseOrThrow(
       z.object({
-        channel: z.enum(['seo', 'search_ads', 'social', 'email', 'advertising', 'analytics', 'content', 'conversion']),
+        channel: z.enum(['seo', 'search_ads', 'social', 'email', 'advertising', 'analytics', 'content', 'conversion'] as const),
         name: z.string().max(120).optional(),
         providerKey: z.string().min(2).max(64),
       }),
@@ -427,7 +427,7 @@ export async function registerAdminPlatformServiceRoutes(app: FastifyInstance, e
     const auth = await requireRole(request, env, pool, STAFF);
     const input = parseOrThrow(
       z.object({
-        status: z.enum(['planning', 'active', 'paused', 'reporting', 'completed', 'rejected', 'cancelled', 'failed']),
+        status: z.enum(['planning', 'active', 'paused', 'reporting', 'completed', 'rejected', 'cancelled', 'failed'] as const),
         note: z.string().max(500).nullable().optional(),
       }),
       request.body
@@ -451,7 +451,7 @@ export async function registerAdminPlatformServiceRoutes(app: FastifyInstance, e
         periodStart: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use a date in YYYY-MM-DD form'),
         periodEnd: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use a date in YYYY-MM-DD form'),
         summary: z.string().max(2000).nullable().optional(),
-        status: z.enum(['pending', 'collecting', 'published', 'unavailable']).optional(),
+        status: z.enum(['pending', 'collecting', 'published', 'unavailable'] as const).optional(),
       }),
       request.body
     );
@@ -470,7 +470,7 @@ export async function registerAdminPlatformServiceRoutes(app: FastifyInstance, e
               key: z.string().min(1).max(60),
               label: z.string().min(1).max(120),
               value: z.number().finite(),
-              unit: z.enum(['count', 'currency', 'percent', 'ratio', 'seconds']).optional(),
+              unit: z.enum(['count', 'currency', 'percent', 'ratio', 'seconds'] as const).optional(),
               source: z.string().min(1).max(60),
               estimated: z.boolean().optional(),
             })
@@ -493,7 +493,7 @@ export async function registerAdminPlatformServiceRoutes(app: FastifyInstance, e
   app.post<{ Params: { id: string } }>('/api/v1/admin/marketing-services/campaigns/:id/messages', async (request, reply) => {
     const auth = await requireRole(request, env, pool, STAFF);
     const input = parseOrThrow(
-      z.object({ body: z.string().min(1).max(8000), visibility: z.enum(['customer', 'internal']) }),
+      z.object({ body: z.string().min(1).max(8000), visibility: z.enum(['customer', 'internal'] as const) }),
       request.body
     );
     const message = await addStaffCampaignMessage(pool, auth.userId, request.params.id, input);

@@ -3,22 +3,29 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Icon, CheckIcon, ArrowIcon } from '../components/ui/Icon';
 import { Illustration } from '../components/marketing/Illustration';
 import { usePageMeta } from '../lib/usePageMeta';
-import { NAV_SECTIONS, TOOLS_CATEGORIES, BRAND } from '../navigation/registry.generated';
+import { useApiResource } from '../lib/useApiResource';
+import { formatPrice, type PublicPrice, type PublicPlan } from '../lib/catalog-types';
+import { CatalogErrorBanner, CatalogLoadingBanner } from '../components/CatalogStateBanner';
+import { useCurrency } from '../currency/CurrencyProvider';
+import { NAV_SECTIONS, BRAND, UTILITY } from '../navigation/registry.generated';
 
 /**
- * The CloudHost247 homepage.
+ * CloudHost247 homepage — premium marketing surface.
  *
- * It is a guide into the ecosystem, not a catalogue: each section answers "what is this and where
- * do I go next", and the deep pages do the explaining. The product family cards and tool
- * categories are rendered from the shared navigation registry, so the homepage cannot advertise a
+ * Structure follows a conversion page, not a catalogue: each section answers "what is this
+ * and where do I go next", and the deep pages do the explaining. The one exception is the
+ * featured plans strip, which shows real plans and real prices from the live catalogue so a
+ * visitor can order without leaving the page.
+ *
+ * Every link comes from the shared navigation registry, so the homepage cannot advertise a
  * product the rest of the site does not have — and adding a product updates this page too.
  *
- * Deliberately absent: a customer-logo wall, an uptime percentage, a data-centre pin map and any
- * price. None of those can be stated truthfully without data this deployment does not hold, and
- * each of them is a thing a visitor has learned to distrust anyway.
+ * Deliberately absent: a customer-logo wall, an uptime percentage, a data-centre pin map and
+ * any invented price. None of those can be stated truthfully without data this deployment
+ * does not hold, and each of them is a thing a visitor has learned to distrust anyway.
  */
 
-const FAMILIES = NAV_SECTIONS.filter((section) => section.id !== 'resources' && section.id !== 'support');
+const FAMILIES = NAV_SECTIONS.filter((section) => section.id !== 'resources' && section.id !== 'company');
 
 const SPOTLIGHTS = [
   {
@@ -85,6 +92,115 @@ const AUDIENCES = [
   { icon: 'store', title: 'A storefront', body: 'Sell products online, with the store and the hosting on the same platform.', to: '/websites' },
 ];
 
+const STEPS = [
+  { index: '01', title: 'Make it yours', body: 'Search for a domain and register it — or transfer one you already own — from the same account as the services it serves.' },
+  { index: '02', title: 'Bring it online', body: 'Choose hosting, a server or an application from the live catalogue and provision it in minutes.' },
+  { index: '03', title: 'Deploy and grow', body: 'Deploy from Git, add certificates and backups, then scale the plan as the workload grows.' },
+];
+
+/**
+ * Featured plans strip: the first three published plans for web hosting, straight from the
+ * live catalogue. Every possible state of the catalogue data is rendered honestly — loading,
+ * error, missing product, no plans — and no price is ever invented.
+ */
+function HomePlansSection() {
+  const result = useApiResource<{ product: { slug: string; name: string }; plans: PublicPlan[] }>('/api/v1/catalog/products/web-hosting/plans');
+  const { formatAmount } = useCurrency();
+
+  if (result.status === 'loading') return <CatalogLoadingBanner label="Loading hosting plans…" />;
+  if (result.status === 'error') {
+    if (result.httpStatus === 404) {
+      return (
+        <section className="ch-section ch-section--tight">
+          <div className="ch-wrap">
+            <div className="ch-state">
+              <strong>Hosting plans aren't in the live catalogue yet.</strong>{' '}
+              Create an account and we'll follow up with current options, or{' '}
+              <Link to="/contact">ask us about hosting</Link>.
+            </div>
+          </div>
+        </section>
+      );
+    }
+    return <CatalogErrorBanner message={result.message} />;
+  }
+
+  const { plans } = result.data;
+  const featured = plans.slice(0, 3);
+
+  if (plans.length === 0) {
+    return (
+      <section className="ch-section ch-section--tight">
+        <div className="ch-wrap">
+          <div className="ch-state">
+            <strong>No hosting plans have been published yet.</strong>{' '}
+            Ask us about current options or{' '}
+            <Link to="/contact">contact us</Link>.
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="ch-section ch-section--tight">
+      <div className="ch-wrap">
+        <div className="ch-section__head">
+          <div>
+            <p className="ch-section__badge">Live from the catalogue</p>
+            <h2>Hosting plans that fit what you are building</h2>
+          </div>
+          <p className="ch-lede">
+            Prices shown in your selected currency and read straight from the product catalogue —
+            what you see here is what the order form charges.
+          </p>
+        </div>
+        <div className="ch-grid ch-grid--3">
+          {featured.map((plan) => {
+            const price = plan.pricing.find((p) => p.billingPeriod === 'monthly') ?? plan.pricing[0];
+            const formatted = price ? formatAmount(price.amount) : null;
+            return (
+              <div className="ch-card ch-card--raised" key={plan.slug}>
+                <h3>{plan.name}</h3>
+                {plan.description && <p style={{ fontSize: '0.85rem', color: 'var(--ch-muted)' }}>{plan.description}</p>}
+                {price ? (
+                  <div style={{ marginTop: 'auto' }}>
+                    <div style={{ fontSize: '2rem', fontWeight: 650, letterSpacing: '-0.03em', marginBottom: 2 }}>
+                      {formatted?.text ?? formatPrice(price)}
+                      <span style={{ fontSize: '0.8rem', fontWeight: 500, color: 'var(--ch-muted)' }}>
+                        {formatted?.converted ? ` · ${formatted.currency}` : price.currency}{' / '}{price.billingPeriod.replace('_', ' ')}
+                      </span>
+                    </div>
+                    {price.setupFee && <p style={{ fontSize: '0.8rem', color: 'var(--ch-muted)' }}>+ setup fee</p>}
+                  </div>
+                ) : null}
+                {plan.features.slice(0, 4).length > 0 && (
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 'var(--ch-space-4) 0 0', fontSize: '0.87rem', color: 'var(--ch-muted)' }}>
+                    {plan.features.slice(0, 4).map((feature) => (
+                      <li key={feature.name} style={{ display: 'flex', gap: 9, alignItems: 'flex-start', marginBottom: 6 }}>
+                        <span style={{ color: 'var(--ch-mint-strong)', fontWeight: 700 }}>{'\u00B7'}</span>
+                        {feature.name}{feature.value ? ` — ${feature.value}` : ''}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <Link className="ch-link" to={`/hosting/web-hosting#plans`}>
+                  Choose {plan.name}<span className="ch-link__arrow" aria-hidden><ArrowIcon /></span>
+                </Link>
+              </div>
+            );
+          })}
+        </div>
+        <p style={{ marginTop: '30px', marginBottom: 0, textAlign: 'center' }}>
+          <Link className="ch-link" to="/hosting/web-hosting">
+            See all hosting plans<span className="ch-link__arrow" aria-hidden><ArrowIcon /></span>
+          </Link>
+        </p>
+      </div>
+    </section>
+  );
+}
+
 export default function HomePage() {
   const navigate = useNavigate();
   const [domainQuery, setDomainQuery] = useState('');
@@ -123,85 +239,66 @@ export default function HomePage() {
   return (
     <div className="ch-ds">
       <section className="ch-hero">
-        <div className="ch-wrap">
-          <div className="ch-hero__inner">
-            <div>
-              <p className="ch-kicker">Domains · Hosting · Cloud · Platforms · Tools</p>
-              <h1>
-                Build. Host.<br />Deploy. <em>Scale.</em>
-              </h1>
-              <p className="ch-lede">
-                Register the domain, host the website, deploy the application, run the server and
-                connect the API — with one account, one catalogue and one support relationship
-                instead of five vendors pointing at each other.
-              </p>
-              <form className="ch-domain-search" onSubmit={onDomainSearch} role="search">
-                <label className="ch-visually-hidden" htmlFor="ch-home-domain">
-                  Search for a domain name
-                </label>
-                <div className="ch-domain-search__field">
-                  <input
-                    id="ch-home-domain"
-                    className="ch-domain-search__input"
-                    type="search"
-                    name="q"
-                    value={domainQuery}
-                    onChange={(event) => setDomainQuery(event.target.value)}
-                    placeholder="Search a domain, e.g. example.com"
-                    maxLength={253}
-                    autoComplete="off"
-                  />
-                  <button className="ch-btn ch-btn--mint" type="submit">
-                    Search domains
-                  </button>
-                </div>
-              </form>
-              <div className="ch-hero__ctas">
-                <Link className="ch-btn ch-btn--mint ch-btn--lg" to="/register">
-                  Create an account
-                </Link>
-                <Link className="ch-btn ch-btn--on-ink ch-btn--lg" to="/hosting">
-                  Explore the platform
-                </Link>
+        <div className="ch-wrap ch-hero-grid">
+          <div>
+            <p className="ch-kicker">Domains · Hosting · Cloud · Platforms · Tools</p>
+            <h1>
+              Build. Host.<br /> Deploy. <em>Scale.</em>
+            </h1>
+            <p className="ch-lede">
+              Register the domain, host the website, deploy the application, run the server and
+              connect the API — with one account, one catalogue and one support relationship
+              instead of five vendors pointing at each other.
+            </p>
+            <form className="ch-domain-search" onSubmit={onDomainSearch} role="search">
+              <label className="ch-visually-hidden" htmlFor="ch-home-domain">
+                Search for a domain name
+              </label>
+              <div className="ch-domain-search__field">
+                <input
+                  id="ch-home-domain"
+                  className="ch-domain-search__input"
+                  type="search"
+                  name="q"
+                  value={domainQuery}
+                  onChange={(event) => setDomainQuery(event.target.value)}
+                  placeholder="Search a domain, e.g. example.com"
+                  maxLength={253}
+                  autoComplete="off"
+                />
+                <button className="ch-btn ch-btn--mint ch-btn--lg" type="submit">
+                  Search domains
+                </button>
               </div>
-              <ul className="ch-hero__points">
-                <li><CheckIcon size={15} />Live catalogue pricing, never a stale price list</li>
-                <li><CheckIcon size={15} />Manage DNS, certificates and backups where available</li>
-                <li><CheckIcon size={15} />Documented APIs for everything you own</li>
-              </ul>
+            </form>
+            <div className="ch-hero__ctas">
+              <Link className="ch-btn ch-btn--mint ch-btn--lg" to={UTILITY.createAccount.to}>
+                {UTILITY.createAccount.label}
+              </Link>
+              <Link className="ch-btn ch-btn--on-ink ch-btn--lg" to="/hosting/web-hosting">
+                Explore hosting plans
+              </Link>
             </div>
-
-            <Illustration
-              visual="hero/infrastructure"
-              visual3d="hero/infrastructure-3d"
-              alt="CloudHost247 platform: a 3D view of servers, cloud compute and a control layer"
-              caption={{ left: 'CloudHost247 platform', right: 'Infrastructure' }}
-              eager
-            />
+            <ul className="ch-hero__points">
+              <li><CheckIcon size={15} />Live catalogue pricing, never a stale price list</li>
+              <li><CheckIcon size={15} />Manage DNS, certificates and backups where available</li>
+              <li><CheckIcon size={15} />Documented APIs for everything you own</li>
+            </ul>
           </div>
+
+          <Illustration
+            visual="hero/infrastructure"
+            visual3d="hero/infrastructure-3d"
+            alt="CloudHost247 platform: a 3D view of servers, cloud compute and a control layer"
+            caption={{ left: 'CloudHost247 platform', right: 'Infrastructure' }}
+            eager
+          />
         </div>
       </section>
 
-      <section className="ch-section ch-section--tight ch-section--soft">
-        <div className="ch-wrap">
-          <ul className="ch-pill-row" style={{ justifyContent: 'space-between' }}>
-            {[
-              'Domains & DNS',
-              'Web & WordPress hosting',
-              'VPS · Cloud · Dedicated',
-              'Application marketplace',
-              'Application deployments',
-              'Website builder & stores',
-              'Online tools for everyday work',
-              'Documented APIs',
-            ].map((item) => (
-              <li className="ch-pill" key={item}>{item}</li>
-            ))}
-          </ul>
-        </div>
-      </section>
+      <HomePlansSection />
 
-      <section className="ch-section">
+      <section className="ch-section ch-section--soft">
         <div className="ch-wrap">
           <div className="ch-section__head">
             <div>
@@ -230,12 +327,12 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="ch-section ch-section--soft">
+      <section className="ch-section">
         <div className="ch-wrap">
           <div className="ch-section__head">
             <div>
-              <p className="ch-kicker">The platform</p>
-              <h2>Eight product families, one account</h2>
+              <p className="ch-kicker">Eight product families, one account</p>
+              <h2>Everything you need to run online</h2>
             </div>
             <p className="ch-lede">
               Each card opens a real product area. The menu, the footer and this page are all rendered
@@ -252,8 +349,7 @@ export default function HomePage() {
                         : family.id === 'domains' ? 'domain'
                           : family.id === 'platforms' ? 'app'
                             : family.id === 'developers' ? 'code'
-                              : family.id === 'websites' ? 'layout'
-                                : family.id === 'tools' ? 'tools' : 'layers'
+                              : family.id === 'tools' ? 'tools' : 'layers'
                   } />
                 </span>
                 <h3>{family.label}</h3>
@@ -270,64 +366,29 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="ch-section">
-        <div className="ch-wrap">
-          <div className="ch-split">
-            <div>
-              <p className="ch-kicker">Start where you are</p>
-              <h2>What are you building?</h2>
-              <p className="ch-lede">
-                The right entry point depends on what you already have. These four cover most of the
-                ways people arrive at CloudHost247.
-              </p>
-              <ul className="ch-check-list" style={{ marginTop: '26px' }}>
-                {AUDIENCES.map((audience) => (
-                  <li key={audience.title}>
-                    <span className="ch-check-list__mark" aria-hidden><CheckIcon /></span>
-                    <span>
-                      <strong>{audience.title}</strong>
-                      <span className="ch-check-list__body">
-                        {audience.body}{' '}
-                        <Link to={audience.to}>Start here →</Link>
-                      </span>
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <Illustration
-              visual="hero/global-network"
-              visual3d="hero/global-network-3d"
-              alt="Conceptual global connectivity — not a map of CloudHost247 data-center locations"
-              caption={{ left: 'Conceptual network', right: 'Not a location map' }}
-            />
-          </div>
-        </div>
-      </section>
-
       <section className="ch-section ch-section--soft">
         <div className="ch-wrap">
-          <div className="ch-split">
-            <Illustration
-              visual="deployment/deployment-pipeline"
-              visual3d="deployment/deployment-pipeline-3d"
-              alt="Conceptual application deployment pipeline"
-              caption={{ left: 'Developers', right: 'Deploy & operate' }}
-            />
+          <div className="ch-section__head">
             <div>
-              <p className="ch-kicker">Developer platform</p>
-              <h2>From repository to running service</h2>
-              <p className="ch-lede">
-                Node.js, PHP, Python, Laravel and Docker environments, with a deployment record you
-                can inspect. The catalogue decides what is actually provisionable on this
-                deployment — this page does not invent runtimes.
-              </p>
-              <div className="ch-hero__ctas">
-                <Link className="ch-btn" to="/developers/deployment">Application deployment</Link>
-                <Link className="ch-link" to="/developers">Developer platform →</Link>
-              </div>
+              <p className="ch-kicker">How it works</p>
+              <h2>From domain to running service</h2>
             </div>
+            <p className="ch-lede">
+              Three steps, one account. Everything after the order — DNS, certificates, backups,
+              deployments and support — lives inside the same dashboard.
+            </p>
           </div>
+          <ul className="ch-steps">
+            {STEPS.map((step) => (
+              <li key={step.index} className="ch-step">
+                <span className="ch-step__index">{step.index}</span>
+                <div>
+                  <h3>{step.title}</h3>
+                  <p>{step.body}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
@@ -335,8 +396,8 @@ export default function HomePage() {
         <div className="ch-wrap">
           <div className="ch-section__head">
             <div>
-              <p className="ch-kicker">Trust</p>
-              <h2>What we can actually claim</h2>
+              <p className="ch-kicker">What we can actually claim</p>
+              <h2>Four things we do differently</h2>
             </div>
             <p className="ch-lede">
               No invented uptime figure, no certification badge, no map with pins on cities we do not
@@ -355,30 +416,14 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="ch-section ch-section--ink">
+      <section className="ch-newsletter">
         <div className="ch-wrap">
-          <div className="ch-section__head">
-            <div>
-              <p className="ch-kicker">Tools</p>
-              <h2>Free tools, honest results</h2>
-            </div>
-            <p className="ch-lede" style={{ color: 'var(--ch-on-dark-muted)' }}>
-              DNS, IP, network, security, developer, designer, webmaster, productivity and gaming
-              utilities. Each one explains its output instead of dressing it up.
-            </p>
-          </div>
-          <div className="ch-grid ch-grid--4">
-            {TOOLS_CATEGORIES.slice(0, 8).map((category) => (
-              <Link className="ch-card ch-card--ink" to={`/tools/category/${category.slug}`} key={category.slug}>
-                <span className="ch-card__icon" aria-hidden><Icon name={category.icon} /></span>
-                <h3>{category.label}</h3>
-                <p>{category.desc}</p>
-              </Link>
-            ))}
-          </div>
-          <p style={{ marginTop: '30px', marginBottom: 0 }}>
-            <Link className="ch-btn ch-btn--mint" to="/tools">Open the Tools Center</Link>
-          </p>
+          <h2>Platform news, straight to your inbox</h2>
+          <p>Product updates, maintenance notices and the occasional engineering note. No spam.</p>
+          <form role="search" aria-label="Newsletter signup" onSubmit={(event) => event.preventDefault()}>
+            <input type="email" name="email" placeholder="you@example.com" required />
+            <button className="ch-btn ch-btn--mint" type="submit">Subscribe</button>
+          </form>
         </div>
       </section>
 
@@ -390,7 +435,9 @@ export default function HomePage() {
               <p>Create an account to see live pricing and order a service, or ask us a question first.</p>
             </div>
             <div className="ch-cta__actions">
-              <Link className="ch-btn" to="/register">Create account</Link>
+              <Link className="ch-btn ch-btn--on-ink" to={UTILITY.createAccount.to}>
+                {UTILITY.createAccount.label}
+              </Link>
               <Link className="ch-btn ch-btn--outline" to="/contact">Contact us</Link>
             </div>
           </div>

@@ -757,6 +757,97 @@ a.ch-card:hover { transform: translateY(-3px); box-shadow: var(--ch-shadow-3); b
 /* The page itself must never scroll sideways, at any breakpoint, on any page. */
 html, body { max-width: 100%; overflow-x: clip; }
 
+/* -----------------------------------------------------------------------------
+   11. Premium product presentation (Hostinger-inspired patterns)
+   -------------------------------------------------------------------------- */
+/* Pricing cards. The base `.ch-plan` is the catalogue card; these classes make
+   one plan the recommended pick and let a page show monthly vs annual billing. */
+.ch-plan--featured {
+  border-color: var(--ch-mint-strong);
+  box-shadow: var(--ch-shadow-3);
+  position: relative;
+}
+.ch-plan--featured .ch-btn { background: var(--ch-ink); color: #fff !important; }
+.ch-plan--featured .ch-btn:hover { background: var(--ch-ink-2); box-shadow: var(--ch-shadow-mint); }
+.ch-plan--featured .ch-plan__price { color: var(--ch-ink); }
+
+.ch-plan-badge {
+  position: absolute; top: var(--ch-space-4); right: var(--ch-space-4);
+  display: inline-flex; align-items: center; gap: var(--ch-space-2);
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: var(--ch-radius-pill);
+  background: var(--ch-mint); color: var(--ch-navy);
+  box-shadow: var(--ch-shadow-2); z-index: 2;
+}
+.ch-plan-badge--mixed { background: var(--ch-ink); color: #fff; }
+
+.ch-plan__period {
+  font-size: 0.8rem; font-weight: 500; color: var(--ch-muted); letter-spacing: -0.01em;
+}
+.ch-plan__period--selected { color: var(--ch-green); }
+
+.ch-billing-toggle {
+  display: inline-flex; align-items: center; gap: var(--ch-space-2);
+  padding: 8px 12px; border: 1px solid var(--ch-line-strong);
+  border-radius: var(--ch-radius-pill); background: #fff; color: var(--ch-ink);
+  font-size: 0.82rem; font-weight: 600; cursor: pointer; user-select: none;
+}
+.ch-billing-toggle:hover { border-color: var(--ch-ink); }
+.ch-billing-toggle__item { padding: 6px 14px; border-radius: var(--ch-radius-pill); }
+.ch-billing-toggle__item--active { background: var(--ch-ink); color: #fff; }
+
+/* Plan comparison table — one row per feature, one column per plan. */
+.ch-plan-table { width: 100%; border-collapse: collapse; font-size: 0.87rem; min-width: 560px; }
+.ch-plan-table th, .ch-plan-table td { padding: 13px 16px; text-align: start; border-bottom: 1px solid var(--ch-line); vertical-align: top; }
+.ch-plan-table thead th { background: var(--ch-soft); font-size: 0.72rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--ch-muted); position: sticky; top: 0; z-index: 1; }
+.ch-plan-table thead th:first-child { position: sticky; left: 0; background: var(--ch-soft); z-index: 2; }
+.ch-plan-table tbody td:first-child { position: sticky; left: 0; background: #fff; z-index: 2; font-weight: 600; color: var(--ch-ink); border-right: 1px solid var(--ch-line); padding-right: 20px; }
+.ch-plan-table .ch-plan-col th { background: var(--ch-mint); color: var(--ch-navy); }
+.ch-plan-table .ch-plan-col--featured th { background: var(--ch-ink); color: #fff; }
+.ch-plan-table .yes { color: var(--ch-green); font-weight: 600; }
+.ch-plan-table .no { color: var(--ch-muted-2); }
+.ch-plan-table tbody tr:last-child td { border-bottom: 0; }
+
+/* Trust bar — verified claims, never invented uptime or customer figures. */
+.ch-trust-bar {
+  display: flex; flex-wrap: wrap; gap: var(--ch-space-6);
+  align-items: center; border: 1px solid var(--ch-line);
+  border-radius: var(--ch-radius); background: #fff; padding: var(--ch-space-5) var(--ch-space-6);
+  box-shadow: var(--ch-shadow-1);
+}
+.ch-trust__item { display: flex; align-items: center; gap: var(--ch-space-3); font-size: 0.9rem; color: var(--ch-ink); }
+.ch-trust__item strong { color: var(--ch-green); }
+.ch-trust__item svg, .ch-trust__item img { width: 20px; height: 20px; flex-shrink: 0; color: var(--ch-green); }
+
+.ch-feature-row {
+  display: flex; align-items: flex-start; gap: var(--ch-space-4);
+  padding: var(--ch-space-3) 0; font-size: 0.9rem; color: var(--ch-muted);
+}
+.ch-feature-row .ch-feature__mark { flex-shrink: 0; width: 20px; height: 20px; border-radius: 5px; display: grid; place-items: center; background: var(--ch-ok-soft); color: var(--ch-green); font-size: 0.75rem; font-weight: 700; margin-top: 3px; }
+
+.ch-newsletter {
+  background: var(--ch-grad-ink); color: #fff; border-radius: var(--ch-radius-lg);
+  padding: clamp(40px, 6vw, 72px) clamp(24px, 4vw, 60px); overflow: hidden; position: relative;
+}
+.ch-newsletter::after {
+  content: ''; position: absolute; width: 600px; height: 600px; right: -180px; top: -180px;
+  background: radial-gradient(circle, rgba(47, 213, 138, 0.18), transparent 55%); pointer-events: none;
+}
+.ch-newsletter h2 { color: #fff; margin-bottom: var(--ch-space-3); }
+.ch-newsletter p { color: var(--ch-on-dark-muted); margin-bottom: var(--ch-space-6); max-width: 48ch; }
+.ch-newsletter form { display: flex; flex-wrap: wrap; gap: 8px; max-width: 560px; }
+.ch-newsletter input { flex: 1 1 260px; min-width: 0; min-height: 50px; padding: 0 var(--ch-space-4); border: 1px solid rgba(255,255,255,0.2); border-radius: var(--ch-radius-sm); background: rgba(255,255,255,0.08); color: #fff; }
+.ch-newsletter input::placeholder { color: var(--ch-on-dark-muted); }
+.ch-newsletter .ch-btn { color: var(--ch-navy) !important; }
+
+.ch-card--raised { box-shadow: var(--ch-shadow-2); }
+.ch-card--raised:hover { box-shadow: var(--ch-shadow-3); transform: translateY(-4px); }
+
+.ch-section__badge {
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ch-mint); margin: 0 0 var(--ch-space-2);
+}
+
 /* =============================================================================
    10. PHP / WHMCS theme bridge
    -----------------------------------------------------------------------------

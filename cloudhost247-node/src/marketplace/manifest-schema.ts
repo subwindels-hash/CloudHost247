@@ -50,7 +50,7 @@ export const manifestEnvironmentEntrySchema = z.object({
   /** Secret values are encrypted at rest and never returned by any API (only their keys are). */
   secret: z.boolean().optional().default(false),
   /** random_32 — the platform generates a 32-byte URL-safe secret at install time. */
-  generate: z.enum(['random_32']).optional(),
+  generate: z.enum(['random_32'] as const).optional(),
   /** Value defaults to the installation's primary domain (e.g. N8N_EDITOR_BASE_URL). */
   defaultFromDomain: z.boolean().optional().default(false),
   /** Value defaults to the platform's external URL for this installation (https://domain). */
@@ -69,15 +69,15 @@ export const manifestServiceSchema = z.object({
   command: z.string().max(2000).optional(),
   volumes: z.array(z.string().min(1).max(255)).optional().default([]),
   dependsOn: z.array(z.string().min(1).max(120)).optional().default([]),
-  environment: z.record(z.string()).optional().default({}),
+  environment: z.record(z.string(), z.string()).optional().default({}),
   /** Declared so the engine can pre-provision a managed database of this type. */
-  database: z.enum(['postgres', 'mysql', 'mariadb', 'mongodb', 'redis']).optional(),
+  database: z.enum(['postgres', 'mysql', 'mariadb', 'mongodb', 'redis'] as const).optional(),
   /** Linux capabilities the container needs (e.g. NET_ADMIN for VPN containers). */
   capabilities: z.array(z.string().min(2).max(32)).optional(),
 });
 
 export const manifestHealthcheckSchema = z.object({
-  type: z.enum(['http', 'tcp', 'command']),
+  type: z.enum(['http', 'tcp', 'command'] as const),
   path: z.string().max(255).optional(),
   port: z.coerce.number().int().min(1).max(65535).optional(),
   /** Which service to probe when the customer-facing app proxies to an internal one. */
@@ -129,7 +129,7 @@ export const applicationManifestSchema = z.object({
   deployment: z.object({
     engine: z.enum(DEPLOYMENT_ENGINES).default('docker-compose'),
     /** For cPanel engine: the installable package kind (spec §38). */
-    cpanelInstaller: z.enum(['wordpress', 'static-site', 'custom']).optional(),
+    cpanelInstaller: z.enum(['wordpress', 'static-site', 'custom'] as const).optional(),
   }),
 
   supportedHostingTypes: hostingTypesSchema.default(['docker']),
@@ -144,7 +144,7 @@ export const applicationManifestSchema = z.object({
     gpu: z.boolean().optional().default(false),
   }),
 
-  services: z.record(manifestServiceSchema).refine(
+  services: z.record(z.string(), manifestServiceSchema).refine(
     (services) => {
       const names = Object.keys(services);
       return names.includes('app') && names.every((n) => /^[a-z0-9_-]{1,40}$/.test(n));
@@ -180,7 +180,7 @@ export const applicationManifestSchema = z.object({
   backup: z
     .object({
       enabled: z.boolean().default(true),
-      includes: z.array(z.enum(['volumes', 'database'])).optional().default(['volumes', 'database']),
+      includes: z.array(z.enum(['volumes', 'database'] as const)).optional().default(['volumes', 'database']),
     })
     .optional()
     .default({ enabled: true, includes: ['volumes', 'database'] }),

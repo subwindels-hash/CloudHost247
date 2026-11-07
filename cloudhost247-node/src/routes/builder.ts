@@ -74,14 +74,14 @@ const idParam = z.object({ id: z.string().uuid('A valid id is required') });
 const createSiteSchema = z.object({
   name: z.string().min(2).max(160),
   templateSlug: z.string().min(1).max(80).nullable().optional(),
-  theme: z.record(z.unknown()).optional(),
+  theme: z.record(z.string(), z.unknown()).optional(),
 });
 
 const updateSiteSchema = z.object({
   name: z.string().min(2).max(160).optional(),
-  theme: z.record(z.unknown()).optional(),
-  seo: z.record(z.unknown()).optional(),
-  settings: z.record(z.unknown()).optional(),
+  theme: z.record(z.string(), z.unknown()).optional(),
+  seo: z.record(z.string(), z.unknown()).optional(),
+  settings: z.record(z.string(), z.unknown()).optional(),
   domainId: z.string().uuid().nullable().optional(),
 });
 
@@ -89,7 +89,7 @@ const createPageSchema = z.object({
   title: z.string().min(1).max(200),
   path: z.string().max(200).optional(),
   content: z.array(z.unknown()).optional(),
-  seo: z.record(z.unknown()).optional(),
+  seo: z.record(z.string(), z.unknown()).optional(),
   isHome: z.boolean().optional(),
 });
 
@@ -97,7 +97,7 @@ const updatePageSchema = z.object({
   title: z.string().min(1).max(200).optional(),
   path: z.string().max(200).optional(),
   content: z.array(z.unknown()).optional(),
-  seo: z.record(z.unknown()).optional(),
+  seo: z.record(z.string(), z.unknown()).optional(),
   note: z.string().max(200).nullable().optional(),
 });
 
@@ -121,11 +121,11 @@ const updateFormSchema = z.object({
   fields: z.array(z.unknown()).optional(),
   notifyEmail: z.string().email().max(255).nullable().optional(),
   successMessage: z.string().max(500).optional(),
-  status: z.enum(['active', 'archived']).optional(),
+  status: z.enum(['active', 'archived'] as const).optional(),
 });
 
 const briefSchema = z.object({
-  brief: z.record(z.unknown()),
+  brief: z.record(z.string(), z.unknown()),
   siteId: z.string().uuid().nullable().optional(),
   name: z.string().max(200).optional(),
 });
@@ -487,7 +487,7 @@ export async function registerBuilderRoutes(app: FastifyInstance, env: Env, over
   app.post<{ Params: { id: string } }>('/api/v1/ai-builder/projects/:id/generate', async (request) => {
     const auth = await authenticate(request, env, pool);
     const { id } = parseOrThrow(idParam, request.params);
-    const input = parseOrThrow(z.object({ engine: z.enum(['rules', 'llm', 'anthropic']).default('rules') }), request.body ?? {});
+    const input = parseOrThrow(z.object({ engine: z.enum(['rules', 'llm', 'anthropic'] as const).default('rules') }), request.body ?? {});
     try {
       const result = await generatePlan(pool, env, auth.userId, id, input.engine ?? 'rules');
       return { generation: result };
@@ -549,7 +549,7 @@ export async function registerBuilderRoutes(app: FastifyInstance, env: Env, over
     async (request, reply) => {
       const slug = parseOrThrow(z.string().min(1).max(80), request.params.slug);
       const formId = parseOrThrow(z.string().uuid('That form id is not valid'), request.params.formId);
-      const input = parseOrThrow(z.object({ fields: z.record(z.unknown()) }), request.body ?? {});
+      const input = parseOrThrow(z.object({ fields: z.record(z.string(), z.unknown()) }), request.body ?? {});
       const outcome = await submitPublishedForm(pool, slug, formId, input.fields, {
         sourceIp: typeof request.ip === 'string' ? request.ip : null,
         origin: typeof request.headers.origin === 'string' ? request.headers.origin : null,

@@ -11,9 +11,7 @@ import { getMyPaymentDetail, initiatePaymentForInvoice } from '../services/payme
 
 const idParamSchema = z.object({ id: z.string().uuid('id must be a valid UUID') });
 const initiatePaymentSchema = z.object({
-  gateway: z.enum(AVAILABLE_GATEWAY_IDS as [string, ...string[]], {
-    errorMap: () => ({ message: `gateway must be one of: ${AVAILABLE_GATEWAY_IDS.join(', ')}` }),
-  }),
+  gateway: z.enum(AVAILABLE_GATEWAY_IDS as [string, ...string[]]),
 });
 
 function parseOrThrow<T>(schema: z.ZodType<T>, value: unknown): T {

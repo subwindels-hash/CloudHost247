@@ -82,12 +82,12 @@ import {
 
 const id = z.string().uuid();
 const slug = z.string().min(1).max(120).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
-const architecture = z.enum(['x86_64','arm64']);
-const serverType = z.enum(['VPS','DEDICATED','CLOUD']);
-const osStatus = z.enum(['ACTIVE','DISABLED','ARCHIVED']);
-const versionStatus = z.enum(['ACTIVE','MAINTENANCE','EOL_WARNING','EOL','ARCHIVED','DISABLED']);
-const providerStatus = z.enum(['ACTIVE','DISABLED','CONFIGURATION_REQUIRED','UNAVAILABLE']);
-const imageStatus = z.enum(['DRAFT','VALIDATING','ACTIVE','DISABLED','INVALID']);
+const architecture = z.enum(['x86_64','arm64'] as const);
+const serverType = z.enum(['VPS','DEDICATED','CLOUD'] as const);
+const osStatus = z.enum(['ACTIVE','DISABLED','ARCHIVED'] as const);
+const versionStatus = z.enum(['ACTIVE','MAINTENANCE','EOL_WARNING','EOL','ARCHIVED','DISABLED'] as const);
+const providerStatus = z.enum(['ACTIVE','DISABLED','CONFIGURATION_REQUIRED','UNAVAILABLE'] as const);
+const imageStatus = z.enum(['DRAFT','VALIDATING','ACTIVE','DISABLED','INVALID'] as const);
 
 // Provider/image/template metadata is operator-controlled, but it is still returned in privileged
 // admin projections and passed into adapter requests. Keep credentials in environment variables,
@@ -105,7 +105,7 @@ function containsSensitiveMetadata(value: unknown, depth = 0): boolean {
       || containsSensitiveMetadata(item, depth + 1);
   });
 }
-const safeMetadata = z.record(z.unknown()).refine(
+const safeMetadata = z.record(z.string(), z.unknown()).refine(
   (value) => !containsSensitiveMetadata(value),
   'Metadata cannot contain provider credentials or secret material; configure those in the server environment',
 );
@@ -183,14 +183,14 @@ const versionSchema = z.object({
 const patchVersionSchema = versionSchema.omit({ version: true }).partial();
 const providerSchema = z.object({
   name: z.string().min(1).max(160),slug,
-  providerType: z.enum(['OVH','HETZNER','AWS','DIGITALOCEAN','VULTR','CONTABO','PROXMOX','VIRTUALIZOR','SOLUSVM','OPENSTACK','GENERIC_HTTP','MOCK','OTHER']),
+  providerType: z.enum(['OVH','HETZNER','AWS','DIGITALOCEAN','VULTR','CONTABO','PROXMOX','VIRTUALIZOR','SOLUSVM','OPENSTACK','GENERIC_HTTP','MOCK','OTHER'] as const),
   adapter: z.enum(ADAPTER_KINDS as [AdapterKind, ...AdapterKind[]]),
   status: providerStatus.optional(),apiBaseUrl: z.string().url().nullable().optional(),credentialEnvPrefix: z.string().max(64).regex(/^[A-Z][A-Z0-9_]*$/).nullable().optional(),
-  capabilities: z.record(z.unknown()).optional(),metadata: safeMetadata.optional(),
+  capabilities: z.record(z.string(), z.unknown()).optional(),metadata: safeMetadata.optional(),
 });
 const patchProviderSchema = providerSchema.omit({ slug: true,providerType: true,adapter: true }).partial();
-const regionSchema = z.object({ providerId: id,code: z.string().min(1).max(96),name: z.string().min(1).max(160),countryCode: z.string().length(2).nullable().optional(),status: z.enum(['ACTIVE','DISABLED','ARCHIVED']).optional(),metadata: safeMetadata.optional() });
-const datacenterSchema = z.object({ regionId: id,code: z.string().min(1).max(96),name: z.string().min(1).max(160),status: z.enum(['ACTIVE','DISABLED','ARCHIVED']).optional(),metadata: safeMetadata.optional() });
+const regionSchema = z.object({ providerId: id,code: z.string().min(1).max(96),name: z.string().min(1).max(160),countryCode: z.string().length(2).nullable().optional(),status: z.enum(['ACTIVE','DISABLED','ARCHIVED'] as const).optional(),metadata: safeMetadata.optional() });
+const datacenterSchema = z.object({ regionId: id,code: z.string().min(1).max(96),name: z.string().min(1).max(160),status: z.enum(['ACTIVE','DISABLED','ARCHIVED'] as const).optional(),metadata: safeMetadata.optional() });
 const imageSchema = z.object({
   providerId: id,operatingSystemVersionId: id,providerImageId: z.string().max(512).nullable().optional(),providerTemplateId: z.string().max(512).nullable().optional(),
   architecture,regionId: id.nullable().optional(),datacenterId: id.nullable().optional(),metadata: safeMetadata.optional(),
@@ -201,7 +201,7 @@ const patchImageSchema = z.object({
 });
 const logoUploadSchema = z.object({
   fileName: z.string().trim().min(1).max(255),
-  contentType: z.enum(['image/png','image/jpeg','image/webp']),
+  contentType: z.enum(['image/png','image/jpeg','image/webp'] as const),
   // Base64 is larger than the decoded payload. The byte-level helper still enforces the exact
   // 512 KiB ceiling and verifies the image magic bytes.
   contentBase64: z.string().min(4).max(Math.ceil(MAX_OS_LOGO_BYTES / 3) * 4 + 8),
@@ -709,7 +709,7 @@ export async function registerInfrastructureRoutes(app: FastifyInstance,env: Env
     return{plans:result.rows};
   });
 
-  const productConfigSchema=z.object({planId:id,providerId:id,regionId:id,datacenterId:id.nullable().optional(),operatingSystemVersionId:id,architecture,serverType,status:z.enum(['ACTIVE','DISABLED','ARCHIVED']).optional(),metadata:safeMetadata.optional()});
+  const productConfigSchema=z.object({planId:id,providerId:id,regionId:id,datacenterId:id.nullable().optional(),operatingSystemVersionId:id,architecture,serverType,status:z.enum(['ACTIVE','DISABLED','ARCHIVED'] as const).optional(),metadata:safeMetadata.optional()});
   app.get('/api/v1/admin/server-product-configurations',async(request)=>{await admin(request);const query=parse(z.object({planId:id.optional()}),request.query??{});return{configurations:await listProductConfigurations(db,query.planId)};});
   app.post('/api/v1/admin/server-product-configurations',async(request,reply)=>{
     const auth=await admin(request);const input=parse(productConfigSchema,request.body);
@@ -720,7 +720,7 @@ export async function registerInfrastructureRoutes(app: FastifyInstance,env: Env
   });
   app.patch<{Params:{id:string}}>('/api/v1/admin/server-product-configurations/:id',async(request)=>{
     const auth=await admin(request);const configurationId=parse(id,request.params.id);
-    const {status}=parse(z.object({status:z.enum(['ACTIVE','DISABLED','ARCHIVED'])}),request.body);
+    const {status}=parse(z.object({status:z.enum(['ACTIVE','DISABLED','ARCHIVED'] as const)}),request.body);
     if(status==='ACTIVE'){
       const current=await db.query<{plan_id:string;provider_id:string;region_id:string;datacenter_id:string|null;operating_system_version_id:string;architecture:'x86_64'|'arm64';server_type:'VPS'|'DEDICATED'|'CLOUD';metadata:Record<string,unknown>}>(`SELECT * FROM server_product_configurations WHERE id=$1`,[configurationId]);
       const row=current.rows[0];if(!row)throw new NotFoundError();
@@ -847,7 +847,7 @@ export async function registerInfrastructureRoutes(app: FastifyInstance,env: Env
   app.get('/api/v1/admin/infrastructure-logs',async(request)=>{
     await admin(request);
     const query=parse(z.object({
-      resourceType:z.enum(['provider','region','datacenter','os_image','operating_system','operating_system_version','server_product_configuration','provisioning_job','server']).optional(),
+      resourceType:z.enum(['provider','region','datacenter','os_image','operating_system','operating_system_version','server_product_configuration','provisioning_job','server'] as const).optional(),
       resourceId:id.optional(),
       action:z.string().trim().min(1).max(120).optional(),
       limit:z.coerce.number().int().min(1).max(200).optional(),

@@ -62,10 +62,10 @@ const createStoreSchema = z.object({
 const updateStoreSchema = z.object({
   name: z.string().min(2).max(160).optional(),
   description: z.string().max(2000).optional(),
-  status: z.enum(['draft', 'active', 'suspended']).optional(),
-  paymentMode: z.enum(['order_intake', 'provider']).optional(),
-  settings: z.record(z.unknown()).optional(),
-  theme: z.record(z.unknown()).optional(),
+  status: z.enum(['draft', 'active', 'suspended'] as const).optional(),
+  paymentMode: z.enum(['order_intake', 'provider'] as const).optional(),
+  settings: z.record(z.string(), z.unknown()).optional(),
+  theme: z.record(z.string(), z.unknown()).optional(),
 });
 
 const downloadSchema = z.object({
@@ -75,7 +75,7 @@ const downloadSchema = z.object({
 });
 
 const productSchema = z.object({
-  kind: z.enum(['physical', 'digital', 'service']),
+  kind: z.enum(['physical', 'digital', 'service'] as const),
   name: z.string().min(1).max(200),
   slug: z.string().max(120).optional(),
   description: z.string().max(8000).optional(),
@@ -87,7 +87,7 @@ const productSchema = z.object({
   weightGrams: z.number().int().min(1).nullable().optional(),
   downloadLimit: z.number().int().min(1).max(100).optional(),
   downloadExpiryDays: z.number().int().min(1).max(3650).optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
   download: downloadSchema.nullable().optional(),
 });
 
@@ -106,7 +106,7 @@ const checkoutSchema = z.object({
   customerEmail: z.string().email().max(255),
   customerPhone: z.string().max(40).nullable().optional(),
   shippingMethodId: z.string().uuid().nullable().optional(),
-  shippingAddress: z.record(z.string().max(200)).nullable().optional(),
+  shippingAddress: z.record(z.string(), z.string().max(200)).nullable().optional(),
   discountCode: z.string().max(40).nullable().optional(),
   notes: z.string().max(2000).nullable().optional(),
 });
@@ -169,7 +169,7 @@ export async function registerStoreRoutes(app: FastifyInstance, env: Env, overri
   app.patch<{ Params: { id: string } }>('/api/v1/store/products/:id', async (request) => {
     const auth = await authenticate(request, env, pool);
     const { id } = parseOrThrow(idParam, request.params);
-    const patch = parseOrThrow(productSchema.partial().extend({ status: z.enum(['draft', 'active', 'archived']).optional() }), request.body);
+    const patch = parseOrThrow(productSchema.partial().extend({ status: z.enum(['draft', 'active', 'archived'] as const).optional() }), request.body);
     return { product: await updateProduct(pool, auth.userId, id, patch) };
   });
 
@@ -177,7 +177,7 @@ export async function registerStoreRoutes(app: FastifyInstance, env: Env, overri
     const auth = await authenticate(request, env, pool);
     const { id } = parseOrThrow(idParam, request.params);
     const input = parseOrThrow(
-      z.object({ delta: z.number().int().min(-100000).max(100000), reason: z.enum(['restock', 'adjustment']) }),
+      z.object({ delta: z.number().int().min(-100000).max(100000), reason: z.enum(['restock', 'adjustment'] as const) }),
       request.body
     );
     return adjustInventory(pool, auth.userId, id, input.delta, input.reason, auth.userId);
@@ -204,7 +204,7 @@ export async function registerStoreRoutes(app: FastifyInstance, env: Env, overri
       const { id, orderId, itemId } = request.params;
       const input = parseOrThrow(
         z.object({
-          status: z.enum(['processing', 'shipped', 'delivered', 'cancelled']),
+          status: z.enum(['processing', 'shipped', 'delivered', 'cancelled'] as const),
           carrier: z.string().max(80).nullable().optional(),
           trackingNumber: z.string().max(120).nullable().optional(),
           trackingUrl: z.string().url().max(500).nullable().optional(),
@@ -230,7 +230,7 @@ export async function registerStoreRoutes(app: FastifyInstance, env: Env, overri
     const input = parseOrThrow(
       z.object({
         code: z.string().min(3).max(40),
-        kind: z.enum(['percentage', 'fixed']),
+        kind: z.enum(['percentage', 'fixed'] as const),
         value: z.number().positive(),
         minOrderAmount: z.number().min(0).nullable().optional(),
         maxRedemptions: z.number().int().min(1).nullable().optional(),
@@ -361,12 +361,12 @@ export async function registerStoreRoutes(app: FastifyInstance, env: Env, overri
         provider: z.string().min(1).max(40),
         providerReference: z.string().min(1).max(160),
         eventType: z.string().min(1).max(60),
-        status: z.enum(['paid', 'failed', 'refunded', 'pending']),
+        status: z.enum(['paid', 'failed', 'refunded', 'pending'] as const),
         amount: z.string().max(20).nullable().optional(),
         currency: z.string().length(3).nullable().optional(),
         signatureVerified: z.boolean(),
         orderId: z.string().uuid().nullable().optional(),
-        payload: z.record(z.unknown()).optional(),
+        payload: z.record(z.string(), z.unknown()).optional(),
       }),
       request.body
     );

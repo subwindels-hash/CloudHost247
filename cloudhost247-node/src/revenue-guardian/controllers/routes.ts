@@ -90,8 +90,8 @@ const listCasesQuery = z.object({
   assignedStaffId: z.string().uuid().optional(),
   invoiceId: z.string().uuid().optional(),
   search: z.string().max(120).optional(),
-  sortBy: z.enum(['opened_at', 'amount_outstanding', 'next_follow_up_at', 'risk_score', 'days_overdue']).optional(),
-  sortDir: z.enum(['asc', 'desc']).optional(),
+  sortBy: z.enum(['opened_at', 'amount_outstanding', 'next_follow_up_at', 'risk_score', 'days_overdue'] as const).optional(),
+  sortDir: z.enum(['asc', 'desc'] as const).optional(),
 });
 
 const createCaseBody = z.object({
@@ -148,7 +148,7 @@ const createPromiseBody = z.object({
 });
 
 const patchPromiseBody = z.object({
-  action: z.enum(['cancel', 'reconcile', 'reassign']),
+  action: z.enum(['cancel', 'reconcile', 'reassign'] as const),
   reason: z.string().max(2000).optional(),
   assignedStaffId: z.string().uuid().optional(),
 });
@@ -268,7 +268,7 @@ export async function registerRevenueGuardianRoutes(app: FastifyInstance, env: E
         ...pagination,
         paymentStatus: z.string().max(24).optional(),
         orderStatus: z.string().max(24).optional(),
-        customerType: z.enum(['new', 'existing']).optional(),
+        customerType: z.enum(['new', 'existing'] as const).optional(),
         dateFrom: z.string().optional(),
         dateTo: z.string().optional(),
         search: z.string().max(120).optional(),
@@ -435,7 +435,7 @@ export async function registerRevenueGuardianRoutes(app: FastifyInstance, env: E
     const query = parseOrThrow(
       z.object({
         ...pagination,
-        status: z.enum(['pending', 'fulfilled', 'partially_fulfilled', 'broken', 'cancelled', 'due_today', 'overdue']).optional(),
+        status: z.enum(['pending', 'fulfilled', 'partially_fulfilled', 'broken', 'cancelled', 'due_today', 'overdue'] as const).optional(),
         customerId: z.string().uuid().optional(),
         caseId: z.string().uuid().optional(),
         invoiceId: z.string().uuid().optional(),
@@ -661,7 +661,7 @@ export async function registerRevenueGuardianRoutes(app: FastifyInstance, env: E
 
   app.post(`${BASE}/reports/export`, async (request, reply) => {
     const ctx = await requireRgPermission(request, env, pool, 'revenue_guardian.export');
-    const body = parseOrThrow(reportQuery.extend({ format: z.enum(['csv']).default('csv') }), request.body);
+    const body = parseOrThrow(reportQuery.extend({ format: z.enum(['csv'] as const).default('csv') }), request.body);
     if (body.reportType === 'staff_performance' && !ctx.permissions.includes('revenue_guardian.staff_performance')) {
       throw new ForbiddenError('Missing permission: revenue_guardian.staff_performance');
     }
@@ -760,7 +760,7 @@ export async function registerRevenueGuardianRoutes(app: FastifyInstance, env: E
   app.get(`${BASE}/automation/runs`, async (request) => {
     await requireRgPermission(request, env, pool, 'revenue_guardian.automation');
     const query = parseOrThrow(
-      z.object({ ...pagination, jobName: z.string().max(64).optional(), status: z.enum(['running', 'completed', 'failed']).optional() }),
+      z.object({ ...pagination, jobName: z.string().max(64).optional(), status: z.enum(['running', 'completed', 'failed'] as const).optional() }),
       request.query
     );
     return listRuns(pool, query);
@@ -793,7 +793,7 @@ export async function registerRevenueGuardianRoutes(app: FastifyInstance, env: E
         customerId: z.string().uuid().optional(),
         caseId: z.string().uuid().optional(),
         status: z.string().max(32).optional(),
-        channel: z.enum(['email', 'whatsapp']).optional(),
+        channel: z.enum(['email', 'whatsapp'] as const).optional(),
       }),
       request.query
     );
@@ -836,8 +836,8 @@ export async function registerRevenueGuardianRoutes(app: FastifyInstance, env: E
       agingBuckets: z.array(z.number().int().min(1).max(3650)).min(1).max(10).optional(),
       escalationLevels: z.array(z.object({ level: z.number().int().min(1).max(4), overdueDays: z.number().int().min(0).max(3650) })).max(4).optional(),
       schedulerIntervalMinutes: z.number().int().min(5).max(1440).optional(),
-      whatsapp: z.record(z.unknown()).optional(),
-      emailTemplates: z.record(z.object({ subject: z.string().max(255).optional(), text: z.string().max(10000).optional(), enabled: z.boolean().optional() })).optional(),
+      whatsapp: z.record(z.string(), z.unknown()).optional(),
+      emailTemplates: z.record(z.string(), z.object({ subject: z.string().max(255).optional(), text: z.string().max(10000).optional(), enabled: z.boolean().optional() })).optional(),
     })
     .strict();
 

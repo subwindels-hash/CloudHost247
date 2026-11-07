@@ -93,6 +93,13 @@
           ]
         },
         {
+          "type": "plans",
+          "kicker": "Live pricing",
+          "heading": "Public cloud instances on this deployment",
+          "lede": "Read from the product catalogue, so what you see here is what the order form charges.",
+          "productSlug": "public-cloud"
+        },
+        {
           "type": "note",
           "heading": "Region availability is configuration, not a claim",
           "body": "A public cloud instance can only be created where the platform has a provider configured for it. The regions list on this deployment shows what is genuinely available; where it is empty, no region is configured and no instance can be promised."
@@ -136,6 +143,13 @@
             { "icon": "network", "title": "Network under your control", "body": "Addressing, firewall rules and connectivity designed around the application." },
             { "icon": "wrench", "title": "Managed if you want it", "body": "Operate it yourself, or have the CloudHost247 team run the platform layer for you." }
           ]
+        },
+        {
+          "type": "plans",
+          "kicker": "Live pricing",
+          "heading": "Private cloud capacity on this deployment",
+          "lede": "Read from the product catalogue, so what you see here is what the order form charges.",
+          "productSlug": "private-cloud"
         },
         {
           "type": "note",

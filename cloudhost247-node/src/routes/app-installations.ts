@@ -37,7 +37,7 @@ const createInstallationSchema = z.object({
   domain: z.string().max(253).nullable().optional(),
   planId: z.string().uuid().optional(),
   billingPeriod: z.enum(['one_time', 'monthly', 'quarterly', 'semi_annually', 'annually']).optional(),
-  environment: z.record(z.string().max(2000)).optional(),
+  environment: z.record(z.string(), z.string().max(2000)).optional(),
   backupEnabled: z.boolean().optional(),
 });
 
