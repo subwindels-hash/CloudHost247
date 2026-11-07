@@ -129,8 +129,22 @@ is idempotent. `.gitignore` excludes the `image-search/` acquisition previews.
 | `npm run evidence:layout` | 1920/1600/1440/1280/1024/834/390 px — **0.0 px overlap** at every width |
 | `node scripts/check-redesign-motion.mjs` (new, real Chromium) | **34/34 passed**: tilt sets/resets `--tilt-x/y`, parallax sets `--parallax-y`, reveals fire, route transition restarts on navigation, no page errors, no horizontal overflow and readable h1 / visible controls at 1920/1440/1280/1024/834/768/390/360 px, reduced-motion disables tilt |
 
+`scripts/release-candidate-check.sh` was run locally with the repository's PHP-WASM shim. It found
+one real defect: the palette sweep had touched two vendor-derived files pinned by the integrity
+baseline. Both were restored to their pinned bytes, after which
+`sha256sum --check --strict`, `tests/security` (**77 tests, OK**) and the website suite (**203
+tests, OK**) all pass. The full 11-minute gate was not re-run end to end after that fix, but every
+other step of it had already passed on the same tree.
+
 Full 166-file Vitest suite was **not** re-run (it historically times out in this sandbox); the
 targeted suites above are the verification basis.
+
+**Pre-existing CI status:** PR #91's two `Release candidate (PHP 7.4 / 8.2)` checks were already
+red on commit `16e8324` (before any redesign work), while the two Node build/typecheck/test checks
+and the content-hygiene check were green. The vendor baseline was verified to match at that commit,
+so those failures are not explained by the redesign; the CI job logs are hosted outside this
+sandbox's allowed network and could not be read. The merge was performed on the user's explicit
+request with that status visible.
 
 ## 5. Screenshots of actually rendered pages
 
@@ -149,10 +163,14 @@ fixtures, not through a live WHMCS installation or a WHMCS browser screenshot.**
    unverified; upscaled previews are staging assets. See `docs/PHOTOGRAPHY-LICENSES.md`.
 2. **No licensed WHMCS / cPanel staging.** Cart, checkout, client-area, provisioning and module
    behaviour cannot be exercised end to end. Fixture rendering proves template output only.
-3. **Frozen legacy surfaces still carry the old green.** Per the Accepted ADR, `platform/` is
-   frozen/read-only; its manifests, favicon and two stylesheets still use `#16704b`, and
-   `templates/cloudhost247_legacy/` (an inactive legacy theme) retains its own green scheme. The
-   canonical Node frontend and the active WHMCS `cloudhost247` theme are green-free.
+3. **Frozen / vendor-locked surfaces still carry the old green.** Per the Accepted ADR, `platform/`
+   is frozen/read-only; its manifests, favicon and two stylesheets still use `#16704b`.
+   `templates/cloudhost247_legacy/css/custom.css` and
+   `modules/addons/xtreme_currency_rates/css/style.css` are vendor-derived files pinned byte-for-byte
+   by `docs/independent-rebuild/original-file-manifest.sha256`; the release gate fails on any edit,
+   so they were deliberately restored and are not part of the active site. The inactive legacy theme
+   retains its own green scheme. The canonical Node frontend and the active WHMCS `cloudhost247`
+   theme are green-free — a hue-based gate (`MetallicPaletteTests`) enforces this.
 4. **Browser coverage.** Motion, overflow and layout were verified in headless Chromium only; no
    Safari, Firefox, real-device, screen-reader or automated axe/WCAG-AA audit was run. Contrast was
    computed by hand for the ink tokens (gold ink 8.6:1, silver ink 7.7:1 on white).
