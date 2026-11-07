@@ -1475,3 +1475,156 @@
   .hg-theme .hg-header .hg-bar__top .hg-bar__locale .ch247-locale__trigger svg { display: none; }
   .hg-theme .hg-bar__top .hg-btn--sm { min-height: 28px; padding: 0 9px; font-size: 0.68rem; }
 }
+
+/* -----------------------------------------------------------------------------
+   10. Section dropdown arrows + sub-link directory on the top menu
+   -----------------------------------------------------------------------------
+   The seven section labels stay direct, always-visible links beside the logo. Each gets its own
+   caret button that opens a single, full-width directory under the header with that section's
+   real registry sub-links. Since the panel is absolutely positioned against the sticky header,
+   opening it never changes the bar's height or pushes the page around.
+   -------------------------------------------------------------------------- */
+
+/* Also hardens the utility line: all six controls are direct flex items of one nowrap row, and
+   no group or control is allowed to wrap Sign In onto a second line at any width or zoom. */
+.hg-bar__top > * { flex: 0 0 auto; flex-wrap: nowrap; white-space: nowrap; }
+.hg-bar__top a,
+.hg-bar__top button { white-space: nowrap; }
+
+.hg-menu__root { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; }
+.hg-menu__root .hg-menu { flex: 1 1 auto; min-width: 0; }
+.hg-menu__item { display: inline-flex; align-items: center; }
+
+.hg-menu__caret {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 44px;
+  margin-left: -5px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #f4f5f6;
+  cursor: pointer;
+}
+.hg-menu__caret:hover,
+.hg-menu__caret:focus-visible,
+.hg-menu__caret[aria-expanded='true'] { color: #e6c875; }
+.hg-theme .hg-menu__caret:focus-visible { outline: 2px solid #e6c875; outline-offset: -2px; }
+.hg-menu__caret svg { transition: transform 0.16s ease; }
+.hg-menu__caret[aria-expanded='true'] svg { transform: rotate(180deg); }
+
+.hg-menu__panel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 160;
+  background: #12151a;
+  border-top: 1px solid #34383d;
+  border-bottom: 2px solid #d4af37;
+  box-shadow: 0 20px 44px rgba(0, 0, 0, 0.5);
+}
+.hg-menu__panel[hidden] { display: none !important; }
+.hg-menu__panel-inner {
+  width: min(1440px, calc(100% - 32px));
+  margin-inline: auto;
+  padding: 16px 0 20px;
+}
+.hg-menu__panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #2a2e33;
+}
+.hg-menu__eyebrow {
+  margin: 0 0 4px;
+  color: #e6c875;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.hg-menu__blurb { margin: 0; max-width: 72ch; color: #aeb6be; font-size: 0.8rem; line-height: 1.5; }
+.hg-menu__panel-actions { display: flex; align-items: center; gap: 12px; flex: 0 0 auto; }
+.hg-menu__panel-all { color: #e6c875; font-size: 0.8rem; font-weight: 700; text-decoration: none; white-space: nowrap; }
+.hg-menu__panel-all:hover { text-decoration: underline; }
+.hg-menu__panel-close {
+  padding: 6px 10px;
+  border: 1px solid #4a5057;
+  border-radius: 4px;
+  background: transparent;
+  color: #d7dce1;
+  font: inherit;
+  font-size: 0.74rem;
+  cursor: pointer;
+}
+.hg-menu__panel-close:hover { border-color: #e6c875; color: #e6c875; }
+
+.hg-menu__groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 16px 26px;
+  max-height: min(58vh, 460px);
+  overflow-y: auto;
+  padding: 16px 0 4px;
+}
+.hg-menu__group h3 {
+  margin: 0 0 8px;
+  color: #e6c875;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.hg-menu__group ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.hg-menu__sublink {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  min-height: 32px;
+  padding: 5px 8px;
+  border-radius: 4px;
+  color: #d7dce1;
+  font-size: 0.8rem;
+  text-decoration: none;
+}
+.hg-menu__sublink:hover,
+.hg-menu__sublink:focus-visible,
+.hg-menu__sublink.active { background: #232830; color: #fff; }
+.hg-menu__badge {
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: rgba(212, 175, 55, 0.16);
+  color: #e6c875;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+.hg-menu__featured {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 10px 14px;
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  border-radius: 6px;
+  background: rgba(212, 175, 55, 0.08);
+  color: #f4f5f6;
+  font-size: 0.8rem;
+  text-decoration: none;
+}
+.hg-menu__featured span { color: #e6c875; }
+.hg-menu__featured:hover { background: rgba(212, 175, 55, 0.16); }
+
+@media (max-width: 767px) {
+  .hg-menu__caret { height: 40px; width: 20px; }
+  .hg-menu__panel-head { flex-direction: column; gap: 10px; }
+  .hg-menu__groups { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); max-height: 52vh; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hg-menu__caret svg { transition: none !important; }
+}

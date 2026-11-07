@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-11-07T18:11:59.121Z",
+  "capturedAt": "2026-11-07T18:28:28.917Z",
   "baseUrl": "http://127.0.0.1:3000",
   "browser": "Chromium (npm @sparticuz/chromium) via playwright-core",
   "screenshots": [
@@ -32,7 +32,7 @@
       "bodyTextLength": 8484,
       "links": 150,
       "images": 3,
-      "scrollHeight": 11306,
+      "scrollHeight": 11350,
       "hasAppShell": true,
       "consoleErrors": [],
       "failedRequests": []
@@ -49,7 +49,7 @@
       "bodyTextLength": 8484,
       "links": 150,
       "images": 3,
-      "scrollHeight": 13668,
+      "scrollHeight": 13712,
       "hasAppShell": true,
       "consoleErrors": [],
       "failedRequests": []
@@ -83,7 +83,7 @@
       "bodyTextLength": 4382,
       "links": 135,
       "images": 3,
-      "scrollHeight": 5028,
+      "scrollHeight": 5072,
       "hasAppShell": true,
       "consoleErrors": [],
       "failedRequests": []
@@ -100,7 +100,7 @@
       "bodyTextLength": 4382,
       "links": 135,
       "images": 3,
-      "scrollHeight": 5928,
+      "scrollHeight": 5972,
       "hasAppShell": true,
       "consoleErrors": [],
       "failedRequests": []
@@ -134,7 +134,7 @@
       "bodyTextLength": 6420,
       "links": 149,
       "images": 3,
-      "scrollHeight": 7629,
+      "scrollHeight": 7673,
       "hasAppShell": true,
       "consoleErrors": [],
       "failedRequests": []
@@ -151,7 +151,7 @@
       "bodyTextLength": 6420,
       "links": 149,
       "images": 3,
-      "scrollHeight": 10643,
+      "scrollHeight": 10687,
       "hasAppShell": true,
       "consoleErrors": [],
       "failedRequests": []
@@ -185,7 +185,7 @@
       "bodyTextLength": 4226,
       "links": 137,
       "images": 2,
-      "scrollHeight": 4473,
+      "scrollHeight": 4517,
       "hasAppShell": true,
       "consoleErrors": [],
       "failedRequests": []
@@ -202,7 +202,7 @@
       "bodyTextLength": 4226,
       "links": 137,
       "images": 2,
-      "scrollHeight": 5526,
+      "scrollHeight": 5570,
       "hasAppShell": true,
       "consoleErrors": [],
       "failedRequests": []
@@ -236,7 +236,7 @@
       "bodyTextLength": 11946,
       "links": 280,
       "images": 2,
-      "scrollHeight": 14533,
+      "scrollHeight": 14577,
       "hasAppShell": true,
       "consoleErrors": [],
       "failedRequests": []
@@ -253,7 +253,7 @@
       "bodyTextLength": 11946,
       "links": 280,
       "images": 2,
-      "scrollHeight": 26072,
+      "scrollHeight": 26116,
       "hasAppShell": true,
       "consoleErrors": [],
       "failedRequests": []
@@ -287,7 +287,7 @@
       "bodyTextLength": 5933,
       "links": 144,
       "images": 3,
-      "scrollHeight": 6742,
+      "scrollHeight": 6786,
       "hasAppShell": true,
       "consoleErrors": [],
       "failedRequests": []
@@ -304,7 +304,7 @@
       "bodyTextLength": 5933,
       "links": 144,
       "images": 3,
-      "scrollHeight": 9519,
+      "scrollHeight": 9563,
       "hasAppShell": true,
       "consoleErrors": [],
       "failedRequests": []

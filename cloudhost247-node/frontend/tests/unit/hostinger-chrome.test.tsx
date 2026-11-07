@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import Header from '../../src/layout/Header';
@@ -7,11 +7,11 @@ import Footer from '../../src/layout/Footer';
 import { FOOTER_COLUMNS, NAV_SECTIONS } from '../../src/navigation/registry.generated';
 
 /**
- * The header was flattened: every registry section is a direct, always-visible link beside the
- * logo, with no trigger buttons, no aria-expanded disclosures, no mega panel, no compact
- * dropdown, no hamburger and no `+` accordion. These tests pin that contract plus the
- * professional four-column dark footer. All content is asserted against the generated registry,
- * so a menu that drifts from the sitemap fails here rather than in production.
+ * The header keeps all seven registry sections visible as direct links beside the logo, and each
+ * now has its own dropdown arrow that opens a directory of that section's real registry
+ * sub-links. Nothing hides behind a hamburger, a `+` accordion or a legacy mega panel. All
+ * content is asserted against the generated registry, so a menu that drifts from the sitemap
+ * fails here rather than in production.
  */
 
 beforeEach(() => {
@@ -34,7 +34,7 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe('Flat single-row menu with no dropdowns', () => {
+describe('Top menu with per-section dropdown arrows', () => {
   it('renders every registry section as a direct link in the bar', () => {
     const { container } = render(<MemoryRouter><Header /></MemoryRouter>);
     expect(container.querySelector('.hg-header .hg-nav__bar')).toBeTruthy();
@@ -45,22 +45,62 @@ describe('Flat single-row menu with no dropdowns', () => {
       expect(link.textContent?.trim()).toBe(NAV_SECTIONS[index].label);
       expect(link.getAttribute('href')).toBe(NAV_SECTIONS[index].to);
       expect(link.tagName).toBe('A');
+      expect(link.hasAttribute('hidden')).toBe(false);
     });
 
-    // Nothing is hidden behind a disclosure any more.
+    // No legacy collapsed chrome came back with the arrows.
     expect(container.querySelectorAll('.hg-nav__trigger')).toHaveLength(0);
     expect(container.querySelectorAll('.hg-mega')).toHaveLength(0);
     expect(container.querySelectorAll('.hg-drawer__toggle')).toHaveLength(0);
     expect(container.querySelectorAll('.hg-nav__toggle')).toHaveLength(0);
-    expect(container.querySelectorAll('[aria-expanded]')).toHaveLength(2); // the two locale settings only
   });
 
-  it('keeps the settings and account controls inline in the menu area', () => {
+  it('puts a labelled, collapsed dropdown arrow beside every section link', () => {
+    const { container } = render(<MemoryRouter><Header /></MemoryRouter>);
+    const carets = [...container.querySelectorAll<HTMLButtonElement>('.hg-menu__caret')];
+    expect(carets).toHaveLength(NAV_SECTIONS.length);
+    carets.forEach((caret, index) => {
+      expect(caret.getAttribute('aria-label')).toBe(`${NAV_SECTIONS[index].label} sub-links`);
+      expect(caret.getAttribute('aria-expanded')).toBe('false');
+      expect(caret.getAttribute('aria-controls')).toBe('ch247-menu-panel');
+      expect(caret.previousElementSibling?.textContent?.trim()).toBe(NAV_SECTIONS[index].label);
+    });
+
+    const panel = container.querySelector<HTMLElement>('#ch247-menu-panel');
+    expect(panel).toBeTruthy();
+    expect(panel?.hasAttribute('hidden')).toBe(true);
+    // Seven arrows plus the two always-inline language/currency settings disclosures.
+    expect(container.querySelectorAll('[aria-expanded]')).toHaveLength(NAV_SECTIONS.length + 2);
+  });
+
+  it('opens the matching registry sub-links on the top menu and closes on Escape', () => {
+    const { container } = render(<MemoryRouter><Header /></MemoryRouter>);
+    const carets = [...container.querySelectorAll<HTMLButtonElement>('.hg-menu__caret')];
+    const panel = container.querySelector<HTMLElement>('#ch247-menu-panel')!;
+
+    fireEvent.click(carets[0]);
+    expect(panel.hasAttribute('hidden')).toBe(false);
+    expect(panel.getAttribute('aria-label')).toBe('Hosting sub-links');
+    expect(carets[0].getAttribute('aria-expanded')).toBe('true');
+    expect(carets.slice(1).every((c) => c.getAttribute('aria-expanded') === 'false')).toBe(true);
+
+    const expected = NAV_SECTIONS[0].groups.flatMap((group) => group.links.map((link) => link.to));
+    const rendered = [...panel.querySelectorAll<HTMLAnchorElement>('.hg-menu__sublink')]
+      .map((a) => a.getAttribute('href'));
+    expect(rendered.length).toBe(expected.length);
+    expect(rendered).toEqual(expected);
+    expect(panel.querySelectorAll('.hg-menu__group').length).toBe(NAV_SECTIONS[0].groups.length);
+
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(panel.hasAttribute('hidden')).toBe(true);
+    expect(carets[0].getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('keeps the settings and account controls inline on the utility line', () => {
     const { container } = render(<MemoryRouter><Header /></MemoryRouter>);
     const primary = container.querySelector<HTMLElement>('#ch247-primary-nav')!;
     expect(primary).toBeTruthy();
 
-    // Settings live in the bar, not the footer (also pinned by Header.test.tsx).
     expect(within(primary).getByRole('button', { name: 'Language: English' })).toBeTruthy();
     expect(within(primary).getByRole('button', { name: /^Display currency: USD/ })).toBeTruthy();
     expect(within(primary).getByRole('link', { name: 'Sign In' })).toBeTruthy();
@@ -69,10 +109,16 @@ describe('Flat single-row menu with no dropdowns', () => {
     expect(within(primary).getByRole('link', { name: 'Help' })).toBeTruthy();
     expect(within(primary).getByRole('link', { name: 'Cart' })).toBeTruthy();
 
-    // Every section link is visible in the DOM — no panel is collapsed or hidden.
-    const links = [...primary.querySelectorAll('.hg-menu__link')];
-    expect(links.length).toBe(NAV_SECTIONS.length);
-    links.forEach((link) => expect(link.hasAttribute('hidden')).toBe(false));
+    // All six controls are children of one single, non-wrapping line beside the announcement.
+    const line = container.querySelector<HTMLElement>('.hg-bar__top')!;
+    expect(line).toBeTruthy();
+    const controls = [
+      ...line.querySelectorAll('.hg-bar__quick a'),
+      ...line.querySelectorAll('.hg-bar__locale button'),
+      ...line.querySelectorAll('.hg-bar__actions a, .hg-bar__actions button'),
+    ];
+    expect(controls).toHaveLength(6);
+    controls.forEach((control) => expect(control.hasAttribute('hidden')).toBe(false));
   });
 });
 

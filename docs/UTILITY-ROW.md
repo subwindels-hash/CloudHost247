@@ -1,3 +1,7 @@
+> **Follow-up.** The main bar now has a dropdown arrow beside each of the seven section
+> links, with registry sub-links in a panel under the top menu. The utility line itself is
+> unchanged — see `docs/SECTION-DROPDOWNS.md`.
+
 # Utility line under the announcement bar
 
 > **Request:** move `Pricing`, `Help`, `English▾`, `USD▾`, `Sign In`, `Create Account` onto one

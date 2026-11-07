@@ -96,8 +96,8 @@ async function main() {
     }
 
     if (viewport.name === 'desktop') {
-      // The menu is now flat: there is no dropdown to open. Capture the whole menu area with all
-      // links visible beside the logo, after scrolling back to the top (the 3D shot scrolls down).
+      // Capture the whole menu area with all links and their arrows beside the logo, after
+      // scrolling back to the top (the 3D shot scrolls down).
       await page.evaluate(() => window.scrollTo(0, 0));
       await page.waitForTimeout(200);
       await page.screenshot({
@@ -106,7 +106,20 @@ async function main() {
       });
       report.shots.push('menu-flat-desktop.png');
       report.flatMenuLinks = await page.locator('.hg-menu__link').count();
-      report.dropdownTriggers = await page.locator('.hg-nav__trigger, .hg-mega, .hg-nav__toggle').count();
+      report.dropdownCarets = await page.locator('.hg-menu__caret').count();
+      report.legacyDropdownTriggers = await page.locator('.hg-nav__trigger, .hg-mega, .hg-nav__toggle').count();
+
+      // Open the first arrow to show that the sub-links live on the top menu. Use an evaluated
+      // click so no pointer hover can interfere with the deterministic state.
+      await page.locator('.hg-menu__caret').first().evaluate((el) => el.click());
+      await page.waitForTimeout(200);
+      await page.screenshot({
+        path: path.join(OUT_DIR, 'menu-open-desktop.png'),
+        clip: { x: 0, y: 0, width: viewport.width, height: 620 },
+      });
+      report.shots.push('menu-open-desktop.png');
+      report.openSubLinks = await page.locator('.hg-menu__panel .hg-menu__sublink').count();
+      await page.keyboard.press('Escape');
     }
     await page.close();
   }
@@ -114,7 +127,7 @@ async function main() {
   await browser.close();
   writeFileSync(path.join(OUT_DIR, 'chrome-report.json'), `${JSON.stringify(report, null, 2)}\n`);
   console.log(`captured ${report.shots.length} chrome views → ${OUT_DIR}`);
-  console.log(JSON.stringify({ desktop: report['footer-desktop'], mobile: report['footer-mobile'], flatMenuLinks: report.flatMenuLinks, dropdownTriggers: report.dropdownTriggers }));
+  console.log(JSON.stringify({ desktop: report['footer-desktop'], mobile: report['footer-mobile'], flatMenuLinks: report.flatMenuLinks, dropdownCarets: report.dropdownCarets, openSubLinks: report.openSubLinks }));
 }
 
 main().catch((error) => { console.error(error); process.exitCode = 2; });

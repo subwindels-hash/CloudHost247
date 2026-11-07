@@ -1,14 +1,15 @@
 /**
- * Real-Chromium acceptance check for the flat, dropdown-free menu / professional footer chrome.
+ * Real-Chromium acceptance check for the top menu (direct links + dropdown arrows),
+ * the straight utility line and the professional footer chrome.
  *
  *   BASE_URL=http://127.0.0.1:3000 node scripts/check-chrome-benchmark.mjs
  *
  * CSS review alone cannot prove that every registry section is a visible, directly clickable
- * link beside the logo, that no disclosure/hamburger is hiding anything, or that a wrapped bar
- * does not overlap or overflow at narrow widths. Every assertion below reads a computed style,
- * an attribute or a bounding box from a real page at desktop, laptop, tablet and phone widths.
+ * link beside the logo, that each arrow opens real registry sub-links, that Sign In and the other
+ * utility controls stay on one line, or that a wrapped bar does not overlap or overflow. Every
+ * assertion below reads a computed style, an attribute or a bounding box from a real page.
  */
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -16,6 +17,20 @@ import { chromium } from 'playwright-core';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const BASE_URL = process.env.BASE_URL ?? 'http://127.0.0.1:3000';
+
+/** Every real SPA destination in the shared registry, used to reject invented sub-links. */
+const REGISTRY_PATHS = new Set();
+{
+  const registry = JSON.parse(readFileSync(path.join(HERE, '..', '..', 'shared', 'site', 'registry.json'), 'utf8'));
+  const visit = (value) => {
+    if (Array.isArray(value)) value.forEach(visit);
+    else if (value && typeof value === 'object') {
+      if (typeof value.href === 'object' && typeof value.href.spa === 'string') REGISTRY_PATHS.add(value.href.spa);
+      Object.values(value).forEach(visit);
+    }
+  };
+  visit(registry);
+}
 
 async function launch() {
   const pkg = await import('@sparticuz/chromium');
@@ -91,6 +106,9 @@ const BAR_PROBE = () => {
     dropdownTriggers: document.querySelectorAll('.hg-nav__trigger, .hg-mega, .hg-drawer__toggle, .hg-nav__toggle').length,
     plusAccordions: document.querySelectorAll('.hg-drawer__toggle').length,
     hiddenPanels: document.querySelectorAll('.hg-mega[hidden], .hg-nav__collapsible:not(.is-open)').length,
+    carets: document.querySelectorAll('.hg-menu__caret').length,
+    panels: document.querySelectorAll('.hg-menu__panel').length,
+    panelHidden: document.querySelector('.hg-menu__panel')?.hasAttribute('hidden') ?? false,
     settings: {
       english: [...(primary?.querySelectorAll('button') ?? [])].some((b) => /Language:/.test(b.getAttribute('aria-label') ?? '') && visible(b)),
       usd: [...(primary?.querySelectorAll('button') ?? [])].some((b) => /Display currency:/.test(b.getAttribute('aria-label') ?? '') && visible(b)),
@@ -149,9 +167,12 @@ async function main() {
   check('every section is a direct link, not a trigger',
     bar.links.length >= 7 && bar.links.every((l) => l.tag === 'A' && l.href.startsWith('/') && !l.hasCaret && !l.expanded),
     `${bar.links.length} links: ${bar.links.map((l) => l.label).join(', ')}`);
-  check('no dropdowns, carets, hamburger or + accordions remain',
+  check('no legacy hamburger, drawer, mega panel or + accordion returns',
     bar.dropdownTriggers === 0 && bar.plusAccordions === 0 && bar.hiddenPanels === 0,
-    `${bar.dropdownTriggers} disclosure remnants`);
+    `${bar.dropdownTriggers} legacy remnants`);
+  check('each section has its own dropdown arrow beside its direct link',
+    bar.carets === bar.links.length && bar.panels === 1 && bar.panelHidden,
+    `${bar.carets} carets, ${bar.panels} closed panel`);
   const settings = bar.settings;
   check('English, USD, Sign In and Create Account are all shown in the bar',
     settings.english && settings.usd && settings.signIn && settings.createAccount,
@@ -172,6 +193,53 @@ async function main() {
   check('Create Account button is compact enough for the line',
     row.ctaHeight > 0 && row.ctaHeight <= 34 && row.ctaHeight <= (row.row?.height ?? 0),
     `${row.ctaHeight}px tall`);
+
+  // ---- Dropdown arrows: each one opens that section's real registry sub-links ----
+  const caretInfo = await page.evaluate(() => [...document.querySelectorAll('.hg-menu__caret')].map((c) => ({
+    label: c.getAttribute('aria-label'),
+    expanded: c.getAttribute('aria-expanded'),
+    controls: c.getAttribute('aria-controls'),
+    sibling: c.previousElementSibling?.textContent?.trim() ?? '',
+  })));
+  check('all seven arrows are labelled, collapsed and wired to the panel',
+    caretInfo.length === 7 && caretInfo.every((c) => c.expanded === 'false'
+      && c.controls === 'ch247-menu-panel' && c.label === `${c.sibling} sub-links`),
+    caretInfo.map((c) => c.sibling).join(', '));
+
+  for (let index = 0; index < caretInfo.length; index += 1) {
+    // A real mouse click would hover the caret first; this component is click-only, so use an
+    // evaluated click to avoid any pointer-driven state churn.
+    await page.locator('.hg-menu__caret').nth(index).evaluate((el) => el.click());
+    const sub = await page.evaluate(() => {
+      const panel = document.querySelector('.hg-menu__panel');
+      const barBottom = document.querySelector('.hg-nav__bar').getBoundingClientRect().bottom;
+      const links = [...panel.querySelectorAll('.hg-menu__sublink')];
+      return {
+        hidden: panel.hasAttribute('hidden'),
+        label: panel.getAttribute('aria-label'),
+        count: links.length,
+        hrefs: links.map((a) => a.getAttribute('href')),
+        groups: panel.querySelectorAll('.hg-menu__group').length,
+        expanded: document.querySelectorAll('.hg-menu__caret[aria-expanded="true"]').length,
+        belowBar: Math.round(panel.getBoundingClientRect().top) >= Math.round(barBottom) - 2,
+      };
+    });
+    const registryHits = sub.hrefs.filter((h) => REGISTRY_PATHS.has(h)).length;
+    check(`${caretInfo[index].sibling} dropdown shows its sub-links on the top menu`,
+      !sub.hidden && sub.count > 0 && sub.groups > 0 && sub.expanded === 1 && sub.belowBar
+        && registryHits === sub.count
+        && sub.hrefs.every((h) => h && h.startsWith('/') && !h.includes('#')),
+      `${sub.count} registry sub-links in ${sub.groups} groups (${registryHits} verified routes)`);
+  }
+  await page.keyboard.press('Escape');
+  const escaped = await page.evaluate(() => ({
+    hidden: document.querySelector('.hg-menu__panel').hasAttribute('hidden'),
+    focused: document.activeElement?.getAttribute('aria-label') ?? '',
+    expanded: document.querySelectorAll('.hg-menu__caret[aria-expanded="true"]').length,
+  }));
+  check('Escape closes the dropdown and restores focus to its arrow',
+    escaped.hidden && escaped.expanded === 0 && /sub-links$/.test(escaped.focused),
+    `focus=${escaped.focused}`);
 
   const footer = await page.evaluate(() => {
     const el = document.querySelector('footer.hg-footer');
@@ -220,19 +288,17 @@ async function main() {
     check(`all ${r.links.length} section links stay visible at ${width}px`,
       r.visibleLinks >= 7 && r.dropdownTriggers === 0 && r.overlap === 0 && !r.overflow,
       `${r.visibleLinks} visible, ${r.overlap}px overlap, overflow=${r.overflow}`);
-    if (width === 1440 || width === 390) {
-      const u = await p.evaluate(UTILITY_ROW_PROBE);
-      check(`utility line stays one straight row at ${width}px`,
-        u.count === 6 && u.wrap === 'nowrap' && u.inside && !u.overflow
-          && Math.max(...u.centers) - Math.min(...u.centers) <= 3,
-        `${u.count} controls, ${Math.round(u.row?.height ?? 0)}px row, CTA ${u.ctaHeight}px`);
-    }
+    const u = await p.evaluate(UTILITY_ROW_PROBE);
+    check(`Sign In and the other utility controls stay on one straight line at ${width}px`,
+      u.count === 6 && u.wrap === 'nowrap' && u.inside && !u.overflow
+        && Math.max(...u.centers) - Math.min(...u.centers) <= 3,
+      `${u.count} controls, centres ${u.centers.join('/')}, CTA ${u.ctaHeight}px`);
     await p.close();
   }
 
   await browser.close();
   const failed = results.filter((r) => !r.ok);
-  console.log(`\n${results.length - failed.length}/${results.length} flat menu/footer checks passed`);
+  console.log(`\n${results.length - failed.length}/${results.length} header/footer checks passed`);
   if (failed.length) process.exit(1);
 }
 

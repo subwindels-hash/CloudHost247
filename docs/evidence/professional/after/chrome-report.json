@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-11-07T18:11:51.886Z",
+  "capturedAt": "2026-11-07T18:28:21.265Z",
   "baseUrl": "http://127.0.0.1:3000",
   "shots": [
     "header-desktop.png",
@@ -7,6 +7,7 @@
     "footer-desktop.png",
     "experience-3d-desktop.png",
     "menu-flat-desktop.png",
+    "menu-open-desktop.png",
     "header-tablet.png",
     "utility-row-tablet.png",
     "footer-tablet.png",
@@ -20,7 +21,9 @@
     "columns": 5
   },
   "flatMenuLinks": 7,
-  "dropdownTriggers": 0,
+  "dropdownCarets": 7,
+  "legacyDropdownTriggers": 0,
+  "openSubLinks": 21,
   "footer-tablet": {
     "height": 1846,
     "links": 102,
