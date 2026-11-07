@@ -43,7 +43,8 @@
     "evidence:screenshots": "node scripts/capture-rendered-pages.mjs",
     "evidence:layout": "node scripts/check-header-layout.mjs",
     "evidence:chrome": "node scripts/capture-chrome-benchmark.mjs",
-    "check:chrome": "node scripts/check-chrome-benchmark.mjs"
+    "check:chrome": "node scripts/check-chrome-benchmark.mjs",
+    "check:3d": "node scripts/check-3d-experience.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-cloudwatch": "3.1144.0",

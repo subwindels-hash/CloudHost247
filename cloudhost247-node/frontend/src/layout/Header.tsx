@@ -11,14 +11,14 @@ import { UTILITY } from '../navigation/registry.generated';
 import { useAuthState } from './useAuthState';
 
 /**
- * The universal CloudHost247 header — GoDaddy-style dark two-tier menu.
+ * The universal CloudHost247 header — professional light two-tier menu.
  *
- * Structure: a slim dark utility strip (with cart) · brand (white mark) · dropdown navigation ·
+ * Structure: a slim light utility strip (with cart) · brand (dark mark) · dropdown navigation ·
  * utility (language, currency, search) · Sign In / Create Account (or the account controls once
  * signed in) · mobile drawer. The mega menus come from the shared registry, so this header, the
  * drawer, the footer and the sitemap cannot disagree about what exists.
  *
- * Only the chrome's appearance is benchmarked here: no link is invented (every utility destination
+ * Only the chrome's appearance changes here: no link is invented (every utility destination
  * already exists in the registry), and the signed-in subnav and mobile drawer keep their behaviour.
  *
  * Signed-in state adds a second, quieter row for account areas (services, domains, billing,
@@ -84,11 +84,11 @@ export default function Header() {
 
   return (
     <header className="ch247-header hg-header" id="ch247-top" ref={headerRef}>
-      {/* GoDaddy's slim utility strip above the product bar. Hidden below 768px by the chrome CSS. */}
+      {/* Slim utility strip above the product bar. Hidden below 768px by the chrome CSS. */}
       <div className="hg-utility">
         <div className="hg-utility__inner">
           <nav className="hg-utility__left" aria-label="Quick links">
-            <NavLink to="/pricing" onClick={closeMenu}>Deals &amp; pricing</NavLink>
+            <NavLink to="/pricing" onClick={closeMenu}>Pricing</NavLink>
             <NavLink to="/sitemap" onClick={closeMenu}>All products</NavLink>
             <NavLink to="/status" onClick={closeMenu}>Platform status</NavLink>
           </nav>
@@ -101,7 +101,7 @@ export default function Header() {
       </div>
 
       <div className="hg-nav__bar">
-        <Brand className="hg-nav__brand hg-nav__brand--on-dark" />
+        <Brand className="hg-nav__brand" />
 
         <button
           type="button"

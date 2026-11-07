@@ -1,47 +1,58 @@
 import { Link } from 'react-router-dom';
 import { Brand } from '../components/navigation/PlatformMegaMenu';
-import { Icon } from '../components/ui/Icon';
 import { useLocale } from '../i18n/LocaleProvider';
 import { FOOTER_COLUMNS, BRAND, UTILITY } from '../navigation/registry.generated';
 
 /**
- * CloudHost247 footer — Amazon-style directory.
+ * CloudHost247 footer — professional corporate directory.
  *
- * The reference is the *anatomy*, not the brand: a full-width "Back to top" strip, a deep dark
- * directory of four dense topic columns with white headings and muted small links, a divided
- * brand + locale row, and a darker legal/copyright band. Amazon's own marks, copy and commerce
- * links are not reproduced; every destination here still comes from FOOTER_COLUMNS in the shared
- * registry, so the footer, menus and sitemap cannot disagree about what exists.
+ * The footer is arranged as a brand/intro row, four evenly-balanced topic columns, then a compact
+ * legal bar. Each of the eight registry columns is placed under a labelled sub-group inside one of
+ * those four columns, so a visitor can scan "Hosting", "Domains", "Tools", "Legal" … without a
+ * single undifferentiated wall of links.
  *
- * The eight registry columns are merged into four topics and de-duplicated by destination. No
- * link is dropped — the footer is the one place every registry destination stays reachable.
- * Language/currency switchers deliberately remain in the header only (pinned by Header.test.tsx);
- * the pills below are a read-out of the current locale/currency, not a second set of controls.
+ * *Every* registry destination is still rendered (de-duplicated within each column), so the
+ * footer, menus and sitemap cannot disagree about what exists. Language/currency switchers stay
+ * in the header only (`Header.test.tsx`); the locale line below is a plain read-out. "Back to top"
+ * is an inline link in the legal bar rather than a full-width retail band.
  */
 
-const FOOTER_GROUPS: Array<{ title: string; sources: string[] }> = [
-  { title: 'Hosting, Cloud & Servers', sources: ['Products', 'Cloud & Servers'] },
-  { title: 'Domains & Developers', sources: ['Domains', 'Developers'] },
-  { title: 'Tools & Resources', sources: ['Tools', 'Resources'] },
-  { title: 'Company & Legal', sources: ['Company', 'Legal'] },
+interface FooterSection {
+  title: string;
+  source: string;
+}
+
+const FOOTER_GROUPS: Array<{ title: string; sections: FooterSection[] }> = [
+  {
+    title: 'Products & Domains',
+    sections: [{ title: 'Hosting', source: 'Products' }, { title: 'Domains', source: 'Domains' }],
+  },
+  {
+    title: 'Cloud & Resources',
+    sections: [{ title: 'Infrastructure', source: 'Cloud & Servers' }, { title: 'Resources', source: 'Resources' }],
+  },
+  {
+    title: 'Developers & Tools',
+    sections: [{ title: 'Developers', source: 'Developers' }, { title: 'Tools', source: 'Tools' }],
+  },
+  {
+    title: 'Company & Legal',
+    sections: [{ title: 'Company', source: 'Company' }, { title: 'Legal', source: 'Legal' }],
+  },
 ];
 
-/** Merges registry columns into one curated column, keeping each destination once. */
-function linksFor(sources: string[]): Array<{ label: string; to: string }> {
+/** Resolves a column's sub-groups from the registry, de-duplicating destinations within it. */
+function columnSections(sections: FooterSection[]) {
   const seen = new Set<string>();
-  const links: Array<{ label: string; to: string }> = [];
-  for (const source of sources) {
-    const column = FOOTER_COLUMNS.find((entry) => entry.title === source);
-    if (!column) continue;
-    for (const link of column.links) {
-      if (seen.has(link.to)) continue;
+  return sections.map((section) => {
+    const column = FOOTER_COLUMNS.find((entry) => entry.title === section.source);
+    const links = (column?.links ?? []).filter((link) => {
+      if (seen.has(link.to)) return false;
       seen.add(link.to);
-      links.push(link);
-    }
-  }
-  // Deliberately no truncation: the footer is the one place every registry destination is
-  // reachable, and dropping entries would silently break the site-wide link contract.
-  return links;
+      return true;
+    });
+    return { ...section, links };
+  });
 }
 
 export default function Footer() {
@@ -50,55 +61,55 @@ export default function Footer() {
 
   return (
     <footer className="ch247-footer hg-footer">
-      {/* Amazon's first band: a full-width return-to-top strip. The header owns #ch247-top. */}
-      <a className="hg-footer__top" href="#ch247-top">Back to top</a>
-
       <div className="hg-footer__directory">
         <div className="hg-wrap">
+          <div className="hg-footer__intro">
+            <div className="hg-footer__brand">
+              <Brand className="ch247-brand--footer" />
+              <p>{BRAND.description}</p>
+            </div>
+            <div className="hg-footer__intro-actions">
+              <Link className="hg-link" to="/status">
+                Platform status <span className="hg-link__arrow" aria-hidden="true">→</span>
+              </Link>
+              <Link className="hg-btn hg-btn--sm" to={UTILITY.createAccount.to}>
+                {UTILITY.createAccount.label}
+              </Link>
+            </div>
+          </div>
+
           <nav className="hg-footer__columns" aria-label="Footer">
-            {FOOTER_GROUPS.map((group) => {
-              const links = linksFor(group.sources);
-              return (
-                <div
-                  className={`hg-footer__column${links.length > 10 ? ' hg-footer__column--wide' : ''}`}
-                  key={group.title}
-                >
-                  <h2>{group.title}</h2>
-                  <ul>
-                    {links.map((link) => (
-                      <li key={`${group.title}-${link.to}-${link.label}`}>
-                        <Link to={link.to}>{link.label}</Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              );
-            })}
+            {FOOTER_GROUPS.map((group) => (
+              <div className="hg-footer__column" key={group.title}>
+                <h2>{group.title}</h2>
+                {columnSections(group.sections).map((section) => (
+                  <div className="hg-footer__subgroup" key={section.title}>
+                    <h3>{section.title}</h3>
+                    <ul>
+                      {section.links.map((link) => (
+                        <li key={`${section.title}-${link.to}-${link.label}`}>
+                          <Link to={link.to}>{link.label}</Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            ))}
           </nav>
         </div>
       </div>
 
-      {/* Amazon's divided brand / locale row. The pills are a read-out, not duplicate controls. */}
-      <div className="hg-footer__locale-band">
-        <div className="hg-wrap hg-footer__locale-inner">
-          <div className="hg-footer__brand">
-            <Brand className="ch247-brand--footer" />
-            <span className="hg-footer__tagline">{BRAND.tagline}</span>
-          </div>
+      <div className="hg-footer__bottom">
+        <div className="hg-wrap hg-footer__bottom-inner">
+          <p className="hg-footer__copyright">
+            {t('footer.copyright', { year, legalName: BRAND.legalName })}
+          </p>
           <div className="hg-footer__locale" aria-label="Current language, currency and region">
-            <span className="hg-footer__locale-pill"><Icon name="globe" size={14} /> English</span>
-            <span className="hg-footer__locale-pill">USD — US Dollar</span>
-            <span className="hg-footer__locale-pill">Worldwide</span>
+            <span>English</span><span aria-hidden="true">·</span>
+            <span>USD</span><span aria-hidden="true">·</span>
+            <span>Worldwide</span>
           </div>
-          <Link className="hg-btn hg-btn--sm hg-footer__signup" to={UTILITY.createAccount.to}>
-            {UTILITY.createAccount.label}
-          </Link>
-        </div>
-      </div>
-
-      {/* Amazon's darkest band: a centred policy row, then the copyright line. */}
-      <div className="hg-footer__legal">
-        <div className="hg-wrap">
           <nav className="hg-footer__legal-links" aria-label={t('footer.legalAndAccount')}>
             <Link to="/legal">{t('footer.nav.legalCenter')}</Link>
             <Link to="/legal/privacy-policy">{t('footer.nav.privacy')}</Link>
@@ -109,9 +120,7 @@ export default function Footer() {
             <Link to="/contact">{t('footer.nav.contact')}</Link>
             <Link to="/sitemap">Sitemap</Link>
           </nav>
-          <p className="hg-footer__copyright">
-            {t('footer.copyright', { year, legalName: BRAND.legalName })}
-          </p>
+          <a className="hg-footer__top" href="#ch247-top">Back to top ↑</a>
         </div>
       </div>
     </footer>

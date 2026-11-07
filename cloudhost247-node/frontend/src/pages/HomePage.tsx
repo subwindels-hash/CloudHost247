@@ -7,13 +7,14 @@ import { CatalogErrorBanner } from '../components/CatalogStateBanner';
 import { useCurrency } from '../currency/CurrencyProvider';
 import { BRAND, UTILITY, NAV_SECTIONS } from '../navigation/registry.generated';
 import { resolvePhoto } from '../components/marketing/photo-map.generated';
+import Experience3D from '../components/marketing/Experience3D';
 
 /**
  * CloudHost247 public homepage — Hostinger-style page grammar.
  *
  * The page is deliberately built as a conversion funnel, in the same order as hostinger.com:
  * promo marquee (shared chrome) → split hero with a product screenshot → capability strip →
- * tabbed pricing cards → "explore more" cards → AI builder prompt → tabbed feature showcase →
+ * tabbed pricing cards → interactive 3D platform stack → "explore more" cards → AI builder prompt → tabbed feature showcase →
  * use-case gallery → "more power" link list → FAQ accordion → full-width CTA → dark footer
  * (shared chrome).
  *
@@ -424,6 +425,9 @@ export default function HomePage() {
 
       {/* 3. Tabbed pricing cards */}
       <PricingSection />
+
+      {/* 3b. Interactive 3D Experience — layered CSS 3D stack with keyboard controls */}
+      <Experience3D />
 
       {/* 4. Explore more */}
       <section className="hg-section hg-section--soft">

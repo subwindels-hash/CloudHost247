@@ -11,7 +11,7 @@ import { FOOTER_COLUMNS, NAV_SECTIONS } from '../../src/navigation/registry.gene
 /**
  * The shared chrome was rebuilt in the Hostinger shape. These tests pin the parts that are easy
  * to lose in a refactor: the compact trigger bar, the full-width mega panel (intro card + three
- * link columns + "see all" bar), the mobile accordion, and the Amazon-style four-column dark footer. All
+ * link columns + "see all" bar), the mobile accordion, and the professional four-column dark footer. All
  * content is asserted against the generated registry, so a menu that drifts from the sitemap
  * fails here rather than in production.
  */
@@ -105,33 +105,43 @@ describe('Hostinger-style menu and mega menu', () => {
   });
 });
 
-describe('Amazon-style footer directory', () => {
-  it('has a back-to-top strip, four registry-driven columns, a brand/locale row and a legal band', () => {
+describe('Professional footer directory', () => {
+  it('has a brand intro, four balanced columns with eight labelled sub-groups, and a legal bar', () => {
     const { container } = render(<MemoryRouter><Footer /></MemoryRouter>);
     const footer = container.querySelector<HTMLElement>('footer.ch247-footer.hg-footer')!;
     expect(footer).toBeTruthy();
 
-    expect(footer.querySelector('.hg-footer__top')?.getAttribute('href')).toBe('#ch247-top');
-    expect(footer.querySelector('.hg-footer__locale')).toBeTruthy();
-    expect(footer.querySelector('.hg-footer__locale-pill')).toBeTruthy();
-    expect(footer.querySelector('.hg-footer__legal-links')).toBeTruthy();
-    expect(footer.querySelector('.hg-footer__copyright')).toBeTruthy();
+    expect(footer.querySelector('.hg-footer__intro')).toBeTruthy();
     expect(footer.querySelector('.hg-footer__brand img')?.getAttribute('src')).toContain('white');
+    expect(footer.querySelector('.hg-footer__bottom')).toBeTruthy();
+    expect(footer.querySelector('.hg-footer__bottom .hg-footer__top')?.getAttribute('href')).toBe('#ch247-top');
+    expect(footer.querySelector('.hg-footer__locale')).toBeTruthy();
+    expect(footer.querySelector('.hg-footer__legal-links')).toBeTruthy();
 
     const columns = footer.querySelectorAll('.hg-footer__column');
     expect(columns).toHaveLength(4);
-    expect(columns[0].querySelector('h2')?.textContent).toBe('Hosting, Cloud & Servers');
+    expect([...columns].map((column) => column.querySelector('h2')?.textContent)).toEqual([
+      'Products & Domains', 'Cloud & Resources', 'Developers & Tools', 'Company & Legal',
+    ]);
+    // The rearrangement keeps all eight registry columns, each under a readable sub-heading.
+    const subgroups = footer.querySelectorAll('.hg-footer__subgroup');
+    expect(subgroups).toHaveLength(8);
+    expect([...subgroups].map((group) => group.querySelector('h3')?.textContent)).toEqual([
+      'Hosting', 'Domains', 'Infrastructure', 'Resources',
+      'Developers', 'Tools', 'Company', 'Legal',
+    ]);
 
     // Every destination rendered in the footer comes from the shared registry, and every
-    // registry destination is still reachable — the four-column layout must not silently drop
-    // a link (the "Business Tools" footer entry is asserted by business-tools-page.test.tsx).
+    // registry destination is still reachable — rearranging columns must not silently drop a link.
     const registryPaths = new Set(FOOTER_COLUMNS.flatMap((column) => column.links.map((link) => link.to)));
     const rendered = [...footer.querySelectorAll('.hg-footer__column a')].map((a) => a.getAttribute('href'));
     expect(rendered.length).toBeGreaterThan(10);
     rendered.forEach((href) => expect(registryPaths.has(href!)).toBe(true));
     expect([...registryPaths].filter((path) => !rendered.includes(path))).toEqual([]);
+    // Balanced columns: no column is more than twice the size of the smallest one.
+    const counts = [...columns].map((column) => column.querySelectorAll('a').length);
+    expect(Math.max(...counts)).toBeLessThanOrEqual(Math.min(...counts) * 2);
 
-    // The locale pills are a read-out, not a second set of interactive switchers.
     // Switchers live in the header only (also pinned by Header.test.tsx).
     expect(within(footer).queryByRole('button', { name: /Language:/i })).toBeNull();
     expect(within(footer).queryByRole('button', { name: /Display currency:/i })).toBeNull();

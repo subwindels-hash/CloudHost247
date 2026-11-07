@@ -100,3 +100,103 @@
   .ch-footer__directory { padding: 32px 0; }
   .ch-footer__legal-links { gap: 8px 14px; }
 }
+
+/* =============================================================================
+   Professional chrome — supersedes the Amazon/GoDaddy benchmark rules above
+   -----------------------------------------------------------------------------
+   Light, hairline-bordered menu; light grouped mega panel; deep-slate footer with a brand intro,
+   four balanced columns with labelled sub-groups, and a compact legal bar. The registry-driven
+   templates are unchanged in structure except for the footer link rearrangement.
+   ========================================================================== */
+
+/* ---- Professional light menu bar ---- */
+.ch-site .ch-header { background: #fff; border-bottom: 1px solid #dfe4e9; box-shadow: 0 1px 0 #0d111608, 0 8px 22px #0d11160d; }
+.ch-site .ch-top { background: #f5f7f8; color: #5b6773; border-bottom: 1px solid #e5e9ed; }
+.ch-site .ch-top a, .ch-site .ch-top button { color: #5b6773; }
+.ch-site .ch-top a:hover, .ch-site .ch-top button:hover { color: #8a6410; }
+.ch-site .ch-brand img { filter: none; }
+.ch-site .ch-nav-item > summary { color: #1b242c; min-height: 64px; font-weight: 600; }
+.ch-site .ch-nav-item > summary:hover, .ch-site .ch-nav-item[open] > summary { color: #8a6410; }
+.ch-site .ch-nav-search input { background: #fff; border-color: #d8dfe5; color: #1b242c; }
+.ch-site .ch-nav-search input::placeholder { color: #66727e; }
+.ch-site .ch-account > a { color: #1b242c; }
+.ch-site .ch-account > a:hover { color: #8a6410; }
+.ch-site .ch-menu-toggle { background: #fff; border-color: #d8dfe5; color: #1b242c; }
+
+.ch-site .ch-mega {
+  background: #fff; color: #1b242c;
+  border: 1px solid #dfe4e9; border-top: 2px solid #b8860b;
+  border-radius: 0 0 8px 8px; box-shadow: 0 24px 60px #0d111624;
+}
+.ch-site .ch-mega-intro { background: #f7f8fa; }
+.ch-site .ch-mega-intro h2, .ch-site .ch-mega-group h3, .ch-site .ch-kicker { color: #8a6410; }
+.ch-site .ch-mega-intro p, .ch-site .ch-mega-group a { color: #5b6773; }
+.ch-site .ch-mega-group a:hover, .ch-site .ch-mega-group a:focus-visible { color: #1b242c; }
+.ch-site .ch-mega :focus-visible { outline-color: #b8860b; }
+[data-ch-tools-menu] .ch-mega { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+/* ---- Professional footer ---- */
+.ch-site .ch-footer { background: #121820; color: #aeb8c2; border-top: 0; padding: 0; }
+.ch-site .ch-footer__directory, .ch-footer__directory { padding: 54px 0 48px; }
+.ch-footer__intro {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 32px;
+  padding-bottom: 36px; margin-bottom: 40px; border-bottom: 1px solid #ffffff1a;
+  flex-wrap: wrap;
+}
+.ch-site .ch-footer__brand img { height: 34px; width: auto; filter: none; }
+.ch-footer__intro p { margin: 16px 0 0; max-width: 560px; color: #aeb8c2; font-size: 13px; line-height: 1.7; }
+.ch-footer__intro-actions { display: flex; align-items: center; gap: 20px; flex: 0 0 auto; }
+.ch-footer__intro-actions a { color: #e6c875; font-size: 13px; font-weight: 600; text-decoration: none; }
+.ch-footer__intro-actions a:hover { color: #fff; }
+.ch-site .ch-footer .ch-btn-outline { border-color: #6b7684; }
+.ch-site .ch-footer .ch-btn-outline:hover { border-color: #b8860b; color: #e6c875; }
+
+.ch-site .ch-footer-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 40px; align-items: start; }
+.ch-site .ch-footer__col h2 {
+  margin: 0 0 16px; padding-bottom: 12px; border-bottom: 1px solid #ffffff1f;
+  color: #fff; font-size: 15px; font-weight: 700; line-height: 1.35;
+  text-transform: none; letter-spacing: 0;
+}
+.ch-footer__subgroup + .ch-footer__subgroup { margin-top: 22px; }
+.ch-footer__subgroup h3 {
+  margin: 0 0 10px; color: #d4af37; font-size: 11px; font-weight: 800;
+  letter-spacing: .13em; text-transform: uppercase;
+}
+.ch-site .ch-footer__col ul { display: grid; gap: 3px; }
+.ch-site .ch-footer li a {
+  display: inline-block; min-height: 24px; color: #aeb8c2; font-size: 13px;
+  line-height: 1.35; text-decoration: none; overflow-wrap: normal; word-break: normal;
+}
+.ch-site .ch-footer li a:hover { color: #fff; text-decoration: underline; }
+
+.ch-site .ch-footer__bottom, .ch-footer__bottom { background: #0c1117; border-top: 1px solid #ffffff14; padding: 22px 0 26px; }
+.ch-footer__bottom-inner { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 20px; }
+.ch-site .ch-footer__bottom p, .ch-footer__bottom p { margin: 0; color: #8793a0; font-size: 12px; }
+.ch-footer__locale { display: flex; align-items: center; gap: 8px; color: #8793a0; font-size: 12px; }
+.ch-footer__legal-links { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-left: auto; }
+.ch-footer__legal-links a { display: inline-flex; align-items: center; min-height: 24px; color: #aeb8c2; font-size: 12px; text-decoration: none; }
+.ch-footer__legal-links a:hover { color: #e6c875; text-decoration: underline; }
+/* The earlier full-width navy "Back to top" band becomes an inline link in the legal bar. */
+.ch-site .ch-footer .ch-footer__top {
+  display: inline-flex; min-height: 0; padding: 0; background: transparent; color: #aeb8c2;
+  font-size: 12px; font-weight: 600; letter-spacing: 0; text-decoration: none;
+}
+.ch-site .ch-footer .ch-footer__top:hover { background: transparent; color: #e6c875; }
+
+/* ---- Responsive ---- */
+@media (max-width: 1080px) {
+  .ch-site .ch-footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; }
+  .ch-footer__legal-links { margin-left: 0; }
+}
+@media (max-width: 767px) {
+  .ch-site .ch-nav-item > summary { min-height: 44px; }
+  .ch-site .ch-footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ch-footer__intro { padding-bottom: 28px; margin-bottom: 30px; }
+  .ch-footer__bottom-inner { flex-direction: column; align-items: flex-start; }
+  [data-ch-tools-menu] .ch-mega { grid-template-columns: 1fr; }
+}
+@media (max-width: 420px) {
+  .ch-site .ch-footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+  .ch-footer__directory { padding: 36px 0 32px; }
+  .ch-footer__legal-links { gap: 8px 12px; }
+}

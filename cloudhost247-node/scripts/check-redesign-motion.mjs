@@ -76,6 +76,14 @@ async function main() {
     await page.evaluate(() => window.scrollTo(0, 0));
   }
 
+  // Scroll the first reveal candidate into view before counting. The observer uses a -6% bottom
+  // rootMargin, so a fixed 320px scroll can leave the first candidate just outside it — which made
+  // this check flaky rather than proving reveals work.
+  const firstReveal = page.locator('[data-reveal]').first();
+  if (await firstReveal.count()) {
+    await firstReveal.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(280);
+  }
   const revealed = await page.locator('[data-reveal].is-revealed').count();
   const revealTotal = await page.locator('[data-reveal]').count();
   check('in-view sections reveal', revealTotal > 0 && revealed > 0, `${revealed}/${revealTotal} revealed`);

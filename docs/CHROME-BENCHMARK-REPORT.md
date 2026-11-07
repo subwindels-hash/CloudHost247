@@ -1,3 +1,7 @@
+> **Superseded.** This report describes the Amazon-footer / GoDaddy-menu iteration (commit
+> `4c34a2d`). The current chrome is the professional corporate restyle with rearranged footer
+> links and the homepage 3D Experience — see `docs/3D-EXPERIENCE-AND-PROFESSIONAL-CHROME.md`.
+
 # Menu & footer chrome benchmark
 
 Two requests, applied to both public surfaces:

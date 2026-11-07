@@ -57,13 +57,35 @@ async function main() {
 
     const footer = page.locator('footer').first();
     if (await footer.count()) {
+      // The marketing header is sticky; an element screenshot of a full-height footer otherwise
+      // has the header painted across it. Unstick it just for this capture, then restore.
+      await page.evaluate(() => {
+        const header = document.querySelector('header.hg-header, header.ch-header');
+        if (header) header.style.position = 'static';
+      });
       await footer.screenshot({ path: path.join(OUT_DIR, `footer-${viewport.name}.png`) });
+      await page.evaluate(() => {
+        const header = document.querySelector('header.hg-header, header.ch-header');
+        if (header) header.style.removeProperty('position');
+      });
       report.shots.push(`footer-${viewport.name}.png`);
       report[`footer-${viewport.name}`] = await footer.evaluate((el) => ({
         height: Math.round(el.getBoundingClientRect().height),
         links: el.querySelectorAll('a').length,
         columns: el.querySelectorAll('[class*="column"]').length,
       }));
+    }
+
+    // The homepage 3D Experience (when present) is captured as its own element so the layered
+    // scene is visible without a full-page shot.
+    const experience = page.locator('.hg-exp3d').first();
+    if (viewport.name === 'desktop' && await experience.count()) {
+      // Scrolling the section into view starts its one-shot reveal animation; let it finish so
+      // the evidence shows the finished section rather than a half-faded heading.
+      await experience.scrollIntoViewIfNeeded();
+      await page.waitForTimeout(900);
+      await experience.screenshot({ path: path.join(OUT_DIR, 'experience-3d-desktop.png') });
+      report.shots.push('experience-3d-desktop.png');
     }
 
     if (viewport.name === 'desktop') {

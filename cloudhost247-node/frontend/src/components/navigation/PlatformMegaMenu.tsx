@@ -5,7 +5,7 @@ import { publicFetch } from '../../lib/api';
 import { NAV_SECTIONS, TOOLS_CATEGORIES } from '../../navigation/registry.generated';
 
 /**
- * CloudHost247 navigation — GoDaddy-style dark menu / mega menu / mobile drawer.
+ * CloudHost247 navigation — professional menu / mega menu / mobile drawer.
  *
  * The menu renders `NAV_SECTIONS` — imported straight from the generated registry, not fetched
  * over the network on mount. That is deliberate: a navigation that arrives late is a navigation

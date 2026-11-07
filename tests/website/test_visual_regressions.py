@@ -94,7 +94,7 @@ CACHE_BUSTING_STAMPS = {
         '20261107', 'e7d6faf94d0420b732bc23f4e24c51cd0c8fa786a4e7709de91a844ad6909f27'),
     # GoDaddy/Amazon chrome benchmark for the WHMCS theme (loads after the generated sheets).
     'templates/cloudhost247/css/chrome-benchmark.css': (
-        '20261108', '1497521c50b48be868030bf30d5769a8cdb6032a5e653628913a2b63b7cbbdb7'),
+        '20261109', 'c4e9df74679d32c6a3537f049c2879088ee807a1a61d638088694d4493d36e8c'),
 }
 
 

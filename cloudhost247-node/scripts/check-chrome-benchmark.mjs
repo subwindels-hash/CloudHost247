@@ -1,11 +1,12 @@
 /**
- * Real-Chromium acceptance check for the Amazon/GoDaddy chrome benchmark.
+ * Real-Chromium acceptance check for the professional menu/footer chrome.
  *
  *   BASE_URL=http://127.0.0.1:3000 node scripts/check-chrome-benchmark.mjs
  *
- * CSS review alone cannot prove that the menu is dark, that the four-column directory renders, or
- * that the extra utility strip did not reintroduce the 1440px overlap. Every assertion below reads
- * a computed style or a bounding box from a real page, at desktop and phone widths.
+ * CSS review alone cannot prove that the menu is light, that the four balanced footer columns
+ * render with their sub-groups, or that the extra utility strip did not reintroduce the 1440px
+ * nav overlap. Every assertion below reads a computed style or a bounding box from a real page,
+ * at desktop and phone widths.
  */
 import { existsSync } from 'node:fs';
 import path from 'node:path';
@@ -37,7 +38,7 @@ function check(name, ok, detail = '') {
   console.log(`${ok ? 'OK  ' : 'FAIL'} ${name}${detail ? ` — ${detail}` : ''}`);
 }
 
-/** Relative luminance of an rgb()/rgba() computed colour; dark chrome must be below 0.16. */
+/** Relative luminance of an rgb()/rgba() computed colour. */
 function luminance(value) {
   const parts = (value.match(/[\d.]+/g) ?? []).map(Number);
   const [r, g, b] = parts.slice(0, 3);
@@ -55,24 +56,21 @@ async function main() {
 
   const header = await page.evaluate(() => {
     const el = document.querySelector('header.hg-header');
-    const bar = document.querySelector('.hg-nav__bar');
     const utility = document.querySelector('.hg-utility');
     const brand = document.querySelector('.hg-nav__brand img');
     const css = (node) => node ? getComputedStyle(node) : null;
     return {
       bg: css(el)?.backgroundColor,
       sticky: css(el)?.position,
-      barHeight: bar?.getBoundingClientRect().height ?? 0,
       utilityVisible: utility ? getComputedStyle(utility).display !== 'none' : false,
       utilityLinks: document.querySelectorAll('.hg-utility a').length,
-      brandWhite: (brand?.getAttribute('src') ?? '').includes('white'),
+      brandDark: (brand?.getAttribute('src') ?? '').includes('dark'),
       topAnchor: !!document.querySelector('#ch247-top'),
     };
   });
-  check('GoDaddy-style near-black sticky header', luminance(header.bg) < 0.16, `background ${header.bg}`);
-  check('header stays sticky', header.sticky === 'sticky');
+  check('professional light sticky header', luminance(header.bg) > 0.85 && header.sticky === 'sticky', `background ${header.bg}`);
   check('slim utility strip renders with real links', header.utilityVisible && header.utilityLinks >= 5, `${header.utilityLinks} links`);
-  check('white brand mark on the dark bar', header.brandWhite);
+  check('dark brand mark on the light bar', header.brandDark);
   check('back-to-top anchor target exists', header.topAnchor);
 
   const trigger = page.locator('.hg-nav__trigger').first();
@@ -80,48 +78,60 @@ async function main() {
   await page.waitForTimeout(200);
   const mega = await page.evaluate(() => {
     const el = document.querySelector('.hg-mega:not([hidden])');
-    const groups = el?.querySelectorAll('.hg-mega__group').length ?? 0;
     return {
       bg: el ? getComputedStyle(el).backgroundColor : null,
-      groups, open: !!el,
+      groups: el?.querySelectorAll('.hg-mega__group').length ?? 0,
+      open: !!el,
       width: Math.round(el?.getBoundingClientRect().width ?? 0),
       viewport: window.innerWidth,
     };
   });
   // The first registry section has two groups; every section has at least two. Width is pinned so
   // the panel cannot quietly shrink back into a small dropdown.
-  check('full-width dark mega panel opens with grouped links',
-    mega.open && luminance(mega.bg) < 0.2 && mega.groups >= 2 && mega.width >= mega.viewport - 2,
+  check('full-width light mega panel opens with grouped links',
+    mega.open && luminance(mega.bg) > 0.85 && mega.groups >= 2 && mega.width >= mega.viewport - 2,
     `background ${mega.bg}, ${mega.groups} groups, ${mega.width}px wide`);
   await trigger.click();
 
   const footer = await page.evaluate(() => {
     const el = document.querySelector('footer.hg-footer');
     const top = el?.querySelector('.hg-footer__top');
-    const directory = el?.querySelector('.hg-footer__directory');
-    const legal = el?.querySelector('.hg-footer__legal');
-    const columns = el?.querySelectorAll('.hg-footer__column').length ?? 0;
-    const links = el?.querySelectorAll('.hg-footer__column a').length ?? 0;
-    const pills = el?.querySelectorAll('.hg-footer__locale-pill').length ?? 0;
+    const bottom = el?.querySelector('.hg-footer__bottom');
+    const columns = [...(el?.querySelectorAll('.hg-footer__column') ?? [])];
     return {
       topText: top?.textContent?.trim(),
       topHref: top?.getAttribute('href'),
-      dirBg: directory ? getComputedStyle(directory).backgroundColor : null,
+      // A flex item's computed display is blockified, so `inline-flex` reports as `flex`.
+      // Assert the things that actually distinguish an inline legal-bar link from the old
+      // full-width retail band: no min-height, no background, and a content-sized box.
+      topInline: top ? (getComputedStyle(top).minHeight === '0px'
+        && getComputedStyle(top).backgroundColor === 'rgba(0, 0, 0, 0)'
+        && top.getBoundingClientRect().width < 300) : false,
+      topInBottom: !!bottom?.contains(top ?? null),
       footerBg: el ? getComputedStyle(el).backgroundColor : null,
-      legalBg: legal ? getComputedStyle(legal).backgroundColor : null,
-      columns, links, pills,
+      bottomBg: bottom ? getComputedStyle(bottom).backgroundColor : null,
+      intro: !!el?.querySelector('.hg-footer__intro'),
+      columns: columns.length,
+      subgroups: el?.querySelectorAll('.hg-footer__subgroup').length ?? 0,
+      links: el?.querySelectorAll('.hg-footer__column a').length ?? 0,
+      counts: columns.map((c) => c.querySelectorAll('a').length),
+      retailPills: el?.querySelectorAll('.hg-footer__locale-pill').length ?? 0,
       height: Math.round(el?.getBoundingClientRect().height ?? 0),
       overflow: document.documentElement.scrollWidth > window.innerWidth + 1,
     };
   });
-  check('Amazon "Back to top" strip links to the header', footer.topText === 'Back to top' && footer.topHref === '#ch247-top');
-  check('deep navy directory band', luminance(footer.footerBg) > luminance(footer.legalBg) && luminance(footer.footerBg) < 0.3,
-    `directory ${footer.footerBg}, legal ${footer.legalBg}`);
-  check('darkest legal band below the directory', luminance(footer.legalBg) < 0.1);
-  check('four topic columns with every registry link', footer.columns === 4 && footer.links >= 90,
-    `${footer.columns} columns / ${footer.links} links`);
-  check('brand/locale pill row', footer.pills === 3, `${footer.pills} pills`);
-  check('footer is more compact than the pre-benchmark 1173px', footer.height > 0 && footer.height < 1000, `${footer.height}px`);
+  check('brand intro row above the directory', footer.intro);
+  check('deep slate directory with a darker legal bar',
+    luminance(footer.footerBg) < 0.2 && luminance(footer.bottomBg) < luminance(footer.footerBg),
+    `directory ${footer.footerBg}, bottom ${footer.bottomBg}`);
+  check('four balanced columns with eight labelled sub-groups',
+    footer.columns === 4 && footer.subgroups === 8 && Math.max(...footer.counts) <= Math.min(...footer.counts) * 2,
+    `${footer.columns} columns / ${footer.subgroups} groups / counts ${footer.counts.join(',')}`);
+  check('every registry destination still rendered', footer.links >= 90, `${footer.links} links`);
+  check('back-to-top is an inline link in the legal bar',
+    /Back to top/.test(footer.topText ?? '') && footer.topHref === '#ch247-top' && footer.topInline && footer.topInBottom);
+  check('no retail locale pills remain', footer.retailPills === 0);
+  check('footer stays compact', footer.height > 0 && footer.height < 1300, `${footer.height}px`);
   check('no horizontal overflow at 1440px', !footer.overflow);
   await page.close();
 
@@ -149,7 +159,7 @@ async function main() {
 
   await browser.close();
   const failed = results.filter((r) => !r.ok);
-  console.log(`\n${results.length - failed.length}/${results.length} chrome benchmark checks passed`);
+  console.log(`\n${results.length - failed.length}/${results.length} professional chrome checks passed`);
   if (failed.length) process.exit(1);
 }
 
