@@ -1,6 +1,6 @@
 # Phase Delivery Report — 2026-11-07
 
-**Branch:** `arena/1b329121-cloudhost247` · **Canonical Node backend:** `cloudhost247-node/` (ADR-001)
+**Branch:** `arena/1b329121-cloudhost247` · **Review PR:** [#91](https://github.com/subwindels-hash/CloudHost247/pull/91) (3 commits) · **Canonical Node backend:** `cloudhost247-node/` (ADR-001)
 **Financial freeze:** **IN FORCE.** No live gateway, no live webhook, no quarantined migration released, no production payment setting changed, no real transaction.
 **Production deployment:** **None.** No production compatibility claimed.
 
@@ -185,7 +185,7 @@ This report covers the work authorised on 2026-11-07: P0 defect fix, canonical-b
 **Outstanding blockers / known limitations:**
 - No licensed WHMCS/cPanel staging → **PHP/WHMCS pages were not rendered**; only the generated theme CSS, `site.json`, nav/footer and content were verified. See `docs/STAGING-ENVIRONMENT-REQUIREMENTS.md` §3.
 - `templates/cloudhost247/homepage.tpl` still contains a newsletter form with `onsubmit="return false;"` — a **UI-only** element with no consent/unsubscribe/anti-abuse backend. It is **not** claimed as an implemented marketing feature; tracked as `G15`/`G16` gap.
-- `navigation-links.test.ts` lives under `tests/integration/` and was not included in the `frontend/tests/...` glob above; it was green in the Phase 1 49-file run and is unchanged here.
+- `navigation-links.test.ts` lives under `tests/integration/` and was not included in the `frontend/tests/...` glob above; it was re-run separately after the Phase 3 build: **1 file / 5 tests passed**.
 - No full 166-file Vitest run (timed out at 900 s in an earlier session); this phase used targeted suites.
 - `platform/` tests: 2 transient failures in one run, not reproduced twice — flakiness item open.
 - `@sparticuz/chromium` is a dev-only dependency used solely for evidence; no runtime/deployment dependency added.
