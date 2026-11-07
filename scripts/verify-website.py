@@ -32,7 +32,10 @@ def route_exists(path):
 # Stylesheets every first-party page loads, in load order (templates/cloudhost247/includes/site-head.tpl).
 # `css/auth.css` is loaded by the same site-head partial on every page (it is scoped to `.ch-auth`,
 # so only the account pages use it, but a template that renders after the head can rely on it).
-THEME_SHEETS=('css/site.css','css/design-system.css','css/auth.css')
+# Every first-party sheet the theme ships, including the generated metals.css and the
+# chrome-benchmark.css restyle. The class audit below reads the sheets a page actually loads, so a
+# new shipped sheet must be named here or its classes look undefined to the validator.
+THEME_SHEETS=('css/site.css','css/design-system.css','css/auth.css','css/metals.css','css/chrome-benchmark.css')
 def _sheet_text(name):
  p=ROOT/'templates/cloudhost247'/name
  return p.read_text() if p.is_file() else ''

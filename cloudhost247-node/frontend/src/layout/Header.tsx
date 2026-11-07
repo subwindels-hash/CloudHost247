@@ -11,12 +11,15 @@ import { UTILITY } from '../navigation/registry.generated';
 import { useAuthState } from './useAuthState';
 
 /**
- * The universal CloudHost247 header — Hostinger-style menu bar.
+ * The universal CloudHost247 header — GoDaddy-style dark two-tier menu.
  *
- * Structure: brand · dropdown navigation · utility (language, currency, search) ·
- * Sign In / Create Account (or the account controls once signed in) · mobile drawer.
- * The mega menus come from the shared registry, so this header, the drawer, the footer and the
- * sitemap cannot disagree about what exists.
+ * Structure: a slim dark utility strip (with cart) · brand (white mark) · dropdown navigation ·
+ * utility (language, currency, search) · Sign In / Create Account (or the account controls once
+ * signed in) · mobile drawer. The mega menus come from the shared registry, so this header, the
+ * drawer, the footer and the sitemap cannot disagree about what exists.
+ *
+ * Only the chrome's appearance is benchmarked here: no link is invented (every utility destination
+ * already exists in the registry), and the signed-in subnav and mobile drawer keep their behaviour.
  *
  * Signed-in state adds a second, quieter row for account areas (services, domains, billing,
  * support) plus the role-gated staff links. Those links are a convenience only — every one of
@@ -80,9 +83,25 @@ export default function Header() {
   }
 
   return (
-    <header className="ch247-header hg-header" ref={headerRef}>
+    <header className="ch247-header hg-header" id="ch247-top" ref={headerRef}>
+      {/* GoDaddy's slim utility strip above the product bar. Hidden below 768px by the chrome CSS. */}
+      <div className="hg-utility">
+        <div className="hg-utility__inner">
+          <nav className="hg-utility__left" aria-label="Quick links">
+            <NavLink to="/pricing" onClick={closeMenu}>Deals &amp; pricing</NavLink>
+            <NavLink to="/sitemap" onClick={closeMenu}>All products</NavLink>
+            <NavLink to="/status" onClick={closeMenu}>Platform status</NavLink>
+          </nav>
+          <nav className="hg-utility__right" aria-label="Help and account">
+            <NavLink to="/help" onClick={closeMenu}>Help</NavLink>
+            <NavLink to="/search" onClick={closeMenu}>Search</NavLink>
+            <NavLink to={UTILITY.cart.to} onClick={closeMenu}>Cart</NavLink>
+          </nav>
+        </div>
+      </div>
+
       <div className="hg-nav__bar">
-        <Brand className="hg-nav__brand" />
+        <Brand className="hg-nav__brand hg-nav__brand--on-dark" />
 
         <button
           type="button"
@@ -106,6 +125,8 @@ export default function Header() {
             <NavLink className="hg-nav__icon" to="/search" aria-label={t('header.search.label')} onClick={closeMenu}>
               <Icon name="search" size={18} />
             </NavLink>
+            {/* Cart stays in the utility strip above: at 1440px a fourth icon here would push the
+                seven desktop triggers into the language/currency cluster (evidence:layout). */}
           </div>
 
           <div className="hg-nav__actions">

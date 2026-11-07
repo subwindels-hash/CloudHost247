@@ -5,7 +5,7 @@ import { publicFetch } from '../../lib/api';
 import { NAV_SECTIONS, TOOLS_CATEGORIES } from '../../navigation/registry.generated';
 
 /**
- * CloudHost247 navigation — Hostinger-style menu / mega menu / mobile drawer.
+ * CloudHost247 navigation — GoDaddy-style dark menu / mega menu / mobile drawer.
  *
  * The menu renders `NAV_SECTIONS` — imported straight from the generated registry, not fetched
  * over the network on mount. That is deliberate: a navigation that arrives late is a navigation
@@ -113,9 +113,12 @@ function ToolsGroups({ limit, active = true }: { limit: number; active?: boolean
 }
 
 export function Brand({ className }: { className?: string }) {
+  // `on-dark` lets the GoDaddy-style dark menu bar use the white mark without changing the
+  // component's API; the footer's existing `--footer` class keeps working the same way.
+  const onDark = Boolean(className?.includes('footer') || className?.includes('on-dark'));
   return (
     <Link to="/" className={className ? `ch247-brand ${className}` : 'ch247-brand'} aria-label="CloudHost247 — home">
-      <img src={`/media/cloudhost247/brand/logo-horizontal-${className?.includes('footer') ? 'white' : 'dark'}.svg`} width={204} height={39} alt="CloudHost247" />
+      <img src={`/media/cloudhost247/brand/logo-horizontal-${onDark ? 'white' : 'dark'}.svg`} width={204} height={39} alt="CloudHost247" />
     </Link>
   );
 }

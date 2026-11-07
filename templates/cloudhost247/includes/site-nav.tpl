@@ -1,7 +1,7 @@
 <a class="ch-skip" href="#ch-main">Skip to main content</a>
-<header class="ch-header">
+<header class="ch-header" id="ch247-top">
 {if $cloudhost247.settings.show_announcement == '1' && $cloudhost247.settings.announcement_text}<div class="ch247-announcement">{$cloudhost247.settings.announcement_text|escape}</div>{/if}
-  <div class="ch-top"><div class="ch-wrap"><span>Built for your next chapter.</span><div><a href="{$WEB_ROOT}/help-center.php">Support</a><a href="{$WEB_ROOT}/site-search.php">Search</a>{if $languagechangeenabled || (!$loggedin && $currencies)}<button type="button" data-toggle="modal" data-target="#modalChooseLanguage">{$activeLocale.localisedName|default:'Language'|escape}{if $activeCurrency.code} / {$activeCurrency.code|escape}{/if} <span aria-hidden="true">⌄</span></button>{/if}</div></div></div>
+  <div class="ch-top"><div class="ch-wrap"><span>Built for your next chapter.</span><div><a href="{$WEB_ROOT}/cart.php">Cart</a><a href="{$WEB_ROOT}/serverstatus.php">Platform status</a><a href="{$WEB_ROOT}/help-center.php">Support</a><a href="{$WEB_ROOT}/site-search.php">Search</a>{if $languagechangeenabled || (!$loggedin && $currencies)}<button type="button" data-toggle="modal" data-target="#modalChooseLanguage">{$activeLocale.localisedName|default:'Language'|escape}{if $activeCurrency.code} / {$activeCurrency.code|escape}{/if} <span aria-hidden="true">⌄</span></button>{/if}</div></div></div>
   <div class="ch-nav ch-wrap">
     <a class="ch-brand" href="{$WEB_ROOT}/index.php" aria-label="CloudHost247 home"><img src="{if $cloudhost247.settings.logo_url}{$cloudhost247.settings.logo_url|escape}{else}{$WEB_ROOT}/assets/images/cloudhost247/brand/logo-horizontal-dark.svg{/if}" width="204" height="36" alt="CloudHost247"></a>
     <button class="ch-menu-toggle" type="button" aria-expanded="false" aria-controls="ch-navigation">Menu <span aria-hidden="true">☰</span></button>
@@ -17,6 +17,7 @@
       {/foreach}
       </div>
       <div class="ch-account">
+      <a href="{$WEB_ROOT}/cart.php" aria-label="Cart">Cart</a>
       {if $loggedin}<a href="{$WEB_ROOT}/clientarea.php">Dashboard</a><a href="{$WEB_ROOT}/clientarea.php?action=details">Account</a><a href="{$WEB_ROOT}/logout.php">Log Out</a>
       {else}<a href="{$WEB_ROOT}/clientarea.php">Sign In</a><a class="ch-btn ch-btn-small" href="{$WEB_ROOT}/register.php">Create Account</a>{/if}
       </div>

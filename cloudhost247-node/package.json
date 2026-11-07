@@ -41,7 +41,9 @@
     "build:tools": "vite build --config frontend/vite.tools.config.ts",
     "e2e": "playwright test",
     "evidence:screenshots": "node scripts/capture-rendered-pages.mjs",
-    "evidence:layout": "node scripts/check-header-layout.mjs"
+    "evidence:layout": "node scripts/check-header-layout.mjs",
+    "evidence:chrome": "node scripts/capture-chrome-benchmark.mjs",
+    "check:chrome": "node scripts/check-chrome-benchmark.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-cloudwatch": "3.1144.0",

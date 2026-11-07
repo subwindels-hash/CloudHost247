@@ -8,9 +8,12 @@
 <link rel="stylesheet" href="{$WEB_ROOT}/templates/cloudhost247/css/site.css?v=20261107">
 <link rel="stylesheet" href="{$WEB_ROOT}/templates/cloudhost247/css/design-system.css?v=20261107">
 <link rel="stylesheet" href="{$WEB_ROOT}/templates/cloudhost247/css/auth.css?v=20261107">
-{* Generated copy of shared/site/metals.css. Must load last: it restyles the metallic finish,
-   depth and motion primitives on top of site.css and design-system.css. *}
+{* Generated copy of shared/site/metals.css. Must load last among the shared sheets: it restyles
+   the metallic finish, depth and motion primitives on top of site.css and design-system.css. *}
 <link rel="stylesheet" href="{$WEB_ROOT}/templates/cloudhost247/css/metals.css?v=20261107">
+{* First-party chrome benchmark: GoDaddy-style menu + Amazon-style footer. Loaded after metals.css
+   so its `.ch-site` overrides win with equal specificity. Only the visual anatomy is borrowed. *}
+<link rel="stylesheet" href="{$WEB_ROOT}/templates/cloudhost247/css/chrome-benchmark.css?v=20261108">
 <link rel="icon" href="{$WEB_ROOT}/assets/images/cloudhost247/favicon/favicon.ico" sizes="any">
 <link rel="icon" type="image/svg+xml" href="{$WEB_ROOT}/assets/images/cloudhost247/brand/icon-mark.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="{$WEB_ROOT}/assets/images/cloudhost247/favicon/apple-touch-icon.png">

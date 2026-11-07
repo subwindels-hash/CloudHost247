@@ -1,23 +1,23 @@
 /* =============================================================================
-   CloudHost247 — Hostinger-style menu / mega menu / footer
+   CloudHost247 — shared menu / mega menu / footer chrome
    -----------------------------------------------------------------------------
    Loaded AFTER hostinger.css. The three shared chrome components (Header,
-   PlatformMegaMenu, Footer) now render `hg-nav*`, `hg-mega*`, `hg-drawer*` and
-   `hg-footer*` classes modelled on hostinger.com:
+   PlatformMegaMenu, Footer) render `hg-nav*`, `hg-mega*`, `hg-drawer*` and
+   `hg-footer*` classes. The original (Hostinger-shaped) layout rules remain in
+   sections 1–4; section 5 restyles that same markup against two new references:
 
-     • Menu      — compact sticky bar, dropdown triggers with active underlines,
-                   utility cluster (language / currency / search), one strong CTA.
-     • Mega menu — full-width white panel: tinted "explore" column + featured card
-                   on the left, three columns of icon links with descriptions and
-                   badges on the right, and a "see all" bottom bar.
-     • Footer    — CTA band, brand block, five curated registry-driven columns,
-                   legal bar.
+     • Menu      — GoDaddy-style near-black two-tier bar: a slim utility strip,
+                   white brand mark, dropdown triggers, a full-width dark mega
+                   panel, search/cart and one strong gold CTA.
+     • Footer    — Amazon-style directory: a "Back to top" strip, four dense
+                   topic columns, a brand/locale row and a darkest legal band.
 
-   All content still comes from NAV_SECTIONS / FOOTER_COLUMNS / UTILITY, so the
-   registry's link-integrity tests remain the single source of truth. No invented
-   promotion, review score or external social link.
+   These are layout/visual references only: no other company's mark, copy, review
+   score or commerce link is reproduced. All content still comes from
+   NAV_SECTIONS / FOOTER_COLUMNS / UTILITY, so the registry's link-integrity
+   tests remain the single source of truth.
 
-   Palette: CloudHost247 ink + mint (see the --hg-accent* tokens in hostinger.css).
+   Palette: CloudHost247 ink + metallic gold/silver (see shared/site/metals.css).
    ========================================================================== */
 
 /* -----------------------------------------------------------------------------
@@ -566,3 +566,237 @@
   border-top: 1px solid rgba(212, 175, 55, 0.38);
 }
 .hg-theme .hg-footer__bottom { border-top-color: rgba(212, 175, 55, 0.22); }
+
+/* -----------------------------------------------------------------------------
+   5. Benchmark chrome — GoDaddy-style dark menu + Amazon-style footer directory
+   -----------------------------------------------------------------------------
+   Everything below overrides sections 1–4 with equal-or-higher specificity. The DOM,
+   registry data, interaction model and responsive breakpoints are unchanged: this is a
+   restyle of the same components, not a second implementation.
+   -------------------------------------------------------------------------- */
+
+/* ---- GoDaddy: slim utility strip above a near-black product bar ---- */
+.hg-theme .hg-header {
+  background: #0d1116;
+  border-bottom: 1px solid #2b3440;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.30);
+}
+.hg-utility { background: #161d25; border-bottom: 1px solid #262e38; }
+.hg-utility__inner {
+  width: min(1440px, calc(100% - 32px));
+  min-height: 32px;
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.hg-utility__left, .hg-utility__right { display: flex; align-items: center; gap: 18px; }
+.hg-utility a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  color: #c3cbd4;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.hg-utility a:hover, .hg-utility a:focus-visible { color: #e6c875; }
+.hg-utility a:focus-visible { outline: 2px solid #d4af37; outline-offset: 2px; }
+
+.hg-theme .hg-nav__bar { min-height: 68px; }
+.hg-theme .hg-nav__brand img { height: 34px; width: auto; }
+.hg-theme .hg-nav__trigger { color: #f2f4f6; }
+.hg-theme .hg-nav__trigger:hover,
+.hg-theme .hg-nav__trigger.is-open { background: rgba(230, 200, 117, 0.10); color: #e6c875; }
+.hg-theme .hg-nav__trigger.is-open::after,
+.hg-theme .hg-nav__trigger:hover::after { background: #d4af37; }
+.hg-theme .hg-nav__caret { opacity: 0.7; }
+.hg-theme .hg-nav__trigger:focus-visible,
+.hg-theme .hg-nav__icon:focus-visible,
+.hg-theme .hg-nav__text-link:focus-visible,
+.hg-theme .hg-mega__link:focus-visible,
+.hg-theme .hg-drawer__toggle:focus-visible { outline: 3px solid #d4af37; outline-offset: 2px; }
+
+.hg-theme .hg-nav__utility .ch247-locale__trigger {
+  background: transparent;
+  border-color: #3b4450;
+  color: #e5e4e2;
+  font-size: 0.78rem;
+}
+.hg-theme .hg-nav__utility .ch247-locale__trigger:hover,
+.hg-theme .hg-nav__utility .ch247-locale__trigger[aria-expanded='true'] {
+  background: rgba(230, 200, 117, 0.10);
+  border-color: #d4af37;
+  color: #e6c875;
+}
+.hg-theme .hg-nav__icon,
+.hg-theme .hg-nav__text-link { color: #eef0f2; }
+.hg-theme .hg-nav__icon:hover { background: rgba(230, 200, 117, 0.12); color: #e6c875; }
+.hg-theme .hg-nav__text-link:hover { color: #e6c875; }
+.hg-theme .hg-nav__avatar {
+  background: rgba(212, 175, 55, 0.14);
+  border: 1px solid rgba(212, 175, 55, 0.42);
+  color: #e6c875;
+}
+.hg-theme .hg-nav__avatar:hover { background: rgba(212, 175, 55, 0.24); }
+
+/* ---- GoDaddy: full-width dark mega panel with a highlighted promo column ---- */
+.hg-theme .hg-mega {
+  background: #171e27;
+  border: 1px solid #2b3440;
+  border-top: 2px solid #d4af37;
+  border-radius: 0 0 6px 6px;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.50);
+}
+.hg-theme .hg-mega__inner { width: min(1440px, 100%); }
+.hg-theme .hg-mega__intro {
+  background: linear-gradient(165deg, #202a35 0%, #151c24 100%);
+  border-right: 1px solid #2b3440;
+}
+.hg-theme .hg-mega__eyebrow,
+.hg-theme .hg-mega__featured-label { color: #e6c875; }
+.hg-theme .hg-mega__intro h2 { color: #fff; }
+.hg-theme .hg-mega__blurb { color: #aab4bf; }
+.hg-theme .hg-mega__featured {
+  background: linear-gradient(150deg, #2b2415 0%, #1b1a14 100%);
+  border-color: rgba(212, 175, 55, 0.45);
+  color: #f5f1e6;
+}
+.hg-theme .hg-mega__featured:hover { color: #fff; box-shadow: 0 12px 30px rgba(0, 0, 0, 0.40); }
+.hg-theme .hg-mega__featured strong { color: #fff; }
+.hg-theme .hg-mega__featured > span { color: #cbc6b6; }
+.hg-theme .hg-mega__featured .hg-link { color: #e6c875; }
+.hg-theme .hg-mega__group h3 { color: #e6c875; }
+.hg-theme .hg-mega__link { color: #e9edf1; }
+.hg-theme .hg-mega__link:hover { background: rgba(230, 200, 117, 0.10); }
+.hg-theme .hg-mega__link-icon { background: rgba(212, 175, 55, 0.14); color: #e6c875; }
+.hg-theme .hg-mega__link-desc { color: #98a4b0; }
+.hg-theme .hg-badge { background: rgba(212, 175, 55, 0.16); color: #e6c875; }
+.hg-theme .hg-mega__foot { background: #121820; border-top: 1px solid #2b3440; color: #98a4b0; }
+.hg-theme .hg-mega__foot .hg-link { color: #e6c875; }
+
+/* Signed-in second row stays in the same dark family. */
+.hg-theme .hg-subnav { background: #161d25; border-bottom: 1px solid #262e38; box-shadow: none; }
+.hg-theme .hg-subnav a { color: #aeb7c0; }
+.hg-theme .hg-subnav a:hover,
+.hg-theme .hg-subnav a.active { color: #e6c875; border-bottom-color: #d4af37; }
+
+/* ---- Amazon: back-to-top strip, four-column directory, locale row, legal band ---- */
+.hg-theme .hg-footer { background: #232f3e; border-top: 0; color: #d6dade; margin-top: auto; }
+.hg-footer__top {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  background: #37475a;
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+}
+.hg-footer__top:hover, .hg-footer__top:focus-visible { background: #485769; color: #e6c875; }
+.hg-footer__directory { padding: 44px 0 48px; }
+.hg-theme .hg-footer__columns { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 36px; }
+.hg-theme .hg-footer__column h2 {
+  margin: 0 0 16px;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  color: #fff;
+}
+.hg-theme .hg-footer__column ul { display: grid; gap: 5px; }
+/* Amazon's directory is dense: the long columns flow into two internal sub-columns. At four
+   270px-wide topics those sub-columns are ~130px, so labels wrap at spaces rather than mid-word —
+   `overflow-wrap` stays `normal` for exactly that reason. Every destination is still rendered. */
+.hg-theme .hg-footer__column--wide ul {
+  display: block;
+  columns: 2;
+  column-gap: 14px;
+}
+.hg-theme .hg-footer__column--wide li { break-inside: avoid; margin: 0 0 5px; }
+.hg-theme .hg-footer__column a {
+  display: inline-block;
+  min-height: 20px;
+  color: #d6dade;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  text-decoration: none;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+.hg-theme .hg-footer__column a:hover { color: #fff; text-decoration: underline; }
+
+.hg-footer__locale-band { border-top: 1px solid #3b4757; }
+.hg-footer__locale-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 26px 0;
+}
+.hg-footer__brand { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.hg-footer__brand img { height: 34px; width: auto; }
+.hg-footer__tagline { font-size: 0.82rem; color: #9aa6b2; }
+.hg-footer__locale { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.hg-footer__locale-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 32px;
+  padding: 6px 12px;
+  border: 1px solid #6b7684;
+  border-radius: 4px;
+  color: #e9edf1;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.hg-footer__signup { flex: 0 0 auto; }
+
+.hg-footer__legal { background: #0d1116; padding: 30px 0 34px; text-align: center; }
+.hg-footer__legal-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 20px; }
+.hg-footer__legal-links a { color: #c7ced6; font-size: 0.76rem; text-decoration: none; }
+.hg-footer__legal-links a:hover { color: #e6c875; text-decoration: underline; }
+.hg-footer__copyright { margin: 16px 0 0; color: #8b96a2; font-size: 0.74rem; }
+
+/* ---- Responsive: same breakpoints, dark chrome, no horizontal overflow ---- */
+@media (max-width: 1439px) {
+  .hg-theme .hg-nav__toggle { background: #1b242c; border-color: #3b4450; }
+  .hg-theme .ch247-menu-toggle__bar { background: #f2f4f6 !important; }
+  .hg-theme .hg-nav__collapsible {
+    background: #0d1116;
+    border-top: 1px solid #2b3440;
+    box-shadow: 0 24px 50px rgba(0, 0, 0, 0.55);
+  }
+  .hg-theme .hg-nav__utility,
+  .hg-theme .hg-nav__actions { border-bottom-color: #2b3440; }
+  .hg-theme .hg-drawer__group { border-bottom-color: #2b3440; }
+  .hg-theme .hg-drawer__toggle { color: #f2f4f6; }
+  .hg-theme .hg-drawer__subgroup h3 { color: #e6c875; }
+  .hg-theme .hg-drawer__link { color: #e9edf1; }
+  .hg-theme .hg-drawer__link:hover { background: rgba(230, 200, 117, 0.10); }
+  .hg-theme .hg-drawer__all { color: #e6c875; }
+}
+@media (max-width: 1080px) {
+  .hg-theme .hg-footer__columns { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hg-footer__locale-inner { flex-wrap: wrap; }
+}
+@media (max-width: 768px) {
+  .hg-utility { display: none; }
+}
+@media (max-width: 640px) {
+  /* Amazon stacks its link groups on a phone; two narrow columns keep all 94 destinations
+     reachable without a three-thousand-pixel scroll. */
+  .hg-theme .hg-footer__columns { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+  .hg-theme .hg-footer__column--wide ul { columns: 1; }
+  .hg-theme .hg-footer__column h2 { font-size: 0.9rem; }
+  .hg-theme .hg-footer__column a { font-size: 0.75rem; }
+  .hg-footer__directory { padding: 32px 0; }
+  .hg-footer__locale-inner { flex-direction: column; align-items: flex-start; gap: 18px; }
+  .hg-footer__legal-links { gap: 8px 14px; }
+}
