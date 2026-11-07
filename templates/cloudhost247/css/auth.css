@@ -44,7 +44,7 @@
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--ch-green, #16704b);
+  color: var(--ch-green, #5f450a);
 }
 
 .ch-auth__card h1 {
@@ -82,7 +82,7 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--ch-green, #16704b);
+  background: var(--ch-green, #5f450a);
   transform: translateY(-1px);
 }
 
@@ -110,7 +110,7 @@
 .ch-auth__field > label {
   font-size: 0.85rem;
   font-weight: 650;
-  color: var(--ch-ink, #0c1c26);
+  color: var(--ch-ink, #10171d);
   margin: 0;
 }
 
@@ -120,7 +120,7 @@
   border: 1px solid var(--ch-line-strong, #c3d0ca);
   border-radius: 8px;
   background: #fff;
-  color: var(--ch-ink, #0c1c26);
+  color: var(--ch-ink, #10171d);
   font-size: 0.95rem;
   width: 100%;
 }
@@ -130,8 +130,8 @@
 }
 
 .ch-auth__field .form-control:focus {
-  border-color: var(--ch-green, #16704b);
-  box-shadow: 0 0 0 3px rgba(22, 112, 75, 0.15);
+  border-color: var(--ch-green, #5f450a);
+  box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.15);
   outline: none;
 }
 
@@ -175,7 +175,7 @@
   align-items: flex-start;
   font-size: 0.86rem;
   line-height: 1.55;
-  color: var(--ch-ink, #0c1c26);
+  color: var(--ch-ink, #10171d);
   margin: 0;
 }
 
@@ -184,7 +184,7 @@
   width: 18px;
   height: 18px;
   margin: 2px 0 0;
-  accent-color: var(--ch-green, #16704b);
+  accent-color: var(--ch-green, #5f450a);
 }
 
 .ch-auth__submit {
@@ -193,9 +193,9 @@
   justify-content: center;
   min-height: 48px;
   padding: 0 22px;
-  border: 1px solid var(--ch-green, #16704b);
+  border: 1px solid var(--ch-green, #5f450a);
   border-radius: 8px;
-  background: var(--ch-green, #16704b);
+  background: var(--ch-green, #5f450a);
   color: #fff;
   font-size: 0.95rem;
   font-weight: 650;
@@ -204,12 +204,12 @@
 }
 
 .ch-auth__submit:hover {
-  background: var(--ch-green-dark, #0f5537);
-  border-color: var(--ch-green-dark, #0f5537);
+  background: var(--ch-green-dark, #4a3608);
+  border-color: var(--ch-green-dark, #4a3608);
 }
 
 .ch-auth__submit:focus-visible {
-  outline: 3px solid var(--ch-mint-strong, #2fd58a);
+  outline: 3px solid var(--ch-mint-strong, #d4af37);
   outline-offset: 2px;
 }
 
@@ -225,7 +225,7 @@
 }
 
 .ch-auth__links a {
-  color: var(--ch-green, #16704b);
+  color: var(--ch-green, #5f450a);
   font-weight: 600;
 }
 
@@ -268,7 +268,7 @@
   border-radius: 8px;
   border: 1px solid var(--ch-line, #e2e9e6);
   background: var(--ch-soft, #f4f8f6);
-  color: var(--ch-ink, #0c1c26);
+  color: var(--ch-ink, #10171d);
   padding: 12px 14px;
   font-size: 0.88rem;
   margin-bottom: 16px;
@@ -282,8 +282,8 @@
 
 .ch-auth .alert-success {
   background: var(--ch-ok-soft, #eef8f2);
-  border-color: #c2e6d3;
-  color: var(--ch-green, #16704b);
+  border-color: #e3d3a6;
+  color: var(--ch-green, #5f450a);
 }
 
 /* Password strength meter, driven by the vendor PasswordStrength.js the form loads. */
@@ -297,7 +297,7 @@
 .ch-auth__meter > div {
   height: 100%;
   width: 0;
-  background: var(--ch-green, #16704b);
+  background: var(--ch-green, #5f450a);
   transition: width 0.18s ease;
 }
 
@@ -365,5 +365,5 @@
 }
 
 .ch-auth__cancel:hover {
-  color: var(--ch-ink, #0c1c26);
+  color: var(--ch-ink, #10171d);
 }

@@ -38,3 +38,8 @@ __pycache__/
 /tools/data/overrides.json
 /tools/data/ratelimit/
 /tools/data/security.log
+
+# Local image-search acquisition previews (working copies, not release assets).
+# Provenance for the shipped photography lives in assets/images/cloudhost247/photography/sources.json
+# and docs/PHOTOGRAPHY-LICENSES.md.
+/image-search/

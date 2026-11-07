@@ -236,7 +236,7 @@
 .ch247-provider-card__count { font-size: 13px; font-weight: 600; margin-bottom: 10px; }
 
 .ch247-provider-card--microsoft365 .ch247-provider-card__features li::before { background: #1f7ae0; }
-.ch247-provider-card--google .ch247-provider-card__features li::before { background: #1aa260; }
+.ch247-provider-card--google .ch247-provider-card__features li::before { background: #d4af37; }
 
 /* ------------------------------------------------------------ plan cards */
 

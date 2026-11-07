@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import type { Env } from '../config/env';
 import { isDatabaseReachable } from '../db/pool';
+import type { Queryable } from '../db/types';
 
 /**
  * /health — liveness. Confirms the Node process is up and answering HTTP requests. Must stay
@@ -19,13 +20,13 @@ import { isDatabaseReachable } from '../db/pool';
  *   cannot check — a status page that shows a green tick it never earned is worse than no status
  *   page at all.
  */
-export async function registerHealthRoutes(app: FastifyInstance, env: Env) {
+export async function registerHealthRoutes(app: FastifyInstance, env: Env, pool?: Queryable) {
   app.get('/health', async () => {
     return { status: 'ok' };
   });
 
   app.get('/ready', async (_request, reply) => {
-    const dbOk = await isDatabaseReachable(env);
+    const dbOk = await isDatabaseReachable(env, 3000, pool);
     if (!dbOk) {
       reply.code(503);
       return { status: 'error', checks: { database: 'error' } };
@@ -37,7 +38,7 @@ export async function registerHealthRoutes(app: FastifyInstance, env: Env) {
     const started = Date.now();
     let website = 'operational';
     try {
-      await isDatabaseReachable(env);
+      await isDatabaseReachable(env, 3000, pool);
     } catch {
       website = 'degraded';
     }

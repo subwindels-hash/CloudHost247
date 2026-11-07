@@ -5,14 +5,17 @@
    the one that has to win, because it is what keeps this site and the CloudHost247
    application on one palette, one type scale and one focus treatment.
    Do not reorder these two lines. *}
-<link rel="stylesheet" href="{$WEB_ROOT}/templates/cloudhost247/css/site.css?v=20261019">
-<link rel="stylesheet" href="{$WEB_ROOT}/templates/cloudhost247/css/design-system.css?v=20261016">
-<link rel="stylesheet" href="{$WEB_ROOT}/templates/cloudhost247/css/auth.css?v=20261019">
+<link rel="stylesheet" href="{$WEB_ROOT}/templates/cloudhost247/css/site.css?v=20261107">
+<link rel="stylesheet" href="{$WEB_ROOT}/templates/cloudhost247/css/design-system.css?v=20261107">
+<link rel="stylesheet" href="{$WEB_ROOT}/templates/cloudhost247/css/auth.css?v=20261107">
+{* Generated copy of shared/site/metals.css. Must load last: it restyles the metallic finish,
+   depth and motion primitives on top of site.css and design-system.css. *}
+<link rel="stylesheet" href="{$WEB_ROOT}/templates/cloudhost247/css/metals.css?v=20261107">
 <link rel="icon" href="{$WEB_ROOT}/assets/images/cloudhost247/favicon/favicon.ico" sizes="any">
 <link rel="icon" type="image/svg+xml" href="{$WEB_ROOT}/assets/images/cloudhost247/brand/icon-mark.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="{$WEB_ROOT}/assets/images/cloudhost247/favicon/apple-touch-icon.png">
 <link rel="manifest" href="{$WEB_ROOT}/assets/images/cloudhost247/favicon/site.webmanifest">
-<meta name="theme-color" content="#0a1620">
+<meta name="theme-color" content="#0d1116">
 {if !$ch247Builder}
 <meta name="description" content="{$ch247Site.description|escape}">
 {if $ch247Site.canonical}<link rel="canonical" href="{$ch247Site.canonical|escape}">{/if}
@@ -27,3 +30,5 @@
 {if !$ch247Site.public || $cloudhost247Page.missing || $ch247Site.path == 'notfound.php' || $ch247Site.path == 'site-search.php' || $ch247Site.path == 'service-error.php'}<meta name="robots" content="noindex,follow">{/if}
 {/if}
 <script src="{$WEB_ROOT}/templates/cloudhost247/js/site.js?v=20261016" defer></script>
+{* Generated copy of shared/site/motion.js — identical behaviour to the SPA controller. *}
+<script src="{$WEB_ROOT}/templates/cloudhost247/js/motion.js?v=20261107" defer></script>

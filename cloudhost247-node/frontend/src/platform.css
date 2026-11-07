@@ -1,306 +1,11 @@
 /*
- * CLOUDHOST247 platform services — mega navigation, builder, store, marketing, logo maker, inbox.
+ * CLOUDHOST247 platform services — builder, store, marketing, logo maker, inbox.
  *
  * Colours, radii and spacing come from the brand tokens in styles.css (--ch247-*), so these new
  * surfaces look like the rest of CloudHost247 rather than a bolted-on section. Everything here is
- * responsive: the mega panels collapse into an accordion drawer below 1024px, and no rule in this
- * file can cause horizontal overflow (long words wrap, tables scroll inside their own container).
+ * responsive: the shared menu / mega menu / drawer live in hostinger-chrome.css, and no rule in
+ * this file can cause horizontal overflow (long words wrap, tables scroll inside their own container).
  */
-
-/* ------------------------------------------------------------------------------------------
- * Mega navigation
- * ---------------------------------------------------------------------------------------- */
-
-.ch247-platform-nav {
-  position: static;
-}
-
-.ch247-platform-nav__bar {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.ch247-platform-nav__item {
-  position: static;
-}
-
-.ch247-platform-nav__trigger {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 44px;
-  padding: 10px 12px;
-  border: none;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  font-size: 0.92rem;
-  cursor: pointer;
-  text-decoration: none;
-  border-radius: 8px;
-  white-space: nowrap;
-}
-
-.ch247-platform-nav__trigger:hover,
-.ch247-platform-nav__trigger.is-open {
-  background: rgba(22, 112, 75, 0.08);
-  color: var(--ch247-primary);
-}
-
-.ch247-platform-nav__trigger:focus-visible,
-.ch247-mega-link:focus-visible,
-.ch247-mobile-nav__toggle:focus-visible,
-.ch247-mobile-nav__link:focus-visible {
-  outline: 3px solid var(--ch247-primary);
-  outline-offset: 2px;
-}
-
-.ch247-nav-loading {
-  padding: 10px 12px;
-  font-size: 0.85rem;
-  color: rgba(22, 35, 58, 0.6);
-}
-
-.ch247-mega-panel {
-  position: absolute;
-  inset-inline: 16px;
-  top: 100%;
-  display: grid;
-  grid-template-columns: minmax(220px, 1fr) minmax(0, 3fr);
-  gap: 24px;
-  padding: 24px;
-  background: #fff;
-  color: var(--ch247-ink);
-  border: 1px solid var(--ch247-border);
-  border-top: 3px solid var(--ch247-primary);
-  border-radius: 0 0 14px 14px;
-  box-shadow: 0 24px 48px rgba(22, 35, 58, 0.16);
-  z-index: 300;
-  max-height: 76vh;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-}
-
-.ch247-mega-intro {
-  background: var(--ch247-bg);
-  border: 1px solid var(--ch247-border);
-  padding: 20px;
-  border-radius: 10px;
-}
-
-.ch247-mega-intro h2 {
-  margin: 0 0 8px;
-  font-size: 1.15rem;
-}
-
-.ch247-mega-intro h3 {
-  margin: 18px 0 6px;
-  font-size: 0.82rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: rgba(22, 35, 58, 0.7);
-}
-
-.ch247-mega-intro p {
-  margin: 0 0 10px;
-  font-size: 0.85rem;
-  line-height: 1.5;
-  color: rgba(22, 35, 58, 0.78);
-}
-
-.ch247-mega-groups {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
-}
-
-.ch247-mega-groups h3 {
-  margin: 0 0 10px;
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: rgba(22, 35, 58, 0.62);
-}
-
-.ch247-mega-groups ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 2px;
-}
-
-.ch247-mega-link {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 9px 10px;
-  border-radius: 8px;
-  text-decoration: none;
-  color: inherit;
-}
-
-/* The icon is decorative; it inherits the link colour and never becomes the only signal. */
-.ch247-nav-icon {
-  width: 18px;
-  height: 18px;
-  flex: 0 0 18px;
-  margin-top: 2px;
-  color: var(--ch247-primary);
-}
-
-.ch247-mega-link__body {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.ch247-mega-link:hover {
-  background: rgba(22, 112, 75, 0.06);
-}
-
-.ch247-mega-link__label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 600;
-  font-size: 0.92rem;
-  color: var(--ch247-ink);
-  overflow-wrap: anywhere;
-}
-
-.ch247-mega-link__desc {
-  display: block;
-  margin-top: 2px;
-  font-size: 0.78rem;
-  line-height: 1.45;
-  color: rgba(22, 35, 58, 0.66);
-}
-
-/* Badges are deliberately few (at most two per section) — see src/navigation/mega-menu.ts. */
-.ch247-nav-badge {
-  display: inline-block;
-  padding: 2px 7px;
-  border-radius: 999px;
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.ch247-nav-badge--new {
-  background: rgba(22, 112, 75, 0.12);
-  color: var(--ch247-primary, #16704b);
-}
-
-.ch247-nav-badge--popular {
-  background: rgba(22, 112, 75, 0.16);
-  color: var(--ch247-primary, #16704b);
-}
-
-.ch247-nav-badge--trending {
-  background: rgba(234, 88, 12, 0.14);
-  color: #b45309;
-}
-
-.ch247-nav-badge--included {
-  background: rgba(22, 35, 58, 0.1);
-  color: #16233a;
-}
-
-.ch247-nav-badge--sale {
-  background: rgba(220, 38, 38, 0.12);
-  color: #b91c1c;
-}
-
-/* ------------------------------------------------------------------------------------------
- * Mobile drawer / accordion
- * ---------------------------------------------------------------------------------------- */
-
-.ch247-mobile-nav {
-  display: none;
-}
-
-.ch247-mobile-nav__group {
-  border-bottom: 1px solid var(--ch247-border);
-}
-
-.ch247-mobile-nav__toggle {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  min-height: 48px;
-  padding: 12px 4px;
-  border: none;
-  background: transparent;
-  font: inherit;
-  font-size: 0.98rem;
-  font-weight: 600;
-  color: var(--ch247-ink);
-  text-decoration: none;
-  cursor: pointer;
-  text-align: left;
-}
-
-/* The panel sets display:grid, which would override the hidden attribute and leave every
- * closed menu drawn as an empty white band under the header. */
-.ch247-mega-panel[hidden] {
-  display: none;
-}
-
-.ch247-mobile-nav__panel {
-  padding: 0 0 12px 4px;
-}
-
-.ch247-mobile-nav__subgroup h3 {
-  margin: 12px 0 6px;
-  font-size: 0.74rem;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: rgba(22, 35, 58, 0.6);
-}
-
-.ch247-mobile-nav__subgroup ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.ch247-mobile-nav__link {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  min-height: 44px;
-  padding: 10px 8px;
-  border-radius: 8px;
-  text-decoration: none;
-  color: inherit;
-}
-
-.ch247-mobile-nav__link:hover {
-  background: rgba(22, 112, 75, 0.06);
-}
-
-@media (max-width: 1023px) {
-  .ch247-platform-nav {
-    display: none;
-  }
-
-  .ch247-mobile-nav {
-    display: block;
-  }
-
-  .ch247-mega-panel {
-    display: none;
-  }
-}
 
 /* ------------------------------------------------------------------------------------------
  * Shared service page pieces
@@ -361,8 +66,8 @@
 }
 
 .ch247-pill--ok {
-  background: rgba(22, 112, 75, 0.16);
-  color: var(--ch247-primary, #16704b);
+  background: rgba(184, 134, 11, 0.16);
+  color: var(--ch247-primary, #5f450a);
 }
 
 .ch247-pill--warn {
@@ -379,7 +84,7 @@
   margin: 8px 0;
   padding: 10px 12px;
   border-left: 3px solid var(--ch247-primary);
-  background: rgba(22, 112, 75, 0.05);
+  background: rgba(184, 134, 11, 0.05);
   font-size: 0.84rem;
   line-height: 1.5;
   border-radius: 0 8px 8px 0;
@@ -435,11 +140,11 @@
 }
 
 .ch247-thread-list button:hover {
-  background: rgba(22, 112, 75, 0.05);
+  background: rgba(184, 134, 11, 0.05);
 }
 
 .ch247-thread-list .is-selected {
-  background: rgba(22, 112, 75, 0.09);
+  background: rgba(184, 134, 11, 0.09);
 }
 
 .ch247-message {
@@ -456,7 +161,7 @@
 }
 
 .ch247-message--outbound {
-  background: rgba(22, 112, 75, 0.05);
+  background: rgba(184, 134, 11, 0.05);
 }
 
 .ch247-message__meta {
@@ -483,7 +188,7 @@
 
 .ch247-logo-card.is-selected {
   border-color: var(--ch247-primary);
-  box-shadow: 0 0 0 2px rgba(22, 112, 75, 0.15);
+  box-shadow: 0 0 0 2px rgba(184, 134, 11, 0.15);
 }
 
 .ch247-logo-card svg {
@@ -542,10 +247,6 @@
 }
 
 @media (max-width: 767px) {
-  .ch247-mega-panel {
-    display: none;
-  }
-
   .ch247-service-grid,
   .ch247-logo-gallery,
   .ch247-kanban {
@@ -655,24 +356,6 @@
   border-radius: 5px;
   border: 1px solid var(--ch247-border);
   display: inline-block;
-}
-
-.ch247-mobile-nav-host {
-  display: none;
-}
-
-@media (max-width: 1023px) {
-  /* Below the mega-panel breakpoint the bar would open panels that are not rendered, so the
-     accordion drawer replaces it — never a row of buttons that appear to do nothing. */
-  .ch247-platform-nav {
-    display: none;
-  }
-
-  .ch247-mobile-nav-host {
-    display: block;
-    flex-basis: 100%;
-    width: 100%;
-  }
 }
 
 /* --------------------------------------------------------------------------------------------

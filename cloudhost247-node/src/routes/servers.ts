@@ -14,6 +14,7 @@ import type { Queryable } from '../db/types';
 import { authenticate } from '../lib/require-auth';
 import { requireRole } from '../lib/require-role';
 import { ValidationError, NotFoundError, ConflictError } from '../lib/errors';
+import { catalogIdSchema } from '../lib/identifier-contract';
 import { auditRequest } from '../lib/audit';
 import {
   createServer,
@@ -79,22 +80,25 @@ const patchServerSchema = createServerSchema.partial().extend({
   status: z.enum(['active', 'provisioning', 'maintenance', 'offline', 'retired']).optional(),
 });
 
+// Catalogue ids may be deterministic seeded values (version nibble 0), which PostgreSQL's `uuid`
+// domain accepts but zod 4's RFC-4122-only `z.string().uuid()` rejects. Use the shared DB-domain
+// contract everywhere a request carries a catalogue identifier — see src/lib/identifier-contract.ts.
 const orderServerSchema = z.object({
-  planId: z.string().uuid(),
+  planId: catalogIdSchema,
   billingPeriod: z.enum(['one_time','monthly','quarterly','semi_annually','annually']),
-  providerId: z.string().uuid(),
-  regionId: z.string().uuid(),
-  datacenterId: z.string().uuid().nullable().optional(),
-  operatingSystemVersionId: z.string().uuid(),
+  providerId: catalogIdSchema,
+  regionId: catalogIdSchema,
+  datacenterId: catalogIdSchema.nullable().optional(),
+  operatingSystemVersionId: catalogIdSchema,
   architecture: z.enum(['x86_64','arm64']),
   serverType: z.enum(['VPS','DEDICATED','CLOUD']),
-  sshKeyIds: z.array(z.string().uuid()).min(1).max(20),
+  sshKeyIds: z.array(catalogIdSchema).min(1).max(20),
   hostname: z.string().min(1).max(253),
-  controlPanelId: z.string().uuid().nullable().optional(),
+  controlPanelId: catalogIdSchema.nullable().optional(),
 });
 
 const reinstallServerSchema = z.object({
-  operatingSystemVersionId: z.string().uuid(),
+  operatingSystemVersionId: catalogIdSchema,
   architecture: z.enum(['x86_64','arm64']),
   confirmation: z.literal('REINSTALL'),
 });
@@ -109,7 +113,7 @@ const cancelServerSchema = z.object({
 const resizeServerSchema = z.object({
   // A plan id is only a catalogue choice. Price, provider size metadata and eligibility are all
   // resolved server-side before an invoice is issued.
-  targetPlanId: z.string().uuid(),
+  targetPlanId: catalogIdSchema,
 });
 
 const createSnapshotSchema = z.object({

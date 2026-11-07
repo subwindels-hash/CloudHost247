@@ -61,8 +61,8 @@ class CartSkinTests(unittest.TestCase):
     def test_colour_comes_from_a_shared_token_first(self):
         # Every brand-filled control must read the design-system variable, with the literal only
         # as a fallback for a parent page that loads without the site stylesheet.
-        self.assertIn('var(--ch247-primary, #16704b)', self.body)
-        self.assertIn('var(--ch-ink, #0c1c26)', self.body)
+        self.assertIn('var(--ch247-primary, #5f450a)', self.body)
+        self.assertIn('var(--ch-ink, #10171d)', self.body)
         self.assertIn('var(--ch-line, #dbe3e0)', self.body)
 
     def test_the_shared_scope_is_scoped_to_the_cart(self):

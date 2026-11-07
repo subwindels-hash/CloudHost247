@@ -13,10 +13,10 @@
    -------------------------------------------------------------------------- */
 
 #order-standard_cart {
-  --ch247-cart-primary: var(--ch247-primary, #16704b);
-  --ch247-cart-primary-dark: var(--ch-green-dark, #0f5537);
-  --ch247-cart-accent: var(--ch247-accent, #7ff0b4);
-  --ch247-cart-ink: var(--ch-ink, #0c1c26);
+  --ch247-cart-primary: var(--ch247-primary, #5f450a);
+  --ch247-cart-primary-dark: var(--ch-green-dark, #4a3608);
+  --ch247-cart-accent: var(--ch247-accent, #e6c875);
+  --ch247-cart-ink: var(--ch-ink, #10171d);
   --ch247-cart-muted: var(--ch-muted, #56686f);
   --ch247-cart-line: var(--ch-line, #dbe3e0);
   --ch247-cart-soft: var(--ch-soft, #f4f8f6);
@@ -109,7 +109,7 @@
 
 #order-standard_cart .form-control:focus {
   border-color: var(--ch247-cart-primary);
-  box-shadow: 0 0 0 3px rgba(22, 112, 75, 0.15);
+  box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.15);
 }
 
 #order-standard_cart .form-group label {
@@ -154,7 +154,7 @@
    everywhere else on the site. */
 #order-standard_cart .alert-success {
   background: var(--ch-ok-soft, #eef8f2);
-  border-color: #c2e6d3;
+  border-color: #e3d3a6;
   color: var(--ch247-cart-primary);
 }
 
@@ -175,7 +175,7 @@
 
 /* Focus: the site's indicator, on every control the parent renders inside the cart. */
 #order-standard_cart :where(a, button, input, select, textarea):focus-visible {
-  outline: 3px solid var(--ch247-cart-primary, #16704b);
+  outline: 3px solid var(--ch247-cart-primary, #5f450a);
   outline-offset: 2px;
 }
 

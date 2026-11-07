@@ -87,7 +87,7 @@ export function AdminRefundModal({ isOpen, onClose, invoice, onRefundSuccess }: 
           </div>
           <div className="flex justify-between">
             <span>Total Collected:</span>
-            <span className="text-emerald-600 dark:text-emerald-400">
+            <span className="text-amber-600 dark:text-amber-400">
               ${(totalPaidCents / 100).toFixed(2)}
             </span>
           </div>

@@ -213,7 +213,7 @@ export default function DnsManagementPage() {
                     border: '1px solid #e2e8f0',
                     borderRadius: 8,
                     marginBottom: '0.5rem',
-                    background: selectedZone?.id === zone.id ? '#e9f7ef' : '#fff',
+                    background: selectedZone?.id === zone.id ? '#fbf5e4' : '#fff',
                     cursor: 'pointer',
                   }}
                   onClick={() => loadZoneRecords(zone)}
@@ -252,7 +252,7 @@ export default function DnsManagementPage() {
               </div>
             </div>
 
-            <div style={{ margin: '1rem 0', background: '#f8fafc', padding: '0.85rem', borderRadius: 8, border: '1px solid #e2e8f0' }}>
+            <div style={{ margin: '1rem 0', background: '#f5f5f3', padding: '0.85rem', borderRadius: 8, border: '1px solid #e2e8f0' }}>
               <span style={{ fontSize: '0.82rem', color: '#64748b', fontWeight: 600 }}>AUTHORITATIVE NAMESERVERS</span>
               <div style={{ display: 'flex', gap: '1rem', marginTop: '0.35rem', fontFamily: 'monospace', fontSize: '0.9rem' }}>
                 {selectedZone.nameservers.map((ns) => (

@@ -1,0 +1,394 @@
+/* =============================================================================
+   CloudHost247 — Metals & Depth
+   -----------------------------------------------------------------------------
+   CANONICAL SOURCE. Edit this file, then run:
+
+       node scripts/site/generate.mjs
+
+   which copies it to `templates/cloudhost247/css/metals.css` for the WHMCS/PHP
+   surface. The SPA imports this file directly, last, so the treatment is
+   identical on both surfaces. Never edit the copy.
+
+   WHY THIS FILE EXISTS
+   The design system owns the palette, type, radius and spacing. This layer owns
+   *finish* and *motion*: how gold and silver behave as materials (specular
+   highlights, brushed grain, edge light, cast shadows) and how a small number
+   of elements move in 3D. Keeping them separate means a colour change never
+   rewrites the motion contract and vice versa.
+
+   DESIGN RULES
+   1. Gold and silver are GRADIENTS, not flat swatches. Anisotropic multi-stop
+      ramps plus a moving specular band are what make a metal read as metal.
+   2. Motion is opt-in. Only `[data-tilt]`, `[data-parallax]`, `[data-reveal]`
+      and the two hero floaters move. Nothing else floats, spins or bounces.
+   3. All movement uses GPU-friendly transform/opacity, is capped in amplitude,
+      and is disabled below 1024 px and under `prefers-reduced-motion`.
+   4. No layout-affecting animation: nothing animates width/height/top/left, so
+      there is no cumulative layout shift and no Core Web Vitals penalty.
+   ========================================================================== */
+
+:root {
+  /* ---- Metals: the physical palette -------------------------------------- */
+  --metal-gold: #d4af37;
+  --metal-gold-deep: #b8860b;
+  --metal-gold-champagne: #e6c875;
+  --metal-gold-shadow: #7a580c;
+  --metal-gold-ink: #5f450a;          /* 8.6:1 on white — safe for body text */
+  --metal-gold-ink-2: #4a3608;
+  --metal-silver: #c0c0c0;
+  --metal-silver-platinum: #e5e4e2;
+  --metal-silver-dark: #858585;
+  --metal-silver-ink: #4d5257;        /* 7.7:1 on white — safe for body text */
+  --metal-ink: #0d1116;
+  --metal-ink-2: #171d24;
+
+  /* Anisotropic ramps. The very light and very dark stops are the reflected
+     environment; the sharp light band at 34% is the specular highlight. */
+  --metal-ramp-gold: linear-gradient(
+    115deg,
+    #6b4d0c 0%, #b8860b 11%, #d4af37 23%, #f0d68a 32%, #fff4cf 37%,
+    #d4af37 47%, #a8780c 59%, #e6c875 72%, #b8860b 86%, #7a580c 100%
+  );
+  --metal-ramp-gold-soft: linear-gradient(
+    135deg, #fdf8e8 0%, #f0dfa6 28%, #e6c875 48%, #d4af37 70%, #b8860b 100%
+  );
+  --metal-ramp-silver: linear-gradient(
+    115deg,
+    #62676d 0%, #9ba1a8 11%, #c0c0c0 23%, #e5e4e2 32%, #ffffff 37%,
+    #c9cacc 47%, #858585 59%, #e5e4e2 72%, #a8adb3 86%, #62676d 100%
+  );
+  --metal-ramp-silver-soft: linear-gradient(
+    135deg, #ffffff 0%, #f2f2f0 26%, #e5e4e2 52%, #c0c0c0 78%, #9fa3a8 100%
+  );
+  --metal-grain: repeating-linear-gradient(
+    90deg, rgba(255, 255, 255, 0.055) 0 1px, rgba(0, 0, 0, 0.022) 1px 2px, transparent 2px 4px
+  );
+  --metal-specular: linear-gradient(
+    104deg, transparent 34%, rgba(255, 255, 255, 0.62) 46%,
+    rgba(255, 255, 255, 0.10) 54%, transparent 66%
+  );
+
+  /* Cast shadows tuned for a warm metal rather than a flat dark blob. */
+  --metal-shadow-gold: 0 18px 44px rgba(90, 63, 6, 0.20), 0 3px 10px rgba(90, 63, 6, 0.12);
+  --metal-shadow-silver: 0 18px 44px rgba(23, 29, 36, 0.16), 0 3px 10px rgba(23, 29, 36, 0.08);
+  --metal-edge-gold: inset 0 1px 0 rgba(255, 246, 214, 0.75), inset 0 -1px 0 rgba(101, 71, 7, 0.35);
+  --metal-edge-silver: inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(74, 79, 84, 0.24);
+
+  /* Motion contract: one easing curve and one duration scale. */
+  --metal-ease: cubic-bezier(0.22, 0.72, 0.24, 1);
+  --metal-fast: 180ms;
+  --metal-mid: 380ms;
+  --metal-slow: 720ms;
+}
+
+/* -----------------------------------------------------------------------------
+   1. Metal as a material — reusable surfaces
+   -------------------------------------------------------------------------- */
+.ch-metal {
+  position: relative;
+  isolation: isolate;
+  background: var(--metal-ramp-silver);
+  box-shadow: var(--metal-edge-silver), var(--metal-shadow-silver);
+  color: var(--metal-ink);
+}
+.ch-metal--gold { background: var(--metal-ramp-gold); box-shadow: var(--metal-edge-gold), var(--metal-shadow-gold); }
+.ch-metal--soft { background: var(--metal-ramp-silver-soft); }
+.ch-metal--gold-soft { background: var(--metal-ramp-gold-soft); }
+
+/* Brushed grain, then a specular band that only sweeps on interaction. The
+   band is a transform on a pseudo-element, so it is compositor-only. */
+.ch-metal::before,
+.ch-metal::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+}
+.ch-metal::before { background: var(--metal-grain); opacity: 0.55; z-index: -1; }
+.ch-metal::after {
+  background: var(--metal-specular);
+  opacity: 0;
+  transform: translate3d(-120%, 0, 0);
+  transition: transform var(--metal-slow) var(--metal-ease), opacity var(--metal-mid) ease;
+  z-index: 2;
+}
+.ch-metal:hover::after,
+.ch-metal:focus-within::after { opacity: 0.42; transform: translate3d(120%, 0, 0); }
+
+/* Metallic text is a gradient clipped to glyphs — never a flat yellow. */
+.ch-metal-text {
+  background: var(--metal-ramp-gold);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+.ch-on-ink .ch-metal-text,
+.ch-dark .ch-metal-text {
+  background: linear-gradient(100deg, #b8860b 0%, #f0d68a 26%, #fff4cf 42%, #d4af37 62%, #e6c875 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+/* Buttons: real gold, with a lit top edge and a restrained 3D press. */
+.ch-btn.ch-metal-btn,
+.hg-btn.ch-metal-btn,
+.ch-site .ch-btn.ch-metal-btn {
+  background: var(--metal-ramp-gold);
+  background-size: 180% 100%;
+  background-position: 0% 50%;
+  color: #241a02 !important;
+  border: 1px solid rgba(122, 88, 12, 0.55);
+  box-shadow: var(--metal-edge-gold), var(--metal-shadow-gold);
+  transition: transform var(--metal-fast) var(--metal-ease),
+              box-shadow var(--metal-fast) var(--metal-ease),
+              background-position var(--metal-slow) var(--metal-ease);
+}
+.ch-btn.ch-metal-btn:hover,
+.hg-btn.ch-metal-btn:hover,
+.ch-site .ch-btn.ch-metal-btn:hover {
+  transform: translate3d(0, -2px, 0);
+  background-position: 100% 50%;
+  box-shadow: var(--metal-edge-gold), 0 24px 52px rgba(90, 63, 6, 0.28);
+}
+.ch-btn.ch-metal-btn:active,
+.hg-btn.ch-metal-btn:active { transform: translate3d(0, 0, 0); }
+
+/* -----------------------------------------------------------------------------
+   2. Depth — applied consistently to the existing card/button vocabulary
+   -------------------------------------------------------------------------- */
+.hg-theme .ch-btn,
+.hg-theme .hg-btn,
+.ch-ds .ch-btn { transition: transform var(--metal-fast) var(--metal-ease), box-shadow var(--metal-fast) var(--metal-ease), background var(--metal-fast) ease; }
+
+.hg-theme .hg-btn:hover,
+.hg-theme .hg-btn:focus-visible,
+.ch-ds .ch-btn:hover,
+.ch-ds .ch-btn:focus-visible {
+  transform: perspective(700px) translate3d(0, -2px, 0) rotateX(1.2deg);
+}
+
+/* Cards lift a few degrees, never spin. `perspective` is on the hovered
+   element itself so it cannot affect siblings' stacking or cause overflow. */
+.hg-theme .hg-plan,
+.hg-theme .hg-explore__card,
+.hg-theme .hg-usecase,
+.hg-theme .hg-card,
+.ch-ds .ch-card,
+.ch-ds .ch-plan,
+.ch-ds .ch-service-card,
+.ch-ds .ch-resource-card,
+.ch-site .ch-service-card,
+.ch-site .ch-resource-card,
+.ch-site .ch-card,
+.ch-site .ch-plan {
+  transform-style: preserve-3d;
+  transition: transform var(--metal-mid) var(--metal-ease),
+              box-shadow var(--metal-mid) var(--metal-ease),
+              border-color var(--metal-mid) ease;
+}
+.hg-theme .hg-plan:hover,
+.hg-theme .hg-explore__card:hover,
+.hg-theme .hg-usecase:hover,
+.hg-theme .hg-card:hover,
+.ch-ds .ch-card:hover,
+.ch-ds .ch-plan:hover,
+.ch-ds .ch-service-card:hover,
+.ch-ds .ch-resource-card:hover,
+.ch-site .ch-service-card:hover,
+.ch-site .ch-resource-card:hover,
+.ch-site .ch-card:hover,
+.ch-site .ch-plan:hover {
+  transform: perspective(1000px) translate3d(0, -6px, 0) rotateX(1.6deg) rotateY(-1.2deg);
+  box-shadow: 0 22px 48px rgba(23, 29, 36, 0.14), 0 2px 8px rgba(23, 29, 36, 0.07);
+  border-color: rgba(184, 134, 11, 0.42);
+}
+
+/* One thin gold edge on section heads — a highlight, not a border everywhere. */
+.ch-ds .ch-section-heading,
+.hg-theme .hg-section__head { position: relative; }
+.ch-ds .ch-section-heading::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: -14px;
+  width: 54px;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--metal-ramp-gold);
+  box-shadow: 0 2px 8px rgba(184, 134, 11, 0.30);
+}
+
+/* -----------------------------------------------------------------------------
+   3. Interactive 3D — driven by shared/site/motion.js via CSS custom properties
+   -------------------------------------------------------------------------- */
+[data-tilt] {
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
+  transform: perspective(1200px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y)) translate3d(0, 0, 0);
+  transform-style: preserve-3d;
+  transition: transform var(--metal-mid) var(--metal-ease);
+  will-change: transform;
+}
+[data-tilt].is-tilting { transition: none; }
+
+[data-parallax] {
+  --parallax-y: 0px;
+  transform: translate3d(0, var(--parallax-y), 0);
+  will-change: transform;
+}
+
+/* Reveal is additive: without JS the element is fully visible. */
+[data-reveal].is-revealed { animation: ch-reveal-in var(--metal-slow) var(--metal-ease) both; }
+@keyframes ch-reveal-in {
+  from { opacity: 0; transform: translate3d(0, 12px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+/* A gentle hero-only float. Nothing else on the page uses this. */
+.ch-float--ambient { animation: ch-float 11s ease-in-out infinite; }
+.ch-float--ambient-slow { animation: ch-float 14s ease-in-out infinite reverse; }
+@keyframes ch-float {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50%      { transform: translate3d(0, -9px, 0); }
+}
+
+/* Route transition: opacity only, so it cannot shift layout. */
+.ch247-main[data-route-transition] { animation: ch-route-in 320ms var(--metal-ease) both; }
+@keyframes ch-route-in { from { opacity: 0.55; } to { opacity: 1; } }
+
+/* -----------------------------------------------------------------------------
+   4. Photographic infrastructure frame (hero + product visuals)
+   -------------------------------------------------------------------------- */
+.ch-photo-frame {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 18px;
+  border: 1px solid rgba(212, 175, 55, 0.55);
+  background: var(--metal-ramp-silver);
+  padding: 7px;
+  box-shadow: var(--metal-edge-gold), 0 36px 78px rgba(13, 17, 22, 0.28);
+}
+.ch-photo-frame > picture,
+.ch-photo-frame > img { display: block; border-radius: 12px; overflow: hidden; }
+.ch-photo-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: saturate(0.86) contrast(1.04);
+}
+.ch-photo-frame::after {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  border-radius: 12px;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(13, 17, 22, 0.02) 40%, rgba(13, 17, 22, 0.34) 100%),
+              var(--metal-specular);
+  background-size: auto, 220% 100%;
+  background-position: center, -40% 0;
+  opacity: 0.72;
+  transition: background-position var(--metal-slow) var(--metal-ease);
+}
+.ch-photo-frame:hover::after { background-position: center, 140% 0; }
+.ch-photo-frame__label {
+  position: absolute;
+  z-index: 3;
+  left: 18px;
+  bottom: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  background: rgba(13, 17, 22, 0.76);
+  border: 1px solid rgba(230, 200, 117, 0.48);
+  color: #f7ecd0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  backdrop-filter: blur(6px);
+}
+.ch-photo-frame__label::before {
+  content: '';
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--metal-gold-champagne);
+  box-shadow: 0 0 0 3px rgba(230, 200, 117, 0.22);
+}
+
+/* Metal framing for the shared illustration component on BOTH surfaces. The
+   photograph stays the content; the bezel, edge light and specular sweep are
+   the material. No element here changes the picture's box, so there is no CLS. */
+.ch-visual--3d picture {
+  display: block;
+  padding: 6px;
+  border-radius: var(--ch-radius-lg, 20px);
+  border: 1px solid rgba(212, 175, 55, 0.55);
+  background: var(--metal-ramp-silver);
+  box-shadow: var(--metal-edge-gold), 0 26px 60px rgba(13, 17, 22, 0.24);
+}
+.ch-visual--3d picture img {
+  border-radius: 13px;
+  filter: saturate(0.88) contrast(1.03);
+}
+.ch-visual--3d { border-color: rgba(212, 175, 55, 0.28) !important; }
+.ch-visual--3d:hover picture { box-shadow: var(--metal-edge-gold), 0 32px 74px rgba(13, 17, 22, 0.30); }
+.ch-visual--3d picture { transition: box-shadow var(--metal-mid) var(--metal-ease); }
+
+/* -----------------------------------------------------------------------------
+   5. Accessibility & responsive guards
+   -------------------------------------------------------------------------- */
+:focus-visible { outline-color: var(--metal-gold-deep); }
+
+/* Never let a transform create a horizontal scrollbar. `clip` (not `hidden`)
+   does not create a new scroll container, so sticky headers still stick. */
+body { overflow-x: clip; }
+
+@media (max-width: 1023px) {
+  /* Smaller screens get the finish but not the movement. */
+  [data-tilt] { transform: none !important; will-change: auto; }
+  [data-parallax] { transform: none !important; will-change: auto; }
+  .ch-float--ambient,
+  .ch-float--ambient-slow { animation: none; }
+  .hg-theme .hg-plan:hover,
+  .hg-theme .hg-explore__card:hover,
+  .hg-theme .hg-usecase:hover,
+  .hg-theme .hg-card:hover,
+  .ch-ds .ch-card:hover,
+  .ch-ds .ch-plan:hover,
+  .ch-ds .ch-service-card:hover,
+  .ch-ds .ch-resource-card:hover,
+  .ch-site .ch-service-card:hover,
+  .ch-site .ch-resource-card:hover,
+  .ch-site .ch-card:hover,
+  .ch-site .ch-plan:hover { transform: translate3d(0, -2px, 0); }
+  .ch-photo-frame { box-shadow: var(--metal-edge-gold), 0 18px 40px rgba(13, 17, 22, 0.18); }
+}
+
+@media (max-width: 640px) {
+  .ch-photo-frame { border-radius: 14px; padding: 5px; }
+  .ch-photo-frame__label { font-size: 0.6rem; left: 12px; bottom: 11px; }
+  .ch-ds .ch-section-heading::before { width: 38px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  [data-tilt], [data-parallax] { transform: none !important; will-change: auto; }
+  .ch-metal::after { display: none; }
+  [data-reveal] { animation: none !important; }
+}
+
+/* Print: no metal, no motion, no decorative layers. */
+@media print {
+  .ch-metal::before, .ch-metal::after, .ch-photo-frame::after { display: none; }
+  [data-tilt], [data-parallax] { transform: none !important; }
+}

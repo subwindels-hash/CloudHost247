@@ -779,7 +779,7 @@ export default function MrzToolPage({ defaultTab }: MrzToolPageProps) {
                       aria-label="Generated MRZ Output"
                       style={{
                         background: '#0f172a',
-                        color: '#f8fafc',
+                        color: '#f5f5f3',
                         padding: '1rem 1.25rem',
                         borderRadius: 8,
                         fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
@@ -821,7 +821,7 @@ export default function MrzToolPage({ defaultTab }: MrzToolPageProps) {
                       aria-label="Generated MRZ Output"
                       style={{
                         background: '#0f172a',
-                        color: '#f8fafc',
+                        color: '#f5f5f3',
                         padding: '1rem 1.25rem',
                         borderRadius: 8,
                         fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
@@ -1219,7 +1219,7 @@ export default function MrzToolPage({ defaultTab }: MrzToolPageProps) {
                       whiteSpace: 'pre-wrap',
                       fontFamily: 'inherit',
                       margin: 0,
-                      background: '#f8fafc',
+                      background: '#f5f5f3',
                       padding: '0.75rem 1rem',
                       borderRadius: 6,
                       border: '1px solid var(--ch247-border)',
@@ -1263,8 +1263,8 @@ function ValidationSummaryCard({ validation }: { validation: MrzValidationResult
               borderRadius: 6,
               fontWeight: 800,
               marginRight: '0.6rem',
-              background: validation.valid ? '#d1fae5' : '#fee2e2',
-              color: validation.valid ? '#065f46' : '#991b1b',
+              background: validation.valid ? '#f7f1e0' : '#fee2e2',
+              color: validation.valid ? '#5f450a' : '#991b1b',
             }}
           >
             {validation.status}
@@ -1297,7 +1297,7 @@ function ValidationSummaryCard({ validation }: { validation: MrzValidationResult
               <tr key={r.label}>
                 <td>{r.label}</td>
                 <td>
-                  <strong style={{ color: r.status === 'PASS' ? '#065f46' : '#991b1b' }}>{r.status}</strong>
+                  <strong style={{ color: r.status === 'PASS' ? '#5f450a' : '#991b1b' }}>{r.status}</strong>
                 </td>
               </tr>
             ))}

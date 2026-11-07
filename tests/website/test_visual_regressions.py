@@ -75,21 +75,23 @@ REVIEWED_CARD_ARTWORK = {
 # (stamp, sha256) per stamped asset. Re-cut this table when an asset changes *and* the stamp in
 # the template moves with it; the test's failure message says which of the two is out of step.
 CACHE_BUSTING_STAMPS = {
+    # (stamp, sha256). Re-cut after an intentional asset edit, together with the ?v= stamp.
     'templates/cloudhost247/css/site.css': (
-        '20261019', 'fa282fb10dcffe4229266f80660d34e5c9891a1973233d974435c0616d81d3c2'),
+        '20261107', '51a34474fdee4988a541ece20faced4bc3e31fdf5d923e3cb202633526d5ec9f'),
     'templates/cloudhost247/css/design-system.css': (
-        '20261016', 'b30a85ef92edc71c3d2e14fa5c8ef96aa929e1b870b578ae023b34d0b4637f4e'),
+        '20261107', 'd5421da183cb93561c5b0dfdcc3b03685f166c1f0d543e0c551a88ba7a77d016'),
     'templates/cloudhost247/js/site.js': (
         '20261016', '4bf8557df4b9458075ee962bd7a3bb9272f6e5c2ea2b82ab5c5a755e8126237f'),
     'templates/cloudhost247/css/tools.css': (
-        '20261019', '1ac4993a44953755165b69c6d7907fd789d675c857884464035103db6974763c'),
-    # The sign-in, registration and password-recovery sheet. Pinned too: it is the one file every
-    # account page depends on, so an edit that does not move its stamp is the failure this table
-    # exists to catch.
+        '20261107', '98238d3ee198078ae35a3ef303d73207056b9fd878d70a730c8589c85375f090'),
     'templates/cloudhost247/css/auth.css': (
-        '20261019', 'a93eb017f76d88399e5945ef61cc647c258ba14bb0bb2291fb86bede357ac969'),
+        '20261107', '6cbcf6f88853b7b56c95913d585b53821e59de77f939880e5e27b4dddc2190ce'),
     'templates/cloudhost247/js/tools.js': (
         '20261016', 'c15666bec6bbf61b2f0317e69138c42cbe56992daaad9b767ff624c483544ee2'),
+    'templates/cloudhost247/css/metals.css': (
+        '20261107', '8256aa3f3321863894b87aec297e339af8e0ad7f201ac00c7b1644dafa6838a5'),
+    'templates/cloudhost247/js/motion.js': (
+        '20261107', 'e7d6faf94d0420b732bc23f4e24c51cd0c8fa786a4e7709de91a844ad6909f27'),
 }
 
 

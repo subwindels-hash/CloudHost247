@@ -1,0 +1,185 @@
+{
+  "version": "1.0.0",
+  "license": {
+    "name": "Pexels License",
+    "url": "https://www.pexels.com/license/",
+    "note": "Free to use commercially, no attribution required. Attribution is recorded here anyway so every image can be traced back to its source page. All photographs are real, unaltered scenes of enterprise hosting infrastructure; only resized, lightly sharpened and contrast-graded."
+  },
+  "resolutionNote": "Source masters were obtained as 500 px-wide search previews and upscaled to the 1280 px ladder that visual.tpl / Illustration.tsx advertise. Replace them with the full-resolution originals from the source pages before a production launch. See docs/PHOTOGRAPHY-LICENSES.md.",
+  "default": "data-centre-aisle",
+  "photos": {
+    "data-centre-aisle": {
+      "key": "photography/data-centre-aisle",
+      "alt": "Network engineer walking between rows of server racks in a blue-lit data centre",
+      "credit": "Pexels 1181316 — pexels.com/photo/1181316"
+    },
+    "server-racks-blue": {
+      "key": "photography/server-racks-blue",
+      "alt": "Close-up of enterprise server bays with blue status indicators",
+      "credit": "Pexels 1148820 — pexels.com/photo/1148820"
+    },
+    "server-hardware": {
+      "key": "photography/server-hardware",
+      "alt": "Rack-mounted servers and network cabling along a data centre aisle",
+      "credit": "Pexels 6466141 — pexels.com/photo/server-racks-on-data-center-4508751"
+    },
+    "network-engineer": {
+      "key": "photography/network-engineer",
+      "alt": "IT professional inspecting servers in a modern data centre",
+      "credit": "Pexels 1181335 — pexels.com/photo/1181335"
+    },
+    "fibre-patch-panel": {
+      "key": "photography/fibre-patch-panel",
+      "alt": "Fibre-optic patch cables terminated in an optical distribution panel",
+      "credit": "Pexels 4486718 — pexels.com/photo/4486718"
+    },
+    "network-cables": {
+      "key": "photography/network-cables",
+      "alt": "Network cables plugged into a switch in a server rack",
+      "credit": "Pexels 2881229 — pexels.com/photo/blue-wires-connected-to-server-4716292"
+    },
+    "fibre-engineer": {
+      "key": "photography/fibre-engineer",
+      "alt": "Engineer working on fibre-optic patch leads in a communications rack",
+      "credit": "Pexels 38246354 — pexels.com/photo/38246354"
+    },
+    "operations-centre": {
+      "key": "photography/operations-centre",
+      "alt": "Security operations team monitoring a video wall in a control room",
+      "credit": "Pexels 30481728 — pexels.com/photo/30481728"
+    },
+    "data-centre-workstation": {
+      "key": "photography/data-centre-workstation",
+      "alt": "Administration workstation in front of rows of server racks",
+      "credit": "Pexels 5092815 — pexels.com/photo/modern-computer-placed-near-server-racks-5092815"
+    },
+    "server-storage": {
+      "key": "photography/server-storage",
+      "alt": "Hot-swap storage array in a blue-lit enterprise server rack",
+      "credit": "Pexels 17489150 — pexels.com/photo/17489150"
+    },
+    "network-switch": {
+      "key": "photography/network-switch",
+      "alt": "Blue Ethernet patch leads connected to a network switch",
+      "credit": "Pexels 4818711 — pexels.com/photo/4818711"
+    }
+  },
+  "families": {
+    "hero": "data-centre-aisle",
+    "hosting": "server-racks-blue",
+    "cloud": "data-centre-aisle",
+    "servers": "server-hardware",
+    "domains": "fibre-patch-panel",
+    "applications": "data-centre-workstation",
+    "deployment": "network-cables",
+    "tools": "network-switch",
+    "security": "operations-centre",
+    "management": "network-engineer",
+    "operating-systems": "server-storage",
+    "blog": "fibre-engineer",
+    "panels": "server-hardware",
+    "network": "network-cables",
+    "icons": "network-switch"
+  },
+  "note": "Scenes with no explicit override rotate deterministically through a curated pool of infrastructure photographs. This keeps every picture relevant to its hosting family while avoiding the same photo on twenty neighbouring pages. Assignment is a stable hash of the scene key, so it never changes between generator runs.",
+  "overrides": {
+    "hero/infrastructure-3d": "data-centre-aisle",
+    "hero/infrastructure": "data-centre-aisle",
+    "hero/cloud-hosting-3d": "data-centre-aisle"
+  },
+  "pools": {
+    "hero": [
+      "data-centre-aisle",
+      "server-racks-blue",
+      "network-cables"
+    ],
+    "hosting": [
+      "server-racks-blue",
+      "data-centre-aisle",
+      "server-hardware",
+      "data-centre-workstation",
+      "network-switch"
+    ],
+    "cloud": [
+      "data-centre-aisle",
+      "network-cables",
+      "server-racks-blue",
+      "fibre-patch-panel",
+      "data-centre-workstation"
+    ],
+    "servers": [
+      "server-hardware",
+      "server-storage",
+      "server-racks-blue",
+      "network-switch",
+      "network-cables"
+    ],
+    "domains": [
+      "fibre-patch-panel",
+      "network-cables",
+      "network-switch",
+      "fibre-engineer"
+    ],
+    "applications": [
+      "data-centre-workstation",
+      "server-racks-blue",
+      "network-cables",
+      "server-hardware"
+    ],
+    "deployment": [
+      "network-cables",
+      "network-switch",
+      "fibre-engineer",
+      "network-engineer",
+      "server-storage"
+    ],
+    "tools": [
+      "network-switch",
+      "network-cables",
+      "server-storage",
+      "data-centre-workstation"
+    ],
+    "security": [
+      "operations-centre",
+      "network-engineer",
+      "fibre-engineer",
+      "server-racks-blue",
+      "data-centre-workstation",
+      "network-cables",
+      "server-hardware"
+    ],
+    "management": [
+      "network-engineer",
+      "data-centre-workstation",
+      "operations-centre",
+      "fibre-engineer",
+      "server-racks-blue"
+    ],
+    "operating-systems": [
+      "server-storage",
+      "server-hardware",
+      "server-racks-blue"
+    ],
+    "blog": [
+      "fibre-engineer",
+      "data-centre-workstation",
+      "network-cables",
+      "server-hardware"
+    ],
+    "panels": [
+      "server-hardware",
+      "server-storage",
+      "data-centre-workstation"
+    ],
+    "network": [
+      "network-cables",
+      "fibre-patch-panel",
+      "network-switch",
+      "fibre-engineer"
+    ],
+    "icons": [
+      "network-switch",
+      "server-storage"
+    ]
+  }
+}

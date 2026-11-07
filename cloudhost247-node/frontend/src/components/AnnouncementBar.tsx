@@ -27,12 +27,12 @@ function StarSprite() {
       <defs>
         <linearGradient id="ch-announce-star-face" x1="0" y1="0" x2="0.4" y2="1">
           <stop offset="0%" stopColor="#ffffff" />
-          <stop offset="55%" stopColor="#7ff0cd" />
-          <stop offset="100%" stopColor="#2fd3a1" />
+          <stop offset="55%" stopColor="#e6c875" />
+          <stop offset="100%" stopColor="#d4af37" />
         </linearGradient>
         <linearGradient id="ch-announce-star-shade" x1="0.2" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#7ff0b4" />
-          <stop offset="100%" stopColor="#046b52" />
+          <stop offset="0%" stopColor="#e6c875" />
+          <stop offset="100%" stopColor="#6b4d0c" />
         </linearGradient>
         <symbol id="ch-announce-star" viewBox="0 0 24 25">
           {/* Five points, each split into a lit and a shaded facet meeting at the centre — the

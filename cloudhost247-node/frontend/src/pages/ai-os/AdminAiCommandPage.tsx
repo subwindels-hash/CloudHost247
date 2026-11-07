@@ -44,20 +44,20 @@ const statusPill = (status: string) =>
     queued: 'bg-slate-100 text-slate-700',
     running: 'bg-blue-100 text-blue-700',
     awaiting_approval: 'bg-amber-100 text-amber-800',
-    succeeded: 'bg-emerald-100 text-emerald-700',
+    succeeded: 'bg-amber-100 text-amber-700',
     failed: 'bg-red-100 text-red-700',
     cancelled: 'bg-slate-200 text-slate-500',
     pending: 'bg-amber-100 text-amber-800',
-    approved: 'bg-emerald-100 text-emerald-700',
+    approved: 'bg-amber-100 text-amber-700',
     rejected: 'bg-red-100 text-red-700',
     expired: 'bg-slate-200 text-slate-500',
-    executed: 'bg-emerald-100 text-emerald-700',
+    executed: 'bg-amber-100 text-amber-700',
     open: 'bg-red-100 text-red-700',
     acknowledged: 'bg-amber-100 text-amber-800',
     closed: 'bg-slate-200 text-slate-600',
     investigating: 'bg-amber-100 text-amber-800',
     mitigated: 'bg-blue-100 text-blue-700',
-    resolved: 'bg-emerald-100 text-emerald-700',
+    resolved: 'bg-amber-100 text-amber-700',
     new: 'bg-slate-100 text-slate-700',
   }[status] ?? 'bg-slate-100 text-slate-700');
 
@@ -393,7 +393,7 @@ function AgentsTab() {
                       }}
                       disabled={busyId === agent.id}
                       className={`rounded-full px-3 py-1 text-xs font-medium ${
-                        agent.enabled ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-500'
+                        agent.enabled ? 'bg-amber-100 text-amber-700' : 'bg-slate-200 text-slate-500'
                       } disabled:opacity-40`}
                     >
                       {busyId === agent.id ? '…' : agent.enabled ? 'on' : 'off'}
@@ -634,7 +634,7 @@ function ApprovalsTab({ authRole }: { authRole?: string }) {
                   <button
                     disabled={!canManage || busyId === a.id}
                     onClick={() => void decide(a.id, 'approved')}
-                    className="rounded-lg bg-emerald-600 px-4 py-1.5 text-sm font-medium text-white disabled:opacity-40"
+                    className="rounded-lg bg-amber-600 px-4 py-1.5 text-sm font-medium text-white disabled:opacity-40"
                   >
                     {busyId === a.id ? '…' : 'Approve & execute'}
                   </button>
@@ -651,7 +651,7 @@ function ApprovalsTab({ authRole }: { authRole?: string }) {
           </ul>
         )}
         <ErrorBox text={error} />
-        {info ? <p className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">{info}</p> : null}
+        {info ? <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">{info}</p> : null}
       </Card>
 
       {history.length > 0 ? (
@@ -734,7 +734,7 @@ function BoardTab() {
           ))}
         </div>
         <p className="mt-2 text-xs text-slate-500">Every seat runs its own audited digest task; the CEO stitches them live. Repeat clicks return the same final report.</p>
-        {message ? <p className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">{message}</p> : null}
+        {message ? <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">{message}</p> : null}
         <ErrorBox text={error} />
       </Card>
 
@@ -744,7 +744,7 @@ function BoardTab() {
             {board.seats.map((seat) => (
               <div key={seat.seat} className="rounded-lg border border-slate-200 p-3">
                 <p className="text-xs font-bold uppercase tracking-wide text-slate-500">{seat.seat}</p>
-                <p className={`text-xs ${seat.enabled ? 'text-emerald-600' : 'text-red-500'}`}>
+                <p className={`text-xs ${seat.enabled ? 'text-amber-600' : 'text-red-500'}`}>
                   {seat.enabled ? 'active' : 'disabled — digests marked UNAVAILABLE in briefings'}
                 </p>
                 {seat.latestDigest?.headline ? (
@@ -942,7 +942,7 @@ function FindingsTab() {
                       className="flex-1 rounded-lg border border-slate-300 px-3 py-1.5 text-sm"
                     />
                     <button onClick={() => void addNote(i)} className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm">Add note</button>
-                    <button onClick={() => void resolve(i)} className="rounded-lg bg-emerald-600 px-3 py-1.5 text-sm text-white">Resolve</button>
+                    <button onClick={() => void resolve(i)} className="rounded-lg bg-amber-600 px-3 py-1.5 text-sm text-white">Resolve</button>
                   </div>
                 ) : null}
               </li>
@@ -985,7 +985,7 @@ function OpsTab() {
             {workflows.map((w) => (
               <li key={w.id} className="rounded-lg border border-slate-200 p-3">
                 <div className="flex items-center gap-2">
-                  <Pill text={w.enabled ? 'on' : 'off'} tone={w.enabled ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-500'} />
+                  <Pill text={w.enabled ? 'on' : 'off'} tone={w.enabled ? 'bg-amber-100 text-amber-700' : 'bg-slate-200 text-slate-500'} />
                   <span className="font-medium text-slate-900">{w.name}</span>
                   <span className="ml-auto font-mono text-xs text-slate-500">WHEN {w.event_type}</span>
                 </div>
@@ -1012,7 +1012,7 @@ function OpsTab() {
                     <td className="py-2 pr-4 text-xs text-slate-500">{e.source}</td>
                     <td className="max-w-xs truncate py-2 pr-4 font-mono text-xs text-slate-400">{e.fingerprint}</td>
                     <td className="whitespace-nowrap py-2 pr-4 text-xs text-slate-400">{new Date(e.emitted_at).toLocaleString()}</td>
-                    <td className="py-2 text-xs">{e.processed_at ? <span className="text-emerald-600">✓</span> : <span className="text-amber-500">pending</span>}</td>
+                    <td className="py-2 text-xs">{e.processed_at ? <span className="text-amber-600">✓</span> : <span className="text-amber-500">pending</span>}</td>
                   </tr>
                 ))}
               </tbody>
@@ -1101,7 +1101,7 @@ function KnowledgeTab() {
             <button disabled={busy || !form.title.trim() || form.content.trim().length < 10} className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-40">
               {busy ? 'Storing…' : 'Store'}
             </button>
-            {info ? <span className="text-xs text-emerald-700">{info}</span> : null}
+            {info ? <span className="text-xs text-amber-700">{info}</span> : null}
           </div>
         </form>
         <ErrorBox text={error} />
@@ -1201,7 +1201,7 @@ function ModelsTab({ authRole }: { authRole?: string }) {
                 <button
                   onClick={() => void toggle(m)}
                   disabled={!canManage || busyEngine === m.engine}
-                  className={`rounded-full px-3 py-1 text-xs font-medium ${m.enabled ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-500'} disabled:opacity-40`}
+                  className={`rounded-full px-3 py-1 text-xs font-medium ${m.enabled ? 'bg-amber-100 text-amber-700' : 'bg-slate-200 text-slate-500'} disabled:opacity-40`}
                 >
                   {busyEngine === m.engine ? '…' : m.enabled ? 'on' : 'off'}
                 </button>
@@ -1249,7 +1249,7 @@ function AuditTab() {
                   <td className="py-2 pr-4 font-mono text-xs text-slate-700">{e.action}</td>
                   <td className="py-2 pr-4 text-xs text-slate-500">{e.agent_slug ?? (e.agent_id ? `${e.agent_id.slice(0, 8)}…` : '—')}</td>
                   <td className="py-2 pr-4 font-mono text-xs text-slate-500">{e.tool ?? '—'}</td>
-                  <td className="py-2 pr-4"><Pill text={e.status} tone={e.status === 'ok' ? 'bg-emerald-100 text-emerald-700' : e.status === 'denied' ? 'bg-red-100 text-red-700' : statusPill(e.status)} /></td>
+                  <td className="py-2 pr-4"><Pill text={e.status} tone={e.status === 'ok' ? 'bg-amber-100 text-amber-700' : e.status === 'denied' ? 'bg-red-100 text-red-700' : statusPill(e.status)} /></td>
                   <td className="py-2 pr-4 text-xs text-slate-500">{e.error_code ?? ''}</td>
                   <td className="py-2 text-xs text-slate-400">{e.duration_ms != null ? `${e.duration_ms}ms` : ''}</td>
                 </tr>

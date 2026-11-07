@@ -1,0 +1,568 @@
+/* =============================================================================
+   CloudHost247 — Hostinger-style menu / mega menu / footer
+   -----------------------------------------------------------------------------
+   Loaded AFTER hostinger.css. The three shared chrome components (Header,
+   PlatformMegaMenu, Footer) now render `hg-nav*`, `hg-mega*`, `hg-drawer*` and
+   `hg-footer*` classes modelled on hostinger.com:
+
+     • Menu      — compact sticky bar, dropdown triggers with active underlines,
+                   utility cluster (language / currency / search), one strong CTA.
+     • Mega menu — full-width white panel: tinted "explore" column + featured card
+                   on the left, three columns of icon links with descriptions and
+                   badges on the right, and a "see all" bottom bar.
+     • Footer    — CTA band, brand block, five curated registry-driven columns,
+                   legal bar.
+
+   All content still comes from NAV_SECTIONS / FOOTER_COLUMNS / UTILITY, so the
+   registry's link-integrity tests remain the single source of truth. No invented
+   promotion, review score or external social link.
+
+   Palette: CloudHost247 ink + mint (see the --hg-accent* tokens in hostinger.css).
+   ========================================================================== */
+
+/* -----------------------------------------------------------------------------
+   1. Menu bar
+   -------------------------------------------------------------------------- */
+.hg-header {
+  position: sticky;
+  top: 0;
+  z-index: 140;
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--hg-line);
+  box-shadow: 0 2px 16px rgba(12, 28, 38, 0.06);
+}
+/* hostinger.css still sets a lower z-index on `.ch247-header`; keep the chrome above the page. */
+.hg-theme .hg-header { z-index: 140; }
+
+.hg-nav__bar {
+  /* Phase 3 (2026-11-07): an independent Chromium render at 1440px showed the seven desktop
+     triggers overflowing their flex track and colliding with the language/currency cluster. The
+     full chrome needs ~1400px, so the bar is wider than the old 1280 cap and the desktop
+     breakpoint is raised to 1440px (see section 3). Compact/drawer chrome below that. */
+  width: min(1440px, calc(100% - 32px));
+  min-height: 72px;
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.hg-nav__brand { flex: 0 0 auto; display: inline-flex; align-items: center; }
+.hg-nav__brand img { height: 34px; width: auto; display: block; }
+
+.hg-nav__collapsible {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: static; /* let .hg-mega resolve against the sticky header */
+}
+
+.hg-nav { position: static; flex: 1; min-width: 0; }
+.hg-nav__list { position: static; }
+.hg-nav__items {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  min-width: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.hg-nav__item { position: static; }
+
+.hg-nav__trigger {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 10px 9px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--hg-ink);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 650;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.16s ease, color 0.16s ease;
+}
+.hg-nav__trigger::after {
+  content: '';
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 4px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--hg-accent);
+  transform: scaleX(0);
+  transition: transform 0.16s ease;
+}
+.hg-nav__trigger:hover,
+.hg-nav__trigger.is-open { background: var(--hg-accent-soft); color: var(--hg-accent-dark); }
+.hg-nav__trigger.is-open::after { transform: scaleX(1); }
+.hg-nav__trigger:focus-visible,
+.hg-nav__icon:focus-visible,
+.hg-nav__text-link:focus-visible,
+.hg-mega__link:focus-visible,
+.hg-drawer__toggle:focus-visible { outline: 3px solid var(--hg-accent); outline-offset: 2px; }
+.hg-nav__caret { font-size: 0.68rem; opacity: 0.7; }
+
+.hg-nav__utility { display: flex; align-items: center; gap: 4px; flex: 0 0 auto; }
+.hg-nav__utility .ch247-locale__trigger {
+  /* Keep the 44 px target from language-switcher.css — a compact pill, not a shrunken one. */
+  min-width: 44px;
+  padding: 0.25rem 0.45rem;
+  border: 1px solid var(--hg-line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--hg-ink);
+  font-size: 0.8rem;
+  font-weight: 650;
+}
+.hg-nav__utility .ch247-locale__trigger:hover,
+.hg-nav__utility .ch247-locale__trigger[aria-expanded='true'] {
+  border-color: var(--hg-accent);
+  color: var(--hg-accent-dark);
+  background: var(--hg-accent-tint);
+}
+.hg-nav__icon {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  color: var(--hg-ink);
+  text-decoration: none;
+}
+.hg-nav__icon:hover { background: var(--hg-accent-soft); color: var(--hg-accent-dark); }
+
+.hg-nav__actions { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+.hg-nav__text-link {
+  padding: 8px 4px;
+  border: 0;
+  background: transparent;
+  color: var(--hg-ink);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 650;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.hg-nav__text-link:hover { color: var(--hg-accent-dark); }
+.hg-nav__avatar {
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--hg-accent-soft);
+  color: var(--hg-accent-dark);
+  font-size: 0.85rem;
+  font-weight: 750;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.hg-nav__avatar:hover { background: var(--hg-accent-tint); }
+
+.hg-nav__toggle { display: none; }
+.hg-nav__drawer { display: none; }
+
+/* Signed-in account strip — Hostinger keeps a quiet second row under the header. */
+.hg-theme .hg-subnav {
+  background: #fff;
+  border-bottom: 1px solid var(--hg-line);
+  box-shadow: 0 2px 10px rgba(12, 28, 38, 0.05);
+}
+.hg-theme .hg-subnav .hg-nav__bar {
+  /* styles.css still targets `.ch247-subnav nav` for the older shell; reset those inherited
+     values so this row scrolls horizontally instead of wrapping into a tall block. */
+  width: min(1280px, calc(100% - 48px));
+  max-width: none;
+  margin: 0 auto;
+  padding: 0;
+  min-height: 44px;
+  gap: 20px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+.hg-theme .hg-subnav a {
+  font-size: 0.8rem;
+  font-weight: 650;
+  color: var(--hg-muted);
+  text-decoration: none;
+  white-space: nowrap;
+  padding: 8px 0;
+  border-bottom: 2px solid transparent;
+}
+.hg-theme .hg-subnav a:hover { color: var(--hg-accent); }
+.hg-theme .hg-subnav a.active { color: var(--hg-accent-dark); border-bottom-color: var(--hg-accent); }
+
+/* -----------------------------------------------------------------------------
+   2. Mega menu
+   -------------------------------------------------------------------------- */
+.hg-mega {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 180;
+  max-height: calc(100dvh - 90px);
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid var(--hg-line);
+  border-top: 0;
+  border-radius: 0 0 20px 20px;
+  box-shadow: 0 28px 70px rgba(12, 28, 38, 0.16);
+}
+.hg-mega[hidden] { display: none !important; }
+.hg-mega__inner {
+  width: min(1280px, 100%);
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: 270px minmax(0, 1fr);
+}
+.hg-mega__intro {
+  padding: 28px;
+  background: linear-gradient(165deg, var(--hg-accent-tint), #fff);
+  border-right: 1px solid var(--hg-line);
+}
+.hg-mega__eyebrow {
+  margin: 0 0 10px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--hg-accent-dark);
+}
+.hg-mega__intro h2 {
+  margin: 0 0 10px;
+  font-size: 1.6rem;
+  font-weight: 850;
+  letter-spacing: -0.04em;
+  color: var(--hg-ink);
+}
+.hg-mega__blurb {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.62;
+  color: var(--hg-body);
+}
+.hg-mega__featured {
+  display: grid;
+  gap: 6px;
+  margin-top: 22px;
+  padding: 18px;
+  border: 1px solid #e6d9b3;
+  border-radius: 14px;
+  background: var(--hg-accent-soft);
+  color: var(--hg-ink);
+  text-decoration: none;
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+.hg-mega__featured:hover { transform: translateY(-2px); box-shadow: var(--hg-shadow); color: inherit; }
+.hg-mega__featured-label {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--hg-accent-dark);
+}
+.hg-mega__featured strong { font-size: 1.02rem; font-weight: 800; letter-spacing: -0.02em; }
+.hg-mega__featured > span { font-size: 0.8rem; line-height: 1.55; color: var(--hg-body); }
+.hg-mega__featured .hg-link { margin-top: 6px; font-size: 0.82rem; }
+
+.hg-mega__groups {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  padding: 28px;
+}
+.hg-mega__group h3 {
+  margin: 0 0 12px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--hg-muted);
+}
+.hg-mega__group ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; }
+.hg-mega__link {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  color: var(--hg-ink);
+  text-decoration: none;
+  transition: background 0.16s ease;
+}
+.hg-mega__link:hover { background: var(--hg-accent-tint); }
+.hg-mega__link-icon {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  background: var(--hg-accent-soft);
+  color: var(--hg-accent-dark);
+}
+.hg-mega__link-label {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+.hg-mega__link-desc {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--hg-muted);
+}
+.hg-badge {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--hg-accent-soft);
+  color: var(--hg-accent-dark);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.hg-badge--sale { background: #f7f1e0; color: #b4581b; }
+.hg-badge--new { background: #f7f1e0; color: #8a6410; }
+
+.hg-mega__foot {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 15px 28px;
+  border-top: 1px solid var(--hg-line);
+  background: #fff;
+  font-size: 0.8rem;
+  color: var(--hg-muted);
+}
+.hg-mega__foot .hg-link { font-size: 0.88rem; }
+
+/* -----------------------------------------------------------------------------
+   3. Mobile drawer
+   -------------------------------------------------------------------------- */
+@media (max-width: 1439px) {
+  /* The desktop trigger list is replaced entirely — the wrapper must collapse too, otherwise
+     its `flex: 1` would eat vertical space at the top of the drawer. */
+  .hg-nav,
+  .hg-nav__list { display: none; }
+  .hg-theme .hg-nav__toggle {
+    display: flex;
+    margin-left: auto;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    border: 1px solid var(--hg-line);
+    border-radius: 10px;
+    background: #fff;
+  }
+  .hg-nav__collapsible {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 160;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 12px 24px 26px;
+    max-height: calc(100dvh - 72px);
+    overflow-y: auto;
+    background: #fff;
+    border-top: 1px solid var(--hg-line);
+    box-shadow: 0 24px 50px rgba(12, 28, 38, 0.18);
+  }
+  .hg-nav__collapsible.is-open { display: flex; }
+  .hg-nav__utility,
+  .hg-nav__actions {
+    flex-wrap: wrap;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--hg-line);
+  }
+  .hg-nav__drawer { display: block; }
+}
+
+.hg-drawer__group { border-bottom: 1px solid var(--hg-line); }
+.hg-drawer__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  min-height: 54px;
+  padding: 10px 2px;
+  border: 0;
+  background: transparent;
+  color: var(--hg-ink);
+  font: inherit;
+  font-size: 0.96rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.hg-drawer__panel { padding: 0 0 14px 10px; }
+.hg-drawer__panel[hidden] { display: none !important; }
+.hg-drawer__subgroup h3 {
+  margin: 14px 0 6px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--hg-muted);
+}
+.hg-drawer__subgroup ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.hg-drawer .hg-mega__group { padding: 8px 0; }
+.hg-drawer .hg-mega__groups { display: grid; grid-template-columns: 1fr; gap: 8px; padding: 0; }
+.hg-drawer__link {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-height: 52px;
+  padding: 10px;
+  border-radius: 10px;
+  color: var(--hg-ink);
+  text-decoration: none;
+}
+.hg-drawer__link:hover { background: var(--hg-accent-tint); }
+.hg-drawer__all { display: inline-flex; margin: 14px 0 4px; font-size: 0.88rem; }
+
+/* -----------------------------------------------------------------------------
+   4. Footer
+   -------------------------------------------------------------------------- */
+.hg-theme .hg-footer {
+  background: linear-gradient(160deg, var(--hg-accent-deep) 0%, #171d24 100%);
+  color: #c9dbe0;
+  margin-top: auto;
+}
+.hg-footer__cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 44px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+.hg-footer__eyebrow {
+  margin: 0 0 10px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #e6c875;
+}
+.hg-footer__cta h2 {
+  margin: 0 0 10px;
+  font-size: clamp(1.7rem, 3vw, 2.4rem);
+  font-weight: 850;
+  letter-spacing: -0.045em;
+  color: #fff;
+}
+.hg-footer__cta p { margin: 0; max-width: 640px; font-size: 0.92rem; line-height: 1.65; color: #b6b9bd; }
+.hg-footer__cta .hg-btn { flex: 0 0 auto; }
+
+.hg-footer__main {
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
+  gap: 48px;
+  padding: 48px 0;
+}
+.hg-footer__brand img { height: 34px; width: auto; }
+.hg-footer__brand p { margin: 18px 0 16px; font-size: 0.86rem; line-height: 1.7; color: #b6b9bd; }
+.hg-footer__brand .hg-link { color: #e6c875; font-size: 0.85rem; }
+.hg-footer__brand .hg-link:hover { color: #fff; }
+
+.hg-footer__columns { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 26px; }
+.hg-footer__column h2 {
+  margin: 0 0 16px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #fff;
+}
+.hg-footer__column ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 9px; }
+/* Long registry columns split into two internal columns instead of making the footer a wall
+   of links — every destination from the registry is still rendered and clickable. */
+.hg-footer__column--wide ul { display: block; columns: 2; column-gap: 22px; }
+.hg-footer__column--wide li { break-inside: avoid; margin-bottom: 9px; }
+.hg-footer__column a {
+  color: #b6b9bd;
+  text-decoration: none;
+  font-size: 0.82rem;
+  overflow-wrap: anywhere;
+}
+.hg-footer__column a:hover { color: #fff; text-decoration: underline; }
+
+.hg-footer__bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 22px 0 30px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 0.78rem;
+  color: #8fa9b3;
+}
+.hg-footer__bottom p { margin: 0; }
+.hg-footer__bottom nav { display: flex; flex-wrap: wrap; gap: 16px; }
+.hg-footer__bottom a { color: inherit; text-decoration: none; }
+.hg-footer__bottom a:hover { color: #fff; }
+
+@media (max-width: 1080px) {
+  .hg-footer__main { grid-template-columns: 1fr; gap: 32px; }
+  .hg-footer__columns { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .hg-nav__bar { width: min(1440px, calc(100% - 32px)); }
+  .hg-footer__cta { flex-direction: column; align-items: flex-start; padding: 34px 0; }
+  .hg-footer__columns { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hg-footer__column--wide ul { columns: 1; }
+  .hg-footer__bottom { flex-direction: column; align-items: flex-start; }
+  .hg-footer__bottom nav { gap: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hg-nav__trigger, .hg-mega__featured, .hg-mega__link { transition: none !important; transform: none !important; }
+}
+
+/* -----------------------------------------------------------------------------
+   Metallic finish on the shared chrome (canonical palette lives in hostinger.css).
+   These are restrained: a lit top edge, a silver mega panel, a gold footer rule.
+   -------------------------------------------------------------------------- */
+.hg-theme .hg-nav__bar {
+  box-shadow: 0 1px 0 rgba(212, 175, 55, 0.30), 0 8px 26px rgba(13, 17, 22, 0.05);
+}
+.hg-theme .hg-nav__trigger.is-open::after,
+.hg-theme .hg-nav__trigger:hover::after { background: var(--hg-metal-gold); }
+.hg-theme .hg-mega__panel {
+  background:
+    radial-gradient(700px 260px at 12% 0%, rgba(255, 255, 255, 0.95), transparent 70%),
+    linear-gradient(160deg, #ffffff 0%, #f2f2f0 62%, #e5e4e2 100%);
+  border-top: 2px solid #d4af37;
+}
+.hg-theme .hg-footer {
+  background:
+    linear-gradient(100deg, transparent 26%, rgba(230, 200, 117, 0.07) 48%, transparent 66%),
+    linear-gradient(160deg, #0d1116 0%, #1b242c 100%);
+  border-top: 1px solid rgba(212, 175, 55, 0.38);
+}
+.hg-theme .hg-footer__bottom { border-top-color: rgba(212, 175, 55, 0.22); }

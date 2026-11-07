@@ -37,8 +37,11 @@
     "tools:catalog": "tsx scripts/export-tools-site.ts",
     "tools:catalog:check": "tsx scripts/export-tools-site.ts --check",
     "tools:preview": "tsx scripts/tools-demo-preview.ts",
+    "preview": "tsx scripts/tools-preview-server.ts",
     "build:tools": "vite build --config frontend/vite.tools.config.ts",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "evidence:screenshots": "node scripts/capture-rendered-pages.mjs",
+    "evidence:layout": "node scripts/check-header-layout.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-cloudwatch": "3.1144.0",
@@ -68,6 +71,7 @@
     "@axe-core/playwright": "^4.13.0",
     "@electric-sql/pglite": "^0.2.7",
     "@playwright/test": "^1.64.0",
+    "@sparticuz/chromium": "^153.0.0",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.7",
     "@types/bcryptjs": "^2.4.6",

@@ -5,23 +5,23 @@ import { publicFetch } from '../../lib/api';
 import { NAV_SECTIONS, TOOLS_CATEGORIES } from '../../navigation/registry.generated';
 
 /**
- * CloudHost247 mega navigation.
+ * CloudHost247 navigation — Hostinger-style menu / mega menu / mobile drawer.
  *
  * The menu renders `NAV_SECTIONS` — imported straight from the generated registry, not fetched
  * over the network on mount. That is deliberate: a navigation that arrives late is a navigation
  * that flashes empty on a cold load, and a failed request would leave the header with nothing in
  * it. The definition is the same for every visitor, so it belongs in the bundle.
  *
- * `/api/v1/navigation` still serves the identical definition for `/sitemap.xml`, the SEO routes
- * and automated link checks. Both come from `shared/site/registry.json`, so they cannot disagree.
+ * Hostinger's pattern, reproduced here:
+ *   • a compact, sticky top bar of dropdown triggers with active underlines;
+ *   • a full-width white mega panel: a tinted "explore" column with a featured card on the
+ *     left, three columns of icon links with descriptions and badges on the right, and a
+ *     bottom "see all" bar;
+ *   • a phone drawer that turns the same registry into a one-level accordion.
  *
- * Interaction:
- *  - desktop: pointer, click and keyboard all open a panel; it spans the viewport so it cannot
- *    overflow the window whichever item is open;
- *  - Escape closes and returns focus to the trigger; outside click closes; navigating closes;
- *  - the panel is capped at `calc(100dvh - header)` and scrolls internally, so a long menu on a
- *    short screen cannot push content out of reach;
- *  - `aria-expanded` / `aria-controls` are always wired, and one panel is open at a time.
+ * Interaction: pointer, click and keyboard open a panel; Escape closes and returns focus to the
+ * trigger; outside click closes; navigating closes. `aria-expanded` / `aria-controls` are always
+ * wired, and one panel is open at a time.
  */
 
 interface CatalogueTool {
@@ -69,18 +69,16 @@ function ToolsGroups({ limit, active = true }: { limit: number; active?: boolean
           ? entries
           : [{ slug: `${category.slug}-index`, name: `${category.label} tools`, path: `/tools/category/${category.slug}` }];
         return (
-          <section key={category.slug} className="ch247-mega-group" aria-label={category.label}>
+          <section key={category.slug} className="hg-mega__group" aria-label={category.label}>
             <h3>{category.label}</h3>
             <ul>
               {shown.map((tool) => (
                 <li key={tool.slug}>
-                  <Link className="ch247-mega-link" to={tool.path}>
-                    <span className="ch247-mega-link__icon">
-                      <Icon name={category.icon} size={17} />
-                    </span>
+                  <Link className="hg-mega__link" to={tool.path}>
+                    <span className="hg-mega__link-icon"><Icon name={category.icon} size={17} /></span>
                     <span>
-                      <span className="ch247-mega-link__label">{tool.name}</span>
-                      <span className="ch247-mega-link__desc">{category.desc}</span>
+                      <span className="hg-mega__link-label">{tool.name}</span>
+                      <span className="hg-mega__link-desc">{category.desc}</span>
                     </span>
                   </Link>
                 </li>
@@ -89,21 +87,21 @@ function ToolsGroups({ limit, active = true }: { limit: number; active?: boolean
           </section>
         );
       })}
-      <section className="ch247-mega-group" aria-label="All tools">
+      <section className="hg-mega__group" aria-label="All tools">
         <h3>Browse</h3>
         <ul>
           <li>
-            <Link className="ch247-mega-link" to="/tools">
-              <span className="ch247-mega-link__icon"><Icon name="grid" size={17} /></span>
+            <Link className="hg-mega__link" to="/tools">
+              <span className="hg-mega__link-icon"><Icon name="grid" size={17} /></span>
               <span>
-                <span className="ch247-mega-link__label">All CloudHost247 Tools</span>
-                <span className="ch247-mega-link__desc">Search the full catalogue by name or category.</span>
+                <span className="hg-mega__link-label">All CloudHost247 Tools</span>
+                <span className="hg-mega__link-desc">Search the full catalogue by name or category.</span>
               </span>
             </Link>
           </li>
           {failed ? (
             <li>
-              <span className="ch247-mega-link__desc" style={{ display: 'block', padding: '0 10px' }}>
+              <span className="hg-mega__link-desc" style={{ display: 'block', padding: '0 10px' }}>
                 The live tool catalogue could not be loaded, so only categories are listed.
               </span>
             </li>
@@ -123,7 +121,7 @@ export function Brand({ className }: { className?: string }) {
 }
 
 function Badge({ kind }: { kind: string }) {
-  return <span className={`ch247-nav-badge ch247-nav-badge--${kind.toLowerCase()}`}>{kind}</span>;
+  return <span className={`hg-badge hg-badge--${kind.toLowerCase()}`}>{kind}</span>;
 }
 
 export function PlatformMegaMenu() {
@@ -156,93 +154,95 @@ export function PlatformMegaMenu() {
   }, [openId]);
 
   return (
-    <div ref={navRef} className="ch247-header__nav-slot">
-      <nav className="ch247-platform-nav" aria-label="Primary">
-        <ul className="ch247-platform-nav__bar">
+    <div ref={navRef} className="hg-nav">
+      <nav className="hg-nav__list" aria-label="Primary">
+        <ul className="hg-nav__items">
           {NAV_SECTIONS.map((section) => {
             const open = openId === section.id;
             const panelId = `ch247-nav-panel-${section.id}`;
             const expand = () => {
-              if (window.matchMedia('(min-width: 1181px)').matches) setOpenId(section.id);
+              if (window.matchMedia('(min-width: 1440px)').matches) setOpenId(section.id);
             };
             const collapse = () => {
-              if (window.matchMedia('(min-width: 1181px)').matches) {
+              if (window.matchMedia('(min-width: 1440px)').matches) {
                 setOpenId((current) => (current === section.id ? null : current));
               }
             };
             return (
-              <li key={section.id} className="ch247-platform-nav__item" onMouseEnter={expand} onMouseLeave={collapse}>
+              <li key={section.id} className="hg-nav__item" onMouseEnter={expand} onMouseLeave={collapse}>
                 <button
                   type="button"
-                  className={`ch247-platform-nav__trigger${open ? ' is-open' : ''}`}
+                  className={`hg-nav__trigger${open ? ' is-open' : ''}`}
                   aria-expanded={open}
                   aria-controls={panelId}
                   onClick={() => setOpenId(open ? null : section.id)}
                 >
                   {section.label}
-                  <span className="ch247-caret" aria-hidden>▾</span>
+                  <span className="hg-nav__caret" aria-hidden>▾</span>
                 </button>
 
                 {/* The panel element always exists so `aria-controls` is never dangling, but its
                     contents are mounted only while it is open: rendering every menu's ~110 links
                     into the DOM of every page would cost parse time for content most visitors
                     never open. The same links are always available in the footer and the sitemap. */}
-                <div id={panelId} className="ch247-mega-panel" hidden={!open}>
+                <div id={panelId} className="hg-mega" hidden={!open}>
                   {open ? (
-                  <div className="ch247-mega-panel__inner">
-                    <div className="ch247-mega-intro">
-                      <h2>{section.label}</h2>
-                      <p>{section.blurb}</p>
-                      {section.featured ? (
-                        <div className="ch247-mega-featured">
-                          <h3>{section.featured.title}</h3>
-                          <p>{section.featured.body}</p>
-                          <Link className="ch-link" to={section.featured.to}>
-                            {section.featured.ctaLabel}
-                            <span className="ch-link__arrow" aria-hidden>→</span>
+                    <div className="hg-mega__inner">
+                      <aside className="hg-mega__intro">
+                        <p className="hg-mega__eyebrow">Explore</p>
+                        <h2>{section.label}</h2>
+                        <p className="hg-mega__blurb">{section.blurb}</p>
+                        {section.featured ? (
+                          <Link className="hg-mega__featured" to={section.featured.to}>
+                            <span className="hg-mega__featured-label">Featured</span>
+                            <strong>{section.featured.title}</strong>
+                            <span>{section.featured.body}</span>
+                            <span className="hg-link">
+                              {section.featured.ctaLabel}
+                              <span className="hg-link__arrow" aria-hidden>→</span>
+                            </span>
                           </Link>
-                        </div>
-                      ) : null}
-                      <p style={{ marginTop: '18px', marginBottom: 0 }}>
-                        <Link className="ch-link" to={section.to}>
-                          All {section.label.toLowerCase()}
-                          <span className="ch-link__arrow" aria-hidden>→</span>
-                        </Link>
-                      </p>
-                    </div>
+                        ) : null}
+                      </aside>
 
-                    <div className="ch247-mega-groups">
-                      {section.toolsDriven ? (
-                        /* Mounted only while the panel is open, so the catalogue request happens
-                           when a visitor opens Tools — not on every page load. */
-                        open ? <ToolsGroups limit={6} active /> : null
-                      ) : (
-                        section.groups.map((group) => (
-                          <section key={group.title} className="ch247-mega-group" aria-label={group.title}>
-                            <h3>{group.title}</h3>
-                            <ul>
-                              {group.links.map((link) => (
-                                <li key={`${group.title}-${link.to}-${link.label}`}>
-                                  <Link className="ch247-mega-link" to={link.to}>
-                                    <span className="ch247-mega-link__icon">
-                                      <Icon name={link.icon} size={17} />
-                                    </span>
-                                    <span>
-                                      <span className="ch247-mega-link__label">
-                                        {link.label}
-                                        {link.badge ? <Badge kind={link.badge} /> : null}
+                      <div className="hg-mega__groups">
+                        {section.toolsDriven ? (
+                          /* Mounted only while the panel is open, so the catalogue request happens
+                             when a visitor opens Tools — not on every page load. */
+                          <ToolsGroups limit={6} active />
+                        ) : (
+                          section.groups.map((group) => (
+                            <section key={group.title} className="hg-mega__group" aria-label={group.title}>
+                              <h3>{group.title}</h3>
+                              <ul>
+                                {group.links.map((link) => (
+                                  <li key={`${group.title}-${link.to}-${link.label}`}>
+                                    <Link className="hg-mega__link" to={link.to}>
+                                      <span className="hg-mega__link-icon"><Icon name={link.icon} size={17} /></span>
+                                      <span>
+                                        <span className="hg-mega__link-label">
+                                          {link.label}
+                                          {link.badge ? <Badge kind={link.badge} /> : null}
+                                        </span>
+                                        <span className="hg-mega__link-desc">{link.description}</span>
                                       </span>
-                                      <span className="ch247-mega-link__desc">{link.description}</span>
-                                    </span>
-                                  </Link>
-                                </li>
-                              ))}
-                            </ul>
-                          </section>
-                        ))
-                      )}
+                                    </Link>
+                                  </li>
+                                ))}
+                              </ul>
+                            </section>
+                          ))
+                        )}
+                      </div>
+
+                      <div className="hg-mega__foot">
+                        <Link className="hg-link" to={section.to}>
+                          All {section.label.toLowerCase()}
+                          <span className="hg-link__arrow" aria-hidden>→</span>
+                        </Link>
+                        <span>Every link here opens a page this build serves.</span>
+                      </div>
                     </div>
-                  </div>
                   ) : null}
                 </div>
               </li>
@@ -270,15 +270,15 @@ export function PlatformMobileNav({ onNavigate }: { onNavigate?: () => void }) {
   const baseId = useId();
 
   return (
-    <nav className="ch247-mobile-nav" aria-label="Mobile">
+    <nav className="hg-drawer" aria-label="Mobile">
       {NAV_SECTIONS.map((section) => {
         const open = openId === section.id;
         const panelId = `${baseId}-${section.id}`;
         return (
-          <div key={section.id} className="ch247-mobile-nav__group">
+          <div key={section.id} className="hg-drawer__group">
             <button
               type="button"
-              className="ch247-mobile-nav__toggle"
+              className="hg-drawer__toggle"
               aria-expanded={open}
               aria-controls={panelId}
               onClick={() => setOpenId(open ? null : section.id)}
@@ -286,23 +286,21 @@ export function PlatformMobileNav({ onNavigate }: { onNavigate?: () => void }) {
               <span>{section.label}</span>
               <span aria-hidden>{open ? '−' : '+'}</span>
             </button>
-            <div id={panelId} className="ch247-mobile-nav__panel" hidden={!open}>
+            <div id={panelId} className="hg-drawer__panel" hidden={!open}>
               {open ? section.groups.map((group) => (
-                <div key={group.title} className="ch247-mobile-nav__subgroup">
+                <div key={group.title} className="hg-drawer__subgroup">
                   <h3>{group.title}</h3>
                   <ul>
                     {group.links.map((link) => (
                       <li key={`${group.title}-${link.to}-${link.label}`}>
-                        <Link className="ch247-mobile-nav__link" to={link.to} onClick={onNavigate}>
-                          <span className="ch247-mega-link__icon">
-                            <Icon name={link.icon} size={17} />
-                          </span>
+                        <Link className="hg-drawer__link" to={link.to} onClick={onNavigate}>
+                          <span className="hg-mega__link-icon"><Icon name={link.icon} size={17} /></span>
                           <span>
-                            <span className="ch247-mega-link__label">
+                            <span className="hg-mega__link-label">
                               {link.label}
                               {link.badge ? <Badge kind={link.badge} /> : null}
                             </span>
-                            <span className="ch247-mega-link__desc">{link.description}</span>
+                            <span className="hg-mega__link-desc">{link.description}</span>
                           </span>
                         </Link>
                       </li>
@@ -312,9 +310,9 @@ export function PlatformMobileNav({ onNavigate }: { onNavigate?: () => void }) {
               )) : null}
               {open && section.toolsDriven ? <ToolsGroups limit={9} active /> : null}
               {open ? (
-                <Link className="ch-link ch247-mobile-nav__all" to={section.to} onClick={onNavigate}>
+                <Link className="hg-link hg-drawer__all" to={section.to} onClick={onNavigate}>
                   All {section.label.toLowerCase()}
-                  <span className="ch-link__arrow" aria-hidden>→</span>
+                  <span className="hg-link__arrow" aria-hidden>→</span>
                 </Link>
               ) : null}
             </div>
