@@ -1,0 +1,29 @@
+{
+  "capturedAt": "2026-11-07T16:26:07.364Z",
+  "baseUrl": "http://127.0.0.1:3000",
+  "shots": [
+    "header-desktop.png",
+    "footer-desktop.png",
+    "menu-open-desktop.png",
+    "header-tablet.png",
+    "footer-tablet.png",
+    "header-mobile.png",
+    "footer-mobile.png"
+  ],
+  "footer-desktop": {
+    "height": 820,
+    "links": 103,
+    "columns": 5
+  },
+  "megaPanelOpen": true,
+  "footer-tablet": {
+    "height": 1259,
+    "links": 103,
+    "columns": 5
+  },
+  "footer-mobile": {
+    "height": 2136,
+    "links": 103,
+    "columns": 5
+  }
+}

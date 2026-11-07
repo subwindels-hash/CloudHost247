@@ -1,23 +1,23 @@
 /* =============================================================================
-   CloudHost247 — Hostinger-style menu / mega menu / footer
+   CloudHost247 — shared menu / mega menu / footer chrome
    -----------------------------------------------------------------------------
    Loaded AFTER hostinger.css. The three shared chrome components (Header,
-   PlatformMegaMenu, Footer) now render `hg-nav*`, `hg-mega*`, `hg-drawer*` and
-   `hg-footer*` classes modelled on hostinger.com:
+   PlatformMegaMenu, Footer) render `hg-nav*`, `hg-mega*`, `hg-drawer*` and
+   `hg-footer*` classes. The original (Hostinger-shaped) layout rules remain in
+   sections 1–4; section 5 restyles that same markup against two new references:
 
-     • Menu      — compact sticky bar, dropdown triggers with active underlines,
-                   utility cluster (language / currency / search), one strong CTA.
-     • Mega menu — full-width white panel: tinted "explore" column + featured card
-                   on the left, three columns of icon links with descriptions and
-                   badges on the right, and a "see all" bottom bar.
-     • Footer    — CTA band, brand block, five curated registry-driven columns,
-                   legal bar.
+     • Menu      — GoDaddy-style near-black two-tier bar: a slim utility strip,
+                   white brand mark, dropdown triggers, a full-width dark mega
+                   panel, search/cart and one strong gold CTA.
+     • Footer    — Amazon-style directory: a "Back to top" strip, four dense
+                   topic columns, a brand/locale row and a darkest legal band.
 
-   All content still comes from NAV_SECTIONS / FOOTER_COLUMNS / UTILITY, so the
-   registry's link-integrity tests remain the single source of truth. No invented
-   promotion, review score or external social link.
+   These are layout/visual references only: no other company's mark, copy, review
+   score or commerce link is reproduced. All content still comes from
+   NAV_SECTIONS / FOOTER_COLUMNS / UTILITY, so the registry's link-integrity
+   tests remain the single source of truth.
 
-   Palette: CloudHost247 ink + mint (see the --hg-accent* tokens in hostinger.css).
+   Palette: CloudHost247 ink + metallic gold/silver (see shared/site/metals.css).
    ========================================================================== */
 
 /* -----------------------------------------------------------------------------
@@ -566,3 +566,1065 @@
   border-top: 1px solid rgba(212, 175, 55, 0.38);
 }
 .hg-theme .hg-footer__bottom { border-top-color: rgba(212, 175, 55, 0.22); }
+
+/* -----------------------------------------------------------------------------
+   5. Benchmark chrome — GoDaddy-style dark menu + Amazon-style footer directory
+   -----------------------------------------------------------------------------
+   Everything below overrides sections 1–4 with equal-or-higher specificity. The DOM,
+   registry data, interaction model and responsive breakpoints are unchanged: this is a
+   restyle of the same components, not a second implementation.
+   -------------------------------------------------------------------------- */
+
+/* ---- GoDaddy: slim utility strip above a near-black product bar ---- */
+.hg-theme .hg-header {
+  background: #0d1116;
+  border-bottom: 1px solid #2b3440;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.30);
+}
+.hg-utility { background: #161d25; border-bottom: 1px solid #262e38; }
+.hg-utility__inner {
+  width: min(1440px, calc(100% - 32px));
+  min-height: 32px;
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.hg-utility__left, .hg-utility__right { display: flex; align-items: center; gap: 18px; }
+.hg-utility a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  color: #c3cbd4;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.hg-utility a:hover, .hg-utility a:focus-visible { color: #e6c875; }
+.hg-utility a:focus-visible { outline: 2px solid #d4af37; outline-offset: 2px; }
+
+.hg-theme .hg-nav__bar { min-height: 68px; }
+.hg-theme .hg-nav__brand img { height: 34px; width: auto; }
+.hg-theme .hg-nav__trigger { color: #f2f4f6; }
+.hg-theme .hg-nav__trigger:hover,
+.hg-theme .hg-nav__trigger.is-open { background: rgba(230, 200, 117, 0.10); color: #e6c875; }
+.hg-theme .hg-nav__trigger.is-open::after,
+.hg-theme .hg-nav__trigger:hover::after { background: #d4af37; }
+.hg-theme .hg-nav__caret { opacity: 0.7; }
+.hg-theme .hg-nav__trigger:focus-visible,
+.hg-theme .hg-nav__icon:focus-visible,
+.hg-theme .hg-nav__text-link:focus-visible,
+.hg-theme .hg-mega__link:focus-visible,
+.hg-theme .hg-drawer__toggle:focus-visible { outline: 3px solid #d4af37; outline-offset: 2px; }
+
+.hg-theme .hg-nav__utility .ch247-locale__trigger {
+  background: transparent;
+  border-color: #3b4450;
+  color: #e5e4e2;
+  font-size: 0.78rem;
+}
+.hg-theme .hg-nav__utility .ch247-locale__trigger:hover,
+.hg-theme .hg-nav__utility .ch247-locale__trigger[aria-expanded='true'] {
+  background: rgba(230, 200, 117, 0.10);
+  border-color: #d4af37;
+  color: #e6c875;
+}
+.hg-theme .hg-nav__icon,
+.hg-theme .hg-nav__text-link { color: #eef0f2; }
+.hg-theme .hg-nav__icon:hover { background: rgba(230, 200, 117, 0.12); color: #e6c875; }
+.hg-theme .hg-nav__text-link:hover { color: #e6c875; }
+.hg-theme .hg-nav__avatar {
+  background: rgba(212, 175, 55, 0.14);
+  border: 1px solid rgba(212, 175, 55, 0.42);
+  color: #e6c875;
+}
+.hg-theme .hg-nav__avatar:hover { background: rgba(212, 175, 55, 0.24); }
+
+/* ---- GoDaddy: full-width dark mega panel with a highlighted promo column ---- */
+.hg-theme .hg-mega {
+  background: #171e27;
+  border: 1px solid #2b3440;
+  border-top: 2px solid #d4af37;
+  border-radius: 0 0 6px 6px;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.50);
+}
+.hg-theme .hg-mega__inner { width: min(1440px, 100%); }
+.hg-theme .hg-mega__intro {
+  background: linear-gradient(165deg, #202a35 0%, #151c24 100%);
+  border-right: 1px solid #2b3440;
+}
+.hg-theme .hg-mega__eyebrow,
+.hg-theme .hg-mega__featured-label { color: #e6c875; }
+.hg-theme .hg-mega__intro h2 { color: #fff; }
+.hg-theme .hg-mega__blurb { color: #aab4bf; }
+.hg-theme .hg-mega__featured {
+  background: linear-gradient(150deg, #2b2415 0%, #1b1a14 100%);
+  border-color: rgba(212, 175, 55, 0.45);
+  color: #f5f1e6;
+}
+.hg-theme .hg-mega__featured:hover { color: #fff; box-shadow: 0 12px 30px rgba(0, 0, 0, 0.40); }
+.hg-theme .hg-mega__featured strong { color: #fff; }
+.hg-theme .hg-mega__featured > span { color: #cbc6b6; }
+.hg-theme .hg-mega__featured .hg-link { color: #e6c875; }
+.hg-theme .hg-mega__group h3 { color: #e6c875; }
+.hg-theme .hg-mega__link { color: #e9edf1; }
+.hg-theme .hg-mega__link:hover { background: rgba(230, 200, 117, 0.10); }
+.hg-theme .hg-mega__link-icon { background: rgba(212, 175, 55, 0.14); color: #e6c875; }
+.hg-theme .hg-mega__link-desc { color: #98a4b0; }
+.hg-theme .hg-badge { background: rgba(212, 175, 55, 0.16); color: #e6c875; }
+.hg-theme .hg-mega__foot { background: #121820; border-top: 1px solid #2b3440; color: #98a4b0; }
+.hg-theme .hg-mega__foot .hg-link { color: #e6c875; }
+
+/* Signed-in second row stays in the same dark family. */
+.hg-theme .hg-subnav { background: #161d25; border-bottom: 1px solid #262e38; box-shadow: none; }
+.hg-theme .hg-subnav a { color: #aeb7c0; }
+.hg-theme .hg-subnav a:hover,
+.hg-theme .hg-subnav a.active { color: #e6c875; border-bottom-color: #d4af37; }
+
+/* ---- Amazon: back-to-top strip, four-column directory, locale row, legal band ---- */
+.hg-theme .hg-footer { background: #232f3e; border-top: 0; color: #d6dade; margin-top: auto; }
+.hg-footer__top {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  background: #37475a;
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+}
+.hg-footer__top:hover, .hg-footer__top:focus-visible { background: #485769; color: #e6c875; }
+.hg-footer__directory { padding: 44px 0 48px; }
+.hg-theme .hg-footer__columns { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 36px; }
+.hg-theme .hg-footer__column h2 {
+  margin: 0 0 16px;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  color: #fff;
+}
+.hg-theme .hg-footer__column ul { display: grid; gap: 5px; }
+/* Amazon's directory is dense: the long columns flow into two internal sub-columns. At four
+   270px-wide topics those sub-columns are ~130px, so labels wrap at spaces rather than mid-word —
+   `overflow-wrap` stays `normal` for exactly that reason. Every destination is still rendered. */
+.hg-theme .hg-footer__column--wide ul {
+  display: block;
+  columns: 2;
+  column-gap: 14px;
+}
+.hg-theme .hg-footer__column--wide li { break-inside: avoid; margin: 0 0 5px; }
+.hg-theme .hg-footer__column a {
+  display: inline-block;
+  min-height: 20px;
+  color: #d6dade;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  text-decoration: none;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+.hg-theme .hg-footer__column a:hover { color: #fff; text-decoration: underline; }
+
+.hg-footer__locale-band { border-top: 1px solid #3b4757; }
+.hg-footer__locale-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 26px 0;
+}
+.hg-footer__brand { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.hg-footer__brand img { height: 34px; width: auto; }
+.hg-footer__tagline { font-size: 0.82rem; color: #9aa6b2; }
+.hg-footer__locale { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.hg-footer__locale-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 32px;
+  padding: 6px 12px;
+  border: 1px solid #6b7684;
+  border-radius: 4px;
+  color: #e9edf1;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.hg-footer__signup { flex: 0 0 auto; }
+
+.hg-footer__legal { background: #0d1116; padding: 30px 0 34px; text-align: center; }
+.hg-footer__legal-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 20px; }
+.hg-footer__legal-links a { color: #c7ced6; font-size: 0.76rem; text-decoration: none; }
+.hg-footer__legal-links a:hover { color: #e6c875; text-decoration: underline; }
+.hg-footer__copyright { margin: 16px 0 0; color: #8b96a2; font-size: 0.74rem; }
+
+/* ---- Responsive: same breakpoints, dark chrome, no horizontal overflow ---- */
+@media (max-width: 1439px) {
+  .hg-theme .hg-nav__toggle { background: #1b242c; border-color: #3b4450; }
+  .hg-theme .ch247-menu-toggle__bar { background: #f2f4f6 !important; }
+  .hg-theme .hg-nav__collapsible {
+    background: #0d1116;
+    border-top: 1px solid #2b3440;
+    box-shadow: 0 24px 50px rgba(0, 0, 0, 0.55);
+  }
+  .hg-theme .hg-nav__utility,
+  .hg-theme .hg-nav__actions { border-bottom-color: #2b3440; }
+  .hg-theme .hg-drawer__group { border-bottom-color: #2b3440; }
+  .hg-theme .hg-drawer__toggle { color: #f2f4f6; }
+  .hg-theme .hg-drawer__subgroup h3 { color: #e6c875; }
+  .hg-theme .hg-drawer__link { color: #e9edf1; }
+  .hg-theme .hg-drawer__link:hover { background: rgba(230, 200, 117, 0.10); }
+  .hg-theme .hg-drawer__all { color: #e6c875; }
+}
+@media (max-width: 1080px) {
+  .hg-theme .hg-footer__columns { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hg-footer__locale-inner { flex-wrap: wrap; }
+}
+@media (max-width: 768px) {
+  .hg-utility { display: none; }
+}
+@media (max-width: 640px) {
+  /* Amazon stacks its link groups on a phone; two narrow columns keep all 94 destinations
+     reachable without a three-thousand-pixel scroll. */
+  .hg-theme .hg-footer__columns { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+  .hg-theme .hg-footer__column--wide ul { columns: 1; }
+  .hg-theme .hg-footer__column h2 { font-size: 0.9rem; }
+  .hg-theme .hg-footer__column a { font-size: 0.75rem; }
+  .hg-footer__directory { padding: 32px 0; }
+  .hg-footer__locale-inner { flex-direction: column; align-items: flex-start; gap: 18px; }
+  .hg-footer__legal-links { gap: 8px 14px; }
+}
+
+/* -----------------------------------------------------------------------------
+   6. Professional chrome (supersedes the Amazon/GoDaddy benchmark in section 5)
+   -----------------------------------------------------------------------------
+   A restrained corporate treatment: a light, hairline-bordered menu bar, a light mega panel with
+   clear columns, and a deep-slate footer with balanced, labelled link groups. Same DOM, same
+   registry data, same interaction model and breakpoints — only the visual language changes.
+   -------------------------------------------------------------------------- */
+
+/* ---- Professional light menu bar ---- */
+.hg-theme .hg-header {
+  background: #fff;
+  border-bottom: 1px solid #dfe4e9;
+  box-shadow: 0 1px 0 rgba(13, 17, 22, 0.03), 0 8px 22px rgba(13, 17, 22, 0.05);
+}
+.hg-utility { background: #f5f7f8; border-bottom: 1px solid #e5e9ed; }
+.hg-utility a { color: #5b6773; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.01em; }
+.hg-utility a:hover, .hg-utility a:focus-visible { color: #8a6410; }
+.hg-theme .hg-nav__bar { min-height: 68px; }
+.hg-theme .hg-nav__brand img { height: 34px; width: auto; }
+.hg-theme .hg-nav__trigger { color: #1b242c; }
+.hg-theme .hg-nav__trigger:hover,
+.hg-theme .hg-nav__trigger.is-open { background: #f2f4f6; color: #8a6410; }
+.hg-theme .hg-nav__trigger.is-open::after,
+.hg-theme .hg-nav__trigger:hover::after { background: #b8860b; }
+.hg-theme .hg-nav__caret { opacity: 0.6; }
+.hg-theme .hg-nav__trigger:focus-visible,
+.hg-theme .hg-nav__icon:focus-visible,
+.hg-theme .hg-nav__text-link:focus-visible,
+.hg-theme .hg-mega__link:focus-visible,
+.hg-theme .hg-drawer__toggle:focus-visible { outline: 3px solid #b8860b; outline-offset: 2px; }
+
+.hg-theme .hg-nav__utility .ch247-locale__trigger {
+  background: #fff;
+  border-color: #d8dfe5;
+  color: #1b242c;
+  font-size: 0.78rem;
+}
+.hg-theme .hg-nav__utility .ch247-locale__trigger:hover,
+.hg-theme .hg-nav__utility .ch247-locale__trigger[aria-expanded='true'] {
+  background: #f7f1e0;
+  border-color: #b8860b;
+  color: #8a6410;
+}
+.hg-theme .hg-nav__icon,
+.hg-theme .hg-nav__text-link { color: #1b242c; }
+.hg-theme .hg-nav__icon:hover { background: #f2f4f6; color: #8a6410; }
+.hg-theme .hg-nav__text-link:hover { color: #8a6410; }
+.hg-theme .hg-nav__avatar {
+  background: #f7f1e0;
+  border: 1px solid #e5d09a;
+  color: #8a6410;
+}
+.hg-theme .hg-nav__avatar:hover { background: #f0e4c2; }
+
+/* ---- Light, clearly grouped mega panel ---- */
+.hg-theme .hg-mega {
+  background: #fff;
+  border: 1px solid #dfe4e9;
+  border-top: 2px solid #b8860b;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 24px 60px rgba(13, 17, 22, 0.14);
+}
+.hg-theme .hg-mega__inner { width: min(1440px, 100%); }
+.hg-theme .hg-mega__intro {
+  background: #f7f8fa;
+  border-right: 1px solid #e5e9ed;
+}
+.hg-theme .hg-mega__eyebrow,
+.hg-theme .hg-mega__featured-label,
+.hg-theme .hg-mega__group h3 { color: #8a6410; }
+.hg-theme .hg-mega__intro h2 { color: #131a21; }
+.hg-theme .hg-mega__blurb { color: #5b6773; }
+.hg-theme .hg-mega__featured {
+  background: #fff;
+  border-color: #e5d09a;
+  color: #131a21;
+}
+.hg-theme .hg-mega__featured:hover { color: #131a21; box-shadow: 0 12px 28px rgba(13, 17, 22, 0.12); }
+.hg-theme .hg-mega__featured strong { color: #131a21; }
+.hg-theme .hg-mega__featured > span { color: #5b6773; }
+.hg-theme .hg-mega__featured .hg-link { color: #8a6410; }
+.hg-theme .hg-mega__link { color: #1b242c; }
+.hg-theme .hg-mega__link:hover { background: #f4f6f8; }
+.hg-theme .hg-mega__link-icon { background: #f7f1e0; color: #8a6410; }
+.hg-theme .hg-mega__link-desc { color: #66727e; }
+.hg-theme .hg-badge { background: #f7f1e0; color: #8a6410; }
+.hg-theme .hg-mega__foot { background: #fafbfc; border-top: 1px solid #e5e9ed; color: #66727e; }
+.hg-theme .hg-mega__foot .hg-link { color: #8a6410; }
+
+.hg-theme .hg-subnav { background: #f5f7f8; border-bottom: 1px solid #e5e9ed; box-shadow: none; }
+.hg-theme .hg-subnav a { color: #5b6773; }
+.hg-theme .hg-subnav a:hover,
+.hg-theme .hg-subnav a.active { color: #8a6410; border-bottom-color: #b8860b; }
+
+/* ---- Professional footer: brand row, four balanced columns, compact legal bar ---- */
+.hg-theme .hg-footer { background: #121820; border-top: 0; color: #aeb8c2; margin-top: auto; }
+.hg-footer__directory { padding: 54px 0 48px; }
+.hg-footer__intro {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 32px;
+  padding-bottom: 36px;
+  margin-bottom: 40px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+}
+.hg-footer__brand { display: grid; gap: 0; max-width: 560px; }
+.hg-footer__brand img { height: 34px; width: auto; display: block; }
+.hg-footer__brand p { margin: 16px 0 0; font-size: 0.86rem; line-height: 1.7; color: #aeb8c2; }
+.hg-footer__intro-actions { display: flex; align-items: center; gap: 20px; flex: 0 0 auto; }
+.hg-footer__intro-actions .hg-link { color: #e6c875; font-size: 0.84rem; font-weight: 650; }
+.hg-footer__intro-actions .hg-link:hover { color: #fff; }
+
+.hg-theme .hg-footer__columns { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 40px; align-items: start; }
+.hg-theme .hg-footer__column h2 {
+  margin: 0 0 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 0.94rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  color: #fff;
+}
+.hg-footer__subgroup + .hg-footer__subgroup { margin-top: 22px; }
+.hg-footer__subgroup h3 {
+  margin: 0 0 10px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: #d4af37;
+}
+.hg-theme .hg-footer__column ul { display: grid; gap: 3px; }
+.hg-theme .hg-footer__column a {
+  display: inline-block;
+  min-height: 18px;
+  color: #aeb8c2;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  text-decoration: none;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+.hg-theme .hg-footer__column a:hover { color: #fff; text-decoration: underline; }
+
+.hg-theme .hg-footer__bottom,
+.hg-footer__bottom {
+  background: #0c1117;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 22px 0 26px;
+}
+.hg-footer__bottom-inner { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 20px; }
+.hg-footer__copyright { margin: 0; font-size: 0.75rem; color: #8793a0; }
+.hg-footer__locale { display: flex; align-items: center; gap: 8px; font-size: 0.75rem; color: #8793a0; }
+.hg-footer__legal-links { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-left: auto; }
+.hg-footer__legal-links a { color: #aeb8c2; font-size: 0.75rem; text-decoration: none; }
+.hg-footer__legal-links a:hover { color: #e6c875; text-decoration: underline; }
+/* Section 5 made this a full-width navy band; here it is an inline link in the legal bar. */
+.hg-theme .hg-footer .hg-footer__top {
+  display: inline-flex;
+  min-height: 0;
+  padding: 0;
+  background: transparent;
+  color: #aeb8c2;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-decoration: none;
+}
+.hg-theme .hg-footer .hg-footer__top:hover,
+.hg-theme .hg-footer .hg-footer__top:focus-visible { background: transparent; color: #e6c875; }
+
+/* ---- Responsive ---- */
+@media (max-width: 1439px) {
+  .hg-theme .hg-nav__toggle { background: #fff; border-color: #d8dfe5; }
+  .hg-theme .ch247-menu-toggle__bar { background: #1b242c !important; }
+  .hg-theme .hg-nav__collapsible {
+    background: #fff;
+    border-top: 1px solid #e5e9ed;
+    box-shadow: 0 24px 50px rgba(13, 17, 22, 0.12);
+  }
+  .hg-theme .hg-nav__utility,
+  .hg-theme .hg-nav__actions { border-bottom-color: #e5e9ed; }
+  .hg-theme .hg-drawer__group { border-bottom-color: #e5e9ed; }
+  .hg-theme .hg-drawer__toggle { color: #1b242c; }
+  .hg-theme .hg-drawer__subgroup h3 { color: #8a6410; }
+  .hg-theme .hg-drawer__link { color: #1b242c; }
+  .hg-theme .hg-drawer__link:hover { background: #f4f6f8; }
+  .hg-theme .hg-drawer__all { color: #8a6410; }
+}
+@media (max-width: 1080px) {
+  .hg-theme .hg-footer__columns { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; }
+  .hg-footer__intro { flex-wrap: wrap; }
+  .hg-footer__legal-links { margin-left: 0; }
+}
+@media (max-width: 768px) { .hg-utility { display: none; } }
+@media (max-width: 640px) {
+  .hg-footer__directory { padding: 36px 0 32px; }
+  .hg-theme .hg-footer__columns { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+  .hg-theme .hg-footer__column h2 { font-size: 0.86rem; }
+  .hg-theme .hg-footer__column a { font-size: 0.74rem; }
+  .hg-footer__intro { padding-bottom: 28px; margin-bottom: 30px; }
+  .hg-footer__bottom-inner { flex-direction: column; align-items: flex-start; }
+  .hg-footer__legal-links { gap: 8px 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hg-footer__column a, .hg-nav__trigger, .hg-mega__link { transition: none !important; }
+}
+
+/* -----------------------------------------------------------------------------
+   7. Single-row dark horizontal menu (supersedes the light two-tier bar in section 6)
+   -----------------------------------------------------------------------------
+   The brief: show every top-level section inline in one near-black bar, as in the reference
+   screenshot, instead of hiding them behind a full-width dropdown panel. The footer from
+   section 6 is unaffected.
+
+   Same DOM, same registry data, same aria-expanded / Escape / outside-click / route-close
+   behaviour. What changes: the bar is one row; the utility strip folds into a short right-hand
+   cluster at desktop; and each trigger opens a compact, item-anchored dropdown instead of a
+   viewport-wide mega panel. The desktop bar is also available from 1200px up (it used to start
+   at 1440px), so a 1280/1366 laptop sees the horizontal menu rather than a hamburger.
+   -------------------------------------------------------------------------- */
+
+.hg-nav__quick { display: none; align-items: center; gap: 14px; flex: 0 0 auto; }
+
+.hg-theme .hg-header {
+  background: #1b1d20;
+  border-bottom: 1px solid #34383d;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.28);
+}
+.hg-utility { background: #16181b; border-bottom: 1px solid #2c3034; }
+.hg-utility a { color: #b9c0c8; font-size: 0.72rem; }
+.hg-utility a:hover, .hg-utility a:focus-visible { color: #e6c875; }
+
+.hg-theme .hg-nav__bar { min-height: 62px; gap: 12px; }
+.hg-theme .hg-nav__brand img { height: 32px; width: auto; }
+.hg-theme .hg-nav__trigger {
+  color: #f4f5f6;
+  font-size: 0.84rem;
+  font-weight: 600;
+  padding: 8px 7px;
+  border-radius: 0;
+  gap: 5px;
+}
+.hg-theme .hg-nav__trigger::after { left: 9px; right: 9px; bottom: 2px; background: #d4af37; }
+.hg-theme .hg-nav__trigger:hover,
+.hg-theme .hg-nav__trigger.is-open { background: transparent; color: #e6c875; }
+.hg-theme .hg-nav__caret { opacity: 0.75; font-size: 0.62rem; }
+.hg-theme .hg-nav__trigger:focus-visible,
+.hg-theme .hg-nav__icon:focus-visible,
+.hg-theme .hg-nav__text-link:focus-visible,
+.hg-theme .hg-nav__quick a:focus-visible,
+.hg-theme .hg-mega__link:focus-visible,
+.hg-theme .hg-drawer__toggle:focus-visible { outline: 2px solid #e6c875; outline-offset: -2px; }
+
+.hg-theme .hg-nav__utility .ch247-locale__trigger {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  min-width: 0;
+  padding: 0 4px;
+  color: #d7dce1;
+  font-size: 0.76rem;
+}
+.hg-theme .hg-nav__utility .ch247-locale__trigger:hover,
+.hg-theme .hg-nav__utility .ch247-locale__trigger[aria-expanded='true'] {
+  background: transparent; border-color: transparent; color: #e6c875;
+}
+.hg-theme .hg-nav__icon { color: #f4f5f6; width: 36px; height: 36px; }
+.hg-theme .hg-nav__icon:hover { background: rgba(230, 200, 117, 0.12); color: #e6c875; }
+
+.hg-nav__quick a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 2px;
+  color: #eef0f2;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.hg-nav__quick a:hover { color: #e6c875; }
+.hg-nav__cart { position: relative; }
+.hg-cart__dot {
+  position: absolute;
+  top: 8px;
+  right: -2px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #d4af37;
+  box-shadow: 0 0 0 2px #1b1d20;
+}
+
+.hg-theme .hg-nav__text-link { color: #f4f5f6; font-size: 0.82rem; }
+.hg-theme .hg-nav__text-link:hover { color: #e6c875; }
+.hg-theme .hg-nav__avatar { background: rgba(212, 175, 55, 0.16); border-color: rgba(212, 175, 55, 0.45); color: #e6c875; }
+
+/* ---- Compact, item-anchored dropdown (replaces the full-width mega panel) ---- */
+.hg-theme .hg-nav__item { position: relative; }
+.hg-theme .hg-mega {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: auto;
+  width: 292px;
+  max-width: calc(100vw - 32px);
+  max-height: min(72vh, 560px);
+  overflow-y: auto;
+  background: #23262b;
+  border: 1px solid #3a3f45;
+  border-top: 2px solid #d4af37;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
+}
+.hg-theme .hg-mega__inner { width: 100%; display: block; }
+.hg-theme .hg-mega__intro { display: none; }
+.hg-theme .hg-mega__groups { display: block; padding: 12px 14px 14px; }
+.hg-theme .hg-mega__group { margin: 0 0 14px; }
+.hg-theme .hg-mega__group h3 {
+  margin: 0 0 6px; padding-bottom: 5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+  color: #e6c875; font-size: 0.66rem; letter-spacing: 0.1em;
+}
+.hg-theme .hg-mega__group ul { gap: 0; }
+.hg-theme .hg-mega__link { padding: 5px 6px; border-radius: 4px; color: #e9edf1; }
+.hg-theme .hg-mega__link:hover { background: rgba(230, 200, 117, 0.10); }
+.hg-theme .hg-mega__link-icon,
+.hg-theme .hg-mega__link-desc { display: none; }
+.hg-theme .hg-mega__link-label { font-size: 0.8rem; font-weight: 600; line-height: 1.35; }
+.hg-theme .hg-badge { background: rgba(212, 175, 55, 0.18); color: #e6c875; font-size: 0.55rem; }
+.hg-theme .hg-mega__foot {
+  display: flex; align-items: center; justify-content: flex-start;
+  padding: 10px 14px; background: #1c1f23;
+  border-top: 1px solid #3a3f45; color: #98a4b0; font-size: 0.72rem;
+}
+.hg-theme .hg-mega__foot > span { display: none; }
+.hg-theme .hg-mega__foot .hg-link { color: #e6c875; font-size: 0.8rem; }
+
+.hg-theme .hg-subnav { background: #16181b; border-bottom: 1px solid #2c3034; box-shadow: none; }
+.hg-theme .hg-subnav a { color: #b9c0c8; }
+.hg-theme .hg-subnav a:hover,
+.hg-theme .hg-subnav a.active { color: #e6c875; border-bottom-color: #d4af37; }
+
+/* ---- Desktop: one bar, all sections inline ---- */
+/* At 1440px+ the whole right-hand cluster fits on the single bar, so the slim strip is folded
+   away entirely. Between 1200 and 1439 the bar still shows every section inline, but the quick
+   links drop back to the slim strip and the triggers tighten so nothing overlaps. */
+@media (min-width: 1440px) {
+  .hg-utility { display: none; }
+  .hg-nav__quick { display: flex; }
+  .hg-theme .hg-nav__utility .hg-nav__icon,
+  .hg-theme .hg-nav__utility .ch247-locale__trigger svg { display: none; }
+}
+
+/* Section 3 hides the trigger list below 1440px and shows the drawer. Restore the horizontal
+   bar for 1200–1439px so a normal laptop sees the inline menu. Later rules win at equal
+   specificity; .hg-theme-prefixed selectors also beat the section 5/6 overrides. */
+@media (min-width: 1200px) and (max-width: 1439px) {
+  .hg-nav, .hg-nav__list { display: block; }
+  .hg-nav { position: static; flex: 1; min-width: 0; }
+  .hg-nav__items { display: flex; }
+  .hg-theme .hg-nav__toggle { display: none; }
+  .hg-theme .hg-nav__collapsible {
+    display: flex;
+    position: static;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    padding: 0;
+    max-height: none;
+    overflow: visible;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+  }
+  .hg-theme .hg-nav__utility,
+  .hg-theme .hg-nav__actions { flex-wrap: nowrap; padding: 0; border-bottom: 0; }
+  .hg-nav__drawer { display: none; }
+  .hg-nav__quick { display: none; }
+  .hg-theme .hg-nav__utility .hg-nav__icon,
+  .hg-theme .hg-nav__utility .ch247-locale__trigger svg { display: none; }
+  .hg-theme .hg-nav__trigger { font-size: 0.78rem; padding: 8px 6px; gap: 4px; }
+  .hg-theme .hg-nav__trigger::after { left: 6px; right: 6px; }
+}
+
+/* ---- Compact/drawer widths keep the dark header family ---- */
+@media (max-width: 1199px) {
+  .hg-theme .hg-nav__toggle { background: #24272c; border-color: #3a3f45; }
+  .hg-theme .ch247-menu-toggle__bar { background: #f4f5f6 !important; }
+  .hg-theme .hg-nav__collapsible {
+    background: #1b1d20;
+    border-top: 1px solid #34383d;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
+  }
+  .hg-theme .hg-nav__utility,
+  .hg-theme .hg-nav__actions { border-bottom-color: #34383d; }
+  .hg-theme .hg-drawer__group { border-bottom-color: #34383d; }
+  .hg-theme .hg-drawer__toggle { color: #f4f5f6; }
+  .hg-theme .hg-drawer__subgroup h3 { color: #e6c875; }
+  .hg-theme .hg-drawer__link { color: #e9edf1; }
+  .hg-theme .hg-drawer__link:hover { background: rgba(230, 200, 117, 0.10); }
+  .hg-theme .hg-drawer__all { color: #e6c875; }
+  /* The drawer replaces desktop panels: keep them in the flow, never a floating overlay. */
+  .hg-theme .hg-mega {
+    position: static;
+    width: 100%;
+    max-width: 100%;
+    max-height: none;
+    border: 0;
+    border-top: 1px solid #3a3f45;
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+  }
+  .hg-theme .hg-mega__groups { padding: 0 0 8px; }
+  .hg-theme .hg-mega__link-icon,
+  .hg-theme .hg-mega__link-desc { display: none; }
+  .hg-theme .hg-mega__foot { background: transparent; padding: 8px 0; }
+}
+
+/* -----------------------------------------------------------------------------
+   8. Flat bar — every menu link visible beside the logo, no dropdowns at all
+   -----------------------------------------------------------------------------
+   Supersedes sections 1–3, 5–7 for the header. The menu is now a plain list of real links:
+   no trigger buttons, no aria-expanded disclosures, no mega panel, no compact dropdown, no
+   hamburger and no `+` accordion. Language/currency remain inline settings controls (they are
+   not menu links), and the seven registry sections are direct links to their landing pages.
+
+   At narrow widths the bar wraps onto extra rows instead of collapsing into a drawer, so every
+   destination stays visible. Dead rules from the earlier sections are left in place because other
+   pages still import some of the shared hg-mega_* helpers.
+   -------------------------------------------------------------------------- */
+
+.hg-theme .hg-nav__bar {
+  flex-wrap: wrap;
+  align-items: center;
+  row-gap: 4px;
+  padding-block: 8px;
+  min-height: 62px;
+}
+.hg-theme .hg-nav__brand { flex: 0 0 auto; }
+
+.hg-bar__body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px 12px;
+  min-width: 0;
+}
+.hg-menu { flex: 1 1 auto; min-width: 0; }
+.hg-menu__items {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 2px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.hg-menu__item { flex: 0 0 auto; }
+.hg-menu__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 8px 7px;
+  border-bottom: 2px solid transparent;
+  color: #f4f5f6;
+  font-size: 0.84rem;
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: color 0.16s ease, border-color 0.16s ease;
+}
+.hg-menu__link:hover,
+.hg-menu__link:focus-visible,
+.hg-menu__link.active { color: #e6c875; border-bottom-color: #d4af37; }
+
+.hg-bar__quick { display: flex; align-items: center; gap: 12px; flex: 0 0 auto; }
+.hg-bar__quick a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: #eef0f2;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.hg-bar__quick a:hover,
+.hg-bar__quick a.active { color: #e6c875; }
+
+.hg-bar__locale { display: flex; align-items: center; gap: 4px; flex: 0 0 auto; }
+/* Beats `.ch247-header .ch247-locale__trigger` from language-switcher.css (light pill). */
+.hg-theme .hg-header .hg-bar__locale .ch247-locale__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 5px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #d7dce1;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.hg-theme .hg-header .hg-bar__locale .ch247-locale__trigger:hover,
+.hg-theme .hg-header .hg-bar__locale .ch247-locale__trigger[aria-expanded='true'] {
+  background: transparent; color: #e6c875;
+}
+.hg-theme .hg-header .hg-bar__locale .ch247-locale__trigger svg { width: 15px; height: 15px; }
+
+.hg-bar__icon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: #f4f5f6;
+  text-decoration: none;
+}
+.hg-bar__icon:hover { color: #e6c875; }
+.hg-cart__dot {
+  position: absolute;
+  top: 9px;
+  right: 6px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #d4af37;
+  box-shadow: 0 0 0 2px #1b1d20;
+}
+
+.hg-bar__actions { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+.hg-bar__text-link {
+  padding: 8px 2px;
+  border: 0;
+  background: transparent;
+  color: #f4f5f6;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.hg-bar__text-link:hover { color: #e6c875; }
+.hg-bar__avatar {
+  padding: 8px 14px;
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  border-radius: 999px;
+  background: rgba(212, 175, 55, 0.16);
+  color: #e6c875;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.hg-theme .hg-menu__link:focus-visible,
+.hg-theme .hg-bar__quick a:focus-visible,
+.hg-theme .hg-bar__icon:focus-visible,
+.hg-theme .hg-bar__text-link:focus-visible,
+.hg-theme .hg-bar__locale .ch247-locale__trigger:focus-visible { outline: 2px solid #e6c875; outline-offset: -2px; }
+
+/* Keep the logo on the same line as the links from tablet up. Only the groups inside the body
+   wrap, so at 1280/1024 the seven sections still sit beside the brand rather than below it. */
+@media (min-width: 768px) {
+  .hg-theme .hg-nav__bar { flex-wrap: nowrap; }
+}
+@media (max-width: 900px) {
+  /* A wrapped bar is several rows tall; do not let it pin over the page. */
+  .hg-theme .hg-header { position: relative; }
+  .hg-bar__body { justify-content: flex-start; }
+  .hg-menu__link { font-size: 0.8rem; padding: 8px 6px; }
+}
+@media (max-width: 767px) {
+  .hg-theme .hg-nav__bar { flex-wrap: wrap; }
+  .hg-menu { flex-basis: 100%; }
+  .hg-menu__items { gap: 0 4px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hg-menu__link { transition: none !important; }
+}
+
+/* -----------------------------------------------------------------------------
+   9. Utility/account line directly under the announcement bar
+   -----------------------------------------------------------------------------
+   Pricing, Help, English, USD, Sign In and Create Account move out of the main bar onto a
+   single straight, shallow row immediately below the site-wide announcement bar. The main bar
+   below keeps the brand mark, the seven section links, search and cart. The Create Account
+   button is deliberately compact (30px) so the row stays a thin strip.
+   -------------------------------------------------------------------------- */
+
+.hg-header__body { display: block; }
+
+.hg-bar__top {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: nowrap;               /* one straight line — never wraps */
+  gap: 14px;
+  min-height: 42px;
+  padding-inline: max(16px, calc((100% - 1440px) / 2));
+  background: #16181b;
+  border-bottom: 1px solid #34383d;
+}
+.hg-bar__top .hg-bar__quick { gap: 12px; }
+.hg-bar__top .hg-bar__quick a {
+  min-height: 34px;
+  color: #d7dce1;
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+.hg-bar__top .hg-bar__quick a:hover,
+.hg-bar__top .hg-bar__quick a.active { color: #e6c875; }
+
+/* Beats both language-switcher.css and section 8's `.hg-bar__locale` rule. */
+.hg-theme .hg-header .hg-bar__top .hg-bar__locale .ch247-locale__trigger {
+  min-height: 34px;
+  min-width: 0;
+  padding: 0 5px;
+  gap: 4px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #d7dce1;
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+.hg-theme .hg-header .hg-bar__top .hg-bar__locale .ch247-locale__trigger:hover,
+.hg-theme .hg-header .hg-bar__top .hg-bar__locale .ch247-locale__trigger[aria-expanded='true'] {
+  background: transparent;
+  color: #e6c875;
+}
+.hg-theme .hg-header .hg-bar__top .hg-bar__locale .ch247-locale__trigger svg { width: 14px; height: 14px; }
+
+.hg-bar__top .hg-bar__text-link { min-height: 34px; padding: 4px 2px; font-size: 0.76rem; }
+.hg-bar__top .hg-bar__avatar { padding: 4px 10px; font-size: 0.76rem; }
+
+/* The requested smaller Create Account button: 30px tall instead of 42/52px. */
+.hg-theme .hg-bar__top .hg-btn--sm {
+  min-height: 30px;
+  padding: 0 12px;
+  border-radius: 5px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  line-height: 1.2;
+  box-shadow: inset 0 1px 0 rgba(255, 246, 214, 0.65);
+}
+.hg-theme .hg-bar__top .hg-btn--sm:hover { transform: none; }
+
+.hg-bar__icons { display: flex; align-items: center; gap: 2px; flex: 0 0 auto; }
+
+/* All six controls must stay on one line even on a phone: compact them rather than wrapping or
+   introducing a horizontal scrollbar that would clip the language/currency disclosures. */
+@media (max-width: 600px) {
+  .hg-bar__top { gap: 7px; padding-inline: 8px; min-height: 38px; }
+  .hg-bar__top .hg-bar__quick { gap: 8px; }
+  .hg-bar__top .hg-bar__quick a,
+  .hg-bar__top .hg-bar__text-link { font-size: 0.7rem; min-height: 30px; }
+  .hg-theme .hg-header .hg-bar__top .hg-bar__locale .ch247-locale__trigger {
+    font-size: 0.68rem; padding: 0 2px; min-height: 30px; gap: 2px;
+  }
+  .hg-theme .hg-header .hg-bar__top .hg-bar__locale .ch247-locale__trigger svg { display: none; }
+  .hg-theme .hg-bar__top .hg-btn--sm { min-height: 28px; padding: 0 9px; font-size: 0.68rem; }
+}
+
+/* -----------------------------------------------------------------------------
+   10. Section dropdown arrows + sub-link directory on the top menu
+   -----------------------------------------------------------------------------
+   The seven section labels stay direct, always-visible links beside the logo. Each gets its own
+   caret button that opens a single, full-width directory under the header with that section's
+   real registry sub-links. Since the panel is absolutely positioned against the sticky header,
+   opening it never changes the bar's height or pushes the page around.
+   -------------------------------------------------------------------------- */
+
+/* Also hardens the utility line: all six controls are direct flex items of one nowrap row, and
+   no group or control is allowed to wrap Sign In onto a second line at any width or zoom. */
+.hg-bar__top > * { flex: 0 0 auto; flex-wrap: nowrap; white-space: nowrap; }
+.hg-bar__top a,
+.hg-bar__top button { white-space: nowrap; }
+
+.hg-menu__root { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; }
+.hg-menu__root .hg-menu { flex: 1 1 auto; min-width: 0; }
+.hg-menu__item { display: inline-flex; align-items: center; }
+
+.hg-menu__caret {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 44px;
+  margin-left: -5px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #f4f5f6;
+  cursor: pointer;
+}
+.hg-menu__caret:hover,
+.hg-menu__caret:focus-visible,
+.hg-menu__caret[aria-expanded='true'] { color: #e6c875; }
+.hg-theme .hg-menu__caret:focus-visible { outline: 2px solid #e6c875; outline-offset: -2px; }
+.hg-menu__caret svg { transition: transform 0.16s ease; }
+.hg-menu__caret[aria-expanded='true'] svg { transform: rotate(180deg); }
+
+.hg-menu__panel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 160;
+  background: #12151a;
+  border-top: 1px solid #34383d;
+  border-bottom: 2px solid #d4af37;
+  box-shadow: 0 20px 44px rgba(0, 0, 0, 0.5);
+}
+.hg-menu__panel[hidden] { display: none !important; }
+.hg-menu__panel-inner {
+  width: min(1440px, calc(100% - 32px));
+  margin-inline: auto;
+  padding: 16px 0 20px;
+}
+.hg-menu__panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #2a2e33;
+}
+.hg-menu__eyebrow {
+  margin: 0 0 4px;
+  color: #e6c875;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.hg-menu__blurb { margin: 0; max-width: 72ch; color: #aeb6be; font-size: 0.8rem; line-height: 1.5; }
+.hg-menu__panel-actions { display: flex; align-items: center; gap: 12px; flex: 0 0 auto; }
+.hg-menu__panel-all { color: #e6c875; font-size: 0.8rem; font-weight: 700; text-decoration: none; white-space: nowrap; }
+.hg-menu__panel-all:hover { text-decoration: underline; }
+.hg-menu__panel-close {
+  padding: 6px 10px;
+  border: 1px solid #4a5057;
+  border-radius: 4px;
+  background: transparent;
+  color: #d7dce1;
+  font: inherit;
+  font-size: 0.74rem;
+  cursor: pointer;
+}
+.hg-menu__panel-close:hover { border-color: #e6c875; color: #e6c875; }
+
+.hg-menu__groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 16px 26px;
+  max-height: min(58vh, 460px);
+  overflow-y: auto;
+  padding: 16px 0 4px;
+}
+.hg-menu__group h3 {
+  margin: 0 0 8px;
+  color: #e6c875;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.hg-menu__group ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.hg-menu__sublink {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  min-height: 32px;
+  padding: 5px 8px;
+  border-radius: 4px;
+  color: #d7dce1;
+  font-size: 0.8rem;
+  text-decoration: none;
+}
+.hg-menu__sublink:hover,
+.hg-menu__sublink:focus-visible,
+.hg-menu__sublink.active { background: #232830; color: #fff; }
+.hg-menu__badge {
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: rgba(212, 175, 55, 0.16);
+  color: #e6c875;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+.hg-menu__featured {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 10px 14px;
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  border-radius: 6px;
+  background: rgba(212, 175, 55, 0.08);
+  color: #f4f5f6;
+  font-size: 0.8rem;
+  text-decoration: none;
+}
+.hg-menu__featured span { color: #e6c875; }
+.hg-menu__featured:hover { background: rgba(212, 175, 55, 0.16); }
+
+@media (max-width: 767px) {
+  .hg-menu__caret { height: 40px; width: 20px; }
+  .hg-menu__panel-head { flex-direction: column; gap: 10px; }
+  .hg-menu__groups { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); max-height: 52vh; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hg-menu__caret svg { transition: none !important; }
+}

@@ -1,9 +1,10 @@
 /**
- * Rendered-layout regression check (Phase 3, 2026-11-07).
+ * Rendered-layout regression check (Phase 3, 2026-11-07; flat bar 2026-11-07).
  *
- * A real Chromium render at 1440px exposed desktop nav triggers overflowing their flex track and
- * colliding with the language/currency cluster. Static CSS review did not catch it; this check
- * measures actual bounding boxes at several widths and FAILS on any horizontal overlap.
+ * A real Chromium render at 1440px once exposed desktop nav triggers overflowing their flex
+ * track and colliding with the language/currency cluster. Now that the menu is a flat wrapping
+ * list of links, this check measures those links against the inline settings/account groups at
+ * several widths and FAILS on any horizontal overlap.
  *
  *   npm run evidence:layout
  *
@@ -46,9 +47,9 @@ async function main() {
     const result = await page.evaluate(() => {
       const box = (el) => { const r = el.getBoundingClientRect(); return { x: r.x, right: r.right, top: r.top, bottom: r.bottom, w: r.width }; };
       const visible = (el) => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(el).visibility !== 'hidden'; };
-      const triggers = [...document.querySelectorAll('.hg-nav__trigger')].filter(visible).map(box);
-      const utility = [...document.querySelectorAll('.hg-nav__utility')].filter(visible).map(box);
-      const actions = [...document.querySelectorAll('.hg-nav__actions')].filter(visible).map(box);
+      const triggers = [...document.querySelectorAll('.hg-menu__link')].filter(visible).map(box);
+      const utility = [...document.querySelectorAll('.hg-bar__locale, .hg-bar__quick')].filter(visible).map(box);
+      const actions = [...document.querySelectorAll('.hg-bar__actions')].filter(visible).map(box);
       const bar = document.querySelector('.hg-nav__bar');
       return { triggers, utility, actions, bar: bar ? box(bar) : null, header: !!document.querySelector('.hg-header') };
     });
@@ -61,8 +62,8 @@ async function main() {
     }
     const compact = result.triggers.length === 0;
     const status = worst === 0 ? 'OK' : 'FAIL';
-    console.log(`${status.padEnd(4)} ${String(width).padStart(4)}px  triggers=${result.triggers.length}  utility=${result.utility.length}  actions=${result.actions.length}  overlap=${worst.toFixed(1)}px  ${compact ? 'compact/drawer chrome' : 'desktop chrome'}`);
-    if (worst > 0 || !result.header) failures.push({ width, worst, header: result.header });
+    console.log(`${status.padEnd(4)} ${String(width).padStart(4)}px  links=${result.triggers.length}  utility=${result.utility.length}  actions=${result.actions.length}  overlap=${worst.toFixed(1)}px  ${compact ? 'NO VISIBLE MENU LINKS' : 'flat inline bar'}`);
+    if (worst > 0 || !result.header || compact) failures.push({ width, worst, links: result.triggers.length, header: result.header });
     await page.close();
   }
   await browser.close();

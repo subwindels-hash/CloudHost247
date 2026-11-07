@@ -1,0 +1,201 @@
+/* =============================================================================
+   Homepage "3D Experience" — layered CSS 3D platform stack
+   -----------------------------------------------------------------------------
+   No WebGL and no new dependency. `data-tilt` / `data-parallax` are driven by
+   shared/site/motion.js + shared/site/metals.css, which already disable motion for
+   reduced-motion, coarse pointers and viewports below 1024px. The static fallbacks at the
+   bottom of this file make the stack a plain, readable list in exactly those cases.
+   ========================================================================== */
+
+.hg-exp3d {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(165deg, #0d1116 0%, #141c25 58%, #101820 100%);
+  color: #eef1f4;
+}
+.hg-exp3d .hg-eyebrow { color: #e6c875; }
+.hg-exp3d .hg-h2 { color: #fff; }
+.hg-exp3d .hg-lede { color: #aab4bf; }
+.hg-exp3d .hg-h3 { color: #fff; }
+
+.hg-exp3d__layout {
+  display: grid;
+  grid-template-columns: 1.12fr 0.88fr;
+  gap: 44px;
+  align-items: center;
+}
+
+/* --- The 3D stage --------------------------------------------------------- */
+.hg-exp3d__stage {
+  position: relative;
+  min-height: 430px;
+  /* `data-tilt` supplies perspective() + rotateX/Y in metals.css; these two properties keep the
+     depth readable and let the planes sit inside a stable box that cannot push the page wide. */
+  perspective-origin: 50% 42%;
+  isolation: isolate;
+}
+.hg-exp3d__glow {
+  position: absolute;
+  inset: 8% 4% 12%;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(212, 175, 55, 0.22), rgba(212, 175, 55, 0.04) 62%, transparent 78%);
+  filter: blur(18px);
+  pointer-events: none;
+}
+.hg-exp3d__stack {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  pointer-events: none;
+}
+.hg-exp3d__plane {
+  position: absolute;
+  left: 5%;
+  top: 8%;
+  width: 88%;
+  min-height: 78px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 22px;
+  border: 1px solid rgba(212, 175, 55, 0.26);
+  border-radius: 14px;
+  background: linear-gradient(120deg, rgba(34, 45, 57, 0.97), rgba(17, 24, 32, 0.97));
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.42);
+  transform: translate3d(0, var(--plane-y), var(--plane-z));
+  transition: transform 0.38s cubic-bezier(0.22, 0.61, 0.36, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.hg-exp3d__plane.is-active {
+  border-color: #d4af37;
+  box-shadow: 0 26px 62px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(212, 175, 55, 0.42);
+  transform: translate3d(0, calc(var(--plane-y) - 8px), calc(var(--plane-z) + 38px));
+}
+.hg-exp3d__plane-step {
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  background: rgba(212, 175, 55, 0.13);
+  color: #e6c875;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+.hg-exp3d__plane-icon {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: rgba(212, 175, 55, 0.10);
+  color: #e6c875;
+}
+.hg-exp3d__plane-text { display: grid; gap: 2px; min-width: 0; }
+.hg-exp3d__plane-text b { font-size: 0.98rem; font-weight: 750; letter-spacing: -0.01em; }
+.hg-exp3d__plane-text small { font-size: 0.74rem; color: #9fabb7; }
+.hg-exp3d__hint {
+  position: absolute;
+  left: 5%;
+  bottom: 2%;
+  margin: 0;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8492a0;
+}
+
+/* --- Controls + live detail ---------------------------------------------- */
+.hg-exp3d__panel { display: grid; gap: 20px; }
+.hg-exp3d__controls { display: grid; gap: 8px; }
+.hg-exp3d__control {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.035);
+  color: #d8dee5;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 650;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+.hg-exp3d__control:hover { border-color: rgba(212, 175, 55, 0.55); color: #fff; }
+.hg-exp3d__control.is-active {
+  border-color: #d4af37;
+  background: rgba(212, 175, 55, 0.13);
+  color: #fff;
+}
+.hg-exp3d__control:focus-visible { outline: 3px solid #d4af37; outline-offset: 2px; }
+.hg-exp3d__control-step { margin-left: auto; font-size: 0.7rem; color: #8492a0; }
+.hg-exp3d__control.is-active .hg-exp3d__control-step { color: #e6c875; }
+
+.hg-exp3d__detail {
+  padding: 22px 24px;
+  border: 1px solid rgba(212, 175, 55, 0.26);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.045);
+}
+.hg-exp3d__detail-step {
+  margin: 0 0 8px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #e6c875;
+}
+.hg-exp3d__detail h3 { margin: 0 0 10px; font-size: 1.16rem; }
+.hg-exp3d__detail > p:not(.hg-exp3d__detail-step) {
+  margin: 0 0 14px;
+  font-size: 0.86rem;
+  line-height: 1.65;
+  color: #b6c0ca;
+}
+.hg-exp3d__detail .hg-link { color: #e6c875; font-size: 0.86rem; font-weight: 700; }
+.hg-exp3d__detail .hg-link:hover { color: #fff; }
+
+/* --- Responsive ---------------------------------------------------------- */
+@media (max-width: 1023px) {
+  .hg-exp3d__layout { grid-template-columns: 1fr; gap: 28px; }
+  .hg-exp3d__stage { min-height: 400px; }
+  .hg-exp3d__plane { left: 4%; width: 90%; }
+  .hg-exp3d__hint { left: 4%; }
+}
+
+/* Hard off switches: below 1024px motion.js disables tilt, and reduced motion disables it at
+   every width. In both cases the planes must become a normal stacked list rather than four
+   absolutely-positioned cards sitting on top of each other. */
+@media (max-width: 1023px), (prefers-reduced-motion: reduce) {
+  .hg-exp3d__stage { min-height: 0; }
+  .hg-exp3d__glow { display: none; }
+  .hg-exp3d__stack { position: static; transform-style: flat; }
+  .hg-exp3d__plane,
+  .hg-exp3d__plane.is-active {
+    position: relative;
+    left: auto;
+    top: auto;
+    width: 100%;
+    margin: 0 0 10px;
+    min-height: 72px;
+    transform: none !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .hg-exp3d__hint { position: static; margin: 4px 0 0; }
+}
+
+@media (max-width: 640px) {
+  .hg-exp3d__plane { padding: 12px 14px; gap: 10px; min-height: 64px; }
+  .hg-exp3d__plane-icon { width: 34px; height: 34px; }
+  .hg-exp3d__plane-step { width: 30px; height: 30px; }
+  .hg-exp3d__plane-text b { font-size: 0.88rem; }
+  .hg-exp3d__detail { padding: 18px; }
+}

@@ -1,0 +1,277 @@
+/* =============================================================================
+   WHMCS chrome benchmark — GoDaddy-style dark menu + Amazon-style footer directory
+   -----------------------------------------------------------------------------
+   First-party theme stylesheet. Loaded LAST (after site.css, design-system.css, auth.css
+   and the generated metals.css) so its `.ch-site` rules win with equal specificity.
+
+   This is a restyle of the existing templates, not a second implementation: the same
+   <details>/<summary> mega menus, the same registry-driven footer links, the same skip link,
+   menu toggle and language/currency controls are all preserved. Only the visual anatomy of
+   www.godaddy.com's menu and www.amazon.com's footer is borrowed — no third-party mark,
+   copy, review score or commerce link is reproduced.
+
+   Touch targets stay at or above the shipped accessibility contract (24px inline links,
+   44px menu toggle), and all breakpoints remain defined in the earlier stylesheets.
+   ========================================================================== */
+
+/* ---- GoDaddy: near-black two-tier header ---- */
+.ch-site .ch-header { background: #0d1116; border-bottom: 1px solid #2b3440; box-shadow: 0 10px 28px #0000004d; }
+.ch-site .ch-top { background: #161d25; color: #c3cbd4; border-bottom: 1px solid #262e38; }
+.ch-site .ch-top a,
+.ch-site .ch-top button { color: #c3cbd4; }
+.ch-site .ch-top a:hover,
+.ch-site .ch-top button:hover { color: #e6c875; }
+.ch-site .ch-nav { background: transparent; }
+.ch-site .ch-brand img { filter: brightness(0) invert(1); }
+.ch-site .ch-nav-item > summary { color: #f2f4f6; min-height: 64px; font-weight: 600; }
+.ch-site .ch-nav-item > summary:hover,
+.ch-site .ch-nav-item[open] > summary { color: #e6c875; }
+.ch-site .ch-nav-search input { background: #1b242c; border-color: #3b4450; color: #f2f4f6; }
+.ch-site .ch-nav-search input::placeholder { color: #98a4b0; }
+.ch-site .ch-account > a { color: #eef0f2; }
+.ch-site .ch-account > a:hover { color: #e6c875; }
+.ch-site .ch-menu-toggle { background: #1b242c; border-color: #3b4450; color: #f2f4f6; }
+
+/* Full-width dark mega panel with a highlighted promo column. */
+.ch-site .ch-mega {
+  background: #171e27;
+  color: #e9edf1;
+  border: 1px solid #2b3440;
+  border-top: 2px solid #d4af37;
+  border-radius: 0 0 6px 6px;
+  box-shadow: 0 30px 70px #00000080;
+}
+.ch-site .ch-mega-intro { background: linear-gradient(165deg, #202a35 0%, #151c24 100%); }
+.ch-site .ch-mega-intro h2,
+.ch-site .ch-mega-group h3 { color: #e6c875; }
+.ch-site .ch-mega-intro p,
+.ch-site .ch-mega-group a { color: #c3cbd4; }
+.ch-site .ch-mega-group a:hover,
+.ch-site .ch-mega-group a:focus-visible { color: #fff; }
+.ch-site .ch-kicker { color: #e6c875; }
+.ch-site .ch-mega :focus-visible { outline-color: #d4af37; }
+[data-ch-tools-menu] .ch-mega { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+/* ---- Amazon: back-to-top strip, dense directory, locale row, legal band ---- */
+.ch-site .ch-footer { background: #232f3e; color: #d6dade; border-top: 0; padding: 0; }
+.ch-footer__top {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 48px; background: #37475a; color: #fff;
+  font-size: 13px; font-weight: 600; letter-spacing: .02em; text-decoration: none;
+}
+.ch-footer__top:hover { background: #485769; color: #e6c875; }
+.ch-footer__directory { padding: 44px 0 48px; }
+.ch-site .ch-footer-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 32px; align-items: start; }
+.ch-site .ch-footer__col h2 { color: #fff; font-size: 16px; font-weight: 700; line-height: 1.3; margin: 0 0 14px; text-transform: none; letter-spacing: 0; }
+.ch-site .ch-footer__col ul { display: grid; gap: 4px; }
+.ch-site .ch-footer li a { display: inline-block; min-height: 24px; color: #d6dade; font-size: 13px; line-height: 1.45; text-decoration: none; overflow-wrap: anywhere; }
+.ch-site .ch-footer li a:hover { color: #fff; text-decoration: underline; }
+
+.ch-footer__locale { border-top: 1px solid #3b4757; }
+.ch-footer__locale-inner { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 26px 0; flex-wrap: wrap; }
+.ch-site .ch-footer__brand img { height: 34px; width: auto; filter: none; }
+.ch-footer__pills { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ch-footer__pill {
+  display: inline-flex; align-items: center; min-height: 32px; padding: 6px 12px;
+  border: 1px solid #6b7684; border-radius: 4px; color: #e9edf1;
+  font-size: 12px; font-weight: 600; white-space: nowrap;
+}
+.ch-site .ch-footer .ch-btn-outline { border-color: #6b7684; }
+.ch-site .ch-footer .ch-btn-outline:hover { border-color: #d4af37; color: #e6c875; }
+
+.ch-footer__legal { background: #0d1116; padding: 30px 0 34px; text-align: center; }
+.ch-footer__legal-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 20px; }
+.ch-footer__legal-links a { color: #c7ced6; font-size: 12px; text-decoration: none; min-height: 24px; display: inline-flex; align-items: center; }
+.ch-footer__legal-links a:hover { color: #e6c875; text-decoration: underline; }
+.ch-footer__legal p { margin: 16px 0 0; color: #8b96a2; font-size: 12px; }
+
+/* ---- Responsive ---- */
+@media (max-width: 1080px) {
+  .ch-site .ch-footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 767px) {
+  .ch-site .ch-nav-item > summary { min-height: 44px; }
+  .ch-site .ch-footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ch-footer__locale-inner { flex-direction: column; align-items: flex-start; gap: 18px; }
+  [data-ch-tools-menu] .ch-mega { grid-template-columns: 1fr; }
+}
+@media (max-width: 420px) {
+  .ch-site .ch-footer-grid { grid-template-columns: 1fr; gap: 24px; }
+  .ch-footer__directory { padding: 32px 0; }
+  .ch-footer__legal-links { gap: 8px 14px; }
+}
+
+/* =============================================================================
+   Professional chrome — supersedes the Amazon/GoDaddy benchmark rules above
+   -----------------------------------------------------------------------------
+   Light, hairline-bordered menu; light grouped mega panel; deep-slate footer with a brand intro,
+   four balanced columns with labelled sub-groups, and a compact legal bar. The registry-driven
+   templates are unchanged in structure except for the footer link rearrangement.
+   ========================================================================== */
+
+/* ---- Professional light menu bar ---- */
+.ch-site .ch-header { background: #fff; border-bottom: 1px solid #dfe4e9; box-shadow: 0 1px 0 #0d111608, 0 8px 22px #0d11160d; }
+.ch-site .ch-top { background: #f5f7f8; color: #5b6773; border-bottom: 1px solid #e5e9ed; }
+.ch-site .ch-top a, .ch-site .ch-top button { color: #5b6773; }
+.ch-site .ch-top a:hover, .ch-site .ch-top button:hover { color: #8a6410; }
+.ch-site .ch-brand img { filter: none; }
+.ch-site .ch-nav-item > summary { color: #1b242c; min-height: 64px; font-weight: 600; }
+.ch-site .ch-nav-item > summary:hover, .ch-site .ch-nav-item[open] > summary { color: #8a6410; }
+.ch-site .ch-nav-search input { background: #fff; border-color: #d8dfe5; color: #1b242c; }
+.ch-site .ch-nav-search input::placeholder { color: #66727e; }
+.ch-site .ch-account > a { color: #1b242c; }
+.ch-site .ch-account > a:hover { color: #8a6410; }
+.ch-site .ch-menu-toggle { background: #fff; border-color: #d8dfe5; color: #1b242c; }
+
+.ch-site .ch-mega {
+  background: #fff; color: #1b242c;
+  border: 1px solid #dfe4e9; border-top: 2px solid #b8860b;
+  border-radius: 0 0 8px 8px; box-shadow: 0 24px 60px #0d111624;
+}
+.ch-site .ch-mega-intro { background: #f7f8fa; }
+.ch-site .ch-mega-intro h2, .ch-site .ch-mega-group h3, .ch-site .ch-kicker { color: #8a6410; }
+.ch-site .ch-mega-intro p, .ch-site .ch-mega-group a { color: #5b6773; }
+.ch-site .ch-mega-group a:hover, .ch-site .ch-mega-group a:focus-visible { color: #1b242c; }
+.ch-site .ch-mega :focus-visible { outline-color: #b8860b; }
+[data-ch-tools-menu] .ch-mega { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+/* ---- Professional footer ---- */
+.ch-site .ch-footer { background: #121820; color: #aeb8c2; border-top: 0; padding: 0; }
+.ch-site .ch-footer__directory, .ch-footer__directory { padding: 54px 0 48px; }
+.ch-footer__intro {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 32px;
+  padding-bottom: 36px; margin-bottom: 40px; border-bottom: 1px solid #ffffff1a;
+  flex-wrap: wrap;
+}
+.ch-site .ch-footer__brand img { height: 34px; width: auto; filter: none; }
+.ch-footer__intro p { margin: 16px 0 0; max-width: 560px; color: #aeb8c2; font-size: 13px; line-height: 1.7; }
+.ch-footer__intro-actions { display: flex; align-items: center; gap: 20px; flex: 0 0 auto; }
+.ch-footer__intro-actions a { color: #e6c875; font-size: 13px; font-weight: 600; text-decoration: none; }
+.ch-footer__intro-actions a:hover { color: #fff; }
+.ch-site .ch-footer .ch-btn-outline { border-color: #6b7684; }
+.ch-site .ch-footer .ch-btn-outline:hover { border-color: #b8860b; color: #e6c875; }
+
+.ch-site .ch-footer-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 40px; align-items: start; }
+.ch-site .ch-footer__col h2 {
+  margin: 0 0 16px; padding-bottom: 12px; border-bottom: 1px solid #ffffff1f;
+  color: #fff; font-size: 15px; font-weight: 700; line-height: 1.35;
+  text-transform: none; letter-spacing: 0;
+}
+.ch-footer__subgroup + .ch-footer__subgroup { margin-top: 22px; }
+.ch-footer__subgroup h3 {
+  margin: 0 0 10px; color: #d4af37; font-size: 11px; font-weight: 800;
+  letter-spacing: .13em; text-transform: uppercase;
+}
+.ch-site .ch-footer__col ul { display: grid; gap: 3px; }
+.ch-site .ch-footer li a {
+  display: inline-block; min-height: 24px; color: #aeb8c2; font-size: 13px;
+  line-height: 1.35; text-decoration: none; overflow-wrap: normal; word-break: normal;
+}
+.ch-site .ch-footer li a:hover { color: #fff; text-decoration: underline; }
+
+.ch-site .ch-footer__bottom, .ch-footer__bottom { background: #0c1117; border-top: 1px solid #ffffff14; padding: 22px 0 26px; }
+.ch-footer__bottom-inner { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 20px; }
+.ch-site .ch-footer__bottom p, .ch-footer__bottom p { margin: 0; color: #8793a0; font-size: 12px; }
+.ch-footer__locale { display: flex; align-items: center; gap: 8px; color: #8793a0; font-size: 12px; }
+.ch-footer__legal-links { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-left: auto; }
+.ch-footer__legal-links a { display: inline-flex; align-items: center; min-height: 24px; color: #aeb8c2; font-size: 12px; text-decoration: none; }
+.ch-footer__legal-links a:hover { color: #e6c875; text-decoration: underline; }
+/* The earlier full-width navy "Back to top" band becomes an inline link in the legal bar. */
+.ch-site .ch-footer .ch-footer__top {
+  display: inline-flex; min-height: 0; padding: 0; background: transparent; color: #aeb8c2;
+  font-size: 12px; font-weight: 600; letter-spacing: 0; text-decoration: none;
+}
+.ch-site .ch-footer .ch-footer__top:hover { background: transparent; color: #e6c875; }
+
+/* ---- Responsive ---- */
+@media (max-width: 1080px) {
+  .ch-site .ch-footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; }
+  .ch-footer__legal-links { margin-left: 0; }
+}
+@media (max-width: 767px) {
+  .ch-site .ch-nav-item > summary { min-height: 44px; }
+  .ch-site .ch-footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ch-footer__intro { padding-bottom: 28px; margin-bottom: 30px; }
+  .ch-footer__bottom-inner { flex-direction: column; align-items: flex-start; }
+  [data-ch-tools-menu] .ch-mega { grid-template-columns: 1fr; }
+}
+@media (max-width: 420px) {
+  .ch-site .ch-footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+  .ch-footer__directory { padding: 36px 0 32px; }
+  .ch-footer__legal-links { gap: 8px 12px; }
+}
+
+/* =============================================================================
+   Single-row dark horizontal menu — supersedes the light bar above
+   -----------------------------------------------------------------------------
+   Same templates, same <details>/<summary> disclosures, same registry-driven links. Every
+   top-level section stays inline; the viewport-wide mega panel becomes a narrow dropdown
+   anchored to its own item. The professional footer below is unchanged.
+   ========================================================================== */
+
+.ch-site .ch-header { background: #1b1d20; border-bottom: 1px solid #34383d; box-shadow: 0 6px 22px #00000047; }
+.ch-site .ch-top { background: #1b1d20; color: #b9c0c8; border-bottom: 0; }
+.ch-site .ch-top a, .ch-site .ch-top button { color: #b9c0c8; }
+.ch-site .ch-top a:hover, .ch-site .ch-top button:hover { color: #e6c875; }
+.ch-site .ch-nav { min-height: 62px; }
+.ch-site .ch-brand img { filter: brightness(0) invert(1); }
+.ch-site .ch-nav-item > summary { color: #f4f5f6; min-height: 62px; font-size: 13px; font-weight: 600; }
+.ch-site .ch-nav-item > summary > span { color: #b9c0c8; }
+.ch-site .ch-nav-item > summary:hover, .ch-site .ch-nav-item[open] > summary { color: #e6c875; }
+.ch-site .ch-account > a { color: #f4f5f6; }
+.ch-site .ch-account > a:hover { color: #e6c875; }
+.ch-site .ch-menu-toggle { background: #24272c; border-color: #3a3f45; color: #f4f5f6; }
+.ch-site .ch-header :focus-visible { outline-color: #e6c875; }
+
+/* Compact, item-anchored dropdown instead of a full-width mega panel. */
+.ch-site .ch-nav-item { position: relative; }
+.ch-site .ch-mega {
+  position: absolute; top: 100%; left: 0; right: auto; inset-inline: auto;
+  display: block; width: 292px; max-width: calc(100vw - 32px);
+  max-height: min(72vh, 560px); overflow: auto; gap: 0;
+  padding: 12px 14px;
+  background: #23262b; color: #e9edf1;
+  border: 1px solid #3a3f45; border-top: 2px solid #d4af37;
+  border-radius: 0 0 8px 8px; box-shadow: 0 24px 48px #00000080;
+}
+[data-ch-tools-menu] .ch-mega { display: block; grid-template-columns: none; }
+.ch-site .ch-mega-intro {
+  background: transparent; border-radius: 0; padding: 0 0 10px; margin: 0 0 10px;
+  border-bottom: 1px solid #ffffff17;
+}
+.ch-site .ch-mega-intro .ch-kicker,
+.ch-site .ch-mega-intro h2,
+.ch-site .ch-mega-intro p { display: none; }
+.ch-site .ch-mega-intro a { color: #e6c875; font-size: 13px; font-weight: 600; }
+.ch-site .ch-mega-group { margin: 0 0 12px; }
+.ch-site .ch-mega-group h3 {
+  margin: 0 0 6px; padding-bottom: 5px; border-bottom: 1px solid #ffffff17;
+  color: #e6c875; font-size: 11px; letter-spacing: .1em;
+}
+.ch-site .ch-mega-group ul { margin: 0; padding: 0; }
+.ch-site .ch-mega-group a {
+  padding: 5px 6px; font-size: 13px; color: #e9edf1; border-radius: 4px;
+}
+.ch-site .ch-mega-group a:hover, .ch-site .ch-mega-group a:focus-visible { background: #e6c8751a; color: #fff; }
+.ch-site .ch-mega-group a span { opacity: 0; }
+.ch-site .ch-mega :focus-visible { outline-color: #d4af37; }
+.ch-site .ch-nav-search input { background: #23262b; border-color: #3a3f45; color: #f4f5f6; }
+.ch-site .ch-nav-search input::placeholder { color: #98a4b0; }
+
+@media (min-width: 1200px) {
+  /* The top strip already carries Search; free the inline row from a second search field. */
+  .ch-site .ch-nav-search { display: none; }
+}
+@media (max-width: 1199px) {
+  /* The drawer puts panels back in the flow — never a floating overlay on a phone. */
+  .ch-site .ch-mega {
+    position: static; width: 100%; max-width: 100%; max-height: none; overflow: visible;
+    padding: 16px 0; background: transparent; border: 0; border-radius: 0; box-shadow: none;
+  }
+  .ch-site .ch-nav-search { display: block; }
+  .ch-site .ch-nav-item > summary { min-height: 49px; }
+}
+@media (max-width: 767px) {
+  .ch-site .ch-nav-item > summary { min-height: 44px; }
+  [data-ch-tools-menu] .ch-mega { grid-template-columns: 1fr; }
+}
