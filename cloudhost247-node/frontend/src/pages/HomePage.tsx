@@ -4,7 +4,7 @@ import { Icon, CheckIcon, ArrowIcon } from '../components/ui/Icon';
 import { Illustration } from '../components/marketing/Illustration';
 import { usePageMeta } from '../lib/usePageMeta';
 import { useApiResource } from '../lib/useApiResource';
-import { formatPrice } from '../lib/catalog-types';
+import { formatPrice, type PublicPrice, type PublicPlan } from '../lib/catalog-types';
 import { CatalogErrorBanner, CatalogLoadingBanner } from '../components/CatalogStateBanner';
 import { useCurrency } from '../currency/CurrencyProvider';
 import { NAV_SECTIONS, BRAND, UTILITY } from '../navigation/registry.generated';
@@ -104,11 +104,7 @@ const STEPS = [
  * error, missing product, no plans — and no price is ever invented.
  */
 function HomePlansSection() {
-  const result = useApiResource<{ product: { slug: string; name: string }; plans: Array<{
-    slug: string; name: string; description: string | null;
-    pricing: Array<{ billingPeriod: string; currency: string; amount: number; setupFee: number | null }>;
-    features: Array<{ name: string; value: string | null }>;
-  }> }>('/api/v1/catalog/products/web-hosting/plans');
+  const result = useApiResource<{ product: { slug: string; name: string }; plans: PublicPlan[] }>('/api/v1/catalog/products/web-hosting/plans');
   const { formatAmount } = useCurrency();
 
   if (result.status === 'loading') return <CatalogLoadingBanner label="Loading hosting plans…" />;
