@@ -244,10 +244,17 @@ export default function App() {
             broken page — only a clear "sign in to use this" message. */}
         <Route path="/tools" element={<ToolsCenterPage />} />
         <Route path="/tools/category/:category" element={<ToolsCenterPage />} />
-        <Route path="/tools/history" element={<ToolsHistoryPage />} />
-        <Route path="/tools/favorites" element={<ToolsFavoritesPage />} />
-        <Route path="/tools/reports" element={<ToolsReportsPage />} />
-        <Route path="/tools/monitors" element={<ToolsMonitorsPage />} />
+        {/* History, favorites, reports and monitors are per-account data (the API requires a
+            bearer token and answers 401 without one). They sit behind RequireAuth so a
+            signed-out visitor is sent to /login with a return path instead of landing on a
+            page that leaks the raw "Missing bearer token" API error and offers Clear/Refresh
+            buttons that cannot work. Audited 2026-11-07: guests previously saw exactly that. */}
+        <Route element={<RequireAuth />}>
+          <Route path="/tools/history" element={<ToolsHistoryPage />} />
+          <Route path="/tools/favorites" element={<ToolsFavoritesPage />} />
+          <Route path="/tools/reports" element={<ToolsReportsPage />} />
+          <Route path="/tools/monitors" element={<ToolsMonitorsPage />} />
+        </Route>
         {/* Tool pages use the catalogue's own nested paths (e.g. /tools/dns/propagation), so the
             whole /tools/* branch is handled by one page that resolves the path back to a tool. */}
         {/* The registry footer links this collection hub; without its own route it fell through
