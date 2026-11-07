@@ -10,6 +10,7 @@ import { ValidationError } from '../lib/errors';
 import { listPublishedPlans, type PlatformServiceKind } from '../commerce/platform-plans';
 import {
   addItemToCart,
+  addCatalogItemBySlug,
   addServiceItemToCart,
   checkoutCart,
   getCartSummary,
@@ -25,6 +26,14 @@ const billingPeriodEnum = z.enum(['one_time', 'monthly', 'quarterly', 'semi_annu
 
 const addCartItemSchema = z.object({
   planId: z.string().uuid('planId must be a valid UUID'),
+  billingPeriod: billingPeriodEnum,
+  quantity: z.number().int().min(1).max(MAX_CART_ITEM_QUANTITY).optional(),
+});
+
+const publicSlug = z.string().min(1).max(160).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/);
+const addCatalogItemBySlugSchema = z.object({
+  productSlug: publicSlug,
+  planSlug: publicSlug,
   billingPeriod: billingPeriodEnum,
   quantity: z.number().int().min(1).max(MAX_CART_ITEM_QUANTITY).optional(),
 });
@@ -89,6 +98,16 @@ export async function registerCommerceRoutes(app: FastifyInstance, env: Env, ove
     const input = parseOrThrow(addCartItemSchema, request.body);
 
     const cart = await addItemToCart(pool, auth.userId, { ...input, quantity: input.quantity ?? 1 }, randomUUID);
+    reply.code(201);
+    return { cart };
+  });
+
+  // Public catalogues expose slugs rather than database IDs. Resolve both on the server, then
+  // reuse the same authenticated, server-priced cart operation as the ID-based endpoint.
+  app.post('/api/v1/cart/catalog-items', async (request, reply) => {
+    const auth = await authenticate(request, env, pool);
+    const input = parseOrThrow(addCatalogItemBySlugSchema, request.body);
+    const cart = await addCatalogItemBySlug(pool, auth.userId, { ...input, quantity: input.quantity ?? 1 }, randomUUID);
     reply.code(201);
     return { cart };
   });

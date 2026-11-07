@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { apiFetch, ApiRequestError } from '../../lib/api';
 import { getToken } from '../../lib/auth';
 import { usePageMeta } from '../../lib/usePageMeta';
@@ -24,6 +24,7 @@ export default function CartPage() {
   usePageMeta('Cart & checkout', 'Review everything in your CloudHost247 cart and place one order.');
   const token = getToken();
   const navigate = useNavigate();
+  const location = useLocation();
   const [cart, setCart] = useState<CartSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
@@ -47,38 +48,46 @@ export default function CartPage() {
 
   useEffect(() => load(), [load]);
 
-  /**
-   * Deep link support: `/cart?add=<serviceKind>:<planCode>` (used by the plan cards and service
-   * pages) adds that published plan as a cart service line. The plan is looked up through the public
-   * plans endpoint — the client never sends a price — and the parameter is removed afterwards so a
-   * refresh cannot add the same plan twice. A code that resolves to nothing says so instead of
-   * silently doing nothing.
-   */
-  const consumedAdd = useRef(false);
+  /** Consume a selected published plan after authentication and the initial cart read. The
+   * server resolves the plan and price; the URL carries identifiers and billing period only.
+   * Remove the intent before dispatch so a refresh cannot silently add a duplicate item. */
+  const consumedAdd = useRef<string | null>(null);
+  const runAction = action.run;
   useEffect(() => {
-    if (consumedAdd.current || !token) return;
-    const raw = new URLSearchParams(window.location.search).get('add');
-    if (!raw) return;
-    consumedAdd.current = true;
-    const [serviceKind, code] = raw.includes(':') ? (raw.split(':') as [string, string]) : ['website_builder', raw];
-    window.history.replaceState({}, '', window.location.pathname);
-    fetchPublishedPlans(serviceKind)
-      .then(async (response) => {
-        const plan = response.plans.find((entry) => entry.code === code);
-        if (!plan) throw new Error(`No published ${serviceKind.replace(/_/g, ' ')} plan matches “${code}”.`);
-        await apiFetch('/api/v1/cart/service-items', {
-          method: 'POST',
-          body: JSON.stringify({ serviceKind: 'platform_plan', serviceRef: plan.id }),
+    if (!token || loading || loadError || !cart) return;
+    const params = new URLSearchParams(location.search);
+    const raw = params.get('add');
+    const product = params.get('product');
+    const plan = params.get('plan');
+    const period = params.get('period');
+    const key = raw ? `platform:${raw}` : (product || plan || period ? `catalog:${product}:${plan}:${period}` : null);
+    if (!key) { consumedAdd.current = null; return; }
+    if (consumedAdd.current === key) return;
+    consumedAdd.current = key;
+    ['add', 'product', 'plan', 'period'].forEach((name) => params.delete(name));
+    const remaining = params.toString();
+    navigate({ pathname: location.pathname, search: remaining ? `?${remaining}` : '', hash: location.hash }, { replace: true });
+
+    void runAction(async () => {
+      if (raw) {
+        const [serviceKind, code] = raw.includes(':') ? raw.split(':', 2) : ['website_builder', raw];
+        const response = await fetchPublishedPlans(serviceKind);
+        const selected = response.plans.find((entry) => entry.code === code);
+        if (!selected) throw new Error(`No published ${serviceKind.replace(/_/g, ' ')} plan matches “${code}”.`);
+        const result = await apiFetch<{ cart: CartSummary }>('/api/v1/cart/service-items', {
+          method: 'POST', body: JSON.stringify({ serviceKind: 'platform_plan', serviceRef: selected.id }),
         });
-        load();
-        return `${plan.name} was added to your cart.`;
-      })
-      .catch((err: Error) => {
-        void action.run(async () => {
-          throw err;
-        });
+        setCart(result.cart);
+        return `${selected.name} was added to your cart.`;
+      }
+      if (!product || !plan || !period) throw new Error('The plan link is incomplete. Please choose a plan again from the product catalogue.');
+      const result = await apiFetch<{ cart: CartSummary }>('/api/v1/cart/catalog-items', {
+        method: 'POST', body: JSON.stringify({ productSlug: product, planSlug: plan, billingPeriod: period }),
       });
-  }, [action, load, token]);
+      setCart(result.cart);
+      return 'The selected plan was added to your cart.';
+    });
+  }, [cart, loadError, loading, location.hash, location.pathname, location.search, navigate, runAction, token]);
 
   async function patchQuantity(kind: 'item' | 'service', id: string, quantity: number) {
     const path = kind === 'item' ? `/api/v1/cart/items/${id}` : `/api/v1/cart/service-items/${id}`;
@@ -201,7 +210,7 @@ export default function CartPage() {
                       <ApproxAmount amount={line.lineTotalAmount ?? line.unitPriceAmount} currency={line.currency} />
                     </td>
                     <td>
-                      <button type="button" className="ch247-button ch247-button--ghost ch247-button--small" onClick={() => void remove('item', line.id)}>
+                      <button type="button" className="ch247-button ch247-button--outline ch247-button--small" onClick={() => void remove('item', line.id)}>
                         Remove
                       </button>
                     </td>
@@ -230,7 +239,7 @@ export default function CartPage() {
                       <ApproxAmount amount={line.lineTotalAmount ?? line.unitPriceAmount} currency={line.currency} />
                     </td>
                     <td>
-                      <button type="button" className="ch247-button ch247-button--ghost ch247-button--small" onClick={() => void remove('service', line.id)}>
+                      <button type="button" className="ch247-button ch247-button--outline ch247-button--small" onClick={() => void remove('service', line.id)}>
                         Remove
                       </button>
                     </td>
