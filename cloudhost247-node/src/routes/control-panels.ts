@@ -19,9 +19,11 @@ import {
 } from '../db/control-panels';
 import { requireRole } from '../lib/require-role';
 import { NotFoundError, ValidationError } from '../lib/errors';
+import { catalogIdSchema } from '../lib/identifier-contract';
 import { auditRequest } from '../lib/audit';
 
-const idSchema = z.string().uuid();
+// Control-panel rows are seeded deterministic catalogue ids (see identifier-contract.ts).
+const idSchema = catalogIdSchema;
 const slugSchema = z.string().min(1).max(120).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
 
 const createPanelSchema = z.object({
@@ -47,7 +49,7 @@ const createPanelSchema = z.object({
 const patchPanelSchema = createPanelSchema.omit({ slug: true }).partial();
 
 const createPlanSchema = z.object({
-  controlPanelId: z.string().uuid(),
+  controlPanelId: catalogIdSchema,
   name: z.string().min(1).max(160),
   description: z.string().max(2000).nullable().optional(),
   billingCycle: z.enum(['one_time', 'monthly', 'quarterly', 'semi_annually', 'annually'] as const).optional(),

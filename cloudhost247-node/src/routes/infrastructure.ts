@@ -8,6 +8,7 @@ import { authenticate } from '../lib/require-auth';
 import { requireRole } from '../lib/require-role';
 import { auditRequest } from '../lib/audit';
 import { ConflictError, NotFoundError, ValidationError } from '../lib/errors';
+import { catalogIdSchema } from '../lib/identifier-contract';
 import {
   createOperatingSystem,
   createOperatingSystemVersion,
@@ -80,7 +81,9 @@ import {
   markNotificationRead,
 } from '../services/notification-service';
 
-const id = z.string().uuid();
+// OS families/versions and control panels are seeded deterministic catalogue ids; providers,
+// regions and images are runtime-generated. Both forms satisfy the shared DB UUID contract.
+const id = catalogIdSchema;
 const slug = z.string().min(1).max(120).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
 const architecture = z.enum(['x86_64','arm64'] as const);
 const serverType = z.enum(['VPS','DEDICATED','CLOUD'] as const);
