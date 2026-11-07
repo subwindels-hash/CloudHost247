@@ -32,6 +32,7 @@ async function main(): Promise<void> {
   const { PgliteClient } = await import('../database/db-client');
   const { migrateUp } = await import('../database/migrate');
   const { hashPassword } = await import('../src/lib/password');
+  const { seedPreviewCatalog } = await import('./seed-preview-catalog');
 
   const port = Number(process.argv[2] ?? process.env.PORT ?? 3000);
   const env = loadEnv(process.env as NodeJS.ProcessEnv);
@@ -39,6 +40,10 @@ async function main(): Promise<void> {
   const db = new PGlite();
   const client = new PgliteClient(db);
   await migrateUp(client, { allowProduction: false });
+
+  // Demo catalogue rows live only in this in-memory database. They let the public pricing pages
+  // be reviewed end to end against the real catalog API (see scripts/seed-preview-catalog.ts).
+  const demoPlans = await seedPreviewCatalog(client);
 
   const accounts = [
     { email: 'demo@cloudhost247.test', password: 'demo-tools-247', name: 'Demo Customer', role: 'customer' },
@@ -90,6 +95,7 @@ async function main(): Promise<void> {
   console.log('CloudHost247 Tools Center preview');
   console.log(`  URL        http://localhost:${port}/tools`);
   console.log(`  Admin      http://localhost:${port}/admin/tools`);
+  console.log(`  Catalog    ${demoPlans} demo plans seeded in memory (never written to a production DB)`);
   console.log('  Accounts (in-memory demo data — reset every restart):');
   for (const account of accounts) {
     console.log(`    ${account.role.padEnd(11)} ${account.email}  /  ${account.password}`);

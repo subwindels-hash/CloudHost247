@@ -13,6 +13,7 @@
  */
 import { Pool, type PoolConfig } from 'pg';
 import type { Env } from '../config/env';
+import type { Queryable } from './types';
 
 export function buildPoolConfig(env: Env): PoolConfig {
   const config: PoolConfig = {
@@ -53,9 +54,19 @@ export async function closePool(): Promise<void> {
   }
 }
 
-/** Lightweight liveness probe used by /ready. Resolves true/false, never throws. */
-export async function isDatabaseReachable(env: Env, timeoutMs = 3000): Promise<boolean> {
-  const p = getPool(env);
+/**
+ * Lightweight liveness probe used by /ready. Resolves true/false, never throws.
+ *
+ * `overridePool` lets the same probe check the Queryable an app was actually built with (the
+ * embedded preview database, or a pool injected by a test) instead of always opening a second
+ * live connection from DATABASE_URL. Production leaves it unset.
+ */
+export async function isDatabaseReachable(
+  env: Env,
+  timeoutMs = 3000,
+  overridePool?: Queryable,
+): Promise<boolean> {
+  const p = overridePool ?? getPool(env);
   try {
     await Promise.race([
       p.query('SELECT 1'),

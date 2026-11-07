@@ -159,7 +159,7 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
   // strict sequence.
   app.register(async (instance) => {
     await registerSecurityPlugins(instance, env);
-    await registerHealthRoutes(instance, env);
+    await registerHealthRoutes(instance, env, pool);
     await registerAuthRoutes(instance, env, pool);
     await registerPublicCatalogRoutes(instance, env, pool);
     await registerCurrencyRoutes(instance, env, pool);

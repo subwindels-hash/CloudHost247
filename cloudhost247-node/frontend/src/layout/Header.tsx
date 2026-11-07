@@ -11,11 +11,12 @@ import { UTILITY } from '../navigation/registry.generated';
 import { useAuthState } from './useAuthState';
 
 /**
- * The universal CloudHost247 header.
+ * The universal CloudHost247 header — Hostinger-style menu bar.
  *
- * Structure: brand · mega navigation · search · Sign In / Create Account (or the account
- * controls once signed in). The mega menus come from the shared registry, so this header, the
- * mobile drawer, the footer and the sitemap cannot disagree about what exists.
+ * Structure: brand · dropdown navigation · utility (language, currency, search) ·
+ * Sign In / Create Account (or the account controls once signed in) · mobile drawer.
+ * The mega menus come from the shared registry, so this header, the drawer, the footer and the
+ * sitemap cannot disagree about what exists.
  *
  * Signed-in state adds a second, quieter row for account areas (services, domains, billing,
  * support) plus the role-gated staff links. Those links are a convenience only — every one of
@@ -79,13 +80,13 @@ export default function Header() {
   }
 
   return (
-    <header className="ch247-header" ref={headerRef}>
-      <div className="ch247-header__inner">
-        <Brand />
+    <header className="ch247-header hg-header" ref={headerRef}>
+      <div className="hg-nav__bar">
+        <Brand className="hg-nav__brand" />
 
         <button
           type="button"
-          className="ch247-menu-toggle"
+          className="ch247-menu-toggle hg-nav__toggle"
           aria-expanded={menuOpen}
           aria-controls="ch247-primary-nav"
           aria-label={menuOpen ? t('header.menu.close') : t('header.menu.open')}
@@ -96,82 +97,73 @@ export default function Header() {
           <span className="ch247-menu-toggle__bar" />
         </button>
 
-        <div id="ch247-primary-nav" className={`ch247-header__collapsible${menuOpen ? ' is-open' : ''}`}>
+        <div id="ch247-primary-nav" className={`hg-nav__collapsible${menuOpen ? ' is-open' : ''}`}>
           <PlatformMegaMenu />
 
-          <div className="ch247-mobile-nav-host">
-            <PlatformMobileNav onNavigate={closeMenu} />
-          </div>
-
-          <div className="ch247-header__actions">
+          <div className="hg-nav__utility">
             <LanguageSwitcher />
             <CurrencySwitcher />
-            <NavLink className="ch247-header__search" to="/search" aria-label={t('header.search.label')} onClick={closeMenu}>
+            <NavLink className="hg-nav__icon" to="/search" aria-label={t('header.search.label')} onClick={closeMenu}>
               <Icon name="search" size={18} />
             </NavLink>
+          </div>
+
+          <div className="hg-nav__actions">
             {token ? (
               <>
-                <NavLink className="ch-btn ch-btn--outline ch-btn--sm" to="/dashboard" onClick={closeMenu}>
+                <NavLink className="hg-nav__text-link" to="/dashboard" onClick={closeMenu}>
                   {t('header.account.dashboard')}
                 </NavLink>
-                <NavLink className="ch-btn ch-btn--sm" to="/account" onClick={closeMenu}>
+                <NavLink className="hg-nav__avatar" to="/account" onClick={closeMenu}>
                   {user?.fullName?.split(' ')[0] ?? t('header.account.fallback')}
                 </NavLink>
-                <button type="button" className="ch-btn ch-btn--outline ch-btn--sm" onClick={handleLogout}>
+                <button type="button" className="hg-nav__text-link" onClick={handleLogout}>
                   {t('header.account.logout')}
                 </button>
               </>
             ) : (
               <>
-                <NavLink className="ch-btn ch-btn--outline ch-btn--sm" to={UTILITY.signIn.to} onClick={closeMenu}>
+                <NavLink className="hg-nav__text-link" to={UTILITY.signIn.to} onClick={closeMenu}>
                   {UTILITY.signIn.label}
                 </NavLink>
-                <NavLink className="ch-btn ch-btn--mint ch-btn--sm" to={UTILITY.createAccount.to} onClick={closeMenu}>
+                <NavLink className="hg-btn hg-btn--sm" to={UTILITY.createAccount.to} onClick={closeMenu}>
                   {UTILITY.createAccount.label}
                 </NavLink>
               </>
             )}
           </div>
+
+          <div className="hg-nav__drawer">
+            <PlatformMobileNav onNavigate={closeMenu} />
+          </div>
         </div>
       </div>
 
       {token ? (
-        <div className="ch247-subnav">
-          <nav className="ch-wrap--wide" aria-label={t('header.account.navLabel')}>
+        <div className="ch247-subnav hg-subnav">
+          <nav className="hg-nav__bar" aria-label={t('header.account.navLabel')}>
             {ACCOUNT_LINKS.map((link) => (
               <NavLink key={link.to} to={link.to} onClick={closeMenu} end={link.to === '/dashboard'}>
                 {link.label}
               </NavLink>
             ))}
             {user && SUPPORT_ROLES.includes(user.role) ? (
-              <NavLink to="/admin/ai-support" onClick={closeMenu}>
-                AI Support Desk
-              </NavLink>
+              <NavLink to="/admin/ai-support" onClick={closeMenu}>AI Support Desk</NavLink>
             ) : null}
             {user && SUPPORT_ROLES.includes(user.role) ? (
-              <NavLink to="/admin/unified-inbox" onClick={closeMenu}>
-                Inbox
-              </NavLink>
+              <NavLink to="/admin/unified-inbox" onClick={closeMenu}>Inbox</NavLink>
             ) : null}
             {user && SUPPORT_ROLES.includes(user.role) ? (
-              <NavLink to="/admin/platform-services" onClick={closeMenu}>
-                Platform Services
-              </NavLink>
+              <NavLink to="/admin/platform-services" onClick={closeMenu}>Platform Services</NavLink>
             ) : null}
             {user && STAFF_ROLES.includes(user.role) ? (
-              <NavLink to="/admin" onClick={closeMenu} end>
-                Admin
-              </NavLink>
+              <NavLink to="/admin" onClick={closeMenu} end>Admin</NavLink>
             ) : null}
             {user && STAFF_ROLES.includes(user.role) ? (
-              <NavLink to="/admin/domain-services" onClick={closeMenu}>
-                Domain Services
-              </NavLink>
+              <NavLink to="/admin/domain-services" onClick={closeMenu}>Domain Services</NavLink>
             ) : null}
             {user && STAFF_ROLES.includes(user.role) ? (
-              <NavLink to="/admin/infrastructure" onClick={closeMenu}>
-                Infrastructure
-              </NavLink>
+              <NavLink to="/admin/infrastructure" onClick={closeMenu}>Infrastructure</NavLink>
             ) : null}
           </nav>
         </div>

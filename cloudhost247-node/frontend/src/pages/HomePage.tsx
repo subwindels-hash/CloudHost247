@@ -1,209 +1,341 @@
 import { FormEvent, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Icon, CheckIcon, ArrowIcon } from '../components/ui/Icon';
-import { Illustration } from '../components/marketing/Illustration';
 import { usePageMeta } from '../lib/usePageMeta';
 import { useApiResource } from '../lib/useApiResource';
-import { formatPrice, type PublicPrice, type PublicPlan } from '../lib/catalog-types';
-import { CatalogErrorBanner, CatalogLoadingBanner } from '../components/CatalogStateBanner';
+import { formatPrice, type ProductPlansResponse, type PublicPlan } from '../lib/catalog-types';
+import { CatalogErrorBanner } from '../components/CatalogStateBanner';
 import { useCurrency } from '../currency/CurrencyProvider';
-import { NAV_SECTIONS, BRAND, UTILITY } from '../navigation/registry.generated';
+import { BRAND, UTILITY, NAV_SECTIONS } from '../navigation/registry.generated';
 
 /**
- * CloudHost247 homepage — premium marketing surface.
+ * CloudHost247 public homepage — Hostinger-style page grammar.
  *
- * Structure follows a conversion page, not a catalogue: each section answers "what is this
- * and where do I go next", and the deep pages do the explaining. The one exception is the
- * featured plans strip, which shows real plans and real prices from the live catalogue so a
- * visitor can order without leaving the page.
+ * The page is deliberately built as a conversion funnel, in the same order as hostinger.com:
+ * promo marquee (shared chrome) → split hero with a product screenshot → capability strip →
+ * tabbed pricing cards → "explore more" cards → AI builder prompt → tabbed feature showcase →
+ * use-case gallery → "more power" link list → FAQ accordion → full-width CTA → dark footer
+ * (shared chrome).
  *
- * Every link comes from the shared navigation registry, so the homepage cannot advertise a
- * product the rest of the site does not have — and adding a product updates this page too.
- *
- * Deliberately absent: a customer-logo wall, an uptime percentage, a data-centre pin map and
- * any invented price. None of those can be stated truthfully without data this deployment
- * does not hold, and each of them is a thing a visitor has learned to distrust anyway.
+ * Two rules carried over from the original homepage and kept intact:
+ *   • Every link resolves to a route this build actually serves (registry-driven where possible).
+ *   • No invented price, discount, uptime figure, award, press logo or customer quote. Plans and
+ *     prices come from the live catalogue API; if nothing is published the section says so.
  */
 
-const FAMILIES = NAV_SECTIONS.filter((section) => section.id !== 'resources' && section.id !== 'company');
+const PLAN_TABS = [
+  { id: 'websites', label: 'Websites', slug: 'web-hosting', to: '/hosting/web-hosting' },
+  { id: 'vps', label: 'VPS hosting', slug: 'vps-hosting', to: '/hosting/vps' },
+  { id: 'cloud', label: 'Cloud hosting', slug: 'cloud-hosting', to: '/cloud' },
+] as const;
 
-const SPOTLIGHTS = [
+const PROOF = [
+  { glyph: '⌁', title: 'Live catalogue pricing', text: 'No stale price list, no placeholder numbers' },
+  { glyph: '◈', title: 'One account', text: 'Domains, hosting, servers, apps and billing' },
+  { glyph: '⛨', title: 'Security by default', text: 'Passkeys, MFA, encrypted credentials, audit trail' },
+];
+
+const EXPLORE = [
   {
-    to: '/hosting/web-hosting',
-    title: 'Web Hosting',
-    body: 'Shared and business hosting with live catalogue plans, mailboxes and certificates.',
-    visual: 'hosting/web-hosting',
-    visual3d: 'hosting/web-hosting-3d',
-  },
-  {
-    to: '/hosting/vps',
-    title: 'VPS & Cloud',
-    body: 'Virtual servers with the provider, region and resources the catalogue actually lists.',
-    visual: 'cloud/vps',
-    visual3d: 'cloud/vps-3d',
-  },
-  {
+    label: 'Domains',
+    icon: '🌐',
+    title: 'Find a name that fits',
+    body: 'Search availability, register or transfer a domain, and manage its DNS from the same account as the site it serves.',
     to: '/domains',
-    title: 'Domains',
-    body: 'Search, register, transfer and manage DNS from the same account as the site they serve.',
-    visual: 'domains/domain-network',
-    visual3d: 'domains/domain-network-3d',
+    cta: 'Search domains',
   },
   {
-    to: '/platforms/applications',
-    title: 'Applications',
-    body: 'Explore application requirements, supported versions and deployment options.',
-    visual: 'applications/application-stack',
-    visual3d: 'applications/application-stack-3d',
+    label: 'Free tools',
+    icon: '⚡',
+    title: 'Diagnose anything, no account needed',
+    body: 'DNS, IP, SSL, network, encoding and security diagnostics — browsable and runnable straight from the Tools Center.',
+    to: '/tools',
+    cta: 'Open the Tools Center',
+  },
+  {
+    label: 'Website Builder',
+    icon: '✦',
+    title: 'Build a site without starting from scratch',
+    body: 'Start from a template or describe what you want, then shape the page in the builder and publish it to your domain.',
+    to: '/websites',
+    cta: 'Explore websites',
   },
 ];
 
-const PILLARS = [
+const SHOWCASE = [
   {
-    icon: 'shield',
-    title: 'Security that is a practice',
-    body: 'Passkeys and multi-factor sign-in, least-privilege administration, encryption in transit, and an audit trail behind every infrastructure operation.',
-    to: '/security',
+    id: 'build',
+    label: 'Build',
+    hint: 'Get a site, app or server online',
+    heading: 'Everything you need to launch, in one platform',
+    body: 'Choose a domain, pick a published plan, install an application or deploy from Git. Every step is recorded in the same account that owns the service.',
+    points: ['Domain search, registration and transfer', 'Live hosting, VPS and cloud plans', 'Application catalogue and Git deployments', 'Website Builder with templates and AI'],
+    tiles: ['Domains', 'Hosting', 'Deploy'],
+    to: '/hosting',
+    cta: 'Explore hosting',
   },
   {
-    icon: 'hard-drive',
-    title: 'Backups with a restore path',
-    body: 'Scheduled jobs scoped to each service, a run history you can inspect, and a restore performed from your own account.',
-    to: '/hosting/backups',
+    id: 'grow',
+    label: 'Grow',
+    hint: 'Reach customers and sell online',
+    heading: 'Keep growing after you go live',
+    body: 'Add a storefront, business email, an SSL certificate and marketing tools as the project grows — without migrating to a second provider.',
+    points: ['Online store and product catalogue', 'Email hosting and certificates', 'Logo Maker and digital marketing', 'Hire an Expert when you want help'],
+    tiles: ['Store', 'Email', 'Marketing'],
+    to: '/websites',
+    cta: 'Explore websites',
   },
   {
-    icon: 'activity',
-    title: 'Monitoring, honestly reported',
-    body: 'Telemetry on the resources you run. The status page reports only the checks this platform can genuinely perform, and says which components it cannot see.',
+    id: 'manage',
+    label: 'Manage',
+    hint: 'Operate it all from one dashboard',
+    heading: 'One dashboard for everything you run',
+    body: 'DNS records, certificates, backups, firewall rules, servers, deployments, invoices and support tickets — with an audit trail behind infrastructure operations.',
+    points: ['DNS, SSL and firewall management', 'Scheduled backups with a restore path', 'Monitoring and an honest status page', 'Invoices, services and support tickets'],
+    tiles: ['DNS', 'Backups', 'Billing'],
     to: '/status',
+    cta: 'See platform status',
+  },
+] as const;
+
+const AI_CHIPS = ['AI Website Builder', 'Cloud AI assistant', 'Logo Maker palettes', 'AI support answers'];
+
+const USE_CASES = [
+  { glyph: '▤', title: 'A business website', text: 'Domain, hosting, business email and HTTPS', to: '/hosting/business' },
+  { glyph: '▦', title: 'An online store', text: 'A storefront with products and orders', to: '/websites' },
+  { glyph: '⌘', title: 'An API or application', text: 'A supported runtime, a domain and a deployment', to: '/developers' },
+  { glyph: '▥', title: 'Infrastructure you run', text: 'VPS, cloud or dedicated servers with backups', to: '/cloud' },
+];
+
+const MORE_POWER = [
+  { title: 'VPS hosting', text: 'Full root access and predictable resources', to: '/hosting/vps' },
+  { title: 'Dedicated servers', text: 'Bare-metal capacity for larger workloads', to: '/hosting/dedicated' },
+  { title: 'Application deployments', text: 'Ship from Git or a supported runtime', to: '/developers/deployment' },
+  { title: 'Application marketplace', text: 'Browse supported apps and requirements', to: '/apps' },
+  { title: 'Domains & DNS', text: 'Registration, transfers and DNS records', to: '/domains' },
+  { title: 'Security & backups', text: 'Certificates, firewall rules and restore points', to: '/security' },
+];
+
+const FAQS = [
+  {
+    q: 'What is CloudHost247?',
+    a: 'A single platform for getting and staying online: domains, website and email hosting, VPS and cloud servers, applications, deployments, billing and a free Tools Center. One account and one support relationship instead of a separate vendor for each piece.',
   },
   {
-    icon: 'wrench',
-    title: 'One place to operate',
-    body: 'Servers, domains, DNS, certificates, applications, deployments, invoices and tickets in the same account as the services they belong to.',
-    to: '/dashboard',
+    q: 'Where do the prices on this site come from?',
+    a: 'Prices are read at request time from the product catalogue, in the currency you select. If a plan or price has not been published yet, the page says so instead of showing a made-up number. The same published price is what the order form charges.',
+  },
+  {
+    q: 'Do I need to know how to code?',
+    a: 'No. You can search for a domain, choose a published hosting plan and use the Website Builder or an application from the catalogue. If you do write code, the platform also exposes documented APIs, Git deployment and full control over servers.',
+  },
+  {
+    q: 'Can I manage everything from one account?',
+    a: 'Yes. Domains, DNS records, certificates, backups, servers, deployments, invoices and support tickets all live in the same account as the services they belong to.',
+  },
+  {
+    q: 'Are external providers configured automatically?',
+    a: 'No. Each integration is configured separately by an operator. Until its credentials are set, the platform fails closed and reports exactly which setting is missing rather than pretending an action succeeded.',
+  },
+  {
+    q: 'Can I use the tools without an account?',
+    a: 'Yes. The Tools Center publishes free DNS, IP, network, developer, webmaster and security diagnostics that work anonymously. Tools that need an account or a provider say so on the card before you run them.',
+  },
+  {
+    q: 'How is my account protected?',
+    a: 'Sign-in supports passkeys and multi-factor authentication, stored credentials are encrypted at rest, and infrastructure operations write an audit record. The status page reports only the checks the platform can genuinely perform.',
   },
 ];
 
-const AUDIENCES = [
-  { icon: 'briefcase', title: 'A business website', body: 'Domain, hosting, business email and HTTPS — with someone to call when it breaks.', to: '/hosting/business' },
-  { icon: 'code', title: 'An application', body: 'A supported application version, its configuration, a domain and a deployment record you can inspect.', to: '/developers/deployment' },
-  { icon: 'server-rack', title: 'Infrastructure you run', body: 'VPS, cloud or dedicated servers with firewall rules, backups and telemetry.', to: '/cloud' },
-  { icon: 'store', title: 'A storefront', body: 'Sell products online, with the store and the hosting on the same platform.', to: '/websites' },
-];
+function Check() {
+  return <span className="hg-check" aria-hidden="true">✓</span>;
+}
 
-const STEPS = [
-  { index: '01', title: 'Make it yours', body: 'Search for a domain and register it — or transfer one you already own — from the same account as the services it serves.' },
-  { index: '02', title: 'Bring it online', body: 'Choose hosting, a server or an application from the live catalogue and provision it in minutes.' },
-  { index: '03', title: 'Deploy and grow', body: 'Deploy from Git, add certificates and backups, then scale the plan as the workload grows.' },
-];
+function Arrow() {
+  return <span className="hg-link__arrow" aria-hidden="true">→</span>;
+}
 
-/**
- * Featured plans strip: the first three published plans for web hosting, straight from the
- * live catalogue. Every possible state of the catalogue data is rendered honestly — loading,
- * error, missing product, no plans — and no price is ever invented.
- */
-function HomePlansSection() {
-  const result = useApiResource<{ product: { slug: string; name: string }; plans: PublicPlan[] }>('/api/v1/catalog/products/web-hosting/plans');
+/** The live tool count is data, not a marketing number we made up. */
+function ToolCountProof() {
+  const result = useApiResource<{ count?: number }>('/api/tools/catalog');
+  const count = result.status === 'success' && typeof result.data.count === 'number' ? result.data.count : null;
+  return (
+    <div className="hg-proof__item">
+      <i aria-hidden="true">✦</i>
+      <div>
+        <b>{count === null ? 'Free online tools' : `${count} free online tools`}</b>
+        <small>DNS, IP, SSL, network and developer diagnostics</small>
+      </div>
+    </div>
+  );
+}
+
+function Price({ plan }: { plan: PublicPlan }) {
   const { formatAmount } = useCurrency();
-
-  if (result.status === 'loading') return <CatalogLoadingBanner label="Loading hosting plans…" />;
-  if (result.status === 'error') {
-    if (result.httpStatus === 404) {
-      return (
-        <section className="ch-section ch-section--tight">
-          <div className="ch-wrap">
-            <div className="ch-state">
-              <strong>Hosting plans aren't in the live catalogue yet.</strong>{' '}
-              Create an account and we'll follow up with current options, or{' '}
-              <Link to="/contact">ask us about hosting</Link>.
-            </div>
-          </div>
-        </section>
-      );
-    }
-    return <CatalogErrorBanner message={result.message} />;
-  }
-
-  const { plans } = result.data;
-  const featured = plans.slice(0, 3);
-
-  if (plans.length === 0) {
+  const price = plan.pricing.find((p) => p.billingPeriod === 'monthly') ?? plan.pricing[0];
+  if (!price) {
     return (
-      <section className="ch-section ch-section--tight">
-        <div className="ch-wrap">
-          <div className="ch-state">
-            <strong>No hosting plans have been published yet.</strong>{' '}
-            Ask us about current options or{' '}
-            <Link to="/contact">contact us</Link>.
-          </div>
-        </div>
-      </section>
+      <>
+        <div className="hg-plan__price"><strong style={{ fontSize: '1.25rem' }}>Contact us</strong></div>
+        <p className="hg-plan__billing">No price has been published for this plan yet.</p>
+      </>
     );
   }
+  const formatted = formatAmount(price.amount, price.currency);
+  return (
+    <>
+      <div className="hg-plan__price">
+        <strong>{formatted.text || formatPrice(price)}</strong>
+        <span>/mo</span>
+      </div>
+      <p className="hg-plan__billing">
+        Billed {price.billingPeriod.replace(/_/g, ' ')} · {formatted.converted ? formatted.currency : price.currency}
+        {price.setupFee ? ' · setup fee applies' : ''}
+      </p>
+    </>
+  );
+}
+
+/**
+ * Tabbed pricing cards — the centrepiece of a Hostinger-style page. Data comes from the public
+ * catalogue API, so loading / error / empty are all real states with honest wording.
+ */
+function PricingSection() {
+  const [activeId, setActiveId] = useState<string>(PLAN_TABS[0].id);
+  const active = PLAN_TABS.find((tab) => tab.id === activeId) ?? PLAN_TABS[0];
+  const result = useApiResource<ProductPlansResponse>(`/api/v1/catalog/products/${active.slug}/plans`);
 
   return (
-    <section className="ch-section ch-section--tight">
-      <div className="ch-wrap">
-        <div className="ch-section__head">
-          <div>
-            <p className="ch-section__badge">Live from the catalogue</p>
-            <h2>Hosting plans that fit what you are building</h2>
-          </div>
-          <p className="ch-lede">
-            Prices shown in your selected currency and read straight from the product catalogue —
-            what you see here is what the order form charges.
+    <section className="hg-section hg-pricing" id="pricing">
+      <div className="hg-wrap">
+        <div className="hg-section__head">
+          <p className="hg-eyebrow">Plans &amp; prices</p>
+          <h2 className="hg-h2">Choose the plan that fits what you are building</h2>
+          <p className="hg-lede">
+            Start with what you need and move up as the project grows. Prices are read from the live
+            catalogue — what you see here is what the order form charges.
           </p>
         </div>
-        <div className="ch-grid ch-grid--3">
-          {featured.map((plan) => {
-            const price = plan.pricing.find((p) => p.billingPeriod === 'monthly') ?? plan.pricing[0];
-            const formatted = price ? formatAmount(price.amount) : null;
-            return (
-              <div className="ch-card ch-card--raised" key={plan.slug}>
-                <h3>{plan.name}</h3>
-                {plan.description && <p style={{ fontSize: '0.85rem', color: 'var(--ch-muted)' }}>{plan.description}</p>}
-                {price ? (
-                  <div style={{ marginTop: 'auto' }}>
-                    <div style={{ fontSize: '2rem', fontWeight: 650, letterSpacing: '-0.03em', marginBottom: 2 }}>
-                      {formatted?.text ?? formatPrice(price)}
-                      <span style={{ fontSize: '0.8rem', fontWeight: 500, color: 'var(--ch-muted)' }}>
-                        {formatted?.converted ? ` · ${formatted.currency}` : price.currency}{' / '}{price.billingPeriod.replace('_', ' ')}
-                      </span>
-                    </div>
-                    {price.setupFee && <p style={{ fontSize: '0.8rem', color: 'var(--ch-muted)' }}>+ setup fee</p>}
-                  </div>
-                ) : null}
-                {plan.features.slice(0, 4).length > 0 && (
-                  <ul style={{ listStyle: 'none', padding: 0, margin: 'var(--ch-space-4) 0 0', fontSize: '0.87rem', color: 'var(--ch-muted)' }}>
-                    {plan.features.slice(0, 4).map((feature) => (
-                      <li key={feature.name} style={{ display: 'flex', gap: 9, alignItems: 'flex-start', marginBottom: 6 }}>
-                        <span style={{ color: 'var(--ch-mint-strong)', fontWeight: 700 }}>{'\u00B7'}</span>
-                        {feature.name}{feature.value ? ` — ${feature.value}` : ''}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                <Link className="ch-link" to={`/hosting/web-hosting#plans`}>
-                  Choose {plan.name}<span className="ch-link__arrow" aria-hidden><ArrowIcon /></span>
-                </Link>
-              </div>
-            );
-          })}
+
+        <div className="hg-tabs" role="tablist" aria-label="Plan categories">
+          {PLAN_TABS.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              role="tab"
+              aria-selected={activeId === tab.id}
+              className={activeId === tab.id ? 'is-active' : ''}
+              onClick={() => setActiveId(tab.id)}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
-        <p style={{ marginTop: '30px', marginBottom: 0, textAlign: 'center' }}>
-          <Link className="ch-link" to="/hosting/web-hosting">
-            See all hosting plans<span className="ch-link__arrow" aria-hidden><ArrowIcon /></span>
-          </Link>
+
+        {result.status === 'loading' ? (
+          <div className="hg-state">Loading the published {active.label.toLowerCase()} plans…</div>
+        ) : result.status === 'error' ? (
+          result.httpStatus === 404 ? (
+            <div className="hg-state">
+              <strong>No {active.label.toLowerCase()} plans are published yet.</strong>{' '}
+              An administrator has not added this product to the catalogue.{' '}
+              <Link className="hg-link" to={active.to}>See the product page</Link> or{' '}
+              <Link className="hg-link" to="/contact">ask us about current options</Link>.
+            </div>
+          ) : (
+            <CatalogErrorBanner message={result.message} />
+          )
+        ) : result.data.plans.length === 0 ? (
+          <div className="hg-state">
+            <strong>No {active.label.toLowerCase()} plans are published yet.</strong>{' '}
+            <Link className="hg-link" to={active.to}>See the product page</Link> for what is available.
+          </div>
+        ) : (
+          <div className="hg-plans" role="tabpanel">
+            {result.data.plans.slice(0, 3).map((plan, index) => {
+              const featured = index === 1 && result.data.plans.length > 1;
+              return (
+                <article className={`hg-plan${featured ? ' hg-plan--featured' : ''}`} key={plan.slug}>
+                  {featured ? <span className="hg-plan__ribbon">Most flexible</span> : null}
+                  <h3 className="hg-plan__name">{plan.name}</h3>
+                  <p className="hg-plan__desc">{plan.description ?? `A ${active.label.toLowerCase()} plan from the live catalogue.`}</p>
+                  <Price plan={plan} />
+                  <Link className={`hg-btn${featured ? '' : ' hg-btn--ghost'}`} to={active.to}>
+                    Choose plan
+                  </Link>
+                  {plan.features.length > 0 ? (
+                    <ul className="hg-plan__features">
+                      {plan.features.slice(0, 7).map((feature) => (
+                        <li key={`${feature.name}-${feature.displayOrder}`}>
+                          <Check />
+                          <span>{feature.name}{feature.value ? ` — ${feature.value}` : ''}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="hg-plan__billing">Full specifications on the product page.</p>
+                  )}
+                </article>
+              );
+            })}
+          </div>
+        )}
+
+        <p className="hg-pricing__note">
+          All prices come from the published product catalogue. Plans renew at the price shown unless
+          an administrator publishes a change; no price on this page is a placeholder.
         </p>
       </div>
     </section>
   );
 }
 
+/** A CSS-only product screenshot: composition, not fabricated telemetry. */
+function HeroVisual() {
+  return (
+    <div className="hg-hero__visual" aria-hidden="true">
+      <div className="hg-browser">
+        <div className="hg-browser__bar">
+          <span className="hg-browser__dots"><i /><i /><i /></span>
+          <span className="hg-browser__url">cloudhost247.com / dashboard</span>
+        </div>
+        <div className="hg-browser__body">
+          <div className="hg-browser__side">
+            <b>CloudHost247</b>
+            <span className="is-active">Overview</span>
+            <span>Services</span>
+            <span>Domains &amp; DNS</span>
+            <span>Deployments</span>
+            <span>Billing</span>
+            <span>Support</span>
+          </div>
+          <div className="hg-browser__content">
+            <h4>Good to see you</h4>
+            <p>Everything you run, in one place</p>
+            <div className="hg-browser__tiles">
+              <div className="hg-browser__tile"><i /><b>Hosting</b><small>Plans &amp; sites</small></div>
+              <div className="hg-browser__tile"><i /><b>Domains</b><small>DNS &amp; SSL</small></div>
+              <div className="hg-browser__tile"><i /><b>Servers</b><small>Backups</small></div>
+            </div>
+            <div className="hg-browser__rows">
+              <div className="hg-browser__row"><i /><span>Domain registration</span><span>Manage</span></div>
+              <div className="hg-browser__row"><i /><span>SSL certificates</span><span>Manage</span></div>
+              <div className="hg-browser__row"><i /><span>Application deployments</span><span>Manage</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="hg-float hg-float--one"><i>✓</i> One account for every service</div>
+      <div className="hg-float hg-float--two"><i>↗</i> Live catalogue pricing</div>
+    </div>
+  );
+}
+
 export default function HomePage() {
   const navigate = useNavigate();
   const [domainQuery, setDomainQuery] = useState('');
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [showcaseId, setShowcaseId] = useState<string>('build');
+  const showcase = SHOWCASE.find((item) => item.id === showcaseId) ?? SHOWCASE[0];
 
   usePageMeta(
     'CloudHost247 — Hosting, Cloud, Domains & Developer Platform',
@@ -220,12 +352,7 @@ export default function HomePage() {
           slogan: BRAND.tagline,
           description: BRAND.description,
         },
-        {
-          '@context': 'https://schema.org',
-          '@type': 'WebSite',
-          name: BRAND.name,
-          description: BRAND.description,
-        },
+        { '@context': 'https://schema.org', '@type': 'WebSite', name: BRAND.name, description: BRAND.description },
       ],
     }
   );
@@ -236,210 +363,233 @@ export default function HomePage() {
     navigate(trimmed ? `/domains?q=${encodeURIComponent(trimmed)}` : '/domains');
   }
 
+  function onAiPrompt(event: FormEvent) {
+    event.preventDefault();
+    navigate(aiPrompt.trim() ? `/register?idea=${encodeURIComponent(aiPrompt.trim())}` : UTILITY.createAccount.to);
+  }
+
   return (
-    <div className="ch-ds">
-      <section className="ch-hero">
-        <div className="ch-wrap ch-hero-grid">
+    <div className="hg-page">
+      {/* 1. Hero — big headline, domain search, primary CTA, product screenshot */}
+      <section className="hg-hero">
+        <div className="hg-wrap hg-hero__grid">
           <div>
-            <p className="ch-kicker">Domains · Hosting · Cloud · Platforms · Tools</p>
-            <h1>
-              Build. Host.<br /> Deploy. <em>Scale.</em>
-            </h1>
-            <p className="ch-lede">
+            <p className="hg-hero__pill"><span>Platform</span> Domains · Hosting · Cloud · Apps · Tools</p>
+            <h1>Your idea, online. <span className="hg-accent">All in one place.</span></h1>
+            <p className="hg-hero__sub">
               Register the domain, host the website, deploy the application, run the server and
-              connect the API — with one account, one catalogue and one support relationship
-              instead of five vendors pointing at each other.
+              connect the API — with one account, one catalogue and one support relationship.
             </p>
-            <form className="ch-domain-search" onSubmit={onDomainSearch} role="search">
-              <label className="ch-visually-hidden" htmlFor="ch-home-domain">
-                Search for a domain name
-              </label>
-              <div className="ch-domain-search__field">
-                <input
-                  id="ch-home-domain"
-                  className="ch-domain-search__input"
-                  type="search"
-                  name="q"
-                  value={domainQuery}
-                  onChange={(event) => setDomainQuery(event.target.value)}
-                  placeholder="Search a domain, e.g. example.com"
-                  maxLength={253}
-                  autoComplete="off"
-                />
-                <button className="ch-btn ch-btn--mint ch-btn--lg" type="submit">
-                  Search domains
-                </button>
-              </div>
+            <form className="hg-domain" onSubmit={onDomainSearch} role="search" aria-label="Search for a domain name">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
+              </svg>
+              <label className="ch-visually-hidden" htmlFor="hg-domain-input">Search for a domain name</label>
+              <input
+                id="hg-domain-input"
+                type="search"
+                name="q"
+                value={domainQuery}
+                onChange={(event) => setDomainQuery(event.target.value)}
+                placeholder="Find your domain, e.g. example.com"
+                maxLength={253}
+                autoComplete="off"
+              />
+              <button className="hg-btn hg-btn--sm" type="submit">Search</button>
             </form>
-            <div className="ch-hero__ctas">
-              <Link className="ch-btn ch-btn--mint ch-btn--lg" to={UTILITY.createAccount.to}>
-                {UTILITY.createAccount.label}
-              </Link>
-              <Link className="ch-btn ch-btn--on-ink ch-btn--lg" to="/hosting/web-hosting">
-                Explore hosting plans
-              </Link>
+            <div className="hg-hero__ctas">
+              <Link className="hg-btn" to={UTILITY.createAccount.to}>{UTILITY.createAccount.label}</Link>
+              <Link className="hg-btn hg-btn--ghost" to="/#pricing">See plans</Link>
             </div>
-            <ul className="ch-hero__points">
-              <li><CheckIcon size={15} />Live catalogue pricing, never a stale price list</li>
-              <li><CheckIcon size={15} />Manage DNS, certificates and backups where available</li>
-              <li><CheckIcon size={15} />Documented APIs for everything you own</li>
+            <ul className="hg-hero__points">
+              <li><Check /> Live catalogue pricing, never a stale price list</li>
+              <li><Check /> DNS, certificates, backups and deployments in one account</li>
+              <li><Check /> Documented APIs for everything you own</li>
             </ul>
           </div>
-
-          <Illustration
-            visual="hero/infrastructure"
-            visual3d="hero/infrastructure-3d"
-            alt="CloudHost247 platform: a 3D view of servers, cloud compute and a control layer"
-            caption={{ left: 'CloudHost247 platform', right: 'Infrastructure' }}
-            eager
-          />
+          <HeroVisual />
         </div>
       </section>
 
-      <HomePlansSection />
-
-      <section className="ch-section ch-section--soft">
-        <div className="ch-wrap">
-          <div className="ch-section__head">
-            <div>
-              <p className="ch-kicker">Start here</p>
-              <h2>Hosting, cloud, domains and applications</h2>
+      {/* 2. Capability strip — real capabilities instead of press logos we do not have */}
+      <section className="hg-proof ch-assurance" aria-label="Platform capabilities">
+        <div className="hg-wrap hg-proof__grid">
+          {PROOF.map((item) => (
+            <div className="hg-proof__item" key={item.title}>
+              <i aria-hidden="true">{item.glyph}</i>
+              <div><b>{item.title}</b><small>{item.text}</small></div>
             </div>
-            <p className="ch-lede">
-              Choose your starting point. Explore the specifications and options for your next project.
-            </p>
+          ))}
+          <ToolCountProof />
+        </div>
+      </section>
+
+      {/* 3. Tabbed pricing cards */}
+      <PricingSection />
+
+      {/* 4. Explore more */}
+      <section className="hg-section hg-section--soft">
+        <div className="hg-wrap">
+          <div className="hg-section__head--split">
+            <div>
+              <p className="hg-eyebrow">Explore the platform</p>
+              <h2 className="hg-h2">Everything you need before you go live</h2>
+            </div>
+            <p className="hg-lede">Each card opens a real product area. The menu, footer and this page all come from the same navigation definition.</p>
           </div>
-          <div className="ch-grid ch-grid--4">
-            {SPOTLIGHTS.map((item) => (
-              <Link className="ch-card" to={item.to} key={item.to}>
-                <Illustration visual={item.visual} visual3d={item.visual3d} alt="" />
-                <h3>{item.title}</h3>
-                <p>{item.body}</p>
-                <span className="ch-card__foot">
-                  <span className="ch-link">
-                    Explore
-                    <span className="ch-link__arrow" aria-hidden><ArrowIcon /></span>
-                  </span>
-                </span>
+          <div className="hg-cards hg-cards--3">
+            {EXPLORE.map((card) => (
+              <Link className="hg-card" to={card.to} key={card.title}>
+                <span className="hg-card__icon" aria-hidden="true">{card.icon}</span>
+                <span className="hg-card__label">{card.label}</span>
+                <h3 className="hg-h3">{card.title}</h3>
+                <p>{card.body}</p>
+                <span className="hg-card__foot"><span className="hg-link">{card.cta} <Arrow /></span></span>
               </Link>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="ch-section">
-        <div className="ch-wrap">
-          <div className="ch-section__head">
-            <div>
-              <p className="ch-kicker">Eight product families, one account</p>
-              <h2>Everything you need to run online</h2>
-            </div>
-            <p className="ch-lede">
-              Each card opens a real product area. The menu, the footer and this page are all rendered
-              from the same definition, so nothing here leads to a page that does not exist.
-            </p>
-          </div>
-          <div className="ch-grid ch-grid--4">
-            {FAMILIES.map((family) => (
-              <Link className="ch-card" to={family.to} key={family.id}>
-                <span className="ch-card__icon" aria-hidden>
-                  <Icon name={
-                    family.id === 'hosting' ? 'server'
-                      : family.id === 'cloud' ? 'cloud'
-                        : family.id === 'domains' ? 'domain'
-                          : family.id === 'platforms' ? 'app'
-                            : family.id === 'developers' ? 'code'
-                              : family.id === 'tools' ? 'tools' : 'layers'
-                  } />
-                </span>
-                <h3>{family.label}</h3>
-                <p>{family.blurb}</p>
-                <span className="ch-card__foot">
-                  <span className="ch-link">
-                    Explore
-                    <span className="ch-link__arrow" aria-hidden><ArrowIcon /></span>
-                  </span>
-                </span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="ch-section ch-section--soft">
-        <div className="ch-wrap">
-          <div className="ch-section__head">
-            <div>
-              <p className="ch-kicker">How it works</p>
-              <h2>From domain to running service</h2>
-            </div>
-            <p className="ch-lede">
-              Three steps, one account. Everything after the order — DNS, certificates, backups,
-              deployments and support — lives inside the same dashboard.
-            </p>
-          </div>
-          <ul className="ch-steps">
-            {STEPS.map((step) => (
-              <li key={step.index} className="ch-step">
-                <span className="ch-step__index">{step.index}</span>
-                <div>
-                  <h3>{step.title}</h3>
-                  <p>{step.body}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-
-      <section className="ch-section">
-        <div className="ch-wrap">
-          <div className="ch-section__head">
-            <div>
-              <p className="ch-kicker">What we can actually claim</p>
-              <h2>Four things we do differently</h2>
-            </div>
-            <p className="ch-lede">
-              No invented uptime figure, no certification badge, no map with pins on cities we do not
-              deploy to. These four statements are backed by the platform itself.
-            </p>
-          </div>
-          <div className="ch-grid ch-grid--4">
-            {PILLARS.map((pillar) => (
-              <Link className="ch-card" to={pillar.to} key={pillar.title}>
-                <span className="ch-card__icon" aria-hidden><Icon name={pillar.icon} /></span>
-                <h3>{pillar.title}</h3>
-                <p>{pillar.body}</p>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="ch-newsletter">
-        <div className="ch-wrap">
-          <h2>Platform news, straight to your inbox</h2>
-          <p>Product updates, maintenance notices and the occasional engineering note. No spam.</p>
-          <form role="search" aria-label="Newsletter signup" onSubmit={(event) => event.preventDefault()}>
-            <input type="email" name="email" placeholder="you@example.com" required />
-            <button className="ch-btn ch-btn--mint" type="submit">Subscribe</button>
+      {/* 5. AI builder prompt */}
+      <section className="hg-section hg-ai">
+        <div className="hg-wrap" style={{ position: 'relative', textAlign: 'center' }}>
+          <p className="hg-eyebrow">Describe it. Build it live.</p>
+          <h2 className="hg-h2">Tell CloudHost247 what you want to create</h2>
+          <p className="hg-lede">
+            Describe a website, keep prompting to shape it, then publish it to a domain you own.
+            The built-in generator always works; external model providers are optional and never
+            silently substituted.
+          </p>
+          <form className="hg-prompt" onSubmit={onAiPrompt} role="search" aria-label="Describe your website">
+            <label className="ch-visually-hidden" htmlFor="hg-ai-input">Describe the website you want</label>
+            <input
+              id="hg-ai-input"
+              value={aiPrompt}
+              onChange={(event) => setAiPrompt(event.target.value)}
+              placeholder="A portfolio site for a design studio in Abuja…"
+              maxLength={300}
+            />
+            <button className="hg-btn" type="submit">Create with AI</button>
           </form>
+          <div className="hg-ai__chips">
+            {AI_CHIPS.map((chip) => <span key={chip}>{chip}</span>)}
+          </div>
         </div>
       </section>
 
-      <section className="ch-cta">
-        <div className="ch-wrap">
-          <div className="ch-cta__inner">
-            <div>
-              <h2>Ready when you are</h2>
-              <p>Create an account to see live pricing and order a service, or ask us a question first.</p>
+      {/* 6. Tabbed feature showcase */}
+      <section className="hg-section hg-section--white">
+        <div className="hg-wrap">
+          <div className="hg-section__head">
+            <p className="hg-eyebrow">Tools for every online project</p>
+            <h2 className="hg-h2">More control over what you build, without more complexity</h2>
+            <p className="hg-lede">Build it, grow it, then run it — all from the same platform.</p>
+          </div>
+          <div className="hg-showcase">
+            <div className="hg-showcase__tabs" role="tablist" aria-label="Platform areas">
+              {SHOWCASE.map((item) => (
+                <button
+                  type="button"
+                  role="tab"
+                  key={item.id}
+                  aria-selected={showcaseId === item.id}
+                  className={`hg-showcase__tab${showcaseId === item.id ? ' is-active' : ''}`}
+                  onClick={() => setShowcaseId(item.id)}
+                >
+                  <b>{item.label}</b>
+                  <small>{item.hint}</small>
+                </button>
+              ))}
             </div>
-            <div className="ch-cta__actions">
-              <Link className="ch-btn ch-btn--on-ink" to={UTILITY.createAccount.to}>
-                {UTILITY.createAccount.label}
+            <div className="hg-showcase__panel" role="tabpanel">
+              <h3>{showcase.heading}</h3>
+              <p>{showcase.body}</p>
+              <ul className="hg-showcase__list">
+                {showcase.points.map((point) => <li key={point}><Check />{point}</li>)}
+              </ul>
+              <div className="hg-showcase__mock" aria-hidden="true">
+                {showcase.tiles.map((tile) => <div key={tile}>{tile}</div>)}
+              </div>
+              <p style={{ marginTop: 22, marginBottom: 0 }}>
+                <Link className="hg-link" to={showcase.to}>{showcase.cta} <Arrow /></Link>
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 7. Use cases — Hostinger has a customer gallery; we show real starting points instead
+             of inventing testimonials. */}
+      <section className="hg-section hg-section--soft">
+        <div className="hg-wrap">
+          <div className="hg-section__head">
+            <p className="hg-eyebrow">What will you build?</p>
+            <h2 className="hg-h2">Pick a starting point</h2>
+            <p className="hg-lede">Every tile opens a product area that exists in this build.</p>
+          </div>
+          <div className="hg-cards hg-cards--4">
+            {USE_CASES.map((item) => (
+              <Link className="hg-usecase" to={item.to} key={item.title}>
+                <span className="hg-usecase__glyph" aria-hidden="true">{item.glyph}</span>
+                <b>{item.title}</b>
+                <small>{item.text}</small>
               </Link>
-              <Link className="ch-btn ch-btn--outline" to="/contact">Contact us</Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 8. "More power when you need it" link list, from the shared navigation registry */}
+      <section className="hg-section hg-section--white">
+        <div className="hg-wrap">
+          <div className="hg-section__head--split">
+            <div>
+              <p className="hg-eyebrow">More power when you need it</p>
+              <h2 className="hg-h2">Scale on your own terms</h2>
             </div>
+            <p className="hg-lede">{NAV_SECTIONS.length} product families, one account. Move up without moving providers.</p>
+          </div>
+          <div className="hg-linklist">
+            {MORE_POWER.map((link) => (
+              <Link to={link.to} key={link.title}>
+                <span>{link.title}<small>{link.text}</small></span>
+                <span aria-hidden="true">→</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 9. FAQ accordion */}
+      <section className="hg-section hg-section--soft" id="faq">
+        <div className="hg-wrap">
+          <div className="hg-section__head">
+            <p className="hg-eyebrow">Platform FAQs</p>
+            <h2 className="hg-h2">Questions, answered honestly</h2>
+          </div>
+          <div className="hg-faq">
+            {FAQS.map((item) => (
+              <details key={item.q}>
+                <summary>{item.q}</summary>
+                <p>{item.a}</p>
+              </details>
+            ))}
+          </div>
+          <p style={{ textAlign: 'center', marginTop: 28, marginBottom: 0 }}>
+            <Link className="hg-link" to="/faq">Read the full FAQ <Arrow /></Link>
+          </p>
+        </div>
+      </section>
+
+      {/* 10. Final CTA */}
+      <section className="hg-cta">
+        <div className="hg-wrap">
+          <h2>Your idea, online. Now&apos;s the time.</h2>
+          <p>Create an account to see live pricing and order a service, or ask us a question first.</p>
+          <div className="hg-cta__actions">
+            <Link className="hg-btn hg-btn--light" to={UTILITY.createAccount.to}>{UTILITY.createAccount.label}</Link>
+            <Link className="hg-btn hg-btn--light" to="/contact" style={{ background: 'transparent', color: '#fff', borderColor: 'rgba(255,255,255,0.55)' }}>Contact us</Link>
           </div>
         </div>
       </section>

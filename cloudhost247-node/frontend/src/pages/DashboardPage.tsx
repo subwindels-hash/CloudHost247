@@ -49,6 +49,14 @@ const platformTiles: Array<{
   { key: 'cartItems', label: 'Cart', to: '/cart', hint: 'Items waiting for checkout', empty: 'Your cart is empty' },
 ];
 
+/** Hostinger hPanel-style quick actions: the four tasks people open an account for most. */
+const quickActions = [
+  { icon: '🌐', label: 'Find a domain', hint: 'Search and register', to: '/domains/search' },
+  { icon: '▦', label: 'Deploy an app', hint: 'Marketplace applications', to: '/apps' },
+  { icon: '✦', label: 'Build a website', hint: 'Templates and AI builder', to: '/websites/builder' },
+  { icon: '☏', label: 'Get support', hint: 'Open or track a ticket', to: '/support' },
+];
+
 interface MeResponse {
   user: { id: string; email: string; fullName: string; role: string };
 }
@@ -168,11 +176,34 @@ export default function DashboardPage() {
           from the <Link to="/websites/templates">template gallery</Link>.
         </p>
       </div>
-      <div className="ch247-card">
-        <h1>Welcome back, {me.fullName}</h1>
-        <p>
-          Signed in as <strong>{me.email}</strong> — role: {me.role}
-        </p>
+      {/* Account overview: one greeting, one row of real account links, then quick actions.
+          The layout follows Hostinger's hPanel; every link resolves to a route this build serves. */}
+      <div className="hg-account-hero">
+        <div className="hg-account-hero__inner">
+          <div>
+            <p className="hg-account-hero__eyebrow">Your account</p>
+            <h1>Welcome back, {me.fullName}</h1>
+            <p>Signed in as <strong>{me.email}</strong> — role: {me.role}</p>
+          </div>
+          <div className="hg-account-hero__actions">
+            <Link className="hg-btn hg-btn--sm" to="/services">Manage services</Link>
+            <Link className="hg-btn hg-btn--ghost hg-btn--sm" to="/account/domains">Domains</Link>
+            <Link className="hg-btn hg-btn--ghost hg-btn--sm" to="/billing">Billing</Link>
+            <Link className="hg-btn hg-btn--ghost hg-btn--sm" to="/support">Support</Link>
+          </div>
+        </div>
+      </div>
+
+      <div className="hg-quick">
+        <h2>Quick actions</h2>
+        <div className="hg-quick__grid">
+          {quickActions.map((action) => (
+            <Link className="hg-quick__item" to={action.to} key={action.label}>
+              <i aria-hidden="true">{action.icon}</i>
+              <span>{action.label}<small>{action.hint}</small></span>
+            </Link>
+          ))}
+        </div>
       </div>
 
       <div className="ch247-card">

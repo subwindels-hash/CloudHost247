@@ -1120,3 +1120,42 @@ html, body { max-width: 100%; overflow-x: clip; }
 .ch247-brand img { display: block; width: 204px; max-width: 100%; height: auto; }
 .ch-site .ch-cta .ch-kicker, .ch-site .ch-cta .ch-text-link { color: var(--ch-ink); }
 .ch-site .ch-footer-bottom a { color: var(--ch-on-dark-muted); }
+
+/* -----------------------------------------------------------------------------
+   Phase 3 shared assurance strip (2026-11-07)
+   -----------------------------------------------------------------------------
+   ONE responsive primitive for the capability strip on both runtimes: the WHMCS/PHP
+   homepage (`templates/cloudhost247/homepage.tpl` .ch-principles) and the React/Node
+   homepage (`frontend/src/pages/HomePage.tsx` .hg-proof). Only behaviour/a11y/overflow
+   properties are declared here — layout stays with each runtime's own stylesheet so
+   this canonical addition cannot regress either one. Generated into the WHMCS theme by
+   `node scripts/site/generate.mjs`; the SPA imports this file directly.
+   -------------------------------------------------------------------------- */
+.ch-site .ch-assurance, .hg-theme .ch-assurance {
+  color: var(--ch-ink);
+  overflow-wrap: anywhere;
+}
+.ch-site .ch-assurance > *, .hg-theme .ch-assurance > * { min-width: 0; }
+.ch-site .ch-assurance a, .hg-theme .ch-assurance a { color: var(--ch-green-dark); }
+.ch-site .ch-assurance a:focus-visible,
+.hg-theme .ch-assurance a:focus-visible,
+.ch-site .ch-assurance [tabindex]:focus-visible,
+.hg-theme .ch-assurance [tabindex]:focus-visible {
+  outline: 3px solid var(--ch-green);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+.ch-site .ch-assurance span, .hg-theme .ch-assurance span { text-wrap: balance; }
+@media (prefers-reduced-motion: reduce) {
+  .ch-site .ch-assurance *, .hg-theme .ch-assurance * { animation: none !important; transition: none !important; }
+}
+@media (prefers-contrast: more) {
+  .ch-site .ch-assurance, .hg-theme .ch-assurance {
+    background: #fff;
+    color: #000;
+    border-block: 2px solid #000;
+  }
+}
+@media (forced-colors: active) {
+  .ch-site .ch-assurance, .hg-theme .ch-assurance { border-block: 1px solid CanvasText; }
+}

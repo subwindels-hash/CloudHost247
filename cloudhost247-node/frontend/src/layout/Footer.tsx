@@ -1,69 +1,98 @@
 import { Link } from 'react-router-dom';
+import { Brand } from '../components/navigation/PlatformMegaMenu';
 import { useLocale } from '../i18n/LocaleProvider';
 import { FOOTER_COLUMNS, BRAND, UTILITY } from '../navigation/registry.generated';
 
 /**
- * The global CloudHost247 footer.
+ * CloudHost247 footer — Hostinger-style dark footer.
  *
- * Nine columns covering Products, Cloud & Infrastructure, Domains, Platforms & Developers, Tools,
- * Websites, Company, Support and Legal. Every link comes from the same registry as the header, so
- * the footer can never advertise a route the application does not serve — and because the registry
- * is validated against the router at build time, "no dead footer links" is a build guarantee rather
- * than a promise.
+ * Hostinger's footer is a conversion band, then a dark five-column directory, then a legal bar.
+ * This one follows that shape: a "Build. Host. Deploy. Scale." CTA, a brand block with the
+ * white logo and a status link, five curated link columns, and a bottom legal bar.
  *
- * The Tools column comes from the same registry as the header and sitemap. It links the current
- * discovery categories and the complete index rather than duplicating a second category list here.
+ * Every column is still built from `FOOTER_COLUMNS` in the shared registry — the eight source
+ * columns are merged into five by topic and de-duplicated by destination. No link is invented,
+ * and the registry's link-integrity test still covers all of them. Language and currency
+ * switchers deliberately stay in the header only (pinned by Header.test.tsx).
  */
+
+const FOOTER_GROUPS: Array<{ title: string; sources: string[] }> = [
+  { title: 'Hosting & Cloud', sources: ['Products', 'Cloud & Servers'] },
+  { title: 'Domains', sources: ['Domains'] },
+  { title: 'Build & Develop', sources: ['Developers', 'Tools'] },
+  { title: 'Resources', sources: ['Resources'] },
+  { title: 'Company & Legal', sources: ['Company', 'Legal'] },
+];
+
+/** Merges registry columns into one curated column, keeping each destination once. */
+function linksFor(sources: string[]): Array<{ label: string; to: string }> {
+  const seen = new Set<string>();
+  const links: Array<{ label: string; to: string }> = [];
+  for (const source of sources) {
+    const column = FOOTER_COLUMNS.find((entry) => entry.title === source);
+    if (!column) continue;
+    for (const link of column.links) {
+      if (seen.has(link.to)) continue;
+      seen.add(link.to);
+      links.push(link);
+    }
+  }
+  // Deliberately no truncation: the footer is the one place every registry destination is
+  // reachable, and dropping entries would silently break the site-wide link contract.
+  return links;
+}
+
 export default function Footer() {
   const year = new Date().getFullYear();
   const { t } = useLocale();
 
   return (
-    <footer className="ch247-footer">
-      <div className="ch-wrap--wide">
-        <div className="ch247-footer__top">
+    <footer className="ch247-footer hg-footer">
+      <div className="hg-wrap">
+        <div className="hg-footer__cta">
           <div>
-            <Link to="/" className="ch247-brand ch247-brand--footer" aria-label="CloudHost247 — home">
-              <span className="ch247-brand__mark" aria-hidden>
-                <svg viewBox="0 0 24 24" focusable="false">
-                  <path d="M12 2.5 21 7.5v9L12 21.5 3 16.5v-9L12 2.5Z" fill="none" stroke="#7ff0b4" strokeWidth="1.5" strokeLinejoin="round" />
-                  <path d="M3 7.5 12 13l9-5.5M12 13v8.5" fill="none" stroke="#7ff0b4" strokeWidth="1" opacity="0.7" />
-                  <circle cx="12" cy="13" r="1.7" fill="#7ff0b4" />
-                </svg>
-              </span>
-              <span>
-                CloudHost<span className="ch247-brand__suffix">247</span>
-              </span>
-            </Link>
+            <p className="hg-footer__eyebrow">CloudHost247</p>
+            <h2>{BRAND.tagline}</h2>
             <p>{BRAND.description}</p>
-            <p style={{ fontWeight: 600, color: '#fff', marginBottom: 0 }}>{BRAND.tagline}</p>
-            <div className="ch247-footer__badge">
-              <Link className="ch-btn ch-btn--on-ink ch-btn--sm" to={UTILITY.createAccount.to}>
-                {UTILITY.createAccount.label}
-              </Link>
-            </div>
+          </div>
+          <Link className="hg-btn hg-btn--light" to={UTILITY.createAccount.to}>
+            {UTILITY.createAccount.label}
+          </Link>
+        </div>
+
+        <div className="hg-footer__main">
+          <div className="hg-footer__brand">
+            <Brand className="ch247-brand--footer" />
+            <p>One account for domains, hosting, cloud servers, applications and the tools that keep them running.</p>
+            <Link className="hg-link" to="/status">
+              View platform status <span className="hg-link__arrow" aria-hidden>→</span>
+            </Link>
           </div>
 
-          <nav className="ch247-footer__columns" aria-label="Footer">
-            {FOOTER_COLUMNS.map((column) => (
-              <div key={column.title}>
-                <h2>{column.title}</h2>
-                <ul>
-                  {column.links.map((link) => (
-                    <li key={`${column.title}-${link.to}-${link.label}`}>
-                      <Link to={link.to}>{link.label}</Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+          <nav className="hg-footer__columns" aria-label="Footer">
+            {FOOTER_GROUPS.map((group) => {
+              const links = linksFor(group.sources);
+              return (
+                <div
+                  className={`hg-footer__column${links.length > 10 ? ' hg-footer__column--wide' : ''}`}
+                  key={group.title}
+                >
+                  <h2>{group.title}</h2>
+                  <ul>
+                    {links.map((link) => (
+                      <li key={`${group.title}-${link.to}-${link.label}`}>
+                        <Link to={link.to}>{link.label}</Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
           </nav>
         </div>
 
-        <div className="ch247-footer__bottom">
-          <p style={{ margin: 0 }}>
-            {t('footer.copyright', { year, legalName: BRAND.legalName })}
-          </p>
+        <div className="hg-footer__bottom">
+          <p>{t('footer.copyright', { year, legalName: BRAND.legalName })}</p>
           <nav aria-label={t('footer.legalAndAccount')}>
             <Link to="/legal">{t('footer.nav.legalCenter')}</Link>
             <Link to="/legal/privacy-policy">{t('footer.nav.privacy')}</Link>
@@ -72,6 +101,7 @@ export default function Footer() {
             <Link to="/status">{t('footer.nav.status')}</Link>
             <Link to="/help">{t('footer.nav.help')}</Link>
             <Link to="/contact">{t('footer.nav.contact')}</Link>
+            <Link to="/sitemap">Sitemap</Link>
           </nav>
         </div>
       </div>

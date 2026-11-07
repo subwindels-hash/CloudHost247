@@ -53,20 +53,14 @@ a {
   border-radius: 0.4rem;
 }
 
-/* --- Header / shared app shell nav ------------------------------------------------------- */
+/* --- Shared app shell tokens: header / footer shells ------------------------------------
+ * The menu, mega menu and footer layouts live in hostinger-chrome.css. The rules below are the
+ * legacy colour/base tokens still used by the header, brand, subnav and footer elements.
+ * ------------------------------------------------------------------------------------------ */
 
 .ch247-header {
   background: rgba(255, 255, 255, 0.92);
   color: var(--ch-ink, #0b1426);
-}
-
-.ch247-header__inner {
-  width: min(var(--ch-width-wide, 1380px), calc(100% - 40px));
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0;
 }
 
 .sr-only {
@@ -108,15 +102,6 @@ a {
   border-radius: 2px;
 }
 
-.ch247-header__collapsible {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex: 1;
-  min-width: 0;
-  flex-wrap: nowrap;
-}
-
 .ch247-brand {
   font-weight: 800;
   font-size: 1.15rem;
@@ -130,36 +115,15 @@ a {
   margin-bottom: 0.35rem;
 }
 
-.ch247-nav-links {
-  display: flex;
-  gap: 1.1rem;
-  flex-wrap: wrap;
-  flex: 1;
-}
-
-.ch247-nav-links a,
 .ch247-subnav a {
   color: #dce6f7;
   text-decoration: none;
   font-size: 0.92rem;
 }
 
-.ch247-nav-links a:hover,
-.ch247-nav-links a.active,
 .ch247-subnav a:hover,
 .ch247-subnav a.active {
   color: #fff;
-}
-
-.ch247-auth-links {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.ch247-auth-greeting {
-  color: #dce6f7;
-  font-size: 0.9rem;
 }
 
 .ch247-subnav {
@@ -515,30 +479,6 @@ form.ch247-form .ch247-button--outline:hover:not(:disabled) {
     display: flex;
   }
 
-  .ch247-header__collapsible {
-    display: none;
-    flex-direction: column;
-    align-items: flex-start;
-    width: 100%;
-    gap: 1rem;
-    padding-top: 0.75rem;
-  }
-
-  .ch247-header__collapsible.is-open {
-    display: flex;
-  }
-
-  .ch247-nav-links {
-    flex-direction: column;
-    gap: 0.75rem;
-    width: 100%;
-  }
-
-  .ch247-auth-links {
-    width: 100%;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-  }
 }
 
 /* --- Footer -------------------------------------------------------------------------------- */
@@ -547,46 +487,6 @@ form.ch247-form .ch247-button--outline:hover:not(:disabled) {
   background: #0a1620;
   color: #dce7fa;
   margin-top: auto;
-}
-
-.ch247-footer__inner {
-  max-width: var(--ch247-width);
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 2rem;
-  padding: 2.25rem 1.5rem 1.25rem;
-}
-
-.ch247-footer__inner p {
-  margin: 0;
-  max-width: 320px;
-  opacity: 0.85;
-}
-
-.ch247-footer__inner nav {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.ch247-footer__inner nav a {
-  color: #dce7fa;
-  text-decoration: none;
-  font-size: 0.9rem;
-}
-
-.ch247-footer__inner nav a:hover {
-  color: #fff;
-}
-
-.ch247-footer__legal {
-  max-width: var(--ch247-width);
-  margin: 0 auto;
-  padding: 0.75rem 1.5rem 1.5rem;
-  font-size: 0.8rem;
-  opacity: 0.7;
 }
 
 /* --- Existing app/dashboard components (unchanged from Phase 1) ------------------------- */
