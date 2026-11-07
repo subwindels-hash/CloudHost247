@@ -1,3 +1,8 @@
+> **Layout updated.** The menu is still completely flat, but `Pricing`, `Help`, `English`,
+> `USD`, `Sign In` and `Create Account` have since moved to a slim line directly beneath the
+> announcement bar, with a smaller Create Account button — see `docs/UTILITY-ROW.md`. The
+> no-dropdown contract, footer, 3D Experience and all verification results still apply.
+
 # Flat menu — every link beside the logo, no dropdowns
 
 > **Request:** “Move all the menu link out from dropdown e.g: `English▾`, `USD▾`, `Sign In`,

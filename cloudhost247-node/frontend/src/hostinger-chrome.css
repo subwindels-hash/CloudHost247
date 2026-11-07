@@ -1392,3 +1392,86 @@
 @media (prefers-reduced-motion: reduce) {
   .hg-menu__link { transition: none !important; }
 }
+
+/* -----------------------------------------------------------------------------
+   9. Utility/account line directly under the announcement bar
+   -----------------------------------------------------------------------------
+   Pricing, Help, English, USD, Sign In and Create Account move out of the main bar onto a
+   single straight, shallow row immediately below the site-wide announcement bar. The main bar
+   below keeps the brand mark, the seven section links, search and cart. The Create Account
+   button is deliberately compact (30px) so the row stays a thin strip.
+   -------------------------------------------------------------------------- */
+
+.hg-header__body { display: block; }
+
+.hg-bar__top {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: nowrap;               /* one straight line — never wraps */
+  gap: 14px;
+  min-height: 42px;
+  padding-inline: max(16px, calc((100% - 1440px) / 2));
+  background: #16181b;
+  border-bottom: 1px solid #34383d;
+}
+.hg-bar__top .hg-bar__quick { gap: 12px; }
+.hg-bar__top .hg-bar__quick a {
+  min-height: 34px;
+  color: #d7dce1;
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+.hg-bar__top .hg-bar__quick a:hover,
+.hg-bar__top .hg-bar__quick a.active { color: #e6c875; }
+
+/* Beats both language-switcher.css and section 8's `.hg-bar__locale` rule. */
+.hg-theme .hg-header .hg-bar__top .hg-bar__locale .ch247-locale__trigger {
+  min-height: 34px;
+  min-width: 0;
+  padding: 0 5px;
+  gap: 4px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #d7dce1;
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+.hg-theme .hg-header .hg-bar__top .hg-bar__locale .ch247-locale__trigger:hover,
+.hg-theme .hg-header .hg-bar__top .hg-bar__locale .ch247-locale__trigger[aria-expanded='true'] {
+  background: transparent;
+  color: #e6c875;
+}
+.hg-theme .hg-header .hg-bar__top .hg-bar__locale .ch247-locale__trigger svg { width: 14px; height: 14px; }
+
+.hg-bar__top .hg-bar__text-link { min-height: 34px; padding: 4px 2px; font-size: 0.76rem; }
+.hg-bar__top .hg-bar__avatar { padding: 4px 10px; font-size: 0.76rem; }
+
+/* The requested smaller Create Account button: 30px tall instead of 42/52px. */
+.hg-theme .hg-bar__top .hg-btn--sm {
+  min-height: 30px;
+  padding: 0 12px;
+  border-radius: 5px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  line-height: 1.2;
+  box-shadow: inset 0 1px 0 rgba(255, 246, 214, 0.65);
+}
+.hg-theme .hg-bar__top .hg-btn--sm:hover { transform: none; }
+
+.hg-bar__icons { display: flex; align-items: center; gap: 2px; flex: 0 0 auto; }
+
+/* All six controls must stay on one line even on a phone: compact them rather than wrapping or
+   introducing a horizontal scrollbar that would clip the language/currency disclosures. */
+@media (max-width: 600px) {
+  .hg-bar__top { gap: 7px; padding-inline: 8px; min-height: 38px; }
+  .hg-bar__top .hg-bar__quick { gap: 8px; }
+  .hg-bar__top .hg-bar__quick a,
+  .hg-bar__top .hg-bar__text-link { font-size: 0.7rem; min-height: 30px; }
+  .hg-theme .hg-header .hg-bar__top .hg-bar__locale .ch247-locale__trigger {
+    font-size: 0.68rem; padding: 0 2px; min-height: 30px; gap: 2px;
+  }
+  .hg-theme .hg-header .hg-bar__top .hg-bar__locale .ch247-locale__trigger svg { display: none; }
+  .hg-theme .hg-bar__top .hg-btn--sm { min-height: 28px; padding: 0 9px; font-size: 0.68rem; }
+}

@@ -103,6 +103,38 @@ const BAR_PROBE = () => {
   };
 };
 
+
+/** Measures the slim utility/account line that must sit directly under the announcement bar. */
+const UTILITY_ROW_PROBE = () => {
+  const box = (el) => {
+    const r = el.getBoundingClientRect();
+    return { x: r.x, right: r.right, top: r.top, bottom: r.bottom, height: r.height, cy: r.top + r.height / 2 };
+  };
+  const top = document.querySelector('.hg-bar__top');
+  const announce = document.querySelector('.ch-announce');
+  const main = document.querySelector('.hg-nav__bar');
+  if (!top) return { row: null };
+  const row = box(top);
+  const items = [
+    ...top.querySelectorAll('.hg-bar__quick a'),
+    ...top.querySelectorAll('.hg-bar__locale button'),
+    ...top.querySelectorAll('.hg-bar__actions a, .hg-bar__actions button'),
+  ].map(box);
+  const cta = top.querySelector('a.hg-btn--sm');
+  return {
+    row,
+    announceBottom: announce ? box(announce).bottom : null,
+    mainTop: main ? box(main).top : null,
+    count: items.length,
+    centers: items.map((i) => Math.round(i.cy)),
+    inside: items.every((i) => i.top >= row.top - 1 && i.bottom <= row.bottom + 1
+      && i.x >= row.x - 1 && i.right <= row.right + 1),
+    ctaHeight: cta ? Math.round(box(cta).height) : 0,
+    wrap: getComputedStyle(top).flexWrap,
+    overflow: document.documentElement.scrollWidth > window.innerWidth + 1,
+  };
+};
+
 async function main() {
   const browser = await launch();
 
@@ -126,6 +158,20 @@ async function main() {
     JSON.stringify(settings));
   check('back-to-top anchor target exists', bar.topAnchor);
   check('no overlap or overflow at 1440px', bar.overlap === 0 && !bar.overflow, `${bar.overlap}px`);
+
+  const row = await page.evaluate(UTILITY_ROW_PROBE);
+  check('utility line sits directly below the announcement bar',
+    row.row && row.announceBottom !== null && row.row.top >= row.announceBottom - 2
+      && row.row.top - row.announceBottom <= 40 && row.mainTop >= row.row.bottom - 2,
+    `announcement ends ${row.announceBottom}, row ${Math.round(row.row?.top ?? 0)}–${Math.round(row.row?.bottom ?? 0)}, main bar ${Math.round(row.mainTop ?? 0)}`);
+  check('Pricing, Help, English, USD, Sign In and Create Account share one straight line',
+    row.count === 6 && row.wrap === 'nowrap' && row.inside
+      && Math.max(...row.centers) - Math.min(...row.centers) <= 3,
+    `${row.count} controls, centres ${row.centers.join('/')}`);
+  check('utility line stays shallow', row.row && row.row.height <= 52, `${Math.round(row.row?.height ?? 0)}px`);
+  check('Create Account button is compact enough for the line',
+    row.ctaHeight > 0 && row.ctaHeight <= 34 && row.ctaHeight <= (row.row?.height ?? 0),
+    `${row.ctaHeight}px tall`);
 
   const footer = await page.evaluate(() => {
     const el = document.querySelector('footer.hg-footer');
@@ -174,6 +220,13 @@ async function main() {
     check(`all ${r.links.length} section links stay visible at ${width}px`,
       r.visibleLinks >= 7 && r.dropdownTriggers === 0 && r.overlap === 0 && !r.overflow,
       `${r.visibleLinks} visible, ${r.overlap}px overlap, overflow=${r.overflow}`);
+    if (width === 1440 || width === 390) {
+      const u = await p.evaluate(UTILITY_ROW_PROBE);
+      check(`utility line stays one straight row at ${width}px`,
+        u.count === 6 && u.wrap === 'nowrap' && u.inside && !u.overflow
+          && Math.max(...u.centers) - Math.min(...u.centers) <= 3,
+        `${u.count} controls, ${Math.round(u.row?.height ?? 0)}px row, CTA ${u.ctaHeight}px`);
+    }
     await p.close();
   }
 

@@ -1,14 +1,17 @@
 {
-  "capturedAt": "2026-11-07T18:01:35.934Z",
+  "capturedAt": "2026-11-07T18:11:51.886Z",
   "baseUrl": "http://127.0.0.1:3000",
   "shots": [
     "header-desktop.png",
+    "utility-row-desktop.png",
     "footer-desktop.png",
     "experience-3d-desktop.png",
     "menu-flat-desktop.png",
     "header-tablet.png",
+    "utility-row-tablet.png",
     "footer-tablet.png",
     "header-mobile.png",
+    "utility-row-mobile.png",
     "footer-mobile.png"
   ],
   "footer-desktop": {

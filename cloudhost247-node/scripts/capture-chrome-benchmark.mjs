@@ -55,6 +55,13 @@ async function main() {
       report.shots.push(`header-${viewport.name}.png`);
     }
 
+    // The slim utility/account line that sits directly under the announcement bar.
+    const utilityRow = page.locator('.hg-bar__top').first();
+    if (await utilityRow.count()) {
+      await utilityRow.screenshot({ path: path.join(OUT_DIR, `utility-row-${viewport.name}.png`) });
+      report.shots.push(`utility-row-${viewport.name}.png`);
+    }
+
     const footer = page.locator('footer').first();
     if (await footer.count()) {
       // The marketing header is sticky; an element screenshot of a full-height footer otherwise

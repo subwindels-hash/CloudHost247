@@ -1,0 +1,34 @@
+{
+  "capturedAt": "2026-11-07T18:11:20.558Z",
+  "baseUrl": "http://127.0.0.1:3000",
+  "shots": [
+    "header-desktop.png",
+    "utility-row-desktop.png",
+    "footer-desktop.png",
+    "experience-3d-desktop.png",
+    "menu-flat-desktop.png",
+    "header-tablet.png",
+    "utility-row-tablet.png",
+    "footer-tablet.png",
+    "header-mobile.png",
+    "utility-row-mobile.png",
+    "footer-mobile.png"
+  ],
+  "footer-desktop": {
+    "height": 1053,
+    "links": 102,
+    "columns": 5
+  },
+  "flatMenuLinks": 7,
+  "dropdownTriggers": 0,
+  "footer-tablet": {
+    "height": 1846,
+    "links": 102,
+    "columns": 5
+  },
+  "footer-mobile": {
+    "height": 1964,
+    "links": 102,
+    "columns": 5
+  }
+}

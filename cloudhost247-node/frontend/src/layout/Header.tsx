@@ -12,14 +12,14 @@ import { useAuthState } from './useAuthState';
 /**
  * The universal CloudHost247 header — one flat dark bar, no dropdowns.
  *
- * Everything is visible beside the logo: the seven registry sections as direct links, the quick
- * links, the language/currency disclosures, search, cart, and Sign In / Create Account (or the
- * signed-in account controls). There is no hamburger, no `+` accordion, no mega panel and no
- * compact dropdown, so no menu destination is ever hidden behind a disclosure.
+ * Directly beneath the site-wide announcement bar is a slim, single straight line holding the
+ * utility/account controls: Pricing, Help, language, currency, Sign In and Create Account. Below
+ * that sits the main bar with the white brand mark, all seven registry sections as direct links,
+ * plus search and cart. The Create Account button is deliberately compact so the utility line
+ * stays shallow.
  *
- * At narrower widths the bar wraps onto additional rows rather than collapsing into a drawer —
- * the links stay visible. The header stops being sticky on phones so a wrapped bar never covers
- * the content underneath it.
+ * Everything is visible: no hamburger, no `+` accordion, no mega panel and no compact dropdown.
+ * At narrower widths the rows wrap rather than collapsing into a drawer — links stay visible.
  *
  * The menu comes from the shared registry, so the header, the footer and the sitemap cannot
  * disagree about what exists. No link is invented. Signed-in state adds a quieter second row for
@@ -62,12 +62,10 @@ export default function Header() {
 
   return (
     <header className="ch247-header hg-header" id="ch247-top">
-      <div className="hg-nav__bar">
-        <Brand className="hg-nav__brand on-dark" />
-
-        <div id="ch247-primary-nav" className="hg-bar__body">
-          <PlatformMenu />
-
+      {/* #ch247-primary-nav wraps both rows, so the settings/account controls stay in the
+          navigation landmark pinned by Header.test.tsx and the accessibility contract. */}
+      <div id="ch247-primary-nav" className="hg-header__body">
+        <div className="hg-bar__top">
           <nav className="hg-bar__quick" aria-label="Quick links">
             <NavLink to="/pricing">Pricing</NavLink>
             <NavLink to="/help">Help</NavLink>
@@ -76,13 +74,6 @@ export default function Header() {
           <div className="hg-bar__locale">
             <LanguageSwitcher />
             <CurrencySwitcher />
-            <NavLink className="hg-bar__icon" to={UTILITY.search.to} aria-label={t('header.search.label')}>
-              <Icon name="search" size={18} />
-            </NavLink>
-            <NavLink className="hg-bar__icon hg-bar__cart" to={UTILITY.cart.to} aria-label={UTILITY.cart.label}>
-              <Icon name="cart" size={19} />
-              <span className="hg-cart__dot" aria-hidden="true" />
-            </NavLink>
           </div>
 
           <div className="hg-bar__actions">
@@ -108,6 +99,24 @@ export default function Header() {
                 </NavLink>
               </>
             )}
+          </div>
+        </div>
+
+        <div className="hg-nav__bar">
+          <Brand className="hg-nav__brand on-dark" />
+
+          <div className="hg-bar__body">
+            <PlatformMenu />
+
+            <div className="hg-bar__icons">
+              <NavLink className="hg-bar__icon" to={UTILITY.search.to} aria-label={t('header.search.label')}>
+                <Icon name="search" size={18} />
+              </NavLink>
+              <NavLink className="hg-bar__icon hg-bar__cart" to={UTILITY.cart.to} aria-label={UTILITY.cart.label}>
+                <Icon name="cart" size={19} />
+                <span className="hg-cart__dot" aria-hidden="true" />
+              </NavLink>
+            </div>
           </div>
         </div>
       </div>
