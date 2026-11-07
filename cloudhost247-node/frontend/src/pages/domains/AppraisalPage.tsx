@@ -1,3 +1,4 @@
+import ReturnToLogin from '../../components/ReturnToLogin';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { usePageMeta } from '../../lib/usePageMeta';
@@ -63,7 +64,7 @@ export default function AppraisalPage() {
 
       <section className="ch247-section">
         <div className="ch247-page">
-          {!token && <p><Link className="ch247-button" to="/login">Sign in to appraise a domain</Link></p>}
+          {!token && <p><ReturnToLogin className="ch247-button">Sign in to appraise a domain</ReturnToLogin></p>}
 
           {token && (
             <form className="ch247-dsvc-search" onSubmit={onAppraise}>

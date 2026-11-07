@@ -1,9 +1,10 @@
 import { FormEvent, useId, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AuthFrame from '../components/AuthFrame';
 import { apiFetch } from '../lib/api';
 import { setSession, type StoredUser } from '../lib/auth';
 import { usePageMeta } from '../lib/usePageMeta';
+import { authLink, safeReturnTo } from '../lib/return-to';
 
 interface AuthResponse {
   user: StoredUser;
@@ -45,6 +46,10 @@ export default function RegisterPage() {
   const [message, setMessage] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const navigate = useNavigate();
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const idea = (params.get('idea') ?? '').trim().slice(0, 300);
+  const returnTo = safeReturnTo(params.get('next')) ?? (idea ? `/websites/ai-builder?idea=${encodeURIComponent(idea)}` : null);
   const idPrefix = useId();
 
   function validate() {
@@ -88,8 +93,8 @@ export default function RegisterPage() {
           ? `Account created for ${res.user.email}. A verification email request has been queued.`
           : `Account created for ${res.user.email}.`,
       });
-      // The account page makes the pending verification state and resend action immediately visible.
-      navigate('/account');
+      // Keep task context when registration was started from a service; otherwise show verification.
+      navigate(returnTo ?? '/account');
     } catch (err) {
       setMessage({ kind: 'error', text: err instanceof Error ? err.message : 'Registration failed' });
     } finally {
@@ -232,7 +237,7 @@ export default function RegisterPage() {
 
       <div className="ch247-auth__links">
         <span>Already have an account?</span>
-        <Link to="/login">Log in</Link>
+        <Link to={authLink('/login', returnTo)}>Log in</Link>
       </div>
     </AuthFrame>
   );

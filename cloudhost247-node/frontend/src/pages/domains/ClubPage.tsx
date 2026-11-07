@@ -1,3 +1,4 @@
+import ReturnToLogin from '../../components/ReturnToLogin';
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { usePageMeta } from '../../lib/usePageMeta';
@@ -155,7 +156,7 @@ export default function ClubPage() {
                     {membership?.status === 'active' ? 'Membership active' : busy === plan.id ? 'Starting…' : 'Join the club'}
                   </button>
                 ) : (
-                  <Link className="ch247-dsvc-card__link" to="/login">Sign in to join</Link>
+                  <ReturnToLogin className="ch247-dsvc-card__link">Sign in to join</ReturnToLogin>
                 )}
               </article>
             ))}

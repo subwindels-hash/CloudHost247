@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { apiFetch, ApiRequestError } from '../../lib/api';
 import { getToken } from '../../lib/auth';
 import { usePageMeta } from '../../lib/usePageMeta';
@@ -54,7 +54,8 @@ function BriefForm({ token, navigate }: { token: string | null; navigate: Return
   usePageMeta('AI Website Builder', 'Describe your website in plain language and get real pages, copy and SEO.');
   const [engines, setEngines] = useState<AiEngine[]>([]);
   const [engine, setEngine] = useState('rules');
-  const [brief, setBrief] = useState<BriefState>(EMPTY_BRIEF);
+  const [params] = useSearchParams();
+  const [brief, setBrief] = useState<BriefState>(() => ({ ...EMPTY_BRIEF, description: (params.get('idea') ?? '').slice(0, 4000) }));
   const [projects, setProjects] = useState<AiProject[] | null>(null);
   const [loadError, setLoadError] = useState('');
   const action = useAction();
