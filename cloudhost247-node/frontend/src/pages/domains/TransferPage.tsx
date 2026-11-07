@@ -1,5 +1,6 @@
+import ReturnToLogin from '../../components/ReturnToLogin';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { usePageMeta } from '../../lib/usePageMeta';
 import { getToken } from '../../lib/auth';
 import { apiFetch } from '../../lib/api';
@@ -31,7 +32,8 @@ export default function TransferPage() {
   usePageMeta('Transfer Domains', 'Move your domains to CloudHost247.');
   const token = getToken();
 
-  const [domainName, setDomainName] = useState('');
+  const [params] = useSearchParams();
+  const [domainName, setDomainName] = useState(() => (params.get('domain') ?? '').slice(0, 253));
   const [currentRegistrar, setCurrentRegistrar] = useState('');
   const [authCode, setAuthCode] = useState('');
   const [authorized, setAuthorized] = useState(false);
@@ -113,7 +115,7 @@ export default function TransferPage() {
         <div className="ch247-page">
           {!token && (
             <p>
-              <Link className="ch247-button" to="/login">Sign in to start a transfer</Link>
+              <ReturnToLogin className="ch247-button">Sign in to start a transfer</ReturnToLogin>
             </p>
           )}
 

@@ -1,3 +1,4 @@
+import ReturnToLogin from '../../components/ReturnToLogin';
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { usePageMeta } from '../../lib/usePageMeta';
@@ -141,7 +142,7 @@ export default function AuctionDetailPage() {
           )}
 
           {actionable && !token && (
-            <p><Link className="ch247-button" to="/login">Sign in to bid</Link></p>
+            <p><ReturnToLogin className="ch247-button">Sign in to bid</ReturnToLogin></p>
           )}
 
           {actionable && token && (

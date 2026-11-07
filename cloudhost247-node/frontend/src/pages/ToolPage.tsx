@@ -1,3 +1,4 @@
+import ReturnToLogin from '../components/ReturnToLogin';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { measureBrowserConnection } from '../lib/tools-speed';
@@ -269,7 +270,7 @@ export default function ToolPage() {
               'Ask support to configure platform access.'
             )
           ) : (
-            <Link to="/login">Sign in to continue</Link>
+            <ReturnToLogin>Sign in to continue</ReturnToLogin>
           )}
         </p>
       )}

@@ -33,3 +33,6 @@ if (typeof window !== 'undefined' && !window.matchMedia) {
     })),
   });
 }
+
+// jsdom does not implement scrolling; browser tests exercise actual layout and anchor behavior.
+if (typeof window !== 'undefined') window.scrollTo = vi.fn();

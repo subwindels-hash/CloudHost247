@@ -1,3 +1,4 @@
+import ReturnToLogin from '../../components/ReturnToLogin';
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { usePageMeta } from '../../lib/usePageMeta';
@@ -55,7 +56,8 @@ export default function SearchPage() {
   const token = getToken();
   const [searchParams] = useSearchParams();
 
-  const [query, setQuery] = useState(searchParams.get('domain') ?? '');
+  const incomingDomain = (searchParams.get('domain') ?? '').trim();
+  const [query, setQuery] = useState(incomingDomain);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [search, setSearch] = useState<SearchResponse | null>(null);
@@ -116,11 +118,17 @@ export default function SearchPage() {
     }
   }
 
-  // Deep links (e.g. /domains/search?domain=example.com from bulk search) run once on arrival.
+  // Deep links also update when navigating between searches without remounting this page.
   useEffect(() => {
-    const prefill = (searchParams.get('domain') ?? '').trim();
+    const prefill = incomingDomain;
     if (!prefill) return;
     let cancelled = false;
+    setQuery(prefill);
+    setError('');
+    setSearch(null);
+    setSelected(null);
+    setQuote(null);
+    setCreatedInvoice(null);
     setBusy(true);
     searchDomains(prefill)
       .then((response) => {
@@ -135,8 +143,7 @@ export default function SearchPage() {
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [incomingDomain]);
 
   async function selectDomain(result: SearchResultRow) {
     setSelected(result);
@@ -273,10 +280,10 @@ export default function SearchPage() {
                             {selected?.domainName === result.domainName ? 'Selected' : 'Select'}
                           </button>
                         ) : (
-                          <Link className="ch247-button ch247-button--small" to="/login">Sign in to register</Link>
+                          <ReturnToLogin className="ch247-button ch247-button--small" destination={`/domains/search?domain=${encodeURIComponent(result.domainName)}`}>Sign in to register</ReturnToLogin>
                         ))}
                       {result.availabilityStatus === 'registered' && (
-                        <Link className="ch247-button ch247-button--outline ch247-button--small" to="/domains/transfer">Transfer</Link>
+                        <Link className="ch247-button ch247-button--outline ch247-button--small" to={`/domains/transfer?domain=${encodeURIComponent(result.domainName)}`}>Transfer</Link>
                       )}
                       {(result.availabilityStatus === 'registered' || result.availabilityStatus === 'unavailable') && token && (
                         watchedDomains.has(result.domainName.toLowerCase()) ? (
@@ -314,7 +321,7 @@ export default function SearchPage() {
 
               {!token && (
                 <p>
-                  <Link className="ch247-button" to="/login">Sign in to continue</Link>
+                  <ReturnToLogin className="ch247-button" destination={`/domains/search?domain=${encodeURIComponent(selected.domainName)}`}>Sign in to continue</ReturnToLogin>
                 </p>
               )}
 

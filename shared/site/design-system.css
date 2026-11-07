@@ -1221,3 +1221,29 @@ html, body { max-width: 100%; overflow-x: clip; }
 @media (forced-colors: active) {
   .ch-site .ch-assurance, .hg-theme .ch-assurance { border-block: 1px solid CanvasText; }
 }
+
+/* Inner pages: keep content and page links comfortably inset without changing the homepage.
+   Full-width section backgrounds and the shared site chrome remain untouched. */
+.ch-site.ch-inner-page #main-body {
+  --ch-inner-gutter: clamp(20px, 4vw, 48px);
+}
+.ch-site.ch-inner-page #main-body .ch-wrap {
+  width: min(var(--ch-width), calc(100% - 2 * var(--ch-inner-gutter)));
+  margin-inline: auto;
+}
+.ch-site.ch-inner-page #main-body .ch-legal-layout {
+  gap: clamp(28px, 4vw, 56px);
+}
+.ch-site.ch-inner-page #main-body .ch-legal-nav {
+  padding: 20px;
+  border: 1px solid var(--ch-line);
+}
+.ch-site.ch-inner-page #main-body .ch-legal-nav a { overflow-wrap: anywhere; }
+.ch-site.ch-inner-page #main-body .ch-prose { min-width: 0; }
+@media (max-width: 767px) {
+  .ch-site.ch-inner-page #main-body .ch-legal-nav {
+    display: block;
+    max-height: 300px;
+    overflow: auto;
+  }
+}

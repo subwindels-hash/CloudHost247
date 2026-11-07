@@ -19,7 +19,7 @@ export default function RequireAuth() {
   const location = useLocation();
 
   if (!token) {
-    return <Navigate to="/login" replace state={{ from: `${location.pathname}${location.search}` }} />;
+    return <Navigate to="/login" replace state={{ from: `${location.pathname}${location.search}${location.hash}` }} />;
   }
 
   return <Outlet />;

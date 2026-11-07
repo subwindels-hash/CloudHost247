@@ -47,7 +47,7 @@ export function isMarketingSurface(pathname: string): boolean {
 }
 
 export default function Layout() {
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
   const marketing = isMarketingSurface(pathname);
 
   // A 320 ms opacity-only transition between routes. Opacity (not transform) is deliberate: it
@@ -62,6 +62,30 @@ export default function Layout() {
     main.setAttribute('data-route-transition', '');
   }, [pathname]);
 
+  // Client-side route changes otherwise keep the previous page's scroll position. Fragment links
+  // must wait for lazy route content before scrolling, and account for the sticky site header.
+  useEffect(() => {
+    if (!hash) {
+      window.scrollTo(0, 0);
+      return;
+    }
+    let id: string;
+    try { id = decodeURIComponent(hash.slice(1)); } catch { return; }
+    const scrollToTarget = () => {
+      const target = document.getElementById(id);
+      if (!target) return false;
+      const header = document.querySelector<HTMLElement>('.ch247-header');
+      const offset = header?.getBoundingClientRect().height ?? 0;
+      window.scrollTo(0, Math.max(0, window.scrollY + target.getBoundingClientRect().top - offset - 12));
+      return true;
+    };
+    if (scrollToTarget()) return;
+    const observer = new MutationObserver(() => { if (scrollToTarget()) observer.disconnect(); });
+    observer.observe(document.getElementById('main-content') ?? document.body, { childList: true, subtree: true });
+    const timer = window.setTimeout(() => observer.disconnect(), 5000);
+    return () => { observer.disconnect(); window.clearTimeout(timer); };
+  }, [pathname, hash]);
+
   return (
     <ToolsNavigationProvider><div className={`ch247-shell hg-theme ${marketing ? 'hg-shell' : 'hg-app'}`}>
       <a className="ch247-skip" href="#main-content">
@@ -72,7 +96,7 @@ export default function Layout() {
       <AnnouncementBar />
       <SupportModeBanner />
       <Header />
-      <main id="main-content" className="ch247-main">
+      <main id="main-content" className={`ch247-main${pathname === '/' ? '' : ' ch247-main--inner'}`}>
         {/* Route-level code splitting: the boundary lives here, around the routed outlet, so a
             lazily-loaded page only replaces the page body — the header, footer and support
             widget stay painted instead of being swapped out for a full-screen fallback. */}

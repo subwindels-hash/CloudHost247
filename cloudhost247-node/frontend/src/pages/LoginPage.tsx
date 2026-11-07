@@ -5,6 +5,7 @@ import AuthFrame from '../components/AuthFrame';
 import { apiFetch } from '../lib/api';
 import { setSession, type StoredUser } from '../lib/auth';
 import { usePageMeta } from '../lib/usePageMeta';
+import { authLink, safeReturnTo } from '../lib/return-to';
 
 interface AuthResponse {
   user?: StoredUser;
@@ -37,7 +38,8 @@ export default function LoginPage() {
   const [message, setMessage] = useState<{ kind: 'ok' | 'error'; text: string } | null>(
     locationState?.recoveryMessage ? { kind: 'ok', text: locationState.recoveryMessage } : null
   );
-  const redirectTo = locationState?.from || '/dashboard';
+  const returnTo = safeReturnTo(locationState?.from) ?? safeReturnTo(new URLSearchParams(location.search).get('next'));
+  const redirectTo = returnTo ?? '/dashboard';
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -183,7 +185,7 @@ export default function LoginPage() {
       </form>
       <div className="ch247-auth__links">
         <Link to="/forgot-password">Forgot your password?</Link>
-        <Link to="/register">Create an account</Link>
+        <Link to={authLink('/register', returnTo)}>Create an account</Link>
         <Link to="/verify-email">Resend a verification email</Link>
       </div>
     </AuthFrame>

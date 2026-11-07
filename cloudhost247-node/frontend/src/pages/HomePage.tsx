@@ -1,12 +1,14 @@
 import { FormEvent, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { usePageMeta } from '../lib/usePageMeta';
+import { getToken } from '../lib/auth';
 import { useApiResource } from '../lib/useApiResource';
 import { type ProductPlansResponse, type PublicPlan } from '../lib/catalog-types';
 import { CatalogErrorBanner } from '../components/CatalogStateBanner';
 import { useLocale } from '../i18n/LocaleProvider';
 import { formatCurrency } from '../i18n/format';
 import { ApproxAmount } from '../components/ApproxAmount';
+import { BASE_CURRENCY } from '../currency/display-currency';
 import { BRAND, UTILITY, NAV_SECTIONS } from '../navigation/registry.generated';
 import Experience3D from '../components/marketing/Experience3D';
 
@@ -172,14 +174,19 @@ function ToolCountProof() {
   );
 }
 
+function orderPrice(plan: PublicPlan) {
+  const prices = plan.pricing.filter((price) => price.currency.toUpperCase() === BASE_CURRENCY);
+  return prices.find((price) => price.billingPeriod === 'monthly') ?? prices[0];
+}
+
 export function Price({ plan }: { plan: PublicPlan }) {
   const { locale } = useLocale();
-  const price = plan.pricing.find((p) => p.billingPeriod === 'monthly') ?? plan.pricing[0];
+  const price = orderPrice(plan);
   if (!price) {
     return (
       <>
         <div className="hg-plan__price"><strong style={{ fontSize: '1.25rem' }}>Contact us</strong></div>
-        <p className="hg-plan__billing">No price has been published for this plan yet.</p>
+        <p className="hg-plan__billing">No USD price has been published for this plan yet.</p>
       </>
     );
   }
@@ -187,6 +194,7 @@ export function Price({ plan }: { plan: PublicPlan }) {
     <>
       <div className="hg-plan__price">
         <strong>{formatCurrency(price.amount, price.currency, locale.code)}</strong>
+        <span>{({ one_time: ' one-time', monthly: '/mo', quarterly: '/quarter', semi_annually: '/6 months', annually: '/year' } as const)[price.billingPeriod]}</span>
       </div>
       <p className="hg-plan__billing">
         Billed {price.billingPeriod.replace(/_/g, ' ')} · {price.currency}
@@ -255,15 +263,18 @@ function PricingSection() {
           <div className="hg-plans" role="tabpanel">
             {result.data.plans.slice(0, 3).map((plan, index) => {
               const featured = index === 1 && result.data.plans.length > 1;
+              const price = orderPrice(plan);
               return (
                 <article className={`hg-plan${featured ? ' hg-plan--featured' : ''}`} key={plan.slug}>
                   {featured ? <span className="hg-plan__ribbon">Most flexible</span> : null}
                   <h3 className="hg-plan__name">{plan.name}</h3>
                   <p className="hg-plan__desc">{plan.description ?? `A ${active.label.toLowerCase()} plan from the live catalogue.`}</p>
                   <Price plan={plan} />
-                  <Link className={`hg-btn${featured ? '' : ' hg-btn--ghost'}`} to={active.to}>
-                    Choose plan
-                  </Link>
+                  {price ? (
+                    <Link className={`hg-btn${featured ? '' : ' hg-btn--ghost'}`} to={`/cart?product=${encodeURIComponent(active.slug)}&plan=${encodeURIComponent(plan.slug)}&period=${encodeURIComponent(price.billingPeriod)}`}>
+                      Choose plan
+                    </Link>
+                  ) : <Link className="hg-btn hg-btn--ghost" to="/contact">Ask about this plan</Link>}
                   {plan.features.length > 0 ? (
                     <ul className="hg-plan__features">
                       {plan.features.slice(0, 7).map((feature) => (
@@ -360,7 +371,9 @@ export default function HomePage() {
 
   function onAiPrompt(event: FormEvent) {
     event.preventDefault();
-    navigate(aiPrompt.trim() ? `/register?idea=${encodeURIComponent(aiPrompt.trim())}` : UTILITY.createAccount.to);
+    const idea = aiPrompt.trim();
+    const target = idea ? `?idea=${encodeURIComponent(idea)}` : '';
+    navigate(getToken() ? `/websites/ai-builder${target}` : `/register${target}`);
   }
 
   return (

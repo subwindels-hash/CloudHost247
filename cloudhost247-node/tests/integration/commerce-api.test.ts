@@ -72,6 +72,7 @@ describe('commerce API (/api/v1/cart, /api/v1/orders)', () => {
     const routes: Array<{ method: 'GET' | 'POST' | 'PATCH' | 'DELETE'; url: string }> = [
       { method: 'GET', url: '/api/v1/cart' },
       { method: 'POST', url: '/api/v1/cart/items' },
+      { method: 'POST', url: '/api/v1/cart/catalog-items' },
       { method: 'PATCH', url: `/api/v1/cart/items/${randomUUID()}` },
       { method: 'DELETE', url: `/api/v1/cart/items/${randomUUID()}` },
       { method: 'POST', url: '/api/v1/orders' },
@@ -111,6 +112,38 @@ describe('commerce API (/api/v1/cart, /api/v1/orders)', () => {
     expect(cart.items[0].unitPriceAmount).toBe('19.99');
     expect(cart.items[0].lineTotalAmount).toBe('39.98');
     expect(cart.subtotalAmount).toBe('39.98');
+    await app.close();
+  });
+
+  it('adds the selected product and plan by public slugs at the server price', async () => {
+    const { token } = await createCustomer('slug-cart@example.com');
+    const first = await makeActivePlanWithPrice(19.99);
+    const second = await makeActivePlanWithPrice(45.00);
+    await db.query('UPDATE product_plans SET slug = $1 WHERE id = $2', ['starter', first.plan.id]);
+    await db.query('UPDATE product_plans SET slug = $1 WHERE id = $2', ['starter', second.plan.id]);
+    const app = buildTestApp();
+    const res = await app.inject({ method: 'POST', url: '/api/v1/cart/catalog-items',
+      headers: { authorization: `Bearer ${token}` },
+      payload: { productSlug: second.product.slug, planSlug: 'starter', billingPeriod: 'monthly', unitPriceAmount: '0.01' } });
+    expect(res.statusCode).toBe(201);
+    expect(res.json().cart.items[0]).toMatchObject({ planId: second.plan.id, unitPriceAmount: '45.00' });
+    await app.close();
+  });
+
+  it('rejects unpublished, private or mismatched slug plans without adding a line', async () => {
+    const { token } = await createCustomer('slug-security@example.com');
+    const { product, plan } = await makeActivePlanWithPrice();
+    const app = buildTestApp();
+    const request = (productSlug: string, planSlug: string, billingPeriod = 'monthly') => app.inject({
+      method: 'POST', url: '/api/v1/cart/catalog-items', headers: { authorization: `Bearer ${token}` },
+      payload: { productSlug, planSlug, billingPeriod },
+    });
+    expect((await request(product.slug, 'not-a-plan')).statusCode).toBe(404);
+    expect((await request(product.slug, plan.slug, 'annually')).statusCode).toBe(400);
+    await db.query(`UPDATE products SET visibility = 'private' WHERE id = $1`, [product.id]);
+    expect((await request(product.slug, plan.slug)).statusCode).toBe(404);
+    const cart = await app.inject({ method: 'GET', url: '/api/v1/cart', headers: { authorization: `Bearer ${token}` } });
+    expect(cart.json().cart.itemCount).toBe(0);
     await app.close();
   });
 

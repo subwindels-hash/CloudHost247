@@ -1,3 +1,4 @@
+import { BASE_CURRENCY } from '../../currency/display-currency';
 import { useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Icon, CheckIcon, ArrowIcon } from '../../components/ui/Icon';
@@ -353,7 +354,7 @@ function LiveStatus({ section }: { section: MarketingSection }) {
 }
 
 function planPrice(plan: PublicPlan) {
-  const pricing = [...(plan.pricing ?? [])].sort((a, b) => a.amount - b.amount)[0];
+  const pricing = [...(plan.pricing ?? [])].filter((price) => price.currency.toUpperCase() === BASE_CURRENCY).sort((a, b) => a.amount - b.amount)[0];
   return pricing ?? null;
 }
 
@@ -430,9 +431,11 @@ function Catalog({ section }: { section: MarketingSection }) {
                                   ))}
                                 </ul>
                               ) : null}
-                              <Link className="ch-btn ch-btn--sm" to={`/cart?plan=${encodeURIComponent(plan.slug)}`}>
-                                Add to cart
-                              </Link>
+                              {price ? (
+                                <Link className="ch-btn ch-btn--sm" to={`/cart?product=${encodeURIComponent(product.slug)}&plan=${encodeURIComponent(plan.slug)}&period=${encodeURIComponent(price.billingPeriod)}`}>
+                                  Add to cart
+                                </Link>
+                              ) : <p className="ch-muted">A USD price is required to order this plan.</p>}
                             </li>
                           );
                         })}

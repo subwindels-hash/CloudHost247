@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { usePageMeta } from '../lib/usePageMeta';
+import { authLink } from '../lib/return-to';
 import { getToken } from '../lib/auth';
 import { searchDomains, type SearchResponse } from '../lib/domain-services-api';
 import { AvailabilityChip, formatPrice } from '../components/domain-services/ui';
@@ -53,20 +54,24 @@ export default function DomainsMarketingPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [search, setSearch] = useState<SearchResponse | null>(null);
+  const [searchedQuery, setSearchedQuery] = useState('');
+  const incomingQuery = (params.get('q') ?? '').trim();
 
   // Clean up a stale search result if the user signs out/in mid-session.
   useEffect(() => () => setSearch(null), []);
 
   // Honour `?q=` from the homepage domain search so the visitor does not have to type twice.
   useEffect(() => {
-    const incoming = (params.get('q') ?? '').trim();
+    const incoming = incomingQuery;
     if (!incoming) return undefined;
+    setQuery(incoming);
+    setSearch(null);
     let cancelled = false;
     setBusy(true);
     setError('');
     searchDomains(incoming)
       .then((response) => {
-        if (!cancelled) setSearch(response);
+        if (!cancelled) { setSearch(response); setSearchedQuery(incoming); }
       })
       .catch((err) => {
         if (!cancelled) setError(err instanceof Error ? err.message : 'The search could not be completed right now.');
@@ -77,7 +82,7 @@ export default function DomainsMarketingPage() {
     return () => {
       cancelled = true;
     };
-  }, [params]);
+  }, [incomingQuery]);
 
   async function onSearch(event: React.FormEvent) {
     event.preventDefault();
@@ -89,6 +94,7 @@ export default function DomainsMarketingPage() {
     try {
       const response = await searchDomains(trimmed);
       setSearch(response);
+      setSearchedQuery(trimmed);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'The search could not be completed right now.');
     } finally {
@@ -174,16 +180,16 @@ export default function DomainsMarketingPage() {
             </div>
           )}
 
-          {search && search.status === 'completed' && search.results.length > 12 && (
+          {search && search.status === 'completed' && search.results.length > 0 && (
             <p style={{ marginTop: '0.75rem' }}>
-              <Link to="/domains/search">See all {search.results.length} results and register a domain →</Link>
+              <Link to={`/domains/search?domain=${encodeURIComponent(searchedQuery)}`}>See all {search.results.length} results and register a domain →</Link>
             </p>
           )}
 
-          {search && search.status === 'completed' && search.results.some((r) => r.availabilityStatus === 'available') && !token && (
+          {search && search.status === 'completed' && search.results.some((r) => r.availabilityStatus === 'available' || r.availabilityStatus === 'premium') && !token && (
             <p style={{ marginTop: '1rem' }}>
-              <Link className="ch247-button" to="/register">
-                Create an account to register this domain
+              <Link className="ch247-button" to={authLink('/register', `/domains/search?domain=${encodeURIComponent(searchedQuery)}`)}>
+                Create an account to register a domain
               </Link>
             </p>
           )}

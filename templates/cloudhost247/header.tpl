@@ -8,7 +8,7 @@
     {$headoutput}
     {include file="cloudhost247/includes/site-head.tpl"}
 </head>
-<body class="primary-bg-color ch-site {if $ch247Site.public}ch-public{else}ch-workspace{/if}" data-phone-cc-input="{$phoneNumberInputStyle}">
+<body class="primary-bg-color ch-site {if !$ch247Site.home}ch-inner-page{/if} {if $ch247Site.public}ch-public{else}ch-workspace{/if}" data-phone-cc-input="{$phoneNumberInputStyle}">
     {if $captcha}{$captcha->getMarkup()}{/if}
     {$headeroutput}
 

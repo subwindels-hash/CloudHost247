@@ -23,8 +23,8 @@ import { resolveServiceLine, type ResolvedServiceLine } from '../commerce/servic
 import { findPlanById as findPlatformPlanById } from '../commerce/platform-plans';
 import { attachRegistrationToOrder, discardRegistrationDraft } from '../domain-services/registration-service';
 import { createOrder, findOrderById, listOrderItemsForOrder, listOrdersForUser, type CreateOrderItemInput } from '../db/orders';
-import { findPlanById } from '../db/catalog-plans';
-import { findProductById } from '../db/catalog-products';
+import { findPlanById, listActivePlansForProduct } from '../db/catalog-plans';
+import { findProductById, findPubliclyListableProductBySlug } from '../db/catalog-products';
 import { listPublishedPricingForPlan, type BillingPeriod } from '../db/catalog-pricing';
 import { withTransaction } from '../db/transaction';
 import { issueInvoiceForOrder } from './billing-service';
@@ -128,6 +128,21 @@ export interface AddCartItemInput {
  * cadence in the platform's single supported currency — before adding it to the cart. Rejects
  * outright rather than adding a line the customer could never actually check out.
  */
+/** Resolve public product and plan slugs server-side, then apply the same purchase and price checks
+ * as the ID-based cart API. A plan slug alone is not unique across products. */
+export async function addCatalogItemBySlug(
+  pool: Queryable, userId: string,
+  input: { productSlug: string; planSlug: string; billingPeriod: BillingPeriod; quantity: number },
+  genId: () => string,
+): Promise<CartSummaryDTO> {
+  const product = await findPubliclyListableProductBySlug(pool, input.productSlug);
+  if (!product || product.status !== 'active') throw new NotFoundError('No purchasable plan was found');
+  const plans = await listActivePlansForProduct(pool, product.id);
+  const plan = plans.find((entry) => entry.slug === input.planSlug);
+  if (!plan) throw new NotFoundError('No purchasable plan was found');
+  return addItemToCart(pool, userId, { planId: plan.id, billingPeriod: input.billingPeriod, quantity: input.quantity }, genId);
+}
+
 export async function addItemToCart(pool: Queryable, userId: string, input: AddCartItemInput, genId: () => string): Promise<CartSummaryDTO> {
   const plan = await findPlanById(pool, input.planId);
   if (!plan || plan.status !== 'active') {
