@@ -74,7 +74,7 @@ export default function ClubPage() {
 
   return (
     <div>
-      <section className="ch247-hero ch247-hero--compact">
+      <section className="ch247-hero ch247-hero--compact ch247-hero--photo ch247-hero--domains">
         <div className="ch247-hero__inner">
           <h1>Discount Domain Club</h1>
           <p>One membership, member pricing on eligible domain registrations.</p>

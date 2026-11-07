@@ -69,7 +69,7 @@ export default function LegalIndexPage() {
 
   return (
     <div>
-      <section className="ch247-hero ch247-hero--compact">
+      <section className="ch247-hero ch247-hero--compact ch247-hero--photo ch247-hero--legal">
         <div className="ch247-hero__inner">
           <h1>Legal &amp; Policy Center</h1>
           <p>All our legal documents and policies in one place.</p>

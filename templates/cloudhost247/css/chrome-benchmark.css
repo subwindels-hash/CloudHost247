@@ -275,3 +275,23 @@
   .ch-site .ch-nav-item > summary { min-height: 44px; }
   [data-ch-tools-menu] .ch-mega { grid-template-columns: 1fr; }
 }
+
+/* The optional administrator announcement uses the same metallic edge. */
+@property --announcement-border-angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+@keyframes announcement-metal-border { to { --announcement-border-angle: 360deg; } }
+.ch-site .ch247-announcement {
+  border: 2px solid transparent;
+  background: linear-gradient(#000, #000) padding-box,
+    conic-gradient(from var(--announcement-border-angle, 0deg), #8c6511, #f9e8a4, #a87c1e, #f2f3f4, #8d949d, #f9fafb, #b3882e, #8c6511) border-box;
+  animation: announcement-metal-border 9s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) { .ch-site .ch247-announcement { animation: none; } }
+
+/* Preserve the official logo's original colours and aspect ratio. */
+.ch-site .ch-brand img.ch-official-logo { filter: none; width: 135px; max-height: none; height: auto; }
+.ch-site .ch-footer__brand img { width: 150px; height: auto; }
+@media (max-width: 767px) { .ch-site .ch-brand img.ch-official-logo { width: 108px; } }
+
+/* Keep the navigation consistent with the official logo's near-black backdrop. */
+.ch-site .ch-header,
+.ch-site .ch-top { background: #191617; }

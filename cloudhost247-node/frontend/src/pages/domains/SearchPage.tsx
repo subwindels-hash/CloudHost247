@@ -218,7 +218,7 @@ export default function SearchPage() {
 
   return (
     <div>
-      <section className="ch247-hero ch247-hero--compact">
+      <section className="ch247-hero ch247-hero--compact ch247-hero--photo ch247-hero--domains">
         <div className="ch247-hero__inner">
           <h1>Domain Search</h1>
           <p>Search a name or an exact domain. Availability and prices come from our domain provider.</p>

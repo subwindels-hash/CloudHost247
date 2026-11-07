@@ -83,3 +83,12 @@
 .ch-camera video{width:100%;max-width:420px;aspect-ratio:4/3;object-fit:cover;background:#0d1a24;border:1px solid var(--ch-line);border-radius:var(--ch-radius-sm)}
 .ch-camera-preview{max-width:100%;background:#fff;border:1px solid var(--ch-line);border-radius:var(--ch-radius-sm)}
 .ch-camera-preview[hidden]{display:none}
+
+/* Polished, accessible catalogue search on both tools directories. */
+.ch-tools-search label { font-size: 13px; letter-spacing: .02em; }
+.ch-tools-search div { gap: 10px; align-items: stretch; }
+.ch-tools-search input { min-height: 56px; padding: 14px 18px; border: 1px solid #c8d0d8; border-radius: 12px; font: inherit; box-shadow: 0 8px 28px rgba(0,0,0,.16); }
+.ch-tools-search input::placeholder { color: #63707c; opacity: 1; }
+.ch-tools-search input:focus { outline: 3px solid rgba(230,200,117,.75); outline-offset: 2px; border-color: #a47b20; }
+.ch-tools-search button { min-height: 56px; border-radius: 10px; padding-inline: 24px; }
+@media(max-width:640px) { .ch-tools-search div { flex-direction: row; } .ch-tools-search input { font-size: 16px; } .ch-tools-search button { padding-inline: 16px; } }

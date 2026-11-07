@@ -104,7 +104,7 @@ export default function TransferPage() {
 
   return (
     <div>
-      <section className="ch247-hero ch247-hero--compact">
+      <section className="ch247-hero ch247-hero--compact ch247-hero--photo ch247-hero--domains">
         <div className="ch247-hero__inner">
           <h1>Transfer Domain Names</h1>
           <p>Bring your domains to CloudHost247. Unlock the domain at your current registrar, then enter the EPP code.</p>

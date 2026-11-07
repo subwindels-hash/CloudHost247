@@ -3,12 +3,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import { usePageMeta } from '../lib/usePageMeta';
 import { getToken } from '../lib/auth';
 import { useApiResource } from '../lib/useApiResource';
-import { formatPrice, type ProductPlansResponse, type PublicPlan } from '../lib/catalog-types';
+import { type ProductPlansResponse, type PublicPlan } from '../lib/catalog-types';
 import { CatalogErrorBanner } from '../components/CatalogStateBanner';
-import { useCurrency } from '../currency/CurrencyProvider';
+import { useLocale } from '../i18n/LocaleProvider';
+import { formatCurrency } from '../i18n/format';
+import { ApproxAmount } from '../components/ApproxAmount';
 import { BASE_CURRENCY } from '../currency/display-currency';
 import { BRAND, UTILITY, NAV_SECTIONS } from '../navigation/registry.generated';
-import { resolvePhoto } from '../components/marketing/photo-map.generated';
 import Experience3D from '../components/marketing/Experience3D';
 
 /**
@@ -104,10 +105,10 @@ const SHOWCASE = [
 const AI_CHIPS = ['AI Website Builder', 'Cloud AI assistant', 'Logo Maker palettes', 'AI support answers'];
 
 const USE_CASES = [
-  { glyph: '▤', title: 'A business website', text: 'Domain, hosting, business email and HTTPS', to: '/hosting/business' },
-  { glyph: '▦', title: 'An online store', text: 'A storefront with products and orders', to: '/websites' },
-  { glyph: '⌘', title: 'An API or application', text: 'A supported runtime, a domain and a deployment', to: '/developers' },
-  { glyph: '▥', title: 'Infrastructure you run', text: 'VPS, cloud or dedicated servers with backups', to: '/cloud' },
+  { image: 'business', glyph: '▤', title: 'A business website', text: 'Domain, hosting, business email and HTTPS', to: '/hosting/business' },
+  { image: 'store', glyph: '▦', title: 'An online store', text: 'A storefront with products and orders', to: '/websites' },
+  { image: 'application', glyph: '⌘', title: 'An API or application', text: 'A supported runtime, a domain and a deployment', to: '/developers' },
+  { image: 'infrastructure', glyph: '▥', title: 'Infrastructure you run', text: 'VPS, cloud or dedicated servers with backups', to: '/cloud' },
 ];
 
 const MORE_POWER = [
@@ -178,8 +179,8 @@ function orderPrice(plan: PublicPlan) {
   return prices.find((price) => price.billingPeriod === 'monthly') ?? prices[0];
 }
 
-function Price({ plan }: { plan: PublicPlan }) {
-  const { formatAmount } = useCurrency();
+export function Price({ plan }: { plan: PublicPlan }) {
+  const { locale } = useLocale();
   const price = orderPrice(plan);
   if (!price) {
     return (
@@ -189,17 +190,17 @@ function Price({ plan }: { plan: PublicPlan }) {
       </>
     );
   }
-  const formatted = formatAmount(price.amount, price.currency);
   return (
     <>
       <div className="hg-plan__price">
-        <strong>{formatted.text || formatPrice(price)}</strong>
+        <strong>{formatCurrency(price.amount, price.currency, locale.code)}</strong>
         <span>{({ one_time: ' one-time', monthly: '/mo', quarterly: '/quarter', semi_annually: '/6 months', annually: '/year' } as const)[price.billingPeriod]}</span>
       </div>
       <p className="hg-plan__billing">
-        Billed {price.billingPeriod.replace(/_/g, ' ')} · {formatted.converted ? formatted.currency : price.currency}
+        Billed {price.billingPeriod.replace(/_/g, ' ')} · {price.currency}
         {price.setupFee ? ' · setup fee applies' : ''}
       </p>
+      <ApproxAmount amount={price.amount} currency={price.currency} />
     </>
   );
 }
@@ -302,16 +303,13 @@ function PricingSection() {
 }
 
 /**
- * Hero visual — real, licensed enterprise data-centre photography in a metallic frame.
+ * Hero visual — illustrative data-centre imagery in a metallic frame.
  *
- * Deliberately NOT a CSS-drawn "product screenshot": the old mock dashboard looked like a generic
- * illustration and told the visitor nothing about the infrastructure behind the service. The photo
- * comes from the same generated registry as every other marketing illustration, so the homepage
- * and the WHMCS theme show the same scene. The frame tilts a few degrees with the pointer and the
- * two capability chips float at a different depth; nothing else on the page moves.
+ * A homepage-specific AI-generated image keeps the requested engineer scene separate from the
+ * shared marketing image registry. Responsive variants are generated alongside the master.
  */
 function HeroVisual() {
-  const photo = resolvePhoto('hero/infrastructure-3d');
+  const photo = { key: 'photography/home-engineer', alt: 'Illustrative image of an engineer holding a laptop beside server racks' };
   const srcSet = (format: string) =>
     [640, 960, 1280].map((width) => `/media/cloudhost247/${photo.key}-${width}.${format} ${width}w`).join(', ');
 
@@ -323,8 +321,8 @@ function HeroVisual() {
           <source type="image/webp" sizes="(max-width: 900px) 100vw, 620px" srcSet={srcSet('webp')} />
           <img
             src={`/media/cloudhost247/${photo.key}.jpg`}
-            width={1280}
-            height={855}
+            width={1376}
+            height={768}
             alt={photo.alt}
             fetchPriority="high"
             decoding="async"
@@ -333,7 +331,7 @@ function HeroVisual() {
         <figcaption className="ch-photo-frame__label">Enterprise infrastructure</figcaption>
       </figure>
       <div className="hg-float hg-float--one ch-float--ambient"><i>✓</i> One account for every service</div>
-      <div className="hg-float hg-float--two ch-float--ambient-slow"><i>↗</i> Live catalogue pricing</div>
+      <div className="hg-float hg-float--two"><i>↗</i> Live catalogue pricing</div>
     </div>
   );
 }
@@ -544,7 +542,7 @@ export default function HomePage() {
           </div>
           <div className="hg-cards hg-cards--4">
             {USE_CASES.map((item) => (
-              <Link className="hg-usecase" to={item.to} key={item.title}>
+              <Link className={`hg-usecase hg-usecase--${item.image}`} to={item.to} key={item.title}>
                 <span className="hg-usecase__glyph" aria-hidden="true">{item.glyph}</span>
                 <b>{item.title}</b>
                 <small>{item.text}</small>

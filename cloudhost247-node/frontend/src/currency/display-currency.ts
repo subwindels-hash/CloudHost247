@@ -62,6 +62,7 @@ export function resolveDisplayCurrency(requested: unknown, status: DisplayCurren
 
 export function rateFor(code: string, status: DisplayCurrencyStatus): number | null {
   if (code === BASE_CURRENCY) return 1;
+  if (!status.available || !isCurrencyCode(code)) return null;
   const match = status.currencies.find((r) => r.code === code);
   return match && Number.isFinite(match.rate) && match.rate > 0 ? match.rate : null;
 }

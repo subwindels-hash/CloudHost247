@@ -25,17 +25,30 @@ describe('Header: authentication-aware navigation', () => {
     vi.unstubAllGlobals();
   });
 
-  it('shows Sign In / Create Account, and no account controls, when logged out', () => {
+  it('shows Sign In but no Create Account or account controls when logged out', () => {
     render(
       <MemoryRouter>
         <Header />
       </MemoryRouter>
     );
 
+    const logo = screen.getByRole('link', { name: 'CloudHost247 — home' }).querySelector('img');
+    expect(logo?.getAttribute('src')).toContain('cloudhost247-official.webp');
     expect(screen.getByRole('link', { name: 'Sign In' })).toBeTruthy();
-    expect(screen.getByRole('link', { name: 'Create Account' })).toBeTruthy();
+    expect(screen.queryByRole('link', { name: 'Create Account' })).toBeNull();
     expect(screen.queryByRole('link', { name: 'Dashboard' })).toBeNull();
     expect(screen.queryByText('Log out')).toBeNull();
+  });
+
+  it('toggles the mobile menu and closes it with Escape', async () => {
+    render(<MemoryRouter><Header /></MemoryRouter>);
+    const toggle = screen.getByRole('button', { name: 'Menu' });
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    await userEvent.click(toggle);
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    await userEvent.keyboard('{Escape}');
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(document.activeElement).toBe(toggle);
   });
 
   it('shows Dashboard, an account link, and Log out — and no Sign In/Create Account — when logged in', () => {

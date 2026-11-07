@@ -49,7 +49,7 @@ export function DocsIndexPage() {
 
   return (
     <div className="ch-ds">
-      <section className="ch-hero ch-hero--compact">
+      <section className="ch-hero ch-hero--compact ch-docs-hero">
         <div className="ch-wrap">
           <p className="ch-kicker">Resources</p>
           <h1>Documentation</h1>

@@ -72,6 +72,11 @@ describe('amount formatting', () => {
     expect(out).toEqual({ text: '€9.23', converted: true, currency: 'EUR' });
   });
 
+  it('does not convert from an unavailable status even if it contains old rates', () => {
+    const out = formatAmountInDisplayCurrency(10, 'USD', 'EUR', { ...LIVE, available: false, reason: 'stale' }, 'en-US');
+    expect(out).toEqual({ text: '$10.00', converted: false, currency: 'USD' });
+  });
+
   it('uses the currency’s own minor-unit rules (JPY has none)', () => {
     const out = formatAmountInDisplayCurrency(10, 'USD', 'JPY', LIVE, 'en-US');
     expect(out.converted).toBe(true);

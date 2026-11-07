@@ -34,7 +34,7 @@ export default function AuctionsPage() {
 
   return (
     <div>
-      <section className="ch247-hero ch247-hero--compact">
+      <section className="ch247-hero ch247-hero--compact ch247-hero--photo ch247-hero--company">
         <div className="ch247-hero__inner">
           <h1>Domain Auctions</h1>
           <p>Bid on premium domain names in a transparent, server-verified marketplace.</p>

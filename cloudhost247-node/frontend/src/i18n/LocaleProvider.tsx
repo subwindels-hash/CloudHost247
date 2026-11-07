@@ -1,6 +1,6 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { createTranslator, type Translator } from './catalogue';
-import { LOCALE_STORAGE_KEY, findLocale, getDefaultLocale, resolveLocale, type LocaleInfo } from './locales';
+import { LOCALE_STORAGE_KEY, findLocale, getDefaultLocale, resolveLocale, localeForCountry, type LocaleInfo } from './locales';
 import { en, type Catalogue } from './messages/en';
 import { fr, de, es, pt, it, nl, pl, ru, ar, zh, ja, ko } from './messages/translations';
 
@@ -29,13 +29,16 @@ export interface LocaleContextValue {
   readonly t: Translator;
   /** Switches language and remembers the choice. Returns false, and changes nothing, for an unsupported code. */
   readonly setLocale: (code: string) => boolean;
+  /** Advisory default; never overrides an explicit language preference. */
+  readonly suggestCountryLocale: (country: string) => void;
 }
 
-function buildValue(locale: LocaleInfo, setLocale: LocaleContextValue['setLocale']): LocaleContextValue {
+function buildValue(locale: LocaleInfo, setLocale: LocaleContextValue['setLocale'], suggestCountryLocale: LocaleContextValue['suggestCountryLocale'] = () => {}): LocaleContextValue {
   return {
     locale,
     t: createTranslator(locale.code, CATALOGUES[locale.code] ?? en),
     setLocale,
+    suggestCountryLocale,
   };
 }
 
@@ -75,9 +78,15 @@ interface LocaleProviderProps {
 }
 
 export function LocaleProvider({ children, initialLocale, savedLocaleHint }: LocaleProviderProps) {
-  const [locale, setLocaleState] = useState<LocaleInfo>(() =>
-    resolveLocale(savedLocaleHint ?? initialLocale ?? readStoredLocale(), browserLanguages()),
-  );
+  const explicitChoice = useRef(Boolean(findLocale(readStoredLocale()) || findLocale(savedLocaleHint) || findLocale(initialLocale)));
+  const [locale, setLocaleState] = useState<LocaleInfo>(() => {
+    let country: string | null = null;
+    try { country = localStorage.getItem('ch247.country'); } catch { /* storage unavailable */ }
+    const explicit = savedLocaleHint ?? initialLocale ?? readStoredLocale();
+    // A visitor-selected country is a stronger hint than the browser default, but never an
+    // override for a saved/manual language. Automatically inferred regions remain a fallback.
+    return findLocale(explicit) ?? localeForCountry(country) ?? resolveLocale(null, browserLanguages());
+  });
 
   useEffect(() => {
     document.documentElement.lang = locale.code;
@@ -87,12 +96,17 @@ export function LocaleProvider({ children, initialLocale, savedLocaleHint }: Loc
   const setLocale = useCallback((code: string) => {
     const match = findLocale(code);
     if (!match) return false;
+    explicitChoice.current = true;
     writeStoredLocale(match.code);
     setLocaleState(match);
     return true;
   }, []);
 
-  const value = useMemo(() => buildValue(locale, setLocale), [locale, setLocale]);
+  const suggestCountryLocale = useCallback((country: string) => {
+    const suggestion = localeForCountry(country);
+    if (!explicitChoice.current && suggestion) setLocaleState(suggestion);
+  }, []);
+  const value = useMemo(() => buildValue(locale, setLocale, suggestCountryLocale), [locale, setLocale, suggestCountryLocale]);
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;
 }
 

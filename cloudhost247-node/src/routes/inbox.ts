@@ -13,6 +13,7 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import type { Env } from '../config/env';
 import { getPool } from '../db/pool';
+import { withTransaction } from '../db/transaction';
 import type { Queryable } from '../db/types';
 import { authenticate } from '../lib/require-auth';
 import { requireRole } from '../lib/require-role';
@@ -61,6 +62,29 @@ function emailTransportConfigured(): boolean {
 
 export async function registerInboxRoutes(app: FastifyInstance, env: Env, overridePool?: Queryable) {
   const pool = overridePool ?? getPool(env);
+
+  // Public contact messages are saved in the staff inbox. The department is included in the
+  // subject so staff can identify and route the request; no email delivery is implied.
+  app.post('/api/v1/contact', { config: { rateLimit: { max: 5, timeWindow: '15 minutes' } } }, async (request, reply) => {
+    const input = parseOrThrow(z.object({
+      name: z.string().trim().min(1).max(200),
+      email: z.string().trim().email().max(255),
+      department: z.enum(['General support', 'Billing', 'Abuse & security', 'Privacy & data protection', 'Legal']),
+      subject: z.string().trim().min(1).max(180),
+      message: z.string().trim().min(1).max(10000),
+    }).strict(), request.body);
+
+    await withTransaction(pool, (tx) => recordMessage(tx, {
+      channelKind: 'web_form',
+      contactName: input.name,
+      contactEmail: input.email,
+      authorName: input.name,
+      authorEmail: input.email,
+      subject: `[${input.department}] ${input.subject}`,
+      body: input.message,
+    }));
+    return reply.code(201).send({ received: true });
+  });
 
   /* ------------------------------------------------------------------------------------------
    * Customer view of their own conversations

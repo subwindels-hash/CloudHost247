@@ -65,6 +65,10 @@ const envSchema = z.object({
   FX_FEED_TOKEN: z.string().min(16).optional(),
   FX_MAX_AGE_HOURS: z.coerce.number().int().min(1).max(720).default(48),
 
+  // Disabled until deployment explicitly selects a direct or verified proxy topology.
+  VISITOR_IP_MODE: z.enum(['off', 'direct', 'trusted-proxy']).default('off'),
+  VISITOR_IP_TRUSTED_PROXIES: z.string().max(4096).optional(),
+
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
 
   // --- Phase 5C: payment gateways (src/payments/*) -------------------------------------------

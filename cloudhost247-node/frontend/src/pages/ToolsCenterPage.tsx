@@ -177,20 +177,22 @@ export default function ToolsCenterPage() {
         <p className="tools-eyebrow">THE INFRASTRUCTURE TOOLKIT</p>
         <h1>{title}</h1>
         <p>{description}</p>
-        <label className="tools-search">
-          <span className="sr-only">Search tools</span>
+        <div className="tools-search" role="search">
+          <label className="sr-only" htmlFor="tools-catalog-search">Search tools</label>
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <circle cx="10" cy="10" r="6" />
             <path d="m15 15 6 6" />
           </svg>
           <input
+            id="tools-catalog-search"
             type="search"
             maxLength={100}
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Find a tool — DNS, IP, SSL, JSON…"
           />
-        </label>
+          {search && <button type="button" className="tools-search__clear" aria-label="Clear tools search" onClick={() => { setSearch(''); document.getElementById('tools-catalog-search')?.focus(); }}>×</button>}
+        </div>
         <div className="tools-hero__actions">
           <span>Live diagnostics. Clear results. No guesswork.</span>
           {!toolsHost().embedded && (

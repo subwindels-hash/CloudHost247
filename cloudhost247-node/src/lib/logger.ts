@@ -14,6 +14,11 @@ export function createLogger(env: Env) {
     level: env.LOG_LEVEL,
     redact: {
       paths: [
+        'req.remoteAddress',
+        'req.remotePort',
+        'req.headers.x-forwarded-for',
+        'req.headers.cf-connecting-ip',
+        'req.headers.x-real-ip',
         'req.headers.authorization',
         'req.headers.cookie',
         '*.password',

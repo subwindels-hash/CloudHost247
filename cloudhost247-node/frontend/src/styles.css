@@ -1667,7 +1667,7 @@ form.ch247-form--auth button[type="submit"] {
    ----------------------------------------------------------------------------------------- */
 
 .ch-announce {
-  --ch-announce-duration: 42s;
+  --ch-announce-duration: 145s;
   --ch-announce-gap: 2.5rem;
   position: relative;
   overflow: hidden;
@@ -1810,4 +1810,47 @@ form.ch247-form--auth button[type="submit"] {
 
 @media print {
   .ch-announce { display: none; }
+}
+
+/* Wide public heroes: a subject-specific photographic-style scene, integrated into the existing
+   navy, gold and blue palette. Each image is decorative; the headings remain the accessible name. */
+.ch247-hero--hosting { --hero-image: url('/media/cloudhost247/hero-backgrounds/hosting-1280.webp'); }
+.ch247-hero--domains { --hero-image: url('/media/cloudhost247/hero-backgrounds/domains-1280.webp'); }
+.ch247-hero--cloud { --hero-image: url('/media/cloudhost247/hero-backgrounds/cloud-1280.webp'); }
+.ch247-hero--servers { --hero-image: url('/media/cloudhost247/hero-backgrounds/servers-1280.webp'); }
+.ch247-hero--developers { --hero-image: url('/media/cloudhost247/hero-backgrounds/developers-1280.webp'); }
+.ch247-hero--security { --hero-image: url('/media/cloudhost247/hero-backgrounds/security-1280.webp'); }
+.ch247-hero--tools { --hero-image: url('/media/cloudhost247/hero-backgrounds/tools-1280.webp'); }
+.ch247-hero--support { --hero-image: url('/media/cloudhost247/hero-backgrounds/support-1280.webp'); }
+.ch247-hero--legal { --hero-image: url('/media/cloudhost247/hero-backgrounds/legal-1280.webp'); }
+.ch247-hero--company { --hero-image: url('/media/cloudhost247/hero-backgrounds/company-1280.webp'); }
+.ch247-hero--photo {
+  background-color: #0d1725;
+  background-image: linear-gradient(90deg, rgba(6, 15, 28, .96) 0%, rgba(9, 19, 32, .86) 43%, rgba(8, 18, 31, .43) 100%),
+    radial-gradient(ellipse at 80% 90%, rgba(19, 91, 178, .30), transparent 60%),
+    radial-gradient(ellipse at 55% 10%, rgba(188, 139, 35, .18), transparent 58%), var(--hero-image);
+  background-position: center, center, center, right center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+@media (max-width: 767px) {
+  .ch247-hero--photo {
+    background-image: linear-gradient(90deg, rgba(6, 15, 28, .94), rgba(8, 18, 31, .72)),
+      radial-gradient(ellipse at 80% 90%, rgba(19, 91, 178, .22), transparent 60%),
+      radial-gradient(ellipse at 55% 10%, rgba(188, 139, 35, .14), transparent 58%), var(--hero-image);
+    background-position: center, center, center, 70% center;
+  }
+}
+
+@media (max-width: 767px) {
+  .ch247-hero--hosting { --hero-image: url('/media/cloudhost247/hero-backgrounds/hosting-640.webp'); }
+  .ch247-hero--domains { --hero-image: url('/media/cloudhost247/hero-backgrounds/domains-640.webp'); }
+  .ch247-hero--cloud { --hero-image: url('/media/cloudhost247/hero-backgrounds/cloud-640.webp'); }
+  .ch247-hero--servers { --hero-image: url('/media/cloudhost247/hero-backgrounds/servers-640.webp'); }
+  .ch247-hero--developers { --hero-image: url('/media/cloudhost247/hero-backgrounds/developers-640.webp'); }
+  .ch247-hero--security { --hero-image: url('/media/cloudhost247/hero-backgrounds/security-640.webp'); }
+  .ch247-hero--tools { --hero-image: url('/media/cloudhost247/hero-backgrounds/tools-640.webp'); }
+  .ch247-hero--support { --hero-image: url('/media/cloudhost247/hero-backgrounds/support-640.webp'); }
+  .ch247-hero--legal { --hero-image: url('/media/cloudhost247/hero-backgrounds/legal-640.webp'); }
+  .ch247-hero--company { --hero-image: url('/media/cloudhost247/hero-backgrounds/company-640.webp'); }
 }

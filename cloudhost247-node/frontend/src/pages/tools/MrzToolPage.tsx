@@ -411,7 +411,7 @@ export default function MrzToolPage({ defaultTab }: MrzToolPageProps) {
 
   return (
     <div>
-      <section className="ch247-hero ch247-hero--compact">
+      <section className="ch247-hero ch247-hero--compact ch247-hero--photo ch247-hero--security">
         <div className="ch247-hero__inner">
           <nav aria-label="Breadcrumb" style={{ marginBottom: '0.4rem', fontSize: '0.85rem', opacity: 0.9 }}>
             <Link to="/tools" style={{ color: '#fff', textDecoration: 'underline' }}>

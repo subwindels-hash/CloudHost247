@@ -1,5 +1,5 @@
 {*
-    CloudHost247 illustration frame — authentic infrastructure photography first.
+    CloudHost247 illustration frame — illustrative infrastructure imagery first.
 
     `$visual` is the SVG diagram key (always the <img> src, so crawlers, fixtures and the raster
     ladder tests still see a file that exists). `$visual3d` is the legacy 3D scene key. Both are
@@ -7,7 +7,7 @@
     contract, so no published page loses its declared artwork.
 
     `photo-map.tpl` is generated from shared/site/photography.json and assigns $photoId / $photoAlt
-    for the scene. Real, licensed data-centre photography is offered first in AVIF / WebP / JPEG;
+    for the scene. AI-generated illustrative infrastructure imagery is offered first in AVIF / WebP / JPEG;
     the original 3D ladder stays underneath as a second fallback, and the SVG <img> remains the
     last resort. A browser with no modern codec still renders the diagram, never a blank box.
 

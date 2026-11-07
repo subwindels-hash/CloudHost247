@@ -142,7 +142,7 @@ export default function IdCardGeneratorPage() {
 
   return (
     <div className="idc">
-      <section className="ch247-hero ch247-hero--compact">
+      <section className="ch247-hero ch247-hero--compact ch247-hero--photo ch247-hero--security">
         <div className="ch247-hero__inner">
           <nav aria-label="Breadcrumb">
             <ol className="bt247-breadcrumbs">

@@ -26,7 +26,7 @@ export default function HostingCpanelPage() {
 
   return (
     <div>
-      <section className="ch247-hero ch247-hero--compact">
+      <section className="ch247-hero ch247-hero--compact ch247-hero--photo ch247-hero--hosting">
         <div className="ch247-hero__inner">
           <h1>cPanel Hosting</h1>
           <p>Everyday web hosting with the control panel administrators already know.</p>

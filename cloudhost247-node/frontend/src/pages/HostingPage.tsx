@@ -40,7 +40,7 @@ export default function HostingPage() {
 
   return (
     <div>
-      <section className="ch247-hero ch247-hero--compact">
+      <section className="ch247-hero ch247-hero--compact ch247-hero--photo ch247-hero--hosting">
         <div className="ch247-hero__inner">
           <h1>Hosting</h1>
           <p>Cloud hosting and infrastructure services, built for dependable performance and transparent billing.</p>

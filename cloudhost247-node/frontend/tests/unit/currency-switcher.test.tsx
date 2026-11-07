@@ -46,7 +46,7 @@ afterEach(() => {
 });
 
 describe('CurrencySwitcher', () => {
-  it('starts in USD, lists USD first, and offers only published currencies', async () => {
+  it('lists published currencies first and shows unavailable currencies as disabled', async () => {
     const user = userEvent.setup();
     renderSwitcher(LIVE);
     const trigger = screen.getByRole('button', { name: /Display currency: USD/ });
@@ -56,9 +56,12 @@ describe('CurrencySwitcher', () => {
     const list = screen.getByRole('list', { name: 'Choose a display currency' });
     const options = within(list).getAllByRole('button').map((b) => b.textContent);
     expect(options[0]).toContain('USD');
-    expect(options).toHaveLength(3);
+    expect(options.length).toBeGreaterThan(3);
     expect(options.join(' ')).toContain('EUR');
-    expect(options.join(' ')).not.toContain('JPY');
+    expect(options.join(' ')).toContain('JPY');
+    const jpy = within(list).getByRole('button', { name: /JPY/ }) as HTMLButtonElement;
+    expect(jpy.disabled).toBe(true);
+    expect(jpy.textContent).toContain('Rate unavailable');
   });
 
   it('persists the choice, reflects it in the trigger, and leaves the language unchanged', async () => {
@@ -102,6 +105,7 @@ describe('CurrencySwitcher', () => {
     renderSwitcher({ ...LIVE, available: false, reason: 'not_synced', currencies: [] });
     await user.click(screen.getByRole('button', { name: /Display currency/ }));
     expect(screen.getByText('Other currencies are unavailable right now. Prices are shown in USD.')).toBeTruthy();
+    expect((screen.getByRole('button', { name: /NGN/ }) as HTMLButtonElement).disabled).toBe(true);
   });
 
   it('states that charges are in USD and that converted amounts are estimates', async () => {
@@ -124,7 +128,8 @@ describe('CurrencySwitcher', () => {
     await user.keyboard('{ArrowDown}');
     expect(document.activeElement).toBe(options[1]);
     await user.keyboard('{End}');
-    expect(document.activeElement).toBe(options[options.length - 1]);
+    const enabled = options.filter((option) => !(option as HTMLButtonElement).disabled);
+    expect(document.activeElement).toBe(enabled[enabled.length - 1]);
     await user.keyboard('{Home}');
     expect(document.activeElement).toBe(options[0]);
 

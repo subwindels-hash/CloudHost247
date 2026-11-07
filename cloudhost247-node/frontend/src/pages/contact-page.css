@@ -1,0 +1,16 @@
+.ch247-contact-hero {
+  background: linear-gradient(90deg, rgba(9, 15, 23, .92) 0%, rgba(9, 15, 23, .76) 45%, rgba(9, 15, 23, .35) 100%),
+    url('/media/cloudhost247/contact-hero.jpg') center / cover no-repeat;
+  background-color: #10171d;
+}
+.ch247-contact { max-width: 720px; border: 1px solid #d7c591; box-shadow: 0 8px 28px rgba(13, 17, 22, .08); }
+.ch247-contact__form { display: grid; gap: 8px; margin-top: 24px; }
+.ch247-contact__form label { font-weight: 650; margin-top: 10px; }
+.ch247-contact__form input,
+.ch247-contact__form select,
+.ch247-contact__form textarea { width: 100%; padding: 12px; border: 1px solid #aeb8c3; border-radius: 6px; background: #fff; color: #17202a; font: inherit; }
+.ch247-contact__form textarea { resize: vertical; }
+.ch247-contact__form :is(input, select, textarea):focus-visible { outline: 3px solid #b8860b; outline-offset: 2px; }
+.ch247-contact__form button { justify-self: start; margin-top: 14px; }
+.ch247-contact__form button:disabled { opacity: .65; cursor: wait; }
+.ch247-contact__form [role='alert'] { color: #a12727; }
