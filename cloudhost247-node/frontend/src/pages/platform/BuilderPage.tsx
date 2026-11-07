@@ -153,7 +153,7 @@ function SiteList({ token, navigate }: { token: string | null; navigate: ReturnT
                   Open editor
                 </Link>
                 {site.status === 'published' ? (
-                  <a className="ch247-button ch247-button--ghost ch247-button--small" href={`/api/v1/public/sites/${site.slug}`} target="_blank" rel="noreferrer">
+                  <a className="ch247-button ch247-button--outline ch247-button--small" href={`/sites/${encodeURIComponent(site.slug)}`} target="_blank" rel="noreferrer">
                     View published
                   </a>
                 ) : null}
@@ -312,7 +312,7 @@ function SiteEditor({ siteId, token }: { siteId: string; token: string | null })
           Unpublish
         </button>
         {site.status === 'published' ? (
-          <a className="ch247-button ch247-button--ghost" href={`/api/v1/public/sites/${site.slug}`} target="_blank" rel="noreferrer">
+          <a className="ch247-button ch247-button--outline" href={`/sites/${encodeURIComponent(site.slug)}`} target="_blank" rel="noreferrer">
             View published site
           </a>
         ) : null}

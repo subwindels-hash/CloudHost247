@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { apiFetch } from '../../lib/api';
 import { getToken } from '../../lib/auth';
 import { usePageMeta } from '../../lib/usePageMeta';
@@ -382,19 +382,32 @@ export function ExpertRequestForm() {
   const navigate = useNavigate();
   const token = getToken();
   const [offerings, setOfferings] = useState<ExpertOffering[]>([]);
+  const [offeringError, setOfferingError] = useState('');
+  const [searchParams] = useSearchParams();
+  const requestedOffering = searchParams.get('offering');
   const [form, setForm] = useState({ offeringCode: '', title: '', description: '', goals: '', referenceUrl: '' });
   const action = useAction();
 
   useEffect(() => {
+    let active = true;
+    setOfferingError('');
     apiFetch<{ offerings: ExpertOffering[] }>('/api/v1/experts/offerings')
       .then((response) => {
+        if (!active) return;
         setOfferings(response.offerings);
-        const preselect = new URLSearchParams(window.location.search).get('offering');
-        const chosen = response.offerings.find((offering) => offering.code === preselect) ?? response.offerings[0];
-        if (chosen) setForm((current) => ({ ...current, offeringCode: chosen.code }));
+        const chosen = requestedOffering
+          ? response.offerings.find((offering) => offering.code === requestedOffering)
+          : response.offerings[0];
+        setForm((current) => ({ ...current, offeringCode: chosen?.code ?? '' }));
+        if (requestedOffering && !chosen) setOfferingError('That service is no longer available. Please select another service.');
       })
-      .catch(() => setOfferings([]));
-  }, []);
+      .catch((error: Error) => {
+        if (!active) return;
+        setOfferings([]);
+        setOfferingError(error.message || 'Expert services could not be loaded.');
+      });
+    return () => { active = false; };
+  }, [requestedOffering]);
 
   if (!token) {
     return (
@@ -417,11 +430,13 @@ export function ExpertRequestForm() {
         A detailed brief gets a faster, more accurate quote. You approve the quote before anything is billed.
       </p>
       <Feedback error={action.error} message={action.message} />
+      {offeringError ? <CatalogErrorBanner message={offeringError} /> : null}
       <section className="ch247-card">
         <div className="ch247-form">
           <label className="ch247-field">
             <span className="ch247-field-label">Service</span>
             <select value={form.offeringCode} onChange={(event) => setForm({ ...form, offeringCode: event.target.value })}>
+              {!form.offeringCode ? <option value="">Select a service</option> : null}
               {offerings.map((offering) => (
                 <option key={offering.id} value={offering.code}>
                   {offering.name}

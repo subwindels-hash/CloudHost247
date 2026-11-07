@@ -102,7 +102,6 @@ export default function AiSupportWidget() {
     if (!session || !text.trim()) return;
     const body = text.trim();
     setText('');
-    setMessages((current) => [...current, { author_type: 'CUSTOMER', body }]);
     setBusy(true);
     setError('');
     try {
@@ -113,6 +112,7 @@ export default function AiSupportWidget() {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message ?? 'Message failed');
+      setMessages((current) => [...current, { author_type: 'CUSTOMER', body }]);
       if (data.decision?.kind === 'NEWSLETTER') setShowSubscribe(true);
       if (data.transfer) {
         setStatus(data.transfer.status);
@@ -122,6 +122,8 @@ export default function AiSupportWidget() {
         setMessages((current) => [...current, data.response]);
       }
     } catch (cause) {
+      // Do not present an unsent message as delivered. Keep it available for a retry.
+      setText((current) => current || body);
       setError(cause instanceof Error ? cause.message : 'Message failed');
     } finally {
       setBusy(false);
