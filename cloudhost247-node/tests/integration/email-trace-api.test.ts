@@ -419,6 +419,99 @@ describe('email trace API', () => {
     expect(serialised).not.toContain('@alpha.example');
   });
 
+  it('pins and releases an event for an investigation, admin only', async () => {
+    const api = await app();
+    const { rows } = await db.query<{ id: string }>(
+      `SELECT id FROM email_trace_events WHERE trace_id = '1xYzAb-000124-EF'`
+    );
+    const eventId = rows[0]!.id;
+
+    const forbidden = await api.inject({
+      method: 'PATCH',
+      url: `/api/v1/admin/email-trace/events/${eventId}`,
+      headers: authed(customerA.token),
+      payload: { retentionHold: true },
+    });
+    expect(forbidden.statusCode).toBe(403);
+
+    const pinned = await api.inject({
+      method: 'PATCH',
+      url: `/api/v1/admin/email-trace/events/${eventId}`,
+      headers: authed(admin.token),
+      payload: { retentionHold: true },
+    });
+    expect(pinned.statusCode).toBe(200);
+    expect((pinned.json() as { event: { retentionHold: boolean } }).event.retentionHold).toBe(true);
+
+    // The admin list shows the hold; the customer view does not mention it at all.
+    const adminList = await api.inject({ method: 'GET', url: '/api/v1/admin/email-trace', headers: authed(admin.token) });
+    const held = (adminList.json() as { events: Array<{ traceId: string; retentionHold?: boolean }> }).events.find(
+      (entry) => entry.traceId === '1xYzAb-000124-EF'
+    );
+    expect(held?.retentionHold).toBe(true);
+
+    const customerDetail = await api.inject({
+      method: 'GET',
+      url: '/api/v1/email-trace/1xYzAb-000124-EF',
+      headers: authed(customerA.token),
+    });
+    expect(customerDetail.statusCode).toBe(200);
+    expect(JSON.stringify(customerDetail.json())).not.toContain('retentionHold');
+
+    // Audited before the change.
+    const { rows: auditRows } = await db.query<{ action: string; metadata: Record<string, unknown> }>(
+      `SELECT action, metadata FROM audit_logs WHERE resource_type = 'email_trace' AND action = 'email_trace.source_updated'`
+    );
+    expect(auditRows.some((row) => JSON.stringify(row.metadata).includes(eventId))).toBe(true);
+
+    const unknown = await api.inject({
+      method: 'PATCH',
+      url: '/api/v1/admin/email-trace/events/aaaaaaaa-1111-4111-8111-111111111111',
+      headers: authed(admin.token),
+      payload: { retentionHold: true },
+    });
+    expect(unknown.statusCode).toBe(404);
+  });
+
+  it('runs domain diagnostics for an owned domain only, with an explicit not-checked vocabulary', async () => {
+    const api = await app();
+
+    const unauthorized = await api.inject({ method: 'GET', url: `/api/v1/email-trace/domains/${domainA}/diagnostics` });
+    expect(unauthorized.statusCode).toBe(401);
+
+    const foreign = await api.inject({
+      method: 'GET',
+      url: `/api/v1/email-trace/domains/${domainA}/diagnostics`,
+      headers: authed(customerB.token),
+    });
+    expect(foreign.statusCode).toBe(404);
+
+    const own = await api.inject({
+      method: 'GET',
+      url: `/api/v1/email-trace/domains/${domainA}/diagnostics`,
+      headers: authed(customerA.token),
+    });
+    expect(own.statusCode).toBe(200);
+    const body = own.json() as {
+      domain: string;
+      checks: Array<{ id: string; status: string; unavailable: boolean; summary: string }>;
+      caveat: string;
+      notes: string[];
+    };
+    expect(body.domain).toBe('alpha.example');
+    expect(body.checks.map((check) => check.id).sort()).toEqual(
+      ['dkim', 'dmarc', 'mx', 'ptr', 'smtp_banner', 'spf'].sort()
+    );
+    // Whatever this environment's DNS allows, every check must land in the fixed vocabulary — and a
+    // check that could not run must say so rather than defaulting to a pass.
+    for (const check of body.checks) {
+      expect(['PASS', 'WARNING', 'ERROR', 'NOT_FOUND', 'NOT_CHECKED', 'UNKNOWN']).toContain(check.status);
+      if (check.unavailable) expect(check.status).toBe('NOT_CHECKED');
+    }
+    expect(body.caveat).toContain('cannot say whether any individual message was delivered');
+    expect(body.notes.join(' ')).toContain('NOT_CHECKED result means the check did not run');
+  });
+
   it('does not expose raw log lines anywhere in a trace response', async () => {
     const api = await app();
     const response = await api.inject({ method: 'GET', url: '/api/v1/email-trace/1xYzAb-000123-CD', headers: authed(customerA.token) });

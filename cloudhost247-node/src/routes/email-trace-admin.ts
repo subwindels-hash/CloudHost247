@@ -19,6 +19,7 @@ import { requireRole } from '../lib/require-role';
 import { NotFoundError, ValidationError } from '../lib/errors';
 import {
   findEmailTraceSourceById,
+  setEmailTraceRetentionHold,
   listEmailTraceEvents,
   listEmailTraceSources,
   updateEmailTraceSource,
@@ -47,6 +48,11 @@ const collectBodySchema = z.object({
 const sourcePatchSchema = z.object({
   collectionEnabled: z.boolean().optional(),
   retentionDaysOverride: z.number().int().min(1).max(3650).nullable().optional(),
+});
+
+const holdSchema = z.object({
+  /** True pins the row against the retention sweep; false releases it. */
+  retentionHold: z.boolean(),
 });
 
 const runsQuerySchema = z.object({
@@ -107,6 +113,7 @@ export async function registerEmailTraceAdminRoutes(app: FastifyInstance, env: E
         // Only the admin surface exposes attribution, and only as ids — never another tenant's name.
         customerId: row.customer_id,
         hostingAccountId: row.hosting_account_id,
+        retentionHold: row.retention_hold,
       })),
       total: result.total,
       limit: result.limit,
@@ -248,6 +255,35 @@ export async function registerEmailTraceAdminRoutes(app: FastifyInstance, env: E
       view: 'collection-runs',
     });
     return runs;
+  });
+
+  /**
+   * Pin or release a single event for an investigation.
+   *
+   * Audited *before* the change, like every other admin action here: "staff extended the life of this
+   * message record" is exactly the kind of decision that needs a record of its own. Releasing a hold
+   * does not delete anything — the next retention sweep simply becomes free to.
+   */
+  app.patch('/api/v1/admin/email-trace/events/:eventId', async (request) => {
+    const auth = await requireRole(request, env, pool, EMAIL_TRACE_ADMIN_ROLES);
+    const params = parseOrThrow(z.object({ eventId: z.string().uuid() }), request.params);
+    const body = parseOrThrow(holdSchema, request.body ?? {});
+
+    await auditEmailTraceAction(pool, request, auth.userId, 'email_trace.source_updated', {
+      eventId: params.eventId,
+      retentionHold: body.retentionHold,
+    });
+
+    const updated = await setEmailTraceRetentionHold(pool, params.eventId, body.retentionHold);
+    if (!updated) throw new NotFoundError('Trace event not found');
+    return {
+      event: {
+        id: updated.id,
+        traceId: updated.trace_id,
+        retentionHold: updated.retention_hold,
+        eventTimestamp: updated.event_timestamp,
+      },
+    };
   });
 
   app.get('/api/v1/admin/email-trace/queue', async (request) => {

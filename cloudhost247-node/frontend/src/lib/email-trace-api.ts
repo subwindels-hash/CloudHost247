@@ -37,6 +37,8 @@ export interface TraceEvent {
   /** Admin list only — attribution ids, never another tenant's name or email. */
   customerId?: string | null;
   hostingAccountId?: string | null;
+  /** Admin list only — pinned against the retention sweep for an investigation. */
+  retentionHold?: boolean;
 }
 
 export interface TraceListResponse {
@@ -143,6 +145,24 @@ function query(params: Record<string, string | number | undefined>): string {
   return serialised ? `?${serialised}` : '';
 }
 
+export type DiagnosticStatus = 'PASS' | 'WARNING' | 'ERROR' | 'NOT_FOUND' | 'NOT_CHECKED' | 'UNKNOWN';
+
+export interface DomainDiagnosticCheck {
+  id: 'spf' | 'dkim' | 'dmarc' | 'mx' | 'ptr' | 'smtp_banner';
+  label: string;
+  status: DiagnosticStatus;
+  summary: string;
+  detail: string[];
+  unavailable: boolean;
+}
+
+export interface DomainDiagnostics {
+  domain: string;
+  checks: DomainDiagnosticCheck[];
+  notes: string[];
+  caveat: string;
+}
+
 export function fetchTraceStatuses() {
   return apiFetch<TraceStatusVocabulary>('/api/v1/email-trace/statuses');
 }
@@ -189,6 +209,26 @@ export function updateTraceSource(
     method: 'PATCH',
     body: JSON.stringify(patch),
   });
+}
+
+/**
+ * Domain diagnostics (SPF/DKIM/DMARC/MX/PTR and the opt-in SMTP banner).
+ *
+ * One endpoint rather than five tool calls: the server owns domain ownership checks and maps every
+ * outcome into one vocabulary, including "this check could not run".
+ */
+export function fetchDomainDiagnostics(domainId: string, options: { banner?: boolean } = {}) {
+  const search = options.banner ? '?banner=true' : '';
+  return apiFetch<DomainDiagnostics>(
+    `/api/v1/email-trace/domains/${encodeURIComponent(domainId)}/diagnostics${search}`
+  );
+}
+
+export function setTraceEventHold(eventId: string, retentionHold: boolean) {
+  return apiFetch<{ event: { id: string; traceId: string; retentionHold: boolean; eventTimestamp: string } }>(
+    `/api/v1/admin/email-trace/events/${encodeURIComponent(eventId)}`,
+    { method: 'PATCH', body: JSON.stringify({ retentionHold }) }
+  );
 }
 
 export function fetchCollectionRuns(params: { sourceId?: string; status?: string; limit?: number; offset?: number } = {}) {

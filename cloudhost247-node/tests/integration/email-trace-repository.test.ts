@@ -26,6 +26,7 @@ import {
   listLatestQueueSnapshots,
   markEmailTraceSourceFailure,
   markEmailTraceSourceSuccess,
+  setEmailTraceRetentionHold,
   startEmailTraceCollectionRun,
   summariseEmailTraceEvents,
   trimEmailTraceCollectionRuns,
@@ -235,6 +236,27 @@ describe('email trace repository', () => {
 
     const remaining = await listEmailTraceEvents(client, {});
     expect(remaining.total).toBe(2);
+  });
+
+  it('pins a single event for an investigation and releases it again', async () => {
+    await insertEmailTraceEvents(client, SERVER, [
+      event({ traceId: '1xYzAb-000123-CD', eventTimestamp: new Date(Date.now() - 60 * 86_400_000) }),
+    ]);
+    const { rows } = await db.query<{ id: string }>(`SELECT id FROM email_trace_events LIMIT 1`);
+    const eventId = rows[0]!.id;
+
+    const held = await setEmailTraceRetentionHold(client, eventId, true);
+    expect(held?.retention_hold).toBe(true);
+
+    // Pinned: the retention sweep reports it as held and keeps the row.
+    expect(await trimEmailTraceEvents(client, 30)).toEqual({ deleted: 0, held: 1 });
+
+    const released = await setEmailTraceRetentionHold(client, eventId, false);
+    expect(released?.retention_hold).toBe(false);
+    expect(await trimEmailTraceEvents(client, 30)).toEqual({ deleted: 1, held: 0 });
+
+    // An unknown id is a null, never a silent success.
+    expect(await setEmailTraceRetentionHold(client, 'aaaaaaaa-1111-4111-8111-111111111111', true)).toBeNull();
   });
 
   it('keeps source configuration, checkpoint and failure state', async () => {

@@ -6,6 +6,7 @@ import {
   fetchTraceEvents,
   fetchTraceSummary,
   fetchTraceSources,
+  setTraceEventHold,
   triggerCollection,
   updateTraceSource,
   type DeliveryStatus,
@@ -69,6 +70,7 @@ export default function AdminEmailTracePage() {
   const [busy, setBusy] = useState<string | null>(null);
   const [actionError, setActionError] = useState('');
   const [actionNote, setActionNote] = useState('');
+  const [retentionDraft, setRetentionDraft] = useState<Record<string, string>>({});
   const [statusFilter, setStatusFilter] = useState('');
   const [domainFilter, setDomainFilter] = useState('');
   const [offset, setOffset] = useState(0);
@@ -138,6 +140,50 @@ export default function AdminEmailTracePage() {
           : 'Collection enabled. The next sweep will read the next slice of the message log.'
       );
       loadSources();
+    } catch (err) {
+      setActionError((err as Error).message);
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const saveRetention = async (source: TraceSource) => {
+    const raw = retentionDraft[source.id];
+    const parsed = raw === undefined || raw.trim() === '' ? null : Number(raw);
+    if (parsed !== null && (!Number.isFinite(parsed) || parsed < 1 || parsed > 3650)) {
+      setActionError('Retention must be between 1 and 3650 days, or left empty to use the platform default.');
+      return;
+    }
+    setBusy(source.id);
+    setActionError('');
+    setActionNote('');
+    try {
+      await updateTraceSource(source.id, { retentionDaysOverride: parsed });
+      setActionNote(
+        parsed === null
+          ? 'Retention override cleared; this server now uses the platform default.'
+          : `This server keeps trace events for ${parsed} day(s), unless an event is pinned.`
+      );
+      loadSources();
+    } catch (err) {
+      setActionError((err as Error).message);
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const toggleHold = async (event: TraceEvent) => {
+    setBusy(event.id);
+    setActionError('');
+    setActionNote('');
+    try {
+      const response = await setTraceEventHold(event.id, !event.retentionHold);
+      setActionNote(
+        response.event.retentionHold
+          ? `Pinned ${response.event.traceId}: the retention sweep will keep this event and report it as held.`
+          : `Released ${response.event.traceId}: the next retention sweep may remove it once it is past the window.`
+      );
+      loadEvents();
     } catch (err) {
       setActionError((err as Error).message);
     } finally {
@@ -232,6 +278,7 @@ export default function AdminEmailTracePage() {
                 <th>Checkpoint</th>
                 <th>Last success</th>
                 <th>Last error</th>
+                <th>Retention (days)</th>
                 <th />
               </tr>
             </thead>
@@ -263,6 +310,27 @@ export default function AdminEmailTracePage() {
                     ) : (
                       '—'
                     )}
+                  </td>
+                  <td>
+                    <div className="ch247-inline-actions">
+                      <input
+                        aria-label={`Retention days for ${source.serverId.slice(0, 8)}`}
+                        placeholder={source.retentionDaysOverride === null ? 'default' : String(source.retentionDaysOverride)}
+                        value={retentionDraft[source.id] ?? ''}
+                        onChange={(change) =>
+                          setRetentionDraft((current) => ({ ...current, [source.id]: change.target.value }))
+                        }
+                        style={{ width: '5.5rem' }}
+                      />
+                      <button
+                        type="button"
+                        className="ch247-btn ch247-button--small"
+                        disabled={busy !== null}
+                        onClick={() => saveRetention(source)}
+                      >
+                        Save
+                      </button>
+                    </div>
                   </td>
                   <td>
                     <div className="ch247-inline-actions">
@@ -372,6 +440,7 @@ export default function AdminEmailTracePage() {
                   <th>To</th>
                   <th>Customer</th>
                   <th>Message id</th>
+                  <th>Retention</th>
                 </tr>
               </thead>
               <tbody>
@@ -392,6 +461,19 @@ export default function AdminEmailTracePage() {
                     </td>
                     <td>
                       <code>{event.traceId}</code>
+                    </td>
+                    <td>
+                      <div className="ch247-inline-actions">
+                        {event.retentionHold && <Badge tone="warn">pinned</Badge>}
+                        <button
+                          type="button"
+                          className="ch247-btn ch247-button--small"
+                          disabled={busy !== null}
+                          onClick={() => toggleHold(event)}
+                        >
+                          {event.retentionHold ? 'Release' : 'Pin for investigation'}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

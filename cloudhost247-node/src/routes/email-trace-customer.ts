@@ -20,6 +20,7 @@ import { NotFoundError, ValidationError } from '../lib/errors';
 import { DELIVERY_STATUSES, type DeliveryStatus } from '../email-trace/types';
 import { resolveDomainAccess, scopeForOwnMail } from '../email-trace/access-control';
 import { auditEmailTraceRead } from '../email-trace/audit';
+import { diagnoseDomain, defaultDiagnosticRunners, DEFAULT_DKIM_SELECTORS } from '../email-trace/diagnostics';
 import {
   buildHealthView,
   buildQueueView,
@@ -196,6 +197,54 @@ export async function registerEmailTraceCustomerRoutes(app: FastifyInstance, env
       events: events.events.map((row) => toEventView(row, { mask })),
       total: events.total,
     };
+  });
+
+  /**
+   * Domain mail diagnostics: SPF, DKIM, DMARC, MX, PTR and (opt-in) the SMTP banner.
+   *
+   * Scoped by `resolveDomainAccess`, so a customer can only diagnose a domain they own and an
+   * unknown/foreign domain is a 404. The checks themselves are the Tools Center's own functions —
+   * this endpoint adds ownership and one consistent vocabulary, not a second DNS implementation.
+   */
+  app.get('/api/v1/email-trace/domains/:domainId/diagnostics', async (request) => {
+    const auth = await authenticate(request, env, pool);
+    const params = parseOrThrow(z.object({ domainId: idSchema }), request.params);
+    const query = parseOrThrow(
+      z.object({
+        banner: z.enum(['true', 'false']).optional(),
+        selectors: z.string().max(200).optional(),
+      }),
+      request.query
+    );
+    const access = await resolveDomainAccess(pool, auth, params.domainId);
+    if (!access) throw new NotFoundError('Domain not found');
+
+    const selectors = query.selectors
+      ? query.selectors
+          .split(',')
+          .map((value) => value.trim().toLowerCase())
+          .filter(Boolean)
+          .slice(0, 10)
+      : DEFAULT_DKIM_SELECTORS;
+
+    const diagnostics = await diagnoseDomain(
+      {
+        domain: access.domainName,
+        dkimSelectors: selectors,
+        includeSmtpBanner: query.banner === 'true',
+      },
+      defaultDiagnosticRunners(pool)
+    );
+
+    await auditEmailTraceRead(pool, request, auth.userId, 'email_trace.domain_view', {
+      domainId: access.domainId,
+      domain: access.domainName,
+      view: 'diagnostics',
+      banner: query.banner === 'true',
+      viaSupportSession: auth.supportSessionId ?? null,
+    });
+
+    return diagnostics;
   });
 
   app.get('/api/v1/email-trace/:traceId/timeline', async (request) => {

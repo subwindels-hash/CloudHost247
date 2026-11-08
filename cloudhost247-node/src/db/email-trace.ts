@@ -301,6 +301,25 @@ export async function findEmailTraceTimeline(
   return rows.length > 0 ? rows : null;
 }
 
+/**
+ * Pins or releases one event for an investigation.
+ *
+ * `retention_hold = true` means the retention sweep counts the row as held instead of deleting it.
+ * Returns the updated row, or `null` when the id does not exist — the caller decides whether that is
+ * a 404, and the route never reveals whether a row exists outside its scope.
+ */
+export async function setEmailTraceRetentionHold(
+  db: Queryable,
+  eventId: string,
+  hold: boolean
+): Promise<EmailTraceEventRow | null> {
+  const { rows } = await db.query<EmailTraceEventRow>(
+    `UPDATE email_trace_events SET retention_hold = $2 WHERE id = $1 RETURNING *`,
+    [eventId, hold]
+  );
+  return rows[0] ?? null;
+}
+
 /** Status counts for the dashboard, within a window and a scope. */
 export async function summariseEmailTraceEvents(
   db: Queryable,

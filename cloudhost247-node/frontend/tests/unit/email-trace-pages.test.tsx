@@ -88,6 +88,25 @@ function customerStub(overrides: { events?: unknown[]; sources?: unknown[] } = {
     if (url.includes('/api/v1/email-trace/summary')) {
       return { total: 7, byStatus: STATUSES, from: null, to: null, evidenceNote: EVIDENCE_NOTE, window: '24h' };
     }
+    if (url.includes('/api/v1/account/domains')) {
+      return { domains: [{ id: 'dom-1', domain_name: 'alpha.example', status: 'active' }] };
+    }
+    if (url.includes('/diagnostics')) {
+      return {
+        domain: 'alpha.example',
+        checks: [
+          { id: 'spf', label: 'SPF', status: 'PASS', summary: 'An SPF record is published and parses.', detail: ['v=spf1 -all'], unavailable: false },
+          { id: 'dkim', label: 'DKIM', status: 'NOT_CHECKED', summary: 'This check could not be completed: resolver timeout.', detail: [], unavailable: true },
+          { id: 'dmarc', label: 'DMARC', status: 'NOT_FOUND', summary: 'No DMARC record is published.', detail: [], unavailable: false },
+          { id: 'mx', label: 'MX', status: 'PASS', summary: '1 mail host is published.', detail: ['mx1.alpha.example (priority 10)'], unavailable: false },
+          { id: 'ptr', label: 'PTR (reverse DNS)', status: 'WARNING', summary: 'Some mail hosts do not have matching reverse DNS.', detail: [], unavailable: false },
+          { id: 'smtp_banner', label: 'SMTP banner', status: 'NOT_CHECKED', summary: 'Not requested. The banner check opens a TCP connection to the mail host.', detail: [], unavailable: false },
+        ],
+        notes: ['A NOT_CHECKED result means the check did not run. It is never displayed as a pass.'],
+        caveat:
+          'These checks read public DNS and, when requested, the SMTP banner of the domain’s mail host. They show whether mail authentication and mail routing are published correctly. They cannot say whether any individual message was delivered, filtered or read.',
+      };
+    }
     if (url.includes('/api/v1/email-trace/queue')) {
       return { servers: [], note: 'Queue figures are a snapshot taken by the last successful collection run.' };
     }
@@ -183,6 +202,24 @@ describe('/account/email-trace', () => {
     expect(screen.getByText(/250 — 250 2\.0\.0 Ok/)).toBeTruthy();
   });
 
+  it('runs the domain diagnostics endpoint and shows “not checked” rather than a pass', async () => {
+    customerStub();
+    render(
+      <MemoryRouter>
+        <EmailTracePage />
+      </MemoryRouter>
+    );
+
+    const run = await screen.findByRole('button', { name: 'Run checks' });
+    await userEvent.click(run);
+
+    expect(await screen.findByText('An SPF record is published and parses.')).toBeTruthy();
+    // A check that could not run is labelled, not hidden and not green.
+    expect(screen.getAllByText('Not checked').length).toBeGreaterThanOrEqual(2);
+    expect(screen.getByText(/cannot say whether any individual message was delivered/)).toBeTruthy();
+    expect(screen.getByText(/never displayed as a pass/)).toBeTruthy();
+  });
+
   it('marks the mail queue as a snapshot, not a live number', async () => {
     customerStub();
     render(
@@ -204,6 +241,9 @@ describe('/admin/email-trace', () => {
     return stubApi((url, init) => {
       if (url.includes('/sources') && init?.method === 'PATCH') {
         return { source: { ...source, collectionEnabled: true } };
+      }
+      if (url.includes('/events/') && init?.method === 'PATCH') {
+        return { event: { id: 'e1', traceId: '1xYzAb-000123-CD', retentionHold: true, eventTimestamp: '2026-11-08T09:14:03.000Z' } };
       }
       if (url.includes('/sources')) {
         return {
@@ -316,6 +356,36 @@ describe('/admin/email-trace', () => {
     await userEvent.click(collect);
 
     await waitFor(() => expect(screen.getByText(/1 source\(s\) collected, 8 new event\(s\)\./)).toBeTruthy());
+  });
+
+  it('pins an event for an investigation and says what that does', async () => {
+    adminStub(source);
+    render(
+      <MemoryRouter>
+        <AdminEmailTracePage />
+      </MemoryRouter>
+    );
+
+    const pin = await screen.findByRole('button', { name: 'Pin for investigation' });
+    await userEvent.click(pin);
+
+    await waitFor(() =>
+      expect(screen.getByText(/the retention sweep will keep this event and report it as held/)).toBeTruthy()
+    );
+  });
+
+  it('saves a per-server retention override and rejects an out-of-range value', async () => {
+    adminStub(source);
+    render(
+      <MemoryRouter>
+        <AdminEmailTracePage />
+      </MemoryRouter>
+    );
+
+    const input = await screen.findByLabelText(/Retention days for/);
+    await userEvent.type(input, '14');
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(screen.getByText(/keeps trace events for 14 day/)).toBeTruthy());
   });
 
   it('describes the read-only boundary on the admin page', async () => {

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { usePageMeta } from '../lib/usePageMeta';
-import { apiFetch } from '../lib/api';
 import { CatalogErrorBanner, CatalogLoadingBanner } from '../components/CatalogStateBanner';
 import {
+  fetchDomainDiagnostics,
   fetchTraceDetail,
   fetchTraceEvents,
   fetchTraceHealth,
@@ -14,6 +14,7 @@ import {
   type TraceHealth,
   type TraceQueue,
   type TraceSummary,
+  type DomainDiagnostics,
 } from '../lib/email-trace-api';
 import './email-trace.css';
 
@@ -56,6 +57,22 @@ const STATUS_TONE: Record<DeliveryStatus, 'ok' | 'warn' | 'bad' | 'neutral'> = {
 
 const WINDOWS = ['24h', '7d', '30d', '90d'] as const;
 
+const DIAGNOSTIC_TONE: Record<string, 'ok' | 'warn' | 'bad' | 'neutral'> = {
+  PASS: 'ok',
+  WARNING: 'warn',
+  ERROR: 'bad',
+  NOT_FOUND: 'bad',
+  NOT_CHECKED: 'neutral',
+  UNKNOWN: 'neutral',
+};
+
+/** The customer's own domains, used only to address the diagnostics endpoint by id. */
+async function apiFetchDomains(): Promise<Array<{ id: string; domain_name: string }>> {
+  const { apiFetch } = await import('../lib/api');
+  const response = await apiFetch<{ domains: Array<{ id: string; domain_name: string }> }>('/api/v1/account/domains');
+  return response.domains;
+}
+
 function StatusBadge({ status, label }: { status: DeliveryStatus; label: string }) {
   return <span className={`et-status et-status--${STATUS_TONE[status]}`}>{label}</span>;
 }
@@ -80,8 +97,10 @@ export default function EmailTracePage() {
   const [detailError, setDetailError] = useState('');
   const [queue, setQueue] = useState<TraceQueue | null>(null);
   const [health, setHealth] = useState<TraceHealth | null>(null);
-  const [authDomain, setAuthDomain] = useState('');
-  const [authChecks, setAuthChecks] = useState<Array<{ label: string; status: string; detail: string }> | null>(null);
+  const [domains, setDomains] = useState<Array<{ id: string; domain_name: string }>>([]);
+  const [authDomainId, setAuthDomainId] = useState('');
+  const [includeBanner, setIncludeBanner] = useState(false);
+  const [diagnostics, setDiagnostics] = useState<DomainDiagnostics | null>(null);
   const [authError, setAuthError] = useState('');
   const [authRunning, setAuthRunning] = useState(false);
   const pageSize = 25;
@@ -139,6 +158,23 @@ export default function EmailTracePage() {
     };
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    apiFetchDomains()
+      .then((list) => {
+        if (cancelled) return;
+        setDomains(list);
+        if (list.length > 0) setAuthDomainId((current) => current || list[0]!.id);
+      })
+      .catch(() => {
+        // Diagnostics are optional: without a domain list the panel explains itself below.
+        if (!cancelled) setDomains([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const openTrace = (traceId: string) => {
     setDetailError('');
     setSelected(null);
@@ -148,45 +184,14 @@ export default function EmailTracePage() {
   };
 
   const runAuthChecks = async () => {
-    const domain = authDomain.trim().toLowerCase();
-    if (!domain) return;
+    if (!authDomainId) return;
     setAuthRunning(true);
     setAuthError('');
-    setAuthChecks(null);
+    setDiagnostics(null);
     try {
-      // Reuse the existing Tools Center checks — the same resolvers, the same rules. Nothing here
-      // signs or sends mail; it only reads public DNS.
-      const specs: Array<{ label: string; path: string; pick: (body: Record<string, unknown>) => string }> = [
-        {
-          label: 'SPF',
-          path: `/api/tools/spf-checker?domain=${encodeURIComponent(domain)}`,
-          pick: (body) => String((body.result as { analysis?: { status?: string } } | undefined)?.analysis?.status ?? 'UNKNOWN'),
-        },
-        {
-          label: 'DKIM',
-          path: `/api/tools/dkim-checker?domain=${encodeURIComponent(domain)}`,
-          pick: (body) => String((body.result as { status?: string } | undefined)?.status ?? 'UNKNOWN'),
-        },
-        {
-          label: 'DMARC',
-          path: `/api/tools/dmarc-checker?domain=${encodeURIComponent(domain)}`,
-          pick: (body) => String((body.result as { status?: string } | undefined)?.status ?? 'UNKNOWN'),
-        },
-      ];
-      const results: Array<{ label: string; status: string; detail: string }> = [];
-      for (const spec of specs) {
-        try {
-          const body = await apiFetch<Record<string, unknown>>(spec.path);
-          results.push({
-            label: spec.label,
-            status: spec.pick(body),
-            detail: `${spec.label} record published for ${domain}`,
-          });
-        } catch (err) {
-          results.push({ label: spec.label, status: 'NOT_CHECKED', detail: (err as Error).message });
-        }
-      }
-      setAuthChecks(results);
+      // One endpoint, one vocabulary. The server decides what each check means — including "this
+      // check could not run" — so this page never has to reinterpret a tool's own result shape.
+      setDiagnostics(await fetchDomainDiagnostics(authDomainId, { banner: includeBanner }));
     } catch (err) {
       setAuthError((err as Error).message);
     } finally {
@@ -423,42 +428,77 @@ export default function EmailTracePage() {
       </div>
 
       <div className="ch247-card">
-        <h2>Email authentication (DNS)</h2>
+        <h2>Mail diagnostics for a domain</h2>
         <p className="ch247-page__hint">
-          Checks the public SPF, DKIM and DMARC records for a domain using the same DNS tools as the Tools Center.
-          These are publishing checks — they do not test whether a specific message was delivered.
+          Checks the public SPF, DKIM, DMARC, MX and reverse-DNS records for one of your domains. The SMTP banner
+          check is optional because it opens a connection to your mail host. A check that cannot run is shown as
+          “Not checked” — never as a pass.
         </p>
         <div className="ch247-market-controls">
-          <input
-            placeholder="Your domain"
+          <select
             aria-label="Domain to check"
-            value={authDomain}
-            onChange={(event) => setAuthDomain(event.target.value)}
-          />
-          <button type="button" className="ch247-btn" onClick={runAuthChecks} disabled={authRunning || !authDomain.trim()}>
-            {authRunning ? 'Checking…' : 'Run DNS checks'}
+            value={authDomainId}
+            onChange={(event) => {
+              setAuthDomainId(event.target.value);
+              setDiagnostics(null);
+            }}
+          >
+            {domains.length === 0 && <option value="">No domains on this account</option>}
+            {domains.map((domain) => (
+              <option key={domain.id} value={domain.id}>
+                {domain.domain_name}
+              </option>
+            ))}
+          </select>
+          <label className="et-checkbox">
+            <input type="checkbox" checked={includeBanner} onChange={(event) => setIncludeBanner(event.target.checked)} />
+            Also read the SMTP banner
+          </label>
+          <button type="button" className="ch247-btn" onClick={runAuthChecks} disabled={authRunning || !authDomainId}>
+            {authRunning ? 'Checking…' : 'Run checks'}
           </button>
         </div>
         {authError && <CatalogErrorBanner message={authError} />}
-        {authChecks && (
-          <table className="ch247-table">
-            <thead>
-              <tr>
-                <th>Check</th>
-                <th>Result</th>
-                <th>Detail</th>
-              </tr>
-            </thead>
-            <tbody>
-              {authChecks.map((check) => (
-                <tr key={check.label}>
-                  <td>{check.label}</td>
-                  <td>{check.status}</td>
-                  <td>{check.detail}</td>
+        {diagnostics && (
+          <>
+            <table className="ch247-table">
+              <thead>
+                <tr>
+                  <th>Check</th>
+                  <th>Result</th>
+                  <th>What was found</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {diagnostics.checks.map((check) => (
+                  <tr key={check.id}>
+                    <td>{check.label}</td>
+                    <td>
+                      <span className={`et-status et-status--${DIAGNOSTIC_TONE[check.status]}`}>
+                        {check.status === 'NOT_CHECKED' ? 'Not checked' : check.status.replace('_', ' ')}
+                      </span>
+                    </td>
+                    <td>
+                      <div>{check.summary}</div>
+                      {check.detail.length > 0 && (
+                        <div className="ch247-page__hint">
+                          {check.detail.map((line) => (
+                            <div key={line}>{line}</div>
+                          ))}
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p className="ch247-page__hint">{diagnostics.caveat}</p>
+            {diagnostics.notes.map((note) => (
+              <p className="ch247-page__hint" key={note}>
+                {note}
+              </p>
+            ))}
+          </>
         )}
       </div>
     </div>

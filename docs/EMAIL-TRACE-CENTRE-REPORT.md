@@ -2,7 +2,7 @@
 
 **Feature:** native Email Trace Centre (no external email-tracking API)
 **Branch:** `arena/b4931f08-cloudhost247`
-**Commits:** `c9f134e` (schema + parsers) · `4cd8afb` (collector, agent op, API, sweep) · `e1c75ea` (UI, navigation, this report)
+**Commits:** `c9f134e` (schema + parsers) · `4cd8afb` (collector, agent op, API, sweep) · `e1c75ea` (UI, navigation, this report) · final commit on this branch adds full diagnostics and retention controls
 **Date:** 2026-11-08
 
 ---
@@ -29,6 +29,8 @@ Behind those two pages:
 | Collection | `src/email-trace/collector.ts` | checkpoint → read → parse → attribute → insert → advance |
 | Transport | `src/email-trace/adapters/exim-agent.ts` + `server-agent/src/mail-trace.js` | signed, allowlisted, bounded, line-aligned |
 | API | `src/routes/email-trace-customer.ts`, `src/routes/email-trace-admin.ts` | role + tenant scoped, audited |
+| Diagnostics | `src/email-trace/diagnostics.ts` | SPF, DKIM, DMARC, MX, PTR and the opt-in SMTP banner, composed from the existing Tools Center checks |
+| Retention controls | `PATCH /api/v1/admin/email-trace/events/:id` + admin UI controls | pin/release an event, per-server window override |
 | Scheduling | `src/worker/email-trace-sweep.ts` | every 5 min + retention trims |
 | UI | `frontend/src/pages/EmailTracePage.tsx`, `AdminEmailTracePage.tsx` | both routes registered in `App.tsx` |
 
@@ -49,7 +51,10 @@ with the real migration runner) or a real Node process — not against a mock of
 | Migration 0089 applies cleanly on top of all 88 existing migrations | `tests/integration/email-trace-repository.test.ts`, plus `auth-flow` and `agent-deployments-api` suites re-run after the migration was added |
 | Event deduplication (same window collected twice stores nothing new) | repository + collector tests: `{inserted: 0, duplicates: n}` |
 | Tenant isolation at the query layer; an empty scope matches nothing | repository scope tests; API tests for 404-instead-of-403 |
-| Retention deletes past-window events but **never** deletes `retention_hold` rows | `trimEmailTraceEvents` test → `{deleted: 1, held: 1}` |
+| Retention deletes past-window events but **never** deletes `retention_hold` rows | repository test → `{deleted: 1, held: 1}` |
+| Pinning/releasing an event through the API, admin-only and audited | API test: 403 for a customer, 200 + `retentionHold: true` for an admin, hold visible only in the admin list |
+| Diagnostics vocabulary discipline: a failed or timed-out check is `NOT_CHECKED`, never `PASS`; checks run concurrently under a per-check ceiling | 11 unit tests with injected runners + the API contract test |
+| Diagnostics ownership: a customer can only diagnose their own domain (404 otherwise) | API test |
 | Collection run bookkeeping (seen / stored / rejected / queue / error) | collector tests |
 | Failure handling: agent unreachable leaves the checkpoint untouched | collector test asserts `checkpoint = {}` after a failed run |
 | Collections are opt-in; a disabled source opens no run and reads nothing | collector + API tests |
@@ -77,15 +82,16 @@ fixtures; a live host is the only thing that can confirm them.
 | Rotation detection (inode/size) | an actual logrotate cycle |
 | Attribution of events to customers | depends on `customer_domains` being accurate; unattributed events are stored but shown only to staff |
 | End-to-end collection through the worker sweep | needs an agent paired with a server and collection enabled |
+| Real diagnostic results | the composition and vocabulary are tested with injected runners; the live DNS/SMTP answers depend on the domain and network and are **not** asserted anywhere |
 
 ### 2.3 UI ONLY
 
 Nothing in the shipped UI falls in this bucket: every number, badge and table on both pages is
 rendered from an API response produced by the code above. There is no placeholder data, no mock
-provider and no hard-coded delivery status anywhere in the frontend. The DNS diagnostics panel on the
-customer page is a thin caller of the existing Tools Center endpoints (`/api/tools/spf-checker`,
-`/api/tools/dkim-checker`, `/api/tools/dmarc-checker`); if those tools are unavailable the panel says
-`NOT_CHECKED` rather than showing a green tick.
+provider and no hard-coded delivery status anywhere in the frontend. The diagnostics panel is backed by
+`GET /api/v1/email-trace/domains/:domainId/diagnostics`, which composes the Tools Center's own SPF /
+DKIM / DMARC / MX / reverse-DNS / SMTP-banner checks behind one ownership check and one vocabulary;
+a check that cannot run is rendered as "Not checked", never as a tick.
 
 ### 2.4 BLOCKED
 
@@ -97,17 +103,12 @@ customer page is a thin caller of the existing Tools Center endpoints (`/api/too
 
 ### 2.5 NOT IMPLEMENTED
 
-- **Retention configuration UI** — the window is server-side (`EMAIL_TRACE_RETENTION_DAYS`, per-source
-  `retention_days_override` via `PATCH /api/v1/admin/email-trace/sources/:id`, exercised by tests) but
-  there is no form control for the override on the admin page yet.
-- **Per-message "pin" action** for `retention_hold` — the column and the retention behaviour exist and
-  are tested; no endpoint or button toggles it.
+- **Notifications** (e.g. "your message bounced") — not part of this feature.
 - **Cross-run sender carry-forward** — a delivery line whose submission line fell outside the read
   window is rejected (counted, never guessed). Deliberate: the alternative is inventing a sender.
 - **Hosting-account attribution** — `hosting_account_id` is always `NULL` today because
   `customer_services` carries no domain, so there is no honest link from a message to a service.
   Attribution uses `customer_domains` only.
-- **Notifications** (e.g. "your message bounced") — not part of this feature.
 - **Inbox placement, spam-folder placement, open/read tracking** — never implemented, and cannot be:
   no log on the sending host contains that information.
 
@@ -144,14 +145,14 @@ cd cloudhost247-node
 npx tsc -p tsconfig.json --noEmit            # clean
 npx tsc -p frontend/tsconfig.json --noEmit   # clean
 
-npx vitest run tests/unit tests/integration/email-trace-repository.test.ts \
-               tests/integration/email-trace-collector.test.ts \
-               tests/integration/email-trace-api.test.ts
-# unit suite green (includes 45 parser/resolver/normaliser/queue tests,
-# 20 access-control + capability tests)
-# integration: 14 + 10 + 17 = 41 tests green
+npx vitest run tests/unit/email-trace-*.test.ts tests/integration/email-trace-*.test.ts
+# 10 files, 120 tests green:
+#   45 parser / resolver / normaliser / queue
+#   20 access-control + capability
+#   11 diagnostics composition
+#   15 repository + 10 collector + 19 API (integration, real migrations on PGlite)
 
-npx vitest run frontend/tests               # full frontend suite green (includes 9 new page tests)
+npx vitest run frontend/tests               # full frontend suite green (includes 12 page tests)
 cd ../server-agent && npm test              # 83 tests green (12 new mail-trace tests)
 ```
 
@@ -173,12 +174,26 @@ named `FakeEximAdapter`; the API tests seed rows through the repository.
 
 ## 6. Suggested next steps (in order)
 
-1. Pair one real server agent, enable collection for it, and re-run the four "live-unverified"
-   assertions in §2.2 against its actual log. This is the single highest-value remaining action.
+1. Pair one real server agent, enable collection for it, and re-run the "live-unverified" assertions in
+   §2.2 against its actual log. This is the single highest-value remaining action.
 2. Decide the log-permission policy (does the agent's account get read access to
    `/var/log/exim_mainlog`, or is a copy made for it?) — the capability report currently surfaces this
    as `unavailable` and refuses to escalate.
-3. Add the retention-override and `retention_hold` controls to the admin page (backend already
-   supports both).
-4. Consider a module-scoped `email_trace` permission if staff accounts should see trace data without a
-   full admin role.
+3. Consider a module-scoped `email_trace` permission if staff accounts should see trace data without a
+   full admin role (today: `admin` / `super_admin` only).
+4. If Postfix hosts matter, add a Postfix adapter behind the existing `EximTraceAdapter` interface
+   rather than branching inside the collector.
+
+---
+
+## 7. Change log after the first draft of this report
+
+Two gaps that the first draft listed as missing are now closed, with tests:
+
+- **Full domain diagnostics.** `GET /api/v1/email-trace/domains/:domainId/diagnostics` now returns
+  SPF, DKIM, DMARC, MX, PTR **and** the SMTP banner (banner opt-in via `?banner=true`), composed from
+  the existing Tools Center checks. Bounded: the independent lookups run concurrently under a 12s
+  per-check ceiling, so a hung resolver produces a `NOT_CHECKED` row instead of a stalled page.
+- **Retention controls.** `PATCH /api/v1/admin/email-trace/events/:eventId` pins or releases a single
+  event (audited before the change), and the admin page now exposes both that control and a per-server
+  retention-day override whose out-of-range values are rejected client-side and server-side.

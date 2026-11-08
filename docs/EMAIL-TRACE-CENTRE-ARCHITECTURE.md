@@ -725,5 +725,12 @@ Where the implementation departed from this document, and why:
    outside the allowlist causes the whole call to read nothing, so a caller cannot probe the filesystem.
 6. **Customer route vocabulary endpoint added:** `GET /api/v1/email-trace/statuses` publishes labels and
    explanations so the UI cannot invent its own wording.
-7. **DNS diagnostics are reused, not reimplemented.** The customer page calls the existing Tools Center
-   `spf-checker` / `dkim-checker` / `dmarc-checker` endpoints; no second DNS implementation exists.
+7. **DNS diagnostics are reused, not reimplemented.** `src/email-trace/diagnostics.ts` composes the
+   Tools Center's own `spfCheck`, `dmarcCheck`, `dkimCheck`, `mxLookup` and `smtpTest` behind one
+   ownership-checked endpoint (`GET /api/v1/email-trace/domains/:domainId/diagnostics`). No second
+   DNS or SMTP implementation exists. The independent lookups run concurrently under a per-check
+   timeout, and a check that cannot run is `NOT_CHECKED` — never `PASS`.
+8. **Retention controls exist.** `PATCH /api/v1/admin/email-trace/events/:eventId` pins/releases a
+   row (`retention_hold`), audited before the change, and the admin page carries both the pin control
+   and the per-server `retention_days_override`. Releasing a hold deletes nothing; it only stops
+   protecting the row from the next sweep.
