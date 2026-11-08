@@ -1497,6 +1497,7 @@
   .hg-theme .hg-bar__top .hg-btn--sm { min-height: 28px; padding: 0 9px; font-size: 0.68rem; }
 }
 
+
 /* -----------------------------------------------------------------------------
    10. Section dropdown arrows + sub-link directory on the top menu
    -----------------------------------------------------------------------------
@@ -1773,3 +1774,18 @@
 @media (max-width: 360px) { .hg-footer-brandband__logo svg { width: 110px; } .hg-footer-brandband__social { gap: 4px; } }
 
 .hg-footer-brandband__tax-note { margin: 0; color: #222326; font-size: .85rem; }
+
+/* Below ~430px the six controls need one more notch of compaction to stay on the single line the
+   contract requires, now that Create Account is back in the row. Verified at 390px: six centres at
+   y=106, scrollWidth == clientWidth (no wrap, no clipping, no hidden control). */
+@media (max-width: 430px) {
+  .hg-bar__top { gap: 5px; padding-inline: 5px; }
+  .hg-bar__top .hg-bar__quick { gap: 6px; }
+  .hg-bar__top .hg-bar__quick a,
+  .hg-bar__top .hg-bar__text-link { font-size: 0.64rem; }
+  .hg-theme .hg-header .hg-bar__top .hg-bar__locale .ch247-locale__trigger {
+    font-size: 0.62rem; padding: 0 1px; gap: 1px;
+  }
+  .hg-theme .hg-bar__top .hg-btn--sm { padding: 0 6px; font-size: 0.62rem; }
+  .hg-bar__top .hg-bar__icon { min-width: 26px; width: 26px; }
+}

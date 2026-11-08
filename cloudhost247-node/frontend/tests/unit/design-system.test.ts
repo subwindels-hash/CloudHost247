@@ -21,6 +21,27 @@ const THEME_COPY = readFileSync(join(ROOT, 'templates', 'cloudhost247', 'css', '
 const SRC = join(__dirname, '..', '..', 'src');
 const APP_STYLES = readFileSync(join(SRC, 'styles.css'), 'utf8');
 
+/** Reads one `--token: value;` declaration from a stylesheet, trimmed, or undefined. */
+const declaration = (source: string, token: string) =>
+  new RegExp(`${token}\\s*:\\s*([^;]+);`).exec(source)?.[1]?.trim();
+
+/**
+ * Follows `var(--x)` chains inside one stylesheet down to a concrete value.
+ *
+ * Needed because the bridge tokens point at palette tokens (`--ch247-primary: var(--ch-gold-ink)`),
+ * so comparing the *declarations* would report a difference between two spellings of the same
+ * colour. What has to match is the colour that is finally painted.
+ */
+const resolveToken = (source: string, value: string | undefined): string | undefined => {
+  let current = value;
+  for (let hops = 0; current && hops < 8; hops += 1) {
+    const reference = /^var\(\s*(--[\w-]+)\s*\)$/.exec(current);
+    if (!reference) return current;
+    current = declaration(source, reference[1]!);
+  }
+  return current;
+};
+
 describe('design system', () => {
   it('prevents horizontal overflow at the document level', () => {
     expect(DESIGN_SYSTEM).toMatch(/html,\s*body\s*\{[^}]*overflow-x:\s*clip/);
@@ -64,12 +85,16 @@ describe('design system', () => {
     // tabs, focus ring and footer painted a second palette whenever their rule outranked the
     // bridge. Read the expected values from the design system rather than restating them here, so
     // a future brand change moves both files or fails this test.
-    const declaration = (source: string, token: string) =>
-      new RegExp(`${token}\\s*:\\s*([^;]+);`).exec(source)?.[1]?.trim();
     for (const token of ['--ch247-primary', '--ch247-accent', '--ch247-ink', '--ch247-bg', '--ch247-border']) {
-      const expected = declaration(DESIGN_SYSTEM, token);
-      expect(expected, `the design system does not declare ${token}`).toBeTruthy();
-      expect(declaration(APP_STYLES, token), `${token} in styles.css has drifted from the design system`).toBe(expected);
+      // Compare the colour that is *painted*, not the spelling of the declaration: the design
+      // system expresses the bridge through palette tokens while styles.css restates the literal
+      // it needs before the design system has loaded.
+      const expected = resolveToken(DESIGN_SYSTEM, declaration(DESIGN_SYSTEM, token));
+      expect(expected, `the design system does not resolve ${token}`).toMatch(/^#[0-9a-f]{6}$/i);
+      expect(
+        resolveToken(APP_STYLES, declaration(APP_STYLES, token)),
+        `${token} in styles.css has drifted from the design system`
+      ).toBe(expected);
     }
     for (const retired of ['#0756d8', '#071b3d', '#0a1730', '#12b886']) {
       expect(APP_STYLES, `styles.css still paints the retired palette colour ${retired}`).not.toContain(retired);
@@ -92,10 +117,30 @@ describe('design system', () => {
   });
 
   it('bridges the older application tokens onto the new palette', () => {
-    // The dashboard/admin stylesheets still reference these; mapping them keeps the whole product
-    // on one palette without rewriting every page in the same change.
-    expect(DESIGN_SYSTEM).toContain('--ch247-primary: #16704b');
-    expect(DESIGN_SYSTEM).toContain('--ch247-accent: #7ff0b4');
+    // The dashboard/admin stylesheets still reference the `--ch247-*` bridge names; mapping them
+    // keeps the whole product on one palette without rewriting every page in the same change.
+    //
+    // Assert the *mapping*, not a literal. Pinning `#16704b` here is how this test outlived its
+    // own subject: the brand moved to gold, both stylesheets followed, and the assertion kept
+    // demanding the retired green. What actually matters is that the bridge resolves to a palette
+    // token rather than to an independent hex that can drift on its own, and that the pre-load
+    // fallback restated in styles.css is *the same colour* — otherwise the app flashes a different
+    // brand for the moment before the design system loads.
+    for (const [bridgeName, paletteToken] of [
+      ['--ch247-primary', '--ch-gold-ink'],
+      ['--ch247-accent', '--ch-gold-champagne'],
+    ] as const) {
+      const bridgeValue = declaration(DESIGN_SYSTEM, bridgeName);
+      expect(bridgeValue, `the design system does not declare ${bridgeName}`).toBeTruthy();
+      // The bridge must point at the palette, so a brand change moves it automatically.
+      expect(bridgeValue, `${bridgeName} must resolve through the palette`).toContain('var(--ch-');
+
+      const expected = resolveToken(DESIGN_SYSTEM, declaration(DESIGN_SYSTEM, paletteToken));
+      const fallback = resolveToken(APP_STYLES, declaration(APP_STYLES, bridgeName));
+      expect(expected, `${paletteToken} must resolve to a literal colour`).toMatch(/^#[0-9a-f]{6}$/i);
+      expect(fallback, `${bridgeName} in styles.css must resolve to a literal colour`).toMatch(/^#[0-9a-f]{6}$/i);
+      expect(fallback, `${bridgeName} in styles.css has drifted from ${paletteToken}`).toBe(expected);
+    }
   });
 
   it('honours reduced-motion preferences', () => {

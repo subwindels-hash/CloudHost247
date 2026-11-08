@@ -4,7 +4,7 @@ import { z } from 'zod';
 import type { Env } from '../config/env';
 import { getPool } from '../db/pool';
 import type { Queryable } from '../db/types';
-import { findUserByEmail, findUserById, recordAuthEvent } from '../db/users';
+import { findUserByEmail, findUserById, findUserByLoginIdentifier, recordAuthEvent } from '../db/users';
 import { confirmEmailVerification, completePasswordReset, issueAuthAction } from '../services/auth-recovery-service';
 import {
   beginTotpEnrollment,
@@ -15,6 +15,21 @@ import {
   issueMfaLoginChallenge,
 } from '../services/totp-mfa-service';
 import { createUserWithIdentity } from '../services/customer-identity-service';
+import {
+  deriveUsernameCandidate,
+  isUsernameTaken,
+  suggestUsernames,
+  validateUsernameFormat,
+} from '../services/username-service';
+import {
+  expiryFromNow as pinExpiryFromNow,
+  generatePinSalt,
+  generateSecurityPin,
+  getSecurityPinPolicy,
+  hashSecurityPin,
+  sealSecurityPin,
+} from '../services/security-pin-service';
+import { pinKeyOrNull } from '../lib/pin-key';
 import { beginPasskeyRegistration, finishPasskeyRegistration, listPasskeys, removePasskey, renamePasskey } from '../services/passkey-service';
 import { beginPasskeyAuthentication, finishPasskeyAuthentication } from '../services/passkey-authentication-service';
 import {
@@ -36,12 +51,33 @@ const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(10, 'Password must be at least 10 characters'),
   fullName: z.string().min(1).max(255),
+  /**
+   * The customer's chosen handle. The web registration form requires it; the API accepts its
+   * absence so that an existing API client (or an administrator-driven import) keeps working — in
+   * that case a unique name is derived from the email local-part and de-duplicated. Either way every
+   * account leaves registration with exactly one unique username.
+   *
+   * Format/reservation rules live in src/services/username-service.ts rather than in this schema so
+   * registration, account settings and admin creation cannot drift apart.
+   */
+  username: z.string().min(3).max(32).optional(),
 });
 
-const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(1),
-});
+/**
+ * Login accepts an email address *or* a username in the same field (plus the legacy `email` key so
+ * older clients keep working). Whichever is supplied is resolved to exactly one account; the
+ * failure message is identical either way, so the form is not an enumeration oracle.
+ */
+const loginSchema = z
+  .object({
+    email: z.string().min(3).max(320).optional(),
+    username: z.string().min(3).max(32).optional(),
+    identifier: z.string().min(3).max(320).optional(),
+    password: z.string().min(1),
+  })
+  .refine((value) => Boolean(value.identifier ?? value.username ?? value.email), {
+    message: 'Enter your email address or username',
+  });
 
 const passwordResetRequestSchema = z.object({
   email: z.string().email(),
@@ -84,14 +120,17 @@ function publicUser(user: {
   full_name: string;
   role: string;
   status: string;
+  username?: string | null;
   customer_id?: string | null;
   email_verified_at?: string | null;
 }) {
-  // Deliberately identical in shape to src/dto/account.ts#toPublicUser: identity only. The
-  // Security Number (hash, plaintext, expiry, version) is never part of this payload — not on
-  // register, not on login, and not on /api/auth/me (spec §11/§46). It has its own endpoint.
+  // Deliberately identical in shape to src/dto/account.ts#toPublicUser: identity only. Neither the
+  // Security PIN (hash, salt, plaintext, expiry, version) nor the Security Number is ever part of
+  // this payload — not on register, not on login, and not on /api/auth/me. Each has its own
+  // endpoint, and the PIN additionally requires a fresh email verification to be read.
   return {
     id: user.id,
+    username: user.username ?? null,
     email: user.email,
     fullName: user.full_name,
     role: user.role,
@@ -120,26 +159,76 @@ export async function registerAuthRoutes(app: FastifyInstance, env: Env, overrid
       if (!parsed.success) {
         throw new ValidationError(parsed.error.issues.map((i) => i.message).join(', '));
       }
-      const { email, password, fullName } = parsed.data;
+      const { email, password, fullName, username: rawUsername } = parsed.data;
 
       const existing = await findUserByEmail(pool, email);
       if (existing) {
         throw new ConflictError('An account with this email already exists');
       }
 
+      // Reserve/uniqueness rules are applied before any write, so a customer never receives a
+      // confusing "duplicate key" for a name they can simply change.
+      const usernameCheck = validateUsernameFormat(rawUsername ?? deriveUsernameCandidate(email));
+      if (!usernameCheck.ok) throw new ValidationError(usernameCheck.error ?? 'That username is not available');
+      let username = usernameCheck.value;
+      if (await isUsernameTaken(pool, username)) {
+        if (rawUsername) {
+          const suggestions = await suggestUsernames(pool, username);
+          throw new ConflictError(
+            suggestions.length > 0
+              ? `That username is already taken. Try ${suggestions.map((s) => `"${s}"`).join(', ')}.`
+              : 'That username is already taken.'
+          );
+        }
+        // Derived name collided (two customers share an email local-part): append a suffix rather
+        // than failing a registration the customer cannot reasonably resolve.
+        let resolved = false;
+        for (let suffix = 1; suffix <= 50 && !resolved; suffix += 1) {
+          const candidate = `${username.slice(0, 28)}${suffix}`;
+          if (!(await isUsernameTaken(pool, candidate))) {
+            username = candidate;
+            resolved = true;
+          }
+        }
+        if (!resolved) throw new ConflictError('Could not derive a unique username. Please choose one.');
+      }
+      // A missing PIN key must not stop customers from signing up. The account is created now and
+      // its PIN is issued lazily the first time the security card is opened (see
+      // `/api/v1/account/security`, which calls `ensureCurrentPin`). Registration is the one path
+      // that is dangerous to fail: refusing it takes the whole platform down over one missing
+      // environment variable, whereas a deferred PIN degrades exactly one feature and self-heals
+      // as soon as the key is configured.
+      const pinKey = pinKeyOrNull();
+
       const passwordHash = await hashPassword(password);
 
-      // Identity is issued at creation time, atomically with the account itself: a permanent
-      // six-digit Customer ID (unique by database constraint, retried on collision) and the
-      // first four-digit Security Number, stored only as a bcrypt hash with a 24-hour window.
+      // Identity is issued at creation time, atomically with the account itself:
+      //   - a unique username (database index on lower(username) is the authority),
+      //   - a permanent nine-digit Customer ID (unique by constraint, retried on collision),
+      //   - the first four-digit Security Number (bcrypt hash, 24-hour window), and
+      //   - the first four-digit Security PIN (keyed HMAC + per-value salt, 24-hour window).
+      //
+      // The PIN plaintext is deliberately NOT returned to the registrant: reading the PIN always
+      // requires a fresh six-digit email verification (see src/routes/account-security.ts), so a
+      // stolen registration response or a shoulder-surfed signup cannot leak it.
       const policy = await getSecurityNumberPolicy(pool);
+      const pinPolicy = await getSecurityPinPolicy(pool);
       const securityNumber = generateSecurityNumber();
+      // When the key is absent these stay null, which `ensureCurrentPin` treats the same as an
+      // expired PIN: it issues one the next time the customer opens their security settings.
+      const pinSalt = pinKey ? generatePinSalt() : null;
+      const securityPin = pinKey ? generateSecurityPin() : null;
       const { user } = await createUserWithIdentity(pool, {
         email,
         passwordHash,
         fullName,
+        username,
         securityNumberHash: await hashSecurityNumber(securityNumber),
         securityNumberExpiresAt: expiryFromNow(policy.rotationHours),
+        securityPinHash: pinKey && securityPin && pinSalt ? hashSecurityPin(securityPin, pinSalt, pinKey) : null,
+        securityPinSalt: pinSalt,
+        securityPinEncrypted: pinKey && securityPin ? sealSecurityPin(securityPin, pinKey) : null,
+        securityPinExpiresAt: pinKey ? pinExpiryFromNow(pinPolicy.rotationHours) : null,
       });
 
       await recordAuthEvent(pool, {
@@ -180,6 +269,10 @@ export async function registerAuthRoutes(app: FastifyInstance, env: Env, overrid
         user: publicUser(user),
         token,
         securityNumber: { value: securityNumber, expiresAt: user.security_number_expires_at },
+        // Shape only — no digits of the PIN. The account's first PIN is already in place (written
+        // in the same INSERT as the account), and it can only be read after a fresh six-digit
+        // email verification, so this response says when the first rotation is due and nothing else.
+        securityPin: { set: Boolean(user.security_pin_hash), nextRotationAt: user.security_pin_expires_at },
         emailVerification: { queued: verification.issued },
       };
     }
@@ -205,9 +298,13 @@ export async function registerAuthRoutes(app: FastifyInstance, env: Env, overrid
     if (!parsed.success) {
       throw new ValidationError(parsed.error.issues.map((i) => i.message).join(', '));
     }
-    const { email, password } = parsed.data;
+    // One field accepts either an email address or a username; `identifier` is the preferred key
+    // for new clients, `email`/`username` keep older clients (and the login form's field name)
+    // working unchanged.
+    const identifier = (parsed.data.identifier ?? parsed.data.username ?? parsed.data.email ?? '').trim();
+    const { password } = parsed.data;
 
-    const user = await findUserByEmail(pool, email);
+    const user = await findUserByLoginIdentifier(pool, identifier);
     const passwordOk = user ? await verifyPassword(password, user.password_hash) : false;
 
     if (!user || !passwordOk) {
@@ -217,9 +314,14 @@ export async function registerAuthRoutes(app: FastifyInstance, env: Env, overrid
         eventType: 'login_failure',
         ipAddress: request.ip,
         userAgent: request.headers['user-agent'] ?? null,
-        metadata: { email },
+        // Only the fact that an identifier was attempted, plus the identifier itself when it
+        // looks like an email (matching the pre-existing behaviour support tooling relies on).
+        // A username is recorded too, since it is not secret by design.
+        metadata: { identifier },
       });
-      throw new UnauthorizedError('Invalid email or password');
+      // Identical message whether the identifier is unknown or the password is wrong — the login
+      // form must not become an account-enumeration oracle.
+      throw new UnauthorizedError('Invalid email/username or password');
     }
 
     if (user.status !== 'active') {

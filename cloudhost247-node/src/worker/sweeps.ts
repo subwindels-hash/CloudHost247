@@ -10,6 +10,15 @@ import { enqueueDeployment } from '../db/deployments';
 import { listInstallationsForHealthChecks } from './worker-db';
 import { expireStaleSupportSessions } from '../db/support-sessions';
 import { listAccountsNeedingRotation, rotateSecurityNumber } from '../services/security-number-service';
+import {
+  describeSecurityPin,
+  getSecurityPinPolicy,
+  listAccountsNeedingPinNotice,
+  listAccountsNeedingPinRotation,
+  markPinNotified,
+  rotateSecurityPin,
+} from '../services/security-pin-service';
+import { notifySecurityPinRotated } from '../services/notification-service';
 import { recordAuditBestEffort } from '../lib/audit';
 
 export const HEALTHCHECK_PERIOD_MINUTES = 5;
@@ -17,6 +26,8 @@ export const SUBSCRIPTION_GRACE_DEFAULT_DAYS = 7;
 export const SUSPEND_AFTER_GRACE_DEFAULT_DAYS = 7;
 /** Rotation windows are hours long, so a five-minute sweep is timely without being chatty. */
 export const SECURITY_NUMBER_SWEEP_INTERVAL_MS = 5 * 60_000;
+/** The Security PIN shares the same cadence and the same reasoning. */
+export const SECURITY_PIN_SWEEP_INTERVAL_MS = SECURITY_NUMBER_SWEEP_INTERVAL_MS;
 
 /**
  * Enqueues health-check jobs for active installations (spec §52). One job per installation per
@@ -139,4 +150,79 @@ export async function sweepExpiredSupportSessions(db: Queryable): Promise<number
     });
   }
   return expired.length;
+}
+
+
+/**
+ * Proactive Security PIN rotation.
+ *
+ * The reactive half of the guarantee lives on the read paths (`GET /api/v1/account/security` and
+ * the verified reveal both rotate an expired PIN), so a stopped worker can never leave a customer
+ * holding a dead credential. This sweep is the proactive half: it keeps every active account's PIN
+ * current even when the customer is not looking, which is what makes "the PIN changes every 24
+ * hours" true in the everyday sense rather than only on access.
+ *
+ * Concurrency: each rotation is a compare-and-swap on `security_pin_version` (see
+ * `ensureCurrentPin`), so a sweep racing a customer's own read cannot mint competing PINs — the
+ * loser simply observes the winner's value.
+ *
+ * Nothing here logs, audits or notifies the value. The audit row records the trigger, version and
+ * new expiry; the notification (delivered separately, idempotently by version) deliberately cannot
+ * contain the PIN.
+ */
+export async function sweepSecurityPins(db: Queryable, batchSize = 500): Promise<number> {
+  const due = await listAccountsNeedingPinRotation(db, batchSize);
+  if (due.length === 0) return 0;
+  const policy = await getSecurityPinPolicy(db);
+  let rotated = 0;
+  for (const user of due) {
+    const result = await rotateSecurityPin(db, user.id, { rotationHours: policy.rotationHours });
+    if (!result) continue;
+    rotated += 1;
+    await recordAuditBestEffort(db, {
+      actorId: null,
+      action: 'security_pin_rotated',
+      resourceType: 'user',
+      resourceId: user.id,
+      metadata: {
+        customerId: user.customer_id,
+        trigger: 'scheduled_rotation',
+        version: result.version,
+        expiresAt: result.expiresAt,
+      },
+    });
+  }
+  return rotated;
+}
+
+/**
+ * Sends the "your Security PIN has changed" notice for rotations that have not been announced yet.
+ *
+ * Idempotent by construction: the notification is keyed on the rotation version, and
+ * `markPinNotified` records the highest version announced. A redelivered sweep tick therefore
+ * neither double-notifies nor re-sends an email. The mail never contains the PIN.
+ */
+export async function sweepSecurityPinNotices(db: Queryable, batchSize = 200): Promise<number> {
+  const policy = await getSecurityPinPolicy(db);
+  if (!policy.notifyOnRotation) return 0;
+  const pending = await listAccountsNeedingPinNotice(db, batchSize);
+  let notified = 0;
+  for (const user of pending) {
+    const state = describeSecurityPin(user, policy.rotationHours);
+    try {
+      await notifySecurityPinRotated(db, {
+        userId: user.id,
+        version: user.security_pin_version,
+        rotatedAt: state.createdAt ?? new Date().toISOString(),
+        nextRotationAt: state.expiresAt ?? new Date().toISOString(),
+        customerId: user.customer_id,
+      });
+      await markPinNotified(db, user.id, user.security_pin_version);
+      notified += 1;
+    } catch {
+      // A failed notification must not stall the sweep for everyone behind it; the version stays
+      // un-notified, so the next tick retries.
+    }
+  }
+  return notified;
 }

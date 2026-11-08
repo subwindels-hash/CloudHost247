@@ -35,6 +35,20 @@ export async function registerSecurityPlugins(app: FastifyInstance, env: Env) {
     global: true,
     max: 300,
     timeWindow: '1 minute',
+    /**
+     * Per-route buckets, not one shared bucket per IP.
+     *
+     * The default key is just the client IP, which means every route's `config.rateLimit` shares one
+     * counter: nine requests to `/account/security-pin/view` would exhaust a 5-per-10-minutes route
+     * limit *and* leave the login route already throttled. That turns a limit meant to protect one
+     * sensitive action into a global ceiling, and (worse) lets traffic on a busy route deny service
+     * to a different one. Keying on `routeOptions.url` gives each route its own window while still
+     * keying by client IP within that route.
+     *
+     * The array-appended per-route config only *low*ers the ceiling (see @fastify/rate-limit's
+     * mergeParams), so routes that opt in still inherit the global 300/minute as an outer bound.
+     */
+    keyGenerator: (request) => `${request.ip}|${request.routeOptions?.url ?? request.url.split(/[?#]/)[0]}`,
     // Content-hashed static bundles are not API traffic. A tool page pulls around twenty of them,
     // so counting them against the API ceiling made a single browser session fail mid-load: once the
     // minute's budget was spent, the JavaScript itself was refused and the page rendered blank.

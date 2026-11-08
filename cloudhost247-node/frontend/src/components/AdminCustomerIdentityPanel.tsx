@@ -3,11 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import {
   forceRotateCustomerSecurityNumber,
   getCustomerSecurityNumberStatus,
+  getCustomerSecurityPinStatus,
   requireSecurityNumberReinitialization,
+  rotateCustomerSecurityPin,
   switchToCustomerAccount,
 } from '../lib/account-api';
 import { getStoredUser, getToken, setSession, setSupportOrigin } from '../lib/auth';
-import type { PublicUser, SecurityNumberStatus } from '../lib/account-types';
+import type { PublicUser, SecurityNumberStatus, SecurityPinStatus } from '../lib/account-types';
 
 /**
  * Staff-side identity panel for one customer: Security Number oversight and "switch to this
@@ -17,6 +19,12 @@ import type { PublicUser, SecurityNumberStatus } from '../lib/account-types';
  * Security Number was issued, which version it is, when it expires. The value itself is not in
  * the API response and does not exist in recoverable form anywhere: only a bcrypt hash is stored.
  * Forcing a rotation issues a new number that only the customer can retrieve.
+ *
+ * The same rule governs the rotating Security PIN, and it is enforced by the API rather than by
+ * this component: `/admin/users/:id/security-pin` returns lifecycle metadata, and its rotate
+ * endpoint re-seals a new PIN for the customer without returning it. So there is nothing here for
+ * an administrator to read even if they wanted to, and the support-mode switch below cannot be
+ * used as a side door either — the PIN endpoints refuse a delegated session outright.
  */
 export default function AdminCustomerIdentityPanel({
   customer,
@@ -26,6 +34,7 @@ export default function AdminCustomerIdentityPanel({
   isSuperAdmin: boolean;
 }) {
   const [status, setStatus] = useState<SecurityNumberStatus | null>(null);
+  const [pinStatus, setPinStatus] = useState<SecurityPinStatus | null>(null);
   const [message, setMessage] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [reason, setReason] = useState('');
@@ -35,6 +44,9 @@ export default function AdminCustomerIdentityPanel({
     getCustomerSecurityNumberStatus(customer.id)
       .then((res) => setStatus(res.securityNumber))
       .catch(() => setStatus(null));
+    getCustomerSecurityPinStatus(customer.id)
+      .then((res) => setPinStatus(res.securityPin))
+      .catch(() => setPinStatus(null));
   }, [customer.id]);
 
   useEffect(() => {
@@ -50,6 +62,23 @@ export default function AdminCustomerIdentityPanel({
       setMessage({ kind: 'ok', text: okText });
     } catch (err) {
       setMessage({ kind: 'error', text: err instanceof Error ? err.message : 'That action could not be completed.' });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function rotatePin() {
+    setBusy(true);
+    setMessage(null);
+    try {
+      const res = await rotateCustomerSecurityPin(customer.id);
+      setPinStatus(res.securityPin);
+      setMessage({
+        kind: 'ok',
+        text: 'A new Security PIN has been issued. The customer must verify their email to see it — it was not shown to you.',
+      });
+    } catch (err) {
+      setMessage({ kind: 'error', text: err instanceof Error ? err.message : 'The PIN could not be rotated.' });
     } finally {
       setBusy(false);
     }
@@ -93,6 +122,8 @@ export default function AdminCustomerIdentityPanel({
       <dl className="ch247-definition-list">
         <dt>Customer ID</dt>
         <dd data-testid="admin-customer-id">{customer.customerId ?? '—'}</dd>
+        <dt>Username</dt>
+        <dd data-testid="admin-username">{customer.username ?? '—'}</dd>
         <dt>Security Number</dt>
         <dd>
           {status
@@ -103,6 +134,14 @@ export default function AdminCustomerIdentityPanel({
         </dd>
         <dt>Expires</dt>
         <dd>{status?.expiresAt ? new Date(status.expiresAt).toLocaleString() : '—'}</dd>
+        <dt>Security PIN</dt>
+        <dd data-testid="admin-security-pin">
+          {pinStatus
+            ? `•••• · version ${pinStatus.version} · rotates every ${pinStatus.rotationHours}h`
+            : 'Unavailable'}
+        </dd>
+        <dt>PIN next rotation</dt>
+        <dd>{pinStatus?.nextRotationAt ? new Date(pinStatus.nextRotationAt).toLocaleString() : '—'}</dd>
       </dl>
       <p className="ch247-page__hint">
         The Security Number itself is never visible to staff — we store only a one-way hash. If a
@@ -118,6 +157,14 @@ export default function AdminCustomerIdentityPanel({
           onClick={() => run(() => forceRotateCustomerSecurityNumber(customer.id), 'A new Security Number has been issued.')}
         >
           Force rotation
+        </button>
+        <button
+          type="button"
+          className="ch247-button ch247-button--outline ch247-button--small"
+          disabled={busy}
+          onClick={rotatePin}
+        >
+          Rotate Security PIN
         </button>
         {isSuperAdmin && (
           <button
@@ -141,7 +188,8 @@ export default function AdminCustomerIdentityPanel({
         Signing in to this account never uses or reveals the customer&apos;s password or Security
         Number. It creates a separate, time-limited session that stays attached to your admin
         identity, shows the customer-facing screens exactly as they see them, blocks sensitive
-        actions, and records everything you do.
+        actions, and records everything you do. In particular, the customer&apos;s Security PIN stays
+        locked while you are signed in as them.
       </p>
       <form className="ch247-form ch247-form--wide" onSubmit={onSwitch}>
         <label>

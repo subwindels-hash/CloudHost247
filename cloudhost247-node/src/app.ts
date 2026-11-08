@@ -14,6 +14,8 @@ import { registerCatalogAdminRoutes } from './routes/catalog-admin';
 import { registerAccountRoutes } from './routes/account';
 import { registerAdminCustomerRoutes } from './routes/admin-customers';
 import { registerAccountIdentityRoutes } from './routes/account-identity';
+import { registerAccountSecurityRoutes } from './routes/account-security';
+import { registerAdminAccountSecurityRoutes } from './routes/admin-account-security';
 import { registerAdminUserRoutes } from './routes/admin-users';
 import { registerCommerceRoutes } from './routes/commerce';
 import { registerBillingRoutes } from './routes/billing';
@@ -168,6 +170,10 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     await registerCatalogAdminRoutes(instance, env, pool);
     await registerAccountRoutes(instance, env, pool);
     await registerAccountIdentityRoutes(instance, env, pool);
+    // Username, the rotating Security PIN and its six-digit email-verification gate, plus account
+    // recovery (customer side) and staff oversight of recovery + PIN policy (admin side).
+    await registerAccountSecurityRoutes(instance, env, pool);
+    await registerAdminAccountSecurityRoutes(instance, env, pool);
     await registerAdminCustomerRoutes(instance, env, pool);
     await registerAdminUserRoutes(instance, env, pool);
     await registerCommerceRoutes(instance, env, pool);

@@ -6,7 +6,13 @@
 import { apiFetch } from './api';
 import type {
   AccountProfile,
+  AccountRecoveryRequest,
+  AccountSecurityPayload,
   AdminSupportSession,
+  RevealedSecurityPin,
+  SecurityPinChallenge,
+  SecurityPinStatus,
+  UsernameAvailability,
   SecurityNumberStatus,
   AdminCustomerDetail,
   AdminCustomerDomain,
@@ -209,6 +215,93 @@ export function changeMySecurityNumber(currentSecurityNumber: string, newSecurit
   );
 }
 
+// --- Account Security: username + rotating Security PIN ---------------------------------------
+
+/**
+ * The whole Account / Security card in one call: username, Customer ID, PIN lifecycle metadata and
+ * the legacy Security Number status. The PIN itself is never in this payload.
+ */
+export function getMyAccountSecurity() {
+  return apiFetch<AccountSecurityPayload>('/api/v1/account/security');
+}
+
+export function checkUsernameAvailability(username: string) {
+  return apiFetch<UsernameAvailability>(
+    `/api/v1/account/username/availability?username=${encodeURIComponent(username)}`
+  );
+}
+
+/** Changes the handle. The old one stops working for login immediately. */
+export function changeMyUsername(username: string) {
+  return apiFetch<{ username: string; usernameChangedAt: string | null; unchanged: boolean }>(
+    '/api/v1/account/username',
+    { method: 'PATCH', body: JSON.stringify({ username }) }
+  );
+}
+
+/**
+ * Starts the gate: asks the server to email a six-digit code to the account's *registered* address.
+ * The response carries a challenge token and the masked address — never the code, and never the PIN.
+ */
+export function requestSecurityPinView() {
+  return apiFetch<{ challenge: SecurityPinChallenge; message: string }>(
+    '/api/v1/account/security-pin/view',
+    { method: 'POST', body: JSON.stringify({}) }
+  );
+}
+
+export function resendSecurityPinCode(challengeToken: string) {
+  return apiFetch<{ challenge: SecurityPinChallenge; message: string }>(
+    '/api/v1/account/security-pin/resend',
+    { method: 'POST', body: JSON.stringify({ challengeToken }) }
+  );
+}
+
+/** Submits the emailed code. On success the challenge may be spent exactly once by `reveal`. */
+export function verifySecurityPinCode(challengeToken: string, code: string) {
+  return apiFetch<{ verified: boolean; message: string }>('/api/v1/account/security-pin/verify', {
+    method: 'POST',
+    body: JSON.stringify({ challengeToken, code }),
+  });
+}
+
+/**
+ * The only endpoint that returns a real PIN. The caller must display it for at most
+ * `displayTtlSeconds` and must never write it to storage, a URL, or an analytics event.
+ */
+export function revealSecurityPin(challengeToken: string) {
+  return apiFetch<RevealedSecurityPin>('/api/v1/account/security-pin/reveal', {
+    method: 'POST',
+    body: JSON.stringify({ challengeToken }),
+  });
+}
+
+// --- Account recovery ---------------------------------------------------------------------------
+
+export function createAccountRecoveryRequest(input: {
+  reason: AccountRecoveryRequest['reason'];
+  contactEmail?: string;
+  contactPhone?: string;
+  details?: string;
+  acknowledgeNoPinDisclosure?: true;
+}) {
+  return apiFetch<{ recovery: AccountRecoveryRequest; existing: boolean; message: string }>(
+    '/api/v1/account/recovery',
+    { method: 'POST', body: JSON.stringify(input) }
+  );
+}
+
+export function listMyRecoveryRequests() {
+  return apiFetch<{ requests: AccountRecoveryRequest[] }>('/api/v1/account/recovery');
+}
+
+export function cancelMyRecoveryRequest(id: string, note?: string) {
+  return apiFetch<{ recovery: AccountRecoveryRequest }>(`/api/v1/account/recovery/${id}/cancel`, {
+    method: 'POST',
+    body: JSON.stringify(note ? { note } : {}),
+  });
+}
+
 export function uploadMyProfileImage(input: { data: string; contentType: string; fileName: string }) {
   return apiFetch<{ profileImage: { contentType: string; byteSize: number; updatedAt: string } }>(
     '/api/v1/account/profile-image',
@@ -224,6 +317,29 @@ export function removeMyProfileImage() {
 
 export function getCustomerSecurityNumberStatus(userId: string) {
   return apiFetch<{ securityNumber: SecurityNumberStatus }>(`/api/v1/admin/users/${userId}/security-number`);
+}
+
+// --- Admin: Security PIN oversight --------------------------------------------------------------
+
+/**
+ * Lifecycle metadata only. The response has no field that can carry the PIN, its hash, its salt or
+ * its envelope — an administrator supervises rotation, never disclosure.
+ */
+export function getCustomerSecurityPinStatus(userId: string) {
+  return apiFetch<{ securityPin: SecurityPinStatus; customer: AdminCustomerSummary }>(
+    `/api/v1/admin/users/${encodeURIComponent(userId)}/security-pin`
+  );
+}
+
+/**
+ * Forces a rotation after a suspected compromise. The new value is sealed for the customer only;
+ * it is not returned here, so an administrator cannot learn it by rotating and reading the result.
+ */
+export function rotateCustomerSecurityPin(userId: string) {
+  return apiFetch<{ securityPin: SecurityPinStatus }>(
+    `/api/v1/admin/users/${encodeURIComponent(userId)}/security-pin/rotate`,
+    { method: 'POST', body: JSON.stringify({}) }
+  );
 }
 
 export function forceRotateCustomerSecurityNumber(userId: string) {

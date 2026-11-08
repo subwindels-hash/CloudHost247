@@ -19,9 +19,24 @@ export interface UserRecord {
   email_verified_at: string | null;
   /** Monotonic JWT session generation; increments with every password change (0059 migration). */
   auth_session_version: number;
-  /** Permanent, human-readable six-digit account number (0051 migration). Never a relational
-   * key — `id` (uuid) remains the primary key and every foreign key still points at it. */
+  /** Unique, customer-chosen login handle (0085 migration). Case-insensitive uniqueness. */
+  username: string;
+  username_changed_at: string | null;
+  /** Permanent, human-readable nine-digit account number (0085 migration; six digits for accounts
+   * created before it). Never a relational key — `id` (uuid) remains the primary key and every
+   * foreign key still points at it. Immutable: a database trigger rejects any change. */
   customer_id: string | null;
+  /** Keyed hash (HMAC-SHA-256) of the four-digit Security PIN plus its per-value salt. The
+   * plaintext is never stored, never logged and never included in a DTO. */
+  security_pin_hash: string | null;
+  security_pin_salt: string | null;
+  /** AES-256-GCM envelope of the same PIN, used only by the verified reveal path. Never DTO'd. */
+  security_pin_encrypted: string | null;
+  security_pin_created_at: string | null;
+  security_pin_expires_at: string | null;
+  security_pin_version: number;
+  security_pin_notified_version: number;
+  security_pin_previous_hash: string | null;
   /** bcrypt hash of the four-digit Security Number. The plaintext is never stored anywhere. */
   security_number_hash: string | null;
   security_number_created_at: string | null;
@@ -58,25 +73,41 @@ export async function createUser(
     email: string;
     passwordHash: string;
     fullName: string;
-    /** Six-digit Customer ID candidate. A unique-violation on this column is the authoritative
+    /** Chosen (or derived) username. A unique-violation on this column is a real conflict and is
+     * surfaced to the caller; the database index on lower(username) is the authority. */
+    username: string;
+    /** Nine-digit Customer ID candidate. A unique-violation on this column is the authoritative
      * collision signal and is retried by src/services/customer-identity-service.ts — never do a
      * SELECT-then-INSERT, which races. */
     customerId?: string;
     role?: UserRole;
     securityNumberHash?: string | null;
     securityNumberExpiresAt?: Date | null;
+    /** Keyed hash + salt of the first rotating Security PIN (see src/services/security-pin-service.ts). */
+    securityPinHash?: string | null;
+    securityPinSalt?: string | null;
+    /** Sealed (AES-GCM) copy of the same PIN — see src/services/security-pin-service.ts. */
+    securityPinEncrypted?: string | null;
+    securityPinExpiresAt?: Date | null;
   }
 ): Promise<UserRecord> {
   return withTransaction(pool, async (tx) => {
     const role: UserRole = input.role ?? 'customer';
     const hasSecurityNumber = Boolean(input.securityNumberHash);
+    // The identity of an account — username, permanent Customer ID, first Security PIN — is written
+    // in the same INSERT as the account itself, so an account can never exist without them.
     const { rows } = await tx.query<UserRecord>(
       `INSERT INTO users (
-         id, email, password_hash, full_name, role, customer_id,
+         id, email, password_hash, full_name, role, username, customer_id,
          security_number_hash, security_number_created_at, security_number_expires_at,
-         security_number_initialized
+         security_number_initialized,
+         security_pin_hash, security_pin_salt, security_pin_encrypted,
+         security_pin_created_at, security_pin_expires_at, security_pin_version
        )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, CASE WHEN $7::text IS NULL THEN NULL ELSE now() END, $8, $9)
+       VALUES ($1, $2, $3, $4, $5, $6, $7,
+               $8, CASE WHEN $8::text IS NULL THEN NULL ELSE now() END, $9, $10,
+               $11, $12, $13, CASE WHEN $11::text IS NULL THEN NULL ELSE now() END, $14,
+               CASE WHEN $11::text IS NULL THEN 0 ELSE 1 END)
        RETURNING *`,
       [
         input.id,
@@ -84,10 +115,15 @@ export async function createUser(
         input.passwordHash,
         input.fullName,
         role,
+        input.username,
         input.customerId ?? null,
         input.securityNumberHash ?? null,
         input.securityNumberExpiresAt ?? null,
         hasSecurityNumber,
+        input.securityPinHash ?? null,
+        input.securityPinSalt ?? null,
+        input.securityPinEncrypted ?? null,
+        input.securityPinExpiresAt ?? null,
       ]
     );
     const row = rows[0];
@@ -205,15 +241,19 @@ export async function listUsers(pool: Queryable, filter: ListUsersFilter): Promi
     const term = filter.search.trim();
     params.push(`%${term.toLowerCase()}%`);
     const like = `$${params.length}`;
+    // Exact-match lane for a pasted username, so "ada" does not bury "ada" under "ada2".
+    params.push(term.toLowerCase());
+    const likeExactUsername = `$${params.length}`;
     // Exact-match lanes for the two identifiers staff actually paste in (six-digit Customer ID
     // and the internal UUID) alongside the substring lanes for human fields.
-    params.push(/^[0-9]{6}$/.test(term) ? term : null);
+    params.push(/^([0-9]{6}|[0-9]{9})$/.test(term) ? term : null);
     const exactCustomerId = `$${params.length}`;
     params.push(/^[0-9a-fA-F-]{36}$/.test(term) ? term : null);
     const exactUuid = `$${params.length}`;
     conditions.push(
       `(lower(email) LIKE ${like} OR lower(full_name) LIKE ${like} OR lower(coalesce(phone, '')) LIKE ${like}` +
-        ` OR customer_id = ${exactCustomerId} OR id::text = ${exactUuid})`
+        ` OR lower(username) LIKE ${like}` +
+        ` OR lower(username) = ${likeExactUsername} OR customer_id = ${exactCustomerId} OR id::text = ${exactUuid})`
     );
   }
 
@@ -266,7 +306,19 @@ export async function recordAuthEvent(
       | 'passkey_enrollment_started'
       | 'passkey_added'
       | 'passkey_removed'
-      | 'passkey_renamed';
+      | 'passkey_renamed'
+      // --- 0085: username, Security PIN, verification and recovery -----------------------------
+      | 'username_changed'
+      | 'security_pin_rotated'
+      | 'security_pin_view_challenge_requested'
+      | 'security_pin_view_challenge_resent'
+      | 'security_pin_view_verification_failed'
+      | 'security_pin_viewed'
+      | 'account_recovery_requested'
+      | 'account_recovery_cancelled'
+      | 'account_recovery_identity_verified'
+      | 'account_recovery_approved'
+      | 'account_recovery_rejected';
     ipAddress?: string | null;
     userAgent?: string | null;
     metadata?: Record<string, unknown>;
@@ -286,7 +338,7 @@ export async function recordAuthEvent(
   );
 }
 
-/** Looks an account up by its permanent six-digit Customer ID (admin search, support flows). */
+/** Looks an account up by its permanent nine-digit Customer ID (admin search, support flows). */
 export async function findUserByCustomerId(pool: Queryable, customerId: string): Promise<UserRecord | null> {
   const { rows } = await pool.query<UserRecord>('SELECT * FROM users WHERE customer_id = $1 LIMIT 1', [customerId]);
   return rows[0] ?? null;
@@ -365,6 +417,49 @@ export async function updateUserEmail(pool: Queryable, id: string, email: string
   const { rows } = await pool.query<UserRecord>(
     `UPDATE users SET email = $2, updated_at = now() WHERE id = $1 RETURNING *`,
     [id, email]
+  );
+  return rows[0] ?? null;
+}
+
+/**
+ * Looks an account up by username, case-insensitively. Username-based identification is used by
+ * support tooling and by the login form (which accepts "email or username"); it is never used to
+ * decide authorization — the account's uuid and role are still the only authorities.
+ */
+export async function findUserByUsername(pool: Queryable, username: string): Promise<UserRecord | null> {
+  const { rows } = await pool.query<UserRecord>('SELECT * FROM users WHERE lower(username) = lower($1) LIMIT 1', [
+    username,
+  ]);
+  return rows[0] ?? null;
+}
+
+/**
+ * Resolves a login identifier that may be either an email address or a username. Lookup order is
+ * deliberately email-first: an account can only be reached by the handle that exactly matches, so a
+ * username can never be used to shadow somebody else's email address.
+ */
+export async function findUserByLoginIdentifier(pool: Queryable, identifier: string): Promise<UserRecord | null> {
+  const value = identifier.trim();
+  if (value.includes('@')) {
+    const byEmail = await findUserByEmail(pool, value);
+    if (byEmail) return byEmail;
+  }
+  return findUserByUsername(pool, value);
+}
+
+/**
+ * Profile edit. Extends the Phase 4 safe-field list with the username, which is customer-owned but
+ * must go through the service layer's reservation/uniqueness rules before it gets here. The
+ * permanent Customer ID and every security_pin_* column remain unreachable from this function.
+ */
+export async function updateUsernameForUser(
+  pool: Queryable,
+  id: string,
+  username: string
+): Promise<UserRecord | null> {
+  const { rows } = await pool.query<UserRecord>(
+    `UPDATE users SET username = $2, username_changed_at = now(), updated_at = now() WHERE id = $1 RETURNING *`,
+    [id, username]
   );
   return rows[0] ?? null;
 }

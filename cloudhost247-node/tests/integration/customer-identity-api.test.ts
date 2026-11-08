@@ -59,21 +59,31 @@ describe('customer identity, security number and support mode', () => {
   async function createStaff(role: 'admin' | 'super_admin', email = `${role}-${randomUUID()}@example.com`) {
     const id = randomUUID();
     await db.query(
-      `INSERT INTO users (id, email, password_hash, full_name, role, customer_id)
-       VALUES ($1, $2, $3, $4, $5, $6)`,
-      [id, email, await hashPassword('correct-horse-battery'), 'Staff Person', role, String(Math.floor(Math.random() * 900000) + 100000)]
+      `INSERT INTO users (id, email, password_hash, full_name, role, username, customer_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [
+        id,
+        email,
+        await hashPassword('correct-horse-battery'),
+        'Staff Person',
+        role,
+        // Migration 0085 made username mandatory. The reserved-word/substring rules mean a
+        // "staff…"/"ops…"-style prefix can be rejected, so derive a neutral, always-valid name.
+        `t${id.replace(/-/g, '').slice(0, 12)}`,
+        String(Math.floor(Math.random() * 900_000_000) + 100_000_000),
+      ]
     );
     return { id, token: signAuthToken(env, { sub: id, role, email }) };
   }
 
   // --- Customer ID ------------------------------------------------------------------------------
 
-  it('issues a permanent, unique six-digit Customer ID at registration and keeps it stable', async () => {
+  it('issues a permanent, unique nine-digit Customer ID at registration and keeps it stable', async () => {
     const first = await register('ident1@example.com');
     const second = await register('ident2@example.com');
 
-    expect(first.user.customerId).toMatch(/^[0-9]{6}$/);
-    expect(second.user.customerId).toMatch(/^[0-9]{6}$/);
+    expect(first.user.customerId).toMatch(/^[0-9]{9}$/);
+    expect(second.user.customerId).toMatch(/^[0-9]{9}$/);
     expect(first.user.customerId).not.toBe(second.user.customerId);
 
     // Immutable across profile edits.
@@ -134,10 +144,42 @@ describe('customer identity, security number and support mode', () => {
     for (const url of ['/api/auth/me', '/api/v1/account']) {
       const res = await app().inject({ method: 'GET', url, headers: { authorization: `Bearer ${token}` } });
       expect(res.statusCode).toBe(200);
-      const body = res.body;
-      expect(body).not.toContain(securityNumber.value);
-      expect(body).not.toContain('security_number');
-      expect(body).not.toContain('securityNumberHash');
+
+      // Structural assertions, not `expect(res.body).not.toContain(pin)`. A raw substring scan over
+      // the whole payload reports a leak whenever four digits of a random UUID happen to match the
+      // PIN (id `...99ee-1899654295eb` contains `5429`), and — worse — it would keep passing if the
+      // value were ever exposed under a key whose name or encoding it did not anticipate. Walk the
+      // parsed response instead: no field may hold the value, and no key may describe it.
+      const seen: Array<[string, unknown]> = [];
+      const walk = (node: unknown, path: string): void => {
+        if (Array.isArray(node)) {
+          node.forEach((item, index) => walk(item, `${path}[${index}]`));
+          return;
+        }
+        if (node && typeof node === 'object') {
+          for (const [key, value] of Object.entries(node as Record<string, unknown>)) {
+            const next = path ? `${path}.${key}` : key;
+            seen.push([next, value]);
+            walk(value, next);
+          }
+        }
+      };
+      const parsed: unknown = res.json();
+      walk(parsed, '');
+
+      for (const [path, value] of seen) {
+        // Only compare scalars: an object/array key is a container, not a stored credential.
+        if (typeof value === 'string' || typeof value === 'number') {
+          expect(String(value), `${url} leaked the Security PIN at ${path}`).not.toBe(securityNumber.value);
+        }
+        // Any key that names the credential is itself a defect, whatever it holds.
+        expect(path, `${url} exposes a security-number field at ${path}`).not.toMatch(
+          /security[_-]?number(?!_?initialized|_?expires|_?version)/i,
+        );
+      }
+
+      // Belt and braces for the two spellings the payload must never contain at all.
+      expect(res.body).not.toContain('securityNumberHash');
     }
   });
 
@@ -284,7 +326,7 @@ describe('customer identity, security number and support mode', () => {
     // A leaked value would appear as a whole JSON string, not as a substring of a number.
     expect(detail.body).not.toContain(`"${securityNumber.value}"`);
     expect(detail.body).not.toContain('passwordHash');
-    expect(detail.json().user.customerId).toMatch(/^[0-9]{6}$/);
+    expect(detail.json().user.customerId).toMatch(/^[0-9]{9}$/);
   });
 
   it('lets an admin force rotation and a super admin require re-initialization', async () => {
@@ -446,7 +488,7 @@ describe('customer identity, security number and support mode', () => {
     });
     expect(created.statusCode).toBe(201);
     const customerId = created.json().user.customerId as string;
-    expect(customerId).toMatch(/^[0-9]{6}$/);
+    expect(customerId).toMatch(/^[0-9]{9}$/);
     // The admin does not receive the generated Security Number.
     expect(created.body).not.toMatch(/"securityNumber"\s*:\s*"?[0-9]{4}/);
 

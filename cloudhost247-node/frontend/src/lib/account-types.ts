@@ -6,12 +6,23 @@
 
 export interface PublicUser {
   id: string;
+  /**
+   * The customer's unique, changeable handle. Used for signing in (alongside email) and for
+   * support to find the account. Optional only for payloads written before migration 0085.
+   */
+  username?: string | null;
   email: string;
   fullName: string;
   role: 'customer' | 'admin' | 'super_admin';
   status: 'active' | 'suspended' | 'disabled' | 'deleted';
-  /** Permanent six-digit account number. Display-safe identifier — never a credential. */
+  /**
+   * Permanent account number: nine digits for every account created after migration 0085, and six
+   * digits for accounts that predate it (those are preserved verbatim, never re-issued).
+   * Display-safe identifier — never a credential.
+   */
   customerId: string | null;
+  /** Whether the registered email address has been confirmed. Gates viewing the Security PIN. */
+  emailVerified?: boolean;
 }
 
 /** The signed-in customer's own editable profile (GET/PATCH /api/v1/account). */
@@ -39,6 +50,88 @@ export interface SecurityNumberStatus {
   expired: boolean;
   secondsUntilExpiry: number;
   rotationHours: number;
+}
+
+/**
+ * The rotating four-digit Security PIN, as far as the browser is ever concerned.
+ *
+ * `maskedValue` is a literal mask produced by the server. There is no field here that can hold the
+ * real PIN: the only way to obtain it is `POST /account/security-pin/reveal`, whose response is
+ * consumed by the caller and never persisted.
+ */
+export interface SecurityPinStatus {
+  maskedValue: string;
+  set: boolean;
+  version: number;
+  lastRotatedAt: string | null;
+  nextRotationAt: string | null;
+  secondsUntilRotation: number;
+  rotationHours: number;
+  /** How long a revealed PIN stays on screen before the UI hides it again. */
+  revealDisplayTtlSeconds: number;
+  verificationCodeTtlMinutes: number;
+  resendCooldownSeconds: number;
+  maxAttempts: number;
+  /** False when the account's email is unverified, or the server has no PIN key configured. */
+  canView: boolean;
+  viewRequiresEmailVerification: boolean;
+  /** Whether the platform can actually deliver verification mail right now. */
+  emailVerificationConfigured: boolean;
+}
+
+/** The whole Account / Security card (GET /api/v1/account/security). */
+export interface AccountSecurityPayload {
+  account: {
+    username: string | null;
+    usernameChangedAt: string | null;
+    customerId: string | null;
+    email: string;
+    emailVerified: boolean;
+  };
+  securityPin: SecurityPinStatus;
+  securityNumber: SecurityNumberStatus;
+}
+
+/** A verification challenge opened by POST /account/security-pin/view. */
+export interface SecurityPinChallenge {
+  challengeToken: string;
+  maskedEmail: string;
+  expiresAt: string;
+  codeTtlMinutes: number;
+  resendAvailableInSeconds: number;
+  maxAttempts: number;
+  maxResends: number;
+  resendCount?: number;
+}
+
+/** The one response in the application that carries the real PIN. Shows once, then it is spent. */
+export interface RevealedSecurityPin {
+  securityPin: {
+    value: string;
+    version: number;
+    expiresAt: string | null;
+    displayTtlSeconds: number;
+  };
+}
+
+export interface UsernameAvailability {
+  available: boolean;
+  username: string;
+  reason: string | null;
+  suggestions: string[];
+}
+
+export interface AccountRecoveryRequest {
+  id: string;
+  reference: string;
+  reason: 'cannot_access_email' | 'email_compromised' | 'lost_device' | 'other';
+  status: 'OPEN' | 'IDENTITY_VERIFIED' | 'APPROVED' | 'REJECTED' | 'CANCELLED';
+  details: string | null;
+  contactEmail: string | null;
+  contactPhone: string | null;
+  createdAt: string;
+  resolvedAt: string | null;
+  resolutionNote: string | null;
 }
 
 export interface SupportSessionContext {
@@ -149,6 +242,7 @@ export interface AdminCustomerSummary {
   status: 'active' | 'suspended' | 'disabled' | 'deleted';
   createdAt: string;
   customerId: string | null;
+  username?: string | null;
   phone: string | null;
   deletedAt: string | null;
 }

@@ -363,12 +363,18 @@ function Catalog({ section }: { section: MarketingSection }) {
   const [openSlug, setOpenSlug] = useState<string | null>(null);
   const plans = useApiResource<ProductPlansResponse>(openSlug ? `/api/v1/catalog/products/${openSlug}/plans` : '');
 
+  // Defensive reads, not belt-and-braces for their own sake: this is a public marketing page, and
+  // an API that answers 200 with an unexpectedly shaped body would otherwise take the whole page
+  // down to a blank screen. A missing array degrades to the honest empty state below.
+  const products = catalog.status === 'success' ? (catalog.data?.products ?? []) : [];
+  const planList = plans.status === 'success' ? (plans.data?.plans ?? []) : [];
+
   return (
     <>
       <h2>{section.heading}</h2>
       {catalog.status === 'loading' ? <CatalogLoadingBanner label="Loading the product catalogue…" /> : null}
       {catalog.status === 'error' ? <CatalogErrorBanner message={catalog.message} /> : null}
-      {catalog.status === 'success' && catalog.data.products.length === 0 ? (
+      {catalog.status === 'success' && products.length === 0 ? (
         <div className="ch-state ch-state--warn">
           <Icon name="alert" size={20} />
           <span>
@@ -379,9 +385,9 @@ function Catalog({ section }: { section: MarketingSection }) {
         </div>
       ) : null}
 
-      {catalog.status === 'success' && catalog.data.products.length > 0 ? (
+      {catalog.status === 'success' && products.length > 0 ? (
         <div className="ch-grid ch-grid--3">
-          {catalog.data.products.map((product) => (
+          {products.map((product) => (
             <article className="ch-card" key={product.slug}>
               <span className="ch-card__icon" aria-hidden><Icon name="layers" /></span>
               <h3>{product.name}</h3>
@@ -406,9 +412,9 @@ function Catalog({ section }: { section: MarketingSection }) {
                   {plans.status === 'loading' ? <CatalogLoadingBanner label="Loading plans…" /> : null}
                   {plans.status === 'error' ? <CatalogErrorBanner message={plans.message} /> : null}
                   {plans.status === 'success' ? (
-                    plans.data.plans.length > 0 ? (
+                    planList.length > 0 ? (
                       <ul className="ch-plan-grid" style={{ listStyle: 'none', padding: 0, gridTemplateColumns: '1fr' }}>
-                        {plans.data.plans.map((plan) => {
+                        {planList.map((plan) => {
                           const price = planPrice(plan);
                           return (
                             <li className="ch-plan" key={plan.slug}>

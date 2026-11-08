@@ -89,6 +89,13 @@ export default function Header() {
                 <NavLink className="hg-bar__text-link" to={UTILITY.signIn.to}>
                   {copy.signIn}
                 </NavLink>
+                {/* The compact CTA belongs on this line — it is the sixth utility control the
+                    chrome contract and scripts/check-chrome-benchmark.mjs both count
+                    (Pricing, Help, English, USD, Sign In, Create Account). Removing it leaves a
+                    signed-out visitor with no visible route into registration from the header. */}
+                <NavLink className="hg-btn hg-btn--sm" to={UTILITY.createAccount.to}>
+                  {copy.createAccount}
+                </NavLink>
               </>
             )}
           </div>

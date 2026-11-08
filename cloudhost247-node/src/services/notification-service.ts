@@ -99,6 +99,47 @@ export async function notifyServerTerminated(db: Queryable, server: CustomerServ
   });
 }
 
+/**
+ * Tells a customer their Security PIN rotated.
+ *
+ * Two deliberate properties:
+ *   - the notification never contains the PIN (it cannot: the caller does not pass it, and the
+ *     template in src/lib/pin-email-templates.ts takes no such argument);
+ *   - it is keyed on the PIN *version*, so the idempotent unique index makes a redelivered sweep
+ *     tick a no-op instead of a second email. `resourceId` is the rotation version rendered as a
+ *     deterministic uuid-shaped value so it fits the index's `uuid` column.
+ *
+ * Returns the notification id when one was created, null when it already existed.
+ */
+export async function notifySecurityPinRotated(
+  db: Queryable,
+  input: {
+    userId: string;
+    version: number;
+    rotatedAt: string;
+    nextRotationAt: string;
+    customerId?: string | null;
+  }
+): Promise<string | null> {
+  // Deterministic, uuid-shaped surrogate for the rotation version. Not an entity id: nothing joins
+  // on it. Version 8 (custom) keeps it clearly distinct from real uuids in a database dump.
+  const versionKey = `00000000-0000-8000-8000-${String(input.version).padStart(12, '0')}`;
+  const { securityPinRotatedEmail } = await import('../lib/pin-email-templates');
+  const content = securityPinRotatedEmail({
+    customerId: input.customerId ?? null,
+    rotatedAt: input.rotatedAt,
+    nextRotationAt: input.nextRotationAt,
+  });
+  return createNotification(db, {
+    userId: input.userId,
+    type: 'SECURITY_PIN_ROTATED',
+    title: content.subject,
+    message: content.text,
+    resourceType: 'security_pin_rotation',
+    resourceId: versionKey,
+  });
+}
+
 export async function listNotifications(db: Queryable, userId: string) {
   const { rows } = await db.query(
     `SELECT * FROM user_notifications WHERE user_id=$1 ORDER BY created_at DESC LIMIT 100`, [userId]

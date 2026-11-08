@@ -815,6 +815,23 @@ form.ch247-form--auth button[type="submit"] {
   color: #5d6d7e;
 }
 
+/* Marks a field the customer may leave blank (currently only the username). */
+.ch247-field-optional {
+  font-weight: 400;
+  color: #5d6d7e;
+}
+
+/* Suggestion text rendered as a clickable choice — reads as a hint, behaves as a button. */
+.ch247-link-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: #16704b;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 .ch247-field-error {
   font-size: 0.8rem;
   font-weight: 600;

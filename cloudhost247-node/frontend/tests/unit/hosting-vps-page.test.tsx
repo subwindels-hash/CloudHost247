@@ -49,7 +49,16 @@ describe('/hosting/vps plans & pricing', () => {
 
     await waitFor(() => expect(screen.getByText('VPS 1')).toBeTruthy());
     expect(screen.getByText(/\$12\.00/)).toBeTruthy();
-    expect(fetchMock).toHaveBeenCalledWith('/api/v1/catalog/products/vps-hosting/plans', expect.anything());
+    // Match on the path, not the whole URL: catalogue requests carry an explicit `?lang=` so an
+    // HTTP cache cannot serve one language to another visitor, and pinning the bare path here only
+    // asserted that localisation had not been added.
+    const requestedPlanUrls = fetchMock.mock.calls
+      .map(([url]) => String(url))
+      .filter((url) => url.includes('/plans'));
+    expect(requestedPlanUrls).toHaveLength(1);
+    const requestedUrl = new URL(requestedPlanUrls[0]!, 'https://example.test');
+    expect(requestedUrl.pathname).toBe('/api/v1/catalog/products/vps-hosting/plans');
+    expect(requestedUrl.searchParams.get('lang')).toBeTruthy();
   });
 
   it('shows the empty-plans notice honestly when the product is available but has no published plans', async () => {

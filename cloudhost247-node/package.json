@@ -12,6 +12,8 @@
   "main": "server.js",
   "scripts": {
     "dev": "concurrently -k -n server,frontend -c blue,green \"npm:dev:server\" \"npm:dev:frontend\"",
+    "dev:stack": "concurrently -k -n api,web -c blue,green \"npm:dev:api\" \"npm:dev:frontend\"",
+    "dev:api": "tsx watch scripts/dev-server.ts",
     "dev:server": "tsx watch src/server.ts",
     "dev:frontend": "vite --config frontend/vite.config.ts",
     "build": "npm run tools:catalog:check && npm run build:server && npm run build:frontend && npm run build:tools",

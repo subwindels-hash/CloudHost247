@@ -51,7 +51,13 @@ async function main() {
       const utility = [...document.querySelectorAll('.hg-bar__locale, .hg-bar__quick')].filter(visible).map(box);
       const actions = [...document.querySelectorAll('.hg-bar__actions')].filter(visible).map(box);
       const bar = document.querySelector('.hg-nav__bar');
-      return { triggers, utility, actions, bar: bar ? box(bar) : null, header: !!document.querySelector('.hg-header') };
+      const toggle = document.querySelector('.hg-menu__mobile-toggle');
+      return {
+        triggers, utility, actions,
+        bar: bar ? box(bar) : null,
+        header: !!document.querySelector('.hg-header'),
+        menuToggle: !!toggle && visible(toggle),
+      };
     });
     let worst = 0;
     for (const t of result.triggers) {
@@ -60,10 +66,17 @@ async function main() {
       }
       if (result.bar) worst = Math.max(worst, Math.max(0, t.right - result.bar.right));
     }
+    // Below 768px the seven sections collapse into the Menu disclosure by design
+    // (hostinger-chrome.css, max-width: 767px). Zero flat links there is correct, not a
+    // regression — what must hold is the toggle, a header, and no overlap or overflow.
     const compact = result.triggers.length === 0;
-    const status = worst === 0 ? 'OK' : 'FAIL';
-    console.log(`${status.padEnd(4)} ${String(width).padStart(4)}px  links=${result.triggers.length}  utility=${result.utility.length}  actions=${result.actions.length}  overlap=${worst.toFixed(1)}px  ${compact ? 'NO VISIBLE MENU LINKS' : 'flat inline bar'}`);
-    if (worst > 0 || !result.header || compact) failures.push({ width, worst, links: result.triggers.length, header: result.header });
+    const mobile = width < 768;
+    const ok = mobile
+      ? compact && result.header && result.menuToggle && worst === 0
+      : !compact && result.header && worst === 0;
+    const status = ok ? 'OK' : 'FAIL';
+    console.log(`${status.padEnd(4)} ${String(width).padStart(4)}px  links=${result.triggers.length}  utility=${result.utility.length}  actions=${result.actions.length}  overlap=${worst.toFixed(1)}px  ${mobile ? (result.menuToggle ? 'Menu disclosure' : 'NO MENU TOGGLE') : compact ? 'NO VISIBLE MENU LINKS' : 'flat inline bar'}`);
+    if (!ok) failures.push({ width, worst, links: result.triggers.length, header: result.header });
     await page.close();
   }
   await browser.close();
