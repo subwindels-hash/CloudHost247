@@ -40,18 +40,10 @@ async function main() {
     }
   }
 
-  // Same idea for Domain Services: the extension catalogue is empty until a registrar is connected,
-  // which leaves the homepage price tags with nothing to show. Load the committed fixture catalogue
-  // on a fresh local database only, again clearly marked as fixtures rather than real prices.
-  const extensionSeedPath = path.join(process.cwd(), 'database', 'seed', 'dev-domain-extensions-seed.sql');
-  if (existsSync(extensionSeedPath)) {
-    const { rows } = await db.query<{ count: string }>('SELECT count(*)::text AS count FROM domain_extensions');
-    if (rows[0]?.count === '0') {
-      await db.exec(readFileSync(extensionSeedPath, 'utf8'));
-      // eslint-disable-next-line no-console
-      console.log('[dev-server] extension catalogue was empty — loaded database/seed/dev-domain-extensions-seed.sql (dev fixtures, not real prices)');
-    }
-  }
+  // Deliberately no Domain Services fixture: nothing in the repository may seed the extension
+  // catalogue (tests/security/test_domain_data_provenance.py, and the release-candidate gate that
+  // runs it). A local database with no registrar connected therefore renders the honest empty
+  // state, exactly as a fresh install does.
 
   const app = buildApp(env, { serveFrontend: false, pool: db });
   await app.listen({ port: PORT, host: '0.0.0.0' });

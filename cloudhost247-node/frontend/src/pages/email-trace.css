@@ -73,9 +73,9 @@
 }
 
 .et-status--ok {
-  background: #eaf7ee;
-  border-color: #b9e2c5;
-  color: #1c6b36;
+  background: #faf4e0;
+  border-color: #e6d49a;
+  color: #7a5c12;
 }
 
 .et-status--warn {
