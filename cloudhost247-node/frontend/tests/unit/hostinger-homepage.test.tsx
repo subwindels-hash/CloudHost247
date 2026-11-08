@@ -113,11 +113,14 @@ describe('Hostinger-style public homepage', () => {
     expect(heading.closest('section')?.nextElementSibling).toBe(container.querySelector('.assistant-showcase'));
   });
 
-  it('shows the illustrative website gallery directly after pricing with a real templates link', () => {
+  it('shows the assurance strip after pricing, then the illustrative gallery with a real templates link', () => {
     const { container } = renderHome();
     const pricing = container.querySelector('#pricing');
+    const assurance = container.querySelector('.assurance');
     const gallery = container.querySelector('.creation-showcase');
-    expect(pricing?.nextElementSibling).toBe(gallery);
+    // The five service promises sit between the plans and the gallery, not above the prices.
+    expect(pricing?.nextElementSibling).toBe(assurance);
+    expect(assurance?.nextElementSibling).toBe(gallery);
     expect(screen.getByRole('heading', { name: /See what you can create/i })).toBeTruthy();
     expect(screen.getByRole('link', { name: /Explore templates/i }).getAttribute('href')).toBe('/websites/templates');
     expect(gallery?.querySelectorAll('.creation-card').length).toBe(10);

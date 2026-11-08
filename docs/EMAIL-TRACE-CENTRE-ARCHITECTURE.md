@@ -4,14 +4,14 @@
 
 | Slice | Scope | Status |
 | --- | --- | --- |
-| 1 | Migration 0089, repository, Exim/queue parsers, normaliser, status resolver, dedupe, fixtures | **IMPLEMENTED — NOT LIVE-VERIFIED** (see §15) |
-| 2 | Collector, adapters, capability probe, runs, worker sweep | NOT IMPLEMENTED |
-| 3 | Customer + admin endpoints, RBAC, tenant isolation | NOT IMPLEMENTED |
-| 4 | Admin + customer UI | NOT IMPLEMENTED |
-| 5 | Agent `mail.trace` operation, live verification | BLOCKED (needs approval + a mail server) |
+| 1 | Migration 0089, repository, Exim/queue parsers, normaliser, status resolver, dedupe, fixtures | IMPLEMENTED — NOT LIVE-VERIFIED (see §15) |
+| 2 | Collector, adapter, capability probe, runs, worker sweep | IMPLEMENTED — NOT LIVE-VERIFIED against a real host |
+| 3 | Customer + admin endpoints, RBAC, tenant isolation | IMPLEMENTED AND VERIFIED (17 API integration tests) |
+| 4 | Admin + customer UI | IMPLEMENTED (9 page tests; live preview not exercised against a mail server) |
+| 5 | Agent `mail.trace` operation | IMPLEMENTED AND VERIFIED as a component (12 agent tests); live verification BLOCKED — needs a real host with a readable Exim log |
 
-No route, page, worker hook or agent operation exists yet: the feature currently cannot read a mail
-server, cannot be reached over HTTP, and is not wired into the application in any way.
+The delivery report with the exact per-capability classification, the security decisions as shipped
+and the remaining unverified surface is `docs/EMAIL-TRACE-CENTRE-REPORT.md`.
 
 > **Freeze boundaries that this proposal must not cross**
 > - The WHMCS integration is read-only today (`cloudhost247-node/src/whmcs/*`); this feature does not
@@ -533,7 +533,7 @@ suite.
 | `database/migrations/0089_create_email_trace_centre.sql` | 1 — **done** |
 | `src/db/email-trace.ts` (`EmailTraceRepository` + row types — this is the repository; there is no separate `src/email-trace/trace-repository.ts`) | 1 — **done** |
 | `src/email-trace/types.ts`, `status-resolver.ts`, `dedupe.ts`, `exim/mainlog-parser.ts`, `exim/queue-parser.ts`, `exim/normalizer.ts` | 1 — **done** |
-| `src/email-trace/trace-service.ts`, `access-control.ts`, `audit.ts`, `capability.ts`, `adapters/*` | 2 (retention SQL already exists in `src/db/email-trace.ts`) |
+| `src/email-trace/trace-service.ts`, `access-control.ts`, `audit.ts`, `capability.ts`, `collector.ts`, `adapters/exim-agent.ts` | 2 — **done** (retention SQL lives in `src/db/email-trace.ts`) |
 | `src/worker/email-trace-sweep.ts` | 2 |
 | `src/email-trace/routes/customer.ts`, `src/email-trace/routes/admin.ts` | 3 |
 | `frontend/src/lib/email-trace-api.ts` | 4 |
@@ -698,3 +698,32 @@ npx vitest run tests/integration/auth-flow.test.ts tests/integration/agent-deplo
 | Exim mainlog + queue parsing | **IMPLEMENTED — NOT LIVE-VERIFIED** | synthetic fixtures only |
 | Anything reading a mail server | **NOT IMPLEMENTED** | Slice 2+ |
 | Any HTTP endpoint or UI | **NOT IMPLEMENTED** | Slices 3–4 |
+
+
+---
+
+## 16. Slices 2–5 as built (deltas from the proposal)
+
+Where the implementation departed from this document, and why:
+
+1. **No separate `src/email-trace/adapters/whm.ts`.** The WHM API transport is BLOCKED (see the delivery
+   report): no verifiable function name exists in this repository and the WHMCS integration is frozen.
+   The adapter interface has one implementation, `agent`, and a future transport must be added
+   deliberately rather than appearing as a branch inside collection logic.
+2. **`access-control.ts` exposes two scope functions, not one.** `scopeForOwnMail()` always returns the
+   caller's own id (never `{}`, even for an admin on the customer page) and `scopeForAdminConsole()` is
+   the only way to obtain an unrestricted scope. A single function that switched on role was rejected
+   because an administrator opening `/account/email-trace` would then have seen the whole platform.
+3. **Run status describes the collection, not the mail.** A window full of connection-level spam
+   rejections is `ok`; a window that could not be read, or where nothing at all could be stored, is
+   `partial`. Rejected lines are still counted and displayed per run.
+4. **Attribution uses `customer_domains` only.** `customer_services` has no domain column, so
+   `hosting_account_id` stays `NULL` rather than being guessed. Unattributed events are stored (staff
+   only) instead of being dropped or shown to everybody.
+5. **The agent is a new module, not a new generic endpoint.** `server-agent/src/mail-trace.js` reads one
+   allowlisted log with an 8 MiB cap and line alignment, and runs exactly `exim -bp`. A requested path
+   outside the allowlist causes the whole call to read nothing, so a caller cannot probe the filesystem.
+6. **Customer route vocabulary endpoint added:** `GET /api/v1/email-trace/statuses` publishes labels and
+   explanations so the UI cannot invent its own wording.
+7. **DNS diagnostics are reused, not reimplemented.** The customer page calls the existing Tools Center
+   `spf-checker` / `dkim-checker` / `dmarc-checker` endpoints; no second DNS implementation exists.
