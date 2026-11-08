@@ -2,7 +2,7 @@
 
 **Feature:** native Email Trace Centre (no external email-tracking API)
 **Branch:** `arena/b4931f08-cloudhost247`
-**Commits:** `c9f134e` (schema + parsers) · `4cd8afb` (collector, agent op, API, sweep) · `e1c75ea` (UI, navigation, this report) · final commit on this branch adds full diagnostics and retention controls
+**Commits:** `c9f134e` (schema + parsers) · `4cd8afb` (collector, agent op, API, sweep) · `e1c75ea` (UI, navigation, this report) · `557d4fb` (full diagnostics + retention controls)
 **Date:** 2026-11-08
 
 ---
