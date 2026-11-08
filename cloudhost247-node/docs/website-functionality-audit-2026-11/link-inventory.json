@@ -1,0 +1,1070 @@
+{
+ "generatedAt": "2026-11-07",
+ "scope": "cloudhost247-node/frontend/src (the running website on port 3000)",
+ "routeTable": {
+  "declaredRoutePatterns": 259,
+  "appTsxLiteralPatterns": 189,
+  "marketingRoutes": 55,
+  "legalSpaRoutes": 17,
+  "routes": [
+   "*",
+   "/",
+   "/about",
+   "/account",
+   "/account/assistant",
+   "/account/dns",
+   "/account/domain-brokerage",
+   "/account/domains",
+   "/account/services",
+   "/account/services/:id",
+   "/account/services/:id/backups",
+   "/account/services/:id/billing",
+   "/account/services/:id/dns",
+   "/account/services/:id/firewall",
+   "/account/services/:id/monitoring",
+   "/account/services/:id/overview",
+   "/account/services/:id/ssl",
+   "/account/ssl",
+   "/admin",
+   "/admin/ai-command",
+   "/admin/ai-support",
+   "/admin/applications/:id",
+   "/admin/apps",
+   "/admin/apps/:id",
+   "/admin/audit",
+   "/admin/audit-logs",
+   "/admin/cloudflare",
+   "/admin/cloudflare/:tab",
+   "/admin/control-panels",
+   "/admin/control-panels/:id",
+   "/admin/customers/:id",
+   "/admin/deployments",
+   "/admin/deployments/:id",
+   "/admin/dns",
+   "/admin/domain-services",
+   "/admin/expert-services",
+   "/admin/infrastructure",
+   "/admin/infrastructure/availability",
+   "/admin/infrastructure/control-panels",
+   "/admin/infrastructure/images",
+   "/admin/infrastructure/logs",
+   "/admin/infrastructure/operating-systems",
+   "/admin/infrastructure/operating-systems/:slug/versions",
+   "/admin/infrastructure/providers",
+   "/admin/infrastructure/provisioning",
+   "/admin/infrastructure/provisioning/:id",
+   "/admin/integrations/cloudflare",
+   "/admin/invoices",
+   "/admin/invoices/:id",
+   "/admin/ledger",
+   "/admin/licenses",
+   "/admin/marketing-services",
+   "/admin/monitoring",
+   "/admin/online-store",
+   "/admin/platform-plans",
+   "/admin/platform-services",
+   "/admin/revenue-guardian",
+   "/admin/revenue-guardian/activity",
+   "/admin/revenue-guardian/assignments",
+   "/admin/revenue-guardian/automation",
+   "/admin/revenue-guardian/automation/runs",
+   "/admin/revenue-guardian/customer-health",
+   "/admin/revenue-guardian/customers/:id",
+   "/admin/revenue-guardian/email-logs",
+   "/admin/revenue-guardian/expiring-services",
+   "/admin/revenue-guardian/follow-ups",
+   "/admin/revenue-guardian/forecast",
+   "/admin/revenue-guardian/high-value",
+   "/admin/revenue-guardian/kanban",
+   "/admin/revenue-guardian/module-health",
+   "/admin/revenue-guardian/my-work",
+   "/admin/revenue-guardian/orders",
+   "/admin/revenue-guardian/pre-suspension",
+   "/admin/revenue-guardian/pre-termination",
+   "/admin/revenue-guardian/promises",
+   "/admin/revenue-guardian/recovery",
+   "/admin/revenue-guardian/recovery/:id",
+   "/admin/revenue-guardian/renewal-rescue",
+   "/admin/revenue-guardian/renewals",
+   "/admin/revenue-guardian/reports",
+   "/admin/revenue-guardian/revenue-at-risk",
+   "/admin/revenue-guardian/risk-analysis",
+   "/admin/revenue-guardian/settings",
+   "/admin/revenue-guardian/staff-performance",
+   "/admin/servers",
+   "/admin/servers/:id",
+   "/admin/settings",
+   "/admin/settings/tools/mrz",
+   "/admin/ssl",
+   "/admin/tickets",
+   "/admin/tickets/:id",
+   "/admin/tools",
+   "/admin/tools/mrz",
+   "/admin/unified-inbox",
+   "/admin/website-builder",
+   "/apps",
+   "/apps/:slug",
+   "/billing",
+   "/blog",
+   "/cart",
+   "/checkout",
+   "/cloud",
+   "/cloud/backups",
+   "/cloud/data-centers",
+   "/cloud/enterprise-servers",
+   "/cloud/firewall",
+   "/cloud/game-servers",
+   "/cloud/infrastructure",
+   "/cloud/ip-management",
+   "/cloud/managed-services",
+   "/cloud/monitoring",
+   "/cloud/network",
+   "/cloud/operating-systems",
+   "/cloud/private",
+   "/cloud/public",
+   "/cloud/security",
+   "/cloud/server-management",
+   "/contact",
+   "/dashboard",
+   "/dashboard/apps",
+   "/dashboard/apps/:id",
+   "/dashboard/apps/:id/backups",
+   "/dashboard/apps/:id/domains",
+   "/dashboard/apps/:id/logs",
+   "/dashboard/apps/:id/settings",
+   "/dashboard/deployments/:id",
+   "/dashboard/dns",
+   "/dashboard/domains",
+   "/dashboard/notifications",
+   "/dashboard/servers",
+   "/dashboard/servers/:id",
+   "/dashboard/servers/:id/logs",
+   "/dashboard/ssl",
+   "/developers",
+   "/developers/deployment",
+   "/developers/docker",
+   "/developers/environments",
+   "/developers/laravel",
+   "/developers/nodejs",
+   "/developers/php",
+   "/developers/python",
+   "/docs",
+   "/docs/:slug",
+   "/domains",
+   "/domains/:domain/health",
+   "/domains/appraisal",
+   "/domains/auctions",
+   "/domains/auctions/:id",
+   "/domains/broker",
+   "/domains/bulk-search",
+   "/domains/club",
+   "/domains/extensions",
+   "/domains/search",
+   "/domains/transfer",
+   "/domains/whois",
+   "/faq",
+   "/forgot-password",
+   "/help",
+   "/hosting",
+   "/hosting/api",
+   "/hosting/backups",
+   "/hosting/business",
+   "/hosting/control-panels",
+   "/hosting/control-panels/:slug",
+   "/hosting/cpanel",
+   "/hosting/dedicated",
+   "/hosting/developer",
+   "/hosting/email",
+   "/hosting/migration",
+   "/hosting/reseller",
+   "/hosting/security",
+   "/hosting/ssl",
+   "/hosting/vps",
+   "/hosting/web-hosting",
+   "/hosting/windows",
+   "/hosting/wordpress",
+   "/invoices",
+   "/invoices/:id",
+   "/legal",
+   "/legal/acceptable-use",
+   "/legal/backup-policy",
+   "/legal/cookies",
+   "/legal/cybercrime-policy",
+   "/legal/data-deletion",
+   "/legal/data-protection-standards",
+   "/legal/domain-agreement",
+   "/legal/domain-brokerage-terms",
+   "/legal/domain-registration-addendum",
+   "/legal/domain-renewal-policy",
+   "/legal/fair-usage",
+   "/legal/legal-notice",
+   "/legal/privacy-notice-and-consent",
+   "/legal/privacy-policy",
+   "/legal/refund-policy",
+   "/legal/terms",
+   "/legal/trademark",
+   "/login",
+   "/marketing",
+   "/marketing/analytics",
+   "/marketing/digital",
+   "/marketing/digital/:id",
+   "/marketing/inbox",
+   "/marketing/inbox/:conversationId",
+   "/marketing/logo-maker",
+   "/marketing/logo-maker/:projectId",
+   "/marketing/seo",
+   "/offers",
+   "/platforms",
+   "/platforms/applications",
+   "/platforms/containers",
+   "/platforms/databases",
+   "/platforms/paas",
+   "/pricing",
+   "/register",
+   "/reset-password",
+   "/search",
+   "/security",
+   "/servers/new",
+   "/services",
+   "/services/cloudflare",
+   "/services/cloudflare/:id",
+   "/services/cloudflare/:id/:tab",
+   "/sitemap",
+   "/sites/:slug/*",
+   "/status",
+   "/store/:slug",
+   "/support",
+   "/support/:id",
+   "/tools",
+   "/tools/*",
+   "/tools/business-tools",
+   "/tools/business-tools/:tool",
+   "/tools/business-tools/employee-id-card-generator",
+   "/tools/business-tools/mrz-generator",
+   "/tools/business-tools/mrz-parser",
+   "/tools/category/:category",
+   "/tools/compliance-documents",
+   "/tools/document",
+   "/tools/document/mrz",
+   "/tools/document/mrz-parser",
+   "/tools/favorites",
+   "/tools/history",
+   "/tools/monitors",
+   "/tools/mrz-generator",
+   "/tools/mrz-parser",
+   "/tools/reports",
+   "/verify-email",
+   "/websites",
+   "/websites/ai-builder",
+   "/websites/ai-builder/:projectId",
+   "/websites/builder",
+   "/websites/builder/:siteId",
+   "/websites/design-services",
+   "/websites/experts",
+   "/websites/experts/:id",
+   "/websites/experts/new",
+   "/websites/store",
+   "/websites/store/:storeId",
+   "/websites/templates"
+  ]
+ },
+ "linkInventory": {
+  "distinctInternalTargets": 130,
+  "targets": [
+   {
+    "target": "/",
+    "kind": "link",
+    "exampleSource": "components/navigation/PlatformMegaMenu.tsx",
+    "occurrences": 12
+   },
+   {
+    "target": "/account",
+    "kind": "link",
+    "exampleSource": "layout/Header.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/account/domain-brokerage",
+    "kind": "link",
+    "exampleSource": "pages/DashboardDomainsPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/account/domains",
+    "kind": "link",
+    "exampleSource": "pages/DashboardPage.tsx",
+    "occurrences": 2
+   },
+   {
+    "target": "/admin",
+    "kind": "programmatic",
+    "exampleSource": "components/SupportModeBanner.tsx",
+    "occurrences": 7
+   },
+   {
+    "target": "/admin/ai-command",
+    "kind": "link",
+    "exampleSource": "pages/AdminPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/admin/ai-support",
+    "kind": "link",
+    "exampleSource": "layout/Header.tsx",
+    "occurrences": 2
+   },
+   {
+    "target": "/admin/apps",
+    "kind": "link",
+    "exampleSource": "pages/AdminPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/admin/apps/:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/AdminAppsPage.tsx",
+    "occurrences": 2
+   },
+   {
+    "target": "/admin/audit",
+    "kind": "link",
+    "exampleSource": "pages/AdminDomainServicesPage.tsx",
+    "occurrences": 2
+   },
+   {
+    "target": "/admin/cloudflare",
+    "kind": "link",
+    "exampleSource": "pages/AdminPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/admin/control-panels",
+    "kind": "link",
+    "exampleSource": "pages/AdminPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/admin/customers/:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/AdminPage.tsx",
+    "occurrences": 2
+   },
+   {
+    "target": "/admin/deployments",
+    "kind": "link",
+    "exampleSource": "pages/AdminPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/admin/deployments/:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/AdminDeploymentsPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/admin/domain-services",
+    "kind": "link",
+    "exampleSource": "layout/Header.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/admin/infrastructure",
+    "kind": "link",
+    "exampleSource": "layout/Header.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/admin/infrastructure/images?os=:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/AdminOperatingSystemsPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/admin/infrastructure/images?version=:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/AdminOsVersionsPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/admin/infrastructure/operating-systems",
+    "kind": "link",
+    "exampleSource": "pages/AdminOsVersionsPage.tsx",
+    "occurrences": 2
+   },
+   {
+    "target": "/admin/infrastructure/operating-systems/:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/AdminOperatingSystemsPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/admin/infrastructure/provisioning",
+    "kind": "link",
+    "exampleSource": "pages/AdminPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/admin/invoices",
+    "kind": "link",
+    "exampleSource": "pages/AdminInvoiceDetailPage.tsx",
+    "occurrences": 4
+   },
+   {
+    "target": "/admin/invoices/:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/AdminInvoicesPage.tsx",
+    "occurrences": 2
+   },
+   {
+    "target": "/admin/ledger",
+    "kind": "link",
+    "exampleSource": "pages/AdminInvoicesPage.tsx",
+    "occurrences": 2
+   },
+   {
+    "target": "/admin/platform-services",
+    "kind": "link",
+    "exampleSource": "layout/Header.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/admin/revenue-guardian",
+    "kind": "link",
+    "exampleSource": "pages/AdminPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/admin/revenue-guardian/customers/:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/revenue-guardian/AssignmentsPage.tsx",
+    "occurrences": 11
+   },
+   {
+    "target": "/admin/revenue-guardian/follow-ups",
+    "kind": "link",
+    "exampleSource": "pages/revenue-guardian/DashboardPage.tsx",
+    "occurrences": 2
+   },
+   {
+    "target": "/admin/revenue-guardian/pre-suspension",
+    "kind": "link",
+    "exampleSource": "pages/revenue-guardian/DashboardPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/admin/revenue-guardian/pre-termination",
+    "kind": "link",
+    "exampleSource": "pages/revenue-guardian/DashboardPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/admin/revenue-guardian/recovery",
+    "kind": "link",
+    "exampleSource": "pages/revenue-guardian/DashboardPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/admin/revenue-guardian/recovery/:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/revenue-guardian/CustomerProfilePage.tsx",
+    "occurrences": 4
+   },
+   {
+    "target": "/admin/revenue-guardian/renewals",
+    "kind": "link",
+    "exampleSource": "pages/revenue-guardian/DashboardPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/admin/revenue-guardian/revenue-at-risk",
+    "kind": "link",
+    "exampleSource": "pages/revenue-guardian/DashboardPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/admin/servers",
+    "kind": "link",
+    "exampleSource": "pages/AdminPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/admin/settings",
+    "kind": "link",
+    "exampleSource": "pages/AdminMrzSettingsPage.tsx",
+    "occurrences": 2
+   },
+   {
+    "target": "/admin/settings/tools/mrz",
+    "kind": "link",
+    "exampleSource": "pages/AdminPage.tsx",
+    "occurrences": 2
+   },
+   {
+    "target": "/admin/tickets",
+    "kind": "link",
+    "exampleSource": "pages/AdminPage.tsx",
+    "occurrences": 2
+   },
+   {
+    "target": "/admin/tickets/:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/AdminCustomerDetailPage.tsx",
+    "occurrences": 2
+   },
+   {
+    "target": "/admin/unified-inbox",
+    "kind": "link",
+    "exampleSource": "layout/Header.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/api/v1/navigation",
+    "kind": "link",
+    "exampleSource": "pages/marketing/SitemapPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/api/v1/public/downloads/:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/platform/StorefrontPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/apps",
+    "kind": "link",
+    "exampleSource": "pages/DashboardPage.tsx",
+    "occurrences": 2
+   },
+   {
+    "target": "/apps/:param",
+    "kind": "parameterised-link",
+    "exampleSource": "components/AppTile.tsx",
+    "occurrences": 2
+   },
+   {
+    "target": "/billing",
+    "kind": "link",
+    "exampleSource": "pages/DashboardPage.tsx",
+    "occurrences": 3
+   },
+   {
+    "target": "/cart?add=:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/platform/ExpertsPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/cart?add=website_builder::param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/platform/PlatformHubPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/cart?product=:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/HomePage.tsx",
+    "occurrences": 2
+   },
+   {
+    "target": "/contact",
+    "kind": "link",
+    "exampleSource": "layout/Footer.tsx",
+    "occurrences": 10
+   },
+   {
+    "target": "/dashboard",
+    "kind": "programmatic",
+    "exampleSource": "components/AdminCustomerIdentityPanel.tsx",
+    "occurrences": 3
+   },
+   {
+    "target": "/dashboard/apps",
+    "kind": "link",
+    "exampleSource": "pages/DashboardPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/dashboard/apps/:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/AppDetailPage.tsx",
+    "occurrences": 5
+   },
+   {
+    "target": "/dashboard/deployments/:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/AppInstancePage.tsx",
+    "occurrences": 2
+   },
+   {
+    "target": "/dashboard/domains",
+    "kind": "link",
+    "exampleSource": "pages/AppInstancePage.tsx",
+    "occurrences": 5
+   },
+   {
+    "target": "/dashboard/servers",
+    "kind": "link",
+    "exampleSource": "pages/NewServerPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/dashboard/servers/:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/AdminMonitoringPage.tsx",
+    "occurrences": 6
+   },
+   {
+    "target": "/docs",
+    "kind": "link",
+    "exampleSource": "pages/marketing/DocsPages.tsx",
+    "occurrences": 4
+   },
+   {
+    "target": "/domains/appraisal",
+    "kind": "link",
+    "exampleSource": "pages/DashboardDomainsPage.tsx",
+    "occurrences": 2
+   },
+   {
+    "target": "/domains/auctions",
+    "kind": "link",
+    "exampleSource": "pages/DashboardDomainsPage.tsx",
+    "occurrences": 3
+   },
+   {
+    "target": "/domains/auctions/:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/DashboardDomainsPage.tsx",
+    "occurrences": 5
+   },
+   {
+    "target": "/domains/broker",
+    "kind": "link",
+    "exampleSource": "pages/DashboardDomainsPage.tsx",
+    "occurrences": 3
+   },
+   {
+    "target": "/domains/bulk-search",
+    "kind": "link",
+    "exampleSource": "pages/DashboardDomainsPage.tsx",
+    "occurrences": 2
+   },
+   {
+    "target": "/domains/club",
+    "kind": "link",
+    "exampleSource": "pages/DashboardDomainsPage.tsx",
+    "occurrences": 4
+   },
+   {
+    "target": "/domains/extensions",
+    "kind": "link",
+    "exampleSource": "pages/DomainsMarketingPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/domains/search",
+    "kind": "link",
+    "exampleSource": "pages/DashboardDomainsPage.tsx",
+    "occurrences": 6
+   },
+   {
+    "target": "/domains/search?domain=:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/DashboardDomainsPage.tsx",
+    "occurrences": 3
+   },
+   {
+    "target": "/domains/transfer",
+    "kind": "link",
+    "exampleSource": "pages/DashboardDomainsPage.tsx",
+    "occurrences": 3
+   },
+   {
+    "target": "/domains/transfer?domain=:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/domains/SearchPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/domains/whois",
+    "kind": "link",
+    "exampleSource": "pages/DomainsMarketingPage.tsx",
+    "occurrences": 2
+   },
+   {
+    "target": "/faq",
+    "kind": "link",
+    "exampleSource": "pages/HomePage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/forgot-password",
+    "kind": "link",
+    "exampleSource": "pages/LoginPage.tsx",
+    "occurrences": 2
+   },
+   {
+    "target": "/help",
+    "kind": "link",
+    "exampleSource": "layout/Footer.tsx",
+    "occurrences": 2
+   },
+   {
+    "target": "/hosting",
+    "kind": "link",
+    "exampleSource": "pages/InvoicesPage.tsx",
+    "occurrences": 2
+   },
+   {
+    "target": "/hosting/control-panels",
+    "kind": "link",
+    "exampleSource": "pages/ControlPanelDetailPage.tsx",
+    "occurrences": 5
+   },
+   {
+    "target": "/hosting/control-panels/:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/ControlPanelsPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/invoices",
+    "kind": "link",
+    "exampleSource": "pages/BillingPage.tsx",
+    "occurrences": 6
+   },
+   {
+    "target": "/invoices/:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/InvoicesPage.tsx",
+    "occurrences": 8
+   },
+   {
+    "target": "/legal",
+    "kind": "link",
+    "exampleSource": "layout/Footer.tsx",
+    "occurrences": 7
+   },
+   {
+    "target": "/legal/cookies",
+    "kind": "link",
+    "exampleSource": "layout/Footer.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/legal/privacy-policy",
+    "kind": "link",
+    "exampleSource": "layout/Footer.tsx",
+    "occurrences": 3
+   },
+   {
+    "target": "/legal/terms",
+    "kind": "link",
+    "exampleSource": "layout/Footer.tsx",
+    "occurrences": 2
+   },
+   {
+    "target": "/login",
+    "kind": "link",
+    "exampleSource": "components/RequireAuth.tsx",
+    "occurrences": 25
+   },
+   {
+    "target": "/login?next=/marketing/digital/:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/platform/MarketingPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/login?next=/marketing/logo-maker/:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/platform/LogoMakerPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/login?next=/websites/experts/:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/platform/ExpertsPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/marketing/digital",
+    "kind": "link",
+    "exampleSource": "pages/platform/MarketingPage.tsx",
+    "occurrences": 3
+   },
+   {
+    "target": "/marketing/digital/:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/platform/MarketingPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/marketing/inbox/:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/platform/InboxPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/marketing/logo-maker",
+    "kind": "link",
+    "exampleSource": "pages/platform/LogoMakerPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/marketing/logo-maker/:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/platform/LogoMakerPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/pricing",
+    "kind": "link",
+    "exampleSource": "layout/Header.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/register",
+    "kind": "link",
+    "exampleSource": "pages/FaqPage.tsx",
+    "occurrences": 4
+   },
+   {
+    "target": "/robots.txt",
+    "kind": "link",
+    "exampleSource": "pages/marketing/SitemapPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/servers/new",
+    "kind": "link",
+    "exampleSource": "pages/DashboardServersPage.tsx",
+    "occurrences": 5
+   },
+   {
+    "target": "/servers/new?panel=:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/ControlPanelDetailPage.tsx",
+    "occurrences": 3
+   },
+   {
+    "target": "/services",
+    "kind": "link",
+    "exampleSource": "pages/DashboardPage.tsx",
+    "occurrences": 3
+   },
+   {
+    "target": "/services/cloudflare",
+    "kind": "link",
+    "exampleSource": "pages/cloudflare/CloudflareServicePage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/services/cloudflare/:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/cloudflare/CloudflareServicesPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/sitemap",
+    "kind": "link",
+    "exampleSource": "layout/Footer.tsx",
+    "occurrences": 2
+   },
+   {
+    "target": "/sitemap.xml",
+    "kind": "link",
+    "exampleSource": "pages/marketing/SitemapPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/sites/:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/platform/AdminPlatformServicesPage.tsx",
+    "occurrences": 6
+   },
+   {
+    "target": "/status",
+    "kind": "link",
+    "exampleSource": "layout/Footer.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/store/:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/platform/StorePage.tsx",
+    "occurrences": 2
+   },
+   {
+    "target": "/support",
+    "kind": "link",
+    "exampleSource": "pages/DashboardPage.tsx",
+    "occurrences": 6
+   },
+   {
+    "target": "/support/:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/SupportPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/tools",
+    "kind": "link",
+    "exampleSource": "components/tools/ToolsNavigation.tsx",
+    "occurrences": 25
+   },
+   {
+    "target": "/tools?category=:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/ToolPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/tools/:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/AdminToolsPage.tsx",
+    "occurrences": 4
+   },
+   {
+    "target": "/tools/category/:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/ToolsCenterPage.tsx",
+    "occurrences": 2
+   },
+   {
+    "target": "/tools/document",
+    "kind": "link",
+    "exampleSource": "pages/ToolsCenterPage.tsx",
+    "occurrences": 2
+   },
+   {
+    "target": "/tools/domain-dns-health:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/DomainHealthPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/tools/domain-health",
+    "kind": "link",
+    "exampleSource": "pages/DomainHealthPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/tools/favorites",
+    "kind": "link",
+    "exampleSource": "pages/ToolsCenterPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/tools/history",
+    "kind": "link",
+    "exampleSource": "pages/ToolsCenterPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/tools/monitors",
+    "kind": "link",
+    "exampleSource": "pages/DomainHealthPage.tsx",
+    "occurrences": 2
+   },
+   {
+    "target": "/tools/mrz-generator",
+    "kind": "link",
+    "exampleSource": "pages/tools/MrzToolPage.tsx",
+    "occurrences": 2
+   },
+   {
+    "target": "/tools/mrz-parser",
+    "kind": "link",
+    "exampleSource": "pages/tools/MrzToolPage.tsx",
+    "occurrences": 2
+   },
+   {
+    "target": "/tools/reports",
+    "kind": "link",
+    "exampleSource": "pages/ToolsCenterPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/verify-email",
+    "kind": "link",
+    "exampleSource": "pages/LoginPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/websites/ai-builder",
+    "kind": "link",
+    "exampleSource": "pages/platform/AiBuilderPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/websites/ai-builder/:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/platform/AiBuilderPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/websites/builder",
+    "kind": "link",
+    "exampleSource": "pages/platform/BuilderPage.tsx",
+    "occurrences": 4
+   },
+   {
+    "target": "/websites/builder/:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/platform/AiBuilderPage.tsx",
+    "occurrences": 2
+   },
+   {
+    "target": "/websites/experts",
+    "kind": "link",
+    "exampleSource": "pages/DashboardPage.tsx",
+    "occurrences": 2
+   },
+   {
+    "target": "/websites/experts/:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/platform/ExpertsPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/websites/experts/new?offering=:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/platform/ExpertsPage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/websites/store",
+    "kind": "link",
+    "exampleSource": "pages/platform/StorePage.tsx",
+    "occurrences": 2
+   },
+   {
+    "target": "/websites/store/:param",
+    "kind": "parameterised-link",
+    "exampleSource": "pages/platform/StorePage.tsx",
+    "occurrences": 1
+   },
+   {
+    "target": "/websites/templates",
+    "kind": "link",
+    "exampleSource": "pages/DashboardPage.tsx",
+    "occurrences": 1
+   }
+  ]
+ },
+ "buttonsSourceScan": {
+  "total": 493,
+  "withOnClick": 417,
+  "formSubmit": 0
+ },
+ "browserCrawl": {
+  "note": "Full rendered crawl 2026-11-07 (public + demo customer + demo admin), raw data retained from audit session",
+  "pagesPerRoleCap": 220,
+  "distinctTargetsProbedPerRole": 345,
+  "notFoundTargets": 0,
+  "jsPageErrors": 0,
+  "placeholderHrefs": 0,
+  "externalLinks": 0
+ }
+}

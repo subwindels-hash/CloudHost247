@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type MouseEvent } from 'react';
 import { faInstagram, faWhatsapp, faTiktok, faTelegram, faCcVisa, faCcMastercard, faCcDiscover, faCcJcb, faCcDinersClub } from '@fortawesome/free-brands-svg-icons';
 import { publicFetch } from '../lib/api';
 import FooterLogoIcon from '../components/FooterLogoIcon';
@@ -130,6 +130,22 @@ function FooterBrandBand() {
   );
 }
 
+/**
+ * Amazon-style "Back to top" strip: a full-width bar (see hostinger-chrome.css
+ * `.hg-footer__top`), placed as the footer's final band below the bottom row (copyright / locale)
+ * rather than as a small link buried inside it.
+ * The whole bar is the click target. The `href` keeps the action working without JS and
+ * gives the link a real destination (`#ch247-top` is the header); the handler upgrades
+ * it to a smooth scroll that respects reduced-motion, and moves keyboard focus to the
+ * top of the page so keyboard/screen-reader users land where the view lands.
+ */
+function scrollToTop(event: MouseEvent<HTMLAnchorElement>) {
+  event.preventDefault();
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
+  document.getElementById('ch247-top')?.focus({ preventScroll: true });
+}
+
 export default function Footer() {
   const year = new Date().getFullYear();
   const { t, locale } = useLocale();
@@ -146,24 +162,21 @@ export default function Footer() {
       <FooterBrandBand />
       <div className="hg-footer__bottom">
         <div className="hg-wrap hg-footer__bottom-inner">
-          <p className="hg-footer__copyright">{t('footer.copyright', { year, legalName: BRAND.legalName })} · This product includes GeoLite2 data created by <a href="https://www.maxmind.com">MaxMind</a>.</p>
-          <p className="hg-footer__geo-credit">This product includes GeoLite2 data created by WIL<strong>®</strong>.</p>
+          <div className="hg-footer__brand-lines">
+            <p className="hg-footer__copyright">{t('footer.copyright', { year, legalName: BRAND.legalName })} · This product includes GeoLite2 data created by <a href="https://www.maxmind.com">MaxMind</a>.</p>
+            <p className="hg-footer__powered">Proudly Powered by WINDELS GROUP &amp; COMPANY®</p>
+            <p className="hg-footer__geo-credit">This product includes GeoLite2 data created by WIL<strong>®</strong>.</p>
+          </div>
           <div className="hg-footer__locale" aria-label="Current language, currency and region">
             <span>{locale.nativeName}</span><span aria-hidden="true">·</span><span>{currency}</span><span aria-hidden="true">·</span><span>{country === 'GB' ? 'UK' : country ?? 'Country unavailable'}</span>
           </div>
-          <nav className="hg-footer__legal-links" aria-label={t('footer.legalAndAccount')}>
-            <Link to="/legal">{t('footer.nav.legalCenter')}</Link>
-            <Link to="/legal/privacy-policy">{t('footer.nav.privacy')}</Link>
-            <Link to="/legal/cookies">{t('footer.nav.cookies')}</Link>
-            <Link to="/legal/terms">{t('footer.nav.terms')}</Link>
-            <Link to="/status">{t('footer.nav.status')}</Link>
-            <Link to="/help">{t('footer.nav.help')}</Link>
-            <Link to="/contact">{t('footer.nav.contact')}</Link>
-            <Link to="/sitemap">Sitemap</Link>
-          </nav>
-          <a className="hg-footer__top" href="#ch247-top">Back to top ↑</a>
         </div>
       </div>
+      {/* Back-to-top strip sits below the footer bottom row (copyright / locale),
+          as the final full-width band of the footer. */}
+      <a className="hg-footer__top" href="#ch247-top" onClick={scrollToTop}>
+        Back to top
+      </a>
     </footer>
   );
 }
