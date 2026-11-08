@@ -134,6 +134,8 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0088_create_whmcs_sso_rate_limits.sql',
     // Consent-aware Meta Pixel/CAPI configuration, consent, conversion activity and delivery outbox.
     '0089_create_marketing_integrations.sql',
+    // TikTok Pixel + Events API as a second provider on the 0089 marketing tables.
+    '0090_add_tiktok_pixel_integration.sql',
   ];
 
   it('finds the committed migration files in order', () => {

@@ -4,6 +4,7 @@ import { fetchInvoiceDetail, type InvoiceDetail } from '../lib/billing-api';
 import StatusBadge from '../components/StatusBadge';
 import PaymentModal from '../components/PaymentModal';
 import { trackVerifiedPurchase } from '../lib/marketing';
+import { trackVerifiedTikTokPurchase } from '../lib/tiktok';
 
 export default function InvoiceDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -31,7 +32,7 @@ export default function InvoiceDetailPage() {
   }, [id]);
 
   useEffect(() => {
-    if (invoice?.status === 'paid' && invoice.payments.some(p => p.status === 'successful')) void trackVerifiedPurchase(invoice.id);
+    if (invoice?.status === 'paid' && invoice.payments.some(p => p.status === 'successful')) void trackVerifiedPurchase(invoice.id); void trackVerifiedTikTokPurchase(invoice.id);
   }, [invoice?.id, invoice?.status, invoice?.payments]);
 
   if (loading) {

@@ -1573,6 +1573,7 @@ export const SPA_ROUTE_PATTERNS: string[] = [
   "/admin/infrastructure/provisioning",
   "/admin/infrastructure/provisioning/:id",
   "/admin/integrations/cloudflare",
+  "/admin/integrations/tiktok-pixel",
   "/admin/invoices",
   "/admin/invoices/:id",
   "/admin/ledger",

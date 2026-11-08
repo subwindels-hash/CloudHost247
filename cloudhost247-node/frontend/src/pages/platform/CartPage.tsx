@@ -6,6 +6,7 @@ import { usePageMeta } from '../../lib/usePageMeta';
 import { CatalogErrorBanner, CatalogLoadingBanner } from '../../components/CatalogStateBanner';
 import { Feedback, useAction } from '../../components/platform/ui';
 import { trackMarketing } from '../../lib/marketing';
+import { trackTikTok } from '../../lib/tiktok';
 import { ApproxAmount } from '../../components/ApproxAmount';
 import { fetchPublishedPlans, money, type CartSummary, type OrderSummary } from '../../lib/platform-api';
 
@@ -126,6 +127,8 @@ export default function CartPage() {
         const response = await apiFetch<{ order: OrderSummary }>('/api/v1/orders', { method: 'POST', body: JSON.stringify({}) });
         setOrder(response.order);
         trackMarketing('InitiateCheckout', { value: Number(response.order.totalAmount), currency: response.order.currency, content_ids: contents.map(item => item.id), contents, num_items: contents.reduce((n,item) => n + item.quantity, 0) }, `checkout:${response.order.id}`);
+        trackTikTok('InitiateCheckout', { value: Number(response.order.totalAmount), currency: response.order.currency, content_ids: contents.map(item => item.id), contents, num_items: contents.reduce((n,item) => n + item.quantity, 0) }, `checkout:${response.order.id}`);
+        trackTikTok('PlaceAnOrder', { value: Number(response.order.totalAmount), currency: response.order.currency, content_ids: contents.map(item => item.id), contents, num_items: contents.reduce((n,item) => n + item.quantity, 0) }, `order:${response.order.id}`);
         load();
       } catch (err) {
         if (err instanceof ApiRequestError && err.status === 401) {

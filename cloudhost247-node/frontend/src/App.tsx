@@ -446,6 +446,7 @@ export default function App() {
             <Route path="/admin/integrations/cloudflare" element={<AdminCloudflarePage />} />
             <Route path="/admin/marketing-integrations" element={<AdminMarketingIntegrationsPage />} />
             <Route path="/admin/marketing-integrations/:provider" element={<AdminMarketingIntegrationsPage />} />
+            <Route path="/admin/integrations/tiktok-pixel" element={<AdminMarketingIntegrationsPage />} />
             {/* Domain Services control room: providers + credentials + real Test Connection,
                 extension catalogue + trending, auctions, transfers, Domain Club plans. */}
             <Route path="/admin/domain-services" element={<AdminDomainServicesPage />} />

@@ -1,4 +1,5 @@
 import { recordServerConversion } from '../marketing/conversion-service';
+import { recordTikTokServerConversion } from '../tiktok/event-service';
 import { randomUUID } from 'node:crypto';
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
@@ -261,6 +262,7 @@ export async function registerAuthRoutes(app: FastifyInstance, env: Env, overrid
       );
 
       const marketing = await recordServerConversion(pool, request, env.APP_URL, { name: 'CompleteRegistration', id: `registration:${user.id}`, data: { content_name: 'CloudHost247 account', content_category: 'registration' } }).catch(() => null);
+      await recordTikTokServerConversion(pool, request, env.APP_URL, { name: 'CompleteRegistration', id: `registration:${user.id}`, data: { content_name: 'CloudHost247 account', content_category: 'registration' } }).catch(() => null);
 
       const token = signAuthToken(env, { sub: user.id, role: user.role, email: user.email, sv: user.auth_session_version });
       reply.code(201);
