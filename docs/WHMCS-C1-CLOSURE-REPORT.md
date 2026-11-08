@@ -150,10 +150,11 @@ the staging host, or a secret manager. Never through issues, commits, chat, docu
 
 1. **No live verification of anything WHMCS-side.** Every WHMCS interaction in this repository ran against a scripted
    transport. The first real run can still surprise us — that is the point of the runbook's abort conditions.
-2. **The operator CLI has no automated end-to-end harness.** It is type-checked and was probed manually; D1, D4 and D5
-   were all CLI-level defects found by running it, not by the unit suite. A scripted CLI test remains the obvious next
-   hardening step *if* the closure review had not already given us three of them — it is recorded here as a residual
-   risk, not started, because it is not a blocker for staging.
+2. **The operator CLI has no automated end-to-end harness** — tracked as **TD-01** in
+   [`TECHNICAL-DEBT-REGISTER.md`](TECHNICAL-DEBT-REGISTER.md). It is type-checked and was probed manually; D1, D4 and
+   D5 were all CLI-level defects found by running it, not by the unit suite. A scripted CLI test remains the obvious
+   next hardening step; it is recorded as accepted residual risk and not started, because it is not a blocker for
+   staging.
 3. **Redaction is pattern-based.** It covers what WHMCS and shell tools actually emit; the stronger guarantee is that
    configured secret values never enter the pack module at all.
 4. **Readiness has no `--map` override**, so the tampered-map path is proven through `probeTooling` rather than
@@ -193,7 +194,8 @@ Then stop and present the pack. Binding stays a separate reviewed command per se
 | Are products bound? | **No — 0 of 59** |
 | Are 59 services correctly blocked rather than falsely orderable? | **Yes** |
 | Is C2, checkout, payment, migration or provisioning enabled? | **No** |
-| What unblocks the next phase? | The eight staging handoff items |
+| What unblocks the next phase? | The eight staging handoff items (§7) |
+| Where is the deferred work recorded? | [`TECHNICAL-DEBT-REGISTER.md`](TECHNICAL-DEBT-REGISTER.md) — 8 open items, 5 closed, external blockers kept separate |
 
 **Recommendation: close C1 here.** No further local milestone should be started unless the staging run exposes a
 specific, reproducible defect.

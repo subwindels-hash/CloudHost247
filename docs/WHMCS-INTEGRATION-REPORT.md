@@ -36,6 +36,8 @@ Companion documents: [`WHMCS-INTEGRATION-AUDIT.md`](WHMCS-INTEGRATION-AUDIT.md) 
 | Staging access handoff | C1.8 | **DONE** | `docs/WHMCS-STAGING-ACCESS-HANDOFF.md` (§9.3); the eight items it lists are **OUTSTANDING** |
 | Evidence-integrity review | C1.9 | **DONE** | `docs/WHMCS-EVIDENCE-INTEGRITY-REVIEW.md`; 4 defects found and fixed; readiness + pack suites 36 tests (§10) |
 | C1 closure review | C1.10 | **DONE** | `docs/WHMCS-C1-CLOSURE-REPORT.md`; 1 defect found and fixed (D5: review/evidence exited 0 on an unusable snapshot) |
+| Technical debt register | C1.10 follow-up | **DONE** | `docs/TECHNICAL-DEBT-REGISTER.md` — TD-01 (no automated CLI end-to-end harness) recorded as accepted residual risk; five closed items kept for the record; the eight staging items kept separate as external blockers |
+| C2 staging integration | C2 | **NOT STARTED — not authorised** | gated on the eight staging handoff items and an approved mapping proposal |
 | **Discovery run against staging** | C1.4 | **BLOCKED** | needs the staging URL and a read-only API credential |
 | Verified product mapping | C2.0 | **BLOCKED** | depends on the discovery run; the committed map has 0 bindings and the review classifies 0 services as verified (§6) |
 | SPA catalogue wiring | C2 | **NOT STARTED** | gated on a reviewed, verified mapping |
