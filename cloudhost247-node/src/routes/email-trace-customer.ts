@@ -72,6 +72,9 @@ function parseStatuses(raw: string | undefined): DeliveryStatus[] | undefined {
   return values as DeliveryStatus[];
 }
 
+/** Per-check ceiling for the diagnostics endpoint: one hung resolver must not stall the page. */
+const EMPTY_TRACE_CHECK_TIMEOUT_MS = 8_000;
+
 const WINDOW_MS: Record<string, number> = {
   '24h': 24 * 60 * 60 * 1000,
   '7d': 7 * 24 * 60 * 60 * 1000,
@@ -232,6 +235,8 @@ export async function registerEmailTraceCustomerRoutes(app: FastifyInstance, env
         domain: access.domainName,
         dkimSelectors: selectors,
         includeSmtpBanner: query.banner === 'true',
+        // Bound every check so this endpoint always answers, even when a resolver is hanging.
+        perCheckTimeoutMs: EMPTY_TRACE_CHECK_TIMEOUT_MS,
       },
       defaultDiagnosticRunners(pool)
     );

@@ -473,7 +473,10 @@ describe('email trace API', () => {
     expect(unknown.statusCode).toBe(404);
   });
 
-  it('runs domain diagnostics for an owned domain only, with an explicit not-checked vocabulary', async () => {
+  // This test performs real DNS lookups (it is the endpoint's actual job), so it gets a longer
+  // ceiling than the default: on a hosted runner the resolvers answer in seconds, but a slow or
+  // partially blocked resolver must not turn a correct NOT_CHECKED answer into a flaky failure.
+  it('runs domain diagnostics for an owned domain only, with an explicit not-checked vocabulary', { timeout: 120_000 }, async () => {
     const api = await app();
 
     const unauthorized = await api.inject({ method: 'GET', url: `/api/v1/email-trace/domains/${domainA}/diagnostics` });
