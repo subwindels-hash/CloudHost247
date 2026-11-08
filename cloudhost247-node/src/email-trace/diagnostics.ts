@@ -278,6 +278,17 @@ export async function diagnoseDomain(
     });
   } else if (!mx) {
     checks.push(notChecked('ptr', 'PTR (reverse DNS)', 'the MX lookup did not complete, so there were no hosts to check.'));
+  } else {
+    // The MX lookup completed but resolved no mail host. There is nothing to reverse-look-up, and
+    // omitting the row would let a reader conclude PTR was fine — every check is always reported.
+    checks.push({
+      id: 'ptr',
+      label: 'PTR (reverse DNS)',
+      status: 'NOT_FOUND',
+      summary: 'No MX record resolves to a mail host, so there is no reverse DNS entry to check.',
+      detail: [],
+      unavailable: false,
+    });
   }
 
   // --- SMTP banner (opt-in; opens a TCP connection) ----------------------------------------------

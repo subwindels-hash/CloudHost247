@@ -210,6 +210,22 @@ describe('diagnoseDomain', () => {
     expect(byId(result.checks, 'ptr').summary).toContain('no hosts to check');
   });
 
+  it('still reports PTR when the MX lookup completes with no mail host at all', async () => {
+    // The CI failure this covers: `.example` resolves no MX host, the lookup does not throw, and the
+    // PTR row used to disappear. A missing row reads as "nothing wrong", so an absent check is the
+    // one outcome the honesty contract cannot allow.
+    const result = await diagnoseDomain(
+      { domain: 'alpha.example' },
+      runners({ mx: async () => mxResult({ records: [], hosts: [], implicitMx: false }) })
+    );
+    expect(result.checks.map((check) => check.id).sort()).toEqual(
+      ['dkim', 'dmarc', 'mx', 'ptr', 'smtp_banner', 'spf'].sort()
+    );
+    expect(byId(result.checks, 'mx').status).toBe('NOT_FOUND');
+    expect(byId(result.checks, 'ptr')).toMatchObject({ status: 'NOT_FOUND', unavailable: false });
+    expect(byId(result.checks, 'ptr').summary).toContain('no reverse DNS entry to check');
+  });
+
   it('reads the SMTP banner only when asked, and reports an unreachable host honestly', async () => {
     const banner = await diagnoseDomain({ domain: 'alpha.example', includeSmtpBanner: true }, runners());
     expect(byId(banner.checks, 'smtp_banner').status).toBe('PASS');
