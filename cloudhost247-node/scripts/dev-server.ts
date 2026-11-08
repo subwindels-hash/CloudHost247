@@ -40,6 +40,19 @@ async function main() {
     }
   }
 
+  // Same idea for Domain Services: the extension catalogue is empty until a registrar is connected,
+  // which leaves the homepage price tags with nothing to show. Load the committed fixture catalogue
+  // on a fresh local database only, again clearly marked as fixtures rather than real prices.
+  const extensionSeedPath = path.join(process.cwd(), 'database', 'seed', 'dev-domain-extensions-seed.sql');
+  if (existsSync(extensionSeedPath)) {
+    const { rows } = await db.query<{ count: string }>('SELECT count(*)::text AS count FROM domain_extensions');
+    if (rows[0]?.count === '0') {
+      await db.exec(readFileSync(extensionSeedPath, 'utf8'));
+      // eslint-disable-next-line no-console
+      console.log('[dev-server] extension catalogue was empty — loaded database/seed/dev-domain-extensions-seed.sql (dev fixtures, not real prices)');
+    }
+  }
+
   const app = buildApp(env, { serveFrontend: false, pool: db });
   await app.listen({ port: PORT, host: '0.0.0.0' });
   // eslint-disable-next-line no-console
