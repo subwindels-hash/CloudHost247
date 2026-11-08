@@ -2,7 +2,7 @@
 
 **Feature:** native Email Trace Centre (no external email-tracking API)
 **Branch:** `arena/b4931f08-cloudhost247`
-**Commits:** `c9f134e` (schema + parsers), `4cd8afb` (collector, agent op, API, sweep), final commit for UI + this report (see `git log` — the SHA is printed by `git log -1 --format=%H` on this branch)
+**Commits:** `c9f134e` (schema + parsers) · `4cd8afb` (collector, agent op, API, sweep) · `e1c75ea` (UI, navigation, this report)
 **Date:** 2026-11-08
 
 ---
