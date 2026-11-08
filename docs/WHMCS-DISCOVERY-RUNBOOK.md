@@ -3,6 +3,9 @@
 **Purpose.** The exact, ordered procedure for running discovery against the real WHMCS installation, deciding
 whether what came back is trustworthy, and turning it into a product mapping proposal for approval.
 
+> **Verified locally — not WHMCS-integrated in a live staging environment.** Every step below has been exercised locally against fixtures and
+> scripted transports; none has been run against a WHMCS installation.
+
 **Status vocabulary used here:** `DONE` — implemented and covered by a test that fails if the behaviour is removed.
 `BLOCKED` — cannot be done in this repository and states what would unblock it. `NOT STARTED` — not written.
 

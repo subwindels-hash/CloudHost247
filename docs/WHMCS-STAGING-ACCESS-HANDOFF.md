@@ -3,6 +3,9 @@
 **Purpose.** Everything needed to unblock the first real WHMCS discovery, written so that the handoff itself never
 carries a secret.
 
+> **Verified locally — not WHMCS-integrated in a live staging environment.** The tooling described here is tested locally; the
+> environment it targets has never been contacted.
+
 **The rule this document exists to keep:** credentials are never requested or supplied through GitHub issues, pull
 requests, commits, chat messages, documentation, screenshots or email. This document lists *what* to provide, *how* it
 must be delivered, and *who* is responsible for each part. It never contains a value, and it should never be edited to

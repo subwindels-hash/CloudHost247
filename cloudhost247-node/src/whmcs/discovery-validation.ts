@@ -231,6 +231,41 @@ export function validateDiscoveryArtifact(value: unknown): DiscoveryValidation {
   return finish();
 }
 
+/**
+ * The verdict a command should act on, as data.
+ *
+ * `validate` already exits non-zero for an unusable artifact, but `review` and `evidence` used to print a normal
+ * success line and exit 0 while refusing to classify anything — the safest possible behaviour with the least
+ * detectable signal. This is that decision, extracted so it is testable and so all three commands agree.
+ */
+export function validationVerdict(validation: DiscoveryValidation | null): {
+  status: 'no-artifact' | 'usable' | 'unusable';
+  exitCode: 0 | 1;
+  message: string;
+} {
+  if (validation === null) {
+    return {
+      status: 'no-artifact',
+      exitCode: 0,
+      message: 'no discovery artifact — every advertised service is BLOCKED until one exists',
+    };
+  }
+  if (validation.usable) {
+    return {
+      status: 'usable',
+      exitCode: 0,
+      message: `artifact usable — ${validation.warnings.length} warning(s) for the reviewer`,
+    };
+  }
+  return {
+    status: 'unusable',
+    exitCode: 1,
+    message:
+      `artifact FAILED validation (${validation.critical.length} critical check(s)) — nothing may be reviewed, ` +
+      'approved or bound from it; the report was still written so the failure can be investigated',
+  };
+}
+
 /** The artifact's cycles as a plain string list — used by reports, never as a price source. */
 export function pricedCycles(product: { pricing: Record<string, Array<{ cycle: string }>> }): BillingCycle[] {
   const seen = new Set<string>();

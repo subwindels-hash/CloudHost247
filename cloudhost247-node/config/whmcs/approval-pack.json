@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-08T16:16:06.248Z",
+  "generatedAt": "2026-11-08T16:26:22.845Z",
   "stagingOnly": true,
   "environment": {
     "baseUrlHost": null,
@@ -835,6 +835,7 @@
     "consistent": false
   },
   "ownerApproved": false,
+  "verificationStatus": "Verified locally — not WHMCS-integrated in a live staging environment.",
   "notVerified": [
     "configurable options were not read (slice B2.3)",
     "provisioning module capability was not exercised — a configured module is not a working server",

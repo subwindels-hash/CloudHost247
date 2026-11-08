@@ -5,7 +5,7 @@
 
 | Field | Value |
 | --- | --- |
-| Generated at | 2026-11-08T16:16:05.797Z |
+| Generated at | 2026-11-08T16:26:22.356Z |
 | Discovery artifact | **none — C1 has not run** |
 | Proposal | **none** |
 | Product map | `config/whmcs/product-map.json` |

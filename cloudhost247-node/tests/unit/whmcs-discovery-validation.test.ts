@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { validateDiscoveryArtifact } from '../../src/whmcs/discovery-validation';
+import { validateDiscoveryArtifact, validationVerdict } from '../../src/whmcs/discovery-validation';
 import { DISCOVERY_SCHEMA, type DiscoveryArtifact } from '../../src/whmcs/discovery';
 
 /**
@@ -214,6 +214,22 @@ describe('validateDiscoveryArtifact', () => {
     const noProducts = validateDiscoveryArtifact(artifact({ products: [] }));
     expect(noProducts.usable).toBe(false);
     expect(noProducts.critical.join(' ')).toContain('products.present');
+  });
+
+  it('gives review and evidence a non-zero verdict for an unusable artifact (C1.10 defect)', () => {
+    // These commands used to print a normal success line and exit 0 while refusing to classify anything: the safest
+    // behaviour with the least detectable signal. A pipeline or operator could not tell a rejection from a pass.
+    expect(validationVerdict(null)).toMatchObject({ status: 'no-artifact', exitCode: 0 });
+
+    const usable = validateDiscoveryArtifact(artifact());
+    expect(validationVerdict(usable)).toMatchObject({ status: 'usable', exitCode: 0 });
+
+    const unusable = validateDiscoveryArtifact(artifact({ currencies: [], defaultCurrency: null }));
+    const verdict = validationVerdict(unusable);
+    expect(verdict.status).toBe('unusable');
+    expect(verdict.exitCode).toBe(1);
+    expect(verdict.message).toContain('nothing may be reviewed');
+    expect(verdict.message).toContain('still written');
   });
 
   it('carries the run\'s own warnings forward for the reviewer', () => {

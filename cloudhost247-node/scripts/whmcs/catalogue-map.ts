@@ -55,7 +55,7 @@ import { BILLING_CYCLES, type BillingCycle } from '../../src/whmcs/types';
 import { collectDiscovery, renderDiscoveryReport, type DiscoveryArtifact } from '../../src/whmcs/discovery';
 import { readServiceRegister } from '../../src/whmcs/service-register';
 import { buildMappingReview, renderMappingReview, type MappingProposal } from '../../src/whmcs/mapping-review';
-import { validateDiscoveryArtifact } from '../../src/whmcs/discovery-validation';
+import { validateDiscoveryArtifact, validationVerdict } from '../../src/whmcs/discovery-validation';
 import { renderEvidencePack, buildEvidenceSummary, type EvidenceEnvironment } from '../../src/whmcs/evidence-pack';
 import {
   assessReadiness,
@@ -634,6 +634,8 @@ function review(args: Args): void {
   for (const [state, count] of Object.entries(result.summary)) {
     console.log(`  ${state.padEnd(30)} ${count}`);
   }
+  const verdict = validationVerdict(result.validation);
+  console.log(`  snapshot            ${verdict.message}`);
   console.log(`✓ ${args.reviewPath}`);
   console.log(`✓ ${args.reviewJsonPath}`);
   if (!result.discovered) {
@@ -643,6 +645,7 @@ function review(args: Args): void {
     console.log('  ! no proposal file: nothing is proposed, so nothing is recommended for binding.');
   }
   console.log('  nothing was bound. Approve rows first, then bind one service at a time.');
+  if (verdict.exitCode !== 0) process.exit(verdict.exitCode);
 }
 
 /**
@@ -747,6 +750,11 @@ function evidence(args: Args): void {
   console.log(`✓ ${path.relative(process.cwd(), DEFAULT_PACK_PATH)}`);
   console.log(`✓ ${path.relative(process.cwd(), DEFAULT_PACK_JSON_PATH)}`);
   console.log('  nothing was bound. The pack recommends; the owner approves; bind stays a separate step.');
+  const packVerdict = validationVerdict(validation);
+  if (packVerdict.exitCode !== 0) {
+    console.log(`  ! ${packVerdict.message}`);
+    process.exit(packVerdict.exitCode);
+  }
 }
 
 /**

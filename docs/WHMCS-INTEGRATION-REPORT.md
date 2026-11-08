@@ -8,10 +8,11 @@ against a live WHMCS installation — which, as of this report, has not happened
 Companion documents: [`WHMCS-INTEGRATION-AUDIT.md`](WHMCS-INTEGRATION-AUDIT.md) (the plan and the audit trail) and
 [`WHMCS-INTEGRATION.md`](WHMCS-INTEGRATION.md) (how the pieces work and the rules a change must not break).
 
-> **Integration status (keep this in every project report).** The WHMCS integration is **verified locally**: tooling,
-> validation gates and evidence controls are implemented and tested. It is **not WHMCS-integrated in a live staging
-> environment** — no WHMCS installation has been contacted, **0 of 59** products are bound, all 59 advertised services
-> are `BLOCKED`, and C2, checkout, payments, migration and provisioning are **not authorised**. The independent review
+> **Verified locally — not WHMCS-integrated in a live staging environment.**
+>
+> Tooling, validation gates and evidence controls are implemented and tested. No WHMCS installation has been
+> contacted, **0 of 59** products are bound, all 59 advertised services are `BLOCKED`, and C2, checkout, payments,
+> migration and provisioning are **not authorised**. The independent review
 > of these controls is [`WHMCS-EVIDENCE-INTEGRITY-REVIEW.md`](WHMCS-EVIDENCE-INTEGRITY-REVIEW.md).
 
 ---
@@ -34,14 +35,15 @@ Companion documents: [`WHMCS-INTEGRATION-AUDIT.md`](WHMCS-INTEGRATION-AUDIT.md) 
 | Readiness diagnostics | C1.8 | **DONE** | `src/whmcs/readiness.ts`, `npm run whmcs:readiness`; 15 tests; five states, no authenticated request (§9.1) |
 | Staging access handoff | C1.8 | **DONE** | `docs/WHMCS-STAGING-ACCESS-HANDOFF.md` (§9.3); the eight items it lists are **OUTSTANDING** |
 | Evidence-integrity review | C1.9 | **DONE** | `docs/WHMCS-EVIDENCE-INTEGRITY-REVIEW.md`; 4 defects found and fixed; readiness + pack suites 36 tests (§10) |
+| C1 closure review | C1.10 | **DONE** | `docs/WHMCS-C1-CLOSURE-REPORT.md`; 1 defect found and fixed (D5: review/evidence exited 0 on an unusable snapshot) |
 | **Discovery run against staging** | C1.4 | **BLOCKED** | needs the staging URL and a read-only API credential |
 | Verified product mapping | C2.0 | **BLOCKED** | depends on the discovery run; the committed map has 0 bindings and the review classifies 0 services as verified (§6) |
 | SPA catalogue wiring | C2 | **NOT STARTED** | gated on a reviewed, verified mapping |
 | Unified cart, checkout, payments | C3 | **NOT STARTED** | gated on C2 |
 | Provider verification (domains, hosting, SSL) | D | **NOT STARTED** | needs staging providers |
 
-Test inventory for the whole integration: **234 tests across 16 files** (`tests/unit/whmcs-*.test.ts`,
-`tests/integration/whmcs-*.test.ts`). Backend unit suite overall: **1093 tests / 63 files**. Frontend unit suite:
+Test inventory for the whole integration: **236 tests across 16 files** (`tests/unit/whmcs-*.test.ts`,
+`tests/integration/whmcs-*.test.ts`). Backend unit suite overall: **1095 tests / 63 files**. Frontend unit suite:
 **782 tests / 63 files** unchanged.
 
 ---
@@ -415,6 +417,23 @@ exactly its own row.
 
 **What this phase did not do.** No new capability was added to advance a milestone count. No binding, no C2, no
 checkout, no payment, no migration, no provisioning.
+
+---
+
+## 10a. Phase C1.10 — closure review and staging handoff
+
+The C1 chain is closed. [`WHMCS-C1-CLOSURE-REPORT.md`](WHMCS-C1-CLOSURE-REPORT.md) is the record: milestones and
+commits, all nine chain confirmations, the documentation-consistency check, the service-register verification, test
+totals with their commands, the security-control matrix with test evidence, the eight outstanding staging
+prerequisites, and the remaining risks.
+
+**One further defect was found by that review and fixed (D5):** `whmcs:review` and `whmcs:evidence` exited **0** on a
+snapshot that failed validation — the rows were correctly `BLOCKED`, but neither an operator nor a pipeline could tell
+a rejection from a pass. `validationVerdict()` now gives all three commands one answer: unusable → exit 1, with the
+failed report still written so the failure stays investigable. One regression test added.
+
+Status is unchanged and must stay that way: **verified locally — not WHMCS-integrated in a live staging environment**;
+0 bindings, 59 dispositions, 59 `BLOCKED`, C2 unauthorised.
 
 ---
 

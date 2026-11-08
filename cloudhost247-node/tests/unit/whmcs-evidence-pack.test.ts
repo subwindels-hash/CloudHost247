@@ -235,6 +235,15 @@ describe('renderEvidencePack', () => {
     expect(summaryOf({ ...input, review: reviewed }).artifactIntegrity.consistent).toBe(true);
   });
 
+  it('carries the project-wide verification status line', () => {
+    const markdown = renderEvidencePack(baseInput());
+    const empty = renderEvidencePack(baseInput({ discovery: null, validation: null }));
+    const sentence = 'Verified locally — not WHMCS-integrated in a live staging environment.';
+    expect(markdown).toContain(sentence);
+    expect(empty).toContain(sentence);
+    expect(summaryOf(baseInput()).verificationStatus).toBe(sentence);
+  });
+
   it('never claims an owner approval', () => {
     const markdown = renderEvidencePack(baseInput());
     expect(markdown).toContain('not recorded — this pack is a request, not an approval');

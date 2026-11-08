@@ -6,9 +6,10 @@ changes made during this review. It inspects the implementation, executes the co
 
 **Status statement that must survive into any project status report:**
 
-> The WHMCS integration is **verified locally**: tooling, validation gates and evidence controls are implemented and
-> tested. It is **not WHMCS-integrated in a live staging environment**. No WHMCS installation has been contacted, no
-> product is bound (0 of 59), and all 59 advertised services are `BLOCKED`.
+> **Verified locally — not WHMCS-integrated in a live staging environment.**
+>
+> Tooling, validation gates and evidence controls are implemented and tested. No WHMCS installation has been
+> contacted, no product is bound (0 of 59), and all 59 advertised services are `BLOCKED`.
 
 **Method.** Source inspection, the automated suites, and manual adversarial probes run in this environment: a local
 TCP listener to prove the readiness probe sends nothing, a mutated snapshot to break the digest chain, and a
