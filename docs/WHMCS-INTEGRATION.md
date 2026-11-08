@@ -46,7 +46,7 @@ Everything below is a consequence of that sentence.
 | `scripts/whmcs/catalogue-map.ts` | Operator CLI: `verify`, `snapshot`, `bind`, `dispose`, `dispositions`, `init`, `readiness`, `doctor`, `discover`, `validate`, `review`, `evidence`. Type-checked via `tsconfig.scripts.json` (`npm run typecheck:scripts`, part of `npm run build`). |
 | `config/whmcs/product-map.json` | The generated map. Currently **0 bindings, 59 dispositions**. |
 | `config/whmcs/service-register.csv` (repository root) | Cross-stack inventory of advertised services, shared with the PHP/WHMCS side. |
-| `tests/unit/whmcs-*.test.ts`, `tests/integration/whmcs-*.test.ts` | 230 tests across 16 files: the layer, the completeness gate, the orderability verdict, the identity bridge, the discovery pipeline, the mapping review, the snapshot validation gate, the readiness diagnostics and the approval pack. |
+| `tests/unit/whmcs-*.test.ts`, `tests/integration/whmcs-*.test.ts` | 234 tests across 16 files: the layer, the completeness gate, the orderability verdict, the identity bridge, the discovery pipeline, the mapping review, the snapshot validation gate, the readiness diagnostics and the approval pack. |
 
 ---
 

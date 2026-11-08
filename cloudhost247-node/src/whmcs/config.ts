@@ -70,7 +70,7 @@ function intInRange(raw: string | undefined, fallback: number, min: number, max:
  * A staging install reached over plain http would send the API secret in clear text, so it is
  * refused rather than "warned about".
  */
-function normalizeBaseUrl(raw: string): string {
+export function normalizeBaseUrl(raw: string): string {
   let url: URL;
   try {
     url = new URL(raw.trim());

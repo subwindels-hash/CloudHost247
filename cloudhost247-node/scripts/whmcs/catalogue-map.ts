@@ -60,6 +60,7 @@ import { renderEvidencePack, buildEvidenceSummary, type EvidenceEnvironment } fr
 import {
   assessReadiness,
   probeTooling,
+  readinessRouteTarget,
   renderReadinessReport,
   type RouteProbe,
 } from '../../src/whmcs/readiness';
@@ -690,7 +691,23 @@ function evidence(args: Args): void {
   }
 
   const validation = discovery ? validateDiscoveryArtifact(discovery) : null;
-  const review = buildMappingReview({ services, discovery, proposal, map: document, artifactSha256: discoverySha });
+
+  // Prefer the review that is *on disk*: that is the document the owner read. Rebuilding it here would silently
+  // repair any drift between the artifact and the evidence, which is the exact failure the digest chain exists to
+  // detect. Rebuilding is only a fallback for the first run, and it says so.
+  let review: ReturnType<typeof buildMappingReview> | null = null;
+  if (existsSync(args.reviewJsonPath)) {
+    try {
+      const parsed = JSON.parse(readFileSync(args.reviewJsonPath, 'utf8')) as ReturnType<typeof buildMappingReview>;
+      if (Array.isArray(parsed.rows) && parsed.summary) review = parsed;
+    } catch {
+      review = null;
+    }
+  }
+  const reviewSource = review ? 'config/whmcs/mapping-review.json (as reviewed)' : 'rebuilt from the current artifact';
+  if (!review) {
+    review = buildMappingReview({ services, discovery, proposal, map: document, artifactSha256: discoverySha });
+  }
 
   const doctorOutput = args.doctorPath && existsSync(args.doctorPath) ? readFileSync(args.doctorPath, 'utf8') : null;
   const secrets = [process.env.WHMCS_API_SECRET, process.env.WHMCS_API_IDENTIFIER].filter(
@@ -717,6 +734,7 @@ function evidence(args: Args): void {
   writeFileSync(DEFAULT_PACK_JSON_PATH, `${JSON.stringify(buildEvidenceSummary(input), null, 2)}\n`, 'utf8');
 
   console.log('Approval pack — C1.7 evidence review');
+  console.log(`  review               ${reviewSource}`);
   console.log(`  discovery artifact   ${discoverySha ? discoverySha.slice(0, 12) + '…' : 'none captured'}`);
   const validationLabel = !validation
     ? 'not run'
@@ -749,11 +767,11 @@ async function readiness(): Promise<void> {
     if (/^\s*WHMCS_API_SECRET\s*=/m.test(dotenvText)) channel = 'dotenv-file';
   }
 
-  const loaded = loadWhmcsConfig(env);
-  let route: RouteProbe = { state: 'skipped', reason: 'no valid install URL to probe' };
-  if (loaded.enabled) {
-    route = await probeRoute(loaded.config.baseUrl);
-  }
+  // Never throws: an invalid configuration is one of the states this command reports, not a crash.
+  const target = readinessRouteTarget(env);
+  const route: RouteProbe = target
+    ? await probeRoute(target)
+    : { state: 'skipped', reason: 'no valid install URL, so there is nothing to probe' };
 
   const report = assessReadiness({
     env,
@@ -785,17 +803,9 @@ async function readiness(): Promise<void> {
 }
 
 /** Unauthenticated TCP connect. No TLS handshake, no HTTP request, no credential. */
-function probeRoute(baseUrl: string): Promise<RouteProbe> {
+function probeRoute(target: { host: string; port: number }): Promise<RouteProbe> {
   return new Promise((resolve) => {
-    let url: URL;
-    try {
-      url = new URL(baseUrl);
-    } catch {
-      resolve({ state: 'skipped', reason: 'the install URL could not be parsed' });
-      return;
-    }
-    const host = url.hostname;
-    const port = Number(url.port || (url.protocol === 'https:' ? 443 : 80));
+    const { host, port } = target;
     const socket = net.connect({ host, port });
     let settled = false;
     const finish = (result: RouteProbe) => {

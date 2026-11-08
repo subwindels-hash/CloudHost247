@@ -1,4 +1,4 @@
-import { mkdtempSync, writeFileSync, copyFileSync } from 'node:fs';
+import { copyFileSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -7,6 +7,7 @@ import {
   assessReadiness,
   looksLikePlaceholder,
   probeTooling,
+  readinessRouteTarget,
   renderReadinessReport,
   type ReadinessInput,
 } from '../../src/whmcs/readiness';
@@ -176,6 +177,49 @@ describe('assessReadiness', () => {
     expect(Object.keys(report.summary)).toEqual([...READINESS_STATES]);
     const total = Object.values(report.summary).reduce((sum, count) => sum + count, 0);
     expect(total).toBe(report.checks.length);
+  });
+});
+
+describe('C1.9 review findings', () => {
+  it('attributes a credential failure to the credential check, not to the URL', () => {
+    const report = assessReadiness(input({ env: { ...GOOD_ENV, WHMCS_API_SECRET: 'short' } }));
+    expect(byId(report, 'secrets.channel').state).toBe('INVALID');
+    expect(byId(report, 'secrets.channel').detail).toContain('at least');
+    // The URL and the installation identity are still assessable: one bad variable must not hide the others.
+    expect(byId(report, 'config.url').state).toBe('READY');
+    expect(byId(report, 'install.identity').state).toBe('READY');
+  });
+
+  it('attributes a URL failure to the URL check, leaving the credential channel assessable', () => {
+    const report = assessReadiness(input({ env: { ...GOOD_ENV, WHMCS_BASE_URL: 'http://billing.example.com' } }));
+    expect(byId(report, 'config.url').state).toBe('INVALID');
+    expect(byId(report, 'config.url').detail).toContain('https');
+    expect(byId(report, 'secrets.channel').state).toBe('READY');
+    expect(byId(report, 'install.identity').state).toBe('MISSING');
+  });
+
+  it('resolves a route target only from a valid URL, and never throws', () => {
+    expect(readinessRouteTarget({ ...GOOD_ENV } as NodeJS.ProcessEnv)).toMatchObject({
+      host: 'billing.staging.example.com',
+      port: 443,
+    });
+    expect(readinessRouteTarget({ ...GOOD_ENV, WHMCS_BASE_URL: 'http://127.0.0.1:8080' } as NodeJS.ProcessEnv)).toMatchObject({
+      host: '127.0.0.1',
+      port: 8080,
+    });
+    // A short secret must not cost the URL its route probe.
+    expect(readinessRouteTarget({ ...GOOD_ENV, WHMCS_API_SECRET: 'short' } as NodeJS.ProcessEnv)).toMatchObject({ port: 443 });
+    expect(readinessRouteTarget({ ...GOOD_ENV, WHMCS_BASE_URL: 'http://billing.example.com' } as NodeJS.ProcessEnv)).toBeNull();
+    expect(readinessRouteTarget({} as NodeJS.ProcessEnv)).toBeNull();
+    expect(readinessRouteTarget({ ...GOOD_ENV, WHMCS_BASE_URL: 'not-a-url' } as NodeJS.ProcessEnv)).toBeNull();
+  });
+
+  it('has no HTTP client, so it cannot issue an authenticated request even by accident', () => {
+    const source = readFileSync(new URL('../../src/whmcs/readiness.ts', import.meta.url), 'utf8');
+    expect(source).not.toMatch(/from '\.[^']*client'/);
+    expect(source).not.toMatch(/from '\.[^']*transport'/);
+    expect(source).not.toMatch(/\b(fetch|axios|http\.request|https\.request)\s*\(/);
+    expect(source).not.toMatch(/includes\/api\.php/);
   });
 });
 

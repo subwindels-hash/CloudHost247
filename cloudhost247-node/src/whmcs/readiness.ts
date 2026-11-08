@@ -24,7 +24,7 @@
 
 import { existsSync } from 'node:fs';
 import { fingerprintBaseUrl, readProductMapFile } from './product-map';
-import { loadWhmcsConfig } from './config';
+import { loadWhmcsConfig, normalizeBaseUrl } from './config';
 import { WhmcsError } from './errors';
 
 export const READINESS_STATES = ['READY', 'MISSING', 'INVALID', 'UNREACHABLE', 'NOT CHECKED'] as const;
@@ -70,6 +70,23 @@ export interface ReadinessInput {
 }
 
 const PLACEHOLDER = /^(changeme|change-me|placeholder|example|test|dummy|todo|xxx+|your[-_].*|secret|password|<.*>)$/i;
+
+/**
+ * The normalised install URL, or `null` when there is not a usable one.
+ *
+ * Uses the application's own URL rules rather than a copy of them, and deliberately does **not** call the full
+ * configuration loader: that loader also validates the credential, and a short secret would then hide a perfectly
+ * good URL behind "no install URL" — mis-attributing one problem to another check's line.
+ */
+function resolveInstallUrl(env: NodeJS.ProcessEnv): string | null {
+  const raw = envValue(env, 'WHMCS_BASE_URL');
+  if (raw === '') return null;
+  try {
+    return normalizeBaseUrl(raw);
+  } catch {
+    return null;
+  }
+}
 
 /** True when a configured secret cannot plausibly be a real credential. The value itself is never returned. */
 export function looksLikePlaceholder(value: string): boolean {
@@ -130,6 +147,14 @@ export function assessReadiness(input: ReadinessInput): ReadinessReport {
       configError = error instanceof Error ? error : new Error(String(error));
     }
   }
+  // The loader validates the URL and the credential together. Attribute its complaint to the right check by the
+  // variable it names, so a short secret is not reported as a broken install URL.
+  const urlProblem = configError && /BASE_URL/i.test(configError.message) ? configError.message : null;
+  const credentialProblem = configError && /(SECRET|IDENTIFIER)/i.test(configError.message) ? configError.message : null;
+
+  // The URL is resolved on its own, so a credential problem cannot make the route and identity checks look like
+  // a URL problem (they would otherwise report "no install URL" for a perfectly valid one).
+  const installUrl = resolveInstallUrl(input.env);
 
   const secretValue = envValue(input.env, 'WHMCS_API_SECRET');
   const identifierValue = envValue(input.env, 'WHMCS_API_IDENTIFIER');
@@ -137,16 +162,15 @@ export function assessReadiness(input: ReadinessInput): ReadinessReport {
 
   if (absent.includes('WHMCS_BASE_URL')) {
     add('config.url', 'Install URL', 'MISSING', 'WHMCS_BASE_URL is not set');
-  } else if (configError) {
-    add('config.url', 'Install URL', 'INVALID', configError.message);
-  } else if (loaded && loaded.enabled) {
-    const host = hostOf(loaded.config.baseUrl) ?? '(unparseable)';
-    const loopback = loaded.config.baseUrl.startsWith('http://');
+  } else if (urlProblem) {
+    add('config.url', 'Install URL', 'INVALID', urlProblem);
+  } else if (installUrl) {
+    const host = hostOf(installUrl) ?? '(unparseable)';
     add(
       'config.url',
       'Install URL',
       'READY',
-      loopback
+      installUrl.startsWith('http://')
         ? `${host} — http accepted only because it is loopback (local development)`
         : `${host} — https, no credentials, no query string`,
     );
@@ -155,11 +179,15 @@ export function assessReadiness(input: ReadinessInput): ReadinessReport {
   }
 
   if (placeholder) {
+    // Placeholder first: it is the actionable cause, and "must be at least 16 characters" would be the
+    // loader's complaint about `changeme` rather than the reason it is wrong.
     add('secrets.channel', 'Credential delivery channel', 'INVALID',
       'WHMCS_API_SECRET looks like a placeholder value — replace it through the approved secrets mechanism');
   } else if (identifierValue !== '' && looksLikePlaceholder(identifierValue)) {
     add('secrets.channel', 'Credential delivery channel', 'INVALID',
       'WHMCS_API_IDENTIFIER looks like a placeholder value');
+  } else if (credentialProblem) {
+    add('secrets.channel', 'Credential delivery channel', 'INVALID', credentialProblem);
   } else if (input.secretsChannel === 'environment') {
     add('secrets.channel', 'Credential delivery channel', 'READY',
       'supplied as environment variables by the deployment (preferred; not read into this report)');
@@ -175,7 +203,7 @@ export function assessReadiness(input: ReadinessInput): ReadinessReport {
   // 4. Network route — an unauthenticated TCP connect, or an honest NOT CHECKED.
   // -------------------------------------------------------------------------------------------
   // A route cannot have been probed for an install whose URL does not validate, whatever the caller passed.
-  if (!loaded || !loaded.enabled) {
+  if (!installUrl) {
     add('network.route', 'Network route to the install', 'NOT CHECKED',
       'no valid install URL, so there is nothing to probe');
   } else if (input.route.state === 'ok') {
@@ -191,11 +219,11 @@ export function assessReadiness(input: ReadinessInput): ReadinessReport {
   // -------------------------------------------------------------------------------------------
   // 5. Installation identity — can the expected install be stated and does the committed map agree?
   // -------------------------------------------------------------------------------------------
-  if (!loaded || !loaded.enabled) {
+  if (!installUrl) {
     add('install.identity', 'Installation identity', 'MISSING',
       'no install URL, so there is no fingerprint to compare against');
   } else {
-    const fingerprint = fingerprintBaseUrl(loaded.config.baseUrl);
+    const fingerprint = fingerprintBaseUrl(installUrl);
     if (input.tooling.mapState === 'valid' && input.tooling.mapHasSnapshot
         && input.tooling.mapFingerprint && input.tooling.mapFingerprint !== fingerprint) {
       add('install.identity', 'Installation identity', 'INVALID',
@@ -235,6 +263,28 @@ export function assessReadiness(input: ReadinessInput): ReadinessReport {
     ready: blockers.length === 0,
     blockers,
   };
+}
+
+/**
+ * Where a route probe should be aimed, or `null` when the configuration cannot support one.
+ *
+ * This exists because the CLI must not crash on a configuration the readiness report is *supposed* to describe:
+ * `loadWhmcsConfig` throws on an invalid URL or a short secret, and a stack trace tells the operator nothing about
+ * which of the five states applies. Returning `null` lets the caller report `NOT CHECKED` and the module report
+ * `INVALID` with the loader's own message.
+ */
+export function readinessRouteTarget(
+  env: NodeJS.ProcessEnv,
+): { host: string; port: number; baseUrl: string } | null {
+  const baseUrl = resolveInstallUrl(env);
+  if (!baseUrl) return null;
+  try {
+    const url = new URL(baseUrl);
+    const port = Number(url.port || (url.protocol === 'https:' ? 443 : 80));
+    return { host: url.hostname, port, baseUrl };
+  } catch {
+    return null;
+  }
 }
 
 /** Reads the tooling facts from disk. Kept separate so `assessReadiness` stays pure. */
