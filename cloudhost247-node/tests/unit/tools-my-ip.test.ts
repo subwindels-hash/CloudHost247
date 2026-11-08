@@ -28,7 +28,7 @@ function call(options: {
 }) {
   const resolution: VisitorIpResolution = resolveVisitorIpDetail(
     options.peer,
-    options.forwardedFor,
+    options.forwardedFor === undefined ? {} : { 'x-forwarded-for': options.forwardedFor },
     options.mode ?? 'trusted-proxy',
     options.proxyList ?? TRUSTED
   );
@@ -146,7 +146,7 @@ describe('my-ip tool', () => {
   it('reports TLS only when the socket really is encrypted', () => {
     expect(call({ peer: TRUSTED, forwardedFor: '102.89.234.5' }).connection.tls).toBeNull();
     const encrypted = myIp({
-      resolution: resolveVisitorIpDetail(TRUSTED, '102.89.234.5', 'trusted-proxy', TRUSTED),
+      resolution: resolveVisitorIpDetail(TRUSTED, { 'x-forwarded-for': '102.89.234.5' }, 'trusted-proxy', TRUSTED),
       headers: {},
       protocol: 'https',
       socket: {

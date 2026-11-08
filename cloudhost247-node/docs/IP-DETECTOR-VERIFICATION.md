@@ -48,3 +48,16 @@ Real Chromium against the running stack (API in `trusted-proxy` mode trusting th
 * **`Vary: CF-Connecting-IP` on `/api/v1/currency/geo-country`.** Nothing reads `CF-Connecting-IP`, but an existing test pins the header as a defensive cache key, so it was left alone rather than churned; the visitor endpoint's `Vary` lists only what it actually consults.
 * **Other authenticated portal `GET` routes** (`/api/tools/history`, `/favorites`, `/reports`, `/monitors`) also lack an explicit `no-store`. Same class as F5 but outside the IP detector; noted for a follow-up.
 * **GeoLite currency/attribution** remains as flagged in `docs/FEATURE-REVIEW-2026-11-08.md` (MaxMind licence, data age).
+
+## Follow-up after the preview still showed no IP
+
+The original end-to-end run intentionally left detection off in the live API process, matching the production-safe default. That made the fresh preview say `IP: not enabled`; additionally, the resolver only understood `X-Forwarded-For`, while common edges may provide a single authoritative `CF-Connecting-IP` / `X-Real-IP` or the RFC 7239 `Forwarded` header. The browser cannot fix either issue itself.
+
+The preview is now corrected at both ends: `scripts/dev-server.ts` enables trusted-proxy mode only when the development/preview API has no explicit mode (and trusts only local/private proxy hops), and Vite appends its observed proxy hop to `X-Forwarded-For`. The production server keeps `VISITOR_IP_MODE=off` unless its operator explicitly configures the real proxy boundary. The shared resolver now reads authoritative edge headers only behind an allowlisted peer, safely parses `Forwarded`, and updates `Vary` on both IP-dependent endpoints. A malformed preferred chain fails closed rather than falling through to another header.
+
+Local smoke check through the Vite proxy:
+
+- No edge address header: `{"ip":null,"reason":"unverified","privacyStatus":"unknown"}` — local direct curl has no real public visitor address, which is the honest result.
+- Simulated trusted edge header `CF-Connecting-IP: 8.8.8.8`: `{"ip":"8.8.8.8","reason":"detected","privacyStatus":"unknown"}`.
+
+Added tests cover Cloudflare, X-Real-IP, RFC 7239 Forwarded, precedence, malformed chains, and untrusted peers. The end-user preview will display the real visitor address only if its outer proxy supplies a trustworthy client-IP header; without that, it continues to say unverified rather than inventing or spoofing an address.

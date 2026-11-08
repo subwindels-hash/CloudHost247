@@ -1,13 +1,17 @@
 import Fastify from 'fastify';
 import { describe, expect, it } from 'vitest';
 import { loadEnv } from '../../src/config/env';
-import { registerVisitorIpRoute, resolveVisitorIp, trustedProxyAllowlistIsValid } from '../../src/routes/visitor-ip';
+import { registerVisitorIpRoute, resolveVisitorIp, resolveVisitorIpDetail, trustedProxyAllowlistIsValid } from '../../src/routes/visitor-ip';
 
 const base = { NODE_ENV: 'test', DATABASE_URL: 'postgresql://u:p@localhost/test', JWT_SECRET: 'a'.repeat(32) };
 
+/** The resolver now reads the whole header set, the way a request presents it. */
+const xff = (value?: string): Record<string, string | string[] | undefined> =>
+  value === undefined ? {} : { 'x-forwarded-for': value };
+
 describe('visitor IP boundary', () => {
   it('supports direct IPv4, IPv6 and IPv4-mapped sockets without trusting headers', () => {
-    expect(resolveVisitorIp('8.8.8.8', '1.1.1.1', 'direct')).toBe('8.8.8.8');
+    expect(resolveVisitorIp('8.8.8.8', xff('1.1.1.1'), 'direct')).toBe('8.8.8.8');
     expect(resolveVisitorIp('2606:4700:4700::1111', undefined, 'direct')).toBe('2606:4700:4700::1111');
     expect(resolveVisitorIp('::ffff:8.8.8.8', undefined, 'direct')).toBe('8.8.8.8');
   });
@@ -18,13 +22,53 @@ describe('visitor IP boundary', () => {
     }
   });
   it('uses forwarded headers only for a configured trusted peer and walks the chain safely', () => {
-    expect(resolveVisitorIp('10.0.0.5', '9.9.9.9, 8.8.8.8, 10.0.0.4', 'trusted-proxy', '10.0.0.0/24')).toBe('8.8.8.8');
-    expect(resolveVisitorIp('8.8.8.8', '1.1.1.1', 'trusted-proxy', '10.0.0.0/24')).toBeNull();
-    expect(resolveVisitorIp('10.0.0.5', '8.8.8.8', 'trusted-proxy')).toBeNull();
-    expect(resolveVisitorIp('10.0.0.5', '8.8.8.8', 'trusted-proxy', '0.0.0.0/0')).toBeNull();
-    expect(resolveVisitorIp('10.0.0.5', 'junk, 8.8.8.8', 'trusted-proxy', '10.0.0.5')).toBeNull();
-    expect(resolveVisitorIp('10.0.0.5', '10.0.0.6', 'trusted-proxy', '10.0.0.0/24')).toBeNull();
-    expect(resolveVisitorIp('::1', '2606:4700:4700::1111', 'trusted-proxy', '::1')).toBe('2606:4700:4700::1111');
+    expect(resolveVisitorIp('10.0.0.5', xff('9.9.9.9, 8.8.8.8, 10.0.0.4'), 'trusted-proxy', '10.0.0.0/24')).toBe('8.8.8.8');
+    expect(resolveVisitorIp('8.8.8.8', xff('1.1.1.1'), 'trusted-proxy', '10.0.0.0/24')).toBeNull();
+    expect(resolveVisitorIp('10.0.0.5', xff('8.8.8.8'), 'trusted-proxy')).toBeNull();
+    expect(resolveVisitorIp('10.0.0.5', xff('8.8.8.8'), 'trusted-proxy', '0.0.0.0/0')).toBeNull();
+    expect(resolveVisitorIp('10.0.0.5', xff('junk, 8.8.8.8'), 'trusted-proxy', '10.0.0.5')).toBeNull();
+    expect(resolveVisitorIp('10.0.0.5', xff('10.0.0.6'), 'trusted-proxy', '10.0.0.0/24')).toBeNull();
+    expect(resolveVisitorIp('::1', xff('2606:4700:4700::1111'), 'trusted-proxy', '::1')).toBe('2606:4700:4700::1111');
+  });
+
+  /**
+   * Real edges state the client address outright instead of appending to a chain: Cloudflare
+   * overwrites CF-Connecting-IP, nginx and Apache mod_remoteip conventionally set X-Real-IP, and
+   * RFC 7239 defines Forwarded. The resolver used to read X-Forwarded-For only, so a correctly
+   * configured Cloudflare or cPanel/Apache deployment — and any preview whose outer proxy supplies
+   * one of these — saw "unverified" forever.
+   */
+  it('reads the edge headers a real proxy overwrites, behind a trusted peer only', () => {
+    expect(resolveVisitorIp('10.0.0.5', { 'cf-connecting-ip': '8.8.8.8' }, 'trusted-proxy', '10.0.0.5')).toBe('8.8.8.8');
+    expect(resolveVisitorIp('10.0.0.5', { 'x-real-ip': '8.8.8.8' }, 'trusted-proxy', '10.0.0.5')).toBe('8.8.8.8');
+    expect(resolveVisitorIp('10.0.0.5', { forwarded: 'for=8.8.8.8' }, 'trusted-proxy', '10.0.0.5')).toBe('8.8.8.8');
+    expect(resolveVisitorIp('10.0.0.5', { forwarded: 'for="[2606:4700:4700::1111]:8080";by=10.0.0.5' }, 'trusted-proxy', '10.0.0.5')).toBe('2606:4700:4700::1111');
+    // An untrusted peer asserting the same header is ignored, exactly like a spoofed chain.
+    expect(resolveVisitorIp('203.0.113.9', { 'cf-connecting-ip': '8.8.8.8' }, 'trusted-proxy', '10.0.0.5')).toBeNull();
+    expect(resolveVisitorIp('203.0.113.9', { 'x-real-ip': '8.8.8.8' }, 'trusted-proxy', '10.0.0.5')).toBeNull();
+    // direct mode never consults headers at all.
+    expect(resolveVisitorIp('8.8.8.8', { 'cf-connecting-ip': '1.1.1.1' }, 'direct')).toBe('8.8.8.8');
+  });
+
+  it('prefers an edge header over a chain, and never lets a private one become the answer', () => {
+    const both = resolveVisitorIpDetail('10.0.0.5', { 'cf-connecting-ip': '8.8.8.8', 'x-forwarded-for': '1.1.1.1' }, 'trusted-proxy', '10.0.0.5');
+    expect(both).toMatchObject({ ip: '8.8.8.8', source: 'cf-connecting-ip' });
+
+    const privateEdge = resolveVisitorIpDetail('10.0.0.5', { 'x-real-ip': '192.168.1.5' }, 'trusted-proxy', '10.0.0.5');
+    expect(privateEdge).toMatchObject({ ip: null, reason: 'not_public', source: 'x-real-ip' });
+
+    const none = resolveVisitorIpDetail('10.0.0.5', {}, 'trusted-proxy', '10.0.0.5');
+    expect(none).toMatchObject({ ip: null, reason: 'unverified', source: null, peerTrusted: true });
+
+    // A malformed preferred chain is not allowed to fall through to a conflicting chain.
+    const malformed = resolveVisitorIpDetail('10.0.0.5', {
+      forwarded: 'for=unknown',
+      'x-forwarded-for': '8.8.8.8',
+    }, 'trusted-proxy', '10.0.0.5');
+    expect(malformed).toMatchObject({ ip: null, reason: 'unverified', source: 'forwarded' });
+
+    const untrusted = resolveVisitorIpDetail('203.0.113.9', { 'x-real-ip': '8.8.8.8' }, 'trusted-proxy', '10.0.0.5');
+    expect(untrusted).toMatchObject({ peerTrusted: false, source: null });
   });
   it('sends only the current visitor address, with private no-store and unknown privacy status', async () => {
     const app = Fastify({ trustProxy: true });
