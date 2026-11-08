@@ -120,6 +120,8 @@ describe('Header: authentication-aware navigation', () => {
     const menuBar = container.querySelector<HTMLElement>('#ch247-primary-nav');
     expect(menuBar).toBeTruthy();
     expect(within(menuBar!).getByRole('button', { name: 'Language: English' })).toBeTruthy();
+    expect(within(menuBar!).queryByText(/This product includes GeoLite2 data created by WIL/)).toBeNull();
+    expect(within(container.querySelector('footer')!).getByText(/This product includes GeoLite2 data created by WIL/).textContent).toBe('This product includes GeoLite2 data created by WIL®.');
     expect(within(menuBar!).getByRole('button', { name: /^Display currency: USD/ })).toBeTruthy();
 
     const footer = container.querySelector<HTMLElement>('footer.ch247-footer');

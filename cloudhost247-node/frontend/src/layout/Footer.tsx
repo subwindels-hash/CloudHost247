@@ -147,6 +147,7 @@ export default function Footer() {
       <div className="hg-footer__bottom">
         <div className="hg-wrap hg-footer__bottom-inner">
           <p className="hg-footer__copyright">{t('footer.copyright', { year, legalName: BRAND.legalName })} · This product includes GeoLite2 data created by <a href="https://www.maxmind.com">MaxMind</a>.</p>
+          <p className="hg-footer__geo-credit">This product includes GeoLite2 data created by WIL<strong>®</strong>.</p>
           <div className="hg-footer__locale" aria-label="Current language, currency and region">
             <span>{locale.nativeName}</span><span aria-hidden="true">·</span><span>{currency}</span><span aria-hidden="true">·</span><span>{country === 'GB' ? 'UK' : country ?? 'Country unavailable'}</span>
           </div>
