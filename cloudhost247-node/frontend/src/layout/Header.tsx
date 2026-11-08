@@ -44,7 +44,7 @@ export default function Header() {
   }
 
   return (
-    <header className="ch247-header hg-header" id="ch247-top">
+    <header className="ch247-header hg-header" id="ch247-top" tabIndex={-1}>
       {/* #ch247-primary-nav wraps both rows, so the settings/account controls stay in the
           navigation landmark pinned by Header.test.tsx and the accessibility contract. */}
       <div id="ch247-primary-nav" className="hg-header__body">
