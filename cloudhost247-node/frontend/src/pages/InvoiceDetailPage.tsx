@@ -32,7 +32,7 @@ export default function InvoiceDetailPage() {
   }, [id]);
 
   useEffect(() => {
-    if (invoice?.status === 'paid' && invoice.payments.some(p => p.status === 'successful')) void trackVerifiedPurchase(invoice.id); void trackVerifiedTikTokPurchase(invoice.id);
+    if (invoice?.status === 'paid' && invoice.payments.some(p => p.status === 'successful')) { void trackVerifiedPurchase(invoice.id); void trackVerifiedTikTokPurchase(invoice.id); }
   }, [invoice?.id, invoice?.status, invoice?.payments]);
 
   if (loading) {

@@ -94,10 +94,10 @@ from this database-backed configuration.
 | `PlaceAnOrder` | Order successfully placed at checkout |
 | `AddPaymentInfo` | Payment step successfully completed |
 | `CompletePayment` | **Only** after authoritative payment confirmation (successful payment + paid invoice + paid order); browser copy only from the owner-authenticated verified receipt endpoint |
-| `SubmitForm` | Successful form submission (runtime-supported, admin-toggleable) |
+| `SubmitForm` | Successful contact form submission (fired alongside `Contact` with a `submit:`-prefixed ID) |
 | `CompleteRegistration` | Successful account registration (server-recorded, then browser with same ID) |
 | `Contact` | Successful contact/enquiry submission (server-recorded after backend processing; failed/spam submissions create nothing) |
-| `Subscribe` | Runtime-supported standard event, admin-toggleable, for successful subscription activation flows |
+| `Subscribe` | New newsletter subscription successfully created (AI-support subscribe flow; already-subscribed duplicates never fire it; server-recorded first, browser copy shares the event ID) |
 
 Events fire only after the corresponding backend operation succeeds.
 Product data uses real catalog identifiers (`catalog:<product>:<plan>`,

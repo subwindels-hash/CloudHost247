@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import { usePageMeta } from '../lib/usePageMeta';
-import { getMetaConfiguration, getMetaActivity, getMetaAudit, metaAdminSend, type MetaAdminConfiguration, type MetaActivity, type MetaAuditEntry } from '../lib/marketing-admin-api';
+import { getMetaConfiguration, getMetaActivity, getMetaAudit, metaAdminSend, getTikTokConfiguration, getTikTokDiagnostics, getTikTokActivity, tiktokAdminSend, type MetaAdminConfiguration, type MetaActivity, type MetaAuditEntry, type TikTokAdminConfiguration, type TikTokDiagnostics } from '../lib/marketing-admin-api';
 import { formatDateTime } from '../components/revenue-guardian/rg-widgets';
 
 const TABS = [{ id: 'meta-pixel', label: 'Meta Pixel' }, { id: 'tiktok-pixel', label: 'TikTok Pixel' }, { id: 'activity', label: 'Event activity' }, { id: 'audit', label: 'Configuration history' }] as const;
@@ -12,7 +12,8 @@ const statusLabel = (value: string | null) => value ? value.replace(/_/g, ' ') :
 export default function AdminMarketingIntegrationsPage() {
   usePageMeta('Marketing Integrations', 'Centrally manage consent-aware Meta Pixel and Conversions API settings.');
   const { provider } = useParams();
-  const tab = TABS.some(t => t.id === provider) ? provider! : 'meta-pixel';
+  const { pathname } = useLocation();
+  const tab = pathname.includes('tiktok-pixel') ? 'tiktok-pixel' : TABS.some(t => t.id === provider) ? provider! : 'meta-pixel';
   return <div className="ch247-stack ch247-marketing-admin">
     <header className="ch247-card">
       <p className="ch247-page__hint"><Link to="/admin">Admin</Link> / Marketing Integrations</p>
@@ -205,7 +206,7 @@ function TikTokPixelSettings() {
       </fieldset>
       <fieldset className="ch247-marketing-admin__fieldset"><legend>Events API (server-side, optional)</legend>
         <p className="ch247-page__hint">Credential: {config.eventsApi.hasToken ? 'Stored encrypted; write-only' : 'Not configured — Events API remains pending external TikTok account configuration until an authorized token is stored'}. Server events share the browser event_id for deduplication and are never sent without marketing consent.</p>
-        <label className="ch247-marketing-admin__check"><input type="checkbox" checked={config.eventsApi.enabled} onChange={e => update({ eventsApi: { enabled: e.target.checked } })} /> Enable Events API delivery</label>
+        <label className="ch247-marketing-admin__check"><input type="checkbox" checked={config.eventsApi.enabled} onChange={e => update({ eventsApi: { ...config.eventsApi, enabled: e.target.checked } })} /> Enable Events API delivery</label>
         <label>TikTok access token<input type="password" autoComplete="new-password" value={token} placeholder={config.eventsApi.hasToken ? 'Leave blank to keep the stored token' : 'Write-only authorized access token'} onChange={e => setToken(e.target.value)} /><small>Never returned by the API, logged, or sent to the browser.</small></label>
         <label className="ch247-marketing-admin__check"><input type="checkbox" checked={removeToken} onChange={e => setRemoveToken(e.target.checked)} /> Remove stored token (disable Events API first)</label>
       </fieldset>

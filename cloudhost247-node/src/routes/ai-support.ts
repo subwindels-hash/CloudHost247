@@ -10,6 +10,7 @@ import { NotFoundError, ValidationError } from '../lib/errors';
 import { auditRequest } from '../lib/audit';
 import { createTicket } from '../db/support-tickets';
 import { createNotification } from '../services/notification-service';
+import { recordTikTokServerConversion } from '../tiktok/event-service';
 import { decideSupportResponse, listSupportKnowledge, type EscalationReason } from '../services/ai-support-operator';
 
 const id = z.string().uuid('conversation id must be a valid UUID');
@@ -395,7 +396,13 @@ export async function registerAiSupportRoutes(app: FastifyInstance, env: Env, ov
       resourceId: subscription.id,
       metadata: { source: 'ai_assistant', alreadySubscribed: inserted.rows.length === 0 },
     });
-    return { subscribed: true, alreadySubscribed: inserted.rows.length === 0, status: subscription.status };
+    // TikTok Subscribe lead: only a genuinely new subscription counts; an
+    // already-subscribed duplicate never produces a lead event.
+    const marketing = inserted.rows[0]
+      ? await recordTikTokServerConversion(db, request, env.APP_URL, { name: 'Subscribe', id: `subscribe:${subscription.id}`, data: { content_name: 'Newsletter subscription', content_category: 'newsletter' } }).catch(() => null)
+      : null;
+    return { subscribed: true, alreadySubscribed: inserted.rows.length === 0, status: subscription.status,
+      marketingEvent: marketing?.recorded ? { eventName: 'Subscribe', eventId: marketing.eventId } : null };
   });
 
   app.get('/api/v1/ai-support/availability', async () => ({ status: await availability(db) }));
