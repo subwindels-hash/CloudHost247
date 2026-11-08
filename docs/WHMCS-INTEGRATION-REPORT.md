@@ -12,7 +12,11 @@ Companion documents: [`WHMCS-INTEGRATION-AUDIT.md`](WHMCS-INTEGRATION-AUDIT.md) 
 >
 > Tooling, validation gates and evidence controls are implemented and tested. No WHMCS installation has been
 > contacted, **0 of 59** products are bound, all 59 advertised services are `BLOCKED`, and C2, checkout, payments,
-> migration and provisioning are **not authorised**. The independent review
+> migration and provisioning are **not authorised**.
+>
+> **Implementation is frozen at the staging-access boundary** (commit `35bbb3c`). Deferred work lives in
+> [`TECHNICAL-DEBT-REGISTER.md`](TECHNICAL-DEBT-REGISTER.md) §1–§2, external blockers in §3, and the resume protocol
+> in §5. The independent review
 > of these controls is [`WHMCS-EVIDENCE-INTEGRITY-REVIEW.md`](WHMCS-EVIDENCE-INTEGRITY-REVIEW.md).
 
 ---

@@ -5,7 +5,8 @@
 > 0 of 59 products bound · 59 service dispositions (`BLOCKED`) · C2, checkout, payment, customer migration, real orders
 > and provisioning are **not authorised**.
 
-One place for work that is known, accepted and deliberately **not** being done now. An entry is here because someone
+One place for work that is known, accepted and deliberately **not** being done now. **This register is the
+authoritative record of deferred engineering work, including during the implementation freeze (§5).** An entry is here because someone
 decided not to fix it yet and can say why — not because it was forgotten. Items that are simply blocked on someone
 else (staging access) are in §3, not here.
 
@@ -67,3 +68,41 @@ Details, delivery channels and permissions: [`WHMCS-STAGING-ACCESS-HANDOFF.md`](
 2. Closing an entry requires the commit that closed it; entries move to §2 rather than disappearing.
 3. Anything that is blocked on an external party belongs in §3, because calling it debt invites someone to "fix" it
    locally — which is exactly how a simulated integration starts.
+
+---
+
+## 5. Implementation freeze
+
+**Effective 2026-11-08**, following acceptance of commit `35bbb3c`. The C1 chain is closed and implementation work is
+frozen at the staging-access boundary.
+
+| Item | State |
+| --- | --- |
+| Frozen at | `35bbb3c` (technical debt register); register and reports from `7179243`–`35bbb3c` |
+| Verified at freeze | backend + frontend unit **1877 tests / 126 files**; WHMCS integration **236 / 16**; migrations **18 / 2**; `tsc` app and scripts clean; `whmcs:map -- verify` exit 0; `whmcs:review` 59 `BLOCKED`; `whmcs:evidence` 0 bindings, `ownerApproved: false`; `whmcs:readiness` exit 1 (correct — no credentials) |
+| Product bindings | **0** |
+| Service dispositions | **59** |
+| Blocked services | **59** |
+| C2, checkout, payments, migration, orders, provisioning | **Not authorised** |
+
+**What may still happen during the freeze:** nothing that changes behaviour. Corrections to documentation, this
+register, and a fix for a **reproducible defect** that would block staging execution are the only permitted changes —
+and the latter must be recorded here with its commit before it is made.
+
+**What may not happen:** C2 work, product bindings, proposal approval, checkout or payment activation, customer
+migration, real orders, provisioning tests, or any change that makes a service orderable without approved staging
+evidence.
+
+**Resume protocol — do not skip any step:**
+
+1. Inspect the repository state first (`git log`, `git status`). Do not assume the commits, artifacts or reports in
+   this document are still current.
+2. Re-read §3: all eight staging items must be satisfied through the approved channels.
+3. Re-run the verification bundle and compare it with the table above — unit suite, WHMCS suites, migrations,
+   `tsc` for app and scripts, and the document gates.
+4. Re-check the register counts: an unexpected binding is a stop condition, not a curiosity.
+5. Then, and only then, run the C1.7 sequence (`whmcs:readiness` → `doctor` → `discover` → `validate` → `review` →
+   `evidence`) and present the pack for owner review.
+
+**Resume conditions.** Genuine staging access (§3), or a reproducible defect that must be corrected before staging
+execution can proceed. Nothing else.
