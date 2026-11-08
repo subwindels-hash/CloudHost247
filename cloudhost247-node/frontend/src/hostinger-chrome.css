@@ -957,8 +957,8 @@
 .hg-footer__brand-lines { display: grid; gap: 3px; }
 .hg-footer__copyright { margin: 0; font-size: 0.75rem; color: #8793a0; }
 .hg-footer__powered { margin: 0; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em; color: #8793a0; }
-/* Locale sits at the right end of the bottom row; brand lines stay left. */
 .hg-footer__locale { display: flex; align-items: center; gap: 8px; margin-left: auto; font-size: 0.75rem; color: #8793a0; }
+.hg-footer__geo-credit { font-size: 0.75rem; color: #8793a0; }
 .hg-footer__legal-links { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-left: auto; }
 .hg-footer__legal-links a { color: #aeb8c2; font-size: 0.75rem; text-decoration: none; }
 .hg-footer__legal-links a:hover { color: #e6c875; text-decoration: underline; }
@@ -1677,25 +1677,24 @@
 
 /* Light directory with a six-column desktop layout and mobile disclosures. */
 .hg-theme .hg-footer { background: linear-gradient(125deg, #a9adb2 0%, #e1e3e5 28%, #b8bcc0 52%, #e5e6e7 76%, #a8adb2 100%); color: #18191b; }
-.hg-footer__directory { padding: 56px 0 60px; }
+.hg-footer__directory { padding: 32px 0 20px; }
 .hg-theme .hg-footer__columns { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 28px; align-items: start; }
-.hg-theme .hg-footer__column .hg-footer__heading { margin: 0 0 16px; color: #18191b; font-size: .9rem; font-weight: 700; letter-spacing: 0; text-transform: uppercase; }
-.hg-theme .hg-footer__column ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 9px; }
+.hg-theme .hg-footer__column .hg-footer__heading { margin: 0 0 12px; color: #18191b; font-size: .9rem; font-weight: 700; letter-spacing: 0; text-transform: uppercase; }
+.hg-theme .hg-footer__column ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .hg-theme .hg-footer__column a { color: #222326; font-size: .88rem; line-height: 1.4; text-decoration: none; }
 .hg-theme .hg-footer__column a:hover { color: #735306; text-decoration: underline; }
 .hg-footer__toggle { display: none; }
-.hg-theme .hg-footer__bottom { background: rgba(125, 130, 136, .16); border-top: 1px solid #979ca1; }
-/* The back-to-top strip keeps its own slate band + white text (Amazon-style, above);
-   it is deliberately not recoloured with the legal-row text. */
-.hg-theme .hg-footer__copyright, .hg-theme .hg-footer__powered, .hg-theme .hg-footer__locale, .hg-theme .hg-footer__legal-links a { color: #4b4c4e; }
+.hg-theme .hg-footer__bottom { background: rgba(125, 130, 136, .16); border-top: 1px solid #979ca1; padding: 14px 0; }
+/* The back-to-top strip retains its own slate band and white text. */
+.hg-theme .hg-footer__copyright, .hg-theme .hg-footer__powered, .hg-theme .hg-footer__locale, .hg-theme .hg-footer__geo-credit, .hg-theme .hg-footer__legal-links a { color: #4b4c4e; }
 @media (max-width: 900px) and (min-width: 768px) {
   .hg-theme .hg-footer__columns { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 36px; }
 }
 @media (max-width: 767px) {
-  .hg-footer__directory { padding: 24px 0 36px; }
+  .hg-footer__directory { padding: 16px 0 14px; }
   .hg-theme .hg-footer__columns { display: block; }
   .hg-theme .hg-footer__column .hg-footer__heading { display: none; }
-  .hg-footer__toggle { display: flex; width: 100%; align-items: center; justify-content: space-between; min-height: 60px; padding: 12px 0; border: 0; background: transparent; color: #18191b; text-align: left; text-transform: uppercase; font: inherit; font-size: 1rem; font-weight: 700; cursor: pointer; }
+  .hg-footer__toggle { display: flex; width: 100%; align-items: center; justify-content: space-between; min-height: 48px; padding: 8px 0; border: 0; background: transparent; color: #18191b; text-align: left; text-transform: uppercase; font: inherit; font-size: 1rem; font-weight: 700; cursor: pointer; }
   .hg-footer__toggle span { font-size: 1.6rem; font-weight: 400; line-height: 1; }
   .hg-footer__toggle:focus-visible { outline: 2px solid #8a6410; outline-offset: 2px; }
   .hg-theme .hg-footer__column .hg-footer__list { display: none; padding: 0 0 18px; }
@@ -1750,3 +1749,31 @@
 @media (max-width: 500px) {
   .hg-theme .hg-header .ch247-visitor-privacy .ch247-country__select { max-width: 90px; }
 }
+
+/* Brand, sharing and policy strip above the copyright row. */
+.hg-theme .hg-footer-brandband { background: transparent; color: #18191b; }
+.hg-footer-brandband__inner { padding-block: 14px; display: grid; gap: 12px; }
+.hg-footer-brandband__top, .hg-footer-brandband__bottom { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.hg-footer-brandband__logo { display: inline-flex; align-items: center; flex: 0 0 auto; }
+.hg-footer-brandband__logo svg { display: block; width: 145px; max-width: 100%; height: auto; }
+.hg-footer-brandband__social { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; }
+.hg-theme .hg-footer-brandband__social a, .hg-theme .hg-footer-brandband__social-unconfigured { color: #222326; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; }
+.hg-footer-brandband__social-unconfigured { opacity: 0.65; }
+.hg-footer-brandband__social svg { display: block; width: 24px; height: 24px; fill: currentColor; }
+.hg-theme .hg-footer-brandband__social a:hover, .hg-theme .hg-footer-brandband__policies a:hover { color: #735306; }
+.hg-footer-brandband__payments { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: .85rem; font-weight: 600; }
+.hg-footer-brandband__cards { display: flex; flex-wrap: wrap; gap: 8px; }
+.hg-footer-brandband__card { display: block; width: 42px; height: 32px; fill: #222326; }
+.hg-footer-brandband__policies { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 12px 20px; }
+.hg-theme .hg-footer-brandband__policies a { color: #222326; text-decoration: none; font-size: .85rem; }
+.hg-footer-brandband a:focus-visible { outline: 2px solid #e6c875; outline-offset: 3px; }
+@media (max-width: 767px) {
+  .hg-footer-brandband__inner { gap: 12px; padding-block: 14px; }
+  .hg-footer-brandband__top { gap: 12px; }
+  .hg-footer-brandband__logo svg { width: 125px; }
+  .hg-footer-brandband__bottom { align-items: flex-start; flex-direction: column; gap: 10px; }
+  .hg-footer-brandband__policies { justify-content: flex-start; }
+}
+@media (max-width: 360px) { .hg-footer-brandband__logo svg { width: 110px; } .hg-footer-brandband__social { gap: 4px; } }
+
+.hg-footer-brandband__tax-note { margin: 0; color: #222326; font-size: .85rem; }

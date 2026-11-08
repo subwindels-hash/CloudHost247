@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import HomePage from '../../src/pages/HomePage';
+import LanguageSwitcher from '../../src/components/LanguageSwitcher';
 import { isMarketingSurface } from '../../src/layout/Layout';
 import App from '../../src/App';
 import { LocaleProvider } from '../../src/i18n/LocaleProvider';
@@ -104,6 +105,18 @@ describe('Hostinger-style public homepage', () => {
 
     await waitFor(() => expect(screen.getByText('Starter')).toBeTruthy());
     expect(screen.getByText('75 free online tools')).toBeTruthy();
+  });
+
+  it('updates translated homepage copy immediately when the language changes', async () => {
+    render(<MemoryRouter><LocaleProvider><CurrencyProvider><LanguageSwitcher /><HomePage /></CurrencyProvider></LocaleProvider></MemoryRouter>);
+    fireEvent.click(screen.getByRole('button', { name: 'Language: English' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Français' }));
+    expect(screen.getByRole('heading', { level: 1, name: /Votre idée, en ligne/ })).toBeTruthy();
+    expect(screen.getByRole('search', { name: 'Rechercher un nom de domaine' })).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Voir les offres' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Choisissez l’offre adaptée à votre projet' })).toBeTruthy();
+    await waitFor(() => expect(screen.getAllByRole('link', { name: 'Choisir cette offre' }).length).toBeGreaterThan(0));
+    expect(localStorage.getItem('ch247.locale')).toBe('fr');
   });
 
   it('pricing tabs fetch a different catalogue product and render its published prices', async () => {

@@ -58,6 +58,7 @@ export default function AdminSettingsPage() {
             : rawValue;
       await apiFetch(`/api/v1/admin/settings/${encodeURIComponent(key)}`, { method: 'PUT', body: JSON.stringify({ value }) });
       setMessage(`Saved ${key}.`);
+      if (key.startsWith('social.')) window.dispatchEvent(new Event('ch247:social-links-changed'));
       load();
     } catch (err) {
       setMessage(err instanceof Error ? err.message : 'Save failed');

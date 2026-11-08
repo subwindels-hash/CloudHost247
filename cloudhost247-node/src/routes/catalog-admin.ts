@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { CONTENT_LOCALES } from '../services/catalog-translations';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import type { Env } from '../config/env';
@@ -129,6 +130,54 @@ export async function registerCatalogAdminRoutes(app: FastifyInstance, env: Env,
   async function assertAdmin(request: FastifyRequest) {
     return requireRole(request, env, pool, CATALOG_ADMIN_ROLES);
   }
+
+  // Translation publishing is explicit and restricted to the existing catalogue administrator.
+  // Source snapshots ensure later edits cannot silently publish stale translations.
+  const translationParams = z.object({ id: z.string().uuid(), locale: z.enum(CONTENT_LOCALES).refine((value) => value !== 'en', 'English is the original language') });
+  const translationBody = z.object({
+    name: z.string().trim().min(1).max(255),
+    description: z.string().trim().min(1).max(4000).nullable(),
+    status: z.enum(['draft', 'published']),
+    sourceName: z.string().min(1).max(255),
+    sourceDescription: z.string().max(4000).nullable(),
+  });
+  app.get<{ Params: { id: string } }>('/api/v1/admin/catalog/products/:id/translations', async (request) => {
+    await assertAdmin(request);
+    const { id } = parseOrThrow(idParamSchema, request.params);
+    const product = await findProductById(pool, id);
+    if (!product) throw new NotFoundError('No product was found with that id');
+    const { rows } = await pool.query(
+      `SELECT locale, name, description, status, updated_at AS "updatedAt",
+       (source_name IS DISTINCT FROM $2 OR source_description IS DISTINCT FROM $3) AS stale
+       FROM catalog_product_translations WHERE product_id = $1 ORDER BY locale`,
+      [id, product.name, product.description]
+    );
+    return { translations: rows };
+  });
+  app.put<{ Params: { id: string; locale: string } }>('/api/v1/admin/catalog/products/:id/translations/:locale', async (request) => {
+    await assertAdmin(request);
+    const { id, locale } = parseOrThrow(translationParams, request.params);
+    const input = parseOrThrow(translationBody, request.body);
+    const product = await findProductById(pool, id);
+    if (!product) throw new NotFoundError('No product was found with that id');
+    if (input.status === 'published' && product.description !== null && input.description === null) {
+      throw new ValidationError('A translated description is required before publishing');
+    }
+    // Read the source in the same SQL statement that writes the snapshot.
+    const { rows } = await pool.query(
+      `INSERT INTO catalog_product_translations (product_id, locale, name, description, source_name, source_description, status)
+       SELECT id, $2, $3, $4, name, description, $5::text FROM products
+       WHERE id = $1 AND name = $6 AND description IS NOT DISTINCT FROM $7::text
+         AND ($5::text <> 'published' OR description IS NULL OR $4::text IS NOT NULL)
+       ON CONFLICT (product_id, locale) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description,
+         source_name = EXCLUDED.source_name, source_description = EXCLUDED.source_description,
+         status = EXCLUDED.status, updated_at = now()
+       RETURNING locale, name, description, status, updated_at AS "updatedAt"`,
+      [id, locale, input.name, input.description, input.status, input.sourceName, input.sourceDescription]
+    );
+    if (!rows.length) throw new ValidationError('Product changed; reload and review the translation');
+    return { translation: rows[0] };
+  });
 
   // --- Products ---------------------------------------------------------------------------------
 

@@ -66,10 +66,11 @@ describe('Footer: Amazon-style back-to-top strip', () => {
     const { container } = renderFooter();
     const footer = container.querySelector('footer.ch247-footer');
     expect(footer?.querySelector('.hg-footer__legal-links')).toBeNull();
-    // The bottom row keeps only copyright + locale: no links at all live there now
-    // (the directory columns above it still carry those destinations).
+    // The only bottom-row link is the GeoLite2 attribution, not a legal-links row.
     const bottom = container.querySelector('.hg-footer__bottom');
-    expect(bottom?.querySelectorAll('a')).toHaveLength(0);
+    const links = bottom?.querySelectorAll('a');
+    expect(links).toHaveLength(1);
+    expect(links?.[0]?.getAttribute('href')).toBe('https://www.maxmind.com');
   });
 
   it('smooth-scrolls to the very top and moves focus to the header on click', () => {

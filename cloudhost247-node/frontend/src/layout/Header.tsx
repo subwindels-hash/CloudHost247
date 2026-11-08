@@ -5,6 +5,7 @@ import LanguageSwitcher from '../components/LanguageSwitcher';
 import CurrencySwitcher from '../components/CurrencySwitcher';
 import { Icon } from '../components/ui/Icon';
 import { useLocale } from '../i18n/LocaleProvider';
+import { siteText } from '../i18n/site-text';
 import { apiFetch } from '../lib/api';
 import { clearSession } from '../lib/auth';
 import { UTILITY } from '../navigation/registry.generated';
@@ -28,7 +29,8 @@ const SUPPORT_ROLES = ['staff', 'admin', 'super_admin'];
 
 export default function Header() {
   const { token, user } = useAuthState();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
+  const copy = siteText(locale.code);
   const navigate = useNavigate();
 
   async function handleLogout() {
@@ -51,14 +53,13 @@ export default function Header() {
         <div className="hg-bar__top">
           <VisitorPrivacy />
           <nav className="hg-bar__quick" aria-label="Quick links">
-            <NavLink to="/pricing">Pricing</NavLink>
-            <NavLink to="/help">Help</NavLink>
+            <div className="hg-bar__locale">
+              <LanguageSwitcher />
+              <CurrencySwitcher />
+            </div>
+            <NavLink to="/pricing">{copy.pricing}</NavLink>
+            <NavLink to="/help">{copy.help}</NavLink>
           </nav>
-
-          <div className="hg-bar__locale">
-            <LanguageSwitcher />
-            <CurrencySwitcher />
-          </div>
 
           <div className="hg-bar__icons">
             <NavLink className="hg-bar__icon" to={UTILITY.search.to} aria-label={t('header.search.label')}>
@@ -86,7 +87,7 @@ export default function Header() {
             ) : (
               <>
                 <NavLink className="hg-bar__text-link" to={UTILITY.signIn.to}>
-                  {UTILITY.signIn.label}
+                  {copy.signIn}
                 </NavLink>
               </>
             )}

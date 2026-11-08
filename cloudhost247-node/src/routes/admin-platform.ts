@@ -5,6 +5,7 @@
  */
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
+import { SOCIAL_HOSTS, isValidSocialUrl, type SocialNetwork } from '../social/footer-links';
 import type { Env } from '../config/env';
 import { getPool } from '../db/pool';
 import type { Queryable } from '../db/types';
@@ -32,7 +33,9 @@ const booleanSettingSchema = z.preprocess(
   z.enum(['true', 'false']).transform((v) => v === 'true')
 );
 
+const SOCIAL_NETWORKS = Object.keys(SOCIAL_HOSTS) as SocialNetwork[];
 const SETTING_SCHEMAS: Record<string, z.ZodType<unknown>> = {
+  ...Object.fromEntries(SOCIAL_NETWORKS.map((network) => [`social.${network}`, z.string().trim().max(512).refine((value) => isValidSocialUrl(network, value), 'Use a valid HTTPS URL for this network, or leave blank to hide it')])),
   'subscription.grace_period_days': z.coerce.number().int().min(1).max(90),
   'subscription.suspend_after_days': z.coerce.number().int().min(1).max(90),
   'backup.retention_days': z.coerce.number().int().min(1).max(3650),
@@ -186,6 +189,26 @@ export async function registerAdminPlatformRoutes(app: FastifyInstance, env: Env
       max: null,
     },
   ];
+
+  for (const network of SOCIAL_NETWORKS) SETTING_META.push({
+    key: `social.${network}`, type: 'string', label: `Footer ${network[0]!.toUpperCase()}${network.slice(1)} URL`,
+    description: 'Public HTTPS profile or contact URL. Leave blank to show the icon without a link.', min: null, max: null,
+  });
+
+  // Public output is restricted to these four validated URLs, never the full settings table.
+  app.get('/api/v1/site/social-links', async (_request, reply) => {
+    reply.header('Cache-Control', 'no-store');
+    const { rows } = await pool.query<{ key: string; value: unknown }>(
+      'SELECT key, value FROM platform_settings WHERE key = ANY($1::text[])',
+      [SOCIAL_NETWORKS.map((network) => `social.${network}`)]
+    );
+    const links: Partial<Record<SocialNetwork, string>> = {};
+    for (const row of rows) {
+      const network = row.key.slice('social.'.length) as SocialNetwork;
+      if (SOCIAL_NETWORKS.includes(network) && typeof row.value === 'string' && row.value && isValidSocialUrl(network, row.value)) links[network] = row.value;
+    }
+    return { links };
+  });
 
   app.get('/api/v1/admin/settings', async (request) => {
     await requireRole(request, env, pool, ['admin', 'super_admin']);

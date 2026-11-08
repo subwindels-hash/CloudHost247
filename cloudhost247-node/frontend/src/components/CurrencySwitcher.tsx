@@ -1,6 +1,5 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
 import { useCurrency } from '../currency/CurrencyProvider';
-import { BASE_CURRENCY, formatRateTimestamp } from '../currency/display-currency';
 import { useLocale } from '../i18n/LocaleProvider';
 import '../i18n/language-switcher.css';
 
@@ -12,12 +11,6 @@ const COMMON_CURRENCIES = [
   'SGD', 'MYR', 'IDR', 'PHP', 'PKR', 'BDT', 'NZD', 'CHF', 'SEK', 'NOK', 'DKK',
   'PLN', 'TRY', 'MXN', 'BRL', 'ARS', 'CLP', 'COP',
 ] as const;
-const UNAVAILABLE_LABEL: Record<string, string> = {
-  en: 'Rate unavailable', fr: 'Taux indisponible', de: 'Kurs nicht verfügbar',
-  es: 'Tasa no disponible', pt: 'Taxa indisponível', it: 'Tasso non disponibile',
-  nl: 'Koers niet beschikbaar', pl: 'Kurs niedostępny', ru: 'Курс недоступен',
-  ar: 'سعر الصرف غير متاح', zh: '汇率不可用', ja: '為替レートを利用できません', ko: '환율을 사용할 수 없음',
-};
 
 function currencyName(code: string, locale: string): string {
   try {
@@ -34,12 +27,11 @@ function currencyName(code: string, locale: string): string {
  *
  * It is a disclosure with the same keyboard model as LanguageSwitcher: Enter or Space opens it, the
  * arrow keys move between options, Home and End jump to the ends, and Escape closes it and returns
- * focus to the trigger. It states, in text, that charges are in USD and that converted amounts are
- * estimates, so the choice never implies a different price.
+ * focus to the trigger. The billing note remains available to assistive technology.
  */
 export default function CurrencySwitcher() {
   const { t, locale } = useLocale();
-  const { currency, options, setCurrency, status, ratesState } = useCurrency();
+  const { currency, options, setCurrency } = useCurrency();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -89,10 +81,8 @@ export default function CurrencySwitcher() {
     }
   }
 
-  const asOf = formatRateTimestamp(status.asOf, locale.code);
   const displayName = currencyName(currency, locale.code);
   const visibleCurrencies = [...options, ...COMMON_CURRENCIES.filter((code) => !options.includes(code))];
-  const unavailableLabel = UNAVAILABLE_LABEL[locale.code] ?? UNAVAILABLE_LABEL.en;
 
   return (
     <div
@@ -132,17 +122,12 @@ export default function CurrencySwitcher() {
                     onClick={() => choose(code)}
                   >
                     <span>{code}</span>
-                    <span className="ch247-locale__english">{code !== BASE_CURRENCY ? currencyName(code, locale.code) : ''}{!available ? ` · ${unavailableLabel}` : ''}</span>
                   </button>
                 </li>
               );
             })}
           </ul>
-          {ratesState === 'unavailable' || options.length === 1 ? (
-            <p className="ch247-locale__note">{t('currency.switcher.unavailable')}</p>
-          ) : null}
-          {asOf ? <p className="ch247-locale__count">{t('currency.switcher.asOf', { time: asOf })}</p> : null}
-          <p id={noteId} className="ch247-locale__note">{t('currency.switcher.note')}</p>
+          <p id={noteId} className="ch247-currency__sr-note">{t('currency.switcher.note')}</p>
         </div>
       ) : null}
     </div>

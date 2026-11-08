@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
+import { useLocale } from '../../i18n/LocaleProvider';
+import { navigationLabel } from '../../i18n/site-text';
 import { NAV_SECTIONS, TOOLS_CATEGORIES, type RegistryGroup, type RegistrySection } from '../../navigation/registry.generated';
 
 export function Brand({ className }: { className?: string }) {
@@ -42,6 +44,8 @@ function Chevron() {
 }
 
 export function PlatformMenu() {
+  const { locale } = useLocale();
+  const label = (section: RegistrySection) => navigationLabel(locale.code, section.id, section.label);
   const [mobileOpen, setMobileOpen] = useState(false);
   const mobileTriggerRef = useRef<HTMLButtonElement>(null);
   const [openId, setOpenId] = useState<string | null>(null);
@@ -94,11 +98,11 @@ export function PlatformMenu() {
             const open = openId === section.id;
             return (
               <li key={section.id} className={`hg-menu__item${open ? ' is-open' : ''}`}>
-                <NavLink className="hg-menu__link" to={section.to}>{section.label}</NavLink>
+                <NavLink className="hg-menu__link" to={section.to}>{label(section)}</NavLink>
                 <button
                   type="button"
                   className="hg-menu__caret"
-                  aria-label={`${section.label} sub-links`}
+                  aria-label={`${label(section)} sub-links`}
                   aria-controls="ch247-menu-panel"
                   aria-expanded={open}
                   onClick={(event) => toggle(section, event.currentTarget)}
@@ -115,18 +119,18 @@ export function PlatformMenu() {
         className="hg-menu__panel"
         id="ch247-menu-panel"
         role="region"
-        aria-label={active ? `${active.label} sub-links` : 'Section sub-links'}
+        aria-label={active ? `${label(active)} sub-links` : 'Section sub-links'}
         hidden={!active}
       >
         {active ? (
           <div className="hg-menu__panel-inner">
             <div className="hg-menu__panel-head">
               <div>
-                <p className="hg-menu__eyebrow">{active.label}</p>
+                <p className="hg-menu__eyebrow">{label(active)}</p>
                 <p className="hg-menu__blurb">{active.blurb}</p>
               </div>
               <div className="hg-menu__panel-actions">
-                <NavLink className="hg-menu__panel-all" to={active.to}>View all {active.label} →</NavLink>
+                <NavLink className="hg-menu__panel-all" to={active.to}>View all {label(active)} →</NavLink>
                 <button type="button" className="hg-menu__panel-close" onClick={() => { setOpenId(null); triggerRef.current?.focus(); }}>
                   Close ✕
                 </button>

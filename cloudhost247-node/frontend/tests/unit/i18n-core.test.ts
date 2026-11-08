@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { compareWithEnglish, createTranslator, interpolate } from '../../src/i18n/catalogue';
+import { clearMissingTranslationKeys, compareWithEnglish, createTranslator, getMissingTranslationKeys, interpolate } from '../../src/i18n/catalogue';
 import { en } from '../../src/i18n/messages/en';
 import { DEFAULT_LOCALE, findLocale, getDefaultLocale, resolveLocale } from '../../src/i18n/locales';
 
@@ -78,6 +78,26 @@ describe('createTranslator', () => {
     const t = createTranslator('de', { 'header.account.logout': 'Abmelden' });
     expect(t('header.account.logout')).toBe('Abmelden');
     expect(t('header.account.dashboard')).toBe('Dashboard');
+  });
+
+  it('records missing registered keys without retaining interpolation values or unknown content', () => {
+    clearMissingTranslationKeys();
+    const t = createTranslator('fr', {});
+    t('footer.copyright', { legalName: 'Private name', year: 2026 });
+    t('footer.copyright', { legalName: 'Other private name', year: 2026 });
+    t('private content' as never);
+    expect(getMissingTranslationKeys()).toEqual({ fr: ['footer.copyright'] });
+    clearMissingTranslationKeys();
+    expect(getMissingTranslationKeys()).toEqual({});
+  });
+
+  it('records a missing plural once but accepts a translated other form', () => {
+    clearMissingTranslationKeys();
+    createTranslator('fr', {}).plural('language.switcher.count', 1);
+    expect(getMissingTranslationKeys()).toEqual({ fr: ['language.switcher.count.other'] });
+    clearMissingTranslationKeys();
+    createTranslator('fr', { 'language.switcher.count.other': '{count} langues' }).plural('language.switcher.count', 1);
+    expect(getMissingTranslationKeys()).toEqual({});
   });
 
   it('returns the key itself when no catalogue defines it, so the gap is visible', () => {

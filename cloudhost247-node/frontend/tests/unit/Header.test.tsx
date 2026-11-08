@@ -94,6 +94,21 @@ describe('Header: authentication-aware navigation', () => {
     );
   });
 
+  it('places the branded payment strip and VAT note before the copyright', () => {
+    const { container } = render(<MemoryRouter><Footer /></MemoryRouter>);
+    const band = container.querySelector('.hg-footer-brandband');
+    const copyright = container.querySelector('.hg-footer__bottom');
+    expect(band?.nextElementSibling).toBe(copyright);
+    expect(within(band as HTMLElement).getByRole('img', { name: 'CloudHost247' }).tagName.toLowerCase()).toBe('svg');
+    for (const card of ['Visa', 'Mastercard', 'Verve', 'American Express', 'Discover', 'JCB', 'Diners Club']) {
+      expect(within(band as HTMLElement).getByRole('img', { name: card }).tagName.toLowerCase()).toBe('svg');
+    }
+    expect(within(band as HTMLElement).getByRole('img', { name: 'Mastercard' }).nextElementSibling?.getAttribute('aria-label')).toBe('Verve');
+    expect(within(band as HTMLElement).getByRole('img', { name: 'American Express' }).textContent).toBe('AMEX');
+    expect(within(band as HTMLElement).getByText('Prices are listed without VAT')).toBeTruthy();
+    expect(within(band as HTMLElement).getByRole('link', { name: 'Share CloudHost247 on LinkedIn' }).getAttribute('href')).toContain('linkedin.com/sharing');
+  });
+
   it('places the Language and Currency switchers in the header menu bar and not in the footer', () => {
     const { container } = render(
       <MemoryRouter>
@@ -105,6 +120,8 @@ describe('Header: authentication-aware navigation', () => {
     const menuBar = container.querySelector<HTMLElement>('#ch247-primary-nav');
     expect(menuBar).toBeTruthy();
     expect(within(menuBar!).getByRole('button', { name: 'Language: English' })).toBeTruthy();
+    expect(within(menuBar!).queryByText(/This product includes GeoLite2 data created by WIL/)).toBeNull();
+    expect(within(container.querySelector('footer')!).getByText(/This product includes GeoLite2 data created by WIL/).textContent).toBe('This product includes GeoLite2 data created by WIL®.');
     expect(within(menuBar!).getByRole('button', { name: /^Display currency: USD/ })).toBeTruthy();
 
     const footer = container.querySelector<HTMLElement>('footer.ch247-footer');

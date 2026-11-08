@@ -4,6 +4,7 @@ import type { Env } from '../config/env';
 import { getPool } from '../db/pool';
 import type { Queryable } from '../db/types';
 import { NotFoundError, ValidationError } from '../lib/errors';
+import { CONTENT_LOCALES, localizeProducts } from '../services/catalog-translations';
 import { getPublicCatalog, getPublicPlansForProduct, getPublicProductBySlug, getPublicProductList } from '../services/catalog-service';
 
 const productTypeSchema = z.enum(['hosting', 'domain', 'service']);
@@ -14,9 +15,13 @@ const slugSchema = z
   .max(160, 'slug is too long')
   .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, 'slug must be lowercase letters, numbers, and single hyphens only');
 
-const listQuerySchema = z.object({
-  type: productTypeSchema.optional(),
-});
+const localeQuerySchema = z.object({ lang: z.enum(CONTENT_LOCALES).default('en') });
+const listQuerySchema = localeQuerySchema.extend({ type: productTypeSchema.optional() });
+function localeQuery(query: unknown) {
+  const parsed = localeQuerySchema.safeParse(query);
+  if (!parsed.success) throw new ValidationError('Unsupported language');
+  return parsed.data.lang;
+}
 
 /**
  * Public, unauthenticated catalog API — see docs/API_CATALOG.md for the full contract.
@@ -29,8 +34,10 @@ const listQuerySchema = z.object({
 export async function registerPublicCatalogRoutes(app: FastifyInstance, env: Env, overridePool?: Queryable) {
   const pool = overridePool ?? getPool(env);
 
-  app.get('/api/v1/catalog', async () => {
-    return getPublicCatalog(pool);
+  app.get('/api/v1/catalog', async (request) => {
+    const lang = localeQuery(request.query);
+    const result = await getPublicCatalog(pool);
+    return { products: await localizeProducts(pool, result.products, lang) };
   });
 
   app.get('/api/v1/catalog/products', async (request) => {
@@ -38,7 +45,8 @@ export async function registerPublicCatalogRoutes(app: FastifyInstance, env: Env
     if (!parsed.success) {
       throw new ValidationError(parsed.error.issues.map((i) => i.message).join(', '));
     }
-    return getPublicProductList(pool, parsed.data.type);
+    const result = await getPublicProductList(pool, parsed.data.type);
+    return { products: await localizeProducts(pool, result.products, parsed.data.lang) };
   });
 
   app.get<{ Params: { slug: string } }>('/api/v1/catalog/products/:slug', async (request) => {
@@ -51,7 +59,8 @@ export async function registerPublicCatalogRoutes(app: FastifyInstance, env: Env
     if (!product) {
       throw new NotFoundError('No product was found with that identifier');
     }
-    return { product };
+    const [localized] = await localizeProducts(pool, [product], localeQuery(request.query));
+    return { product: localized };
   });
 
   app.get<{ Params: { slug: string } }>('/api/v1/catalog/products/:slug/plans', async (request) => {
@@ -64,6 +73,7 @@ export async function registerPublicCatalogRoutes(app: FastifyInstance, env: Env
     if (!result) {
       throw new NotFoundError('No product was found with that identifier');
     }
-    return result;
+    const [product] = await localizeProducts(pool, [result.product], localeQuery(request.query));
+    return { ...result, product };
   });
 }

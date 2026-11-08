@@ -30,7 +30,7 @@ export interface LocaleContextValue {
   /** Switches language and remembers the choice. Returns false, and changes nothing, for an unsupported code. */
   readonly setLocale: (code: string) => boolean;
   /** Advisory default; never overrides an explicit language preference. */
-  readonly suggestCountryLocale: (country: string) => void;
+  readonly suggestCountryLocale: (country: string, resetPreference?: boolean) => void;
 }
 
 function buildValue(locale: LocaleInfo, setLocale: LocaleContextValue['setLocale'], suggestCountryLocale: LocaleContextValue['suggestCountryLocale'] = () => {}): LocaleContextValue {
@@ -102,9 +102,13 @@ export function LocaleProvider({ children, initialLocale, savedLocaleHint }: Loc
     return true;
   }, []);
 
-  const suggestCountryLocale = useCallback((country: string) => {
-    const suggestion = localeForCountry(country);
-    if (!explicitChoice.current && suggestion) setLocaleState(suggestion);
+  const suggestCountryLocale = useCallback((country: string, resetPreference = false) => {
+    if (resetPreference) {
+      explicitChoice.current = false;
+      try { localStorage.removeItem(LOCALE_STORAGE_KEY); } catch { /* storage unavailable */ }
+    }
+    const suggestion = localeForCountry(country) ?? getDefaultLocale();
+    if (!explicitChoice.current) setLocaleState(suggestion);
   }, []);
   const value = useMemo(() => buildValue(locale, setLocale, suggestCountryLocale), [locale, setLocale, suggestCountryLocale]);
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;

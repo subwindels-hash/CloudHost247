@@ -205,6 +205,25 @@
   border-color: rgba(184, 134, 11, 0.42);
 }
 
+/* Keep pricing cards and their actions stationary while hovered. Nested 3D
+   transforms can distort the button and move its hit target under the pointer. */
+.hg-theme .hg-plan,
+.ch-ds .ch-plan,
+.ch-site .ch-plan { transform-style: flat; }
+.hg-theme .hg-plan:hover,
+.ch-ds .ch-plan:hover,
+.ch-site .ch-plan:hover { transform: none; }
+.hg-theme .hg-plan--featured:hover { transform: translateY(-8px); }
+.hg-theme .hg-plan .hg-btn:hover,
+.hg-theme .hg-plan .hg-btn:focus-visible,
+.ch-ds .ch-plan .ch-btn:hover,
+.ch-ds .ch-plan .ch-btn:focus-visible,
+.ch-site .ch-plan .ch-btn:hover,
+.ch-site .ch-plan .ch-btn:focus-visible { transform: none; }
+@media (max-width: 900px) {
+  .hg-theme .hg-plan--featured:hover { transform: none; }
+}
+
 /* One thin gold edge on section heads — a highlight, not a border everywhere. */
 .ch-ds .ch-section-heading,
 .hg-theme .hg-section__head { position: relative; }
@@ -354,18 +373,15 @@ body { overflow-x: clip; }
   [data-parallax] { transform: none !important; will-change: auto; }
   .ch-float--ambient,
   .ch-float--ambient-slow { animation: none; }
-  .hg-theme .hg-plan:hover,
   .hg-theme .hg-explore__card:hover,
   .hg-theme .hg-usecase:hover,
   .hg-theme .hg-card:hover,
   .ch-ds .ch-card:hover,
-  .ch-ds .ch-plan:hover,
   .ch-ds .ch-service-card:hover,
   .ch-ds .ch-resource-card:hover,
   .ch-site .ch-service-card:hover,
   .ch-site .ch-resource-card:hover,
-  .ch-site .ch-card:hover,
-  .ch-site .ch-plan:hover { transform: translate3d(0, -2px, 0); }
+  .ch-site .ch-card:hover { transform: translate3d(0, -2px, 0); }
   .ch-photo-frame { box-shadow: var(--metal-edge-gold), 0 18px 40px rgba(13, 17, 22, 0.18); }
 }
 

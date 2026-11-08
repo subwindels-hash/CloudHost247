@@ -6,6 +6,7 @@ import { useApiResource } from '../lib/useApiResource';
 import { type ProductPlansResponse, type PublicPlan } from '../lib/catalog-types';
 import { CatalogErrorBanner } from '../components/CatalogStateBanner';
 import { useLocale } from '../i18n/LocaleProvider';
+import { siteText, sitePricingText } from '../i18n/site-text';
 import { formatCurrency } from '../i18n/format';
 import { ApproxAmount } from '../components/ApproxAmount';
 import { BASE_CURRENCY } from '../currency/display-currency';
@@ -210,6 +211,8 @@ export function Price({ plan }: { plan: PublicPlan }) {
  * catalogue API, so loading / error / empty are all real states with honest wording.
  */
 function PricingSection() {
+  const { locale } = useLocale();
+  const copy = sitePricingText(locale.code);
   const [activeId, setActiveId] = useState<string>(PLAN_TABS[0].id);
   const active = PLAN_TABS.find((tab) => tab.id === activeId) ?? PLAN_TABS[0];
   const result = useApiResource<ProductPlansResponse>(`/api/v1/catalog/products/${active.slug}/plans`);
@@ -218,15 +221,15 @@ function PricingSection() {
     <section className="hg-section hg-pricing" id="pricing">
       <div className="hg-wrap">
         <div className="hg-section__head" data-reveal>
-          <p className="hg-eyebrow">Plans &amp; prices</p>
-          <h2 className="hg-h2">Choose the plan that fits what you are building</h2>
+          <p className="hg-eyebrow">{copy.eyebrow}</p>
+          <h2 className="hg-h2">{copy.title}</h2>
           <p className="hg-lede">
             Start with what you need and move up as the project grows. Prices are read from the live
             catalogue — what you see here is what the order form charges.
           </p>
         </div>
 
-        <div className="hg-tabs" role="tablist" aria-label="Plan categories">
+        <div className="hg-tabs" role="tablist" aria-label={copy.categories}>
           {PLAN_TABS.map((tab) => (
             <button
               key={tab.id}
@@ -272,7 +275,7 @@ function PricingSection() {
                   <Price plan={plan} />
                   {price ? (
                     <Link className={`hg-btn${featured ? '' : ' hg-btn--ghost'}`} to={`/cart?product=${encodeURIComponent(active.slug)}&plan=${encodeURIComponent(plan.slug)}&period=${encodeURIComponent(price.billingPeriod)}`}>
-                      Choose plan
+                      {copy.choose}
                     </Link>
                   ) : <Link className="hg-btn hg-btn--ghost" to="/contact">Ask about this plan</Link>}
                   {plan.features.length > 0 ? (
@@ -337,6 +340,8 @@ function HeroVisual() {
 }
 
 export default function HomePage() {
+  const { locale } = useLocale();
+  const copy = siteText(locale.code);
   const navigate = useNavigate();
   const [domainQuery, setDomainQuery] = useState('');
   const [aiPrompt, setAiPrompt] = useState('');
@@ -384,31 +389,30 @@ export default function HomePage() {
         <div className="hg-wrap hg-hero__grid">
           <div>
             <p className="hg-hero__pill"><span>Platform</span> Domains · Hosting · Cloud · Apps · Tools</p>
-            <h1>Your idea, online. <span className="hg-accent">All in one place.</span></h1>
+            <h1>{copy.headline} <span className="hg-accent">{copy.headlineAccent}</span></h1>
             <p className="hg-hero__sub">
-              Register the domain, host the website, deploy the application, run the server and
-              connect the API — with one account, one catalogue and one support relationship.
+              {copy.heroDescription}
             </p>
-            <form className="hg-domain" onSubmit={onDomainSearch} role="search" aria-label="Search for a domain name">
+            <form className="hg-domain" onSubmit={onDomainSearch} role="search" aria-label={copy.domainSearch}>
               <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                 <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
               </svg>
-              <label className="ch-visually-hidden" htmlFor="hg-domain-input">Search for a domain name</label>
+              <label className="ch-visually-hidden" htmlFor="hg-domain-input">{copy.domainSearch}</label>
               <input
                 id="hg-domain-input"
                 type="search"
                 name="q"
                 value={domainQuery}
                 onChange={(event) => setDomainQuery(event.target.value)}
-                placeholder="Find your domain, e.g. example.com"
+                placeholder={copy.domainPlaceholder}
                 maxLength={253}
                 autoComplete="off"
               />
-              <button className="hg-btn hg-btn--sm" type="submit">Search</button>
+              <button className="hg-btn hg-btn--sm" type="submit">{copy.search}</button>
             </form>
             <div className="hg-hero__ctas">
-              <Link className="hg-btn" to={UTILITY.createAccount.to}>{UTILITY.createAccount.label}</Link>
-              <Link className="hg-btn hg-btn--ghost" to="/#pricing">See plans</Link>
+              <Link className="hg-btn" to={UTILITY.createAccount.to}>{copy.createAccount}</Link>
+              <Link className="hg-btn hg-btn--ghost" to="/#pricing">{copy.seePlans}</Link>
             </div>
             <ul className="hg-hero__points">
               <li><Check /> Live catalogue pricing, never a stale price list</li>

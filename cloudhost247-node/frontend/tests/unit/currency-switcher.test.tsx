@@ -61,7 +61,8 @@ describe('CurrencySwitcher', () => {
     expect(options.join(' ')).toContain('JPY');
     const jpy = within(list).getByRole('button', { name: /JPY/ }) as HTMLButtonElement;
     expect(jpy.disabled).toBe(true);
-    expect(jpy.textContent).toContain('Rate unavailable');
+    expect(jpy.textContent).toBe('JPY');
+    expect(options.every((text) => /^[A-Z]{3}$/.test(text ?? ''))).toBe(true);
   });
 
   it('persists the choice, reflects it in the trigger, and leaves the language unchanged', async () => {
@@ -100,11 +101,10 @@ describe('CurrencySwitcher', () => {
     expect(screen.getByRole('button', { name: /Display currency: USD/ })).toBeTruthy();
   });
 
-  it('explains, in text, when other currencies are unavailable', async () => {
+  it('disables currencies when rates are unavailable', async () => {
     const user = userEvent.setup();
     renderSwitcher({ ...LIVE, available: false, reason: 'not_synced', currencies: [] });
     await user.click(screen.getByRole('button', { name: /Display currency/ }));
-    expect(screen.getByText('Other currencies are unavailable right now. Prices are shown in USD.')).toBeTruthy();
     expect((screen.getByRole('button', { name: /NGN/ }) as HTMLButtonElement).disabled).toBe(true);
   });
 
@@ -176,7 +176,7 @@ describe('CurrencyProvider rate loading', () => {
   });
 
   it('accepts a well-formed feed and drops malformed entries', async () => {
-    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async () =>
       new Response(
         JSON.stringify({
           ...LIVE,

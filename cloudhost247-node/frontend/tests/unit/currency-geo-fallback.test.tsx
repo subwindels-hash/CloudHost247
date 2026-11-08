@@ -89,9 +89,11 @@ describe('display currency: the geolocation hint is a suggestion, never a decisi
     await waitFor(() =>
       expect(screen.getByRole('button', { name: /Display currency: EUR/ })).toBeTruthy()
     );
-    // And the hint is not even fetched once a choice exists: no request, no inference.
-    const calls = (globalThis.fetch as unknown as { mock: { calls: unknown[][] } }).mock.calls;
-    expect(calls.some((call) => String(call[0]).includes('geo-country'))).toBe(false);
+    // The country is still detected for the indicator, but cannot override the currency choice.
+    await waitFor(() => {
+      const calls = (globalThis.fetch as unknown as { mock: { calls: unknown[][] } }).mock.calls;
+      expect(calls.some((call) => String(call[0]).includes('geo-country'))).toBe(true);
+    });
   });
 
   it('lets the authenticated account preference outrank the country hint', async () => {
