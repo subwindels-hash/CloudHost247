@@ -21,15 +21,16 @@ Companion documents: [`WHMCS-INTEGRATION-AUDIT.md`](WHMCS-INTEGRATION-AUDIT.md) 
 | One identity + SSO | B5.1 | **DONE** | `src/whmcs/sso.ts`, `src/routes/account-whmcs.ts`, migrations `0087`/`0088`; 50 tests |
 | Security review | B5.1 follow-up | **DONE** | §4 of this document; `whmcs-sso` unit + integration suites |
 | Discovery tooling | C1.1–C1.3 | **DONE** | `scripts/whmcs/catalogue-map.ts` (`doctor`, `discover`, `snapshot`, `bind`, `dispose`, `verify`), `src/whmcs/discovery.ts`; 11 tests |
+| Product mapping review | C1.5 / C2.0 | **DONE** | `src/whmcs/mapping-review.ts`, `src/whmcs/service-register.ts`, `npm run whmcs:review`; 27 tests; `docs/WHMCS-MAPPING-REVIEW.md` (59/59 `BLOCKED` — see §6) |
 | **Discovery run against staging** | C1.4 | **BLOCKED** | needs the staging URL and a read-only API credential |
-| Verified product mapping | C2.0 | **BLOCKED** | depends on the discovery run; the committed map has 0 bindings |
+| Verified product mapping | C2.0 | **BLOCKED** | depends on the discovery run; the committed map has 0 bindings and the review classifies 0 services as verified (§6) |
 | SPA catalogue wiring | C2 | **NOT STARTED** | gated on a reviewed, verified mapping |
 | Unified cart, checkout, payments | C3 | **NOT STARTED** | gated on C2 |
 | Provider verification (domains, hosting, SSL) | D | **NOT STARTED** | needs staging providers |
 
-Test inventory for the whole integration: **153 tests across 12 files** (`tests/unit/whmcs-*.test.ts`,
-`tests/integration/whmcs-*.test.ts`). Backend unit suite overall: **1012 tests / 59 files**. Frontend unit suite:
-**782 tests / 63 files**.
+Test inventory for the whole integration: **180 tests across 13 files** (`tests/unit/whmcs-*.test.ts`,
+`tests/integration/whmcs-*.test.ts`). Backend unit suite overall: **1039 tests / 60 files**. Frontend unit suite:
+**782 tests / 63 files** unchanged.
 
 ---
 
@@ -189,11 +190,72 @@ for nothing), empty groups, currencies with no priced products, and a missing de
 flagged; unpriced product reported with `available: false`; no cross-currency fallback; report table escaping; the
 artifact contains neither the base URL nor the API secret.
 
-**Blocked.** The run itself — see §7.
+**Blocked.** The run itself — see §8.
 
 ---
 
-## 6. Frontend regression baseline
+## 6. Product mapping review (the C2 gate)
+
+This is the deliverable the brief asked for: **every advertised hosting service, with evidence, classified and
+recommended — and nothing bound.**
+
+**Implemented.**
+
+| Piece | What it does |
+| --- | --- |
+| `src/whmcs/service-register.ts` | RFC-4180 reader for `config/whmcs/service-register.csv` (the cross-stack inventory, 59 rows). Quoting, embedded commas, doubled quotes and CRLF are tested; a row without a service key is skipped rather than becoming a phantom service. |
+| `src/whmcs/mapping-review.ts` | `classifyService()` decides one row; `buildMappingReview()` builds the whole document; `renderMappingReview()` writes it. It takes a *proposal* as input and returns data — it accepts no path and writes no file, which is why "does not bind" is a test rather than a promise. |
+| `npm run whmcs:review` | Writes `docs/WHMCS-MAPPING-REVIEW.md` and `config/whmcs/mapping-review.json`; prints the per-state counts and refuses to imply a binding. |
+
+**The six classifications, checked in this order** (each earlier state invalidates the later questions):
+
+| # | State | Trigger |
+| --- | --- | --- |
+| 1 | `VERIFIED — READY FOR APPROVAL` | product exists in the discovery artifact, is visible, has a provisioning module, and is priced for at least one proposed cycle in the install's default currency |
+| 2 | `NOT INTEGRATED` | the service has no proposal |
+| 3 | `NO PROVISIONING MODULE` | the product would invoice for nothing |
+| 4 | `NO VALID PRICE` | no proposed cycle is priced in the default currency |
+| 5 | `HIDDEN PRODUCT` | hidden in WHMCS, so `cart.php` cannot sell it |
+| 6 | `BLOCKED` | no discovery run; a proposal whose pid is absent from the discovery artifact; one pid proposed for two services; a bound pid that has vanished from discovery |
+
+**Each row carries:** service name, service key, website page (SPA route or PHP page), product group, product id,
+product name, currencies, monthly and annual price (WHMCS's own strings), available cycles, provisioning module,
+visibility, classification, missing dependencies, and the evidence for the verdict. Configurable options are a column
+that reads **"not read — slice B2.3"** for every row: the WHMCS options surface has not been read, so the report says so
+instead of inventing options.
+
+**Current output — complete, and honestly empty.**
+
+| Classification | Services |
+| --- | --- |
+| VERIFIED — READY FOR APPROVAL | 0 |
+| NOT INTEGRATED | 0 |
+| NO PROVISIONING MODULE | 0 |
+| NO VALID PRICE | 0 |
+| HIDDEN PRODUCT | 0 |
+| BLOCKED | 59 |
+
+All 59 rows are `BLOCKED` for one reason: no discovery artifact exists (`config/whmcs/catalogue-snapshot.json`), so
+there is no evidence to classify against, and the report says exactly that in each row's *missing dependencies* and
+*evidence* cells. The document also lists the repository-level blockers a reviewer must clear first and ends with the
+proposal format and the single next action. Nothing is proposed, so nothing is recommended for binding.
+
+**Tested.** 27 tests: all six classifications are reachable from fixtures (an assertion fails if any branch stops being
+exercised), the summary is a partition of the register, a bound pid missing from discovery is `BLOCKED` rather than
+verified, an empty map stays byte-identical after a review of a proposal that would verify, and the rendered table
+escapes pipes.
+
+**Why it cannot flatter the installation.** The proposal file (`config/whmcs/mapping-proposal.json`) does not exist and
+is not generated by any command; it is written by hand from the discovery artifact. Without it the engine can only
+report `BLOCKED` or `NOT INTEGRATED`. A pid may be proposed only if it appears in the discovery artifact, and it may be
+bound only by a separate, reviewed `whmcs:map -- bind`.
+
+**Blocked.** The evidence: same three items as §8. The review is the one artefact that will populate itself the moment
+`whmcs:discover` runs against staging.
+
+---
+
+## 7. Frontend regression baseline
 
 The 19 pre-existing failures recorded at the previous milestone are **closed: 782/782 frontend unit tests pass across
 63 files**. Each was investigated and classified; none was excluded, skipped or silenced.
@@ -211,7 +273,7 @@ pass. The regenerated navigation artifact was the only generated file touched; i
 
 ---
 
-## 7. What is blocking C1, precisely
+## 8. What is blocking C1, precisely
 
 1. **Staging WHMCS URL** — the install root, no `/includes/api.php` suffix, https.
 2. **Restricted API identifier and secret** — read-only role (catalogue reads only; no client, order or payment
@@ -221,16 +283,18 @@ pass. The regenerated navigation artifact was the only generated file touched; i
 4. Supplied through the agreed secure secrets mechanism — never in chat, never in Git.
 
 With those, the sequence is: `npm run whmcs:doctor` → `npm run whmcs:discover` → review
-`docs/WHMCS-DISCOVERY-REPORT.md` → `npm run whmcs:map -- snapshot` → bind services one at a time → `whmcs:map -- verify`
-→ re-run the orderability endpoint against staging.
+`docs/WHMCS-DISCOVERY-REPORT.md` → write the proposal → `npm run whmcs:review` → approve the mapping review →
+`npm run whmcs:map -- snapshot` → bind services one at a time → `whmcs:map -- verify` → re-run the orderability
+endpoint against staging.
 
 ---
 
-## 8. What this report does *not* claim
+## 9. What this report does *not* claim
 
 - Not production-ready. No production checkout, live payment, customer migration or real provisioning has been enabled.
 - Not verified against any live WHMCS installation. Every WHMCS interaction so far ran against a scripted transport.
-- No hosting service is orderable. The committed map has 0 bindings and 59 explicit non-orderable dispositions.
+- No hosting service is orderable. The committed map has 0 bindings and 59 explicit non-orderable dispositions, and
+  the mapping review classifies 0 services as verified (§6) — it is a complete structure with no evidence in it yet.
 - The SPA catalogue, cart and checkout are untouched and still the working commerce path.
 - SSO is not evidence that cart, checkout, provisioning or invoicing works; those remain separate phases with their own
   evidence requirements.

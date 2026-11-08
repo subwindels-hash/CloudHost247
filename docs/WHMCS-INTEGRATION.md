@@ -38,10 +38,12 @@ Everything below is a consequence of that sentence.
 | `src/whmcs/orderability.ts` | B2.4 — the single verdict "may this service be bought online, and in which cycles": binding ∩ live product ∩ priced cycles, plus a 60-second single-flight catalogue cache. |
 | `src/routes/whmcs-public.ts` | `GET /api/v1/whmcs/orderability[/:serviceKey]`. Anonymous, never a 500 for a WHMCS problem, fails closed on a broken map. |
 | `src/whmcs/discovery.ts` | C1 read-only discovery: reads groups/products/currencies into a reviewable artifact and renders the Markdown report. Issues no write action, by construction. |
-| `scripts/whmcs/catalogue-map.ts` | Operator CLI: `snapshot`, `bind`, `dispose`, `dispositions`, `verify`. |
+| `src/whmcs/mapping-review.ts` | The mapping review engine: classifies every advertised service against the discovery artifact and renders `docs/WHMCS-MAPPING-REVIEW.md`. It writes no binding. |
+| `src/whmcs/service-register.ts` | Typed RFC-4180 reader for the cross-stack service register, shared by the review and the coverage tooling. |
+| `scripts/whmcs/catalogue-map.ts` | Operator CLI: `verify`, `snapshot`, `bind`, `dispose`, `dispositions`, `init`, `doctor`, `discover`, `review`. |
 | `config/whmcs/product-map.json` | The generated map. Currently **0 bindings, 59 dispositions**. |
 | `config/whmcs/service-register.csv` (repository root) | Cross-stack inventory of advertised services, shared with the PHP/WHMCS side. |
-| `tests/unit/whmcs-*.test.ts`, `tests/integration/whmcs-*.test.ts` | 153 tests across 12 files: the layer, the completeness gate, the orderability verdict, the identity bridge and the discovery pipeline. |
+| `tests/unit/whmcs-*.test.ts`, `tests/integration/whmcs-*.test.ts` | 180 tests across 13 files: the layer, the completeness gate, the orderability verdict, the identity bridge, the discovery pipeline and the mapping review. |
 
 ---
 
@@ -68,22 +70,32 @@ Everything below is a consequence of that sentence.
    npm run whmcs:discover    # C1: config/whmcs/catalogue-snapshot.json + docs/WHMCS-DISCOVERY-REPORT.md
    ```
 
-   `discover` binds nothing. Review the report, then `snapshot` and `bind` service by service — see §4.
+   `discover` binds nothing. Review `docs/WHMCS-DISCOVERY-REPORT.md` before going further.
 
-4. **Restart the application**, then check the reason it reports:
+4. **Produce the mapping review** — one row per advertised service, with evidence:
+
+   ```bash
+   npm run whmcs:review      # docs/WHMCS-MAPPING-REVIEW.md + config/whmcs/mapping-review.json
+   ```
+
+   It writes no binding. Until a proposal exists it reports every service as `BLOCKED` (no discovery) or
+   `NOT INTEGRATED` (no proposal) — which is the honest answer. Submit it for approval before any `bind`;
+   it is the gate C2 waits on.
+
+5. **Restart the application**, then check the reason it reports:
 
    ```bash
    node -e "const {loadWhmcsConfig}=require('./dist/src/whmcs/config');console.log(loadWhmcsConfig())"
    ```
 
-5. **Take a snapshot** (read-only — calls `GetProductGroups`, `GetProducts`, `GetCurrencies`):
+6. **Take a snapshot** (read-only — calls `GetProductGroups`, `GetProducts`, `GetCurrencies`):
 
    ```bash
    npm run whmcs:map -- snapshot
    npm run whmcs:map -- verify
    ```
 
-6. **Bind each advertised service** to the product it actually sells:
+7. **Bind each advertised service** to the product it actually sells:
 
    ```bash
    npm run whmcs:map -- bind --service hosting-vps --product 12
@@ -93,13 +105,13 @@ Everything below is a consequence of that sentence.
    `bind` refuses a product id that is not in the snapshot, a cycle WHMCS does not offer, and a product with no
    configured price.
 
-7. **Dispose of what is not orderable** — with a reason, not silently:
+8. **Dispose of what is not orderable** — with a reason, not silently:
 
    ```bash
    npm run whmcs:map -- dispose --service hosting-plesk --reason "no Plesk product configured in WHMCS"
    ```
 
-8. **Commit the map.** It is a generated artifact: regenerating it is normal, hand-editing it is not possible
+9. **Commit the map.** It is a generated artifact: regenerating it is normal, hand-editing it is not possible
    without the checksum failing.
 
 ---

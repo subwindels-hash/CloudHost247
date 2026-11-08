@@ -49,7 +49,8 @@
     "check:chrome": "node scripts/check-chrome-benchmark.mjs",
     "check:3d": "node scripts/check-3d-experience.mjs",
     "whmcs:discover": "tsx scripts/whmcs/catalogue-map.ts discover",
-    "whmcs:doctor": "tsx scripts/whmcs/catalogue-map.ts doctor"
+    "whmcs:doctor": "tsx scripts/whmcs/catalogue-map.ts doctor",
+    "whmcs:review": "tsx scripts/whmcs/catalogue-map.ts review"
   },
   "dependencies": {
     "@aws-sdk/client-cloudwatch": "3.1144.0",

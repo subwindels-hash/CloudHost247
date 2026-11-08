@@ -18,6 +18,7 @@
  *   sso       — the one-identity link and the single-use session hand-off into the client area
  *   orderability — the single public verdict "may this be bought online, in these cycles"
  *   discovery — the read-only C1 snapshot of a real installation, and its review report
+ *   mapping-review — the service-by-service classification between discovery and any binding
  *   idempotency — one durable record per order/payment operation, so a retry cannot double-charge
  */
 
@@ -33,4 +34,6 @@ export * from './cart';
 export * from './sso';
 export * from './orderability';
 export * from './discovery';
+export * from './service-register';
+export * from './mapping-review';
 export * from './idempotency';

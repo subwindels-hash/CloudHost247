@@ -11,6 +11,7 @@
  *
  *   npm run whmcs:map -- doctor                    # read-only preflight: can this deployment read WHMCS?
  *   npm run whmcs:map -- discover                  # C1: catalogue JSON + review report, binds nothing
+ *   npm run whmcs:map -- review                    # classify every advertised service (binds nothing)
  *   npm run whmcs:map -- verify
  *   npm run whmcs:map -- snapshot                  # read-only; needs WHMCS_BASE_URL + API credentials
  *   npm run whmcs:map -- bind --service hosting-vps --product 12
@@ -49,12 +50,17 @@ import {
   toArray,
 } from '../../src/whmcs/schemas';
 import { BILLING_CYCLES, type BillingCycle } from '../../src/whmcs/types';
-import { collectDiscovery, renderDiscoveryReport } from '../../src/whmcs/discovery';
+import { collectDiscovery, renderDiscoveryReport, type DiscoveryArtifact } from '../../src/whmcs/discovery';
+import { readServiceRegister } from '../../src/whmcs/service-register';
+import { buildMappingReview, renderMappingReview, type MappingProposal } from '../../src/whmcs/mapping-review';
 
 const DEFAULT_MAP_PATH = path.join(process.cwd(), 'config', 'whmcs', 'product-map.json');
 const DEFAULT_REGISTER_PATH = path.resolve(process.cwd(), '..', 'config', 'whmcs', 'service-register.csv');
 const DEFAULT_DISCOVERY_PATH = path.join(process.cwd(), 'config', 'whmcs', 'catalogue-snapshot.json');
 const DEFAULT_REPORT_PATH = path.resolve(process.cwd(), '..', 'docs', 'WHMCS-DISCOVERY-REPORT.md');
+const DEFAULT_REVIEW_PATH = path.resolve(process.cwd(), '..', 'docs', 'WHMCS-MAPPING-REVIEW.md');
+const DEFAULT_REVIEW_JSON_PATH = path.join(process.cwd(), 'config', 'whmcs', 'mapping-review.json');
+const DEFAULT_PROPOSAL_PATH = path.join(process.cwd(), 'config', 'whmcs', 'mapping-proposal.json');
 
 interface Args {
   command: string;
@@ -66,6 +72,9 @@ interface Args {
   registerPath: string;
   discoveryPath: string;
   reportPath: string;
+  reviewPath: string;
+  reviewJsonPath: string;
+  proposalPath: string;
 }
 
 function parseArgs(argv: string[]): Args {
@@ -76,6 +85,9 @@ function parseArgs(argv: string[]): Args {
     registerPath: DEFAULT_REGISTER_PATH,
     discoveryPath: DEFAULT_DISCOVERY_PATH,
     reportPath: DEFAULT_REPORT_PATH,
+    reviewPath: DEFAULT_REVIEW_PATH,
+    reviewJsonPath: DEFAULT_REVIEW_JSON_PATH,
+    proposalPath: DEFAULT_PROPOSAL_PATH,
   };
   for (let i = 0; i < rest.length; i += 1) {
     const token = rest[i];
@@ -103,6 +115,12 @@ function parseArgs(argv: string[]): Args {
         break;
       case '--out':
         args.discoveryPath = value();
+        break;
+      case '--json':
+        args.reviewJsonPath = value();
+        break;
+      case '--proposal':
+        args.proposalPath = value();
         break;
       case '--report':
         args.reportPath = value();
@@ -312,50 +330,6 @@ function dispose(args: Args): void {
 }
 
 /** Minimal RFC 4180 reader: the register quotes fields that contain commas. */
-function parseCsv(text: string): Array<Record<string, string>> {
-  const rows: string[][] = [];
-  let field = '';
-  let row: string[] = [];
-  let quoted = false;
-  for (let i = 0; i < text.length; i += 1) {
-    const char = text[i];
-    if (quoted) {
-      if (char === '"' && text[i + 1] === '"') {
-        field += '"';
-        i += 1;
-      } else if (char === '"') {
-        quoted = false;
-      } else {
-        field += char;
-      }
-      continue;
-    }
-    if (char === '"') {
-      quoted = true;
-    } else if (char === ',') {
-      row.push(field);
-      field = '';
-    } else if (char === '\n') {
-      row.push(field);
-      rows.push(row);
-      row = [];
-      field = '';
-    } else if (char !== '\r') {
-      field += char;
-    }
-  }
-  if (field !== '' || row.length > 0) {
-    row.push(field);
-    rows.push(row);
-  }
-  const [header, ...body] = rows;
-  if (!header) return [];
-  const keys = header.map((key) => key.trim());
-  return body
-    .filter((cells) => cells.some((cell) => cell.trim() !== ''))
-    .map((cells) => Object.fromEntries(keys.map((key, index) => [key, (cells[index] ?? '').trim()])));
-}
-
 /**
  * Seeds a disposition for every advertised service that has none.
  *
@@ -365,13 +339,13 @@ function parseCsv(text: string): Array<Record<string, string>> {
  */
 function seedDispositions(args: Args): void {
   if (!existsSync(args.registerPath)) fail(`no service register at ${args.registerPath}`, 2);
-  const rows = parseCsv(readFileSync(args.registerPath, 'utf8'));
+  const rows = readServiceRegister(args.registerPath);
   if (rows.length === 0) fail('the service register is empty', 2);
 
   const document = existsSync(args.mapPath) ? readDocument(args.mapPath) : emptyDocument(fingerprintBaseUrl('unconfigured'));
   // The register is derived from the website itself, so it is authoritative for which services need
   // a disposition: an entry for a service that no longer exists is pruned rather than left to rot.
-  const advertised = new Set(rows.map((row) => row.service_key ?? '').filter(Boolean));
+  const advertised = new Set(rows.map((row) => row.serviceKey).filter(Boolean));
   const unmapped: Record<string, { reason: string; since: string }> = {};
   let pruned = 0;
   for (const [key, entry] of Object.entries(document.unmapped)) {
@@ -380,7 +354,7 @@ function seedDispositions(args: Args): void {
   }
   let added = 0;
   for (const row of rows) {
-    const serviceKey = row.service_key ?? '';
+    const serviceKey = row.serviceKey;
     if (!serviceKey || document.services[serviceKey] || unmapped[serviceKey]) continue;
     const reason =
       row.category === 'domains'
@@ -548,6 +522,75 @@ function silence() {
   return { info: () => undefined, warn: () => undefined, error: () => undefined };
 }
 
+/**
+ * The product mapping review: every advertised service, classified, with evidence.
+ *
+ * Reads (never writes) three inputs: the service register (what the site advertises), the discovery
+ * artifact (what WHMCS actually sells, if C1 has run) and an optional human proposal. Writes a
+ * Markdown review and a JSON copy for diffing. It binds nothing — a VERIFIED row is a recommendation
+ * that still needs a reviewed `bind`.
+ */
+function review(args: Args): void {
+  if (!existsSync(args.registerPath)) fail(`no service register at ${args.registerPath}`, 2);
+  const services = readServiceRegister(args.registerPath);
+  if (services.length === 0) fail('the service register is empty', 2);
+
+  const document = existsSync(args.mapPath) ? readDocument(args.mapPath) : emptyDocument(fingerprintBaseUrl('unconfigured'));
+
+  let discovery: DiscoveryArtifact | null = null;
+  let discoverySource: string | null = null;
+  if (existsSync(args.discoveryPath)) {
+    discovery = JSON.parse(readFileSync(args.discoveryPath, 'utf8')) as DiscoveryArtifact;
+    discoverySource = path.relative(process.cwd(), args.discoveryPath);
+  }
+
+  let proposal: MappingProposal | null = null;
+  let proposalSource: string | null = null;
+  if (existsSync(args.proposalPath)) {
+    const parsed = JSON.parse(readFileSync(args.proposalPath, 'utf8')) as MappingProposal;
+    if (!Array.isArray(parsed.entries)) fail(`${args.proposalPath} must contain an "entries" array`, 2);
+    for (const entry of parsed.entries) {
+      if (!entry.serviceKey || !Number.isInteger(entry.productId) || entry.productId <= 0) {
+        fail(`${args.proposalPath}: every entry needs a serviceKey and a positive integer productId`, 2);
+      }
+    }
+    proposal = parsed;
+    proposalSource = path.relative(process.cwd(), args.proposalPath);
+  }
+
+  const result = buildMappingReview({ services, discovery, proposal, map: document });
+
+  mkdirSync(path.dirname(args.reviewPath), { recursive: true });
+  writeFileSync(
+    args.reviewPath,
+    renderMappingReview(result, {
+      sources: {
+        discovery: discoverySource,
+        proposal: proposalSource,
+        map: path.relative(process.cwd(), args.mapPath),
+        register: path.relative(process.cwd(), args.registerPath),
+      },
+    }),
+    'utf8',
+  );
+  mkdirSync(path.dirname(args.reviewJsonPath), { recursive: true });
+  writeFileSync(args.reviewJsonPath, `${JSON.stringify(result, null, 2)}\n`, 'utf8');
+
+  console.log(`Service mapping review — ${services.length} advertised service(s)`);
+  for (const [state, count] of Object.entries(result.summary)) {
+    console.log(`  ${state.padEnd(30)} ${count}`);
+  }
+  console.log(`✓ ${args.reviewPath}`);
+  console.log(`✓ ${args.reviewJsonPath}`);
+  if (!result.discovered) {
+    console.log('  ! no discovery artifact: every service is BLOCKED until C1 runs against staging.');
+  }
+  if (proposalSource === null) {
+    console.log('  ! no proposal file: nothing is proposed, so nothing is recommended for binding.');
+  }
+  console.log('  nothing was bound. Approve rows first, then bind one service at a time.');
+}
+
 function help(): void {
   console.log(readFileSync(new URL(import.meta.url)).toString().split('\n').slice(1, 36).join('\n').replace(/^ \* ?/gm, ''));
 }
@@ -575,6 +618,9 @@ async function main(): Promise<void> {
       break;
     case 'doctor':
       await doctor();
+      break;
+    case 'review':
+      review(args);
       break;
     case 'init': {
       const loaded = loadWhmcsConfig();
